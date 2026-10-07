@@ -133,6 +133,37 @@ export const publicVersionedCloudAdapter: Adapter = (args) => ({
     }`,
 })
 
+/** Simulates a custom adapter whose client uploads send `uploadReference: {}` without a receipt. */
+export const referencedVersionedCloudAdapter: Adapter = (args) => {
+  const adapter = versionedCloudAdapter(args)
+
+  return {
+    ...adapter,
+    name: 'test-referenced-cloud',
+    staticHandler: (req, options) => {
+      if (options.doc) {
+        return adapter.staticHandler(req, options)
+      }
+      const bytes = versionedCloudFiles.get(options.params.filename)
+
+      return bytes
+        ? new Response(new Uint8Array(bytes), {
+            headers: { 'Content-Length': String(bytes.length) },
+          })
+        : new Response('Not found', { status: 404 })
+    },
+    uploadInstructions: {
+      enabled: true,
+      generate: ({ filename, filesize, mimeType }) => ({
+        name: 'uploadToTestCloud',
+        type: 'dispatch',
+        file: { filename, mimeType, size: filesize, uploadReference: {} },
+      }),
+      useInAdmin: false,
+    },
+  }
+}
+
 function deleteStoredCloudFile({ storageFilePath }: { storageFilePath: string }): Promise<void> {
   versionedCloudCalls.deletes.push(storageFilePath)
   if (versionedCloudFailure.deleteKey === storageFilePath) {

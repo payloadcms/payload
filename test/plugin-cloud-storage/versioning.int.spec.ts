@@ -12,10 +12,12 @@ import { scheduleUnreferencedFileCleanup } from '../../packages/payload/src/uplo
 import { test } from '../__helpers/int/vitest.js'
 import {
   mediaWithDisabledPluginSlug,
+  referencedCloudMediaSlug,
   unversionedCloudMediaSlug,
   versionedCloudMediaSlug,
   versionedConvertedCloudMediaSlug,
   versionedPublicCloudMediaSlug,
+  versionedPublicVariantCloudMediaSlug,
 } from './shared.js'
 import {
   getStoredCloudFiles,
@@ -1555,6 +1557,143 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     for (const url of [created.url, created.original?.url, read.url, read.original?.url]) {
       expect(storedKeys).toContain(new URL(url!).pathname)
     }
+  })
+
+  test('should keep the stored object folder in selected provider URLs', async ({ payload }) => {
+    const created = await payload.create({
+      collection: versionedPublicCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+    })
+    const stored = await payload.db.findOne({
+      collection: versionedPublicCloudMediaSlug,
+      where: { id: { equals: created.id } },
+    })
+    const storedKeys = getStoredCloudFiles(stored).map(({ key }) => `/${key}`)
+    const {
+      docs: [selected],
+    } = await payload.find({
+      collection: versionedPublicCloudMediaSlug,
+      select: { filename: true, original: { filename: true, url: true }, url: true },
+      where: { id: { equals: created.id } },
+    })
+
+    for (const url of [selected?.url, selected?.original?.url]) {
+      expect(storedKeys).toContain(new URL(url!).pathname)
+    }
+  })
+
+  for (const reference of [
+    { filename: 'notes.txt', mimeType: 'text/plain', readBytes: () => Buffer.from('provider') },
+    { filename: 'photo.png', mimeType: 'image/png', readBytes: () => readFile(firstFile) },
+  ]) {
+    test(`should save the provider filename for a ${reference.mimeType} upload reference without a receipt`, async ({
+      payload,
+      restClient,
+    }) => {
+      const bytes = await reference.readBytes()
+      const formData = new FormData()
+
+      versionedCloudFiles.set(reference.filename, bytes)
+      formData.append('_payload', JSON.stringify({}))
+      formData.append(
+        'file',
+        JSON.stringify({
+          filename: reference.filename,
+          mimeType: reference.mimeType,
+          size: bytes.length,
+          uploadReference: {},
+        }),
+      )
+
+      const response = await restClient.POST(`/${referencedCloudMediaSlug}`, { body: formData })
+      const { doc } = await response.json<{ doc: { id: number | string } }>()
+      const stored = await payload.db.findOne({
+        collection: referencedCloudMediaSlug,
+        where: { id: { equals: doc.id } },
+      })
+
+      expect(response.status).toBe(201)
+      expect(stored?.filename).toBe(reference.filename)
+      expect(getStoredCloudFiles(stored).map(({ key }) => key)).toEqual([
+        ...versionedCloudFiles.keys(),
+      ])
+    })
+  }
+
+  test('should recognise a legacy direct file after its URL signature changes', async ({
+    payload,
+  }) => {
+    publicVersionedCloudURL.signature = 'first'
+
+    const created = await payload.create({
+      collection: versionedPublicVariantCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+    })
+    const legacyKey = 'legacy-signed.png'
+    const legacySmallKey = 'legacy-signed-100x100.png'
+    const bytes = await readFile(secondFile)
+    const legacyData = {
+      _objectKey: null,
+      filename: legacyKey,
+      original: { filename: null, filesize: null, mimeType: null, url: null },
+      url: `https://files.example.test/${legacyKey}?signature=first`,
+      variants: {
+        small: {
+          _objectKey: null,
+          filename: legacySmallKey,
+          filesize: bytes.length,
+          height: 100,
+          mimeType: 'image/png',
+          prefix: null,
+          url: `https://files.example.test/${legacySmallKey}?signature=first`,
+          width: 100,
+        },
+      },
+    }
+
+    versionedCloudFiles.clear()
+    versionedCloudFiles.set(legacyKey, bytes)
+    versionedCloudFiles.set(legacySmallKey, bytes)
+    await payload.db.updateOne({
+      collection: versionedPublicVariantCloudMediaSlug,
+      data: legacyData,
+      where: { id: { equals: created.id } },
+    })
+    const { docs: versions } = await payload.db.findVersions({
+      collection: versionedPublicVariantCloudMediaSlug,
+      where: { parent: { equals: created.id } },
+    })
+    for (const row of versions) {
+      await payload.db.updateVersion({
+        id: row.id,
+        collection: versionedPublicVariantCloudMediaSlug,
+        versionData: {
+          createdAt: row.createdAt,
+          latest: row.latest,
+          parent: row.parent,
+          updatedAt: row.updatedAt,
+          version: { ...row.version, ...legacyData },
+        },
+      })
+    }
+
+    publicVersionedCloudURL.signature = 'second'
+    await payload.update({
+      id: created.id,
+      collection: versionedPublicVariantCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+    })
+    const { docs: retained } = await payload.db.findVersions({
+      collection: versionedPublicVariantCloudMediaSlug,
+      where: { parent: { equals: created.id } },
+    })
+    const legacyVersion = retained.find(({ version }) => version.filename === legacyKey)?.version
+
+    expect(versionedCloudFiles.get(legacyKey)?.equals(bytes)).toBe(true)
+    expect(legacyVersion?.original?.filename).toBe(legacyKey)
   })
 
   test('should keep authorized public provider URLs direct across history and restore', async ({
