@@ -76,7 +76,9 @@ The following arguments are provided to the `beforeOperation` hook:
 
 ### beforeValidate
 
-Runs during the `update` operation. This hook allows you to add or format data before the incoming data is validated server-side.
+Runs during the `update` and `validate` operations. This hook allows you to add or format data before the incoming data is validated server-side.
+
+On-demand validation runs this hook with `operation: 'validate'` without saving the candidate. Use the `operation` argument to skip external calls and other side effects that should only run when data is saved.
 
 Please do note that this does not run before client-side validation. If you render a custom field component in your front-end and provide it with a `validate` function, the order that validations will run in is:
 
@@ -104,6 +106,7 @@ The following arguments are provided to the `beforeValidate` hook:
 | **`global`**      | The [Global](../configuration/globals) in which this Hook is running against.                                                                         |
 | **`context`**     | Custom context passed between Hooks. [More details](./context).                                                                                       |
 | **`data`**        | The incoming data passed through the operation.                                                                                                       |
+| **`operation`**   | The name of the operation that this hook is running within.                                                                                           |
 | **`originalDoc`** | The full document before changes are applied. Present on updates; undefined on creates. Use this to read the document id and any unchanged fields.    |
 | **`req`**         | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
 
@@ -116,7 +119,9 @@ The following arguments are provided to the `beforeValidate` hook:
 
 ### beforeChange
 
-Immediately following validation, `beforeChange` hooks will run within the `update` operation. At this stage, you can be confident that the data that will be saved to the document is valid in accordance to your field validations. You can optionally modify the shape of data to be saved.
+Immediately before field validation, `beforeChange` hooks run during the `update` and `validate` operations. At this stage, treat the data as unvalidated user input. Required fields can be missing, and fields can have an incorrect format. You can modify the data before Payload validates it.
+
+On-demand validation runs this hook with `operation: 'validate'` but does not run `afterChange`. Use the `operation` argument to skip external calls and other side effects that should only run when data is saved.
 
 ```ts
 import type { GlobalBeforeChangeHook } from 'payload'
@@ -138,6 +143,7 @@ The following arguments are provided to the `beforeChange` hook:
 | **`global`**      | The [Global](../configuration/globals) in which this Hook is running against.                                                                         |
 | **`context`**     | Custom context passed between hooks. [More details](./context).                                                                                       |
 | **`data`**        | The incoming data passed through the operation.                                                                                                       |
+| **`operation`**   | The name of the operation that this hook is running within.                                                                                           |
 | **`originalDoc`** | The full document before changes are applied. Present on updates; undefined on creates. Use this to read the document id and any unchanged fields.    |
 | **`req`**         | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
 

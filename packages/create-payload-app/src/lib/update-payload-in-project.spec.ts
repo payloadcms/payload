@@ -139,7 +139,7 @@ describe('Payload project updates', () => {
       isSrcDir: true,
       isSupportedNextVersion: true,
       nextConfigPath,
-      nextVersion: '15.0.0',
+      nextVersion: '16.4.0',
     }
 
     const result = await updatePayloadInNextProject({ appDetails, versionOrTag: 'beta' })
