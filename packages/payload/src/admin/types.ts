@@ -399,7 +399,6 @@ export type {
 
 export type {
   BaseVersionField,
-  DiffMethod,
   FieldDiffClientProps,
   FieldDiffServerProps,
   VersionField,
