@@ -941,6 +941,38 @@ If an affected adapter or feature performs asynchronous work, move that work to 
 
 The `transactionIDPromise` property on `PayloadRequest` has been removed. It was deprecated and unused — `transactionID` (which already supports `Promise<number | string>`) is the correct property to use for both resolved values and pending transactions.
 
+### `headers` and `languageCode` removed from `AdminContext`
+
+The `headers` and `languageCode` properties have been removed from `AdminContext`, the object returned by `initAdminContext`. Both duplicated values that are already available on `req`:
+
+```diff
+const context = await initAdminContext(args)
+
+-const userAgent = context.headers.get('user-agent')
++const userAgent = context.req.headers.get('user-agent')
+
+-const languageCode = context.languageCode
++const languageCode = context.req.i18n.language
+```
+
+`req.i18n.language` is typed as `string`. Cast it to `AcceptedLanguages` if you need the narrower type.
+
+`languageCode` has also been removed from `PartialAdminContext`. Use `i18n.language` instead. `getRootLayoutData` from `@payloadcms/ui` no longer accepts `headers` or `languageCode` and reads both from `req`.
+
+#### Codemod
+
+To migrate automatically, run:
+
+```bash
+npx @payloadcms/codemod --transform migrate-admin-context-properties
+```
+
+The codemod rewrites property reads and destructures on `initAdminContext()` results and on parameters or variables typed as `AdminContext` or `PartialAdminContext`. It also updates `Pick<AdminContext, ...>` and `AdminContext['...']` types and drops both arguments from `getRootLayoutData()` calls. Element access such as `context['headers']`, and contexts passed through your own wrapper functions, are left unchanged for manual migration.
+
+### `DiffMethod` type removed
+
+The deprecated `DiffMethod` type has been removed from `payload`. It mirrored an enum from `react-diff-viewer-continued`, which Payload no longer depends on. Remove any imports of `DiffMethod`.
+
 ### Collection `afterOperation` hook: `operation: 'read'` removed
 
 The deprecated `'read'` value for the `operation` argument of collection `afterOperation` hooks has been removed. Payload has not dispatched `afterOperation` with `operation: 'read'` for some time — the `find` and `findByID` operations report their own names (`'find'` and `'findByID'`) instead.

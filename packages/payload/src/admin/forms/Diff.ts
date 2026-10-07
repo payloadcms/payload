@@ -28,22 +28,6 @@ export type VersionField = {
   fieldByLocale?: Record<string, BaseVersionField>
 }
 
-/**
- * Taken from react-diff-viewer-continued
- *
- * @deprecated remove in 4.0 - react-diff-viewer-continued is no longer a dependency
- */
-export declare enum DiffMethod {
-  CHARS = 'diffChars',
-  CSS = 'diffCss',
-  JSON = 'diffJson',
-  LINES = 'diffLines',
-  SENTENCES = 'diffSentences',
-  TRIMMED_LINES = 'diffTrimmedLines',
-  WORDS = 'diffWords',
-  WORDS_WITH_SPACE = 'diffWordsWithSpace',
-}
-
 export type FieldDiffClientProps<TClientField extends ClientFieldWithOptionalType = ClientField> = {
   baseVersionField: BaseVersionField
   /**
