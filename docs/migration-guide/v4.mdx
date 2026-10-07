@@ -583,6 +583,29 @@ To migrate automatically, there's a codemod for this change available by running
 npx @payloadcms/codemod --transform migrate-field-component-types
 ```
 
+### Diff component props `comparisonValue` and `versionValue` renamed to `valueFrom` and `valueTo`
+
+Custom Diff Components (`admin.components.Diff`) receive the two field values being compared as `valueFrom` and `valueTo`. The `comparisonValue` and `versionValue` props have been removed from `FieldDiffClientProps` and `FieldDiffServerProps`, including every field-specific variant such as `TextFieldDiffClientProps`.
+
+| Old prop          | New prop    | Description                                      |
+| ----------------- | ----------- | ------------------------------------------------ |
+| `comparisonValue` | `valueFrom` | Field value from the version being compared from |
+| `versionValue`    | `valueTo`   | Field value from the version being compared to   |
+
+```diff
+  import type { TextFieldDiffClientProps } from 'payload'
+  import type React from 'react'
+
+  export const MyTextDiff: React.FC<TextFieldDiffClientProps> = ({
+-   comparisonValue,
+-   versionValue,
++   valueFrom,
++   valueTo,
+  }) => {
+    // ...
+  }
+```
+
 ### `DefaultValue` function variant is now typed to allow returning a `Promise` ([#17522](https://github.com/payloadcms/payload/pull/17522))
 
 The exported `DefaultValue` type's function variant previously declared a synchronous-only return type (`SerializableValue`), even though Payload has always awaited the result of a `defaultValue` function at runtime. The type now correctly reflects this and allows `Promise<SerializableValue> | SerializableValue`.
