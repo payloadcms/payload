@@ -19,7 +19,7 @@ import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
 import { expect, vi } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 import type { AutosaveMultiSelectPost, DraftPost } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -3216,7 +3216,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
   test.describe('Collections - GraphQL', () => {
     async function createAutoSavePostHelper(
-      { restClient }: { restClient: NextRESTClient },
+      { restClient }: { restClient: RESTClient },
       {
         description,
         title,
@@ -3247,7 +3247,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
     async function updateAutoSavePostHelper(
       { payload }: { payload: Payload },
-      { restClient }: { restClient: NextRESTClient },
+      { restClient }: { restClient: RESTClient },
       {
         id,
         title,
@@ -3278,7 +3278,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
     async function getVersionByIDHelper(
       { payload }: { payload: Payload },
-      { restClient }: { restClient: NextRESTClient },
+      { restClient }: { restClient: RESTClient },
       { id }: { id: number | string },
     ): Promise<JsonObject> {
       const query = `query {
@@ -3306,7 +3306,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
     async function getLatestVersionByParentIDHelper(
       { payload }: { payload: Payload },
-      { restClient }: { restClient: NextRESTClient },
+      { restClient }: { restClient: RESTClient },
       {
         parentID,
       }: {
@@ -4640,7 +4640,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
   test.describe('Globals - GraphQL', () => {
     let autosaveGlobalVersionID: number | string
 
-    async function createAndSetVersionID({ restClient }: { restClient: NextRESTClient }) {
+    async function createAndSetVersionID({ restClient }: { restClient: RESTClient }) {
       const update = `mutation {
         updateAutosaveGlobal(draft: true, data: {
           title: "${globalGraphQLOriginalTitle}"
