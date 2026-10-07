@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
+import { gotoAndWaitForForm, saveDocAndAssert } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
@@ -16,6 +17,7 @@ import {
   branchMergesSlug,
   headerGlobalSlug,
   homepageGlobalSlug,
+  mediaSlug,
   nestedSlug,
   pagesSlug,
   postsSlug,
@@ -65,6 +67,7 @@ async function switchBranch({ name, page }: { name: string; page: Page }): Promi
 test.describe('Branching', () => {
   let page: Page
   let nestedURL: AdminUrlUtil
+  let mediaURL: AdminUrlUtil
   let pagesURL: AdminUrlUtil
   let postsURL: AdminUrlUtil
 
@@ -87,6 +90,7 @@ test.describe('Branching', () => {
     payload = payloadFromInit
     serverURL = serverFromInit
     nestedURL = new AdminUrlUtil(serverURL, nestedSlug)
+    mediaURL = new AdminUrlUtil(serverURL, mediaSlug)
     pagesURL = new AdminUrlUtil(serverURL, pagesSlug)
     postsURL = new AdminUrlUtil(serverURL, postsSlug)
 
@@ -97,7 +101,7 @@ test.describe('Branching', () => {
   test.afterEach(async () => {
     // Shadow rows are addressed by their real primary key, so these deletes
     // bypass branch resolution rather than writing tombstones.
-    for (const collection of [nestedSlug, pagesSlug, postsSlug] as const) {
+    for (const collection of [mediaSlug, nestedSlug, pagesSlug, postsSlug] as const) {
       const documents = await payload.find({ branch: false, collection, pagination: false })
 
       for (const doc of documents.docs) {
@@ -163,6 +167,132 @@ test.describe('Branching', () => {
         .delete({ id: preference.id, collection: 'payload-preferences', overrideAccess: true })
         .catch(() => {})
     }
+  })
+
+  test.describe('Media files', () => {
+    const expectImagePreviewToLoad = async ({
+      expectedFilename,
+    }: {
+      expectedFilename: string
+    }): Promise<void> => {
+      const image = page.locator('.file-preview__thumbnail img')
+
+      await expect(image).toBeVisible()
+      await expect
+        .poll(() => image.evaluate((element) => (element as HTMLImageElement).naturalWidth))
+        .toBeGreaterThan(0)
+      await expect(image).toHaveAttribute('src', new RegExp(expectedFilename.replace('.', '\\.')))
+    }
+
+    test('should upload and render media created on a branch', async () => {
+      await page.goto(mediaURL.list)
+      await switchBranch({ name: branchName, page })
+      await gotoAndWaitForForm(page, mediaURL.create)
+      await page.setInputFiles(
+        '.file-manager input[type="file"]',
+        path.resolve(dirname, '../uploads/image.png'),
+      )
+      await page.locator('#field-alt').fill('Branch-created image')
+
+      const saveResponse = page.waitForResponse((response) => {
+        const requestURL = new URL(response.url())
+
+        return requestURL.pathname === `/api/${mediaSlug}` && response.request().method() === 'POST'
+      })
+
+      await saveDocAndAssert(page)
+
+      const response = await saveResponse
+
+      await expect.poll(() => response.ok()).toBe(true)
+      await expect.poll(() => new URL(response.url()).searchParams.get('branch')).toBe(branchSlug)
+
+      const documentID = page.url().split('/').pop()!
+      const [onBranch, onMain] = await Promise.all([
+        payload.find({
+          branch: branchSlug,
+          collection: mediaSlug,
+          pagination: false,
+          where: { id: { equals: documentID } },
+        }),
+        payload.find({
+          collection: mediaSlug,
+          pagination: false,
+          where: { id: { equals: documentID } },
+        }),
+      ])
+      const branchDocument = onBranch.docs[0]!
+
+      await expect.poll(() => branchDocument.filename).toContain(branchSlug)
+      await expectImagePreviewToLoad({ expectedFilename: branchDocument.filename! })
+      await expect.poll(() => onMain.docs).toHaveLength(0)
+    })
+
+    test('should render separate files after replacing main media on a branch', async () => {
+      await gotoAndWaitForForm(page, mediaURL.create)
+      await page.setInputFiles(
+        '.file-manager input[type="file"]',
+        path.resolve(dirname, '../uploads/image.png'),
+      )
+      await page.locator('#field-alt').fill('Main image')
+      await saveDocAndAssert(page)
+
+      const documentID = page.url().split('/').pop()!
+      const originalResult = await payload.find({
+        collection: mediaSlug,
+        pagination: false,
+        where: { id: { equals: documentID } },
+      })
+      const original = originalResult.docs[0]!
+
+      await page.goto(mediaURL.list)
+      await switchBranch({ name: branchName, page })
+      await gotoAndWaitForForm(page, mediaURL.edit(documentID))
+      await page.locator('.file-toolbar__filename-btn').click()
+      await page.locator('.popup-button-list__button', { hasText: 'Replace file' }).click()
+      await page.setInputFiles(
+        '.file-manager input[type="file"]',
+        path.resolve(dirname, '../uploads/image.jpg'),
+      )
+      await page.locator('#field-alt').fill('Branch replacement image')
+
+      const saveResponse = page.waitForResponse((response) => {
+        const requestURL = new URL(response.url())
+
+        return requestURL.pathname === `/api/${mediaSlug}/${documentID}`
+      })
+
+      await saveDocAndAssert(page)
+
+      const response = await saveResponse
+
+      await expect.poll(() => response.ok()).toBe(true)
+      await expect.poll(() => new URL(response.url()).searchParams.get('branch')).toBe(branchSlug)
+
+      const [onBranch, onMain] = await Promise.all([
+        payload.find({
+          branch: branchSlug,
+          collection: mediaSlug,
+          pagination: false,
+          where: { id: { equals: documentID } },
+        }),
+        payload.find({
+          collection: mediaSlug,
+          pagination: false,
+          where: { id: { equals: documentID } },
+        }),
+      ])
+      const branchDocument = onBranch.docs[0]!
+      const mainDocument = onMain.docs[0]!
+
+      await expect.poll(() => branchDocument.filename).not.toBe(original.filename)
+      await expect.poll(() => branchDocument.filename).toContain(branchSlug)
+      await expect.poll(() => mainDocument.filename).toBe(original.filename)
+      await expectImagePreviewToLoad({ expectedFilename: branchDocument.filename! })
+
+      await switchBranch({ name: 'main', page })
+      await expectImagePreviewToLoad({ expectedFilename: original.filename! })
+    })
   })
 
   test.describe('Canonical document identity', () => {

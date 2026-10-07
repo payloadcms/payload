@@ -2,6 +2,7 @@
 export const postsSlug = 'posts'
 export const pagesSlug = 'pages'
 export const mediaSlug = 'media'
+export const versionedMediaSlug = 'versioned-media'
 export const categoriesSlug = 'categories'
 export const uniqueSlug = 'unique-docs'
 export const numericIDSlug = 'numeric-id-docs'

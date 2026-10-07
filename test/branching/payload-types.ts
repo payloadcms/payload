@@ -73,6 +73,7 @@ export interface Config {
     pages: Page;
     categories: Category;
     media: Media;
+    'versioned-media': VersionedMedia;
     'unique-docs': UniqueDoc;
     'numeric-id-docs': NumericIdDoc;
     'restricted-docs': RestrictedDoc;
@@ -105,6 +106,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'versioned-media': VersionedMediaSelect<false> | VersionedMediaSelect<true>;
     'unique-docs': UniqueDocsSelect<false> | UniqueDocsSelect<true>;
     'numeric-id-docs': NumericIdDocsSelect<false> | NumericIdDocsSelect<true>;
     'restricted-docs': RestrictedDocsSelect<false> | RestrictedDocsSelect<true>;
@@ -370,6 +372,35 @@ export interface Media {
       filename?: string | null;
     };
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-media".
+ */
+export interface VersionedMedia {
+  id: string;
+  alt?: string | null;
+  _branch: string;
+  _branchDocID?: (string | null) | VersionedMedia;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -800,6 +831,10 @@ export interface PayloadBranchChange {
         value: string | Media;
       } | null)
     | ({
+        relationTo: 'versioned-media';
+        value: string | VersionedMedia;
+      } | null)
+    | ({
         relationTo: 'unique-docs';
         value: string | UniqueDoc;
       } | null)
@@ -953,6 +988,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'versioned-media';
+        value: string | VersionedMedia;
       } | null)
     | ({
         relationTo: 'unique-docs';
@@ -1146,6 +1185,28 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-media_select".
+ */
+export interface VersionedMediaSelect<T extends boolean = true> {
+  alt?: T;
+  _branch?: T;
+  _branchDocID?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1705,6 +1766,7 @@ export interface CollectionQueryWidget {
       | 'pages'
       | 'categories'
       | 'media'
+      | 'versioned-media'
       | 'unique-docs'
       | 'numeric-id-docs'
       | 'restricted-docs'
@@ -1743,6 +1805,7 @@ export interface ActivityWidget {
           | 'pages'
           | 'categories'
           | 'media'
+          | 'versioned-media'
           | 'unique-docs'
           | 'numeric-id-docs'
           | 'restricted-docs'
@@ -1765,7 +1828,7 @@ export interface ActivityWidget {
  */
 export interface UploadDropzoneWidget {
   data?: {
-    excludedCollections?: 'media'[] | null;
+    excludedCollections?: ('media' | 'versioned-media')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

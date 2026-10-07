@@ -26,6 +26,7 @@ import {
   restrictedSlug,
   uninitializedGlobalSlug,
   uniqueSlug,
+  versionedMediaSlug,
   whereAccessSlug,
 } from './shared.js'
 
@@ -259,6 +260,15 @@ export default buildConfigWithDefaults({
           staticDir: path.resolve(dirname, 'media'),
         },
         versions: false,
+      },
+      {
+        slug: versionedMediaSlug,
+        fields: [{ name: 'alt', type: 'text' }],
+        upload: {
+          filenameCompoundIndex: ['filename', 'alt'],
+          staticDir: path.resolve(dirname, 'versioned-media'),
+        },
+        versions: true,
       },
       {
         slug: uniqueSlug,
