@@ -5,6 +5,7 @@ import {
   REST_DELETE as createDELETE,
   REST_GET as createGET,
   GRAPHQL_POST as createGraphqlPOST,
+  REST_HEAD as createHEAD,
   REST_PATCH as createPATCH,
   REST_POST as createPOST,
   REST_PUT as createPUT,
@@ -59,6 +60,11 @@ export class NextRESTClient {
 
   private _GRAPHQL_POST: (request: Request) => Promise<Response>
 
+  private _HEAD: (
+    request: Request,
+    args: { params: Promise<{ slug: string[] }> },
+  ) => Promise<Response>
+
   private _PATCH: (
     request: Request,
     args: { params: Promise<{ slug: string[] }> },
@@ -86,6 +92,7 @@ export class NextRESTClient {
       this.serverURL = config.serverURL
     }
     this._GET = createGET(config)
+    this._HEAD = createHEAD(config)
     this._POST = createPOST(config)
     this._DELETE = createDELETE(config)
     this._PATCH = createPATCH(config)
@@ -163,6 +170,22 @@ export class NextRESTClient {
       method: 'GET',
     })
     return this._GET(request, { params: Promise.resolve({ slug }) })
+  }
+
+  async HEAD(
+    path: ValidPath,
+    options: Omit<RequestInit, 'body'> & RequestOptions = {},
+  ): Promise<Response> {
+    const { slug, params, url } = this.generateRequestParts(path)
+    const { query, ...rest } = options || {}
+    const queryParams = generateQueryString(query, params)
+
+    const request = new Request(`${url}${queryParams}`, {
+      ...rest,
+      headers: this.buildHeaders(options),
+      method: 'HEAD',
+    })
+    return this._HEAD(request, { params: Promise.resolve({ slug }) })
   }
 
   async GRAPHQL_POST(options: RequestInit & RequestOptions): Promise<Response> {
