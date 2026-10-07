@@ -14,6 +14,10 @@ export function getDocumentThumbnailSelect({
 
   appendUploadSelectFields({ collectionConfig, select: thumbnailSelect })
 
+  if (collectionConfig.upload) {
+    thumbnailSelect.url = true
+  }
+
   if (collectionConfig.upload && typeof collectionConfig.upload.adminThumbnail === 'function') {
     for (const field of collectionConfig.flattenedFields) {
       thumbnailSelect[field.name] = true
