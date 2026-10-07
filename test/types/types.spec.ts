@@ -2335,8 +2335,8 @@ describe('Types testing', () => {
         expect(payload.create).type.toBeCallableWith({
           collection: 'draft-posts',
           data: {
-            description: 'Description',
             title: 'Test',
+            description: 'Description',
           },
           draft: false,
         })
@@ -2355,8 +2355,8 @@ describe('Types testing', () => {
         expect(payload.create).type.toBeCallableWith({
           collection: 'draft-posts',
           data: {
-            description: 'Description',
             title: 'Test',
+            description: 'Description',
           },
         })
       })
@@ -2391,9 +2391,9 @@ describe('Types testing', () => {
         expect(payload.create).type.not.toBeCallableWith({
           collection: 'draft-posts',
           data: {
+            title: 'Test',
             description: 'Description',
             invalidProperty: 'should error',
-            title: 'Test',
           },
           draft: false,
         })
@@ -2401,8 +2401,8 @@ describe('Types testing', () => {
         expect(payload.create).type.not.toBeCallableWith({
           collection: 'draft-posts',
           data: {
-            invalidProperty: 'should error',
             title: 'Test',
+            invalidProperty: 'should error',
           },
           draft: true,
         })
@@ -2446,32 +2446,32 @@ describe('Types testing', () => {
 
       test('findByID with draft:true on non-draft collection should error', () => {
         expect(payload.findByID).type.not.toBeCallableWith({
-          id: 1,
           collection: 'pages',
+          id: 1,
           draft: true,
         })
       })
 
       test('findByID with draft:false on non-draft collection should error', () => {
         expect(payload.findByID).type.not.toBeCallableWith({
-          id: 1,
           collection: 'pages',
+          id: 1,
           draft: false,
         })
       })
 
       test('findByID with draft:true on draft-enabled collection should work', () => {
         expect(payload.findByID).type.toBeCallableWith({
-          id: 1,
           collection: 'draft-posts',
+          id: 1,
           draft: true,
         })
       })
 
       test('update with draft:true on non-draft collection should error', () => {
         expect(payload.update).type.not.toBeCallableWith({
-          id: 1,
           collection: 'pages',
+          id: 1,
           data: { title: 'Test' },
           draft: true,
         })
@@ -2479,8 +2479,8 @@ describe('Types testing', () => {
 
       test('update with draft:false on non-draft collection should error', () => {
         expect(payload.update).type.not.toBeCallableWith({
-          id: 1,
           collection: 'pages',
+          id: 1,
           data: { title: 'Test' },
           draft: false,
         })
@@ -2488,8 +2488,8 @@ describe('Types testing', () => {
 
       test('update with draft:true on draft-enabled collection should work', () => {
         expect(payload.update).type.toBeCallableWith({
-          id: 1,
           collection: 'draft-posts',
+          id: 1,
           data: { title: 'Test' },
           draft: true,
         })
@@ -2497,24 +2497,24 @@ describe('Types testing', () => {
 
       test('duplicate with draft:true on non-draft collection should error', () => {
         expect(payload.duplicate).type.not.toBeCallableWith({
-          id: 1,
           collection: 'pages',
+          id: 1,
           draft: true,
         })
       })
 
       test('duplicate with draft:false on non-draft collection should error', () => {
         expect(payload.duplicate).type.not.toBeCallableWith({
-          id: 1,
           collection: 'pages',
+          id: 1,
           draft: false,
         })
       })
 
       test('duplicate with draft:true on draft-enabled collection should work', () => {
         expect(payload.duplicate).type.toBeCallableWith({
-          id: 1,
           collection: 'draft-posts',
+          id: 1,
           draft: true,
         })
       })

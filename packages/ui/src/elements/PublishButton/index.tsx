@@ -17,13 +17,10 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { PopupList } from '../Popup/index.js'
 import { FieldErrorsToast } from '../Toasts/fieldErrors.js'
-import {
-  hasLocalizedFields as fieldsContainLocalizedData,
-  getValidationEndpoint,
-  validateDocumentLocales,
-} from './validateAllLocales.js'
+import { validateDocumentLocales } from './validateAllLocales.js'
 import './index.css'
 
 export function PublishButton({
@@ -81,7 +78,7 @@ export function PublishButton({
     () =>
       Boolean(
         entityConfig?.fields &&
-          fieldsContainLocalizedData({
+          traverseForLocalizedFields({
             blocksMap,
             fields: entityConfig.fields,
           }),
@@ -164,11 +161,22 @@ export function PublishButton({
       let validation
 
       try {
+        const encodedID = id === undefined ? '' : `/${encodeURIComponent(String(id))}`
+        let validationPath: `/${string}`
+
+        if (globalSlug) {
+          validationPath = `/globals/${encodeURIComponent(globalSlug)}/validate`
+        } else if (collectionSlug) {
+          validationPath = `/${encodeURIComponent(collectionSlug)}${encodedID}/validate`
+        } else {
+          throw new Error('Document validation requires a collection or global slug.')
+        }
+
         validation = await validateDocumentLocales({
           activeLocale: localeCode,
           blocksMap,
           data: { ...getData(), _status: 'published' },
-          endpoint: getValidationEndpoint({ id, apiRoute: api, collectionSlug, globalSlug }),
+          endpoint: formatAdminURL({ apiRoute: api, path: validationPath }),
           fields: entityConfig?.fields ?? [],
           locales: localization.locales.map(({ code }) => code),
         })

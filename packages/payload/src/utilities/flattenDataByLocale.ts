@@ -7,13 +7,6 @@ import { deepCopyObjectSimple } from './deepCopyObject.js'
 
 type Args = {
   configBlockReferences: SanitizedConfig['blocks']
-  /**
-   * Whether `docWithLocales` stores each localized field as a locale-code-keyed object (the
-   * stored document representation, and the internal publish-all-locales candidate). Pass
-   * `false` for a flat, single-locale candidate, such as the data passed to `payload.validate()`.
-   * @default true
-   */
-  dataIsLocaleKeyed?: boolean
   docWithLocales: JsonObject
   fields: Field[]
   locale: string
@@ -27,7 +20,6 @@ type Args = {
  */
 export function flattenDataByLocale({
   configBlockReferences,
-  dataIsLocaleKeyed = true,
   docWithLocales,
   fields,
   locale,
@@ -38,7 +30,6 @@ export function flattenDataByLocale({
   flattenFields({
     configBlockReferences,
     data: result,
-    dataIsLocaleKeyed,
     fields,
     locale,
     parentIsLocalized,
@@ -50,7 +41,6 @@ export function flattenDataByLocale({
 type FlattenFieldsArgs = {
   configBlockReferences: SanitizedConfig['blocks']
   data: JsonObject
-  dataIsLocaleKeyed: boolean
   fields: Field[]
   locale: string
   parentIsLocalized: boolean
@@ -59,7 +49,6 @@ type FlattenFieldsArgs = {
 function flattenFields({
   configBlockReferences,
   data,
-  dataIsLocaleKeyed,
   fields,
   locale,
   parentIsLocalized,
@@ -70,7 +59,6 @@ function flattenFields({
 
       if (isLocalized) {
         data[field.name] = getLocaleValue({
-          dataIsLocaleKeyed,
           locale,
           value: data[field.name],
         })
@@ -92,7 +80,6 @@ function flattenFields({
                 flattenFields({
                   configBlockReferences,
                   data: row,
-                  dataIsLocaleKeyed,
                   fields: field.fields,
                   locale,
                   parentIsLocalized: nestedParentIsLocalized,
@@ -123,7 +110,6 @@ function flattenFields({
                 flattenFields({
                   configBlockReferences,
                   data: row,
-                  dataIsLocaleKeyed,
                   fields: block.fields,
                   locale,
                   parentIsLocalized: nestedParentIsLocalized,
@@ -139,7 +125,6 @@ function flattenFields({
             flattenFields({
               configBlockReferences,
               data: fieldValue,
-              dataIsLocaleKeyed,
               fields: field.fields,
               locale,
               parentIsLocalized: nestedParentIsLocalized,
@@ -159,7 +144,6 @@ function flattenFields({
         flattenFields({
           configBlockReferences,
           data,
-          dataIsLocaleKeyed,
           fields: field.fields,
           locale,
           parentIsLocalized,
@@ -173,7 +157,6 @@ function flattenFields({
 
             if (isLocalized) {
               data[tab.name] = getLocaleValue({
-                dataIsLocaleKeyed,
                 locale,
                 value: data[tab.name],
               })
@@ -185,7 +168,6 @@ function flattenFields({
               flattenFields({
                 configBlockReferences,
                 data: tabData,
-                dataIsLocaleKeyed,
                 fields: tab.fields,
                 locale,
                 parentIsLocalized: parentIsLocalized || Boolean(tab.localized),
@@ -195,7 +177,6 @@ function flattenFields({
             flattenFields({
               configBlockReferences,
               data,
-              dataIsLocaleKeyed,
               fields: tab.fields,
               locale,
               parentIsLocalized,
@@ -230,16 +211,8 @@ function transformStoredFieldValue({ field, value }: { field: Field; value: unkn
   }
 }
 
-function getLocaleValue({
-  dataIsLocaleKeyed,
-  locale,
-  value,
-}: {
-  dataIsLocaleKeyed: boolean
-  locale: string
-  value: unknown
-}): unknown {
-  if (dataIsLocaleKeyed && value && typeof value === 'object' && !Array.isArray(value)) {
+function getLocaleValue({ locale, value }: { locale: string; value: unknown }): unknown {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
     return (value as Record<string, unknown>)[locale]
   }
 

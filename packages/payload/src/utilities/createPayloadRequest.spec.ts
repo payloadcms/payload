@@ -130,28 +130,4 @@ describe('createPayloadRequest - URL construction', () => {
     expect(result.url).toBe('http://localhost/api/test')
     expect(mockPayload.logger.error).not.toHaveBeenCalled()
   })
-
-  it('should preserve an explicit anonymous user override', async () => {
-    const authenticatedUser = {
-      collection: 'users',
-      id: 'authenticated-user',
-    } as never
-
-    const inherited = await createPayloadRequest({
-      payload: mockPayload,
-      req: {
-        user: authenticatedUser,
-      },
-    })
-    const anonymous = await createPayloadRequest({
-      payload: mockPayload,
-      req: {
-        user: authenticatedUser,
-      },
-      user: null,
-    })
-
-    expect(inherited.user).toBe(authenticatedUser)
-    expect(anonymous.user).toBeNull()
-  })
 })

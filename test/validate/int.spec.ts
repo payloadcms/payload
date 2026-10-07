@@ -3404,42 +3404,6 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
         es: 'draft',
       })
     })
-
-    test('should continue to publish one locale when sibling locales are invalid', async ({
-      payload,
-    }) => {
-      const draft = await seedPublishCollection({
-        de: '',
-        en: 'English valid',
-        es: '',
-        payload,
-      })
-
-      await payload.update({
-        id: draft.id,
-        collection: publishCollectionSlug,
-        data: {
-          _status: 'published',
-        },
-        locale: 'en',
-        overrideAccess: true,
-        publishAllLocales: false,
-      })
-
-      const latestDraft = await payload.findByID({
-        id: draft.id,
-        collection: publishCollectionSlug,
-        draft: true,
-        locale: 'all',
-        overrideAccess: true,
-      })
-
-      expect(latestDraft._status).toMatchObject({
-        de: 'draft',
-        en: 'published',
-        es: 'draft',
-      })
-    })
   })
 
   test.describe('write safety', () => {

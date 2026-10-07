@@ -7,9 +7,9 @@ import type {
 } from 'payload'
 
 import {
+  deepCopyObjectSimple,
   fieldAffectsData,
   fieldShouldBeLocalized,
-  formatAdminURL,
   tabHasName,
 } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -23,35 +23,7 @@ type DocumentValidationRequestArgs = {
   signal?: AbortSignal
 }
 
-type ValidationTarget = {
-  apiRoute: string
-  collectionSlug?: string
-  globalSlug?: string
-  id?: number | string
-}
-
-export function getValidationEndpoint({
-  id,
-  apiRoute,
-  collectionSlug,
-  globalSlug,
-}: ValidationTarget): string {
-  if (!collectionSlug && !globalSlug) {
-    throw new Error('Document validation requires a collection or global slug.')
-  }
-
-  const encodedID = id === undefined ? '' : `/${encodeURIComponent(String(id))}`
-  const path: `/${string}` = globalSlug
-    ? `/globals/${encodeURIComponent(globalSlug)}/validate`
-    : `/${encodeURIComponent(collectionSlug)}${encodedID}/validate`
-
-  return formatAdminURL({
-    apiRoute,
-    path,
-  })
-}
-
-export function projectValidationDataForSiblingLocales({
+function projectValidationDataForSiblingLocales({
   blocksMap,
   data,
   fields,
@@ -60,15 +32,14 @@ export function projectValidationDataForSiblingLocales({
   data: Data
   fields: ClientField[]
 }): Data {
-  const projectedData = cloneValidationData(data)
+  const projectedData = deepCopyObjectSimple(data)
   const status = projectedData._status
 
-  processLocalizedFields({
+  removeLocalizedFieldValues({
     blocksMap,
     data: projectedData,
     fields,
     parentIsLocalized: false,
-    visitedBlockSlugs: new Set(),
   })
 
   if (status !== undefined) {
@@ -76,21 +47,6 @@ export function projectValidationDataForSiblingLocales({
   }
 
   return projectedData
-}
-
-export function hasLocalizedFields({
-  blocksMap,
-  fields,
-}: {
-  blocksMap: Record<string, ClientBlock>
-  fields: ClientField[]
-}): boolean {
-  return processLocalizedFields({
-    blocksMap,
-    fields,
-    parentIsLocalized: false,
-    visitedBlockSlugs: new Set(),
-  })
 }
 
 export async function validateDocumentLocales({
@@ -153,7 +109,7 @@ export async function validateDocumentLocales({
   }
 }
 
-export async function requestDocumentValidation({
+async function requestDocumentValidation({
   body,
   endpoint,
   locales,
@@ -251,70 +207,37 @@ function isValidationFieldError(value: unknown): value is ValidationFieldError {
   )
 }
 
-function cloneValidationData<T>(value: T): T {
-  if (Array.isArray(value)) {
-    return value.map(cloneValidationData) as T
-  }
-
-  if (isObject(value)) {
-    return Object.fromEntries(
-      Object.entries(value).map(([key, childValue]) => [key, cloneValidationData(childValue)]),
-    ) as T
-  }
-
-  return value
-}
-
-function processLocalizedFields({
+function removeLocalizedFieldValues({
   blocksMap,
   data,
   fields,
   parentIsLocalized,
-  visitedBlockSlugs,
 }: {
   blocksMap: Record<string, ClientBlock>
-  data?: Data
+  data: Data
   fields: ClientField[]
   parentIsLocalized: boolean
-  visitedBlockSlugs: Set<string>
-}): boolean {
-  let hasLocalizedField = false
-
+}): void {
   for (const field of fields) {
     if (fieldAffectsData(field)) {
       if (parentIsLocalized || fieldShouldBeLocalized({ field, parentIsLocalized })) {
-        hasLocalizedField = true
-
-        if (data) {
-          delete data[field.name]
-        }
-
+        delete data[field.name]
         continue
       }
 
-      const fieldValue = data?.[field.name]
+      const fieldValue = data[field.name]
 
       switch (field.type) {
         case 'array': {
-          if (data === undefined) {
-            hasLocalizedField =
-              processLocalizedFields({
-                blocksMap,
-                fields: field.fields,
-                parentIsLocalized: false,
-                visitedBlockSlugs,
-              }) || hasLocalizedField
-          } else if (Array.isArray(fieldValue)) {
+          if (Array.isArray(fieldValue)) {
             for (const row of fieldValue) {
               if (isObject(row)) {
-                hasLocalizedField =
-                  processLocalizedFields({
-                    blocksMap,
-                    data: row,
-                    fields: field.fields,
-                    parentIsLocalized: false,
-                    visitedBlockSlugs,
-                  }) || hasLocalizedField
+                removeLocalizedFieldValues({
+                  blocksMap,
+                  data: row,
+                  fields: field.fields,
+                  parentIsLocalized: false,
+                })
               }
             }
           }
@@ -322,29 +245,7 @@ function processLocalizedFields({
         }
 
         case 'blocks': {
-          if (data === undefined) {
-            for (const blockOrSlug of field.blocks) {
-              if (typeof blockOrSlug === 'string' && visitedBlockSlugs.has(blockOrSlug)) {
-                continue
-              }
-
-              const block = typeof blockOrSlug === 'string' ? blocksMap[blockOrSlug] : blockOrSlug
-
-              if (typeof blockOrSlug === 'string') {
-                visitedBlockSlugs.add(blockOrSlug)
-              }
-
-              if (block) {
-                hasLocalizedField =
-                  processLocalizedFields({
-                    blocksMap,
-                    fields: block.fields,
-                    parentIsLocalized: false,
-                    visitedBlockSlugs,
-                  }) || hasLocalizedField
-              }
-            }
-          } else if (Array.isArray(fieldValue)) {
+          if (Array.isArray(fieldValue)) {
             for (const row of fieldValue) {
               if (!isObject(row) || typeof row.blockType !== 'string') {
                 continue
@@ -356,14 +257,12 @@ function processLocalizedFields({
               const block = typeof blockOrSlug === 'string' ? blocksMap[blockOrSlug] : blockOrSlug
 
               if (block) {
-                hasLocalizedField =
-                  processLocalizedFields({
-                    blocksMap,
-                    data: row,
-                    fields: block.fields,
-                    parentIsLocalized: false,
-                    visitedBlockSlugs,
-                  }) || hasLocalizedField
+                removeLocalizedFieldValues({
+                  blocksMap,
+                  data: row,
+                  fields: block.fields,
+                  parentIsLocalized: false,
+                })
               }
             }
           }
@@ -371,15 +270,13 @@ function processLocalizedFields({
         }
 
         case 'group': {
-          if (data === undefined || isObject(fieldValue)) {
-            hasLocalizedField =
-              processLocalizedFields({
-                blocksMap,
-                data: isObject(fieldValue) ? fieldValue : undefined,
-                fields: field.fields,
-                parentIsLocalized: false,
-                visitedBlockSlugs,
-              }) || hasLocalizedField
+          if (isObject(fieldValue)) {
+            removeLocalizedFieldValues({
+              blocksMap,
+              data: fieldValue,
+              fields: field.fields,
+              parentIsLocalized: false,
+            })
           }
           break
         }
@@ -392,15 +289,12 @@ function processLocalizedFields({
           const isLocalized =
             parentIsLocalized || fieldShouldBeLocalized({ field, parentIsLocalized })
 
-          hasLocalizedField = isLocalized || hasLocalizedField
-          hasLocalizedField =
-            processLocalizedFields({
-              blocksMap,
-              data,
-              fields: field.fields,
-              parentIsLocalized: isLocalized,
-              visitedBlockSlugs,
-            }) || hasLocalizedField
+          removeLocalizedFieldValues({
+            blocksMap,
+            data,
+            fields: field.fields,
+            parentIsLocalized: isLocalized,
+          })
           break
         }
 
@@ -409,32 +303,24 @@ function processLocalizedFields({
             const isLocalized =
               parentIsLocalized || fieldShouldBeLocalized({ field: tab, parentIsLocalized })
 
-            hasLocalizedField = isLocalized || hasLocalizedField
-
             if (tabHasName(tab)) {
               if (isLocalized) {
-                if (data) {
-                  delete data[tab.name]
-                }
-              } else if (data === undefined || isObject(data[tab.name])) {
-                hasLocalizedField =
-                  processLocalizedFields({
-                    blocksMap,
-                    data: data && isObject(data[tab.name]) ? data[tab.name] : undefined,
-                    fields: tab.fields,
-                    parentIsLocalized: false,
-                    visitedBlockSlugs,
-                  }) || hasLocalizedField
+                delete data[tab.name]
+              } else if (isObject(data[tab.name])) {
+                removeLocalizedFieldValues({
+                  blocksMap,
+                  data: data[tab.name],
+                  fields: tab.fields,
+                  parentIsLocalized: false,
+                })
               }
             } else {
-              hasLocalizedField =
-                processLocalizedFields({
-                  blocksMap,
-                  data,
-                  fields: tab.fields,
-                  parentIsLocalized: isLocalized,
-                  visitedBlockSlugs,
-                }) || hasLocalizedField
+              removeLocalizedFieldValues({
+                blocksMap,
+                data,
+                fields: tab.fields,
+                parentIsLocalized: isLocalized,
+              })
             }
           }
           break
@@ -442,8 +328,6 @@ function processLocalizedFields({
       }
     }
   }
-
-  return hasLocalizedField
 }
 
 function isObject(value: unknown): value is Data {

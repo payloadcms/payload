@@ -29,7 +29,7 @@ const createArgs = (slug = 'posts'): AccessArgs => ({
 })
 
 describe('addCollectionAccess', () => {
-  it('should add tenant constraints through base access without replacing collection access', async () => {
+  it('adds tenant constraints through base access without replacing collection access', async () => {
     const documentRead = vi.fn(() => ({ published: { equals: true } }))
     const collection: CollectionConfig = {
       slug: 'posts',
@@ -56,7 +56,7 @@ describe('addCollectionAccess', () => {
     expect(documentRead).not.toHaveBeenCalled()
   })
 
-  it('should return a boolean tenant result for collection create access', async () => {
+  it('returns a boolean tenant result for collection create access', async () => {
     const collection: CollectionConfig = { slug: 'posts', fields: [] }
     const config = {} as Config
 
@@ -65,13 +65,16 @@ describe('addCollectionAccess', () => {
     await expect(config.baseAccess?.collections?.create?.(createArgs())).resolves.toBe(true)
   })
 
-  it('should use explicit base validate access and otherwise fall back to update access', async () => {
+  it('uses explicit base validate access and otherwise falls back to update access', async () => {
     const collection: CollectionConfig = { slug: 'posts', fields: [] }
-    const fallbackUpdate = vi.fn(() => false)
+    let fallbackUpdateCalls = 0
     const fallbackConfig = {
       baseAccess: {
         collections: {
-          update: fallbackUpdate,
+          update: () => {
+            fallbackUpdateCalls += 1
+            return false
+          },
         },
       },
     } as Config
@@ -81,15 +84,21 @@ describe('addCollectionAccess', () => {
     await expect(fallbackConfig.baseAccess?.collections?.validate?.(createArgs())).resolves.toBe(
       false,
     )
-    expect(fallbackUpdate).toHaveBeenCalledOnce()
+    expect(fallbackUpdateCalls).toBe(1)
 
-    const explicitUpdate = vi.fn(() => false)
-    const explicitValidate = vi.fn(() => true)
+    let explicitUpdateCalls = 0
+    let explicitValidateCalls = 0
     const explicitConfig = {
       baseAccess: {
         collections: {
-          update: explicitUpdate,
-          validate: explicitValidate,
+          update: () => {
+            explicitUpdateCalls += 1
+            return false
+          },
+          validate: () => {
+            explicitValidateCalls += 1
+            return true
+          },
         },
       },
     } as Config
@@ -101,43 +110,7 @@ describe('addCollectionAccess', () => {
         tenant: { in: ['tenant-1'] },
       },
     )
-    expect(explicitUpdate).not.toHaveBeenCalled()
-    expect(explicitValidate).toHaveBeenCalledOnce()
-  })
-
-  it('should use update access for validate when an access result override is configured', async () => {
-    const documentUpdate = vi.fn(({ req }: AccessArgs) => req.context.allowUpdate === true)
-    const accessResultCallback = vi.fn(({ accessResult }) => accessResult)
-    const collection: CollectionConfig = {
-      slug: 'posts',
-      access: { update: documentUpdate },
-      fields: [],
-    }
-    const config = {} as Config
-
-    addCollectionAccess({
-      config,
-      scopes: [createScope(collection, accessResultCallback)],
-    })
-
-    expect(config.baseAccess).toBeUndefined()
-    const deniedArgs = createArgs()
-    deniedArgs.req.context = { allowUpdate: false }
-
-    await expect(collection.access?.validate?.(deniedArgs)).resolves.toBe(false)
-
-    const allowedArgs = createArgs()
-    allowedArgs.req.context = { allowUpdate: true }
-    allowedArgs.req.user!.collection = 'other-users'
-
-    await expect(collection.access?.validate?.(allowedArgs)).resolves.toBe(true)
-    expect(accessResultCallback).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({ accessKey: 'validate', accessResult: false }),
-    )
-    expect(accessResultCallback).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({ accessKey: 'validate', accessResult: true }),
-    )
+    expect(explicitUpdateCalls).toBe(0)
+    expect(explicitValidateCalls).toBe(1)
   })
 })

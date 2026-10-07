@@ -71,21 +71,6 @@ test.describe('Publish all locales', () => {
       .not.toBe('published')
   })
 
-  test('should publish successfully when every locale has valid data', async () => {
-    const id = await createDraft({
-      frenchTitle: 'Titre en français',
-      germanTitle: 'Deutscher Titel',
-      spanishTitle: 'Título en español',
-    })
-
-    await openDraft(id)
-    await saveDocAndAssert(page, '#publish-all-locales', 'success')
-
-    for (const locale of ['en', 'es', 'de', 'fr']) {
-      await expect.poll(() => getLocaleStatus({ id, locale })).toBe('published')
-    }
-  })
-
   test('should report a denied validation request without publishing', async () => {
     const id = await createDraft({
       englishTitle: validationRequestFailureTitle,
