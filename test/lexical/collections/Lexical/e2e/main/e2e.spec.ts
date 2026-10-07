@@ -584,7 +584,7 @@ describe('lexicalMain', () => {
     await secondUploadNode.click()
 
     await expect(secondUploadNode.locator('.LexicalEditorTheme__upload__filename')).toHaveText(
-      'payload-1.jpg',
+      'payload-original-1.jpg',
     )
     await expect(
       secondUploadNode.locator('.LexicalEditorTheme__upload__collectionLabel'),
@@ -629,7 +629,7 @@ describe('lexicalMain', () => {
     await expect(uploadListDrawer).toBeVisible()
     await wait(500)
 
-    await uploadListDrawer.locator('button').getByText('payload.jpg').first().click()
+    await uploadListDrawer.locator('button').getByText('payload-original.jpg').first().click()
     await expect(uploadListDrawer).toBeHidden()
 
     const newUploadNode = richTextField.locator('.LexicalEditorTheme__upload').nth(1)
@@ -639,7 +639,7 @@ describe('lexicalMain', () => {
     await newUploadNode.hover()
 
     await expect(newUploadNode.locator('.LexicalEditorTheme__upload__filename')).toContainText(
-      'payload.jpg',
+      'payload-original.jpg',
     )
 
     // Click on button with class LexicalEditorTheme__upload__upload-drawer-toggler
@@ -1354,7 +1354,7 @@ describe('lexicalMain', () => {
     await expect(uploadListDrawer).toBeVisible()
     await wait(1000)
 
-    await uploadListDrawer.locator('button').getByText('payload.png').first().click()
+    await uploadListDrawer.locator('button').getByText('payload-original.png').first().click()
     await expect(uploadListDrawer).toBeHidden()
 
     const newUploadNode = richTextField.locator('.LexicalEditorTheme__upload').first()
@@ -1366,7 +1366,7 @@ describe('lexicalMain', () => {
     await newUploadNode.hover()
 
     await expect(newUploadNode.locator('.LexicalEditorTheme__upload__filename')).toHaveText(
-      'payload.png',
+      'payload-original.png',
     )
 
     await page.keyboard.press('Enter') // floating toolbar needs to appear with enough distance to the upload node, otherwise clicking may fail
@@ -1393,8 +1393,8 @@ describe('lexicalMain', () => {
     // Click anywhere in the drawer to make sure the cursor position is preserved
     await uploadSwapDrawer.locator('.drawer__content').first().click()
 
-    // click button with text content "payload.jpg"
-    await uploadSwapDrawer.locator('button').getByText('payload.jpg').first().click()
+    // click button with text content "payload-original.jpg"
+    await uploadSwapDrawer.locator('button').getByText('payload-original.jpg').first().click()
 
     await expect(uploadSwapDrawer).toBeHidden()
     await wait(500)
@@ -1743,7 +1743,7 @@ describe('lexicalMain', () => {
     // test
     await navigateToLexicalFields()
     const uploadNode = page
-      .locator('.LexicalEditorTheme__upload__contents[data-filename="payload.jpg"]')
+      .locator('.LexicalEditorTheme__upload__contents[data-filename="payload-original.jpg"]')
       .first()
     await uploadNode.click()
     await expectInsideSelectedDecorator(uploadNode)
@@ -1753,7 +1753,7 @@ describe('lexicalMain', () => {
     await expect(decoratorLocator).toBeHidden()
 
     const closeTagInMultiSelect = page.getByRole('button', {
-      name: /^Remove payload\.jpg/,
+      name: /^Remove payload-original\.jpg/,
     })
     await closeTagInMultiSelect.click()
     await expect(decoratorLocator).toBeHidden()

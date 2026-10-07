@@ -90,7 +90,9 @@ test.describe('storage-azure client uploads E2E', () => {
 
     expect(blobNames).toEqual(
       expect.arrayContaining([
-        expect.stringMatching(/^docprefix-collection\/doc-[a-z0-9]{1,8}\/[0-9a-f-]+\/image\.png$/),
+        expect.stringMatching(
+          /^docprefix-collection\/doc-[a-z0-9]{1,8}\/[0-9a-f-]+\/image(?:-\d+)?-original\.png$/,
+        ),
       ]),
     )
 

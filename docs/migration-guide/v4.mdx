@@ -198,6 +198,31 @@ Run a typecheck after the codemod. Three patterns it cannot resolve:
 
 `payload.jobs.queue`, `run`, `runByID`, `cancel`, and `cancelByID` now also default `overrideAccess` to `false`. The option remains optional, but omitting it runs the corresponding `jobs.access.queue`, `jobs.access.run`, or `jobs.access.cancel` function. The codemod adds `overrideAccess: true` to these calls—including zero-argument `payload.jobs.run()` calls—to preserve Payload 3 behavior for review.
 
+### On-demand validation adds a `validate` operation
+
+The `Operation` type now includes `validate`. The `operation` argument for collection, global, and field `beforeValidate` and `beforeChange` hooks also includes `validate`.
+
+On-demand validation runs these hooks without saving the candidate. Update exhaustive operation checks and skip external side effects that should only run during `create` or `update`:
+
+```ts
+import type { CollectionBeforeChangeHook } from 'payload'
+
+const syncCustomer: CollectionBeforeChangeHook = async ({
+  data,
+  operation,
+}) => {
+  if (operation === 'validate') {
+    return data
+  }
+
+  await syncCustomerWithStripe(data)
+
+  return data
+}
+```
+
+Sanitized collection and global access types now require a `validate` key. Payload supplies this key during configuration sanitization and uses `update` access by default. Code that constructs a sanitized access object directly must add the key.
+
 ### Collection and Global Access Control callbacks receive `slug`
 
 Collection and Global Access Control callback arguments now include the document's `slug`. This additive property is unlikely to affect most projects, but code that manually invokes access callbacks or `executeAccess` must now pass `slug`. Code that validates, enumerates, or compares the exact callback argument shape may also need updating.
@@ -1071,9 +1096,9 @@ Run `npx @payloadcms/codemod --transform migrate-db-types-subpath` to migrate au
 
 The minimum supported Node.js version is now **24.15.0** (previously 18.20.2). Upgrade your runtime — along with any CI, Docker images, and deployment targets — to the latest node LTS version or newer before upgrading to 4.0.
 
-### Minimum supported Next.js version is now 16.2.6 ([#16537](https://github.com/payloadcms/payload/pull/16537))
+### Minimum supported Next.js version is now 16.4.0 ([#16537](https://github.com/payloadcms/payload/pull/16537))
 
-Older versions of Next.js are no longer supported. Update Next.js to **16.2.6** or newer.
+Older versions of Next.js are no longer supported. Update Next.js to **16.4.0** or newer.
 
 ### Minimum supported TypeScript version is now 6.0.3 ([#16692](https://github.com/payloadcms/payload/pull/16692))
 
@@ -1719,6 +1744,8 @@ If you typed `clientUploads.access`, replace `ClientUploadsAccess` with `UploadI
 
 #### If you maintain a custom storage adapter
 
+File versioning adds a required `GeneratedAdapter.copyFile` method. Copy `from` to `to` (complete storage keys) without changing the source, reject an existing destination, and return only once the destination is readable. `moveFile` stays optional. See [Custom Storage Adapters](../upload/storage-adapters) for the full contract.
+
 Replace `clientUploadContext` with `uploadReference` in generated file metadata and static handler parameters. `handleUpload` no longer receives it because Payload skips uploading files that are already stored.
 
 Set `uploadInstructions.enabled`. When false, Payload adds `adminHandler` to the import map without rendering it. When true, Payload also renders it and exposes the instructions and supporting endpoint.
@@ -1990,6 +2017,12 @@ The `alwaysInsertFields` option (on `cloudStoragePlugin` and every `storage-*` a
 
 - Remove `alwaysInsertFields` from your storage adapter or `cloudStoragePlugin` config — it has no effect and no longer exists on the option types.
 - For Postgres, SQLite, or D1 projects, run `payload migrate:create` to generate the migration that adds the `prefix` column, then run `payload migrate` to apply it.
+
+### Upload collections retain originals and file history
+
+Upload collections now store `original` metadata and a `prefix` and `_objectKey` for each stored file (the main file, `original`, and each variant), so saved versions can find their files. New uploads keep their source under an `-original` filename. Update any code or infrastructure that relies on the old filename, URL, or object key.
+
+**Postgres and SQLite:** after updating, run `payload migrate:create`, check that it adds these columns to each upload collection table and its versions table, then run `payload migrate`. Existing rows keep `null` values until their next write.
 
 ### `FileSizeImproved` removed — use `FileSize` ([#16593](https://github.com/payloadcms/payload/pull/16593))
 

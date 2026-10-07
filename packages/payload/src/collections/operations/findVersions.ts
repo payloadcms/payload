@@ -11,6 +11,8 @@ import { validateQueryPaths } from '../../database/queryValidation/validateQuery
 import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { checkFileAccess } from '../../uploads/checkFileAccess.js'
+import { markHistoricalFileURLs } from '../../uploads/fileVersioning/markHistoricalFileURLs.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
@@ -140,6 +142,19 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     where: fullWhere,
   })
 
+  if (collectionConfig.upload && !overrideAccess) {
+    for (const row of paginatedDocs.docs) {
+      const filename = (row.version as Record<string, unknown>)?.filename
+
+      await checkFileAccess({
+        collection: args.collection,
+        documentID: row.parent,
+        filename: typeof filename === 'string' ? filename : '',
+        req,
+      })
+    }
+  }
+
   // /////////////////////////////////////
   // beforeRead - Collection
   // /////////////////////////////////////
@@ -221,6 +236,18 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
         return docRef
       }),
     )
+  }
+
+  if (collectionConfig.upload) {
+    result.docs = result.docs.map((row) => ({
+      ...row,
+      version: markHistoricalFileURLs({
+        collectionSlug: collectionConfig.slug,
+        doc: row.version as Record<string, unknown>,
+        req,
+        versionID: row.id,
+      }) as TData,
+    }))
   }
 
   // /////////////////////////////////////

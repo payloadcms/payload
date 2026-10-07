@@ -1,5 +1,3 @@
-import { status as httpStatus } from 'http-status'
-
 import type { Collection } from '../../collections/config/types.js'
 import type { AuthenticatedUser } from '../../index.js'
 import type { Document, PayloadRequest } from '../../types/index.js'
@@ -8,7 +6,9 @@ import { buildAfterOperation } from '../../collections/operations/utilities/buil
 import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { applyUserReadAccess } from '../applyUserReadAccess.js'
@@ -30,6 +30,8 @@ export type Arguments = {
 
 export const refreshOperation = async (incomingArgs: Arguments): Promise<Result> => {
   let args = incomingArgs
+
+  assertNoValidationWrite(args.req)
 
   try {
     const shouldCommit = await initTransaction(args.req)

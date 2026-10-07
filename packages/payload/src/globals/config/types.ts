@@ -24,7 +24,13 @@ import type {
   TypedGlobal,
   TypedGlobalSelect,
 } from '../../index.js'
-import type { PayloadRequest, SelectIncludeType, Where, WithSelectFn } from '../../types/index.js'
+import type {
+  FieldOperation,
+  PayloadRequest,
+  SelectIncludeType,
+  Where,
+  WithSelectFn,
+} from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
 
 export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
@@ -41,6 +47,13 @@ export type GlobalAccess<TData = any> = {
   read?: Access<TData>
   readVersions?: Access<TData>
   update?: Access<TData>
+  /**
+   * Controls on-demand validation for this global.
+   * Falls back to `update` access when omitted.
+   * The access function receives `req.operation === 'validate'`.
+   * @see https://payloadcms.com/docs/validation/overview#access-control-and-hooks
+   */
+  validate?: Access<TData>
 }
 
 /**
@@ -70,11 +83,15 @@ export type DraftFlagFromGlobalSlug<TSlug extends GlobalSlug> = string extends G
         draft?: boolean
       }
 
+type GlobalChangeOperation = Extract<FieldOperation, 'update' | 'validate'>
+
 export type BeforeValidateHook = (args: {
   context: RequestContext
   data?: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /** Hook operation being performed. */
+  operation: GlobalChangeOperation
   originalDoc?: any
   /**
    * Whether access control is being overridden for this operation
@@ -88,6 +105,8 @@ export type BeforeChangeHook = (args: {
   data: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /** Hook operation being performed. */
+  operation: GlobalChangeOperation
   originalDoc?: any
   /**
    * Whether access control is being overridden for this operation
@@ -102,6 +121,8 @@ export type AfterChangeHook = (args: {
   doc: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /** Hook operation being performed. */
+  operation: 'update'
   /**
    * Whether access control is being overridden for this operation
    */
@@ -280,7 +301,7 @@ export interface SanitizedGlobalConfig
     >,
     Required<Pick<GlobalConfig, 'admin' | 'custom' | 'label'>> {
   _sanitized: true
-  access: Required<Pick<GlobalAccess, 'read' | 'readVersions' | 'update'>>
+  access: Required<Pick<GlobalAccess, 'read' | 'readVersions' | 'update' | 'validate'>>
   authorship: SanitizedAuthorship
   endpoints: Endpoint[] | false
   /**

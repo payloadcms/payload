@@ -2,9 +2,11 @@
 import type { Option, OptionObject, SelectFieldClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useId, useMemo } from 'react'
 
+import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
 import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
+import { FieldDescription } from '../../../fields/FieldDescription/index.js'
 import { FieldLabel } from '../../../fields/FieldLabel/index.js'
 import { useField } from '../../../forms/useField/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -26,9 +28,17 @@ export const RecentlyViewedCollectionsField: React.FC<SelectFieldClientProps> = 
   path: pathFromProps,
   readOnly,
 }) => {
-  const { label } = field
-  const { path, setValue, value } = useField<string[]>({ potentiallyStalePath: pathFromProps })
+  const { admin: { description } = {}, label } = field
+  const {
+    customComponents: { Description } = {},
+    path,
+    setValue,
+    value,
+  } = useField<string[]>({ potentiallyStalePath: pathFromProps })
+  const hasDescription = Boolean(Description || description)
   const { i18n } = useTranslation()
+  const labelID = useId()
+  const descriptionID = useId()
 
   const excludedSlugs = useMemo(() => new Set<string>(Array.isArray(value) ? value : []), [value])
 
@@ -50,8 +60,15 @@ export const RecentlyViewedCollectionsField: React.FC<SelectFieldClientProps> = 
   )
 
   return (
-    <div className={baseClass}>
-      <FieldLabel as="span" label={label} path={path} />
+    <div
+      aria-describedby={hasDescription ? descriptionID : undefined}
+      aria-labelledby={labelID}
+      className={baseClass}
+      role="group"
+    >
+      <span id={labelID}>
+        <FieldLabel as="span" label={label} path={path} />
+      </span>
       <ul className={`${baseClass}__list`}>
         {options.map((option) => {
           const isIncluded = !excludedSlugs.has(option.value)
@@ -70,6 +87,12 @@ export const RecentlyViewedCollectionsField: React.FC<SelectFieldClientProps> = 
           )
         })}
       </ul>
+      <div id={descriptionID}>
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
+        />
+      </div>
     </div>
   )
 }
