@@ -11,16 +11,13 @@ import type {
   ListViewServerPropsOnly,
   PaginatedDocs,
   PayloadComponent,
-  PopulateType,
   QueryPreset,
   SanitizedCollectionPermission,
-  SelectType,
 } from 'payload'
 
 import { docAccessOperation } from 'payload'
 import {
   appendDateTimezoneSelectFields,
-  appendUploadSelectFields,
   combineWhereConstraints,
   formatAdminURL,
   isNumber,
@@ -43,6 +40,8 @@ import {
 /* eslint-enable payload/no-imports-from-exports-dir */
 import { getColumns } from '../../utilities/getColumns.js'
 import { getDocumentPermissions } from '../../utilities/getDocumentPermissions.js'
+import { getDocumentThumbnailPopulate } from '../../utilities/getDocumentThumbnailPopulate.js'
+import { getDocumentThumbnailSelect } from '../../utilities/getDocumentThumbnailSelect.js'
 import { renderFilters, renderTable } from '../../utilities/renderTable.js'
 import { upsertPreferences } from '../../utilities/upsertPreferences.js'
 import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
@@ -269,7 +268,10 @@ export const renderListView = async (
   })
 
   /** Automatically force select active columns. */
-  const select = transformColumnsToSelect(columns)
+  const select = getDocumentThumbnailSelect({
+    collectionConfig,
+    select: transformColumnsToSelect(columns),
+  })
 
   /** Grid cards need their title, timestamp, and thumbnail regardless of visible table columns. */
   if (collectionConfig.admin.useAsTitle) {
@@ -290,48 +292,17 @@ export const renderListView = async (
     select[collectionConfig.hierarchy.collectionSpecific.fieldName] = true
   }
 
-  /** Force select image fields for list view thumbnails */
-  appendUploadSelectFields({
-    collectionConfig,
-    select,
-  })
-
   /** Populate only the configured thumbnail relationship for flat collection grids. */
   const thumbnailFieldName =
     collectionPreferences?.documentLayout === 'grid' && viewType !== 'hierarchy'
       ? collectionConfig.admin.useAsThumbnail
       : undefined
-  let thumbnailPopulate: PopulateType | undefined
+  const thumbnailPopulate = thumbnailFieldName
+    ? getDocumentThumbnailPopulate({ collectionConfig, collections: payload.config.collections })
+    : undefined
 
   if (thumbnailFieldName) {
     select[thumbnailFieldName] = true
-
-    const thumbnailField = collectionConfig.flattenedFields.find(
-      (field) => field.name === thumbnailFieldName && field.type === 'upload',
-    )
-
-    if (thumbnailField && 'relationTo' in thumbnailField) {
-      const relatedSlugs = Array.isArray(thumbnailField.relationTo)
-        ? thumbnailField.relationTo
-        : [thumbnailField.relationTo]
-
-      thumbnailPopulate = {}
-
-      for (const relatedSlug of relatedSlugs) {
-        const relatedCollectionConfig = payload.collections[relatedSlug]?.config
-
-        if (relatedCollectionConfig) {
-          const relatedSelect: SelectType = {}
-
-          appendUploadSelectFields({
-            collectionConfig: relatedCollectionConfig,
-            select: relatedSelect,
-          })
-
-          thumbnailPopulate[relatedSlug] = relatedSelect
-        }
-      }
-    }
   }
 
   /** Force select `_tz` siblings for any timezone-enabled date fields in select */

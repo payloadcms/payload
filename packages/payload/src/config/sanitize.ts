@@ -188,6 +188,7 @@ const addDefaultDashboardWidgets = ({
           // inverse as an exclusion list, so collections added later stay visible by default.
           Field: '@payloadcms/ui#RecentlyViewedCollectionsField',
         },
+        description: ({ t }) => t('dashboard:widgetRecentlyViewedFilterDescription'),
       },
       hasMany: true,
       label: ({ t }) => t('general:collections'),
@@ -248,8 +249,8 @@ const addDefaultDashboardWidgets = ({
       richTextSanitizers,
       validRelationships,
     }),
-    label: ({ t }) => t('dashboard:widgetRecentlyViewedTitle'),
-    minWidth: 'x-small',
+    label: ({ t }) => t('dashboard:widgetRecentsAndPinned'),
+    minWidth: 'small',
   })
   if (uploadCollections.length > 0) {
     dashboard.widgets.push({
