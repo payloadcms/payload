@@ -1472,6 +1472,7 @@ export type Config = {
    * Enabling this adds `_branch` columns to every included collection, which
    * requires a migration on relational databases. Disabling it again does not.
    *
+   * @experimental Content Branching can include breaking changes in minor releases. Its configuration, APIs, database structure, and behavior are not stable.
    * @default false
    */
   branching?: boolean | BranchingConfig
