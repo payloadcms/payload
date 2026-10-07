@@ -4,7 +4,6 @@ import type {
   DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
 } from '../../collections/config/types.js'
-import type { Options as CreateOptions } from '../../collections/operations/local/create.js'
 import type { AuthCollectionSlug } from '../../index.js'
 import type { PayloadRequest, SelectType } from '../../types/index.js'
 
@@ -79,13 +78,12 @@ export const registerFirstUserOperation = async <TSlug extends AuthCollectionSlu
     // Register first user
     // /////////////////////////////////////
 
-    // Generic TSlug leaves the draft conditional unresolved; Arguments already requires published data.
     const result = await payload.create<TSlug, SelectType>({
       collection: slug as TSlug,
       data,
       overrideAccess: true,
       req,
-    } as CreateOptions<TSlug, SelectType>)
+    })
 
     // auto-verify (if applicable)
     if (verify) {
