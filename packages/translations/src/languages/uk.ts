@@ -278,6 +278,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     all: 'Все',
     allCollections: 'Усі Колекції',
     allLocales: 'Всі локалізації',
+    allowedTypes: 'Дозволені типи',
     and: 'і',
     anotherUser: 'Інший користувач',
     anotherUserTakenOver: 'Інший користувач взяв на себе редагування цього документа.',
@@ -292,6 +293,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     checked: 'Перевірено',
     clear: 'Очистити',
     clearAll: 'Очистити все',
+    clearSearch: 'Очистити пошук',
     close: 'Закрити',
     collapse: 'Згорнути',
     collection: 'Колекція',
@@ -562,6 +564,23 @@ export const ukTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Пошук {{label}}',
     searchResults: 'Знайдено: {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Додаткові інструкції',
+    collectionDescription:
+      'Додайте власні інструкції для колекції {{label}}, щоб допомогти LLM краще адаптувати відповіді на запити.',
+    collectionSystemDescription:
+      'Ці системні інструкції задано у файлі конфігурації колекції, і вони завжди включаються.',
+    editInstructions: 'Редагувати інструкції для LLM',
+    global: 'Глобальний документ',
+    globalDescription:
+      'Додайте власні інструкції для глобального документа {{label}}, щоб допомогти LLM краще адаптувати відповіді на запити.',
+    globalSystemDescription:
+      'Ці системні інструкції задано у файлі конфігурації глобального документа, і вони завжди включаються.',
+    instructions: 'Інструкції для LLM',
+    systemInstructions: 'Системні інструкції (лише для читання)',
+    targetCannotBeChanged: 'Неможливо змінити об’єкт, якого стосуються інструкції.',
+    title: 'Заголовок',
   },
   localization: {
     cannotCopySameLocale: 'Не можна копіювати в ту ж саму локалізацію',

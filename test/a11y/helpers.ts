@@ -5,7 +5,7 @@ import { expect } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, instructionsCollectionSlug } from 'payload/shared'
 
 import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
@@ -727,4 +727,24 @@ export async function openNavigationFolders({
     sidebar.locator('.tree-node__title', { hasText: /^Accessibility folder$/ }),
   ).toBeVisible()
   return sidebar
+}
+
+export async function openLLMInstructions({ page, serverURL }: { page: Page; serverURL: string }) {
+  await page.goto(
+    formatAdminURL({
+      adminRoute: '/admin',
+      path: `/collections/${instructionsCollectionSlug}/collection-posts`,
+      serverURL,
+    }),
+  )
+  await expect(page.getByRole('heading', { name: 'posts', exact: true })).toBeVisible()
+
+  const field = page.locator('.llm-instructions')
+
+  await field.getByRole('tab', { name: 'Additional instructions', exact: true }).press('Enter')
+  await expect(
+    field.getByRole('textbox', { name: 'Additional instructions', exact: true }),
+  ).toBeVisible()
+
+  return field
 }

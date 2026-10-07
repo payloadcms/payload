@@ -284,6 +284,7 @@ export const huTranslations: DefaultTranslationsObject = {
     all: 'Mind',
     allCollections: 'Minden gyűjtemény',
     allLocales: 'Minden helyszín',
+    allowedTypes: 'Engedélyezett típusok',
     and: 'És',
     anotherUser: 'Egy másik felhasználó',
     anotherUserTakenOver: 'Egy másik felhasználó átvette ennek a dokumentumnak a szerkesztését.',
@@ -299,6 +300,7 @@ export const huTranslations: DefaultTranslationsObject = {
     checked: 'Ellenőrizve',
     clear: 'Tiszta',
     clearAll: 'Törölj mindent',
+    clearSearch: 'Keresés törlése',
     close: 'Bezárás',
     collapse: 'Összecsukás',
     collection: 'Gyűjtemény',
@@ -574,6 +576,23 @@ export const huTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Keresés {{label}}',
     searchResults: 'Találatok száma: {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'További utasítások',
+    collectionDescription:
+      'Adjon egyéni utasításokat a(z) {{label}} gyűjteményhez, hogy az LLM-ek jobban a kérésekhez igazíthassák válaszaikat.',
+    collectionSystemDescription:
+      'Ezek a rendszerutasítások a gyűjtemény konfigurációs fájljából származnak, és mindig szerepelnek az utasítások között.',
+    editInstructions: 'LLM-utasítások szerkesztése',
+    global: 'Globális dokumentum',
+    globalDescription:
+      'Adjon egyéni utasításokat a(z) {{label}} globális dokumentumhoz, hogy az LLM-ek jobban a kérésekhez igazíthassák válaszaikat.',
+    globalSystemDescription:
+      'Ezek a rendszerutasítások a globális dokumentum konfigurációs fájljából származnak, és mindig szerepelnek az utasítások között.',
+    instructions: 'LLM-utasítások',
+    systemInstructions: 'Rendszerutasítások (csak olvasható)',
+    targetCannotBeChanged: 'Az utasítások célja nem módosítható.',
+    title: 'Cím',
   },
   localization: {
     cannotCopySameLocale: 'Nem lehet ugyanarra a helyre másolni',

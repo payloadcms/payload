@@ -282,6 +282,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     all: 'すべて',
     allCollections: 'すべてのコレクション',
     allLocales: 'すべてのロケール',
+    allowedTypes: '許可されているタイプ',
     and: 'かつ',
     anotherUser: '別のユーザー',
     anotherUserTakenOver: '別のユーザーがこのドキュメントの編集を引き継ぎました。',
@@ -296,6 +297,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     checked: 'チェックあり',
     clear: 'クリア',
     clearAll: 'すべてクリア',
+    clearSearch: '検索をクリア',
     close: '閉じる',
     collapse: '閉じる',
     collection: 'コレクション',
@@ -566,6 +568,23 @@ export const jaTranslations: DefaultTranslationsObject = {
     noResults: '「{{query}}」に一致する結果がありません',
     searchLabel: '{{label}}を検索する',
     searchResults: '{{count}}件見つかりました',
+  },
+  llmInstructions: {
+    additionalInstructions: '追加の指示',
+    collectionDescription:
+      '{{label}} コレクションにカスタム指示を追加して、LLM がプロンプトにより適した回答を生成できるようにします。',
+    collectionSystemDescription:
+      'これらのシステム指示はコレクションの設定ファイルから提供され、常に含まれます。',
+    editInstructions: 'LLM の指示を編集',
+    global: 'グローバル',
+    globalDescription:
+      '{{label}} グローバルにカスタム指示を追加して、LLM がプロンプトにより適した回答を生成できるようにします。',
+    globalSystemDescription:
+      'これらのシステム指示はグローバルの設定ファイルから提供され、常に含まれます。',
+    instructions: 'LLM の指示',
+    systemInstructions: 'システム指示（読み取り専用）',
+    targetCannotBeChanged: '指示の対象は変更できません。',
+    title: 'タイトル',
   },
   localization: {
     cannotCopySameLocale: '同じロケールにはコピーできません',

@@ -280,6 +280,7 @@ export const idTranslations: DefaultTranslationsObject = {
     all: 'Semua',
     allCollections: 'Semua Koleksi',
     allLocales: 'Semua lokal',
+    allowedTypes: 'Jenis yang diizinkan',
     and: 'Dan',
     anotherUser: 'Pengguna lain',
     anotherUserTakenOver: 'Pengguna lain telah mengambil alih pengeditan dokumen ini.',
@@ -295,6 +296,7 @@ export const idTranslations: DefaultTranslationsObject = {
     checked: 'Diperiksa',
     clear: 'Hapus',
     clearAll: 'Hapus Semua',
+    clearSearch: 'Hapus pencarian',
     close: 'Tutup',
     collapse: 'Ciutkan',
     collection: 'Koleksi',
@@ -570,6 +572,23 @@ export const idTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Cari {{label}}',
     searchResults: 'Ditemukan {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Instruksi tambahan',
+    collectionDescription:
+      'Tambahkan instruksi khusus untuk koleksi {{label}} agar LLM dapat menyesuaikan respons terhadap prompt dengan lebih baik.',
+    collectionSystemDescription:
+      'Instruksi sistem ini berasal dari file konfigurasi koleksi dan selalu disertakan.',
+    editInstructions: 'Edit instruksi LLM',
+    global: 'Global',
+    globalDescription:
+      'Tambahkan instruksi khusus untuk global {{label}} agar LLM dapat menyesuaikan respons terhadap prompt dengan lebih baik.',
+    globalSystemDescription:
+      'Instruksi sistem ini berasal dari file konfigurasi global dan selalu disertakan.',
+    instructions: 'Instruksi LLM',
+    systemInstructions: 'Instruksi sistem (hanya baca)',
+    targetCannotBeChanged: 'Target instruksi tidak dapat diubah.',
+    title: 'Judul',
   },
   localization: {
     cannotCopySameLocale: 'Tidak dapat menyalin ke lokal yang sama',

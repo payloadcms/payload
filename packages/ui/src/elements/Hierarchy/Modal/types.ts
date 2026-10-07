@@ -20,6 +20,7 @@ export type UseHierarchyModalArgs = {
 }
 
 export type HierarchyModalProps = {
+  readonly confirmLabel?: string
   readonly hasMany?: boolean
   readonly initialSelections?: (number | string)[]
   readonly onMoveToRoot?: () => void
@@ -28,6 +29,7 @@ export type HierarchyModalProps = {
     selections: Map<number | string, SelectionWithPath>
   }) => void
   readonly showMoveToRoot?: boolean
+  readonly title?: string
 }
 
 export type HierarchyModalInternalProps = {

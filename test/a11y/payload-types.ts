@@ -294,6 +294,7 @@ export interface Post {
   publishingNote?: string | null;
   customLabelNote?: string | null;
   '_h_payload-folders'?: (string | null) | PayloadFolder;
+  readOnlyHierarchy?: (string | PayloadFolder)[] | null;
   featuredImage?: (string | null) | Media;
   createdBy?: {
     relationTo: 'users';
@@ -608,6 +609,7 @@ export interface PostsSelect<T extends boolean = true> {
   publishingNote?: T;
   customLabelNote?: T;
   '_h_payload-folders'?: T;
+  readOnlyHierarchy?: T;
   featuredImage?: T;
   createdBy?: T;
   updatedBy?: T;
