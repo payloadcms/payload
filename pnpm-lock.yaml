@@ -1754,6 +1754,9 @@ importers:
       dotenv:
         specifier: 16.4.7
         version: 16.4.7
+      esbuild:
+        specifier: 0.27.1
+        version: 0.27.1
       prettier:
         specifier: 3.5.3
         version: 3.5.3

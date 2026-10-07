@@ -278,6 +278,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     all: 'Բոլորը',
     allCollections: 'Բոլոր հավաքածուները',
     allLocales: 'Բոլոր տեղայինությունները',
+    allowedTypes: 'Թույլատրված տեսակներ',
     and: 'Եվ',
     anotherUser: 'Այլ օգտատեր',
     anotherUserTakenOver: 'Այլ օգտատեր ստանձել է այս փաստաթղթի խմբագրումը։',
@@ -570,6 +571,23 @@ export const hyTranslations: DefaultTranslationsObject = {
     noResults: '«{{query}}»-ի համար արդյունքներ չկան',
     searchLabel: 'Որոնել {{label}}',
     searchResults: 'Գտնվել է {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Լրացուցիչ հրահանգներ',
+    collectionDescription:
+      'Ավելացրեք հատուկ հրահանգներ {{label}} հավաքածուի համար՝ օգնելու LLM-ներին ավելի լավ հարմարեցնել հարցումներին տրվող պատասխանները։',
+    collectionSystemDescription:
+      'Այս համակարգային հրահանգները տրամադրվում են հավաքածուի կազմաձևման ֆայլով և միշտ ներառվում են։',
+    editInstructions: 'Խմբագրել LLM-ի հրահանգները',
+    global: 'Գլոբալ փաստաթուղթ',
+    globalDescription:
+      'Ավելացրեք հատուկ հրահանգներ {{label}} գլոբալ փաստաթղթի համար՝ օգնելու LLM-ներին ավելի լավ հարմարեցնել հարցումներին տրվող պատասխանները։',
+    globalSystemDescription:
+      'Այս համակարգային հրահանգները տրամադրվում են գլոբալ փաստաթղթի կազմաձևման ֆայլով և միշտ ներառվում են։',
+    instructions: 'LLM-ի հրահանգներ',
+    systemInstructions: 'Համակարգային հրահանգներ (միայն ընթերցման համար)',
+    targetCannotBeChanged: 'Հրահանգների թիրախը հնարավոր չէ փոխել։',
+    title: 'Վերնագիր',
   },
   localization: {
     cannotCopySameLocale: 'Հնարավոր չէ պատճենել նույն լոկալին',

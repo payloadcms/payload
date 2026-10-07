@@ -709,6 +709,8 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
     plural?: LabelFunction | StaticLabel
     singular?: LabelFunction | StaticLabel
   }
+  /** Read-only Markdown instructions included in this collection's MCP and CLI schema responses. */
+  llmInstructions?: string
   /**
    * Enables / Disables the ability to lock documents while editing
    * @default true

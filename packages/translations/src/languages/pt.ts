@@ -280,6 +280,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     all: 'Todos',
     allCollections: 'Todas as Coleções',
     allLocales: 'Todos os locais',
+    allowedTypes: 'Tipos permitidos',
     and: 'E',
     anotherUser: 'Outro usuário',
     anotherUserTakenOver: 'Outro usuário assumiu a edição deste documento.',
@@ -570,6 +571,23 @@ export const ptTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Pesquisar {{label}}',
     searchResults: 'Encontrados: {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Instruções adicionais',
+    collectionDescription:
+      'Adicione instruções personalizadas para a coleção {{label}} para ajudar os LLMs a adaptar melhor as respostas aos prompts.',
+    collectionSystemDescription:
+      'Estas instruções do sistema vêm do arquivo de configuração da coleção e são sempre incluídas.',
+    editInstructions: 'Editar instruções de LLM',
+    global: 'Global',
+    globalDescription:
+      'Adicione instruções personalizadas para o global {{label}} para ajudar os LLMs a adaptar melhor as respostas aos prompts.',
+    globalSystemDescription:
+      'Estas instruções do sistema vêm do arquivo de configuração do global e são sempre incluídas.',
+    instructions: 'Instruções de LLM',
+    systemInstructions: 'Instruções do sistema (somente leitura)',
+    targetCannotBeChanged: 'O destino das instruções não pode ser alterado.',
+    title: 'Título',
   },
   localization: {
     cannotCopySameLocale: 'Não é possível copiar para o mesmo local',

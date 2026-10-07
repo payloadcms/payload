@@ -1,6 +1,6 @@
 'use client'
 
-import React, { Fragment } from 'react'
+import React, { Fragment, useMemo } from 'react'
 
 import { DeleteMany } from '../../../elements/DeleteMany/index.js'
 import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
@@ -14,6 +14,10 @@ import { useDocumentSelection } from '../../../providers/DocumentSelection/index
 import { useHierarchy } from '../../../providers/Hierarchy/index.js'
 import { useRouteCache } from '../../../providers/RouteCache/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import {
+  getEffectiveHierarchyCollections,
+  getHierarchyCollectionRestrictions,
+} from '../../../utilities/hierarchyCollectionRestrictions.js'
 
 export type DocumentListSelectionProps = {
   disableBulkDelete?: boolean
@@ -52,7 +56,8 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
   hierarchyIcon,
   hierarchySlug,
 }) => {
-  const { clearAll, getSelectionsForActions, getTotalCount } = useDocumentSelection()
+  const { clearAll, getSelectionsForActions, getSelectionsWithMetadata, getTotalCount } =
+    useDocumentSelection()
   const { parent, refreshTree } = useHierarchy()
   const { clearRouteCache } = useRouteCache()
   const { config } = useConfig()
@@ -69,7 +74,41 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
     ? config.collections.find((collection) => collection.slug === singleCollectionSlug)
     : null
 
+  const hierarchyCollectionConfig = hierarchySlug
+    ? config.collections.find((collection) => collection.slug === hierarchySlug)
+    : null
+
+  const { relatedCollectionSlugs } = useMemo(
+    () =>
+      getHierarchyCollectionRestrictions({
+        collectionConfig: hierarchyCollectionConfig ?? undefined,
+      }),
+    [hierarchyCollectionConfig],
+  )
+
   const ids = singleCollectionSelected ? groupedSelections[singleCollectionSlug]?.ids || [] : []
+
+  const requiredCollections = useMemo(() => {
+    const selectionsWithMetadata = getSelectionsWithMetadata()
+    const required = new Set<string>()
+
+    for (const [collectionSlug, { selections }] of Object.entries(selectionsWithMetadata)) {
+      if (collectionSlug === hierarchySlug) {
+        for (const { metadata } of selections) {
+          for (const slug of getEffectiveHierarchyCollections({
+            allowedCollections: metadata.allowedCollections,
+            relatedCollectionSlugs,
+          })) {
+            required.add(slug)
+          }
+        }
+      } else {
+        required.add(collectionSlug)
+      }
+    }
+
+    return required.size > 0 ? Array.from(required) : undefined
+  }, [getSelectionsWithMetadata, hierarchySlug, relatedCollectionSlugs])
 
   // Check if single hierarchy item is selected (for direct edit)
   // Only available when hierarchySlug is provided
@@ -155,6 +194,7 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
             key="bulk-move"
             modalPrefix="hierarchy-list"
             onSuccess={handleActionSuccess}
+            requiredCollections={requiredCollections}
             selections={groupedSelections}
           />
         ),
