@@ -1,6 +1,7 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { JsonObject, PayloadRequest } from '../../types/index.js'
 import type { FileToSave } from '../types.js'
+import type { StagedObject } from './fileOperationManager.js'
 
 import { saveVersion } from '../../versions/saveVersion.js'
 import {
@@ -67,6 +68,7 @@ export const runCloudFileCreation = async <T>({
       removeUnreferencedStagedObjects({ collection, objects, req }),
     req,
     stage: async ({ trackStagedObject }) => {
+      trackClientUploadOriginal({ collection, data, req, trackStagedObject })
       const staged = await operations.stage({
         data,
         files,
@@ -138,6 +140,7 @@ export const runCloudFileUpdate = async <T>({
       if (files.length === 0 && !req.context?._payloadVerifiedProviderOriginal) {
         return
       }
+      trackClientUploadOriginal({ collection, data, req, trackStagedObject })
       const staged = await operations.stage({
         data,
         files,
@@ -170,6 +173,46 @@ export const runCloudFileUpdate = async <T>({
 
       return result
     },
+  })
+}
+
+/** Track a verified client-uploaded source, retaining it if another document still references it. */
+const trackClientUploadOriginal = ({
+  collection,
+  data,
+  req,
+  trackStagedObject,
+}: {
+  collection: SanitizedCollectionConfig
+  data: JsonObject
+  req: PayloadRequest
+  trackStagedObject: (object: StagedObject) => void
+}): void => {
+  const verifiedOriginal = req.context?._payloadVerifiedProviderOriginal as
+    | { key: string }
+    | undefined
+
+  if (!verifiedOriginal) {
+    return
+  }
+
+  const original = collectStoredFiles({ collection, doc: data, req, trustGenerated: true }).find(
+    ({ key, roles }) =>
+      key === verifiedOriginal.key && roles.some((role) => role.type === 'original'),
+  )
+
+  if (!original) {
+    return
+  }
+
+  const object: StagedObject = {
+    key: original.key,
+    remove: () => collection.upload.fileOperations!.delete({ key: original.key, req }),
+  }
+
+  trackStagedObject({
+    key: object.key,
+    remove: () => removeUnreferencedStagedObjects({ collection, objects: [object], req }),
   })
 }
 
