@@ -1,0 +1,47 @@
+---
+title: Versioning and Breaking Changes Policy
+label: Versioning Policy
+order: 20
+desc: How Payload applies semantic versioning, what counts as a breaking change, and what can change in a minor release.
+keywords: versioning, semver, semantic versioning, breaking changes, upgrade, documentation, Content Management System, cms, headless, javascript, node, react
+---
+
+# Versioning and Breaking Changes Policy
+
+Payload follows [Semantic Versioning](https://semver.org/). This document explains what that means in practice: which parts of Payload are covered, what counts as a breaking change, and what is excluded from our breaking changes policy.
+
+## Summary
+
+| Release                       | May contain                           | Upgrade expectation                                                              |
+| ----------------------------- | ------------------------------------- | -------------------------------------------------------------------------------- |
+| **Major** (`3.x` → `4.0`)     | Breaking changes                      | Follow the [migration guide](/docs/migration-guide/overview) and run the codemod |
+| **Minor** (`4.1` → `4.2`)     | New features, deprecations, bug fixes | Usually safe to upgrade without code changes (see exceptions below)              |
+| **Patch** (`4.2.0` → `4.2.1`) | Bug fixes                             | Guaranteed safe to upgrade without code changes                                  |
+
+Minor releases can still change anything listed under [Exceptions](#exceptions).
+
+## What counts as breaking
+
+A change is breaking if it makes working code fail or behave differently, as long as that code only relies on documented behavior. This includes changing a default (e.g. 4.0 lowered the default `depth` to `1`), requiring a database migration for an existing config, or changing types so correct code no longer compiles.
+
+Adding things isn't breaking, unless you have to implement them, like a new required method on an adapter interface.
+
+## Exceptions
+
+We keep breaking changes in minor releases to a minimum, but the following can still change:
+
+- **Internals.** `payload/internal`, anything marked `@internal`, undocumented exports, imports from `dist/`, and undocumented subpaths like `@payloadcms/ui/utilities/*`. These exist so our own packages can share code.
+- **Experimental and beta APIs.** Anything marked `@experimental` in its types, or labeled experimental or beta in the docs. Once the label is removed, the usual rules apply.
+- **Prereleases.** Canary and beta builds make no promises to each other. Migration guides only cover changes between stable versions.
+- **Admin UI markup.** DOM structure, class names and layout may change between releases. Relying on them in custom CSS or JavaScript is at your own risk. Documented [CSS variables](/docs/admin/customizing-css), including design tokens, are covered by our breaking changes policy.
+- **Wording.** Error messages, logs and translation strings.
+- **Bugs.** Fixing unintended behavior isn't a breaking change, even if your project relies on it. Examples include correcting types to match runtime behavior or applying a configured default that was previously ignored. We'll call out fixes that are likely to affect a lot of projects.
+- **Security fixes.** If we can't fix a vulnerability without changing behavior, the fix ships anyway. Where we can, we'll give you a way to keep the old behavior, but this may not always be possible. To report a vulnerability, see our [security policy](https://github.com/payloadcms/payload/blob/main/SECURITY.md).
+- **Dependencies.** Most dependency upgrades don't affect you, but some need changes on your end. We may still upgrade or replace a dependency when it needs a security fix, or proactively when it reaches end of life or stops being maintained, since staying on an unmaintained dependency is a risk in itself. Common examples:
+  - **Node.js.** Once a Node.js version reaches [end of life](https://github.com/nodejs/release#release-schedule), we may raise the minimum Node.js version, but only to the oldest version that's still supported.
+  - **Next.js, TanStack Start and React.** We may raise the minimum version within the same major to pick up a security fix. We won't drop a major just because it reached end of life.
+  - **Lexical.** Lexical hasn't reached 1.0, so any of its releases can break things. If you use Lexical's APIs directly, for example through `@payloadcms/richtext-lexical/lexical/*`, check [Lexical's release notes](https://github.com/facebook/lexical/releases) when you upgrade. Payload's own rich text APIs are still covered.
+
+## How breaking changes are announced
+
+Breaking commits and PR titles use the `!` marker (`feat!:`, `fix(storage-azure)!:`), and release notes list them under **⚠️ BREAKING CHANGES**.

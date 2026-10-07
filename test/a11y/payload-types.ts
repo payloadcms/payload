@@ -280,6 +280,7 @@ export interface Post {
   accessibilityDisabledSelect?: ('one' | 'two') | null;
   requiredTags: string[];
   relatedPost?: (string | null) | Post;
+  status?: ('draft' | 'published') | null;
   publishedOn?: string | null;
   content?: LexicalRichText<LexicalNodes_D6CBC3A3> | null;
   items?:
@@ -575,6 +576,7 @@ export interface PostsSelect<T extends boolean = true> {
   accessibilityDisabledSelect?: T;
   requiredTags?: T;
   relatedPost?: T;
+  status?: T;
   publishedOn?: T;
   content?: T;
   items?:

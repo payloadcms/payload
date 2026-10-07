@@ -68,7 +68,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
       />
       {onClear && value.length > 0 && (
         <Button
-          aria-label={t('general:clear')}
+          aria-label={t('general:clearSearch')}
           buttonStyle="ghost"
           className={`${baseClass}__clear`}
           icon={<XIcon size={16} />}
