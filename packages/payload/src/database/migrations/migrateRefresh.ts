@@ -1,7 +1,7 @@
-import type { BaseDatabaseAdapter } from '../types.js'
+import type { BaseDatabaseAdapter, MigrationResult } from '../types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'
-import { createLocalReq } from '../../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getMigrations } from './getMigrations.js'
@@ -10,7 +10,7 @@ import { readMigrationFiles } from './readMigrationFiles.js'
 /**
  * Run all migration down functions before running up
  */
-export async function migrateRefresh(this: BaseDatabaseAdapter) {
+export async function migrateRefresh(this: BaseDatabaseAdapter): Promise<MigrationResult> {
   const { payload } = this
   const migrationFiles = await readMigrationFiles({ payload })
 
@@ -18,7 +18,9 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
     payload,
   })
 
-  const req = await createLocalReq({}, payload)
+  const req = await createPayloadRequest({ payload })
+  const migrated: string[] = []
+  const rolledBack: string[] = []
 
   if (existingMigrations?.length) {
     payload.logger.info({
@@ -44,6 +46,7 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
         })
         await payload.delete({
           collection: 'payload-migrations',
+          overrideAccess: true,
           req,
           where: {
             name: {
@@ -51,6 +54,7 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
             },
           },
         })
+        rolledBack.push(migration.name)
       } catch (err: unknown) {
         await killTransaction(req)
         let msg = `Error running migration ${migration.name}. Rolling back.`
@@ -61,7 +65,7 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
           err,
           msg,
         })
-        process.exit(1)
+        throw err
       }
     }
   } else {
@@ -81,9 +85,11 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
           name: migration.name,
           executed: true,
         },
+        overrideAccess: true,
         req,
       })
       await commitTransaction(req)
+      migrated.push(migration.name)
 
       payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` })
     } catch (err: unknown) {
@@ -96,7 +102,9 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
         err,
         msg,
       })
-      process.exit(1)
+      throw err
     }
   }
+
+  return { migrated, rolledBack }
 }

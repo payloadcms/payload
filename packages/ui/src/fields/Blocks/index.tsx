@@ -1,9 +1,9 @@
 'use client'
-import type { BlocksFieldClientComponent, ClientBlock } from 'payload'
+import type { BlocksFieldClientProps, ClientBlock } from 'payload'
 
 import { verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { getTranslation } from '@payloadcms/translations'
-import React, { Fragment, useCallback, useMemo } from 'react'
+import React, { Fragment, useCallback, useId, useMemo } from 'react'
 import { toast } from 'sonner'
 
 import type { ClipboardPasteData } from '../../elements/ClipboardAction/types.js'
@@ -13,6 +13,7 @@ import { Button } from '../../elements/Button/index.js'
 import { clipboardCopy, clipboardPaste } from '../../elements/ClipboardAction/clipboardUtilities.js'
 import { ClipboardAction } from '../../elements/ClipboardAction/index.js'
 import {
+  insertRowFromClipboard,
   mergeFormStateFromClipboard,
   reduceFormStateByPath,
 } from '../../elements/ClipboardAction/mergeFormStateFromClipboard.js'
@@ -43,12 +44,14 @@ import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
+import { useRowFocus } from '../shared/useRowFocus.js'
 import { BlockRow } from './BlockRow.js'
 import { BlocksDrawer } from './BlocksDrawer/index.js'
 
 const baseClass = 'blocks-field'
 
-const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
+const BlocksFieldComponent: React.FC<BlocksFieldClientProps> = (props) => {
+  const rowsID = useId()
   const { i18n, t } = useTranslation()
 
   const {
@@ -86,7 +89,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     replaceState,
     setModified,
   } = useForm()
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const {
     config: { localization },
     config,
@@ -168,6 +172,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const getBlockConfig = (blockType: string): ClientBlock | undefined =>
     config.blocksMap[blockType] ?? clientBlocks.find((block) => block.slug === blockType)
 
+  const { fieldRef, focusRow } = useRowFocus()
+
   const addRow = useCallback(
     (rowIndex: number, blockType: string) => {
       addFieldRow({
@@ -177,11 +183,9 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         schemaPath,
       })
 
-      setTimeout(() => {
-        scrollToID(`${path}-row-${rowIndex + 1}`)
-      }, 0)
+      focusRow(`${path.split('.').join('-')}-row-${rowIndex}`)
     },
-    [addFieldRow, path, schemaPath],
+    [addFieldRow, focusRow, path, schemaPath],
   )
 
   const duplicateRow = useCallback(
@@ -293,6 +297,38 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     [clientBlocks, getFields, path, replaceState, setModified, t],
   )
 
+  const pasteRowBelow = useCallback(
+    (rowIndex: number) => {
+      const pasteArgs = {
+        onPaste: (dataFromClipboard: ClipboardPasteData) => {
+          const formState = { ...getFields() }
+          const newState = insertRowFromClipboard({
+            dataFromClipboard,
+            formState,
+            path,
+            rowIndex: rowIndex + 1,
+          })
+          replaceState(newState)
+          setModified(true)
+
+          setTimeout(() => {
+            scrollToID(`${path?.split('.').join('-')}-row-${rowIndex + 1}`)
+          }, 0)
+        },
+        path,
+        schemaBlocks: clientBlocks,
+        t,
+      }
+
+      const clipboardResult = clipboardPaste(pasteArgs)
+
+      if (typeof clipboardResult === 'string') {
+        toast.error(clipboardResult)
+      }
+    },
+    [clientBlocks, getFields, path, replaceState, setModified, t],
+  )
+
   const pasteBlocks = useCallback(
     (dataFromClipboard: ClipboardPasteData) => {
       const formState = { ...getFields() }
@@ -382,6 +418,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         .filter(Boolean)
         .join(' ')}
       id={`field-${path?.replace(/\./g, '__')}`}
+      ref={fieldRef}
       style={styles}
     >
       {shouldShowFieldError && (
@@ -412,7 +449,14 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
             )}
           </div>
           <ul className={`${baseClass}__header-actions`}>
-            {rows.length > 0 && <CollapseAllToggle onClick={toggleCollapseAll} />}
+            {rows.length > 0 && (
+              <CollapseAllToggle
+                controls={rowsID}
+                isExpanded={rows.some((row) => !row.collapsed)}
+                label={getTranslation(label || labels?.plural || name, i18n)}
+                onClick={toggleCollapseAll}
+              />
+            )}
             <li>
               <ClipboardAction
                 allowCopy={rows?.length > 0}
@@ -448,6 +492,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
           className={`${baseClass}__rows`}
+          id={rowsID}
           ids={rows.map((row) => row.id)}
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
           renderDragOverlay={isSortable && !readOnly && !disabled ? renderDragOverlay : undefined}
@@ -490,6 +535,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       moveRow={moveRow}
                       parentPath={path}
                       pasteRow={pasteRow}
+                      pasteRowBelow={pasteRowBelow}
                       path={rowPath}
                       permissions={permissions}
                       readOnly={readOnly || disabled}
@@ -528,16 +574,16 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!hasMaxRows && (
+      {!hasMaxRows && !readOnly && (
         <Fragment>
           <DrawerToggler
             className={`${baseClass}__drawer-toggler`}
-            disabled={readOnly || disabled}
+            disabled={disabled}
             slug={drawerSlug}
           >
             <Button
               buttonStyle="ghost"
-              disabled={readOnly || disabled}
+              disabled={disabled}
               el="span"
               icon={<CirclePlusIcon />}
               iconPosition="left"

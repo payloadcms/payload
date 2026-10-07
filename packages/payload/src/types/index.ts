@@ -24,7 +24,7 @@ import type {
   TypedLocale,
 } from '../index.js'
 import type { File } from '../uploads/types.js'
-import type { Operator } from './constants.js'
+import type { HasManyRelationshipOperator, Operator } from './constants.js'
 export type { TypeWithID } from '../collections/config/types.js'
 export type { Payload } from '../index.js'
 
@@ -38,6 +38,12 @@ export type CustomPayloadRequestProperties = {
   context: RequestContext
   /** The locale that should be used for a field when it is not translated to the requested locale */
   fallbackLocale?: TypedFallbackLocale
+  /**
+   * Set by Payload only while running a collection's `read` access function for a
+   * dynamic file transformation request. Restored to its prior value immediately
+   * after that access check completes; never set for ordinary reads.
+   */
+  fileTransform?: true
   i18n: I18n
   /**
    * The requested locale if specified
@@ -120,10 +126,7 @@ type PayloadRequestData = {
   data?: JsonObject
   /** The file on the request, same rules apply as the `data` property */
   file?: {
-    /**
-     * Context of the file when it was uploaded via client side.
-     */
-    clientUploadContext?: unknown
+    uploadReference?: unknown
   } & File
   /** All files from multipart form data, keyed by field name */
   files?: Record<string, File | File[]>
@@ -135,7 +138,7 @@ export interface PayloadRequest
   headers: Request['headers']
 }
 
-export type { Operator }
+export type { HasManyRelationshipOperator, Operator }
 
 // Makes it so things like passing new Date() will error
 export type JsonValue = JsonArray | JsonObject | unknown //Date | JsonArray | JsonObject | boolean | null | number | string // TODO: Evaluate proper, strong type for this
@@ -147,7 +150,7 @@ export interface JsonObject {
 }
 
 export type WhereField = {
-  // any json-serializable value
+  // any json-serializable value, including a nested query for supported relationship operators
   [key in Operator]?: JsonValue
 }
 
@@ -167,7 +170,7 @@ export type DefaultValue =
       locale?: TypedLocale
       req: PayloadRequest
       user: PayloadRequest['user']
-    }) => SerializableValue)
+    }) => Promise<SerializableValue> | SerializableValue)
   | SerializableValue
 
 /**
@@ -333,6 +336,8 @@ export type TransformGlobalWithSelect<
   : DataFromGlobalSlug<TSlug>
 
 export type PopulateType = Partial<TypedCollectionSelect>
+
+export type { SharedLocalAPIOptions } from './operations.js'
 
 export type ResolvedFilterOptions = { [collection: string]: Where }
 

@@ -119,16 +119,6 @@ export const STORAGE_ADAPTER_CONFIG: Record<StorageAdapter, StorageAdapterConfig
   })`,
     packageName: '@payloadcms/storage-s3',
   },
-  uploadthingStorage: {
-    adapterName: 'uploadthingStorage',
-    configTemplate: () => `uploadthingStorage({
-    collections: {
-      media: true,
-    },
-    token: process.env.UPLOADTHING_SECRET || '',
-  })`,
-    packageName: '@payloadcms/storage-uploadthing',
-  },
   vercelBlobStorage: {
     adapterName: 'vercelBlobStorage',
     configTemplate: () => `vercelBlobStorage({

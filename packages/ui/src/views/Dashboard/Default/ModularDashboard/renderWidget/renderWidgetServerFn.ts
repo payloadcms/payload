@@ -27,7 +27,7 @@ export type RenderWidgetServerFnReturnType = {
 export const renderWidgetHandler: ServerFunction<
   RenderWidgetServerFnArgs,
   RenderWidgetServerFnReturnType
-> = ({ cookies, locale, permissions, req, widgetData, widgetSlug }) => {
+> = ({ cookies, locale, permissions, req, user, widgetData, widgetSlug }) => {
   if (!req.user) {
     throw new Error('Unauthorized')
   }
@@ -44,11 +44,11 @@ export const renderWidgetHandler: ServerFunction<
         'div',
         {
           style: {
-            background: 'var(--theme-elevation-50)',
-            border: 'var(--stroke-width-small) solid var(--theme-elevation-200)',
-            borderRadius: '4px',
-            color: 'var(--theme-text)',
-            padding: '20px',
+            background: 'var(--color-bg-secondary)',
+            border: 'var(--stroke-width-small) solid var(--color-border)',
+            borderRadius: 'var(--radius-medium)',
+            color: 'var(--color-text)',
+            padding: 'var(--spacer-3)',
             textAlign: 'center',
           },
         },
@@ -67,6 +67,7 @@ export const renderWidgetHandler: ServerFunction<
       locale,
       permissions,
       req,
+      user,
       widgetData: localeFilteredData,
       widgetSlug,
     }
@@ -92,11 +93,11 @@ export const renderWidgetHandler: ServerFunction<
         'div',
         {
           style: {
-            background: 'var(--theme-error-50)',
-            border: 'var(--stroke-width-small) solid var(--theme-error-200)',
-            borderRadius: '4px',
-            color: 'var(--theme-error-text)',
-            padding: '20px',
+            background: 'var(--color-bg-danger-tertiary)',
+            border: 'var(--stroke-width-small) solid var(--color-border-danger)',
+            borderRadius: 'var(--radius-medium)',
+            color: 'var(--color-text-danger)',
+            padding: 'var(--spacer-3)',
             textAlign: 'center',
           },
         },

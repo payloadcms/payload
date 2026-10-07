@@ -82,12 +82,3 @@ export type FieldDiffServerProps<
   req: PayloadRequest
   selectedLocales: string[]
 } & Omit<FieldDiffClientProps, 'field'>
-
-export type FieldDiffClientComponent<
-  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
-> = React.ComponentType<FieldDiffClientProps<TFieldClient>>
-
-export type FieldDiffServerComponent<
-  TFieldServer extends Field = Field,
-  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
-> = React.ComponentType<FieldDiffServerProps<TFieldServer, TFieldClient>>

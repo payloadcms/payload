@@ -4,7 +4,7 @@ export type DrawerHeaderAction = {
   readonly disabled?: boolean
   readonly label: string
   readonly onClick: () => void
-  readonly style?: 'dashed' | 'destructive' | 'ghost' | 'pill' | 'primary' | 'secondary'
+  readonly style?: 'dashed' | 'destructive' | 'ghost' | 'link' | 'pill' | 'primary' | 'secondary'
 }
 
 export type Props = {
@@ -18,7 +18,7 @@ export type Props = {
 }
 
 export type TogglerProps = {
-  buttonStyle?: 'dashed' | 'destructive' | 'ghost' | 'pill' | 'primary' | 'secondary'
+  buttonStyle?: 'dashed' | 'destructive' | 'ghost' | 'link' | 'pill' | 'primary' | 'secondary'
   children: React.ReactNode
   className?: string
   disabled?: boolean

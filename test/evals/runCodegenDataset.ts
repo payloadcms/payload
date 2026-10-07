@@ -1,5 +1,3 @@
-/* eslint-disable no-console -- eval runner reports case progress and summaries */
-
 import type { Payload } from 'payload'
 
 import { randomUUID } from 'node:crypto'
@@ -8,6 +6,7 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import ts from 'typescript'
 import { expect as vitestExpect } from 'vitest'
+import { getPayload as getPayloadInstance } from 'payload'
 
 import type { MCPEvalDatabase } from './mcpDatabase.js'
 import type {
@@ -32,6 +31,7 @@ import { findReusableResult, recordRunResult, shouldRerun } from './runResults.j
 import { scoreConfigChange, scoreEvidence } from './scorer/index.js'
 import { accuracySummary, writeFailedCodegenAssertion } from './utils/index.js'
 import { validateConfigTypes } from './validate.js'
+import { runInit } from '../runInit.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const fixturesDir = path.join(__dirname, 'fixtures')
@@ -82,6 +82,7 @@ export async function runCodegenCase(
   )
 
   const paramsHash = codegenParamsHash({
+    additionalAllowedTools: testCase.additionalAllowedTools,
     category: testCase.category,
     configPath: testCase.configPath,
     fixtureContent: starterConfig,
@@ -90,6 +91,7 @@ export async function runCodegenCase(
     runnerKind: kind,
     skillInstall: kind === 'claude-code' ? skillInstall : undefined,
     systemPromptKey: kind === 'llm' ? systemPromptKey : undefined,
+    workspaceFiles: testCase.workspaceFiles,
   })
 
   const reusable = !shouldRerun() ? findReusableResult({ paramsHash }) : undefined
@@ -123,6 +125,7 @@ export async function runCodegenCase(
       await testCase.setup({ payload })
     }
     runnerOutput = await runCodegenEval(testCase.input, starterConfig, {
+      additionalAllowedTools: testCase.additionalAllowedTools,
       agentModel,
       configPath: testCase.configPath,
       exposeMcpTools,
@@ -132,6 +135,7 @@ export async function runCodegenCase(
       model: runnerModel,
       skillInstall,
       systemPromptKey,
+      workspaceFiles: testCase.workspaceFiles,
     })
   } catch (error) {
     await lazyPayload?.cleanup()
@@ -224,12 +228,17 @@ export async function runCodegenCase(
   }
 
   try {
+    const verifyPayload = await resolveVerifyPayload({
+      boot: lazyPayload.boot,
+      lazyPayload: lazyPayload.payload,
+      verify: testCase.verify,
+    })
     const verifyResult = await testCase.verify({
       ast,
       audit,
       config: evalConfig,
       expect: createEvalExpect(),
-      payload: lazyPayload.payload,
+      payload: verifyPayload,
       score,
       source: modifiedConfig,
       transcript: transcript ?? [],
@@ -284,6 +293,18 @@ export async function runCodegenCase(
   } finally {
     await lazyPayload.cleanup()
   }
+}
+
+export async function resolveVerifyPayload({
+  boot,
+  lazyPayload,
+  verify,
+}: {
+  boot: () => Promise<Payload>
+  lazyPayload: Payload
+  verify: EvalCase['verify']
+}): Promise<Payload> {
+  return verifyUsesArg(verify, 'payload') ? boot() : lazyPayload
 }
 
 function createEvalExpect(): EvalExpect {
@@ -447,12 +468,15 @@ function createLazyPayload({
         }
 
         try {
-          const { initPayloadInt } = await import('../__helpers/shared/initPayloadInt.js')
-          payload = (
-            await initPayloadInt(configDir, suiteName, undefined, configFile, {
-              payloadKey: configFile,
-            })
-          ).payload
+          await runInit(suiteName, false, true, configFile)
+          const { default: configPromise } = (await import(pathToFileURL(configFilePath).href)) as {
+            default: Promise<import('payload').SanitizedConfig>
+          }
+          payload = await getPayloadInstance({
+            config: await configPromise,
+            cron: true,
+            key: configFile,
+          })
           return payload
         } finally {
           if (restoreMCPEnvironment) {

@@ -1,5 +1,23 @@
 @layer payload-default {
+  .ContentEditable__keyboard-hint {
+    /* Reserve space so blur cannot move a pointer target between mouse-down and mouse-up. */
+    visibility: hidden;
+    margin: 0;
+    padding-block-start: var(--spacer-2);
+    padding-inline: calc(var(--content-editable-padding-inline-start) + var(--stroke-width-small));
+    color: var(--color-text);
+    font-size: var(--text-body-small-font-size);
+  }
+
+  .editor-container:has(> .editor-scroller > .editor > .ContentEditable__root:focus)
+    + .ContentEditable__keyboard-hint {
+    visibility: visible;
+  }
+
   .rich-text-lexical {
+    --content-editable-padding-block-start: var(--spacer-3);
+    --content-editable-padding-inline-start: var(--spacer-3);
+
     .editor {
       position: relative;
     }
@@ -17,8 +35,9 @@
 
     .LexicalEditorTheme__placeholder {
       position: absolute;
-      top: var(--spacer-4);
-      color: var(--color-text-secondary);
+      top: var(--content-editable-padding-block-start);
+      inset-inline-start: var(--content-editable-padding-inline-start);
+      color: var(--color-text);
       user-select: none;
       -webkit-user-select: none;
       -moz-user-select: none;
@@ -28,23 +47,15 @@
     }
   }
 
-  .rich-text-lexical--show-gutter
-    > .rich-text-lexical__wrap
-    > .editor-container
-    > .editor-scroller
-    > .editor
-    > div
-    > .LexicalEditorTheme__placeholder {
-    inset-inline-start: var(--spacer-5);
-  }
+  @media (min-width: 768px) {
+    .rich-text-lexical {
+      --content-editable-padding-block-start: var(--spacer-4);
+      --content-editable-padding-inline-start: var(--spacer-5);
+    }
 
-  .rich-text-lexical:not(.rich-text-lexical--show-gutter)
-    > .rich-text-lexical__wrap
-    > .editor-container
-    > .editor-scroller
-    > .editor
-    > div
-    > .LexicalEditorTheme__placeholder {
-    inset-inline-start: 0;
+    .rich-text-lexical:not(.rich-text-lexical--show-gutter) {
+      --content-editable-padding-block-start: var(--spacer-2);
+      --content-editable-padding-inline-start: 0px;
+    }
   }
 }

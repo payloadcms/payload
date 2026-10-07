@@ -6,13 +6,14 @@ import { fileURLToPath } from 'url'
 
 import { login } from '../__helpers/e2e/auth/login.js'
 import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
   // throttleTest,
 } from '../__helpers/e2e/helpers.js'
+import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { adminRoute } from './shared.js'
 
@@ -43,17 +44,14 @@ test.describe('Admin Panel (Root)', () => {
     })
 
     context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({
+    ;({ page } = await initPage({
+      context,
       customRoutes: {
         admin: adminRoute,
       },
       noAutoLogin: true,
-      page,
       serverURL,
-    })
+    }))
 
     await login({ customRoutes: { admin: adminRoute }, page, serverURL })
 
@@ -143,6 +141,11 @@ test.describe('Admin Panel (Root)', () => {
     await expect(page.locator('#field-theme-auto')).toBeHidden()
   })
 
+  test('ignores the ?theme= param when config.admin.theme restricts the theme', async () => {
+    await page.goto(`${url.account}?theme=light`)
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+  })
+
   test('should mount custom root views', async () => {
     await page.goto(`${url.admin}/custom-view`)
     await expect(page.locator('#custom-view')).toBeVisible()
@@ -152,6 +155,7 @@ test.describe('Admin Panel (Root)', () => {
     await page.goto(url.create)
     const textField = page.locator('#field-text')
     await textField.fill('updated')
+    await openNav(page)
     await page.click('button[aria-label="Account"]')
     const profileLink = page.locator('a.user-menu__profile')
     await expect(profileLink).toBeVisible()

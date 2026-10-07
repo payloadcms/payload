@@ -1,4 +1,4 @@
-import type { BrowserContext, CDPSession, Page, Request, Route } from '@playwright/test'
+import type { BrowserContext, Page, Request, Route } from '@playwright/test'
 import type { FormState } from 'payload'
 
 import { expect } from '@playwright/test'
@@ -19,17 +19,12 @@ import {
   removeArrayRow,
 } from '../__helpers/e2e/fields/array/index.js'
 import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-  throttleTest,
-  waitForFormReady,
-} from '../__helpers/e2e/helpers.js'
+import { saveDocAndAssert, throttleTest, waitForFormReady } from '../__helpers/e2e/helpers.js'
 import { currentFramework, test } from '../__helpers/e2e/playwright.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { autosavePostsSlug } from './collections/Autosave/index.js'
 import { postsSlug } from './collections/Posts/index.js'
@@ -56,9 +51,7 @@ test.describe('Form State', () => {
     autosavePostsUrl = new AdminUrlUtil(serverURL, autosavePostsSlug)
 
     context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   test.beforeEach(async () => {
@@ -78,18 +71,14 @@ test.describe('Form State', () => {
     await expect(page.locator('#field-title')).toBeDisabled()
   })
 
-  test(
-    'should render the create form ready to edit',
-    { framework: 'tanstack-start' },
-    async () => {
-      await page.goto(postsUrl.create)
-      // No client-init disabled phase: the RSC payload arrives with form state
-      // already initialized, so the field is immediately enabled and editable.
-      await expect(page.locator('#field-title')).toBeEnabled()
-      await page.locator('#field-title').fill(title)
-      await expect(page.locator('#field-title')).toHaveValue(title)
-    },
-  )
+  test('should render the create form ready to edit', { framework: 'tanstack-start' }, async () => {
+    await page.goto(postsUrl.create)
+    // No client-init disabled phase: the RSC payload arrives with form state
+    // already initialized, so the field is immediately enabled and editable.
+    await expect(page.locator('#field-title')).toBeEnabled()
+    await page.locator('#field-title').fill(title)
+    await expect(page.locator('#field-title')).toHaveValue(title)
+  })
 
   test('should disable fields while processing', async () => {
     const doc = await createPost()
@@ -293,6 +282,33 @@ test.describe('Form State', () => {
     await page.unroute(postsUrl.create)
   })
 
+  test('should update the document title after a burst of input events', async () => {
+    const updatedTitle = '[검증용] PR #242 E2E 확인 — 곧 삭제됩니다'
+
+    await page.goto(postsUrl.create)
+    await waitForFormReady(page)
+
+    const titleField = page.locator('#field-title')
+
+    await titleField.evaluate((field: HTMLInputElement, value) => {
+      const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set
+
+      for (let index = 1; index <= value.length; index++) {
+        setValue?.call(field, value.slice(0, index))
+        field.dispatchEvent(
+          new InputEvent('input', {
+            bubbles: true,
+            data: value[index - 1],
+            inputType: 'insertText',
+          }),
+        )
+      }
+    }, updatedTitle)
+
+    await expect(titleField).toHaveValue(updatedTitle)
+    await expect(page.locator('.doc-header__title')).toHaveText(updatedTitle)
+  })
+
   // TODO: This test is not very reliable but would be really nice to have
   test.skip('should not lag on slow CPUs', async () => {
     await page.goto(postsUrl.create)
@@ -422,6 +438,7 @@ test.describe('Form State', () => {
       data: {
         title: 'Initial Title',
       },
+      overrideAccess: true,
     })
 
     await page.goto(autosavePostsUrl.edit(doc.id))
@@ -519,8 +536,14 @@ test.describe('Form State', () => {
     await expect(computedTitleField).toHaveValue('Test Title - Edited')
 
     // but then when editing another field, the computed field should update
+    const autosaveResponse = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'PATCH' &&
+        response.url().includes(`/api/${autosavePostsSlug}/`) &&
+        response.ok(),
+    )
     await titleField.fill('Test Title 2')
-    await waitForAutoSaveToRunAndComplete(page)
+    await autosaveResponse
     await expect(computedTitleField).toHaveValue('Test Title 2')
   })
 
@@ -562,6 +585,7 @@ test.describe('Form State', () => {
       data: {
         title: 'Initial Title',
       },
+      overrideAccess: true,
     })
 
     await page.goto(autosavePostsUrl.edit(autosavePost.id))
@@ -570,7 +594,7 @@ test.describe('Form State', () => {
     const field = page.locator('#field-title')
     await expect(field).toBeEnabled()
 
-    const cdpSession = await throttleTest({
+    const stopThrottling = await throttleTest({
       context,
       delay: 'Slow 3G',
       page,
@@ -595,19 +619,12 @@ test.describe('Form State', () => {
       )
     } finally {
       // Ensure throttling is always cleaned up, even if the test fails
-      await cdpSession.send('Network.emulateNetworkConditions', {
-        downloadThroughput: -1,
-        latency: 0,
-        offline: false,
-        uploadThroughput: -1,
-      })
-
-      await cdpSession.detach()
+      await stopThrottling()
     }
   })
 
   describe('Throttled tests', () => {
-    let cdpSession: CDPSession
+    let stopThrottling: () => Promise<void>
 
     beforeEach(async () => {
       await page.goto(postsUrl.create)
@@ -620,7 +637,7 @@ test.describe('Form State', () => {
       // affect the request tracking of other tests depending on how fast they run
       await wait(1000)
 
-      cdpSession = await throttleTest({
+      stopThrottling = await throttleTest({
         context,
         delay: 'Slow 3G',
         page,
@@ -628,14 +645,7 @@ test.describe('Form State', () => {
     })
 
     afterEach(async () => {
-      await cdpSession.send('Network.emulateNetworkConditions', {
-        downloadThroughput: -1,
-        latency: 0,
-        offline: false,
-        uploadThroughput: -1,
-      })
-
-      await cdpSession.detach()
+      await stopThrottling()
     })
 
     test('optimistic rows should not disappear between pending network requests', async () => {
@@ -826,5 +836,6 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
       title: 'Post Title',
       ...overrides,
     },
+    overrideAccess: true,
   }) as unknown as Promise<Post>
 }

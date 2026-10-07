@@ -105,6 +105,7 @@ enum ErrorField_Home_Array_radio {
 
 type User {
   id: String
+  _strategy: String
   updatedAt: DateTime
   createdAt: DateTime
   email: EmailAddress!
@@ -5032,6 +5033,7 @@ type usersRefreshedUser {
 type usersJWT {
   email: EmailAddress!
   collection: String!
+  _strategy: String
 }
 
 type usersLoginResult {

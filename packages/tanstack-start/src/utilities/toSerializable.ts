@@ -1,3 +1,10 @@
+import type { Serializable, SerializableExtensions } from '@tanstack/react-router'
+
+import { setOwnProperty } from 'payload/shared'
+
+/** A record sanitized for TanStack's server-function transport. */
+export type SerializableRecord = Record<string, unknown> & SerializableExtensions['TsrSerializable']
+
 /**
  * Recursively strip values that seroval cannot serialize (React elements,
  * functions, Symbols) while preserving Maps, Sets, Dates, typed arrays, etc.
@@ -116,13 +123,35 @@ function stripUnserializable(
   for (const key of Object.keys(obj)) {
     const v = stripUnserializable(obj[key], cache, ancestors)
     if (v !== undefined) {
-      result[key] = v
+      setOwnProperty({ key, target: result, value: v })
     }
   }
   ancestors.delete(obj)
   return result
 }
 
-export function toSerializable<T>(value: T): T {
-  return stripUnserializable(value) as T
+/**
+ * Removes values unsupported by TanStack's serializer. Trusted serializable
+ * additions are merged afterward so opaque handles such as RSC payloads are
+ * preserved while the source record is sanitized.
+ */
+export function toSerializable<T>(value: T): T
+export function toSerializable(
+  value: Record<string, unknown>,
+  additions: Record<string, Serializable>,
+): SerializableRecord
+export function toSerializable(value: unknown, additions?: Record<string, Serializable>): unknown {
+  const serialized = stripUnserializable(value)
+
+  if (additions) {
+    if (typeof serialized !== 'object' || serialized === null || Array.isArray(serialized)) {
+      throw new TypeError('Serializable additions require an object source')
+    }
+
+    const result = { ...serialized, ...additions } satisfies Record<string, unknown>
+
+    return result as SerializableRecord
+  }
+
+  return serialized
 }

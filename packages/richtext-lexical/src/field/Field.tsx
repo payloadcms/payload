@@ -2,6 +2,7 @@
 import type { EditorState, SerializedEditorState } from 'lexical'
 import type { FallbackProps } from 'react-error-boundary'
 
+import { getTranslation } from '@payloadcms/translations'
 import {
   BulkUploadProvider,
   FieldDescription,
@@ -14,6 +15,7 @@ import {
   useEffectEvent,
   useField,
   useLocale,
+  useTranslation,
 } from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
 import { dequal } from 'dequal/lite'
@@ -55,6 +57,8 @@ const RichTextComponent: React.FC<
     schemaPath,
     validate, // Users can pass in client side validation if they WANT to, but it's not required anymore
   } = props
+
+  const { i18n } = useTranslation()
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
@@ -193,16 +197,24 @@ const RichTextComponent: React.FC<
 
   return (
     <div
+      aria-label={getTranslation(label || '', i18n)}
       className={classes}
       data-field-path={path}
       data-field-schemapath={schemaPath}
       data-lexical-view={editorConfig?.view}
       key={pathWithEditDepth}
+      role="group"
       style={styles}
     >
       <div className={`${baseClass}__label-row`}>
         {Label || (
-          <FieldLabel label={label} localized={localized} path={path} required={required} />
+          <FieldLabel
+            hasRequiredAccessibleState
+            label={label}
+            localized={localized}
+            path={path}
+            required={required}
+          />
         )}
         {!isControlledByParent && <ViewSelector />}
       </div>
@@ -213,22 +225,24 @@ const RichTextComponent: React.FC<
         />
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           {BeforeInput}
-          {/* Lexical may be in a drawer. We need to define another BulkUploadProvider to ensure that the bulk upload drawer
-          is rendered in the correct depth (not displayed *behind* the current drawer).
-          The `lexical-` prefix prevents drawer-slug collisions with non-lexical `BulkUploadProvider`s up the tree. */}
-          <BulkUploadProvider modalSlugPrefix={`lexical-${path}`}>
-            <LexicalProvider
-              composerKey={pathWithEditDepth}
-              editorConfig={editorConfig}
-              fieldProps={props}
-              isSmallWidthViewport={isSmallWidthViewport}
-              key={JSON.stringify({ path, rerenderProviderKey })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
-              onChange={handleChange}
-              readOnly={disabled}
-              rtl={rtl}
-              value={value}
-            />
-          </BulkUploadProvider>
+          <div className={`${baseClass}__editor-content`}>
+            {/* Lexical may be in a drawer. We need to define another BulkUploadProvider to ensure that the bulk upload drawer
+            is rendered in the correct depth (not displayed *behind* the current drawer).
+            The `lexical-` prefix prevents drawer-slug collisions with non-lexical `BulkUploadProvider`s up the tree. */}
+            <BulkUploadProvider modalSlugPrefix={`lexical-${path}`}>
+              <LexicalProvider
+                composerKey={pathWithEditDepth}
+                editorConfig={editorConfig}
+                fieldProps={props}
+                isSmallWidthViewport={isSmallWidthViewport}
+                key={JSON.stringify({ path, rerenderProviderKey })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
+                onChange={handleChange}
+                readOnly={disabled}
+                rtl={rtl}
+                value={value}
+              />
+            </BulkUploadProvider>
+          </div>
           {AfterInput}
         </ErrorBoundary>
         <RenderCustomComponent

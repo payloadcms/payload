@@ -80,7 +80,11 @@ export default async function UserStatsWidget({ req }: WidgetServerProps) {
   const { payload } = req
 
   // Fetch data server-side
-  const userCount = await payload.count({ collection: 'users' })
+  const userCount = await payload.count({
+    collection: 'users',
+    overrideAccess: false,
+    req,
+  })
 
   return (
     <div className="card">
@@ -95,8 +99,8 @@ export default async function UserStatsWidget({ req }: WidgetServerProps) {
 
 For visual consistency with the Payload UI, we recommend:
 
-1. Using the `card` class for your root element, unless you don't want it to have a background color.
-2. Using our theme variables for backgrounds and text colors. For example, use `var(--theme-elevation-0)` for backgrounds and `var(--theme-text)` for text colors.
+1. Use the `card` class for card-style widget roots. It applies the same theme-aware surface, border, radius, and padding as Payload's built-in dashboard cards; omit it for unframed content.
+2. Use our theme variables for backgrounds and text colors. For example, use `var(--color-bg)` for backgrounds and `var(--color-text)` for text colors.
 
 ### Default Layout
 
@@ -175,9 +179,12 @@ export default async function SalesSummaryWidgetComponent({
 
 ### Built-in Widgets
 
-Payload includes a built-in `collections` widget that displays collection and global cards.
+Payload includes built-in `welcome`, `activity` (recently viewed), `collections`, and `collection-query` widgets.
+The `collections` widget displays collection and global cards.
+The `collection-query` widget displays documents from a selected collection.
 
-If you don't define a `defaultLayout`, the collections widget will be automatically included in your dashboard.
+If you don't define a `defaultLayout`, these three widgets will appear in that order, each at full width.
+The `collection-query` widget is available through the **Add +** menu.
 
 ### User Customization
 

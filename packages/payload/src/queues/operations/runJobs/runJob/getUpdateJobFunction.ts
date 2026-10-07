@@ -1,26 +1,49 @@
 import type { Job } from '../../../../index.js'
 import type { PayloadRequest } from '../../../../types/index.js'
 
-import { JobCancelledError } from '../../../errors/index.js'
-import { updateJob } from '../../../utilities/updateJob.js'
+import { JobCancelledError, JobRunAbortedError } from '../../../errors/index.js'
+import { getCurrentDate } from '../../../utilities/getCurrentDate.js'
+import { updateJobs } from '../../../utilities/updateJob.js'
 
 export type UpdateJobFunction = (jobData: Partial<Job>) => Promise<Job>
 
 /**
  * Helper for updating a job that does the following, additionally to updating the job:
  * - Merges incoming data from the updated job into the original job object
- * - Handles job cancellation by throwing a `JobCancelledError` if the job was cancelled.
+ * - Throws a `JobCancelledError` if another process cancelled the job.
+ * - Stops updates after this worker loses the job's lease.
  */
 export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFunction {
   return async (jobData) => {
-    const updatedJob = await updateJob({
-      id: job.id,
+    const processingToken = job.processingToken
+
+    if (!processingToken) {
+      throw new JobRunAbortedError(`Job ${job.id} can no longer be updated by this runner`)
+    }
+
+    const minimumProcessingUntil = new Date(
+      getCurrentDate().getTime() + req.payload.config.jobs.processingLease.safetyBuffer,
+    ).toISOString()
+    const updatedJobs = await updateJobs({
       data: jobData,
+      limit: 1,
       req,
+      returning: true,
+      where: {
+        and: [
+          { id: { equals: job.id } },
+          { processingToken: { equals: processingToken } },
+          // Do not update this job if the lease expired.
+          // Append safety buffer, as, depending on the db adapter, the update itself
+          // may not be atomic, and another worker may have claimed the job before this update finishes.
+          { processingUntil: { greater_than: minimumProcessingUntil } },
+        ],
+      },
     })
+    const updatedJob = updatedJobs?.[0]
 
     if (!updatedJob) {
-      return job
+      throw new JobRunAbortedError(`Job ${job.id} can no longer be updated by this runner`)
     }
 
     // Update job object like this to modify the original object - that way, incoming changes (e.g. taskStatus field that will be re-generated through the hook) will be reflected in the calling function
@@ -38,7 +61,10 @@ export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFu
       }
     }
 
-    if ((updatedJob?.error as Record<string, unknown>)?.cancelled) {
+    if (
+      (updatedJob.error as Record<string, unknown>)?.cancelled &&
+      !(jobData.error as Record<string, unknown> | undefined)?.cancelled
+    ) {
       throw new JobCancelledError(`Job ${job.id} was cancelled`)
     }
 

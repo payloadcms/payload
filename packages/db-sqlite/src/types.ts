@@ -230,8 +230,8 @@ export type MigrateDownArgs = {
 
 declare module 'payload' {
   export interface DatabaseAdapter
-    extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
-      DrizzleAdapter {
+    extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool' | 'prodMigrations'>,
+      SQLiteDrizzleAdapter {
     beginTransaction: (options?: SQLiteTransactionConfig) => Promise<null | number | string>
     busyTimeout: number
     drizzle: Drizzle
@@ -254,6 +254,7 @@ declare module 'payload' {
     relationshipsSuffix?: string
     resolveInitializing: () => void
     schema: Record<string, GenericRelation | GenericTable>
+    sessions: DrizzleAdapter['sessions']
     tableNameMap: Map<string, string>
     transactionOptions: SQLiteTransactionConfig
     versionsSuffix?: string

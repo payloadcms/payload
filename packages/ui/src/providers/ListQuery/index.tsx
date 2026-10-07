@@ -1,7 +1,6 @@
 'use client'
 import { type ListQuery, type Where } from 'payload'
 import { transformWhereQuery, validateWhereQuery } from 'payload/shared'
-import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { IListQueryContext, ListQueryProps } from './types.js'
@@ -12,6 +11,7 @@ import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useRouter, useSearchParams } from '../RouterAdapter/index.js'
 import { ListQueryContext, ListQueryModifiedContext } from './context.js'
+import { getSearchWithListQuery } from './getSearchWithListQuery.js'
 import { mergeQuery } from './mergeQuery.js'
 import { sanitizeQuery } from './sanitizeQuery.js'
 
@@ -46,7 +46,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   const [query, setQuery] = useState<ListQuery>(() => {
     if (modifySearchParams) {
-      return queryFromURL
+      return queryFromProps ? sanitizeQuery(queryFromProps) : queryFromURL
     } else {
       return {
         limit: queryFromProps.limit,
@@ -54,6 +54,8 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       }
     }
   })
+
+  const [searchInput, setSearchInput] = useState(query?.search || '')
 
   const refineListData = useCallback(
     // eslint-disable-next-line @typescript-eslint/require-await
@@ -68,11 +70,11 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       })
 
       if (modifySearchParams) {
-        const search = `?${qs.stringify({
-          ...newQuery,
-          columns: JSON.stringify(newQuery.columns),
-          queryByGroup: JSON.stringify(newQuery.queryByGroup),
-        })}`
+        const search = getSearchWithListQuery({
+          currentSearch: window.location.search,
+          query: newQuery,
+          updatedQuery: incomingQuery,
+        })
         if (window.location.search !== search) {
           startRouteTransition(() => router.replace(search, { scroll: false }))
         }
@@ -138,16 +140,22 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const syncPropsToURL = useEffectEvent(() => {
     const newQuery = sanitizeQuery({ ...(query || {}), ...(queryFromProps || {}) })
 
-    const search = `?${qs.stringify({
-      ...newQuery,
-      columns: JSON.stringify(newQuery.columns),
-      queryByGroup: JSON.stringify(newQuery.queryByGroup),
-    })}`
+    const search = getSearchWithListQuery({
+      currentSearch: window.location.search,
+      query: newQuery,
+    })
 
     if (window.location.search !== search) {
       setQuery(newQuery)
       // Important: do not use router.replace here to avoid re-rendering.
-      window.history.replaceState(null, '', search)
+      // Go through the adapter's replaceState so routers that observe history
+      // mutations (e.g. TanStack) don't re-run their loader and double-load the
+      // view. Falls back to the native call for adapters that don't implement it.
+      if (router.replaceState) {
+        router.replaceState(search)
+      } else {
+        window.history.replaceState(null, '', search)
+      }
     }
   })
 
@@ -202,7 +210,11 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         orderableFieldName,
         query,
         refineListData,
+        resolvedGroupBy: queryFromProps?.groupBy,
+        resolvedSearch: queryFromProps?.search,
+        searchInput,
         setModified,
+        setSearchInput,
         ...contextRef.current,
       }}
     >

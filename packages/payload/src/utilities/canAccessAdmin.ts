@@ -18,7 +18,7 @@ export const canAccessAdmin = async ({ req }: { req: PayloadRequest }) => {
     const adminAccessFn = req.payload.collections[incomingUserSlug]?.config.access?.admin
 
     if (adminAccessFn) {
-      const canAccess = await adminAccessFn({ req })
+      const canAccess = await adminAccessFn({ slug: incomingUserSlug, req })
 
       if (!canAccess) {
         throw new UnauthorizedError()
@@ -32,6 +32,7 @@ export const canAccessAdmin = async ({ req }: { req: PayloadRequest }) => {
       collection: adminUserSlug,
       depth: 0,
       limit: 1,
+      overrideAccess: true,
       pagination: false,
     })
 

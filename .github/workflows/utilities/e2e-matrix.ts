@@ -16,6 +16,12 @@ export interface TestConfig {
   parallel?: boolean
   /** Whether to enable cacheComponents for this test run */
   cacheComponents?: boolean
+  /**
+   * Whether the job runs with `continue-on-error` (failures don't block the
+   * `all-green` gate). Defaults to `true` for `tanstack-start` suites, `false`
+   * otherwise. Set explicitly to promote a stabilized tanstack suite to required.
+   */
+  optional?: boolean
 }
 
 interface MatrixEntry {
@@ -45,6 +51,7 @@ function generateMatrix(testConfigs: TestConfig[]): Matrix {
     shards,
     parallel = false,
     cacheComponents = false,
+    optional = framework === 'tanstack-start',
   } of testConfigs) {
     for (let shard = 1; shard <= shards; shard++) {
       include.push({
@@ -54,7 +61,7 @@ function generateMatrix(testConfigs: TestConfig[]): Matrix {
         'total-shards': shards,
         parallel,
         cacheComponents,
-        optional: framework === 'tanstack-start',
+        optional,
       })
     }
   }

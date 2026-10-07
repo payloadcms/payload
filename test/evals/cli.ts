@@ -253,6 +253,7 @@ async function findIdenticalCases({
       'utf8',
     )
     const paramsHash = codegenParamsHash({
+      additionalAllowedTools: testCase.additionalAllowedTools,
       category: testCase.category,
       configPath: testCase.configPath,
       fixtureContent: starterConfig,
@@ -261,6 +262,7 @@ async function findIdenticalCases({
       runnerKind: runner,
       skillInstall,
       systemPromptKey,
+      workspaceFiles: testCase.workspaceFiles,
     })
     return latestResultByParams.has(paramsHash)
   })

@@ -2,6 +2,7 @@
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { hasAutosaveEnabled } from 'payload/shared'
 import React, { useState } from 'react'
 
 import type { Props as ButtonProps } from '../Button/types.js'
@@ -70,7 +71,10 @@ export function CreateDocumentButton({
   }
 
   const handleSave: DocumentDrawerContextProps['onSave'] = (args) => {
-    closeModal(drawerSlug)
+    if (!hasAutosaveEnabled(args.collectionConfig)) {
+      closeModal(drawerSlug)
+    }
+
     return onSave?.(args)
   }
 
@@ -109,19 +113,21 @@ export function CreateDocumentButton({
   return (
     <>
       <Popup
-        button={
+        className={`${baseClass}__popup`}
+        horizontalAlign="right"
+        popupType="menu"
+        renderButton={({ active, ...buttonProps }) => (
           <Button
+            {...buttonProps}
             buttonStyle={buttonStyle}
             className={`${baseClass}__popup-button`}
             icon="chevron"
+            selected={active}
             size={size}
           >
             {buttonLabel}
           </Button>
-        }
-        buttonType="custom"
-        className={`${baseClass}__popup`}
-        horizontalAlign="right"
+        )}
       >
         <PopupList.ButtonGroup>
           {collections.map((collection) => (

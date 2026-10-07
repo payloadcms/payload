@@ -31,7 +31,6 @@
     position: relative;
     white-space: nowrap;
     flex-shrink: 0;
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
@@ -66,7 +65,7 @@
   }
 
   .tabs__tab-button--active {
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
     color: var(--color-text);
   }
 
@@ -92,6 +91,7 @@
     background: var(--field-color-border-error);
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .tabs__tab-button {
       padding-bottom: var(--spacer-2);

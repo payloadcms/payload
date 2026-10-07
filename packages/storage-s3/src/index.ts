@@ -9,29 +9,16 @@ import type { Config, StorageAdapter, UploadCollectionSlug } from 'payload'
 
 import { S3 } from '@aws-sdk/client-s3'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
-import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
 import type { SignedDownloadsConfig } from './getFile.js'
 
 import { createS3Adapter } from './adapter.js'
-import { getGenerateSignedURLHandler } from './generateSignedURL.js'
 
 export type S3StorageOptions = {
   /**
    * Access control list for uploaded files.
    */
   acl?: 'private' | 'public-read'
-
-  /**
-   * When enabled, fields (like the prefix field) will always be inserted into
-   * the collection schema regardless of whether the plugin is enabled. This
-   * ensures a consistent schema across all environments.
-   *
-   * This will be enabled by default in Payload v4.
-   *
-   * @default false
-   */
-  alwaysInsertFields?: boolean
 
   /**
    * Bucket name to upload files to.
@@ -50,7 +37,7 @@ export type S3StorageOptions = {
   clientCacheKey?: string
 
   /**
-   * Do uploads directly on the client to bypass limits on Vercel. You must allow CORS PUT method for the bucket to your website.
+   * Upload directly to S3 instead of through Payload. You must allow CORS PUT requests from your website.
    */
   clientUploads?: ClientUploadsConfig
   /**
@@ -91,14 +78,15 @@ export type S3StorageOptions = {
   signedDownloads?: SignedDownloadsConfig
   /**
    * When true, the collection-level prefix and document-level prefix are combined
-   * (compositional). When false (default), document prefix overrides collection
-   * prefix entirely.
+   * (compositional). When false (default), a document prefix already within the
+   * collection prefix is used as-is for new uploads; otherwise it is nested beneath it.
+   * Existing files retain their stored prefixes for reads, URLs, and cleanup.
    *
-   * Example:
-   * - collection prefix: `collection-prefix/`
-   * - document prefix: `document-prefix/`
-   * - resulting prefix with useCompositePrefixes=true: `collection-prefix/document-prefix/`
-   * - resulting prefix with useCompositePrefixes=false: `document-prefix/`
+   * Example with a document prefix already contained by the collection prefix:
+   * - collection prefix: `uploads/`
+   * - document prefix: `uploads/documents/`
+   * - resulting prefix with useCompositePrefixes=true: `uploads/uploads/documents/`
+   * - resulting prefix with useCompositePrefixes=false: `uploads/documents/`
    *
    * @default false
    */
@@ -146,51 +134,27 @@ export const s3Storage: S3StorageFactory = (
       return s3Clients.get(cacheKey)!
     }
 
-    initClientUploads({
-      clientHandler: '@payloadcms/storage-s3/client#S3ClientUploadHandler',
-      collections: s3StorageOptions.collections,
-      config: incomingConfig,
-      enabled: !isPluginDisabled && Boolean(s3StorageOptions.clientUploads),
-      serverHandler: getGenerateSignedURLHandler({
-        access:
-          typeof s3StorageOptions.clientUploads === 'object'
-            ? s3StorageOptions.clientUploads.access
-            : undefined,
-        acl: s3StorageOptions.acl,
-        bucket: s3StorageOptions.bucket,
-        collections: s3StorageOptions.collections,
-        getStorageClient,
-        useCompositePrefixes: s3StorageOptions.useCompositePrefixes,
-      }),
-      serverHandlerPath: '/storage-s3-generate-signed-url',
-    })
-
     if (isPluginDisabled) {
-      // If alwaysInsertFields is true, still call cloudStoragePlugin to insert fields
-      if (s3StorageOptions.alwaysInsertFields) {
-        // Build collections with adapter: null since plugin is disabled
-        const collectionsWithoutAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
-          s3StorageOptions.collections,
-        ).reduce(
-          (acc, [slug, collOptions]) => ({
-            ...acc,
-            [slug]: {
-              ...(collOptions === true ? {} : collOptions),
-              adapter: null,
-            },
-          }),
-          {} as Record<string, CollectionOptions>,
-        )
+      // Still call cloudStoragePlugin with adapter: null so fields (like prefix) are
+      // inserted into the schema, keeping it consistent across environments.
+      const collectionsWithoutAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
+        s3StorageOptions.collections,
+      ).reduce(
+        (acc, [slug, collOptions]) => ({
+          ...acc,
+          [slug]: {
+            ...(collOptions === true ? {} : collOptions),
+            adapter: null,
+          },
+        }),
+        {} as Record<string, CollectionOptions>,
+      )
 
-        return cloudStoragePlugin({
-          alwaysInsertFields: true,
-          collections: collectionsWithoutAdapter,
-          enabled: false,
-          useCompositePrefixes: s3StorageOptions.useCompositePrefixes,
-        })(incomingConfig)
-      }
-
-      return incomingConfig
+      return cloudStoragePlugin({
+        collections: collectionsWithoutAdapter,
+        enabled: false,
+        useCompositePrefixes: s3StorageOptions.useCompositePrefixes,
+      })(incomingConfig)
     }
 
     // Determine signedDownloads for this collection
@@ -250,7 +214,6 @@ export const s3Storage: S3StorageFactory = (
     }
 
     return cloudStoragePlugin({
-      alwaysInsertFields: s3StorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
       useCompositePrefixes: s3StorageOptions.useCompositePrefixes,
     })(config)

@@ -77,6 +77,7 @@ async function build() {
     bundle: true,
     minify: true,
     outdir: 'dist-styles',
+    loader: { '.svg': 'dataurl' },
     packages: 'external',
     plugins: [sassPlugin({ css: 'external' })],
   })
@@ -87,7 +88,7 @@ async function build() {
     // chain). `copyfiles` also copies `src/styles.css` to `dist/styles.css`,
     // but the write below would overwrite it — dropping the tokens entirely.
     // Consumers that load `styles.css` directly (the `@payloadcms/ui/css`
-    // export, and `scss/app.scss`'s `@import '../styles.css'`) would then get
+    // export, and `css/app.css`'s `@import '../styles.css'`) would then get
     // components with no CSS custom properties, so every `var(--spacer-*)`
     // resolves empty (e.g. switch toggles collapse to 0×0). Prepend the token
     // chain so the published `styles.css` is a complete, self-contained sheet.
@@ -108,20 +109,10 @@ async function build() {
   }
 
   console.log('styles.css bundled successfully')
-  // Plugin to externalize all internal relative imports that point outside the
-  // exports/ directory. This prevents the barrel from inlining provider/context
-  // modules, ensuring that both the barrel export and subpath exports resolve to
-  // the same physical files (avoiding duplicate React context instances).
-  const externalizeInternalModules = {
-    name: 'externalize-internal-modules',
-    setup(build) {
-      build.onResolve({ filter: /^\.\.\/\.\.\//, namespace: 'file' }, (args) => {
-        return { external: true, path: args.path }
-      })
-    },
-  }
 
-  // Bundle `client.ts`
+  // Bundle `client.ts`. Admin code must import client code from this barrel only:
+  // subpaths like `@payloadcms/ui/elements/Link` stay unbundled for apps outside the
+  // admin panel, and hold their own copies of providers and contexts.
   const resultClient = await esbuild.build({
     entryPoints: ['dist/exports/client/index.js'],
     bundle: true,
@@ -164,11 +155,8 @@ function require(m) {
       'next',
       'crypto',
       // `sonner` owns a module-level toast event bus that the mounted `<Toaster>`
-      // (in the externalized ToastContainer provider) subscribes to. If the barrel
-      // inlines its own sonner copy, the `toast` it re-exports dispatches to a
-      // different bus than the one `<Toaster>` listens on, so toasts fired from
-      // consumer code imported via `@payloadcms/ui` never render. Keep it external
-      // so every consumer shares the single node_modules instance.
+      // subscribes to. Keep it external so code that imports `sonner` directly
+      // dispatches to the same bus as the barrel's `<Toaster>`.
       'sonner',
     ],
     //packages: 'external',
@@ -178,7 +166,6 @@ function require(m) {
 
     tsconfig: path.resolve(dirname, './tsconfig.json'),
     plugins: [
-      externalizeInternalModules,
       removeCSSImports,
       useClientPlugin, // required for banner to work
       /*commonjs({

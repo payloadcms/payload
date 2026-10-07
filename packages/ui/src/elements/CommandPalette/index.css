@@ -20,7 +20,6 @@
 
   .cmd-palette__input {
     padding: var(--spacer-3) var(--spacer-4);
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
@@ -59,9 +58,8 @@
 
   .cmd-palette__group-label {
     padding: var(--spacer-1) var(--spacer-4);
-    font-family: var(--text-body-medium-strong-font-family);
     font-size: var(--text-body-medium-font-size);
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
     text-transform: uppercase;
     letter-spacing: 0.06em;
     /* Tertiary + bold reads as a non-interactive section header, distinct from
@@ -79,7 +77,6 @@
        each side ≈ 1.375rem total; 2.25rem gives comfortable breathing room). */
     height: 2.25rem;
     padding: 0 var(--spacer-4);
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
@@ -101,14 +98,13 @@
   }
 
   .cmd-palette__option-match {
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
     color: var(--color-text);
   }
 
   .cmd-palette__empty {
     padding: var(--spacer-4);
     text-align: center;
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     color: var(--color-text-secondary);
   }
@@ -122,7 +118,6 @@
     gap: var(--spacer-2);
     padding: var(--spacer-2) var(--spacer-4);
     border-top: var(--stroke-width-small) solid var(--color-border);
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     color: var(--color-text-secondary);
   }
@@ -152,7 +147,7 @@
   /* The primary action (Enter): emphasized so it reads as the default. Selector is
      element-qualified to outrank button.cmd-palette__hint's `font`/`color: inherit`. */
   button.cmd-palette__hint--primary {
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
     color: var(--color-text);
 
     & .cmd-palette__key {
@@ -190,12 +185,5 @@
     background: var(--color-bg-secondary);
     border: 0;
     border-radius: var(--radius-small);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .cmd-palette,
-    .cmd-palette__inner {
-      transition: none;
-    }
   }
 }

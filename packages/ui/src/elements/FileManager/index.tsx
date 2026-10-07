@@ -2,8 +2,8 @@
 import type { SanitizedCollectionConfig, UploadEdits } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { formatAdminURL, formatFilesize, isImage } from 'payload/shared'
-import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
+import { formatFilesize, isImage, validateMimeType } from 'payload/shared'
+import React, { Fragment, useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { FieldError } from '../../fields/FieldError/index.js'
@@ -11,7 +11,6 @@ import { fieldBaseClass } from '../../fields/shared/index.js'
 import { TextInput } from '../../fields/Text/Input.js'
 import { useForm } from '../../forms/Form/index.js'
 import { useField } from '../../forms/useField/index.js'
-import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -24,7 +23,10 @@ import { EditUpload } from '../EditUpload/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
 import { editDrawerSlug, sizePreviewSlug } from '../Upload/index.js'
-import { pasteURLDrawerSlug, UploadFromURLModal } from '../Upload/UploadFromURLModal/index.js'
+import { UploadFromURLModal } from '../Upload/UploadFromURLModal/index.js'
+import { usePasteFromClipboard } from '../Upload/usePasteFromClipboard.js'
+import { useUploadFromUrl } from '../Upload/useUploadFromUrl.js'
+import { UploadDropzoneContent } from '../UploadDropzoneContent/index.js'
 import { AudioPreview } from './FilePreview/AudioPreview/index.js'
 import { FilePreview } from './FilePreview/index.js'
 import { PdfPreview } from './FilePreview/PdfPreview/index.js'
@@ -33,16 +35,6 @@ import { FileToolbar } from './FileToolbar/index.js'
 import './index.css'
 
 const baseClass = 'file-manager'
-
-const validate = (value) => {
-  if (!value && value !== undefined) {
-    return 'A file is required.'
-  }
-  if (value && (!value.name || value.name === '')) {
-    return 'A file name is required.'
-  }
-  return true
-}
 
 export type FileManagerProps = {
   readonly collectionSlug: string
@@ -53,7 +45,7 @@ export type FileManagerProps = {
    */
   readonly resetUploadEdits?: () => void
   readonly updateUploadEdits?: (args: UploadEdits) => void
-  readonly uploadConfig: SanitizedCollectionConfig['upload']
+  readonly uploadConfig: Omit<SanitizedCollectionConfig['upload'], 'uploadInstructions'>
   readonly UploadControls?: React.ReactNode
   readonly uploadEdits?: UploadEdits
   readonly UploadFilePreview?: React.ReactNode
@@ -69,25 +61,38 @@ export const FileManager: React.FC<FileManagerProps> = ({
   uploadEdits: uploadEditsFromProps,
   UploadFilePreview,
 }) => {
-  const { closeModal, openModal } = useModal()
+  const { openModal } = useModal()
   const { t } = useTranslation()
   const { setModified } = useForm()
-  const { id, data, setUploadStatus } = useDocumentInfo()
+  const { data } = useDocumentInfo()
+  const validate = useCallback(
+    (file: File | null | undefined) => {
+      if (!file && file !== undefined) {
+        return 'A file is required.'
+      }
+      if (file && (!file.name || file.name === '')) {
+        return 'A file name is required.'
+      }
+      if (
+        file instanceof File &&
+        uploadConfig.mimeTypes?.length &&
+        !validateMimeType(file.type, uploadConfig.mimeTypes)
+      ) {
+        return t('error:invalidFileType')
+      }
+      return true
+    },
+    [t, uploadConfig.mimeTypes],
+  )
   const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',
     validate,
   })
   const {
-    config: {
-      routes: { api },
-    },
-  } = useConfig()
-  const {
     setUploadControlFile,
     setUploadControlFileName,
     setUploadControlFileUrl,
     uploadControlFile,
-    uploadControlFileName,
     uploadControlFileUrl,
   } = useUploadControls()
   const uploadEditsContext = useUploadEdits()
@@ -98,25 +103,19 @@ export const FileManager: React.FC<FileManagerProps> = ({
   const [fileSrc, setFileSrc] = useState<null | string>(null)
   const [removedFile, setRemovedFile] = useState(false)
   const [filename, setFilename] = useState<string>(value?.name || '')
-  const [fileUrl, setFileUrl] = useState<string>('')
   const [selectedSize, setSelectedSize] = useState<null | string>(null)
-
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  const useServerSideFetch =
-    typeof uploadConfig?.pasteURL === 'object' && uploadConfig.pasteURL.allowList?.length > 0
 
   const acceptMimeTypes = uploadConfig.mimeTypes?.join(', ')
   const imageCacheTag = uploadConfig?.cacheTags && data?.updatedAt
 
-  const hasImageSizes = uploadConfig?.imageSizes?.length > 0
-  const hasResizeOptions = Boolean(uploadConfig?.resizeOptions)
+  const hasVariants = uploadConfig?.variants?.length > 0
+  const hasImageAdjustments = Boolean(uploadConfig?.hasImageAdjustments)
   const focalPointEnabled = uploadConfig?.focalPoint === true
   const { crop: showCrop = true, focalPoint = true } = uploadConfig
-  const showFocalPoint = focalPoint && (hasImageSizes || hasResizeOptions || focalPointEnabled)
+  const showFocalPoint = focalPoint && (hasVariants || hasImageAdjustments || focalPointEnabled)
 
   const selectedSizeData = selectedSize
-    ? (data?.sizes?.[selectedSize] as Record<string, unknown>)
+    ? (data?.variants?.[selectedSize] as Record<string, unknown>)
     : null
   const sidePanelFileSrc = (selectedSizeData?.url ?? data?.thumbnailURL ?? data?.url ?? null) as
     | null
@@ -136,6 +135,14 @@ export const FileManager: React.FC<FileManagerProps> = ({
 
   const handleFileChange = useCallback(
     ({ file, isNewFile = true }: { file: File | null; isNewFile?: boolean }) => {
+      if (
+        file instanceof File &&
+        uploadConfig.mimeTypes?.length &&
+        !validateMimeType(file.type, uploadConfig.mimeTypes)
+      ) {
+        toast.error(t('error:invalidFileType'))
+        return
+      }
       if (isNewFile && file instanceof File) {
         setFileSrc(URL.createObjectURL(file))
       }
@@ -144,7 +151,14 @@ export const FileManager: React.FC<FileManagerProps> = ({
       setUploadControlFileName(null)
       setUploadControlFile(null)
     },
-    [setValue, setUploadControlFile, setUploadControlFileName, setUploadControlFileUrl],
+    [
+      setValue,
+      setUploadControlFile,
+      setUploadControlFileName,
+      setUploadControlFileUrl,
+      t,
+      uploadConfig.mimeTypes,
+    ],
   )
 
   const handleFileNameChange = useCallback(
@@ -157,6 +171,29 @@ export const FileManager: React.FC<FileManagerProps> = ({
     },
     [handleFileChange, value],
   )
+
+  const handleFileSelection = useCallback(
+    (files: FileList) => handleFileChange({ file: files?.[0] }),
+    [handleFileChange],
+  )
+
+  const handleFileFetchedFromUrl = useCallback(
+    (file: File) => handleFileChange({ file }),
+    [handleFileChange],
+  )
+
+  const { fileUrl, handleUrlSubmit, isValidUrl, setFileUrl } = useUploadFromUrl({
+    collectionSlug,
+    onFileFetched: handleFileFetchedFromUrl,
+    uploadConfig,
+  })
+
+  const handlePasteFromClipboard = usePasteFromClipboard({
+    handleFileSelection,
+    handleUrlSubmit,
+    setFileUrl,
+    uploadConfig,
+  })
 
   const handleFileRemoval = useCallback(() => {
     setRemovedFile(true)
@@ -171,71 +208,10 @@ export const FileManager: React.FC<FileManagerProps> = ({
   }, [
     handleFileChange,
     resetUploadEdits,
+    setFileUrl,
     setUploadControlFile,
     setUploadControlFileName,
     setUploadControlFileUrl,
-  ])
-
-  const handleFileSelection = useCallback(
-    (files: FileList) => handleFileChange({ file: files?.[0] }),
-    [handleFileChange],
-  )
-
-  const isValidUrl = Boolean(fileUrl && URL.canParse(fileUrl))
-
-  const handleUrlSubmit = useCallback(async () => {
-    if (!fileUrl || !URL.canParse(fileUrl) || uploadConfig?.pasteURL === false) {
-      return
-    }
-    setUploadStatus('uploading')
-    try {
-      const clientResponse = await fetch(fileUrl)
-      if (!clientResponse.ok) {
-        throw new Error(`Fetch failed: ${clientResponse.status}`)
-      }
-      const blob = await clientResponse.blob()
-      const rawSegment = fileUrl.split('/').pop() || ''
-      const fileName = uploadControlFileName || decodeURIComponent(rawSegment.split('?')[0])
-      handleFileChange({ file: new File([blob], fileName, { type: blob.type }) })
-      setUploadStatus('idle')
-      closeModal(pasteURLDrawerSlug)
-      setFileUrl('')
-      return
-    } catch (_clientError) {
-      if (!useServerSideFetch) {
-        toast.error('Failed to fetch the file.')
-        setUploadStatus('failed')
-        return
-      }
-    }
-    try {
-      const pasteURL: `/${string}` = `/${collectionSlug}/paste-url${id ? `/${id}?` : '?'}src=${encodeURIComponent(fileUrl)}`
-      const serverResponse = await fetch(formatAdminURL({ apiRoute: api, path: pasteURL }))
-      if (!serverResponse.ok) {
-        throw new Error(`Fetch failed: ${serverResponse.status}`)
-      }
-      const blob = await serverResponse.blob()
-      const rawSegment = fileUrl.split('/').pop() || ''
-      const fileName = decodeURIComponent(rawSegment.split('?')[0])
-      handleFileChange({ file: new File([blob], fileName, { type: blob.type }) })
-      setUploadStatus('idle')
-      closeModal(pasteURLDrawerSlug)
-      setFileUrl('')
-    } catch (_serverError) {
-      toast.error('The provided URL is not allowed.')
-      setUploadStatus('failed')
-    }
-  }, [
-    api,
-    closeModal,
-    collectionSlug,
-    fileUrl,
-    handleFileChange,
-    id,
-    setUploadStatus,
-    uploadConfig,
-    uploadControlFileName,
-    useServerSideFetch,
   ])
 
   const onEditsSave = useCallback(
@@ -245,6 +221,13 @@ export const FileManager: React.FC<FileManagerProps> = ({
     },
     [setModified, updateUploadEdits],
   )
+
+  // Reset states for when replacing the file with a new upload
+  useEffect(() => {
+    setSelectedSize(null)
+    setRemovedFile(false)
+    setFileSrc('')
+  }, [data?.url, data?.filename])
 
   useEffect(() => {
     if (initialState?.file?.value instanceof File) {
@@ -262,10 +245,6 @@ export const FileManager: React.FC<FileManagerProps> = ({
   }, [fileSrc])
 
   useEffect(() => {
-    setSelectedSize(null)
-  }, [data?.url, data?.filename])
-
-  useEffect(() => {
     const handleControlFileUrl = async () => {
       if (uploadControlFileUrl) {
         setFileUrl(uploadControlFileUrl)
@@ -273,7 +252,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
       }
     }
     void handleControlFileUrl()
-  }, [uploadControlFileUrl, handleUrlSubmit])
+  }, [uploadControlFileUrl, handleUrlSubmit, setFileUrl])
 
   useEffect(() => {
     if (uploadControlFile) {
@@ -340,7 +319,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
           />
         </EditDepthProvider>
       )}
-      {data && hasImageSizes && (
+      {data && hasVariants && (
         <Drawer
           className={`${baseClass}__preview-drawer`}
           hoverTitle
@@ -367,7 +346,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
 
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
-      <FieldError message={errorMessage} showError={showError} />
+      <FieldError message={errorMessage} path="filename" showError={showError} />
       <div className={`${baseClass}__panel`}>
         {data?.filename && !removedFile && (
           <FileToolbar
@@ -394,58 +373,33 @@ export const FileManager: React.FC<FileManagerProps> = ({
             />
           ) : showUploadInput ? (
             <div className={`${baseClass}__upload`}>
+              {!value && removedFile && data?.filename && (
+                <Button
+                  aria-label={t('general:cancel')}
+                  buttonStyle="secondary"
+                  className={`${baseClass}__remove`}
+                  icon="x"
+                  onClick={() => setRemovedFile(false)}
+                  round
+                  tooltip={t('general:cancel')}
+                />
+              )}
               {!value && (
                 <Dropzone onChange={handleFileSelection}>
-                  <div className={`${baseClass}__dropzone-content`}>
-                    <div className={`${baseClass}__dropzone-buttons`}>
-                      <Button
-                        buttonStyle="secondary"
-                        onClick={() => inputRef.current?.click()}
-                        size="medium"
-                      >
-                        {t('upload:selectFile')}
-                      </Button>
-                      <input
-                        accept={acceptMimeTypes}
-                        aria-hidden="true"
-                        className={`${baseClass}__hidden-input`}
-                        hidden
-                        onChange={(e) => {
-                          if (e.target.files && e.target.files.length > 0) {
-                            handleFileSelection(e.target.files)
-                          }
-                        }}
-                        ref={inputRef}
-                        type="file"
-                      />
-                      {uploadConfig?.pasteURL !== false && (
-                        <Fragment>
-                          <span className={`${baseClass}__or-text`}>{t('general:or')}</span>
-                          <Button
-                            buttonStyle="secondary"
-                            onClick={() => {
-                              openModal(pasteURLDrawerSlug)
-                              setUploadControlFileUrl('')
-                              setUploadControlFile(null)
-                              setUploadControlFileName(null)
-                            }}
-                            size="medium"
-                          >
-                            {t('upload:pasteURL')}
-                          </Button>
-                        </Fragment>
-                      )}
-                      {UploadControls ?? null}
-                    </div>
-                    <p className={`${baseClass}__drag-text`}>
-                      {t('general:or')} {t('upload:dragAndDrop')}
-                    </p>
-                  </div>
+                  <UploadDropzoneContent
+                    acceptMimeTypes={acceptMimeTypes}
+                    extraControls={UploadControls}
+                    onFilesSelected={handleFileSelection}
+                    onPasteFromClipboard={handlePasteFromClipboard}
+                    pasteButtonClassName={`${baseClass}__pasteFromClipboard`}
+                    pasteTooltip={t('upload:pasteURL')}
+                  />
                 </Dropzone>
               )}
               {value && fileSrc && (
                 <Fragment>
                   <Button
+                    aria-label={t('general:cancel')}
                     buttonStyle="secondary"
                     className={`${baseClass}__remove`}
                     icon="x"

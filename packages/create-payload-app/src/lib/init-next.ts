@@ -1,13 +1,9 @@
-import type { CompilerOptions } from 'typescript'
-
 import * as p from '@clack/prompts'
-import { parse, stringify } from 'comment-json'
 import fs from 'fs'
 import fse from 'fs-extra'
 import globby from 'globby'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { promisify } from 'util'
 
 import type { CliArgs, DbType, NextAppDetails, NextConfigType, PackageManager } from '../types.js'
 
@@ -18,12 +14,10 @@ import {
   DEFAULT_PAYLOAD_VERSION_TAG,
   resolvePackageVersion,
 } from '../utils/resolvePackageVersion.js'
+import { configurePayloadTsConfig } from './configure-payload-tsconfig.js'
 import { ensurePnpmBuildApprovals } from './configure-pnpm-builds.js'
 import { installPackages } from './install-packages.js'
 import { wrapNextConfig } from './wrap-next-config.js'
-
-const readFile = promisify(fs.readFile)
-const writeFile = promisify(fs.writeFile)
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -110,45 +104,12 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
     }
   }
 
-  // Add `@payload-config` to tsconfig.json `paths`
-  await addPayloadConfigToTsConfig(projectDir, isSrcDir)
+  await configurePayloadTsConfig({
+    configPath: path.resolve(projectDir, 'tsconfig.json'),
+    payloadConfigPath: configurationResult.payloadConfigPath,
+  })
   installSpinner.stop('Successfully installed Payload and dependencies')
   return { ...configurationResult, isSrcDir, nextAppDir, success: true }
-}
-
-async function addPayloadConfigToTsConfig(projectDir: string, isSrcDir: boolean) {
-  const tsConfigPath = path.resolve(projectDir, 'tsconfig.json')
-
-  // Check if tsconfig.json exists
-  if (!fs.existsSync(tsConfigPath)) {
-    warning(`Could not find tsconfig.json to add @payload-config path.`)
-    return
-  }
-  const userTsConfigContent = await readFile(tsConfigPath, {
-    encoding: 'utf8',
-  })
-  const userTsConfig = parse(userTsConfigContent) as {
-    compilerOptions?: CompilerOptions
-  }
-
-  const hasBaseUrl =
-    userTsConfig?.compilerOptions?.baseUrl && userTsConfig?.compilerOptions?.baseUrl !== '.'
-  const baseUrl = hasBaseUrl ? userTsConfig?.compilerOptions?.baseUrl : './'
-
-  if (!userTsConfig.compilerOptions && !('extends' in userTsConfig)) {
-    userTsConfig.compilerOptions = {}
-  }
-
-  if (
-    !userTsConfig.compilerOptions?.paths?.['@payload-config'] &&
-    userTsConfig.compilerOptions?.paths
-  ) {
-    userTsConfig.compilerOptions.paths = {
-      ...(userTsConfig.compilerOptions.paths || {}),
-      '@payload-config': [`${baseUrl}${isSrcDir ? 'src/' : ''}payload.config.ts`],
-    }
-    await writeFile(tsConfigPath, stringify(userTsConfig, null, 2), { encoding: 'utf8' })
-  }
 }
 
 async function installAndConfigurePayload(

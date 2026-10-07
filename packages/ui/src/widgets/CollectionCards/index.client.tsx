@@ -1,5 +1,5 @@
 'use client'
-import type { ClientUser } from 'payload'
+import type { User } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { EntityType, formatAdminURL } from 'payload/shared'
@@ -42,7 +42,7 @@ export const CollectionCardsClient: React.FC<CollectionCardsData> = ({
                     let href: string
                     let hasCreatePermission: boolean
                     let isLocked = null
-                    let userEditing: ClientUser | null = null
+                    let userEditing: null | User = null
 
                     if (type === EntityType.collection) {
                       title = getTranslation(label, i18n)
@@ -78,7 +78,7 @@ export const CollectionCardsClient: React.FC<CollectionCardsData> = ({
 
                       if (globalLockData) {
                         isLocked = globalLockData.data._isLocked
-                        userEditing = globalLockData.data._userEditing as ClientUser | null
+                        userEditing = globalLockData.data._userEditing as null | User
 
                         const lockDuration = globalLockData?.lockDuration
                         const lastEditedAt = new Date(globalLockData.data?._lastEditedAt).getTime()
@@ -93,6 +93,8 @@ export const CollectionCardsClient: React.FC<CollectionCardsData> = ({
                       }
                     }
 
+                    const createButtonLabel = t('general:createNewLabel', { label: title })
+
                     return (
                       <li key={entityIndex}>
                         <Card
@@ -101,21 +103,20 @@ export const CollectionCardsClient: React.FC<CollectionCardsData> = ({
                               <Locked className={`${baseClass}__locked`} user={userEditing} />
                             ) : hasCreatePermission && type === EntityType.collection ? (
                               <Button
-                                aria-label={t('general:createNewLabel', {
-                                  label,
-                                })}
+                                aria-label={createButtonLabel}
                                 buttonStyle="ghost"
                                 el="link"
                                 icon="plus"
                                 round
                                 to={createHREF}
+                                tooltip={createButtonLabel}
                               />
                             ) : undefined
                           }
                           buttonAriaLabel={buttonAriaLabel}
                           href={href}
                           id={`card-${slug}`}
-                          title={getTranslation(label, i18n)}
+                          title={title}
                           titleAs="h3"
                         />
                       </li>

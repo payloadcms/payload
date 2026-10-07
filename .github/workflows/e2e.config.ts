@@ -18,6 +18,7 @@ const nextSuites: TestConfig[] = [
   { file: 'admin__e2e__general', shards: 3 },
   { file: 'admin__e2e__list-view', shards: 4 },
   { file: 'admin__e2e__document-view', shards: 3 },
+  { file: 'admin-routing', shards: 1 },
   { file: 'admin-bar', shards: 1 },
   { file: 'admin-root', shards: 1 },
   { file: 'auth', shards: 1 },
@@ -84,6 +85,7 @@ const nextSuites: TestConfig[] = [
   { file: 'query-presets', shards: 1 },
   { file: 'form-state', shards: 1 },
   { file: 'live-preview', shards: 2 },
+  { file: 'llm-instructions', shards: 1 },
   { file: 'localization', shards: 2 },
   { file: 'locked-documents', shards: 1 },
   { file: 'i18n', shards: 1 },
@@ -101,14 +103,17 @@ const nextSuites: TestConfig[] = [
   { file: 'queues', shards: 1 },
   { file: 'sort', shards: 1 },
   { file: 'server-url', shards: 1 },
+  { file: 'tags', shards: 1 },
   { file: 'trash', shards: 2 },
   { file: 'versions', shards: 3 },
   { file: 'uploads', shards: 3 },
+  { file: 'upload-transformers', shards: 1 },
 ]
 
 const tanstackSuites: TestConfig[] = nextSuites.map((suite) => ({
   ...suite,
-  framework: 'tanstack-start' as const,
+  framework: 'tanstack-start',
+  optional: false,
 }))
 
 export default createE2EConfig([...nextSuites, ...tanstackSuites])

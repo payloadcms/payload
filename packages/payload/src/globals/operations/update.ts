@@ -17,6 +17,8 @@ import type {
 } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { hasWhereAccessResult } from '../../auth/types.js'
+import { Forbidden } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
@@ -25,6 +27,7 @@ import { deepCopyObjectSimple } from '../../index.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
+import { getTopLevelFieldNames } from '../../utilities/getTopLevelFieldNames.js'
 import {
   hasDraftsEnabled,
   hasDraftValidationEnabled,
@@ -34,6 +37,14 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import {
+  buildAllLocalesPublicationHookDoc,
+  getAllLocalesPublicationStatus,
+  hasAuthorizedAllLocalesPublicationStatus,
+  normalizeAllLocalesPublicationStatus,
+  reconcileAllLocalesPublicationStatus,
+  validateAllLocalesPublicationFlags,
+} from '../../versions/allLocalesPublicationStatus.js'
 import { buildLocalizedPublishData } from '../../versions/buildSingleLocalePublishData.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
@@ -60,55 +71,97 @@ export const updateOperation = async <
 >(
   args: Args<TSlug>,
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
-  const {
-    slug,
-    autosave,
-    depth,
-    disableTransaction,
-    draft: draftArg,
-    globalConfig,
-    overrideAccess,
-    overrideLock,
-    populate,
-    publishAllLocales: publishAllLocalesArg,
-    req: { fallbackLocale, locale, payload, payload: { config } = {} },
-    req,
-    select: incomingSelect,
-    showHiddenFields,
-    unpublishAllLocales: unpublishAllLocalesArg,
-  } = args
+  const req = args.req
+  const initialGlobalConfig = args.globalConfig
+
+  validateAllLocalesPublicationFlags({
+    publishAllLocales: args.publishAllLocales,
+    unpublishAllLocales: args.unpublishAllLocales,
+  })
+
+  const initialAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
+    hasLocalizedStatus: Boolean(
+      req.payload.config.localization && hasLocalizeStatusEnabled(initialGlobalConfig),
+    ),
+    publishAllLocales:
+      !args.draft &&
+      (args.publishAllLocales ??
+        !(hasLocalizeStatusEnabled(initialGlobalConfig) && req.locale !== 'all')),
+    unpublishAllLocales: Boolean(args.unpublishAllLocales),
+  })
+
+  const initialAllLocalesPublicationIntent = normalizeAllLocalesPublicationStatus({
+    data: args.data,
+    status: initialAllLocalesPublicationStatus,
+  })
 
   try {
-    const shouldCommit = !disableTransaction && (await initTransaction(req))
+    const shouldCommit = !args.disableTransaction && (await initTransaction(req))
 
     // /////////////////////////////////////
     // beforeOperation - Global
     // /////////////////////////////////////
 
-    if (globalConfig.hooks?.beforeOperation?.length) {
-      for (const hook of globalConfig.hooks.beforeOperation) {
+    if (initialGlobalConfig.hooks?.beforeOperation?.length) {
+      for (const hook of initialGlobalConfig.hooks.beforeOperation) {
         args =
           (await hook({
             args,
             context: args.req.context,
-            global: globalConfig,
+            global: initialGlobalConfig,
             operation: 'update',
-            overrideAccess,
+            overrideAccess: args.overrideAccess,
             req: args.req,
           })) || args
       }
     }
 
+    const {
+      slug,
+      autosave,
+      depth,
+      draft: draftArg,
+      globalConfig,
+      overrideAccess,
+      overrideLock,
+      populate,
+      publishAllLocales: publishAllLocalesArg,
+      req: { fallbackLocale, locale, payload, payload: { config } = {} },
+      select: incomingSelect,
+      showHiddenFields,
+      unpublishAllLocales: unpublishAllLocalesArg,
+    } = args
+
     let { data } = args
 
-    const publishAllLocales =
+    validateAllLocalesPublicationFlags({
+      publishAllLocales: publishAllLocalesArg,
+      unpublishAllLocales: unpublishAllLocalesArg,
+    })
+
+    let publishAllLocales =
       !draftArg &&
-      (publishAllLocalesArg ??
-        (hasLocalizeStatusEnabled(globalConfig) && locale !== 'all' ? false : true))
-    const unpublishAllLocales =
+      (publishAllLocalesArg ?? !(hasLocalizeStatusEnabled(globalConfig) && locale !== 'all'))
+    let unpublishAllLocales =
       typeof unpublishAllLocalesArg === 'string'
         ? unpublishAllLocalesArg === 'true'
         : !!unpublishAllLocalesArg
+    const requestedAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
+      hasLocalizedStatus: Boolean(config?.localization && hasLocalizeStatusEnabled(globalConfig)),
+      publishAllLocales,
+      unpublishAllLocales,
+    })
+    const allLocalesPublicationStatus = reconcileAllLocalesPublicationStatus({
+      data,
+      intent: initialAllLocalesPublicationIntent,
+      status: requestedAllLocalesPublicationStatus,
+    })
+
+    if (requestedAllLocalesPublicationStatus && !allLocalesPublicationStatus) {
+      publishAllLocales = false
+      unpublishAllLocales = false
+    }
+
     const isSavingDraft =
       Boolean(draftArg && hasDraftsEnabled(globalConfig)) &&
       data._status !== 'published' &&
@@ -118,6 +171,10 @@ export const updateOperation = async <
       data._status = 'draft'
     }
 
+    const submittedTopLevelFieldNames = unpublishAllLocales
+      ? getTopLevelFieldNames(data)
+      : undefined
+
     // /////////////////////////////////////
     // 1. Retrieve and execute access
     // /////////////////////////////////////
@@ -125,6 +182,7 @@ export const updateOperation = async <
     const accessResults = !overrideAccess
       ? await executeAccess(
           {
+            slug: globalConfig.slug,
             data,
             req,
           },
@@ -150,6 +208,14 @@ export const updateOperation = async <
       where: query,
     })
     const { global, globalExists } = globalVersionResult || {}
+
+    if (
+      hasWhereAccessResult(accessResults) &&
+      globalExists &&
+      (!global || Object.keys(global).length === 0)
+    ) {
+      throw new Forbidden(req.t)
+    }
 
     let globalJSON: JsonObject = {}
 
@@ -190,15 +256,38 @@ export const updateOperation = async <
     // beforeValidate - Fields
     // /////////////////////////////////////
 
+    let statusFieldAccess = false
+    const publicationFieldPolicyDoc = buildAllLocalesPublicationHookDoc({
+      doc: originalDoc,
+      docWithLocales: globalJSON,
+      status:
+        data._status === allLocalesPublicationStatus ? allLocalesPublicationStatus : undefined,
+    })
+
     data = await beforeValidate({
       collection: null,
       context: req.context,
       data,
       doc: originalDoc,
+      docForHooks: publicationFieldPolicyDoc,
       global: globalConfig,
+      onFieldAccess: ({ accessResult, path }) => {
+        if (path === '_status') {
+          statusFieldAccess = accessResult
+        }
+      },
       operation: 'update',
       overrideAccess: overrideAccess!,
       req,
+    })
+
+    const publicationHookDoc = buildAllLocalesPublicationHookDoc({
+      doc: originalDoc,
+      docWithLocales: globalJSON,
+      status:
+        statusFieldAccess && data._status === allLocalesPublicationStatus
+          ? allLocalesPublicationStatus
+          : undefined,
     })
 
     // /////////////////////////////////////
@@ -212,7 +301,7 @@ export const updateOperation = async <
             context: req.context,
             data,
             global: globalConfig,
-            originalDoc,
+            originalDoc: publicationHookDoc,
             overrideAccess,
             req,
           })) || data
@@ -230,12 +319,14 @@ export const updateOperation = async <
             context: req.context,
             data,
             global: globalConfig,
-            originalDoc,
+            originalDoc: publicationHookDoc,
             overrideAccess,
             req,
           })) || data
       }
     }
+
+    const publicationData = { ...data }
 
     // /////////////////////////////////////
     // beforeChange - Fields
@@ -245,18 +336,40 @@ export const updateOperation = async <
       collection: null,
       context: req.context,
       data,
-      doc: originalDoc,
+      doc: publicationHookDoc,
       docWithLocales: globalJSON,
+      fieldsToValidate: submittedTopLevelFieldNames,
       global: globalConfig,
       operation: 'update' as Operation,
       req,
-      skipValidation:
-        (isSavingDraft && !hasDraftValidationEnabled(globalConfig)) ||
-        // Skip validation for unpublish operations — they only change _status, not document data
-        unpublishAllLocales,
+      skipValidation: isSavingDraft && !hasDraftValidationEnabled(globalConfig),
     }
 
-    let result: JsonObject = await beforeChange(beforeChangeArgs)
+    let statusFieldValue: unknown
+
+    let result: JsonObject = await beforeChange({
+      ...beforeChangeArgs,
+      onDataProcessed: (processedData) => {
+        statusFieldValue = processedData._status
+      },
+    })
+
+    const hasAuthorizedPublicationStatus = hasAuthorizedAllLocalesPublicationStatus({
+      data: publicationData,
+      fieldAccessDenied: !statusFieldAccess,
+      fieldValue: statusFieldValue,
+      status: allLocalesPublicationStatus,
+    })
+
+    if (
+      allLocalesPublicationStatus &&
+      !hasAuthorizedPublicationStatus &&
+      typeof statusFieldValue === 'undefined' &&
+      typeof globalJSON._status === 'object' &&
+      globalJSON._status !== null
+    ) {
+      result._status = { ...globalJSON._status }
+    }
 
     if (
       config?.localization &&
@@ -264,9 +377,21 @@ export const updateOperation = async <
       typeof result._status === 'string'
     ) {
       const statusStr = result._status
-      result._status = {}
-      for (const localeCode of config.localization.localeCodes) {
-        ;(result._status as Record<string, unknown>)[localeCode] = statusStr
+
+      if (
+        hasAuthorizedPublicationStatus &&
+        typeof globalJSON._status === 'object' &&
+        globalJSON._status !== null
+      ) {
+        result._status = { ...globalJSON._status }
+      } else {
+        result._status = {}
+      }
+
+      if (!hasAuthorizedPublicationStatus) {
+        for (const localeCode of config.localization.localeCodes) {
+          ;(result._status as Record<string, unknown>)[localeCode] = statusStr
+        }
       }
     }
 
@@ -278,7 +403,7 @@ export const updateOperation = async <
 
     if (config && config.localization && globalConfig.versions) {
       if (hasLocalizeStatusEnabled(globalConfig)) {
-        if (publishAllLocales || unpublishAllLocales) {
+        if (hasAuthorizedPublicationStatus) {
           let accessibleLocaleCodes = config.localization.localeCodes
 
           if (config.localization.filterAvailableLocales) {

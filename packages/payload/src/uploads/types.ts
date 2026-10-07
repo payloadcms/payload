@@ -1,9 +1,7 @@
-import type { ResizeOptions, Sharp, SharpOptions } from 'sharp'
-
 import type { CollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { PayloadComponent } from '../config/types.js'
+import type { UploadCollectionSlug } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
-import type { WithMetadata } from './optionallyAppendMetadata.js'
 
 export type FileSize = {
   filename: null | string
@@ -25,9 +23,9 @@ export type FileData = {
   focalY?: number
   height: number
   mimeType: string
-  sizes: FileSizes
   tempFilePath?: string
   url?: string
+  variants: FileSizes
   width: number
 }
 
@@ -35,21 +33,6 @@ export type ProbedImageSize = {
   height: number
   width: number
 }
-
-/**
- * Params sent to the sharp `toFormat()` function
- * @link https://sharp.pixelplumbing.com/api-output#toformat
- */
-export type ImageUploadFormatOptions = {
-  format: Parameters<Sharp['toFormat']>[0]
-  options?: Parameters<Sharp['toFormat']>[1]
-}
-
-/**
- * Params sent to the sharp trim() function
- * @link https://sharp.pixelplumbing.com/api-resize#trim
- */
-export type ImageUploadTrimOptions = Parameters<Sharp['trim']>[0]
 
 export type GenerateImageName = (args: {
   extension: string
@@ -59,7 +42,7 @@ export type GenerateImageName = (args: {
   width: number
 }) => string
 
-export type ImageSize = {
+type ImageSizeBase = {
   /**
    * Admin UI options that control how this image size appears in list views.
    */
@@ -79,27 +62,34 @@ export type ImageSize = {
     }
   }
   /**
-   * @deprecated prefer position
-   */
-  crop?: string // comes from sharp package
-  formatOptions?: ImageUploadFormatOptions
-  /**
    * Generate a custom name for the file of this image size.
    */
   generateImageName?: GenerateImageName
   name: string
-  trimOptions?: ImageUploadTrimOptions
-  /**
-   * When an uploaded image is smaller than the defined image size, we have 3 options:
-   *
-   * `undefined | false | true`
-   *
-   * 1. `undefined` [default]: uploading images with smaller width AND height than the image size will return null
-   * 2. `false`: always enlarge images to the image size
-   * 3. `true`: if the image is smaller than the image size, return the original image
-   */
-  withoutEnlargement?: ResizeOptions['withoutEnlargement']
-} & Omit<ResizeOptions, 'withoutEnlargement'>
+}
+
+/**
+ * Interface to be module-augmented by image processing providers.
+ *
+ * When no provider is registered, ImageSize carries no processor-specific options.
+ * When one or more providers are registered (e.g. `@payloadcms/transformer-sharp`),
+ * ImageSize uses the union of their registered options instead.
+ *
+ * @example
+ * declare module 'payload' {
+ *   interface RegisteredImageSizeOptions {
+ *     myProvider: MyProviderImageSizeOptions
+ *   }
+ * }
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- Intentionally empty so image processing providers can augment it.
+export interface RegisteredImageSizeOptions {}
+
+type ImageSizeOptions = keyof RegisteredImageSizeOptions extends never
+  ? unknown
+  : RegisteredImageSizeOptions[keyof RegisteredImageSizeOptions]
+
+export type ImageSize = ImageSizeBase & ImageSizeOptions
 
 export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => false | null | string
 
@@ -130,6 +120,13 @@ type UploadFilePreviewMap = {
   [mimeTypePattern: string]: PayloadComponent
 }
 
+/**
+ * Distinguishes an ordinary public file request (`read`) from Payload's internal
+ * retrieval of a stored file's bytes for a dynamic transformation (`transform`).
+ * Defaults to `read` when omitted, for third-party handler compatibility.
+ */
+export type FileHandlerOperation = 'read' | 'transform'
+
 type Admin = {
   components?: {
     /**
@@ -146,6 +143,11 @@ type Admin = {
      */
     filePreview?: PayloadComponent | UploadFilePreviewMap
   }
+}
+
+export type ExternalFileHeaderFilterContext = {
+  isSameOrigin: boolean
+  url: string
 }
 
 export type UploadConfig = {
@@ -184,11 +186,6 @@ export type UploadConfig = {
    */
   cacheTags?: boolean
   /**
-   * Sharp constructor options to be passed to the uploaded file.
-   * @link https://sharp.pixelplumbing.com/api-constructor/#sharp
-   */
-  constructorOptions?: SharpOptions
-  /**
    * Enables cropping of images.
    * @default true
    */
@@ -205,8 +202,10 @@ export type UploadConfig = {
    */
   displayPreview?: boolean
   /**
-   *
-   * Accepts existing headers and returns the headers after filtering or modifying.
+   * Accepts existing headers and returns the headers after filtering or modifying. The optional
+   * context identifies the destination for the current request, including each redirect hop.
+   * `isSameOrigin` is true only when that destination matches a trusted origin established for a
+   * relative file URL.
    * If using this option, you should handle the removal of any sensitive cookies
    * (like payload-prefixed cookies) to prevent leaking session information to external
    * services. By default, Payload automatically filters out payload-prefixed cookies
@@ -215,7 +214,10 @@ export type UploadConfig = {
    * Useful for adding custom headers to fetch from external providers.
    * @default undefined
    */
-  externalFileHeaderFilter?: (headers: Record<string, string>) => Record<string, string>
+  externalFileHeaderFilter?: (
+    headers: Record<string, string>,
+    context?: ExternalFileHeaderFilterContext,
+  ) => Record<string, string>
   /**
    * Field slugs to use for a compound index instead of the default filename index.
    */
@@ -231,17 +233,12 @@ export type UploadConfig = {
    */
   focalPoint?: boolean
   /**
-   * Format options for the uploaded file. Formatting image sizes needs to be done within each formatOptions individually.
-   */
-  formatOptions?: ImageUploadFormatOptions
-  /**
    * Custom handlers to run when a file is fetched.
    *
    * - If a handler returns a Response, the response will be sent to the client and no further handlers will be run.
    * - If a handler returns null, the next handler will be run.
    * - If no handlers return a response the file will be returned by default.
    *
-   * @link https://sharp.pixelplumbing.com/api-output/#toformat
    * @default undefined
    */
   handlers?: ((
@@ -250,13 +247,24 @@ export type UploadConfig = {
       doc: TypeWithID
       headers?: Headers
       params: {
-        clientUploadContext?: unknown
         collection: string
         filename: string
+        /** @default 'read' */
+        operation?: FileHandlerOperation
         prefix?: string
+        uploadReference?: unknown
       }
     },
   ) => Promise<Response> | Promise<void> | Response | void)[]
+  /**
+   * Whether a registered transformer performs additional processing on the main
+   * uploaded file beyond simple pass-through (e.g. resizing, format conversion,
+   * trimming). Written by a transformer's `init()`; not intended to be set
+   * directly in collection config. Used by the Admin UI to decide whether to
+   * show focal-point controls when no image sizes are configured.
+   * @internal
+   */
+  hasImageAdjustments?: boolean
   /**
    * Set to `true` to prevent the admin UI from showing file inputs during document creation, useful for programmatic file generation.
    */
@@ -265,7 +273,6 @@ export type UploadConfig = {
    * Set to `true` to prevent the admin UI having a way to remove an existing file while editing.
    */
   hideRemoveFile?: boolean
-  imageSizes?: ImageSize[]
   /**
    * Restrict mimeTypes in the file picker. Array of valid mime types or mimetype wildcards
    * @example ['image/*', 'application/pdf']
@@ -290,12 +297,6 @@ export type UploadConfig = {
       }
     | false
   /**
-   * Sharp resize options for the original image.
-   * @link https://sharp.pixelplumbing.com/api-resize#resize
-   * @default undefined
-   */
-  resizeOptions?: ResizeOptions
-  /**
    *  Skip safe fetch when using server-side fetching for external files from these URLs.
    *  @default false
    */
@@ -305,20 +306,67 @@ export type UploadConfig = {
    * @default undefined
    */
   staticDir?: string
-  trimOptions?: ImageUploadTrimOptions
   /**
-   * Optionally append metadata to the image during processing.
-   *
-   * Can be a boolean or a function.
-   *
-   * If true, metadata will be appended to the image.
-   * If false, no metadata will be appended.
-   * If a function, it will receive an object containing the metadata and should return a boolean indicating whether to append the metadata.
-   * @default false
+   * Adapter-provided upload instructions.
+   * @internal
    */
-  withMetadata?: WithMetadata
+  uploadInstructions?: UploadInstructionsCapability
+}
+
+export type UploadInstructionsAccess = (args: {
+  collectionSlug: UploadCollectionSlug
+  req: PayloadRequest
+}) => boolean | Promise<boolean>
+
+export type UploadInstructionsRequest = {
+  collectionSlug: UploadCollectionSlug
+  docPrefix?: string
+  filename: string
+  filesize: number
+  mimeType: string
+}
+
+export type UploadInstructions = {
+  file: {
+    filename: string
+    mimeType: string
+    size: number
+    uploadReference: Record<string, unknown>
+  }
+} & (
+  | {
+      data?: unknown
+      name: string
+      type: 'dispatch'
+    }
+  | {
+      request: {
+        headers?: Record<string, string>
+        method: 'POST' | 'PUT'
+        url: string
+      }
+      type: 'http'
+    }
+)
+
+export type GenerateUploadInstructions = (
+  args: { overrideAccess?: boolean; req: PayloadRequest } & UploadInstructionsRequest,
+) => Promise<UploadInstructions> | UploadInstructions
+
+export type UploadInstructionsCapability = {
+  /** Generates upload instructions. The generator or supporting endpoint must check access. */
+  generate: GenerateUploadInstructions
+  /** Require a signed server-issued reference before invoking upload handlers. @internal */
+  requiresUploadReceipt?: boolean
+  /**
+   * Whether the Admin panel should use these instructions before saving a document.
+   * This can still be useful when upload chunks pass through Payload.
+   */
+  useInAdmin: boolean
 }
 export type checkFileRestrictionsParams = {
+  /** Set to false when the file bytes have not been uploaded yet. */
+  checkFileContents?: boolean
   collection: CollectionConfig
   file: File
   req: PayloadRequest
@@ -326,6 +374,12 @@ export type checkFileRestrictionsParams = {
 
 export type SanitizedUploadConfig = {
   staticDir: UploadConfig['staticDir']
+  /**
+   * The collection's image sizes, as written at startup by a registered transformer such as
+   * `sharpTransformer({ collections: { <slug>: { variants } } })`. Names and admin options
+   * only — not authored on the collection.
+   */
+  variants?: ImageSize[]
 } & UploadConfig
 
 export type File = {
@@ -351,16 +405,28 @@ export type File = {
   tempFilePath?: string
 }
 
-export type FileToSave = {
-  /**
-   * The buffer of the file.
-   */
-  buffer: Buffer
-  /**
-   * The path to save the file.
-   */
-  path: string
-}
+export type FileToSave =
+  | {
+      /**
+       * The buffer of the file.
+       */
+      buffer: Buffer
+      /**
+       * The path to save the file.
+       */
+      path: string
+    }
+  | {
+      /**
+       * The path to save the file.
+       */
+      path: string
+      /**
+       * An existing file on disk to copy to `path`, instead of `buffer` - avoids loading a file
+       * that's already on disk (e.g. a temp file) fully into memory just to write it back out.
+       */
+      sourcePath: string
+    }
 
 type Crop = {
   height: number

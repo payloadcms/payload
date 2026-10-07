@@ -10,7 +10,7 @@ import {
 } from './builtin/collections/authTools.js'
 import { countDocumentsTool } from './builtin/collections/countTool.js'
 import { countVersionsTool } from './builtin/collections/countVersionsTool.js'
-import { createDocumentTool } from './builtin/collections/createTool.js'
+import { createDocumentsTool } from './builtin/collections/createTool.js'
 import { deleteDocumentsTool } from './builtin/collections/deleteTool.js'
 import { duplicateDocumentTool } from './builtin/collections/duplicateTool.js'
 import { findDistinctTool } from './builtin/collections/findDistinctTool.js'
@@ -20,6 +20,7 @@ import { findVersionsTool } from './builtin/collections/findVersionsTool.js'
 import { getCollectionSchemaTool } from './builtin/collections/getCollectionSchemaTool.js'
 import { restoreVersionTool } from './builtin/collections/restoreVersionTool.js'
 import { updateDocumentTool } from './builtin/collections/updateTool.js'
+import { getUploadInstructionsTool } from './builtin/collections/uploadInstructionsTool.js'
 import { getConfigInfoTool } from './builtin/getConfigInfoTool.js'
 import { countGlobalVersionsTool } from './builtin/globals/countVersionsTool.js'
 import { findGlobalTool } from './builtin/globals/findTool.js'
@@ -32,6 +33,7 @@ import { updateGlobalTool } from './builtin/globals/updateTool.js'
 type CollectionBuiltin = {
   mcpName: string
   requiresDuplicateEnabled?: boolean
+  requiresUpload?: boolean
   requiresVersions?: boolean
   tool: CollectionTool
 }
@@ -54,7 +56,7 @@ export const TOOL_BUILTINS = {
 export const COLLECTION_BUILTINS = {
   count: { mcpName: 'countDocuments', tool: countDocumentsTool },
   countVersions: { mcpName: 'countVersions', requiresVersions: true, tool: countVersionsTool },
-  create: { mcpName: 'createDocument', tool: createDocumentTool },
+  create: { mcpName: 'createDocuments', tool: createDocumentsTool },
   delete: { mcpName: 'deleteDocuments', tool: deleteDocumentsTool },
   duplicate: {
     mcpName: 'duplicateDocument',
@@ -70,6 +72,11 @@ export const COLLECTION_BUILTINS = {
   },
   findVersions: { mcpName: 'findVersions', requiresVersions: true, tool: findVersionsTool },
   getCollectionSchema: { mcpName: 'getCollectionSchema', tool: getCollectionSchemaTool },
+  getUploadInstructions: {
+    mcpName: 'getUploadInstructions',
+    requiresUpload: true,
+    tool: getUploadInstructionsTool,
+  },
   restoreVersion: { mcpName: 'restoreVersion', requiresVersions: true, tool: restoreVersionTool },
   update: { mcpName: 'updateDocument', tool: updateDocumentTool },
 } satisfies Record<string, CollectionBuiltin>

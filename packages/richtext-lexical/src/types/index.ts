@@ -11,8 +11,8 @@ import type {
   ClientField,
   DefaultServerCellComponentProps,
   LabelFunction,
+  MarkdownRichTextAdapter,
   PayloadComponent,
-  RichTextAdapter,
   RichTextField,
   RichTextFieldClient,
   RichTextFieldClientProps,
@@ -482,7 +482,7 @@ export type LexicalEditorProps = {
 export type LexicalRichTextAdapter = {
   editorConfig: SanitizedServerEditorConfig
   features: FeatureProviderServer<any, any, any>[]
-} & RichTextAdapter<SerializedEditorState, AdapterProps>
+} & MarkdownRichTextAdapter<SerializedEditorState, AdapterProps>
 
 export type LexicalRichTextAdapterProvider =
   /**
@@ -496,7 +496,7 @@ export type LexicalRichTextAdapterProvider =
     config: SanitizedConfig
     isRoot?: boolean
     parentIsLocalized: boolean
-  }) => Promise<LexicalRichTextAdapter>
+  }) => LexicalRichTextAdapter
 
 export type SingleFeatureClientSchemaMap = {
   [key: string]: ClientField[]

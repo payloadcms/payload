@@ -21,10 +21,10 @@ function readSystemPrompt(promptFilePath: string): string {
 export function buildSystemPrompt(promptFilePath: string, isFork = false): string {
   const reviewPrompt = readSystemPrompt(promptFilePath)
 
-  const claudeMdPath = path.resolve(process.env.GITHUB_WORKSPACE ?? process.cwd(), 'CLAUDE.md')
-  const base = !fs.existsSync(claudeMdPath)
+  const agentsMdPath = path.resolve(process.env.GITHUB_WORKSPACE ?? process.cwd(), 'AGENTS.md')
+  const base = !fs.existsSync(agentsMdPath)
     ? reviewPrompt
-    : `# Project Conventions (from CLAUDE.md)\n\n${fs.readFileSync(claudeMdPath, 'utf-8')}\n\n---\n\n# Review Instructions\n\n${reviewPrompt}`
+    : `# Project Conventions (from AGENTS.md)\n\n${fs.readFileSync(agentsMdPath, 'utf-8')}\n\n---\n\n# Review Instructions\n\n${reviewPrompt}`
 
   return isFork ? base + INJECTION_NOTICE : base
 }

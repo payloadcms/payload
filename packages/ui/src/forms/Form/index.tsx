@@ -8,6 +8,7 @@ import {
   getSiblingData as getSiblingDataFunc,
   hasDraftValidationEnabled,
   reduceFieldsToValues,
+  uploadRequiresServerValidation,
   wait,
 } from 'payload/shared'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
@@ -30,6 +31,7 @@ import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useFormErrorHandler } from '../../providers/FormErrorHandler/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
@@ -49,6 +51,7 @@ import {
   ModifiedContext,
   ProcessingContext,
   SubmittedContext,
+  SuccessfulSubmitCountContext,
   useDocumentForm,
 } from './context.js'
 import { errorMessages } from './errorMessages.js'
@@ -92,9 +95,11 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const documentForm = useDocumentForm()
 
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const { i18n, t } = useTranslation()
   const { refreshCookie, user } = useAuth()
+  const onNonFieldError = useFormErrorHandler()
   const operation = useOperation()
   const { queueTask } = useQueue()
 
@@ -108,6 +113,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const [isMounted, setIsMounted] = useState(false)
 
   const [submitted, setSubmitted] = useState(false)
+  const [successfulSubmitCount, setSuccessfulSubmitCount] = useState(0)
 
   /**
    * Tracks wether the form state passes validation.
@@ -429,6 +435,8 @@ export const Form: React.FC<FormProps> = (props) => {
         }
 
         if (res.status < 400) {
+          setSuccessfulSubmitCount((count) => count + 1)
+
           if (typeof onSuccess === 'function') {
             const newFormState = await onSuccess(json, {
               context,
@@ -511,6 +519,10 @@ export const Form: React.FC<FormProps> = (props) => {
             })
 
             nonFieldErrors.forEach((err) => {
+              // Pass overridesFromArgs (not the computed overrides) so a retry re-evaluates any function overrides against current fields.
+              if (onNonFieldError?.(err, () => void submit({ overrides: overridesFromArgs }))) {
+                return
+              }
               errorToast(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
             })
 
@@ -551,6 +563,7 @@ export const Form: React.FC<FormProps> = (props) => {
       waitForAutocomplete,
       setModified,
       setSubmitted,
+      onNonFieldError,
     ],
   )
 
@@ -581,23 +594,20 @@ export const Form: React.FC<FormProps> = (props) => {
 
         const handler = getUploadHandler({ collectionSlug })
 
-        if (typeof handler === 'function') {
-          let filename = file.name
-          const clientUploadContext = await handler({
-            docPrefix: typeof data?.prefix === 'string' ? data.prefix : undefined,
-            file,
-            updateFilename: (value) => {
-              filename = value
-            },
-          })
-
-          file = JSON.stringify({
-            clientUploadContext,
-            collectionSlug,
-            filename,
+        if (
+          typeof handler === 'function' &&
+          !uploadRequiresServerValidation({
+            allowRestrictedFileTypes: docConfig.upload.allowRestrictedFileTypes,
+            filename: file.name,
             mimeType: file.type,
-            size: file.size,
           })
+        ) {
+          file = JSON.stringify(
+            await handler({
+              docPrefix: typeof data?.prefix === 'string' ? data.prefix : undefined,
+              file,
+            }),
+          )
         }
       }
 
@@ -908,7 +918,9 @@ export const Form: React.FC<FormProps> = (props) => {
                     <ModifiedContext value={modified}>
                       {/* eslint-disable-next-line @eslint-react/no-context-provider */}
                       <FormFieldsContext.Provider value={fieldsReducer}>
-                        {children}
+                        <SuccessfulSubmitCountContext value={successfulSubmitCount}>
+                          {children}
+                        </SuccessfulSubmitCountContext>
                       </FormFieldsContext.Provider>
                     </ModifiedContext>
                   </BackgroundProcessingContext>

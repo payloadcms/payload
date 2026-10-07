@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientUser } from 'payload'
+import type { User } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { hasAutosaveEnabled, hasDraftsEnabled } from 'payload/shared'
@@ -33,7 +33,7 @@ export const DocumentDrawerHeader: React.FC<{
   readOnlyForIncomingUser?: boolean
   renderTitleAsLink?: boolean
   Status?: React.ReactNode
-  user?: ClientUser
+  user?: User
 }> = ({
   actions,
   AfterHeader,
@@ -147,7 +147,7 @@ export const DocumentDrawerHeader: React.FC<{
             icon={<ChevronIcon direction="left" size={24} />}
             onClick={handleOnClose}
           />
-          <span className={`${documentDrawerBaseClass}__header-text`}>{headerLabel}</span>
+          <h2 className={`${documentDrawerBaseClass}__header-text`}>{headerLabel}</h2>
         </div>
         {actions ? (
           <div className={`${documentDrawerBaseClass}__header-actions`}>{actions}</div>
@@ -157,7 +157,7 @@ export const DocumentDrawerHeader: React.FC<{
       <div className={`${documentDrawerBaseClass}__title-bar`}>
         <RenderTitle
           className={`${documentDrawerBaseClass}__title`}
-          element="h2"
+          element="h3"
           renderAsLink={renderTitleAsLink}
         />
         {showMeta ? (

@@ -88,6 +88,7 @@ export const ToolbarButton = ({
   return (
     <button
       aria-label={tooltipLabel}
+      aria-pressed={item.isActive ? active : undefined}
       className={className}
       data-button-key={item.key}
       disabled={!enabled}

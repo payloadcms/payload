@@ -1,10 +1,16 @@
 import type { DefaultNodeTypes, DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 
 import { NodeFormat } from '@payloadcms/richtext-lexical'
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import type { EvalCase } from '../types.js'
 
 import { getFinalAgentResponse, scoreMCPExecution } from '../utils/mcpToolCalls.js'
+
+const datasetsDirectory = path.dirname(fileURLToPath(import.meta.url))
+const uploadsFixtureDirectory = path.resolve(datasetsDirectory, '../../uploads')
 
 function lexicalNodes({ nodes }: { nodes: DefaultNodeTypes[] }): DefaultNodeTypes[] {
   return nodes.flatMap((node) => [
@@ -24,6 +30,147 @@ function lexicalText({ node }: { node: DefaultNodeTypes }): string {
 
 export const mcpDataset: EvalCase[] = [
   {
+    /** Allows the agent to read and base64-encode the local file before passing it to MCP. */
+    additionalAllowedTools: ['Bash'],
+    bootConfig: true,
+    category: 'mcp',
+    configPath: 'mcp/uploads',
+    input:
+      'Upload the local file "checklist.jpg" to the media library and use "Local checklist icon" as its alt text.',
+    verify: async ({ audit, expect, payload, transcript }) => {
+      const { docs } = await payload.find({
+        collection: 'media',
+        where: { alt: { equals: 'Local checklist icon' } },
+        overrideAccess: true,
+      })
+      const media = docs[0]
+
+      expect(docs).toHaveLength(1)
+      expect(media?.mimeType).toBe('image/jpeg')
+      expect(media?.filesize).toBeGreaterThan(0)
+
+      const storedFile = await readFile(
+        path.join(payload.collections.media.config.upload.staticDir, media!.filename),
+      )
+      const sourceFile = await readFile(
+        path.join(uploadsFixtureDirectory, 'horizontal-squares.jpg'),
+      )
+
+      expect(storedFile).toEqual(sourceFile)
+      const createCalls = audit.filter(
+        (event) => event.type === 'mcp-tool-call' && event.name === 'createDocuments',
+      )
+      const createCall = createCalls[0]
+
+      expect(createCalls).toHaveLength(1)
+      expect(createCall?.input).toMatchObject({
+        slug: 'media',
+        documents: [
+          {
+            data: { alt: 'Local checklist icon' },
+            file: { source: 'base64' },
+          },
+        ],
+      })
+      expect(createCall?.response.doc).toMatchObject({
+        docs: [{ doc: { id: media!.id }, index: 0 }],
+        errors: [],
+      })
+
+      return scoreMCPExecution({
+        audit,
+        optimalModificationAttempts: 1,
+        optimalToolCalls: 3,
+        requiredPayloadOperation: { slug: 'media', kind: 'mutation' },
+        transcript,
+      })
+    },
+    workspaceFiles: [
+      {
+        sourcePath: path.join(uploadsFixtureDirectory, 'horizontal-squares.jpg'),
+        targetPath: 'checklist.jpg',
+      },
+    ],
+  },
+  {
+    bootConfig: true,
+    category: 'mcp',
+    configPath: 'mcp/uploads',
+    input:
+      'Add this checklist icon to the media library and use "Checklist icon" as its alt text: https://raw.githubusercontent.com/payloadcms/payload/main/test/uploads/image.jpg',
+    verify: async ({ audit, expect, payload, transcript }) => {
+      const { docs } = await payload.find({
+        collection: 'media',
+        where: { alt: { equals: 'Checklist icon' } },
+        overrideAccess: true,
+      })
+      const media = docs[0]
+
+      expect(docs).toHaveLength(1)
+      expect(media?.mimeType).toBe('image/jpeg')
+      expect(media?.filesize).toBeGreaterThan(0)
+
+      const storedFile = await readFile(
+        path.join(payload.collections.media.config.upload.staticDir, media!.filename),
+      )
+
+      expect(storedFile.subarray(0, 3)).toEqual(Buffer.from([0xff, 0xd8, 0xff]))
+
+      return scoreMCPExecution({
+        audit,
+        optimalModificationAttempts: 1,
+        optimalToolCalls: 3,
+        requiredPayloadOperation: { slug: 'media', kind: 'mutation' },
+        transcript,
+      })
+    },
+  },
+  {
+    bootConfig: true,
+    category: 'mcp',
+    configPath: 'mcp/uploads',
+    input:
+      'Replace the file for the media item "Outdated checklist icon" with this updated image, and change its alt text to "Updated checklist icon": https://raw.githubusercontent.com/payloadcms/payload/main/test/uploads/image.jpg',
+    setup: async ({ payload }) => {
+      const originalFile = await readFile(path.join(uploadsFixtureDirectory, 'image.png'))
+
+      await payload.create({
+        collection: 'media',
+        data: { alt: 'Outdated checklist icon' },
+        file: {
+          name: 'outdated-checklist-icon.png',
+          data: originalFile,
+          mimetype: 'image/png',
+          size: originalFile.length,
+        },
+        overrideAccess: true,
+      })
+    },
+    verify: async ({ audit, expect, payload, transcript }) => {
+      const { docs } = await payload.find({ collection: 'media', overrideAccess: true })
+      const media = docs[0]
+
+      expect(docs).toHaveLength(1)
+      expect(media?.alt).toBe('Updated checklist icon')
+      expect(media?.mimeType).toBe('image/jpeg')
+      expect(media?.filesize).toBeGreaterThan(0)
+
+      const storedFile = await readFile(
+        path.join(payload.collections.media.config.upload.staticDir, media!.filename),
+      )
+
+      expect(storedFile.subarray(0, 3)).toEqual(Buffer.from([0xff, 0xd8, 0xff]))
+
+      return scoreMCPExecution({
+        audit,
+        optimalModificationAttempts: 1,
+        optimalToolCalls: 4,
+        requiredPayloadOperation: { slug: 'media', kind: 'mutation' },
+        transcript,
+      })
+    },
+  },
+  {
     bootConfig: true,
     category: 'mcp',
     configPath: 'mcp/shared',
@@ -32,6 +179,7 @@ export const mcpDataset: EvalCase[] = [
       const { docs } = await payload.find({
         collection: 'posts',
         where: { title: { equals: 'Created by Payload MCP eval' } },
+        overrideAccess: true,
       })
 
       expect(docs).toHaveLength(1)
@@ -49,16 +197,59 @@ export const mcpDataset: EvalCase[] = [
     bootConfig: true,
     category: 'mcp',
     configPath: 'mcp/shared',
+    input:
+      'Create two posts in one request: one titled "First bulk MCP post" and one titled "Second bulk MCP post".',
+    verify: async ({ audit, expect, payload, transcript }) => {
+      const { docs } = await payload.find({
+        collection: 'posts',
+        sort: 'title',
+        where: {
+          title: { in: ['First bulk MCP post', 'Second bulk MCP post'] },
+        },
+        overrideAccess: true,
+      })
+      const createCalls = audit.filter(
+        (event) => event.type === 'mcp-tool-call' && event.name === 'createDocuments',
+      )
+
+      expect(docs.map(({ title }) => title)).toEqual([
+        'First bulk MCP post',
+        'Second bulk MCP post',
+      ])
+      expect(createCalls).toHaveLength(1)
+      expect(createCalls[0]?.input).toMatchObject({
+        slug: 'posts',
+        documents: [
+          { data: { title: 'First bulk MCP post' } },
+          { data: { title: 'Second bulk MCP post' } },
+        ],
+      })
+
+      return scoreMCPExecution({
+        audit,
+        optimalModificationAttempts: 2,
+        optimalToolCalls: 2,
+        requiredPayloadOperation: { slug: 'posts', kind: 'mutation' },
+        transcript,
+      })
+    },
+  },
+  {
+    bootConfig: true,
+    category: 'mcp',
+    configPath: 'mcp/shared',
     input: 'Rename the post "MCP Update Target" to "Updated by Payload MCP eval".',
     setup: async ({ payload }) => {
       await payload.create({
         collection: 'posts',
         data: { title: 'MCP Update Target' },
+        overrideAccess: true,
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs } = await payload.find({
         collection: 'posts',
+        overrideAccess: true,
       })
 
       expect(docs).toHaveLength(1)
@@ -80,16 +271,18 @@ export const mcpDataset: EvalCase[] = [
     input: 'Delete the post titled "MCP Delete Target".',
     setup: async ({ payload }) => {
       for (const title of ['MCP Delete Target', 'MCP Keep', 'MCP Update Target']) {
-        await payload.create({ collection: 'posts', data: { title } })
+        await payload.create({ collection: 'posts', data: { title }, overrideAccess: true })
       }
     },
     verify: async ({ audit, expect, payload, transcript }) => {
       const deletedPosts = await payload.find({
         collection: 'posts',
         where: { title: { equals: 'MCP Delete Target' } },
+        overrideAccess: true,
       })
       const remainingPosts = await payload.find({
         collection: 'posts',
+        overrideAccess: true,
       })
 
       expect(deletedPosts.docs).toHaveLength(0)
@@ -113,7 +306,10 @@ export const mcpDataset: EvalCase[] = [
     configPath: 'mcp/shared',
     input: 'Change the site tagline to "Updated through Payload MCP".',
     verify: async ({ audit, expect, payload, transcript }) => {
-      const settings = (await payload.findGlobal({ slug: 'site-settings' })) as {
+      const settings = (await payload.findGlobal({
+        slug: 'site-settings',
+        overrideAccess: true,
+      })) as {
         tagline?: unknown
       }
 
@@ -141,17 +337,20 @@ export const mcpDataset: EvalCase[] = [
       await payload.create({
         collection: 'authors',
         data: { name: 'Ada Lovelace' },
+        overrideAccess: true,
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs: authors } = await payload.find({
         collection: 'authors',
         where: { name: { equals: 'Ada Lovelace' } },
+        overrideAccess: true,
       })
       const { docs: posts } = await payload.find({
         collection: 'posts',
         depth: 0,
         where: { title: { equals: 'Relationship created by Payload MCP eval' } },
+        overrideAccess: true,
       })
       const author = authors[0] as Record<string, unknown> | undefined
       const post = posts[0] as Record<string, unknown> | undefined
@@ -183,6 +382,7 @@ export const mcpDataset: EvalCase[] = [
       const { docs } = await payload.find({
         collection: 'posts',
         where: { title: { equals: 'Lexical content created by Payload MCP eval' } },
+        overrideAccess: true,
       })
       const post = docs[0] as Record<string, unknown> | undefined
       const content = post?.content as DefaultTypedEditorState | undefined
@@ -233,6 +433,7 @@ export const mcpDataset: EvalCase[] = [
         collection: 'articles',
         data: { _status: 'published', title: 'MCP Draft Update Target' },
         locale: 'en',
+        overrideAccess: true,
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
@@ -241,6 +442,7 @@ export const mcpDataset: EvalCase[] = [
         draft: true,
         locale: 'en',
         where: { title: { equals: 'MCP Draft Update Saved' } },
+        overrideAccess: true,
       })
       expect(draftArticles).toHaveLength(1)
 
@@ -250,6 +452,7 @@ export const mcpDataset: EvalCase[] = [
         collection: 'articles',
         draft: false,
         locale: 'en',
+        overrideAccess: true,
       })
 
       expect(publishedArticle.title).toBe('MCP Draft Update Target')
@@ -277,6 +480,7 @@ export const mcpDataset: EvalCase[] = [
         collection: 'articles',
         data: { _status: 'published', title: 'MCP Published Update Target' },
         locale: 'en',
+        overrideAccess: true,
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
@@ -285,6 +489,7 @@ export const mcpDataset: EvalCase[] = [
         draft: false,
         locale: 'en',
         where: { title: { equals: 'MCP Published Update Saved' } },
+        overrideAccess: true,
       })
       const publishedArticle = publishedArticles[0]
 
@@ -312,6 +517,7 @@ export const mcpDataset: EvalCase[] = [
         collection: 'articles',
         data: { _status: 'published', title: 'MCP Unpublish Target' },
         locale: 'en',
+        overrideAccess: true,
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
@@ -320,6 +526,7 @@ export const mcpDataset: EvalCase[] = [
         draft: false,
         locale: 'en',
         where: { title: { equals: 'MCP Unpublish Target' } },
+        overrideAccess: true,
       })
       const unpublishedArticle = unpublishedArticles[0]
 
@@ -346,6 +553,7 @@ export const mcpDataset: EvalCase[] = [
         collection: 'articles',
         data: { _status: 'published', title: 'MCP Published Read Target' },
         locale: 'en',
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -354,6 +562,7 @@ export const mcpDataset: EvalCase[] = [
         data: { title: 'MCP Draft Must Not Be Read' },
         draft: true,
         locale: 'en',
+        overrideAccess: true,
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
@@ -362,6 +571,7 @@ export const mcpDataset: EvalCase[] = [
         draft: false,
         locale: 'en',
         where: { title: { equals: 'MCP Published Read Target' } },
+        overrideAccess: true,
       })
       expect(publishedArticles).toHaveLength(1)
 
@@ -371,6 +581,7 @@ export const mcpDataset: EvalCase[] = [
         collection: 'articles',
         draft: true,
         locale: 'en',
+        overrideAccess: true,
       })
       const agentResponse = getFinalAgentResponse({ transcript })
 
@@ -403,6 +614,7 @@ export const mcpDataset: EvalCase[] = [
         collection: 'articles',
         data: { _status: 'published', title: 'MCP Draft Read Published Title' },
         locale: 'en',
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -411,6 +623,7 @@ export const mcpDataset: EvalCase[] = [
         data: { title: 'MCP Draft Read Latest Title' },
         draft: true,
         locale: 'en',
+        overrideAccess: true,
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
@@ -419,6 +632,7 @@ export const mcpDataset: EvalCase[] = [
         draft: true,
         locale: 'en',
         where: { title: { equals: 'MCP Draft Read Latest Title' } },
+        overrideAccess: true,
       })
       const storedDraft = draftArticles[0]
       const agentResponse = getFinalAgentResponse({ transcript })
@@ -451,6 +665,7 @@ export const mcpDataset: EvalCase[] = [
         collection: 'articles',
         data: { _status: 'published', title: 'MCP English Publish Target' },
         locale: 'en',
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -460,6 +675,7 @@ export const mcpDataset: EvalCase[] = [
         draft: false,
         locale: 'es',
         publishAllLocales: false,
+        overrideAccess: true,
       })
       await payload.update({
         id: article.id,
@@ -467,6 +683,7 @@ export const mcpDataset: EvalCase[] = [
         data: { title: 'MCP Spanish Draft Title' },
         draft: true,
         locale: 'es',
+        overrideAccess: true,
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
@@ -475,6 +692,7 @@ export const mcpDataset: EvalCase[] = [
         draft: false,
         locale: 'en',
         where: { title: { equals: 'MCP English Published Title' } },
+        overrideAccess: true,
       })
       expect(publishedEnglishArticles).toHaveLength(1)
 
@@ -484,12 +702,14 @@ export const mcpDataset: EvalCase[] = [
         collection: 'articles',
         draft: false,
         locale: 'es',
+        overrideAccess: true,
       })
       const draftSpanish = await payload.findByID({
         id: publishedEnglish!.id,
         collection: 'articles',
         draft: true,
         locale: 'es',
+        overrideAccess: true,
       })
 
       expect(publishedEnglish?.title).toBe('MCP English Published Title')
@@ -520,6 +740,7 @@ export const mcpDataset: EvalCase[] = [
         draft: true,
         locale: 'en',
         where: { title: { equals: 'MCP Newly Created Draft' } },
+        overrideAccess: true,
       })
       const article = docs[0]
 
@@ -546,6 +767,7 @@ export const mcpDataset: EvalCase[] = [
         draft: false,
         locale: 'en',
         where: { title: { equals: 'MCP Newly Created Published' } },
+        overrideAccess: true,
       })
       const article = docs[0]
 

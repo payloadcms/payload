@@ -12,11 +12,22 @@ export const RUNNER_CAPABILITIES: Record<RunnerKind, RunnerCapability[]> = {
 
 export type SkillInstallMode = 'embedded' | 'none'
 
+export type AgentBuiltinTool = 'Bash' | 'Read'
+
+export type AgentWorkspaceFile = {
+  /** File on the host that will be copied into the agent's workdir. */
+  sourcePath: string
+  /** Relative path where the agent will see the file. */
+  targetPath: string
+}
+
 /**
  * Options for a codegen runner. `kind` selects which runner consumes the bag;
  * fields tagged "claude-code only" or "llm only" are ignored by the other runner.
  */
 export type CodegenRunnerOptions = {
+  /** claude-code only: extra built-in tools available for this case. */
+  additionalAllowedTools?: AgentBuiltinTool[]
   /** claude-code only: model string passed to the `claude --model` flag. */
   agentModel?: string
   /** Starter config fixture path. */
@@ -36,6 +47,8 @@ export type CodegenRunnerOptions = {
   systemPromptKey?: SystemPromptKey
   /** claude-code only: hard timeout before the agent process is killed. */
   timeoutMs?: number
+  /** claude-code only: files copied into the temporary agent workdir. */
+  workspaceFiles?: AgentWorkspaceFile[]
 }
 
 export type CodegenRunner = {

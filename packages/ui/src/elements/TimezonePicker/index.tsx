@@ -31,7 +31,12 @@ const SmallDropdownIndicator: React.FC<
 > = (props) => {
   const {
     innerProps: { ref, ...restInnerProps },
+    isDisabled,
   } = props
+
+  if (isDisabled) {
+    return null
+  }
 
   return (
     <button

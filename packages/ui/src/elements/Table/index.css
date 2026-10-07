@@ -75,7 +75,27 @@
       padding-inline-start: var(--spacer-3);
     }
 
-    #heading-_select,
+    td.cell--linked > :is(a, button),
+    .cell-link {
+      font-weight: var(--text-body-medium-bold-font-weight);
+      text-decoration-line: underline;
+      text-decoration-style: solid;
+      text-decoration-skip-ink: none;
+      text-decoration-color: var(--color-border);
+      text-decoration-thickness: auto;
+      text-underline-offset: 2px;
+      text-underline-position: from-font;
+
+      &:hover {
+        text-decoration-color: var(--color-text);
+      }
+    }
+
+    td.cell--linked > :is(a, button):has(.id-label) {
+      text-decoration-line: none;
+    }
+
+    .heading-_select,
     .cell-_select {
       width: var(--spacer-5);
       min-width: var(--spacer-5);
@@ -84,19 +104,37 @@
       text-align: center;
     }
 
-    #heading-_dragHandle {
+    /* Size the locked-row lock icon to the checkbox's 16px box (keeping the column
+     * width stable) and center it like the checkbox; the larger icon overflows. */
+    .cell-_select .locked {
+      display: flex;
+      height: var(--spacer-3);
+      width: var(--spacer-3);
+
+      svg {
+        flex-shrink: 0;
+      }
+    }
+
+    .heading-_dragHandle {
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    #heading-_dragHandle,
+    .heading-_dragHandle,
     .cell-_dragHandle {
       width: var(--spacer-4);
       min-width: var(--spacer-4);
       padding: var(--spacer-2) 0;
       text-align: center;
       vertical-align: middle;
+    }
+
+    .cell-_dragHandle > div {
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     tbody tr {
@@ -130,6 +168,7 @@
 
   /* Condensed appearance */
   .table--appearance-condensed {
+    border: var(--stroke-width-small) solid var(--color-border);
     border-radius: var(--radius-medium);
     scrollbar-width: thin;
     scrollbar-color: var(--scrollbar-color) transparent;
@@ -234,6 +273,7 @@
     z-index: var(--z-popup);
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1024px) {
     .table {
       th,

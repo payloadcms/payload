@@ -1,5 +1,5 @@
 @layer payload-default {
-  .widget-card {
+  .card.widget-card {
     --widget-card-visible-rows: 5;
     --widget-card-row-gap: var(--spacer-1);
     --widget-card-row-height: 40px;
@@ -31,7 +31,6 @@
   .widget-card__title {
     margin: 0;
     color: var(--color-text);
-    font-family: var(--text-heading-medium-font-family);
     font-size: var(--text-heading-medium-font-size);
     font-weight: var(--text-heading-medium-font-weight);
     line-height: var(--text-heading-medium-line-height);
@@ -106,11 +105,10 @@
   .widget-card__row-title {
     overflow: hidden;
     color: var(--color-text);
-    font-family: var(--text-body-medium-strong-font-family);
-    font-size: var(--text-body-medium-strong-font-size);
-    font-weight: var(--text-body-medium-strong-font-weight);
-    line-height: var(--text-body-medium-strong-line-height);
-    letter-spacing: var(--text-body-medium-strong-letter-spacing);
+    font-size: var(--text-body-medium-bold-font-size);
+    font-weight: var(--text-body-medium-bold-font-weight);
+    line-height: var(--text-body-medium-bold-line-height);
+    letter-spacing: var(--text-body-medium-bold-letter-spacing);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -120,7 +118,6 @@
     gap: var(--spacer-1);
     padding-left: calc(var(--spacer-1) * 1.5);
     color: var(--color-text-secondary);
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     line-height: var(--text-body-medium-line-height);
     letter-spacing: var(--text-body-medium-letter-spacing);
@@ -133,7 +130,6 @@
     border-radius: var(--radius-small, 3px);
     background: var(--color-bg-secondary);
     color: var(--color-text-secondary);
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     line-height: var(--text-body-medium-line-height);
     letter-spacing: var(--text-body-medium-letter-spacing);

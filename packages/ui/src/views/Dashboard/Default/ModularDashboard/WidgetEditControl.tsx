@@ -4,6 +4,7 @@ import type { Data } from 'payload'
 
 import React, { useId } from 'react'
 
+import { Button } from '../../../../elements/Button/index.js'
 import { useModal } from '../../../../elements/Modal/index.js'
 import { EditIcon } from '../../../../icons/Edit/index.js'
 import { useConfig } from '../../../../providers/Config/index.js'
@@ -17,10 +18,12 @@ export function WidgetEditControl({
   onSave,
   widgetData,
   widgetID,
+  widgetLabel,
 }: {
   onSave: (data: Data) => void
   widgetData?: Record<string, unknown>
   widgetID: string
+  widgetLabel: string
 }) {
   const { t } = useTranslation()
   const { openModal } = useModal()
@@ -39,18 +42,17 @@ export function WidgetEditControl({
 
   return (
     <>
-      <button
+      <Button
+        aria-label={t('general:editLabel', { label: widgetLabel })}
+        buttonStyle="secondary"
         className="widget-wrapper__edit-btn"
+        extraButtonProps={{ tabIndex: 0 }}
+        icon={<EditIcon />}
+        margin={false}
         onClick={() => {
           openModal(drawerSlug)
         }}
-        type="button"
-      >
-        <span className="sr-only">
-          {t('general:edit')} {widgetID}
-        </span>
-        <EditIcon />
-      </button>
+      />
       <WidgetConfigDrawer
         drawerSlug={drawerSlug}
         onSave={onSave}

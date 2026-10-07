@@ -1,7 +1,10 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const skillDir = path.resolve(process.cwd(), 'tools/claude-plugin/skills/payload')
+// Resolve the skill source relative to this file so behavior is independent of cwd.
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const skillDir = path.resolve(__dirname, '../../packages/payload/skills/payload')
 const referenceDir = path.join(skillDir, 'reference')
 
 let cached: null | string = null

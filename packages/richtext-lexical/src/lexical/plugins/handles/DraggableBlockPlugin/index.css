@@ -5,6 +5,7 @@
     padding: 0;
     cursor: grab;
     opacity: 0;
+    visibility: hidden;
     position: absolute;
     inset-inline-start: 0;
     top: 0;
@@ -46,6 +47,7 @@
 
   .rich-text-lexical--show-gutter
     > .rich-text-lexical__wrap
+    > .rich-text-lexical__editor-content
     > .editor-container
     > .editor-scroller
     > .editor {

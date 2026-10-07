@@ -7,25 +7,6 @@ export const Media: CollectionConfig = {
       headers.set('X-Universal-Truth', 'Set')
     },
     disableLocalStorage: true,
-    resizeOptions: {
-      position: 'center',
-      width: 200,
-      height: 200,
-    },
-    imageSizes: [
-      {
-        height: 400,
-        width: 400,
-        crop: 'center',
-        name: 'square',
-      },
-      {
-        width: 900,
-        height: 450,
-        crop: 'center',
-        name: 'sixteenByNineMedium',
-      },
-    ],
   },
   fields: [
     {

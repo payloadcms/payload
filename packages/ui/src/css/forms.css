@@ -6,16 +6,12 @@
     border: var(--stroke-width-small) solid var(--field-color-border);
     border-radius: var(--field-border-radius);
     color: var(--field-color-text);
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
     padding: 0 var(--field-padding-inline);
     appearance: none;
     -webkit-appearance: none;
-    transition-property: box-shadow, background-color;
-    transition-duration: 100ms;
-    transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
     outline: none;
 
     &[data-rtl='true'] {
@@ -70,9 +66,6 @@
     border: var(--stroke-width-small) solid var(--field-color-border);
     border-radius: var(--field-border-radius);
     min-height: var(--field-min-height-large);
-    transition-property: box-shadow, background-color;
-    transition-duration: 100ms;
-    transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
 
     &:where(:hover:not(:focus-within):not(:has(input:disabled)):not(:has(input:read-only))) {
       border-color: var(--field-color-border-hover);

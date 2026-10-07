@@ -24,10 +24,11 @@ To do so, import the `useField` hook as follows:
 
 ```tsx
 'use client'
-import type { TextFieldClientComponent } from 'payload'
+import type React from 'react'
+import type { TextFieldClientProps } from 'payload'
 import { useField } from '@payloadcms/ui'
 
-export const CustomTextField: TextFieldClientComponent = ({ path }) => {
+export const CustomTextField: React.FC<TextFieldClientProps> = ({ path }) => {
   const { value, setValue } = useField({ path }) // highlight-line
 
   return (
@@ -805,7 +806,7 @@ The `useDocumentInfo` hook provides information about the current document being
 | **`unlockDocument`**               | Method to unlock a document. [More details](./locked-documents).                                                                                 |
 | **`unpublishedVersionCount`**      | The number of unpublished versions of the document.                                                                                              |
 | **`updateDocumentEditor`**         | Method to update who is currently editing the document. [More details](./locked-documents).                                                      |
-| **`updateSavedDocumentData`**      | Method to update the saved document data.                                                                                                        |
+| **`setData`**                      | Method to update the saved document data.                                                                                                        |
 | **`uploadStatus`**                 | Status of any uploads in progress ('idle', 'uploading', or 'failed').                                                                            |
 | **`versionCount`**                 | The current version count of the document.                                                                                                       |
 
@@ -928,7 +929,7 @@ const MyComponent: React.FC = () => {
 
 ## useLocale
 
-In any Custom Component you can get the selected locale object with the `useLocale` hook. `useLocale` gives you the full locale object, consisting of a `label`, `rtl`(right-to-left) property, and then `code`. Here is a simple example:
+In any Custom Component you can get the selected locale object with the `useLocale` hook. `useLocale` gives you the full locale object, consisting of a `label`, `rtl` (right-to-left) property, and `code`. It returns `null` when localization is disabled or configured without any locales. Here is a simple example:
 
 ```tsx
 'use client'
@@ -938,6 +939,10 @@ const Greeting: React.FC = () => {
   // highlight-start
   const locale = useLocale()
   // highlight-end
+
+  if (!locale) {
+    return null
+  }
 
   const trans = {
     en: 'Hello',
@@ -1150,6 +1155,7 @@ The `useStepNav` hook provides a way to change the step-nav breadcrumb links in 
 
 ```tsx
 'use client'
+import type React from 'react'
 import { type StepNavItem, useStepNav } from '@payloadcms/ui'
 import { useEffect } from 'react'
 

@@ -29,7 +29,6 @@
   .tree-node__content {
     display: flex;
     align-items: center;
-    transition: background-color 100ms ease;
     font-size: var(--tree-font-size);
     line-height: var(--tree-node-content-height);
   }

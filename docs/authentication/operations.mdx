@@ -159,6 +159,7 @@ mutation {
 ```ts
 const result = await payload.login({
   collection: 'collection-slug',
+  overrideAccess: false, // intentionally run the collection's login access control
   data: {
     email: 'dev@payloadcms.com',
     password: 'get-out',
@@ -169,8 +170,7 @@ const result = await payload.login({
 <Banner type="success">
   **Server Functions:** Payload offers a ready-to-use `login` server function
   that utilizes the Local API. For integration details and examples, check out
-  the [Server Function
-  docs](../local-api/server-functions#reusable-payload-server-functions).
+  the [Server Function docs](./server-functions).
 </Banner>
 
 ## Logout
@@ -202,13 +202,36 @@ mutation {
 <Banner type="success">
   **Server Functions:** Payload provides a ready-to-use `logout` server function
   that manages the user's cookie for a seamless logout. For integration details
-  and examples, check out the [Server Function
-  docs](../local-api/server-functions#reusable-payload-server-functions).
+  and examples, check out the [Server Function docs](./server-functions).
 </Banner>
 
 #### Logging out with sessions enabled
 
 By default, logging out will only end the session pertaining to the JWT that was used to log out with. However, you can pass `allSessions: true` to the logout operation in order to end all sessions for the user logging out.
+
+#### Password changes and sessions
+
+With sessions enabled, changing a user's password ends that user's other sessions, so tokens that were issued before the change stop working.
+
+- Updating the password of the user making the request - through the admin Account view, the REST and GraphQL update endpoints, or a Local API update that receives the authenticated user - keeps the session that the request was made with and ends the rest.
+- Updating a user's password on their behalf, such as an admin updating another user, ends all of that user's sessions.
+- The `resetPassword` operation ends all existing sessions and returns a token for the new session that it creates.
+
+A Local API update that runs without an authenticated user has no session to keep, so it ends all of the user's sessions. Pass the `user` returned by `payload.auth` when the user making the request should stay logged in:
+
+```ts
+const { user } = await payload.auth({ headers })
+
+await payload.update({
+  collection: 'users',
+  overrideAccess: false,
+  id: user.id,
+  data: {
+    password: 'new-password',
+  },
+  user,
+})
+```
 
 ## Refresh
 
@@ -265,7 +288,7 @@ mutation {
   **Server Functions:** Payload exports a ready-to-use `refresh` server function
   that automatically renews the user's token and updates the associated cookie.
   For integration details and examples, check out the [Server Function
-  docs](../local-api/server-functions#reusable-payload-server-functions).
+  docs](./server-functions).
 </Banner>
 
 ## Verify by Email
@@ -337,6 +360,10 @@ mutation {
 ```ts
 const result = await payload.unlock({
   collection: 'collection-slug',
+  overrideAccess: true,
+  data: {
+    email: 'dev@payloadcms.com',
+  },
 })
 ```
 
@@ -378,6 +405,7 @@ mutation {
 ```ts
 const token = await payload.forgotPassword({
   collection: 'collection-slug',
+  overrideAccess: true,
   data: {
     email: 'dev@payloadcms.com',
   },

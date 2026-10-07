@@ -2,13 +2,15 @@
 
 import React, { createContext, use } from 'react'
 
+import type { RenderTabServerFnArgs } from '../../elements/Nav/SidebarTabs/renderTabServerFn.js'
+
 export type SidebarTabsContextType = {
   activeTabSlug: null | string
   /**
    * Reload the content for a specific tab, bypassing the cache.
    * Useful when the tab's data dependencies change.
    */
-  reloadTabContent: (tabSlug: string) => void
+  reloadTabContent: (tabSlug: string, serverArgs?: Partial<RenderTabServerFnArgs>) => void
 }
 
 const SidebarTabsContext = createContext<null | SidebarTabsContextType>(null)
@@ -16,7 +18,7 @@ const SidebarTabsContext = createContext<null | SidebarTabsContextType>(null)
 export type SidebarTabsProviderProps = {
   activeTabSlug: null | string
   children: React.ReactNode
-  reloadTabContent: (tabSlug: string) => void
+  reloadTabContent: (tabSlug: string, serverArgs?: Partial<RenderTabServerFnArgs>) => void
 }
 
 export const SidebarTabsProvider: React.FC<SidebarTabsProviderProps> = ({

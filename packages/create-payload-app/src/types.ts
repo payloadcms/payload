@@ -3,7 +3,6 @@ import type arg from 'arg'
 import type { ALL_DATABASE_ADAPTERS, ALL_STORAGE_ADAPTERS } from './lib/ast/types.js'
 
 export interface Args extends arg.Spec {
-  '--agent': StringConstructor
   '--beta': BooleanConstructor
   '--branch': StringConstructor
   '--db': StringConstructor
@@ -31,7 +30,6 @@ export interface Args extends arg.Spec {
 
   // Aliases
 
-  '-a': string
   '-e': string
   '-h': string
   '-n': string
@@ -94,6 +92,22 @@ export type NextAppDetails = {
 
 export type NextConfigType = 'cjs' | 'esm' | 'ts'
 
-export type StorageAdapterType = (typeof ALL_STORAGE_ADAPTERS)[number]
+export type TanStackAppKind = 'router-only' | 'start'
 
-export type AgentType = 'claude' | 'codex' | 'cursor'
+export type TanStackAppDetails = {
+  isPayloadInstalled: boolean
+  kind: TanStackAppKind
+  projectDir: string
+  rootRoutePath: string
+  routerPath: string
+  routesDir: string
+  sourceDir: string
+  viteConfigPath: string
+}
+
+export type TanStackDetectionResult =
+  | { compatible: false; detected: true; reason: string }
+  | { compatible: true; details: TanStackAppDetails; detected: true }
+  | { detected: false }
+
+export type StorageAdapterType = (typeof ALL_STORAGE_ADAPTERS)[number]

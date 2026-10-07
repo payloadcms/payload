@@ -8,7 +8,6 @@
       background: var(--color-bg);
       height: 1.25rem;
       margin: 0;
-      transition: border 0.2s cubic-bezier(0.2, 0, 0, 1);
 
       &:focus,
       &:focus-visible {
@@ -20,5 +19,10 @@
 
   .multi-value--is-dragging {
     z-index: 2;
+  }
+
+  .multi-value.rs__multi-value:has(.multi-value-label__drag-button:focus-visible) {
+    outline: var(--accessibility-outline);
+    outline-offset: calc(var(--stroke-width-small) * -1);
   }
 }
