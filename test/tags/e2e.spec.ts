@@ -154,12 +154,12 @@ test.describe('Tags', () => {
       await expect(tagsField).toBeVisible()
       await browseButton.click()
       await expect(modal).toBeVisible()
-      await expect(modal.getByRole('button', { name: 'Cancel' })).toBeVisible()
-      await expect(modal.getByRole('button', { name: 'Select' })).toBeVisible()
+      await expect(modal.getByRole('button', { name: 'Close' })).toBeVisible()
+      await expect(modal.getByRole('button', { name: 'Confirm' })).toBeVisible()
 
       await modal.getByRole('button', { name: 'Seasons', exact: true }).click()
       await modal.getByRole('checkbox', { name: 'Spring' }).check()
-      await modal.getByRole('button', { name: 'Select' }).click()
+      await modal.getByRole('button', { name: 'Confirm' }).click()
       await expect(modal).toBeHidden()
       await expect(tagsField.locator('.relationship--multi-value-label__text')).toHaveText([
         'Spring',
@@ -170,7 +170,7 @@ test.describe('Tags', () => {
       await browseButton.click()
       await expect(modal.getByRole('checkbox', { name: 'Spring' })).toBeChecked()
       await modal.getByRole('checkbox', { name: 'Seasons' }).check()
-      await modal.getByRole('button', { name: 'Cancel' }).click()
+      await modal.getByRole('button', { name: 'Close' }).click()
       await expect(modal).toBeHidden()
       await expect(tagsField.locator('.relationship--multi-value-label__text')).toHaveText([
         'Spring',
@@ -179,7 +179,7 @@ test.describe('Tags', () => {
       await browseButton.click()
       await expect(modal.getByRole('checkbox', { name: 'Spring' })).toBeChecked()
       await modal.getByRole('button', { name: 'Clear' }).click()
-      await modal.getByRole('button', { name: 'Select' }).click()
+      await modal.getByRole('button', { name: 'Confirm' }).click()
       await expect(modal).toBeHidden()
       await expect(tagsField.locator('.relationship--multi-value-label__text')).toHaveCount(0)
     })

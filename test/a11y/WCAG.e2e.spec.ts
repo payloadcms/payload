@@ -21,6 +21,7 @@ import {
   expectOptionsToHaveAccessibleNames,
   expectPaintedFocus,
   getFocusIndicatorStyle,
+  getTextContrastRatios,
   gotoCreatePost,
   gotoFirstPost,
   gotoPostsList,
@@ -70,6 +71,7 @@ test.describe('WCAG 2.2 Level AA', () => {
   let page: Page
   let postsURL: AdminUrlUtil
   let serverURL: string
+  const dashboardCleanup: Array<() => Promise<void>> = []
 
   test.beforeAll(async ({ browser }, testInfo) => {
     ;({ page, postsURL, serverURL } = await openAccessibilityTestPage({
@@ -79,6 +81,11 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.afterEach(async () => {
+    const restore = dashboardCleanup.splice(0).reverse()
+
+    for (const cleanup of restore) {
+      await cleanup()
+    }
     await cleanupModalMedia({ page })
   })
 
@@ -829,6 +836,63 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.4.3 Contrast (Minimum) (AA)', () => {
+    test('should keep dashboard document labels readable in both themes', async () => {
+      const preference = await (
+        await page.request.get(`${serverURL}/api/payload-preferences/recently-viewed`)
+      ).json()
+      const documents = (await (await page.request.get(`${serverURL}/api/posts?limit=3`)).json())
+        .docs
+      const originalTheme = await page.locator('html').getAttribute('data-theme')
+
+      dashboardCleanup.push(async () => {
+        await page.locator('html').evaluate((element, value) => {
+          if (value) {
+            element.setAttribute('data-theme', value)
+          }
+        }, originalTheme)
+        await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
+          data: { value: preference?.value ?? { items: [] } },
+        })
+      })
+
+      await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
+        data: {
+          value: {
+            items: documents.map((doc) => ({
+              id: doc.id,
+              collectionSlug: 'posts',
+              viewedAt: new Date().toISOString(),
+            })),
+          },
+        },
+      })
+      await page.goto(`${serverURL}/admin`)
+      const widget = page.locator('.recents-widget')
+
+      for (const theme of ['light', 'dark']) {
+        await page
+          .locator('html')
+          .evaluate((element, value) => element.setAttribute('data-theme', value), theme)
+        await widget.getByRole('button', { name: 'Recently viewed' }).click()
+        await expect(widget.locator('.recents-widget__meta').first()).toBeVisible()
+        const ratios = await getTextContrastRatios({
+          container: widget,
+          selectors: [
+            '.recents-widget__tab',
+            '.recents-widget__meta',
+            '.recents-widget__status-pill',
+            '.recents-widget__pagination button:not(:disabled)',
+            '.recents-widget__pagination span',
+          ],
+        })
+
+        expect(ratios.length).toBeGreaterThan(3)
+        for (const { ratio, selector } of ratios) {
+          expect(ratio, `${theme}: ${selector}`).toBeGreaterThanOrEqual(4.5)
+        }
+      }
+    })
+
     test('should give an empty rich-text editor placeholder sufficient contrast', async ({
       browser: _browser,
     }, testInfo) => {
@@ -1038,6 +1102,243 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.1.1 Keyboard (A)', () => {
+    test('should switch dashboard document tabs with keyboard and expose pressed states', async () => {
+      await page.goto(`${serverURL}/admin`)
+      const widget = page.locator('.recents-widget')
+      const pinned = widget.getByRole('button', { name: 'Pinned', exact: true })
+      const recents = widget.getByRole('button', { name: 'Recently viewed' })
+
+      await pinned.focus()
+      await pinned.press('Enter')
+      await expect(pinned).toHaveAttribute('aria-pressed', 'true')
+      await expect(widget.getByRole('button', { name: 'Recently viewed' })).toHaveAttribute(
+        'aria-pressed',
+        'false',
+      )
+
+      await recents.focus()
+      await recents.press('Space')
+      await expect(recents).toHaveAttribute('aria-pressed', 'true')
+      const viewport = widget.locator('.recents-widget__viewport')
+
+      await expect(viewport).toHaveAttribute('aria-busy', 'false')
+      let shouldFail = true
+
+      await page.route('**/*', async (route) => {
+        if (
+          shouldFail &&
+          route.request().method() === 'POST' &&
+          route.request().postData()?.includes('get-dashboard-documents')
+        ) {
+          await route.abort('failed')
+          return
+        }
+        await route.continue()
+      })
+      try {
+        await pinned.press('Enter')
+        const retry = widget.getByRole('button', { name: 'Retry', exact: true })
+
+        await expect(retry).toBeVisible()
+        await expect(widget.locator('.recents-widget__status')).toHaveText(
+          'An unknown error has occurred.',
+        )
+        await retry.focus()
+        await expectPaintedFocus({ page })
+        shouldFail = false
+        await retry.press('Enter')
+        await expect(pinned).toBeFocused()
+        await expect(viewport).toHaveAttribute('aria-busy', 'false')
+        await expect(retry).toHaveCount(0)
+        await expectPaintedFocus({ page })
+      } finally {
+        await page.unrouteAll({ behavior: 'wait' })
+      }
+    })
+
+    test('should open the dashboard pin picker by keyboard and restore focus after cancel or selection', async () => {
+      test.slow()
+      const testInfo = test.info()
+
+      await page.goto(`${serverURL}/admin`)
+      const widget = page.locator('.recents-widget')
+      const opener = widget.getByRole('button', {
+        name: 'Pin document',
+        exact: true,
+        includeHidden: true,
+      })
+      const drawer = page.locator('.list-drawer.drawer--is-open')
+      const document = (await (await page.request.get(`${serverURL}/api/posts?limit=1`)).json())
+        .docs[0]
+      const previousPins = await (
+        await page.request.get(`${serverURL}/api/payload-preferences/pinned-documents`)
+      ).json()
+
+      dashboardCleanup.push(async () => {
+        await page.request.post(`${serverURL}/api/payload-preferences/pinned-documents`, {
+          data: { value: previousPins.value ?? { items: [] } },
+        })
+      })
+
+      await widget.locator('.recents-widget__empty-icon--pinned').click()
+      await expect(drawer).toHaveCount(0)
+      await expect(opener).toHaveAttribute('aria-expanded', 'false')
+      await expect(opener).toHaveAccessibleDescription(
+        'No pinned documents Documents you pin will appear here',
+      )
+      const openerBox = await opener.boundingBox()
+
+      expect(openerBox!.height).toBeGreaterThanOrEqual(24)
+      expect(openerBox!.width).toBeGreaterThanOrEqual(24)
+      await opener.focus()
+      await expectPaintedFocus({ page })
+      await opener.press('Enter')
+      await expect(drawer).toBeVisible()
+      await expect(opener).toHaveAttribute('aria-expanded', 'true')
+      await expectFocusInside({ container: drawer, page })
+      await page.keyboard.press('Shift+Tab')
+      await expectFocusInside({ container: drawer, page })
+      await page.keyboard.press('Tab')
+      await expectFocusInside({ container: drawer, page })
+      await page.keyboard.press('Escape')
+      await expect(drawer).toBeHidden()
+      await expect(opener).toBeFocused()
+      await expect(opener).toHaveAttribute('aria-expanded', 'false')
+      await opener.press('Space')
+      const collectionInput = drawer.locator('.list-header__select-collection input[type="text"]')
+
+      await collectionInput.focus()
+      await expect(collectionInput).toHaveAccessibleName('Select a Collection to Browse')
+      await collectionInput.press('ArrowDown')
+      await expect(
+        getSelectMenu({ page }).getByText(/pinned documents|preferences|locked documents/i),
+      ).toHaveCount(0)
+      await expect(getSelectMenu({ page }).getByRole('option', { name: /folder/i })).toHaveCount(1)
+      await collectionInput.fill('Post')
+      await collectionInput.press('ArrowDown')
+      await collectionInput.press('Enter')
+      await expect(drawer.getByRole('button', { name: document.title, exact: true })).toBeVisible()
+      const results = await runAxeScan({
+        include: ['.list-drawer.drawer--is-open'],
+        page,
+        testInfo,
+      })
+
+      expect(results.violations).toEqual([])
+      const selectDocument = drawer.getByRole('button', { name: document.title, exact: true })
+
+      await selectDocument.focus()
+      await expectPaintedFocus({ page })
+      await selectDocument.press('Enter')
+      await expect(drawer).toBeHidden()
+      await expect(widget.getByRole('button', { name: 'Pinned', exact: true })).toBeFocused()
+      await expect(widget.locator('.document-card__title')).toContainText(document.title)
+      const pins = await (
+        await page.request.get(`${serverURL}/api/payload-preferences/pinned-documents`)
+      ).json()
+
+      expect(pins.value.items).toContainEqual({ id: document.id, collectionSlug: 'posts' })
+      const widgetResults = await runAxeScan({ include: ['.recents-widget'], page, testInfo })
+
+      expect(widgetResults.violations).toEqual([])
+    })
+
+    test('should paginate and unpin dashboard documents with the keyboard while retaining focus', async () => {
+      const previousViewport = page.viewportSize()
+      const preference = await (
+        await page.request.get(`${serverURL}/api/payload-preferences/recently-viewed`)
+      ).json()
+      const documents = (await (await page.request.get(`${serverURL}/api/posts?limit=3`)).json())
+        .docs
+      const previousPins = await (
+        await page.request.get(`${serverURL}/api/payload-preferences/pinned-documents`)
+      ).json()
+
+      dashboardCleanup.push(async () => {
+        await page.request.post(`${serverURL}/api/payload-preferences/pinned-documents`, {
+          data: { value: previousPins.value ?? { items: [] } },
+        })
+        await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
+          data: { value: preference?.value ?? { items: [] } },
+        })
+        if (previousViewport) {
+          await page.setViewportSize(previousViewport)
+        }
+      })
+
+      const pinResponse = await page.request.post(
+        `${serverURL}/api/payload-preferences/pinned-documents`,
+        {
+          data: { value: { items: [{ id: documents[0].id, collectionSlug: 'posts' }] } },
+        },
+      )
+
+      expect(pinResponse.ok()).toBe(true)
+      await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
+        data: {
+          value: {
+            items: documents.map((doc) => ({
+              id: doc.id,
+              collectionSlug: 'posts',
+              viewedAt: new Date().toISOString(),
+            })),
+          },
+        },
+      })
+      await page.setViewportSize({ height: 900, width: 375 })
+      await page.goto(`${serverURL}/admin`)
+      const widget = page.locator('.recents-widget')
+      const recents = widget.getByRole('button', { name: 'Recently viewed' })
+      const next = widget.getByRole('button', { name: 'Next', exact: true })
+      const previous = widget.getByRole('button', { name: 'Previous', exact: true })
+
+      await expect(
+        widget.getByRole('group', { name: 'Document pagination', exact: true }),
+      ).toBeVisible()
+
+      await recents.focus()
+      await recents.press('Enter')
+      await expect(widget.locator('.document-card__title')).toHaveCount(1)
+      await expect(previous).toBeDisabled()
+      await next.focus()
+      await next.press('Space')
+      await expect(widget.locator('.document-card__title')).toHaveText(documents[1].title)
+      await expect(next).toBeFocused()
+      await expect(widget.locator('.recents-widget__pagination [aria-live]')).toContainText(
+        '2 of 3',
+      )
+      await next.press('Enter')
+      await expect(widget.locator('.document-card__title')).toHaveText(documents[2].title)
+      await expect(previous).toBeFocused()
+      await previous.press('Space')
+      await expect(widget.locator('.recents-widget__pagination [aria-live]')).toContainText(
+        '2 of 3',
+      )
+      await previous.focus()
+      await previous.press('Enter')
+      await expect(next).toBeFocused()
+      await widget.locator('.document-card__title').focus()
+      await expectPaintedFocus({ page })
+      await expect(widget.locator('.recents-widget__pin')).toHaveCount(0)
+      const pinned = widget.getByRole('button', { name: 'Pinned', exact: true })
+
+      await pinned.focus()
+      await pinned.press('Enter')
+      const unpin = widget.getByRole('button', {
+        name: `Unpin document: ${documents[0].title}`,
+        exact: true,
+      })
+
+      await unpin.focus()
+      await expect(unpin).toHaveCSS('opacity', '1')
+      await unpin.press('Space')
+      await expect(pinned).toBeFocused()
+      await expect(widget.locator('.recents-widget__empty-title')).toHaveText('No pinned documents')
+      await expect
+        .poll(() => widget.evaluate((element) => element.scrollWidth <= element.clientWidth))
+        .toBe(true)
+    })
+
     test('should choose a related document with the keyboard after saving grid layout', async () => {
       await page.goto(postsURL.list)
 
@@ -2080,6 +2381,70 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.3 Focus Order (A)', () => {
+    test('should return focus to the active dashboard tab when pagination disappears', async () => {
+      const previousViewport = page.viewportSize()
+      const preference = await (
+        await page.request.get(`${serverURL}/api/payload-preferences/recently-viewed`)
+      ).json()
+      const documents: Array<{ id: number | string; title: string }> = []
+
+      dashboardCleanup.push(async () => {
+        await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
+          data: { value: preference?.value ?? { items: [] } },
+        })
+        for (const document of documents) {
+          const response = await page.request.delete(`${serverURL}/api/posts/${document.id}`)
+
+          expect(response.ok()).toBe(true)
+        }
+        if (previousViewport) {
+          await page.setViewportSize(previousViewport)
+        }
+      })
+
+      for (const title of ['Pagination focus first', 'Pagination focus second']) {
+        const response = await page.request.post(`${serverURL}/api/posts?draft=true`, {
+          data: { accessibilitySelect: 'one', title },
+        })
+
+        expect(response.ok()).toBe(true)
+        documents.push((await response.json()).doc)
+      }
+      const preferenceResponse = await page.request.post(
+        `${serverURL}/api/payload-preferences/recently-viewed`,
+        {
+          data: {
+            value: {
+              items: documents.map(({ id }) => ({ id, collectionSlug: 'posts' })),
+            },
+          },
+        },
+      )
+
+      expect(preferenceResponse.ok()).toBe(true)
+      await page.setViewportSize({ height: 900, width: 375 })
+      await page.goto(`${serverURL}/admin`)
+      const widget = page.locator('.recents-widget')
+      const recents = widget.getByRole('button', { name: 'Recently viewed', exact: true })
+
+      await recents.focus()
+      await recents.press('Enter')
+      await expect(widget.locator('.document-card__title')).toHaveText(documents[0].title)
+      const next = widget.getByRole('button', { name: 'Next', exact: true })
+
+      await next.focus()
+      await expect(next).toBeFocused()
+      const deleted = await page.request.delete(`${serverURL}/api/posts/${documents[1].id}`)
+
+      expect(deleted.ok()).toBe(true)
+      documents.pop()
+      await next.press('Enter')
+      await expect(widget.locator('.recents-widget__pagination')).toHaveCount(0)
+      await expect(widget.locator('.document-card__title')).toHaveText(documents[0].title)
+      await expect(recents).toBeFocused()
+      await expectPaintedFocus({ page })
+    })
+
     test('should focus the block date-picker calendar when opened with the keyboard', async () => {
       // PYLD-3791
       try {
@@ -3649,6 +4014,29 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('3.3.2 Labels or Instructions (A)', () => {
+    test('should describe the dashboard collection filter as applying only to Recently viewed', async () => {
+      await openDashboardEditor({ page, serverURL })
+      const widget = page.locator('.widget[data-slug^="activity-"]')
+      const edit = widget.getByRole('button', { name: 'Edit Recents and pinned', exact: true })
+
+      await edit.focus()
+      await edit.press('Enter')
+      const drawer = page.locator('dialog[id^="widget-editor-"]')
+      const collections = drawer.getByRole('group', { name: 'Collections', exact: true })
+
+      await expect(collections).toHaveAccessibleDescription('Filter Recently viewed only.')
+      await expect(collections.getByText('Filter Recently viewed only.')).toBeVisible()
+      await expect(page.locator('html')).toHaveAttribute('lang', 'en')
+      const checkbox = collections.getByRole('checkbox').first()
+
+      await checkbox.focus()
+      await expect(checkbox).toBeFocused()
+      await expect(checkbox).toBeChecked()
+      await checkbox.press('Space')
+      await expect(checkbox).not.toBeChecked()
+      await page.keyboard.press('Escape')
+    })
+
     test('should expose required state without naming the asterisk', async () => {
       // PYLD-3579, PYLD-3779, PYLD-3715
       for (const { name, collection, field, localized } of [
