@@ -9,6 +9,7 @@ import { getNormalizeUploadPrefixHook } from './hooks/normalizeUploadPrefix.js'
 import { getPreserveFileDataHook } from './hooks/preserveFileData.js'
 import { getPublicOriginalURLHook } from './hooks/publicOriginalURL.js'
 import { createFileOperations } from './utilities/createFileOperations.js'
+import { getStorageLocationSelect } from './utilities/getStorageLocationSelect.js'
 
 // This plugin extends all targeted collections by offloading uploaded files
 // to cloud storage instead of solely storing files locally.
@@ -238,6 +239,7 @@ export const cloudStoragePlugin =
               getPreserveFileDataHook(),
             ],
           },
+          select: getStorageLocationSelect({ select: existingCollection.select }),
           upload: {
             ...(typeof existingCollection.upload === 'object' ? existingCollection.upload : {}),
             adapter: adapter.name,

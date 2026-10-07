@@ -487,7 +487,17 @@ export const generateFileData = async <T>({
     const isDuplicatingAnOriginal =
       isDuplicating && file.name === (originalDoc as FileData | undefined)?.original?.filename
 
-    if (!fileWasTransformed && !retainedOriginal && !providerOriginal && !isDuplicatingAnOriginal) {
+    // A provider reference without a receipt names an object the client already stored; renaming
+    // it would point the document at a key that was never uploaded.
+    const isUnverifiedProviderReference = Boolean(hasProviderDirectReference && !providerOriginal)
+
+    if (
+      !fileWasTransformed &&
+      !retainedOriginal &&
+      !providerOriginal &&
+      !isDuplicatingAnOriginal &&
+      !isUnverifiedProviderReference
+    ) {
       fsSafeName = getOriginalFilename({ filename: fsSafeName })
     }
 

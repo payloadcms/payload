@@ -89,7 +89,12 @@ export const createFileOperations = ({
           relative: true,
         })
       }
-      if (doc.url !== (await expectedURL({ filename: doc.filename }))) {
+      if (
+        !isSameFileLocation({
+          actual: doc.url,
+          expected: await expectedURL({ filename: doc.filename }),
+        })
+      ) {
         return false
       }
       if (doc.variants && typeof doc.variants === 'object' && !Array.isArray(doc.variants)) {
@@ -106,7 +111,10 @@ export const createFileOperations = ({
             if (
               !('url' in size) ||
               typeof size.url !== 'string' ||
-              size.url !== (await expectedURL({ filename: size.filename, size: imageSize }))
+              !isSameFileLocation({
+                actual: size.url,
+                expected: await expectedURL({ filename: size.filename, size: imageSize }),
+              })
             ) {
               return false
             }
@@ -285,4 +293,21 @@ const getMimeType = ({
     }
   }
   return typeof data.mimeType === 'string' ? data.mimeType : 'application/octet-stream'
+}
+
+/** Signed and time-limited URLs change their query on every generation, so only the location is compared. */
+const isSameFileLocation = ({
+  actual,
+  expected,
+}: {
+  actual: string
+  expected: null | string | undefined
+}): boolean =>
+  typeof expected === 'string' &&
+  getFileLocation({ url: actual }) === getFileLocation({ url: expected })
+
+const getFileLocation = ({ url }: { url: string }): string => {
+  const parsed = new URL(url, 'http://payload.local')
+
+  return url.startsWith('/') ? parsed.pathname : `${parsed.origin}${parsed.pathname}`
 }
