@@ -287,6 +287,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     auto: 'Automātiska',
     automatic: 'Automātiski',
     backToDashboard: 'Atpakaļ uz paneli',
+    breadcrumb: 'Navigācijas ceļš',
     by: 'Autors',
     cancel: 'Atcelt',
     changesNotSaved: 'Jūsu izmaiņas nav saglabātas. Ja tagad pametīsiet, izmaiņas tiks zaudētas.',
@@ -294,6 +295,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     clear:
       'Izpratiet oriģinālteksta nozīmi Payload kontekstā. Šeit ir saraksts ar Payload terminiem, kas ir ļoti specifiskas nozīmes:\n    - Kolekcija: Kolekcija ir dokumentu grupa, kuriem ir kopīga struktūra un mērķis. Kolekcijas tiek izmantotas saturu organizēšanai un pārvaldīšanai Payload.\n    - Lauks: Lauks ir konkrēts datu fragments dokumentā iekš kolekcijas. Lauki definē struktūru un dat',
     clearAll: 'Notīrīt visu',
+    clearSearch: 'Notīrīt meklēšanu',
     close: 'Aizvērt',
     collapse: 'Sakļaut',
     collection: 'Kolekcija',
@@ -567,6 +569,23 @@ export const lvTranslations: DefaultTranslationsObject = {
     searchLabel: 'Meklēt {{label}}',
     searchResults: 'Atrasts: {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Papildu norādījumi',
+    collectionDescription:
+      'Pievienojiet pielāgotus norādījumus kolekcijai {{label}}, lai palīdzētu LLM labāk pielāgot atbildes uz uzvednēm.',
+    collectionSystemDescription:
+      'Šie sistēmas norādījumi nāk no kolekcijas konfigurācijas faila un vienmēr tiek iekļauti.',
+    editInstructions: 'Rediģēt LLM norādījumus',
+    global: 'Globālais dokuments',
+    globalDescription:
+      'Pievienojiet pielāgotus norādījumus globālajam dokumentam {{label}}, lai palīdzētu LLM labāk pielāgot atbildes uz uzvednēm.',
+    globalSystemDescription:
+      'Šie sistēmas norādījumi nāk no globālā dokumenta konfigurācijas faila un vienmēr tiek iekļauti.',
+    instructions: 'LLM norādījumi',
+    systemInstructions: 'Sistēmas norādījumi (tikai lasāmi)',
+    targetCannotBeChanged: 'Norādījumu mērķi nevar mainīt.',
+    title: 'Virsraksts',
+  },
   localization: {
     cannotCopySameLocale: 'Nevar kopēt uz to pašu lokalizāciju',
     copyFrom: 'Kopēt no',
@@ -600,9 +619,18 @@ export const lvTranslations: DefaultTranslationsObject = {
     addFiles: 'Pievienot failus',
     bulkUpload: 'Masveida augšupielāde',
     copyLinkToFile: 'Kopēt saiti uz failu',
+    copyURL: 'Kopēt URL',
     crop: 'Apgriezt',
+    cropBottom: 'Apakšējais apgriešanas rokturis',
+    cropBottomLeft: 'Apakšējais kreisais apgriešanas rokturis',
+    cropBottomRight: 'Apakšējais labais apgriešanas rokturis',
+    cropLeft: 'Kreisais apgriešanas rokturis',
+    cropRight: 'Labais apgriešanas rokturis',
     cropToolDescription:
       'Velciet atlasītā apgabala stūrus, uzzīmējiet jaunu apgabalu vai pielāgojiet vērtības zemāk.',
+    cropTop: 'Augšējais apgriešanas rokturis',
+    cropTopLeft: 'Augšējais kreisais apgriešanas rokturis',
+    cropTopRight: 'Augšējais labais apgriešanas rokturis',
     download: 'Lejupielādēt',
     dragAndDrop: 'Ievelciet un nometiet failu',
     dragAndDropHere: 'vai ievelciet un nometiet failu šeit',

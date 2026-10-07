@@ -294,6 +294,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     auto: 'Automatisch',
     automatic: 'Automatisch',
     backToDashboard: 'Terug naar dashboard',
+    breadcrumb: 'Kruimelpad',
     by: 'Door',
     cancel: 'Annuleren',
     changesNotSaved:
@@ -301,6 +302,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     checked: 'Gecontroleerd',
     clear: 'Wissen',
     clearAll: 'Alles wissen',
+    clearSearch: 'Zoekopdracht wissen',
     close: 'Sluiten',
     collapse: 'Samenvouwen',
     collection: 'Collectie',
@@ -576,6 +578,23 @@ export const nlTranslations: DefaultTranslationsObject = {
     searchLabel: 'Zoek {{label}}',
     searchResults: '{{count}} gevonden',
   },
+  llmInstructions: {
+    additionalInstructions: 'Aanvullende instructies',
+    collectionDescription:
+      "Voeg aangepaste instructies toe voor de collectie {{label}} zodat LLM's hun antwoorden op prompts beter kunnen afstemmen.",
+    collectionSystemDescription:
+      'Deze systeeminstructies komen uit het configuratiebestand van de collectie en worden altijd opgenomen.',
+    editInstructions: 'LLM-instructies bewerken',
+    global: 'Global',
+    globalDescription:
+      "Voeg aangepaste instructies toe voor de global {{label}} zodat LLM's hun antwoorden op prompts beter kunnen afstemmen.",
+    globalSystemDescription:
+      'Deze systeeminstructies komen uit het configuratiebestand van de global en worden altijd opgenomen.',
+    instructions: 'LLM-instructies',
+    systemInstructions: 'Systeeminstructies (alleen-lezen)',
+    targetCannotBeChanged: 'Het doel van de instructies kan niet worden gewijzigd.',
+    title: 'Titel',
+  },
   localization: {
     cannotCopySameLocale: 'Kan niet naar dezelfde taal kopiëren',
     copyFrom: 'Kopiëren van',
@@ -609,9 +628,18 @@ export const nlTranslations: DefaultTranslationsObject = {
     addFiles: 'Bestanden toevoegen',
     bulkUpload: 'Bulk Upload',
     copyLinkToFile: 'Kopieer link naar bestand',
+    copyURL: 'Kopieer URL',
     crop: 'Bijsnijden',
+    cropBottom: 'Onderste bijsnijdgreep',
+    cropBottomLeft: 'Linkeronderste bijsnijdgreep',
+    cropBottomRight: 'Rechteronderste bijsnijdgreep',
+    cropLeft: 'Linker bijsnijdgreep',
+    cropRight: 'Rechter bijsnijdgreep',
     cropToolDescription:
       'Sleep de hoeken van het geselecteerde gebied, teken een nieuw gebied of pas de waarden hieronder aan.',
+    cropTop: 'Bovenste bijsnijdgreep',
+    cropTopLeft: 'Linkerbovenste bijsnijdgreep',
+    cropTopRight: 'Rechterbovenste bijsnijdgreep',
     download: 'Downloaden',
     dragAndDrop: 'Sleep een bestand',
     dragAndDropHere: 'of sleep een bestand naar hier',

@@ -293,6 +293,7 @@ export const roTranslations: DefaultTranslationsObject = {
     auto: 'Automat',
     automatic: 'Automat',
     backToDashboard: 'Înapoi la panoul de bord',
+    breadcrumb: 'Cale de navigare',
     by: 'De',
     cancel: 'Anulați',
     changesNotSaved:
@@ -300,6 +301,7 @@ export const roTranslations: DefaultTranslationsObject = {
     checked: 'Verificat',
     clear: 'Clar',
     clearAll: 'Șterge tot',
+    clearSearch: 'Șterge căutarea',
     close: 'Închide',
     collapse: 'Colaps',
     collection: 'Colectie',
@@ -574,6 +576,23 @@ export const roTranslations: DefaultTranslationsObject = {
     searchLabel: 'Caută {{label}}',
     searchResults: 'Rezultate găsite: {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Instrucțiuni suplimentare',
+    collectionDescription:
+      'Adăugați instrucțiuni personalizate pentru colecția {{label}} pentru a ajuta modelele LLM să își adapteze mai bine răspunsurile la solicitări.',
+    collectionSystemDescription:
+      'Aceste instrucțiuni de sistem provin din fișierul de configurare al colecției și sunt incluse întotdeauna.',
+    editInstructions: 'Editați instrucțiunile LLM',
+    global: 'Global',
+    globalDescription:
+      'Adăugați instrucțiuni personalizate pentru globalul {{label}} pentru a ajuta modelele LLM să își adapteze mai bine răspunsurile la solicitări.',
+    globalSystemDescription:
+      'Aceste instrucțiuni de sistem provin din fișierul de configurare al globalului și sunt incluse întotdeauna.',
+    instructions: 'Instrucțiuni LLM',
+    systemInstructions: 'Instrucțiuni de sistem (doar citire)',
+    targetCannotBeChanged: 'Destinația instrucțiunilor nu poate fi schimbată.',
+    title: 'Titlu',
+  },
   localization: {
     cannotCopySameLocale: 'Nu se poate copia în aceeași localizare',
     copyFrom: 'Copiază de la',
@@ -607,9 +626,18 @@ export const roTranslations: DefaultTranslationsObject = {
     addFiles: 'Adăugați fișiere',
     bulkUpload: 'Încărcare în masă',
     copyLinkToFile: 'Copiați linkul către fișier',
+    copyURL: 'Copiați URL-ul',
     crop: 'Cultură',
+    cropBottom: 'Mâner de decupare inferior',
+    cropBottomLeft: 'Mâner de decupare din stânga jos',
+    cropBottomRight: 'Mâner de decupare din dreapta jos',
+    cropLeft: 'Mâner de decupare din stânga',
+    cropRight: 'Mâner de decupare din dreapta',
     cropToolDescription:
       'Trageți colțurile zonei selectate, desenați o nouă zonă sau ajustați valorile de mai jos.',
+    cropTop: 'Mâner de decupare superior',
+    cropTopLeft: 'Mâner de decupare din stânga sus',
+    cropTopRight: 'Mâner de decupare din dreapta sus',
     download: 'Descărcare',
     dragAndDrop: 'Trageți și plasați un fișier',
     dragAndDropHere: 'sau trageți și plasați un fișier aici',

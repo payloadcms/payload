@@ -125,7 +125,7 @@ export function FileSidebar() {
                 </button>
 
                 <button
-                  aria-label={t('general:remove')}
+                  aria-label={`${t('general:remove')}: ${currentFile.name || t('upload:noFile')}`}
                   className={`${baseClass}__remove ${baseClass}__remove--overlay`}
                   onClick={() => handleRemoveFile(index)}
                   type="button"

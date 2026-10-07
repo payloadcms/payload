@@ -289,6 +289,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     auto: 'Automatisk',
     automatic: 'Automatisk',
     backToDashboard: 'Tilbake til kontrollpanel',
+    breadcrumb: 'Brødsmulesti',
     by: 'Av',
     cancel: 'Avbryt',
     changesNotSaved:
@@ -296,6 +297,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     checked: 'Kontrollert',
     clear: 'Tydelig',
     clearAll: 'Tøm alt',
+    clearSearch: 'Tøm søk',
     close: 'Lukk',
     collapse: 'Skjul',
     collection: 'Samling',
@@ -571,6 +573,23 @@ export const nbTranslations: DefaultTranslationsObject = {
     searchLabel: 'Søk {{label}}',
     searchResults: 'Fant {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Tilleggsinstruksjoner',
+    collectionDescription:
+      'Legg til tilpassede instruksjoner for samlingen {{label}} slik at LLM-er kan tilpasse svarene på ledetekster bedre.',
+    collectionSystemDescription:
+      'Disse systeminstruksjonene kommer fra samlingens konfigurasjonsfil og inkluderes alltid.',
+    editInstructions: 'Rediger LLM-instruksjoner',
+    global: 'Global',
+    globalDescription:
+      'Legg til tilpassede instruksjoner for globalen {{label}} slik at LLM-er kan tilpasse svarene på ledetekster bedre.',
+    globalSystemDescription:
+      'Disse systeminstruksjonene kommer fra globalens konfigurasjonsfil og inkluderes alltid.',
+    instructions: 'LLM-instruksjoner',
+    systemInstructions: 'Systeminstruksjoner (skrivebeskyttet)',
+    targetCannotBeChanged: 'Målet for instruksjonene kan ikke endres.',
+    title: 'Tittel',
+  },
   localization: {
     cannotCopySameLocale: 'Kan ikke kopiere til samme språk',
     copyFrom: 'Kopier fra',
@@ -604,9 +623,18 @@ export const nbTranslations: DefaultTranslationsObject = {
     addFiles: 'Legg til filer',
     bulkUpload: 'Bulk opplasting',
     copyLinkToFile: 'Kopier lenke til fil',
+    copyURL: 'Kopier URL',
     crop: 'Beskjær',
+    cropBottom: 'Nedre beskjæringshåndtak',
+    cropBottomLeft: 'Nedre venstre beskjæringshåndtak',
+    cropBottomRight: 'Nedre høyre beskjæringshåndtak',
+    cropLeft: 'Venstre beskjæringshåndtak',
+    cropRight: 'Høyre beskjæringshåndtak',
     cropToolDescription:
       'Dra hjørnene av det valgte området, tegn et nytt område eller juster verdiene nedenfor.',
+    cropTop: 'Øvre beskjæringshåndtak',
+    cropTopLeft: 'Øvre venstre beskjæringshåndtak',
+    cropTopRight: 'Øvre høyre beskjæringshåndtak',
     download: 'Last ned',
     dragAndDrop: 'Dra og slipp en fil',
     dragAndDropHere: 'eller dra og slipp en fil her',

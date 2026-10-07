@@ -545,7 +545,7 @@ export const renderListView = async (
     user: userWithReadAccess,
   }
 
-  const listViewSlots = renderListViewSlots({
+  const listViewSlots = await renderListViewSlots({
     clientProps: {
       collectionSlug,
       hasCreatePermission,
@@ -558,6 +558,7 @@ export const renderListView = async (
     description: staticDescription,
     notFoundDocId,
     payload,
+    req,
     serverProps,
   })
 

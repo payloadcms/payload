@@ -289,6 +289,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     auto: 'Automático',
     automatic: 'Automático',
     backToDashboard: 'Voltar para Painel de Controle',
+    breadcrumb: 'Caminho de navegação',
     by: 'Por',
     cancel: 'Cancelar',
     changesNotSaved:
@@ -296,6 +297,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     checked: 'Verificado',
     clear: 'Claro',
     clearAll: 'Limpar Tudo',
+    clearSearch: 'Limpar pesquisa',
     close: 'Fechar',
     collapse: 'Recolher',
     collection: 'Coleção',
@@ -572,6 +574,23 @@ export const ptTranslations: DefaultTranslationsObject = {
     searchLabel: 'Pesquisar {{label}}',
     searchResults: 'Encontrados: {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Instruções adicionais',
+    collectionDescription:
+      'Adicione instruções personalizadas para a coleção {{label}} para ajudar os LLMs a adaptar melhor as respostas aos prompts.',
+    collectionSystemDescription:
+      'Estas instruções do sistema vêm do arquivo de configuração da coleção e são sempre incluídas.',
+    editInstructions: 'Editar instruções de LLM',
+    global: 'Global',
+    globalDescription:
+      'Adicione instruções personalizadas para o global {{label}} para ajudar os LLMs a adaptar melhor as respostas aos prompts.',
+    globalSystemDescription:
+      'Estas instruções do sistema vêm do arquivo de configuração do global e são sempre incluídas.',
+    instructions: 'Instruções de LLM',
+    systemInstructions: 'Instruções do sistema (somente leitura)',
+    targetCannotBeChanged: 'O destino das instruções não pode ser alterado.',
+    title: 'Título',
+  },
   localization: {
     cannotCopySameLocale: 'Não é possível copiar para o mesmo local',
     copyFrom: 'Copiar de',
@@ -605,9 +624,18 @@ export const ptTranslations: DefaultTranslationsObject = {
     addFiles: 'Adicionar Arquivos',
     bulkUpload: 'Upload em Massa',
     copyLinkToFile: 'Copiar link para o arquivo',
+    copyURL: 'Copiar URL',
     crop: 'Cultura',
+    cropBottom: 'Alça de recorte inferior',
+    cropBottomLeft: 'Alça de recorte inferior esquerda',
+    cropBottomRight: 'Alça de recorte inferior direita',
+    cropLeft: 'Alça de recorte esquerda',
+    cropRight: 'Alça de recorte direita',
     cropToolDescription:
       'Arraste as bordas da área selecionada, desenhe uma nova área ou ajuste os valores abaixo.',
+    cropTop: 'Alça de recorte superior',
+    cropTopLeft: 'Alça de recorte superior esquerda',
+    cropTopRight: 'Alça de recorte superior direita',
     download: 'Baixar',
     dragAndDrop: 'Arraste e solte um arquivo',
     dragAndDropHere: 'ou arraste um arquivo aqui',

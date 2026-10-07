@@ -286,6 +286,7 @@ export const koTranslations: DefaultTranslationsObject = {
     auto: '자동',
     automatic: '자동 설정',
     backToDashboard: '대시보드로 돌아가기',
+    breadcrumb: '탐색 경로',
     by: '작성자',
     cancel: '취소',
     changesNotSaved: '변경 사항이 저장되지 않았습니다. 지금 떠나면 변경 사항을 잃게 됩니다.',
@@ -293,6 +294,7 @@ export const koTranslations: DefaultTranslationsObject = {
     clear:
       '페이로드의 맥락 내에서 원문의 의미를 존중하십시오. 다음은 페이로드에서 사용되는 특정 의미를 내포하는 일반적인 페이로드 용어 목록입니다: \n- Collection: 컬렉션은 공통의 구조와 목적을 공유하는 문서의 그룹입니다. 컬렉션은 페이로드에서 콘텐츠를 정리하고 관리하는 데 사용됩니다.\n- Field: 필드는 컬렉',
     clearAll: '모두 지우기',
+    clearSearch: '검색 지우기',
     close: '닫기',
     collapse: '접기',
     collection: '콜렉션',
@@ -565,6 +567,22 @@ export const koTranslations: DefaultTranslationsObject = {
     searchLabel: '{{label}} 검색',
     searchResults: '{{count}}개 찾음',
   },
+  llmInstructions: {
+    additionalInstructions: '추가 지침',
+    collectionDescription:
+      'LLM이 프롬프트에 더 적합한 답변을 제공할 수 있도록 {{label}} 컬렉션에 사용자 지정 지침을 추가하세요.',
+    collectionSystemDescription:
+      '이 시스템 지침은 컬렉션의 구성 파일에서 제공되며 항상 포함됩니다.',
+    editInstructions: 'LLM 지침 편집',
+    global: '글로벌',
+    globalDescription:
+      'LLM이 프롬프트에 더 적합한 답변을 제공할 수 있도록 {{label}} 글로벌에 사용자 지정 지침을 추가하세요.',
+    globalSystemDescription: '이 시스템 지침은 글로벌의 구성 파일에서 제공되며 항상 포함됩니다.',
+    instructions: 'LLM 지침',
+    systemInstructions: '시스템 지침 (읽기 전용)',
+    targetCannotBeChanged: '지침의 대상을 변경할 수 없습니다.',
+    title: '제목',
+  },
   localization: {
     cannotCopySameLocale: '동일한 로캘에 복사할 수 없습니다.',
     copyFrom: '에서 복사하십시오.',
@@ -598,9 +616,18 @@ export const koTranslations: DefaultTranslationsObject = {
     addFiles: '파일 추가',
     bulkUpload: '일괄 업로드',
     copyLinkToFile: '파일에 대한 링크 복사',
+    copyURL: 'URL 복사',
     crop: '자르기',
+    cropBottom: '아래쪽 자르기 핸들',
+    cropBottomLeft: '왼쪽 아래 자르기 핸들',
+    cropBottomRight: '오른쪽 아래 자르기 핸들',
+    cropLeft: '왼쪽 자르기 핸들',
+    cropRight: '오른쪽 자르기 핸들',
     cropToolDescription:
       '선택한 영역의 모퉁이를 드래그하거나 새로운 영역을 그리거나 아래의 값을 조정하세요.',
+    cropTop: '위쪽 자르기 핸들',
+    cropTopLeft: '왼쪽 위 자르기 핸들',
+    cropTopRight: '오른쪽 위 자르기 핸들',
     download: '다운로드',
     dragAndDrop: '파일을 끌어다 놓으세요',
     dragAndDropHere: '또는 여기로 파일을 끌어다 놓으세요',

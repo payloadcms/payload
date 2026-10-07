@@ -292,6 +292,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     auto: 'স্বয়ংক্রিয়',
     automatic: 'স্বয়ংক্রিয়',
     backToDashboard: 'ড্যাশবোর্ডে ফিরে যান',
+    breadcrumb: 'নেভিগেশন পথ',
     by: 'দ্বারা',
     cancel: 'বাতিল করুন',
     changesNotSaved:
@@ -299,6 +300,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     checked: 'পরীক্ষিত',
     clear: 'স্পষ্ট',
     clearAll: 'সমস্ত সাফ করুন',
+    clearSearch: 'অনুসন্ধান মুছুন',
     close: 'বন্ধ করুন',
     collapse: 'সংকুচিত করুন',
     collection: 'সংগ্রহ',
@@ -576,6 +578,23 @@ export const bnInTranslations: DefaultTranslationsObject = {
     searchLabel: '{{label}} অনুসন্ধান করুন',
     searchResults: '{{count}}টি পাওয়া গেছে',
   },
+  llmInstructions: {
+    additionalInstructions: 'অতিরিক্ত নির্দেশনা',
+    collectionDescription:
+      'LLM-কে প্রম্পটের আরও উপযুক্ত উত্তর দিতে সাহায্য করার জন্য {{label}} সংগ্রহে কাস্টম নির্দেশনা যোগ করুন।',
+    collectionSystemDescription:
+      'এই সিস্টেম নির্দেশনাগুলি সংগ্রহের কনফিগারেশন ফাইল থেকে আসে এবং সর্বদা অন্তর্ভুক্ত থাকে।',
+    editInstructions: 'LLM নির্দেশনা সম্পাদনা করুন',
+    global: 'গ্লোবাল',
+    globalDescription:
+      'LLM-কে প্রম্পটের আরও উপযুক্ত উত্তর দিতে সাহায্য করার জন্য {{label}} গ্লোবালে কাস্টম নির্দেশনা যোগ করুন।',
+    globalSystemDescription:
+      'এই সিস্টেম নির্দেশনাগুলি গ্লোবালের কনফিগারেশন ফাইল থেকে আসে এবং সর্বদা অন্তর্ভুক্ত থাকে।',
+    instructions: 'LLM নির্দেশনা',
+    systemInstructions: 'সিস্টেম নির্দেশনা (শুধু পড়ার জন্য)',
+    targetCannotBeChanged: 'নির্দেশনার লক্ষ্য পরিবর্তন করা যাবে না।',
+    title: 'শিরোনাম',
+  },
   localization: {
     cannotCopySameLocale: 'একই লোকেলে কপি করা যাবে না',
     copyFrom: 'থেকে কপি করুন',
@@ -609,9 +628,18 @@ export const bnInTranslations: DefaultTranslationsObject = {
     addFiles: 'ফাইলগুলি যোগ করুন',
     bulkUpload: 'বাল্ক আপলোড',
     copyLinkToFile: 'ফাইলের লিঙ্ক অনুলিপি করুন',
+    copyURL: 'URL অনুলিপি করুন',
     crop: 'ক্রপ করুন',
+    cropBottom: 'ছাঁটাইয়ের নীচের হ্যান্ডেল',
+    cropBottomLeft: 'ছাঁটাইয়ের নীচের বাঁ হ্যান্ডেল',
+    cropBottomRight: 'ছাঁটাইয়ের নীচের ডান হ্যান্ডেল',
+    cropLeft: 'ছাঁটাইয়ের বাঁ হ্যান্ডেল',
+    cropRight: 'ছাঁটাইয়ের ডান হ্যান্ডেল',
     cropToolDescription:
       'নির্বাচিত অঞ্চলের কোণগুলি টানুন, একটি নতুন অঞ্চল আঁকুন বা নিচের মানগুলি সামঞ্জস্য করুন।',
+    cropTop: 'ছাঁটাইয়ের উপরের হ্যান্ডেল',
+    cropTopLeft: 'ছাঁটাইয়ের উপরের বাঁ হ্যান্ডেল',
+    cropTopRight: 'ছাঁটাইয়ের উপরের ডান হ্যান্ডেল',
     download: 'ডাউনলোড করুন',
     dragAndDrop: 'একটি ফাইল টেনে এনে ছেড়ে দিন',
     dragAndDropHere: 'অথবা একটি ফাইল টেনে এনে এখানে ছেড়ে দিন',

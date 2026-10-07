@@ -36,6 +36,7 @@ import {
   openFirstBlockActions,
   openFolderCreationLocation,
   openLivePreview,
+  openLLMInstructions,
   openLocaleOptions,
   openNavigationFolders,
   openPostsFilter,
@@ -113,6 +114,52 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
   })
 
   test.describe('1.3.1 Info and Relationships (A)', () => {
+    test('should encounter the duplicate locale checkbox and label as one screen-reader item', async ({
+      // PYLD-3671
+      page,
+      screenReader,
+    }) => {
+      await gotoFirstPost({ page, postsURL, serverURL })
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+      await page.getByRole('menuitem', { name: /duplicate selected locales/i }).click()
+      await expect(page.locator('.select-locales-drawer')).toBeVisible()
+      await navigateScreenReaderTo({
+        matches: /English.*check\s?box|check\s?box.*English/i,
+        screenReader,
+      })
+
+      expect(await screenReader.itemText()).toMatch(/English.*check\s?box|check\s?box.*English/i)
+      await screenReader.next()
+      const next = await screenReader.itemText()
+
+      expect(next).not.toMatch(/English/i)
+      expect(next).toMatch(/Spanish.*check\s?box|check\s?box.*Spanish/i)
+    })
+
+    test('should encounter the deletion checkbox label as one screen-reader item', async ({
+      // PYLD-3678
+      page,
+      screenReader,
+    }) => {
+      await gotoFirstPost({ page, postsURL, serverURL })
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+      await page.getByRole('menuitem', { name: 'Delete', exact: true }).click()
+      await expect(page.getByRole('dialog', { name: /confirm deletion/i })).toBeVisible()
+      await navigateScreenReaderTo({
+        matches: /delete permanently.*check\s?box|check\s?box.*delete permanently/i,
+        screenReader,
+      })
+
+      expect(await screenReader.itemText()).toMatch(
+        /delete permanently.*check\s?box|check\s?box.*delete permanently/i,
+      )
+      await screenReader.next()
+      const next = await screenReader.itemText()
+
+      expect(next).not.toMatch(/delete permanently/i)
+      expect(next).toMatch(/Cancel.*button|button.*Cancel/i)
+    })
+
     test.describe('Safari and VoiceOver report', () => {
       test.skip(process.platform !== 'darwin', 'Safari and VoiceOver report')
 
@@ -806,6 +853,41 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should announce LLM instruction tabs and the read-only editor', async ({
+      page,
+      screenReader,
+    }) => {
+      const field = await openLLMInstructions({ page, serverURL })
+      const additionalTab = field.getByRole('tab', { name: 'Additional instructions', exact: true })
+      const systemTab = field.getByRole('tab', {
+        name: 'System instructions (read-only)',
+        exact: true,
+      })
+
+      await field.getByRole('textbox').focus()
+
+      const additionalOutput = await captureScreenReaderOutput({
+        action: () => additionalTab.focus(),
+        screenReader,
+      })
+
+      expect(additionalOutput).toMatch(/Additional instructions/i)
+      expect(additionalOutput).toMatch(/selected/i)
+      expect(additionalOutput).toMatch(/tab/i)
+      await page.keyboard.press('ArrowRight')
+      await expect(systemTab).toBeFocused()
+      await page.keyboard.press('Enter')
+      await expect(systemTab).toHaveAttribute('aria-selected', 'true')
+
+      const output = await captureScreenReaderOutput({
+        action: () => field.getByRole('textbox').focus(),
+        screenReader,
+      })
+
+      expect(output).toMatch(/System instructions/i)
+      expect(output).toMatch(/read.only/i)
+    })
+
     test('should announce rich-text upload and relationship filter options in NVDA browse mode', async ({
       page,
       screenReader,

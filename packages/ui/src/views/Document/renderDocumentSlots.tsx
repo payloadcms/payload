@@ -26,6 +26,7 @@ import { hasDraftsEnabled, matchMimeType } from 'payload/shared'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
 import { ViewDescription } from '../../exports/client/index.js'
+import { filterLLMInstructionsMenuItems } from '../../utilities/filterLLMInstructionsMenuItems.js'
 import { getDocumentPermissions } from '../../utilities/getDocumentPermissions.js'
 
 export const renderDocumentSlots: (args: {
@@ -38,7 +39,7 @@ export const renderDocumentSlots: (args: {
   permissions: SanitizedPermissions
   req: PayloadRequest
   user?: PayloadRequest['user']
-}) => DocumentSlots = (args) => {
+}) => Promise<DocumentSlots> = async (args) => {
   const {
     id,
     collectionConfig,
@@ -92,9 +93,17 @@ export const renderDocumentSlots: (args: {
     })
   }
 
-  const EditMenuItems = collectionConfig?.admin?.components?.edit?.editMenuItems
+  const EditMenuItems = await filterLLMInstructionsMenuItems({
+    collectionSlug: collectionConfig?.slug,
+    globalSlug: globalConfig?.slug,
+    menuItems:
+      collectionConfig?.admin?.components?.edit?.editMenuItems ||
+      globalConfig?.admin?.components?.edit?.editMenuItems,
+    permissions,
+    req,
+  })
 
-  if (EditMenuItems) {
+  if (EditMenuItems?.length) {
     components.EditMenuItems = RenderServerComponent({
       Component: EditMenuItems,
       importMap: req.payload.importMap,

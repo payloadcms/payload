@@ -291,6 +291,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     auto: 'Automatinis',
     automatic: 'Automatinis',
     backToDashboard: 'Atgal į informacinę skydelį',
+    breadcrumb: 'Naršymo kelias',
     by: 'Iki',
     cancel: 'Atšaukti',
     changesNotSaved:
@@ -298,6 +299,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     checked: 'Patikrinta',
     clear: 'Aišku',
     clearAll: 'Išvalyti viską',
+    clearSearch: 'Išvalyti paiešką',
     close: 'Uždaryti',
     collapse: 'Susikolimas',
     collection: 'Kolekcija',
@@ -572,6 +574,23 @@ export const ltTranslations: DefaultTranslationsObject = {
     searchLabel: 'Ieškoti {{label}}',
     searchResults: 'Rasta: {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Papildomi nurodymai',
+    collectionDescription:
+      'Pridėkite pasirinktinius nurodymus rinkiniui {{label}}, kad LLM galėtų geriau pritaikyti atsakymus į užklausas.',
+    collectionSystemDescription:
+      'Šie sistemos nurodymai pateikiami rinkinio konfigūracijos faile ir visada įtraukiami.',
+    editInstructions: 'Redaguoti LLM nurodymus',
+    global: 'Globalus dokumentas',
+    globalDescription:
+      'Pridėkite pasirinktinius nurodymus globaliam dokumentui {{label}}, kad LLM galėtų geriau pritaikyti atsakymus į užklausas.',
+    globalSystemDescription:
+      'Šie sistemos nurodymai pateikiami globalaus dokumento konfigūracijos faile ir visada įtraukiami.',
+    instructions: 'LLM nurodymai',
+    systemInstructions: 'Sistemos nurodymai (tik skaitomi)',
+    targetCannotBeChanged: 'Nurodymų paskirties keisti negalima.',
+    title: 'Pavadinimas',
+  },
   localization: {
     cannotCopySameLocale: 'Negalima kopijuoti į tą pačią vietovę',
     copyFrom: 'Kopijuoti iš',
@@ -605,9 +624,18 @@ export const ltTranslations: DefaultTranslationsObject = {
     addFiles: 'Pridėti failus',
     bulkUpload: 'Masinis įkėlimas',
     copyLinkToFile: 'Kopijuoti nuorodą į failą',
+    copyURL: 'Kopijuoti URL',
     crop: 'Pasėlis',
+    cropBottom: 'Apatinė apkirpimo rankenėlė',
+    cropBottomLeft: 'Apatinė kairioji apkirpimo rankenėlė',
+    cropBottomRight: 'Apatinė dešinioji apkirpimo rankenėlė',
+    cropLeft: 'Kairioji apkirpimo rankenėlė',
+    cropRight: 'Dešinioji apkirpimo rankenėlė',
     cropToolDescription:
       'Temkite pasirinktos srities kampus, nubrėžkite naują sritį arba koreguokite žemiau esančias reikšmes.',
+    cropTop: 'Viršutinė apkirpimo rankenėlė',
+    cropTopLeft: 'Viršutinė kairioji apkirpimo rankenėlė',
+    cropTopRight: 'Viršutinė dešinioji apkirpimo rankenėlė',
     download: 'Atsisiųsti',
     dragAndDrop: 'Temkite ir numeskite failą',
     dragAndDropHere: 'arba nuvilkite failą čia',
