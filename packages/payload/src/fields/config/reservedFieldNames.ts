@@ -27,6 +27,7 @@ export const reservedAPIKeyFieldNames = [
  * Reserved field names for collections with upload config enabled
  */
 export const reservedBaseUploadFieldNames = [
+  '_transforms',
   'file',
   /* 'mimeType',
     'thumbnailURL',

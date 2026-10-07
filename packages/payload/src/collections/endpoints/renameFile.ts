@@ -1,5 +1,3 @@
-import { status as httpStatus } from 'http-status'
-
 import type { PayloadHandler } from '../../config/types.js'
 
 import { APIError } from '../../errors/index.js'
@@ -21,7 +19,7 @@ export const renameFileHandler: PayloadHandler = async (req) => {
     { doc, message: req.t('general:updatedSuccessfully') },
     {
       headers: headersWithCors({ headers: new Headers(), req }),
-      status: httpStatus.OK,
+      status: 200,
     },
   )
 }

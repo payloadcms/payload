@@ -1,6 +1,5 @@
 import type { Endpoint, PayloadHandler } from 'payload'
 
-import { status as httpStatus } from 'http-status'
 import * as qs from 'qs-esm'
 
 import type { TestDataConfig } from './testDataConfig.js'
@@ -43,7 +42,7 @@ export const createReInitEndpoint = ({ seed, suite }: TestDataConfig): Endpoint 
           message: 'Database reset and seed run successfully.',
         },
         {
-          status: httpStatus.OK,
+          status: 200,
         },
       )
     } catch (err) {
@@ -65,6 +64,6 @@ const createErrorResponse = (error: unknown): Response =>
       message: error instanceof Error ? error.message : String(error),
     },
     {
-      status: httpStatus.INTERNAL_SERVER_ERROR,
+      status: 500,
     },
   )

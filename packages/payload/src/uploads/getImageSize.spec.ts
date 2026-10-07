@@ -6,6 +6,8 @@ import { afterAll, afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { PayloadRequest } from '../types/index.js'
 
+import sharp from 'sharp'
+
 import { getImageSize } from './getImageSize.js'
 
 // Tracks bytes actually read off disk so the streaming test below can assert
@@ -75,6 +77,19 @@ const fileFor = (name: string): PayloadRequest['file'] => {
 }
 
 describe('getImageSize', () => {
+  it('should measure the orientation-normalized original', async () => {
+    const data = await sharp({ create: { width: 20, height: 10, channels: 3, background: 'red' } })
+      .withMetadata({ orientation: 6 })
+      .jpeg()
+      .toBuffer()
+
+    expect(
+      await getImageSize({
+        file: { data, name: 'oriented.jpg', mimetype: 'image/jpeg', size: data.length },
+      }),
+    ).toEqual({ width: 10, height: 20 })
+  })
+
   const cases: Array<{ file: string; height: number; width: number }> = [
     { file: 'test-image.png', height: 800, width: 800 },
     { file: 'test-image.jpg', height: 800, width: 800 },

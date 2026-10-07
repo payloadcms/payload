@@ -1,10 +1,12 @@
 import type { Collection, TypeWithID } from '../../collections/config/types.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
+import type { TransformState } from '../transformState/types.js'
 
 import { Forbidden } from '../../errors/Forbidden.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 
 export type ResolvedUploadDocument = {
+  _transforms?: null | TransformState
   filename: string
   mimeType: string
   original?: { filename?: null | string; mimeType?: null | string } | null

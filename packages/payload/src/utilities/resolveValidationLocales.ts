@@ -1,5 +1,3 @@
-import { status as httpStatus } from 'http-status'
-
 import type { TypedLocale } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
@@ -39,7 +37,7 @@ export async function resolveValidationLocales({
     const locales = Array.isArray(locale) ? locale : [locale]
 
     if (locales.length === 0 || locales.some((value) => value !== null)) {
-      throw new APIError('Validation requires a locale.', httpStatus.BAD_REQUEST)
+      throw new APIError('Validation requires a locale.', 400)
     }
 
     return [...new Set(locales)]
@@ -59,7 +57,7 @@ export async function resolveValidationLocales({
 
   if (locale === 'all') {
     if (availableLocaleCodes.length === 0) {
-      throw new APIError('No validation locales are available.', httpStatus.BAD_REQUEST)
+      throw new APIError('No validation locales are available.', 400)
     }
 
     return [...new Set(availableLocaleCodes)] as TypedLocale[]
@@ -73,24 +71,18 @@ export async function resolveValidationLocales({
       (requestedLocale) => typeof requestedLocale !== 'string' || requestedLocale.length === 0,
     )
   ) {
-    throw new APIError('Validation requires a locale.', httpStatus.BAD_REQUEST)
+    throw new APIError('Validation requires a locale.', 400)
   }
 
   const locales = [...new Set(requestedLocales)]
 
   for (const requestedLocale of locales) {
     if (!localization.localeCodes.includes(requestedLocale as string)) {
-      throw new APIError(
-        `Validation locale "${String(requestedLocale)}" is not configured.`,
-        httpStatus.BAD_REQUEST,
-      )
+      throw new APIError(`Validation locale "${String(requestedLocale)}" is not configured.`, 400)
     }
 
     if (!availableLocaleCodes.includes(requestedLocale as string)) {
-      throw new APIError(
-        `Validation locale "${String(requestedLocale)}" is not available.`,
-        httpStatus.BAD_REQUEST,
-      )
+      throw new APIError(`Validation locale "${String(requestedLocale)}" is not available.`, 400)
     }
   }
 

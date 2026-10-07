@@ -67,6 +67,13 @@ export const collectStoredFiles = ({
     if (typeof representation.filename !== 'string') {
       return
     }
+    // Logical default/variant endpoints have no physical key or stable byte length.
+    if (
+      typeof representation._objectKey !== 'string' &&
+      !(typeof representation.filesize === 'number' && Number.isFinite(representation.filesize))
+    ) {
+      return
+    }
     const filename = representation.filename
     if (
       !operations &&

@@ -92,6 +92,8 @@ export const ExampleCollection: CollectionConfig = {
 
 ## JSON Schema Validation
 
+Use `jsonSchema.inputSchema` to override the schema used for generated input types and MCP/CLI input prevalidation. When omitted, these use `jsonSchema.schema`. Output types and the Admin editor continue to use `schema`; the field's `validate` function remains authoritative for document writes.
+
 Payload JSON fields fully support the [JSON schema](https://json-schema.org/) standard. By providing a schema in your field config, the editor will be guided in the admin UI, getting typeahead for properties and their formats automatically. When the document is saved, the default validation will prevent saving any invalid data in the field according to the schema in your config.
 
 If you only provide a URL to a schema, Payload will fetch the desired schema if it is publicly available. If not, it is recommended to add the schema directly to your config or import it from another file so that it can be implemented consistently in your project.

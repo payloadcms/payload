@@ -3,6 +3,7 @@ import type { PayloadComponent } from '../config/types.js'
 import type { UploadCollectionSlug } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { StagedObject } from './fileVersioning/fileOperationManager.js'
+import type { TransformState } from './transformState/types.js'
 
 export type OriginalFileData = {
   _objectKey?: string
@@ -32,6 +33,7 @@ export type FileSizes = {
 
 export type FileData = {
   _objectKey?: string
+  _transforms?: null | TransformState
   filename: string
   filesize: number
   focalX?: number

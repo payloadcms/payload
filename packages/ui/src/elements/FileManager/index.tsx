@@ -1,5 +1,5 @@
 'use client'
-import type { SanitizedCollectionConfig, UploadEdits } from 'payload'
+import type { FormState, SanitizedCollectionConfig, TransformState, UploadEdits } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { formatFilesize, isImage, validateMimeType } from 'payload/shared'
@@ -36,10 +36,11 @@ import { FileToolbar } from './FileToolbar/index.js'
 import './index.css'
 
 const baseClass = 'file-manager'
+const transformsFieldOptions = { path: '_transforms' }
 
 export type FileManagerProps = {
   readonly collectionSlug: string
-  readonly initialState?: import('payload').FormState
+  readonly initialState?: FormState
   /**
    * When provided, upload edits are sourced from these props instead of the `useUploadEdits`
    * context. The bulk upload drawer uses this to drive per-file edits from its FormsManager.
@@ -56,10 +57,8 @@ export const FileManager: React.FC<FileManagerProps> = ({
   collectionSlug,
   initialState,
   resetUploadEdits: resetUploadEditsFromProps,
-  updateUploadEdits: updateUploadEditsFromProps,
   uploadConfig,
   UploadControls,
-  uploadEdits: uploadEditsFromProps,
   UploadFilePreview,
 }) => {
   const { openModal } = useModal()
@@ -89,6 +88,9 @@ export const FileManager: React.FC<FileManagerProps> = ({
     path: 'file',
     validate,
   })
+  const { setValue: setTransforms, value: transforms } = useField<null | TransformState>(
+    transformsFieldOptions,
+  )
   const {
     setUploadControlFile,
     setUploadControlFileName,
@@ -98,8 +100,6 @@ export const FileManager: React.FC<FileManagerProps> = ({
   } = useUploadControls()
   const uploadEditsContext = useUploadEdits()
   const resetUploadEdits = resetUploadEditsFromProps ?? uploadEditsContext.resetUploadEdits
-  const updateUploadEdits = updateUploadEditsFromProps ?? uploadEditsContext.updateUploadEdits
-  const uploadEdits = uploadEditsFromProps ?? uploadEditsContext.uploadEdits
 
   const [fileSrc, setFileSrc] = useState<null | string>(null)
   const [removedFile, setRemovedFile] = useState(false)
@@ -144,6 +144,10 @@ export const FileManager: React.FC<FileManagerProps> = ({
         toast.error(t('error:invalidFileType'))
         return
       }
+      if (isNewFile) {
+        setTransforms(null)
+        resetUploadEdits()
+      }
       if (isNewFile && file instanceof File) {
         setFileSrc(URL.createObjectURL(file))
       }
@@ -154,6 +158,8 @@ export const FileManager: React.FC<FileManagerProps> = ({
     },
     [
       setValue,
+      resetUploadEdits,
+      setTransforms,
       setUploadControlFile,
       setUploadControlFileName,
       setUploadControlFileUrl,
@@ -216,11 +222,12 @@ export const FileManager: React.FC<FileManagerProps> = ({
   ])
 
   const onEditsSave = useCallback(
-    (args: UploadEdits) => {
+    (args: null | TransformState) => {
       setModified(true)
-      updateUploadEdits(args)
+      setTransforms(args)
+      resetUploadEdits()
     },
-    [setModified, updateUploadEdits],
+    [resetUploadEdits, setModified, setTransforms],
   )
 
   // Reset states for when replacing the file with a new upload
@@ -309,11 +316,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
             fileName={value?.name || (data?.filename as string)}
             fileSrc={getEditorFileSrc({ data, fileSrc, hasSelectedFile: Boolean(value) })}
             imageCacheTag={imageCacheTag}
-            initialCrop={uploadEdits?.crop ?? undefined}
-            initialFocalPoint={{
-              x: uploadEdits?.focalPoint?.x || (data?.focalX as number) || 50,
-              y: uploadEdits?.focalPoint?.y || (data?.focalY as number) || 50,
-            }}
+            initialTransforms={transforms === undefined ? data?._transforms : transforms}
             onSave={onEditsSave}
             showCrop={showCrop}
             showFocalPoint={showFocalPoint}

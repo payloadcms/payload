@@ -1,16 +1,20 @@
 import type { Collection } from '../../collections/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { ResolvedUploadDocument } from './resolveUploadDocument.js'
-import type { UploadTransformer } from './types.js'
+import type { PlannedTransformer, UploadDocument } from './types.js'
 
 import { Forbidden } from '../../errors/Forbidden.js'
 import { NotFound } from '../../errors/NotFound.js'
 import { TransformerContractError } from '../../errors/TransformerContractError.js'
 import { checkFileAccess } from '../checkFileAccess.js'
 import { retrieveFileResponse } from '../endpoints/getFile.js'
+import { assertTransformCoverage } from '../transformState/assertTransformCoverage.js'
+import { canReuseStoredDefault } from '../transformState/canReuseStoredDefault.js'
+import { createDocumentSnapshot } from './createDocumentSnapshot.js'
 import { createLazySourceGetter } from './createLazySourceGetter.js'
 import { finalizeFileResponse } from './finalizeFileResponse.js'
 import { getSourceFileResponse } from './getSourceFileResponse.js'
+import { matchesMimeType } from './matchesMimeType.js'
 import { getCandidateTransformers, planTransformerPipeline } from './planTransformerPipeline.js'
 import { getRequestedFile, resolveUploadDocument } from './resolveUploadDocument.js'
 import { withFileTransformAccessContext } from './withFileTransformAccessContext.js'
@@ -51,10 +55,7 @@ export async function handleDynamicFileRequest({
     throw new NotFound(req.t)
   }
 
-  if (
-    resolvedDocument.original?.filename === filename &&
-    (resolvedDocument.filename !== filename || req.searchParams.size === 0)
-  ) {
+  if (resolvedDocument.original?.filename === filename && resolvedDocument.filename !== filename) {
     const permittedDocument = await withFileTransformAccessContext({
       callback: () => checkFileAccess({ collection, filename, prefix, req }),
       isTransform: false,
@@ -70,7 +71,7 @@ export async function handleDynamicFileRequest({
     })
   }
 
-  const { document, pipeline } = await authorizeDocument({
+  const { doc, document, originalDoc, pipeline } = await authorizeDocument({
     collection,
     filename,
     prefix,
@@ -78,65 +79,232 @@ export async function handleDynamicFileRequest({
     resolvedDocument,
   })
 
-  const requestedFile = getRequestedFile({ document, filename })
+  const hasPersistedWork = Boolean(
+    doc._transforms &&
+      Object.keys(doc._transforms).length &&
+      !canReuseStoredDefault({ collection: collection.config, doc, filename, req }),
+  )
+  const persistedPipeline = hasPersistedWork
+    ? await planTransformerPipeline({
+        args: {
+          collectionSlug: collection.config.slug,
+          doc,
+          operation: 'request',
+          originalDoc,
+          purpose: 'persisted-default',
+          req,
+        },
+        capability: 'handleRequest',
+        mimeType: doc.original?.mimeType ?? doc.mimeType,
+        transformers: req.payload.config.upload.transformers,
+      })
+    : []
 
-  const source = createLazySourceGetter({
-    retrieve: () => getSourceFileResponse({ collection, document, filename, prefix, req }),
+  if (hasPersistedWork) {
+    assertTransformCoverage({ pipeline: persistedPipeline, state: doc._transforms })
+  }
+
+  const originalSource = createLazySourceGetter({
+    retrieve: () =>
+      getSourceFileResponse({
+        collection,
+        document,
+        filename: document.original?.filename ?? document.filename,
+        prefix,
+        req,
+      }),
   })
+  const source = hasPersistedWork
+    ? originalSource
+    : createLazySourceGetter({
+        retrieve: () => getSourceFileResponse({ collection, document, filename, prefix, req }),
+      })
+  const phases = [
+    { pipeline: persistedPipeline, purpose: 'persisted-default' as const },
+    { pipeline, purpose: 'request-override' as const },
+  ]
 
   let currentResponse: Response | undefined
-  // Each stage has its own controller so a discarded body can be closed even when the
-  // transformer locked it with a reader. Every remaining controller is aborted on failure.
+  // Aborted on failure to close every response body handed to a transformer, even one the
+  // transformer locked with its own reader before throwing.
   const handedOutBodyControllers = new Map<Response, AbortController>()
-
   const discardResponse = async (response: Response): Promise<void> => {
     await cancelUnusedBody(response)
     handedOutBodyControllers.get(response)?.abort()
     handedOutBodyControllers.delete(response)
   }
+  let currentMimeType = hasPersistedWork
+    ? (doc.original?.mimeType ?? doc.mimeType)
+    : getRequestedFile({ document, filename }).mimeType
+
+  const initialOverrideMimeType = getRequestedFile({ document, filename }).mimeType
 
   try {
-    for (const transformer of pipeline) {
-      const previousResponse = currentResponse
-      let handedOutResponse: Response | undefined
-      const handedOutBodyController = new AbortController()
-      const stageSource = createLazySourceGetter({
-        retrieve: async () => {
-          handedOutResponse = withAbortableBody({
-            response: currentResponse ?? (await source.get()),
-            signal: handedOutBodyController.signal,
-          })
-          handedOutBodyControllers.set(handedOutResponse, handedOutBodyController)
+    for (const phase of phases) {
+      if (phase.purpose === 'request-override' && currentMimeType !== initialOverrideMimeType) {
+        phase.pipeline = await planTransformerPipeline({
+          args: {
+            collectionSlug: collection.config.slug,
+            doc,
+            operation: 'request',
+            originalDoc,
+            purpose: phase.purpose,
+            req,
+          },
+          capability: 'handleRequest',
+          mimeType: currentMimeType,
+          transformers: req.payload.config.upload.transformers,
+        })
+      }
+      const phaseMimeType = currentMimeType
+      const stages =
+        phase.purpose === 'persisted-default'
+          ? phase.pipeline.map((planned) => ({ planned, transformer: planned.transformer }))
+          : (req.payload.config.upload.transformers.length
+              ? req.payload.config.upload.transformers
+              : phase.pipeline.map(({ transformer }) => transformer)
+            ).map((transformer) => ({
+              planned: phase.pipeline.find((stage) => stage.transformer === transformer),
+              transformer,
+            }))
 
-          return handedOutResponse
-        },
-      })
+      for (const [index, { planned, transformer }] of stages.entries()) {
+        if (!transformer.handleRequest) {
+          continue
+        }
+        const stage =
+          planned ??
+          (currentMimeType !== phaseMimeType
+            ? (
+                await planTransformerPipeline({
+                  args: {
+                    collectionSlug: collection.config.slug,
+                    doc,
+                    operation: 'request',
+                    originalDoc,
+                    purpose: phase.purpose,
+                    req,
+                  },
+                  capability: 'handleRequest',
+                  mimeType: currentMimeType,
+                  transformers: [transformer],
+                })
+              )[0]
+            : undefined)
+        if (!stage) {
+          continue
+        }
+        const { handledTransformKeys, options } = stage
 
-      const result = await transformer.handleRequest!({
-        collectionSlug: collection.config.slug,
-        documentID: document.id,
-        filename: requestedFile.filename,
-        getSourceFile: stageSource.get,
-        mimeType: requestedFile.mimeType,
-        req,
-      })
+        if (
+          handledTransformKeys?.length &&
+          !transformer.mimeTypes.some((pattern) =>
+            matchesMimeType({ mimeType: currentMimeType, pattern }),
+          )
+        ) {
+          throw new TransformerContractError(
+            `Transformer ${transformer.slug} cannot handle the current source MIME type ${currentMimeType}.`,
+          )
+        }
+        if (
+          !transformer.mimeTypes.some((pattern) =>
+            matchesMimeType({ mimeType: currentMimeType, pattern }),
+          )
+        ) {
+          continue
+        }
+        const previousResponse = currentResponse
+        let handedOutResponse: Response | undefined
+        const handedOutBodyController = new AbortController()
+        const stageSource = createLazySourceGetter({
+          retrieve: async () => {
+            handedOutResponse = withAbortableBody({
+              response: currentResponse ?? (await source.get()),
+              signal: handedOutBodyController.signal,
+            })
+            handedOutBodyControllers.set(handedOutResponse, handedOutBodyController)
+            return handedOutResponse
+          },
+        })
 
-      if (result.response) {
-        if (handedOutResponse && result.response !== handedOutResponse) {
-          await discardResponse(handedOutResponse)
-        } else if (previousResponse && result.response !== previousResponse) {
-          await discardResponse(previousResponse)
+        const result = await transformer.handleRequest({
+          collectionSlug: collection.config.slug,
+          doc,
+          getOriginalFile: async () => {
+            const response = withAbortableBody({
+              response: await originalSource.get(),
+              signal: handedOutBodyController.signal,
+            })
+            handedOutBodyControllers.set(response, handedOutBodyController)
+            return response
+          },
+          getSourceFile: stageSource.get,
+          options,
+          originalDoc,
+          purpose: phase.purpose,
+          req,
+        })
+
+        if (result.response) {
+          if (handedOutResponse && result.response !== handedOutResponse) {
+            await discardResponse(handedOutResponse)
+          } else if (previousResponse && result.response !== previousResponse) {
+            await discardResponse(previousResponse)
+          }
+          currentResponse = result.response
+          const mimeType = result.response.headers.get('content-type')?.split(';')[0]?.trim()
+
+          if (
+            !mimeType &&
+            handledTransformKeys?.length &&
+            !(
+              result.status === 'complete' &&
+              result.response.status >= 300 &&
+              result.response.status < 400
+            )
+          ) {
+            throw new TransformerContractError(
+              'A persisted transformer must return the representation Content-Type.',
+            )
+          }
+          if (mimeType) {
+            doc.mimeType = mimeType
+            currentMimeType = mimeType
+          }
+        } else if (stageSource.wasCalled()) {
+          throw new TransformerContractError(
+            'A transformer that consumes its source must return a response.',
+          )
         }
 
-        currentResponse = result.response
-      } else if (stageSource.wasCalled()) {
-        throw new TransformerContractError(
-          'A transformer that consumes its source must return a response.',
-        )
-      }
-
-      if (result.status === 'complete') {
-        return finalizeFileResponse({ collection, req, response: currentResponse! })
+        if (result.status === 'complete') {
+          const pendingOverrides =
+            phase.purpose === 'persisted-default'
+              ? await planTransformerPipeline({
+                  args: {
+                    collectionSlug: collection.config.slug,
+                    doc,
+                    operation: 'request',
+                    originalDoc,
+                    purpose: 'request-override',
+                    req,
+                  },
+                  capability: 'handleRequest',
+                  mimeType: currentMimeType,
+                  transformers: req.payload.config.upload.transformers,
+                })
+              : []
+          if (
+            phase.purpose === 'persisted-default' &&
+            (stages.slice(index + 1).some(({ planned }) => planned?.handledTransformKeys?.length) ||
+              pendingOverrides.length > 0)
+          ) {
+            throw new TransformerContractError(
+              'A persisted transform completed before all saved transforms and request overrides were satisfied.',
+            )
+          }
+          return finalizeFileResponse({ collection, req, response: currentResponse! })
+        }
       }
     }
   } catch (err) {
@@ -197,24 +365,30 @@ async function cancelUnusedBody(response: Response | undefined): Promise<void> {
 
 function planRequestPipeline({
   collection,
+  doc,
   document,
   filename,
+  originalDoc,
   req,
 }: {
   collection: Collection
+  doc: UploadDocument
   document: ResolvedUploadDocument
   filename: string
+  originalDoc: Readonly<UploadDocument>
   req: PayloadRequest
-}): Promise<UploadTransformer[]> {
+}): Promise<PlannedTransformer[]> {
   return planTransformerPipeline({
     args: {
       collectionSlug: collection.config.slug,
-      documentID: document.id,
-      mimeType: getRequestedFile({ document, filename }).mimeType,
+      doc,
       operation: 'request',
+      originalDoc,
+      purpose: 'request-override',
       req,
     },
     capability: 'handleRequest',
+    mimeType: getRequestedFile({ document, filename }).mimeType,
     transformers: req.payload.config.upload.transformers,
   })
 }
@@ -251,7 +425,12 @@ async function authorizeDocument({
   prefix?: string
   req: PayloadRequest
   resolvedDocument: ResolvedUploadDocument
-}): Promise<{ document: ResolvedUploadDocument; pipeline: UploadTransformer[] }> {
+}): Promise<{
+  doc: UploadDocument
+  document: ResolvedUploadDocument
+  originalDoc: Readonly<UploadDocument>
+  pipeline: PlannedTransformer[]
+}> {
   const accessResults = new Map<boolean, Promise<AccessResult>>()
 
   const checkAccess = ({ isTransform }: { isTransform: boolean }): Promise<AccessResult> => {
@@ -281,7 +460,18 @@ async function authorizeDocument({
     return accessResults.get(isTransform)!
   }
 
+  const hasSavedTransformWork = Boolean(
+    resolvedDocument._transforms &&
+      Object.keys(resolvedDocument._transforms).length &&
+      !canReuseStoredDefault({
+        collection: collection.config,
+        doc: resolvedDocument,
+        filename,
+        req,
+      }),
+  )
   const hasCandidateTransformers =
+    hasSavedTransformWork ||
     getCandidateTransformers({
       capability: 'handleRequest',
       mimeType: getRequestedFile({ document: resolvedDocument, filename }).mimeType,
@@ -305,8 +495,23 @@ async function authorizeDocument({
       ? access.document
       : resolvedDocument
 
-  const pipeline = await planRequestPipeline({ collection, document, filename, req })
-  const isTransform = pipeline.length > 0
+  const doc = structuredClone(document)
+  const originalDoc = createDocumentSnapshot({ doc })
+  const pipeline = await planRequestPipeline({
+    collection,
+    doc,
+    document,
+    filename,
+    originalDoc,
+    req,
+  })
+  const isTransform =
+    pipeline.length > 0 ||
+    Boolean(
+      document._transforms &&
+        Object.keys(document._transforms).length &&
+        !canReuseStoredDefault({ collection: collection.config, doc: document, filename, req }),
+    )
 
   if (isTransform !== isTransformAccess) {
     const requiredAccess = await checkAccess({ isTransform })
@@ -319,5 +524,5 @@ async function authorizeDocument({
     }
   }
 
-  return { document, pipeline }
+  return { doc, document, originalDoc, pipeline }
 }

@@ -1,5 +1,3 @@
-import { status as httpStatus } from 'http-status'
-
 import type { PayloadHandler } from '../../config/types.js'
 
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
@@ -42,7 +40,7 @@ export const validateHandler: PayloadHandler = async (req) => {
         headers: new Headers(),
         req,
       }),
-      status: httpStatus.OK,
+      status: 200,
     })
   } finally {
     await unlinkTempFiles({
@@ -88,7 +86,7 @@ export const validateByIDHandler: PayloadHandler = async (req) => {
         headers: new Headers(),
         req,
       }),
-      status: httpStatus.OK,
+      status: 200,
     })
   } finally {
     await unlinkTempFiles({

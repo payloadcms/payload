@@ -1,6 +1,5 @@
 import type { Endpoint, PayloadHandler } from 'payload'
 
-import { status as httpStatus } from 'http-status'
 import { addDataAndFileToRequest } from 'payload'
 
 export const handler: PayloadHandler = async (req) => {
@@ -18,12 +17,12 @@ export const handler: PayloadHandler = async (req) => {
       })
 
       return Response.json(result, {
-        status: httpStatus.OK,
+        status: 200,
       })
     } catch (err) {
       payload.logger.error(err)
       return Response.json(err, {
-        status: httpStatus.BAD_REQUEST,
+        status: 400,
       })
     }
   }
@@ -33,13 +32,13 @@ export const handler: PayloadHandler = async (req) => {
       message: 'Payload Local API method not found.',
     },
     {
-      status: httpStatus.BAD_REQUEST,
+      status: 400,
     },
   )
 }
 
 export const localAPIEndpoint: Endpoint = {
-  path: '/local-api',
-  method: 'post',
   handler,
+  method: 'post',
+  path: '/local-api',
 }

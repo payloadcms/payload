@@ -3855,6 +3855,70 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
 
+  test.describe('2.5.7 Dragging Movements (AA)', () => {
+    test('should save a crop and focal point using numeric controls without dragging', async ({
+      browser: _browser,
+    }, testInfo) => {
+      const dialog = await openEditImageDialog({ page, serverURL })
+      const documentID = new URL(page.url()).pathname.split('/').pop()
+      const x = dialog.getByRole('spinbutton', { name: 'Crop X', exact: true })
+      const y = dialog.getByRole('spinbutton', { name: 'Crop Y', exact: true })
+
+      await x.fill('999999')
+      await expect(dialog.getByRole('alert')).toContainText('Crop X')
+      await expect(
+        dialog.getByRole('button', { name: 'Apply Changes', exact: true }),
+      ).toBeDisabled()
+      await x.fill('1')
+      await y.fill('2')
+      await dialog.getByRole('spinbutton', { name: 'Width', exact: true }).fill('5')
+      await dialog.getByRole('spinbutton', { name: 'Height', exact: true }).fill('6')
+      await dialog.getByRole('spinbutton', { name: 'Focal Point X', exact: true }).fill('0')
+      await dialog.getByRole('spinbutton', { name: 'Focal Point Y', exact: true }).fill('0.25')
+      await expect(x).toHaveValue('1')
+      await expect(y).toHaveValue('2')
+      const scan = await runAxeScan({ include: ['.edit-upload__dialog'], page, testInfo })
+
+      expect(scan.violations).toHaveLength(0)
+      await dialog.getByRole('button', { name: 'Apply Changes', exact: true }).click()
+      await expect(dialog).toBeHidden()
+      await page.getByRole('button', { name: 'Save', exact: true }).click()
+      await expect
+        .poll(async () => {
+          const response = await page.request.get(`${serverURL}/api/media/${documentID}`)
+          const doc = await response.json()
+
+          return doc._transforms
+        })
+        .toEqual({ crop: { height: 6, width: 5, x: 1, y: 2 }, focalPoint: { x: 0, y: 0.25 } })
+
+      await page.getByRole('button', { name: /edit image/i }).click()
+      await expect(dialog.getByRole('spinbutton', { name: 'Crop X', exact: true })).toHaveValue('1')
+      await expect(
+        dialog.getByRole('spinbutton', { name: 'Focal Point X', exact: true }),
+      ).toHaveValue('0')
+      await dialog.getByRole('button', { name: 'Apply Changes', exact: true }).focus()
+      await page.screenshot({
+        fullPage: true,
+        path: testInfo.outputPath('transform-editor-wide.png'),
+      })
+      const viewport = page.viewportSize()
+
+      try {
+        await page.setViewportSize({ height: 800, width: 320 })
+        await expect(dialog.getByRole('spinbutton', { name: 'Crop X', exact: true })).toBeVisible()
+        await page.screenshot({
+          fullPage: true,
+          path: testInfo.outputPath('transform-editor-narrow.png'),
+        })
+      } finally {
+        if (viewport) {
+          await page.setViewportSize(viewport)
+        }
+      }
+    })
+  })
+
   test.describe('2.5.8 Target Size (Minimum) (AA)', () => {
     test('selected-value remove controls only dim their icon on hover', async () => {
       // Additional coverage for PYLD-3811.

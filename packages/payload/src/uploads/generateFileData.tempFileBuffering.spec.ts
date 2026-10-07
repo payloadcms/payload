@@ -1,7 +1,7 @@
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
-import type { UploadTransformer } from './transformers/types.js'
+import type { FileSource, UploadTransformer } from './transformers/types.js'
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -23,12 +23,18 @@ vi.mock('fs/promises', () => ({
   },
 }))
 
+vi.mock('./getSafeFilename.js', () => ({
+  getSafeFileName: vi.fn(async ({ desiredFilename }) => desiredFilename),
+  incrementName: vi.fn(),
+}))
+
 const { generateFileData } = await import('./generateFileData.js')
 
 const createCollection = (disableLocalStorage: boolean): Collection =>
   ({
     config: {
       slug: 'media',
+      fields: [],
       upload: {
         disableLocalStorage,
         staticDir: '/tmp/media',
@@ -53,8 +59,8 @@ const createReq = (tempFilePath: string, size: number): PayloadRequest =>
     },
   }) as unknown as PayloadRequest
 
-const readStream = async (file: File): Promise<string> =>
-  Buffer.from(await new Response(file.stream()).arrayBuffer()).toString()
+const readStream = async (source: FileSource): Promise<string> =>
+  Buffer.from(await new Response(await source.stream()).arrayBuffer()).toString()
 
 describe('generateFileData - non-image temp file buffering', () => {
   beforeEach(() => {
@@ -99,9 +105,9 @@ describe('generateFileData - non-image temp file buffering', () => {
     ])
   })
 
-  it('passes a disk-backed File to upload transformers without reading the temp file into memory', async () => {
-    const transformFile = vi.fn<UploadTransformer['transformFile']>(async ({ file }) => {
-      expect(await readStream(file)).toBe('disk-backed-contents')
+  it('passes a disk-backed source to upload transformers without reading the temp file into memory', async () => {
+    const transformFile = vi.fn<UploadTransformer['transformFile']>(async ({ source }) => {
+      expect(await readStream(source)).toBe('disk-backed-contents')
       return { status: 'continue' }
     })
     const req = createReq('/tmp/payload-transformer-upload', 20)

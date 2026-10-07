@@ -31,6 +31,7 @@ import {
 } from '../../uploads/fileVersioning/fileOperationManager.js'
 import { withLegacyCloudUploadFileData } from '../../uploads/fileVersioning/storedFiles.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
+import { prepareUploadData } from '../../uploads/prepareUploadData.js'
 import {
   getLocalizedUploadProperties,
   getUploadDestination,
@@ -62,7 +63,7 @@ import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { copyDataWithFreshRowIDs } from './utilities/copyDataWithFreshRowIDs.js'
 import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
-import { updateDocument } from './utilities/update.js'
+import { prepareUpdateDocument } from './utilities/update.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
   autosave?: boolean
@@ -332,6 +333,7 @@ export const updateOperation = async <
           config,
           data: bulkUpdateData,
           operation: 'update',
+          overrideAccess,
           overwriteExistingFiles,
           req,
           throwOnMissingFile: false,
@@ -381,11 +383,9 @@ export const updateOperation = async <
             req: documentReq,
           })
         }
-        const generatedFileData =
-          sharedGeneratedFileData ??
-          (await generateFileData({
-            collection,
-            config,
+        let generatedFileData = sharedGeneratedFileData ?? {
+          data: await prepareUploadData({
+            collection: collectionConfig,
             data: mergeUploadDataWithDocument(bulkUpdateData, docWithLocales, {
               locale:
                 locale === 'all' || !locale
@@ -395,12 +395,11 @@ export const updateOperation = async <
                   : locale,
               localizedProperties: getLocalizedUploadProperties(collectionConfig.flattenedFields),
             }),
-            operation: 'update',
             originalDoc: docWithLocales,
-            overwriteExistingFiles,
             req: documentReq,
-            throwOnMissingFile: false,
-          }))
+          }),
+          files: [],
+        }
 
         const select = sanitizeSelect({
           fields: collectionConfig.flattenedFields,
@@ -443,13 +442,27 @@ export const updateOperation = async <
           showHiddenFields: showHiddenFields!,
           unpublishAllLocales,
         } as const
-        const write = () => updateDocument(updateArgs)
+        const prepared = await prepareUpdateDocument(updateArgs)
+        generatedFileData = collectionConfig.upload
+          ? await generateFileData({
+              collection,
+              config,
+              data: prepared.data,
+              operation: 'update',
+              originalDoc: docWithLocales,
+              overwriteExistingFiles,
+              req: documentReq,
+              throwOnMissingFile: false,
+            })
+          : { data: prepared.data, files: generatedFileData.files }
+        const write = () =>
+          prepared.write({ data: generatedFileData.data, filesToUpload: generatedFileData.files })
         let updatedDoc = collectionConfig.upload.fileOperations
           ? await runCloudFileUpdate({
               id,
               collection: collectionConfig,
               current: incomingDoc,
-              data: updateArgs.data,
+              data: generatedFileData.data,
               files: generatedFileData.files,
               req: documentReq,
               write,

@@ -1,7 +1,5 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import { status as httpStatus } from 'http-status'
-
 import type {
   CollectionSlug,
   Payload,
@@ -87,7 +85,7 @@ export async function validateLocal<TSlug extends CollectionSlug>(
   } = options
 
   if (id === undefined && data === undefined) {
-    throw new APIError('Validation create simulation requires data.', httpStatus.BAD_REQUEST)
+    throw new APIError('Validation create simulation requires data.', 400)
   }
 
   const collection = payload.collections[collectionSlug]
