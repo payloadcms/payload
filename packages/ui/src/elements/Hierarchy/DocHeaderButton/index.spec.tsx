@@ -38,6 +38,14 @@ vi.mock('../../Button/index.js', () => ({
   ),
 }))
 
+vi.mock('../ActionsMenu/index.js', () => ({
+  HierarchyActionsMenu: ({
+    renderTrigger,
+  }: {
+    renderTrigger: (triggerProps: undefined) => React.ReactNode
+  }) => renderTrigger(undefined),
+}))
+
 vi.mock('../Modal/useHierarchyModal.js', () => ({
   useHierarchyModal: () => [() => null, undefined, { openModal }],
 }))

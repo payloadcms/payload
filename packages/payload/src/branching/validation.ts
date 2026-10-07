@@ -14,6 +14,7 @@ import {
   readBranchGlobalWrite,
   resolveGlobalMergeWrites,
 } from './globalMergeWrites.js'
+import { branchMergeValidationContextKey } from './mergeWriteGuard.js'
 import { readLocalizedBranchWrite } from './readLocalizedBranchWrite.js'
 import { isolateBranchState } from './resolveBranch.js'
 import { branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
@@ -69,7 +70,9 @@ export const createBranchMergeValidationRequest = ({
   req: PayloadRequest
 }): PayloadRequest => {
   const validationReq = createMainBranchRequest({ req })
+  const validationContext = validationReq.context as Record<PropertyKey, unknown>
 
+  validationContext[branchMergeValidationContextKey] = true
   validationReq.operation = 'validate'
 
   return validationReq

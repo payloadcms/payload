@@ -13,14 +13,28 @@ export type BranchMergeWrite = {
 
 export type BranchMergeWriteGuard = (write: BranchMergeWrite) => Promise<void>
 
+export const branchMergeValidationContextKey = Symbol('branchMergeValidation')
 export const branchMergeWriteGuardContextKey = Symbol('branchMergeWriteGuard')
 
 /** Prevents content writes made through a branch merge validation request. */
-export const assertBranchMergeValidationWriteAllowed = ({ req }: { req: PayloadRequest }): void => {
-  if (req.operation === 'validate') {
+export const assertBranchMergeValidationWriteAllowed = ({
+  req,
+}: {
+  req?: Partial<PayloadRequest>
+}): void => {
+  if (isBranchMergeValidationRequest({ req })) {
     throw new APIError('Content cannot be changed during branch merge validation.', 409)
   }
 }
+
+export const isBranchMergeValidationRequest = ({
+  req,
+}: {
+  req?: Partial<PayloadRequest>
+}): boolean =>
+  Boolean(
+    (req?.context as Record<PropertyKey, unknown> | undefined)?.[branchMergeValidationContextKey],
+  )
 
 /** Runs the active merge's final-data guard after hooks and field processing. */
 export const runBranchMergeWriteGuard = async ({
