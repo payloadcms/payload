@@ -44,8 +44,9 @@ export const checkFileAccess = async ({
         ? await resolveUploadDocument({
             collection,
             filename,
+            prefix,
             req,
-            where: { and: constraints },
+            where: typeof accessResult === 'object' ? accessResult : undefined,
           })
         : await req.payload.db.findOne({
             collection: config.slug,
