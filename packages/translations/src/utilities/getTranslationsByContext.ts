@@ -2,38 +2,42 @@ import type { Language } from '../types.js'
 
 import { clientTranslationKeys } from '../clientKeys.js'
 
-function filterKeys(obj: Record<string, unknown>, parentGroupKey = '', keys: string[]) {
+/** The client translation keys, grouped by namespace: `general:cancel` is `cancel` in `general` */
+const clientKeysByNamespace = new Map<string, Set<string>>()
+for (const clientKey of clientTranslationKeys) {
+  const separatorIndex = clientKey.indexOf(':')
+  const namespace = clientKey.slice(0, separatorIndex)
+  const key = clientKey.slice(separatorIndex + 1)
+  const keys = clientKeysByNamespace.get(namespace) ?? new Set<string>()
+  clientKeysByNamespace.set(namespace, keys.add(key))
+}
+
+/** Plural forms of a key, for example `item_one` and `item_other` for `item` */
+const pluralSuffix = /_(?:zero|one|two|few|many|other)$/
+
+function filterClientKeys(translations: Record<string, unknown>) {
   const result: Record<string, unknown> = {}
 
-  for (const [namespaceKey, value] of Object.entries(obj)) {
-    // Skip $schema key
-    if (namespaceKey === '$schema') {
-      result[namespaceKey] = value
+  for (const [namespace, value] of Object.entries(translations)) {
+    if (namespace === '$schema') {
+      result[namespace] = value
       continue
     }
 
-    if (typeof value === 'object') {
-      const filteredObject = filterKeys(value as Record<string, unknown>, namespaceKey, keys)
-      if (Object.keys(filteredObject).length > 0) {
-        result[namespaceKey] = filteredObject
-      }
-    } else {
-      for (const key of keys) {
-        const [groupKey, selector] = key.split(':')
+    const clientKeys = clientKeysByNamespace.get(namespace)
+    if (!clientKeys || typeof value !== 'object' || value === null) {
+      continue
+    }
 
-        if (parentGroupKey === groupKey) {
-          if (namespaceKey === selector) {
-            result[selector] = value
-          } else {
-            const pluralKeys = ['zero', 'one', 'two', 'few', 'many', 'other']
-            pluralKeys.forEach((pluralKey) => {
-              if (namespaceKey === `${selector}_${pluralKey}`) {
-                result[`${selector}_${pluralKey}`] = value
-              }
-            })
-          }
-        }
+    const clientTranslations: Record<string, unknown> = {}
+    for (const [key, translation] of Object.entries(value)) {
+      if (clientKeys.has(key) || clientKeys.has(key.replace(pluralSuffix, ''))) {
+        clientTranslations[key] = translation
       }
+    }
+
+    if (Object.keys(clientTranslations).length > 0) {
+      result[namespace] = clientTranslations
     }
   }
 
@@ -56,7 +60,7 @@ function sortObject(obj: Record<string, unknown>) {
 
 export const getTranslationsByContext = (selectedLanguage: Language, context: 'api' | 'client') => {
   if (context === 'client') {
-    return sortObject(filterKeys(selectedLanguage.translations, '', clientTranslationKeys))
+    return sortObject(filterClientKeys(selectedLanguage.translations))
   } else {
     return selectedLanguage.translations
   }
