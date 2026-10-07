@@ -54,7 +54,7 @@ import config from '@payload-config'
 const payload = await getPayload({ config })
 ```
 
-If you're working in Next.js' development mode, Payload will work with Hot Module Replacement (HMR), and as you make changes to your Payload Config, your usage of Payload will always be in sync with your changes. In production, `getPayload` simply disables all HMR functionality so you don't need to write your code any differently. We handle optimization for you in production mode.
+If you're working in your framework's development mode (Next.js or TanStack Start), Payload will work with Hot Module Replacement (HMR), and as you make changes to your Payload Config, your usage of Payload will always be in sync with your changes. In production, `getPayload` simply disables all HMR functionality so you don't need to write your code any differently. We handle optimization for you in production mode.
 
 If you are accessing Payload via function arguments or `req.payload`, HMR is automatically supported if you are using it within Next.js (and TanStack Start).
 
@@ -349,7 +349,11 @@ available:
 // you'll also have to await headers inside your function, or component, like so:
 // const headers = await nextHeaders()
 
-// If you're using Payload outside of Next.js, you'll have to provide headers accordingly.
+// If you're using TanStack Start, get headers from the incoming request instead:
+// import { getRequest } from '@tanstack/react-start/server'
+// const headers = new Headers(getRequest().headers)
+
+// If you're using Payload outside of your host framework, you'll have to provide headers accordingly.
 
 // result will be formatted as follows:
 // {

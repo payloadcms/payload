@@ -70,7 +70,7 @@ But, if you allow public user registration, for example, you will want to make s
 
 Depending on where you deploy Payload, you may need to provide a start script to your deployment platform in order to start up Payload in production mode.
 
-Note that this is different than running `next dev`. Generally, Next.js apps come configured with a `start` script which runs `next start`.
+Note that this is different than running your framework's dev server. Generally, Next.js apps come configured with a `start` script which runs `next start`, while TanStack Start apps come configured with a `start` script that serves the built server bundle.
 
 ### Secure Cookie Settings
 
@@ -194,6 +194,8 @@ Follow the docs to configure any one of these storage providers. For local devel
 This is an example of a multi-stage docker build of Payload for production. Ensure you are setting your environment
 variables on deployment, like `PAYLOAD_SECRET`, `PAYLOAD_CONFIG_PATH`, and `DATABASE_URL` if needed. If you don't want to have a DB connection and your build requires that, learn [here](./building-without-a-db-connection) how to prevent that.
 
+### Next.js
+
 In your Next.js config, set the `output` property `standalone`.
 
 ```js
@@ -276,6 +278,62 @@ ENV PORT 3000
 # server.js is created by next build from the standalone output
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output
 CMD HOSTNAME="0.0.0.0" node server.js
+```
+
+### TanStack Start
+
+TanStack Start builds with Vite, so there's no `next.config` or `standalone` output step. The `build` script produces a `dist/client` and `dist/server` bundle, and the `start` script serves them with [`srvx`](https://srvx.h3.dev):
+
+```dockerfile
+# Dockerfile
+# From https://github.com/payloadcms/payload/blob/main/templates/blank-tanstack/Dockerfile
+
+FROM node:24-alpine AS base
+
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+RUN \
+  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then npm ci; \
+  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
+  else echo "Lockfile not found." && exit 1; \
+  fi
+
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+RUN \
+  if [ -f yarn.lock ]; then yarn run build; \
+  elif [ -f package-lock.json ]; then npm run build; \
+  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
+  else echo "Lockfile not found." && exit 1; \
+  fi
+
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 payload
+RUN mkdir -p /app/media && chown payload:nodejs /app/media
+
+COPY --from=builder --chown=payload:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=payload:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=payload:nodejs /app/dist ./dist
+
+USER payload
+
+EXPOSE 3000
+
+ENV PORT=3000
+
+CMD ["./node_modules/.bin/srvx", "--prod", "--dir=.", "--static=dist/client", "--entry=dist/server/server.js"]
 ```
 
 ## Docker Compose
