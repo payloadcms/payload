@@ -959,6 +959,16 @@ const context = await initAdminContext(args)
 
 `languageCode` has also been removed from `PartialAdminContext`. Use `i18n.language` instead. `getRootLayoutData` from `@payloadcms/ui` no longer accepts `headers` or `languageCode` and reads both from `req`.
 
+#### Codemod
+
+To migrate automatically, run:
+
+```bash
+npx @payloadcms/codemod --transform migrate-admin-context-properties
+```
+
+The codemod rewrites property reads and destructures on `initAdminContext()` results and on parameters or variables typed as `AdminContext` or `PartialAdminContext`. It also updates `Pick<AdminContext, ...>` and `AdminContext['...']` types and drops both arguments from `getRootLayoutData()` calls. Element access such as `context['headers']`, and contexts passed through your own wrapper functions, are left unchanged for manual migration.
+
 ### `DiffMethod` type removed
 
 The deprecated `DiffMethod` type has been removed from `payload`. It mirrored an enum from `react-diff-viewer-continued`, which Payload no longer depends on. Remove any imports of `DiffMethod`.
