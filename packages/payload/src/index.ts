@@ -2002,6 +2002,8 @@ export type {
   DocumentPreferences,
   FieldsPreferences,
   InsideFieldsPreferences,
+  PinnedDocument,
+  PinnedDocumentsPreferences,
   PreferenceRequest,
   PreferenceUpdateRequest,
   RecentlyViewedItem,
