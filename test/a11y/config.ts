@@ -10,6 +10,7 @@ import { devUser } from '../credentials.js'
 import { MediaCollection, mediaSlug } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { UsersCollection, usersSlug } from './collections/Users/index.js'
+import { seededAPIKey } from './constants.js'
 import { MenuGlobal } from './globals/Menu/index.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -49,9 +50,9 @@ export default buildConfigWithDefaults({
     admin: {
       components: {
         views: {
-          StatusMessages: {
-            Component: '/components/StatusMessages/index.js#StatusMessages',
-            path: '/status-messages',
+          BreadcrumbCurrentPage: {
+            Component: '/components/BreadcrumbCurrentPage/index.js#BreadcrumbCurrentPage',
+            path: '/breadcrumb-current-page',
           },
           CustomIDModals: {
             Component: '/components/CustomIDModals/index.js#CustomIDModals',
@@ -60,6 +61,10 @@ export default buildConfigWithDefaults({
           FocusIndicatorsView: {
             Component: '/components/FocusIndicatorsView.js#FocusIndicatorsView',
             path: '/focus-indicators',
+          },
+          StatusMessages: {
+            Component: '/components/StatusMessages/index.js#StatusMessages',
+            path: '/status-messages',
           },
         },
       },
@@ -109,7 +114,7 @@ export default buildConfigWithDefaults({
     await payload.create({
       collection: usersSlug,
       data: {
-        apiKey: 'a11y-modal-dialog-fixture-key-1234',
+        apiKey: seededAPIKey,
         email: devUser.email,
         password: devUser.password,
       },
