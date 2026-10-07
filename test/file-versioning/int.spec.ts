@@ -1302,6 +1302,76 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     expect(await readFile(path.join(mediaDir, result.docs[0]!.filename!))).toEqual(secondBytes)
   })
 
+  for (const hasRequestTransformers of [false, true]) {
+    test(`should serve the latest draft file with request transformers ${hasRequestTransformers}`, async ({
+      payload,
+      restClient,
+    }) => {
+      const published = await payload.create({
+        collection: draftMediaSlug,
+        data: { _status: 'published', alt: 'published' },
+        filePath: imageFixture,
+      })
+      const priorDraft = await payload.update({
+        id: published.id,
+        collection: draftMediaSlug,
+        data: { alt: 'prior draft' },
+        draft: true,
+        filePath: imageFixture,
+      })
+      const latestBytes = await sharp(await readFile(imageFixture))
+        .negate()
+        .png()
+        .toBuffer()
+      const latestDraft = await payload.update({
+        id: published.id,
+        collection: draftMediaSlug,
+        data: { alt: 'latest draft' },
+        draft: true,
+        file: {
+          name: 'latest.png',
+          data: latestBytes,
+          mimetype: 'image/png',
+          size: latestBytes.length,
+        },
+      })
+      const collection = payload.collections[draftMediaSlug].config
+      const readAccess = collection.access.read
+      const transformers = payload.config.upload.transformers
+
+      if (!hasRequestTransformers) {
+        payload.config.upload.transformers = []
+      }
+
+      try {
+        collection.access.read = () => ({ alt: { equals: 'latest draft' } })
+        const response = await restClient.GET(`/${draftMediaSlug}/file/${latestDraft.filename}`)
+
+        expect(response.status).toBe(200)
+        expect(Buffer.from(await response.arrayBuffer())).toEqual(latestBytes)
+
+        collection.access.read = () => true
+        const priorResponse = await restClient.GET(`/${draftMediaSlug}/file/${priorDraft.filename}`)
+        const publishedResponse = await restClient.GET(
+          `/${draftMediaSlug}/file/${published.filename}`,
+        )
+
+        expect(priorResponse.status).toBe(404)
+        expect(publishedResponse.status).toBe(200)
+
+        collection.access.read = () => ({ _status: { equals: 'published' } })
+        const deniedResponse = await restClient.GET(
+          `/${draftMediaSlug}/file/${latestDraft.filename}`,
+        )
+
+        expect(deniedResponse.status).toBe(403)
+      } finally {
+        collection.access.read = readAccess
+        payload.config.upload.transformers = transformers
+      }
+    })
+  }
+
   test('should preserve stored files through draft, autosave, publish, and unpublish', async ({
     payload,
   }) => {
@@ -2300,7 +2370,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
   for (const operation of ['bulk update', 'version restore'] as const) {
     test.options(
       `should compensate nested uploads when a ${operation} rolls back`,
-      { db: 'mongo' },
+      { db: (adapter) => ['documentdb', 'mongodb', 'mongodb-atlas'].includes(adapter) },
       async ({ payload }) => {
         const created = await payload.create({
           collection: mediaSlug,
