@@ -39,8 +39,7 @@ pnpm add @payloadcms/plugin-mcp
 ## Quick Start
 
 Use the [Payload CLI](../configuration/cli) for local development and coding-agent
-work. It loads your current config directly and does not require a running web
-server or the MCP plugin. Use MCP to connect clients to a stable running server,
+work. Use MCP to connect clients to a stable running server,
 such as your production deployment, with credentials and permissions for that
 server. MCP follows the same access rules when used against a development server.
 
@@ -276,17 +275,6 @@ If no authorization is sent, MCP runs access control with no user.
 4. Use that key as `Authorization: users API-Key <key>`. Replace `users` with
    that auth collection's slug.
 
-### Access control in development
-
-HTTP and stdio run normal Payload authentication and access control in every
-environment. `NODE_ENV=development` does not grant additional permissions.
-HTTP rejects the `overrideAccess` URL parameter. The removed
-`PAYLOAD_MCP_OVERRIDE_ACCESS` environment variable has no effect on stdio.
-
-Use the [CLI](../configuration/cli#working-with-data-from-the-cli) for trusted
-local development operations. Authenticate MCP clients with the user's API key,
-JWT, or a configured custom authentication strategy.
-
 ### Custom auth
 
 Use `overrideGetAuthorizedMCP` to replace the default Payload authentication and
@@ -296,8 +284,7 @@ MCP authorization flow. The custom resolver must:
    Assign `null` when the caller is anonymous.
 2. Return only the MCP `items` that caller may use.
 3. Return `overrideAccess: false` so Payload's local API enforces the caller's
-   access rules. Any override returned by custom server code is the application's
-   responsibility; never derive it from client input.
+   access rules.
 
 `req.user` is the single source of truth for the caller's identity. Payload
 access control, MCP access callbacks, and local API calls that receive `req` all
@@ -906,9 +893,9 @@ mcpPlugin({
 <Banner type="warning">
   Use the CLI for local development and authenticated HTTP MCP for a stable
   running server. The stdio server does not hot reload Payload configuration or
-  refresh its MCP registrations and authorization state. Restart the server and reconnect your
-  MCP client after changing your Payload config, collections, globals, tools,
-  prompts, resources, hooks, or access rules.
+  refresh its MCP registrations and authorization state. Restart the server and
+  reconnect your MCP client after changing your Payload config, collections,
+  globals, tools, prompts, resources, hooks, or access rules.
 </Banner>
 
 For clients that can only spawn local processes, the package also ships a
