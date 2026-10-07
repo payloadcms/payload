@@ -6,7 +6,7 @@ import type { FeatureProviderServer, ResolvedServerFeatureMap } from './features
 import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
 import type {
   AdapterProps,
-  LexicalEditorProps,
+  LexicalEditorArgs,
   LexicalRichTextAdapterProvider,
 } from './types/index.js'
 
@@ -28,7 +28,7 @@ let checkedDependencies = false
 
 export const lexicalTargetVersion = '0.52.0'
 
-export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapterProvider {
+export function lexicalEditor(args?: LexicalEditorArgs): LexicalRichTextAdapterProvider {
   if (
     process.env.NODE_ENV !== 'production' &&
     process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true' &&
@@ -360,7 +360,7 @@ export { populate } from './populateGraphQL/populate.js'
 export type {
   ClientFeaturesMap,
   LexicalEditorNodeMap,
-  LexicalEditorProps,
+  LexicalEditorArgs,
   LexicalEditorViewMap,
   LexicalFieldAdminProps,
   LexicalRichTextAdapter,

@@ -519,10 +519,6 @@ const buildVersionField = ({
       ...baseVersionField,
       CustomComponent: undefined,
     },
-    /**
-     * @deprecated remove in 4.0. Each field should handle its own diffing logic
-     */
-    diffMethod: 'diffWordsWithSpace',
     field: clientField,
     fieldPermissions:
       typeof fieldPermissions === 'undefined' ? parentFieldsPermissions : fieldPermissions,

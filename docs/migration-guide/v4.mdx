@@ -913,6 +913,23 @@ When a missing locale is already valid for the receiving API, optional chaining 
 const locale = useLocale()?.code
 ```
 
+### `readOnly` removed from the `useField` return type
+
+The deprecated `readOnly` property has been removed from `FieldType`, the object returned by `useField`. `useField` already stopped returning it in 3.x, so it was always `undefined` at runtime.
+
+Read `readOnly` from your field component's props instead:
+
+```diff
+'use client'
+import type { TextFieldClientComponent } from 'payload'
+import { useField } from '@payloadcms/ui'
+
+-export const MyField: TextFieldClientComponent = ({ path }) => {
+-  const { readOnly, value } = useField({ path })
++export const MyField: TextFieldClientComponent = ({ path, readOnly }) => {
++  const { value } = useField({ path })
+```
+
 ### RichText adapter `i18n` property removed
 
 The `i18n` property on `RichTextAdapter` (and its return type from adapter provider functions) has been removed. It was deprecated in v3 in favour of merging translations directly into `config.i18n.translations` inside the adapter provider.
@@ -1005,6 +1022,20 @@ The codemod rewrites property reads and destructures on `initAdminContext()` res
 ### `DiffMethod` type removed
 
 The deprecated `DiffMethod` type has been removed from `payload`. It mirrored an enum from `react-diff-viewer-continued`, which Payload no longer depends on. Remove any imports of `DiffMethod`.
+
+### `diffMethod` prop removed from Diff components
+
+Custom Diff components (`admin.components.Diff`) no longer receive a `diffMethod` prop. It has been removed from `FieldDiffClientProps` and every field-specific variant like `TextFieldDiffClientProps`. Payload always passed the same `'diffWordsWithSpace'` value, so the prop carried no information. Each Diff component handles its own diffing.
+
+Remove `diffMethod` from your props. If you passed it on to a diffing utility, pass `'diffWordsWithSpace'` directly instead:
+
+```diff
+  export const MyTextDiff: React.FC<TextFieldDiffClientProps> = ({
+-   diffMethod,
+    valueFrom,
+    valueTo,
+  }) => {
+```
 
 ### Collection `afterOperation` hook: `operation: 'read'` removed
 
@@ -1114,6 +1145,15 @@ If you use a `declare module` augmentation to extend `GeneratedDatabaseSchema` (
 ```
 
 Run `npx @payloadcms/codemod --transform migrate-db-types-subpath` to migrate automatically. The codemod handles import declarations, re-export declarations, and `declare module` augmentations.
+
+### `findMigrationDir` removed from `@payloadcms/drizzle`
+
+The deprecated `findMigrationDir` re-export has been removed from `@payloadcms/drizzle`. Import it from `payload` instead:
+
+```diff
+- import { findMigrationDir } from '@payloadcms/drizzle'
++ import { findMigrationDir } from 'payload'
+```
 
 ### Minimum supported Node.js version is now 24.15.0 ([#16540](https://github.com/payloadcms/payload/pull/16540))
 
@@ -1229,6 +1269,15 @@ The table feature is no longer experimental, so it drops its prefix.
 ```
 
 Stored content is unaffected.
+
+### Lexical: `LexicalEditorProps` renamed to `LexicalEditorArgs`
+
+The `LexicalEditorProps` type exported from `@payloadcms/richtext-lexical` has been renamed to `LexicalEditorArgs`. It describes the arguments of the `lexicalEditor` function, not component props. The shape is unchanged.
+
+```diff
+- import type { LexicalEditorProps } from '@payloadcms/richtext-lexical'
++ import type { LexicalEditorArgs } from '@payloadcms/richtext-lexical'
+```
 
 ### Lexical: the `version` of nodes is ignored
 
