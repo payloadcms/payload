@@ -133,8 +133,10 @@ describe('initTanStack default template', () => {
         'utf8',
       )
 
-      expect(route).toContain("import '@payloadcms/ui/css/app.css'")
-      expect(route).toContain("import './custom.css'")
+      expect(route).toContain("import('@payloadcms/ui/css/app.css')")
+      expect(route).toContain("import('./custom.css')")
+      expect(route).not.toContain("import '@payloadcms/ui/css/app.css'")
+      expect(route).not.toContain("import './custom.css'")
     }
     expect(fse.readFileSync(path.join(projectDir, 'src/routes/_payload/custom.css'), 'utf8')).toBe(
       '',
