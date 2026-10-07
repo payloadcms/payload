@@ -22,15 +22,15 @@
     "@payloadcms/next": "workspace:*",
     "@payloadcms/plugin-mcp": "workspace:*",
     "@payloadcms/richtext-lexical": "workspace:*",
+    "@payloadcms/transformer-sharp": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "cross-env": "10.1.0",
     "dotenv": "16.4.7",
     "graphql": "^16.8.1",
-    "next": "16.3.8",
+    "next": "16.4.0",
     "payload": "workspace:*",
     "react": "19.3.0",
-    "react-dom": "19.3.0",
-    "sharp": "0.35.4"
+    "react-dom": "19.3.0"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
@@ -40,7 +40,7 @@
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "4.5.2",
     "eslint": "^9.16.0",
-    "eslint-config-next": "16.3.8",
+    "eslint-config-next": "16.4.0",
     "jsdom": "28.0.0",
     "prettier": "^3.4.2",
     "tsx": "4.23.15",

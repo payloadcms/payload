@@ -79,6 +79,8 @@ const wrapCollectionAccess = (scope: TenantAccessConfig): void => {
   const updateAccessFallback = scope.collection.access.update
 
   for (const accessKey of collectionAccessKeys) {
+    // A collection without its own `validate` access is governed by `update`, matching core's
+    // fallback contract, rather than the generic "any authenticated user" default below.
     const accessFunction =
       scope.collection.access[accessKey] ??
       (accessKey === 'validate' ? updateAccessFallback : undefined) ??

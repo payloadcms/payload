@@ -3,7 +3,7 @@ import type { DatePickerProps } from 'react-datepicker'
 
 import React from 'react'
 import ReactDatePickerDefaultImport, { registerLocale, setDefaultLocale } from 'react-datepicker'
-import { createPortal } from 'react-dom'
+import { createPortal, flushSync } from 'react-dom'
 const ReactDatePicker =
   'default' in ReactDatePickerDefaultImport
     ? ReactDatePickerDefaultImport.default
@@ -15,26 +15,30 @@ import { CalendarIcon } from '../../icons/Calendar/index.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { getFormattedLocale } from './getFormattedLocale.js'
+import { hasAmbiguousYearInput } from './hasAmbiguousYearInput.js'
+import { useDatePickerKeyboard } from './useDatePickerKeyboard.js'
 import './index.css'
 
 const baseClass = 'date-time-picker'
 
 type AccessibleCalendarContainerProps = React.PropsWithChildren<{
   className?: string
+  containerRef: React.RefObject<HTMLDivElement | null>
   dialogLabel: string
   monthLabel: string
+  onKeyDown: React.KeyboardEventHandler<HTMLDivElement>
   yearLabel: string
 }>
 
 const AccessibleCalendarContainer: React.FC<AccessibleCalendarContainerProps> = ({
   children,
   className,
+  containerRef,
   dialogLabel,
   monthLabel,
+  onKeyDown,
   yearLabel,
 }) => {
-  const containerRef = React.useRef<HTMLDivElement>(null)
-
   React.useLayoutEffect(() => {
     containerRef.current
       ?.querySelector<HTMLSelectElement>('.react-datepicker__month-select')
@@ -45,7 +49,14 @@ const AccessibleCalendarContainer: React.FC<AccessibleCalendarContainerProps> = 
   })
 
   return (
-    <div aria-label={dialogLabel} className={className} ref={containerRef} role="dialog">
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- Handle Escape bubbling from the dialog's interactive children.
+    <div
+      aria-label={dialogLabel}
+      className={className}
+      onKeyDown={onKeyDown}
+      ref={containerRef}
+      role="dialog"
+    >
       {children}
     </div>
   )
@@ -78,6 +89,18 @@ const DatePicker: React.FC<Props> = (props) => {
     value,
   } = props
 
+  const {
+    calendarRef,
+    datePickerRef,
+    onBlur,
+    onCalendarClose,
+    onCalendarKeyDown,
+    onCalendarOpen,
+    onChangeRaw,
+    onKeyDown,
+    onKeyDownCapture,
+  } = useDatePickerKeyboard(props)
+  const rejectedInputValueRef = React.useRef<string | undefined>(undefined)
   const [modalContainer, setModalContainer] = React.useState<Element | null>(null)
   const setContainerRef = React.useCallback((element: HTMLDivElement | null) => {
     setModalContainer(element?.closest('dialog, [role="dialog"]') ?? null)
@@ -91,18 +114,29 @@ const DatePicker: React.FC<Props> = (props) => {
   const { i18n, t } = useTranslation()
   const monthLabel = getDateTimeFieldLabel({ field: 'month', locale: i18n.language })
   const yearLabel = getDateTimeFieldLabel({ field: 'year', locale: i18n.language })
+  const CustomCalendarContainer = overrides?.calendarContainer
   const calendarContainer = React.useCallback(
-    ({ children, className }) => (
-      <AccessibleCalendarContainer
-        className={className}
-        dialogLabel={`${t('general:selectValue')}: ${monthLabel}, ${yearLabel}`}
-        monthLabel={monthLabel}
-        yearLabel={yearLabel}
-      >
-        {children}
-      </AccessibleCalendarContainer>
-    ),
-    [monthLabel, t, yearLabel],
+    ({ children, className, ...containerProps }) =>
+      CustomCalendarContainer ? (
+        // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- Handle Escape bubbling from the custom calendar's interactive children.
+        <div onKeyDown={onCalendarKeyDown} ref={calendarRef} style={{ display: 'contents' }}>
+          <CustomCalendarContainer {...containerProps} className={className}>
+            {children}
+          </CustomCalendarContainer>
+        </div>
+      ) : (
+        <AccessibleCalendarContainer
+          className={className}
+          containerRef={calendarRef}
+          dialogLabel={`${t('general:selectValue')}: ${monthLabel}, ${yearLabel}`}
+          monthLabel={monthLabel}
+          onKeyDown={onCalendarKeyDown}
+          yearLabel={yearLabel}
+        >
+          {children}
+        </AccessibleCalendarContainer>
+      ),
+    [CustomCalendarContainer, calendarRef, monthLabel, onCalendarKeyDown, t, yearLabel],
   )
 
   let dateFormat = customDisplayFormat
@@ -124,9 +158,33 @@ const DatePicker: React.FC<Props> = (props) => {
 
   const onChange: Extract<
     DatePickerProps,
-    { selectsMultiple?: never; selectsRange?: never }
-  >['onChange'] = (incomingDate) => {
+    { selectsMultiple?: false; selectsRange?: false }
+  >['onChange'] = (incomingDate, event) => {
     const newDate = incomingDate
+
+    const inputValue =
+      event?.target instanceof HTMLInputElement
+        ? event.target.value
+        : !event
+          ? rejectedInputValueRef.current
+          : undefined
+
+    if (
+      hasAmbiguousYearInput({
+        date: newDate,
+        dateFormat: overrides?.dateFormat ?? dateFormat,
+        inputValue,
+        locale: overrides?.locale,
+      })
+    ) {
+      const picker = datePickerRef.current
+
+      rejectedInputValueRef.current = inputValue
+      picker?.setPreSelection(picker.calcInitialState().preSelection)
+      return
+    }
+    rejectedInputValueRef.current = undefined
+
     if (newDate instanceof Date && ['dayOnly', 'default', 'monthOnly'].includes(pickerAppearance)) {
       const tzOffset = incomingDate.getTimezoneOffset() / 60
       newDate.setHours(12 - tzOffset, 0)
@@ -145,9 +203,8 @@ const DatePicker: React.FC<Props> = (props) => {
 
   const dateTimePickerProps: Extract<
     DatePickerProps,
-    { selectsMultiple?: never; selectsRange?: never }
+    { selectsMultiple?: false; selectsRange?: false }
   > = {
-    calendarContainer,
     customInputRef: 'ref',
     dateFormat,
     disabled: readOnly,
@@ -163,6 +220,7 @@ const DatePicker: React.FC<Props> = (props) => {
     popperContainer: modalContainer ? popperContainer : undefined,
     popperPlacement: 'bottom-start',
     portalId: modalContainer ? undefined : 'date-time-picker-portal',
+    preventOpenOnFocus: true,
     previousMonthButtonLabel: <ChevronIcon direction="left" />,
     previousYearButtonLabel: '‹',
     selected: value && new Date(value),
@@ -175,8 +233,31 @@ const DatePicker: React.FC<Props> = (props) => {
     timeIntervals,
     ...(overrides as Extract<
       DatePickerProps,
-      { selectsMultiple?: never; selectsRange?: never } // to satisfy TypeScript. Overrides can enable selectsMultiple or selectsRange but then it's up to the user to ensure they pass in the correct onChange
+      { selectsMultiple?: false; selectsRange?: false } // to satisfy TypeScript. Overrides can enable selectsMultiple or selectsRange but then it's up to the user to ensure they pass in the correct onChange
     >),
+    calendarContainer,
+    onBlur,
+    onCalendarClose,
+    onCalendarOpen,
+    onChangeRaw,
+    onKeyDown,
+  }
+
+  const onBlurCapture = (event: React.FocusEvent<HTMLDivElement>) => {
+    const input = event.target
+
+    if (input !== datePickerRef.current?.input || !(input instanceof HTMLInputElement)) {
+      return
+    }
+
+    if (/[a-z0-9]/i.test(input.value) || !/[\p{L}\p{N}]/u.test(input.value)) {
+      return
+    }
+
+    // react-datepicker 9.1 treats non-Latin input as an empty mask.
+    // Reset raw text synchronously before its blur handler can clear the selected date.
+    // eslint-disable-next-line @eslint-react/dom/no-flush-sync -- Programmatic blur also requires the reset before the upstream handler runs.
+    flushSync(() => datePickerRef.current?.resetInputValue())
   }
 
   const classes = [baseClass, `${baseClass}__appearance--${pickerAppearance}`]
@@ -197,9 +278,16 @@ const DatePicker: React.FC<Props> = (props) => {
   }, [i18n.language, i18n.dateFNS])
 
   return (
-    <div className={classes} id={id} ref={setContainerRef}>
+    <div
+      className={classes}
+      id={id}
+      onBlurCapture={onBlurCapture}
+      onKeyDownCapture={onKeyDownCapture}
+      ref={setContainerRef}
+    >
       <div className={`${baseClass}__input-wrapper`}>
         <ReactDatePicker
+          ref={datePickerRef}
           {...dateTimePickerProps}
           dropdownMode="select"
           showMonthDropdown={pickerAppearance !== 'monthOnly'}

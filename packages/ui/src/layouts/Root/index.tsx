@@ -1,23 +1,16 @@
-import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient } from 'payload'
+import type { ImportMap, SanitizedConfig, ServerFunctionClient } from 'payload'
 
-import { applyLocaleFiltering } from 'payload/shared'
 import React, { Suspense } from 'react'
 
 import type { InitAdminContextFn } from '../../views/Root/index.js'
 
-import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
-// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
-import { ProgressBar, RootProvider } from '../../exports/client/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference client bundle for proper client boundary in production
+import { DocumentRoot, RootProviders } from '../../exports/client/index.js'
 import { checkDependencies, type CheckDependenciesArgs } from '../../utilities/checkDependencies.js'
-import { getClientConfig } from '../../utilities/getClientConfig.js'
-import { getLanguageDir } from '../../utilities/getLanguageDir.js'
-import { getRequestEmbed } from '../../utilities/getRequestEmbed.js'
-import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.js'
-import { getRequestTheme } from '../../utilities/getRequestTheme.js'
+import { getRootLayoutData } from './getRootLayoutData.js'
 import { NestProviders } from './NestProviders.js'
-import { ResolveThemeOnClient } from './ResolveThemeOnClient.js'
 import { getViewportMeta } from './viewport.js'
-// eslint-disable-next-line payload/no-imports-from-self -- Self-import via package path ensures consumer's bundler resolves the full CSS chain (design tokens, preflight, etc.) in prod builds
+// eslint-disable-next-line payload/no-imports-from-self -- Self-import ensures the consumer bundler resolves the full CSS chain
 import '@payloadcms/ui/css/app.css'
 
 type Font = {
@@ -89,125 +82,62 @@ const RootLayoutContent = async ({
   children,
   config: configPromise,
   fonts = [],
-  head: headFromProps,
+  head,
   htmlProps = {},
   importMap,
   initAdminContext,
   RouterAdapter,
   serverFunction,
 }: RootLayoutProps) => {
-  const {
+  const context = await initAdminContext({ configPromise, importMap, key: 'RootLayout' })
+
+  const { cookies, headers, languageCode, permissions, req, user } = context
+
+  const { config } = req.payload
+
+  const data = await getRootLayoutData({
     cookies,
     headers,
+    importMap,
     languageCode,
     permissions,
     req,
-    req: {
-      payload: { config },
-    },
-    user,
-  } = await initAdminContext({ configPromise, importMap, key: 'RootLayout' })
-
-  const { theme, themeSource } = getRequestTheme({
-    config,
-    cookies,
-    headers,
-  })
-
-  const highContrastMode = getRequestHighContrast({
-    config,
-    cookies,
-    headers,
-  })
-
-  const dir = getLanguageDir({ languageCode })
-  const embed = getRequestEmbed({ config, cookies })
-
-  const languageOptions: LanguageOptions = Object.entries(
-    config.i18n.supportedLanguages || {},
-  ).reduce((acc, [language, languageConfig]) => {
-    if (Object.keys(config.i18n.supportedLanguages).includes(language)) {
-      acc.push({
-        label: languageConfig.translations.general.thisLanguage,
-        value: language,
-      })
-    }
-
-    return acc
-  }, [])
-
-  const navPrefs = await getNavPrefs(req)
-
-  const clientConfig = getClientConfig({
-    config,
-    i18n: req.i18n,
-    importMap,
     user,
   })
-
-  await applyLocaleFiltering({ clientConfig, config, req })
-
-  const fontClassNames = fonts.map((f) => f.variable ?? f.className).filter(Boolean)
-  const viewportMeta = getViewportMeta(headers.get('user-agent') ?? undefined)
 
   return (
-    <html
-      {...htmlProps}
-      className={[...fontClassNames, htmlProps?.className].filter(Boolean).join(' ')}
-      data-enhanced-contrast={highContrastMode ? '' : undefined}
-      data-theme={theme}
-      dir={dir}
-      lang={languageCode}
-      suppressHydrationWarning={
-        config.admin.theme === 'all' || config.admin.suppressHydrationWarning
-      }
+    <DocumentRoot
+      dir={data.dir}
+      fonts={fonts}
+      head={head}
+      highContrastMode={data.highContrastMode}
+      htmlProps={htmlProps}
+      languageCode={data.languageCode}
+      suppressHydrationWarning={data.suppressHydrationWarning}
+      theme={data.theme}
+      themeSource={data.themeSource}
+      viewport={getViewportMeta(headers.get('user-agent') ?? undefined)}
     >
-      <head>
-        {themeSource === 'default' && <ResolveThemeOnClient serverTheme={theme} />}
-        {viewportMeta}
-        <style>{`@layer payload-default, payload;`}</style>
-        {headFromProps}
-      </head>
-      <body>
-        <RootProvider
-          config={clientConfig}
-          dateFNSKey={req.i18n.dateFNSKey}
-          embed={embed}
-          fallbackLang={config.i18n.fallbackLanguage}
-          highContrastMode={highContrastMode}
-          isNavOpen={navPrefs?.open ?? true}
-          languageCode={languageCode}
-          languageOptions={languageOptions}
-          locale={req.locale}
-          permissions={user ? permissions : null}
-          RouterAdapter={RouterAdapter}
-          serverFunction={serverFunction}
-          theme={theme}
-          translations={req.i18n.translations}
-          user={user}
-        >
-          <ProgressBar />
-          {Array.isArray(config.admin?.components?.providers) &&
-          config.admin?.components?.providers.length > 0 ? (
-            <NestProviders
-              importMap={req.payload.importMap}
-              providers={config.admin?.components?.providers}
-              serverProps={{
-                i18n: req.i18n,
-                payload: req.payload,
-                permissions,
-                server: req.server,
-                user,
-              }}
-            >
-              {children}
-            </NestProviders>
-          ) : (
-            children
-          )}
-        </RootProvider>
-        <div id="portal" />
-      </body>
-    </html>
+      <RootProviders data={data} RouterAdapter={RouterAdapter} serverFunction={serverFunction}>
+        {Array.isArray(config.admin?.components?.providers) &&
+        config.admin.components.providers.length > 0 ? (
+          <NestProviders
+            importMap={req.payload.importMap}
+            providers={config.admin.components.providers}
+            serverProps={{
+              i18n: req.i18n,
+              payload: req.payload,
+              permissions,
+              server: req.server,
+              user,
+            }}
+          >
+            {children}
+          </NestProviders>
+        ) : (
+          children
+        )}
+      </RootProviders>
+    </DocumentRoot>
   )
 }

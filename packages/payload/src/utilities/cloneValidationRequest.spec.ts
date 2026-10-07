@@ -5,6 +5,65 @@ import { describe, expect, it } from 'vitest'
 import { cloneValidationRequest } from './cloneValidationRequest.js'
 
 describe('cloneValidationRequest', () => {
+  it('should return an empty object for an undefined request', () => {
+    expect(cloneValidationRequest({ request: undefined })).toEqual({})
+  })
+
+  it('should clone a fetch request while preserving abort propagation', () => {
+    const abortController = new AbortController()
+    const request = new Request('https://example.com/api/posts', {
+      headers: { 'x-test': 'value' },
+      method: 'POST',
+      signal: abortController.signal,
+    }) as unknown as PayloadRequest
+
+    const clonedRequest = cloneValidationRequest({ request })
+
+    expect(clonedRequest.url).toBe('https://example.com/api/posts')
+    expect(clonedRequest.method).toBe('POST')
+    expect(clonedRequest.headers).not.toBe(request.headers)
+    expect((clonedRequest.headers as unknown as Headers).get('x-test')).toBe('value')
+    expect(clonedRequest.signal?.aborted).toBe(false)
+
+    abortController.abort()
+
+    expect(clonedRequest.signal?.aborted).toBe(true)
+  })
+
+  it('should clone own enumerable properties independently of the source request', () => {
+    const request = {
+      context: { marker: 'original' },
+    } as unknown as PayloadRequest
+
+    const clonedRequest = cloneValidationRequest({ request })
+
+    expect(clonedRequest.context).toEqual({ marker: 'original' })
+    expect(clonedRequest.context).not.toBe(request.context)
+  })
+
+  it('should default context, query, and routeParams to empty objects', () => {
+    const request = {} as unknown as PayloadRequest
+
+    const clonedRequest = cloneValidationRequest({ request })
+
+    expect(clonedRequest.context).toEqual({})
+    expect(clonedRequest.query).toEqual({})
+    expect(clonedRequest.routeParams).toEqual({})
+  })
+
+  it('should share properties reused across validation locale passes', () => {
+    const payload = {}
+    const request = {
+      payload,
+      transactionID: 'txn-1',
+    } as unknown as PayloadRequest
+
+    const clonedRequest = cloneValidationRequest({ request })
+
+    expect(clonedRequest.payload).toBe(payload)
+    expect(clonedRequest.transactionID).toBe('txn-1')
+  })
+
   it('should isolate file metadata without copying file buffers', () => {
     const fileBuffer = Buffer.from('validation upload')
     const req = {

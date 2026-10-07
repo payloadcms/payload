@@ -165,7 +165,7 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     square?: {
       url?: string | null;
       width?: number | null;
@@ -358,7 +358,7 @@ export interface MediaWithOverwrite {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     square?: {
       url?: string | null;
       width?: number | null;
@@ -498,7 +498,7 @@ export interface TestMetadatum {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     thumbnail?: {
       url?: string | null;
       width?: number | null;
@@ -640,7 +640,7 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         square?:
@@ -770,7 +770,7 @@ export interface MediaWithOverwriteSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         square?:
@@ -882,7 +882,7 @@ export interface TestMetadataSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         thumbnail?:

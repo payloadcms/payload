@@ -62,7 +62,6 @@ const baseAccess: BaseAccess = {
 }
 
 export default buildConfigWithDefaults({
-  suite: 'base-access',
   config: {
     baseAccess,
     collections: [
@@ -115,4 +114,5 @@ export default buildConfigWithDefaults({
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
+  suite: 'base-access',
 })

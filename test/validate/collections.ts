@@ -1,20 +1,8 @@
-import type { Block, CollectionBeforeChangeHook, CollectionConfig } from 'payload'
+import type { Block, CollectionConfig } from 'payload'
 
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
-import path from 'path'
-import {
-  createCreatedByField,
-  defaultUserCollection,
-  logoutOperation,
-  refreshOperation,
-  saveVersion,
-  ValidationError,
-} from 'payload'
+import { createCreatedByField, defaultUserCollection, ValidationError } from 'payload'
 
-// Direct internal import intentionally exercises the upload write guard.
-// eslint-disable-next-line payload/no-relative-monorepo-imports
-import { uploadFiles } from '../../packages/payload/src/uploads/uploadFiles.js'
-import { devUser } from '../credentials.js'
 import {
   accessEvents,
   fallbackAccessEvents,
@@ -35,203 +23,15 @@ import {
   validationEmptyCollectionSlug,
   validationFallbackCollectionSlug,
   validationNonLocalizedCollectionSlug,
-  validationPublishUploadsDir,
-  validationPublishUploadsSlug,
+  validationRequestFailureTitle,
+  validationTranslatedLabelTitle,
   validationUniqueCollectionSlug,
   validationUploadsDir,
   validationUploadsSlug,
   validationWhereCollectionSlug,
-  validationWriteTargetGlobalSlug,
   writeTargetsSlug,
 } from './shared.js'
-
-const runWriteAttempt: CollectionBeforeChangeHook = async ({ data, operation, req }) => {
-  if (operation !== 'validate') {
-    return data
-  }
-
-  const targetID = data.targetID as string | undefined
-
-  switch (data.writeAttempt) {
-    case 'create':
-      await req.payload.create({
-        collection: writeTargetsSlug,
-        data: { title: 'must not be created' },
-        disableTransaction: true,
-        req,
-      })
-      break
-
-    case 'delete':
-      await req.payload.delete({
-        id: targetID!,
-        collection: writeTargetsSlug,
-        disableTransaction: true,
-        req,
-      })
-      break
-
-    case 'deleteMany':
-      await req.payload.delete({
-        collection: writeTargetsSlug,
-        disableTransaction: true,
-        req,
-        where: {
-          id: {
-            equals: targetID!,
-          },
-        },
-      })
-      break
-
-    case 'forgotPassword':
-      await req.payload.forgotPassword({
-        collection: 'users',
-        data: { email: 'validation-write-guard-forgot-password@example.com' },
-        req,
-      })
-      break
-
-    case 'jobsHandleSchedules':
-      await req.payload.jobs.handleSchedules({
-        allQueues: true,
-        req,
-      })
-      break
-
-    case 'jobsQueue':
-      await req.payload.jobs.queue({
-        input: {},
-        req,
-        task: 'validationWriteGuardProbe',
-      })
-      break
-
-    case 'login':
-      await req.payload.login({
-        collection: 'users',
-        data: { email: devUser.email, password: 'not-the-real-password' },
-        req,
-      })
-      break
-
-    case 'logout':
-      await logoutOperation({
-        collection: req.payload.collections['users']!,
-        req,
-      })
-      break
-
-    case 'refresh':
-      await refreshOperation({
-        collection: req.payload.collections['users']!,
-        req,
-      })
-      break
-
-    case 'resetPassword':
-      await req.payload.resetPassword({
-        collection: 'users',
-        data: { password: 'must-not-be-set', token: 'any-token' },
-        overrideAccess: true,
-        req,
-      })
-      break
-
-    case 'restoreGlobalVersion':
-      await req.payload.restoreGlobalVersion({
-        id: targetID!,
-        slug: validationWriteTargetGlobalSlug,
-        req,
-      })
-      break
-
-    case 'restoreVersion':
-      await req.payload.restoreVersion({
-        id: targetID!,
-        collection: writeTargetsSlug,
-        disableTransaction: true,
-        req,
-      })
-      break
-
-    case 'update':
-      await req.payload.update({
-        id: targetID!,
-        collection: writeTargetsSlug,
-        data: { title: 'must not be updated' },
-        disableTransaction: true,
-        req,
-      })
-      break
-
-    case 'updateGlobal':
-      await req.payload.updateGlobal({
-        slug: validationWriteTargetGlobalSlug,
-        data: {
-          title: 'must not be updated',
-        },
-        req,
-      })
-      break
-
-    case 'updateMany':
-      await req.payload.update({
-        collection: writeTargetsSlug,
-        data: {
-          title: 'must not be updated',
-        },
-        disableTransaction: true,
-        req,
-        where: {
-          id: {
-            equals: targetID!,
-          },
-        },
-      })
-      break
-
-    case 'upload': {
-      const fileData = Buffer.from('must not be uploaded')
-
-      await uploadFiles(
-        req.payload,
-        [
-          {
-            buffer: fileData,
-            path: path.join(validationUploadsDir, 'blocked.txt'),
-          },
-        ],
-        req,
-      )
-      break
-    }
-
-    case 'verifyEmail':
-      await req.payload.verifyEmail({
-        collection: 'users',
-        req,
-        token: 'any-token',
-      })
-      break
-
-    case 'version':
-      await saveVersion({
-        id: targetID,
-        collection: req.payload.collections[writeTargetsSlug]!.config,
-        docWithLocales: {
-          id: targetID,
-          title: 'must not create a version',
-        },
-        operation: 'update',
-        payload: req.payload,
-        req,
-      })
-      break
-  }
-
-  return data
-}
+import { runWriteAttempt } from './writeSafety.js'
 
 // Exercises the operation value that Lexical's Blocks, Link, and Upload features pass down to
 // their nested fields' own `validate` functions and `beforeChange` hooks. `validate` used to
@@ -647,11 +447,6 @@ const validationWhereCollection: CollectionConfig = {
       required: true,
     },
   ],
-  versions: {
-    drafts: {
-      validate: false,
-    },
-  },
   hooks: {
     beforeValidate: [
       ({ context, operation, req }) => {
@@ -663,6 +458,11 @@ const validationWhereCollection: CollectionConfig = {
         })
       },
     ],
+  },
+  versions: {
+    drafts: {
+      validate: false,
+    },
   },
 }
 
@@ -723,47 +523,6 @@ const publishCollection: CollectionConfig = {
 
         return typeof value === 'string' && value.length > 0 ? true : 'Title is required'
       },
-    },
-    {
-      name: 'localizedGroup',
-      type: 'group',
-      fields: [
-        {
-          name: 'value',
-          type: 'text',
-          required: true,
-        },
-      ],
-      localized: true,
-    },
-    {
-      name: 'localizedJSON',
-      type: 'json',
-      localized: true,
-      required: true,
-    },
-    {
-      name: 'localizedRichText',
-      type: 'richText',
-      localized: true,
-      required: true,
-    },
-    {
-      type: 'tabs',
-      tabs: [
-        {
-          name: 'localizedTab',
-          fields: [
-            {
-              name: 'value',
-              type: 'text',
-              required: true,
-            },
-          ],
-          label: 'Localized tab',
-          localized: true,
-        },
-      ],
     },
     {
       name: 'localizedArray',
@@ -833,23 +592,6 @@ const publishCollection: CollectionConfig = {
       minRows: 1,
       required: true,
     },
-    {
-      name: 'nested',
-      type: 'group',
-      fields: [
-        {
-          name: 'localizedJSON',
-          type: 'json',
-          localized: true,
-          required: true,
-        },
-        {
-          name: 'shared',
-          type: 'text',
-          required: true,
-        },
-      ],
-    },
   ],
   hooks: {
     beforeValidate: [
@@ -889,14 +631,29 @@ const publishCollection: CollectionConfig = {
 
 const validationCustomButtonsCollection: CollectionConfig = {
   slug: validationCustomButtonsCollectionSlug,
-  admin: {
-    components: {
-      edit: {
-        beforeDocumentControls: [
-          '/components/CustomValidateAllLocalesButton/index.js#CustomValidateAllLocalesButton',
-          '/components/CustomValidateOtherLocalesButtons/index.js#CustomValidateOtherLocalesButtons',
-        ],
-      },
+  access: {
+    validate: ({ data, req }) => {
+      if (!req.user) {
+        return false
+      }
+
+      if (req.method === 'POST' && data?.title === validationRequestFailureTitle) {
+        throw new ValidationError(
+          {
+            errors: [
+              {
+                label: { en: 'Request failure title' },
+                message: 'The validation request failed.',
+                path: 'title',
+              },
+            ],
+            req,
+          },
+          req.t,
+        )
+      }
+
+      return true
     },
   },
   fields: [
@@ -912,6 +669,32 @@ const validationCustomButtonsCollection: CollectionConfig = {
       required: true,
     },
   ],
+  hooks: {
+    beforeValidate: [
+      ({ data, operation, req }) => {
+        if (operation === 'validate' && data?.title === validationTranslatedLabelTitle) {
+          throw new ValidationError(
+            {
+              errors: [
+                {
+                  label: {
+                    de: 'Übersetzter Titel',
+                    en: 'Translated title',
+                  },
+                  message: 'The translated title is invalid.',
+                  path: 'title',
+                },
+              ],
+              req,
+            },
+            req.t,
+          )
+        }
+
+        return data
+      },
+    ],
+  },
   versions: {
     drafts: {
       validate: false,
@@ -1015,6 +798,12 @@ const validationUniqueCollection: CollectionConfig = {
       unique: true,
     },
     {
+      name: 'localizedUniqueValue',
+      type: 'text',
+      localized: true,
+      unique: true,
+    },
+    {
       name: 'compoundScope',
       type: 'text',
     },
@@ -1064,34 +853,5 @@ export const validationCollections: CollectionConfig[] = [
       staticDir: validationUploadsDir,
     },
     versions: false,
-  },
-  {
-    slug: validationPublishUploadsSlug,
-    access: {
-      validate: () => true,
-    },
-    fields: [
-      {
-        name: 'title',
-        type: 'text',
-        localized: true,
-        required: true,
-      },
-    ],
-    upload: {
-      imageSizes: [
-        {
-          name: 'thumbnail',
-          height: 64,
-          width: 64,
-        },
-      ],
-      staticDir: validationPublishUploadsDir,
-    },
-    versions: {
-      drafts: {
-        validate: false,
-      },
-    },
   },
 ]

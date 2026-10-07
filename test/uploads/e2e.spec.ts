@@ -13,7 +13,7 @@ import type { Config } from './payload-types.js'
 import {
   getColumnSelectorItem,
   openListColumns,
-  toggleColumn,
+  toggleColumns,
 } from '../__helpers/e2e/columns/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
 import {
@@ -297,7 +297,7 @@ describe('Uploads', () => {
       .locator('tr', { hasText: 'Polymorphic upload two' })
       .locator('.select-row__checkbox')
       .click()
-    await listDrawer.getByRole('button', { name: 'Select 1' }).click()
+    await listDrawer.getByRole('button', { name: 'Confirm' }).click()
 
     await saveDocAndAssert(page)
 
@@ -814,7 +814,7 @@ describe('Uploads', () => {
       slug: animatedTypeMedia,
       auth: true,
     })
-    expect(doc.sizes.squareSmall.filename).toMatch(/480x480\.webp$/)
+    expect(doc.variants.squareSmall.filename).toMatch(/480x480\.webp$/)
   })
 
   test('should show resized images', async () => {
@@ -834,20 +834,20 @@ describe('Uploads', () => {
 
     // The per-size detail drawer was replaced by the inline carousel, which no longer surfaces
     // per-size dimensions/formats; verify the generated sizes via the API instead.
-    const { sizes } = pngDoc!
+    const { variants } = pngDoc!
 
-    expect(sizes!.maintainedAspectRatio).toMatchObject({ height: 1024, width: 1024 })
-    expect(sizes!.differentFormatFromMainImage!.mimeType).toBe('image/jpeg')
-    expect(sizes!.maintainedImageSize).toMatchObject({ height: 1600, width: 1600 })
-    expect(sizes!.maintainedImageSizeWithNewFormat).toMatchObject({
+    expect(variants!.maintainedAspectRatio).toMatchObject({ height: 1024, width: 1024 })
+    expect(variants!.differentFormatFromMainImage!.mimeType).toBe('image/jpeg')
+    expect(variants!.maintainedImageSize).toMatchObject({ height: 1600, width: 1600 })
+    expect(variants!.maintainedImageSizeWithNewFormat).toMatchObject({
       height: 1600,
       mimeType: 'image/jpeg',
       width: 1600,
     })
-    expect(sizes!.accidentalSameSize).toMatchObject({ height: 80, width: 320 })
-    expect(sizes!.tablet).toMatchObject({ height: 480, width: 640 })
-    expect(sizes!.mobile).toMatchObject({ height: 240, width: 320 })
-    expect(sizes!.icon).toMatchObject({ height: 16, width: 16 })
+    expect(variants!.accidentalSameSize).toMatchObject({ height: 80, width: 320 })
+    expect(variants!.tablet).toMatchObject({ height: 480, width: 640 })
+    expect(variants!.mobile).toMatchObject({ height: 240, width: 320 })
+    expect(variants!.icon).toMatchObject({ height: 16, width: 16 })
   })
 
   test('should resize and show tiff images', async () => {
@@ -898,7 +898,7 @@ describe('Uploads', () => {
       slug: customFileNameMediaSlug,
       auth: true,
     })
-    expect(doc.sizes.custom.filename).toBe('custom-500x500.png')
+    expect(doc.variants.custom.filename).toBe('custom-500x500.png')
   })
 
   test('should show draft uploads in the relation list', async () => {
@@ -1235,10 +1235,11 @@ describe('Uploads', () => {
       auth: true,
     })
 
-    const acceptableFileSizes = [9431, 9435]
+    // EXIF plus the compact sRGB ICC profile embedded by sharp >= 0.33 (libvips 8.15+)
+    const acceptableFileSizes = [2989]
 
     await expect
-      .poll(() => acceptableFileSizes.includes(mediaDoc.sizes.sizeOne.filesize))
+      .poll(() => acceptableFileSizes.includes(mediaDoc.variants.sizeOne.filesize))
       .toBe(true)
   })
 
@@ -1259,7 +1260,7 @@ describe('Uploads', () => {
     const acceptableFileSizes = [2424, 2445]
 
     await expect
-      .poll(() => acceptableFileSizes.includes(mediaDoc.sizes.sizeTwo.filesize))
+      .poll(() => acceptableFileSizes.includes(mediaDoc.variants.sizeTwo.filesize))
       .toBe(true)
   })
 
@@ -1277,11 +1278,11 @@ describe('Uploads', () => {
       auth: true,
     })
 
-    const acceptableFileSizesForJPEG = [9554, 9575]
+    const acceptableFileSizesForJPEG = [3112]
 
     // without metadata appended, the jpeg image filesize would be 2424
     await expect
-      .poll(() => acceptableFileSizesForJPEG.includes(jpegMediaDoc.sizes.sizeThree.filesize))
+      .poll(() => acceptableFileSizesForJPEG.includes(jpegMediaDoc.variants.sizeThree.filesize))
       .toBe(true)
 
     await gotoAndWaitForForm(page, withOnlyJPEGMetadataURL.create)
@@ -1298,7 +1299,7 @@ describe('Uploads', () => {
     })
 
     // With metadata, the animated image filesize would be 218762
-    await expect.poll(() => webpMediaDoc.sizes.sizeThree.filesize).toBe(211638)
+    await expect.poll(() => webpMediaDoc.variants.sizeThree.filesize).toBe(211638)
   })
 
   test('should show custom upload component', async () => {
@@ -2424,7 +2425,7 @@ describe('Uploads', () => {
       })
 
       // without focal point update this generated size was equal to 1736
-      await expect.poll(() => redDoc.sizes.focalTest.filesize).toBe(1586)
+      await expect.poll(() => redDoc.variants.focalTest.filesize).toBe(1586)
     })
 
     test('should resize image after crop if resizeOptions defined', async () => {
@@ -2485,9 +2486,15 @@ describe('Uploads', () => {
     await page.goto(relationPreviewURL.list)
 
     // Show all columns with relations
-    await toggleColumn(page, { columnLabel: 'Image Without Preview2', targetState: 'on' })
-    await toggleColumn(page, { columnLabel: 'Image With Preview3', targetState: 'on' })
-    await toggleColumn(page, { columnLabel: 'Image Without Preview3', targetState: 'on' })
+    await toggleColumns({
+      columns: [
+        { columnLabel: 'Image Without Preview2', targetState: 'on' },
+        { columnLabel: 'Image With Preview3', targetState: 'on' },
+        { columnLabel: 'Image Without Preview3', targetState: 'on' },
+      ],
+      page,
+      shouldCloseListColumns: true,
+    })
 
     // Wait for the columns to be displayed
     await expect(page.locator('.cell-imageWithoutPreview3')).toBeVisible()

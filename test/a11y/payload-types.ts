@@ -280,6 +280,7 @@ export interface Post {
   accessibilityDisabledSelect?: ('one' | 'two') | null;
   requiredTags: string[];
   relatedPost?: (string | null) | Post;
+  status?: ('draft' | 'published') | null;
   publishedOn?: string | null;
   content?: LexicalRichText<LexicalNodes_D6CBC3A3> | null;
   items?:
@@ -290,7 +291,10 @@ export interface Post {
       }[]
     | null;
   layout?: (TextBlock | ImageBlock)[] | null;
+  publishingNote?: string | null;
+  customLabelNote?: string | null;
   '_h_payload-folders'?: (string | null) | PayloadFolder;
+  readOnlyHierarchy?: (string | PayloadFolder)[] | null;
   featuredImage?: (string | null) | Media;
   createdBy?: {
     relationTo: 'users';
@@ -378,7 +382,7 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     thumbnail?: {
       url?: string | null;
       width?: number | null;
@@ -572,6 +576,7 @@ export interface PostsSelect<T extends boolean = true> {
   accessibilityDisabledSelect?: T;
   requiredTags?: T;
   relatedPost?: T;
+  status?: T;
   publishedOn?: T;
   content?: T;
   items?:
@@ -601,7 +606,10 @@ export interface PostsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  publishingNote?: T;
+  customLabelNote?: T;
   '_h_payload-folders'?: T;
+  readOnlyHierarchy?: T;
   featuredImage?: T;
   createdBy?: T;
   updatedBy?: T;
@@ -634,7 +642,7 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         thumbnail?:

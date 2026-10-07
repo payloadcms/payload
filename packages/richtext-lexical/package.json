@@ -486,7 +486,7 @@
     "swc-plugin-transform-remove-imports": "8.3.0"
   },
   "peerDependencies": {
-    "@faceless-ui/modal": "3.0.1",
+    "@faceless-ui/modal": "3.0.2",
     "@faceless-ui/scroll-info": "2.0.0",
     "payload": "workspace:*",
     "react": "^19.0.1 || ^19.1.2 || ^19.2.1",

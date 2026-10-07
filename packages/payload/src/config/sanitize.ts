@@ -26,6 +26,7 @@ import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
 import { resolveHierarchyCollections } from '../hierarchy/resolveHierarchyCollections.js'
 import { baseBlockFields, formatLabels, sanitizeFields } from '../index.js'
+import { addLLMInstructions } from '../llm-instructions/addLLMInstructions.js'
 import {
   getLockedDocumentsCollection,
   lockedDocumentsCollectionSlug,
@@ -671,12 +672,13 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   }
 
   if (!config.upload) {
-    config.upload = { adapters: [] }
+    config.upload = { adapters: [], transformers: [] }
   }
 
   config.upload.adapters = Array.from(
     new Set(config.collections!.map((c) => c.upload?.adapter).filter(Boolean) as string[]),
   )
+  config.upload.transformers = config.upload.transformers ?? []
 
   // Pass through the email config as is so adapters don't break
   if (incomingConfig.email) {
@@ -689,6 +691,19 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
       isRoot: true,
       parentIsLocalized: false,
     })
+  }
+
+  if (config.llmInstructions !== false) {
+    const instructionsCollection = addLLMInstructions({ config: config as SanitizedConfig })
+
+    config.collections!.push(
+      sanitizeCollection(
+        config as unknown as Config,
+        instructionsCollection,
+        richTextSanitizers,
+        validRelationships,
+      ),
+    )
   }
 
   for (const sanitizeRichText of richTextSanitizers) {

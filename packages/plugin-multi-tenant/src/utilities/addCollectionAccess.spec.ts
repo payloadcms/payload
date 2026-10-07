@@ -105,8 +105,8 @@ describe('addCollectionAccess', () => {
     expect(explicitValidate).toHaveBeenCalledOnce()
   })
 
-  it('should fall back to update access for validate when accessResultCallback is configured', async () => {
-    const documentUpdate = vi.fn(() => true)
+  it('should use update access for validate when an access result override is configured', async () => {
+    const documentUpdate = vi.fn(({ req }: AccessArgs) => req.context.allowUpdate === true)
     const accessResultCallback = vi.fn(({ accessResult }) => accessResult)
     const collection: CollectionConfig = {
       slug: 'posts',
@@ -120,39 +120,24 @@ describe('addCollectionAccess', () => {
       scopes: [createScope(collection, accessResultCallback)],
     })
 
-    await expect(collection.access?.validate?.(createArgs())).resolves.toEqual({
-      tenant: { in: ['tenant-1'] },
-    })
-
-    expect(documentUpdate).toHaveBeenCalledOnce()
-    expect(accessResultCallback).toHaveBeenCalledOnce()
-    expect(accessResultCallback).toHaveBeenCalledWith(
-      expect.objectContaining({ accessKey: 'validate' }),
-    )
-  })
-
-  it('should keep callback wrapping when an access result override is configured', async () => {
-    const documentResult = { published: { equals: true } }
-    const documentRead = vi.fn(() => documentResult)
-    const accessResultCallback = vi.fn(({ accessResult }) => accessResult)
-    const collection: CollectionConfig = {
-      slug: 'posts',
-      access: { read: documentRead },
-      fields: [],
-    }
-    const config = {} as Config
-
-    addCollectionAccess({
-      config,
-      scopes: [createScope(collection, accessResultCallback)],
-    })
-
     expect(config.baseAccess).toBeUndefined()
-    await expect(collection.access?.read?.(createArgs())).resolves.toEqual({
-      and: [documentResult, { tenant: { in: ['tenant-1'] } }],
-    })
-    expect(accessResultCallback).toHaveBeenCalledWith(
-      expect.objectContaining({ accessKey: 'read' }),
+    const deniedArgs = createArgs()
+    deniedArgs.req.context = { allowUpdate: false }
+
+    await expect(collection.access?.validate?.(deniedArgs)).resolves.toBe(false)
+
+    const allowedArgs = createArgs()
+    allowedArgs.req.context = { allowUpdate: true }
+    allowedArgs.req.user!.collection = 'other-users'
+
+    await expect(collection.access?.validate?.(allowedArgs)).resolves.toBe(true)
+    expect(accessResultCallback).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ accessKey: 'validate', accessResult: false }),
+    )
+    expect(accessResultCallback).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ accessKey: 'validate', accessResult: true }),
     )
   })
 })

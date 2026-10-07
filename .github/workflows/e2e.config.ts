@@ -85,6 +85,7 @@ const nextSuites: TestConfig[] = [
   { file: 'query-presets', shards: 1 },
   { file: 'form-state', shards: 1 },
   { file: 'live-preview', shards: 2 },
+  { file: 'llm-instructions', shards: 1 },
   { file: 'localization', shards: 2 },
   { file: 'locked-documents', shards: 1 },
   { file: 'i18n', shards: 1 },
@@ -106,6 +107,7 @@ const nextSuites: TestConfig[] = [
   { file: 'trash', shards: 2 },
   { file: 'versions', shards: 3 },
   { file: 'uploads', shards: 3 },
+  { file: 'upload-transformers', shards: 1 },
 ]
 
 const tanstackSuites: TestConfig[] = nextSuites.map((suite) => ({

@@ -209,6 +209,11 @@ type RichTextAdapterBase<
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
+  /** Convert between stored editor data and Markdown using the editor's configured features. */
+  converters?: {
+    fromMarkdown?: (args: { markdown: string }) => Value
+    toMarkdown?: (args: { data: Value }) => string
+  }
   /**
    * Provide a function that can be used to add items to the import map. This is useful for
    * making modules available to the client.
@@ -270,6 +275,14 @@ type RichTextAdapterBase<
       | 'variant'
     >,
   ) => JSONSchema4
+  /** Editors configured for specific uses, initialized independently from this editor. */
+  presets?: {
+    /**
+     * Editor to use for LLM instructions collection, with both Markdown converters.
+     * This provider should select its own features without inheriting unrestricted root features.
+     */
+    llmInstructions?: MarkdownRichTextAdapterProvider<Value, AdapterProps, ExtraFieldProperties>
+  }
   /**
    * Provide validation function for the richText field. This function is run the same way
    * as other field validation functions.
@@ -325,3 +338,22 @@ export type RichTextAdapterProvider<
   isRoot?: boolean
   parentIsLocalized: boolean
 }) => RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>
+
+/** A rich-text adapter that supports conversion to and from Markdown. */
+export type MarkdownRichTextAdapter<
+  Value extends object = any,
+  AdapterProps = any,
+  ExtraFieldProperties = any,
+> = {
+  converters: Required<
+    NonNullable<RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>['converters']>
+  >
+} & RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>
+
+export type MarkdownRichTextAdapterProvider<
+  Value extends object = object,
+  AdapterProps = any,
+  ExtraFieldProperties = {},
+> = (
+  args: Parameters<RichTextAdapterProvider<Value, AdapterProps, ExtraFieldProperties>>[0],
+) => MarkdownRichTextAdapter<Value, AdapterProps, ExtraFieldProperties>

@@ -326,6 +326,23 @@ export const updateDocument = async <
     result._status = { ...docWithLocales._status }
   }
 
+  // File deletion and writes must occur after beforeChange's field validation. Validation
+  // failures leave both the persisted upload and local files untouched.
+  if (!isDraftOverPublished) {
+    await deleteAssociatedFiles({
+      collectionConfig,
+      config,
+      doc: docWithLocales,
+      files: filesToUpload,
+      overrideDelete: false,
+      req,
+    })
+  }
+
+  if (!collectionConfig.upload.disableLocalStorage) {
+    await uploadFiles(payload, filesToUpload, req)
+  }
+
   if (
     config.localization &&
     hasLocalizeStatusEnabled(collectionConfig) &&

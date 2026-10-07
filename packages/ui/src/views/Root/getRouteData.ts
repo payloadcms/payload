@@ -5,7 +5,6 @@ import type {
   CustomComponent,
   DocumentSubViewTypes,
   Payload,
-  PayloadComponent,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
@@ -68,13 +67,6 @@ export type GetRouteDataArgs = {
   adminRoute: string
   adminViews: AdminViewAdapter
   collectionConfig?: SanitizedCollectionConfig
-  /**
-   * User preferences for a collection.
-   *
-   * These preferences are normally undefined
-   * unless the user is on the list view and the
-   * collection is folder enabled.
-   */
   collectionPreferences?: CollectionPreferences
   currentRoute: string
   globalConfig?: SanitizedGlobalConfig
@@ -89,10 +81,11 @@ export const getRouteData = ({
   adminRoute,
   adminViews,
   collectionConfig,
-  collectionPreferences = undefined,
+  collectionPreferences,
   currentRoute,
   globalConfig,
   payload,
+  searchParams,
   segments,
 }: GetRouteDataArgs): GetRouteDataResult => {
   const { config } = payload
@@ -209,8 +202,11 @@ export const getRouteData = ({
         // --> /collections/:collectionSlug'
         routeParams.collection = collectionConfig.slug
 
-        if (collectionPreferences?.listViewType === 'hierarchy' && collectionConfig.hierarchy) {
-          // Render hierarchy view by default if set in preferences
+        if (
+          collectionConfig.hierarchy &&
+          (searchParams.view === 'hierarchy' ||
+            (!searchParams.view && collectionPreferences?.listViewType === 'hierarchy'))
+        ) {
           ViewToRender = {
             Component: HierarchyView,
           }
@@ -303,17 +299,6 @@ export const getRouteData = ({
           templateClassName = `${segmentTwo}-trash`
           templateType = 'default'
           viewType = 'trash'
-
-          viewActions.push(...(collectionConfig.admin.components?.views?.list?.actions || []))
-        } else if (segmentThree === 'hierarchy' && collectionConfig.hierarchy) {
-          // --> /collections/:collectionSlug/hierarchy
-          ViewToRender = {
-            Component: HierarchyView,
-          }
-
-          templateClassName = `${segmentTwo}-hierarchy`
-          templateType = 'default'
-          viewType = 'hierarchy'
 
           viewActions.push(...(collectionConfig.admin.components?.views?.list?.actions || []))
         } else {

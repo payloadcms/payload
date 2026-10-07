@@ -5,7 +5,7 @@ import { expect } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, instructionsCollectionSlug } from 'payload/shared'
 
 import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
@@ -529,8 +529,7 @@ export async function cleanupModalMedia({ page }: { page: Page }) {
   mediaFixtures.delete(page)
 }
 
-export async function openEditImageDialog({ page, serverURL }: { page: Page; serverURL: string }) {
-  const mediaURL = new AdminUrlUtil(serverURL, 'media')
+export async function createMediaFixture({ page, serverURL }: { page: Page; serverURL: string }) {
   const apiURL = formatAdminURL({ apiRoute: '/api', path: '/media', serverURL })
   const response = await page.request.post(apiURL, {
     multipart: {
@@ -549,6 +548,13 @@ export async function openEditImageDialog({ page, serverURL }: { page: Page; ser
   const { doc } = await response.json()
 
   mediaFixtures.set(page, [...(mediaFixtures.get(page) || []), `${apiURL}/${doc.id}`])
+  return doc
+}
+
+export async function openEditImageDialog({ page, serverURL }: { page: Page; serverURL: string }) {
+  const doc = await createMediaFixture({ page, serverURL })
+  const mediaURL = new AdminUrlUtil(serverURL, 'media')
+
   await page.goto(mediaURL.edit(doc.id))
   await waitForFormReady(page)
   await page.getByRole('button', { name: /edit image/i }).click()
@@ -631,7 +637,7 @@ export async function addCollectionQueryWidget({ page }: { page: Page }) {
   const previousCount = await widgets.count()
   const add = page
     .locator('.dashboard-breadcrumb-dropdown__actions')
-    .getByRole('button', { name: 'Add +', exact: true })
+    .getByRole('button', { name: 'Add +: Add Widget', exact: true })
 
   await add.press('Enter')
   const drawer = page.locator('dialog[id^="widgets-drawer-"]')
@@ -683,4 +689,62 @@ export async function expectPaintedFocus({ page }: { page: Page }) {
       }),
     )
     .toBe(true)
+}
+
+export async function openGlobalAPI({ page, serverURL }: { page: Page; serverURL: string }) {
+  await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/globals/menu', serverURL }))
+  await page.getByRole('link', { name: 'API', exact: true }).click()
+  await expect(page.locator('.query-inspector .monaco-editor')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'toggle fullscreen', exact: true })).toBeVisible()
+}
+
+export async function openNavigation({ page }: { page: Page }) {
+  await expect(page.locator('aside.nav--nav-hydrated')).toBeVisible()
+  const openMenu = page.getByRole('button', { name: 'Open Menu', exact: true })
+
+  if (await openMenu.isVisible()) {
+    await openMenu.click()
+  }
+  await expect(page.locator('aside.nav')).toHaveClass(/nav--nav-open/)
+}
+
+export async function openNavigationFolders({
+  page,
+  serverURL,
+}: {
+  page: Page
+  serverURL: string
+}) {
+  await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
+  await openNavigation({ page })
+  const tab = page.getByRole('tab', { name: /folders/i })
+
+  await tab.click()
+  const sidebar = page.locator('.hierarchy-sidebar-tab:visible')
+
+  await expect(sidebar.getByRole('tree')).toBeVisible()
+  await expect(
+    sidebar.locator('.tree-node__title', { hasText: /^Accessibility folder$/ }),
+  ).toBeVisible()
+  return sidebar
+}
+
+export async function openLLMInstructions({ page, serverURL }: { page: Page; serverURL: string }) {
+  await page.goto(
+    formatAdminURL({
+      adminRoute: '/admin',
+      path: `/collections/${instructionsCollectionSlug}/collection-posts`,
+      serverURL,
+    }),
+  )
+  await expect(page.getByRole('heading', { name: 'posts', exact: true })).toBeVisible()
+
+  const field = page.locator('.llm-instructions')
+
+  await field.getByRole('tab', { name: 'Additional instructions', exact: true }).press('Enter')
+  await expect(
+    field.getByRole('textbox', { name: 'Additional instructions', exact: true }),
+  ).toBeVisible()
+
+  return field
 }
