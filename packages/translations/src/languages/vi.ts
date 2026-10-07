@@ -296,6 +296,7 @@ export const viTranslations: DefaultTranslationsObject = {
     checked: 'Đã kiểm tra',
     clear: 'Xóa',
     clearAll: 'Xóa tất cả',
+    clearSearch: 'Xóa tìm kiếm',
     close: 'Đóng',
     collapse: 'Thu gọn',
     collection: 'Bộ sưu tập',

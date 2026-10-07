@@ -293,6 +293,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     checked: 'Перевірено',
     clear: 'Очистити',
     clearAll: 'Очистити все',
+    clearSearch: 'Очистити пошук',
     close: 'Закрити',
     collapse: 'Згорнути',
     collection: 'Колекція',

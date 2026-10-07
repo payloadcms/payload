@@ -291,6 +291,7 @@ export const csTranslations: DefaultTranslationsObject = {
     checked: 'Zkontrolováno',
     clear: 'Jasný',
     clearAll: 'Vymazat vše',
+    clearSearch: 'Vymazat hledání',
     close: 'Zavřít',
     collapse: 'Sbalit',
     collection: 'Kolekce',

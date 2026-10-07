@@ -305,6 +305,7 @@ export const deTranslations: DefaultTranslationsObject = {
     checked: 'Überprüft',
     clear: 'Leeren',
     clearAll: 'Alles leeren',
+    clearSearch: 'Suche löschen',
     close: 'Schließen',
     collapse: 'Einklappen',
     collection: 'Sammlung',

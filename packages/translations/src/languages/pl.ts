@@ -294,6 +294,7 @@ export const plTranslations: DefaultTranslationsObject = {
     checked: 'Sprawdzone',
     clear: 'Jasne',
     clearAll: 'Wyczyść wszystko',
+    clearSearch: 'Wyczyść wyszukiwanie',
     close: 'Zamknij',
     collapse: 'Zwiń',
     collection: 'Kolekcja',

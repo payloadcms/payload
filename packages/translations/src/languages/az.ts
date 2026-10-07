@@ -298,6 +298,7 @@ export const azTranslations: DefaultTranslationsObject = {
     clear:
       'Payload kontekstində orijinal mətnin mənasını qoruya. İşte Payload terminləri siyahısıdır ki, onlar üzərində çox xüsusi mənalar gəlir:\n    - Kolleksiya: Kolleksiya sənədlərin hamıya ortaq struktur və məqsəd sərbəst olan bir qrupdur. Kolleksiyalar Payload-da məzmunu təşkil etmək və idarə etmək üçün istifadə edilir.\n    - Sahə: Sahə',
     clearAll: 'Hamısını təmizlə',
+    clearSearch: 'Axtarışı təmizlə',
     close: 'Bağla',
     collapse: 'Bağla',
     collection: 'Kolleksiya',

@@ -294,6 +294,7 @@ export const isTranslations: DefaultTranslationsObject = {
     checked: 'Staðfest',
     clear: 'Hreinsa',
     clearAll: 'Hreinsa allt',
+    clearSearch: 'Hreinsa leit',
     close: 'Loka',
     collapse: 'Fella saman',
     collection: 'Safn',

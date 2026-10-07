@@ -299,6 +299,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     checked: 'পরীক্ষিত',
     clear: 'স্পষ্ট',
     clearAll: 'সমস্ত সাফ করুন',
+    clearSearch: 'অনুসন্ধান মুছুন',
     close: 'বন্ধ করুন',
     collapse: 'সংকুচিত করুন',
     collection: 'সংগ্রহ',

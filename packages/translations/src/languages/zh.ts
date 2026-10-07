@@ -278,6 +278,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     checked: '已检查',
     clear: '清除',
     clearAll: '清除全部',
+    clearSearch: '清除搜索',
     close: '关闭',
     collapse: '折叠',
     collection: '收集',

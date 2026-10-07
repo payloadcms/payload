@@ -293,6 +293,7 @@ export const slTranslations: DefaultTranslationsObject = {
     checked: 'Preverjeno',
     clear: 'Čisto',
     clearAll: 'Počisti vse',
+    clearSearch: 'Počisti iskanje',
     close: 'Zapri',
     collapse: 'Strni',
     collection: 'Zbirka',

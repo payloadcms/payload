@@ -296,6 +296,7 @@ export const idTranslations: DefaultTranslationsObject = {
     checked: 'Diperiksa',
     clear: 'Hapus',
     clearAll: 'Hapus Semua',
+    clearSearch: 'Hapus pencarian',
     close: 'Tutup',
     collapse: 'Ciutkan',
     collection: 'Koleksi',

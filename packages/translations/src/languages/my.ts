@@ -299,6 +299,7 @@ export const myTranslations: DefaultTranslationsObject = {
     checked: 'စစ်ဆေးပြီး',
     clear: 'ရှင်းလင်းပါ',
     clearAll: 'အားလုံးကိုရှင်းလင်းပါ',
+    clearSearch: 'ရှာဖွေမှုကို ရှင်းလင်းရန်',
     close: 'ပိတ်',
     collapse: 'ခေါက်သိမ်းပါ။',
     collection: 'စုဆည်းမှု',

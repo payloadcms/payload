@@ -287,6 +287,7 @@ export const arTranslations: DefaultTranslationsObject = {
     checked: 'تم التحقق',
     clear: 'واضح',
     clearAll: 'امسح الكل',
+    clearSearch: 'مسح البحث',
     close: 'إغلاق',
     collapse: 'طيّ',
     collection: 'مجموعة',

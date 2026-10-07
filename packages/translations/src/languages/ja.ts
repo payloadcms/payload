@@ -297,6 +297,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     checked: 'チェックあり',
     clear: 'クリア',
     clearAll: 'すべてクリア',
+    clearSearch: '検索をクリア',
     close: '閉じる',
     collapse: '閉じる',
     collection: 'コレクション',

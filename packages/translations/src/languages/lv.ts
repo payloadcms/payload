@@ -294,6 +294,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     clear:
       'Izpratiet oriģinālteksta nozīmi Payload kontekstā. Šeit ir saraksts ar Payload terminiem, kas ir ļoti specifiskas nozīmes:\n    - Kolekcija: Kolekcija ir dokumentu grupa, kuriem ir kopīga struktūra un mērķis. Kolekcijas tiek izmantotas saturu organizēšanai un pārvaldīšanai Payload.\n    - Lauks: Lauks ir konkrēts datu fragments dokumentā iekš kolekcijas. Lauki definē struktūru un dat',
     clearAll: 'Notīrīt visu',
+    clearSearch: 'Notīrīt meklēšanu',
     close: 'Aizvērt',
     collapse: 'Sakļaut',
     collection: 'Kolekcija',

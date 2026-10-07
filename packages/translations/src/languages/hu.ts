@@ -300,6 +300,7 @@ export const huTranslations: DefaultTranslationsObject = {
     checked: 'Ellenőrizve',
     clear: 'Tiszta',
     clearAll: 'Törölj mindent',
+    clearSearch: 'Keresés törlése',
     close: 'Bezárás',
     collapse: 'Összecsukás',
     collection: 'Gyűjtemény',

@@ -297,6 +297,7 @@ export const caTranslations: DefaultTranslationsObject = {
     checked: 'Comprovat',
     clear: 'Clar',
     clearAll: 'Esborra-ho tot',
+    clearSearch: 'Esborra la cerca',
     close: 'Tanca',
     collapse: 'Replegar',
     collection: 'Col·lecció',

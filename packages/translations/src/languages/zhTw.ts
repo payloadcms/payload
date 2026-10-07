@@ -276,6 +276,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     checked: '已檢查',
     clear: '清除',
     clearAll: '全部清除',
+    clearSearch: '清除搜尋',
     close: '關閉',
     collapse: '收合',
     collection: '集合',

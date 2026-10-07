@@ -300,6 +300,7 @@ export const esTranslations: DefaultTranslationsObject = {
     checked: 'Comprobado',
     clear: 'Claro',
     clearAll: 'Limpiar todo',
+    clearSearch: 'Borrar búsqueda',
     close: 'Cerrar',
     collapse: 'Contraer',
     collection: 'Colección',

@@ -301,6 +301,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     checked: 'Gecontroleerd',
     clear: 'Wissen',
     clearAll: 'Alles wissen',
+    clearSearch: 'Zoekopdracht wissen',
     close: 'Sluiten',
     collapse: 'Samenvouwen',
     collection: 'Collectie',

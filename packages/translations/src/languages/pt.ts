@@ -296,6 +296,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     checked: 'Verificado',
     clear: 'Claro',
     clearAll: 'Limpar Tudo',
+    clearSearch: 'Limpar pesquisa',
     close: 'Fechar',
     collapse: 'Recolher',
     collection: 'Coleção',

@@ -284,6 +284,7 @@ export const heTranslations: DefaultTranslationsObject = {
     clear:
       'בהתחשב במשמעות של הטקסט המקורי בהקשר של Payload. הנה רשימה של מונחים מקוריים של Payload שנושאים משמעויות מסוימות:\n- אוסף: אוסף הוא קבוצה של מסמכים ששותפים למבנה ולמטרה משות',
     clearAll: 'נקה הכל',
+    clearSearch: 'ניקוי החיפוש',
     close: 'סגור',
     collapse: 'כווץ',
     collection: 'אוסף',
