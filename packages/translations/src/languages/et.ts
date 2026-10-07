@@ -556,13 +556,14 @@ export const etTranslations: DefaultTranslationsObject = {
     yes: 'Jah',
   },
   hierarchy: {
+    goTo: 'Mine "{{name}}" juurde',
     itemsMovedTo: '{{title}} viidi üle {{destination}}',
     itemsMovedToRoot: '{{title}} liigutatud juurikasse',
-    moveItemsToRootConfirmation:
-      'Te oled tõstmas <1>{{count}} {{label}}</1> juuretasandile. Oled sa kindel?',
+    moveTo: 'Liiguta...',
     moveToRoot: 'Liikuge juurikasse',
     noParent: 'Ei Vanem',
     noResults: 'No results for "{{query}}"',
+    removeFrom: 'Eemalda {{label}}-st',
     searchLabel: 'Otsi {{label}}',
     searchResults: 'Leitud: {{count}}',
   },

@@ -559,13 +559,14 @@ export const lvTranslations: DefaultTranslationsObject = {
     yes: 'Jā',
   },
   hierarchy: {
+    goTo: 'Dodieties uz "{{name}}"',
     itemsMovedTo: '{{title}} tika pārvietots uz {{destination}}',
     itemsMovedToRoot: '{{title}} pārvietots uz sakni',
-    moveItemsToRootConfirmation:
-      'Jūs gatavojaties pārvietot <1>{{count}} {{label}}</1> uz saknes. Vai esat pārliecināts?',
+    moveTo: 'Pārvietot uz...',
     moveToRoot: 'Pāriet uz Sakni',
     noParent: 'Nav vecāku',
     noResults: 'No results for "{{query}}"',
+    removeFrom: 'Noņemt no {{label}}',
     searchLabel: 'Meklēt {{label}}',
     searchResults: 'Atrasts: {{count}}',
   },

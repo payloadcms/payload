@@ -558,13 +558,14 @@ export const slTranslations: DefaultTranslationsObject = {
     yes: 'Da',
   },
   hierarchy: {
+    goTo: 'Pojdite na "{{name}}"',
     itemsMovedTo: '{{title}} preseljeno v {{destination}}',
     itemsMovedToRoot: '{{title}} premaknjeno v koren',
-    moveItemsToRootConfirmation:
-      'Pravkar boste prestavili <1>{{count}} {{label}}</1> v koren. Ste prepričani?',
+    moveTo: 'Premakni v...',
     moveToRoot: 'Premakni v Root',
     noParent: 'Brez nadrejenega',
     noResults: 'No results for "{{query}}"',
+    removeFrom: 'Odstrani iz {{label}}',
     searchLabel: 'Iskanje {{label}}',
     searchResults: 'Najdeno: {{count}}',
   },

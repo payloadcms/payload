@@ -559,13 +559,14 @@ export const enTranslations = {
     yes: 'Yes',
   },
   hierarchy: {
+    goTo: 'Go to "{{name}}"',
     itemsMovedTo: '{{title}} moved to {{destination}}',
     itemsMovedToRoot: '{{title}} moved to root',
-    moveItemsToRootConfirmation:
-      'You are about to move <1>{{count}} {{label}}</1> to root. Are you sure?',
+    moveTo: 'Move to...',
     moveToRoot: 'Move to Root',
     noParent: 'No Parent',
     noResults: 'No results for "{{query}}"',
+    removeFrom: 'Remove from {{label}}',
     searchLabel: 'Search {{label}}',
     searchResults: 'Found {{count}}',
   },
