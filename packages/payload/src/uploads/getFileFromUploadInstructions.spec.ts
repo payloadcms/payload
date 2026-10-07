@@ -244,6 +244,7 @@ describe('getFileFromUploadInstructions', () => {
         where: {
           or: [
             { filename: { equals: 'preview.png' } },
+            { 'original.filename': { equals: 'preview.png' } },
             { 'variants.preview.filename': { equals: 'preview.png' } },
           ],
         },

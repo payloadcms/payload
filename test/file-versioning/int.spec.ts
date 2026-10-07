@@ -734,6 +734,106 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     }
   })
 
+  for (const hasStoredBytes of [true, false]) {
+    test(`should leave legacy file references unchanged on a metadata-only update with bytes ${hasStoredBytes ? 'present' : 'missing'}`, async ({
+      payload,
+    }) => {
+      const bytes = await readFile(imageFixture)
+      const smallBytes = await sharp(bytes).resize(200, 200).png().toBuffer()
+
+      const storedObjects = hasStoredBytes
+        ? [
+            { data: bytes, filename: 'legacy-metadata.png' },
+            { data: smallBytes, filename: 'legacy-metadata-small.png' },
+          ]
+        : []
+
+      await mkdir(transformedMediaDir, { recursive: true })
+      await Promise.all(
+        storedObjects.map(({ data, filename }) =>
+          writeFile(path.join(transformedMediaDir, filename), data),
+        ),
+      )
+
+      const legacy = await payload.db.create({
+        collection: transformedMediaSlug,
+        data: {
+          alt: 'legacy caption',
+          filename: 'legacy-metadata.png',
+          filesize: bytes.length,
+          mimeType: 'image/png',
+          url: `/api/${transformedMediaSlug}/file/legacy-metadata.png`,
+          variants: {
+            small: {
+              filename: 'legacy-metadata-small.png',
+              filesize: smallBytes.length,
+              height: 200,
+              mimeType: 'image/png',
+              url: `/api/${transformedMediaSlug}/file/legacy-metadata-small.png`,
+              width: 200,
+            },
+          },
+        },
+      })
+      const now = new Date().toISOString()
+
+      await payload.db.createVersion({
+        collectionSlug: transformedMediaSlug,
+        createdAt: now,
+        parent: legacy.id,
+        updatedAt: now,
+        versionData: legacy,
+      })
+
+      const { docs: versionsBefore } = await payload.db.findVersions({
+        collection: transformedMediaSlug,
+        pagination: false,
+        where: { parent: { equals: legacy.id } },
+      })
+      const filesBefore = (await readdir(transformedMediaDir)).sort()
+
+      await payload.update({
+        id: legacy.id,
+        collection: transformedMediaSlug,
+        data: { alt: 'updated caption' },
+        overrideAccess: true,
+      })
+
+      const current = await payload.db.findOne({
+        collection: transformedMediaSlug,
+        where: { id: { equals: legacy.id } },
+      })
+      const { docs: versionsAfter } = await payload.db.findVersions({
+        collection: transformedMediaSlug,
+        pagination: false,
+        where: { parent: { equals: legacy.id } },
+      })
+
+      expect(current?.alt).toBe('updated caption')
+      expect(current).toMatchObject({
+        filename: 'legacy-metadata.png',
+        url: `/api/${transformedMediaSlug}/file/legacy-metadata.png`,
+        variants: {
+          small: {
+            filename: 'legacy-metadata-small.png',
+            url: `/api/${transformedMediaSlug}/file/legacy-metadata-small.png`,
+          },
+        },
+      })
+      expect(current?.original?.filename).toBeFalsy()
+      expect((await readdir(transformedMediaDir)).sort()).toEqual(filesBefore)
+      for (const { data, filename } of storedObjects) {
+        expect(await readFile(path.join(transformedMediaDir, filename))).toEqual(data)
+      }
+      expect(versionsAfter).toHaveLength(versionsBefore.length + 1)
+      for (const previous of versionsBefore) {
+        const retained = versionsAfter.find(({ id }) => String(id) === String(previous.id))
+
+        expect(retained?.version).toEqual(previous.version)
+      }
+    })
+  }
+
   test('should create a readable baseline when a legacy file is first replaced', async ({
     payload,
   }) => {
@@ -2101,6 +2201,71 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       },
     )
   }
+
+  test.options(
+    'should keep files committed by an earlier document when a later bulk update document fails',
+    { db: isTransactionalMongoAdapter },
+    async ({ payload }) => {
+      const first = await payload.create({
+        collection: mediaSlug,
+        data: { alt: 'first' },
+        filePath: imageFixture,
+      })
+      const second = await payload.create({
+        collection: mediaSlug,
+        data: { alt: 'second' },
+        filePath: imageFixture,
+      })
+      const collection = payload.collections[mediaSlug].config
+      const afterChange = collection.hooks.afterChange
+      const bulkOperationsSingleTransaction = payload.db.bulkOperationsSingleTransaction
+
+      const commitTransaction = vi.spyOn(payload.db, 'commitTransaction')
+
+      payload.db.bulkOperationsSingleTransaction = true
+      collection.hooks.afterChange = [
+        ...(afterChange ?? []),
+        ({ doc }) => {
+          if (String(doc.id) === String(second.id)) {
+            throw new Error('Rejected the second document')
+          }
+          return doc
+        },
+      ]
+
+      try {
+        const result = await payload.update({
+          collection: mediaSlug,
+          data: {},
+          disableTransaction: true,
+          filePath: pdfFixture,
+          overrideAccess: true,
+          sort: 'createdAt',
+          where: { id: { in: [first.id, second.id] } },
+        })
+
+        expect(result.docs.map(({ id }) => id)).toEqual([first.id])
+        expect(result.errors).toEqual([
+          expect.objectContaining({ id: second.id, message: 'Rejected the second document' }),
+        ])
+        expect(commitTransaction).toHaveBeenCalledOnce()
+
+        const committed = await payload.db.findOne({
+          collection: mediaSlug,
+          where: { id: { equals: first.id } },
+        })
+
+        expect(committed?.original?.filename).not.toBe(first.original?.filename)
+        for (const filename of storedFilenames(committed!)) {
+          await expect(stat(path.join(mediaDir, filename))).resolves.toBeTruthy()
+        }
+      } finally {
+        collection.hooks.afterChange = afterChange
+        commitTransaction.mockRestore()
+        payload.db.bulkOperationsSingleTransaction = bulkOperationsSingleTransaction
+      }
+    },
+  )
 
   test('should clean a nontransactional delete when its afterOperation hook fails', async ({
     payload,

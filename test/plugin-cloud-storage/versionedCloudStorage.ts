@@ -119,11 +119,18 @@ export const versionedCloudAdapter: Adapter = () => ({
   },
 })
 
+/** Simulates a time-limited provider URL when set. */
+export const publicVersionedCloudURL: { signature?: string } = {}
+
 export const publicVersionedCloudAdapter: Adapter = (args) => ({
   ...versionedCloudAdapter(args),
   name: 'test-public-cloud',
   generateURL: ({ filename, prefix }) =>
-    `https://files.example.test/${prefix ? `${prefix}/` : ''}${encodeURIComponent(filename)}`,
+    `https://files.example.test/${prefix ? `${prefix}/` : ''}${encodeURIComponent(filename)}${
+      publicVersionedCloudURL.signature
+        ? `?signature=${encodeURIComponent(publicVersionedCloudURL.signature)}`
+        : ''
+    }`,
 })
 
 function deleteStoredCloudFile({ storageFilePath }: { storageFilePath: string }): Promise<void> {

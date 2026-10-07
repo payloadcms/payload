@@ -14,10 +14,12 @@ import {
   mediaWithDisabledPluginSlug,
   unversionedCloudMediaSlug,
   versionedCloudMediaSlug,
+  versionedConvertedCloudMediaSlug,
   versionedPublicCloudMediaSlug,
 } from './shared.js'
 import {
   getStoredCloudFiles,
+  publicVersionedCloudURL,
   versionedCloudCalls,
   versionedCloudFailure,
   versionedCloudFiles,
@@ -46,6 +48,7 @@ const getStoredFiles = async ({
 
 test.suite('versioned cloud storage', { config: './config.ts' }, () => {
   test.afterEach(() => {
+    delete publicVersionedCloudURL.signature
     versionedCloudFiles.clear()
     versionedCloudCalls.afterChanges = 0
     versionedCloudCalls.deletes.length = 0
@@ -1487,6 +1490,46 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     } finally {
       hooks.afterDelete = afterDelete
       logged.mockRestore()
+    }
+  })
+
+  test('should give identical transformed uploads different original filenames', async ({
+    payload,
+  }) => {
+    const first = await payload.create({
+      collection: versionedConvertedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+    })
+    const second = await payload.create({
+      collection: versionedConvertedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+    })
+
+    expect(first.original?.filename).toBeTruthy()
+    expect(second.original?.filename).not.toBe(first.original?.filename)
+    expect(second.original?.url).not.toBe(first.original?.url)
+  })
+
+  test('should regenerate provider URLs on every read', async ({ payload }) => {
+    publicVersionedCloudURL.signature = 'first'
+
+    const created = await payload.create({
+      collection: versionedPublicCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+    })
+
+    publicVersionedCloudURL.signature = 'second'
+
+    const read = await payload.findByID({
+      id: created.id,
+      collection: versionedPublicCloudMediaSlug,
+    })
+
+    for (const url of [read.url, read.original?.url]) {
+      expect(new URL(url!).searchParams.get('signature')).toBe('second')
     }
   })
 
