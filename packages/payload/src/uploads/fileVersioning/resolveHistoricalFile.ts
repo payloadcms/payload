@@ -26,55 +26,27 @@ export const resolveHistoricalFile = async ({
   filename: string
   prefix?: string
   req: PayloadRequest
-  versionID?: string
+  versionID: string
 }): Promise<TypeWithID> => {
-  if (versionID) {
-    const { docs } = await req.payload.db.findVersions<JsonObject>({
-      collection: collection.config.slug,
-      limit: 1,
-      req,
-      where: { id: { equals: versionID } },
-    })
-    const matched = docs[0]
+  const { docs } = await req.payload.db.findVersions<JsonObject>({
+    collection: collection.config.slug,
+    limit: 1,
+    req,
+    where: { id: { equals: versionID } },
+  })
+  const matched = docs[0]
 
-    if (!matched) {
-      throw new NotFound(req.t)
-    }
-
-    const historical = await resolveVersionFile({ collection, filename, prefix, req, row: matched })
-
-    if (!historical) {
-      throw new NotFound(req.t)
-    }
-
-    return historical
+  if (!matched) {
+    throw new NotFound(req.t)
   }
 
-  let page = 1
+  const historical = await resolveVersionFile({ collection, filename, prefix, req, row: matched })
 
-  while (true) {
-    const versions = await req.payload.db.findVersions<JsonObject>({
-      collection: collection.config.slug,
-      limit: 100,
-      page,
-      req,
-    })
-
-    for (const row of versions.docs) {
-      const historical = await resolveVersionFile({ collection, filename, prefix, req, row })
-
-      if (historical) {
-        return historical
-      }
-    }
-
-    if (versions.docs.length < 100) {
-      break
-    }
-    page += 1
+  if (!historical) {
+    throw new NotFound(req.t)
   }
 
-  throw new NotFound(req.t)
+  return historical
 }
 
 const resolveVersionFile = async ({

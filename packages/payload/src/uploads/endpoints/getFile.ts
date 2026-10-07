@@ -11,6 +11,7 @@ import type { PayloadRequest } from '../../types/index.js'
 import type { FileHandlerOperation } from '../types.js'
 
 import { APIError } from '../../errors/APIError.js'
+import { NotFound } from '../../errors/NotFound.js'
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { checkFileAccess } from '../checkFileAccess.js'
@@ -58,11 +59,8 @@ export const getFileHandler: PayloadHandler = async (req) => {
     ? await resolveUploadDocument({ collection, filename, prefix, req })
     : undefined
 
-  if (collection.config.versions) {
-    if (!current) {
-      const historical = await resolveHistoricalFile({ collection, filename, prefix, req })
-      return retrieveFileResponse({ collection, doc: historical, filename, prefix, req })
-    }
+  if (collection.config.versions && !current) {
+    throw new NotFound(req.t)
   }
 
   const accessResult = (await checkFileAccess({
