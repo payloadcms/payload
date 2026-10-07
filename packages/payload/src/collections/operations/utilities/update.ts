@@ -188,6 +188,11 @@ export const updateDocument = async <
   // draft, it is safe to delete the old draft file as it is being replaced.
   const isDraftOverPublished = isSavingDraft && docWithLocales._status === 'published'
 
+  const hasManagedLocalUpload =
+    filesToUpload.length > 0 &&
+    Boolean(data.original) &&
+    !collectionConfig.upload.disableLocalStorage
+
   // /////////////////////////////////////
   // beforeValidate - Fields
   // /////////////////////////////////////
@@ -326,7 +331,7 @@ export const updateDocument = async <
 
   // File deletion and writes must occur after beforeChange's field validation. Validation
   // failures leave both the persisted upload and local files untouched.
-  if (!isDraftOverPublished) {
+  if (!isDraftOverPublished && !hasManagedLocalUpload) {
     await deleteAssociatedFiles({
       collectionConfig,
       config,
@@ -337,7 +342,7 @@ export const updateDocument = async <
     })
   }
 
-  if (!collectionConfig.upload.disableLocalStorage) {
+  if (!collectionConfig.upload.disableLocalStorage && !hasManagedLocalUpload) {
     await uploadFiles(payload, filesToUpload, req)
   }
 

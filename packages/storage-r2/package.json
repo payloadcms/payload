@@ -47,7 +47,9 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@payloadcms/plugin-cloud-storage": "workspace:*"
+    "@aws-sdk/client-s3": "^3.614.0",
+    "@payloadcms/plugin-cloud-storage": "workspace:*",
+    "@payloadcms/storage-s3": "workspace:*"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "4.20260218.0",

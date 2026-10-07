@@ -4339,11 +4339,11 @@ test.describe('WCAG 2.2 Level AA', () => {
       const drawer = page.locator('.list-drawer')
 
       await expect(drawer).toBeVisible()
-      await drawer.getByText('modal-dialog-regression.png', { exact: true }).click()
+      await drawer.getByText('modal-dialog-regression-original.png', { exact: true }).click()
       await expect(drawer).toBeHidden()
       const remove = imageField.locator('.upload-relationship-details__actions button').last()
 
-      await expect(imageField).toContainText('modal-dialog-regression.png')
+      await expect(imageField).toContainText('modal-dialog-regression-original.png')
       await expect(remove).toBeVisible()
       await expect(remove).toHaveAccessibleName(/remove/i)
     })
