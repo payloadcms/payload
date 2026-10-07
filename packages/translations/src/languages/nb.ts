@@ -561,13 +561,16 @@ export const nbTranslations: DefaultTranslationsObject = {
     yes: 'Ja',
   },
   hierarchy: {
+    goTo: 'Gå til "{{name}}"',
     itemsMovedTo: '{{title}} flyttet til {{destination}}',
     itemsMovedToRoot: '{{title}} flyttet til roten',
     moveItemsToRootConfirmation:
       'Du er i ferd med å flytte <1>{{count}} {{label}}</1> til roten. Er du sikker?',
+    moveTo: 'Flytt til...',
     moveToRoot: 'Flytt til Rot',
     noParent: 'Ingen forelder',
     noResults: 'No results for "{{query}}"',
+    removeFrom: 'Fjern fra {{label}}',
     searchLabel: 'Søk {{label}}',
     searchResults: 'Fant {{count}}',
   },

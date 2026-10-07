@@ -564,13 +564,16 @@ export const roTranslations: DefaultTranslationsObject = {
     yes: 'Da',
   },
   hierarchy: {
+    goTo: 'Mergi la "{{name}}"',
     itemsMovedTo: '{{title}} s-a mutat la {{destination}}',
     itemsMovedToRoot: '{{title}} a fost mutat la rădăcină',
     moveItemsToRootConfirmation:
       'Sunteți pe cale să mutați <1>{{count}} {{label}}</1> la rădăcină. Sunteți sigur?',
+    moveTo: 'Mută în...',
     moveToRoot: 'Mutați la Rădăcină',
     noParent: 'Fără părinte',
     noResults: 'No results for "{{query}}"',
+    removeFrom: 'Elimină din {{label}}',
     searchLabel: 'Caută {{label}}',
     searchResults: 'Rezultate găsite: {{count}}',
   },

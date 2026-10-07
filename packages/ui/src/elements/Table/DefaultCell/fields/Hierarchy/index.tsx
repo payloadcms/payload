@@ -335,7 +335,7 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
                     requestAnimationFrame(handleOpenModal)
                   }}
                 >
-                  Move to...
+                  {t('hierarchy:moveTo')}
                 </PopupList.Button>
                 <PopupList.Button
                   onClick={() => {
@@ -343,12 +343,12 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
                     void handleRemove()
                   }}
                 >
-                  {`Remove from ${hierarchyLabel}`}
+                  {t('hierarchy:removeFrom', { label: hierarchyLabel })}
                 </PopupList.Button>
                 <PopupList.Divider />
                 <PopupList.Button href={goToHref} onClick={close}>
                   <span className={`${baseClass}__truncate`} title={displayText}>
-                    {`Go to "${displayText}"`}
+                    {t('hierarchy:goTo', { name: displayText })}
                   </span>
                 </PopupList.Button>
               </PopupList.MenuItem>
