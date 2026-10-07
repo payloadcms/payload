@@ -389,6 +389,27 @@ export default buildConfigWithDefaults({
         versions: false,
       },
     ],
+    endpoints:
+      framework === 'tanstack'
+        ? [
+            {
+              handler: async () => {
+                const { tanstackServerAdapter } = await import('@payloadcms/tanstack-start/server')
+
+                await tanstackServerAdapter.setCookie('first-cookie', 'first-value', {
+                  path: '/',
+                })
+                await tanstackServerAdapter.setCookie('second-cookie', 'second-value', {
+                  path: '/',
+                })
+
+                return Response.json({ ok: true })
+              },
+              method: 'get',
+              path: '/set-two-cookies',
+            },
+          ]
+        : [],
     previousSecrets: [rotateSecretOldSecret],
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),

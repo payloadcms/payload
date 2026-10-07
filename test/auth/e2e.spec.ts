@@ -19,7 +19,7 @@ import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.
 import { initPage } from '../__setup/e2e/initPage.js'
 import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { BASE_PATH, refreshTestCookieName, slug } from './shared.js'
+import { BASE_PATH, slug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -531,14 +531,22 @@ describe('Auth', () => {
           return refreshedCookie?.expires
         })
         .not.toBe(initialCookie?.expires)
+    })
 
-      if (process.env.PAYLOAD_FRAMEWORK === 'tanstack-start') {
-        const refreshTestCookie = (await page.context().cookies()).find(
-          (cookie) => cookie.name === refreshTestCookieName,
-        )
+    test('should preserve multiple cookies in a response', async () => {
+      test.skip(process.env.PAYLOAD_FRAMEWORK !== 'tanstack-start')
 
-        expect(refreshTestCookie?.value).toBe('refreshed')
-      }
+      const response = await page.request.get(`${serverURL}/api/set-two-cookies`)
+      const setCookieHeaders = response
+        .headersArray()
+        .filter(({ name }) => name.toLowerCase() === 'set-cookie')
+        .map(({ value }) => value)
+
+      expect(response.ok()).toBe(true)
+      expect(setCookieHeaders).toEqual([
+        'first-cookie=first-value; Path=/',
+        'second-cookie=second-value; Path=/',
+      ])
     })
 
     test('should log user out from logout server function', async () => {

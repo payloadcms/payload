@@ -29,6 +29,4 @@ export const namedSaveToJWTValue = 'namedSaveToJWT value'
 
 export const saveToJWTKey = 'x-custom-jwt-property-name'
 
-export const refreshTestCookieName = 'payload-refresh-test'
-
 export const BASE_PATH: '' | `/${string}` = ''
