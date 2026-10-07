@@ -559,13 +559,14 @@ export const plTranslations: DefaultTranslationsObject = {
     yes: 'Tak',
   },
   hierarchy: {
+    goTo: 'Przejdź do "{{name}}"',
     itemsMovedTo: '{{title}} został przeniesiony do {{destination}}',
     itemsMovedToRoot: '{{title}} przeniesiony do głównego katalogu',
-    moveItemsToRootConfirmation:
-      'Zamierzasz przenieść <1>{{count}} {{label}}</1> do korzenia. Jesteś pewny?',
+    moveTo: 'Przenieś do...',
     moveToRoot: 'Przenieś do korzenia',
     noParent: 'Brak rodzica',
     noResults: 'No results for "{{query}}"',
+    removeFrom: 'Usuń z {{label}}',
     searchLabel: 'Szukaj {{label}}',
     searchResults: 'Znaleziono: {{count}}',
   },

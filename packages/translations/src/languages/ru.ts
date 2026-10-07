@@ -565,13 +565,14 @@ export const ruTranslations: DefaultTranslationsObject = {
     yes: 'Да',
   },
   hierarchy: {
+    goTo: 'Перейти к "{{name}}"',
     itemsMovedTo: '{{title}} перемещен в {{destination}}',
     itemsMovedToRoot: '{{title}} перемещен в корень',
-    moveItemsToRootConfirmation:
-      'Вы собираетесь переместить <1>{{count}} {{label}}</1> в корень. Вы уверены?',
+    moveTo: 'Переместить в...',
     moveToRoot: 'Перейти в Корень',
     noParent: 'Нет родителя',
     noResults: 'No results for "{{query}}"',
+    removeFrom: 'Удалить из {{label}}',
     searchLabel: 'Поиск {{label}}',
     searchResults: 'Найдено: {{count}}',
   },

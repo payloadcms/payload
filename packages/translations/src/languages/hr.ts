@@ -559,13 +559,14 @@ export const hrTranslations: DefaultTranslationsObject = {
     yes: 'Da',
   },
   hierarchy: {
+    goTo: 'Idite na "{{name}}"',
     itemsMovedTo: '{{title}} premješten na {{destination}}',
     itemsMovedToRoot: '{{title}} premješten u korijen',
-    moveItemsToRootConfirmation:
-      'Uskoro ćete premjestiti <1>{{count}} {{label}}</1> u korijen. Jeste li sigurni?',
+    moveTo: 'Premjesti u...',
     moveToRoot: 'Premjesti na korijen',
     noParent: 'Bez nadređenog',
     noResults: 'No results for "{{query}}"',
+    removeFrom: 'Ukloni iz {{label}}',
     searchLabel: 'Pretraži {{label}}',
     searchResults: 'Pronađeno: {{count}}',
   },

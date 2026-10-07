@@ -567,13 +567,14 @@ export const trTranslations: DefaultTranslationsObject = {
     yes: 'Evet',
   },
   hierarchy: {
+    goTo: '"{{name}}" öğesine gidin',
     itemsMovedTo: "{{title}} {{destination}}'ye taşındı",
     itemsMovedToRoot: '{{title}} kök bölüme taşındı.',
-    moveItemsToRootConfirmation:
-      '<1>{{count}} {{label}}</1> köküne taşımayı planlıyorsunuz. Emin misiniz?',
+    moveTo: 'Taşı...',
     moveToRoot: 'Kök Dizinine Taşı',
     noParent: 'Üst Yok',
     noResults: 'No results for "{{query}}"',
+    removeFrom: '{{label}} öğesinden kaldır',
     searchLabel: '{{label}} Ara',
     searchResults: '{{count}} bulundu',
   },

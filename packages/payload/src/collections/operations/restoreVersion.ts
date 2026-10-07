@@ -27,6 +27,7 @@ import {
 } from '../../uploads/fileVersioning/fileOperationManager.js'
 import { runStoredFileRestore } from '../../uploads/fileVersioning/restore.js'
 import { restoreUploadDataFromDocument } from '../../uploads/sanitizeUploadData.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { hasDraftValidationEnabled } from '../../utilities/getVersionsConfig.js'
@@ -59,6 +60,8 @@ export const restoreVersionOperation = async <
 >(
   args: Arguments,
 ): Promise<TData> => {
+  assertNoValidationWrite(args.req)
+
   const {
     id,
     collection: { config: collectionConfig },

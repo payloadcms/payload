@@ -568,13 +568,14 @@ export const huTranslations: DefaultTranslationsObject = {
     yes: 'Igen',
   },
   hierarchy: {
+    goTo: 'Ugrás ide: "{{name}}"',
     itemsMovedTo: '{{title}} átkerült ide: {{destination}}',
     itemsMovedToRoot: '{{title}} áthelyezve a gyökérbe',
-    moveItemsToRootConfirmation:
-      'Ön éppen <1>{{count}} {{label}}</1> áthelyezésére készül a gyökérhez. Biztos benne?',
+    moveTo: 'Áthelyezés ide...',
     moveToRoot: 'Áthelyezés a gyökérhez',
     noParent: 'Nincs Szülő',
     noResults: 'No results for "{{query}}"',
+    removeFrom: 'Eltávolítás innen: {{label}}',
     searchLabel: 'Keresés {{label}}',
     searchResults: 'Találatok száma: {{count}}',
   },

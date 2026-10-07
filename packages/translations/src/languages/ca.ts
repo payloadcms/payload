@@ -564,13 +564,14 @@ export const caTranslations: DefaultTranslationsObject = {
     yes: 'Sí',
   },
   hierarchy: {
+    goTo: 'Vés a "{{name}}"',
     itemsMovedTo: "{{title}} s'ha traslladat a {{destination}}",
     itemsMovedToRoot: "{{title}} s'ha traslladat a l'arrel",
-    moveItemsToRootConfirmation:
-      "Esteu a punt de moure <1>{{count}} {{label}}</1> a l'arrel. N'esteu segur?",
+    moveTo: 'Mou a...',
     moveToRoot: "Mou a l'arrel",
     noParent: 'Sense Pare',
     noResults: 'No results for "{{query}}"',
+    removeFrom: 'Elimina de {{label}}',
     searchLabel: 'Cerca {{label}}',
     searchResults: 'S’han trobat {{count}}',
   },

@@ -3,6 +3,7 @@ import type {
   CollectionPreferences,
   Column,
   ColumnPreference,
+  CurrentHierarchyItem,
   HierarchyViewData,
   ListQuery,
   ListViewClientProps,
@@ -16,6 +17,7 @@ import type {
   SelectType,
 } from 'payload'
 
+import { docAccessOperation } from 'payload'
 import {
   appendDateTimezoneSelectFields,
   appendUploadSelectFields,
@@ -354,6 +356,7 @@ export const renderListView = async (
     typeof collectionConfig.hierarchy === 'object'
       ? (collectionConfig.hierarchy.parentFieldName ?? 'parent')
       : 'parent'
+  const isHierarchyView = viewType === 'hierarchy'
   let hierarchyParentId: null | number | string = null
 
   if (isHierarchyCollection) {
@@ -365,6 +368,40 @@ export const renderListView = async (
         payload.db.defaultIDType === 'number' && isNumber(parentParam)
           ? Number(parentParam)
           : parentParam
+    }
+  }
+
+  let currentHierarchyItem: CurrentHierarchyItem | undefined
+
+  if (isHierarchyCollection && hierarchyParentId !== null) {
+    try {
+      const currentHierarchyDoc = await payload.findByID({
+        id: hierarchyParentId,
+        collection: collectionSlug,
+        depth: 0,
+        disableErrors: true,
+        overrideAccess: false,
+        req,
+        user,
+      })
+
+      if (currentHierarchyDoc) {
+        const { update: hasUpdatePermission } = await docAccessOperation({
+          id: currentHierarchyDoc.id,
+          collection: { config: collectionConfig },
+          data: currentHierarchyDoc,
+          req,
+        })
+        const titleFieldName = collectionConfig.admin?.useAsTitle || 'id'
+
+        currentHierarchyItem = {
+          id: currentHierarchyDoc.id,
+          hasUpdatePermission: Boolean(hasUpdatePermission),
+          title: String(currentHierarchyDoc[titleFieldName] || currentHierarchyDoc.id),
+        }
+      }
+    } catch (err) {
+      payload.logger.warn({ err, msg: `Could not resolve hierarchy item: ${hierarchyParentId}` })
     }
   }
 
@@ -463,9 +500,8 @@ export const renderListView = async (
     }
   }
 
-  // Fetch hierarchy data only for hierarchy view
+  // Resolve hierarchy data for the hierarchy list view.
   let HierarchyIcon: React.ReactNode | undefined
-  const isHierarchyView = viewType === 'hierarchy'
 
   if (isHierarchyCollection && isHierarchyView) {
     // Extract typeFilter from searchParams (comma-separated list of collection slugs)
@@ -592,6 +628,7 @@ export const renderListView = async (
       baseFilter: baseFilterConstraint,
       collectionSlug,
       columnState,
+      currentHierarchyItem,
       disableBulkDelete: collectionConfig.disableBulkDelete ?? disableBulkDelete,
       disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
       disableQueryPresets,

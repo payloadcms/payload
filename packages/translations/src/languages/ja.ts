@@ -560,13 +560,14 @@ export const jaTranslations: DefaultTranslationsObject = {
     yes: 'はい',
   },
   hierarchy: {
+    goTo: '「{{name}}」へ移動してください。',
     itemsMovedTo: '{{title}}は{{destination}}に移動しました',
     itemsMovedToRoot: '{{title}}がルートに移動されました',
-    moveItemsToRootConfirmation:
-      'あなたは<1>{{count}} {{label}} </1>をルートに移動しようとしています。よろしいですか？',
+    moveTo: '移動先...',
     moveToRoot: 'ルートに移動',
     noParent: '親なし',
     noResults: '「{{query}}」に一致する結果がありません',
+    removeFrom: '{{label}} から削除',
     searchLabel: '{{label}}を検索する',
     searchResults: '{{count}}件見つかりました',
   },

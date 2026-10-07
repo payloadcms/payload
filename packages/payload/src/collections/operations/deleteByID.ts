@@ -25,6 +25,7 @@ import {
   completeFileOperationScope,
 } from '../../uploads/fileVersioning/fileOperationManager.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js'
@@ -60,6 +61,8 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
   if (hasFileOperationScope) {
     beginFileOperationScope({ req: args.req })
   }
+
+  assertNoValidationWrite(args.req)
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))

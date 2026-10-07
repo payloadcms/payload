@@ -560,13 +560,14 @@ export const daTranslations: DefaultTranslationsObject = {
     yes: 'Ja',
   },
   hierarchy: {
+    goTo: 'Gå til "{{name}}"',
     itemsMovedTo: '{{title}} flyttet til {{destination}}',
     itemsMovedToRoot: '{{title}} flyttet til rod',
-    moveItemsToRootConfirmation:
-      'Du er ved at flytte <1>{{count}} {{label}}</1> til roden. Er du sikker?',
+    moveTo: 'Flyt til...',
     moveToRoot: 'Flyt til Rod',
     noParent: 'Ingen Forælder',
     noResults: 'No results for "{{query}}"',
+    removeFrom: 'Fjern fra {{label}}',
     searchLabel: 'Søg {{label}}',
     searchResults: 'Fandt {{count}}',
   },
