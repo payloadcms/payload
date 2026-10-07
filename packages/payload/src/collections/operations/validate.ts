@@ -4,6 +4,7 @@ import type { FindOneArgs } from '../../database/types.js'
 import type { CollectionSlug, JsonObject } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { ValidationResult } from '../../types/validation.js'
+import type { ValidationSourceData } from '../../utilities/runValidationLifecycle.js'
 import type { Collection, RequiredDataFromCollectionSlug, TypeWithID } from '../config/types.js'
 
 import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
@@ -14,6 +15,7 @@ import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
+import { flattenDataByLocale } from '../../utilities/flattenDataByLocale.js'
 import { runValidationLifecycle } from '../../utilities/runValidationLifecycle.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { validateUniqueConstraints } from './utilities/validateUniqueConstraints.js'
@@ -26,13 +28,18 @@ export type Arguments<TSlug extends CollectionSlug> = {
   onValidationData?: (data: JsonObject) => void
   overrideAccess: boolean
   req: PayloadRequest
+  skipAccessControl?: boolean
+  skipMutationHooks?: boolean
+  sourceData?: ValidationSourceData
+  trash?: boolean
+  validationOperation?: 'create' | 'update' | 'validate'
 }
 
 export async function validateOperation<TSlug extends CollectionSlug>(
   args: Arguments<TSlug>,
 ): Promise<ValidationResult> {
   const previousOperation = args.req.operation
-  args.req.operation = 'validate'
+  args.req.operation = args.validationOperation ?? 'validate'
 
   try {
     return await validateOperationWithScopedRequest(args)
@@ -49,27 +56,33 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
   onValidationData,
   overrideAccess,
   req,
+  skipAccessControl = false,
+  skipMutationHooks = false,
+  sourceData,
+  trash = false,
+  validationOperation = 'validate',
 }: Arguments<TSlug>): Promise<ValidationResult> {
   const collectionConfig = collection.config
 
-  const accessResult = !overrideAccess
-    ? await executeAccess(
-        { id, slug: collectionConfig.slug, data: incomingData, req },
-        collectionConfig.access.validate,
-      )
-    : true
+  const accessResult =
+    !skipAccessControl && !overrideAccess
+      ? await executeAccess(
+          { id, slug: collectionConfig.slug, data: incomingData, req },
+          collectionConfig.access.validate,
+        )
+      : true
   const hasWherePolicy = hasWhereAccessResult(accessResult)
 
   if (id === undefined && hasWherePolicy) {
     throw new Forbidden(req.t)
   }
 
-  let docWithLocales: JsonObject = {}
+  let docWithLocales: JsonObject = sourceData ? deepCopyObjectSimple(sourceData.docWithLocales) : {}
 
-  if (id !== undefined) {
+  if (id !== undefined && !sourceData) {
     const idWhere = appendNonTrashedFilter({
       enableTrash: collectionConfig.trash,
-      trash: false,
+      trash,
       where: { id: { equals: id } },
     })
     const where = combineQueries(idWhere, accessResult)
@@ -134,19 +147,28 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
   const originalDoc =
     id === undefined
       ? docWithLocales
-      : await afterRead({
-          collection: collectionConfig,
-          context: req.context,
-          depth: 0,
-          doc: deepCopyObjectSimple(docWithLocales),
-          draft,
-          fallbackLocale: null,
-          global: null,
-          locale: req.locale!,
-          overrideAccess: true,
-          req,
-          showHiddenFields: true,
-        })
+      : sourceData
+        ? req.locale === sourceData.originalLocale
+          ? deepCopyObjectSimple(sourceData.originalDoc)
+          : flattenDataByLocale({
+              configBlockReferences: req.payload.config.blocks,
+              docWithLocales,
+              fields: collectionConfig.fields,
+              locale: req.locale!,
+            })
+        : await afterRead({
+            collection: collectionConfig,
+            context: req.context,
+            depth: 0,
+            doc: deepCopyObjectSimple(docWithLocales),
+            draft,
+            fallbackLocale: null,
+            global: null,
+            locale: req.locale!,
+            overrideAccess: true,
+            req,
+            showHiddenFields: true,
+          })
 
   return runValidationLifecycle({
     id,
@@ -182,6 +204,7 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
     originalDoc,
     overrideAccess,
     req,
+    skipMutationHooks,
     validateData: ({ data }) =>
       validateUniqueConstraints({
         id,
@@ -189,5 +212,6 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
         data,
         req,
       }),
+    validationOperation,
   })
 }

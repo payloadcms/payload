@@ -45,6 +45,7 @@ type Args = {
   fieldLabelPath: string
   global: null | SanitizedGlobalConfig
   id?: number | string
+  isValidationOperation: boolean
   mergeLocaleActions: (() => Promise<void> | void)[]
   operation: FieldOperation
   overrideAccess: boolean
@@ -57,6 +58,7 @@ type Args = {
   siblingDoc: JsonObject
   siblingDocWithLocales?: JsonObject
   siblingFields?: (Field | TabAsField)[]
+  skipHooks: boolean
   skipValidation: boolean
   submittedTopLevelFieldNames?: ReadonlySet<string>
 }
@@ -82,6 +84,7 @@ export const promise = async ({
   fieldIndex,
   fieldLabelPath,
   global,
+  isValidationOperation,
   mergeLocaleActions,
   operation,
   overrideAccess,
@@ -94,6 +97,7 @@ export const promise = async ({
   siblingDoc,
   siblingDocWithLocales,
   siblingFields,
+  skipHooks,
   skipValidation,
   submittedTopLevelFieldNames,
 }: Args): Promise<void> => {
@@ -131,6 +135,7 @@ export const promise = async ({
 
   if (fieldAffectsData(field)) {
     const shouldSkipValidationForLocalizedFallback =
+      !isValidationOperation &&
       operation !== 'validate' &&
       fieldShouldBeLocalized({ field, parentIsLocalized }) &&
       operationLocale !== defaultLocale &&
@@ -142,7 +147,7 @@ export const promise = async ({
     }
 
     // Execute hooks
-    if ('hooks' in field && field.hooks?.beforeChange) {
+    if (!skipHooks && 'hooks' in field && field.hooks?.beforeChange) {
       for (const hook of field.hooks.beforeChange) {
         const hookedValue = await hook({
           blockData,
@@ -339,6 +344,7 @@ export const promise = async ({
                     ),
               fields: field.fields,
               global,
+              isValidationOperation,
               mergeLocaleActions,
               operation,
               overrideAccess,
@@ -353,6 +359,7 @@ export const promise = async ({
                 row as JsonObject,
                 siblingDocWithLocales?.[field.name],
               ),
+              skipHooks,
               skipValidation: skipValidationFromHere,
               submittedTopLevelFieldNames,
             }),
@@ -409,6 +416,7 @@ export const promise = async ({
 
                 fields: block.fields,
                 global,
+                isValidationOperation,
                 mergeLocaleActions,
                 operation,
                 overrideAccess,
@@ -420,6 +428,7 @@ export const promise = async ({
                 siblingData: row as JsonObject,
                 siblingDoc: rowSiblingDoc,
                 siblingDocWithLocales: rowSiblingDocWithLocales,
+                skipHooks,
                 skipValidation: skipValidationFromHere,
                 submittedTopLevelFieldNames,
               }),
@@ -453,6 +462,7 @@ export const promise = async ({
               ),
         fields: field.fields,
         global,
+        isValidationOperation,
         mergeLocaleActions,
         operation,
         overrideAccess,
@@ -464,6 +474,7 @@ export const promise = async ({
         siblingData,
         siblingDoc,
         siblingDocWithLocales: siblingDocWithLocales!,
+        skipHooks,
         skipValidation: skipValidationFromHere,
         submittedTopLevelFieldNames,
       })
@@ -524,6 +535,7 @@ export const promise = async ({
             : buildFieldLabel(fieldLabelPath, getTranslatedLabel(fallbackLabel, req.i18n)),
         fields: field.fields,
         global,
+        isValidationOperation,
         mergeLocaleActions,
         operation,
         overrideAccess,
@@ -535,6 +547,7 @@ export const promise = async ({
         siblingData: groupSiblingData,
         siblingDoc: groupSiblingDoc,
         siblingDocWithLocales: groupSiblingDocWithLocales!,
+        skipHooks,
         skipValidation: skipValidationFromHere,
         submittedTopLevelFieldNames,
       })
@@ -572,7 +585,7 @@ export const promise = async ({
 
       const editor: RichTextAdapter = field?.editor
 
-      if (editor?.hooks?.beforeChange?.length) {
+      if (!skipHooks && editor?.hooks?.beforeChange?.length) {
         for (const hook of editor.hooks.beforeChange) {
           const hookedValue = await hook({
             collection,
@@ -658,6 +671,7 @@ export const promise = async ({
               ),
         fields: field.fields,
         global,
+        isValidationOperation,
         mergeLocaleActions,
         operation,
         overrideAccess,
@@ -669,6 +683,7 @@ export const promise = async ({
         siblingData: tabSiblingData,
         siblingDoc: tabSiblingDoc,
         siblingDocWithLocales: tabSiblingDocWithLocales!,
+        skipHooks,
         skipValidation: skipValidationFromHere,
         submittedTopLevelFieldNames,
       })
@@ -692,6 +707,7 @@ export const promise = async ({
             : buildFieldLabel(fieldLabelPath, getTranslatedLabel(field?.label || '', req.i18n)),
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         global,
+        isValidationOperation,
         mergeLocaleActions,
         operation,
         overrideAccess,
@@ -703,6 +719,7 @@ export const promise = async ({
         siblingData,
         siblingDoc,
         siblingDocWithLocales: siblingDocWithLocales!,
+        skipHooks,
         skipValidation: skipValidationFromHere,
         submittedTopLevelFieldNames,
       })

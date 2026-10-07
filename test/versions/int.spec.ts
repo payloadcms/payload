@@ -57,6 +57,47 @@ const dirname = path.dirname(filename)
 const formatGraphQLID = ({ payload }: { payload: Payload }, id: number | string) =>
   payload.db.defaultIDType === 'number' ? id : `"${id}"`
 
+const seedGlobalSiblingLocales = async ({
+  slug,
+  payload,
+  title,
+}: {
+  payload: Payload
+  slug: typeof autoSaveGlobalSlug | typeof draftGlobalSlug
+  title: string
+}) => {
+  for (const locale of ['es', 'de']) {
+    await payload.updateGlobal({
+      slug,
+      data: { title: `${title} ${locale}` },
+      draft: true,
+      locale,
+      overrideAccess: true,
+    })
+  }
+}
+
+const seedDraftCollectionSiblingLocales = async ({
+  id,
+  payload,
+  title,
+}: {
+  id: number | string
+  payload: Payload
+  title: string
+}) => {
+  for (const locale of ['es', 'de']) {
+    await payload.update({
+      id,
+      collection: draftCollectionSlug,
+      data: { title: `${title} ${locale}` },
+      draft: true,
+      locale,
+      overrideAccess: true,
+    })
+  }
+}
+
 test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () => {
   let secondaryAdminUser: JsonObject
   let user: JsonObject
@@ -3710,6 +3751,12 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       test('should have different createdAt in a new version while the same version.createdAt', async ({
         payload,
       }) => {
+        await seedGlobalSiblingLocales({
+          slug: autoSaveGlobalSlug,
+          payload,
+          title: 'Initial global title',
+        })
+
         const doc = await payload.updateGlobal({
           slug: autoSaveGlobalSlug,
           data: { title: 'asd' },
@@ -3984,6 +4031,12 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
     test.describe('Restore', () => {
       test('should allow a version to be restored', async ({ payload }) => {
         const title2 = 'Another updated title in EN'
+
+        await seedGlobalSiblingLocales({
+          slug: autoSaveGlobalSlug,
+          payload,
+          title: 'Restorable global title',
+        })
 
         const updatedGlobal = await payload.updateGlobal({
           slug: autoSaveGlobalSlug,
@@ -4555,6 +4608,12 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       test('should allow a draft to be patched', async ({ payload }) => {
         const originalTitle = 'Here is a published global'
 
+        await seedGlobalSiblingLocales({
+          slug: autoSaveGlobalSlug,
+          payload,
+          title: originalTitle,
+        })
+
         await payload.updateGlobal({
           slug: autoSaveGlobalSlug,
           data: {
@@ -4781,6 +4840,12 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
       expect(draft._status).toStrictEqual('draft')
 
+      await seedDraftCollectionSiblingLocales({
+        id: draft.id,
+        payload,
+        title: 'my doc to publish in the future',
+      })
+
       const currentDate = new Date()
 
       await payload.jobs.queue({
@@ -4836,6 +4901,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             relationTo: draftCollectionSlug,
             value: draft.id,
           },
+          locale: 'en',
           user: {
             relationTo: 'users',
             value: user.id,
@@ -4889,6 +4955,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           relationTo: draftCollectionSlug,
           value: draft.id,
         },
+        localeToPublish: 'en',
         req,
         user: secondaryAdminUser,
       })
@@ -4950,6 +5017,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           relationTo: draftCollectionSlug,
           value: draft.id,
         },
+        localeToPublish: 'en',
         req,
         user: secondaryAdminUser,
       })
@@ -5002,6 +5070,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             relationTo: draftCollectionSlug,
             value: draft.id,
           },
+          locale: 'en',
           user: user.id,
         },
         task: 'schedulePublish',
@@ -5058,6 +5127,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             relationTo: draftCollectionSlug,
             value: draft.id,
           },
+          locale: 'en',
           user: {
             relationTo: 'users',
             value: 0,
@@ -5262,6 +5332,12 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       })
 
       expect(draft._status).toStrictEqual('draft')
+
+      await seedGlobalSiblingLocales({
+        slug: draftGlobalSlug,
+        payload,
+        title: 'i will publish',
+      })
 
       const currentDate = new Date()
 
