@@ -280,6 +280,7 @@ export const skTranslations: DefaultTranslationsObject = {
     all: 'Všetko',
     allCollections: 'Všetky Kolekcie',
     allLocales: 'Všetky lokality',
+    allowedTypes: 'Povolené typy',
     and: 'a',
     anotherUser: 'Iný používateľ',
     anotherUserTakenOver: 'Iný používateľ prevzal úpravy tohto dokumentu.',
@@ -563,6 +564,23 @@ export const skTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Vyhľadávanie {{label}}',
     searchResults: 'Nájdené: {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Ďalšie pokyny',
+    collectionDescription:
+      'Pridajte vlastné pokyny pre kolekciu {{label}}, ktoré pomôžu modelom LLM lepšie prispôsobiť odpovede na zadania.',
+    collectionSystemDescription:
+      'Tieto systémové pokyny pochádzajú z konfiguračného súboru kolekcie a sú vždy zahrnuté.',
+    editInstructions: 'Upraviť pokyny LLM',
+    global: 'Globálny dokument',
+    globalDescription:
+      'Pridajte vlastné pokyny pre globálny dokument {{label}}, ktoré pomôžu modelom LLM lepšie prispôsobiť odpovede na zadania.',
+    globalSystemDescription:
+      'Tieto systémové pokyny pochádzajú z konfiguračného súboru globálneho dokumentu a sú vždy zahrnuté.',
+    instructions: 'Pokyny LLM',
+    systemInstructions: 'Systémové pokyny (iba na čítanie)',
+    targetCannotBeChanged: 'Cieľ pokynov nemožno zmeniť.',
+    title: 'Názov',
   },
   localization: {
     cannotCopySameLocale: 'Nemožno kopírovať do rovnakej lokalizácie.',

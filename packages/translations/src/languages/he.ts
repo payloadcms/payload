@@ -268,6 +268,7 @@ export const heTranslations: DefaultTranslationsObject = {
     all: 'כל',
     allCollections: 'כל האוספים',
     allLocales: 'כל המקומות',
+    allowedTypes: 'סוגים מותרים',
     and: 'וגם',
     anotherUser: 'משתמש אחר',
     anotherUserTakenOver: 'משתמש אחר השתלט על עריכת מסמך זה.',
@@ -549,6 +550,21 @@ export const heTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'חפש {{label}}',
     searchResults: 'נמצאו {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'הנחיות נוספות',
+    collectionDescription:
+      'הוסיפו הנחיות מותאמות אישית לאוסף {{label}} כדי לעזור למודלי LLM להתאים טוב יותר את תשובותיהם לבקשות.',
+    collectionSystemDescription: 'הנחיות מערכת אלה מגיעות מקובץ התצורה של האוסף ונכללות תמיד.',
+    editInstructions: 'עריכת הנחיות LLM',
+    global: 'מסמך גלובלי',
+    globalDescription:
+      'הוסיפו הנחיות מותאמות אישית למסמך הגלובלי {{label}} כדי לעזור למודלי LLM להתאים טוב יותר את תשובותיהם לבקשות.',
+    globalSystemDescription: 'הנחיות מערכת אלה מגיעות מקובץ התצורה של המסמך הגלובלי ונכללות תמיד.',
+    instructions: 'הנחיות LLM',
+    systemInstructions: 'הנחיות מערכת (לקריאה בלבד)',
+    targetCannotBeChanged: 'לא ניתן לשנות את יעד ההנחיות.',
+    title: 'כותרת',
   },
   localization: {
     cannotCopySameLocale: 'לא ניתן להעתיק לאותו מקום',

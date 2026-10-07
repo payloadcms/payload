@@ -277,6 +277,7 @@ export const slTranslations: DefaultTranslationsObject = {
     all: 'Vse',
     allCollections: 'Vse Zbirke',
     allLocales: 'Vse lokacije',
+    allowedTypes: 'Dovoljene vrste',
     and: 'In',
     anotherUser: 'Drug uporabnik',
     anotherUserTakenOver: 'Drug uporabnik je prevzel urejanje tega dokumenta.',
@@ -564,6 +565,23 @@ export const slTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Iskanje {{label}}',
     searchResults: 'Najdeno: {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Dodatna navodila',
+    collectionDescription:
+      'Dodajte navodila po meri za zbirko {{label}}, da bodo modeli LLM bolje prilagodili odgovore na pozive.',
+    collectionSystemDescription:
+      'Ta sistemska navodila izvirajo iz konfiguracijske datoteke zbirke in so vedno vključena.',
+    editInstructions: 'Uredi navodila za LLM',
+    global: 'Globalni dokument',
+    globalDescription:
+      'Dodajte navodila po meri za globalni dokument {{label}}, da bodo modeli LLM bolje prilagodili odgovore na pozive.',
+    globalSystemDescription:
+      'Ta sistemska navodila izvirajo iz konfiguracijske datoteke globalnega dokumenta in so vedno vključena.',
+    instructions: 'Navodila za LLM',
+    systemInstructions: 'Sistemska navodila (samo za branje)',
+    targetCannotBeChanged: 'Cilja navodil ni mogoče spremeniti.',
+    title: 'Naslov',
   },
   localization: {
     cannotCopySameLocale: 'Ni mogoče kopirati v isti jezik',

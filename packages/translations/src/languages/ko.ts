@@ -277,6 +277,7 @@ export const koTranslations: DefaultTranslationsObject = {
     all: '모두',
     allCollections: '모든 컬렉션',
     allLocales: '모든 지역 설정',
+    allowedTypes: '허용된 유형',
     and: '및',
     anotherUser: '다른 사용자',
     anotherUserTakenOver: '다른 사용자가 이 문서의 편집을 인수했습니다.',
@@ -563,6 +564,22 @@ export const koTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: '{{label}} 검색',
     searchResults: '{{count}}개 찾음',
+  },
+  llmInstructions: {
+    additionalInstructions: '추가 지침',
+    collectionDescription:
+      'LLM이 프롬프트에 더 적합한 답변을 제공할 수 있도록 {{label}} 컬렉션에 사용자 지정 지침을 추가하세요.',
+    collectionSystemDescription:
+      '이 시스템 지침은 컬렉션의 구성 파일에서 제공되며 항상 포함됩니다.',
+    editInstructions: 'LLM 지침 편집',
+    global: '글로벌',
+    globalDescription:
+      'LLM이 프롬프트에 더 적합한 답변을 제공할 수 있도록 {{label}} 글로벌에 사용자 지정 지침을 추가하세요.',
+    globalSystemDescription: '이 시스템 지침은 글로벌의 구성 파일에서 제공되며 항상 포함됩니다.',
+    instructions: 'LLM 지침',
+    systemInstructions: '시스템 지침 (읽기 전용)',
+    targetCannotBeChanged: '지침의 대상을 변경할 수 없습니다.',
+    title: '제목',
   },
   localization: {
     cannotCopySameLocale: '동일한 로캘에 복사할 수 없습니다.',

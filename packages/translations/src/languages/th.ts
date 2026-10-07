@@ -271,6 +271,7 @@ export const thTranslations: DefaultTranslationsObject = {
     all: 'ทั้งหมด',
     allCollections: 'คอลเลกชันทั้งหมด',
     allLocales: 'ทุกสถานที่',
+    allowedTypes: 'ประเภทที่อนุญาต',
     and: 'และ',
     anotherUser: 'ผู้ใช้อื่น',
     anotherUserTakenOver: 'ผู้ใช้อื่นเข้าครอบครองการแก้ไขเอกสารนี้แล้ว',
@@ -556,6 +557,23 @@ export const thTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'ค้นหา {{label}}',
     searchResults: 'พบ {{count}} รายการ',
+  },
+  llmInstructions: {
+    additionalInstructions: 'คำแนะนำเพิ่มเติม',
+    collectionDescription:
+      'เพิ่มคำแนะนำที่กำหนดเองสำหรับคอลเลกชัน {{label}} เพื่อช่วยให้ LLM ปรับคำตอบให้เหมาะกับพรอมต์ได้ดียิ่งขึ้น',
+    collectionSystemDescription:
+      'คำแนะนำระบบเหล่านี้มาจากไฟล์การกำหนดค่าของคอลเลกชันและจะรวมไว้เสมอ',
+    editInstructions: 'แก้ไขคำแนะนำ LLM',
+    global: 'เอกสารส่วนกลาง',
+    globalDescription:
+      'เพิ่มคำแนะนำที่กำหนดเองสำหรับเอกสารส่วนกลาง {{label}} เพื่อช่วยให้ LLM ปรับคำตอบให้เหมาะกับพรอมต์ได้ดียิ่งขึ้น',
+    globalSystemDescription:
+      'คำแนะนำระบบเหล่านี้มาจากไฟล์การกำหนดค่าของเอกสารส่วนกลางและจะรวมไว้เสมอ',
+    instructions: 'คำแนะนำ LLM',
+    systemInstructions: 'คำแนะนำระบบ (อ่านอย่างเดียว)',
+    targetCannotBeChanged: 'ไม่สามารถเปลี่ยนเป้าหมายของคำแนะนำได้',
+    title: 'ชื่อเรื่อง',
   },
   localization: {
     cannotCopySameLocale: 'ไม่สามารถคัดลอกไปยังตำแหน่งที่ตั้งเดียวกัน',

@@ -10,6 +10,10 @@
     align-self: stretch;
   }
 
+  .popup-button-list > .popup-divider:first-child {
+    display: none;
+  }
+
   [dir='rtl'] .popup-button-list__text-align--left {
     text-align: right;
   }

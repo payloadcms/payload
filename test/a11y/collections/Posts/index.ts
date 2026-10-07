@@ -261,6 +261,7 @@ export const PostsCollection: CollectionConfig = {
       label: false,
     },
   ],
+  llmInstructions: 'Use descriptive post titles.',
   trash: true,
   versions: {
     drafts: true,
