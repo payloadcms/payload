@@ -4,12 +4,12 @@ import type { ImportMap, SanitizedConfig } from 'payload'
 import { getViewportContent } from '@payloadcms/ui/shared'
 import { renderServerComponent } from '@tanstack/react-start/rsc'
 
-import type { AdminPageMetadata } from './metadata.js'
+import type { AdminPageMetadata } from '../metadata.js'
 
-import { getRequestI18n } from '../utilities/getRequestI18n.server.js'
-import { initAdminContext } from '../utilities/initAdminContext.server.js'
-import { toAdminPageMetadata } from './metadata.js'
-import { createPageRenderServerAdapter } from './server.js'
+import { getRequestI18n } from '../../utilities/getRequestI18n.server.js'
+import { initAdminContext } from '../../utilities/initAdminContext.server.js'
+import { toAdminPageMetadata } from '../metadata.js'
+import { createPageRenderServerAdapter } from '../server.js'
 
 export type LoadAdminPageArgs = {
   config: SanitizedConfig

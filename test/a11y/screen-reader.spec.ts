@@ -36,6 +36,7 @@ import {
   openFirstBlockActions,
   openFolderCreationLocation,
   openLivePreview,
+  openLLMInstructions,
   openLocaleOptions,
   openNavigationFolders,
   openPostsFilter,
@@ -852,6 +853,41 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should announce LLM instruction tabs and the read-only editor', async ({
+      page,
+      screenReader,
+    }) => {
+      const field = await openLLMInstructions({ page, serverURL })
+      const additionalTab = field.getByRole('tab', { name: 'Additional instructions', exact: true })
+      const systemTab = field.getByRole('tab', {
+        name: 'System instructions (read-only)',
+        exact: true,
+      })
+
+      await field.getByRole('textbox').focus()
+
+      const additionalOutput = await captureScreenReaderOutput({
+        action: () => additionalTab.focus(),
+        screenReader,
+      })
+
+      expect(additionalOutput).toMatch(/Additional instructions/i)
+      expect(additionalOutput).toMatch(/selected/i)
+      expect(additionalOutput).toMatch(/tab/i)
+      await page.keyboard.press('ArrowRight')
+      await expect(systemTab).toBeFocused()
+      await page.keyboard.press('Enter')
+      await expect(systemTab).toHaveAttribute('aria-selected', 'true')
+
+      const output = await captureScreenReaderOutput({
+        action: () => field.getByRole('textbox').focus(),
+        screenReader,
+      })
+
+      expect(output).toMatch(/System instructions/i)
+      expect(output).toMatch(/read.only/i)
+    })
+
     test('should announce rich-text upload and relationship filter options in NVDA browse mode', async ({
       page,
       screenReader,

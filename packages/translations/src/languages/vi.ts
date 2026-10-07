@@ -281,6 +281,7 @@ export const viTranslations: DefaultTranslationsObject = {
     all: 'Tất cả',
     allCollections: 'Tất cả Bộ sưu tập',
     allLocales: 'Tất cả ngôn ngữ',
+    allowedTypes: 'Các loại được phép',
     and: 'Và',
     anotherUser: 'Người dùng khác',
     anotherUserTakenOver: 'Người dùng khác đã tiếp quản việc chỉnh sửa tài liệu này.',
@@ -295,6 +296,7 @@ export const viTranslations: DefaultTranslationsObject = {
     checked: 'Đã kiểm tra',
     clear: 'Xóa',
     clearAll: 'Xóa tất cả',
+    clearSearch: 'Xóa tìm kiếm',
     close: 'Đóng',
     collapse: 'Thu gọn',
     collection: 'Bộ sưu tập',
@@ -567,6 +569,23 @@ export const viTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Tìm kiếm {{label}}',
     searchResults: 'Tìm thấy {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Hướng dẫn bổ sung',
+    collectionDescription:
+      'Thêm hướng dẫn tùy chỉnh cho bộ sưu tập {{label}} để giúp các LLM điều chỉnh câu trả lời cho lời nhắc phù hợp hơn.',
+    collectionSystemDescription:
+      'Các hướng dẫn hệ thống này được cung cấp từ tệp cấu hình của bộ sưu tập và luôn được bao gồm.',
+    editInstructions: 'Chỉnh sửa hướng dẫn LLM',
+    global: 'Tài liệu toàn cục',
+    globalDescription:
+      'Thêm hướng dẫn tùy chỉnh cho tài liệu toàn cục {{label}} để giúp các LLM điều chỉnh câu trả lời cho lời nhắc phù hợp hơn.',
+    globalSystemDescription:
+      'Các hướng dẫn hệ thống này được cung cấp từ tệp cấu hình của tài liệu toàn cục và luôn được bao gồm.',
+    instructions: 'Hướng dẫn LLM',
+    systemInstructions: 'Hướng dẫn hệ thống (chỉ đọc)',
+    targetCannotBeChanged: 'Không thể thay đổi đối tượng đích của hướng dẫn.',
+    title: 'Tiêu đề',
   },
   localization: {
     cannotCopySameLocale: 'Không thể sao chép vào cùng một vị trí',

@@ -30,7 +30,7 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
     if (disabled) {
       return true
     }
-    if (!filterByCollection || filterByCollection.length === 0) {
+    if (filterByCollection === undefined) {
       return false
     }
     return !isSuperset(allowedCollections, filterByCollection)
@@ -75,6 +75,7 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
   return (
     <div
       aria-current={isSelected ? 'location' : undefined}
+      aria-disabled={isDisabled || undefined}
       className={[
         baseClass,
         isExpanded && `${baseClass}--expanded`,
@@ -84,7 +85,7 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
         .filter(Boolean)
         .join(' ')}
       onClick={isDisabled ? undefined : handleRowClick}
-      onKeyDown={handleKeyDown}
+      onKeyDown={isDisabled ? undefined : handleKeyDown}
       role="button"
       tabIndex={isDisabled ? -1 : 0}
     >

@@ -281,6 +281,7 @@ export const azTranslations: DefaultTranslationsObject = {
     all: 'Hamısı',
     allCollections: 'Bütün kolleksiyalar',
     allLocales: 'Bütün lokal məkanlar',
+    allowedTypes: 'İcazə verilən növlər',
     and: 'Və',
     anotherUser: 'Başqa bir istifadəçi',
     anotherUserTakenOver: 'Başqa bir istifadəçi bu sənədin redaktəsini ələ keçirdi.',
@@ -297,6 +298,7 @@ export const azTranslations: DefaultTranslationsObject = {
     clear:
       'Payload kontekstində orijinal mətnin mənasını qoruya. İşte Payload terminləri siyahısıdır ki, onlar üzərində çox xüsusi mənalar gəlir:\n    - Kolleksiya: Kolleksiya sənədlərin hamıya ortaq struktur və məqsəd sərbəst olan bir qrupdur. Kolleksiyalar Payload-da məzmunu təşkil etmək və idarə etmək üçün istifadə edilir.\n    - Sahə: Sahə',
     clearAll: 'Hamısını təmizlə',
+    clearSearch: 'Axtarışı təmizlə',
     close: 'Bağla',
     collapse: 'Bağla',
     collection: 'Kolleksiya',
@@ -572,6 +574,23 @@ export const azTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Axtar {{label}}',
     searchResults: '{{count}} tapıldı',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Əlavə təlimatlar',
+    collectionDescription:
+      'LLM-lərin sorğulara daha uyğun cavablar verməsinə kömək etmək üçün {{label}} kolleksiyasına xüsusi təlimatlar əlavə edin.',
+    collectionSystemDescription:
+      'Bu sistem təlimatları kolleksiyanın konfiqurasiya faylından götürülür və həmişə daxil edilir.',
+    editInstructions: 'LLM təlimatlarını redaktə et',
+    global: 'Qlobal',
+    globalDescription:
+      'LLM-lərin sorğulara daha uyğun cavablar verməsinə kömək etmək üçün {{label}} qlobal sənədinə xüsusi təlimatlar əlavə edin.',
+    globalSystemDescription:
+      'Bu sistem təlimatları qlobal sənədin konfiqurasiya faylından götürülür və həmişə daxil edilir.',
+    instructions: 'LLM təlimatları',
+    systemInstructions: 'Sistem təlimatları (yalnız oxumaq üçün)',
+    targetCannotBeChanged: 'Təlimatların hədəfi dəyişdirilə bilməz.',
+    title: 'Başlıq',
   },
   localization: {
     cannotCopySameLocale: 'Eyni dildə köçürmək mümkün deyil',
