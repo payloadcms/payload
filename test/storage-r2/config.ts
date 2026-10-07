@@ -3,10 +3,12 @@ import type { GetPlatformProxyOptions } from 'wrangler'
 
 import { getCloudflareContext } from '@opennextjs/cloudflare'
 import { r2Storage } from '@payloadcms/storage-r2'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { storageMediaSharpOptions } from '../__helpers/shared/storageMediaSharpOptions.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
@@ -59,6 +61,16 @@ export default buildConfigWithDefaults({
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
+    upload: {
+      transformers: [
+        sharpTransformer({
+          collections: {
+            'media-client': storageMediaSharpOptions,
+            [mediaSlug]: storageMediaSharpOptions,
+          },
+        }),
+      ],
+    },
   },
   seed: async (payload) => {
     await payload.create({
@@ -67,6 +79,7 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
   },
 })

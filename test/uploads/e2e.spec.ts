@@ -13,7 +13,7 @@ import type { Config } from './payload-types.js'
 import {
   getColumnSelectorItem,
   openListColumns,
-  toggleColumn,
+  toggleColumns,
 } from '../__helpers/e2e/columns/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
 import {
@@ -213,7 +213,9 @@ describe('Uploads', () => {
 
   test('should show upload filename in upload collection list', async () => {
     await page.goto(mediaURL.list)
-    const audioUpload = page.locator('tbody .cell-filename', { hasText: exactText('audio.mp3') })
+    const audioUpload = page.locator('tbody .cell-filename', {
+      hasText: exactText('audio-original.mp3'),
+    })
     await expect(audioUpload).toBeVisible()
 
     const imageUpload = page.locator('tbody .cell-filename', { hasText: exactText('image.png') })
@@ -241,6 +243,7 @@ describe('Uploads', () => {
         depth: 0,
         limit: 1,
         pagination: false,
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -277,6 +280,7 @@ describe('Uploads', () => {
     const relationDoc = await payload.create({
       collection: relationSlug,
       data: {},
+      overrideAccess: true,
     })
 
     await page.goto(relationURL.edit(relationDoc.id))
@@ -295,7 +299,7 @@ describe('Uploads', () => {
       .locator('tr', { hasText: 'Polymorphic upload two' })
       .locator('.select-row__checkbox')
       .click()
-    await listDrawer.getByRole('button', { name: 'Select 1' }).click()
+    await listDrawer.getByRole('button', { name: 'Confirm' }).click()
 
     await saveDocAndAssert(page)
 
@@ -308,6 +312,7 @@ describe('Uploads', () => {
             equals: relationDoc.id,
           },
         },
+        overrideAccess: true,
       })
     ).docs[0] as any
 
@@ -332,6 +337,7 @@ describe('Uploads', () => {
         depth: 0,
         limit: 1,
         pagination: false,
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -348,6 +354,7 @@ describe('Uploads', () => {
         depth: 0,
         limit: 1,
         pagination: false,
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -373,6 +380,7 @@ describe('Uploads', () => {
             equals: 'image/png',
           },
         },
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -392,6 +400,7 @@ describe('Uploads', () => {
         depth: 0,
         limit: 1,
         pagination: false,
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -425,6 +434,7 @@ describe('Uploads', () => {
         where: {
           mimeType: { contains: 'image/' },
         },
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -456,6 +466,7 @@ describe('Uploads', () => {
         where: {
           mimeType: { contains: 'image/' },
         },
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -488,6 +499,7 @@ describe('Uploads', () => {
         where: {
           mimeType: { contains: 'image/' },
         },
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -804,7 +816,7 @@ describe('Uploads', () => {
       slug: animatedTypeMedia,
       auth: true,
     })
-    expect(doc.sizes.squareSmall.filename).toMatch(/480x480\.webp$/)
+    expect(doc.variants.squareSmall.filename).toMatch(/480x480\.webp$/)
   })
 
   test('should show resized images', async () => {
@@ -818,25 +830,26 @@ describe('Uploads', () => {
             equals: 'image/png',
           },
         },
+        overrideAccess: true,
       })
     ).docs[0]
 
     // The per-size detail drawer was replaced by the inline carousel, which no longer surfaces
     // per-size dimensions/formats; verify the generated sizes via the API instead.
-    const { sizes } = pngDoc!
+    const { variants } = pngDoc!
 
-    expect(sizes!.maintainedAspectRatio).toMatchObject({ height: 1024, width: 1024 })
-    expect(sizes!.differentFormatFromMainImage!.mimeType).toBe('image/jpeg')
-    expect(sizes!.maintainedImageSize).toMatchObject({ height: 1600, width: 1600 })
-    expect(sizes!.maintainedImageSizeWithNewFormat).toMatchObject({
+    expect(variants!.maintainedAspectRatio).toMatchObject({ height: 1024, width: 1024 })
+    expect(variants!.differentFormatFromMainImage!.mimeType).toBe('image/jpeg')
+    expect(variants!.maintainedImageSize).toMatchObject({ height: 1600, width: 1600 })
+    expect(variants!.maintainedImageSizeWithNewFormat).toMatchObject({
       height: 1600,
       mimeType: 'image/jpeg',
       width: 1600,
     })
-    expect(sizes!.accidentalSameSize).toMatchObject({ height: 80, width: 320 })
-    expect(sizes!.tablet).toMatchObject({ height: 480, width: 640 })
-    expect(sizes!.mobile).toMatchObject({ height: 240, width: 320 })
-    expect(sizes!.icon).toMatchObject({ height: 16, width: 16 })
+    expect(variants!.accidentalSameSize).toMatchObject({ height: 80, width: 320 })
+    expect(variants!.tablet).toMatchObject({ height: 480, width: 640 })
+    expect(variants!.mobile).toMatchObject({ height: 240, width: 320 })
+    expect(variants!.icon).toMatchObject({ height: 16, width: 16 })
   })
 
   test('should resize and show tiff images', async () => {
@@ -887,7 +900,7 @@ describe('Uploads', () => {
       slug: customFileNameMediaSlug,
       auth: true,
     })
-    expect(doc.sizes.custom.filename).toBe('custom-500x500.png')
+    expect(doc.variants.custom.filename).toBe('custom-500x500.png')
   })
 
   test('should show draft uploads in the relation list', async () => {
@@ -941,6 +954,7 @@ describe('Uploads', () => {
           collection: audioSlug,
           depth: 0,
           pagination: false,
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -986,6 +1000,7 @@ describe('Uploads', () => {
           collection: audioSlug,
           depth: 0,
           pagination: false,
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -1111,6 +1126,7 @@ describe('Uploads', () => {
             equals: 'image/png',
           },
         },
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -1138,6 +1154,7 @@ describe('Uploads', () => {
             equals: 'image/png',
           },
         },
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -1168,6 +1185,7 @@ describe('Uploads', () => {
         depth: 0,
         limit: 1,
         pagination: false,
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -1219,10 +1237,11 @@ describe('Uploads', () => {
       auth: true,
     })
 
-    const acceptableFileSizes = [9431, 9435]
+    // EXIF plus the compact sRGB ICC profile embedded by sharp >= 0.33 (libvips 8.15+)
+    const acceptableFileSizes = [2989]
 
     await expect
-      .poll(() => acceptableFileSizes.includes(mediaDoc.sizes.sizeOne.filesize))
+      .poll(() => acceptableFileSizes.includes(mediaDoc.variants.sizeOne.filesize))
       .toBe(true)
   })
 
@@ -1243,7 +1262,7 @@ describe('Uploads', () => {
     const acceptableFileSizes = [2424, 2445]
 
     await expect
-      .poll(() => acceptableFileSizes.includes(mediaDoc.sizes.sizeTwo.filesize))
+      .poll(() => acceptableFileSizes.includes(mediaDoc.variants.sizeTwo.filesize))
       .toBe(true)
   })
 
@@ -1261,11 +1280,11 @@ describe('Uploads', () => {
       auth: true,
     })
 
-    const acceptableFileSizesForJPEG = [9554, 9575]
+    const acceptableFileSizesForJPEG = [3112]
 
     // without metadata appended, the jpeg image filesize would be 2424
     await expect
-      .poll(() => acceptableFileSizesForJPEG.includes(jpegMediaDoc.sizes.sizeThree.filesize))
+      .poll(() => acceptableFileSizesForJPEG.includes(jpegMediaDoc.variants.sizeThree.filesize))
       .toBe(true)
 
     await gotoAndWaitForForm(page, withOnlyJPEGMetadataURL.create)
@@ -1282,7 +1301,7 @@ describe('Uploads', () => {
     })
 
     // With metadata, the animated image filesize would be 218762
-    await expect.poll(() => webpMediaDoc.sizes.sizeThree.filesize).toBe(211638)
+    await expect.poll(() => webpMediaDoc.variants.sizeThree.filesize).toBe(211638)
   })
 
   test('should show custom upload component', async () => {
@@ -1331,7 +1350,7 @@ describe('Uploads', () => {
     // Ensure the URL ends correctly
     await expect
       .poll(() => href)
-      .toMatch(/\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
+      .toMatch(/\/api\/admin-thumbnail-size\/file\/test-image-original(-\d+)?\.png$/i)
 
     // Ensure no "-100x100" or any similar suffix
     await expect.poll(() => !/-\d+x\d+\.png$/.test(href!)).toBe(true)
@@ -1373,7 +1392,7 @@ describe('Uploads', () => {
       .locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem a')
       .getAttribute('href')
 
-    expect(href).toMatch(/\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
+    expect(href).toMatch(/\/api\/admin-thumbnail-size\/file\/test-image-original(-\d+)?\.png$/i)
     expect(href).not.toMatch(/-\d+x\d+\.png$/)
   })
 
@@ -2408,7 +2427,7 @@ describe('Uploads', () => {
       })
 
       // without focal point update this generated size was equal to 1736
-      await expect.poll(() => redDoc.sizes.focalTest.filesize).toBe(1586)
+      await expect.poll(() => redDoc.variants.focalTest.filesize).toBe(1586)
     })
 
     test('should resize image after crop if resizeOptions defined', async () => {
@@ -2469,9 +2488,15 @@ describe('Uploads', () => {
     await page.goto(relationPreviewURL.list)
 
     // Show all columns with relations
-    await toggleColumn(page, { columnLabel: 'Image Without Preview2', targetState: 'on' })
-    await toggleColumn(page, { columnLabel: 'Image With Preview3', targetState: 'on' })
-    await toggleColumn(page, { columnLabel: 'Image Without Preview3', targetState: 'on' })
+    await toggleColumns({
+      columns: [
+        { columnLabel: 'Image Without Preview2', targetState: 'on' },
+        { columnLabel: 'Image With Preview3', targetState: 'on' },
+        { columnLabel: 'Image Without Preview3', targetState: 'on' },
+      ],
+      page,
+      shouldCloseListColumns: true,
+    })
 
     // Wait for the columns to be displayed
     await expect(page.locator('.cell-imageWithoutPreview3')).toBeVisible()
@@ -2512,6 +2537,7 @@ describe('Uploads', () => {
       data: {
         title: 'test',
       },
+      overrideAccess: true,
     })
     await page.goto(hideFileInputOnCreateURL.edit(doc.id))
 
@@ -2553,7 +2579,7 @@ describe('Uploads', () => {
       const thumbnail = page.locator('#field-withinRange div.thumbnail > img')
       await expect(thumbnail).toHaveAttribute(
         'src',
-        /\/api\/enlarge\/file\/test-image-180x50\.jpg(\?.*)?$/,
+        /\/api\/enlarge\/file\/test-image-original-180x50\.jpg(\?.*)?$/,
       )
     })
 
@@ -2565,7 +2591,7 @@ describe('Uploads', () => {
       const thumbnail = page.locator('#field-nextSmallestOutOfRange div.thumbnail > img')
       await expect(thumbnail).toHaveAttribute(
         'src',
-        /\/api\/focal-only\/file\/test-image-400x300\.jpg(\?.*)?$/,
+        /\/api\/focal-only\/file\/test-image-original-400x300\.jpg(\?.*)?$/,
       )
     })
 
@@ -2575,7 +2601,10 @@ describe('Uploads', () => {
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'small.png'))
       await page.locator('dialog button#action-save').click()
       const thumbnail = page.locator('#field-original div.thumbnail > img')
-      await expect(thumbnail).toHaveAttribute('src', /\/api\/focal-only\/file\/small\.png(\?.*)?$/)
+      await expect(thumbnail).toHaveAttribute(
+        'src',
+        /\/api\/focal-only\/file\/small-original\.png(\?.*)?$/,
+      )
     })
   })
 
@@ -2596,7 +2625,7 @@ describe('Uploads', () => {
 
     const imageUploadImg = imageUploadCell.locator('.thumbnail')
     await expect(imageUploadImg).toBeVisible()
-    await expect(imageRelationshipCell).toHaveText('image.png')
+    await expect(imageRelationshipCell).toHaveText('image-original.png')
 
     // Navigate back to page 1 using the left arrow
     const prevPageButton = page.locator('.clickable-arrow--left')
@@ -2647,8 +2676,13 @@ describe('Uploads', () => {
   })
 
   test('should be able to replace the file even if the user doesnt have delete access', async () => {
-    const docID = (await payload.find({ collection: mediaWithoutDeleteAccessSlug, limit: 1 }))
-      .docs[0]?.id as string
+    const docID = (
+      await payload.find({
+        collection: mediaWithoutDeleteAccessSlug,
+        limit: 1,
+        overrideAccess: true,
+      })
+    ).docs[0]?.id as string
     await gotoAndWaitForForm(page, mediaWithoutDeleteAccessURL.edit(docID))
     // Replacing the file is available even without delete access
     await page.locator('.file-toolbar__filename-btn').click()
@@ -2664,9 +2698,13 @@ describe('Uploads', () => {
     await expect(filename).toHaveValue('test-image.jpg')
     await saveDocAndAssert(page)
     const filenameFromAPI = (
-      await payload.find({ collection: mediaWithoutDeleteAccessSlug, limit: 1 })
+      await payload.find({
+        collection: mediaWithoutDeleteAccessSlug,
+        limit: 1,
+        overrideAccess: true,
+      })
     ).docs[0]?.filename
-    expect(filenameFromAPI).toBe('test-image.jpg')
+    expect(filenameFromAPI).toBe('test-image-original.jpg')
   })
 
   test('should not show image sizes in column selector in list view if imageSize has admin.disableListColumn true', async () => {
@@ -2954,6 +2992,7 @@ describe('Uploads', () => {
       data: {
         title: 'Upload without file',
       },
+      overrideAccess: true,
     })
 
     const relationDoc = await payload.create({
@@ -2962,6 +3001,7 @@ describe('Uploads', () => {
         title: 'Relation document',
         uploadField: uploadDoc.id,
       },
+      overrideAccess: true,
     })
 
     await page.goto(relationToNoFilesRequiredURL.edit(relationDoc.id))
@@ -3016,6 +3056,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'image/png' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3033,6 +3074,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'audio/mpeg' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3052,6 +3094,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'application/pdf' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3071,6 +3114,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'audio/mpeg' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3090,6 +3134,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'video/mp4' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3109,6 +3154,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'image/png' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3129,6 +3175,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'image/png' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3146,6 +3193,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'audio/mpeg' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3165,6 +3213,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'audio/mpeg' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3182,6 +3231,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'application/pdf' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3198,6 +3248,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'image/png' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3216,6 +3267,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'video/mp4' } },
+          overrideAccess: true,
         })
       ).docs[0]
 

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/storage-r2",
-  "version": "4.0.0-canary.36",
+  "version": "4.0.0-canary.38",
   "description": "Payload storage adapter for Cloudflare R2",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -47,7 +47,9 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@payloadcms/plugin-cloud-storage": "workspace:*"
+    "@aws-sdk/client-s3": "^3.614.0",
+    "@payloadcms/plugin-cloud-storage": "workspace:*",
+    "@payloadcms/storage-s3": "workspace:*"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "4.20260218.0",

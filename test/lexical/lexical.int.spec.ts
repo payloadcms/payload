@@ -3,12 +3,13 @@ import type {
   SerializedLexicalNode,
   SerializedParagraphNode,
 } from '@payloadcms/richtext-lexical/lexical'
-import type { Block, BlocksField, BlockSlug, Config, PaginatedDocs } from 'payload'
+import type { Block, BlocksField, BlockSlug, Config, PaginatedDocs, Payload } from 'payload'
 
 import {
   BlocksFeature,
   buildEditorState,
   type DefaultNodeTypes,
+  getEnabledNodes,
   lexicalEditor,
   type LexicalRichTextAdapter,
   LinkFeature,
@@ -20,7 +21,15 @@ import {
   type SerializedUploadNode,
   UploadFeature,
 } from '@payloadcms/richtext-lexical'
-import { configToJSONSchema, sanitizeConfig } from 'payload'
+import { createHeadlessEditor } from '@payloadcms/richtext-lexical/lexical/headless'
+import {
+  configToJSONSchema,
+  createPayloadRequest,
+  getCollectionInputSchema,
+  sanitizeConfig,
+  validateCollectionData,
+  ValidationError,
+} from 'payload'
 import { generateTypes } from 'payload/node'
 import { sanitizeUrl } from 'payload/shared'
 import { expect } from 'vitest'
@@ -79,7 +88,7 @@ let createdJPGDocID: number | string = null
 let createdTextDocID: number | string = null
 let createdRichTextDocID: number | string = null
 
-test.suite({ config: './config.ts' })('Lexical', () => {
+test.suite('Lexical', { config: './config.ts' }, () => {
   test.beforeEach(async ({ payload, restClient }) => {
     await restClient.login({
       slug: 'users',
@@ -90,6 +99,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       await payload.find({
         collection: arrayFieldsSlug,
         depth: 0,
+        overrideAccess: true,
         where: {
           title: {
             equals: 'array doc 1',
@@ -102,9 +112,10 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       await payload.find({
         collection: uploadsSlug,
         depth: 0,
+        overrideAccess: true,
         where: {
           filename: {
-            equals: 'payload.jpg',
+            equals: 'payload-original.jpg',
           },
         },
       })
@@ -114,6 +125,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       await payload.find({
         collection: textFieldsSlug,
         depth: 0,
+        overrideAccess: true,
         where: {
           text: {
             equals: 'Seeded text document',
@@ -126,6 +138,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       await payload.find({
         collection: richTextFieldsSlug,
         depth: 0,
+        overrideAccess: true,
         where: {
           title: {
             equals: 'Rich Text',
@@ -143,11 +156,11 @@ test.suite({ config: './config.ts' })('Lexical', () => {
             nodes: [
               {
                 type: 'heading',
-                tag: 'h1',
                 children: [],
                 direction: 'ltr',
                 format: '',
                 indent: 0,
+                tag: 'h1',
                 version: 1,
               },
             ],
@@ -245,6 +258,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       const doc = await payload.create({
         collection: lexicalListsFeatureSlug,
         data: { onlyOrderedList: listData },
+        overrideAccess: true,
       })
       const invalidData = JSON.parse(JSON.stringify(listData))
 
@@ -268,6 +282,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       const savedDoc = await payload.findByID({
         id: doc.id,
         collection: lexicalListsFeatureSlug,
+        overrideAccess: true,
       })
 
       expect(savedDoc.onlyOrderedList).toEqual(listData)
@@ -278,6 +293,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         await payload.find({
           collection: richTextFieldsSlug,
           depth: 0,
+          overrideAccess: true,
           where: {
             title: {
               equals: richTextDocData.title,
@@ -316,6 +332,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         await payload.find({
           collection: richTextFieldsSlug,
           depth: 1,
+          overrideAccess: true,
           where: {
             title: {
               equals: richTextDocData.title,
@@ -356,6 +373,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         await payload.find({
           collection: richTextFieldsSlug,
           depth: 1,
+          overrideAccess: true,
           where: {
             title: {
               equals: richTextDocData.title,
@@ -382,6 +400,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
           email: 'related-user@example.com',
           password: 'test-password',
         },
+        overrideAccess: true,
       })
 
       const originalReadAccess = payload.collections[usersSlug].config.access.read
@@ -411,6 +430,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         const doc = await payload.create({
           collection: lexicalRelationshipFieldsSlug,
           data: {},
+          overrideAccess: true,
         })
 
         // Simulate existing content referencing a collection outside enabledCollections.
@@ -425,6 +445,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
           id: doc.id,
           collection: lexicalRelationshipFieldsSlug,
           depth: 2,
+          overrideAccess: true,
         })
 
         const storedNode = rendered.richText.root.children[0] as SerializedRelationshipNode
@@ -435,17 +456,22 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       }
     })
 
-    for (const { fieldName, relationTo, type } of [
-      { fieldName: 'richText', relationTo: textFieldsSlug, type: 'relationship' },
-      { fieldName: 'richText', relationTo: uploads2Slug, type: 'upload' },
-      { fieldName: 'richText', relationTo: usersSlug, type: 'upload' },
-      { fieldName: 'richText3', relationTo: uploadsSlug, type: 'upload' },
+    for (const { type, fieldName, relationTo } of [
+      { type: 'relationship', fieldName: 'richText', relationTo: textFieldsSlug },
+      { type: 'upload', fieldName: 'richText', relationTo: uploads2Slug },
+      { type: 'upload', fieldName: 'richText', relationTo: usersSlug },
+      { type: 'upload', fieldName: 'richText3', relationTo: uploadsSlug },
     ] as const) {
       test(`should enforce ${fieldName} collection restrictions for ${type} nodes referencing ${relationTo}`, async ({
         payload,
         restClient,
       }) => {
-        const { docs: targets } = await payload.find({ collection: relationTo, depth: 0, limit: 1 })
+        const { docs: targets } = await payload.find({
+          collection: relationTo,
+          depth: 0,
+          limit: 1,
+          overrideAccess: true,
+        })
         const targetID = targets[0].id
         const node = {
           id: 'test-upload-node',
@@ -466,6 +492,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         const doc = await payload.create({
           collection: lexicalRelationshipFieldsSlug,
           data: {},
+          overrideAccess: true,
         })
 
         // Simulate existing content referencing a collection not enabled for this field.
@@ -479,6 +506,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
           id: doc.id,
           collection: lexicalRelationshipFieldsSlug,
           depth: 2,
+          overrideAccess: true,
         })
 
         expect(localDoc[fieldName].root.children[0].value).toBe(targetID)
@@ -533,59 +561,60 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       const uploadNode: SerializedUploadNode = docs[0].lexicalCustomFields.root.children.find(
         (node) => node.type === 'upload',
       ) as SerializedUploadNode
-      expect((uploadNode.value.media as any).filename).toStrictEqual('payload.png')
+      expect((uploadNode.value.media as any).filename).toStrictEqual('payload-original.png')
     })
   })
 
   test('ensure link nodes convert to markdown', async ({ payload }) => {
     const newLexicalDoc = await payload.create({
       collection: lexicalFieldsSlug,
-      depth: 0,
       data: {
-        title: 'Lexical Markdown Test',
         lexicalWithBlocks: {
           root: {
             type: 'root',
-            format: '',
-            indent: 0,
-            version: 1,
             children: [
               {
+                type: 'paragraph',
                 children: [
                   {
+                    type: 'autolink',
                     children: [
                       {
+                        type: 'text',
                         detail: 0,
                         format: 0,
                         mode: 'normal',
                         style: '',
                         text: 'link to payload',
-                        type: 'text',
                         version: 1,
                       },
                     ],
                     direction: 'ltr',
-                    format: '',
-                    indent: 0,
-                    type: 'autolink',
-                    version: 2,
                     fields: {
                       linkType: 'custom',
                       url: 'https://payloadcms.com',
                     },
+                    format: '',
+                    indent: 0,
+                    version: 2,
                   },
                 ],
                 direction: 'ltr',
                 format: '',
                 indent: 0,
-                type: 'paragraph',
                 version: 1,
               },
             ],
             direction: 'ltr',
+            format: '',
+            indent: 0,
+            version: 1,
           },
         },
+        title: 'Lexical Markdown Test',
       },
+      depth: 0,
+      overrideAccess: true,
     })
 
     expect(newLexicalDoc.lexicalWithBlocks_markdown).toEqual(
@@ -597,29 +626,30 @@ test.suite({ config: './config.ts' })('Lexical', () => {
     test('exports upload node to markdown placeholder when unpopulated', async ({ payload }) => {
       const newLexicalDoc = await payload.create({
         collection: lexicalFieldsSlug,
-        depth: 0,
         data: {
-          title: 'Lexical Upload Markdown Unpopulated',
           lexicalWithBlocks: {
             root: {
               type: 'root',
-              format: '',
-              indent: 0,
-              version: 1,
               children: [
                 {
-                  format: '',
                   type: 'upload',
-                  version: 2,
+                  fields: {},
+                  format: '',
                   relationTo: 'uploads',
                   value: createdJPGDocID,
-                  fields: {},
+                  version: 2,
                 },
               ],
               direction: 'ltr',
+              format: '',
+              indent: 0,
+              version: 1,
             },
           },
+          title: 'Lexical Upload Markdown Unpopulated',
         },
+        depth: 0,
+        overrideAccess: true,
       })
 
       expect(newLexicalDoc.lexicalWithBlocks_markdown).toEqual(`![uploads:${createdJPGDocID}]()`)
@@ -629,6 +659,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       const lexicalDoc = await payload.find({
         collection: lexicalFieldsSlug,
         depth: 0,
+        overrideAccess: true,
         where: { title: { equals: lexicalDocData.title } },
       })
 
@@ -644,6 +675,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         await payload.find({
           collection: lexicalFieldsSlug,
           depth: 0,
+          overrideAccess: true,
           where: {
             title: {
               equals: lexicalDocData.title,
@@ -668,6 +700,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         await payload.find({
           collection: lexicalFieldsSlug,
           depth: 1,
+          overrideAccess: true,
           where: {
             title: {
               equals: lexicalDocData.title,
@@ -684,7 +717,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       /**
        * Depth 1 population:
        */
-      expect(relationshipBlockNode.fields.rel.filename).toStrictEqual('payload.jpg')
+      expect(relationshipBlockNode.fields.rel.filename).toStrictEqual('payload-original.jpg')
     })
 
     test('should correctly populate polymorphic hasMany relationships in blocks with depth=0', async ({
@@ -694,6 +727,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         await payload.find({
           collection: lexicalFieldsSlug,
           depth: 0,
+          overrideAccess: true,
           where: {
             title: {
               equals: lexicalDocData.title,
@@ -727,6 +761,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         await payload.find({
           collection: lexicalFieldsSlug,
           depth: 1,
+          overrideAccess: true,
           where: {
             title: {
               equals: lexicalDocData.title,
@@ -755,7 +790,9 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       expect(relationshipBlockNode.fields.rel[1].relationTo).toStrictEqual('uploads')
       expect(relationshipBlockNode.fields.rel[1].value.id).toStrictEqual(createdJPGDocID)
       expect(relationshipBlockNode.fields.rel[1].value.text).toStrictEqual(uploadsDoc.text)
-      expect(relationshipBlockNode.fields.rel[1].value.filename).toStrictEqual('payload.jpg')
+      expect(relationshipBlockNode.fields.rel[1].value.filename).toStrictEqual(
+        'payload-original.jpg',
+      )
     })
 
     test('should not populate relationship nodes inside of a sub-editor from a blocks node with 0 depth', async ({
@@ -765,6 +802,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         await payload.find({
           collection: lexicalFieldsSlug,
           depth: 0,
+          overrideAccess: true,
           where: {
             title: {
               equals: lexicalDocData.title,
@@ -799,6 +837,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         await payload.find({
           collection: lexicalFieldsSlug,
           depth: 1,
+          overrideAccess: true,
           where: {
             title: {
               equals: lexicalDocData.title,
@@ -848,6 +887,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         await payload.find({
           collection: lexicalFieldsSlug,
           depth: 2,
+          overrideAccess: true,
           where: {
             title: {
               equals: lexicalDocData.title,
@@ -889,11 +929,133 @@ test.suite({ config: './config.ts' })('Lexical', () => {
     })
   })
 
+  test.describe('Node version', () => {
+    test('should not include version in the CLI and MCP input schema', async ({ payload }) => {
+      const req = await createPayloadRequest({ payload })
+      const schema = getCollectionInputSchema({ collectionSlug: lexicalFieldsSlug, req })
+
+      expect(schema).not.toBeNull()
+      expect(findSchemasWithVersion({ schema })).toEqual([])
+    })
+
+    test('should accept existing rich text that still contains version', async ({ payload }) => {
+      const req = await createPayloadRequest({ payload })
+      const lexicalDoc = await findSeededLexicalDoc({ payload })
+
+      expect(JSON.stringify(lexicalDoc.lexicalWithBlocks)).toContain('"version"')
+      expect(() =>
+        validateCollectionData({
+          slug: lexicalFieldsSlug,
+          data: { lexicalWithBlocks: lexicalDoc.lexicalWithBlocks },
+          partial: true,
+          req,
+        }),
+      ).not.toThrow()
+    })
+
+    test('should accept rich text without version', async ({ payload }) => {
+      const req = await createPayloadRequest({ payload })
+
+      expect(() =>
+        validateCollectionData({
+          slug: lexicalFieldsSlug,
+          data: {
+            lexicalWithBlocks: createParagraphRichText({ textNode: helloTextNode }),
+            title: 'Rich text without version',
+          },
+          req,
+        }),
+      ).not.toThrow()
+    })
+
+    test('should reject unknown properties on rich text nodes', async ({ payload }) => {
+      const req = await createPayloadRequest({ payload })
+      let validationError: unknown
+
+      try {
+        validateCollectionData({
+          slug: lexicalFieldsSlug,
+          data: {
+            lexicalWithBlocks: createParagraphRichText({
+              textNode: { ...helloTextNode, bold: true },
+            }),
+            title: 'Rich text with an unknown property',
+          },
+          req,
+        })
+      } catch (error) {
+        validationError = error
+      }
+
+      expect(validationError).toBeInstanceOf(ValidationError)
+      expect((validationError as ValidationError).data.errors).toEqual([
+        {
+          message: 'Unrecognized key: "bold"',
+          path: 'data.lexicalWithBlocks.root.children[0].children[0]',
+        },
+      ])
+    })
+
+    test('should still reject unknown properties inside block fields', async ({ payload }) => {
+      const req = await createPayloadRequest({ payload })
+      const lexicalDoc = await findSeededLexicalDoc({ payload })
+      const root = lexicalDoc.lexicalWithBlocks.root
+      const blockNode = structuredClone(
+        root.children.find((node) => node.type === 'block'),
+      ) as SerializedBlockNode
+
+      blockNode.fields = { ...blockNode.fields, notAField: true } as typeof blockNode.fields
+
+      expect(() =>
+        validateCollectionData({
+          slug: lexicalFieldsSlug,
+          data: { lexicalWithBlocks: { root: { ...root, children: [blockNode] } } },
+          partial: true,
+          req,
+        }),
+      ).toThrow()
+    })
+
+    test('should ignore the version of a node when loading it', async ({ payload }) => {
+      const lexicalDoc = await findSeededLexicalDoc({ payload })
+      const root = lexicalDoc.lexicalWithBlocks.root
+      const blockNode = structuredClone(
+        root.children.find((node) => node.type === 'block'),
+      ) as SerializedBlockNode
+
+      // Payload used to upgrade blocks with version 1 by unwrapping `fields.data`
+      blockNode.version = 1
+
+      const lexicalWithBlocksField = payload.collections[lexicalFieldsSlug].config.fields.find(
+        (field) => 'name' in field && field.name === 'lexicalWithBlocks',
+      ) as { editor: LexicalRichTextAdapter }
+      const headlessEditor = createHeadlessEditor({
+        nodes: getEnabledNodes({ editorConfig: lexicalWithBlocksField.editor.editorConfig }),
+      })
+
+      headlessEditor.update(
+        () => {
+          headlessEditor.setEditorState(
+            headlessEditor.parseEditorState({ root: { ...root, children: [blockNode] } }),
+          )
+        },
+        { discrete: true },
+      )
+
+      const [loadedBlockNode] = headlessEditor.getEditorState().toJSON().root.children as [
+        SerializedBlockNode,
+      ]
+
+      expect(loadedBlockNode.fields).toEqual(blockNode.fields)
+    })
+  })
+
   test.describe('Localization', () => {
     test('ensure localized lexical field is different across locales', async ({ payload }) => {
       const lexicalDocEN = await payload.find({
         collection: 'lexical-localized-fields',
         locale: 'en',
+        overrideAccess: true,
         where: {
           title: {
             equals: 'Localized Lexical en',
@@ -906,9 +1068,10 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       )
 
       const lexicalDocES = await payload.findByID({
+        id: lexicalDocEN.docs[0].id,
         collection: 'lexical-localized-fields',
         locale: 'es',
-        id: lexicalDocEN.docs[0].id,
+        overrideAccess: true,
       })
 
       expect(lexicalDocES.lexicalBlocksLocalized.root.children[0].children[0].text).toEqual(
@@ -922,6 +1085,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       const lexicalDocEN = await payload.find({
         collection: 'lexical-localized-fields',
         locale: 'en',
+        overrideAccess: true,
         where: {
           title: {
             equals: 'Localized Lexical en',
@@ -939,9 +1103,10 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       ).toEqual('English text in block')
 
       const lexicalDocES = await payload.findByID({
+        id: lexicalDocEN.docs[0].id,
         collection: 'lexical-localized-fields',
         locale: 'es',
-        id: lexicalDocEN.docs[0].id,
+        overrideAccess: true,
       })
 
       expect(lexicalDocES.lexicalBlocksSubLocalized.root.children[0].children[0].text).toEqual(
@@ -958,15 +1123,16 @@ test.suite({ config: './config.ts' })('Lexical', () => {
     test('ensure hook within number field within lexical block runs', async ({ payload }) => {
       const lexicalDocEN = await payload.create({
         collection: 'lexical-localized-fields',
-        locale: 'en',
         data: {
-          title: 'Localized Lexical hooks',
           lexicalBlocksLocalized: buildEditorState<DefaultNodeTypes>({ text: 'some text' }),
           lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
             'Shared text',
             'English text in block',
           ) as any,
+          title: 'Localized Lexical hooks',
         },
+        locale: 'en',
+        overrideAccess: true,
       })
 
       expect(
@@ -975,10 +1141,11 @@ test.suite({ config: './config.ts' })('Lexical', () => {
 
       // update document with same data
       const lexicalDocENUpdated = await payload.update({
-        collection: 'lexical-localized-fields',
-        locale: 'en',
         id: lexicalDocEN.id,
+        collection: 'lexical-localized-fields',
         data: lexicalDocEN,
+        locale: 'en',
+        overrideAccess: true,
       })
 
       expect(
@@ -1000,34 +1167,35 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       const doc = await payload.create({
         collection: 'lexical-autosave',
         data: {
-          title: 'Autosave test document',
           cta: [
             {
               richText: {
                 root: {
+                  type: 'root',
                   children: [
                     {
                       type: 'block',
-                      version: 2,
-                      format: '',
                       fields: {
                         id: 'block-id-1',
                         blockName: '',
                         blockTitle: 'Initial block title',
                         blockType: 'textBlock',
                       },
+                      format: '',
+                      version: 2,
                     },
                   ],
                   direction: null,
                   format: '',
                   indent: 0,
-                  type: 'root',
                   version: 1,
                 },
               },
             },
           ],
+          title: 'Autosave test document',
         },
+        overrideAccess: true,
       })
 
       // Verify create operation has undefined previousValue (expected)
@@ -1039,37 +1207,38 @@ test.suite({ config: './config.ts' })('Lexical', () => {
 
       // Simulate autosave by updating the document
       await payload.update({
-        collection: 'lexical-autosave',
         id: doc.id,
+        collection: 'lexical-autosave',
         data: {
-          title: 'Updated via autosave',
           cta: [
             {
               richText: {
                 root: {
+                  type: 'root',
                   children: [
                     {
                       type: 'block',
-                      version: 2,
-                      format: '',
                       fields: {
                         id: 'block-id-1',
                         blockName: '',
                         blockTitle: 'Updated block title',
                         blockType: 'textBlock',
                       },
+                      format: '',
+                      version: 2,
                     },
                   ],
                   direction: null,
                   format: '',
                   indent: 0,
-                  type: 'root',
                   version: 1,
                 },
               },
             },
           ],
+          title: 'Updated via autosave',
         },
+        overrideAccess: true,
       })
 
       expect(autosaveHookLog.relationshipField?.operation).toBe('update')
@@ -1123,24 +1292,24 @@ test.suite({ config: './config.ts' })('Lexical', () => {
 
   const converterVariants = [
     {
-      label: 'Sync',
       heading: HeadingHTMLConverter,
+      label: 'Sync',
       link: LinkHTMLConverter({}),
       list: ListHTMLConverter,
+      noop: noopNodesToHTML,
       table: TableHTMLConverter,
       text: TextHTMLConverter,
       upload: UploadHTMLConverter,
-      noop: noopNodesToHTML,
     },
     {
-      label: 'Async',
       heading: HeadingHTMLConverterAsync,
+      label: 'Async',
       link: LinkHTMLConverterAsync({}),
       list: ListHTMLConverterAsync,
+      noop: noopNodesToHTMLAsync,
       table: TableHTMLConverterAsync,
       text: TextHTMLConverterAsync,
       upload: UploadHTMLConverterAsync,
-      noop: noopNodesToHTMLAsync,
     },
   ] as const
 
@@ -1267,11 +1436,11 @@ test.suite({ config: './config.ts' })('Lexical', () => {
           fields: {},
           relationTo: 'uploads',
           value: {
+            id: '1',
             filename: 'test.pdf',
             height: 100,
-            id: '1',
             mimeType: 'application/pdf',
-            sizes: {},
+            variants: {},
             url: '/uploads/test.pdf',
             width: 100,
           },
@@ -1331,11 +1500,11 @@ test.suite({ config: './config.ts' })('Lexical', () => {
               fields: { alt: 'A nice photo' },
               relationTo: 'uploads',
               value: {
+                id: '1',
                 filename: 'photo.jpg',
                 height: 600,
-                id: '1',
                 mimeType: 'image/jpeg',
-                sizes: {},
+                variants: {},
                 url: '/uploads/photo.jpg',
                 width: 800,
               },
@@ -1521,11 +1690,11 @@ test.suite({ config: './config.ts' })('Lexical', () => {
           fields: {},
           relationTo: 'uploads',
           value: {
+            id: '1',
             filename: 'photo.jpg',
             height: 600,
-            id: '1',
             mimeType: 'image/jpeg',
-            sizes: {
+            variants: {
               thumbnail: {
                 filename: 'photo-thumb.jpg',
                 filesize: 1000,
@@ -1822,3 +1991,81 @@ test.describe('Lexical inline block node type generation', () => {
     expect(generatedTypes).not.toMatch(/SerializedInlineBlockNode<\s*\{\s*blockType:/)
   })
 })
+
+async function findSeededLexicalDoc({ payload }: { payload: Payload }): Promise<LexicalField> {
+  const { docs } = await payload.find({
+    collection: lexicalFieldsSlug,
+    depth: 0,
+    overrideAccess: true,
+    where: {
+      title: {
+        equals: lexicalDocData.title,
+      },
+    },
+  })
+
+  return docs[0] as LexicalField
+}
+
+const helloTextNode = {
+  type: 'text',
+  detail: 0,
+  format: 0,
+  mode: 'normal',
+  style: '',
+  text: 'Hello',
+}
+
+/**
+ * Rich text with a single paragraph around `textNode`, written without `version` like an agent would.
+ */
+function createParagraphRichText({ textNode }: { textNode: Record<string, unknown> }) {
+  return {
+    root: {
+      type: 'root',
+      children: [
+        {
+          type: 'paragraph',
+          children: [textNode],
+          direction: null,
+          format: '',
+          indent: 0,
+          textFormat: 0,
+          textStyle: '',
+        },
+      ],
+      direction: null,
+      format: '',
+      indent: 0,
+    },
+  }
+}
+
+/**
+ * Returns the path of every subschema that has a `version` property or requires one.
+ */
+function findSchemasWithVersion({
+  path = '#',
+  schema,
+}: {
+  path?: string
+  schema: unknown
+}): string[] {
+  if (!schema || typeof schema !== 'object') {
+    return []
+  }
+
+  const schemaRecord = schema as Record<string, unknown>
+  const properties = schemaRecord.properties as Record<string, unknown> | undefined
+  const required = schemaRecord.required
+  const hasVersion =
+    (properties && 'version' in properties) ||
+    (Array.isArray(required) && required.includes('version'))
+
+  return [
+    ...(hasVersion ? [path] : []),
+    ...Object.entries(schemaRecord).flatMap(([key, value]) =>
+      findSchemasWithVersion({ path: `${path}/${key}`, schema: value }),
+    ),
+  ]
+}

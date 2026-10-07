@@ -1,4 +1,4 @@
-import { jwtVerify } from 'jose'
+import { jwtVerify } from 'jose/jwt/verify'
 
 import type { Payload, PayloadRequest, Where } from '../../types/index.js'
 import type { AuthStrategyFunction, AuthStrategyResult } from '../index.js'
@@ -103,6 +103,7 @@ async function autoLogin({
       fallbackLocale,
       limit: 1,
       locale,
+      overrideAccess: true,
       pagination: false,
       req,
       where,

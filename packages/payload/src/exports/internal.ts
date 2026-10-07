@@ -2,9 +2,18 @@
  * Modules exported here are not part of the public API and are subject to change without notice and without a major version bump.
  */
 
+export {
+  type AdminContextCache,
+  initAdminContext,
+  type InitAdminContextArgs,
+  type PartialAdminContext,
+} from '../admin/initAdminContext.js'
 export { applyUserReadAccess } from '../auth/applyUserReadAccess.js'
 export { createCLI } from '../cli/index.js'
 export { getCommandInput } from '../cli/runtime/getCommandInput.js'
+export { createSchemaBuildContext } from '../database/createSchemaBuildContext.js'
+export type { SchemaBuildContext } from '../database/createSchemaBuildContext.js'
+export { getLLMInstructions } from '../llm-instructions/getInstructions.js'
 export { assertClientUploadAccess } from '../uploads/assertClientUploadAccess.js'
 export { assertClientUploadAllowed } from '../uploads/assertClientUploadAllowed.js'
 export {
@@ -13,15 +22,34 @@ export {
 } from '../uploads/clientUploadReceipt.js'
 export { downloadFileToBuffer } from '../uploads/downloadFileToBuffer.js'
 export { getUploadInstructions } from '../uploads/endpoints/uploadInstructions.js'
+export { getOriginalFilename } from '../uploads/fileVersioning/naming.js'
 export { getFileFromUploadInstructions } from '../uploads/getFileFromUploadInstructions.js'
 export { isXmlMimeType } from '../uploads/getFileTypeIdentity.js'
 export { getRangeRequestInfo } from '../uploads/getRangeRequestInfo.js'
-export { getSafeFileName } from '../uploads/getSafeFilename.js'
+export { getSafeFileName, incrementName } from '../uploads/getSafeFilename.js'
 export { parseRangeHeader } from '../uploads/parseRangeHeader.js'
 export { externalURLInputSchema, resolveURLUploadInput } from '../uploads/resolveURLUploadInput.js'
 export type { ExternalURLInput } from '../uploads/resolveURLUploadInput.js'
+export {
+  getUploadFilePath,
+  getUploadTransformerInternal,
+  setUploadFilePath,
+  uploadTransformerInternal,
+} from '../uploads/transformers/uploadTransformerBridge.js'
+export type {
+  PreparedUploadTransformation,
+  TransformerWithInternalBridge,
+  UploadTransformerInternal,
+  UploadTransformTask,
+} from '../uploads/transformers/uploadTransformerBridge.js'
 export { uploadContentSecurityPolicy } from '../uploads/uploadContentSecurityPolicy.js'
+export {
+  batchProcessing,
+  type BatchProcessingOptions,
+  type BatchProcessorResult,
+} from '../utilities/batchProcessing.js'
 export { getEntityPermissions } from '../utilities/getEntityPermissions/getEntityPermissions.js'
+export { httpStatus } from '../utilities/httpStatus.js'
 export { isURLAllowed } from '../utilities/isURLAllowed.js'
 export { sanitizePermissions } from '../utilities/sanitizePermissions.js'
 export { sendTelemetryEvent } from '../utilities/telemetry/index.js'

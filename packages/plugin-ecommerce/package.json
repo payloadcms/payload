@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-ecommerce",
-  "version": "4.0.0-canary.36",
+  "version": "4.0.0-canary.38",
   "description": "Ecommerce plugin for Payload",
   "keywords": [
     "payload",
@@ -92,8 +92,8 @@
     "@payloadcms/next": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@types/json-schema": "7.0.15",
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "payload": "workspace:*",
     "stripe": "18.3.0"
   },

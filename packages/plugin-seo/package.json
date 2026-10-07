@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-seo",
-  "version": "4.0.0-canary.36",
+  "version": "4.0.0-canary.38",
   "description": "SEO plugin for Payload",
   "keywords": [
     "payload",
@@ -73,8 +73,8 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/next": "workspace:*",
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {

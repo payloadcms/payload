@@ -6,7 +6,7 @@ import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { removeFiles } from '../__helpers/shared/removeFiles.js'
-import { mediaSlug, pagesSlug, siteSettingsSlug } from './shared.js'
+import { mediaSlug, pagesSlug, pagesWithImportedFieldsSlug, siteSettingsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -34,7 +34,7 @@ const generationEndpoints = [
   },
 ] as const
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
+test.suite('@payloadcms/plugin-seo', { config: './config.ts' }, () => {
   let page = null
   let mediaDoc = null
   let mediaDoc2 = null
@@ -53,19 +53,21 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
       collection: mediaSlug,
       data: {},
       file,
+      overrideAccess: true,
     })
 
     page = await payload.create({
       collection: 'pages',
       data: {
-        title: 'Test page',
         slug: 'test-page',
         featuredMedia: mediaDoc.id,
         meta: {
           title: 'Test page',
         },
+        title: 'Test page',
       },
       depth: 0,
+      overrideAccess: true,
     })
 
     readablePage = await payload.create({
@@ -78,25 +80,28 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
         title: 'Readable page',
       },
       depth: 0,
+      overrideAccess: true,
     })
 
     trashedPage = await payload.create({
       collection: pagesSlug,
       data: {
-        deletedAt: new Date().toISOString(),
         slug: 'trashed-page',
+        deletedAt: new Date().toISOString(),
         meta: {
           title: 'Trashed page',
         },
         title: 'Trashed page',
       },
       depth: 0,
+      overrideAccess: true,
     })
 
     mediaDoc2 = await payload.create({
       collection: mediaSlug,
       data: {},
       file,
+      overrideAccess: true,
     })
   })
 
@@ -163,6 +168,45 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
     expect(results).toEqual(
       generationEndpoints.map(({ expectedResult }) => ({ result: expectedResult })),
     )
+  })
+
+  test('should generate metadata for collections with manually configured SEO fields', async ({
+    restClient,
+  }) => {
+    await restClient.login({ slug: 'users' })
+
+    const results: unknown[] = []
+
+    for (const { body, endpoint } of generationEndpoints) {
+      const response = await restClient.POST(endpoint, {
+        body: JSON.stringify({
+          collectionSlug: pagesWithImportedFieldsSlug,
+          doc: body,
+        }),
+      })
+
+      expect(response.status).toBe(200)
+      results.push(await response.json())
+    }
+
+    expect(results).toEqual(
+      generationEndpoints.map(({ expectedResult }) => ({ result: expectedResult })),
+    )
+  })
+
+  test('should reject collections without SEO generation fields', async ({ restClient }) => {
+    await restClient.login({ slug: 'users' })
+
+    const response = await restClient.POST('/plugin-seo/generate-title', {
+      body: JSON.stringify({
+        collectionSlug: mediaSlug,
+        doc: {
+          title: 'Media title',
+        },
+      }),
+    })
+
+    expect(response.status).toBe(403)
   })
 
   test('should respect collection read access for generation endpoints', async ({ restClient }) => {
@@ -434,15 +478,16 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
     // Update it to mediaDoc2 and we expect to see different previousValue and value in the hook
     const context: { identicalCount?: number } = {}
     await payload.update({
-      collection: 'pages',
       id: page.id,
+      collection: 'pages',
+      context,
       data: {
         // this field has an afterChange hook that will increment req.context.identicalCount
         // when previousValue === value
         featuredMedia: mediaDoc2.id,
       },
       depth: 0,
-      context,
+      overrideAccess: true,
     })
 
     // If identicalCount was incremented, it means previousValue === value incorrectly
@@ -452,14 +497,15 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
 
   test('should add meta title', async ({ payload }) => {
     const pageWithTitle = await payload.update({
-      collection: 'pages',
       id: page.id,
+      collection: 'pages',
       data: {
         meta: {
           title: 'Hello, world!',
         },
       },
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(pageWithTitle).toHaveProperty('meta')
@@ -469,14 +515,15 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
 
   test('should add meta description', async ({ payload }) => {
     const pageWithDescription = await payload.update({
-      collection: 'pages',
       id: page.id,
+      collection: 'pages',
       data: {
         meta: {
           description: 'This is a test page',
         },
       },
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(pageWithDescription).toHaveProperty('meta')
@@ -486,14 +533,15 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
 
   test('should add meta image', async ({ payload }) => {
     const pageWithImage = await payload.update({
-      collection: 'pages',
       id: page.id,
+      collection: 'pages',
       data: {
         meta: {
           image: mediaDoc.id,
         },
       },
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(pageWithImage).toHaveProperty('meta')
@@ -503,14 +551,15 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
 
   test('should add custom meta field', async ({ payload }) => {
     const pageWithCustomField = await payload.update({
-      collection: 'pages',
       id: page.id,
+      collection: 'pages',
       data: {
         meta: {
           ogTitle: 'Hello, world!',
         },
       },
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(pageWithCustomField).toHaveProperty('meta')
@@ -520,29 +569,31 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
 
   test('should localize meta fields', async ({ payload }) => {
     await payload.update({
-      collection: 'pages',
       id: page.id,
+      collection: 'pages',
       data: {
         meta: {
-          title: 'Hello, world!',
           description: 'This is a test page',
+          title: 'Hello, world!',
         },
       },
-      locale: 'en',
       depth: 0,
+      locale: 'en',
+      overrideAccess: true,
     })
 
     const pageWithLocalizedMeta = await payload.update({
-      collection: 'pages',
       id: page.id,
+      collection: 'pages',
       data: {
         meta: {
-          title: 'Hola, mundo!',
           description: 'Esta es una página de prueba',
+          title: 'Hola, mundo!',
         },
       },
-      locale: 'es',
       depth: 0,
+      locale: 'es',
+      overrideAccess: true,
     })
 
     expect(pageWithLocalizedMeta).toHaveProperty('meta')
@@ -553,9 +604,10 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
 
     // query the page in the default locale
     const pageInDefaultLocale = await payload.findByID({
-      collection: 'pages',
       id: page.id,
+      collection: 'pages',
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(pageInDefaultLocale).toHaveProperty('meta')

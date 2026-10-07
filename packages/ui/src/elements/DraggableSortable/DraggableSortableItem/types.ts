@@ -5,7 +5,7 @@ import type React from 'react'
 import type { UseDraggableSortableReturn } from '../useDraggableSortable/types.js'
 
 export type DragHandleProps = {
-  attributes: UseDraggableArguments['attributes']
+  attributes: React.AriaAttributes & UseDraggableArguments['attributes']
   listeners: SyntheticListenerMap
 } & UseDraggableArguments
 

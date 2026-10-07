@@ -79,10 +79,10 @@
   }
 
   .edit-upload__section-title {
-    font-family: var(--text-body-medium-strong-font-family);
-    font-size: var(--text-body-medium-strong-font-size);
-    font-weight: var(--text-body-medium-strong-font-weight);
-    line-height: var(--text-body-medium-strong-line-height);
+    margin: 0;
+    font-size: var(--text-body-medium-bold-font-size);
+    font-weight: var(--text-body-medium-bold-font-weight);
+    line-height: var(--text-body-medium-bold-line-height);
     color: var(--color-text);
   }
 

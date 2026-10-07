@@ -10,11 +10,14 @@ import {
   buildUploadStoragePathData,
 } from '../utilities/buildStoragePathData.js'
 import { getIncomingFiles } from '../utilities/getIncomingFiles.js'
+import { appendProxyPrefix } from './afterRead.js'
 
 interface Args {
   adapter: GeneratedAdapter
   collection: CollectionConfig
   collectionPrefix?: string
+  disablePayloadAccessControl?: boolean
+  hasCustomFileURL?: boolean
   useCompositePrefixes?: boolean
 }
 
@@ -29,6 +32,8 @@ export const getAfterChangeHook =
     adapter,
     collection,
     collectionPrefix,
+    disablePayloadAccessControl,
+    hasCustomFileURL,
     useCompositePrefixes,
   }: Args): CollectionAfterChangeHook<FileData & TypeWithID> =>
   async ({ data, doc, operation, previousDoc, req, select }) => {
@@ -39,9 +44,64 @@ export const getAfterChangeHook =
 
     // Restore upload metadata removed by select, including partially selected image sizes.
     const uploadData = select ? deepMergeWithSourceArrays<FileData & TypeWithID>(data, doc) : doc
+    const withProxyPrefix = (upload: FileData & TypeWithID): FileData & TypeWithID => {
+      const { prefix } = upload as { prefix?: string } & FileData & TypeWithID
+
+      if (disablePayloadAccessControl || hasCustomFileURL || !useCompositePrefixes || !prefix) {
+        return upload
+      }
+
+      return {
+        ...upload,
+        ...(upload.url && {
+          url: appendProxyPrefix({ prefix, url: upload.url }),
+        }),
+        ...(upload.original?.url && {
+          original: {
+            ...upload.original,
+            url: appendProxyPrefix({ prefix, url: upload.original.url }),
+          },
+        }),
+      }
+    }
     const isDraftSave = (uploadData as { _status?: string })._status === 'draft'
     const isDraftOverPublished =
       isDraftSave && (previousDoc as { _status?: string } | undefined)?._status === 'published'
+
+    if (req.context?._payloadManagedCloudStorage) {
+      const metadata = req.context._payloadManagedCloudMetadata as
+        | Partial<FileData & TypeWithID>
+        | undefined
+
+      if (!metadata || Object.keys(metadata).length === 0) {
+        return withProxyPrefix(doc)
+      }
+
+      req.context.skipCloudStorage = true
+      req.file = undefined
+      req.payloadUploadSizes = undefined
+      const originalQuery = req.query
+      req.query = { ...req.query }
+      delete req.query.uploadEdits
+
+      try {
+        const updatedDoc = await req.payload.update({
+          id: doc.id,
+          collection: collection.slug,
+          data: metadata,
+          depth: 0,
+          draft: isDraftSave,
+          overrideAccess: true,
+          req,
+          select,
+        })
+
+        return withProxyPrefix({ ...doc, ...updatedDoc })
+      } finally {
+        req.query = originalQuery
+        delete req.context.skipCloudStorage
+      }
+    }
 
     try {
       const files = getIncomingFiles({ data: uploadData, req })
@@ -102,6 +162,7 @@ export const getAfterChangeHook =
               data: uploadMetadata,
               depth: 0,
               draft: isDraftSave,
+              overrideAccess: true,
               req,
               select,
             })
@@ -117,16 +178,22 @@ export const getAfterChangeHook =
         // persistence have succeeded. Deleting earlier would orphan the
         // record if a later step throws (e.g. a user-defined afterChange
         // hook on the same collection).
-        if (previousDoc && operation === 'update' && !isDraftOverPublished) {
+        if (
+          previousDoc &&
+          operation === 'update' &&
+          !isDraftOverPublished &&
+          !collection.versions &&
+          !previousDoc.original
+        ) {
           let filesToDelete: string[] = []
 
           if (typeof previousDoc?.filename === 'string') {
             filesToDelete.push(previousDoc.filename)
           }
 
-          if (typeof previousDoc.sizes === 'object') {
+          if (typeof previousDoc.variants === 'object') {
             filesToDelete = filesToDelete.concat(
-              Object.values(previousDoc?.sizes || []).map(
+              Object.values(previousDoc?.variants || []).map(
                 (resizedFileData) => resizedFileData?.filename as string,
               ),
             )
@@ -139,8 +206,8 @@ export const getAfterChangeHook =
           if (typeof newFileData.filename === 'string') {
             newFilenames.add(newFileData.filename)
           }
-          if (typeof newFileData.sizes === 'object') {
-            for (const size of Object.values(newFileData.sizes || {})) {
+          if (typeof newFileData.variants === 'object') {
+            for (const size of Object.values(newFileData.variants || {})) {
               if (size?.filename && typeof size.filename === 'string') {
                 newFilenames.add(size.filename)
               }

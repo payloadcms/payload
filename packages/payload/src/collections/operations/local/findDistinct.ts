@@ -11,9 +11,10 @@ import type {
   User,
   Where,
 } from '../../../index.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
+import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 
-import { APIError, createLocalReq } from '../../../index.js'
+import { APIError, createPayloadRequest } from '../../../index.js'
 import { findDistinctOperation } from '../findDistinct.js'
 
 export type Options<
@@ -52,12 +53,6 @@ export type Options<
    * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
    */
   locale?: 'all' | TypedLocale
-  /**
-   * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
-   * @default true
-   */
-  overrideAccess?: boolean
   /**
    * Get a specific page number (if limit is specified)
    * @default 1
@@ -100,7 +95,7 @@ export type Options<
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: Where
-}
+} & Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export async function findDistinct<
   TSlug extends CollectionSlug,
@@ -115,7 +110,7 @@ export async function findDistinct<
     disableErrors,
     field,
     limit,
-    overrideAccess = true,
+    overrideAccess = false,
     page,
     populate,
     showHiddenFields,
@@ -140,7 +135,10 @@ export async function findDistinct<
     overrideAccess,
     page,
     populate,
-    req: await createLocalReq(options as CreateLocalReqOptions, payload),
+    req: await createPayloadRequest({
+      ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
+      payload,
+    }),
     showHiddenFields,
     sort,
     trash,

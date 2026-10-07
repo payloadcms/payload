@@ -36,6 +36,8 @@ export const defaultESLintIgnores = [
   'packages/payload/rollup.dts.config.mjs',
   'scripts/**/*.js',
   'packages/plugin-mcp/bin.js',
+  'packages/translations/bundleDateFNSLocales.js',
+  'packages/translations/verifyDateFNSLocales.js',
 ]
 
 /** @typedef {import('eslint').Linter.Config} Config */
@@ -62,6 +64,7 @@ export const rootEslintConfig = [
       'packages/drizzle/src/sqlite/predefinedMigrations/localize-status/**',
       'packages/codemod/src/transforms/**/*.input.ts',
       'packages/codemod/src/transforms/**/*.output.ts',
+      'packages/codemod/scripts/**',
       'packages/tanstack-start/scripts/**',
       'packages/tanstack-start/test/**',
     ],

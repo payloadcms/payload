@@ -23,6 +23,7 @@ import { EditUpload } from '../EditUpload/index.js'
 import { FileDetails } from '../FileDetails/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
+import { getEditorFileSrc } from './getEditorFileSrc.js'
 import { pasteURLDrawerSlug, UploadFromURLModal } from './UploadFromURLModal/index.js'
 import { usePasteFromClipboard } from './usePasteFromClipboard.js'
 import { useUploadFromUrl } from './useUploadFromUrl.js'
@@ -114,7 +115,7 @@ export type UploadProps = {
   readonly customActions?: React.ReactNode[]
   readonly initialState?: FormState
   readonly onChange?: (file?: File) => void
-  readonly uploadConfig: SanitizedCollectionConfig['upload']
+  readonly uploadConfig: Omit<SanitizedCollectionConfig['upload'], 'uploadInstructions'>
   readonly UploadControls?: React.ReactNode
 }
 
@@ -288,14 +289,14 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
 
   const canRemoveUpload = docPermissions?.update
 
-  const hasImageSizes = uploadConfig?.imageSizes?.length > 0
-  const hasResizeOptions = Boolean(uploadConfig?.resizeOptions)
+  const hasVariants = uploadConfig?.variants?.length > 0
+  const hasImageAdjustments = Boolean(uploadConfig?.hasImageAdjustments)
   // Explicity check if set to true, default is undefined
   const focalPointEnabled = uploadConfig?.focalPoint === true
 
   const { crop: showCrop = true, focalPoint = true } = uploadConfig
 
-  const showFocalPoint = focalPoint && (hasImageSizes || hasResizeOptions || focalPointEnabled)
+  const showFocalPoint = focalPoint && (hasVariants || hasImageAdjustments || focalPointEnabled)
 
   const acceptMimeTypes = uploadConfig.mimeTypes?.join(', ')
 
@@ -328,7 +329,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
         <EditDepthProvider>
           <EditUpload
             fileName={value?.name || data?.filename}
-            fileSrc={data?.url || fileSrc}
+            fileSrc={getEditorFileSrc({ data, fileSrc, hasSelectedFile: Boolean(value) })}
             imageCacheTag={imageCacheTag}
             initialCrop={uploadEdits?.crop ?? undefined}
             initialFocalPoint={{
@@ -341,7 +342,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
           />
         </EditDepthProvider>
       )}
-      {data && hasImageSizes && (
+      {data && hasVariants && (
         <Drawer
           className={`${baseClass}__previewDrawer`}
           hoverTitle
@@ -372,7 +373,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
           doc={data}
           enableAdjustments={showCrop || showFocalPoint}
           handleRemove={canRemoveUpload ? handleFileRemoval : undefined}
-          hasImageSizes={hasImageSizes}
+          hasImageSizes={hasVariants}
           hideRemoveFile={uploadConfig.hideRemoveFile}
           imageCacheTag={imageCacheTag}
           uploadConfig={uploadConfig}
@@ -452,7 +453,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
                 <UploadActions
                   customActions={customActions}
                   enableAdjustments={showCrop || showFocalPoint}
-                  enablePreviewSizes={hasImageSizes && data?.filename && !removedFile}
+                  enablePreviewSizes={hasVariants && data?.filename && !removedFile}
                   mimeType={value.type}
                 />
               </div>

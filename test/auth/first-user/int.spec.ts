@@ -2,15 +2,15 @@ import type { Payload } from 'payload'
 
 import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
+import type { RESTClient } from '../../__helpers/shared/RESTClient.js'
 
 import { test } from '../../__helpers/int/vitest.js'
 import { firstUsersSlug } from './shared.js'
 
 let payload: Payload
-let restClient: NextRESTClient
+let restClient: RESTClient
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('First user registration', () => {
+test.suite('First user registration', { config: './config.ts', resetBetweenTests: false }, () => {
   test.beforeAll(({ payloadInstance, restClientInstance }) => {
     payload = payloadInstance
     restClient = restClientInstance
@@ -42,7 +42,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('First user regi
       expect(registered.user).not.toHaveProperty('restrictedField')
     } finally {
       if (createdUserID) {
-        await payload.delete({ id: createdUserID, collection: firstUsersSlug as any })
+        await payload.delete({
+          id: createdUserID,
+          collection: firstUsersSlug as any,
+          overrideAccess: true,
+        })
       }
     }
   })

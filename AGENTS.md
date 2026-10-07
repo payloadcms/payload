@@ -61,6 +61,7 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - Use `import type` for types, regular `import` for values, separate statements even from same module
 - Prefix booleans with `is`/`has`/`can`/`should` (e.g., `isValid`, `hasData`) for clarity
 - Prefer self describing function and variable names over generic names with comments to explain their purpose
+- For changes affecting rendered UI, user interaction, focus, keyboard behavior, content, or component semantics, use the `payload-accessibility` skill and report the WCAG 2.2 Level A and AA criteria assessed, automated evidence, and any required manual or assistive-technology verification.
 - **Translation/Label handling**: Always use `getTranslation` from `@payloadcms/translations` when you need to render labels defined in the config - it already handles functions, strings, and translation objects correctly. Don't write custom if/else logic to handle different label types.
 - **Memoize arrays/objects passed to hooks**: Never pass inline array/object literals to custom hooks - they create new references on every render, breaking memoization and causing unnecessary re-renders or remounts.
 
@@ -166,21 +167,24 @@ Screenshots are saved to `.playwright-mcp/` and displayed inline.
 **Integration tests MUST use the shared fixture wrapper:**
 
 - Import `test` from `test/__helpers/int/vitest.ts`, not directly from Vitest
-- Wrap Payload-backed tests in one root `test.suite({ config: './config.ts' })`
+- Wrap Payload-backed tests in one root `test.suite('My Feature', { config: './config.ts' }, () => { ... })`
 - Read `payload`, `restClient`, `sdk`, or `cli` from the test or hook arguments
 - Do not initialize Payload manually or add database reset/seed hooks; the fixture initializes
   Payload once per file, resets and seeds before each test that uses it, and destroys it afterward
 - Existing suites that intentionally manage shared state can set `resetBetweenTests: false`. The fixture
   resets and seeds once for the file, and the suite keeps responsibility for between-test cleanup.
   New suites should use the default per-test reset behavior.
-- Use `test.suite({})` only for integration tests that do not use Payload
+- Use `test.suite('My Feature', {}, () => { ... })` only for integration tests that do not use Payload
+- Use `test.options('Name', { db: 'drizzle' }, callback)` for database-specific tests, and
+  `test.options.describe('Name', { db: 'mongo' }, callback)` for database-specific groups.
+  Keep the name first and use one call so VS Code does not discover the options as a fake test.
 
 ```typescript
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 
-test.suite({ config: './config.ts' })('My Feature', () => {
+test.suite('My Feature', { config: './config.ts' }, () => {
   test('should create a record', async ({ payload }) => {
     const record = await payload.create({
       collection: 'my-collection',
@@ -337,14 +341,15 @@ const queryString = qs.stringify({ limit, page, where }, { addQueryPrefix: true 
 const url = formatAdminURL({ apiRoute: api, path: `/${collectionSlug}${queryString}`, serverURL })
 ```
 
-**Building server functions, views, or endpoints:** Always use `overrideAccess: false` and pass the `user` to payload operations. Without these, the operation runs with access control disabled, which is a security vulnerability.
+**Building server functions, views, or endpoints:** Keep `overrideAccess` set to `false` (the default) and pass the authenticated `user` to payload operations. Setting `overrideAccess: true` bypasses access control and is a security vulnerability when an operation acts on behalf of a user.
 
 Incorrect:
 
 ```typescript
-// INSECURE - runs with full access, bypassing all access control
+// INSECURE - explicitly bypasses all access control
 const docs = await payload.find({
   collection: 'posts',
+  overrideAccess: true,
 })
 ```
 

@@ -9,6 +9,7 @@ interface Args {
   collection: CollectionConfig
   disablePayloadAccessControl?: boolean
   generateFileURL?: GenerateFileURL
+  isOriginal?: boolean
   size?: ImageSize
 }
 
@@ -28,14 +29,30 @@ const getObjectFolder = (data: unknown, originalDoc: unknown): string => {
 }
 
 export const getBeforeChangeHook =
-  ({ adapter, collection, disablePayloadAccessControl, generateFileURL, size }: Args): FieldHook =>
+  ({
+    adapter,
+    collection,
+    disablePayloadAccessControl,
+    generateFileURL,
+    isOriginal,
+    size,
+  }: Args): FieldHook =>
   async ({ data, originalDoc, value }) => {
-    const newFilename = size ? data?.sizes?.[size.name]?.filename : data?.filename
-    const originalFilename = size
-      ? originalDoc?.sizes?.[size.name]?.filename
-      : originalDoc?.filename
+    const newRepresentation = isOriginal
+      ? data?.original
+      : size
+        ? data?.variants?.[size.name]
+        : data
+    const originalRepresentation = isOriginal
+      ? originalDoc?.original
+      : size
+        ? originalDoc?.variants?.[size.name]
+        : originalDoc
+    const newFilename = newRepresentation?.filename
+    const originalFilename = originalRepresentation?.filename
     const filename = newFilename || originalFilename
-    const prefix = getObjectFolder(data, originalDoc)
+    const representation = newRepresentation ?? originalRepresentation
+    const prefix = getObjectFolder(representation, data ?? originalDoc)
     let url = value
 
     if (generateFileURL && filename) {

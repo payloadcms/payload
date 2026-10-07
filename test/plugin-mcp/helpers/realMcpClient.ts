@@ -2,7 +2,7 @@ import type { ProtocolEra } from '@modelcontextprotocol/client'
 
 import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client'
 
-import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
+import type { RESTClient } from '../../__helpers/shared/RESTClient.js'
 
 /**
  * Connects a real MCP client and returns it after the initialize handshake.
@@ -23,7 +23,7 @@ export async function connectMcpClient({
   onResponse?: (response: McpHTTPResponse) => void
   overrideAccess?: boolean
   protocolEra: ProtocolEra
-  restClient: NextRESTClient
+  restClient: RESTClient
 }): Promise<Client> {
   const client = new Client(
     { name: 'plugin-mcp-tests', version: '1.0.0' },

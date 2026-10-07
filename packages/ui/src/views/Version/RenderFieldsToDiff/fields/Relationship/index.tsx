@@ -1,7 +1,7 @@
 import type {
   PayloadRequest,
   RelationshipField,
-  RelationshipFieldDiffServerComponent,
+  RelationshipFieldDiffServerProps,
   TypeWithID,
 } from 'payload'
 
@@ -19,7 +19,7 @@ export type RelationshipValue =
   | { relationTo: string; value: number | string | TypeWithID }
   | (number | string | TypeWithID)
 
-export const Relationship: RelationshipFieldDiffServerComponent = ({
+export const Relationship: React.FC<RelationshipFieldDiffServerProps> = ({
   comparisonValue: valueFrom,
   field,
   i18n,

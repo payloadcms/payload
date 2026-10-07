@@ -32,7 +32,7 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
     /**
      * If the upload is a simple image with no different sizes, return a simple img tag
      */
-    if (!uploadDoc.sizes || !Object.keys(uploadDoc.sizes).length) {
+    if (!uploadDoc.variants || !Object.keys(uploadDoc.variants).length) {
       return <img alt={alt} height={uploadDoc.height} src={url} width={uploadDoc.width} />
     }
 
@@ -41,9 +41,9 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
      */
     const pictureJSX: React.ReactNode[] = []
 
-    // Iterate through each size in the data.sizes object
-    for (const size in uploadDoc.sizes) {
-      const imageSize = uploadDoc.sizes[size] as FileSize
+    // Iterate through each size in the data.variants object
+    for (const size in uploadDoc.variants) {
+      const imageSize = uploadDoc.variants[size] as FileSize
 
       // Skip if any property of the size object is null
       if (

@@ -2,6 +2,7 @@
 import React from 'react'
 
 import { useNav } from '../../../elements/Nav/context.js'
+import { SkipToContent } from '../../../elements/SkipToContent/index.js'
 import './index.css'
 
 export const Wrapper: React.FC<{
@@ -23,6 +24,7 @@ export const Wrapper: React.FC<{
         .filter(Boolean)
         .join(' ')}
     >
+      <SkipToContent />
       {children}
     </div>
   )

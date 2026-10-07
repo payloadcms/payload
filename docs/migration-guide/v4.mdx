@@ -22,6 +22,55 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
 
+### Payload request creation is consolidated
+
+Payload request creation now uses `createPayloadRequest` for local contexts and `createPayloadRequestFromWebRequest` to convert a Web `Request`. Admin context setup is exposed as `initAdminContext`.
+
+| Old name                                | New name                                    |
+| --------------------------------------- | ------------------------------------------- |
+| `createLocalReq`                        | `createPayloadRequest`                      |
+| `CreateLocalReqOptions` (internal type) | `Omit<CreatePayloadRequestArgs, 'payload'>` |
+| `createPayloadRequest`                  | `createPayloadRequestFromWebRequest`        |
+| `initReq`                               | `initAdminContext`                          |
+| `InitReqArgs`                           | `InitAdminContextArgs`                      |
+| `InitReqResult`                         | `AdminContext`                              |
+| `InitReqCache`                          | `AdminContextCache`                         |
+| `InitReqPartialResult`                  | `PartialAdminContext`                       |
+
+`initAdminContext` and its cache types are primarily contracts for framework adapters. Custom Root layout adapters must rename their injected `initReq` callback to `initAdminContext`.
+
+Local request creation now takes a single object argument containing `payload`. For a request without options:
+
+```diff
+-import { createLocalReq } from 'payload'
++import { createPayloadRequest } from 'payload'
+
+-const req = await createLocalReq({}, payload)
++const req = await createPayloadRequest({ payload })
+```
+
+`CreatePayloadRequestArgs` is exported from `payload` and requires `payload`. Options-only values should use `Omit<CreatePayloadRequestArgs, 'payload'>`. The old `CreateLocalReqOptions` type was declared in the internal request utility, not exported from the package root; relative/private imports of that type require manual migration. The codemod handles an existing named import of that type only when its source is `payload`.
+
+Web request conversion uses its new role-specific name:
+
+```diff
+-import { createPayloadRequest } from 'payload'
++import { createPayloadRequestFromWebRequest } from 'payload'
+
+-const req = await createPayloadRequest({ config, request })
++const req = await createPayloadRequestFromWebRequest({ config, request })
+```
+
+#### Codemod
+
+To migrate automatically, there's a codemod for this change available by running:
+
+```bash
+npx @payloadcms/codemod --transform migrate-payload-request-creation
+```
+
+Automatic call migration requires a plain identifier payload argument and either `{}` or an initialized local `const` options identifier. The options type must expose all seven old option properties, or be `any`. For that identifier form, the generated argument captures payload first and uses forwarding getters for `context`, `depth`, `fallbackLocale`, `locale`, `req`, `urlSuffix`, and `user`. This preserves inherited getters, their read order, and rejected promises from throwing getters without reading unrelated properties. Complex expressions, mutable/unresolved options bindings, narrow option types, collisions, and unsupported type usages are left unchanged with notes for manual migration.
+
 ### JWT authentication is versioned without moving token data
 
 Payload 4 keeps the decoded JWT payload flat, so integrations can continue reading `id`, `collection`, `sid`, `email`, and fields selected by `saveToJWT` from the same paths as Payload 3.
@@ -72,6 +121,65 @@ if (decodeProtectedHeader(token).authVersion !== JWT_AUTH_VERSION) {
 A token is also rejected if its `collection` is not auth-enabled or has `disableLocalStrategy` enabled.
 
 See [Token Data](../authentication/token-data) for the full token data shape.
+
+### `overrideAccess` now defaults to `false` on Local API operations
+
+Local API operations whose optional `overrideAccess` value previously defaulted to `true` now default it to `false`, so omitting it respects Access Control instead. Operations that do not expose `overrideAccess`, and operations such as `resetPassword` where it was already required or did not default to `true`, are unaffected by this change.
+
+```diff
+const posts = await payload.find({
+  collection: 'posts',
++ overrideAccess: true, // preserves the Payload 3 default
+})
+```
+
+- `overrideAccess: false` (the new default) — respect Access Control. Use this whenever the operation acts on behalf of a user, and pass `user` alongside it.
+- `overrideAccess: true` — bypass Access Control. Use this for trusted server-side work such as cron jobs, seeding, and migrations.
+
+The property stays optional on the affected operations, and there is no compile error for either TypeScript or JavaScript projects — a call that omitted `overrideAccess` before still compiles after upgrading, it just behaves differently: it now enforces Access Control instead of skipping it. Run the codemod to find every affected call site and restore the previous behavior explicitly:
+
+```bash
+npx @payloadcms/codemod
+```
+
+Review the results afterwards. Leave the property off, or set it to `overrideAccess: false`, wherever the operation acts on behalf of a user — that is the more secure outcome and is now the default.
+
+#### Cases the codemod leaves behind
+
+Run a typecheck after the codemod. Three patterns it cannot resolve:
+
+- **Spread arguments** — `payload.find({ ...args })`. The codemod cannot tell whether `args` already supplies the property.
+- **Aliased or cast receivers** — `const db = payload; db.find({ ... })` and `(payload as any).find({ ... })`. It matches `payload`, `.payload`, and their `.jobs` properties only.
+- **Non-literal arguments** — `payload.find(options)`. The codemod cannot safely modify the value at the call site.
+
+#### Jobs operations use the same default
+
+`payload.jobs.queue`, `run`, `runByID`, `cancel`, and `cancelByID` now also default `overrideAccess` to `false`. The option remains optional, but omitting it runs the corresponding `jobs.access.queue`, `jobs.access.run`, or `jobs.access.cancel` function. The codemod adds `overrideAccess: true` to these calls—including zero-argument `payload.jobs.run()` calls—to preserve Payload 3 behavior for review.
+
+### On-demand validation adds a `validate` operation
+
+The `Operation` type now includes `validate`. The `operation` argument for collection, global, and field `beforeValidate` and `beforeChange` hooks also includes `validate`.
+
+On-demand validation runs these hooks without saving the candidate. Update exhaustive operation checks and skip external side effects that should only run during `create` or `update`:
+
+```ts
+import type { CollectionBeforeChangeHook } from 'payload'
+
+const syncCustomer: CollectionBeforeChangeHook = async ({
+  data,
+  operation,
+}) => {
+  if (operation === 'validate') {
+    return data
+  }
+
+  await syncCustomerWithStripe(data)
+
+  return data
+}
+```
+
+Sanitized collection and global access types now require a `validate` key. Payload supplies this key during configuration sanitization and uses `update` access by default. Code that constructs a sanitized access object directly must add the key.
 
 ### Collection and Global Access Control callbacks receive `slug`
 
@@ -201,6 +309,7 @@ If your application relies on two populated levels, prefer specifying `depth: 2`
 ```ts
 const posts = await payload.find({
   collection: 'posts',
+  overrideAccess: true,
   depth: 2,
 })
 ```
@@ -265,6 +374,39 @@ export const Posts: CollectionConfig = {
   fields: [],
 }
 ```
+
+### Authorship (`createdBy` / `updatedBy`) is now enabled by default
+
+Collections and globals now track authorship by default: Payload injects `createdBy` and `updatedBy` polymorphic relationship fields (related to every auth-enabled collection) and stamps them from `req.user` on each write. Previously there was no authorship tracking; you now opt out with `authorship: false`.
+
+**What changes:**
+
+- Every non-internal collection and global gains `createdBy` and `updatedBy` when your config has at least one auth collection. On SQL adapters this adds relationship rows (stored in each entity's `_rels` table), so existing projects need a database migration. In development the schema is pushed automatically; in production, generate a migration with `payload migrate:create` and run `payload migrate`. Existing documents are backfilled with `null`.
+- `createdBy` is only derived on a document's first write, so editing a document whose `createdBy` is `null` (for example a migrated or anonymously created document) does not backfill the editor as the creator.
+- Payload's internal system collections and globals are excluded automatically: `payload-jobs`, `payload-jobs-stats`, `payload-preferences`, `payload-locked-documents`, `payload-migrations`, `payload-query-presets`, and the KV collection.
+
+**Plugins:** plugin-injected collections also receive authorship unless the plugin opts out. In this release:
+
+- **Opted out** (no authorship): `@payloadcms/plugin-search`, `@payloadcms/payload-cloud`, and all `@payloadcms/plugin-ecommerce` collections.
+- **Kept on** (they gain `createdBy` / `updatedBy`): `@payloadcms/plugin-redirects`, `@payloadcms/plugin-form-builder` (forms and form submissions), and `@payloadcms/plugin-import-export` (imports and exports). Existing projects using these plugins on a SQL adapter need a migration for those collections too. To opt one out, set `authorship: false` through that plugin's collection-override option.
+
+**To opt out for an existing collection or global:**
+
+```diff
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  fields: [],
++ authorship: false,
+}
+```
+
+**A codemod is available** to preserve the previous behaviour:
+
+```bash
+npx @payloadcms/codemod --transform migrate-authorship-default
+```
+
+`migrate-authorship-default` adds `authorship: false` to every `CollectionConfig` and `GlobalConfig` in your source that does not already set `authorship`, so your own collections have zero schema changes. It only rewrites your config files — it cannot reach plugin-injected collections, so any plugin that keeps authorship on (above) still gains the fields and requires a migration (or an explicit `authorship: false` override).
 
 ### List View Select API is now the default
 
@@ -361,20 +503,20 @@ Several types and utilities that were re-exported from `@payloadcms/ui` and `@pa
 
 **Pass-through re-exports** — same name, new source:
 
-| Symbol                        | Old source                   | New source       |
-| ----------------------------- | ---------------------------- | ---------------- |
-| `Column`                      | `@payloadcms/ui`             | `payload`        |
-| `ListViewSlots`               | `@payloadcms/ui`             | `payload`        |
-| `ListViewClientProps`         | `@payloadcms/ui`             | `payload`        |
-| `EntityType`                  | `@payloadcms/ui/shared`      | `payload/shared` |
-| `formatAdminURL`              | `@payloadcms/ui/shared`      | `payload/shared` |
-| `mergeListSearchAndWhere`     | `@payloadcms/ui/shared`      | `payload/shared` |
-| `mergeHeaders`                | `@payloadcms/next/utilities` | `payload`        |
-| `headersWithCors`             | `@payloadcms/next/utilities` | `payload`        |
-| `createPayloadRequest`        | `@payloadcms/next/utilities` | `payload`        |
-| `addDataAndFileToRequest`     | `@payloadcms/next/utilities` | `payload`        |
-| `sanitizeLocales`             | `@payloadcms/next/utilities` | `payload`        |
-| `addLocalesToRequestFromData` | `@payloadcms/next/utilities` | `payload`        |
+| Symbol                        | Old source                   | New source                                        |
+| ----------------------------- | ---------------------------- | ------------------------------------------------- |
+| `Column`                      | `@payloadcms/ui`             | `payload`                                         |
+| `ListViewSlots`               | `@payloadcms/ui`             | `payload`                                         |
+| `ListViewClientProps`         | `@payloadcms/ui`             | `payload`                                         |
+| `EntityType`                  | `@payloadcms/ui/shared`      | `payload/shared`                                  |
+| `formatAdminURL`              | `@payloadcms/ui/shared`      | `payload/shared`                                  |
+| `mergeListSearchAndWhere`     | `@payloadcms/ui/shared`      | `payload/shared`                                  |
+| `mergeHeaders`                | `@payloadcms/next/utilities` | `payload`                                         |
+| `headersWithCors`             | `@payloadcms/next/utilities` | `payload`                                         |
+| `createPayloadRequest`        | `@payloadcms/next/utilities` | `createPayloadRequestFromWebRequest` in `payload` |
+| `addDataAndFileToRequest`     | `@payloadcms/next/utilities` | `payload`                                         |
+| `sanitizeLocales`             | `@payloadcms/next/utilities` | `payload`                                         |
+| `addLocalesToRequestFromData` | `@payloadcms/next/utilities` | `payload`                                         |
 
 **Renamed types** — use the new canonical name from `payload`:
 
@@ -393,7 +535,53 @@ Several types and utilities that were re-exported from `@payloadcms/ui` and `@pa
 + import { headersWithCors, mergeHeaders } from 'payload'
 ```
 
-Run `npx @payloadcms/codemod --transform migrate-aliased-exports` to migrate automatically. Renamed types are imported using an `as` alias (e.g. `import type { CollectionPreferences as ListPreferences } from 'payload'`) so existing usages keep compiling — drop the alias and rename usages manually if you want to fully commit to the new name.
+Running `npx @payloadcms/codemod --transform migrate-aliased-exports` preserves old local bindings by importing renamed symbols with an `as` alias (e.g. `import type { CollectionPreferences as ListPreferences } from 'payload'` or `import { createPayloadRequestFromWebRequest as createPayloadRequest } from 'payload'`). Run `migrate-payload-request-creation` to complete the request helper's identifier and call-site migration, or drop the other aliases and rename their usages manually if you want to fully commit to the new names.
+
+### Field component types replaced by props types
+
+Field component aliases that wrapped props in `React.ComponentType<Props>` have been removed. Import the props type directly so each component can use `React.FC<Props>` or a function declaration.
+
+```diff
+- import type { TextFieldClientComponent } from 'payload'
++ import type { TextFieldClientProps } from 'payload'
++ import type React from 'react'
+
+- export const CustomTextField: TextFieldClientComponent = (props) => {
++ export const CustomTextField: React.FC<TextFieldClientProps> = (props) => {
+    // ...
+  }
+```
+
+Generic type arguments move to the props type:
+
+```diff
+- import type { FieldErrorClientComponent, TextFieldClient } from 'payload'
++ import type { FieldErrorClientProps, TextFieldClient } from 'payload'
++ import type React from 'react'
+
+- const Error: FieldErrorClientComponent<TextFieldClient> = (props) => null
++ const Error: React.FC<FieldErrorClientProps<TextFieldClient>> = (props) => null
+```
+
+Function declarations can annotate their parameter without a component wrapper:
+
+```tsx
+import type { TextFieldServerProps } from 'payload'
+
+export default async function CustomTextField(props: TextFieldServerProps) {
+  // ...
+}
+```
+
+This covers main field components, labels, descriptions, errors, diffs, and block row labels. Admin-view types such as `AdminViewComponent` and `DocumentTabComponent` are separate.
+
+#### Codemod
+
+To migrate automatically, there's a codemod for this change available by running:
+
+```bash
+npx @payloadcms/codemod --transform migrate-field-component-types
+```
 
 ### `DefaultValue` function variant is now typed to allow returning a `Promise` ([#17522](https://github.com/payloadcms/payload/pull/17522))
 
@@ -753,6 +941,38 @@ If an affected adapter or feature performs asynchronous work, move that work to 
 
 The `transactionIDPromise` property on `PayloadRequest` has been removed. It was deprecated and unused — `transactionID` (which already supports `Promise<number | string>`) is the correct property to use for both resolved values and pending transactions.
 
+### `headers` and `languageCode` removed from `AdminContext`
+
+The `headers` and `languageCode` properties have been removed from `AdminContext`, the object returned by `initAdminContext`. Both duplicated values that are already available on `req`:
+
+```diff
+const context = await initAdminContext(args)
+
+-const userAgent = context.headers.get('user-agent')
++const userAgent = context.req.headers.get('user-agent')
+
+-const languageCode = context.languageCode
++const languageCode = context.req.i18n.language
+```
+
+`req.i18n.language` is typed as `string`. Cast it to `AcceptedLanguages` if you need the narrower type.
+
+`languageCode` has also been removed from `PartialAdminContext`. Use `i18n.language` instead. `getRootLayoutData` from `@payloadcms/ui` no longer accepts `headers` or `languageCode` and reads both from `req`.
+
+#### Codemod
+
+To migrate automatically, run:
+
+```bash
+npx @payloadcms/codemod --transform migrate-admin-context-properties
+```
+
+The codemod rewrites property reads and destructures on `initAdminContext()` results and on parameters or variables typed as `AdminContext` or `PartialAdminContext`. It also updates `Pick<AdminContext, ...>` and `AdminContext['...']` types and drops both arguments from `getRootLayoutData()` calls. Element access such as `context['headers']`, and contexts passed through your own wrapper functions, are left unchanged for manual migration.
+
+### `DiffMethod` type removed
+
+The deprecated `DiffMethod` type has been removed from `payload`. It mirrored an enum from `react-diff-viewer-continued`, which Payload no longer depends on. Remove any imports of `DiffMethod`.
+
 ### Collection `afterOperation` hook: `operation: 'read'` removed
 
 The deprecated `'read'` value for the `operation` argument of collection `afterOperation` hooks has been removed. Payload has not dispatched `afterOperation` with `operation: 'read'` for some time — the `find` and `findByID` operations report their own names (`'find'` and `'findByID'`) instead.
@@ -866,9 +1086,9 @@ Run `npx @payloadcms/codemod --transform migrate-db-types-subpath` to migrate au
 
 The minimum supported Node.js version is now **24.15.0** (previously 18.20.2). Upgrade your runtime — along with any CI, Docker images, and deployment targets — to the latest node LTS version or newer before upgrading to 4.0.
 
-### Minimum supported Next.js version is now 16.2.6 ([#16537](https://github.com/payloadcms/payload/pull/16537))
+### Minimum supported Next.js version is now 16.4.0 ([#16537](https://github.com/payloadcms/payload/pull/16537))
 
-Older versions of Next.js are no longer supported. Update Next.js to **16.2.6** or newer.
+Older versions of Next.js are no longer supported. Update Next.js to **16.4.0** or newer.
 
 ### Minimum supported TypeScript version is now 6.0.3 ([#16692](https://github.com/payloadcms/payload/pull/16692))
 
@@ -924,9 +1144,9 @@ The deprecated `isHTMLElement` utility has been removed from `@payloadcms/richte
 
 `lexical`'s built-in `isHTMLElement` is the canonical implementation and narrows against the node's owning-document `HTMLElement`, so it is also safe across iframes and other realms.
 
-### Lexical: vendored `@lexical/markdown` fork removed and lexical upgraded to `0.50.0`
+### Lexical: vendored `@lexical/markdown` fork removed and lexical upgraded to `0.52.0`
 
-`@payloadcms/richtext-lexical` no longer ships a vendored copy of `@lexical/markdown`. The package is now a direct dependency, every `@lexical/*` package was upgraded from `0.41.0` to `0.50.0`, and `@payloadcms/richtext-lexical/lexical/markdown` is a pure passthrough of `@lexical/markdown`.
+`@payloadcms/richtext-lexical` no longer ships a vendored copy of `@lexical/markdown`. The package is now a direct dependency, every `@lexical/*` package was upgraded from `0.41.0` to `0.52.0`, and `@payloadcms/richtext-lexical/lexical/markdown` is a pure passthrough of `@lexical/markdown`.
 
 Most projects use markdown through the editor or through `convertMarkdownToLexical` / `convertLexicalToMarkdown` and need no changes. You are only affected if you import from `@payloadcms/richtext-lexical/lexical/markdown` directly.
 
@@ -950,7 +1170,16 @@ If you keep calling `$convertFromMarkdownString` directly, pass `editorConfig.fe
 
 **Whitespace-only markdown table cells now import as an empty paragraph** instead of a text node of padding spaces. This comes from the lexical upgrade, not Payload's own code. No action is required unless you assert on those padding spaces in stored content.
 
-If you import lexical APIs directly through `@payloadcms/richtext-lexical/lexical/*`, also review the [lexical breaking changes](https://github.com/facebook/lexical/releases) between `0.41.0` and `0.50.0`. None of them require action for typical Payload usage.
+If you import lexical APIs directly through `@payloadcms/richtext-lexical/lexical/*`, also review the [lexical breaking changes](https://github.com/facebook/lexical/releases) between `0.41.0` and `0.52.0`. None of them require action for typical Payload usage.
+
+If your app imports Lexical types or adds custom features, check these changes from `0.50.0`. They also apply to imports through `@payloadcms/richtext-lexical/lexical` and its subpaths:
+
+- Lexical packages are ESM only. Use ESM imports; CommonJS `require()` needs Node.js 20.19 or later.
+- `SELECTION_CHANGE_COMMAND` now runs before DOM reconciliation. Defer DOM lookups and floating UI positioning with `$onUpdate(() => editor.read('latest', callback))`, or use an update listener for work that should run after every commit.
+- Call `node.getLatest().exportJSON()` when serializing a node reference retained across an update. Payload continues to write the full JSON format; compact export is not enabled.
+- `SerializedEditorState<T>`, `SerializedElementNode<T>`, and `SerializedRootNode<T>` no longer accept a type argument. Remove `<T>` if you only need the base node type. For a document with your own node types, use Payload's `TypedEditorState<T>` instead. Without a type argument, Lexical's `children` are still typed as `SerializedLexicalNode[]`.
+- `ReturnType<Node['exportJSON']>` can now infer partial JSON, making fields such as `version` and `url` optional. If your code expects the full format, use the node's explicit serialized type, such as `SerializedLinkNode`. A normal `node.exportJSON()` call still returns the full format.
+- `LexicalNode.getCommonAncestor` was removed. Use `$getCommonAncestor(a, b)?.commonAncestor ?? null`; pass the parents of non-element nodes if you need the old method's behavior.
 
 ### Lexical: `EXPERIMENTAL_TableFeature` renamed to `TableFeature`
 
@@ -967,6 +1196,27 @@ The table feature is no longer experimental, so it drops its prefix.
 ```
 
 Stored content is unaffected.
+
+### Lexical: the `version` of nodes is ignored
+
+Lexical deprecated the `version` property of serialized nodes, and now ignores it when it loads a document. Payload no longer reads it either.
+
+**Rich text written by the Payload 3.0 betas is no longer upgraded when it's loaded.** Payload used `version: 1` to detect two older shapes:
+
+- Block nodes whose fields were wrapped in an extra `data` object (`fields.data`)
+- Relationship and upload nodes that stored the whole related document in `value`, instead of its ID
+
+If your database may still contain rich text from the 3.0 betas, run `upgradeLexicalData` on the latest 3.x release before you upgrade to 4.0. It re-saves every document, which converts these shapes:
+
+```ts
+import { upgradeLexicalData } from '@payloadcms/richtext-lexical'
+
+await upgradeLexicalData({ payload })
+```
+
+**`version` is optional in the JSON schema of Lexical nodes.** The CLI and MCP no longer require it, and leave it out of the schema they show agents. They still accept it, so existing documents, which contain `version`, stay valid input.
+
+**Payload doesn't add or remove `version` when it saves rich text.** Rich text created by Lexical, like in the admin panel, still has `version: 1` on every node, because Lexical's JSON export writes it. Payload's own nodes used to write their own numbers instead (like `2` for blocks), and now write `1` as well. Rich text sent through the API, CLI or MCP is saved as sent, so it may not contain `version`. The generated types still include `version`, marked as deprecated, so don't rely on it being there.
 
 ### Field `typescriptSchema` renamed to `jsonSchema`
 
@@ -1199,9 +1449,11 @@ And update any `$ref` pointers you wrote by hand to point at `$defs`:
 
 Do not keep your additions on `definitions` while new ones land on `$defs`.
 
-### Jobs: generic collection access is denied by default
+### Jobs: access is enforced by default
 
-The generated `payload-jobs` collection now denies generic create, read, update, and delete access by default. This affects REST and GraphQL CRUD, plus Local API collection operations that use `overrideAccess: false`. Dedicated operations such as `payload.jobs.queue()`, `payload.jobs.run()`, and `payload.jobs.cancel()` continue to work as before.
+The generated `payload-jobs` collection now denies generic create, read, update, and delete access by default. This affects REST and GraphQL CRUD, plus Local API collection operations because `overrideAccess` now defaults to `false`.
+
+Dedicated operations such as `payload.jobs.queue()`, `payload.jobs.run()`, `payload.jobs.runByID()`, `payload.jobs.cancel()`, and `payload.jobs.cancelByID()` also default `overrideAccess` to `false`. They now run the corresponding `jobs.access.queue`, `jobs.access.run`, or `jobs.access.cancel` function when the option is omitted. Add `overrideAccess: true` to trusted server-side calls that must preserve the Payload 3 behavior of bypassing Jobs access control.
 
 If your application intentionally exposes the internal payload-jobs collection, configure only the access it needs through `jobsCollectionOverrides`. For example, the following enables read-only Admin Panel access for trusted administrators:
 
@@ -1503,6 +1755,8 @@ If you typed `clientUploads.access`, replace `ClientUploadsAccess` with `UploadI
 
 #### If you maintain a custom storage adapter
 
+File versioning adds a required `GeneratedAdapter.copyFile` method. Copy `from` to `to` (complete storage keys) without changing the source, reject an existing destination, and return only once the destination is readable. `moveFile` stays optional. See [Custom Storage Adapters](../upload/storage-adapters) for the full contract.
+
 Replace `clientUploadContext` with `uploadReference` in generated file metadata and static handler parameters. `handleUpload` no longer receives it because Payload skips uploading files that are already stored.
 
 Set `uploadInstructions.enabled`. When false, Payload adds `adminHandler` to the import map without rendering it. When true, Payload also renders it and exposes the instructions and supporting endpoint.
@@ -1640,6 +1894,126 @@ azureStorage({
 
 Run `npx @payloadcms/codemod --transform migrate-azure-chunk-large-files` to remove the flag automatically (it collapses `clientUploads: { chunkLargeFiles: true }` to `clientUploads: true` and keeps any other `clientUploads` options).
 
+### Sharp moved out of core into `@payloadcms/transformer-sharp`
+
+Image resizing is no longer built into `payload` itself. It now ships as an official [file transformer](../upload/transformers), `@payloadcms/transformer-sharp`, that you register under `upload.transformers`.
+
+This affects four things:
+
+1. The top-level `sharp` config property has been removed. Passing a Sharp instance now happens through `sharpTransformer({ sharp })` instead.
+2. Per-collection Sharp options — `constructorOptions`, `formatOptions`, `resizeOptions`, `trimOptions`, and `withMetadata` — have been removed from `CollectionConfig['upload']`. They're now authored through `sharpTransformer({ collections })`.
+   - `imageSizes` has also been removed from `CollectionConfig['upload']`. Image sizes are now declared as `variants` on `sharpTransformer({ collections: { <slug>: { variants } } })`. The entries themselves (`name`, `width`, `height`, `generateImageName`, and so on) are unchanged. A collection that still sets `upload.imageSizes` fails the build.
+3. `sharp` is no longer a dependency of `payload` at all (previously a `devDependency`, not a runtime `dependency`). Install `@payloadcms/transformer-sharp` explicitly.
+4. The Sharp-specific types `SharpDependency`, `ImageUploadFormatOptions`, `ImageUploadTrimOptions`, and `SharpImageSizeOptions` are no longer exported from `payload`. Import `SharpDependency` from `@payloadcms/transformer-sharp`. For the option types, use `SharpCollectionConfig['formatOptions']`, `SharpCollectionConfig['trimOptions']`, and `NonNullable<SharpCollectionConfig['variants']>[number]` from the same package.
+
+```sh
+pnpm add @payloadcms/transformer-sharp
+```
+
+```diff
++ import { sharpTransformer } from '@payloadcms/transformer-sharp'
+  import { buildConfig } from 'payload'
+
+  export default buildConfig({
+    collections: [
+      {
+        slug: 'media',
+        upload: {
+-         resizeOptions: { width: 2048, height: 2048 },
+-         imageSizes: [{ name: 'thumbnail', width: 400, height: 300 }],
+        },
+      },
+    ],
+-   sharp,
+    upload: {
++     transformers: [
++       sharpTransformer({
++         sharp,
++         collections: {
++           media: {
++             resizeOptions: { width: 2048, height: 2048 },
++             variants: [{ name: 'thumbnail', width: 400, height: 300 }],
++           },
++         },
++       }),
++     ],
+    },
+  })
+```
+
+Run `npx @payloadcms/codemod --transform migrate-sharp-to-transformer` to migrate automatically. The codemod moves a top-level `sharp` dependency and inline collection Sharp options — including `crop` and `focalPoint` — into `sharpTransformer({ collections })` (writing `imageSizes` as `variants`), appends to an existing `upload.transformers` array if you already have one, and leaves anything it can't safely rewrite in place with a note — for example, a `collections` array built by a function call, or a collection defined outside the `buildConfig` call. Review those manually. For a config that already registers `sharpTransformer`, it only renames `imageSizes` to `variants` inside the existing `sharpTransformer` call and flags a leftover top-level `sharp` property; it doesn't move any remaining collection options.
+
+Your `variants`, `crop`, and `focalPoint` are readable at `collection.upload.variants`/`.crop`/`.focalPoint` on the **sanitized** config (for example `req.payload.collections.media.config.upload.variants`). Code that read the sanitized `upload.imageSizes` in 3.x must read `upload.variants` instead. `sharpTransformer` writes a projection of what you configure back onto the sanitized collection at startup, so the Admin Panel and the rest of core see the same configuration. For a collection configured on `sharpTransformer`, a `crop` or `focalPoint` set on the transformer replaces the collection's own value; one left unset there keeps the collection's. Neither `imageSizes` nor `variants` can be set on the collection at all.
+
+If you inject a custom Sharp build or version, pass it the same way:
+
+```diff
+- buildConfig({ sharp: myCustomSharp })
++ sharpTransformer({ sharp: myCustomSharp })
+```
+
+`sharpTransformer` can also resize images at request time (`/api/media/file/photo.png?width=400`). This is new in Payload 4 and **disabled by default**, so a migrated config keeps serving only the original file and your pre-generated `variants`. The codemod doesn't enable it. To opt in, pass `dynamic: true` or `dynamic: { collections: ['media'] }` — see [Dynamic (request-time) resizing](../upload/transformers#dynamic-request-time-resizing), and [Securing dynamic resizing](../upload/transformers#securing-dynamic-resizing) before enabling it on a publicly readable collection.
+
+#### The stored `sizes` field on upload documents is renamed to `variants`
+
+The group field that holds each generated image size on an upload document is now `variants` instead of `sizes`. Every place that reads or queries it changes:
+
+```diff
+- doc.sizes?.thumbnail?.url
++ doc.variants?.thumbnail?.url
+
+- where: { 'sizes.thumbnail.filename': { equals: 'photo-400x300.png' } }
++ where: { 'variants.thumbnail.filename': { equals: 'photo-400x300.png' } }
+
+- select: { sizes: { thumbnail: true } }
++ select: { variants: { thumbnail: true } }
+```
+
+GraphQL queries select `variants { thumbnail { url } }` instead of `sizes { thumbnail { url } }`, and regenerated types expose `variants?: { ... }` (and `variants?: T | { ... }` on the `*Select` types) in place of `sizes`. Update any frontend code that reads `media.sizes`, including values you pass to helpers such as `getBestFitFromSizes({ sizes: doc.variants })`.
+
+Existing documents must be migrated. Create the predefined migration for your database adapter and run it:
+
+<Banner type="warning">
+  Payload 4 uses `variants` as the top-level field for generated upload
+  variants. If an upload collection already defines a custom field named
+  `variants`, rename that field before you run the predefined migration. Choose
+  a new name, update your config, and write a custom migration that moves the
+  existing custom data from `variants` to the new field. Then run the predefined
+  `sizes-to-variants` migration. If legacy `sizes` data or columns and custom
+  `variants` data or columns are both present, the predefined migration stops
+  before it changes data or indexes. It cannot choose a new name or merge this
+  custom data for you.
+</Banner>
+
+```sh
+# MongoDB
+payload migrate:create --file @payloadcms/db-mongodb/sizes-to-variants
+# Postgres
+payload migrate:create --file @payloadcms/db-postgres/sizes-to-variants
+# Vercel Postgres
+payload migrate:create --file @payloadcms/db-vercel-postgres/sizes-to-variants
+# SQLite
+payload migrate:create --file @payloadcms/db-sqlite/sizes-to-variants
+# Cloudflare D1
+payload migrate:create --file @payloadcms/db-d1-sqlite/sizes-to-variants
+
+payload migrate
+```
+
+**Postgres and SQLite (including Vercel Postgres and D1):** the columns are renamed in place from `sizes_<name>_<property>` to `variants_<name>_<property>`, on each upload collection's table and its versions table, along with their indexes. Use the predefined migration above **instead of** a plain `payload migrate:create` for this change. A generated migration would drop the `sizes_*` columns and add new `variants_*` columns, losing the stored image size data. The predefined migration also writes the schema snapshot, so the next generated migration starts from the renamed columns.
+
+On MongoDB the migration renames `sizes` (and `version.sizes` on versions) with `$rename` and re-creates the indexes on those fields under the new path. Run the migration before the upgraded app writes to upload documents.
+
+#### The file endpoint changes once any transformer is registered
+
+Registering any transformer under `upload.transformers` — including `sharpTransformer()` with dynamic resizing off — routes every file request through the transformer-aware handler:
+
+- A file must belong to an upload document to be served. A file that exists in storage without a matching document now returns `404`.
+- For files whose MIME type a transformer declares (every image, with `sharpTransformer()`), `access.read` can run twice per request: once with `req.fileTransform` set to `true` to decide a possible transform, and once without it for an ordinary read. Keep `access.read` cheap, and use `req.fileTransform` to restrict transformed reads — see [Access control](../upload/transformers#access-control).
+- Responses produced by a transformer always carry Payload's CORS headers, which `modifyResponseHeaders` can't override.
+
+To link to a file from your own code, including with transformer query parameters, use the new `generatePayloadFileURL` helper (exported from `payload` and `payload/shared`). It always builds the access-controlled Payload file endpoint, so links never bypass `access.read` by pointing straight at storage.
+
 ### Storage adapters always insert the `prefix` field now — `alwaysInsertFields` removed
 
 The `alwaysInsertFields` option (on `cloudStoragePlugin` and every `storage-*` adapter: `-s3`, `-azure`, `-gcs`, `-r2`, `-vercel-blob`) has been removed. The behavior it used to opt into — always inserting the hidden `prefix` field into the collection schema — is now unconditional, so the schema stays consistent whether or not a collection configures a `prefix` and whether or not the plugin is `enabled`.
@@ -1654,6 +2028,12 @@ The `alwaysInsertFields` option (on `cloudStoragePlugin` and every `storage-*` a
 
 - Remove `alwaysInsertFields` from your storage adapter or `cloudStoragePlugin` config — it has no effect and no longer exists on the option types.
 - For Postgres, SQLite, or D1 projects, run `payload migrate:create` to generate the migration that adds the `prefix` column, then run `payload migrate` to apply it.
+
+### Upload collections retain originals and file history
+
+Upload collections now store `original` metadata and a `prefix` and `_objectKey` for each stored file (the main file, `original`, and each variant), so saved versions can find their files. New uploads keep their source under an `-original` filename. Update any code or infrastructure that relies on the old filename, URL, or object key.
+
+**Postgres and SQLite:** after updating, run `payload migrate:create`, check that it adds these columns to each upload collection table and its versions table, then run `payload migrate`. Existing rows keep `null` values until their next write.
 
 ### `FileSizeImproved` removed — use `FileSize` ([#16593](https://github.com/payloadcms/payload/pull/16593))
 
@@ -1908,6 +2288,8 @@ Because the `payload-mcp-api-keys` collection config was removed, run your norma
 By default, MCP items require an authenticated user. Built-in collection and global tools also include Payload permission checks in their default `access` callbacks. If you provide an `access` callback for a built-in tool, it replaces the default callback.
 
 **Dependencies.** The plugin now builds on `@modelcontextprotocol/server` instead of `@modelcontextprotocol/sdk` + `mcp-handler`. It no longer depends on Zod directly; its built-in tools use the Zod Mini export from `payload`. If your custom tools use regular Zod, install Zod v4 in your project and import it directly.
+
+**HTTP requests have a size limit.** `POST /api/mcp` now answers request bodies over 4 MiB with `413`. Base64 file uploads count toward this limit. Raise it with `mcp.maxRequestBodySize`.
 
 ### `@payloadcms/ui/scss` export removed and legacy `--theme-*` tokens retired
 

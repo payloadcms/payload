@@ -10,6 +10,7 @@ import type {
 } from 'lexical'
 import type {
   Field,
+  FieldOperation,
   FieldSchemaMap,
   FieldsToJSONSchemaArgs,
   ImportMapGenerators,
@@ -165,7 +166,7 @@ export type AfterChangeNodeHookArgs<T extends SerializedLexicalNode> = {
 }
 export type BeforeValidateNodeHookArgs<T extends SerializedLexicalNode> = {
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
-  operation: 'create' | 'delete' | 'read' | 'update'
+  operation: FieldOperation
   /** The value of the node before any changes. Not available in afterRead hooks */
   originalNode: T
   overrideAccess: boolean
@@ -178,7 +179,7 @@ export type BeforeChangeNodeHookArgs<T extends SerializedLexicalNode> = {
   errors: ValidationFieldError[]
   mergeLocaleActions: (() => Promise<void> | void)[]
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
-  operation: 'create' | 'delete' | 'read' | 'update'
+  operation: FieldOperation
   /** The value of the node before any changes. Not available in afterRead hooks */
   originalNode: T
   /**
@@ -234,7 +235,16 @@ export type JSONSchemaArgs = {
 
 export type JSONSchemaFn = (args: JSONSchemaArgs) => JSONSchema4
 
-// Define the node with hooks that use the node's exportJSON return type
+// Match both overloads to infer the full JSON format. ReturnType selects the compact
+// overload, and LexicalExportJSON widens custom nodes' serialized type discriminants.
+type SerializedNodeJSON<T extends LexicalNode> = T['exportJSON'] extends {
+  (compact?: false): infer Serialized extends SerializedLexicalNode
+  // eslint-disable-next-line perfectionist/sort-object-types -- Overload order determines inference.
+  (compact: boolean): unknown
+}
+  ? Serialized
+  : never
+
 export type NodeWithHooks<T extends LexicalNode = any> = {
   /**
    * If a node includes sub-fields (e.g. block and link nodes), passing those subFields here will make payload
@@ -244,14 +254,14 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
     /**
      * Optional. If not provided, all possible sub-fields should be returned.
      */
-    node?: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
+    node?: SerializedNodeJSON<ReplaceAny<T, LexicalNode>>
     req?: PayloadRequest
   }) => Field[] | null
   /**
    * If a node includes sub-fields, the sub-fields data needs to be returned here, alongside `getSubFields` which returns their schema.
    */
   getSubFieldsData?: (args: {
-    node: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
+    node: SerializedNodeJSON<ReplaceAny<T, LexicalNode>>
     req: PayloadRequest
   }) => JsonObject
   /**
@@ -261,18 +271,16 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
    * In order for them to be populated correctly in graphQL, the population logic needs to be provided here.
    */
   graphQLPopulationPromises?: Array<
-    PopulationPromise<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
+    PopulationPromise<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>
   >
   /**
    * Just like payload fields, you can provide hooks which are run for this specific node. These are called Node Hooks.
    */
   hooks?: {
-    afterChange?: Array<AfterChangeNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
-    afterRead?: Array<AfterReadNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
-    beforeChange?: Array<BeforeChangeNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
-    beforeValidate?: Array<
-      BeforeValidateNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
-    >
+    afterChange?: Array<AfterChangeNodeHook<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
+    afterRead?: Array<AfterReadNodeHook<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
+    beforeChange?: Array<BeforeChangeNodeHook<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
+    beforeValidate?: Array<BeforeValidateNodeHook<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
   }
   /**
    * Returns the JSON Schema for this node, plus optional standalone TS
@@ -288,7 +296,7 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
    * This allows you to provide node validations, which are run when your document is being validated, alongside other payload fields.
    * You can use it to throw a validation error for a specific node in case its data is incorrect.
    */
-  validations?: Array<NodeValidation<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
+  validations?: Array<NodeValidation<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
 }
 
 export type ServerFeature<ServerProps, ClientFeatureProps> = {
