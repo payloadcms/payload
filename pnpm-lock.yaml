@@ -1902,6 +1902,9 @@ importers:
       '@payloadcms/next':
         specifier: workspace:*
         version: link:../../packages/next
+      '@payloadcms/plugin-mcp':
+        specifier: workspace:*
+        version: link:../../packages/plugin-mcp
       '@payloadcms/richtext-lexical':
         specifier: workspace:*
         version: link:../../packages/richtext-lexical
@@ -1984,6 +1987,9 @@ importers:
       '@payloadcms/graphql':
         specifier: workspace:*
         version: link:../../packages/graphql
+      '@payloadcms/plugin-mcp':
+        specifier: workspace:*
+        version: link:../../packages/plugin-mcp
       '@payloadcms/richtext-lexical':
         specifier: workspace:*
         version: link:../../packages/richtext-lexical

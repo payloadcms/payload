@@ -21,10 +21,13 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
 
   const pluginConfig = getPluginConfig({ config: req.payload.config })
   if (new URL(req.url).searchParams.has('overrideAccess')) {
-    throw new APIError('MCP overrideAccess is not supported. Authenticate with Payload instead.', 400)
+    throw new APIError(
+      'MCP overrideAccess is not supported. Authenticate with Payload instead.',
+      400,
+    )
   }
 
-  const authorizedMCP = await getAuthorizedMCP({ overrideAccess: false, req })
+  const authorizedMCP = await getAuthorizedMCP({ req })
   const maxRequestBodySize = pluginConfig.mcp?.maxRequestBodySize
   // Payload augments the original web-standard Request in place.
   const mcpRequest = req as PayloadRequest & Request

@@ -43,6 +43,9 @@ work. Use MCP to connect clients to a stable running server,
 such as your production deployment, with credentials and permissions for that
 server. MCP follows the same access rules when used against a development server.
 
+The blank Next.js and TanStack templates include this plugin. They do not configure
+a local MCP client connection or generate `.mcp.json`.
+
 **1.** Add `mcpPlugin` to your Payload config:
 
 ```ts
@@ -233,7 +236,7 @@ The agent reads the collection's upload settings before acting. MIME type and fi
 
 The `getCollectionSchema` and `getGlobalSchema` tools return [LLM instructions](../configuration/llm-instructions) in `structuredContent.instructions` alongside `schema`, and in a text content block. Read them before creating or updating content.
 
-These instructions come from your collection or global config and can include additional instructions saved in the Admin Panel. To read them, the caller needs permission to create or update documents in that collection, or to update that global. Saved instructions also require the caller to be logged in and have read permission for the collection or global. These permission checks are skipped when `overrideAccess` is enabled.
+These instructions come from your collection or global config and can include additional instructions saved in the Admin Panel. To read them, the caller needs permission to create or update documents in that collection, or to update that global. Saved instructions also require the caller to be logged in and have read permission for the collection or global.
 
 ## HTTP transport
 
@@ -283,8 +286,6 @@ MCP authorization flow. The custom resolver must:
 1. Authenticate the caller and assign the matching Payload user to `req.user`.
    Assign `null` when the caller is anonymous.
 2. Return only the MCP `items` that caller may use.
-3. Return `overrideAccess: false` so Payload's local API enforces the caller's
-   access rules.
 
 `req.user` is the single source of truth for the caller's identity. Payload
 access control, MCP access callbacks, and local API calls that receive `req` all
@@ -308,7 +309,6 @@ mcpPlugin({
 
     return {
       items: req.user ? pluginConfig.items : [],
-      overrideAccess: false,
     }
   },
 })
@@ -322,7 +322,6 @@ The handler receives:
 
 - `req` - the incoming `PayloadRequest`
 - `pluginConfig` - the fully sanitized plugin config, including the registered `items`
-- `overrideAccess` - `false` for both HTTP and stdio; clients cannot request an access override
 
 ## Connecting MCP clients
 
@@ -430,13 +429,13 @@ mcpPlugin({
       input: z.object({
         sides: z.number().int().min(2).max(1000).default(6),
       }),
-    }).handler(async ({ authorizedMCP, input, req }) => {
+    }).handler(async ({ input, req }) => {
       const result = Math.floor(Math.random() * input.sides) + 1
 
       await req.payload.create({
         collection: 'rolls',
         data: { sides: input.sides, result, user: req.user?.id },
-        overrideAccess: authorizedMCP.overrideAccess,
+        overrideAccess: false,
         req,
       })
 
@@ -465,12 +464,12 @@ mcpPlugin({
           input: z.object({
             id: z.string(),
           }),
-        }).handler(async ({ slug, input, authorizedMCP, req }) => {
+        }).handler(async ({ slug, input, req }) => {
           const result = await req.payload.update({
             id: input.id,
             collection: slug,
             data: { _status: 'published' },
-            overrideAccess: authorizedMCP.overrideAccess,
+            overrideAccess: false,
             req,
           })
           return {
@@ -505,11 +504,11 @@ mcpPlugin({
           input: z.object({
             enabled: z.boolean(),
           }),
-        }).handler(async ({ slug, input, authorizedMCP, req }) => {
+        }).handler(async ({ slug, input, req }) => {
           const result = await req.payload.updateGlobal({
             slug,
             data: { maintenanceMode: input.enabled },
-            overrideAccess: authorizedMCP.overrideAccess,
+            overrideAccess: false,
             req,
           })
 
@@ -643,24 +642,23 @@ an `authorizedMCP` object describing the MCP authorization result:
 ```ts
 type AuthorizedMCP = {
   items: MCPItem[] // the items this caller may use
-  overrideAccess: boolean // whether handlers should bypass Payload access control
 }
 ```
 
-When calling Payload's local API from a tool handler, pass `req` and
-`authorizedMCP.overrideAccess`. The local API reads the user from `req.user`:
+When calling Payload's local API from a tool handler, pass `req` and keep
+`overrideAccess: false`. The local API reads the user from `req.user`:
 
 ```ts
 await req.payload.create({
   collection: 'posts',
   data,
-  overrideAccess: authorizedMCP.overrideAccess,
+  overrideAccess: false,
   req,
 })
 ```
 
-Built-in CRUD tools already use this pattern. They run as `req.user` unless
-`overrideAccess` is true.
+Built-in CRUD tools already use this pattern. They always enforce Payload access
+control for `req.user`, including when using a custom authorization resolver.
 
 Prompt and resource handlers receive `req`, but not `authorizedMCP`.
 

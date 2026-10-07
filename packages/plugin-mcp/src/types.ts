@@ -101,8 +101,7 @@ export type GlobalToolHandlerArgs<TSchema = undefined> = {
 export type Tool<TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined> = {
   /**
    * Runs while authorizing each MCP request, before the tool is advertised or called. Return
-   * `false` to make the tool unavailable for that request. This is skipped when `overrideAccess`
-   * is enabled.
+   * `false` to make the tool unavailable for that request.
    */
   access?: (args: MCPAccessArgs) => MaybePromise<boolean>
   annotations?: ToolAnnotations
@@ -121,8 +120,7 @@ export type CollectionTool<
   /**
    * Runs while authorizing each MCP request for this collection. Return `false` to reject calls
    * to this tool for the collection. The shared tool is not advertised when no collections allow
-   * it, but can remain advertised when it is available for another collection. This is skipped
-   * when `overrideAccess` is enabled.
+   * it, but can remain advertised when it is available for another collection.
    */
   access?: (args: CollectionMCPAccessArgs) => MaybePromise<boolean>
   handler: (args: CollectionToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
@@ -134,8 +132,7 @@ export type GlobalTool<TSchema extends ToolInputSchema | undefined = ToolInputSc
     /**
      * Runs while authorizing each MCP request for this global. Return `false` to reject calls to
      * this tool for the global. The shared tool is not advertised when no globals allow it, but
-     * can remain advertised when it is available for another global. This is skipped when
-     * `overrideAccess` is enabled.
+     * can remain advertised when it is available for another global.
      */
     access?: (args: GlobalMCPAccessArgs) => MaybePromise<boolean>
     handler: (args: GlobalToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
@@ -150,7 +147,7 @@ export type GlobalTool<TSchema extends ToolInputSchema | undefined = ToolInputSc
 export type MCPBuiltInCollectionToolOverride = {
   /**
    * Replaces the built-in tool's access check. Return `false` to make the tool unavailable for
-   * this collection. This is skipped when `overrideAccess` is enabled.
+   * this collection.
    */
   access?: (args: CollectionMCPAccessArgs) => MaybePromise<boolean>
   annotations?: ToolAnnotations
@@ -162,7 +159,7 @@ export type MCPBuiltInCollectionToolOverride = {
 export type MCPBuiltInGlobalToolOverride = {
   /**
    * Replaces the built-in tool's access check. Return `false` to make the tool unavailable for
-   * this global. This is skipped when `overrideAccess` is enabled.
+   * this global.
    */
   access?: (args: GlobalMCPAccessArgs) => MaybePromise<boolean>
   annotations?: ToolAnnotations
@@ -210,8 +207,7 @@ export type PromptHandlerArgs<TSchema = undefined> = {
 export type Prompt<TSchema extends ToolInputSchema = ToolInputSchema> = {
   /**
    * Runs while authorizing each MCP request, before the prompt is advertised or used. Return
-   * `false` to make the prompt unavailable for that request. This is skipped when
-   * `overrideAccess` is enabled.
+   * `false` to make the prompt unavailable for that request.
    */
   access?: (args: MCPAccessArgs) => MaybePromise<boolean>
   argsSchema: TSchema
@@ -233,8 +229,7 @@ export type ResourceHandlerArgs = {
 export type Resource = {
   /**
    * Runs while authorizing each MCP request, before the resource is advertised or read. Return
-   * `false` to make the resource unavailable for that request. This is skipped when
-   * `overrideAccess` is enabled.
+   * `false` to make the resource unavailable for that request.
    */
   access?: (args: MCPAccessArgs) => MaybePromise<boolean>
   description: string
@@ -295,8 +290,8 @@ export type MCPPluginConfig = {
    *
    * This hook replaces the default authentication flow. It must set `req.user` to the
    * authenticated Payload user, or to `null` for an anonymous caller, before returning.
-   * HTTP and stdio always supply `overrideAccess: false`. Never grant an access override
-   * based on client input.
+   * Return only the MCP items the caller may use. Built-in tools always enforce Payload
+   * access control using `req.user`.
    */
   overrideGetAuthorizedMCP?: (
     args: {
@@ -361,10 +356,8 @@ export type MCPItem =
   | GlobalMCPItem
 
 /**
- * The MCP items and access mode authorized for this request. The authenticated user is available
- * as `req.user`.
+ * The MCP items authorized for this request. The authenticated user is available as `req.user`.
  */
 export type AuthorizedMCP = {
   items: MCPItem[]
-  overrideAccess: boolean
 }

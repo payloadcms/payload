@@ -19,7 +19,7 @@ export const countGlobalVersionsTool = defineGlobalTool({
   },
   description: DEFAULT_DESCRIPTION,
   input: countGlobalVersionsInputSchema,
-}).handler(async ({ slug, authorizedMCP, input, req }) => {
+}).handler(async ({ slug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
   const { locale, where } = input
@@ -29,7 +29,7 @@ export const countGlobalVersionsTool = defineGlobalTool({
   try {
     const result = await payload.countGlobalVersions({
       global: slug,
-      overrideAccess: authorizedMCP.overrideAccess,
+      overrideAccess: false,
       req,
       ...(locale ? { locale } : {}),
       ...(where ? { where } : {}),

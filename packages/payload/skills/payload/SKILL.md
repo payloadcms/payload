@@ -56,7 +56,9 @@ Read the schema and its LLM instructions before writing content. The CLI is a
 trusted local interface with access to the project's database credentials.
 
 Use authenticated MCP when working against a stable running server, such as a
-production deployment. Install and configure the MCP plugin explicitly. HTTP
+production deployment. The blank templates include the MCP plugin; other projects
+can install and configure it. Configure the client with the server's URL and
+credentials; do not set up a local Payload MCP connection in `.mcp.json`. HTTP
 and stdio enforce normal Payload authentication and access control in every
 environment; development mode does not grant extra permissions.
 

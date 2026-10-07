@@ -20,6 +20,7 @@
   "dependencies": {
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/graphql": "workspace:*",
+    "@payloadcms/plugin-mcp": "workspace:*",
     "@payloadcms/richtext-lexical": "workspace:*",
     "@payloadcms/tanstack-start": "workspace:*",
     "@payloadcms/ui": "workspace:*",

@@ -46,10 +46,12 @@ pnpm payload getConfigInfo --json
 pnpm payload getCollectionSchema --slug users --json
 ```
 
-The [MCP plugin](https://payloadcms.com/docs/plugins/mcp) is optional and is not
-installed by this template. Add it when clients need authenticated access to a
-stable running server, such as your production deployment. MCP uses the same
-Payload authentication and access controls in every environment.
+The [MCP plugin](https://payloadcms.com/docs/plugins/mcp) is installed and configured
+for authenticated access to a stable running server, such as your production
+deployment. Configure your MCP client with that server's URL and credentials.
+This template does not set up a local MCP connection or generate `.mcp.json`;
+use the CLI for local work. MCP enforces Payload authentication and access
+controls in every environment.
 
 ## How it works
 

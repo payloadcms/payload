@@ -79,7 +79,7 @@ export const runMcpStdio = async (): Promise<void> => {
 
   const req = await createPayloadRequest({ payload, req: { headers } })
   req.payloadAPI = 'MCP' as const
-  const authorizedMCP = await getAuthorizedMCP({ overrideAccess: false, req })
+  const authorizedMCP = await getAuthorizedMCP({ req })
 
   const stdioServer = serveStdio(() => buildMcpServer({ authorizedMCP, pluginConfig, req }), {
     onerror: (err) => {

@@ -1,4 +1,5 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { mcpPlugin } from '@payloadcms/plugin-mcp'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -33,4 +34,5 @@ export default buildConfig({
     fallback: true,
     defaultLocale: 'en',
   },
+  plugins: [mcpPlugin({})],
 })
