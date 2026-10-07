@@ -363,8 +363,8 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect(created.filename).toBe('image-original.png')
     expect(created.original?.filename).toBe(created.filename)
     expect(created.original?.url).toBe(created.url)
-    expect(created._objectKey).toBeUndefined()
-    expect(created.original?._objectKey).toBeUndefined()
+    expect(created._objectKey).toEqual(expect.any(String))
+    expect(created.original?._objectKey).toBe(created._objectKey)
     expect(files).toEqual([
       {
         key: expect.stringMatching(/image-original\.png$/),
@@ -1530,6 +1530,30 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
 
     for (const url of [read.url, read.original?.url]) {
       expect(new URL(url!).searchParams.get('signature')).toBe('second')
+    }
+  })
+
+  test('should keep the stored object folder in regenerated provider URLs', async ({
+    payload,
+  }) => {
+    const created = await payload.create({
+      collection: versionedPublicCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+    })
+    const read = await payload.findByID({
+      id: created.id,
+      collection: versionedPublicCloudMediaSlug,
+    })
+    const stored = await payload.db.findOne({
+      collection: versionedPublicCloudMediaSlug,
+      where: { id: { equals: created.id } },
+    })
+    const storedKeys = getStoredCloudFiles(stored).map(({ key }) => `/${key}`)
+
+    expect(stored?._objectKey).toBeTruthy()
+    for (const url of [created.url, created.original?.url, read.url, read.original?.url]) {
+      expect(storedKeys).toContain(new URL(url!).pathname)
     }
   })
 
