@@ -468,7 +468,7 @@ export const updateOperation = async <
       hasDraftsEnabled(globalConfig) &&
       publishAllLocales &&
       !unpublishAllLocales &&
-      hasAuthorizedPublicationStatus
+      (!hasLocalizeStatusEnabled(globalConfig) || hasAuthorizedPublicationStatus)
     ) {
       const validationResult = await validateGlobalLocalWithLocaleKeyedData({
         operation: 'update',

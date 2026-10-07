@@ -1,5 +1,6 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { defaultDraftValidationBlock } from './blocks.js'
 import { validationCollections } from './collections.js'
 import { localeFilterOperationEvents } from './events.js'
 import { validationGlobals } from './globals.js'
@@ -18,6 +19,7 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     },
+    blocks: [defaultDraftValidationBlock],
     collections: validationCollections,
     globals: validationGlobals,
     jobs: {

@@ -466,7 +466,7 @@ export const createOperation = async <
       config.localization &&
       hasDraftsEnabled(collectionConfig) &&
       publishAllLocales &&
-      hasAuthorizedPublicationStatus
+      (!hasLocalizeStatusEnabled(collectionConfig) || hasAuthorizedPublicationStatus)
     ) {
       const validationResult = await validateLocalWithLocaleKeyedData({
         operation: 'create',

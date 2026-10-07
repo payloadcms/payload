@@ -13,6 +13,9 @@ import {
   trackLocalePass,
 } from './events.js'
 import {
+  defaultDraftPublishCollectionSlug,
+  defaultDraftPublishUploadCollectionSlug,
+  defaultDraftValidationBlockSlug,
   publishCollectionSlug,
   validateAfterReadPreviousValue,
   validationAuthCollectionSlug,
@@ -629,6 +632,49 @@ const publishCollection: CollectionConfig = {
   },
 }
 
+const defaultDraftPublishCollection: CollectionConfig = {
+  slug: defaultDraftPublishCollectionSlug,
+  access: {
+    update: () => true,
+  },
+  dbName: 'default_draft',
+  fields: [
+    {
+      name: 'layout',
+      type: 'blocks',
+      blocks: [defaultDraftValidationBlockSlug],
+      minRows: 1,
+      required: true,
+    },
+  ],
+  versions: {
+    drafts: true,
+  },
+}
+
+const defaultDraftPublishUploadCollection: CollectionConfig = {
+  slug: defaultDraftPublishUploadCollectionSlug,
+  access: {
+    update: () => true,
+  },
+  dbName: 'default_upload',
+  fields: [
+    {
+      name: 'layout',
+      type: 'blocks',
+      blocks: [defaultDraftValidationBlockSlug],
+      minRows: 1,
+      required: true,
+    },
+  ],
+  upload: {
+    staticDir: validationUploadsDir,
+  },
+  versions: {
+    drafts: true,
+  },
+}
+
 const validationCustomButtonsCollection: CollectionConfig = {
   slug: validationCustomButtonsCollectionSlug,
   access: {
@@ -827,6 +873,8 @@ export const validationCollections: CollectionConfig[] = [
   validationFallbackCollection,
   validationWhereCollection,
   publishCollection,
+  defaultDraftPublishCollection,
+  defaultDraftPublishUploadCollection,
   validationCustomButtonsCollection,
   validationDeniedCollection,
   validationNonLocalizedCollection,
