@@ -276,6 +276,7 @@ export const csTranslations: DefaultTranslationsObject = {
     all: 'Všechny',
     allCollections: 'Všechny kolekce',
     allLocales: 'Všechny lokalizace',
+    allowedTypes: 'Povolené typy',
     and: 'a',
     anotherUser: 'Jiný uživatel',
     anotherUserTakenOver: 'Jiný uživatel převzal úpravy tohoto dokumentu.',
@@ -291,6 +292,7 @@ export const csTranslations: DefaultTranslationsObject = {
     checked: 'Zkontrolováno',
     clear: 'Jasný',
     clearAll: 'Vymazat vše',
+    clearSearch: 'Vymazat hledání',
     close: 'Zavřít',
     collapse: 'Sbalit',
     collection: 'Kolekce',
@@ -563,6 +565,23 @@ export const csTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Hledat {{label}}',
     searchResults: 'Nalezeno: {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Další pokyny',
+    collectionDescription:
+      'Přidejte vlastní pokyny pro kolekci {{label}}, které pomohou modelům LLM lépe přizpůsobit odpovědi na zadání.',
+    collectionSystemDescription:
+      'Tyto systémové pokyny pocházejí z konfiguračního souboru kolekce a jsou vždy zahrnuty.',
+    editInstructions: 'Upravit pokyny LLM',
+    global: 'Globální dokument',
+    globalDescription:
+      'Přidejte vlastní pokyny pro globální dokument {{label}}, které pomohou modelům LLM lépe přizpůsobit odpovědi na zadání.',
+    globalSystemDescription:
+      'Tyto systémové pokyny pocházejí z konfiguračního souboru globálního dokumentu a jsou vždy zahrnuty.',
+    instructions: 'Pokyny LLM',
+    systemInstructions: 'Systémové pokyny (pouze pro čtení)',
+    targetCannotBeChanged: 'Cíl pokynů nelze změnit.',
+    title: 'Název',
   },
   localization: {
     cannotCopySameLocale: 'Nelze kopírovat do stejného umístění',

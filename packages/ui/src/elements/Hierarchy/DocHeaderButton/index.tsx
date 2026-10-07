@@ -8,6 +8,10 @@ import { useForm, useFormFields } from '../../../forms/Form/context.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import {
+  getEffectiveHierarchyCollections,
+  getHierarchyCollectionRestrictions,
+} from '../../../utilities/hierarchyCollectionRestrictions.js'
 import { Button } from '../../Button/index.js'
 import { useHierarchyModal } from '../Modal/useHierarchyModal.js'
 import './index.css'
@@ -33,7 +37,7 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
 }) => {
   const { t } = useTranslation()
   const { config, getEntityConfig } = useConfig()
-  const { collectionSlug: documentCollectionSlug } = useDocumentInfo()
+  const { id: documentId, collectionSlug: documentCollectionSlug } = useDocumentInfo()
   const { disabled: formDisabled, setModified } = useForm()
   const readOnly = readOnlyFromProps || formDisabled
   const dispatchField = useFormFields(([_, dispatch]) => dispatch)
@@ -46,18 +50,48 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
 
   const collectionConfig = getEntityConfig({ collectionSlug: hierarchyCollectionSlug })
   const useAsTitle = collectionConfig?.admin?.useAsTitle || 'name'
+  const { relatedCollectionSlugs, typeFieldName } = useMemo(
+    () => getHierarchyCollectionRestrictions({ collectionConfig }),
+    [collectionConfig],
+  )
+
+  const allowedCollections = useFormFields(([fields]) => {
+    const value = typeFieldName ? fields?.[typeFieldName]?.value : undefined
+
+    return Array.isArray(value) ? (value as string[]) : undefined
+  })
 
   const isHierarchyCollection = documentCollectionSlug === hierarchyCollectionSlug
 
   // When in hierarchy collection, let the modal use allowedCollections from context
   // When in other collections, filter by that collection's slug
   // Memoize to prevent new array references on every render
-  const filterByCollection = useMemo(
-    () => (isHierarchyCollection || !documentCollectionSlug ? undefined : [documentCollectionSlug]),
-    [isHierarchyCollection, documentCollectionSlug],
+  const filterByCollection = useMemo(() => {
+    if (!documentCollectionSlug) {
+      return undefined
+    }
+    if (!isHierarchyCollection) {
+      return [documentCollectionSlug]
+    }
+    if (!typeFieldName) {
+      return undefined
+    }
+    return getEffectiveHierarchyCollections({ allowedCollections, relatedCollectionSlugs })
+  }, [
+    allowedCollections,
+    documentCollectionSlug,
+    isHierarchyCollection,
+    relatedCollectionSlugs,
+    typeFieldName,
+  ])
+
+  const disabledIds = useMemo(
+    () => (isHierarchyCollection && documentId !== undefined ? new Set([documentId]) : undefined),
+    [documentId, isHierarchyCollection],
   )
 
   const [HierarchyModal, , { openModal }] = useHierarchyModal({
+    disabledIds,
     filterByCollection,
     hierarchyCollectionSlug,
     Icon,

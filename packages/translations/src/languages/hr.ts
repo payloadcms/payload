@@ -279,6 +279,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     all: 'Svi',
     allCollections: 'Sve kolekcije',
     allLocales: 'Sve lokalne postavke',
+    allowedTypes: 'Dopuštene vrste',
     and: 'i',
     anotherUser: 'Drugi korisnik',
     anotherUserTakenOver: 'Drugi korisnik je preuzeo uređivanje ovog dokumenta.',
@@ -294,6 +295,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     checked: 'Provjereno',
     clear: 'Jasan',
     clearAll: 'Očisti sve',
+    clearSearch: 'Očisti pretragu',
     close: 'Zatvori',
     collapse: 'Sažmi',
     collection: 'Kolekcija',
@@ -566,6 +568,23 @@ export const hrTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Pretraži {{label}}',
     searchResults: 'Pronađeno: {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Dodatne upute',
+    collectionDescription:
+      'Dodajte prilagođene upute za zbirku {{label}} kako biste pomogli LLM-ovima da bolje prilagode odgovore na upite.',
+    collectionSystemDescription:
+      'Ove sistemske upute dolaze iz konfiguracijske datoteke zbirke i uvijek su uključene.',
+    editInstructions: 'Uredi upute za LLM',
+    global: 'Globalni dokument',
+    globalDescription:
+      'Dodajte prilagođene upute za globalni dokument {{label}} kako biste pomogli LLM-ovima da bolje prilagode odgovore na upite.',
+    globalSystemDescription:
+      'Ove sistemske upute dolaze iz konfiguracijske datoteke globalnog dokumenta i uvijek su uključene.',
+    instructions: 'Upute za LLM',
+    systemInstructions: 'Sistemske upute (samo za čitanje)',
+    targetCannotBeChanged: 'Cilj uputa nije moguće promijeniti.',
+    title: 'Naslov',
   },
   localization: {
     cannotCopySameLocale: 'Ne može se kopirati na istu lokaciju',

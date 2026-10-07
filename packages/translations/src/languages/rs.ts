@@ -280,6 +280,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     all: 'Svi',
     allCollections: 'Све Колекције',
     allLocales: 'Sve lokacije',
+    allowedTypes: 'Дозвољени типови',
     and: 'И',
     anotherUser: 'Други корисник',
     anotherUserTakenOver: 'Други корисник је преузео уређивање овог документа.',
@@ -295,6 +296,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     checked: 'Provereno',
     clear: 'Jasno',
     clearAll: 'Obriši sve',
+    clearSearch: 'Обриши претрагу',
     close: 'Затвори',
     collapse: 'Скупи',
     collection: 'Kolekcija',
@@ -566,6 +568,23 @@ export const rsTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Pretraga {{label}}',
     searchResults: 'Пронађено: {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Додатна упутства',
+    collectionDescription:
+      'Додајте прилагођена упутства за колекцију {{label}} да бисте помогли LLM моделима да боље прилагоде одговоре на упите.',
+    collectionSystemDescription:
+      'Ова системска упутства потичу из конфигурационе датотеке колекције и увек су укључена.',
+    editInstructions: 'Уреди упутства за LLM',
+    global: 'Глобални документ',
+    globalDescription:
+      'Додајте прилагођена упутства за глобални документ {{label}} да бисте помогли LLM моделима да боље прилагоде одговоре на упите.',
+    globalSystemDescription:
+      'Ова системска упутства потичу из конфигурационе датотеке глобалног документа и увек су укључена.',
+    instructions: 'Упутства за LLM',
+    systemInstructions: 'Системска упутства (само за читање)',
+    targetCannotBeChanged: 'Циљ упутстава није могуће променити.',
+    title: 'Наслов',
   },
   localization: {
     cannotCopySameLocale: 'Не може се копирати на исту локацију.',

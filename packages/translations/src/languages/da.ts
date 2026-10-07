@@ -278,6 +278,7 @@ export const daTranslations: DefaultTranslationsObject = {
     all: 'Alle',
     allCollections: 'Alle samlinger',
     allLocales: 'Alle lokaliteter',
+    allowedTypes: 'Tilladte typer',
     and: 'Og',
     anotherUser: 'En anden bruger',
     anotherUserTakenOver: 'En anden bruger har overtaget denne ressource.',
@@ -294,6 +295,7 @@ export const daTranslations: DefaultTranslationsObject = {
     checked: 'Kontrolleret',
     clear: 'Klar',
     clearAll: 'Ryd alt',
+    clearSearch: 'Ryd søgning',
     close: 'Luk',
     collapse: 'Skjul',
     collection: 'Samling',
@@ -567,6 +569,23 @@ export const daTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Søg {{label}}',
     searchResults: 'Fandt {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Yderligere instruktioner',
+    collectionDescription:
+      "Tilføj tilpassede instruktioner til samlingen {{label}}, så LLM'er bedre kan tilpasse deres svar på prompts.",
+    collectionSystemDescription:
+      'Disse systeminstruktioner kommer fra samlingens konfigurationsfil og medtages altid.',
+    editInstructions: 'Rediger LLM-instruktioner',
+    global: 'Global',
+    globalDescription:
+      "Tilføj tilpassede instruktioner til globalen {{label}}, så LLM'er bedre kan tilpasse deres svar på prompts.",
+    globalSystemDescription:
+      'Disse systeminstruktioner kommer fra globalens konfigurationsfil og medtages altid.',
+    instructions: 'LLM-instruktioner',
+    systemInstructions: 'Systeminstruktioner (skrivebeskyttet)',
+    targetCannotBeChanged: 'Instruktionernes mål kan ikke ændres.',
+    title: 'Titel',
   },
   localization: {
     cannotCopySameLocale: 'Kan ikke kopiere til den samme lokalitet',

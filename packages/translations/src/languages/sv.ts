@@ -279,6 +279,7 @@ export const svTranslations: DefaultTranslationsObject = {
     all: 'Alla',
     allCollections: 'Alla samlingar',
     allLocales: 'Alla språk',
+    allowedTypes: 'Tillåtna typer',
     and: 'Och',
     anotherUser: 'En annan användare',
     anotherUserTakenOver: 'En annan användare har tagit över redigeringen av detta dokument.',
@@ -295,6 +296,7 @@ export const svTranslations: DefaultTranslationsObject = {
     checked: 'Kontrollerad',
     clear: 'Rensa',
     clearAll: 'Rensa alla',
+    clearSearch: 'Rensa sökning',
     close: 'Stäng',
     collapse: 'Fäll ihop',
     collection: 'Samling',
@@ -569,6 +571,23 @@ export const svTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Sök {{label}}',
     searchResults: 'Hittade {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Ytterligare instruktioner',
+    collectionDescription:
+      'Lägg till anpassade instruktioner för samlingen {{label}} så att LLM:er bättre kan anpassa sina svar på promptar.',
+    collectionSystemDescription:
+      'Dessa systeminstruktioner kommer från samlingens konfigurationsfil och inkluderas alltid.',
+    editInstructions: 'Redigera LLM-instruktioner',
+    global: 'Global',
+    globalDescription:
+      'Lägg till anpassade instruktioner för globalen {{label}} så att LLM:er bättre kan anpassa sina svar på promptar.',
+    globalSystemDescription:
+      'Dessa systeminstruktioner kommer från globalens konfigurationsfil och inkluderas alltid.',
+    instructions: 'LLM-instruktioner',
+    systemInstructions: 'Systeminstruktioner (skrivskyddade)',
+    targetCannotBeChanged: 'Instruktionernas mål kan inte ändras.',
+    title: 'Titel',
   },
   localization: {
     cannotCopySameLocale: 'Kan inte kopiera till samma språk',

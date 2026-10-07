@@ -279,6 +279,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     all: 'Всички',
     allCollections: 'Всички колекции',
     allLocales: 'Всички локации',
+    allowedTypes: 'Разрешени типове',
     and: 'И',
     anotherUser: 'Друг потребител',
     anotherUserTakenOver: 'Друг потребител пое редактирането на този документ.',
@@ -294,6 +295,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     checked: 'Проверено',
     clear: 'Ясно',
     clearAll: 'Изчисти всичко',
+    clearSearch: 'Изчистване на търсенето',
     close: 'Затвори',
     collapse: 'Свий',
     collection: 'Колекция',
@@ -567,6 +569,23 @@ export const bgTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Търсене {{label}}',
     searchResults: 'Намерени: {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Допълнителни инструкции',
+    collectionDescription:
+      'Добавете персонализирани инструкции за колекцията {{label}}, за да помогнете на LLM моделите да адаптират по-добре отговорите си на заявки.',
+    collectionSystemDescription:
+      'Тези системни инструкции идват от конфигурационния файл на колекцията и винаги се включват.',
+    editInstructions: 'Редактиране на инструкции за LLM',
+    global: 'Глобален документ',
+    globalDescription:
+      'Добавете персонализирани инструкции за глобалния документ {{label}}, за да помогнете на LLM моделите да адаптират по-добре отговорите си на заявки.',
+    globalSystemDescription:
+      'Тези системни инструкции идват от конфигурационния файл на глобалния документ и винаги се включват.',
+    instructions: 'Инструкции за LLM',
+    systemInstructions: 'Системни инструкции (само за четене)',
+    targetCannotBeChanged: 'Целта на инструкциите не може да бъде променена.',
+    title: 'Заглавие',
   },
   localization: {
     cannotCopySameLocale: 'Не може да се копира в същата локация',
