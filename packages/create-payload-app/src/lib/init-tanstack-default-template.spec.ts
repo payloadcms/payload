@@ -133,8 +133,12 @@ describe('initTanStack default template', () => {
         'utf8',
       )
 
-      expect(route).toContain("import('@payloadcms/ui/css/app.css')")
-      expect(route).toContain("import('./custom.css')")
+      expect(route).toContain("import payloadStyles from '@payloadcms/ui/css/app.css?url'")
+      expect(route).toContain("import customStyles from './custom.css?url'")
+      expect(route).toContain('const adminHead = adminRoute.head(context)')
+      expect(route).toContain('...adminHead.links')
+      expect(route).toContain("{ rel: 'stylesheet', href: payloadStyles }")
+      expect(route).toContain("{ rel: 'stylesheet', href: customStyles }")
       expect(route).not.toContain("import '@payloadcms/ui/css/app.css'")
       expect(route).not.toContain("import './custom.css'")
     }
