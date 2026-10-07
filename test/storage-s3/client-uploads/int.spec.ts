@@ -696,4 +696,124 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
   test.afterEach(async () => {
     await clearTestBucket()
   })
+  test('should keep a legacy original readable through repeated image edits', async ({
+    payload,
+    restClient,
+  }) => {
+    await restClient.login({ slug: 'users' })
+    const bytes = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+    const filename = 'legacy-source.png'
+    await getAWSClient().putObject({
+      Body: bytes,
+      Bucket: getTestBucketName(),
+      ContentType: 'image/png',
+      Key: filename,
+    })
+    const created = await payload.db.create({
+      collection: mediaSlug,
+      data: {
+        filename,
+        filesize: bytes.length,
+        height: 800,
+        mimeType: 'image/png',
+        url: `/api/${mediaSlug}/file/${filename}`,
+        width: 800,
+      },
+    })
+
+    for (const x of [0, 25]) {
+      const response = await restClient.PATCH(`/${mediaSlug}/${created.id}`, {
+        body: JSON.stringify({}),
+        query: {
+          uploadEdits: {
+            crop: { height: 50, unit: '%', width: 50, x, y: 0 },
+            heightInPixels: 800,
+            widthInPixels: 800,
+          },
+        },
+      })
+
+      expect(response.status).toBe(200)
+      const { doc } = await response.json<{ doc: { original: { url: string }; url: string } }>()
+      expect(doc.url).not.toBe(doc.original.url)
+      const source = new URL(doc.original.url, 'http://localhost')
+      const original = await restClient.GET(
+        `${source.pathname.replace(/^\/api/, '')}${source.search}`,
+      )
+      expect(original.status).toBe(200)
+      expect(Buffer.from(await original.arrayBuffer())).toEqual(bytes)
+    }
+  })
+  test('should clean a legacy variant from its inherited folder after its last version is pruned', async ({
+    payload,
+    restClient,
+  }) => {
+    await restClient.login({ slug: 'users' })
+    const bytes = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+    const filename = 'legacy-source.png'
+    const variantFilename = 'legacy-thumbnail.png'
+    const prefix = 'legacy-folder'
+    const client = getAWSClient()
+    const Bucket = getTestBucketName()
+    await client.putObject({
+      Body: bytes,
+      Bucket,
+      ContentType: 'image/png',
+      Key: `${prefix}/${filename}`,
+    })
+    await client.putObject({
+      Body: bytes,
+      Bucket,
+      ContentType: 'image/png',
+      Key: `${prefix}/${variantFilename}`,
+    })
+    const created = await payload.db.create({
+      collection: mediaHeaderOnlyWithSizesSlug,
+      data: {
+        filename,
+        filesize: bytes.length,
+        height: 1600,
+        mimeType: 'image/png',
+        prefix,
+        url: `/api/${mediaHeaderOnlyWithSizesSlug}/file/${filename}`,
+        variants: {
+          thumbnail: {
+            filename: variantFilename,
+            filesize: bytes.length,
+            height: 1600,
+            mimeType: 'image/png',
+            url: `/api/${mediaHeaderOnlyWithSizesSlug}/file/${variantFilename}`,
+            width: 1600,
+          },
+        },
+        width: 1600,
+      },
+    })
+
+    const collection = payload.collections[mediaHeaderOnlyWithSizesSlug].config
+    const previousVersions = collection.versions
+    collection.versions = { ...previousVersions, maxPerDoc: 1 }
+
+    try {
+      const response = await restClient.PATCH(`/${mediaHeaderOnlyWithSizesSlug}/${created.id}`, {
+        body: JSON.stringify({}),
+        query: {
+          uploadEdits: {
+            crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
+            heightInPixels: 1600,
+            widthInPixels: 1600,
+          },
+        },
+      })
+
+      expect(response.status).toBe(200)
+      const objects = await client.listObjectsV2({ Bucket })
+      expect(objects.Contents?.some(({ Key }) => Key === `${prefix}/${variantFilename}`)).toBe(
+        false,
+      )
+      expect(objects.Contents?.some(({ Key }) => Key === `${prefix}/${filename}`)).toBe(true)
+    } finally {
+      collection.versions = previousVersions
+    }
+  })
 })
