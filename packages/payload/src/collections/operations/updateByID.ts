@@ -1,7 +1,5 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import { status as httpStatus } from 'http-status'
-
 import type { FindOneArgs } from '../../database/types.js'
 import type {
   PayloadRequest,
@@ -21,6 +19,13 @@ import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { type CollectionSlug, deepCopyObjectSimple, type FindOptions } from '../../index.js'
+import { runCloudFileUpdate } from '../../uploads/fileVersioning/cloudStorage.js'
+import {
+  abortFileOperationScope,
+  beginFileOperationScope,
+  completeFileOperationScope,
+} from '../../uploads/fileVersioning/fileOperationManager.js'
+import { withLegacyCloudUploadFileData } from '../../uploads/fileVersioning/storedFiles.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import {
   getLocalizedUploadProperties,
@@ -33,6 +38,7 @@ import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.j
 import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
@@ -75,6 +81,11 @@ export const updateByIDOperation = async <
   incomingArgs: Arguments<TSlug>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
+  const hasFileOperationScope = Boolean(args.collection.config.upload)
+
+  if (hasFileOperationScope) {
+    beginFileOperationScope({ req: args.req })
+  }
 
   assertNoValidationWrite(args.req)
 
@@ -241,7 +252,7 @@ export const updateByIDOperation = async <
       where: fullWhere,
     }
 
-    const docWithLocales = await getLatestCollectionVersion<
+    let docWithLocales = await getLatestCollectionVersion<
       RequiredDataFromCollectionSlug<TSlug> & TypeWithID
     >({
       id,
@@ -259,6 +270,15 @@ export const updateByIDOperation = async <
     }
     if (!docWithLocales) {
       throw new NotFound(req.t)
+    }
+
+    const storedDocWithLocales = docWithLocales
+    if (collectionConfig.upload.fileOperations) {
+      docWithLocales = await withLegacyCloudUploadFileData({
+        collection: collectionConfig,
+        doc: docWithLocales,
+        req,
+      })
     }
 
     if (collectionConfig.upload && !overrideAccess) {
@@ -302,7 +322,7 @@ export const updateByIDOperation = async <
     // Update document, runs all document level hooks
     // ///////////////////////////////////////////////
 
-    let result = await updateDocument<TSlug, TSelect>({
+    const updateArgs = {
       id,
       autosave,
       collectionConfig,
@@ -321,9 +341,23 @@ export const updateByIDOperation = async <
       publishAllLocales,
       req,
       select: select!,
+      shouldManageLocalFiles: true,
       showHiddenFields: showHiddenFields!,
       unpublishAllLocales,
-    })
+    } as const
+
+    const write = () => updateDocument<TSlug, TSelect>(updateArgs)
+    let result = collectionConfig.upload.fileOperations
+      ? await runCloudFileUpdate({
+          id,
+          collection: collectionConfig,
+          current: storedDocWithLocales,
+          data: updateArgs.data,
+          files: filesToUpload,
+          req,
+          write,
+        })
+      : await write()
 
     // /////////////////////////////////////
     // Add collection property for auth collections
@@ -361,6 +395,10 @@ export const updateByIDOperation = async <
       await commitTransaction(req)
     }
 
+    if (hasFileOperationScope) {
+      await completeFileOperationScope({ req })
+    }
+
     return result
   } catch (error: unknown) {
     await unlinkTempFiles({
@@ -371,6 +409,9 @@ export const updateByIDOperation = async <
       args.req.payload.logger.error({ err: unlinkError, msg: 'Failed to remove temp file' })
     })
     await killTransaction(args.req)
+    if (hasFileOperationScope) {
+      await abortFileOperationScope({ req: args.req })
+    }
     throw error
   }
 }

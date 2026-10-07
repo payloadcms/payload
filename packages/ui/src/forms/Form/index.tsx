@@ -814,7 +814,6 @@ export const Form: React.FC<FormProps> = (props) => {
       dispatchFields({
         type: 'REPLACE_STATE',
         optimize: false,
-        sanitize: true,
         state: initialState,
       })
     }

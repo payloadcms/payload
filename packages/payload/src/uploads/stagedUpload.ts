@@ -1,4 +1,4 @@
-import { jwtVerify } from 'jose'
+import { jwtVerify } from 'jose/jwt/verify'
 import { randomUUID } from 'node:crypto'
 import fs from 'node:fs/promises'
 import os from 'node:os'

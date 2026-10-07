@@ -1,8 +1,7 @@
-import { status as httpStatus } from 'http-status'
-
 import type { AccessResult } from '../../config/types.js'
 import type { CollectionSlug, FindOptions } from '../../index.js'
 import type { PayloadRequest, PopulateType, SelectType, Where } from '../../types/index.js'
+import type { StoredFileList } from '../../uploads/fileVersioning/types.js'
 import type {
   BulkOperationResult,
   Collection,
@@ -18,6 +17,16 @@ import { APIError, Locked } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
+import {
+  collectStoredFiles,
+  collectVersionFiles,
+  scheduleUnreferencedFileCleanup,
+} from '../../uploads/fileVersioning/cleanup.js'
+import {
+  abortFileOperationScope,
+  beginFileOperationScope,
+  completeFileOperationScope,
+} from '../../uploads/fileVersioning/fileOperationManager.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import {
@@ -27,6 +36,7 @@ import {
 } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -62,6 +72,14 @@ export const deleteOperation = async <
 
   if (args.collection.config.disableBulkDelete && !args.overrideAccess) {
     throw new APIError(`Collection ${args.collection.config.slug} has disabled bulk delete`, 403)
+  }
+
+  const hasFileOperationScope =
+    Boolean(args.collection.config.upload) && !args.req.payload.db.bulkOperationsSingleTransaction
+  const markedManagedDeletes = new Set<string>()
+
+  if (hasFileOperationScope) {
+    beginFileOperationScope({ req: args.req })
   }
 
   try {
@@ -152,12 +170,17 @@ export const deleteOperation = async <
       collection: collectionConfig.slug,
       locale: locale!,
       req,
-      select,
+      // File cleanup needs every stored representation even when the response selects only an ID.
+      select: collectionConfig.upload ? undefined : select,
       where: fullWhere,
     })
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
     let didBatchDeleteFail = false
+    const deletedFilesByID = new Map<number | string, StoredFileList>()
+    req.context ??= {}
+    const managedDeletedUploads = (req.context._payloadManagedDeletedUploads ??=
+      new Set()) as Set<string>
 
     type Doc = DataFromCollectionSlug<TSlug>
     type ResultDoc = BulkOperationResult<TSlug, TSelect>['docs'][number]
@@ -183,6 +206,20 @@ export const deleteOperation = async <
             context: req.context,
             req,
           })
+        }
+      }
+
+      if (collectionConfig.upload) {
+        deletedFilesByID.set(doc.id, [
+          ...(await collectStoredFiles({ collection: collectionConfig, doc, req })),
+          ...(collectionConfig.versions
+            ? await collectVersionFiles({ collection: collectionConfig, parentID: doc.id, req })
+            : []),
+        ])
+        if (deletedFilesByID.get(doc.id)?.length) {
+          const identity = JSON.stringify([collectionConfig.slug, String(doc.id)])
+          managedDeletedUploads.add(identity)
+          markedManagedDeletes.add(identity)
         }
       }
 
@@ -257,6 +294,12 @@ export const deleteOperation = async <
      * on its own and therefore cannot share a batched write with the rest of the operation.
      */
     const deleteDocumentIndividually = async (doc: Doc): Promise<null | ResultDoc> => {
+      const hasIndividualFileScope = Boolean(collectionConfig.upload)
+
+      if (hasIndividualFileScope) {
+        beginFileOperationScope({ req })
+      }
+
       try {
         const docShouldCommit = await initTransaction(req)
 
@@ -299,15 +342,30 @@ export const deleteOperation = async <
           },
         })
 
+        if (collectionConfig.upload) {
+          await scheduleUnreferencedFileCleanup({
+            candidates: deletedFilesByID.get(doc.id) ?? [],
+            collection: collectionConfig,
+            req,
+          })
+        }
+
         const result = await runAfterDeleteWork(doc)
 
         if (docShouldCommit) {
           await commitTransaction(req)
         }
 
+        if (hasIndividualFileScope) {
+          await completeFileOperationScope({ req })
+        }
+
         return result
       } catch (error) {
         await killTransaction(req)
+        if (hasIndividualFileScope) {
+          await abortFileOperationScope({ req })
+        }
         pushError(doc.id, error)
 
         return null
@@ -433,6 +491,14 @@ export const deleteOperation = async <
         return results
       }
 
+      if (collectionConfig.upload) {
+        await scheduleUnreferencedFileCleanup({
+          candidates: deletable.flatMap(({ doc }) => deletedFilesByID.get(doc.id) ?? []),
+          collection: collectionConfig,
+          req,
+        })
+      }
+
       await Promise.all(
         deletable.map(async (entry) => {
           try {
@@ -493,9 +559,26 @@ export const deleteOperation = async <
       await commitTransaction(req)
     }
 
+    if (hasFileOperationScope) {
+      await completeFileOperationScope({ req })
+    }
+
     return result
   } catch (error: unknown) {
     await killTransaction(args.req)
+    if (hasFileOperationScope) {
+      await abortFileOperationScope({ req: args.req })
+    }
     throw error
+  } finally {
+    const managedDeletedUploads = args.req.context?._payloadManagedDeletedUploads as
+      | Set<string>
+      | undefined
+    for (const identity of markedManagedDeletes) {
+      managedDeletedUploads?.delete(identity)
+    }
+    if (managedDeletedUploads?.size === 0) {
+      delete args.req.context._payloadManagedDeletedUploads
+    }
   }
 }

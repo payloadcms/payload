@@ -1,10 +1,9 @@
-import { status as httpStatus } from 'http-status'
-
 import type { PayloadHandler } from '../../config/types.js'
 
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { getRequestGlobal } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import {
   assertValidationData,
   parseValidationLocaleSelector,

@@ -90,6 +90,10 @@ import {
   type Options as FindVersionsOptions,
 } from './collections/operations/local/findVersions.js'
 import {
+  renameFileLocal,
+  type RenameFileOptions,
+} from './collections/operations/local/renameFile.js'
+import {
   restoreVersionLocal,
   type Options as RestoreVersionOptions,
 } from './collections/operations/local/restoreVersion.js'
@@ -736,6 +740,13 @@ export class BasePayload {
   }
 
   reencrypt = reencrypt
+
+  /** Rename an upload's current managed files without changing their bytes. */
+  renameFile = async <TSlug extends CollectionSlug>(
+    options: RenameFileOptions<TSlug>,
+  ): Promise<DataFromCollectionSlug<TSlug>> => {
+    return renameFileLocal<TSlug>(this, options)
+  }
 
   resetPassword = async <TSlug extends CollectionSlug>(
     options: ResetPasswordOptions<TSlug>,
@@ -1577,6 +1588,7 @@ export {
   updateDocumentLocalInputSchema,
 } from './collections/operations/inputSchemas.js'
 export type { ValidateCollectionOptions } from './collections/operations/local/validate.js'
+export { renameFileOperation } from './collections/operations/renameFile.js'
 export { restoreVersionOperation } from './collections/operations/restoreVersion.js'
 export { updateOperation } from './collections/operations/update.js'
 export { updateByIDOperation } from './collections/operations/updateByID.js'
@@ -2056,6 +2068,11 @@ export type * from './uploads/transformers/types.js'
 export type * from './uploads/types.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
+export {
+  batchProcessing,
+  type BatchProcessingOptions,
+  type BatchProcessorResult,
+} from './utilities/batchProcessing.js'
 export { canAccessAdmin } from './utilities/canAccessAdmin.js'
 export { commitTransaction } from './utilities/commitTransaction.js'
 export {

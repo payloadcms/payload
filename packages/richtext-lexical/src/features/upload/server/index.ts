@@ -15,12 +15,7 @@ import { UploadServerNode } from './nodes/UploadNode.js'
 import { createUploadNodeJSONSchema } from './schema.js'
 import { uploadValidation } from './validate.js'
 
-export type {
-  Internal_UploadData,
-  SerializedUploadNode,
-  UploadData,
-  UploadDataImproved,
-} from './schema.js'
+export type { Internal_UploadData, SerializedUploadNode, UploadData } from './schema.js'
 
 export type ExclusiveUploadFeatureProps =
   | {
