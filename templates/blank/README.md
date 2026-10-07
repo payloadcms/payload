@@ -37,8 +37,7 @@ To do so, follow these steps:
 ## CLI and AI agents
 
 Use the built-in [Payload CLI](https://payloadcms.com/docs/configuration/cli) for
-local development and coding-agent work. It loads the current config without a
-running web server:
+local development and coding-agent work:
 
 ```sh
 pnpm payload help --json
@@ -49,9 +48,6 @@ pnpm payload getCollectionSchema --slug users --json
 The [MCP plugin](https://payloadcms.com/docs/plugins/mcp) is installed and configured
 for authenticated access to a stable running server, such as your production
 deployment. Configure your MCP client with that server's URL and credentials.
-This template does not set up a local MCP connection or generate `.mcp.json`;
-use the CLI for local work. MCP enforces Payload authentication and access
-controls in every environment.
 
 ## How it works
 

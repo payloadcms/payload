@@ -42,9 +42,7 @@ Payload is a Next.js native CMS with TypeScript-first architecture, providing ad
 
 ## Choosing an interface
 
-Use the built-in Payload CLI for local development and coding-agent work. Each
-invocation loads the current config without a running web server or MCP plugin.
-Use the project's development database configuration for local work.
+Use the built-in Payload CLI for local development and coding-agent work.
 
 ```sh
 pnpm payload help --json
@@ -58,9 +56,7 @@ trusted local interface with access to the project's database credentials.
 Use authenticated MCP when working against a stable running server, such as a
 production deployment. The blank templates include the MCP plugin; other projects
 can install and configure it. Configure the client with the server's URL and
-credentials; do not set up a local Payload MCP connection in `.mcp.json`. HTTP
-and stdio enforce normal Payload authentication and access control in every
-environment; development mode does not grant extra permissions.
+credentials.
 
 ## Quick Start
 

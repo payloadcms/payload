@@ -116,9 +116,6 @@ ComponentName/
 
 Use this CLI wrapper for local development and coding-agent operations. Add
 `--json` for structured output, for example `pnpm payload fields getConfigInfo --json`.
-MCP is intended for authenticated access to a stable running server and must use
-normal Payload access control in every environment. Configure that connection
-explicitly; the repository does not provide a default local Payload MCP server.
 
 ### Development Environment
 
