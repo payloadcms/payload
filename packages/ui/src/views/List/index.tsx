@@ -17,7 +17,7 @@ import type {
   SelectType,
 } from 'payload'
 
-import { getAncestors } from 'payload'
+import { docAccessOperation } from 'payload'
 import {
   appendDateTimezoneSelectFields,
   appendUploadSelectFields,
@@ -374,26 +374,30 @@ export const renderListView = async (
   let currentHierarchyItem: CurrentHierarchyItem | undefined
 
   if (isHierarchyCollection && hierarchyParentId !== null) {
-    const hierarchyAncestors = await getAncestors({
+    const currentHierarchyDoc = await payload.findByID({
       id: hierarchyParentId,
-      collectionSlug,
+      collection: collectionSlug,
+      depth: 0,
+      disableErrors: true,
+      overrideAccess: false,
       req,
+      user,
     })
 
-    const currentAncestor = hierarchyAncestors.at(-1)
-
-    if (currentAncestor) {
-      // Collection-level `update` is true when access returns a query, so resolve it per document
-      const { docPermissions } = await getDocumentPermissions({
-        id: currentAncestor.id,
-        collectionConfig,
-        data: {},
+    if (currentHierarchyDoc) {
+      // Pass the real document so access functions that read `data` get the right answer
+      const { update: hasUpdatePermission } = await docAccessOperation({
+        id: currentHierarchyDoc.id,
+        collection: { config: collectionConfig },
+        data: currentHierarchyDoc,
         req,
       })
+      const titleFieldName = collectionConfig.admin?.useAsTitle || 'id'
 
       currentHierarchyItem = {
-        ...currentAncestor,
-        hasUpdatePermission: Boolean(docPermissions?.update),
+        id: currentHierarchyDoc.id,
+        hasUpdatePermission: Boolean(hasUpdatePermission),
+        title: String(currentHierarchyDoc[titleFieldName] || currentHierarchyDoc.id),
       }
     }
   }
