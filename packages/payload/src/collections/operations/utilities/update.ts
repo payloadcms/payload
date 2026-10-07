@@ -114,6 +114,11 @@ export const updateDocument = async <
   showHiddenFields,
   unpublishAllLocales: unpublishAllLocalesArg,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
+  const nextFileData =
+    collectionConfig.upload && shouldManageLocalFiles && !collectionConfig.upload.fileOperations
+      ? deepCopyObjectSimple(data)
+      : undefined
+
   validateAllLocalesPublicationFlags({
     publishAllLocales: publishAllLocalesArg,
     unpublishAllLocales: unpublishAllLocalesArg,
@@ -622,7 +627,7 @@ export const updateDocument = async <
     return result as TransformCollectionWithSelect<TSlug, TSelect>
   }
 
-  if (!shouldManageLocalFiles || collectionConfig.upload.fileOperations) {
+  if (!nextFileData) {
     return writeDocument()
   }
 
@@ -631,7 +636,7 @@ export const updateDocument = async <
     collection: collectionConfig,
     current: docWithLocales,
     files: hasManagedLocalUpload ? filesToUpload : [],
-    next: data as JsonObject,
+    next: nextFileData as JsonObject,
     req,
     write: writeDocument,
   })
