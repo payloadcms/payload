@@ -1,5 +1,3 @@
-import { status as httpStatus } from 'http-status'
-
 import type { AccessResult } from '../../config/types.js'
 import type { CollectionSlug, FindOptions } from '../../index.js'
 import type { PayloadRequest, PopulateType, SelectType, Where } from '../../types/index.js'
@@ -38,6 +36,7 @@ import {
 } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { killTransaction } from '../../utilities/killTransaction.js'

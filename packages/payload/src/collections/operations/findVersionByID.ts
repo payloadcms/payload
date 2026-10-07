@@ -1,5 +1,3 @@
-import { status as httpStatus } from 'http-status'
-
 import type { FindOptions } from '../../index.js'
 import type { PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
@@ -13,6 +11,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { checkFileAccess } from '../../uploads/checkFileAccess.js'
 import { markHistoricalFileURLs } from '../../uploads/fileVersioning/markHistoricalFileURLs.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'

@@ -855,9 +855,6 @@ importers:
       graphql-playground-html:
         specifier: 1.6.30
         version: 1.6.30
-      http-status:
-        specifier: 2.1.0
-        version: 2.1.0
       next:
         specifier: '>=16.4.0 <17.0.0'
         version: 16.4.0(@babel/core@7.27.3)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@24.12.3)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.77.4)
@@ -973,9 +970,6 @@ importers:
       graphql:
         specifier: 16.8.1
         version: 16.8.1
-      http-status:
-        specifier: 2.1.0
-        version: 2.1.0
       image-dimensions:
         specifier: 2.5.1
         version: 2.5.1

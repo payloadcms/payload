@@ -1,5 +1,3 @@
-import { status as httpStatus } from 'http-status'
-
 import type {
   AuthOperationsFromCollectionSlug,
   Collection,
@@ -13,6 +11,7 @@ import { APIError } from '../../errors/index.js'
 import { combineQueries, Forbidden } from '../../index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { executeAccess } from '../executeAccess.js'

@@ -1,6 +1,5 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import { status as httpStatus } from 'http-status'
 import { randomUUID } from 'node:crypto'
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -43,6 +42,7 @@ import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.j
 import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasDraftsEnabled, hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
