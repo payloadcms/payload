@@ -6,7 +6,7 @@ import { fieldsToJSONSchema, flattenAllFields, registerBlockInterface } from 'pa
 import type { LexicalElementFormat } from '../../../types/nodeTypes.js'
 import type { JSONSchemaArgs, JSONSchemaFn } from '../../typesServer.js'
 
-import { formatSchema } from '../../../types/jsonSchemaHelpers.js'
+import { formatSchema, versionSchema } from '../../../types/jsonSchemaHelpers.js'
 
 type BaseBlockFields<TFields extends JsonObject = JsonObject> = {
   blockName?: null | string
@@ -143,10 +143,12 @@ export const createBlockNodeJSONSchema =
 
     return {
       type: 'object',
+      additionalProperties: false,
       properties: {
         type: { type: 'string', const: 'block' },
         fields: fieldsSchema,
         format: formatSchema,
+        version: versionSchema,
       },
       required: ['fields', 'format', 'type'],
       tsType,
@@ -175,9 +177,11 @@ export const createInlineBlockNodeJSONSchema =
 
     return {
       type: 'object',
+      additionalProperties: false,
       properties: {
         type: { type: 'string', const: 'inlineBlock' },
         fields: fieldsSchema,
+        version: versionSchema,
       },
       required: ['fields', 'type'],
       tsType,

@@ -28,6 +28,7 @@ import {
   getCollectionInputSchema,
   sanitizeConfig,
   validateCollectionData,
+  ValidationError,
 } from 'payload'
 import { generateTypes } from 'payload/node'
 import { sanitizeUrl } from 'payload/shared'
@@ -957,39 +958,40 @@ test.suite('Lexical', { config: './config.ts' }, () => {
         validateCollectionData({
           slug: lexicalFieldsSlug,
           data: {
+            lexicalWithBlocks: createParagraphRichText({ textNode: helloTextNode }),
             title: 'Rich text without version',
-            lexicalWithBlocks: {
-              root: {
-                type: 'root',
-                children: [
-                  {
-                    type: 'paragraph',
-                    children: [
-                      {
-                        type: 'text',
-                        detail: 0,
-                        format: 0,
-                        mode: 'normal',
-                        style: '',
-                        text: 'Hello',
-                      },
-                    ],
-                    direction: null,
-                    format: '',
-                    indent: 0,
-                    textFormat: 0,
-                    textStyle: '',
-                  },
-                ],
-                direction: null,
-                format: '',
-                indent: 0,
-              },
-            },
           },
           req,
         }),
       ).not.toThrow()
+    })
+
+    test('should reject unknown properties on rich text nodes', async ({ payload }) => {
+      const req = await createPayloadRequest({ payload })
+      let validationError: unknown
+
+      try {
+        validateCollectionData({
+          slug: lexicalFieldsSlug,
+          data: {
+            lexicalWithBlocks: createParagraphRichText({
+              textNode: { ...helloTextNode, bold: true },
+            }),
+            title: 'Rich text with an unknown property',
+          },
+          req,
+        })
+      } catch (error) {
+        validationError = error
+      }
+
+      expect(validationError).toBeInstanceOf(ValidationError)
+      expect((validationError as ValidationError).data.errors).toEqual([
+        {
+          message: 'Unrecognized key: "bold"',
+          path: 'data.lexicalWithBlocks.root.children[0].children[0]',
+        },
+      ])
     })
 
     test('should still reject unknown properties inside block fields', async ({ payload }) => {
@@ -2001,6 +2003,40 @@ async function findSeededLexicalDoc({ payload }: { payload: Payload }): Promise<
   })
 
   return docs[0] as LexicalField
+}
+
+const helloTextNode = {
+  type: 'text',
+  detail: 0,
+  format: 0,
+  mode: 'normal',
+  style: '',
+  text: 'Hello',
+}
+
+/**
+ * Rich text with a single paragraph around `textNode`, written without `version` like an agent would.
+ */
+function createParagraphRichText({ textNode }: { textNode: Record<string, unknown> }) {
+  return {
+    root: {
+      type: 'root',
+      children: [
+        {
+          type: 'paragraph',
+          children: [textNode],
+          direction: null,
+          format: '',
+          indent: 0,
+          textFormat: 0,
+          textStyle: '',
+        },
+      ],
+      direction: null,
+      format: '',
+      indent: 0,
+    },
+  }
 }
 
 /**

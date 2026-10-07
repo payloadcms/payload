@@ -1,5 +1,7 @@
 import type { JSONSchemaFn } from '../../typesServer.js'
 
+import { versionSchema } from '../../../types/jsonSchemaHelpers.js'
+
 export interface SerializedHorizontalRuleNode {
   type: 'horizontalrule'
   version: number
@@ -15,8 +17,10 @@ export const horizontalRuleNodeJSONSchema: JSONSchemaFn = ({ typeStringDefinitio
   typeStringDefinitions.add(SERIALIZED_HORIZONTAL_RULE_NODE_TS)
   return {
     type: 'object',
+    additionalProperties: false,
     properties: {
       type: { type: 'string', const: 'horizontalrule' },
+      version: versionSchema,
     },
     required: ['type'],
     tsType: 'SerializedHorizontalRuleNode',

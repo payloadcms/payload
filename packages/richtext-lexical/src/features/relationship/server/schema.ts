@@ -10,7 +10,7 @@ import type { LexicalElementFormat } from '../../../types/nodeTypes.js'
 import type { JSONSchemaFn } from '../../typesServer.js'
 import type { RelationshipFeatureServerProps } from './index.js'
 
-import { formatSchema } from '../../../types/jsonSchemaHelpers.js'
+import { formatSchema, versionSchema } from '../../../types/jsonSchemaHelpers.js'
 
 export type RelationshipData = {
   [TCollectionSlug in CollectionSlug]: {
@@ -76,6 +76,7 @@ export const createRelationshipNodeJSONSchema =
       const idType: 'number' | 'string' = collectionIDFieldTypes[slug] ?? 'string'
       return {
         type: 'object',
+        additionalProperties: false,
         properties: {
           type: { type: 'string', const: 'relationship' },
           format: formatSchema,
@@ -87,6 +88,7 @@ export const createRelationshipNodeJSONSchema =
                   'The related document by ID (string or number). Populated to the full document when read at depth > 0.',
                 oneOf: [{ type: idType }, { $ref: `#/$defs/${slug}` }],
               },
+          version: versionSchema,
         },
         required: ['format', 'relationTo', 'type', 'value'],
       }
@@ -99,6 +101,7 @@ export const createRelationshipNodeJSONSchema =
         additionalProperties: true,
         properties: {
           type: { type: 'string', const: 'relationship' },
+          version: versionSchema,
         },
         required: ['type'],
       }

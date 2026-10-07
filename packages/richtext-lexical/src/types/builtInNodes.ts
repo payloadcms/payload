@@ -4,6 +4,8 @@ import { withNullableJSONSchemaType } from 'payload'
 
 import type { JSONSchemaFn } from '../features/typesServer.js'
 
+import { versionSchema } from './jsonSchemaHelpers.js'
+
 /**
  * Cross-cutting Lexical types shared by every element node. Inlined into
  * `payload-types.ts`. Must stay byte-for-byte in sync with the runtime twins
@@ -87,6 +89,7 @@ export const textNodeJSONSchema: JSONSchemaFn = ({ typeStringDefinitions }) => {
   typeStringDefinitions.add(SERIALIZED_TEXT_NODE_TS)
   return {
     type: 'object',
+    additionalProperties: false,
     properties: {
       type: { type: 'string', const: 'text' },
       detail: { type: 'integer' },
@@ -94,6 +97,7 @@ export const textNodeJSONSchema: JSONSchemaFn = ({ typeStringDefinitions }) => {
       mode: textModeSchema,
       style: { type: 'string' },
       text: { type: 'string' },
+      version: versionSchema,
     },
     required: ['detail', 'format', 'mode', 'style', 'text', 'type'],
     tsType: 'SerializedTextNode',
@@ -105,6 +109,7 @@ export const tabNodeJSONSchema: JSONSchemaFn = ({ typeStringDefinitions }) => {
   typeStringDefinitions.add(SERIALIZED_TAB_NODE_TS)
   return {
     type: 'object',
+    additionalProperties: false,
     properties: {
       type: { type: 'string', const: 'tab' },
       // A tab node is fully fixed: Lexical marks it unmergeable (`detail` = IS_UNMERGEABLE = 2) and
@@ -114,6 +119,7 @@ export const tabNodeJSONSchema: JSONSchemaFn = ({ typeStringDefinitions }) => {
       mode: textModeSchema,
       style: { type: 'string' },
       text: { const: '\t', description: 'Always a single tab character.' },
+      version: versionSchema,
     },
     required: ['detail', 'format', 'mode', 'style', 'text', 'type'],
     tsType: 'SerializedTabNode',
@@ -124,8 +130,10 @@ export const lineBreakNodeJSONSchema: JSONSchemaFn = ({ typeStringDefinitions })
   typeStringDefinitions.add(SERIALIZED_LINE_BREAK_NODE_TS)
   return {
     type: 'object',
+    additionalProperties: false,
     properties: {
       type: { type: 'string', const: 'linebreak' },
+      version: versionSchema,
     },
     required: ['type'],
     tsType: 'SerializedLineBreakNode',

@@ -1157,7 +1157,7 @@ import { upgradeLexicalData } from '@payloadcms/richtext-lexical'
 await upgradeLexicalData({ payload })
 ```
 
-**The JSON schema of Lexical nodes no longer contains `version`.** The schema the CLI and MCP use to validate input no longer asks for it, and Lexical nodes accept properties the schema doesn't list. Existing documents, which still contain `version`, therefore stay valid input. Objects inside a node, like a block's `fields`, still reject unknown properties.
+**`version` is optional in the JSON schema of Lexical nodes.** The CLI and MCP no longer require it, and leave it out of the schema they show agents. They still accept it, so existing documents, which contain `version`, stay valid input.
 
 Payload still writes `version` when it saves rich text, and the generated types still include it.
 
