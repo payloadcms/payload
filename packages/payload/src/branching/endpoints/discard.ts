@@ -1,9 +1,8 @@
-import { status as httpStatus } from 'http-status'
-
 import type { PayloadHandler } from '../../config/types.js'
 
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { assertBranchActionAccess } from '../assertBranchActionAccess.js'
 import { discardBranchChanges } from '../discard.js'
 import { branchesCollectionSlug } from '../types.js'

@@ -1,11 +1,10 @@
-import { status as httpStatus } from 'http-status'
-
 import type { PayloadHandler } from '../../config/types.js'
 import type { MergeResult } from '../merge.js'
 import type { MergeProgress } from '../types.js'
 
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { mergeBranch } from '../merge.js'
 import { isolateBranchState } from '../resolveBranch.js'
 import { branchesCollectionSlug } from '../types.js'
