@@ -292,6 +292,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     auto: 'স্বয়ংক্রিয়',
     automatic: 'স্বয়ংক্রিয়',
     backToDashboard: 'ড্যাশবোর্ডে ফিরে যান',
+    breadcrumb: 'নেভিগেশন পথ',
     by: 'দ্বারা',
     cancel: 'বাতিল করুন',
     changesNotSaved:

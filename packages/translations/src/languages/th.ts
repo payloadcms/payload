@@ -280,6 +280,7 @@ export const thTranslations: DefaultTranslationsObject = {
     auto: 'อัตโนมัติ',
     automatic: 'อัตโนมัติ',
     backToDashboard: 'กลับไปหน้าแดชบอร์ด',
+    breadcrumb: 'เส้นทางการนำทาง',
     by: 'โดย',
     cancel: 'ยกเลิก',
     changesNotSaved: 'การเปลี่ยนแปลงยังไม่ได้ถูกบันทึก ถ้าคุณออกตอนนี้ สิ่งที่แก้ไขไว้จะหายไป',

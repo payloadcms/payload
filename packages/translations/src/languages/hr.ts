@@ -288,6 +288,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     auto: 'Automatski',
     automatic: 'Automatsko',
     backToDashboard: 'Natrag na nadzornu ploču',
+    breadcrumb: 'Navigacijska putanja',
     by: 'Od strane',
     cancel: 'Otkaži',
     changesNotSaved: 'Vaše promjene nisu spremljene. Ako izađete sada, izgubit ćete promjene.',

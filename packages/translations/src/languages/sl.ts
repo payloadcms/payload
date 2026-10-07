@@ -286,6 +286,7 @@ export const slTranslations: DefaultTranslationsObject = {
     auto: 'Samodejno',
     automatic: 'Samodejno',
     backToDashboard: 'Nazaj na nadzorno ploščo',
+    breadcrumb: 'Navigacijska pot',
     by: 'S strani',
     cancel: 'Prekliči',
     changesNotSaved:

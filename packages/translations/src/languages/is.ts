@@ -287,6 +287,7 @@ export const isTranslations: DefaultTranslationsObject = {
     auto: 'Sjálfvirkt',
     automatic: 'Sjálfvirkt',
     backToDashboard: 'Aftur í stjórnborð',
+    breadcrumb: 'Brauðmolaslóð',
     by: 'Eftir',
     cancel: 'Hætta við',
     changesNotSaved:

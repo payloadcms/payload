@@ -293,6 +293,7 @@ export const roTranslations: DefaultTranslationsObject = {
     auto: 'Automat',
     automatic: 'Automat',
     backToDashboard: 'Înapoi la panoul de bord',
+    breadcrumb: 'Cale de navigare',
     by: 'De',
     cancel: 'Anulați',
     changesNotSaved:

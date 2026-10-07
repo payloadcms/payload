@@ -289,6 +289,7 @@ export const skTranslations: DefaultTranslationsObject = {
     auto: 'Automaticky',
     automatic: 'Automatický',
     backToDashboard: 'Späť na nástenku',
+    breadcrumb: 'Navigačná cesta',
     by: 'Autor',
     cancel: 'Zrušiť',
     changesNotSaved: 'Vaše zmeny neboli uložené. Ak teraz odídete, stratíte svoje zmeny.',

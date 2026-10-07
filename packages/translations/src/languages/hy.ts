@@ -287,6 +287,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     auto: 'Ավտո',
     automatic: 'Ավտոմատ',
     backToDashboard: 'Վերադառնալ վահանակ',
+    breadcrumb: 'Նավիգացիոն ուղի',
     by: 'Միջոցով',
     cancel: 'Չեղարկել',
     changesNotSaved:

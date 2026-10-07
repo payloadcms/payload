@@ -288,6 +288,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     auto: 'Автоматично',
     automatic: 'Автоматична',
     backToDashboard: 'Обратно към таблото',
+    breadcrumb: 'Навигационна пътека',
     by: 'От',
     cancel: 'Отмени',
     changesNotSaved: 'Промените ти не са запазени. Ако напуснеш сега, ще ги загубиш.',

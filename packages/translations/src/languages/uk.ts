@@ -287,6 +287,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     auto: 'Авто',
     automatic: 'Автоматично',
     backToDashboard: 'Повернутись до головної сторінки',
+    breadcrumb: 'Навігаційний ланцюжок',
     by: 'Від',
     cancel: 'Скасувати',
     changesNotSaved: 'Ваши зміни не були збережені. Якщо ви вийдете зараз, то втратите свої зміни.',

@@ -298,6 +298,7 @@ export const deTranslations: DefaultTranslationsObject = {
     auto: 'Automatisch',
     automatic: 'Automatisch',
     backToDashboard: 'Zurück zur Übersicht',
+    breadcrumb: 'Brotkrumennavigation',
     by: 'Von',
     cancel: 'Abbrechen',
     changesNotSaved:

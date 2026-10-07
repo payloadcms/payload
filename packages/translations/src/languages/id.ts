@@ -289,6 +289,7 @@ export const idTranslations: DefaultTranslationsObject = {
     auto: 'Otomatis',
     automatic: 'Otomatis',
     backToDashboard: 'Kembali ke Dasbor',
+    breadcrumb: 'Jejak navigasi',
     by: 'Oleh',
     cancel: 'Batal',
     changesNotSaved:

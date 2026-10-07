@@ -289,6 +289,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     auto: 'Automatski',
     automatic: 'Аутоматско',
     backToDashboard: 'Назад на контролни панел',
+    breadcrumb: 'Навигациона путања',
     by: 'Od strane',
     cancel: 'Откажи',
     changesNotSaved: 'Ваше промене нису сачуване. Ако изађете сада, изгубићете промене.',

@@ -292,6 +292,7 @@ export const trTranslations: DefaultTranslationsObject = {
     auto: 'Otomatik',
     automatic: 'Otomatik',
     backToDashboard: 'Anasayfaya geri dön',
+    breadcrumb: 'Gezinti yolu',
     by: 'Tarafından',
     cancel: 'İptal',
     changesNotSaved:

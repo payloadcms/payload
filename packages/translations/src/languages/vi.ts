@@ -290,6 +290,7 @@ export const viTranslations: DefaultTranslationsObject = {
     auto: 'Tự động',
     automatic: 'Tự động',
     backToDashboard: 'Quay lại bảng điều khiển',
+    breadcrumb: 'Đường dẫn điều hướng',
     by: 'Bởi',
     cancel: 'Hủy',
     changesNotSaved: 'Thay đổi chưa được lưu lại. Bạn sẽ mất bản chỉnh sửa nếu thoát bây giờ.',
