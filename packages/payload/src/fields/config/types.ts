@@ -1141,6 +1141,8 @@ export type JSONField = {
 
   jsonSchema?: {
     fileMatch: string[]
+    /** Override the schema used for input types and MCP/CLI prevalidation; field validation remains authoritative. */
+    inputSchema?: JSONSchema4
     schema: JSONSchema4
     uri: string
   }

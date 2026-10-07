@@ -35,5 +35,8 @@ export function buildTransformStateJSONSchema({
     }
   }
 
-  return schema
+  return {
+    ...schema,
+    inputSchema: structuredClone(transformStateJSONSchema.schema),
+  }
 }

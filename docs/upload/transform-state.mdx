@@ -53,6 +53,8 @@ const transformer: UploadTransformer = {
 
 These definitions enrich the collection's `_transforms` generated type; the exported general `TransformState` remains open. Definitions do not schedule execution or add core runtime validation for custom values. Each adapter validates its custom values before effects, claims the keys it handles, and defines its operation order. Core still validates JSON compatibility and built-in shapes. Redefining a built-in or providing conflicting schemas for the same custom key fails during configuration; identical custom definitions may be shared by adapters.
 
+MCP and CLI input schemas validate built-in shapes and leave custom values to adapters, matching ordinary Payload writes. Optional definitions remain in generated output types and JSDoc; generated input types accept additional custom keys without imposing those optional shapes.
+
 ## Replacing state
 
 `_transforms` is a complete replacement:

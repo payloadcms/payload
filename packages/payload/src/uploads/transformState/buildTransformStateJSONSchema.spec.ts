@@ -69,6 +69,9 @@ describe('optional transform definitions', () => {
   })
 
   it('should work without definitions', () => {
-    expect(buildTransformStateJSONSchema({ transformers: [] })).toEqual(transformStateJSONSchema)
+    expect(buildTransformStateJSONSchema({ transformers: [] })).toEqual({
+      ...transformStateJSONSchema,
+      inputSchema: transformStateJSONSchema.schema,
+    })
   })
 })
