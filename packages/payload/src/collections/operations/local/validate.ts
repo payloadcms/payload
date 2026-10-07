@@ -1,7 +1,5 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import { status as httpStatus } from 'http-status'
-
 import type {
   CollectionSlug,
   Payload,
@@ -19,6 +17,7 @@ import type {
 } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
+import { httpStatus } from '../../../utilities/httpStatus.js'
 import { runLocaleScopedValidation } from '../../../utilities/runLocaleScopedValidation.js'
 import { validateOperation } from '../validate.js'
 
