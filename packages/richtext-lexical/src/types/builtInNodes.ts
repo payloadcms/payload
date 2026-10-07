@@ -23,6 +23,7 @@ export interface SerializedLexicalElementBase<TChildren> {
   indent: number;
   textFormat?: number;
   textStyle?: string;
+  /** @deprecated Ignored when loading. May be missing from rich text saved through the API, CLI or MCP. */
   version: number;
 }`
 
@@ -44,6 +45,7 @@ const SERIALIZED_TEXT_NODE_TS = `export interface SerializedTextNode {
   mode: LexicalTextMode;
   style: string;
   text: string;
+  /** @deprecated Ignored when loading. May be missing from rich text saved through the API, CLI or MCP. */
   version: number;
 }`
 
@@ -55,12 +57,14 @@ const SERIALIZED_TAB_NODE_TS = `export interface SerializedTabNode {
   mode: LexicalTextMode;
   style: string;
   text: string;
+  /** @deprecated Ignored when loading. May be missing from rich text saved through the API, CLI or MCP. */
   version: number;
 }`
 
 /** MUST stay byte-for-byte in sync with `SerializedLineBreakNode` in `types/nodeTypes.ts`. */
 const SERIALIZED_LINE_BREAK_NODE_TS = `export interface SerializedLineBreakNode {
   type: 'linebreak';
+  /** @deprecated Ignored when loading. May be missing from rich text saved through the API, CLI or MCP. */
   version: number;
 }`
 
@@ -166,6 +170,7 @@ export interface LexicalRichText<TNode> {
     format: LexicalElementFormat;
     indent: number;
     type: 'root';
+    /** @deprecated Ignored when loading. May be missing from rich text saved through the API, CLI or MCP. */
     version: number;
   };
 }`

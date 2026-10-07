@@ -120,7 +120,6 @@ export class LinkNode extends ElementNode {
       ...super.exportJSON(),
       type: 'link',
       fields,
-      version: 3,
     }
     const id = this.getID()
     if (id) {

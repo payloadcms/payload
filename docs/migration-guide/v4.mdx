@@ -1159,7 +1159,7 @@ await upgradeLexicalData({ payload })
 
 **`version` is optional in the JSON schema of Lexical nodes.** The CLI and MCP no longer require it, and leave it out of the schema they show agents. They still accept it, so existing documents, which contain `version`, stay valid input.
 
-Payload still writes `version` when it saves rich text, and the generated types still include it.
+**Payload doesn't add or remove `version` when it saves rich text.** Rich text created by Lexical, like in the admin panel, still has `version: 1` on every node, because Lexical's JSON export writes it. Payload's own nodes used to write their own numbers instead (like `2` for blocks), and now write `1` as well. Rich text sent through the API, CLI or MCP is saved as sent, so it may not contain `version`. The generated types still include `version`, marked as deprecated, so don't rely on it being there.
 
 ### Field `typescriptSchema` renamed to `jsonSchema`
 

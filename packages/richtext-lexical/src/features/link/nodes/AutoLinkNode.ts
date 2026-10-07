@@ -45,7 +45,7 @@ export class AutoLinkNode extends LinkNode {
       fields: serialized.fields,
       format: serialized.format,
       indent: serialized.indent,
-      version: 2,
+      version: serialized.version,
     }
   }
 

@@ -32,6 +32,7 @@ export interface SerializedLexicalElementBase<TChildren> {
   indent: number
   textFormat?: number
   textStyle?: string
+  /** @deprecated Ignored when loading. May be missing from rich text saved through the API, CLI or MCP. */
   version: number
 }
 
@@ -44,6 +45,7 @@ export interface SerializedTextNode {
   style: string
   text: string
   type: 'text'
+  /** @deprecated Ignored when loading. May be missing from rich text saved through the API, CLI or MCP. */
   version: number
 }
 
@@ -54,11 +56,13 @@ export interface SerializedTabNode {
   style: string
   text: string
   type: 'tab'
+  /** @deprecated Ignored when loading. May be missing from rich text saved through the API, CLI or MCP. */
   version: number
 }
 
 export interface SerializedLineBreakNode {
   type: 'linebreak'
+  /** @deprecated Ignored when loading. May be missing from rich text saved through the API, CLI or MCP. */
   version: number
 }
 
@@ -78,6 +82,7 @@ export interface LexicalRichText<TNode> {
     format: LexicalElementFormat
     indent: number
     type: 'root'
+    /** @deprecated Ignored when loading. May be missing from rich text saved through the API, CLI or MCP. */
     version: number
   }
 }

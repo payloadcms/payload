@@ -117,7 +117,6 @@ export class RelationshipServerNode extends DecoratorBlockNode {
       ...super.exportJSON(),
       ...this.getData(),
       type: 'relationship',
-      version: 2,
     }
   }
 

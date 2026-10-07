@@ -36,6 +36,7 @@ export type SerializedBlockNode<TFields extends { blockType: string } = { blockT
         fields: { blockName?: null | string; id: string } & Omit<TFields, 'blockName' | 'id'>
         format: LexicalElementFormat
         type: 'block'
+        /** @deprecated Ignored when loading. May be missing from rich text saved through the API, CLI or MCP. */
         version: number
       }
     : never
@@ -46,6 +47,7 @@ export type SerializedInlineBlockNode<
   ? {
       fields: { id: string } & Omit<TFields, 'id'>
       type: 'inlineBlock'
+      /** @deprecated Ignored when loading. May be missing from rich text saved through the API, CLI or MCP. */
       version: number
     }
   : never
@@ -57,11 +59,13 @@ export type SerializedInlineBlockNode<
 const BLOCK_NODES_TS = `export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'block';
   format: LexicalElementFormat;
+  /** @deprecated Ignored when loading. May be missing from rich text saved through the API, CLI or MCP. */
   version: number;
   fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
 } : never;
 export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'inlineBlock';
+  /** @deprecated Ignored when loading. May be missing from rich text saved through the API, CLI or MCP. */
   version: number;
   fields: { id: string } & Omit<TFields, 'id'>;
 } : never;`

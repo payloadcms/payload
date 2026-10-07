@@ -102,7 +102,6 @@ export class UploadServerNode extends DecoratorBlockNode {
       ...super.exportJSON(),
       ...this.getData(),
       type: 'upload',
-      version: 3,
     }
   }
 

@@ -86,7 +86,6 @@ export class ServerBlockNode extends DecoratorBlockNode {
       ...super.exportJSON(),
       type: 'block',
       fields: this.getFields(),
-      version: 2,
     }
   }
 
