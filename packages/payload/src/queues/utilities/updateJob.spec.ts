@@ -61,6 +61,17 @@ describe('updateJobs', () => {
     expect(jobAfterRead).toHaveBeenCalledWith({ config: {}, doc: updatedJob })
   })
 
+  it('should commit when the transaction ID is zero', async () => {
+    beginTransaction.mockResolvedValue(0)
+
+    await expect(
+      updateJobs({ data: {}, id: 'job-id', req: createRequest(), returning: false }),
+    ).resolves.toBeNull()
+
+    expect(commitTransaction).toHaveBeenCalledWith(0)
+    expect(rollbackTransaction).not.toHaveBeenCalled()
+  })
+
   it('should roll back its transaction when updating jobs fails', async () => {
     const updateError = new Error('update jobs failed')
     updateJobsInDatabase.mockRejectedValue(updateError)
@@ -70,6 +81,19 @@ describe('updateJobs', () => {
     ).rejects.toBe(updateError)
 
     expect(rollbackTransaction).toHaveBeenCalledWith(transactionID)
+    expect(commitTransaction).not.toHaveBeenCalled()
+  })
+
+  it('should roll back when the transaction ID is zero and updating jobs fails', async () => {
+    const updateError = new Error('update jobs failed')
+    beginTransaction.mockResolvedValue(0)
+    updateJobsInDatabase.mockRejectedValue(updateError)
+
+    await expect(
+      updateJobs({ data: {}, id: 'job-id', req: createRequest(), returning: false }),
+    ).rejects.toBe(updateError)
+
+    expect(rollbackTransaction).toHaveBeenCalledWith(0)
     expect(commitTransaction).not.toHaveBeenCalled()
   })
 
@@ -149,7 +173,7 @@ describe('updateJobs', () => {
     ).resolves.toBeNull()
 
     expect(updateJobsInDatabase).toHaveBeenCalledWith(
-      expect.objectContaining({ req: { transactionID: null } }),
+      expect.objectContaining({ req: { transactionID: undefined } }),
     )
     expect(commitTransaction).not.toHaveBeenCalled()
     expect(rollbackTransaction).not.toHaveBeenCalled()

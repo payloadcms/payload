@@ -55,12 +55,9 @@ export async function updateJobs({
   const limit = id ? 1 : limitArg
   const where = id ? { id: { equals: id } } : whereArg
 
-  const jobReq = {
-    transactionID:
-      req.payload.db.name !== 'mongoose'
-        ? ((await req.payload.db.beginTransaction()) as string)
-        : undefined,
-  }
+  const transactionID =
+    req.payload.db.name !== 'mongoose' ? await req.payload.db.beginTransaction() : undefined
+  const jobReq = { transactionID: transactionID ?? undefined }
 
   if (data.processingUntil === null) {
     data.processingToken = null
@@ -92,13 +89,13 @@ export async function updateJobs({
   try {
     updatedJobs = await req.payload.db.updateJobs(args)
 
-    if (req.payload.db.name !== 'mongoose' && jobReq.transactionID) {
-      await req.payload.db.commitTransaction(jobReq.transactionID)
+    if (transactionID !== null && typeof transactionID !== 'undefined') {
+      await req.payload.db.commitTransaction(transactionID)
     }
   } catch (error) {
-    if (req.payload.db.name !== 'mongoose' && jobReq.transactionID) {
+    if (transactionID !== null && typeof transactionID !== 'undefined') {
       try {
-        await req.payload.db.rollbackTransaction(jobReq.transactionID)
+        await req.payload.db.rollbackTransaction(transactionID)
       } catch {
         // Preserve the update or commit error that caused the rollback.
       }
