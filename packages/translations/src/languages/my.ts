@@ -568,13 +568,16 @@ export const myTranslations: DefaultTranslationsObject = {
     yes: 'ဟုတ်ကဲ့',
   },
   hierarchy: {
+    goTo: '"{{name}}" သို့သွားပါ',
     itemsMovedTo: '{{title}} ကို {{destination}} သို့ ရွှေ့လိုက်ပါပြီ',
     itemsMovedToRoot: '"{{title}}" ကို အမြစ်သို့ ရွှေ့လိုက်ပါပြီ။',
     moveItemsToRootConfirmation:
       'သင်သည် <1>{{count}} {{label}}</1> ကို အမြစ်သို့ ရွှေ့ပါတော့မည်။ သေချာပါသလား။',
+    moveTo: 'ရွှေ့ပါ...',
     moveToRoot: 'အမြစ်သို့ ရွှေ့ပါ',
     noParent: 'မိဘ မရှိပါ',
     noResults: '"{{query}}" အတွက် ရလဒ်မရှိပါ',
+    removeFrom: '{{label}} ကို ဖယ်ရှားပါ',
     searchLabel: '{{label}} ရှာဖွေပါ',
     searchResults: '{{count}} ခု တွေ့ရှိသည်',
   },

@@ -559,13 +559,16 @@ export const viTranslations: DefaultTranslationsObject = {
     yes: 'Có',
   },
   hierarchy: {
+    goTo: 'Đi đến "{{name}}"',
     itemsMovedTo: '{{title}} đã di chuyển đến {{destination}}',
     itemsMovedToRoot: '{{title}} đã được chuyển đến gốc',
     moveItemsToRootConfirmation:
       'Bạn sắp di chuyển <1>{{count}} {{label}}</1> về gốc. Bạn có chắc không?',
+    moveTo: 'Chuyển đến...',
     moveToRoot: 'Di chuyển đến Gốc',
     noParent: 'Không có bố mẹ',
     noResults: 'No results for "{{query}}"',
+    removeFrom: 'Xóa khỏi {{label}}',
     searchLabel: 'Tìm kiếm {{label}}',
     searchResults: 'Tìm thấy {{count}}',
   },

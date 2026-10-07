@@ -562,13 +562,16 @@ export const hyTranslations: DefaultTranslationsObject = {
     yes: 'Այո',
   },
   hierarchy: {
+    goTo: 'Անցեք "{{name}}"',
     itemsMovedTo: '{{title}} տեղափոխվեց {{destination}}։',
     itemsMovedToRoot: '"{{title}}" տեղափոխվել է արմատը',
     moveItemsToRootConfirmation:
       'Դուք պատրաստ եք տեղափոխել <1>{{count}} {{label}}</1> արմատ. Հաստատում եք:',
+    moveTo: 'Տեղափոխել դեպի...',
     moveToRoot: 'Տեղափոխվեք արմատ՝',
     noParent: 'Ոչ ծնող',
     noResults: '«{{query}}»-ի համար արդյունքներ չկան',
+    removeFrom: 'Հեռացնել {{label}}-ից',
     searchLabel: 'Որոնել {{label}}',
     searchResults: 'Գտնվել է {{count}}',
   },

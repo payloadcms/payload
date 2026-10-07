@@ -1216,6 +1216,60 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(page.locator('.hierarchy-modal')).toBeVisible()
     })
 
+    test('should translate hierarchy action accessible names', async () => {
+      await page.goto(`${serverURL}/admin/account`)
+
+      const languageField = page.locator('.payload-settings__language .react-select')
+
+      await languageField.click()
+      await page.locator('.rs__option', { hasText: 'Español' }).click()
+      await page.waitForTimeout(500)
+
+      try {
+        await page.goto(productsURL.edit(String(productWithFolder.id)))
+
+        const folderButton = page.getByRole('button', { name: childFolderName })
+
+        await expect(folderButton).toBeVisible()
+        await folderButton.click()
+
+        await expect(page.getByRole('menuitem', { name: 'Mover a...' })).toBeVisible()
+        await expect(page.getByRole('menuitem', { name: 'Eliminar de Folder' })).toBeVisible()
+        await expect(
+          page.getByRole('menuitem', { name: `Ir a "${childFolderName}"` }),
+        ).toBeVisible()
+
+        await page.keyboard.press('Escape')
+        await page.goto(productsURL.list)
+
+        const productRow = page.locator('tr', { hasText: productWithFolderName })
+
+        await productRow.locator('.hierarchy-cell__button').click()
+
+        await expect(page.getByRole('menuitem', { name: 'Mover a...' })).toBeVisible()
+        await expect(page.getByRole('menuitem', { name: 'Eliminar de Folder' })).toBeVisible()
+        await expect(
+          page.getByRole('menuitem', { name: `Ir a "${childFolderName}"` }),
+        ).toBeVisible()
+
+        await page.keyboard.press('Escape')
+        await page.goto(`${foldersURL.hierarchy}&parentFolder=${parentFolder.id}`)
+
+        const childFolderRow = page.locator('tr', { hasText: childFolderName })
+
+        await childFolderRow.getByRole('checkbox').click()
+        await page.locator('.move-many__toggle').click()
+
+        await expect(page.getByRole('menuitem', { name: 'Mover a...' })).toBeVisible()
+        await expect(page.getByRole('menuitem', { name: 'Eliminar de Folder' })).toBeVisible()
+      } finally {
+        await page.goto(`${serverURL}/admin/account`)
+        await languageField.click()
+        await page.locator('.rs__option', { hasText: 'English' }).click()
+        await page.waitForTimeout(500)
+      }
+    })
+
     test('should reset transient selections after canceling and reopening the modal', async () => {
       await page.goto(productsURL.edit(String(productWithFolder.id)))
 

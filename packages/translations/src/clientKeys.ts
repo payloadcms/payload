@@ -188,12 +188,15 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'fields:toggleBlock',
   'fields:uploadNewLabel',
 
+  'hierarchy:goTo',
   'hierarchy:itemsMovedTo',
   'hierarchy:itemsMovedToRoot',
   'hierarchy:moveItemsToRootConfirmation',
+  'hierarchy:moveTo',
   'hierarchy:moveToRoot',
   'hierarchy:noParent',
   'hierarchy:noResults',
+  'hierarchy:removeFrom',
   'hierarchy:searchLabel',
   'hierarchy:searchResults',
 

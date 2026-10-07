@@ -287,7 +287,7 @@ export function MoveMany({
                   requestAnimationFrame(openHierarchyModal)
                 }}
               >
-                Move to...
+                {t('hierarchy:moveTo')}
               </PopupList.Button>
               <PopupList.Button
                 icon={<XIcon />}
@@ -296,7 +296,7 @@ export function MoveMany({
                   handleMoveToRoot()
                 }}
               >
-                {`Remove from ${hierarchyLabel}`}
+                {t('hierarchy:removeFrom', { label: hierarchyLabel })}
               </PopupList.Button>
             </PopupList.MenuItem>
           )}

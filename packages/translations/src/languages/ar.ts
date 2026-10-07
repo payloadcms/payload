@@ -547,13 +547,16 @@ export const arTranslations: DefaultTranslationsObject = {
     yes: 'نعم',
   },
   hierarchy: {
+    goTo: 'اذهب إلى "{{name}}"',
     itemsMovedTo: '{{title}} تم نقله إلى {{destination}}',
     itemsMovedToRoot: '{{title}} تم نقله إلى الجذر',
     moveItemsToRootConfirmation:
       'أنت على وشك نقل <1>{{count}} {{label}}</1> إلى الجذر. هل أنت متأكد؟',
+    moveTo: 'الانتقال إلى...',
     moveToRoot: 'الانتقال إلى الجذر',
     noParent: 'لا والدين',
     noResults: 'No results for "{{query}}"',
+    removeFrom: 'إزالة من {{label}}',
     searchLabel: 'البحث {{label}}',
     searchResults: 'تم العثور على {{count}}',
   },

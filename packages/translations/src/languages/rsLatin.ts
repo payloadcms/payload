@@ -558,13 +558,16 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     yes: 'Da',
   },
   hierarchy: {
+    goTo: 'Idite na "{{name}}"',
     itemsMovedTo: '{{title}} premešten u {{destination}}',
     itemsMovedToRoot: '{{title}} premešteno u koren',
     moveItemsToRootConfirmation:
       'Na korak ste da premestite <1>{{count}} {{label}}</1> u korenu. Jeste li sigurni?',
+    moveTo: 'Premesti u...',
     moveToRoot: 'Premesti se na koren',
     noParent: 'Bez roditelja',
     noResults: 'No results for "{{query}}"',
+    removeFrom: 'Ukloni iz {{label}}',
     searchLabel: 'Pretraga {{label}}',
     searchResults: 'Pronađeno: {{count}}',
   },
