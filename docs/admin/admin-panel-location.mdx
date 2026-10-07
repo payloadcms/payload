@@ -9,15 +9,11 @@ keywords: admin, customization, routes, folder structure, import map, configurat
 Payload is flexible about where your Admin Panel lives within your application. You can customize routes, move folders, and organize your project structure to match your application's needs.
 
 <Banner type="info">
-  This guide uses **Next.js App Router** file conventions — the `(payload)`
-  route group, `layout.tsx`, and `route.ts` handlers. On [TanStack
-  Start](https://tanstack.com/start/latest), the equivalent files are the
-  `_payload` pathless layout route and its route files (`admin.$.tsx`,
-  `admin.index.tsx`, `api.$.ts`), and routes are configured through the
-  `payloadPlugin` Vite plugin rather than moving a route-group folder. See
-  [Project Structure](./overview#project-structure) for the TanStack Start
-  layout. The `routes` and `admin.routes` config options below apply to both
-  frameworks.
+  This guide uses **Next.js App Router** file conventions. If you're on
+  [TanStack Start](https://tanstack.com/start/latest), see [Project
+  Structure](./overview#project-structure) for the equivalent files and routing
+  conventions. The `routes` and `admin.routes` config options below apply to
+  both frameworks.
 </Banner>
 
 ## Common Use Cases
@@ -26,31 +22,6 @@ Payload is flexible about where your Admin Panel lives within your application. 
 - **Nested admin panels** - Place Payload at `/admin/content` alongside custom admin routes
 - **Multiple admin interfaces** - Organize Payload and custom dashboards together
 - **Organizational preferences** - Match your team's folder structure conventions
-
-## Understanding the Payload Folder Structure
-
-By default, Payload creates this structure in your Next.js app:
-
-```
-app/ (or src/app/)
-├── (payload)/
-│   ├── admin/
-│   │   ├── [[...segments]]/
-│   │   │   ├── not-found.tsx
-│   │   │   └── page.tsx
-│   │   └── importMap.js
-│   ├── api/
-│   │   └── [...slug]/
-│   │       └── route.ts
-│   ├── custom.css
-│   └── layout.tsx
-```
-
-- **`(payload)/`** - Parent folder containing all Payload-related routes
-- **`admin/`** - Admin Panel UI routes
-- **`api/`** - REST API routes
-- **`layout.tsx`** - Root layout that imports the import map
-- **`importMap.js`** - Auto-generated file mapping component paths (regenerated on startup)
 
 ## Scenario 1: Simple Route Change
 
