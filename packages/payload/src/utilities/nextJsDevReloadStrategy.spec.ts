@@ -35,14 +35,20 @@ const { MockWebSocket } = vi.hoisted(() => {
 })
 
 vi.mock('ws', () => ({ default: MockWebSocket }))
+vi.mock('./getNextVersion.js', () => ({ getNextVersion: vi.fn() }))
 
+const { getNextVersion } = await import('./getNextVersion.js')
 const { defaultNextJsDevReloadStrategy } = await import('./nextJsDevReloadStrategy.js')
+
+const modernURL = 'ws://localhost:3000/_next/hmr'
+const legacyURL = 'ws://localhost:3000/_next/webpack-hmr'
 
 describe('defaultNextJsDevReloadStrategy', () => {
   const cleanups: (() => void)[] = []
 
   beforeEach(() => {
     MockWebSocket.instances.length = 0
+    vi.mocked(getNextVersion).mockReturnValue('16.3.0')
     vi.stubEnv('PAYLOAD_HMR_URL_OVERRIDE', undefined)
     vi.stubEnv('PORT', '3000')
     vi.stubEnv('__NEXT_ASSET_PREFIX', undefined)
@@ -72,10 +78,58 @@ describe('defaultNextJsDevReloadStrategy', () => {
     return MockWebSocket.instances[0]!.url
   }
 
-  it('should connect to the Next.js HMR path', () => {
+  it('should connect to the current HMR path on Next.js 16.3', () => {
     connect()
 
-    expect(connectedURL()).toBe('ws://localhost:3000/_next/hmr')
+    expect(connectedURL()).toBe(modernURL)
+  })
+
+  it('should connect to the current HMR path on Next.js versions above 16.3', () => {
+    vi.mocked(getNextVersion).mockReturnValue('17.0.1')
+
+    connect()
+
+    expect(connectedURL()).toBe(modernURL)
+  })
+
+  it('should connect to the legacy HMR path on Next.js below 16.3', () => {
+    vi.mocked(getNextVersion).mockReturnValue('16.2.7')
+
+    connect()
+
+    expect(connectedURL()).toBe(legacyURL)
+  })
+
+  it('should connect to the legacy HMR path on a Next.js 15 install', () => {
+    vi.mocked(getNextVersion).mockReturnValue('15.5.0')
+
+    connect()
+
+    expect(connectedURL()).toBe(legacyURL)
+  })
+
+  it('should ignore pre-release identifiers when choosing the path', () => {
+    vi.mocked(getNextVersion).mockReturnValue('16.3.0-canary.12')
+
+    connect()
+
+    expect(connectedURL()).toBe(modernURL)
+  })
+
+  it('should connect to the legacy HMR path on a pre-release below 16.3', () => {
+    vi.mocked(getNextVersion).mockReturnValue('16.2.0-canary.5')
+
+    connect()
+
+    expect(connectedURL()).toBe(legacyURL)
+  })
+
+  it('should connect to the current HMR path when the Next.js version is unknown', () => {
+    vi.mocked(getNextVersion).mockReturnValue(undefined)
+
+    connect()
+
+    expect(connectedURL()).toBe(modernURL)
   })
 
   it('should call onReload for server component changes', () => {
@@ -97,7 +151,8 @@ describe('defaultNextJsDevReloadStrategy', () => {
     expect(MockWebSocket.instances[0]!.isClosed).toBe(true)
   })
 
-  it('should use PAYLOAD_HMR_URL_OVERRIDE when set', () => {
+  it('should use PAYLOAD_HMR_URL_OVERRIDE whatever the version', () => {
+    vi.mocked(getNextVersion).mockReturnValue(undefined)
     vi.stubEnv('PAYLOAD_HMR_URL_OVERRIDE', 'ws://localhost:4000/custom-hmr')
 
     connect()
