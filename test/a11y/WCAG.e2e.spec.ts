@@ -102,6 +102,28 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.3.1 Info and Relationships (A)', () => {
+    test('should associate top-level, array, and block date-picker labels with their inputs', async () => {
+      // PYLD-3819
+      test.setTimeout(60000)
+      await prepareBlockDateField({ page, postsURL })
+      await page.locator('#field-items .array-field__add-row').click()
+      const fields = page.locator('.date-time-field')
+
+      await expect(fields).toHaveCount(3)
+      for (const field of await fields.all()) {
+        const label = field.locator('label.field-label').first()
+        const input = field.getByRole('textbox')
+
+        await expect(input).toBeVisible()
+        expect
+          .soft(await label.evaluate((element: HTMLLabelElement) => element.control?.tagName))
+          .toBe('INPUT')
+        await label.click()
+        await expect.soft(input).toBeFocused()
+        await page.keyboard.press('Escape')
+      }
+    })
+
     test('should expose the rich-text callout first toggle state through collapse and return', async () => {
       // PYLD-3667
       test.slow()
@@ -1891,6 +1913,73 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.3 Focus Order (A)', () => {
+    test('should focus the block date-picker calendar when opened with the keyboard', async () => {
+      // PYLD-3791
+      try {
+        for (const day of [15, 14]) {
+          await page.clock.setFixedTime(new Date(2026, 8, day, 12))
+          const { calendar, field, input } = await prepareBlockDateField({ page, postsURL })
+          const precedingText = field
+            .locator('..')
+            .getByRole('textbox', { name: 'Text', exact: true })
+
+          await precedingText.focus()
+          await page.keyboard.press('Tab')
+          await expect(input).toBeFocused()
+          await expect(calendar).toBeHidden()
+
+          for (const key of ['ArrowDown', 'ArrowUp', 'Enter']) {
+            await page.keyboard.press(key)
+            await expect(calendar).toBeVisible()
+            await expectFocusInside({ container: calendar, page })
+            if (day === 14) {
+              await expect(
+                calendar.locator(
+                  '.react-datepicker__day--014:not(.react-datepicker__day--outside-month)',
+                ),
+              ).toHaveAttribute('aria-disabled', 'true')
+              await expect(calendar.getByRole('button', { name: 'Previous Month' })).toBeFocused()
+            }
+            await page.keyboard.press('Escape')
+            await expect(calendar).toBeHidden()
+            await expect(input).toBeFocused()
+          }
+        }
+      } finally {
+        await page.clock.setSystemTime(new Date())
+      }
+    })
+
+    test('should move focus between named block date-picker days with arrow keys', async () => {
+      // PYLD-3739
+      await page.clock.setFixedTime(new Date(2026, 8, 15, 12))
+
+      try {
+        const { calendar, input } = await prepareBlockDateField({ page, postsURL })
+
+        await input.focus()
+        await page.keyboard.press('ArrowDown')
+        await expect(calendar).toBeVisible()
+        const day = calendar.locator('.react-datepicker__day:focus')
+
+        await expect(day).toHaveAccessibleName(/September 15.*2026/i)
+        await page.keyboard.press('ArrowRight')
+        await expect(day).toHaveAccessibleName(/September 16.*2026/i)
+        await page.keyboard.press('ArrowLeft')
+        await expect(day).toHaveAccessibleName(/September 15.*2026/i)
+        await page.keyboard.press('PageDown')
+        await expect(day).toHaveAccessibleName(/October 15.*2026/i)
+        await page.keyboard.press('PageUp')
+        await expect(day).toHaveAccessibleName(/September 15.*2026/i)
+        await page.keyboard.press('Enter')
+        await expect(input).toHaveValue('09/15/2026')
+        await page.keyboard.press('Escape')
+        await expect(input).toBeFocused()
+      } finally {
+        await page.clock.setSystemTime(new Date())
+      }
+    })
+
     test('should navigate LLM instructions tabs and the editor in keyboard order', async () => {
       const field = await openLLMInstructions({ page, serverURL })
       const additionalTab = field.getByRole('tab', { name: 'Additional instructions', exact: true })
@@ -3950,6 +4039,24 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(page.locator('.nav__close')).toHaveAccessibleName(/hide sidebar/i)
     })
 
+    test('should expose the block date-picker input with its visible Date label', async () => {
+      // PYLD-3740
+      const { field, input } = await prepareBlockDateField({ page, postsURL })
+
+      await expect(field.locator('label.field-label')).toHaveText('Date')
+      await expect(input).toHaveAccessibleName('Date')
+    })
+
+    test('should expose the block date-picker calendar as a descriptively named dialog', async () => {
+      // PYLD-3736
+      const { calendar, input } = await prepareBlockDateField({ page, postsURL })
+
+      await input.click()
+      await expect(calendar).toBeVisible()
+      await expect(calendar).toHaveRole('dialog')
+      await expect(calendar).toHaveAccessibleName(/date|calendar|month.*year/i)
+    })
+
     test('should expose table Columns and Group By expansion states', async () => {
       // PYLD-3781
       // PYLD-3705
@@ -4888,6 +4995,15 @@ async function expectRequiredState({ input }: { input: Locator }) {
         element.required || element.getAttribute('aria-required') === 'true',
     ),
   ).toBe(true)
+}
+
+async function prepareBlockDateField({ page, postsURL }: { page: Page; postsURL: AdminUrlUtil }) {
+  await addTextBlock({ page, postsURL })
+  const field = page.locator('#field-layout .blocks-field__row .date-time-field').first()
+  const input = field.getByRole('textbox')
+
+  await expect(input).toBeVisible()
+  return { calendar: page.locator('.react-datepicker'), field, input }
 }
 
 async function openMainNavigation({ page, postsURL }: { page: Page; postsURL: AdminUrlUtil }) {
