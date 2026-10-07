@@ -258,12 +258,7 @@ export async function getNextAppDetails(projectDir: string): Promise<NextAppDeta
 
     const { major, minor } = versionMatch.groups as { major: string; minor?: string }
     const majorVersion = parseInt(major)
-    // A specifier without a minor version (e.g. `^16`) can resolve to any minor, so only the major is checked
-    const isBelowMinimumMinor =
-      majorVersion === minimumNextVersion.major &&
-      minor !== undefined &&
-      parseInt(minor) < minimumNextVersion.minor
-    if (majorVersion < minimumNextVersion.major || isBelowMinimumMinor) {
+    if (majorVersion < minimumNextVersion.major) {
       return {
         hasTopLevelLayout: false,
         isSrcDir,
@@ -271,6 +266,19 @@ export async function getNextAppDetails(projectDir: string): Promise<NextAppDeta
         nextConfigPath,
         nextVersion,
       }
+    }
+
+    // TODO: Older minor versions of the minimum major are only warned about, not rejected, to make
+    // migrating easier. This can be turned into a hard requirement in the future.
+    // A specifier without a minor version (e.g. `^16`) can resolve to any minor, so it is not warned about.
+    const isBelowMinimumMinor =
+      majorVersion === minimumNextVersion.major &&
+      minor !== undefined &&
+      parseInt(minor) < minimumNextVersion.minor
+    if (isBelowMinimumMinor) {
+      p.log.warn(
+        `Next.js v${nextVersion} is not supported. Upgrade to Next.js >= ${minimumNextVersion.major}.${minimumNextVersion.minor} to use Payload.`,
+      )
     }
   }
 
