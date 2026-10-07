@@ -1,12 +1,17 @@
 /* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options"] }] -- Tests use the shared fixture wrapper. */
 import type { Payload } from 'payload'
 
-import { readFile } from 'node:fs/promises'
+import { readFile, rm } from 'node:fs/promises'
 import path from 'node:path'
+import { createPayloadRequest } from 'payload'
 import { expect, vi } from 'vitest'
 
+/* eslint-disable payload/no-relative-monorepo-imports -- Exercise the internal cleanup lifecycle against saved documents and versions. */
+import { scheduleUnreferencedFileCleanup } from '../../packages/payload/src/uploads/fileVersioning/cleanup.js'
+/* eslint-enable payload/no-relative-monorepo-imports */
 import { test } from '../__helpers/int/vitest.js'
 import {
+  mediaWithDisabledPluginSlug,
   unversionedCloudMediaSlug,
   versionedCloudMediaSlug,
   versionedPublicCloudMediaSlug,
@@ -50,9 +55,221 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     versionedCloudFailure.beforeCopy = undefined
     versionedCloudFailure.beforeUpload = undefined
     versionedCloudFailure.deleteKey = undefined
-    versionedCloudFailure.moveNumber = undefined
     versionedCloudFailure.uploadNumber = 0
   })
+
+  for (const operation of ['create', 'update'] as const) {
+    test(`should preserve outer cloud metadata through a nested ${operation}`, async ({
+      payload,
+    }) => {
+      const bytes = await readFile(firstFile)
+      const nestedBytes = await readFile(secondFile)
+      const existing =
+        operation === 'update'
+          ? await Promise.all([
+              payload.create({
+                collection: versionedCloudMediaSlug,
+                data: {},
+                filePath: firstFile,
+                overrideAccess: true,
+              }),
+              payload.create({
+                collection: versionedCloudMediaSlug,
+                data: {},
+                filePath: secondFile,
+                overrideAccess: true,
+              }),
+            ])
+          : undefined
+      const uploadsBefore = versionedCloudCalls.uploads
+      const req = await createPayloadRequest({
+        payload,
+        context:
+          operation === 'update'
+            ? {
+                _payloadManagedCloudStorage: undefined,
+                _payloadManagedCloudMetadata: undefined,
+              }
+            : {},
+      })
+      const hooks = payload.collections[versionedCloudMediaSlug].config.hooks
+      const afterChange = hooks.afterChange
+      let nested: { id: number | string; storageMarker?: null | string } | undefined
+      hooks.afterChange = [
+        async ({ doc, req: hookReq }) => {
+          if (doc.filename !== 'outer-original.png' || hookReq.context.skipCloudStorage) {
+            return
+          }
+          expect(hookReq).toBe(req)
+          expect(hookReq.context._payloadManagedCloudStorage).toBe(true)
+          const metadata = hookReq.context._payloadManagedCloudMetadata
+          expect(metadata).toMatchObject({ storageMarker: doc.storageMarker })
+          const args = {
+            collection: versionedCloudMediaSlug,
+            data: {},
+            file: {
+              name: 'nested.png',
+              data: nestedBytes,
+              mimetype: 'image/png',
+              size: nestedBytes.length,
+            },
+            overrideAccess: true,
+            req: hookReq,
+          }
+          nested =
+            operation === 'create'
+              ? await payload.create(args)
+              : await payload.update({ ...args, id: existing![1].id })
+          expect(hookReq.context._payloadManagedCloudStorage).toBe(true)
+          expect(hookReq.context._payloadManagedCloudMetadata).toBe(metadata)
+        },
+        ...afterChange,
+      ]
+
+      try {
+        const args = {
+          collection: versionedCloudMediaSlug,
+          data: {},
+          file: { name: 'outer.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+          overrideAccess: true,
+          req,
+        }
+        const outer =
+          operation === 'create'
+            ? await payload.create(args)
+            : await payload.update({ ...args, id: existing![0].id })
+        expect(nested).toBeDefined()
+        const outerKey = (await getStoredFiles({ id: outer.id, payload }))[0]!.key
+        const nestedKey = (await getStoredFiles({ id: nested!.id, payload }))[0]!.key
+        expect(outerKey).not.toBe(nestedKey)
+        expect(outer.storageMarker).toBe(outerKey)
+        expect(nested!.storageMarker).toBe(nestedKey)
+        const savedOuter = await payload.db.findOne({
+          collection: versionedCloudMediaSlug,
+          where: { id: { equals: outer.id } },
+        })
+        const savedNested = await payload.db.findOne({
+          collection: versionedCloudMediaSlug,
+          where: { id: { equals: nested!.id } },
+        })
+        expect(savedOuter?.storageMarker).toBe(outerKey)
+        expect(savedNested?.storageMarker).toBe(nestedKey)
+        expect(versionedCloudFiles.get(outerKey)).toEqual(bytes)
+        expect(versionedCloudFiles.get(nestedKey)).toEqual(nestedBytes)
+        expect(versionedCloudCalls.uploads).toBe(uploadsBefore + 2)
+        expect(Object.hasOwn(req.context, '_payloadManagedCloudStorage')).toBe(
+          operation === 'update',
+        )
+        expect(Object.hasOwn(req.context, '_payloadManagedCloudMetadata')).toBe(
+          operation === 'update',
+        )
+        expect(req.context._payloadManagedCloudStorage).toBeUndefined()
+        expect(req.context._payloadManagedCloudMetadata).toBeUndefined()
+      } finally {
+        hooks.afterChange = afterChange
+      }
+    })
+  }
+
+  for (const nestedOperation of ['failed create', 'failed update', 'local create'] as const) {
+    test(`should preserve the cloud guard after a nested ${nestedOperation}`, async ({
+      payload,
+    }) => {
+      const bytes = await readFile(firstFile)
+      const nestedBytes = await readFile(secondFile)
+      const existing =
+        nestedOperation === 'failed update'
+          ? await payload.create({
+              collection: versionedCloudMediaSlug,
+              data: {},
+              filePath: secondFile,
+              overrideAccess: true,
+            })
+          : undefined
+      const uploadsBefore = versionedCloudCalls.uploads
+      const req = await createPayloadRequest({ payload })
+      const hooks = payload.collections[versionedCloudMediaSlug].config.hooks
+      const afterChange = hooks.afterChange
+      const localFiles: string[] = []
+      let hasCheckedNestedOperation = false
+      hooks.afterChange = [
+        async ({ doc, req: hookReq }) => {
+          if (hookReq.context.skipCloudStorage) {
+            return
+          }
+          if (doc.filename === 'nested-failed-original.png') {
+            throw new Error('Nested cloud hook failed')
+          }
+          if (doc.filename !== 'outer-original.png') {
+            return
+          }
+          const metadata = hookReq.context._payloadManagedCloudMetadata
+          expect(hookReq.context._payloadManagedCloudStorage).toBe(true)
+          const args = {
+            collection: versionedCloudMediaSlug,
+            data: {},
+            disableTransaction: true,
+            file: {
+              name: 'nested-failed.png',
+              data: nestedBytes,
+              mimetype: 'image/png',
+              size: nestedBytes.length,
+            },
+            overrideAccess: true,
+            req: hookReq,
+          }
+          let nestedError: unknown
+
+          if (nestedOperation === 'local create') {
+            const local = await payload.create({ ...args, collection: mediaWithDisabledPluginSlug })
+            const staticDir =
+              payload.collections[mediaWithDisabledPluginSlug].config.upload.staticDir
+            localFiles.push(
+              ...getStoredCloudFiles(local).map(({ key }) => path.join(staticDir, key)),
+            )
+          } else {
+            try {
+              await (nestedOperation === 'failed create'
+                ? payload.create(args)
+                : payload.update({ ...args, id: existing!.id }))
+            } catch (error) {
+              nestedError = error
+            }
+          }
+          expect(nestedError).toEqual(
+            nestedOperation === 'local create' ? undefined : new Error('Nested cloud hook failed'),
+          )
+          expect(hookReq.context._payloadManagedCloudStorage).toBe(true)
+          expect(hookReq.context._payloadManagedCloudMetadata).toBe(metadata)
+          hasCheckedNestedOperation = true
+        },
+        ...afterChange,
+      ]
+
+      try {
+        const outer = await payload.create({
+          collection: versionedCloudMediaSlug,
+          data: {},
+          disableTransaction: true,
+          file: { name: 'outer.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+          overrideAccess: true,
+          req,
+        })
+        const key = (await getStoredFiles({ id: outer.id, payload }))[0]!.key
+        expect(hasCheckedNestedOperation).toBe(true)
+        expect(outer.storageMarker).toBe(key)
+        expect(versionedCloudFiles.get(key)).toEqual(bytes)
+        expect(versionedCloudCalls.uploads).toBe(
+          uploadsBefore + (nestedOperation === 'local create' ? 1 : 2),
+        )
+        expect(Object.hasOwn(req.context, '_payloadManagedCloudStorage')).toBe(false)
+        expect(Object.hasOwn(req.context, '_payloadManagedCloudMetadata')).toBe(false)
+      } finally {
+        hooks.afterChange = afterChange
+        await Promise.all(localFiles.map((file) => rm(file, { force: true })))
+      }
+    })
+  }
 
   test('should rename a cloud upload by copying its bytes and retaining its history', async ({
     payload,
@@ -548,7 +765,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
   })
 
   test.options(
-    'should use native move for an unversioned rename',
+    'should keep unversioned cloud sources readable until the rename commits',
     { db: isTransactionalMongoAdapter },
     async ({ payload }) => {
       const created = await payload.create({
@@ -558,25 +775,40 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
         overrideAccess: true,
       })
       const oldKey = [...versionedCloudFiles.keys()][0]!
-      expect(
-        payload.collections[unversionedCloudMediaSlug].config.upload.fileOperations?.move,
-      ).toBeTypeOf('function')
+      const bytes = Buffer.from(versionedCloudFiles.get(oldKey)!)
+      const newKey = path.posix.join(path.posix.dirname(oldKey), 'moved-original.png')
+      const commitTransaction = payload.db.commitTransaction
+      let hasCheckedPendingRename = false
 
-      const renamed = await payload.renameFile({
-        id: created.id,
-        collection: unversionedCloudMediaSlug,
-        filename: 'moved.png',
-        overrideAccess: true,
-      })
+      payload.db.commitTransaction = async (transactionID) => {
+        const current = await payload.db.findOne({
+          collection: unversionedCloudMediaSlug,
+          where: { id: { equals: created.id } },
+        })
 
-      expect(renamed.filename).toBe('moved-original.png')
-      expect(versionedCloudCalls.moves).toBe(1)
-      expect(versionedCloudFiles.has(oldKey)).toBe(false)
-      const current = await payload.db.findOne({
-        collection: unversionedCloudMediaSlug,
-        where: { id: { equals: created.id } },
-      })
-      expect(versionedCloudFiles.has(getStoredCloudFiles(current)[0]!.key)).toBe(true)
+        expect(current?.filename).toBe(created.filename)
+        expect(versionedCloudFiles.get(oldKey)).toEqual(bytes)
+        expect(versionedCloudFiles.get(newKey)).toEqual(bytes)
+        hasCheckedPendingRename = true
+        return commitTransaction.call(payload.db, transactionID)
+      }
+
+      try {
+        const renamed = await payload.renameFile({
+          id: created.id,
+          collection: unversionedCloudMediaSlug,
+          filename: 'moved.png',
+          overrideAccess: true,
+        })
+
+        expect(renamed.filename).toBe('moved-original.png')
+        expect(hasCheckedPendingRename).toBe(true)
+        expect(versionedCloudCalls.moves).toBe(0)
+        expect(versionedCloudFiles.has(oldKey)).toBe(false)
+        expect(versionedCloudFiles.get(newKey)).toEqual(bytes)
+      } finally {
+        payload.db.commitTransaction = commitTransaction
+      }
     },
   )
 
@@ -611,53 +843,59 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     },
   )
 
-  test.options(
-    'should restore earlier objects when a later native move fails',
-    { db: isTransactionalMongoAdapter },
-    async ({ payload }) => {
-      const created = await payload.create({
+  test('should retain all cloud sources when a later rename destination is occupied', async ({
+    payload,
+  }) => {
+    const created = await payload.create({
+      collection: unversionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const originalKey = [...versionedCloudFiles.keys()][0]!
+    const processedKey = originalKey.replace(/\.png$/, '-cropped.png')
+    versionedCloudFiles.set(processedKey, Buffer.from('cropped'))
+    await payload.db.updateOne({
+      collection: unversionedCloudMediaSlug,
+      data: {
+        filename: path.posix.basename(processedKey),
+        url: `/api/${unversionedCloudMediaSlug}/file/${path.posix.basename(processedKey)}`,
+      },
+      where: { id: { equals: created.id } },
+    })
+    const oldStem = path.posix.parse(originalKey).name.replace(/-original$/, '')
+    const collisionKey = path.posix.join(
+      path.posix.dirname(processedKey),
+      path.posix.basename(processedKey).replace(oldStem, 'later'),
+    )
+    const occupiedBytes = Buffer.from('occupied')
+    versionedCloudFiles.set(collisionKey, occupiedBytes)
+
+    await expect(
+      payload.renameFile({
+        id: created.id,
         collection: unversionedCloudMediaSlug,
-        data: {},
-        filePath: firstFile,
+        filename: 'later.png',
         overrideAccess: true,
-      })
-      const originalKey = [...versionedCloudFiles.keys()][0]!
-      const processedKey = originalKey.replace(/\.png$/, '-cropped.png')
-      versionedCloudFiles.set(processedKey, Buffer.from('cropped'))
-      await payload.db.updateOne({
-        collection: unversionedCloudMediaSlug,
-        data: {
-          filename: path.posix.basename(processedKey),
-          url: `/api/${unversionedCloudMediaSlug}/file/${path.posix.basename(processedKey)}`,
-        },
-        where: { id: { equals: created.id } },
-      })
-      versionedCloudFailure.moveNumber = 2
+      }),
+    ).rejects.toThrow('already exists')
 
-      await expect(
-        payload.renameFile({
-          id: created.id,
-          collection: unversionedCloudMediaSlug,
-          filename: 'later.png',
-          overrideAccess: true,
-        }),
-      ).rejects.toThrow('Cloud test move failed')
-
-      expect(versionedCloudFiles.has(originalKey)).toBe(true)
-      expect(versionedCloudFiles.has(processedKey)).toBe(true)
-      expect(
-        [...versionedCloudFiles.keys()].some((key) => key.endsWith('/later-original.png')),
-      ).toBe(false)
-      const saved = await payload.db.findOne({
-        collection: unversionedCloudMediaSlug,
-        where: { id: { equals: created.id } },
-      })
-      expect(saved?.filename).toBe(path.posix.basename(processedKey))
-    },
-  )
+    expect(versionedCloudFiles.get(collisionKey)).toEqual(occupiedBytes)
+    expect(versionedCloudFiles.get(originalKey)).toEqual(await readFile(firstFile))
+    expect(versionedCloudCalls.moves).toBe(0)
+    expect(versionedCloudFiles.has(processedKey)).toBe(true)
+    expect([...versionedCloudFiles.keys()].some((key) => key.endsWith('/later-original.png'))).toBe(
+      false,
+    )
+    const saved = await payload.db.findOne({
+      collection: unversionedCloudMediaSlug,
+      where: { id: { equals: created.id } },
+    })
+    expect(saved?.filename).toBe(path.posix.basename(processedKey))
+  })
 
   test.options(
-    'should restore a native move when the database commit fails',
+    'should retain cloud sources and remove new copies when the rename commit fails',
     { db: isTransactionalMongoAdapter },
     async ({ payload }) => {
       const created = await payload.create({
@@ -668,7 +906,15 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       })
       const oldKey = [...versionedCloudFiles.keys()][0]!
       const commitTransaction = payload.db.commitTransaction
-      payload.db.commitTransaction = () => Promise.reject(new Error('Cloud test commit failed'))
+      payload.db.commitTransaction = async () => {
+        expect(versionedCloudFiles.get(oldKey)).toEqual(await readFile(firstFile))
+        expect(
+          versionedCloudFiles.get(
+            path.posix.join(path.posix.dirname(oldKey), 'uncommitted-original.png'),
+          ),
+        ).toEqual(await readFile(firstFile))
+        throw new Error('Cloud test commit failed')
+      }
 
       try {
         await expect(
@@ -695,9 +941,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     },
   )
 
-  test('should copy then remove the source when an unversioned adapter has no native move', async ({
-    payload,
-  }) => {
+  test('should retain the source when a cloud rename copy fails', async ({ payload }) => {
     const created = await payload.create({
       collection: unversionedCloudMediaSlug,
       data: {},
@@ -705,60 +949,20 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       overrideAccess: true,
     })
     const oldKey = [...versionedCloudFiles.keys()][0]!
-    const bytes = Buffer.from(versionedCloudFiles.get(oldKey)!)
-    const operations = payload.collections[unversionedCloudMediaSlug].config.upload.fileOperations!
-    const move = operations.move
-    operations.move = undefined
-
-    try {
-      const renamed = await payload.renameFile({
-        id: created.id,
-        collection: unversionedCloudMediaSlug,
-        filename: 'copied.png',
-        overrideAccess: true,
-      })
-      const after = await payload.db.findOne({
-        collection: unversionedCloudMediaSlug,
-        where: { id: { equals: created.id } },
-      })
-
-      expect(renamed.filename).toBe('copied-original.png')
-      expect(versionedCloudCalls.moves).toBe(0)
-      expect(versionedCloudFiles.has(oldKey)).toBe(false)
-      expect(versionedCloudFiles.get(getStoredCloudFiles(after)[0]!.key)).toEqual(bytes)
-    } finally {
-      operations.move = move
-    }
-  })
-
-  test('should retain the source when fallback copy fails', async ({ payload }) => {
-    const created = await payload.create({
-      collection: unversionedCloudMediaSlug,
-      data: {},
-      filePath: firstFile,
-      overrideAccess: true,
-    })
-    const oldKey = [...versionedCloudFiles.keys()][0]!
-    const operations = payload.collections[unversionedCloudMediaSlug].config.upload.fileOperations!
-    const move = operations.move
-    operations.move = undefined
     versionedCloudFailure.beforeCopy = () => Promise.reject(new Error('Cloud copy failed'))
 
-    try {
-      await expect(
-        payload.renameFile({
-          id: created.id,
-          collection: unversionedCloudMediaSlug,
-          filename: 'failed.png',
-          overrideAccess: true,
-        }),
-      ).rejects.toThrow('Cloud copy failed')
+    await expect(
+      payload.renameFile({
+        id: created.id,
+        collection: unversionedCloudMediaSlug,
+        filename: 'failed.png',
+        overrideAccess: true,
+      }),
+    ).rejects.toThrow('Cloud copy failed')
 
-      expect(versionedCloudFiles.has(oldKey)).toBe(true)
-      expect(versionedCloudCalls.deletes).not.toContain(oldKey)
-    } finally {
-      operations.move = move
-    }
+    expect(versionedCloudFiles.get(oldKey)).toEqual(await readFile(firstFile))
+    expect(versionedCloudCalls.moves).toBe(0)
+    expect(versionedCloudCalls.deletes).not.toContain(oldKey)
   })
 
   test('should not treat a custom legacy URL as an owned cloud object', async ({ payload }) => {
@@ -1058,7 +1262,80 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect(after.find(({ id }) => id === selected.id)?.version).toEqual(selected.version)
   })
 
-  test('should retain a failed cloud deletion and log its exact storage key', async ({
+  test('should retain exact cloud references across documents and non-latest versions', async ({
+    payload,
+  }) => {
+    const collection = payload.collections[versionedCloudMediaSlug].config
+    const source = { filename: 'source.png', prefix: 'originals', _objectKey: 'source' }
+    const history = { filename: 'history.png', prefix: 'history', _objectKey: 'old' }
+    const doc = await payload.db.create({
+      collection: versionedCloudMediaSlug,
+      data: { filename: 'current.png', prefix: 'current', _objectKey: 'active', original: source },
+    })
+    await payload.db.create({
+      collection: versionedCloudMediaSlug,
+      data: { filename: 'shared.png', prefix: 'shared', _objectKey: 'active', original: source },
+    })
+    const oldVersion = await payload.db.createVersion({
+      autosave: false,
+      collectionSlug: versionedCloudMediaSlug,
+      parent: doc.id,
+      updatedAt: '2026-01-01T00:00:00.000Z',
+      versionData: { filename: 'history-main.png', original: history },
+    })
+    await payload.db.createVersion({
+      autosave: false,
+      collectionSlug: versionedCloudMediaSlug,
+      parent: doc.id,
+      updatedAt: '2026-01-02T00:00:00.000Z',
+      versionData: { filename: 'current.png', original: source },
+    })
+    const versions = await payload.db.findVersions({
+      collection: versionedCloudMediaSlug,
+      where: { id: { equals: oldVersion.id } },
+    })
+    await Promise.all(
+      Array.from({ length: 101 }, (_, index) =>
+        payload.db.create({
+          collection: versionedCloudMediaSlug,
+          data: {
+            filename: `other-${index}.png`,
+            original: { ...source, _objectKey: `other-${index}` },
+          },
+        }),
+      ),
+    )
+    const retained = [
+      'originals/source/source.png',
+      'originals/other-100/source.png',
+      'history/old/history.png',
+    ]
+    const unreferenced = [
+      'different-prefix/source/source.png',
+      'originals/different-object/source.png',
+    ]
+    const bytes = await readFile(firstFile)
+    for (const key of [...retained, ...unreferenced]) {
+      versionedCloudFiles.set(key, bytes)
+    }
+    const req = await createPayloadRequest({ payload })
+
+    expect(versions.docs[0]!.latest).toBeFalsy()
+    await scheduleUnreferencedFileCleanup({
+      candidates: [...retained, ...unreferenced].map((key) => ({
+        key,
+        roles: [{ type: 'original' }],
+      })),
+      collection,
+      req,
+    })
+
+    expect([...versionedCloudFiles.keys()].sort()).toEqual(retained.sort())
+    expect(versionedCloudCalls.deletes.sort()).toEqual(unreferenced.sort())
+    expect(versionedCloudCalls.uploads).toBe(0)
+  })
+
+  test('should log failed cleanup without masking a nontransactional delete hook error', async ({
     payload,
   }) => {
     const first = await payload.create({
@@ -1077,10 +1354,37 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     const currentKey = (await getStoredFiles({ id: first.id, payload }))[0]!.key
     const logged = vi.spyOn(payload.logger, 'error')
     versionedCloudFailure.deleteKey = firstKey
+    const hooks = payload.collections[versionedCloudMediaSlug].config.hooks
+    const afterDelete = hooks.afterDelete
+
+    hooks.afterDelete = [
+      ...afterDelete,
+      () => {
+        throw new Error('Cloud delete hook failed')
+      },
+    ]
 
     try {
-      await payload.delete({ id: first.id, collection: versionedCloudMediaSlug })
+      await expect(
+        payload.delete({
+          id: first.id,
+          collection: versionedCloudMediaSlug,
+          disableTransaction: true,
+        }),
+      ).rejects.toThrow('Cloud delete hook failed')
 
+      expect(
+        await payload.db.findOne({
+          collection: versionedCloudMediaSlug,
+          where: { id: { equals: first.id } },
+        }),
+      ).toBeNull()
+      const versions = await payload.db.findVersions({
+        collection: versionedCloudMediaSlug,
+        where: { parent: { equals: first.id } },
+      })
+
+      expect(versions.docs).toEqual([])
       expect(versionedCloudFiles.has(firstKey)).toBe(true)
       expect(versionedCloudFiles.has(currentKey)).toBe(false)
       expect(versionedCloudCalls.deletes).toContain(firstKey)
@@ -1090,6 +1394,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
         }),
       )
     } finally {
+      hooks.afterDelete = afterDelete
       logged.mockRestore()
     }
   })
@@ -1182,6 +1487,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       const firstKey = (await getStoredFiles({ id: first.id, payload }))[0]!.key
       const originalKeys = [...versionedCloudFiles.keys()]
 
+      const req = await createPayloadRequest({ payload })
       versionedCloudFailure.afterChange = true
       await expect(
         payload.update({
@@ -1190,9 +1496,12 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
           data: {},
           filePath: secondFile,
           overrideAccess: true,
+          req,
         }),
       ).rejects.toThrow('Cloud test afterChange failed')
 
+      expect(Object.hasOwn(req.context, '_payloadManagedCloudStorage')).toBe(false)
+      expect(Object.hasOwn(req.context, '_payloadManagedCloudMetadata')).toBe(false)
       const current = await payload.findByID({
         id: first.id,
         collection: versionedCloudMediaSlug,

@@ -179,7 +179,9 @@ test.suite('File rename', { config: './config.ts' }, () => {
     expect(await readFile(path.join(mediaDir, created.filename!))).toEqual(bytes)
   })
 
-  test('should remove the previous object after an unversioned rename', async ({ payload }) => {
+  test('should keep local sources readable during rename and remove them after success', async ({
+    payload,
+  }) => {
     const bytes = await readFile(imageFixture)
     const created = await payload.create({
       collection: plainMediaSlug,
@@ -191,13 +193,37 @@ test.suite('File rename', { config: './config.ts' }, () => {
     expect(created.original?.filename).toBe(created.filename)
     expect(created.original?.url).toBe(created.url)
 
-    await renameFileOperation({
-      id: created.id,
-      collection: payload.collections[plainMediaSlug],
-      filename: 'new.png',
-      overrideAccess: true,
-      req: await createPayloadRequest({ payload }),
-    })
+    const hooks = payload.collections[plainMediaSlug].config.hooks
+    const beforeChange = hooks.beforeChange
+    let hasCheckedPendingRename = false
+    hooks.beforeChange = [
+      ...beforeChange,
+      async () => {
+        const current = await payload.db.findOne({
+          collection: plainMediaSlug,
+          where: { id: { equals: created.id } },
+        })
+
+        expect(current?.filename).toBe(created.filename)
+        expect(await readFile(path.join(plainMediaDir, created.filename!))).toEqual(bytes)
+        expect(await readFile(path.join(plainMediaDir, 'new-original.png'))).toEqual(bytes)
+        hasCheckedPendingRename = true
+      },
+    ]
+
+    try {
+      await renameFileOperation({
+        id: created.id,
+        collection: payload.collections[plainMediaSlug],
+        filename: 'new.png',
+        overrideAccess: true,
+        req: await createPayloadRequest({ payload }),
+      })
+    } finally {
+      hooks.beforeChange = beforeChange
+    }
+
+    expect(hasCheckedPendingRename).toBe(true)
 
     expect(await readFile(path.join(plainMediaDir, 'new-original.png'))).toEqual(bytes)
     const saved = await payload.db.findOne({
@@ -209,6 +235,48 @@ test.suite('File rename', { config: './config.ts' }, () => {
       code: 'ENOENT',
     })
   })
+
+  test.options(
+    'should retain local sources and remove new copies when the rename commit fails',
+    { db: 'mongo' },
+    async ({ payload }) => {
+      const bytes = await readFile(imageFixture)
+      const created = await payload.create({
+        collection: plainMediaSlug,
+        data: { alt: 'rollback' },
+        file: { name: 'source.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+      })
+      const commitTransaction = payload.db.commitTransaction
+      payload.db.commitTransaction = async () => {
+        expect(await readFile(path.join(plainMediaDir, created.filename!))).toEqual(bytes)
+        expect(await readFile(path.join(plainMediaDir, 'uncommitted-original.png'))).toEqual(bytes)
+        throw new Error('Local test commit failed')
+      }
+
+      try {
+        await expect(
+          payload.renameFile({
+            id: created.id,
+            collection: plainMediaSlug,
+            filename: 'uncommitted.png',
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow('Local test commit failed')
+      } finally {
+        payload.db.commitTransaction = commitTransaction
+      }
+
+      expect(await readFile(path.join(plainMediaDir, created.filename!))).toEqual(bytes)
+      await expect(
+        readFile(path.join(plainMediaDir, 'uncommitted-original.png')),
+      ).rejects.toMatchObject({ code: 'ENOENT' })
+      const saved = await payload.db.findOne({
+        collection: plainMediaSlug,
+        where: { id: { equals: created.id } },
+      })
+      expect(saved?.filename).toBe(created.filename)
+    },
+  )
 
   test('should roll back staged copies when a later representation collides', async ({
     payload,
