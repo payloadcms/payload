@@ -120,7 +120,7 @@ const StepNav: React.FC<{
           buttonStyle="ghost"
           className={itemClassName}
           el="link"
-          extraButtonProps={{ 'aria-current': isCurrent ? 'page' : undefined }}
+          extraButtonProps={{ 'aria-current': isCurrent ? 'page' : false }}
           url={item.url}
         >
           {StepLabel}
@@ -165,7 +165,7 @@ const StepNav: React.FC<{
                 <PopupList.ButtonGroup className={`${baseClass}__collapsed-list`}>
                   {collapsedItems.map((item, i) => (
                     <PopupList.Button
-                      ariaCurrent={item.isCurrent ? 'page' : undefined}
+                      ariaCurrent={item.isCurrent ? 'page' : false}
                       href={item.url}
                       key={i}
                       onClick={close}
