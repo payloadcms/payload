@@ -241,7 +241,10 @@ export const getTableColumnFromPath = ({
             adapter.tableNameMap.get(`${tableName}_blocks_${toSnakeCase(block.slug)}`),
           )
 
-          constraintPath = `${constraintPath}${field.name}.%.`
+          // Use a per-iteration path: reassigning the shared constraintPath would
+          // accumulate one `${field.name}.%.` segment per attempted block, so a
+          // relationship in a later block would never match (see #18272).
+          const blockConstraintPath = `${constraintPath}${field.name}.%.`
 
           let result: TableColumn
           const blockConstraints = []
@@ -281,7 +284,7 @@ export const getTableColumnFromPath = ({
             result = getTableColumnFromPath({
               adapter,
               collectionPath,
-              constraintPath,
+              constraintPath: blockConstraintPath,
               constraints: blockConstraints,
               fields: block.flattenedFields,
               joins: newJoins,
