@@ -1,0 +1,63 @@
+---
+title: DatePicker
+label: DatePicker
+order: 90
+desc: Select dates and times with Payload's DatePicker component.
+keywords: ui, component, date, time, calendar, picker
+---
+
+The `DatePicker` component wraps `react-datepicker` with Payload's styles, localization, and date and time display options.
+
+## Import
+
+```tsx
+import { DatePicker } from '@payloadcms/ui'
+```
+
+## Basic usage
+
+<ComponentPreview component="DatePicker" example="basic" />
+
+Pair the picker with a visible label. `id` is applied to the picker's wrapper element, not to the underlying input, so pass the input's ID through `overrides` and point the label's `htmlFor` at that value instead:
+
+```tsx
+<label htmlFor="publish-date-input">Publish date</label>
+<DatePicker
+  onChange={setValue}
+  overrides={{ id: 'publish-date-input' }}
+  value={value}
+/>
+```
+
+The picker calls `onChange` with `null` when its clear button is used.
+
+## Picker appearances
+
+Use `pickerAppearance` to choose between a date, date and time, day, month, or time input. Payload selects a matching display format when `displayFormat` is not provided.
+
+| Appearance   | Input                  |
+| ------------ | ---------------------- |
+| `default`    | Calendar date          |
+| `dayAndTime` | Calendar date and time |
+| `dayOnly`    | Day and month          |
+| `monthOnly`  | Month                  |
+| `timeOnly`   | Time                   |
+
+## Common props
+
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
+| Prop               | Type                                                                  | Default     | Description                                      |
+| ------------------ | --------------------------------------------------------------------- | ----------- | ------------------------------------------------ |
+| `id`               | `string`                                                              | —           | Sets the ID of the picker's wrapper element.     |
+| `value`            | `Date \| string`                                                      | —           | Selected date or date string.                    |
+| `onChange`         | `(value: Date \| null) => void`                                       | —           | Runs when the selected value changes.            |
+| `placeholder`      | `string`                                                              | —           | Displays text when no value is selected.         |
+| `pickerAppearance` | `'default' \| 'dayAndTime' \| 'dayOnly' \| 'monthOnly' \| 'timeOnly'` | `'default'` | Selects the date and time controls shown.        |
+| `displayFormat`    | `string`                                                              | Automatic   | Overrides the date-fns display format.           |
+| `minDate`          | `Date`                                                                | —           | Sets the earliest selectable date.               |
+| `maxDate`          | `Date`                                                                | —           | Sets the latest selectable date.                 |
+| `monthsToShow`     | `1 \| 2`                                                              | `1`         | Sets the number of visible calendar months.      |
+| `timeIntervals`    | `number`                                                              | `30`        | Sets the number of minutes between time options. |
+| `readOnly`         | `boolean`                                                             | `false`     | Prevents the value from being changed.           |
+| `overrides`        | `ReactDatePickerProps`                                                | —           | Passes supported options to `react-datepicker`.  |

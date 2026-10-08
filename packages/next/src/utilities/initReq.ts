@@ -11,6 +11,7 @@ import {
   getRequestLanguage,
   parseCookies,
 } from 'payload'
+import { applyUserReadAccess } from 'payload/internal'
 
 import { getRequestLocale } from './getRequestLocale.js'
 import { selectiveCache } from './selectiveCache.js'
@@ -75,45 +76,81 @@ export const initReq = async function ({
   }, 'global')
 
   return reqCache
-    .get(async () => {
-      const { i18n, languageCode, payload, responseHeaders, user } = partialResult
+    .get(
+      async () => {
+        const { i18n, languageCode, payload, responseHeaders, user } = partialResult
 
-      const { req: reqOverrides, ...optionsOverrides } = overrides || {}
+        const { req: reqOverrides, ...optionsOverrides } = overrides || {}
+        const hasOptionsUserOverride = Object.hasOwn(optionsOverrides, 'user')
+        const hasReqUserOverride = Object.hasOwn(reqOverrides ?? {}, 'user')
+        const hasUserOverride = hasOptionsUserOverride || hasReqUserOverride
+        const userOverride = hasOptionsUserOverride ? optionsOverrides.user : reqOverrides?.user
 
-      const req = await createLocalReq(
-        {
-          req: {
-            headers,
-            host: headers.get('host'),
-            i18n: i18n as I18n,
-            responseHeaders,
-            user,
-            ...(reqOverrides || {}),
+        const req = await createLocalReq(
+          {
+            req: {
+              headers,
+              host: headers.get('host'),
+              i18n: i18n as I18n,
+              responseHeaders,
+              user,
+              ...(reqOverrides || {}),
+            },
+            ...(optionsOverrides || {}),
           },
-          ...(optionsOverrides || {}),
-        },
-        payload,
-      )
+          payload,
+        )
 
-      const locale = await getRequestLocale({
-        req,
-      })
+        if (hasUserOverride && userOverride == null) {
+          req.user = null
+        }
 
-      req.locale = locale?.code
+        let userWithReadAccess = req.user
 
-      const permissions = await getAccessResults({
-        req,
-      })
+        const locale = await getRequestLocale({ req })
+        req.locale = locale?.code
 
-      return {
-        cookies,
-        headers,
-        languageCode,
-        locale,
-        permissions,
-        req,
-      }
-    }, key)
+        if (!hasUserOverride && req.user) {
+          try {
+            const collectionSlug = req.user.collection ?? payload.config.admin.user
+            const collection = payload.collections[collectionSlug]
+
+            if (!collection?.config.auth) {
+              throw new Error('Authenticated user collection not found')
+            }
+
+            userWithReadAccess = await applyUserReadAccess({
+              collection: collection.config,
+              depth: collection.config.auth.depth,
+              overrideAccess: false,
+              req,
+              showHiddenFields: false,
+              user: req.user,
+            })
+          } catch (error) {
+            payload.logger.error({ err: error })
+            req.user = null
+            userWithReadAccess = null
+          }
+        }
+
+        const permissions = await getAccessResults({
+          req,
+        })
+
+        return {
+          cookies,
+          headers,
+          languageCode,
+          locale,
+          permissions,
+          req,
+          user: userWithReadAccess,
+        }
+      },
+      key,
+      overrides,
+    )
     .then((result) => {
       // CRITICAL: Create a shallow copy of req before returning to prevent
       // mutations from propagating to the cached req object.

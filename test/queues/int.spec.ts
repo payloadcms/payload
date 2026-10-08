@@ -14,8 +14,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 import { clearAndSeedEverything } from './seed.js'
 import { waitUntilAutorunIsDone } from './utilities.js'
 
@@ -1011,6 +1011,40 @@ describe('Queues - Payload', () => {
 
     const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
     expect(after?.id).toBe(id)
+  })
+
+  it('should complete a job and save its log with runHooks enabled', async () => {
+    const originalRunHooks = payload.config.jobs.runHooks
+    const originalDeleteJobOnComplete = payload.config.jobs.deleteJobOnComplete
+    const job = await payload.jobs.queue({
+      task: 'DoNothingTask',
+      input: { message: 'runHooks test' },
+    })
+
+    try {
+      payload.config.jobs.runHooks = true
+      payload.config.jobs.deleteJobOnComplete = false
+
+      await payload.jobs.run({ silent: true })
+
+      const jobAfterRun = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+      })
+
+      expect(jobAfterRun.error).toBeFalsy()
+      expect(jobAfterRun.hasError).toBe(false)
+      expect(jobAfterRun.completedAt).toBeTruthy()
+      expect(jobAfterRun.log).toHaveLength(1)
+      expect(jobAfterRun.log?.[0]).toMatchObject({
+        state: 'succeeded',
+        taskSlug: 'DoNothingTask',
+      })
+    } finally {
+      payload.config.jobs.runHooks = originalRunHooks
+      payload.config.jobs.deleteJobOnComplete = originalDeleteJobOnComplete
+      await payload.delete({ collection: 'payload-jobs', id: job.id })
+    }
   })
 
   it('can queue single tasks', async () => {

@@ -1,12 +1,12 @@
 import type { PopulationPromise } from '../../typesServer.js'
-import type { UploadFeatureProps } from './index.js'
+import type { UploadFeatureServerProps } from './index.js'
 import type { SerializedUploadNode } from './nodes/UploadNode.js'
 
 import { populate } from '../../../populateGraphQL/populate.js'
 import { recursivelyPopulateFieldsForGraphQL } from '../../../populateGraphQL/recursivelyPopulateFieldsForGraphQL.js'
 
 export const uploadPopulationPromiseHOC = (
-  props?: UploadFeatureProps,
+  props: UploadFeatureServerProps,
 ): PopulationPromise<SerializedUploadNode> => {
   return ({
     context,
@@ -25,7 +25,7 @@ export const uploadPopulationPromiseHOC = (
     req,
     showHiddenFields,
   }) => {
-    if (node?.value) {
+    if (node?.value && props.enabledCollectionSlugs.includes(node.relationTo)) {
       const collection = req.payload.collections[node?.relationTo]
 
       if (collection) {

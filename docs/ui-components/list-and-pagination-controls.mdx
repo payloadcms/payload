@@ -1,0 +1,92 @@
+---
+title: List and Pagination Controls
+label: List and Pagination Controls
+order: 150
+desc: Add pagination, page-size, sorting, and selection controls to Payload Admin lists.
+keywords: ui, components, list, pagination, per page, sorting, selection
+---
+
+Payload's list controls support paginated data, page-size selection, sorting, and row selection. Use the standalone controls for custom data views and the provider-backed controls when extending an existing Admin list.
+
+## Import
+
+```tsx
+import {
+  Pagination,
+  PerPage,
+  SelectAll,
+  SelectMany,
+  SelectRow,
+  SortColumn,
+  SortHeader,
+  SortRow,
+} from '@payloadcms/ui'
+```
+
+## Pagination
+
+<ComponentPreview component="ListAndPagination" example="pagination" />
+
+`Pagination` is controlled. Pass the current page metadata and update your query or local state from `onChange`.
+
+The component returns `null` when both `hasPrevPage` and `hasNextPage` are false.
+
+## Page size
+
+`PerPage` displays a compact selector for the number of rows shown on each page.
+
+```tsx
+const [limit, setLimit] = useState(10)
+
+<PerPage handleChange={setLimit} limit={limit} limits={[10, 25, 50, 100]} />
+```
+
+Reset the current page when changing the limit if the new page size would make that page invalid.
+
+## Sorting
+
+- `SortColumn` renders ascending and descending controls for a named column.
+- `SortHeader` switches an orderable list to its configured order field.
+- `SortRow` renders the drag handle used by an actively orderable list.
+
+These controls read and update Payload's `ListQuery` context. Use them inside an Admin list or a custom view that provides the same list-query state.
+
+## Selection
+
+- `SelectAll` toggles selection for the current list.
+- `SelectRow` toggles one row and respects document locking.
+- `SelectMany` renders an action pill for the current selection.
+
+Selection controls require Payload's selection context. `SelectRow` also reads the authenticated user to determine whether a locked row can be selected.
+
+## Common props
+
+These are the props most commonly used. See the exported types in `@payloadcms/ui` for the complete list.
+
+### Pagination props
+
+| Prop                | Type                     | Default | Description                                     |
+| ------------------- | ------------------------ | ------- | ----------------------------------------------- |
+| `page`              | `number`                 | —       | Sets the current page.                          |
+| `totalPages`        | `number`                 | —       | Sets the total page count.                      |
+| `hasNextPage`       | `boolean`                | `false` | Enables the next-page control.                  |
+| `hasPrevPage`       | `boolean`                | `false` | Enables the previous-page control.              |
+| `nextPage`          | `number`                 | —       | Sets the page selected by the next control.     |
+| `prevPage`          | `number`                 | —       | Sets the page selected by the previous control. |
+| `numberOfNeighbors` | `number`                 | `1`     | Sets how many pages surround the current page.  |
+| `onChange`          | `(page: number) => void` | —       | Runs when the user selects a different page.    |
+
+### PerPage props
+
+| Prop           | Type                      | Default | Description                                      |
+| -------------- | ------------------------- | ------- | ------------------------------------------------ |
+| `limit` \*     | `number`                  | —       | Sets the selected page size.                     |
+| `limits` \*    | `number[]`                | —       | Sets the available page sizes.                   |
+| `defaultLimit` | `number`                  | `10`    | Provides a fallback when `limit` is not numeric. |
+| `handleChange` | `(limit: number) => void` | —       | Runs when the user chooses a new page size.      |
+
+_\* An asterisk denotes that a prop is required._
+
+## Internal list wrappers
+
+`PageControls` and `PageControlsComponent` are exported for Payload's own list views but are marked internal. For Custom Components, compose `Pagination` and `PerPage` unless you are intentionally extending Payload's existing list-query implementation.

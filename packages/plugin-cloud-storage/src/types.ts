@@ -7,6 +7,7 @@ import type {
   TypeWithID,
   UploadCollectionSlug,
 } from 'payload'
+import type { SignedClientUploadReceipt } from 'payload/internal'
 
 export interface File {
   buffer: Buffer
@@ -28,12 +29,28 @@ export type ClientUploadsConfig =
     }
   | boolean
 
+/**
+ * Context returned by a client-upload handler and submitted with the document
+ * create request. `prefix` plus the server-owned `_objectKey` segment locate the object.
+ */
+export type ClientUploadContext = {
+  _objectKey?: string
+  prefix: string
+  signedReceipt: SignedClientUploadReceipt
+}
+
 export type HandleUpload = (args: {
   clientUploadContext: unknown
   collection: CollectionConfig
   data: any
   file: File
   req: PayloadRequest
+  /**
+   * Pre-resolved storage file path (`_objectKey` folded in, contained beneath the collection prefix).
+   * Path-based adapters upload to it; provider-id adapters (e.g. uploadthing) ignore it and assign
+   * their own key.
+   */
+  storageFilePath: string
 }) =>
   | Partial<FileData & TypeWithID>
   | Promise<Partial<FileData & TypeWithID>>
@@ -49,6 +66,11 @@ export type HandleDelete = (args: {
   doc: FileData & TypeWithID & TypeWithPrefix
   filename: string
   req: PayloadRequest
+  /**
+   * Pre-resolved storage file path of the object to delete. Path-based adapters delete it; provider-id
+   * adapters (e.g. uploadthing) ignore it and locate the object via `doc`.
+   */
+  storageFilePath: string
 }) => Promise<void> | void
 
 export type GenerateURL = (args: {
@@ -80,7 +102,8 @@ export interface GeneratedAdapter {
   handleDelete: HandleDelete
   handleUpload: HandleUpload
   name: string
-  onInit?: () => void
+  onInit?: () => Promise<void> | void
+  requiresClientUploadReceipt?: boolean
   staticHandler: StaticHandler
 }
 

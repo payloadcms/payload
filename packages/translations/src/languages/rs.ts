@@ -57,6 +57,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     newPassword: 'Нова лозинка',
     passed: 'Autentifikacija uspela',
     passwordResetSuccessfully: 'Успешно ресетована лозинка.',
+    resend: 'Пошаљи поново',
     resetPassword: 'Промена лозинке',
     resetPasswordExpiration: 'Промена рока трајања лозинке',
     resetPasswordToken: 'Промена лозинке токена',

@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.614.0",
-    "@azure/storage-blob": "^12.11.0",
+    "@azure/storage-blob": "^12.34.0",
     "@cloudflare/workers-types": "4.20260218.0",
     "@date-fns/tz": "1.2.0",
     "@miniflare/d1": "2.14.4",
@@ -99,7 +99,7 @@
     "jwt-decode": "4.0.0",
     "mongoose": "8.22.1",
     "next": "16.3.3",
-    "nodemailer": "^8.0.5",
+    "nodemailer": "^8.0.11",
     "object-to-formdata": "4.5.1",
     "payload": "workspace:*",
     "pg": "8.16.3",

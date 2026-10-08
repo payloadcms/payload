@@ -2,6 +2,9 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { AccessJoinArticles } from './collections/AccessJoinArticles.js'
+import { AccessJoinNotes } from './collections/AccessJoinNotes.js'
+import { AccessJoinParents } from './collections/AccessJoinParents.js'
 import { Categories } from './collections/Categories.js'
 import { CategoriesVersions } from './collections/CategoriesVersions.js'
 import { FolderPoly1 } from './collections/FolderPoly1.js'
@@ -34,6 +37,9 @@ export default buildConfigWithDefaults({
     user: 'users',
   },
   collections: [
+    AccessJoinArticles,
+    AccessJoinNotes,
+    AccessJoinParents,
     {
       slug: 'users',
       auth: true,

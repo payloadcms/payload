@@ -144,6 +144,11 @@ type Admin = {
   }
 }
 
+export type ExternalFileHeaderFilterContext = {
+  isSameOrigin: boolean
+  url: string
+}
+
 export type UploadConfig = {
   /**
    * The adapter name to use for uploads. Used for storage adapter telemetry.
@@ -201,8 +206,10 @@ export type UploadConfig = {
    */
   displayPreview?: boolean
   /**
-   *
-   * Accepts existing headers and returns the headers after filtering or modifying.
+   * Accepts existing headers and returns the headers after filtering or modifying. The optional
+   * context identifies the destination for the current request, including each redirect hop.
+   * `isSameOrigin` is true only when that destination matches a trusted origin established for a
+   * relative file URL.
    * If using this option, you should handle the removal of any sensitive cookies
    * (like payload-prefixed cookies) to prevent leaking session information to external
    * services. By default, Payload automatically filters out payload-prefixed cookies
@@ -211,7 +218,10 @@ export type UploadConfig = {
    * Useful for adding custom headers to fetch from external providers.
    * @default undefined
    */
-  externalFileHeaderFilter?: (headers: Record<string, string>) => Record<string, string>
+  externalFileHeaderFilter?: (
+    headers: Record<string, string>,
+    context?: ExternalFileHeaderFilterContext,
+  ) => Record<string, string>
   /**
    * Field slugs to use for a compound index instead of the default filename index.
    */
@@ -285,6 +295,8 @@ export type UploadConfig = {
         allowList: AllowList
       }
     | false
+  /** @internal Require a server-issued receipt before invoking client-upload handlers. */
+  requiresClientUploadReceipt?: boolean
   /**
    * Sharp resize options for the original image.
    * @link https://sharp.pixelplumbing.com/api-resize#resize
@@ -347,16 +359,28 @@ export type File = {
   tempFilePath?: string
 }
 
-export type FileToSave = {
-  /**
-   * The buffer of the file.
-   */
-  buffer: Buffer
-  /**
-   * The path to save the file.
-   */
-  path: string
-}
+export type FileToSave =
+  | {
+      /**
+       * The buffer of the file.
+       */
+      buffer: Buffer
+      /**
+       * The path to save the file.
+       */
+      path: string
+    }
+  | {
+      /**
+       * The path to save the file.
+       */
+      path: string
+      /**
+       * An existing file on disk to copy to `path`, instead of `buffer` - avoids loading a file
+       * that's already on disk (e.g. a temp file) fully into memory just to write it back out.
+       */
+      sourcePath: string
+    }
 
 type Crop = {
   height: number

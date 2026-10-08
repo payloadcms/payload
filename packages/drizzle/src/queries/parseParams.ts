@@ -3,8 +3,8 @@ import type { FlattenedField, Operator, Sort, Where } from 'payload'
 
 import { and, getTableName, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
-import { APIError, QueryError } from 'payload'
-import { validOperatorSet } from 'payload/shared'
+import { APIError, getFieldByPath, QueryError } from 'payload'
+import { isNestedRelationshipQuery, validOperatorSet } from 'payload/shared'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
@@ -84,6 +84,49 @@ export function parseParams({
           const pathOperators = where[relationOrPath]
           if (typeof pathOperators === 'object') {
             for (let operator of Object.keys(pathOperators)) {
+              const nestedRelationshipValue = where[relationOrPath][operator]
+
+              // A `contains` query with a nested `where` targets a has-many relationship, upload,
+              // or join field. Prefix the nested paths with the relationship path and delegate
+              // back to `parseParams`. Reusing the same join alias keeps every constraint scoped
+              // to the SAME related document, closing a related-document oracle.
+              if (operator === 'contains' && isNestedRelationshipQuery(nestedRelationshipValue)) {
+                const resolvedField = getFieldByPath({
+                  fields,
+                  path: relationOrPath.replace(/__/g, '.'),
+                })?.field
+
+                if (
+                  resolvedField &&
+                  (resolvedField.type === 'relationship' ||
+                    resolvedField.type === 'upload' ||
+                    resolvedField.type === 'join')
+                ) {
+                  const nestedCondition = parseParams({
+                    adapter,
+                    aliasTable,
+                    context,
+                    fields,
+                    joins,
+                    locale,
+                    parentIsLocalized,
+                    selectFields,
+                    selectLocale,
+                    tableName,
+                    where: prefixJoinContainsWhere({
+                      prefix: relationOrPath,
+                      where: nestedRelationshipValue,
+                    }),
+                  })
+
+                  if (nestedCondition) {
+                    constraints.push(nestedCondition)
+                  }
+
+                  continue
+                }
+              }
+
               if (validOperatorSet.has(operator as Operator)) {
                 const val = where[relationOrPath][operator]
 
@@ -192,7 +235,12 @@ export function parseParams({
                   ) {
                     formattedValue = val
                   } else if (['in', 'not_in'].includes(operator) && Array.isArray(val)) {
-                    formattedValue = `(${val.map((v) => `${escapeSQLValue(v)}`).join(',')})`
+                    formattedValue = `(${val
+                      .map((v) => {
+                        const escaped = escapeSQLValue(v)
+                        return typeof v === 'string' ? `'${escaped}'` : String(escaped)
+                      })
+                      .join(',')})`
                   } else {
                     formattedValue = `'${operatorKeys[operator].wildcard}${escapeSQLValue(val)}${operatorKeys[operator].wildcard}'`
                   }
@@ -491,4 +539,30 @@ export function parseParams({
   }
 
   return result
+}
+
+/**
+ * Prefixes every field path in a join's nested `contains` query with the join field's path, so the
+ * query can be resolved through the join's shared table alias.
+ *
+ * @example
+ * ```ts
+ * prefixJoinContainsWhere({ prefix: 'comments', where: { and: [{ text: { equals: 'hi' } }] } })
+ * // => { and: [{ 'comments.text': { equals: 'hi' } }] }
+ * ```
+ */
+function prefixJoinContainsWhere({ prefix, where }: { prefix: string; where: Where }): Where {
+  const prefixedWhere: Where = {}
+
+  for (const [key, value] of Object.entries(where)) {
+    if (['and', 'or'].includes(key.toLowerCase()) && Array.isArray(value)) {
+      prefixedWhere[key] = value.map((nestedWhere) =>
+        prefixJoinContainsWhere({ prefix, where: nestedWhere }),
+      )
+    } else {
+      prefixedWhere[`${prefix}.${key}`] = value
+    }
+  }
+
+  return prefixedWhere
 }

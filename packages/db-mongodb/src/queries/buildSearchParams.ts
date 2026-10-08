@@ -3,7 +3,7 @@ import type { FlattenedField, Operator, PathToQuery, Payload } from 'payload'
 
 import { Types } from 'mongoose'
 import { APIError, escapeRegExp, getFieldByPath, getLocalizedPaths } from 'payload'
-import { validOperatorSet } from 'payload/shared'
+import { isNestedRelationshipQuery, validOperatorSet } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 import type { OperatorMapKey } from './operatorMap.js'
@@ -21,6 +21,124 @@ type SearchParam = {
 
 const subQueryOptions = {
   lean: true,
+}
+
+/**
+ * Builds a MongoDB condition for a `contains` query nested on a has-many relationship or upload
+ * field.
+ *
+ * Finds the related documents matching the nested query and constrains the parent to reference
+ * them, so the user's filter and any injected access constraint resolve against the same related
+ * document.
+ */
+async function buildHasManyRelationshipContainsSearchParam({
+  field,
+  locale,
+  nestedWhere,
+  path,
+  payload,
+}: {
+  field: FlattenedField
+  locale?: string
+  nestedWhere: unknown
+  path: string
+  payload: Payload
+}): Promise<SearchParam | undefined> {
+  if (field.type !== 'relationship' && field.type !== 'upload') {
+    return undefined
+  }
+
+  if (
+    !field.hasMany ||
+    typeof field.relationTo !== 'string' ||
+    !isNestedRelationshipQuery(nestedWhere)
+  ) {
+    return undefined
+  }
+
+  const { Model: RelatedModel } = getCollection({
+    adapter: payload.db as MongooseAdapter,
+    collectionSlug: field.relationTo,
+  })
+  const pathLocale = payload.config.localization
+    ? payload.config.localization.localeCodes.find(
+        (localeCode) => path.split('.').at(-1) === localeCode,
+      )
+    : undefined
+  const matchingRelatedDocumentsQuery = await RelatedModel.buildQuery({
+    locale: pathLocale ?? locale,
+    payload,
+    where: nestedWhere,
+  })
+
+  const matchingRelatedDocumentIDs = (
+    await RelatedModel.find(matchingRelatedDocumentsQuery).lean().select({ _id: true })
+  ).map((document) => document._id)
+
+  return {
+    path,
+    value: { $in: matchingRelatedDocumentIDs },
+  }
+}
+
+/**
+ * Builds a MongoDB condition for a `contains` query nested on a join field.
+ *
+ * Finds documents in the joined collection that match the nested query, then follows the join's
+ * `on` relationship to collect the parent IDs those documents point back to. Because the nested
+ * query resolves against a single joined document, the user's filter and any injected access
+ * constraint must be satisfied by the same document.
+ */
+async function buildJoinContainsSearchParam({
+  field,
+  locale,
+  nestedWhere,
+  payload,
+}: {
+  field: FlattenedField
+  locale?: string
+  nestedWhere: unknown
+  payload: Payload
+}): Promise<SearchParam | undefined> {
+  if (
+    field.type !== 'join' ||
+    typeof field.collection !== 'string' ||
+    !isNestedRelationshipQuery(nestedWhere)
+  ) {
+    return undefined
+  }
+
+  const { collectionConfig, Model: JoinedModel } = getCollection({
+    adapter: payload.db as MongooseAdapter,
+    collectionSlug: field.collection,
+  })
+
+  const relationshipField = getFieldByPath({
+    fields: collectionConfig.flattenedFields,
+    path: field.on,
+  })
+
+  if (!relationshipField) {
+    throw new APIError('Relationship field was not found')
+  }
+
+  let joinPath = relationshipField.localizedPath
+  if (relationshipField.pathHasLocalized && payload.config.localization) {
+    joinPath = joinPath.replace('<locale>', locale || payload.config.localization.defaultLocale)
+  }
+
+  const subQuery = await JoinedModel.buildQuery({
+    locale,
+    payload,
+    where: nestedWhere,
+  })
+
+  const parentIDs = await JoinedModel.distinct(joinPath, subQuery)
+
+  return {
+    path: '_id',
+    value: { $in: parentIDs },
+  }
 }
 
 /**
@@ -96,6 +214,51 @@ export async function buildSearchParam({
   }
 
   const [{ field, path }] = paths
+
+  if (
+    operator === 'contains' &&
+    paths.length === 1 &&
+    (field.type === 'relationship' || field.type === 'upload') &&
+    field.hasMany &&
+    typeof field.relationTo === 'string' &&
+    isNestedRelationshipQuery(val)
+  ) {
+    return buildHasManyRelationshipContainsSearchParam({
+      field,
+      locale,
+      nestedWhere: val,
+      path,
+      payload,
+    })
+  }
+
+  if (
+    operator === 'contains' &&
+    paths.length === 1 &&
+    field.type === 'join' &&
+    typeof field.collection === 'string' &&
+    isNestedRelationshipQuery(val)
+  ) {
+    return buildJoinContainsSearchParam({
+      field,
+      locale,
+      nestedWhere: val,
+      payload,
+    })
+  }
+
+  // Refuse plain-object (or array-of-plain-object) values for text-matching operators
+  // before sanitizeQueryValue can splice them into a rawQuery. The legitimate nested-where
+  // shapes for `contains` on hasMany relationship / join fields are handled by the two
+  // `build*ContainsSearchParam` branches above.
+  if (
+    (operator === 'contains' || operator === 'like' || operator === 'not_like') &&
+    (isNestedRelationshipQuery(val) ||
+      (Array.isArray(val) && val.some((entry) => isNestedRelationshipQuery(entry))))
+  ) {
+    throw new APIError(`Invalid value for "${operator}" on path "${path}": expected a string.`, 400)
+  }
+
   if (path) {
     const sanitizedQueryValue = sanitizeQueryValue({
       field,

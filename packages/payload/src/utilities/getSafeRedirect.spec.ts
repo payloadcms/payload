@@ -123,4 +123,10 @@ describe('getSafeRedirect', () => {
       )
     },
   )
+
+  it('should support an empty fallback for callers that branch on the result', () => {
+    expect(getSafeRedirect({ redirectTo: '//example.invalid', fallbackTo: '' })).toBe('')
+    expect(getSafeRedirect({ redirectTo: 'dashboard', fallbackTo: '' })).toBe('')
+    expect(getSafeRedirect({ redirectTo: '/dashboard', fallbackTo: '' })).toBe('/dashboard')
+  })
 })

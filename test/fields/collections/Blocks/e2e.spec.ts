@@ -783,6 +783,93 @@ describe('Block fields', () => {
   })
 
   describe('conditional blocks', () => {
+    const createdIDs: string[] = []
+
+    test.afterEach(async () => {
+      for (const id of createdIDs) {
+        await client.delete(id, { slug: 'block-fields' })
+      }
+      createdIDs.length = 0
+    })
+
+    test('should retain block type when a block condition becomes true within a block reference', async () => {
+      await page.goto(url.create)
+
+      const configuration = page.locator('#field-configuration')
+      const conditionalBlock = page.locator('#field-configuration__0__testBlocks')
+
+      await expect(configuration.locator('.blocks-field__row').first()).toBeVisible()
+      await expect(conditionalBlock).toBeHidden()
+
+      await page.locator('label[for=field-showConditionalFields]').click()
+
+      await expect(conditionalBlock).toBeVisible()
+      await expect(conditionalBlock.locator('.blocks-field__row')).toHaveCount(1)
+
+      await saveDocAndAssert(page)
+
+      const id = page.url().split('/').pop()!
+      createdIDs.push(id)
+
+      const { doc } = await client.findByID({ id, slug: 'block-fields' })
+
+      expect(doc.configuration).toHaveLength(1)
+      expect(doc.configuration[0].blockType).toBe('conditionalReference')
+      expect(doc.configuration[0].testBlocks).toHaveLength(1)
+      expect(doc.configuration[0].testBlocks[0].blockType).toBe('testBlock')
+    })
+
+    test('should keep the block type when a referenced blocks field in a group becomes visible', async () => {
+      await page.goto(url.create)
+
+      const conditionalConfiguration = page.locator(
+        '#field-conditionalGroup__conditionalConfiguration',
+      )
+
+      await expect(conditionalConfiguration).toBeHidden()
+      await page.locator('label[for=field-showConditionalFields]').click()
+      await expect(conditionalConfiguration).toBeVisible()
+
+      await page.locator('#field-enabledBlocks').fill('blockOne')
+      await expect(page.locator('#conditionalGroup-conditionalConfiguration-row-0')).toBeVisible()
+
+      await saveDocAndAssert(page)
+
+      const id = page.url().split('/').pop()!
+      createdIDs.push(id)
+
+      const { doc } = await client.findByID({ id, slug: 'block-fields' })
+
+      expect(doc.conditionalGroup.conditionalConfiguration).toHaveLength(1)
+      expect(doc.conditionalGroup.conditionalConfiguration[0].blockType).toBe(
+        'conditionalReference',
+      )
+    })
+
+    test('should retain a default inline block type when a top-level condition becomes true', async () => {
+      await page.goto(url.create)
+
+      const testBlocks = page.locator('#field-testBlocks')
+
+      await expect(testBlocks).toBeHidden()
+      await page.locator('label[for=field-showInlineBlocks]').click()
+      await expect(testBlocks).toBeVisible()
+      await expect(testBlocks.locator('.blocks-field__row')).toHaveCount(1)
+
+      await page.locator('#field-enabledBlocks').fill('blockOne')
+      await expect(testBlocks.locator('.blocks-field__row')).toHaveCount(1)
+
+      await saveDocAndAssert(page)
+
+      const id = page.url().split('/').pop()!
+      createdIDs.push(id)
+
+      const { doc } = await client.findByID({ id, slug: 'block-fields' })
+
+      expect(doc.testBlocks).toHaveLength(1)
+      expect(doc.testBlocks[0].blockType).toBe('testBlock')
+    })
+
     test('ensure static filterOptions are respected', async () => {
       await page.goto(url.create)
       const addButton = page.locator(

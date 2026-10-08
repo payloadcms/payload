@@ -4,7 +4,13 @@ import { formatAdminURL } from 'payload/shared'
 import { genUploader } from 'uploadthing/client'
 
 export const UploadthingClientUploadHandler = createClientUploadHandler({
-  handler: async ({ apiRoute, collectionSlug, file, serverHandlerPath, serverURL }) => {
+  handler: async ({
+    apiRoute,
+    collectionSlug,
+    file,
+    serverHandlerPath,
+    serverURL,
+  }): Promise<{ key: string; signedReceipt: string }> => {
     const endpointRoute = formatAdminURL({
       apiRoute,
       path: `${serverHandlerPath}?collectionSlug=${collectionSlug}`,
@@ -19,6 +25,11 @@ export const UploadthingClientUploadHandler = createClientUploadHandler({
       files: [file],
     })
 
-    return { key: res[0]?.key }
+    const uploaded = res[0]
+    if (!uploaded?.serverData?.signedReceipt) {
+      throw new Error('Uploadthing did not return a client upload receipt')
+    }
+
+    return { key: uploaded.key, signedReceipt: uploaded.serverData.signedReceipt }
   },
 })

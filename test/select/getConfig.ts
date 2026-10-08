@@ -30,7 +30,13 @@ export const getConfig: () => Partial<Config> = () => ({
     ForceSelect,
     {
       slug: 'upload',
-      fields: [],
+      fields: [
+        {
+          name: 'link',
+          type: 'relationship',
+          relationTo: 'rels',
+        },
+      ],
       upload: {
         staticDir: path.resolve(dirname, 'media'),
       },
@@ -65,6 +71,34 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
         },
       ],
+    },
+    {
+      slug: 'select-documents',
+      fields: [
+        {
+          name: 'blocks',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'select-relationship-block',
+              fields: [
+                {
+                  name: 'link',
+                  type: 'relationship',
+                  relationTo: 'rels',
+                },
+              ],
+              interfaceName: 'SelectRelationshipBlock',
+            },
+          ],
+        },
+        {
+          name: 'upload',
+          type: 'upload',
+          relationTo: 'upload',
+        },
+      ],
+      versions: false,
     },
     CustomID,
     UsersCollection,

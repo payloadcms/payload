@@ -10,7 +10,7 @@
     .stroke {
       fill: none;
       stroke: currentColor;
-      stroke-width: 0.75;
+      stroke-width: $style-stroke-width-s;
     }
 
     .fill {

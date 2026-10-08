@@ -55,6 +55,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     newPassword: '新的密码',
     passed: '身份验证通过',
     passwordResetSuccessfully: '密码重置成功。',
+    resend: '重新发送',
     resetPassword: '重置密码',
     resetPasswordExpiration: '重置密码的有效期',
     resetPasswordToken: '重置密码令牌',

@@ -1,3 +1,5 @@
+import type { CollectionConfig } from 'payload'
+
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
@@ -13,6 +15,12 @@ import { MediaContainer } from './collections/MediaContainer.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const legacyMediaSlug = 'legacy-media'
+const LegacyMedia: CollectionConfig = {
+  slug: legacyMediaSlug,
+  fields: [],
+  upload: { allowRestrictedFileTypes: true },
+}
 
 dotenv.config({
   path: path.resolve(dirname, '../../plugin-cloud-storage/.env.emulated'),
@@ -24,7 +32,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname, '..'),
     },
   },
-  collections: [Media, MediaWithPrefix, MediaContainer, Users],
+  collections: [Media, MediaWithPrefix, MediaContainer, LegacyMedia, Users],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -40,6 +48,7 @@ export default buildConfigWithDefaults({
         access: ({ req }) => (req.headers.get('x-disallow-access') ? false : true),
       },
       collections: {
+        [legacyMediaSlug]: true,
         [mediaSlug]: true,
         [mediaWithPrefixSlug]: {
           prefix,

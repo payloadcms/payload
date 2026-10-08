@@ -157,7 +157,7 @@ import { traverseFields } from './utilities/traverseFields.js'
  * useful as users wish to extend built-in fields with custom logic
  */
 export { accountLockFields as baseAccountLockFields } from './auth/baseFields/accountLock.js'
-export { apiKeyFields as baseAPIKeyFields } from './auth/baseFields/apiKey.js'
+export { apiKeyFields as baseAPIKeyFields } from './auth/baseFields/apiKey/index.js'
 export { baseAuthFields } from './auth/baseFields/auth.js'
 export { emailFieldConfig as baseEmailField } from './auth/baseFields/email.js'
 export { sessionsFieldConfig as baseSessionsField } from './auth/baseFields/sessions.js'
@@ -745,7 +745,6 @@ export class BasePayload {
                 const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
 
                 if (!shouldAutoRun) {
-                  jobAutorunCron.stop()
                   return
                 }
               }
@@ -1288,6 +1287,8 @@ interface RequestContext {
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
 export { jwtSign } from './auth/jwt.js'
+export { JWT_AUTH_VERSION } from './auth/jwtAuth.js'
+export type { JWTAuthVersion } from './auth/jwtAuth.js'
 export { accessOperation } from './auth/operations/access.js'
 export { forgotPasswordOperation } from './auth/operations/forgotPassword.js'
 export { initOperation } from './auth/operations/init.js'
@@ -1799,6 +1800,7 @@ export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
 
 export type * from './uploads/types.js'
+export { unlinkClientUploadTempFile } from './uploads/unlinkClientUploadTempFile.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
 export { canAccessAdmin } from './utilities/canAccessAdmin.js'

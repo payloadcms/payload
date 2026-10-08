@@ -16,10 +16,10 @@ import {
   saveDocAndAssert,
   switchTab,
 } from '../../../__helpers/e2e/helpers.js'
-import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { navigateToDoc } from '../../../__helpers/e2e/navigateToDoc.js'
-import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { tabsFieldsSlug } from '../../slugs.js'
@@ -28,7 +28,7 @@ const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
 
-const { beforeAll, beforeEach, describe } = test
+const { afterEach, beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
 let client: RESTClient
@@ -213,6 +213,92 @@ describe('Tabs', () => {
 
     await expect(async () => await expect(tab2).toHaveClass(/--active/)).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
+    })
+  })
+
+  describe('stored tab preferences', () => {
+    const rowTabSelector = '.tabs-field__tab-button:has-text("Tab with Row")'
+    const blocksTabSelector = '.tabs-field__tab-button:has-text("Tab with Blocks")'
+    const docPreferenceRegex = new RegExp(
+      `/payload-preferences/collection-${tabsFieldsSlug}-[^/]+$`,
+    )
+
+    let releaseStoredPreferenceRead: () => void = () => {}
+
+    afterEach(async () => {
+      releaseStoredPreferenceRead()
+      await page.unrouteAll({ behavior: 'ignoreErrors' })
+    })
+
+    /**
+     * Holds the document's stored-preference read open until released, which is
+     * what a cold CI machine does on its own. Opens the window in which a tab
+     * can be selected before the stored preference has been read back.
+     */
+    const holdStoredPreferenceRead = async () => {
+      const storedPreferenceRead = new Promise<void>((resolve) => {
+        releaseStoredPreferenceRead = resolve
+      })
+
+      await page.route(
+        (requestURL) => docPreferenceRegex.test(requestURL.pathname),
+        async (route) => {
+          if (route.request().method() === 'GET') {
+            await storedPreferenceRead
+          }
+
+          await route.continue()
+        },
+      )
+    }
+
+    const releaseAndSettleStoredPreferenceRead = async () => {
+      const storedPreferenceRead = page.waitForResponse((response) =>
+        docPreferenceRegex.test(new URL(response.url()).pathname),
+      )
+
+      releaseStoredPreferenceRead()
+      await storedPreferenceRead
+      await wait(500)
+    }
+
+    test('should keep the selected tab when no preference is stored yet', async () => {
+      await holdStoredPreferenceRead()
+      await navigateToDoc(page, url)
+
+      const rowTab = page.locator(rowTabSelector)
+
+      await rowTab.click()
+      await expect(rowTab).toHaveClass(/--active/)
+
+      await releaseAndSettleStoredPreferenceRead()
+
+      await expect(rowTab).toHaveClass(/--active/)
+    })
+
+    test('should keep the selected tab over a different stored preference', async () => {
+      await navigateToDoc(page, url)
+
+      const storedPreferenceWrite = page.waitForResponse(
+        (response) =>
+          docPreferenceRegex.test(new URL(response.url()).pathname) &&
+          response.request().method() === 'POST',
+      )
+
+      await switchTab(page, blocksTabSelector)
+      await storedPreferenceWrite
+
+      await holdStoredPreferenceRead()
+      await page.reload()
+
+      const rowTab = page.locator(rowTabSelector)
+
+      await rowTab.click()
+      await expect(rowTab).toHaveClass(/--active/)
+
+      await releaseAndSettleStoredPreferenceRead()
+
+      await expect(rowTab).toHaveClass(/--active/)
     })
   })
 
