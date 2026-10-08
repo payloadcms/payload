@@ -2,6 +2,7 @@ import type { TypedLocale } from '../index.js'
 import type { ValidationLocaleSelector } from './resolveValidationLocales.js'
 
 import { APIError } from '../errors/index.js'
+import { httpStatus } from './httpStatus.js'
 
 /**
  * Parses a REST `locale` query value. Repeated query parameters are represented as an array and

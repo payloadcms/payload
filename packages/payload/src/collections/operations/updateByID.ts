@@ -19,7 +19,6 @@ import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { type CollectionSlug, deepCopyObjectSimple, type FindOptions } from '../../index.js'
-import { runLocalFileUpdate } from '../../uploads/fileVersioning/archive.js'
 import { runCloudFileUpdate } from '../../uploads/fileVersioning/cloudStorage.js'
 import {
   abortFileOperationScope,
@@ -339,6 +338,7 @@ export const updateByIDOperation = async <
       publishAllLocales,
       req,
       select: select!,
+      shouldManageLocalFiles: true,
       showHiddenFields: showHiddenFields!,
       unpublishAllLocales,
     }
@@ -367,15 +367,7 @@ export const updateByIDOperation = async <
           req,
           write,
         })
-      : await runLocalFileUpdate({
-          id,
-          collection: collectionConfig,
-          current: docWithLocales,
-          files: filesToUpload,
-          next: newFileData as Record<string, unknown>,
-          req,
-          write,
-        })
+      : await write()
 
     // /////////////////////////////////////
     // Add collection property for auth collections

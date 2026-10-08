@@ -22,7 +22,6 @@ import { validateSortQuery } from '../../database/queryValidation/validateSortQu
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
 import { type CollectionSlug, type FindOptions } from '../../index.js'
-import { runLocalFileUpdate } from '../../uploads/fileVersioning/archive.js'
 import { runCloudFileUpdate } from '../../uploads/fileVersioning/cloudStorage.js'
 import {
   abortFileOperationScope,
@@ -430,6 +429,7 @@ export const updateOperation = async <
           publishAllLocales,
           req: documentReq,
           select: select!,
+          shouldManageLocalFiles: true,
           showHiddenFields: showHiddenFields!,
           unpublishAllLocales,
         } as const
@@ -459,15 +459,7 @@ export const updateOperation = async <
               req: documentReq,
               write,
             })
-          : await runLocalFileUpdate({
-              id,
-              collection: collectionConfig,
-              current: docWithLocales,
-              files: generatedFileData.files,
-              next: generatedFileData.data as Record<string, unknown>,
-              req: documentReq,
-              write,
-            })
+          : await write()
 
         // /////////////////////////////////////
         // Add collection property for auth collections

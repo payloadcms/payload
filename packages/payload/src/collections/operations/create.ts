@@ -20,7 +20,7 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
 import { getDuplicateDocumentData } from '../../duplicateDocument/index.js'
-import { APIError } from '../../errors/index.js'
+import { APIError, ValidationError } from '../../errors/index.js'
 import { fillEmptyLocalizedSlugs } from '../../fields/baseFields/slug/fillEmptyLocalizedSlugs.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
@@ -68,6 +68,7 @@ import {
   normalizeAllLocalesPublicationStatus,
   reconcileAllLocalesPublicationStatus,
 } from '../../versions/allLocalesPublicationStatus.js'
+import { validateLocalWithLocaleKeyedData } from './local/validate.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
@@ -215,7 +216,6 @@ export const createOperation = async <
     if (requestedAllLocalesPublicationStatus && !allLocalesPublicationStatus) {
       publishAllLocales = false
     }
-
     const isSavingDraft = Boolean(draft && hasDraftsEnabled(collectionConfig) && !publishAllLocales)
 
     if (isSavingDraft) {
@@ -475,6 +475,36 @@ export const createOperation = async <
         overrideAccess,
         req,
       })
+    }
+
+    if (
+      config.localization &&
+      hasDraftsEnabled(collectionConfig) &&
+      publishAllLocales &&
+      (!hasLocalizeStatusEnabled(collectionConfig) || hasAuthorizedPublicationStatus)
+    ) {
+      const validationResult = await validateLocalWithLocaleKeyedData({
+        operation: 'create',
+        options: {
+          collection: collectionConfig.slug,
+          data: dataWithLocales,
+          locale: 'all',
+          overrideAccess,
+          req,
+        },
+        payload,
+      })
+
+      if (!validationResult.valid) {
+        throw new ValidationError(
+          {
+            collection: collectionConfig.slug,
+            errors: validationResult.errors,
+            req,
+          },
+          req.t,
+        )
+      }
     }
 
     // /////////////////////////////////////

@@ -3,6 +3,7 @@ import type { PayloadHandler } from '../../config/types.js'
 import { APIError } from '../../errors/index.js'
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { renameFileOperation } from '../operations/renameFile.js'
 
 export const renameFileHandler: PayloadHandler = async (req) => {

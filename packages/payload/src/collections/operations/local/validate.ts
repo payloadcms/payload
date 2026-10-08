@@ -10,6 +10,7 @@ import type {
 import type { PayloadRequest } from '../../../types/index.js'
 import type { ValidationResult } from '../../../types/validation.js'
 import type { ValidationLocaleSelector } from '../../../utilities/resolveValidationLocales.js'
+import type { ValidationSourceData } from '../../../utilities/runValidationLifecycle.js'
 import type {
   DataFromCollectionSlug,
   DraftFlagFromCollectionSlug,
@@ -17,6 +18,7 @@ import type {
 } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
+import { httpStatus } from '../../../utilities/httpStatus.js'
 import { runLocaleScopedValidation } from '../../../utilities/runLocaleScopedValidation.js'
 import { validateOperation } from '../validate.js'
 
@@ -75,6 +77,53 @@ export async function validateLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: ValidateCollectionOptions<TSlug>,
 ): Promise<ValidationResult> {
+  return validateLocalInternal({ options, payload })
+}
+
+export async function validateLocalWithLocaleKeyedData<TSlug extends CollectionSlug>({
+  operation,
+  options,
+  payload,
+  sourceData,
+  trash,
+}: {
+  operation: 'create' | 'update'
+  options: ValidateCollectionOptions<TSlug>
+  payload: Payload
+  sourceData?: ValidationSourceData
+  trash?: boolean
+}): Promise<ValidationResult> {
+  return validateLocalInternal({
+    dataIsLocaleKeyed: true,
+    operation,
+    options,
+    payload,
+    skipAccessControl: true,
+    skipMutationHooks: true,
+    sourceData,
+    trash,
+  })
+}
+
+async function validateLocalInternal<TSlug extends CollectionSlug>({
+  dataIsLocaleKeyed = false,
+  operation = 'validate',
+  options,
+  payload,
+  skipAccessControl = false,
+  skipMutationHooks = false,
+  sourceData,
+  trash,
+}: {
+  dataIsLocaleKeyed?: boolean
+  operation?: 'create' | 'update' | 'validate'
+  options: ValidateCollectionOptions<TSlug>
+  payload: Payload
+  skipAccessControl?: boolean
+  skipMutationHooks?: boolean
+  sourceData?: ValidationSourceData
+  trash?: boolean
+}): Promise<ValidationResult> {
   const {
     id,
     collection: collectionSlug,
@@ -99,8 +148,10 @@ export async function validateLocal<TSlug extends CollectionSlug>(
   return runLocaleScopedValidation({
     context: options.context,
     data,
+    dataIsLocaleKeyed,
     fields: collection.config.fields,
     locale,
+    operation,
     payload,
     req: options.req,
     runPass: ({ data: validationData, onValidationData, req }) =>
@@ -112,6 +163,11 @@ export async function validateLocal<TSlug extends CollectionSlug>(
         onValidationData,
         overrideAccess,
         req,
+        skipAccessControl,
+        skipMutationHooks,
+        sourceData,
+        trash,
+        validationOperation: operation,
       }),
     user: options.user,
   })

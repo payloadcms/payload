@@ -2097,6 +2097,11 @@ export type {
 export type * from './uploads/types.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
+export {
+  batchProcessing,
+  type BatchProcessingOptions,
+  type BatchProcessorResult,
+} from './utilities/batchProcessing.js'
 export { canAccessAdmin } from './utilities/canAccessAdmin.js'
 export { commitTransaction } from './utilities/commitTransaction.js'
 export {

@@ -9,7 +9,7 @@ import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
 import {
@@ -31,7 +31,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const originalPdfText = fs.readFileSync(path.resolve(dirname, '../uploads/test-pdf.pdf'), 'utf-8')
 
-let restClient: NextRESTClient
+let restClient: RESTClient
 let payload: Payload
 
 const uploadFixture = async ({
@@ -387,7 +387,7 @@ test.suite('Upload transformers', { config: './config.ts' }, () => {
     })
 
     // A repeated `?width=` query parameter is covered at the unit level
-    // (parseDynamicResize.spec.ts) — NextRESTClient's
+    // (parseDynamicResize.spec.ts) — RESTClient's
     // qs-based query parsing collapses duplicate keys to the last value before
     // the request is ever sent, so it cannot be exercised through this client.
     test.for([

@@ -2,6 +2,7 @@ import type { TypedLocale } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { APIError } from '../errors/index.js'
+import { httpStatus } from './httpStatus.js'
 
 // TypedLocale is narrowed by generated types, while its untyped fallback intentionally includes string.
 /**

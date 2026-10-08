@@ -5,6 +5,8 @@ export type EntityInputSchema = {
   additionalProperties?: boolean | EntityInputSchema
   anyOf?: Array<boolean | EntityInputSchema>
   const?: unknown
+  /** Hidden from the schema shown to agents unless required. Validation still accepts it. */
+  deprecated?: boolean
   description?: string
   enum?: unknown[]
   items?: EntityInputSchema | EntityInputSchema[]

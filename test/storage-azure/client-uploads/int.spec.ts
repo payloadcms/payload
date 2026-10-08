@@ -10,7 +10,7 @@ import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 import { expect, vi } from 'vitest'
 
-import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
+import type { RESTClient } from '../../__helpers/shared/RESTClient.js'
 
 import { getStoredUploadKeys } from '../../__helpers/int/storedUploadKeys.js'
 import { test } from '../../__helpers/int/vitest.js'
@@ -48,7 +48,7 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
     file: Buffer
     filename: string
     mimeType: string
-    restClient: NextRESTClient
+    restClient: RESTClient
   }) => {
     const instructions = (await restClient
       .POST('/upload-instructions', {
