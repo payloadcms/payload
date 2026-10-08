@@ -59,7 +59,6 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     throw new APIError('Missing ID of version.', httpStatus.BAD_REQUEST)
   }
 
-  // Entities without versions have no versions table/collection in the database adapter.
   if (!hasVersionsEnabled(collectionConfig)) {
     if (disableErrors) {
       return null!

@@ -70,8 +70,6 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
   const req = args.req!
   const { fallbackLocale, locale, payload } = req
 
-  // Entities without versions have no versions table/collection in the database adapter,
-  // so querying it would crash (e.g. a TypeError in the drizzle adapter → HTTP 500).
   if (!hasVersionsEnabled(collectionConfig)) {
     throw new NotFound(req.t)
   }
