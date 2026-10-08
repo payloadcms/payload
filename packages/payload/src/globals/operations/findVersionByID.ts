@@ -66,6 +66,15 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     throw new NotFound(req.t)
   }
 
+  // Globals without versions have no versions table/collection in the database adapter.
+  if (!globalConfig.versions) {
+    if (disableErrors) {
+      return null!
+    }
+
+    throw new NotFound(req.t)
+  }
+
   const hasWhereAccess = typeof accessResults === 'object'
 
   const versionFields = buildVersionGlobalFields(payload.config, globalConfig, true)

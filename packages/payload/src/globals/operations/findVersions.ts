@@ -9,6 +9,7 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
+import { NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
@@ -57,6 +58,12 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
   const accessResults = !overrideAccess
     ? await executeAccess({ slug: globalConfig.slug, req }, globalConfig.access.readVersions)
     : true
+
+  // Globals without versions have no versions table/collection in the database adapter,
+  // so querying it would crash (e.g. a TypeError in the drizzle adapter → HTTP 500).
+  if (!globalConfig.versions) {
+    throw new NotFound(req.t)
+  }
 
   await validateQueryPaths({
     globalConfig,

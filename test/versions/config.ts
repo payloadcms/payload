@@ -44,6 +44,7 @@ import LocalizedGlobal from './globals/LocalizedGlobal.js'
 import { MaxVersions } from './globals/MaxVersions.js'
 import RestoreAccessGlobal, { RestoreAccessNoVersionsGlobal } from './globals/RestoreAccess.js'
 import SimpleDraftGlobal from './globals/SimpleDraft.js'
+import { VersionsDisabledGlobal } from './globals/VersionsDisabled.js'
 import { seed } from './seed.js'
 import { BASE_PATH } from './shared.js'
 import { draftWithUploadCloudStorageCollectionSlug } from './slugs.js'
@@ -99,6 +100,7 @@ export default buildConfigWithDefaults({
       SimpleDraftGlobal,
       RestoreAccessGlobal,
       RestoreAccessNoVersionsGlobal,
+      VersionsDisabledGlobal,
     ],
     indexSortableFields: true,
     localization: {
