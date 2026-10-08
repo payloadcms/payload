@@ -68,6 +68,12 @@
     width: 100%;
   }
 
+  .collection-edit .collection-edit__main > .document-fields {
+    width: clamp(calc(var(--spacer-6) * 24), 80%, calc(var(--spacer-6) * 32));
+    max-width: 100%;
+    margin-inline: auto;
+  }
+
   .collection-edit__main--popup-open {
     width: 100%;
   }
