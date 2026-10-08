@@ -1,5 +1,4 @@
-import type { PayloadRequest, PopulateType, Where } from '../../types/index.js'
-import type { TypeWithVersion } from '../../versions/types.js'
+import type { JsonObject, PayloadRequest, PopulateType, Where } from '../../types/index.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
@@ -34,7 +33,7 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any>(
+export const restoreVersionOperation = async <T extends JsonObject = any>(
   args: Arguments,
 ): Promise<T> => {
   assertNoValidationWrite(args.req)
@@ -185,27 +184,17 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
       result[branchField] = writeBranch ?? MAIN_BRANCH
     }
 
-    if (global || writeBranch) {
+    if (global || writeBranch || draft) {
       // Ensure updatedAt date is always updated
       result.updatedAt = new Date().toISOString()
-      result = await payload.db.updateGlobal({
-        slug: globalConfig.slug,
-        data: result,
-        req,
-      })
-      markTransactionWrite({ req })
-
-      result = await saveVersion({
-        autosave: false,
-        docWithLocales: result,
-        draft,
-        global: globalConfig,
-        operation: 'restoreVersion',
-        payload,
-        req,
-        returning: true,
-        shouldReturnVersionDocument: true,
-      })
+      if (!draft) {
+        result = await payload.db.updateGlobal({
+          slug: globalConfig.slug,
+          data: result,
+          req,
+        })
+        markTransactionWrite({ req })
+      }
     } else {
       result = await payload.db.createGlobal({
         slug: globalConfig.slug,
@@ -220,6 +209,21 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
         globalSlug: globalConfig.slug,
         req,
       })
+    }
+
+    result = await saveVersion({
+      autosave: false,
+      docWithLocales: result,
+      draft,
+      global: globalConfig,
+      operation: 'restoreVersion',
+      payload,
+      req,
+    })
+
+    result = {
+      ...result,
+      globalType: globalConfig.slug,
     }
 
     // /////////////////////////////////////

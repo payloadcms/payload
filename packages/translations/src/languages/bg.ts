@@ -375,6 +375,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     and: 'И',
     anotherUser: 'Друг потребител',
     anotherUserTakenOver: 'Друг потребител пое редактирането на този документ.',
+    apiResponse: 'API отговор',
     applyChanges: 'Приложи промените',
     ascending: 'Възходящ',
     auto: 'Автоматично',
@@ -447,6 +448,13 @@ export const bgTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Този документ беше наскоро обновен от друг потребител. Вашият изглед е неактуален.',
     documents: 'Документи',
+    dragCancelled: 'Плъзгането на {{label}} е отменено.',
+    dragDropped: '{{label}} е пуснат. Позиция {{position}} от {{count}}.',
+    dragInstructions:
+      'Натиснете Space или Enter, за да вдигнете ред. Използвайте стрелките, за да го преместите. С VoiceOver изключете Quick Nav и използвайте Command + стрелките. Натиснете Space или Enter, за да пуснете, или Escape, за да отмените.',
+    dragMoved: '{{label}}: {{direction}}. Позиция {{position}} от {{count}}.',
+    dragPickedUp: '{{label}} е вдигнат. Позиция {{position}} от {{count}}.',
+    dragToMove: 'Плъзнете за преместване',
     dragToReorder: 'Плъзнете, за да пренаредите',
     duplicate: 'Дупликирай',
     duplicateWithoutSaving: 'Дупликирай без да запазваш промените',
@@ -561,6 +569,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Преиндексиране на всички {{collections}}.',
     reloadDocument: 'Презареди документ',
     remove: 'Премахни',
+    removeFilter: 'Премахване на филтъра',
     rename: 'Преименувайте',
     replaceRow: 'Заменете ред',
     requiredFields: 'Полетата, отбелязани с *, са задължителни.',
@@ -653,6 +662,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     yes: 'Да',
   },
   hierarchy: {
+    folderLocation: 'Местоположение на папката',
     goTo: 'Отидете на "{{name}}"',
     itemsMovedTo: '{{title}} беше преместен в {{destination}}',
     itemsMovedToRoot: '{{title}} преместен към корена',

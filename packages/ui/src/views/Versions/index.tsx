@@ -53,7 +53,7 @@ export async function VersionsView(props: DocumentViewServerProps) {
     page: page ? parseInt(page.toString(), 10) : undefined,
     parentID: id,
     req,
-    sort: sort as string,
+    sort,
     user,
   })
 
@@ -147,7 +147,7 @@ export async function VersionsView(props: DocumentViewServerProps) {
             orderableFieldName={collectionConfig?.orderable === true ? '_order' : undefined}
             query={{
               limit: limitToUse,
-              sort: sort as string,
+              sort,
             }}
           >
             <VersionsViewClient

@@ -140,7 +140,7 @@ export async function updateGlobalLocal<
   for (let attempt = 0; attempt < MAX_TRANSIENT_TRANSACTION_ATTEMPTS; attempt++) {
     try {
       return await updateOperation<TSlug, TSelect>({
-        slug: globalSlug as string,
+        slug: globalSlug,
         // Each attempt starts from the caller's input because field and global hooks may mutate data.
         data: deepCopyObjectSimple(data),
         depth,

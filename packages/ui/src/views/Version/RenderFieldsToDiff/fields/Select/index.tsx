@@ -64,7 +64,6 @@ const getTranslatedOptions = (options: Option | Option[], i18n: I18nClient): str
 }
 
 export const Select: React.FC<SelectFieldDiffClientProps> = ({
-  diffMethod,
   field,
   locale,
   nestingLevel,

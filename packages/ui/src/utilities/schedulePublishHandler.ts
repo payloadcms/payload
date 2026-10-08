@@ -39,8 +39,8 @@ export const getUpcomingScheduledPublishHandler: ServerFunction<
   const entityConfig = collectionConfig || globalConfig
   const hasValidTarget = Boolean(
     entityConfig &&
-      hasScheduledPublishEnabled(entityConfig) &&
-      ((collectionConfig && id !== undefined && !globalSlug) || (globalConfig && !collectionSlug)),
+    hasScheduledPublishEnabled(entityConfig) &&
+    ((collectionConfig && id !== undefined && !globalSlug) || (globalConfig && !collectionSlug)),
   )
 
   if (!hasValidTarget) {

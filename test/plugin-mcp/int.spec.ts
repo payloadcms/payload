@@ -264,7 +264,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         jsonrpc: '2.0',
       })
     })
-    /* eslint-disable vitest/no-standalone-expect -- testModern is a custom Vitest test registrar. */
+    /* eslint-disable @vitest/no-standalone-expect -- testModern is a custom Vitest test registrar. */
     testModern(
       'should reject subscription streams without opening SSE',
       async ({ mcp, getApiKey }) => {
@@ -284,7 +284,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         ).toBe(false)
       },
     )
-    /* eslint-enable vitest/no-standalone-expect */
+    /* eslint-enable @vitest/no-standalone-expect */
     test.describe('API Keyed Access', () => {
       it('should not allow GET /api/mcp', async ({ getApiKey, restClient }) => {
         const apiKey = await getApiKey()

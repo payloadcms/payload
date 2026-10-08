@@ -20,6 +20,10 @@
 
   .doc-tab--active {
     color: var(--color-text);
+
+    html[data-enhanced-contrast] & {
+      border-color: var(--color-border-control);
+    }
   }
 
   .doc-tab--active :is(.pill-version-count, .pill-branch-changes) {

@@ -171,11 +171,26 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
     childrenCache.current.clear()
   }
 
-  useMemo(() => {
-    if (!initialData || initialData.docs.length === 0) {
-      return
-    }
+  // Fill the cache during render, so children find initialData on their first render. Compares the
+  // inputs like useMemo would, since a useMemo used only for its side effect isn't guaranteed to run.
+  const initialDataInputs = [
+    initialData,
+    filterByCollections,
+    parentFieldName,
+    collectionSlug,
+    treeLimit,
+    baseFilterKey,
+  ]
+  const prevInitialDataInputsRef = useRef<typeof initialDataInputs>(null)
+  const haveInitialDataInputsChanged =
+    !prevInitialDataInputsRef.current ||
+    initialDataInputs.some((input, i) => !Object.is(input, prevInitialDataInputsRef.current[i]))
 
+  if (haveInitialDataInputsChanged) {
+    prevInitialDataInputsRef.current = initialDataInputs
+  }
+
+  if (haveInitialDataInputsChanged && initialData && initialData.docs.length > 0) {
     const docsByParent = new Map<string, TreeDocument[]>()
     for (const doc of initialData.docs) {
       const parentId = doc[parentFieldName] || 'null'
@@ -213,15 +228,7 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
         })
       }
     }
-  }, [
-    baseFilterKey,
-    branch,
-    collectionSlug,
-    filterByCollections,
-    initialData,
-    parentFieldName,
-    treeLimit,
-  ])
+  }
 
   const treeRef = useRef<HTMLDivElement>(null)
   const allOptionRef = useRef<HTMLDivElement>(null)

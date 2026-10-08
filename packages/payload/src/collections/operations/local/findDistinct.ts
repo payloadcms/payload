@@ -148,5 +148,5 @@ export async function findDistinct<
     sort,
     trash,
     where,
-  }) as Promise<PaginatedDistinctDocs<Record<TField, DataFromCollectionSlug<TSlug>[TField]>>>
+  })
 }

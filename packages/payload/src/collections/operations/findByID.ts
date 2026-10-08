@@ -198,7 +198,7 @@ export const findByIDOperation = async <
       context: req.context,
       payload: req.payload,
       transactionID: req.transactionID,
-    } as PayloadRequest,
+    },
     select: dbSelect,
     where: fullWhere,
   }

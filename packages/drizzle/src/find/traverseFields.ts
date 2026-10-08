@@ -428,6 +428,7 @@ export const traverseFields = ({
             limit,
             locale,
             page,
+            pageSize: limitArg,
             path,
             req,
             shouldCount,

@@ -234,7 +234,7 @@ function getRequestDefaults({
             query: qs.parse(url.search, {
               depth: 10,
               ignoreQueryPrefix: true,
-            }) as PayloadRequest['query'],
+            }),
           }
         : {}),
       url: requestURL,

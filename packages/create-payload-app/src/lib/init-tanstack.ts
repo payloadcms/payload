@@ -160,7 +160,7 @@ function getRequiredDependencies({
   }
 
   if (appDetails.kind === 'router-only') {
-    dependencies['@tanstack/react-start'] = '^1.168.60'
+    dependencies['@tanstack/react-start'] = '^1.169.1'
   }
 
   return dependencies

@@ -10,7 +10,9 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
+import { NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { hasVersionsEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
@@ -48,6 +50,10 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
   } = args
   const req = args.req!
   const { fallbackLocale, locale, payload } = req
+
+  if (!hasVersionsEnabled(globalConfig)) {
+    throw new NotFound(req.t)
+  }
 
   if (!overrideAccess) {
     await assertBranchReadable({ globalSlug: globalConfig.slug, req })

@@ -65,7 +65,8 @@ export const Restore: React.FC<Props> = ({
     },
   )
 
-  const canRestoreAsDraft = status !== 'draft' && collectionConfig?.versions?.drafts
+  const restoresAsDraftOnly = status === 'draft' && Boolean(collectionConfig?.versions?.drafts)
+  const canRestoreAsDraft = status !== 'draft' && Boolean(collectionConfig?.versions?.drafts)
 
   const handleRestore = useCallback(async () => {
     const queryString = qs.stringify(
@@ -133,13 +134,21 @@ export const Restore: React.FC<Props> = ({
           className={[canRestoreAsDraft && `${baseClass}__restore-as-draft-button`]
             .filter(Boolean)
             .join(' ')}
-          onClick={() => toggleModal(modalSlug)}
+          onClick={() => {
+            setDraft(restoresAsDraftOnly)
+            toggleModal(modalSlug)
+          }}
           size="medium"
           SubMenuPopupContent={
             canRestoreAsDraft
               ? () => (
                   <PopupList.ButtonGroup>
-                    <PopupList.Button onClick={() => [setDraft(true), toggleModal(modalSlug)]}>
+                    <PopupList.Button
+                      onClick={() => {
+                        setDraft(true)
+                        toggleModal(modalSlug)
+                      }}
+                    >
                       {t('version:restoreAsDraft')}
                     </PopupList.Button>
                   </PopupList.ButtonGroup>
@@ -147,7 +156,7 @@ export const Restore: React.FC<Props> = ({
               : null
           }
         >
-          {t('version:restoreThisVersion')}
+          {restoresAsDraftOnly ? t('version:restoreAsDraft') : t('version:restoreThisVersion')}
         </Button>
       </div>
       <ConfirmationModal
@@ -155,6 +164,7 @@ export const Restore: React.FC<Props> = ({
         confirmingLabel={t('version:restoring')}
         heading={t('version:confirmVersionRestoration')}
         modalSlug={modalSlug}
+        onCancel={() => setDraft(restoresAsDraftOnly)}
         onConfirm={handleRestore}
       />
     </Fragment>

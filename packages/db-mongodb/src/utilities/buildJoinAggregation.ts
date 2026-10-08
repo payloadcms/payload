@@ -212,10 +212,14 @@ export const buildJoinAggregation = async ({
                 [sortProperty]: sortDirection,
               },
             },
-            {
-              // Unfortunately, we can't use $skip here because we can lose data, instead we do $slice then
-              $limit: page ? page * limitJoin : limitJoin,
-            },
+            ...(limitJoin > 0
+              ? [
+                  {
+                    // Unfortunately, we can't use $skip here because we can lose data, instead we do $slice then
+                    $limit: page ? page * limitJoin : limitJoin,
+                  },
+                ]
+              : []),
             {
               $project: {
                 value: '$_id',
@@ -296,13 +300,15 @@ export const buildJoinAggregation = async ({
       },
     })
 
-    aggregate.push({
-      $set: {
-        [`${as}.docs`]: {
-          $slice: [`$${as}.docs`, ...sliceValue],
+    if (limitJoin > 0) {
+      aggregate.push({
+        $set: {
+          [`${as}.docs`]: {
+            $slice: [`$${as}.docs`, ...sliceValue],
+          },
         },
-      },
-    })
+      })
+    }
   }
 
   for (const slug of Object.keys(joinConfig)) {

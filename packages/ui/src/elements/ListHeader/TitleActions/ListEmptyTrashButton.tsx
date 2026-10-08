@@ -136,7 +136,7 @@ export function ListEmptyTrashButton({
         })
       }
 
-      router.replace(
+      void router.replace(
         qs.stringify(
           {
             ...Object.fromEntries(searchParams.entries()),

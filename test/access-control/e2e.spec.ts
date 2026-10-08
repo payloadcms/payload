@@ -536,8 +536,8 @@ describe('Access Control', () => {
       await expect(documentDrawer).toBeVisible()
       await expect(documentDrawer.locator('#action-save')).toBeVisible()
 
-      await documentDrawer.locator('#field-name').fill('name')
-      await expect(documentDrawer.locator('#field-name')).toHaveValue('name')
+      await documentDrawer.locator('input[name="name"]').fill('name')
+      await expect(documentDrawer.locator('input[name="name"]')).toHaveValue('name')
 
       await saveDocAndAssert(
         page,
@@ -545,7 +545,7 @@ describe('Access Control', () => {
       )
 
       await expect(documentDrawer.locator('#action-save')).toBeHidden()
-      await expect(documentDrawer.locator('#field-name')).toBeDisabled()
+      await expect(documentDrawer.locator('input[name="name"]')).toBeDisabled()
     })
   })
 
@@ -594,20 +594,20 @@ describe('Access Control', () => {
         await addDocButton.click()
         const documentDrawer = page.locator('[id^=doc-drawer_user-restricted-collection_1_]')
         await expect(documentDrawer).toBeVisible()
-        await documentDrawer.locator('#field-name').fill('anonymous@email.com')
+        await documentDrawer.locator('input[name="name"]').fill('anonymous@email.com')
         await wait(500)
         await documentDrawer.locator('#action-save').click()
         await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-        await expect(documentDrawer.locator('#field-name')).toBeDisabled()
+        await expect(documentDrawer.locator('input[name="name"]')).toBeDisabled()
         await documentDrawer.locator('button.doc-drawer__header-close').click()
         await expect(documentDrawer).toBeHidden()
         await addDocButton.click()
         const documentDrawer2 = page.locator('[id^=doc-drawer_user-restricted-collection_1_]')
         await expect(documentDrawer2).toBeVisible()
-        await documentDrawer2.locator('#field-name').fill('dev@payloadcms.com')
+        await documentDrawer2.locator('input[name="name"]').fill('dev@payloadcms.com')
         await documentDrawer2.locator('#action-save').click()
         await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-        await expect(documentDrawer2.locator('#field-name')).toBeEnabled()
+        await expect(documentDrawer2.locator('input[name="name"]')).toBeEnabled()
       })
     })
 

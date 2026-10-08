@@ -143,7 +143,7 @@ export const createClientCollectionConfig = ({
           break
         }
 
-        clientCollection.admin = {} as ClientCollectionConfig['admin']
+        clientCollection.admin = {}
 
         for (const adminKey in collection.admin) {
           if (serverOnlyCollectionAdminProperties.includes(adminKey as any)) {
@@ -267,7 +267,7 @@ export const createClientCollectionConfig = ({
 
         // Strip slugify function as it can't cross server-client boundary
         const { slugify: _slugify, ...clientHierarchy } = collection.hierarchy
-        clientCollection.hierarchy = clientHierarchy as ClientHierarchyConfig
+        clientCollection.hierarchy = clientHierarchy
 
         break
       }

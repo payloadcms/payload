@@ -279,7 +279,7 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
   }, [branch, collection, searchParams, selectAll, ids, locale, where])
 
   const onSuccess = () => {
-    router.replace(
+    void router.replace(
       qs.stringify(
         {
           ...parseSearchParams(searchParams),

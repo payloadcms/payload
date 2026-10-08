@@ -137,6 +137,8 @@ export function UploadInput(props: UploadInputProps) {
   const code = locale?.code
   const branch = useBranchParam()
   const { i18n, t } = useTranslation()
+  const labelID = React.useId()
+  const a11yID = label ? labelID : undefined
 
   // This will be used by the bulk upload to allow you to select only collections you have create permissions for
   const collectionSlugsWithCreatePermission = useMemo(() => {
@@ -400,6 +402,8 @@ export function UploadInput(props: UploadInputProps) {
         setMaxFiles(maxRows)
       }
 
+      // The drawer resets its success callback on close, so register it again on every open
+      setOnSuccess(onUploadSuccess)
       openModal(drawerSlug)
     },
     [
@@ -414,6 +418,8 @@ export function UploadInput(props: UploadInputProps) {
       setInitialFiles,
       setSelectableCollections,
       setMaxFiles,
+      setOnSuccess,
+      onUploadSuccess,
     ],
   )
 
@@ -695,6 +701,7 @@ export function UploadInput(props: UploadInputProps) {
 
   return (
     <div
+      aria-labelledby={a11yID}
       className={[
         fieldBaseClass,
         baseClass,
@@ -705,14 +712,23 @@ export function UploadInput(props: UploadInputProps) {
         .filter(Boolean)
         .join(' ')}
       id={`field-${path?.replace(/\./g, '__')}`}
+      role={a11yID ? 'group' : undefined}
       style={style}
     >
-      <RenderCustomComponent
-        CustomComponent={Label}
-        Fallback={
-          <FieldLabel label={label} localized={localized} path={path} required={required} />
-        }
-      />
+      <div className={`${baseClass}__label`} id={a11yID}>
+        <RenderCustomComponent
+          CustomComponent={Label}
+          Fallback={
+            <FieldLabel
+              as="span"
+              label={label}
+              localized={localized}
+              path={path}
+              required={required}
+            />
+          }
+        />
+      </div>
       {BeforeInput}
       <div className={`${fieldBaseClass}__wrap`}>
         <RenderCustomComponent
