@@ -9,6 +9,7 @@ import { globalEndpoints } from './endpoints/globals.js'
 import { endpoints } from './endpoints/root.js'
 import {
   collectionSlug,
+  customAPIRoute,
   globalSlug,
   noEndpointsCollectionSlug,
   noEndpointsGlobalSlug,
@@ -74,6 +75,9 @@ export default buildConfigWithDefaults({
         versions: false,
       },
     ],
+    routes: {
+      api: customAPIRoute,
+    },
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },

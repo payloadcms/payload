@@ -61,6 +61,8 @@ npx @sentry/wizard@latest -i nextjs
 
 Or the [Manual Setup](https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/)
 
+If you're running the admin panel on TanStack Start instead of Next.js, follow Sentry's [Vite / React setup guide](https://docs.sentry.io/platforms/javascript/guides/react/) before configuring the Payload `sentryPlugin`. The Payload plugin configuration itself is identical regardless of framework.
+
 ## Basic Usage
 
 In the `plugins` array of your [Payload Config](https://payloadcms.com/docs/configuration/overview), call the plugin and pass in your Sentry DSN as an option.

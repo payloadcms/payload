@@ -349,8 +349,7 @@ export interface BaseBlocksToJsonEntityToMigrate {
   originalData: Record<string, any>
 }
 
-export interface CollectionOrVersionBlocksToJsonEntityToMigrate
-  extends BaseBlocksToJsonEntityToMigrate {
+export interface CollectionOrVersionBlocksToJsonEntityToMigrate extends BaseBlocksToJsonEntityToMigrate {
   id: number | string
   slug: string
   type: 'collection' | 'collectionVersion' | 'globalVersion'

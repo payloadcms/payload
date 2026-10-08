@@ -37,6 +37,8 @@ export const disablePublishGlobalSlug = 'disable-publish-global'
 export const textCollectionSlug = 'text'
 export const usersCollectionSlug = 'users'
 
+export const versionsDisabledCollectionSlug = 'versions-disabled-collection'
+
 export const collectionSlugs = [
   autosaveCollectionSlug,
   autosaveWithMultiSelectCollectionSlug,
@@ -66,6 +68,8 @@ export const draftWithMaxGlobalSlug = 'draft-with-max-global'
 export const restoreAccessGlobalSlug = 'restore-access-global'
 
 export const restoreAccessNoVersionsGlobalSlug = 'restore-access-no-versions-global'
+
+export const versionsDisabledGlobalSlug = 'versions-disabled-global'
 
 export const restoreAccessCollectionSlug = 'restore-access'
 

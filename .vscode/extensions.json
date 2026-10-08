@@ -1,6 +1,6 @@
 {
   "recommendations": [
-    "esbenp.prettier-vscode",
+    "oxc.oxc-vscode",
     "dbaeumer.vscode-eslint",
     "stylelint.vscode-stylelint",
     "TypeScriptTeam.native-preview",

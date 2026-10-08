@@ -30,10 +30,6 @@ export type VersionField = {
 
 export type FieldDiffClientProps<TClientField extends ClientFieldWithOptionalType = ClientField> = {
   baseVersionField: BaseVersionField
-  /**
-   * @deprecated remove in 4.0. react-diff-viewer-continued is no longer a dependency
-   */
-  diffMethod: any
   field: TClientField
   /**
    * Permissions at this level of the field. If this field is unnamed, this will be `SanitizedFieldsPermissions` - if it is named, it will be `SanitizedFieldPermissions`

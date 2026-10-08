@@ -11,6 +11,7 @@ import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
+import { hasVersionsEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
@@ -43,6 +44,14 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     select: incomingSelect,
     showHiddenFields,
   } = args
+
+  if (!hasVersionsEnabled(globalConfig)) {
+    if (disableErrors) {
+      return null!
+    }
+
+    throw new NotFound(req.t)
+  }
 
   if (!overrideAccess) {
     await assertBranchReadable({ globalSlug: globalConfig.slug, req })
