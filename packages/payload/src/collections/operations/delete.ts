@@ -235,6 +235,8 @@ export const deleteOperation = async <
         config.branching?.enabled &&
           config.branching.branchableCollections.has(collectionConfig.slug),
       ) && branch !== MAIN_BRANCH
+    const hasBranchSharedTransaction = isDeletingFromBranch && hasSharedTransaction
+
     const pushError = (id: number | string, error: unknown, message?: string) => {
       errors.push({
         id,
@@ -453,7 +455,7 @@ export const deleteOperation = async <
               : entry,
           )
         }
-      } else if (hasSharedTransaction) {
+      } else if (hasBranchSharedTransaction) {
         for (const entry of initiallyChecked) {
           try {
             await runBeforeDeleteHooks({ doc: entry.doc })
@@ -533,7 +535,7 @@ export const deleteOperation = async <
 
       const postHookCheckResults: (CheckedDeleteEntry | null)[] = []
 
-      if (hasSharedTransaction) {
+      if (hasBranchSharedTransaction) {
         for (const entry of lockCheckedAfterHooks) {
           const fullDocument = await assertDeleteUnreferenced({ doc: entry.fullDocument })
 
@@ -838,7 +840,7 @@ export const deleteOperation = async <
               clearDeferredCleanupScope({ req, scope: documentCleanupScope })
             }
 
-            if (hasSharedTransaction && hasWriteCapableBeforeDeleteHooks) {
+            if (hasBranchSharedTransaction && hasWriteCapableBeforeDeleteHooks) {
               throw error
             }
 
@@ -1043,7 +1045,7 @@ export const deleteOperation = async <
         })
       }
 
-      if (hasSharedTransaction) {
+      if (hasBranchSharedTransaction) {
         for (const entry of deletable) {
           const resultDocument = isDeletingFromBranch
             ? (requireBranchDeleteOutcome({
