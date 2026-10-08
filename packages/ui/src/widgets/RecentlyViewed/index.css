@@ -8,7 +8,7 @@
     );
   }
 
-  .card.recents-widget {
+  .card.widget-card.recents-widget {
     container-type: inline-size;
     gap: var(--spacer-3);
     height: auto;
