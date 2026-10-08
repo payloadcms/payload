@@ -4,6 +4,8 @@ import type { LexicalEditor } from 'lexical'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { mergeRegister } from '@lexical/utils'
+import { getTranslation } from '@payloadcms/translations'
+import { useTranslation } from '@payloadcms/ui'
 import {
   $getSelection,
   $isRangeSelection,
@@ -26,6 +28,7 @@ import { getDOMRangeRect } from '../../../../../lexical/utils/getDOMRangeRect.js
 import { setFloatingElemPosition } from '../../../../../lexical/utils/setFloatingElemPosition.js'
 import { ToolbarButton } from '../../../shared/ToolbarButton/index.js'
 import { ToolbarDropdown } from '../../../shared/ToolbarDropdown/index.js'
+import { useToolbarKeyboardNavigation } from '../../../shared/useToolbarKeyboardNavigation.js'
 import { useToolbarStates } from '../../../shared/useToolbarStates.js'
 import './index.css'
 
@@ -130,6 +133,12 @@ function InlineToolbar({
   editor: LexicalEditor
 }): React.ReactNode {
   const floatingToolbarRef = useRef<HTMLDivElement | null>(null)
+  const keyboardNavigationOptions = useMemo(() => ({ toolbarRef: floatingToolbarRef }), [])
+  const { fieldProps } = useEditorConfigContext()
+  const { i18n } = useTranslation()
+
+  useToolbarKeyboardNavigation(keyboardNavigationOptions)
+
   const caretRef = useRef<HTMLDivElement | null>(null)
 
   const { editorConfig } = useEditorConfigContext()
@@ -288,7 +297,14 @@ function InlineToolbar({
   }, [editor, $updateTextFormatFloatingToolbar])
 
   return (
-    <div className="inline-toolbar-popup" ref={floatingToolbarRef}>
+    <div
+      aria-label={
+        getTranslation(fieldProps.field.label || fieldProps.path, i18n) || fieldProps.path
+      }
+      className="inline-toolbar-popup"
+      ref={floatingToolbarRef}
+      role="toolbar"
+    >
       <div className="caret" ref={caretRef} />
       {editorConfig?.features &&
         editorConfig.features?.toolbarInline?.groups.map((group, i) => {

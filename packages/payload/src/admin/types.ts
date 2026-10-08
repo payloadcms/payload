@@ -399,7 +399,6 @@ export type {
 
 export type {
   BaseVersionField,
-  DiffMethod,
   FieldDiffClientProps,
   FieldDiffServerProps,
   VersionField,
@@ -644,6 +643,7 @@ export type {
   BeforeListTableClientProps,
   BeforeListTableServerProps,
   BeforeListTableServerPropsOnly,
+  CurrentHierarchyItem,
   HierarchyViewData,
   ListViewClientProps,
   ListViewGroup,
