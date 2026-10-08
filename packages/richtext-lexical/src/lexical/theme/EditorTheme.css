@@ -46,6 +46,10 @@
     position: relative;
   }
 
+  .LexicalEditorTheme__indent {
+    min-width: fit-content;
+  }
+
   .LexicalEditorTheme__quote {
     font-size: var(--spacer-3);
     line-height: 1.5;
