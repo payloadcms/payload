@@ -22,7 +22,7 @@ export async function getAccessResults({
 
   if (userCollectionConfig && payload.config.admin.user === user?.collection) {
     results.canAccessAdmin = userCollectionConfig.access.admin
-      ? await userCollectionConfig.access.admin({ req })
+      ? await userCollectionConfig.access.admin({ slug: userCollectionConfig.slug, req })
       : isLoggedIn
   } else {
     results.canAccessAdmin = false
@@ -31,7 +31,13 @@ export async function getAccessResults({
 
   await Promise.all(
     payload.config.collections.map(async (collection) => {
-      const collectionOperations: AllOperations[] = ['create', 'read', 'update', 'delete']
+      const collectionOperations: AllOperations[] = [
+        'create',
+        'read',
+        'update',
+        'delete',
+        'validate',
+      ]
 
       if (
         collection.auth &&
@@ -59,7 +65,7 @@ export async function getAccessResults({
 
   await Promise.all(
     payload.config.globals.map(async (global) => {
-      const globalOperations: AllOperations[] = ['read', 'update']
+      const globalOperations: AllOperations[] = ['read', 'update', 'validate']
 
       if (global.versions) {
         globalOperations.push('readVersions')

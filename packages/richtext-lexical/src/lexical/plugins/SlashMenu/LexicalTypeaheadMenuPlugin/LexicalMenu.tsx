@@ -365,7 +365,7 @@ export function LexicalMenu({
           close()
           return true
         },
-        COMMAND_PRIORITY_LOW,
+        COMMAND_PRIORITY_NORMAL,
       ),
       editor.registerCommand<KeyboardEvent>(
         KEY_TAB_COMMAND,

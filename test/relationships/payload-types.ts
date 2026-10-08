@@ -77,6 +77,9 @@ export interface Config {
     screenings: Screening;
     movies: Movie;
     directors: Director;
+    'transitive-join-songs': TransitiveJoinSong;
+    'transitive-join-albums': TransitiveJoinAlbum;
+    'transitive-join-artists': TransitiveJoinArtist;
     movieReviews: MovieReview;
     'polymorphic-relationships': PolymorphicRelationship;
     tree: Tree;
@@ -95,6 +98,12 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {
+    'transitive-join-albums': {
+      song: 'transitive-join-songs';
+    };
+    'transitive-join-artists': {
+      album: 'transitive-join-albums';
+    };
     items: {
       relation: 'relations';
     };
@@ -110,6 +119,9 @@ export interface Config {
     screenings: ScreeningsSelect<false> | ScreeningsSelect<true>;
     movies: MoviesSelect<false> | MoviesSelect<true>;
     directors: DirectorsSelect<false> | DirectorsSelect<true>;
+    'transitive-join-songs': TransitiveJoinSongsSelect<false> | TransitiveJoinSongsSelect<true>;
+    'transitive-join-albums': TransitiveJoinAlbumsSelect<false> | TransitiveJoinAlbumsSelect<true>;
+    'transitive-join-artists': TransitiveJoinArtistsSelect<false> | TransitiveJoinArtistsSelect<true>;
     movieReviews: MovieReviewsSelect<false> | MovieReviewsSelect<true>;
     'polymorphic-relationships': PolymorphicRelationshipsSelect<false> | PolymorphicRelationshipsSelect<true>;
     tree: TreeSelect<false> | TreeSelect<true>;
@@ -136,6 +148,8 @@ export interface Config {
   locale: 'en' | 'de';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -178,6 +192,14 @@ export interface Post {
   customIdRelation?: (string | null) | CustomId;
   customIdNumberRelation?: (number | null) | CustomIdNumber;
   filteredRelation?: (string | null) | Relation;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -189,8 +211,50 @@ export interface Relation {
   id: string;
   name?: string | null;
   disableRelation: boolean;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -210,6 +274,14 @@ export interface StrictAccess {
   id: string;
   name?: string | null;
   disableRelation: boolean;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -221,6 +293,14 @@ export interface Chained {
   id: string;
   name?: string | null;
   relation?: (string | null) | Chained;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -231,6 +311,14 @@ export interface Chained {
 export interface CustomId {
   id: string;
   name?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -241,6 +329,14 @@ export interface CustomId {
 export interface CustomIdNumber {
   id: number;
   name?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -252,42 +348,22 @@ export interface PostsLocalized {
   id: string;
   title?: string | null;
   relationField?: (string | null) | Relation;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "screenings".
- */
-export interface Screening {
-  id: string;
-  name?: string | null;
-  movie?: (string | null) | Movie;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "movies".
- */
-export interface Movie {
-  id: string;
-  name?: string | null;
-  select?: ('a' | 'b' | 'c')[] | null;
-  director?: (string | null) | Director;
-  array?:
+  localizedDirectors?:
     | {
-        director?: (string | Director)[] | null;
-        polymorphic?: {
-          relationTo: 'directors';
-          value: string | Director;
-        } | null;
+        director?: (string | null) | Director;
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
-  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -300,6 +376,133 @@ export interface Director {
   movies?: (string | Movie)[] | null;
   movie?: (string | null) | Movie;
   directors?: (string | Director)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "movies".
+ */
+export interface Movie {
+  id: string;
+  name?: string | null;
+  select?: ('a' | 'b' | 'c')[] | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  location?: [number, number] | null;
+  director?: (string | null) | Director;
+  array?:
+    | {
+        director?: (string | Director)[] | null;
+        polymorphic?: {
+          relationTo: 'directors';
+          value: string | Director;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "screenings".
+ */
+export interface Screening {
+  id: string;
+  name?: string | null;
+  movie?: (string | null) | Movie;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transitive-join-songs".
+ */
+export interface TransitiveJoinSong {
+  id: string;
+  name?: string | null;
+  albums?: (string | TransitiveJoinAlbum)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transitive-join-albums".
+ */
+export interface TransitiveJoinAlbum {
+  id: string;
+  artist?: (string | null) | TransitiveJoinArtist;
+  song?: {
+    docs?: (string | TransitiveJoinSong)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transitive-join-artists".
+ */
+export interface TransitiveJoinArtist {
+  id: string;
+  album?: {
+    docs?: (string | TransitiveJoinAlbum)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -312,33 +515,16 @@ export interface MovieReview {
   movieReviewer: string | User;
   likes?: (string | User)[] | null;
   visibility: 'followers' | 'public';
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -366,6 +552,14 @@ export interface PolymorphicRelationship {
         value: string | Movie;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -377,6 +571,14 @@ export interface Tree {
   id: string;
   text?: string | null;
   parent?: (string | null) | Tree;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -392,6 +594,14 @@ export interface Page {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -402,6 +612,14 @@ export interface Page {
 export interface RelsToPage {
   id: string;
   page?: (string | null) | Page;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -424,6 +642,14 @@ export interface RelsToPagesAndCustomTextId {
         relationTo: 'custom-id-number';
         value: number | CustomIdNumber;
       } | null);
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -445,6 +671,14 @@ export interface ObjectWrite {
         value: string | Movie;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -457,6 +691,14 @@ export interface DeepNested {
   content?: {
     blocks?: TestBlock[] | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -482,6 +724,14 @@ export interface Relation1 {
     relationTo: 'items';
     value: string | Item;
   } | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -497,6 +747,14 @@ export interface Item {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -507,6 +765,14 @@ export interface Item {
 export interface Block1 {
   id: string;
   blocks?: Some[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -584,6 +850,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'directors';
         value: string | Director;
+      } | null)
+    | ({
+        relationTo: 'transitive-join-songs';
+        value: string | TransitiveJoinSong;
+      } | null)
+    | ({
+        relationTo: 'transitive-join-albums';
+        value: string | TransitiveJoinAlbum;
+      } | null)
+    | ({
+        relationTo: 'transitive-join-artists';
+        value: string | TransitiveJoinArtist;
       } | null)
     | ({
         relationTo: 'movieReviews';
@@ -701,6 +979,8 @@ export interface PostsSelect<T extends boolean = true> {
   customIdRelation?: T;
   customIdNumberRelation?: T;
   filteredRelation?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -711,6 +991,14 @@ export interface PostsSelect<T extends boolean = true> {
 export interface PostsLocalizedSelect<T extends boolean = true> {
   title?: T;
   relationField?: T;
+  localizedDirectors?:
+    | T
+    | {
+        director?: T;
+        id?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -721,6 +1009,8 @@ export interface PostsLocalizedSelect<T extends boolean = true> {
 export interface RelationSelect<T extends boolean = true> {
   name?: T;
   disableRelation?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -731,6 +1021,8 @@ export interface RelationSelect<T extends boolean = true> {
 export interface StrictAccessSelect<T extends boolean = true> {
   name?: T;
   disableRelation?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -741,6 +1033,8 @@ export interface StrictAccessSelect<T extends boolean = true> {
 export interface ChainedSelect<T extends boolean = true> {
   name?: T;
   relation?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -751,6 +1045,8 @@ export interface ChainedSelect<T extends boolean = true> {
 export interface CustomIdSelect<T extends boolean = true> {
   id?: T;
   name?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -761,6 +1057,8 @@ export interface CustomIdSelect<T extends boolean = true> {
 export interface CustomIdNumberSelect<T extends boolean = true> {
   id?: T;
   name?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -771,6 +1069,8 @@ export interface CustomIdNumberSelect<T extends boolean = true> {
 export interface ScreeningsSelect<T extends boolean = true> {
   name?: T;
   movie?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -781,6 +1081,7 @@ export interface ScreeningsSelect<T extends boolean = true> {
 export interface MoviesSelect<T extends boolean = true> {
   name?: T;
   select?: T;
+  location?: T;
   director?: T;
   array?:
     | T
@@ -789,6 +1090,8 @@ export interface MoviesSelect<T extends boolean = true> {
         polymorphic?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -803,6 +1106,43 @@ export interface DirectorsSelect<T extends boolean = true> {
   movies?: T;
   movie?: T;
   directors?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transitive-join-songs_select".
+ */
+export interface TransitiveJoinSongsSelect<T extends boolean = true> {
+  name?: T;
+  albums?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transitive-join-albums_select".
+ */
+export interface TransitiveJoinAlbumsSelect<T extends boolean = true> {
+  artist?: T;
+  song?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transitive-join-artists_select".
+ */
+export interface TransitiveJoinArtistsSelect<T extends boolean = true> {
+  album?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -814,6 +1154,8 @@ export interface MovieReviewsSelect<T extends boolean = true> {
   movieReviewer?: T;
   likes?: T;
   visibility?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -826,6 +1168,8 @@ export interface PolymorphicRelationshipsSelect<T extends boolean = true> {
   polymorphicLocalized?: T;
   polymorphicMany?: T;
   polymorphicManyLocalized?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -836,6 +1180,8 @@ export interface PolymorphicRelationshipsSelect<T extends boolean = true> {
 export interface TreeSelect<T extends boolean = true> {
   text?: T;
   parent?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -850,6 +1196,8 @@ export interface PagesSelect<T extends boolean = true> {
         label?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -859,6 +1207,8 @@ export interface PagesSelect<T extends boolean = true> {
  */
 export interface RelsToPagesSelect<T extends boolean = true> {
   page?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -868,6 +1218,8 @@ export interface RelsToPagesSelect<T extends boolean = true> {
  */
 export interface RelsToPagesAndCustomTextIdsSelect<T extends boolean = true> {
   rel?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -880,6 +1232,8 @@ export interface ObjectWritesSelect<T extends boolean = true> {
   many?: T;
   onePoly?: T;
   manyPoly?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -907,6 +1261,8 @@ export interface DeepNestedSelect<T extends boolean = true> {
                   };
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -916,6 +1272,8 @@ export interface DeepNestedSelect<T extends boolean = true> {
  */
 export interface RelationsSelect<T extends boolean = true> {
   item?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -926,6 +1284,8 @@ export interface RelationsSelect<T extends boolean = true> {
 export interface ItemsSelect<T extends boolean = true> {
   status?: T;
   relation?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -946,6 +1306,8 @@ export interface BlocksSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -962,6 +1324,8 @@ export interface PayloadKvSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -969,6 +1333,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1020,6 +1385,92 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'posts'
+      | 'postsLocalized'
+      | 'relation'
+      | 'strict-access'
+      | 'chained'
+      | 'custom-id'
+      | 'custom-id-number'
+      | 'screenings'
+      | 'movies'
+      | 'directors'
+      | 'transitive-join-songs'
+      | 'transitive-join-albums'
+      | 'transitive-join-artists'
+      | 'movieReviews'
+      | 'polymorphic-relationships'
+      | 'tree'
+      | 'pages'
+      | 'rels-to-pages'
+      | 'rels-to-pages-and-custom-text-ids'
+      | 'object-writes'
+      | 'deep-nested'
+      | 'relations'
+      | 'items'
+      | 'blocks'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'posts'
+          | 'postsLocalized'
+          | 'relation'
+          | 'strict-access'
+          | 'chained'
+          | 'custom-id'
+          | 'custom-id-number'
+          | 'screenings'
+          | 'movies'
+          | 'directors'
+          | 'transitive-join-songs'
+          | 'transitive-join-albums'
+          | 'transitive-join-artists'
+          | 'movieReviews'
+          | 'polymorphic-relationships'
+          | 'tree'
+          | 'pages'
+          | 'rels-to-pages'
+          | 'rels-to-pages-and-custom-text-ids'
+          | 'object-writes'
+          | 'deep-nested'
+          | 'relations'
+          | 'items'
+          | 'blocks'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -1,6 +1,6 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { baseConfig } from './baseConfig.js'
+import { baseConfig, seed } from './baseConfig.js'
 
-export default buildConfigWithDefaults(baseConfig)
+export default buildConfigWithDefaults({ suite: 'v4', config: baseConfig, seed })
 
 export { collections } from './baseConfig.js'

@@ -3,6 +3,7 @@ import type { Config } from 'payload'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { getTestSuiteDir } from '../../__helpers/shared/getTestSuiteDir.js'
 import { removeFiles } from '../../__helpers/shared/removeFiles.js'
 import { devUser } from '../../credentials.js'
 import {
@@ -25,10 +26,7 @@ import { tenant2 } from './tenant-2.js'
 import { trashedPost } from './trashed-post.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-const seedDir =
-  process.env.PAYLOAD_FRAMEWORK === 'tanstack-start' && process.env.ROOT_DIR
-    ? path.resolve(process.env.ROOT_DIR, 'live-preview/seed')
-    : dirname
+const seedDir = getTestSuiteDir({ fallbackDir: dirname, suitePath: 'live-preview/seed' })
 
 export const seed: Config['onInit'] = async (payload) => {
   const existingUser = await payload.find({
@@ -38,6 +36,7 @@ export const seed: Config['onInit'] = async (payload) => {
         equals: devUser.email,
       },
     },
+    overrideAccess: true,
   })
 
   // Seed already ran => this is likely a consecutive, uncached getPayload call
@@ -54,16 +53,19 @@ export const seed: Config['onInit'] = async (payload) => {
       email: devUser.email,
       password: devUser.password,
     },
+    overrideAccess: true,
   })
 
   const tenant1Doc = await payload.create({
     collection: tenantsSlug,
     data: tenant1,
+    overrideAccess: true,
   })
 
   await payload.create({
     collection: tenantsSlug,
     data: tenant2,
+    overrideAccess: true,
   })
 
   const media = await payload.create({
@@ -72,6 +74,7 @@ export const seed: Config['onInit'] = async (payload) => {
     data: {
       alt: 'Image 1',
     },
+    overrideAccess: true,
   })
 
   const mediaID = payload.db.defaultIDType === 'number' ? media.id : `"${media.id}"`
@@ -84,6 +87,7 @@ export const seed: Config['onInit'] = async (payload) => {
         .replace(/"\{\{IMAGE\}\}"/g, mediaID)
         .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
     ),
+    overrideAccess: true,
   })
 
   const post2Doc = await payload.create({
@@ -93,6 +97,7 @@ export const seed: Config['onInit'] = async (payload) => {
         .replace(/"\{\{IMAGE\}\}"/g, mediaID)
         .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
     ),
+    overrideAccess: true,
   })
 
   const post3Doc = await payload.create({
@@ -102,6 +107,7 @@ export const seed: Config['onInit'] = async (payload) => {
         .replace(/"\{\{IMAGE\}\}"/g, mediaID)
         .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
     ),
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -111,11 +117,13 @@ export const seed: Config['onInit'] = async (payload) => {
         .replace(/"\{\{IMAGE\}\}"/g, mediaID)
         .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
     ),
+    overrideAccess: true,
   })
 
   const postsPageDoc = await payload.create({
     collection: pagesSlug,
     data: JSON.parse(JSON.stringify(postsPage).replace(/"\{\{IMAGE\}\}"/g, mediaID)),
+    overrideAccess: true,
   })
 
   let postsPageDocID = postsPageDoc.id
@@ -141,6 +149,7 @@ export const seed: Config['onInit'] = async (payload) => {
         .replace(/"\{\{POST_3_ID\}\}"/g, post3DocID)
         .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
     ),
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -158,6 +167,7 @@ export const seed: Config['onInit'] = async (payload) => {
       title: 'Custom Live Preview',
       slug: 'custom-live-preview',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -175,6 +185,7 @@ export const seed: Config['onInit'] = async (payload) => {
       title: 'SSR Home',
       slug: 'home',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -192,6 +203,7 @@ export const seed: Config['onInit'] = async (payload) => {
       title: 'SSR Home',
       slug: 'home',
     },
+    overrideAccess: true,
   })
 
   await payload.updateGlobal({
@@ -203,10 +215,12 @@ export const seed: Config['onInit'] = async (payload) => {
         .replace(/"\{\{POST_2_ID\}\}"/g, post2DocID)
         .replace(/"\{\{POST_3_ID\}\}"/g, post3DocID),
     ),
+    overrideAccess: true,
   })
 
   await payload.updateGlobal({
     slug: 'footer',
     data: JSON.parse(JSON.stringify(footer)),
+    overrideAccess: true,
   })
 }

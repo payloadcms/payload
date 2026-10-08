@@ -1,7 +1,7 @@
 import type { I18nClient, TFunction } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 
-import type { ImportMap } from '../bin/generateImportMap/index.js'
+import type { ImportMap } from '../cli/commands/generateImportMap/generateImportMap.js'
 import type { ClientBlock } from '../fields/config/types.js'
 import type { BlockSlug, User } from '../index.js'
 import type {
@@ -20,7 +20,8 @@ import { type ClientGlobalConfig, createClientGlobalConfigs } from '../globals/c
 
 export type ServerOnlyRootProperties = keyof Pick<
   SanitizedConfig,
-  | 'bin'
+  | 'baseAccess'
+  | 'cli'
   | 'cors'
   | 'csrf'
   | 'custom'
@@ -33,14 +34,15 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'i18n'
   | 'jobs'
   | 'kv'
+  | 'llmInstructions'
   | 'logger'
   | 'onInit'
   | 'plugins'
   | 'queryPresets'
   | 'secret'
-  | 'sharp'
   | 'storage'
   | 'typescript'
+  | 'upload'
 >
 
 export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'], 'components'>
@@ -80,15 +82,15 @@ export type UnauthenticatedClientConfig = {
 export const serverOnlyAdminConfigProperties: readonly Partial<ServerOnlyRootAdminProperties>[] = []
 
 export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperties>[] = [
+  'baseAccess',
   'endpoints',
   'db',
   'editor',
   'plugins',
-  'sharp',
   'onInit',
   'secret',
   'hooks',
-  'bin',
+  'cli',
   'i18n',
   'typescript',
   'cors',
@@ -99,8 +101,10 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'jobs',
   'logger',
   'kv',
+  'llmInstructions',
   'queryPresets',
   'storage',
+  'upload',
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
 
@@ -226,7 +230,7 @@ export const createClientConfig = ({
 
       case 'blocks': {
         ;(clientConfig.blocks as ClientBlock[]) = createClientBlocks({
-          blocks: config.blocks!,
+          blocks: config.blocks,
           defaultIDType: config.db.defaultIDType,
           i18n,
           importMap,
@@ -272,11 +276,6 @@ export const createClientConfig = ({
 
           if (config.localization.defaultLocale) {
             clientConfig.localization.defaultLocale = config.localization.defaultLocale
-          }
-
-          if (config.localization.defaultLocalePublishOption) {
-            clientConfig.localization.defaultLocalePublishOption =
-              config.localization.defaultLocalePublishOption
           }
 
           if (config.localization.fallback) {

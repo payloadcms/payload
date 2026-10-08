@@ -1,7 +1,22 @@
 import type { Auth, IncomingAuthType, LoginWithUsernameOptions } from '../../auth/types.js'
+import type { Access } from '../../config/types.js'
 import type { CollectionConfig, SanitizedCollectionConfig } from './types.js'
 
 import { defaultAccess } from '../../auth/defaultAccess.js'
+import { defaultUnlockAccess } from '../../auth/defaultUnlockAccess.js'
+import { hasWhereAccessResult } from '../../auth/types.js'
+import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
+import {
+  markInheritedReadVersionsAccess,
+  resolveInheritedReadVersionsAccessArgs,
+} from '../../versions/isInheritedReadVersionsAccess.js'
+
+export const createInheritedReadVersionsAccess = (read: Access): Access =>
+  markInheritedReadVersionsAccess(async (args) => {
+    const result = await read(resolveInheritedReadVersionsAccessArgs(args))
+
+    return hasWhereAccessResult(result) ? appendVersionToQueryKey(result) : result
+  })
 
 /**
  * @deprecated - remove in 4.0. This is error-prone, as mutating this object will affect any objects that use the defaults as a base.
@@ -11,8 +26,9 @@ export const defaults: Partial<CollectionConfig> = {
     create: defaultAccess,
     delete: defaultAccess,
     read: defaultAccess,
-    unlock: defaultAccess,
+    unlock: defaultUnlockAccess,
     update: defaultAccess,
+    validate: defaultAccess,
   },
   admin: {
     components: {},
@@ -57,14 +73,17 @@ export const defaults: Partial<CollectionConfig> = {
 
 export const addDefaultsToCollectionConfig = (collection: CollectionConfig): CollectionConfig => {
   const access = collection.access
+  const read = access?.read ?? defaultAccess
 
   collection.access = {
     ...access,
     create: access?.create ?? defaultAccess,
     delete: access?.delete ?? defaultAccess,
-    read: access?.read ?? defaultAccess,
-    unlock: access?.unlock ?? defaultAccess,
+    read,
+    readVersions: access?.readVersions ?? createInheritedReadVersionsAccess(read),
+    unlock: access?.unlock ?? defaultUnlockAccess,
     update: access?.update ?? defaultAccess,
+    validate: access?.validate ?? access?.update ?? defaultAccess,
   } satisfies SanitizedCollectionConfig['access']
 
   collection.admin = {
@@ -129,6 +148,7 @@ export const addDefaultsToAuthConfig = (auth: IncomingAuthType): Auth => {
 
   auth.depth = auth.depth ?? 0
   auth.forgotPassword = auth.forgotPassword ?? {}
+  auth.forgotPassword.minRequestInterval = auth.forgotPassword.minRequestInterval ?? 15000
   auth.lockTime = auth.lockTime ?? 600000 // 10 minutes
   auth.loginWithUsername = auth.loginWithUsername
     ? addDefaultsToLoginWithUsernameConfig(

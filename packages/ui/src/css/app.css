@@ -4,7 +4,7 @@
 
 @layer payload-default {
   :root {
-    --font-body: var(--font-family-sans), sans-serif;
+    --font-body: var(--font-family-sans, var(--text-body-family)), sans-serif;
     --font-mono: var(--font-family-mono), 'SF Mono', Menlo, Consolas, Monaco, monospace;
 
     --app-header-height: 0px;
@@ -13,6 +13,7 @@
     --nav-width: 275px;
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     :root {
       --nav-width: 100vw;

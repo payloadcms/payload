@@ -48,6 +48,7 @@ describe('Queues', () => {
       where: {
         id: { exists: true },
       },
+      overrideAccess: true,
     })
 
     // Clear jobs collection before each test
@@ -56,6 +57,7 @@ describe('Queues', () => {
       where: {
         id: { exists: true },
       },
+      overrideAccess: true,
     })
   })
 
@@ -82,6 +84,7 @@ describe('Queues', () => {
           },
           workflowSlug: 'externalWorkflow',
         },
+        overrideAccess: true,
       })
 
       // Run the job via the jobs endpoint (this runs within Next.js context)
@@ -99,6 +102,7 @@ describe('Queues', () => {
             const allSimples = await payload.find({
               collection: 'simple',
               limit: 100,
+              overrideAccess: true,
             })
             return allSimples.totalDocs
           },
@@ -109,6 +113,7 @@ describe('Queues', () => {
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
       expect(allSimples.docs[0]?.title).toEqual('externalWorkflowE2E')
     })
@@ -128,6 +133,7 @@ describe('Queues', () => {
           },
           taskSlug: 'ExternalTask',
         },
+        overrideAccess: true,
       })
 
       const runResponse = await apiContext.get(`${serverURL}/api/payload-jobs/run?silent=true`)
@@ -140,6 +146,7 @@ describe('Queues', () => {
             const allSimples = await payload.find({
               collection: 'simple',
               limit: 100,
+              overrideAccess: true,
             })
             return allSimples.totalDocs
           },
@@ -150,6 +157,7 @@ describe('Queues', () => {
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
       expect(allSimples.docs[0]?.title).toEqual('externalTaskE2E')
     })

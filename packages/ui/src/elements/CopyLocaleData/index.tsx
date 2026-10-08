@@ -32,7 +32,8 @@ export const CopyLocaleData: React.FC = () => {
       routes: { admin },
     },
   } = useConfig()
-  const { code } = useLocale()
+  const locale = useLocale()
+  const code = locale?.code
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
   const { i18n, t } = useTranslation()
   const modified = useFormModified()
@@ -90,6 +91,7 @@ export const CopyLocaleData: React.FC = () => {
         )
 
         toggleModal(drawerSlug)
+        toast.success(t('general:copied'))
       } catch (error) {
         setCopying(false)
         const errorMessage = (error as Error).message || 'error:unknown'

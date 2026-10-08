@@ -30,7 +30,6 @@ let url: AdminUrlUtil
 describe('Checkboxes', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ serverURL } = await initPayloadE2ENoConfig({
       dirname,
       // prebuild,
@@ -45,8 +44,6 @@ describe('Checkboxes', () => {
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
     if (client) {
       await client.logout()
@@ -69,7 +66,7 @@ describe('Checkboxes', () => {
     await expect(page.locator('table > tbody > tr')).toHaveCount(1)
   })
 
-  test('should portal the field-error tooltip next to the checkbox when invalid', async () => {
+  test('should keep the checkbox error adjacent and focusable', async () => {
     await page.goto(url.create)
     await page.locator('#field-checkboxRequiresTrue').click()
     await page.locator('#action-save').click({ delay: 100 })
@@ -77,8 +74,10 @@ describe('Checkboxes', () => {
     const tooltip = page.locator('.tooltip--show', { hasText: 'This field is required.' })
     await expect(tooltip).toBeVisible()
 
-    const isPortaledToBody = await tooltip.evaluate((el) => el.parentElement === document.body)
-    expect(isPortaledToBody).toBe(true)
+    expect(await tooltip.evaluate((element) => Boolean(element.closest('.field-type')))).toBe(true)
+    await expect(tooltip).toHaveAttribute('role', 'alert')
+    await tooltip.focus()
+    await expect(tooltip).toBeFocused()
 
     const tooltipBox = await tooltip.boundingBox()
     const checkboxBox = await page.locator('#field-checkboxRequiresTrue').boundingBox()

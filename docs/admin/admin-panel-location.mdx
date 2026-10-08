@@ -213,17 +213,6 @@ Not all files in the `(payload)` folder are auto-generated. Here's what you need
 | `api/[...slug]/route.ts`              | No              | Rarely needed | Never                        | Part of template. Usually no need to edit.                   |
 | `custom.css`                          | No              | Yes           | Never                        | Intended for your custom styles.                             |
 
-### About the "DO NOT MODIFY" Warning
-
-You may see this warning in `layout.tsx`:
-
-```ts
-/* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */
-/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
-```
-
-**This warning is misleading.** The file was generated during initial project setup by `create-payload-app`, but it is **never regenerated** by Payload. It is completely safe to modify this file, especially when customizing your folder structure.
-
 ## Editing layout.tsx Safely
 
 When you move the Payload folder, you'll need to update the import path in `layout.tsx`:

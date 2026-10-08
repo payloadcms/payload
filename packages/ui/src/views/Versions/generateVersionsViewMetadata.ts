@@ -50,8 +50,8 @@ export const generateVersionsViewMetadata: GenerateEditViewMetadata = async ({
       ...(config.admin.meta || {}),
       description: t('version:viewingVersionsGlobal', { entitySlug: globalConfig.slug }),
       title: `${t('version:versions')} - ${entityLabel}`,
-      ...((globalConfig?.admin.meta || {}) as MetaConfig),
-      ...((globalConfig?.admin?.components?.views?.edit?.versions?.meta || {}) as MetaConfig),
+      ...(globalConfig?.admin.meta || {}),
+      ...(globalConfig?.admin?.components?.views?.edit?.versions?.meta || {}),
     }
   }
 

@@ -3,6 +3,7 @@ import type {
   QueryPreset,
   ResolvedFilterOptions,
   SanitizedCollectionPermission,
+  ViewTypes,
   Where,
 } from 'payload'
 
@@ -10,16 +11,6 @@ export type ListControlsProps = {
   readonly beforeActions?: React.ReactNode[]
   readonly collectionConfig: ClientCollectionConfig
   readonly collectionSlug: string
-  /**
-   * @deprecated
-   * These are now handled by the `ListSelection` component
-   */
-  readonly disableBulkDelete?: boolean
-  /**
-   * @deprecated
-   * These are now handled by the `ListSelection` component
-   */
-  readonly disableBulkEdit?: boolean
   readonly disableQueryPresets?: boolean
   readonly enableColumns?: boolean
   readonly enableFilters?: boolean
@@ -28,7 +19,9 @@ export type ListControlsProps = {
   readonly handleSortChange?: (sort: string) => void
   readonly handleWhereChange?: (where: Where) => void
   readonly hasCreatePermission?: boolean
+  readonly hasDeletePermission?: boolean
   readonly isWhereOpen?: boolean
+  readonly layoutToggle?: React.ReactNode
   readonly listMenuItems?: React.ReactNode[]
   readonly newDocumentURL?: string
   readonly onWhereToggle?: () => void
@@ -36,4 +29,5 @@ export type ListControlsProps = {
   readonly queryPresetPermissions?: SanitizedCollectionPermission
   readonly renderedFilters?: Map<string, React.ReactNode>
   readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
+  readonly viewType?: ViewTypes
 }

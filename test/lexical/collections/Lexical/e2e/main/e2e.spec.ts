@@ -77,7 +77,6 @@ async function navigateToLexicalFields(
 describe('lexicalMain', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     context = await browser.newContext()
@@ -91,8 +90,6 @@ describe('lexicalMain', () => {
     })*/
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'lexicalTest',
-      uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
     })
 
     if (client) {
@@ -315,7 +312,7 @@ describe('lexicalMain', () => {
     await expect(richTextField).toBeVisible()
     await richTextField.click() // Use click, because focus does not work
     await page.keyboard.type('some text')
-    const spanInEditor = richTextField.locator('span').first()
+    const spanInEditor = richTextField.locator('[data-lexical-text="true"]').first()
     await expect(spanInEditor).toHaveText('some text')
     await saveDocAndAssert(page)
     await page.locator('#clear-lexical-lexicalSimple').click()
@@ -330,7 +327,7 @@ describe('lexicalMain', () => {
     await expect(richTextField).toBeVisible()
     await richTextField.click() // Use click, because focus does not work
     await page.keyboard.type('some text')
-    const spanInEditor = richTextField.locator('span').first()
+    const spanInEditor = richTextField.locator('[data-lexical-text="true"]').first()
     await expect(spanInEditor).toHaveText('some text')
     await saveDocAndAssert(page)
     await page.locator('#clear-lexical-lexicalSimple').click()
@@ -526,7 +523,7 @@ describe('lexicalMain', () => {
     await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
-    const lastParagraph = richTextField.locator('p').last()
+    const lastParagraph = richTextField.locator('.ContentEditable__root > p').last()
     await lastParagraph.scrollIntoViewIfNeeded()
     await expect(lastParagraph).toBeVisible()
 
@@ -587,7 +584,7 @@ describe('lexicalMain', () => {
     await secondUploadNode.click()
 
     await expect(secondUploadNode.locator('.LexicalEditorTheme__upload__filename')).toHaveText(
-      'payload-1.jpg',
+      'payload-original-1.jpg',
     )
     await expect(
       secondUploadNode.locator('.LexicalEditorTheme__upload__collectionLabel'),
@@ -605,7 +602,7 @@ describe('lexicalMain', () => {
     await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
-    const lastParagraph = richTextField.locator('p').last()
+    const lastParagraph = richTextField.locator('.ContentEditable__root > p').last()
     await lastParagraph.scrollIntoViewIfNeeded()
     await expect(lastParagraph).toBeVisible()
 
@@ -632,7 +629,7 @@ describe('lexicalMain', () => {
     await expect(uploadListDrawer).toBeVisible()
     await wait(500)
 
-    await uploadListDrawer.locator('button').getByText('payload.jpg').first().click()
+    await uploadListDrawer.locator('button').getByText('payload-original.jpg').first().click()
     await expect(uploadListDrawer).toBeHidden()
 
     const newUploadNode = richTextField.locator('.LexicalEditorTheme__upload').nth(1)
@@ -642,7 +639,7 @@ describe('lexicalMain', () => {
     await newUploadNode.hover()
 
     await expect(newUploadNode.locator('.LexicalEditorTheme__upload__filename')).toContainText(
-      'payload.jpg',
+      'payload-original.jpg',
     )
 
     // Click on button with class LexicalEditorTheme__upload__upload-drawer-toggler
@@ -712,7 +709,7 @@ describe('lexicalMain', () => {
       await navigateToLexicalFields(true, 'lexical-relationship-fields')
       const richTextField = page.locator('.rich-text-lexical').nth(0)
 
-      const lastParagraph = richTextField.locator('p').last()
+      const lastParagraph = richTextField.locator('.ContentEditable__root > p').last()
       await lastParagraph.scrollIntoViewIfNeeded()
       await expect(lastParagraph).toBeVisible()
 
@@ -738,7 +735,7 @@ describe('lexicalMain', () => {
       await navigateToLexicalFields(true, 'lexical-relationship-fields')
       const richTextField = page.locator('.rich-text-lexical').nth(0)
 
-      const lastParagraph = richTextField.locator('p').last()
+      const lastParagraph = richTextField.locator('.ContentEditable__root > p').last()
       await lastParagraph.scrollIntoViewIfNeeded()
       await expect(lastParagraph).toBeVisible()
 
@@ -1357,7 +1354,7 @@ describe('lexicalMain', () => {
     await expect(uploadListDrawer).toBeVisible()
     await wait(1000)
 
-    await uploadListDrawer.locator('button').getByText('payload.png').first().click()
+    await uploadListDrawer.locator('button').getByText('payload-original.png').first().click()
     await expect(uploadListDrawer).toBeHidden()
 
     const newUploadNode = richTextField.locator('.LexicalEditorTheme__upload').first()
@@ -1369,7 +1366,7 @@ describe('lexicalMain', () => {
     await newUploadNode.hover()
 
     await expect(newUploadNode.locator('.LexicalEditorTheme__upload__filename')).toHaveText(
-      'payload.png',
+      'payload-original.png',
     )
 
     await page.keyboard.press('Enter') // floating toolbar needs to appear with enough distance to the upload node, otherwise clicking may fail
@@ -1396,8 +1393,8 @@ describe('lexicalMain', () => {
     // Click anywhere in the drawer to make sure the cursor position is preserved
     await uploadSwapDrawer.locator('.drawer__content').first().click()
 
-    // click button with text content "payload.jpg"
-    await uploadSwapDrawer.locator('button').getByText('payload.jpg').first().click()
+    // click button with text content "payload-original.jpg"
+    await uploadSwapDrawer.locator('button').getByText('payload-original.jpg').first().click()
 
     await expect(uploadSwapDrawer).toBeHidden()
     await wait(500)
@@ -1746,7 +1743,7 @@ describe('lexicalMain', () => {
     // test
     await navigateToLexicalFields()
     const uploadNode = page
-      .locator('.LexicalEditorTheme__upload__contents[data-filename="payload.jpg"]')
+      .locator('.LexicalEditorTheme__upload__contents[data-filename="payload-original.jpg"]')
       .first()
     await uploadNode.click()
     await expectInsideSelectedDecorator(uploadNode)
@@ -1755,9 +1752,9 @@ describe('lexicalMain', () => {
     await textNode.click()
     await expect(decoratorLocator).toBeHidden()
 
-    const closeTagInMultiSelect = page
-      .getByRole('button', { name: 'payload.jpg Edit payload.jpg' })
-      .getByLabel('Remove')
+    const closeTagInMultiSelect = page.getByRole('button', {
+      name: /^Remove payload-original\.jpg/,
+    })
     await closeTagInMultiSelect.click()
     await expect(decoratorLocator).toBeHidden()
 
@@ -1780,7 +1777,7 @@ describe('lexicalMain', () => {
     await page.keyboard.press('Backspace')
     await expect(labelInsideCollapsableBody2).toBeHidden()
 
-    const monacoLabel = page.locator('label').getByText('Code')
+    const monacoLabel = page.locator('.field-label').getByText('Code', { exact: true })
     await monacoLabel.click()
     await expectInsideSelectedDecorator(monacoLabel)
 
@@ -1862,6 +1859,11 @@ describe('lexicalMain', () => {
     await page.keyboard.press('ArrowUp')
     await selectedNthDecorator(0)
     await page.keyboard.press('ArrowUp')
+    await expect(selectedDecorator).toBeHidden()
+    await expect
+      .poll(() => page.evaluate(() => window.getSelection()?.anchorNode?.textContent))
+      .toBe('Upload Node:')
+    await page.keyboard.press('ArrowDown')
     await selectedNthDecorator(0)
 
     // TODO: It would be nice to add tests with lists and nested lists
@@ -1894,6 +1896,7 @@ describe('lexicalMain', () => {
         },
         title: 'Test Custom Cell',
       },
+      overrideAccess: true,
     })
 
     const url = new AdminUrlUtil(serverURL, lexicalCustomCellSlug)

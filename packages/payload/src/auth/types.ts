@@ -18,6 +18,8 @@ export type BlockPermissions = {
   fields: FieldsPermissions
   read: Permission
   update: Permission
+  /** Permission to validate candidate block data without saving. */
+  validate: Permission
 }
 
 export type SanitizedBlockPermissions =
@@ -42,6 +44,8 @@ export type FieldPermissions = {
   fields?: FieldsPermissions
   read?: Permission
   update?: Permission
+  /** Permission to validate candidate field data without saving. */
+  validate?: Permission
 }
 
 export type SanitizedFieldPermissions =
@@ -51,6 +55,7 @@ export type SanitizedFieldPermissions =
       fields?: SanitizedFieldsPermissions
       read: true
       update: true
+      validate: true
     }
   | true
 
@@ -69,6 +74,8 @@ export type CollectionPermission = {
   // Auth-enabled Collections only
   unlock?: Permission
   update?: Permission
+  /** Permission to validate collection candidate data without saving. */
+  validate?: Permission
 }
 
 export type SanitizedCollectionPermission = {
@@ -80,6 +87,7 @@ export type SanitizedCollectionPermission = {
   // Auth-enabled Collections only
   unlock?: true
   update?: true
+  validate?: true
 }
 
 export type GlobalPermission = {
@@ -87,6 +95,8 @@ export type GlobalPermission = {
   read?: Permission
   readVersions?: Permission
   update?: Permission
+  /** Permission to validate global candidate data without saving. */
+  validate?: Permission
 }
 
 export type SanitizedGlobalPermission = {
@@ -94,6 +104,7 @@ export type SanitizedGlobalPermission = {
   read?: true
   readVersions?: true
   update?: true
+  validate?: true
 }
 
 export type DocumentPermissions = CollectionPermission | GlobalPermission
@@ -139,9 +150,8 @@ export type AuthRuntimeFields = {
  * from a read `User` doc, so a `never`-typed `password` would break those assignments
  */
 /**
- * The signed-in user: the read user plus the runtime auth markers (`_strategy`, `_sid`). This is
- * what `req.user`, `payload.auth()`, the `me` operation, auth strategies, and `useAuth().user`
- * return.
+ * The signed-in user: the read user plus the runtime auth markers (`_strategy`, `_sid`).
+ * Server authentication APIs may retain complete fields, while response boundaries apply read access.
  */
 export type AuthenticatedUser = AuthRuntimeFields & User
 
@@ -182,6 +192,8 @@ export type AuthStrategyFunctionArgs = {
   headers: Request['headers']
   isGraphQL?: boolean
   payload: Payload
+  /** The request that initiated authentication, when available. */
+  req?: PayloadRequest
   /**
    * The AuthStrategy name property from the payload config.
    */
@@ -231,7 +243,12 @@ export interface IncomingAuthType {
    */
   depth?: number
   /**
-   * Advanced - disable Payload's built-in local auth strategy. Only use this property if you have replaced Payload's auth mechanisms with your own.
+   * Controls whether Payload's built-in local auth strategy is disabled. Set to `true` to disable
+   * local authentication or `false` to keep it enabled.
+   *
+   * Pass an object to disable local authentication while configuring how its fields are retained.
+   * Only disable local authentication if you have replaced Payload's auth mechanisms with your own.
+   * @default false
    */
   disableLocalStrategy?:
     | {
@@ -240,9 +257,12 @@ export interface IncomingAuthType {
          * Useful when you do not want the database or types to vary depending on the auth configuration.
          */
         enableFields?: true
+        /**
+         * When auth fields are retained, make the password field optional.
+         */
         optionalPassword?: true
       }
-    | true
+    | boolean
   /**
    * Customize the way that the forgotPassword operation functions.
    * @link https://payloadcms.com/docs/authentication/email#forgot-password
@@ -255,6 +275,12 @@ export interface IncomingAuthType {
     expiration?: number
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
+    /**
+     * The minimum number of milliseconds between password reset emails for the same user.
+     * @default 15000
+     * Set to 0 to disable.
+     */
+    minRequestInterval?: number
   }
   /**
    * Set the time (in milliseconds) that a user should be locked out if they fail authentication more times than maxLoginAttempts allows for.
@@ -290,7 +316,15 @@ export interface IncomingAuthType {
    * @default false
    * @link https://payloadcms.com/docs/authentication/api-keys
    */
-  useAPIKey?: boolean
+  useAPIKey?:
+    | {
+        /**
+         * Allows administrators to reveal stored API keys from the Admin Panel.
+         * @default false
+         */
+        reveal?: boolean
+      }
+    | boolean
 
   /**
    * Use sessions for authentication. Enabled by default.

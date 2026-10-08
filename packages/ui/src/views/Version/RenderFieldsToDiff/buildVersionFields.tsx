@@ -17,13 +17,7 @@ import {
   type SanitizedFieldsPermissions,
   type VersionField,
 } from 'payload'
-import {
-  fieldIsID,
-  fieldShouldBeLocalized,
-  getFieldPaths,
-  getUniqueListBy,
-  tabHasName,
-} from 'payload/shared'
+import { fieldIsID, fieldShouldBeLocalized, getFieldPaths, tabHasName } from 'payload/shared'
 
 import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
 import { diffComponents } from './fields/index.js'
@@ -450,11 +444,9 @@ const buildVersionField = ({
           (block) => typeof block !== 'string' && block.slug === blockSlugToMatch,
         ) as FlattenedBlock | undefined)
 
-      let fields = []
+      let replacedBlock: FlattenedBlock | undefined = undefined
 
-      if (toRow.blockType === fromRow.blockType) {
-        fields = toBlock.fields
-      } else {
+      if (toRow.blockType !== fromRow.blockType) {
         const fromBlockSlugToMatch: string = fromRow?.blockType ?? toRow?.blockType
 
         const fromBlock =
@@ -463,34 +455,20 @@ const buildVersionField = ({
             (block) => typeof block !== 'string' && block.slug === fromBlockSlugToMatch,
           ) as FlattenedBlock | undefined)
 
-        if (fromBlock) {
-          fields = getUniqueListBy<Field>([...toBlock.fields, ...fromBlock.fields], 'name')
-        } else {
-          fields = toBlock.fields
+        if (fromBlock && fromBlock.slug !== toBlock.slug) {
+          replacedBlock = fromBlock
         }
       }
 
-      let blockFieldsPermissions: SanitizedFieldsPermissions = undefined
+      const blockFieldsPermissions = getBlockFieldsPermissions({
+        blockSlug: blockSlugToMatch,
+        fieldPermissions,
+      })
 
-      // fieldPermissions will be set here, as the blocks field has a name
-      if (typeof fieldPermissions === 'boolean') {
-        blockFieldsPermissions = fieldPermissions
-      } else if (typeof fieldPermissions?.blocks === 'boolean') {
-        blockFieldsPermissions = fieldPermissions.blocks
-      } else {
-        const permissionsBlockSpecific = fieldPermissions?.blocks?.[blockSlugToMatch]
-        if (typeof permissionsBlockSpecific === 'boolean') {
-          blockFieldsPermissions = permissionsBlockSpecific
-        } else {
-          blockFieldsPermissions = permissionsBlockSpecific?.fields
-        }
-      }
-
-      const versionFields = buildVersionFields({
+      const blockDiffArgs = {
         clientSchemaMap,
         customDiffComponents,
         entitySlug,
-        fields,
         fieldsPermissions: blockFieldsPermissions,
         i18n,
         modifiedOnly,
@@ -498,12 +476,33 @@ const buildVersionField = ({
         parentIndexPath: 'name' in field ? '' : indexPath,
         parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
         parentPath: ('name' in field ? path : parentPath) + '.' + i,
-        parentSchemaPath: schemaPath + '.' + toBlock.slug,
         req,
         selectedLocales,
-        versionFromSiblingData: fromRow,
+      }
+
+      const oldBlockFields = replacedBlock
+        ? buildVersionFields({
+            ...blockDiffArgs,
+            fields: replacedBlock.fields,
+            fieldsPermissions: getBlockFieldsPermissions({
+              blockSlug: replacedBlock.slug,
+              fieldPermissions,
+            }),
+            parentSchemaPath: schemaPath + '.' + replacedBlock.slug,
+            versionFromSiblingData: fromRow,
+            versionToSiblingData: {},
+          }).versionFields
+        : []
+
+      const newBlockFields = buildVersionFields({
+        ...blockDiffArgs,
+        fields: toBlock.fields,
+        parentSchemaPath: schemaPath + '.' + toBlock.slug,
+        versionFromSiblingData: replacedBlock ? {} : fromRow,
         versionToSiblingData: toRow,
       }).versionFields
+
+      const versionFields = [...oldBlockFields, ...newBlockFields]
 
       if (versionFields?.length) {
         baseVersionField.rows[i] = versionFields
@@ -520,24 +519,14 @@ const buildVersionField = ({
       ...baseVersionField,
       CustomComponent: undefined,
     },
-    /**
-     * TODO: Change to valueFrom in 4.0
-     */
-    comparisonValue: valueFrom,
-    /**
-     * @deprecated remove in 4.0. Each field should handle its own diffing logic
-     */
-    diffMethod: 'diffWordsWithSpace',
     field: clientField,
     fieldPermissions:
       typeof fieldPermissions === 'undefined' ? parentFieldsPermissions : fieldPermissions,
     parentIsLocalized,
 
     nestingLevel: nestingLevel ? nestingLevel : undefined,
-    /**
-     * TODO: Change to valueTo in 4.0
-     */
-    versionValue: valueTo,
+    valueFrom,
+    valueTo,
   }
   if (locale) {
     clientDiffProps.locale = locale
@@ -562,4 +551,24 @@ const buildVersionField = ({
   })
 
   return baseVersionField
+}
+
+const getBlockFieldsPermissions = ({
+  blockSlug,
+  fieldPermissions,
+}: {
+  blockSlug: string
+  fieldPermissions: SanitizedFieldPermissions | undefined
+}): SanitizedFieldsPermissions => {
+  if (typeof fieldPermissions === 'boolean') {
+    return fieldPermissions
+  }
+
+  if (typeof fieldPermissions?.blocks === 'boolean') {
+    return fieldPermissions.blocks
+  }
+
+  const blockPermissions = fieldPermissions?.blocks?.[blockSlug]
+
+  return typeof blockPermissions === 'boolean' ? blockPermissions : blockPermissions?.fields
 }

@@ -28,7 +28,8 @@ export const APIViewClient: React.FC = () => {
 
   const searchParams = useSearchParams()
   const { i18n, t } = useTranslation()
-  const { code } = useLocale()
+  const currentLocale = useLocale()
+  const code = currentLocale?.code
 
   const {
     config: {
@@ -66,6 +67,21 @@ export const APIViewClient: React.FC = () => {
   const [depth, setDepth] = React.useState<string>(
     searchParams.get('depth') || defaultDepth.toString(),
   )
+  const [depthAnnouncement, setDepthAnnouncement] = React.useState('')
+  const previousDepth = React.useRef(depth)
+
+  React.useEffect(() => {
+    if (previousDepth.current === depth) {
+      return
+    }
+    previousDepth.current = depth
+    const timeout = setTimeout(() => {
+      setDepthAnnouncement(`${t('general:depth')}: ${Number(depth || 0)}`)
+    }, 300)
+
+    return () => clearTimeout(timeout)
+  }, [depth, t])
+
   const [authenticated, setAuthenticated] = React.useState<boolean>(true)
   const [fullscreen, setFullscreen] = React.useState<boolean>(false)
   const [origin, setOrigin] = React.useState<string>(serverURL || '')
@@ -171,6 +187,9 @@ export const APIViewClient: React.FC = () => {
             }}
           >
             <div className={`${baseClass}__form-fields`}>
+              <span aria-atomic="true" className="sr-only" role="status">
+                {depthAnnouncement}
+              </span>
               {localeOptions && (
                 <LocaleSelector localeOptions={localeOptions} onChange={setLocale} />
               )}
@@ -236,6 +255,7 @@ export const APIViewClient: React.FC = () => {
               />
               <Button
                 aria-label="toggle fullscreen"
+                aria-pressed={fullscreen}
                 buttonStyle="secondary"
                 className={`${baseClass}__toggle-fullscreen-button`}
                 icon={<MinimizeMaximizeIcon isMinimized={!fullscreen} />}

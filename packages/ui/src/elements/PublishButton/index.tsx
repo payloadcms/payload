@@ -5,7 +5,8 @@ import type { PublishButtonClientProps } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL, hasAutosaveEnabled, hasLocalizeStatusEnabled } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
+import { toast } from 'sonner'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
@@ -16,8 +17,11 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { PopupList } from '../Popup/index.js'
+import { FieldErrorsToast } from '../Toasts/fieldErrors.js'
+import { validateDocumentLocales } from './validateAllLocales.js'
 import './index.css'
 
 export function PublishButton({
@@ -37,11 +41,14 @@ export function PublishButton({
   } = useDocumentInfo()
 
   const { config, getEntityConfig } = useConfig()
-  const { submit } = useForm()
+  const { getData, submit } = useForm()
+  const { uploadEdits } = useUploadEdits()
   const modified = useFormModified()
   const editDepth = useEditDepth()
-  const { code: localeCode } = useLocale()
+  const locale = useLocale()
+  const localeCode = locale?.code
   const {
+    blocksMap,
     localization,
     routes: { api },
   } = config
@@ -67,12 +74,19 @@ export function PublishButton({
     (modified || hasNewerVersions || !hasPublishedDoc) &&
     uploadStatus !== 'uploading'
 
-  const [hasLocalizedFields, setHasLocalizedFields] = useState(false)
+  const [isValidatingLocales, setIsValidatingLocales] = useState(false)
 
-  useEffect(() => {
-    const hasLocalizedField = traverseForLocalizedFields(entityConfig?.fields)
-    setHasLocalizedFields(hasLocalizedField)
-  }, [entityConfig?.fields])
+  const hasLocalizedFields = React.useMemo(
+    () =>
+      Boolean(
+        entityConfig?.fields &&
+          traverseForLocalizedFields({
+            blocksMap,
+            fields: entityConfig.fields,
+          }),
+      ),
+    [blocksMap, entityConfig?.fields],
+  )
 
   const isSpecificLocalePublishEnabled = localization && hasLocalizedFields && hasPublishPermission
 
@@ -94,6 +108,7 @@ export function PublishButton({
         draft: true,
         'fallback-locale': 'null',
         locale: localeCode,
+        uploadEdits: uploadEdits || undefined,
       },
       { addQueryPrefix: true },
     )
@@ -126,7 +141,7 @@ export function PublishButton({
       },
       skipValidation: true,
     })
-  }, [disabled, localeCode, collectionSlug, globalSlug, submit, api, id])
+  }, [disabled, localeCode, collectionSlug, globalSlug, submit, api, id, uploadEdits])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     e.preventDefault()
@@ -144,10 +159,58 @@ export function PublishButton({
       return
     }
 
+    if (localization && hasLocalizedFields) {
+      setIsValidatingLocales(true)
+      let validation
+
+      try {
+        const encodedID = id === undefined ? '' : `/${encodeURIComponent(String(id))}`
+        let validationPath: `/${string}`
+
+        if (globalSlug) {
+          validationPath = `/globals/${encodeURIComponent(globalSlug)}/validate`
+        } else if (collectionSlug) {
+          validationPath = `/${encodeURIComponent(collectionSlug)}${encodedID}/validate`
+        } else {
+          throw new Error('Document validation requires a collection or global slug.')
+        }
+
+        validation = await validateDocumentLocales({
+          activeLocale: localeCode,
+          blocksMap,
+          data: { ...getData(), _status: 'published' },
+          endpoint: formatAdminURL({ apiRoute: api, path: validationPath }),
+          fields: entityConfig?.fields ?? [],
+          locales: localization.locales.map(({ code }) => code),
+        })
+      } catch {
+        toast.error(t('error:unknown'))
+        return
+      } finally {
+        setIsValidatingLocales(false)
+      }
+
+      if (!validation.valid) {
+        const introMessage = t('error:followingFieldsInvalid', { count: validation.errors.length })
+        const fieldList = validation.errors
+          .map(
+            (error) =>
+              `${error.locale ? `[${error.locale}] ` : ''}${
+                error.label ? getTranslation(error.label, i18n) : error.path
+              }`,
+          )
+          .join(', ')
+
+        toast.error(<FieldErrorsToast errorMessage={`${introMessage} ${fieldList}`} />)
+        return
+      }
+    }
+
     const params = qs.stringify(
       {
         depth: 0,
         locale: localeCode,
+        uploadEdits: uploadEdits || undefined,
         ...(localizeStatusEnabled && { publishAllLocales: true }),
       },
       { addQueryPrefix: true },
@@ -176,14 +239,22 @@ export function PublishButton({
     localeCode,
     localizeStatusEnabled,
     api,
+    blocksMap,
     collectionSlug,
+    entityConfig?.fields,
+    getData,
     globalSlug,
+    hasLocalizedFields,
     id,
+    localization,
+    i18n,
     setHasPublishedDoc,
     submit,
     setUnpublishedVersionCount,
+    t,
     uploadStatus,
     setMostRecentVersionIsAutosaved,
+    uploadEdits,
   ])
 
   const publishLocale = useCallback(
@@ -196,6 +267,7 @@ export function PublishButton({
         {
           depth: 0,
           locale,
+          uploadEdits: uploadEdits || undefined,
         },
         { addQueryPrefix: true },
       )
@@ -231,13 +303,9 @@ export function PublishButton({
       setUnpublishedVersionCount,
       submit,
       uploadStatus,
+      uploadEdits,
     ],
   )
-
-  // Publish to all locales unless there are localized fields AND defaultLocalePublishOption is 'active'
-  const isDefaultPublishAll =
-    !isSpecificLocalePublishEnabled ||
-    (localization && localization?.defaultLocalePublishOption !== 'active')
 
   const activeLocale =
     localization &&
@@ -255,36 +323,24 @@ export function PublishButton({
     <React.Fragment>
       <FormSubmit
         buttonId="action-save"
-        disabled={!canPublish}
-        onClick={isDefaultPublishAll ? publish : () => publishLocale(activeLocale.code)}
+        disabled={!canPublish || isValidatingLocales}
+        loading={isValidatingLocales}
+        onClick={isSpecificLocalePublishEnabled ? () => publishLocale(activeLocale.code) : publish}
         size="medium"
         SubMenuPopupContent={
           isSpecificLocalePublishEnabled
-            ? ({ close }) => {
-                return (
-                  <React.Fragment>
-                    {isSpecificLocalePublishEnabled && (
-                      <PopupList.ButtonGroup>
-                        <PopupList.Button
-                          id="publish-locale"
-                          onClick={
-                            isDefaultPublishAll ? () => publishLocale(activeLocale.code) : publish
-                          }
-                        >
-                          {isDefaultPublishAll
-                            ? t('version:publishIn', { locale: activeLocaleLabel })
-                            : t('version:publishAllLocales')}
-                        </PopupList.Button>
-                      </PopupList.ButtonGroup>
-                    )}
-                  </React.Fragment>
-                )
-              }
+            ? () => (
+                <PopupList.ButtonGroup>
+                  <PopupList.Button id="publish-all-locales" onClick={publish}>
+                    {t('version:publishAllLocales')}
+                  </PopupList.Button>
+                </PopupList.ButtonGroup>
+              )
             : undefined
         }
         type="button"
       >
-        {!isDefaultPublishAll ? (
+        {isSpecificLocalePublishEnabled ? (
           t('version:publishIn', { locale: activeLocaleLabel })
         ) : (
           <React.Fragment>

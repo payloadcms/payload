@@ -1,8 +1,17 @@
 import type { PayloadRequest } from 'payload'
 
-import { getSafeFileName } from 'payload/internal'
+import { randomUUID } from 'node:crypto'
+import {
+  createClientUploadReceipt,
+  getOriginalFilename,
+  getSafeFileName,
+  incrementName,
+} from 'payload/internal'
+import { getSanitizedUploadFilename } from 'payload/shared'
 
-import { getFileKey } from './getFileKey.js'
+import type { UploadReference } from '../types.js'
+
+import { buildUploadPrefix, buildUploadStoragePathData } from './buildStoragePathData.js'
 
 type Args = {
   collectionPrefix?: string
@@ -18,8 +27,17 @@ type Args = {
  * the filename via {@link getSafeFileName} so a duplicate upload does not
  * overwrite an existing blob.
  *
+ * A unique per-upload segment is included in the storage key so each issued
+ * key is distinct. The stored `filename` stays clean and the semantic `prefix`
+ * stays exactly what the collection configured — the per-upload entropy is
+ * persisted separately in `_objectKey`.
+ *
  * The resolved `sanitizedFilename` is returned so the browser-side handler
  * can update the form via `updateFilename`.
+ *
+ * The semantic prefix is resolved with {@link buildUploadPrefix} and the final
+ * key with {@link buildUploadStoragePathData}, so the receipt only ever signs a key
+ * beneath the configured collection prefix.
  */
 export async function resolveSignedURLKey({
   collectionPrefix = '',
@@ -28,20 +46,54 @@ export async function resolveSignedURLKey({
   filename,
   req,
   useCompositePrefixes = false,
-}: Args) {
-  const sanitizedFilename = await getSafeFileName({
-    collectionSlug,
-    desiredFilename: filename,
-    prefix: docPrefix,
-    req,
-  })
+}: Args): Promise<{
+  sanitizedDocPrefix: string
+  sanitizedFilename: string
+  storageFilePath: string
+  uploadReference: UploadReference
+}> {
+  // The document stores the -original name, so check collisions against that name.
+  let sanitizedFilename = getSanitizedUploadFilename(filename)
+  let originalFilename = getOriginalFilename({ filename: sanitizedFilename })
 
-  const { fileKey, sanitizedDocPrefix } = getFileKey({
+  while (
+    (await getSafeFileName({ collectionSlug, desiredFilename: originalFilename, req })) !==
+    originalFilename
+  ) {
+    sanitizedFilename = incrementName(sanitizedFilename)
+    originalFilename = getOriginalFilename({ filename: sanitizedFilename })
+  }
+
+  const rawBaseDocPrefix = useCompositePrefixes ? docPrefix : docPrefix || collectionPrefix
+  const { sanitizedDocPrefix } = buildUploadPrefix({
     collectionPrefix,
-    docPrefix,
-    filename: sanitizedFilename,
+    docPrefix: rawBaseDocPrefix,
     useCompositePrefixes,
   })
 
-  return { fileKey, sanitizedDocPrefix, sanitizedFilename }
+  const _objectKey = randomUUID()
+  // Per-upload segment lives in the key; it is persisted in `_objectKey`, keeping `prefix` semantic.
+  const keyedDocPrefix = sanitizedDocPrefix ? `${sanitizedDocPrefix}/${_objectKey}` : _objectKey
+
+  const { storageFilePath } = buildUploadStoragePathData({
+    collectionPrefix,
+    docPrefix: keyedDocPrefix,
+    filename: originalFilename,
+    useCompositePrefixes,
+  })
+
+  const uploadReference = {
+    _objectKey,
+    prefix: sanitizedDocPrefix,
+    signedReceipt: createClientUploadReceipt({
+      _objectKey,
+      collectionSlug,
+      filename: sanitizedFilename,
+      filePrefix: sanitizedDocPrefix,
+      req,
+      storageFilePath,
+    }),
+  }
+
+  return { sanitizedDocPrefix, sanitizedFilename, storageFilePath, uploadReference }
 }

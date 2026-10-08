@@ -1,4 +1,4 @@
-import type { Payload, SanitizedCollectionConfig, SanitizedGlobalConfig, User } from 'payload'
+import type { Payload, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
 import { hasScheduledPublishEnabled } from 'payload/shared'
 
@@ -11,7 +11,6 @@ type Args = {
   hasPublishPermission?: boolean
   id?: number | string
   payload: Payload
-  user: User
 }
 
 export const getHasScheduledPublish = async ({
@@ -20,7 +19,6 @@ export const getHasScheduledPublish = async ({
   globalConfig,
   hasPublishPermission,
   payload,
-  user,
 }: Args): Promise<boolean> => {
   const entityConfig = collectionConfig || globalConfig
   const id = sanitizeID(idArg)
@@ -38,10 +36,8 @@ export const getHasScheduledPublish = async ({
   }
 
   try {
-    const { totalDocs } = await payload.count({
+    const { totalDocs } = await payload.db.count({
       collection: 'payload-jobs',
-      overrideAccess: false,
-      user,
       where: buildUpcomingScheduleWhere({ id, collectionSlug, globalSlug }),
     })
 

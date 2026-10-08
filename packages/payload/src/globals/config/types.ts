@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import type { DeepRequired, IsAny } from 'ts-essentials'
+import type { IsAny } from 'ts-essentials'
 
 import type {
   Access,
@@ -14,6 +14,7 @@ import type {
   StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
+import type { Authorship, SanitizedAuthorship } from '../../fields/baseFields/authorship/types.js'
 import type { Field, FlattenedField } from '../../fields/config/types.js'
 import type {
   GeneratedTypes,
@@ -24,12 +25,31 @@ import type {
   TypedGlobal,
   TypedGlobalSelect,
 } from '../../index.js'
-import type { PayloadRequest, SelectIncludeType, Where, WithSelectFn } from '../../types/index.js'
+import type {
+  FieldOperation,
+  PayloadRequest,
+  SelectIncludeType,
+  Where,
+  WithSelectFn,
+} from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
 
 export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
 
 export type SelectFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobalSelect[TSlug]
+
+export type GlobalAccess<TData = any> = {
+  read?: Access<TData>
+  readVersions?: Access<TData>
+  update?: Access<TData>
+  /**
+   * Controls on-demand validation for this global.
+   * Falls back to `update` access when omitted.
+   * The access function receives `req.operation === 'validate'`.
+   * @see https://payloadcms.com/docs/validation/overview#access-control-and-hooks
+   */
+  validate?: Access<TData>
+}
 
 /**
  * Global slugs that do not have drafts enabled.
@@ -66,11 +86,15 @@ export type DraftFlagFromGlobalSlug<TSlug extends GlobalSlug> = GeneratedTypes e
       draft?: boolean
     }
 
+type GlobalChangeOperation = Extract<FieldOperation, 'update' | 'validate'>
+
 export type BeforeValidateHook = (args: {
   context: RequestContext
   data?: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /** Hook operation being performed. */
+  operation: GlobalChangeOperation
   originalDoc?: any
   /**
    * Whether access control is being overridden for this operation
@@ -84,6 +108,8 @@ export type BeforeChangeHook = (args: {
   data: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /** Hook operation being performed. */
+  operation: GlobalChangeOperation
   originalDoc?: any
   /**
    * Whether access control is being overridden for this operation
@@ -98,6 +124,8 @@ export type AfterChangeHook = (args: {
   doc: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /** Hook operation being performed. */
+  operation: 'update'
   /**
    * Whether access control is being overridden for this operation
    */
@@ -185,18 +213,33 @@ export type GlobalAdminOptions = {
   preview?: GeneratePreviewURL
 }
 
+type GlobalHooks = {
+  afterChange?: AfterChangeHook[]
+  afterRead?: AfterReadHook[]
+  beforeChange?: BeforeChangeHook[]
+  beforeOperation?: BeforeOperationHook[]
+  beforeRead?: BeforeReadHook[]
+  beforeValidate?: BeforeValidateHook[]
+}
+
 export type GlobalConfig<TSlug extends GlobalSlug = any> = {
   /**
    * Do not set this property manually. This is set to true during sanitization, to avoid
    * sanitizing the same global multiple times.
    */
   _sanitized?: boolean
-  access?: {
-    read?: Access
-    readVersions?: Access
-    update?: Access
-  }
+  access?: GlobalAccess
   admin?: GlobalAdminOptions
+  /**
+   * Automatically track the user that created and last updated this global via
+   * polymorphic `createdBy` / `updatedBy` relationship fields to your auth collections.
+   *
+   * Use `true` (default) to enable both, `false` to disable both, or an object to
+   * toggle each field independently, e.g. `{ updatedBy: false }`.
+   *
+   * @default true
+   */
+  authorship?: Authorship | boolean
   /** Extension point to add your custom data. Server only. */
   custom?: GlobalCustom
   /**
@@ -212,15 +255,10 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
         name?: string
       }
     | false
-  hooks?: {
-    afterChange?: AfterChangeHook[]
-    afterRead?: AfterReadHook[]
-    beforeChange?: BeforeChangeHook[]
-    beforeOperation?: BeforeOperationHook[]
-    beforeRead?: BeforeReadHook[]
-    beforeValidate?: BeforeValidateHook[]
-  }
+  hooks?: GlobalHooks
   label?: LabelFunction | StaticLabel
+  /** Read-only Markdown instructions included in this global's MCP and CLI schema responses. */
+  llmInstructions?: string
   /**
    * Enables / Disables the ability to lock documents while editing
    * @default true
@@ -251,14 +289,30 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
 >
 
 export interface SanitizedGlobalConfig
-  extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'slug' | 'versions'> {
+  extends Omit<
+      GlobalConfig,
+      | '_sanitized'
+      | 'access'
+      | 'admin'
+      | 'authorship'
+      | 'custom'
+      | 'endpoints'
+      | 'hooks'
+      | 'label'
+      | 'slug'
+      | 'versions'
+    >,
+    Required<Pick<GlobalConfig, 'admin' | 'custom' | 'label'>> {
+  _sanitized: true
+  access: Required<Pick<GlobalAccess, 'read' | 'readVersions' | 'update' | 'validate'>>
+  authorship: SanitizedAuthorship
   endpoints: Endpoint[] | false
-  fields: Field[]
   /**
    * Fields in the database schema structure
    * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
    */
   flattenedFields: FlattenedField[]
+  hooks: Required<GlobalHooks>
   slug: GlobalSlug
   versions?: SanitizedGlobalVersions
 }
