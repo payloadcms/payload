@@ -344,6 +344,13 @@ export const arTranslations: DefaultTranslationsObject = {
     documentModified: 'تم تعديل المستند',
     documentOutOfDate: 'تم تحديث هذا المستند مؤخرًا بواسطة مستخدم آخر. عرضك غير محدث.',
     documents: 'وثائق',
+    dragCancelled: 'تم إلغاء سحب {{label}}.',
+    dragDropped: 'تم إفلات {{label}}. الموضع {{position}} من {{count}}.',
+    dragInstructions:
+      'اضغط على Space أو Enter لالتقاط صف. استخدم مفاتيح الأسهم لنقله. مع VoiceOver، أوقف Quick Nav واستخدم Command مع مفاتيح الأسهم. اضغط على Space أو Enter للإفلات، أو Escape للإلغاء.',
+    dragMoved: '{{label}}: {{direction}}. الموضع {{position}} من {{count}}.',
+    dragPickedUp: 'تم التقاط {{label}}. الموضع {{position}} من {{count}}.',
+    dragToMove: 'اسحب للنقل',
     dragToReorder: 'اسحب لإعادة الترتيب',
     duplicate: 'استنساخ',
     duplicateWithoutSaving: 'استنساخ بدون حفظ التغييرات',

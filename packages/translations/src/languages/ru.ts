@@ -357,6 +357,13 @@ export const ruTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Этот документ недавно был обновлен другим пользователем. Ваш просмотр устарел.',
     documents: 'Документы',
+    dragCancelled: 'Перетаскивание {{label}} отменено.',
+    dragDropped: '{{label}} отпущен. Позиция {{position}} из {{count}}.',
+    dragInstructions:
+      'Нажмите Space или Enter, чтобы захватить строку. Используйте стрелки для перемещения. С VoiceOver отключите Quick Nav и используйте Command + стрелки. Нажмите Space или Enter, чтобы отпустить, или Escape, чтобы отменить.',
+    dragMoved: '{{label}}: {{direction}}. Позиция {{position}} из {{count}}.',
+    dragPickedUp: '{{label}} захвачен. Позиция {{position}} из {{count}}.',
+    dragToMove: 'Перетащите для перемещения',
     dragToReorder: 'Перетащите для изменения порядка',
     duplicate: 'Дублировать',
     duplicateWithoutSaving: 'Дублирование без сохранения изменений',

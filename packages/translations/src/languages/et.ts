@@ -351,6 +351,13 @@ export const etTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Seda dokumenti on hiljuti värskendanud teine kasutaja. Teie vaade on aegunud.',
     documents: 'Dokumendid',
+    dragCancelled: '{{label}} lohistamine tühistati.',
+    dragDropped: '{{label}} on maha pandud. Asukoht {{position}} / {{count}}.',
+    dragInstructions:
+      'Rea ülesvõtmiseks vajutage Space või Enter. Liigutamiseks kasutage nooleklahve. VoiceOveriga lülitage Quick Nav välja ning kasutage Command + nooleklahve. Mahapanekuks vajutage Space või Enter, tühistamiseks Escape.',
+    dragMoved: '{{label}}: {{direction}}. Asukoht {{position}} / {{count}}.',
+    dragPickedUp: '{{label}} on üles võetud. Asukoht {{position}} / {{count}}.',
+    dragToMove: 'Lohista liigutamiseks',
     dragToReorder: 'Lohistage, et ümber järjestada',
     duplicate: 'Dubleeri',
     duplicateWithoutSaving: 'Dubleeri ilma muudatusi salvestamata',

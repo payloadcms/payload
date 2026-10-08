@@ -346,6 +346,13 @@ export const thTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'เอกสารนี้ได้รับการปรับปรุงเมื่อเร็ว ๆ นี้โดยผู้ใช้คนอื่น มุมมองของคุณล้าสมัยแล้ว',
     documents: 'เอกสาร',
+    dragCancelled: 'ยกเลิกการลาก {{label}} แล้ว',
+    dragDropped: 'วาง {{label}} แล้ว ตำแหน่ง {{position}} จาก {{count}}',
+    dragInstructions:
+      'กด Space หรือ Enter เพื่อหยิบแถว ใช้ปุ่มลูกศรเพื่อย้าย เมื่อใช้ VoiceOver ให้ปิด Quick Nav และใช้ Command + ปุ่มลูกศร กด Space หรือ Enter เพื่อวาง หรือ Escape เพื่อยกเลิก',
+    dragMoved: '{{label}}: {{direction}}. ตำแหน่ง {{position}} จาก {{count}}',
+    dragPickedUp: 'หยิบ {{label}} แล้ว ตำแหน่ง {{position}} จาก {{count}}',
+    dragToMove: 'ลากเพื่อย้าย',
     dragToReorder: 'ลากเพื่อจัดลำดับใหม่',
     duplicate: 'สำเนา',
     duplicateWithoutSaving: 'สำเนาโดยไม่บันทึกการแก้ไข',

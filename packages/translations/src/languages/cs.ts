@@ -349,6 +349,13 @@ export const csTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Tento dokument byl nedávno aktualizován jiným uživatelem. Váš pohled je zastaralý.',
     documents: 'Dokumenty',
+    dragCancelled: 'Přetahování {{label}} bylo zrušeno.',
+    dragDropped: '{{label}} byl puštěn. Pozice {{position}} z {{count}}.',
+    dragInstructions:
+      'Stisknutím Space nebo Enter uchopíte řádek. Pomocí šipek jej přesunete. S VoiceOver vypněte Quick Nav a použijte Command + šipky. Stisknutím Space nebo Enter jej pustíte, Escape akci zruší.',
+    dragMoved: '{{label}}: {{direction}}. Pozice {{position}} z {{count}}.',
+    dragPickedUp: '{{label}} byl uchopen. Pozice {{position}} z {{count}}.',
+    dragToMove: 'Přetažením přesunout',
     dragToReorder: 'Přetáhněte pro změnu pořadí',
     duplicate: 'Duplikovat',
     duplicateWithoutSaving: 'Duplikovat bez uložení změn',

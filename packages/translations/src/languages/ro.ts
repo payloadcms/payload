@@ -359,6 +359,13 @@ export const roTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Acest document a fost actualizat recent de un alt utilizator. Vizualizarea dvs. este depășită.',
     documents: 'Documente',
+    dragCancelled: 'Tragerea {{label}} a fost anulată.',
+    dragDropped: '{{label}} a fost plasat. Poziția {{position}} din {{count}}.',
+    dragInstructions:
+      'Apăsați Space sau Enter pentru a ridica un rând. Folosiți săgețile pentru a-l muta. Cu VoiceOver, dezactivați Quick Nav și folosiți Command + săgețile. Apăsați Space sau Enter pentru a plasa, sau Escape pentru a anula.',
+    dragMoved: '{{label}}: {{direction}}. Poziția {{position}} din {{count}}.',
+    dragPickedUp: '{{label}} a fost ridicat. Poziția {{position}} din {{count}}.',
+    dragToMove: 'Trageți pentru a muta',
     dragToReorder: 'Trage pentru a reordona',
     duplicate: 'Duplicați',
     duplicateWithoutSaving: 'Duplicați fără salvarea modificărilor',

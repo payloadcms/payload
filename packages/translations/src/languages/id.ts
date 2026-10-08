@@ -355,6 +355,13 @@ export const idTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Dokumen ini baru-baru ini diperbarui oleh pengguna lain. Tampilan Anda sudah usang.',
     documents: 'Dokumen',
+    dragCancelled: 'Penyeretan {{label}} dibatalkan.',
+    dragDropped: '{{label}} diletakkan. Posisi {{position}} dari {{count}}.',
+    dragInstructions:
+      'Tekan Space atau Enter untuk mengangkat baris. Gunakan tombol panah untuk memindahkannya. Dengan VoiceOver, nonaktifkan Quick Nav dan gunakan Command + tombol panah. Tekan Space atau Enter untuk meletakkan, atau Escape untuk membatalkan.',
+    dragMoved: '{{label}}: {{direction}}. Posisi {{position}} dari {{count}}.',
+    dragPickedUp: '{{label}} diangkat. Posisi {{position}} dari {{count}}.',
+    dragToMove: 'Seret untuk memindahkan',
     dragToReorder: 'Seret untuk mengurutkan ulang',
     duplicate: 'Duplikat',
     duplicateWithoutSaving: 'Duplikat tanpa menyimpan perubahan',

@@ -358,6 +358,13 @@ export const trTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Bu belge yakın zamanda başka bir kullanıcı tarafından güncellendi. Görünümünüz güncel değil.',
     documents: 'Belgeler',
+    dragCancelled: '{{label}} sürüklemesi iptal edildi.',
+    dragDropped: '{{label}} bırakıldı. {{count}} içinde {{position}}. konum.',
+    dragInstructions:
+      'Bir satırı almak için Space veya Enter tuşuna basın. Taşımak için ok tuşlarını kullanın. VoiceOver ile Quick Nav özelliğini kapatın ve Command + ok tuşlarını kullanın. Bırakmak için Space veya Enter, iptal etmek için Escape tuşuna basın.',
+    dragMoved: '{{label}}: {{direction}}. {{count}} içinde {{position}}. konum.',
+    dragPickedUp: '{{label}} alındı. {{count}} içinde {{position}}. konum.',
+    dragToMove: 'Taşımak için sürükleyin',
     dragToReorder: 'Sürükleyerek yeniden sıralayın',
     duplicate: 'Çoğalt',
     duplicateWithoutSaving: 'Ayarları kaydetmeden çoğalt',

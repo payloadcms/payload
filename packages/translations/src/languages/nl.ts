@@ -360,6 +360,13 @@ export const nlTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Dit document is onlangs bijgewerkt door een andere gebruiker. Uw weergave is verouderd.',
     documents: 'Documenten',
+    dragCancelled: 'Slepen van {{label}} geannuleerd.',
+    dragDropped: '{{label}} neergezet. Positie {{position}} van {{count}}.',
+    dragInstructions:
+      'Druk op Space of Enter om een rij op te pakken. Gebruik de pijltjestoetsen om deze te verplaatsen. Schakel met VoiceOver Quick Nav uit en gebruik Command + pijltjestoetsen. Druk op Space of Enter om neer te zetten, of Escape om te annuleren.',
+    dragMoved: '{{label}}: {{direction}}. Positie {{position}} van {{count}}.',
+    dragPickedUp: '{{label}} opgepakt. Positie {{position}} van {{count}}.',
+    dragToMove: 'Sleep om te verplaatsen',
     dragToReorder: 'Sleep om opnieuw te rangschikken',
     duplicate: 'Dupliceren',
     duplicateWithoutSaving: 'Dupliceren zonder wijzigingen te bewaren',

@@ -352,6 +352,13 @@ export const hrTranslations: DefaultTranslationsObject = {
     documentModified: 'Dokument izmijenjen',
     documentOutOfDate: 'Ovaj dokument je nedavno ažurirao drugi korisnik. Vaš pogled je zastario.',
     documents: 'Dokumenti',
+    dragCancelled: 'Povlačenje {{label}} je otkazano.',
+    dragDropped: '{{label}} je ispušten. Položaj {{position}} od {{count}}.',
+    dragInstructions:
+      'Pritisnite Space ili Enter za podizanje retka. Premještajte ga tipkama sa strelicama. Uz VoiceOver isključite Quick Nav i koristite Command + tipke sa strelicama. Pritisnite Space ili Enter za ispuštanje ili Escape za otkazivanje.',
+    dragMoved: '{{label}}: {{direction}}. Položaj {{position}} od {{count}}.',
+    dragPickedUp: '{{label}} je podignut. Položaj {{position}} od {{count}}.',
+    dragToMove: 'Povucite za premještanje',
     dragToReorder: 'Povucite za promjenu redoslijeda',
     duplicate: 'Duplikat',
     duplicateWithoutSaving: 'Dupliciraj bez spremanja promjena',

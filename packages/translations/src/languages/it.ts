@@ -358,6 +358,13 @@ export const itTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Questo documento è stato recentemente aggiornato da un altro utente. La tua visualizzazione non è aggiornata.',
     documents: 'Documenti',
+    dragCancelled: 'Trascinamento di {{label}} annullato.',
+    dragDropped: '{{label}} rilasciato. Posizione {{position}} di {{count}}.',
+    dragInstructions:
+      'Premi Space o Enter per prendere una riga. Usa le frecce per spostarla. Con VoiceOver, disattiva Quick Nav e usa Command + le frecce. Premi Space o Enter per rilasciare, oppure Escape per annullare.',
+    dragMoved: '{{label}}: {{direction}}. Posizione {{position}} di {{count}}.',
+    dragPickedUp: '{{label}} selezionato per lo spostamento. Posizione {{position}} di {{count}}.',
+    dragToMove: 'Trascina per spostare',
     dragToReorder: 'Trascina per riordinare',
     duplicate: 'Duplica',
     duplicateWithoutSaving: 'Duplica senza salvare le modifiche',

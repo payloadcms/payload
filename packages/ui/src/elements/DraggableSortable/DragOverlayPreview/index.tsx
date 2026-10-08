@@ -9,7 +9,7 @@ const baseClass = 'drag-overlay-preview'
 
 export const DragOverlayPreview: React.FC<{ header: React.ReactNode }> = ({ header }) => {
   return (
-    <div className={baseClass}>
+    <div aria-hidden className={baseClass} inert>
       <Collapsible
         collapsibleStyle="default"
         dragHandleProps={{ id: '', attributes: {}, listeners: undefined }}

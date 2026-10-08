@@ -333,6 +333,13 @@ export const zhTranslations: DefaultTranslationsObject = {
     documentModified: '文档已修改',
     documentOutOfDate: '此文档最近已由其他用户更新。您当前的视图已过期。',
     documents: '文档',
+    dragCancelled: '已取消拖动{{label}}。',
+    dragDropped: '已放下{{label}}。 位置：第{{position}}项，共{{count}}项。',
+    dragInstructions:
+      '按Space或Enter拾起一行。使用方向键移动。使用VoiceOver时，请关闭Quick Nav并使用Command + 方向键。按Space或Enter放下，或按Escape取消。',
+    dragMoved: '{{label}}: {{direction}}. 位置：第{{position}}项，共{{count}}项。',
+    dragPickedUp: '已拾起{{label}}。 位置：第{{position}}项，共{{count}}项。',
+    dragToMove: '拖动以移动',
     dragToReorder: '拖动以重新排序',
     duplicate: '复制',
     duplicateWithoutSaving: '复制副本(不保存更改)。',

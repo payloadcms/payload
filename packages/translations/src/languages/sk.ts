@@ -353,6 +353,13 @@ export const skTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Tento dokument bol nedávno aktualizovaný iným používateľom. Váš pohľad je zastaraný.',
     documents: 'Dokumenty',
+    dragCancelled: 'Presúvanie {{label}} bolo zrušené.',
+    dragDropped: '{{label}} bol pustený. Pozícia {{position}} z {{count}}.',
+    dragInstructions:
+      'Stlačením Space alebo Enter uchopíte riadok. Pomocou šípok ho presuniete. S VoiceOver vypnite Quick Nav a použite Command + šípky. Stlačením Space alebo Enter ho pustíte, Escape akciu zruší.',
+    dragMoved: '{{label}}: {{direction}}. Pozícia {{position}} z {{count}}.',
+    dragPickedUp: '{{label}} bol uchopený. Pozícia {{position}} z {{count}}.',
+    dragToMove: 'Presunutím premiestniť',
     dragToReorder: 'Potiahnite pre zmenu poradia',
     duplicate: 'Duplikovať',
     duplicateWithoutSaving: 'Duplikovať bez uloženia zmien',

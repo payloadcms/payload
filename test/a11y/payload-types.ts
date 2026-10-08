@@ -62,21 +62,18 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_D6CBC3A3".
+ * via the `definition` "LexicalNodes_8D74B2CC".
  */
-export type LexicalNodes_D6CBC3A3 =
+export type LexicalNodes_8D74B2CC =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_D6CBC3A3>
-  | SerializedBlockNode<Callout | NoHandle>
-  | SerializedTableNode<LexicalNodes_D6CBC3A3>
-  | SerializedTableCellNode<LexicalNodes_D6CBC3A3>
-  | SerializedTableRowNode<LexicalNodes_D6CBC3A3>
+  | SerializedParagraphNode<LexicalNodes_8D74B2CC>
+  | SerializedBlockNode<Callout>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
   | SerializedUploadNode<'media-alt'>
-  | SerializedQuoteNode<LexicalNodes_D6CBC3A3>
+  | SerializedQuoteNode<LexicalNodes_8D74B2CC>
   | SerializedRelationshipNode<
       | 'users'
       | 'payload-folders'
@@ -85,25 +82,30 @@ export type LexicalNodes_D6CBC3A3 =
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
+      | 'payload-llm-instructions'
     >
-  | SerializedAutoLinkNode<LexicalNodes_D6CBC3A3, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_D6CBC3A3, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_D6CBC3A3>
-  | SerializedListItemNode<LexicalNodes_D6CBC3A3>
-  | SerializedHeadingNode<LexicalNodes_D6CBC3A3>;
+  | SerializedAutoLinkNode<LexicalNodes_8D74B2CC, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_8D74B2CC, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_8D74B2CC>
+  | SerializedListItemNode<LexicalNodes_8D74B2CC>
+  | SerializedHeadingNode<LexicalNodes_8D74B2CC>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_0E5D99AF".
+ * via the `definition` "LexicalNodes_8B6A9D63".
  */
-export type LexicalNodes_0E5D99AF =
+export type LexicalNodes_8B6A9D63 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_0E5D99AF>
+  | SerializedParagraphNode<LexicalNodes_8B6A9D63>
+  | SerializedBlockNode<Callout | NestedRichText | NoHandle>
+  | SerializedTableNode<LexicalNodes_8B6A9D63>
+  | SerializedTableCellNode<LexicalNodes_8B6A9D63>
+  | SerializedTableRowNode<LexicalNodes_8B6A9D63>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
   | SerializedUploadNode<'media-alt'>
-  | SerializedQuoteNode<LexicalNodes_0E5D99AF>
+  | SerializedQuoteNode<LexicalNodes_8B6A9D63>
   | SerializedRelationshipNode<
       | 'users'
       | 'payload-folders'
@@ -112,12 +114,53 @@ export type LexicalNodes_0E5D99AF =
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
+      | 'payload-llm-instructions'
     >
-  | SerializedAutoLinkNode<LexicalNodes_0E5D99AF, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_0E5D99AF, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_0E5D99AF>
-  | SerializedListItemNode<LexicalNodes_0E5D99AF>
-  | SerializedHeadingNode<LexicalNodes_0E5D99AF>;
+  | SerializedAutoLinkNode<LexicalNodes_8B6A9D63, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_8B6A9D63, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_8B6A9D63>
+  | SerializedListItemNode<LexicalNodes_8B6A9D63>
+  | SerializedHeadingNode<LexicalNodes_8B6A9D63>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_8888827C".
+ */
+export type LexicalNodes_8888827C =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_8888827C>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'media'>
+  | SerializedUploadNode<'media-alt'>
+  | SerializedQuoteNode<LexicalNodes_8888827C>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'payload-folders'
+      | 'posts'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-llm-instructions'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_8888827C, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_8888827C, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_8888827C>
+  | SerializedListItemNode<LexicalNodes_8888827C>
+  | SerializedHeadingNode<LexicalNodes_8888827C>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_4EE6A29F".
+ */
+export type LexicalNodes_4EE6A29F =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_4EE6A29F>
+  | SerializedListNode<LexicalNodes_4EE6A29F>
+  | SerializedListItemNode<LexicalNodes_4EE6A29F>
+  | SerializedHeadingNode<LexicalNodes_4EE6A29F, 'h2' | 'h3' | 'h4'>;
 
 export interface Config {
   auth: {
@@ -134,6 +177,7 @@ export interface Config {
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+    'payload-llm-instructions': PayloadLlmInstruction;
   };
   collectionsJoins: {
     'payload-folders': {
@@ -150,6 +194,7 @@ export interface Config {
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+    'payload-llm-instructions': PayloadLlmInstructionsSelect<false> | PayloadLlmInstructionsSelect<true>;
   };
   db: {
     defaultIDType: string;
@@ -163,6 +208,7 @@ export interface Config {
   };
   locale: 'en' | 'es';
   widgets: {
+    welcome: WelcomeWidget;
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
@@ -282,7 +328,7 @@ export interface Post {
   relatedPost?: (string | null) | Post;
   status?: ('draft' | 'published') | null;
   publishedOn?: string | null;
-  content?: LexicalRichText<LexicalNodes_D6CBC3A3> | null;
+  content?: LexicalRichText<LexicalNodes_8B6A9D63> | null;
   items?:
     | {
         label?: string | null;
@@ -292,18 +338,16 @@ export interface Post {
     | null;
   layout?: (TextBlock | ImageBlock)[] | null;
   publishingNote?: string | null;
+  customLabelRows?:
+    | {
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   customLabelNote?: string | null;
   '_h_payload-folders'?: (string | null) | PayloadFolder;
   readOnlyHierarchy?: (string | PayloadFolder)[] | null;
   featuredImage?: (string | null) | Media;
-  createdBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
   /**
    * @minItems 2
    * @maxItems 2
@@ -329,6 +373,14 @@ export interface Post {
     | boolean
     | null;
   unlabelledSource?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -339,7 +391,7 @@ export interface Post {
  * via the `definition` "TextBlock".
  */
 export interface TextBlock {
-  body?: LexicalRichText<LexicalNodes_0E5D99AF> | null;
+  body?: LexicalRichText<LexicalNodes_8888827C> | null;
   text?: string | null;
   date?: string | null;
   id?: string | null;
@@ -362,6 +414,7 @@ export interface ImageBlock {
  */
 export interface Media {
   id: string;
+  alt: string;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -370,7 +423,6 @@ export interface Media {
     relationTo: 'users';
     value: string | User;
   } | null;
-  alt: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -523,6 +575,28 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-llm-instructions".
+ */
+export interface PayloadLlmInstruction {
+  id: string;
+  entitySlug: string;
+  title?: string | null;
+  entityType: 'collection' | 'global';
+  additionalInstructions?: LexicalRichText<LexicalNodes_4EE6A29F> | null;
+  systemInstructions?: LexicalRichText<LexicalNodes_4EE6A29F> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -607,17 +681,23 @@ export interface PostsSelect<T extends boolean = true> {
             };
       };
   publishingNote?: T;
+  customLabelRows?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
   customLabelNote?: T;
   '_h_payload-folders'?: T;
   readOnlyHierarchy?: T;
   featuredImage?: T;
-  createdBy?: T;
-  updatedBy?: T;
   location?: T;
   settings?: T;
   source?: T;
   unlabelledSettings?: T;
   unlabelledSource?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -628,9 +708,9 @@ export interface PostsSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
   createdBy?: T;
   updatedBy?: T;
-  alt?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -738,6 +818,22 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-llm-instructions_select".
+ */
+export interface PayloadLlmInstructionsSelect<T extends boolean = true> {
+  id?: T;
+  entitySlug?: T;
+  title?: T;
+  entityType?: T;
+  additionalInstructions?: T;
+  systemInstructions?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "menu".
  */
 export interface Menu {
@@ -765,6 +861,16 @@ export interface MenuSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "welcome_widget".
+ */
+export interface WelcomeWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -827,6 +933,16 @@ export interface Callout {
   id: string;
   blockType: 'callout';
   text?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NestedRichText".
+ */
+export interface NestedRichText {
+  id: string;
+  blockType: 'nestedRichText';
+  body?: LexicalRichText<LexicalNodes_8D74B2CC> | null;
   blockName?: string | null;
 }
 /**
@@ -904,27 +1020,6 @@ export type SerializedInlineBlockNode<TFields extends { blockType: string }> = T
   version: number;
   fields: { id: string } & Omit<TFields, 'id'>;
 } : never;
-
-export interface SerializedTableNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
-  type: 'table';
-  colWidths?: number[];
-  frozenColumnCount?: number;
-  frozenRowCount?: number;
-  rowStriping?: boolean;
-}
-export interface SerializedTableRowNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
-  type: 'tablerow';
-  height?: number;
-}
-export interface SerializedTableCellNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
-  type: 'tablecell';
-  backgroundColor?: string | null;
-  colSpan?: number;
-  headerState: number;
-  rowSpan?: number;
-  verticalAlign?: string;
-  width?: number;
-}
 
 export interface SerializedHorizontalRuleNode {
   type: 'horizontalrule';
@@ -1011,6 +1106,27 @@ export interface LexicalRichText<TNode> {
     type: 'root';
     version: number;
   };
+}
+
+export interface SerializedTableNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'table';
+  colWidths?: number[];
+  frozenColumnCount?: number;
+  frozenRowCount?: number;
+  rowStriping?: boolean;
+}
+export interface SerializedTableRowNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'tablerow';
+  height?: number;
+}
+export interface SerializedTableCellNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'tablecell';
+  backgroundColor?: string | null;
+  colSpan?: number;
+  headerState: number;
+  rowSpan?: number;
+  verticalAlign?: string;
+  width?: number;
 }
 
 

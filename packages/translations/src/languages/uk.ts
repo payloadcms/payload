@@ -350,6 +350,13 @@ export const ukTranslations: DefaultTranslationsObject = {
     documentModified: 'Документ змінено',
     documentOutOfDate: 'Цей документ нещодавно оновив інший користувач. Ваш перегляд застарів.',
     documents: 'Документи',
+    dragCancelled: 'Перетягування {{label}} скасовано.',
+    dragDropped: '{{label}} відпущено. Позиція {{position}} із {{count}}.',
+    dragInstructions:
+      'Натисніть Space або Enter, щоб захопити рядок. Використовуйте стрілки для переміщення. З VoiceOver вимкніть Quick Nav і використовуйте Command + стрілки. Натисніть Space або Enter, щоб відпустити, або Escape, щоб скасувати.',
+    dragMoved: '{{label}}: {{direction}}. Позиція {{position}} із {{count}}.',
+    dragPickedUp: '{{label}} захоплено. Позиція {{position}} із {{count}}.',
+    dragToMove: 'Перетягніть для переміщення',
     dragToReorder: 'Перетягніть, щоб змінити порядок',
     duplicate: 'Дублювати',
     duplicateWithoutSaving: 'Дублювання без збереження змін',

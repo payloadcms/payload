@@ -31,6 +31,7 @@ import {
   openBulkUploadDialog,
   openCopyToLocaleDrawer,
   openDashboardEditor,
+  openDragReorderField,
   openDrawerFilters,
   openEditImageDialog,
   openFirstBlockActions,
@@ -114,6 +115,74 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
   })
 
   test.describe('1.3.1 Info and Relationships (A)', () => {
+    for (const kind of ['Array', 'Blocks'] as const) {
+      test(`should announce a meaningful ${kind} row name when picked up`, async ({
+        page,
+        screenReader,
+      }) => {
+        // PYLD-3628
+        const { firstRowLabel, handle } = await openDragReorderField({ kind, page, postsURL })
+
+        await handle.focus()
+        try {
+          const output = await captureScreenReaderOutput({
+            action: () => screenReader.press('Space'),
+            screenReader,
+          })
+
+          await expect(handle).toHaveAttribute('aria-pressed', 'true')
+          expect(output.toLowerCase()).toContain(firstRowLabel.toLowerCase())
+          expect(output).toMatch(/picked up|lifted|dragging/i)
+        } finally {
+          await screenReader.press('Escape')
+        }
+      })
+
+      test(`should announce usable ${kind} pickup movement and drop instructions`, async ({
+        page,
+        screenReader,
+      }) => {
+        // PYLD-3627
+        const { handle } = await openDragReorderField({ kind, page, postsURL })
+        const output = await captureScreenReaderOutput({
+          action: () => handle.focus(),
+          screenReader,
+        })
+
+        expect.soft(output).toMatch(/space|enter/i)
+        expect.soft(output).toMatch(/arrow/i)
+        expect.soft(output).toMatch(/drop/i)
+        expect.soft(output).toMatch(/escape|cancel/i)
+        if (process.platform === 'darwin') {
+          expect(output).toMatch(/command|cmd|quick nav|pass.?through|interact/i)
+        }
+      })
+
+      test(`should announce relative direction and position while dragging the ${kind} row`, async ({
+        page,
+        screenReader,
+      }) => {
+        // PYLD-3626
+        const { handle } = await openDragReorderField({ kind, page, postsURL })
+
+        await handle.focus()
+        await screenReader.press('Space')
+        await expect(handle).toHaveAttribute('aria-pressed', 'true')
+        try {
+          const output = await captureScreenReaderOutput({
+            action: () =>
+              screenReader.press(process.platform === 'darwin' ? 'Meta+ArrowDown' : 'ArrowDown'),
+            screenReader,
+          })
+
+          expect.soft(output).toMatch(/down|after|below/i)
+          expect(output).toMatch(/(?:position|order)(?:\s*:\s*|\s+)2|2 (?:of|out of) 2|second/i)
+        } finally {
+          await screenReader.press('Escape')
+        }
+      })
+    }
+
     test('should encounter the duplicate locale checkbox and label as one screen-reader item', async ({
       // PYLD-3671
       page,
@@ -369,6 +438,35 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     })
   })
   test.describe('2.1.1 Keyboard (A)', () => {
+    for (const kind of ['Array', 'Blocks'] as const) {
+      test(`should drop the ${kind} row with the screen reader active`, async ({
+        page,
+        screenReader,
+      }) => {
+        // PYLD-3625
+        const { handle, rows, values } = await openDragReorderField({ kind, page, postsURL })
+
+        const initialSecondTop = (await rows.nth(1).boundingBox())!.y
+
+        await handle.focus()
+        try {
+          await screenReader.press('Space')
+          await expect(handle).toHaveAttribute('aria-pressed', 'true')
+          await screenReader.press(process.platform === 'darwin' ? 'Meta+ArrowDown' : 'ArrowDown')
+          await expect
+            .poll(async () => (await rows.nth(1).boundingBox())!.y)
+            .toBeLessThan(initialSecondTop)
+          await screenReader.press('Space')
+          await expect(values.nth(0)).toHaveValue('Second drag row')
+          await expect(values.nth(1)).toHaveValue('First drag row')
+          await expect(rows.nth(1).getByRole('button', { name: /drag to reorder/i })).toBeFocused()
+          await expect(page.locator('body')).not.toHaveClass(/is-dragging/)
+        } finally {
+          await screenReader.press('Escape')
+        }
+      })
+    }
+
     test.describe('Requires Windows and NVDA', () => {
       test.skip(process.platform !== 'win32', 'Requires Windows and NVDA')
 
