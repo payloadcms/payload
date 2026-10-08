@@ -249,9 +249,6 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
   }
 }
 
-/**
- * @todo deprecate /types subpath export in 4.0
- */
 export type {
   Args as SQLiteAdapterArgs,
   CountDistinct,
