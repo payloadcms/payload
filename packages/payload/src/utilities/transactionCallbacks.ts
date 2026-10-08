@@ -409,7 +409,7 @@ const closeTransactionScopes = ({
 }): TransactionCallbackEntry[] => {
   const scope = req.context?.[deferredCleanupScopeContextKey] as DeferredCleanupScope | undefined
 
-  if (scope?.transactionID !== transactionID) {
+  if (!scope || scope.transactionID !== transactionID) {
     return []
   }
 

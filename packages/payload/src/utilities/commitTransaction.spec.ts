@@ -25,6 +25,21 @@ test('should allow artifact rollback after a known transaction failure', () => {
   expect(shouldRollbackTransactionArtifacts({ error: new Error('commit failed') })).toBe(true)
 })
 
+test('should not report a cleanup failure when an adapter commits without a transaction ID', async () => {
+  const loggerError = vi.fn()
+  const req = {
+    context: {},
+    payload: {
+      db: { commitTransaction: vi.fn().mockResolvedValue(undefined) },
+      logger: { error: loggerError },
+    },
+  } as unknown as PayloadRequest
+
+  await commitTransaction(req)
+
+  expect(loggerError).not.toHaveBeenCalled()
+})
+
 test('should clear transaction callbacks without running them when the commit result remains unknown', async () => {
   const commitError = {
     errorLabels: ['UnknownTransactionCommitResult'],

@@ -12,6 +12,7 @@ export const deletionSafetyBranchGlobalSlug = 'deletion-safety-branch-settings'
 export const deletionSafetyGlobalSlug = 'deletion-safety-settings'
 export const deletionSafetyVersionedGlobalSlug = 'deletion-safety-versioned-settings'
 export const deletionSafetyMediaSlug = 'deletion-safety-media'
+export const deletionSafetyUnversionedMediaSlug = 'deletion-safety-unversioned-media'
 export const deletionSafetyOwnersSlug = 'deletion-safety-owners'
 export const deletionSafetyTargetsSlug = 'deletion-safety-targets'
 export const deletionSafetyVersionedTargetsSlug = 'deletion-safety-versioned-targets'
@@ -334,6 +335,12 @@ export default buildConfigWithDefaults({
         },
         upload: { staticDir: deletionSafetyMediaDirectory },
         versions: { drafts: { schedulePublish: true } },
+      },
+      {
+        slug: deletionSafetyUnversionedMediaSlug,
+        fields: [{ name: 'alt', type: 'text' }],
+        upload: { staticDir: deletionSafetyMediaDirectory },
+        versions: false,
       },
     ],
     globals: [

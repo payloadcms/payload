@@ -20,6 +20,7 @@ import {
   deletionSafetyMediaSlug,
   deletionSafetyOwnersSlug,
   deletionSafetyTargetsSlug,
+  deletionSafetyUnversionedMediaSlug,
   deletionSafetyVersionedGlobalSlug,
   deletionSafetyVersionedTargetsSlug,
 } from './deletion-safety.config.js'
@@ -2126,7 +2127,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     async ({ payload }) => {
       const originalFileData = Buffer.from('cleanup failure original bytes')
       const upload = await payload.create({
-        collection: deletionSafetyMediaSlug,
+        collection: deletionSafetyUnversionedMediaSlug,
         data: { alt: 'cleanup failure original' },
         file: {
           name: 'cleanup-failure-original.txt',
@@ -2138,12 +2139,12 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
       })
       const replacementFileData = Buffer.from('cleanup failure replacement bytes')
       const cleanupError = new Error('Unable to remove the original upload')
-      const removeSpy = vi.spyOn(fs.promises, 'rm').mockRejectedValueOnce(cleanupError)
+      const unlinkSpy = vi.spyOn(fs.promises, 'unlink').mockRejectedValueOnce(cleanupError)
       const loggerErrorSpy = vi.spyOn(payload.logger, 'error').mockImplementation(() => undefined)
 
       try {
         const result = await payload.update({
-          collection: deletionSafetyMediaSlug,
+          collection: deletionSafetyUnversionedMediaSlug,
           data: { alt: 'cleanup failure replacement' },
           file: {
             name: 'cleanup-failure-replacement.txt',
@@ -2159,10 +2160,10 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
         expect(result.errors).toEqual([])
         expect(loggerErrorSpy).toHaveBeenCalledWith({
           err: expect.any(Error),
-          msg: 'A post-commit cleanup task failed.',
+          msg: expect.stringContaining('Failed to delete unreferenced upload file'),
         })
       } finally {
-        removeSpy.mockRestore()
+        unlinkSpy.mockRestore()
         loggerErrorSpy.mockRestore()
       }
     },
@@ -4069,6 +4070,18 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
     resetDeletionSafetySpy()
 
+    const branchVersionsBeforeDelete = await payload.db.findVersions({
+      branch: false,
+      collection: deletionSafetyMediaSlug,
+      pagination: false,
+      where: {
+        and: [
+          { _branch: { equals: branch.slug } },
+          { 'version.filename': { equals: upload.filename } },
+        ],
+      },
+    })
+
     const result = await payload.delete({
       branch: branch.slug,
       collection: deletionSafetyMediaSlug,
@@ -4081,7 +4094,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
       collection: deletionSafetyMediaSlug,
       limit: 0,
       pagination: false,
-      where: { parent: { equals: upload.id } },
+      where: { id: { in: branchVersionsBeforeDelete.docs.map(({ id }) => id) } },
     })
     const scheduledJobs = await payload.find({
       collection: 'payload-jobs',
@@ -4094,6 +4107,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     expect(result.docs).toHaveLength(1)
     expect(deletionSafetySpy.uploadBeforeDeleteCount).toBe(1)
     expect(deletionSafetySpy.uploadAfterDeleteCount).toBe(1)
+    expect(branchVersionsBeforeDelete.docs.length).toBeGreaterThan(0)
     expect(fs.existsSync(filePath)).toBe(false)
     expect(remainingVersions.docs).toHaveLength(0)
     expect(scheduledJobs.docs).toHaveLength(0)

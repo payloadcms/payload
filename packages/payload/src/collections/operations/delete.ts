@@ -26,6 +26,7 @@ import {
   willBranchAbsorbDelete,
 } from '../../branching/tombstone.js'
 import { MAIN_BRANCH } from '../../branching/types.js'
+import { resolveBranchOwnVersions } from '../../branching/versions.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
@@ -34,8 +35,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import {
-  collectStoredFiles,
-  collectVersionFiles,
+  collectDocumentDeleteFileCandidates,
   scheduleUnreferencedFileCleanup,
 } from '../../uploads/fileVersioning/cleanup.js'
 import {
@@ -223,6 +223,9 @@ export const deleteOperation = async <
     type DeleteEntry = {
       absorbedByBranch: boolean
     } & CheckedDeleteEntry
+    type BranchDeleteEntry = {
+      branchVersionIDs: (number | string)[]
+    } & DeleteEntry
 
     const deletedDocumentIDs = new Map<string, number | string>()
     const hasWriteCapableBeforeDeleteHooks = Boolean(collectionConfig.hooks?.beforeDelete?.length)
@@ -232,8 +235,6 @@ export const deleteOperation = async <
         config.branching?.enabled &&
           config.branching.branchableCollections.has(collectionConfig.slug),
       ) && branch !== MAIN_BRANCH
-    const hasBranchSharedTransaction = isDeletingFromBranch && hasSharedTransaction
-
     const pushError = (id: number | string, error: unknown, message?: string) => {
       errors.push({
         id,
@@ -266,6 +267,60 @@ export const deleteOperation = async <
       }
     }
 
+    const storeDeleteFileCandidates = async ({
+      fullDocument,
+    }: {
+      fullDocument: Doc
+    }): Promise<void> => {
+      const documentID = fullDocument.id
+
+      if (!collectionConfig.upload || deletedFilesByID.has(documentID)) {
+        return
+      }
+
+      const candidates = await collectDocumentDeleteFileCandidates({
+        collection: collectionConfig,
+        doc: fullDocument,
+        parentID: documentID,
+        req,
+      })
+
+      deletedFilesByID.set(documentID, candidates)
+
+      if (candidates.length) {
+        const identity = JSON.stringify([collectionConfig.slug, String(documentID)])
+
+        managedDeletedUploads.add(identity)
+        markedManagedDeletes.add(identity)
+      }
+    }
+
+    const findBranchVersionIDs = async ({
+      fullDocument,
+    }: {
+      fullDocument: Doc
+    }): Promise<(number | string)[]> => {
+      if (!collectionConfig.versions) {
+        return []
+      }
+
+      const where = await resolveBranchOwnVersions({
+        id: fullDocument.id,
+        collectionSlug: collectionConfig.slug,
+        req,
+      })
+      const { docs: versions } = await payload.db.findVersions({
+        branch: false,
+        collection: collectionConfig.slug,
+        limit: 0,
+        pagination: false,
+        req,
+        where,
+      })
+
+      return versions.map(({ id }) => id)
+    }
+
     const runDeleteCleanup = async ({
       fullDocument,
       isTombstone,
@@ -281,29 +336,7 @@ export const deleteOperation = async <
           req,
         }))
 
-      if (collectionConfig.upload) {
-        deletedFilesByID.set(fullDocument.id, [
-          ...(await collectStoredFiles({
-            collection: collectionConfig,
-            doc: fullDocument,
-            req,
-          })),
-          ...(collectionConfig.versions
-            ? await collectVersionFiles({
-                collection: collectionConfig,
-                parentID: fullDocument.id,
-                req,
-              })
-            : []),
-        ])
-
-        if (deletedFilesByID.get(fullDocument.id)?.length) {
-          const identity = JSON.stringify([collectionConfig.slug, String(fullDocument.id)])
-
-          managedDeletedUploads.add(identity)
-          markedManagedDeletes.add(identity)
-        }
-      }
+      await storeDeleteFileCandidates({ fullDocument })
 
       if (!absorbedByBranch) {
         await deleteAssociatedFiles({
@@ -420,7 +453,7 @@ export const deleteOperation = async <
               : entry,
           )
         }
-      } else if (hasBranchSharedTransaction) {
+      } else if (hasSharedTransaction) {
         for (const entry of initiallyChecked) {
           try {
             await runBeforeDeleteHooks({ doc: entry.doc })
@@ -500,7 +533,7 @@ export const deleteOperation = async <
 
       const postHookCheckResults: (CheckedDeleteEntry | null)[] = []
 
-      if (hasBranchSharedTransaction) {
+      if (hasSharedTransaction) {
         for (const entry of lockCheckedAfterHooks) {
           const fullDocument = await assertDeleteUnreferenced({ doc: entry.fullDocument })
 
@@ -613,6 +646,12 @@ export const deleteOperation = async <
           req,
         })
         let branchDeleteOutcome: BranchDeleteOutcome | undefined
+        let branchVersionIDs: (number | string)[] = []
+
+        if (isDeletingFromBranch) {
+          await storeDeleteFileCandidates({ fullDocument })
+          branchVersionIDs = await findBranchVersionIDs({ fullDocument })
+        }
 
         if (!isDeletingFromBranch) {
           await runDeleteCleanup({ fullDocument })
@@ -685,6 +724,7 @@ export const deleteOperation = async <
               slug: collectionConfig.slug,
               payload,
               req,
+              versionIDs: branchVersionIDs,
             })
           }
 
@@ -798,7 +838,7 @@ export const deleteOperation = async <
               clearDeferredCleanupScope({ req, scope: documentCleanupScope })
             }
 
-            if (hasBranchSharedTransaction && hasWriteCapableBeforeDeleteHooks) {
+            if (hasSharedTransaction && hasWriteCapableBeforeDeleteHooks) {
               throw error
             }
 
@@ -854,10 +894,19 @@ export const deleteOperation = async <
 
       const deletedInBatch: (number | string)[] = []
       const branchDeleteOutcomes = new Map<string, BranchDeleteOutcome>()
+      const branchDeleteEntries: BranchDeleteEntry[] = []
 
       try {
         if (isDeletingFromBranch) {
-          for (const { absorbedByBranch, doc } of deletable) {
+          for (const entry of deletable) {
+            const { absorbedByBranch, doc, fullDocument } = entry
+
+            await storeDeleteFileCandidates({ fullDocument })
+            branchDeleteEntries.push({
+              ...entry,
+              branchVersionIDs: await findBranchVersionIDs({ fullDocument }),
+            })
+
             setBranchDeleteOperation({
               branch,
               collectionSlug: collectionConfig.slug,
@@ -926,6 +975,7 @@ export const deleteOperation = async <
               ids,
               payload,
               req,
+              versionIDs: branchDeleteEntries.flatMap(({ branchVersionIDs }) => branchVersionIDs),
             })
           }
 
@@ -993,7 +1043,7 @@ export const deleteOperation = async <
         })
       }
 
-      if (hasBranchSharedTransaction) {
+      if (hasSharedTransaction) {
         for (const entry of deletable) {
           const resultDocument = isDeletingFromBranch
             ? (requireBranchDeleteOutcome({

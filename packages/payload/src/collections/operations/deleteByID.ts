@@ -37,8 +37,8 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import {
+  collectDocumentDeleteFileCandidates,
   collectStoredFiles,
-  collectVersionFiles,
   scheduleUnreferencedFileCleanup,
 } from '../../uploads/fileVersioning/cleanup.js'
 import {
@@ -359,12 +359,12 @@ const deleteByIDOperationAttempt = async <
     })
 
     let deletedFiles = collectionConfig.upload
-      ? [
-          ...(await collectStoredFiles({ collection: collectionConfig, doc: docToDelete!, req })),
-          ...(collectionConfig.versions
-            ? await collectVersionFiles({ collection: collectionConfig, parentID: id, req })
-            : []),
-        ]
+      ? await collectDocumentDeleteFileCandidates({
+          collection: collectionConfig,
+          doc: docToDelete!,
+          parentID: id,
+          req,
+        })
       : []
 
     if (deletedFiles.length) {
