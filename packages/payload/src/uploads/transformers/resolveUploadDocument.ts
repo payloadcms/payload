@@ -8,7 +8,7 @@ import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQu
 export type ResolvedUploadDocument = {
   _transforms?: null | TransformState
   filename: string
-  mimeType: string
+  mimeType: null | string
   original?: { filename?: null | string; mimeType?: null | string } | null
   variants?: Record<string, { filename?: null | string; mimeType?: null | string } | null>
 } & TypeWithID
@@ -61,7 +61,10 @@ export function getRequestedFile({
     }
   }
 
-  return { filename: document.filename, mimeType: document.mimeType }
+  return {
+    filename: document.filename,
+    mimeType: document.mimeType ?? document.original?.mimeType ?? 'application/octet-stream',
+  }
 }
 
 /**

@@ -188,6 +188,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
       jsonSchema: buildTransformStateJSONSchema({
         transformers: config.upload?.transformers ?? [],
       }),
+      label: 'Transforms',
       validate: (value, { collectionSlug, data, req }) => {
         validateTransformState({ collectionSlug, doc: data, req, value })
 

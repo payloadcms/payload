@@ -197,5 +197,6 @@ export type SharpUploadTaskOptions =
       focalPoint?: FocalPoint
       imageResizeConfig: ImageSize
       kind: 'size'
+      metadataFormat?: SharpMetadata['format']
       originalDimensions: ProbedImageSize
     }

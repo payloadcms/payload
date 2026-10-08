@@ -153,7 +153,11 @@ describe('createTransformFile', () => {
           ? true
           : ({ metadata }) => {
               callbackCalls++
-              return policy === 'callback-preserve' && metadata.density === 300
+              return (
+                policy === 'callback-preserve' &&
+                metadata.format === 'jpeg' &&
+                metadata.density === 300
+              )
             }
       const result = await createTransformFile({ sharpDependency: sharp })({
         source: createFileSource({

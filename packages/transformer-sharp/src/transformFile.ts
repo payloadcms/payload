@@ -1,5 +1,5 @@
 import type { PayloadRequest, TransformFileArgs, TransformFileResult } from 'payload'
-import type { ResizeOptions, SharpOptions } from 'sharp'
+import type { Metadata, ResizeOptions, SharpOptions } from 'sharp'
 
 import type { SharpDependency, SharpTransformLimits, SharpUploadTaskOptions } from './types.js'
 
@@ -21,10 +21,12 @@ export function createTransformFile({
   maxSourceBytes = 64 * 1024 * 1024,
   sharpDependency,
   transformLimits,
+  variantSources,
 }: {
   maxSourceBytes?: number
   sharpDependency: SharpDependency
   transformLimits?: SharpTransformLimits
+  variantSources?: WeakMap<File, File>
 }) {
   return async function transformFile({
     doc,
@@ -57,6 +59,7 @@ export function createTransformFile({
         limits: transformLimits,
         mimeType: file.type,
         sharpDependency,
+        shouldDeferEncoding: true,
         // Encoding belongs to the final main output, after configured adjustments.
         state: {
           ...state,
@@ -77,7 +80,7 @@ export function createTransformFile({
     const canonicalFormatOptions = resolveOutputFormat({
       encoding,
       formatOptions,
-      mimeType: file.type,
+      mimeType: input.mimeType,
     })
     const collectionUpload = {
       ...options.collectionUpload,
@@ -88,7 +91,14 @@ export function createTransformFile({
       options.kind === 'main'
         ? {
             ...options,
-            collectionUpload: { ...collectionUpload, formatOptions: canonicalFormatOptions },
+            collectionUpload: {
+              ...collectionUpload,
+              formatOptions:
+                canonicalFormatOptions ??
+                (shouldApplySavedState
+                  ? { format: input.mimeType.slice('image/'.length) as 'jpeg' }
+                  : undefined),
+            },
           }
         : {
             ...options,
@@ -102,12 +112,16 @@ export function createTransformFile({
     if (options.kind === 'main') {
       const result = await transformMain({
         file,
+        metadataFormat: shouldApplySavedState
+          ? (input.mimeType.slice('image/'.length) as 'jpeg')
+          : undefined,
         options,
         req,
         sharpDependency,
         shouldApplyMetadataPolicy: Boolean(
           shouldApplySavedState && typeof withMetadata === 'function',
         ),
+        variantSources,
       })
 
       return shouldApplySavedState && !result.file ? { file, status: 'continue' } : result
@@ -119,16 +133,20 @@ export function createTransformFile({
 
 async function transformMain({
   file,
+  metadataFormat,
   options,
   req,
   sharpDependency,
   shouldApplyMetadataPolicy = false,
+  variantSources,
 }: {
   file: File
+  metadataFormat?: Metadata['format']
   options: Extract<SharpUploadTaskOptions, { kind: 'main' }>
   req: PayloadRequest
   sharpDependency: SharpDependency
   shouldApplyMetadataPolicy?: boolean
+  variantSources?: WeakMap<File, File>
 }): Promise<TransformFileResult> {
   const { collectionUpload, crop } = options
   const { constructorOptions, formatOptions, resizeOptions, trimOptions, withMetadata } =
@@ -180,11 +198,31 @@ async function transformMain({
     sharpFile = sharpFile.trim(trimOptions)
   }
 
-  sharpFile = await optionallyAppendMetadata({ req, sharpFile, withMetadata })
+  sharpFile = await optionallyAppendMetadata({ metadataFormat, req, sharpFile, withMetadata })
+  const variantSource =
+    variantSources &&
+    collectionUpload.variants?.length &&
+    (resizeOptions || trimOptions || constructorOptions)
+      ? new File(
+          [
+            await (
+              fileIsAnimatedType
+                ? sharpFile.clone().webp({ lossless: true })
+                : sharpFile.clone().png()
+            ).toBuffer(),
+          ],
+          file.name,
+          { type: fileIsAnimatedType ? 'image/webp' : 'image/png' },
+        )
+      : file
   const { data: outputData, info } = await sharpFile.toBuffer({ resolveWithObject: true })
+  const output = new File([outputData], file.name, { type: `image/${info.format}` })
+
+  // Only reuse this source when Sharp's result remains the effective main file.
+  variantSources?.set(output, variantSource)
 
   return {
-    file: new File([outputData], file.name, { type: `image/${info.format}` }),
+    file: output,
     status: 'continue',
   }
 }
@@ -310,6 +348,7 @@ async function transformSize({
     })
 
     const metadataAppended = await optionallyAppendMetadata({
+      metadataFormat: options.metadataFormat,
       req,
       sharpFile: resized,
       withMetadata,
@@ -361,7 +400,12 @@ async function transformSize({
     resized = resized.trim(imageResizeConfig.trimOptions)
   }
 
-  resized = await optionallyAppendMetadata({ req, sharpFile: resized, withMetadata })
+  resized = await optionallyAppendMetadata({
+    metadataFormat: options.metadataFormat,
+    req,
+    sharpFile: resized,
+    withMetadata,
+  })
   const { data: outputData, info } = await resized.toBuffer({ resolveWithObject: true })
 
   return {

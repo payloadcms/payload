@@ -36,3 +36,21 @@ export function assertTransformCoverage({
     }
   }
 }
+
+/** Whether this capability alone can execute every saved key exactly once. */
+export function hasCompleteTransformCoverage({
+  pipeline,
+  state,
+}: {
+  pipeline: PlannedTransformer[]
+  state: null | TransformState | undefined
+}): boolean {
+  const keys = Object.keys(state ?? {})
+  const claimed = pipeline.flatMap(({ handledTransformKeys = [] }) => handledTransformKeys)
+
+  return (
+    claimed.length === keys.length &&
+    new Set(claimed).size === keys.length &&
+    claimed.every((key) => keys.includes(key))
+  )
+}

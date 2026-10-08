@@ -9,19 +9,24 @@ import {
   videoEncodingSchema,
 } from './transformStateSchema.js'
 
-/** Validate shared built-in conventions without restricting custom transform keys. */
+/**
+ * Validate shared shapes before execution. MIME-specific encoding is checked only
+ * at the final representation boundary, after converters have selected its format.
+ */
 export function validateTransformState({
   collectionSlug,
   doc,
   req,
+  shouldValidateEncoding = false,
   value,
 }: {
   collectionSlug?: string
   doc?: Document
   req?: PayloadRequest
+  shouldValidateEncoding?: boolean
   value: unknown
 }): void {
-  const errors = getTransformStateErrors({ doc, value })
+  const errors = getTransformStateErrors({ doc, shouldValidateEncoding, value })
 
   if (errors.length) {
     throw new ValidationError({ collection: collectionSlug, errors, req }, req?.t)
@@ -30,9 +35,11 @@ export function validateTransformState({
 
 export function getTransformStateErrors({
   doc,
+  shouldValidateEncoding = true,
   value,
 }: {
   doc?: Document
+  shouldValidateEncoding?: boolean
   value: unknown
 }): ValidationFieldError[] {
   if (value === undefined || value === null) {
@@ -80,7 +87,7 @@ export function getTransformStateErrors({
     addError('pageRange.endPage', 'Page range end must not precede its start.')
   }
 
-  if (state.encoding && typeof doc?.mimeType === 'string') {
+  if (shouldValidateEncoding && state.encoding && typeof doc?.mimeType === 'string') {
     const schema = doc.mimeType.startsWith('image/')
       ? imageEncodingSchema
       : doc.mimeType.startsWith('video/')
@@ -119,7 +126,9 @@ function getJSONErrors({
     typeof value !== 'object' ||
     seen.has(value) ||
     Object.getOwnPropertySymbols(value).length > 0 ||
-    (Array.isArray(value) && Object.keys(value).length !== value.length) ||
+    (Array.isArray(value) &&
+      (Object.keys(value).length !== value.length ||
+        Object.keys(value).some((key, index) => key !== String(index)))) ||
     (!Array.isArray(value) &&
       Object.getPrototypeOf(value) !== Object.prototype &&
       Object.getPrototypeOf(value) !== null)

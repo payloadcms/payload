@@ -10,6 +10,7 @@ import { checkFileAccess } from '../checkFileAccess.js'
 import { retrieveFileResponse } from '../endpoints/getFile.js'
 import { assertTransformCoverage } from '../transformState/assertTransformCoverage.js'
 import { canReuseStoredDefault } from '../transformState/canReuseStoredDefault.js'
+import { validateTransformState } from '../transformState/validateTransformState.js'
 import { createDocumentSnapshot } from './createDocumentSnapshot.js'
 import { createLazySourceGetter } from './createLazySourceGetter.js'
 import { finalizeFileResponse } from './finalizeFileResponse.js'
@@ -90,7 +91,7 @@ export async function handleDynamicFileRequest({
   }) => planRequestPipeline({ collection, doc, mimeType, originalDoc, purpose, req, transformers })
   const persistedPipeline = hasPersistedWork
     ? await planPipeline({
-        mimeType: doc.original?.mimeType ?? doc.mimeType,
+        mimeType: doc.original?.mimeType ?? doc.mimeType ?? 'application/octet-stream',
         purpose: 'persisted-default',
       })
     : []
@@ -199,7 +200,7 @@ export async function handleDynamicFileRequest({
     })
   }
   let currentMimeType = hasPersistedWork
-    ? (doc.original?.mimeType ?? doc.mimeType)
+    ? (doc.original?.mimeType ?? doc.mimeType ?? 'application/octet-stream')
     : getRequestedFile({ document, filename }).mimeType
 
   const initialOverrideMimeType = getRequestedFile({ document, filename }).mimeType
@@ -341,8 +342,12 @@ export async function handleDynamicFileRequest({
               'A persisted transform completed before all saved transforms and request overrides were satisfied.',
             )
           }
+          validateTransformState({ doc, req, shouldValidateEncoding: true, value: doc._transforms })
           return finalize({ response: currentResponse! })
         }
+      }
+      if (phase.purpose === 'persisted-default' && hasPersistedWork) {
+        validateTransformState({ doc, req, shouldValidateEncoding: true, value: doc._transforms })
       }
     }
   } catch (err) {

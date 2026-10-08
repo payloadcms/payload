@@ -107,9 +107,34 @@ Adapters may optionally provide `transformDefinitions`, a map of custom keys to 
 
 On writes, field and document hooks run before transformation. Payload validates transformer changes to the final document before committing it, using the ordinary field-validator context, including the nearest block and the trusted access mode. This validation does not run those hooks a second time. Request-time document changes remain local to the response.
 
+### ⚠️ Breaking Changes: upload hook metadata
+
+`beforeValidate` and `beforeChange` run before file transformers so hooks can set `_transforms`. On a new or replacement upload, `width`, `height`, `mimeType`, `filename`, and `filesize` describe the incoming source at that point. Previous versions processed the file before those hooks. On an edit without a new source, hooks see the existing document metadata until replay runs.
+
+If a hook saves fields calculated from the processed bytes, move that calculation into a transformer after the stage that produces those bytes. Mutate `doc` there; Payload validates and saves those fields with the final file metadata. For example:
+
+```ts
+import type { UploadTransformer } from 'payload'
+import sharp from 'sharp'
+
+const derivedDimensions: UploadTransformer = {
+  slug: 'derived-dimensions',
+  mimeTypes: ['image/*'],
+  transformFile: async ({ doc, source }) => {
+    const bytes = await source.arrayBuffer({ maxBytes: 64 * 1024 * 1024 })
+    const metadata = await sharp(Buffer.from(bytes)).metadata()
+
+    doc.imageDimensions = `${metadata.width} x ${metadata.height}`
+    return { status: 'continue' }
+  },
+}
+```
+
+Place this stage after Sharp or your other image processor. Use `afterChange` for side effects that need the final allocated filename or storage identity, which Payload assigns after transformation. Metadata for a request-only default can remain unknown until delivery; calculate display-only fields on read when appropriate.
+
 `FileSource` exposes `filename`, `mimeType`, optional `size`, lazy `stream()`, bounded `read({ length, offset? })`, and `arrayBuffer({ maxBytes })`. Custom stages can probe temporary or provider sources without eager whole-file downloads. Consumers must declare a whole-file byte limit. Sharp defaults to 64 MiB through `maxSourceBytes`.
 
-Sharp's private variant bridge derives configured variants from the effective main result. Other stages keep their own options and run on the main pipeline; they do not receive Sharp task options.
+Sharp's private variant bridge derives configured variants from the effective main geometry, using original bytes or a lossless intermediate to avoid encoding the main output a second time. Other stages keep their own options and run on the main pipeline; they do not receive Sharp task options.
 
 The stored `filename` is based on the returned `File`'s `name`. Its `mimeType` and extension come from the output bytes when their format can be detected, such as an image converted to WebP. Otherwise, as for text-like output like CSV or JSON, they come from the returned `File`'s `type` and `name`. Set both on the `File` you return when your transformer changes the format.
 

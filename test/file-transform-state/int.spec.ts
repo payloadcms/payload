@@ -373,6 +373,195 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     }
   })
 
+  test('should let a transformer derive persisted fields from final bytes after source metadata hooks', async ({
+    payload,
+  }) => {
+    const collection = payload.collections[mediaSlug].config
+    const hooks = collection.hooks.beforeChange
+    const transformers = payload.config.upload.transformers
+    collection.hooks.beforeChange = [
+      ...hooks,
+      ({ data }) => {
+        data.appliedState = {
+          filesize: data.filesize,
+          height: data.height,
+          mimeType: data.mimeType,
+          width: data.width,
+        }
+        return data
+      },
+    ]
+    payload.config.upload.transformers = [
+      ...transformers,
+      {
+        slug: 'derived-dimensions',
+        mimeTypes: ['image/*'],
+        transformFile: async ({ doc, source }) => {
+          const metadata = await sharp(
+            Buffer.from(await source.arrayBuffer({ maxBytes: 1024 * 1024 })),
+          ).metadata()
+          doc.title = `${metadata.width} x ${metadata.height}`
+          return { status: 'continue' }
+        },
+      },
+    ]
+    try {
+      const data = await createImageBuffer({})
+      const doc = await payload.create({
+        collection: mediaSlug,
+        data: { _transforms: { crop: { height: 5, width: 10, x: 0, y: 0 } } },
+        file: { name: 'hook-metadata.png', data, mimetype: 'image/png', size: data.length },
+      })
+      expect(doc.appliedState).toEqual({
+        filesize: data.length,
+        height: 10,
+        mimeType: 'image/png',
+        width: 20,
+      })
+      expect(doc).toMatchObject({ height: 5, title: '10 x 5', width: 10 })
+      expect(await payload.findByID({ id: doc.id, collection: mediaSlug })).toMatchObject({
+        title: '10 x 5',
+      })
+    } finally {
+      collection.hooks.beforeChange = hooks
+      payload.config.upload.transformers = transformers
+    }
+  })
+
+  test('should select complete request coverage and keep conversion metadata unknown', async ({
+    payload,
+    restClient,
+  }) => {
+    const previous = payload.config.upload.transformers
+    payload.config.upload.transformers = [
+      ...previous,
+      {
+        slug: 'request-webp',
+        canTransform: ({ doc, operation, purpose }) =>
+          operation === 'request' && purpose === 'persisted-default' && doc._transforms?.customWebp
+            ? { canTransform: true, handledTransformKeys: ['customWebp'] }
+            : false,
+        handleRequest: async ({ getSourceFile }) => ({
+          response: new Response(
+            await sharp(Buffer.from(await (await getSourceFile()).arrayBuffer()))
+              .webp()
+              .toBuffer(),
+            {
+              headers: { 'Content-Type': 'image/webp' },
+            },
+          ),
+          status: 'continue',
+        }),
+        mimeTypes: ['image/*'],
+      },
+    ]
+    try {
+      const data = await createImageBuffer({})
+      const doc = await payload.create({
+        collection: mediaSlug,
+        data: { _transforms: { crop: { height: 10, width: 10, x: 0, y: 0 }, customWebp: true } },
+        file: { name: 'request-conversion.png', data, mimetype: 'image/png', size: data.length },
+      })
+      expect(doc).toMatchObject({ filesize: null, height: null, mimeType: null, width: null })
+      expect(doc.variants.small.mimeType).toBeNull()
+      expect(doc.filename).not.toMatch(/\.png$/)
+      const response = await restClient.GET(`/${mediaSlug}/file/${doc.filename}`)
+      expect(response.status).toBe(200)
+      expect(response.headers.get('content-type')).toContain('image/webp')
+      expect(await sharp(Buffer.from(await response.arrayBuffer())).metadata()).toMatchObject({
+        format: 'webp',
+        height: 10,
+        width: 10,
+      })
+      const variant = await restClient.GET(`/${mediaSlug}/file/${doc.variants.small.filename}`)
+      expect(variant.status).toBe(200)
+      expect(await sharp(Buffer.from(await variant.arrayBuffer())).metadata()).toMatchObject({
+        format: 'webp',
+        height: 3,
+        width: 3,
+      })
+      const updated = await payload.update({
+        id: doc.id,
+        collection: mediaSlug,
+        data: { _transforms: { crop: { height: 5, width: 5, x: 0, y: 0 }, customWebp: true } },
+      })
+      expect(updated.mimeType).toBeNull()
+      const next = await restClient.GET(`/${mediaSlug}/file/${updated.filename}`)
+      expect(next.status).toBe(200)
+      expect(await sharp(Buffer.from(await next.arrayBuffer())).metadata()).toMatchObject({
+        format: 'webp',
+        height: 5,
+        width: 5,
+      })
+    } finally {
+      payload.config.upload.transformers = previous
+    }
+  })
+
+  for (const { encoding, expected, label } of [
+    {
+      encoding: { quality: 75 },
+      expected: { format: 'png', mimeType: 'image/png', originalMimeType: 'video/mp4' },
+      label: 'accept image',
+    },
+    {
+      encoding: { videoBitrate: 1000 },
+      expected: { errors: [{ path: '_transforms.encoding' }] },
+      label: 'reject video',
+    },
+  ]) {
+    test(`should ${label} encoding after a video poster conversion`, async ({ payload }) => {
+      const previous = payload.config.upload.transformers
+      const data = await createImageBuffer({})
+      payload.config.upload.transformers = [
+        {
+          slug: 'poster',
+          canTransform: ({ doc }) =>
+            doc._transforms?.posterFrame
+              ? { canTransform: true, handledTransformKeys: ['posterFrame'] }
+              : false,
+          mimeTypes: ['video/*'],
+          transformFile: () =>
+            Promise.resolve({
+              file: new File([data], 'poster.png', { type: 'image/png' }),
+              status: 'continue',
+            }),
+        },
+        previous[0],
+      ]
+      try {
+        const create = payload.create({
+          collection: mediaSlug,
+          data: {
+            _transforms: {
+              encoding,
+              posterFrame: { timestampMs: 0 },
+            },
+          },
+          file: { name: 'video.mp4', data: Buffer.from('video'), mimetype: 'video/mp4', size: 5 },
+        })
+        await expect(
+          create.then(
+            async (doc) => ({
+              format: (
+                await sharp(
+                  await readFile(
+                    path.join(payload.collections[mediaSlug].config.upload.staticDir, doc.filename),
+                  ),
+                ).metadata()
+              ).format,
+              mimeType: doc.mimeType,
+              originalMimeType: doc.original.mimeType,
+            }),
+            (error) => ({ errors: error.data?.errors }),
+          ),
+        ).resolves.toMatchObject(expected)
+      } finally {
+        payload.config.upload.transformers = previous
+      }
+    })
+  }
+
   test('should detect source MIME before validating image encoding intent', async ({ payload }) => {
     const data = await createImageBuffer({ format: 'jpeg' })
     const doc = await payload.create({

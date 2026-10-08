@@ -32,6 +32,7 @@ export async function transformState({
   metadataOptions,
   mimeType,
   sharpDependency,
+  shouldDeferEncoding = false,
   state,
 }: {
   buffer: Buffer
@@ -41,6 +42,7 @@ export async function transformState({
   metadataOptions?: { req: PayloadRequest; withMetadata?: WithMetadata }
   mimeType: string
   sharpDependency: SharpDependency
+  shouldDeferEncoding?: boolean
   state: TransformState
 }): Promise<File> {
   const constructorOptions = {
@@ -51,19 +53,26 @@ export async function transformState({
   const shouldPreserveMetadata = withMetadata === true || typeof withMetadata === 'function'
   const preserveMetadata = ({ image }: { image: ReturnType<SharpDependency> }) =>
     shouldPreserveMetadata ? image.withMetadata({ orientation: 1 }) : image
-  let normalized = await preserveMetadata({
-    image: sharpDependency(buffer, constructorOptions).rotate(),
+  // Geometry steps must not introduce another lossy encode before the final output.
+  const lossless = ({ image }: { image: ReturnType<SharpDependency> }) =>
+    constructorOptions.animated ? image.webp({ lossless: true }) : image.png()
+  let normalized = await lossless({
+    image: preserveMetadata({
+      image: sharpDependency(buffer, constructorOptions).rotate(),
+    }),
   }).toBuffer()
 
   const originalDimensions = await sharpDependency(normalized, constructorOptions).metadata()
 
   if (state.crop) {
-    normalized = await preserveMetadata({
-      image: sharpDependency(normalized, constructorOptions).extract({
-        height: state.crop.height,
-        left: state.crop.x,
-        top: state.crop.y,
-        width: state.crop.width,
+    normalized = await lossless({
+      image: preserveMetadata({
+        image: sharpDependency(normalized, constructorOptions).extract({
+          height: state.crop.height,
+          left: state.crop.x,
+          top: state.crop.y,
+          width: state.crop.width,
+        }),
       }),
     }).toBuffer()
   }
@@ -81,7 +90,9 @@ export async function transformState({
   }
   if (state.resize) {
     const dimensions =
-      state.flip || state.rotate ? await preserveMetadata({ image: output }).toBuffer() : normalized
+      state.flip || state.rotate
+        ? await lossless({ image: preserveMetadata({ image: output }) }).toBuffer()
+        : normalized
     const metadata = await sharpDependency(dimensions, constructorOptions).metadata()
     const sourceHeight = metadata.pageHeight ?? metadata.height
     const sourceWidth = metadata.width
@@ -140,8 +151,14 @@ export async function transformState({
       const width = Math.round(metadata.width * scale)
       const height = Math.round(frameHeight * scale)
       assertWithinLimits({ height, width })
-      const resized = await preserveMetadata({
-        image: sharpDependency(rotated, constructorOptions).resize({ fit: 'fill', height, width }),
+      const resized = await lossless({
+        image: preserveMetadata({
+          image: sharpDependency(rotated, constructorOptions).resize({
+            fit: 'fill',
+            height,
+            width,
+          }),
+        }),
       }).toBuffer()
 
       const cropWidth = Math.min(state.resize.width, width)
@@ -165,6 +182,7 @@ export async function transformState({
   }
   if (metadataOptions) {
     output = await optionallyAppendMetadata({
+      metadataFormat: mimeType.slice('image/'.length) as 'jpeg',
       req: metadataOptions.req,
       sharpFile: output,
       withMetadata,
@@ -174,9 +192,12 @@ export async function transformState({
   }
   const outputFormat = resolveOutputFormat({ encoding: state.encoding, formatOptions, mimeType })
 
-  if (outputFormat) {
-    output = output.toFormat(outputFormat.format, outputFormat.options)
-  }
+  output = shouldDeferEncoding
+    ? lossless({ image: output })
+    : output.toFormat(
+        outputFormat?.format ?? (mimeType.slice('image/'.length) as 'jpeg'),
+        outputFormat?.options,
+      )
 
   const { data, info } = await output.toBuffer({ resolveWithObject: true })
 

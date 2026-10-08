@@ -20,6 +20,17 @@ describe('transform state validation', () => {
     )
   })
 
+  it.each([
+    ['sparse', Object.assign(Array(2), { 0: 'kept', extra: 'lost' })],
+    ['extra property', Object.assign(['kept'], { extra: 'lost' })],
+    ['non-canonical index', Object.assign(Array(1), { '01': 'lost' })],
+    ['missing index', Array(1)],
+  ])('should reject arrays with a %s', (_, custom) => {
+    expect(getTransformStateErrors({ value: { custom } })).toEqual([
+      expect.objectContaining({ path: '_transforms.custom' }),
+    ])
+  })
+
   it('should validate standard shapes under built-in keys', () => {
     expect(getTransformStateErrors({ value: { crop: 'custom' } })).toEqual([
       expect.objectContaining({ path: '_transforms.crop' }),

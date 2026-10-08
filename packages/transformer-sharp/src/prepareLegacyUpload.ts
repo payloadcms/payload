@@ -36,9 +36,11 @@ async function tryProbe(file: File, sharpDependency: SharpDependency) {
 export function createPrepareLegacyUpload({
   collections,
   sharpDependency,
+  variantSources,
 }: {
   collections: Partial<Record<string, SharpCollectionConfig>>
   sharpDependency: SharpDependency
+  variantSources?: WeakMap<File, File>
 }): NonNullable<UploadTransformerInternal['prepareUpload']> {
   return async ({ collectionSlug, doc, file, req, transform, uploadEdits }) => {
     const collectionUpload = collections[collectionSlug] ?? {}
@@ -123,6 +125,13 @@ export function createPrepareLegacyUpload({
 
       const sizeResults = await mapWithBoundedConcurrency(variants, async (rawConfig) => {
         const imageResizeConfig = sanitizeResizeConfig(rawConfig)
+        const variantSource = variantSources?.get(mainResultFile) ?? mainResultFile
+
+        if (variantSource !== mainResultFile && !imageResizeConfig.formatOptions) {
+          imageResizeConfig.formatOptions = {
+            format: mainResultFile.type.slice('image/'.length) as 'jpeg',
+          }
+        }
         const fieldPath = `variants.${imageResizeConfig.name}` as const
 
         const resizeAction = getImageResizeAction({
@@ -137,12 +146,16 @@ export function createPrepareLegacyUpload({
 
         const sizeResultFile = await transform({
           fieldPath,
-          file: mainResultFile,
+          file: variantSource,
           options: {
             collectionUpload,
             focalPoint: resizeAction === 'resizeWithFocalPoint' ? focalPoint : undefined,
             imageResizeConfig,
             kind: 'size',
+            metadataFormat:
+              variantSource !== mainResultFile
+                ? (mainResultFile.type.slice('image/'.length) as 'jpeg')
+                : undefined,
             originalDimensions: effectiveDimensions,
           } satisfies SharpUploadTaskOptions,
         })

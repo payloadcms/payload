@@ -44,7 +44,10 @@ import {
   getUploadTransformerInternal,
   setUploadFilePath,
 } from './transformers/uploadTransformerBridge.js'
-import { assertTransformCoverage } from './transformState/assertTransformCoverage.js'
+import {
+  assertTransformCoverage,
+  hasCompleteTransformCoverage,
+} from './transformState/assertTransformCoverage.js'
 import { resolveTransformStateWrite } from './transformState/resolveTransformStateWrite.js'
 import { validateTransformState } from './transformState/validateTransformState.js'
 import { validateTransformedDocument } from './validateTransformedDocument.js'
@@ -154,6 +157,23 @@ export const generateFileData = async <T>({
       transformers: req.payload.config.upload?.transformers ?? [],
     })
 
+  const planUploadPipeline = async (
+    args: Omit<Parameters<typeof planSavedPipeline>[0], 'capability'>,
+  ) => {
+    const pipeline = await planSavedPipeline({ ...args, capability: 'transformFile' })
+
+    if (
+      !args.doc._transforms ||
+      hasCompleteTransformCoverage({ pipeline, state: args.doc._transforms })
+    ) {
+      return pipeline
+    }
+    const requestPipeline = await planSavedPipeline({ ...args, capability: 'handleRequest' })
+
+    assertTransformCoverage({ pipeline: requestPipeline, state: args.doc._transforms })
+    return []
+  }
+
   const { serverURL } = req.payload.config
 
   let file = isDuplicating ? undefined : req.file
@@ -248,8 +268,7 @@ export const generateFileData = async <T>({
   if (!file && retainedOriginal && transformStateWrite.hasChanged) {
     const candidate = { ...retainedSourceData, ...incomingFileData }
 
-    replayPipeline = await planSavedPipeline({
-      capability: 'transformFile',
+    replayPipeline = await planUploadPipeline({
       doc: candidate,
       mimeType: retainedOriginal.mimeType,
     })
@@ -263,8 +282,7 @@ export const generateFileData = async <T>({
     const duplicateMimeType = currentFileData?.original?.mimeType ?? currentFileData?.mimeType
     const candidate = structuredClone({ ...incomingFileData, mimeType: duplicateMimeType })
     const originalSnapshot = createDocumentSnapshot({ doc: candidate })
-    replayPipeline = await planSavedPipeline({
-      capability: 'transformFile',
+    replayPipeline = await planUploadPipeline({
       doc: candidate,
       mimeType: duplicateMimeType,
       originalDoc: originalSnapshot,
@@ -374,13 +392,15 @@ export const generateFileData = async <T>({
         assertTransformCoverage({ pipeline, state: candidate._transforms })
       }
 
-      const { name: stem, ext } = parseFilename(retainedOriginal.filename)
+      const { name: stem } = parseFilename(retainedOriginal.filename)
       const logicalFilename = hasSavedIntent
-        ? candidate.filename !== retainedOriginal.filename
+        ? candidate.mimeType === null &&
+          candidate.filename !== retainedOriginal.filename &&
+          !parseFilename(candidate.filename).ext
           ? candidate.filename
           : await getSafeFileName({
               collectionSlug: collectionConfig.slug,
-              desiredFilename: `${stem}-default${ext ? `.${ext}` : ''}`,
+              desiredFilename: `${stem}-default`,
               prefix: candidate.prefix,
               req,
               staticPath,
@@ -394,7 +414,6 @@ export const generateFileData = async <T>({
             ? getLogicalDefaultMetadata({
                 collection: collectionConfig,
                 filename: logicalFilename,
-                mimeType: candidate.mimeType ?? retainedOriginal.mimeType,
                 url: undefined,
               })
             : {
@@ -447,7 +466,6 @@ export const generateFileData = async <T>({
   const filesToSave: FileToSave[] = []
   const fileData: Partial<FileData> = {}
   let isRequestOnlyDefault = false
-  let expectedDefaultMimeType: string | undefined
   let sourceDimensions: { height: number; width: number } | undefined
 
   try {
@@ -485,8 +503,7 @@ export const generateFileData = async <T>({
     const pipelineOriginalDoc = createDocumentSnapshot({ doc: workingDoc })
     const plannedPipeline =
       replayPipeline ??
-      (await planSavedPipeline({
-        capability: 'transformFile',
+      (await planUploadPipeline({
         doc: workingDoc,
         originalDoc: pipelineOriginalDoc,
       }))
@@ -519,7 +536,6 @@ export const generateFileData = async <T>({
       })
 
       assertTransformCoverage({ pipeline: requestPipeline, state: workingDoc._transforms })
-      expectedDefaultMimeType = workingDoc.mimeType
     }
 
     if (canRunTransformers && workingDoc._transforms) {
@@ -1008,10 +1024,10 @@ export const generateFileData = async <T>({
   }
 
   if (isRequestOnlyDefault && fileData.original) {
-    const { name: stem, ext } = parseFilename(fileData.original.filename)
+    const { name: stem } = parseFilename(fileData.original.filename)
     const filename = await getSafeFileName({
       collectionSlug: collectionConfig.slug,
-      desiredFilename: `${stem}-default${ext ? `.${ext}` : ''}`,
+      desiredFilename: `${stem}-default`,
       prefix: (newData as Document).prefix,
       req,
       staticPath,
@@ -1022,7 +1038,6 @@ export const generateFileData = async <T>({
       ...getLogicalDefaultMetadata({
         collection: collectionConfig,
         filename,
-        mimeType: expectedDefaultMimeType,
         url: null,
       }),
     }
@@ -1032,6 +1047,7 @@ export const generateFileData = async <T>({
     collectionSlug: collectionConfig.slug,
     doc: newData,
     req,
+    shouldValidateEncoding: true,
     value: (newData as Document)._transforms,
   })
   await validateTransformedDocument({
@@ -1068,12 +1084,10 @@ function getCanonicalUploadEdits({
 function getLogicalDefaultMetadata({
   collection,
   filename,
-  mimeType,
   url,
 }: {
   collection: Collection['config']
   filename: string
-  mimeType: string | undefined
   url: null | undefined
 }) {
   return {
@@ -1081,7 +1095,7 @@ function getLogicalDefaultMetadata({
     filename,
     filesize: null,
     height: null,
-    mimeType,
+    mimeType: null,
     url,
     variants: getLogicalVariants({ collection, filename }),
     width: null,

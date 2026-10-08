@@ -60,6 +60,7 @@ export function sharpTransformer(
   const dynamicDefaults = resolveSharpDynamicDefaults(dynamicOptions || undefined)
   const sharpDependency = options.sharp ?? bundledSharp
   const collections = options.collections ?? {}
+  const variantSources = new WeakMap<File, File>()
   const transformLimits = {
     maxHeight: options.transformLimits?.maxHeight ?? 4096,
     maxPixels: options.transformLimits?.maxPixels ?? 16_777_216,
@@ -138,13 +139,16 @@ export function sharpTransformer(
     [uploadTransformerInternal]: {
       handlesCollection,
       maxSourceBytes,
-      prepareUpload: createPrepareLegacyUpload({ collections, sharpDependency }),
+      prepareUpload: createPrepareLegacyUpload({ collections, sharpDependency, variantSources }),
     },
     // `options` here is always what this transformer computed via `prepareUpload`'s
     // `transform` callback; the public contract's `unknown` just reflects that core never inspects it.
-    transformFile: createTransformFile({ maxSourceBytes, sharpDependency, transformLimits }) as (
-      args: TransformFileArgs,
-    ) => Promise<TransformFileResult>,
+    transformFile: createTransformFile({
+      maxSourceBytes,
+      sharpDependency,
+      transformLimits,
+      variantSources,
+    }) as (args: TransformFileArgs) => Promise<TransformFileResult>,
   }
 
   return transformer

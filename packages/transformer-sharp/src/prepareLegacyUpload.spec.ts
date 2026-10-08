@@ -2,6 +2,11 @@ import type { PayloadRequest, UploadEdits } from 'payload'
 import type { UploadTransformTask } from 'payload/internal'
 
 import { describe, expect, it, vi } from 'vitest'
+import sharp from 'sharp'
+import { getUploadTransformerInternal } from 'payload/internal'
+
+import { createFileSource } from '../../payload/src/uploads/transformers/createFileSource.js'
+import { sharpTransformer } from './sharpTransformer.js'
 
 import type { SharpCollectionConfig, SharpDependency, SharpUploadTaskOptions } from './types.js'
 
@@ -45,6 +50,63 @@ const runPrepareUpload = async ({
 const variants = [{ name: 'card', height: 200, width: 400 }]
 
 describe('createPrepareLegacyUpload', () => {
+  it.each([false, true])(
+    'should encode variants once while preserving main geometry (resize: %s)',
+    async (shouldResizeMain) => {
+      const pixels = Buffer.from(
+        Array.from(
+          { length: 64 * 48 * 3 },
+          (_, index) => (index * 73 + Math.floor(index / 7)) % 256,
+        ),
+      )
+      const input = await sharp(pixels, { raw: { width: 64, height: 48, channels: 3 } })
+        .webp()
+        .toBuffer()
+      const file = new File([input], 'source.webp', { type: 'image/webp' })
+      const resizeOptions = shouldResizeMain
+        ? { width: 40, height: 30, fit: 'fill' as const }
+        : undefined
+      const transformer = sharpTransformer({
+        collections: {
+          media: { resizeOptions, variants: [{ name: 'card', width: 16, height: 12 }] },
+        },
+      })
+      const req = makeReq({ focalPoint: false })
+      const results = await getUploadTransformerInternal(transformer).prepareUpload({
+        collectionSlug: 'media',
+        doc: {},
+        file,
+        req,
+        transform: async (task) => {
+          const sourceFile = task.file ?? file
+          const result = await transformer.transformFile({
+            source: createFileSource({ file: sourceFile }),
+            doc: {},
+            originalDoc: {},
+            options: task.options,
+            req,
+          })
+          return result.file ?? sourceFile
+        },
+      })
+      const variant = results.find(({ fieldPath }) => fieldPath === 'variants.card').file
+      const variantSource = shouldResizeMain
+        ? await sharp(input).rotate().resize(resizeOptions).webp({ lossless: true }).toBuffer()
+        : input
+      const expected = await sharp(variantSource, { animated: true })
+        .rotate()
+        .resize({ width: 16, height: 12 })
+        .webp()
+        .toBuffer()
+      expect(Buffer.from(await variant.arrayBuffer())).toEqual(expected)
+      expect(await sharp(Buffer.from(await variant.arrayBuffer())).metadata()).toMatchObject({
+        width: 16,
+        height: 12,
+        format: 'webp',
+      })
+    },
+  )
+
   it.each([
     { collectionFocalPoint: false, expected: undefined, sharpFocalPoint: undefined },
     { collectionFocalPoint: false, expected: { x: 10, y: 90 }, sharpFocalPoint: true },
