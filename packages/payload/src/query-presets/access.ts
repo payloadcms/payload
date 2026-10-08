@@ -2,18 +2,21 @@ import type { Access, Config } from '../config/types.js'
 import type { Operation } from '../types/index.js'
 
 import { defaultAccess } from '../auth/defaultAccess.js'
+import { defaultUnlockAccess } from '../auth/defaultUnlockAccess.js'
 
-const operations: Operation[] = ['delete', 'read', 'update', 'create'] as const
+type QueryPresetOperation = Exclude<Operation, 'validate'>
+
+const operations: QueryPresetOperation[] = ['delete', 'read', 'update', 'create'] as const
 
 const defaultCollectionAccess = {
   create: defaultAccess,
   delete: defaultAccess,
   read: defaultAccess,
-  unlock: defaultAccess,
+  unlock: defaultUnlockAccess,
   update: defaultAccess,
 }
 
-export const getAccess = (config: Config): Record<Operation, Access> =>
+export const getAccess = (config: Config): Record<QueryPresetOperation, Access> =>
   operations.reduce(
     (acc, operation) => {
       acc[operation] = async (args) => {
@@ -100,5 +103,5 @@ export const getAccess = (config: Config): Record<Operation, Access> =>
 
       return acc
     },
-    {} as Record<Operation, Access>,
+    {} as Record<QueryPresetOperation, Access>,
   )

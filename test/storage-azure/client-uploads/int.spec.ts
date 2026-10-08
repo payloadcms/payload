@@ -1,15 +1,18 @@
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options", "test.for", "test.each"] }] -- Tests use the shared fixture wrapper. */
 import type { ContainerClient } from '@azure/storage-blob'
-import type { UploadInstructions } from 'payload'
+import type { Payload, UploadInstructions } from 'payload'
 
 import { BlobServiceClient, BlockBlobClient } from '@azure/storage-blob'
 import { readFileSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import path from 'path'
+import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 import { expect, vi } from 'vitest'
 
-import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
+import type { RESTClient } from '../../__helpers/shared/RESTClient.js'
 
+import { getStoredUploadKeys } from '../../__helpers/int/storedUploadKeys.js'
 import { test } from '../../__helpers/int/vitest.js'
 import { mediaSlug } from '../shared.js'
 import { mediaHeaderOnlySlug } from './collections/MediaHeaderOnly.js'
@@ -21,7 +24,7 @@ const dirname = path.dirname(filename)
 let containerClient: ContainerClient
 let TEST_CONTAINER: string
 
-test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads', () => {
+test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' }, () => {
   const clearContainer = async () => {
     for await (const blob of containerClient.listBlobsFlat()) {
       await containerClient.deleteBlob(blob.name)
@@ -45,7 +48,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
     file: Buffer
     filename: string
     mimeType: string
-    restClient: NextRESTClient
+    restClient: RESTClient
   }) => {
     const instructions = (await restClient
       .POST('/upload-instructions', {
@@ -86,12 +89,226 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
     await clearContainer()
   })
 
+  const seedLegacyUpload = async ({ payload }: { payload: Payload }) => {
+    const file = await readFile(path.resolve(dirname, '../../uploads/image.png'))
+    const filename = 'legacy.png'
+    const prefix = 'legacy-invoices'
+
+    await containerClient.getBlockBlobClient(`${prefix}/${filename}`).uploadData(file, {
+      blobHTTPHeaders: { blobContentType: 'image/png' },
+    })
+
+    // Seed persisted pre-upgrade metadata directly; current upload hooks must not run.
+    const doc = await payload.db.create({
+      collection: mediaWithDocPrefixSlug,
+      data: {
+        filename,
+        filesize: file.length,
+        mimeType: 'image/png',
+        prefix,
+        url: `/api/${mediaWithDocPrefixSlug}/file/${filename}`,
+      },
+    })
+
+    return { doc: { ...doc, filename, prefix }, file, key: `${prefix}/${filename}` }
+  }
+
+  test('should reject an unmatched query prefix for an existing legacy upload', async ({
+    payload,
+    restClient,
+  }) => {
+    const { doc } = await seedLegacyUpload({ payload })
+    const response = await restClient.GET(
+      `/${mediaWithDocPrefixSlug}/file/${doc.filename}?prefix=unmatched-prefix`,
+    )
+
+    expect(response.status).toBe(403)
+  })
+
+  test('should reuse the access-checked document for an image-size filename without a second lookup', async ({
+    payload,
+    restClient,
+  }) => {
+    const file = await readFile(path.resolve(dirname, '../../uploads/image.png'))
+    const sizeFilename = 'legacy-thumbnail.png'
+    const prefix = 'legacy-thumbnails'
+
+    await containerClient.getBlockBlobClient(`${prefix}/${sizeFilename}`).uploadData(file, {
+      blobHTTPHeaders: { blobContentType: 'image/png' },
+    })
+
+    const doc = await payload.db.create({
+      collection: mediaHeaderOnlyWithSizesSlug,
+      data: {
+        filename: 'legacy-original.png',
+        mimeType: 'image/png',
+        prefix,
+        variants: { thumbnail: { filename: sizeFilename, mimeType: 'image/png' } },
+      },
+    })
+    const collection = payload.collections[mediaHeaderOnlyWithSizesSlug].config
+    const originalRead = collection.access.read
+    const findSpy = vi.spyOn(payload, 'find')
+
+    collection.access.read = () => ({ id: { equals: doc.id } })
+
+    try {
+      const response = await restClient.GET(`/${mediaHeaderOnlyWithSizesSlug}/file/${sizeFilename}`)
+
+      expect(response.status).toBe(200)
+      expect(Buffer.from(await response.arrayBuffer())).toEqual(file)
+      expect(
+        findSpy.mock.calls.filter(([args]) => args.collection === mediaHeaderOnlyWithSizesSlug),
+      ).toHaveLength(0)
+    } finally {
+      collection.access.read = originalRead
+      findSpy.mockRestore()
+    }
+  })
+
+  test('should serve and transform only the access-checked document when another prefix has the same filename', async ({
+    payload,
+    restClient,
+  }) => {
+    const sharedFilename = 'shared.png'
+    const seeded = await Promise.all(
+      [
+        { fixture: 'image.png', prefix: 'tenant-a', resizedHeight: 32 },
+        { fixture: 'small.png', prefix: 'tenant-b', resizedHeight: 8 },
+      ].map(async ({ fixture, prefix, resizedHeight }) => {
+        const file = await readFile(path.resolve(dirname, `../../uploads/${fixture}`))
+
+        await containerClient.getBlockBlobClient(`${prefix}/${sharedFilename}`).uploadData(file, {
+          blobHTTPHeaders: { blobContentType: 'image/png' },
+        })
+
+        const doc = await payload.db.create({
+          collection: mediaWithDocPrefixSlug,
+          data: { filename: sharedFilename, filesize: file.length, mimeType: 'image/png', prefix },
+        })
+
+        return { doc, file, resizedHeight }
+      }),
+    )
+    const collection = payload.collections[mediaWithDocPrefixSlug].config
+    const originalRead = collection.access.read
+
+    try {
+      // The unfiltered filename lookup can only match one of the two documents, so allowing
+      // each in turn makes one iteration hit a lookup that matched the unreadable document.
+      for (const { doc, file, resizedHeight } of seeded) {
+        collection.access.read = () => ({ id: { equals: doc.id } })
+
+        const original = await restClient.GET(`/${mediaWithDocPrefixSlug}/file/${sharedFilename}`)
+
+        expect(Buffer.from(await original.arrayBuffer())).toEqual(file)
+
+        const resized = await restClient.GET(
+          `/${mediaWithDocPrefixSlug}/file/${sharedFilename}?width=32`,
+        )
+        const metadata = await sharp(Buffer.from(await resized.arrayBuffer())).metadata()
+
+        expect(metadata.height).toBe(resizedHeight)
+      }
+    } finally {
+      collection.access.read = originalRead
+    }
+  })
+
   /**
-   * When a doc with the same filename already exists, the upload-instructions
-   * endpoint should sanitize the filename (e.g. `duplicate-target-1.png`) so the
-   * browser SDK upload lands on a fresh blob instead of overwriting the existing one.
+   * `prefix` is an ordinary writable field, so this locks in that a metadata-only request
+   * cannot repoint an existing document at an object outside the collection prefix.
+   * `sanitizeUploadData` drops an incoming `prefix` on update, and the containment hooks
+   * are the second line of defence if that ever changes.
    */
-  test('sanitizes the filename when a duplicate already exists', async ({
+  test('should ignore a foreign document prefix supplied without a file', async ({
+    payload,
+    restClient,
+  }) => {
+    const { doc, file } = await seedLegacyUpload({ payload })
+    const foreignKey = `tenant-b/private/${doc.filename}`
+
+    await containerClient
+      .getBlockBlobClient(foreignKey)
+      .uploadData(Buffer.from('another tenant object'), {
+        blobHTTPHeaders: { blobContentType: 'image/png' },
+      })
+
+    const response = await restClient.PATCH(`/${mediaWithDocPrefixSlug}/${doc.id}`, {
+      body: JSON.stringify({ prefix: 'tenant-b/private' }),
+    })
+
+    expect(response.status).toBe(200)
+
+    const updated = await payload.findByID({
+      id: doc.id,
+      collection: mediaWithDocPrefixSlug,
+      overrideAccess: true,
+    })
+
+    expect(updated.prefix).toBe(doc.prefix)
+
+    const fileResponse = await restClient.GET(`/${mediaWithDocPrefixSlug}/file/${doc.filename}`)
+
+    expect(Buffer.from(await fileResponse.arrayBuffer())).toEqual(file)
+    expect(await containerClient.getBlockBlobClient(foreignKey).exists()).toBe(true)
+  })
+
+  test('should prefer the exact legacy object when both old and contained keys exist', async ({
+    payload,
+    restClient,
+  }) => {
+    const { doc, file, key } = await seedLegacyUpload({ payload })
+    await containerClient
+      .getBlockBlobClient(`docprefix-collection/${key}`)
+      .uploadData(Buffer.from('different object'))
+
+    const response = await restClient.GET(
+      `/${mediaWithDocPrefixSlug}/file/${doc.filename}?prefix=${doc.prefix}`,
+    )
+
+    expect(response.status).toBe(200)
+    expect(Buffer.from(await response.arrayBuffer())).toEqual(file)
+  })
+
+  test('should delete an existing upload at its pre-upgrade object key', async ({ payload }) => {
+    const { doc, key } = await seedLegacyUpload({ payload })
+
+    await payload.delete({ id: doc.id, collection: mediaWithDocPrefixSlug, overrideAccess: true })
+
+    expect(await containerClient.getBlockBlobClient(key).exists()).toBe(false)
+  })
+
+  test('should replace a legacy upload inside the collection prefix and clean up its old object', async ({
+    payload,
+  }) => {
+    const { doc, key } = await seedLegacyUpload({ payload })
+    const updated = await payload.update({
+      id: doc.id,
+      collection: mediaWithDocPrefixSlug,
+      data: {},
+      filePath: path.resolve(dirname, '../../uploads/image.png'),
+      overrideAccess: true,
+    })
+
+    expect(updated.prefix).toBe('docprefix-collection/legacy-invoices')
+    const stored = await payload.db.findOne({
+      collection: mediaWithDocPrefixSlug,
+      where: { id: { equals: doc.id } },
+    })
+    const currentKey = getStoredUploadKeys({
+      collectionSlug: mediaWithDocPrefixSlug,
+      doc: stored,
+      payload,
+    }).find((key) => key.endsWith(`/${updated.filename}`))
+
+    expect(currentKey?.startsWith(`${updated.prefix}/`)).toBe(true)
+    expect(await containerClient.getBlockBlobClient(currentKey!).exists()).toBe(true)
+    expect(await containerClient.getBlockBlobClient(key).exists()).toBe(false)
+  })
+
+  /** A second upload must keep both its document name and provider object distinct. */
+  test('should issue a unique filename when a duplicate already exists', async ({
     payload,
     restClient,
   }) => {
@@ -106,7 +323,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
     const { doc: seedDoc }: { doc: { filename: string; id: number | string } } =
       await seedRes.json()
 
-    expect(seedDoc.filename).toBe(dupFilename)
+    expect(seedDoc.filename).toBe('duplicate-target-original.png')
 
     const signedURLRes = await restClient.POST('/upload-instructions', {
       body: JSON.stringify({
@@ -120,11 +337,16 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
     expect(signedURLRes.status).toBe(200)
     const instructions = (await signedURLRes.json()) as UploadInstructions
     expect(instructions.type).toBe('dispatch')
+
     expect(instructions.file).toEqual({
-      uploadReference: { prefix: '' },
       filename: 'duplicate-target-1.png',
       mimeType: 'image/png',
       size: fileBuffer.length,
+      uploadReference: {
+        _objectKey: expect.stringMatching(/^[0-9a-f-]+$/),
+        prefix: '',
+        signedReceipt: expect.any(String),
+      },
     })
 
     if (instructions.type !== 'dispatch') {
@@ -138,23 +360,48 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
       new URL(signedURL).pathname.replace(`/devstoreaccount1/${TEST_CONTAINER}/`, ''),
     )
 
-    expect(blobKey).toBe('duplicate-target-1.png')
+    expect(blobKey).toMatch(/^[0-9a-f-]+\/duplicate-target-1-original\.png$/)
 
-    await payload.delete({ id: seedDoc.id, collection: mediaSlug })
+    await new BlockBlobClient(signedURL).uploadData(fileBuffer, {
+      blobHTTPHeaders: { blobContentType: 'image/png' },
+    })
+    const secondForm = new FormData()
+    secondForm.append('file', JSON.stringify(instructions.file))
+    const secondResponse = await restClient.POST(`/${mediaSlug}`, { body: secondForm })
+    const { doc: secondDoc }: { doc: { filename: string; id: number | string } } =
+      await secondResponse.json()
+
+    expect(secondResponse.status).toBe(201)
+    expect(secondDoc.filename).toBe('duplicate-target-1-original.png')
+    expect(await containerClient.getBlobClient(blobKey).exists()).toBe(true)
+
+    await payload.delete({ id: seedDoc.id, collection: mediaSlug, overrideAccess: true })
+    await payload.delete({ id: secondDoc.id, collection: mediaSlug, overrideAccess: true })
   })
 
-  test('preserves a user-defined prefix.defaultValue across the plugin', async ({ payload }) => {
+  test('should preserve prefix.defaultValue while storing the file beneath the collection prefix', async ({
+    payload,
+  }) => {
     const upload = await payload.create({
       collection: mediaWithDocPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../../uploads/image.png'),
+      overrideAccess: true,
     })
 
-    expect(upload.prefix).toMatch(/^doc-[a-z0-9]{1,8}$/)
+    expect(upload.prefix).toMatch(/^docprefix-collection\/doc-[a-z0-9]{1,8}$/)
+    const stored = await payload.db.findOne({
+      collection: mediaWithDocPrefixSlug,
+      where: { id: { equals: upload.id } },
+    })
+    const currentKey = getStoredUploadKeys({
+      collectionSlug: mediaWithDocPrefixSlug,
+      doc: stored,
+      payload,
+    }).find((key) => key.endsWith(`/${upload.filename}`))
 
-    const props = await containerClient
-      .getBlobClient(`${upload.prefix}/${upload.filename}`)
-      .getProperties()
+    expect(currentKey?.startsWith(`${upload.prefix}/`)).toBe(true)
+    const props = await containerClient.getBlobClient(currentKey!).getProperties()
     expect(props.contentLength).toBeGreaterThan(0)
   })
 
@@ -169,21 +416,20 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
    *
    * The same collection also covers the `'none'` content requirement: content requirement
    * depends on the uploaded MIME type as well as collection configuration, so `audio/mpeg`
-   * selects `'none'` while `image/jpeg` selects `'header'`.
+   * selects `'none'` (its only transformer declines it) while `image/jpeg` selects `'header'`
+   * and `text/plain`, which a transformer handles, needs the whole file.
    */
   test.describe('header-only and no-content requirements (real Azure handler)', () => {
     const createdIds: (number | string)[] = []
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdIds) {
-        await payload.delete({ id, collection: mediaHeaderOnlySlug })
+        await payload.delete({ id, collection: mediaHeaderOnlySlug, overrideAccess: true })
       }
       createdIds.length = 0
     })
 
-    test('does not read a client-uploaded non-image when metadata is sufficient', async ({
-      restClient,
-    }) => {
+    test('verifies a client-uploaded non-image with a bounded read', async ({ restClient }) => {
       const file = readFileSync(path.resolve(dirname, '../../uploads/audio.mp3'))
       expect(file.length).toBe(23_334)
 
@@ -207,12 +453,43 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
 
         expect(doc.filesize).toBe(23_334)
         expect(doc.mimeType).toBe('audio/mpeg')
-        expect(getPropertiesSpy).not.toHaveBeenCalled()
-        expect(downloadSpy).not.toHaveBeenCalled()
+        expect(getPropertiesSpy).toHaveBeenCalledOnce()
+        expect(downloadSpy).toHaveBeenCalledWith(0, 1, expect.any(Object))
       } finally {
         getPropertiesSpy.mockRestore()
         downloadSpy.mockRestore()
       }
+    })
+
+    test('fetches the whole client-uploaded file for a transformer that handles its type', async ({
+      restClient,
+    }) => {
+      const form = await stageAzureClientUpload({
+        collectionSlug: mediaHeaderOnlySlug,
+        file: Buffer.from('client text'),
+        filename: 'note.txt',
+        mimeType: 'text/plain',
+        restClient,
+      })
+
+      const downloadSpy = vi.spyOn(BlockBlobClient.prototype, 'download')
+
+      try {
+        const createRes = await restClient.POST(`/${mediaHeaderOnlySlug}`, { body: form })
+        expect(createRes.status).toBe(201)
+
+        const { doc } = await createRes.json()
+        createdIds.push(doc.id)
+
+        expect(downloadSpy).toHaveBeenCalledTimes(1)
+        expect(downloadSpy.mock.calls[0]![1]).toBeUndefined()
+      } finally {
+        downloadSpy.mockRestore()
+      }
+
+      const stored = await restClient.GET(`/${mediaHeaderOnlySlug}/file/note.txt`)
+
+      expect(await stored.text()).toBe('CLIENT TEXT')
     })
 
     test('creates a document from a client-uploaded image via the real Azure handler', async ({
@@ -258,18 +535,18 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
   })
 
   /**
-   * `media-header-only-with-sizes` has `imageSizes` configured but no `resizeOptions`, so a
+   * `media-header-only-with-sizes` has `variants` configured but no `resizeOptions`, so a
    * client upload larger than `HEADER_PROBE_BYTE_LENGTH` (1MB) is a regression test for a bug
-   * where `getFileContentRequirement` ignored `imageSizes` and chose the `'header'` content
+   * where `getFileContentRequirement` ignored `variants` and chose the `'header'` content
    * requirement anyway - handing `createImageSizes` a truncated buffer and crashing instead of
    * fetching the full file through the real Azure handler.
    */
-  test.describe('imageSizes with a large upload (real Azure handler)', () => {
+  test.describe('variants with a large upload (real Azure handler)', () => {
     const createdIds: (number | string)[] = []
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdIds) {
-        await payload.delete({ id, collection: mediaHeaderOnlyWithSizesSlug })
+        await payload.delete({ id, collection: mediaHeaderOnlyWithSizesSlug, overrideAccess: true })
       }
       createdIds.length = 0
     })
@@ -301,9 +578,9 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
 
         expect(doc.filesize).toBe(file.length)
         expect(doc.mimeType).toBe('image/jpeg')
-        expect(doc.sizes.thumbnail.width).toBe(400)
-        expect(doc.sizes.thumbnail.height).toBe(300)
-        expect(doc.sizes.thumbnail.filename).toBeTruthy()
+        expect(doc.variants.thumbnail.width).toBe(400)
+        expect(doc.variants.thumbnail.height).toBe(300)
+        expect(doc.variants.thumbnail.filename).toBeTruthy()
 
         expect(downloadSpy).toHaveBeenCalledTimes(1)
 

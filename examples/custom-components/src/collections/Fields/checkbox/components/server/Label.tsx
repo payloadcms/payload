@@ -1,9 +1,9 @@
-import type { CheckboxFieldLabelServerComponent } from 'payload'
+import type { CheckboxFieldLabelServerProps } from 'payload'
 
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomCheckboxFieldLabelServer: CheckboxFieldLabelServerComponent = ({
+export const CustomCheckboxFieldLabelServer: React.FC<CheckboxFieldLabelServerProps> = ({
   clientField,
   path,
 }) => {

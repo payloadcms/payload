@@ -32,10 +32,19 @@ export const withBaseAccess = (options: Args): Access => {
       slug: options.slug,
     }
     const { baseAccess } = args.req.payload.config
-    const baseAccessFunction =
-      options.entityType === 'collection'
-        ? baseAccess?.collections?.[options.operation]
-        : baseAccess?.globals?.[options.operation]
+    let baseAccessFunction: Access | undefined
+
+    if (options.entityType === 'collection') {
+      baseAccessFunction =
+        options.operation === 'validate'
+          ? (baseAccess?.collections?.validate ?? baseAccess?.collections?.update)
+          : baseAccess?.collections?.[options.operation]
+    } else {
+      baseAccessFunction =
+        options.operation === 'validate'
+          ? (baseAccess?.globals?.validate ?? baseAccess?.globals?.update)
+          : baseAccess?.globals?.[options.operation]
+    }
 
     if (!baseAccessFunction) {
       return documentAccess(accessArgs)

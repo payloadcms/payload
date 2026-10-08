@@ -36,6 +36,8 @@ export type ColumnPreference = {
 
 export type CollectionPreferences = {
   columns?: ColumnPreference[]
+  /** Controls whether a collection renders documents as a table or a grid of cards */
+  documentLayout?: 'grid' | 'table'
   editViewType?: 'default' | 'live-preview'
   groupBy?: string
   limit?: number
@@ -59,4 +61,12 @@ export type RecentlyViewedItem = {
  */
 export type RecentlyViewedPreferences = {
   items: RecentlyViewedItem[]
+}
+
+/** A document identity stored in the user's pinned documents preference. */
+export type PinnedDocument = Pick<RecentlyViewedItem, 'collectionSlug' | 'id'>
+
+/** The `pinned-documents` preference value, with the newest pins first. */
+export type PinnedDocumentsPreferences = {
+  items: PinnedDocument[]
 }

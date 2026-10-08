@@ -2,14 +2,18 @@ import type {
   CollectionConfig,
   Field,
   FileData,
+  FileHandlerOperation,
   ImageSize,
   PayloadHandler,
   PayloadRequest,
+  SanitizedCollectionConfig,
   TypeWithID,
   UploadCollectionSlug,
   UploadInstructionsAccess,
   UploadInstructionsCapability,
 } from 'payload'
+
+export type { FileHandlerOperation } from 'payload'
 
 export interface File {
   buffer: Buffer
@@ -22,11 +26,26 @@ export interface File {
 
 export type ClientUploadsConfig = { access?: UploadInstructionsAccess } | boolean
 
+/**
+ * Reference to a client-uploaded object, returned by an upload handler and
+ * submitted with the document. Always carries the signed receipt; `prefix`
+ * locates the stored object.
+ */
+export type UploadReference = {
+  _objectKey?: string
+  prefix: string
+  signedReceipt: `${string}.${string}`
+}
+
 export type HandleUpload = (args: {
   collection: CollectionConfig
   data: any
   file: File
   req: PayloadRequest
+  /**
+   * Pre-resolved storage path (`_objectKey` folded in, contained beneath the collection prefix).
+   */
+  storageFilePath: string
 }) =>
   | Partial<FileData & TypeWithID>
   | Promise<Partial<FileData & TypeWithID>>
@@ -42,7 +61,31 @@ export type HandleDelete = (args: {
   doc: FileData & TypeWithID & TypeWithPrefix
   filename: string
   req: PayloadRequest
+  /**
+   * Pre-resolved storage path of the object to delete.
+   */
+  storageFilePath: string
 }) => Promise<void> | void
+
+/** Deletes a stored object without requiring a saved document. */
+export type DeleteFile = (args: {
+  collection: CollectionConfig
+  req: PayloadRequest
+  /** Complete storage path, with prefixes and `_objectKey` already resolved. */
+  storageFilePath: string
+}) => Promise<void> | void
+
+/** Complete storage keys are resolved before invoking a provider operation. */
+export type FileOperationArgs = {
+  collection: SanitizedCollectionConfig
+  from: string
+  mimeType?: string
+  req: PayloadRequest
+  to: string
+}
+
+export type CopyFile = (args: FileOperationArgs) => Promise<void>
+export type MoveFile = (args: FileOperationArgs) => Promise<void>
 
 export type GenerateURL = (args: {
   collection: CollectionConfig
@@ -56,11 +99,20 @@ export type StaticHandler = (
   args: {
     doc?: TypeWithID
     headers?: Headers
-    params: { collection: string; filename: string; prefix?: string; uploadReference?: unknown }
+    params: {
+      collection: string
+      filename: string
+      operation?: FileHandlerOperation
+      prefix?: string
+      uploadReference?: unknown
+    }
   },
 ) => Promise<Response> | Response
 
 export interface GeneratedAdapter {
+  /** Preserve object metadata and fail if `to` already exists. Rename retains `from` for history. */
+  copyFile: CopyFile
+  deleteFile: DeleteFile
   /**
    * Additional fields to be injected into the base collection and image sizes
    */
@@ -71,9 +123,12 @@ export interface GeneratedAdapter {
   generateURL?: GenerateURL
   handleDelete: HandleDelete
   handleUpload: HandleUpload
+  moveFile?: MoveFile
   name: string
-  onInit?: () => void
+  onInit?: () => Promise<void> | void
   staticHandler: StaticHandler
+  /** Reads source files by path when staging server-mediated uploads. */
+  supportsTempFiles?: boolean
   /** Generates upload instructions when supported. */
   uploadInstructions?: {
     adminHandler?: {
@@ -114,16 +169,6 @@ export interface CollectionOptions {
 }
 
 export interface PluginOptions {
-  /**
-   * When enabled, fields (like the prefix field) will always be inserted into
-   * the collection schema regardless of whether the plugin is enabled. This
-   * ensures a consistent schema across all environments.
-   *
-   * This will be enabled by default in Payload v4.
-   *
-   * @default false
-   */
-  alwaysInsertFields?: boolean
   collections: Partial<Record<UploadCollectionSlug, CollectionOptions>>
   /**
    * Whether or not to enable the plugin

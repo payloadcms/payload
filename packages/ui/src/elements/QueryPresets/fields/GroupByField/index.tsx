@@ -1,5 +1,5 @@
 'use client'
-import type { TextFieldClientComponent } from 'payload'
+import type { TextFieldClientProps } from 'payload'
 
 import React, { useMemo } from 'react'
 
@@ -9,7 +9,7 @@ import { useConfig } from '../../../../providers/Config/index.js'
 import { GroupByButton } from '../../../GroupBy/index.js'
 import '../fields.css'
 
-export const QueryPresetsGroupByField: TextFieldClientComponent = ({
+export const QueryPresetsGroupByField: React.FC<TextFieldClientProps> = ({
   field: { label, required },
 }) => {
   const { path, setValue, value } = useField<string>()

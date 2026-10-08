@@ -4,15 +4,38 @@ import { deepMergeWithSourceArrays } from 'payload'
 
 import type { GeneratedAdapter } from '../types.js'
 
+import { buildPrefixWithObjectKey } from '../utilities/buildPrefixWithObjectKey.js'
+import {
+  buildStoragePathData,
+  buildUploadStoragePathData,
+} from '../utilities/buildStoragePathData.js'
 import { getIncomingFiles } from '../utilities/getIncomingFiles.js'
+import { appendProxyPrefix } from './afterRead.js'
 
 interface Args {
   adapter: GeneratedAdapter
   collection: CollectionConfig
+  collectionPrefix?: string
+  disablePayloadAccessControl?: boolean
+  hasCustomFileURL?: boolean
+  useCompositePrefixes?: boolean
+}
+
+// The object's folder: semantic prefix + `_objectKey` segment.
+const getObjectFolder = (data: unknown): string => {
+  const record = (data ?? {}) as { _objectKey?: string; prefix?: string }
+  return buildPrefixWithObjectKey({ objectKey: record._objectKey, prefix: record.prefix })
 }
 
 export const getAfterChangeHook =
-  ({ adapter, collection }: Args): CollectionAfterChangeHook<FileData & TypeWithID> =>
+  ({
+    adapter,
+    collection,
+    collectionPrefix,
+    disablePayloadAccessControl,
+    hasCustomFileURL,
+    useCompositePrefixes,
+  }: Args): CollectionAfterChangeHook<FileData & TypeWithID> =>
   async ({ data, doc, operation, previousDoc, req, select }) => {
     // Skip if this is an internal update to prevent infinite loop
     if (req.context?.skipCloudStorage) {
@@ -21,23 +44,87 @@ export const getAfterChangeHook =
 
     // Restore upload metadata removed by select, including partially selected image sizes.
     const uploadData = select ? deepMergeWithSourceArrays<FileData & TypeWithID>(data, doc) : doc
+    const withProxyPrefix = (upload: FileData & TypeWithID): FileData & TypeWithID => {
+      const { prefix } = upload as { prefix?: string } & FileData & TypeWithID
+
+      if (disablePayloadAccessControl || hasCustomFileURL || !useCompositePrefixes || !prefix) {
+        return upload
+      }
+
+      return {
+        ...upload,
+        ...(upload.url && {
+          url: appendProxyPrefix({ prefix, url: upload.url }),
+        }),
+        ...(upload.original?.url && {
+          original: {
+            ...upload.original,
+            url: appendProxyPrefix({ prefix, url: upload.original.url }),
+          },
+        }),
+      }
+    }
     const isDraftSave = (uploadData as { _status?: string })._status === 'draft'
     const isDraftOverPublished =
       isDraftSave && (previousDoc as { _status?: string } | undefined)?._status === 'published'
+
+    if (req.context?._payloadManagedCloudStorage) {
+      const metadata = req.context._payloadManagedCloudMetadata as
+        | Partial<FileData & TypeWithID>
+        | undefined
+
+      if (!metadata || Object.keys(metadata).length === 0) {
+        return withProxyPrefix(doc)
+      }
+
+      req.context.skipCloudStorage = true
+      req.file = undefined
+      req.payloadUploadSizes = undefined
+      const originalQuery = req.query
+      req.query = { ...req.query }
+      delete req.query.uploadEdits
+
+      try {
+        const updatedDoc = await req.payload.update({
+          id: doc.id,
+          collection: collection.slug,
+          data: metadata,
+          depth: 0,
+          draft: isDraftSave,
+          overrideAccess: true,
+          req,
+          select,
+        })
+
+        return withProxyPrefix({ ...doc, ...updatedDoc })
+      } finally {
+        req.query = originalQuery
+        delete req.context.skipCloudStorage
+      }
+    }
 
     try {
       const files = getIncomingFiles({ data: uploadData, req })
 
       if (files.length > 0) {
+        // Fold `_objectKey` so generated sizes land in the same folder as the original.
+        const dataForUpload = { ...uploadData, prefix: getObjectFolder(uploadData) }
+
         const uploadResults = await Promise.all(
           files
             .filter((file) => !file.uploadReference)
             .map((file) =>
               adapter.handleUpload({
                 collection,
-                data: uploadData,
+                data: dataForUpload,
                 file,
                 req,
+                storageFilePath: buildUploadStoragePathData({
+                  collectionPrefix,
+                  docPrefix: dataForUpload.prefix,
+                  filename: file.filename,
+                  useCompositePrefixes,
+                }).storageFilePath,
               }),
             ),
         )
@@ -51,6 +138,10 @@ export const getAfterChangeHook =
             (acc, metadata) => ({ ...acc, ...metadata }),
             {} as Partial<FileData & TypeWithID>,
           )
+
+        // Adapters may echo `data` back as metadata; keep the document's own `prefix`/`_objectKey`.
+        delete (uploadMetadata as Record<string, unknown>).prefix
+        delete (uploadMetadata as Record<string, unknown>)._objectKey
 
         let docWithMetadata = doc
 
@@ -71,6 +162,7 @@ export const getAfterChangeHook =
               data: uploadMetadata,
               depth: 0,
               draft: isDraftSave,
+              overrideAccess: true,
               req,
               select,
             })
@@ -86,40 +178,80 @@ export const getAfterChangeHook =
         // persistence have succeeded. Deleting earlier would orphan the
         // record if a later step throws (e.g. a user-defined afterChange
         // hook on the same collection).
-        if (previousDoc && operation === 'update' && !isDraftOverPublished) {
+        if (
+          previousDoc &&
+          operation === 'update' &&
+          !isDraftOverPublished &&
+          !collection.versions &&
+          !previousDoc.original
+        ) {
           let filesToDelete: string[] = []
 
           if (typeof previousDoc?.filename === 'string') {
             filesToDelete.push(previousDoc.filename)
           }
 
-          if (typeof previousDoc.sizes === 'object') {
+          if (typeof previousDoc.variants === 'object') {
             filesToDelete = filesToDelete.concat(
-              Object.values(previousDoc?.sizes || []).map(
+              Object.values(previousDoc?.variants || []).map(
                 (resizedFileData) => resizedFileData?.filename as string,
               ),
             )
           }
 
-          // Collect new filenames (main + sizes) so we don't delete a
-          // file that the new upload reused (e.g. same filename on reupload
-          // where Payload overwrites in place).
+          // Compare full locations: a replacement can reuse a filename while moving
+          // a legacy object beneath the collection prefix.
           const newFileData = { ...uploadData, ...uploadMetadata }
           const newFilenames = new Set<string>()
           if (typeof newFileData.filename === 'string') {
             newFilenames.add(newFileData.filename)
           }
-          if (typeof newFileData.sizes === 'object') {
-            for (const size of Object.values(newFileData.sizes || {})) {
+          if (typeof newFileData.variants === 'object') {
+            for (const size of Object.values(newFileData.variants || {})) {
               if (size?.filename && typeof size.filename === 'string') {
                 newFilenames.add(size.filename)
               }
             }
           }
 
+          const resolveKey = ({
+            data,
+            filename,
+          }: {
+            data: { _objectKey?: string; prefix?: string }
+            filename: string
+          }) =>
+            buildStoragePathData({
+              collectionPrefix,
+              docPrefix: getObjectFolder(data),
+              filename,
+              useCompositePrefixes,
+            }).storageFilePath
+          const newKeys = new Set(
+            [...newFilenames].map((filename) =>
+              resolveKey({
+                data: newFileData as { _objectKey?: string; prefix?: string },
+                filename,
+              }),
+            ),
+          )
+
           const deletionPromises = filesToDelete.map(async (filename) => {
-            if (filename && !newFilenames.has(filename)) {
-              await adapter.handleDelete({ collection, doc: previousDoc, filename, req })
+            if (!filename) {
+              return
+            }
+            const storageFilePath = resolveKey({
+              data: previousDoc as { _objectKey?: string; prefix?: string },
+              filename,
+            })
+            if (!newKeys.has(storageFilePath)) {
+              await adapter.handleDelete({
+                collection,
+                doc: previousDoc,
+                filename,
+                req,
+                storageFilePath,
+              })
             }
           })
 

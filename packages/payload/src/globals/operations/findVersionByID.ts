@@ -6,9 +6,11 @@ import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
+import { hasVersionsEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
@@ -42,6 +44,14 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     showHiddenFields,
   } = args
 
+  if (!hasVersionsEnabled(globalConfig)) {
+    if (disableErrors) {
+      return null!
+    }
+
+    throw new NotFound(req.t)
+  }
+
   // /////////////////////////////////////
   // Access
   // /////////////////////////////////////
@@ -58,10 +68,18 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     return null!
   }
 
+  const isValidID =
+    (typeof id === 'string' && id.length > 0) || (typeof id === 'number' && Number.isFinite(id))
+
+  if (!isValidID) {
+    throw new NotFound(req.t)
+  }
+
   const hasWhereAccess = typeof accessResults === 'object'
 
+  const versionFields = buildVersionGlobalFields(payload.config, globalConfig, true)
   const select = sanitizeSelect({
-    fields: buildVersionGlobalFields(payload.config, globalConfig, true),
+    fields: versionFields,
     select: resolveSelect({
       config: globalConfig.select,
       operation: 'read',
@@ -71,22 +89,22 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     versions: true,
   })
 
+  const where = combineQueries({ id: { equals: id } }, accessResults)
+
+  sanitizeWhereQuery({ fields: versionFields, payload, where })
+
   const findGlobalVersionsArgs: FindGlobalVersionsArgs = {
     global: globalConfig.slug,
     limit: 1,
     locale: locale!,
     req,
     select,
-    where: combineQueries({ id: { equals: id } }, accessResults),
+    where,
   }
 
   // /////////////////////////////////////
   // Find by ID
   // /////////////////////////////////////
-
-  if (!findGlobalVersionsArgs.where?.and?.[0]?.id) {
-    throw new NotFound(req.t)
-  }
 
   const { docs: results } = await payload.db.findGlobalVersions(findGlobalVersionsArgs)
   if (!results || results?.length === 0) {

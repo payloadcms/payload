@@ -46,7 +46,7 @@ const tanStackCreateArgs = [
   '--non-interactive',
 ]
 
-test.suite({})('create-payload-app', () => {
+test.suite('create-payload-app', {}, () => {
   test.beforeAll(() => {
     // Runs copyfiles copy app/(payload) -> dist/app/(payload)
     shelljs.exec('pnpm build:create-payload-app')
@@ -490,12 +490,12 @@ function expectRequiredTanStackFiles({ projectDir }: { projectDir: string }): vo
     'src/collections/Media.ts',
     'src/collections/Tags.ts',
     'src/collections/Users.ts',
-    'src/payload.css',
     'src/payload.config.ts',
     'src/routes/_payload.tsx',
     'src/routes/_payload/admin.$.tsx',
     'src/routes/_payload/admin.index.tsx',
     'src/routes/_payload/api.$.ts',
+    'src/routes/_payload/custom.css',
     'src/routes/_payload/importMap.js',
     'src/routes/_payload/server.functions.ts',
   ]

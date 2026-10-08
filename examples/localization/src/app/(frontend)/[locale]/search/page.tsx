@@ -32,6 +32,7 @@ export default async function Page({
     depth: 1,
     limit: 12,
     locale,
+    overrideAccess: true,
     ...(query
       ? {
           where: {

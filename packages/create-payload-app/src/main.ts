@@ -17,7 +17,7 @@ import { createProject } from './lib/create-project.js'
 import { parseExample } from './lib/examples.js'
 import { generateSecret } from './lib/generate-secret.js'
 import { getPackageManager } from './lib/get-package-manager.js'
-import { getNextAppDetails, initNext } from './lib/init-next.js'
+import { getNextAppDetails, initNext, minimumNextVersion } from './lib/init-next.js'
 import { initTanStack } from './lib/init-tanstack.js'
 import { manageEnvFiles } from './lib/manage-env-files.js'
 import { parseProjectName } from './lib/parse-project-name.js'
@@ -50,7 +50,6 @@ export class Main {
     // @ts-expect-error bad typings
     this.args = arg(
       {
-        '--agent': String,
         '--branch': String,
         '--db': String,
         '--db-accept-recommended': Boolean,
@@ -140,7 +139,7 @@ export class Main {
 
       if (appFramework.kind === 'next' && !appFramework.appDetails.isSupportedNextVersion) {
         p.log.warn(
-          `Next.js v${appFramework.appDetails.nextVersion} is unsupported. Next.js >= 15 is required to use Payload.`,
+          `Next.js v${appFramework.appDetails.nextVersion} is unsupported. Next.js >= ${minimumNextVersion.major}.${minimumNextVersion.minor} is required to use Payload.`,
         )
         p.outro(feedbackOutro())
         process.exit(0)

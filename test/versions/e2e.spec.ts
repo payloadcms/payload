@@ -163,6 +163,7 @@ describe('Versions', () => {
           description: 'This is published',
           title: 'Published Document',
         },
+        overrideAccess: true,
       })
 
       // Navigate to the document
@@ -317,7 +318,7 @@ describe('Versions', () => {
       await page.goto(`${savedDocURL}/versions/${versionID}`)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
       await page.locator('.restore-version .popup__trigger-wrap button').click()
-      await page.getByRole('button', { name: 'Restore as draft' }).click()
+      await page.getByRole('menuitem', { name: 'Restore as draft' }).click()
       await page.locator('button:has-text("Confirm")').click()
       await page.waitForURL(savedDocURL)
 
@@ -364,6 +365,7 @@ describe('Versions', () => {
           _status: 'draft',
         },
         draft: false,
+        overrideAccess: true,
       })
 
       await page.goto(`${url.edit(publishedDoc.id)}/versions`)
@@ -401,6 +403,7 @@ describe('Versions', () => {
         data: {
           title: 'initial title',
         },
+        overrideAccess: true,
       })
 
       const global = new AdminUrlUtil(serverURL, draftWithMaxGlobalSlug)
@@ -454,6 +457,7 @@ describe('Versions', () => {
           description: 'post description',
           title: 'post title',
         },
+        overrideAccess: true,
       })
 
       await page.goto(postURL.edit(postID))
@@ -507,6 +511,7 @@ describe('Versions', () => {
           description: 'post description',
           title: 'post title',
         },
+        overrideAccess: true,
       })
 
       const { id: docID } = await payload.create({
@@ -516,6 +521,7 @@ describe('Versions', () => {
           relationship: postID,
           title: 'autosave title',
         },
+        overrideAccess: true,
       })
 
       await page.goto(autosaveURL.edit(docID))
@@ -561,6 +567,7 @@ describe('Versions', () => {
       const { totalDocs: initialDocsCount } = await payload.find({
         collection: autosaveCollectionSlug,
         draft: true,
+        overrideAccess: true,
       })
 
       await page.goto(autosaveURL.create)
@@ -571,6 +578,7 @@ describe('Versions', () => {
       const { totalDocs: updatedDocsCount } = await payload.find({
         collection: autosaveCollectionSlug,
         draft: true,
+        overrideAccess: true,
       })
 
       await expect(() => {
@@ -589,6 +597,7 @@ describe('Versions', () => {
       const { totalDocs: latestDocsCount } = await payload.find({
         collection: autosaveCollectionSlug,
         draft: true,
+        overrideAccess: true,
       })
 
       await expect(() => {
@@ -694,7 +703,10 @@ describe('Versions', () => {
       await expect
         .poll(
           async () =>
-            await page.locator('.doc-tab[aria-label="Versions"] .pill-version-count').textContent(),
+            await page
+              .getByRole('link', { name: /^Versions\b/ })
+              .locator('.pill-version-count')
+              .textContent(),
           { timeout: POLL_TOPASS_TIMEOUT },
         )
         .toEqual('2')
@@ -778,6 +790,7 @@ describe('Versions', () => {
           _status: 'draft',
           title: 'draft title',
         },
+        overrideAccess: true,
       })
 
       await page.goto(disablePublishURL.edit(String(draftDoc.id)))
@@ -816,6 +829,7 @@ describe('Versions', () => {
           _status: 'published',
           title: 'title',
         },
+        overrideAccess: true,
       })
       await page.goto(errorOnUnpublishURL.edit(String(publishedDoc.id)))
       await openDocControls(page)
@@ -833,17 +847,19 @@ describe('Versions', () => {
           _status: 'published',
           title: 'Test Custom Unpublish',
         },
+        overrideAccess: true,
       })
 
       const customUnpublishURL = new AdminUrlUtil(serverURL, draftWithCustomUnpublishSlug)
       await page.goto(customUnpublishURL.edit(String(publishedDoc.id)))
 
       await openDocControls(page)
-      await expect(page.getByRole('button', { name: 'Custom Unpublish' })).toBeVisible()
+      await expect(page.getByRole('menuitem', { name: 'Custom Unpublish' })).toBeVisible()
 
       await payload.delete({
         id: publishedDoc.id,
         collection: draftWithCustomUnpublishSlug,
+        overrideAccess: true,
       })
     })
 
@@ -854,6 +870,7 @@ describe('Versions', () => {
           description: 'This collection has drafts disabled',
           title: 'No Drafts Doc',
         },
+        overrideAccess: true,
       })
 
       await page.goto(versionURL.edit(String(doc.id)))
@@ -864,6 +881,7 @@ describe('Versions', () => {
       await payload.delete({
         id: doc.id,
         collection: versionCollectionSlug,
+        overrideAccess: true,
       })
     })
 
@@ -875,6 +893,7 @@ describe('Versions', () => {
           description: 'description',
           title: 'unpublish version count test',
         },
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(publishedDoc.id))
@@ -893,6 +912,7 @@ describe('Versions', () => {
       await payload.delete({
         id: publishedDoc.id,
         collection: draftCollectionSlug,
+        overrideAccess: true,
       })
     })
 
@@ -904,6 +924,7 @@ describe('Versions', () => {
           title: 'some title',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       await page.goto(postURL.create)
@@ -929,6 +950,7 @@ describe('Versions', () => {
           title: 'some title',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(createdDoc.id))
@@ -975,6 +997,7 @@ describe('Versions', () => {
           title: 'initial title',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       const collection = new AdminUrlUtil(serverURL, draftWithMaxCollectionSlug)
@@ -1154,6 +1177,7 @@ describe('Versions', () => {
           alt: 'Original image',
         },
         filePath: path.resolve(dirname, './image.jpg'),
+        overrideAccess: true,
       })
 
       await page.goto(uploadURL.edit(publishedDoc.id))
@@ -1176,11 +1200,82 @@ describe('Versions', () => {
       await expect(async () => {
         const { docs } = await payload.find({
           collection: draftWithUploadCollectionSlug,
+          overrideAccess: true,
           where: { id: { equals: publishedDoc.id } },
         })
         expect(docs[0]!._status).toStrictEqual('published')
         expect(docs[0]!.filename).toStrictEqual(publishedDoc.filename)
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+    })
+
+    test('should show a cropped image after saving a draft', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: { _status: 'published', alt: 'Original image' },
+        filePath: path.resolve(dirname, './image.jpg'),
+        overrideAccess: true,
+      })
+
+      await page.goto(uploadURL.edit(publishedDoc.id))
+      await waitForFormReady(page)
+      await page.locator('button[aria-label="Edit Image"]').click()
+      await page.locator('input[name="cropWidth"]').fill('800')
+      await page.locator('input[name="cropHeight"]').fill('800')
+      await page.locator('button:has-text("Apply Changes")').click()
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      const { docs: drafts } = await payload.find({
+        collection: draftWithUploadCollectionSlug,
+        draft: true,
+        overrideAccess: true,
+        where: { id: { equals: publishedDoc.id } },
+      })
+      const draft = drafts[0]!
+
+      expect(draft.filename).not.toBe(publishedDoc.filename)
+      expect(draft.url).not.toBe(publishedDoc.original?.url)
+      expect(draft.width).toBe(800)
+      expect(draft.height).toBe(800)
+      await expect(page.locator('.file-preview__info-meta')).toContainText('800 × 800')
+      await expect(page.locator('.file-preview img')).toHaveJSProperty('naturalWidth', 800)
+
+      const { docs: published } = await payload.find({
+        collection: draftWithUploadCollectionSlug,
+        overrideAccess: true,
+        where: { id: { equals: publishedDoc.id } },
+      })
+      expect(published[0]!.filename).toBe(publishedDoc.filename)
+    })
+
+    test('should publish a cropped image', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: { _status: 'published', alt: 'Original image' },
+        filePath: path.resolve(dirname, './image.jpg'),
+        overrideAccess: true,
+      })
+
+      await page.goto(uploadURL.edit(publishedDoc.id))
+      await waitForFormReady(page)
+      await page.locator('button[aria-label="Edit Image"]').click()
+      await page.locator('input[name="cropWidth"]').fill('800')
+      await page.locator('input[name="cropHeight"]').fill('800')
+      await page.locator('button:has-text("Apply Changes")').click()
+      await saveDocAndAssert(page, '#action-save')
+
+      const { docs: published } = await payload.find({
+        collection: draftWithUploadCollectionSlug,
+        overrideAccess: true,
+        where: { id: { equals: publishedDoc.id } },
+      })
+      const cropped = published[0]!
+
+      expect(cropped.filename).not.toBe(publishedDoc.filename)
+      expect(cropped.url).not.toBe(publishedDoc.original?.url)
+      expect(cropped.width).toBe(800)
+      expect(cropped.height).toBe(800)
+      await expect(page.locator('.file-preview__info-meta')).toContainText('800 × 800')
+      await expect(page.locator('.file-preview img')).toHaveJSProperty('naturalWidth', 800)
     })
 
     test('should create a draft version with the new file without altering the published doc', async () => {
@@ -1191,6 +1286,7 @@ describe('Versions', () => {
           alt: 'Original image',
         },
         filePath: path.resolve(dirname, './image.jpg'),
+        overrideAccess: true,
       })
 
       await page.goto(uploadURL.edit(publishedDoc.id))
@@ -1210,6 +1306,7 @@ describe('Versions', () => {
         const { docs: draftDocs } = await payload.find({
           collection: draftWithUploadCollectionSlug,
           draft: true,
+          overrideAccess: true,
           where: { id: { equals: publishedDoc.id } },
         })
         expect(draftDocs[0]!._status).toStrictEqual('draft')
@@ -1217,6 +1314,7 @@ describe('Versions', () => {
 
         const { docs: mainDocs } = await payload.find({
           collection: draftWithUploadCollectionSlug,
+          overrideAccess: true,
           where: { id: { equals: publishedDoc.id } },
         })
         expect(mainDocs[0]!.filename).toStrictEqual(publishedDoc.filename)
@@ -1231,6 +1329,7 @@ describe('Versions', () => {
           alt: 'Original image',
         },
         filePath: path.resolve(dirname, './image.jpg'),
+        overrideAccess: true,
       })
 
       await page.goto(uploadURL.edit(publishedDoc.id))
@@ -1252,12 +1351,14 @@ describe('Versions', () => {
         const { docs: draftDocs } = await payload.find({
           collection: draftWithUploadCollectionSlug,
           draft: true,
+          overrideAccess: true,
           where: { id: { equals: duplicatedDocID } },
         })
         expect(draftDocs[0]!._status).toStrictEqual('draft')
 
         const { docs: mainDocs } = await payload.find({
           collection: draftWithUploadCollectionSlug,
+          overrideAccess: true,
           where: { id: { equals: duplicatedDocID } },
         })
         expect(mainDocs[0]!._status).toStrictEqual('draft')
@@ -1297,6 +1398,7 @@ describe('Versions', () => {
         data: {
           title: 'initial title',
         },
+        overrideAccess: true,
       })
 
       const global = new AdminUrlUtil(serverURL, draftWithMaxGlobalSlug)
@@ -1387,6 +1489,7 @@ describe('Versions', () => {
       await payload.updateGlobal({
         slug: simpleDraftGlobalSlug,
         data: { _status: 'published', title: 'published global' },
+        overrideAccess: true,
       })
 
       const globalURL = new AdminUrlUtil(serverURL, simpleDraftGlobalSlug)
@@ -1400,6 +1503,7 @@ describe('Versions', () => {
       await payload.updateGlobal({
         slug: simpleDraftGlobalSlug,
         data: { _status: 'published', title: 'published global' },
+        overrideAccess: true,
       })
 
       const globalURL = new AdminUrlUtil(serverURL, simpleDraftGlobalSlug)
@@ -1418,6 +1522,7 @@ describe('Versions', () => {
       await payload.updateGlobal({
         slug: simpleDraftGlobalSlug,
         data: { _status: 'published', title: 'unpublish version count test' },
+        overrideAccess: true,
       })
 
       const globalURL = new AdminUrlUtil(serverURL, simpleDraftGlobalSlug)
@@ -1442,6 +1547,7 @@ describe('Versions', () => {
           _status: 'published',
           title: 'published global',
         },
+        overrideAccess: true,
       })
 
       const url = new AdminUrlUtil(serverURL, disablePublishGlobalSlug)
@@ -1457,12 +1563,14 @@ describe('Versions', () => {
         data: {
           title: 'initial title',
         },
+        overrideAccess: true,
       })
       await payload.updateGlobal({
         slug: draftGlobalSlug,
         data: {
           title: 'initial title 2',
         },
+        overrideAccess: true,
       })
 
       const url = new AdminUrlUtil(serverURL, draftGlobalSlug)
@@ -1586,15 +1694,14 @@ describe('Versions', () => {
 
       await page.locator('.date-time-picker input').click()
 
-      const popper = page.locator('.react-datepicker-popper')
+      const drawer = page.locator('dialog[id^="schedule-publish-"]')
+      const popper = drawer.locator('.react-datepicker-popper')
       await expect(popper).toBeVisible()
 
-      const portalInfo = await popper.evaluate((el) => ({
-        isInsideDrawerScroll: el.closest('.drawer__content-children') !== null,
-        isInsidePortal: el.closest('#date-time-picker-portal') !== null,
-      }))
-      expect(portalInfo.isInsideDrawerScroll).toBe(false)
-      expect(portalInfo.isInsidePortal).toBe(true)
+      const isInsideDrawerScroll = await popper.evaluate(
+        (el) => el.closest('.drawer__content-children') !== null,
+      )
+      expect(isInsideDrawerScroll).toBe(false)
 
       await expect(popper).toBeInViewport()
     })
@@ -1624,6 +1731,7 @@ describe('Versions', () => {
           description: 'new description',
           title: 'new post',
         },
+        overrideAccess: true,
       })
 
       await localPage.goto(
@@ -1662,6 +1770,7 @@ describe('Versions', () => {
         docs: [createdJob],
       } = await payload.find({
         collection: 'payload-jobs',
+        overrideAccess: true,
         where: {
           'input.doc.value': {
             equals: String(post.id),
@@ -1710,7 +1819,7 @@ describe('Versions', () => {
       url = new AdminUrlUtil(serverURL, localizedCollectionSlug)
     })
 
-    test('should show publish individual locale dropdown', async () => {
+    test('should show publish all locales dropdown', async () => {
       await page.goto(url.create)
       const publishOptions = page.locator('.doc-controls__controls .popup')
 
@@ -1719,12 +1828,9 @@ describe('Versions', () => {
 
     test('should show option to publish current locale', async () => {
       await page.goto(url.create)
-      const publishOptions = page.locator('.doc-controls__controls .popup')
-      await publishOptions.click()
+      const publishButton = page.locator('#action-save')
 
-      const publishLocaleContent = page.locator('.popup__content')
-
-      await expect(publishLocaleContent).toContainText('English')
+      await expect(publishButton).toContainText('English')
     })
 
     test('should publish specific locale', async () => {
@@ -1744,12 +1850,9 @@ describe('Versions', () => {
       await changeLocale(page, 'en')
       await textField.fill('english published')
 
-      const publishOptions = page.locator('#action-save-popup')
-      await publishOptions.click()
-
-      const publishLocaleButton = page.locator('#publish-locale')
-      await expect(publishLocaleButton).toContainText('English')
-      await publishLocaleButton.click()
+      const publishButton = page.locator('#action-save')
+      await expect(publishButton).toContainText('English')
+      await publishButton.click()
 
       await wait(500)
 
@@ -1766,6 +1869,7 @@ describe('Versions', () => {
       const data = await payload.find({
         collection: localizedCollectionSlug,
         locale: '*',
+        overrideAccess: true,
         where: {
           id: { equals: id },
         },
@@ -1807,6 +1911,7 @@ describe('Versions', () => {
         },
         draft: true,
         locale: 'en',
+        overrideAccess: true,
       })
 
       // Step 3: Publish specific locale (English) via API
@@ -1825,6 +1930,7 @@ describe('Versions', () => {
         },
         draft: false,
         locale: 'en',
+        overrideAccess: true,
       })
 
       // Step 4: Verify blocks survived with metadata intact
@@ -1835,6 +1941,7 @@ describe('Versions', () => {
       // Step 5: Verify via find (reload from DB)
       const data = await payload.find({
         collection: localizedCollectionSlug,
+        overrideAccess: true,
         where: {
           id: { equals: id },
         },
@@ -2166,6 +2273,7 @@ describe('Versions', () => {
           description: 'some description',
           title: 'This is a test',
         },
+        overrideAccess: true,
       })
 
       const url = new AdminUrlUtil(serverURL, postsCollectionSlug)
@@ -2229,7 +2337,7 @@ describe('Versions', () => {
       url = new AdminUrlUtil(serverURL, localizedGlobalSlug)
     })
 
-    test('should show publish individual locale dropdown', async () => {
+    test('should show publish all locales dropdown', async () => {
       await page.goto(url.global(localizedGlobalSlug))
       const publishOptions = page.locator('.doc-controls__controls .popup')
 
@@ -2238,12 +2346,9 @@ describe('Versions', () => {
 
     test('should show option to publish current locale', async () => {
       await page.goto(url.global(localizedGlobalSlug))
-      const publishOptions = page.locator('.doc-controls__controls .popup')
-      await publishOptions.click()
+      const publishButton = page.locator('#action-save')
 
-      const publishLocaleContent = page.locator('.popup__content')
-
-      await expect(publishLocaleContent).toContainText('English')
+      await expect(publishButton).toContainText('English')
     })
   })
 
@@ -2267,6 +2372,7 @@ describe('Versions', () => {
           title: 'new post',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       postID = newPost.id
@@ -2287,12 +2393,14 @@ describe('Versions', () => {
         },
         depth: 0,
         draft: true,
+        overrideAccess: true,
       })
 
       const versions = await payload.findVersions({
         collection: draftCollectionSlug,
         depth: 0,
         limit: 2,
+        overrideAccess: true,
         where: {
           parent: { equals: postID },
         },
@@ -2306,6 +2414,7 @@ describe('Versions', () => {
           collection: diffCollectionSlug,
           depth: 0,
           limit: 1,
+          overrideAccess: true,
         })
       ).docs[0] as Diff
 
@@ -2316,6 +2425,7 @@ describe('Versions', () => {
           collection: diffCollectionSlug,
           depth: 0,
           limit: 1,
+          overrideAccess: true,
           where: {
             parent: { equals: diffID },
           },
@@ -2525,6 +2635,7 @@ describe('Versions', () => {
             return block
           }),
         },
+        overrideAccess: true,
       })
 
       const latestVersionDiff = (
@@ -2535,6 +2646,7 @@ describe('Versions', () => {
           where: {
             parent: { equals: diffID },
           },
+          overrideAccess: true,
         })
       ).docs[0] as Diff
 
@@ -2727,6 +2839,7 @@ describe('Versions', () => {
         collection: 'draft-posts',
         depth: 0,
         limit: 3,
+        overrideAccess: true,
         sort: 'createdAt',
       })
 
@@ -2765,6 +2878,21 @@ describe('Versions', () => {
 
       expect(await oldDiff.locator('p').first().innerHTML()).toEqual(oldHTML)
       expect(await newDiff.locator('p').first().innerHTML()).toEqual(newHTML)
+    })
+
+    test('should respect relationship read access in rich text diffs', async () => {
+      await navigateToDiffVersionView()
+
+      const richtext = page.locator('[data-field-path="richtextWithConstrainedRelationship"]')
+      const oldRelationshipInfo = richtext.locator(
+        '.html-diff__diff-old .lexical-relationship-diff__info',
+      )
+      const newRelationshipInfo = richtext.locator(
+        '.html-diff__diff-new .lexical-relationship-diff__info',
+      )
+
+      await expect(oldRelationshipInfo).not.toHaveText('Document 3')
+      await expect(newRelationshipInfo).toHaveText('Document 2')
     })
 
     test('correctly renders diff for richtext fields with custom Diff component', async () => {
@@ -2861,6 +2989,7 @@ describe('Versions', () => {
         collection: 'media',
         depth: 0,
         limit: 2,
+        overrideAccess: true,
         sort: 'createdAt',
       })
 
@@ -2903,6 +3032,7 @@ describe('Versions', () => {
     test('correctly renders diff for relationship fields with deleted relation', async () => {
       await payload.delete({
         collection: 'draft-posts',
+        overrideAccess: true,
       })
 
       await navigateToDiffVersionView()
@@ -2923,6 +3053,7 @@ describe('Versions', () => {
     test('correctly renders diff for upload fields with deleted upload', async () => {
       await payload.delete({
         collection: 'media',
+        overrideAccess: true,
       })
 
       await navigateToDiffVersionView()
@@ -2952,6 +3083,7 @@ describe('Versions', () => {
             }),
           ],
         },
+        overrideAccess: true,
       })
 
       const latestVersionDiff = (
@@ -2959,6 +3091,7 @@ describe('Versions', () => {
           collection: diffCollectionSlug,
           depth: 0,
           limit: 1,
+          overrideAccess: true,
           where: {
             parent: { equals: diffID },
           },
@@ -3004,6 +3137,7 @@ describe('Versions', () => {
         data: {
           array: newArray,
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -3020,6 +3154,7 @@ describe('Versions', () => {
             return arrayItem
           }),
         },
+        overrideAccess: true,
       })
 
       const latestVersionDiff = (
@@ -3027,6 +3162,7 @@ describe('Versions', () => {
           collection: diffCollectionSlug,
           depth: 0,
           limit: 1,
+          overrideAccess: true,
           where: {
             parent: { equals: diffID },
           },
@@ -3053,6 +3189,7 @@ describe('Versions', () => {
         data: {
           text: 'Test text document',
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -3080,6 +3217,7 @@ describe('Versions', () => {
             },
           ],
         },
+        overrideAccess: true,
       })
 
       // Swap the order of the blocks
@@ -3108,6 +3246,7 @@ describe('Versions', () => {
             },
           ],
         },
+        overrideAccess: true,
       })
 
       const latestVersionDiff = (
@@ -3115,6 +3254,7 @@ describe('Versions', () => {
           collection: diffCollectionSlug,
           depth: 0,
           limit: 1,
+          overrideAccess: true,
           where: {
             parent: { equals: diffID },
           },
@@ -3136,6 +3276,7 @@ describe('Versions', () => {
           _status: 'published',
           text: '<b>bold</b> & "quotes"',
         },
+        overrideAccess: true,
       })
 
       // Update to create a version
@@ -3146,6 +3287,7 @@ describe('Versions', () => {
           _status: 'published',
           text: '<script>alert(1)</script>',
         },
+        overrideAccess: true,
       })
 
       const versionDiff = (
@@ -3153,6 +3295,7 @@ describe('Versions', () => {
           collection: diffCollectionSlug,
           depth: 0,
           limit: 1,
+          overrideAccess: true,
           where: {
             parent: { equals: doc.id },
           },
@@ -3175,7 +3318,7 @@ describe('Versions', () => {
       await expect(text.locator('.html-diff__diff-new')).toHaveText('<script>alert(1)</script>')
 
       // Cleanup
-      await payload.delete({ id: doc.id, collection: diffCollectionSlug })
+      await payload.delete({ id: doc.id, collection: diffCollectionSlug, overrideAccess: true })
     })
 
     test('correctly renders JSON fields containing HTML special characters', async () => {
@@ -3186,6 +3329,7 @@ describe('Versions', () => {
           _status: 'published',
           json: { html: '<div class="test">&amp;</div>' },
         },
+        overrideAccess: true,
       })
 
       // Update to create a version
@@ -3196,6 +3340,7 @@ describe('Versions', () => {
           _status: 'published',
           json: { html: '<span onclick="alert(1)">click</span>' },
         },
+        overrideAccess: true,
       })
 
       const versionDiff = (
@@ -3203,6 +3348,7 @@ describe('Versions', () => {
           collection: diffCollectionSlug,
           depth: 0,
           limit: 1,
+          overrideAccess: true,
           where: {
             parent: { equals: doc.id },
           },
@@ -3227,7 +3373,7 @@ describe('Versions', () => {
       )
 
       // Cleanup
-      await payload.delete({ id: doc.id, collection: diffCollectionSlug })
+      await payload.delete({ id: doc.id, collection: diffCollectionSlug, overrideAccess: true })
     })
   })
 })

@@ -68,7 +68,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     margin: 0;
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
@@ -81,8 +80,7 @@
 
   .doc-controls__creating-new {
     color: var(--color-text);
-    font-family: var(--text-body-medium-strong-font-family);
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
   }
 
   .doc-controls__controls-wrapper {
@@ -144,6 +142,7 @@
     background: transparent;
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1024px) {
     .doc-controls__controls-wrapper {
       margin-left: auto;
@@ -176,7 +175,6 @@
     }
 
     .doc-controls__meta:has(.doc-controls__status) .doc-controls__value {
-      font-family: var(--text-body-small-font-family);
       font-size: var(--text-body-small-font-size);
       font-weight: var(--text-body-small-font-weight);
       line-height: var(--text-body-small-line-height);
@@ -184,7 +182,6 @@
     }
 
     .doc-controls .autosave {
-      font-family: var(--text-body-small-font-family);
       font-size: var(--text-body-small-font-size);
       font-weight: var(--text-body-small-font-weight);
       line-height: var(--text-body-small-line-height);

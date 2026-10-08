@@ -1,7 +1,6 @@
 import type { TFunction } from '@payloadcms/translations'
 
-import { status as httpStatus } from 'http-status'
-
+import { httpStatus } from '../utilities/httpStatus.js'
 import { APIError } from './APIError.js'
 
 export class FileRetrievalError extends APIError {
@@ -12,5 +11,6 @@ export class FileRetrievalError extends APIError {
       msg += ` ${message}`
     }
     super(msg, httpStatus.INTERNAL_SERVER_ERROR)
+    this.name = 'FileRetrievalError'
   }
 }

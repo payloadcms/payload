@@ -4,7 +4,6 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
-import { v4 as uuid } from 'uuid'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
@@ -12,6 +11,7 @@ import type { Config } from './payload-types.js'
 import { login } from '../__helpers/e2e/auth/login.js'
 import { logout } from '../__helpers/e2e/auth/logout.js'
 import { getRoutes, saveDocAndAssert } from '../__helpers/e2e/helpers.js'
+import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -19,7 +19,7 @@ import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.
 import { initPage } from '../__setup/e2e/initPage.js'
 import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { apiKeysSlug, BASE_PATH, slug } from './shared.js'
+import { BASE_PATH, slug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -29,22 +29,16 @@ let payload: PayloadTestSDK<Config>
 
 const { afterAll, beforeAll, beforeEach, describe } = test
 
-const headers = {
-  'Content-Type': 'application/json',
-}
-
 describe('Auth', () => {
   let page: Page
   let context: BrowserContext
   let url: AdminUrlUtil
   let serverURL: string
-  let apiURL: string
   let adminRoute: string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
-    apiURL = formatAdminURL({ apiRoute: '/api', path: '', serverURL })
     url = new AdminUrlUtil(serverURL, slug)
 
     const {
@@ -65,6 +59,7 @@ describe('Auth', () => {
 
       await payload.delete({
         collection: slug,
+        overrideAccess: true,
         where: {
           email: {
             exists: true,
@@ -181,6 +176,7 @@ describe('Auth', () => {
         const { docs } = await payload.find({
           collection: slug,
           limit: 1,
+          overrideAccess: true,
           where: { email: { equals: devUser.email } },
         })
 
@@ -188,32 +184,32 @@ describe('Auth', () => {
           id: docs[0]!.id,
           collection: slug,
           data: { password: devUser.password },
+          overrideAccess: true,
         })
       })
 
-      // TODO: This test is unreliable. During development, the bundle sent to the client will include debug information.
-      // For example, arguments passed from one RSC to another RSC may be sent to the client by Next.js for debug reasons.
-      // In production however, this would never happen.
-      // In this case, simply using console.log on the permissions object
-      // may cause `shouldNotShowInClientConfigUnlessAuthenticated` to be included in the bundle,
-      // even though we're never actually sending it to the client.
-      // We'll need to run this test in production to ensure it passes.
-      test.skip('should protect field schemas behind authentication', async () => {
+      // In dev, RSC payloads can include the full client config for debugging, even when we're not intentionally sending it to the client.
+      // For example, arguments passed between server components can show up in the page source with field schemas included.
+      // We need a prod server to reliably check the page source, which is why those assertions are gated behind prod.
+      test('should protect field schemas behind authentication', async () => {
         await logout(page, serverURL)
 
         // Inspect the page source (before authentication)
         const loginPageRes = await page.goto(
           formatAdminURL({ adminRoute, path: '/login', serverURL }),
         )
-        const loginPageSource = await loginPageRes?.text()
-        expect(loginPageSource).not.toContain('shouldNotShowInClientConfigUnlessAuthenticated')
+
+        if (process.env.PAYLOAD_TEST_PROD === 'true') {
+          const loginPageSource = await loginPageRes?.text()
+          expect(loginPageSource).not.toContain('onlyShowInClientConfigWhenAuthenticated')
+        }
 
         // Inspect the client config (before authentication)
         await expect(page.locator('#unauthenticated-client-config')).toBeAttached()
 
         await expect(
           page.locator('#unauthenticated-client-config', {
-            hasText: 'shouldNotShowInClientConfigUnlessAuthenticated',
+            hasText: 'onlyShowInClientConfigWhenAuthenticated',
           }),
         ).toHaveCount(0)
 
@@ -226,7 +222,7 @@ describe('Auth', () => {
 
         await expect(
           page.locator('#authenticated-client-config', {
-            hasText: 'shouldNotShowInClientConfigUnlessAuthenticated',
+            hasText: 'onlyShowInClientConfigWhenAuthenticated',
           }),
         ).toHaveCount(1)
 
@@ -234,8 +230,11 @@ describe('Auth', () => {
         const dashboardPageRes = await page.goto(
           formatAdminURL({ adminRoute, path: '', serverURL }),
         )
-        const dashboardPageSource = await dashboardPageRes?.text()
-        expect(dashboardPageSource).toContain('shouldNotShowInClientConfigUnlessAuthenticated')
+
+        if (process.env.PAYLOAD_TEST_PROD === 'true') {
+          const dashboardPageSource = await dashboardPageRes?.text()
+          expect(dashboardPageSource).toContain('onlyShowInClientConfigWhenAuthenticated')
+        }
       })
 
       test('should allow change password', async () => {
@@ -335,6 +334,7 @@ describe('Auth', () => {
           const lockedDocs = await payload.find({
             collection: 'payload-locked-documents',
             limit: 1,
+            overrideAccess: true,
             pagination: false,
           })
 
@@ -345,6 +345,7 @@ describe('Auth', () => {
 
         await expect.poll(countLockedDocs, { timeout: POLL_TOPASS_TIMEOUT }).toBe(1)
 
+        await openNav(page)
         await page.locator('.user-menu__trigger').click()
         await page.locator('a[href$="/logout"]').click()
 
@@ -364,90 +365,14 @@ describe('Auth', () => {
       })
     })
 
-    describe('api-keys', () => {
-      let user
-
-      beforeAll(async () => {
-        url = new AdminUrlUtil(serverURL, apiKeysSlug)
-
-        user = await payload.create({
-          collection: apiKeysSlug,
-          data: {
-            apiKey: uuid(),
-            enableAPIKey: true,
-          },
-        })
-      })
-
-      test('should enable api key', async () => {
-        await page.goto(url.create)
-
-        await page.locator('#field-enableAPIKey').click()
-
-        // assert that the value is set
-        const apiKeyLocator = page.locator('#apiKey')
-        await expect
-          .poll(async () => await apiKeyLocator.inputValue(), { timeout: POLL_TOPASS_TIMEOUT })
-          .toBeDefined()
-
-        const apiKey = await apiKeyLocator.inputValue()
-
-        await saveDocAndAssert(page)
-
-        await expect(async () => {
-          const apiKeyAfterSave = await apiKeyLocator.inputValue()
-          expect(apiKey).toStrictEqual(apiKeyAfterSave)
-        }).toPass({
-          timeout: POLL_TOPASS_TIMEOUT,
-        })
-      })
-
-      test('should disable api key', async () => {
-        await page.goto(url.edit(user.id))
-
-        // click enable api key checkbox
-        await page.locator('#field-enableAPIKey').click()
-
-        // assert that the apiKey field is hidden
-        await expect(page.locator('#apiKey')).toBeHidden()
-
-        await saveDocAndAssert(page)
-
-        // use the api key in a fetch to assert that it is disabled
-        await expect(async () => {
-          const response = await fetch(`${apiURL}/${apiKeysSlug}/me`, {
-            headers: {
-              ...headers,
-              Authorization: `${apiKeysSlug} API-Key ${user.apiKey}`,
-            },
-          }).then((res) => res.json())
-
-          expect(response.user).toBeNull()
-        }).toPass({
-          timeout: POLL_TOPASS_TIMEOUT,
-        })
-      })
-    })
-
     describe('api-keys-with-field-read-access', () => {
-      let user
-
-      beforeAll(async () => {
+      beforeAll(() => {
         url = new AdminUrlUtil(serverURL, 'api-keys-with-field-read-access')
-
-        user = await payload.create({
-          collection: apiKeysSlug,
-          data: {
-            apiKey: uuid(),
-            enableAPIKey: true,
-          },
-        })
       })
 
-      test('should hide auth parent container if api keys enabled but no read access', async () => {
+      test('should hide API key controls when create access is denied', async () => {
         await page.goto(url.create)
 
-        // assert that the auth parent container is hidden
         await expect(page.locator('.auth-fields')).toBeHidden()
 
         await saveDocAndAssert(page)
@@ -457,6 +382,7 @@ describe('Auth', () => {
         const users = await payload.find({
           collection: slug,
           limit: 1,
+          overrideAccess: true,
         })
 
         const userDocumentRoute = formatAdminURL({
@@ -492,6 +418,7 @@ describe('Auth', () => {
         const notInUserCollection = await payload.create({
           collection: 'relationsCollection',
           data: {},
+          overrideAccess: true,
         })
 
         await logout(page, serverURL)

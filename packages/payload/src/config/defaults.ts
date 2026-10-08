@@ -144,7 +144,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
       typescript?.outputFile ??
       `${typeof process?.cwd === 'function' ? process.cwd() : ''}/payload-types.ts`,
   }
-  config.upload = config.upload ?? {}
+  config.upload = config.upload ?? { transformers: [] }
 
   config.auth = {
     ...(config.auth || {}),

@@ -53,6 +53,7 @@ import type {
   TransformCollectionWithSelect,
   TransformGlobalWithSelect,
 } from './types/index.js'
+import type { ValidationResult } from './types/validation.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 
 import { countLocal, type CountOptions } from './collections/operations/local/count.js'
@@ -89,6 +90,10 @@ import {
   type Options as FindVersionsOptions,
 } from './collections/operations/local/findVersions.js'
 import {
+  renameFileLocal,
+  type RenameFileOptions,
+} from './collections/operations/local/renameFile.js'
+import {
   restoreVersionLocal,
   type Options as RestoreVersionOptions,
 } from './collections/operations/local/restoreVersion.js'
@@ -98,6 +103,10 @@ import {
   type ManyOptions as UpdateManyOptions,
   type Options as UpdateOptions,
 } from './collections/operations/local/update.js'
+import {
+  type ValidateCollectionOptions,
+  validateLocal,
+} from './collections/operations/local/validate.js'
 import {
   countGlobalVersionsLocal,
   type CountGlobalVersionsOptions,
@@ -122,6 +131,10 @@ import {
   updateGlobalLocal,
   type Options as UpdateGlobalOptions,
 } from './globals/operations/local/update.js'
+import {
+  validateGlobalLocal,
+  type ValidateGlobalOptions,
+} from './globals/operations/local/validate.js'
 export type * from './admin/adapters/index.js'
 export type { FieldState } from './admin/forms/Form.js'
 export type * from './admin/types.js'
@@ -304,18 +317,18 @@ export interface UntypedPayloadTypes {
     _verificationToken?: null | string
     /** Whether the email is verified. Only with `auth.verify`. */
     _verified?: boolean | null
-    /** The user's API key. Only with `auth.useAPIKey`, once enabled for this user. */
+    /** The user's API key. Write-only: accepted on `create`/`update`, never returned on reads. */
     apiKey?: null | string
-    /** Internal lookup index for the API key. Hidden (needs `showHiddenFields`). Only with `auth.useAPIKey`. */
+    /** Internal lookup index for the API key. Never returned on reads. */
     apiKeyIndex?: null | string
+    /** The API key's final four characters. Only with `auth.useAPIKey`. */
+    apiKeyLast4?: null | string
     /** Slug of the auth collection this user belongs to. Always present; identifies the source collection. */
     collection: string
     /** When the user was created. Not present when timestamps are disabled. */
     createdAt?: string
     /** The user's email. Absent if email login is disabled via `auth.loginWithUsername`. */
     email?: null | string
-    /** Whether API key auth is enabled for this user. Only with `auth.useAPIKey`. */
-    enableAPIKey?: boolean | null
     /** Hashed password. Hidden (needs `showHiddenFields`). Only with the local strategy. */
     hash?: null | string
     /** The user's ID. Always present. */
@@ -328,6 +341,8 @@ export interface UntypedPayloadTypes {
     password?: null | string
     /** Reset-token expiry. Hidden (needs `showHiddenFields`). Only after `forgotPassword`, until reset. */
     resetPasswordExpiration?: null | string
+    /** Last password-reset email time. Hidden (needs `showHiddenFields`). */
+    resetPasswordRequestedAt?: null | string
     /** Active password-reset token. Hidden (needs `showHiddenFields`). Only after `forgotPassword`, until reset. */
     resetPasswordToken?: null | string
     /** Password salt. Hidden (needs `showHiddenFields`). Only with the local strategy. */
@@ -726,6 +741,13 @@ export class BasePayload {
 
   reencrypt = reencrypt
 
+  /** Rename an upload's current managed files without changing their bytes. */
+  renameFile = async <TSlug extends CollectionSlug>(
+    options: RenameFileOptions<TSlug>,
+  ): Promise<DataFromCollectionSlug<TSlug>> => {
+    return renameFileLocal<TSlug>(this, options)
+  }
+
   resetPassword = async <TSlug extends CollectionSlug>(
     options: ResetPasswordOptions<TSlug>,
   ): Promise<ResetPasswordResult> => {
@@ -782,6 +804,40 @@ export class BasePayload {
     return updateGlobalLocal<TSlug, TSelect>(this, options)
   }
 
+  /**
+   * Validates a collection document candidate for selected locales without persisting data,
+   * versions, or files.
+   *
+   * Omit `id` to validate create data. With `id`, the stored main document is the default base;
+   * `draft: true` selects the newest available draft version and falls back to the main document.
+   * Partial candidate data is merged over that base. Field validation failures resolve to
+   * `{ valid: false, errors }`; access, argument, lookup, and other lifecycle errors throw.
+   *
+   * @see https://payloadcms.com/docs/validation/overview#local-api
+   */
+  validate = async <TSlug extends CollectionSlug>(
+    options: ValidateCollectionOptions<TSlug>,
+  ): Promise<ValidationResult> => {
+    return validateLocal<TSlug>(this, options)
+  }
+
+  /**
+   * Validates a global document candidate for selected locales without persisting data or
+   * versions.
+   *
+   * The stored main global is the default base; `draft: true` selects the newest available draft
+   * version and falls back to the main global. Partial candidate data is merged over that base.
+   * Field validation failures resolve to `{ valid: false, errors }`; access, argument, and other
+   * lifecycle errors throw.
+   *
+   * @see https://payloadcms.com/docs/validation/overview#local-api
+   */
+  validateGlobal = async <TSlug extends GlobalSlug>(
+    options: ValidateGlobalOptions<TSlug>,
+  ): Promise<ValidationResult> => {
+    return validateGlobalLocal<TSlug>(this, options)
+  }
+
   validationRules!: (args: OperationArgs<any>) => ValidationRule[]
 
   verifyEmail = async <TSlug extends CollectionSlug>(
@@ -828,7 +884,6 @@ export class BasePayload {
                 const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
 
                 if (!shouldAutoRun) {
-                  jobAutorunCron.stop()
                   return
                 }
               }
@@ -836,6 +891,7 @@ export class BasePayload {
               await this.jobs.run({
                 allQueues: cronConfig.allQueues,
                 limit: cronConfig.limit ?? DEFAULT_LIMIT,
+                overrideAccess: true,
                 queue: cronConfig.queue,
                 silent: cronConfig.silent,
               })
@@ -1014,16 +1070,6 @@ export class BasePayload {
       }
 
       this.email = consoleEmailAdapter({ payload: this })
-    }
-
-    // Warn if image resizing is enabled but sharp is not installed
-    if (
-      !this.config.sharp &&
-      this.config.collections.some((c) => c.upload.imageSizes || c.upload.formatOptions)
-    ) {
-      this.logger.warn(
-        `Image resizing is enabled for one or more collections, but sharp not installed. Please install 'sharp' and pass into the config.`,
-      )
     }
 
     // Warn if user is deploying to Vercel, and any upload collection is missing a storage adapter
@@ -1409,6 +1455,8 @@ export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
 export * from './auth/index.js'
 export { jwtSign } from './auth/jwt.js'
+export { JWT_AUTH_VERSION } from './auth/jwtAuth.js'
+export type { JWTAuthVersion } from './auth/jwtAuth.js'
 export { accessOperation } from './auth/operations/access.js'
 export { forgotPasswordOperation } from './auth/operations/forgotPassword.js'
 export { initOperation } from './auth/operations/init.js'
@@ -1501,9 +1549,10 @@ export type {
 export type { CompoundIndex, FoldersConfig, TagsConfig } from './collections/config/types.js'
 
 export type { SanitizedCompoundIndex } from './collections/config/types.js'
-export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
 
+export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
 export { countOperation } from './collections/operations/count.js'
+
 export { createOperation } from './collections/operations/create.js'
 export { deleteOperation } from './collections/operations/delete.js'
 export { deleteByIDOperation } from './collections/operations/deleteByID.js'
@@ -1538,6 +1587,8 @@ export {
   updateDocumentInputSchema,
   updateDocumentLocalInputSchema,
 } from './collections/operations/inputSchemas.js'
+export type { ValidateCollectionOptions } from './collections/operations/local/validate.js'
+export { renameFileOperation } from './collections/operations/renameFile.js'
 export { restoreVersionOperation } from './collections/operations/restoreVersion.js'
 export { updateOperation } from './collections/operations/update.js'
 export { updateByIDOperation } from './collections/operations/updateByID.js'
@@ -1554,9 +1605,9 @@ export {
 export { addDefaultsToConfig } from './config/defaults.js'
 
 export { definePlugin } from './config/definePlugin.js'
-
 export { type OrderableEndpointBody } from './config/orderable/index.js'
 export { sanitizeConfig } from './config/sanitize.js'
+
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
@@ -1582,9 +1633,15 @@ export { validateQueryPaths } from './database/queryValidation/validateQueryPath
 export { validateSearchParam } from './database/queryValidation/validateSearchParams.js'
 export type {
   BaseDatabaseAdapter,
+  BatchProcessing,
+  BatchProcessingArgs,
+  BatchProcessingOperation,
+  BatchProcessingResult,
   BeginTransaction,
   CommitTransaction,
   Connect,
+  Copy,
+  CopyArgs,
   Count,
   CountArgs,
   CountGlobalVersionArgs,
@@ -1674,6 +1731,7 @@ export {
   MissingFile,
   NotFound,
   QueryError,
+  TransformerContractError,
   UnauthorizedError,
   UnverifiedEmail,
   ValidationError,
@@ -1681,6 +1739,8 @@ export {
 } from './errors/index.js'
 
 export type { ValidationFieldError } from './errors/index.js'
+export type { Authorship, SanitizedAuthorship } from './fields/baseFields/authorship/index.js'
+export { createCreatedByField, createUpdatedByField } from './fields/baseFields/authorship/index.js'
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'
 
@@ -1896,7 +1956,6 @@ export type {
 } from './globals/config/types.js'
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 export { findOneOperation } from './globals/operations/findOne.js'
-
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
 export {
@@ -1914,6 +1973,7 @@ export {
   updateGlobalInputSchema,
   updateGlobalLocalInputSchema,
 } from './globals/operations/inputSchemas.js'
+export type { ValidateGlobalOptions } from './globals/operations/local/validate.js'
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
 export {
@@ -1954,6 +2014,8 @@ export type {
   DocumentPreferences,
   FieldsPreferences,
   InsideFieldsPreferences,
+  PinnedDocument,
+  PinnedDocumentsPreferences,
   PreferenceRequest,
   PreferenceUpdateRequest,
   RecentlyViewedItem,
@@ -1998,11 +2060,19 @@ export {
 } from './queues/utilities/getCurrentDate.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
+export type { ValidationResult } from './types/validation.js'
+export { generatePayloadFileURL } from './uploads/generatePayloadFileURL.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
+export type * from './uploads/transformers/types.js'
 export type * from './uploads/types.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
+export {
+  batchProcessing,
+  type BatchProcessingOptions,
+  type BatchProcessorResult,
+} from './utilities/batchProcessing.js'
 export { canAccessAdmin } from './utilities/canAccessAdmin.js'
 export { commitTransaction } from './utilities/commitTransaction.js'
 export {
@@ -2016,8 +2086,11 @@ export {
   withNullableJSONSchemaType,
 } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
-export { createLocalReq } from './utilities/createLocalReq.js'
-export { createPayloadRequest } from './utilities/createPayloadRequest.js'
+export {
+  createPayloadRequest,
+  type CreatePayloadRequestArgs,
+} from './utilities/createPayloadRequest.js'
+export { createPayloadRequestFromWebRequest } from './utilities/createPayloadRequestFromWebRequest.js'
 export {
   deepCopyObject,
   deepCopyObjectComplex,

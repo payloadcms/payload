@@ -16,6 +16,8 @@ const PNG_SIGNATURE = Buffer.from(
   'base64',
 )
 
+const GIF_SIGNATURE = Buffer.from('R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==', 'base64')
+
 const createSharpMock = () => {
   const toBufferMock = vi.fn().mockResolvedValue({
     data: PNG_SIGNATURE,
@@ -93,31 +95,172 @@ describe('generateFileData', () => {
     expect(toBufferMock).not.toHaveBeenCalled()
   })
 
-  it('still runs sharp processing when resize options are configured', async () => {
-    const { sharp, toBufferMock } = createSharpMock()
+  describe('focal point without a transformer', () => {
+    const createPngReq = ({ query = {} }: { query?: Record<string, unknown> } = {}) =>
+      ({
+        file: {
+          data: PNG_SIGNATURE,
+          mimetype: 'image/png',
+          name: 'photo.png',
+          size: PNG_SIGNATURE.length,
+        },
+        payload: {
+          config: {},
+          logger: { error: vi.fn() },
+        },
+        query,
+      }) as unknown as PayloadRequest
 
-    await generateFileData({
-      collection: createCollection({ resizeOptions: { width: 100 } }),
+    it('should default the focal point to the center on create', async () => {
+      const result = await generateFileData({
+        collection: createCollection({ focalPoint: true }),
+        config: {} as SanitizedConfig,
+        data: {},
+        operation: 'create',
+        overwriteExistingFiles: true,
+        req: createPngReq(),
+      })
+
+      expect(result.data).toMatchObject({ focalX: 50, focalY: 50 })
+    })
+
+    it('should save a focal point sent through the uploadEdits query param', async () => {
+      const result = await generateFileData({
+        collection: createCollection({ focalPoint: true }),
+        config: {} as SanitizedConfig,
+        data: {},
+        operation: 'create',
+        overwriteExistingFiles: true,
+        req: createPngReq({ query: { uploadEdits: { focalPoint: { x: 20.4, y: 80.6 } } } }),
+      })
+
+      expect(result.data).toMatchObject({ focalX: 20, focalY: 81 })
+    })
+
+    it('should not save a focal point when focalPoint is disabled', async () => {
+      const result = await generateFileData({
+        collection: createCollection({ focalPoint: false }),
+        config: {} as SanitizedConfig,
+        data: {},
+        operation: 'create',
+        overwriteExistingFiles: true,
+        req: createPngReq(),
+      })
+
+      expect(result.data).not.toHaveProperty('focalX')
+    })
+  })
+
+  it('uses the inspected non-image type for image processing', async () => {
+    const { sharp } = createSharpMock()
+    const fileContent = Buffer.from(
+      '<?xml version="1.0"?><document><title>Reference</title></document>',
+    )
+    const req = {
+      file: {
+        data: fileContent,
+        mimetype: 'image/avif',
+        name: 'reference.avif',
+        size: fileContent.length,
+      },
+      payload: {
+        config: { sharp },
+        logger: { error: vi.fn() },
+      },
+    } as unknown as PayloadRequest
+
+    const result = await generateFileData({
+      collection: createCollection(),
       config: {} as SanitizedConfig,
       data: {},
       operation: 'create',
       overwriteExistingFiles: true,
-      req: createReq(sharp),
+      req,
     })
 
-    expect(toBufferMock).toHaveBeenCalledTimes(1)
+    expect(sharp).not.toHaveBeenCalled()
+    expect(result.data).toMatchObject({ mimeType: 'application/xml' })
+  })
+
+  it('handles inspected SVG dimensions and crop edits without image processing', async () => {
+    const { sharp } = createSharpMock()
+    const fileContent = Buffer.from(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><rect width="1" height="1"/></svg>',
+    )
+    const req = {
+      file: {
+        data: fileContent,
+        mimetype: 'image/avif',
+        name: 'reference.avif',
+        size: fileContent.length,
+      },
+      payload: {
+        config: { sharp },
+        logger: { error: vi.fn() },
+      },
+      query: {
+        uploadEdits: {
+          crop: { x: 0, y: 0 },
+          heightInPixels: 2,
+          widthInPixels: 2,
+        },
+      },
+    } as unknown as PayloadRequest
+
+    const result = await generateFileData({
+      collection: createCollection(),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+
+    expect(sharp).not.toHaveBeenCalled()
+    expect(result.data).toMatchObject({ height: 1, mimeType: 'image/svg+xml', width: 1 })
   })
 
   it('does not overwrite req.file with a truncated header-only buffer', async () => {
     // Mirrors what `getFileFromUploadInstructions` returns for the `'header'` content
     // requirement: only the first bytes of the file, alongside the real, full declared size.
-    const truncatedBuffer = PNG_SIGNATURE.subarray(0, 4)
+    const truncatedBuffer = PNG_SIGNATURE
     const fullFileSize = 5_000_000
     const { sharp } = createSharpMock()
 
     const req = {
       file: {
         data: truncatedBuffer,
+        mimetype: 'image/png',
+        name: 'photo.png',
+        size: fullFileSize,
+        uploadReference: { prefix: 'media' },
+      },
+      payload: {
+        config: { sharp },
+        logger: { error: vi.fn() },
+      },
+    } as unknown as PayloadRequest
+
+    await generateFileData({
+      collection: createCollection({ variants: [] }),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+
+    expect(req.file?.size).toBe(fullFileSize)
+    expect(req.file?.data).toBe(truncatedBuffer)
+    expect(sharp).not.toHaveBeenCalled()
+  })
+
+  it('does not process a header-only upload after detecting an animated image type', async () => {
+    const fullFileSize = 5_000_000
+    const { sharp } = createSharpMock()
+    const req = {
+      file: {
+        data: GIF_SIGNATURE,
         mimetype: 'image/png',
         name: 'photo.png',
         size: fullFileSize,
@@ -129,7 +272,7 @@ describe('generateFileData', () => {
       },
     } as unknown as PayloadRequest
 
-    await generateFileData({
+    const result = await generateFileData({
       collection: createCollection(),
       config: {} as SanitizedConfig,
       data: {},
@@ -138,8 +281,8 @@ describe('generateFileData', () => {
       req,
     })
 
-    expect(req.file?.size).toBe(fullFileSize)
-    expect(req.file?.data).toBe(truncatedBuffer)
+    expect(sharp).not.toHaveBeenCalled()
+    expect(result.data).toMatchObject({ height: 1, mimeType: 'image/gif', width: 1 })
   })
 
   it('copies straight from the temp file instead of reading it into memory when local storage is enabled', async () => {
@@ -152,7 +295,9 @@ describe('generateFileData', () => {
         tempFilePath,
       },
       payload: {
-        config: { sharp: undefined },
+        collections: { media: { config: { fields: [], upload: {} } } },
+        config: { routes: { api: '/api' }, sharp: undefined },
+        db: { findOne: vi.fn(async () => null) },
         logger: { error: vi.fn() },
       },
     } as unknown as PayloadRequest
@@ -168,7 +313,7 @@ describe('generateFileData', () => {
 
     expect(files).toEqual([
       {
-        path: `${os.tmpdir()}/document.pdf`,
+        path: `${os.tmpdir()}/document-original.pdf`,
         sourcePath: tempFilePath,
       },
     ])

@@ -176,7 +176,7 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
   return (
     <SidebarTabsProvider activeTabSlug={activeTabID} reloadTabContent={reloadTabContent}>
       <div className={baseClass}>
-        <div className={`${baseClass}__tabs`} role="tablist">
+        <div className={`${baseClass}__tabs scrollbar-thin`} role="tablist">
           {tabs.map((tab, index) => {
             const isActive = tab.slug === activeTabID
 

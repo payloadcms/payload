@@ -22,8 +22,16 @@ import './index.css'
 export { Props }
 
 export const DraggableSortable: React.FC<Props> = (props) => {
-  const { children, className, ids, onDragEnd, onDragStart, renderDragOverlay, sortingStrategy } =
-    props
+  const {
+    id,
+    children,
+    className,
+    ids,
+    onDragEnd,
+    onDragStart,
+    renderDragOverlay,
+    sortingStrategy,
+  } = props
   const [activeId, setActiveId] = useState<null | number | string>(null)
 
   // The overlay is a different element than the drag handle, so its inline cursor
@@ -120,7 +128,7 @@ export const DraggableSortable: React.FC<Props> = (props) => {
         items={ids}
         strategy={sortingStrategy}
       >
-        <div className={className} ref={setNodeRef}>
+        <div className={className} id={id} ref={setNodeRef}>
           {children}
         </div>
       </SortableContext>

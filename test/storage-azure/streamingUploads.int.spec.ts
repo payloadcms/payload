@@ -1,3 +1,4 @@
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options", "test.for", "test.each"] }] -- Tests use the shared fixture wrapper. */
 import type { ContainerClient } from '@azure/storage-blob'
 import type { CollectionSlug, Payload } from 'payload'
 
@@ -7,13 +8,14 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
+import { getStoredUploadKeys } from '../__helpers/int/storedUploadKeys.js'
 import { test } from '../__helpers/int/vitest.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts' })('@payloadcms/storage-azure streamingUploads', () => {
+test.suite('@payloadcms/storage-azure streamingUploads', { config: './config.ts' }, () => {
   let TEST_CONTAINER: string
   let client: ContainerClient
 
@@ -52,6 +54,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure streamingUpload
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -64,6 +67,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure streamingUpload
       collection: mediaWithPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -71,12 +75,12 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure streamingUpload
       { payload },
       {
         collectionSlug: mediaWithPrefixSlug,
-        uploadId: upload.id,
         prefix,
+        uploadId: upload.id,
       },
     )
     expect(upload.url).toEqual(
-      `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=${encodeURIComponent(prefix)}`,
+      `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=${prefix}`,
     )
   })
 
@@ -95,27 +99,38 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure streamingUpload
     { payload }: { payload: Payload },
     {
       collectionSlug,
-      uploadId,
       prefix = '',
+      uploadId,
     }: {
       collectionSlug: CollectionSlug
       prefix?: string
       uploadId: number | string
     },
   ) {
-    const uploadData = (await payload.findByID({
+    const uploadData = (await payload.db.findOne({
       collection: collectionSlug,
-      id: uploadId,
-    })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
+      where: { id: { equals: uploadId } },
+    })) as unknown as {
+      filename: string
+      original?: { filename?: string }
+      variants: Record<string, { filename: string }>
+    }
+    const fileKeys = getStoredUploadKeys({ collectionSlug, doc: uploadData, payload })
+    const filenames = [
+      uploadData.filename,
+      uploadData.original?.filename,
+      ...Object.values(uploadData.variants || {}).map(({ filename }) => filename),
+    ].filter((filename): filename is string => Boolean(filename))
 
-    const fileKeys = Object.keys(uploadData.sizes || {}).map((key) => {
-      const rawFilename = uploadData.sizes[key].filename
-      return prefix ? `${prefix}/${rawFilename}` : rawFilename
-    })
-
-    fileKeys.push(`${prefix ? `${prefix}/` : ''}${uploadData.filename}`)
+    expect(fileKeys.length).toBeGreaterThan(0)
+    for (const filename of filenames) {
+      expect(fileKeys.some((key) => path.basename(key) === filename)).toBe(true)
+    }
 
     for (const key of fileKeys) {
+      if (prefix) {
+        expect(key.startsWith(`${prefix}/`)).toBe(true)
+      }
       const blobClient = client.getBlobClient(key)
       try {
         const props = await blobClient.getProperties()

@@ -1,6 +1,6 @@
 'use client'
 import type { I18nClient } from '@payloadcms/translations'
-import type { Option, SelectField, SelectFieldDiffClientComponent } from 'payload'
+import type { Option, SelectField, SelectFieldDiffClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -63,13 +63,12 @@ const getTranslatedOptions = (options: Option | Option[], i18n: I18nClient): str
   return typeof translatedLabel === 'string' ? translatedLabel : options.value
 }
 
-export const Select: SelectFieldDiffClientComponent = ({
-  comparisonValue: valueFrom,
-  diffMethod,
+export const Select: React.FC<SelectFieldDiffClientProps> = ({
   field,
   locale,
   nestingLevel,
-  versionValue: valueTo,
+  valueFrom,
+  valueTo,
 }) => {
   const { i18n } = useTranslation()
 

@@ -218,7 +218,7 @@ export const generateFormCollection = (
       name: 'emails',
       type: 'array',
       access: {
-        read: ({ req: { user } }) => !!user,
+        read: ({ req }) => req.user?.collection === req.payload.config.admin.user,
       },
       admin: {
         description: ({ t }) =>

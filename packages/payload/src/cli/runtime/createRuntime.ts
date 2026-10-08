@@ -21,7 +21,7 @@ export const createCLIRuntime = (): CLIRuntime => {
 
   const getConfig = (): Promise<SanitizedConfig> => {
     configPromise ??= (async () => {
-      const importedConfig = await import(pathToFileURL(configPath).toString())
+      const importedConfig = await import(/* @vite-ignore */ pathToFileURL(configPath).toString())
       const config = importedConfig.default ? await importedConfig.default : importedConfig
 
       return config as SanitizedConfig

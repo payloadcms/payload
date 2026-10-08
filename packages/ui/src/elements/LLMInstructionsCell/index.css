@@ -1,0 +1,11 @@
+@layer payload-default {
+  .llm-instructions-cell {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    max-inline-size: calc(var(--spacer-6) * 8);
+    min-inline-size: calc(var(--spacer-6) * 4);
+    overflow: hidden;
+    white-space: pre-line;
+  }
+}

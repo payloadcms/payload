@@ -4,6 +4,24 @@ import { APIError } from '../errors/APIError.js'
 import { isURLAllowed } from '../utilities/isURLAllowed.js'
 import { safeFetch } from './safeFetch.js'
 
+export const parseFileURL = (url: string, base?: URL): URL => {
+  try {
+    const parsedURL = new URL(url, base)
+
+    if (parsedURL.protocol !== 'http:' && parsedURL.protocol !== 'https:') {
+      throw new APIError('External file URLs must use HTTP or HTTPS.', 400)
+    }
+
+    return parsedURL
+  } catch (error) {
+    if (error instanceof APIError) {
+      throw error
+    }
+
+    throw new APIError('Invalid external file URL.', 400)
+  }
+}
+
 /**
  * Fetches a file, checking each redirect against the allow list and SSRF restrictions.
  * Returns the unread response so callers can either stream it or buffer it into a Payload File.
@@ -11,12 +29,14 @@ import { safeFetch } from './safeFetch.js'
  */
 export const fetchWithRedirects = async ({
   allowList,
+  getHeaders,
   headers,
   skipSafeFetch,
   timeout,
   url,
 }: {
   allowList?: AllowList
+  getHeaders?: (url: string) => Record<string, string>
   headers?: Record<string, string>
   skipSafeFetch?: UploadConfig['skipSafeFetch']
   timeout?: number
@@ -33,7 +53,7 @@ export const fetchWithRedirects = async ({
 
     const response = await (shouldSkipSafeFetch ? fetch : safeFetch)(url, {
       credentials: 'include',
-      headers,
+      headers: getHeaders ? getHeaders(url) : headers,
       redirect: 'manual',
       signal: timeout ? AbortSignal.timeout(timeout) : undefined,
     })
@@ -46,7 +66,7 @@ export const fetchWithRedirects = async ({
       const location = response.headers.get('location')
 
       if (location) {
-        url = new URL(location, url).href
+        url = parseFileURL(location, parseFileURL(url)).href
 
         if (allowList && !isURLAllowed(url, allowList)) {
           throw new APIError('Redirect target is not allowed.', 400)

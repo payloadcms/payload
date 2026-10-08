@@ -24,8 +24,9 @@ export const DocumentHeader: React.FC<{
   hideTabs?: boolean
   permissions: SanitizedPermissions
   req: PayloadRequest
+  user?: PayloadRequest['user']
 }> = (props) => {
-  const { AfterHeader, collectionConfig, globalConfig, hideTabs, permissions, req } = props
+  const { AfterHeader, collectionConfig, globalConfig, hideTabs, permissions, req, user } = props
 
   return (
     <DocumentHeaderRoot>
@@ -36,6 +37,7 @@ export const DocumentHeader: React.FC<{
           globalConfig={globalConfig}
           permissions={permissions}
           req={req}
+          user={user}
         />
       )}
       {AfterHeader ? <div className={`${baseClass}__after-header`}>{AfterHeader}</div> : null}

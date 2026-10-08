@@ -1,15 +1,16 @@
 import { getCollectionSchemaInputSchema } from '../../../collections/operations/inputSchemas.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { getLLMInstructions } from '../../../llm-instructions/getInstructions.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { getCollectionInputSchema } from '../../../utilities/entityInputSchema/getEntityInputSchema.js'
 import { defineCLICommand } from '../../defineCLICommand.js'
 import { printJSON } from '../data/utilities.js'
 
 export const createGetCollectionSchemaCommand = defineCLICommand({
-  description: 'Print the writable JSON schema for a local collection.',
+  description: 'Print the writable JSON schema and LLM instructions for a local collection.',
   handler: async ({ args, getPayload, isJSON }) => {
     const payload = await getPayload()
     const slug = args.slug
-    const req = await createLocalReq({}, payload)
+    const req = await createPayloadRequest({ payload })
     const schema = getCollectionInputSchema({ collectionSlug: slug, req })
 
     if (!schema) {
@@ -29,7 +30,13 @@ export const createGetCollectionSchemaCommand = defineCLICommand({
         }
       : { enabled: false }
 
-    const result = { slug, schema, upload }
+    const instructions = await getLLMInstructions({
+      slug,
+      type: 'collection',
+      overrideAccess: true,
+      req,
+    })
+    const result = { slug, schema, upload, ...(instructions ? { instructions } : {}) }
 
     if (!isJSON) {
       printJSON(result)

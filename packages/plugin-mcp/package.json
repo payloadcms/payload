@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-mcp",
-  "version": "4.0.0-canary.14",
+  "version": "4.0.0-canary.38",
   "description": "MCP (Model Context Protocol) capabilities with Payload",
   "keywords": [
     "plugin",
@@ -60,14 +60,14 @@
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "pack:plugin": "pnpm build && pnpm pack"
   },
   "dependencies": {
-    "@modelcontextprotocol/server": "2.0.0",
-    "tsx": "4.22.4"
+    "@modelcontextprotocol/server": "2.3.1",
+    "tsx": "4.23.15"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
