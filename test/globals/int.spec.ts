@@ -62,10 +62,10 @@ describe('globals', () => {
       expect(globalDoc).toMatchObject(data)
     })
 
-    it('should return 400 when reading versions without versions enabled', async () => {
+    it('should return 404 when reading versions without versions enabled', async () => {
       const response = await restClient.GET(`/globals/${slug}/versions`)
 
-      expect(response.status).toEqual(400)
+      expect(response.status).toEqual(404)
     })
 
     it('should update with localization', async () => {

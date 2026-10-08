@@ -1,5 +1,3 @@
-import { status as httpStatus } from 'http-status'
-
 import type { FindOptions } from '../../collections/operations/local/find.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
@@ -10,8 +8,9 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
-import { APIError } from '../../errors/index.js'
+import { NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { hasVersionsEnabled } from '../../utilities/getVersionsConfig.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
@@ -51,6 +50,12 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
   const req = args.req!
   const { fallbackLocale, locale, payload } = req
 
+  // Entities without versions have no versions table/collection in the database adapter,
+  // so querying it would crash (e.g. a TypeError in the drizzle adapter → HTTP 500).
+  if (!hasVersionsEnabled(globalConfig)) {
+    throw new NotFound(req.t)
+  }
+
   const versionFields = buildVersionGlobalFields(payload.config, globalConfig, true)
 
   try {
@@ -61,13 +66,6 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     const accessResults = !overrideAccess
       ? await executeAccess({ req }, globalConfig.access.readVersions)
       : true
-
-    if (!globalConfig.versions) {
-      throw new APIError(
-        `Versions are not enabled for global "${globalConfig.slug}".`,
-        httpStatus.BAD_REQUEST,
-      )
-    }
 
     await validateQueryPaths({
       globalConfig,

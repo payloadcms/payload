@@ -33,6 +33,8 @@ export const disablePublishGlobalSlug = 'disable-publish-global'
 
 export const textCollectionSlug = 'text'
 
+export const versionsDisabledCollectionSlug = 'versions-disabled-collection'
+
 export const collectionSlugs = [
   autosaveCollectionSlug,
   autosaveWithMultiSelectCollectionSlug,
@@ -57,6 +59,8 @@ export const simpleDraftGlobalSlug = 'simple-draft-global'
 export const draftUnlimitedGlobalSlug = 'draft-unlimited-global'
 
 export const draftWithMaxGlobalSlug = 'draft-with-max-global'
+
+export const versionsDisabledGlobalSlug = 'versions-disabled-global'
 
 export const globalSlugs = [
   autoSaveGlobalSlug,

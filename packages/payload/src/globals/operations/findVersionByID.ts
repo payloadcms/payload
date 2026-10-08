@@ -9,6 +9,7 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
+import { hasVersionsEnabled } from '../../utilities/getVersionsConfig.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
@@ -42,6 +43,15 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     select: incomingSelect,
     showHiddenFields,
   } = args
+
+  // Entities without versions have no versions table/collection in the database adapter.
+  if (!hasVersionsEnabled(globalConfig)) {
+    if (disableErrors) {
+      return null!
+    }
+
+    throw new NotFound(req.t)
+  }
 
   try {
     // /////////////////////////////////////

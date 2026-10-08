@@ -10,6 +10,7 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { hasVersionsEnabled } from '../../utilities/getVersionsConfig.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
@@ -50,6 +51,15 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
 
   if (!id) {
     throw new APIError('Missing ID of version.', httpStatus.BAD_REQUEST)
+  }
+
+  // Entities without versions have no versions table/collection in the database adapter.
+  if (!hasVersionsEnabled(collectionConfig)) {
+    if (disableErrors) {
+      return null!
+    }
+
+    throw new NotFound(req.t)
   }
 
   try {
