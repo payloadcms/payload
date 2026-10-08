@@ -5,12 +5,16 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, NotFound } from '../../errors/index.js'
 import { checkFileAccess } from '../../uploads/checkFileAccess.js'
+import { checkFileRestrictions } from '../../uploads/checkFileRestrictions.js'
+import { getMimeTypeEssence } from '../../uploads/getFileTypeIdentity.js'
+import { isProcessableImage } from '../../uploads/isProcessableImage.js'
 import { createFileSource } from '../../uploads/transformers/createFileSource.js'
 import { createUploadFileSource } from '../../uploads/transformers/createUploadFileSource.js'
 import { getSourceFileResponse } from '../../uploads/transformers/getSourceFileResponse.js'
 import { handleDynamicFileRequest } from '../../uploads/transformers/handleDynamicFileRequest.js'
 import { withFileTransformAccessContext } from '../../uploads/transformers/withFileTransformAccessContext.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
+import { uploadContentSecurityPolicy } from '../../uploads/uploadContentSecurityPolicy.js'
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 
 /** Render unsaved edits without running document write hooks or writing files. */
@@ -113,6 +117,20 @@ const renderPreviewFile: PayloadHandler = async (req) => {
     throw new APIError('File previews require an uploaded file, not a provider reference.', 400)
   }
 
+  let previewFile = req.file
+  if (previewFile) {
+    const detectedType = await checkFileRestrictions({
+      collection: collection.config,
+      file: previewFile,
+      req,
+    })
+    // Previews cannot rely on filename or client MIME fallbacks for unknown bytes.
+    if (!detectedType) {
+      throw new APIError('Unable to determine the preview source file type.', 400)
+    }
+    previewFile = { ...previewFile, mimetype: detectedType.mime }
+  }
+
   const original = document?.original ?? document
   if (document && !req.file) {
     await withFileTransformAccessContext({
@@ -127,8 +145,8 @@ const renderPreviewFile: PayloadHandler = async (req) => {
       req,
     })
   }
-  const source = req.file
-    ? createUploadFileSource({ collectionSlug, file: req.file, req })
+  const source = previewFile
+    ? createUploadFileSource({ collectionSlug, file: previewFile, req })
     : createFileSource({
         filename: original?.filename ?? document!.filename,
         mimeType: original?.mimeType ?? document!.mimeType ?? 'application/octet-stream',
@@ -153,6 +171,12 @@ const renderPreviewFile: PayloadHandler = async (req) => {
     },
     req,
   })
+  if (!isProcessableImage(getMimeTypeEssence(response.headers.get('Content-Type')))) {
+    await response.body?.cancel()
+    throw new APIError('This file does not support image previews.', 400)
+  }
+  response.headers.set('Content-Security-Policy', uploadContentSecurityPolicy)
+  response.headers.set('X-Content-Type-Options', 'nosniff')
   response.headers.set('Cache-Control', 'private, no-store')
   response.headers.delete('ETag')
   response.headers.delete('Last-Modified')

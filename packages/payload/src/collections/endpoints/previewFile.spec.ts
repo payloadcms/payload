@@ -8,6 +8,7 @@ import path from 'node:path'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getSourceFileResponse } from '../../uploads/transformers/getSourceFileResponse.js'
+import { wrapInternalEndpoints } from '../../utilities/wrapInternalEndpoints.js'
 import { previewFileHandler } from './previewFile.js'
 
 vi.mock('../../uploads/transformers/getSourceFileResponse.js', () => ({
@@ -45,7 +46,7 @@ function makeRequest({
       config: { cors: [], upload: { transformers: [sharpTransformer({ dynamic: false })] } },
       db: { defaultIDType: 'text', findOne: vi.fn().mockResolvedValue(document) },
       find: read,
-      logger: { error: vi.fn() },
+      logger: { error: vi.fn(), warn: vi.fn() },
     },
     routeParams: { collection: 'media', ...(id ? { id } : {}) },
     searchParams: new URLSearchParams(),
@@ -221,4 +222,137 @@ describe('previewFileHandler', () => {
     await expect(previewFileHandler(req)).rejects.toMatchObject({ status: 400 })
     expect(getSourceFileResponse).not.toHaveBeenCalled()
   })
+})
+
+describe('preview file security', () => {
+  it.each(['', '1'])(
+    'should reject forbidden HTML for new and replacement files (id %s)',
+    async (id) => {
+      const { req } = makeRequest({ id, transforms: null })
+      req.payload.collections.media.config.upload.mimeTypes = ['image/png']
+      const data = Buffer.from('<!doctype html><script>alert(1)</script>')
+      req.file = { data, mimetype: 'text/html', name: 'probe.html', size: data.length }
+
+      await expect(previewFileHandler(req)).rejects.toMatchObject({ status: 400 })
+    },
+  )
+
+  it('should reject HTML even when restricted file types are enabled', async () => {
+    const { req } = makeRequest({ id: '', transforms: null })
+    req.payload.collections.media.config.upload.allowRestrictedFileTypes = true
+    req.payload.config.upload.transformers = []
+    const data = Buffer.from('<!doctype html><script>alert(1)</script>')
+    req.file = { data, mimetype: 'text/html', name: 'probe.html', size: data.length }
+
+    await expect(previewFileHandler(req)).rejects.toMatchObject({ status: 400 })
+  })
+
+  it('should reject HTML disguised as an allowed PNG', async () => {
+    const { req } = makeRequest({ id: '', transforms: null })
+    req.payload.collections.media.config.upload.mimeTypes = ['image/png']
+    req.payload.config.upload.transformers = []
+    const data = Buffer.from('<!doctype html><script>alert(1)</script>')
+    req.file = { data, mimetype: 'image/png', name: 'probe.png', size: data.length }
+
+    await expect(previewFileHandler(req)).rejects.toMatchObject({ status: 400 })
+  })
+
+  it('should reject unsafe SVG before preview processing', async () => {
+    const { req } = makeRequest({ id: '', transforms: null })
+    req.payload.collections.media.config.upload.mimeTypes = ['image/svg+xml']
+    req.payload.config.upload.transformers = []
+    const data = Buffer.from(
+      '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>',
+    )
+    req.file = { data, mimetype: 'image/svg+xml', name: 'probe.svg', size: data.length }
+
+    await expect(previewFileHandler(req)).rejects.toMatchObject({ status: 400 })
+  })
+
+  it('should enforce the configured MIME allowlist for a valid image', async () => {
+    const { req } = makeRequest({ id: '', transforms: null })
+    req.payload.collections.media.config.upload.mimeTypes = ['image/jpeg']
+    const data = await sharp({ create: { background: 'red', channels: 3, width: 2, height: 2 } })
+      .png()
+      .toBuffer()
+    req.file = { data, mimetype: 'image/png', name: 'probe.png', size: data.length }
+
+    await expect(previewFileHandler(req)).rejects.toMatchObject({ status: 400 })
+  })
+
+  it('should use detected image MIME and protect previews from active content', async () => {
+    const { req } = makeRequest({ id: '', transforms: null })
+    req.payload.collections.media.config.upload.mimeTypes = ['image/png']
+    req.payload.config.upload.transformers = []
+    const data = await sharp({ create: { background: 'red', channels: 3, width: 2, height: 2 } })
+      .png()
+      .toBuffer()
+    req.file = { data, mimetype: 'text/html', name: 'probe.png', size: data.length }
+    const response = await previewFileHandler(req)
+
+    expect(response.headers.get('Content-Type')).toBe('image/png')
+    expect(response.headers.get('X-Content-Type-Options')).toBe('nosniff')
+    expect(response.headers.get('Content-Security-Policy')).toContain("script-src 'none'")
+    expect(await getDimensions({ response })).toEqual({ width: 2, height: 2 })
+  })
+
+  it('should reject a non-image preview response from a stored source', async () => {
+    const { read, req } = makeRequest({ transforms: null })
+    req.payload.config.upload.transformers = []
+    read.mockResolvedValue({
+      docs: [
+        {
+          ...document,
+          mimeType: 'text/html',
+          original: { ...document.original, mimeType: 'text/html' },
+        },
+      ],
+    })
+    vi.mocked(getSourceFileResponse).mockResolvedValue(
+      new Response('<script>alert(1)</script>', { headers: { 'Content-Type': 'text/html' } }),
+    )
+
+    await expect(previewFileHandler(req)).rejects.toMatchObject({ status: 400 })
+  })
+})
+
+it('should enforce preview restrictions after parsing a multipart request', async () => {
+  const { req } = makeRequest({ id: '', transforms: null })
+  req.payload.collections.media.config.upload.mimeTypes = ['image/png']
+  const formData = new FormData()
+  formData.append('_payload', JSON.stringify({ _transforms: null }))
+  formData.append(
+    'file',
+    new File(['<!doctype html><script>alert(1)</script>'], 'probe.html', { type: 'text/html' }),
+  )
+  const request = Object.assign(
+    new Request('http://localhost/api/media/preview-file', { method: 'POST', body: formData }),
+    {
+      payload: req.payload,
+      routeParams: req.routeParams,
+      t: req.t,
+      user: req.user,
+    },
+  ) as PayloadRequest
+  const [endpoint] = wrapInternalEndpoints([
+    { handler: previewFileHandler, method: 'post', path: '/preview-file' },
+  ])
+
+  await expect(endpoint.handler(request)).rejects.toMatchObject({ status: 400 })
+})
+
+it('should allow a safe SVG preview with restrictive response headers', async () => {
+  const { req } = makeRequest({ id: '', transforms: null })
+  req.payload.collections.media.config.upload.mimeTypes = ['image/svg+xml']
+  req.payload.config.upload.transformers = []
+  const data = Buffer.from(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2"><rect width="2" height="2" fill="red"/></svg>',
+  )
+  req.file = { data, mimetype: 'image/svg+xml', name: 'safe.svg', size: data.length }
+  const response = await previewFileHandler(req)
+
+  expect(response.headers.get('Content-Type')).toBe('image/svg+xml')
+  expect(response.headers.get('Content-Security-Policy')).toContain("script-src 'none'")
+  expect(response.headers.get('X-Content-Type-Options')).toBe('nosniff')
+  expect(await response.text()).toBe(data.toString())
 })
