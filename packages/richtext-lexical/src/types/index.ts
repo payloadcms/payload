@@ -461,10 +461,7 @@ export type LexicalEditorViewMap<
   }
 }
 
-/**
- * @todo rename to LexicalEditorArgs in 4.0, since these are arguments for the lexicalEditor function
- */
-export type LexicalEditorProps = {
+export type LexicalEditorArgs = {
   admin?: LexicalFieldAdminProps
   features?: FeaturesInput
   lexical?: LexicalEditorConfig
