@@ -8,6 +8,7 @@ import { LanguageIcon } from '../../icons/Language/index.js'
 import { SidebarIcon } from '../../icons/Sidebar/index.js'
 import { useActions } from '../../providers/Actions/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useEmbed } from '../../providers/Embed/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
@@ -25,6 +26,7 @@ export function AppHeader() {
   const { Actions } = useActions()
 
   const { navOpen, setNavOpen } = useNav()
+  const { isEmbedded } = useEmbed()
 
   const {
     config: { localization },
@@ -57,7 +59,13 @@ export function AppHeader() {
 
   return (
     <header
-      className={[baseClass, navOpen && `${baseClass}--nav-open`].filter(Boolean).join(' ')}
+      className={[
+        baseClass,
+        navOpen && `${baseClass}--nav-open`,
+        isEmbedded && `${baseClass}--embedded`,
+      ]
+        .filter(Boolean)
+        .join(' ')}
       ref={headerRef}
     >
       <div className={`${baseClass}__content`}>

@@ -15,8 +15,10 @@ export const SidebarIcon: React.FC<{
   readonly size?: 16
 }> = ({ className, size = 16 }) => (
   <svg
+    aria-hidden="true"
     className={['icon', 'icon--sidebar', className].filter(Boolean).join(' ')}
     fill="none"
+    focusable="false"
     height={paths[size].height}
     viewBox={`0 0 ${paths[size].width} ${paths[size].height}`}
     width={paths[size].width}
