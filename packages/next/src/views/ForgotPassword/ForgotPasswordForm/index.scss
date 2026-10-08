@@ -1,0 +1,14 @@
+.forgot-password__form {
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: calc(var(--base) * 0.25);
+  }
+
+  &__submit.btn--style-primary.btn--disabled {
+    --bg-color: var(--theme-elevation-150);
+    --color: var(--theme-elevation-800);
+    --btn-border: 1px solid var(--theme-elevation-300);
+  }
+}

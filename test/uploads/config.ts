@@ -25,6 +25,7 @@ import {
   customFileNameMediaSlug,
   draftReuploadMediaSlug,
   enlargeSlug,
+  fileAccessMediaSlug,
   focalNoSizesSlug,
   hideFileInputOnCreateSlug,
   imageSizesOnlySlug,
@@ -1082,6 +1083,51 @@ export default buildConfigWithDefaults({
       upload: {
         staticDir: path.resolve(dirname, './prefix-media'),
       },
+    },
+    {
+      slug: fileAccessMediaSlug,
+      access: {
+        read: () => ({
+          visibility: {
+            equals: 'public',
+          },
+        }),
+      },
+      fields: [
+        {
+          name: 'prefix',
+          type: 'text',
+        },
+        {
+          name: 'requestMetadata',
+          type: 'text',
+        },
+        {
+          name: 'visibility',
+          type: 'select',
+          options: ['public', 'restricted'],
+          required: true,
+        },
+      ],
+      hooks: {
+        beforeChange: [
+          ({ data, req }) => ({
+            ...data,
+            requestMetadata: `${req.method}:${req.headers.get('content-type') ?? ''}:${new URL(req.url!).pathname}`,
+          }),
+        ],
+      },
+      upload: {
+        imageSizes: [
+          {
+            name: 'thumbnail',
+            height: 100,
+            width: 100,
+          },
+        ],
+        staticDir: path.resolve(dirname, `./${fileAccessMediaSlug}`),
+      },
+      versions: true,
     },
     {
       // Drafts + a `prefix` field reproduce the reupload-on-draft access bug:

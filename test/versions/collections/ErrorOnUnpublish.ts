@@ -1,8 +1,13 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, TextFieldValidation } from 'payload'
 
 import { APIError } from 'payload'
 
 import { errorOnUnpublishSlug } from '../slugs.js'
+
+const validateSubmittedNestedValue: TextFieldValidation = (value) =>
+  typeof value === 'undefined' || (typeof value === 'string' && value.length > 0)
+    ? true
+    : 'Enter a value'
 
 const ErrorOnUnpublish: CollectionConfig = {
   slug: errorOnUnpublishSlug,
@@ -14,6 +19,17 @@ const ErrorOnUnpublish: CollectionConfig = {
       name: 'title',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'group',
+      type: 'group',
+      fields: [
+        {
+          name: 'textInGroup',
+          type: 'text',
+          validate: validateSubmittedNestedValue,
+        },
+      ],
     },
   ],
   versions: {

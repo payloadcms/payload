@@ -56,8 +56,8 @@ describe('@payloadcms/storage-s3', () => {
 
     await verifyUploads({
       collectionSlug: mediaSlug,
-      uploadId: upload.id,
       payload,
+      uploadId: upload.id,
     })
 
     expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
@@ -74,9 +74,9 @@ describe('@payloadcms/storage-s3', () => {
 
     await verifyUploads({
       collectionSlug: mediaWithPrefixSlug,
-      uploadId: upload.id,
-      prefix,
       payload,
+      prefix,
+      uploadId: upload.id,
     })
     expect(upload.url).toEqual(
       `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=${prefix}`,
@@ -143,7 +143,7 @@ describe('@payloadcms/storage-s3', () => {
     })
 
     const response = await restClient.GET(`/${mediaWithSignedDownloadsSlug}/file/temp.png`, {
-      headers: { 'X-Disable-Signed-URL': 'true', 'If-None-Match': 'invalid-etag-1234' },
+      headers: { 'If-None-Match': 'invalid-etag-1234', 'X-Disable-Signed-URL': 'true' },
     })
     expect(response.status).toBe(200)
     expect(response.headers.get('Content-Type')).toBe('image/png')
@@ -155,8 +155,8 @@ describe('@payloadcms/storage-s3', () => {
       `/${mediaWithSignedDownloadsSlug}/file/temp.png`,
       {
         headers: {
-          'X-Disable-Signed-URL': 'true',
           'If-None-Match': etag!,
+          'X-Disable-Signed-URL': 'true',
         },
       },
     )
@@ -234,7 +234,7 @@ describe('@payloadcms/storage-s3', () => {
       expect(dbDoc.sizes.thumbnail.url).toContain(getTestBucketName())
       expect(dbDoc.sizes.thumbnail.url).not.toMatch(/^\/api\//)
 
-      await payload.delete({ collection: mediaWithDirectAccessSlug, id: upload.id })
+      await payload.delete({ id: upload.id, collection: mediaWithDirectAccessSlug })
     })
 
     it('should return direct S3 URL without encoding issues for normal filenames', async () => {
@@ -348,7 +348,14 @@ describe('@payloadcms/storage-s3', () => {
       expect(upload1.filename).toBe('image.png')
       expect(upload2.filename).toBe('image.png') // Should NOT increment
       expect(upload1.prefix).toBe(prefix) // 'test-prefix'
-      expect(upload2.prefix).toBe('different-prefix')
+      // New uploads store the document prefix beneath the collection prefix.
+      expect(upload2.prefix).toBe(`${prefix}/different-prefix`)
+      await verifyUploads({
+        collectionSlug: mediaWithPrefixSlug,
+        payload,
+        prefix: `${prefix}/different-prefix`,
+        uploadId: upload2.id,
+      })
     })
 
     it('supports multi-tenant scenario with dynamic prefix from hook', async () => {

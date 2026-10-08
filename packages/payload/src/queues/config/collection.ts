@@ -120,6 +120,12 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
 
   const jobsCollection: CollectionConfig = {
     slug: jobsCollectionSlug,
+    access: {
+      create: () => false,
+      delete: () => false,
+      read: () => false,
+      update: () => false,
+    },
     admin: {
       group: 'System',
       hidden: true,

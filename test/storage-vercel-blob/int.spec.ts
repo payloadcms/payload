@@ -263,7 +263,14 @@ describe('@payloadcms/storage-vercel-blob', () => {
       expect(upload1.filename).toBe('image.png')
       expect(upload2.filename).toBe('image.png')
       expect(upload1.prefix).toBe(prefix)
-      expect(upload2.prefix).toBe('different-prefix')
+      // New uploads store the document prefix beneath the collection prefix.
+      expect(upload2.prefix).toBe(`${prefix}/different-prefix`)
+      await verifyUploads({
+        collectionSlug: mediaWithPrefixSlug,
+        payload,
+        prefix: `${prefix}/different-prefix`,
+        uploadId: upload2.id,
+      })
     })
 
     it('supports multi-tenant scenario with dynamic prefix from hook', async () => {

@@ -43,6 +43,17 @@ export default buildConfigWithDefaults({
   },
   collections: [
     {
+      slug: 'session-users',
+      auth: true,
+      fields: [
+        {
+          name: 'restrictedField',
+          type: 'text',
+          access: { read: () => false },
+        },
+      ],
+    },
+    {
       slug,
       admin: {
         useAsTitle: 'custom',
@@ -61,6 +72,7 @@ export default buildConfigWithDefaults({
         verify: false,
         forgotPassword: {
           expiration: 300000, // 5 minutes
+          minRequestInterval: 1,
         },
       },
       fields: [
@@ -72,6 +84,11 @@ export default buildConfigWithDefaults({
               return user?.roles?.includes('admin')
             },
           },
+        },
+        {
+          name: 'restrictedField',
+          type: 'text',
+          access: { read: () => false },
         },
         {
           name: 'roles',
@@ -283,6 +300,7 @@ export default buildConfigWithDefaults({
     {
       slug: publicUsersSlug,
       auth: {
+        useSessions: false,
         verify: true,
       },
       fields: [],
@@ -319,7 +337,9 @@ export default buildConfigWithDefaults({
           name: 'apiKey',
           type: 'text',
           access: {
+            create: () => false,
             read: () => false,
+            update: () => false,
           },
         },
       ],

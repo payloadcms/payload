@@ -1,0 +1,80 @@
+---
+title: Text Inputs
+label: Text Inputs
+order: 102
+desc: Build custom text controls with Payload's TextInput and TextareaInput components.
+keywords: ui, components, text input, textarea, custom field, form
+---
+
+`TextInput` and `TextareaInput` combine native text controls with Payload's label, description, validation, and read-only field presentation. Use them when building a Custom Field that manages its own value.
+
+## Import
+
+```tsx
+import { TextareaInput, TextInput } from '@payloadcms/ui'
+```
+
+## TextInput
+
+<ComponentPreview component="TextInputs" example="text" />
+
+`TextInput` is controlled. Pass the current string through `value` and update it from the native change event.
+
+Set `hasMany` to render Payload's sortable multi-value text control instead of a native input.
+
+## TextareaInput
+
+<ComponentPreview component="TextInputs" example="textarea" />
+
+Use `rows` to establish the initial height. The value remains controlled by the surrounding Custom Field.
+
+## Common props
+
+These props are shared by both inputs unless noted otherwise.
+
+| Prop          | Type                      | Default | Description                                    |
+| ------------- | ------------------------- | ------- | ---------------------------------------------- |
+| `path` \*     | `string`                  | —       | Identifies the field and connects its UI.      |
+| `value`       | `string`                  | `''`    | Supplies the controlled value.                 |
+| `onChange`    | `ChangeEventHandler`      | —       | Receives native input changes.                 |
+| `label`       | `StaticLabel`             | —       | Displays Payload's field label.                |
+| `description` | `StaticDescription`       | —       | Displays helper text beneath the input.        |
+| `placeholder` | `string \| LabelFunction` | —       | Displays translated placeholder text.          |
+| `required`    | `boolean`                 | `false` | Displays the required marker.                  |
+| `readOnly`    | `boolean`                 | `false` | Disables editing and applies read-only styles. |
+| `showError`   | `boolean`                 | Form    | Displays the current validation error.         |
+| `BeforeInput` | `ReactNode`               | —       | Inserts content before the native control.     |
+| `AfterInput`  | `ReactNode`               | —       | Inserts content after the native control.      |
+| `rows`        | `number`                  | —       | Sets the TextareaInput row count.              |
+| `hasMany`     | `boolean`                 | `false` | Enables TextInput's multi-value mode.          |
+
+_\* An asterisk denotes that a prop is required._
+
+## Custom field usage
+
+Inside a Custom Field, connect the input to Payload's form state with `useField`:
+
+```tsx
+'use client'
+
+import { TextInput, useField } from '@payloadcms/ui'
+
+export function CustomTextField({ field, path }) {
+  const { setValue, showError, value } = useField<string>({ path })
+
+  return (
+    <TextInput
+      label={field.label}
+      onChange={(event) => setValue(event.target.value)}
+      path={path}
+      required={field.required}
+      showError={showError}
+      value={value}
+    />
+  )
+}
+```
+
+## Provider requirements
+
+The Admin Panel supplies the translation and form contexts used by the built-in label, description, and validation components. Use these inputs inside a Payload Custom Field, or provide equivalent contexts when rendering them elsewhere.

@@ -56,6 +56,7 @@ export const plTranslations: DefaultTranslationsObject = {
     newPassword: 'Nowe hasło',
     passed: 'Uwierzytelnienie zakończone sukcesem',
     passwordResetSuccessfully: 'Hasło zostało pomyślnie zresetowane.',
+    resend: 'Wyślij ponownie',
     resetPassword: 'Zresetuj hasło',
     resetPasswordExpiration: 'Zresetuj czas wygaśnięcia hasła',
     resetPasswordToken: 'Zresetuj token hasła',

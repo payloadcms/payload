@@ -1,7 +1,7 @@
 import { createRequire } from 'module'
 import path from 'path'
 import fs from 'fs'
-import { defineConfig } from 'vitest/config'
+import { defaultExclude, defineConfig } from 'vitest/config'
 
 // Use process.cwd() to be safe in both CJS and ESM contexts within Vitest
 const ROOT_DIR = process.cwd()
@@ -39,10 +39,15 @@ export default defineConfig({
     },
     projects: [
       {
+        esbuild: {
+          jsx: 'automatic',
+        },
         test: {
-          include: ['packages/**/*.spec.ts'],
+          exclude: [...defaultExclude, '**/*.rsc.spec.ts'],
+          include: ['packages/**/*.spec.ts', 'test/benchmark-blocks/**/*.unit.spec.ts'],
           name: 'unit',
           environment: 'node',
+          execArgv: ['--expose-gc'],
         },
       },
       {

@@ -2,7 +2,7 @@ import type { JSONSchema4 } from 'json-schema'
 
 import { createMcpHandler } from 'mcp-handler'
 import { join } from 'path'
-import { APIError, configToJSONSchema, type PayloadRequest, type TypedUser } from 'payload'
+import { APIError, configToJSONSchema, type PayloadRequest } from 'payload'
 
 import type { MCPAccessSettings, MCPPluginConfig } from '../types.js'
 
@@ -43,7 +43,7 @@ import { createJobTool } from './tools/job/create.js'
 import { runJobTool } from './tools/job/run.js'
 import { updateJobTool } from './tools/job/update.js'
 
-export const getMCPHandler = (
+export const getMcpHandler = (
   pluginOptions: MCPPluginConfig,
   mcpAccessSettings: MCPAccessSettings,
   req: PayloadRequest,
@@ -78,32 +78,25 @@ export const getMCPHandler = (
   const user = mcpAccessSettings.user
 
   // MCP Server and Handler Options
-  const MCPOptions = pluginOptions.mcp || {}
-  const customMCPTools = MCPOptions.tools || []
-  const customMCPPrompts = MCPOptions.prompts || []
-  const customMCPResources = MCPOptions.resources || []
-  const MCPHandlerOptions = MCPOptions.handlerOptions || {}
-  const serverOptions = MCPOptions.serverOptions || {}
-  const useVerboseLogs = MCPHandlerOptions.verboseLogs ?? false
+  const mcpOptions = pluginOptions.mcp || {}
+  const customTools = mcpOptions.tools || []
+  const customPrompts = mcpOptions.prompts || []
+  const customResources = mcpOptions.resources || []
+  const mcpHandlerOptions = mcpOptions.handlerOptions || {}
+  const serverOptions = mcpOptions.serverOptions || {}
+  const useVerboseLogs = mcpHandlerOptions.verboseLogs ?? false
 
   // Experimental MCP Tool Requirements
   const isDevelopment = process.env.NODE_ENV === 'development'
   const experimentalTools: NonNullable<MCPPluginConfig['experimental']>['tools'] =
-    pluginOptions?.experimental?.tools || {}
+    pluginOptions.experimental?.tools || {}
   const collectionsPluginConfig = pluginOptions.collections || {}
   const globalsPluginConfig = pluginOptions.globals || {}
   const collectionsDirPath =
-    experimentalTools && experimentalTools.collections?.collectionsDirPath
-      ? experimentalTools.collections.collectionsDirPath
-      : join(process.cwd(), 'src/collections')
+    experimentalTools.collections?.collectionsDirPath || join(process.cwd(), 'src/collections')
   const configFilePath =
-    experimentalTools && experimentalTools.config?.configFilePath
-      ? experimentalTools.config.configFilePath
-      : join(process.cwd(), 'src/payload.config.ts')
-  const jobsDirPath =
-    experimentalTools && experimentalTools.jobs?.jobsDirPath
-      ? experimentalTools.jobs.jobsDirPath
-      : join(process.cwd(), 'src/jobs')
+    experimentalTools.config?.configFilePath || join(process.cwd(), 'src/payload.config.ts')
+  const jobsDirPath = experimentalTools.jobs?.jobsDirPath || join(process.cwd(), 'src/jobs')
 
   try {
     return createMcpHandler(
@@ -274,7 +267,7 @@ export const getMCPHandler = (
         })
 
         // Custom tools
-        customMCPTools.forEach((tool) => {
+        customTools.forEach((tool) => {
           const camelCasedToolName = toCamelCase(tool.name)
           const isToolEnabled = mcpAccessSettings['payload-mcp-tool']?.[camelCasedToolName] ?? false
 
@@ -296,7 +289,7 @@ export const getMCPHandler = (
         })
 
         // Custom prompts
-        customMCPPrompts.forEach((prompt) => {
+        customPrompts.forEach((prompt) => {
           const camelCasedPromptName = toCamelCase(prompt.name)
           const isPromptEnabled =
             mcpAccessSettings['payload-mcp-prompt']?.[camelCasedPromptName] ?? false
@@ -320,7 +313,7 @@ export const getMCPHandler = (
         })
 
         // Custom resources
-        customMCPResources.forEach((resource) => {
+        customResources.forEach((resource) => {
           const camelCasedResourceName = toCamelCase(resource.name)
           const isResourceEnabled =
             mcpAccessSettings['payload-mcp-resource']?.[camelCasedResourceName] ?? false
@@ -492,7 +485,11 @@ export const getMCPHandler = (
           )
         }
 
-        if (mcpAccessSettings.auth?.resetPassword && experimentalTools.auth?.enabled) {
+        if (
+          mcpAccessSettings.auth?.resetPassword &&
+          experimentalTools.auth?.enabled &&
+          isDevelopment
+        ) {
           registerTool(
             mcpAccessSettings.auth.resetPassword,
             'Reset Password',
@@ -502,7 +499,11 @@ export const getMCPHandler = (
           )
         }
 
-        if (mcpAccessSettings.auth?.forgotPassword && experimentalTools.auth?.enabled) {
+        if (
+          mcpAccessSettings.auth?.forgotPassword &&
+          experimentalTools.auth?.enabled &&
+          isDevelopment
+        ) {
           registerTool(
             mcpAccessSettings.auth.forgotPassword,
             'Forgot Password',
@@ -512,7 +513,7 @@ export const getMCPHandler = (
           )
         }
 
-        if (mcpAccessSettings.auth?.unlock && experimentalTools.auth?.enabled) {
+        if (mcpAccessSettings.auth?.unlock && experimentalTools.auth?.enabled && isDevelopment) {
           registerTool(
             mcpAccessSettings.auth.unlock,
             'Unlock',
@@ -531,11 +532,11 @@ export const getMCPHandler = (
         serverInfo: serverOptions.serverInfo,
       },
       {
-        basePath: MCPHandlerOptions.basePath || payload.config.routes?.api || '/api',
-        disableSse: MCPHandlerOptions.disableSse ?? true,
-        maxDuration: MCPHandlerOptions.maxDuration || 60,
-        onEvent: MCPHandlerOptions.onEvent,
-        redisUrl: MCPHandlerOptions.redisUrl,
+        basePath: mcpHandlerOptions.basePath || payload.config.routes?.api || '/api',
+        disableSse: mcpHandlerOptions.disableSse ?? true,
+        maxDuration: mcpHandlerOptions.maxDuration || 60,
+        onEvent: mcpHandlerOptions.onEvent,
+        redisUrl: mcpHandlerOptions.redisUrl,
         verboseLogs: useVerboseLogs,
       },
     )

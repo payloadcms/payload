@@ -56,6 +56,7 @@ export const viTranslations: DefaultTranslationsObject = {
     newPassword: 'Mật khẩu mới',
     passed: 'Xác thực thành công',
     passwordResetSuccessfully: 'Đặt lại mật khẩu thành công.',
+    resend: 'Gửi lại',
     resetPassword: 'Tạo lại mật khẩu',
     resetPasswordExpiration: 'Hạn tạo lại mật khẩu ',
     resetPasswordToken: 'Tạo lại token cho mật khẩu',

@@ -56,6 +56,7 @@ export const azTranslations: DefaultTranslationsObject = {
     newPassword: 'Yeni şifrə',
     passed: 'Doğrulama Keçildi',
     passwordResetSuccessfully: 'Parol uğurla yenidən quruldu.',
+    resend: 'Yenidən göndər',
     resetPassword: 'Şifrəni sıfırla',
     resetPasswordExpiration: 'Şifrənin müddətini sıfırla',
     resetPasswordToken: 'Şifrə Tokenini Sıfırla',

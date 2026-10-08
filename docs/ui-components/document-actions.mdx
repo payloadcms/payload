@@ -1,0 +1,97 @@
+---
+title: Document Actions
+label: Document Actions
+order: 95
+desc: Use Payload's context-aware save, publish, and bulk document actions in Admin Panel Custom Components.
+keywords: ui, components, document, actions, save, draft, publish, unpublish, bulk, delete, edit
+---
+
+Payload's document action components connect standard Admin controls to the current form, document, permissions, and selection state. Use them inside the corresponding Edit or List View rather than as general-purpose buttons.
+
+## Import
+
+```tsx
+import {
+  DeleteMany,
+  EditMany,
+  PublishButton,
+  PublishMany,
+  PreviewButton,
+  SaveButton,
+  SaveDraftButton,
+  UnpublishButton,
+  UnpublishMany,
+} from '@payloadcms/ui'
+```
+
+## Save
+
+When drafts are disabled, `SaveButton` submits the current document form. It is disabled while an upload is in progress and, when editing an existing document, until the form has been modified.
+
+<ComponentPreview component="DocumentActions" example="save" />
+
+Pass `label` to `SaveButton` when a replacement component needs a more specific action label.
+
+## Draft and publish actions
+
+When drafts are enabled, Payload uses `SaveDraftButton` and `PublishButton` instead of `SaveButton`. Saving a draft skips validation; publishing submits the document with a published status.
+
+<ComponentPreview component="DocumentActions" example="editView" />
+
+`UnpublishButton` appears in the document action menu when the current user can publish, the document is published, and drafts are enabled. It opens a confirmation modal before changing the document back to draft status.
+
+`PreviewButton` opens the current document's configured preview URL in a new tab. It only renders when the Edit View's live preview context contains a URL.
+
+Use these components when replacing the equivalent Edit View control. The surrounding Edit View supplies their form, document information, operation, locale, translation, and modal contexts.
+
+```ts
+export const Posts = {
+  slug: 'posts',
+  admin: {
+    components: {
+      edit: {
+        SaveDraftButton: '/components/CustomSaveDraftButton',
+        PublishButton: '/components/CustomPublishButton',
+        UnpublishButton: '/components/CustomUnpublishButton',
+      },
+    },
+  },
+}
+```
+
+See [Edit View Custom Components](/docs/custom-components/edit-view) for all Collection and Global replacement slots and their server and client prop types.
+
+## Bulk List View actions
+
+The bulk action components operate on the documents selected in the current List View.
+
+<ComponentPreview component="DocumentActions" example="bulk" />
+
+Each component receives the current Collection's client configuration. Selection and authentication providers determine whether the action is visible and which documents it affects. `PublishMany` and `UnpublishMany` only render for Collections with drafts enabled.
+
+These controls are intended for List View composition. They do not create selection state when rendered elsewhere.
+
+## Behavior and visibility
+
+| Component         | Context   | When it is used                                                |
+| ----------------- | --------- | -------------------------------------------------------------- |
+| `SaveButton`      | Edit View | Saves a document when drafts are disabled.                     |
+| `SaveDraftButton` | Edit View | Saves a draft without requiring the form to pass validation.   |
+| `PublishButton`   | Edit View | Publishes the current document when drafts are enabled.        |
+| `UnpublishButton` | Edit View | Returns a published document to draft status after confirming. |
+| `PreviewButton`   | Edit View | Opens the configured document preview in a new tab.            |
+| `EditMany`        | List View | Opens the bulk-edit workflow for selected documents.           |
+| `PublishMany`     | List View | Publishes selected documents.                                  |
+| `UnpublishMany`   | List View | Unpublishes selected documents.                                |
+| `DeleteMany`      | List View | Trashes or permanently deletes selected documents.             |
+
+## Accessibility
+
+- Keep replacement labels action-oriented and specific to the operation.
+- Preserve the built-in confirmation step for destructive or difficult-to-reverse actions.
+- Do not force an action to remain visible when Payload hides it because of permissions or document state.
+- Keep custom action order consistent with the surrounding Edit or List View.
+
+## Provider requirements
+
+These components depend on providers supplied by the Payload Admin Panel. Edit actions require the current form and document contexts. Bulk actions require the current Collection, selection, authentication, and List View contexts. Use [`Button`](/docs/ui-components/button) for actions that do not need this behavior.

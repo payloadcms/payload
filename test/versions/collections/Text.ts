@@ -4,6 +4,28 @@ import { textCollectionSlug } from '../slugs.js'
 
 export const TextCollection: CollectionConfig = {
   slug: textCollectionSlug,
+  access: {
+    read: ({ req: { user } }) => {
+      if (!user) {
+        return false
+      }
+
+      return {
+        or: [
+          {
+            owner: {
+              equals: user.id,
+            },
+          },
+          {
+            owner: {
+              exists: false,
+            },
+          },
+        ],
+      }
+    },
+  },
   admin: {
     useAsTitle: 'text',
   },
@@ -12,6 +34,11 @@ export const TextCollection: CollectionConfig = {
       name: 'text',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'owner',
+      type: 'relationship',
+      relationTo: 'users',
     },
   ],
 }

@@ -56,6 +56,7 @@ export const arTranslations: DefaultTranslationsObject = {
     newPassword: 'كلمة مرور جديدة',
     passed: 'تمت المصادقة',
     passwordResetSuccessfully: 'تمت إعادة تعيين كلمة المرور بنجاح.',
+    resend: 'إعادة الإرسال',
     resetPassword: 'إعادة تعيين كلمة المرور',
     resetPasswordExpiration: 'انتهاء صلاحيّة إعادة تعيين كلمة المرور',
     resetPasswordToken: 'رمز إعادة تعيين كلمة المرور',

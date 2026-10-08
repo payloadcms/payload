@@ -1,0 +1,66 @@
+---
+title: Relationship and Upload Inputs
+label: Relationship and Upload Inputs
+order: 104
+desc: Select related documents and media from Custom Fields with Payload's RelationshipInput and UploadInput components.
+keywords: ui, components, relationship input, upload input, media, choose existing, custom field
+---
+
+`RelationshipInput` and `UploadInput` are the input-level interfaces used by Payload's relationship-backed fields. Use them when replacing a field component while preserving Payload's document-selection workflows.
+
+## Import
+
+```tsx
+import { RelationshipInput, UploadInput } from '@payloadcms/ui'
+```
+
+## RelationshipInput
+
+<ComponentPreview component="RelationshipInputs" example="relationship" />
+
+`RelationshipInput` selects documents from one or more Collections. Use `appearance="select"` for searchable inline results or `appearance="drawer"` to choose documents from a List Drawer.
+
+## UploadInput
+
+<ComponentPreview component="RelationshipInputs" example="upload" />
+
+`UploadInput` relates documents from an upload-enabled Collection. Its empty state includes **Create New**, **Choose from existing**, and drag-and-drop file intake when the current user has permission to create uploads.
+
+This differs from [`Upload`](/docs/ui-components/upload), which manages the file attached to an upload-enabled Collection's own Edit View, and [`Dropzone`](/docs/ui-components/dropzone), which only handles incoming files.
+
+## RelationshipInput props
+
+| Prop            | Type                                       | Default    | Description                                     |
+| --------------- | ------------------------------------------ | ---------- | ----------------------------------------------- |
+| `relationTo` \* | `string[]`                                 | —          | Identifies the selectable Collections.          |
+| `path` \*       | `string`                                   | —          | Identifies the form field.                      |
+| `hasMany` \*    | `boolean`                                  | —          | Selects one document or multiple documents.     |
+| `value`         | `ValueWithRelation \| ValueWithRelation[]` | —          | Supplies the controlled relationship value.     |
+| `onChange` \*   | `(value) => void`                          | —          | Receives the updated relationship value.        |
+| `appearance`    | `'select' \| 'drawer'`                     | `'select'` | Chooses inline search or List Drawer selection. |
+| `allowCreate`   | `boolean`                                  | `true`     | Allows creating related documents.              |
+| `allowEdit`     | `boolean`                                  | `true`     | Allows opening selected documents for editing.  |
+| `filterOptions` | `FilterOptionsResult`                      | —          | Restricts selectable documents.                 |
+| `isSortable`    | `boolean`                                  | `true`     | Enables reordering when `hasMany` is enabled.   |
+| `readOnly`      | `boolean`                                  | `false`    | Disables selection and editing.                 |
+
+## UploadInput props
+
+| Prop             | Type                                      | Default | Description                                     |
+| ---------------- | ----------------------------------------- | ------- | ----------------------------------------------- |
+| `relationTo` \*  | `string \| string[]`                      | —       | Identifies the upload-enabled Collections.      |
+| `path` \*        | `string`                                  | —       | Identifies the form field.                      |
+| `value`          | `string \| number \| ValueWithRelation[]` | —       | Supplies the controlled upload relationship.    |
+| `onChange`       | `(value) => void`                         | —       | Receives the updated upload relationship.       |
+| `allowCreate`    | `boolean`                                 | `false` | Shows file creation when permissions allow it.  |
+| `hasMany`        | `boolean`                                 | `false` | Allows multiple upload documents.               |
+| `displayPreview` | `boolean`                                 | —       | Displays thumbnails for selected uploads.       |
+| `maxRows`        | `number`                                  | —       | Limits selections in multi-value mode.          |
+| `filterOptions`  | `FilterOptionsResult`                     | —       | Restricts documents shown in the List Drawer.   |
+| `readOnly`       | `boolean`                                 | `false` | Disables selection, removal, and upload intake. |
+
+_\* An asterisk denotes that a prop is required._
+
+## Provider requirements
+
+These inputs are intended for Payload Custom Fields. They rely on the Admin Panel's Config, Auth, Translation, Locale, Modal, drawer, and document-event contexts. `UploadInput` also uses Payload's bulk-upload context. Use the complete `RelationshipField` or `UploadField` when Payload should manage the field configuration and form connection for you.

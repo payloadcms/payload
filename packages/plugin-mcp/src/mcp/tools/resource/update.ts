@@ -30,11 +30,9 @@ export const updateResourceTool = (
     draft: boolean = false,
     depth: number = 0,
     overrideLock: boolean = true,
-    filePath?: string,
-    overwriteExistingFiles: boolean = false,
     locale?: string,
     fallbackLocale?: string,
-    select?: string,
+    select?: Record<string, unknown>,
   ): Promise<{
     content: Array<{
       text: string
@@ -120,25 +118,6 @@ export const updateResourceTool = (
         }
       }
 
-      let selectClause: SelectType | undefined
-      if (select) {
-        try {
-          selectClause = JSON.parse(select) as SelectType
-        } catch (_parseError) {
-          payload.logger.warn(`[payload-mcp] Invalid select clause JSON: ${select}`)
-          const response = {
-            content: [{ type: 'text' as const, text: 'Error: Invalid JSON in select clause' }],
-          }
-          return (collections?.[collectionSlug]?.overrideResponse?.(response, {}, req) ||
-            response) as {
-            content: Array<{
-              text: string
-              type: 'text'
-            }>
-          }
-        }
-      }
-
       // Update by ID or where clause
       if (id) {
         // Single document update
@@ -152,11 +131,9 @@ export const updateResourceTool = (
           overrideLock,
           req,
           user,
-          ...(filePath && { filePath }),
-          ...(overwriteExistingFiles && { overwriteExistingFiles }),
           ...(locale && { locale }),
           ...(fallbackLocale && { fallbackLocale }),
-          ...(selectClause && { select: selectClause }),
+          ...(select && { select: select as SelectType }),
         }
 
         if (verboseLogs) {
@@ -203,11 +180,9 @@ ${JSON.stringify(result)}
           req,
           user,
           where: whereClause,
-          ...(filePath && { filePath }),
-          ...(overwriteExistingFiles && { overwriteExistingFiles }),
           ...(locale && { locale }),
           ...(fallbackLocale && { fallbackLocale }),
-          ...(selectClause && { select: selectClause }),
+          ...(select && { select: select as SelectType }),
         }
 
         if (verboseLogs) {
@@ -313,7 +288,6 @@ ${JSON.stringify(errors)}
         .string()
         .optional()
         .describe('Optional: fallback locale code to use when requested locale is not available'),
-      filePath: z.string().optional().describe('File path for file uploads'),
       locale: z
         .string()
         .optional()
@@ -325,16 +299,11 @@ ${JSON.stringify(errors)}
         .optional()
         .default(true)
         .describe('Whether to override document locks'),
-      overwriteExistingFiles: z
-        .boolean()
-        .optional()
-        .default(false)
-        .describe('Whether to overwrite existing files'),
       select: z
-        .string()
+        .record(z.string(), z.unknown())
         .optional()
         .describe(
-          'Optional: define exactly which fields you\'d like to return in the response (JSON), e.g., \'{"title": "My Post"}\'',
+          "Optional: define exactly which fields you'd like to return in the response, e.g., {\"title\": true}",
         ),
       where: z
         .string()
@@ -354,10 +323,8 @@ ${JSON.stringify(errors)}
           depth,
           draft,
           fallbackLocale,
-          filePath,
           locale,
           overrideLock,
-          overwriteExistingFiles,
           select,
           where,
           ...fieldData
@@ -371,11 +338,9 @@ ${JSON.stringify(errors)}
           draft as boolean,
           depth as number,
           overrideLock as boolean,
-          filePath as string | undefined,
-          overwriteExistingFiles as boolean,
           locale as string | undefined,
           fallbackLocale as string | undefined,
-          select as string | undefined,
+          select as Record<string, unknown> | undefined,
         )
       },
     )

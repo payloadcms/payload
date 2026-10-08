@@ -121,21 +121,26 @@ export const getFieldsToSign = (args: {
 }): Record<string, unknown> => {
   const { collectionConfig, email, sid, user } = args
 
-  const result: Record<string, unknown> = {
-    id: user?.id,
-    collection: collectionConfig.slug,
-    email,
-  }
-
-  if (sid) {
-    result.sid = sid
-  }
+  const fieldsToSign = Object.create(null) as Record<string, unknown>
 
   traverseFields({
     data: user!,
     fields: collectionConfig.fields,
-    result,
+    result: fieldsToSign,
   })
 
-  return result
+  delete fieldsToSign.collection
+  delete fieldsToSign.email
+  delete fieldsToSign.exp
+  delete fieldsToSign.iat
+  delete fieldsToSign.id
+  delete fieldsToSign.sid
+
+  return {
+    ...fieldsToSign,
+    id: user?.id,
+    collection: collectionConfig.slug,
+    email,
+    ...(sid ? { sid } : {}),
+  }
 }

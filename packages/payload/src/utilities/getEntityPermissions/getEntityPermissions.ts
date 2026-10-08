@@ -136,6 +136,8 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
       : undefined
 
   const isLoggedIn = !!user
+  const collectionConfig =
+    entityType === 'collection' ? (entity as SanitizedCollectionConfig) : undefined
 
   const fieldsPermissions: FieldsPermissions = {}
 
@@ -162,7 +164,14 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
       if (typeof accessFunction === 'function') {
         accessResults.push({
           operation,
-          result: Promise.resolve(accessFunction({ id, data, req })) as Promise<boolean | Where>,
+          result: Promise.resolve(
+            accessFunction({
+              id,
+              collectionConfig,
+              data,
+              req,
+            }),
+          ) as Promise<boolean | Where>,
         })
       } else {
         entityPermissions[operation] = {

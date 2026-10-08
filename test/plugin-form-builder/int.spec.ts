@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { Payload, PayloadRequest } from 'payload'
 
 import path from 'path'
 import { ValidationError } from 'payload'
@@ -93,6 +93,29 @@ describe('@payloadcms/plugin-form-builder', () => {
     it('adds form submissions collection', async () => {
       const { docs: formSubmissions } = await payload.find({ collection: formSubmissionsSlug })
       expect(formSubmissions).toHaveLength(1)
+    })
+
+    it('should restrict form data reads to admin collection users', async () => {
+      const formsCollection = payload.config.collections.find(({ slug }) => slug === formsSlug)!
+      const submissionsCollection = payload.config.collections.find(
+        ({ slug }) => slug === formSubmissionsSlug,
+      )!
+      const emailsField = formsCollection.fields.find(
+        (field) => 'name' in field && field.name === 'emails',
+      )!
+      const adminRequest = {
+        payload,
+        user: { collection: payload.config.admin.user },
+      } as PayloadRequest
+      const unrelatedRequest = {
+        payload,
+        user: { collection: 'customers' },
+      } as PayloadRequest
+
+      expect(await submissionsCollection.access.read({ req: adminRequest })).toBe(true)
+      expect(await submissionsCollection.access.read({ req: unrelatedRequest })).toBe(false)
+      expect(await emailsField.access?.read?.({ req: adminRequest })).toBe(true)
+      expect(await emailsField.access?.read?.({ req: unrelatedRequest })).toBe(false)
     })
   })
 
@@ -303,6 +326,76 @@ describe('@payloadcms/plugin-form-builder', () => {
       })
 
       describe('lexical serializer', () => {
+        it('serializes automatically detected links', async () => {
+          const url = 'https://example.com'
+          const serializedEmail = await serializeLexical({
+            root: {
+              type: 'root',
+              children: [
+                {
+                  type: 'paragraph',
+                  children: [
+                    {
+                      type: 'text',
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: 'This person used ',
+                      version: 1,
+                    },
+                    {
+                      type: 'autolink',
+                      children: [
+                        {
+                          type: 'text',
+                          detail: 0,
+                          format: 0,
+                          mode: 'normal',
+                          style: '',
+                          text: url,
+                          version: 1,
+                        },
+                      ],
+                      direction: 'ltr',
+                      fields: {
+                        linkType: 'custom',
+                        newTab: false,
+                        url,
+                      },
+                      format: '',
+                      indent: 0,
+                      version: 2,
+                    },
+                    {
+                      type: 'text',
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: ' to sign in',
+                      version: 1,
+                    },
+                  ],
+                  direction: 'ltr',
+                  format: '',
+                  indent: 0,
+                  version: 1,
+                },
+              ],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              version: 1,
+            },
+          })
+
+          expect(serializedEmail).toBe(
+            `<p>This person used <a href="${url}">${url}</a> to sign in</p>`,
+          )
+          expect(serializedEmail).not.toContain('unknown node')
+        })
+
         it('specific field names', async () => {
           const mockName = 'Test Submission'
           const mockEmail = 'dev@payloadcms.com'

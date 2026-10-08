@@ -1,5 +1,5 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { CollectionConfig, Config } from 'payload'
+import type { CollectionConfig, Config, TypedUser } from 'payload'
 
 import chalk from 'chalk'
 import { hasAutosaveEnabled } from 'payload/shared'
@@ -13,6 +13,7 @@ import { tenantField } from './fields/tenantField/index.js'
 import { tenantsArrayField } from './fields/tenantsArrayField/index.js'
 import { filterDocumentsByTenants } from './filters/filterDocumentsByTenants.js'
 import { addTenantCleanup } from './hooks/afterTenantDelete.js'
+import { addCollectionBeforeValidateHook } from './hooks/enforceTenantMembership.js'
 import { translations } from './translations/index.js'
 import { addCollectionAccess } from './utilities/addCollectionAccess.js'
 import { addFilterOptionsToFields } from './utilities/addFilterOptionsToFields.js'
@@ -91,6 +92,27 @@ export const multiTenantPlugin =
       adminUsersCollection.fields.push(
         tenantsArrayField({
           ...(pluginConfig?.tenantsArrayField || {}),
+          arrayFieldAccess: {
+            create: ({ req }) =>
+              Boolean(
+                req.user &&
+                  userHasAccessToAllTenants(
+                    req.user as ConfigType extends { user: unknown }
+                      ? ConfigType['user']
+                      : TypedUser,
+                  ),
+              ),
+            update: ({ req }) =>
+              Boolean(
+                req.user &&
+                  userHasAccessToAllTenants(
+                    req.user as ConfigType extends { user: unknown }
+                      ? ConfigType['user']
+                      : TypedUser,
+                  ),
+              ),
+            ...(pluginConfig?.tenantsArrayField?.arrayFieldAccess || {}),
+          },
           tenantsArrayFieldName,
           tenantsArrayTenantFieldName,
           tenantsCollectionSlug,
@@ -190,8 +212,9 @@ export const multiTenantPlugin =
            * Add tenant field to enabled collections
            */
           collection.fields.unshift(
-            tenantField({
+            tenantField<ConfigType>({
               name: tenantFieldName,
+              adminUsersSlug: adminUsersCollection.slug,
               debug: pluginConfig.debug,
               isAutosaveEnabled: hasAutosaveEnabled(collection),
               overrides: pluginConfig.collections[collection.slug]?.tenantFieldOverrides
@@ -201,9 +224,22 @@ export const multiTenantPlugin =
               tenantsArrayTenantFieldName,
               tenantsCollectionSlug,
               unique: false,
+              userHasAccessToAllTenants,
             }),
           )
         }
+
+        /**
+         * Reject writes that assign a tenant the user is not a member of
+         * - covers drafts, autosave and restore-version, which skip field validation
+         */
+        addCollectionBeforeValidateHook<ConfigType>({
+          collection,
+          tenantFieldName,
+          tenantsArrayFieldName,
+          tenantsArrayTenantFieldName,
+          userHasAccessToAllTenants,
+        })
 
         const { useBaseFilter, useBaseListFilter } = pluginConfig.collections[collection.slug] || {}
         if (useBaseFilter ?? useBaseListFilter ?? true) {
@@ -384,8 +420,9 @@ export const multiTenantPlugin =
            * Add tenant field to enabled collections
            */
           collection.fields.unshift(
-            tenantField({
+            tenantField<ConfigType>({
               name: tenantFieldName,
+              adminUsersSlug: adminUsersCollection.slug,
               debug: pluginConfig.debug,
               isAutosaveEnabled: hasAutosaveEnabled(collection),
               overrides: pluginConfig.collections[collection.slug]?.tenantFieldOverrides
@@ -395,9 +432,22 @@ export const multiTenantPlugin =
               tenantsArrayTenantFieldName,
               tenantsCollectionSlug,
               unique: isGlobal,
+              userHasAccessToAllTenants,
             }),
           )
         }
+
+        /**
+         * Reject writes that assign a tenant the user is not a member of
+         * - covers drafts, autosave and restore-version, which skip field validation
+         */
+        addCollectionBeforeValidateHook<ConfigType>({
+          collection,
+          tenantFieldName,
+          tenantsArrayFieldName,
+          tenantsArrayTenantFieldName,
+          userHasAccessToAllTenants,
+        })
 
         const { useBaseFilter, useBaseListFilter } = pluginConfig.collections[collection.slug] || {}
         if (useBaseFilter ?? useBaseListFilter ?? true) {

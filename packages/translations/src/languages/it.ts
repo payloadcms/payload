@@ -56,6 +56,7 @@ export const itTranslations: DefaultTranslationsObject = {
     newPassword: 'Nuova Password',
     passed: 'Autenticazione Superata',
     passwordResetSuccessfully: 'Reset della password eseguito con successo.',
+    resend: 'Invia di nuovo',
     resetPassword: 'Modifica Password',
     resetPasswordExpiration: 'Reimposta Scadenza Password',
     resetPasswordToken: 'Reimposta il Password Token',
