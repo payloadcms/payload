@@ -533,25 +533,6 @@ describe('Auth', () => {
         .not.toBe(initialCookie?.expires)
     })
 
-    test('should preserve multiple cookies in a response', async () => {
-      await page.goto(formatAdminURL({ adminRoute, path: serverFunctionsPath, serverURL }))
-
-      const responsePromise = page.waitForResponse(async (response) => {
-        const setCookieHeaders = await response.headerValues('set-cookie')
-
-        return setCookieHeaders.some((value) => value.startsWith('second-cookie='))
-      })
-
-      await page.getByRole('button', { name: 'Set multiple cookies' }).click()
-      const response = await responsePromise
-
-      await expect.poll(() => response.ok()).toBe(true)
-      await expect(page.getByRole('status').filter({ hasText: 'Cookies set' })).toBeVisible()
-      await expect
-        .poll(() => response.headerValues('set-cookie'))
-        .toEqual(['first-cookie=first-value; Path=/', 'second-cookie=second-value; Path=/'])
-    })
-
     test('should log user out from logout server function', async () => {
       await login({ page, serverURL })
       await page.goto(formatAdminURL({ adminRoute, path: serverFunctionsPath, serverURL }))

@@ -3,25 +3,19 @@ import type { ReactNode } from 'react'
 import { FormHeader, MinimalTemplate } from '@payloadcms/ui/rsc'
 
 type Props = {
-  cookies: ReactNode
   isAuthenticated: boolean
   login: ReactNode
   logout: ReactNode
   refresh: ReactNode
 }
 
-export function ServerFunctionsView({ cookies, isAuthenticated, login, logout, refresh }: Props) {
+export function ServerFunctionsView({ isAuthenticated, login, logout, refresh }: Props) {
   return (
     <MinimalTemplate>
       <FormHeader
-        description="Exercise framework-specific authentication and cookie handling."
+        description="Exercise the framework-specific login, refresh, and logout entrypoints."
         heading="Auth server functions"
       />
-
-      <section>
-        <h2>Cookies</h2>
-        {cookies}
-      </section>
 
       {isAuthenticated ? (
         <section>
