@@ -143,6 +143,7 @@ export const Condition: React.FC<Props> = (props) => {
         <div className={`${baseClass}__inputs`}>
           <div className={`${baseClass}__field`}>
             <ReactSelect
+              aria-label={t('general:field')}
               disabled={disabled}
               filterOption={(option, inputValue) =>
                 ((option?.data?.plainTextLabel as string) || option.label)
@@ -161,6 +162,7 @@ export const Condition: React.FC<Props> = (props) => {
           </div>
           <div className={`${baseClass}__operator`}>
             <ReactSelect
+              aria-label={t('general:filter')}
               disabled={disabled}
               isClearable={false}
               onChange={handleOperatorChange}
@@ -187,6 +189,7 @@ export const Condition: React.FC<Props> = (props) => {
         </div>
         <div className={`${baseClass}__actions`}>
           <Button
+            aria-label={t('general:remove')}
             buttonStyle="icon-label"
             className={`${baseClass}__actions-remove`}
             icon="x"
@@ -200,6 +203,7 @@ export const Condition: React.FC<Props> = (props) => {
             round
           />
           <Button
+            aria-label={t('general:addFilter')}
             buttonStyle="icon-label"
             className={`${baseClass}__actions-add`}
             icon="plus"

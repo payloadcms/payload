@@ -60,6 +60,10 @@ export type OptionGroup = {
 }
 
 export type ReactSelectAdapterProps = {
+  /**
+   * Accessible name for the select's combobox input. Use when the select has no visible label.
+   */
+  'aria-label'?: string
   backspaceRemovesValue?: boolean
   blurInputOnSelect?: boolean
   className?: string
