@@ -31,16 +31,6 @@ export class BlockNode extends ServerBlockNode {
   }
 
   static override importJSON(serializedNode: SerializedBlockNode): BlockNode {
-    if (serializedNode.version === 1) {
-      // Convert (version 1 had the fields wrapped in another, unnecessary data property)
-      serializedNode = {
-        ...serializedNode,
-        fields: {
-          ...(serializedNode as any).fields.data,
-        },
-        version: 2,
-      }
-    }
     const node = $createBlockNode(serializedNode.fields)
     node.setFormat(serializedNode.format)
     return node

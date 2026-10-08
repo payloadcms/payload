@@ -145,6 +145,8 @@ export interface Config {
   locale: 'en' | 'es' | 'fr';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -185,6 +187,14 @@ export interface Tenant {
   };
   isPublic?: boolean | null;
   selectedLocales?: ('allLocales' | 'en' | 'es' | 'fr')[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -202,6 +212,14 @@ export interface User {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -209,6 +227,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -245,6 +264,14 @@ export interface FoodItem {
         value: string | NotTenanted;
       } | null);
   folder?: (string | null) | Folder;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -257,6 +284,14 @@ export interface Relationship {
   tenant?: (string | null) | Tenant;
   title: string;
   relationship?: (string | null) | Relationship;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -267,6 +302,14 @@ export interface Relationship {
 export interface NotTenanted {
   id: string;
   name?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -279,6 +322,14 @@ export interface Folder {
   folder?: (string | null) | Folder;
   tenant?: (string | null) | Tenant;
   name: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _h_slugPath?: string | null;
@@ -303,6 +354,14 @@ export interface FoodMenu {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -315,6 +374,14 @@ export interface AutosaveGlobal {
   tenant?: (string | null) | Tenant;
   title: string;
   description?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -328,6 +395,14 @@ export interface MultiTenantPost {
   tenant?: (string | Tenant)[] | null;
   title: string;
   parent?: (string | null) | MultiTenantPost;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -339,6 +414,14 @@ export interface Media {
   id: string;
   tenant?: (string | null) | Tenant;
   alt?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -467,6 +550,8 @@ export interface TenantsSelect<T extends boolean = true> {
   users?: T;
   isPublic?: T;
   selectedLocales?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -483,6 +568,8 @@ export interface UsersSelect<T extends boolean = true> {
         tenantRole?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -490,6 +577,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -511,6 +599,8 @@ export interface FoodItemsSelect<T extends boolean = true> {
   content?: T;
   polymorphicRelationship?: T;
   folder?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -529,6 +619,8 @@ export interface FoodMenuSelect<T extends boolean = true> {
         active?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -540,6 +632,8 @@ export interface AutosaveGlobalSelect<T extends boolean = true> {
   tenant?: T;
   title?: T;
   description?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -552,6 +646,8 @@ export interface RelationshipsSelect<T extends boolean = true> {
   tenant?: T;
   title?: T;
   relationship?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -563,6 +659,8 @@ export interface MultiTenantPostsSelect<T extends boolean = true> {
   tenant?: T;
   title?: T;
   parent?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -573,6 +671,8 @@ export interface MultiTenantPostsSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   tenant?: T;
   alt?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -591,6 +691,8 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface NotTenantedSelect<T extends boolean = true> {
   name?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -602,6 +704,8 @@ export interface FoldersSelect<T extends boolean = true> {
   folder?: T;
   tenant?: T;
   name?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _h_slugPath?: T;
@@ -656,6 +760,62 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'tenants'
+      | 'users'
+      | 'food-items'
+      | 'food-menu'
+      | 'autosave-global'
+      | 'relationships'
+      | 'multi-tenant-posts'
+      | 'media'
+      | 'notTenanted'
+      | 'folders';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'tenants'
+          | 'users'
+          | 'food-items'
+          | 'food-menu'
+          | 'autosave-global'
+          | 'relationships'
+          | 'multi-tenant-posts'
+          | 'media'
+          | 'notTenanted'
+          | 'folders'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

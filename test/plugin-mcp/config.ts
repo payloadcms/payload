@@ -7,6 +7,7 @@ import * as z from 'zod'
 
 import { testRBACPlugin } from '../__helpers/plugins/rbac/index.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
 import { FieldTypes } from './collections/FieldTypes.js'
 import { DispatchMedia, Media } from './collections/Media.js'
 import { ModifiedPrompts } from './collections/ModifiedPrompts.js'
@@ -59,6 +60,9 @@ export default buildConfigWithDefaults({
       ],
     },
     globals: [SiteSettings],
+    llmInstructions: {
+      access: ({ req }) => req.user?.email === devUser.email,
+    },
     plugins: [
       testRBACPlugin(),
 
@@ -179,6 +183,8 @@ export default buildConfigWithDefaults({
           },
         },
         mcp: {
+          // Above the SDK's 4 MiB default, so tests can tell the custom limit is applied.
+          maxRequestBodySize: 5 * 1024 * 1024,
           serverOptions: {
             serverInfo: {
               name: 'My Custom MCP Server',

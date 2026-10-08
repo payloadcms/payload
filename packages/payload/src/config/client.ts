@@ -34,14 +34,15 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'i18n'
   | 'jobs'
   | 'kv'
+  | 'llmInstructions'
   | 'logger'
   | 'onInit'
   | 'plugins'
   | 'queryPresets'
   | 'secret'
-  | 'sharp'
   | 'storage'
   | 'typescript'
+  | 'upload'
 >
 
 export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'], 'components'>
@@ -86,7 +87,6 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'db',
   'editor',
   'plugins',
-  'sharp',
   'onInit',
   'secret',
   'hooks',
@@ -101,8 +101,10 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'jobs',
   'logger',
   'kv',
+  'llmInstructions',
   'queryPresets',
   'storage',
+  'upload',
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
 

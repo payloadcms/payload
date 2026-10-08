@@ -120,6 +120,7 @@ export const payloadCloudPlugin =
         admin: {
           hidden: true,
         },
+        authorship: false,
         fields: [
           {
             name: 'instance',

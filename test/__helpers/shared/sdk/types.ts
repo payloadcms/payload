@@ -4,8 +4,8 @@ import type { DeepPartial, MarkOptional } from 'ts-essentials'
 type CollectionDoc = {
   createdAt?: string
   id?: number | string
-  sizes?: unknown
   updatedAt?: string
+  variants?: unknown
 }
 
 type BaseTypes = {
@@ -48,7 +48,7 @@ export type CreateArgs<
   collection: TSlug
   data: MarkOptional<
     TGeneratedTypes['collections'][TSlug],
-    'createdAt' | 'id' | 'sizes' | 'updatedAt'
+    'createdAt' | 'id' | 'updatedAt' | 'variants'
   >
   depth?: number
   disableTransaction?: boolean

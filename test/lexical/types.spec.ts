@@ -2,12 +2,15 @@ import type {
   RichTextNodes,
   SerializedBlockNode,
   SerializedParagraphNode,
+  UploadData,
   WithDefaultNodes,
 } from '@payloadcms/richtext-lexical'
 import type * as Runtime from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import type { JSXConverters, JSXConvertersFunction } from '@payloadcms/richtext-lexical/react'
+import type { RichTextAdapter, RichTextAdapterProvider, SanitizedConfig } from 'payload'
 
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import { describe, expect, test } from 'tstyche'
 
@@ -20,6 +23,8 @@ import type {
   LexicalFullyFeatured,
   LexicalViewsFrontend,
   MyBlock,
+  Upload,
+  Uploads2,
 } from './payload-types.js'
 
 // A user composes their node union from a generated block type (`BannerBlock` from `payload-types`).
@@ -27,6 +32,70 @@ type Nodes = WithDefaultNodes<SerializedBlockNode<BannerBlock>>
 
 // A serialized editor state to satisfy the required `data` argument; the converters are what's under test.
 declare const data: SerializedEditorState
+
+declare const adapter: Omit<RichTextAdapter<SerializedEditorState>, 'converters'>
+declare const config: SanitizedConfig
+declare const uploadData: UploadData<{ caption: string }>
+
+describe('UploadData', () => {
+  test('should narrow populated upload documents by collection slug', () => {
+    expect(uploadData.fields).type.toBe<{ caption: string }>()
+
+    if (uploadData.relationTo === 'uploads') {
+      expect(uploadData.value).type.toBe<string | Upload>()
+    } else if (uploadData.relationTo === 'uploads2') {
+      expect(uploadData.value).type.toBe<string | Uploads2>()
+    }
+
+    expect<UploadData['relationTo']>().type.not.toBeAssignableFrom<'lexical-fully-featured'>()
+  })
+})
+
+describe('LLM instructions editor preset', () => {
+  type Preset = NonNullable<
+    NonNullable<RichTextAdapter<SerializedEditorState>['presets']>['llmInstructions']
+  >
+
+  test('should require converters for the preset but not ordinary editors', () => {
+    const provider = () => adapter
+
+    expect(provider).type.toBeAssignableTo<RichTextAdapterProvider<SerializedEditorState>>()
+    expect(provider).type.not.toBeAssignableTo<Preset>()
+  })
+
+  test('should reject incomplete Markdown converters', () => {
+    const empty = () => ({ ...adapter, converters: {} })
+    const fromMarkdownOnly = () => ({ ...adapter, converters: { fromMarkdown: () => data } })
+    const toMarkdownOnly = () => ({ ...adapter, converters: { toMarkdown: () => '' } })
+
+    expect(empty).type.not.toBeAssignableTo<Preset>()
+    expect(fromMarkdownOnly).type.not.toBeAssignableTo<Preset>()
+    expect(toMarkdownOnly).type.not.toBeAssignableTo<Preset>()
+  })
+
+  test('should accept a custom editor with both Markdown converters', () => {
+    const provider = () => ({
+      ...adapter,
+      converters: {
+        fromMarkdown: () => data,
+        toMarkdown: () => '',
+      },
+    })
+
+    expect(provider).type.toBeAssignableTo<Preset>()
+  })
+
+  test('should expose both Markdown converters on Lexical without optional checks', () => {
+    const provider = lexicalEditor()
+    const editor = provider({ config, parentIsLocalized: false })
+
+    expect(provider).type.toBeAssignableTo<Preset>()
+    expect(
+      editor.converters.fromMarkdown({ markdown: 'Instructions' }),
+    ).type.toBe<SerializedEditorState>()
+    expect(editor.converters.toMarkdown({ data })).type.toBe<string>()
+  })
+})
 
 describe('strongly-typed block converters', () => {
   test('RichText accepts JSXConvertersFunction<Nodes>', () => {

@@ -46,6 +46,7 @@ import {
   reorderColumns,
   sortColumn,
   toggleColumn,
+  toggleColumns,
   waitForColumnInURL,
 } from '../../../__helpers/e2e/columns/index.js'
 import { addListFilter, openListFilters } from '../../../__helpers/e2e/filters/index.js'
@@ -57,6 +58,7 @@ import { getSelectMenu } from '../../../__helpers/e2e/selectInput.js'
 import { expectPerPageLimits, setPerPageLimit } from '../../../__helpers/e2e/setPerPageLimit.js'
 import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
 import { closeListDrawer } from '../../../__helpers/e2e/toggleListDrawer.js'
+import { openNav } from '../../../__helpers/e2e/toggleNav.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { listViewSelectAPISlug } from '../../../admin/collections/ListViewSelectAPI/index.js'
 import { noTimestampsSlug } from '../../../admin/collections/NoTimestamps.js'
@@ -182,11 +184,11 @@ describe('List View', () => {
       const rowCheckboxes = page.locator(`${tableRowLocator} .select-row__checkbox input`)
 
       await expect(rowCheckboxes).toHaveCount(2)
-      await expect(page.getByRole('checkbox', { name: 'Select post1' })).toBeVisible()
-      await expect(page.getByRole('checkbox', { name: 'Select post2' })).toBeVisible()
+      await expect(page.getByRole('checkbox', { name: /^Select post[12], Row 1$/ })).toBeVisible()
+      await expect(page.getByRole('checkbox', { name: /^Select post[12], Row 2$/ })).toBeVisible()
     })
 
-    test('should use the document ID in the accessible name when useAsTitle is not configured', async () => {
+    test('should label grid row checkboxes with the document ID and row number when useAsTitle is not configured', async () => {
       const doc = await payload.create({
         collection: listViewSelectAPISlug,
         data: {
@@ -198,10 +200,12 @@ describe('List View', () => {
       const selectAPIUrl = new AdminUrlUtil(serverURL, listViewSelectAPISlug)
 
       await page.goto(selectAPIUrl.list)
-      await expect(page.getByRole('checkbox', { name: `Select ${doc.id}` })).toBeVisible()
+      await expect(
+        page.getByRole('checkbox', { name: `Select ${doc.id}, Row 1`, exact: true }),
+      ).toBeVisible()
     })
 
-    test('should use useAsTitle in the accessible name when its column is hidden', async () => {
+    test('should retain grid row checkbox titles and numbers when the title column is hidden', async () => {
       await toggleColumn(page, {
         columnLabel: 'Title',
         columnName: 'title',
@@ -210,8 +214,8 @@ describe('List View', () => {
       await page.reload()
 
       await expect(page.locator('#heading-title')).toBeHidden()
-      await expect(page.getByRole('checkbox', { name: 'Select post1' })).toBeVisible()
-      await expect(page.getByRole('checkbox', { name: 'Select post2' })).toBeVisible()
+      await expect(page.getByRole('checkbox', { name: /^Select post[12], Row 1$/ })).toBeVisible()
+      await expect(page.getByRole('checkbox', { name: /^Select post[12], Row 2$/ })).toBeVisible()
     })
 
     test('should link second cell', async () => {
@@ -375,7 +379,7 @@ describe('List View', () => {
 
       await expect(page.locator('#search-filter-input')).toHaveValue('test')
 
-      await page.locator('.app-header__sidebar-toggle').click()
+      await openNav(page)
       await expect(page.locator('#nav-uploads')).toContainText('Uploads')
 
       const uploadsUrl = await page.locator('#nav-uploads').getAttribute('href')
@@ -778,7 +782,7 @@ describe('List View', () => {
       const tableItems = page.locator(tableRowLocator)
 
       await expect(tableItems).toHaveCount(5)
-      await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6')
+      await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6 items')
       await expect(page.locator('.per-page .popup__trigger-wrap > button')).toContainText('5')
       await page.goto(`${postsUrl.list}?limit=5&page=2`)
 
@@ -790,7 +794,7 @@ describe('List View', () => {
       })
 
       await page.waitForURL(new RegExp(`${postsUrl.list}\\?limit=5&page=1`))
-      await expect(page.locator('.page-controls__page-info')).toHaveText('1-3 of 3')
+      await expect(page.locator('.page-controls__page-info')).toHaveText('1-3 of 3 items')
     })
 
     test('should reset filter values for every additional filter', async () => {
@@ -1127,12 +1131,17 @@ describe('List View', () => {
           )
           .toBeTruthy()
 
-        await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
-
-        await toggleColumn(page, {
-          columnLabel: 'Description',
-          columnName: 'description',
-          targetState: 'off',
+        await toggleColumns({
+          columns: [
+            { columnLabel: 'ID', columnName: 'id', targetState: 'off' },
+            {
+              columnLabel: 'Description',
+              columnName: 'description',
+              targetState: 'off',
+            },
+          ],
+          page,
+          shouldCloseListColumns: true,
         })
 
         // Poll until the "description" field is removed from the response BUT `id` is still present
@@ -1557,7 +1566,7 @@ describe('List View', () => {
       await setPerPageLimit({ limit: 5, page })
 
       await expect.poll(async () => await page.locator(tableRowLocator).count()).toBe(5)
-      await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6')
+      await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6 items')
 
       await wait(500)
 
@@ -1586,7 +1595,7 @@ describe('List View', () => {
 
       const tableItems = page.locator(tableRowLocator)
       await expect.poll(async () => await tableItems.count()).toBe(5)
-      await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 16')
+      await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 16 items')
 
       await wait(500)
 
@@ -1599,7 +1608,7 @@ describe('List View', () => {
       await wait(500)
       await expect(tableItems).toHaveCount(1)
       await expectPerPageLimits({ expectedLimits: [5, 10, 15], page })
-      await expect(page.locator('.page-controls__page-info')).toHaveText('16-16 of 16')
+      await expect(page.locator('.page-controls__page-info')).toHaveText('16-16 of 16 items')
     })
 
     test('should paginate when timestamps are disabled', async () => {
@@ -1791,7 +1800,12 @@ describe('List View', () => {
     test('should sort with existing filters', async () => {
       await page.goto(postsUrl.list)
 
-      await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
+      await toggleColumn(page, {
+        columnLabel: 'ID',
+        columnName: 'id',
+        shouldCloseListColumns: true,
+        targetState: 'off',
+      })
 
       await page.locator('#heading-id').waitFor({ state: 'detached' })
       await page.locator('#heading-title button.sort-column__asc').click()
@@ -1849,17 +1863,13 @@ describe('List View', () => {
       await expect(page.locator('#heading-_status')).toBeVisible()
       await expect(page.locator('.cell-_status').first()).toBeVisible()
 
-      await toggleColumn(page, {
-        columnLabel: 'Wavelengths',
-        columnName: 'wavelengths',
-        targetState: 'on',
-      })
-      await wait(500)
-
-      await toggleColumn(page, {
-        columnLabel: 'Select Field',
-        columnName: 'selectField',
-        targetState: 'on',
+      await toggleColumns({
+        columns: [
+          { columnLabel: 'Wavelengths', columnName: 'wavelengths', targetState: 'on' },
+          { columnLabel: 'Select Field', columnName: 'selectField', targetState: 'on' },
+        ],
+        page,
+        shouldCloseListColumns: true,
       })
       await wait(500)
 
@@ -1894,9 +1904,14 @@ describe('List View', () => {
 
       await page.goto(virtualsUrl.list)
 
-      await openListColumns(page, {})
-      await toggleColumn(page, { columnLabel: 'Virtual Text', targetState: 'on' })
-      await toggleColumn(page, { columnLabel: 'Text Field', targetState: 'on' })
+      await toggleColumns({
+        columns: [
+          { columnLabel: 'Virtual Text', targetState: 'on' },
+          { columnLabel: 'Text Field', targetState: 'on' },
+        ],
+        page,
+        shouldCloseListColumns: true,
+      })
 
       // Check that virtualText (virtual: true) does NOT have sort buttons
       const virtualTextHeading = page.locator('#heading-virtualText')
@@ -2195,6 +2210,81 @@ describe('List View', () => {
       )
     })
 
+    test('should honor formatDocURL destinations and disabled links in grid layout', async () => {
+      const noLinkDoc = await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'no-link' },
+      })
+
+      const customLinkDoc = await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'custom-link' },
+      })
+
+      await page.goto(formatDocURLUrl.list)
+      await page.getByRole('radio', { name: 'Grid' }).check()
+
+      try {
+        await expect(page.locator('.document-card')).toHaveCount(2)
+        const noLinkCard = page.locator('.document-card', {
+          has: page.locator('.document-card__title', { hasText: exactText(String(noLinkDoc.id)) }),
+        })
+
+        await expect(noLinkCard).toBeVisible()
+        await expect(noLinkCard.locator('a')).toHaveCount(0)
+        await expect(
+          page.getByRole('link', { name: String(customLinkDoc.id), exact: true }),
+        ).toHaveAttribute('href', '/custom-destination')
+      } finally {
+        await page.getByRole('radio', { name: 'Table' }).check()
+      }
+    })
+
+    test('should choose a document with the keyboard in a drawer after saving grid layout', async () => {
+      const doc = await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'linkable' },
+      })
+
+      await page.goto(formatDocURLUrl.list)
+
+      const gridPreferenceSaved = page.waitForResponse(
+        (response) =>
+          response
+            .url()
+            .includes(`/payload-preferences/collection-${formatDocURLCollectionSlug}`) &&
+          response.request().method() === 'POST',
+      )
+
+      await page.getByRole('radio', { name: 'Grid' }).check()
+      await gridPreferenceSaved
+      await expect(page.locator('.document-card')).toHaveCount(1)
+      await page.getByRole('button', { name: 'Select format doc' }).click()
+
+      const drawer = page.locator('.list-drawer.drawer--is-open')
+
+      try {
+        await expect(drawer.locator('table tbody tr')).toHaveCount(1)
+        await expect(drawer.locator('.document-card')).toHaveCount(0)
+
+        const selectionButton = drawer.locator('button.default-cell__first-cell')
+
+        await selectionButton.focus()
+        await selectionButton.press('Enter')
+        await expect(
+          page.getByRole('status').filter({ hasText: `Selected document: ${doc.id}` }),
+        ).toBeVisible()
+        expect(new URL(page.url()).pathname).toBe(new URL(formatDocURLUrl.list).pathname)
+      } finally {
+        if (!page.isClosed() && (await drawer.isVisible())) {
+          await drawer.locator('.list-drawer__header .close-modal-button').click()
+        }
+        if (!page.isClosed()) {
+          await page.getByRole('radio', { name: 'Table' }).check()
+        }
+      }
+    })
+
     test('should disable linking in ListDrawer for documents with formatDocURL returning null', async () => {
       await payload.create({
         collection: formatDocURLCollectionSlug,
@@ -2209,7 +2299,7 @@ describe('List View', () => {
       })
 
       await page.goto(formatDocURLUrl.list)
-      await expect(page).toHaveURL(/depth=1&limit=10/)
+      await expect(page).toHaveURL(/[?&]limit=10(?:&|$)/)
 
       const selectButton = page.locator('button:has-text("Select format doc")')
       await selectButton.waitFor({ state: 'visible' })

@@ -13,6 +13,15 @@ import type { Column } from '../elements/Table.js'
 import type { Data, ViewTypes } from '../types.js'
 import type { RelatedDocumentsGrouped } from './hierarchyList.js'
 
+export type CurrentHierarchyItem = {
+  /**
+   * Whether the current user can update this specific document, including row-level access.
+   */
+  hasUpdatePermission: boolean
+  id: number | string
+  title: string
+}
+
 export type HierarchyViewData = {
   /**
    * Collections allowed for creation based on parent's collectionSpecific field.
@@ -49,6 +58,12 @@ export type ListViewSlots = {
   Table: React.ReactNode | React.ReactNode[]
 }
 
+export type ListViewGroup = {
+  data: PaginatedDocs
+  heading: string
+  value: string
+}
+
 /**
  * The `ListViewServerPropsOnly` approach is needed to ensure type strictness when injecting component props
  * There is no way to do something like `Omit<ListViewServerProps, keyof ListViewClientProps>`
@@ -70,15 +85,23 @@ export type ListViewClientProps = {
   beforeActions?: React.ReactNode[]
   collectionSlug: SanitizedCollectionConfig['slug']
   columnState: Column[]
+  /**
+   * The selected hierarchy item used to customize the default list header.
+   */
+  currentHierarchyItem?: CurrentHierarchyItem
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   disableQueryPresets?: boolean
+  documentLayout?: CollectionPreferences['documentLayout']
+  /** Server-resolved grid destinations. A null value disables document navigation. */
+  documentURLs?: Record<string, null | string>
   enableRowSelections?: boolean
+  groupedData?: ListViewGroup[]
   hasCreatePermission: boolean
   hasDeletePermission?: boolean
   hasTrashPermission?: boolean
   /**
-   * Hierarchy view data - present when viewing a hierarchy collection with a parent selected
+   * Hierarchy data used by the hierarchy list view.
    */
   hierarchyData?: HierarchyViewData
   /**

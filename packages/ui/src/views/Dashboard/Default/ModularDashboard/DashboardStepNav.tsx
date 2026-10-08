@@ -1,7 +1,7 @@
 'use client'
 import type { ClientWidget } from 'payload'
 
-import { useEffect, useId } from 'react'
+import { useEffect, useId, useRef } from 'react'
 
 import { Button } from '../../../../elements/Button/index.js'
 import { DrawerToggler } from '../../../../elements/Drawer/index.js'
@@ -78,15 +78,26 @@ export function DashboardBreadcrumbDropdown(props: {
     props
   const { t } = useTranslation()
 
+  const addButtonRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (isEditing) {
+      addButtonRef.current?.focus()
+    }
+  }, [isEditing])
+
   if (isEditing) {
     return (
       <div className="dashboard-breadcrumb-dropdown__editing">
         <span>{t('dashboard:editingDashboard')}</span>
         <div className="dashboard-breadcrumb-dropdown__actions">
-          <DrawerToggler className="drawer-toggler--unstyled" slug={widgetsDrawerSlug}>
-            <Button buttonStyle="primary" el="span" size="medium">
-              {t('dashboard:addButton')}
-            </Button>
+          <DrawerToggler
+            aria-label={`${t('dashboard:addButton')}: ${t('dashboard:addWidget')}`}
+            buttonStyle="primary"
+            extraButtonProps={{ ref: addButtonRef }}
+            slug={widgetsDrawerSlug}
+          >
+            {t('dashboard:addButton')}
           </DrawerToggler>
           <Button buttonStyle="pill" onClick={onSaveChanges} size="medium">
             {t('fields:saveChanges')}

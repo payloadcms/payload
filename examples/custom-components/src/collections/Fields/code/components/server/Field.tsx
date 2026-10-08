@@ -1,9 +1,9 @@
-import type { CodeFieldServerComponent } from 'payload'
+import type { CodeFieldServerProps } from 'payload'
 import type React from 'react'
 
 import { CodeField } from '@payloadcms/ui'
 
-export const CustomCodeFieldServer: CodeFieldServerComponent = ({
+export const CustomCodeFieldServer: React.FC<CodeFieldServerProps> = ({
   clientField,
   path,
   schemaPath,

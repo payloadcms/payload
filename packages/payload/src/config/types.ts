@@ -14,7 +14,6 @@ import type { JSONSchema4 } from 'json-schema'
 import type { Metadata } from 'next'
 import type { DestinationStream, Level, LoggerOptions } from 'pino'
 import type React from 'react'
-import type { default as sharp } from 'sharp'
 
 import type { ComponentRenderer } from '../admin/adapters/render.js'
 import type { ServerAdapter } from '../admin/adapters/server.js'
@@ -73,6 +72,7 @@ import type {
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
 import type { MaybePromise, PayloadRequest, Where } from '../types/index.js'
+import type { UploadTransformer } from '../uploads/transformers/types.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
 /**
@@ -400,6 +400,7 @@ export type GraphQLInfo = {
     groupTypes: Record<string, GraphQL.GraphQLObjectType>
     localeInputType?: GraphQL.GraphQLEnumType | GraphQL.GraphQLScalarType
     tabTypes: Record<string, GraphQL.GraphQLObjectType>
+    validationResultType?: GraphQL.GraphQLObjectType
   }
 }
 export type GraphQLExtension = (
@@ -727,7 +728,8 @@ export type SanitizedLocalizationConfig = Prettify<
      * @example `["en", "es", "fr", "nl", "de", "jp"]`
      */
     localeCodes: string[]
-  } & Omit<LocalizationConfigWithLabels, 'fallback'> &
+    locales: Locale[]
+  } & Omit<LocalizationConfigWithLabels, 'fallback' | 'locales'> &
     Required<Pick<LocalizationConfigWithLabels, 'fallback'>>
 >
 
@@ -744,23 +746,6 @@ export type LabelFunction<TTranslationKeys = ClientTranslationKeys> = (args: {
 }) => string
 
 export type StaticLabel = Record<string, string> | string
-
-export type SharpDependency = (
-  input?:
-    | ArrayBuffer
-    | Buffer
-    | Float32Array
-    | Float64Array
-    | Int8Array
-    | Int16Array
-    | Int32Array
-    | string
-    | Uint8Array
-    | Uint8ClampedArray
-    | Uint16Array
-    | Uint32Array,
-  options?: sharp.SharpOptions,
-) => sharp.Sharp
 
 export type CORSConfig = {
   headers?: string[]
@@ -887,6 +872,16 @@ export type FetchAPIFileUploadOptions = {
    */
   useTempFiles?: boolean | undefined
 } & Partial<BusboyConfig>
+
+export type GlobalUploadConfig = {
+  /**
+   * Ordered list of file transformers. Every eligible transformer joins the pipeline
+   * for a given upload or dynamic request in declaration order. Slugs must be unique.
+   *
+   * @see https://payloadcms.com/docs/upload/transformers
+   */
+  transformers?: UploadTransformer[]
+} & FetchAPIFileUploadOptions
 
 export type ErrorResult = {
   data?: any
@@ -1267,7 +1262,7 @@ type RootAdminConfig = {
   toast?: {
     /**
      * Time in milliseconds until the toast automatically closes.
-     * @default 4000
+     * @default 6000
      */
     duration?: number
     /**
@@ -1555,6 +1550,15 @@ export type Config = {
    * ```
    */
   kv?: KVAdapterResult
+  /** Manage instructions shared by MCP and CLI consumers. Set to false to disable the management UI and collection. */
+  llmInstructions?:
+    | {
+        /** Who may edit saved instructions, in addition to the target's read and update access. Defaults to users of the admin auth collection. */
+        access?: Access
+        /** Editor for instructions. Defaults to the root editor's llmInstructions preset, or plain text if unavailable. */
+        editor?: Config['editor']
+      }
+    | false
   /**
    * Translate your content to different languages/locales.
    *
@@ -1745,11 +1749,6 @@ export type Config = {
    */
   serverURL?: string
   /**
-   * Pass in a local copy of Sharp if you'd like to use it.
-   *
-   */
-  sharp?: SharpDependency
-  /**
    * Storage adapters that handle where uploaded files are stored (S3, GCS, Azure, Vercel Blob, etc.).
    *
    * Adapters are initialized **before** `plugins`, so file handling is fully wired before any plugin
@@ -1768,9 +1767,10 @@ export type Config = {
   /** Control how typescript interfaces are generated from your collections. */
   typescript?: RootTypeScriptConfig
   /**
-   * Customize the handling of incoming file uploads for collections that have uploads enabled.
+   * Customize the handling of incoming file uploads for collections that have uploads enabled,
+   * including the `transformers` pipeline.
    */
-  upload?: FetchAPIFileUploadOptions
+  upload?: GlobalUploadConfig
 }
 
 interface SanitizedAdminConfig
@@ -1898,7 +1898,8 @@ export interface SanitizedConfig
      * Deduped list of adapters used in the project
      */
     adapters: string[]
-  } & FetchAPIFileUploadOptions
+  } & GlobalUploadConfig &
+    Required<Pick<GlobalUploadConfig, 'transformers'>>
 }
 
 export type EditConfig = EditConfigWithoutRoot | EditConfigWithRoot

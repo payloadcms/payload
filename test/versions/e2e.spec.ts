@@ -703,7 +703,10 @@ describe('Versions', () => {
       await expect
         .poll(
           async () =>
-            await page.locator('.doc-tab[aria-label="Versions"] .pill-version-count').textContent(),
+            await page
+              .getByRole('link', { name: /^Versions\b/ })
+              .locator('.pill-version-count')
+              .textContent(),
           { timeout: POLL_TOPASS_TIMEOUT },
         )
         .toEqual('2')
@@ -1205,6 +1208,76 @@ describe('Versions', () => {
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
 
+    test('should show a cropped image after saving a draft', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: { _status: 'published', alt: 'Original image' },
+        filePath: path.resolve(dirname, './image.jpg'),
+        overrideAccess: true,
+      })
+
+      await page.goto(uploadURL.edit(publishedDoc.id))
+      await waitForFormReady(page)
+      await page.locator('button[aria-label="Edit Image"]').click()
+      await page.locator('input[name="cropWidth"]').fill('800')
+      await page.locator('input[name="cropHeight"]').fill('800')
+      await page.locator('button:has-text("Apply Changes")').click()
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      const { docs: drafts } = await payload.find({
+        collection: draftWithUploadCollectionSlug,
+        draft: true,
+        overrideAccess: true,
+        where: { id: { equals: publishedDoc.id } },
+      })
+      const draft = drafts[0]!
+
+      expect(draft.filename).not.toBe(publishedDoc.filename)
+      expect(draft.url).not.toBe(publishedDoc.original?.url)
+      expect(draft.width).toBe(800)
+      expect(draft.height).toBe(800)
+      await expect(page.locator('.file-preview__info-meta')).toContainText('800 × 800')
+      await expect(page.locator('.file-preview img')).toHaveJSProperty('naturalWidth', 800)
+
+      const { docs: published } = await payload.find({
+        collection: draftWithUploadCollectionSlug,
+        overrideAccess: true,
+        where: { id: { equals: publishedDoc.id } },
+      })
+      expect(published[0]!.filename).toBe(publishedDoc.filename)
+    })
+
+    test('should publish a cropped image', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: { _status: 'published', alt: 'Original image' },
+        filePath: path.resolve(dirname, './image.jpg'),
+        overrideAccess: true,
+      })
+
+      await page.goto(uploadURL.edit(publishedDoc.id))
+      await waitForFormReady(page)
+      await page.locator('button[aria-label="Edit Image"]').click()
+      await page.locator('input[name="cropWidth"]').fill('800')
+      await page.locator('input[name="cropHeight"]').fill('800')
+      await page.locator('button:has-text("Apply Changes")').click()
+      await saveDocAndAssert(page, '#action-save')
+
+      const { docs: published } = await payload.find({
+        collection: draftWithUploadCollectionSlug,
+        overrideAccess: true,
+        where: { id: { equals: publishedDoc.id } },
+      })
+      const cropped = published[0]!
+
+      expect(cropped.filename).not.toBe(publishedDoc.filename)
+      expect(cropped.url).not.toBe(publishedDoc.original?.url)
+      expect(cropped.width).toBe(800)
+      expect(cropped.height).toBe(800)
+      await expect(page.locator('.file-preview__info-meta')).toContainText('800 × 800')
+      await expect(page.locator('.file-preview img')).toHaveJSProperty('naturalWidth', 800)
+    })
+
     test('should create a draft version with the new file without altering the published doc', async () => {
       const publishedDoc = await payload.create({
         collection: draftWithUploadCollectionSlug,
@@ -1621,15 +1694,14 @@ describe('Versions', () => {
 
       await page.locator('.date-time-picker input').click()
 
-      const popper = page.locator('.react-datepicker-popper')
+      const drawer = page.locator('dialog[id^="schedule-publish-"]')
+      const popper = drawer.locator('.react-datepicker-popper')
       await expect(popper).toBeVisible()
 
-      const portalInfo = await popper.evaluate((el) => ({
-        isInsideDrawerScroll: el.closest('.drawer__content-children') !== null,
-        isInsidePortal: el.closest('#date-time-picker-portal') !== null,
-      }))
-      expect(portalInfo.isInsideDrawerScroll).toBe(false)
-      expect(portalInfo.isInsidePortal).toBe(true)
+      const isInsideDrawerScroll = await popper.evaluate(
+        (el) => el.closest('.drawer__content-children') !== null,
+      )
+      expect(isInsideDrawerScroll).toBe(false)
 
       await expect(popper).toBeInViewport()
     })

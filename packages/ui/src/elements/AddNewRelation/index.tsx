@@ -139,7 +139,7 @@ export const AddNewRelation: React.FC<Props> = ({
       {relatedCollections.length === 1 && (
         <Fragment>
           <DocumentDrawerToggler
-            buttonStyle="pill"
+            buttonStyle="secondary"
             className={[
               `${baseClass}__add-button`,
               unstyled && `${baseClass}__add-button--unstyled`,
@@ -187,7 +187,7 @@ export const AddNewRelation: React.FC<Props> = ({
               <Button
                 className={`${baseClass}__add-button`}
                 {...buttonProps}
-                buttonStyle="pill"
+                buttonStyle="secondary"
                 selected={active}
                 tooltip={popupOpen ? '' : t('fields:addNew')}
               >

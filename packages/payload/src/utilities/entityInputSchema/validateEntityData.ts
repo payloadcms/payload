@@ -19,7 +19,11 @@ export const validateCollectionData = ({
   req: PayloadRequest
   slug: CollectionSlug
 }): void => {
-  const schema = getCollectionInputSchema({ collectionSlug: slug, req })
+  const schema = getCollectionInputSchema({
+    collectionSlug: slug,
+    req,
+    shouldKeepDeprecatedProperties: true,
+  })
 
   validateEntityData({ slug, data, entity: 'collection', partial, req, schema })
 }
@@ -33,7 +37,7 @@ export const validateGlobalData = ({
   req: PayloadRequest
   slug: GlobalSlug
 }): void => {
-  const schema = getGlobalInputSchema({ globalSlug: slug, req })
+  const schema = getGlobalInputSchema({ globalSlug: slug, req, shouldKeepDeprecatedProperties: true })
 
   validateEntityData({ slug, data, entity: 'global', partial: true, req, schema })
 }

@@ -488,7 +488,7 @@ function TableActionMenu({
         </span>
       </button>
     </div>,
-    document.body,
+    editor.getRootElement()?.closest('dialog, [role="dialog"]') ?? document.body,
   )
 }
 

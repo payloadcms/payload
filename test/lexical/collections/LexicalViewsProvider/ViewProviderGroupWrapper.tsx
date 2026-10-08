@@ -1,5 +1,6 @@
 'use client'
-import type { GroupFieldClientComponent } from 'payload'
+import type { GroupFieldClientProps } from 'payload'
+import type React from 'react'
 
 import { RichTextViewProvider } from '@payloadcms/richtext-lexical/client'
 import { GroupField } from '@payloadcms/ui'
@@ -17,7 +18,7 @@ import { GroupField } from '@payloadcms/ui'
  * - ViewSelector should be hidden (isControlledByParent=true)
  * - Each nested field uses its own views map to resolve the "frontend" view
  */
-export const ViewProviderGroupWrapper: GroupFieldClientComponent = (props) => {
+export const ViewProviderGroupWrapper: React.FC<GroupFieldClientProps> = (props) => {
   return (
     <RichTextViewProvider currentView="frontend" inheritable={true}>
       <GroupField {...props} />

@@ -82,6 +82,7 @@ export const renderTable = ({
   groupByFieldPath,
   groupByValue,
   heading,
+  hierarchyParentFieldName,
   i18n,
   key = 'table',
   orderableFieldName,
@@ -107,6 +108,7 @@ export const renderTable = ({
   groupByFieldPath?: string
   groupByValue?: string
   heading?: string
+  hierarchyParentFieldName?: string
   i18n: I18nClient
   key?: string
   orderableFieldName: string
@@ -185,6 +187,7 @@ export const renderTable = ({
     | 'customCellProps'
     | 'enableRowSelections'
     | 'fieldPermissions'
+    | 'hierarchyParentFieldName'
     | 'i18n'
     | 'payload'
     | 'req'
@@ -196,6 +199,7 @@ export const renderTable = ({
     columns,
     enableRowSelections,
     fieldPermissions,
+    hierarchyParentFieldName,
     i18n,
     // sortColumnProps,
     customCellProps,
@@ -263,6 +267,7 @@ export const renderTable = ({
         <SelectRow
           key={i}
           rowData={row}
+          rowIndex={i}
           selectRowLabel={getSelectRowLabel({ i18n, rowData: row, useAsTitle })}
         />
       )),
@@ -294,6 +299,13 @@ export const renderTable = ({
             <TableSectionContent>
               <Table
                 appearance={tableAppearance}
+                ariaLabel={
+                  heading
+                    ? [getTranslation(clientCollectionConfig?.labels?.plural, i18n), heading]
+                        .filter(Boolean)
+                        .join(': ')
+                    : undefined
+                }
                 columns={columnsToUse}
                 data={data?.docs || []}
                 id={tableId}

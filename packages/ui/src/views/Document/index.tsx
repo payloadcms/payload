@@ -384,7 +384,7 @@ export const renderDocument = async ({
     }
   }
 
-  const documentSlots = renderDocumentSlots({
+  const documentSlots = await renderDocumentSlots({
     id,
     collectionConfig,
     doc: doc as Record<string, unknown>,

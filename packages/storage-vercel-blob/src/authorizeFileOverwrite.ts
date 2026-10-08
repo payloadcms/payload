@@ -28,7 +28,7 @@ function getDocumentFileKeys({
   doc: OwnerDocument
   useCompositePrefixes: boolean
 }): string[] {
-  return [doc.filename, ...Object.values(doc.sizes || {}).map((size) => size?.filename)]
+  return [doc.filename, ...Object.values(doc.variants || {}).map((size) => size?.filename)]
     .filter((filename): filename is string => typeof filename === 'string')
     .map(
       (filename) =>
@@ -62,14 +62,14 @@ async function findMatchingDocs({
     return []
   }
 
-  const imageSizes =
+  const variants =
     collection.config.upload && typeof collection.config.upload === 'object'
-      ? collection.config.upload.imageSizes || []
+      ? collection.config.upload.variants || []
       : []
   const filenameQueries: Where[] = [
     { filename: { equals: requestedFilename } },
-    ...imageSizes.map(({ name }) => ({
-      [`sizes.${name}.filename`]: { equals: requestedFilename },
+    ...variants.map(({ name }) => ({
+      [`variants.${name}.filename`]: { equals: requestedFilename },
     })),
   ]
   const result = await req.payload.find({
