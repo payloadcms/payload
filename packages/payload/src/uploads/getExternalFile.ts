@@ -149,13 +149,15 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
       throw new APIError(`Failed to fetch file from ${fileURL}`, res?.status)
     }
 
-    const data = await res.arrayBuffer()
+    const fileBuffer = Buffer.from(await res.arrayBuffer())
 
     return {
       name: filename,
-      data: Buffer.from(data),
+      data: fileBuffer,
       mimetype: res.headers.get('content-type') || undefined!,
-      size: Number(res.headers.get('content-length')) || 0,
+      // Use the size of the body that was actually read. `Content-Length` is missing for chunked
+      // responses and is the *compressed* length when the response is content-encoded.
+      size: fileBuffer.byteLength,
     }
   }
 
