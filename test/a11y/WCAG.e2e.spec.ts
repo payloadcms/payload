@@ -5449,6 +5449,147 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
   test.describe('4.1.3 Status Messages (AA)', () => {
+    test('should preview applied image edits and announce failures without saving', async ({
+      browser: _browser,
+    }, testInfo) => {
+      const dialog = await openEditImageDialog({ page, serverURL })
+      const documentID = new URL(page.url()).pathname.split('/').pop()
+      const before = await (await page.request.get(`${serverURL}/api/media/${documentID}`)).json()
+      await dialog.getByRole('spinbutton', { name: 'Width', exact: true }).fill('5')
+      await dialog.getByRole('spinbutton', { name: 'Height', exact: true }).fill('6')
+      const apply = dialog.getByRole('button', { name: 'Apply Changes', exact: true })
+      await apply.focus()
+      await apply.press('Enter')
+      await expect(dialog).toBeHidden()
+      const preview = page
+        .locator('.file-manager .file-preview__main img, .file-field .file-details__thumbnail img')
+        .first()
+      await expect(preview).toHaveAttribute('src', /^blob:/)
+      await expect
+        .poll(() =>
+          preview.evaluate((image: HTMLImageElement) => ({
+            height: image.naturalHeight,
+            width: image.naturalWidth,
+          })),
+        )
+        .toEqual({ height: 6, width: 5 })
+      const upload = page.locator('.file-manager, .file-field').first()
+      await expect(upload).toHaveAttribute('aria-busy', 'false')
+      await expect(upload.getByRole('status')).toHaveText('Preview')
+      await page.screenshot({
+        fullPage: true,
+        path: testInfo.outputPath('upload-edit-preview.png'),
+      })
+      const after = await (await page.request.get(`${serverURL}/api/media/${documentID}`)).json()
+      expect(after._transforms).toEqual(before._transforms)
+      expect(after.updatedAt).toEqual(before.updatedAt)
+      const scan = await runAxeScan({
+        include: [
+          '.file-manager [role=status], .file-field [role=status], .file-preview__main img, .file-details__thumbnail img',
+        ],
+        page,
+        testInfo,
+      })
+      expect(scan.violations).toHaveLength(0)
+
+      await page.route('**/preview-file/**', (route) =>
+        route.fulfill({ json: { errors: [{ message: 'Preview failed' }] }, status: 500 }),
+      )
+      try {
+        await page.getByRole('button', { name: /edit image/i }).click()
+        await dialog.getByRole('spinbutton', { name: 'Width', exact: true }).fill('4')
+        await dialog.getByRole('button', { name: 'Apply Changes', exact: true }).click()
+        await expect(dialog).toBeHidden()
+        await expect(upload.getByRole('alert')).toContainText('problem previewing')
+        await expect(upload).toHaveAttribute('aria-busy', 'false')
+        const unsaved = await (
+          await page.request.get(`${serverURL}/api/media/${documentID}`)
+        ).json()
+        expect(unsaved._transforms).toEqual(before._transforms)
+      } finally {
+        await page.unroute('**/preview-file/**')
+      }
+    })
+
+    test('should preview repeated edits and clearing a crop before saving', async () => {
+      const dialog = await openEditImageDialog({ page, serverURL })
+      const preview = page.locator('.file-manager .file-preview__main img').first()
+      await dialog.getByRole('spinbutton', { name: 'Width', exact: true }).fill('500')
+      await dialog.getByRole('spinbutton', { name: 'Height', exact: true }).fill('600')
+      await dialog.getByRole('button', { name: 'Apply Changes', exact: true }).click()
+      await expect(preview).toHaveAttribute('src', /^blob:/)
+      await expect
+        .poll(() => preview.evaluate((image: HTMLImageElement) => image.naturalWidth))
+        .toBe(500)
+
+      await page.getByRole('button', { name: /edit image/i }).click()
+      await dialog.getByRole('spinbutton', { name: 'Width', exact: true }).fill('800')
+      await dialog.getByRole('button', { name: 'Apply Changes', exact: true }).click()
+      await expect
+        .poll(() => preview.evaluate((image: HTMLImageElement) => image.naturalWidth))
+        .toBe(800)
+
+      await page.getByRole('button', { name: /edit image/i }).click()
+      await dialog.getByRole('button', { name: 'Reset: Crop', exact: true }).click()
+      await dialog.getByRole('button', { name: 'Apply Changes', exact: true }).click()
+      await expect
+        .poll(() => preview.evaluate((image: HTMLImageElement) => image.naturalWidth))
+        .toBe(1600)
+      await page.getByRole('button', { name: /edit image/i }).click()
+      const src = await preview.getAttribute('src')
+      await dialog.getByRole('spinbutton', { name: 'Width', exact: true }).fill('700')
+      await dialog.getByRole('button', { name: 'Cancel', exact: true }).click()
+      await expect(preview).toHaveAttribute('src', src!)
+    })
+
+    test('should preview the selected image size after applying focal-point edits', async () => {
+      const dialog = await openEditImageDialog({ page, serverURL })
+      await dialog.getByRole('spinbutton', { name: 'Focal Point X', exact: true }).fill('0')
+      await dialog.getByRole('button', { name: 'Apply Changes', exact: true }).click()
+      const upload = page.locator('.file-manager')
+      await expect(upload).toHaveAttribute('aria-busy', 'false')
+      const variant = upload.getByRole('button', { name: 'thumbnail', exact: true })
+      await expect(variant.locator('img')).toHaveAttribute('src', /^blob:/)
+      await variant.click()
+      const preview = upload.locator('.file-preview__main img')
+      await expect(preview).toHaveAttribute('src', /^blob:/)
+      await expect
+        .poll(() =>
+          preview.evaluate((image: HTMLImageElement) => ({
+            height: image.naturalHeight,
+            width: image.naturalWidth,
+          })),
+        )
+        .toEqual({ height: 200, width: 200 })
+    })
+
+    test('should preview a new bulk upload without persisting a document', async () => {
+      const bulk = await openBulkUploadDialog({ page, serverURL })
+      const before = await (await page.request.get(`${serverURL}/api/media?limit=1`)).json()
+      await bulk
+        .locator('input[type=file]')
+        .setInputFiles(fileURLToPath(new URL('../uploads/image.png', import.meta.url)))
+      const manager = page.locator('.bulk-upload--file-manager')
+      await manager.getByRole('button', { name: /edit image/i }).click()
+      const dialog = page.locator('.edit-upload__dialog')
+      await expect(dialog).toBeVisible()
+      await dialog.getByRole('spinbutton', { name: 'Width', exact: true }).fill('500')
+      await dialog.getByRole('spinbutton', { name: 'Height', exact: true }).fill('600')
+      await dialog.getByRole('button', { name: 'Apply Changes', exact: true }).click()
+      const preview = manager.locator('.file-manager img[src^="blob:"]').first()
+      await expect(preview).toBeVisible()
+      await expect
+        .poll(() =>
+          preview.evaluate((image: HTMLImageElement) => ({
+            height: image.naturalHeight,
+            width: image.naturalWidth,
+          })),
+        )
+        .toEqual({ height: 600, width: 500 })
+      const after = await (await page.request.get(`${serverURL}/api/media?limit=1`)).json()
+      expect(after.totalDocs).toBe(before.totalDocs)
+    })
+
     test('should keep the toast close button accessible with its live announcements off', async () => {
       await page.goto(`${postsURL.admin}/status-messages`)
       await page.getByRole('button', { name: 'Show action toast' }).click()

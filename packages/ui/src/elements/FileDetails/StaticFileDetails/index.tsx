@@ -21,6 +21,7 @@ export type StaticFileDetailsProps = {
   hasImageSizes?: boolean
   hideRemoveFile?: boolean
   imageCacheTag?: false | string
+  previewSrc?: string
   uploadConfig: SanitizedCollectionConfig['upload']
 }
 
@@ -33,6 +34,7 @@ export const StaticFileDetails: React.FC<StaticFileDetailsProps> = (props) => {
     hasImageSizes,
     hideRemoveFile,
     imageCacheTag,
+    previewSrc,
     uploadConfig,
   } = props
 
@@ -48,7 +50,7 @@ export const StaticFileDetails: React.FC<StaticFileDetailsProps> = (props) => {
             // size="small"
             className={`${baseClass}__thumbnail`}
             doc={doc}
-            fileSrc={thumbnailURL || url}
+            fileSrc={previewSrc || thumbnailURL || url}
             imageCacheTag={imageCacheTag}
             uploadConfig={uploadConfig}
           />

@@ -130,6 +130,18 @@ A request-only pipeline stores the original and intent, without storing transfor
 
 A stored default can remain readable after its executor is removed when the server-owned stored-file descriptors identify physical bytes. A dynamic default, changed intent, or version replay requires current compatible executors. Arbitrary URLs or keys inside custom JSON never grant managed-file ownership or drive cleanup.
 
+## Previewing unsaved edits
+
+The Admin image editor refreshes the file and image-size previews after **Apply Changes**, before the document is saved. Reopening the editor still uses the original file. Cancelling the editor does not apply changes; saving the document persists the pending `_transforms` as usual.
+
+`POST /api/{collection}/preview-file/{id}` renders replacement `_transforms` against the retained original. Send JSON `{ "_transforms": { ... } }`, or `{ "_transforms": null }` to preview clearing all edits. Add `variant` with a configured image-size name to preview that size. For a newly selected file, omit the ID and send multipart `file` bytes plus `_payload` containing the same JSON.
+
+Previews require create permission for new files, or update and read permission for an existing document, including static transformed-file and original-file read access. The endpoint validates state and runs request-capable transformers with `operation: 'request'` and `purpose: 'preview'`. Custom adapters that support editable state must claim the keys they handle for this purpose and return the preview bytes through `handleRequest`. Sharp supports previews without enabling dynamic width/height query resizing and uses the same image adjustments as Save.
+
+New and replacement files must pass the collection’s MIME and content restrictions, and their type must be identifiable from their bytes. Only supported image responses are returned; previews include a restrictive content security policy and `nosniff` protection.
+
+Preview state replaces saved state in a disposable document snapshot. The response is `private, no-store`. Payload does not run document write hooks, create versions, or store transformed preview files. A failed preview leaves the pending edits available to correct or save.
+
 ## Versions and migration
 
 Drafts, publishing, duplication, and version restoration carry the original and intent together. Duplication independently owns its managed files. Restoring a version replays its intent through the current compatible pipeline, so current encodings and configured variants can differ from historical bytes. Historical file delivery can still serve retained managed objects without replay. Version pruning uses stored-file references.

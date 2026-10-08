@@ -36,7 +36,7 @@ type BaseCanTransformArgs = {
 }
 
 export type CanTransformArgs = (
-  | { operation: 'request'; purpose?: 'persisted-default' | 'request-override' }
+  | { operation: 'request'; purpose?: 'persisted-default' | 'preview' | 'request-override' }
   | { operation: 'upload' }
 ) &
   BaseCanTransformArgs
@@ -68,7 +68,7 @@ export type HandleTransformRequestArgs = {
   getSourceFile: () => Promise<Response>
   options?: unknown
   originalDoc: Readonly<UploadDocument>
-  purpose?: 'persisted-default' | 'request-override'
+  purpose?: 'persisted-default' | 'preview' | 'request-override'
   req: PayloadRequest
 }
 

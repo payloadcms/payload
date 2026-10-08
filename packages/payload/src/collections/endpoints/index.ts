@@ -12,6 +12,7 @@ import { findByIDHandler } from './findByID.js'
 // import { findDistinctHandler } from './findDistinct.js'
 import { findVersionByIDHandler } from './findVersionByID.js'
 import { findVersionsHandler } from './findVersions.js'
+import { previewFileHandler } from './previewFile.js'
 import { renameFileHandler } from './renameFile.js'
 import { restoreVersionHandler } from './restoreVersion.js'
 import { updateHandler } from './update.js'
@@ -77,6 +78,11 @@ export const defaultCollectionEndpoints: Endpoint[] = [
       handler: findHandler,
       method: 'get',
       path: '/',
+    },
+    {
+      handler: previewFileHandler,
+      method: 'post',
+      path: '/preview-file/:id?',
     },
     {
       handler: findByIDHandler,

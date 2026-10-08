@@ -1,6 +1,7 @@
 import type { HandleTransformRequestArgs, HandleTransformRequestResult } from 'payload'
 import type { SharpOptions } from 'sharp'
 
+import { APIError } from 'payload'
 import { createFileSource } from 'payload/internal'
 
 import type {
@@ -12,8 +13,10 @@ import type {
 
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
 import { parseDynamicResize } from './parseDynamicResize.js'
+import { createPrepareLegacyUpload } from './prepareLegacyUpload.js'
 import { resolveFocalPoint } from './resolveFocalPoint.js'
 import { getOutputDimensions } from './resolveResizeDimensions.js'
+import { createTransformFile } from './transformFile.js'
 import { resolveOutputFormat, resolveWithMetadata, transformState } from './transformState.js'
 
 // Must match generateFileData.ts's allow-list — the only MIME types Sharp auto-detects multi-frame animation for.
@@ -42,9 +45,83 @@ export function createHandleRequest({
   return async ({ collectionSlug: argumentsCollectionSlug, doc, getSourceFile, purpose, req }) => {
     const collectionConfig = collections[argumentsCollectionSlug]
     const withMetadata = resolveWithMetadata({
-      state: doc._transforms,
+      state: doc._transforms ?? {},
       withMetadata: collectionConfig?.withMetadata,
     })
+    if (purpose === 'preview') {
+      const source = await getSourceFile()
+      const sourceMimeType =
+        source.headers.get('Content-Type')?.split(';')[0]?.trim() ??
+        doc.mimeType ??
+        doc.original?.mimeType
+      const file = new File(
+        [
+          Buffer.from(
+            await createFileSource({
+              filename: doc.original?.filename ?? doc.filename,
+              mimeType: sourceMimeType,
+              retrieve: () => Promise.resolve(source),
+            }).arrayBuffer({ maxBytes: maxSourceBytes }),
+          ),
+        ],
+        doc.original?.filename ?? doc.filename,
+        {
+          type: sourceMimeType,
+        },
+      )
+      const variantName = req.data?.variant as string | undefined
+      const variantSources = new WeakMap<File, File>()
+      const transformFile = createTransformFile({
+        maxSourceBytes,
+        sharpDependency,
+        transformLimits,
+        variantSources,
+      })
+      const prepare = createPrepareLegacyUpload({
+        collections: {
+          [argumentsCollectionSlug]: {
+            ...collectionConfig,
+            variants: variantName
+              ? collectionConfig?.variants?.filter(({ name }) => name === variantName)
+              : [],
+          },
+        },
+        sharpDependency,
+        variantSources,
+      })
+      const results = await prepare({
+        collectionSlug: argumentsCollectionSlug,
+        doc,
+        file,
+        req,
+        transform: async (task) => {
+          const input = task.file ?? file
+          const result = await transformFile({
+            collectionSlug: argumentsCollectionSlug,
+            doc,
+            options: task.options as Parameters<typeof transformFile>[0]['options'],
+            originalDoc: doc,
+            originalSource: createFileSource({ file }),
+            req,
+            source: createFileSource({ file: input }),
+          })
+          return result.file ?? input
+        },
+        uploadEdits: {},
+      })
+      const output = results.find(
+        ({ fieldPath }) => fieldPath === (variantName ? `variants.${variantName}` : 'filename'),
+      )?.file
+      if (!output) {
+        throw new APIError('This image variant is not available for the preview.', 422, {
+          code: 'PREVIEW_VARIANT_OMITTED',
+        })
+      }
+      return {
+        response: new Response(output.stream(), { headers: { 'Content-Type': output.type } }),
+        status: 'continue',
+      }
+    }
     if (purpose === 'persisted-default') {
       const source = await getSourceFile()
       const variantKey = Object.keys(doc.variants ?? {}).find(
@@ -88,7 +165,7 @@ export function createHandleRequest({
                     : 'strip',
               },
             }
-          : doc._transforms,
+          : (doc._transforms ?? {}),
       })
       if (variant && shouldTransformVariant) {
         const original = doc.original ?? doc
@@ -96,7 +173,7 @@ export function createHandleRequest({
           original.width && original.height
             ? resolveFocalPoint({
                 height: original.height,
-                state: doc._transforms,
+                state: doc._transforms ?? {},
                 width: original.width,
               })
             : undefined
@@ -110,9 +187,9 @@ export function createHandleRequest({
           mimeType: file.type,
           sharpDependency,
           state: {
-            encoding: doc._transforms.encoding,
+            encoding: doc._transforms?.encoding,
             focalPoint,
-            metadataPolicy: doc._transforms.metadataPolicy,
+            metadataPolicy: doc._transforms?.metadataPolicy,
             resize:
               variant.width || variant.height
                 ? {
@@ -230,7 +307,7 @@ export function createHandleRequest({
       doc._transforms && original.width && original.height
         ? resolveFocalPoint({
             height: original.height,
-            state: doc._transforms,
+            state: doc._transforms ?? {},
             width: original.width,
           })
         : undefined

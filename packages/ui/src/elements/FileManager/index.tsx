@@ -23,10 +23,11 @@ import { EditUpload } from '../EditUpload/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
 import { getEditorFileSrc } from '../Upload/getEditorFileSrc.js'
-import { editDrawerSlug, sizePreviewSlug } from '../Upload/index.js'
+import { editDrawerSlug, sizePreviewSlug, UploadActions } from '../Upload/index.js'
 import { UploadFromURLModal } from '../Upload/UploadFromURLModal/index.js'
 import { usePasteFromClipboard } from '../Upload/usePasteFromClipboard.js'
 import { useUploadFromUrl } from '../Upload/useUploadFromUrl.js'
+import { useUploadPreview } from '../Upload/useUploadPreview.js'
 import { UploadDropzoneContent } from '../UploadDropzoneContent/index.js'
 import { AudioPreview } from './FilePreview/AudioPreview/index.js'
 import { FilePreview } from './FilePreview/index.js'
@@ -66,7 +67,20 @@ export const FileManager: React.FC<FileManagerProps> = ({
   const { openModal } = useModal()
   const { t } = useTranslation()
   const { setModified } = useForm()
-  const { data } = useDocumentInfo()
+  const { id, data } = useDocumentInfo()
+  const {
+    hasPreviewError,
+    isPreviewLoading,
+    previewSources,
+    previewSrc,
+    requestPreview,
+    resetPreview,
+  } = useUploadPreview({
+    id,
+    collectionSlug,
+    updatedAt: data?.updatedAt,
+    variants: uploadConfig.variants,
+  })
   const validate = useCallback(
     (file: File | null | undefined) => {
       if (!file && file !== undefined) {
@@ -154,6 +168,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
         return
       }
       if (isNewFile && file instanceof File) {
+        resetPreview()
         if (data?.filename && !replacementIntent.current) {
           replacementIntent.current = structuredClone({
             transforms: transforms ?? null,
@@ -177,6 +192,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
       transforms,
       uploadEdits,
       resetUploadEdits,
+      resetPreview,
       setTransforms,
       setUploadControlFile,
       setUploadControlFileName,
@@ -221,14 +237,16 @@ export const FileManager: React.FC<FileManagerProps> = ({
   })
 
   const handleReplaceFile = useCallback(() => {
+    resetPreview()
     replacementIntent.current = structuredClone({ transforms: transforms ?? null, uploadEdits })
     setRemovedFile(true)
     setFileSrc('')
     setFileUrl('')
     setSelectedSize(null)
-  }, [setFileUrl, transforms, uploadEdits])
+  }, [resetPreview, setFileUrl, transforms, uploadEdits])
 
   const handleCancelReplacement = useCallback(() => {
+    resetPreview()
     const intent = replacementIntent.current
     if (intent) {
       setTransforms(intent.transforms)
@@ -239,6 +257,9 @@ export const FileManager: React.FC<FileManagerProps> = ({
       resetUploadEdits()
     }
     replacementIntent.current = null
+    if (intent && data?.filename) {
+      void requestPreview({ transforms: intent.transforms })
+    }
     setValue(undefined)
     setRemovedFile(false)
     setFileSrc('')
@@ -249,6 +270,8 @@ export const FileManager: React.FC<FileManagerProps> = ({
     setUploadControlFile(null)
   }, [
     data?.filename,
+    requestPreview,
+    resetPreview,
     resetUploadEdits,
     setFileUrl,
     setTransforms,
@@ -264,8 +287,10 @@ export const FileManager: React.FC<FileManagerProps> = ({
       setModified(true)
       setTransforms(args)
       resetUploadEdits()
+      setSelectedSize(null)
+      void requestPreview({ file: value ?? undefined, transforms: args })
     },
-    [resetUploadEdits, setModified, setTransforms],
+    [requestPreview, resetUploadEdits, setModified, setTransforms, value],
   )
 
   // Reset states for when replacing the file with a new upload
@@ -276,12 +301,15 @@ export const FileManager: React.FC<FileManagerProps> = ({
     setFileSrc('')
   }, [data?.url, data?.filename])
 
+  const selectedFile = value instanceof File ? value : initialState?.file?.value
   useEffect(() => {
-    if (initialState?.file?.value instanceof File) {
-      setFileSrc(URL.createObjectURL(initialState.file.value))
-      setRemovedFile(false)
+    if (selectedFile instanceof File) {
+      setFileSrc(URL.createObjectURL(selectedFile))
+      if (!data?.filename) {
+        setRemovedFile(false)
+      }
     }
-  }, [initialState])
+  }, [data?.filename, selectedFile])
 
   useEffect(() => {
     return () => {
@@ -369,7 +397,12 @@ export const FileManager: React.FC<FileManagerProps> = ({
           slug={sizePreviewSlug}
           title={t('upload:sizesFor', { label: data.filename })}
         >
-          <PreviewSizes doc={data} imageCacheTag={imageCacheTag} uploadConfig={uploadConfig} />
+          <PreviewSizes
+            doc={data}
+            imageCacheTag={imageCacheTag}
+            previewSources={previewSources}
+            uploadConfig={uploadConfig}
+          />
         </Drawer>
       )}
       {uploadConfig?.pasteURL !== false && (
@@ -388,13 +421,16 @@ export const FileManager: React.FC<FileManagerProps> = ({
   const showUploadInput = Boolean(value) || removedFile || !uploadConfig?.hideFileInputOnCreate
 
   return (
-    <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
+    <div
+      aria-busy={isPreviewLoading}
+      className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}
+    >
       <FieldError message={errorMessage} path="filename" showError={showError} />
       <div className={`${baseClass}__panel`}>
         {data?.filename && !removedFile && (
           <FileToolbar
             filename={data.filename as string}
-            fileSrc={sidePanelFileSrc}
+            fileSrc={previewSources[selectedSize ?? 'default'] || sidePanelFileSrc}
             fileUrl={data?.url as string}
             hideRemoveFile={uploadConfig?.hideRemoveFile}
             isAdjustable={fileTypeIsAdjustable}
@@ -408,6 +444,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
               collectionSlug={collectionSlug}
               data={data as Record<string, unknown>}
               imageCacheTag={imageCacheTag}
+              previewSources={previewSources}
               selectedSize={selectedSize}
               selectedSizeData={selectedSizeData}
               setSelectedSize={setSelectedSize}
@@ -450,8 +487,13 @@ export const FileManager: React.FC<FileManagerProps> = ({
                     round
                     tooltip={t('general:cancel')}
                   />
-                  {renderSelectedFilePreview(fileSrc)}
+                  {renderSelectedFilePreview(previewSrc || fileSrc)}
                   <div className={`${baseClass}__file-adjustments`}>
+                    <UploadActions
+                      enableAdjustments={showCrop || showFocalPoint}
+                      enablePreviewSizes={false}
+                      mimeType={value.type}
+                    />
                     {/* Custom id so this editor doesn't collide with the hidden auto `filename` field. */}
                     <TextInput
                       id="field-filemanager-filename"
@@ -474,6 +516,10 @@ export const FileManager: React.FC<FileManagerProps> = ({
           ) : null}
         </div>
       </div>
+      <div role="status">
+        {isPreviewLoading ? t('general:loading') : previewSrc ? t('version:preview') : null}
+      </div>
+      {hasPreviewError && <div role="alert">{t('error:previewing')}</div>}
       {drawers}
     </div>
   )

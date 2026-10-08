@@ -19,7 +19,7 @@ const makeReq = ({ query = '' }: { query?: string } = {}): PayloadRequest =>
   ({
     headers: new Headers(),
     method: 'GET',
-    payload: { logger: { error: vi.fn() } },
+    payload: { collections: {}, logger: { error: vi.fn() } },
     searchParams: new URLSearchParams(query),
   }) as unknown as PayloadRequest
 
@@ -64,6 +64,33 @@ const getOutputMetadata = async (result: Awaited<ReturnType<typeof resizeReal>>)
   sharp(Buffer.from(await result.response!.arrayBuffer())).metadata()
 
 describe('createHandleRequest', () => {
+  it('should use converted source MIME when previewing a crop after another transformer', async () => {
+    const source = await makeSourceImage({ width: 12, height: 8 })
+    const handler = createHandleRequest({
+      sharpDependency: sharp,
+      dynamicDefaults: resolveSharpDynamicDefaults(),
+    })
+    const result = await handler({
+      collectionSlug: 'media',
+      doc: {
+        filename: 'poster.png',
+        mimeType: 'image/png',
+        original: { filename: 'original.mp4', mimeType: 'video/mp4' },
+        _transforms: { crop: { width: 5, height: 3, x: 0, y: 0 } },
+      },
+      originalDoc: {},
+      getSourceFile: () =>
+        Promise.resolve(new Response(source, { headers: { 'Content-Type': 'image/png' } })),
+      purpose: 'preview',
+      req: makeReq(),
+    })
+    const metadata = await getOutputMetadata(result)
+
+    expect(metadata.width).toBe(5)
+    expect(metadata.height).toBe(3)
+    expect(result.response!.headers.get('Content-Type')).toBe('image/png')
+  })
+
   it('should enforce saved limits independently of dynamic query settings', async () => {
     const source = await makeSourceImage({ width: 20, height: 10 })
     const handler = createHandleRequest({
