@@ -4,6 +4,7 @@ import { formatAdminURL } from 'payload/shared'
 
 import { TanStackLoginForm } from '../login/tanstack.js'
 import { TanStackLogoutButton } from '../logout/tanstack.js'
+import { TanStackMultipleCookies } from '../multiple-cookies/tanstack.js'
 import { TanStackRefreshToken } from '../refresh/tanstack.js'
 import { ServerFunctionsView } from './index.js'
 
@@ -27,6 +28,7 @@ export function TanStackServerFunctionsView({ initPageResult }: AdminViewServerP
 
   return (
     <ServerFunctionsView
+      cookies={<TanStackMultipleCookies />}
       isAuthenticated={Boolean(user)}
       login={<TanStackLoginForm dashboardURL={dashboardURL} />}
       logout={<TanStackLogoutButton loginURL={loginURL} />}

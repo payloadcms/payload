@@ -5,4 +5,5 @@
 // functions out of the manifest that serves the server-function RPC.
 import './server-functions/login/tanstackFunction.js'
 import './server-functions/logout/tanstackFunction.js'
+import './server-functions/multiple-cookies/tanstackFunction.js'
 import './server-functions/refresh/tanstackFunction.js'

@@ -534,17 +534,22 @@ describe('Auth', () => {
     })
 
     test('should preserve multiple cookies in a response', async () => {
-      const response = await page.request.get(`${serverURL}/api/set-two-cookies`)
-      const setCookieHeaders = response
-        .headersArray()
-        .filter(({ name }) => name.toLowerCase() === 'set-cookie')
-        .map(({ value }) => value)
+      await page.goto(formatAdminURL({ adminRoute, path: serverFunctionsPath, serverURL }))
 
-      expect(response.ok()).toBe(true)
-      expect(setCookieHeaders).toEqual([
-        'first-cookie=first-value; Path=/',
-        'second-cookie=second-value; Path=/',
-      ])
+      const responsePromise = page.waitForResponse(async (response) => {
+        const setCookieHeaders = await response.headerValues('set-cookie')
+
+        return setCookieHeaders.some((value) => value.startsWith('second-cookie='))
+      })
+
+      await page.getByRole('button', { name: 'Set multiple cookies' }).click()
+      const response = await responsePromise
+
+      await expect.poll(() => response.ok()).toBe(true)
+      await expect(page.getByRole('status').filter({ hasText: 'Cookies set' })).toBeVisible()
+      await expect
+        .poll(() => response.headerValues('set-cookie'))
+        .toEqual(['first-cookie=first-value; Path=/', 'second-cookie=second-value; Path=/'])
     })
 
     test('should log user out from logout server function', async () => {

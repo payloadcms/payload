@@ -4,6 +4,7 @@ import { formatAdminURL } from 'payload/shared'
 
 import { NextLoginForm } from '../login/next.js'
 import { NextLogoutButton } from '../logout/next.js'
+import { NextMultipleCookies } from '../multiple-cookies/next.js'
 import { NextRefreshToken } from '../refresh/next.js'
 import { ServerFunctionsView } from './index.js'
 
@@ -27,6 +28,7 @@ export function NextServerFunctionsView({ initPageResult }: AdminViewServerProps
 
   return (
     <ServerFunctionsView
+      cookies={<NextMultipleCookies />}
       isAuthenticated={Boolean(user)}
       login={<NextLoginForm dashboardURL={dashboardURL} />}
       logout={<NextLogoutButton loginURL={loginURL} />}

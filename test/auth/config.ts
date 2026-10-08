@@ -389,22 +389,6 @@ export default buildConfigWithDefaults({
         versions: false,
       },
     ],
-    endpoints: [
-      {
-        handler: async (req) => {
-          if (!req.server) {
-            throw new Error('Server adapter is not available')
-          }
-
-          await req.server.setCookie('first-cookie', 'first-value', { path: '/' })
-          await req.server.setCookie('second-cookie', 'second-value', { path: '/' })
-
-          return Response.json({ ok: true })
-        },
-        method: 'get',
-        path: '/set-two-cookies',
-      },
-    ],
     previousSecrets: [rotateSecretOldSecret],
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
