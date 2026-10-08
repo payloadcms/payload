@@ -283,11 +283,18 @@ test.describe('WCAG 2.2 Level AA', () => {
 
         await expect(items.first()).toBeVisible()
         for (const item of await items.all()) {
-          const label = (await item.locator('.column-selector__item-label').innerText()).trim()
+          const label = await item.locator('.column-selector__item-label').evaluate((element) =>
+            Array.from(element.childNodes)
+              .map((node) =>
+                node instanceof Element && node.classList.contains('column-selector__separator')
+                  ? ' > '
+                  : node.textContent,
+              )
+              .join('')
+              .trim(),
+          )
 
-          const snapshot = await item.getByRole('checkbox').ariaSnapshot()
-
-          expect.soft(snapshot.match(/^- checkbox "(.*?)"/)?.[1]).toBe(label)
+          await expect.soft(item.getByRole('checkbox')).toHaveAccessibleName(label)
         }
       })
     })
