@@ -92,7 +92,7 @@
     );
 
     /* Match the thumbnail, two text lines, padding, metadata gap, and card border. */
-    min-block-size: max(
+    --recents-content-height: max(
       calc(var(--spacer-6) * 5),
       calc(
         (var(--recents-card-width) - var(--stroke-width-small) * 2) * 3 / 4 +
@@ -100,6 +100,7 @@
           var(--stroke-width-small) * 2
       )
     );
+    min-block-size: var(--recents-content-height);
     position: relative;
   }
 
@@ -217,7 +218,7 @@
     align-items: center;
     justify-content: center;
     gap: var(--spacer-2);
-    min-height: calc(var(--spacer-6) * 5);
+    min-block-size: var(--recents-content-height);
     padding: var(--spacer-5) var(--spacer-3);
     border: var(--stroke-width-small) dashed var(--color-border);
     border-radius: var(--radius-large);
