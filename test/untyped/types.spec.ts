@@ -1,3 +1,4 @@
+import type { UploadData } from '@payloadcms/richtext-lexical'
 import type {
   DataFromCollectionSlug,
   Job,
@@ -59,6 +60,11 @@ describe('Untyped Payload types', () => {
     const doc = await payload.findGlobal({ slug: 'custom-global', draft: true })
 
     expect(doc).type.toBeAssignableTo<{ id: unknown }>()
+  })
+
+  test('should use the generic upload document fallback for UploadData', () => {
+    expect<Extract<UploadData['value'], object>>().type.toBe<JsonObject & TypeWithID>()
+    expect<Extract<UploadData['value'], number | string>>().type.toBe<number | string>()
   })
 
   test('should expose managed and generic collection fallbacks', () => {

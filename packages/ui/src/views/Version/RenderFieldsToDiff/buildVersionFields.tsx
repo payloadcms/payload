@@ -520,10 +520,6 @@ const buildVersionField = ({
       CustomComponent: undefined,
     },
     /**
-     * TODO: Change to valueFrom in 4.0
-     */
-    comparisonValue: valueFrom,
-    /**
      * @deprecated remove in 4.0. Each field should handle its own diffing logic
      */
     diffMethod: 'diffWordsWithSpace',
@@ -533,10 +529,8 @@ const buildVersionField = ({
     parentIsLocalized,
 
     nestingLevel: nestingLevel ? nestingLevel : undefined,
-    /**
-     * TODO: Change to valueTo in 4.0
-     */
-    versionValue: valueTo,
+    valueFrom,
+    valueTo,
   }
   if (locale) {
     clientDiffProps.locale = locale

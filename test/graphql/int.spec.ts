@@ -2,11 +2,9 @@ import type { GraphQLInputObjectType } from 'graphql'
 
 import { configToSchema } from '@payloadcms/graphql'
 import { GraphQLNonNull } from 'graphql'
-import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { handleGraphQL } from '../../packages/tanstack-start/src/routes/graphql/handler.server.js'
 import { test } from '../__helpers/int/vitest.js'
 import { idToString } from '../__helpers/shared/idToString.js'
 
@@ -18,33 +16,17 @@ test.suite('graphql', { config: './config.ts' }, () => {
       payload.config.graphQL.disable = true
 
       try {
-        const body = JSON.stringify({
-          query: `query {
-            Posts {
-              docs {
-                id
-              }
+        const response = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({
+            query: `query {
+          Posts {
+            docs {
+              id
             }
-          }`,
+          }
+        }`,
+          }),
         })
-        const response =
-          process.env.PAYLOAD_FRAMEWORK === 'tanstack-start'
-            ? await handleGraphQL({
-                config: payload.config,
-                request: new Request(
-                  formatAdminURL({
-                    apiRoute: payload.config.routes.api,
-                    path: payload.config.routes.graphQL as `/${string}`,
-                    serverURL: restClient.serverURL,
-                  }),
-                  {
-                    body,
-                    headers: { 'Content-Type': 'application/json' },
-                    method: 'POST',
-                  },
-                ),
-              })
-            : await restClient.GRAPHQL_POST({ body })
 
         expect(response.status).toBe(404)
       } finally {

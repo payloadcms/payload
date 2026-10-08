@@ -32,13 +32,11 @@ export async function getLayoutData({
 }: GetLayoutDataArgs): Promise<RootLayoutData> {
   const context = await initAdminContext({ configPromise, importMap })
 
-  const { cookies, headers, languageCode, permissions, req, user } = context
+  const { cookies, permissions, req, user } = context
 
   const data = await getRootLayoutData({
     cookies,
-    headers,
     importMap,
-    languageCode,
     permissions,
     req,
     user,
