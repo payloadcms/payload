@@ -124,7 +124,7 @@ export function createPrepareLegacyUpload({
       }
 
       const sizeResults = await mapWithBoundedConcurrency(variants, async (rawConfig) => {
-        const imageResizeConfig = sanitizeResizeConfig(rawConfig)
+        const imageResizeConfig = { ...sanitizeResizeConfig(rawConfig) }
         const variantSource = variantSources?.get(mainResultFile) ?? mainResultFile
 
         if (variantSource !== mainResultFile && !imageResizeConfig.formatOptions) {

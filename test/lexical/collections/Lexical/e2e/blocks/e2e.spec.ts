@@ -1391,21 +1391,18 @@ describe('lexicalBlocks', () => {
 
       const codeEditor = page.locator('.code-editor')
 
+      await expect(codeEditor.locator('.monaco-editor')).toBeVisible()
       await codeEditor.scrollIntoViewIfNeeded()
       await expect(codeEditor).toBeVisible()
 
-      const height = (await codeEditor.boundingBox())?.height
-
-      await expect(() => {
-        expect(height).toBeGreaterThanOrEqual(48) // MIN_HEIGHT
-      }).toPass()
+      await expect
+        .poll(async () => (await codeEditor.boundingBox())?.height)
+        .toBeGreaterThanOrEqual(48) // MIN_HEIGHT
+      const height = (await codeEditor.boundingBox())!.height
       await codeEditor.click()
       await page.keyboard.press('Enter')
 
-      const height2 = (await codeEditor.boundingBox())?.height
-      await expect(() => {
-        expect(height2).toBe(height + 16) // LINE_HEIGHT = 16
-      }).toPass()
+      await expect.poll(async () => (await codeEditor.boundingBox())?.height).toBe(height + 16) // LINE_HEIGHT = 16
     })
 
     test('ensure nested lexical field displays field label and description', async () => {

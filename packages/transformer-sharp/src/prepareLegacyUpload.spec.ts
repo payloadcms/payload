@@ -50,6 +50,53 @@ const runPrepareUpload = async ({
 const variants = [{ name: 'card', height: 200, width: 400 }]
 
 describe('createPrepareLegacyUpload', () => {
+  it('should preserve shared variant configuration across uploads with different output formats', async () => {
+    const input = await sharp({ create: { width: 64, height: 48, channels: 3, background: 'red' } })
+      .jpeg()
+      .toBuffer()
+    const file = new File([input], 'source.jpg', { type: 'image/jpeg' })
+    const sharedVariants = [{ name: 'card', width: 16, height: 12 }]
+    const transformer = sharpTransformer({
+      collections: {
+        png: { formatOptions: { format: 'png' }, variants: sharedVariants },
+        jpeg: { variants: sharedVariants },
+      },
+    })
+    const req = makeReq({ focalPoint: false })
+    const results = []
+
+    for (const collectionSlug of ['png', 'jpeg']) {
+      results.push(
+        await getUploadTransformerInternal(transformer).prepareUpload({
+          collectionSlug,
+          doc: {},
+          file,
+          req,
+          transform: async (task) => {
+            const sourceFile = task.file ?? file
+            const result = await transformer.transformFile({
+              source: createFileSource({ file: sourceFile }),
+              doc: {},
+              originalDoc: {},
+              options: task.options,
+              req,
+            })
+
+            return result.file ?? sourceFile
+          },
+        }),
+      )
+    }
+
+    expect(results[0].find(({ fieldPath }) => fieldPath === 'variants.card').file.type).toBe(
+      'image/png',
+    )
+    expect(results[1].find(({ fieldPath }) => fieldPath === 'variants.card').file.type).toBe(
+      'image/jpeg',
+    )
+    expect(sharedVariants).toEqual([{ name: 'card', width: 16, height: 12 }])
+  })
+
   it.each([false, true])(
     'should encode variants once while preserving main geometry (resize: %s)',
     async (shouldResizeMain) => {
