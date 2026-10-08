@@ -10,8 +10,10 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
+import { NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { hasVersionsEnabled } from '../../utilities/getVersionsConfig.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
@@ -38,6 +40,10 @@ export type Arguments = {
 export const findVersionsOperation = async <TData extends TypeWithVersion<TData>>(
   args: Arguments,
 ): Promise<PaginatedDocs<TData>> => {
+  if (!hasVersionsEnabled(args.collection.config)) {
+    throw new NotFound(args.req!.t)
+  }
+
   try {
     // /////////////////////////////////////
     // beforeOperation - Collection
