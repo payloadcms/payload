@@ -16,6 +16,7 @@ type SharedFileDetailsProps = {
   hasImageSizes?: boolean
   hideRemoveFile?: boolean
   imageCacheTag?: false | string
+  previewSrc?: string
   uploadConfig: SanitizedCollectionConfig['upload']
 }
 

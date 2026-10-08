@@ -18,6 +18,7 @@ const baseClass = 'file-preview'
 type Props = {
   readonly data: Record<string, unknown>
   readonly imageCacheTag?: false | string
+  readonly previewSources?: Record<string, string>
   readonly selectedSize?: null | string
   readonly selectedSizeData?: null | Record<string, unknown>
   readonly setSelectedSize: (size: null | string) => void
@@ -27,6 +28,7 @@ export const FilePreview: React.FC<Props> = ({
   collectionSlug,
   data,
   imageCacheTag,
+  previewSources,
   selectedSize,
   selectedSizeData,
   setSelectedSize,
@@ -41,6 +43,28 @@ export const FilePreview: React.FC<Props> = ({
   const fileSrc = (selectedSizeData?.url ?? data?.thumbnailURL ?? data?.url ?? null) as
     | null
     | string
+
+  const previewData = React.useMemo(
+    () =>
+      previewSources?.default
+        ? {
+            ...data,
+            url: previewSources.default,
+            variants: Object.fromEntries(
+              Object.entries(previewSources)
+                .filter(([name]) => name !== 'default')
+                .map(([name, url]) => [
+                  name,
+                  {
+                    ...((data.variants as Record<string, Record<string, unknown>>)?.[name] ?? {}),
+                    url,
+                  },
+                ]),
+            ),
+          }
+        : data,
+    [data, previewSources],
+  )
 
   const originalUrl = data?.url as string | undefined
   const nativePreviewSrc = originalUrl ? appendCacheTag(originalUrl, imageCacheTag) : undefined
@@ -64,7 +88,7 @@ export const FilePreview: React.FC<Props> = ({
         className={`${baseClass}__thumbnail`}
         collectionSlug={collectionSlug}
         doc={selectedSizeData || data}
-        fileSrc={fileSrc}
+        fileSrc={previewSources?.[selectedSize ?? 'default'] || fileSrc}
         imageCacheTag={imageCacheTag}
         size="expand"
         uploadConfig={uploadConfig}
@@ -73,6 +97,9 @@ export const FilePreview: React.FC<Props> = ({
   }
 
   const metaString = (() => {
+    if (previewSources?.[selectedSize ?? 'default']) {
+      return t('version:preview')
+    }
     const w = (selectedSizeData?.width ?? data?.width) as number | undefined
     const h = (selectedSizeData?.height ?? data?.height) as number | undefined
     const parts: string[] = []
@@ -92,7 +119,7 @@ export const FilePreview: React.FC<Props> = ({
     <div className={baseClass}>
       {hasVariants && isImageFile && (
         <MiniCarousel
-          doc={data}
+          doc={previewData}
           imageCacheTag={imageCacheTag}
           onSelect={setSelectedSize}
           selectedSize={selectedSize}

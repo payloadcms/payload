@@ -100,12 +100,14 @@ export function sharpTransformer(
         }
       }
 
-      if (args.purpose === 'persisted-default') {
+      if (args.purpose === 'persisted-default' || args.purpose === 'preview') {
         const handledTransformKeys = Object.keys(args.doc._transforms ?? {}).filter((key) =>
           sharpTransformKeys.includes(key),
         )
 
-        return handledTransformKeys.length ? { canTransform: true, handledTransformKeys } : false
+        return handledTransformKeys.length || args.purpose === 'preview'
+          ? { canTransform: true, handledTransformKeys }
+          : false
       }
 
       if (

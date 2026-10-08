@@ -1,7 +1,7 @@
 import type { Collection } from '../../collections/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { ResolvedUploadDocument } from './resolveUploadDocument.js'
-import type { PlannedTransformer, UploadDocument, UploadTransformer } from './types.js'
+import type { FileSource, PlannedTransformer, UploadDocument, UploadTransformer } from './types.js'
 
 import { Forbidden } from '../../errors/Forbidden.js'
 import { NotFound } from '../../errors/NotFound.js'
@@ -33,14 +33,23 @@ export async function handleDynamicFileRequest({
   collection,
   filename,
   prefix,
+  preview,
   req,
 }: {
   collection: Collection
   filename: string
   prefix?: string
+  /** Internal preview input. The caller must authorize the document and source first. */
+  preview?: {
+    document: ResolvedUploadDocument
+    isNewFile?: boolean
+    source: FileSource
+    transforms: unknown
+  }
   req: PayloadRequest
 }): Promise<Response> {
-  const resolvedDocument = await resolveUploadDocument({ collection, filename, prefix, req })
+  const resolvedDocument =
+    preview?.document ?? (await resolveUploadDocument({ collection, filename, prefix, req }))
 
   if (!resolvedDocument) {
     // There's no mimeType to plan a pipeline from, so both access modes must pass
@@ -56,7 +65,11 @@ export async function handleDynamicFileRequest({
     throw new NotFound(req.t)
   }
 
-  if (resolvedDocument.original?.filename === filename && resolvedDocument.filename !== filename) {
+  if (
+    !preview &&
+    resolvedDocument.original?.filename === filename &&
+    resolvedDocument.filename !== filename
+  ) {
     const permittedDocument = await withFileTransformAccessContext({
       callback: () => checkFileAccess({ collection, filename, prefix, req }),
       isTransform: false,
@@ -72,13 +85,31 @@ export async function handleDynamicFileRequest({
     })
   }
 
-  const { doc, document, hasPersistedWork, originalDoc, pipeline } = await authorizeDocument({
-    collection,
-    filename,
-    prefix,
-    req,
-    resolvedDocument,
-  })
+  const previewDoc = preview ? structuredClone(resolvedDocument) : undefined
+  if (previewDoc) {
+    validateTransformState({
+      collectionSlug: collection.config.slug,
+      doc: previewDoc,
+      req,
+      value: preview!.transforms,
+    })
+    previewDoc._transforms = preview!.transforms as ResolvedUploadDocument['_transforms']
+  }
+  const { doc, document, hasPersistedWork, originalDoc, pipeline } = previewDoc
+    ? {
+        doc: previewDoc,
+        document: resolvedDocument,
+        hasPersistedWork: true,
+        originalDoc: createDocumentSnapshot({ doc: resolvedDocument }),
+        pipeline: [] as PlannedTransformer[],
+      }
+    : await authorizeDocument({
+        collection,
+        filename,
+        prefix,
+        req,
+        resolvedDocument,
+      })
 
   const planPipeline = ({
     mimeType,
@@ -86,13 +117,13 @@ export async function handleDynamicFileRequest({
     transformers,
   }: {
     mimeType: string
-    purpose: 'persisted-default' | 'request-override'
+    purpose: 'persisted-default' | 'preview' | 'request-override'
     transformers?: UploadTransformer[]
   }) => planRequestPipeline({ collection, doc, mimeType, originalDoc, purpose, req, transformers })
   const persistedPipeline = hasPersistedWork
     ? await planPipeline({
         mimeType: doc.original?.mimeType ?? doc.mimeType ?? 'application/octet-stream',
-        purpose: 'persisted-default',
+        purpose: preview ? 'preview' : 'persisted-default',
       })
     : []
 
@@ -103,13 +134,20 @@ export async function handleDynamicFileRequest({
   const createOriginalSource = () =>
     createLazySourceGetter({
       retrieve: () =>
-        getSourceFileResponse({
-          collection,
-          document,
-          filename: document.original?.filename ?? document.filename,
-          prefix,
-          req,
-        }),
+        preview
+          ? preview.source
+              .stream()
+              .then(
+                (body) =>
+                  new Response(body, { headers: { 'Content-Type': preview.source.mimeType } }),
+              )
+          : getSourceFileResponse({
+              collection,
+              document,
+              filename: document.original?.filename ?? document.filename,
+              prefix,
+              req,
+            }),
     })
   const source = hasPersistedWork
     ? createOriginalSource()
@@ -117,7 +155,10 @@ export async function handleDynamicFileRequest({
         retrieve: () => getSourceFileResponse({ collection, document, filename, prefix, req }),
       })
   const phases = [
-    { pipeline: persistedPipeline, purpose: 'persisted-default' as const },
+    {
+      pipeline: persistedPipeline,
+      purpose: preview ? ('preview' as const) : ('persisted-default' as const),
+    },
     { pipeline, purpose: 'request-override' as const },
   ]
 
@@ -207,12 +248,15 @@ export async function handleDynamicFileRequest({
 
   try {
     for (const phase of phases) {
+      if (preview && phase.purpose === 'request-override') {
+        continue
+      }
       if (phase.purpose === 'request-override' && currentMimeType !== initialOverrideMimeType) {
         phase.pipeline = await planPipeline({ mimeType: currentMimeType, purpose: phase.purpose })
       }
       const phaseMimeType = currentMimeType
       const stages =
-        phase.purpose === 'persisted-default'
+        phase.purpose !== 'request-override'
           ? phase.pipeline.map((planned) => ({ planned, transformer: planned.transformer }))
           : (req.payload.config.upload.transformers.length
               ? req.payload.config.upload.transformers
@@ -334,7 +378,7 @@ export async function handleDynamicFileRequest({
               ? await planPipeline({ mimeType: currentMimeType, purpose: 'request-override' })
               : []
           if (
-            phase.purpose === 'persisted-default' &&
+            phase.purpose !== 'request-override' &&
             (stages.slice(index + 1).some(({ planned }) => planned?.handledTransformKeys?.length) ||
               pendingOverrides.length > 0)
           ) {
@@ -346,7 +390,7 @@ export async function handleDynamicFileRequest({
           return finalize({ response: currentResponse! })
         }
       }
-      if (phase.purpose === 'persisted-default' && hasPersistedWork) {
+      if (phase.purpose !== 'request-override' && hasPersistedWork) {
         validateTransformState({ doc, req, shouldValidateEncoding: true, value: doc._transforms })
       }
     }
@@ -368,6 +412,22 @@ export async function handleDynamicFileRequest({
 
   // No transformer produced a response — serve the original file through the
   // normal path (Range/ETag/redirect support, existing `modifyResponseHeaders` order).
+  if (preview) {
+    if (!preview.isNewFile) {
+      await withFileTransformAccessContext({
+        callback: () =>
+          checkFileAccess({
+            collection,
+            documentID: document.id,
+            filename: document.original?.filename ?? filename,
+            req,
+          }),
+        isTransform: false,
+        req,
+      })
+    }
+    return finalizeFileResponse({ collection, req, response: await createOriginalSource().get() })
+  }
   return retrieveFileResponse({ collection, doc: document, filename, prefix, req })
 }
 
@@ -461,7 +521,7 @@ function planRequestPipeline({
   doc: UploadDocument
   mimeType: string
   originalDoc: Readonly<UploadDocument>
-  purpose?: 'persisted-default' | 'request-override'
+  purpose?: 'persisted-default' | 'preview' | 'request-override'
   req: PayloadRequest
   transformers?: UploadTransformer[]
 }): Promise<PlannedTransformer[]> {

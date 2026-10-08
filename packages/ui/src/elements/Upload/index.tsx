@@ -27,6 +27,7 @@ import { getEditorFileSrc } from './getEditorFileSrc.js'
 import { pasteURLDrawerSlug, UploadFromURLModal } from './UploadFromURLModal/index.js'
 import { usePasteFromClipboard } from './usePasteFromClipboard.js'
 import { useUploadFromUrl } from './useUploadFromUrl.js'
+import { useUploadPreview } from './useUploadPreview.js'
 
 export { pasteURLDrawerSlug }
 
@@ -161,7 +162,20 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
 
   const { t } = useTranslation()
   const { setModified } = useForm()
-  const { data, docPermissions } = useDocumentInfo()
+  const { id, data, docPermissions } = useDocumentInfo()
+  const {
+    hasPreviewError,
+    isPreviewLoading,
+    previewSources,
+    previewSrc,
+    requestPreview,
+    resetPreview,
+  } = useUploadPreview({
+    id,
+    collectionSlug,
+    updatedAt: data?.updatedAt,
+    variants: uploadConfig.variants,
+  })
   const isFormSubmitting = useFormProcessing()
   const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',
@@ -180,6 +194,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
   const handleFileChange = useCallback(
     ({ file, isNewFile = true }: { file: File | null; isNewFile?: boolean }) => {
       if (isNewFile) {
+        resetPreview()
         setTransforms(null)
         resetUploadEdits()
       }
@@ -199,6 +214,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
     [
       onChange,
       resetUploadEdits,
+      resetPreview,
       setTransforms,
       setValue,
       setUploadControlFile,
@@ -277,8 +293,9 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
       setModified(true)
       setTransforms(args)
       resetUploadEdits()
+      void requestPreview({ file: value ?? undefined, transforms: args })
     },
-    [resetUploadEdits, setModified, setTransforms],
+    [requestPreview, resetUploadEdits, setModified, setTransforms, value],
   )
 
   useEffect(() => {
@@ -360,7 +377,12 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
           slug={sizePreviewSlug}
           title={t('upload:sizesFor', { label: data.filename })}
         >
-          <PreviewSizes doc={data} imageCacheTag={imageCacheTag} uploadConfig={uploadConfig} />
+          <PreviewSizes
+            doc={data}
+            imageCacheTag={imageCacheTag}
+            previewSources={previewSources}
+            uploadConfig={uploadConfig}
+          />
         </Drawer>
       )}
       {uploadConfig?.pasteURL !== false && (
@@ -375,7 +397,10 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
   )
 
   return (
-    <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
+    <div
+      aria-busy={isPreviewLoading}
+      className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}
+    >
       <FieldError message={errorMessage} showError={showError} />
       {data && data.filename && !removedFile && (
         <FileDetails
@@ -387,6 +412,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
           hasImageSizes={hasVariants}
           hideRemoveFile={uploadConfig.hideRemoveFile}
           imageCacheTag={imageCacheTag}
+          previewSrc={previewSrc}
           uploadConfig={uploadConfig}
         />
       )}
@@ -451,7 +477,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
               <div className={`${baseClass}__thumbnail-wrap`}>
                 <Thumbnail
                   collectionSlug={collectionSlug}
-                  fileSrc={isImage(value.type) ? fileSrc : null}
+                  fileSrc={isImage(value.type) ? previewSrc || fileSrc : null}
                 />
               </div>
               <div className={`${baseClass}__file-adjustments`}>
@@ -472,6 +498,10 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
           )}
         </div>
       )}
+      <div role="status">
+        {isPreviewLoading ? t('general:loading') : previewSrc ? t('version:preview') : null}
+      </div>
+      {hasPreviewError && <div role="alert">{t('error:previewing')}</div>}
       {drawers}
     </div>
   )

@@ -39,6 +39,7 @@ type PreviewSizeCardProps = {
   name: string
   onClick?: () => void
   previewSrc: string
+  shouldShowMeta?: boolean
 }
 const PreviewSizeCard: React.FC<PreviewSizeCardProps> = ({
   name,
@@ -47,6 +48,7 @@ const PreviewSizeCard: React.FC<PreviewSizeCardProps> = ({
   meta,
   onClick,
   previewSrc,
+  shouldShowMeta = true,
 }) => {
   return (
     <div
@@ -70,7 +72,7 @@ const PreviewSizeCard: React.FC<PreviewSizeCardProps> = ({
       </div>
       <div className={`${baseClass}__sizeMeta`}>
         <div className={`${baseClass}__sizeName`}>{name}</div>
-        <FileMeta {...meta} />
+        {shouldShowMeta && <FileMeta {...meta} />}
       </div>
     </div>
   )
@@ -81,22 +83,40 @@ export type PreviewSizesProps = {
     variants?: FilesSizesWithUrl
   } & Data
   imageCacheTag?: false | string
+  previewSources?: Record<string, string>
   uploadConfig: SanitizedCollectionConfig['upload']
 }
 
-export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, uploadConfig }) => {
+export const PreviewSizes: React.FC<PreviewSizesProps> = ({
+  doc,
+  imageCacheTag,
+  previewSources,
+  uploadConfig,
+}) => {
   const { variants } = uploadConfig
   const { variants: sizes } = doc
 
   const alt = (doc as { alt?: string })?.alt || doc.filename || ''
 
+  const effectiveSizes = useMemo(
+    () =>
+      previewSources?.default
+        ? Object.fromEntries(
+            Object.entries(previewSources)
+              .filter(([name]) => name !== 'default')
+              .map(([name, url]) => [name, { ...sizes?.[name], url } as FileInfo]),
+          )
+        : sizes,
+    [previewSources, sizes],
+  )
+
   const [orderedSizes, setOrderedSizes] = useState<FilesSizesWithUrl>(() =>
-    sortSizes(sizes, variants),
+    sortSizes(effectiveSizes, variants),
   )
   const [selectedSize, setSelectedSize] = useState<null | string>(null)
 
   const generateImageUrl = (doc) => {
-    if (!doc.filename) {
+    if (!doc?.filename) {
       return null
     }
     if (doc.url) {
@@ -104,12 +124,23 @@ export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, 
     }
   }
   useEffect(() => {
-    setOrderedSizes(sortSizes(sizes, variants))
-  }, [sizes, variants, imageCacheTag])
+    setOrderedSizes(sortSizes(effectiveSizes, variants))
+  }, [effectiveSizes, variants, imageCacheTag])
 
-  const mainPreviewSrc = selectedSize
-    ? generateImageUrl(doc.variants[selectedSize])
-    : generateImageUrl(doc)
+  useEffect(() => {
+    if (
+      selectedSize &&
+      !(previewSources?.default ? previewSources[selectedSize] : sizes?.[selectedSize]?.url)
+    ) {
+      setSelectedSize(null)
+    }
+  }, [previewSources, selectedSize, sizes])
+
+  const mainPreviewSrc = previewSources?.default
+    ? previewSources[selectedSize ?? 'default'] || previewSources.default
+    : selectedSize
+      ? generateImageUrl(doc.variants?.[selectedSize]) || generateImageUrl(doc)
+      : generateImageUrl(doc)
 
   const originalImage = useMemo(
     (): FileInfo => ({
@@ -129,7 +160,9 @@ export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, 
       <div className={`${baseClass}__imageWrap`}>
         <div className={`${baseClass}__meta`}>
           <div className={`${baseClass}__sizeName`}>{selectedSize || originalFilename}</div>
-          <FileMeta {...(selectedSize ? orderedSizes[selectedSize] : originalImage)} />
+          {!previewSources?.default && (
+            <FileMeta {...(selectedSize ? orderedSizes[selectedSize] : originalImage)} />
+          )}
         </div>
         <img alt={alt} className={`${baseClass}__preview`} src={mainPreviewSrc} />
       </div>
@@ -141,12 +174,13 @@ export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, 
             meta={originalImage}
             name={originalFilename}
             onClick={() => setSelectedSize(null)}
-            previewSrc={generateImageUrl(doc)}
+            previewSrc={previewSources?.default || generateImageUrl(doc)}
+            shouldShowMeta={!previewSources?.default}
           />
 
           {Object.entries(orderedSizes).map(([key, val]) => {
             const selected = selectedSize === key
-            const previewSrc = generateImageUrl(val)
+            const previewSrc = previewSources?.default ? previewSources[key] : generateImageUrl(val)
 
             if (previewSrc) {
               return (
@@ -158,6 +192,7 @@ export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, 
                   name={key}
                   onClick={() => setSelectedSize(key)}
                   previewSrc={previewSrc}
+                  shouldShowMeta={!previewSources?.default}
                 />
               )
             }

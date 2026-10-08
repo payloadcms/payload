@@ -27,7 +27,9 @@ export async function planTransformerPipeline({
   const hasSavedWork =
     args.doc._transforms &&
     Object.keys(args.doc._transforms).length &&
-    (args.operation === 'upload' || args.purpose === 'persisted-default')
+    (args.operation === 'upload' ||
+      args.purpose === 'persisted-default' ||
+      args.purpose === 'preview')
   const candidates = hasSavedWork
     ? transformers.filter((transformer) => typeof transformer[capability] === 'function')
     : getCandidateTransformers({
