@@ -44,7 +44,6 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     showHiddenFields,
   } = args
 
-  // Entities without versions have no versions table/collection in the database adapter.
   if (!hasVersionsEnabled(globalConfig)) {
     if (disableErrors) {
       return null!

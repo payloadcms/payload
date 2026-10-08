@@ -40,8 +40,6 @@ export type Arguments = {
 export const findVersionsOperation = async <TData extends TypeWithVersion<TData>>(
   args: Arguments,
 ): Promise<PaginatedDocs<TData>> => {
-  // Entities without versions have no versions table/collection in the database adapter,
-  // so querying it would crash (e.g. a TypeError in the drizzle adapter → HTTP 500).
   if (!hasVersionsEnabled(args.collection.config)) {
     throw new NotFound(args.req!.t)
   }
