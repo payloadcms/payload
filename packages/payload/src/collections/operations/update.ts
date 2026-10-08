@@ -436,9 +436,8 @@ export const updateOperation = async <
             // Branch updates need a transaction per result so a caught document failure can roll back
             // its fork without removing successful documents from the same bulk operation.
             if (
-              !args.disableTransaction &&
-              (req.payload.db.bulkOperationsSingleTransaction ||
-                shouldUsePerDocumentBranchTransactions)
+              req.payload.db.bulkOperationsSingleTransaction ||
+              (!args.disableTransaction && shouldUsePerDocumentBranchTransactions)
             ) {
               docShouldCommit = await initTransaction(documentReq)
             }

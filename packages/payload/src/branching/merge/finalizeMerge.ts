@@ -171,23 +171,26 @@ export const finalizeMergeAfterCommit = async ({
                   collection: collectionConfig,
                   req,
                 })
-
-                if (!collectionConfig.upload.fileOperations) {
-                  await collectionConfig.upload.deleteFiles?.({
-                    req,
-                    retainedDoc: uploadCleanupPlan.retainedDoc,
-                    sourceDoc,
-                  })
-                }
               } else {
                 await deleteUploadFilesExclusiveToDocument({
                   collectionConfig,
                   config: payload.config,
+                  deleteFromAdapter: false,
                   req,
                   retainedDoc: uploadCleanupPlan.retainedDoc,
                   sourceDoc,
                 })
               }
+            }
+
+            const legacyCleanupSourceDoc = uploadCleanupPlan.sourceDocs[0]
+
+            if (!collectionConfig.upload.fileOperations && legacyCleanupSourceDoc) {
+              await collectionConfig.upload.deleteFiles?.({
+                req,
+                retainedDoc: uploadCleanupPlan.retainedDoc,
+                sourceDoc: legacyCleanupSourceDoc,
+              })
             }
           } catch (error) {
             cleanupError = getMergeErrorMessage({ error })

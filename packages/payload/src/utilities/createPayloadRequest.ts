@@ -5,10 +5,12 @@ import { peekResolvedBranch, resetBranchState } from '../branching/resolveBranch
 import { MAIN_BRANCH } from '../branching/types.js'
 import { getDataLoader } from '../collections/dataloader.js'
 import { getLocalI18n } from '../translations/getLocalI18n.js'
+import { shareFileOperationScope } from '../uploads/fileVersioning/fileOperationManager.js'
 import { sanitizeFallbackLocale } from '../utilities/sanitizeFallbackLocale.js'
 import { isolateObjectProperty } from './isolateObjectProperty.js'
 import {
   createIsolatedDeferredCleanupContext,
+  deferredCleanupScopeContextKey,
   hasActiveDeferredCleanupScope,
 } from './transactionCallbacks.js'
 
@@ -123,10 +125,15 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
 }): Promise<PayloadRequest> => {
   const localization = payload.config?.localization
   let shouldCreateIsolatedDataLoader = false
+  let parentOperationReq: PayloadRequest | undefined
 
   if (hasActiveDeferredCleanupScope({ req })) {
+    parentOperationReq = req as PayloadRequest
+    const parentCleanupScope = req.context![deferredCleanupScopeContextKey]
+
     req = isolateObjectProperty(req, 'context')
     req.context = createIsolatedDeferredCleanupContext({ req })
+    req.context[deferredCleanupScopeContextKey] = parentCleanupScope
   }
 
   if (localization) {
@@ -180,6 +187,10 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
     } else {
       delete (req.context as Record<string, unknown>)._branchBypass
     }
+  }
+
+  if (parentOperationReq && req !== parentOperationReq) {
+    shareFileOperationScope({ owner: parentOperationReq, req: req as PayloadRequest })
   }
 
   req.payloadAPI = req?.payloadAPI || 'local'

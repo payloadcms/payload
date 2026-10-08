@@ -1,4 +1,5 @@
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
+import fs from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
@@ -121,9 +122,28 @@ export default buildConfigWithDefaults({
           [mergeSecurityCloudUploadsSlug]: {
             adapter: () => ({
               name: 'merge-security-cloud-storage',
+              copyFile: async ({ from, to }) => {
+                await fs.copyFile(
+                  path.resolve(mergeSecurityCloudUploadsDirectory, path.basename(from)),
+                  path.resolve(mergeSecurityCloudUploadsDirectory, path.basename(to)),
+                  fs.constants.COPYFILE_EXCL,
+                )
+              },
+              deleteFile: ({ storageFilePath }) =>
+                fs.rm(
+                  path.resolve(mergeSecurityCloudUploadsDirectory, path.basename(storageFilePath)),
+                  { force: true },
+                ),
               handleDelete: () => undefined,
-              handleUpload: ({ file }) => {
+              handleUpload: async ({ file, storageFilePath }) => {
                 mergeSecuritySpy.cloudUploadContents.push(file.buffer.toString('utf8'))
+                const targetPath = path.resolve(
+                  mergeSecurityCloudUploadsDirectory,
+                  path.basename(storageFilePath),
+                )
+
+                await fs.mkdir(path.dirname(targetPath), { recursive: true })
+                await fs.writeFile(targetPath, file.buffer)
               },
               staticHandler: () => new Response('Not found', { status: 404 }),
             }),

@@ -66,6 +66,7 @@ import {
   beginDeferredCleanupScope,
   clearDeferredCleanupScope,
   flushDeferredCleanupScopeAfterOperation,
+  hasActiveDeferredCleanupScope,
 } from '../../utilities/transactionCallbacks.js'
 import {
   getAllLocalesPublicationStatus,
@@ -197,12 +198,16 @@ const updateByIDOperationWithLifecycle = async <
         didReachFinalCommit = false
         isRetrySafe = false
 
-        const retryRequest = hasCallerTransaction
-          ? undefined
-          : await createOperationRetryRequest({
-              copyFileTempPath: shouldIsolateTempFile,
-              req: incomingArgs.req,
-            })
+        const shouldReuseParentRequest =
+          incomingArgs.disableTransaction &&
+          hasActiveDeferredCleanupScope({ req: incomingArgs.req })
+        const retryRequest =
+          hasCallerTransaction || shouldReuseParentRequest
+            ? undefined
+            : await createOperationRetryRequest({
+                copyFileTempPath: shouldIsolateTempFile,
+                req: incomingArgs.req,
+              })
 
         isRetrySafe = retryRequest?.isRetrySafe ?? false
         const attemptArgs = retryRequest

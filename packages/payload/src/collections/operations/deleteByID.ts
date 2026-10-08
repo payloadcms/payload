@@ -59,6 +59,7 @@ import {
   beginDeferredCleanupScope,
   clearDeferredCleanupScope,
   flushDeferredCleanupScopeAfterOperation,
+  hasActiveDeferredCleanupScope,
 } from '../../utilities/transactionCallbacks.js'
 import { markTransactionWrite } from '../../utilities/transactionMutationTracker.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
@@ -124,9 +125,12 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       didReachFinalCommit = false
       isRetrySafe = false
 
-      const retryRequest = hasCallerTransaction
-        ? undefined
-        : await createOperationRetryRequest({ req: incomingArgs.req })
+      const shouldReuseParentRequest =
+        incomingArgs.disableTransaction && hasActiveDeferredCleanupScope({ req: incomingArgs.req })
+      const retryRequest =
+        hasCallerTransaction || shouldReuseParentRequest
+          ? undefined
+          : await createOperationRetryRequest({ req: incomingArgs.req })
 
       isRetrySafe = retryRequest?.isRetrySafe ?? false
       const attemptArgs = retryRequest

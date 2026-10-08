@@ -420,6 +420,12 @@ export const generateFileData = async <T>({
     const hasReusableOriginalMain = Boolean(
       isResettingCrop && !fileWasTransformed && retainedOriginal,
     )
+    const hasReusableCurrentMain = Boolean(
+      !hasReusableOriginalMain &&
+        !fileWasTransformed &&
+        retainedOriginal &&
+        currentFileData?.filename,
+    )
     if (hasReusableOriginalMain && !hasFocalPointChange && retainedOriginal) {
       return {
         data: {
@@ -519,6 +525,8 @@ export const generateFileData = async <T>({
 
     if (hasReusableOriginalMain) {
       fsSafeName = retainedOriginal!.filename
+    } else if (hasReusableCurrentMain) {
+      fsSafeName = currentFileData!.filename
     } else if (
       !overwriteExistingFiles ||
       !disableLocalStorage ||
@@ -538,6 +546,13 @@ export const generateFileData = async <T>({
     fileData.filename = fsSafeName
     if (hasReusableOriginalMain) {
       fileData.url = retainedOriginal!.url
+    } else if (hasReusableCurrentMain) {
+      fileData.filesize = currentFileData!.filesize
+      fileData.height = currentFileData!.height
+      fileData.mimeType = currentFileData!.mimeType
+      fileData.url = currentFileData!.url
+      fileData.width = currentFileData!.width
+      req.file = { ...file, name: currentFileData!.filename }
     }
 
     const hasGeneratedProviderRepresentations = Boolean(
@@ -635,7 +650,7 @@ export const generateFileData = async <T>({
           size: mainBuffer.length,
         }
       }
-    } else if (!hasReusableOriginalMain) {
+    } else if (!hasReusableOriginalMain && !hasReusableCurrentMain) {
       // file.data is empty when useTempFiles is on, so the real content lives at
       // file.tempFilePath instead (see the function doc for why we avoid buffering it).
       const tempFileHandling = resolveTempFileHandling({

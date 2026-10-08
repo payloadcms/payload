@@ -3,7 +3,11 @@ import { describe, expect, it, vi } from 'vitest'
 import type { Payload } from '../index.js'
 
 import { createPayloadRequest } from './createPayloadRequest.js'
-import { beginDeferredCleanupScope, clearDeferredCleanupScope } from './transactionCallbacks.js'
+import {
+  beginDeferredCleanupScope,
+  clearDeferredCleanupScope,
+  deferredCleanupScopeContextKey,
+} from './transactionCallbacks.js'
 
 describe('createPayloadRequest - URL construction', () => {
   const mockPayload = {
@@ -180,7 +184,7 @@ describe('createPayloadRequest - URL construction', () => {
     expect(mainRequest.context).toMatchObject({ _branchBypass: true })
   })
 
-  it('should isolate nested local operations from an active cleanup scope', async () => {
+  it('should isolate nested local operations while retaining their parent cleanup scope', async () => {
     const parentRequest = await createPayloadRequest({ payload: mockPayload })
     const parentScope = await beginDeferredCleanupScope({ req: parentRequest })
 
@@ -196,9 +200,14 @@ describe('createPayloadRequest - URL construction', () => {
     expect(firstNestedRequest).not.toBe(parentRequest)
     expect(secondNestedRequest).not.toBe(parentRequest)
     expect(secondNestedRequest).not.toBe(firstNestedRequest)
+    expect(firstNestedRequest.context[deferredCleanupScopeContextKey]).toBe(parentScope)
+    expect(secondNestedRequest.context[deferredCleanupScopeContextKey]).toBe(parentScope)
 
     const firstNestedScope = await beginDeferredCleanupScope({ req: firstNestedRequest })
     const secondNestedScope = await beginDeferredCleanupScope({ req: secondNestedRequest })
+
+    expect(firstNestedScope.parent).toBe(parentScope)
+    expect(secondNestedScope.parent).toBe(parentScope)
 
     expect(() =>
       clearDeferredCleanupScope({ req: firstNestedRequest, scope: firstNestedScope }),
