@@ -9,6 +9,7 @@
 
   .tabs__tabs {
     display: inline-flex;
+    gap: var(--spacer-3);
     min-width: 100%;
     vertical-align: bottom;
     position: relative;
@@ -24,7 +25,7 @@
     align-items: center;
     justify-content: center;
     gap: var(--spacer-1);
-    padding: var(--spacer-1) var(--spacer-2);
+    padding: var(--spacer-1) 0;
     margin: 0;
     margin-bottom: var(--spacer-2);
     cursor: pointer;
@@ -41,8 +42,8 @@
   .tabs__tab-button:after {
     content: '';
     position: absolute;
-    left: var(--spacer-2);
-    right: var(--spacer-2);
+    left: 0;
+    right: 0;
     bottom: calc(-1 * var(--spacer-2) - 1px);
     height: 3px;
     background: var(--color-icon-brand);

@@ -69,9 +69,27 @@
   }
 
   .collection-edit .collection-edit__main > .document-fields {
-    width: clamp(calc(var(--spacer-6) * 24), 80%, calc(var(--spacer-6) * 32));
+    width: 100%;
     max-width: 100%;
     margin-inline: auto;
+  }
+
+  @media (width > 1024px) {
+    .collection-edit
+      .collection-edit__main
+      > .document-fields:not(.document-fields--force-sidebar-wrap) {
+      --field-border-bleed: 0;
+      max-width: 1080px;
+    }
+  }
+
+  @container drawer (width <= 768px) {
+    .collection-edit
+      .collection-edit__main
+      > .document-fields:not(.document-fields--force-sidebar-wrap) {
+      --field-border-bleed: 1;
+      max-width: 100%;
+    }
   }
 
   .collection-edit__main--popup-open {
