@@ -266,6 +266,8 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:errors',
   'general:fallbackToDefaultLocale',
   'general:false',
+  'general:field',
+  'general:filter',
   'general:filters',
   'general:filterWhere',
   'general:globals',
