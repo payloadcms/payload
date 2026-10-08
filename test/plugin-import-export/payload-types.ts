@@ -258,6 +258,14 @@ export interface User {
   id: string;
   name?: string | null;
   limit?: number | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -265,6 +273,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -378,6 +387,14 @@ export interface Page {
   point?: [number, number] | null;
   textHasMany?: string[] | null;
   upload?: (string | null) | Media;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -426,6 +443,14 @@ export interface Post {
   id: string;
   title: string;
   content?: LexicalRichText<LexicalNodes_A6419FB0> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -437,6 +462,14 @@ export interface Post {
 export interface Media {
   id: string;
   alt?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -457,6 +490,15 @@ export interface PostsExportsOnly {
   id: string;
   title: string;
   content?: LexicalRichText<LexicalNodes_A6419FB0> | null;
+  disabledForImportExport?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -469,6 +511,14 @@ export interface PostsImportsOnly {
   id: string;
   title: string;
   content?: LexicalRichText<LexicalNodes_A6419FB0> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -481,6 +531,14 @@ export interface PostsNoJobsQueue {
   id: string;
   title: string;
   content?: LexicalRichText<LexicalNodes_A6419FB0> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -493,6 +551,14 @@ export interface PostsWithLimit {
   id: string;
   title: string;
   content?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -503,6 +569,14 @@ export interface PostsWithLimit {
 export interface PostsWithS3 {
   id: string;
   title: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -517,6 +591,14 @@ export interface PostsWithHook {
   secret?: string | null;
   count?: number | null;
   email?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -528,6 +610,14 @@ export interface PostsWithHooksJob {
   id: string;
   title: string;
   count?: number | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -562,6 +652,14 @@ export interface PostsWithFieldHook {
     slugFromTitle?: string | null;
     siblingEcho?: string | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -585,6 +683,14 @@ export interface PostsWithColumnMap {
   excerpt?: string | null;
   count?: number | null;
   sharedName?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -595,6 +701,14 @@ export interface PostsWithColumnMap {
 export interface CustomIdPage {
   id: string;
   title: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -624,6 +738,14 @@ export interface Export {
     | number
     | boolean
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -662,6 +784,14 @@ export interface PostsExport {
     | number
     | boolean
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -700,6 +830,14 @@ export interface PostsNoJobsQueueExport {
     | number
     | boolean
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -739,6 +877,15 @@ export interface PostsWithS3Export {
     | boolean
     | null;
   prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -777,6 +924,14 @@ export interface PostsWithLimitsExport {
     | number
     | boolean
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -820,6 +975,14 @@ export interface PostsWithHooksExport {
   draft?: string | null;
   userCollection?: string | null;
   userID?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -863,6 +1026,14 @@ export interface PostsWithHooksJobsExport {
   draft?: string | null;
   userCollection?: string | null;
   userID?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -901,6 +1072,14 @@ export interface PostsWithFieldHooksExport {
     | number
     | boolean
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -939,6 +1118,14 @@ export interface PostsWithColumnMapExport {
     | number
     | boolean
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -976,6 +1163,14 @@ export interface Import {
       | boolean
       | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1013,6 +1208,14 @@ export interface PostsImport {
       | boolean
       | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1051,6 +1254,15 @@ export interface PostsWithS3Import {
       | null;
   };
   prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1088,6 +1300,14 @@ export interface PostsWithLimitsImport {
       | boolean
       | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1129,6 +1349,14 @@ export interface PostsWithHooksImport {
   previewLimit?: string | null;
   fileData?: string | null;
   format?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1170,6 +1398,14 @@ export interface PostsWithHooksJobsImport {
   previewLimit?: string | null;
   fileData?: string | null;
   format?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1207,6 +1443,14 @@ export interface PostsWithFieldHooksImport {
       | boolean
       | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1244,6 +1488,14 @@ export interface PostsWithColumnMapImport {
       | boolean
       | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1495,6 +1747,8 @@ export interface PayloadMigration {
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
   limit?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1502,6 +1756,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1606,6 +1861,8 @@ export interface PagesSelect<T extends boolean = true> {
   point?: T;
   textHasMany?: T;
   upload?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1617,6 +1874,8 @@ export interface PagesSelect<T extends boolean = true> {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   content?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1628,6 +1887,9 @@ export interface PostsSelect<T extends boolean = true> {
 export interface PostsExportsOnlySelect<T extends boolean = true> {
   title?: T;
   content?: T;
+  disabledForImportExport?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1639,6 +1901,8 @@ export interface PostsExportsOnlySelect<T extends boolean = true> {
 export interface PostsImportsOnlySelect<T extends boolean = true> {
   title?: T;
   content?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1650,6 +1914,8 @@ export interface PostsImportsOnlySelect<T extends boolean = true> {
 export interface PostsNoJobsQueueSelect<T extends boolean = true> {
   title?: T;
   content?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1661,6 +1927,8 @@ export interface PostsNoJobsQueueSelect<T extends boolean = true> {
 export interface PostsWithLimitsSelect<T extends boolean = true> {
   title?: T;
   content?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1670,6 +1938,8 @@ export interface PostsWithLimitsSelect<T extends boolean = true> {
  */
 export interface PostsWithS3Select<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1683,6 +1953,8 @@ export interface PostsWithHooksSelect<T extends boolean = true> {
   secret?: T;
   count?: T;
   email?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1693,6 +1965,8 @@ export interface PostsWithHooksSelect<T extends boolean = true> {
 export interface PostsWithHooksJobsSelect<T extends boolean = true> {
   title?: T;
   count?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1742,6 +2016,8 @@ export interface PostsWithFieldHooksSelect<T extends boolean = true> {
         slugFromTitle?: T;
         siblingEcho?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1754,6 +2030,8 @@ export interface PostsWithColumnMapSelect<T extends boolean = true> {
   excerpt?: T;
   count?: T;
   sharedName?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1763,6 +2041,8 @@ export interface PostsWithColumnMapSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1782,6 +2062,8 @@ export interface MediaSelect<T extends boolean = true> {
 export interface CustomIdPagesSelect<T extends boolean = true> {
   id?: T;
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1802,6 +2084,8 @@ export interface ExportsSelect<T extends boolean = true> {
   fields?: T;
   collectionSlug?: T;
   where?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1831,6 +2115,8 @@ export interface PostsExportSelect<T extends boolean = true> {
   fields?: T;
   collectionSlug?: T;
   where?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1860,6 +2146,8 @@ export interface PostsNoJobsQueueExportSelect<T extends boolean = true> {
   fields?: T;
   collectionSlug?: T;
   where?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1890,6 +2178,9 @@ export interface PostsWithS3ExportSelect<T extends boolean = true> {
   collectionSlug?: T;
   where?: T;
   prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1919,6 +2210,8 @@ export interface PostsWithLimitsExportSelect<T extends boolean = true> {
   fields?: T;
   collectionSlug?: T;
   where?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1953,6 +2246,8 @@ export interface PostsWithHooksExportSelect<T extends boolean = true> {
   draft?: T;
   userCollection?: T;
   userID?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1987,6 +2282,8 @@ export interface PostsWithHooksJobsExportSelect<T extends boolean = true> {
   draft?: T;
   userCollection?: T;
   userID?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2016,6 +2313,8 @@ export interface PostsWithFieldHooksExportSelect<T extends boolean = true> {
   fields?: T;
   collectionSlug?: T;
   where?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2045,6 +2344,8 @@ export interface PostsWithColumnMapExportSelect<T extends boolean = true> {
   fields?: T;
   collectionSlug?: T;
   where?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2075,6 +2376,8 @@ export interface ImportsSelect<T extends boolean = true> {
         issues?: T;
         issueDetails?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2105,6 +2408,8 @@ export interface PostsImportSelect<T extends boolean = true> {
         issues?: T;
         issueDetails?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2136,6 +2441,9 @@ export interface PostsWithS3ImportSelect<T extends boolean = true> {
         issueDetails?: T;
       };
   prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2166,6 +2474,8 @@ export interface PostsWithLimitsImportSelect<T extends boolean = true> {
         issues?: T;
         issueDetails?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2200,6 +2510,8 @@ export interface PostsWithHooksImportSelect<T extends boolean = true> {
   previewLimit?: T;
   fileData?: T;
   format?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2234,6 +2546,8 @@ export interface PostsWithHooksJobsImportSelect<T extends boolean = true> {
   previewLimit?: T;
   fileData?: T;
   format?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2264,6 +2578,8 @@ export interface PostsWithFieldHooksImportSelect<T extends boolean = true> {
         issues?: T;
         issueDetails?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2294,6 +2610,8 @@ export interface PostsWithColumnMapImportSelect<T extends boolean = true> {
         issues?: T;
         issueDetails?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

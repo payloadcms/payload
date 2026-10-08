@@ -686,7 +686,10 @@ describe('Access Control', () => {
 
     test('versions tab should not show', async () => {
       await page.goto(restrictedVersionsAdminPanelUrl.edit(existingDoc.id))
-      await page.locator('.doc-tabs__tabs').getByLabel('Versions').click()
+      await page
+        .locator('.doc-tabs__tabs')
+        .getByRole('link', { name: /^Versions\b/ })
+        .click()
       const rows = page.locator('.versions table tbody tr')
       await expect(rows).toHaveCount(1)
     })
@@ -729,8 +732,14 @@ describe('Access Control', () => {
     test('can only unlock self when admin', async () => {
       await page.goto(usersUrl.list)
 
-      const adminUserRow = page.locator('.table tr').filter({ hasText: devUser.email })
-      const nonAdminUserRow = page.locator('.table tr').filter({ hasText: nonAdminEmail })
+      // Scope the match to the email cell so authorship's createdBy/updatedBy
+      // columns can't interfere with locating the correct user row.
+      const adminUserRow = page
+        .locator('.table tr')
+        .filter({ has: page.locator('.cell-email', { hasText: devUser.email }) })
+      const nonAdminUserRow = page
+        .locator('.table tr')
+        .filter({ has: page.locator('.cell-email', { hasText: nonAdminEmail }) })
 
       // Wait for hydration
       await wait(1000)

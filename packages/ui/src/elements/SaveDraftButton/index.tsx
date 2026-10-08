@@ -3,6 +3,7 @@
 import type { SaveDraftButtonClientProps } from 'payload'
 
 import { formatAdminURL } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { useCallback, useRef } from 'react'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
@@ -14,6 +15,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 
 const baseClass = 'save-draft'
 
@@ -34,6 +36,7 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
   const editDepth = useEditDepth()
   const { t } = useTranslation()
   const { submit } = useForm()
+  const { uploadEdits } = useUploadEdits()
   const operation = useOperation()
 
   const disabled = (operation === 'update' && !modified) || uploadStatus === 'uploading'
@@ -43,7 +46,16 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
       return
     }
 
-    const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`
+    const search = qs.stringify(
+      {
+        depth: 0,
+        draft: true,
+        'fallback-locale': 'null',
+        locale,
+        uploadEdits: uploadEdits || undefined,
+      },
+      { addQueryPrefix: true },
+    )
     let action
     let method = 'POST'
 
@@ -74,7 +86,17 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
     })
 
     setUnpublishedVersionCount((count) => count + 1)
-  }, [submit, collectionSlug, globalSlug, api, locale, id, disabled, setUnpublishedVersionCount])
+  }, [
+    submit,
+    collectionSlug,
+    globalSlug,
+    api,
+    locale,
+    id,
+    disabled,
+    setUnpublishedVersionCount,
+    uploadEdits,
+  ])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     if (disabled) {

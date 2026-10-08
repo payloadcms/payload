@@ -1,5 +1,4 @@
 import fs from 'fs/promises'
-import { status as httpStatus } from 'http-status'
 import path from 'path'
 
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
@@ -8,7 +7,9 @@ import type { PayloadRequest } from '../types/index.js'
 import type { FileData, FileToSave } from './types.js'
 
 import { APIError, ErrorDeletingFile } from '../errors/index.js'
+import { httpStatus } from '../utilities/httpStatus.js'
 import { fileExists } from './fileExists.js'
+import { withLegacyUploadFileData } from './fileVersioning/storedFiles.js'
 
 type Args = {
   collectionConfig: SanitizedCollectionConfig
@@ -21,12 +22,18 @@ type Args = {
 
 export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
   collectionConfig,
+  config,
   doc,
   files = [],
   overrideDelete,
   req,
 }) => {
   if (!collectionConfig.upload) {
+    return
+  }
+  const stored = withLegacyUploadFileData({ collection: collectionConfig, config, doc })
+
+  if (collectionConfig.versions || stored.original) {
     return
   }
   if (overrideDelete || files.length > 0) {
@@ -43,8 +50,8 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
       throw new ErrorDeletingFile(req.t)
     }
 
-    if (doc.sizes) {
-      const sizes: FileData[] = Object.values(doc.sizes)
+    if (doc.variants) {
+      const sizes: FileData[] = Object.values(doc.variants)
       // Since forEach will not wait until unlink is finished it could
       // happen that two operations will try to delete the same file.
       // To avoid this it is recommended to use "sync" instead

@@ -1,11 +1,11 @@
 @layer payload-default {
   .card {
-    background: var(--color-bg-secondary);
-    padding: var(--spacer-2-5) var(--spacer-3);
+    background: var(--color-bg);
+    padding: var(--spacer-2-5);
     width: 100%;
     min-height: 4rem;
     position: relative;
-    border-radius: var(--radius-medium);
+    border-radius: var(--radius-large);
     border: var(--stroke-width-small) solid var(--color-border);
     display: flex;
     align-items: stretch;
@@ -14,10 +14,9 @@
 
   .card__title {
     letter-spacing: var(--text-body-medium-letter-spacing);
-    font-family: var(--text-body-medium-strong-font-family);
-    font-size: var(--text-body-medium-strong-font-size);
-    font-weight: var(--text-body-medium-strong-font-weight);
-    line-height: var(--text-body-medium-strong-line-height);
+    font-size: var(--text-body-medium-bold-font-size);
+    font-weight: var(--text-body-medium-bold-font-weight);
+    line-height: var(--text-body-medium-bold-line-height);
     color: var(--color-text);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -36,7 +35,7 @@
     cursor: pointer;
 
     &:hover {
-      background: var(--color-bg-secondary-hover);
+      background: var(--color-bg-secondary);
     }
 
     &:has(.card__click:active) {

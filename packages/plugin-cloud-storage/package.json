@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-cloud-storage",
-  "version": "4.0.0-canary.37",
+  "version": "4.0.0-canary.38",
   "description": "The official cloud storage plugin for Payload CMS",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -65,8 +65,8 @@
   },
   "devDependencies": {
     "@types/find-node-modules": "^2.1.2",
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {

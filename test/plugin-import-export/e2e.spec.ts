@@ -124,10 +124,12 @@ test.describe('Import Export Plugin', () => {
 
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
+      await expect(createExportButton.locator('button')).toHaveCount(0)
 
       await createExportButton.click()
 
@@ -150,8 +152,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -174,8 +177,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -217,8 +221,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts No Jobs Queues',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -269,8 +274,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts Exports Only',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -346,8 +352,9 @@ test.describe('Import Export Plugin', () => {
         await expect(listMenuButton).toBeVisible()
         await listMenuButton.click()
 
-        const createExportButton = page.locator('.popup__scroll-container button', {
-          hasText: 'Export',
+        const createExportButton = page.getByRole('menuitem', {
+          name: 'Export Custom Id Pages',
+          exact: true,
         })
         await expect(createExportButton).toBeVisible()
         await createExportButton.click()
@@ -358,12 +365,8 @@ test.describe('Import Export Plugin', () => {
 
         // Ensure the export is for custom-id-pages (id + title columns visible) before saving
         await expect(async () => {
-          await expect(
-            page.locator('.export-preview table thead th').filter({ hasText: 'id' }),
-          ).toBeVisible()
-          await expect(
-            page.locator('.export-preview table thead th').filter({ hasText: 'title' }),
-          ).toBeVisible()
+          await expect(page.locator('.export-preview table thead th#heading-id')).toBeVisible()
+          await expect(page.locator('.export-preview table thead th#heading-title')).toBeVisible()
         }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
         // Verify the collection field is set to Custom ID Pages before saving
@@ -420,9 +423,9 @@ test.describe('Import Export Plugin', () => {
         const content = fs.readFileSync(tempPath, 'utf8')
         fs.unlinkSync(tempPath)
 
-        // Ensure we got the custom-id-pages export (id,title only; no _status)
+        // Ensure we got the custom-id-pages export (id,title lead; no _status)
         await expect(() => {
-          expect(content).toMatch(/^\uFEFF?id,title,updatedAt,createdAt/m)
+          expect(content).toMatch(/^\uFEFF?id,title,/m)
           expect(content).not.toContain('_status')
 
           expect(content).toContain(`e2e-export-${uniqueId}-1`)
@@ -464,8 +467,9 @@ test.describe('Import Export Plugin', () => {
         await expect(listMenuButton).toBeVisible()
         await listMenuButton.click()
 
-        const createExportButton = page.locator('.popup__scroll-container button', {
-          hasText: 'Export',
+        const createExportButton = page.getByRole('menuitem', {
+          name: 'Export Custom Id Pages',
+          exact: true,
         })
         await expect(createExportButton).toBeVisible()
         await createExportButton.click()
@@ -566,8 +570,9 @@ test.describe('Import Export Plugin', () => {
         await expect(listMenuButton).toBeVisible()
         await listMenuButton.click()
 
-        const createExportButton = page.locator('.popup__scroll-container button', {
-          hasText: 'Export',
+        const createExportButton = page.getByRole('menuitem', {
+          name: 'Export Custom Id Pages',
+          exact: true,
         })
         await expect(createExportButton).toBeVisible()
         await createExportButton.click()
@@ -796,10 +801,12 @@ test.describe('Import Export Plugin', () => {
 
       await listMenuButton.click()
 
-      const createImportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Import Posts',
+      const createImportButton = page.getByRole('menuitem', {
+        name: 'Import Posts',
+        exact: true,
       })
       await expect(createImportButton).toBeVisible()
+      await expect(createImportButton.locator('button')).toHaveCount(0)
 
       await createImportButton.click()
 
@@ -1089,6 +1096,139 @@ test.describe('Import Export Plugin', () => {
         }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
       })
     })
+
+    test.describe('Relationship Preview', () => {
+      const relationshipBaseClass = 'import-preview-relationship'
+
+      // The preview renders the file as-is without populating relationships, so these
+      // IDs never need to exist — nothing here reaches the database.
+      const uploadPreviewFile = async ({
+        docs,
+        name,
+      }: {
+        docs: Record<string, unknown>[]
+        name: string
+      }) => {
+        await page.goto(importsURL.create)
+        await expect(page.locator('.collection-edit')).toBeVisible()
+
+        const collectionField = page.locator('#field-collectionSlug')
+        await collectionField.locator('.rs__control').click()
+        await getSelectMenu({ page }).locator('.rs__option:text-is("Pages")').click()
+
+        await page.locator('input[type="file"]').setInputFiles({
+          name,
+          buffer: Buffer.from(JSON.stringify(docs)),
+          mimeType: 'application/json',
+        })
+
+        await expect(async () => {
+          await expect(page.locator('.import-preview table')).toBeVisible()
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+      }
+
+      /** The first row's cell under the given column heading. */
+      const getPreviewCell = async ({ heading }: { heading: string }) => {
+        const previewTable = page.locator('.import-preview table')
+        const headings = await previewTable.locator('thead th').allTextContents()
+        const columnIndex = headings.findIndex((text) => text.trim() === heading)
+
+        expect(columnIndex).toBeGreaterThan(-1)
+
+        return previewTable.locator('tbody tr').first().locator('td').nth(columnIndex)
+      }
+
+      test('should group polymorphic relationship values by collection', async () => {
+        await uploadPreviewFile({
+          docs: [
+            {
+              title: 'Polymorphic Preview',
+              hasManyPolymorphic: [
+                { relationTo: 'users', value: 'preview-user-1' },
+                { relationTo: 'posts', value: 'preview-post-1' },
+              ],
+            },
+          ],
+          name: 'polymorphic-preview.json',
+        })
+
+        const cell = await getPreviewCell({ heading: 'Has Many Polymorphic' })
+        const groups = cell.locator(`.${relationshipBaseClass}__group`)
+
+        await expect(groups).toHaveCount(2)
+        await expect(groups.nth(0).locator(`.${relationshipBaseClass}__collection`)).toHaveText(
+          'Users',
+        )
+        await expect(groups.nth(0).locator(`.${relationshipBaseClass}__values`)).toHaveText(
+          'preview-user-1',
+        )
+        await expect(groups.nth(1).locator(`.${relationshipBaseClass}__collection`)).toHaveText(
+          'Posts',
+        )
+        await expect(groups.nth(1).locator(`.${relationshipBaseClass}__values`)).toHaveText(
+          'preview-post-1',
+        )
+      })
+
+      test('should preserve plain rendering for monomorphic relationship values', async () => {
+        await uploadPreviewFile({
+          docs: [
+            {
+              title: 'Monomorphic Preview',
+              hasManyMonomorphic: ['preview-post-1', 'preview-post-2'],
+            },
+          ],
+          name: 'monomorphic-preview.json',
+        })
+
+        const cell = await getPreviewCell({ heading: 'Has Many Monomorphic' })
+
+        await expect(cell.locator(`.${relationshipBaseClass}`)).toHaveCount(0)
+        await expect(cell).toHaveText('preview-post-1, preview-post-2')
+      })
+
+      test('should show the document title for populated relationship values', async () => {
+        await uploadPreviewFile({
+          docs: [
+            {
+              title: 'Populated Preview',
+              hasManyMonomorphic: [{ id: 'preview-post-1', title: 'Populated Post Title' }],
+            },
+          ],
+          name: 'populated-relationship-preview.json',
+        })
+
+        const cell = await getPreviewCell({ heading: 'Has Many Monomorphic' })
+
+        await expect(cell.locator(`.${relationshipBaseClass}`)).toHaveCount(0)
+        await expect(cell).toHaveText('Populated Post Title')
+      })
+
+      test('should not cap monomorphic relationship values', async () => {
+        await uploadPreviewFile({
+          docs: [
+            {
+              title: 'Overflow Preview',
+              hasManyMonomorphic: [
+                'preview-post-1',
+                'preview-post-2',
+                'preview-post-3',
+                'preview-post-4',
+                'preview-post-5',
+              ],
+            },
+          ],
+          name: 'overflow-relationship-preview.json',
+        })
+
+        const cell = await getPreviewCell({ heading: 'Has Many Monomorphic' })
+
+        await expect(cell.locator(`.${relationshipBaseClass}`)).toHaveCount(0)
+        await expect(cell).toHaveText(
+          'preview-post-1, preview-post-2, preview-post-3, preview-post-4, preview-post-5',
+        )
+      })
+    })
   })
 
   test.describe('S3 Storage', () => {
@@ -1183,8 +1323,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1226,8 +1367,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1292,8 +1434,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Pages',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Pages',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1361,8 +1504,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts With Limits',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts With Limits',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1388,8 +1532,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts With Limits',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts With Limits',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1424,8 +1569,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts With Limits',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts With Limits',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1551,8 +1697,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts With Limits',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts With Limits',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1578,8 +1725,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts With Limits',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts With Limits',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1619,8 +1767,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts With Limits',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts With Limits',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()

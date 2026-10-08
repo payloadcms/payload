@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useId, useMemo } from 'react'
 
 import type { ColumnItemProps } from '../types.js'
 
@@ -21,6 +21,7 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
   onSelect,
 }) => {
   const { id, allowedCollections, hasChildren, title } = item
+  const titleId = useId()
 
   // Disable selection if:
   // 1. This item is in the disabledIds set (e.g., being moved)
@@ -29,7 +30,7 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
     if (disabled) {
       return true
     }
-    if (!filterByCollection || filterByCollection.length === 0) {
+    if (filterByCollection === undefined) {
       return false
     }
     return !isSuperset(allowedCollections, filterByCollection)
@@ -73,6 +74,8 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
 
   return (
     <div
+      aria-current={isSelected ? 'location' : undefined}
+      aria-disabled={isDisabled || undefined}
       className={[
         baseClass,
         isExpanded && `${baseClass}--expanded`,
@@ -82,12 +85,13 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
         .filter(Boolean)
         .join(' ')}
       onClick={isDisabled ? undefined : handleRowClick}
-      onKeyDown={handleKeyDown}
+      onKeyDown={isDisabled ? undefined : handleKeyDown}
       role="button"
       tabIndex={isDisabled ? -1 : 0}
     >
       <div className={`${baseClass}__checkbox`}>
         <CheckboxInput
+          aria-labelledby={titleId}
           checked={isSelected}
           onToggle={handleCheckboxToggle}
           readOnly={isDisabled}
@@ -95,7 +99,7 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
         />
       </div>
 
-      <span className={`${baseClass}__title`} title={title}>
+      <span className={`${baseClass}__title`} id={titleId} title={title}>
         {title}
       </span>
 

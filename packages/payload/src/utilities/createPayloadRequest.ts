@@ -93,7 +93,7 @@ export type CreatePayloadRequestArgs = {
   payload: Payload
   req?: Partial<PayloadRequest>
   urlSuffix?: string
-  user?: User
+  user?: null | User
 }
 
 type CreatePayloadRequest = (args: CreatePayloadRequestArgs) => Promise<PayloadRequest>
@@ -140,7 +140,7 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
   req.payload = payload
   req.i18n = i18n
   req.t = i18n.t
-  req.user = user || req?.user || null
+  req.user = user === undefined ? (req?.user ?? null) : user
 
   // Ensure user.collection is set for auth-related access control
   // TODO (4.0): Instead of silently falling back, throw an error if user.collection is missing

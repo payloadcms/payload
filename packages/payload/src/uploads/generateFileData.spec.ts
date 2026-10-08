@@ -95,6 +95,62 @@ describe('generateFileData', () => {
     expect(toBufferMock).not.toHaveBeenCalled()
   })
 
+  describe('focal point without a transformer', () => {
+    const createPngReq = ({ query = {} }: { query?: Record<string, unknown> } = {}) =>
+      ({
+        file: {
+          data: PNG_SIGNATURE,
+          mimetype: 'image/png',
+          name: 'photo.png',
+          size: PNG_SIGNATURE.length,
+        },
+        payload: {
+          config: {},
+          logger: { error: vi.fn() },
+        },
+        query,
+      }) as unknown as PayloadRequest
+
+    it('should default the focal point to the center on create', async () => {
+      const result = await generateFileData({
+        collection: createCollection({ focalPoint: true }),
+        config: {} as SanitizedConfig,
+        data: {},
+        operation: 'create',
+        overwriteExistingFiles: true,
+        req: createPngReq(),
+      })
+
+      expect(result.data).toMatchObject({ focalX: 50, focalY: 50 })
+    })
+
+    it('should save a focal point sent through the uploadEdits query param', async () => {
+      const result = await generateFileData({
+        collection: createCollection({ focalPoint: true }),
+        config: {} as SanitizedConfig,
+        data: {},
+        operation: 'create',
+        overwriteExistingFiles: true,
+        req: createPngReq({ query: { uploadEdits: { focalPoint: { x: 20.4, y: 80.6 } } } }),
+      })
+
+      expect(result.data).toMatchObject({ focalX: 20, focalY: 81 })
+    })
+
+    it('should not save a focal point when focalPoint is disabled', async () => {
+      const result = await generateFileData({
+        collection: createCollection({ focalPoint: false }),
+        config: {} as SanitizedConfig,
+        data: {},
+        operation: 'create',
+        overwriteExistingFiles: true,
+        req: createPngReq(),
+      })
+
+      expect(result.data).not.toHaveProperty('focalX')
+    })
+  })
+
   it('uses the inspected non-image type for image processing', async () => {
     const { sharp } = createSharpMock()
     const fileContent = Buffer.from(
@@ -164,21 +220,6 @@ describe('generateFileData', () => {
     expect(result.data).toMatchObject({ height: 1, mimeType: 'image/svg+xml', width: 1 })
   })
 
-  it('still runs sharp processing when resize options are configured', async () => {
-    const { sharp, toBufferMock } = createSharpMock()
-
-    await generateFileData({
-      collection: createCollection({ resizeOptions: { width: 100 } }),
-      config: {} as SanitizedConfig,
-      data: {},
-      operation: 'create',
-      overwriteExistingFiles: true,
-      req: createReq(sharp),
-    })
-
-    expect(toBufferMock).toHaveBeenCalledTimes(1)
-  })
-
   it('does not overwrite req.file with a truncated header-only buffer', async () => {
     // Mirrors what `getFileFromUploadInstructions` returns for the `'header'` content
     // requirement: only the first bytes of the file, alongside the real, full declared size.
@@ -201,7 +242,7 @@ describe('generateFileData', () => {
     } as unknown as PayloadRequest
 
     await generateFileData({
-      collection: createCollection({ imageSizes: [] }),
+      collection: createCollection({ variants: [] }),
       config: {} as SanitizedConfig,
       data: {},
       operation: 'create',
@@ -254,7 +295,9 @@ describe('generateFileData', () => {
         tempFilePath,
       },
       payload: {
-        config: { sharp: undefined },
+        collections: { media: { config: { fields: [], upload: {} } } },
+        config: { routes: { api: '/api' }, sharp: undefined },
+        db: { findOne: vi.fn(async () => null) },
         logger: { error: vi.fn() },
       },
     } as unknown as PayloadRequest
@@ -270,7 +313,7 @@ describe('generateFileData', () => {
 
     expect(files).toEqual([
       {
-        path: `${os.tmpdir()}/document.pdf`,
+        path: `${os.tmpdir()}/document-original.pdf`,
         sourcePath: tempFilePath,
       },
     ])

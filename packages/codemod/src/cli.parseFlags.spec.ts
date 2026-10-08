@@ -9,6 +9,7 @@ describe('parseFlags', () => {
       command: undefined,
       dry: false,
       force: false,
+      help: false,
       list: false,
       path: process.cwd(),
       print: false,
@@ -38,6 +39,19 @@ describe('parseFlags', () => {
 
   it('parses --list', () => {
     expect(parseFlags(['--list']).list).toBe(true)
+  })
+
+  it('parses --help and its -h short form', () => {
+    expect(parseFlags(['--help']).help).toBe(true)
+    expect(parseFlags(['-h']).help).toBe(true)
+  })
+
+  it('parses --help on an upgrade verb', () => {
+    expect(parseFlags(['upgrade', 'run', '--help'])).toMatchObject({
+      command: 'upgrade',
+      help: true,
+      upgrade: 'run',
+    })
   })
 
   it('treats --dry-run as an alias for --dry', () => {

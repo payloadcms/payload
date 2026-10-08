@@ -34,10 +34,6 @@ export type FieldType<T> = {
   formSubmitted: boolean
   initialValue?: T
   path: string
-  /**
-   * @deprecated - readOnly is no longer returned from useField. Remove this in 4.0.
-   */
-  readOnly?: boolean
   setValue: (val: unknown, disableModifyingForm?: boolean) => void
   showError: boolean
   value: T

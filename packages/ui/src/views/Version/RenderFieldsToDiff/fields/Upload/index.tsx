@@ -3,7 +3,7 @@ import type {
   PayloadRequest,
   TypeWithID,
   UploadField,
-  UploadFieldDiffServerComponent,
+  UploadFieldDiffServerProps,
 } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
@@ -21,16 +21,8 @@ type PolyUploadDoc = { relationTo: string; value: (FileData & TypeWithID) | numb
 
 type UploadDoc = NonPolyUploadDoc | PolyUploadDoc
 
-export const Upload: UploadFieldDiffServerComponent = (args) => {
-  const {
-    comparisonValue: valueFrom,
-    field,
-    i18n,
-    locale,
-    nestingLevel,
-    req,
-    versionValue: valueTo,
-  } = args
+export const Upload: React.FC<UploadFieldDiffServerProps> = (args) => {
+  const { field, i18n, locale, nestingLevel, req, valueFrom, valueTo } = args
   const hasMany = 'hasMany' in field && field.hasMany && Array.isArray(valueTo)
   const polymorphic = Array.isArray(field.relationTo)
 

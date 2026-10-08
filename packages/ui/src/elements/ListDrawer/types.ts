@@ -36,6 +36,7 @@ export type RenderListServerFnReturnType = {
 
 export type ListDrawerProps = {
   readonly allowCreate?: boolean
+  readonly className?: string
   readonly collectionSlugs: SanitizedCollectionConfig['slug'][]
   readonly disableQueryPresets?: boolean
   readonly drawerSlug?: string

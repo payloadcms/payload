@@ -11,8 +11,8 @@ import type {
   ClientField,
   DefaultServerCellComponentProps,
   LabelFunction,
+  MarkdownRichTextAdapter,
   PayloadComponent,
-  RichTextAdapter,
   RichTextField,
   RichTextFieldClient,
   RichTextFieldClientProps,
@@ -461,10 +461,7 @@ export type LexicalEditorViewMap<
   }
 }
 
-/**
- * @todo rename to LexicalEditorArgs in 4.0, since these are arguments for the lexicalEditor function
- */
-export type LexicalEditorProps = {
+export type LexicalEditorArgs = {
   admin?: LexicalFieldAdminProps
   features?: FeaturesInput
   lexical?: LexicalEditorConfig
@@ -482,7 +479,7 @@ export type LexicalEditorProps = {
 export type LexicalRichTextAdapter = {
   editorConfig: SanitizedServerEditorConfig
   features: FeatureProviderServer<any, any, any>[]
-} & RichTextAdapter<SerializedEditorState, AdapterProps>
+} & MarkdownRichTextAdapter<SerializedEditorState, AdapterProps>
 
 export type LexicalRichTextAdapterProvider =
   /**
