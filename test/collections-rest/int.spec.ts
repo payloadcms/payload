@@ -11,7 +11,6 @@ import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
-import { databaseAdapterSupportsTransactions } from '../__helpers/shared/databaseAdapterCapabilities.js'
 import { getFormDataSize } from '../__helpers/shared/getFormDataSize.js'
 import { largeDocumentsCollectionSlug } from './collections/LargeDocuments.js'
 import {
@@ -670,13 +669,10 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
           query: { where: { text: { equals: 'test' } } },
         })
         const result = await response.json()
-        const usesAtomicBatchTransaction =
-          databaseAdapterSupportsTransactions({ adapter: process.env.PAYLOAD_DATABASE }) &&
-          !payload.db.bulkOperationsSingleTransaction
 
         expect(response.status).toEqual(400)
-        expect(result.docs).toHaveLength(usesAtomicBatchTransaction ? 0 : 1)
-        expect(result.errors).toHaveLength(usesAtomicBatchTransaction ? 2 : 1)
+        expect(result.docs).toHaveLength(1)
+        expect(result.errors).toHaveLength(1)
         expect(result.errors[0].message).toBeDefined()
         expect(result.errors[0].id).toBeDefined()
       })
