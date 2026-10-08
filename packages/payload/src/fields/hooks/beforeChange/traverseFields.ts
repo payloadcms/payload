@@ -33,6 +33,7 @@ type Args = {
   fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
   id?: number | string
+  isValidationOperation?: boolean
   mergeLocaleActions: (() => Promise<void> | void)[]
   operation: FieldOperation
   overrideAccess: boolean
@@ -53,6 +54,7 @@ type Args = {
    * The original siblingData with locales (not modified by any hooks)
    */
   siblingDocWithLocales: JsonObject
+  skipHooks?: boolean
   skipValidation?: boolean
   submittedTopLevelFieldNames?: ReadonlySet<string>
 }
@@ -77,6 +79,7 @@ export const traverseFields = async ({
   fieldLabelPath,
   fields,
   global,
+  isValidationOperation,
   mergeLocaleActions,
   operation,
   overrideAccess,
@@ -88,6 +91,7 @@ export const traverseFields = async ({
   siblingData,
   siblingDoc,
   siblingDocWithLocales,
+  skipHooks,
   skipValidation,
   submittedTopLevelFieldNames,
 }: Args): Promise<void> => {
@@ -108,6 +112,7 @@ export const traverseFields = async ({
         fieldIndex,
         fieldLabelPath,
         global,
+        isValidationOperation: isValidationOperation!,
         mergeLocaleActions,
         operation,
         overrideAccess,
@@ -120,6 +125,7 @@ export const traverseFields = async ({
         siblingDoc,
         siblingDocWithLocales,
         siblingFields: fields,
+        skipHooks: skipHooks!,
         skipValidation: skipValidation!,
         submittedTopLevelFieldNames,
       }),

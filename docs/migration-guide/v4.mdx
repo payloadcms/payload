@@ -919,7 +919,7 @@ The deprecated `readOnly` property has been removed from `FieldType`, the object
 
 Read `readOnly` from your field component's props instead:
 
-```diff
+````diff
 'use client'
 import type { TextFieldClientComponent } from 'payload'
 import { useField } from '@payloadcms/ui'
@@ -928,7 +928,33 @@ import { useField } from '@payloadcms/ui'
 -  const { readOnly, value } = useField({ path })
 +export const MyField: TextFieldClientComponent = ({ path, readOnly }) => {
 +  const { value } = useField({ path })
-```
+
+### Deprecated `TableColumnsProvider` props removed
+
+The following deprecated props have been removed from `TableColumnsProvider` and its `TableColumnsProviderProps` type:
+
+- `docs`
+- `enableRowSelections`
+- `listPreferences`
+- `preferenceKey`
+- `renderRowTypes`
+- `setTable`
+- `sortColumnProps`
+- `tableAppearance`
+
+`TableColumnsProvider` has ignored these props since 3.26.0, when column state moved to the URL. Remove them where you render the provider. It now only accepts `children`, `collectionSlug`, `columnState`, and `LinkedCellOverride`.
+
+```diff
+<TableColumnsProvider
+  collectionSlug={collectionSlug}
+  columnState={columnState}
+- enableRowSelections
+- preferenceKey={preferenceKey}
+- tableAppearance="condensed"
+>
+  {children}
+</TableColumnsProvider>
+````
 
 ### RichText adapter `i18n` property removed
 
@@ -1274,10 +1300,17 @@ Stored content is unaffected.
 
 The `LexicalEditorProps` type exported from `@payloadcms/richtext-lexical` has been renamed to `LexicalEditorArgs`. It describes the arguments of the `lexicalEditor` function, not component props. The shape is unchanged.
 
-```diff
+````diff
 - import type { LexicalEditorProps } from '@payloadcms/richtext-lexical'
 + import type { LexicalEditorArgs } from '@payloadcms/richtext-lexical'
-```
+
+### Lexical: `UploadDataImproved` replaced by `UploadData` ([#18606](https://github.com/payloadcms/payload/pull/18606))
+
+The internal `UploadDataImproved` type has been removed, and its definition is now used by the public `UploadData` type. Replace any `UploadDataImproved` imports and type references with `UploadData`:
+
+```ts
+import type { UploadData } from '@payloadcms/richtext-lexical'
+````
 
 ### Lexical: the `version` of nodes is ignored
 

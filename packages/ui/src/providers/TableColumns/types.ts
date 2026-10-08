@@ -1,6 +1,4 @@
-import type { CollectionPreferences, Column } from 'payload'
-
-import type { SortColumnProps } from '../../elements/SortColumn/index.js'
+import type { Column } from 'payload'
 
 export interface ITableColumns {
   columns: Column[]
@@ -16,37 +14,5 @@ export type TableColumnsProviderProps = {
   readonly children: React.ReactNode
   readonly collectionSlug: string | string[]
   readonly columnState: Column[]
-  /**
-   * @deprecated
-   */
-  readonly docs?: any[]
-  /**
-   * @deprecated
-   */
-  readonly enableRowSelections?: boolean
   readonly LinkedCellOverride?: React.ReactNode
-  /**
-   * @deprecated
-   */
-  readonly listPreferences?: CollectionPreferences
-  /**
-   * @deprecated
-   */
-  readonly preferenceKey?: string
-  /**
-   * @deprecated
-   */
-  readonly renderRowTypes?: boolean
-  /**
-   * @deprecated
-   */
-  readonly setTable?: (Table: React.ReactNode) => void
-  /**
-   * @deprecated
-   */
-  readonly sortColumnProps?: Partial<SortColumnProps>
-  /**
-   * @deprecated
-   */
-  readonly tableAppearance?: 'condensed' | 'default'
 }

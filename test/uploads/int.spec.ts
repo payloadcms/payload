@@ -4201,7 +4201,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
    * file into memory (see generateFileData.ts). `mediaSlug` has no restrictions on non-image
    * mime types, so an audio file uploaded there skips all sharp processing and exercises that
    * copy against real disk I/O.
-  */
+   */
   test.describe('temp file copy to local storage', () => {
     const createdDocuments: {
       collection: typeof fileAccessMediaSlug | typeof mediaSlug

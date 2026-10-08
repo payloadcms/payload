@@ -5,6 +5,7 @@ import type { AccessResult } from '../../config/types.js'
 import type { GlobalSlug, JsonObject } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { ValidationResult } from '../../types/validation.js'
+import type { ValidationSourceData } from '../../utilities/runValidationLifecycle.js'
 import type { DataFromGlobalSlug, SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
@@ -12,6 +13,7 @@ import { hasWhereAccessResult } from '../../auth/types.js'
 import { Forbidden } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
+import { flattenDataByLocale } from '../../utilities/flattenDataByLocale.js'
 import { runValidationLifecycle } from '../../utilities/runValidationLifecycle.js'
 import {
   findDraftVersion,
@@ -25,14 +27,18 @@ export type Arguments<TSlug extends GlobalSlug> = {
   onValidationData?: (data: JsonObject) => void
   overrideAccess: boolean
   req: PayloadRequest
+  skipAccessControl?: boolean
+  skipMutationHooks?: boolean
   slug: string
+  sourceData?: ValidationSourceData
+  validationOperation?: 'update' | 'validate'
 }
 
 export async function validateOperation<TSlug extends GlobalSlug>(
   args: Arguments<TSlug>,
 ): Promise<ValidationResult> {
   const previousOperation = args.req.operation
-  args.req.operation = 'validate'
+  args.req.operation = args.validationOperation ?? 'validate'
 
   try {
     return await validateOperationWithScopedRequest(args)
@@ -49,18 +55,25 @@ async function validateOperationWithScopedRequest<TSlug extends GlobalSlug>({
   onValidationData,
   overrideAccess,
   req,
+  skipAccessControl = false,
+  skipMutationHooks = false,
+  sourceData,
+  validationOperation = 'validate',
 }: Arguments<TSlug>): Promise<ValidationResult> {
-  const accessResult = !overrideAccess
-    ? await executeAccess({ slug, data: incomingData, req }, globalConfig.access.validate)
-    : true
-  const storedGlobal = await resolveValidationGlobalSource({
-    slug,
-    accessResult,
-    draft,
-    globalConfig,
-    overrideAccess,
-    req,
-  })
+  const accessResult =
+    !skipAccessControl && !overrideAccess
+      ? await executeAccess({ slug, data: incomingData, req }, globalConfig.access.validate)
+      : true
+  const storedGlobal = sourceData
+    ? sourceData.docWithLocales
+    : await resolveValidationGlobalSource({
+        slug,
+        accessResult,
+        draft,
+        globalConfig,
+        overrideAccess,
+        req,
+      })
 
   const docWithLocales: JsonObject = deepCopyObjectSimple(storedGlobal)
 
@@ -68,19 +81,28 @@ async function validateOperationWithScopedRequest<TSlug extends GlobalSlug>({
     delete docWithLocales._id
   }
 
-  const originalDoc = await afterRead({
-    collection: null,
-    context: req.context,
-    depth: 0,
-    doc: deepCopyObjectSimple(docWithLocales),
-    draft,
-    fallbackLocale: req.fallbackLocale!,
-    global: globalConfig,
-    locale: req.locale!,
-    overrideAccess: true,
-    req,
-    showHiddenFields: true,
-  })
+  const originalDoc = sourceData
+    ? req.locale === sourceData.originalLocale
+      ? deepCopyObjectSimple(sourceData.originalDoc)
+      : flattenDataByLocale({
+          configBlockReferences: req.payload.config.blocks,
+          docWithLocales,
+          fields: globalConfig.fields,
+          locale: req.locale!,
+        })
+    : await afterRead({
+        collection: null,
+        context: req.context,
+        depth: 0,
+        doc: deepCopyObjectSimple(docWithLocales),
+        draft,
+        fallbackLocale: req.fallbackLocale!,
+        global: globalConfig,
+        locale: req.locale!,
+        overrideAccess: true,
+        req,
+        showHiddenFields: true,
+      })
 
   return runValidationLifecycle({
     collection: null,
@@ -91,6 +113,8 @@ async function validateOperationWithScopedRequest<TSlug extends GlobalSlug>({
     originalDoc,
     overrideAccess,
     req,
+    skipMutationHooks,
+    validationOperation,
   })
 }
 
