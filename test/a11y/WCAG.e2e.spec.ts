@@ -3677,11 +3677,11 @@ test.describe('WCAG 2.2 Level AA', () => {
         await tab.press('Enter')
         await expect(tab).toHaveAttribute('aria-selected', 'true')
         await expect(panel).toBeVisible()
-        const panelID = panel
-        const tabID = tab
+        const panelID = (await panel.getAttribute('id')) ?? ''
+        const tabID = (await tab.getAttribute('id')) ?? ''
 
-        await expect(panelID).toHaveAttribute('id')
-        await expect(tabID).toHaveAttribute('id')
+        expect(panelID).toBeTruthy()
+        expect(tabID).toBeTruthy()
         await expect(tab).toHaveAttribute('aria-controls', panelID)
         await expect(panel).toHaveAttribute('aria-labelledby', tabID)
         await expect(field.getByRole('tabpanel')).toHaveCount(1)
@@ -3720,11 +3720,11 @@ test.describe('WCAG 2.2 Level AA', () => {
         }
         await expect(tab).toHaveAttribute('aria-selected', 'true')
         await expect(panel).toBeVisible()
-        const tabID = tab
-        const panelID = panel
+        const tabID = (await tab.getAttribute('id')) ?? ''
+        const panelID = (await panel.getAttribute('id')) ?? ''
 
-        await expect(tabID).toHaveAttribute('id')
-        await expect(panelID).toHaveAttribute('id')
+        expect(tabID).toBeTruthy()
+        expect(panelID).toBeTruthy()
         await expect(panel).toHaveAttribute('aria-labelledby', tabID)
         await expect(tab).toHaveAttribute('aria-controls', panelID)
         await expect(sidebar.getByRole('tabpanel')).toHaveCount(1)
