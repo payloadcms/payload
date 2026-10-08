@@ -1,7 +1,7 @@
 'use client'
 
 import { PREFERENCE_KEYS } from 'payload/shared'
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useId, useRef, useState } from 'react'
 
 import type { RenderTabServerFnArgs, RenderTabServerFnReturnType } from './renderTabServerFn.js'
 
@@ -42,6 +42,7 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
 }) => {
   const { setPreference } = usePreferences()
   const { serverFunction } = useServerFunctions()
+  const tabsID = useId()
 
   const [activeTabID, setActiveTabID] = useState(initialActiveTabID)
   const [tabContent, setTabContent] = useState<Record<string, React.ReactNode>>(initialTabContents)
@@ -182,8 +183,10 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
 
             return (
               <button
+                aria-controls={`${tabsID}-panel-${tab.slug}`}
                 aria-selected={isActive}
                 className={`${baseClass}__tab ${isActive ? `${baseClass}__tab--active` : ''}`}
+                id={`${tabsID}-tab-${tab.slug}`}
                 key={tab.slug}
                 onClick={() => handleTabChange(tab.slug)}
                 onKeyDown={(e) => handleTabKeyDown(e, index)}
@@ -206,21 +209,27 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
             )
           })}
         </div>
-        <div className={`${baseClass}__content`} role="tabpanel">
-          <DelayedSpinner
-            baseClass={baseClass}
-            delay={loadingDelay}
-            isLoading={loadingTab === activeTabID}
-          />
+        <div className={`${baseClass}__content`}>
           {tabs.map((tab) => {
             const content = tabContent[tab.slug]
-            if (!content) {
-              return null
-            }
-            const isActive = tab.slug === activeTabID && loadingTab !== activeTabID
+            const isActive = tab.slug === activeTabID
             return (
-              <div key={tab.slug} style={isActive ? undefined : { display: 'none' }}>
-                {content}
+              <div
+                aria-labelledby={`${tabsID}-tab-${tab.slug}`}
+                hidden={!isActive}
+                id={`${tabsID}-panel-${tab.slug}`}
+                key={tab.slug}
+                role="tabpanel"
+                tabIndex={0}
+              >
+                <DelayedSpinner
+                  baseClass={baseClass}
+                  delay={loadingDelay}
+                  isLoading={isActive && loadingTab === tab.slug}
+                />
+                <div style={loadingTab === tab.slug ? { display: 'none' } : undefined}>
+                  {content}
+                </div>
               </div>
             )
           })}

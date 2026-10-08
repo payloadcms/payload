@@ -329,6 +329,10 @@ export interface Post {
     | boolean
     | null;
   unlabelledSource?: string | null;
+  tabDetails?: {
+    note?: string | null;
+  };
+  tabSummary?: string | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -618,6 +622,12 @@ export interface PostsSelect<T extends boolean = true> {
   source?: T;
   unlabelledSettings?: T;
   unlabelledSource?: T;
+  tabDetails?:
+    | T
+    | {
+        note?: T;
+      };
+  tabSummary?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;

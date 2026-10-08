@@ -277,6 +277,20 @@ export const PostsCollection: CollectionConfig = {
       },
       label: false,
     },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          name: 'tabDetails',
+          fields: [{ name: 'note', type: 'text' }],
+          label: { en: 'Post details' },
+        },
+        {
+          fields: [{ name: 'tabSummary', type: 'text' }],
+          label: 'Post summary',
+        },
+      ],
+    },
   ],
   llmInstructions: 'Use descriptive post titles.',
   trash: true,
