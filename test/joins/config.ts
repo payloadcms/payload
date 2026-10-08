@@ -257,6 +257,7 @@ export default buildConfigWithDefaults({
       {
         slug: collectionRestrictedSlug,
         access: {
+          create: () => false,
           read: () => ({ canRead: { equals: true } }),
         },
         admin: {
