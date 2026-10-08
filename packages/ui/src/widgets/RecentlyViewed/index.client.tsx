@@ -27,6 +27,7 @@ export type RecentDocument = {
   dateLabel?: string
   dateTime?: string
   href: string
+  isChanged?: boolean
   isDraft?: boolean
   statusLabel?: string
   thumbnailURL?: string
@@ -390,7 +391,7 @@ export function RecentsAndPinnedClient({
                     </div>
                     {item.statusLabel ? (
                       <span
-                        className={`recents-widget__status-pill${item.isDraft ? ' recents-widget__status-pill--draft' : ''}`}
+                        className={`recents-widget__status-pill${item.isDraft ? ' recents-widget__status-pill--draft' : item.isChanged ? ' recents-widget__status-pill--changed' : ''}`}
                       >
                         {item.statusLabel}
                       </span>

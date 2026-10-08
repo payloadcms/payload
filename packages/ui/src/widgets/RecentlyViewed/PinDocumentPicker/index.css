@@ -7,7 +7,7 @@
     gap: var(--spacer-2);
     width: 100%;
     height: 100%;
-    min-height: calc(var(--spacer-6) * 5);
+    min-block-size: var(--recents-content-height);
     padding: var(--spacer-3);
     border: var(--stroke-width-small) dashed var(--color-border);
     border-radius: var(--radius-large);
