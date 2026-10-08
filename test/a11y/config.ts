@@ -50,9 +50,9 @@ export default buildConfigWithDefaults({
     admin: {
       components: {
         views: {
-          StatusMessages: {
-            Component: '/components/StatusMessages/index.js#StatusMessages',
-            path: '/status-messages',
+          BreadcrumbCurrentPage: {
+            Component: '/components/BreadcrumbCurrentPage/index.js#BreadcrumbCurrentPage',
+            path: '/breadcrumb-current-page',
           },
           CustomIDModals: {
             Component: '/components/CustomIDModals/index.js#CustomIDModals',
@@ -62,12 +62,17 @@ export default buildConfigWithDefaults({
             Component: '/components/FocusIndicatorsView.js#FocusIndicatorsView',
             path: '/focus-indicators',
           },
+          StatusMessages: {
+            Component: '/components/StatusMessages/index.js#StatusMessages',
+            path: '/status-messages',
+          },
         },
       },
       dashboard: {
         defaultLayout: [
           { widgetSlug: 'collections', width: 'full' },
           { widgetSlug: 'upload-dropzone', width: 'small' },
+          { widgetSlug: 'activity', width: 'full' },
         ],
         widgets: [],
       },

@@ -41,6 +41,10 @@ export const AddNewButton = ({
   const isPolymorphic = Array.isArray(relationTo)
 
   if (!isPolymorphic) {
+    if (!permissions?.collections?.[relationTo]?.create) {
+      return null
+    }
+
     return (
       <Button
         buttonStyle={buttonStyle}

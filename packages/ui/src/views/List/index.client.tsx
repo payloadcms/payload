@@ -51,6 +51,7 @@ export function DefaultListView(props: ListViewClientProps) {
     BeforeListTable,
     collectionSlug,
     columnState,
+    currentHierarchyItem,
     Description,
     disableBulkDelete,
     disableBulkEdit,
@@ -297,6 +298,7 @@ export function DefaultListView(props: ListViewClientProps) {
             {BeforeList}
             <CollectionListHeader
               collectionConfig={collectionConfig}
+              currentHierarchyItem={currentHierarchyItem}
               Description={
                 Description || collectionConfig?.admin?.description ? (
                   <div className={`${baseClass}__sub-header`}>

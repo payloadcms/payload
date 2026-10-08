@@ -837,6 +837,13 @@ describe('Join Field', () => {
     await expect(joinField.locator('.cell-canRead')).not.toContainText('false')
   })
 
+  test('should hide the add new button when create access is denied', async () => {
+    await navigateToDoc(page, categoriesJoinRestrictedURL)
+    const joinField = page.locator('#field-collectionRestrictedJoin.field-type.join')
+    await expect(joinField.locator('.relationship-table table')).toBeVisible()
+    await expect(joinField.locator('.relationship-table__add-new')).toHaveCount(0)
+  })
+
   test('should render join field with array of collections', async () => {
     await page.goto(foldersURL.edit(rootParentID))
     const joinField = page.locator('#field-children.field-type.join')

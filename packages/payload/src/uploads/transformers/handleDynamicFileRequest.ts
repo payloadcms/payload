@@ -51,6 +51,25 @@ export async function handleDynamicFileRequest({
     throw new NotFound(req.t)
   }
 
+  if (
+    resolvedDocument.original?.filename === filename &&
+    (resolvedDocument.filename !== filename || req.searchParams.size === 0)
+  ) {
+    const permittedDocument = await withFileTransformAccessContext({
+      callback: () => checkFileAccess({ collection, filename, prefix, req }),
+      isTransform: false,
+      req,
+    })
+
+    return retrieveFileResponse({
+      collection,
+      doc: (permittedDocument ?? resolvedDocument) as ResolvedUploadDocument,
+      filename,
+      prefix,
+      req,
+    })
+  }
+
   const { document, pipeline } = await authorizeDocument({
     collection,
     filename,

@@ -356,17 +356,15 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         return newState
       }
 
-      // TODO: Remove this in 4.0 - this is a temporary fix to prevent a breaking change
-      if (action.sanitize) {
-        for (const field of Object.values(action.state)) {
-          if (field.valid !== false) {
-            field.valid = true
-          }
-          if (field.passesCondition !== false) {
-            field.passesCondition = true
-          }
+      for (const field of Object.values(action.state)) {
+        if (field.valid !== false) {
+          field.valid = true
+        }
+        if (field.passesCondition !== false) {
+          field.passesCondition = true
         }
       }
+
       // If we're not optimizing, just set the state to the new state
       return action.state
     }

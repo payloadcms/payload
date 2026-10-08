@@ -41,11 +41,12 @@ const createContinuationRequest = ({ multipartKey }: { multipartKey: string }) =
   } as unknown as PayloadRequest
 
   const signedReceipt = createClientUploadReceipt({
+    _objectKey: 'upload-1',
     collectionSlug: 'media',
     filePrefix: 'media/documents',
     filename: 'photo.png',
     req,
-    storageFilePath: 'media/documents/photo.png',
+    storageFilePath: 'media/documents/upload-1/photo-original.png',
   })
 
   ;(req as { searchParams?: URLSearchParams }).searchParams = new URLSearchParams({
@@ -82,6 +83,7 @@ describe('getHandleMultiPartUpload', () => {
   describe('continuation', () => {
     const createHandler = () => {
       const resumeMultipartUpload = vi.fn(() => ({
+        complete: vi.fn().mockResolvedValue({ key: 'other/photo-original.png' }),
         uploadPart: vi.fn().mockResolvedValue({ etag: 'etag', partNumber: 1 }),
       }))
 
@@ -113,12 +115,26 @@ describe('getHandleMultiPartUpload', () => {
 
       const response = await handler(
         createContinuationRequest({
-          multipartKey: 'media/documents/photo.png',
+          multipartKey: 'media/documents/upload-1/photo-original.png',
         }),
       )
 
       expect(response.status).toBe(200)
-      expect(resumeMultipartUpload).toHaveBeenCalledWith('media/documents/photo.png', 'upload-id')
+      expect(resumeMultipartUpload).toHaveBeenCalledWith(
+        'media/documents/upload-1/photo-original.png',
+        'upload-id',
+      )
+    })
+
+    it('should reject completion at a different provider key', async () => {
+      const { handler } = createHandler()
+      const req = createContinuationRequest({
+        multipartKey: 'media/documents/upload-1/photo-original.png',
+      })
+      req.searchParams.delete('multipartNumber')
+      req.json = vi.fn().mockResolvedValue([])
+
+      await expect(handler(req)).rejects.toMatchObject({ status: 400 })
     })
   })
 
