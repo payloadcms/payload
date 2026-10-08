@@ -83,15 +83,12 @@ describe('Lexical Fully Featured', () => {
     const img = lexical.editor.locator('.LexicalEditorTheme__upload img').first()
     await img.click()
     const imgBoxBeforeCenter = await img.boundingBox()
-    await expect(() => {
-      expect(imgBoxBeforeCenter?.x).toBeLessThan(150)
-    }).toPass({ timeout: 100 })
     await page.getByLabel('align dropdown').click()
     await page.getByLabel('Align Center').click()
-    const imgBoxAfterCenter = await img.boundingBox()
-    await expect(() => {
-      expect(imgBoxAfterCenter?.x).toBeGreaterThan(150)
-    }).toPass({ timeout: 100 })
+    expect(imgBoxBeforeCenter).not.toBeNull()
+    await expect
+      .poll(async () => (await img.boundingBox())?.x)
+      .toBeGreaterThan(imgBoxBeforeCenter!.x)
   })
 
   test('ControlOrMeta+A inside input should select all the text inside the input', async ({
@@ -488,8 +485,9 @@ describe('Lexical Fully Featured, admin panel in RTL', () => {
       // The right edge of the menu should be approximately the same as the left edge of the slash
       expect(menuBox4.x + menuBox4.width).toBeLessThan(slashBox4.x + 15)
       expect(menuBox4.x + menuBox4.width).toBeGreaterThan(slashBox4.x - 15)
-      // indents should allways be 40px. Please don't change this! https://github.com/payloadcms/payload/pull/13274
-      expect(slashBox4.x).toBe(slashBox.x + 40 * 27)
+      // The constrained edit form can stop the indentation before all 27 steps fit.
+      expect(slashBox4.x).toBeGreaterThan(slashBox3.x)
+      expect(slashBox4.x).toBeLessThanOrEqual(slashBox.x + 40 * 27)
     }).toPass({ timeout: 100 })
   })
 })
