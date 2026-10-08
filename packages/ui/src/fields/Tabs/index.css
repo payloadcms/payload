@@ -26,7 +26,7 @@
       &:before,
       &:after {
         content: ' ';
-        display: block;
+        display: var(--field-tabs-edge-display, block);
         width: calc(var(--spacer-2) * var(--field-border-bleed, 1));
       }
     }
@@ -51,7 +51,7 @@
     &:before,
     &:after {
       content: ' ';
-      display: block;
+      display: var(--field-tabs-edge-display, block);
       width: max(0px, calc(var(--gutter-h) * var(--field-border-bleed, 1) - var(--spacer-2)));
       flex-shrink: 0;
     }

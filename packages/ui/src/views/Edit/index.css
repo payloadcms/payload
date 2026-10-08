@@ -79,6 +79,7 @@
       .collection-edit__main
       > .document-fields:not(.document-fields--force-sidebar-wrap) {
       --field-border-bleed: 0;
+      --field-tabs-edge-display: none;
       max-width: 1080px;
     }
   }
@@ -88,6 +89,7 @@
       .collection-edit__main
       > .document-fields:not(.document-fields--force-sidebar-wrap) {
       --field-border-bleed: 1;
+      --field-tabs-edge-display: block;
       max-width: 100%;
     }
   }
