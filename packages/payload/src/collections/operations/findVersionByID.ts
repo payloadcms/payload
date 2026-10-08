@@ -11,6 +11,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { checkFileAccess } from '../../uploads/checkFileAccess.js'
 import { markHistoricalFileURLs } from '../../uploads/fileVersioning/markHistoricalFileURLs.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { hasVersionsEnabled } from '../../utilities/getVersionsConfig.js'
 import { httpStatus } from '../../utilities/httpStatus.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
@@ -56,6 +57,15 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
 
   if (!id) {
     throw new APIError('Missing ID of version.', httpStatus.BAD_REQUEST)
+  }
+
+  // Entities without versions have no versions table/collection in the database adapter.
+  if (!hasVersionsEnabled(collectionConfig)) {
+    if (disableErrors) {
+      return null!
+    }
+
+    throw new NotFound(req.t)
   }
 
   // /////////////////////////////////////

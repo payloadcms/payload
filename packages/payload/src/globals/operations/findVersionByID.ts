@@ -10,6 +10,7 @@ import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
+import { hasVersionsEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
@@ -43,6 +44,15 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     showHiddenFields,
   } = args
 
+  // Entities without versions have no versions table/collection in the database adapter.
+  if (!hasVersionsEnabled(globalConfig)) {
+    if (disableErrors) {
+      return null!
+    }
+
+    throw new NotFound(req.t)
+  }
+
   // /////////////////////////////////////
   // Access
   // /////////////////////////////////////
@@ -63,15 +73,6 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     (typeof id === 'string' && id.length > 0) || (typeof id === 'number' && Number.isFinite(id))
 
   if (!isValidID) {
-    throw new NotFound(req.t)
-  }
-
-  // Globals without versions have no versions table/collection in the database adapter.
-  if (!globalConfig.versions) {
-    if (disableErrors) {
-      return null!
-    }
-
     throw new NotFound(req.t)
   }
 

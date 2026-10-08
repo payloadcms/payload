@@ -45,6 +45,7 @@ import {
   restoreAccessNoVersionsGlobalSlug,
   secondaryAdminUserCollectionSlug,
   versionCollectionSlug,
+  versionsDisabledCollectionSlug,
   versionsDisabledGlobalSlug,
 } from './slugs.js'
 
@@ -4738,6 +4739,51 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
     })
   })
 
+  test.describe('Collections - versions disabled', () => {
+    test('should throw NotFound when finding versions of a collection without versions', async ({
+      payload,
+    }) => {
+      await expect(
+        payload.findVersions({
+          collection: versionsDisabledCollectionSlug as any,
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow(NotFound)
+    })
+
+    test('should throw NotFound when finding a version by ID of a collection without versions', async ({
+      payload,
+    }) => {
+      await expect(
+        payload.findVersionByID({
+          id: '1',
+          collection: versionsDisabledCollectionSlug as any,
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow(NotFound)
+    })
+
+    test('should respond with 404 instead of 500 for REST versions of a collection without versions', async ({
+      restClient,
+    }) => {
+      const response = await restClient.GET(
+        `/${versionsDisabledCollectionSlug}/versions`,
+      )
+
+      expect(response.status).toBe(404)
+    })
+
+    test('should respond with 404 instead of 500 for a REST version by ID of a collection without versions', async ({
+      restClient,
+    }) => {
+      const response = await restClient.GET(
+        `/${versionsDisabledCollectionSlug}/versions/1`,
+      )
+
+      expect(response.status).toBe(404)
+    })
+  })
+
   test.describe('Globals - GraphQL', () => {
     let autosaveGlobalVersionID: number | string
 
@@ -4897,9 +4943,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             value: draft.id,
           },
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       await wait(4000)
@@ -4949,9 +4995,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             value: user.id,
           },
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       await wait(4000)
@@ -5115,9 +5161,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           locale: 'en',
           user: user.id,
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       const queuedJob = (
@@ -5175,9 +5221,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             value: 0,
           },
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       const queuedJob = (
@@ -5233,9 +5279,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             value: published.id,
           },
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       await wait(4000)
@@ -5279,9 +5325,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             value: draft.id,
           },
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       await payload.delete({
@@ -5333,9 +5379,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             value: draft.id,
           },
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       await payload.delete({
@@ -5387,9 +5433,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         input: {
           global: draftGlobalSlug,
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       await wait(4000)
@@ -5424,9 +5470,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           type: 'unpublish',
           global: draftGlobalSlug,
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       await wait(4000)

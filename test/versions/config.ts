@@ -34,6 +34,7 @@ import { SecondaryAdminUsers } from './collections/SecondaryAdminUsers.js'
 import { TextCollection } from './collections/Text.js'
 import { Users } from './collections/Users.js'
 import VersionPosts from './collections/Versions.js'
+import { VersionsDisabledCollection } from './collections/VersionsDisabled.js'
 import AutosaveGlobal from './globals/Autosave.js'
 import AutosaveWithDraftButtonGlobal from './globals/AutosaveWithDraftButton.js'
 import DisablePublishGlobal from './globals/DisablePublish.js'
@@ -87,6 +88,7 @@ export default buildConfigWithDefaults({
       RestoreAccessLocalized,
       Users,
       SecondaryAdminUsers,
+      VersionsDisabledCollection,
     ],
     globals: [
       AutosaveGlobal,

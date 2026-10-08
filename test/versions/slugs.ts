@@ -37,6 +37,8 @@ export const disablePublishGlobalSlug = 'disable-publish-global'
 export const textCollectionSlug = 'text'
 export const usersCollectionSlug = 'users'
 
+export const versionsDisabledCollectionSlug = 'versions-disabled-collection'
+
 export const collectionSlugs = [
   autosaveCollectionSlug,
   autosaveWithMultiSelectCollectionSlug,

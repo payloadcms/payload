@@ -11,6 +11,7 @@ import { validateSortQuery } from '../../database/queryValidation/validateSortQu
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { hasVersionsEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
@@ -49,6 +50,12 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
   const req = args.req!
   const { fallbackLocale, locale, payload } = req
 
+  // Entities without versions have no versions table/collection in the database adapter,
+  // so querying it would crash (e.g. a TypeError in the drizzle adapter → HTTP 500).
+  if (!hasVersionsEnabled(globalConfig)) {
+    throw new NotFound(req.t)
+  }
+
   const versionFields = buildVersionGlobalFields(payload.config, globalConfig, true)
 
   // /////////////////////////////////////
@@ -58,12 +65,6 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
   const accessResults = !overrideAccess
     ? await executeAccess({ slug: globalConfig.slug, req }, globalConfig.access.readVersions)
     : true
-
-  // Globals without versions have no versions table/collection in the database adapter,
-  // so querying it would crash (e.g. a TypeError in the drizzle adapter → HTTP 500).
-  if (!globalConfig.versions) {
-    throw new NotFound(req.t)
-  }
 
   await validateQueryPaths({
     globalConfig,
