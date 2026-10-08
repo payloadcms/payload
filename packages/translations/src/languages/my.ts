@@ -517,10 +517,15 @@ export const myTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'ဖိုင်ထည့်ပါ',
     addFiles: 'ဖိုင်များ ထည့်ပါ',
+    aspectRatio: 'အချိုးအစား',
+    aspectRatioCustom: 'စိတ်ကြိုက်',
+    aspectRatioFreeform: 'လွတ်လပ်စွာ',
+    aspectRatioOriginal: 'မူရင်းပုံ',
     bulkUpload: 'အစုလိုက် အပ်လုဒ်',
     crop: 'သုန်း',
     cropToolDescription:
       'ရွေးထားသည့်ဧရိယာတွင်မွေးလျှက်မှုများကိုဆွဲပြီး, အသစ်တည်ပြီးသို့မဟုတ်အောက်ပါတ',
+    customAspectRatio: 'စိတ်ကြိုက်အချိုး',
     download: 'ဒေါင်းလုဒ်ဆွဲပါ',
     dragAndDrop: 'ဖိုင်တစ်ဖိုင်ကို ဆွဲချလိုက်ပါ။',
     dragAndDropHere: 'သို့မဟုတ် ဖိုင်တစ်ခုကို ဤနေရာတွင် ဆွဲချပါ။',
@@ -533,6 +538,7 @@ export const myTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'ပြသနားရထားသည့်ပုံအားထိန်းသိမ်းရန် ဖိုကယ်ပိုင်းကို တိုက်ရိုက်ပွဲ့နိုင်သည် သို',
     height: 'Height',
+    invalidAspectRatio: 'အချိုးကို အကျယ်:အမြင့် ပုံစံဖြင့် ထည့်ပါ၊ ဥပမာ 16:9။',
     lessInfo: 'အချက်အလက်နည်းတယ်။',
     moreInfo: 'အချက်အလက်',
     noFile: 'ဖိုင် မရှိပါ',

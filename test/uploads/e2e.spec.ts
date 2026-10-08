@@ -76,7 +76,7 @@ const adminThumbnailFunctionSrcPattern = new RegExp(
     '$',
 )
 
-const { afterAll, beforeAll, beforeEach, describe } = test
+const { afterAll, afterEach, beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
 let client: RESTClient
@@ -2007,6 +2007,139 @@ describe('Uploads', () => {
       // Increment back to original using arrow up
       await heightInput.press('ArrowUp')
       await expect(heightInput).toHaveValue('800')
+    })
+
+    describe('aspect ratio', () => {
+      const createdMediaIDs: (number | string)[] = []
+
+      const openCropEditor = async ({ fileName }: { fileName: string }) => {
+        await page.goto(mediaURL.create)
+        await page.setInputFiles('input[type="file"]', path.join(dirname, fileName))
+        await page.locator('.file-field__edit').click()
+      }
+
+      const getAspectRatioSelect = () => page.getByLabel('Aspect Ratio', { exact: true })
+      const getCustomAspectRatioInput = () => page.getByLabel('Custom ratio', { exact: true })
+      const getWidthInput = () => page.locator('.edit-upload__input input[name="Width (px)"]')
+      const getHeightInput = () => page.locator('.edit-upload__input input[name="Height (px)"]')
+
+      afterEach(async () => {
+        for (const id of createdMediaIDs) {
+          await payload.delete({ id, collection: mediaSlug })
+        }
+        createdMediaIDs.length = 0
+      })
+
+      test('should default to freeform and keep width and height independent', async () => {
+        await openCropEditor({ fileName: 'test-image.jpg' })
+
+        await expect(getAspectRatioSelect()).toHaveValue('freeform')
+
+        await getWidthInput().fill('400')
+        await expect(getHeightInput()).toHaveValue('800')
+      })
+
+      test('should lock the crop to the original image aspect ratio', async () => {
+        await openCropEditor({ fileName: 'horizontal-squares.jpg' })
+
+        await getAspectRatioSelect().selectOption('original')
+        await expect(getWidthInput()).toHaveValue('800')
+        await expect(getHeightInput()).toHaveValue('200')
+
+        await getWidthInput().fill('400')
+        await expect(getHeightInput()).toHaveValue('100')
+      })
+
+      test('should lock the crop to the prefilled custom aspect ratio', async () => {
+        await openCropEditor({ fileName: 'test-image.jpg' })
+
+        await getAspectRatioSelect().selectOption('custom')
+        await expect(getCustomAspectRatioInput()).toHaveValue('16:9')
+        await expect(getWidthInput()).toHaveValue('800')
+        await expect(getHeightInput()).toHaveValue('450')
+
+        await getWidthInput().fill('400')
+        await expect(getHeightInput()).toHaveValue('225')
+      })
+
+      test('should refit the crop when the custom aspect ratio changes', async () => {
+        await openCropEditor({ fileName: 'test-image.jpg' })
+
+        await getAspectRatioSelect().selectOption('custom')
+        await getCustomAspectRatioInput().fill('3:4')
+
+        await expect(getWidthInput()).toHaveValue('600')
+        await expect(getHeightInput()).toHaveValue('800')
+      })
+
+      test('should show an error after blurring an invalid custom aspect ratio', async () => {
+        await openCropEditor({ fileName: 'test-image.jpg' })
+
+        await getAspectRatioSelect().selectOption('custom')
+        await getCustomAspectRatioInput().fill('abc')
+
+        const error = page.locator('.edit-upload__aspectRatioError')
+
+        await expect(error).toBeHidden()
+
+        await getCustomAspectRatioInput().blur()
+        await expect(error).toBeVisible()
+        await expect(getCustomAspectRatioInput()).toHaveAttribute('aria-invalid', 'true')
+
+        await getCustomAspectRatioInput().fill('4:3')
+        await expect(error).toBeHidden()
+        await expect(getWidthInput()).toHaveValue('800')
+        await expect(getHeightInput()).toHaveValue('600')
+      })
+
+      test('should reset a locked crop to the largest centered crop at that ratio', async () => {
+        await openCropEditor({ fileName: 'test-image.jpg' })
+
+        await getAspectRatioSelect().selectOption('custom')
+        await getWidthInput().fill('400')
+        await expect(getHeightInput()).toHaveValue('225')
+
+        await page
+          .locator('.edit-upload__groupWrap')
+          .first()
+          .getByRole('button', { name: 'Reset' })
+          .click()
+
+        await expect(getWidthInput()).toHaveValue('800')
+        await expect(getHeightInput()).toHaveValue('450')
+      })
+
+      test('should unlock the crop when switching back to freeform', async () => {
+        await openCropEditor({ fileName: 'test-image.jpg' })
+
+        await getAspectRatioSelect().selectOption('custom')
+        await expect(getHeightInput()).toHaveValue('450')
+
+        await getAspectRatioSelect().selectOption('freeform')
+        await getWidthInput().fill('400')
+
+        await expect(getHeightInput()).toHaveValue('450')
+      })
+
+      test('should save an image cropped to a custom aspect ratio', async () => {
+        await openCropEditor({ fileName: 'test-image.jpg' })
+
+        await getAspectRatioSelect().selectOption('custom')
+        await getCustomAspectRatioInput().fill('2:1')
+        await expect(getHeightInput()).toHaveValue('400')
+
+        await page.locator('button:has-text("Apply Changes")').click()
+        await saveDocAndAssert(page)
+
+        const mediaID = page.url().split('/').pop() as string
+
+        createdMediaIDs.push(mediaID)
+
+        const { doc } = await client.findByID({ id: mediaID, slug: mediaSlug, auth: true })
+
+        expect(doc.width).toBe(800)
+        expect(doc.height).toBe(400)
+      })
     })
   })
 
