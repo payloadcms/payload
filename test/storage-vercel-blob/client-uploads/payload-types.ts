@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     media: Media;
+    'converted-media': ConvertedMedia;
     'media-with-prefix': MediaWithPrefix;
     'media-container': MediaContainer;
     'legacy-media': LegacyMedia;
@@ -80,6 +81,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     media: MediaSelect<false> | MediaSelect<true>;
+    'converted-media': ConvertedMediaSelect<false> | ConvertedMediaSelect<true>;
     'media-with-prefix': MediaWithPrefixSelect<false> | MediaWithPrefixSelect<true>;
     'media-container': MediaContainerSelect<false> | MediaContainerSelect<true>;
     'legacy-media': LegacyMediaSelect<false> | LegacyMediaSelect<true>;
@@ -151,7 +153,28 @@ export interface Media {
       filesize?: number | null;
       filename?: string | null;
     };
-    sixteenByNineMedium?: {
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "converted-media".
+ */
+export interface ConvertedMedia {
+  id: string;
+  _objectKey?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    square?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -265,6 +288,10 @@ export interface PayloadLockedDocument {
         value: string | Media;
       } | null)
     | ({
+        relationTo: 'converted-media';
+        value: string | ConvertedMedia;
+      } | null)
+    | ({
         relationTo: 'media-with-prefix';
         value: string | MediaWithPrefix;
       } | null)
@@ -353,7 +380,29 @@ export interface MediaSelect<T extends boolean = true> {
               filesize?: T;
               filename?: T;
             };
-        sixteenByNineMedium?:
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "converted-media_select".
+ */
+export interface ConvertedMediaSelect<T extends boolean = true> {
+  _objectKey?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        square?:
           | T
           | {
               url?: T;

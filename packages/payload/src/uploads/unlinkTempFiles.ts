@@ -4,7 +4,6 @@ import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
-import { mapAsync } from '../utilities/mapAsync.js'
 import { unlinkClientUploadTempFile } from './unlinkClientUploadTempFile.js'
 
 type Args = {
@@ -21,21 +20,25 @@ export const unlinkTempFiles: (args: Args) => Promise<void> = async ({
   req,
 }) => {
   const { file } = req
+  const preservedTempFilePath = req.context?._payloadCloudStorageTempFilePath
+  const tempFilePath =
+    file?.tempFilePath ??
+    (typeof preservedTempFilePath === 'string' ? preservedTempFilePath : undefined)
   const isClientUploadTempFile = Boolean(
-    file?.tempFilePath && Object.prototype.hasOwnProperty.call(file, 'clientUploadContext'),
+    file?.clientUpload ||
+      (file?.tempFilePath && Object.prototype.hasOwnProperty.call(file, 'clientUploadContext')),
   )
   let unlinkedTempFilePath: string | undefined
 
   if (collectionConfig.upload && (config.upload?.useTempFiles || isClientUploadTempFile)) {
-    const fileArray = [{ file }]
-    await mapAsync(fileArray, async ({ file }) => {
-      // Still need this check because this will not be populated if using local API
-      if (file?.tempFilePath) {
-        await fs.unlink(file.tempFilePath)
-        unlinkedTempFilePath = file.tempFilePath
-      }
-    })
+    if (tempFilePath) {
+      await fs.unlink(tempFilePath)
+      unlinkedTempFilePath = tempFilePath
+    }
   }
 
   await unlinkClientUploadTempFile({ alreadyUnlinkedPath: unlinkedTempFilePath, req })
+  if (req.context) {
+    delete req.context._payloadCloudStorageTempFilePath
+  }
 }

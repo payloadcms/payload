@@ -4,6 +4,7 @@ import { expect, test } from '@playwright/test'
 import { readFileSync, statSync } from 'fs'
 import path from 'path'
 import { wait } from 'payload/shared'
+import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
@@ -1926,9 +1927,26 @@ describe('Uploads', () => {
         auth: true,
       })
 
-      // green and red squares should have different sizes (colors make the difference)
-      expect(greenDoc.filesize).toEqual(1205)
-      expect(redDoc.filesize).toEqual(1207)
+      for (const { doc, dominantChannel, otherChannel } of [
+        { doc: greenDoc, dominantChannel: 1, otherChannel: 0 },
+        { doc: redDoc, dominantChannel: 0, otherChannel: 1 },
+      ]) {
+        await expect(async () => {
+          const response = await page.request.get(new URL(doc.url, serverURL).href)
+          const bytes = await response.body()
+          const image = sharp(bytes)
+          const metadata = await image.metadata()
+          const stats = await image.stats()
+
+          expect(response.ok()).toBe(true)
+          expect(doc.mimeType).toBe('image/png')
+          expect(bytes.length).toBe(doc.filesize)
+          expect(metadata).toMatchObject({ format: 'png', height: 400, width: 400 })
+          expect(stats.channels[dominantChannel]!.mean).toBeGreaterThan(
+            stats.channels[otherChannel]!.mean,
+          )
+        }).toPass()
+      }
     })
 
     test('should update image alignment based on focal point', async () => {

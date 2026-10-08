@@ -7,6 +7,7 @@ interface UploadFileArgs {
   buffer: Buffer
   mimeType: string
   storageFilePath: string
+  tempFilePath?: string
 }
 
 export async function uploadFile({
@@ -14,9 +15,14 @@ export async function uploadFile({
   buffer,
   mimeType,
   storageFilePath,
+  tempFilePath,
 }: UploadFileArgs): Promise<void> {
   // Read more: https://github.com/cloudflare/workers-sdk/issues/6047#issuecomment-2691217843
-  const body = isMiniflare ? new Blob([buffer]) : buffer
+  const body = tempFilePath
+    ? await (await import('node:fs')).openAsBlob(tempFilePath)
+    : isMiniflare
+      ? new Blob([buffer])
+      : buffer
 
   await bucket.put(storageFilePath, body, {
     httpMetadata: { contentType: mimeType },

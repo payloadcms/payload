@@ -1,8 +1,10 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { list } from '@vercel/blob'
 import dotenv from 'dotenv'
 import * as path from 'path'
+import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
 import {
@@ -73,6 +75,132 @@ test.describe('storage-vercel-blob client uploads E2E', () => {
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, '../../uploads/image.png'))
     await expect(page.locator('.file-field__filename')).toHaveValue('image.png')
     await saveDocAndAssert(page)
+  })
+
+  for (const format of ['webp', 'gif', 'tiff'] as const) {
+    test(`should retain processed image bytes after saving a ${format} client upload`, async () => {
+      const buffer = await sharp({
+        create: { background: '#336699', channels: 3, height: 80, width: 120 },
+      })
+        .toFormat(format)
+        .toBuffer()
+
+      await page.goto(mediaURL.create)
+      await page.setInputFiles('input[type="file"]', {
+        name: `client-upload.${format === 'tiff' ? 'tif' : format}`,
+        buffer,
+        mimeType: `image/${format}`,
+      })
+
+      const savedResponse = page.waitForResponse(
+        (response) =>
+          new URL(response.url()).pathname === `/api/${mediaSlug}` &&
+          response.request().method() === 'POST',
+      )
+
+      await saveDocAndAssert(page)
+
+      const { doc } = await (await savedResponse).json()
+      const { blobs } = await list()
+      const stored = blobs.find((blob) => blob.pathname.endsWith(`/${doc.filename}`))
+
+      expect(doc.filename).toBe(`client-upload.${format === 'tiff' ? 'tif' : format}`)
+      expect(doc.sizes.square.filename).toBeDefined()
+      expect(blobs.every((blob) => blob.size > 0)).toBe(true)
+
+      const storedSize = blobs.find((blob) =>
+        blob.pathname.endsWith(`/${doc.sizes.square.filename}`),
+      )
+
+      expect(storedSize).toBeDefined()
+      expect(storedSize!.size).toBe(doc.sizes.square.filesize)
+
+      const sizeBytes = Buffer.from(await (await fetch(storedSize!.url)).arrayBuffer())
+
+      expect(await sharp(sizeBytes).metadata()).toMatchObject({ height: 20, width: 30 })
+      expect(stored).toBeDefined()
+
+      const download = await fetch(stored!.url)
+      const bytes = Buffer.from(await download.arrayBuffer())
+
+      expect(doc.filesize).toBeGreaterThan(0)
+      expect(stored!.size).toBe(doc.filesize)
+      expect(bytes.length).toBe(doc.filesize)
+
+      const served = await page.request.get(new URL(doc.url, serverURL).href)
+
+      expect(served.status()).toBe(200)
+      expect((await served.body()).equals(bytes)).toBe(true)
+      expect(await sharp(bytes).metadata()).toMatchObject({
+        format,
+        height: 200,
+        width: 200,
+      })
+    })
+  }
+
+  test('should retain cropped and resized client upload bytes', async () => {
+    const format = 'png'
+    const buffer = await sharp({
+      create: { background: '#336699', channels: 3, height: 80, width: 120 },
+    })
+      .toFormat(format)
+      .toBuffer()
+
+    await page.goto(mediaURL.create)
+    await page.setInputFiles('input[type="file"]', {
+      name: `client-upload.${format === 'tiff' ? 'tif' : format}`,
+      buffer,
+      mimeType: `image/${format}`,
+    })
+
+    await page.locator('.file-field__edit').click()
+    await page.locator('.edit-upload__input input[name="Width (px)"]').fill('60')
+    await page.locator('.edit-upload__input input[name="Height (px)"]').fill('40')
+    await page.locator('button:has-text("Apply Changes")').click()
+
+    const savedResponse = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === `/api/${mediaSlug}` &&
+        response.request().method() === 'POST',
+    )
+
+    await saveDocAndAssert(page)
+
+    const { doc } = await (await savedResponse).json()
+    const { blobs } = await list()
+    const stored = blobs.find((blob) => blob.pathname.endsWith(`/${doc.filename}`))
+
+    expect(doc.filename).toBe(`client-upload.${format === 'tiff' ? 'tif' : format}`)
+    expect(doc.sizes.square.filename).toBeDefined()
+    expect(blobs.every((blob) => blob.size > 0)).toBe(true)
+
+    const storedSize = blobs.find((blob) => blob.pathname.endsWith(`/${doc.sizes.square.filename}`))
+
+    expect(storedSize).toBeDefined()
+    expect(storedSize!.size).toBe(doc.sizes.square.filesize)
+
+    const sizeBytes = Buffer.from(await (await fetch(storedSize!.url)).arrayBuffer())
+
+    expect(await sharp(sizeBytes).metadata()).toMatchObject({ height: 20, width: 30 })
+    expect(stored).toBeDefined()
+
+    const download = await fetch(stored!.url)
+    const bytes = Buffer.from(await download.arrayBuffer())
+
+    expect(doc.filesize).toBeGreaterThan(0)
+    expect(stored!.size).toBe(doc.filesize)
+    expect(bytes.length).toBe(doc.filesize)
+
+    const served = await page.request.get(new URL(doc.url, serverURL).href)
+
+    expect(served.status()).toBe(200)
+    expect((await served.body()).equals(bytes)).toBe(true)
+    expect(await sharp(bytes).metadata()).toMatchObject({
+      format,
+      height: 200,
+      width: 200,
+    })
   })
 
   test('should upload file directly to Vercel Blob, not through the Payload server', async ({
@@ -211,7 +339,7 @@ test.describe('storage-vercel-blob client uploads E2E', () => {
     await expect(async () => {
       await bulkUploadButton.click()
       await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
-    }).toPass({ timeout: 5000, intervals: [500] })
+    }).toPass({ intervals: [500], timeout: 5000 })
 
     await testPage.setInputFiles('.dropzone input[type="file"]', [
       path.resolve(dirname, '../../uploads/image.png'),

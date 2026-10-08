@@ -5,6 +5,8 @@ import type { SanitizedUploadConfig } from '../uploads/types.js'
 import fs from 'fs/promises'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { createClientUploadReceipt } from '../uploads/clientUploadReceipt.js'
+
 import { addDataAndFileToRequest } from './addDataAndFileToRequest.js'
 
 type MinimalReq = Pick<PayloadRequest, 'body' | 'headers' | 'method' | 'payload'> & {
@@ -86,6 +88,83 @@ const createClientUploadReq = ({
 }
 
 describe('addDataAndFileToRequest', () => {
+  it('should derive client state from a verified receipt and ignore submitted state', async () => {
+    const handler = vi.fn()
+    const signedReceipt = createClientUploadReceipt({
+      collectionSlug: 'media',
+      context: { prefix: 'receipts', _objectKey: 'issued-key' },
+      filename: 'clip.mp4',
+      req: { payload: { secret: 'test-secret' } } as PayloadRequest,
+    })
+    const req = createClientUploadReq({
+      file: {
+        collectionSlug: 'media',
+        filename: 'clip.mp4',
+        mimeType: 'video/mp4',
+        size: 11,
+        clientUploadContext: { signedReceipt },
+        clientUpload: { isProcessed: true, originalStorageFilePath: 'forged.png' },
+      } as ClientUploadData,
+      handler,
+      upload: { requiresClientUploadReceipt: true },
+    }) as PayloadRequest
+    req.payload.secret = 'test-secret'
+
+    await addDataAndFileToRequest(req)
+
+    expect(req.file?.clientUpload).toEqual({
+      isProcessed: false,
+      originalStorageFilePath: 'receipts/issued-key/clip.mp4',
+    })
+    expect(handler).not.toHaveBeenCalled()
+  })
+
+  it('should preserve provider key receipts without assigning cloud path state', async () => {
+    const handler = vi.fn()
+    const signedReceipt = createClientUploadReceipt({
+      collectionSlug: 'media',
+      context: { key: 'provider-file-key' },
+      filename: 'clip.mp4',
+      req: { payload: { secret: 'test-secret' } } as PayloadRequest,
+    })
+    const req = createClientUploadReq({
+      file: {
+        collectionSlug: 'media',
+        filename: 'clip.mp4',
+        mimeType: 'video/mp4',
+        size: 11,
+        clientUploadContext: { signedReceipt },
+      },
+      handler,
+      upload: { requiresClientUploadReceipt: true },
+    }) as PayloadRequest
+    req.payload.secret = 'test-secret'
+
+    await addDataAndFileToRequest(req)
+
+    expect(req.file?.clientUploadContext).toEqual({ key: 'provider-file-key' })
+    expect(req.file?.clientUpload).toBeUndefined()
+    expect(handler).not.toHaveBeenCalled()
+  })
+
+  it('should not accept submitted provider state without a verified receipt', async () => {
+    const req = createClientUploadReq({
+      file: {
+        collectionSlug: 'media',
+        filename: 'clip.mp4',
+        mimeType: 'video/mp4',
+        size: 11,
+        clientUploadContext: { prefix: '' },
+        clientUpload: { isProcessed: true, originalStorageFilePath: 'forged.png' },
+      } as ClientUploadData,
+      handler: vi.fn(),
+    }) as PayloadRequest
+
+    await addDataAndFileToRequest(req)
+
+    expect(req.file?.clientUpload).toBeUndefined()
+  })
+
   it('should parse multipart form-data even when content-length is absent', async () => {
     const req = createReqWithMultipartBody()
 

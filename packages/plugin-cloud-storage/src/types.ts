@@ -1,4 +1,5 @@
 import type {
+  ClientUploadState,
   CollectionConfig,
   Field,
   FileData,
@@ -11,10 +12,12 @@ import type { SignedClientUploadReceipt } from 'payload/internal'
 
 export interface File {
   buffer: Buffer
+  clientUpload?: ClientUploadState
   clientUploadContext?: unknown
   filename: string
   filesize: number
   mimeType: string
+  sizeName?: string
   tempFilePath?: string
 }
 
