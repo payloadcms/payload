@@ -30,7 +30,7 @@ As mentioned above, you can queue jobs, but the jobs won't run unless a worker p
 
 ### Bin script (Recommended for Dedicated Servers)
 
-For dedicated servers, the recommended approach is to use Payload's bin script to run jobs. This creates a completely separate process from your Next.js server, making it easier to deploy, scale, and manage workers independently.
+For dedicated servers, the recommended approach is to use Payload's bin script to run jobs. This creates a completely separate process from your Next.js or TanStack Start server, making it easier to deploy, scale, and manage workers independently.
 
 ```sh
 # Basic usage - run jobs from default queue
@@ -51,18 +51,18 @@ pnpm payload jobs:run --all-queues
 
 **Benefits of using bin scripts:**
 
-- **Separate process**: Runs completely independently from your Next.js server, preventing any impact on API response times
+- **Separate process**: Runs completely independently from your app server, preventing any impact on API response times
 - **Easy deployment**: Can be deployed as a separate service/container, making it simple to scale workers independently
 - **Simple monitoring**: Each worker process can be monitored, restarted, and scaled independently
-- **No Next.js overhead**: Workers don't load the entire Next.js application, making them lighter and faster
+- **No framework overhead**: Workers don't load the entire Next.js or TanStack Start application, making them lighter and faster
 
 **Deployment example:**
 
 ```yaml
 # docker-compose.yml or similar
 services:
-  nextjs:
-    # Your main Next.js app
+  app:
+    # Your main Next.js or TanStack Start app
     command: pnpm start
 
   worker-default:
@@ -78,7 +78,7 @@ This makes it easy to run multiple workers for different queues, scale them inde
 
 ### autoRun (Alternative for Dedicated Servers)
 
-The `jobs.autoRun` property allows you to configure cron jobs that automatically **execute** jobs from your queue at specified intervals. This runs within your Next.js process.
+The `jobs.autoRun` property allows you to configure cron jobs that automatically **execute** jobs from your queue at specified intervals. This runs within your app's process (Next.js or TanStack Start).
 
 <Banner type="warning">
   **Important Distinction:** `autoRun` does NOT queue new jobs—it only **runs**
@@ -498,7 +498,7 @@ Here's a quick guide to help you choose:
 | Method         | Best For                               | Pros                                   | Cons                                       |
 | -------------- | -------------------------------------- | -------------------------------------- | ------------------------------------------ |
 | **Bin script** | Dedicated servers (Recommended)        | Separate process, easy to deploy/scale | Requires dedicated server                  |
-| **autoRun**    | Dedicated servers (Alternative)        | Simple setup, automatic execution      | Runs in Next.js process                    |
+| **autoRun**    | Dedicated servers (Alternative)        | Simple setup, automatic execution      | Runs in your app's process                 |
 | **Endpoint**   | Serverless platforms (Vercel, Netlify) | Works with serverless, easy to trigger | Requires external cron (Vercel Cron, etc.) |
 | **Local API**  | Custom scheduling, testing             | Full control, good for tests           | Must implement your own scheduling         |
 
@@ -612,7 +612,7 @@ console.log(jobs.docs[0].waitUntil) // Check if this is in the future
 
 **Symptom:** Jobs work initially but stop running after you make code changes in development.
 
-**Diagnosis:** Hot Module Reload (HMR) in Next.js disrupts cron schedules. This is expected behavior in development.
+**Diagnosis:** Hot Module Reload (HMR) in Next.js or TanStack Start disrupts cron schedules. This is expected behavior in development.
 
 **Solution:** Restart your dev server after making changes to job configurations. This is not an issue in production.
 

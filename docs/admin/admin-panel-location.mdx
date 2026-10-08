@@ -6,7 +6,12 @@ desc: Learn how to move and customize the location of your Payload Admin Panel, 
 keywords: admin, customization, routes, folder structure, import map, configuration
 ---
 
-Payload is flexible about where your Admin Panel lives within your Next.js application. You can customize routes, move folders, and organize your project structure to match your application's needs.
+Payload is flexible about where your Admin Panel lives within your application. You can customize routes, move folders, and organize your project structure to match your application's needs.
+
+<Banner type="info">
+  This guide applies to Next.js. TanStack Start does not yet support customizing
+  the Admin Panel's route location.
+</Banner>
 
 ## Common Use Cases
 
@@ -14,31 +19,6 @@ Payload is flexible about where your Admin Panel lives within your Next.js appli
 - **Nested admin panels** - Place Payload at `/admin/content` alongside custom admin routes
 - **Multiple admin interfaces** - Organize Payload and custom dashboards together
 - **Organizational preferences** - Match your team's folder structure conventions
-
-## Understanding the Payload Folder Structure
-
-By default, Payload creates this structure in your Next.js app:
-
-```
-app/ (or src/app/)
-├── (payload)/
-│   ├── admin/
-│   │   ├── [[...segments]]/
-│   │   │   ├── not-found.tsx
-│   │   │   └── page.tsx
-│   │   └── importMap.js
-│   ├── api/
-│   │   └── [...slug]/
-│   │       └── route.ts
-│   ├── custom.css
-│   └── layout.tsx
-```
-
-- **`(payload)/`** - Parent folder containing all Payload-related routes
-- **`admin/`** - Admin Panel UI routes
-- **`api/`** - REST API routes
-- **`layout.tsx`** - Root layout that imports the import map
-- **`importMap.js`** - Auto-generated file mapping component paths (regenerated on startup)
 
 ## Scenario 1: Simple Route Change
 

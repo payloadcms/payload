@@ -72,20 +72,20 @@ Custom List Views receive a different set of props than other views because Payl
 
 Server components receive all [client props](#client-component-props-listviewclientprops) plus the following additional server-only data:
 
-| Prop                   | Description                                                                           |
-| ---------------------- | ------------------------------------------------------------------------------------- |
-| `collectionConfig`     | The sanitized [Collection Config](../configuration/collections) for this collection.  |
-| `data`                 | The paginated query result, including `docs`, `totalDocs`, `page`, `totalPages`, etc. |
-| `limit`                | The number of documents displayed per page.                                           |
-| `listPreferences`      | Saved user preferences for this list (columns, sort, etc.).                           |
-| `listSearchableFields` | The fields configured as searchable in the collection's admin options.                |
-| `i18n`                 | The [i18n](../configuration/i18n) object.                                             |
-| `locale`               | The active locale, if localization is enabled.                                        |
-| `params`               | Route parameters from the Next.js dynamic route.                                      |
-| `payload`              | The [Payload](../local-api/overview) class.                                           |
-| `permissions`          | The current user's permissions.                                                       |
-| `searchParams`         | URL search parameters (page, sort, where, limit, etc.).                               |
-| `user`                 | The currently authenticated user.                                                     |
+| Prop                   | Description                                                                                         |
+| ---------------------- | --------------------------------------------------------------------------------------------------- |
+| `collectionConfig`     | The sanitized [Collection Config](../configuration/collections) for this collection.                |
+| `data`                 | The paginated query result, including `docs`, `totalDocs`, `page`, `totalPages`, etc.               |
+| `limit`                | The number of documents displayed per page.                                                         |
+| `listPreferences`      | Saved user preferences for this list (columns, sort, etc.).                                         |
+| `listSearchableFields` | The fields configured as searchable in the collection's admin options.                              |
+| `i18n`                 | The [i18n](../configuration/i18n) object.                                                           |
+| `locale`               | The active locale, if localization is enabled.                                                      |
+| `params`               | Route parameters from the framework's dynamic route (Next.js segments or the TanStack Start splat). |
+| `payload`              | The [Payload](../local-api/overview) class.                                                         |
+| `permissions`          | The current user's permissions.                                                                     |
+| `searchParams`         | URL search parameters (page, sort, where, limit, etc.).                                             |
+| `user`                 | The currently authenticated user.                                                                   |
 
 #### Client Component Props (`ListViewClientProps`)
 

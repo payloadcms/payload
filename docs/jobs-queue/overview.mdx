@@ -3,7 +3,7 @@ title: Jobs Queue
 label: Overview
 order: 10
 desc: Payload provides all you need to run job queues, which are helpful to offload long-running processes into separate workers.
-keywords: jobs queue, application framework, typescript, node, react, nextjs
+keywords: jobs queue, application framework, typescript, node, react, nextjs, tanstack start
 ---
 
 Payload's Jobs Queue gives you a simple, yet powerful way to offload large or future tasks to separate compute resources which is a very powerful feature of many application frameworks.
@@ -42,7 +42,7 @@ Examples:
 
 #### Offloading complex operations
 
-You may run into the need to perform computationally expensive functions which might slow down your main Payload API server(s). The Jobs Queue allows you to offload these tasks to a separate compute resource rather than slowing down the server(s) that run your Payload APIs. With Payload Task definitions, you can even keep large dependencies out of your main Next.js bundle by dynamically importing them only when they are used. This keeps your Next.js + Payload compilation fast and ensures large dependencies do not get bundled into your Payload production build.
+You may run into the need to perform computationally expensive functions which might slow down your main Payload API server(s). The Jobs Queue allows you to offload these tasks to a separate compute resource rather than slowing down the server(s) that run your Payload APIs. With Payload Task definitions, you can even keep large dependencies out of your main application bundle by dynamically importing them only when they are used. This keeps your Payload compilation fast and ensures large dependencies do not get bundled into your production build, whether you're hosting Payload on Next.js or TanStack Start.
 
 Examples:
 
@@ -132,7 +132,7 @@ autoRun: [{ cron: '* * * * *', queue: 'emails' }]
 pnpm payload jobs:run --cron "* * * * *" --queue emails
 
 // Option B: autoRun (Dedicated Server)
-// Runs within Next.js process, handles BOTH scheduling + running
+// Runs within your app's process, handles BOTH scheduling + running
 autoRun: [{
   cron: '* * * * *',
   queue: 'emails',
