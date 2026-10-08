@@ -1,3 +1,4 @@
+import type { Field, Validate } from '../fields/config/types.js'
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
@@ -9,6 +10,7 @@ import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { generateFileData } from './generateFileData.js'
+import { validateTransformedDocument } from './validateTransformedDocument.js'
 
 // A minimal valid 1x1 transparent PNG, so `file-type` can detect `image/png` from it.
 const PNG_SIGNATURE = Buffer.from(
@@ -81,62 +83,97 @@ describe('generateFileData', () => {
       },
     }) as unknown as PayloadRequest
 
-  it('should replay a retained original through bounded reads without eager buffering', async () => {
-    const filename = path.basename(tempFilePath)
+  it.each([false, true])(
+    'should replay a retained original through bounded reads without eager buffering (legacy: %s)',
+    async (isLegacy) => {
+      let transformCalls = 0
+      const filename = path.basename(tempFilePath)
+      const req = createReq(undefined)
+      req.file = undefined
+      req.payload.config.routes = { api: '/api' } as any
+      req.payload.config.upload = {
+        transformers: [
+          {
+            slug: 'inspect',
+            mimeTypes: ['image/png'],
+            canTransform: () => ({ canTransform: true, handledTransformKeys: ['inspect'] }),
+            transformFile: async ({ source }) => {
+              transformCalls++
+              expect(Buffer.from(await source.read({ length: 8 }))).toEqual(
+                PNG_SIGNATURE.subarray(0, 8),
+              )
+              return { status: 'continue' }
+            },
+          },
+        ],
+      } as any
+      const originalDoc = {
+        id: '1',
+        filename,
+        mimeType: 'image/png',
+        filesize: PNG_SIGNATURE.length,
+        url: `/api/media/file/${filename}`,
+        original: {
+          filename,
+          url: '/original',
+          mimeType: 'image/png',
+          filesize: PNG_SIGNATURE.length,
+          width: 1,
+          height: 1,
+        },
+      }
+      if (isLegacy) {
+        delete (originalDoc as any).original
+      }
+      const readFile = vi
+        .spyOn(fs, 'readFile')
+        .mockRejectedValue(new Error('Unexpected whole original read.'))
+
+      try {
+        const result = await generateFileData({
+          collection: createCollection({
+            disableLocalStorage: false,
+            staticDir: path.dirname(tempFilePath),
+          }),
+          config: {} as SanitizedConfig,
+          data: { _transforms: { inspect: true } },
+          originalDoc,
+          operation: 'update',
+          overwriteExistingFiles: true,
+          req,
+        })
+
+        expect(transformCalls).toBe(1)
+        expect(result.files).toEqual([])
+        expect(readFile).not.toHaveBeenCalled()
+      } finally {
+        readFile.mockRestore()
+      }
+    },
+  )
+
+  it.each([
+    { url: 'https://external.example/image.png', filesize: PNG_SIGNATURE.length },
+    { url: '/api/media/file/logical.png', filesize: null },
+  ])('should not infer original ownership from an unverified descriptor %j', async (descriptor) => {
     const req = createReq(undefined)
     req.file = undefined
     req.payload.config.routes = { api: '/api' } as any
-    req.payload.config.upload = {
-      transformers: [
-        {
-          slug: 'inspect',
-          mimeTypes: ['image/png'],
-          canTransform: () => ({ canTransform: true, handledTransformKeys: ['inspect'] }),
-          transformFile: async ({ source }) => {
-            expect(Buffer.from(await source.read({ length: 8 }))).toEqual(
-              PNG_SIGNATURE.subarray(0, 8),
-            )
-            return { status: 'continue' }
-          },
-        },
-      ],
-    } as any
-    const originalDoc = {
-      id: '1',
-      filename,
-      mimeType: 'image/png',
-      original: {
-        filename,
-        url: '/original',
-        mimeType: 'image/png',
-        filesize: PNG_SIGNATURE.length,
-        width: 1,
-        height: 1,
-      },
-    }
-    const readFile = vi
-      .spyOn(fs, 'readFile')
-      .mockRejectedValue(new Error('Unexpected whole original read.'))
+    req.payload.config.upload = { transformers: [] } as any
+    const originalDoc = { filename: 'logical.png', mimeType: 'image/png', ...descriptor }
 
-    try {
-      const result = await generateFileData({
-        collection: createCollection({
-          disableLocalStorage: false,
-          staticDir: path.dirname(tempFilePath),
-        }),
-        config: {} as SanitizedConfig,
-        data: { _transforms: { inspect: true } },
-        originalDoc,
-        operation: 'update',
-        overwriteExistingFiles: true,
-        req,
-      })
+    const result = await generateFileData({
+      collection: createCollection({ disableLocalStorage: false }),
+      config: req.payload.config,
+      originalDoc,
+      data: { _transforms: { custom: true } },
+      operation: 'update',
+      req,
+    })
 
-      expect(result.files).toEqual([])
-      expect(readFile).not.toHaveBeenCalled()
-    } finally {
-      readFile.mockRestore()
-    }
+    expect(result.files).toEqual([])
+    expect(result.data).not.toHaveProperty('original')
+    expect(originalDoc).not.toHaveProperty('original')
   })
 
   it('does not run full sharp processing on an image with no configured adjustments, even when it arrives via tempFilePath', async () => {
@@ -403,5 +440,136 @@ describe('generateFileData', () => {
     })
 
     expect(files).toEqual([])
+  })
+})
+
+describe('post-transform validation', () => {
+  it('should pass the nearest block and final document context through nested containers', async () => {
+    const observations: Record<string, unknown>[] = []
+    const validate: Validate = (value, args) => {
+      observations.push({
+        blockType: args.blockData?.blockType,
+        data: args.data,
+        operation: args.operation,
+        overrideAccess: args.overrideAccess,
+        path: args.path,
+        previousValue: args.previousValue,
+        siblingData: args.siblingData,
+        value,
+      })
+      return true
+    }
+    const fields: Field[] = [
+      { name: 'title', type: 'text', validate },
+      {
+        name: 'sections',
+        type: 'blocks',
+        blocks: [
+          {
+            slug: 'outer',
+            fields: [
+              {
+                name: 'details',
+                type: 'group',
+                fields: [
+                  {
+                    name: 'rows',
+                    type: 'array',
+                    fields: [{ name: 'value', type: 'text', validate }],
+                  },
+                ],
+              },
+              {
+                name: 'nested',
+                type: 'blocks',
+                blocks: [
+                  {
+                    slug: 'inner',
+                    fields: [{ name: 'value', type: 'text', validate }],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ]
+    const doc = {
+      title: 'after',
+      sections: [
+        {
+          blockType: 'outer',
+          details: { rows: [{ value: 'after' }] },
+          nested: [{ blockType: 'inner', value: 'after' }],
+        },
+      ],
+    }
+    const originalDoc = structuredClone(doc)
+    originalDoc.title = 'before'
+    originalDoc.sections[0].details.rows[0].value = 'before'
+    originalDoc.sections[0].nested[0].value = 'before'
+
+    await validateTransformedDocument({
+      collection: { ...createCollection().config, fields },
+      doc,
+      originalDoc,
+      operation: 'update',
+      overrideAccess: true,
+      req: { payload: { config: {} } } as PayloadRequest,
+    })
+
+    expect(observations).toEqual([
+      expect.objectContaining({ blockType: undefined, path: ['title'], siblingData: doc }),
+      expect.objectContaining({
+        blockType: 'outer',
+        path: ['sections', 0, 'details', 'rows', 0, 'value'],
+        siblingData: { value: 'after' },
+      }),
+      expect.objectContaining({
+        blockType: 'inner',
+        path: ['sections', 0, 'nested', 0, 'value'],
+        siblingData: { blockType: 'inner', value: 'after' },
+      }),
+    ])
+    for (const observation of observations) {
+      expect(observation).toMatchObject({
+        data: doc,
+        operation: 'update',
+        overrideAccess: true,
+        previousValue: 'before',
+        value: 'after',
+      })
+    }
+  })
+
+  it('should validate localized mutations with the corresponding locale and previous value', async () => {
+    const observations: unknown[] = []
+    const validate: Validate = (value, { previousValue, req }) => {
+      observations.push({
+        fallbackLocale: req.fallbackLocale,
+        locale: req.locale,
+        previousValue,
+        value,
+      })
+      return true
+    }
+
+    await validateTransformedDocument({
+      collection: {
+        ...createCollection().config,
+        fields: [{ name: 'title', type: 'text', localized: true, validate }],
+      },
+      doc: { title: { en: 'after-en', de: 'after-de' } },
+      originalDoc: { title: { en: 'before-en', de: 'before-de' } },
+      operation: 'update',
+      req: {
+        payload: { config: { localization: { localeCodes: ['en', 'de'] } } },
+      } as PayloadRequest,
+    })
+
+    expect(observations).toEqual([
+      { fallbackLocale: null, locale: 'en', previousValue: 'before-en', value: 'after-en' },
+      { fallbackLocale: null, locale: 'de', previousValue: 'before-de', value: 'after-de' },
+    ])
   })
 })

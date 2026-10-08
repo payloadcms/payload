@@ -24,6 +24,7 @@ import { canResizeImage } from './canResizeImage.js'
 import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { downloadFileToBuffer } from './downloadFileToBuffer.js'
 import { getOriginalFilename } from './fileVersioning/naming.js'
+import { withLegacyUploadFileData } from './fileVersioning/storedFiles.js'
 import { generateFilePathOrURL } from './generateFilePathOrURL.js'
 import { generateImageSizeFilename } from './generateImageSizeFilename.js'
 import { getFileByPath } from './getFileByPath.js'
@@ -127,6 +128,32 @@ export const generateFileData = async <T>({
     }
   }
 
+  const planSavedPipeline = ({
+    capability,
+    doc,
+    mimeType,
+    originalDoc = createDocumentSnapshot({ doc }),
+  }: {
+    capability: 'handleRequest' | 'transformFile'
+    doc: Document
+    mimeType?: string
+    originalDoc?: Readonly<Document>
+  }) =>
+    planTransformerPipeline({
+      args: {
+        collectionSlug: collectionConfig.slug,
+        doc,
+        originalDoc,
+        req,
+        ...(capability === 'transformFile'
+          ? { operation: 'upload' as const }
+          : { operation: 'request' as const, purpose: 'persisted-default' as const }),
+      },
+      capability,
+      mimeType,
+      transformers: req.payload.config.upload?.transformers ?? [],
+    })
+
   const { serverURL } = req.payload.config
 
   let file = isDuplicating ? undefined : req.file
@@ -195,13 +222,21 @@ export const generateFileData = async <T>({
   const currentFileData = (operation === 'update' ? originalDoc : incomingFileData) as
     | FileData
     | undefined
+  const retainedSourceData =
+    currentFileData && operation === 'update' && transformStateWrite.hasChanged
+      ? (withLegacyUploadFileData({
+          collection: collectionConfig,
+          config: req.payload.config,
+          doc: currentFileData,
+        }) as FileData)
+      : currentFileData
   const retainedOriginal =
     operation === 'update' &&
     !file &&
     !externalUploadSource &&
-    typeof currentFileData?.original?.filename === 'string' &&
-    typeof currentFileData.original.url === 'string'
-      ? currentFileData.original
+    typeof retainedSourceData?.original?.filename === 'string' &&
+    typeof retainedSourceData.original.url === 'string'
+      ? retainedSourceData.original
       : undefined
   const fileSourceData = isDuplicating
     ? (currentFileData?.original ?? currentFileData)
@@ -211,19 +246,12 @@ export const generateFileData = async <T>({
   let replaySource: FileSource | undefined
 
   if (!file && retainedOriginal && transformStateWrite.hasChanged) {
-    const candidate = { ...currentFileData, ...incomingFileData }
+    const candidate = { ...retainedSourceData, ...incomingFileData }
 
-    replayPipeline = await planTransformerPipeline({
-      args: {
-        collectionSlug: collectionConfig.slug,
-        doc: candidate,
-        operation: 'upload',
-        originalDoc: createDocumentSnapshot({ doc: candidate }),
-        req,
-      },
+    replayPipeline = await planSavedPipeline({
       capability: 'transformFile',
+      doc: candidate,
       mimeType: retainedOriginal.mimeType,
-      transformers: req.payload.config.upload?.transformers ?? [],
     })
 
     if (candidate._transforms && replayPipeline.length) {
@@ -235,32 +263,19 @@ export const generateFileData = async <T>({
     const duplicateMimeType = currentFileData?.original?.mimeType ?? currentFileData?.mimeType
     const candidate = structuredClone({ ...incomingFileData, mimeType: duplicateMimeType })
     const originalSnapshot = createDocumentSnapshot({ doc: candidate })
-    replayPipeline = await planTransformerPipeline({
-      args: {
-        collectionSlug: collectionConfig.slug,
-        doc: candidate,
-        operation: 'upload',
-        originalDoc: originalSnapshot,
-        req,
-      },
+    replayPipeline = await planSavedPipeline({
       capability: 'transformFile',
+      doc: candidate,
       mimeType: duplicateMimeType,
-      transformers: req.payload.config.upload?.transformers ?? [],
+      originalDoc: originalSnapshot,
     })
     const coveragePipeline = replayPipeline.length
       ? replayPipeline
-      : await planTransformerPipeline({
-          args: {
-            collectionSlug: collectionConfig.slug,
-            doc: candidate,
-            operation: 'request',
-            originalDoc: originalSnapshot,
-            purpose: 'persisted-default',
-            req,
-          },
+      : await planSavedPipeline({
           capability: 'handleRequest',
+          doc: candidate,
           mimeType: duplicateMimeType,
-          transformers: req.payload.config.upload?.transformers ?? [],
+          originalDoc: originalSnapshot,
         })
 
     assertTransformCoverage({ pipeline: coveragePipeline, state: incomingFileData._transforms })
@@ -345,23 +360,15 @@ export const generateFileData = async <T>({
     }
 
     if (retainedOriginal && transformStateWrite.hasChanged && !replayPipeline?.length) {
-      const candidate = { ...currentFileData, ...incomingFileData }
+      const candidate = { ...retainedSourceData, ...incomingFileData }
       const state = transformStateWrite.value
       const hasSavedIntent = Boolean(state && Object.keys(state).length)
 
       if (hasSavedIntent) {
-        const pipeline = await planTransformerPipeline({
-          args: {
-            collectionSlug: collectionConfig.slug,
-            doc: candidate,
-            operation: 'request',
-            originalDoc: createDocumentSnapshot({ doc: candidate }),
-            purpose: 'persisted-default',
-            req,
-          },
+        const pipeline = await planSavedPipeline({
           capability: 'handleRequest',
+          doc: candidate,
           mimeType: retainedOriginal.mimeType,
-          transformers: req.payload.config.upload?.transformers ?? [],
         })
 
         assertTransformCoverage({ pipeline, state: candidate._transforms })
@@ -383,23 +390,28 @@ export const generateFileData = async <T>({
       return {
         data: {
           ...candidate,
-          _objectKey: hasSavedIntent ? null : retainedOriginal._objectKey,
-          filename: logicalFilename,
-          filesize: hasSavedIntent ? null : retainedOriginal.filesize,
-          height: hasSavedIntent ? null : retainedOriginal.height,
-          mimeType: hasSavedIntent
-            ? (candidate.mimeType ?? retainedOriginal.mimeType)
-            : retainedOriginal.mimeType,
-          original: retainedOriginal,
-          url: undefined,
-          variants: hasSavedIntent
-            ? getLogicalVariants({ collection: collectionConfig, filename: logicalFilename })
-            : getLogicalVariants({
+          ...(hasSavedIntent
+            ? getLogicalDefaultMetadata({
                 collection: collectionConfig,
                 filename: logicalFilename,
-                shouldClear: true,
+                mimeType: candidate.mimeType ?? retainedOriginal.mimeType,
+                url: undefined,
+              })
+            : {
+                _objectKey: retainedOriginal._objectKey,
+                filename: logicalFilename,
+                filesize: retainedOriginal.filesize,
+                height: retainedOriginal.height,
+                mimeType: retainedOriginal.mimeType,
+                url: undefined,
+                variants: getLogicalVariants({
+                  collection: collectionConfig,
+                  filename: logicalFilename,
+                  shouldClear: true,
+                }),
+                width: retainedOriginal.width,
               }),
-          width: hasSavedIntent ? null : retainedOriginal.width,
+          original: retainedOriginal,
         } as T,
         files: [],
       }
@@ -436,6 +448,7 @@ export const generateFileData = async <T>({
   const fileData: Partial<FileData> = {}
   let isRequestOnlyDefault = false
   let expectedDefaultMimeType: string | undefined
+  let sourceDimensions: { height: number; width: number } | undefined
 
   try {
     const workingDoc = structuredClone({
@@ -445,11 +458,9 @@ export const generateFileData = async <T>({
     })
 
     if (!retainedOriginal && (req.file || externalUploadSource)) {
-      let dimensions: { height: number; width: number } | undefined
-
       if (canResizeImage(file.mimetype)) {
         try {
-          dimensions = await getImageSize({ file })
+          sourceDimensions = await getImageSize({ file })
         } catch {
           // An unrecognized image has no known bounds; its adapter validates the source.
         }
@@ -459,7 +470,7 @@ export const generateFileData = async <T>({
         filename: file.name,
         filesize: file.size,
         mimeType: file.mimetype,
-        ...dimensions,
+        ...sourceDimensions,
       }
     }
 
@@ -474,16 +485,10 @@ export const generateFileData = async <T>({
     const pipelineOriginalDoc = createDocumentSnapshot({ doc: workingDoc })
     const plannedPipeline =
       replayPipeline ??
-      (await planTransformerPipeline({
-        args: {
-          collectionSlug: collectionConfig.slug,
-          doc: workingDoc,
-          operation: 'upload',
-          originalDoc: pipelineOriginalDoc,
-          req,
-        },
+      (await planSavedPipeline({
         capability: 'transformFile',
-        transformers: req.payload.config.upload?.transformers ?? [],
+        doc: workingDoc,
+        originalDoc: pipelineOriginalDoc,
       }))
 
     const originalSource =
@@ -506,18 +511,11 @@ export const generateFileData = async <T>({
       Boolean(workingDoc._transforms && Object.keys(workingDoc._transforms).length)
 
     if (isRequestOnlyDefault) {
-      const requestPipeline = await planTransformerPipeline({
-        args: {
-          collectionSlug: collectionConfig.slug,
-          doc: workingDoc,
-          operation: 'request',
-          originalDoc: pipelineOriginalDoc,
-          purpose: 'persisted-default',
-          req,
-        },
+      const requestPipeline = await planSavedPipeline({
         capability: 'handleRequest',
+        doc: workingDoc,
         mimeType: originalSource.mimeType,
-        transformers: req.payload.config.upload?.transformers ?? [],
+        originalDoc: pipelineOriginalDoc,
       })
 
       assertTransformCoverage({ pipeline: requestPipeline, state: workingDoc._transforms })
@@ -629,7 +627,7 @@ export const generateFileData = async <T>({
       }
     }
 
-    newData = { ...incomingFileData, ...workingDoc } as T
+    newData = workingDoc as T
 
     if (mainWebFile && workingDoc._transforms) {
       validateTransformState({
@@ -793,7 +791,7 @@ export const generateFileData = async <T>({
 
       if (!retainedOriginal && isProcessableImage(file.mimetype)) {
         try {
-          const dimensions = await getImageSize({ file })
+          const dimensions = sourceDimensions ?? (await getImageSize({ file }))
           original.width = dimensions.width
           original.height = dimensions.height
         } catch {
@@ -1021,14 +1019,12 @@ export const generateFileData = async <T>({
 
     newData = {
       ...newData,
-      _objectKey: null,
-      filename,
-      filesize: null,
-      height: null,
-      mimeType: expectedDefaultMimeType,
-      url: null,
-      variants: getLogicalVariants({ collection: collectionConfig, filename }),
-      width: null,
+      ...getLogicalDefaultMetadata({
+        collection: collectionConfig,
+        filename,
+        mimeType: expectedDefaultMimeType,
+        url: null,
+      }),
     }
   }
 
@@ -1067,6 +1063,29 @@ function getCanonicalUploadEdits({
     : operation === 'create'
       ? { focalPoint: { x: 50, y: 50 } }
       : {}
+}
+
+function getLogicalDefaultMetadata({
+  collection,
+  filename,
+  mimeType,
+  url,
+}: {
+  collection: Collection['config']
+  filename: string
+  mimeType: string | undefined
+  url: null | undefined
+}) {
+  return {
+    _objectKey: null,
+    filename,
+    filesize: null,
+    height: null,
+    mimeType,
+    url,
+    variants: getLogicalVariants({ collection, filename }),
+    width: null,
+  }
 }
 
 function getLogicalVariants({

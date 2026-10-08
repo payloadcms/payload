@@ -145,6 +145,16 @@ export type DynamicResizeParseResult =
       isRouted: false
     }
 
+/** Output resource bounds for saved transforms, including all animation frames. */
+export type SharpTransformLimits = {
+  /** @default 4096 */
+  maxHeight: number
+  /** @default 16_777_216 */
+  maxPixels: number
+  /** @default 4096 */
+  maxWidth: number
+}
+
 export type SharpTransformerOptions = {
   /** Per-collection upload-time image processing settings. */
   collections?: Partial<Record<UploadCollectionSlug, SharpCollectionConfig>>
@@ -162,6 +172,8 @@ export type SharpTransformerOptions = {
   sharp?: SharpDependency
   /** @default 'sharp' */
   slug?: string
+  /** Bounds for upload-time and request-time saved transforms. */
+  transformLimits?: Partial<SharpTransformLimits>
 }
 
 /**

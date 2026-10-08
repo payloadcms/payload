@@ -24,6 +24,21 @@ export const Media: CollectionConfig = {
         value?.title === 'invalid' ? 'Invalid nested transformed title.' : true,
     },
     { name: 'entryMimeType', type: 'text' },
+    {
+      name: 'details',
+      type: 'group',
+      fields: [{ name: 'required', type: 'text', defaultValue: 'present', required: true }],
+    },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          name: 'editorial',
+          fields: [{ name: 'required', type: 'text', defaultValue: 'present', required: true }],
+          label: 'Editorial',
+        },
+      ],
+    },
   ],
   hooks: {
     afterChange: [

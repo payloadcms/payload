@@ -1,7 +1,7 @@
 import type { Collection } from '../../collections/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { ResolvedUploadDocument } from './resolveUploadDocument.js'
-import type { PlannedTransformer, UploadDocument } from './types.js'
+import type { PlannedTransformer, UploadDocument, UploadTransformer } from './types.js'
 
 import { Forbidden } from '../../errors/Forbidden.js'
 import { NotFound } from '../../errors/NotFound.js'
@@ -71,7 +71,7 @@ export async function handleDynamicFileRequest({
     })
   }
 
-  const { doc, document, originalDoc, pipeline } = await authorizeDocument({
+  const { doc, document, hasPersistedWork, originalDoc, pipeline } = await authorizeDocument({
     collection,
     filename,
     prefix,
@@ -79,24 +79,19 @@ export async function handleDynamicFileRequest({
     resolvedDocument,
   })
 
-  const hasPersistedWork = Boolean(
-    doc._transforms &&
-      Object.keys(doc._transforms).length &&
-      !canReuseStoredDefault({ collection: collection.config, doc, filename, req }),
-  )
+  const planPipeline = ({
+    mimeType,
+    purpose,
+    transformers,
+  }: {
+    mimeType: string
+    purpose: 'persisted-default' | 'request-override'
+    transformers?: UploadTransformer[]
+  }) => planRequestPipeline({ collection, doc, mimeType, originalDoc, purpose, req, transformers })
   const persistedPipeline = hasPersistedWork
-    ? await planTransformerPipeline({
-        args: {
-          collectionSlug: collection.config.slug,
-          doc,
-          operation: 'request',
-          originalDoc,
-          purpose: 'persisted-default',
-          req,
-        },
-        capability: 'handleRequest',
+    ? await planPipeline({
         mimeType: doc.original?.mimeType ?? doc.mimeType,
-        transformers: req.payload.config.upload.transformers,
+        purpose: 'persisted-default',
       })
     : []
 
@@ -104,18 +99,19 @@ export async function handleDynamicFileRequest({
     assertTransformCoverage({ pipeline: persistedPipeline, state: doc._transforms })
   }
 
-  const originalSource = createLazySourceGetter({
-    retrieve: () =>
-      getSourceFileResponse({
-        collection,
-        document,
-        filename: document.original?.filename ?? document.filename,
-        prefix,
-        req,
-      }),
-  })
+  const createOriginalSource = () =>
+    createLazySourceGetter({
+      retrieve: () =>
+        getSourceFileResponse({
+          collection,
+          document,
+          filename: document.original?.filename ?? document.filename,
+          prefix,
+          req,
+        }),
+    })
   const source = hasPersistedWork
-    ? originalSource
+    ? createOriginalSource()
     : createLazySourceGetter({
         retrieve: () => getSourceFileResponse({ collection, document, filename, prefix, req }),
       })
@@ -128,10 +124,79 @@ export async function handleDynamicFileRequest({
   // Aborted on failure to close every response body handed to a transformer, even one the
   // transformer locked with its own reader before throwing.
   const handedOutBodyControllers = new Map<Response, AbortController>()
-  const discardResponse = async (response: Response): Promise<void> => {
+  const discardResponse = async ({
+    response,
+    retainedResponse,
+  }: {
+    response: Response
+    retainedResponse: Response
+  }): Promise<void> => {
+    // Locked bodies can still feed a returned streaming response; release them when it ends.
+    if (response.body && (response.body.locked || response.body === retainedResponse.body)) {
+      return
+    }
     await cancelUnusedBody(response)
     handedOutBodyControllers.get(response)?.abort()
     handedOutBodyControllers.delete(response)
+  }
+  let cancelFinalResponse: (() => void) | undefined
+  const cleanup = () => {
+    cancelFinalResponse?.()
+    for (const controller of handedOutBodyControllers.values()) {
+      controller.abort()
+    }
+    handedOutBodyControllers.clear()
+    req.signal?.removeEventListener('abort', cleanup)
+  }
+  req.signal?.addEventListener('abort', cleanup, { once: true })
+  const finalize = ({ response }: { response: Response }) => {
+    if (!response.body) {
+      cleanup()
+      return finalizeFileResponse({ collection, req, response })
+    }
+    const reader = response.body.getReader()
+    const body = new ReadableStream<Uint8Array>({
+      async cancel(reason) {
+        cancelFinalResponse = undefined
+        cleanup()
+        await reader.cancel(reason).catch(() => {})
+      },
+      async pull(controller) {
+        try {
+          const result = await reader.read()
+          if (result.done) {
+            controller.close()
+            cancelFinalResponse = undefined
+            cleanup()
+          } else {
+            controller.enqueue(result.value)
+          }
+        } catch (err) {
+          controller.error(err)
+          cancelFinalResponse = undefined
+          cleanup()
+        }
+      },
+      start(controller) {
+        cancelFinalResponse = () => {
+          controller.error(req.signal?.reason)
+          void reader.cancel(req.signal?.reason).catch(() => {})
+          cancelFinalResponse = undefined
+        }
+        if (req.signal?.aborted) {
+          cleanup()
+        }
+      },
+    })
+    return finalizeFileResponse({
+      collection,
+      req,
+      response: new Response(body, {
+        headers: response.headers,
+        status: response.status,
+        statusText: response.statusText,
+      }),
+    })
   }
   let currentMimeType = hasPersistedWork
     ? (doc.original?.mimeType ?? doc.mimeType)
@@ -142,19 +207,7 @@ export async function handleDynamicFileRequest({
   try {
     for (const phase of phases) {
       if (phase.purpose === 'request-override' && currentMimeType !== initialOverrideMimeType) {
-        phase.pipeline = await planTransformerPipeline({
-          args: {
-            collectionSlug: collection.config.slug,
-            doc,
-            operation: 'request',
-            originalDoc,
-            purpose: phase.purpose,
-            req,
-          },
-          capability: 'handleRequest',
-          mimeType: currentMimeType,
-          transformers: req.payload.config.upload.transformers,
-        })
+        phase.pipeline = await planPipeline({ mimeType: currentMimeType, purpose: phase.purpose })
       }
       const phaseMimeType = currentMimeType
       const stages =
@@ -176,17 +229,9 @@ export async function handleDynamicFileRequest({
           planned ??
           (currentMimeType !== phaseMimeType
             ? (
-                await planTransformerPipeline({
-                  args: {
-                    collectionSlug: collection.config.slug,
-                    doc,
-                    operation: 'request',
-                    originalDoc,
-                    purpose: phase.purpose,
-                    req,
-                  },
-                  capability: 'handleRequest',
+                await planPipeline({
                   mimeType: currentMimeType,
+                  purpose: phase.purpose,
                   transformers: [transformer],
                 })
               )[0]
@@ -196,21 +241,15 @@ export async function handleDynamicFileRequest({
         }
         const { handledTransformKeys, options } = stage
 
-        if (
-          handledTransformKeys?.length &&
-          !transformer.mimeTypes.some((pattern) =>
-            matchesMimeType({ mimeType: currentMimeType, pattern }),
-          )
-        ) {
+        const isMatchingMimeType = transformer.mimeTypes.some((pattern) =>
+          matchesMimeType({ mimeType: currentMimeType, pattern }),
+        )
+        if (handledTransformKeys?.length && !isMatchingMimeType) {
           throw new TransformerContractError(
             `Transformer ${transformer.slug} cannot handle the current source MIME type ${currentMimeType}.`,
           )
         }
-        if (
-          !transformer.mimeTypes.some((pattern) =>
-            matchesMimeType({ mimeType: currentMimeType, pattern }),
-          )
-        ) {
+        if (!isMatchingMimeType) {
           continue
         }
         const previousResponse = currentResponse
@@ -220,24 +259,32 @@ export async function handleDynamicFileRequest({
           retrieve: async () => {
             handedOutResponse = withAbortableBody({
               response: currentResponse ?? (await source.get()),
-              signal: handedOutBodyController.signal,
+              signal: req.signal
+                ? AbortSignal.any([req.signal, handedOutBodyController.signal])
+                : handedOutBodyController.signal,
             })
             handedOutBodyControllers.set(handedOutResponse, handedOutBodyController)
             return handedOutResponse
           },
         })
 
+        const originalBodyController = new AbortController()
+        const stageOriginal = createLazySourceGetter({
+          retrieve: async () => {
+            const response = withAbortableBody({
+              response: await createOriginalSource().get(),
+              signal: req.signal
+                ? AbortSignal.any([req.signal, originalBodyController.signal])
+                : originalBodyController.signal,
+            })
+            handedOutBodyControllers.set(response, originalBodyController)
+            return response
+          },
+        })
         const result = await transformer.handleRequest({
           collectionSlug: collection.config.slug,
           doc,
-          getOriginalFile: async () => {
-            const response = withAbortableBody({
-              response: await originalSource.get(),
-              signal: handedOutBodyController.signal,
-            })
-            handedOutBodyControllers.set(response, handedOutBodyController)
-            return response
-          },
+          getOriginalFile: stageOriginal.get,
           getSourceFile: stageSource.get,
           options,
           originalDoc,
@@ -247,9 +294,12 @@ export async function handleDynamicFileRequest({
 
         if (result.response) {
           if (handedOutResponse && result.response !== handedOutResponse) {
-            await discardResponse(handedOutResponse)
+            await discardResponse({
+              response: handedOutResponse,
+              retainedResponse: result.response,
+            })
           } else if (previousResponse && result.response !== previousResponse) {
-            await discardResponse(previousResponse)
+            await discardResponse({ response: previousResponse, retainedResponse: result.response })
           }
           currentResponse = result.response
           const mimeType = result.response.headers.get('content-type')?.split(';')[0]?.trim()
@@ -280,19 +330,7 @@ export async function handleDynamicFileRequest({
         if (result.status === 'complete') {
           const pendingOverrides =
             phase.purpose === 'persisted-default'
-              ? await planTransformerPipeline({
-                  args: {
-                    collectionSlug: collection.config.slug,
-                    doc,
-                    operation: 'request',
-                    originalDoc,
-                    purpose: 'request-override',
-                    req,
-                  },
-                  capability: 'handleRequest',
-                  mimeType: currentMimeType,
-                  transformers: req.payload.config.upload.transformers,
-                })
+              ? await planPipeline({ mimeType: currentMimeType, purpose: 'request-override' })
               : []
           if (
             phase.purpose === 'persisted-default' &&
@@ -303,7 +341,7 @@ export async function handleDynamicFileRequest({
               'A persisted transform completed before all saved transforms and request overrides were satisfied.',
             )
           }
-          return finalizeFileResponse({ collection, req, response: currentResponse! })
+          return finalize({ response: currentResponse! })
         }
       }
     }
@@ -312,13 +350,16 @@ export async function handleDynamicFileRequest({
     for (const handedOutBodyController of handedOutBodyControllers.values()) {
       handedOutBodyController.abort(err)
     }
+    cleanup()
     await cancelUnusedBody(currentResponse)
     throw err
   }
 
   if (currentResponse) {
-    return finalizeFileResponse({ collection, req, response: currentResponse })
+    return finalize({ response: currentResponse })
   }
+
+  cleanup()
 
   // No transformer produced a response — serve the original file through the
   // normal path (Range/ETag/redirect support, existing `modifyResponseHeaders` order).
@@ -340,7 +381,46 @@ function withAbortableBody({
     return response
   }
 
-  return new Response(response.body.pipeThrough(new TransformStream(), { signal }), {
+  let removeAbortListener: () => void
+  const reader = response.body.getReader()
+  const body = new ReadableStream<Uint8Array>({
+    async cancel(reason) {
+      removeAbortListener()
+      await reader.cancel(reason)
+    },
+    async pull(controller) {
+      try {
+        const result = await reader.read()
+        if (signal.aborted) {
+          return
+        }
+        if (result.done) {
+          removeAbortListener()
+          controller.close()
+        } else {
+          controller.enqueue(result.value)
+        }
+      } catch (err) {
+        removeAbortListener()
+        if (!signal.aborted) {
+          controller.error(err)
+        }
+      }
+    },
+    start(controller) {
+      const abort = () => {
+        signal.removeEventListener('abort', abort)
+        controller.error(signal.reason)
+        void reader.cancel(signal.reason).catch(() => {})
+      }
+      signal.addEventListener('abort', abort, { once: true })
+      if (signal.aborted) {
+        abort()
+      }
+      removeAbortListener = () => signal.removeEventListener('abort', abort)
+    },
+  })
+  return new Response(body, {
     headers: response.headers,
     status: response.status,
     statusText: response.statusText,
@@ -366,17 +446,19 @@ async function cancelUnusedBody(response: Response | undefined): Promise<void> {
 function planRequestPipeline({
   collection,
   doc,
-  document,
-  filename,
+  mimeType,
   originalDoc,
+  purpose = 'request-override',
   req,
+  transformers = req.payload.config.upload.transformers,
 }: {
   collection: Collection
   doc: UploadDocument
-  document: ResolvedUploadDocument
-  filename: string
+  mimeType: string
   originalDoc: Readonly<UploadDocument>
+  purpose?: 'persisted-default' | 'request-override'
   req: PayloadRequest
+  transformers?: UploadTransformer[]
 }): Promise<PlannedTransformer[]> {
   return planTransformerPipeline({
     args: {
@@ -384,13 +466,31 @@ function planRequestPipeline({
       doc,
       operation: 'request',
       originalDoc,
-      purpose: 'request-override',
+      purpose,
       req,
     },
     capability: 'handleRequest',
-    mimeType: getRequestedFile({ document, filename }).mimeType,
-    transformers: req.payload.config.upload.transformers,
+    mimeType,
+    transformers,
   })
+}
+
+function hasPersistedTransformWork({
+  collection,
+  doc,
+  filename,
+  req,
+}: {
+  collection: Collection
+  doc: UploadDocument
+  filename: string
+  req: PayloadRequest
+}): boolean {
+  return Boolean(
+    doc._transforms &&
+      Object.keys(doc._transforms).length &&
+      !canReuseStoredDefault({ collection: collection.config, doc, filename, req }),
+  )
 }
 
 type AccessResult = { document?: ResolvedUploadDocument; isAllowed: true } | { isAllowed: false }
@@ -428,6 +528,7 @@ async function authorizeDocument({
 }): Promise<{
   doc: UploadDocument
   document: ResolvedUploadDocument
+  hasPersistedWork: boolean
   originalDoc: Readonly<UploadDocument>
   pipeline: PlannedTransformer[]
 }> {
@@ -460,16 +561,12 @@ async function authorizeDocument({
     return accessResults.get(isTransform)!
   }
 
-  const hasSavedTransformWork = Boolean(
-    resolvedDocument._transforms &&
-      Object.keys(resolvedDocument._transforms).length &&
-      !canReuseStoredDefault({
-        collection: collection.config,
-        doc: resolvedDocument,
-        filename,
-        req,
-      }),
-  )
+  const hasSavedTransformWork = hasPersistedTransformWork({
+    collection,
+    doc: resolvedDocument,
+    filename,
+    req,
+  })
   const hasCandidateTransformers =
     hasSavedTransformWork ||
     getCandidateTransformers({
@@ -500,18 +597,12 @@ async function authorizeDocument({
   const pipeline = await planRequestPipeline({
     collection,
     doc,
-    document,
-    filename,
+    mimeType: getRequestedFile({ document, filename }).mimeType,
     originalDoc,
     req,
   })
   const isTransform =
-    pipeline.length > 0 ||
-    Boolean(
-      document._transforms &&
-        Object.keys(document._transforms).length &&
-        !canReuseStoredDefault({ collection: collection.config, doc: document, filename, req }),
-    )
+    pipeline.length > 0 || hasPersistedTransformWork({ collection, doc: document, filename, req })
 
   if (isTransform !== isTransformAccess) {
     const requiredAccess = await checkAccess({ isTransform })
@@ -524,5 +615,11 @@ async function authorizeDocument({
     }
   }
 
-  return { doc, document, originalDoc, pipeline }
+  return {
+    doc,
+    document,
+    hasPersistedWork: hasPersistedTransformWork({ collection, doc, filename, req }),
+    originalDoc,
+    pipeline,
+  }
 }

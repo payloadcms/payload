@@ -5,12 +5,15 @@ import { fileURLToPath } from 'node:url'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { DynamicMedia } from './collections/DynamicMedia/index.js'
 import { Media } from './collections/Media/index.js'
-import { dynamicMediaSlug } from './shared.js'
+import { dynamicMediaSlug, mediaSlug } from './shared.js'
 import { recordingTransformer } from './transformerFixtures.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 const transformer = sharpTransformer({
-  collections: { [dynamicMediaSlug]: { variants: [{ name: 'square', height: 3, width: 3 }] } },
+  collections: {
+    [dynamicMediaSlug]: { variants: [{ name: 'square', height: 3, width: 3 }] },
+    [mediaSlug]: { variants: [{ name: 'small', height: 3, width: 3 }] },
+  },
   dynamic: true,
 })
 const canTransform = transformer.canTransform!

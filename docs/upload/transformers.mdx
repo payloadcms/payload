@@ -105,6 +105,8 @@ Adapters may optionally provide `transformDefinitions`, a map of custom keys to 
 
 `transformFile` processes one current source and never writes to storage. Its `options` come only from that stage's own `canTransform` result. The retained original remains separately available when a stage replaces the current source. The full working document includes custom fields and `_transforms`; the entry snapshot is deeply frozen.
 
+On writes, field and document hooks run before transformation. Payload validates transformer changes to the final document before committing it, using the ordinary field-validator context, including the nearest block and the trusted access mode. This validation does not run those hooks a second time. Request-time document changes remain local to the response.
+
 `FileSource` exposes `filename`, `mimeType`, optional `size`, lazy `stream()`, bounded `read({ length, offset? })`, and `arrayBuffer({ maxBytes })`. Custom stages can probe temporary or provider sources without eager whole-file downloads. Consumers must declare a whole-file byte limit. Sharp defaults to 64 MiB through `maxSourceBytes`.
 
 Sharp's private variant bridge derives configured variants from the effective main result. Other stages keep their own options and run on the main pipeline; they do not receive Sharp task options.
@@ -344,6 +346,8 @@ sharpTransformer({
 ```
 
 As with every transformer, dynamic-resize output is never written back to storage — it is generated for that one response and discarded.
+
+Saved resizes are bounded by `sharpTransformer({ transformLimits: { maxWidth, maxHeight, maxPixels } })` on uploads and persisted-default requests. Defaults are 4096 pixels per axis and 16,777,216 pixels across all animation frames. Limits include intermediate focal-cover resizes and derived dimensions. Excessive transforms fail with a client error; configured dynamic query limits remain separate.
 
 #### Securing dynamic resizing
 

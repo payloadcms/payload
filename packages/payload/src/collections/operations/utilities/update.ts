@@ -440,11 +440,6 @@ export const prepareUpdateDocument = async <
 
       const dataToUpdate: JsonObject = { ...(localizedPublishData ?? result) }
 
-      if (collectionConfig.upload) {
-        // A file operation may have claimed this parent row after docWithLocales was read.
-        // The ordinary document write must not restore that stale revision value.
-      }
-
       // /////////////////////////////////////
       // Handle potential password update
       // /////////////////////////////////////

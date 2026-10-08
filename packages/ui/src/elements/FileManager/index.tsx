@@ -3,7 +3,7 @@ import type { FormState, SanitizedCollectionConfig, TransformState, UploadEdits 
 
 import { useModal } from '@faceless-ui/modal'
 import { formatFilesize, isImage, validateMimeType } from 'payload/shared'
-import React, { Fragment, useCallback, useEffect, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { FieldError } from '../../fields/FieldError/index.js'
@@ -57,8 +57,10 @@ export const FileManager: React.FC<FileManagerProps> = ({
   collectionSlug,
   initialState,
   resetUploadEdits: resetUploadEditsFromProps,
+  updateUploadEdits: updateUploadEditsFromProps,
   uploadConfig,
   UploadControls,
+  uploadEdits: uploadEditsFromProps,
   UploadFilePreview,
 }) => {
   const { openModal } = useModal()
@@ -100,6 +102,13 @@ export const FileManager: React.FC<FileManagerProps> = ({
   } = useUploadControls()
   const uploadEditsContext = useUploadEdits()
   const resetUploadEdits = resetUploadEditsFromProps ?? uploadEditsContext.resetUploadEdits
+
+  const updateUploadEdits = updateUploadEditsFromProps ?? uploadEditsContext.updateUploadEdits
+  const uploadEdits = uploadEditsFromProps ?? uploadEditsContext.uploadEdits
+  const replacementIntent = useRef<{
+    transforms: null | TransformState
+    uploadEdits: UploadEdits
+  } | null>(null)
 
   const [fileSrc, setFileSrc] = useState<null | string>(null)
   const [removedFile, setRemovedFile] = useState(false)
@@ -144,7 +153,13 @@ export const FileManager: React.FC<FileManagerProps> = ({
         toast.error(t('error:invalidFileType'))
         return
       }
-      if (isNewFile) {
+      if (isNewFile && file instanceof File) {
+        if (data?.filename && !replacementIntent.current) {
+          replacementIntent.current = structuredClone({
+            transforms: transforms ?? null,
+            uploadEdits,
+          })
+        }
         setTransforms(null)
         resetUploadEdits()
       }
@@ -158,6 +173,9 @@ export const FileManager: React.FC<FileManagerProps> = ({
     },
     [
       setValue,
+      data?.filename,
+      transforms,
+      uploadEdits,
       resetUploadEdits,
       setTransforms,
       setUploadControlFile,
@@ -202,23 +220,43 @@ export const FileManager: React.FC<FileManagerProps> = ({
     uploadConfig,
   })
 
-  const handleFileRemoval = useCallback(() => {
+  const handleReplaceFile = useCallback(() => {
+    replacementIntent.current = structuredClone({ transforms: transforms ?? null, uploadEdits })
     setRemovedFile(true)
-    handleFileChange({ file: null })
     setFileSrc('')
     setFileUrl('')
     setSelectedSize(null)
-    resetUploadEdits()
+  }, [setFileUrl, transforms, uploadEdits])
+
+  const handleCancelReplacement = useCallback(() => {
+    const intent = replacementIntent.current
+    if (intent) {
+      setTransforms(intent.transforms)
+      resetUploadEdits()
+      updateUploadEdits(intent.uploadEdits)
+    } else if (!data?.filename) {
+      setTransforms(null)
+      resetUploadEdits()
+    }
+    replacementIntent.current = null
+    setValue(undefined)
+    setRemovedFile(false)
+    setFileSrc('')
+    setFileUrl('')
+    setSelectedSize(null)
     setUploadControlFileUrl('')
     setUploadControlFileName(null)
     setUploadControlFile(null)
   }, [
-    handleFileChange,
+    data?.filename,
     resetUploadEdits,
     setFileUrl,
+    setTransforms,
     setUploadControlFile,
     setUploadControlFileName,
     setUploadControlFileUrl,
+    setValue,
+    updateUploadEdits,
   ])
 
   const onEditsSave = useCallback(
@@ -232,6 +270,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
 
   // Reset states for when replacing the file with a new upload
   useEffect(() => {
+    replacementIntent.current = null
     setSelectedSize(null)
     setRemovedFile(false)
     setFileSrc('')
@@ -360,7 +399,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
             hideRemoveFile={uploadConfig?.hideRemoveFile}
             isAdjustable={fileTypeIsAdjustable}
             onEditImage={() => openModal(editDrawerSlug)}
-            onReplace={handleFileRemoval}
+            onReplace={handleReplaceFile}
           />
         )}
         <div className={`${baseClass}__content`}>
@@ -383,7 +422,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
                   buttonStyle="secondary"
                   className={`${baseClass}__remove`}
                   icon="x"
-                  onClick={() => setRemovedFile(false)}
+                  onClick={handleCancelReplacement}
                   round
                   tooltip={t('general:cancel')}
                 />
@@ -407,7 +446,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
                     buttonStyle="secondary"
                     className={`${baseClass}__remove`}
                     icon="x"
-                    onClick={handleFileRemoval}
+                    onClick={handleCancelReplacement}
                     round
                     tooltip={t('general:cancel')}
                   />

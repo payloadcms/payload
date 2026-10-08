@@ -5,6 +5,12 @@ import { describe, expect, it } from 'vitest'
 import { resolveSharpDynamicDefaults, sharpTransformer } from './sharpTransformer.js'
 
 describe('sharpTransformer', () => {
+  it.each([0, -1, Infinity, 1.5])('should reject invalid saved resource limits %s', (maxPixels) => {
+    expect(() => sharpTransformer({ transformLimits: { maxPixels } })).toThrow(
+      'positive safe integers',
+    )
+  })
+
   it("should default mimeTypes to canResizeImage's allow-list exactly, excluding jxl", () => {
     expect(sharpTransformer().mimeTypes).toEqual([
       'image/jpeg',

@@ -926,7 +926,6 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         // Check api response
         expect(doc.mimeType).toEqual('image/png')
         expect(doc._transforms).toBeNull()
-        expect(doc._transforms).toBeNull()
         expect(variants.maintainedAspectRatio.url).toContain('/api/media/file/image')
         expect(variants.maintainedAspectRatio.url).toContain('.png')
         expect(variants.maintainedAspectRatio.width).toEqual(1024)
@@ -2987,7 +2986,6 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       })
 
       expect(doc._transforms).toBeNull()
-      expect(doc._transforms).toBeNull()
 
       const updateWithoutFocal = await payload.update({
         id: doc.id,
@@ -2996,7 +2994,6 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         overrideAccess: true,
       })
 
-      expect(updateWithoutFocal._transforms).toBeNull()
       expect(updateWithoutFocal._transforms).toBeNull()
 
       await payload.delete({ id: doc.id, collection: focalOnlySlug, overrideAccess: true })
@@ -3012,7 +3009,6 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         overrideAccess: true,
       })
 
-      expect(doc._transforms).toBeNull()
       expect(doc._transforms).toBeNull()
 
       await payload.delete({ id: doc.id, collection: focalNoSizesSlug, overrideAccess: true })

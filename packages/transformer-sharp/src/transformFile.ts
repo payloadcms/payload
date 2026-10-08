@@ -1,11 +1,11 @@
 import type { PayloadRequest, TransformFileArgs, TransformFileResult } from 'payload'
 import type { ResizeOptions, SharpOptions } from 'sharp'
 
-import type { SharpDependency, SharpUploadTaskOptions } from './types.js'
+import type { SharpDependency, SharpTransformLimits, SharpUploadTaskOptions } from './types.js'
 
 import { createSharpFromFile } from './createSharpFromFile.js'
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
-import { transformState } from './transformState.js'
+import { resolveOutputFormat, resolveWithMetadata, transformState } from './transformState.js'
 
 const ANIMATED_MIME_TYPES = ['image/avif', 'image/gif', 'image/webp']
 
@@ -20,9 +20,11 @@ const percentToPixel = (value: number, dimension: number) => Math.floor((value /
 export function createTransformFile({
   maxSourceBytes = 64 * 1024 * 1024,
   sharpDependency,
+  transformLimits,
 }: {
   maxSourceBytes?: number
   sharpDependency: SharpDependency
+  transformLimits?: SharpTransformLimits
 }) {
   return async function transformFile({
     doc,
@@ -32,7 +34,13 @@ export function createTransformFile({
   }: TransformFileArgs<SharpUploadTaskOptions>): Promise<TransformFileResult> {
     const state = doc._transforms
     const shouldApplySavedState =
-      state && Object.keys(state).some((key) => key !== 'focalPoint') && options.kind === 'main'
+      state &&
+      Object.keys(state).some((key) => key !== 'focalPoint' && key !== 'encoding') &&
+      options.kind === 'main'
+    const withMetadata = resolveWithMetadata({
+      state,
+      withMetadata: options.collectionUpload.withMetadata,
+    })
     const input = source
     let file = new File(
       [Buffer.from(await input.arrayBuffer({ maxBytes: maxSourceBytes }))],
@@ -46,29 +54,34 @@ export function createTransformFile({
       file = await transformState({
         buffer: Buffer.from(await file.arrayBuffer()),
         filename: file.name,
+        limits: transformLimits,
         mimeType: file.type,
         sharpDependency,
-        state,
+        // Encoding belongs to the final main output, after configured adjustments.
+        state: {
+          ...state,
+          encoding: undefined,
+          metadataPolicy: {
+            mode:
+              withMetadata === true || typeof withMetadata === 'function' ? 'preserve' : 'strip',
+          },
+        },
       })
     }
 
-    const metadataMode = state?.metadataPolicy?.mode
     const encoding = state?.encoding
     const formatOptions =
       options.kind === 'size'
         ? options.imageResizeConfig.formatOptions
         : options.collectionUpload.formatOptions
-    const canonicalFormatOptions = encoding
-      ? {
-          format: formatOptions?.format ?? (file.type.slice('image/'.length) as 'jpeg'),
-          options: { ...formatOptions?.options, ...encoding },
-        }
-      : formatOptions
+    const canonicalFormatOptions = resolveOutputFormat({
+      encoding,
+      formatOptions,
+      mimeType: file.type,
+    })
     const collectionUpload = {
       ...options.collectionUpload,
-      withMetadata: metadataMode
-        ? metadataMode === 'preserve'
-        : options.collectionUpload.withMetadata,
+      withMetadata,
     }
 
     options =
@@ -87,7 +100,15 @@ export function createTransformFile({
           }
 
     if (options.kind === 'main') {
-      const result = await transformMain({ file, options, req, sharpDependency })
+      const result = await transformMain({
+        file,
+        options,
+        req,
+        sharpDependency,
+        shouldApplyMetadataPolicy: Boolean(
+          shouldApplySavedState && typeof withMetadata === 'function',
+        ),
+      })
 
       return shouldApplySavedState && !result.file ? { file, status: 'continue' } : result
     }
@@ -101,11 +122,13 @@ async function transformMain({
   options,
   req,
   sharpDependency,
+  shouldApplyMetadataPolicy = false,
 }: {
   file: File
   options: Extract<SharpUploadTaskOptions, { kind: 'main' }>
   req: PayloadRequest
   sharpDependency: SharpDependency
+  shouldApplyMetadataPolicy?: boolean
 }): Promise<TransformFileResult> {
   const { collectionUpload, crop } = options
   const { constructorOptions, formatOptions, resizeOptions, trimOptions, withMetadata } =
@@ -113,7 +136,11 @@ async function transformMain({
 
   const fileIsAnimatedType = ANIMATED_MIME_TYPES.includes(file.type)
   const fileHasAdjustments = Boolean(
-    resizeOptions || formatOptions || trimOptions || constructorOptions,
+    resizeOptions ||
+      formatOptions ||
+      trimOptions ||
+      constructorOptions ||
+      shouldApplyMetadataPolicy,
   )
 
   if (crop) {

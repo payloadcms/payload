@@ -6,6 +6,7 @@ import path from 'node:path'
 
 import type { AccessResult } from '../../config/types.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
+import type { FileToSave } from '../../uploads/types.js'
 import type {
   BulkOperationResult,
   Collection,
@@ -327,18 +328,8 @@ export const updateOperation = async <
       docs = query.docs
     }
 
-    const sharedGeneratedFileData = !collectionConfig.upload
-      ? await generateFileData({
-          collection,
-          config,
-          data: bulkUpdateData,
-          operation: 'update',
-          overrideAccess,
-          overwriteExistingFiles,
-          req,
-          throwOnMissingFile: false,
-        })
-      : null
+    const sharedGeneratedFileData: { data: typeof bulkUpdateData; files: FileToSave[] } | null =
+      collectionConfig.upload ? null : { data: bulkUpdateData, files: [] }
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
 
@@ -366,7 +357,7 @@ export const updateOperation = async <
           documentFile.tempFilePath = documentTempFilePath
         }
 
-        if (collectionConfig.upload && sharedGeneratedFileData === null) {
+        if (collectionConfig.upload) {
           documentReq = isolateObjectProperty(req, ['file', 'payloadUploadSizes'])
           // A document that commits its own transaction must not roll back files committed by
           // earlier documents, so it only shares the operation's file scope inside one transaction.
@@ -450,6 +441,7 @@ export const updateOperation = async <
               data: prepared.data,
               operation: 'update',
               originalDoc: docWithLocales,
+              overrideAccess,
               overwriteExistingFiles,
               req: documentReq,
               throwOnMissingFile: false,

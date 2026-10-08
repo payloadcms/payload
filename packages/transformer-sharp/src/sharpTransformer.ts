@@ -60,6 +60,15 @@ export function sharpTransformer(
   const dynamicDefaults = resolveSharpDynamicDefaults(dynamicOptions || undefined)
   const sharpDependency = options.sharp ?? bundledSharp
   const collections = options.collections ?? {}
+  const transformLimits = {
+    maxHeight: options.transformLimits?.maxHeight ?? 4096,
+    maxPixels: options.transformLimits?.maxPixels ?? 16_777_216,
+    maxWidth: options.transformLimits?.maxWidth ?? 4096,
+  }
+
+  if (Object.values(transformLimits).some((value) => !Number.isSafeInteger(value) || value <= 0)) {
+    throw new Error('Sharp transformLimits must be positive safe integers.')
+  }
   const handlesCollection = ({ collectionSlug }: { collectionSlug: string }) =>
     Boolean(collections[collectionSlug])
   const maxSourceBytes = options.maxSourceBytes ?? 64 * 1024 * 1024
@@ -117,6 +126,7 @@ export function sharpTransformer(
       dynamicDefaults,
       maxSourceBytes,
       sharpDependency,
+      transformLimits,
     }),
     init: (config) => {
       assertDynamicCollectionsExist({ config, dynamicOptions })
@@ -132,7 +142,7 @@ export function sharpTransformer(
     },
     // `options` here is always what this transformer computed via `prepareUpload`'s
     // `transform` callback; the public contract's `unknown` just reflects that core never inspects it.
-    transformFile: createTransformFile({ maxSourceBytes, sharpDependency }) as (
+    transformFile: createTransformFile({ maxSourceBytes, sharpDependency, transformLimits }) as (
       args: TransformFileArgs,
     ) => Promise<TransformFileResult>,
   }

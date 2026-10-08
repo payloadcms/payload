@@ -63,6 +63,15 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+// Variants derive from the 200px default; keep them within that size so they are generated.
+const cloudMediaSharpOptions = {
+  ...storageMediaSharpOptions,
+  variants: [
+    { name: 'square', height: 100, width: 100 },
+    { name: 'sixteenByNineMedium', height: 90, width: 160 },
+  ],
+}
+
 export const uploadedTestFiles = new Map<string, { prefix?: string } & File>()
 
 export type BuildPluginCloudStorageIntConfigArgs = {
@@ -300,8 +309,8 @@ export function buildPluginCloudStorageIntConfig({
         transformers: [
           sharpTransformer({
             collections: {
-              [mediaSlug]: storageMediaSharpOptions,
-              [mediaWithOverwriteSlug]: storageMediaSharpOptions,
+              [mediaSlug]: cloudMediaSharpOptions,
+              [mediaWithOverwriteSlug]: cloudMediaSharpOptions,
               [testMetadataSlug]: {
                 formatOptions: { format: 'webp' },
                 variants: [{ name: 'thumbnail', width: 300 }],

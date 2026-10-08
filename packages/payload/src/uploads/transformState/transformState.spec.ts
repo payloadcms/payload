@@ -4,6 +4,7 @@ import type { SanitizedCollectionConfig } from '../../collections/config/types.j
 import type { PayloadRequest } from '../../types/index.js'
 import type { PlannedTransformer } from '../transformers/types.js'
 
+import { validateTransformedDocument } from '../validateTransformedDocument.js'
 import { assertTransformCoverage } from './assertTransformCoverage.js'
 import { buildTransformStateJSONSchema } from './buildTransformStateJSONSchema.js'
 import { canReuseStoredDefault } from './canReuseStoredDefault.js'
@@ -298,4 +299,36 @@ describe('optional transform definitions', () => {
       }),
     ).toEqual(buildTransformStateJSONSchema({ transformers: [transformer] }))
   })
+})
+
+describe('removed transformer containers', () => {
+  it.each(['group', 'tabs'] as const)(
+    'should validate required descendants of removed %s',
+    async (kind) => {
+      const child = {
+        name: 'required',
+        type: 'text' as const,
+        required: true,
+        validate: (value: unknown) => (value ? true : 'Required child.'),
+      }
+      const fields =
+        kind === 'group'
+          ? [{ name: 'container', type: 'group', fields: [child] }]
+          : [{ type: 'tabs', tabs: [{ name: 'container', label: 'Container', fields: [child] }] }]
+
+      for (const value of [undefined, null, {}]) {
+        await expect(
+          validateTransformedDocument({
+            collection: { slug: 'media', fields } as SanitizedCollectionConfig,
+            doc: { container: value },
+            originalDoc: { container: { other: true } },
+            operation: 'update',
+            req: { payload: { config: {} }, t: (key: string) => key } as PayloadRequest,
+          }),
+        ).rejects.toMatchObject({
+          data: { errors: [expect.objectContaining({ path: 'container.required' })] },
+        })
+      }
+    },
+  )
 })

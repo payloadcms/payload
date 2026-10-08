@@ -97,6 +97,150 @@ describe('handleDynamicFileRequest', () => {
     )
   })
 
+  it('should provide an independent original to every stage after saved source consumption', async () => {
+    const document = {
+      ...uploadDocument,
+      original: { filename: 'original.png', mimeType: 'image/png' },
+      _transforms: { custom: true },
+    }
+    const reads: string[] = []
+    const transformer: UploadTransformer = {
+      slug: 'original-reader',
+      mimeTypes: ['image/*'],
+      canTransform: ({ purpose }) =>
+        purpose === 'persisted-default'
+          ? { canTransform: true, handledTransformKeys: ['custom'] }
+          : true,
+      handleRequest: async ({ getOriginalFile, getSourceFile, purpose }) => {
+        reads.push(await (await getSourceFile()).text())
+        reads.push(await (await getOriginalFile()).text())
+        return {
+          status: 'continue',
+          response: new Response(purpose, { headers: { 'Content-Type': 'image/png' } }),
+        }
+      },
+    }
+    vi.mocked(resolveUploadDocument).mockResolvedValue(document)
+    vi.mocked(checkFileAccess).mockResolvedValue(document)
+    vi.mocked(getSourceFileResponse).mockImplementation(
+      async () => new Response('original', { headers: { 'Content-Type': 'image/png' } }),
+    )
+
+    const response = await handleDynamicFileRequest({
+      collection,
+      filename: document.filename,
+      req: makeReq([transformer]),
+    })
+
+    expect(await response.text()).toBe('request-override')
+    expect(reads).toEqual(['original', 'original', 'persisted-default', 'original'])
+  })
+
+  it('should retain a consumed source until its returned streaming replacement finishes', async () => {
+    let sourceController: ReadableStreamDefaultController<Uint8Array>
+    vi.mocked(getSourceFileResponse).mockImplementation(
+      async () =>
+        new Response(
+          new ReadableStream({
+            start(controller) {
+              sourceController = controller
+            },
+          }),
+        ),
+    )
+    const transformer: UploadTransformer = {
+      slug: 'stream',
+      mimeTypes: ['image/*'],
+      canTransform: () => true,
+      handleRequest: async ({ getSourceFile }) => {
+        const source = await getSourceFile()
+        return {
+          status: 'continue',
+          response: new Response(source.body!.pipeThrough(new TransformStream())),
+        }
+      },
+    }
+    const response = await handleDynamicFileRequest({
+      collection,
+      filename: 'logo.png',
+      req: makeReq([transformer]),
+    })
+    sourceController!.enqueue(new TextEncoder().encode('streamed original'))
+    sourceController!.close()
+
+    expect(await response.text()).toBe('streamed original')
+  })
+
+  it('should retain a source body reused directly by a header-wrapping response', async () => {
+    vi.mocked(getSourceFileResponse).mockImplementation(async () => new Response('original'))
+    const transformer: UploadTransformer = {
+      slug: 'headers',
+      mimeTypes: ['image/*'],
+      canTransform: () => true,
+      handleRequest: async ({ getSourceFile }) => {
+        const source = await getSourceFile()
+        return {
+          status: 'continue',
+          response: new Response(source.body, { headers: { 'X-Transformed': 'true' } }),
+        }
+      },
+    }
+    const response = await handleDynamicFileRequest({
+      collection,
+      filename: 'logo.png',
+      req: makeReq([transformer]),
+    })
+
+    expect(await response.text()).toBe('original')
+    expect(response.headers.get('X-Transformed')).toBe('true')
+  })
+
+  it('should release a returned body when the client aborts', async () => {
+    const cancelled = vi.fn()
+    const transformer: UploadTransformer = {
+      slug: 'stream',
+      mimeTypes: ['image/*'],
+      canTransform: () => true,
+      handleRequest: async () => ({
+        status: 'continue',
+        response: new Response(new ReadableStream({ cancel: cancelled })),
+      }),
+    }
+    const controller = new AbortController()
+    const req = makeReq([transformer])
+    req.signal = controller.signal
+    await handleDynamicFileRequest({ collection, filename: 'logo.png', req })
+    controller.abort()
+
+    await vi.waitFor(() => expect(cancelled).toHaveBeenCalled())
+  })
+
+  it.each(['GET', 'HEAD'])(
+    'should close discarded original responses on successful %s requests',
+    async (method) => {
+      const onCancel = vi.fn()
+      vi.mocked(getSourceFileResponse).mockImplementation(
+        async () => new Response(new ReadableStream({ cancel: onCancel })),
+      )
+      const transformer: UploadTransformer = {
+        slug: 'discard-original',
+        mimeTypes: ['image/*'],
+        canTransform: () => true,
+        handleRequest: async ({ getOriginalFile }) => {
+          const original = await getOriginalFile()
+          original.body!.getReader()
+          return { status: 'continue', response: new Response('replacement') }
+        },
+      }
+      const req = makeReq([transformer])
+      req.method = method
+      const response = await handleDynamicFileRequest({ collection, filename: 'logo.png', req })
+      await response.text()
+
+      await vi.waitFor(() => expect(onCancel).toHaveBeenCalled())
+    },
+  )
+
   it('should reject unclaimed saved keys before fetching the source', async () => {
     const document = { ...uploadDocument, _transforms: { custom: 'saved' } }
     const transformer: UploadTransformer = {
@@ -159,6 +303,27 @@ describe('handleDynamicFileRequest', () => {
       ).rejects.toThrow('transform failed')
 
       await vi.waitFor(() => expect(source.onCancel).toHaveBeenCalled())
+    })
+
+    it('should close both independent bodies when a transformer locks them and throws', async () => {
+      const sources = [makeTrackedSourceResponse(), makeTrackedSourceResponse()]
+      let index = 0
+      vi.mocked(getSourceFileResponse).mockImplementation(async () => sources[index++].response)
+      const transformer: UploadTransformer = {
+        slug: 'both',
+        mimeTypes: ['image/*'],
+        canTransform: () => true,
+        handleRequest: async ({ getSourceFile, getOriginalFile }) => {
+          await (await getSourceFile()).body!.getReader().read()
+          await (await getOriginalFile()).body!.getReader().read()
+          throw new Error('both failed')
+        },
+      }
+
+      await expect(
+        handleDynamicFileRequest({ collection, filename: 'logo.png', req: makeReq([transformer]) }),
+      ).rejects.toThrow('both failed')
+      await vi.waitFor(() => sources.forEach(({ onCancel }) => expect(onCancel).toHaveBeenCalled()))
     })
 
     it('should cancel an earlier stage response no later stage read', async () => {

@@ -1,5 +1,8 @@
+import type { TextField } from 'payload'
+
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 /* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options", "test.for"] }] -- Tests use the shared fixture wrapper. */
-import { readdir, readFile, rm } from 'node:fs/promises'
+import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import sharp from 'sharp'
 import { expect } from 'vitest'
@@ -8,6 +11,201 @@ import { test } from '../__helpers/int/vitest.js'
 import { dynamicMediaSlug, mediaSlug } from './shared.js'
 
 test.suite('File transform state', { config: './config.ts' }, () => {
+  test('should preserve trusted access mode during single and bulk transformer validation', async ({
+    payload,
+  }) => {
+    const data = await createImageBuffer({})
+    const doc = await payload.create({
+      collection: mediaSlug,
+      data: {},
+      file: { name: 'access.png', data, mimetype: 'image/png', size: data.length },
+    })
+    const field = payload.collections[mediaSlug].config.fields.find(
+      (field) => 'name' in field && field.name === 'title',
+    ) as TextField
+    const validate = field.validate
+    const transformer = payload.config.upload.transformers[0]
+    const transformFile = transformer.transformFile!
+    const observed: boolean[] = []
+
+    field.validate = (value, { overrideAccess }) => {
+      if (value === 'transformed') {
+        observed.push(overrideAccess)
+        return overrideAccess ? true : 'Trusted transform expected.'
+      }
+      return true
+    }
+    transformer.transformFile = async (args) => {
+      args.doc.title = 'transformed'
+      return transformFile(args)
+    }
+    try {
+      await payload.update({
+        id: doc.id,
+        collection: mediaSlug,
+        data: { _transforms: { rotate: { angle: 90 } } },
+        overrideAccess: true,
+      })
+      await payload.update({
+        collection: mediaSlug,
+        data: { _transforms: { rotate: { angle: 180 } }, title: 'before' },
+        overrideAccess: true,
+        where: { id: { equals: doc.id } },
+      })
+      expect(observed).toEqual([true, true])
+      await expect(
+        payload.update({
+          id: doc.id,
+          collection: mediaSlug,
+          data: { _transforms: { rotate: { angle: 270 } }, title: 'before' },
+          overrideAccess: false,
+        }),
+      ).rejects.toMatchObject({ data: { errors: [expect.objectContaining({ path: 'title' })] } })
+      expect(observed.at(-1)).toBe(false)
+    } finally {
+      field.validate = validate
+      transformer.transformFile = transformFile
+    }
+  })
+
+  for (const isBulk of [false, true]) {
+    test(`should replay verified legacy local bytes on a ${isBulk ? 'bulk rotation' : 'single crop'} update`, async ({
+      payload,
+    }) => {
+      const data = await sharp(await createImageBuffer({}))
+        .composite([
+          {
+            input: await sharp({
+              create: { background: 'blue', channels: 3, height: 10, width: 10 },
+            })
+              .png()
+              .toBuffer(),
+            left: 10,
+            top: 0,
+          },
+        ])
+        .png()
+        .toBuffer()
+      const upload = payload.collections[mediaSlug].config.upload
+      const directory = upload.staticDir
+      await mkdir(directory, { recursive: true })
+      await writeFile(path.join(directory, 'legacy.png'), data)
+      const doc = await payload.db.create({
+        collection: mediaSlug,
+        data: {
+          filename: 'legacy.png',
+          filesize: data.length,
+          height: 10,
+          mimeType: 'image/png',
+          url: `/api/${mediaSlug}/file/legacy.png`,
+          width: 20,
+        },
+      })
+      const previousTransformer = payload.config.upload.transformers[0]
+      payload.config.upload.transformers[0] = sharpTransformer({
+        collections: { [mediaSlug]: { variants: [{ name: 'small', height: 3, width: 3 }] } },
+      })
+      const state = isBulk
+        ? { rotate: { angle: 90 } }
+        : { crop: { height: 10, width: 10, x: 10, y: 0 } }
+      try {
+        const result = await payload.update({
+          collection: mediaSlug,
+          ...(isBulk ? { where: { id: { equals: doc.id } } } : { id: doc.id }),
+          data: { _transforms: state },
+        })
+        const updated = 'docs' in result ? result.docs[0] : result
+
+        expect(updated).toMatchObject({
+          _transforms: state,
+          height: isBulk ? 20 : 10,
+          original: { filename: 'legacy.png' },
+          width: 10,
+        })
+        expect(await readFile(path.join(directory, updated.original.filename))).toEqual(data)
+        const output = await sharp(path.join(directory, updated.filename))
+          .removeAlpha()
+          .raw()
+          .toBuffer({ resolveWithObject: true })
+        expect(output.info).toMatchObject({ height: isBulk ? 20 : 10, width: 10 })
+        expect([...output.data.subarray(0, 3)]).toEqual(isBulk ? [255, 0, 0] : [0, 0, 255])
+        expect(
+          await sharp(path.join(directory, updated.variants.small.filename)).metadata(),
+        ).toMatchObject({ height: 3, width: 3 })
+      } finally {
+        payload.config.upload.transformers[0] = previousTransformer
+      }
+    })
+  }
+
+  test('should reject canonical replay from a missing legacy source without saving intent', async ({
+    payload,
+  }) => {
+    const doc = await payload.db.create({
+      collection: mediaSlug,
+      data: {
+        filename: 'missing.png',
+        filesize: 100,
+        height: 10,
+        mimeType: 'image/png',
+        url: `/api/${mediaSlug}/file/missing.png`,
+        width: 20,
+      },
+    })
+
+    await expect(
+      payload.update({
+        id: doc.id,
+        collection: mediaSlug,
+        data: { _transforms: { rotate: { angle: 90 } } },
+      }),
+    ).rejects.toThrow()
+    expect(await payload.findByID({ id: doc.id, collection: mediaSlug })).toMatchObject({
+      _transforms: null,
+      height: 10,
+      width: 20,
+    })
+  })
+
+  for (const container of ['details', 'editorial']) {
+    test(`should reject removal of required ${container} descendants by a transformer`, async ({
+      payload,
+    }) => {
+      const data = await createImageBuffer({})
+      const doc = await payload.create({
+        collection: mediaSlug,
+        data: {},
+        file: { name: 'container.png', data, mimetype: 'image/png', size: data.length },
+      })
+      const directory = payload.collections[mediaSlug].config.upload.staticDir
+      const files = await readdir(directory)
+      const transformer = payload.config.upload.transformers[0]
+      const transformFile = transformer.transformFile!
+      transformer.transformFile = async (args) => {
+        delete args.doc[container]
+        return transformFile(args)
+      }
+      try {
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: mediaSlug,
+            data: { _transforms: { rotate: { angle: 90 } } },
+          }),
+        ).rejects.toMatchObject({
+          data: { errors: [expect.objectContaining({ path: `${container}.required` })] },
+        })
+        expect(await readdir(directory)).toEqual(files)
+        expect(await payload.findByID({ id: doc.id, collection: mediaSlug })).toMatchObject({
+          _transforms: null,
+          [container]: { required: 'present' },
+        })
+      } finally {
+        transformer.transformFile = transformFile
+      }
+    })
+  }
+
   test('should process transform state produced by collection hooks', async ({ payload }) => {
     const data = await createImageBuffer({})
     const doc = await payload.create({
@@ -86,6 +284,32 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     const files = await readdir(directory)
     const transformer = payload.config.upload.transformers[0]
     const transformFile = transformer.transformFile!
+    const collection = payload.collections[mediaSlug].config
+    const field = collection.fields.find(
+      (field) => 'name' in field && field.name === 'title',
+    ) as TextField
+    const fieldHooks = field.hooks
+    const beforeChange = collection.hooks.beforeChange
+    let fieldHookCalls = 0
+    let collectionHookCalls = 0
+
+    field.hooks = {
+      ...fieldHooks,
+      beforeChange: [
+        ...(fieldHooks?.beforeChange ?? []),
+        ({ value }) => {
+          fieldHookCalls++
+          return value
+        },
+      ],
+    }
+    collection.hooks.beforeChange = [
+      ...beforeChange,
+      ({ data }) => {
+        collectionHookCalls++
+        return data
+      },
+    ]
 
     transformer.transformFile = async (args) => {
       args.doc.title = 'invalid'
@@ -107,8 +331,12 @@ test.suite('File transform state', { config: './config.ts' }, () => {
         width: 20,
       })
       expect(await readdir(directory)).toEqual(files)
+      expect(fieldHookCalls).toBe(1)
+      expect(collectionHookCalls).toBe(1)
     } finally {
       transformer.transformFile = transformFile
+      field.hooks = fieldHooks
+      collection.hooks.beforeChange = beforeChange
     }
   })
   test('should validate nested transformer mutations against a detached baseline', async ({
@@ -273,7 +501,7 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     const response = await restClient.GRAPHQL_POST({
       body: JSON.stringify({
         query:
-          'mutation State($state: JSON!) { createTransformStateMedia(data: { _transforms: $state }) { id _transforms } }',
+          'mutation State($state: JSON!) { createTransformStateMedia(data: { _transforms: $state, details: { required: "present" }, editorial: { required: "present" } }) { id _transforms } }',
         variables: { state },
       }),
     })

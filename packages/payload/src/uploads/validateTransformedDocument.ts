@@ -2,7 +2,7 @@ import { isDeepStrictEqual } from 'node:util'
 
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { ValidationFieldError } from '../errors/ValidationError.js'
-import type { Field } from '../fields/config/types.js'
+import type { Field, Validate } from '../fields/config/types.js'
 import type { Document, PayloadRequest } from '../types/index.js'
 
 import { ValidationError } from '../errors/ValidationError.js'
@@ -34,25 +34,31 @@ export async function validateTransformedDocument({
   }
 
   async function visit({
+    blockData,
     data,
     fields,
+    hasChangedAncestor = false,
     path,
     previous,
   }: {
+    blockData?: Document
     data: Document
     fields: Field[]
+    hasChangedAncestor?: boolean
     path: (number | string)[]
     previous: Document
   }): Promise<void> {
-    if (!data || typeof data !== 'object') {
-      return
-    }
+    data = data && typeof data === 'object' ? data : {}
     for (const field of fields) {
       if (field.type === 'tabs') {
         for (const tab of field.tabs) {
           await visit({
+            blockData,
             data: 'name' in tab ? data[tab.name] : data,
             fields: tab.fields,
+            hasChangedAncestor:
+              hasChangedAncestor ||
+              ('name' in tab && !isDeepStrictEqual(data[tab.name], previous?.[tab.name])),
             path: 'name' in tab ? [...path, tab.name] : path,
             previous: 'name' in tab ? previous?.[tab.name] : previous,
           })
@@ -61,7 +67,7 @@ export async function validateTransformedDocument({
       }
       if (!fieldAffectsData(field)) {
         if ('fields' in field) {
-          await visit({ data, fields: field.fields, path, previous })
+          await visit({ blockData, data, fields: field.fields, hasChangedAncestor, path, previous })
         }
         continue
       }
@@ -70,7 +76,7 @@ export async function validateTransformedDocument({
       const previousValue = previous?.[field.name]
       const fieldPath = [...path, field.name]
 
-      if (isDeepStrictEqual(value, previousValue)) {
+      if (!hasChangedAncestor && isDeepStrictEqual(value, previousValue)) {
         continue
       }
 
@@ -88,23 +94,22 @@ export async function validateTransformedDocument({
           ? Object.assign(Object.create(req), { fallbackLocale: null, locale: entry.locale })
           : req
         if ('validate' in field && typeof field.validate === 'function') {
-          const result = await field.validate(
-            entry.value as never,
-            {
-              ...field,
-              id: doc.id,
-              collectionSlug: collection.slug,
-              data: deepCopyObjectSimple(doc),
-              event: 'submit',
-              operation,
-              overrideAccess,
-              path: fieldPath,
-              preferences: { fields: {} },
-              previousValue: entry.previousValue,
-              req: validationReq,
-              siblingData: deepCopyObjectSimple(data),
-            } as never,
-          )
+          const validate = field.validate as Validate<unknown, Document, Document, Document>
+          const result = await validate(entry.value, {
+            ...field,
+            id: doc.id,
+            blockData,
+            collectionSlug: collection.slug,
+            data: deepCopyObjectSimple(doc),
+            event: 'submit',
+            operation,
+            overrideAccess,
+            path: fieldPath,
+            preferences: { fields: {} },
+            previousValue: entry.previousValue,
+            req: validationReq,
+            siblingData: deepCopyObjectSimple(data),
+          })
 
           if (typeof result === 'string') {
             errors.push({ message: result, path: fieldPath.join('.') })
@@ -112,8 +117,10 @@ export async function validateTransformedDocument({
         }
         if ('fields' in field && field.type !== 'array') {
           await visit({
+            blockData,
             data: entry.value,
             fields: field.fields,
+            hasChangedAncestor: true,
             path: fieldPath,
             previous: entry.previousValue,
           })
@@ -127,12 +134,14 @@ export async function validateTransformedDocument({
                     (block) => typeof block !== 'string' && block.slug === row.blockType,
                   ) ?? req.payload.blocks[row.blockType])
             await visit({
+              blockData: field.type === 'blocks' ? row : blockData,
               data: row,
               fields: Array.isArray(rowFields)
                 ? rowFields
                 : typeof rowFields === 'object'
                   ? rowFields.fields
                   : [],
+              hasChangedAncestor,
               path: [...fieldPath, index],
               previous: entry.previousValue?.[index],
             })

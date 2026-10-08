@@ -154,6 +154,12 @@ export interface TransformStateMedia {
     | boolean
     | null;
   entryMimeType?: string | null;
+  details: {
+    required: string;
+  };
+  editorial: {
+    required: string;
+  };
   createdBy?: {
     relationTo: 'users';
     value: number | User;
@@ -261,6 +267,18 @@ export interface TransformStateMedia {
   };
   focalX?: number | null;
   focalY?: number | null;
+  variants?: {
+    small?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -313,6 +331,12 @@ export interface DynamicTransformStateMedia {
     | boolean
     | null;
   entryMimeType?: string | null;
+  details: {
+    required: string;
+  };
+  editorial: {
+    required: string;
+  };
   createdBy?: {
     relationTo: 'users';
     value: number | User;
@@ -541,6 +565,16 @@ export interface TransformStateMediaSelect<T extends boolean = true> {
   title?: T;
   appliedState?: T;
   entryMimeType?: T;
+  details?:
+    | T
+    | {
+        required?: T;
+      };
+  editorial?:
+    | T
+    | {
+        required?: T;
+      };
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -568,6 +602,22 @@ export interface TransformStateMediaSelect<T extends boolean = true> {
       };
   focalX?: T;
   focalY?: T;
+  variants?:
+    | T
+    | {
+        small?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -577,6 +627,16 @@ export interface DynamicTransformStateMediaSelect<T extends boolean = true> {
   title?: T;
   appliedState?: T;
   entryMimeType?: T;
+  details?:
+    | T
+    | {
+        required?: T;
+      };
+  editorial?:
+    | T
+    | {
+        required?: T;
+      };
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;

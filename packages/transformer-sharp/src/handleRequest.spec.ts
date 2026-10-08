@@ -6,6 +6,8 @@ import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 import { describe, expect, it, vi } from 'vitest'
 
+import type { SharpDependency, WithMetadata } from './types.js'
+
 import { createHandleRequest } from './handleRequest.js'
 import { resolveSharpDynamicDefaults } from './sharpTransformer.js'
 
@@ -62,6 +64,31 @@ const getOutputMetadata = async (result: Awaited<ReturnType<typeof resizeReal>>)
   sharp(Buffer.from(await result.response!.arrayBuffer())).metadata()
 
 describe('createHandleRequest', () => {
+  it('should enforce saved limits independently of dynamic query settings', async () => {
+    const source = await makeSourceImage({ width: 20, height: 10 })
+    const handler = createHandleRequest({
+      sharpDependency: sharp,
+      dynamicDefaults: resolveSharpDynamicDefaults(),
+      transformLimits: { maxWidth: 8, maxHeight: 8, maxPixels: 64 },
+    })
+
+    await expect(
+      handler({
+        collectionSlug: 'media',
+        doc: {
+          filename: 'image.png',
+          mimeType: 'image/png',
+          _transforms: { resize: { width: 16, height: 16 } },
+        },
+        originalDoc: {},
+        purpose: 'persisted-default',
+        req: makeReq(),
+        getSourceFile: async () =>
+          new Response(source, { headers: { 'Content-Type': 'image/png' } }),
+      }),
+    ).rejects.toMatchObject({ status: 400 })
+  })
+
   it('should retain saved metadata and encoding through a configured dynamic variant', async () => {
     const source = await sharp(await makeSourceImage({ format: 'jpeg' }))
       .withMetadata({ density: 300 })
@@ -113,6 +140,131 @@ describe('createHandleRequest', () => {
     expect(metadata.width).toBe(20)
   })
 
+  it.each(['preserve', 'callback-preserve', 'callback-strip', 'saved-strip'] as const)(
+    'should inherit collection metadata policy for dynamic variants (%s)',
+    async (policy) => {
+      const source = await sharp(await makeSourceImage({ format: 'jpeg' }))
+        .withMetadata({ density: 300 })
+        .toBuffer()
+      let callbackCalls = 0
+      const withMetadata: WithMetadata =
+        policy === 'preserve' || policy === 'saved-strip'
+          ? true
+          : ({ metadata }) => {
+              callbackCalls++
+              return policy === 'callback-preserve' && metadata.density === 300
+            }
+      const doc = {
+        filename: 'image.jpg',
+        mimeType: 'image/jpeg',
+        original: { filename: 'original.jpg', mimeType: 'image/jpeg', width: 400, height: 200 },
+        variants: { thumb: { filename: 'thumb.jpg' } },
+        _transforms: {
+          rotate: { angle: 90 },
+          ...(policy === 'saved-strip' ? { metadataPolicy: { mode: 'strip' as const } } : {}),
+        },
+      }
+      const req = makeReq()
+      req.routeParams = { filename: 'thumb.jpg' }
+      const result = await createHandleRequest({
+        collections: {
+          media: { withMetadata, variants: [{ name: 'thumb', width: 20, height: 20 }] },
+        },
+        dynamicDefaults: resolveSharpDynamicDefaults(),
+        sharpDependency: sharp,
+      })({
+        collectionSlug: 'media',
+        doc,
+        originalDoc: doc,
+        purpose: 'persisted-default',
+        req,
+        getSourceFile: async () =>
+          new Response(source, { headers: { 'Content-Type': 'image/jpeg' } }),
+      })
+      const metadata = await sharp(Buffer.from(await result.response!.arrayBuffer())).metadata()
+
+      expect(metadata).toMatchObject({ width: 20, height: 20 })
+      if (policy === 'callback-strip' || policy === 'saved-strip') {
+        expect(metadata.exif).toBeUndefined()
+      } else {
+        expect(metadata.exif).toBeDefined()
+        expect(metadata.density).toBe(300)
+      }
+      expect(callbackCalls).toBe(policy === 'preserve' || policy === 'saved-strip' ? 0 : 1)
+    },
+  )
+
+  it.each([false, true])(
+    'should apply configured output format without resize dimensions (variant: %s)',
+    async (isVariant) => {
+      const source = await makeSourceImage()
+      const doc = {
+        filename: 'image.png',
+        mimeType: 'image/png',
+        variants: { converted: { filename: 'converted.jpg' } },
+        _transforms: { rotate: { angle: 90 } },
+      }
+      const req = makeReq()
+      req.routeParams = { filename: isVariant ? 'converted.jpg' : 'image.png' }
+      const result = await createHandleRequest({
+        collections: {
+          media: isVariant
+            ? { variants: [{ name: 'converted', formatOptions: { format: 'jpeg' } }] }
+            : { formatOptions: { format: 'jpeg' } },
+        },
+        dynamicDefaults: resolveSharpDynamicDefaults(),
+        sharpDependency: sharp,
+      })({
+        collectionSlug: 'media',
+        doc,
+        originalDoc: doc,
+        purpose: 'persisted-default',
+        req,
+        getSourceFile: async () =>
+          new Response(source, { headers: { 'Content-Type': 'image/png' } }),
+      })
+      const metadata = await sharp(Buffer.from(await result.response!.arrayBuffer())).metadata()
+
+      expect(metadata).toMatchObject({ format: 'jpeg', width: 200, height: 400 })
+      expect(result.response!.headers.get('Content-Type')).toBe('image/jpeg')
+    },
+  )
+
+  it.each([false, true])(
+    'should preserve saved metadata through query resizing (focal: %s)',
+    async (hasFocalPoint) => {
+      const source = await sharp(await makeSourceImage({ format: 'jpeg' }))
+        .withMetadata({ density: 300 })
+        .toBuffer()
+      const doc = {
+        filename: 'image.jpg',
+        mimeType: 'image/jpeg',
+        original: { width: 400, height: 200 },
+        _transforms: {
+          metadataPolicy: { mode: 'preserve' as const },
+          encoding: { progressive: true },
+          ...(hasFocalPoint ? { focalPoint: { x: 0, y: 0 } } : {}),
+        },
+      }
+      const result = await createHandleRequest({
+        dynamicDefaults: resolveSharpDynamicDefaults(),
+        sharpDependency: sharp,
+      })({
+        collectionSlug: 'media',
+        doc,
+        originalDoc: doc,
+        purpose: 'request-override',
+        req: makeReq({ query: 'width=20&height=20' }),
+        getSourceFile: async () =>
+          new Response(source, { headers: { 'Content-Type': 'image/jpeg' } }),
+      })
+      const metadata = await sharp(Buffer.from(await result.response!.arrayBuffer())).metadata()
+
+      expect(metadata).toMatchObject({ width: 20, height: 20, density: 300, isProgressive: true })
+      expect(metadata.exif).toBeDefined()
+    },
+  )
+
   it('should use saved focal points for query resizing', async () => {
     const source = await sharp({
       create: { width: 20, height: 10, channels: 3, background: 'red' },
@@ -137,9 +289,19 @@ describe('createHandleRequest', () => {
       original: { width: 20, height: 10 },
       _transforms: { focalPoint: { x: 0, y: 0 } },
     }
+    let resizeCount = 0
+    const sharpDependency: SharpDependency = (input, options) => {
+      const image = sharp(input, options)
+      const resize = image.resize.bind(image)
+      image.resize = (...args: Parameters<typeof resize>) => {
+        resizeCount++
+        return resize(...args)
+      }
+      return image
+    }
     const result = await createHandleRequest({
       dynamicDefaults: resolveSharpDynamicDefaults(),
-      sharpDependency: sharp,
+      sharpDependency,
     })({
       collectionSlug: 'media',
       doc,
@@ -153,6 +315,7 @@ describe('createHandleRequest', () => {
       .toBuffer()
 
     expect([...data.subarray((5 * 10 + 9) * 3, (5 * 10 + 9) * 3 + 3)]).toEqual([255, 0, 0])
+    expect(resizeCount).toBe(1)
   })
 
   it.each([
