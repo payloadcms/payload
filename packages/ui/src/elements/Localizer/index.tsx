@@ -1,7 +1,7 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
 import * as qs from 'qs-esm'
-import React, { Fragment } from 'react'
+import React, { Fragment, useState } from 'react'
 
 import type { PopupButtonRenderProps } from '../Popup/PopupTrigger/index.js'
 
@@ -9,8 +9,7 @@ import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { LanguageIcon } from '../../icons/Language/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale, useLocaleLoading } from '../../providers/Locale/index.js'
-import { useRouter } from '../../providers/RouterAdapter/index.js'
-import { useRouteTransition } from '../../providers/RouteTransition/index.js'
+import { useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
@@ -27,8 +26,11 @@ export const Localizer: React.FC<{
     config: { localization },
   } = useConfig()
 
-  const router = useRouter()
-  const { startRouteTransition } = useRouteTransition()
+  const searchParams = useSearchParams()
+
+  // `useSearchParams` can be stale because `ListQueryProvider` updates the URL with
+  // `window.history.pushState`, so the query is read from `window.location` when the menu opens
+  const [searchWhenOpened, setSearchWhenOpened] = useState<null | string>(null)
 
   const { setLocaleIsLoading } = useLocaleLoading()
 
@@ -47,37 +49,41 @@ export const Localizer: React.FC<{
       <div className={[baseClass, className].filter(Boolean).join(' ')}>
         <Popup
           horizontalAlign="right"
+          onToggleClose={() => setSearchWhenOpened(null)}
+          onToggleOpen={() => setSearchWhenOpened(window.location.search)}
           popupType="menu"
           render={({ close }) => (
             <PopupList.RadioGroup>
               {locales.map((localeOption) => {
                 const localeOptionLabel = getTranslation(localeOption.label, i18n)
+                const isActive = locale.code === localeOption.code
+
+                // Rendered as links so `LeaveWithoutSaving` can intercept the navigation
+                // when the document has unsaved changes
+                const localeURL = isActive
+                  ? undefined
+                  : qs.stringify(
+                      {
+                        ...qs.parse(searchWhenOpened ?? searchParams.toString(), {
+                          depth: 10,
+                          ignoreQueryPrefix: true,
+                        }),
+                        locale: localeOption.code,
+                      },
+                      { addQueryPrefix: true },
+                    )
 
                 return (
                   <PopupList.RadioGroupItem
-                    active={locale.code === localeOption.code}
+                    active={isActive}
+                    href={localeURL}
                     key={localeOption.code}
                     onClick={() => {
-                      setLocaleIsLoading(true)
+                      if (!isActive) {
+                        setLocaleIsLoading(true)
+                      }
+
                       close()
-
-                      // can't use `useSearchParams` here because it is stale due to `window.history.pushState` in `ListQueryProvider`
-                      const searchParams = new URLSearchParams(window.location.search)
-
-                      const url = qs.stringify(
-                        {
-                          ...qs.parse(searchParams.toString(), {
-                            depth: 10,
-                            ignoreQueryPrefix: true,
-                          }),
-                          locale: localeOption.code,
-                        },
-                        { addQueryPrefix: true },
-                      )
-
-                      startRouteTransition(() => {
-                        router.push(url)
-                      })
                     }}
                   >
                     {localeOptionLabel !== localeOption.code ? (
