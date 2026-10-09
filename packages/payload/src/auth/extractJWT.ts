@@ -40,15 +40,22 @@ const extractionMethods: Record<string, ExtractionMethod> = {
       return cookieToken
     }
 
-    // No Origin with csrf configured — fall back to Sec-Fetch-Site
+    // No Origin with csrf configured — fall back to Sec-Fetch-* headers
     const secFetchSite = headers.get('Sec-Fetch-Site')
+    const secFetchMode = headers.get('Sec-Fetch-Mode')
 
-    // Allow same-origin, same-site, and direct navigations (none)
-    if (secFetchSite === 'same-origin' || secFetchSite === 'same-site' || secFetchSite === 'none') {
+    // Allow same-origin, same-site, direct navigations (none),
+    // and cross-site top-level navigations (e.g. clicking a link from an email)
+    if (
+      secFetchSite === 'same-origin' ||
+      secFetchSite === 'same-site' ||
+      secFetchSite === 'none' ||
+      secFetchMode === 'navigate'
+    ) {
       return cookieToken
     }
 
-    // Reject cross-site requests and missing header (non-browser clients)
+    // Reject cross-site non-navigation requests and missing header (non-browser clients)
     return null
   },
   JWT: ({ headers }) => {
