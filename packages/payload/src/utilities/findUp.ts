@@ -13,6 +13,10 @@ export function findUpSync({
   dir: string
   fileNames?: string[]
 }): null | string {
+  // A relative dir has no parsed root (`path.parse('./src').root === ''`) and
+  // `path.dirname()` bottoms out at '.', so the root checks below would never be
+  // reached and the walk would never terminate.
+  dir = path.resolve(dir)
   const { root } = path.parse(dir)
 
   while (true) {
@@ -60,6 +64,8 @@ export async function findUp({
   dir: string
   fileNames?: string[]
 }): Promise<null | string> {
+  // See findUpSync above — a relative dir never reaches the parsed root.
+  dir = path.resolve(dir)
   const { root } = path.parse(dir)
 
   while (true) {
