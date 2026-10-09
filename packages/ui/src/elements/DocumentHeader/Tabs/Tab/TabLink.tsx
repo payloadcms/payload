@@ -66,7 +66,7 @@ export const DocumentTabLink: React.FC<{
       buttonStyle={isActive ? 'pill' : 'ghost'}
       className={[baseClass, isActive && `${baseClass}--active`].filter(Boolean).join(' ')}
       el="link"
-      extraButtonProps={{ 'aria-current': isActive ? 'page' : undefined }}
+      extraButtonProps={{ 'aria-current': isActive ? 'page' : false }}
       margin={false}
       newTab={newTab}
       onClick={href === pathname && !newTab ? (event) => event.preventDefault() : undefined}

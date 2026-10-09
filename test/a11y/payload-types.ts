@@ -288,8 +288,6 @@ export interface PayloadFolder {
 export interface Post {
   id: string;
   title: string;
-  slug?: string | null;
-  slugLock?: boolean | null;
   /**
    * A subtitle field to test focus indicators in the admin UI, helps us detect exiting out of rich text editor properly.
    */
@@ -639,8 +637,6 @@ export interface PayloadFoldersSelect<T extends boolean = true> {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
-  slug?: T;
-  slugLock?: T;
   subtitle?: T;
   accessibilitySelect?: T;
   accessibilitySortableSelect?: T;

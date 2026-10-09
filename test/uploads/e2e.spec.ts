@@ -914,7 +914,10 @@ describe('Uploads', () => {
     await page.locator('.field-type:nth-of-type(2) .icon--write').click()
 
     // fill the title with 'draft'
-    await page.locator('#field-title').fill('draft')
+    await page
+      .locator('.doc-drawer')
+      .getByRole('textbox', { name: /^Title\b/ })
+      .fill('draft')
 
     await saveDocAndAssert(
       page,

@@ -756,7 +756,7 @@ describe('Relationship Field', () => {
       selector: '#field-relationship button.relationship--single-value__drawer-toggler',
     })
 
-    const field = page.locator('#field-name')
+    const field = page.locator('.doc-drawer').getByRole('textbox', { name: 'Name', exact: true })
     await field.fill('Updated')
 
     await saveButton.nth(1).click()

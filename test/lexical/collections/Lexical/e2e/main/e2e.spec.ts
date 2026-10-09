@@ -1747,6 +1747,8 @@ describe('lexicalMain', () => {
       .first()
     await uploadNode.click()
     await expectInsideSelectedDecorator(uploadNode)
+    await page.keyboard.press('Backspace')
+    await expect(uploadNode).toBeHidden()
 
     const textNode = page.getByText('Upload Node:', { exact: true })
     await textNode.click()
@@ -1771,11 +1773,8 @@ describe('lexicalMain', () => {
 
     const labelInsideCollapsableBody2 = page.getByText('Text2')
     await labelInsideCollapsableBody2.click()
-    await expectInsideSelectedDecorator(labelInsideCollapsableBody2)
-
-    // TEST DELETE!
-    await page.keyboard.press('Backspace')
-    await expect(labelInsideCollapsableBody2).toBeHidden()
+    await expect(page.getByRole('textbox', { name: 'Text2', exact: true })).toBeFocused()
+    await expect(decoratorLocator).toBeHidden()
 
     const monacoLabel = page.locator('.field-label').getByText('Code', { exact: true })
     await monacoLabel.click()

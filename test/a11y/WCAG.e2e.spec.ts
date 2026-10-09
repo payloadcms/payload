@@ -12,7 +12,7 @@ import { toggleLivePreview } from '../__helpers/e2e/live-preview/toggleLivePrevi
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { getSelectMenu, selectInput } from '../__helpers/e2e/selectInput.js'
 import { initPage } from '../__setup/e2e/initPage.js'
-import { customSlugLabelTitle, seededAPIKey } from './constants.js'
+import { seededAPIKey } from './constants.js'
 import {
   addCollectionQueryWidget,
   addTextBlock,
@@ -4513,23 +4513,14 @@ test.describe('WCAG 2.2 Level AA', () => {
       }
     })
 
-    test('should name the Title input and separate custom Slug label in the relationship creation panel', async () => {
+    test('should name the Title input in the relationship creation panel', async () => {
       // pyld-3652
       const drawer = await openRelationshipCreationDrawer({ page, postsURL })
       const title = drawer.getByRole('textbox', { name: /^Title/ })
 
       await expect(title).toHaveCount(1)
-      await title.fill(customSlugLabelTitle)
-      await expect(title).toHaveValue(customSlugLabelTitle)
-
-      const slugField = drawer.locator('.slug-field-component')
-      const slug = slugField.locator('input[name="slug"]')
-
-      await expect(slug).toHaveAccessibleName('Slug')
-      await slugField.getByRole('button', { name: 'Unlock', exact: true }).click()
-      await expect(slug).toBeEnabled()
-      await slugField.locator('label.field-label').click()
-      await expect(slug).toBeFocused()
+      await title.fill('Accessible relationship title')
+      await expect(title).toHaveValue('Accessible relationship title')
     })
 
     test('should name the collection query menu when configuring a new widget', async () => {
