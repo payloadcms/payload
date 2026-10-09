@@ -84,7 +84,7 @@ describe('relationship', () => {
     await page
       .locator('.popup__content .relationship-add-new__relation-button--text-fields')
       .click()
-    const textField = page.locator('.drawer__content #field-text')
+    const textField = page.locator('.drawer__content input[name="text"]')
     await expect(textField).toBeEnabled()
     const textValue = 'hello'
     await textField.fill(textValue)
@@ -329,7 +329,7 @@ describe('relationship', () => {
       .locator('.popup__content .relationship-add-new__relation-button--text-fields')
       .click()
 
-    await page.locator('.drawer__content #field-text').fill('something')
+    await page.locator('.drawer__content input[name="text"]').fill('something')
 
     await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
@@ -341,7 +341,7 @@ describe('relationship', () => {
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
     await openCreateDocDrawer({ fieldSelector: '#field-relationshipHasMany', page })
     const value = 'Hello, world!'
-    await page.locator('.drawer__content #field-text').fill(value)
+    await page.locator('.drawer__content input[name="text"]').fill(value)
 
     // Save and close the drawer
     await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
@@ -357,15 +357,15 @@ describe('relationship', () => {
       selector: '#field-relationshipHasMany button.relationship--multi-value-label__drawer-toggler',
     })
 
-    await page.locator('[id^=doc-drawer_text-fields_1_] #field-text').click()
+    await page.locator('[id^=doc-drawer_text-fields_1_] input[name="text"]').click()
     await page.keyboard.down('1')
     await page.keyboard.type('23')
-    await expect(page.locator('[id^=doc-drawer_text-fields_1_] #field-text')).toHaveValue(
+    await expect(page.locator('[id^=doc-drawer_text-fields_1_] input[name="text"]')).toHaveValue(
       `${value}123`,
     )
     await page.keyboard.type('4567')
     await page.keyboard.press('Backspace')
-    await expect(page.locator('[id^=doc-drawer_text-fields_1_] #field-text')).toHaveValue(
+    await expect(page.locator('[id^=doc-drawer_text-fields_1_] input[name="text"]')).toHaveValue(
       `${value}123456`,
     )
 
@@ -446,7 +446,7 @@ describe('relationship', () => {
     await page.getByRole('button', { name: 'Edit Seeded text document' }).click()
 
     // Fill 'text' field of 'Seeded text document'
-    await page.locator('.drawer__content #field-text').fill('some updated text value')
+    await page.locator('.drawer__content input[name="text"]').fill('some updated text value')
 
     // Save drawer (not parent page) with hotkey
     await saveDocHotkeyAndAssert(page)
@@ -493,7 +493,7 @@ describe('relationship', () => {
       await page.locator('.popup__content #action-create').click()
       await wait(1000) // wait for /form-state to return
       const title = 'Created from drawer'
-      await drawer1Content.locator('#field-text').fill(title)
+      await drawer1Content.locator('input[name="text"]').fill(title)
       await saveDocAndAssert(page, '[id^=doc-drawer_text-fields_1_] .drawer__content #action-save')
       await expect(drawer1Title).not.toHaveAttribute('data-doc-id', originalDrawerID)
       await page.locator('[id^=doc-drawer_text-fields_1_] .drawer__close').click()
@@ -547,7 +547,7 @@ describe('relationship', () => {
       const drawer1Title = drawer1Content.locator('.doc-drawer__title')
       const originalID = await drawer1Title.getAttribute('data-doc-id')
       const originalText = 'Text'
-      await drawer1Content.locator('#field-text').fill(originalText)
+      await drawer1Content.locator('input[name="text"]').fill(originalText)
       await saveDocAndAssert(page, '[id^=doc-drawer_text-fields_1_] .drawer__content #action-save')
       await openDocControls(drawer1Content, page)
       await page.locator('.popup__content #action-duplicate').click()
@@ -1090,7 +1090,7 @@ describe('relationship', () => {
       selector: '#field-relationship button.relationship--single-value__drawer-toggler',
     })
 
-    await page.locator('[id^=doc-drawer_text-fields_1_] #field-text').fill('new text')
+    await page.locator('[id^=doc-drawer_text-fields_1_] input[name="text"]').fill('new text')
 
     // save drawer
     await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()

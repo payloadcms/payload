@@ -169,6 +169,7 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
   return (
     <>
       <Button
+        aria-label={`${t('hierarchy:folderLocation')}: ${label}`}
         buttonStyle="secondary"
         className={[baseClass, readOnly && `${baseClass}--read-only`].filter(Boolean).join(' ')}
         disabled={readOnly}

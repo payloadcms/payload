@@ -558,6 +558,7 @@ export const enTranslations = {
     yes: 'Yes',
   },
   hierarchy: {
+    folderLocation: 'Folder location',
     itemsMovedTo: '{{title}} moved to {{destination}}',
     itemsMovedToRoot: '{{title}} moved to root',
     moveItemsToRootConfirmation:

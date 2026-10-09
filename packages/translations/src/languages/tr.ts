@@ -566,6 +566,7 @@ export const trTranslations: DefaultTranslationsObject = {
     yes: 'Evet',
   },
   hierarchy: {
+    folderLocation: 'Klasör konumu',
     itemsMovedTo: "{{title}} {{destination}}'ye taşındı",
     itemsMovedToRoot: '{{title}} kök bölüme taşındı.',
     moveItemsToRootConfirmation:

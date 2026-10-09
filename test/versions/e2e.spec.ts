@@ -2217,7 +2217,7 @@ describe('Versions', () => {
         '#field-relationToAutosaves .relationship--single-value__drawer-toggler',
       )
 
-      const titleField = page.locator('#field-title')
+      const titleField = page.locator('[id^=doc-drawer_autosave-posts_1_] input[name="title"]')
 
       await titleField.fill('')
 

@@ -532,6 +532,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     yes: '是',
   },
   hierarchy: {
+    folderLocation: '資料夾位置',
     itemsMovedTo: '{{title}} 移至 {{destination}}',
     itemsMovedToRoot: '{{title}} 已移至根目錄',
     moveItemsToRootConfirmation: '您即將將 <1>{{count}} {{label}}</1> 移至根目錄。您確定嗎？',

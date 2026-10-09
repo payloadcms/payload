@@ -35,6 +35,7 @@ export type Props = {
   onClick?: (event: MouseEvent) => void
   onKeyDown?: KeyboardEventHandler
   onMouseDown?: (event: MouseEvent) => void
+  popupAriaLabel?: string
   /**
    * Size of the chevron icon in the split-button popup trigger.
    * @default 24

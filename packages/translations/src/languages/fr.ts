@@ -573,6 +573,7 @@ export const frTranslations: DefaultTranslationsObject = {
     yes: 'Oui',
   },
   hierarchy: {
+    folderLocation: 'Emplacement du dossier',
     itemsMovedTo: '{{title}} déplacé vers {{destination}}',
     itemsMovedToRoot: '{{title}} déplacé à la racine',
     moveItemsToRootConfirmation:

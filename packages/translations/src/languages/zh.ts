@@ -534,6 +534,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     yes: '是的',
   },
   hierarchy: {
+    folderLocation: '文件夹位置',
     itemsMovedTo: '{{title}} 已移至 {{destination}}',
     itemsMovedToRoot: '{{title}}移至根目录',
     moveItemsToRootConfirmation: '您即将将<1>{{count}} {{label}}</1>移动至根目录。您确定吗？',

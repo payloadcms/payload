@@ -559,6 +559,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     yes: 'はい',
   },
   hierarchy: {
+    folderLocation: 'フォルダーの場所',
     itemsMovedTo: '{{title}}は{{destination}}に移動しました',
     itemsMovedToRoot: '{{title}}がルートに移動されました',
     moveItemsToRootConfirmation:

@@ -764,7 +764,7 @@ test.describe('Hierarchy Sidebar', () => {
         await page.getByRole('menuitem', { name: 'Organization', exact: true }).click()
 
         const drawer = page.locator('#hierarchy-create-folders')
-        const titleInput = drawer.locator('#field-title')
+        const titleInput = drawer.locator('input[name="title"]')
 
         await expect(drawer).toBeVisible()
         await titleInput.fill(organizationTitle)

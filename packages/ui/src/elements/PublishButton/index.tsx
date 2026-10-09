@@ -251,6 +251,7 @@ export function PublishButton({
         buttonId="action-save"
         disabled={!canPublish}
         onClick={isSpecificLocalePublishEnabled ? () => publishLocale(activeLocale.code) : publish}
+        popupAriaLabel={`${t('general:moreOptions')}: ${t('version:publish')}`}
         size="medium"
         SubMenuPopupContent={
           isSpecificLocalePublishEnabled

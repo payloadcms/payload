@@ -551,6 +551,7 @@ export const faTranslations: DefaultTranslationsObject = {
     yes: 'بله',
   },
   hierarchy: {
+    folderLocation: 'محل پوشه',
     itemsMovedTo: '{{title}} به {{destination}} منتقل شد.',
     itemsMovedToRoot: '{{title}} به ریشه منتقل شد',
     moveItemsToRootConfirmation:

@@ -1,4 +1,13 @@
 @layer payload-default {
+  .upload__label > .field-label:not(.unstyled) {
+    display: flex;
+    align-items: center;
+    color: var(--field-color-label);
+    font-weight: var(--text-body-medium-bold-font-weight);
+    letter-spacing: var(--field-label-letter-spacing);
+    margin-inline-end: auto;
+  }
+
   .upload__dropzoneAndUpload {
     display: flex;
     flex-direction: column;

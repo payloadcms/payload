@@ -62,21 +62,21 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_D6CBC3A3".
+ * via the `definition` "LexicalNodes_CC173CAC".
  */
-export type LexicalNodes_D6CBC3A3 =
+export type LexicalNodes_CC173CAC =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_D6CBC3A3>
+  | SerializedParagraphNode<LexicalNodes_CC173CAC>
   | SerializedBlockNode<Callout | NoHandle>
-  | SerializedTableNode<LexicalNodes_D6CBC3A3>
-  | SerializedTableCellNode<LexicalNodes_D6CBC3A3>
-  | SerializedTableRowNode<LexicalNodes_D6CBC3A3>
+  | SerializedTableNode<LexicalNodes_CC173CAC>
+  | SerializedTableCellNode<LexicalNodes_CC173CAC>
+  | SerializedTableRowNode<LexicalNodes_CC173CAC>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
   | SerializedUploadNode<'media-alt'>
-  | SerializedQuoteNode<LexicalNodes_D6CBC3A3>
+  | SerializedQuoteNode<LexicalNodes_CC173CAC>
   | SerializedRelationshipNode<
       | 'users'
       | 'payload-folders'
@@ -85,25 +85,26 @@ export type LexicalNodes_D6CBC3A3 =
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
+      | 'payload-llm-instructions'
     >
-  | SerializedAutoLinkNode<LexicalNodes_D6CBC3A3, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_D6CBC3A3, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_D6CBC3A3>
-  | SerializedListItemNode<LexicalNodes_D6CBC3A3>
-  | SerializedHeadingNode<LexicalNodes_D6CBC3A3>;
+  | SerializedAutoLinkNode<LexicalNodes_CC173CAC, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_CC173CAC, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_CC173CAC>
+  | SerializedListItemNode<LexicalNodes_CC173CAC>
+  | SerializedHeadingNode<LexicalNodes_CC173CAC>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_0E5D99AF".
+ * via the `definition` "LexicalNodes_8888827C".
  */
-export type LexicalNodes_0E5D99AF =
+export type LexicalNodes_8888827C =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_0E5D99AF>
+  | SerializedParagraphNode<LexicalNodes_8888827C>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
   | SerializedUploadNode<'media-alt'>
-  | SerializedQuoteNode<LexicalNodes_0E5D99AF>
+  | SerializedQuoteNode<LexicalNodes_8888827C>
   | SerializedRelationshipNode<
       | 'users'
       | 'payload-folders'
@@ -112,12 +113,25 @@ export type LexicalNodes_0E5D99AF =
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
+      | 'payload-llm-instructions'
     >
-  | SerializedAutoLinkNode<LexicalNodes_0E5D99AF, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_0E5D99AF, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_0E5D99AF>
-  | SerializedListItemNode<LexicalNodes_0E5D99AF>
-  | SerializedHeadingNode<LexicalNodes_0E5D99AF>;
+  | SerializedAutoLinkNode<LexicalNodes_8888827C, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_8888827C, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_8888827C>
+  | SerializedListItemNode<LexicalNodes_8888827C>
+  | SerializedHeadingNode<LexicalNodes_8888827C>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_4EE6A29F".
+ */
+export type LexicalNodes_4EE6A29F =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_4EE6A29F>
+  | SerializedListNode<LexicalNodes_4EE6A29F>
+  | SerializedListItemNode<LexicalNodes_4EE6A29F>
+  | SerializedHeadingNode<LexicalNodes_4EE6A29F, 'h2' | 'h3' | 'h4'>;
 
 export interface Config {
   auth: {
@@ -134,6 +148,7 @@ export interface Config {
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+    'payload-llm-instructions': PayloadLlmInstruction;
   };
   collectionsJoins: {
     'payload-folders': {
@@ -150,6 +165,7 @@ export interface Config {
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+    'payload-llm-instructions': PayloadLlmInstructionsSelect<false> | PayloadLlmInstructionsSelect<true>;
   };
   db: {
     defaultIDType: string;
@@ -163,6 +179,7 @@ export interface Config {
   };
   locale: 'en' | 'es';
   widgets: {
+    welcome: WelcomeWidget;
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
@@ -271,6 +288,8 @@ export interface PayloadFolder {
 export interface Post {
   id: string;
   title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
   /**
    * A subtitle field to test focus indicators in the admin UI, helps us detect exiting out of rich text editor properly.
    */
@@ -279,9 +298,10 @@ export interface Post {
   accessibilitySortableSelect?: ('one' | 'two')[] | null;
   accessibilityDisabledSelect?: ('one' | 'two') | null;
   requiredTags: string[];
+  relatedPosts?: (string | Post)[] | null;
   relatedPost?: (string | null) | Post;
   publishedOn?: string | null;
-  content?: LexicalRichText<LexicalNodes_D6CBC3A3> | null;
+  content?: LexicalRichText<LexicalNodes_CC173CAC> | null;
   items?:
     | {
         label?: string | null;
@@ -295,14 +315,6 @@ export interface Post {
   '_h_payload-folders'?: (string | null) | PayloadFolder;
   readOnlyHierarchy?: (string | PayloadFolder)[] | null;
   featuredImage?: (string | null) | Media;
-  createdBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
   /**
    * @minItems 2
    * @maxItems 2
@@ -328,6 +340,14 @@ export interface Post {
     | boolean
     | null;
   unlabelledSource?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -338,7 +358,7 @@ export interface Post {
  * via the `definition` "TextBlock".
  */
 export interface TextBlock {
-  body?: LexicalRichText<LexicalNodes_0E5D99AF> | null;
+  body?: LexicalRichText<LexicalNodes_8888827C> | null;
   text?: string | null;
   date?: string | null;
   id?: string | null;
@@ -361,6 +381,7 @@ export interface ImageBlock {
  */
 export interface Media {
   id: string;
+  alt: string;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -369,7 +390,6 @@ export interface Media {
     relationTo: 'users';
     value: string | User;
   } | null;
-  alt: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -522,6 +542,28 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-llm-instructions".
+ */
+export interface PayloadLlmInstruction {
+  id: string;
+  entitySlug: string;
+  title?: string | null;
+  entityType: 'collection' | 'global';
+  additionalInstructions?: LexicalRichText<LexicalNodes_4EE6A29F> | null;
+  systemInstructions?: LexicalRichText<LexicalNodes_4EE6A29F> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -569,11 +611,14 @@ export interface PayloadFoldersSelect<T extends boolean = true> {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  slug?: T;
+  slugLock?: T;
   subtitle?: T;
   accessibilitySelect?: T;
   accessibilitySortableSelect?: T;
   accessibilityDisabledSelect?: T;
   requiredTags?: T;
+  relatedPosts?: T;
   relatedPost?: T;
   publishedOn?: T;
   content?: T;
@@ -609,13 +654,13 @@ export interface PostsSelect<T extends boolean = true> {
   '_h_payload-folders'?: T;
   readOnlyHierarchy?: T;
   featuredImage?: T;
-  createdBy?: T;
-  updatedBy?: T;
   location?: T;
   settings?: T;
   source?: T;
   unlabelledSettings?: T;
   unlabelledSource?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -626,9 +671,9 @@ export interface PostsSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
   createdBy?: T;
   updatedBy?: T;
-  alt?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -736,6 +781,22 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-llm-instructions_select".
+ */
+export interface PayloadLlmInstructionsSelect<T extends boolean = true> {
+  id?: T;
+  entitySlug?: T;
+  title?: T;
+  entityType?: T;
+  additionalInstructions?: T;
+  systemInstructions?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "menu".
  */
 export interface Menu {
@@ -763,6 +824,16 @@ export interface MenuSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "welcome_widget".
+ */
+export interface WelcomeWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -558,6 +558,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     yes: 'Да',
   },
   hierarchy: {
+    folderLocation: 'Локација фасцикле',
     itemsMovedTo: '{{title}} je premešten u {{destination}}',
     itemsMovedToRoot: '{{title}} premestio se u koren',
     moveItemsToRootConfirmation:

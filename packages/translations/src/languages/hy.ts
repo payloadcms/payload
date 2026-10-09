@@ -563,6 +563,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     yes: 'Այո',
   },
   hierarchy: {
+    folderLocation: 'Պանակի տեղադրություն',
     itemsMovedTo: '{{title}} տեղափոխվեց {{destination}}։',
     itemsMovedToRoot: '"{{title}}" տեղափոխվել է արմատը',
     moveItemsToRootConfirmation:

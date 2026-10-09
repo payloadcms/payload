@@ -191,7 +191,7 @@ describe('Join Field', () => {
 
     const drawer = page.locator('[id^=doc-drawer_hidden-posts_1_]')
     await expect(drawer).toBeVisible()
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
     await expect(titleField).toBeVisible()
     await titleField.fill('Test Hidden Post')
 
@@ -397,7 +397,7 @@ describe('Join Field', () => {
     await expect(categoryField).toBeVisible({ timeout: EXPECT_TIMEOUT * 5 })
     const categoryValue = categoryField.locator('.relationship--single-value__text')
     await expect(categoryValue).toHaveText('example')
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
     await expect(titleField).toBeVisible()
     await titleField.fill('Test Post 4')
 
@@ -441,7 +441,7 @@ describe('Join Field', () => {
     await expect(categoryField).toBeVisible({ timeout: EXPECT_TIMEOUT * 5 })
     await expect(categoryField.locator('.relationship--single-value__text')).toHaveText('example')
 
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
     await expect(titleField).toBeVisible()
     await titleField.fill(newTitle)
 
@@ -482,7 +482,7 @@ describe('Join Field', () => {
     await expect(categoryField).toBeVisible({ timeout: EXPECT_TIMEOUT * 5 })
     await expect(categoryField.locator('.relationship--single-value__text')).toHaveText('example')
 
-    const titleField = createDrawer.locator('#field-title')
+    const titleField = createDrawer.locator('input[name="title"]')
     await expect(titleField).toBeVisible()
     await titleField.fill(title)
 
@@ -625,7 +625,7 @@ describe('Join Field', () => {
     await editButton.click()
     const drawer = page.locator('[id^=doc-drawer_posts_1_]')
     await expect(drawer).toBeVisible()
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
     await expect(titleField).toBeVisible()
 
     const updatedTitle = 'Test Post 1 (Updated)'
@@ -669,7 +669,7 @@ describe('Join Field', () => {
     await editButton.click()
     const drawer = page.locator('[id^=doc-drawer_versions_1_]')
     await expect(drawer).toBeVisible()
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
     await expect(titleField).toBeVisible()
 
     const updatedTitle = 'Test Post (Updated)'
@@ -726,7 +726,7 @@ describe('Join Field', () => {
     await joinField.locator('.relationship-table__add-new').click()
     const drawer = page.locator('[id^=doc-drawer_posts_1_]')
     await expect(drawer).toBeVisible()
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
     await expect(titleField).toBeVisible()
     await titleField.fill('Test polymorphic Post')
     await expect(drawer.locator('#field-polymorphic')).toContainText('example')
@@ -743,7 +743,7 @@ describe('Join Field', () => {
     await joinField.locator('.relationship-table__add-new').click()
     const drawer = page.locator('[id^=doc-drawer_posts_1_]')
     await expect(drawer).toBeVisible()
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
     await expect(titleField).toBeVisible()
     await titleField.fill('Test polymorphic Post')
     await expect(drawer.locator('#field-polymorphics')).toContainText('example')
@@ -760,7 +760,7 @@ describe('Join Field', () => {
     await joinField.locator('.relationship-table__add-new').click()
     const drawer = page.locator('[id^=doc-drawer_posts_1_]')
     await expect(drawer).toBeVisible()
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
     await expect(titleField).toBeVisible()
     await titleField.fill('Test polymorphic Post')
     await expect(drawer.locator('#field-localizedPolymorphic')).toContainText('example')
@@ -777,7 +777,7 @@ describe('Join Field', () => {
     await joinField.locator('.relationship-table__add-new').click()
     const drawer = page.locator('[id^=doc-drawer_posts_1_]')
     await expect(drawer).toBeVisible()
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
     await expect(titleField).toBeVisible()
     await titleField.fill('Test polymorphic Post')
     await expect(drawer.locator('#field-localizedPolymorphics')).toContainText('example')
@@ -814,7 +814,7 @@ describe('Join Field', () => {
     await expect(uploadField).toBeVisible()
     const uploadValue = uploadField.locator('.upload-relationship-details img')
     await expect(uploadValue).toBeVisible()
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
     await expect(titleField).toBeVisible()
     await titleField.fill('Edited title for upload')
     await drawer.locator('button[id="action-save"]').click()
@@ -869,7 +869,7 @@ describe('Join Field', () => {
     )
     await expect(pageOption).toHaveText('Example Page')
     await pageOption.click()
-    await page.locator('.drawer__content input#field-title').fill('Some new page')
+    await page.locator('.drawer__content input[name="title"]').fill('Some new page')
     await page.locator('.drawer__content #action-save').click()
 
     await expect(

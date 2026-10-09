@@ -555,6 +555,7 @@ export const csTranslations: DefaultTranslationsObject = {
     yes: 'Ano',
   },
   hierarchy: {
+    folderLocation: 'Umístění složky',
     itemsMovedTo: '{{title}} byl přesunut do {{destination}}',
     itemsMovedToRoot: '{{title}} přesunuto do kořenové složky',
     moveItemsToRootConfirmation:

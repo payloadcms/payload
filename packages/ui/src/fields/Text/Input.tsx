@@ -53,8 +53,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
   const editDepth = useEditDepth()
   const { i18n, t } = useTranslation()
 
-  const inputID =
-    idFromProps ?? (hasMany ? generateFieldID(path, editDepth, uuid, 'input') : undefined)
+  const inputID = idFromProps ?? generateFieldID(path, editDepth, uuid, hasMany ? 'input' : 'field')
   const errorID = showError ? generateFieldID(path, editDepth, uuid, 'field-error') : undefined
 
   const editableProps: ReactSelectAdapterProps['customProps']['editableProps'] = (
@@ -183,7 +182,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
             className="form-input"
             data-rtl={rtl}
             disabled={readOnly}
-            id={idFromProps ?? `field-${path?.replace(/\./g, '__')}`}
+            id={inputID}
             name={path}
             onChange={onChange as (e: ChangeEvent<HTMLInputElement>) => void}
             onKeyDown={onKeyDown}

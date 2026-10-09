@@ -556,6 +556,7 @@ export const koTranslations: DefaultTranslationsObject = {
     yes: '네',
   },
   hierarchy: {
+    folderLocation: '폴더 위치',
     itemsMovedTo: '{{title}}은 {{destination}}으로 이동되었습니다.',
     itemsMovedToRoot: '{{title}}가 루트로 이동되었습니다.',
     moveItemsToRootConfirmation:

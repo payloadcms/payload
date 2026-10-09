@@ -558,6 +558,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     yes: 'Da',
   },
   hierarchy: {
+    folderLocation: 'Lokacija mape',
     itemsMovedTo: '{{title}} premješten na {{destination}}',
     itemsMovedToRoot: '{{title}} premješten u korijen',
     moveItemsToRootConfirmation:

@@ -555,6 +555,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     yes: 'Так',
   },
   hierarchy: {
+    folderLocation: 'Розташування папки',
     itemsMovedTo: '{{title}} перейшов до {{destination}}',
     itemsMovedToRoot: '{{title}} переміщено в корінь',
     moveItemsToRootConfirmation:

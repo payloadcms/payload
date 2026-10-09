@@ -557,6 +557,7 @@ export const slTranslations: DefaultTranslationsObject = {
     yes: 'Da',
   },
   hierarchy: {
+    folderLocation: 'Lokacija mape',
     itemsMovedTo: '{{title}} preseljeno v {{destination}}',
     itemsMovedToRoot: '{{title}} premaknjeno v koren',
     moveItemsToRootConfirmation:

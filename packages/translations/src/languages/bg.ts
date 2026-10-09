@@ -559,6 +559,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     yes: 'Да',
   },
   hierarchy: {
+    folderLocation: 'Местоположение на папката',
     itemsMovedTo: '{{title}} беше преместен в {{destination}}',
     itemsMovedToRoot: '{{title}} преместен към корена',
     moveItemsToRootConfirmation:

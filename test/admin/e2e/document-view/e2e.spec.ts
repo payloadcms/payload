@@ -382,7 +382,7 @@ describe('Document View', () => {
       const drawerEditView = drawer.locator('.drawer__content .collection-edit')
       await expect(drawerEditView).toBeVisible()
 
-      const drawerTitleField = drawerEditView.locator('#field-title')
+      const drawerTitleField = drawerEditView.locator('input[name="title"]')
       const testTitle = 'Test Title for Persistence'
       await drawerTitleField.fill(testTitle)
       await expect(drawerTitleField).toHaveValue(testTitle)
@@ -471,7 +471,7 @@ describe('Document View', () => {
       await expect(drawer1Content).toBeVisible()
 
       // modify the title to trigger the leave page modal
-      await page.locator('.drawer__content #field-title').fill('New Title')
+      await page.locator('.drawer__content input[name="title"]').fill('New Title')
       await wait(200)
 
       // The drawer header renders the document title as a link to the full document.
@@ -971,7 +971,7 @@ describe('Document View', () => {
         selector: '#field-relationship button.relationship--single-value__drawer-toggler',
       })
       const editModal = page.locator('.drawer--is-open .collection-edit')
-      await editModal.locator('#field-title').fill('new sean')
+      await editModal.locator('input[name="title"]').fill('new sean')
 
       // Attempt to close the drawer
       const closeButton = editModal.locator('button.doc-drawer__header-close')

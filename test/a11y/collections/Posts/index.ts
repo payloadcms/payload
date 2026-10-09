@@ -8,6 +8,7 @@ import {
 } from '@payloadcms/richtext-lexical'
 import { createFolderField } from 'payload'
 
+import { customSlugLabelTitle } from '../../constants.js'
 import { mediaSlug } from '../Media/index.js'
 
 export const postsSlug = 'posts'
@@ -27,6 +28,34 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
       localized: true,
       required: true,
+    },
+    {
+      name: 'slug',
+      type: 'text',
+      admin: {
+        components: {
+          Field: {
+            clientProps: {
+              checkboxFieldPath: 'slugLock',
+              fieldToUse: 'title',
+            },
+            path: '../../examples/localization/src/fields/slug/SlugComponent#SlugComponent',
+          },
+        },
+        // Keep the example's lock control out of unrelated keyboard-navigation scenarios.
+        condition: (data) => data.title === customSlugLabelTitle,
+        disabled: { bulkEdit: true, column: true, filter: true, groupBy: true },
+      },
+      label: 'Slug',
+    },
+    {
+      name: 'slugLock',
+      type: 'checkbox',
+      admin: {
+        disabled: { bulkEdit: true, column: true, filter: true, groupBy: true },
+        hidden: true,
+      },
+      defaultValue: true,
     },
     {
       name: 'subtitle',
@@ -87,6 +116,12 @@ export const PostsCollection: CollectionConfig = {
           Field: '/components/NonSearchableSelect/index.js#NonSearchableSelect',
         },
       },
+    },
+    {
+      name: 'relatedPosts',
+      type: 'relationship',
+      hasMany: true,
+      relationTo: postsSlug,
     },
     {
       name: 'relatedPost',

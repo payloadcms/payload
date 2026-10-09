@@ -556,6 +556,7 @@ export const skTranslations: DefaultTranslationsObject = {
     yes: 'Áno',
   },
   hierarchy: {
+    folderLocation: 'Umiestnenie priečinka',
     itemsMovedTo: '{{title}} presunuté do {{destination}}',
     itemsMovedToRoot: '{{title}} presunutý do koreňa',
     moveItemsToRootConfirmation:

@@ -559,6 +559,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     yes: 'Da',
   },
   hierarchy: {
+    folderLocation: 'Lokacija fascikle',
     itemsMovedTo: '{{title}} premešten u {{destination}}',
     itemsMovedToRoot: '{{title}} premešteno u koren',
     moveItemsToRootConfirmation:

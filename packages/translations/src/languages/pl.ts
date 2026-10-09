@@ -558,6 +558,7 @@ export const plTranslations: DefaultTranslationsObject = {
     yes: 'Tak',
   },
   hierarchy: {
+    folderLocation: 'Lokalizacja folderu',
     itemsMovedTo: '{{title}} został przeniesiony do {{destination}}',
     itemsMovedToRoot: '{{title}} przeniesiony do głównego katalogu',
     moveItemsToRootConfirmation:

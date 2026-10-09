@@ -567,6 +567,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     yes: 'হ্যাঁ',
   },
   hierarchy: {
+    folderLocation: 'ফোল্ডারের অবস্থান',
     itemsMovedTo: '{{title}} টি {{destination}} এ সরিয়ে নেওয়া হলো।',
     itemsMovedToRoot: '{{title}} মূলে সরিয়ে নেওয়া হয়েছে',
     moveItemsToRootConfirmation:

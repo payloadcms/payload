@@ -726,7 +726,7 @@ describe('Relationship Field', () => {
     await openCreateDocDrawer({ fieldSelector: '#field-relationshipHasMany', page })
     const documentDrawer = page.locator('[id^=doc-drawer_relation-one_1_]')
     await expect(documentDrawer).toBeVisible()
-    const drawerField = documentDrawer.locator('#field-name')
+    const drawerField = documentDrawer.locator('input[name="name"]')
     await drawerField.fill('Newly created document')
     const saveButton = documentDrawer.locator('#action-save')
     await saveButton.click()

@@ -548,6 +548,7 @@ export const arTranslations: DefaultTranslationsObject = {
     yes: 'نعم',
   },
   hierarchy: {
+    folderLocation: 'موقع المجلد',
     itemsMovedTo: '{{title}} تم نقله إلى {{destination}}',
     itemsMovedToRoot: '{{title}} تم نقله إلى الجذر',
     moveItemsToRootConfirmation:

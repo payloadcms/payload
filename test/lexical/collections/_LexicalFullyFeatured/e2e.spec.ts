@@ -56,7 +56,7 @@ describe('Lexical Fully Featured', () => {
     await lexical.page.evaluate(() => navigator.clipboard.writeText(''))
     await lexical.drawer.locator('.file-manager__pasteFromClipboard').click()
     await lexical.page
-      .locator('#upload-paste-url #field-url')
+      .locator('#upload-paste-url input[name="url"]')
       .fill(
         'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg',
       )
@@ -77,7 +77,7 @@ describe('Lexical Fully Featured', () => {
     await lexical.drawer.locator('.file-manager__pasteFromClipboard').click()
     const url =
       'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg'
-    await lexical.page.locator('#upload-paste-url #field-url').fill(url)
+    await lexical.page.locator('#upload-paste-url input[name="url"]').fill(url)
     await lexical.page.locator('#upload-paste-url button', { hasText: 'Add file' }).click()
     await lexical.save('drawer')
     const img = lexical.editor.locator('.LexicalEditorTheme__upload img').first()
@@ -101,7 +101,7 @@ describe('Lexical Fully Featured', () => {
     await page.keyboard.type('Hello')
     await page.keyboard.press('Enter')
     await lexical.slashCommand('myblock')
-    await page.locator('#field-someText').first().focus()
+    await page.locator('input[name="someText"]').first().focus()
     await page.keyboard.type('World')
     await page.keyboard.press('ControlOrMeta+A')
     await page.keyboard.press('Backspace')

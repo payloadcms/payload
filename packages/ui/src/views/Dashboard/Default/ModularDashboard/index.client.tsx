@@ -1,6 +1,6 @@
 'use client'
 
-import type { Modifier } from '@dnd-kit/core'
+import type { Announcements, Modifier, UniqueIdentifier } from '@dnd-kit/core'
 import type { ClientWidget, WidgetWidth } from 'payload'
 
 import { DndContext, DragOverlay, useDraggable, useDroppable } from '@dnd-kit/core'
@@ -91,6 +91,48 @@ export function ModularDashboardClient({
   const [activeDragId, setActiveDragId] = useState<null | string>(null)
   const [activeControlsWidgetID, setActiveControlsWidgetID] = useState<null | string>(null)
   const sensors = useDashboardSensors()
+  const announcements = useMemo<Announcements>(() => {
+    const describeWidget = ({ id, index }: { id: UniqueIdentifier; index?: number }) => {
+      const widgetID = String(id).replace(/-(?:before|after)$/, '')
+      const slug = widgetID.slice(0, widgetID.lastIndexOf('-'))
+      const label = getTranslation(
+        widgets.find((widget) => widget.slug === slug)?.label ?? toWords(slug),
+        i18n,
+      )
+      const position = index ?? currentLayout.findIndex((widget) => widget.item.id === widgetID)
+
+      return `${label}, ${t('general:order')}: ${position + 1}`
+    }
+    const announceCancel: Announcements['onDragCancel'] = ({ active }) =>
+      `${t('general:cancel')}: ${describeWidget({ id: active.id })}`
+    const announceMove: NonNullable<Announcements['onDragOver']> = ({ active, over }) => {
+      if (!over) {
+        return undefined
+      }
+      const { moveToIndex } = getWidgetMoveIndexes({
+        activeID: active.id,
+        layout: currentLayout,
+        overID: over.id,
+      })
+
+      return t('hierarchy:itemsMovedTo', {
+        title: describeWidget({ id: active.id }),
+        destination: describeWidget({ id: over.id, index: moveToIndex }),
+      })
+    }
+
+    return {
+      onDragCancel: announceCancel,
+      onDragEnd: (event) => announceMove(event) ?? announceCancel(event),
+      onDragOver: (event) => {
+        const message = announceMove(event)
+
+        return message ? `${t('general:move')}: ${message}` : undefined
+      },
+      onDragStart: ({ active }) =>
+        `${t('general:dragToReorder')}: ${describeWidget({ id: active.id })}`,
+    }
+  }, [currentLayout, i18n, t, widgets])
 
   useEffect(() => {
     if (!isEditing) {
@@ -101,6 +143,7 @@ export function ModularDashboardClient({
   return (
     <div>
       <DndContext
+        accessibility={{ announcements }}
         autoScroll={{
           enabled: true,
           threshold: {
@@ -120,26 +163,15 @@ export function ModularDashboardClient({
           if (!event.over) {
             return
           }
-          const droppableId = event.over.id as string
-          const i = droppableId.lastIndexOf('-')
-          const slug = droppableId.slice(0, i)
-          const position = droppableId.slice(i + 1)
+          const indexes = getWidgetMoveIndexes({
+            activeID: event.active.id,
+            layout: currentLayout,
+            overID: event.over.id,
+          })
 
-          if (slug === event.active.id) {
-            return
+          if (indexes.moveFromIndex !== indexes.moveToIndex) {
+            moveWidget(indexes)
           }
-
-          const moveFromIndex = currentLayout?.findIndex(
-            (widget) => widget.item.id === event.active.id,
-          )
-          let moveToIndex = currentLayout?.findIndex((widget) => widget.item.id === slug)
-          if (moveFromIndex < moveToIndex) {
-            moveToIndex--
-          }
-          if (position === 'after') {
-            moveToIndex++
-          }
-          moveWidget({ moveFromIndex, moveToIndex })
         }}
         onDragStart={(event) => {
           setActiveDragId(event.active.id as string)
@@ -447,4 +479,29 @@ function DroppableItem({ id, position }: { id: string; position: 'after' | 'befo
       }}
     />
   )
+}
+
+function getWidgetMoveIndexes({
+  activeID,
+  layout,
+  overID,
+}: {
+  activeID: UniqueIdentifier
+  layout: WidgetInstanceClient[]
+  overID: UniqueIdentifier
+}) {
+  const widgetID = String(overID).replace(/-(?:before|after)$/, '')
+  const moveFromIndex = layout.findIndex((widget) => widget.item.id === activeID)
+  let moveToIndex = layout.findIndex((widget) => widget.item.id === widgetID)
+
+  if (widgetID !== activeID) {
+    if (moveFromIndex < moveToIndex) {
+      moveToIndex--
+    }
+    if (String(overID).endsWith('-after')) {
+      moveToIndex++
+    }
+  }
+
+  return { moveFromIndex, moveToIndex }
 }

@@ -543,6 +543,7 @@ export const heTranslations: DefaultTranslationsObject = {
     yes: 'כן',
   },
   hierarchy: {
+    folderLocation: 'מיקום התיקייה',
     itemsMovedTo: '{{title}} הועבר ל-{{destination}}',
     itemsMovedToRoot: '{{title}} הועבר לשורש',
     moveItemsToRootConfirmation: 'אתה עומד להעביר <1>{{count}} {{label}}</1> לשורש. האם אתה בטוח?',

@@ -31,11 +31,15 @@ export const FieldDiffContainer: React.FC<{
     To,
   } = args
 
+  const labelID = React.useId()
+
   return (
     <div
+      aria-labelledby={label !== false ? labelID : undefined}
       className={`${baseClass}-container${className ? ` ${className}` : ''} nested-level-${nestingLevel}`}
+      role={label !== false ? 'group' : undefined}
     >
-      <FieldDiffLabel>
+      <FieldDiffLabel id={labelID}>
         {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
         {label !== false && getTranslation(label || '', i18n)}
       </FieldDiffLabel>

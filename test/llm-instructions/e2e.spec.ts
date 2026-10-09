@@ -86,7 +86,7 @@ test('should open the correct instructions document from the global menu', async
   await page.goto(
     formatAdminURL({ adminRoute: '/admin', path: '/globals/site-settings', serverURL }),
   )
-  await page.getByRole('button', { name: 'More options', exact: true }).click()
+  await page.getByRole('button', { name: 'More options: Document', exact: true }).click()
   await expect(page.getByRole('menuitem', { name: 'Edit LLM instructions' })).toHaveAttribute(
     'href',
     new URL(`${instructionsURL}/global-site-settings`).pathname,

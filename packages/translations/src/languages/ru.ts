@@ -564,6 +564,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     yes: 'Да',
   },
   hierarchy: {
+    folderLocation: 'Расположение папки',
     itemsMovedTo: '{{title}} перемещен в {{destination}}',
     itemsMovedToRoot: '{{title}} перемещен в корень',
     moveItemsToRootConfirmation:

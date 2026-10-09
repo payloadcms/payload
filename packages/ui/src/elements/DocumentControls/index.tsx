@@ -381,7 +381,7 @@ export const DocumentControls: React.FC<{
             renderButton={({ active, ...buttonProps }) => (
               <Button
                 {...buttonProps}
-                aria-label={t('general:moreOptions')}
+                aria-label={`${t('general:moreOptions')}: ${t('general:document')}`}
                 buttonStyle="ghost"
                 className={`${baseClass}__popup-button`}
                 icon={<MoreIcon />}
