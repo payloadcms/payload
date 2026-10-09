@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-mcp",
-  "version": "4.0.0-canary.39",
+  "version": "4.0.0-beta.0",
   "description": "MCP (Model Context Protocol) capabilities with Payload",
   "keywords": [
     "plugin",
