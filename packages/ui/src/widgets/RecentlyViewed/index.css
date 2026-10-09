@@ -82,26 +82,56 @@
   }
 
   .card-grid.recents-widget__items--grid {
-    grid-template-columns: repeat(1, minmax(0, 1fr));
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
   }
 
   .recents-widget__viewport {
-    --recents-columns: 1;
+    --recents-columns: 2;
+    --recents-rows: 2;
     --recents-card-width: calc(
       (100cqw - var(--spacer-3) * (var(--recents-columns) - 1)) / var(--recents-columns)
     );
 
     /* Match the thumbnail, two text lines, padding, metadata gap, and card border. */
-    --recents-content-height: max(
+    --recents-row-height: max(
       calc(var(--spacer-6) * 5),
       calc(
-        (var(--recents-card-width) - var(--stroke-width-small) * 2) * 3 / 4 +
+        var(--recents-thumbnail-height) +
           (var(--text-body-medium-line-height) + var(--spacer-2-5)) * 2 + var(--spacer-1) +
           var(--stroke-width-small) * 2
       )
     );
+    --recents-thumbnail-height: calc(var(--spacer-6) * 3.5 - var(--stroke-width-small) * 2);
+    --recents-content-height: calc(
+      var(--recents-row-height) * var(--recents-rows) + var(--spacer-3) * (var(--recents-rows) - 1)
+    );
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacer-3);
     min-block-size: var(--recents-content-height);
     position: relative;
+  }
+
+  .recents-widget__content {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    align-content: start;
+  }
+
+  .recents-widget__empty {
+    grid-column: 1 / -1;
+  }
+
+  .recents-widget .document-card {
+    min-block-size: var(--recents-row-height);
+  }
+
+  .recents-widget .document-card__thumbnail {
+    height: var(--recents-thumbnail-height);
+    min-height: 0;
+    aspect-ratio: auto;
   }
 
   .recents-widget__error {
@@ -302,23 +332,21 @@
     .recents-widget__toolbar {
       min-block-size: var(--spacer-4);
     }
+  }
 
+  @container (min-width: 600px) {
     .recents-widget__viewport {
-      --recents-columns: 2;
-    }
-
-    .card-grid.recents-widget__items--grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
 
-  @container (min-width: 768px) {
+  @container (min-width: 800px) {
     .recents-widget__viewport {
-      --recents-columns: 4;
-    }
-
-    .card-grid.recents-widget__items--grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      --recents-rows: 1;
+      --recents-thumbnail-height: calc(
+        (var(--recents-card-width) - var(--stroke-width-small) * 2) * 3 / 4
+      );
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, calc(var(--spacer-6) * 4.5)), 1fr));
     }
   }
 }

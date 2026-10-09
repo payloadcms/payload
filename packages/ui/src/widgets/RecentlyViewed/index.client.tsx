@@ -186,9 +186,13 @@ export function RecentsAndPinnedClient({
     }
 
     let observedPageSize = 0
-    const observer = new ResizeObserver(([entry]) => {
-      const width = entry.contentRect.width
-      const nextPageSize = width >= 768 ? 4 : width >= 400 ? 2 : 1
+    const observer = new ResizeObserver(() => {
+      const styles = getComputedStyle(element)
+      const columns = styles.gridTemplateColumns.split(' ').length
+      const rows = Number(styles.getPropertyValue('--recents-rows'))
+      const nextPageSize = columns * rows
+
+      element.style.setProperty('--recents-columns', String(columns))
 
       if (nextPageSize !== observedPageSize) {
         observedPageSize = nextPageSize
