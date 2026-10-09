@@ -15,7 +15,10 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
-import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
+import {
+  checkDocumentLockStatus,
+  deleteUserDocumentLocks,
+} from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
@@ -180,6 +183,25 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     })
 
     // /////////////////////////////////////
+    // Delete preferences and locks owned by the document
+    // /////////////////////////////////////
+
+    // Must run before the document is deleted: SQL adapters cascade the user relationship rows
+    // away with the user, so these can no longer be matched by user afterwards
+    await deleteUserPreferences({
+      collectionConfig,
+      ids: [id],
+      payload,
+      req,
+    })
+
+    await deleteUserDocumentLocks({
+      collectionSlug: collectionConfig.slug,
+      ids: [id],
+      req,
+    })
+
+    // /////////////////////////////////////
     // Delete document
     // /////////////////////////////////////
 
@@ -197,17 +219,6 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     if (collectionConfig.auth) {
       result = { ...result, collection: collectionConfig.slug }
     }
-
-    // /////////////////////////////////////
-    // Delete Preferences
-    // /////////////////////////////////////
-
-    await deleteUserPreferences({
-      collectionConfig,
-      ids: [id],
-      payload,
-      req,
-    })
 
     // /////////////////////////////////////
     // afterRead - Fields

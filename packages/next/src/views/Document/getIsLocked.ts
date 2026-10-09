@@ -105,7 +105,8 @@ export const getIsLocked = async ({
     const currentEditor = docs[0].user?.value
     const lastUpdateTime = new Date(docs[0].updatedAt).getTime()
 
-    if (extractID(currentEditor) !== req.user.id) {
+    // A lock left behind by a deleted user has no owner, so it locks the document for nobody
+    if (currentEditor && extractID(currentEditor) !== req.user.id) {
       return {
         currentEditor,
         isLocked: true,
