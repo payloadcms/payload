@@ -58,13 +58,15 @@ import {
 } from './helpers.js'
 
 const openNavigationForUserMenu = async ({ page }: { page: Page }): Promise<void> => {
-  const openNavigation = page.locator('.app-header--nav-open')
+  const navigation = page.locator('aside.nav')
 
-  if ((await openNavigation.count()) === 0) {
+  await expect(navigation).toHaveClass(/nav--nav-hydrated/)
+
+  if (await navigation.evaluate((element) => element.hasAttribute('inert'))) {
     await page.getByRole('button', { name: /open menu/i }).click()
-    await expect(openNavigation).toHaveCount(1)
   }
 
+  await expect(navigation).not.toHaveAttribute('inert')
   await expect(page.locator('.user-menu__trigger')).toBeVisible()
 }
 
