@@ -60,7 +60,8 @@ export async function createGlobalVersion<T extends JsonObject = JsonObject>(
       sql: sql`
           UPDATE ${table}
           SET latest = false
-          WHERE ${table.id} != ${result.id};
+          WHERE ${table.id} != ${result.id}
+            AND ${table.latest} IS NOT FALSE;
         `,
     })
   }
