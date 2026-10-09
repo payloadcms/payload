@@ -1,9 +1,11 @@
+import { getInitialTreeData } from 'payload'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import type { Organization } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
+import { devUser } from '../credentials.js'
 
 test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () => {
   test.describe('Collection Config Property', () => {
@@ -1662,6 +1664,65 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
       // Should have full 3-level path
       expect(result._h_slugPath).toBe('level-1/level-2/level-3')
       expect(result._h_titlePath).toBe('Level 1/Level 2/Level 3')
+    })
+  })
+
+  test.describe('Initial Tree Data', () => {
+    test.beforeEach(async ({ payload }) => {
+      // Clear existing data before each test
+      await payload.delete({ collection: 'organizations', overrideAccess: true, where: {} })
+    })
+
+    test.afterEach(async ({ payload }) => {
+      // Clean up data after each test
+      await payload.delete({ collection: 'organizations', overrideAccess: true, where: {} })
+    })
+
+    test('should fetch children of an expanded parent only once when its ID arrives as string and number', async ({
+      payload,
+    }) => {
+      const rootPage = await payload.create({
+        collection: 'organizations',
+        data: { parent: null, title: 'Tree Root' },
+        overrideAccess: true,
+      })
+
+      const childA = await payload.create({
+        collection: 'organizations',
+        data: { parent: rootPage.id, title: 'Child A' },
+        overrideAccess: true,
+      })
+
+      const childB = await payload.create({
+        collection: 'organizations',
+        data: { parent: rootPage.id, title: 'Child B' },
+        overrideAccess: true,
+      })
+
+      const users = await payload.find({
+        collection: 'users',
+        overrideAccess: true,
+        where: { email: { equals: devUser.email } },
+      })
+
+      // Saved expanded-node preferences store the ID as a string while resolved
+      // ancestors add the same ID as a number (e.g. "1" and 1). The parent's
+      // children must be fetched and returned only once.
+      const tree = await getInitialTreeData({
+        collectionSlug: 'organizations',
+        expandedNodeIds: [String(rootPage.id), rootPage.id],
+        payload,
+        user: users.docs[0],
+      })
+
+      const ids = tree.docs.map((doc) => String(doc.id))
+      expect(new Set(ids).size).toBe(ids.length)
+
+      expect(ids).toContain(String(rootPage.id))
+      expect(ids).toContain(String(childA.id))
+      expect(ids).toContain(String(childB.id))
+
+      expect(tree.loadedParents[String(rootPage.id)].loadedCount).toBe(2)
     })
   })
 })
