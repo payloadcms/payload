@@ -6,6 +6,7 @@ import { formatAdminURL, instructionsCollectionSlug } from 'payload/shared'
 
 import type { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 
+import { addListFilter } from '../__helpers/e2e/filters/index.js'
 import { addGroupBy, clearGroupBy, openGroupBy } from '../__helpers/e2e/groupBy/index.js'
 import { waitForFormReady } from '../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
@@ -3738,6 +3739,46 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.6 Headings and Labels (AA)', () => {
+    test('should identify the account controls by their purpose without unrelated label text', async () => {
+      // PYLD-3614
+      await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
+      await openNavigationForUserMenu({ page })
+      const trigger = page.locator('.user-menu__trigger')
+
+      await trigger.focus()
+      await expect(trigger).toBeFocused()
+      await expect.soft(trigger).toHaveAccessibleName('Account: dev@payloadcms.com')
+      await trigger.press('Enter')
+      const profile = page.locator('.user-menu__profile')
+
+      await expect(profile).toBeVisible()
+      await expect.soft(profile).toHaveAccessibleName(/account|profile/i)
+      await expect.soft(profile).not.toHaveAccessibleName(/\byas\b/i)
+      await expect(profile).toHaveAttribute(
+        'href',
+        formatAdminURL({ adminRoute: '/admin', path: '/account' }),
+      )
+      await profile.press('Enter')
+      await expect(page).toHaveURL(
+        formatAdminURL({ adminRoute: '/admin', path: '/account', serverURL }),
+      )
+    })
+
+    test('should identify the global API results editor as read-only before typing', async () => {
+      // PYLD-3620
+      await openGlobalAPI({ page, serverURL })
+      const results = page.locator('.query-inspector__results')
+      const editor = results.getByRole('textbox')
+
+      await expect(results.locator('.monaco-editor')).toBeVisible()
+      await expect(editor).toBeAttached()
+      await editor.focus()
+      await expect(editor).toBeFocused()
+      await expect(editor).toHaveAccessibleName(/read.only/i)
+      await expect(editor).toHaveJSProperty('readOnly', true)
+      await expect(editor).not.toBeEditable()
+    })
+
     test('should describe the dashboard add action as adding a widget', async () => {
       // PYLD-3594
       await openDashboardEditor({ page, serverURL })
@@ -4342,6 +4383,98 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should name the remove-filter button and remove its condition by keyboard', async () => {
+      // PYLD-3756
+      test.setTimeout(60000)
+      await gotoPostsList({ page, postsURL })
+      const filters = page.locator('.where-builder')
+      const conditions = filters.locator('.condition')
+
+      try {
+        for (const value of ['Example', 'post']) {
+          await addListFilter({ fieldLabel: 'Title', operatorLabel: 'contains', page, value })
+        }
+        await expect(conditions).toHaveCount(2)
+        await expect(conditions.first().locator('.condition__value input')).toHaveValue('Example')
+        await expect(conditions.last().locator('.condition__value input')).toHaveValue('post')
+        await expect(page).toHaveURL(
+          (url) =>
+            url.searchParams.get('where[or][0][and][0][title][contains]') === 'Example' &&
+            url.searchParams.get('where[or][1][and][0][title][contains]') === 'post',
+        )
+        const remove = conditions.first().locator('.condition__actions-remove')
+
+        await expect(remove).toBeVisible()
+        await expect(remove).toBeEnabled()
+        await remove.focus()
+        await expect(remove).toBeFocused()
+        await expect.soft(remove).toHaveAccessibleName(/remove.*filter/i)
+        await remove.press('Enter')
+        await expect(conditions).toHaveCount(1)
+        await expect(filters).toBeVisible()
+        await expect(conditions.locator('.condition__value input')).toHaveValue('post')
+      } finally {
+        for (let index = 0; index < 2; index++) {
+          const remove = conditions.first().locator('.condition__actions-remove')
+
+          if (await remove.isVisible()) {
+            await remove.click()
+          }
+        }
+      }
+    })
+
+    test('should include the current rich-text mode in the text selector accessible name', async () => {
+      // PYLD-3675
+      const originalCookies = (await page.context().cookies()).filter(
+        ({ name }) => name === 'payload-lng',
+      )
+
+      try {
+        await page.context().addCookies([{ name: 'payload-lng', url: serverURL, value: 'es' }])
+        await gotoCreatePost({ page, postsURL })
+        const field = page.locator('[data-field-path="content"]')
+        const editor = field.locator('[contenteditable="true"]')
+        const fixedSelector = field.locator('.fixed-toolbar .toolbar-popup__dropdown-text')
+        const inlineSelector = field.locator('.inline-toolbar-popup .toolbar-popup__dropdown-text')
+
+        await editor.fill('Modo de texto accesible')
+        await editor.press('End')
+        await fixedSelector.focus()
+        await expect(fixedSelector).toContainText('Texto normal')
+        await expect(fixedSelector).toHaveAccessibleName('Texto normal, Estilo de texto')
+        await fixedSelector.press('Enter')
+        await expect(
+          page.getByRole('menuitemcheckbox', { name: 'Texto normal', exact: true }),
+        ).toBeFocused()
+        await page
+          .getByRole('menuitemcheckbox', { name: 'Cita en bloque', exact: true })
+          .press('Enter')
+        await expect(editor.locator('blockquote')).toHaveText('Modo de texto accesible')
+        await fixedSelector.focus()
+        await expect(fixedSelector).toHaveAccessibleName('Cita en bloque, Estilo de texto')
+        await editor.press('ControlOrMeta+a')
+        await expect(inlineSelector).toBeVisible()
+        await inlineSelector.focus()
+        await expect(inlineSelector).toHaveAccessibleName('Cita en bloque, Estilo de texto')
+        await inlineSelector.press('Enter')
+        await expect(
+          page.getByRole('menuitemcheckbox', { name: 'Texto normal', exact: true }),
+        ).toBeFocused()
+        await page
+          .getByRole('menuitemcheckbox', { name: 'Texto normal', exact: true })
+          .press('Enter')
+        await expect(editor.locator('blockquote')).toHaveCount(0)
+        await editor.press('ControlOrMeta+a')
+        await expect(inlineSelector).toBeVisible()
+        await expect(inlineSelector).toHaveAccessibleName('Texto normal, Estilo de texto')
+        await expect(fixedSelector).toHaveAccessibleName('Texto normal, Estilo de texto')
+      } finally {
+        await page.context().clearCookies({ name: 'payload-lng' })
+        await page.context().addCookies(originalCookies)
+      }
+    })
+
     test('should translate crop handle names into Spanish', async () => {
       const originalCookies = (await page.context().cookies()).filter(
         ({ name }) => name === 'payload-lng',
