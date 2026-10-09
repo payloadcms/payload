@@ -29,10 +29,13 @@
     "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@types/js-yaml": "4.0.9",
     "@types/node": "24.12.3",
     "@types/qrcode": "1.5.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "gray-matter": "4.0.3",
+    "js-yaml": "4.1.1",
     "typescript": "6.0.3"
   },
   "engines": {

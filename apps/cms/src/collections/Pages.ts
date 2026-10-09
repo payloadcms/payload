@@ -15,6 +15,7 @@ import type { Page } from '../payload-types'
 import { publishedOrLoggedIn } from '../access/publishedOrLoggedIn'
 import { Code } from '../blocks/Code'
 import { YouTube } from '../blocks/YouTube'
+import { revalidateWebsiteCollection } from '../hooks/revalidateWebsite'
 import { sites } from '../sites'
 
 /** "About Me!" → "about-me": derived from the title while empty, normalized when typed */
@@ -77,6 +78,11 @@ const preventDuplicateSlugs: CollectionBeforeChangeHook<Page> = async ({
 
   return data
 }
+
+// The personal website shows its pages at /<slug> and rebuilds them when they change
+const revalidatePersonalWebsite = revalidateWebsiteCollection({
+  isOnWebsite: (page) => Boolean(page.sites?.includes('personal')),
+})
 
 /**
  * Standalone pages such as "About", "Services" or "Privacy policy" for every website and app in
@@ -186,7 +192,9 @@ export const Pages: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [preventDuplicateSlugs],
+    afterChange: [revalidatePersonalWebsite.afterChange],
+    afterDelete: [revalidatePersonalWebsite.afterDelete],
+    beforeChange: [preventDuplicateSlugs, revalidatePersonalWebsite.beforeChange],
   },
   // Backstop for the check in preventDuplicateSlugs: one slug per site
   indexes: [{ fields: ['sites', 'slug'], unique: true }],

@@ -2,84 +2,141 @@ import type {
   CollectionAfterChangeHook,
   CollectionAfterDeleteHook,
   CollectionBeforeChangeHook,
+  CollectionSlug,
+  GlobalAfterChangeHook,
   PayloadRequest,
 } from 'payload'
 
-import type { Post } from '../payload-types'
-
 /**
- * Asks the personal website to rebuild the pages that show a post right after it is published,
- * edited, unpublished or deleted, instead of waiting for the website's periodic refresh.
+ * Asks the personal website to rebuild the pages that show a document right after it is published,
+ * edited, unpublished or deleted, instead of waiting for the website's periodic refresh: posts,
+ * projects, its pages in Pages, and the pages and settings under "Personal website".
  *
  * Calls `POST <WEBSITE_URL>/api/revalidate` (pages/api/revalidate.js in the website repo) with
- * `Authorization: Bearer <WEBSITE_REVALIDATE_SECRET>`. Does nothing unless both are set, or when
- * an operation runs with `context: { disableRevalidate: true }` (e.g. a seed script).
+ * `Authorization: Bearer <WEBSITE_REVALIDATE_SECRET>` and what changed: `{ collection, slugs,
+ * tags }` for documents, `{ global }` for a page or the site settings. Does nothing unless both are
+ * set, or when an operation runs with `context: { disableRevalidate: true }` (e.g. an import
+ * script).
  */
 const websiteURL = process.env.WEBSITE_URL?.replace(/\/+$/, '') || ''
 const secret = process.env.WEBSITE_REVALIDATE_SECRET || ''
 
-type PostRef = null | Pick<Post, '_status' | 'slug' | 'tags'> | undefined
+type WebsiteDoc = {
+  _status?: 'draft' | 'published' | null
+  id: number | string
+  sites?: null | string[]
+  slug?: null | string
+  tags?: null | string[]
+}
 
 /**
- * Remembers the live (published) version of a post before it changes. `previousDoc` in afterChange
- * is the latest version instead, which can be a newer draft, e.g. when a post with unpublished
- * edits gets unpublished. Saving a draft leaves the live document in the collection untouched.
+ * Hooks for a collection with drafts whose published documents appear on the website.
+ * `isOnWebsite` tells whether a document is shown there at all, e.g. a page of another site isn't.
  */
-export const rememberLivePost: CollectionBeforeChangeHook<Post> = async ({
-  data,
-  operation,
-  originalDoc,
-  req,
-}) => {
-  if (isEnabled({ req }) && operation === 'update' && originalDoc?.id) {
-    const livePost = await req.payload.db.findOne<Post>({
-      collection: 'posts',
+export const revalidateWebsiteCollection = ({
+  isOnWebsite = () => true,
+}: {
+  isOnWebsite?: (doc: WebsiteDoc) => boolean
+} = {}) => {
+  /**
+   * Remembers the live (published) version of a document before it changes. `previousDoc` in
+   * afterChange is the latest version instead, which can be a newer draft, e.g. when a post with
+   * unpublished edits gets unpublished. Saving a draft leaves the live document untouched.
+   */
+  const beforeChange: CollectionBeforeChangeHook = async ({
+    collection,
+    data,
+    operation,
+    originalDoc,
+    req,
+  }) => {
+    if (isEnabled({ req }) && operation === 'update' && originalDoc?.id) {
+      const liveDoc = await req.payload.db.findOne<WebsiteDoc>({
+        collection: collection.slug as CollectionSlug,
+        req,
+        where: { id: { equals: originalDoc.id } },
+      })
+
+      req.context[liveDocKey({ collection: collection.slug, id: originalDoc.id })] =
+        liveDoc?._status === 'published' ? liveDoc : null
+    }
+
+    return data
+  }
+
+  const afterChange: CollectionAfterChangeHook = ({ collection, doc, req }) => {
+    const isPublished = doc._status === 'published'
+    const liveDoc = req.context[liveDocKey({ collection: collection.slug, id: doc.id })] as
+      | null
+      | undefined
+      | WebsiteDoc
+
+    // Published or edited: rebuild its pages, including the old slug and tags if they changed.
+    // Unpublished: rebuild the pages that listed it. Drafts of documents that aren't live don't
+    // matter.
+    notifyAboutDocs({
+      collection: collection.slug,
+      docs: [isPublished ? (doc as WebsiteDoc) : null, liveDoc],
+      isOnWebsite,
       req,
-      where: { id: { equals: originalDoc.id } },
     })
 
-    req.context[livePostKey({ id: originalDoc.id })] =
-      livePost?._status === 'published' ? livePost : null
+    return doc
   }
 
-  return data
+  const afterDelete: CollectionAfterDeleteHook = ({ collection, doc, req }) => {
+    if (doc?._status === 'published') {
+      notifyAboutDocs({ collection: collection.slug, docs: [doc as WebsiteDoc], isOnWebsite, req })
+    }
+
+    return doc
+  }
+
+  return { afterChange, afterDelete, beforeChange }
 }
 
-export const revalidatePostAfterChange: CollectionAfterChangeHook<Post> = ({ doc, req }) => {
-  const isPublished = doc._status === 'published'
-  const livePost = req.context[livePostKey({ id: doc.id })] as PostRef
-
-  // Published or edited: rebuild its pages, including the old slug and tags if they changed.
-  // Unpublished: rebuild the pages that listed it. Drafts of posts that aren't live don't matter.
-  if (isPublished || livePost) {
-    notifyWebsite({ posts: [isPublished ? doc : null, livePost], req })
-  }
-
-  return doc
-}
-
-export const revalidatePostAfterDelete: CollectionAfterDeleteHook<Post> = ({ doc, req }) => {
-  if (doc?._status === 'published') {
-    notifyWebsite({ posts: [doc], req })
-  }
-
+/** For the globals under "Personal website": they have no drafts, so every save is live */
+export const revalidateWebsiteGlobal: GlobalAfterChangeHook = ({ doc, global, req }) => {
+  notifyWebsite({ body: { global: global.slug }, req })
   return doc
 }
 
 const isEnabled = ({ req }: { req: PayloadRequest }) =>
   Boolean(websiteURL && secret && !req.context.disableRevalidate)
 
-const livePostKey = ({ id }: { id: number | string }) => `revalidateWebsite:livePost:${id}`
+const liveDocKey = ({ collection, id }: { collection: string; id: number | string }) =>
+  `revalidateWebsite:liveDoc:${collection}:${id}`
 
-const notifyWebsite = ({ posts, req }: { posts: PostRef[]; req: PayloadRequest }) => {
-  if (!isEnabled({ req })) {
+const notifyAboutDocs = ({
+  collection,
+  docs,
+  isOnWebsite,
+  req,
+}: {
+  collection: string
+  docs: (null | undefined | WebsiteDoc)[]
+  isOnWebsite: (doc: WebsiteDoc) => boolean
+  req: PayloadRequest
+}) => {
+  const shownDocs = docs.filter((doc): doc is WebsiteDoc => Boolean(doc && isOnWebsite(doc)))
+
+  if (shownDocs.length === 0) {
     return
   }
 
-  const body = {
-    collection: 'posts',
-    slugs: [...new Set(posts.map((post) => post?.slug).filter(Boolean))],
-    tags: [...new Set(posts.flatMap((post) => post?.tags ?? []))],
+  notifyWebsite({
+    body: {
+      collection,
+      slugs: [...new Set(shownDocs.map((doc) => doc.slug).filter(Boolean))],
+      tags: [...new Set(shownDocs.flatMap((doc) => doc.tags ?? []))],
+    },
+    req,
+  })
+}
+
+const notifyWebsite = ({ body, req }: { body: Record<string, unknown>; req: PayloadRequest }) => {
+  if (!isEnabled({ req })) {
+    return
   }
 
   // Not awaited: saving in the admin panel shouldn't wait for the website
@@ -92,7 +149,8 @@ const notifyWebsite = ({ posts, req }: { posts: PostRef[]; req: PayloadRequest }
           'Content-Type': 'application/json',
         },
         method: 'POST',
-        signal: AbortSignal.timeout(60_000),
+        // Site settings rebuild every page
+        signal: AbortSignal.timeout(120_000),
       })
 
       if (!res.ok) {

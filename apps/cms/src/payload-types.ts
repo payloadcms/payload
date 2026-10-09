@@ -74,6 +74,24 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_52BE8802".
+ */
+export type LexicalNodes_52BE8802 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_52BE8802>
+  | SerializedBlockNode<Code | YouTubeBlock>
+  | SerializedAutoLinkNode<LexicalNodes_52BE8802, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_52BE8802, LexicalLinkFields>
+  | SerializedHeadingNode<LexicalNodes_52BE8802, 'h2' | 'h3' | 'h4' | 'h5' | 'h6'>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'media'>
+  | SerializedQuoteNode<LexicalNodes_52BE8802>
+  | SerializedListNode<LexicalNodes_52BE8802>
+  | SerializedListItemNode<LexicalNodes_52BE8802>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_6B304EA0".
  */
 export type LexicalNodes_6B304EA0 =
@@ -92,19 +110,20 @@ export type LexicalNodes_6B304EA0 =
   | SerializedListItemNode<LexicalNodes_6B304EA0>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_1C111DCF".
+ * via the `definition` "LexicalNodes_0D9794BB".
  */
-export type LexicalNodes_1C111DCF =
+export type LexicalNodes_0D9794BB =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_1C111DCF>
+  | SerializedParagraphNode<LexicalNodes_0D9794BB>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_1C111DCF>
+  | SerializedQuoteNode<LexicalNodes_0D9794BB>
   | SerializedRelationshipNode<
       | 'users'
       | 'posts'
+      | 'personal-projects'
       | 'pages'
       | 'profiles'
       | 'clients'
@@ -118,11 +137,11 @@ export type LexicalNodes_1C111DCF =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_1C111DCF, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_1C111DCF, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_1C111DCF>
-  | SerializedListItemNode<LexicalNodes_1C111DCF>
-  | SerializedHeadingNode<LexicalNodes_1C111DCF>;
+  | SerializedAutoLinkNode<LexicalNodes_0D9794BB, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_0D9794BB, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_0D9794BB>
+  | SerializedListItemNode<LexicalNodes_0D9794BB>
+  | SerializedHeadingNode<LexicalNodes_0D9794BB>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_3DE324E4".
@@ -145,6 +164,7 @@ export interface Config {
     users: User;
     media: Media;
     posts: Post;
+    'personal-projects': PersonalProject;
     pages: Page;
     profiles: Profile;
     clients: Client;
@@ -168,6 +188,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    'personal-projects': PersonalProjectsSelect<false> | PersonalProjectsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     profiles: ProfilesSelect<false> | ProfilesSelect<true>;
     clients: ClientsSelect<false> | ClientsSelect<true>;
@@ -188,11 +209,25 @@ export interface Config {
   fallbackLocale:
     ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'fr' | 'zh-Hant') | ('en' | 'es' | 'fr' | 'zh-Hant')[];
   globals: {
+    'personal-settings': PersonalSettings;
+    'personal-home': PersonalHome;
+    'personal-about': PersonalAbout;
+    'personal-services': PersonalServices;
+    'personal-projects-page': PersonalProjectsPage;
+    'personal-blog-page': PersonalBlogPage;
+    'personal-contact': PersonalContact;
     'vigor-settings': VigorSettings;
     'vigor-home': VigorHome;
     'vigor-about': VigorAbout;
   };
   globalsSelect: {
+    'personal-settings': PersonalSettingsSelect<false> | PersonalSettingsSelect<true>;
+    'personal-home': PersonalHomeSelect<false> | PersonalHomeSelect<true>;
+    'personal-about': PersonalAboutSelect<false> | PersonalAboutSelect<true>;
+    'personal-services': PersonalServicesSelect<false> | PersonalServicesSelect<true>;
+    'personal-projects-page': PersonalProjectsPageSelect<false> | PersonalProjectsPageSelect<true>;
+    'personal-blog-page': PersonalBlogPageSelect<false> | PersonalBlogPageSelect<true>;
+    'personal-contact': PersonalContactSelect<false> | PersonalContactSelect<true>;
     'vigor-settings': VigorSettingsSelect<false> | VigorSettingsSelect<true>;
     'vigor-home': VigorHomeSelect<false> | VigorHomeSelect<true>;
     'vigor-about': VigorAboutSelect<false> | VigorAboutSelect<true>;
@@ -373,6 +408,84 @@ export interface Post {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-projects".
+ */
+export interface PersonalProject {
+  id: string;
+  title: string;
+  /**
+   * One or two sentences shown on the projects page and in search results.
+   */
+  description: string;
+  /**
+   * The first image is shown on the projects page. All images appear in the gallery at the top of the project.
+   */
+  images?: (string | Media)[] | null;
+  /**
+   * Optional. Shown over the right side of the first image on the projects page, e.g. a phone screenshot.
+   */
+  overlay?: (string | null) | Media;
+  /**
+   * Optional SVG logo above the title on the projects page. The website colors it to match the theme.
+   */
+  logo?: (string | null) | Media;
+  /**
+   * Shown on the projects page and at the top of the project, e.g. Duration: 2 years, Role: Developer.
+   */
+  attributes?:
+    | {
+        /**
+         * e.g. Role
+         */
+        label: string;
+        /**
+         * e.g. Inventor, Programmer, Designer
+         */
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  content: LexicalRichText<LexicalNodes_52BE8802>;
+  /**
+   * The project is published at /projects/<slug>.
+   */
+  slug: string;
+  /**
+   * Shown on the project, e.g. when it launched. Projects are sorted by it.
+   */
+  date: string;
+  /**
+   * Technologies, e.g. swift, ble. Shown as tags.
+   */
+  tags?: string[] | null;
+  /**
+   * Title and description for search engines and link previews. Empty fields use the defaults from Site settings.
+   */
+  seo?: {
+    /**
+     * The browser tab shows it in the Site settings title template, e.g. "Oskar Wong | <title>".
+     */
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Shown in link previews, e.g. on LinkedIn or X.
+     */
+    image?: (string | null) | Media;
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
 export interface Page {
@@ -423,7 +536,7 @@ export interface Profile {
    */
   headline?: string | null;
   photo?: (string | null) | Media;
-  bio?: LexicalRichText<LexicalNodes_1C111DCF> | null;
+  bio?: LexicalRichText<LexicalNodes_0D9794BB> | null;
   links?:
     | {
         platform: 'github' | 'linkedin' | 'youtube' | 'x' | 'website' | 'other';
@@ -792,6 +905,10 @@ export interface PayloadLockedDocument {
         value: string | Post;
       } | null)
     | ({
+        relationTo: 'personal-projects';
+        value: string | PersonalProject;
+      } | null)
+    | ({
         relationTo: 'pages';
         value: string | Page;
       } | null)
@@ -971,6 +1088,40 @@ export interface PostsSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-projects_select".
+ */
+export interface PersonalProjectsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  images?: T;
+  overlay?: T;
+  logo?: T;
+  attributes?:
+    | T
+    | {
+        label?: T;
+        value?: T;
+        id?: T;
+      };
+  content?: T;
+  slug?: T;
+  date?: T;
+  tags?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
       };
   createdBy?: T;
   updatedBy?: T;
@@ -1247,6 +1398,608 @@ export interface PayloadLlmInstructionsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-settings".
+ */
+export interface PersonalSettings {
+  id: string;
+  /**
+   * e.g. your name. Shown in link previews and the RSS feed.
+   */
+  siteName: string;
+  /**
+   * The author of blog posts. Empty: the site name.
+   */
+  authorName?: string | null;
+  /**
+   * Browser tab title of pages without their own SEO title.
+   */
+  defaultTitle: string;
+  /**
+   * Browser tab title of the other pages; %s is replaced by their title, e.g. Oskar Wong | %s
+   */
+  titleTemplate?: string | null;
+  /**
+   * For search engines and link previews of pages without their own description.
+   */
+  description?: string | null;
+  /**
+   * Published as the contact address of the RSS feed.
+   */
+  email?: string | null;
+  /**
+   * Your X (Twitter) username for link previews, e.g. @atropos
+   */
+  twitterHandle?: string | null;
+  /**
+   * The menu on every page, in this order.
+   */
+  menu?:
+    | {
+        label: string;
+        /**
+         * e.g. /about
+         */
+        link: string;
+        icon:
+          | 'home'
+          | 'user'
+          | 'briefcase'
+          | 'pencil'
+          | 'trophy'
+          | 'envelope'
+          | 'camera'
+          | 'picture'
+          | 'book'
+          | 'note'
+          | 'star'
+          | 'heart'
+          | 'globe'
+          | 'rocket'
+          | 'bulb'
+          | 'graph'
+          | 'people'
+          | 'calendar'
+          | 'screen'
+          | 'smartphone'
+          | 'diamond';
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Icons under the menu.
+   */
+  social?:
+    | {
+        platform:
+          | 'github'
+          | 'linkedin'
+          | 'youtube'
+          | 'x'
+          | 'instagram'
+          | 'facebook'
+          | 'medium'
+          | 'stackoverflow'
+          | 'dribbble'
+          | 'behance'
+          | 'tiktok'
+          | 'email'
+          | 'website';
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-home".
+ */
+export interface PersonalHome {
+  id: string;
+  /**
+   * The large heading, e.g. your name.
+   */
+  name: string;
+  /**
+   * e.g. Based in New York
+   */
+  location?: string | null;
+  /**
+   * Typed out under the name, one after another, e.g. Software Engineer. Press Enter after each.
+   */
+  roles?: string[] | null;
+  intro?: LexicalRichText<LexicalNodes_52BE8802> | null;
+  /**
+   * Optional. Shown above the name.
+   */
+  photo?: (string | null) | Media;
+  /**
+   * Shown below the introduction, e.g. "Download Resume" with your resume as the file.
+   */
+  button?: {
+    /**
+     * The button text. Leave empty to hide the button.
+     */
+    label?: string | null;
+    /**
+     * A page of the website, e.g. /contact, or a full URL.
+     */
+    link?: string | null;
+    /**
+     * Optional. The button opens this file instead of the link, e.g. your resume.
+     */
+    file?: (string | null) | Media;
+  };
+  /**
+   * Key figures, shown four in a row on large screens.
+   */
+  achievements?:
+    | {
+        /**
+         * e.g. 10+
+         */
+        number: string;
+        /**
+         * e.g. Years of experience
+         */
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Lists the newest posts that have Featured ticked.
+   */
+  featuredPosts: {
+    /**
+     * e.g. Featured Articles
+     */
+    title?: string | null;
+    /**
+     * How many posts to show.
+     */
+    limit: number;
+    text?: string | null;
+  };
+  /**
+   * A row of logos at the bottom of the page, on larger screens only.
+   */
+  expertise?: {
+    /**
+     * e.g. Expert In
+     */
+    title?: string | null;
+    logos?:
+      | {
+          /**
+           * e.g. Node.js
+           */
+          name: string;
+          /**
+           * An SVG file. The website colors it to match the theme.
+           */
+          logo: string | Media;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  /**
+   * Title and description for search engines and link previews. Empty fields use the defaults from Site settings.
+   */
+  seo?: {
+    /**
+     * The browser tab shows it in the Site settings title template, e.g. "Oskar Wong | <title>".
+     */
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Shown in link previews, e.g. on LinkedIn or X.
+     */
+    image?: (string | null) | Media;
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-about".
+ */
+export interface PersonalAbout {
+  id: string;
+  /**
+   * Shown at the top of the photo.
+   */
+  name: string;
+  /**
+   * A portrait, shown in black and white next to the text.
+   */
+  photo?: (string | null) | Media;
+  /**
+   * Numbered automatically: 01., 02., …
+   */
+  sections?:
+    | {
+        /**
+         * e.g. Interests and Hobbies
+         */
+        title: string;
+        text: LexicalRichText<LexicalNodes_52BE8802>;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Shown at the bottom of the photo.
+   */
+  cta?: {
+    /**
+     * e.g. Ready to discuss your project?
+     */
+    title?: string | null;
+    text?: string | null;
+    button?: {
+      /**
+       * The button text. Leave empty to hide the button.
+       */
+      label?: string | null;
+      /**
+       * A page of the website, e.g. /contact, or a full URL.
+       */
+      link?: string | null;
+      /**
+       * Optional. The button opens this file instead of the link, e.g. your resume.
+       */
+      file?: (string | null) | Media;
+    };
+  };
+  specialties?: {
+    /**
+     * e.g. I'm Specialized in
+     */
+    title?: string | null;
+    /**
+     * Typed out below the title, one after another, e.g. Back-End Development. Press Enter after each.
+     */
+    lines?: string[] | null;
+  };
+  skillSets?:
+    | {
+        /**
+         * e.g. Back-End Development
+         */
+        title: string;
+        skills?:
+          | {
+              name: string;
+              /**
+               * 1 (basic) to 5 (expert)
+               */
+              level: number;
+              /**
+               * An SVG file. The website colors it to match the theme.
+               */
+              icon?: (string | null) | Media;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Lists shown side by side at the bottom of the page, e.g. Employment and Education.
+   */
+  history?:
+    | {
+        /**
+         * e.g. Employment
+         */
+        title: string;
+        entries?:
+          | {
+              /**
+               * e.g. the company or school
+               */
+              name: string;
+              /**
+               * e.g. the role or degree
+               */
+              description?: string | null;
+              /**
+               * e.g. 2017-2023
+               */
+              period?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Title and description for search engines and link previews. Empty fields use the defaults from Site settings.
+   */
+  seo?: {
+    /**
+     * The browser tab shows it in the Site settings title template, e.g. "Oskar Wong | <title>".
+     */
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Shown in link previews, e.g. on LinkedIn or X.
+     */
+    image?: (string | null) | Media;
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-services".
+ */
+export interface PersonalServices {
+  id: string;
+  /**
+   * e.g. Services
+   */
+  title: string;
+  /**
+   * Shown below the title in color, e.g. My Expertise
+   */
+  subtitle?: string | null;
+  intro?: LexicalRichText<LexicalNodes_52BE8802> | null;
+  button?: {
+    /**
+     * The button text. Leave empty to hide the button.
+     */
+    label?: string | null;
+    /**
+     * A page of the website, e.g. /contact, or a full URL.
+     */
+    link?: string | null;
+    /**
+     * Optional. The button opens this file instead of the link, e.g. your resume.
+     */
+    file?: (string | null) | Media;
+  };
+  services?:
+    | {
+        /**
+         * e.g. Web and Mobile App Development
+         */
+        title: string;
+        /**
+         * An SVG file. The website colors it to match the theme.
+         */
+        icon?: (string | null) | Media;
+        text?: LexicalRichText<LexicalNodes_52BE8802> | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Title and description for search engines and link previews. Empty fields use the defaults from Site settings.
+   */
+  seo?: {
+    /**
+     * The browser tab shows it in the Site settings title template, e.g. "Oskar Wong | <title>".
+     */
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Shown in link previews, e.g. on LinkedIn or X.
+     */
+    image?: (string | null) | Media;
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * The projects themselves are under Projects.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-projects-page".
+ */
+export interface PersonalProjectsPage {
+  id: string;
+  github?: {
+    /**
+     * e.g. My Open-Source Projects
+     */
+    title?: string | null;
+    text?: string | null;
+    /**
+     * GitHub repositories as owner/name, e.g. atorpos/visa-status-api. The website shows their description, language and stars (it needs GITHUB_TOKEN for that).
+     */
+    repositories?: string[] | null;
+  };
+  projects?: {
+    /**
+     * e.g. Latest Projects
+     */
+    title?: string | null;
+    text?: string | null;
+  };
+  /**
+   * Title and description for search engines and link previews. Empty fields use the defaults from Site settings.
+   */
+  seo?: {
+    /**
+     * The browser tab shows it in the Site settings title template, e.g. "Oskar Wong | <title>".
+     */
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Shown in link previews, e.g. on LinkedIn or X.
+     */
+    image?: (string | null) | Media;
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * The posts themselves are under Posts.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-blog-page".
+ */
+export interface PersonalBlogPage {
+  id: string;
+  /**
+   * Above the post list, e.g. Latest Articles
+   */
+  title: string;
+  text?: string | null;
+  /**
+   * The tags that have a tag page in the website repo (content/tags).
+   */
+  categories?: {
+    /**
+     * e.g. Categories
+     */
+    title?: string | null;
+    text?: string | null;
+  };
+  /**
+   * Title and description for search engines and link previews. Empty fields use the defaults from Site settings.
+   */
+  seo?: {
+    /**
+     * The browser tab shows it in the Site settings title template, e.g. "Oskar Wong | <title>".
+     */
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Shown in link previews, e.g. on LinkedIn or X.
+     */
+    image?: (string | null) | Media;
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-contact".
+ */
+export interface PersonalContact {
+  id: string;
+  /**
+   * e.g. Get in touch
+   */
+  title: string;
+  /**
+   * Shown below the title in color, e.g. Let's talk about your project
+   */
+  subtitle?: string | null;
+  intro?: LexicalRichText<LexicalNodes_52BE8802> | null;
+  /**
+   * Shown below the introduction, each with its icon.
+   */
+  details?:
+    | {
+        type:
+          | 'phone'
+          | 'email'
+          | 'location'
+          | 'github'
+          | 'linkedin'
+          | 'youtube'
+          | 'x'
+          | 'instagram'
+          | 'facebook'
+          | 'medium'
+          | 'stackoverflow'
+          | 'dribbble'
+          | 'behance'
+          | 'tiktok'
+          | 'website'
+          | 'other';
+        /**
+         * e.g. Phone
+         */
+        label?: string | null;
+        /**
+         * e.g. (626) 206-3228
+         */
+        value: string;
+        /**
+         * Optional, e.g. https://www.linkedin.com/in/you. Email addresses and phone numbers are linked automatically.
+         */
+        link?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Title and description for search engines and link previews. Empty fields use the defaults from Site settings.
+   */
+  seo?: {
+    /**
+     * The browser tab shows it in the Site settings title template, e.g. "Oskar Wong | <title>".
+     */
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Shown in link previews, e.g. on LinkedIn or X.
+     */
+    image?: (string | null) | Media;
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "vigor-settings".
  */
 export interface VigorSettings {
@@ -1399,6 +2152,292 @@ export interface VigorAbout {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-settings_select".
+ */
+export interface PersonalSettingsSelect<T extends boolean = true> {
+  siteName?: T;
+  authorName?: T;
+  defaultTitle?: T;
+  titleTemplate?: T;
+  description?: T;
+  email?: T;
+  twitterHandle?: T;
+  menu?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+        icon?: T;
+        id?: T;
+      };
+  social?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        id?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-home_select".
+ */
+export interface PersonalHomeSelect<T extends boolean = true> {
+  name?: T;
+  location?: T;
+  roles?: T;
+  intro?: T;
+  photo?: T;
+  button?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+        file?: T;
+      };
+  achievements?:
+    | T
+    | {
+        number?: T;
+        text?: T;
+        id?: T;
+      };
+  featuredPosts?:
+    | T
+    | {
+        title?: T;
+        limit?: T;
+        text?: T;
+      };
+  expertise?:
+    | T
+    | {
+        title?: T;
+        logos?:
+          | T
+          | {
+              name?: T;
+              logo?: T;
+              id?: T;
+            };
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-about_select".
+ */
+export interface PersonalAboutSelect<T extends boolean = true> {
+  name?: T;
+  photo?: T;
+  sections?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        id?: T;
+      };
+  cta?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        button?:
+          | T
+          | {
+              label?: T;
+              link?: T;
+              file?: T;
+            };
+      };
+  specialties?:
+    | T
+    | {
+        title?: T;
+        lines?: T;
+      };
+  skillSets?:
+    | T
+    | {
+        title?: T;
+        skills?:
+          | T
+          | {
+              name?: T;
+              level?: T;
+              icon?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  history?:
+    | T
+    | {
+        title?: T;
+        entries?:
+          | T
+          | {
+              name?: T;
+              description?: T;
+              period?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-services_select".
+ */
+export interface PersonalServicesSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  intro?: T;
+  button?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+        file?: T;
+      };
+  services?:
+    | T
+    | {
+        title?: T;
+        icon?: T;
+        text?: T;
+        id?: T;
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-projects-page_select".
+ */
+export interface PersonalProjectsPageSelect<T extends boolean = true> {
+  github?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        repositories?: T;
+      };
+  projects?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-blog-page_select".
+ */
+export interface PersonalBlogPageSelect<T extends boolean = true> {
+  title?: T;
+  text?: T;
+  categories?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-contact_select".
+ */
+export interface PersonalContactSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  intro?: T;
+  details?:
+    | T
+    | {
+        type?: T;
+        label?: T;
+        value?: T;
+        link?: T;
+        id?: T;
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "vigor-settings_select".
  */
 export interface VigorSettingsSelect<T extends boolean = true> {
@@ -1530,6 +2569,7 @@ export interface CollectionQueryWidget {
       | 'users'
       | 'media'
       | 'posts'
+      | 'personal-projects'
       | 'pages'
       | 'profiles'
       | 'clients'
@@ -1564,6 +2604,7 @@ export interface ActivityWidget {
           | 'users'
           | 'media'
           | 'posts'
+          | 'personal-projects'
           | 'pages'
           | 'profiles'
           | 'clients'

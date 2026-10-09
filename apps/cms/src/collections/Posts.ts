@@ -1,4 +1,4 @@
-import type { CollectionConfig, FieldHook } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 import {
   BlocksFeature,
@@ -11,28 +11,10 @@ import {
 import { publishedOrLoggedIn } from '../access/publishedOrLoggedIn'
 import { Code } from '../blocks/Code'
 import { YouTube } from '../blocks/YouTube'
-import {
-  rememberLivePost,
-  revalidatePostAfterChange,
-  revalidatePostAfterDelete,
-} from '../hooks/revalidateWebsite'
+import { revalidateWebsiteCollection } from '../hooks/revalidateWebsite'
+import { normalizeTags, personalWebsiteGroup } from '../personal/fields'
 
-/** Stores tags in the form the website uses for its tag pages: "Next.js" -> "next-js" */
-const normalizeTags: FieldHook = ({ value }) =>
-  Array.isArray(value)
-    ? [
-        ...new Set(
-          value
-            .map((tag) =>
-              String(tag)
-                .toLowerCase()
-                .replace(/[^\p{L}\p{N}]+/gu, '-')
-                .replace(/^-|-$/g, ''),
-            )
-            .filter(Boolean),
-        ),
-      ]
-    : value
+const revalidate = revalidateWebsiteCollection()
 
 /**
  * Blog posts for the personal website, shown at `/blog/<slug>` and in its post lists.
@@ -45,6 +27,7 @@ export const Posts: CollectionConfig = {
   },
   admin: {
     defaultColumns: ['title', 'publishedAt', '_status', 'featured'],
+    group: personalWebsiteGroup,
     useAsTitle: 'title',
   },
   defaultPopulate: {
@@ -87,8 +70,8 @@ export const Posts: CollectionConfig = {
           ...rootFeatures.filter((feature) => feature.key !== 'relationship'),
           // The post title is the page's h1
           HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
-          // Internal links can only point at other posts (/blog/<slug> on the website)
-          LinkFeature({ enabledCollections: ['posts'] }),
+          // Internal links: posts (/blog/<slug> on the website) and projects (/projects/<slug>)
+          LinkFeature({ enabledCollections: ['posts', 'personal-projects'] }),
           BlocksFeature({ blocks: [Code, YouTube] }),
           FixedToolbarFeature(),
         ],
@@ -160,9 +143,9 @@ export const Posts: CollectionConfig = {
     },
   ],
   hooks: {
-    afterChange: [revalidatePostAfterChange],
-    afterDelete: [revalidatePostAfterDelete],
-    beforeChange: [rememberLivePost],
+    afterChange: [revalidate.afterChange],
+    afterDelete: [revalidate.afterDelete],
+    beforeChange: [revalidate.beforeChange],
   },
   versions: {
     drafts: true,

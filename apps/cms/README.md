@@ -25,7 +25,9 @@ uses to test templates.
 | `src/payload.config.ts`                    | Payload config: MongoDB via `DATABASE_URL`, `SERVER_URL`, CORS/CSRF                    |
 | `src/endpoints/health.ts`                  | `GET /api/health`: pings MongoDB (used by the Docker healthcheck)                      |
 | `src/storage/s3.ts`                        | Optional S3 storage for uploads, turned on by `S3_BUCKET`                              |
-| `src/collections/Posts.ts`                 | Blog posts for the personal website (see "Blog posts")                                 |
+| `src/personal/`                            | Pages, settings and projects of the personal website (see "Personal website")          |
+| `src/collections/Posts.ts`                 | Blog posts for the personal website (see "Personal website")                           |
+| `scripts/import-personal-website.ts`       | Copies the personal website's current content into the CMS (see "Personal website")    |
 | `src/collections/Pages.ts`, `src/sites.ts` | Pages for each website and app (see "Pages for several websites and apps")             |
 | `src/collections/Profiles.ts`              | Profiles: bio, links, skills, work history, education                                  |
 | `src/collections/Clients.ts`               | Private client records: contacts, business type, importance (see "Clients and events") |
@@ -36,7 +38,7 @@ uses to test templates.
 | `src/timezones.ts`                         | Time zones offered for event dates                                                     |
 | `src/proxy.ts`, `src/twoFactor/`           | Two-factor authentication for every login (see "Two-factor authentication")            |
 | `src/email/sendgrid.ts`                    | Sends emails such as "forgot password" through SendGrid (see "Email (SendGrid)")       |
-| `src/hooks/revalidateWebsite.ts`           | Tells the website to refresh its pages when a post changes                             |
+| `src/hooks/revalidateWebsite.ts`           | Tells the personal website to refresh its pages when its content changes               |
 | `Dockerfile`                               | Multi-stage build from the repo root → small standalone image                          |
 | `docker-compose.yml`, `Caddyfile`          | Production stack on the app EC2                                                        |
 | `.env.example`                             | Every setting the server needs                                                         |
@@ -44,6 +46,7 @@ uses to test templates.
 | `deploy/check-db.sh`                       | Checks that the app EC2 can reach and write to MongoDB                                 |
 | `deploy/deploy.sh`                         | Build + (re)start + wait until healthy                                                 |
 | `deploy/import-events.sh`                  | Runs the events import on the server                                                   |
+| `deploy/import-personal-website.sh`        | Runs the personal website import on the server                                         |
 | `deploy/import-vigor.sh`                   | Runs the Vigor website import on the server                                            |
 | `deploy/mongodb/create-payload-user.js`    | Creates the MongoDB user for Payload (run on the DB EC2)                               |
 | `scripts/pack-local-packages.mjs`          | Packs `packages/*` into tarballs for the app (used by the Dockerfile)                  |
@@ -133,7 +136,7 @@ nano .env
 | `SERVER_URL`                                                | exactly what you type in the browser, no trailing slash: `http://<ec2-public-ip>` or `https://cms.example.com` |
 | `SITE_ADDRESS`                                              | `:80` for plain HTTP on the IP, or `cms.example.com` for automatic HTTPS                                       |
 | `CORS_ORIGINS`                                              | optional, comma-separated frontend origins that call the API with cookies                                      |
-| `WEBSITE_URL`, `WEBSITE_REVALIDATE_SECRET`                  | optional, refresh the website as soon as a post is published (see "Blog posts")                                |
+| `WEBSITE_URL`, `WEBSITE_REVALIDATE_SECRET`                  | optional, refresh the personal website as soon as its content changes (see "Personal website")                 |
 | `VIGOR_WEBSITE_URL`, `VIGOR_WEBSITE_REVALIDATE_SECRET`      | optional, refresh the Vigor website as soon as its content changes (see "Vigor website")                       |
 | `SENDGRID_API_KEY`, `EMAIL_FROM_ADDRESS`, `EMAIL_FROM_NAME` | optional, send "forgot password" emails (see "Email (SendGrid)")                                               |
 
@@ -298,34 +301,86 @@ docker exec -it mongo mongosh -u admin -p --authenticationDatabase admin payload
 S3-compatible storage (Cloudflare R2, MinIO, …) works too. Set `S3_ENDPOINT`, and for MinIO
 also `S3_FORCE_PATH_STYLE=true`.
 
-## Blog posts
+## Personal website
 
-The `posts` collection holds the blog posts of the personal website
-([atorpos/personalwebsite](https://github.com/atorpos/personalwebsite), setup in its `docs/payload-cms.md`).
-The website reads published posts from `GET /api/posts` without logging in. Drafts are only visible to
-logged-in users.
+Everything under **Personal website** in the admin panel is the content of the personal website
+([atorpos/personalwebsite](https://github.com/atorpos/personalwebsite), setup in its `docs/payload-cms.md`), together
+with its pages in **Pages**. The code is in `src/personal/` and `src/collections/Posts.ts`. The website reads published
+content without logging in; drafts are only visible to logged-in users.
 
-| Field        | On the website                                                                                  |
-| ------------ | ----------------------------------------------------------------------------------------------- |
-| Title        | Post title                                                                                      |
-| Description  | Text on post cards, in search results and in the RSS feed                                       |
-| Images       | The first one is the cover on post cards; all of them form the gallery at the top of the post   |
-| Content      | The post: headings, lists, quotes, links (to URLs or other posts), images, code, YouTube videos |
-| Slug         | The URL, `/blog/<slug>`. Generated from the title once and kept when the title changes          |
-| Published At | The post date. Filled in when the post is first published                                       |
-| Featured     | Lists the post under "Featured" on the home page                                                |
-| Tags         | Tag chips. A tag links to `/tags/<tag>` when the website has `content/tags/<tag>.md`            |
-| SEO          | Optional title and description for search engines and link previews                             |
+| In the admin panel | On the website                                                                                              |
+| ------------------ | ----------------------------------------------------------------------------------------------------------- |
+| Posts              | The blog: `/blog/<slug>`, the post lists, tag pages, featured posts on the home page, the RSS feed          |
+| Projects           | The cards on `/projects` and a page per project at `/projects/<slug>`                                       |
+| Site settings      | Site name, browser tab titles, default description, X handle, main menu and social links                    |
+| Home page          | `/`: name, job titles, introduction, button (e.g. your resume), key figures, featured posts, logos          |
+| About page         | `/about`: photo, numbered sections, call to action, skill sets with levels and icons, employment, education |
+| Services page      | `/services`: introduction, button and a tile per service                                                    |
+| Projects page      | The texts of `/projects` and the GitHub repositories shown there                                            |
+| Blog page          | The texts of `/blog`                                                                                        |
+| Contact page       | The texts of `/contact` and the contact details next to the form                                            |
+| Pages              | Pages whose **Sites** include **Personal website**, at `/<slug>`, e.g. `/privacy-policy`                    |
 
-The website refreshes its pages from the CMS about once a minute. To update it the moment you publish,
-edit, unpublish or delete a post, give both sides the same secret (`openssl rand -hex 32`):
+**Pages and Site settings** have no drafts (with MongoDB, Payload gives every global with drafts an index with the same
+name, so all but one of them fail to build): **Save** puts the change live, and the **Versions** tab can restore an
+earlier save. Until a page or Site settings is saved for the first time, the website keeps showing its own Markdown
+file or `theme.config.js`, so pages can move to the CMS one at a time.
+
+**Posts and projects** have drafts: **Save Draft** keeps changes private, **Publish** makes them public.
+
+- **Icons** (skills, services, "Expert In" logos, project logos) must be SVG files; only those can be chosen. The
+  website puts them inline so they take the theme's colors.
+- **Buttons** link to a page of the website (`/contact`), a full URL, or an uploaded file such as a resume.
+- **Menu icons, social platforms and contact detail types** are in `src/personal/options.ts`. The website maps each
+  value to an icon (`components/SiteIcons.jsx`): when you add one, add it there too.
+
+### Copying the website's content into the CMS (once)
+
+`deploy/import-personal-website.sh` reads the website repo the way the website does (`theme.config.js`, the pages in
+`content/` and the projects in `content/projects`), uploads its images and icons to Media and saves everything;
+projects are published. On the app server:
+
+```bash
+cd ~/payloadcms/apps/cms
+./deploy/import-personal-website.sh https://github.com/atorpos/personalwebsite --dry-run   # preview, nothing is saved
+./deploy/import-personal-website.sh https://github.com/atorpos/personalwebsite
+```
+
+- The repo is cloned from its default branch; use `<url>#<branch>` for another branch, or the path of a checkout on
+  the server. A private repo needs a URL with access, e.g. `https://<token>@github.com/...`.
+- Pages and Site settings that were already saved in the CMS, projects with the same slug and files already in Media
+  are skipped, so running it again is safe and keeps your edits.
+- The output ends with what to check in the admin panel, e.g. a project logo that isn't an SVG.
+- Blog posts aren't copied; the website keeps showing its Markdown posts next to the CMS's.
+
+Locally, run `pnpm payload run scripts/import-personal-website.ts <website-folder> [--dry-run]` in this folder instead.
+
+### Posts
+
+| Field        | On the website                                                                                      |
+| ------------ | --------------------------------------------------------------------------------------------------- |
+| Title        | Post title                                                                                          |
+| Description  | Text on post cards, in search results and in the RSS feed                                           |
+| Images       | The first one is the cover on post cards; all of them form the gallery at the top of the post       |
+| Content      | The post: headings, lists, quotes, links (to URLs, posts or projects), images, code, YouTube videos |
+| Slug         | The URL, `/blog/<slug>`. Generated from the title once and kept when the title changes              |
+| Published At | The post date. Filled in when the post is first published                                           |
+| Featured     | Lists the post under "Featured" on the home page                                                    |
+| Tags         | Tag chips. A tag links to `/tags/<tag>` when the website has `content/tags/<tag>.md`                |
+| SEO          | Optional title and description for search engines and link previews                                 |
+
+### Refreshing the website
+
+The website refreshes its pages from the CMS about once a minute. To update it the moment you save a page or Site
+settings, or publish, edit, unpublish or delete a post, project or page, give both sides the same secret
+(`openssl rand -hex 32`):
 
 1. Website: set `REVALIDATE_SECRET=<secret>` and redeploy it.
 2. CMS `.env`: set `WEBSITE_URL=https://<your-website>` and `WEBSITE_REVALIDATE_SECRET=<secret>`, then run
    `./deploy/deploy.sh`.
 
-After a publish, `docker compose logs cms` shows `Revalidated website` with the refreshed pages, or
-`Could not revalidate` with the reason.
+After a change, `docker compose logs cms` shows `Revalidated website` with the refreshed pages, or
+`Could not revalidate` with the reason. Saving Site settings refreshes every page.
 
 The website reads the API from its own server, so it doesn't need to be in `CORS_ORIGINS`. With uploads in
 S3, set `PAYLOAD_MEDIA_URL` on the website to `S3_PUBLIC_URL` (or `https://<bucket>.s3.<region>.amazonaws.com`
@@ -343,7 +398,7 @@ without logging in.
   LinkedIn, …), skills (category and level 1–5), work experience and education. The email address is only
   returned to logged-in users.
 
-The website doesn't read these yet; they are ready for it the same way as posts.
+The personal website shows its pages (see "Personal website"); no website reads profiles yet.
 
 ### Pages for several websites and apps
 
@@ -643,7 +698,8 @@ shows whether an email was delivered.
 | Caddy can't get a certificate                                            | DNS doesn't point at the instance yet, or port 80/443 is closed. Check `docker compose logs caddy`.                                                                         |
 | Upload fails: `Could not load credentials` / `AccessDenied`              | S3 access. Check that the IAM role is attached with the policy above and that the metadata hop limit is 2, or set the key pair in `.env`.                                   |
 | Upload works but images are broken (403)                                 | The files aren't public. Add the bucket policy (and untick the bucket-policy public-access blocks), or check the CloudFront origin access settings.                         |
-| Website only shows a published post after a minute                       | `docker compose logs cms` shows `Could not revalidate`: `401` means the two secrets differ; `ECONNREFUSED` or a timeout means `WEBSITE_URL` is wrong.                       |
+| Personal website only shows a change after a minute                      | `docker compose logs cms` shows `Could not revalidate`: `401` means the two secrets differ; `ECONNREFUSED` or a timeout means `WEBSITE_URL` is wrong.                       |
+| Personal website still shows its Markdown version of a page              | The page (or Site settings) was never saved in the CMS. Open it in the admin panel and save it, or run the import.                                                          |
 | Vigor website only shows a change after a minute                         | The same, for `VIGOR_WEBSITE_URL` and `VIGOR_WEBSITE_REVALIDATE_SECRET` (the website's `REVALIDATE_SECRET`).                                                                |
 | A page can't use a slug that another site's page uses ("invalid: slug")  | The database still has the index from before the Sites field. Remove it as described in "Pages for several websites and apps".                                              |
 | A new Vigor product shows in English but not in the other languages      | It is published in English only. Open it and use the arrow next to **Publish in English** → **Publish all locales**.                                                        |

@@ -15,6 +15,7 @@ import { Users } from './collections/Users'
 import { sendgridAdapter } from './email/sendgrid'
 import { healthEndpoint } from './endpoints/health'
 import { locales } from './locales'
+import { personalCollections, personalGlobals } from './personal'
 import { s3StorageAdapter } from './storage/s3'
 import { timezones } from './timezones'
 import { vigorCollections, vigorGlobals } from './vigor'
@@ -60,7 +61,17 @@ export default buildConfig({
     timezones,
     user: Users.slug,
   },
-  collections: [Users, Media, Posts, Pages, Profiles, Clients, Events, ...vigorCollections],
+  collections: [
+    Users,
+    Media,
+    Posts,
+    ...personalCollections,
+    Pages,
+    Profiles,
+    Clients,
+    Events,
+    ...vigorCollections,
+  ],
   cors: allowedOrigins,
   csrf: allowedOrigins,
   db: mongooseAdapter({
@@ -74,7 +85,7 @@ export default buildConfig({
   // Sends emails such as "forgot password" through SendGrid when SENDGRID_API_KEY is set
   email: sendgridAdapter(),
   endpoints: [healthEndpoint],
-  globals: [...vigorGlobals],
+  globals: [...personalGlobals, ...vigorGlobals],
   // Only fields marked `localized: true` have a version per language; see src/locales.ts
   localization: {
     defaultLocale: 'en',
