@@ -1147,7 +1147,7 @@ describe('Trash', () => {
       await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}/)
 
       await expect(page.locator('input[name="email"]')).toBeDisabled()
-      await expect(page.locator('#change-password')).toBeDisabled()
+      await expect(page.locator('#change-password')).toHaveCount(0)
 
       await expect(page.locator('#field-name')).toBeDisabled()
       await expect(page.locator('#field-roles .rs__input')).toBeDisabled()
