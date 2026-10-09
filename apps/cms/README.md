@@ -387,6 +387,18 @@ docker run --rm mongo:8 mongosh "$(grep '^DATABASE_URL=' .env | cut -d= -f2-)" -
   )'
 ```
 
+**Databases from before the Sites field** also still have the old index that allowed each slug only once across
+all sites, so a second site's page with the same slug fails to save ("The following field is invalid: slug"), and
+`deploy/import-vigor.sh` warns about an index in `pages`. Remove it once, then restart the CMS, which creates the
+right index:
+
+```bash
+cd ~/payloadcms/apps/cms
+docker run --rm mongo:8 mongosh "$(grep '^DATABASE_URL=' .env | cut -d= -f2-)" --quiet --eval '
+  db.pages.dropIndex("slug_1")'
+docker compose restart cms
+```
+
 ## Vigor website
 
 Everything under **Vigor website** in the admin panel is the content of the Vigor Gems and Jewelry website
@@ -633,6 +645,7 @@ shows whether an email was delivered.
 | Upload works but images are broken (403)                                 | The files aren't public. Add the bucket policy (and untick the bucket-policy public-access blocks), or check the CloudFront origin access settings.                         |
 | Website only shows a published post after a minute                       | `docker compose logs cms` shows `Could not revalidate`: `401` means the two secrets differ; `ECONNREFUSED` or a timeout means `WEBSITE_URL` is wrong.                       |
 | Vigor website only shows a change after a minute                         | The same, for `VIGOR_WEBSITE_URL` and `VIGOR_WEBSITE_REVALIDATE_SECRET` (the website's `REVALIDATE_SECRET`).                                                                |
+| A page can't use a slug that another site's page uses ("invalid: slug")  | The database still has the index from before the Sites field. Remove it as described in "Pages for several websites and apps".                                              |
 | A new Vigor product shows in English but not in the other languages      | It is published in English only. Open it and use the arrow next to **Publish in English** → **Publish all locales**.                                                        |
 
 ## Local development
