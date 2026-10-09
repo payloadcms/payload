@@ -1,3 +1,4 @@
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.for"] }] -- Tests use the shared fixture wrapper. */
 import type { CollectionSlug, Payload, File as PayloadFile } from 'payload'
 
 import { createHash } from 'crypto'
@@ -8,7 +9,7 @@ import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
 import {
@@ -30,7 +31,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const originalPdfText = fs.readFileSync(path.resolve(dirname, '../uploads/test-pdf.pdf'), 'utf-8')
 
-let restClient: NextRESTClient
+let restClient: RESTClient
 let payload: Payload
 
 const uploadFixture = async ({
@@ -50,7 +51,14 @@ const uploadFixture = async ({
     data: {},
     file: file ?? (await getFileByPath(path.resolve(dirname, `../uploads/${fixture}`))),
     overrideAccess: true,
-  })) as unknown as { filename: string; filesize: number; id: number | string; mimeType: string }
+  })) as unknown as {
+    filename: string
+    filesize: number
+    id: number | string
+    mimeType: string
+    original?: { url?: string }
+    url: string
+  }
 
 test.suite('Upload transformers', { config: './config.ts' }, () => {
   test.beforeEach(async ({ payload: payloadInstance, restClient: restClientInstance }) => {
@@ -229,17 +237,17 @@ test.suite('Upload transformers', { config: './config.ts' }, () => {
           status: 200,
         },
         {
-          name: 'should serve the original when transform access is denied and no transformer applies',
+          name: 'should serve the retained original through ordinary read access',
           denied: ['transform'],
-          events: ['access:transform', 'access:plain', 'canTransform'],
+          events: ['access:plain'],
           expected: originalPdfText,
           query: '',
           status: 200,
         },
         {
-          name: 'should not serve the original when only transform access is allowed and no transformer applies',
+          name: 'should deny the retained original when ordinary read access is denied',
           denied: ['plain'],
-          events: ['access:transform', 'canTransform', 'access:plain'],
+          events: ['access:plain'],
           query: '',
           status: 403,
         },
@@ -379,7 +387,7 @@ test.suite('Upload transformers', { config: './config.ts' }, () => {
     })
 
     // A repeated `?width=` query parameter is covered at the unit level
-    // (parseDynamicResize.spec.ts) — NextRESTClient's
+    // (parseDynamicResize.spec.ts) — RESTClient's
     // qs-based query parsing collapses duplicate keys to the last value before
     // the request is ever sent, so it cannot be exercised through this client.
     test.for([
@@ -442,7 +450,7 @@ test.suite('Upload transformers', { config: './config.ts' }, () => {
         variants: { thumbnail: { filename: null | string; width: null | number } }
       }
 
-      expect(doc.variants.thumbnail.filename).toBe('image-100x100.png')
+      expect(doc.variants.thumbnail.filename).toBe('image-original-100x100.png')
       expect(doc.variants.thumbnail.width).toBe(100)
     })
 

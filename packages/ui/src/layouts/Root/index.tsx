@@ -90,9 +90,18 @@ const RootLayoutContent = async ({
   serverFunction,
 }: RootLayoutProps) => {
   const context = await initAdminContext({ configPromise, importMap, key: 'RootLayout' })
-  const { permissions, req, user } = context
+
+  const { cookies, permissions, req, user } = context
+
   const { config } = req.payload
-  const data = await getRootLayoutData({ context, importMap })
+
+  const data = await getRootLayoutData({
+    cookies,
+    importMap,
+    permissions,
+    req,
+    user,
+  })
 
   return (
     <DocumentRoot
@@ -105,7 +114,7 @@ const RootLayoutContent = async ({
       suppressHydrationWarning={data.suppressHydrationWarning}
       theme={data.theme}
       themeSource={data.themeSource}
-      viewport={getViewportMeta(context.headers.get('user-agent') ?? undefined)}
+      viewport={getViewportMeta(req.headers.get('user-agent') ?? undefined)}
     >
       <RootProviders data={data} RouterAdapter={RouterAdapter} serverFunction={serverFunction}>
         {Array.isArray(config.admin?.components?.providers) &&

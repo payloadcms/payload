@@ -4,6 +4,7 @@ import type {
   Data,
   DocumentPreferences,
   Field,
+  FieldOperation,
   FieldSchemaMap,
   FieldState,
   FlattenedBlock,
@@ -76,7 +77,7 @@ export type AddFieldStatePromiseArgs = {
    * Whether to omit parent fields in the state. @default false
    */
   omitParents?: boolean
-  operation: 'create' | 'update'
+  operation: FieldOperation
   parentIndexPath: string
   parentPath: string
   parentPermissions: SanitizedFieldsPermissions

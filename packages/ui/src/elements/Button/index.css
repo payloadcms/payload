@@ -10,7 +10,6 @@
     }
 
     border-radius: var(--button-radius);
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
@@ -47,6 +46,23 @@
     &.btn--disabled:not(.btn--loading) {
       color: var(--color-text-ondisabled);
       background-color: var(--color-bg-disabled);
+    }
+  }
+
+  .btn--style-primary-ghost {
+    color: var(--color-text-brand);
+    background-color: transparent;
+
+    &:hover:not(.btn--disabled) {
+      background-color: var(--color-bg-brand-tertiary);
+    }
+
+    &:active:not(.btn--disabled) {
+      background-color: var(--color-bg-brand-tertiary-hover);
+    }
+
+    &.btn--disabled {
+      color: var(--color-text-disabled);
     }
   }
 
@@ -145,6 +161,13 @@
   .btn.btn--style-primary.btn--selected:hover,
   .btn.btn--style-primary.btn--selected:active {
     background-color: var(--color-bg-brand-pressed);
+  }
+
+  /* Selected state - primary ghost buttons */
+  .btn.btn--style-primary-ghost.btn--selected,
+  .btn.btn--style-primary-ghost.btn--selected:hover,
+  .btn.btn--style-primary-ghost.btn--selected:active {
+    background-color: var(--color-bg-brand-tertiary-hover);
   }
 
   /* Selected state - ghost buttons */

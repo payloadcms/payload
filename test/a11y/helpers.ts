@@ -5,7 +5,7 @@ import { expect, test } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, instructionsCollectionSlug } from 'payload/shared'
 
 import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
@@ -775,8 +775,7 @@ export async function cleanupModalMedia({ page }: { page: Page }) {
   mediaFixtures.delete(page)
 }
 
-export async function openEditImageDialog({ page, serverURL }: { page: Page; serverURL: string }) {
-  const mediaURL = new AdminUrlUtil(serverURL, 'media')
+export async function createMediaFixture({ page, serverURL }: { page: Page; serverURL: string }) {
   const apiURL = formatAdminURL({ apiRoute: '/api', path: '/media', serverURL })
   const response = await page.request.post(apiURL, {
     multipart: {
@@ -795,6 +794,13 @@ export async function openEditImageDialog({ page, serverURL }: { page: Page; ser
   const { doc } = await response.json()
 
   mediaFixtures.set(page, [...(mediaFixtures.get(page) || []), `${apiURL}/${doc.id}`])
+  return doc
+}
+
+export async function openEditImageDialog({ page, serverURL }: { page: Page; serverURL: string }) {
+  const doc = await createMediaFixture({ page, serverURL })
+  const mediaURL = new AdminUrlUtil(serverURL, 'media')
+
   await page.goto(mediaURL.edit(doc.id))
   await waitForFormReady(page)
   await page.getByRole('button', { name: /edit image/i }).click()
@@ -888,7 +894,7 @@ export async function addCollectionQueryWidget({ page }: { page: Page }) {
   const previousCount = await widgets.count()
   const add = page
     .locator('.dashboard-breadcrumb-dropdown__actions')
-    .getByRole('button', { name: 'Add +', exact: true })
+    .getByRole('button', { name: 'Add +: Add Widget', exact: true })
 
   await add.press('Enter')
   const drawer = page.locator('dialog[id^="widgets-drawer-"]')
@@ -1040,4 +1046,86 @@ export async function expectEnhancedDividerContrast({
       .evaluate((element) => element.removeAttribute('data-enhanced-contrast'))
   }
   expect(await readPaint()).toEqual(defaultPaint)
+}
+
+/** Measure text against the composited backgrounds of its rendered ancestors. */
+export async function getTextContrastRatios({
+  container,
+  selectors,
+}: {
+  container: Locator
+  selectors: string[]
+}) {
+  return container.evaluate((element, selectors) => {
+    const rgba = ({ value }: { value: string }) => {
+      const values = value.match(/[\d.]+/g)!.map(Number)
+      const divisor = value.startsWith('color(srgb') ? 1 : 255
+
+      return [values[0] / divisor, values[1] / divisor, values[2] / divisor, values[3] ?? 1]
+    }
+    const composite = ({
+      background,
+      foreground,
+    }: {
+      background: number[]
+      foreground: number[]
+    }) =>
+      foreground
+        .slice(0, 3)
+        .map((channel, index) => channel * foreground[3] + background[index] * (1 - foreground[3]))
+    const luminance = ({ color }: { color: number[] }) =>
+      color.reduce((sum, channel, index) => {
+        const linear = channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
+
+        return sum + linear * [0.2126, 0.7152, 0.0722][index]
+      }, 0)
+
+    return selectors.flatMap((selector) =>
+      Array.from(element.querySelectorAll(selector)).map((text) => {
+        const ancestors: Element[] = []
+        let ancestor: Element | null = text
+
+        while (ancestor) {
+          ancestors.unshift(ancestor)
+          ancestor = ancestor.parentElement
+        }
+        const background = ancestors.reduce(
+          (color, node) =>
+            composite({
+              background: color,
+              foreground: rgba({ value: getComputedStyle(node).backgroundColor }),
+            }),
+          [1, 1, 1],
+        )
+        const foreground = composite({
+          background,
+          foreground: rgba({ value: getComputedStyle(text).color }),
+        })
+        const lighter = Math.max(luminance({ color: foreground }), luminance({ color: background }))
+        const darker = Math.min(luminance({ color: foreground }), luminance({ color: background }))
+
+        return { ratio: (lighter + 0.05) / (darker + 0.05), selector }
+      }),
+    )
+  }, selectors)
+}
+
+export async function openLLMInstructions({ page, serverURL }: { page: Page; serverURL: string }) {
+  await page.goto(
+    formatAdminURL({
+      adminRoute: '/admin',
+      path: `/collections/${instructionsCollectionSlug}/collection-posts`,
+      serverURL,
+    }),
+  )
+  await expect(page.getByRole('heading', { name: 'posts', exact: true })).toBeVisible()
+
+  const field = page.locator('.llm-instructions')
+
+  await field.getByRole('tab', { name: 'Additional instructions', exact: true }).press('Enter')
+  await expect(
+    field.getByRole('textbox', { name: 'Additional instructions', exact: true }),
+  ).toBeVisible()
+
+  return field
 }

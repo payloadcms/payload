@@ -34,10 +34,9 @@
   .column-selector__title {
     margin: 0;
     padding-inline-start: var(--spacer-2);
-    font-family: var(--text-body-medium-strong-font-family);
-    font-size: var(--text-body-medium-strong-font-size);
-    font-weight: var(--text-body-medium-strong-font-weight);
-    line-height: var(--text-body-medium-strong-line-height);
+    font-size: var(--text-body-medium-bold-font-size);
+    font-weight: var(--text-body-medium-bold-font-weight);
+    line-height: var(--text-body-medium-bold-line-height);
     color: var(--color-text);
   }
 
@@ -78,7 +77,6 @@
     padding: 0;
     background: transparent;
     border: none;
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
@@ -109,7 +107,6 @@
       var(--spacer-6) + var(--spacer-2)
     ); /* 48px total: 32px content + 8px top/bottom padding */
     padding-block: var(--spacer-2);
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
@@ -133,10 +130,9 @@
     align-items: center;
     height: var(--spacer-5);
     padding-inline: var(--spacer-3);
-    font-family: var(--text-body-medium-strong-font-family);
-    font-size: var(--text-body-medium-strong-font-size);
-    font-weight: var(--text-body-medium-strong-font-weight);
-    line-height: var(--text-body-medium-strong-line-height);
+    font-size: var(--text-body-medium-bold-font-size);
+    font-weight: var(--text-body-medium-bold-font-weight);
+    line-height: var(--text-body-medium-bold-line-height);
     color: var(--color-text-secondary);
   }
 
@@ -162,7 +158,6 @@
   .column-selector__item-label {
     flex: 1;
     min-width: 0;
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);

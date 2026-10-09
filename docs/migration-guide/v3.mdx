@@ -653,7 +653,7 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
    }
    ```
 
-1. The `href` and `isActive` functions on View Tabs no longer includes the `match` or `location` arguments. This is is a property specific to React Router, not Next.js. If you need to do URL matching similar to this, use a custom tab that fires of some hooks, i.e. `usePathname()` and run it through your own utility functions:
+1. The `href` and `isActive` functions on View Tabs no longer includes the `match` or `location` arguments. This is a property specific to React Router, not Next.js. If you need to do URL matching similar to this, use a custom tab that fires off some hooks, i.e. `usePathname()` and run it through your own utility functions:
 
    ```diff
    // collections/Posts.ts

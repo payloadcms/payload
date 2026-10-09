@@ -19,7 +19,7 @@ concurrency:
 jobs:
   publish:
     name: publish-release-${{ github.ref_name }}
-    if: github.repository_owner == 'payloadcms'
+    if: github.repository == 'payloadcms/payload'
     runs-on: ubuntu-24.04
     environment: release
     permissions:

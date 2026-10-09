@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "4.0.0-canary.37",
+  "version": "4.0.0-canary.39",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -104,7 +104,6 @@
     "file-type": "22.0.1",
     "graphql-http": "1.22.4",
     "graphql-playground-html": "1.6.30",
-    "http-status": "2.1.0",
     "path-to-regexp": "6.3.0",
     "qs-esm": "8.0.1",
     "sass": "1.77.4",
@@ -116,7 +115,7 @@
     "@babel/preset-env": "7.27.2",
     "@babel/preset-react": "7.27.1",
     "@babel/preset-typescript": "7.27.1",
-    "@next/eslint-plugin-next": "16.3.8",
+    "@next/eslint-plugin-next": "16.4.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/busboy": "1.5.4",
     "@types/react": "19.3.0",
@@ -129,7 +128,7 @@
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
-    "next": ">=16.2.6 <17.0.0",
+    "next": ">=16.4.0 <17.0.0",
     "payload": "workspace:*"
   },
   "engines": {

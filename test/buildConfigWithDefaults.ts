@@ -49,6 +49,7 @@ import { testEmailAdapter } from './testEmailAdapter.js'
 type BuildConfigWithDefaultsArgs = {
   config: Partial<Config>
   disableAutoLogin?: boolean
+  disableMCP?: boolean
   seed?: SeedFunction
   suite: string
 }
@@ -56,6 +57,7 @@ type BuildConfigWithDefaultsArgs = {
 export async function buildConfigWithDefaults({
   config: testConfig,
   disableAutoLogin,
+  disableMCP,
   seed,
   suite,
 }: BuildConfigWithDefaultsArgs): Promise<SanitizedConfig> {
@@ -194,7 +196,7 @@ export async function buildConfigWithDefaults({
   // Auto-add the MCP plugin so every test suite exercises it. Suites that need
   // to configure it explicitly add their own `mcpPlugin({...})` call.
   const hasMcpPlugin = (config.plugins ?? []).some((p) => p.slug === '@payloadcms/plugin-mcp')
-  if (!hasMcpPlugin) {
+  if (!disableMCP && !hasMcpPlugin) {
     config.plugins = [...(config.plugins ?? []), mcpPlugin({})]
   }
 

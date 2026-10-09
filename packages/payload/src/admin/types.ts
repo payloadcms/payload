@@ -399,7 +399,6 @@ export type {
 
 export type {
   BaseVersionField,
-  DiffMethod,
   FieldDiffClientProps,
   FieldDiffServerProps,
   VersionField,
@@ -552,7 +551,13 @@ export type {
 
 export type { LanguageOptions } from './LanguageOptions.js'
 
-export type { RichTextAdapter, RichTextAdapterProvider, RichTextHooks } from './RichText.js'
+export type {
+  MarkdownRichTextAdapter,
+  MarkdownRichTextAdapterProvider,
+  RichTextAdapter,
+  RichTextAdapterProvider,
+  RichTextHooks,
+} from './RichText.js'
 
 export { type WidgetServerProps } from './views/dashboard.js'
 
@@ -638,6 +643,7 @@ export type {
   BeforeListTableClientProps,
   BeforeListTableServerProps,
   BeforeListTableServerPropsOnly,
+  CurrentHierarchyItem,
   HierarchyViewData,
   ListViewClientProps,
   ListViewGroup,

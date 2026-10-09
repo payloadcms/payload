@@ -6,11 +6,16 @@ export const TestMetadata: CollectionConfig = {
   slug: testMetadataSlug,
   access: {
     create: () => true,
+    delete: () => true,
     read: () => true,
     update: () => true,
-    delete: () => true,
   },
   fields: [
+    { name: 'bucketName', type: 'text' },
+    { name: 'customStorageId', type: 'text' },
+    { name: 'objectKey', type: 'text' },
+    { name: 'processingStatus', type: 'text' },
+    { name: 'storageProvider', type: 'text' },
     {
       name: 'testNote',
       type: 'text',
@@ -18,6 +23,8 @@ export const TestMetadata: CollectionConfig = {
         description: 'Test note to identify this upload',
       },
     },
+    { name: 'uploadTimestamp', type: 'text' },
+    { name: 'uploadVersion', type: 'text' },
   ],
   upload: {
     adminThumbnail: 'thumbnail',

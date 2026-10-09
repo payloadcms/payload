@@ -5,7 +5,7 @@ import { randomUUID } from 'crypto'
 import { onTestFinished } from 'vitest'
 
 import type { TestRBAC } from '../../__helpers/plugins/rbac/index.js'
-import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
+import type { RESTClient } from '../../__helpers/shared/RESTClient.js'
 import type { McpClient } from './mcpClient.js'
 
 import { test as base } from '../../__helpers/int/vitest.js'
@@ -23,7 +23,7 @@ type McpTestContext = {
   mcp: McpClient
   payload: Payload
   protocolEra: ProtocolEra
-  restClient: NextRESTClient
+  restClient: RESTClient
 } & McpSetup
 
 type McpTestFunction = (context: McpTestContext) => Promise<void> | void
