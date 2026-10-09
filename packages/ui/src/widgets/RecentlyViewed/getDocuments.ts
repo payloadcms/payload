@@ -256,6 +256,7 @@ function enrichDocument({
       adminRoute: payload.config.routes.admin,
       path: `/collections/${collectionSlug}/${encodeURIComponent(String(doc.id))}`,
     }),
+    isChanged: status === 'changed',
     isDraft: status === 'draft',
     statusLabel:
       status === 'draft'
