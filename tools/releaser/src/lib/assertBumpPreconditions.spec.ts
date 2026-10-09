@@ -6,17 +6,21 @@ const valid = {
   branch: 'main',
   bump: 'prerelease',
   hasGithubToken: true,
-  preid: 'canary',
-  version: '4.0.0-canary.9',
+  preid: 'beta',
+  version: '4.0.0-beta.9',
 }
 
 describe('assertBumpPreconditions', () => {
-  it('should pass for valid canary inputs', () => {
+  it('should pass for valid beta inputs', () => {
     expect(() => assertBumpPreconditions({ ...valid })).not.toThrow()
   })
 
   it('should allow a canary.N -> beta.0 transition (preid need not match the current id)', () => {
-    expect(() => assertBumpPreconditions({ ...valid, preid: 'beta' })).not.toThrow()
+    expect(() => assertBumpPreconditions({ ...valid, version: '4.0.0-canary.39' })).not.toThrow()
+  })
+
+  it('should throw for the canary preid', () => {
+    expect(() => assertBumpPreconditions({ ...valid, preid: 'canary' })).toThrow(/Invalid --preid/)
   })
 
   it('should throw when not on main', () => {

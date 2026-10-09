@@ -7,7 +7,6 @@ on:
         description: Prerelease identifier
         type: choice
         options:
-          - canary
           - beta
         default: beta
       bump:

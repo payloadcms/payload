@@ -84,7 +84,7 @@ export const runReleaseCi = async ({
       `Refusing to publish ${version}: prerelease line must be one of ${PREIDS.join(', ')} (got ${preid ?? 'none'}).`,
     )
   }
-  const tag = preid // narrowed to 'beta' | 'canary'
+  const tag = preid // narrowed to Preid
 
   // npm publishes the package.json version, so a tag pushed on a commit with a
   // different version would silently skip as "already published".
