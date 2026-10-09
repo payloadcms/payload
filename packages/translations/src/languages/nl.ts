@@ -498,8 +498,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     restore: 'Herstellen',
     restoreAsPublished: 'Herstellen als gepubliceerde versie',
     restoredCountSuccessfully: '{{count}} {{label}} succesvol hersteld.',
-    restoring:
-      'Respecteer de betekenis van de originele tekst in de context van Payload. Hier volgt een lijst van veelvoorkomende Payload-termen die zeer specifieke betekenissen hebben:\n    - Collectie: Een collectie is een groep documenten die een gemeenschappelijke structuur en doel delen. Collecties worden gebruikt om content in Payload te organiseren en beheren.\n    - Veld: Een veld is een specifiek stuk data binnen een document in een collectie. Velden bepalen de structuur en het type data dat in een document kan worden opgeslagen.\n    - Document: Een document is een individueel record binnen',
+    restoring: 'Herstellen...',
     retry: 'Opnieuw proberen',
     row: 'Rij',
     rows: 'Rijen',
@@ -797,7 +796,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     viewingVersion: 'Bekijk versie voor {{entityLabel}} {{documentTitle}}',
     viewingVersionGlobal: 'Bekijk versie voor global {{entityLabel}}',
     viewingVersions: 'Bekijk versies voor {{entityLabel}} {{documentTitle}}',
-    viewingVersionsGlobal: '`Bekijk versies voor global {{entityLabel}}',
+    viewingVersionsGlobal: 'Bekijk versies voor global {{entityLabel}}',
   },
 }
 

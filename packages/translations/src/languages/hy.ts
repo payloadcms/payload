@@ -305,8 +305,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     changesNotSaved:
       'Ձեր փոփոխությունները չեն պահպանվել։ Եթե հիմա հեռանաք, կկորցնեք չպահպանված փոփոխությունները։',
     checked: 'Ստուգված',
-    clear:
-      'Հիմնական տեքստի իմաստը պետք է պահպանվի Payload կոնտեքստի մեջ: Այս այս այստեղ են հաճախակի',
+    clear: 'Մաքրել',
     clearAll: 'Մաքրել բոլորը',
     clearSearch: 'Մաքրել որոնումը',
     close: 'Փակել',
@@ -492,8 +491,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     restore: 'Վերականգնել',
     restoreAsPublished: 'Վերականգնել որպես հրատարակված տարբերակ',
     restoredCountSuccessfully: '{{count}} {{label}} հաջողությամբ վերականգնվեց:',
-    restoring:
-      'Payload-i original teksti mijocov achqers, nran avelacnum e urish Payload nshanakutyunner, oronq kangnvec en specifik texer:\n\n- Zuygh: Zuygh e ayd dokumnerneri jmum, oronq kanen arden mek ban u zoracnum en Payload-i nersum u bavararum.\n- Dasht: Dasht e ayd zuyghi bnutyun dokumneri mej. Dashter pahpanum en bnutyunneri banakanutyuny u texy, ete oronq sa patrastvi dokumentnerum.\n- Dokument: Dokument e mi',
+    restoring: 'Վերականգնվում է...',
     retry: 'Կրկնել',
     row: 'Տող',
     rows: 'Տողեր',
@@ -559,9 +557,9 @@ export const hyTranslations: DefaultTranslationsObject = {
     updatedAt: 'Թարմացված է',
     updatedBy: 'Թարմացվել է կողմից',
     updatedCountSuccessfully: '{{count}} {{label}} հաջողությամբ թարմացվել է։',
-    updatedLabelSuccessfully: '',
+    updatedLabelSuccessfully: '{{label}} հաջողությամբ թարմացվել է։',
     updatedSuccessfully: 'Հաջողությամբ թարմացվել է։',
-    updateForEveryone: '',
+    updateForEveryone: 'Թարմացնել բոլորի համար',
     updating: 'Թարմացում',
     uploading: 'Վերբեռնվում է',
     uploadingBulk: 'Վերբեռնվում է {{current}}-ը {{total}}-ից',

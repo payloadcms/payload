@@ -517,7 +517,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     skipToContent: 'Пређи на садржај',
     sorryNotFound: 'Нажалост, не постоји ништа што одговара вашем захтеву.',
     sort: 'Сортирај',
-    sortByLabelDirection: 'Сортирај према {{label}} {{дирецтион}}',
+    sortByLabelDirection: 'Сортирај према {{label}} {{direction}}',
     sortByOrderToReorder:
       'Da biste preuredili redove, prvo ih morate sortirati prema koloni „Redosled”.',
     stayOnThisPage: 'Остани на овој страници',
@@ -686,7 +686,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     latitudeOutOfBounds: 'Geografska širina mora biti između -90 i 90.',
     lessThanMin: '{{value}} је испод дозвољеног минимума за {{label}} (доњи лимит је {{min}}).',
     limitReached: 'Досегнут је лимит, може се додати само {{max}} ставки.',
-    longerThanMin: 'Ова вредност мора бити дужа од минималне дужине од {{минЛенгтх}} карактера',
+    longerThanMin: 'Ова вредност мора бити дужа од минималне дужине од {{minLength}} карактера',
     longitudeOutOfBounds: 'Дужина мора бити између -180 и 180.',
     notValidDate: '"{{value}}" није валидан датум.',
     required: 'Ово поље је обавезно.',

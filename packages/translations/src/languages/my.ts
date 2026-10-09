@@ -799,9 +799,9 @@ export const myTranslations: DefaultTranslationsObject = {
     versionID: 'ဗားရှင်း ID',
     versions: 'ဗားရှင်းများ',
     viewingVersion: '{{entityLabel}} {{documentTitle}} အတွက် ဗားရှင်းကို ကြည့်ရှုနေသည်',
-    viewingVersionGlobal: '`ဂလိုဘယ်ဆိုင်ရာ {entityLabel}} အတွက် ဗားရှင်းကို ကြည့်ရှုနေသည်',
+    viewingVersionGlobal: 'ဂလိုဘယ်ဆိုင်ရာ {{entityLabel}} အတွက် ဗားရှင်းကို ကြည့်ရှုနေသည်',
     viewingVersions: '{{entityLabel}} {{documentTitle}} အတွက် ဗားရှင်းများကို ကြည့်ရှုခြင်း',
-    viewingVersionsGlobal: '`ဂလိုဘယ်ဆိုင်ရာ {{entityLabel}} အတွက် ဗားရှင်းများကို ကြည့်ရှုနေသည်',
+    viewingVersionsGlobal: 'ဂလိုဘယ်ဆိုင်ရာ {{entityLabel}} အတွက် ဗားရှင်းများကို ကြည့်ရှုနေသည်',
   },
 }
 

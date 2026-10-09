@@ -35,7 +35,7 @@ export const koTranslations: DefaultTranslationsObject = {
     generate: '생성',
     generateNewAPIKey: '새로운 API 키 생성',
     generatingNewAPIKeyWillInvalidate:
-      '새로운 API 키를 생성하면 이전 키가 무효화됩니다. 계속하시겠습니까?',
+      '새로운 API 키를 생성하면 이전 키가 <1>무효화</1>됩니다. 계속하시겠습니까?',
     lockUntil: '잠금 시간',
     logBackIn: '다시 로그인',
     loggedIn: '다른 사용자로 로그인하려면 먼저 <0>로그아웃</0>해야 합니다.',
@@ -302,8 +302,7 @@ export const koTranslations: DefaultTranslationsObject = {
     cancel: '취소',
     changesNotSaved: '변경 사항이 저장되지 않았습니다. 지금 떠나면 변경 사항을 잃게 됩니다.',
     checked: '확인됨',
-    clear:
-      '페이로드의 맥락 내에서 원문의 의미를 존중하십시오. 다음은 페이로드에서 사용되는 특정 의미를 내포하는 일반적인 페이로드 용어 목록입니다: \n- Collection: 컬렉션은 공통의 구조와 목적을 공유하는 문서의 그룹입니다. 컬렉션은 페이로드에서 콘텐츠를 정리하고 관리하는 데 사용됩니다.\n- Field: 필드는 컬렉',
+    clear: '지우기',
     clearAll: '모두 지우기',
     clearSearch: '검색 지우기',
     close: '닫기',
@@ -487,8 +486,7 @@ export const koTranslations: DefaultTranslationsObject = {
     restore: '복원',
     restoreAsPublished: '게시된 버전으로 복원하다',
     restoredCountSuccessfully: '성공적으로 {{count}} {{label}}를 복원했습니다.',
-    restoring:
-      '원래 텍스트의 의미를 Payload 문맥 내에서 존중하십시오. 여기에는 매우 특정한 의미를 가진 일반 Payload 용어 목록이 있습니다:\n    - Collection: 컬렉션은 공통 구조와 목적을 공유하는 문서의 그룹입니다. 컬렉션은 Payload에서 컨텐츠를 구성하고 관리하는 데 사용됩니다.\n    - Field: 필드는 컬렉션 내의 문서에 있는 특정 데이터 조각입니다.',
+    restoring: '복원 중...',
     retry: '재시도',
     row: '행',
     rows: '행',
