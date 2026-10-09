@@ -1144,6 +1144,12 @@ type RootAdminConfig = {
       dashboard?: AdminViewConfig
     }
   }
+  /**
+   * Limit collection and global document fields to 1080px on desktop.
+   *
+   * @default false
+   */
+  constrainDocumentWidth?: boolean
   /** Extension point to add your custom data. Available in server and client. */
   custom?: Record<string, any>
   /**

@@ -49,6 +49,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
     ...admin,
     avatar: admin?.avatar ?? 'gravatar',
     components: admin?.components ?? {},
+    constrainDocumentWidth: admin?.constrainDocumentWidth ?? false,
     custom: admin?.custom ?? {},
     dateFormat: admin?.dateFormat ?? 'MMMM do yyyy, h:mm a',
     dependencies: admin?.dependencies ?? {},

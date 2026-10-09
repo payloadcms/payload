@@ -74,18 +74,18 @@
     margin-inline: auto;
   }
 
-  @media (width > 1024px) {
-    .collection-edit
+  @media (min-width: 1024px) {
+    .collection-edit--constrain-document-width
       .collection-edit__main
       > .document-fields:not(.document-fields--force-sidebar-wrap) {
       --field-border-bleed: 0;
       --field-tabs-edge-display: none;
-      max-width: 1080px;
+      max-width: calc(var(--spacer-6) * 27);
     }
   }
 
   @container drawer (width <= 768px) {
-    .collection-edit
+    .collection-edit--constrain-document-width
       .collection-edit__main
       > .document-fields:not(.document-fields--force-sidebar-wrap) {
       --field-border-bleed: 1;
