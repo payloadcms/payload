@@ -13,7 +13,7 @@ type NoResultsProps = {
 export function NoListResults({ Actions, description, title, withMargin }: NoResultsProps) {
   return (
     <div className={`${baseClass}${withMargin ? ` ${baseClass}--with-margin` : ''}`}>
-      {title ? <span className={`${baseClass}__title`}>{title}</span> : null}
+      {title ? <h2 className={`${baseClass}__title`}>{title}</h2> : null}
       {description ? <p className={`${baseClass}__description`}>{description}</p> : null}
       {Actions && Actions.length > 0 && (
         <div className={`${baseClass}__actions`}>
