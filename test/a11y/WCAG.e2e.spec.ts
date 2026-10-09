@@ -4362,6 +4362,36 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should present the embedded dashboard breadcrumb without editing controls', async () => {
+      try {
+        await page.goto(`${serverURL}/admin?embed=true`)
+        await expect(page.locator('.modular-dashboard')).toBeVisible()
+        const breadcrumb = page.getByRole('navigation', { name: 'Breadcrumb' })
+
+        await expect(breadcrumb).toContainText('Dashboard')
+        await expect(
+          breadcrumb.getByRole('button', { name: 'Dashboard', exact: true }),
+        ).toHaveCount(0)
+        await expect(page.locator('.dashboard-breadcrumb-dropdown')).toHaveCount(0)
+        await expect(page.locator('.dashboard-breadcrumb-dropdown__editing')).toHaveCount(0)
+
+        await page.goto(`${serverURL}/admin?embed=false`)
+        const dashboard = page.getByRole('button', { name: 'Dashboard', exact: true })
+
+        await dashboard.press('Enter')
+        await expect(
+          page.getByRole('menuitem', { name: 'Edit Dashboard', exact: true }),
+        ).toBeVisible()
+        await expect(
+          page.getByRole('menuitem', { name: 'Reset Layout', exact: true }),
+        ).toBeVisible()
+        await page.keyboard.press('Escape')
+        await expect(dashboard).toBeFocused()
+      } finally {
+        await page.goto(`${serverURL}/admin?embed=false`)
+      }
+    })
+
     test('should translate crop handle names into Spanish', async () => {
       const originalCookies = (await page.context().cookies()).filter(
         ({ name }) => name === 'payload-lng',
@@ -4790,6 +4820,47 @@ test.describe('WCAG 2.2 Level AA', () => {
         await expect(nav).toHaveAttribute('inert', '')
         await expect.soft(toggle).toHaveAttribute('aria-expanded', 'false')
       } finally {
+        if (originalViewport) {
+          await page.setViewportSize(originalViewport)
+        }
+      }
+    })
+
+    test('should keep the embedded navigation toggle operable beside the breadcrumb', async () => {
+      // PYLD-4334
+      const originalViewport = page.viewportSize()
+
+      try {
+        for (const width of [1440, 768]) {
+          await page.setViewportSize({ height: 900, width })
+          await page.goto(`${postsURL.list}?embed=true`)
+          const toggle = page.locator('.app-header__sidebar-toggle')
+          const nav = page.locator('aside.nav')
+
+          await expect(nav).toHaveClass(/nav-hydrated/)
+          await expect(page.locator('.nav__header')).toHaveCount(0)
+          await expect(toggle).toBeVisible()
+          await toggle.focus()
+          if ((await toggle.getAttribute('aria-expanded')) === 'true') {
+            await toggle.press('Space')
+          }
+          await expect(toggle).toHaveAccessibleName(/open menu/i)
+          await expect(nav).toHaveAttribute('inert', '')
+          await toggle.press('Enter')
+          await expect(toggle).toBeVisible()
+          await expect(toggle).toBeFocused()
+          await expect(toggle).toHaveAccessibleName(/close menu/i)
+          await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+          await expect(nav).not.toHaveAttribute('inert', '')
+          await toggle.press('Space')
+          await expect(toggle).toBeFocused()
+          await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+          await expect(nav).toHaveAttribute('inert', '')
+        }
+        await page.goto(`${postsURL.list}?embed=false`)
+        await expect(page.locator('.nav__header')).toHaveCount(1)
+      } finally {
+        await page.goto(`${postsURL.list}?embed=false`)
         if (originalViewport) {
           await page.setViewportSize(originalViewport)
         }

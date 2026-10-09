@@ -11,6 +11,7 @@ import type { GetDefaultLayoutServerFnReturnType } from './renderWidget/getDefau
 import { ConfirmationModal } from '../../../../elements/ConfirmationModal/index.js'
 import { useModal } from '../../../../elements/Modal/index.js'
 import { useConfig } from '../../../../providers/Config/index.js'
+import { useEmbed } from '../../../../providers/Embed/index.js'
 import { usePreferences } from '../../../../providers/Preferences/index.js'
 import { useServerFunctions } from '../../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
@@ -18,13 +19,26 @@ import { RenderWidget } from './renderWidget/RenderWidget.js'
 
 export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
   const setLayoutPreference = useSetLayoutPreference()
-  const [isEditing, setIsEditing] = useState(false)
+  const { isEmbedded } = useEmbed()
+  const [isEditingState, setIsEditingState] = useState(false)
+  const isEditing = !isEmbedded && isEditingState
+  const setIsEditing = useCallback(
+    (shouldEdit: boolean) => setIsEditingState(shouldEdit && !isEmbedded),
+    [isEmbedded],
+  )
   const { widgets = [] } = useConfig().config.admin.dashboard ?? {}
   const [currentLayout, setCurrentLayout] = useState<WidgetInstanceClient[]>(initialLayout)
   const { openModal } = useModal()
   const cancelModalSlug = 'cancel-dashboard-changes'
   const { serverFunction } = useServerFunctions()
   const { t } = useTranslation()
+
+  useEffect(() => {
+    if (isEmbedded) {
+      setIsEditingState(false)
+      setCurrentLayout(initialLayout)
+    }
+  }, [isEmbedded, initialLayout])
 
   // Sync state when initialLayout prop changes (e.g., when query params change and server component re-renders)
   useEffect(() => {
@@ -44,7 +58,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       setIsEditing(true)
       toast.error(t('error:failedToSaveLayout'))
     }
-  }, [setLayoutPreference, currentLayout])
+  }, [setLayoutPreference, currentLayout, setIsEditing])
 
   const resetLayout = useCallback(async () => {
     try {
@@ -60,12 +74,12 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     } catch {
       toast.error(t('error:failedToResetLayout'))
     }
-  }, [setLayoutPreference, serverFunction])
+  }, [setLayoutPreference, serverFunction, setIsEditing])
 
   const performCancel = useCallback(() => {
     setCurrentLayout(initialLayout)
     setIsEditing(false)
-  }, [initialLayout])
+  }, [initialLayout, setIsEditing])
 
   const cancel = useCallback(() => {
     // Check if layout has changed
