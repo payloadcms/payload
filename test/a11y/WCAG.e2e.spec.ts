@@ -57,6 +57,8 @@ import {
 } from './helpers.js'
 
 const openNavigationForUserMenu = async ({ page }: { page: Page }): Promise<void> => {
+  await expect(page.locator('.nav--nav-hydrated')).toBeAttached()
+
   const openNavigation = page.locator('.app-header--nav-open')
 
   if ((await openNavigation.count()) === 0) {
