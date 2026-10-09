@@ -1,3 +1,5 @@
+import semver from 'semver'
+
 type Args = {
   branch: string
   fetchImpl?: typeof fetch
@@ -45,7 +47,8 @@ export const createDraftGitHubRelease = async ({
             body: releaseNotes,
             draft: true,
             generate_release_notes: false,
-            prerelease: false,
+            // A prerelease is never marked "Latest", so it cannot displace the stable line.
+            prerelease: semver.prerelease(tag) !== null,
             tag_name: tag,
             target_commitish: branch,
           },

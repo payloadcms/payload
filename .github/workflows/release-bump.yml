@@ -7,9 +7,8 @@ on:
         description: Prerelease identifier
         type: choice
         options:
-          - canary
           - beta
-        default: canary
+        default: beta
       bump:
         description: Semver bump
         type: choice
