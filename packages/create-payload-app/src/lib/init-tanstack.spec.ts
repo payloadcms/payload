@@ -5,7 +5,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { DbType, TanStackAppDetails } from '../types.js'
 
-import { DEFAULT_PAYLOAD_VERSION_TAG } from '../utils/resolvePackageVersion.js'
 import { initTanStack } from './init-tanstack.js'
 
 const mocks = vi.hoisted(() => ({
@@ -308,7 +307,7 @@ describe('initTanStack', () => {
       expect(mocks.resolvePackageVersion).toHaveBeenCalledWith({
         debug: undefined,
         packageName: 'payload',
-        versionOrTag: DEFAULT_PAYLOAD_VERSION_TAG,
+        versionOrTag: 'beta',
       })
       expect(mocks.ensurePnpmBuildApprovals).not.toHaveBeenCalled()
       expect(mocks.installPackages).not.toHaveBeenCalled()
