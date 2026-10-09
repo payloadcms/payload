@@ -67,6 +67,11 @@
       "types": "./src/lexical-proxy/lexical.ts",
       "default": "./src/lexical-proxy/lexical.ts"
     },
+    "./lexical/extension": {
+      "import": "./src/lexical-proxy/@lexical-extension.ts",
+      "types": "./src/lexical-proxy/@lexical-extension.ts",
+      "default": "./src/lexical-proxy/@lexical-extension.ts"
+    },
     "./lexical/headless": {
       "import": "./src/lexical-proxy/@lexical-headless.ts",
       "types": "./src/lexical-proxy/@lexical-headless.ts",
@@ -437,6 +442,7 @@
   },
   "dependencies": {
     "@lexical/clipboard": "0.52.0",
+    "@lexical/extension": "0.52.0",
     "@lexical/headless": "0.52.0",
     "@lexical/html": "0.52.0",
     "@lexical/link": "0.52.0",
@@ -541,6 +547,11 @@
         "import": "./dist/lexical-proxy/lexical.js",
         "types": "./dist/lexical-proxy/lexical.d.ts",
         "default": "./dist/lexical-proxy/lexical.js"
+      },
+      "./lexical/extension": {
+        "import": "./dist/lexical-proxy/@lexical-extension.js",
+        "types": "./dist/lexical-proxy/@lexical-extension.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-extension.js"
       },
       "./lexical/headless": {
         "import": "./dist/lexical-proxy/@lexical-headless.js",
