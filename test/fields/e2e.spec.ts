@@ -191,8 +191,10 @@ describe('Core field visual regression', () => {
     })
 
     const target = page.locator('#field-items.field-type.array-field')
+    const expandedRows = target.locator('button.collapsible__toggle--open:visible')
 
-    await collapseExpandedRows({ target })
+    await target.getByRole('button', { name: 'Collapse All: Items' }).click()
+    await expect(expandedRows).toHaveCount(0)
     await expect(target.locator('.array-field__row')).toHaveCount(6)
     await expectScreenshot({ name: 'array-field.png', page, target })
   })
