@@ -12,7 +12,7 @@ import { transforms as registry } from '../registry.js'
 import { runTransforms as defaultRunTransforms } from '../runner.js'
 import { loadPackageJsons, serializePackageJson } from '../utils/packageJson.js'
 import { loadProject } from '../utils/project.js'
-import { readOwnVersion, resolveDefaultTag } from './defaultTag.js'
+import { resolveDefaultTag } from './defaultTag.js'
 import { detectPackageManager } from './detectPackageManager.js'
 import { renderReport } from './report.js'
 import { resolveVersions } from './resolveVersions.js'
@@ -82,7 +82,7 @@ export async function runUpgrade(
   }
 
   // 2. RESOLVE VERSIONS
-  const tag = flags.tag ?? resolveDefaultTag(readOwnVersion())
+  const tag = flags.tag ?? resolveDefaultTag()
   const resolved = await resolveVersions({ fetchRegistry: deps.fetchRegistry, tag })
   warnStaleNode(resolved)
 
