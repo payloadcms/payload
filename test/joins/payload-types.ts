@@ -576,6 +576,7 @@ export interface Category {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  defaultPost?: (string | null) | Post;
   noRowTypes?: {
     docs?: (string | Post)[];
     hasNextPage?: boolean;
@@ -1717,6 +1718,7 @@ export interface PostsSelect<T extends boolean = true> {
 export interface CategoriesSelect<T extends boolean = true> {
   name?: T;
   relatedPosts?: T;
+  defaultPost?: T;
   noRowTypes?: T;
   hasManyPosts?: T;
   hasManyPostsLocalized?: T;
