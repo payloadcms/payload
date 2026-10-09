@@ -56,12 +56,15 @@ export function DocumentRoot({
       suppressHydrationWarning={suppressHydrationWarning}
     >
       <head>
-        {themeSource === 'default' && <ResolveThemeOnClient serverTheme={theme ?? defaultTheme} />}
         {viewport}
         <style>{`@layer payload-default, payload;`}</style>
         {head}
       </head>
-      <body>{children}</body>
+      <body>
+        {/* Rendered in <body>, not <head>, so React does not pair it with scripts a host adds to <head> during hydration */}
+        {themeSource === 'default' && <ResolveThemeOnClient serverTheme={theme ?? defaultTheme} />}
+        {children}
+      </body>
     </html>
   )
 }
