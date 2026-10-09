@@ -4,7 +4,7 @@ import type { Locale, SanitizedLocalizationConfig } from 'payload'
 */
 export const findLocaleFromCode = (
   localizationConfig: SanitizedLocalizationConfig,
-  locale: string,
+  locale: string | undefined,
 ): Locale | null => {
   if (!localizationConfig?.locales || localizationConfig.locales.length === 0) {
     return null
