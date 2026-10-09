@@ -223,7 +223,11 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
 
   const authenticatedHash = user.hash
   const authenticatedSalt = user.salt
-  const authResult = await authenticateLocalStrategy({ doc: user, password })
+  const authResult = await authenticateLocalStrategy({
+    collection: collectionConfig,
+    doc: user,
+    password,
+  })
   user = sanitizeInternalFields(user)
 
   const maxLoginAttemptsEnabled = args.collection.config.auth.maxLoginAttempts > 0
