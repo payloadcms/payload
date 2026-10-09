@@ -1057,6 +1057,86 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
       })
     })
 
+    test.describe('Localized - global length validation', () => {
+      test('should persist each locale on a global write with locale all', async ({ payload }) => {
+        await payload.updateGlobal({
+          slug: 'global-text',
+          data: {
+            localizedTextWithLength: {
+              en: 'valid english',
+              es: 'valido en es',
+            },
+          },
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        const refetched: any = await payload.findGlobal({
+          slug: 'global-text',
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        expect(refetched.localizedTextWithLength.en).toStrictEqual('valid english')
+        expect(refetched.localizedTextWithLength.es).toStrictEqual('valido en es')
+      })
+
+      test('should reject a global write where one locale violates minLength with locale all', async ({
+        payload,
+      }) => {
+        await expect(
+          payload.updateGlobal({
+            slug: 'global-text',
+            data: {
+              localizedTextWithLength: {
+                en: 'valid english',
+                es: 'no',
+              },
+            },
+            locale: 'all',
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow('Localized Text With Length (es)')
+      })
+    })
+
+    test.describe('Localized - nested length validation', () => {
+      test('should reject a locale that violates minLength on a localized scalar inside a non-localized group', async ({
+        payload,
+      }) => {
+        await expect(
+          payload.create({
+            collection: allFieldsLocalizedSlug,
+            data: {
+              text: { en: 'valid text', es: 'valido es' },
+              nonLocalizedGroup: {
+                localizedText: { en: 'group english', es: 'no' },
+                nonLocalizedText: 'shared',
+              },
+            } as any,
+            locale: 'all',
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow('Localized Text (es)')
+      })
+
+      test('should reject a locale that violates minLength on a localized scalar inside a non-localized array', async ({
+        payload,
+      }) => {
+        await expect(
+          payload.create({
+            collection: allFieldsLocalizedSlug,
+            data: {
+              text: { en: 'valid text', es: 'valido es' },
+              nonLocalizedArray: [{ localizedItem: { en: 'array english', es: 'no' } }],
+            } as any,
+            locale: 'all',
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow('Localized Item (es)')
+      })
+    })
+
     test.describe('Localized - arrays with nested localized fields', () => {
       test('should allow moving rows and retain existing row locale data', async ({ payload }) => {
         const globalArray: any = await payload.findGlobal({

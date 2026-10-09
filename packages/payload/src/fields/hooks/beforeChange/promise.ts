@@ -9,6 +9,7 @@ import { MissingEditorProp } from '../../../errors/index.js'
 import { type RequestContext, validateBlocksFilterOptions } from '../../../index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
 import { getTranslatedLabel } from '../../../utilities/getTranslatedLabel.js'
+import { isolateObjectProperty } from '../../../utilities/isolateObjectProperty.js'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
@@ -192,6 +193,29 @@ export const promise = async ({
     // Validate
     if (!skipValidationFromHere && 'validate' in field && field.validate) {
       const valueToValidate = siblingData[field.name]
+
+      // With `locale: 'all'` a localized scalar is a locale-keyed object; validate each locale, not the
+      // wrapper. Containers (`group`/`array`/`blocks`) are excluded - per-locale child validation is a follow-up.
+      const isLocaleKeyedValue =
+        operationLocale === 'all' &&
+        localization &&
+        fieldShouldBeLocalized({ field, parentIsLocalized }) &&
+        field.type !== 'group' &&
+        valueToValidate !== null &&
+        typeof valueToValidate === 'object' &&
+        !Array.isArray(valueToValidate)
+
+      const localizedValuesToValidate: { locale?: string; value: unknown }[] = isLocaleKeyedValue
+        ? localization.localeCodes
+            .filter((locale) => locale in (valueToValidate as JsonObject))
+            .map((locale) => ({ locale, value: (valueToValidate as JsonObject)[locale] }))
+        : [{ value: valueToValidate }]
+
+      // No recognized locales (e.g. `{}`): validate `undefined` once so required/optional still apply.
+      if (localizedValuesToValidate.length === 0) {
+        localizedValuesToValidate.push({ value: undefined })
+      }
+
       let jsonError: object
 
       if (field.type === 'json' && typeof siblingData[field.name] === 'string') {
@@ -209,23 +233,41 @@ export const promise = async ({
         object
       >
 
-      const validationResult = await validateFn(valueToValidate as never, {
-        ...field,
-        id,
-        blockData: blockData!,
-        collectionSlug: collection?.slug,
-        data: deepMergeWithSourceArrays(doc, data),
-        event: 'submit',
-        // @ts-expect-error
-        jsonError,
-        operation,
-        overrideAccess,
-        path: pathSegments,
-        preferences: { fields: {} },
-        previousValue: siblingDoc[field.name],
-        req,
-        siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
-      })
+      let validationResult: string | true = true
+      let failedLocale: string | undefined
+
+      for (const { locale, value } of localizedValuesToValidate) {
+        // Scope `req.locale` to the locale being validated without mutating the shared request.
+        const validationReq = locale ? isolateObjectProperty(req, 'locale') : req
+        if (locale) {
+          validationReq.locale = locale
+        }
+
+        validationResult = await validateFn(value as never, {
+          ...field,
+          id,
+          blockData: blockData!,
+          collectionSlug: collection?.slug,
+          data: deepMergeWithSourceArrays(doc, data),
+          event: 'submit',
+          // @ts-expect-error generic validation options cannot infer JSON fields
+          jsonError,
+          operation,
+          overrideAccess,
+          path: pathSegments,
+          preferences: { fields: {} },
+          previousValue: locale
+            ? (siblingDoc[field.name] as JsonObject)?.[locale]
+            : siblingDoc[field.name],
+          req: validationReq,
+          siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
+        })
+
+        if (typeof validationResult === 'string') {
+          failedLocale = locale
+          break
+        }
+      }
 
       if (typeof validationResult === 'string') {
         let filterOptionsError = false
@@ -284,7 +326,7 @@ export const promise = async ({
           )
 
           errors.push({
-            label: fieldLabel,
+            label: failedLocale ? `${fieldLabel} (${failedLocale})` : fieldLabel,
             message: validationResult,
             path,
           })
@@ -297,11 +339,25 @@ export const promise = async ({
       mergeLocaleActions.push(() => {
         const localeData: Record<string, unknown> = {}
 
+        // With `locale: 'all'`, siblingData holds a locale-keyed object (`{ en, es }`) rather than a single
+        // locale's value - take each submitted locale, falling back to the existing doc for ones not sent.
+        const submittedValue = siblingData[field.name!]
+        const isAllLocales =
+          req.locale === 'all' &&
+          submittedValue !== null &&
+          typeof submittedValue === 'object' &&
+          !Array.isArray(submittedValue)
+
         for (const locale of localization.localeCodes) {
-          const fieldValue =
-            locale === req.locale
-              ? siblingData[field.name!]
-              : siblingDocWithLocales?.[field.name!]?.[locale]
+          const existingValue = siblingDocWithLocales?.[field.name!]?.[locale]
+
+          const fieldValue = isAllLocales
+            ? locale in (submittedValue as Record<string, unknown>)
+              ? (submittedValue as Record<string, unknown>)[locale]
+              : existingValue
+            : locale === req.locale
+              ? submittedValue
+              : existingValue
 
           // update locale value if it's not undefined
           if (typeof fieldValue !== 'undefined') {
