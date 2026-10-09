@@ -31,6 +31,9 @@ export const i18n: Partial<GenericLanguages> = {
   fa: {
     label: 'نقل قول بلوکی',
   },
+  fi: {
+    label: 'Sitaatti',
+  },
   fr: {
     label: 'Citation',
   },

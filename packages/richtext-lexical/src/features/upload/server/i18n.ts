@@ -31,6 +31,9 @@ export const i18n: Partial<GenericLanguages> = {
   fa: {
     label: 'بارگذاری',
   },
+  fi: {
+    label: 'Tiedosto',
+  },
   fr: {
     label: 'Télécharger',
   },
