@@ -82,6 +82,7 @@ The tool loads your project via [ts-morph](https://ts-morph.com/), using your `t
 
 ## Transforms
 
+- `remove-strict-draft-types`: removes `typescript.strictDraftTypes` from inline config objects regardless of its value. Strict draft types are always enabled in v4. Preserves other TypeScript options; computed, indirect, or spread settings must be updated manually. Variables or imports previously used by the removed option are preserved and may become unused. Remove them manually, preserving any necessary initializer side effects.
 - `migrate-list-view-select-api`: Removes `admin.enableListViewSelectAPI` from Collection Configs. The List View's Select API is the default in v4.
 - `migrate-disabled-fields`: migrates `field.admin.disableListColumn`, `disableListFilter`, `disableGroupBy`, `disableBulkEdit` and their equivalents on `imageSize.admin` into the consolidated `disabled` object form.
 - `globals-components-edit`: Globals: rename `admin.components.elements` to `admin.components.edit` and hoist `Description` to top-level `admin.components.Description` to match Collection conventions.

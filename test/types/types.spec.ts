@@ -2270,9 +2270,84 @@ describe('Types testing', () => {
     })
   })
 
-  describe('strictDraftTypes flag', () => {
+  describe('strict draft types', () => {
     describe('query operations', () => {
-      test('draft find query returns optional required fields when flag is enabled', async () => {
+      test('should return optional required fields when finding a draft by ID', async () => {
+        const doc = await payload.findByID({ id: 'id', collection: 'draft-posts', draft: true })
+
+        expect(doc.title).type.toBe<string | undefined>()
+        expect(doc.description).type.toBe<string | undefined>()
+        expect(doc.id).type.toBe<string>()
+      })
+
+      test('should preserve selected fields and nullable draft results by ID', async () => {
+        const doc = await payload.findByID({
+          id: 'id',
+          collection: 'draft-posts',
+          disableErrors: true,
+          draft: true,
+          select: { title: true },
+        })
+
+        expect(doc).type.toBe<{ id: string; title?: string } | null>()
+      })
+
+      test('should keep published fields required when finding by ID', async () => {
+        const doc = await payload.findByID({ id: 'id', collection: 'draft-posts' })
+        const published = await payload.findByID({
+          id: 'id',
+          collection: 'draft-posts',
+          draft: false,
+        })
+
+        expect(doc.title).type.toBe<string>()
+        expect(published.title).type.toBe<string>()
+      })
+
+      test('should return optional required fields when reading a draft global', async () => {
+        const doc = await payload.findGlobal({ slug: 'settings', draft: true })
+
+        expect(doc.siteName).type.toBe<string | undefined>()
+        expect(doc.id).type.toBe<string>()
+      })
+
+      test('should keep published global fields required', async () => {
+        const doc = await payload.findGlobal({ slug: 'settings' })
+        const published = await payload.findGlobal({ slug: 'settings', draft: false })
+
+        expect(doc.siteName).type.toBe<string>()
+        expect(published.siteName).type.toBe<string>()
+      })
+
+      test('should preserve selected draft global fields', async () => {
+        const doc = await payload.findGlobal({
+          slug: 'settings',
+          draft: true,
+          select: { siteName: true },
+        })
+
+        expect(doc).type.toBe<{ id: string; siteName?: string }>()
+      })
+
+      test('should preserve selected published global fields', async () => {
+        const doc = await payload.findGlobal({
+          slug: 'settings',
+          select: { siteName: true },
+        })
+
+        expect(doc).type.toBe<{ id: string; siteName: string }>()
+      })
+
+      test('should allow incomplete results when the draft flag is a boolean', async () => {
+        const isDraft = true as boolean
+        const doc = await payload.findByID({ id: 'id', collection: 'draft-posts', draft: isDraft })
+        const global = await payload.findGlobal({ slug: 'settings', draft: isDraft })
+
+        expect(doc.title).type.toBe<string | undefined>()
+        expect(global.siteName).type.toBe<string | undefined>()
+      })
+
+      test('should return optional required fields when finding drafts', async () => {
         const result = await payload.find({
           collection: 'draft-posts',
           draft: true,
@@ -2281,7 +2356,7 @@ describe('Types testing', () => {
 
         const doc = result.docs[0]!
 
-        // With strictDraftTypes enabled, user-defined required fields should be optional in draft queries
+        // Drafts skip validation, so user-defined required fields may be absent.
         expect(doc.description).type.toBe<string | undefined>()
         expect(doc.title).type.toBe<string | undefined>()
 
@@ -2408,51 +2483,23 @@ describe('Types testing', () => {
         })
       })
 
-      test('create on pages (non-draft) collection with all fields should work', () => {
-        expect(payload.create).type.toBeCallableWith({
-          collection: 'pages',
-          data: {
-            title: 'Page Title',
-          },
-        })
-      })
-
-      test('create on pages (non-draft) with missing optional fields should work', () => {
-        expect(payload.create).type.toBeCallableWith({
-          collection: 'pages',
-          data: {
-            title: 'Page Title',
-            // category is optional relationship, can be omitted
-          },
-        })
-      })
-
       // Additional operations tests
-      test('find with draft:true on non-draft collection should error', () => {
+      test('should reject draft options for find on a non-draft collection', () => {
         expect(payload.find).type.not.toBeCallableWith({ collection: 'pages', draft: true })
-      })
-
-      test('find with draft:false on non-draft collection should error', () => {
         expect(payload.find).type.not.toBeCallableWith({ collection: 'pages', draft: false })
-      })
-
-      test('find with draft:true on draft-enabled collection should work', () => {
-        expect(payload.find).type.toBeCallableWith({ collection: 'draft-posts', draft: true })
       })
 
       test('find with draft:false on draft-enabled collection should work', () => {
         expect(payload.find).type.toBeCallableWith({ collection: 'draft-posts', draft: false })
       })
 
-      test('findByID with draft:true on non-draft collection should error', () => {
+      test('should reject draft options for findByID on a non-draft collection', () => {
         expect(payload.findByID).type.not.toBeCallableWith({
           collection: 'pages',
           id: 1,
           draft: true,
         })
-      })
 
-      test('findByID with draft:false on non-draft collection should error', () => {
         expect(payload.findByID).type.not.toBeCallableWith({
           collection: 'pages',
           id: 1,
@@ -2460,24 +2507,14 @@ describe('Types testing', () => {
         })
       })
 
-      test('findByID with draft:true on draft-enabled collection should work', () => {
-        expect(payload.findByID).type.toBeCallableWith({
-          collection: 'draft-posts',
-          id: 1,
-          draft: true,
-        })
-      })
-
-      test('update with draft:true on non-draft collection should error', () => {
+      test('should reject draft options for update on a non-draft collection', () => {
         expect(payload.update).type.not.toBeCallableWith({
           collection: 'pages',
           id: 1,
           data: { title: 'Test' },
           draft: true,
         })
-      })
 
-      test('update with draft:false on non-draft collection should error', () => {
         expect(payload.update).type.not.toBeCallableWith({
           collection: 'pages',
           id: 1,
@@ -2495,15 +2532,13 @@ describe('Types testing', () => {
         })
       })
 
-      test('duplicate with draft:true on non-draft collection should error', () => {
+      test('should reject draft options for duplicate on a non-draft collection', () => {
         expect(payload.duplicate).type.not.toBeCallableWith({
           collection: 'pages',
           id: 1,
           draft: true,
         })
-      })
 
-      test('duplicate with draft:false on non-draft collection should error', () => {
         expect(payload.duplicate).type.not.toBeCallableWith({
           collection: 'pages',
           id: 1,
@@ -2519,27 +2554,18 @@ describe('Types testing', () => {
         })
       })
 
-      test('global findOne with draft:true on non-draft global should error', () => {
+      test('should reject draft options for global findOne on a non-draft global', () => {
         expect(payload.findGlobal).type.not.toBeCallableWith({ slug: 'menu', draft: true })
-      })
-
-      test('global findOne with draft:false on non-draft global should error', () => {
         expect(payload.findGlobal).type.not.toBeCallableWith({ slug: 'menu', draft: false })
       })
 
-      test('global findOne with draft:true on draft-enabled global should work', () => {
-        expect(payload.findGlobal).type.toBeCallableWith({ slug: 'settings', draft: true })
-      })
-
-      test('global update with draft:true on non-draft global should error', () => {
+      test('should reject draft options for global update on a non-draft global', () => {
         expect(payload.updateGlobal).type.not.toBeCallableWith({
           slug: 'menu',
           data: {},
           draft: true,
         })
-      })
 
-      test('global update with draft:false on non-draft global should error', () => {
         expect(payload.updateGlobal).type.not.toBeCallableWith({
           slug: 'menu',
           data: {},
