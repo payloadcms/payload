@@ -1,16 +1,18 @@
 import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
+import type { Field, PayloadRequest, RichTextHooks } from 'payload'
 
 import {
   afterChangeTraverseFields,
   afterReadTraverseFields,
   beforeChangeTraverseFields,
   beforeValidateTraverseFields,
-  type RichTextHooks,
+  deepCopyObjectSimple,
+  traverseFields,
 } from 'payload'
 
 import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
 
-import { recurseNodeTree } from './utilities/recurseNodeTree.js'
+import { getNodeID, recurseNodeTree } from './utilities/recurseNodeTree.js'
 
 export const getLexicalHooks: (args: {
   editorConfig: SanitizedServerEditorConfig
@@ -508,30 +510,13 @@ export const getLexicalHooks: (args: {
          *
          */
 
-        /**
-         * flattenedNodes contains all nodes in the editor, in the order they appear in the editor. They will be used for the following hooks:
-         * - afterRead
-         *
-         * The other hooks require nodes to have IDs, which is why those are ran only from the nodeIDMap. They require IDs because they have both doc/siblingDoc and data/siblingData, and
-         * thus require a reliable way to match new node data to old node data. Given that node positions can change in between hooks, this is only reliably possible for nodes which are saved with
-         * an ID.
-         */
-        //const flattenedNodes: SerializedLexicalNode[] = []
-
-        /**
-         * Only nodes with id's (so, nodes with hooks added to them) will be added to the nodeIDMap. They will be used for the following hooks:
-         * - afterChange
-         * - beforeChange
-         * - beforeValidate
-         *
-         * Other hooks are handled by the flattenedNodes. All nodes in the nodeIDMap are part of flattenedNodes.
-         */
-
         const originalNodeIDMap: {
           [key: string]: SerializedLexicalNode
         } = {}
+        const originalFlattenedNodes: SerializedLexicalNode[] = []
 
         recurseNodeTree({
+          flattenedNodes: originalFlattenedNodes,
           nodeIDMap: originalNodeIDMap,
           nodes: (previousValue as SerializedEditorState)?.root?.children ?? [],
         })
@@ -550,23 +535,35 @@ export const getLexicalHooks: (args: {
         /**
          * Now that the maps for all hooks are set up, we can run the validate hook
          */
-        if (!editorConfig.features.nodeHooks?.beforeValidate?.size) {
+        if (
+          !editorConfig.features.nodeHooks?.beforeValidate?.size &&
+          !editorConfig.features.getSubFields?.size
+        ) {
           return value
         }
-        const nodeIDMap: {
-          [key: string]: SerializedLexicalNode
-        } = {}
+        const flattenedNodes: SerializedLexicalNode[] = []
         recurseNodeTree({
-          //flattenedNodes,
-          nodeIDMap,
+          flattenedNodes,
           nodes: (value as SerializedEditorState)?.root?.children ?? [],
         })
 
-        // eslint-disable-next-line prefer-const
-        for (let [id, node] of Object.entries(nodeIDMap)) {
-          const beforeValidateHooks = editorConfig.features.nodeHooks.beforeValidate
+        for (const [nodeIndex, initialNode] of flattenedNodes.entries()) {
+          let node = initialNode
+          const id = getNodeID({ node })
+          const originalNodeAtIndex = originalFlattenedNodes[nodeIndex]
+          const originalNodeForSubFields =
+            originalNodeAtIndex?.type === node.type ? originalNodeAtIndex : node
+          const originalSubFieldDataFn = editorConfig.features.getSubFieldsData?.get(
+            originalNodeForSubFields.type,
+          )
+          const originalSubFieldData = originalSubFieldDataFn
+            ? deepCopyObjectSimple(
+                originalSubFieldDataFn({ node: originalNodeForSubFields, req }) ?? {},
+              )
+            : {}
+          const beforeValidateHooks = editorConfig.features.nodeHooks?.beforeValidate
           const beforeValidateHooksForNode = beforeValidateHooks?.get(node.type)
-          if (beforeValidateHooksForNode) {
+          if (id && beforeValidateHooksForNode) {
             for (const hook of beforeValidateHooksForNode) {
               if (!originalNodeIDMap[id]) {
                 console.warn(
@@ -597,10 +594,15 @@ export const getLexicalHooks: (args: {
           if (subFieldFn && subFieldDataFn) {
             const subFields = subFieldFn({ node, req })
             const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
+            const nodeSiblingDoc =
+              originalNodeForSubFields.type === node.type
+                ? originalSubFieldData
+                : deepCopyObjectSimple(nodeSiblingData)
+            const shouldTraverseSubFields =
+              Boolean(id && editorConfig.features.nodeHooks?.beforeValidate?.size) ||
+              hasBeforeValidateFieldHooks({ fields: subFields, req })
 
-            const nodeSiblingDoc = subFieldDataFn({ node: originalNodeIDMap[id]!, req }) ?? {}
-
-            if (subFields?.length) {
+            if (subFields?.length && shouldTraverseSubFields) {
               await beforeValidateTraverseFields({
                 id,
                 blockData: nodeSiblingData,
@@ -628,4 +630,30 @@ export const getLexicalHooks: (args: {
       },
     ],
   }
+}
+
+const hasBeforeValidateFieldHooks = ({
+  fields,
+  req,
+}: {
+  fields: Field[] | null | undefined
+  req: PayloadRequest
+}): boolean => {
+  if (!fields?.length) {
+    return false
+  }
+
+  let hasBeforeValidateHooks = false
+
+  traverseFields({
+    callback: ({ field }) => {
+      if ('hooks' in field && field.hooks?.beforeValidate?.length) {
+        hasBeforeValidateHooks = true
+      }
+    },
+    config: req.payload.config,
+    fields,
+  })
+
+  return hasBeforeValidateHooks
 }

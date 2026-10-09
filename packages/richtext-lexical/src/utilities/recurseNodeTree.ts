@@ -1,5 +1,21 @@
 import type { SerializedLexicalNode } from 'lexical'
 
+export const getNodeID = ({ node }: { node: SerializedLexicalNode }): string | undefined => {
+  if (node && 'id' in node && node.id) {
+    return node.id as string
+  }
+
+  if (
+    'fields' in node &&
+    typeof node.fields === 'object' &&
+    node.fields &&
+    'id' in node.fields &&
+    node.fields.id
+  ) {
+    return node.fields.id as string
+  }
+}
+
 // Initialize both flattenedNodes and nodeIDMap
 export const recurseNodeTree = ({
   flattenedNodes,
@@ -21,16 +37,10 @@ export const recurseNodeTree = ({
       flattenedNodes.push(node)
     }
     if (nodeIDMap) {
-      if (node && 'id' in node && node.id) {
-        nodeIDMap[node.id as string] = node
-      } else if (
-        'fields' in node &&
-        typeof node.fields === 'object' &&
-        node.fields &&
-        'id' in node.fields &&
-        node?.fields?.id
-      ) {
-        nodeIDMap[node.fields.id as string] = node
+      const nodeID = getNodeID({ node })
+
+      if (nodeID) {
+        nodeIDMap[nodeID] = node
       }
     }
 
