@@ -307,7 +307,7 @@ describe('initTanStack', () => {
       expect(mocks.resolvePackageVersion).toHaveBeenCalledWith({
         debug: undefined,
         packageName: 'payload',
-        versionOrTag: 'canary',
+        versionOrTag: 'beta',
       })
       expect(mocks.ensurePnpmBuildApprovals).not.toHaveBeenCalled()
       expect(mocks.installPackages).not.toHaveBeenCalled()

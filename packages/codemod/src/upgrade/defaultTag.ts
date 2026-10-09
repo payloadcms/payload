@@ -4,14 +4,14 @@ import { fileURLToPath } from 'node:url'
 import semver from 'semver'
 
 /** Dist-tag used when neither --tag nor the running version implies one. */
-const FALLBACK_TAG = 'canary'
+const FALLBACK_TAG = 'beta'
 
 /**
  * Default Payload dist-tag when the caller did not pass --tag. Every package in
  * the monorepo (this one included) is versioned and published in lockstep, so
  * the dist-tag the codemod was invoked under (`npx @payloadcms/codemod@beta`)
  * surfaces as its own version's prerelease id. Follow that train; fall back to
- * canary for stable or local dev builds that carry no prerelease id.
+ * beta for stable or local dev builds that carry no prerelease id.
  */
 export function resolveDefaultTag(version: string | undefined = readOwnVersion()): string {
   const id = version ? semver.prerelease(version)?.[0] : undefined

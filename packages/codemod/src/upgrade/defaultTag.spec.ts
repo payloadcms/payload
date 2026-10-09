@@ -8,9 +8,9 @@ describe('resolveDefaultTag', () => {
     expect(resolveDefaultTag('4.0.0-canary.20')).toBe('canary')
   })
 
-  it('falls back to canary for stable or unparseable versions', () => {
-    expect(resolveDefaultTag('4.1.0')).toBe('canary')
-    expect(resolveDefaultTag('not-a-version')).toBe('canary')
-    expect(resolveDefaultTag(undefined)).toBe('canary')
+  it('falls back to beta for stable or unparseable versions', () => {
+    expect(resolveDefaultTag('4.1.0')).toBe('beta')
+    expect(resolveDefaultTag('not-a-version')).toBe('beta')
+    expect(resolveDefaultTag(undefined)).toBe('beta')
   })
 })
