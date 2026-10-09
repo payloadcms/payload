@@ -119,4 +119,58 @@ describe('builds sort params', () => {
 
     expect(result).toStrictEqual({ order: 'asc' })
   })
+
+  it('adds a fallback on an ascending unique field when querying versions', () => {
+    const result = buildSortParam({
+      config,
+      parentIsLocalized: false,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'order',
+          type: 'number',
+          unique: true,
+        },
+      ],
+      locale: 'en',
+      sort: 'order',
+      timestamps: true,
+      versions: true,
+      adapter: {
+        disableFallbackSort: false,
+      } as MongooseAdapter,
+    })
+
+    expect(result).toStrictEqual({ order: 'asc', createdAt: 'desc' })
+  })
+
+  it('adds a fallback on a descending unique field when querying versions', () => {
+    const result = buildSortParam({
+      config,
+      parentIsLocalized: false,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'order',
+          type: 'number',
+          unique: true,
+        },
+      ],
+      locale: 'en',
+      sort: '-order',
+      timestamps: true,
+      versions: true,
+      adapter: {
+        disableFallbackSort: false,
+      } as MongooseAdapter,
+    })
+
+    expect(result).toStrictEqual({ order: 'desc', createdAt: 'desc' })
+  })
 })
