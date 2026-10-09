@@ -609,6 +609,13 @@ export default buildConfigWithDefaults({
           localized: true,
           type: 'text',
         },
+        {
+          name: 'localizedTextWithLength',
+          type: 'text',
+          localized: true,
+          maxLength: 20,
+          minLength: 5,
+        },
       ],
       slug: 'global-text',
     },
