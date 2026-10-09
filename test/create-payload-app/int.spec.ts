@@ -166,6 +166,7 @@ test.suite('create-payload-app', {}, () => {
       })
 
       assertAndExpectToBeTrue(result.success) // Narrowing for TS
+      expectLocalPayloadPackages({ projectDir })
       expect(result.nextAppDir).toEqual(
         path.resolve(projectDir, result.isSrcDir ? 'src/app' : 'app'),
       )
@@ -238,6 +239,7 @@ test.suite('create-payload-app', {}, () => {
       })
 
       assertAndExpectToBeTrue(result.success)
+      expectLocalPayloadPackages({ projectDir })
 
       // Configure payload config to use postgres (mimics main.ts flow)
       const { configurePayloadConfig: configureFromLib } = await import(
@@ -306,6 +308,7 @@ test.suite('create-payload-app', {}, () => {
       })
 
       assertAndExpectToBeTrue(result.success)
+      expectLocalPayloadPackages({ projectDir })
       await configurePayloadConfig({
         dbType: 'mongodb',
         projectDirOrConfigPath: { payloadConfigPath: result.payloadConfigPath },
@@ -365,6 +368,7 @@ test.suite('create-payload-app', {}, () => {
       })
 
       assertAndExpectToBeTrue(result.success)
+      expectLocalPayloadPackages({ projectDir })
       await configurePayloadConfig({
         dbType: 'mongodb',
         projectDirOrConfigPath: { payloadConfigPath: result.payloadConfigPath },
@@ -472,6 +476,7 @@ test.suite('create-payload-app', {}, () => {
       })
 
       assertAndExpectToBeTrue(mongoResult.success)
+      expectLocalPayloadPackages({ projectDir })
 
       // Verify mongodb is installed
       const packageJson = fse.readJsonSync(path.resolve(projectDir, 'package.json')) as {
@@ -563,6 +568,16 @@ function useLocalPayloadPackages({ projectDir }: { projectDir: string }): void {
     path.join(projectDir, 'pnpm-workspace.yaml'),
     `\noverrides:\n${overrideLines.join('\n')}\n`,
   )
+}
+
+/** Fails if the lockfile resolves any Payload package, direct or transitive, from the registry. */
+function expectLocalPayloadPackages({ projectDir }: { projectDir: string }): void {
+  const lockfile = fs.readFileSync(path.join(projectDir, 'pnpm-lock.yaml'), 'utf8')
+  const registryPayloadPackages = lockfile.match(
+    /^ {2}'?(?:payload|@payloadcms\/[\w-]+)@(?!file:)[^:\n]+/gm,
+  )
+
+  expect(registryPayloadPackages).toBeNull()
 }
 
 function expectRequiredTanStackFiles({ projectDir }: { projectDir: string }): void {
