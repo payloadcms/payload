@@ -23,7 +23,7 @@ export const deleteExistingRowsByPath = async ({
   rows,
   tableName,
 }: Args): Promise<void> => {
-  const localizedPathsToDelete = new Set<string>()
+  const localizedPathsToDelete = new Map<string, Set<string>>()
   const pathsToDelete = new Set<string>()
   const table = adapter.tables[tableName]
 
@@ -32,7 +32,10 @@ export const deleteExistingRowsByPath = async ({
     const localeData = row[localeColumnName]
     if (typeof path === 'string') {
       if (typeof localeData === 'string') {
-        localizedPathsToDelete.add(path)
+        const localePaths = localizedPathsToDelete.get(localeData) ?? new Set<string>()
+
+        localePaths.add(path)
+        localizedPathsToDelete.set(localeData, localePaths)
       } else {
         pathsToDelete.add(path)
       }
@@ -40,17 +43,21 @@ export const deleteExistingRowsByPath = async ({
   })
 
   if (localizedPathsToDelete.size > 0) {
-    const whereConstraints = [eq(table[parentColumnName], parentID)]
+    for (const [locale, localePaths] of localizedPathsToDelete) {
+      const whereConstraints = [eq(table[parentColumnName], parentID)]
 
-    if (pathColumnName) {
-      whereConstraints.push(inArray(table[pathColumnName], Array.from(localizedPathsToDelete)))
+      if (pathColumnName) {
+        whereConstraints.push(inArray(table[pathColumnName], Array.from(localePaths)))
+      }
+
+      whereConstraints.push(eq(table[localeColumnName], locale))
+
+      await adapter.deleteWhere({
+        db,
+        tableName,
+        where: and(...whereConstraints),
+      })
     }
-
-    await adapter.deleteWhere({
-      db,
-      tableName,
-      where: and(...whereConstraints),
-    })
   }
 
   if (pathsToDelete.size > 0) {

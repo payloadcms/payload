@@ -1,0 +1,79 @@
+@layer payload-default {
+  /* The header band supplies the separation the list used to get from a margin
+     on the heading it replaced. */
+  .branch-changes {
+    padding-block-start: var(--spacer-3);
+  }
+
+  /* Matches `doc-controls`, the bar directly above it, so the two read as one
+     stack of header bands rather than a band and a heading. */
+  .branch-changes__controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacer-2);
+    width: 100%;
+    padding: var(--spacer-2-5) var(--gutter-h);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+    background-color: var(--color-bg);
+  }
+
+  .branch-changes__title {
+    margin: 0;
+    font-family: var(--text-heading-medium-font-family);
+    font-size: var(--text-heading-medium-font-size);
+    font-weight: var(--text-heading-medium-font-weight);
+    line-height: var(--text-heading-medium-line-height);
+    letter-spacing: var(--text-heading-medium-letter-spacing);
+  }
+
+  .branch-changes__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+    flex-shrink: 0;
+  }
+
+  /* Separated by space rather than a rule: the section headings already divide them,
+     and a border here would compete with the bordered rows inside each. */
+  .branch-changes__section + .branch-changes__section {
+    margin-block-start: var(--spacer-6);
+  }
+
+  .branch-changes__section-title {
+    margin-block: 0 var(--spacer-2);
+    font-family: var(--text-body-large-strong-font-family);
+    font-size: var(--text-body-large-font-size);
+    font-weight: var(--text-body-large-strong-font-weight);
+  }
+
+  .branch-changes__history-pages {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacer-3);
+    margin-block-start: var(--spacer-4);
+  }
+
+  .branch-changes__history-page[aria-disabled='true'] {
+    pointer-events: none;
+    color: var(--color-text-disabled);
+  }
+
+  .branch-changes__history-position,
+  .branch-changes__since,
+  .branch-changes__empty,
+  .branch-changes__closed,
+  .branch-changes__untouched-note {
+    color: var(--color-text-secondary);
+  }
+
+  .branch-changes__since,
+  .branch-changes__untouched-note {
+    margin-block: 0 var(--spacer-2);
+  }
+
+  .branch-changes__closed {
+    margin-block: 0 var(--spacer-3);
+  }
+}

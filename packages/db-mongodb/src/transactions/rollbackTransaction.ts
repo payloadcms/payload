@@ -14,24 +14,25 @@ export const rollbackTransaction: RollbackTransaction = async function rollbackT
     return
   }
 
-  // when session exists but is not inTransaction something unexpected is happening to the session
-  if (!this.sessions[transactionID]?.inTransaction()) {
-    this.payload.logger.warn('rollbackTransaction called when no transaction exists')
-    delete this.sessions[transactionID]
-    return
-  }
-
   const session = this.sessions[transactionID]
 
   // Delete from registry FIRST to prevent race conditions
   // This ensures other operations can't retrieve this session while we're aborting it
   delete this.sessions[transactionID]
 
-  // the first call for rollback should be aborted and deleted causing any other operations with the same transaction to fail
+  if (session.inTransaction()) {
+    try {
+      await session.abortTransaction()
+    } catch (_error) {
+      // ignore the error as it is likely a race condition from multiple errors
+    }
+  } else {
+    this.payload.logger.warn('rollbackTransaction called when no transaction exists')
+  }
+
   try {
-    await session.abortTransaction()
     await session.endSession()
   } catch (_error) {
-    // ignore the error as it is likely a race condition from multiple errors
+    // ending a session is best effort after its transaction has failed or been aborted
   }
 }

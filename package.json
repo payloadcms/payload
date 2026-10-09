@@ -8,6 +8,7 @@
     "test/*"
   ],
   "scripts": {
+    "benchmark:content-branching": "cross-env BRANCHING_MERGE_BENCHMARK=true NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true vitest run --project int --no-cache test/branching/merge-benchmark.int.spec.ts",
     "bf": "pnpm run build:force",
     "build": "pnpm run build:core",
     "build:admin-bar": "turbo build --filter \"@payloadcms/admin-bar\"",

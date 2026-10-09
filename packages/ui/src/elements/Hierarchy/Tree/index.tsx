@@ -9,6 +9,7 @@ import type { CachedChildren, HierarchyTreeProps, TreeDocument } from './types.j
 
 import { PlusIcon } from '../../../icons/Plus/index.js'
 import { useAuth } from '../../../providers/Auth/index.js'
+import { useBranchParam } from '../../../providers/Branch/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useHierarchy } from '../../../providers/Hierarchy/index.js'
 import { useRouter } from '../../../providers/RouterAdapter/index.js'
@@ -20,7 +21,7 @@ import { DocumentDrawer } from '../../DocumentDrawer/index.js'
 import { LoadMore } from './LoadMore/index.js'
 import { TreeFocusProvider, useFocusableItem, useTreeFocus } from './TreeFocusContext.js'
 import { TreeNode } from './TreeNode/index.js'
-import { useChildren } from './useChildren.js'
+import { getBranchAwareChildrenCacheKey, useChildren } from './useChildren.js'
 import './index.css'
 
 const baseClass = 'tree'
@@ -55,6 +56,7 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
   const router = useRouter()
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
+  const branch = useBranchParam()
   const { getEntityConfig } = useConfig()
   const { closeModal, openModal } = useModal()
   const createDrawerSlug = `tree-create-${useId()}`
@@ -86,10 +88,18 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
   )
 
   const contextData = getTreeDataForCollection(collectionSlug)
+  const activeBranch = branch ?? null
+  const matchingContextData = (contextData?.branch ?? null) === activeBranch ? contextData : null
+  const matchingInitialDataProp =
+    (initialDataProp?.branch ?? null) === activeBranch ? initialDataProp : null
   const baseFilterKey = baseFilter ? JSON.stringify(baseFilter) : ''
-  const contextBaseFilterKey = contextData?.baseFilter ? JSON.stringify(contextData.baseFilter) : ''
+  const contextBaseFilterKey = matchingContextData?.baseFilter
+    ? JSON.stringify(matchingContextData.baseFilter)
+    : ''
   const initialData =
-    baseFilterKey === contextBaseFilterKey ? (contextData ?? initialDataProp) : initialDataProp
+    baseFilterKey === contextBaseFilterKey
+      ? (matchingContextData ?? matchingInitialDataProp)
+      : matchingInitialDataProp
   // Tracks whether context has been seeded at least once since the last navigation.
   // Resets when initialExpandedNodesProp changes (new array reference = navigation).
   // Allows the memo to distinguish "not yet seeded" (fall back to prop) from
@@ -149,6 +159,12 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
   // Pre-populate cache with initialData synchronously before first render
   const childrenCache = useRef<Map<string, CachedChildren>>(new Map())
 
+  const previousBranchRef = useRef(branch)
+  if (previousBranchRef.current !== branch) {
+    previousBranchRef.current = branch
+    childrenCache.current.clear()
+  }
+
   const prevBaseFilterKeyRef = useRef(baseFilterKey)
   if (prevBaseFilterKeyRef.current !== baseFilterKey) {
     prevBaseFilterKeyRef.current = baseFilterKey
@@ -174,7 +190,10 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
       ? filterByCollections.slice().sort().join(',')
       : ''
     for (const [parentKey, docs] of docsByParent) {
-      const cacheKey = `${collectionSlug}-${parentKey}-${filterKey}-${baseFilterKey}`
+      const cacheKey = getBranchAwareChildrenCacheKey({
+        branch,
+        cacheKey: `${collectionSlug}-${parentKey}-${filterKey}-${baseFilterKey}`,
+      })
       const parentMeta = initialData.loadedParents[parentKey]
 
       if (parentMeta) {
@@ -194,7 +213,15 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
         })
       }
     }
-  }, [initialData, filterByCollections, parentFieldName, collectionSlug, treeLimit, baseFilterKey])
+  }, [
+    baseFilterKey,
+    branch,
+    collectionSlug,
+    filterByCollections,
+    initialData,
+    parentFieldName,
+    treeLimit,
+  ])
 
   const treeRef = useRef<HTMLDivElement>(null)
   const allOptionRef = useRef<HTMLDivElement>(null)

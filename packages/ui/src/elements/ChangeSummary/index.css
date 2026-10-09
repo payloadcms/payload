@@ -1,0 +1,18 @@
+@layer payload-default {
+  .change-summary {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacer-1);
+  }
+
+  .change-summary__operations {
+    font-family: var(--text-body-small-font-family);
+    font-size: var(--text-body-small-font-size);
+    color: var(--color-text-secondary);
+  }
+
+  .change-summary__view {
+    color: var(--color-text-brand);
+  }
+}

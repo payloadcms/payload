@@ -1,3 +1,4 @@
+import type { BranchDeleteOutcome } from '../../branching/tombstone.js'
 import type { CollectionSlug, FindOptions } from '../../index.js'
 import type {
   PayloadRequest,
@@ -5,18 +6,39 @@ import type {
   SelectType,
   TransformCollectionWithSelect,
 } from '../../types/index.js'
+import type { DeferredCleanupScope } from '../../utilities/transactionCallbacks.js'
 import type { Collection, DataFromCollectionSlug } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
+import {
+  findCompetingShadow,
+  isConcurrentShadowOperationError,
+  retryConcurrentShadowOperation,
+} from '../../branching/createShadowRow.js'
+import { assertBranchMergeValidationWriteAllowed } from '../../branching/mergeWriteGuard.js'
+import {
+  refreshBranchState,
+  resetBranchState,
+  resolveBranch,
+} from '../../branching/resolveBranch.js'
+import {
+  assertBranchCreatedDeleteUnreferenced,
+  assertBranchDeleteCanUseCallerTransaction,
+  requireBranchDeleteOutcome,
+  setBranchDeleteOperation,
+  setConcurrentBranchDelete,
+  willBranchAbsorbDelete,
+} from '../../branching/tombstone.js'
+import { branchField, MAIN_BRANCH } from '../../branching/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import {
+  collectDocumentDeleteFileCandidates,
   collectStoredFiles,
-  collectVersionFiles,
   scheduleUnreferencedFileCleanup,
 } from '../../uploads/fileVersioning/cleanup.js'
 import {
@@ -33,10 +55,22 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import {
+  beginDeferredCleanupScope,
+  clearDeferredCleanupScope,
+  flushDeferredCleanupScopeAfterOperation,
+  hasActiveDeferredCleanupScope,
+} from '../../utilities/transactionCallbacks.js'
+import { markTransactionWrite } from '../../utilities/transactionMutationTracker.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
+import {
+  commitOperationRetryRequestContext,
+  createOperationRetryRequest,
+  shouldRetryOperationRequest,
+} from './utilities/createOperationRetryRequest.js'
 
 export type Arguments<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   collection: Collection
@@ -54,9 +88,113 @@ export type Arguments<TSlug extends CollectionSlug, TSelect extends SelectType> 
 export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect extends SelectType>(
   incomingArgs: Arguments<TSlug, TSelect>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
+  const hasCallerTransaction = Boolean(await incomingArgs.req.transactionID)
+  const branch = resolveBranch(incomingArgs.req)
+  let didOwnAttemptTransaction = false
+  let didReachFinalCommit = false
+  let isRetrySafe = false
+  let concurrentDeleteRetryError: unknown
+  let concurrentDeleteWinnerID: number | string | undefined
+
+  return retryConcurrentShadowOperation({
+    onRetry: async ({ error }) => {
+      if (!isConcurrentShadowOperationError(error) || branch === MAIN_BRANCH) {
+        return
+      }
+
+      concurrentDeleteWinnerID = undefined
+      concurrentDeleteRetryError = undefined
+
+      const winner = await findCompetingShadow({
+        branch,
+        collectionSlug: incomingArgs.collection.config.slug,
+        docID: incomingArgs.id,
+        operation: 'delete',
+        req: incomingArgs.req,
+      })
+
+      const winnerID = winner?.id
+
+      if (typeof winnerID === 'number' || typeof winnerID === 'string') {
+        concurrentDeleteRetryError = error
+        concurrentDeleteWinnerID = winnerID
+      }
+    },
+    operation: async () => {
+      didOwnAttemptTransaction = false
+      didReachFinalCommit = false
+      isRetrySafe = false
+
+      const shouldReuseParentRequest =
+        incomingArgs.disableTransaction && hasActiveDeferredCleanupScope({ req: incomingArgs.req })
+      const retryRequest =
+        hasCallerTransaction || shouldReuseParentRequest
+          ? undefined
+          : await createOperationRetryRequest({ req: incomingArgs.req })
+
+      isRetrySafe = retryRequest?.isRetrySafe ?? false
+      const attemptArgs = retryRequest
+        ? {
+            ...incomingArgs,
+            req: retryRequest.req,
+          }
+        : incomingArgs
+
+      const result = await deleteByIDOperationAttempt({
+        concurrentDeleteRetryError,
+        concurrentDeleteWinnerID,
+        hasCallerTransaction,
+        incomingArgs: attemptArgs,
+        reportFinalCommit: () => {
+          didReachFinalCommit = true
+        },
+        reportTransactionOwnership: ({ isOperationTransaction }) => {
+          didOwnAttemptTransaction = isOperationTransaction
+        },
+      })
+
+      if (retryRequest?.isRetrySafe) {
+        commitOperationRetryRequestContext({ req: attemptArgs.req })
+      }
+
+      return result
+    },
+    shouldRetry: ({ error }) =>
+      shouldRetryOperationRequest({
+        didOwnAttemptTransaction,
+        didReachFinalCommit,
+        error,
+        hasCallerTransaction,
+        isRetrySafe,
+      }),
+  })
+}
+
+const deleteByIDOperationAttempt = async <
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+>({
+  concurrentDeleteRetryError,
+  concurrentDeleteWinnerID,
+  hasCallerTransaction,
+  incomingArgs,
+  reportFinalCommit,
+  reportTransactionOwnership,
+}: {
+  concurrentDeleteRetryError?: unknown
+  concurrentDeleteWinnerID?: number | string
+  hasCallerTransaction: boolean
+  incomingArgs: Arguments<TSlug, TSelect>
+  reportFinalCommit: () => void
+  reportTransactionOwnership: (args: { isOperationTransaction: boolean }) => void
+}): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
+  let cleanupScope: DeferredCleanupScope | null = null
+  let shouldCommit = false
   const hasFileOperationScope = Boolean(args.collection.config.upload)
   let managedDeleteIdentity: string | undefined
+
+  assertBranchMergeValidationWriteAllowed({ req: args.req })
 
   if (hasFileOperationScope) {
     beginFileOperationScope({ req: args.req })
@@ -65,7 +203,9 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
   assertNoValidationWrite(args.req)
 
   try {
-    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    reportTransactionOwnership({ isOperationTransaction: shouldCommit })
+    cleanupScope = await beginDeferredCleanupScope({ req: args.req })
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -96,6 +236,11 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       showHiddenFields,
       trash = false,
     } = args
+    const isDeletingFromBranch =
+      Boolean(
+        config.branching?.enabled &&
+          config.branching.branchableCollections.has(collectionConfig.slug),
+      ) && resolveBranch(req) !== MAIN_BRANCH
 
     // /////////////////////////////////////
     // Access
@@ -122,12 +267,22 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       where,
     })
 
-    const docToDelete = await req.payload.db.findOne({
+    let docToDelete = await req.payload.db.findOne({
       collection: collectionConfig.slug,
       locale: req.locale!,
       req,
       where,
     })
+
+    if (!docToDelete && concurrentDeleteWinnerID !== undefined) {
+      docToDelete = await req.payload.db.findOne({
+        branch: false,
+        collection: collectionConfig.slug,
+        locale: req.locale!,
+        req,
+        where,
+      })
+    }
 
     if (!docToDelete && !hasWhereAccess) {
       throw new NotFound(req.t)
@@ -135,6 +290,30 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     if (!docToDelete && hasWhereAccess) {
       throw new Forbidden(req.t)
     }
+
+    const documentToDelete = docToDelete as Record<string, unknown>
+
+    const branch = resolveBranch(req)
+    const isBranchingDocument =
+      branch !== MAIN_BRANCH &&
+      req.payload.config.branching?.branchableCollections.has(collectionConfig.slug)
+    const isDeletingUntouchedBranchDocument =
+      isBranchingDocument && documentToDelete[branchField] !== branch
+
+    if (hasCallerTransaction && isBranchingDocument) {
+      await assertBranchDeleteCanUseCallerTransaction({
+        branch,
+        collectionSlug: collectionConfig.slug,
+        docID: id,
+        req,
+      })
+    }
+
+    await assertBranchCreatedDeleteUnreferenced({
+      collectionSlug: collectionConfig.slug,
+      doc: documentToDelete,
+      req,
+    })
 
     // /////////////////////////////////////
     // beforeDelete - Collection
@@ -151,6 +330,12 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       }
     }
 
+    await assertBranchCreatedDeleteUnreferenced({
+      collectionSlug: collectionConfig.slug,
+      doc: documentToDelete,
+      req,
+    })
+
     // /////////////////////////////////////
     // Handle potentially locked documents
     // /////////////////////////////////////
@@ -163,13 +348,23 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       req,
     })
 
-    const deletedFiles = collectionConfig.upload
-      ? [
-          ...(await collectStoredFiles({ collection: collectionConfig, doc: docToDelete!, req })),
-          ...(collectionConfig.versions
-            ? await collectVersionFiles({ collection: collectionConfig, parentID: id, req })
-            : []),
-        ]
+    // A delete on a branch becomes a tombstone, and main keeps its row — so the
+    // cascades below, which all address the canonical document, would strip data
+    // main still depends on. The version cascade is scoped to the branch rather
+    // than skipped, since a branch's own version rows do go with it.
+    const absorbedByBranch = await willBranchAbsorbDelete({
+      collectionSlug: collectionConfig.slug,
+      doc: documentToDelete,
+      req,
+    })
+
+    let deletedFiles = collectionConfig.upload
+      ? await collectDocumentDeleteFileCandidates({
+          collection: collectionConfig,
+          doc: docToDelete!,
+          parentID: id,
+          req,
+        })
       : []
 
     if (deletedFiles.length) {
@@ -180,13 +375,15 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       managedDeletedUploads.add(managedDeleteIdentity)
     }
 
-    await deleteAssociatedFiles({
-      collectionConfig,
-      config,
-      doc: docToDelete!,
-      overrideDelete: true,
-      req,
-    })
+    if (!isBranchingDocument && !absorbedByBranch) {
+      await deleteAssociatedFiles({
+        collectionConfig,
+        config,
+        doc: documentToDelete,
+        overrideDelete: true,
+        req,
+      })
+    }
 
     // /////////////////////////////////////
     // Delete versions
@@ -204,7 +401,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // /////////////////////////////////////
     // Delete scheduled posts
     // /////////////////////////////////////
-    if (hasScheduledPublishEnabled(collectionConfig)) {
+    if (!isBranchingDocument && hasScheduledPublishEnabled(collectionConfig) && !absorbedByBranch) {
       await deleteScheduledPublishJobs({
         id,
         slug: collectionConfig.slug,
@@ -227,12 +424,74 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // Delete document
     // /////////////////////////////////////
 
+    if (concurrentDeleteWinnerID !== undefined && concurrentDeleteRetryError !== undefined) {
+      setConcurrentBranchDelete({
+        branch,
+        collectionSlug: collectionConfig.slug,
+        doc: documentToDelete,
+        docID: id,
+        req,
+        retryError: concurrentDeleteRetryError,
+        winnerID: concurrentDeleteWinnerID,
+      })
+    }
+    let branchDeleteOutcome: BranchDeleteOutcome | undefined
+    if (isBranchingDocument) {
+      setBranchDeleteOperation({
+        branch,
+        collectionSlug: collectionConfig.slug,
+        docID: id,
+        isTombstoneExpected: absorbedByBranch,
+        onResolved: (outcome) => {
+          branchDeleteOutcome = outcome
+        },
+        req,
+        useAmbientTransaction: shouldCommit,
+      })
+    }
+
     let result: DataFromCollectionSlug<TSlug> = await req.payload.db.deleteOne({
       collection: collectionConfig.slug,
       req,
       select,
       where: { id: { equals: id } },
     })
+    markTransactionWrite({ req })
+
+    const finalBranchDeleteOutcome = isBranchingDocument
+      ? requireBranchDeleteOutcome({ outcome: branchDeleteOutcome })
+      : ({ doc: documentToDelete, tombstoned: false } as const)
+
+    if (
+      collectionConfig.upload &&
+      finalBranchDeleteOutcome.tombstoned &&
+      isDeletingUntouchedBranchDocument
+    ) {
+      deletedFiles = await collectStoredFiles({
+        collection: collectionConfig,
+        doc: finalBranchDeleteOutcome.doc,
+        req,
+      })
+    }
+
+    if (isBranchingDocument && !finalBranchDeleteOutcome.tombstoned) {
+      await deleteAssociatedFiles({
+        collectionConfig,
+        config,
+        doc: finalBranchDeleteOutcome.doc,
+        overrideDelete: true,
+        req,
+      })
+
+      if (hasScheduledPublishEnabled(collectionConfig)) {
+        await deleteScheduledPublishJobs({
+          id,
+          slug: collectionConfig.slug,
+          payload,
+          req,
+        })
+      }
+    }
 
     if (collectionConfig.upload) {
       await scheduleUnreferencedFileCleanup({
@@ -254,12 +513,14 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // Delete Preferences
     // /////////////////////////////////////
 
-    await deleteUserPreferences({
-      collectionConfig,
-      ids: [id],
-      payload,
-      req,
-    })
+    if (!finalBranchDeleteOutcome.tombstoned) {
+      await deleteUserPreferences({
+        collectionConfig,
+        ids: [id],
+        payload,
+        req,
+      })
+    }
 
     // /////////////////////////////////////
     // afterRead - Fields
@@ -331,7 +592,11 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // 8. Return results
     // /////////////////////////////////////
 
+    if (cleanupScope) {
+      await flushDeferredCleanupScopeAfterOperation({ req, scope: cleanupScope })
+    }
     if (shouldCommit) {
+      reportFinalCommit()
       await commitTransaction(req)
     }
 
@@ -339,9 +604,21 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       await completeFileOperationScope({ req })
     }
 
+    if (isDeletingFromBranch) {
+      refreshBranchState(req)
+    }
+
     return result as TransformCollectionWithSelect<TSlug, TSelect>
   } catch (error: unknown) {
-    await killTransaction(args.req)
+    if (cleanupScope) {
+      clearDeferredCleanupScope({ req: args.req, scope: cleanupScope })
+    }
+
+    if (shouldCommit) {
+      await killTransaction(args.req)
+    }
+    resetBranchState(args.req)
+
     if (hasFileOperationScope) {
       await abortFileOperationScope({ req: args.req })
     }

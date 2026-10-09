@@ -8,6 +8,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const mkdirMock = vi.fn().mockResolvedValue(undefined)
 const openAsBlobMock = vi.fn().mockResolvedValue(new Blob(['disk-backed-contents']))
 const readFileMock = vi.fn().mockResolvedValue(Buffer.from('unused'))
+const statMock = vi
+  .fn()
+  .mockRejectedValue(Object.assign(new Error('File not found'), { code: 'ENOENT' }))
 const writeFileMock = vi.fn().mockResolvedValue(undefined)
 
 vi.mock('node:fs', async (importOriginal) => ({
@@ -19,6 +22,7 @@ vi.mock('fs/promises', () => ({
   default: {
     mkdir: mkdirMock,
     readFile: readFileMock,
+    stat: statMock,
     writeFile: writeFileMock,
   },
 }))

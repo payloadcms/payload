@@ -26,8 +26,8 @@ export const NavContext = React.createContext<NavContextType>({
 export const useNav = () => React.use(NavContext)
 
 const getNavPreference = async (getPreference): Promise<boolean> => {
-  const navPrefs = await getPreference(PREFERENCE_KEYS.NAV)
-  const preferredState = navPrefs?.open
+  const adminPrefs = await getPreference(PREFERENCE_KEYS.ADMIN)
+  const preferredState = adminPrefs?.open
   if (typeof preferredState === 'boolean') {
     return preferredState
   } else {
@@ -65,7 +65,7 @@ export const NavProvider: React.FC<{
       setNavOpenState(value)
 
       if (persist) {
-        void setPreference(PREFERENCE_KEYS.NAV, { open: value }, true)
+        void setPreference(PREFERENCE_KEYS.ADMIN, { open: value }, true)
       }
     },
     [setPreference],

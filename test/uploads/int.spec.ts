@@ -26,6 +26,7 @@ import { downloadFileToBuffer } from '../../packages/payload/src/uploads/downloa
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { tempFileHandler } from '../../packages/payload/src/uploads/fetchAPI-multipart/handlers.js'
 import { test } from '../__helpers/int/vitest.js'
+import { databaseAdapterSupportsTransactions } from '../__helpers/shared/databaseAdapterCapabilities.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
   adminThumbnailSizeSlug,
@@ -1850,9 +1851,11 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           resolveHooksStarted = resolve
         })
         let startedHookCount = 0
-        // Adapters that wrap each document in its own transaction process bulk updates one at a
+        // Per-document transactions and operation-owned transactions process bulk updates one at a
         // time, so holding the first hook until a second one starts would deadlock there.
-        const processesDocumentsInParallel = !payload.db.bulkOperationsSingleTransaction
+        const processesDocumentsInParallel =
+          !payload.db.bulkOperationsSingleTransaction &&
+          !databaseAdapterSupportsTransactions({ adapter: process.env.PAYLOAD_DATABASE })
 
         collectionHooks.beforeChange = [
           ...(originalBeforeChange ?? []),

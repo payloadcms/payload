@@ -1,10 +1,18 @@
 import type { PaginateOptions, PipelineStage } from 'mongoose'
 import type { Find } from 'payload'
 
-import { flattenWhereToOperators } from 'payload'
+import {
+  applyBranchIDProjection,
+  flattenWhereToOperators,
+  resolveBranchQuery,
+  resolveBranchReadState,
+  rewriteBranchIDs,
+  withBranchIDSelect,
+} from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildBranchVisibilityStages } from './queries/buildBranchVisibility.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
 import { aggregatePaginate } from './utilities/aggregatePaginate.js'
@@ -18,6 +26,7 @@ import { transform } from './utilities/transform.js'
 export const find: Find = async function find(
   this: MongooseAdapter,
   {
+    branch,
     collection: collectionSlug,
     draftsEnabled,
     joins = {},
@@ -33,6 +42,18 @@ export const find: Find = async function find(
   },
 ) {
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
+  const branchReadState = resolveBranchReadState({ branch, collectionSlug, req })
+
+  where = branchReadState.useBranching
+    ? (rewriteBranchIDs(where) ?? {})
+    : ((await resolveBranchQuery({ branch, collectionSlug, req, where })) ?? {})
+  const branchVisibility = branchReadState.useBranching
+    ? buildBranchVisibilityStages({
+        adapter: this,
+        branch: branchReadState.branch,
+        collectionSlug,
+      })
+    : []
 
   let hasNearConstraint = false
 
@@ -58,16 +79,19 @@ export const find: Find = async function find(
 
   const query = await buildQuery({
     adapter: this,
+    branch,
     collectionSlug,
     fields: collectionConfig.flattenedFields,
     locale,
+    req,
     where,
   })
 
   const session = await getSession(this, req)
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
-  const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
+  const useEstimatedCount =
+    !branchVisibility.length && (hasNearConstraint || !query || Object.keys(query).length === 0)
   const paginationOptions: PaginateOptions = {
     lean: true,
     leanWithId: true,
@@ -81,11 +105,13 @@ export const find: Find = async function find(
     useEstimatedCount,
   }
 
-  if (select) {
+  const selectWithBranchID = withBranchIDSelect({ branch, collectionSlug, req, select })
+
+  if (selectWithBranchID) {
     paginationOptions.projection = buildProjectionFromSelect({
       adapter: this,
       fields: collectionConfig.flattenedFields,
-      select,
+      select: selectWithBranchID,
     })
   }
 
@@ -145,6 +171,7 @@ export const find: Find = async function find(
 
   const aggregate = await buildJoinAggregation({
     adapter: this,
+    branch,
     collection: collectionSlug,
     collectionConfig,
     draftsEnabled,
@@ -152,11 +179,13 @@ export const find: Find = async function find(
     locale,
     projection: paginationOptions.projection,
     query,
+    req,
   })
 
-  if (aggregate.length > 0 || sortAggregation.length > 0) {
+  if (aggregate.length > 0 || branchVisibility.length > 0 || sortAggregation.length > 0) {
     result = await aggregatePaginate({
       adapter: this,
+      branchVisibility,
       collation: paginationOptions.collation,
       joinAggregation: aggregate,
       limit: paginationOptions.limit,
@@ -177,10 +206,12 @@ export const find: Find = async function find(
   if (!this.useJoinAggregations) {
     await resolveJoins({
       adapter: this,
+      branch,
       collectionSlug,
       docs: result.docs as Record<string, unknown>[],
       joins,
       locale,
+      req,
     })
   }
 
@@ -189,6 +220,13 @@ export const find: Find = async function find(
     data: result.docs,
     fields: collectionConfig.fields,
     operation: 'read',
+  })
+
+  applyBranchIDProjection({
+    branch,
+    collectionSlug,
+    docs: result.docs as Record<string, unknown>[],
+    req,
   })
 
   return result

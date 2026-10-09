@@ -40,6 +40,7 @@ import { createGlobal } from './createGlobal.js'
 import { createGlobalVersion } from './createGlobalVersion.js'
 import { createMigration } from './createMigration.js'
 import { createVersion } from './createVersion.js'
+import { deleteBranchGlobal } from './deleteBranchGlobal.js'
 import { deleteMany } from './deleteMany.js'
 import { deleteOne } from './deleteOne.js'
 import { deleteVersions } from './deleteVersions.js'
@@ -63,6 +64,7 @@ import { updateMany } from './updateMany.js'
 import { updateOne } from './updateOne.js'
 import { updateVersion } from './updateVersion.js'
 import { upsert } from './upsert.js'
+import { upsertBranchGlobalChange } from './upsertBranchGlobalChange.js'
 
 export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
@@ -311,6 +313,7 @@ export function mongooseAdapter({
       createMigration,
       createVersion,
       defaultIDType: 'text',
+      deleteBranchGlobal,
       deleteMany,
       deleteOne,
       deleteVersions,
@@ -335,6 +338,7 @@ export function mongooseAdapter({
       updateOne,
       updateVersion,
       upsert,
+      upsertBranchGlobalChange,
       useAlternativeDropDatabase,
       useBigIntForNumberIDs,
       useJoinAggregations,

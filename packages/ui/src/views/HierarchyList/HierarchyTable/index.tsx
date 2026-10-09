@@ -29,6 +29,7 @@ import { TableSection } from '../../../elements/TableSection/index.js'
 import { DocumentIcon } from '../../../icons/Document/index.js'
 import { FolderIcon } from '../../../icons/Folder/index.js'
 import { TagIcon } from '../../../icons/Tag/index.js'
+import { useBranchParam } from '../../../providers/Branch/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
 import { useRouteCache } from '../../../providers/RouteCache/index.js'
@@ -99,6 +100,8 @@ export function HierarchyTable({
     },
     getEntityConfig,
   } = useConfig()
+
+  const branch = useBranchParam()
 
   // Children pagination state
   const [childDocs, setChildDocs] = useState(childrenData?.docs || [])
@@ -179,7 +182,7 @@ export function HierarchyTable({
         const where = combineWhereConstraints([parentCondition, searchCondition, baseFilter])
 
         const queryString = qs.stringify(
-          { limit: DEFAULT_HIERARCHY_LIST_LIMIT, page, where },
+          { branch, limit: DEFAULT_HIERARCHY_LIST_LIMIT, page, where },
           { addQueryPrefix: true },
         )
         const url = formatAdminURL({
@@ -213,6 +216,7 @@ export function HierarchyTable({
       }
     },
     [
+      branch,
       apiRoute,
       baseFilter,
       childLoading,
@@ -276,7 +280,7 @@ export function HierarchyTable({
         ])
 
         const queryString = qs.stringify(
-          { limit: DEFAULT_HIERARCHY_LIST_LIMIT, page, where },
+          { branch, limit: DEFAULT_HIERARCHY_LIST_LIMIT, page, where },
           { addQueryPrefix: true },
         )
         const url = formatAdminURL({
@@ -315,6 +319,7 @@ export function HierarchyTable({
       }
     },
     [
+      branch,
       apiRoute,
       getEntityConfig,
       parentFieldName,

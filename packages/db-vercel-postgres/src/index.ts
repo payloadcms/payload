@@ -15,6 +15,7 @@ import {
   createGlobalVersion,
   createSchemaGenerator,
   createVersion,
+  deleteBranchGlobal,
   deleteMany,
   deleteOne,
   deleteVersions,
@@ -41,6 +42,7 @@ import {
   updateOne,
   updateVersion,
   upsert,
+  upsertBranchGlobalChange,
   validateOperatorHandlers,
 } from '@payloadcms/drizzle'
 import {
@@ -182,6 +184,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       }),
       createVersion,
       defaultIDType: payloadIDType,
+      deleteBranchGlobal,
       deleteMany,
       deleteOne,
       deleteVersions,
@@ -221,6 +224,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       updateOne,
       updateVersion,
       upsert,
+      upsertBranchGlobalChange,
     })
 
     adapter.blocksToJsonMigrator = createBlocksToJsonMigrator({

@@ -1,10 +1,20 @@
 import type { PaginateOptions, PipelineStage, QueryOptions } from 'mongoose'
 import type { QueryDrafts } from 'payload'
 
-import { buildVersionCollectionFields, combineQueries, flattenWhereToOperators } from 'payload'
+import {
+  buildVersionCollectionFields,
+  combineQueries,
+  flattenWhereToOperators,
+  projectBranchVersionParent,
+  resolveBranchReadState,
+  resolveBranchVersionQuery,
+  rewriteBranchVersionParents,
+  withBranchVersionSelect,
+} from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildBranchVisibilityStages } from './queries/buildBranchVisibility.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
 import { aggregatePaginate } from './utilities/aggregatePaginate.js'
@@ -18,6 +28,7 @@ import { transform } from './utilities/transform.js'
 export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: MongooseAdapter,
   {
+    branch,
     collection: collectionSlug,
     joins,
     limit,
@@ -35,6 +46,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     collectionSlug,
     versions: true,
   })
+  const branchReadState = resolveBranchReadState({ branch, collectionSlug, req })
 
   let hasNearConstraint
   let sort
@@ -60,19 +72,38 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     })
   }
 
-  const combinedWhere = combineQueries({ latest: { equals: true } }, where)
+  const branchedWhere = branchReadState.useBranching
+    ? rewriteBranchVersionParents(where)
+    : await resolveBranchVersionQuery({
+        branch,
+        collectionSlug,
+        req,
+        where,
+      })
+  const branchVisibility = branchReadState.useBranching
+    ? buildBranchVisibilityStages({
+        adapter: this,
+        branch: branchReadState.branch,
+        collectionSlug,
+        mode: 'drafts',
+      })
+    : []
+
+  const combinedWhere = combineQueries({ latest: { equals: true } }, branchedWhere ?? {})
 
   const versionQuery = await buildQuery({
     adapter: this,
+    branch,
     fields,
     locale,
+    req,
     where: combinedWhere,
   })
 
   const projection = buildProjectionFromSelect({
     adapter: this,
     fields,
-    select,
+    select: withBranchVersionSelect({ collectionSlug, req, select }),
   })
 
   const session = await getSession(this, req)
@@ -82,7 +113,8 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount =
-    hasNearConstraint || !versionQuery || Object.keys(versionQuery).length === 0
+    !branchVisibility.length &&
+    (hasNearConstraint || !versionQuery || Object.keys(versionQuery).length === 0)
   const paginationOptions: PaginateOptions = {
     lean: true,
     leanWithId: true,
@@ -136,18 +168,21 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   const aggregate = await buildJoinAggregation({
     adapter: this,
+    branch,
     collection: collectionSlug,
     collectionConfig,
     joins,
     locale,
     projection,
     query: versionQuery,
+    req,
     versions: true,
   })
 
-  if (aggregate.length > 0 || sortAggregation.length > 0) {
+  if (aggregate.length > 0 || branchVisibility.length > 0 || sortAggregation.length > 0) {
     result = await aggregatePaginate({
       adapter: this,
+      branchVisibility,
       collation: paginationOptions.collation,
       joinAggregation: aggregate,
       limit: paginationOptions.limit,
@@ -168,10 +203,12 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   if (!this.useJoinAggregations) {
     await resolveJoins({
       adapter: this,
+      branch,
       collectionSlug,
       docs: result.docs as Record<string, unknown>[],
       joins,
       locale,
+      req,
       versions: true,
     })
   }
@@ -184,7 +221,9 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   })
 
   for (let i = 0; i < result.docs.length; i++) {
-    const id = result.docs[i].parent
+    // A branch version's `parent` is the shadow row's primary key, so the
+    // canonical document ID comes from `_branchParent` when present.
+    const id = projectBranchVersionParent(result.docs[i] as Record<string, unknown>)
     result.docs[i] = result.docs[i].version ?? {}
     result.docs[i].id = id
   }

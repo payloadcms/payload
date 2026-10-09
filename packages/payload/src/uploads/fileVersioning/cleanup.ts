@@ -71,6 +71,22 @@ export const collectVersionFiles = async ({
   }
 }
 
+/** Collects every stored file that can become unreferenced when a document is deleted. */
+export const collectDocumentDeleteFileCandidates = async ({
+  collection,
+  doc,
+  parentID,
+  req,
+}: {
+  collection: SanitizedCollectionConfig
+  doc: JsonObject
+  parentID: number | string
+  req: PayloadRequest
+}): Promise<StoredFileList> => [
+  ...(await collectStoredFiles({ collection, doc, req })),
+  ...(collection.versions ? await collectVersionFiles({ collection, parentID, req }) : []),
+]
+
 /** Confirms that deleted references have no survivors before and after commit. */
 export const scheduleUnreferencedFileCleanup = async ({
   candidates,

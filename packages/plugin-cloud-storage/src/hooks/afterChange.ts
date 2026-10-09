@@ -1,6 +1,6 @@
 import type { CollectionAfterChangeHook, CollectionConfig, FileData, TypeWithID } from 'payload'
 
-import { deepMergeWithSourceArrays } from 'payload'
+import { deepMergeWithSourceArrays, MAIN_BRANCH, scheduleAfterTransactionCommit } from 'payload'
 
 import type { GeneratedAdapter } from '../types.js'
 
@@ -235,27 +235,57 @@ export const getAfterChangeHook =
               }),
             ),
           )
+          const branchDocumentID = getBranchDocumentID(previousDoc)
 
-          const deletionPromises = filesToDelete.map(async (filename) => {
+          if (branchDocumentID !== undefined) {
+            const retainedMainDocument = (await req.payload.db.findOne({
+              branch: false,
+              collection: collection.slug,
+              req,
+              where: {
+                and: [{ _branch: { equals: MAIN_BRANCH } }, { id: { equals: branchDocumentID } }],
+              },
+            })) as null | Record<string, unknown>
+
+            if (retainedMainDocument) {
+              for (const filename of getDocumentFilenames(retainedMainDocument)) {
+                newKeys.add(
+                  resolveKey({
+                    data: retainedMainDocument as { _objectKey?: string; prefix?: string },
+                    filename,
+                  }),
+                )
+              }
+            }
+          }
+
+          const deletionTargets = filesToDelete.flatMap((filename) => {
             if (!filename) {
-              return
+              return []
             }
             const storageFilePath = resolveKey({
               data: previousDoc as { _objectKey?: string; prefix?: string },
               filename,
             })
-            if (!newKeys.has(storageFilePath)) {
-              await adapter.handleDelete({
-                collection,
-                doc: previousDoc,
-                filename,
-                req,
-                storageFilePath,
-              })
-            }
+            return newKeys.has(storageFilePath) ? [] : [{ filename, storageFilePath }]
           })
 
-          await Promise.all(deletionPromises)
+          await scheduleAfterTransactionCommit({
+            callback: async () => {
+              await Promise.all(
+                deletionTargets.map(({ filename, storageFilePath }) =>
+                  adapter.handleDelete({
+                    collection,
+                    doc: previousDoc,
+                    filename,
+                    req,
+                    storageFilePath,
+                  }),
+                ),
+              )
+            },
+            req,
+          })
         }
 
         if (docWithMetadata !== doc) {
@@ -271,3 +301,43 @@ export const getAfterChangeHook =
     }
     return doc
   }
+
+const getBranchDocumentID = (doc: unknown): number | string | undefined => {
+  if (!doc || typeof doc !== 'object' || Array.isArray(doc)) {
+    return undefined
+  }
+
+  const branchDocument = doc as Record<string, unknown>
+
+  if (branchDocument._branch === MAIN_BRANCH) {
+    return undefined
+  }
+
+  const relation = branchDocument._branchDocID
+  const value =
+    relation && typeof relation === 'object' && !Array.isArray(relation) && 'value' in relation
+      ? relation.value
+      : relation
+
+  return typeof value === 'number' || typeof value === 'string' ? value : undefined
+}
+
+const getDocumentFilenames = (doc: Record<string, unknown>): string[] => {
+  const filenames = typeof doc.filename === 'string' ? [doc.filename] : []
+
+  if (doc.variants && typeof doc.variants === 'object' && !Array.isArray(doc.variants)) {
+    for (const variant of Object.values(doc.variants)) {
+      if (
+        variant &&
+        typeof variant === 'object' &&
+        !Array.isArray(variant) &&
+        'filename' in variant &&
+        typeof variant.filename === 'string'
+      ) {
+        filenames.push(variant.filename)
+      }
+    }
+  }
+
+  return filenames
+}

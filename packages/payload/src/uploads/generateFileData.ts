@@ -1,6 +1,6 @@
 import { fileTypeFromBuffer } from 'file-type'
 import fs from 'fs/promises'
-import { randomUUID } from 'node:crypto'
+import { createHash, randomUUID } from 'node:crypto'
 import { openAsBlob } from 'node:fs'
 
 import type { Collection, TypeWithID } from '../collections/config/types.js'
@@ -10,6 +10,8 @@ import type { ExternalUploadSource } from './sanitizeUploadData.js'
 import type { PreparedUploadTransformation } from './transformers/uploadTransformerBridge.js'
 import type { FileData, FileSizes, FileToSave, UploadEdits } from './types.js'
 
+import { resolveBranch } from '../branching/resolveBranch.js'
+import { MAIN_BRANCH } from '../branching/types.js'
 import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
 import { formatAdminURL } from '../utilities/formatAdminURL.js'
 import { isNumber } from '../utilities/isNumber.js'
@@ -418,6 +420,12 @@ export const generateFileData = async <T>({
     const hasReusableOriginalMain = Boolean(
       isResettingCrop && !fileWasTransformed && retainedOriginal,
     )
+    const hasReusableCurrentMain = Boolean(
+      !hasReusableOriginalMain &&
+        !fileWasTransformed &&
+        retainedOriginal &&
+        currentFileData?.filename,
+    )
     if (hasReusableOriginalMain && !hasFocalPointChange && retainedOriginal) {
       return {
         data: {
@@ -484,6 +492,20 @@ export const generateFileData = async <T>({
     }
 
     let fsSafeName = getSanitizedUploadFilename(outputName, ext)
+    const branch = resolveBranch(req)
+    const isIsolatedProviderUpload = Boolean(
+      file.uploadReference &&
+        typeof file.uploadReference === 'object' &&
+        !Array.isArray(file.uploadReference) &&
+        '_objectKey' in file.uploadReference &&
+        typeof file.uploadReference._objectKey === 'string',
+    )
+    const shouldIsolateBranchFile = branch !== MAIN_BRANCH && !isIsolatedProviderUpload
+
+    if (shouldIsolateBranchFile) {
+      fsSafeName = getBranchUploadFilename({ branch, filename: fsSafeName })
+      overwriteExistingFiles = false
+    }
     const isDuplicatingAnOriginal =
       isDuplicating && file.name === (originalDoc as FileData | undefined)?.original?.filename
 
@@ -503,6 +525,8 @@ export const generateFileData = async <T>({
 
     if (hasReusableOriginalMain) {
       fsSafeName = retainedOriginal!.filename
+    } else if (hasReusableCurrentMain) {
+      fsSafeName = currentFileData!.filename
     } else if (
       !overwriteExistingFiles ||
       !disableLocalStorage ||
@@ -522,6 +546,13 @@ export const generateFileData = async <T>({
     fileData.filename = fsSafeName
     if (hasReusableOriginalMain) {
       fileData.url = retainedOriginal!.url
+    } else if (hasReusableCurrentMain) {
+      fileData.filesize = currentFileData!.filesize
+      fileData.height = currentFileData!.height
+      fileData.mimeType = currentFileData!.mimeType
+      fileData.url = currentFileData!.url
+      fileData.width = currentFileData!.width
+      req.file = { ...file, name: currentFileData!.filename }
     }
 
     const hasGeneratedProviderRepresentations = Boolean(
@@ -619,7 +650,7 @@ export const generateFileData = async <T>({
           size: mainBuffer.length,
         }
       }
-    } else if (!hasReusableOriginalMain) {
+    } else if (!hasReusableOriginalMain && !hasReusableCurrentMain) {
       // file.data is empty when useTempFiles is on, so the real content lives at
       // file.tempFilePath instead (see the function doc for why we avoid buffering it).
       const tempFileHandling = resolveTempFileHandling({
@@ -773,6 +804,86 @@ export const generateFileData = async <T>({
     data: newData,
     files: filesToSave,
   }
+}
+
+const maximumFilesystemFilenameByteLength = 255
+// `getSafeFileName` can add a numeric suffix. Reserve `-` plus 11 digits for that step.
+const deduplicationSuffixByteReserve = 12
+
+/** Adds a stable branch suffix without exceeding the common filesystem filename byte limit. */
+export const getBranchUploadFilename = ({
+  branch,
+  filename,
+}: {
+  branch: string
+  filename: string
+}): string => {
+  const maximumInitialFilenameByteLength =
+    maximumFilesystemFilenameByteLength - deduplicationSuffixByteReserve
+  const ext = getFileExtension(filename)
+  let extension = ext ? `.${ext}` : ''
+  const name = extension ? filename.slice(0, -extension.length) : filename
+  const escapedBranch = branch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const unscopedName = name.replace(new RegExp(`-${escapedBranch}(?:-\\d+)?$`), '')
+  const branchHash = createHash('sha256').update(branch).digest('hex').slice(0, 12)
+  const minimumBranchSuffix = `-${branchHash}`
+  const maximumExtensionByteLength =
+    maximumInitialFilenameByteLength - Buffer.byteLength(minimumBranchSuffix) - 1
+
+  extension = truncateUtf8ByByteLength({
+    maximumByteLength: maximumExtensionByteLength,
+    value: extension,
+  })
+
+  const maximumBranchSuffixByteLength =
+    maximumInitialFilenameByteLength - Buffer.byteLength(extension) - 1
+  let branchSuffix = `-${branch}`
+
+  if (Buffer.byteLength(branchSuffix) > maximumBranchSuffixByteLength) {
+    const maximumBranchPrefixByteLength =
+      maximumBranchSuffixByteLength - Buffer.byteLength(minimumBranchSuffix) - 1
+    const branchPrefix = truncateUtf8ByByteLength({
+      maximumByteLength: maximumBranchPrefixByteLength,
+      value: branch,
+    })
+
+    branchSuffix = branchPrefix ? `-${branchPrefix}${minimumBranchSuffix}` : minimumBranchSuffix
+  }
+
+  const maximumNameByteLength =
+    maximumInitialFilenameByteLength -
+    Buffer.byteLength(branchSuffix) -
+    Buffer.byteLength(extension)
+  const truncatedName = truncateUtf8ByByteLength({
+    maximumByteLength: maximumNameByteLength,
+    value: unscopedName,
+  })
+
+  return `${truncatedName}${branchSuffix}${extension}`
+}
+
+const truncateUtf8ByByteLength = ({
+  maximumByteLength,
+  value,
+}: {
+  maximumByteLength: number
+  value: string
+}): string => {
+  let byteLength = 0
+  let result = ''
+
+  for (const character of value) {
+    const characterByteLength = Buffer.byteLength(character)
+
+    if (byteLength + characterByteLength > maximumByteLength) {
+      break
+    }
+
+    byteLength += characterByteLength
+    result += character
+  }
+
+  return result
 }
 
 /**

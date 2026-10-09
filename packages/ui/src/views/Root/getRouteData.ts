@@ -13,11 +13,12 @@ import type {
 import type React from 'react'
 
 import { parseDocumentID } from 'payload'
-import { formatAdminURL, isNumber } from 'payload/shared'
+import { branchesCollectionSlug, formatAdminURL, isNumber } from 'payload/shared'
 
 import type { ViewFromConfig } from './getCustomViewByRoute.js'
 
 import { isPathMatchingRoute } from '../../utilities/isPathMatchingRoute.js'
+import { BranchDocumentView, BranchesListView } from '../Branches/index.js'
 import { TrashView } from '../CollectionTrash/index.js'
 import { DocumentView } from '../Document/index.js'
 import { forgotPasswordBaseClass } from '../ForgotPassword/index.js'
@@ -92,6 +93,14 @@ export const getRouteData = ({
   let ViewToRender: ViewFromConfig = null
   let templateClassName: string
   let templateType: 'default' | 'minimal' | undefined
+  // `payload-branches` is `admin.hidden` so it stays out of the nav, the dashboard
+  // and the command palette — which also makes the generic views treat it as
+  // not-found. Its own routes swap in wrappers that opt back in. Globals and every
+  // other collection are untouched.
+  const isBranchesCollection = collectionConfig?.slug === branchesCollectionSlug
+  const CollectionListView = isBranchesCollection ? BranchesListView : ListView
+  const CollectionDocumentView = isBranchesCollection ? BranchDocumentView : DocumentView
+
   let documentSubViewType: DocumentSubViewTypes
   let viewType: ViewTypes
   const routeParams: GetRouteDataResult['routeParams'] = {}
@@ -217,7 +226,7 @@ export const getRouteData = ({
         } else {
           // Regular list view
           ViewToRender = {
-            Component: ListView,
+            Component: CollectionListView,
           }
 
           templateClassName = `${segmentTwo}-list`
@@ -274,7 +283,7 @@ export const getRouteData = ({
           routeParams.versionID = segmentSix
 
           ViewToRender = {
-            Component: DocumentView,
+            Component: CollectionDocumentView,
           }
 
           templateClassName = `collection-default-edit`
@@ -329,7 +338,7 @@ export const getRouteData = ({
             routeParams.versionID = segmentFive
 
             ViewToRender = {
-              Component: DocumentView,
+              Component: CollectionDocumentView,
             }
 
             templateClassName = `collection-default-edit`

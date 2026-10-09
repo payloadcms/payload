@@ -35,6 +35,17 @@ export interface PayloadRequestAPI {
 }
 
 export type CustomPayloadRequestProperties = {
+  /**
+   * The active content branch, or `'main'`.
+   *
+   * Resolved once per request from, in order: an explicit Local API argument,
+   * the `branch` query param, the user's stored `branch` preference, then
+   * `'main'` — the same shape as `locale`.
+   *
+   * Available inside access control functions, so a collection can allow on a
+   * branch what it denies on main.
+   */
+  branch?: string
   context: RequestContext
   /** The locale that should be used for a field when it is not translated to the requested locale */
   fallbackLocale?: TypedFallbackLocale
@@ -53,6 +64,8 @@ export type CustomPayloadRequestProperties = {
    */
   // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   locale?: 'all' | TypedLocale
+  /** The internal operation scope for this request. */
+  operation?: 'validate' | Operation
   /**
    * The payload object
    */

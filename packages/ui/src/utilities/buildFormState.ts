@@ -7,7 +7,13 @@ import type {
   User,
 } from 'payload'
 
-import { canAccessAdmin, formatErrors, UnauthorizedError } from 'payload'
+import {
+  assertBranchReadable,
+  canAccessAdmin,
+  formatErrors,
+  resetBranchState,
+  UnauthorizedError,
+} from 'payload'
 import { getSelectMode, reduceFieldsToValues } from 'payload/shared'
 
 import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
@@ -61,9 +67,15 @@ export const buildFormStateHandler: ServerFunction<
   BuildFormStateArgs,
   Promise<BuildFormStateResult>
 > = async (args) => {
-  const { req } = args
+  const { branch, req } = args
 
   try {
+    if (branch) {
+      req.branch = branch
+      resetBranchState(req)
+      await assertBranchReadable({ req })
+    }
+
     await canAccessAdmin({ req })
     const res = await buildFormState(args)
 
@@ -90,6 +102,7 @@ export const buildFormState = async (
 ): Promise<BuildFormStateSuccessResult> => {
   const {
     id: idFromArgs,
+    branch,
     checkForStaleData,
     collectionSlug,
     data: incomingData,
@@ -257,6 +270,7 @@ export const buildFormState = async (
   if (checkForStaleData && originalUpdatedAt && ((collectionSlug && id) || globalSlug)) {
     staleDataStateResult = await handleStaleDataCheck({
       id,
+      branch,
       collectionSlug,
       globalSlug,
       originalUpdatedAt,

@@ -1,6 +1,6 @@
 import type { CollectionSlug, RequestContext } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
-import type { FieldHook, PolymorphicRelationshipField } from '../../config/types.js'
+import type { Field, FieldHook, PolymorphicRelationshipField } from '../../config/types.js'
 import type { Authorship, SanitizedAuthorship } from './types.js'
 
 export type { Authorship, SanitizedAuthorship }
@@ -98,6 +98,22 @@ const setCreatedBy: FieldHook = ({
   }
 
   return userToRelation(req) ?? previousValue
+}
+
+export const isManagedAuthorshipField = (field: Field): field is PolymorphicRelationshipField => {
+  if (field.type !== 'relationship') {
+    return false
+  }
+
+  if (field.name === 'createdBy') {
+    return field.hooks?.beforeChange?.includes(setCreatedBy) ?? false
+  }
+
+  if (field.name === 'updatedBy') {
+    return field.hooks?.beforeChange?.includes(setUpdatedBy) ?? false
+  }
+
+  return false
 }
 
 // Drop the copied value so beforeChange re-attributes the duplicate to the duplicating user.
