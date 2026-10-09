@@ -328,8 +328,8 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     versionedCloudFailure.beforeCopy = () =>
       Promise.reject(
         Object.assign(new Error('precondition failed'), {
-          $metadata: { httpStatusCode: 412 },
           name: 'PreconditionFailed',
+          $metadata: { httpStatusCode: 412 },
         }),
       )
 
@@ -399,7 +399,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       overrideAccess: true,
     })
     const crop = await restClient.PATCH(`/${versionedCloudMediaSlug}/${created.id}`, {
-      body: JSON.stringify({}),
+      body: JSON.stringify({ _transforms: { crop: { height: 800, width: 800, x: 0, y: 0 } } }),
       query: {
         uploadEdits: {
           crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
@@ -413,7 +413,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     const uploadsAfterCrop = versionedCloudCalls.uploads
 
     const reset = await restClient.PATCH(`/${versionedCloudMediaSlug}/${created.id}`, {
-      body: JSON.stringify({}),
+      body: JSON.stringify({ _transforms: null }),
       query: {
         uploadEdits: {
           crop: { height: 100, unit: '%', width: 100, x: 0, y: 0 },
@@ -450,7 +450,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       filePath: firstFile,
     })
     const crop = await restClient.PATCH(`/${versionedCloudMediaSlug}/${created.id}`, {
-      body: JSON.stringify({}),
+      body: JSON.stringify({ _transforms: { crop: { height: 800, width: 800, x: 0, y: 0 } } }),
       query: {
         uploadEdits: {
           crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
@@ -463,7 +463,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     const uploadsAfterCrop = versionedCloudCalls.uploads
 
     const reset = await restClient.PATCH(`/${versionedCloudMediaSlug}/${created.id}`, {
-      body: JSON.stringify({ focalX: 75, focalY: 25 }),
+      body: JSON.stringify({ _transforms: { focalPoint: { x: 75, y: 25 } } }),
       query: {
         uploadEdits: {
           crop: { height: 100, unit: '%', width: 100, x: 0, y: 0 },
@@ -478,8 +478,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     const original = files.find((file) => file.roles.some((role) => role.type === 'original'))
 
     expect(resetDoc.filename).toBe(created.original!.filename)
-    expect(resetDoc.focalX).toBe(75)
-    expect(resetDoc.focalY).toBe(25)
+    expect(resetDoc._transforms).toEqual({ focalPoint: { x: 75, y: 25 } })
     expect(original?.roles).toEqual([{ type: 'original' }, { type: 'default' }])
     expect(versionedCloudCalls.uploads).toBe(uploadsAfterCrop)
   })
@@ -494,7 +493,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       filePath: firstFile,
     })
     const crop = await restClient.PATCH(`/${unversionedCloudMediaSlug}/${created.id}`, {
-      body: JSON.stringify({}),
+      body: JSON.stringify({ _transforms: { crop: { height: 800, width: 800, x: 0, y: 0 } } }),
       query: {
         uploadEdits: {
           crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
@@ -514,7 +513,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     )!.key
 
     const reset = await restClient.PATCH(`/${unversionedCloudMediaSlug}/${created.id}`, {
-      body: JSON.stringify({}),
+      body: JSON.stringify({ _transforms: null }),
       query: {
         uploadEdits: {
           crop: { height: 100, unit: '%', width: 100, x: 0, y: 0 },
@@ -539,7 +538,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     })
     const originalURL = created.original!.url
     const crop = await restClient.PATCH(`/${versionedPublicCloudMediaSlug}/${created.id}`, {
-      body: JSON.stringify({}),
+      body: JSON.stringify({ _transforms: { crop: { height: 800, width: 800, x: 0, y: 0 } } }),
       query: {
         uploadEdits: {
           crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
@@ -551,7 +550,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect(crop.status).toBe(200)
 
     const reset = await restClient.PATCH(`/${versionedPublicCloudMediaSlug}/${created.id}`, {
-      body: JSON.stringify({}),
+      body: JSON.stringify({ _transforms: null }),
       query: {
         uploadEdits: {
           crop: { height: 100, unit: '%', width: 100, x: 0, y: 0 },

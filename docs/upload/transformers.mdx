@@ -61,40 +61,38 @@ A transformer's `mimeTypes` array accepts:
 
 ## How the pipeline runs
 
-For both upload-time and request-time processing, Payload builds a fixed, ordered list of eligible transformers before running any of them:
+Payload executes stages in declaration order. Planning calls each eligible stage's inexpensive `canTransform` before consuming the source. Saved intent preflights key ownership across candidate stages; actual stage MIME is checked during execution. A conversion can activate a later MIME-compatible upload stage. Required saved work cannot be silently skipped after conversion.
 
-1. Filter to transformers that declare the capability being used (`transformFile` for uploads, `handleRequest` for dynamic requests).
-2. Filter to transformers whose `mimeTypes` match the file's MIME type.
-3. Call each remaining transformer's `canTransform` (if defined) to decide whether it's eligible for this specific file/request. A transformer with no `canTransform` is always eligible once it passes the MIME filter.
+- **`continue`** passes the current file/response to the next stage. A stage that consumes a request response must return a replacement response.
+- **`complete`** ends processing when all saved work and applicable request overrides have been satisfied.
+- **Throwing** aborts processing. Managed-file operations compensate staged files when the owning document write fails.
 
-The result is a plan — a fixed list — computed before any transformer actually runs. Every eligible transformer then runs once, in the order it appears in `upload.transformers`, passing its result to the next:
-
-- **`continue`** — hand the (possibly-replaced) file/response to the next transformer in the pipeline. Returning `continue` without a replacement preserves the same object reference; nothing is copied.
-- **`complete`** — stop the pipeline here and use this result. No later transformer runs.
-- **Throwing** — aborts the pipeline immediately. For dynamic requests, the error is logged and rethrown: an `APIError` keeps its own status, anything else becomes a `500`. For uploads, the error fails the upload with a `FileUploadError`, no document is committed, and no partial file is written. A `canTransform` that throws aborts planning the same way, before any stage runs.
-
-Payload only ever keeps the current accumulator, never a history of every stage's output.
+Dynamic defaults first resolve saved intent (`persisted-default`), then apply request-local overrides (`request-override`). See [Transform State](./transform-state) for key ownership and replay semantics.
 
 ## The `canTransform` capability
 
 ```ts
 canTransform: (args: {
   collectionSlug: string
-  documentID?: number | string
-  mimeType: string
+  doc: UploadDocument
+  originalDoc: Readonly<UploadDocument>
   operation: 'request' | 'upload'
+  purpose?: 'persisted-default' | 'request-override' // requests only
   req: PayloadRequest
-}) => boolean | Promise<boolean>
+}) => CanTransformResult | Promise<CanTransformResult>
 ```
 
-`canTransform` must be inexpensive and side-effect-free — it must not fetch the file's source, call an external service, or perform the transformation itself. It only decides eligibility. If you omit it, the transformer is eligible for every request/upload that already passed the MIME filter.
+`canTransform` must be inexpensive and side-effect-free — it must not fetch the file's source, call an external service, or perform the transformation itself. It decides eligibility, claims saved keys, and returns stage-owned options. Successful object results use `{ canTransform: true, handledTransformKeys?, options? }`. Boolean results claim no saved keys. If you omit it, the transformer is eligible for every request/upload that already passed the MIME filter.
 
 ## The `transformFile` capability (uploads)
 
 ```ts
 transformFile: (args: {
   collectionSlug: string
-  file: File
+  doc: UploadDocument
+  originalDoc: Readonly<UploadDocument>
+  source: FileSource
+  originalSource: FileSource
   options: unknown
   req: PayloadRequest
 }) =>
@@ -103,18 +101,40 @@ transformFile: (args: {
   >
 ```
 
-`transformFile` is a one-file-in, one-file-out primitive — it never writes to storage itself. Payload's upload pipeline calls every eligible transformer's `transformFile` in declaration order, threading the result of one into the next, then persists whatever the pipeline produces. `options` is `undefined` for an ordinary upload.
+Adapters may optionally provide `transformDefinitions`, a map of custom keys to JSON schemas for generated types and JSDoc. Definitions never register required keys, replace built-in shapes, claim execution, or replace adapter-owned custom-value validation. See [optional adapter definitions](./transform-state#optional-adapter-definitions).
 
-<Banner type="warning">
-  **Note:** When `sharpTransformer` is registered, it drives every image upload,
-  whether or not the collection is listed in its `collections`: every other
-  eligible transformer's `transformFile` runs inside Sharp's processing, once
-  for the main file and once for each of the collection's `variants`, and
-  receives Sharp's own task object as `options`. A transformer that should only
-  see the main file must not be combined with Sharp for image uploads.
-</Banner>
+`transformFile` processes one current source and never writes to storage. Its `options` come only from that stage's own `canTransform` result. The retained original remains separately available when a stage replaces the current source. The full working document includes custom fields and `_transforms`; the entry snapshot is deeply frozen.
 
-Transformers only run on uploads whose full bytes are available. When a client uploads directly to cloud storage (`clientUploads`) on a collection with `disableLocalStorage`, Payload downloads the whole file only when `upload.mimeTypes` restricts the allowed types, a transformer other than `sharpTransformer` has a `transformFile` that is eligible for the upload (its `mimeTypes` match and its `canTransform`, if any, returns `true`), the request carries a crop or resize edit, the file is an animated image, or the collection has Sharp `variants` or image adjustments (`resizeOptions`, `formatOptions`, and so on). Otherwise the upload is saved without running any transformer.
+On writes, field and document hooks run before transformation. Payload validates transformer changes to the final document before committing it, using the ordinary field-validator context, including the nearest block and the trusted access mode. This validation does not run those hooks a second time. Request-time document changes remain local to the response.
+
+### ⚠️ Breaking Changes: upload hook metadata
+
+`beforeValidate` and `beforeChange` run before file transformers so hooks can set `_transforms`. On a new or replacement upload, `width`, `height`, `mimeType`, `filename`, and `filesize` describe the incoming source at that point. Previous versions processed the file before those hooks. On an edit without a new source, hooks see the existing document metadata until replay runs.
+
+If a hook saves fields calculated from the processed bytes, move that calculation into a transformer after the stage that produces those bytes. Mutate `doc` there; Payload validates and saves those fields with the final file metadata. For example:
+
+```ts
+import type { UploadTransformer } from 'payload'
+import sharp from 'sharp'
+
+const derivedDimensions: UploadTransformer = {
+  slug: 'derived-dimensions',
+  mimeTypes: ['image/*'],
+  transformFile: async ({ doc, source }) => {
+    const bytes = await source.arrayBuffer({ maxBytes: 64 * 1024 * 1024 })
+    const metadata = await sharp(Buffer.from(bytes)).metadata()
+
+    doc.imageDimensions = `${metadata.width} x ${metadata.height}`
+    return { status: 'continue' }
+  },
+}
+```
+
+Place this stage after Sharp or your other image processor. Use `afterChange` for side effects that need the final allocated filename or storage identity, which Payload assigns after transformation. Metadata for a request-only default can remain unknown until delivery; calculate display-only fields on read when appropriate.
+
+`FileSource` exposes `filename`, `mimeType`, optional `size`, lazy `stream()`, bounded `read({ length, offset? })`, and `arrayBuffer({ maxBytes })`. Custom stages can probe temporary or provider sources without eager whole-file downloads. Consumers must declare a whole-file byte limit. Sharp defaults to 64 MiB through `maxSourceBytes`.
+
+Sharp's private variant bridge derives configured variants from the effective main geometry, using original bytes or a lossless intermediate to avoid encoding the main output a second time. Other stages keep their own options and run on the main pipeline; they do not receive Sharp task options.
 
 The stored `filename` is based on the returned `File`'s `name`. Its `mimeType` and extension come from the output bytes when their format can be detected, such as an image converted to WebP. Otherwise, as for text-like output like CSV or JSON, they come from the returned `File`'s `type` and `name`. Set both on the `File` you return when your transformer changes the format.
 
@@ -123,10 +143,12 @@ The stored `filename` is based on the returned `File`'s `name`. Its `mimeType` a
 ```ts
 handleRequest: (args: {
   collectionSlug: string
-  documentID: number | string
-  filename: string
+  doc: UploadDocument
+  originalDoc: Readonly<UploadDocument>
   getSourceFile: () => Promise<Response>
-  mimeType: string
+  getOriginalFile: () => Promise<Response>
+  options?: unknown
+  purpose?: 'persisted-default' | 'request-override'
   req: PayloadRequest
 }) =>
   Promise<
@@ -175,12 +197,12 @@ const externalResizeTransformer: UploadTransformer = {
   slug: 'external-resize',
   mimeTypes: ['image/*'],
   canTransform: ({ req }) => req.searchParams.has('width'),
-  handleRequest: async ({ collectionSlug, filename, req }) => {
+  handleRequest: async ({ collectionSlug, doc, req }) => {
     const width = req.searchParams.get('width')
 
     return {
       response: Response.redirect(
-        `https://images.example.com/${collectionSlug}/${filename}?w=${width}`,
+        `https://images.example.com/${collectionSlug}/${doc.filename}?w=${width}`,
         302,
       ),
       status: 'complete',
@@ -349,6 +371,8 @@ sharpTransformer({
 ```
 
 As with every transformer, dynamic-resize output is never written back to storage — it is generated for that one response and discarded.
+
+Saved resizes are bounded by `sharpTransformer({ transformLimits: { maxWidth, maxHeight, maxPixels } })` on uploads and persisted-default requests. Defaults are 4096 pixels per axis and 16,777,216 pixels across all animation frames. Limits include intermediate focal-cover resizes and derived dimensions. Excessive transforms fail with a client error; configured dynamic query limits remain separate.
 
 #### Securing dynamic resizing
 

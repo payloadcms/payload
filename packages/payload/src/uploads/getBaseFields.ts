@@ -5,6 +5,9 @@ import type { SanitizedUploadConfig } from './types.js'
 
 import { generateFilePathOrURL } from './generateFilePathOrURL.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
+import { buildTransformStateJSONSchema } from './transformState/buildTransformStateJSONSchema.js'
+import { migrateLegacyFocalPoint } from './transformState/migrateLegacyFocalPoint.js'
+import { validateTransformState } from './transformState/validateTransformState.js'
 import { validateUploadFilename } from './validateUploadFilename.js'
 
 const disabledFromImageSize = (
@@ -172,6 +175,27 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     width,
     height,
     {
+      name: '_transforms',
+      type: 'json',
+      admin: { hidden: true },
+      defaultValue: () => null,
+      hooks: {
+        afterRead: [
+          ({ data, value }) =>
+            migrateLegacyFocalPoint({ doc: { ...data, _transforms: value } })._transforms,
+        ],
+      },
+      jsonSchema: buildTransformStateJSONSchema({
+        transformers: config.upload?.transformers ?? [],
+      }),
+      label: 'Transforms',
+      validate: (value, { collectionSlug, data, req }) => {
+        validateTransformState({ collectionSlug, doc: data, req, value })
+
+        return true
+      },
+    },
+    {
       name: 'original',
       type: 'group',
       admin: {
@@ -238,9 +262,11 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
         return {
           name,
           type: 'number',
+          access: { create: () => false, update: () => false },
           admin: {
             disabled: { column: true, filter: true, groupBy: true },
             hidden: true,
+            readOnly: true,
           },
         }
       }),

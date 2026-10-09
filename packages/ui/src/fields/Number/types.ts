@@ -40,7 +40,7 @@ export type NumberInputProps = {
    * Controls the height of the input. Defaults to `'large'`.
    */
   readonly size?: 'large' | 'medium'
-  readonly step?: number
+  readonly step?: 'any' | number
   readonly style?: React.CSSProperties
   /** Short text affix rendered after the value, e.g. `%`. */
   readonly suffix?: string

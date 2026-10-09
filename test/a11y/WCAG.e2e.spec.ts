@@ -1907,9 +1907,13 @@ test.describe('WCAG 2.2 Level AA', () => {
       const x = dialog.getByRole('spinbutton', { name: 'Focal Point X', exact: true })
       const y = dialog.getByRole('spinbutton', { name: 'Focal Point Y', exact: true })
 
+      await x.fill('101')
+      await expect(dialog.getByRole('alert')).toContainText('Focal Point X')
       await handle.focus()
       await handle.press('ArrowRight')
       await expect(x).toHaveValue('51')
+      await expect(dialog.getByRole('alert')).toHaveCount(0)
+      await expect(dialog.getByRole('button', { name: 'Apply Changes', exact: true })).toBeEnabled()
       await handle.press('ArrowDown')
       await expect(y).toHaveValue('51')
       await handle.press('ArrowLeft')
@@ -4045,6 +4049,101 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
 
+  test.describe('2.5.7 Dragging Movements (AA)', () => {
+    test('should save a crop and focal point using numeric controls without dragging', async ({
+      browser: _browser,
+    }, testInfo) => {
+      const dialog = await openEditImageDialog({ page, serverURL })
+      const documentID = new URL(page.url()).pathname.split('/').pop()
+      const x = dialog.getByRole('spinbutton', { name: 'Crop X', exact: true })
+      const y = dialog.getByRole('spinbutton', { name: 'Crop Y', exact: true })
+
+      const focalX = dialog.getByRole('spinbutton', { name: 'Focal Point X', exact: true })
+      await focalX.fill('101')
+      await dialog.getByRole('button', { name: 'Reset: Crop', exact: true }).click()
+      await expect(dialog.getByRole('alert')).toContainText('Focal Point X')
+      await expect(
+        dialog.getByRole('button', { name: 'Apply Changes', exact: true }),
+      ).toBeDisabled()
+      await focalX.fill('49')
+      await x.fill('999999')
+      await expect(dialog.getByRole('alert')).toContainText('Crop X')
+      await expect(
+        dialog.getByRole('button', { name: 'Apply Changes', exact: true }),
+      ).toBeDisabled()
+      await x.fill('1')
+      await y.fill('2')
+      await dialog.getByRole('spinbutton', { name: 'Width', exact: true }).fill('5')
+      await dialog.getByRole('spinbutton', { name: 'Height', exact: true }).fill('6')
+      await x.fill('999999')
+      const cropSelection = dialog.locator('.ReactCrop__crop-selection')
+      await cropSelection.focus()
+      await cropSelection.press('ArrowRight')
+      await expect(dialog.getByRole('alert')).toHaveCount(0)
+      await expect(x).not.toHaveAttribute('aria-invalid', 'true')
+      await x.fill('1')
+      await focalX.fill('101')
+      const focalHandle = dialog.getByRole('button', { name: 'Set focal point', exact: true })
+      const handleBox = await focalHandle.boundingBox()
+      await page.mouse.move(
+        handleBox!.x + handleBox!.width / 2,
+        handleBox!.y + handleBox!.height / 2,
+      )
+      await page.mouse.down()
+      await page.mouse.move(
+        handleBox!.x + handleBox!.width / 2 + 10,
+        handleBox!.y + handleBox!.height / 2 + 10,
+      )
+      await page.mouse.up()
+      await expect(dialog.getByRole('alert')).toHaveCount(0)
+      await expect(focalX).not.toHaveAttribute('aria-invalid', 'true')
+
+      await dialog.getByRole('spinbutton', { name: 'Focal Point X', exact: true }).fill('0')
+      await dialog.getByRole('spinbutton', { name: 'Focal Point Y', exact: true }).fill('0.25')
+      await expect(x).toHaveValue('1')
+      await expect(y).toHaveValue('2')
+      const scan = await runAxeScan({ include: ['.edit-upload__dialog'], page, testInfo })
+
+      expect(scan.violations).toHaveLength(0)
+      await dialog.getByRole('button', { name: 'Apply Changes', exact: true }).click()
+      await expect(dialog).toBeHidden()
+      await page.getByRole('button', { name: 'Save', exact: true }).click()
+      await expect
+        .poll(async () => {
+          const response = await page.request.get(`${serverURL}/api/media/${documentID}`)
+          const doc = await response.json()
+
+          return doc._transforms
+        })
+        .toEqual({ crop: { height: 6, width: 5, x: 1, y: 2 }, focalPoint: { x: 0, y: 0.25 } })
+
+      await page.getByRole('button', { name: /edit image/i }).click()
+      await expect(dialog.getByRole('spinbutton', { name: 'Crop X', exact: true })).toHaveValue('1')
+      await expect(
+        dialog.getByRole('spinbutton', { name: 'Focal Point X', exact: true }),
+      ).toHaveValue('0')
+      await dialog.getByRole('button', { name: 'Apply Changes', exact: true }).focus()
+      await page.screenshot({
+        fullPage: true,
+        path: testInfo.outputPath('transform-editor-wide.png'),
+      })
+      const viewport = page.viewportSize()
+
+      try {
+        await page.setViewportSize({ height: 800, width: 320 })
+        await expect(dialog.getByRole('spinbutton', { name: 'Crop X', exact: true })).toBeVisible()
+        await page.screenshot({
+          fullPage: true,
+          path: testInfo.outputPath('transform-editor-narrow.png'),
+        })
+      } finally {
+        if (viewport) {
+          await page.setViewportSize(viewport)
+        }
+      }
+    })
+  })
+
   test.describe('2.5.8 Target Size (Minimum) (AA)', () => {
     test('selected-value remove controls only dim their icon on hover', async () => {
       // Additional coverage for PYLD-3811.
@@ -4422,18 +4521,69 @@ test.describe('WCAG 2.2 Level AA', () => {
 
     test('should name and operate cancel before selecting a replacement file', async () => {
       const doc = await createMediaFixture({ page, serverURL })
+      const state = {
+        crop: { height: 6, width: 5, x: 1, y: 2 },
+        custom: { nested: ['retained', null, true] },
+        focalPoint: { x: 25, y: 75 },
+      }
+      const apiURL = formatAdminURL({ apiRoute: '/api', path: `/media/${doc.id}`, serverURL })
+      const seeded = await page.request.patch(apiURL, { data: { _transforms: state } })
+      expect(seeded.ok()).toBe(true)
+      const { doc: edited } = await seeded.json()
+      const originalBytes = await (
+        await page.request.get(new URL(edited.original.url, serverURL).href)
+      ).body()
+      const defaultBytes = await (
+        await page.request.get(new URL(edited.url, serverURL).href)
+      ).body()
       await page.goto(
         formatAdminURL({ adminRoute: '/admin', path: `/collections/media/${doc.id}`, serverURL }),
       )
       await waitForFormReady(page)
       await page.locator('.file-toolbar__filename-btn').click()
       await page.getByRole('menuitem', { name: 'Replace file', exact: true }).click()
+      await page
+        .locator('input[type="file"]')
+        .first()
+        .setInputFiles({
+          name: 'rejected.pdf',
+          buffer: Buffer.from('%PDF-1.7'),
+          mimeType: 'application/pdf',
+        })
+      await expect(page.getByText('Invalid file type', { exact: true })).toBeVisible()
       await page.mouse.move(0, 0)
       const cancel = page.locator('.file-manager__remove')
       await expect(cancel).toHaveAccessibleName('Cancel')
       await cancel.press('Enter')
       await expect(page.locator('.file-toolbar')).toBeVisible()
       await expect(page.locator('.file-manager__remove')).toHaveCount(0)
+      await page.getByRole('button', { name: /edit image/i }).click()
+      const editor = page.locator('.edit-upload__dialog')
+      await editor.getByRole('spinbutton', { name: 'Focal Point X', exact: true }).fill('30')
+      await editor.getByRole('button', { name: 'Apply Changes', exact: true }).click()
+      state.focalPoint.x = 30
+      // Selecting and then cancelling a replacement restores the same pending intent.
+      await page.locator('.file-toolbar__filename-btn').click()
+      await page.getByRole('menuitem', { name: 'Replace file', exact: true }).click()
+      await page
+        .locator('input[type="file"]')
+        .first()
+        .setInputFiles({ name: 'replacement.png', buffer: originalBytes, mimeType: 'image/png' })
+      await page.locator('.file-manager__remove').click()
+      await expect(page.locator('.file-toolbar')).toBeVisible()
+      await page.locator('#field-alt').fill('Cancelled replacement')
+      await page.getByRole('button', { name: 'Save', exact: true }).click()
+      await expect
+        .poll(async () => (await (await page.request.get(apiURL)).json()).alt)
+        .toBe('Cancelled replacement')
+      const saved = await (await page.request.get(apiURL)).json()
+      expect(saved._transforms).toEqual(state)
+      expect(
+        await (await page.request.get(new URL(saved.original.url, serverURL).href)).body(),
+      ).toEqual(originalBytes)
+      expect(await (await page.request.get(new URL(saved.url, serverURL).href)).body()).toEqual(
+        defaultBytes,
+      )
     })
 
     test('should name the API-key copy control before its tooltip appears', async () => {

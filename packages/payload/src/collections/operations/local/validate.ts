@@ -134,7 +134,7 @@ async function validateLocalInternal<TSlug extends CollectionSlug>({
   } = options
 
   if (id === undefined && data === undefined) {
-    throw new APIError('Validation create simulation requires data.', httpStatus.BAD_REQUEST)
+    throw new APIError('Validation create simulation requires data.', 400)
   }
 
   const collection = payload.collections[collectionSlug]

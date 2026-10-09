@@ -187,12 +187,12 @@ const findUnreferenced = async ({
   const representationSelect: SelectType = {
     _objectKey: true,
     filename: true,
+    filesize: true,
     prefix: true,
     url: true,
   }
   const select: SelectType = {
     ...representationSelect,
-    filesize: true,
     mimeType: true,
     original: representationSelect,
     ...(variantNames.length

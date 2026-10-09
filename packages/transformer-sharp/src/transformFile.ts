@@ -1,10 +1,11 @@
 import type { PayloadRequest, TransformFileArgs, TransformFileResult } from 'payload'
-import type { ResizeOptions, SharpOptions } from 'sharp'
+import type { Metadata, ResizeOptions, SharpOptions } from 'sharp'
 
-import type { SharpDependency, SharpUploadTaskOptions } from './types.js'
+import type { SharpDependency, SharpTransformLimits, SharpUploadTaskOptions } from './types.js'
 
 import { createSharpFromFile } from './createSharpFromFile.js'
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
+import { resolveOutputFormat, resolveWithMetadata, transformState } from './transformState.js'
 
 const ANIMATED_MIME_TYPES = ['image/avif', 'image/gif', 'image/webp']
 
@@ -16,14 +17,114 @@ const percentToPixel = (value: number, dimension: number) => Math.floor((value /
  * cropped, with `resizeOptions` re-applied to the crop output), or one named
  * legacy image size. Never writes to storage.
  */
-export function createTransformFile({ sharpDependency }: { sharpDependency: SharpDependency }) {
+export function createTransformFile({
+  maxSourceBytes = 64 * 1024 * 1024,
+  sharpDependency,
+  transformLimits,
+  variantSources,
+}: {
+  maxSourceBytes?: number
+  sharpDependency: SharpDependency
+  transformLimits?: SharpTransformLimits
+  variantSources?: WeakMap<File, File>
+}) {
   return async function transformFile({
-    file,
+    doc,
     options,
     req,
+    source,
   }: TransformFileArgs<SharpUploadTaskOptions>): Promise<TransformFileResult> {
+    const state = doc._transforms
+    const shouldApplySavedState =
+      state &&
+      Object.keys(state).some((key) => key !== 'focalPoint' && key !== 'encoding') &&
+      options.kind === 'main'
+    const withMetadata = resolveWithMetadata({
+      state,
+      withMetadata: options.collectionUpload.withMetadata,
+    })
+    const input = source
+    let file = new File(
+      [Buffer.from(await input.arrayBuffer({ maxBytes: maxSourceBytes }))],
+      input.filename,
+      {
+        type: input.mimeType,
+      },
+    )
+
+    if (shouldApplySavedState) {
+      file = await transformState({
+        buffer: Buffer.from(await file.arrayBuffer()),
+        filename: file.name,
+        limits: transformLimits,
+        mimeType: file.type,
+        sharpDependency,
+        shouldDeferEncoding: true,
+        // Encoding belongs to the final main output, after configured adjustments.
+        state: {
+          ...state,
+          encoding: undefined,
+          metadataPolicy: {
+            mode:
+              withMetadata === true || typeof withMetadata === 'function' ? 'preserve' : 'strip',
+          },
+        },
+      })
+    }
+
+    const encoding = state?.encoding
+    const formatOptions =
+      options.kind === 'size'
+        ? options.imageResizeConfig.formatOptions
+        : options.collectionUpload.formatOptions
+    const canonicalFormatOptions = resolveOutputFormat({
+      encoding,
+      formatOptions,
+      mimeType: input.mimeType,
+    })
+    const collectionUpload = {
+      ...options.collectionUpload,
+      withMetadata,
+    }
+
+    options =
+      options.kind === 'main'
+        ? {
+            ...options,
+            collectionUpload: {
+              ...collectionUpload,
+              formatOptions:
+                canonicalFormatOptions ??
+                (shouldApplySavedState
+                  ? { format: input.mimeType.slice('image/'.length) as 'jpeg' }
+                  : undefined),
+            },
+          }
+        : {
+            ...options,
+            collectionUpload,
+            imageResizeConfig: {
+              ...options.imageResizeConfig,
+              formatOptions: canonicalFormatOptions,
+            },
+          }
+
     if (options.kind === 'main') {
-      return transformMain({ file, options, req, sharpDependency })
+      const result = await transformMain({
+        file,
+        metadataFormat: shouldApplySavedState
+          ? (input.mimeType.slice('image/'.length) as 'jpeg')
+          : undefined,
+        options,
+        req,
+        sharpDependency,
+        shouldApplyMetadataPolicy: Boolean(
+          shouldApplySavedState && typeof withMetadata === 'function',
+        ),
+        variantSources,
+      })
+
+      return shouldApplySavedState && !result.file ? { file, status: 'continue' } : result
     }
 
     return transformSize({ file, options, req, sharpDependency })
@@ -32,14 +133,20 @@ export function createTransformFile({ sharpDependency }: { sharpDependency: Shar
 
 async function transformMain({
   file,
+  metadataFormat,
   options,
   req,
   sharpDependency,
+  shouldApplyMetadataPolicy = false,
+  variantSources,
 }: {
   file: File
+  metadataFormat?: Metadata['format']
   options: Extract<SharpUploadTaskOptions, { kind: 'main' }>
   req: PayloadRequest
   sharpDependency: SharpDependency
+  shouldApplyMetadataPolicy?: boolean
+  variantSources?: WeakMap<File, File>
 }): Promise<TransformFileResult> {
   const { collectionUpload, crop } = options
   const { constructorOptions, formatOptions, resizeOptions, trimOptions, withMetadata } =
@@ -47,7 +154,11 @@ async function transformMain({
 
   const fileIsAnimatedType = ANIMATED_MIME_TYPES.includes(file.type)
   const fileHasAdjustments = Boolean(
-    resizeOptions || formatOptions || trimOptions || constructorOptions,
+    resizeOptions ||
+      formatOptions ||
+      trimOptions ||
+      constructorOptions ||
+      shouldApplyMetadataPolicy,
   )
 
   if (crop) {
@@ -87,11 +198,31 @@ async function transformMain({
     sharpFile = sharpFile.trim(trimOptions)
   }
 
-  sharpFile = await optionallyAppendMetadata({ req, sharpFile, withMetadata })
-  const { data: outputData } = await sharpFile.toBuffer({ resolveWithObject: true })
+  sharpFile = await optionallyAppendMetadata({ metadataFormat, req, sharpFile, withMetadata })
+  const variantSource =
+    variantSources &&
+    collectionUpload.variants?.length &&
+    (resizeOptions || trimOptions || constructorOptions)
+      ? new File(
+          [
+            await (
+              fileIsAnimatedType
+                ? sharpFile.clone().webp({ lossless: true })
+                : sharpFile.clone().png()
+            ).toBuffer(),
+          ],
+          file.name,
+          { type: fileIsAnimatedType ? 'image/webp' : 'image/png' },
+        )
+      : file
+  const { data: outputData, info } = await sharpFile.toBuffer({ resolveWithObject: true })
+  const output = new File([outputData], file.name, { type: `image/${info.format}` })
+
+  // Only reuse this source when Sharp's result remains the effective main file.
+  variantSources?.set(output, variantSource)
 
   return {
-    file: new File([outputData], file.name, { type: file.type }),
+    file: output,
     status: 'continue',
   }
 }
@@ -185,14 +316,7 @@ async function transformSize({
   ).rotate()
   const originalImageMeta = await sharpBase.metadata()
 
-  let adjustedDimensions = { ...originalDimensions }
-
-  if ([5, 6, 7, 8].includes(originalImageMeta.orientation!)) {
-    adjustedDimensions = {
-      height: originalDimensions.width,
-      width: originalDimensions.height,
-    }
-  }
+  const adjustedDimensions = originalDimensions
 
   let resized = sharpBase.clone()
 
@@ -224,6 +348,7 @@ async function transformSize({
     })
 
     const metadataAppended = await optionallyAppendMetadata({
+      metadataFormat: options.metadataFormat,
       req,
       sharpFile: resized,
       withMetadata,
@@ -275,11 +400,16 @@ async function transformSize({
     resized = resized.trim(imageResizeConfig.trimOptions)
   }
 
-  resized = await optionallyAppendMetadata({ req, sharpFile: resized, withMetadata })
-  const { data: outputData } = await resized.toBuffer({ resolveWithObject: true })
+  resized = await optionallyAppendMetadata({
+    metadataFormat: options.metadataFormat,
+    req,
+    sharpFile: resized,
+    withMetadata,
+  })
+  const { data: outputData, info } = await resized.toBuffer({ resolveWithObject: true })
 
   return {
-    file: new File([outputData], file.name, { type: file.type }),
+    file: new File([outputData], file.name, { type: `image/${info.format}` }),
     status: 'continue',
   }
 }

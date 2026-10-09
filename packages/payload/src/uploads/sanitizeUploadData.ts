@@ -130,6 +130,8 @@ export const sanitizeUploadData = <T>(data: T, operation: Operation): T => {
   // Server-owned; never accepted from the caller.
   delete sanitizedData._objectKey
   delete sanitizedData.original
+  delete sanitizedData.focalX
+  delete sanitizedData.focalY
 
   // On update, `prefix` is restored from the stored document (file identity); kept on create.
   if (operation === 'update') {

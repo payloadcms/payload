@@ -20,7 +20,7 @@ export const renameFileHandler: PayloadHandler = async (req) => {
     { doc, message: req.t('general:updatedSuccessfully') },
     {
       headers: headersWithCors({ headers: new Headers(), req }),
-      status: httpStatus.OK,
+      status: 200,
     },
   )
 }

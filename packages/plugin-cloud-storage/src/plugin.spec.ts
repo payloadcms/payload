@@ -1,5 +1,5 @@
 import type { AddressInfo } from 'node:net'
-import type { Config, PayloadRequest, UploadConfig } from 'payload'
+import type { Config, JsonObject, PayloadRequest, UploadConfig } from 'payload'
 
 import type { Adapter } from './types.js'
 
@@ -8,6 +8,7 @@ import { downloadFileToBuffer } from 'payload/internal'
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import { cloudStoragePlugin } from './plugin.js'
+import { createFileOperations } from './utilities/createFileOperations.js'
 
 const collectionSlug = 'media'
 
@@ -190,4 +191,85 @@ describe('cloudStoragePlugin', () => {
 
     expect(data.prefix).toBe('tenant/acme')
   })
+})
+
+describe('managed cloud file URLs', () => {
+  it.each([
+    { hasCustomURL: true, disablePayloadAccessControl: false },
+    { hasCustomURL: true, disablePayloadAccessControl: true },
+    { hasCustomURL: false, disablePayloadAccessControl: true },
+    { hasCustomURL: false, disablePayloadAccessControl: false },
+  ])(
+    'should stage final representation URLs with custom=$hasCustomURL and public=$disablePayloadAccessControl',
+    async ({ hasCustomURL, disablePayloadAccessControl }) => {
+      const generateFileURL = vi.fn(
+        async ({ filename, prefix }) => `https://custom.example/${prefix}/${filename}`,
+      )
+      const generateURL = vi.fn(
+        async ({ filename, prefix }) => `https://provider.example/${prefix}/${filename}`,
+      )
+      const handleUpload = vi.fn(async () => undefined)
+      const operations = createFileOperations({
+        adapter: { ...adapter(), generateURL, handleUpload },
+        collection: { slug: 'media', fields: [], upload: true },
+        collectionPrefix: 'assets',
+        disablePayloadAccessControl,
+        generateFileURL: hasCustomURL ? generateFileURL : undefined,
+      })
+      const makeRepresentation = ({ filename }: { filename: string }) => ({
+        filename,
+        mimeType: 'image/png',
+        prefix: 'tenant',
+        _objectKey: 'revision',
+        url: `/api/media/file/${filename}`,
+      })
+      const data = {
+        ...makeRepresentation({ filename: 'default.png' }),
+        original: makeRepresentation({ filename: 'original.png' }),
+        variants: { small: makeRepresentation({ filename: 'small.png' }) },
+      }
+      await operations.stage({
+        data: data as JsonObject,
+        files: ['default.png', 'original.png', 'small.png'].map((filename) => ({
+          path: `/tmp/${filename}`,
+          buffer: Buffer.from('bytes'),
+        })),
+        req: {
+          context: {},
+          payload: {
+            collections: { media: { config: { upload: { variants: [{ name: 'small' }] } } } },
+          },
+        } as unknown as PayloadRequest,
+        trackStagedObject: vi.fn(),
+      })
+
+      for (const representation of [data, data.original, data.variants.small]) {
+        const base = hasCustomURL
+          ? 'https://custom.example/assets/tenant/revision'
+          : disablePayloadAccessControl
+            ? 'https://provider.example/assets/tenant/revision'
+            : '/api/media/file'
+        expect(representation.url).toBe(`${base}/${representation.filename}`)
+        expect(representation.prefix).toBe('assets/tenant')
+      }
+      expect(handleUpload).toHaveBeenCalledTimes(3)
+      expect(handleUpload).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ data: expect.objectContaining({ url: data.url }) }),
+      )
+      if (hasCustomURL) {
+        expect(generateFileURL).toHaveBeenCalledWith(
+          expect.objectContaining({
+            filename: 'small.png',
+            prefix: 'assets/tenant/revision',
+            size: { name: 'small' },
+          }),
+        )
+        expect(generateURL).not.toHaveBeenCalled()
+      } else {
+        expect(generateFileURL).not.toHaveBeenCalled()
+        expect(generateURL).toHaveBeenCalledTimes(disablePayloadAccessControl ? 3 : 0)
+      }
+    },
+  )
 })
