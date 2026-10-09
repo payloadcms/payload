@@ -35,13 +35,14 @@
   .doc-controls__meta {
     flex-grow: 1;
     display: flex;
+    flex-direction: column;
     list-style: none;
     padding: 0;
     color: var(--color-text);
-    gap: var(--spacer-2);
+    gap: 0;
     margin: 0;
-    width: 100%;
-    overflow: hidden;
+    width: auto;
+    overflow: visible;
 
     button {
       margin: 0;
@@ -142,6 +143,15 @@
     background: transparent;
   }
 
+  @media (width > 768px) {
+    .doc-controls__meta {
+      flex-direction: row;
+      width: 100%;
+      gap: var(--spacer-2);
+      overflow: hidden;
+    }
+  }
+
   /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1024px) {
     .doc-controls__controls-wrapper {
@@ -165,13 +175,6 @@
 
     .doc-controls__before-meta {
       display: none;
-    }
-
-    .doc-controls__meta {
-      flex-direction: column;
-      width: auto;
-      gap: 0;
-      overflow: visible;
     }
 
     .doc-controls__meta:has(.doc-controls__status) .doc-controls__value {

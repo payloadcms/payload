@@ -694,6 +694,7 @@ export function DefaultEditView({
     <main
       className={[
         baseClass,
+        config.admin.constrainWidth && `${baseClass}--constrain-document-width`,
         (id || globalSlug) && `${baseClass}--is-editing`,
         globalSlug && `global-edit--${globalSlug}`,
         collectionSlug && `collection-edit--${collectionSlug}`,

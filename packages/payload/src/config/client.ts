@@ -175,6 +175,7 @@ export const createClientConfig = ({
           autoLogin: config.admin.autoLogin,
           autoRefresh: config.admin.autoRefresh,
           avatar: config.admin.avatar,
+          constrainWidth: config.admin.constrainWidth,
           custom: config.admin.custom,
           dateFormat: config.admin.dateFormat,
           importMap: config.admin.importMap,
