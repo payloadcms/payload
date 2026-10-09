@@ -2,8 +2,9 @@
 
 This folder is a deployable Payload app that runs **this branch's `packages/` source**. It's not
 the npm release. The Docker build compiles `payload`, `@payloadcms/next`, `ui`, `db-mongodb`,
-`richtext-lexical`, `translations` and `graphql` from `packages/`, packs them into tarballs and
-installs the app against them. This is the same approach Payload's CI uses to test templates.
+`richtext-lexical`, `storage-s3`, `transformer-sharp`, `translations` and `graphql` from `packages/`,
+packs them into tarballs and installs the app against them. This is the same approach Payload's CI
+uses to test templates.
 
 ```
                  Internet
@@ -404,7 +405,8 @@ Traditional Chinese. The code is in `src/vigor/`, the languages in `src/locales.
 
 **Languages.** Switch language with the menu at the top right; each text field shows its language, e.g.
 "Name — English". Categories, gemstones, metals, badges, units, slugs, SKUs, links and images are the same in
-every language. On the website, a text that isn't translated shows in English.
+every language. Fields marked \* must be filled in English only: in the other languages they can stay empty,
+and the website then shows the English text, also after it's edited.
 
 **Publishing.** Products, service pages, news and events have drafts, and each language is published on its own:
 

@@ -9,9 +9,8 @@
  * On the server, deploy/import-vigor.sh runs this inside Docker (README: "Vigor website").
  *
  * The content comes from `GET <website-url>/api/content/<language>`, so run it while the website
- * still uses its own content files, before it is pointed at the CMS. Payload needs required text in
- * every language it saves, so a text without a translation is saved in English in that language.
- * Items without any translation aren't saved in that language and show in English.
+ * still uses its own content files, before it is pointed at the CMS. Texts without a translation are
+ * left empty in that language, so the website shows the English text, also after it's edited.
  *
  * Products, service pages and news that already exist (same slug), events with the same English
  * title and day, and pages (globals) that already have content are skipped, so running it again
@@ -458,7 +457,8 @@ function translationsOf(english: Data, dataIn: (code: TypedLocale) => Data | und
 }
 
 /**
- * What to save in another language: every localized text, in English where it isn't translated.
+ * What to save in another language: the translated texts, and an empty text where the translation
+ * is the same as the English one, so that it keeps showing the English text after it's edited.
  * Arrays and groups aren't localized themselves, so array rows keep their saved values and ids.
  */
 function translate(fields: FlattenedField[], saved: Data, english: Data, other: Data): Data {
@@ -468,7 +468,7 @@ function translate(fields: FlattenedField[], saved: Data, english: Data, other: 
     const value = other[field.name]
 
     if (field.localized) {
-      result[field.name] = typeof value === 'string' && value ? value : english[field.name]
+      result[field.name] = typeof value === 'string' && value !== english[field.name] ? value : ''
     } else if (field.type === 'array' && Array.isArray(saved[field.name])) {
       const englishRows = (english[field.name] ?? []) as Data[]
       const otherRows = (value ?? []) as Data[]

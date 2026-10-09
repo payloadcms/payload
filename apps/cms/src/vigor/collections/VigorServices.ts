@@ -1,7 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
+import { text, textarea } from 'payload/shared'
+
 import { publishedOrLoggedIn } from '../../access/publishedOrLoggedIn'
-import { bodyField, imageField, slugField, sortOrderField } from '../fields'
+import { bodyField, imageField, requiredInEnglish, slugField, sortOrderField } from '../fields'
 import { revalidateVigorAfterChange, revalidateVigorAfterDelete } from '../revalidate'
 
 /** Service pages of the Vigor website (/topics/<slug>), shown as tiles on the home page */
@@ -23,12 +25,14 @@ export const VigorServices: CollectionConfig = {
       type: 'text',
       localized: true,
       required: true,
+      validate: requiredInEnglish(text),
     },
     {
       name: 'summary',
       type: 'textarea',
       localized: true,
       required: true,
+      validate: requiredInEnglish(textarea),
     },
     bodyField,
     imageField(),

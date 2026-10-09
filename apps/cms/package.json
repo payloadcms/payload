@@ -14,25 +14,25 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
-    "@payloadcms/db-mongodb": "4.0.0-canary.37",
-    "@payloadcms/next": "4.0.0-canary.37",
-    "@payloadcms/richtext-lexical": "4.0.0-canary.37",
-    "@payloadcms/storage-s3": "4.0.0-canary.37",
-    "@payloadcms/ui": "4.0.0-canary.37",
+    "@payloadcms/db-mongodb": "4.0.0-canary.39",
+    "@payloadcms/next": "4.0.0-canary.39",
+    "@payloadcms/richtext-lexical": "4.0.0-canary.39",
+    "@payloadcms/storage-s3": "4.0.0-canary.39",
+    "@payloadcms/transformer-sharp": "4.0.0-canary.39",
+    "@payloadcms/ui": "4.0.0-canary.39",
     "cross-env": "10.1.0",
     "graphql": "16.8.1",
-    "next": "16.3.3",
-    "payload": "4.0.0-canary.37",
+    "next": "16.4.0",
+    "payload": "4.0.0-canary.39",
     "qrcode": "1.5.4",
-    "react": "19.2.6",
-    "react-dom": "19.2.6",
-    "sharp": "0.35.4"
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
   },
   "devDependencies": {
     "@types/node": "24.12.3",
     "@types/qrcode": "1.5.5",
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "typescript": "6.0.3"
   },
   "engines": {

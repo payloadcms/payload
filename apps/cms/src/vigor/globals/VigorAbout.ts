@@ -1,6 +1,8 @@
 import type { GlobalConfig } from 'payload'
 
-import { bodyField } from '../fields'
+import { text, textarea } from 'payload/shared'
+
+import { bodyField, requiredInEnglish } from '../fields'
 import { revalidateVigorGlobal } from '../revalidate'
 
 /** The Vigor website's About Us page (/about) */
@@ -18,6 +20,7 @@ export const VigorAbout: GlobalConfig = {
       type: 'text',
       localized: true,
       required: true,
+      validate: requiredInEnglish(text),
     },
     {
       name: 'summary',
@@ -42,12 +45,14 @@ export const VigorAbout: GlobalConfig = {
           type: 'text',
           localized: true,
           required: true,
+          validate: requiredInEnglish(text),
         },
         {
           name: 'text',
           type: 'textarea',
           localized: true,
           required: true,
+          validate: requiredInEnglish(textarea),
         },
       ],
     },
@@ -71,6 +76,7 @@ export const VigorAbout: GlobalConfig = {
               type: 'text',
               localized: true,
               required: true,
+              validate: requiredInEnglish(text),
             },
           ],
         },
@@ -85,12 +91,14 @@ export const VigorAbout: GlobalConfig = {
           type: 'text',
           localized: true,
           required: true,
+          validate: requiredInEnglish(text),
         },
         {
           name: 'text',
           type: 'textarea',
           localized: true,
           required: true,
+          validate: requiredInEnglish(textarea),
         },
       ],
     },

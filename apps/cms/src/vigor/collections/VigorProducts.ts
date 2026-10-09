@@ -1,7 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
+import { text, textarea } from 'payload/shared'
+
 import { publishedOrLoggedIn } from '../../access/publishedOrLoggedIn'
-import { bodyField, imageField, slugField, sortOrderField } from '../fields'
+import { bodyField, imageField, requiredInEnglish, slugField, sortOrderField } from '../fields'
 import { badges, gemstones, metals, productCategories, units } from '../options'
 import { revalidateVigorAfterChange, revalidateVigorAfterDelete } from '../revalidate'
 
@@ -24,6 +26,7 @@ export const VigorProducts: CollectionConfig = {
       type: 'text',
       localized: true,
       required: true,
+      validate: requiredInEnglish(text),
     },
     {
       type: 'row',
@@ -71,6 +74,7 @@ export const VigorProducts: CollectionConfig = {
       label: 'Weight and size',
       localized: true,
       required: true,
+      validate: requiredInEnglish(text),
     },
     {
       type: 'row',
@@ -97,6 +101,7 @@ export const VigorProducts: CollectionConfig = {
       type: 'textarea',
       localized: true,
       required: true,
+      validate: requiredInEnglish(textarea),
     },
     bodyField,
     imageField({
