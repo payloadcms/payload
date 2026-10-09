@@ -270,6 +270,9 @@ export const APIViewClient: React.FC = () => {
               defaultLanguage="json"
               height="100%"
               options={{
+                ariaLabel: t('general:apiResponseReadOnly'),
+                domReadOnly: true,
+                editContext: false,
                 fixedOverflowWidgets: true,
                 folding: true,
                 lineNumbers: 'on',
