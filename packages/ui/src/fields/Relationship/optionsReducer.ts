@@ -34,7 +34,7 @@ export const optionsReducer = (state: OptionGroup[], action: Action): OptionGrou
       const loadedIDs = reduceToIDs(state)
       const newOptions = [...state]
       const optionsToAddTo = newOptions.find(
-        (optionGroup) => optionGroup.label === collection.labels.plural,
+        (optionGroup) => optionGroup.label === getTranslation(collection.labels.plural, i18n),
       )
       const newSubOptions = docs.reduce((docSubOptions, doc) => {
         if (
@@ -120,12 +120,12 @@ export const optionsReducer = (state: OptionGroup[], action: Action): OptionGrou
     }
 
     case 'REMOVE': {
-      const { id, collection } = action
+      const { id, collection, i18n } = action
 
       const newOptions = [...state]
 
       const indexOfGroup = newOptions.findIndex(
-        (optionGroup) => optionGroup.label === collection.labels.plural,
+        (optionGroup) => optionGroup.label === getTranslation(collection.labels.plural, i18n),
       )
 
       if (indexOfGroup === -1) {
@@ -154,7 +154,7 @@ export const optionsReducer = (state: OptionGroup[], action: Action): OptionGrou
       })
 
       const foundOptionGroup = newOptions.find(
-        (optionGroup) => optionGroup.label === collection.labels.plural,
+        (optionGroup) => optionGroup.label === getTranslation(collection.labels.plural, i18n),
       )
       const foundOption = foundOptionGroup?.options?.find((option) => option.value === doc.id)
 
