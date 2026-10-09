@@ -581,6 +581,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     yes: 'হ্যাঁ',
   },
   hierarchy: {
+    folderLocation: 'ফোল্ডারের অবস্থান',
     goTo: '"{{name}}" এ যান',
     itemsMovedTo: '{{title}} এখন {{destination}} এ স্থানান্তরিত হয়েছে',
     itemsMovedToRoot: '{{title}} মূলে সরানো হয়েছে',

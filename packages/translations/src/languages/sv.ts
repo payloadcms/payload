@@ -573,6 +573,7 @@ export const svTranslations: DefaultTranslationsObject = {
     yes: 'Ja',
   },
   hierarchy: {
+    folderLocation: 'Mappens plats',
     goTo: 'Gå till "{{name}}"',
     itemsMovedTo: '{{title}} flyttades till {{destination}}',
     itemsMovedToRoot: '{{title}} flyttad till rot',

@@ -576,6 +576,7 @@ export const idTranslations: DefaultTranslationsObject = {
     yes: 'Ya',
   },
   hierarchy: {
+    folderLocation: 'Lokasi folder',
     goTo: 'Buka "{{name}}"',
     itemsMovedTo: '{{title}} dipindahkan ke {{destination}}',
     itemsMovedToRoot: '{{title}} dipindahkan ke akar',

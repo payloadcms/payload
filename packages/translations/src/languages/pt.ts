@@ -576,6 +576,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     yes: 'Sim',
   },
   hierarchy: {
+    folderLocation: 'Localização da pasta',
     goTo: 'Ir para "{{name}}"',
     itemsMovedTo: '{{title}} foi movido para {{destination}}',
     itemsMovedToRoot: '{{title}} movido para a raiz',

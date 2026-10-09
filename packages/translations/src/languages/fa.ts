@@ -564,6 +564,7 @@ export const faTranslations: DefaultTranslationsObject = {
     yes: 'بله',
   },
   hierarchy: {
+    folderLocation: 'محل پوشه',
     goTo: 'به "{{name}}" بروید.',
     itemsMovedTo: '{{title}} به {{destination}} منتقل شد.',
     itemsMovedToRoot: '{{title}} به ریشه منتقل شد',

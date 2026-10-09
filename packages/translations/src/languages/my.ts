@@ -582,6 +582,7 @@ export const myTranslations: DefaultTranslationsObject = {
     yes: 'ဟုတ်ကဲ့',
   },
   hierarchy: {
+    folderLocation: 'ဖိုင်တွဲတည်နေရာ',
     goTo: '"{{name}}" သို့သွားပါ',
     itemsMovedTo: '{{title}} ကို {{destination}} သို့ ရွှေ့လိုက်ပါပြီ',
     itemsMovedToRoot: '"{{title}}" ကို အမြစ်သို့ ရွှေ့လိုက်ပါပြီ။',

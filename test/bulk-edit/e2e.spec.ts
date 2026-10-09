@@ -664,7 +664,7 @@ test.describe('Bulk Edit', () => {
     const titleOption = fieldSelectMenu.locator('.rs__option:has-text("Title")').first()
     await titleOption.click()
 
-    await editDrawer.locator('input#field-title').fill(bulkEditValue)
+    await editDrawer.locator('input[name="title"]').fill(bulkEditValue)
 
     await editDrawer.locator('button[type="submit"]:has-text("Publish changes")').click()
 

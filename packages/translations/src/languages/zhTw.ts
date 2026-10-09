@@ -544,6 +544,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     yes: '是',
   },
   hierarchy: {
+    folderLocation: '資料夾位置',
     goTo: '前往「{{name}}」',
     itemsMovedTo: '{{title}} 移至 {{destination}}',
     itemsMovedToRoot: '{{title}} 已移至根目錄',

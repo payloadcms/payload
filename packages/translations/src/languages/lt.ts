@@ -576,6 +576,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     yes: 'Taip',
   },
   hierarchy: {
+    folderLocation: 'Aplanko vieta',
     goTo: 'Eikite į "{{name}}"',
     itemsMovedTo: '{{title}} perkeltas į {{destination}}',
     itemsMovedToRoot: '{{title}} perkeltas į šaknį',

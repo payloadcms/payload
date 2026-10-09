@@ -573,6 +573,7 @@ export const taTranslations: DefaultTranslationsObject = {
     yes: 'ஆம்',
   },
   hierarchy: {
+    folderLocation: 'கோப்புறையின் இருப்பிடம்',
     goTo: '"{{name}}"க்கு செல்லுங்கள்',
     itemsMovedTo: '{{title}} ஐ {{destination}} க்கு நகர்த்தினோம்',
     itemsMovedToRoot: '{{title}} மூலத்திற்கு நகர்த்தப்பட்டது',

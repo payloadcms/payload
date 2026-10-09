@@ -580,6 +580,7 @@ export const huTranslations: DefaultTranslationsObject = {
     yes: 'Igen',
   },
   hierarchy: {
+    folderLocation: 'Mappa helye',
     goTo: 'Ugrás ide: "{{name}}"',
     itemsMovedTo: '{{title}} átkerült ide: {{destination}}',
     itemsMovedToRoot: '{{title}} áthelyezve a gyökérbe',

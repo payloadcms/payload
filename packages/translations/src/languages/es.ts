@@ -580,6 +580,7 @@ export const esTranslations: DefaultTranslationsObject = {
     yes: 'Sí',
   },
   hierarchy: {
+    folderLocation: 'Ubicación de la carpeta',
     goTo: 'Ir a "{{name}}"',
     itemsMovedTo: '{{title}} se trasladó a {{destination}}',
     itemsMovedToRoot: '{{title}} se movió a la raíz',

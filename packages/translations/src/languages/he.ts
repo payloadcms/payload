@@ -555,6 +555,7 @@ export const heTranslations: DefaultTranslationsObject = {
     yes: 'כן',
   },
   hierarchy: {
+    folderLocation: 'מיקום התיקייה',
     goTo: 'עבור אל "{{name}}"',
     itemsMovedTo: '{{title}} הועבר ל-{{destination}}',
     itemsMovedToRoot: '{{title}} הועבר לשורש',

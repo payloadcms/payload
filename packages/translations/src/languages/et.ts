@@ -567,6 +567,7 @@ export const etTranslations: DefaultTranslationsObject = {
     yes: 'Jah',
   },
   hierarchy: {
+    folderLocation: 'Kausta asukoht',
     goTo: 'Mine "{{name}}" juurde',
     itemsMovedTo: '{{title}} viidi üle {{destination}}',
     itemsMovedToRoot: '{{title}} liigutatud juurikasse',

@@ -576,6 +576,7 @@ export const caTranslations: DefaultTranslationsObject = {
     yes: 'Sí',
   },
   hierarchy: {
+    folderLocation: 'Ubicació de la carpeta',
     goTo: 'Vés a "{{name}}"',
     itemsMovedTo: "{{title}} s'ha traslladat a {{destination}}",
     itemsMovedToRoot: "{{title}} s'ha traslladat a l'arrel",

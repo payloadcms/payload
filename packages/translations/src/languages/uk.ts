@@ -567,6 +567,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     yes: 'Так',
   },
   hierarchy: {
+    folderLocation: 'Розташування папки',
     goTo: 'Перейти до "{{name}}"',
     itemsMovedTo: '{{title}} перейшов до {{destination}}',
     itemsMovedToRoot: '{{title}} переміщено в корінь',

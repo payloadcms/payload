@@ -51,7 +51,7 @@ describe('Lexical Link Feature', () => {
 
     await linkButton.click()
 
-    const customField = lexical.drawer.locator('#field-someText')
+    const customField = lexical.drawer.locator('input[name="someText"]')
 
     await expect(customField).toBeVisible()
   })
@@ -93,7 +93,7 @@ describe('Lexical Link Feature', () => {
 
     const longUrl =
       'https://example.com/some/very/long/path/that/should/cause/the/tooltip/to/overflow/when/displayed/in/the/editor/with/many/more/segments/to/make/it/even/longer'
-    const urlField = lexical.drawer.locator('#field-url')
+    const urlField = lexical.drawer.locator('input[name="url"]')
     await urlField.click()
     await urlField.clear()
     await urlField.pressSequentially(longUrl)
@@ -161,7 +161,7 @@ describe('Lexical Link Feature', () => {
 
     const longUrl =
       'https://example.com/some/very/long/path/that/should/cause/the/tooltip/to/overflow/when/displayed/in/the/editor/with/many/more/segments/to/make/it/even/longer'
-    const urlField = lexical.drawer.locator('#field-url')
+    const urlField = lexical.drawer.locator('input[name="url"]')
     await urlField.click()
     await urlField.clear()
     await urlField.pressSequentially(longUrl)
@@ -226,7 +226,7 @@ describe('Lexical Link Feature', () => {
     await linkButton.click()
 
     const shortUrl = 'https://google.com'
-    const urlField = lexical.drawer.locator('#field-url')
+    const urlField = lexical.drawer.locator('input[name="url"]')
     await urlField.click()
     await urlField.clear()
     await urlField.pressSequentially(shortUrl)
@@ -294,7 +294,7 @@ describe('Lexical Link Feature', () => {
     await linkButton.click()
 
     const shortUrl = 'https://google.com'
-    const urlField = lexical.drawer.locator('#field-url')
+    const urlField = lexical.drawer.locator('input[name="url"]')
     await urlField.click()
     await urlField.clear()
     await urlField.pressSequentially(shortUrl)

@@ -577,6 +577,7 @@ export const azTranslations: DefaultTranslationsObject = {
     yes: 'Bəli',
   },
   hierarchy: {
+    folderLocation: 'Qovluğun yeri',
     goTo: '"{{name}}" -a keçin',
     itemsMovedTo: '{{title}} {{destination}}-ə köçürüldü',
     itemsMovedToRoot: '{{title}} kökə köçürüldü',

@@ -251,8 +251,9 @@ describe('Versions', () => {
         '.relationship-add-new__add-button.doc-drawer__toggler',
       )
       await addNewButton.click()
-      const titleField = page.locator('#field-title')
-      const descriptionField = page.locator('#field-description')
+      const drawer = page.locator('.doc-drawer')
+      const titleField = drawer.getByRole('textbox', { name: /^Title\b/ })
+      const descriptionField = drawer.getByRole('textbox', { name: /^Description\b/ })
       await titleField.fill('test')
       await descriptionField.fill('test')
 
@@ -2287,7 +2288,7 @@ describe('Versions', () => {
         '#field-relationToAutosaves .relationship--single-value__drawer-toggler',
       )
 
-      const titleField = page.locator('#field-title')
+      const titleField = page.locator('[id^=doc-drawer_autosave-posts_1_] input[name="title"]')
 
       await titleField.fill('')
 

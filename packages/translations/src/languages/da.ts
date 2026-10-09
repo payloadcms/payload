@@ -571,6 +571,7 @@ export const daTranslations: DefaultTranslationsObject = {
     yes: 'Ja',
   },
   hierarchy: {
+    folderLocation: 'Mappeplacering',
     goTo: 'Gå til "{{name}}"',
     itemsMovedTo: '{{title}} flyttet til {{destination}}',
     itemsMovedToRoot: '{{title}} flyttet til rod',

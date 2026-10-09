@@ -572,6 +572,7 @@ export const viTranslations: DefaultTranslationsObject = {
     yes: 'Có',
   },
   hierarchy: {
+    folderLocation: 'Vị trí thư mục',
     goTo: 'Đi đến "{{name}}"',
     itemsMovedTo: '{{title}} đã di chuyển đến {{destination}}',
     itemsMovedToRoot: '{{title}} đã được chuyển đến gốc',

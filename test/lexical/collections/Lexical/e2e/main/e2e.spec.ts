@@ -1046,7 +1046,7 @@ describe('lexicalMain', () => {
     await expect(linkDrawer).toBeVisible()
     await wait(500)
 
-    const urlInput = linkDrawer.locator('#field-url').first()
+    const urlInput = linkDrawer.locator('input[name="url"]').first()
     // Click on the input to focus it
     await urlInput.click()
     // should be https:// value
@@ -1281,7 +1281,7 @@ describe('lexicalMain', () => {
     const linkDrawer = page.locator('dialog[id^=drawer_1_lexical-rich-text-link-]').first() // IDs starting with drawer_1_lexical-rich-text-link- (there's some other symbol after the underscore)
     await expect(linkDrawer).toBeVisible()
 
-    const urlInput = linkDrawer.locator('#field-url').first()
+    const urlInput = linkDrawer.locator('input[name="url"]').first()
 
     await expect(urlInput).toBeVisible()
   })
@@ -1306,7 +1306,7 @@ describe('lexicalMain', () => {
     const linkDrawer = page.locator('dialog[id^=drawer_1_lexical-rich-text-link-]').first()
     await expect(linkDrawer).toBeVisible()
 
-    const blockTextInput = linkDrawer.locator('#field-blocks__0__text').first()
+    const blockTextInput = linkDrawer.locator('input[name="blocks.0.text"]').first()
 
     await expect(blockTextInput).toBeVisible()
     await expect(blockTextInput).toBeEditable()
@@ -1568,7 +1568,7 @@ describe('lexicalMain', () => {
     await richTextField.locator('.slash-menu-popup button').getByText('My Block').click()
 
     await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(1)
-    await richTextField.locator('#field-someTextRequired').first().fill('test')
+    await richTextField.locator('input[name="someTextRequired"]').first().fill('test')
 
     await saveDocAndAssert(page)
 
@@ -1747,6 +1747,8 @@ describe('lexicalMain', () => {
       .first()
     await uploadNode.click()
     await expectInsideSelectedDecorator(uploadNode)
+    await page.keyboard.press('Backspace')
+    await expect(uploadNode).toBeHidden()
 
     const textNode = page.getByText('Upload Node:', { exact: true })
     await textNode.click()
@@ -1771,11 +1773,8 @@ describe('lexicalMain', () => {
 
     const labelInsideCollapsableBody2 = page.getByText('Text2')
     await labelInsideCollapsableBody2.click()
-    await expectInsideSelectedDecorator(labelInsideCollapsableBody2)
-
-    // TEST DELETE!
-    await page.keyboard.press('Backspace')
-    await expect(labelInsideCollapsableBody2).toBeHidden()
+    await expect(page.getByRole('textbox', { name: 'Text2', exact: true })).toBeFocused()
+    await expect(decoratorLocator).toBeHidden()
 
     const monacoLabel = page.locator('.field-label').getByText('Code', { exact: true })
     await monacoLabel.click()

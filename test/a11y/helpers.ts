@@ -496,7 +496,7 @@ export async function openRelationshipCreationDrawer({
   const drawer = page.locator('dialog[id^="doc-drawer_posts_"]')
 
   await expect(drawer).toBeVisible()
-  await expect(drawer.locator('#field-title')).toBeVisible()
+  await expect(drawer.getByRole('textbox', { name: /^Title/ })).toBeVisible()
   return drawer
 }
 

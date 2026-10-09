@@ -574,6 +574,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     yes: 'Ja',
   },
   hierarchy: {
+    folderLocation: 'Mappeplassering',
     goTo: 'Gå til "{{name}}"',
     itemsMovedTo: '{{title}} flyttet til {{destination}}',
     itemsMovedToRoot: '{{title}} flyttet til roten',

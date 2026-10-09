@@ -4,20 +4,20 @@ import { closeAllToasts } from '../helpers.js'
 import { selectInput } from '../selectInput.js'
 export const createFolderDoc = async ({
   folderName,
-  page,
   folderType,
+  page,
 }: {
   folderName: string
   folderType: string[]
   page: Page
 }) => {
   const drawer = page.locator('dialog .collection-edit--payload-folders')
-  await drawer.locator('input#field-name').fill(folderName)
+  await drawer.getByRole('textbox', { name: /^Name/ }).fill(folderName)
 
   await selectInput({
-    page,
     multiSelect: true,
     options: folderType,
+    page,
     selectLocator: drawer.locator('#field-folderType'),
   })
 

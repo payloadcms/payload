@@ -569,6 +569,7 @@ export const isTranslations: DefaultTranslationsObject = {
     yes: 'Já',
   },
   hierarchy: {
+    folderLocation: 'Staðsetning möppu',
     goTo: 'Farðu á "{{name}}"',
     itemsMovedTo: '{{title}} flutt til {{destination}}',
     itemsMovedToRoot: '{{title}} flutt til rót',

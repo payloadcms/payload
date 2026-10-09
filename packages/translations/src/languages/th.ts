@@ -561,6 +561,7 @@ export const thTranslations: DefaultTranslationsObject = {
     yes: 'ใช่',
   },
   hierarchy: {
+    folderLocation: 'ตำแหน่งโฟลเดอร์',
     goTo: 'ไปที่ "{{name}}"',
     itemsMovedTo: '{{title}} ย้ายไปที่ {{destination}}',
     itemsMovedToRoot: '{{title}} ถูกย้ายไปยังราก',

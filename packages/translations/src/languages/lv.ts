@@ -570,6 +570,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     yes: 'Jā',
   },
   hierarchy: {
+    folderLocation: 'Mapes atrašanās vieta',
     goTo: 'Dodieties uz "{{name}}"',
     itemsMovedTo: '{{title}} tika pārvietots uz {{destination}}',
     itemsMovedToRoot: '{{title}} pārvietots uz sakni',
