@@ -903,6 +903,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     // Tab visibility on the client is keyed by `field.id`, not `path` (like all other fields).
     if (field?.id) {
       state[field.id] = {
+        disableFormData: true,
         passesCondition,
       }
 
