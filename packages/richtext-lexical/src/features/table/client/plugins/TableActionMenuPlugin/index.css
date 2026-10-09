@@ -57,7 +57,7 @@
       border: none;
       height: var(--stroke-width-small);
       margin: var(--spacer-2) calc(var(--spacer-2) * -1);
-      background-color: var(--ramp-white-200);
+      background-color: var(--contrast-menu-border, var(--ramp-white-200));
     }
 
     .item {

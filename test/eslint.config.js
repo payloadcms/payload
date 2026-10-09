@@ -88,6 +88,8 @@ export const testEslintConfig = [
             'assertNetworkRequests',
             'assertRequestBody',
             'expectNoResultsAndCreateFolderButton',
+            'expectPaintContrast',
+            'expectTextContrast',
             'createFolder',
             'createFolderFromDoc',
             'assertURLParams',

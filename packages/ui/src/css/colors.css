@@ -487,4 +487,61 @@
        End Field Tokens
        ————————————————————————————————————————————— */
   }
+  /* Enhanced contrast preserves the standard palette when disabled. */
+  html[data-enhanced-contrast],
+  html[data-enhanced-contrast] [data-theme] {
+    --color-border: var(--color-border-control);
+    --contrast-menu-border: var(--ramp-white-500);
+    --contrast-chip-border: var(--color-border-control);
+    --contrast-button-border: var(--color-border-control);
+    --contrast-nav-border: var(--color-border-control);
+  }
+
+  html[data-enhanced-contrast],
+  html[data-enhanced-contrast] [data-theme='light'] {
+    --color-bg-brand: var(--ramp-blue-700);
+    --color-bg-brand-hover: var(--ramp-blue-800);
+    --color-bg-brand-pressed: var(--ramp-blue-900);
+    --color-bg-selected-strong: var(--color-bg-brand);
+    --color-bg-selected-strong-hover: var(--color-bg-brand-hover);
+    --color-bg-danger: var(--ramp-red-600);
+    --color-bg-danger-hover: var(--ramp-red-700);
+    --color-bg-danger-pressed: var(--ramp-red-800);
+    --field-color-border: var(--color-border-control);
+    --field-color-border-hover: var(--color-border-control);
+    --color-border-control: var(--ramp-black-500);
+    --color-border-selected: var(--ramp-blue-700);
+    --color-icon-tertiary: var(--ramp-black-500);
+    --color-text-brand: var(--ramp-blue-700);
+    --color-text-danger: var(--ramp-red-700);
+    --color-text-disabled: var(--ramp-grey-600);
+    --color-text-ondisabled: var(--ramp-grey-600);
+    --color-text-secondary: var(--ramp-black-600);
+    --color-text-selected: var(--ramp-blue-800);
+    --color-text-tertiary: var(--ramp-grey-600);
+  }
+
+  html[data-enhanced-contrast][data-theme='dark'],
+  html[data-enhanced-contrast] [data-theme='dark'] {
+    --color-bg-brand: var(--ramp-blue-700);
+    --color-bg-brand-hover: var(--ramp-blue-800);
+    --color-bg-brand-pressed: var(--ramp-blue-900);
+    --color-bg-selected-strong: var(--color-bg-brand);
+    --color-bg-selected-strong-hover: var(--color-bg-brand-hover);
+    --color-bg-danger: var(--ramp-dark-red-600);
+    --color-bg-danger-hover: var(--ramp-dark-red-700);
+    --color-bg-danger-pressed: var(--ramp-red-800);
+    --field-color-border: var(--color-border-control);
+    --field-color-border-hover: var(--color-border-control);
+    --color-border-control: var(--ramp-white-500);
+    --color-border-selected: var(--ramp-blue-400);
+    --color-icon-tertiary: var(--ramp-white-400);
+    --color-text-brand: var(--ramp-blue-400);
+    --color-text-danger: var(--ramp-red-400);
+    --color-text-disabled: var(--ramp-white-500);
+    --color-text-ondisabled: var(--ramp-white-1000);
+    --color-text-secondary: var(--ramp-white-500);
+    --color-text-selected: var(--ramp-blue-200);
+    --color-text-tertiary: var(--ramp-white-500);
+  }
 }

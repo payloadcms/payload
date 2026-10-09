@@ -26,7 +26,8 @@
     width: var(--spacer-5);
     height: var(--spacer-3);
     background: var(--color-bg-secondary);
-    border: var(--stroke-width-small) solid var(--special-border-translucent);
+    border: var(--stroke-width-small) solid
+      var(--color-border-control, var(--special-border-translucent));
     border-radius: var(--radius-full);
     pointer-events: none;
   }
@@ -42,7 +43,8 @@
     width: var(--spacer-2-5);
     height: var(--spacer-2);
     background: var(--color-icon-onbrand);
-    outline: var(--stroke-width-small) solid var(--special-border-translucent);
+    outline: var(--stroke-width-small) solid
+      var(--color-border-control, var(--special-border-translucent));
     border-radius: var(--radius-full);
   }
 

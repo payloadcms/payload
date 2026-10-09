@@ -33,6 +33,10 @@
     border: var(--stroke-width-small) solid transparent;
     border-radius: var(--radius-medium);
 
+    &:not([readonly]) {
+      border-color: var(--color-border-control, transparent);
+    }
+
     &::placeholder {
       color: var(--color-text-tertiary);
       font-weight: var(--text-body-medium-font-weight);

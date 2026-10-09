@@ -1,6 +1,6 @@
 @layer payload-default {
   .rich-text-lexical {
-    --lexical-border-color: var(--color-border);
+    --lexical-border-color: var(--color-border-control, var(--color-border));
 
     &.error {
       --lexical-border-color: var(--color-border-danger-strong);

@@ -2,7 +2,7 @@
   .nav-group {
     width: 100%;
     padding: var(--spacer-2) 0;
-    border-top: var(--stroke-width-small) solid var(--color-border);
+    border-top: var(--stroke-width-small) solid var(--contrast-nav-border, var(--color-border));
 
     &:first-child {
       border-top: none;
