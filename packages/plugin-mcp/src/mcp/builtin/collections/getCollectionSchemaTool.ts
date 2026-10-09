@@ -20,12 +20,10 @@ export const getCollectionSchemaTool = defineCollectionTool({
   description:
     'Get the input schema and LLM instructions before creating or updating documents in a collection.',
   input: getCollectionSchemaInputSchema,
-}).handler(async ({ slug, authorizedMCP, req }) => {
-  const permissions = authorizedMCP.overrideAccess
-    ? null
-    : (await getAccessResults({ req })).collections?.[slug]
+}).handler(async ({ slug, req }) => {
+  const permissions = (await getAccessResults({ req })).collections?.[slug]
 
-  if (!authorizedMCP.overrideAccess && !permissions?.create && !permissions?.update) {
+  if (!permissions?.create && !permissions?.update) {
     return {
       content: [
         {
@@ -39,8 +37,8 @@ export const getCollectionSchemaTool = defineCollectionTool({
 
   const inputSchema = getCollectionInputSchema({
     collectionSlug: slug,
+    permissions,
     req,
-    ...(permissions ? { permissions } : {}),
   })
 
   if (!inputSchema) {
@@ -69,7 +67,7 @@ export const getCollectionSchemaTool = defineCollectionTool({
   const instructions = await getLLMInstructions({
     slug,
     type: 'collection',
-    overrideAccess: authorizedMCP.overrideAccess,
+    overrideAccess: false,
     req,
   })
 

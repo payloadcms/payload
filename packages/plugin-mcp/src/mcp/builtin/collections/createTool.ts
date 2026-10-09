@@ -28,7 +28,7 @@ export const createDocumentsTool = defineCollectionTool({
   },
   description: DEFAULT_DESCRIPTION,
   input: createDocumentsInputSchema({ file: fileInputSchema }),
-}).handler(async ({ slug, authorizedMCP, input, req }) => {
+}).handler(async ({ slug, input, req }) => {
   const payload = req.payload
   const collectionConfig = payload.collections[slug]?.config
   const logger = getLogger({ payload })
@@ -73,7 +73,7 @@ export const createDocumentsTool = defineCollectionTool({
           data: parsedData,
           depth,
           draft,
-          overrideAccess: authorizedMCP.overrideAccess,
+          overrideAccess: false,
           populate,
           publishAllLocales,
           req,

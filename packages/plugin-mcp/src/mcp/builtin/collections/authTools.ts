@@ -46,7 +46,7 @@ export const authCollectionTool = defineCollectionTool({
       .optional(z.record(z.string(), z.string()))
       .check(z.describe('Custom headers to send with the authentication request.')),
   }),
-}).handler(async ({ slug, authorizedMCP, input, req }) => {
+}).handler(async ({ slug, input, req }) => {
   const logger = getLogger({ payload: req.payload })
   try {
     let authHeaders = new Headers()
@@ -66,7 +66,7 @@ export const authCollectionTool = defineCollectionTool({
       const user = await req.payload.findByID({
         id: authenticatedUser.id,
         collection: authenticatedUser.collection,
-        overrideAccess: authorizedMCP.overrideAccess,
+        overrideAccess: false,
         req: authReq,
       })
       result.user = {
@@ -145,14 +145,14 @@ export const loginCollectionTool = defineCollectionTool({
     email: emailSchema,
     password: z.string().check(z.describe('The user password.')),
   }),
-}).handler(async ({ slug, authorizedMCP, input, req }) => {
+}).handler(async ({ slug, input, req }) => {
   const logger = getLogger({ payload: req.payload })
   try {
     const result = await req.payload.login({
       collection: slug,
       data: { email: input.email, password: input.password },
       depth: input.depth,
-      overrideAccess: authorizedMCP.overrideAccess,
+      overrideAccess: false,
     })
     return {
       content: [
@@ -183,13 +183,13 @@ export const resetPasswordCollectionTool = defineCollectionTool({
     password: z.string().check(z.describe('The new password for the user.')),
     token: z.string().check(z.describe('The password reset token sent to the user email.')),
   }),
-}).handler(async ({ slug, authorizedMCP, input, req }) => {
+}).handler(async ({ slug, input, req }) => {
   const logger = getLogger({ payload: req.payload })
   try {
     const result = await req.payload.resetPassword({
       collection: slug,
       data: { password: input.password, token: input.token },
-      overrideAccess: authorizedMCP.overrideAccess,
+      overrideAccess: false,
     })
     return {
       content: [
@@ -219,13 +219,13 @@ export const unlockCollectionTool = defineCollectionTool({
   },
   description: 'Unlocks a user account that has been locked due to failed login attempts.',
   input: strictObject({ email: emailSchema }),
-}).handler(async ({ slug, authorizedMCP, input, req }) => {
+}).handler(async ({ slug, input, req }) => {
   const logger = getLogger({ payload: req.payload })
   try {
     const result = await req.payload.unlock({
       collection: slug,
       data: { email: input.email },
-      overrideAccess: authorizedMCP.overrideAccess,
+      overrideAccess: false,
       req,
     })
     return {

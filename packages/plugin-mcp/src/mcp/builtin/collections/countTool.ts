@@ -19,7 +19,7 @@ export const countDocumentsTool = defineCollectionTool({
   },
   description: DEFAULT_DESCRIPTION,
   input: countDocumentsInputSchema,
-}).handler(async ({ slug, authorizedMCP, input, req }) => {
+}).handler(async ({ slug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
   const { locale, trash, where } = input
@@ -29,7 +29,7 @@ export const countDocumentsTool = defineCollectionTool({
   try {
     const result = await payload.count({
       collection: slug,
-      overrideAccess: authorizedMCP.overrideAccess,
+      overrideAccess: false,
       req,
       ...(locale ? { locale } : {}),
       ...(trash !== undefined ? { trash } : {}),

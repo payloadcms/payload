@@ -19,7 +19,7 @@ export const deleteDocumentsTool = defineCollectionTool({
   },
   description: DEFAULT_DESCRIPTION,
   input: deleteDocumentsInputSchema,
-}).handler(async ({ slug, authorizedMCP, input, req }) => {
+}).handler(async ({ slug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
 
@@ -35,7 +35,7 @@ export const deleteDocumentsTool = defineCollectionTool({
         id: parseDocumentID({ id, collectionSlug: slug, payload }),
         collection: slug,
         depth,
-        overrideAccess: authorizedMCP.overrideAccess,
+        overrideAccess: false,
         req,
         ...(locale && { locale }),
         ...(fallbackLocale !== undefined && { fallbackLocale }),
@@ -61,7 +61,7 @@ export const deleteDocumentsTool = defineCollectionTool({
     const result = await payload.delete({
       collection: slug,
       depth,
-      overrideAccess: authorizedMCP.overrideAccess,
+      overrideAccess: false,
       req,
       where,
       ...(locale && { locale }),

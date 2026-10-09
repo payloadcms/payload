@@ -40,6 +40,24 @@ Payload is a Next.js native CMS with TypeScript-first architecture, providing ad
 | Plugin hooks             | Preserve existing hooks in array                                           | [PLUGIN-DEVELOPMENT.md#adding-hooks](reference/PLUGIN-DEVELOPMENT.md#adding-hooks)                                               |
 | Check field type         | Type guard functions                                                       | [FIELD-TYPE-GUARDS.md](reference/FIELD-TYPE-GUARDS.md)                                                                           |
 
+## Choosing an interface
+
+Use the built-in Payload CLI for local development and coding-agent work.
+
+```sh
+pnpm payload help --json
+pnpm payload getConfigInfo --json
+pnpm payload getCollectionSchema --slug users --json
+```
+
+Read the schema and its LLM instructions before writing content. The CLI is a
+trusted local interface with access to the project's database credentials.
+
+Use authenticated MCP when working against a stable running server, such as a
+production deployment. The blank templates include the MCP plugin; other projects
+can install and configure it. Configure the client with the server's URL and
+credentials.
+
 ## Quick Start
 
 ```bash

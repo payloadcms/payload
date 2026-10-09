@@ -2313,20 +2313,19 @@ mcpPlugin({
 Prompts and resources move the same way, into top-level `prompts` and `resources` records.
 
 Tool handlers now receive `authorizedMCP` in that object argument. It contains
-the authorized MCP items and the `overrideAccess` value, but not the user.
+the authorized MCP items, but not the user or an access override.
 `req.user` is now the single source of truth for the caller's identity. Unlike
 the v3 MCP API-key resolver, the default v4 resolver assigns the authenticated
 user to `req.user` before custom handlers run.
 
-If a custom tool calls Payload's local API, pass `req` and
-`authorizedMCP.overrideAccess`. The local API reads the user from `req.user`:
+If a custom tool calls Payload's local API, pass `req` and keep
+`overrideAccess: false`. The local API reads the user from `req.user`:
 
-```diff
+```ts
 const result = await req.payload.find({
   collection: 'posts',
   req,
-- overrideAccess: false,
-+ overrideAccess: authorizedMCP.overrideAccess,
+  overrideAccess: false,
 })
 ```
 
@@ -2396,9 +2395,9 @@ one argument object and returns an `AuthorizedMCP` instead of the old
 `MCPAccessSettings` type.
 
 In v3, the resolved user was stored on `MCPAccessSettings.user`. In v4, a custom
-resolver must assign the user directly to `req.user` and return only `items` and
-`overrideAccess`. Always assign `req.user`, including `null` for an anonymous
-caller. The custom hook replaces the default authentication and item filtering,
+resolver must assign the user directly to `req.user` and return only `items`.
+Always assign `req.user`, including `null` for an anonymous caller.
+The custom hook replaces the default authentication and item filtering,
 so it must also return only the MCP items that caller may use.
 
 ```diff
@@ -2406,13 +2405,12 @@ mcpPlugin({
 - overrideAuth: async (req, getDefaultMcpAccessSettings) => {
 -   return getDefaultMcpAccessSettings()
 - },
-+ overrideGetAuthorizedMCP: async ({ overrideAccess, pluginConfig, req }) => {
++ overrideGetAuthorizedMCP: async ({ pluginConfig, req }) => {
 +   const user = await authenticateExternalRequest(req)
 +   req.user = user ?? null
 +
 +   return {
 +     items: req.user ? pluginConfig.items : [],
-+     overrideAccess,
 +   }
 + },
 })
