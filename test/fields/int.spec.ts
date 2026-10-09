@@ -2197,6 +2197,36 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       expect(result.totalDocs).toBe(0)
     })
 
+    it('should query createdAt (in with a comma-delimited string)', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            in: `${doc.createdAt},${tenMinutesAgo.toISOString()}`,
+          },
+        },
+      })
+
+      expect(result.docs[0].id).toBe(doc.id)
+      expect(result.totalDocs).toBe(1)
+    })
+
+    it('should query createdAt (in ignoring unparseable values)', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            in: `${doc.createdAt},not-a-date`,
+          },
+        },
+      })
+
+      expect(result.docs[0].id).toBe(doc.id)
+      expect(result.totalDocs).toBe(1)
+    })
+
     // Function to generate random date between start and end dates
     function getRandomDate(start: Date, end: Date): string {
       const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()))
