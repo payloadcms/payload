@@ -1868,6 +1868,45 @@ describe('Uploads', () => {
       )
     })
 
+    test('should save the focal point set in a custom upload component inside the bulk upload drawer', async () => {
+      await page.goto(customUploadFieldURL.list)
+      await expect(page.locator('.list-header__title')).toBeVisible()
+
+      const bulkUploadButton = page.locator('.list-header__title-actions button', {
+        hasText: 'Bulk Upload',
+      })
+      await expect(bulkUploadButton).toBeEnabled()
+
+      const dropzoneInput = page.locator('.dropzone input[type="file"]')
+      await expect(async () => {
+        await bulkUploadButton.click()
+        await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
+      }).toPass({ intervals: [500], timeout: 5000 })
+
+      await dropzoneInput.setInputFiles(path.resolve(dirname, './image.png'))
+
+      const bulkUploadForm = page.locator('.bulk-upload--file-manager')
+      await expect(bulkUploadForm.locator('h3')).toHaveText('This text was rendered on the client')
+      await bulkUploadForm.locator('.file-field__edit').click()
+
+      await page.locator('.edit-upload__dialog input[name="focalX"]').fill('12')
+      await page.locator('.edit-upload__dialog input[name="focalY"]').fill('34')
+      await page.locator('button:has-text("Apply Changes")').click()
+
+      await page.locator('.bulk-upload--actions-bar__saveButtons button').click()
+      await expect(page.locator('.bulk-upload--file-manager')).toBeHidden()
+
+      const { result } = await client.find({
+        slug: customUploadFieldSlug,
+        auth: true,
+        limit: 1,
+        sort: '-createdAt',
+      })
+
+      expect(result.docs[0].focalX).toBe(12)
+      expect(result.docs[0].focalY).toBe(34)
+    })
+
     test('should reset state once all files are saved successfully from field bulk upload', async () => {
       await gotoAndWaitForForm(page, uploadsOne.create)
       const fieldBulkUploadButton = page.locator('#field-hasManyThumbnailUpload button', {
