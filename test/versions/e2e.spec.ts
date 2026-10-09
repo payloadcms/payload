@@ -243,18 +243,54 @@ describe('Versions', () => {
       await page.goto(autosaveURL.edit(autosaveDocument.id))
       await waitForFormReady(page)
 
-      await page.locator('#field-title').fill('Updated visual autosave title')
+      let markAutosaveRequestStarted!: () => void
+      let markAutosaveRouteHandled!: () => void
+      let releaseAutosaveRequest!: () => void
+      const autosaveRequestStarted = new Promise<void>((resolve) => {
+        markAutosaveRequestStarted = resolve
+      })
+      const autosaveRouteHandled = new Promise<void>((resolve) => {
+        markAutosaveRouteHandled = resolve
+      })
+      const autosaveRequestCanComplete = new Promise<void>((resolve) => {
+        releaseAutosaveRequest = resolve
+      })
+      const autosaveRequestPattern = `**/api/${autosaveCollectionSlug}/**`
+
+      await page.route(autosaveRequestPattern, async (route) => {
+        if (route.request().method() !== 'PATCH') {
+          await route.continue()
+          return
+        }
+
+        markAutosaveRequestStarted()
+        await autosaveRequestCanComplete
+
+        try {
+          await route.continue()
+        } finally {
+          markAutosaveRouteHandled()
+        }
+      })
 
       const autosaveIndicator = page.locator('.autosave')
       const documentControls = page.locator('.doc-controls')
 
-      await expect(autosaveIndicator).toContainText('Saving...')
-      await expectScreenshot({
-        name: 'autosave-in-progress.png',
-        mask: [documentControls.locator('.doc-controls__value-wrap')],
-        page,
-        target: documentControls,
-      })
+      try {
+        await page.locator('#field-title').fill('Updated visual autosave title')
+        await autosaveRequestStarted
+        await expect(autosaveIndicator).toContainText('Saving...')
+        await expectScreenshot({
+          name: 'autosave-in-progress.png',
+          mask: [documentControls.locator('.doc-controls__value-wrap')],
+          page,
+          target: documentControls,
+        })
+      } finally {
+        releaseAutosaveRequest()
+        await autosaveRouteHandled
+        await page.unroute(autosaveRequestPattern)
+      }
     })
 
     visual('should render the document versions list', async () => {

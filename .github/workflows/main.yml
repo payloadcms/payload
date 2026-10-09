@@ -580,7 +580,7 @@ jobs:
         run: docker exec visual-regression bash -lc "pnpm prepare-run-test-against-prod:ci"
 
       - name: Run visual regression tests
-        run: docker exec visual-regression bash -lc "bash .github/scripts/visual/run-visual-suites.sh -- --fully-parallel"
+        run: docker exec visual-regression bash -lc "bash .github/scripts/visual/run-visual-suites.sh -- --workers=1"
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
