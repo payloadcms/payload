@@ -6,15 +6,7 @@ import { deepMergeSimple } from '@payloadcms/translations/utilities'
 import type { OrderableJoinInfo } from '../fields/config/sanitizeJoinField.js'
 import type { CollectionSlug, GlobalSlug, SanitizedCollectionConfig } from '../index.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
-import type {
-  Config,
-  LocalizationConfigWithLabels,
-  LocalizationConfigWithNoLabels,
-  SanitizedConfig,
-  Timezone,
-  Widget,
-  WidgetInstance,
-} from './types.js'
+import type { Config, Locale, SanitizedConfig, Timezone, Widget, WidgetInstance } from './types.js'
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
 import { authRootEndpoints } from '../auth/endpoints/index.js'
@@ -128,32 +120,56 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   }
 
   if (config.localization && config.localization.locales?.length > 0) {
-    // clone localization config so to not break everything
-    const firstLocale = config.localization.locales[0]
-    if (typeof firstLocale === 'string') {
-      config.localization.localeCodes = [
-        ...(config.localization as unknown as LocalizationConfigWithNoLabels).locales,
-      ]
+    const locales: Locale[] = (
+      config.localization.locales as Array<Locale | Record<string, unknown> | string>
+    ).map((locale) => {
+      if (typeof locale === 'string') {
+        return {
+          code: locale,
+          label: locale,
+          rtl: false,
+          toString: () => locale,
+        }
+      }
 
-      // is string[], so convert to Locale[]
-      config.localization.locales = (
-        config.localization as unknown as LocalizationConfigWithNoLabels
-      ).locales.map((locale) => ({
-        code: locale,
-        label: locale,
-        rtl: false,
-        toString: () => locale,
-      }))
-    } else {
-      // is Locale[], so convert to string[] for localeCodes
-      config.localization.localeCodes = config.localization.locales.map((locale) => locale.code)
+      const code =
+        typeof locale === 'object' && locale !== null
+          ? locale.code ||
+            ('value' in locale && typeof locale.value === 'string' ? locale.value : undefined)
+          : undefined
 
-      config.localization.locales = (
-        config.localization as LocalizationConfigWithLabels
-      ).locales.map((locale) => ({
+      if (!code || typeof code !== 'string') {
+        throw new InvalidConfiguration(
+          `Locale object must contain a valid "code" string property. Received: ${JSON.stringify(locale)}`,
+        )
+      }
+
+      const label: Locale['label'] =
+        typeof locale === 'object' &&
+        locale !== null &&
+        'label' in locale &&
+        (typeof locale.label === 'string' ||
+          (typeof locale.label === 'object' && locale.label !== null))
+          ? (locale.label as Locale['label'])
+          : code
+
+      return {
         ...locale,
-        toString: () => locale.code,
-      }))
+        code,
+        label,
+        toString: () => code,
+      }
+    })
+
+    config.localization.localeCodes = locales.map((locale) => locale.code)
+    config.localization.locales = locales
+
+    if (!config.localization.defaultLocale) {
+      config.localization.defaultLocale = config.localization.localeCodes[0]!
+    } else if (!config.localization.localeCodes.includes(config.localization.defaultLocale)) {
+      throw new InvalidConfiguration(
+        `localization.defaultLocale "${config.localization.defaultLocale}" must be one of the configured locale codes: ${config.localization.localeCodes.join(', ')}`,
+      )
     }
 
     // Default fallback to true if not provided
