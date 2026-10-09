@@ -1,7 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
+import { text, textarea } from 'payload/shared'
+
 import { publishedOrLoggedIn } from '../../access/publishedOrLoggedIn'
-import { bodyField, dayField, imageField, slugField } from '../fields'
+import { bodyField, dayField, imageField, requiredInEnglish, slugField } from '../fields'
 import { newsCategories } from '../options'
 import { revalidateVigorAfterChange, revalidateVigorAfterDelete } from '../revalidate'
 
@@ -25,12 +27,14 @@ export const VigorNews: CollectionConfig = {
       type: 'text',
       localized: true,
       required: true,
+      validate: requiredInEnglish(text),
     },
     {
       name: 'summary',
       type: 'textarea',
       localized: true,
       required: true,
+      validate: requiredInEnglish(textarea),
     },
     bodyField,
     imageField(),

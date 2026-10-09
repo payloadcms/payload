@@ -1,6 +1,8 @@
 import type { GlobalConfig } from 'payload'
 
-import { linkField } from '../fields'
+import { text } from 'payload/shared'
+
+import { linkField, requiredInEnglish } from '../fields'
 import { revalidateVigorGlobal } from '../revalidate'
 
 /** Company details, main menu and key figures of the Vigor website */
@@ -131,6 +133,7 @@ export const VigorSettings: GlobalConfig = {
               type: 'text',
               localized: true,
               required: true,
+              validate: requiredInEnglish(text),
             },
             linkField({ name: 'link', label: 'Link' }),
           ],
@@ -161,6 +164,7 @@ export const VigorSettings: GlobalConfig = {
               type: 'text',
               localized: true,
               required: true,
+              validate: requiredInEnglish(text),
             },
           ],
         },

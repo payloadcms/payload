@@ -1,7 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
+import { text } from 'payload/shared'
+
 import { publishedOrLoggedIn } from '../../access/publishedOrLoggedIn'
-import { dayField } from '../fields'
+import { dayField, requiredInEnglish } from '../fields'
 import { revalidateVigorAfterChange, revalidateVigorAfterDelete } from '../revalidate'
 
 /**
@@ -26,6 +28,7 @@ export const VigorEvents: CollectionConfig = {
       type: 'text',
       localized: true,
       required: true,
+      validate: requiredInEnglish(text),
     },
     {
       type: 'row',
@@ -39,6 +42,7 @@ export const VigorEvents: CollectionConfig = {
           },
           localized: true,
           required: true,
+          validate: requiredInEnglish(text),
         },
       ],
     },

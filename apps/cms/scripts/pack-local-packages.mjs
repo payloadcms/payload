@@ -28,6 +28,7 @@ const PACKAGE_DIRS = [
   'plugin-cloud-storage',
   'richtext-lexical',
   'storage-s3',
+  'transformer-sharp',
   'translations',
   'ui',
 ]

@@ -1,8 +1,8 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import path from 'path'
 import { buildConfig } from 'payload'
-import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
 import { Clients } from './collections/Clients'
@@ -83,7 +83,6 @@ export default buildConfig({
   },
   secret: process.env.PAYLOAD_SECRET || '',
   serverURL,
-  sharp,
   storage: [s3StorageAdapter],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
@@ -91,5 +90,7 @@ export default buildConfig({
   upload: {
     limits: { fileSize: 50 * 1024 * 1024 },
     requestSizeLimit: 60 * 1024 * 1024,
+    // Image processing on upload, such as cropping (the top-level `sharp` option before Payload 4)
+    transformers: [sharpTransformer()],
   },
 })

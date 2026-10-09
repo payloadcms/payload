@@ -1,6 +1,23 @@
-import type { Field, FieldHook, TextFieldSingleValidation } from 'payload'
+import type { Field, FieldHook, PayloadRequest, TextFieldSingleValidation } from 'payload'
 
 import { slugify, text } from 'payload/shared'
+
+/**
+ * Makes a required, localized field required in English (the default language) only. Publishing
+ * to all languages validates every language, and the website shows the English text wherever a
+ * translation is missing, e.g. for a new product that isn't translated yet.
+ */
+export const requiredInEnglish =
+  <TValue, TOptions extends { req: PayloadRequest; required?: boolean }>(
+    validate: (value: TValue, options: TOptions) => Promise<string | true> | string | true,
+  ) =>
+  (value: TValue, options: TOptions) =>
+    validate(value, { ...options, required: options.required && isDefaultLocale(options) })
+
+const isDefaultLocale = ({ req }: { req: PayloadRequest }) => {
+  const { localization } = req.payload.config
+  return !localization || !req.locale || req.locale === localization.defaultLocale
+}
 
 /** "Emerald Halo Ring" → "emerald-halo-ring": derived from `from` while empty, normalized when typed */
 const fillSlug =

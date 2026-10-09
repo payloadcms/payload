@@ -44,7 +44,8 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
       --filter "@payloadcms/db-mongodb..." \
       --filter "@payloadcms/next..." \
       --filter "@payloadcms/richtext-lexical..." \
-      --filter "@payloadcms/storage-s3..."
+      --filter "@payloadcms/storage-s3..." \
+      --filter "@payloadcms/transformer-sharp..."
 
 RUN NODE_OPTIONS="--max-old-space-size=6144" pnpm turbo build \
       --filter payload \
@@ -52,6 +53,7 @@ RUN NODE_OPTIONS="--max-old-space-size=6144" pnpm turbo build \
       --filter @payloadcms/next \
       --filter @payloadcms/richtext-lexical \
       --filter @payloadcms/storage-s3 \
+      --filter @payloadcms/transformer-sharp \
       --output-logs=errors-only
 
 # Writes apps/cms/local-packages/*.tgz and the matching overrides in apps/cms/pnpm-workspace.yaml
