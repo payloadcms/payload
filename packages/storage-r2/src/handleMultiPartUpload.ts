@@ -65,6 +65,9 @@ export const getHandleMultiPartUpload =
       if (isNaN(multipartNumber)) {
         // Upload complete
         const object = await multipartUpload.complete((await request.json()) as R2UploadedPart[])
+        if (object.key !== multipartKey) {
+          throw new APIError('Uploaded source was stored at an unexpected location.', 400)
+        }
         return new Response(object.key, { status: 200 })
       } else {
         // Upload part

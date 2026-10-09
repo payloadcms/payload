@@ -22,6 +22,7 @@ import { Dropzone } from '../Dropzone/index.js'
 import { EditUpload } from '../EditUpload/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
+import { getEditorFileSrc } from '../Upload/getEditorFileSrc.js'
 import { editDrawerSlug, sizePreviewSlug } from '../Upload/index.js'
 import { UploadFromURLModal } from '../Upload/UploadFromURLModal/index.js'
 import { usePasteFromClipboard } from '../Upload/usePasteFromClipboard.js'
@@ -306,7 +307,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
         <EditDepthProvider>
           <EditUpload
             fileName={value?.name || (data?.filename as string)}
-            fileSrc={(data?.url as string) || fileSrc}
+            fileSrc={getEditorFileSrc({ data, fileSrc, hasSelectedFile: Boolean(value) })}
             imageCacheTag={imageCacheTag}
             initialCrop={uploadEdits?.crop ?? undefined}
             initialFocalPoint={{
@@ -375,6 +376,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
             <div className={`${baseClass}__upload`}>
               {!value && removedFile && data?.filename && (
                 <Button
+                  aria-label={t('general:cancel')}
                   buttonStyle="secondary"
                   className={`${baseClass}__remove`}
                   icon="x"
@@ -398,6 +400,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
               {value && fileSrc && (
                 <Fragment>
                   <Button
+                    aria-label={t('general:cancel')}
                     buttonStyle="secondary"
                     className={`${baseClass}__remove`}
                     icon="x"

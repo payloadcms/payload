@@ -92,6 +92,7 @@ export function DashboardBreadcrumbDropdown(props: {
         <span>{t('dashboard:editingDashboard')}</span>
         <div className="dashboard-breadcrumb-dropdown__actions">
           <DrawerToggler
+            aria-label={`${t('dashboard:addButton')}: ${t('dashboard:addWidget')}`}
             buttonStyle="primary"
             extraButtonProps={{ ref: addButtonRef }}
             slug={widgetsDrawerSlug}

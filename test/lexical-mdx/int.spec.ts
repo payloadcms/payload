@@ -149,7 +149,7 @@ test.suite('Lexical MDX', { config: './config.ts' }, () => {
                   {
                     format: '',
                     type: 'block',
-                    version: 2,
+                    version: 1,
                     ...blockNode,
                   },
                 ]

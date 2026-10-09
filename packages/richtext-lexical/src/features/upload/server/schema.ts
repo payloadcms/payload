@@ -23,7 +23,7 @@ export type UploadData<TFields extends JsonObject = JsonObject> = {
     id: string
     relationTo: TCollectionSlug
     /** Either the document ID or the full populated document. */
-    value: DataFromCollectionSlug<TCollectionSlug> | IDTypeForCollectionSlug<TCollectionSlug>
+    value: IDTypeForCollectionSlug<TCollectionSlug> | TypedUploadCollection[TCollectionSlug]
   }
 }[UploadCollectionSlug]
 
@@ -36,20 +36,6 @@ export type Internal_UploadData<TFields extends JsonObject = JsonObject> = {
     src: string
   }
 } & UploadData<TFields>
-
-/**
- * More precise variant of {@link UploadData}. Replaces `UploadData` in v4.
- * @internal
- * @todo Replace UploadData with UploadDataImproved in 4.0
- */
-export type UploadDataImproved<TFields extends JsonObject = JsonObject> = {
-  [TCollectionSlug in UploadCollectionSlug]: {
-    fields: TFields
-    id: string
-    relationTo: TCollectionSlug
-    value: IDTypeForCollectionSlug<TCollectionSlug> | TypedUploadCollection[TCollectionSlug]
-  }
-}[UploadCollectionSlug]
 
 export type SerializedUploadNode<
   TSlugs extends UploadCollectionSlug = UploadCollectionSlug,
@@ -64,6 +50,7 @@ export type SerializedUploadNode<
   format: LexicalElementFormat
   id: string
   type: 'upload'
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number
 }
 
@@ -72,6 +59,7 @@ const SERIALIZED_UPLOAD_NODE_TS = `export type SerializedUploadNode<TSlugs exten
   type: 'upload';
   format: LexicalElementFormat;
   id: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
   fields: TFields;
 } & {
@@ -86,6 +74,7 @@ const SERIALIZED_UPLOAD_NODE_INPUT_TS = `export type SerializedUploadNodeInput<T
   type: 'upload';
   format: LexicalElementFormat;
   id: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
   fields: TFields;
 } & {
@@ -175,7 +164,7 @@ export const createUploadNodeJSONSchema =
               },
           version: versionSchema,
         },
-        required: ['fields', 'format', 'id', 'relationTo', 'type', 'value', 'version'],
+        required: ['fields', 'format', 'id', 'relationTo', 'type', 'value'],
       }
     })
 
@@ -189,7 +178,7 @@ export const createUploadNodeJSONSchema =
           type: { type: 'string', const: 'upload' },
           version: versionSchema,
         },
-        required: ['type', 'version'],
+        required: ['type'],
       }
     } else {
       const baseSchema: JSONSchema4 =

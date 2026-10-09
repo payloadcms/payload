@@ -40,7 +40,7 @@ export const blockValidationHOC = (
       fields: block.fields,
       fieldSchemaMap: undefined,
       initialBlockData: blockFieldData,
-      operation: operation === 'create' || operation === 'update' ? operation : 'update',
+      operation,
       permissions: {},
       preferences,
       renderAllFields: false,

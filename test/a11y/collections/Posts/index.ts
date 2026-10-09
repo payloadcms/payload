@@ -129,6 +129,16 @@ export const PostsCollection: CollectionConfig = {
       relationTo: postsSlug,
     },
     {
+      name: 'status',
+      type: 'select',
+      admin: { position: 'sidebar' },
+      defaultValue: 'draft',
+      options: [
+        { label: 'Draft', value: 'draft' },
+        { label: 'Published', value: 'published' },
+      ],
+    },
+    {
       name: 'publishedOn',
       type: 'date',
     },
@@ -273,6 +283,11 @@ export const PostsCollection: CollectionConfig = {
       name: 'featuredImage',
       type: 'upload',
       relationTo: mediaSlug,
+    },
+    {
+      name: 'quantity',
+      type: 'number',
+      defaultValue: 10,
     },
     {
       name: 'location',

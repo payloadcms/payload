@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "4.0.0-canary.37",
+  "version": "4.0.0-canary.39",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -139,10 +139,9 @@
     "dotenv-expand": "11.0.6",
     "file-type": "22.0.1",
     "get-tsconfig": "4.14.0",
-    "http-status": "2.1.0",
     "image-dimensions": "2.5.1",
     "ipaddr.js": "2.3.0",
-    "jose": "6.2.3",
+    "jose": "6.2.12",
     "json-schema-to-typescript": "15.0.3",
     "path-to-regexp": "6.3.0",
     "pino": "10.3.1",
@@ -185,13 +184,6 @@
     "node": ">=24.15.0"
   },
   "publishConfig": {
-    "imports": {
-      "#validateJSONSchema": {
-        "types": "./dist/fields/validateJSONSchema.d.ts",
-        "browser": "./dist/fields/validateJSONSchema.browser.js",
-        "default": "./dist/fields/validateJSONSchema.js"
-      }
-    },
     "exports": {
       ".": {
         "types": "./dist/index.d.ts",
@@ -242,6 +234,13 @@
       "./__testing__/predefinedMigration": {
         "import": "./dist/__testing__/predefinedMigration.js",
         "default": "./dist/__testing__/predefinedMigration.js"
+      }
+    },
+    "imports": {
+      "#validateJSONSchema": {
+        "types": "./dist/fields/validateJSONSchema.d.ts",
+        "browser": "./dist/fields/validateJSONSchema.browser.js",
+        "default": "./dist/fields/validateJSONSchema.js"
       }
     },
     "main": "./dist/index.js",

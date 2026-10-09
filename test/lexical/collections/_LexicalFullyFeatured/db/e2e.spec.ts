@@ -101,11 +101,11 @@ describe('Lexical Fully Featured - database', () => {
       await expect(lexical.editor.locator('.LexicalEditorTheme__upload')).toHaveCount(1)
       await expect(
         lexical.editor.locator('.LexicalEditorTheme__upload__doc-drawer-toggler'),
-      ).toHaveText(expectedFileName || 'payload-1.jpg')
+      ).toHaveText(expectedFileName || 'payload-original-1.jpg')
 
       const uploadedImage = await payload.find({
         collection: 'uploads',
-        where: { filename: { equals: expectedFileName || 'payload-1.jpg' } },
+        where: { filename: { equals: expectedFileName || 'payload-original-1.jpg' } },
         overrideAccess: true,
       })
       expect(uploadedImage.totalDocs).toBe(1)
@@ -123,7 +123,7 @@ describe('Lexical Fully Featured - database', () => {
       page,
     }) => {
       // blob will be put in src of img tag => cannot infer file name
-      await uploadsTest(page, 'html', 'pasted-image.jpeg')
+      await uploadsTest(page, 'html', 'pasted-image-original.jpeg')
     })
 
     test('ensure auto upload by copy & pasting image works when pasting from website', async ({
@@ -143,7 +143,7 @@ describe('Lexical Fully Featured - database', () => {
       await lexical.editor.first().focus()
       await expect(lexical.editor).toBeFocused()
 
-      await uploadsTest(page, 'cmd+v')
+      await uploadsTest(page, 'cmd+v', 'payload-original-original.jpg')
 
       // Save page
       await saveDocAndAssert(page)
@@ -168,7 +168,7 @@ describe('Lexical Fully Featured - database', () => {
 
       const uploadNode = richText?.root?.children?.[1]?.children?.[0]
       // @ts-expect-error unsafe access is fine in tests
-      expect(uploadNode.value?.filename).toBe('payload-1.jpg')
+      expect(uploadNode.value?.filename).toBe('payload-original-original.jpg')
     })
 
     test('ensure block contents are not reset on save on both create and update', async ({

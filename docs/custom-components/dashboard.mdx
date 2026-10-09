@@ -179,11 +179,12 @@ export default async function SalesSummaryWidgetComponent({
 
 ### Built-in Widgets
 
-Payload includes built-in `welcome`, `activity` (recently viewed), `collections`, and `collection-query` widgets.
+Payload includes built-in `welcome`, `activity`, `collections`, and `collection-query` widgets.
+The `activity` widget has Recently Viewed and Pinned tabs. It loads the visible page on demand and displays a single grid row, with up to four documents per page. Its collection filter applies only to Recently Viewed.
 The `collections` widget displays collection and global cards.
 The `collection-query` widget displays documents from a selected collection.
 
-If you don't define a `defaultLayout`, these three widgets will appear in that order, each at full width.
+If you don't define a `defaultLayout`, `welcome`, `activity`, and `collections` appear in that order, each at full width.
 The `collection-query` widget is available through the **Add +** menu.
 
 ### User Customization

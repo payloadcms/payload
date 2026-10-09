@@ -64,12 +64,11 @@ const getTranslatedOptions = (options: Option | Option[], i18n: I18nClient): str
 }
 
 export const Select: React.FC<SelectFieldDiffClientProps> = ({
-  comparisonValue: valueFrom,
-  diffMethod,
   field,
   locale,
   nestingLevel,
-  versionValue: valueTo,
+  valueFrom,
+  valueTo,
 }) => {
   const { i18n } = useTranslation()
 

@@ -48,11 +48,11 @@ function formatValue(value: unknown): {
 }
 
 export const Text: React.FC<TextFieldDiffClientProps> = ({
-  comparisonValue: valueFrom,
   field,
   locale,
   nestingLevel,
-  versionValue: valueTo,
+  valueFrom,
+  valueTo,
 }) => {
   const { i18n } = useTranslation()
 

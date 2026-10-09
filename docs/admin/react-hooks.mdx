@@ -67,7 +67,6 @@ type FieldType<T> = {
   initialValue?: T
   path: string
   permissions: FieldPermissions
-  readOnly?: boolean
   rows?: Row[]
   schemaPath: string
   setValue: (val: unknown, disableModifyingForm?: boolean) => void

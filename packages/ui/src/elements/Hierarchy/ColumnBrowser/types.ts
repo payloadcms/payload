@@ -42,7 +42,7 @@ export type ColumnProps = {
   isLoading: boolean
   items: ColumnItemData[]
   /** Called when user clicks "New" button - parent should open modal with parentId */
-  onCreateNew: (params: { parentId: null | number | string }) => void
+  onCreateNew: (params: { parentId: null | number | string; path: PathSegment[] }) => void
   onExpand: (params: { id: number | string }) => void
   onLoadMore: () => void
   onSelect: (params: { id: number | string; path: PathSegment[] }) => void
@@ -89,7 +89,7 @@ export type HierarchyColumnBrowserProps = {
   /** Whether the initial expanded path is still being loaded */
   isLoadingPath?: boolean
   /** Called when user clicks "New" button to create a new item */
-  onCreateNew?: (params: { parentId: null | number | string }) => void
+  onCreateNew?: (params: { parentId: null | number | string; path: PathSegment[] }) => void
   onSelect: (params: { id: number | string; path: PathSegment[] }) => void
   parentFieldName: string
   selectedIds: Set<number | string>

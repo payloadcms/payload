@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "4.0.0-canary.37",
+  "version": "4.0.0-canary.39",
   "private": true,
   "type": "module",
   "workspaces": [

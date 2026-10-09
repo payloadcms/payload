@@ -24,10 +24,6 @@ export type ListQueryProps = {
   readonly modifySearchParams?: boolean
   readonly onQueryChange?: OnListQueryChange
   readonly orderableFieldName?: string
-  /**
-   * @deprecated
-   */
-  readonly preferenceKey?: string
   readonly query?: ListQuery
 }
 

@@ -49,7 +49,7 @@ import './index.css'
 
 const baseClass = 'doc-controls'
 
-export const DocumentControls: React.FC<{
+type DocumentControlsProps = {
   readonly apiURL: string
   readonly BeforeDocumentControls?: React.ReactNode
   readonly BeforeDocumentMeta?: React.ReactNode
@@ -92,7 +92,9 @@ export const DocumentControls: React.FC<{
    * - `drawerHeaderActions`: only the action buttons, rendered in the document drawer header.
    */
   readonly variant?: 'default' | 'drawerHeaderActions'
-}> = (props) => {
+}
+
+export const DocumentControls: React.FC<DocumentControlsProps> = (props) => {
   const {
     id,
     slug,
