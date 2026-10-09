@@ -206,6 +206,7 @@ export const slTranslations: DefaultTranslationsObject = {
     browseByFolder: 'Brskaj po mapi',
     byFolder: 'Po mapi',
     deleteFolder: 'Izbriši mapo',
+    folder: 'Mapa',
     folderName: 'Ime mape',
     folders: 'Mape',
     folderTypeDescription:
@@ -264,7 +265,6 @@ export const slTranslations: DefaultTranslationsObject = {
     changesNotSaved:
       'Vaše spremembe niso shranjene. Če zapustite zdaj, boste izgubili svoje spremembe.',
     clear: 'Čisto',
-    clearAll: 'Počisti vse',
     close: 'Zapri',
     collapse: 'Strni',
     collections: 'Zbirke',
@@ -310,6 +310,7 @@ export const slTranslations: DefaultTranslationsObject = {
     deleting: 'Brisanje...',
     depth: 'Globina',
     descending: 'Padajoče',
+    deselectAll: 'Počisti izbor vseh',
     deselectAllRows: 'Odznači vse vrstice',
     document: 'Dokument',
     documentIsTrashed: 'Ta {{label}} je v smetnjaku in je samo za branje.',
@@ -436,6 +437,7 @@ export const slTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Pokaži vse {{label}}',
     sorryNotFound: 'Oprostite - ničesar ni mogoče najti, kar bi ustrezalo vaši zahtevi.',
     sort: 'Razvrsti',
+    sortBy: 'Razvrsti po',
     sortByLabelDirection: 'Razvrsti po {{label}} {{direction}}',
     stayOnThisPage: 'Ostani na tej strani',
     submissionSuccessful: 'Oddaja uspešna.',

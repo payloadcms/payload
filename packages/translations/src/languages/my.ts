@@ -207,6 +207,7 @@ export const myTranslations: DefaultTranslationsObject = {
     browseByFolder: 'ဖိုလ်ဒါအလိုက် ကြည့်ရှုပါ',
     byFolder: 'ဖိုလ်ဒါအလိုက်',
     deleteFolder: 'ဖိုလ်ဒါ ဖျက်ပါ',
+    folder: 'ဖိုလ်ဒါ',
     folderName: 'ဖိုင်နာမည်',
     folders: 'ဖိုလ်ဒါများ',
     folderTypeDescription:
@@ -267,7 +268,6 @@ export const myTranslations: DefaultTranslationsObject = {
     changesNotSaved:
       'သင်၏ပြောင်းလဲမှုများကို မသိမ်းဆည်းရသေးပါ။ ယခု စာမျက်နှာက ထွက်လိုက်ပါက သင်၏ပြောင်းလဲမှုများ အကုန် ဆုံးရှုံးသွားပါမည်။ အကုန်နော်။',
     clear: 'ရှင်းလင်းပါ',
-    clearAll: 'အားလုံးကိုရှင်းလင်းပါ',
     close: 'ပိတ်',
     collapse: 'ခေါက်သိမ်းပါ။',
     collections: 'စုစည်းမှူများ',
@@ -314,6 +314,7 @@ export const myTranslations: DefaultTranslationsObject = {
     deleting: 'ဖျက်နေဆဲ ...',
     depth: 'ထိုင်းအောက်မှု',
     descending: 'ဆင်းသက်လာသည်။',
+    deselectAll: 'အားလုံးကို မရွေးပါ',
     deselectAllRows: 'အားလုံးကို မရွေးနိုင်ပါ',
     document: 'စာရွက်စာတမ်း',
     documentIsTrashed: 'ဤ {{label}} ကို အမှိုက်ပုံးသို့ ရွှေ့ထားပြီး ဖတ်ရှုရန်သာ ဖြစ်သည်။',
@@ -441,6 +442,7 @@ export const myTranslations: DefaultTranslationsObject = {
     showAllLabel: '{{label}} အားလုံး ပြပါ',
     sorryNotFound: 'ဝမ်းနည်းပါသည်။ သင်ရှာနေတဲ့ဟာ ဒီမှာမရှိပါ။',
     sort: 'အစဉ်လိုက်',
+    sortBy: 'အစဉ်အလိုက်',
     sortByLabelDirection: 'အစဉ်အလိုက် စီမံခန့်ခွဲထားသည် {{label}} {{direction}}',
     stayOnThisPage: 'ဒီမှာပဲ ဆက်နေမည်။',
     submissionSuccessful: 'သိမ်းဆည်းမှု အောင်မြင်ပါသည်။',
