@@ -1,6 +1,8 @@
 export const autosaveCollectionSlug = 'autosave-posts'
 export const autosaveWithMultiSelectCollectionSlug = 'autosave-multi-select-posts'
 
+export const nestedArraySelectCollectionSlug = 'nested-array-select'
+
 export const autosaveWithDraftButtonSlug = 'autosave-with-draft-button-posts'
 
 export const autosaveWithDraftValidateSlug = 'autosave-with-validate-posts'
@@ -39,6 +41,7 @@ export const versionsDisabledCollectionSlug = 'versions-disabled-collection'
 export const collectionSlugs = [
   autosaveCollectionSlug,
   autosaveWithMultiSelectCollectionSlug,
+  nestedArraySelectCollectionSlug,
   draftCollectionSlug,
   draftWithChangeHookCollectionSlug,
   postCollectionSlug,
