@@ -1305,6 +1305,9 @@ importers:
       '@payloadcms/next':
         specifier: workspace:*
         version: link:../next
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:../translations
       '@payloadcms/ui':
         specifier: workspace:*
         version: link:../ui
