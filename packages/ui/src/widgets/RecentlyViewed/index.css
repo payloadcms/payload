@@ -165,6 +165,11 @@
     color: var(--color-text);
   }
 
+  .recents-widget__status-pill--changed {
+    background: var(--color-bg-warning);
+    color: var(--color-text-onwarning);
+  }
+
   .recents-widget__meta,
   .recents-widget__empty-description {
     color: var(--recents-text-secondary);
