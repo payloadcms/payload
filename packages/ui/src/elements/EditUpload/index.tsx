@@ -155,6 +155,17 @@ export const EditUpload: React.FC<EditUploadProps> = ({
             >
               {showCrop ? (
                 <ReactCrop
+                  ariaLabels={{
+                    cropArea: t('upload:setCropArea'),
+                    eDragHandle: t('upload:cropRight'),
+                    nDragHandle: t('upload:cropTop'),
+                    neDragHandle: t('upload:cropTopRight'),
+                    nwDragHandle: t('upload:cropTopLeft'),
+                    sDragHandle: t('upload:cropBottom'),
+                    seDragHandle: t('upload:cropBottomRight'),
+                    swDragHandle: t('upload:cropBottomLeft'),
+                    wDragHandle: t('upload:cropLeft'),
+                  }}
                   className={`${baseClass}__reactCrop`}
                   crop={crop}
                   onChange={(_, c) => setCrop(c)}
@@ -202,7 +213,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                   <div className={`${baseClass}__section-header`}>
                     <h3 className={`${baseClass}__section-title`}>{t('upload:crop')}</h3>
                     <button
-                      aria-label={t('general:reset')}
+                      aria-label={`${t('general:reset')}: ${t('upload:crop')}`}
                       className={`${baseClass}__reset`}
                       onClick={() => setCrop({ height: 100, unit: '%', width: 100, x: 0, y: 0 })}
                       type="button"
@@ -238,7 +249,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                   <div className={`${baseClass}__section-header`}>
                     <h3 className={`${baseClass}__section-title`}>{t('upload:focalPoint')}</h3>
                     <button
-                      aria-label={t('general:reset')}
+                      aria-label={`${t('general:reset')}: ${t('upload:focalPoint')}`}
                       className={`${baseClass}__reset`}
                       onClick={centerFocalPoint}
                       type="button"

@@ -26,6 +26,7 @@ export const PostsCollection: CollectionConfig = {
       name: 'title',
       type: 'text',
       localized: true,
+      required: true,
     },
     {
       name: 'subtitle',
@@ -44,6 +45,7 @@ export const PostsCollection: CollectionConfig = {
         { label: 'Value One', value: 'one' },
         { label: 'Value Two', value: 'two' },
       ],
+      required: true,
     },
     {
       name: 'accessibilitySortableSelect',
@@ -71,9 +73,35 @@ export const PostsCollection: CollectionConfig = {
       ],
     },
     {
+      name: 'requiredTags',
+      type: 'text',
+      defaultValue: ['initial'],
+      hasMany: true,
+      required: true,
+    },
+    {
+      name: 'nonSearchableSelect',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/components/NonSearchableSelect/index.js#NonSearchableSelect',
+        },
+      },
+    },
+    {
       name: 'relatedPost',
       type: 'relationship',
       relationTo: postsSlug,
+    },
+    {
+      name: 'status',
+      type: 'select',
+      admin: { position: 'sidebar' },
+      defaultValue: 'draft',
+      options: [
+        { label: 'Draft', value: 'draft' },
+        { label: 'Published', value: 'published' },
+      ],
     },
     {
       name: 'publishedOn',
@@ -153,6 +181,9 @@ export const PostsCollection: CollectionConfig = {
             {
               name: 'body',
               type: 'richText',
+              editor: lexicalEditor({
+                features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
+              }),
             },
             {
               name: 'text',
@@ -161,6 +192,13 @@ export const PostsCollection: CollectionConfig = {
             {
               name: 'date',
               type: 'date',
+              admin: {
+                date: {
+                  overrides: {
+                    excludeDates: [new Date('2026-09-14T12:00:00.000Z')],
+                  },
+                },
+              },
             },
           ],
           labels: {
@@ -183,13 +221,69 @@ export const PostsCollection: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'collapsible',
+      fields: [{ name: 'publishingNote', type: 'text' }],
+      label: 'Publishing details',
+    },
+    {
+      type: 'collapsible',
+      admin: {
+        components: { Label: '/components/CustomCollapsibleLabel/index.js#CustomCollapsibleLabel' },
+      },
+      fields: [{ name: 'customLabelNote', type: 'text' }],
+    },
     createFolderField({ relationTo: 'payload-folders' }),
+    {
+      name: 'readOnlyHierarchy',
+      type: 'relationship',
+      admin: {
+        components: { Field: '@payloadcms/ui/rsc#HierarchyField' },
+        readOnly: true,
+      },
+      hasMany: true,
+      relationTo: 'payload-folders',
+    },
     {
       name: 'featuredImage',
       type: 'upload',
       relationTo: mediaSlug,
     },
+    {
+      name: 'quantity',
+      type: 'number',
+      defaultValue: 10,
+    },
+    {
+      name: 'location',
+      type: 'point',
+    },
+    {
+      name: 'settings',
+      type: 'json',
+    },
+    {
+      name: 'source',
+      type: 'code',
+    },
+    {
+      name: 'unlabelledSettings',
+      type: 'json',
+      admin: {
+        disabled: { bulkEdit: true, column: true, filter: true, groupBy: true },
+      },
+      label: false,
+    },
+    {
+      name: 'unlabelledSource',
+      type: 'code',
+      admin: {
+        disabled: { bulkEdit: true, column: true, filter: true, groupBy: true },
+      },
+      label: false,
+    },
   ],
+  llmInstructions: 'Use descriptive post titles.',
   trash: true,
   versions: {
     drafts: true,

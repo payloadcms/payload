@@ -62,24 +62,24 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_C0124FAC".
+ * via the `definition` "LexicalNodes_FCB16F2F".
  */
-export type LexicalNodes_C0124FAC =
+export type LexicalNodes_FCB16F2F =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_C0124FAC>
+  | SerializedParagraphNode<LexicalNodes_FCB16F2F>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_C0124FAC>
+  | SerializedQuoteNode<LexicalNodes_FCB16F2F>
   | SerializedRelationshipNode<
       'posts' | 'payload-kv' | 'users' | 'payload-locked-documents' | 'payload-preferences' | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_C0124FAC, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_C0124FAC, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_C0124FAC>
-  | SerializedListItemNode<LexicalNodes_C0124FAC>
-  | SerializedHeadingNode<LexicalNodes_C0124FAC>;
+  | SerializedAutoLinkNode<LexicalNodes_FCB16F2F, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_FCB16F2F, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_FCB16F2F>
+  | SerializedListItemNode<LexicalNodes_FCB16F2F>
+  | SerializedHeadingNode<LexicalNodes_FCB16F2F>;
 
 export interface Config {
   auth: {
@@ -106,7 +106,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: null;
   globals: {
@@ -150,16 +150,16 @@ export interface UserAuthOperations {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
+  id: number;
   title?: string | null;
-  content?: LexicalRichText<LexicalNodes_C0124FAC> | null;
+  content?: LexicalRichText<LexicalNodes_FCB16F2F> | null;
   createdBy?: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -169,14 +169,14 @@ export interface Post {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   createdBy?: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -203,14 +203,14 @@ export interface User {
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
   createdBy?: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -221,9 +221,19 @@ export interface Media {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     thumbnail?: {
       url?: string | null;
       width?: number | null;
@@ -231,6 +241,8 @@ export interface Media {
       mimeType?: string | null;
       filesize?: number | null;
       filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
     };
     medium?: {
       url?: string | null;
@@ -239,6 +251,8 @@ export interface Media {
       mimeType?: string | null;
       filesize?: number | null;
       filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
     };
     large?: {
       url?: string | null;
@@ -247,6 +261,8 @@ export interface Media {
       mimeType?: string | null;
       filesize?: number | null;
       filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
     };
   };
 }
@@ -255,7 +271,7 @@ export interface Media {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -272,24 +288,24 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -299,10 +315,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -322,7 +338,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -356,9 +372,21 @@ export interface MediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         thumbnail?:
@@ -370,6 +398,8 @@ export interface MediaSelect<T extends boolean = true> {
               mimeType?: T;
               filesize?: T;
               filename?: T;
+              prefix?: T;
+              _objectKey?: T;
             };
         medium?:
           | T
@@ -380,6 +410,8 @@ export interface MediaSelect<T extends boolean = true> {
               mimeType?: T;
               filesize?: T;
               filename?: T;
+              prefix?: T;
+              _objectKey?: T;
             };
         large?:
           | T
@@ -390,6 +422,8 @@ export interface MediaSelect<T extends boolean = true> {
               mimeType?: T;
               filesize?: T;
               filename?: T;
+              prefix?: T;
+              _objectKey?: T;
             };
       };
 }
@@ -463,15 +497,15 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "menu".
  */
 export interface Menu {
-  id: string;
+  id: number;
   globalText?: string | null;
   createdBy?: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   } | null;
   updatedAt?: string | null;
   createdAt?: string | null;

@@ -20,10 +20,9 @@
 
   .section-title:after,
   .section-title__input {
-    font-family: var(--text-body-medium-strong-font-family);
-    font-weight: var(--text-body-medium-strong-font-weight);
-    font-size: var(--text-body-medium-strong-font-size);
-    line-height: var(--text-body-medium-strong-line-height);
+    font-weight: var(--text-body-medium-bold-font-weight);
+    font-size: var(--text-body-medium-bold-font-size);
+    line-height: var(--text-body-medium-bold-line-height);
     letter-spacing: var(--text-body-medium-letter-spacing);
     padding: 0 var(--spacer-1);
     width: 100%;
@@ -36,7 +35,6 @@
 
     &::placeholder {
       color: var(--color-text-tertiary);
-      font-family: var(--text-body-medium-font-family);
       font-weight: var(--text-body-medium-font-weight);
     }
     min-width: min-content;

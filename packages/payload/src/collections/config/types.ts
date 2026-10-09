@@ -137,9 +137,9 @@ export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
  * The id field is optional since it's auto-generated
  */
 export type DraftDataFromCollection<TData extends JsonObject> = Partial<
-  Omit<TData, 'collection' | 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>
+  Omit<TData, 'collection' | 'createdAt' | 'deletedAt' | 'id' | 'updatedAt' | 'variants'>
 > &
-  Partial<Pick<TData, 'collection' | 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>>
+  Partial<Pick<TData, 'collection' | 'createdAt' | 'deletedAt' | 'id' | 'updatedAt' | 'variants'>>
 
 export type DraftDataFromCollectionSlug<TSlug extends CollectionSlug> = DraftDataFromCollection<
   DataFromCollectionSlug<TSlug>
@@ -150,9 +150,9 @@ export type DraftDataFromCollectionSlug<TSlug extends CollectionSlug> = DraftDat
  * When querying drafts, required fields may be null/undefined as validation is skipped, but system fields like id are always present
  */
 export type QueryDraftDataFromCollection<TData extends JsonObject> = Partial<
-  Omit<TData, 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>
+  Omit<TData, 'createdAt' | 'deletedAt' | 'id' | 'updatedAt' | 'variants'>
 > &
-  Partial<Pick<TData, 'createdAt' | 'deletedAt' | 'sizes' | 'updatedAt'>> &
+  Partial<Pick<TData, 'createdAt' | 'deletedAt' | 'updatedAt' | 'variants'>> &
   Pick<TData, 'id'>
 
 export type QueryDraftDataFromCollectionSlug<TSlug extends CollectionSlug> =
@@ -172,8 +172,10 @@ export type HookOperationType =
   | 'resetPassword'
   | 'restoreVersion'
   | 'update'
+  | 'validate'
 
 type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>
+type CreateUpdateOrValidateOperation = Extract<HookOperationType, 'create' | 'update' | 'validate'>
 
 export type BeforeOperationHook<TOperationGeneric extends CollectionSlug = string> = (
   arg: BeforeOperationArg<TOperationGeneric>,
@@ -191,7 +193,7 @@ export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
   /**
    * Hook operation being performed
    */
-  operation: CreateOrUpdateOperation
+  operation: CreateUpdateOrValidateOperation
   /**
    * Original document before change
    *
@@ -209,7 +211,7 @@ export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
   /**
    * Hook operation being performed
    */
-  operation: CreateOrUpdateOperation
+  operation: CreateUpdateOrValidateOperation
   /**
    * Original document before change
    *
@@ -529,6 +531,10 @@ export type CollectionAdminOptions = {
    */
   preview?: GeneratePreviewURL
   /**
+   * Field to use as the thumbnail image in grid/card views. Defaults to the first field of type `upload`.
+   */
+  useAsThumbnail?: string
+  /**
    * Field to use as title in Edit View and first column in List view
    */
   useAsTitle?: string
@@ -542,6 +548,13 @@ export type CollectionAccess<TData = any> = {
   readVersions?: Access<TData>
   unlock?: Access<TData>
   update?: Access<TData>
+  /**
+   * Controls on-demand validation for this collection.
+   * Falls back to `update` access when omitted.
+   * The access function receives `req.operation === 'validate'`.
+   * @see https://payloadcms.com/docs/validation/overview#access-control-and-hooks
+   */
+  validate?: Access<TData>
 }
 
 type CollectionHooks<TSlug extends CollectionSlug = any> = {
@@ -705,6 +718,8 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
     plural?: LabelFunction | StaticLabel
     singular?: LabelFunction | StaticLabel
   }
+  /** Read-only Markdown instructions included in this collection's MCP and CLI schema responses. */
+  llmInstructions?: string
   /**
    * Enables / Disables the ability to lock documents while editing
    * @default true
@@ -834,7 +849,10 @@ export interface SanitizedCollectionConfig
   _sanitized: true
   access: Pick<CollectionAccess, 'admin'> &
     Required<
-      Pick<CollectionAccess, 'create' | 'delete' | 'read' | 'readVersions' | 'unlock' | 'update'>
+      Pick<
+        CollectionAccess,
+        'create' | 'delete' | 'read' | 'readVersions' | 'unlock' | 'update' | 'validate'
+      >
     >
   auth: Auth
   authorship: SanitizedAuthorship

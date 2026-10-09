@@ -1,4 +1,5 @@
 import type { ScreenReaderPlaywright } from '@guidepup/playwright'
+import type { Locator } from '@playwright/test'
 
 import { NVDAKeyCodeCommands } from '@guidepup/guidepup'
 import { screenReaderTest as test } from '@guidepup/playwright'
@@ -8,6 +9,7 @@ import { fileURLToPath } from 'node:url'
 import { formatAdminURL } from 'payload/shared'
 
 import { openGroupBy } from '../__helpers/e2e/groupBy/index.js'
+import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
@@ -21,6 +23,7 @@ import {
   expectPopupCursorToMove,
   gotoCreatePost,
   gotoFirstPost,
+  gotoLabelTestLogin,
   gotoPostsList,
   insertTextBlockWithKeyboard,
   navigateScreenReaderTo,
@@ -33,7 +36,9 @@ import {
   openFirstBlockActions,
   openFolderCreationLocation,
   openLivePreview,
+  openLLMInstructions,
   openLocaleOptions,
+  openNavigationFolders,
   openPostsFilter,
   openRichTextRelationshipDrawer,
   openRichTextUploadDrawer,
@@ -88,7 +93,73 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     })
   })
 
+  test.describe('1.1.1 Non-text Content (A)', () => {
+    test('should announce required state instead of the asterisk', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3579
+      await page.goto(
+        formatAdminURL({ adminRoute: '/admin', path: '/collections/media/create', serverURL }),
+      )
+      const alt = page.locator('#field-alt')
+
+      await expect(alt).toBeVisible()
+      const capture = await captureScreenReader({ action: () => alt.focus(), screenReader })
+
+      expect(capture.spokenPhrase).toMatch(/alt/i)
+      expect(capture.spokenPhrase).toMatch(/required/i)
+      expect(capture.spokenPhrase).not.toMatch(/star|asterisk/i)
+    })
+  })
+
   test.describe('1.3.1 Info and Relationships (A)', () => {
+    test('should encounter the duplicate locale checkbox and label as one screen-reader item', async ({
+      // PYLD-3671
+      page,
+      screenReader,
+    }) => {
+      await gotoFirstPost({ page, postsURL, serverURL })
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+      await page.getByRole('menuitem', { name: /duplicate selected locales/i }).click()
+      await expect(page.locator('.select-locales-drawer')).toBeVisible()
+      await navigateScreenReaderTo({
+        matches: /English.*check\s?box|check\s?box.*English/i,
+        screenReader,
+      })
+
+      expect(await screenReader.itemText()).toMatch(/English.*check\s?box|check\s?box.*English/i)
+      await screenReader.next()
+      const next = await screenReader.itemText()
+
+      expect(next).not.toMatch(/English/i)
+      expect(next).toMatch(/Spanish.*check\s?box|check\s?box.*Spanish/i)
+    })
+
+    test('should encounter the deletion checkbox label as one screen-reader item', async ({
+      // PYLD-3678
+      page,
+      screenReader,
+    }) => {
+      await gotoFirstPost({ page, postsURL, serverURL })
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+      await page.getByRole('menuitem', { name: 'Delete', exact: true }).click()
+      await expect(page.getByRole('dialog', { name: /confirm deletion/i })).toBeVisible()
+      await navigateScreenReaderTo({
+        matches: /delete permanently.*check\s?box|check\s?box.*delete permanently/i,
+        screenReader,
+      })
+
+      expect(await screenReader.itemText()).toMatch(
+        /delete permanently.*check\s?box|check\s?box.*delete permanently/i,
+      )
+      await screenReader.next()
+      const next = await screenReader.itemText()
+
+      expect(next).not.toMatch(/delete permanently/i)
+      expect(next).toMatch(/Cancel.*button|button.*Cancel/i)
+    })
+
     test.describe('Safari and VoiceOver report', () => {
       test.skip(process.platform !== 'darwin', 'Safari and VoiceOver report')
 
@@ -492,6 +563,55 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
         expect(outputs.join(' ')).not.toMatch(/drag to move|add block|edit link|remove link/i)
       }
     })
+    for (const form of ['document', 'login'] as const) {
+      test.describe(`${form} form`, () => {
+        test('should expose validation errors next to their fields', async ({
+          page,
+          screenReader,
+        }) => {
+          // PYLD-3581; login also covers the reading-order behavior of PYLD-3613.
+          if (form === 'login') {
+            await gotoLabelTestLogin({ page, serverURL })
+            await page.locator('input[name="email"]').fill('dev@payloadcms.com')
+            await page.getByRole('button', { name: 'Login', exact: true }).click()
+          } else {
+            await gotoCreatePost({ page, postsURL })
+            await page.getByRole('button', { name: /^Publish(?: in English)?$/ }).click()
+          }
+
+          const field = page.locator(form === 'login' ? 'input[name="password"]' : '#field-title')
+          const error = page
+            .locator('.field-error')
+            .filter({ hasText: /required/i })
+            .first()
+
+          await expect(error).toBeVisible()
+          await expectAdjacentValidationError({ error, field, screenReader })
+        })
+      })
+    }
+
+    test('should announce password errors after submission', async ({ page, screenReader }) => {
+      // PYLD-3613
+      await gotoLabelTestLogin({ page, serverURL })
+      await page.locator('input[name="email"]').fill('dev@payloadcms.com')
+      const password = page.locator('input[name="password"]')
+
+      await password.fill('temporary')
+      await password.fill('')
+      await password.press('Tab')
+      const error = page.locator('.field-error').filter({ hasText: /required/i })
+      const capture = await captureScreenReader({
+        action: async () => {
+          await page.getByRole('button', { name: 'Login', exact: true }).click()
+          await expect(error).toBeVisible()
+        },
+        screenReader,
+      })
+
+      expect.soft(capture.spokenPhrase).toContain((await error.innerText()).trim())
+    })
+
     test('should contain screen-reader traversal in bulk-upload and image-edit dialogs', async ({
       page,
       screenReader,
@@ -601,6 +721,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       // PYLD-3697
       // PYLD-3701
       await page.goto(`${serverURL}/admin`)
+      await openNav(page)
       await expectPopupCursorToMove({
         expectedItem: /account|preferences|logout/i,
         screenReader,
@@ -663,7 +784,110 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     })
   })
 
+  test.describe('2.4.6 Headings and Labels (AA)', () => {
+    test('should announce Welcome and the signed-in account as a heading', async ({
+      page,
+      screenReader,
+    }) => {
+      await page.goto(`${serverURL}/admin`)
+      await expect(page.getByRole('heading', { name: /^Welcome, /, level: 1 })).toBeVisible()
+
+      const output = await navigateScreenReaderTo({ matches: /Welcome, /i, screenReader })
+
+      expect(output).toMatch(/heading/i)
+    })
+  })
+
+  test.describe('3.2.2 On Input (A)', () => {
+    test('should announce automatic search and collection results', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3773
+      for (const isColumnSearch of [false, true]) {
+        await gotoPostsList({ page, postsURL })
+        if (isColumnSearch) {
+          await page.locator('.columns-button__button').click()
+        }
+        const search = isColumnSearch
+          ? page
+              .getByRole('dialog', { name: /columns/i })
+              .getByRole('textbox', { name: /search columns/i })
+          : page.locator('#search-filter-input')
+        const focusCapture = await captureScreenReader({
+          action: () => search.focus(),
+          screenReader,
+        })
+        const resultsCapture = await captureScreenReader({
+          action: async () => {
+            await search.fill('no-matching-accessibility-result')
+            if (isColumnSearch) {
+              await expect(
+                page.getByText('No matches found for this search', { exact: true }),
+              ).toBeVisible()
+            } else {
+              await expect(page.locator('tbody tr')).toHaveCount(0)
+              await expect(page.locator('.no-results__title')).toHaveText('No Results.')
+            }
+          },
+          screenReader,
+        })
+
+        await expect(search).toBeFocused()
+        expect
+          .soft(
+            (isColumnSearch &&
+              /automatic|as you type|while you type/i.test(focusCapture.spokenPhrase)) ||
+              /results found for.*(?:0|zero)|no (?:matches|results|posts)/i.test(
+                resultsCapture.spokenPhrase,
+              ),
+            JSON.stringify({
+              focus: focusCapture.spokenPhrase,
+              isColumnSearch,
+              results: resultsCapture.spokenPhrase,
+            }),
+          )
+          .toBe(true)
+      }
+    })
+  })
+
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should announce LLM instruction tabs and the read-only editor', async ({
+      page,
+      screenReader,
+    }) => {
+      const field = await openLLMInstructions({ page, serverURL })
+      const additionalTab = field.getByRole('tab', { name: 'Additional instructions', exact: true })
+      const systemTab = field.getByRole('tab', {
+        name: 'System instructions (read-only)',
+        exact: true,
+      })
+
+      await field.getByRole('textbox').focus()
+
+      const additionalOutput = await captureScreenReaderOutput({
+        action: () => additionalTab.focus(),
+        screenReader,
+      })
+
+      expect(additionalOutput).toMatch(/Additional instructions/i)
+      expect(additionalOutput).toMatch(/selected/i)
+      expect(additionalOutput).toMatch(/tab/i)
+      await page.keyboard.press('ArrowRight')
+      await expect(systemTab).toBeFocused()
+      await page.keyboard.press('Enter')
+      await expect(systemTab).toHaveAttribute('aria-selected', 'true')
+
+      const output = await captureScreenReaderOutput({
+        action: () => field.getByRole('textbox').focus(),
+        screenReader,
+      })
+
+      expect(output).toMatch(/System instructions/i)
+      expect(output).toMatch(/read.only/i)
+    })
+
     test('should announce rich-text upload and relationship filter options in NVDA browse mode', async ({
       page,
       screenReader,
@@ -716,6 +940,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     }) => {
       // PYLD-3645
       await page.goto(`${serverURL}/admin`)
+      await openNav(page)
       await page.locator('.user-menu__trigger').click()
       await page.getByRole('button', { name: 'Theme' }).click()
       const selectedTheme = page.locator('.popup-button-list__button--selected').last()
@@ -894,6 +1119,135 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     })
   })
   test.describe('4.1.3 Status Messages (AA)', () => {
+    test('should announce both rapid toast messages', async ({ page, screenReader }) => {
+      await page.goto(`${postsURL.admin}/status-messages`)
+      await screenReader.navigateToWebContent()
+      const capture = await captureScreenReader({
+        action: async () => {
+          await page.getByRole('button', { name: 'Show rapid toasts' }).click()
+          await expect(
+            page.locator('[data-sonner-toast]').filter({ hasText: 'Second rapid notification' }),
+          ).toHaveText('Second rapid notification')
+        },
+        screenReader,
+      })
+
+      expect(capture.spokenPhrase).toMatch(/First rapid notification/i)
+      expect(capture.spokenPhrase).toMatch(/Second rapid notification/i)
+      expect(capture.spokenPhrase).not.toMatch(/close toast/i)
+    })
+
+    test('should announce accessible names in custom toast content', async ({
+      page,
+      screenReader,
+    }) => {
+      await page.goto(`${postsURL.admin}/status-messages`)
+      await screenReader.navigateToWebContent()
+      const capture = await captureScreenReader({
+        action: () => page.getByRole('button', { name: 'Show custom toast' }).click(),
+        screenReader,
+      })
+
+      expect(capture.spokenPhrase).toMatch(/Custom notification/i)
+      expect(capture.spokenPhrase).toMatch(/Upload complete/i)
+      expect(capture.spokenPhrase).toMatch(/Retry upload/i)
+      expect(capture.spokenPhrase).toMatch(/View details/i)
+    })
+
+    test('should announce the unsaved Copy to locale toast without its close button', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3669
+      await gotoFirstPost({ page, postsURL, serverURL })
+      await screenReader.navigateToWebContent()
+      await page.locator('#field-title').fill('Unsaved toast announcement regression')
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+      const capture = await captureScreenReader({
+        action: async () => {
+          await page.locator('#copy-locale-data__button').click()
+          await expect(
+            page.locator('[data-sonner-toast]').filter({ hasText: /unsaved/i }),
+          ).toBeVisible()
+        },
+        screenReader,
+      })
+
+      expect(capture.spokenPhrase).toMatch(/unsaved/i)
+      expect(capture.spokenPhrase).not.toMatch(/close toast/i)
+    })
+
+    test('should announce the trash toast and dismiss it after the default timeout', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3580: six seconds is extra reading time, not virtual-cursor persistence.
+      const apiURL = formatAdminURL({ apiRoute: '/api', path: '/posts', serverURL })
+      const response = await page.request.post(apiURL, {
+        data: { title: 'Toast cursor persistence regression' },
+      })
+      expect(response.ok()).toBe(true)
+      const { doc } = await response.json()
+
+      try {
+        await gotoPostsList({ page, postsURL })
+        const row = page
+          .locator('tbody tr')
+          .filter({ hasText: 'Toast cursor persistence regression' })
+        await row.locator('.cell-_select input').check()
+        await page.locator('.list-selection__button[aria-label="Delete"]').click()
+        await screenReader.navigateToWebContent()
+        const capture = await captureScreenReader({
+          action: () =>
+            page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click(),
+          screenReader,
+        })
+        expect(capture.spokenPhrase).toMatch(/moved to trash/i)
+        await page.mouse.move(0, 0)
+        // Real elapsed time must exceed the configured timeout; browse focus does not pause it.
+        await page.waitForTimeout(7000)
+        await expect(
+          page.locator('[data-sonner-toast]').filter({ hasText: /moved to trash/i }),
+        ).toHaveCount(0)
+        await expect(page.getByRole('status').filter({ hasText: /moved to trash/i })).toHaveCount(0)
+      } finally {
+        const cleanup = await page.request.delete(`${apiURL}/${doc.id}?trash=true`)
+        expect(cleanup.ok()).toBe(true)
+      }
+    })
+
+    test('should announce global API depth changes while focus stays on the stepper', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3618
+      await page.goto(
+        formatAdminURL({ adminRoute: '/admin', path: '/globals/menu/api', serverURL }),
+      )
+      const depth = page.getByRole('spinbutton', { name: 'Depth', exact: true })
+      await expect(depth).toBeVisible()
+      await screenReader.navigateToWebContent()
+      const initialDepth = Number(await depth.inputValue())
+      const field = page.locator('.field-type.number').filter({ has: depth })
+
+      for (const { name, value } of [
+        { name: 'Increment', value: initialDepth + 1 },
+        { name: 'Decrement', value: initialDepth },
+      ]) {
+        const stepper = field.getByRole('button', { name, exact: true })
+        await stepper.focus()
+        const capture = await captureScreenReader({
+          action: async () => {
+            await stepper.press('Enter')
+            await expect(depth).toHaveValue(String(value))
+          },
+          screenReader,
+        })
+        await expect(stepper).toBeFocused()
+        expect.soft(capture.spokenPhrase).toMatch(new RegExp(`\\b${value}\\b`))
+      }
+    })
+
     test('should announce table search result changes without moving focus', async ({
       page,
       screenReader,
@@ -908,17 +1262,17 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
         {
           count: 1,
           query: 'Example post two',
-          speech: /(?:1|one)\s+(?:post|result|document|item)/i,
+          speech: /results found for.*(?:1|one)/i,
         },
         {
           count: 1,
           query: 'Example post three',
-          speech: /(?:1|one)\s+(?:post|result|document|item)/i,
+          speech: /results found for.*(?:1|one)/i,
         },
         {
           count: 0,
           query: 'no-such-accessibility-post',
-          speech: /(?:0|zero)\s+(?:post|result|document|item)/i,
+          speech: /results found for.*(?:0|zero)/i,
         },
       ]) {
         const capture = await captureScreenReader({
@@ -936,6 +1290,33 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
         expect(capture.spokenPhrase).toMatch(speech)
       }
     })
+
+    test('should announce navigation folder search results without moving focus', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3582
+      const sidebar = await openNavigationFolders({ page, serverURL })
+      const search = sidebar.getByRole('textbox')
+      const originalURL = page.url()
+
+      await search.fill('Accessibility child folder')
+      const capture = await captureScreenReader({
+        action: async () => {
+          await search.press('Enter')
+          await expect(sidebar.locator('.hierarchy-search-results__list')).toContainText(
+            'Accessibility child folder',
+          )
+        },
+        screenReader,
+      })
+
+      await expect(search).toBeFocused()
+      await expect(page).toHaveURL(originalURL)
+      expect(capture.spokenPhrase).toMatch(
+        /(?:1|one)\s+(?:search\s+)?result|(?:1|one)\s+folder|found\s+(?:1|one)|showing\s+(?:1|one)\s+of\s+(?:1|one)/i,
+      )
+    })
   })
 })
 
@@ -949,4 +1330,41 @@ async function collectModalCursorStops({ screenReader }: { screenReader: ScreenR
     }
   }
   return stops
+}
+
+async function expectAdjacentValidationError({
+  error,
+  field,
+  screenReader,
+}: {
+  error: Locator
+  field: Locator
+  screenReader: ScreenReaderPlaywright
+}) {
+  const message = (await error.innerText()).replace(/\s+/g, ' ').trim()
+  const stops: string[] = []
+  let hasAdjacentError = false
+
+  // Permit the label and field wrapper between the input and its error, in either direction.
+  for (const direction of ['previous', 'next'] as const) {
+    await field.blur()
+    await field.focus()
+    for (let index = 0; index < 3; index++) {
+      await screenReader[direction]()
+      const text = (await screenReader.itemText()).replace(/\s+/g, ' ').trim()
+
+      stops.push(text)
+      if (text.includes(message)) {
+        hasAdjacentError = true
+        break
+      }
+      if (/dashboard|navigation|publish|save draft/i.test(text)) {
+        break
+      }
+    }
+    if (hasAdjacentError) {
+      break
+    }
+  }
+  expect(hasAdjacentError, JSON.stringify({ message, stops })).toBe(true)
 }

@@ -11,6 +11,10 @@
       "@payloadcms/ui": ["../../ui/dist/exports/client/index.d.ts"],
       "@payloadcms/ui/providers/*": ["../../ui/dist/providers/*/index.d.ts"],
       "@payloadcms/ui/views/NotFound/client": ["../../ui/dist/views/NotFound/client.d.ts"],
+      "@payloadcms/ui/layouts/*": ["../../ui/dist/layouts/Root/*.d.ts"],
+      "@payloadcms/ui/layouts/Root/*": ["../../ui/dist/layouts/Root/*.d.ts"],
+      "@payloadcms/ui/layouts/NestProviders": ["../../ui/dist/layouts/Root/NestProviders.d.ts"],
+      "@payloadcms/ui/utilities/*": ["../../ui/dist/utilities/*.d.ts"],
       "@payloadcms/ui/*": ["../../ui/dist/exports/*"],
       "payload": ["../../payload/dist/index.bundled.d.ts"],
       "payload/*": ["../../payload/dist/exports/*.d.ts"]

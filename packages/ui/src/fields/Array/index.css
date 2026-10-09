@@ -76,6 +76,10 @@
   }
 
   .array-field__title {
+    font-size: var(--text-body-medium-bold-font-size);
+    font-weight: var(--text-body-medium-bold-font-weight);
+    line-height: var(--text-body-medium-bold-line-height);
+    letter-spacing: var(--text-body-medium-bold-letter-spacing);
     margin-bottom: 0;
   }
 

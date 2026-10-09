@@ -25,6 +25,7 @@ import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
 import { buildFoldersHierarchy, buildTagsHierarchy } from '../../hierarchy/presets.js'
 import { sanitizeHierarchyCollection } from '../../hierarchy/sanitizeHierarchyCollection.js'
 import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
+import { withLegacyCloudUploadFileData } from '../../uploads/fileVersioning/storedFiles.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
@@ -42,6 +43,7 @@ import {
   createInheritedReadVersionsAccess,
 } from './defaults.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
+import { validateUseAsThumbnail } from './useAsThumbnail.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
 /**
@@ -393,6 +395,13 @@ export const sanitizeCollection = (
     })
 
     sanitized.fields = mergeBaseFields(sanitized.fields, uploadFields)
+    sanitized.hooks = {
+      ...sanitized.hooks,
+      beforeRead: [
+        ({ doc, req }) => withLegacyCloudUploadFileData({ collection: sanitized, doc, req }),
+        ...(sanitized.hooks?.beforeRead || []),
+      ],
+    }
   }
 
   if (sanitized.auth) {
@@ -418,7 +427,7 @@ export const sanitizeCollection = (
     sanitized.admin!.pagination!.limits = collection.admin.pagination.limits
   }
 
-  for (const operation of ['create', 'delete', 'read', 'unlock', 'update'] as const) {
+  for (const operation of ['create', 'delete', 'read', 'unlock', 'update', 'validate'] as const) {
     sanitized.access![operation] = withBaseAccess({
       slug: sanitized.slug,
       access: sanitized.access?.[operation],
@@ -449,14 +458,25 @@ export const sanitizeCollection = (
       : readVersionsWithBaseAccess
   }
 
-  validateUseAsTitle(sanitized)
-
   const sanitizedConfig = sanitized as SanitizedCollectionConfig
 
   sanitizedConfig.joins = joins
   sanitizedConfig.polymorphicJoins = polymorphicJoins
 
   sanitizedConfig.flattenedFields = flattenAllFields({ fields: sanitizedConfig.fields })
+
+  validateUseAsTitle(sanitized)
+  validateUseAsThumbnail({ config: sanitizedConfig })
+
+  if (!sanitizedConfig.admin.useAsThumbnail) {
+    const uploadField = sanitizedConfig.flattenedFields.find(
+      (field) => fieldAffectsData(field) && field.type === 'upload',
+    )
+
+    if (uploadField && fieldAffectsData(uploadField)) {
+      sanitizedConfig.admin.useAsThumbnail = uploadField.name
+    }
+  }
 
   sanitizedConfig.sanitizedIndexes = sanitizeCompoundIndexes({
     fields: sanitizedConfig.flattenedFields,

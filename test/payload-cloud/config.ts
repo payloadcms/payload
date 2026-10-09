@@ -2,9 +2,11 @@ import { fileURLToPath } from 'node:url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { payloadCloudPlugin } from '@payloadcms/payload-cloud'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import dotenv from 'dotenv'
 import path from 'path'
 
+import { storageMediaSharpOptions } from '../__helpers/shared/storageMediaSharpOptions.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Documents } from './collections/Documents.js'
@@ -31,6 +33,13 @@ export default buildConfigWithDefaults({
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
     upload: {
+      transformers: [
+        sharpTransformer({
+          collections: {
+            media: { variants: storageMediaSharpOptions.variants },
+          },
+        }),
+      ],
       useTempFiles: true,
     },
   },

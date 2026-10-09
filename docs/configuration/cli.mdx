@@ -315,6 +315,8 @@ Payload includes local commands for inspecting the config and working with colle
   logged-in user.
 </Banner>
 
+`getCollectionSchema` and `getGlobalSchema` also return their [LLM instructions](./llm-instructions) alongside `schema`. With `--json`, these are available as `result.instructions`. Read them before creating or updating content.
+
 Start by discovering the available slugs and inspecting the input schema for a collection:
 
 ```sh

@@ -1,5 +1,3 @@
-import { status as httpStatus } from 'http-status'
-
 import type { FindOptions } from '../../index.js'
 import type { PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
@@ -10,7 +8,11 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { checkFileAccess } from '../../uploads/checkFileAccess.js'
+import { markHistoricalFileURLs } from '../../uploads/fileVersioning/markHistoricalFileURLs.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { hasVersionsEnabled } from '../../utilities/getVersionsConfig.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
@@ -55,6 +57,14 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
 
   if (!id) {
     throw new APIError('Missing ID of version.', httpStatus.BAD_REQUEST)
+  }
+
+  if (!hasVersionsEnabled(collectionConfig)) {
+    if (disableErrors) {
+      return null!
+    }
+
+    throw new NotFound(req.t)
   }
 
   // /////////////////////////////////////
@@ -166,6 +176,17 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     return null!
   }
 
+  if (collectionConfig.upload && !overrideAccess) {
+    const filename = (result.version as Record<string, unknown>)?.filename
+
+    await checkFileAccess({
+      collection: args.collection,
+      documentID: result.parent,
+      filename: typeof filename === 'string' ? filename : '',
+      req,
+    })
+  }
+
   if (!result.version) {
     // Fallback if not selected
     ;(result as any).version = {}
@@ -227,6 +248,15 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
           req,
         })) || result.version
     }
+  }
+
+  if (collectionConfig.upload) {
+    result.version = markHistoricalFileURLs({
+      collectionSlug: collectionConfig.slug,
+      doc: result.version as Record<string, unknown>,
+      req,
+      versionID: result.id,
+    }) as TData
   }
 
   // /////////////////////////////////////

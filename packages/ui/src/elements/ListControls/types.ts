@@ -11,16 +11,6 @@ export type ListControlsProps = {
   readonly beforeActions?: React.ReactNode[]
   readonly collectionConfig: ClientCollectionConfig
   readonly collectionSlug: string
-  /**
-   * @deprecated
-   * These are now handled by the `ListSelection` component
-   */
-  readonly disableBulkDelete?: boolean
-  /**
-   * @deprecated
-   * These are now handled by the `ListSelection` component
-   */
-  readonly disableBulkEdit?: boolean
   readonly disableQueryPresets?: boolean
   readonly enableColumns?: boolean
   readonly enableFilters?: boolean
@@ -31,6 +21,7 @@ export type ListControlsProps = {
   readonly hasCreatePermission?: boolean
   readonly hasDeletePermission?: boolean
   readonly isWhereOpen?: boolean
+  readonly layoutToggle?: React.ReactNode
   readonly listMenuItems?: React.ReactNode[]
   readonly newDocumentURL?: string
   readonly onWhereToggle?: () => void

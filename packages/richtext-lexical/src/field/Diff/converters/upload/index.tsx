@@ -10,7 +10,7 @@ import { formatFilesize } from 'payload/shared'
 import React from 'react'
 
 import type { HTMLConvertersAsync } from '../../../../features/converters/lexicalToHtml/async/types.js'
-import type { UploadDataImproved } from '../../../../features/upload/server/schema.js'
+import type { UploadData } from '../../../../features/upload/server/schema.js'
 import type { SerializedUploadNode } from '../../../../types/nodeTypes.js'
 
 const baseClass = 'lexical-upload-diff'
@@ -21,7 +21,7 @@ export const UploadDiffHTMLConverterAsync: (args: {
 }) => HTMLConvertersAsync<SerializedUploadNode> = ({ i18n, req }) => {
   return {
     upload: async ({ node, populate, providedCSSString }) => {
-      const uploadNode = node as UploadDataImproved
+      const uploadNode = node as UploadData
 
       let uploadDoc: (FileData & TypeWithID) | undefined = undefined
 

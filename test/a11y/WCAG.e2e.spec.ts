@@ -1,20 +1,27 @@
 import type { Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { formatAdminURL } from 'payload/shared'
+import { fileURLToPath } from 'node:url'
+import { formatAdminURL, instructionsCollectionSlug } from 'payload/shared'
 
 import type { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 
 import { addGroupBy, clearGroupBy, openGroupBy } from '../__helpers/e2e/groupBy/index.js'
-import { selectInput } from '../__helpers/e2e/selectInput.js'
+import { waitForFormReady } from '../__helpers/e2e/helpers.js'
+import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
+import { getSelectMenu, selectInput } from '../__helpers/e2e/selectInput.js'
+import { initPage } from '../__setup/e2e/initPage.js'
+import { seededAPIKey } from './constants.js'
 import {
   addCollectionQueryWidget,
   addTextBlock,
   cleanupModalMedia,
+  createMediaFixture,
   expectFocusInside,
   expectOptionsToHaveAccessibleNames,
   expectPaintedFocus,
   getFocusIndicatorStyle,
+  getTextContrastRatios,
   gotoCreatePost,
   gotoFirstPost,
   gotoPostsList,
@@ -31,8 +38,12 @@ import {
   openEditImageDialog,
   openFirstBlockActions,
   openFolderCreationLocation,
+  openGlobalAPI,
   openLivePreview,
+  openLLMInstructions,
   openLocaleOptions,
+  openNavigation,
+  openNavigationFolders,
   openPopupWithKeyboard,
   openPostsFilter,
   openRelationshipCreationDrawer,
@@ -41,13 +52,26 @@ import {
   openTableColumns,
   openTableVersionHistory,
   openVersionComparison,
+  openVersionsList,
   openWidgetDrawer,
 } from './helpers.js'
+
+const openNavigationForUserMenu = async ({ page }: { page: Page }): Promise<void> => {
+  const openNavigation = page.locator('.app-header--nav-open')
+
+  if ((await openNavigation.count()) === 0) {
+    await page.getByRole('button', { name: /open menu/i }).click()
+    await expect(openNavigation).toHaveCount(1)
+  }
+
+  await expect(page.locator('.user-menu__trigger')).toBeVisible()
+}
 
 test.describe('WCAG 2.2 Level AA', () => {
   let page: Page
   let postsURL: AdminUrlUtil
   let serverURL: string
+  const dashboardCleanup: Array<() => Promise<void>> = []
 
   test.beforeAll(async ({ browser }, testInfo) => {
     ;({ page, postsURL, serverURL } = await openAccessibilityTestPage({
@@ -57,6 +81,11 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.afterEach(async () => {
+    const restore = dashboardCleanup.splice(0).reverse()
+
+    for (const cleanup of restore) {
+      await cleanup()
+    }
     await cleanupModalMedia({ page })
   })
 
@@ -84,6 +113,295 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.3.1 Info and Relationships (A)', () => {
+    test('should name field collection breadcrumb navigation', async () => {
+      // PYLD-3728
+      await gotoPostsList({ page, postsURL })
+      const breadcrumb = page.locator('nav.step-nav')
+
+      await expect(breadcrumb).toHaveAccessibleName(/breadcrumb/i)
+      await gotoCreatePost({ page, postsURL })
+      await expect(breadcrumb).toHaveAccessibleName(/breadcrumb/i)
+      await expect(breadcrumb.getByRole('link', { name: 'Dashboard', exact: true })).toBeVisible()
+    })
+
+    test('should name versioned collection breadcrumb navigation', async () => {
+      // PYLD-3729
+      await openVersionsList({ page, postsURL, serverURL })
+      const breadcrumb = page.locator('nav.step-nav')
+      const viewport = page.viewportSize()!
+
+      try {
+        await expect(breadcrumb).toHaveAccessibleName(/breadcrumb/i)
+        await page.setViewportSize({ height: 800, width: 400 })
+        await expect(breadcrumb.getByRole('button', { name: 'More options' })).toBeVisible()
+        await expect(breadcrumb).toHaveAccessibleName(/breadcrumb/i)
+      } finally {
+        await page.setViewportSize(viewport)
+      }
+    })
+
+    test('should expose the field collection current breadcrumb page', async () => {
+      // PYLD-3702
+      await gotoPostsList({ page, postsURL })
+      const breadcrumb = page.locator('nav.step-nav')
+      const currentPage = breadcrumb.locator('[aria-current="page"]')
+
+      await expect(currentPage).toHaveCount(1)
+      await expect(currentPage).toHaveText('Posts')
+      await gotoCreatePost({ page, postsURL })
+      await expect(currentPage).toHaveCount(1)
+      await expect(currentPage).toHaveText('Create New')
+      await expect(
+        breadcrumb.getByRole('link', { name: 'Posts', exact: true }),
+      ).not.toHaveAttribute('aria-current', 'page')
+
+      await page.goto(
+        formatAdminURL({
+          adminRoute: '/admin',
+          path: '/collections/payload-folders?view=hierarchy',
+          serverURL,
+        }),
+      )
+      const hierarchy = page.locator('.hierarchy-list')
+
+      await expect(hierarchy).toBeVisible()
+      await expect(currentPage).toHaveCount(1)
+      for (const name of ['Accessibility folder', 'Accessibility child folder']) {
+        const link = hierarchy.getByRole('link', { name, exact: true })
+
+        await expect(link).toHaveAttribute('href')
+        const { search } = new URL((await link.getAttribute('href'))!, serverURL)
+
+        await page.goto(
+          formatAdminURL({
+            adminRoute: '/admin',
+            path: `/collections/payload-folders${search}`,
+            serverURL,
+          }),
+        )
+        await expect(hierarchy.getByRole('heading', { name, exact: true })).toBeVisible()
+        await expect(currentPage).toHaveCount(1)
+        await expect(currentPage).toHaveText(name)
+      }
+      await expect(
+        breadcrumb.getByRole('link', { name: 'Accessibility folder', exact: true }),
+      ).toBeVisible()
+      await expect(currentPage).toHaveCount(1)
+      await expect(currentPage).toHaveText('Accessibility child folder')
+    })
+
+    test('should expose the versioned collection current breadcrumb page', async () => {
+      // PYLD-3703
+      await openVersionsList({ page, postsURL, serverURL })
+      const breadcrumb = page.locator('nav.step-nav')
+      const currentPage = breadcrumb.locator('[aria-current="page"]')
+      const viewport = page.viewportSize()!
+
+      try {
+        await expect(currentPage).toHaveCount(1)
+        await expect(currentPage).toHaveText('Versions')
+        await page.setViewportSize({ height: 800, width: 400 })
+        const moreOptions = breadcrumb.getByRole('button', { name: 'More options' })
+
+        await expect(moreOptions).toBeVisible()
+        await expect(currentPage).toHaveCount(1)
+        await expect(currentPage).toHaveText('Versions')
+        await moreOptions.press('Enter')
+        const posts = page.getByRole('menuitem', { name: 'Posts', exact: true })
+
+        await expect(posts).toBeVisible()
+        await expect(posts).not.toHaveAttribute('aria-current', 'page')
+        await page.keyboard.press('Escape')
+        await expect(moreOptions).toBeFocused()
+        await expect(currentPage).toHaveText('Versions')
+
+        await page.setViewportSize(viewport)
+        await page.goto(
+          formatAdminURL({ adminRoute: '/admin', path: '/breadcrumb-current-page', serverURL }),
+        )
+        await expect(currentPage).toHaveCount(1)
+        await expect(currentPage).toHaveText('Current breadcrumb example')
+        await expect(moreOptions).toBeHidden()
+        await page.setViewportSize({ height: 800, width: 400 })
+        await moreOptions.press('Enter')
+        const currentMenuItem = page.getByRole('menuitem', {
+          name: 'Current breadcrumb example',
+          exact: true,
+        })
+
+        await expect(currentMenuItem).toBeVisible()
+        await expect(currentMenuItem).toHaveAttribute('aria-current', 'page')
+        await expect(
+          page.getByRole('menuitem', { name: 'Parent section of breadcrumb example' }),
+        ).not.toHaveAttribute('aria-current', 'page')
+        await page.keyboard.press('Escape')
+        await expect(moreOptions).toBeFocused()
+        await page.setViewportSize(viewport)
+        await expect(currentPage).toHaveCount(1)
+        await expect(currentPage).toHaveText('Current breadcrumb example')
+      } finally {
+        await page.setViewportSize(viewport)
+      }
+    })
+
+    test('should identify which pending upload each remove button removes', async () => {
+      // PYLD-3604
+      const dialog = await openPendingLabelUploads({ page, serverURL })
+      const rows = dialog.locator('.file-selections__fileRowContainer')
+
+      await expect(rows).toHaveCount(2)
+      for (const filename of ['image.png', 'test-image.png']) {
+        const row = rows.filter({ has: page.getByText(filename, { exact: true }) })
+        const remove = row.locator('button.file-selections__remove')
+
+        await expect(remove).toBeVisible()
+        await expect.soft(remove).toHaveAccessibleName(`Remove: ${filename}`)
+      }
+    })
+
+    test('should distinguish crop reset from focal-point reset', async () => {
+      // PYLD-3600
+      const dialog = await openEditImageDialog({ page, serverURL })
+      const sections = dialog.locator('.edit-upload__section')
+      const cropReset = sections
+        .filter({ has: page.getByRole('heading', { name: 'Crop', exact: true }) })
+        .getByRole('button')
+      const focalReset = sections
+        .filter({ has: page.getByRole('heading', { name: 'Focal Point', exact: true }) })
+        .getByRole('button')
+
+      await expect(cropReset).toBeVisible()
+      await expect(focalReset).toBeVisible()
+      await expect.soft(cropReset).toHaveAccessibleName(/reset.*crop/i)
+      await expect.soft(focalReset).toHaveAccessibleName(/reset.*focal point/i)
+    })
+
+    test('should associate top-level, array, and block date-picker labels with their inputs', async () => {
+      // PYLD-3819
+      test.setTimeout(60000)
+      await prepareBlockDateField({ page, postsURL })
+      await page.locator('#field-items .array-field__add-row').click()
+      const fields = page.locator('.date-time-field')
+
+      await expect(fields).toHaveCount(3)
+      for (const field of await fields.all()) {
+        const label = field.locator('label.field-label').first()
+        const input = field.getByRole('textbox')
+
+        await expect(input).toBeVisible()
+        expect
+          .soft(await label.evaluate((element: HTMLLabelElement) => element.control?.tagName))
+          .toBe('INPUT')
+        await label.click()
+        await expect.soft(input).toBeFocused()
+        await page.keyboard.press('Escape')
+      }
+    })
+
+    test('should expose the rich-text callout first toggle state through collapse and return', async () => {
+      // PYLD-3667
+      test.slow()
+      await gotoCreatePost({ page, postsURL })
+      const callout = getCallouts({ container: page.locator('main') }).first()
+      const toggle = callout.locator('.collapsible__toggle')
+      const content = callout.locator('.collapsible__content')
+
+      await expect(content).toBeVisible()
+      await toggle.focus()
+      await expect.soft(toggle).toHaveAttribute('aria-expanded', 'true')
+      await toggle.press('Enter')
+      await expect(content).toBeHidden()
+      await toggle.press('Tab')
+      await page.keyboard.press('Shift+Tab')
+      await expect(toggle).toBeFocused()
+      await expect.soft(toggle).toHaveAttribute('aria-expanded', 'false')
+      await toggle.press('Space')
+      await expect(content).toBeVisible()
+      await expect.soft(toggle).toHaveAttribute('aria-expanded', 'true')
+    })
+
+    test('should associate bulk collapse and show commands with their Array and Blocks labels', async () => {
+      // PYLD-3629
+      test.slow()
+      await addTextBlock({ page, postsURL })
+      await page.locator('#field-items .array-field__add-row').click()
+
+      for (const [selector, name] of [
+        ['#field-items', /items/i],
+        ['#field-layout', /layout/i],
+      ] as const) {
+        const field = page.locator(selector)
+
+        for (const command of [/collapse all/i, /show all/i]) {
+          const button = field.getByRole('button', { name: command })
+
+          await expect(button).toBeVisible()
+          await expect.soft(button).toHaveAccessibleName(name)
+        }
+      }
+    })
+
+    test('should identify the navigation create-folder action before opening it', async () => {
+      const sidebar = await openNavigationFolders({ page, serverURL })
+      const create = sidebar.locator('.tree__create-button')
+
+      await expect(create).toHaveAccessibleName(/create.*folder/i)
+      await create.press('Enter')
+      await expect(page.locator('dialog[id^="tree-create-"]')).toBeVisible()
+    })
+
+    test('should expose folder names and hierarchy during keyboard navigation', async () => {
+      const sidebar = await openNavigationFolders({ page, serverURL })
+      const parent = sidebar.getByRole('treeitem', { name: 'Accessibility folder', exact: true })
+      const toggle = parent.locator(':scope > .tree-node__content-wrapper .tree-node__toggle')
+
+      await expect(parent).toHaveAccessibleName('Accessibility folder')
+      await expect(toggle).toHaveAccessibleName(/accessibility folder/i)
+      await parent.focus()
+      await parent.press('ArrowRight')
+      const children = parent.getByRole('group').getByRole('treeitem')
+
+      await expect(parent).toHaveAttribute('aria-level', '1')
+      await expect(parent).toHaveAttribute('aria-expanded', 'true')
+      await expect(parent).toHaveAccessibleName('Accessibility folder')
+      await expect(toggle).toHaveAccessibleName(/accessibility folder/i)
+      await expect(children).toHaveCount(2)
+      await expect(children.first()).toHaveAttribute('aria-level', '2')
+      await expect(children.first()).toHaveAccessibleName('Accessibility child folder')
+      for (const child of await children.all()) {
+        await page.keyboard.press('ArrowDown')
+        await expect(child).toBeFocused()
+      }
+      await page.keyboard.press('ArrowDown')
+      await expect(children.last()).toBeFocused()
+      await page.keyboard.press('ArrowUp')
+      await expect(children.first()).toBeFocused()
+      await page.keyboard.press('ArrowUp')
+      await expect(parent).toBeFocused()
+      await children.first().focus()
+      await expect(children.first()).toBeFocused()
+      await toggle.click()
+      await expect(children).toHaveCount(0)
+      await expect(sidebar.locator('[role=treeitem][tabindex="0"]')).toHaveCount(1)
+      await sidebar.locator('.tree__create-button').focus()
+      await page.keyboard.press('Shift+Tab')
+      const all = sidebar.getByRole('treeitem', { name: /all.*folders/i })
+
+      await expect(all).toBeFocused()
+      await all.press('ArrowDown')
+      await expect(parent).toBeFocused()
+      await parent.press('ArrowRight')
+      await expect(children).toHaveCount(2)
+      await page.keyboard.press('ArrowDown')
+      await page.keyboard.press('ArrowDown')
+      await page.keyboard.press('Enter')
+      await expect(children.last()).toHaveAttribute('aria-selected', 'true')
+      await expect(page).toHaveURL(/_h_payload-folders=/)
+      await expect(
+        page.getByRole('heading', { name: 'Accessibility final child folder', exact: true }),
+      ).toBeVisible()
+    })
+
     test('should expose column editor headings and named toggles', async () => {
       test.setTimeout(60000)
       const columns = await openTableColumns({ page, postsURL })
@@ -147,10 +465,10 @@ test.describe('WCAG 2.2 Level AA', () => {
 
         await expect(table.locator('tbody tr')).toHaveCount(1)
         await expect(input).toHaveAccessibleName('Go to table page')
-        const tableID = table
+        await expect(table).toHaveAttribute('id', /\S/)
+        const tableID = await table.getAttribute('id')
 
-        await expect(tableID).toHaveAttribute('id')
-        await expect(input).toHaveAttribute('aria-controls', tableID)
+        await expect(input).toHaveAttribute('aria-controls', tableID!)
         await expect(input).toHaveAccessibleDescription('Enter a page number from 1 to 3.')
       } finally {
         await page.goto(`${postsURL.list}?limit=10`)
@@ -167,11 +485,101 @@ test.describe('WCAG 2.2 Level AA', () => {
         const drawer = await openDrawer({ page, postsURL })
         const headers = drawer.locator('th:has(.sort-column__button)')
 
+        await expect(drawer.getByRole('main')).toHaveCount(0)
+
         await expect(headers.first()).toBeVisible()
         for (const header of await headers.all()) {
           const label = (await header.locator('.sort-column__label').innerText()).trim()
 
           await expect.soft(header).toHaveAccessibleName(label)
+        }
+      }
+    })
+
+    test('should associate coordinate labels with their inputs', async () => {
+      // PYLD-3824, PYLD-3607
+      await gotoCreatePost({ page, postsURL })
+      for (const coordinate of ['Longitude', 'Latitude']) {
+        const label = page.locator('.point label').filter({ hasText: `Location - ${coordinate}` })
+        const input = page.locator(`input[name="location.${coordinate.toLowerCase()}"]`)
+
+        await expect(label).toBeVisible()
+        await expect(input).toBeVisible()
+        await expect.soft(input).toHaveAccessibleName(new RegExp(`Location.*${coordinate}`, 'i'))
+        await label.click()
+        await expect.soft(input).toBeFocused()
+        expect
+          .soft(await label.evaluate((element: HTMLLabelElement) => element.control?.id))
+          .toBe(await input.getAttribute('id'))
+      }
+    })
+
+    test('should associate JSON and Code labels with their editors', async () => {
+      // PYLD-3822
+      test.setTimeout(60000)
+      await gotoCreatePost({ page, postsURL })
+      for (const [field, labelText] of [
+        ['settings', 'Settings'],
+        ['source', 'Source'],
+      ] as const) {
+        const wrapper = page.locator(`#field-${field}`)
+        const input = wrapper.getByRole('textbox')
+        const label = page.locator('.field-label').filter({ hasText: new RegExp(`^${labelText}$`) })
+
+        await wrapper.scrollIntoViewIfNeeded()
+        await expect(input).toBeAttached()
+        await label.click()
+        await expect.soft(input).toBeFocused()
+        await expect.soft(input).toHaveAccessibleName(new RegExp(labelText, 'i'))
+      }
+      for (const field of ['unlabelledSettings', 'unlabelledSource']) {
+        const wrapper = page.locator(`#field-${field}`)
+
+        await wrapper.scrollIntoViewIfNeeded()
+        await expect.soft(wrapper.getByRole('textbox')).toHaveAccessibleName('Editor content')
+      }
+    })
+
+    test('should focus select inputs when their labels are clicked', async () => {
+      // PYLD-3814
+      await gotoCreatePost({ page, postsURL })
+      for (const name of ['Accessibility Select', 'Required Tags']) {
+        const label = page.locator('label').filter({ hasText: name })
+        const field = page.locator('.field-type').filter({ has: label })
+        const input = field.getByRole('combobox')
+
+        await expect(input).toHaveAccessibleName(name)
+        await label.click()
+        await expect(input).toBeFocused()
+        expect(await label.evaluate((element: HTMLLabelElement) => element.control?.id)).toBe(
+          await input.getAttribute('id'),
+        )
+      }
+    })
+
+    test('should associate rich-text toolbars with their fields', async () => {
+      // PYLD-3788, PYLD-3780, PYLD-3742
+      await addTextBlock({ page, postsURL })
+      for (const [selector, name] of [
+        ['[data-field-path="content"]', 'Content'],
+        ['[data-field-path="layout.0.body"]', 'Body'],
+      ] as const) {
+        const field = page.locator(selector)
+        const toolbar = field.locator('.fixed-toolbar')
+        const editor = field.locator('[contenteditable="true"]').first()
+
+        await expect(editor).toBeVisible()
+        await expect(editor).toHaveAccessibleName(name)
+
+        await expect(toolbar).toBeVisible()
+        await expect(toolbar.getByRole('button').first()).toBeVisible()
+        const namedContainer = page
+          .getByRole('group', { name: new RegExp(name, 'i') })
+          .or(page.getByRole('toolbar', { name: new RegExp(name, 'i') }))
+          .or(page.getByRole('region', { name: new RegExp(name, 'i') }))
+
+        for (const button of await toolbar.getByRole('button').all()) {
+          await expect.soft(namedContainer.getByRole('button').and(button)).toHaveCount(1)
         }
       }
     })
@@ -282,10 +690,9 @@ test.describe('WCAG 2.2 Level AA', () => {
         const comparison = await compareHeadingWithOriginalSpan({
           heading,
           originalStyle: `
-            font-family: var(--text-body-medium-strong-font-family);
-            font-size: var(--text-body-medium-strong-font-size);
-            font-weight: var(--text-body-medium-strong-font-weight);
-            line-height: var(--text-body-medium-strong-line-height);
+            font-size: var(--text-body-medium-bold-font-size);
+            font-weight: var(--text-body-medium-bold-font-weight);
+            line-height: var(--text-body-medium-bold-line-height);
             color: var(--color-text);
           `,
         })
@@ -428,7 +835,194 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
 
+  test.describe('1.4.3 Contrast (Minimum) (AA)', () => {
+    test('should keep dashboard document labels readable in both themes', async () => {
+      const preference = await (
+        await page.request.get(`${serverURL}/api/payload-preferences/recently-viewed`)
+      ).json()
+      const documents = (await (await page.request.get(`${serverURL}/api/posts?limit=3`)).json())
+        .docs
+      const originalTheme = await page.locator('html').getAttribute('data-theme')
+
+      dashboardCleanup.push(async () => {
+        await page.locator('html').evaluate((element, value) => {
+          if (value) {
+            element.setAttribute('data-theme', value)
+          }
+        }, originalTheme)
+        await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
+          data: { value: preference?.value ?? { items: [] } },
+        })
+      })
+
+      await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
+        data: {
+          value: {
+            items: documents.map((doc) => ({
+              id: doc.id,
+              collectionSlug: 'posts',
+              viewedAt: new Date().toISOString(),
+            })),
+          },
+        },
+      })
+      await page.goto(`${serverURL}/admin`)
+      const widget = page.locator('.recents-widget')
+
+      for (const theme of ['light', 'dark']) {
+        await page
+          .locator('html')
+          .evaluate((element, value) => element.setAttribute('data-theme', value), theme)
+        await widget.getByRole('button', { name: 'Recently viewed' }).click()
+        await expect(widget.locator('.recents-widget__meta').first()).toBeVisible()
+        const ratios = await getTextContrastRatios({
+          container: widget,
+          selectors: [
+            '.recents-widget__tab',
+            '.recents-widget__meta',
+            '.recents-widget__status-pill',
+            '.recents-widget__pagination button:not(:disabled)',
+            '.recents-widget__pagination span',
+          ],
+        })
+
+        expect(ratios.length).toBeGreaterThan(3)
+        for (const { ratio, selector } of ratios) {
+          expect(ratio, `${theme}: ${selector}`).toBeGreaterThanOrEqual(4.5)
+        }
+      }
+    })
+
+    test('should give an empty rich-text editor placeholder sufficient contrast', async ({
+      browser: _browser,
+    }, testInfo) => {
+      await gotoCreatePost({ page, postsURL })
+      const field = page.locator('[data-field-path="content"]')
+      const editor = field.locator('[contenteditable="true"]')
+
+      await editor.press('ControlOrMeta+a')
+      await editor.press('Backspace')
+      await expect(field.locator('.LexicalEditorTheme__placeholder')).toBeVisible()
+
+      const scan = await runAxeScan({
+        include: ['[data-field-path="content"] .LexicalEditorTheme__placeholder'],
+        page,
+        testInfo,
+      })
+
+      expect(scan.violations).toEqual([])
+    })
+  })
+
   test.describe('1.4.10 Reflow (AA)', () => {
+    test('should keep instruction tabs visible and clear of the required-fields help at 320px', async () => {
+      const viewport = page.viewportSize()!
+
+      try {
+        await page.setViewportSize({ height: 900, width: 320 })
+
+        const field = await openLLMInstructions({ page, serverURL })
+        const additionalTab = field.getByRole('tab', {
+          name: 'Additional instructions',
+          exact: true,
+        })
+        const systemTab = field.getByRole('tab', {
+          name: 'System instructions (read-only)',
+          exact: true,
+        })
+        const help = page.locator('.required-fields-info button')
+
+        for (const tab of [additionalTab, systemTab]) {
+          const bounds = await tab.boundingBox()
+          const helpBounds = await help.boundingBox()
+
+          expect(bounds).not.toBeNull()
+          expect(helpBounds).not.toBeNull()
+          expect(bounds!.x).toBeGreaterThanOrEqual(0)
+          expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(320)
+          expect(
+            bounds!.x + bounds!.width <= helpBounds!.x ||
+              bounds!.y >= helpBounds!.y + helpBounds!.height ||
+              bounds!.y + bounds!.height <= helpBounds!.y,
+          ).toBe(true)
+        }
+
+        await additionalTab.focus()
+        await page.keyboard.press('ArrowRight')
+        await expect(systemTab).toBeFocused()
+        await page.keyboard.press('Enter')
+        await expect(field.getByRole('textbox')).toHaveAccessibleName(
+          'System instructions (read-only)',
+        )
+      } finally {
+        await page.setViewportSize(viewport)
+      }
+    })
+
+    test('should truncate a long account label without obscuring the menu icon', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
+
+      const navHeader = page.locator('.nav__header')
+      const trigger = page.locator('.user-menu__trigger')
+      const label = trigger.locator('.btn__label')
+      const icon = trigger.locator('.btn__icon')
+
+      await label.evaluate((element) => {
+        element.textContent = 'devthisismynameandiloveit@payloadcms.com'
+      })
+
+      const [headerBox, triggerBox, labelBox, iconBox] = await Promise.all([
+        navHeader.boundingBox(),
+        trigger.boundingBox(),
+        label.boundingBox(),
+        icon.boundingBox(),
+      ])
+      const labelMetrics = await label.evaluate((element) => ({
+        clientWidth: element.clientWidth,
+        overflow: getComputedStyle(element).overflow,
+        scrollWidth: element.scrollWidth,
+        textOverflow: getComputedStyle(element).textOverflow,
+      }))
+
+      expect(headerBox).not.toBeNull()
+      expect(triggerBox).not.toBeNull()
+      expect(labelBox).not.toBeNull()
+      expect(iconBox).not.toBeNull()
+      expect(triggerBox!.x + triggerBox!.width).toBeLessThanOrEqual(headerBox!.x + headerBox!.width)
+      expect(labelBox!.x + labelBox!.width).toBeLessThanOrEqual(iconBox!.x)
+      expect(iconBox!.x + iconBox!.width).toBeLessThanOrEqual(triggerBox!.x + triggerBox!.width)
+      expect(labelMetrics).toMatchObject({
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+      })
+      expect(labelMetrics.scrollWidth).toBeGreaterThan(labelMetrics.clientWidth)
+    })
+
+    test('should keep collection cards within a 320px viewport', async () => {
+      const previousViewport = page.viewportSize()
+
+      try {
+        await page.setViewportSize({ height: 720, width: 320 })
+        await page.goto(`${serverURL}/admin`)
+
+        const cards = page.locator('.collections__card-list .card')
+
+        expect(await cards.count()).toBeGreaterThan(0)
+        for (const card of await cards.all()) {
+          const box = await card.boundingBox()
+
+          expect(box).not.toBeNull()
+          expect(box!.x).toBeGreaterThanOrEqual(0)
+          expect(box!.x + box!.width).toBeLessThanOrEqual(320)
+        }
+      } finally {
+        if (previousViewport) {
+          await page.setViewportSize(previousViewport)
+        }
+      }
+    })
+
     test('should ellipsize long selected values without obscuring their remove control', async () => {
       // Additional coverage for PYLD-3811.
       const fieldSelect = await openBulkEditFieldSelect({ page, postsURL })
@@ -498,9 +1092,9 @@ test.describe('WCAG 2.2 Level AA', () => {
         }
       })
 
-      expect(centers.chip).not.toBeNull()
-      expect(centers.icon).not.toBeNull()
-      expect(centers.text).not.toBeNull()
+      if (centers.icon === null || centers.text === null) {
+        throw new Error('Expected the multi-value chip to contain its icon and text')
+      }
       expect(Math.abs(centers.text - centers.chip)).toBeLessThanOrEqual(0.5)
       expect(Math.abs(centers.icon - centers.chip)).toBeLessThanOrEqual(0.5)
       await expect(removeButton).toBeVisible()
@@ -508,6 +1102,553 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.1.1 Keyboard (A)', () => {
+    test('should increase and decrease Number and Point values with arrow keys', async () => {
+      // PYLD-3574
+      await gotoCreatePost({ page, postsURL })
+      for (const name of ['Quantity', 'Location - Longitude', 'Location - Latitude']) {
+        const input = page.getByRole('spinbutton', { name, exact: true })
+
+        await input.fill('10')
+        await input.press('ArrowUp')
+        await expect(input).toHaveValue('11')
+        await input.press('ArrowDown')
+        await expect(input).toHaveValue('10')
+        await expect(input).toBeFocused()
+        await input.press('Tab')
+        await expect(input).not.toBeFocused()
+      }
+    })
+    test('should navigate the whole rich-text toolbar with arrow keys and one Tab stop', async () => {
+      // PYLD-3829
+      await gotoCreatePost({ page, postsURL })
+      const field = page.locator('[data-field-path="content"]')
+      const editor = field.locator('[contenteditable="true"]')
+
+      await editor.fill('Toolbar navigation')
+      for (const selector of ['.fixed-toolbar', '.inline-toolbar-popup']) {
+        if (selector === '.inline-toolbar-popup') {
+          await editor.fill('Toolbar navigation')
+          await editor.press('ControlOrMeta+a')
+        }
+
+        const toolbar = field.locator(selector)
+        const buttons = toolbar.locator('button:enabled')
+
+        await expect(buttons.first()).toBeVisible()
+        await expect(toolbar.locator('[data-button-key="indentDecrease"]')).toBeDisabled()
+        const link = toolbar.locator('[data-button-key="link"]')
+
+        if (selector === '.fixed-toolbar') {
+          await expect(link).toBeDisabled()
+        } else {
+          await expect(link).toBeEnabled()
+        }
+        const count = await buttons.count()
+
+        expect(count).toBeGreaterThan(2)
+        await buttons.first().focus()
+        for (let index = 1; index < count; index++) {
+          await page.keyboard.press('ArrowRight')
+          await expect(buttons.nth(index)).toBeFocused()
+        }
+        await page.keyboard.press('ArrowRight')
+        await expect(buttons.first()).toBeFocused()
+        await page.keyboard.press('ArrowLeft')
+        await expect(buttons.last()).toBeFocused()
+        await page.keyboard.press('Home')
+        await expect(buttons.first()).toBeFocused()
+        await page.keyboard.press('End')
+        await expect(buttons.last()).toBeFocused()
+        await expect(toolbar.locator('button[tabindex="0"]')).toHaveCount(1)
+        await page.keyboard.press('Tab')
+        await expect(toolbar.locator(':focus')).toHaveCount(0)
+        if (selector === '.fixed-toolbar') {
+          await page.keyboard.press('Escape')
+          await page.keyboard.press('Shift+Tab')
+          await expect(toolbar.locator(':focus')).toHaveCount(0)
+          await expect(buttons.last()).toHaveAttribute('tabindex', '0')
+          await page.keyboard.press('Tab')
+          await expect(buttons.last()).toBeFocused()
+        }
+      }
+    })
+
+    test('should switch dashboard document tabs with keyboard and expose pressed states', async () => {
+      await page.goto(`${serverURL}/admin`)
+      const widget = page.locator('.recents-widget')
+      const pinned = widget.getByRole('button', { name: 'Pinned', exact: true })
+      const recents = widget.getByRole('button', { name: 'Recently viewed' })
+
+      await pinned.focus()
+      await pinned.press('Enter')
+      await expect(pinned).toHaveAttribute('aria-pressed', 'true')
+      await expect(widget.getByRole('button', { name: 'Recently viewed' })).toHaveAttribute(
+        'aria-pressed',
+        'false',
+      )
+
+      await recents.focus()
+      await recents.press('Space')
+      await expect(recents).toHaveAttribute('aria-pressed', 'true')
+      const viewport = widget.locator('.recents-widget__viewport')
+
+      await expect(viewport).toHaveAttribute('aria-busy', 'false')
+      let shouldFail = true
+
+      await page.route('**/*', async (route) => {
+        if (
+          shouldFail &&
+          route.request().method() === 'POST' &&
+          route.request().postData()?.includes('get-dashboard-documents')
+        ) {
+          await route.abort('failed')
+          return
+        }
+        await route.continue()
+      })
+      try {
+        await pinned.press('Enter')
+        const retry = widget.getByRole('button', { name: 'Retry', exact: true })
+
+        await expect(retry).toBeVisible()
+        await expect(widget.locator('.recents-widget__status')).toHaveText(
+          'An unknown error has occurred.',
+        )
+        await retry.focus()
+        await expectPaintedFocus({ page })
+        shouldFail = false
+        await retry.press('Enter')
+        await expect(pinned).toBeFocused()
+        await expect(viewport).toHaveAttribute('aria-busy', 'false')
+        await expect(retry).toHaveCount(0)
+        await expectPaintedFocus({ page })
+      } finally {
+        await page.unrouteAll({ behavior: 'wait' })
+      }
+    })
+
+    test('should open the dashboard pin picker by keyboard and restore focus after cancel or selection', async () => {
+      test.slow()
+      const testInfo = test.info()
+
+      await page.goto(`${serverURL}/admin`)
+      const widget = page.locator('.recents-widget')
+      const opener = widget.getByRole('button', {
+        name: 'Pin document',
+        exact: true,
+        includeHidden: true,
+      })
+      const drawer = page.locator('.list-drawer.drawer--is-open')
+      const document = (await (await page.request.get(`${serverURL}/api/posts?limit=1`)).json())
+        .docs[0]
+      const previousPins = await (
+        await page.request.get(`${serverURL}/api/payload-preferences/pinned-documents`)
+      ).json()
+
+      dashboardCleanup.push(async () => {
+        await page.request.post(`${serverURL}/api/payload-preferences/pinned-documents`, {
+          data: { value: previousPins.value ?? { items: [] } },
+        })
+      })
+
+      await widget.locator('.recents-widget__empty-icon--pinned').click()
+      await expect(drawer).toHaveCount(0)
+      await expect(opener).toHaveAttribute('aria-expanded', 'false')
+      await expect(opener).toHaveAccessibleDescription(
+        'No pinned documents Documents you pin will appear here',
+      )
+      const openerBox = await opener.boundingBox()
+
+      expect(openerBox!.height).toBeGreaterThanOrEqual(24)
+      expect(openerBox!.width).toBeGreaterThanOrEqual(24)
+      await opener.focus()
+      await expectPaintedFocus({ page })
+      await opener.press('Enter')
+      await expect(drawer).toBeVisible()
+      await expect(opener).toHaveAttribute('aria-expanded', 'true')
+      await expectFocusInside({ container: drawer, page })
+      await page.keyboard.press('Shift+Tab')
+      await expectFocusInside({ container: drawer, page })
+      await page.keyboard.press('Tab')
+      await expectFocusInside({ container: drawer, page })
+      await page.keyboard.press('Escape')
+      await expect(drawer).toBeHidden()
+      await expect(opener).toBeFocused()
+      await expect(opener).toHaveAttribute('aria-expanded', 'false')
+      await opener.press('Space')
+      const collectionInput = drawer.locator('.list-header__select-collection input[type="text"]')
+
+      await collectionInput.focus()
+      await expect(collectionInput).toHaveAccessibleName('Select a Collection to Browse')
+      await collectionInput.press('ArrowDown')
+      await expect(
+        getSelectMenu({ page }).getByText(/pinned documents|preferences|locked documents/i),
+      ).toHaveCount(0)
+      await expect(getSelectMenu({ page }).getByRole('option', { name: /folder/i })).toHaveCount(1)
+      await collectionInput.fill('Post')
+      await collectionInput.press('ArrowDown')
+      await collectionInput.press('Enter')
+      await expect(drawer.getByRole('button', { name: document.title, exact: true })).toBeVisible()
+      const results = await runAxeScan({
+        include: ['.list-drawer.drawer--is-open'],
+        page,
+        testInfo,
+      })
+
+      expect(results.violations).toEqual([])
+      const selectDocument = drawer.getByRole('button', { name: document.title, exact: true })
+
+      await selectDocument.focus()
+      await expectPaintedFocus({ page })
+      await selectDocument.press('Enter')
+      await expect(drawer).toBeHidden()
+      await expect(widget.getByRole('button', { name: 'Pinned', exact: true })).toBeFocused()
+      await expect(widget.locator('.document-card__title')).toContainText(document.title)
+      const pins = await (
+        await page.request.get(`${serverURL}/api/payload-preferences/pinned-documents`)
+      ).json()
+
+      expect(pins.value.items).toContainEqual({ id: document.id, collectionSlug: 'posts' })
+      const widgetResults = await runAxeScan({ include: ['.recents-widget'], page, testInfo })
+
+      expect(widgetResults.violations).toEqual([])
+    })
+
+    test('should paginate and unpin dashboard documents with the keyboard while retaining focus', async () => {
+      const previousViewport = page.viewportSize()
+      const preference = await (
+        await page.request.get(`${serverURL}/api/payload-preferences/recently-viewed`)
+      ).json()
+      const documents = (await (await page.request.get(`${serverURL}/api/posts?limit=3`)).json())
+        .docs
+      const previousPins = await (
+        await page.request.get(`${serverURL}/api/payload-preferences/pinned-documents`)
+      ).json()
+
+      dashboardCleanup.push(async () => {
+        await page.request.post(`${serverURL}/api/payload-preferences/pinned-documents`, {
+          data: { value: previousPins.value ?? { items: [] } },
+        })
+        await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
+          data: { value: preference?.value ?? { items: [] } },
+        })
+        if (previousViewport) {
+          await page.setViewportSize(previousViewport)
+        }
+      })
+
+      const pinResponse = await page.request.post(
+        `${serverURL}/api/payload-preferences/pinned-documents`,
+        {
+          data: { value: { items: [{ id: documents[0].id, collectionSlug: 'posts' }] } },
+        },
+      )
+
+      expect(pinResponse.ok()).toBe(true)
+      await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
+        data: {
+          value: {
+            items: documents.map((doc) => ({
+              id: doc.id,
+              collectionSlug: 'posts',
+              viewedAt: new Date().toISOString(),
+            })),
+          },
+        },
+      })
+      await page.setViewportSize({ height: 900, width: 375 })
+      await page.goto(`${serverURL}/admin`)
+      const widget = page.locator('.recents-widget')
+      const recents = widget.getByRole('button', { name: 'Recently viewed' })
+      const next = widget.getByRole('button', { name: 'Next', exact: true })
+      const previous = widget.getByRole('button', { name: 'Previous', exact: true })
+
+      await expect(
+        widget.getByRole('group', { name: 'Document pagination', exact: true }),
+      ).toBeVisible()
+
+      await recents.focus()
+      await recents.press('Enter')
+      await expect(widget.locator('.document-card__title')).toHaveCount(1)
+      await expect(previous).toBeDisabled()
+      await next.focus()
+      await next.press('Space')
+      await expect(widget.locator('.document-card__title')).toHaveText(documents[1].title)
+      await expect(next).toBeFocused()
+      await expect(widget.locator('.recents-widget__pagination [aria-live]')).toContainText(
+        '2 of 3',
+      )
+      await next.press('Enter')
+      await expect(widget.locator('.document-card__title')).toHaveText(documents[2].title)
+      await expect(previous).toBeFocused()
+      await previous.press('Space')
+      await expect(widget.locator('.recents-widget__pagination [aria-live]')).toContainText(
+        '2 of 3',
+      )
+      await previous.focus()
+      await previous.press('Enter')
+      await expect(next).toBeFocused()
+      await widget.locator('.document-card__title').focus()
+      await expectPaintedFocus({ page })
+      await expect(widget.locator('.recents-widget__pin')).toHaveCount(0)
+      const pinned = widget.getByRole('button', { name: 'Pinned', exact: true })
+
+      await pinned.focus()
+      await pinned.press('Enter')
+      const unpin = widget.getByRole('button', {
+        name: `Unpin document: ${documents[0].title}`,
+        exact: true,
+      })
+
+      await unpin.focus()
+      await expect(unpin).toHaveCSS('opacity', '1')
+      await unpin.press('Space')
+      await expect(pinned).toBeFocused()
+      await expect(widget.locator('.recents-widget__empty-title')).toHaveText('No pinned documents')
+      await expect
+        .poll(() => widget.evaluate((element) => element.scrollWidth <= element.clientWidth))
+        .toBe(true)
+    })
+
+    test('should choose a related document with the keyboard after saving grid layout', async () => {
+      await page.goto(postsURL.list)
+
+      const gridPreferenceSaved = page.waitForResponse(
+        (response) =>
+          response.url().includes('/payload-preferences/collection-posts') &&
+          response.request().method() === 'POST',
+      )
+
+      await page.getByRole('radio', { name: 'Grid' }).check()
+      await gridPreferenceSaved
+      await expect(page.locator('.document-card').first()).toBeVisible()
+
+      try {
+        const drawer = await openRichTextRelationshipDrawer({ page, postsURL })
+
+        const collectionSelect = drawer.locator('.list-drawer__select-collection-wrap')
+
+        if (
+          (await collectionSelect.locator('.rs__single-value').textContent())?.trim() !== 'Post'
+        ) {
+          await selectInput({
+            multiSelect: false,
+            option: 'Post',
+            page,
+            selectLocator: collectionSelect,
+          })
+        }
+        await expect(drawer.locator('.document-card')).toHaveCount(0)
+
+        const selectionButton = drawer.locator('button.default-cell__first-cell').first()
+
+        await expect(selectionButton).toContainText('Example post')
+
+        const title = (await selectionButton.textContent())!.trim()
+
+        await selectionButton.focus()
+        await selectionButton.press('Enter')
+        await expect(drawer).toBeHidden()
+        await expect(page.locator('.LexicalEditorTheme__relationship')).toContainText(title)
+      } finally {
+        await page.goto(postsURL.list)
+
+        const tablePreferenceSaved = page.waitForResponse(
+          (response) =>
+            response.url().includes('/payload-preferences/collection-posts') &&
+            response.request().method() === 'POST',
+        )
+
+        await page.getByRole('radio', { name: 'Table' }).check()
+        await tablePreferenceSaved
+      }
+    })
+
+    test('should open collection and global LLM instructions using the keyboard', async ({
+      browser: _browser,
+    }, testInfo) => {
+      for (const [path, id, title] of [
+        ['/collections/posts', 'collection-posts', 'posts'],
+        ['/globals/menu', 'global-menu', 'menu'],
+      ] as const) {
+        await page.goto(formatAdminURL({ adminRoute: '/admin', path, serverURL }))
+
+        const trigger = page.getByRole('button', { name: 'More options', exact: true })
+        const item = page.getByRole('menuitem', { name: 'Edit LLM instructions', exact: true })
+
+        await trigger.focus()
+        await page.keyboard.press('Enter')
+        await expect(page.getByRole('menuitem').first()).toBeFocused()
+        await page.keyboard.press('End')
+        await expect(item).toBeFocused()
+
+        const scan = await runAxeScan({ include: ['[role="menu"]'], page, testInfo })
+
+        expect(scan.violations).toEqual([])
+        await page.keyboard.press('Escape')
+        await expect(item).toBeHidden()
+        await expect(trigger).toBeFocused()
+        await page.keyboard.press('Space')
+        await expect(page.getByRole('menuitem').first()).toBeFocused()
+        await page.keyboard.press('End')
+        await expect(item).toBeFocused()
+        await page.keyboard.press('Enter')
+        await expect(page).toHaveURL(
+          formatAdminURL({
+            adminRoute: '/admin',
+            path: `/collections/${instructionsCollectionSlug}/${id}`,
+            serverURL,
+          }),
+        )
+        await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible()
+      }
+    })
+
+    test('should edit and save LLM instructions using the keyboard', async () => {
+      const field = await openLLMInstructions({ page, serverURL })
+      const editor = field.getByRole('textbox', { name: 'Additional instructions', exact: true })
+      const documentURL = formatAdminURL({
+        apiRoute: '/api',
+        path: `/${instructionsCollectionSlug}/collection-posts`,
+        serverURL,
+      })
+      const originalResponse = await page.request.get(documentURL)
+
+      await expect(originalResponse).toBeOK()
+
+      const originalDocument = await originalResponse.json()
+      const text = 'Write clear instructions using the keyboard.'
+
+      try {
+        await editor.focus()
+        await page.keyboard.press('ControlOrMeta+a')
+        await page.keyboard.press('Backspace')
+        await page.keyboard.type(text)
+        await expect(editor).toHaveText(text)
+
+        const save = page.getByRole('button', { name: 'Save', exact: true })
+
+        await expect(save).toBeEnabled()
+
+        const [saved] = await Promise.all([
+          page.waitForResponse(
+            (response) =>
+              response.request().method() === 'PATCH' &&
+              new URL(response.url()).pathname === new URL(documentURL).pathname,
+          ),
+          save.press('Enter'),
+        ])
+
+        expect(saved.ok()).toBe(true)
+        await saved.finished()
+        await expect(save).toBeDisabled()
+        await page.reload()
+        await expect(editor).toHaveText(text)
+      } finally {
+        const restored = await page.request.patch(documentURL, {
+          data: { additionalInstructions: originalDocument.additionalInstructions ?? null },
+        })
+
+        await expect(restored).toBeOK()
+      }
+    })
+
+    test('should open the upload dropzone modal from its button with the keyboard', async () => {
+      // PYLD-4166
+      await page.goto(`${serverURL}/admin`)
+
+      const widget = page.locator('.upload-dropzone-widget')
+      const button = widget.getByRole('button', { name: 'Upload files' })
+      const dropzone = widget.locator('.upload-dropzone-widget__dropzone')
+
+      await expect(button).toBeVisible()
+      await expect(dropzone).not.toHaveAttribute('tabindex', '0')
+      await button.focus()
+      await expect(button).toBeFocused()
+      await button.press('Enter')
+
+      const modal = page.locator('#bulk-upload-modal-slug-1')
+      await expect(modal).toBeVisible()
+      await expect(modal.locator('.bulk-upload--add-files')).toBeVisible()
+      await modal.getByRole('button', { name: 'Close' }).click()
+      await expect(button).toBeFocused()
+    })
+
+    test('should choose the upload collection from the dropzone modal with the keyboard', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await page
+        .locator('.upload-dropzone-widget')
+        .getByRole('button', { name: 'Upload files' })
+        .click()
+
+      const modal = page.locator('#bulk-upload-modal-slug-1')
+      const collection = modal.getByRole('combobox', { name: 'Collection' })
+      await expect(collection).toBeVisible()
+      await collection.focus()
+      await collection.pressSequentially('Media Alt')
+      await collection.press('Enter')
+
+      await expect(modal.locator('.bulk-upload--add-files__collectionSelect')).toContainText(
+        'Media Alt',
+      )
+    })
+
+    test('should keep incompatible upload destinations visible and skip them with the keyboard', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await page
+        .locator('.upload-dropzone-widget')
+        .getByRole('button', { name: 'Upload files' })
+        .click()
+
+      const modal = page.locator('#bulk-upload-modal-slug-1')
+
+      await selectInput({
+        multiSelect: false,
+        option: 'Media Alt',
+        page,
+        selectLocator: modal.locator('.bulk-upload--add-files__collectionSelect'),
+      })
+      await modal.locator('.dropzone input[type="file"]').setInputFiles({
+        name: 'keyboard.pdf',
+        buffer: Buffer.from('pdf'),
+        mimeType: 'application/pdf',
+      })
+
+      const destination = modal.locator('.file-selections__collectionSelect')
+      const input = destination.getByRole('combobox', { name: 'Collection', exact: true })
+
+      await expect(input).toBeVisible()
+      await input.focus()
+      await input.press('ArrowDown')
+      await expect(
+        getSelectMenu({ page }).getByRole('option', {
+          name: 'Media (Accepts: image/*)',
+          exact: true,
+        }),
+      ).toHaveAttribute('aria-disabled', 'true')
+      await input.press('Home')
+      await input.press('Enter')
+      await expect(destination.locator('.react-select--single-value')).toHaveText('Media Alt')
+      await expect(input).toBeFocused()
+
+      await modal.locator('.file-selections__remove--overlay').click()
+
+      const addFilesDestination = modal.locator('.bulk-upload--add-files__collectionSelect')
+      const addFilesInput = addFilesDestination.getByRole('combobox', {
+        name: 'Collection',
+        exact: true,
+      })
+
+      await addFilesInput.focus()
+      await addFilesInput.press('ArrowDown')
+      await expect(
+        getSelectMenu({ page }).getByRole('option', { name: 'Media', exact: true }),
+      ).not.toHaveAttribute('aria-disabled', 'true')
+      await addFilesInput.press('Home')
+      await addFilesInput.press('Enter')
+      await expect(addFilesDestination.locator('.react-select--single-value')).toHaveText('Media')
+    })
+
     test('should navigate and select collection grid rows without trapping keyboard focus', async () => {
       await gotoPostsList({ page, postsURL })
       const grid = page.getByRole('grid', { name: 'Posts', exact: true })
@@ -678,6 +1819,8 @@ test.describe('WCAG 2.2 Level AA', () => {
         await expect(firstCell).toHaveAttribute('tabindex', '0')
         await page.getByRole('link', { name: 'Create New', exact: true }).focus()
         await page.keyboard.press('Tab')
+        await expect(page.getByRole('button', { name: 'More options', exact: true })).toBeFocused()
+        await page.keyboard.press('Tab')
         await expect(firstCell).toBeFocused()
         const target = grid.locator('tbody tr').first().locator('.cell-updatedAt')
 
@@ -690,6 +1833,8 @@ test.describe('WCAG 2.2 Level AA', () => {
         await expect(grid.locator('#heading-title')).toHaveCount(0)
         await page.keyboard.press('Escape')
         await page.getByRole('link', { name: 'Create New', exact: true }).focus()
+        await page.keyboard.press('Tab')
+        await expect(page.getByRole('button', { name: 'More options', exact: true })).toBeFocused()
         await page.keyboard.press('Tab')
         await expect(target).toBeFocused()
       } finally {
@@ -710,6 +1855,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(dragHandle).toHaveCSS('opacity', '1')
       await page.keyboard.press('Space')
       await expect(page.locator('body')).toHaveClass(/is-dragging/)
+      await expect(dragHandle).toHaveAttribute('aria-pressed', 'true')
       await page.keyboard.press('Space')
       await expect(page.locator('body')).not.toHaveClass(/is-dragging/)
       await expect(dragHandle).toBeFocused()
@@ -1033,6 +2179,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       try {
         await page.setViewportSize({ height: 180, width: 320 })
         await page.goto(`${serverURL}/admin`)
+        await openNavigationForUserMenu({ page })
         await page.locator('.user-menu__trigger').click()
         const popup = page.locator('.user-menu > .popup__content')
         const popupBox = await popup.boundingBox()
@@ -1052,6 +2199,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       try {
         await page.setViewportSize({ height: 720, width: 800 })
         await page.goto(`${serverURL}/admin`)
+        await openNavigationForUserMenu({ page })
         await page.locator('.user-menu__trigger').click()
         await page.getByRole('menuitem', { name: /theme/i }).click()
         const submenu = page.locator('.user-menu .popup__content').last()
@@ -1150,25 +2298,52 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
 
-  test.describe('2.1.4 Character Key Shortcuts (A)', () => {
-    test('should close only the top popup when Escape is pressed in a rich-text flyout', async () => {
-      // PYLD-3661
-      const drawer = await openRichTextRelationshipDrawer({ page, postsURL })
-      const { groupByContent: groupByPopup } = await openGroupBy(page)
-
-      await groupByPopup.locator('.group-by-control__select-trigger').first().click()
-      const nestedOption = page.locator('.popup__content').last().getByRole('menuitemradio').first()
-      await expect(nestedOption).toBeVisible()
-      await nestedOption.focus()
-      await page.keyboard.press('Escape')
-
-      await expect(drawer).toBeVisible()
-      await expect(groupByPopup).toBeVisible()
-      await expect(nestedOption).toBeHidden()
-    })
-  })
-
   test.describe('2.1.2 No Keyboard Trap (A)', () => {
+    test('should leave JSON and Code editors using normal Tab and Shift+Tab navigation', async () => {
+      // PYLD-3823
+      test.setTimeout(60000)
+      await gotoCreatePost({ page, postsURL })
+      for (const field of ['settings', 'source']) {
+        const wrapper = page.locator(`#field-${field}`)
+        const input = wrapper.getByRole('textbox')
+
+        await wrapper.scrollIntoViewIfNeeded()
+        await expect(input).toBeVisible()
+        for (const key of ['Tab', 'Shift+Tab']) {
+          await input.focus()
+          await expect(input).toBeFocused()
+          await page.keyboard.press(key)
+          await expect(wrapper.locator(':focus')).toHaveCount(0)
+        }
+
+        const isMac = await page.evaluate(() => navigator.userAgent.includes('Macintosh'))
+        const toggleShortcut = isMac ? 'Control+Shift+m' : 'Control+m'
+
+        await input.focus()
+        await input.press(toggleShortcut)
+        await expect(page.locator('.monaco-aria-container')).toContainText(
+          'Pressing Tab will now insert the tab character',
+        )
+        await input.press(isMac ? 'Meta+a' : 'Control+a')
+        await input.press('Backspace')
+        await input.press('Tab')
+        await expect(input).toBeFocused()
+        await input.pressSequentially('{}')
+        await expect(wrapper.locator('.view-line').first()).toHaveText(/^\s+\{\}$/)
+        await input.press('Shift+Tab')
+        await expect(input).toBeFocused()
+        await expect(wrapper.locator('.view-line').first()).toHaveText('{}')
+        await input.press(toggleShortcut)
+        await expect(page.locator('.monaco-aria-container')).toContainText(
+          'Pressing Tab will now move focus to the next focusable element',
+        )
+        for (const key of ['Tab', 'Shift+Tab']) {
+          await input.focus()
+          await input.press(key)
+          await expect(wrapper.locator(':focus')).toHaveCount(0)
+        }
+      }
+    })
     test('should only intercept Escape while a non-dismissible dialog is open', async () => {
       await page.goto(
         formatAdminURL({ adminRoute: '/admin', path: '/custom-modal-ids', serverURL }),
@@ -1202,6 +2377,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
 
     test('should exit Lexical editors with Escape then Tab or Shift+Tab', async () => {
+      // PYLD-3775
       await gotoCreatePost({ page, postsURL })
       await insertTextBlockWithKeyboard({ page })
       for (const field of ['content', 'layout.0.body']) {
@@ -1244,7 +2420,326 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
 
+  test.describe('2.1.4 Character Key Shortcuts (A)', () => {
+    test('should close only the top popup when Escape is pressed in a rich-text flyout', async () => {
+      // PYLD-3661
+      const drawer = await openRichTextRelationshipDrawer({ page, postsURL })
+      const { groupByContent: groupByPopup } = await openGroupBy(page)
+
+      await groupByPopup.locator('.group-by-control__select-trigger').first().click()
+      const nestedOption = page.locator('.popup__content').last().getByRole('menuitemradio').first()
+      await expect(nestedOption).toBeVisible()
+      await nestedOption.focus()
+      await page.keyboard.press('Escape')
+
+      await expect(drawer).toBeVisible()
+      await expect(groupByPopup).toBeVisible()
+      await expect(nestedOption).toBeHidden()
+    })
+  })
+
+  test.describe('2.4.1 Bypass Blocks (A)', () => {
+    test('should skip navigation on collection, dashboard, and mobile views', async () => {
+      for (const view of ['collection', 'dashboard', 'mobile'] as const) {
+        try {
+          if (view === 'mobile') {
+            await page.setViewportSize({ height: 844, width: 390 })
+            await openMainNavigation({ page, postsURL })
+          } else if (view === 'dashboard') {
+            await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
+            await expect(page.locator('.dashboard')).toBeVisible()
+          } else {
+            await gotoPostsList({ page, postsURL })
+          }
+          const skip = page.getByRole('link', { name: /skip to content/i })
+
+          if (view === 'mobile') {
+            await skip.focus()
+          } else {
+            await page.keyboard.press('Tab')
+          }
+          await expect(skip).toBeFocused()
+          await expect(skip).toBeInViewport()
+          await skip.press('Enter')
+          if (view === 'dashboard') {
+            await expect(page.locator('#payload-main-content')).toBeFocused()
+          } else {
+            await expect(page.getByRole('main')).toBeFocused()
+          }
+          if (view === 'mobile') {
+            await expect(page.locator('aside.nav')).not.toHaveClass(/nav--nav-open/)
+          }
+          await page.keyboard.press('Tab')
+          await expectFocusInside({
+            container: view === 'dashboard' ? page.locator('.dashboard') : page.getByRole('main'),
+            page,
+          })
+          await expect(page.locator(':focus')).toBeInViewport()
+        } finally {
+          await page.setViewportSize({ height: 720, width: 1280 })
+        }
+      }
+    })
+
+    test('should include grouped pagination in the main landmark', async () => {
+      await page.goto(`${postsURL.list}?groupBy=accessibilitySelect&limit=1`)
+      try {
+        const pagination = page.getByRole('button', { name: 'Next table page', exact: true })
+
+        await expect(pagination).toBeVisible()
+        await expect(
+          page.getByRole('main').getByRole('button', { name: 'Next table page', exact: true }),
+        ).toBeVisible()
+      } finally {
+        await page.goto(`${postsURL.list}?groupBy=&limit=10`)
+        await expect(page.locator('tbody tr')).toHaveCount(3)
+      }
+    })
+  })
+
   test.describe('2.4.3 Focus Order (A)', () => {
+    test('should return focus to the active dashboard tab when pagination disappears', async () => {
+      const previousViewport = page.viewportSize()
+      const preference = await (
+        await page.request.get(`${serverURL}/api/payload-preferences/recently-viewed`)
+      ).json()
+      const documents: Array<{ id: number | string; title: string }> = []
+
+      dashboardCleanup.push(async () => {
+        await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
+          data: { value: preference?.value ?? { items: [] } },
+        })
+        for (const document of documents) {
+          const response = await page.request.delete(`${serverURL}/api/posts/${document.id}`)
+
+          expect(response.ok()).toBe(true)
+        }
+        if (previousViewport) {
+          await page.setViewportSize(previousViewport)
+        }
+      })
+
+      for (const title of ['Pagination focus first', 'Pagination focus second']) {
+        const response = await page.request.post(`${serverURL}/api/posts?draft=true`, {
+          data: { accessibilitySelect: 'one', title },
+        })
+
+        expect(response.ok()).toBe(true)
+        documents.push((await response.json()).doc)
+      }
+      const preferenceResponse = await page.request.post(
+        `${serverURL}/api/payload-preferences/recently-viewed`,
+        {
+          data: {
+            value: {
+              items: documents.map(({ id }) => ({ id, collectionSlug: 'posts' })),
+            },
+          },
+        },
+      )
+
+      expect(preferenceResponse.ok()).toBe(true)
+      await page.setViewportSize({ height: 900, width: 375 })
+      await page.goto(`${serverURL}/admin`)
+      const widget = page.locator('.recents-widget')
+      const recents = widget.getByRole('button', { name: 'Recently viewed', exact: true })
+
+      await recents.focus()
+      await recents.press('Enter')
+      await expect(widget.locator('.document-card__title')).toHaveText(documents[0].title)
+      const next = widget.getByRole('button', { name: 'Next', exact: true })
+
+      await next.focus()
+      await expect(next).toBeFocused()
+      const deleted = await page.request.delete(`${serverURL}/api/posts/${documents[1].id}`)
+
+      expect(deleted.ok()).toBe(true)
+      documents.pop()
+      await next.press('Enter')
+      await expect(widget.locator('.recents-widget__pagination')).toHaveCount(0)
+      await expect(widget.locator('.document-card__title')).toHaveText(documents[0].title)
+      await expect(recents).toBeFocused()
+      await expectPaintedFocus({ page })
+    })
+
+    test('should focus the block date-picker calendar when opened with the keyboard', async () => {
+      // PYLD-3791
+      try {
+        for (const day of [15, 14]) {
+          await page.clock.setFixedTime(new Date(2026, 8, day, 12))
+          const { calendar, field, input } = await prepareBlockDateField({ page, postsURL })
+          const precedingText = field
+            .locator('..')
+            .getByRole('textbox', { name: 'Text', exact: true })
+
+          await precedingText.focus()
+          await page.keyboard.press('Tab')
+          await expect(input).toBeFocused()
+          await expect(calendar).toBeHidden()
+
+          for (const key of ['ArrowDown', 'ArrowUp', 'Enter']) {
+            await page.keyboard.press(key)
+            await expect(calendar).toBeVisible()
+            await expectFocusInside({ container: calendar, page })
+            if (day === 14) {
+              await expect(
+                calendar.locator(
+                  '.react-datepicker__day--014:not(.react-datepicker__day--outside-month)',
+                ),
+              ).toHaveAttribute('aria-disabled', 'true')
+              await expect(calendar.getByRole('button', { name: 'Previous Month' })).toBeFocused()
+            }
+            await page.keyboard.press('Escape')
+            await expect(calendar).toBeHidden()
+            await expect(input).toBeFocused()
+          }
+        }
+      } finally {
+        await page.clock.setSystemTime(new Date())
+      }
+    })
+
+    test('should move focus between named block date-picker days with arrow keys', async () => {
+      // PYLD-3739
+      await page.clock.setFixedTime(new Date(2026, 8, 15, 12))
+
+      try {
+        const { calendar, input } = await prepareBlockDateField({ page, postsURL })
+
+        await input.focus()
+        await page.keyboard.press('ArrowDown')
+        await expect(calendar).toBeVisible()
+        const day = calendar.locator('.react-datepicker__day:focus')
+
+        await expect(day).toHaveAccessibleName(/September 15.*2026/i)
+        await page.keyboard.press('ArrowRight')
+        await expect(day).toHaveAccessibleName(/September 16.*2026/i)
+        await page.keyboard.press('ArrowLeft')
+        await expect(day).toHaveAccessibleName(/September 15.*2026/i)
+        await page.keyboard.press('PageDown')
+        await expect(day).toHaveAccessibleName(/October 15.*2026/i)
+        await page.keyboard.press('PageUp')
+        await expect(day).toHaveAccessibleName(/September 15.*2026/i)
+        await page.keyboard.press('Enter')
+        await expect(input).toHaveValue('09/15/2026')
+        await page.keyboard.press('Escape')
+        await expect(input).toBeFocused()
+      } finally {
+        await page.clock.setSystemTime(new Date())
+      }
+    })
+
+    test('should navigate LLM instructions tabs and the editor in keyboard order', async () => {
+      const field = await openLLMInstructions({ page, serverURL })
+      const additionalTab = field.getByRole('tab', { name: 'Additional instructions', exact: true })
+      const systemTab = field.getByRole('tab', {
+        name: 'System instructions (read-only)',
+        exact: true,
+      })
+      const editor = field.getByRole('textbox', { name: 'Additional instructions', exact: true })
+      const toolbarButtons = field.locator('.fixed-toolbar').getByRole('button')
+
+      await expect(additionalTab).toHaveAttribute('tabindex', '0')
+      await expect(systemTab).toHaveAttribute('tabindex', '-1')
+      await additionalTab.focus()
+      await page.keyboard.press('ArrowRight')
+      await expect(systemTab).toBeFocused()
+      await expect(additionalTab).toHaveAttribute('aria-selected', 'true')
+      await page.keyboard.press('ArrowRight')
+      await expect(additionalTab).toBeFocused()
+      await page.keyboard.press('End')
+      await expect(systemTab).toBeFocused()
+      await page.keyboard.press('Home')
+      await expect(additionalTab).toBeFocused()
+      await page.keyboard.press('ArrowLeft')
+      await expect(systemTab).toBeFocused()
+      await page.keyboard.press('Space')
+      await expect(systemTab).toHaveAttribute('aria-selected', 'true')
+      await expect(additionalTab).toHaveAttribute('aria-selected', 'false')
+      await expect(systemTab).toHaveAttribute('tabindex', '0')
+      await expect(additionalTab).toHaveAttribute('tabindex', '-1')
+      await expect(editor).toHaveCount(0)
+      await expect(toolbarButtons).toHaveCount(0)
+
+      const systemPanel = field.getByRole('tabpanel', {
+        name: 'System instructions (read-only)',
+        exact: true,
+      })
+
+      await expect(systemTab).toHaveAttribute(
+        'aria-controls',
+        (await systemPanel.getAttribute('id'))!,
+      )
+      await page.keyboard.press('Tab')
+      await expect(systemPanel).toBeFocused()
+      await page.keyboard.press('Tab')
+      await expect
+        .poll(() => field.evaluate((element) => element.contains(document.activeElement)))
+        .toBe(false)
+      await page.keyboard.press('Shift+Tab')
+      await expect(systemPanel).toBeFocused()
+      await page.keyboard.press('Shift+Tab')
+      await expect(systemTab).toBeFocused()
+      await page.keyboard.press('ArrowLeft')
+      await expect(additionalTab).toBeFocused()
+      await page.keyboard.press('Enter')
+      await expect(additionalTab).toHaveAttribute('aria-selected', 'true')
+
+      const additionalPanel = field.getByRole('tabpanel', {
+        name: 'Additional instructions',
+        exact: true,
+      })
+
+      await expect(additionalTab).toHaveAttribute(
+        'aria-controls',
+        (await additionalPanel.getAttribute('id'))!,
+      )
+      await page.keyboard.press('Tab')
+      await expect(additionalPanel).toBeFocused()
+      await expect(toolbarButtons.first()).toBeVisible()
+
+      await page.keyboard.press('Tab')
+      await expect(toolbarButtons.first()).toBeFocused()
+      for (const button of (await toolbarButtons.all()).slice(1)) {
+        await page.keyboard.press('ArrowRight')
+        await expect(button).toBeFocused()
+      }
+
+      await page.keyboard.press('Tab')
+      await expect(editor).toBeFocused()
+      await page.keyboard.press('Shift+Tab')
+      await expect(toolbarButtons.last()).toBeFocused()
+      await page.keyboard.press('Tab')
+      await expect(editor).toBeFocused()
+      await page.keyboard.press('Tab')
+      await expect(
+        field.getByRole('button', { name: 'Insert Paragraph', exact: true }),
+      ).toBeFocused()
+      await page.keyboard.press('Tab')
+      await expect
+        .poll(() => field.evaluate((element) => element.contains(document.activeElement)))
+        .toBe(false)
+    })
+
+    test('should return focus to each list-options trigger after its Close button', async () => {
+      for (const [selector, name] of [
+        ['#toggle-group-by', /group by/i],
+        ['.columns-button__button', /columns/i],
+      ] as const) {
+        await gotoPostsList({ page, postsURL })
+        const trigger = page.locator(selector)
+
+        await trigger.press('Enter')
+        const dialog = page.getByRole('dialog', { name })
+        const close = dialog.getByRole('button', { name: /close/i })
+
+        await expect(close).toBeFocused()
+        await page.keyboard.press('Enter')
+        await expect(dialog).toBeHidden()
+        await expect.soft(trigger).toBeFocused()
+      }
+    })
+
     test('should reorder widgets using the dedicated keyboard drag control', async () => {
       // PYLD-3642: browser coverage complements the NVDA regression.
       await openDashboardEditor({ page, serverURL })
@@ -1277,11 +2772,16 @@ test.describe('WCAG 2.2 Level AA', () => {
       await drag.focus()
       await page.keyboard.press('Space')
       await expect(page.locator('.drag-overlay')).toBeVisible()
-      await expect(
-        page.getByRole('status').filter({ hasText: 'Picked up draggable item' }),
-      ).toHaveCount(1)
+      await expect(drag).toHaveAttribute('aria-pressed', 'true')
+      await expect(page.getByRole('status').filter({ hasText: lastID! })).toHaveCount(1)
       await page.keyboard.press('ArrowLeft')
-      await expect(page.getByRole('status').filter({ hasText: `${firstID}-before` })).toHaveCount(1)
+      const overFirstWidget = page.getByRole('status').filter({ hasText: firstID! })
+
+      await expect(overFirstWidget).toContainText(new RegExp(`${firstID}-(before|after)`))
+      if ((await overFirstWidget.innerText()).includes(`${firstID}-after`)) {
+        await page.keyboard.press('ArrowLeft')
+      }
+      await expect(overFirstWidget).toContainText(`${firstID}-before`)
       await page.keyboard.press('Space')
       await expect(widgets.first()).toHaveAttribute('data-slug', lastID!)
       await expect(widgets.last()).toHaveAttribute('data-slug', firstID!)
@@ -1296,31 +2796,34 @@ test.describe('WCAG 2.2 Level AA', () => {
 
       await expectFocusInside({ container: header, page })
       await test.step('Read widget content before its named actions', async () => {
-        const widget = page.locator('.widget[data-slug^="activity-"]')
+        const widget = page.locator('.widget[data-slug^="upload-dropzone-"]')
         const card = widget.locator('.draggable')
         const drag = widget.getByRole('button', { name: 'Drag to reorder', exact: true })
-        const text = (await widget.locator('.widget-content').innerText())
-          .replace(/\s+/g, ' ')
-          .trim()
 
+        await expect(
+          widget
+            .getByRole('region', { name: 'Upload files' })
+            .getByText('Upload from your computer via drag-and-drop, or click the button below'),
+        ).toBeVisible()
         await card.focus()
         await page.keyboard.press('Shift+Tab')
         await page.keyboard.press('Tab')
         await expect(card).toBeFocused()
-        await expect(card).toHaveAccessibleName(text)
+        await expect(card).toHaveAccessibleName('Upload files')
+        await expect(drag).toHaveAccessibleDescription(/Upload files/)
         await page.keyboard.press('Tab')
         await expect(drag).toBeFocused()
         await page.keyboard.press('Tab')
         await expect(
-          widget.getByRole('button', { name: 'Edit You recently viewed', exact: true }),
+          widget.getByRole('button', { name: 'Edit Upload files', exact: true }),
         ).toBeFocused()
         await page.keyboard.press('Tab')
         await expect(
-          widget.getByRole('button', { name: /^Resize You recently viewed, current size: small$/ }),
+          widget.getByRole('button', { name: /^Resize Upload files, current size: small$/ }),
         ).toBeFocused()
         await page.keyboard.press('Tab')
         await expect(
-          widget.getByRole('button', { name: 'Delete You recently viewed', exact: true }),
+          widget.getByRole('button', { name: 'Delete Upload files', exact: true }),
         ).toBeFocused()
       })
       const widget = await addCollectionQueryWidget({ page })
@@ -1414,6 +2917,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     test('should visit every theme option with arrow keys including the middle option', async () => {
       // PYLD-3636
       await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
+      await openNavigationForUserMenu({ page })
       await page.locator('.user-menu__trigger').press('Enter')
       await page.getByRole('menuitem', { name: /theme/i }).press('Enter')
       const options = page.getByRole('menuitemradio')
@@ -1514,7 +3018,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         ['ArrowUp', 'Remove'],
         ['Home', 'Move Up'],
         ['End', 'Remove'],
-      ]) {
+      ] as const) {
         await page.keyboard.press(key)
         await expect(menu.getByRole('menuitem', { name, exact: true })).toBeFocused()
       }
@@ -1534,6 +3038,86 @@ test.describe('WCAG 2.2 Level AA', () => {
       await page.keyboard.press('Escape')
       await expect(trigger).toBeFocused()
     })
+    for (const form of ['document', 'login'] as const) {
+      test(`should associate ${form} errors with their fields and focus order`, async () => {
+        // PYLD-3581, PYLD-3613, PYLD-3611
+        const context = await page.context().browser()!.newContext()
+        const { page: formPage } = await initPage({ context, serverURL })
+
+        try {
+          if (form === 'login') {
+            await context.clearCookies()
+            await context.route(
+              (url) => url.origin === new URL(serverURL).origin,
+              async (route) => {
+                await route.continue({
+                  headers: { ...route.request().headers(), DisableAutologin: 'true' },
+                })
+              },
+            )
+            await formPage.goto(formatAdminURL({ adminRoute: '/admin', path: '/login', serverURL }))
+            await formPage.locator('input[name="email"]').fill('dev@payloadcms.com')
+            const password = formPage.locator('input[name="password"]')
+
+            await expectRequiredState({ input: password })
+            await password.fill('temporary')
+            await password.fill('')
+            await password.press('Tab')
+            await formPage.getByRole('button', { name: 'Login', exact: true }).click()
+          } else {
+            await gotoCreatePost({ page: formPage, postsURL })
+            await formPage.getByRole('button', { name: /^Publish(?: in English)?$/ }).click()
+          }
+
+          const input = formPage.locator(
+            form === 'login' ? 'input[name="password"]' : '#field-title',
+          )
+          const error = formPage.locator('.field-type').filter({ has: input }).getByRole('alert')
+
+          await expect(error).toHaveCount(1)
+          await expect(error).toBeVisible()
+          await expect(error).not.toHaveAttribute('aria-hidden', 'true')
+          await expect(input).toHaveAccessibleDescription((await error.innerText()).trim())
+          await expectErrorTabOrder({ error, input })
+          const originalMessage = await error.locator('.tooltip-content').textContent()
+
+          try {
+            await error.locator('.tooltip-content').evaluate((element) => {
+              element.textContent =
+                'Please enter a valid value for this required field before saving your changes. ' +
+                'A'.repeat(100)
+            })
+            for (const direction of ['ltr', 'rtl']) {
+              await formPage.locator('html').evaluate((element, dir) => {
+                element.dir = dir
+              }, direction)
+              for (const width of [390, 1280]) {
+                await formPage.setViewportSize({ height: 900, width })
+                await input.scrollIntoViewIfNeeded()
+                await expect(error).toBeVisible()
+                await expect
+                  .poll(async () => {
+                    const box = await error.boundingBox()
+
+                    return box && box.x >= 0 && box.x + box.width <= width
+                  })
+                  .toBe(true)
+                expect(
+                  await error.evaluate((element) => element.scrollWidth <= element.clientWidth),
+                ).toBe(true)
+                await expectErrorTabOrder({ error, input })
+              }
+            }
+          } finally {
+            await error.locator('.tooltip-content').evaluate((element, message) => {
+              element.textContent = message
+            }, originalMessage)
+          }
+        } finally {
+          await context.close()
+        }
+      })
+    }
 
     for (const key of ['Enter', 'Space']) {
       test(`should retain focus after moving a rich-text block without a drag handle using ${key}`, async () => {
@@ -1778,6 +3362,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     test('should navigate User menu items without entering hidden submenus', async () => {
       // Additional coverage for PYLD-3645 and PYLD-3697.
       await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
       const trigger = page.locator('.user-menu__trigger')
 
       await trigger.focus()
@@ -1807,6 +3392,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     test('should close the full User menu chain when tabbing from a nested menu', async () => {
       // Additional coverage for PYLD-3645 and PYLD-3697.
       await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
       const trigger = page.locator('.user-menu__trigger')
 
       await trigger.focus()
@@ -1827,6 +3413,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     test('should restore visible focus when shift-tabbing from a nested User menu', async () => {
       // Additional coverage for PYLD-3645 and PYLD-3697.
       await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
       const trigger = page.locator('.user-menu__trigger')
 
       await trigger.focus()
@@ -1849,6 +3436,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       // Additional coverage for PYLD-3645 and PYLD-3697.
       await page.setViewportSize({ height: 720, width: 320 })
       await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
       const trigger = page.locator('.user-menu__trigger')
 
       await trigger.focus()
@@ -2150,6 +3738,33 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.6 Headings and Labels (AA)', () => {
+    test('should describe the dashboard add action as adding a widget', async () => {
+      // PYLD-3594
+      await openDashboardEditor({ page, serverURL })
+      const add = page
+        .locator('.dashboard-breadcrumb-dropdown__actions')
+        .getByRole('button', { name: /add/i })
+
+      await expect(add).toBeVisible()
+      await expect(add).toHaveAccessibleName(/add.*widget/i)
+    })
+
+    test('should identify the folder search clear action explicitly', async () => {
+      // PYLD-3583
+      const sidebar = await openNavigationFolders({ page, serverURL })
+      const search = sidebar.getByRole('textbox')
+
+      await search.fill('Accessibility folder')
+      await search.press('Tab')
+      const clear = sidebar.locator('.search-input__clear')
+
+      await expect(clear).toBeFocused()
+      await expect(clear).toHaveAccessibleName('Clear search')
+      await clear.press('Enter')
+      await expect(search).toHaveValue('')
+      await expect(sidebar.getByRole('tree')).toBeVisible()
+    })
+
     test('should include the visible version count in the table history link name', async () => {
       // PYLD-3707
       test.setTimeout(60000)
@@ -2225,10 +3840,88 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.7 Focus Visible (AA)', () => {
+    test('should paint keyboard focus on image crop and focal-point controls', async () => {
+      // PYLD-3602
+      const dialog = await openEditImageDialog({ page, serverURL })
+      const controls = dialog.locator(
+        '.ReactCrop__crop-selection, .ReactCrop__drag-handle, .edit-upload__focalPoint',
+      )
+
+      await expect(controls).toHaveCount(10)
+      await page.mouse.move(0, 0)
+      for (const control of await controls.all()) {
+        await dialog.getByRole('button', { name: /apply changes/i }).focus()
+        const unfocusedStyle = await getFocusIndicatorStyle(control)
+
+        await control.focus()
+        await page.keyboard.press('Shift+Tab')
+        await page.keyboard.press('Tab')
+        await expect(control).toBeFocused()
+        if (!(await control.getAttribute('class'))?.includes('ReactCrop__drag-handle')) {
+          await expectPaintedFocus({ page })
+        }
+        await expect
+          .poll(
+            async () => {
+              if ((await control.getAttribute('class'))?.includes('ReactCrop__drag-handle')) {
+                return control.evaluate((element) => {
+                  const style = getComputedStyle(element, '::after')
+
+                  return (
+                    Number.parseFloat(style.width) > 0 &&
+                    Number.parseFloat(style.height) > 0 &&
+                    style.outlineStyle !== 'none' &&
+                    Number.parseFloat(style.outlineWidth) > 0 &&
+                    style.outlineColor !== 'transparent' &&
+                    !/rgba\([^)]*,\s*0\)$/.test(style.outlineColor)
+                  )
+                })
+              }
+
+              const focusedStyle = await getFocusIndicatorStyle(control)
+
+              return (
+                hasRenderedFocusIndicator({ focusedStyle, unfocusedStyle }) ||
+                (Number.parseFloat(focusedStyle.borderTopWidth) > 0 &&
+                  focusedStyle.borderTopWidth !== unfocusedStyle.borderTopWidth)
+              )
+            },
+            { message: await control.getAttribute('class') },
+          )
+          .toBe(true)
+      }
+    })
+    test('should reveal the collection card create action and its focus indicator by keyboard', async ({
+      browser: _browser,
+    }, testInfo) => {
+      await page.goto(`${serverURL}/admin`)
+      await page.mouse.move(0, 0)
+
+      const scan = await runAxeScan({ include: ['.collections'], page, testInfo })
+      const card = page.locator('.collections__card-list .card').first()
+      const createLink = card.locator('.card__actions a')
+      const actions = card.locator('.card__actions')
+      const unfocusedStyle = await getFocusIndicatorStyle(createLink)
+
+      expect(scan.violations).toHaveLength(0)
+      await expect(actions).toHaveCSS('opacity', '0')
+      await card.locator('.card__click').focus()
+      await page.keyboard.press('Tab')
+
+      await expect(createLink).toBeFocused()
+      await expect(actions).toHaveCSS('opacity', '1')
+      expect(
+        hasRenderedFocusIndicator({
+          focusedStyle: await getFocusIndicatorStyle(createLink),
+          unfocusedStyle,
+        }),
+      ).toBe(true)
+    })
+
     test('should paint a keyboard focus indicator on the dashboard Add button', async () => {
       // PYLD-3631
       const header = await openDashboardEditor({ page, serverURL })
-      const add = header.getByRole('button', { name: 'Add +', exact: true })
+      const add = header.getByRole('button', { name: 'Add +: Add Widget', exact: true })
       await header.getByRole('button', { name: 'Save changes', exact: true }).focus()
       const unfocusedStyle = await getFocusIndicatorStyle(add)
 
@@ -2300,6 +3993,34 @@ test.describe('WCAG 2.2 Level AA', () => {
             }),
           )
           .toBe(true)
+      }
+    })
+  })
+
+  test.describe('2.5.3 Label in Name (A)', () => {
+    test('should preserve the Spanish dashboard Add label in its accessible name', async () => {
+      // Additional coverage for PYLD-3594.
+      const originalCookies = (await page.context().cookies()).filter(
+        ({ name }) => name === 'payload-lng',
+      )
+
+      try {
+        await page.context().addCookies([{ name: 'payload-lng', url: serverURL, value: 'es' }])
+        await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
+        await page.locator('.dashboard-breadcrumb-dropdown .popup__trigger-wrap button').click()
+        await page
+          .getByRole('menuitem', { name: 'Editar el Panel de Control', exact: true })
+          .click()
+        const add = page
+          .locator('.dashboard-breadcrumb-dropdown__actions')
+          .getByRole('button')
+          .first()
+
+        await expect(add).toHaveText('Añadir +')
+        await expect(add).toHaveAccessibleName(/Añadir \+.*Agregar Widget/)
+      } finally {
+        await page.context().clearCookies({ name: 'payload-lng' })
+        await page.context().addCookies(originalCookies)
       }
     })
   })
@@ -2378,7 +4099,909 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
 
+  test.describe('3.2.1 On Focus (A)', () => {
+    test('should retain keyboard focus on Global API toolbar controls without activating them', async () => {
+      // PYLD-3621
+      await openGlobalAPI({ page, serverURL })
+      const apiURL = page.getByRole('textbox', { name: 'API URL', exact: true })
+      const initialURL = page.url()
+      const initialPageCount = page.context().pages().length
+
+      await apiURL.focus()
+      for (const control of [
+        page.getByRole('link', { name: 'Open in new window', exact: true }),
+        page.getByRole('button', { name: 'toggle fullscreen', exact: true }),
+      ]) {
+        await page.keyboard.press('Tab')
+        await expect(control).toBeFocused()
+        // Observe delayed editor focus effects without retrying away a transient focus loss.
+        const retainedFocus = await control.evaluate(async (element) => {
+          let hasLostFocus = document.activeElement !== element
+          const onFocus = () => {
+            hasLostFocus ||= document.activeElement !== element
+          }
+
+          document.addEventListener('focusin', onFocus)
+          await new Promise((resolve) => setTimeout(resolve, 500))
+          document.removeEventListener('focusin', onFocus)
+          return !hasLostFocus && document.activeElement === element
+        })
+
+        expect(retainedFocus).toBe(true)
+        await expect(page.locator('.query-inspector')).not.toHaveClass(
+          /query-inspector--fullscreen/,
+        )
+        expect(page.url()).toBe(initialURL)
+        expect(page.context().pages()).toHaveLength(initialPageCount)
+      }
+    })
+  })
+
+  test.describe('3.2.2 On Input (A)', () => {
+    test('should describe automatic search before input in rich text add panels', async () => {
+      // PYLD-3663
+      for (const openDrawer of [openRichTextUploadDrawer, openRichTextRelationshipDrawer]) {
+        const drawer = await openDrawer({ page, postsURL })
+        const search = drawer.locator('#search-filter-input')
+
+        await search.focus()
+        await expect(search).toHaveAccessibleDescription(/automatically as you type/i)
+        await search.fill('no-matching-accessibility-result')
+        await expect(drawer.locator('.collection-list__search-status')).toHaveText(
+          'Results found for “no-matching-accessibility-result”: 0.',
+        )
+        await expect(drawer.locator('.no-results__title')).toHaveText('No Results.')
+        await expect(search).toBeFocused()
+      }
+    })
+
+    test('should retain focus during automatic search', async () => {
+      // Additional coverage for PYLD-3773.
+      for (const isColumnSearch of [false, true]) {
+        await page.goto(`${postsURL.list}?search=`)
+        if (isColumnSearch) {
+          await page.locator('.columns-button__button').click()
+        }
+        const search = isColumnSearch
+          ? page
+              .getByRole('dialog', { name: /columns/i })
+              .getByRole('textbox', { name: /search columns/i })
+          : page.locator('#search-filter-input')
+
+        await expect(search).toHaveAccessibleDescription(/automatically as you type/i)
+        await search.fill('no-matching-accessibility-result')
+        if (isColumnSearch) {
+          await expect(
+            page.getByText('No matches found for this search', { exact: true }),
+          ).toBeVisible()
+        } else {
+          await expect(page.locator('tbody tr')).toHaveCount(0)
+          await expect(page.locator('.no-results__title')).toHaveText('No Results.')
+        }
+        await expect(search).toBeFocused()
+      }
+    })
+  })
+
+  test.describe('3.3.2 Labels or Instructions (A)', () => {
+    test('should describe the dashboard collection filter as applying only to Recently viewed', async () => {
+      await openDashboardEditor({ page, serverURL })
+      const widget = page.locator('.widget[data-slug^="activity-"]')
+      const edit = widget.getByRole('button', { name: 'Edit Recents and pinned', exact: true })
+
+      await edit.focus()
+      await edit.press('Enter')
+      const drawer = page.locator('dialog[id^="widget-editor-"]')
+      const collections = drawer.getByRole('group', { name: 'Collections', exact: true })
+
+      await expect(collections).toHaveAccessibleDescription('Filter Recently viewed only.')
+      await expect(collections.getByText('Filter Recently viewed only.')).toBeVisible()
+      await expect(page.locator('html')).toHaveAttribute('lang', 'en')
+      const checkbox = collections.getByRole('checkbox').first()
+
+      await checkbox.focus()
+      await expect(checkbox).toBeFocused()
+      await expect(checkbox).toBeChecked()
+      await checkbox.press('Space')
+      await expect(checkbox).not.toBeChecked()
+      await page.keyboard.press('Escape')
+    })
+
+    test('should expose required state without naming the asterisk', async () => {
+      // PYLD-3579, PYLD-3779, PYLD-3715
+      for (const { name, collection, field, localized } of [
+        { name: 'Alt', collection: 'media', field: 'alt', localized: false },
+        { name: 'Title', collection: 'posts', field: 'title', localized: true },
+      ]) {
+        await page.goto(
+          formatAdminURL({
+            adminRoute: '/admin',
+            path: `/collections/${collection}/create`,
+            serverURL,
+          }),
+        )
+        const input = page.locator(`#field-${field}`)
+
+        await expect(input).toBeVisible()
+        await expect(input).toHaveAccessibleName(new RegExp(name))
+        await expect(input).not.toHaveAccessibleName(/\*/)
+        await expectRequiredState({ input })
+        if (localized) {
+          await expect(page.locator('label').filter({ hasText: /^Title/ })).toContainText('English')
+        }
+      }
+    })
+
+    test('should expose select requirements and validation errors', async () => {
+      await gotoCreatePost({ page, postsURL })
+      const select = page.locator('#field-accessibilitySelect')
+      const tags = page
+        .locator('.field-type.text')
+        .filter({ has: page.locator('.field-requiredTags') })
+
+      const selectInput = select.getByRole('combobox')
+
+      await selectInput.focus()
+      await expect(selectInput).toHaveAttribute('aria-describedby', /live-region/)
+      await expect(selectInput).toHaveAttribute('aria-required', 'true')
+      await select.locator('.clear-indicator').click()
+      await tags.locator('.multi-value-remove').click()
+      await page.getByRole('button', { name: /^Publish(?: in English)?$/ }).click()
+
+      for (const field of [select, tags]) {
+        const input = field.getByRole('combobox')
+        const error = field.locator('.field-error[role="alert"]')
+
+        await expect(error).toContainText(/require/i)
+        await expect(input).toHaveAttribute('aria-required', 'true')
+        await expect(input).toHaveAttribute('aria-invalid', 'true')
+        await expect(input).toHaveAccessibleDescription(
+          new RegExp((await error.textContent())!.trim()),
+        )
+        await expect(field.locator('input[required]')).toHaveCount(0)
+        await expect(input).toHaveAttribute('aria-describedby', /placeholder/)
+        await input.focus()
+        await expect(input).toHaveAccessibleDescription(/require/i)
+      }
+    })
+
+    test('should update accessibility states on non-searchable selects', async () => {
+      await gotoCreatePost({ page, postsURL })
+      const input = page.getByRole('combobox', { name: 'Non-searchable required select' })
+
+      await expect(input).toHaveAttribute('aria-required', 'true')
+      await expect(input).toHaveAttribute('aria-invalid', 'true')
+      await expect(input).toHaveAccessibleDescription('Choose an option An option is required.')
+      await input.focus()
+      await expect(input).toHaveAccessibleDescription('Choose an option An option is required.')
+      await expect(input.locator('..').locator('input[required]')).toHaveCount(0)
+      await page.getByRole('button', { name: 'Clear select requirements' }).click()
+      await expect(input).not.toHaveAttribute('aria-required', 'true')
+      await expect(input).not.toHaveAttribute('aria-invalid', 'true')
+      await expect(input).toHaveAccessibleDescription('Choose an option')
+    })
+
+    test('should open and dismiss required-field help', async () => {
+      // PYLD-3778
+      await gotoCreatePost({ page, postsURL })
+      const message = 'Fields marked with * are required.'
+      const trigger = page.getByRole('button', { name: message, exact: true })
+      const explanation = page.getByText(message, { exact: true })
+
+      await expect(trigger).toBeVisible()
+      await expect(trigger).toHaveText('')
+      const spacing = await trigger.evaluate((button) => {
+        const icon = button.closest('.required-fields-info')!
+        const parent = icon.parentElement!
+        const next = icon.nextSibling
+        const fields = parent.querySelector('.document-fields__fields')!
+        const before = fields.getBoundingClientRect().top
+
+        icon.remove()
+        const after = fields.getBoundingClientRect().top
+
+        parent.insertBefore(icon, next)
+        return { after, before }
+      })
+
+      expect(spacing.after).toBe(spacing.before)
+      await expect(explanation).toBeHidden()
+      await trigger.hover()
+      await expect(explanation).toBeVisible()
+      await explanation.hover()
+      await expect(explanation).toBeVisible()
+      await page.keyboard.press('Escape')
+      await expect(explanation).toBeHidden()
+      await page.locator('#field-title').focus()
+      await trigger.focus()
+      await expect(explanation).toBeVisible()
+      await trigger.press('Escape')
+      await expect(explanation).toBeHidden()
+      await trigger.press('Enter')
+      await expect(explanation).toBeVisible()
+      await page.locator('#field-title').click()
+      await expect(explanation).toBeHidden()
+      await trigger.click()
+      await expect(explanation).toBeVisible()
+      const box = await trigger.boundingBox()
+
+      expect(box?.width).toBeGreaterThanOrEqual(24)
+      expect(box?.height).toBeGreaterThanOrEqual(24)
+      await trigger.press('Escape')
+      await page.locator('#relatedPost-add-new button').click()
+      const drawer = page.locator('dialog[id^="doc-drawer_posts_"]')
+      const drawerTrigger = drawer.getByRole('button', { name: message, exact: true })
+      const drawerExplanation = drawer.getByText(message, { exact: true })
+
+      await drawerTrigger.focus()
+      await expect(drawerExplanation).toBeVisible()
+      await drawerTrigger.press('Escape')
+      await expect(drawerExplanation).toBeHidden()
+      await expect(drawer).toBeVisible()
+    })
+  })
+
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should translate crop handle names into Spanish', async () => {
+      const originalCookies = (await page.context().cookies()).filter(
+        ({ name }) => name === 'payload-lng',
+      )
+      const doc = await createMediaFixture({ page, serverURL })
+      try {
+        await page.context().addCookies([{ name: 'payload-lng', url: serverURL, value: 'es' }])
+        await page.goto(
+          formatAdminURL({ adminRoute: '/admin', path: `/collections/media/${doc.id}`, serverURL }),
+        )
+        await waitForFormReady(page)
+        await page.getByRole('button', { name: /editar imagen/i }).click()
+        const dialog = page.locator('.edit-upload__dialog')
+        await expect(dialog.locator('.ReactCrop__drag-handle.ord-e')).toHaveAccessibleName(
+          'Controlador de recorte derecho',
+        )
+        await expect(dialog.locator('.ReactCrop__drag-handle.ord-w')).toHaveAccessibleName(
+          'Controlador de recorte izquierdo',
+        )
+        await expect(dialog.locator('.ReactCrop__crop-selection')).toHaveAccessibleName(
+          'Establecer área de recorte',
+        )
+      } finally {
+        await page.context().clearCookies({ name: 'payload-lng' })
+        await page.context().addCookies(originalCookies)
+      }
+    })
+
+    test('should name and operate cancel before selecting a replacement file', async () => {
+      const doc = await createMediaFixture({ page, serverURL })
+      await page.goto(
+        formatAdminURL({ adminRoute: '/admin', path: `/collections/media/${doc.id}`, serverURL }),
+      )
+      await waitForFormReady(page)
+      await page.locator('.file-toolbar__filename-btn').click()
+      await page.getByRole('menuitem', { name: 'Replace file', exact: true }).click()
+      await page.mouse.move(0, 0)
+      const cancel = page.locator('.file-manager__remove')
+      await expect(cancel).toHaveAccessibleName('Cancel')
+      await cancel.press('Enter')
+      await expect(page.locator('.file-toolbar')).toBeVisible()
+      await expect(page.locator('.file-manager__remove')).toHaveCount(0)
+    })
+
+    test('should name the API-key copy control before its tooltip appears', async () => {
+      // PYLD-3615
+      const me = await page.request.get(
+        formatAdminURL({ apiRoute: '/api', path: '/users/me', serverURL }),
+      )
+
+      expect(me.ok()).toBe(true)
+      const { user } = await me.json()
+      const dialog = await openAPIKeyDialog({ page, serverURL })
+
+      try {
+        await dialog.getByRole('button', { name: 'Generate', exact: true }).click()
+        await expect(dialog).toBeHidden()
+        const copy = page.locator('.api-key .copy-to-clipboard')
+
+        await page.mouse.move(0, 0)
+        await expect(copy).toBeVisible()
+        await expect(copy).toHaveAccessibleName(/copy.*api.*key/i)
+      } finally {
+        const response = await page.request.patch(
+          formatAdminURL({ apiRoute: '/api', path: `/users/${user.id}`, serverURL }),
+          {
+            data: { apiKey: seededAPIKey },
+          },
+        )
+
+        expect(response.ok(), 'Restore the seeded API key after generating a temporary key').toBe(
+          true,
+        )
+      }
+    })
+
+    test('should name the media copy-link control before its tooltip appears', async () => {
+      // PYLD-3578
+      const doc = await createMediaFixture({ page, serverURL })
+
+      await page.goto(
+        formatAdminURL({ adminRoute: '/admin', path: `/collections/media/${doc.id}`, serverURL }),
+      )
+      await waitForFormReady(page)
+      const copy = page.locator('.file-toolbar .copy-to-clipboard')
+
+      await page.mouse.move(0, 0)
+      await expect(copy).toBeVisible()
+      await expect(copy).toHaveAccessibleName(/copy.*link.*file/i)
+    })
+
+    test('should name the single relationship remove control after selection', async () => {
+      // PYLD-3655
+      await gotoCreatePost({ page, postsURL })
+      const relationship = page.locator('#field-relatedPost')
+
+      await selectInput({
+        multiSelect: false,
+        option: 'Example post two',
+        page,
+        selectLocator: relationship,
+        selectType: 'relationship',
+      })
+      const remove = relationship.locator('.clear-indicator')
+
+      await expect(remove).toBeVisible()
+      await expect(remove).toHaveAccessibleName(/clear|remove/i)
+    })
+
+    test('should name the status clear control while live preview is open', async () => {
+      // PYLD-3595
+      await openLivePreview({ page, postsURL, serverURL })
+      const status = page.locator('#field-status')
+      const clear = status.locator('.clear-indicator')
+
+      await expect(status.locator('.rs__single-value')).toHaveText(/published|draft/i)
+      await expect(clear).toBeVisible()
+      await expect(clear).toHaveAccessibleName(/clear|remove/i)
+    })
+
+    test('should name the callout block more-options control', async () => {
+      // PYLD-3668
+      await gotoCreatePost({ page, postsURL })
+      const callout = page.locator('.LexicalEditorTheme__block-callout').first()
+      const more = callout.locator('.LexicalEditorTheme__block__actions-button')
+
+      await expect(callout).toContainText('Callout')
+      await expect(more).toBeVisible()
+      await expect(more).toHaveAccessibleName(/more|options|actions/i)
+    })
+
+    test('should name the pending single-upload cancel control', async () => {
+      // PYLD-3606
+      await page.goto(
+        formatAdminURL({ adminRoute: '/admin', path: '/collections/media/create', serverURL }),
+      )
+      await waitForFormReady(page)
+      await page
+        .locator('.file-manager input[type="file"]')
+        .setInputFiles(fileURLToPath(new URL('../uploads/image.png', import.meta.url)))
+      const cancel = page.locator('.file-manager__remove')
+
+      await expect(page.locator('.file-manager__selected-preview')).toBeVisible()
+      await expect(cancel).toBeVisible()
+      await expect(cancel).toHaveAccessibleName(/cancel|remove/i)
+    })
+
+    test('should name the pending bulk-upload preview cancel control', async () => {
+      // PYLD-3603
+      const dialog = await openPendingLabelUploads({ page, serverURL })
+      const cancel = dialog.locator('.file-manager__remove')
+
+      await expect(dialog.locator('.file-manager__selected-preview')).toBeVisible()
+      await expect(cancel).toBeVisible()
+      await expect(cancel).toHaveAccessibleName(/cancel|remove/i)
+    })
+
+    test('should name the selected featured-image remove control', async () => {
+      // PYLD-3598
+      await createMediaFixture({ page, serverURL })
+      await gotoCreatePost({ page, postsURL })
+      const imageField = page.locator('#field-featuredImage')
+
+      await imageField.getByRole('button', { name: /choose from existing/i }).click()
+      const drawer = page.locator('.list-drawer')
+
+      await expect(drawer).toBeVisible()
+      await drawer.getByText('modal-dialog-regression-original.png', { exact: true }).click()
+      await expect(drawer).toBeHidden()
+      const remove = imageField.locator('.upload-relationship-details__actions button').last()
+
+      await expect(imageField).toContainText('modal-dialog-regression-original.png')
+      await expect(remove).toBeVisible()
+      await expect(remove).toHaveAccessibleName(/remove/i)
+    })
+
+    test('should use a native checkbox label without inferring an ARIA reference from its name', async () => {
+      // PYLD-3817
+      await gotoFirstPost({ page, postsURL, serverURL })
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+      await page.getByRole('menuitem', { name: 'Delete', exact: true }).click()
+      const dialog = page.getByRole('dialog', { name: /confirm deletion/i })
+      const checkbox = dialog.getByRole('checkbox')
+
+      await expect(checkbox).toBeVisible()
+      await expect(checkbox).toHaveAccessibleName('Skip trash and delete permanently')
+      await checkbox.focus()
+      await checkbox.press('Space')
+      await expect(checkbox).toBeChecked()
+      await checkbox.press('Space')
+      await expect(checkbox).not.toBeChecked()
+    })
+
+    test('should expose read-only hierarchy controls as disabled', async () => {
+      await gotoCreatePost({ page, postsURL })
+
+      const field = page.locator('#field-readOnlyHierarchy')
+      const browse = field.locator('.hierarchy-field__browse-button')
+      const combobox = field.locator('input[role="combobox"]')
+
+      await expect(field.locator('.rs--is-disabled')).toBeVisible({ timeout: 15000 })
+      await expect(combobox).toBeDisabled()
+      await expect(browse).toHaveAccessibleName(/select/i)
+      await expect(browse).toBeDisabled()
+      await expect(page.locator('.hierarchy-modal:visible')).toHaveCount(0)
+    })
+
+    test('should omit bulk confirmation from a single-value upload picker', async () => {
+      await gotoCreatePost({ page, postsURL })
+      await page
+        .locator('#field-featuredImage')
+        .getByRole('button', { name: 'Choose from existing' })
+        .press('Enter')
+
+      const drawer = page.locator('.list-drawer:visible')
+
+      await expect(drawer).toBeVisible()
+      await expect(drawer.getByRole('button', { name: 'Confirm', exact: true })).toHaveCount(0)
+      await expect(drawer.locator('.select-row__checkbox')).toHaveCount(0)
+      await drawer.locator('.list-drawer__header-close').press('Enter')
+      await expect(drawer).toBeHidden()
+    })
+
+    test('should expose Media Filters as collapsed and expanded', async () => {
+      // PYLD-3605
+      await page.goto(
+        formatAdminURL({ adminRoute: '/admin', path: '/collections/media', serverURL }),
+      )
+      const filters = page.getByRole('button', { name: 'Filters', exact: true })
+
+      await expect(filters).toBeVisible()
+      await expect.soft(filters).toHaveAttribute('aria-expanded', 'false')
+      await filters.press('Enter')
+      await expect(page.locator('.where-builder')).toBeVisible()
+      await expect.soft(filters).toHaveAttribute('aria-expanded', 'true')
+      await filters.press('Enter')
+      await expect(page.locator('.where-builder')).toBeHidden()
+      await expect(filters).toHaveAttribute('aria-expanded', 'false')
+    })
+
+    test('should name LLM instructions editors and expose the read-only state without accessibility violations', async ({
+      browser: _browser,
+    }, testInfo) => {
+      const field = await openLLMInstructions({ page, serverURL })
+      const editor = field.getByRole('textbox')
+
+      await expect(editor).toHaveAccessibleName('Additional instructions')
+      await expect(editor).toBeEditable()
+
+      const editableScan = await runAxeScan({ include: ['.llm-instructions'], page, testInfo })
+
+      expect.soft(editableScan.violations).toEqual([])
+      await field
+        .getByRole('tab', { name: 'System instructions (read-only)', exact: true })
+        .press('Enter')
+      await expect.soft(editor).toHaveAccessibleName('System instructions (read-only)')
+      await expect(editor).toHaveAttribute('aria-readonly', 'true')
+      await expect(editor).not.toBeEditable()
+      await expect(editor).toHaveText('Use descriptive post titles.')
+      await editor.focus()
+      await page.keyboard.type('This must not change the system instructions.')
+      await expect(editor).toHaveText('Use descriptive post titles.')
+      await expect(field.getByRole('button', { name: 'Bold', exact: true })).toHaveCount(0)
+
+      const readOnlyScan = await runAxeScan({ include: ['.llm-instructions'], page, testInfo })
+
+      expect(readOnlyScan.violations).toEqual([])
+    })
+
+    test('should expose a labelled region for expanded collapsible field content', async () => {
+      // PYLD-3818
+      await gotoCreatePost({ page, postsURL })
+      const field = page.locator('.collapsible-field').filter({ hasText: 'Publishing details' })
+      const toggle = field.locator('.collapsible__toggle')
+      const input = field.getByRole('textbox', { name: 'Publishing Note', exact: true })
+      const region = field.getByRole('region', { name: /publishing details/i })
+
+      await expect(input).toBeVisible()
+      await expect(region).toBeVisible()
+      await expect(
+        region.getByRole('textbox', { name: 'Publishing Note', exact: true }),
+      ).toBeVisible()
+      await expect(toggle).toHaveAttribute('aria-labelledby', /\S/)
+      await expect(region).toHaveAttribute('id', /\S/)
+      const regionID = await region.getAttribute('id')
+      await expect(toggle).toHaveAccessibleName('Publishing details Toggle block')
+      await expect(region).toHaveAccessibleName('Publishing details')
+      await expect(region).toHaveAttribute('aria-labelledby', /\S/)
+      await expect(toggle).toHaveAttribute('aria-controls', regionID!)
+      await toggle.press('Enter')
+      await expect(region).toBeHidden()
+      await toggle.press('Space')
+      await expect(region).toBeVisible()
+    })
+
+    test('should name a collapsible region from its custom Label without a config label', async () => {
+      await gotoCreatePost({ page, postsURL })
+      const field = page.locator('.collapsible-field').filter({ hasText: 'Editorial details' })
+      const region = field.getByRole('region', { name: 'Editorial details', exact: true })
+      const toggle = field.locator('.collapsible__toggle')
+
+      await expect(field.getByText('Editorial details', { exact: true })).toBeVisible()
+      await expect(region).toBeVisible()
+      await expect(
+        region.getByRole('textbox', { name: 'Custom Label Note', exact: true }),
+      ).toBeVisible()
+      await expect(toggle).toHaveAccessibleName('Editorial details Toggle block')
+      await expect(region).toHaveAttribute('id', /\S/)
+      const regionID = await region.getAttribute('id')
+
+      await expect(toggle).toHaveAttribute('aria-controls', regionID!)
+      await toggle.press('Enter')
+      await expect(region).toBeHidden()
+      await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+      await toggle.press('Space')
+      await expect(region).toBeVisible()
+      await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+      await expect(region).toHaveAccessibleName('Editorial details')
+    })
+
+    test('should name Block and Collapsible group toggles and expose their current state', async () => {
+      // PYLD-3792
+      test.setTimeout(90000)
+      await addTextBlock({ page, postsURL })
+      const fields = [
+        { name: /text block/i, container: page.locator('#field-layout .collapsible').first() },
+        {
+          name: /publishing details/i,
+          container: page.locator('.collapsible-field').filter({ hasText: 'Publishing details' }),
+        },
+      ]
+
+      for (const { name, container } of fields) {
+        const toggle = container.locator('.collapsible__toggle')
+        const content = container.locator('.collapsible__content').first()
+
+        await expect(content).toBeVisible()
+        await expect.soft(toggle).toHaveAccessibleName(name)
+        await expect.soft(toggle).toHaveAttribute('aria-expanded', 'true')
+        await toggle.press('Enter')
+        await expect(content).toBeHidden()
+        await expect.soft(toggle).toHaveAttribute('aria-expanded', 'false')
+        await toggle.press('Space')
+        await expect(content).toBeVisible()
+        await expect.soft(toggle).toHaveAttribute('aria-expanded', 'true')
+      }
+    })
+
+    test('should expose bulk collapse and show state for multiple Array and Blocks rows', async () => {
+      // PYLD-3786
+      test.setTimeout(120000)
+      await addTextBlock({ page, postsURL })
+      await page.locator('#field-layout .array-actions__button').first().click()
+      await page.getByRole('menuitem', { name: /duplicate/i }).click()
+      await page.locator('#field-items .array-field__add-row').click()
+      await page.locator('#field-items .array-field__add-row').click()
+
+      for (const selector of ['#field-items', '#field-layout']) {
+        const field = page.locator(selector)
+        const contents = field.locator('.collapsible__content')
+        const collapse = field.getByRole('button', { name: /collapse all/i })
+        const show = field.getByRole('button', { name: /show all/i })
+
+        await expect(contents).toHaveCount(2)
+        await expect(field.getByRole('region')).toHaveCount(0)
+        for (const content of await contents.all()) {
+          await expect(content).toBeVisible()
+        }
+        for (const command of [collapse, show]) {
+          await expect.soft(command).toHaveAttribute('aria-expanded', 'true')
+        }
+        const rows = field.locator('.array-field__draggable-rows, .blocks-field__rows')
+        await expect(rows).toHaveAttribute('id', /\S/)
+        const rowsID = await rows.getAttribute('id')
+        for (const command of [collapse, show]) {
+          await expect(command).toHaveAttribute('aria-controls', rowsID!)
+        }
+        await field.locator('.collapsible__toggle').first().press('Enter')
+        await expect(contents.first()).toBeHidden()
+        await expect(contents.nth(1)).toBeVisible()
+        for (const command of [collapse, show]) {
+          await expect(command).toHaveAttribute('aria-expanded', 'true')
+        }
+        await collapse.press('Enter')
+        for (const content of await contents.all()) {
+          await expect(content).toBeHidden()
+        }
+        for (const command of [collapse, show]) {
+          await expect.soft(command).toHaveAttribute('aria-expanded', 'false')
+        }
+        await show.press('Space')
+        for (const content of await contents.all()) {
+          await expect(content).toBeVisible()
+        }
+        for (const command of [collapse, show]) {
+          await expect.soft(command).toHaveAttribute('aria-expanded', 'true')
+        }
+      }
+    })
+
+    test('should expose navigation disclosure state while opening and closing the menu', async () => {
+      // PYLD-3803
+      test.slow()
+      const originalViewport = page.viewportSize()
+
+      try {
+        await page.setViewportSize({ height: 900, width: 768 })
+        await gotoPostsList({ page, postsURL })
+        const toggle = page.locator('.app-header__sidebar-toggle')
+        const close = page.getByRole('button', { name: 'Hide sidebar', exact: true })
+        const nav = page
+          .locator('aside')
+          .filter({ has: page.getByRole('navigation', { includeHidden: true }) })
+
+        await expect(nav).toHaveClass(/nav-hydrated/)
+        await expect(toggle).toHaveAccessibleName(/open menu/i)
+        await expect.soft(toggle).toHaveAttribute('aria-expanded', 'false')
+        await toggle.press('Enter')
+        await expect(toggle).toBeHidden()
+        await expect(close).toBeVisible()
+        await expect(close).toHaveAttribute('aria-expanded', 'true')
+        await expect(nav).not.toHaveAttribute('inert', '')
+        await expect.soft(toggle).toHaveAttribute('aria-expanded', 'true')
+        await close.press('Space')
+        await expect(toggle).toHaveAccessibleName(/open menu/i)
+        await expect(nav).toHaveAttribute('inert', '')
+        await expect.soft(toggle).toHaveAttribute('aria-expanded', 'false')
+      } finally {
+        if (originalViewport) {
+          await page.setViewportSize(originalViewport)
+        }
+      }
+    })
+
+    test('should expose the initial and changed More options state on versioned document creation', async () => {
+      // PYLD-3714
+      test.slow()
+      await gotoCreatePost({ page, postsURL })
+      const toggle = page
+        .locator('.doc-controls')
+        .getByRole('button', { name: 'More options', exact: true })
+
+      await expect(toggle).toHaveAccessibleName('More options')
+      await expect.soft(toggle).toHaveAttribute('aria-expanded', 'false')
+      await toggle.press('Enter')
+      await expect(page.getByRole('menu')).toBeVisible()
+      await expect.soft(toggle).toHaveAttribute('aria-expanded', 'true')
+      await page.keyboard.press('Escape')
+      await expect(page.getByRole('menu')).toBeHidden()
+      await expect(toggle).toBeFocused()
+      await expect.soft(toggle).toHaveAttribute('aria-expanded', 'false')
+    })
+
+    test('should expose the Global API fullscreen toggle state through both transitions', async () => {
+      // PYLD-3622
+      test.slow()
+      await openGlobalAPI({ page, serverURL })
+      const toggle = page.getByRole('button', { name: 'toggle fullscreen', exact: true })
+      const view = page.locator('.query-inspector')
+
+      await expect(view).not.toHaveClass(/query-inspector--fullscreen/)
+      await expect.soft(toggle).toHaveAttribute('aria-pressed', 'false')
+      await toggle.press('Enter')
+      await expect(view).toHaveClass(/query-inspector--fullscreen/)
+      await expect.soft(toggle).toHaveAttribute('aria-pressed', 'true')
+      await toggle.press('Space')
+      await expect(view).not.toHaveClass(/query-inspector--fullscreen/)
+      await expect.soft(toggle).toHaveAttribute('aria-pressed', 'false')
+    })
+
+    test('should expose and operate the All Folders navigation item by keyboard', async () => {
+      const sidebar = await openNavigationFolders({ page, serverURL })
+      const all = sidebar.getByRole('treeitem', { name: /all.*folders/i })
+      const parent = sidebar.getByRole('treeitem', { name: 'Accessibility folder', exact: true })
+
+      await expect(sidebar.locator('[role=treeitem][tabindex="0"]')).toHaveCount(1)
+      await all.focus()
+      await all.press('ArrowDown')
+      await expect(parent).toBeFocused()
+      await parent.press('ArrowUp')
+      await expect(all).toBeFocused()
+      await expect(sidebar.locator('[role=treeitem][tabindex="0"]')).toHaveCount(1)
+      await all.press('Enter')
+      await expect(page).toHaveURL(/\/admin\/collections\/payload-folders(?:\?|$)/)
+      await expect(page).toHaveURL(/[?&]view=hierarchy(?:&|$)/)
+      await expect(page.locator('.hierarchy-list')).toBeVisible()
+    })
+
+    test('should expose and operate hierarchy breadcrumbs by keyboard', async () => {
+      test.slow()
+      const originalViewport = page.viewportSize()
+
+      try {
+        await page.setViewportSize({ height: 900, width: 360 })
+        const sidebar = await openNavigationFolders({ page, serverURL })
+        const parent = sidebar.getByRole('treeitem', {
+          name: 'Accessibility folder',
+          exact: true,
+        })
+
+        await parent.focus()
+        await parent.press('ArrowRight')
+        const child = sidebar.getByRole('treeitem', {
+          name: 'Accessibility final child folder',
+          exact: true,
+        })
+
+        await child.focus()
+        await child.press('Enter')
+        await expect(
+          page.getByRole('heading', { name: 'Accessibility final child folder', exact: true }),
+        ).toBeVisible()
+
+        const closeNavigation = page.getByRole('button', { name: 'Hide sidebar', exact: true })
+
+        if (await closeNavigation.isVisible()) {
+          await closeNavigation.press('Enter')
+        }
+
+        const stepNav = page.locator('.step-nav')
+
+        await expect(
+          stepNav.getByText('Accessibility final child folder', { exact: true }),
+        ).toBeVisible()
+        await expect(
+          stepNav.getByRole('link', {
+            name: 'Accessibility final child folder',
+            exact: true,
+          }),
+        ).toHaveCount(0)
+
+        const moreOptions = stepNav.getByRole('button', { name: 'More options', exact: true })
+
+        await expect(moreOptions).toBeVisible()
+        await moreOptions.press('Enter')
+        const collapsedItems = page.getByRole('menuitem')
+        const ancestor = page.getByRole('menuitem', {
+          name: 'Accessibility folder',
+          exact: true,
+        })
+
+        await expect(collapsedItems.first()).toBeFocused()
+        await page.keyboard.press('ArrowDown')
+        await expect(ancestor).toBeFocused()
+        await expect(ancestor).toHaveAccessibleName('Accessibility folder')
+        await expect(ancestor).toHaveAttribute('href')
+        const ancestorHref = await ancestor.getAttribute('href')
+
+        if (!ancestorHref) {
+          throw new Error('Accessibility folder breadcrumb is missing its destination')
+        }
+
+        const ancestorURL = new URL(ancestorHref, serverURL)
+
+        expect(ancestorURL.searchParams.get('view')).toBe('hierarchy')
+        expect(ancestorURL.searchParams.get('_h_payload-folders')).toBeTruthy()
+
+        await page.keyboard.press('Enter')
+        await expect(
+          page.getByRole('heading', { name: 'Accessibility folder', exact: true }),
+        ).toBeVisible()
+        await expect
+          .poll(() => new URL(page.url()).searchParams.get('_h_payload-folders'))
+          .toBe(ancestorURL.searchParams.get('_h_payload-folders'))
+        await expect(stepNav.getByText('Accessibility folder', { exact: true })).toBeVisible()
+        await expect(
+          stepNav.getByRole('link', { name: 'Accessibility folder', exact: true }),
+        ).toHaveCount(0)
+        await expect(stepNav).not.toContainText('Accessibility final child folder')
+      } finally {
+        if (originalViewport) {
+          await page.setViewportSize(originalViewport)
+        }
+      }
+    })
+
+    test('should identify all navigation routes and preserve keyboard access', async () => {
+      test.setTimeout(60_000)
+      await openMainNavigation({ page, postsURL })
+      const selected = page.locator('#nav-posts')
+
+      await expect(selected).toHaveAttribute('aria-current', 'page')
+      await expect(selected).toHaveAccessibleName('Posts')
+      await expect(page.locator('#nav-users')).not.toHaveAttribute('aria-current', 'page')
+      const group = page.locator('.nav-group').filter({ has: selected })
+
+      await group.locator('.nav-group__toggle').focus()
+      let hasReachedSelected = false
+
+      for (let index = 0; index < 30; index++) {
+        await page.keyboard.press('Tab')
+        if (await selected.evaluate((element) => element === document.activeElement)) {
+          hasReachedSelected = true
+          break
+        }
+      }
+      expect(hasReachedSelected).toBe(true)
+      for (const view of ['create', 'edit', 'versions'] as const) {
+        if (view === 'create') {
+          await gotoCreatePost({ page, postsURL })
+        } else if (view === 'edit') {
+          await gotoFirstPost({ page, postsURL, serverURL })
+        } else {
+          await openTableVersionHistory({ kind: 'collection', page, postsURL, serverURL })
+        }
+        await openNavigation({ page })
+        await expect(page.locator('#nav-posts')).toHaveAttribute('aria-current', 'location')
+      }
+      const toggle = page.locator('.nav-group__toggle').filter({ hasText: /^Collections$/ })
+
+      await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+      await toggle.press('Enter')
+      await expect(selected).toBeHidden()
+      await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+      await toggle.press('Enter')
+      await expect(selected).toBeVisible()
+      await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    })
+
+    test('should expose the upload dropzone without detectable accessibility violations', async ({
+      browser: _browser,
+    }, testInfo) => {
+      // PYLD-4166
+      await page.goto(`${serverURL}/admin`)
+      await expect(page.locator('.upload-dropzone-widget')).toBeVisible()
+
+      const results = await runAxeScan({
+        include: ['.upload-dropzone-widget'],
+        page,
+        testInfo,
+      })
+
+      expect(results.violations).toEqual([])
+    })
+
+    test('should give the navigation close control an accessible name', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
+
+      await expect(page.locator('.nav__close')).toHaveAccessibleName(/hide sidebar/i)
+    })
+
+    test('should expose the block date-picker input with its visible Date label', async () => {
+      // PYLD-3740
+      const { field, input } = await prepareBlockDateField({ page, postsURL })
+
+      await expect(field.locator('label.field-label')).toHaveText('Date')
+      await expect(input).toHaveAccessibleName('Date')
+    })
+
+    test('should expose the block date-picker calendar as a descriptively named dialog', async () => {
+      // PYLD-3736
+      const { calendar, input } = await prepareBlockDateField({ page, postsURL })
+
+      await input.click()
+      await expect(calendar).toBeVisible()
+      await expect(calendar).toHaveRole('dialog')
+      await expect(calendar).toHaveAccessibleName(/date|calendar|month.*year/i)
+    })
+
     test('should expose table Columns and Group By expansion states', async () => {
       // PYLD-3781
       // PYLD-3705
@@ -2496,6 +5119,39 @@ test.describe('WCAG 2.2 Level AA', () => {
       })
     })
 
+    test('should expose required authentication fields and their errors', async () => {
+      await page.goto(
+        formatAdminURL({ adminRoute: '/admin', path: '/collections/users/create', serverURL }),
+      )
+      const fields = [
+        { name: 'Email', selector: 'input[name="email"]' },
+        { name: 'New Password', selector: 'input[name="password"]' },
+        { name: 'Confirm Password', selector: 'input[name="confirm-password"]' },
+      ]
+
+      for (const { name, selector } of fields) {
+        const input = page.locator(selector)
+
+        await expect(input).toHaveAccessibleName(name)
+        await expectRequiredState({ input })
+        await expect(input).not.toHaveAttribute('aria-invalid', 'true')
+        await expect(input).toHaveAccessibleDescription('')
+      }
+
+      await page.getByRole('button', { name: 'Save', exact: true }).click()
+
+      for (const { name, selector } of fields) {
+        const input = page.locator(selector)
+        const error = page.locator('.field-type').filter({ has: input }).getByRole('alert')
+
+        await expect(error).toBeVisible()
+        await expect(input).toHaveAccessibleName(name)
+        await expect(input).toHaveAttribute('aria-invalid', 'true')
+        await expect(input).toHaveAccessibleDescription((await error.innerText()).trim())
+        await expectErrorTabOrder({ error, input })
+      }
+    })
+
     for (const { label, open } of [
       { label: 'upload', open: openRichTextUploadDrawer },
       { label: 'relationship', open: openRichTextRelationshipDrawer },
@@ -2518,11 +5174,71 @@ test.describe('WCAG 2.2 Level AA', () => {
       }
     }
 
-    test('should name the image focal-point control by its purpose', async () => {
-      // PYLD-3577
+    test('should name the image crop and focal-point controls by their purpose', async () => {
+      // PYLD-3577, PYLD-3601
       const dialog = await openEditImageDialog({ page, serverURL })
+      const handles = dialog.locator('.ReactCrop__drag-handle')
 
-      await expect(dialog.locator('.edit-upload__focalPoint')).toHaveAccessibleName(/focal point/i)
+      await expect(handles).toHaveCount(8)
+      const directions = [
+        {
+          direction: 'nw',
+          keys: ['ArrowRight', 'ArrowDown'],
+          label: 'Top-left',
+        },
+        {
+          direction: 'n',
+          keys: ['ArrowDown'],
+          label: 'Top',
+        },
+        {
+          direction: 'ne',
+          keys: ['ArrowLeft', 'ArrowDown'],
+          label: 'Top-right',
+        },
+        {
+          direction: 'e',
+          keys: ['ArrowLeft'],
+          label: 'Right',
+        },
+        {
+          direction: 'se',
+          keys: ['ArrowLeft', 'ArrowUp'],
+          label: 'Bottom-right',
+        },
+        {
+          direction: 's',
+          keys: ['ArrowUp'],
+          label: 'Bottom',
+        },
+        {
+          direction: 'sw',
+          keys: ['ArrowRight', 'ArrowUp'],
+          label: 'Bottom-left',
+        },
+        {
+          direction: 'w',
+          keys: ['ArrowRight'],
+          label: 'Left',
+        },
+      ]
+      const selection = dialog.locator('.ReactCrop__crop-selection')
+      for (const { direction, keys, label } of directions) {
+        const handle = dialog.locator(`.ReactCrop__drag-handle.ord-${direction}`)
+        await expect.soft(handle).toHaveAccessibleName(`${label} crop handle`)
+        for (const key of keys) {
+          await dialog.getByRole('button', { name: 'Reset: Crop', exact: true }).click()
+          const before = await selection.boundingBox()
+          const dimension = key === 'ArrowLeft' || key === 'ArrowRight' ? 'width' : 'height'
+          await handle.press(key)
+          await expect
+            .poll(async () => (await selection.boundingBox())![dimension])
+            .toBeLessThan(before![dimension])
+        }
+      }
+      await expect
+        .soft(dialog.locator('.edit-upload__focalPoint'))
+        .toHaveAccessibleName(/focal point/i)
     })
 
     test('should expose the active locale as selected rather than disabled', async () => {
@@ -2566,6 +5282,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     test('should expose nested User menu triggers as items in one menu', async () => {
       // Additional coverage for PYLD-3645 and PYLD-3697.
       await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
       const trigger = page.locator('.user-menu__trigger')
 
       await trigger.press('Enter')
@@ -2651,7 +5368,9 @@ test.describe('WCAG 2.2 Level AA', () => {
       const options = page.locator('.rs__option')
       const accessibleNames = await expectOptionsToHaveAccessibleNames(options, { areUnique: true })
 
-      expect(accessibleNames[0]).toMatch(/^Previous Version .+ \d{4}, \d{1,2}:\d{2} [AP]M$/)
+      await expect(
+        page.getByRole('option', { name: /^Previous Version .+ \d{4}, \d{1,2}:\d{2} [AP]M$/ }),
+      ).toBeVisible()
       expect(accessibleNames).toContain('More versions...')
     })
 
@@ -2672,10 +5391,10 @@ test.describe('WCAG 2.2 Level AA', () => {
 
       await expect(blocksButton).toHaveAccessibleName(/layout|text block/i)
       await expect(arrayButton).toHaveAccessibleName(/item/i)
-      await expect(blocksButton).not.toHaveAttribute(
-        'aria-label',
-        await arrayButton.getAttribute('aria-label'),
-      )
+      await expect(arrayButton).toHaveAttribute('aria-label', /\S/)
+      const arrayLabel = await arrayButton.getAttribute('aria-label')
+
+      await expect(blocksButton).not.toHaveAttribute('aria-label', arrayLabel!)
       await expect(blocksButton).toHaveAttribute('aria-haspopup', /true|menu/)
       await expect(arrayButton).toHaveAttribute('aria-haspopup', /true|menu/)
     })
@@ -2685,11 +5404,11 @@ test.describe('WCAG 2.2 Level AA', () => {
       // PYLD-3754
       test.slow()
       const whereBuilder = await openPostsFilter({ page, postsURL })
-      const filterComboboxes = whereBuilder.locator('input[role="combobox"]')
+      const filterComboboxes = whereBuilder.getByRole('combobox')
 
-      expect(await filterComboboxes.count()).toBeGreaterThan(0)
+      await expect(filterComboboxes.first()).toBeVisible()
       await expect
-        .soft(whereBuilder.locator('.condition__field input[role="combobox"]'))
+        .soft(whereBuilder.locator('.condition__field').getByRole('combobox'))
         .toHaveAccessibleName(/where|field/i)
       for (let index = 0; index < (await filterComboboxes.count()); index++) {
         await expect.soft(filterComboboxes.nth(index)).toHaveAccessibleName(/\S/)
@@ -2750,6 +5469,413 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
   test.describe('4.1.3 Status Messages (AA)', () => {
+    test('should keep the toast close button accessible with its live announcements off', async () => {
+      await page.goto(`${postsURL.admin}/status-messages`)
+      await page.getByRole('button', { name: 'Show action toast' }).click()
+      const region = page.getByRole('region', { name: 'Notifications alt+T' })
+      const close = region.getByRole('button', { name: 'Close toast', exact: true })
+
+      await expect(region).toHaveAttribute('aria-live', 'polite')
+      await expect(close).toHaveAttribute('aria-live', 'off')
+      await expect(close).toBeVisible()
+      await expect
+        .poll(async () => {
+          const snapshot = await page.locator('body').ariaSnapshot()
+          return (snapshot.match(/Action notification/g) ?? []).length
+        })
+        .toBe(1)
+      await close.focus()
+      await expect(close).toBeFocused()
+      await close.press('Enter')
+      await expect(page.locator('[data-sonner-toast]')).toHaveCount(0)
+    })
+
+    test('should expose toast actions and descriptions in the native live region', async () => {
+      await page.goto(`${postsURL.admin}/status-messages`)
+      await page.getByRole('button', { name: 'Show action toast' }).click()
+      const announcement = page.getByRole('region', { name: 'Notifications alt+T' })
+
+      await expect(announcement).toContainText('Action notification')
+      await expect(announcement).toContainText('Action description')
+      await expect(announcement).toContainText('Undo change')
+      await page.getByRole('button', { name: 'Undo change', exact: true }).click()
+      await expect(page.locator('[data-sonner-toast]')).toHaveCount(0)
+    })
+
+    test('should preserve accessible names and controls in the native toast content', async () => {
+      await page.goto(`${postsURL.admin}/status-messages`)
+      await page.getByRole('button', { name: 'Show custom toast' }).click()
+      const announcement = page.getByRole('region', { name: 'Notifications alt+T' })
+
+      await expect(announcement).toContainText('Custom notification')
+      await expect(announcement.getByRole('img', { name: 'Upload complete' })).toBeVisible()
+      await expect(announcement.getByRole('button', { name: 'Retry upload' })).toBeVisible()
+      await expect(announcement).toContainText('View details')
+      await expect(announcement.getByRole('button', { name: 'Download file' })).toBeVisible()
+      await page.getByRole('button', { name: 'Retry upload' }).focus()
+      await expect(page.getByRole('button', { name: 'Retry upload' })).toBeFocused()
+      await page.getByRole('link', { name: 'View details' }).focus()
+      await expect(page.getByRole('link', { name: 'View details' })).toBeFocused()
+    })
+
+    test('should retain both rapid toast messages in the native live region', async () => {
+      await page.goto(`${postsURL.admin}/status-messages`)
+      await page.getByRole('button', { name: 'Show rapid toasts' }).click()
+      const region = page.getByRole('region', { name: 'Notifications alt+T' })
+
+      await expect(region).toHaveAttribute('aria-live', 'polite')
+      await expect(region.locator('[data-sonner-toast]')).toHaveCount(2)
+      await expect(region).toContainText('First rapid notification')
+      await expect(region).toContainText('Second rapid notification')
+    })
+
+    test('should expose promise toast completion in the native live region', async () => {
+      await page.goto(`${postsURL.admin}/status-messages`)
+      await page.getByRole('button', { name: 'Start upload' }).click()
+      await expect(page.getByRole('region', { name: 'Notifications alt+T' })).toHaveText(
+        'Uploading file',
+      )
+      await page.getByRole('button', { name: 'Finish upload' }).click()
+      await expect(page.getByRole('region', { name: 'Notifications alt+T' })).toHaveText(
+        'File uploaded',
+      )
+      await expect(page.locator('[data-sonner-toast]')).toHaveCount(1)
+    })
+
+    test('should disable close-control live announcements for the unsaved toast', async () => {
+      // Additional coverage for PYLD-3669; spoken output is tested in screen-reader.spec.ts.
+      await gotoFirstPost({ page, postsURL, serverURL })
+      await page.locator('#field-title').fill('Unsaved toast announcement regression')
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+      await page.locator('#copy-locale-data__button').click()
+      const notification = page.locator('[data-sonner-toast]').filter({ hasText: /unsaved/i })
+      const announcement = page
+        .locator('[role="status"], [aria-live="polite"]')
+        .filter({ hasText: /unsaved/i })
+        .first()
+
+      await expect(notification).toBeVisible()
+      await expect(announcement).toBeAttached()
+      await expect(announcement).toHaveAttribute('aria-live', 'polite')
+      await expect(notification.getByRole('button', { name: /close toast/i })).toHaveAttribute(
+        'aria-live',
+        'off',
+      )
+      await expect(notification.getByRole('button', { name: /close toast/i })).toBeVisible()
+    })
+
+    test('should give a default toast six seconds before automatic dismissal', async () => {
+      // Additional coverage for PYLD-3580; extra reading time does not guarantee virtual cursor persistence.
+      await gotoFirstPost({ page, postsURL, serverURL })
+      await page.locator('#field-title').fill('Persistent toast regression')
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+      await page.locator('#copy-locale-data__button').click()
+      const notification = page.locator('[data-sonner-toast]').filter({ hasText: /unsaved/i })
+
+      await expect(notification).toBeVisible()
+      await page.mouse.move(0, 0)
+      // The default must outlast the former four-second timeout without hover or DOM focus.
+      await page.waitForTimeout(5000)
+      await expect(notification).toBeVisible()
+      await expect(notification).toBeHidden({ timeout: 5000 })
+      await expect(page.locator('[data-sonner-toast]').filter({ hasText: /unsaved/i })).toHaveCount(
+        0,
+      )
+    })
+
+    test('should expose global API depth stepper changes as a status', async () => {
+      // Additional coverage for PYLD-3618; actual speech is tested in screen-reader.spec.ts.
+      await page.goto(
+        formatAdminURL({ adminRoute: '/admin', path: '/globals/menu/api', serverURL }),
+      )
+      const depth = page.getByRole('spinbutton', { name: 'Depth', exact: true })
+      const initialDepth = Number(await depth.inputValue())
+      const field = page.locator('.field-type.number').filter({ has: depth })
+
+      for (const { name, value } of [
+        { name: 'Increment', value: initialDepth + 1 },
+        { name: 'Decrement', value: initialDepth },
+      ]) {
+        const stepper = field.getByRole('button', { name, exact: true })
+        await stepper.focus()
+        await stepper.press('Enter')
+        await expect(depth).toHaveValue(String(value))
+        await expect(stepper).toBeFocused()
+        await expect
+          .soft(page.getByRole('status').filter({ hasText: new RegExp(`Depth: ${value}\\b`) }))
+          .toBeVisible()
+      }
+    })
+
+    test('should expose preview loading as a live status without moving focus', async () => {
+      // PYLD-3724
+      let releasePreview: () => void = () => {}
+      const pendingPreview = new Promise<void>((resolve) => {
+        releasePreview = resolve
+      })
+
+      await page.route('**/preview/**', async (route) => {
+        await pendingPreview
+        await route.fulfill({
+          body: '<html><body>Preview ready</body></html>',
+          contentType: 'text/html',
+        })
+      })
+      try {
+        await gotoFirstPost({ page, postsURL, serverURL })
+        const trigger = page.locator('#live-preview-toggler')
+
+        if (
+          await trigger.evaluate((element) =>
+            element.classList.contains('live-preview-toggler--active'),
+          )
+        ) {
+          await trigger.click()
+        }
+        await trigger.focus()
+        await trigger.press('Enter')
+        const loading = page.locator('.live-preview-window .iframe-loader__loading')
+        await expect(loading).toBeVisible()
+        await expect(loading).toContainText(/loading/i)
+        await expect(trigger).toBeFocused()
+        await expect(
+          page
+            .locator('.live-preview-window')
+            .locator(
+              '[role="status"], [role="alert"], [aria-live="polite"], [aria-live="assertive"]',
+            )
+            .filter({ hasText: /loading/i })
+            .first(),
+        ).toBeVisible()
+        await expect(trigger).toBeFocused()
+      } finally {
+        releasePreview()
+        await page.unrouteAll({ behavior: 'wait' })
+      }
+    })
+
+    test('should expose successful Copy to locale as a live status', async () => {
+      // PYLD-3686
+      const apiURL = formatAdminURL({ apiRoute: '/api', path: '/posts', serverURL })
+      const response = await page.request.post(apiURL, {
+        data: { title: 'Disposable locale copy regression' },
+      })
+      expect(response.ok()).toBe(true)
+      const { doc } = await response.json()
+
+      try {
+        await page.goto(`${postsURL.list}/${doc.id}?locale=en`)
+        await waitForFormReady(page)
+        await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+        await page.locator('#copy-locale-data__button').click()
+        const drawer = page.locator('#copy-locale')
+        const combobox = drawer.locator('#field-toLocale input[role="combobox"]')
+
+        await combobox.press('ArrowDown')
+        await page.getByRole('option', { name: 'Spanish', exact: true }).click()
+        await drawer.getByRole('button', { name: 'Copy', exact: true }).click()
+        await expect(page).toHaveURL(/locale=es/)
+        await expect(drawer).toBeHidden()
+        const notifications = page.getByRole('region', { name: 'Notifications alt+T' })
+
+        await expect(notifications).toHaveAttribute('aria-live', 'polite')
+        await expect(
+          notifications.locator('[data-sonner-toast]').filter({ hasText: /copied|copy.*success/i }),
+        ).toBeVisible()
+      } finally {
+        const cleanup = await page.request.delete(`${apiURL}/${doc.id}?trash=true`)
+        expect(cleanup.ok()).toBe(true)
+        // Reset the locale preference as well as deleting the copied data.
+        await page.goto(`${postsURL.list}?locale=en`)
+        await expect(page.locator('.localizer')).toContainText('en')
+      }
+    })
+
+    test('should expose the password error when a login password is cleared', async ({
+      browser,
+    }) => {
+      // PYLD-3612
+      const loginPage = await browser.newPage({ extraHTTPHeaders: { DisableAutologin: 'true' } })
+
+      try {
+        await loginPage.goto(formatAdminURL({ adminRoute: '/admin', path: '/login', serverURL }))
+        await loginPage.locator('#field-email').fill('dev@payloadcms.com')
+        const password = loginPage.locator('#field-password')
+        const error = loginPage.locator('.field-error[role="alert"]')
+
+        // Validation appears only after a submission; the report omits this prerequisite.
+        await loginPage.getByRole('button', { name: 'Login', exact: true }).click()
+        await expect(error).toBeVisible()
+        await password.fill('test')
+        await expect(error).toBeHidden()
+        await password.fill('')
+        await expect(error).toBeVisible()
+        await expect(error).toContainText(/required/i)
+        await expect(
+          loginPage
+            .locator(
+              '[role="alert"], [role="status"], [aria-live="polite"], [aria-live="assertive"]',
+            )
+            .filter({ hasText: /required/i })
+            .first(),
+        ).toBeVisible()
+      } finally {
+        await loginPage.close()
+      }
+    })
+
+    test('should expose Add Widget search result changes without moving focus', async () => {
+      // PYLD-3593
+      const { drawer, trigger } = await openWidgetDrawer({ page, serverURL })
+      await trigger.click()
+      const search = drawer.getByRole('textbox')
+      const cards = drawer.locator('.items-drawer__item')
+
+      await expect(cards.first()).toBeVisible()
+      const label = (await cards.first().innerText()).trim()
+      for (const query of [label, 'no-such-widget-accessibility', '']) {
+        await search.fill(query)
+        if (query === label || query === '') {
+          await expect(cards.first()).toContainText(label)
+        } else {
+          await expect(cards).toHaveCount(0)
+        }
+        await expect(search).toBeFocused()
+        const count = await cards.count()
+        await expect(drawer.getByRole('status')).toHaveText(
+          query ? `Results found for “${query}”: ${count}.` : `Found ${count}`,
+        )
+      }
+    })
+
+    test('should announce folder search results and clear status without moving focus', async () => {
+      const sidebar = await openNavigationFolders({ page, serverURL })
+      const search = sidebar.getByRole('textbox')
+      const status = sidebar.getByRole('status')
+
+      await expect(status).toBeEmpty()
+      await search.fill('no-such-navigation-folder')
+      await search.press('Enter')
+      await expect(status).toContainText('No results for "no-such-navigation-folder"')
+      await expect(search).toBeFocused()
+      await search.fill('Accessibility child folder')
+      await expect(status).toContainText('No results for "no-such-navigation-folder"')
+      const originalURL = page.url()
+
+      await search.press('Enter')
+      await expect(status).toHaveText('Found 1')
+      await expect(sidebar.locator('.hierarchy-search-results__list')).toContainText(
+        'Accessibility child folder',
+      )
+      await expect(search).toBeFocused()
+      await expect(page).toHaveURL(originalURL)
+      await sidebar.getByRole('button', { name: 'Clear search', exact: true }).click()
+      await expect(status).toBeEmpty()
+      await expect(sidebar.getByRole('tree')).toBeVisible()
+    })
+
+    test('should announce completed collection searches', async () => {
+      await page.clock.install()
+      await page.goto(`${postsURL.list}?groupBy=&search=`)
+      const search = page.locator('#search-filter-input')
+      const status = page.locator('.collection-list__search-status')
+
+      await expect(status).toHaveAttribute('role', 'status')
+      await expect(status).toBeEmpty()
+      await search.fill('no-matching-accessibility-result')
+      await expect(status).toHaveText('Results found for “no-matching-accessibility-result”: 0.')
+      await expect(search).toBeFocused()
+      const previousMessage = await status.locator('span').elementHandle()
+
+      let releaseResponse!: () => void
+      const responseGate = new Promise<void>((resolve) => {
+        releaseResponse = resolve
+      })
+      let hasPendingRequest = false
+      const routePattern = (url: URL) =>
+        url.pathname === new URL(postsURL.list).pathname ||
+        (url.pathname.startsWith('/_serverFn/') &&
+          Boolean(url.searchParams.get('payload')?.includes('"collections/posts"')))
+
+      await page.route(routePattern, async (route) => {
+        hasPendingRequest = true
+        await responseGate
+        await route.continue()
+      })
+      try {
+        await page.clock.pauseAt(new Date())
+        await search.fill('another-no-matching-accessibility-result')
+        await expect(status).toBeEmpty()
+        await page.clock.resume()
+        await expect.poll(() => hasPendingRequest).toBe(true)
+        await expect(status).toBeEmpty()
+        releaseResponse()
+        await expect(status).toHaveText(
+          'Results found for “another-no-matching-accessibility-result”: 0.',
+        )
+        expect(await previousMessage.evaluate((element) => element.isConnected)).toBe(false)
+      } finally {
+        await page.clock.resume()
+        releaseResponse()
+        await page.unrouteAll({ behavior: 'wait' })
+      }
+      await search.fill('')
+      await expect(status).toHaveText('Search cleared.')
+      await expect(search).toBeFocused()
+      await addGroupBy(page, {
+        fieldLabel: 'Accessibility Select',
+        fieldPath: 'accessibilitySelect',
+      })
+      await expect(status).toHaveText(/^\d+ Posts?$/)
+      await page.keyboard.press('Escape')
+      await clearGroupBy(page)
+      await expect(status).toHaveText(/^\d+ Posts?$/)
+      await page.keyboard.press('Escape')
+      try {
+        await search.fill('third version')
+        await expect(status).toHaveText('Results found for “third version”: 1.')
+        await expect(page.getByRole('status').filter({ hasText: /\S/ })).toHaveCount(1)
+        await expect(search).toBeFocused()
+        await search.fill('Example')
+        await expect(status).toHaveText(/Results found for “Example”: \d+\./)
+        for (const groupBy of ['accessibilitySelect', '']) {
+          let releaseGrouping!: () => void
+          let isGroupingPending = false
+          const groupingGate = new Promise<void>((resolve) => {
+            releaseGrouping = resolve
+          })
+          await page.route(routePattern, async (route) => {
+            isGroupingPending = true
+            await groupingGate
+            await route.continue()
+          })
+          try {
+            const { groupByContent } = await openGroupBy(page)
+            if (groupBy) {
+              await groupByContent.locator('.group-by-control__select-trigger').first().click()
+              await page
+                .locator('.popup-button-list .popup-button-list__button')
+                .filter({ hasText: /^Accessibility Select$/ })
+                .click()
+            } else {
+              await groupByContent.getByRole('button', { name: 'Clear', exact: true }).click()
+            }
+            await expect.poll(() => isGroupingPending).toBe(true)
+            await expect(status).toBeEmpty()
+            releaseGrouping()
+            await expect(status).toHaveText(/^\d+ Posts?$/)
+          } finally {
+            releaseGrouping()
+            await page.unrouteAll({ behavior: 'wait' })
+          }
+          await page.keyboard.press('Escape')
+        }
+      } finally {
+        await page.goto(`${postsURL.list}?groupBy=&search=`)
+        await expect(search).toHaveValue('')
+      }
+    })
+
     test('should expose and dismiss a failed drawer submission notification', async () => {
       const drawer = await openRelationshipCreationDrawer({ page, postsURL })
 
@@ -2787,6 +5913,22 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 })
 
+async function openPendingLabelUploads({ page, serverURL }: { page: Page; serverURL: string }) {
+  const addFiles = await openBulkUploadDialog({ page, serverURL })
+
+  await addFiles
+    .locator('input[type="file"]')
+    .setInputFiles([
+      fileURLToPath(new URL('../uploads/image.png', import.meta.url)),
+      fileURLToPath(new URL('../uploads/test-image.png', import.meta.url)),
+    ])
+  const dialog = page.locator('.bulk-upload--file-manager')
+
+  await expect(dialog).toBeVisible()
+  await expect(dialog.locator('.file-selections__fileRowContainer')).toHaveCount(2)
+  return dialog
+}
+
 function getComputedBackgroundColor(element: HTMLElement): string {
   return getComputedStyle(element).backgroundColor
 }
@@ -2807,7 +5949,7 @@ async function compareHeadingWithOriginalSpan({
   originalStyle: string
 }) {
   return heading.evaluate((element, styleText) => {
-    const measure = (node: HTMLElement) => {
+    const measure = (node: Element) => {
       const style = getComputedStyle(node)
       const bounds = node.getBoundingClientRect()
 
@@ -2856,4 +5998,44 @@ async function openRichTextContext({
   }
   await gotoCreatePost({ page, postsURL })
   return page.locator('main')
+}
+
+async function expectErrorTabOrder({ error, input }: { error: Locator; input: Locator }) {
+  await input.focus()
+  await input.press('Shift+Tab')
+  await expect(error).toBeFocused()
+  await expect(error).toHaveCSS('outline-style', 'solid')
+  await error.press('Tab')
+  await expect(input).toBeFocused()
+}
+
+async function expectRequiredState({ input }: { input: Locator }) {
+  expect(
+    await input.evaluate(
+      (element: HTMLInputElement) =>
+        element.required || element.getAttribute('aria-required') === 'true',
+    ),
+  ).toBe(true)
+}
+
+async function prepareBlockDateField({ page, postsURL }: { page: Page; postsURL: AdminUrlUtil }) {
+  await addTextBlock({ page, postsURL })
+  const field = page.locator('#field-layout .blocks-field__row .date-time-field').first()
+  const input = field.getByRole('textbox')
+
+  await expect(input).toBeVisible()
+  return { calendar: page.locator('.react-datepicker'), field, input }
+}
+
+async function openMainNavigation({ page, postsURL }: { page: Page; postsURL: AdminUrlUtil }) {
+  await gotoPostsList({ page, postsURL })
+  await openNavigation({ page })
+  await page.getByRole('tab', { name: /collections/i }).click()
+  const group = page.locator('.nav-group').filter({ has: page.locator('#nav-posts') })
+
+  if (!(await page.locator('#nav-posts').isVisible())) {
+    await page.locator('.nav-group__toggle').filter({ hasText: 'Collections' }).click()
+  }
+  await expect(group).toBeVisible()
+  await expect(page.locator('#nav-posts')).toBeVisible()
 }

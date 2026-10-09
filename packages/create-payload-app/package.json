@@ -1,6 +1,6 @@
 {
   "name": "create-payload-app",
-  "version": "4.0.0-canary.37",
+  "version": "4.0.0-canary.39",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -73,7 +73,7 @@
     "prettier": "^3.5.0",
     "tar": "^7.5.22",
     "terminal-link": "^2.1.1",
-    "ts-morph": "^21.0.1"
+    "ts-morph": "^28.0.0"
   },
   "devDependencies": {
     "@types/esprima": "^4.0.6",

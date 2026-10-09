@@ -8,8 +8,8 @@ export type ColorCircleIconProps = {
 
 export const ColorCircleIcon: React.FC<ColorCircleIconProps> = ({ color = '#888888' }) => {
   return (
-    <svg height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="10" cy="10" fill={color} r="8" />
+    <svg height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" fill={color} r="8" />
     </svg>
   )
 }

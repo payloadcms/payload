@@ -21,6 +21,7 @@ const Group: React.FC<{
 
 export { PopupListDivider as Divider } from '../PopupDivider/index.js'
 export { PopupListGroupLabel as GroupLabel } from '../PopupGroupLabel/index.js'
+export { SubmenuTrigger } from './SubmenuTrigger/index.js'
 
 export const ButtonGroup: React.FC<{
   buttonSize?: 'default' | 'medium'
@@ -80,6 +81,7 @@ export const CheckboxGroup = RadioGroup
 type MenuButtonProps = {
   active?: boolean
   ariaChecked?: boolean
+  ariaCurrent?: React.AriaAttributes['aria-current']
   children: React.ReactNode
   className?: string
   disabled?: boolean
@@ -94,6 +96,7 @@ export const Button: React.FC<MenuButtonProps> = ({
   id,
   active,
   ariaChecked,
+  ariaCurrent,
   children,
   className,
   disabled,
@@ -119,6 +122,7 @@ export const Button: React.FC<MenuButtonProps> = ({
       return (
         <Link
           aria-checked={ariaChecked}
+          aria-current={ariaCurrent}
           className={classes}
           href={href}
           id={id}
@@ -141,6 +145,7 @@ export const Button: React.FC<MenuButtonProps> = ({
       return (
         <button
           aria-checked={ariaChecked}
+          aria-current={ariaCurrent}
           className={classes}
           id={id}
           onClick={(e) => {
@@ -161,6 +166,7 @@ export const Button: React.FC<MenuButtonProps> = ({
 
   return (
     <button
+      aria-current={ariaCurrent}
       aria-disabled="true"
       className={classes}
       data-popup-prevent-close

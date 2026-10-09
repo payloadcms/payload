@@ -1,3 +1,4 @@
+import type { UploadData } from '@payloadcms/richtext-lexical'
 import type {
   DataFromCollectionSlug,
   Job,
@@ -13,6 +14,11 @@ import { describe, expect, test } from 'tstyche'
 declare const payload: Payload
 
 describe('Untyped Payload types', () => {
+  test('should use the generic upload document fallback for UploadData', () => {
+    expect<Extract<UploadData['value'], object>>().type.toBe<JsonObject & TypeWithID>()
+    expect<Extract<UploadData['value'], number | string>>().type.toBe<number | string>()
+  })
+
   test('should expose managed and generic collection fallbacks', () => {
     expect<TypedCollection['payload-jobs']['createdAt']>().type.toBe<string>()
     expect<TypedCollection['payload-jobs']['taskStatus']>().type.toBe<JobTaskStatus>()

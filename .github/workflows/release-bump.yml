@@ -6,11 +6,9 @@ on:
       preid:
         description: Prerelease identifier
         type: choice
-        # 'beta' is intentionally omitted until the beta relases start,
-        # so a contributor cannot accidentally cut a beta through this flow.
-        # TODO: re-add 'beta' to these options when beta releases begin.
         options:
           - canary
+          - beta
         default: canary
       bump:
         description: Semver bump
@@ -36,7 +34,7 @@ concurrency:
 jobs:
   bump:
     name: release-bump
-    if: github.repository_owner == 'payloadcms'
+    if: github.repository == 'payloadcms/payload'
     runs-on: ubuntu-24.04
     # Scopes the App credentials to this environment, whose branch policy
     # limits them to workflows running on main.
