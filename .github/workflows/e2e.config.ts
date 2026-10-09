@@ -25,6 +25,7 @@ const nextSuites: TestConfig[] = [
   { file: 'auth-basic', shards: 1 },
   { file: 'bulk-edit', shards: 2 },
   { file: 'dashboard', shards: 1 },
+  { file: 'endpoints', shards: 1 },
   { file: 'joins', shards: 1 },
   { file: 'field-error-states', shards: 1 },
   { file: 'field-paths', shards: 1 },

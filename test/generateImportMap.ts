@@ -27,7 +27,8 @@ async function run() {
     if (
       testConfigDir === 'live-preview' ||
       testConfigDir === 'admin-root' ||
-      testConfigDir === 'admin-bar'
+      testConfigDir === 'admin-bar' ||
+      testConfigDir === 'endpoints'
     ) {
       rootDir = testDir
 

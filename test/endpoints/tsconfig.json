@@ -1,4 +1,11 @@
 {
   "extends": "../tsconfig.json",
-  "include": ["./**/*.ts", "./**/*.tsx"]
+  "compilerOptions": {
+    "paths": {
+      "@payload-config": ["./config.ts"],
+      "__helpers/*": ["../__helpers/*"]
+    }
+  },
+  "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
 }

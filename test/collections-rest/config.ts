@@ -47,6 +47,7 @@ export const updateShapesSlug = 'update-shapes'
 export const endpointsSlug = 'endpoints'
 
 export default buildConfigWithDefaults({
+  suite: 'collections-rest',
   config: {
     admin: {
       importMap: {
@@ -401,24 +402,6 @@ export default buildConfigWithDefaults({
     ],
     endpoints: [
       {
-        handler: ({ payload }) => {
-          payload.config.routes.api = '/custom-api'
-
-          return Response.json({ ok: true })
-        },
-        method: 'post',
-        path: '/enable-custom-api-route',
-      },
-      {
-        handler: ({ payload }) => {
-          payload.config.routes.api = '/api'
-
-          return Response.json({ ok: true })
-        },
-        method: 'post',
-        path: '/restore-api-route',
-      },
-      {
         handler: async ({ payload }) => {
           await payload.sendEmail({
             from: 'dev@payloadcms.com',
@@ -566,5 +549,4 @@ export default buildConfigWithDefaults({
       overrideAccess: true,
     })
   },
-  suite: 'collections-rest',
 })
