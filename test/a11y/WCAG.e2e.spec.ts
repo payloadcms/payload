@@ -5606,6 +5606,42 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(arrayButton).toHaveAttribute('aria-haspopup', /true|menu/)
     })
 
+    test('should name list filter condition controls and support adding and removing conditions by keyboard', async () => {
+      // PYLD-3836
+      const filters = await openPostsFilter({ page, postsURL })
+      const conditions = filters.locator('.condition')
+      const add = filters.getByRole('button', { name: 'Add Filter', exact: true })
+
+      await expect(conditions).toHaveCount(1)
+      await expect(
+        conditions.first().locator('.condition__field').getByRole('combobox'),
+      ).toHaveAccessibleName('Field')
+      await expect(
+        conditions.first().locator('.condition__operator').getByRole('combobox'),
+      ).toHaveAccessibleName('Filter')
+      await expect(
+        conditions.first().locator('button.condition__actions-remove'),
+      ).toHaveAccessibleName('Remove')
+      await expect(add).toBeVisible()
+      await add.press('Enter')
+      await expect(conditions).toHaveCount(2)
+
+      for (const condition of await conditions.all()) {
+        await expect(
+          condition.locator('.condition__field').getByRole('combobox'),
+        ).toHaveAccessibleName('Field')
+        await expect(
+          condition.locator('.condition__operator').getByRole('combobox'),
+        ).toHaveAccessibleName('Filter')
+        await expect(condition.getByRole('button', { name: 'Remove', exact: true })).toBeEnabled()
+      }
+
+      await conditions.last().getByRole('button', { name: 'Remove', exact: true }).press('Enter')
+      await expect(conditions).toHaveCount(1)
+      await conditions.first().getByRole('button', { name: 'Remove', exact: true }).press('Enter')
+      await expect(filters).toBeHidden()
+    })
+
     test('should give filter and bulk-edit controls and options meaningful accessible names', async () => {
       // PYLD-3751
       // PYLD-3754
