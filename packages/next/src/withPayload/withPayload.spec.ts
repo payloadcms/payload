@@ -26,6 +26,25 @@ describe('withPayload', () => {
     }
   })
 
+  it('should trace strtok3 lib so a standalone build can resolve file-type 22', () => {
+    const result = withPayload({})
+
+    expect(result.outputFileTracingIncludes?.['**/*']).toContain('./node_modules/strtok3/lib/**/*')
+  })
+
+  it('should keep user-provided outputFileTracingIncludes', () => {
+    const result = withPayload({
+      outputFileTracingIncludes: {
+        '**/*': ['./node_modules/sharp/**/*'],
+        '/api/custom': ['./data/**/*'],
+      },
+    })
+
+    expect(result.outputFileTracingIncludes?.['**/*']).toContain('./node_modules/sharp/**/*')
+    expect(result.outputFileTracingIncludes?.['**/*']).toContain('./node_modules/strtok3/lib/**/*')
+    expect(result.outputFileTracingIncludes?.['/api/custom']).toEqual(['./data/**/*'])
+  })
+
   it('should disable devIndicators by default', () => {
     const result = withPayload({})
 

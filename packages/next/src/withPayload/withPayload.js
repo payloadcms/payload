@@ -80,6 +80,30 @@ export const withPayload = (nextConfig = {}, options = {}) => {
         'drizzle-kit/api',
       ],
     },
+    outputFileTracingIncludes: {
+      ...(nextConfig.outputFileTracingIncludes || {}),
+      '**/*': [
+        ...(nextConfig.outputFileTracingIncludes?.['**/*'] || []),
+        /**
+         * `file-type` 22 loads strtok3's Node entry through a deliberately opaque
+         * wrapper so bundlers cannot follow it:
+         *
+         *   function importAtRuntime(specifier) { return import(specifier) }
+         *   await importAtRuntime('strtok3')
+         *
+         * The only static import in that module is `strtok3/core`, and strtok3's
+         * export map sends the bare specifier to `./lib/index.js` under the
+         * `node` condition. Output file tracing therefore copies `lib/core.js`
+         * and not `lib/index.js`, so with `output: 'standalone'` every
+         * `fileTypeFromFile()` call -- upload restriction checks and the file
+         * endpoint among them -- throws ERR_MODULE_NOT_FOUND at runtime.
+         *
+         * Tracing cannot discover this, so it has to be declared.
+         */
+        './node_modules/strtok3/lib/**/*',
+        './node_modules/.pnpm/strtok3@*/node_modules/strtok3/lib/**/*',
+      ],
+    },
     turbopack: {
       ...(nextConfig.turbopack || {}),
     },
