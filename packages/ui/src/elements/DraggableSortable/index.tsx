@@ -13,10 +13,11 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
-import React, { useCallback, useEffect, useId, useState } from 'react'
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import type { Props } from './types.js'
 
+import { useRowAccessibility } from './useRowAccessibility.js'
 import './index.css'
 
 export { Props }
@@ -24,6 +25,7 @@ export { Props }
 export const DraggableSortable: React.FC<Props> = (props) => {
   const {
     id,
+    announceRows = false,
     children,
     className,
     ids,
@@ -32,6 +34,12 @@ export const DraggableSortable: React.FC<Props> = (props) => {
     renderDragOverlay,
     sortingStrategy,
   } = props
+  const containerRef = useRef<HTMLDivElement>(null)
+  const accessibilityOptions = useMemo(
+    () => ({ containerRef, enabled: announceRows, ids }),
+    [announceRows, ids],
+  )
+  const accessibility = useRowAccessibility(accessibilityOptions)
   const [activeId, setActiveId] = useState<null | number | string>(null)
 
   // The overlay is a different element than the drag handle, so its inline cursor
@@ -114,6 +122,7 @@ export const DraggableSortable: React.FC<Props> = (props) => {
 
   return (
     <DndContext
+      accessibility={accessibility}
       collisionDetection={closestCenter}
       // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
       id={dndContextID}
@@ -128,7 +137,14 @@ export const DraggableSortable: React.FC<Props> = (props) => {
         items={ids}
         strategy={sortingStrategy}
       >
-        <div className={className} id={id} ref={setNodeRef}>
+        <div
+          className={className}
+          id={id}
+          ref={(node) => {
+            containerRef.current = node
+            setNodeRef(node)
+          }}
+        >
           {children}
         </div>
       </SortableContext>

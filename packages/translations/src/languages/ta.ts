@@ -366,6 +366,13 @@ export const taTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'இந்த ஆவணம் விரைவில் மற்றொரு பயனரால் மேம்படுத்தப்பட்டது. உங்கள் காட்சி காலாவதியானது.',
     documents: 'ஆவணங்கள்',
+    dragCancelled: '{{label}} இழுத்தல் ரத்துசெய்யப்பட்டது.',
+    dragDropped: '{{label}} வைக்கப்பட்டது. {{count}} இல் நிலை {{position}}.',
+    dragInstructions:
+      'ஒரு வரியை எடுக்க Space அல்லது Enter ஐ அழுத்தவும். நகர்த்த அம்புக்குறி விசைகளைப் பயன்படுத்தவும். VoiceOver உடன் Quick Nav ஐ முடக்கி Command + அம்புக்குறி விசைகளைப் பயன்படுத்தவும். வைக்க Space அல்லது Enter, அல்லது ரத்துசெய்ய Escape ஐ அழுத்தவும்.',
+    dragMoved: '{{label}}: {{direction}}. {{count}} இல் நிலை {{position}}.',
+    dragPickedUp: '{{label}} எடுக்கப்பட்டது. {{count}} இல் நிலை {{position}}.',
+    dragToMove: 'நகர்த்த இழுக்கவும்',
     dragToReorder: 'இழுத்து மறுவரிசைப்படுத்தவும்',
     duplicate: 'நகலெடு',
     duplicateWithoutSaving: 'மாற்றங்களைச் சேமிக்காமல் நகலெடு',

@@ -366,6 +366,13 @@ export const svTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Detta dokument har nyligen uppdaterats av en annan användare. Din vy är föråldrad.',
     documents: 'Dokument',
+    dragCancelled: 'Dragning av {{label}} har avbrutits.',
+    dragDropped: '{{label}} har släppts. Position {{position}} av {{count}}.',
+    dragInstructions:
+      'Tryck på Space eller Enter för att lyfta en rad. Använd piltangenterna för att flytta den. Med VoiceOver stänger du av Quick Nav och använder Command + piltangenterna. Tryck på Space eller Enter för att släppa, eller Escape för att avbryta.',
+    dragMoved: '{{label}}: {{direction}}. Position {{position}} av {{count}}.',
+    dragPickedUp: '{{label}} har lyfts. Position {{position}} av {{count}}.',
+    dragToMove: 'Dra för att flytta',
     dragToReorder: 'Dra för att ändra ordningen',
     duplicate: 'Duplicera',
     duplicateWithoutSaving: 'Duplicera utan att spara ändringar',

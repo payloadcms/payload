@@ -377,6 +377,13 @@ export const deTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Dieses Dokument wurde kürzlich von einem anderen Benutzer aktualisiert. Deine Ansicht ist veraltet.',
     documents: 'Dokumente',
+    dragCancelled: 'Ziehen von {{label}} abgebrochen.',
+    dragDropped: '{{label}} abgelegt. Position {{position}} von {{count}}.',
+    dragInstructions:
+      'Drücken Sie Space oder Enter, um eine Zeile aufzunehmen. Verschieben Sie sie mit den Pfeiltasten. Deaktivieren Sie mit VoiceOver Quick Nav und verwenden Sie Command + Pfeiltasten. Drücken Sie Space oder Enter zum Ablegen oder Escape zum Abbrechen.',
+    dragMoved: '{{label}}: {{direction}}. Position {{position}} von {{count}}.',
+    dragPickedUp: '{{label}} aufgenommen. Position {{position}} von {{count}}.',
+    dragToMove: 'Zum Verschieben ziehen',
     dragToReorder: 'Ziehen, um die Reihenfolge zu ändern',
     duplicate: 'Duplizieren',
     duplicateWithoutSaving: 'Duplizieren ohne Änderungen zu speichern',

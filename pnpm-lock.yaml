@@ -1820,6 +1820,9 @@ importers:
       dequal:
         specifier: 2.0.3
         version: 2.0.3
+      dom-accessibility-api:
+        specifier: 0.5.16
+        version: 0.5.16
       md5:
         specifier: 2.3.0
         version: 2.3.0

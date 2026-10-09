@@ -359,6 +359,13 @@ export const faTranslations: DefaultTranslationsObject = {
     documentModified: 'سند تغییر یافته',
     documentOutOfDate: 'این سند اخیراً توسط کاربر دیگری به روز شده است. نمایش شما به روز نیست.',
     documents: 'اسناد',
+    dragCancelled: 'کشیدن {{label}} لغو شد.',
+    dragDropped: '{{label}} رها شد. موقعیت {{position}} از {{count}}.',
+    dragInstructions:
+      'برای برداشتن یک ردیف، Space یا Enter را فشار دهید. برای جابه‌جایی از کلیدهای جهت‌نما استفاده کنید. در VoiceOver، Quick Nav را خاموش کنید و از Command همراه کلیدهای جهت‌نما استفاده کنید. برای رها کردن Space یا Enter و برای لغو Escape را فشار دهید.',
+    dragMoved: '{{label}}: {{direction}}. موقعیت {{position}} از {{count}}.',
+    dragPickedUp: '{{label}} برداشته شد. موقعیت {{position}} از {{count}}.',
+    dragToMove: 'برای جابه‌جایی بکشید',
     dragToReorder: 'برای تغییر ترتیب، بکشید و رها کنید',
     duplicate: 'ایجاد کپی',
     duplicateWithoutSaving: 'ایجاد کپی بدون ذخیره تغییرات',

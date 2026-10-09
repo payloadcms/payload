@@ -353,6 +353,13 @@ export const heTranslations: DefaultTranslationsObject = {
     documentModified: 'מסמך שונה',
     documentOutOfDate: 'מסמך זה עודכן לאחרונה על ידי משתמש אחר. התצוגה שלך אינה מעודכנת.',
     documents: 'מסמכים',
+    dragCancelled: 'גרירת {{label}} בוטלה.',
+    dragDropped: '{{label}} הונח. מיקום {{position}} מתוך {{count}}.',
+    dragInstructions:
+      'לחץ על Space או Enter כדי לאסוף שורה. השתמש במקשי החצים כדי להזיז אותה. עם VoiceOver, כבה את Quick Nav והשתמש ב־Command + מקשי החצים. לחץ על Space או Enter כדי להניח, או על Escape כדי לבטל.',
+    dragMoved: '{{label}}: {{direction}}. מיקום {{position}} מתוך {{count}}.',
+    dragPickedUp: '{{label}} נאסף. מיקום {{position}} מתוך {{count}}.',
+    dragToMove: 'גרור כדי להזיז',
     dragToReorder: 'גרור לסידור מחדש',
     duplicate: 'שכפול',
     duplicateWithoutSaving: 'שכפול ללא שמירת שינויים',
