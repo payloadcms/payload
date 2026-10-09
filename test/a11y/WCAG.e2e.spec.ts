@@ -1234,7 +1234,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await page.goto(`${serverURL}/admin`)
       const widget = page.locator('.recents-widget')
       const opener = widget.getByRole('button', {
-        name: 'Pin document',
+        name: 'Select Documents',
         exact: true,
         includeHidden: true,
       })
@@ -1319,8 +1319,8 @@ test.describe('WCAG 2.2 Level AA', () => {
       const preference = await (
         await page.request.get(`${serverURL}/api/payload-preferences/recently-viewed`)
       ).json()
-      const documents = (await (await page.request.get(`${serverURL}/api/posts?limit=3`)).json())
-        .docs
+      const documents: Array<{ id: number | string; title: string }> = []
+
       const previousPins = await (
         await page.request.get(`${serverURL}/api/payload-preferences/pinned-documents`)
       ).json()
@@ -1332,10 +1332,24 @@ test.describe('WCAG 2.2 Level AA', () => {
         await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
           data: { value: preference?.value ?? { items: [] } },
         })
+        for (const document of documents) {
+          const response = await page.request.delete(`${serverURL}/api/posts/${document.id}`)
+
+          expect(response.ok()).toBe(true)
+        }
         if (previousViewport) {
           await page.setViewportSize(previousViewport)
         }
       })
+
+      for (let index = 0; index < 9; index++) {
+        const response = await page.request.post(`${serverURL}/api/posts?draft=true`, {
+          data: { accessibilitySelect: 'one', title: `Keyboard pagination document ${index + 1}` },
+        })
+
+        expect(response.ok()).toBe(true)
+        documents.push((await response.json()).doc)
+      }
 
       const pinResponse = await page.request.post(
         `${serverURL}/api/payload-preferences/pinned-documents`,
@@ -1363,23 +1377,25 @@ test.describe('WCAG 2.2 Level AA', () => {
       const next = widget.getByRole('button', { name: 'Next', exact: true })
       const previous = widget.getByRole('button', { name: 'Previous', exact: true })
 
+      await recents.focus()
+      await recents.press('Enter')
       await expect(
         widget.getByRole('group', { name: 'Document pagination', exact: true }),
       ).toBeVisible()
 
-      await recents.focus()
-      await recents.press('Enter')
-      await expect(widget.locator('.document-card__title')).toHaveCount(1)
+      await expect(widget.locator('.document-card__title')).toHaveCount(4)
       await expect(previous).toBeDisabled()
       await next.focus()
       await next.press('Space')
-      await expect(widget.locator('.document-card__title')).toHaveText(documents[1].title)
+      await expect(widget.locator('.document-card__title')).toHaveText(
+        documents.slice(4, 8).map(({ title }) => title),
+      )
       await expect(next).toBeFocused()
       await expect(widget.locator('.recents-widget__pagination [aria-live]')).toContainText(
         '2 of 3',
       )
       await next.press('Enter')
-      await expect(widget.locator('.document-card__title')).toHaveText(documents[2].title)
+      await expect(widget.locator('.document-card__title')).toHaveText([documents[8].title])
       await expect(previous).toBeFocused()
       await previous.press('Space')
       await expect(widget.locator('.recents-widget__pagination [aria-live]')).toContainText(
@@ -1388,7 +1404,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await previous.focus()
       await previous.press('Enter')
       await expect(next).toBeFocused()
-      await widget.locator('.document-card__title').focus()
+      await widget.locator('.document-card__title').first().focus()
       await expectPaintedFocus({ page })
       await expect(widget.locator('.recents-widget__pin')).toHaveCount(0)
       const pinned = widget.getByRole('button', { name: 'Pinned', exact: true })
@@ -2519,9 +2535,9 @@ test.describe('WCAG 2.2 Level AA', () => {
         }
       })
 
-      for (const title of ['Pagination focus first', 'Pagination focus second']) {
+      for (let index = 0; index < 5; index++) {
         const response = await page.request.post(`${serverURL}/api/posts?draft=true`, {
-          data: { accessibilitySelect: 'one', title },
+          data: { accessibilitySelect: 'one', title: `Pagination focus document ${index + 1}` },
         })
 
         expect(response.ok()).toBe(true)
@@ -2546,18 +2562,22 @@ test.describe('WCAG 2.2 Level AA', () => {
 
       await recents.focus()
       await recents.press('Enter')
-      await expect(widget.locator('.document-card__title')).toHaveText(documents[0].title)
+      await expect(widget.locator('.document-card__title')).toHaveText(
+        documents.slice(0, 4).map(({ title }) => title),
+      )
       const next = widget.getByRole('button', { name: 'Next', exact: true })
 
       await next.focus()
       await expect(next).toBeFocused()
-      const deleted = await page.request.delete(`${serverURL}/api/posts/${documents[1].id}`)
+      const deleted = await page.request.delete(`${serverURL}/api/posts/${documents[4].id}`)
 
       expect(deleted.ok()).toBe(true)
       documents.pop()
       await next.press('Enter')
       await expect(widget.locator('.recents-widget__pagination')).toHaveCount(0)
-      await expect(widget.locator('.document-card__title')).toHaveText(documents[0].title)
+      await expect(widget.locator('.document-card__title')).toHaveText(
+        documents.slice(0, 4).map(({ title }) => title),
+      )
       await expect(recents).toBeFocused()
       await expectPaintedFocus({ page })
     })

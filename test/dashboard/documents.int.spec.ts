@@ -358,7 +358,7 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
     })
 
     await expect(
-      getDashboardDocuments({ limit: 20, page: 1, req: authenticatedReq, tab: 'recents' }),
+      getDashboardDocuments({ limit: 101, page: 1, req: authenticatedReq, tab: 'recents' }),
     ).rejects.toThrow('Invalid dashboard page')
   })
 

@@ -48,7 +48,13 @@ export async function getDashboardDocuments({
   if (!req.user) {
     throw new UnauthorizedError(req.t)
   }
-  if (![1, 2, 4].includes(limit) || !Number.isSafeInteger(page) || page < 1) {
+  if (
+    !Number.isSafeInteger(limit) ||
+    limit < 1 ||
+    limit > 100 ||
+    !Number.isSafeInteger(page) ||
+    page < 1
+  ) {
     throw new Error('Invalid dashboard page')
   }
   if (tab !== 'pinned' && tab !== 'recents') {

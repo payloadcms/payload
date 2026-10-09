@@ -22,7 +22,7 @@ export function RecentlyViewedWidget({
     <RecentsAndPinnedClient
       excludedCollections={widgetData?.excludedCollections}
       labels={{
-        addPin: i18n.t('dashboard:widgetAddPin'),
+        addPin: i18n.t('general:selectLabel', { label: i18n.t('general:documents') }),
         loadError: i18n.t('error:unknown'),
         loading: i18n.t('general:loading'),
         next: i18n.t('general:next'),

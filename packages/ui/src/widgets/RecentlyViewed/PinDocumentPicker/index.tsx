@@ -7,9 +7,9 @@ import React, { useId, useMemo, useState } from 'react'
 import type { ListDrawerProps } from '../../../elements/ListDrawer/types.js'
 import type { PinnedItem } from '../recents.js'
 
+import { Button } from '../../../elements/Button/index.js'
 import { useListDrawer } from '../../../elements/ListDrawer/index.js'
 import { PinIcon } from '../../../icons/Pin/index.js'
-import { PlusIcon } from '../../../icons/Plus/index.js'
 import { readPinnedPreferences } from '../pinnedPreferences.js'
 import './index.css'
 
@@ -77,24 +77,24 @@ export function PinDocumentPicker({
   }
 
   const addPinButton = (
-    <button
-      aria-busy={isPreparing}
-      aria-describedby={isEmpty ? emptyStateID : undefined}
-      aria-disabled={isDisabled || isPreparing}
+    <Button
       aria-expanded={isDrawerOpen}
       aria-haspopup="dialog"
       aria-label={labels.addPin}
-      className={`recents-widget__add-pin${isEmpty ? ' recents-widget__add-pin--empty' : ''}`}
+      buttonStyle="secondary"
+      className="recents-widget__select-documents"
+      extraButtonProps={{
+        'aria-busy': isPreparing,
+        'aria-describedby': isEmpty ? emptyStateID : undefined,
+        'aria-disabled': isDisabled || isPreparing,
+      }}
+      margin={false}
       onClick={() => void prepareDrawer()}
+      size="medium"
       type="button"
     >
-      <span className="recents-widget__add-pin-label">
-        <span aria-hidden="true" className="recents-widget__add-pin-icon">
-          <PlusIcon />
-        </span>
-        <span>{labels.addPin}</span>
-      </span>
-    </button>
+      {labels.addPin}
+    </Button>
   )
 
   return (
@@ -116,7 +116,7 @@ export function PinDocumentPicker({
           {addPinButton}
         </div>
       ) : (
-        addPinButton
+        <div className="recents-widget__add-pin">{addPinButton}</div>
       )}
       <ListDrawer
         allowCreate={false}
