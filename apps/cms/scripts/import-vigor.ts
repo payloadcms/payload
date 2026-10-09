@@ -91,12 +91,20 @@ type VigorGlobal = 'vigor-about' | 'vigor-home' | 'vigor-settings'
 /** An image to import, named after what it shows */
 type Image = { alt: string; name: string; url: string }
 
+const OPTIONS = ['--dry-run', '--no-images']
+
 const args = process.argv.slice(2)
 const dryRun = args.includes('--dry-run')
 const withImages = !args.includes('--no-images')
-const websiteURL = args.find((arg) => !arg.startsWith('--'))?.replace(/\/+$/, '')
+const websiteURL = args.find((arg) => !arg.startsWith('-'))?.replace(/\/+$/, '')
+// A mistyped --dry-run must not run a real import
+const unknownOptions = args.filter((arg) => arg.startsWith('-') && !OPTIONS.includes(arg))
 
-if (!websiteURL || !/^https?:\/\/[^/\s]+$/.test(websiteURL)) {
+if (unknownOptions.length) {
+  console.error(`Unknown option: ${unknownOptions.join(' ')}`)
+}
+
+if (unknownOptions.length || !websiteURL || !/^https?:\/\/[^/\s]+$/.test(websiteURL)) {
   console.error(
     'Usage: pnpm payload run scripts/import-vigor.ts <website-url> [--dry-run] [--no-images]',
   )
@@ -118,10 +126,18 @@ if (content !== 'files') {
 const payload = await getPayload({ config })
 
 // On a new database, MongoDB is still creating collections and indexes in the background, and a
-// write in a transaction meanwhile fails with "Transaction ... has been aborted"
-await Promise.all(
-  Object.values((payload.db as MongooseAdapter).connection.models).map((model) => model.init()),
-)
+// write in a transaction meanwhile fails with "Transaction ... has been aborted". An index that
+// can't be built, e.g. because an older one with the same name exists, doesn't stop the import.
+const models = Object.values((payload.db as MongooseAdapter).connection.models)
+const indexBuilds = await Promise.allSettled(models.map((model) => model.init()))
+
+indexBuilds.forEach((result, index) => {
+  if (result.status === 'rejected') {
+    console.warn(
+      `Warning: MongoDB couldn't build an index in "${models[index]!.collection.name}" (README: "Troubleshooting"): ${result.reason instanceof Error ? result.reason.message : String(result.reason)}\n`,
+    )
+  }
+})
 
 const localization = payload.config.localization
 
