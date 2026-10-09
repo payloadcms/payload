@@ -13,12 +13,13 @@ const FALLBACK_TAG = 'canary'
  * surfaces as its own version's prerelease id. Follow that train; fall back to
  * canary for stable or local dev builds that carry no prerelease id.
  */
-export function resolveDefaultTag(version: string | undefined = readOwnVersion()): string {
+export function resolveDefaultTag(version: string | undefined): string {
   const id = version ? semver.prerelease(version)?.[0] : undefined
   return typeof id === 'string' ? id : FALLBACK_TAG
 }
 
-function readOwnVersion(): string | undefined {
+/** Version of this codemod package, or `undefined` when its package.json is unreadable. */
+export function readOwnVersion(): string | undefined {
   try {
     const pkgPath = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', 'package.json')
     return JSON.parse(readFileSync(pkgPath, 'utf8')).version as string
