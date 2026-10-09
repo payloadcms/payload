@@ -1,9 +1,11 @@
 name: post-release-templates
 
 on:
-  release:
-    types:
-      - published
+  # Release trigger disabled: the wait step and template generator both read the npm
+  # `latest` dist-tag, so v4 prerelease tags never resolve and the job times out.
+  # release:
+  #   types:
+  #     - published
   workflow_dispatch:
 
 env:
