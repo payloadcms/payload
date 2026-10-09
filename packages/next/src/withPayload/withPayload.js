@@ -5,6 +5,12 @@
  * user projects regardless of their TypeScript setup.
  */
 
+import {
+  getNextjsVersion,
+  getSupportedNextRange,
+  getUnsupportedNextVersionWarning,
+} from './withPayload.utils.js'
+
 const poweredByHeader = {
   key: 'X-Powered-By',
   value: 'Next.js, Payload',
@@ -17,6 +23,14 @@ const poweredByHeader = {
  * */
 export const withPayload = (nextConfig = {}, options = {}) => {
   const env = nextConfig.env || {}
+
+  const unsupportedNextVersionWarning = getUnsupportedNextVersionWarning(
+    getNextjsVersion(),
+    getSupportedNextRange(),
+  )
+  if (unsupportedNextVersionWarning) {
+    console.warn(unsupportedNextVersionWarning)
+  }
 
   if (nextConfig.experimental?.staleTimes?.dynamic) {
     console.warn(
