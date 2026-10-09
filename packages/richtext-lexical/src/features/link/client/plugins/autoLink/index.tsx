@@ -43,11 +43,16 @@ export function createLinkMatcherWithRegExp(
     if (match === null) {
       return null
     }
+    let matchedText = match[0]
+    // Remove trailing characters that shouldn't be part of URL
+    // This replaces the negative lookbehind (?<![-.+():%]) for Safari 15 compatibility
+    const trailingChars = /[-.+():%]+$/
+    matchedText = matchedText.replace(trailingChars, '')
     return {
       index: match.index,
-      length: match[0].length,
-      text: match[0],
-      url: urlTransformer(match[0]),
+      length: matchedText.length,
+      text: matchedText,
+      url: urlTransformer(matchedText),
     }
   }
 }
@@ -444,7 +449,7 @@ function useAutoLink(
 }
 
 const URL_REGEX =
-  /((https?:\/\/(www\.)?)|(www\.))[-\w@:%.+~#=]{1,256}\.[a-zA-Z\d()]{1,6}\b([-\w()@:%+.~#?&/=]*)(?<![-.+():%])/
+  /((https?:\/\/(www\.)?)|(www\.))[-\w@:%.+~#=]{1,256}\.[a-zA-Z\d()]{1,6}\b([-\w()@:%+.~#?&/=]*)/
 
 const EMAIL_REGEX =
   /(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\])|(([a-z\-\d]+\.)+[a-z]{2,}))/i
