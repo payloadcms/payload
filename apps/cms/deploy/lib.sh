@@ -56,19 +56,22 @@ validate_env() {
     has_error=true
   fi
 
-  local website_url website_revalidate_secret
-  website_url="$(env_value WEBSITE_URL)"
-  website_revalidate_secret="$(env_value WEBSITE_REVALIDATE_SECRET)"
+  # WEBSITE_* for the personal website, VIGOR_WEBSITE_* for the Vigor website
+  local prefix website_url website_revalidate_secret
+  for prefix in "" VIGOR_; do
+    website_url="$(env_value "${prefix}WEBSITE_URL")"
+    website_revalidate_secret="$(env_value "${prefix}WEBSITE_REVALIDATE_SECRET")"
 
-  if [[ -n "$website_url" && -z "$website_revalidate_secret" ]] || [[ -z "$website_url" && -n "$website_revalidate_secret" ]]; then
-    echo "Set both WEBSITE_URL and WEBSITE_REVALIDATE_SECRET, or neither." >&2
-    has_error=true
-  fi
+    if [[ -n "$website_url" && -z "$website_revalidate_secret" ]] || [[ -z "$website_url" && -n "$website_revalidate_secret" ]]; then
+      echo "Set both ${prefix}WEBSITE_URL and ${prefix}WEBSITE_REVALIDATE_SECRET, or neither." >&2
+      has_error=true
+    fi
 
-  if [[ -n "$website_url" && ! "$website_url" =~ ^https?://[^/]+$ ]]; then
-    echo "WEBSITE_URL must be the website's origin without a trailing slash, e.g. https://www.example.com" >&2
-    has_error=true
-  fi
+    if [[ -n "$website_url" && ! "$website_url" =~ ^https?://[^/]+$ ]]; then
+      echo "${prefix}WEBSITE_URL must be the website's origin without a trailing slash, e.g. https://www.example.com" >&2
+      has_error=true
+    fi
+  done
 
   local sendgrid_api_key email_from_address
   sendgrid_api_key="$(env_value SENDGRID_API_KEY)"
