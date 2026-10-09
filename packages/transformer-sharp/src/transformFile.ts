@@ -62,7 +62,11 @@ async function transformMain({
     })
   }
 
-  if (!fileIsAnimatedType && !fileHasAdjustments) {
+  // When withMetadata is false/unspecified and no explicit adjustments exist,
+  // process the image through Sharp to sanitize sensitive EXIF metadata (GPS/camera tags)
+  // unless the caller explicitly requested retaining metadata via withMetadata === true
+  // or a custom withMetadata callback.
+  if (!fileIsAnimatedType && !fileHasAdjustments && withMetadata !== false) {
     return { status: 'continue' }
   }
 
