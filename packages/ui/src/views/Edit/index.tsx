@@ -397,11 +397,16 @@ export function DefaultEditView({
           setDocumentIsLocked(false)
         }
 
-        if (isLivePreviewEnabled && typeofLivePreviewURL === 'function') {
+        // Only update the live-preview / preview URLs when the form-state
+        // request was not aborted. When a save is superseded by a newer one,
+        // `getFormState` resolves to `{ state: null }` (without a
+        // `livePreviewURL` / `previewURL` key), and applying that here would
+        // silently close the live preview pane while the user is still typing.
+        if (state && isLivePreviewEnabled && typeofLivePreviewURL === 'function') {
           setLivePreviewURL(livePreviewURL)
         }
 
-        if (isPreviewEnabled) {
+        if (state && isPreviewEnabled) {
           setPreviewURL(previewURL)
         }
 
