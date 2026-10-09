@@ -11,7 +11,7 @@ A file transformer is a small, ordered stage in Payload's upload pipeline. Trans
 - Process a file's bytes at upload time (resizing an image, converting a format, and so on)
 - Serve a dynamically-transformed variant of an already-stored file at request time (for example, resizing an image on the fly based on query parameters)
 
-Payload core owns transformer configuration, ordering, access control, and storage retrieval. Transformer packages own the actual byte manipulation. `@payloadcms/transformer-sharp` is Payload's official transformer, and covers the image-resizing behavior that shipped as part of core in Payload 3.x.
+Payload core owns transformer configuration, ordering, access control, and storage retrieval. Transformer packages own the actual byte manipulation. `@payloadcms/transformer-sharp` covers the image-resizing behavior that shipped as part of core in Payload 3.x. `@payloadcms/transformer-cloudflare` processes images using Cloudflare Images, through a Workers binding or a remote companion Worker.
 
 <Banner type="info">
   **Note:** If you only need Sharp-based image resizing at upload time — the
@@ -402,3 +402,54 @@ The transformer boundary intentionally does not include:
 - **A background jobs queue.** All transformation happens synchronously, in the request/upload path. A future version may accept a job-shaped input for expensive, queueable transforms, but no such queue exists today.
 
 None of the above is implemented as a stub or a partial feature — they are simply not built yet.
+
+## `@payloadcms/transformer-cloudflare`
+
+The Cloudflare transformer supports upload-time processing and opt-in dynamic
+resizing. Its configuration selects a direct Images binding for Payload hosted
+on Workers, or an authenticated companion Worker for Payload hosted elsewhere.
+Both modes process bytes, so private originals do not need public source URLs.
+
+```ts
+import { cloudflareTransformer } from '@payloadcms/transformer-cloudflare'
+
+cloudflareTransformer({
+  transport: { mode: 'binding', binding: env.IMAGES },
+  dynamic: true,
+  collections: {
+    media: {
+      formatOptions: { format: 'webp', quality: 80 },
+      variants: [{ name: 'thumbnail', width: 400, height: 300 }],
+    },
+  },
+})
+
+// Node/Vercel: deploy the package's companion Worker first.
+cloudflareTransformer({
+  transport: {
+    mode: 'remote',
+    url: process.env.CLOUDFLARE_TRANSFORMER_URL!,
+    token: process.env.CLOUDFLARE_TRANSFORMER_TOKEN!,
+  },
+  dynamic: true,
+})
+```
+
+The companion Worker uses `createCloudflareImagesHandler` from
+`@payloadcms/transformer-cloudflare/worker`, an Images binding, and the same server
+secret. The remote URL points to that Worker, not `api.cloudflare.com`.
+
+Dynamic requests recognize `width`, `height`, and `withoutEnlargement`.
+Cloudflare-specific fit, gravity, output format, quality, and dimension limits
+are configured on the transformer. Source files are retrieved through Payload's
+authorized file pipeline. Transformed responses use `Cache-Control: private,
+no-store` and continue through later eligible transformers.
+
+Upload settings follow the same `collections` shape as Sharp: `variants`,
+`resizeOptions`, `formatOptions`, `crop`, and `focalPoint`. Variants derive from
+the processed main file, with metadata from their actual output bytes. JPEG, PNG,
+GIF, WebP, and AVIF are supported; inputs and outputs are limited to 20 MiB.
+Dynamic pixel limits are per frame, not the sum of all animation frames.
+
+See the [package README](https://github.com/payloadcms/payload/tree/main/packages/transformer-cloudflare)
+for the full configuration and companion Worker setup.

@@ -1729,6 +1729,15 @@ importers:
         specifier: '>=8.0.0'
         version: 8.3.0(@types/node@25.9.9)(esbuild@0.28.2)(jiti@2.7.0)(sass-embedded@1.105.1)(sass@1.105.1)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1)
 
+  packages/transformer-cloudflare:
+    devDependencies:
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+      sharp:
+        specifier: 0.35.4
+        version: 0.35.4
+
   packages/transformer-sharp:
     dependencies:
       sharp:
