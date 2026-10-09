@@ -6,7 +6,9 @@ import * as qs from 'qs-esm'
 
 import type { Config, Geo, Post, Virtual } from '../../payload-types.js'
 
+import { expectScreenshot } from '../../../__helpers/e2e/expectScreenshot.js'
 import { exactText, getRoutes, openColumnControls } from '../../../__helpers/e2e/helpers.js'
+import { visual } from '../../../__helpers/e2e/visual.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
@@ -58,7 +60,7 @@ import { getSelectMenu } from '../../../__helpers/e2e/selectInput.js'
 import { expectPerPageLimits, setPerPageLimit } from '../../../__helpers/e2e/setPerPageLimit.js'
 import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
 import { closeListDrawer } from '../../../__helpers/e2e/toggleListDrawer.js'
-import { openNav } from '../../../__helpers/e2e/toggleNav.js'
+import { closeNav, openNav } from '../../../__helpers/e2e/toggleNav.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { listViewSelectAPISlug } from '../../../admin/collections/ListViewSelectAPI/index.js'
 import { noTimestampsSlug } from '../../../admin/collections/NoTimestamps.js'
@@ -145,6 +147,53 @@ describe('List View', () => {
   })
 
   const tableRowLocator = 'table > tbody > tr'
+
+  visual('should render an empty list view', async () => {
+    await deleteAllPosts()
+    await page.reload()
+    await closeNav(page)
+
+    const noResults = page.locator('.no-results')
+
+    await expect(page.locator(tableRowLocator)).toBeHidden()
+    await expect(noResults).toContainText('No Results.')
+    await expectScreenshot({ name: 'empty-posts-list-view.png', page })
+  })
+
+  visual('should render list selection actions', async () => {
+    await closeNav(page)
+    await page.locator('.row-1 .cell-_select input').check()
+
+    const listSelection = page.locator('.list-selection')
+
+    await expect(listSelection).toContainText('1 selected')
+    await expect(page.locator('.delete-documents__toggle')).toBeVisible()
+    await expectScreenshot({
+      name: 'posts-list-selection-actions.png',
+      mask: [page.locator('.cell-id .id-label')],
+      page,
+    })
+  })
+
+  visual('should render an applied list filter', async () => {
+    await closeNav(page)
+
+    const { whereBuilder } = await addListFilter({
+      fieldLabel: 'Title',
+      operatorLabel: 'equals',
+      page,
+      value: 'post1',
+    })
+
+    await expect(whereBuilder).toBeVisible()
+    await expect(page.locator(tableRowLocator)).toHaveCount(1)
+    await page.locator('.condition__value input').blur()
+    await expectScreenshot({
+      name: 'posts-list-applied-filter.png',
+      mask: [page.locator('.cell-id .id-label')],
+      page,
+    })
+  })
 
   describe('list view descriptions', () => {
     test('should render static collection descriptions', async () => {
