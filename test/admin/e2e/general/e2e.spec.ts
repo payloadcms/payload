@@ -373,6 +373,72 @@ describe('General', () => {
       }
     })
 
+    test('should hydrate without mismatches when a host injects a blocking script into the head', async ({
+      browser,
+    }) => {
+      // A fulfilled document has no network origin, so Chromium would otherwise block
+      // its requests to localhost (e.g. the dev server's HMR socket) and stall hydration.
+      const themeContext = await browser.newContext({
+        colorScheme: 'dark',
+        permissions: ['local-network-access'],
+      })
+      const themePage = await themeContext.newPage()
+      const hostScriptPath = '/__host-injected-script.js'
+      const consoleErrors: string[] = []
+      let serverHTML: string | undefined
+
+      themePage.on('console', (message) => {
+        if (message.type() === 'error') {
+          consoleErrors.push(message.text())
+        }
+      })
+
+      try {
+        await themePage.route(`**${hostScriptPath}`, async (route) => {
+          await route.fulfill({ body: '', contentType: 'text/javascript' })
+        })
+
+        await themePage.route('**/*', async (route) => {
+          const request = route.request()
+
+          if (!request.isNavigationRequest()) {
+            await route.fallback()
+            return
+          }
+
+          // Chromium can re-inject secured client hints after interception.
+          // Fetching outside its network stack forces the server fallback path.
+          const headers = { ...request.headers(), 'sec-ch-prefers-color-scheme': 'unsupported' }
+          const response = await route.fetch({ headers })
+
+          serverHTML = await response.text()
+
+          // Mirrors hosts (e.g. preview proxies) that add a non-async script as the first child of <head>.
+          const hostInjectedHTML = serverHTML.replace(
+            '<head>',
+            `<head><script src="${hostScriptPath}" blocking="render"></script>`,
+          )
+
+          await route.fulfill({ body: hostInjectedHTML, response })
+        })
+
+        await themePage.goto(postsUrl.admin)
+
+        expect(serverHTML).toMatch(/<html[^>]*data-theme="light"/)
+        expect(serverHTML).toContain("matchMedia('(prefers-color-scheme: dark)')")
+        await expect(themePage.locator('html')).toHaveAttribute('data-theme', 'dark')
+
+        await expect(themePage.locator('.template-default--nav-hydrated')).toBeAttached()
+
+        await wait(1000)
+
+        expect(consoleErrors.filter((error) => error.includes("didn't match"))).toEqual([])
+        await expect(themePage.locator(`head > script[src="${hostScriptPath}"]`)).toHaveCount(1)
+      } finally {
+        await themeContext.close()
+      }
+    })
+
     test('should default to automatic theme mode', async () => {
       await page.goto(postsUrl.admin)
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')

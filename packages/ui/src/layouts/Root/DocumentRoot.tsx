@@ -56,12 +56,14 @@ export function DocumentRoot({
       suppressHydrationWarning={suppressHydrationWarning}
     >
       <head>
-        {themeSource === 'default' && <ResolveThemeOnClient serverTheme={theme ?? defaultTheme} />}
         {viewport}
         <style>{`@layer payload-default, payload;`}</style>
         {head}
       </head>
-      <body>{children}</body>
+      <body>
+        {themeSource === 'default' && <ResolveThemeOnClient serverTheme={theme ?? defaultTheme} />}
+        {children}
+      </body>
     </html>
   )
 }
