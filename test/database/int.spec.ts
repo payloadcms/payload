@@ -5146,6 +5146,31 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
     expect(query3.totalDocs).toEqual(1)
   })
 
+  test('should apply every operator on a path, whichever operator comes first', async ({
+    payload,
+  }) => {
+    const titles = ['operators on a path a', 'operators on a path b', 'operators on a path c']
+    for (const title of titles) {
+      await payload.create({ collection: postsSlug, data: { title }, overrideAccess: true })
+    }
+
+    const likeFirst = await payload.find({
+      collection: postsSlug,
+      overrideAccess: true,
+      sort: 'title',
+      where: { title: { like: 'operators on a path', not_equals: titles[0] } },
+    })
+    const notEqualsFirst = await payload.find({
+      collection: postsSlug,
+      overrideAccess: true,
+      sort: 'title',
+      where: { title: { not_equals: titles[0], in: [titles[0], titles[1]] } },
+    })
+
+    expect(likeFirst.docs.map((doc) => doc.title)).toEqual([titles[1], titles[2]])
+    expect(notEqualsFirst.docs.map((doc) => doc.title)).toEqual([titles[1]])
+  })
+
   test('db.deleteOne should not fail if query does not resolve to any document', async ({
     payload,
   }) => {
