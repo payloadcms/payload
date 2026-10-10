@@ -11,6 +11,7 @@ interface Args {
   access?: UploadInstructionsAccess
   acl?: 'private' | 'public-read'
   bucket: string
+  cacheControl?: string
   collectionPrefix: string
   getStorageClient: () => S3
   useCompositePrefixes?: boolean
@@ -20,6 +21,7 @@ export const generateUploadInstructions = ({
   access,
   acl,
   bucket,
+  cacheControl,
   collectionPrefix,
   getStorageClient,
   useCompositePrefixes = false,
@@ -64,11 +66,16 @@ export const generateUploadInstructions = ({
       signableHeaders.add('content-length')
     }
 
+    if (cacheControl) {
+      signableHeaders.add('cache-control')
+    }
+
     const url = await getSignedUrl(
       getStorageClient(),
       new PutObjectCommand({
         ACL: acl,
         Bucket: bucket,
+        CacheControl: cacheControl,
         ContentLength: filesizeLimit ? Math.min(filesize, filesizeLimit) : undefined,
         ContentType: mimeType,
         IfNoneMatch: '*',
@@ -90,6 +97,7 @@ export const generateUploadInstructions = ({
       },
       request: {
         headers: {
+          ...(cacheControl ? { 'Cache-Control': cacheControl } : {}),
           'Content-Length': String(filesize),
           'Content-Type': mimeType,
           'If-None-Match': '*',
