@@ -70,12 +70,15 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(args.migrationDir)
     let resolveInitializing: () => void = () => {}
-    let rejectInitializing: () => void = () => {}
+    let rejectInitializing: (err?: unknown) => void = () => {}
 
     const initializing = new Promise<void>((res, rej) => {
       resolveInitializing = res
       rejectInitializing = rej
     })
+    // `connect` throws its own error when it fails, and only `beginTransaction` awaits this promise:
+    // without a handler, a failed connect on a path that opens no transaction is an unhandled rejection.
+    void initializing.catch(() => {})
 
     // sqlite's like operator is case-insensitive, so we overwrite the DrizzleAdapter operators to not use ilike
     const operators = {
