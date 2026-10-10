@@ -5146,6 +5146,26 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
     expect(query3.totalDocs).toEqual(1)
   })
 
+  test('should keep a path with several operators when a sibling and follows it', async ({
+    payload,
+  }) => {
+    const titles = ['sibling and 1', 'sibling and 2', 'sibling and 3']
+    for (const title of titles) {
+      await payload.create({ collection: postsSlug, data: { title }, overrideAccess: true })
+    }
+
+    const { docs } = await payload.find({
+      collection: postsSlug,
+      overrideAccess: true,
+      where: {
+        title: { in: titles, not_equals: titles[0] },
+        and: [{ title: { not_equals: titles[2] } }],
+      },
+    })
+
+    expect(docs.map((doc) => doc.title)).toEqual([titles[1]])
+  })
+
   test('db.deleteOne should not fail if query does not resolve to any document', async ({
     payload,
   }) => {
