@@ -397,6 +397,8 @@ export function UploadInput(props: UploadInputProps) {
         setMaxFiles(maxRows)
       }
 
+      // The drawer resets its success callback on close, so register it again on every open
+      setOnSuccess(onUploadSuccess)
       openModal(drawerSlug)
     },
     [
@@ -411,6 +413,8 @@ export function UploadInput(props: UploadInputProps) {
       setInitialFiles,
       setSelectableCollections,
       setMaxFiles,
+      setOnSuccess,
+      onUploadSuccess,
     ],
   )
 
