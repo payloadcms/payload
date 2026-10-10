@@ -61,7 +61,6 @@ export function DocumentRoot({
         {head}
       </head>
       <body>
-        {/* Rendered in <body>, not <head>, so React does not pair it with scripts a host adds to <head> during hydration */}
         {themeSource === 'default' && <ResolveThemeOnClient serverTheme={theme ?? defaultTheme} />}
         {children}
       </body>
