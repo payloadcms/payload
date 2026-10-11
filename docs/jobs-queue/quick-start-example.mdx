@@ -111,7 +111,7 @@ export default buildConfig({
 })
 ```
 
-The [`autoRun`](/docs/jobs-queue/queues#cron-jobs) configuration automatically processes queued jobs on a schedule using cron syntax. In this example, Payload checks for pending jobs every 5 minutes and executes them. Alternatively, you can [manually trigger job processing](/docs/jobs-queue/queues#local-api) with `payload.jobs.run()` or use the [API endpoint](/docs/jobs-queue/queues#endpoint) for serverless platforms.
+The [`autoRun`](/docs/jobs-queue/queues#autorun-alternative-for-dedicated-servers) configuration automatically processes queued jobs on a schedule using cron syntax. In this example, Payload checks for pending jobs every 5 minutes and executes them. Alternatively, you can [manually trigger job processing](/docs/jobs-queue/queues#local-api) with `payload.jobs.run()` or use the [API endpoint](/docs/jobs-queue/queues#endpoint) for serverless platforms.
 
 That's it! Now when users sign up, a job is queued and will be processed within 5 minutes without blocking the API response.
 
