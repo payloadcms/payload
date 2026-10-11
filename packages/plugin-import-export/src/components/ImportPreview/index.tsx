@@ -30,6 +30,7 @@ import {
   getFormStateSignature,
   getSubmittedFormValues,
 } from '../../utilities/getSubmittedFormValues.js'
+import { RelationshipCell } from '../RelationshipCell/index.js'
 import './index.css'
 
 const baseClass = 'import-preview'
@@ -256,7 +257,7 @@ export const ImportPreview: React.FC = () => {
                 active: true,
                 field,
                 Heading: label,
-                renderedCells: docs.map((doc) => {
+                renderedCells: docs.map((doc, rowIndex) => {
                   const value = getObjectDotNotation(doc, fieldPath)
 
                   if (value === undefined || value === null) {
@@ -264,10 +265,22 @@ export const ImportPreview: React.FC = () => {
                   }
 
                   // Format based on field type
-                  if (field.type === 'relationship' || field.type === 'upload') {
-                    // Handle relationships
+                  const shouldRenderGroupedRelationship =
+                    format === 'json' &&
+                    field.type === 'relationship' &&
+                    Array.isArray(field.relationTo)
+
+                  if (shouldRenderGroupedRelationship) {
+                    return (
+                      <RelationshipCell
+                        fieldPath={fieldPath}
+                        key={`${fieldPath}-${rowIndex}`}
+                        relationTo={field.relationTo}
+                        value={value}
+                      />
+                    )
+                  } else if (field.type === 'relationship' || field.type === 'upload') {
                     if (typeof value === 'object' && !Array.isArray(value)) {
-                      // Single relationship
                       const relationTo = Array.isArray(field.relationTo)
                         ? (value as any).relationTo
                         : field.relationTo
@@ -285,11 +298,9 @@ export const ImportPreview: React.FC = () => {
                         }
                       }
 
-                      // Fallback to ID
                       const id = (value as any).id || value
                       return `${getTranslation(relatedConfig?.labels?.singular || relationTo, i18n)}: ${id}`
                     } else if (Array.isArray(value)) {
-                      // Multiple relationships
                       return value
                         .map((item) => {
                           if (typeof item === 'object') {
@@ -319,7 +330,6 @@ export const ImportPreview: React.FC = () => {
                         .join(', ')
                     }
 
-                    // Just an ID
                     return String(value)
                   } else if (field.type === 'date') {
                     // Display date as string to avoid wrong locale/timezone conversion

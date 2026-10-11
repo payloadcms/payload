@@ -71,8 +71,11 @@ export type OptionGroup = {
 }
 
 export type ReactSelectAdapterProps = {
+  'aria-describedby'?: AriaAttributes['aria-describedby']
+  'aria-invalid'?: AriaAttributes['aria-invalid']
   'aria-label'?: AriaAttributes['aria-label']
   'aria-labelledby'?: AriaAttributes['aria-labelledby']
+  'aria-required'?: AriaAttributes['aria-required']
   backspaceRemovesValue?: boolean
   blurInputOnSelect?: boolean
   captureMenuScroll?: boolean

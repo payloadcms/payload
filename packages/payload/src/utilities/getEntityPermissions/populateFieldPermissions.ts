@@ -14,6 +14,7 @@ import type { AllOperations, JsonObject, PayloadRequest } from '../../types/inde
 import type { BlockReferencesPermissions } from './getEntityPermissions.js'
 
 import { type Field, tabHasName } from '../../fields/config/types.js'
+import { getAccessOperationRequest } from '../getAccessOperationRequest.js'
 
 const isThenable = (value: unknown): value is Promise<unknown> =>
   value != null && typeof (value as { then?: unknown }).then === 'function'
@@ -107,7 +108,10 @@ export const populateFieldPermissions = ({
                   collection,
                   data,
                   doc: data,
-                  req,
+                  req: getAccessOperationRequest({
+                    operation,
+                    req,
+                  }),
                   // We cannot include siblingData or blockData here, as we do not have siblingData/blockData available once we reach block or array
                   // rows, as we're calculating schema permissions, which do not include individual rows.
                   // For consistency, it's thus better to never include the siblingData and blockData
@@ -117,7 +121,10 @@ export const populateFieldPermissions = ({
                   data,
                   doc: data,
                   global: global!,
-                  req,
+                  req: getAccessOperationRequest({
+                    operation,
+                    req,
+                  }),
                   // We cannot include siblingData or blockData here, as we do not have siblingData/blockData available once we reach block or array
                   // rows, as we're calculating schema permissions, which do not include individual rows.
                   // For consistency, it's thus better to never include the siblingData and blockData

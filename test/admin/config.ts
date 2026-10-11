@@ -1,5 +1,7 @@
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import sharp from 'sharp'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Array } from './collections/Array.js'
@@ -31,7 +33,7 @@ import { CollectionNotInView } from './collections/NotInView.js'
 import { Placeholder } from './collections/Placeholder.js'
 import { Posts } from './collections/Posts.js'
 import { ReorderTabs } from './collections/ReorderTabs.js'
-import { UploadCollection } from './collections/Upload.js'
+import { UploadCollection, uploadCollectionSharpOptions } from './collections/Upload.js'
 import { UploadTwoCollection } from './collections/UploadTwo.js'
 import { UseAsTitleGroupField } from './collections/UseAsTitleGroupField.js'
 import { Users } from './collections/Users.js'
@@ -58,7 +60,7 @@ import {
   protectedCustomNestedViewPath,
   publicCustomViewPath,
 } from './shared.js'
-import { editMenuItemsSlug, reorderTabsSlug } from './slugs.js'
+import { editMenuItemsSlug, reorderTabsSlug, uploadCollectionSlug } from './slugs.js'
 process.env.NEXT_BASE_PATH = BASE_PATH
 
 const filename = fileURLToPath(import.meta.url)
@@ -304,6 +306,14 @@ export default buildConfigWithDefaults({
     },
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
+    upload: {
+      transformers: [
+        sharpTransformer({
+          collections: { [uploadCollectionSlug]: uploadCollectionSharpOptions },
+          sharp,
+        }),
+      ],
     },
   },
   seed,

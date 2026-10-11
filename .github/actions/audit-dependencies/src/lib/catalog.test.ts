@@ -23,7 +23,7 @@ describe('loadCatalogs', () => {
       [
         'catalog:',
         "  zod: '^4.6.0'",
-        "  react: '19.2.6'",
+        "  react: '19.3.0'",
         'catalogs:',
         '  react18:',
         "    react: '18.2.0'",
@@ -34,7 +34,7 @@ describe('loadCatalogs', () => {
     const catalogs = await loadCatalogs({ repoRoot: dir })
 
     expect(catalogs.default.zod).toBe('^4.6.0')
-    expect(catalogs.default.react).toBe('19.2.6')
+    expect(catalogs.default.react).toBe('19.3.0')
     expect(catalogs.named.react18.react).toBe('18.2.0')
   })
 

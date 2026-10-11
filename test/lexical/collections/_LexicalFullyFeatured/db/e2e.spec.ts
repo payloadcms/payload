@@ -2,17 +2,23 @@ import {
   buildEditorState,
   type DefaultNodeTypes,
   type RichTextNodes,
+  type SerializedBlockNode,
   type SerializedInlineBlockNode,
 } from '@payloadcms/richtext-lexical'
-import { expect, type Page, test } from '@playwright/test'
+import { expect, type Page, type Response, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../../__helpers/shared/sdk/index.js'
-import type { Config, InlineBlockWithSelect } from '../../../payload-types.js'
+import type {
+  Config,
+  InlineBlockWithSelect,
+  MyBlock,
+  MyInlineBlock,
+} from '../../../payload-types.js'
 
 import { assertNetworkRequests } from '../../../../__helpers/e2e/assertNetworkRequests.js'
-import { saveDocAndAssert } from '../../../../__helpers/e2e/helpers.js'
+import { changeLocale, saveDocAndAssert } from '../../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -32,6 +38,24 @@ let payload: PayloadTestSDK<Config>
 let serverURL: string
 
 const { beforeAll, beforeEach, describe } = test
+
+const isFormStateResponse = ({ response }: { response: Response }): boolean => {
+  const request = response.request()
+
+  if (request.method() !== 'POST' || response.status() !== 200) {
+    return false
+  }
+
+  if (request.url().includes(`/admin/collections/${lexicalFullyFeaturedSlug}/`)) {
+    return true
+  }
+
+  return (
+    process.env.PAYLOAD_FRAMEWORK === 'tanstack-start' &&
+    request.url().includes('/_serverFn/') &&
+    (request.postData() ?? '').includes('form-state')
+  )
+}
 
 // This test suite resets the database before each test to ensure a clean state and cannot be run in parallel.
 // Use this for tests that modify the database.
@@ -77,11 +101,11 @@ describe('Lexical Fully Featured - database', () => {
       await expect(lexical.editor.locator('.LexicalEditorTheme__upload')).toHaveCount(1)
       await expect(
         lexical.editor.locator('.LexicalEditorTheme__upload__doc-drawer-toggler'),
-      ).toHaveText(expectedFileName || 'payload-1.jpg')
+      ).toHaveText(expectedFileName || 'payload-original-1.jpg')
 
       const uploadedImage = await payload.find({
         collection: 'uploads',
-        where: { filename: { equals: expectedFileName || 'payload-1.jpg' } },
+        where: { filename: { equals: expectedFileName || 'payload-original-1.jpg' } },
         overrideAccess: true,
       })
       expect(uploadedImage.totalDocs).toBe(1)
@@ -99,7 +123,7 @@ describe('Lexical Fully Featured - database', () => {
       page,
     }) => {
       // blob will be put in src of img tag => cannot infer file name
-      await uploadsTest(page, 'html', 'pasted-image.jpeg')
+      await uploadsTest(page, 'html', 'pasted-image-original.jpeg')
     })
 
     test('ensure auto upload by copy & pasting image works when pasting from website', async ({
@@ -119,7 +143,7 @@ describe('Lexical Fully Featured - database', () => {
       await lexical.editor.first().focus()
       await expect(lexical.editor).toBeFocused()
 
-      await uploadsTest(page, 'cmd+v')
+      await uploadsTest(page, 'cmd+v', 'payload-original-original.jpg')
 
       // Save page
       await saveDocAndAssert(page)
@@ -144,7 +168,7 @@ describe('Lexical Fully Featured - database', () => {
 
       const uploadNode = richText?.root?.children?.[1]?.children?.[0]
       // @ts-expect-error unsafe access is fine in tests
-      expect(uploadNode.value?.filename).toBe('payload-1.jpg')
+      expect(uploadNode.value?.filename).toBe('payload-original-original.jpg')
     })
 
     test('ensure block contents are not reset on save on both create and update', async ({
@@ -265,6 +289,167 @@ describe('Lexical Fully Featured - database', () => {
         },
       },
     )
+  })
+
+  test('should preserve null arrays when regular and inline block fields change', async ({
+    page,
+  }) => {
+    const doc = await payload.create({
+      collection: lexicalFullyFeaturedSlug,
+      data: {
+        richText: buildEditorState<FullyFeaturedNode>({
+          nodes: [
+            {
+              type: 'block',
+              fields: {
+                id: 'regular-block',
+                blockType: 'myBlock',
+                items: null,
+                someText: 'Regular before',
+              },
+              format: '',
+              version: 2,
+            },
+            {
+              type: 'block',
+              fields: {
+                id: 'empty-array-block',
+                blockType: 'myBlock',
+                items: null,
+                someText: 'Empty array block',
+              },
+              format: '',
+              version: 2,
+            },
+            {
+              type: 'inlineBlock',
+              fields: {
+                id: 'inline-block',
+                blockType: 'myInlineBlock',
+                items: null,
+                someText: 'Inline before',
+              },
+              version: 1,
+            },
+          ],
+        }),
+      },
+    })
+
+    await page.goto(url.edit(doc.id))
+    await expect(lexical.editor.first()).toBeVisible()
+
+    const regularBlocks = lexical.editor.locator('.LexicalEditorTheme__block-myBlock')
+    const regularBlock = regularBlocks.nth(0)
+    await regularBlock.locator('#field-someText').fill('Regular after')
+
+    const inlineBlock = lexical.editor.locator('.LexicalEditorTheme__inlineBlock').first()
+    await inlineBlock.locator('.LexicalEditorTheme__inlineBlock__container').click()
+    await expect(lexical.drawer).toBeVisible()
+    await lexical.drawer.locator('#field-someText').fill('Inline after')
+    await lexical.drawer.getByText('Save changes').click()
+    await expect(lexical.drawer).toBeHidden()
+
+    const emptyArrayBlock = regularBlocks.nth(1)
+    const itemsField = emptyArrayBlock.locator('#field-items')
+    const emptyFormStateResponsePromise = page.waitForResponse((response) =>
+      isFormStateResponse({ response }),
+    )
+    await itemsField.getByRole('button', { name: 'Add Item' }).click()
+    await expect(itemsField.locator('.array-field__row')).toHaveCount(1)
+
+    await itemsField.locator('#items-row-0 .array-actions__button').click()
+    await page.locator('.popup__content .array-actions__remove').click()
+    await emptyArrayBlock.locator('#field-someText').fill('Empty array after')
+    await emptyFormStateResponsePromise
+    await expect(itemsField.locator('.array-field__row')).toHaveCount(0)
+
+    const updateRequestPromise = page.waitForRequest(
+      (request) =>
+        request.method() === 'PATCH' && request.url().includes(`/api/${lexicalFullyFeaturedSlug}/`),
+    )
+    await saveDocAndAssert(page)
+
+    const updateRequest = await updateRequestPromise
+    const serializedUpdateData = updateRequest
+      .postData()
+      ?.match(/name="_payload"\r\n\r\n(.*?)\r\n--/s)?.[1]
+    expect(serializedUpdateData).toBeDefined()
+    const updateData = JSON.parse(serializedUpdateData as string)
+    const savedNodes = updateData.richText.root.children as FullyFeaturedNode[]
+    const savedRegularBlock = savedNodes.find(
+      (node) => node.type === 'block' && node.fields.id === 'regular-block',
+    ) as SerializedBlockNode<MyBlock> | undefined
+    const savedEmptyArrayBlock = savedNodes.find(
+      (node) => node.type === 'block' && node.fields.id === 'empty-array-block',
+    ) as SerializedBlockNode<MyBlock> | undefined
+    const savedParagraph = savedNodes.find((node) => node.type === 'paragraph')
+    const savedInlineBlock = savedParagraph?.children.find(
+      (node) => node.type === 'inlineBlock' && node.fields.blockType === 'myInlineBlock',
+    ) as SerializedInlineBlockNode<MyInlineBlock> | undefined
+
+    expect(savedRegularBlock?.fields.items).toBeNull()
+    expect(savedEmptyArrayBlock?.fields.items).toBeUndefined()
+    expect(savedInlineBlock?.fields.items).toBeNull()
+  })
+
+  test('should keep a localized block array empty after fallback is disabled', async ({ page }) => {
+    const doc = await payload.create({
+      collection: lexicalFullyFeaturedSlug,
+      data: {
+        richText: buildEditorState<FullyFeaturedNode>({
+          nodes: [
+            {
+              type: 'block',
+              fields: {
+                id: 'localized-empty-array-block',
+                blockType: 'myBlock',
+                items: null,
+                someText: 'Before',
+              },
+              format: '',
+              version: 2,
+            },
+          ],
+        }),
+      },
+    })
+
+    await page.goto(url.edit(doc.id))
+    await expect(lexical.editor.first()).toBeVisible()
+    await changeLocale(page, 'es')
+
+    const block = lexical.editor.locator('.LexicalEditorTheme__block-myBlock')
+    const itemsField = block.locator('#field-items')
+    const fallbackCheckbox = itemsField.locator('input[type="checkbox"]')
+    await expect(fallbackCheckbox).toBeChecked()
+
+    const formStateResponsePromise = page.waitForResponse((response) =>
+      isFormStateResponse({ response }),
+    )
+    await fallbackCheckbox.click()
+    await expect(fallbackCheckbox).not.toBeChecked()
+    await block.locator('#field-someText').fill('After')
+    await formStateResponsePromise
+
+    const updateRequestPromise = page.waitForRequest(
+      (request) =>
+        request.method() === 'PATCH' && request.url().includes(`/api/${lexicalFullyFeaturedSlug}/`),
+    )
+    await saveDocAndAssert(page)
+
+    const updateRequest = await updateRequestPromise
+    const serializedUpdateData = updateRequest
+      .postData()
+      ?.match(/name="_payload"\r\n\r\n(.*?)\r\n--/s)?.[1]
+    expect(serializedUpdateData).toBeDefined()
+    const updateData = JSON.parse(serializedUpdateData as string)
+    const savedNodes = updateData.richText.root.children as FullyFeaturedNode[]
+    const savedBlock = savedNodes.find(
+      (node) => node.type === 'block' && node.fields.id === 'localized-empty-array-block',
+    ) as SerializedBlockNode<MyBlock> | undefined
+
+    expect(savedBlock?.fields.items).toBeUndefined()
   })
 
   test('ensure block name can be saved and loaded', async ({ page }) => {

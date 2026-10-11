@@ -3,6 +3,10 @@
     position: relative;
   }
 
+  .field-type.checkbox:has(+ .checkbox) {
+    margin-bottom: var(--spacer-2);
+  }
+
   .checkbox-input {
     display: flex;
   }

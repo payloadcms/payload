@@ -64,7 +64,7 @@ test.suite(
       }
 
       expect(instructions.data.pathname).toBe(
-        `${collectionPrefix}/${instructions.file.uploadReference.prefix}/${instructions.file.uploadReference._objectKey}/${instructions.file.filename}`,
+        `${collectionPrefix}/${instructions.file.uploadReference.prefix}/${instructions.file.uploadReference._objectKey}/client-composite-image-original.png`,
       )
 
       await put(instructions.data.pathname, new Blob([file], { type: 'image/png' }), {
@@ -95,7 +95,7 @@ test.suite(
       expect(createdDoc?.doc.prefix).toBe(instructions.file.uploadReference.prefix)
 
       const fileResponse = await restClient.GET(
-        `/${mediaWithCompositePrefixesSlug}/file/${instructions.file.filename}?prefix=${encodeURIComponent(instructions.file.uploadReference.prefix)}`,
+        `/${mediaWithCompositePrefixesSlug}/file/${createdDoc.doc.filename}?prefix=${encodeURIComponent(instructions.file.uploadReference.prefix)}`,
       )
 
       expect(fileResponse.status).toBe(200)

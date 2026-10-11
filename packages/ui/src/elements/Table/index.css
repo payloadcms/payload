@@ -77,7 +77,7 @@
 
     td.cell--linked > :is(a, button),
     .cell-link {
-      font-weight: var(--text-body-medium-strong-font-weight);
+      font-weight: var(--text-body-medium-bold-font-weight);
       text-decoration-line: underline;
       text-decoration-style: solid;
       text-decoration-skip-ink: none;

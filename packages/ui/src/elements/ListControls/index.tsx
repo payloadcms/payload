@@ -38,6 +38,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     hasCreatePermission,
     hasDeletePermission,
     isWhereOpen: isWhereOpenFromProps,
+    layoutToggle,
     listMenuItems,
     newDocumentURL,
     onWhereToggle,
@@ -50,7 +51,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
 
   const isControlled = typeof onWhereToggle === 'function'
 
-  const { handleSearchChange, hasActiveFilters, query } = useListQuery()
+  const { handleSearchChange, hasActiveFilters, query, setSearchInput } = useListQuery()
 
   const { t } = useTranslation()
 
@@ -88,6 +89,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             key={collectionSlug}
             label={searchLabelTranslated}
             onSearchChange={handleSearchChange}
+            onSearchInputChange={setSearchInput}
             searchQueryParam={query?.search}
           />
           {collectionConfig?.enableQueryPresets && !disableQueryPresets && (
@@ -139,6 +141,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               {t('general:sort')}
             </Button>
           )}
+          {layoutToggle}
           {hasCreatePermission && newDocumentURL && (
             <Button
               buttonStyle="primary"

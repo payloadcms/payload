@@ -1,3 +1,4 @@
+import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { Payload, TypeWithID } from 'payload'
 
 import path from 'path'
@@ -1705,6 +1706,66 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
       where: { name: { equals: 'totalDocs' } },
     })
   })
+
+  // Categories has join fields, so find goes through aggregatePaginate, which runs a separate count for totalDocs
+  test.options(
+    'should count filtered totalDocs from the matching index entries instead of reading every doc',
+    { db: 'mongo' },
+    async ({ payload }) => {
+      const { collections, connection } = payload.db as unknown as MongooseAdapter
+      const Categories = collections[categoriesSlug]!
+      const db = connection.db!
+
+      // Inserted through Mongoose directly, as creating 1,000 docs through Payload would slow the test down.
+      // Only the 3 docs from 2024 match the filter below.
+      await Categories.insertMany([
+        ...Array.from({ length: 1000 }, () => ({
+          name: 'filteredCount',
+          createdAt: new Date('2020-06-01'),
+        })),
+        ...Array.from({ length: 3 }, () => ({
+          name: 'filteredCount',
+          createdAt: new Date('2024-06-01'),
+        })),
+      ])
+
+      // Profiling level 2 records every operation, including how many index keys and docs it read
+      await db.command({ profile: 2 })
+
+      const result = await payload
+        .find({
+          collection: categoriesSlug,
+          overrideAccess: true,
+          where: {
+            createdAt: {
+              greater_than_equal: '2024-01-01T00:00:00.000Z',
+              less_than: '2025-01-01T00:00:00.000Z',
+            },
+          },
+        })
+        .finally(() => db.command({ profile: 0 }))
+
+      const profiledAggregates = await db
+        .collection('system.profile')
+        .find({ 'command.aggregate': Categories.collection.name })
+        .toArray()
+
+      await db.collection('system.profile').drop()
+      await Categories.deleteMany({ name: 'filteredCount' })
+
+      const countProfile = profiledAggregates.find((entry) =>
+        entry.command.pipeline.some((stage: Record<string, unknown>) => '$group' in stage),
+      )
+
+      expect(result.totalDocs).toBe(3)
+
+      // Before the fix, the count was hinted onto the _id index and read every category in the collection:
+      // { planSummary: 'IXSCAN { _id: 1 }', keysExamined: 1000+, docsExamined: 1000+ }
+      expect(countProfile?.planSummary).toBe('COUNT_SCAN { createdAt: 1 }')
+      expect(countProfile?.keysExamined).toBe(3)
+      expect(countProfile?.docsExamined).toBe(0)
+    },
+  )
 
   test('should self join', async ({ payload }) => {
     const doc_1 = await payload.create({ collection: 'self-joins', data: {}, overrideAccess: true })

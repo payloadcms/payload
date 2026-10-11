@@ -81,10 +81,13 @@ const setCreatedBy: FieldHook = ({
   previousValue,
   req,
 }) => {
-  // Globals always write via `update`, so their first write is detected by a still-empty original doc.
-  const isFirstWrite = collection
-    ? operation === 'create'
-    : !originalDoc || Object.keys(originalDoc).length === 0
+  const hasEmptyOriginalDocument = !originalDoc || Object.keys(originalDoc).length === 0
+  // Globals always write via `update`, so their first write is detected by an empty original doc.
+  // Validation uses its own operation and represents a collection create with the same empty doc.
+  const isFirstWrite =
+    operation === 'create' ||
+    (operation === 'validate' && hasEmptyOriginalDocument) ||
+    (!collection && hasEmptyOriginalDocument)
 
   if (!isFirstWrite) {
     return previousValue

@@ -1,3 +1,4 @@
+/* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. MODIFY AT YOUR OWN RISK. */
 import type { ServerFunctionClientArgs } from 'payload'
 
 import { createServerFunctionClient } from '@payloadcms/tanstack-start/client'

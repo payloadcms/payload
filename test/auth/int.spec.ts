@@ -22,7 +22,7 @@ import { email as emailValidation } from 'payload/shared'
 import { v4 as uuid } from 'uuid'
 import { expect, vitest } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { transformForWrite } from '../../packages/drizzle/src/transform/write/index.js'
@@ -1506,7 +1506,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
 
         const tryLogin = async (
           success: boolean | undefined,
-          { restClient }: { restClient: NextRESTClient },
+          { restClient }: { restClient: RESTClient },
         ) => {
           const res = await restClient.POST(`/${slug}/login`, {
             body: JSON.stringify(

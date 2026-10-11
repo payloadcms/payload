@@ -57,29 +57,16 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ groups, onMobileOpen
 
   return (
     <Popup
+      hoverSubmenu
       popupType="menu"
-      renderButton={({ active, onClick, onKeyDown, ...aria }) => (
-        <button
-          {...aria}
-          className={[
-            'popup-button-list__button',
-            'popup-button-list__button--submenu-trigger',
-            active && 'popup-button-list__button--selected',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-          onClick={onClick}
-          onKeyDown={onKeyDown}
-          type="button"
+      renderButton={(buttonProps) => (
+        <PopupList.SubmenuTrigger
+          buttonProps={buttonProps}
+          icon={<GearIcon size={24} />}
+          trailingIcon={<ChevronIcon direction="right" size={16} />}
         >
-          <span className="popup-button-list__submenu-icon">
-            <GearIcon size={24} />
-          </span>
-          <span className="popup-button-list__label">{t('general:settings')}</span>
-          <span className="popup-button-list__chevron">
-            <ChevronIcon direction="right" size={16} />
-          </span>
-        </button>
+          {t('general:settings')}
+        </PopupList.SubmenuTrigger>
       )}
       side="left"
       size="large"

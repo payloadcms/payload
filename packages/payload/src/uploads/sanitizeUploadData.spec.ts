@@ -16,7 +16,7 @@ describe('sanitizeUploadData', () => {
       getExternalUploadSource({
         alt: 'Alternative text',
         filename: 'remote.png',
-        sizes: { thumbnail: { filename: 'submitted-thumbnail.png' } },
+        variants: { thumbnail: { filename: 'submitted-thumbnail.png' } },
         url: 'https://example.com/remote.png',
       }),
     ).toEqual({
@@ -32,7 +32,7 @@ describe('sanitizeUploadData', () => {
           alt: 'Updated alternative text',
           filename: 'submitted.png',
           prefix: 'articles',
-          sizes: {
+          variants: {
             thumbnail: {
               filename: 'submitted-thumbnail.png',
               height: 100,
@@ -99,7 +99,7 @@ describe('sanitizeUploadData', () => {
     { filename: 'C:\\submitted.png' },
     { filename: '\\\\server\\submitted.png' },
     { filename: 'images/../submitted.png' },
-    { sizes: { thumbnail: { filename: '..\\submitted-thumbnail.png' } } },
+    { variants: { thumbnail: { filename: '..\\submitted-thumbnail.png' } } },
   ])('should reject an invalid submitted filename', (data) => {
     expect(() => sanitizeUploadData(data, 'update')).toThrow('Invalid filename.')
   })
@@ -113,7 +113,7 @@ describe('mergeUploadDataWithDocument', () => {
         {
           filename: 'stored.png',
           prefix: 'articles',
-          sizes: {
+          variants: {
             thumbnail: {
               filename: 'stored-thumbnail.png',
               height: 100,
@@ -127,7 +127,7 @@ describe('mergeUploadDataWithDocument', () => {
       alt: 'Updated alternative text',
       filename: 'stored.png',
       prefix: 'articles',
-      sizes: {
+      variants: {
         thumbnail: {
           filename: 'stored-thumbnail.png',
           height: 100,
@@ -144,13 +144,13 @@ describe('mergeUploadDataWithDocument', () => {
         {
           filename: 'hook.png',
           prefix: 'hook-prefix',
-          sizes: { thumbnail: { filename: 'hook-thumbnail.png' } },
+          variants: { thumbnail: { filename: 'hook-thumbnail.png' } },
           url: '/api/media/file/hook.png',
         },
         {
           filename: 'stored.png',
           prefix: 'stored-prefix',
-          sizes: {
+          variants: {
             thumbnail: { filename: 'stored-thumbnail.png', height: 100, width: 100 },
           },
           url: '/api/media/file/stored.png',
@@ -159,7 +159,7 @@ describe('mergeUploadDataWithDocument', () => {
     ).toEqual({
       filename: 'hook.png',
       prefix: 'hook-prefix',
-      sizes: {
+      variants: {
         thumbnail: { filename: 'hook-thumbnail.png', height: 100, width: 100 },
       },
       url: '/api/media/file/hook.png',

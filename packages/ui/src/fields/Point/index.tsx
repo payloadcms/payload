@@ -9,9 +9,12 @@ import { RenderCustomComponent } from '../../elements/RenderCustomComponent/inde
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
+import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.css'
 import { fieldBaseClass } from '../shared/index.js'
@@ -32,6 +35,8 @@ export const PointFieldComponent: React.FC<PointFieldClientProps> = (props) => {
     validate,
   } = props
 
+  const { uuid } = useForm()
+  const editDepth = useEditDepth()
   const { i18n, t } = useTranslation()
 
   const memoizedValidate: PointFieldValidation = useCallback(
@@ -111,6 +116,8 @@ export const PointFieldComponent: React.FC<PointFieldClientProps> = (props) => {
             CustomComponent={Label}
             Fallback={
               <FieldLabel
+                hasRequiredAccessibleState
+                htmlFor={generateFieldID(path, editDepth, uuid, 'field-longitude')}
                 label={getCoordinateFieldLabel('longitude')}
                 localized={localized}
                 path={path}
@@ -123,9 +130,10 @@ export const PointFieldComponent: React.FC<PointFieldClientProps> = (props) => {
             {/* disable eslint rule because the label is dynamic */}
             {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
+              aria-required={required || undefined}
               className="form-input"
               disabled={readOnly || disabled}
-              id={`field-longitude-${path?.replace(/\./g, '__')}`}
+              id={generateFieldID(path, editDepth, uuid, 'field-longitude')}
               name={`${path}.longitude`}
               onChange={(e) => handleChange(e, 0)}
               placeholder={getTranslation(placeholder, i18n)}
@@ -146,6 +154,8 @@ export const PointFieldComponent: React.FC<PointFieldClientProps> = (props) => {
             CustomComponent={Label}
             Fallback={
               <FieldLabel
+                hasRequiredAccessibleState
+                htmlFor={generateFieldID(path, editDepth, uuid, 'field-latitude')}
                 label={getCoordinateFieldLabel('latitude')}
                 localized={localized}
                 path={path}
@@ -162,9 +172,10 @@ export const PointFieldComponent: React.FC<PointFieldClientProps> = (props) => {
             {/* disable eslint rule because the label is dynamic */}
             {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
+              aria-required={required || undefined}
               className="form-input"
               disabled={readOnly || disabled}
-              id={`field-latitude-${path?.replace(/\./g, '__')}`}
+              id={generateFieldID(path, editDepth, uuid, 'field-latitude')}
               name={`${path}.latitude`}
               onChange={(e) => handleChange(e, 1)}
               placeholder={getTranslation(placeholder, i18n)}

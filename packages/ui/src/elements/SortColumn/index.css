@@ -11,7 +11,6 @@
     white-space: nowrap;
     cursor: default;
     color: var(--color-text-secondary);
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
@@ -32,7 +31,7 @@
   /* Sorted column label styling */
   .sort-column--sorted .sort-column__label {
     color: var(--color-text);
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
   }
 
   .sort-column__buttons {

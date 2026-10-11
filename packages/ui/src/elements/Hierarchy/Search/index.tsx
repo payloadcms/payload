@@ -29,6 +29,7 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
   const { i18n, t } = useTranslation()
   const { getEntityConfig } = useConfig()
   const [inputValue, setInputValue] = useState('')
+  const [completedQuery, setCompletedQuery] = useState('')
 
   const collectionConfig = getEntityConfig({ collectionSlug })
   const titleField = collectionConfig?.admin?.useAsTitle || 'id'
@@ -49,6 +50,7 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
   const handleSearch = useCallback(
     async (query: string) => {
       await search(query)
+      setCompletedQuery(query)
       onActiveChange(true)
     },
     [search, onActiveChange],
@@ -142,6 +144,13 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
             verticalAlign="bottom"
           />
         )}
+      </div>
+      <div aria-atomic="true" className="sr-only" role="status">
+        {isActive && !isLoading
+          ? totalDocs === 0
+            ? t('hierarchy:noResults', { query: completedQuery })
+            : t('hierarchy:searchResults', { count: totalDocs })
+          : ''}
       </div>
       {isActive && (
         <HierarchySearchResults

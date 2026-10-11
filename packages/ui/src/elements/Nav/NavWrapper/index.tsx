@@ -1,6 +1,7 @@
 'use client'
 import React from 'react'
 
+import { useEmbed } from '../../../providers/Embed/index.js'
 import { useNav } from '../context.js'
 import './index.css'
 
@@ -10,10 +11,12 @@ import './index.css'
 export const NavWrapper: React.FC<{
   baseClass?: string
   children: React.ReactNode
+  header?: React.ReactNode
 }> = (props) => {
-  const { baseClass, children } = props
+  const { baseClass, children, header } = props
 
   const { hydrated, navOpen, navRef } = useNav()
+  const { isEmbedded } = useEmbed()
 
   return (
     <aside
@@ -26,6 +29,7 @@ export const NavWrapper: React.FC<{
         .join(' ')}
       inert={!navOpen ? true : undefined}
     >
+      {!isEmbedded && header}
       <div className={`${baseClass}__scroll`} ref={navRef}>
         {children}
       </div>
