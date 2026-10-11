@@ -260,6 +260,7 @@ test.describe.skip('A11y', () => {
         data: {
           title: 'Test Post for Horizontal Overflow',
         },
+        overrideAccess: true,
       })
 
       await page.setViewportSize({ height: 568, width: 320 })

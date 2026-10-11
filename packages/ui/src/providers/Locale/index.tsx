@@ -20,15 +20,21 @@ export const LocaleLoadingContext = createContext({
 
 const fetchPreferences = async <T extends Record<string, unknown> | string>(
   key: string,
-  baseURL: string,
+  apiRoute: string,
 ): Promise<{ id: string; value: T }> =>
-  await fetch(`${baseURL}/payload-preferences/${key}`, {
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
+  await fetch(
+    formatAdminURL({
+      apiRoute,
+      path: `/payload-preferences/${key}`,
+    }),
+    {
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'GET',
     },
-    method: 'GET',
-  })?.then((res) => res.json() as Promise<{ id: string; value: T }>)
+  )?.then((res) => res.json() as Promise<{ id: string; value: T }>)
 
 export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Locale['code'] }> = ({
   children,
@@ -78,11 +84,6 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
     }
   }, [isTransitioning, locale])
 
-  const fetchURL = formatAdminURL({
-    apiRoute,
-    path: '',
-  })
-
   useEffect(() => {
     /**
      * This effect should only run when `localeFromParams` changes, i.e. when the user clicks an anchor link
@@ -93,7 +94,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
       if (localization && user?.id) {
         const localeToUse =
           localeFromParams ||
-          (await fetchPreferences<Locale['code']>('locale', fetchURL)?.then((res) => res.value))
+          (await fetchPreferences<Locale['code']>('locale', apiRoute)?.then((res) => res.value))
 
         const newLocale =
           findLocaleFromCode(localization, localeToUse) ||
@@ -107,7 +108,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
     }
 
     void resetLocale()
-  }, [defaultLocale, localization, fetchURL, localeFromParams, user?.id])
+  }, [apiRoute, defaultLocale, localization, localeFromParams, user?.id])
 
   return (
     <LocaleContext value={locale}>

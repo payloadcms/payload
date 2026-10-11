@@ -359,48 +359,48 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"height" numeric,
   	"focal_x" numeric,
   	"focal_y" numeric,
-  	"sizes_thumbnail_url" varchar,
-  	"sizes_thumbnail_width" numeric,
-  	"sizes_thumbnail_height" numeric,
-  	"sizes_thumbnail_mime_type" varchar,
-  	"sizes_thumbnail_filesize" numeric,
-  	"sizes_thumbnail_filename" varchar,
-  	"sizes_square_url" varchar,
-  	"sizes_square_width" numeric,
-  	"sizes_square_height" numeric,
-  	"sizes_square_mime_type" varchar,
-  	"sizes_square_filesize" numeric,
-  	"sizes_square_filename" varchar,
-  	"sizes_small_url" varchar,
-  	"sizes_small_width" numeric,
-  	"sizes_small_height" numeric,
-  	"sizes_small_mime_type" varchar,
-  	"sizes_small_filesize" numeric,
-  	"sizes_small_filename" varchar,
-  	"sizes_medium_url" varchar,
-  	"sizes_medium_width" numeric,
-  	"sizes_medium_height" numeric,
-  	"sizes_medium_mime_type" varchar,
-  	"sizes_medium_filesize" numeric,
-  	"sizes_medium_filename" varchar,
-  	"sizes_large_url" varchar,
-  	"sizes_large_width" numeric,
-  	"sizes_large_height" numeric,
-  	"sizes_large_mime_type" varchar,
-  	"sizes_large_filesize" numeric,
-  	"sizes_large_filename" varchar,
-  	"sizes_xlarge_url" varchar,
-  	"sizes_xlarge_width" numeric,
-  	"sizes_xlarge_height" numeric,
-  	"sizes_xlarge_mime_type" varchar,
-  	"sizes_xlarge_filesize" numeric,
-  	"sizes_xlarge_filename" varchar,
-  	"sizes_og_url" varchar,
-  	"sizes_og_width" numeric,
-  	"sizes_og_height" numeric,
-  	"sizes_og_mime_type" varchar,
-  	"sizes_og_filesize" numeric,
-  	"sizes_og_filename" varchar
+  	"variants_thumbnail_url" varchar,
+  	"variants_thumbnail_width" numeric,
+  	"variants_thumbnail_height" numeric,
+  	"variants_thumbnail_mime_type" varchar,
+  	"variants_thumbnail_filesize" numeric,
+  	"variants_thumbnail_filename" varchar,
+  	"variants_square_url" varchar,
+  	"variants_square_width" numeric,
+  	"variants_square_height" numeric,
+  	"variants_square_mime_type" varchar,
+  	"variants_square_filesize" numeric,
+  	"variants_square_filename" varchar,
+  	"variants_small_url" varchar,
+  	"variants_small_width" numeric,
+  	"variants_small_height" numeric,
+  	"variants_small_mime_type" varchar,
+  	"variants_small_filesize" numeric,
+  	"variants_small_filename" varchar,
+  	"variants_medium_url" varchar,
+  	"variants_medium_width" numeric,
+  	"variants_medium_height" numeric,
+  	"variants_medium_mime_type" varchar,
+  	"variants_medium_filesize" numeric,
+  	"variants_medium_filename" varchar,
+  	"variants_large_url" varchar,
+  	"variants_large_width" numeric,
+  	"variants_large_height" numeric,
+  	"variants_large_mime_type" varchar,
+  	"variants_large_filesize" numeric,
+  	"variants_large_filename" varchar,
+  	"variants_xlarge_url" varchar,
+  	"variants_xlarge_width" numeric,
+  	"variants_xlarge_height" numeric,
+  	"variants_xlarge_mime_type" varchar,
+  	"variants_xlarge_filesize" numeric,
+  	"variants_xlarge_filename" varchar,
+  	"variants_og_url" varchar,
+  	"variants_og_width" numeric,
+  	"variants_og_height" numeric,
+  	"variants_og_mime_type" varchar,
+  	"variants_og_filesize" numeric,
+  	"variants_og_filename" varchar
   );
   
   CREATE TABLE "categories_breadcrumbs" (
@@ -1006,13 +1006,13 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "media_updated_at_idx" ON "media" USING btree ("updated_at");
   CREATE INDEX "media_created_at_idx" ON "media" USING btree ("created_at");
   CREATE UNIQUE INDEX "media_filename_idx" ON "media" USING btree ("filename");
-  CREATE INDEX "media_sizes_thumbnail_sizes_thumbnail_filename_idx" ON "media" USING btree ("sizes_thumbnail_filename");
-  CREATE INDEX "media_sizes_square_sizes_square_filename_idx" ON "media" USING btree ("sizes_square_filename");
-  CREATE INDEX "media_sizes_small_sizes_small_filename_idx" ON "media" USING btree ("sizes_small_filename");
-  CREATE INDEX "media_sizes_medium_sizes_medium_filename_idx" ON "media" USING btree ("sizes_medium_filename");
-  CREATE INDEX "media_sizes_large_sizes_large_filename_idx" ON "media" USING btree ("sizes_large_filename");
-  CREATE INDEX "media_sizes_xlarge_sizes_xlarge_filename_idx" ON "media" USING btree ("sizes_xlarge_filename");
-  CREATE INDEX "media_sizes_og_sizes_og_filename_idx" ON "media" USING btree ("sizes_og_filename");
+  CREATE INDEX "media_variants_thumbnail_variants_thumbnail_filename_idx" ON "media" USING btree ("variants_thumbnail_filename");
+  CREATE INDEX "media_variants_square_variants_square_filename_idx" ON "media" USING btree ("variants_square_filename");
+  CREATE INDEX "media_variants_small_variants_small_filename_idx" ON "media" USING btree ("variants_small_filename");
+  CREATE INDEX "media_variants_medium_variants_medium_filename_idx" ON "media" USING btree ("variants_medium_filename");
+  CREATE INDEX "media_variants_large_variants_large_filename_idx" ON "media" USING btree ("variants_large_filename");
+  CREATE INDEX "media_variants_xlarge_variants_xlarge_filename_idx" ON "media" USING btree ("variants_xlarge_filename");
+  CREATE INDEX "media_variants_og_variants_og_filename_idx" ON "media" USING btree ("variants_og_filename");
   CREATE INDEX "categories_breadcrumbs_order_idx" ON "categories_breadcrumbs" USING btree ("_order");
   CREATE INDEX "categories_breadcrumbs_parent_id_idx" ON "categories_breadcrumbs" USING btree ("_parent_id");
   CREATE INDEX "categories_breadcrumbs_doc_idx" ON "categories_breadcrumbs" USING btree ("doc_id");

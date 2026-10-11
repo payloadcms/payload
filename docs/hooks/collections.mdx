@@ -90,7 +90,9 @@ The following arguments are provided to the `beforeOperation` hook:
 
 ### beforeValidate
 
-Runs during the `create` and `update` operations. This hook allows you to add or format data before the incoming data is validated server-side.
+Runs during the `create`, `update`, and `validate` operations. This hook allows you to add or format data before the incoming data is validated server-side.
+
+On-demand validation runs this hook with `operation: 'validate'` without saving the candidate. Use the `operation` argument to skip external calls and other side effects that should only run when data is saved.
 
 Please do note that this does not run before client-side validation. If you render a custom field component in your front-end and provide it with a `validate` function, the order that validations will run in is:
 
@@ -133,7 +135,9 @@ The following arguments are provided to the `beforeValidate` hook:
 
 ### beforeChange
 
-Immediately before validation, beforeChange hooks will run during create and update operations. At this stage, the data should be treated as unvalidated user input. There is no guarantee that required fields exist or that fields are in the correct format. As such, using this data for side effects requires manual validation. You can optionally modify the shape of the data to be saved.
+Immediately before validation, beforeChange hooks run during `create`, `update`, and `validate` operations. At this stage, treat the data as unvalidated user input. Required fields can be missing, and fields can have an incorrect format. You can modify the data before Payload validates it.
+
+On-demand validation runs this hook with `operation: 'validate'` but does not run `afterChange`. Use the `operation` argument to skip external calls and other side effects that should only run when data is saved.
 
 ```ts
 import type { CollectionBeforeChangeHook } from 'payload'
@@ -141,7 +145,7 @@ import type { CollectionBeforeChangeHook } from 'payload'
 export const requireTitleOnUpdate: CollectionBeforeChangeHook = async ({
   data, // Partial<T> — changed fields only
   originalDoc, // Full doc before changes (defined on update)
-  operation, // 'create' | 'update'
+  operation, // 'create' | 'update' | 'validate'
 }) => {
   // Need the id? Don't expect it in `data`.
   const id = operation === 'update' ? originalDoc.id : undefined

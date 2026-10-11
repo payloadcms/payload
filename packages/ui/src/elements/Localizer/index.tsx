@@ -3,6 +3,8 @@ import { getTranslation } from '@payloadcms/translations'
 import * as qs from 'qs-esm'
 import React, { Fragment } from 'react'
 
+import type { PopupButtonRenderProps } from '../Popup/PopupTrigger/index.js'
+
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { LanguageIcon } from '../../icons/Language/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -18,13 +20,7 @@ const baseClass = 'localizer'
 
 export const Localizer: React.FC<{
   className?: string
-  renderButton?: (props: {
-    active: boolean
-    'aria-expanded': boolean
-    'aria-haspopup': true
-    onClick: React.MouseEventHandler
-    onKeyDown: React.KeyboardEventHandler
-  }) => React.ReactNode
+  renderButton?: (props: { 'aria-label': string } & PopupButtonRenderProps) => React.ReactNode
 }> = (props) => {
   const { className, renderButton } = props
   const {
@@ -41,11 +37,17 @@ export const Localizer: React.FC<{
 
   if (localization && locale) {
     const { locales } = localization
+    const localeLabel = getTranslation(locale.label, i18n)
+    const localeAccessibleName =
+      localeLabel === locale.code
+        ? `${t('general:locale')}: ${locale.code}`
+        : `${t('general:locale')}: ${localeLabel} (${locale.code})`
 
     return (
       <div className={[baseClass, className].filter(Boolean).join(' ')}>
         <Popup
           horizontalAlign="right"
+          popupType="menu"
           render={({ close }) => (
             <PopupList.RadioGroup>
               {locales.map((localeOption) => {
@@ -54,7 +56,6 @@ export const Localizer: React.FC<{
                 return (
                   <PopupList.RadioGroupItem
                     active={locale.code === localeOption.code}
-                    disabled={locale.code === localeOption.code}
                     key={localeOption.code}
                     onClick={() => {
                       setLocaleIsLoading(true)
@@ -100,11 +101,20 @@ export const Localizer: React.FC<{
               })}
             </PopupList.RadioGroup>
           )}
-          renderButton={
-            renderButton ??
-            (({ active: _active, onClick, onKeyDown, ...ariaProps }) => (
+          renderButton={(buttonProps) => {
+            const labeledButtonProps = {
+              ...buttonProps,
+              'aria-label': localeAccessibleName,
+            }
+
+            if (renderButton) {
+              return renderButton(labeledButtonProps)
+            }
+
+            const { active: _active, onClick, onKeyDown, ...ariaProps } = labeledButtonProps
+
+            return (
               <Button
-                aria-label={t('general:locale')}
                 buttonStyle="secondary"
                 extraButtonProps={{ onKeyDown }}
                 icon={<LanguageIcon size={24} />}
@@ -117,8 +127,8 @@ export const Localizer: React.FC<{
                   <ChevronIcon size={16} />
                 </div>
               </Button>
-            ))
-          }
+            )
+          }}
           showScrollbar
         />
       </div>

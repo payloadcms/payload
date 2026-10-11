@@ -107,9 +107,9 @@ export const ExampleCollection: CollectionConfig = {
 ```tsx
 import type React from 'react'
 import { NumberField } from '@payloadcms/ui'
-import type { NumberFieldServerComponent } from 'payload'
+import type { NumberFieldServerProps } from 'payload'
 
-export const CustomNumberFieldServer: NumberFieldServerComponent = ({
+export const CustomNumberFieldServer: React.FC<NumberFieldServerProps> = ({
   clientField,
   path,
   schemaPath,
@@ -132,9 +132,11 @@ export const CustomNumberFieldServer: NumberFieldServerComponent = ({
 'use client'
 import React from 'react'
 import { NumberField } from '@payloadcms/ui'
-import type { NumberFieldClientComponent } from 'payload'
+import type { NumberFieldClientProps } from 'payload'
 
-export const CustomNumberFieldClient: NumberFieldClientComponent = (props) => {
+export const CustomNumberFieldClient: React.FC<NumberFieldClientProps> = (
+  props,
+) => {
   return <NumberField {...props} />
 }
 ```
@@ -146,12 +148,11 @@ export const CustomNumberFieldClient: NumberFieldClientComponent = (props) => {
 ```tsx
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { NumberFieldLabelServerComponent } from 'payload'
+import type { NumberFieldLabelServerProps } from 'payload'
 
-export const CustomNumberFieldLabelServer: NumberFieldLabelServerComponent = ({
-  clientField,
-  path,
-}) => {
+export const CustomNumberFieldLabelServer: React.FC<
+  NumberFieldLabelServerProps
+> = ({ clientField, path }) => {
   return (
     <FieldLabel
       label={clientField?.label || clientField?.name}
@@ -168,12 +169,11 @@ export const CustomNumberFieldLabelServer: NumberFieldLabelServerComponent = ({
 'use client'
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { NumberFieldLabelClientComponent } from 'payload'
+import type { NumberFieldLabelClientProps } from 'payload'
 
-export const CustomNumberFieldLabelClient: NumberFieldLabelClientComponent = ({
-  field,
-  path,
-}) => {
+export const CustomNumberFieldLabelClient: React.FC<
+  NumberFieldLabelClientProps
+> = ({ field, path }) => {
   return (
     <FieldLabel
       label={field?.label || field?.name}

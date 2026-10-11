@@ -192,6 +192,14 @@ export interface Post {
   customIdRelation?: (string | null) | CustomId;
   customIdNumberRelation?: (number | null) | CustomIdNumber;
   filteredRelation?: (string | null) | Relation;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -203,8 +211,50 @@ export interface Relation {
   id: string;
   name?: string | null;
   disableRelation: boolean;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -224,6 +274,14 @@ export interface StrictAccess {
   id: string;
   name?: string | null;
   disableRelation: boolean;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -235,6 +293,14 @@ export interface Chained {
   id: string;
   name?: string | null;
   relation?: (string | null) | Chained;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -245,6 +311,14 @@ export interface Chained {
 export interface CustomId {
   id: string;
   name?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -255,6 +329,14 @@ export interface CustomId {
 export interface CustomIdNumber {
   id: number;
   name?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -272,6 +354,14 @@ export interface PostsLocalized {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -286,6 +376,14 @@ export interface Director {
   movies?: (string | Movie)[] | null;
   movie?: (string | null) | Movie;
   directors?: (string | Director)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -313,6 +411,14 @@ export interface Movie {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -325,6 +431,14 @@ export interface Screening {
   id: string;
   name?: string | null;
   movie?: (string | null) | Movie;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -336,6 +450,14 @@ export interface TransitiveJoinSong {
   id: string;
   name?: string | null;
   albums?: (string | TransitiveJoinAlbum)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -351,6 +473,14 @@ export interface TransitiveJoinAlbum {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -365,6 +495,14 @@ export interface TransitiveJoinArtist {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -377,33 +515,16 @@ export interface MovieReview {
   movieReviewer: string | User;
   likes?: (string | User)[] | null;
   visibility: 'followers' | 'public';
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -431,6 +552,14 @@ export interface PolymorphicRelationship {
         value: string | Movie;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -442,6 +571,14 @@ export interface Tree {
   id: string;
   text?: string | null;
   parent?: (string | null) | Tree;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -457,6 +594,14 @@ export interface Page {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -467,6 +612,14 @@ export interface Page {
 export interface RelsToPage {
   id: string;
   page?: (string | null) | Page;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -489,6 +642,14 @@ export interface RelsToPagesAndCustomTextId {
         relationTo: 'custom-id-number';
         value: number | CustomIdNumber;
       } | null);
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -510,6 +671,14 @@ export interface ObjectWrite {
         value: string | Movie;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -522,6 +691,14 @@ export interface DeepNested {
   content?: {
     blocks?: TestBlock[] | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -547,6 +724,14 @@ export interface Relation1 {
     relationTo: 'items';
     value: string | Item;
   } | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -562,6 +747,14 @@ export interface Item {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -572,6 +765,14 @@ export interface Item {
 export interface Block1 {
   id: string;
   blocks?: Some[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -778,6 +979,8 @@ export interface PostsSelect<T extends boolean = true> {
   customIdRelation?: T;
   customIdNumberRelation?: T;
   filteredRelation?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -794,6 +997,8 @@ export interface PostsLocalizedSelect<T extends boolean = true> {
         director?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -804,6 +1009,8 @@ export interface PostsLocalizedSelect<T extends boolean = true> {
 export interface RelationSelect<T extends boolean = true> {
   name?: T;
   disableRelation?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -814,6 +1021,8 @@ export interface RelationSelect<T extends boolean = true> {
 export interface StrictAccessSelect<T extends boolean = true> {
   name?: T;
   disableRelation?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -824,6 +1033,8 @@ export interface StrictAccessSelect<T extends boolean = true> {
 export interface ChainedSelect<T extends boolean = true> {
   name?: T;
   relation?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -834,6 +1045,8 @@ export interface ChainedSelect<T extends boolean = true> {
 export interface CustomIdSelect<T extends boolean = true> {
   id?: T;
   name?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -844,6 +1057,8 @@ export interface CustomIdSelect<T extends boolean = true> {
 export interface CustomIdNumberSelect<T extends boolean = true> {
   id?: T;
   name?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -854,6 +1069,8 @@ export interface CustomIdNumberSelect<T extends boolean = true> {
 export interface ScreeningsSelect<T extends boolean = true> {
   name?: T;
   movie?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -873,6 +1090,8 @@ export interface MoviesSelect<T extends boolean = true> {
         polymorphic?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -887,6 +1106,8 @@ export interface DirectorsSelect<T extends boolean = true> {
   movies?: T;
   movie?: T;
   directors?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -897,6 +1118,8 @@ export interface DirectorsSelect<T extends boolean = true> {
 export interface TransitiveJoinSongsSelect<T extends boolean = true> {
   name?: T;
   albums?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -907,6 +1130,8 @@ export interface TransitiveJoinSongsSelect<T extends boolean = true> {
 export interface TransitiveJoinAlbumsSelect<T extends boolean = true> {
   artist?: T;
   song?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -916,6 +1141,8 @@ export interface TransitiveJoinAlbumsSelect<T extends boolean = true> {
  */
 export interface TransitiveJoinArtistsSelect<T extends boolean = true> {
   album?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -927,6 +1154,8 @@ export interface MovieReviewsSelect<T extends boolean = true> {
   movieReviewer?: T;
   likes?: T;
   visibility?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -939,6 +1168,8 @@ export interface PolymorphicRelationshipsSelect<T extends boolean = true> {
   polymorphicLocalized?: T;
   polymorphicMany?: T;
   polymorphicManyLocalized?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -949,6 +1180,8 @@ export interface PolymorphicRelationshipsSelect<T extends boolean = true> {
 export interface TreeSelect<T extends boolean = true> {
   text?: T;
   parent?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -963,6 +1196,8 @@ export interface PagesSelect<T extends boolean = true> {
         label?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -972,6 +1207,8 @@ export interface PagesSelect<T extends boolean = true> {
  */
 export interface RelsToPagesSelect<T extends boolean = true> {
   page?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -981,6 +1218,8 @@ export interface RelsToPagesSelect<T extends boolean = true> {
  */
 export interface RelsToPagesAndCustomTextIdsSelect<T extends boolean = true> {
   rel?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -993,6 +1232,8 @@ export interface ObjectWritesSelect<T extends boolean = true> {
   many?: T;
   onePoly?: T;
   manyPoly?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1020,6 +1261,8 @@ export interface DeepNestedSelect<T extends boolean = true> {
                   };
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1029,6 +1272,8 @@ export interface DeepNestedSelect<T extends boolean = true> {
  */
 export interface RelationsSelect<T extends boolean = true> {
   item?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1039,6 +1284,8 @@ export interface RelationsSelect<T extends boolean = true> {
 export interface ItemsSelect<T extends boolean = true> {
   status?: T;
   relation?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1059,6 +1306,8 @@ export interface BlocksSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1075,6 +1324,8 @@ export interface PayloadKvSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1082,6 +1333,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:

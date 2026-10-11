@@ -93,6 +93,7 @@ export const registerFirstUserOperation = async <TSlug extends AuthCollectionSlu
         data: {
           _verified: true,
         },
+        overrideAccess: true,
         req,
       })
     }

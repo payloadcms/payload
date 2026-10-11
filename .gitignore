@@ -6,19 +6,20 @@ dist
 /.idea/runConfigurations/_template*
 !/.idea/payload.iml
 .pnpm-store
+*.code-workspace
 
 # Local AI Agent files
 AGENTS.local.md
 CLAUDE.local.md
 .claude/commands/*.local.md
 .claude/artifacts
-.claude/skills/add-config-custom-component/
-.claude/skills/check-payload-patterns/
-.claude/skills/log-pattern/
-.claude/skills/payload-hooks/
-.claude/skills/payload-operations/
-.claude/skills/refactoring/
-.claude/skills/writing-scss/
+.agents/skills/add-config-custom-component/
+.agents/skills/check-payload-patterns/
+.agents/skills/log-pattern/
+.agents/skills/payload-hooks/
+.agents/skills/payload-operations/
+.agents/skills/refactoring/
+.agents/skills/writing-scss/
 .worktrees/
 
 # Custom actions

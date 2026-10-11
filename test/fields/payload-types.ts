@@ -189,6 +189,7 @@ export interface Config {
   };
   blocks: {
     ConfigBlockTest: ConfigBlockTest;
+    conditionalReference: ConditionalReference;
     localizedTextReference: LocalizedTextReference;
     localizedTextReference2: LocalizedTextReference2;
   };
@@ -331,6 +332,26 @@ export interface ConfigBlockTest {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ConditionalReference".
+ */
+export interface ConditionalReference {
+  testBlocks?: TestBlock[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'conditionalReference';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestBlock".
+ */
+export interface TestBlock {
+  testField?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'testBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LocalizedTextReference".
  */
 export interface LocalizedTextReference {
@@ -356,6 +377,14 @@ export interface LocalizedTextReference2 {
 export interface User {
   id: string;
   canViewConditionalField?: boolean | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -363,6 +392,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -389,6 +419,14 @@ export interface SelectVersionsField {
       }[]
     | null;
   blocks?: Block[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -511,6 +549,14 @@ export interface ArrayField {
         text?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -559,6 +605,13 @@ export interface BlockField {
   blockWithLabels?: Text[] | null;
   deduplicatedBlocks?: ConfigBlockTest[] | null;
   deduplicatedBlocks2?: ConfigBlockTest[] | null;
+  configuration?: ConditionalReference[] | null;
+  showConditionalFields?: boolean | null;
+  conditionalGroup?: {
+    conditionalConfiguration?: ConditionalReference[] | null;
+  };
+  showInlineBlocks?: boolean | null;
+  testBlocks?: TestBlock[] | null;
   localizedReferencesLocalizedBlock?: LocalizedTextReference[] | null;
   localizedReferences?: LocalizedTextReference2[] | null;
   /**
@@ -572,6 +625,14 @@ export interface BlockField {
   enabledBlocks?: string | null;
   blocksWithDynamicFilterOptions?: (BlockOne | BlockTwo | BlockThree)[] | null;
   blocksWithFilterOptions?: (BlockFour | BlockFive | BlockSix)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -860,6 +921,14 @@ export interface TextField {
       }[]
     | null;
   blocks?: BlockWithText[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1002,6 +1071,14 @@ export interface CheckboxField {
   checkbox: boolean;
   checkboxNotRequired?: boolean | null;
   checkboxRequiresTrue?: boolean | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1017,6 +1094,14 @@ export interface CodeField {
   html?: string | null;
   css?: string | null;
   codeWithPadding?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1050,6 +1135,14 @@ export interface CollapsibleField {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1120,6 +1213,14 @@ export interface ConditionalLogic {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1151,6 +1252,14 @@ export interface BlockWithRadioCondition {
  */
 export interface CustomId {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1165,6 +1274,14 @@ export interface CustomIdNested {
   id: number;
   title: string;
   description?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1174,6 +1291,14 @@ export interface CustomIdNested {
  */
 export interface CustomTabId {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1183,6 +1308,14 @@ export interface CustomTabId {
  */
 export interface CustomRowId {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1238,6 +1371,14 @@ export interface DateField {
   dateWithTimezoneNoDefault_tz?: ('America/New_York' | 'Europe/London' | 'UTC') | null;
   dateWithTimezoneWithDisabledColumns?: string | null;
   dateWithTimezoneWithDisabledColumns_tz?: SupportedTimezones;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1279,6 +1420,14 @@ export interface DuplicateField {
     | null;
   disabledLocalizedText?: string | null;
   disabledHookText?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1314,6 +1463,14 @@ export interface EmailField {
   beforeAndAfterInput?: string | null;
   disableListColumnText?: string | null;
   disableListFilterText?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1325,6 +1482,14 @@ export interface RadioField {
   id: string;
   radio: 'one' | 'two' | 'three';
   radioWithJsxLabelOption?: ('one' | 'two' | 'three') | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1439,6 +1604,14 @@ export interface GroupField {
   deeplyNestedGroup?: {
     insideNestedUnnamedGroup?: string | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1474,6 +1647,14 @@ export interface RowField {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1553,6 +1734,14 @@ export interface IndexedField {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1594,6 +1783,14 @@ export interface JsonField {
     | number
     | boolean
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1622,6 +1819,14 @@ export interface NumberField {
       }[]
     | null;
   blocks?: BlockWithNumber[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1663,6 +1868,14 @@ export interface PointField {
      */
     point?: [number, number] | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1749,6 +1962,14 @@ export interface RelationshipField {
     relationTo: 'text-fields';
     value: string | TextField;
   } | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1781,6 +2002,14 @@ export interface SelectField {
   selectWithFilteredOptions?: ('one' | 'two' | 'three') | null;
   disallowOption2?: boolean | null;
   selectAsyncFilterOptions?: ('one' | 'two' | 'three') | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1799,6 +2028,14 @@ export interface SlugField {
   readOnlySlug?: string | null;
   sourcelessSlug?: string | null;
   test?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1813,6 +2050,14 @@ export interface SlugFieldAccess {
   localizedTitle?: string | null;
   localizedSlug: string;
   sourcelessSlug: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1826,6 +2071,14 @@ export interface SlugAutosave {
   slug: string;
   localizedTitle?: string | null;
   localizedSlug: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1845,6 +2098,14 @@ export interface TabsFields2 {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1929,6 +2190,14 @@ export interface TabsField {
   nestedTab?: {
     text?: string | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1979,6 +2248,14 @@ export interface TextareaField {
   fieldWithDefaultValue?: string | null;
   dependentOnFieldWithDefaultValue?: string | null;
   defaultValueFromReq?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1990,6 +2267,14 @@ export interface Upload {
   id: string;
   text?: string | null;
   media?: (string | null) | Upload;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -2010,6 +2295,14 @@ export interface Uploads2 {
   id: string;
   text?: string | null;
   media?: (string | null) | Uploads2;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -2029,6 +2322,14 @@ export interface Uploads2 {
 export interface Uploads3 {
   id: string;
   media?: (string | null) | Uploads3;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -2049,6 +2350,14 @@ export interface UploadsMulti {
   id: string;
   text?: string | null;
   media?: (string | Upload)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2068,6 +2377,14 @@ export interface UploadsPoly {
         relationTo: 'uploads2';
         value: string | Uploads2;
       } | null);
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2090,6 +2407,14 @@ export interface UploadsMultiPoly {
           }
       )[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2103,6 +2428,14 @@ export interface UploadsRestricted {
   uploadWithoutRestriction?: (string | null) | Upload;
   uploadWithAllowCreateFalse?: (string | null) | Upload;
   uploadMultipleWithAllowCreateFalse?: (string | Upload)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2113,6 +2446,14 @@ export interface UploadsRestricted {
 export interface UiField {
   id: string;
   text: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2344,6 +2685,8 @@ export interface PayloadMigration {
  */
 export interface UsersSelect<T extends boolean = true> {
   canViewConditionalField?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -2351,6 +2694,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -2384,6 +2728,8 @@ export interface SelectVersionsFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -2498,6 +2844,8 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
         id?: T;
         text?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2702,6 +3050,25 @@ export interface BlockFieldsSelect<T extends boolean = true> {
       };
   deduplicatedBlocks?: T | {};
   deduplicatedBlocks2?: T | {};
+  configuration?: T | {};
+  showConditionalFields?: T;
+  conditionalGroup?:
+    | T
+    | {
+        conditionalConfiguration?: T | {};
+      };
+  showInlineBlocks?: T;
+  testBlocks?:
+    | T
+    | {
+        testBlock?:
+          | T
+          | {
+              testField?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   localizedReferencesLocalizedBlock?: T | {};
   localizedReferences?: T | {};
   groupedBlocks?:
@@ -2798,6 +3165,8 @@ export interface BlockFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2943,6 +3312,8 @@ export interface CheckboxFieldsSelect<T extends boolean = true> {
   checkbox?: T;
   checkboxNotRequired?: T;
   checkboxRequiresTrue?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2957,6 +3328,8 @@ export interface CodeFieldsSelect<T extends boolean = true> {
   html?: T;
   css?: T;
   codeWithPadding?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2997,6 +3370,8 @@ export interface CollapsibleFieldsSelect<T extends boolean = true> {
         innerCollapsible?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3088,6 +3463,8 @@ export interface ConditionalLogicSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3097,6 +3474,8 @@ export interface ConditionalLogicSelect<T extends boolean = true> {
  */
 export interface CustomIdSelect<T extends boolean = true> {
   id?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3108,6 +3487,8 @@ export interface CustomIdNestedSelect<T extends boolean = true> {
   id?: T;
   title?: T;
   description?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3117,6 +3498,8 @@ export interface CustomIdNestedSelect<T extends boolean = true> {
  */
 export interface CustomTabIdSelect<T extends boolean = true> {
   id?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3126,6 +3509,8 @@ export interface CustomTabIdSelect<T extends boolean = true> {
  */
 export interface CustomRowIdSelect<T extends boolean = true> {
   id?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3190,6 +3575,8 @@ export interface DateFieldsSelect<T extends boolean = true> {
   dateWithTimezoneNoDefault_tz?: T;
   dateWithTimezoneWithDisabledColumns?: T;
   dateWithTimezoneWithDisabledColumns_tz?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3231,6 +3618,8 @@ export interface DuplicateFieldsSelect<T extends boolean = true> {
       };
   disabledLocalizedText?: T;
   disabledHookText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3252,6 +3641,8 @@ export interface EmailFieldsSelect<T extends boolean = true> {
   beforeAndAfterInput?: T;
   disableListColumnText?: T;
   disableListFilterText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3262,6 +3653,8 @@ export interface EmailFieldsSelect<T extends boolean = true> {
 export interface RadioFieldsSelect<T extends boolean = true> {
   radio?: T;
   radioWithJsxLabelOption?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3404,6 +3797,8 @@ export interface GroupFieldsSelect<T extends boolean = true> {
     | {
         insideNestedUnnamedGroup?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3459,6 +3854,8 @@ export interface RowFieldsSelect<T extends boolean = true> {
         rightArrayChild?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3495,6 +3892,8 @@ export interface IndexedFieldsSelect<T extends boolean = true> {
         text?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3510,6 +3909,8 @@ export interface JsonFieldsSelect<T extends boolean = true> {
         jsonWithinGroup?: T;
       };
   customJSON?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3547,6 +3948,8 @@ export interface NumberFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3563,6 +3966,8 @@ export interface PointFieldsSelect<T extends boolean = true> {
     | {
         point?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3599,6 +4004,8 @@ export interface RelationshipFieldsSelect<T extends boolean = true> {
   relationshipDrawerHasManyPolymorphic?: T;
   relationshipDrawerWithAllowCreateFalse?: T;
   relationshipDrawerWithFilterOptions?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3634,6 +4041,8 @@ export interface SelectFieldsSelect<T extends boolean = true> {
   selectWithFilteredOptions?: T;
   disallowOption2?: T;
   selectAsyncFilterOptions?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3651,6 +4060,8 @@ export interface SlugFieldsSelect<T extends boolean = true> {
   readOnlySlug?: T;
   sourcelessSlug?: T;
   test?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3664,6 +4075,8 @@ export interface SlugFieldAccessSelect<T extends boolean = true> {
   localizedTitle?: T;
   localizedSlug?: T;
   sourcelessSlug?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3676,6 +4089,8 @@ export interface SlugAutosaveSelect<T extends boolean = true> {
   slug?: T;
   localizedTitle?: T;
   localizedSlug?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -3696,6 +4111,8 @@ export interface TabsFields2Select<T extends boolean = true> {
             };
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3791,6 +4208,8 @@ export interface TabsFieldsSelect<T extends boolean = true> {
     | {
         text?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3858,6 +4277,8 @@ export interface TextFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3880,6 +4301,8 @@ export interface TextareaFieldsSelect<T extends boolean = true> {
   fieldWithDefaultValue?: T;
   dependentOnFieldWithDefaultValue?: T;
   defaultValueFromReq?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3890,6 +4313,8 @@ export interface TextareaFieldsSelect<T extends boolean = true> {
 export interface UploadsSelect<T extends boolean = true> {
   text?: T;
   media?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3909,6 +4334,8 @@ export interface UploadsSelect<T extends boolean = true> {
 export interface Uploads2Select<T extends boolean = true> {
   text?: T;
   media?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3927,6 +4354,8 @@ export interface Uploads2Select<T extends boolean = true> {
  */
 export interface Uploads3Select<T extends boolean = true> {
   media?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3946,6 +4375,8 @@ export interface Uploads3Select<T extends boolean = true> {
 export interface UploadsMultiSelect<T extends boolean = true> {
   text?: T;
   media?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3956,6 +4387,8 @@ export interface UploadsMultiSelect<T extends boolean = true> {
 export interface UploadsPolySelect<T extends boolean = true> {
   text?: T;
   media?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3966,6 +4399,8 @@ export interface UploadsPolySelect<T extends boolean = true> {
 export interface UploadsMultiPolySelect<T extends boolean = true> {
   text?: T;
   media?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3978,6 +4413,8 @@ export interface UploadsRestrictedSelect<T extends boolean = true> {
   uploadWithoutRestriction?: T;
   uploadWithAllowCreateFalse?: T;
   uploadMultipleWithAllowCreateFalse?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3987,6 +4424,8 @@ export interface UploadsRestrictedSelect<T extends boolean = true> {
  */
 export interface UiFieldsSelect<T extends boolean = true> {
   text?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }

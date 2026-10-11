@@ -5,6 +5,8 @@ import { stringify } from 'csv-stringify/sync'
 import { APIError } from 'payload'
 import { Readable } from 'stream'
 
+import type { ExportDoc } from '../types.js'
+
 import { applyFieldHooks } from '../utilities/applyFieldHooks.js'
 import { buildDisabledFieldRegex } from '../utilities/buildDisabledFieldRegex.js'
 import { flattenObject } from '../utilities/flattenObject.js'
@@ -52,6 +54,7 @@ export type CreateExportArgs = {
    * If true, stream the file instead of saving it
    */
   download?: boolean
+  exportDoc: ExportDoc
   req: PayloadRequest
 } & Export
 
@@ -65,6 +68,7 @@ export const createExport = async (args: CreateExportArgs) => {
     download,
     drafts: draftsFromInput,
     exportCollection,
+    exportDoc,
     fields,
     format,
     limit: incomingLimit,
@@ -351,6 +355,7 @@ export const createExport = async (args: CreateExportArgs) => {
             batchRowsToWrite = await exportHooks.before({
               batchNumber: streamBatchNumber,
               data: batchRows,
+              exportDoc,
               format,
               originalData: originalDocs,
               req,
@@ -409,6 +414,7 @@ export const createExport = async (args: CreateExportArgs) => {
             await exportHooks.after({
               batchNumber: streamBatchNumber,
               data: batchRowsToWrite,
+              exportDoc,
               format,
               originalData: originalDocs,
               req,
@@ -438,6 +444,7 @@ export const createExport = async (args: CreateExportArgs) => {
             batchRowsToWrite = await exportHooks.before({
               batchNumber: streamBatchNumber,
               data: batchRows,
+              exportDoc,
               format,
               originalData: originalDocs,
               req,
@@ -458,6 +465,7 @@ export const createExport = async (args: CreateExportArgs) => {
             await exportHooks.after({
               batchNumber: streamBatchNumber,
               data: batchRowsToWrite,
+              exportDoc,
               format,
               originalData: originalDocs,
               req,
@@ -532,6 +540,7 @@ export const createExport = async (args: CreateExportArgs) => {
   if (!accessDenied) {
     exportResult = await processor.processExport({
       collectionSlug,
+      exportDoc,
       findArgs: findArgs as ExportFindArgs,
       format,
       hooks: exportHooks,

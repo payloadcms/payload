@@ -43,7 +43,7 @@ export type Test = {
 }
 type Tests = Array<Test>
 
-test.suite({ config: './config.ts' })('Lexical MDX', () => {
+test.suite('Lexical MDX', { config: './config.ts' }, () => {
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
@@ -149,7 +149,7 @@ test.suite({ config: './config.ts' })('Lexical MDX', () => {
                   {
                     format: '',
                     type: 'block',
-                    version: 2,
+                    version: 1,
                     ...blockNode,
                   },
                 ]

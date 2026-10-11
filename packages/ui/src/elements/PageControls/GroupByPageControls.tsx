@@ -13,7 +13,8 @@ import { SimplePagination } from '../Pagination/SimplePagination/index.js'
 export const GroupByPageControls: React.FC<{
   data: PaginatedDocs
   groupByValue?: number | string
-}> = ({ data, groupByValue }) => {
+  tableId: string
+}> = ({ data, groupByValue, tableId }) => {
   const { refineListData } = useListQuery()
 
   const handlePageChange = useCallback(
@@ -29,5 +30,5 @@ export const GroupByPageControls: React.FC<{
     [refineListData, groupByValue],
   )
 
-  return <SimplePagination data={data} onChange={handlePageChange} />
+  return <SimplePagination data={data} onChange={handlePageChange} tableId={tableId} />
 }

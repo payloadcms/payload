@@ -104,9 +104,9 @@ export const ExampleCollection: CollectionConfig = {
 ```tsx
 import type React from 'react'
 import { TextField } from '@payloadcms/ui'
-import type { TextFieldServerComponent } from 'payload'
+import type { TextFieldServerProps } from 'payload'
 
-export const CustomTextFieldServer: TextFieldServerComponent = ({
+export const CustomTextFieldServer: React.FC<TextFieldServerProps> = ({
   clientField,
   path,
   schemaPath,
@@ -129,9 +129,11 @@ export const CustomTextFieldServer: TextFieldServerComponent = ({
 'use client'
 import React from 'react'
 import { TextField } from '@payloadcms/ui'
-import type { TextFieldClientComponent } from 'payload'
+import type { TextFieldClientProps } from 'payload'
 
-export const CustomTextFieldClient: TextFieldClientComponent = (props) => {
+export const CustomTextFieldClient: React.FC<TextFieldClientProps> = (
+  props,
+) => {
   return <TextField {...props} />
 }
 ```
@@ -143,13 +145,11 @@ export const CustomTextFieldClient: TextFieldClientComponent = (props) => {
 ```tsx
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { TextFieldLabelServerComponent } from 'payload'
+import type { TextFieldLabelServerProps } from 'payload'
 
-export const CustomTextFieldLabelServer: TextFieldLabelServerComponent = ({
-  clientField,
-  path,
-  required,
-}) => {
+export const CustomTextFieldLabelServer: React.FC<
+  TextFieldLabelServerProps
+> = ({ clientField, path, required }) => {
   return (
     <FieldLabel
       label={clientField?.label || clientField?.name}
@@ -166,12 +166,11 @@ export const CustomTextFieldLabelServer: TextFieldLabelServerComponent = ({
 'use client'
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { TextFieldLabelClientComponent } from 'payload'
+import type { TextFieldLabelClientProps } from 'payload'
 
-export const CustomTextFieldLabelClient: TextFieldLabelClientComponent = ({
-  field,
-  path,
-}) => {
+export const CustomTextFieldLabelClient: React.FC<
+  TextFieldLabelClientProps
+> = ({ field, path }) => {
   return (
     <FieldLabel
       label={field?.label || field?.name}

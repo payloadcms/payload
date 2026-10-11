@@ -14,7 +14,7 @@ const clearMigrations = () => {
   }
 }
 
-test.suite({ db: (adapter) => adapter === 'postgres' })('SQL migrations', () => {
+test.suite('SQL migrations', { db: (adapter) => adapter === 'postgres' }, () => {
   // If something fails - an error will be thrown.
   test('should up and down migration successfully', async () => {
     clearMigrations()

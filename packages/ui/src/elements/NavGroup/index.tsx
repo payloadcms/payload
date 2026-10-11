@@ -47,6 +47,7 @@ export const NavGroup: React.FC<Props> = ({ children, isOpen: isOpenFromProps, l
         id={`nav-group-${label}`}
       >
         <button
+          aria-expanded={!collapsed}
           className={[
             `${baseClass}__toggle`,
             `${baseClass}__toggle--${collapsed ? 'collapsed' : 'open'}`,

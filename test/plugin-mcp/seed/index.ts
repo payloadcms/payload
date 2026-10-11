@@ -10,12 +10,14 @@ export const seed = async (payload: Payload) => {
         equals: devUser.email,
       },
     },
+    overrideAccess: true,
   })
 
   if (!totalDocs) {
     await payload.create({
       collection: 'users',
       data: devUser,
+      overrideAccess: true,
     })
   }
 }

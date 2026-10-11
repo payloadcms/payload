@@ -14,5 +14,5 @@ export const MediaHeaderOnly: CollectionConfig = {
   upload: {
     disableLocalStorage: true,
   },
-  versions: false,
+  versions: true,
 }

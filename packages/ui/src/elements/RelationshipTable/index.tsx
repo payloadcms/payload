@@ -26,6 +26,7 @@ import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { ListColumnSelectionButton } from '../ListColumnSelectionButton/index.js'
 import { NoListResults } from '../NoListResults/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
+import { TableIdentityProvider } from '../Table/TableIdentity.js'
 import { AddNewButton } from './AddNewButton.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
 import { RelationshipTablePagination } from './Pagination.js'
@@ -364,101 +365,103 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const columnsButton = <ListColumnSelectionButton collectionSlug={collectionConfig?.slug} />
 
   return (
-    <div className={baseClass}>
-      {isLoadingTable ? (
-        <Fragment>
-          <div className={`${baseClass}__header`}>
-            {Label}
-            <div className={`${baseClass}__actions`}>{addNewButton}</div>
-            {Description}
-          </div>
-          {BeforeInput}
-          <p>{t('general:loading')}</p>
-        </Fragment>
-      ) : (
-        <Fragment>
-          {data?.docs && data.docs.length === 0 && (
-            <Fragment>
-              <div className={`${baseClass}__header`}>
-                {Label}
-                <div className={`${baseClass}__actions`}>{addNewButton}</div>
-                {Description}
-              </div>
-              {BeforeInput}
-              <NoListResults
-                Actions={
-                  canCreate
-                    ? [
-                        <AddNewButton
-                          allowCreate={canCreate}
-                          baseClass={baseClass}
-                          collections={config.collections}
-                          i18n={i18n}
-                          key="create"
-                          label={i18n.t('general:createNewLabel', {
-                            label: isPolymorphic
-                              ? i18n.t('general:document')
-                              : getTranslation(collectionConfig?.labels?.singular, i18n),
-                          })}
-                          onClick={isPolymorphic ? setSelectedCollection : openDrawer}
-                          permissions={permissions}
-                          relationTo={relationTo}
-                        />,
-                      ]
-                    : []
-                }
-                description={i18n.t('general:noResults', {
-                  label: isPolymorphic
-                    ? i18n.t('general:documents')
-                    : getTranslation(collectionConfig?.labels?.plural, i18n),
-                })}
-                title={i18n.t('general:noResultsFound')}
-              />
-            </Fragment>
-          )}
-          {data?.docs && data.docs.length > 0 && (
-            <RelationshipProvider>
-              <ListQueryProvider
-                data={data}
-                modifySearchParams={false}
-                onQueryChange={setQuery}
-                orderableFieldName={
-                  !field.orderable || Array.isArray(field.collection)
-                    ? undefined
-                    : `_${field.collection}_${fieldPath.replaceAll('.', '_')}_order`
-                }
-                query={memoizedListQuery}
-              >
-                <TableColumnsProvider
-                  collectionSlug={isPolymorphic ? relationTo[0] : relationTo}
-                  columnState={columnState}
-                  LinkedCellOverride={
-                    <DrawerLink currentDrawerID={currentDrawerID} onDrawerOpen={onDrawerOpen} />
+    <TableIdentityProvider collectionSlug={isPolymorphic ? 'results' : relationTo}>
+      <div className={baseClass}>
+        {isLoadingTable ? (
+          <Fragment>
+            <div className={`${baseClass}__header`}>
+              {Label}
+              <div className={`${baseClass}__actions`}>{addNewButton}</div>
+              {Description}
+            </div>
+            {BeforeInput}
+            <p>{t('general:loading')}</p>
+          </Fragment>
+        ) : (
+          <Fragment>
+            {data?.docs && data.docs.length === 0 && (
+              <Fragment>
+                <div className={`${baseClass}__header`}>
+                  {Label}
+                  <div className={`${baseClass}__actions`}>{addNewButton}</div>
+                  {Description}
+                </div>
+                {BeforeInput}
+                <NoListResults
+                  Actions={
+                    canCreate
+                      ? [
+                          <AddNewButton
+                            allowCreate={canCreate}
+                            baseClass={baseClass}
+                            collections={config.collections}
+                            i18n={i18n}
+                            key="create"
+                            label={i18n.t('general:createNewLabel', {
+                              label: isPolymorphic
+                                ? i18n.t('general:document')
+                                : getTranslation(collectionConfig?.labels?.singular, i18n),
+                            })}
+                            onClick={isPolymorphic ? setSelectedCollection : openDrawer}
+                            permissions={permissions}
+                            relationTo={relationTo}
+                          />,
+                        ]
+                      : []
                   }
+                  description={i18n.t('general:noResults', {
+                    label: isPolymorphic
+                      ? i18n.t('general:documents')
+                      : getTranslation(collectionConfig?.labels?.plural, i18n),
+                  })}
+                  title={i18n.t('general:noResultsFound')}
+                />
+              </Fragment>
+            )}
+            {data?.docs && data.docs.length > 0 && (
+              <RelationshipProvider>
+                <ListQueryProvider
+                  data={data}
+                  modifySearchParams={false}
+                  onQueryChange={setQuery}
+                  orderableFieldName={
+                    !field.orderable || Array.isArray(field.collection)
+                      ? undefined
+                      : `_${field.collection}_${fieldPath.replaceAll('.', '_')}_order`
+                  }
+                  query={memoizedListQuery}
                 >
-                  <div className={`${baseClass}__header`}>
-                    {Label}
-                    <div className={`${baseClass}__actions`}>
-                      {addNewButton}
-                      {columnsButton}
+                  <TableColumnsProvider
+                    collectionSlug={isPolymorphic ? relationTo[0] : relationTo}
+                    columnState={columnState}
+                    LinkedCellOverride={
+                      <DrawerLink currentDrawerID={currentDrawerID} onDrawerOpen={onDrawerOpen} />
+                    }
+                  >
+                    <div className={`${baseClass}__header`}>
+                      {Label}
+                      <div className={`${baseClass}__actions`}>
+                        {addNewButton}
+                        {columnsButton}
+                      </div>
+                      {Description}
                     </div>
-                    {Description}
-                  </div>
-                  {BeforeInput}
-                  {Table}
-                  <RelationshipTablePagination />
-                </TableColumnsProvider>
-              </ListQueryProvider>
-            </RelationshipProvider>
-          )}
-        </Fragment>
-      )}
-      {AfterInput}
-      <DocumentDrawer
-        initialData={initialDrawerData}
-        onDelete={onDrawerDelete}
-        onSave={onDrawerSave}
-      />
-    </div>
+                    {BeforeInput}
+                    {Table}
+                    <RelationshipTablePagination />
+                  </TableColumnsProvider>
+                </ListQueryProvider>
+              </RelationshipProvider>
+            )}
+          </Fragment>
+        )}
+        {AfterInput}
+        <DocumentDrawer
+          initialData={initialDrawerData}
+          onDelete={onDrawerDelete}
+          onSave={onDrawerSave}
+        />
+      </div>
+    </TableIdentityProvider>
   )
 }

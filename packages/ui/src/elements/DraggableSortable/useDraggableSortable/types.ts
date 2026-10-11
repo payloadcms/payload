@@ -7,6 +7,7 @@ export type UseDraggableSortableReturn = {
   readonly isOver?: boolean
   readonly isSorting?: boolean
   readonly listeners: SyntheticListenerMap
+  readonly setActivatorNodeRef?: (node: HTMLElement | null) => void
   readonly setNodeRef: (node: HTMLElement | null) => void
   readonly transform: string
   readonly transition: string

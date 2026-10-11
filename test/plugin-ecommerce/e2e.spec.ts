@@ -55,6 +55,7 @@ test.describe('Ecommerce Plugin', () => {
         priceInUSD: 1999,
         priceInUSDEnabled: true,
       },
+      overrideAccess: true,
     })
     productWithPriceId = productWithPrice.id
     createdProductIDs.push(productWithPriceId)
@@ -67,6 +68,7 @@ test.describe('Ecommerce Plugin', () => {
         priceInUSD: 0,
         priceInUSDEnabled: true,
       },
+      overrideAccess: true,
     })
     zeroPriceProductId = zeroPriceProduct.id
     createdProductIDs.push(zeroPriceProductId)
@@ -77,6 +79,7 @@ test.describe('Ecommerce Plugin', () => {
       data: {
         name: 'No-price product',
       },
+      overrideAccess: true,
     })
     noPriceProductId = noPriceProduct.id
     createdProductIDs.push(noPriceProductId)
@@ -85,6 +88,7 @@ test.describe('Ecommerce Plugin', () => {
     const seededVariants = await payload.find({
       collection: 'variants',
       limit: 1,
+      overrideAccess: true,
       where: { priceInUSD: { equals: 1999 } },
     })
 
@@ -95,7 +99,7 @@ test.describe('Ecommerce Plugin', () => {
 
   test.afterAll(async () => {
     for (const id of createdProductIDs) {
-      await payload.delete({ id, collection: 'products' }).catch(() => {})
+      await payload.delete({ id, collection: 'products', overrideAccess: true }).catch(() => {})
     }
   })
 
@@ -175,6 +179,7 @@ test.describe('Ecommerce Plugin', () => {
           priceInUSD: 999,
           priceInUSDEnabled: true,
         },
+        overrideAccess: true,
       })
       createdProductIDs.push(editableProduct.id)
 
@@ -201,6 +206,7 @@ test.describe('Ecommerce Plugin', () => {
 
       const updatedProductResult = await payload.find({
         collection: 'products',
+        overrideAccess: true,
         where: { id: { equals: editableProduct.id } },
       })
       expect(updatedProductResult.docs[0]?.priceInUSD).toBe(2499)

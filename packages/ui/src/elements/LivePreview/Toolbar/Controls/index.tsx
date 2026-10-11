@@ -44,6 +44,7 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
         <Popup
           className={`${baseClass}__breakpoint`}
           horizontalAlign="right"
+          popupType="menu"
           render={({ close }) => (
             <PopupList.RadioGroup>
               <React.Fragment>
@@ -92,6 +93,7 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
         <Popup
           className={`${baseClass}__zoom`}
           horizontalAlign="right"
+          popupType="menu"
           render={({ close }) => (
             <PopupList.RadioGroup>
               <React.Fragment>
@@ -114,7 +116,12 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
             </PopupList.RadioGroup>
           )}
           renderButton={(buttonProps) => (
-            <Button {...buttonProps} buttonStyle="pill" icon={<ChevronIcon size={16} />}>
+            <Button
+              {...buttonProps}
+              aria-label={`Zoom ${zoom * 100}%`}
+              buttonStyle="pill"
+              icon={<ChevronIcon size={16} />}
+            >
               <span className={`${baseClass}__zoom-percentage`}>%</span>
               {zoom * 100}
             </Button>

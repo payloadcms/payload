@@ -12,7 +12,7 @@ import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 
-test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration', () => {
+test.suite('localizeStatus migration', { config: './localizeStatus.config.ts' }, () => {
   test.beforeEach(async () => {
     if (process.env.PAYLOAD_DATABASE === 'mongodb' || !process.env.PAYLOAD_DATABASE) {
       // Wait for MongoDB to finish building indexes to avoid
@@ -21,7 +21,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
     }
   })
 
-  test.options({ db: (adapter) => adapter === 'postgres' }).describe('PostgreSQL', () => {
+  test.options.describe('PostgreSQL', { db: (adapter) => adapter === 'postgres' }, () => {
     // Reset both test collections to their pre-migration database shape before every
     // scenario so each test is self-contained and order-independent. Real users' databases
     // will be in this pre-migration state; the runtime schema (localizeStatus auto-inferred)
@@ -82,6 +82,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
         const post1 = await payload.create({
           collection: 'testMigrationPosts',
           data: { title: 'Post 1' },
+          overrideAccess: true,
         })
 
         // Publish the post
@@ -89,6 +90,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
           id: post1.id,
           collection: 'testMigrationPosts',
           data: { _status: 'published', title: 'Post 1 Updated' },
+          overrideAccess: true,
         })
 
         // Step 2: Verify "before" state
@@ -277,6 +279,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
         const post = await payload.create({
           collection: 'testMigrationPosts',
           data: { title: 'Initial Draft' },
+          overrideAccess: true,
         })
 
         // Publish it
@@ -284,6 +287,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
           id: post.id,
           collection: 'testMigrationPosts',
           data: { _status: 'published', title: 'Published Version' },
+          overrideAccess: true,
         })
 
         // Make a draft change
@@ -291,6 +295,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
           id: post.id,
           collection: 'testMigrationPosts',
           data: { _status: 'draft', title: 'Draft Changes' },
+          overrideAccess: true,
         })
 
         // Publish again
@@ -298,6 +303,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
           id: post.id,
           collection: 'testMigrationPosts',
           data: { _status: 'published', title: 'Re-published' },
+          overrideAccess: true,
         })
 
         // Query BEFORE migration
@@ -537,6 +543,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
         const doc = await payload.create({
           collection: 'testNoVersions',
           data: { title: 'Test document' },
+          overrideAccess: true,
         })
 
         expect(doc.id).toBeDefined()
@@ -565,7 +572,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
     })
   })
 
-  test.options({ db: (adapter) => adapter === 'sqlite' }).describe('SQLite', () => {
+  test.options.describe('SQLite', { db: (adapter) => adapter === 'sqlite' }, () => {
     // Mirror the PostgreSQL suite: revert the runtime (post-migration) schema back to its
     // pre-migration shape before every scenario so each test is self-contained. SQLite has no
     // `ADD COLUMN IF NOT EXISTS` / `DROP COLUMN IF EXISTS`, so we guard with pragma_table_info.
@@ -680,12 +687,14 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
         const post1 = await payload.create({
           collection: 'testMigrationPosts',
           data: { title: 'Post 1' },
+          overrideAccess: true,
         })
 
         await payload.update({
           id: post1.id,
           collection: 'testMigrationPosts',
           data: { _status: 'published', title: 'Post 1 Updated' },
+          overrideAccess: true,
         })
 
         const beforeVersions = (await drizzle.all(
@@ -897,6 +906,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
         const doc = await payload.create({
           collection: 'testNoVersions',
           data: { title: 'Test document' },
+          overrideAccess: true,
         })
 
         expect(doc.id).toBeDefined()
@@ -926,7 +936,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
     }
   })
 
-  test.options({ db: (adapter) => adapter === 'mongodb' }).describe('MongoDB', () => {
+  test.options.describe('MongoDB', { db: (adapter) => adapter === 'mongodb' }, () => {
     // Force collection and index creation to finish before the timed writes below.
     // With autoIndex enabled on a fresh database, the first write to a versions
     // collection kicks off async index builds; a subsequent write can then race
@@ -950,6 +960,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
         const post = await payload.create({
           collection: 'testMigrationPosts',
           data: { title: 'MongoDB Test Post' },
+          overrideAccess: true,
         })
 
         // Publish the post
@@ -957,6 +968,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
           id: post.id,
           collection: 'testMigrationPosts',
           data: { _status: 'published', title: 'MongoDB Test Post Published' },
+          overrideAccess: true,
         })
 
         // Step 2: Get MongoDB connection and verify "before" state

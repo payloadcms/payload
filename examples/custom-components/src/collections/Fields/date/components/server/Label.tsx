@@ -1,9 +1,9 @@
-import type { DateFieldLabelServerComponent } from 'payload'
+import type { DateFieldLabelServerProps } from 'payload'
 
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomDateFieldLabelServer: DateFieldLabelServerComponent = ({
+export const CustomDateFieldLabelServer: React.FC<DateFieldLabelServerProps> = ({
   clientField,
   path,
 }) => {

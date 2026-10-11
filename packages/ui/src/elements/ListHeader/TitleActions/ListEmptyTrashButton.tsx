@@ -164,7 +164,7 @@ export function ListEmptyTrashButton({
         aria-label={t('general:emptyTrashLabel', {
           label: getTranslation(collectionConfig?.labels?.plural, i18n),
         })}
-        buttonStyle="pill"
+        buttonStyle="secondary"
         disabled={trashCount === 0}
         id="empty-trash-button"
         key="empty-trash-button"

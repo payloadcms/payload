@@ -47,6 +47,7 @@ describe('SEO Plugin', () => {
       collection: mediaSlug,
       data: {},
       file,
+      overrideAccess: true,
     })
 
     const createdPage = (await payload.create({
@@ -61,6 +62,7 @@ describe('SEO Plugin', () => {
         },
         title: 'Test Page',
       },
+      overrideAccess: true,
     })) as unknown as PayloadPage
     id = createdPage.id
   })

@@ -1,0 +1,32 @@
+name: sync-mirror
+
+on:
+  push:
+    branches:
+      - main
+      - '3.x'
+
+permissions: {}
+
+jobs:
+  dispatch-sync:
+    if: ${{ github.repository == 'payloadcms/payload' }}
+    runs-on: ubuntu-latest
+    environment: mirror-dispatch
+    steps:
+      - name: Require mirror target
+        env:
+          MIRROR_REPO: ${{ secrets.MIRROR_REPO }}
+        run: |
+          if [[ ! "$MIRROR_REPO" =~ ^[A-Za-z0-9-]+/[A-Za-z0-9._-]+$ ]]; then
+            echo 'MIRROR_REPO secret in the mirror-dispatch environment must be set to owner/repo' >&2
+            exit 1
+          fi
+
+      - name: Request branch synchronization
+        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
+        with:
+          token: ${{ secrets.MIRROR_REPO_DISPATCH_PAT }}
+          repository: ${{ secrets.MIRROR_REPO }}
+          event-type: payload-repo-sync
+          client-payload: '{"branch": ${{ toJSON(github.ref_name) }}}'

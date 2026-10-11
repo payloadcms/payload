@@ -6,7 +6,8 @@ import type {
   SelectType,
   TransformGlobalWithSelect,
 } from '../../../types/index.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
+import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 import type {
   DataFromGlobalSlug,
   DraftFlagFromGlobalSlug,
@@ -23,7 +24,7 @@ import {
   type TypedLocale,
   type User,
 } from '../../../index.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { updateOperation } from '../update.js'
 
 type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
@@ -50,12 +51,6 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
    */
   locale?: 'all' | TypedLocale
-  /**
-   * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
-   * @default true
-   */
-  overrideAccess?: boolean
   /**
    * If you are uploading a file and would like to replace
    * the existing file instead of generating a new filename,
@@ -96,7 +91,8 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: null | User
-} & Pick<FindOptions<string, SelectType>, 'select'>
+} & Pick<FindOptions<string, SelectType>, 'select'> &
+  Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = BaseOptions<
   TSlug,
@@ -116,7 +112,7 @@ export async function updateGlobalLocal<
     data,
     depth,
     draft,
-    overrideAccess = true,
+    overrideAccess = false,
     overrideLock,
     populate,
     publishAllLocales,
@@ -141,7 +137,10 @@ export async function updateGlobalLocal<
     overrideLock,
     populate,
     publishAllLocales,
-    req: await createLocalReq(options as CreateLocalReqOptions, payload),
+    req: await createPayloadRequest({
+      ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
+      payload,
+    }),
     select,
     showHiddenFields,
     unpublishAllLocales,

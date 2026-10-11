@@ -1,10 +1,11 @@
 import type { GlobalSlug, Payload, RequestContext, TypedLocale, User } from '../../../index.js'
 import type { PayloadRequest, PopulateType } from '../../../types/index.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
+import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { restoreVersionOperation } from '../restoreVersion.js'
 
 export type Options<TSlug extends GlobalSlug> = {
@@ -32,12 +33,6 @@ export type Options<TSlug extends GlobalSlug> = {
    */
   locale?: TypedLocale
   /**
-   * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
-   * @default true
-   */
-  overrideAccess?: boolean
-  /**
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
   populate?: PopulateType
@@ -59,13 +54,20 @@ export type Options<TSlug extends GlobalSlug> = {
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: null | User
-}
+} & Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export async function restoreGlobalVersionLocal<TSlug extends GlobalSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<DataFromGlobalSlug<TSlug>> {
-  const { id, slug: globalSlug, depth, overrideAccess = true, populate, showHiddenFields } = options
+  const {
+    id,
+    slug: globalSlug,
+    depth,
+    overrideAccess = false,
+    populate,
+    showHiddenFields,
+  } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
 
@@ -79,7 +81,10 @@ export async function restoreGlobalVersionLocal<TSlug extends GlobalSlug>(
     globalConfig,
     overrideAccess,
     populate,
-    req: await createLocalReq(options as CreateLocalReqOptions, payload),
+    req: await createPayloadRequest({
+      ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
+      payload,
+    }),
     showHiddenFields,
   })
 }

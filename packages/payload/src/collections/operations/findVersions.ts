@@ -10,8 +10,12 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
+import { NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { checkFileAccess } from '../../uploads/checkFileAccess.js'
+import { markHistoricalFileURLs } from '../../uploads/fileVersioning/markHistoricalFileURLs.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { hasVersionsEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
@@ -65,6 +69,10 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
 
   const req = args.req!
   const { fallbackLocale, locale, payload } = req
+
+  if (!hasVersionsEnabled(collectionConfig)) {
+    throw new NotFound(req.t)
+  }
 
   // /////////////////////////////////////
   // Access
@@ -139,6 +147,19 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     sort,
     where: fullWhere,
   })
+
+  if (collectionConfig.upload && !overrideAccess) {
+    for (const row of paginatedDocs.docs) {
+      const filename = (row.version as Record<string, unknown>)?.filename
+
+      await checkFileAccess({
+        collection: args.collection,
+        documentID: row.parent,
+        filename: typeof filename === 'string' ? filename : '',
+        req,
+      })
+    }
+  }
 
   // /////////////////////////////////////
   // beforeRead - Collection
@@ -221,6 +242,18 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
         return docRef
       }),
     )
+  }
+
+  if (collectionConfig.upload) {
+    result.docs = result.docs.map((row) => ({
+      ...row,
+      version: markHistoricalFileURLs({
+        collectionSlug: collectionConfig.slug,
+        doc: row.version as Record<string, unknown>,
+        req,
+        versionID: row.id,
+      }) as TData,
+    }))
   }
 
   // /////////////////////////////////////

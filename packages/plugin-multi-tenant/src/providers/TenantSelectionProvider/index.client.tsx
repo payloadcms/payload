@@ -7,6 +7,7 @@ import { formatAdminURL } from 'payload/shared'
 import React, { createContext } from 'react'
 
 import { generateCookie } from '../../utilities/generateCookie.js'
+import { shouldRefreshTenantSelection } from '../../utilities/shouldRefreshTenantSelection.js'
 
 type ContextType = {
   /**
@@ -242,20 +243,24 @@ export const TenantSelectionProviderClient = ({
   }, [initialTenantOptions])
 
   React.useEffect(() => {
-    if (userChanged || (initialValue && String(initialValue) !== getTenantCookie())) {
-      if (userID) {
-        // user logging in
-        void syncTenants()
-      } else {
-        // user logging out
-        setSelectedTenantID(undefined)
-        deleteTenantCookie()
-        setTenantOptions((prev) => (prev.length > 0 ? [] : prev))
-        router.refresh()
-      }
+    const hasTenantSelectionMismatch =
+      initialValue && String(initialValue) !== getTenantCookie()
+
+    if (userID && (userChanged || tenantOptions.length === 0 || hasTenantSelectionMismatch)) {
+      // Sync on login, and when the provider remounts after login without tenant options.
+      void syncTenants()
+    } else if (!userID && (userChanged || hasTenantSelectionMismatch)) {
+      // user logging out
+      setSelectedTenantID(undefined)
+      deleteTenantCookie()
+      setTenantOptions((prev) => (prev.length > 0 ? [] : prev))
+      router.refresh()
+    }
+
+    if (userChanged) {
       prevUserID.current = userID
     }
-  }, [userID, userChanged, syncTenants, initialValue, router])
+  }, [userID, userChanged, syncTenants, initialValue, router, tenantOptions.length])
 
   /**
    * Populate tenant options when the provider mounts already-authenticated but
@@ -282,20 +287,17 @@ export const TenantSelectionProviderClient = ({
   }, [userChanged, userID, tenantOptions.length, initialTenantOptions, syncTenants])
 
   /**
-   * If there is no initial value, clear the tenant and refresh the router.
-   * Needed for stale tenantIDs set as a cookie.
-   *
-   * Only refresh when there is actually a stale cookie to clear: when no cookie
-   * is present the server already rendered tenant-less, so a refresh is
-   * redundant. This also avoids an infinite loop on framework adapters whose
-   * `router.refresh()` remounts this provider (e.g. TanStack Start) — an
-   * unconditional refresh would re-fire this mount effect and refresh again,
-   * whereas guarding on the (persistent) cookie self-terminates after the one
-   * refresh that clears it. The cookie is cleared either way via `setTenant`.
+   * If there is no initial value and a stale tenant cookie exists, clear the
+   * tenant and refresh the router.
    */
   React.useEffect(() => {
-    if (!initialValue) {
-      setTenant({ id: undefined, refresh: Boolean(getTenantCookie()) })
+    if (
+      shouldRefreshTenantSelection({
+        initialValue,
+        tenantCookie: getTenantCookie(),
+      })
+    ) {
+      setTenant({ id: undefined, refresh: true })
     }
   }, [initialValue, setTenant])
 

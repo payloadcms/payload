@@ -6,6 +6,24 @@ desc: Converting between lexical richtext and Markdown / MDX
 keywords: lexical, richtext, markdown, md, mdx
 ---
 
+## Editor adapter converters
+
+Lexical provides `converters.fromMarkdown` and `converters.toMarkdown` using the editor's configured features:
+
+```ts
+const converters = payload.config.editor?.converters
+
+if (converters?.fromMarkdown && converters.toMarkdown) {
+  const data = converters.fromMarkdown({
+    markdown: '## Hello world\n\nThis is **bold** text.',
+  })
+
+  const markdown = converters.toMarkdown({ data })
+}
+```
+
+For a field with its own editor, use the converters on that field's initialized `editor`.
+
 ## Richtext to Markdown
 
 If you have access to the Payload Config and the [lexical editor config](/docs/rich-text/converters#retrieving-the-editor-config), you can convert the lexical editor state to Markdown with the following:
