@@ -5,6 +5,7 @@ import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
 import type {
+  BlockPlacement,
   NumberToDelete,
   RelationshipToAppend,
   RelationshipToDelete,
@@ -12,6 +13,7 @@ import type {
   TextToDelete,
 } from './types.js'
 
+import { placementPath } from '../../utilities/blockPlacements.js'
 import { isArrayOfRows } from '../../utilities/isArrayOfRows.js'
 import { resolveBlockTableName } from '../../utilities/validateExistingBlockIsIdentical.js'
 import { transformArray } from './array.js'
@@ -36,6 +38,7 @@ type Args = {
    * This is the name of the base table
    */
   baseTableName: string
+  blockPlacements: BlockPlacement[]
   blocks: RowToInsert['blocks']
   blocksToDelete: Set<string>
   /**
@@ -89,6 +92,7 @@ export const traverseFields = ({
   arrays,
   arraysToPush,
   baseTableName,
+  blockPlacements,
   blocks,
   blocksToDelete,
   columnPrefix,
@@ -164,6 +168,7 @@ export const traverseFields = ({
                 adapter,
                 arrayTableName,
                 baseTableName,
+                blockPlacements,
                 blocks,
                 blocksToDelete,
                 data: localeData,
@@ -207,6 +212,7 @@ export const traverseFields = ({
           adapter,
           arrayTableName,
           baseTableName,
+          blockPlacements,
           blocks,
           blocksToDelete,
           data: value,
@@ -246,12 +252,17 @@ export const traverseFields = ({
             ? adapter.payload.config.blocks.find((each) => each.slug === block)
             : block
 
-        blocksToDelete.add(
-          resolveBlockTableName(
-            matchedBlock,
-            adapter.tableNameMap.get(`${baseTableName}_blocks_${toSnakeCase(matchedBlock.slug)}`),
-          ),
+        const baseBlockTableName = adapter.tableNameMap.get(
+          `${baseTableName}_blocks_${toSnakeCase(matchedBlock.slug)}`,
         )
+        const blockTableName = resolveBlockTableName(matchedBlock, baseBlockTableName)
+
+        blocksToDelete.add(blockTableName)
+        blockPlacements.push({
+          baseBlockTableName,
+          path: placementPath(`${path}${field.name}`),
+          tableName: blockTableName,
+        })
       })
 
       if (isLocalized) {
@@ -261,6 +272,7 @@ export const traverseFields = ({
               transformBlocks({
                 adapter,
                 baseTableName,
+                blockPlacements,
                 blocks,
                 blocksToDelete,
                 data: localeData,
@@ -284,6 +296,7 @@ export const traverseFields = ({
         transformBlocks({
           adapter,
           baseTableName,
+          blockPlacements,
           blocks,
           blocksToDelete,
           data: fieldData,
@@ -316,6 +329,7 @@ export const traverseFields = ({
               arrays,
               arraysToPush,
               baseTableName,
+              blockPlacements,
               blocks,
               blocksToDelete,
               columnPrefix: `${columnName}_`,
@@ -352,6 +366,7 @@ export const traverseFields = ({
             arrays,
             arraysToPush,
             baseTableName,
+            blockPlacements,
             blocks,
             blocksToDelete,
             columnPrefix: `${columnName}_`,
@@ -828,6 +843,7 @@ export const traverseFields = ({
           arrays,
           arraysToPush,
           baseTableName,
+          blockPlacements,
           blocks,
           blocksToDelete,
           columnPrefix,

@@ -5,6 +5,7 @@ import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
 import type {
+  BlockPlacement,
   BlockRowToInsert,
   NumberToDelete,
   RelationshipToDelete,
@@ -17,6 +18,7 @@ import { traverseFields } from './traverseFields.js'
 type Args = {
   adapter: DrizzleAdapter
   baseTableName: string
+  blockPlacements: BlockPlacement[]
   blocks: {
     [blockType: string]: BlockRowToInsert[]
   }
@@ -44,6 +46,7 @@ type Args = {
 export const transformBlocks = ({
   adapter,
   baseTableName,
+  blockPlacements,
   blocks,
   blocksToDelete,
   data,
@@ -119,6 +122,7 @@ export const transformBlocks = ({
       arrays: newRow.arrays,
       arraysToPush: newRow.arraysToPush,
       baseTableName,
+      blockPlacements,
       blocks,
       blocksToDelete,
       columnPrefix: '',
