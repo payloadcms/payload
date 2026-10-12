@@ -91,6 +91,7 @@ export const CopyLocaleData: React.FC = () => {
         )
 
         toggleModal(drawerSlug)
+        toast.success(t('general:copied'))
       } catch (error) {
         setCopying(false)
         const errorMessage = (error as Error).message || 'error:unknown'

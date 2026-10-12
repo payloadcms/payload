@@ -25,9 +25,9 @@ import { expect, test } from '@playwright/test'
  * `pnpm test:visual:preview` show a comparison for every `@visual` test, not just failing ones.
  *
  * A full-page screenshot (no `target`) always includes the global admin chrome, whose account
- * menu defaults to a live, unmocked `gravatar.com` image fetch (see
+ * menu's avatar defaults to a live, unmocked `gravatar.com` image fetch (see
  * `packages/ui/src/graphics/Account/Gravatar/index.tsx`) that this function doesn't wait to
- * resolve — masked unconditionally, since there's no test for which that request's network timing
+ * resolve — visible avatars are masked, since there's no test for which that request's network timing
  * is the thing under test. A `target` screenshot never includes the header, so this doesn't apply.
  *
  * @example
@@ -70,9 +70,7 @@ export async function expectScreenshot({
   })
 
   const screenshotTarget = target ?? page
-  const resolvedMask = target
-    ? mask
-    : [page.locator(ACCOUNT_MENU_TRIGGER_SELECTOR), ...(mask ?? [])]
+  const resolvedMask = target ? mask : [page.locator(ACCOUNT_AVATAR_SELECTOR), ...(mask ?? [])]
 
   await expect(screenshotTarget).toHaveScreenshot(name, { mask: resolvedMask })
 
@@ -86,9 +84,9 @@ export async function expectScreenshot({
   })
 }
 
-// Kept in sync with the class UserMenu's trigger button renders in
+// Kept in sync with the class UserMenu's avatar renders in
 // packages/ui/src/elements/UserMenu/index.tsx.
-const ACCOUNT_MENU_TRIGGER_SELECTOR = '.user-menu__trigger'
+const ACCOUNT_AVATAR_SELECTOR = '.user-menu__avatar:visible'
 
 async function attachMatchedComparison({
   name,

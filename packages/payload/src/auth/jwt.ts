@@ -1,4 +1,4 @@
-import { SignJWT } from 'jose'
+import { SignJWT } from 'jose/jwt/sign'
 
 import { JWT_AUTH_VERSION } from './jwtAuth.js'
 

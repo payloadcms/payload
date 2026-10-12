@@ -68,6 +68,32 @@
     width: 100%;
   }
 
+  .collection-edit .collection-edit__main > .document-fields {
+    width: 100%;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+
+  @media (min-width: 1024px) {
+    .collection-edit--constrain-document-width
+      .collection-edit__main
+      > .document-fields:not(.document-fields--force-sidebar-wrap) {
+      --field-border-bleed: 0;
+      --field-tabs-edge-display: none;
+      max-width: calc(var(--spacer-6) * 27);
+    }
+  }
+
+  @container drawer (width <= 768px) {
+    .collection-edit--constrain-document-width
+      .collection-edit__main
+      > .document-fields:not(.document-fields--force-sidebar-wrap) {
+      --field-border-bleed: 1;
+      --field-tabs-edge-display: block;
+      max-width: 100%;
+    }
+  }
+
   .collection-edit__main--popup-open {
     width: 100%;
   }

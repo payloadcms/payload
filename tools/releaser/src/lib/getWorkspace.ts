@@ -33,7 +33,7 @@ type PackageReleaseType = 'canary' | 'internal' | 'internal-debug' | ReleaseType
 
 type PublishOpts = {
   dryRun?: boolean
-  tag?: 'beta' | 'canary' | 'internal' | 'internal-debug' | 'latest'
+  tag: 'beta' | 'canary' | 'internal' | 'internal-debug' | 'latest'
 }
 
 export type Workspace = {
@@ -57,7 +57,7 @@ export const getWorkspace = (): Workspace => {
   }
 
   // Publish one package at a time, fail-fast at the first failure.
-  const publish: Workspace['publish'] = async ({ dryRun, tag = 'canary' }) => {
+  const publish: Workspace['publish'] = async ({ dryRun, tag }) => {
     const packageDetails = await getPackageDetails(packagePublishList)
     await runPublishSequence({
       packages: packageDetails,
@@ -179,7 +179,7 @@ export async function publishSinglePackage(
   pkg: PackageDetails,
   opts: PublishOpts,
 ): Promise<PublishResult> {
-  const { dryRun, tag = 'canary' } = opts
+  const { dryRun, tag } = opts
 
   try {
     // The pre-check is an optimization to skip already-published packages. A

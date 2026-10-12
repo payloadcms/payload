@@ -16,6 +16,7 @@ export const NavSidebarToggle: React.FC<{
 
   return (
     <button
+      aria-expanded={navOpen}
       aria-label={t('general:hideSidebar')}
       className={`${baseClass}__close`}
       onClick={() => {

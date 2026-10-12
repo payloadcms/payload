@@ -1,3 +1,5 @@
+import type { ChildProcess } from 'child_process'
+
 import globby from 'globby'
 import minimist from 'minimist'
 import { createServer } from 'net'
@@ -230,10 +232,10 @@ async function executePlaywright({
   // Wait for it before running tests.
   // (The dev server compiles routes lazily, so it needs no upfront wait.)
   if (prodServer && !portInUse) {
-    await waitForServer(e2ePort)
+    await waitForServer({ child: server?.child, port: e2ePort })
   }
 
-  await resetServer(e2ePort)
+  await resetServer({ child: server?.child, port: e2ePort })
 
   const shardFlag = shardArg ? ` --shard=${shardArg}` : ''
   const fullyParallelFlag = fullyParallelArg ? ' --fully-parallel' : ''
@@ -274,14 +276,25 @@ function clearWebpackCache() {
 /**
  * Poll a port until the server responds, so Playwright doesn't start against a prod server that is still building.
  * Resolves on any HTTP response (the server only binds after the build/init finishes);
- * rejects if it never comes up.
+ * rejects if the server process exits or it never comes up.
  */
-async function waitForServer(port: number, timeoutMs = 8 * 60 * 1000): Promise<void> {
+async function waitForServer({
+  child,
+  port,
+  timeoutMs = 8 * 60 * 1000,
+}: {
+  /** The server process started by this run, if any. Polling stops as soon as it exits. */
+  child?: ChildProcess
+  port: number
+  timeoutMs?: number
+}): Promise<void> {
   const url = `http://localhost:${port}/`
   const start = Date.now()
   console.log(`Waiting for prod server on ${url} …`)
 
   while (Date.now() - start < timeoutMs) {
+    assertServerIsRunning({ child })
+
     try {
       await fetch(url)
       console.log(`Prod server ready after ${Math.round((Date.now() - start) / 1000)}s`)
@@ -294,13 +307,24 @@ async function waitForServer(port: number, timeoutMs = 8 * 60 * 1000): Promise<v
   throw new Error(`Prod server did not start within ${timeoutMs / 1000}s`)
 }
 
-async function resetServer(port: number, timeoutMs = 8 * 60 * 1000): Promise<void> {
+async function resetServer({
+  child,
+  port,
+  timeoutMs = 8 * 60 * 1000,
+}: {
+  /** The server process started by this run, if any. Polling stops as soon as it exits. */
+  child?: ChildProcess
+  port: number
+  timeoutMs?: number
+}): Promise<void> {
   const url = `http://localhost:${port}/api/re-initialize`
   const start = Date.now()
   let lastConnectionError: unknown
   console.log(`Waiting to reset test data at ${url} …`)
 
   while (Date.now() - start < timeoutMs) {
+    assertServerIsRunning({ child })
+
     let response: Response
 
     try {
@@ -322,4 +346,16 @@ async function resetServer(port: number, timeoutMs = 8 * 60 * 1000): Promise<voi
     lastConnectionError instanceof Error ? `: ${lastConnectionError.message}` : ''
 
   throw new Error(`Timed out waiting to reset test data at ${url}${connectionError}`)
+}
+
+/**
+ * Without this check, a server that crashed on startup (e.g. a failed `next build`)
+ * would leave the caller polling a dead port until its timeout.
+ */
+function assertServerIsRunning({ child }: { child?: ChildProcess }): void {
+  if (child && (child.exitCode !== null || child.signalCode !== null)) {
+    throw new Error(
+      `Test server exited with ${child.signalCode ?? `code ${child.exitCode}`} before it was ready`,
+    )
+  }
 }

@@ -9,6 +9,7 @@ interface Args {
   collection: CollectionConfig
   disablePayloadAccessControl?: boolean
   generateFileURL?: GenerateFileURL
+  isOriginal?: boolean
   size?: ImageSize
 }
 
@@ -28,12 +29,24 @@ const getObjectFolder = (data: unknown): string => {
 }
 
 export const getAfterReadHook =
-  ({ adapter, collection, disablePayloadAccessControl, generateFileURL, size }: Args): FieldHook =>
+  ({
+    adapter,
+    collection,
+    disablePayloadAccessControl,
+    generateFileURL,
+    isOriginal,
+    size,
+  }: Args): FieldHook =>
   async ({ data, value }) => {
-    const filename = size ? data?.sizes?.[size.name]?.filename : data?.filename
-    const prefix = data?.prefix
+    const representation = isOriginal ? data?.original : size ? data?.variants?.[size.name] : data
+    const filename = representation?.filename
+    const hasLegacyVariant = Boolean(size && !data?.original?.filename)
+    const prefix = representation?.prefix ?? (hasLegacyVariant ? data?.prefix : undefined)
     // Direct-serve URLs encode the full location; the proxy resolves `_objectKey` server-side.
-    const objectFolder = getObjectFolder(data)
+    const objectFolder = getObjectFolder({
+      _objectKey: representation?._objectKey ?? (hasLegacyVariant ? data?._objectKey : undefined),
+      prefix,
+    })
     let url = value
 
     if (filename) {
@@ -52,10 +65,17 @@ export const getAfterReadHook =
           prefix: objectFolder,
         })
       } else if (url && prefix) {
-        const separator = url.includes('?') ? '&' : '?'
-        url = `${url}${separator}prefix=${encodeURIComponent(prefix)}`
+        url = appendProxyPrefix({ prefix, url })
       }
     }
 
     return url
   }
+
+export const appendProxyPrefix = ({ prefix, url }: { prefix: string; url: string }): string => {
+  if (new URL(url, 'http://payload.local').searchParams.has('prefix')) {
+    return url
+  }
+  const separator = url.includes('?') ? '&' : '?'
+  return `${url}${separator}prefix=${encodeURIComponent(prefix)}`
+}

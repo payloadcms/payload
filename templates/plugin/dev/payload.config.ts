@@ -1,10 +1,10 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { myPlugin } from 'plugin-package-name-placeholder'
-import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
 import { testEmailAdapter } from './helpers/testEmailAdapter.js'
@@ -65,9 +65,11 @@ const buildConfigWithMemoryDB = async () => {
       }),
     ],
     secret: process.env.PAYLOAD_SECRET || 'test-secret_key',
-    sharp,
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
+    upload: {
+      transformers: [sharpTransformer()],
     },
   })
 }

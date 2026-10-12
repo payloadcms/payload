@@ -267,6 +267,24 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
       ).rejects.toThrow('Document cannot be its own parent')
     })
 
+    test('should prevent self-referential parent during validation', async ({ payload }) => {
+      const page = await payload.create({
+        collection: 'organizations',
+        data: { parent: null, title: 'Test Page' },
+        overrideAccess: true,
+      })
+
+      await expect(
+        payload.validate({
+          id: page.id,
+          collection: 'organizations',
+          data: { parent: page.id },
+          locale: 'en',
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('Document cannot be its own parent')
+    })
+
     test('should prevent circular reference with direct child', async ({ payload }) => {
       const parentPage = await payload.create({
         collection: 'organizations',

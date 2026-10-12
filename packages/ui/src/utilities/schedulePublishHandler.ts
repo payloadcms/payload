@@ -101,6 +101,8 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
           and: [{ id: { equals: deleteID } }, { taskSlug: { equals: 'schedulePublish' } }],
         },
       })
+
+      return { message: i18n.t('general:success') }
     }
 
     await payload.jobs.queue({

@@ -22,6 +22,9 @@ import { wrapNextConfig } from './wrap-next-config.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+/** Keep in sync with the `next` peer dependency range of `@payloadcms/next`. */
+export const minimumNextVersion = { major: 16, minor: 4 }
+
 type InitNextArgs = {
   dbType: DbType
   nextAppDetails?: NextAppDetails
@@ -241,7 +244,7 @@ export async function getNextAppDetails(projectDir: string): Promise<NextAppDeta
   if (packageObj.dependencies?.next) {
     nextVersion = packageObj.dependencies.next
     // Match versions using regex matching groups
-    const versionMatch = /(?<major>\d+)/.exec(nextVersion)
+    const versionMatch = /(?<major>\d+)(?:\.(?<minor>\d+))?/.exec(nextVersion)
     if (!versionMatch) {
       p.log.warn(`Could not determine Next.js version from ${nextVersion}`)
       return {
@@ -253,9 +256,9 @@ export async function getNextAppDetails(projectDir: string): Promise<NextAppDeta
       }
     }
 
-    const { major } = versionMatch.groups as { major: string }
+    const { major, minor } = versionMatch.groups as { major: string; minor?: string }
     const majorVersion = parseInt(major)
-    if (majorVersion < 15) {
+    if (majorVersion < minimumNextVersion.major) {
       return {
         hasTopLevelLayout: false,
         isSrcDir,
@@ -263,6 +266,19 @@ export async function getNextAppDetails(projectDir: string): Promise<NextAppDeta
         nextConfigPath,
         nextVersion,
       }
+    }
+
+    // TODO: Older minor versions of the minimum major are only warned about, not rejected, to make
+    // migrating easier. This can be turned into a hard requirement in the future.
+    // A specifier without a minor version (e.g. `^16`) can resolve to any minor, so it is not warned about.
+    const isBelowMinimumMinor =
+      majorVersion === minimumNextVersion.major &&
+      minor !== undefined &&
+      parseInt(minor) < minimumNextVersion.minor
+    if (isBelowMinimumMinor) {
+      p.log.warn(
+        `Next.js v${nextVersion} is not supported. Upgrade to Next.js >= ${minimumNextVersion.major}.${minimumNextVersion.minor} to use Payload.`,
+      )
     }
   }
 

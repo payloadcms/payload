@@ -194,7 +194,12 @@ export const APIKey: React.FC<{ readonly readOnly?: boolean; readonly reveal?: b
       <div className="field-type api-key read-only">
         <label className={`${baseClass}__label field-label`} htmlFor="apiKey">
           <span>{apiKeyLabel}</span>
-          {apiKeyValue && <CopyToClipboard value={apiKeyValue} />}
+          {apiKeyValue && (
+            <CopyToClipboard
+              defaultMessage={`${t('general:copy')}: ${apiKeyLabel}`}
+              value={apiKeyValue}
+            />
+          )}
         </label>
         <div
           className={[
