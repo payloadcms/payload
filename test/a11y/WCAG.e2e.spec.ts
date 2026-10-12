@@ -1102,6 +1102,30 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.1.1 Keyboard (A)', () => {
+    test('should allow local users to reach logout with the keyboard in embedded mode', async () => {
+      try {
+        await page.goto(`${serverURL}/admin?embed=true`)
+        await openNavigationForUserMenu({ page })
+
+        const trigger = page.getByRole('button', { name: 'Account', exact: true })
+
+        await trigger.focus()
+        await page.keyboard.press('Enter')
+        await page.keyboard.press('End')
+
+        const logout = page.getByRole('menuitem', { name: 'Log out', exact: true })
+
+        await expect(logout).toBeVisible()
+        await expect(logout).toBeFocused()
+        await expect(logout).toHaveAttribute('href', '/admin/logout')
+        await page.keyboard.press('Escape')
+        await expect(trigger).toBeFocused()
+        await expect(logout).toBeHidden()
+      } finally {
+        await page.goto(`${serverURL}/admin?embed=false`)
+      }
+    })
+
     test('should increase and decrease Number and Point values with arrow keys', async () => {
       // PYLD-3574
       await gotoCreatePost({ page, postsURL })

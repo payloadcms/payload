@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
+import { devUser } from '../credentials.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { embedCookieName, themeCookieName } from './shared.js'
 
@@ -33,14 +34,21 @@ test.describe('embed mode', () => {
     ;({ page } = await initPage({ context, serverURL }))
   })
 
-  test('toggles embed mode via the ?embed param and persists it in a cookie', async () => {
+  test.afterAll(async () => {
+    await context?.close()
+  })
+
+  test('should persist embed mode while keeping the local user menu available', async () => {
     // No param and no cookie: not embedded, so the UserMenu is visible.
     await page.goto(url.admin)
     await expect(userMenu()).toBeVisible()
 
-    // ?embed=true enters embed mode, hiding the UserMenu and writing the cookie.
+    // Local users retain access to logout while embed mode is active.
     await page.goto(`${url.admin}?embed=true`)
-    await expect(userMenu()).toBeHidden()
+    await expect(userMenu()).toBeVisible()
+    await userMenu().click()
+    await expect(page.getByRole('menuitem', { name: 'Log out', exact: true })).toBeVisible()
+    await page.keyboard.press('Escape')
 
     // The cookie carries the attributes required for cross-site (iframe)
     // embedding: session-scoped, Secure, SameSite=None, and Partitioned (which
@@ -57,7 +65,7 @@ test.describe('embed mode', () => {
 
     // Navigating to a different page without the param keeps embed mode on via the cookie.
     await page.goto(url.account)
-    await expect(userMenu()).toBeHidden()
+    await expect(userMenu()).toBeVisible()
 
     // ?embed=false deletes the cookie and restores the UserMenu.
     await page.goto(`${url.admin}?embed=false`)
@@ -92,5 +100,34 @@ test.describe('embed mode', () => {
     // An invalid ?theme= value is ignored; the cookie-derived theme still applies.
     await page.goto(`${url.admin}?theme=neon`)
     expect(await getRenderedTheme()).toBe('dark')
+  })
+
+  test('should log out a locally authenticated user in embedded mode', async ({ browser }) => {
+    const logoutContext = await browser.newContext({
+      extraHTTPHeaders: { DisableAutologin: 'true' },
+    })
+
+    try {
+      const loginResponse = await logoutContext.request.post(`${url.serverURL}/api/users/login`, {
+        data: { email: devUser.email, password: devUser.password },
+      })
+
+      expect(loginResponse.ok()).toBe(true)
+
+      const logoutPage = await logoutContext.newPage()
+
+      await logoutPage.goto(`${url.admin}?embed=true`)
+      await logoutPage.getByRole('button', { name: 'Account', exact: true }).click()
+      await logoutPage.getByRole('menuitem', { name: 'Log out', exact: true }).click()
+      await expect(logoutPage).toHaveURL(url.login)
+      await expect(logoutPage.locator('#field-email')).toBeVisible()
+
+      const response = await logoutContext.request.get(`${url.serverURL}/api/users/me`)
+
+      expect(response.ok()).toBe(true)
+      expect((await response.json()).user).toBeNull()
+    } finally {
+      await logoutContext.close()
+    }
   })
 })
