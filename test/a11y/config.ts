@@ -4,11 +4,13 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { mediaSharpTransformer } from '../__helpers/shared/mediaSharpTransformer.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { MediaCollection } from './collections/Media/index.js'
+import { MediaCollection, mediaSlug } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { UsersCollection, usersSlug } from './collections/Users/index.js'
+import { seededAPIKey } from './constants.js'
 import { MenuGlobal } from './globals/Menu/index.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -33,12 +35,25 @@ const FolderCollection = {
   },
 } satisfies CollectionConfig
 
+const MediaAltCollection = {
+  slug: 'media-alt',
+  fields: [],
+  upload: true,
+} satisfies CollectionConfig
+
 export default buildConfigWithDefaults({
   config: {
+    upload: {
+      transformers: [mediaSharpTransformer({ mediaSlug })],
+    },
     // ...extend config here
     admin: {
       components: {
         views: {
+          BreadcrumbCurrentPage: {
+            Component: '/components/BreadcrumbCurrentPage/index.js#BreadcrumbCurrentPage',
+            path: '/breadcrumb-current-page',
+          },
           CustomIDModals: {
             Component: '/components/CustomIDModals/index.js#CustomIDModals',
             path: '/custom-modal-ids',
@@ -47,13 +62,31 @@ export default buildConfigWithDefaults({
             Component: '/components/FocusIndicatorsView.js#FocusIndicatorsView',
             path: '/focus-indicators',
           },
+          StatusMessages: {
+            Component: '/components/StatusMessages/index.js#StatusMessages',
+            path: '/status-messages',
+          },
         },
+      },
+      dashboard: {
+        defaultLayout: [
+          { widgetSlug: 'collections', width: 'full' },
+          { widgetSlug: 'upload-dropzone', width: 'small' },
+          { widgetSlug: 'activity', width: 'full' },
+        ],
+        widgets: [],
       },
       importMap: {
         baseDir: path.resolve(dirname),
       },
     },
-    collections: [UsersCollection, FolderCollection, PostsCollection, MediaCollection],
+    collections: [
+      UsersCollection,
+      FolderCollection,
+      PostsCollection,
+      MediaCollection,
+      MediaAltCollection,
+    ],
     editor: lexicalEditor({}),
     globals: [
       // ...add more globals here
@@ -81,7 +114,7 @@ export default buildConfigWithDefaults({
     await payload.create({
       collection: usersSlug,
       data: {
-        apiKey: 'a11y-modal-dialog-fixture-key-1234',
+        apiKey: seededAPIKey,
         email: devUser.email,
         password: devUser.password,
       },
@@ -112,6 +145,15 @@ export default buildConfigWithDefaults({
         overrideAccess: true,
       })
     }
+
+    await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'Accessibility final child folder',
+        '_h_payload-folders': parentFolder.id,
+      },
+      overrideAccess: true,
+    })
 
     const firstPost = await payload.create({
       collection: postsSlug,

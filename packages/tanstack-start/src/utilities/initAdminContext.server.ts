@@ -7,7 +7,7 @@ import { initAdminContext as initPayloadAdminContext } from 'payload/internal'
 // Registers the dev reload strategy before `initPayloadAdminContext` can build an instance.
 // Side-effect only, and a no-op outside of dev serve.
 import './devConfigReload.server.js'
-import { tanstackServerAdapter } from './serverAdapter.server.js'
+import { tanstackServerAdapter } from '../adapters/server.js'
 
 type TanStackInitAdminContextArgs = {
   serverAdapter?: ServerAdapter

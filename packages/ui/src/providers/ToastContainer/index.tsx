@@ -2,7 +2,7 @@
 import type { ClientConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import React, { useLayoutEffect, useState } from 'react'
+import React, { useCallback, useLayoutEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Toaster } from 'sonner'
 
@@ -20,6 +20,9 @@ export const ToastContainer: React.FC<{
 
   const { modalState } = useModal()
   const [portalContainer, setPortalContainer] = useState<HTMLDivElement | null>(null)
+  const setCloseIconRef = useCallback((element: HTMLSpanElement | null) => {
+    element?.closest('[data-close-button]')?.setAttribute('aria-live', 'off')
+  }, [])
 
   useLayoutEffect(() => {
     const container = document.createElement('div')
@@ -65,11 +68,15 @@ export const ToastContainer: React.FC<{
       closeButton
       // @ts-expect-error - Sonner's `dir` prop is typed as `Direction`, but passing "undefined" opts out of RTL/LTR handling
       dir="undefined"
-      duration={duration ?? 4000}
+      duration={duration ?? 6000}
       expand={expand ?? false}
       gap={8}
       icons={{
-        close: <XIcon size={24} />,
+        close: (
+          <span aria-hidden="true" ref={setCloseIconRef} style={{ display: 'contents' }}>
+            <XIcon size={24} />
+          </span>
+        ),
         error: <WarningIcon />,
         info: <InfoIcon />,
         success: <CheckIcon size={24} />,

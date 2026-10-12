@@ -26,6 +26,19 @@ const removeCSSImports = {
   },
 }
 
+// The client bundle is written to dist/exports/client, but the stylesheet stays in dist/field,
+// where the server-side Diff view imports it too. Pointing the bundle at that same file means the
+// admin compiles and loads the stylesheet once, instead of also loading a copy.
+const shareBundledCSS = {
+  name: 'share-bundled-css',
+  setup(build) {
+    build.onResolve({ filter: /\/bundled\.css$/ }, () => ({
+      external: true,
+      path: '../../field/bundled.css',
+    }))
+  },
+}
+
 async function build() {
   //create empty directoryArg/exports/client_optimized dir
   await fs.promises.mkdir(`${directoryArg}/exports/client_optimized`, { recursive: true })
@@ -44,14 +57,10 @@ async function build() {
 
   try {
     await fs.promises.rename(`${directoryArg}/bundled_scss/cssEntry.css`, `dist/field/bundled.css`)
-    fs.copyFileSync(
-      `dist/field/bundled.css`,
-      `${directoryArg}/exports/client_optimized/bundled.css`,
-    )
 
     fs.rmSync(`${directoryArg}/bundled_scss`, { recursive: true })
   } catch (err) {
-    console.error(`Error while copying CSS files: ${err}`)
+    console.error(`Error while moving CSS files: ${err}`)
     throw err
   }
 
@@ -106,6 +115,7 @@ async function build() {
     tsconfig: path.resolve(dirname, './tsconfig.json'),
     plugins: [
       removeCSSImports,
+      shareBundledCSS,
       /*commonjs({
           ignore: ['date-fns', '@floating-ui/react'],
         }),*/

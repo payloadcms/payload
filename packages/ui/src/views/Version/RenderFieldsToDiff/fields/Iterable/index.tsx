@@ -19,11 +19,11 @@ const baseClass = 'iterable-diff'
 
 export const Iterable: React.FC<FieldDiffClientProps> = ({
   baseVersionField,
-  comparisonValue: valueFrom,
   field,
   locale,
   parentIsLocalized,
-  versionValue: valueTo,
+  valueFrom,
+  valueTo,
 }) => {
   const { i18n, t } = useTranslation()
   const { selectedLocales } = useSelectedLocales()

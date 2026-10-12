@@ -3,9 +3,10 @@ import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
+import { mediaSharpTransformer } from '../__helpers/shared/mediaSharpTransformer.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { MediaCollection } from './collections/Media/index.js'
+import { MediaCollection, mediaSlug } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
 
@@ -25,6 +26,9 @@ export default buildConfigWithDefaults({
     globals: [MenuGlobal],
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
+    upload: {
+      transformers: [mediaSharpTransformer({ mediaSlug })],
     },
   },
   seed: async (payload) => {

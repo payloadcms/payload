@@ -1,5 +1,7 @@
 import type { PayloadRequest, Where } from '../types/index.js'
 
+import { buildFilenameWhere } from './transformers/resolveUploadDocument.js'
+
 type Args = {
   collectionSlug: string
   filename: string
@@ -21,20 +23,10 @@ export const docWithFilenameExists = async ({
   const hasPrefixField = (collection?.fields ?? []).some(
     (field) => 'name' in field && field.name === 'prefix',
   )
-  const filenameCondition: Where = {
-    or: [
-      {
-        filename: {
-          equals: filename,
-        },
-      },
-      ...(upload && typeof upload === 'object' && upload.imageSizes
-        ? upload.imageSizes.map(({ name }) => ({
-            [`sizes.${name}.filename`]: { equals: filename },
-          }))
-        : []),
-    ],
-  }
+  const filenameCondition = buildFilenameWhere({
+    filename,
+    variants: upload && typeof upload === 'object' ? upload.variants : undefined,
+  })
 
   const where: Where =
     !matchAnyPrefix && typeof prefix === 'string' && hasPrefixField

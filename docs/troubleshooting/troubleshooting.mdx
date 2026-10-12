@@ -123,7 +123,7 @@ This is a common pitfall when using a monorepo setup with multiple packages. In 
 
 If you've pinned the versions and the error persists we recommend removing `.next/`, `node_modules/` and if possible deleting the lockfile and re-generating it to ensure that all packages in the monorepo are using the same version of the dependencies mentioned above.
 
-In some cases package managers will hoist dependencies to the root of the monorepo which can lead to multiple versions or multiple instances of the same package being installed in different locations.  
+In some cases package managers will hoist dependencies to the root of the monorepo which can lead to multiple versions or multiple instances of the same package being installed in different locations.
 Where possible it's best to install the Payload dependencies at the root of the monorepo to ensure only one version and one instance is installed across all packages.
 
 ## "Unauthorized, you must be logged in to make this request" when attempting to log in
@@ -159,8 +159,6 @@ Alternatively if more of your URL is dynamic, you can set the full URL for the W
 ```
 PAYLOAD_HMR_URL_OVERRIDE=wss://localhost:3000/_next/hmr
 ```
-
-You do not need to set this to match your Next.js version. Next.js stable releases serve HMR on `/_next/hmr` from version 16.3 onwards, and on `/_next/webpack-hmr` before that. Payload reads the installed Next.js version and connects to the correct path on its own.
 
 ## Database password encoding issues
 

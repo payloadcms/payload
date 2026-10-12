@@ -24,13 +24,4 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-
-  /* Dividers span the full menu width rather than sitting inside the list's inline padding. */
-  .hierarchy-cell__popup-content .popup-divider {
-    margin-inline: calc(var(--spacer-2) * -1);
-  }
-
-  .hierarchy-cell__control {
-    display: contents;
-  }
 }

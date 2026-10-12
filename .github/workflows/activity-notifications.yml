@@ -12,7 +12,7 @@ on:
 
 jobs:
   run:
-    if: github.repository_owner == 'payloadcms'
+    if: github.repository == 'payloadcms/payload'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

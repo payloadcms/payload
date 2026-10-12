@@ -1,7 +1,6 @@
 'use client'
 import { type ListQuery, type Where } from 'payload'
 import { transformWhereQuery, validateWhereQuery } from 'payload/shared'
-import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { IListQueryContext, ListQueryProps } from './types.js'
@@ -12,6 +11,7 @@ import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useRouter, useSearchParams } from '../RouterAdapter/index.js'
 import { ListQueryContext, ListQueryModifiedContext } from './context.js'
+import { getSearchWithListQuery } from './getSearchWithListQuery.js'
 import { mergeQuery } from './mergeQuery.js'
 import { sanitizeQuery } from './sanitizeQuery.js'
 
@@ -46,7 +46,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   const [query, setQuery] = useState<ListQuery>(() => {
     if (modifySearchParams) {
-      return queryFromURL
+      return queryFromProps ? sanitizeQuery(queryFromProps) : queryFromURL
     } else {
       return {
         limit: queryFromProps.limit,
@@ -70,11 +70,11 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       })
 
       if (modifySearchParams) {
-        const search = `?${qs.stringify({
-          ...newQuery,
-          columns: JSON.stringify(newQuery.columns),
-          queryByGroup: JSON.stringify(newQuery.queryByGroup),
-        })}`
+        const search = getSearchWithListQuery({
+          currentSearch: window.location.search,
+          query: newQuery,
+          updatedQuery: incomingQuery,
+        })
         if (window.location.search !== search) {
           startRouteTransition(() => router.replace(search, { scroll: false }))
         }
@@ -140,11 +140,10 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const syncPropsToURL = useEffectEvent(() => {
     const newQuery = sanitizeQuery({ ...(query || {}), ...(queryFromProps || {}) })
 
-    const search = `?${qs.stringify({
-      ...newQuery,
-      columns: JSON.stringify(newQuery.columns),
-      queryByGroup: JSON.stringify(newQuery.queryByGroup),
-    })}`
+    const search = getSearchWithListQuery({
+      currentSearch: window.location.search,
+      query: newQuery,
+    })
 
     if (window.location.search !== search) {
       setQuery(newQuery)

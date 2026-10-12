@@ -20,14 +20,14 @@ export type RelationshipValue =
   | (number | string | TypeWithID)
 
 export const Relationship: React.FC<RelationshipFieldDiffServerProps> = ({
-  comparisonValue: valueFrom,
   field,
   i18n,
   locale,
   nestingLevel,
   parentIsLocalized,
   req,
-  versionValue: valueTo,
+  valueFrom,
+  valueTo,
 }) => {
   const hasMany =
     ('hasMany' in field && field.hasMany) ||

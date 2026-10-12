@@ -5,14 +5,14 @@ import { createPayloadRequestFromWebRequest } from 'payload'
 import { v4 as uuid } from 'uuid'
 import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
+import type { RESTClient } from '../../__helpers/shared/RESTClient.js'
 
 import { test } from '../../__helpers/int/vitest.js'
 import { devUser } from '../../credentials.js'
 import { jwtUsersSlug, restrictedRelationshipsSlug } from '../shared.js'
 
 let payload: Payload
-let restClient: NextRESTClient
+let restClient: RESTClient
 
 const { password } = devUser
 test.suite(

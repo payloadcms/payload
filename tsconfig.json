@@ -78,6 +78,9 @@
       "path": "./packages/richtext-lexical"
     },
     {
+      "path": "./packages/transformer-sharp"
+    },
+    {
       "path": "./packages/translations"
     },
     {

@@ -146,6 +146,12 @@ export const migrateFieldComponentTypes: Transform = {
           }
 
           const binding = specifier.getAliasNode() ?? specifier.getNameNode()
+
+          // Always an Identifier in valid code: a string-literal import name requires an alias.
+          if (!Node.isIdentifier(binding)) {
+            continue
+          }
+
           const references = binding
             .findReferencesAsNodes()
             .filter((node) => node !== binding && node.getSourceFile() === file)

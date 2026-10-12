@@ -180,14 +180,17 @@ For example, the `read` operation runs on every read request, so avoid putting e
 }
 ```
 
-Instead, you might want to use a `beforeChange` or `afterChange` hook, which only runs when a document is created or updated.
+Instead, use `afterChange` for work that must run only after Payload saves a document. The `beforeChange` hook also runs during on-demand validation.
 
 ```ts
 {
   hooks: {
     beforeChange: [
-      async ({ context }) => {
-        // This is more acceptable here, although still should be mindful of performance
+      async ({ context, operation }) => {
+        if (operation === 'validate') {
+          return
+        }
+
         await doSomethingExpensive()
         // ...
       },

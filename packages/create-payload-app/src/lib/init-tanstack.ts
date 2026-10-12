@@ -157,11 +157,10 @@ function getRequiredDependencies({
     [getDbPackageName(dbType)]: payloadVersion,
     graphql: '^16.8.1',
     payload: payloadVersion,
-    sharp: '0.34.2',
   }
 
   if (appDetails.kind === 'router-only') {
-    dependencies['@tanstack/react-start'] = '^1.168.26'
+    dependencies['@tanstack/react-start'] = '^1.168.60'
   }
 
   return dependencies

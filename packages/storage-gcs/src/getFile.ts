@@ -1,5 +1,5 @@
 import type { Storage } from '@google-cloud/storage'
-import type { CollectionConfig, PayloadRequest, TypeWithID } from 'payload'
+import type { CollectionConfig, FileHandlerOperation, PayloadRequest, TypeWithID } from 'payload'
 
 import { ApiError } from '@google-cloud/storage'
 import {
@@ -16,6 +16,7 @@ interface GetFileArgs {
   doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
+  operation?: FileHandlerOperation
   req: PayloadRequest
   uploadReference?: unknown
   useCompositePrefixes?: boolean
@@ -29,10 +30,13 @@ export async function getFile({
   doc,
   filename,
   incomingHeaders,
+  operation = 'read',
   req,
   uploadReference,
   useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
+  const isTransformSource = operation === 'transform'
+
   try {
     const docPrefix = await getDocPrefix({
       collection,
@@ -55,8 +59,7 @@ export async function getFile({
 
     const [metadata] = await file.getMetadata()
 
-    // Handle range request
-    const rangeHeader = req.headers.get('range')
+    const rangeHeader = isTransformSource ? null : req.headers.get('range')
     const fileSize = Number(metadata.size)
     const rangeResult = getRangeRequestInfo({ fileSize, rangeHeader })
 
@@ -72,7 +75,6 @@ export async function getFile({
 
     let headers = new Headers(incomingHeaders)
 
-    // Add range-related headers from the result
     for (const [key, value] of Object.entries(rangeResult.headers)) {
       headers.append(key, value)
     }
@@ -86,6 +88,7 @@ export async function getFile({
     }
 
     if (
+      !isTransformSource &&
       collection.upload &&
       typeof collection.upload === 'object' &&
       typeof collection.upload.modifyResponseHeaders === 'function'
@@ -93,28 +96,56 @@ export async function getFile({
       headers = collection.upload.modifyResponseHeaders({ headers }) || headers
     }
 
-    if (etagFromHeaders && etagFromHeaders === objectEtag) {
+    if (!isTransformSource && etagFromHeaders && etagFromHeaders === objectEtag) {
       return new Response(null, {
         headers,
         status: 304,
       })
     }
 
-    // Manually create a ReadableStream for the web from a Node.js stream.
-    const readableStream = new ReadableStream({
+    const streamOptions =
+      rangeResult.type === 'partial'
+        ? { end: rangeResult.rangeEnd, start: rangeResult.rangeStart }
+        : {}
+    const nodeStream = file.createReadStream(streamOptions)
+
+    // A consumer that stops reading (a failed transform, a disconnected client) must end the
+    // GCS download too, otherwise the underlying connection stays open until it drains.
+    let onAbort: (() => void) | undefined
+    const removeAbortListener = () => {
+      if (onAbort) {
+        req.signal?.removeEventListener('abort', onAbort)
+      }
+    }
+    const stopReading = () => {
+      removeAbortListener()
+      nodeStream.destroy()
+    }
+
+    const readableStream = new ReadableStream<Uint8Array>({
+      cancel: stopReading,
       start(controller) {
-        const streamOptions =
-          rangeResult.type === 'partial'
-            ? { end: rangeResult.rangeEnd, start: rangeResult.rangeStart }
-            : {}
-        const nodeStream = file.createReadStream(streamOptions)
+        onAbort = () => {
+          stopReading()
+          controller.error(req.signal?.reason)
+        }
+
+        if (req.signal?.aborted) {
+          onAbort()
+          return
+        }
+
+        req.signal?.addEventListener('abort', onAbort, { once: true })
+
         nodeStream.on('data', (chunk) => {
           controller.enqueue(new Uint8Array(chunk))
         })
         nodeStream.on('end', () => {
+          removeAbortListener()
           controller.close()
         })
         nodeStream.on('error', (err) => {
+          removeAbortListener()
           controller.error(err)
         })
       },
