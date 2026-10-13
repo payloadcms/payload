@@ -349,11 +349,9 @@ export function DefaultEditView({
       }
 
       if (context?.getDocPermissions !== false) {
-        await getDocPermissions(json, ctx?.isCurrent)
-
-        if (!ctx?.isCurrent()) {
-          return
-        }
+        void getDocPermissions(json, ctx?.isCurrent).catch((err) => {
+          console.error('Error getting document permissions', err) // eslint-disable-line no-console
+        })
       }
 
       // If we're editing the doc of the logged-in user,
