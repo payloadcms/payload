@@ -64,7 +64,10 @@ const createUserWithLockAndPreference = async ({
 test.suite('Locked documents - deleting a user', { config: './config.ts' }, () => {
   test.options(
     'should retain user-owned locks when deletion rolls back',
-    { db: 'mongo' },
+    {
+      db: (adapter) =>
+        adapter === 'mongodb' || adapter === 'mongodb-atlas' || adapter === 'documentdb',
+    },
     async ({ payload }) => {
       const { lock, user } = await createUserWithLockAndPreference({
         email: 'rollback-delete-user@payloadcms.com',
