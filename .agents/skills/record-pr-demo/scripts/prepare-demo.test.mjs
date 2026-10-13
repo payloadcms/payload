@@ -120,6 +120,26 @@ test('packageCandidate converts, verifies, inventories, and cleans up a candidat
   assert.match(await readFile(path.join(directory, 'convert-args.txt'), 'utf8'), /-ss 1\.25/)
 })
 
+test('packageCandidate rejects video that exceeds the upload budget', async () => {
+  const directory = await createFakeMediaTools({ outputBytes: 10 * 1024 * 1024 + 1 })
+  const rawOutput = path.join(directory, 'demo.webm')
+  await writeFile(rawOutput, 'recording')
+
+  await assert.rejects(
+    packageCandidate({
+      contactSheet: path.join(directory, 'demo-contact-sheet.png'),
+      environment: { ...process.env, PATH: `${directory}:${process.env.PATH}` },
+      label: 'demo',
+      manifest: path.join(directory, 'demo.json'),
+      output: path.join(directory, 'demo.mp4'),
+      rawOutput,
+      scenario: path.join(directory, 'scenario.mjs'),
+      trimStart: 0,
+    }),
+    /exceeds the 10240 KB upload budget/,
+  )
+})
+
 test('runWithScenarioFixture wraps execution in scenario setup and teardown hooks', async () => {
   const directory = await mkdtemp(path.join(tmpdir(), 'prepare-pr-demo-fixture-test-'))
   testDirectories.push(directory)
@@ -206,7 +226,7 @@ test('verifyCandidateManifest accepts unchanged reviewed bytes and rejects repla
   await assert.rejects(verifyCandidateManifest(manifest), /does not match the reviewed candidate/)
 })
 
-async function createFakeMediaTools() {
+async function createFakeMediaTools({ outputBytes } = {}) {
   const directory = await mkdtemp(path.join(tmpdir(), 'prepare-pr-demo-test-'))
   testDirectories.push(directory)
 
@@ -231,6 +251,7 @@ for argument in "$@"; do
   previous="$argument"
 done
 cp "$input" "$output"
+${outputBytes ? `truncate -s ${outputBytes} "$output"` : ''}
 `,
   )
   await writeFile(

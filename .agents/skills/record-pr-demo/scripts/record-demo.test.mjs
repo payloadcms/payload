@@ -6,6 +6,7 @@ import path from 'node:path'
 import { test } from 'node:test'
 
 import * as recorder from './record-demo.mjs'
+import { packageCandidate } from './prepare-demo.mjs'
 
 const { parseArgs, parseViewport, sanitizeLabel } = recorder
 
@@ -264,18 +265,15 @@ test('should trim startup frames to the ready opening state', async () => {
     })
 
     assert.ok(trimStart > 1.4, `Expected delayed opening marker, got ${trimStart}`)
-    const convert = spawnSync(
-      'bash',
-      [
-        path.join(import.meta.dirname, 'convert-demo.sh'),
-        rawVideo,
-        convertedVideo,
-        '--trim-start',
-        String(trimStart),
-      ],
-      { encoding: 'utf8' },
-    )
-    assert.equal(convert.status, 0, convert.stderr)
+    await packageCandidate({
+      contactSheet: path.join(directory, 'contact-sheet.png'),
+      label: 'opening-test',
+      manifest: path.join(directory, 'manifest.json'),
+      output: convertedVideo,
+      rawOutput: rawVideo,
+      scenario,
+      trimStart,
+    })
 
     const firstFrame = spawnSync('ffmpeg', [
       '-v',
@@ -292,9 +290,7 @@ test('should trim startup frames to the ready opening state', async () => {
     ])
     assert.equal(firstFrame.status, 0, firstFrame.stderr.toString())
     assert.ok(
-      firstFrame.stdout[0] < 80 &&
-        firstFrame.stdout[1] > 150 &&
-        firstFrame.stdout[2] < 80,
+      firstFrame.stdout[0] < 80 && firstFrame.stdout[1] > 150 && firstFrame.stdout[2] < 80,
       'Opening frame does not show the ready green page',
     )
   } finally {

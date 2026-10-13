@@ -194,7 +194,7 @@ Useful options:
 - `--contact-sheet /tmp/custom-demo-contact-sheet.png`
 - `--manifest /tmp/custom-demo.json`
 
-The lower-level `record-demo.mjs` and `convert-demo.sh` remain available for debugging the recorder itself. Direct calls to `convert-demo.sh` require `--trim-start` with the opening offset from `ready()`; `prepare-demo.mjs` passes it automatically. Use `prepare-demo.mjs` for PR demos so verification and cleanup are not skipped.
+The lower-level `record-demo.mjs` remains available for debugging the recorder itself. Use `prepare-demo.mjs` for PR demos; it converts the recording using the opening state marked by `ready()` and verifies the candidate before cleanup.
 
 ## Review the candidate
 
