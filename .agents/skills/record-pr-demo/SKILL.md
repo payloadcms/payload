@@ -37,7 +37,8 @@ Do not upload previews, rejected takes, raw WebM recordings, or files the user h
 ## Completion criteria
 
 - The recording tells one understandable visual story and ends on visible proof.
-- Pointer movement is smooth, clicks have readable dwell time, and the cursor does not jump between interactions.
+- Pointer movement is smooth, clicks have readable dwell time, and the cursor stays visible above popup menus and dialogs.
+- Overflowing content, including popup menu lists, uses the scenario `scroll` helper for paced movement.
 - The approved artifact is an H.264 `.mp4`, within GitHub's applicable upload limit.
 - The candidate command produced a contact sheet and manifest, and the manifest still matches before upload.
 - The user reviewed the exact bytes that were uploaded.

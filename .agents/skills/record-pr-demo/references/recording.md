@@ -86,7 +86,7 @@ The recorder supplies:
 - `scroll(locator, options?)`: scrolls the actual overflow range with frame-timed easing, or real wheel input when requested;
 - `label`: the normalized recording label.
 
-The recorder adds a visible cursor to the page. Keep the scenario on one page; popup stitching is outside this skill's current scope.
+The recorder adds a visible cursor above in-page popups and dialogs. Keep the scenario on one page; separate browser-window stitching is outside this skill's current scope.
 
 Use `click` for visible interactions instead of calling `locator.click()` directly. Its defaults are a 400 ms eased cursor movement plus a 300 ms dwell before and after the click. `moveCursor` uses the same travel time and pauses for 300 ms after arriving. Override an individual action when the story needs more time:
 
@@ -99,7 +99,7 @@ Change the recording-wide defaults with `--mouse-move-ms` and `--interaction-pau
 
 ## Scroll without hover churn
 
-Destructure `scroll` from the scenario argument and use it for overflow demonstrations:
+Destructure `scroll` from the scenario argument and use it for every visible overflow movement, including the vertical list inside a popup menu. Target the element whose `scrollTop` or `scrollLeft` changes, not the popup container if it does not overflow:
 
 ```js
 await scroll(tabsScroller, {
@@ -112,6 +112,17 @@ await scroll(tabsScroller, {
 await moveCursor(revealedTab)
 await click(revealedTab)
 ```
+
+For a popup menu, open it with `click`, then scroll its list with the same helper before selecting an item:
+
+```js
+await click(columnsButton)
+const menuList = page.getByRole('menu').locator('[data-scroll-container]')
+await scroll(menuList, { duration: 950 })
+await click(revealedMenuItem)
+```
+
+Use a selector from the actual menu markup. The example's `data-scroll-container` is only illustrative. Avoid `page.mouse.wheel()`, `locator.evaluate()` scroll assignments, and repeated `scrollIntoViewIfNeeded()` calls for a scroll that reviewers need to see; they bypass the helper's pacing and position checks. If moving the pointer outside the list dismisses that menu, pass `cursorPlacement: 'inside'` while keeping `input: 'animation'`.
 
 Defaults are `axis: 'y'`, `to: 'end'`, `duration: 950`, `easing: 'easeInOutSine'`, `cursorPlacement: 'outside'`, `input: 'animation'`, and `settle: 150` (times are milliseconds). `to` accepts `'start'`, `'end'`, or a numeric pixel distance from the start, clamped to the real range and rounded to whole pixels. Horizontal RTL targets use distance from the right-hand start.
 

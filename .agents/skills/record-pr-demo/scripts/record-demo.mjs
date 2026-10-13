@@ -192,6 +192,8 @@ async function executeDemo({
     window.addEventListener('DOMContentLoaded', () => {
       const cursor = document.createElement('div')
       cursor.setAttribute('data-pr-demo-cursor', 'mac-arrow')
+      cursor.setAttribute('aria-hidden', 'true')
+      cursor.setAttribute('popover', 'manual')
       cursor.innerHTML = `<svg aria-hidden="true" height="23" viewBox="0 0 28 36" width="18" xmlns="http://www.w3.org/2000/svg">
         <path d="M2 2.2V27l6.7-6.4 5.1 12.7 5-2-5.2-12.2H23L2 2.2Z" fill="#111827" stroke="#fff" stroke-linejoin="round" stroke-width="2.2" />
       </svg>`
@@ -200,6 +202,7 @@ async function executeDemo({
         height: '23px',
         insetBlockStart: '0',
         insetInlineStart: '0',
+        margin: '0',
         opacity: '0',
         pointerEvents: 'none',
         position: 'fixed',
@@ -214,10 +217,34 @@ async function executeDemo({
         transition: 'transform 100ms ease',
       })
       document.documentElement.append(cursor)
+      cursor.showPopover()
+
+      const promoteCursor = () => {
+        if (cursor.matches(':popover-open')) cursor.hidePopover()
+        cursor.showPopover()
+      }
+
+      document.addEventListener(
+        'toggle',
+        (event) => {
+          if (event.target !== cursor && event.newState === 'open') promoteCursor()
+        },
+        true,
+      )
+      new MutationObserver((records) => {
+        if (records.some(({ target }) => target instanceof HTMLDialogElement && target.open)) {
+          promoteCursor()
+        }
+      }).observe(document.documentElement, {
+        attributeFilter: ['open'],
+        attributes: true,
+        subtree: true,
+      })
 
       document.addEventListener(
         'mousemove',
         (event) => {
+          promoteCursor()
           cursor.style.opacity = '1'
           cursor.style.transform = `translate(${event.clientX}px, ${event.clientY}px)`
         },

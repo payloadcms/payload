@@ -193,6 +193,68 @@ test('recordDemo renders a Mac-style arrow cursor', async () => {
   }
 })
 
+test('should keep the recorded cursor visible above a popup and modal dialog', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-top-layer-test-'))
+  const scenario = path.join(directory, 'scenario.mjs')
+
+  try {
+    await writeFile(
+      scenario,
+      `export default async function scenario({ moveCursor, page }) {
+        await page.goto('data:text/html,<button style="position:fixed;left:125px;top:125px">Behind popup</button>')
+        await moveCursor(page.getByRole('button', { name: 'Behind popup' }), { pauseAfter: 150 })
+        await page.evaluate(() => {
+          const popup = document.createElement('div')
+          popup.id = 'popup'
+          popup.setAttribute('popover', 'auto')
+          popup.innerHTML = '<button>Popup item</button>'
+          Object.assign(popup.style, { background: 'red', border: '0', height: '100px', left: '100px', margin: '0', padding: '20px', position: 'fixed', top: '100px', width: '200px' })
+          document.body.append(popup)
+          popup.showPopover()
+        })
+        await page.waitForTimeout(150)
+        await assertCursorVisible(page)
+        await moveCursor(page.getByRole('button', { name: 'Popup item' }), { pauseAfter: 150 })
+        await assertCursorVisible(page)
+
+        await page.evaluate(() => {
+          document.querySelector('#popup').hidePopover()
+          const dialog = document.createElement('dialog')
+          dialog.innerHTML = '<button>Dialog item</button>'
+          Object.assign(dialog.style, { background: 'blue', border: '0', height: '100px', left: '100px', margin: '0', padding: '20px', position: 'fixed', top: '100px', width: '200px' })
+          document.body.append(dialog)
+          dialog.showModal()
+        })
+        await page.waitForTimeout(150)
+        await assertCursorVisible(page)
+        await moveCursor(page.getByRole('button', { name: 'Dialog item' }), { pauseAfter: 150 })
+        await assertCursorVisible(page)
+      }
+
+      async function assertCursorVisible(page) {
+        const cursor = page.locator('[data-pr-demo-cursor]')
+        const box = await cursor.boundingBox()
+        const clip = { x: box.x, y: box.y, width: 18, height: 23 }
+        const withCursor = await page.screenshot({ clip })
+        await cursor.evaluate((element) => { element.style.opacity = '0' })
+        await page.waitForTimeout(150)
+        const withoutCursor = await page.screenshot({ clip })
+        await cursor.evaluate((element) => { element.style.opacity = '1' })
+        if (withCursor.equals(withoutCursor)) throw new Error('cursor is hidden behind the top layer')
+      }`,
+    )
+
+    await recorder.validateDemo({
+      baseURL: 'http://localhost:3000',
+      label: 'top-layer-test',
+      scenario,
+      viewport: { height: 480, width: 640 },
+    })
+  } finally {
+    await rm(directory, { force: true, recursive: true })
+  }
+})
+
 test('validateDemo executes a scenario without retaining video and forwards fixture data', async () => {
   const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-validation-test-'))
   const scenario = path.join(directory, 'scenario.mjs')
@@ -248,6 +310,41 @@ test('should expose scrolling through the real recorder cursor helper during val
     await recorder.validateDemo({
       baseURL: 'http://localhost:3000',
       label: 'scroll-test',
+      scenario,
+      viewport: { height: 480, width: 640 },
+    })
+  } finally {
+    await rm(directory, { force: true, recursive: true })
+  }
+})
+
+test('should smoothly scroll an open popup menu list', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-popup-scroll-test-'))
+  const scenario = path.join(directory, 'scenario.mjs')
+
+  try {
+    await writeFile(
+      scenario,
+      `export default async function scenario({ expect, page, scroll }) {
+        await page.goto('data:text/html,<main>Popup scroll</main>')
+        await page.evaluate(() => {
+          const popup = document.createElement('div')
+          popup.setAttribute('popover', 'manual')
+          popup.innerHTML = '<div id="menu-list" style="height:100px;width:160px;overflow:auto"><div style="height:300px">Menu items</div></div>'
+          Object.assign(popup.style, { left: '100px', margin: '0', padding: '20px', position: 'fixed', top: '80px' })
+          document.body.append(popup)
+          popup.showPopover()
+        })
+        const result = await scroll(page.locator('#menu-list'), { duration: 100, settle: 0 })
+        expect(result).toEqual({ position: 200, target: 200 })
+        await expect(page.locator('[popover]:popover-open')).toHaveCount(2)
+        await expect(page.locator('[data-pr-demo-scroll-anchor]')).toHaveCount(0)
+      }`,
+    )
+
+    await recorder.validateDemo({
+      baseURL: 'http://localhost:3000',
+      label: 'popup-scroll-test',
       scenario,
       viewport: { height: 480, width: 640 },
     })
