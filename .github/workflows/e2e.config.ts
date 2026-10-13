@@ -116,4 +116,10 @@ const tanstackSuites: TestConfig[] = nextSuites.map((suite) => ({
   optional: false,
 }))
 
-export default createE2EConfig([...nextSuites, ...tanstackSuites])
+export default createE2EConfig([
+  ...nextSuites,
+  ...tanstackSuites,
+  // Next.js suites run with `cacheComponents` enabled. This runs the tests tagged
+  // `@also-without-cache-components` from every suite once more, with it disabled.
+  { file: '', shards: 1, disableCacheComponents: true, grep: '@also-without-cache-components' },
+])

@@ -615,38 +615,75 @@ describe('General', () => {
       await expect.poll(() => page.url()).toBe(formatAdminURL({ adminRoute, path: '', serverURL }))
     })
 
-    /**
-     * This test is skipped because `page.goBack()` and `page.goForward()` do not trigger navigation in the Next.js app.
-     * I also tried rendering buttons that call `router.back()` and click those instead, but that also does not work.
-     */
-    test.skip("should clear the router's bfcache when navigating via the forward/back browser controls", async () => {
-      const { id } = await createPost({
-        title: 'Post to test bfcache',
-      })
+    test(
+      "should clear the router's bfcache when navigating via the forward/back browser controls",
+      { tag: '@also-without-cache-components' },
+      async () => {
+        const { id } = await createPost({
+          title: 'Post to test bfcache',
+        })
 
-      // check for it in the list view first
-      await page.goto(postsUrl.list)
-      const cell = page.locator('.table td').filter({ hasText: 'Post to test bfcache' })
-      await page.locator('.table a').filter({ hasText: id }).click()
+        // Open the list view client-side: going back to a directly loaded list view does not render
+        // it, because the list syncs its query to the URL before Next.js patches `history.replaceState`
+        await page.goto(postsUrl.admin)
+        await openNav(page)
+        await page.locator(`#nav-${postsCollectionSlug}`).click()
+        await page.locator('.table a').filter({ hasText: id }).click()
 
-      await page.waitForURL(`${postsUrl.edit(id)}`)
-      const titleField = page.locator('#field-title')
-      await expect(titleField).toHaveValue('Post to test bfcache')
+        await page.waitForURL(`${postsUrl.edit(id)}`)
+        const titleField = page.locator('#field-title')
+        await expect(titleField).toHaveValue('Post to test bfcache')
 
-      // change the title to something else
-      await titleField.fill('Post to test bfcache - updated')
-      await saveDocAndAssert(page)
+        // change the title to something else
+        await titleField.fill('Post to test bfcache - updated')
+        await saveDocAndAssert(page)
 
-      // now use the browser controls to go back to the list
-      await page.goBack()
-      await page.waitForURL(postsUrl.list)
-      await expect(cell).toBeVisible()
+        // now use the browser controls to go back to the list (its URL includes query params like `?limit=5`)
+        await page.goBack()
+        await page.waitForURL((url) => url.pathname === new URL(postsUrl.list).pathname)
+        await expect(
+          page.locator('.table td').filter({ hasText: 'Post to test bfcache - updated' }),
+        ).toBeVisible()
 
-      // and then forward to the edit page again
-      await page.goForward()
-      await page.waitForURL(`${postsUrl.edit(id)}`)
-      await expect(titleField).toHaveValue('Post to test bfcache - updated')
-    })
+        // and then forward to the edit page again
+        await page.goForward()
+        await page.waitForURL(`${postsUrl.edit(id)}`)
+        await expect(titleField).toHaveValue('Post to test bfcache - updated')
+      },
+    )
+
+    test(
+      'should not get stuck in a render loop when navigating while the page is still hydrating',
+      { framework: 'next', tag: '@also-without-cache-components' },
+      async () => {
+        // Clicking a link before hydration finished used to make `CloseModalOnRouteChange` send a
+        // no-op modal action that React kept replaying until it threw "Maximum update depth
+        // exceeded". It doesn't happen on every page load, so try a few.
+        for (let attempt = 0; attempt < 3; attempt++) {
+          const freshPage = await context.newPage()
+          const renderLoopErrors: string[] = []
+          const collectRenderLoopError = (message: string) => {
+            if (/Maximum update depth exceeded|Minified React error #185/.test(message)) {
+              renderLoopErrors.push(message)
+            }
+          }
+
+          freshPage.on('console', (message) => collectRenderLoopError(message.text()))
+          freshPage.on('pageerror', (error) => collectRenderLoopError(String(error)))
+
+          await freshPage.goto(postsUrl.admin, { waitUntil: 'domcontentloaded' })
+          await freshPage.locator(`#card-${postsCollectionSlug} .card__actions a`).click()
+
+          // The loop keeps the create view from rendering. Report the loop error itself, not a timeout
+          await expect(async () => {
+            expect(renderLoopErrors).toEqual([])
+            await expect(freshPage.locator('#field-title')).toBeVisible({ timeout: 100 })
+          }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+          await freshPage.close()
+        }
+      },
+    )
   })
 
   describe('navigation', () => {
