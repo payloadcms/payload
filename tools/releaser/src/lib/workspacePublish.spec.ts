@@ -2,7 +2,10 @@ import { EventEmitter } from 'node:events'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('child_process', () => ({ execSync: vi.fn(), spawn: vi.fn() }))
-vi.mock('./getPackageRegistryVersions.js', () => ({ isVersionPublished: vi.fn() }))
+vi.mock('./getPackageRegistryVersions.js', () => ({
+  getLatestPublishedVersion: vi.fn(),
+  isVersionPublished: vi.fn(),
+}))
 vi.mock('./getPackageDetails.js', () => ({ getPackageDetails: vi.fn() }))
 
 import { spawn } from 'child_process'
@@ -10,7 +13,7 @@ import { spawn } from 'child_process'
 import type { StableDistTag } from './stableDistTag.js'
 
 import { getPackageDetails } from './getPackageDetails.js'
-import { isVersionPublished } from './getPackageRegistryVersions.js'
+import { getLatestPublishedVersion, isVersionPublished } from './getPackageRegistryVersions.js'
 import { getWorkspace } from './getWorkspace.js'
 
 const packages = [
@@ -47,6 +50,7 @@ describe('workspace.publish tags', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(getPackageDetails).mockResolvedValue(packages)
+    vi.mocked(getLatestPublishedVersion).mockResolvedValue('3.90.2')
     vi.mocked(isVersionPublished).mockResolvedValue(false)
     vi.mocked(spawn).mockImplementation(() => spawnExiting(0) as never)
   })
@@ -73,6 +77,61 @@ describe('workspace.publish tags', () => {
     )
 
     expect(spawn).toHaveBeenCalledTimes(1)
+  })
+
+  it('should re-read npm latest for each package right before its publish', async () => {
+    const tags = new Map<string, StableDistTag>([
+      ['payload', 'latest'],
+      ['@payloadcms/richtext-slate', 'latest'],
+    ])
+
+    await getWorkspace().publish({ tag: tags })
+
+    const events = [
+      ...vi
+        .mocked(getLatestPublishedVersion)
+        .mock.invocationCallOrder.map((order) => ({ event: 'read', order })),
+      ...vi.mocked(spawn).mock.invocationCallOrder.map((order) => ({ event: 'spawn', order })),
+    ]
+      .sort((a, b) => a.order - b.order)
+      .map(({ event }) => event)
+
+    expect(vi.mocked(getLatestPublishedVersion).mock.calls).toEqual([
+      [{ name: 'payload' }],
+      [{ name: '@payloadcms/richtext-slate' }],
+    ])
+    expect(events).toEqual(['read', 'spawn', 'read', 'spawn'])
+  })
+
+  it('should stop before spawning a package whose re-read is rejected by the registry', async () => {
+    vi.mocked(getLatestPublishedVersion).mockImplementation(async ({ name }) => {
+      if (name === '@payloadcms/richtext-slate') {
+        throw new Error('503 Service Unavailable')
+      }
+      return '3.90.2'
+    })
+    const tags = new Map<string, StableDistTag>([
+      ['payload', 'latest'],
+      ['@payloadcms/richtext-slate', 'latest'],
+    ])
+
+    await expect(getWorkspace().publish({ tag: tags })).rejects.toThrow(
+      /@payloadcms\/richtext-slate/,
+    )
+
+    expect(spawnedTags()).toEqual([{ path: 'packages/payload', tag: 'latest' }])
+  })
+
+  it('should stop before spawning when npm latest moved to v4 after resolution', async () => {
+    vi.mocked(getLatestPublishedVersion).mockResolvedValue('4.0.0')
+    const tags = new Map<string, StableDistTag>([
+      ['payload', 'latest'],
+      ['@payloadcms/richtext-slate', 'latest'],
+    ])
+
+    await expect(getWorkspace().publish({ tag: tags })).rejects.toThrow(/payload/)
+
+    expect(spawn).not.toHaveBeenCalled()
   })
 
   it('should apply a string tag to every package', async () => {

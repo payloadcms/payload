@@ -1,10 +1,16 @@
 import semver from 'semver'
 
+import type { PackageDetails } from './getPackageDetails.js'
+import type { PublishResult } from './runPublishSequence.js'
+
 import { PINNED_MAJOR } from './pinnedMajor.js'
 
 export const OLD_MAJOR_DIST_TAG = 'payload-3'
 
 export type StableDistTag = 'latest' | typeof OLD_MAJOR_DIST_TAG
+
+/** Reads the version npm serves as `latest`; `undefined` only when the package was never published. */
+export type GetLatestVersion = (args: { name: string }) => Promise<string | undefined>
 
 /**
  * Picks the stable dist-tag from the version currently on npm `latest`. A newer major on
@@ -12,18 +18,20 @@ export type StableDistTag = 'latest' | typeof OLD_MAJOR_DIST_TAG
  */
 export function selectStableDistTag({
   latestVersion,
+  name,
 }: {
   latestVersion: string | undefined
+  name: string
 }): StableDistTag {
   if (latestVersion === undefined) {
     return 'latest'
   }
 
-  return parseMajor({ latestVersion }) > PINNED_MAJOR ? OLD_MAJOR_DIST_TAG : 'latest'
+  return parseMajor({ latestVersion, name }) > PINNED_MAJOR ? OLD_MAJOR_DIST_TAG : 'latest'
 }
 
 /**
- * Independent check run right before publish. Re-derives the rule from `latestVersion`
+ * Guard for a chosen tag against a given npm `latest`. Re-derives the rule from `latestVersion`
  * rather than reusing the selector, so a selector bug cannot also pass the guard.
  */
 export function assertStableDistTagSafe(params: {
@@ -40,7 +48,7 @@ export function assertStableDistTagSafe(params: {
   if (
     tag === 'latest' &&
     latestVersion !== undefined &&
-    parseMajor({ latestVersion }) > PINNED_MAJOR
+    parseMajor({ latestVersion, name }) > PINNED_MAJOR
   ) {
     throw new Error(
       `Refusing to publish ${name} to "latest": npm latest is ${latestVersion}, a newer major than v${PINNED_MAJOR}.`,
@@ -53,14 +61,14 @@ export async function resolveStableDistTags({
   getLatestVersion,
   names,
 }: {
-  getLatestVersion: (args: { name: string }) => Promise<string | undefined>
+  getLatestVersion: GetLatestVersion
   names: string[]
 }): Promise<Map<string, StableDistTag>> {
   const tags = new Map<string, StableDistTag>()
 
   for (const name of names) {
     const latestVersion = await getLatestVersion({ name })
-    const tag = selectStableDistTag({ latestVersion })
+    const tag = selectStableDistTag({ latestVersion, name })
     assertStableDistTagSafe({ name, latestVersion, tag })
     tags.set(name, tag)
   }
@@ -68,9 +76,56 @@ export async function resolveStableDistTags({
   return tags
 }
 
-function parseMajor({ latestVersion }: { latestVersion: string }): number {
+/**
+ * Publishes one package under its resolved stable dist-tag. npm `latest` can move between
+ * resolution and this package's turn, so it is read again here and the guard runs on that fresh
+ * value. A missing tag, a read failure, or a guard failure returns a failed result, which stops
+ * the publish sequence before this package ships.
+ */
+export async function publishWithStableDistTag({
+  distTags,
+  dryRun,
+  getLatestVersion,
+  pkg,
+  publish,
+}: {
+  distTags: ReadonlyMap<string, StableDistTag>
+  dryRun?: boolean
+  getLatestVersion: GetLatestVersion
+  pkg: Pick<PackageDetails, 'name'>
+  publish: (args: { tag: StableDistTag }) => Promise<PublishResult>
+}): Promise<PublishResult> {
+  const { name } = pkg
+  const tag = distTags.get(name)
+  if (!tag) {
+    return refusePublish({
+      name,
+      details: `No dist-tag resolved for ${name}; refusing to publish it.`,
+    })
+  }
+
+  // A dry-run publishes nothing, so it skips the registry read, like the publish pre-check does.
+  if (!dryRun) {
+    try {
+      const latestVersion = await getLatestVersion({ name })
+      assertStableDistTagSafe({ latestVersion, name, tag })
+    } catch (err: unknown) {
+      const reason = err instanceof Error ? err.message : String(err)
+      return refusePublish({ name, details: `Dist-tag re-check failed for ${name}: ${reason}` })
+    }
+  }
+
+  return publish({ tag })
+}
+
+function refusePublish({ name, details }: { details: string; name: string }): PublishResult {
+  console.error(details)
+  return { name, success: false, details }
+}
+
+function parseMajor({ latestVersion, name }: { latestVersion: string; name: string }): number {
   if (semver.valid(latestVersion) === null) {
-    throw new Error(`npm latest version "${latestVersion}" is not valid semver.`)
+    throw new Error(`npm latest version "${latestVersion}" of ${name} is not valid semver.`)
   }
 
   return semver.major(latestVersion)

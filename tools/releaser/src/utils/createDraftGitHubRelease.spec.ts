@@ -95,28 +95,53 @@ describe('createDraftGitHubRelease', () => {
     expect(postBody.make_latest).toBe('false')
   })
 
-  it('should send make_latest true in the PATCH body when makeLatest is true', async () => {
+  it('should omit make_latest from the POST body when makeLatest is true', async () => {
     const fetchImpl = vi
       .fn()
-      .mockResolvedValueOnce(
-        jsonResponse([
-          { id: 42, draft: true, tag_name: 'v3.90.3', html_url: 'https://gh/existing' },
-        ]),
-      )
-      .mockResolvedValueOnce(jsonResponse({ html_url: 'https://gh/existing' }))
+      .mockResolvedValueOnce(jsonResponse([]))
+      .mockResolvedValueOnce(jsonResponse({ html_url: 'https://gh/new' }))
 
     await createDraftGitHubRelease({
       branch: '3.x',
-      fetchImpl: fetchImpl as unknown as typeof fetch,
+      fetchImpl,
       makeLatest: true,
       releaseNotes: 'notes',
       tag: 'v3.90.3',
     })
 
-    const patchCall = fetchImpl.mock.calls.at(-1)!
-    expect(patchCall[1].method).toBe('PATCH')
-    expect(JSON.parse(patchCall[1].body).make_latest).toBe('true')
+    const postCall = fetchImpl.mock.calls.at(-1)
+    expect(postCall?.[1].method).toBe('POST')
+    expect(JSON.parse(postCall?.[1].body)).not.toHaveProperty('make_latest')
   })
+
+  it.each([
+    { makeLatest: true, expected: undefined },
+    { makeLatest: false, expected: 'false' },
+  ])(
+    'should send make_latest $expected in the PATCH body when makeLatest is $makeLatest',
+    async ({ makeLatest, expected }) => {
+      const fetchImpl = vi
+        .fn()
+        .mockResolvedValueOnce(
+          jsonResponse([
+            { id: 42, draft: true, tag_name: 'v3.90.3', html_url: 'https://gh/existing' },
+          ]),
+        )
+        .mockResolvedValueOnce(jsonResponse({ html_url: 'https://gh/existing' }))
+
+      await createDraftGitHubRelease({
+        branch: '3.x',
+        fetchImpl,
+        makeLatest,
+        releaseNotes: 'notes',
+        tag: 'v3.90.3',
+      })
+
+      const patchCall = fetchImpl.mock.calls.at(-1)
+      expect(patchCall?.[1].method).toBe('PATCH')
+      expect(JSON.parse(patchCall?.[1].body).make_latest).toBe(expected)
+    },
+  )
 
   it('should refuse to overwrite an already-published release', async () => {
     const fetchImpl = vi

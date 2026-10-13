@@ -10,9 +10,10 @@ import type { PublishResult } from './runPublishSequence.js'
 import type { StableDistTag } from './stableDistTag.js'
 
 import { getPackageDetails } from './getPackageDetails.js'
-import { isVersionPublished } from './getPackageRegistryVersions.js'
+import { getLatestPublishedVersion, isVersionPublished } from './getPackageRegistryVersions.js'
 import { packagePublishList } from './publishList.js'
 import { runPublishSequence } from './runPublishSequence.js'
+import { publishWithStableDistTag } from './stableDistTag.js'
 
 const cwd = PROJECT_ROOT
 
@@ -69,15 +70,13 @@ export const getWorkspace = (): Workspace => {
           return publishSinglePackage(pkg, { dryRun, tag })
         }
 
-        // Fail closed: a package without a resolved tag is never published.
-        const packageTag = tag.get(pkg.name)
-        if (!packageTag) {
-          const details = `No dist-tag resolved for ${pkg.name}; refusing to publish it.`
-          console.error(details)
-          return { name: pkg.name, success: false, details }
-        }
-
-        return publishSinglePackage(pkg, { dryRun, tag: packageTag })
+        return publishWithStableDistTag({
+          distTags: tag,
+          dryRun,
+          getLatestVersion: getLatestPublishedVersion,
+          pkg,
+          publish: ({ tag: packageTag }) => publishSinglePackage(pkg, { dryRun, tag: packageTag }),
+        })
       },
     })
   }
@@ -112,7 +111,7 @@ export const getWorkspace = (): Workspace => {
       nextReleaseVersion = semver.inc(monorepoVersion, bumpType)
     } else {
       throw new Error(
-        `Invalid bump type: ${bumpType}. Supported types: internal, internal-debug, patch, minor.`,
+        `Invalid bump type: ${String(bumpType)}. Supported types: internal, internal-debug, patch, minor.`,
       )
     }
 

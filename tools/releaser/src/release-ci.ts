@@ -25,7 +25,10 @@ import { getWorkspace } from './lib/getWorkspace.js'
 import { PINNED_MAJOR, pinnedMajorTagGlob, RELEASE_BRANCH } from './lib/pinnedMajor.js'
 import { packagePublishList } from './lib/publishList.js'
 import { resolveStableDistTags } from './lib/stableDistTag.js'
-import { createDraftGitHubRelease } from './utils/createDraftGitHubRelease.js'
+import {
+  createDraftGitHubRelease,
+  NOT_LATEST_PUBLISH_REMINDER,
+} from './utils/createDraftGitHubRelease.js'
 import { generateReleaseNotes } from './utils/generateReleaseNotes.js'
 
 type ReleaseCiDeps = {
@@ -133,13 +136,17 @@ export const runReleaseCi = async ({
   await workspace.build()
   await workspace.publish({ dryRun, tag: distTags })
 
+  const makeLatest = payloadDistTag === 'latest'
   const { releaseUrl: draftUrl } = await createDraftGitHubRelease({
     branch: RELEASE_BRANCH,
-    makeLatest: payloadDistTag === 'latest',
+    makeLatest,
     releaseNotes,
     tag: releaseTag,
   })
   log(`Draft release: ${draftUrl}`)
+  if (!makeLatest) {
+    log(NOT_LATEST_PUBLISH_REMINDER)
+  }
 }
 
 async function main(): Promise<void> {

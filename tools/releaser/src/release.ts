@@ -20,14 +20,19 @@ import semver from 'semver'
 
 import type { StableBump } from './lib/assertBumpPreconditions.js'
 import type { PackageDetails } from './lib/getPackageDetails.js'
+import type { PublishResult } from './lib/runPublishSequence.js'
 
 import { assertBumpPreconditions } from './lib/assertBumpPreconditions.js'
 import { getPackageDetails } from './lib/getPackageDetails.js'
 import { getLatestPublishedVersion } from './lib/getPackageRegistryVersions.js'
 import { RELEASE_BRANCH } from './lib/pinnedMajor.js'
 import { packagePublishList } from './lib/publishList.js'
-import { resolveStableDistTags } from './lib/stableDistTag.js'
-import { createDraftGitHubRelease } from './utils/createDraftGitHubRelease.js'
+import { runPublishSequence } from './lib/runPublishSequence.js'
+import { publishWithStableDistTag, resolveStableDistTags } from './lib/stableDistTag.js'
+import {
+  createDraftGitHubRelease,
+  NOT_LATEST_PUBLISH_REMINDER,
+} from './utils/createDraftGitHubRelease.js'
 import { generateReleaseNotes } from './utils/generateReleaseNotes.js'
 import { getRecommendedBump } from './utils/getRecommendedBump.js'
 
@@ -137,7 +142,7 @@ async function main() {
   console.log(chalk.gray(releaseNotes) + '\n\n')
   console.log(`\n\nRelease URL: ${chalk.dim(prefilledReleaseUrl)}`)
 
-  let packageDetails = await getPackageDetails(packagePublishList)
+  const packageDetails = await getPackageDetails(packagePublishList)
 
   // Resolved before any write so a registry failure stops the run with nothing to undo.
   const distTags = await resolveStableDistTags({
@@ -212,36 +217,25 @@ async function main() {
   header(`🏷️  Tagging release v${nextReleaseVersion}`, { enable: gitTag })
   runCmd(`git tag -a v${nextReleaseVersion} -m "v${nextReleaseVersion}"`, execOpts)
 
-  // Publish only payload to get 5 min auth token
-  packageDetails = packageDetails.filter((p) => p.name !== 'payload')
-  const payloadDistTag = distTags.get('payload')
-  if (!payloadDistTag) {
-    abort(`No dist-tag resolved for 'payload'`)
-  }
-  runCmd(`pnpm publish -C packages/payload --no-git-checks --tag ${payloadDistTag}`, execOpts)
-
-  const results: PublishResult[] = []
-  for (const pkg of packageDetails) {
-    const pkgDistTag = distTags.get(pkg.name)
-    if (!pkgDistTag) {
-      abort(`No dist-tag resolved for '${pkg.name}'`)
-    }
-    const res = await publishSinglePackage(pkg, { distTag: pkgDistTag, dryRun })
-    results.push(res)
-  }
-
-  console.log(chalk.bold.green(`\n\nResults:\n`))
-
-  console.log(
-    results
-      .map((result) => {
-        if (!result.success) {
-          console.error(result.details)
-        }
-        return `  ${result.success ? '✅' : '❌'} ${result.name}`
-      })
-      .join('\n') + '\n',
-  )
+  // Publishes in topological order and stops at the first failure. The first publish is
+  // interactive so the maintainer enters the npm OTP, which npm then honors for 5 minutes.
+  const [firstPackage] = packageDetails
+  await runPublishSequence({
+    packages: packageDetails,
+    publishOne: (pkg) =>
+      publishWithStableDistTag({
+        distTags,
+        dryRun,
+        getLatestVersion: getLatestPublishedVersion,
+        pkg,
+        publish: async ({ tag: distTag }) => {
+          if (pkg === firstPackage) {
+            return publishInteractively({ distTag, pkg, runCmd })
+          }
+          return await publishSinglePackage(pkg, { distTag, dryRun })
+        },
+      }),
+  })
 
   header(`🚀 Publishing complete!`)
 
@@ -254,13 +248,17 @@ async function main() {
   const createDraftRelease = await confirm('Create draft release on GitHub?')
   if (createDraftRelease) {
     try {
+      const makeLatest = distTags.get('payload') === 'latest'
       const { releaseUrl: draftReleaseUrl } = await createDraftGitHubRelease({
         branch: RELEASE_BRANCH,
-        makeLatest: distTags.get('payload') === 'latest',
+        makeLatest,
         releaseNotes,
         tag: `v${nextReleaseVersion}`,
       })
       console.log(chalk.bold.green(`Draft release created on GitHub: ${draftReleaseUrl}`))
+      if (!makeLatest) {
+        console.log(chalk.bold.yellow(NOT_LATEST_PUBLISH_REMINDER))
+      }
     } catch (error: unknown) {
       console.log(chalk.bold.red('\nFull Release Notes:\n\n'))
       console.log(chalk.gray(releaseNotes) + '\n\n')
@@ -308,6 +306,28 @@ function readGuardedRelease(): { bump: StableBump; monorepoVersion: string } {
   }
 
   return { bump: preconditions.bump, monorepoVersion }
+}
+
+/** Inherits stdio so npm can prompt for the OTP. */
+function publishInteractively({
+  distTag,
+  pkg,
+  runCmd,
+}: {
+  distTag: string
+  pkg: PackageDetails
+  runCmd: (cmd: string, execOpts: ExecSyncOptions) => void
+}): PublishResult {
+  try {
+    runCmd(`pnpm publish -C ${pkg.packagePath} --no-git-checks --tag ${distTag}`, execOpts)
+    return { name: pkg.name, success: true }
+  } catch (err: unknown) {
+    return {
+      name: pkg.name,
+      details: `Interactive publish failed for ${pkg.name}: ${err instanceof Error ? err.message : JSON.stringify(err)}`,
+      success: false,
+    }
+  }
 }
 
 async function publishSinglePackage(
@@ -416,10 +436,4 @@ function header(message: string, opts?: { enable?: boolean }) {
   }
 
   console.log(chalk.bold.green(`${message}\n`))
-}
-
-type PublishResult = {
-  details?: string
-  name: string
-  success: boolean
 }

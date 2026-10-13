@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import type { StableDistTag } from './lib/stableDistTag.js'
 
 import { runReleaseCi } from './release-ci.js'
+import { NOT_LATEST_PUBLISH_REMINDER } from './utils/createDraftGitHubRelease.js'
 
 const defaultTriggerTag: string | undefined = 'v3.90.3'
 
@@ -65,6 +66,7 @@ describe('runReleaseCi', () => {
       releaseNotes: 'notes',
       tag: 'v3.90.3',
     })
+    expect(deps.log).not.toHaveBeenCalledWith(NOT_LATEST_PUBLISH_REMINDER)
 
     const resolveOrder = deps.resolveDistTags.mock.invocationCallOrder[0]
     const notesOrder = deps.generateReleaseNotes.mock.invocationCallOrder[0]
@@ -91,6 +93,7 @@ describe('runReleaseCi', () => {
       releaseNotes: 'notes',
       tag: 'v3.90.3',
     })
+    expect(deps.log).toHaveBeenCalledWith(NOT_LATEST_PUBLISH_REMINDER)
   })
 
   it('should refuse before building when dist-tag resolution fails', async () => {

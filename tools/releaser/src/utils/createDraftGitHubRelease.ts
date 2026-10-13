@@ -3,11 +3,18 @@ import semver from 'semver'
 type Args = {
   branch: string
   fetchImpl?: typeof fetch
-  /** Whether GitHub marks this release "Latest" once published. */
+  /**
+   * `false` sends `make_latest: 'false'`. `true` omits the field, so GitHub applies its default
+   * (latest by date and version) when the draft is published.
+   */
   makeLatest: boolean
   releaseNotes: string
   tag: string
 }
+
+/** Logged when `makeLatest` is false: the GitHub UI does not keep `make_latest` from the draft. */
+export const NOT_LATEST_PUBLISH_REMINDER =
+  'npm latest is a newer major: untick "Set as the latest release" when you publish this draft.'
 
 type GitHubRelease = {
   draft: boolean
@@ -41,19 +48,20 @@ export const createDraftGitHubRelease = async ({
     ? `https://api.github.com/repos/${REPO}/releases/${existing.id}`
     : `https://api.github.com/repos/${REPO}/releases`
 
-  // Sent on every request so a re-run converges on the current dist-tag decision.
-  const makeLatestValue = makeLatest ? 'true' : 'false'
+  // GitHub cannot set a draft as latest, so only an explicit 'false' is sent. The value does not
+  // carry over when a maintainer publishes the draft in the UI; callers log that reminder.
+  const makeLatestField = makeLatest ? {} : { make_latest: 'false' }
 
   const res = await fetchImpl(url, {
     body: JSON.stringify(
       existing
-        ? { name: tag, body: releaseNotes, make_latest: makeLatestValue }
+        ? { name: tag, body: releaseNotes, ...makeLatestField }
         : {
             name: tag,
             body: releaseNotes,
             draft: true,
             generate_release_notes: false,
-            make_latest: makeLatestValue,
+            ...makeLatestField,
             // A prerelease is never marked "Latest", so it cannot displace the stable line.
             prerelease: semver.prerelease(tag) !== null,
             tag_name: tag,

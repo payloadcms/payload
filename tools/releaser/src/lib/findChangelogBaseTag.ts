@@ -4,8 +4,8 @@ export type ReleaseLine = 'beta' | 'canary' | 'latest'
 
 /**
  * The release line a version belongs to: its prerelease id when 'beta'/'canary',
- * else 'latest' (stable). A non-throwing superset of the dist-tag classifier so
- * it also handles a future stable/v3 line.
+ * else 'latest' (stable). Stable v3 tags, the main line on 3.x, map to 'latest'.
+ * It never throws, so every candidate tag gets a line.
  */
 export const lineFromVersion = (version: string): ReleaseLine => {
   const preid = semver.prerelease(version)?.[0]
