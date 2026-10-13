@@ -915,7 +915,7 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.4.10 Reflow (AA)', () => {
-    test('should keep instruction tabs visible and clear of the required-fields help at 320px', async () => {
+    test('should keep instruction tabs visible without required-fields help at 320px', async () => {
       const viewport = page.viewportSize()!
 
       try {
@@ -930,21 +930,14 @@ test.describe('WCAG 2.2 Level AA', () => {
           name: 'System instructions (read-only)',
           exact: true,
         })
-        const help = page.locator('.required-fields-info button')
+        await expect(page.locator('.required-fields-info')).toHaveCount(0)
 
         for (const tab of [additionalTab, systemTab]) {
           const bounds = await tab.boundingBox()
-          const helpBounds = await help.boundingBox()
 
           expect(bounds).not.toBeNull()
-          expect(helpBounds).not.toBeNull()
           expect(bounds!.x).toBeGreaterThanOrEqual(0)
           expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(320)
-          expect(
-            bounds!.x + bounds!.width <= helpBounds!.x ||
-              bounds!.y >= helpBounds!.y + helpBounds!.height ||
-              bounds!.y + bounds!.height <= helpBounds!.y,
-          ).toBe(true)
         }
 
         await additionalTab.focus()
@@ -4301,63 +4294,22 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(input).toHaveAccessibleDescription('Choose an option')
     })
 
-    test('should open and dismiss required-field help', async () => {
-      // PYLD-3778
+    test('should omit required-field help from document forms and drawers', async () => {
+      // PYLD-4389: defer this control until its placement has been redesigned.
       await gotoCreatePost({ page, postsURL })
       const message = 'Fields marked with * are required.'
-      const trigger = page.getByRole('button', { name: message, exact: true })
-      const explanation = page.getByText(message, { exact: true })
 
-      await expect(trigger).toBeVisible()
-      await expect(trigger).toHaveText('')
-      const spacing = await trigger.evaluate((button) => {
-        const icon = button.closest('.required-fields-info')!
-        const parent = icon.parentElement!
-        const next = icon.nextSibling
-        const fields = parent.querySelector('.document-fields__fields')!
-        const before = fields.getBoundingClientRect().top
-
-        icon.remove()
-        const after = fields.getBoundingClientRect().top
-
-        parent.insertBefore(icon, next)
-        return { after, before }
-      })
-
-      expect(spacing.after).toBe(spacing.before)
-      await expect(explanation).toBeHidden()
-      await trigger.hover()
-      await expect(explanation).toBeVisible()
-      await explanation.hover()
-      await expect(explanation).toBeVisible()
-      await page.keyboard.press('Escape')
-      await expect(explanation).toBeHidden()
-      await page.locator('#field-title').focus()
-      await trigger.focus()
-      await expect(explanation).toBeVisible()
-      await trigger.press('Escape')
-      await expect(explanation).toBeHidden()
-      await trigger.press('Enter')
-      await expect(explanation).toBeVisible()
-      await page.locator('#field-title').click()
-      await expect(explanation).toBeHidden()
-      await trigger.click()
-      await expect(explanation).toBeVisible()
-      const box = await trigger.boundingBox()
-
-      expect(box?.width).toBeGreaterThanOrEqual(24)
-      expect(box?.height).toBeGreaterThanOrEqual(24)
-      await trigger.press('Escape')
+      await expect(page.locator('.document-fields')).toBeVisible()
+      await expectRequiredState({ input: page.locator('#field-title') })
+      await expect(page.locator('.required-fields-info')).toHaveCount(0)
+      await expect(page.getByRole('button', { name: message, exact: true })).toHaveCount(0)
       await page.locator('#relatedPost-add-new button').click()
       const drawer = page.locator('dialog[id^="doc-drawer_posts_"]')
-      const drawerTrigger = drawer.getByRole('button', { name: message, exact: true })
-      const drawerExplanation = drawer.getByText(message, { exact: true })
 
-      await drawerTrigger.focus()
-      await expect(drawerExplanation).toBeVisible()
-      await drawerTrigger.press('Escape')
-      await expect(drawerExplanation).toBeHidden()
       await expect(drawer).toBeVisible()
+      await expect(drawer.locator('.document-fields')).toBeVisible()
+      await expect(drawer.getByRole('button', { name: message, exact: true })).toHaveCount(0)
+      await expect(drawer.locator('.required-fields-info')).toHaveCount(0)
     })
   })
 
