@@ -1,7 +1,8 @@
 /**
  * Publish-workflow entry point. Reads the committed version from the checked-out
- * tag, builds, publishes to npm (fail-fast, idempotent, topological order), then
- * generates release notes and upserts a DRAFT GitHub release. No version bump — the
+ * tag, builds, publishes to npm (fail-fast, idempotent, topological order), moves
+ * `latest` for prerelease-only packages, then generates release notes and upserts a
+ * DRAFT GitHub release. No version bump — the
  * bump workflow already committed and tagged the version this run publishes.
  *
  * Usage: pnpm release-ci [--dry-run]
@@ -16,6 +17,7 @@ import { pathToFileURL } from 'url'
 
 import type { Workspace } from './lib/getWorkspace.js'
 
+import { addDistTag } from './lib/addDistTag.js'
 import { findChangelogBaseTag } from './lib/findChangelogBaseTag.js'
 import { isVersionPublished } from './lib/getPackageRegistryVersions.js'
 import { getWorkspace } from './lib/getWorkspace.js'
@@ -24,7 +26,17 @@ import { isPreid, PREIDS } from './lib/preids.js'
 import { createDraftGitHubRelease } from './utils/createDraftGitHubRelease.js'
 import { generateReleaseNotes } from './utils/generateReleaseNotes.js'
 
+/**
+ * Packages with no stable v4 release that users run through `npx <name>` without a
+ * version, which resolves `latest`. Each prerelease publish moves `latest` so that
+ * command runs current code. Remove once v4 stable publishes to `latest` directly.
+ */
+export const LATEST_FOLLOWS_PRERELEASE_PACKAGES = ['@payloadcms/codemod']
+
+const DIST_TAG_ATTEMPTS = 2
+
 type ReleaseCiDeps = {
+  addDistTag: (args: { name: string; tag: string; version: string }) => Promise<void>
   createDraftGitHubRelease: (args: {
     branch: string
     releaseNotes: string
@@ -50,6 +62,7 @@ export const runReleaseCi = async ({
   dryRun: boolean
 }): Promise<void> => {
   const {
+    addDistTag,
     createDraftGitHubRelease,
     findChangelogBaseTag,
     generateReleaseNotes,
@@ -112,12 +125,21 @@ export const runReleaseCi = async ({
   if (dryRun) {
     log(`[dry-run] would build all packages`)
     log(`[dry-run] would publish all packages to dist-tag '${tag}'`)
+    for (const name of LATEST_FOLLOWS_PRERELEASE_PACKAGES) {
+      log(`[dry-run] would point dist-tag 'latest' at ${name}@${version}`)
+    }
     log(`[dry-run] would create/upsert draft GitHub release for ${releaseTag}`)
     return
   }
 
   await workspace.build()
   await workspace.publish({ dryRun, tag })
+
+  // npm accepts dist-tag changes while a new version is still in publish-time
+  // scanning, so this runs right after publish without waiting for availability.
+  for (const name of LATEST_FOLLOWS_PRERELEASE_PACKAGES) {
+    await tagLatest({ addDistTag, log, name, version })
+  }
 
   const { releaseUrl: draftUrl } = await createDraftGitHubRelease({
     branch: 'main',
@@ -139,6 +161,7 @@ async function main(): Promise<void> {
 
   await runReleaseCi({
     deps: {
+      addDistTag,
       createDraftGitHubRelease,
       findChangelogBaseTag: ({ version }) =>
         findChangelogBaseTag({ isPublished: isVersionPublished, listTags, version }),
@@ -150,6 +173,38 @@ async function main(): Promise<void> {
     },
     dryRun,
   })
+}
+
+/**
+ * Moves `latest` to the just-published version. Never throws: the packages are
+ * already on npm, and a failed move only leaves `latest` on an older version.
+ */
+async function tagLatest({
+  addDistTag,
+  log,
+  name,
+  version,
+}: { name: string; version: string } & Pick<ReleaseCiDeps, 'addDistTag' | 'log'>): Promise<void> {
+  let lastError: unknown
+  for (let attempt = 1; attempt <= DIST_TAG_ATTEMPTS; attempt++) {
+    try {
+      await addDistTag({ name, tag: 'latest', version })
+      log(`Pointed dist-tag 'latest' at ${name}@${version}`)
+      return
+    } catch (error: unknown) {
+      lastError = error
+    }
+  }
+
+  const reason = lastError instanceof Error ? lastError.message : String(lastError)
+  const message = `Could not point 'latest' at ${name}@${version} (${reason}). Run manually: npm dist-tag add ${name}@${version} latest`
+  // `::warning` surfaces as a GitHub Actions run annotation; non-fatal failures in logs alone go unnoticed.
+  log(`::warning title=dist-tag latest failed::${escapeWorkflowCommandData(message)}`)
+}
+
+/** Workflow commands are single-line; GitHub decodes these escapes in the annotation. */
+function escapeWorkflowCommandData(value: string): string {
+  return value.replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A')
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
