@@ -16,12 +16,17 @@ import { isValidReactElement } from './isValidReactElement.js'
  * - Formats upload file sizes for display.
  * - For all other field types, returns `cellData` unchanged.
  */
-export const getDisplayedFieldValue = (
-  cellData: any,
-  field: ClientField,
-  i18n: I18nClient,
-  { isUploadCollection = false }: { isUploadCollection?: boolean } = {},
-) => {
+export const getDisplayedFieldValue = ({
+  cellData,
+  field,
+  i18n,
+  isUploadCollection = false,
+}: {
+  cellData: any
+  field: ClientField
+  i18n: I18nClient
+  isUploadCollection?: boolean
+}) => {
   if (
     isUploadCollection &&
     field.type === 'number' &&

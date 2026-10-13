@@ -98,7 +98,10 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     )
   }
 
-  const displayedValue = getDisplayedFieldValue(cellData, field, i18n, {
+  const displayedValue = getDisplayedFieldValue({
+    cellData,
+    field,
+    i18n,
     isUploadCollection: Boolean(collectionConfig?.upload),
   })
 
