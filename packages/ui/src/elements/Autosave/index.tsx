@@ -13,13 +13,20 @@ import React, { useDeferredValue, useEffect, useRef, useState } from 'react'
 
 import type { OnSaveContext } from '../../views/Edit/index.js'
 
-import { useAllFormFields, useForm, useFormModified } from '../../forms/Form/context.js'
+import {
+  useAllFormFields,
+  useForm,
+  useFormModified,
+  useFormSubmitted,
+} from '../../forms/Form/context.js'
 import { useDebounce } from '../../hooks/useDebounce.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useUploadEdits } from '../../providers/UploadEdits/index.js'
+import { reduceFieldsToValuesWithValidation } from '../../utilities/reduceFieldsToValuesWithValidation.js'
 import { LeaveWithoutSaving } from '../LeaveWithoutSaving/index.js'
 import './index.css'
 
@@ -52,10 +59,12 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const [formState] = useAllFormFields()
   const modified = useFormModified()
+  const submitted = useFormSubmitted()
 
   const currentLocale = useLocale()
   const locale = currentLocale?.code
   const { t } = useTranslation()
+  const { uploadEdits } = useUploadEdits()
 
   const interval = getAutosaveInterval(docConfig)
   const validateOnDraft = hasDraftValidationEnabled(docConfig)
@@ -96,6 +105,12 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
       return
     }
 
+    const { valid } = reduceFieldsToValuesWithValidation(formState, true)
+
+    if (submitted && !valid && validateOnDraft) {
+      return
+    }
+
     let url: string
     let method: string
     let entitySlug: string
@@ -106,6 +121,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
         draft: true,
         'fallback-locale': 'null',
         locale,
+        uploadEdits: uploadEdits || undefined,
       },
       {
         addQueryPrefix: true,
@@ -176,6 +192,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const didMount = useRef(false)
   const previousDebouncedData = useRef(reduceFieldsToValues(debouncedFormState))
+  const previousUploadEdits = useRef(uploadEdits)
 
   // When debounced fields change, autosave
   useEffect(() => {
@@ -194,14 +211,15 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     const { updatedAt: _, ...formData } = reduceFieldsToValues(debouncedFormState)
     const { updatedAt: __, ...prevFormData } = previousDebouncedData.current
 
-    if (dequal(formData, prevFormData)) {
+    if (dequal(formData, prevFormData) && dequal(uploadEdits, previousUploadEdits.current)) {
       return
     }
 
     previousDebouncedData.current = formData
+    previousUploadEdits.current = uploadEdits
 
     void handleAutosave()
-  }, [debouncedFormState])
+  }, [debouncedFormState, uploadEdits])
 
   /**
    * If component unmounts, clear the autosave timeout

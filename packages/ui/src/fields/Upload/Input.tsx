@@ -440,25 +440,48 @@ export function UploadInput(props: UploadInputProps) {
         }
       }
 
-      const itemsToLoad = selectedDocIDs.map((id) => ({
+      if (!selectedDocIDs.length) {
+        return
+      }
+
+      const idsToApply = hasMany ? selectedDocIDs : selectedDocIDs.slice(0, 1)
+
+      const itemsToLoad = idsToApply.map((id) => ({
         relationTo: relationToUse,
         value: id,
       }))
 
       const loadedDocs = await populateDocs(itemsToLoad)
       if (loadedDocs) {
-        setPopulatedDocs((currentDocs) => [...(currentDocs || []), ...loadedDocs])
+        setPopulatedDocs((currentDocs) =>
+          hasMany ? [...(currentDocs || []), ...loadedDocs] : loadedDocs,
+        )
       }
 
-      const newValues = selectedDocIDs.map((id) =>
+      const newValues = idsToApply.map((id) =>
         isPoly ? { relationTo: relationToUse, value: id } : id,
       )
+
+      if (!hasMany) {
+        onChange(newValues[0])
+        closeListDrawer()
+        return
+      }
       // Normalize existing values before merging
       const normalizedExisting = Array.isArray(value) ? value.map(normalizeValue) : []
       onChange([...normalizedExisting, ...newValues])
       closeListDrawer()
     },
-    [activeRelationTo, closeListDrawer, onChange, populateDocs, value, relationTo, normalizeValue],
+    [
+      activeRelationTo,
+      closeListDrawer,
+      hasMany,
+      onChange,
+      populateDocs,
+      value,
+      relationTo,
+      normalizeValue,
+    ],
   )
 
   const onDocCreate = React.useCallback(

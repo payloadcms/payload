@@ -29,7 +29,7 @@ test.describe('Admin Panel', () => {
     await page.goto('http://localhost:3000/admin')
 
     const payloadFontFamily = await page.evaluate(() =>
-      getComputedStyle(document.documentElement).getPropertyValue('--font-family-sans').trim(),
+      getComputedStyle(document.documentElement).getPropertyValue('--text-body-family').trim(),
     )
 
     expect(payloadFontFamily).not.toBe('')

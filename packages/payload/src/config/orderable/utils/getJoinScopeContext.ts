@@ -34,6 +34,7 @@ export async function getJoinScopeContext(args: {
         id: targetID,
         collection: collectionSlug,
         depth: 0,
+        overrideAccess: true,
         req,
         select: {
           ...(joinOnFieldPath ? { [joinOnFieldPath]: true } : {}),

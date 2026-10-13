@@ -247,6 +247,7 @@ By adding `joins` to the Local API you can customize the request for each join f
 ```js
 const result = await payload.find({
   collection: 'categories',
+  overrideAccess: true,
   where: {
     title: {
       equals: 'My Category',

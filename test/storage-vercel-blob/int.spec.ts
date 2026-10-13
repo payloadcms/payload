@@ -1,9 +1,13 @@
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options"] }] -- Tests use the shared fixture wrapper. */
+import { head, list, put } from '@vercel/blob'
 import dotenv from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
+import { copyVercelBlobFile } from '../../packages/storage-vercel-blob/src/copyFile.js'
 import { test } from '../__helpers/int/vitest.js'
+import { runTransformReadsRealSourceTest } from '../__helpers/shared/transformSourceTests.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
@@ -19,7 +23,7 @@ const dirname = path.dirname(filename)
 
 dotenv.config({ path: path.resolve(dirname, '../plugin-cloud-storage/.env.emulated') })
 
-test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
+test.suite('@payloadcms/storage-vercel-blob', { config: './config.ts' }, () => {
   test.beforeEach(async () => {
     await clearTestBlobs()
   })
@@ -27,12 +31,46 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
   test.afterEach(async ({ payload }) => {
     await clearTestBlobs()
     await Promise.all([
-      payload.delete({ collection: mediaSlug, where: {} }),
-      payload.delete({ collection: mediaWithPrefixSlug, where: {} }),
-      payload.delete({ collection: mediaWithAlwaysInsertFieldsSlug, where: {} }),
-      payload.delete({ collection: mediaWithDirectAccessSlug, where: {} }),
-      payload.delete({ collection: mediaWithDynamicPrefixSlug, where: {} }),
+      payload.delete({ collection: mediaSlug, overrideAccess: true, where: {} }),
+      payload.delete({ collection: mediaWithPrefixSlug, overrideAccess: true, where: {} }),
+      payload.delete({
+        collection: mediaWithAlwaysInsertFieldsSlug,
+        overrideAccess: true,
+        where: {},
+      }),
+      payload.delete({ collection: mediaWithDirectAccessSlug, overrideAccess: true, where: {} }),
+      payload.delete({ collection: mediaWithDynamicPrefixSlug, overrideAccess: true, where: {} }),
     ])
+  })
+
+  test('should copy a blob to an exact unused pathname and preserve content type', async () => {
+    const token = process.env.BLOB_READ_WRITE_TOKEN!
+    await put('copy-source.txt', Buffer.from('copy source'), {
+      access: 'public',
+      addRandomSuffix: false,
+      contentType: 'text/plain',
+      token,
+    })
+
+    await copyVercelBlobFile({
+      access: 'public',
+      cacheControlMaxAge: 60,
+      from: 'copy-source.txt',
+      to: 'copy-destination.txt',
+      token,
+    })
+
+    expect((await head('copy-destination.txt', { token })).contentType).toBe('text/plain')
+    expect((await head('copy-source.txt', { token })).size).toBe(11)
+    await expect(
+      copyVercelBlobFile({
+        access: 'public',
+        cacheControlMaxAge: 60,
+        from: 'copy-source.txt',
+        to: 'copy-destination.txt',
+        token,
+      }),
+    ).rejects.toThrow()
   })
 
   test('can upload', async ({ payload }) => {
@@ -40,6 +78,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -53,11 +92,49 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
     expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
   })
 
+  test.options(
+    'should remove the original and derived blobs when a server upload fails after writing',
+    { db: (adapter) => ['documentdb', 'mongodb', 'mongodb-atlas'].includes(adapter) },
+    async ({ payload }) => {
+      const hooks = payload.collections[mediaSlug].config.hooks
+      const afterChange = hooks.afterChange
+      let uploadedKeys: string[] = []
+      hooks.afterChange = [
+        ...afterChange,
+        async () => {
+          uploadedKeys = (await list()).blobs.map(({ pathname }) => pathname)
+          throw new Error('Server document hook failed')
+        },
+      ]
+
+      try {
+        await expect(
+          payload.create({
+            collection: mediaSlug,
+            data: {},
+            filePath: path.resolve(dirname, '../uploads/image.png'),
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow('Server document hook failed')
+
+        expect(uploadedKeys).toHaveLength(4)
+        expect(uploadedKeys.some((key) => key.endsWith('/image-original.png'))).toBe(true)
+        expect((await list()).blobs).toEqual([])
+        expect(
+          (await payload.count({ collection: mediaSlug, overrideAccess: true })).totalDocs,
+        ).toBe(0)
+      } finally {
+        hooks.afterChange = afterChange
+      }
+    },
+  )
+
   test('can upload with prefix', async ({ payload }) => {
     const upload = await payload.create({
       collection: mediaWithPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -81,6 +158,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
         prefix: 'test',
       },
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -100,6 +178,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     const response = await restClient.GET(`/${mediaSlug}/file/image.png`)
@@ -115,6 +194,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     const first = await restClient.GET(`/${mediaSlug}/file/image.png`)
@@ -135,11 +215,12 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image.png'),
+        overrideAccess: true,
       })
 
       expect(upload.id).toBeTruthy()
       expect(upload.url).toContain(process.env.STORAGE_VERCEL_BLOB_BASE_URL)
-      expect(upload.url).toContain('image.png')
+      expect(upload.url).toContain('image-original.png')
       expect(upload.url).not.toMatch(/^\/api\//)
 
       const response = await fetch(upload.url)
@@ -152,18 +233,19 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image.png'),
+        overrideAccess: true,
       })
 
-      expect(upload.sizes?.thumbnail?.url).toContain(process.env.STORAGE_VERCEL_BLOB_BASE_URL)
-      expect(upload.sizes?.thumbnail?.url).not.toMatch(/^\/api\//)
+      expect(upload.variants?.thumbnail?.url).toContain(process.env.STORAGE_VERCEL_BLOB_BASE_URL)
+      expect(upload.variants?.thumbnail?.url).not.toMatch(/^\/api\//)
 
       const dbDoc = await payload.db.findOne({
         collection: mediaWithDirectAccessSlug,
         where: { id: { equals: upload.id } },
       })
 
-      expect(dbDoc?.sizes?.thumbnail?.url).toContain(process.env.STORAGE_VERCEL_BLOB_BASE_URL)
-      expect(dbDoc?.sizes?.thumbnail?.url).not.toMatch(/^\/api\//)
+      expect(dbDoc?.variants?.thumbnail?.url).toContain(process.env.STORAGE_VERCEL_BLOB_BASE_URL)
+      expect(dbDoc?.variants?.thumbnail?.url).not.toMatch(/^\/api\//)
     })
 
     test('should return direct blob URL with encoded filename for file with spaces', async ({
@@ -173,12 +255,13 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image with spaces.png'),
+        overrideAccess: true,
       })
 
       expect(upload.id).toBeTruthy()
-      expect(upload.filename).toBe('image with spaces.png')
+      expect(upload.filename).toBe('image with spaces-original.png')
       expect(upload.url).toContain(process.env.STORAGE_VERCEL_BLOB_BASE_URL)
-      expect(upload.url).toContain('image%20with%20spaces.png')
+      expect(upload.url).toContain('image%20with%20spaces-original.png')
 
       const response = await fetch(upload.url)
       expect(response.status).toBe(200)
@@ -188,9 +271,13 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
   test.describe('prefix collision detection', () => {
     test.beforeEach(async ({ payload }) => {
       await clearTestBlobs()
-      await payload.delete({ collection: mediaWithPrefixSlug, where: {} })
-      await payload.delete({ collection: mediaSlug, where: {} })
-      await payload.delete({ collection: mediaWithAlwaysInsertFieldsSlug, where: {} })
+      await payload.delete({ collection: mediaWithPrefixSlug, overrideAccess: true, where: {} })
+      await payload.delete({ collection: mediaSlug, overrideAccess: true, where: {} })
+      await payload.delete({
+        collection: mediaWithAlwaysInsertFieldsSlug,
+        overrideAccess: true,
+        where: {},
+      })
     })
 
     test('detects collision within same prefix', async ({ payload }) => {
@@ -200,16 +287,18 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       const upload2 = await payload.create({
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
-      expect(upload1.filename).toBe('image.png')
-      expect(upload2.filename).toBe('image-1.png')
+      expect(upload1.filename).toBe('image-original.png')
+      expect(upload2.filename).toBe('image-original-1.png')
       expect(upload1.prefix).toBe(prefix)
       expect(upload2.prefix).toBe(prefix)
     })
@@ -221,12 +310,14 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
         collection: mediaSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       const upload2 = await payload.create({
         collection: mediaSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       expect(upload1.filename).toBe('image.png')
@@ -244,16 +335,18 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       const upload2 = await payload.create({
         collection: mediaWithPrefixSlug,
         data: { prefix: 'different-prefix' },
         filePath: imageFile,
+        overrideAccess: true,
       })
 
-      expect(upload1.filename).toBe('image.png')
-      expect(upload2.filename).toBe('image.png')
+      expect(upload1.filename).toBe('image-original.png')
+      expect(upload2.filename).toBe('image-original.png')
       expect(upload1.prefix).toBe(prefix)
       // New uploads store the document prefix beneath the collection prefix.
       expect(upload2.prefix).toBe(`${prefix}/different-prefix`)
@@ -272,18 +365,22 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
         collection: mediaWithDynamicPrefixSlug,
         data: { tenant: 'a' },
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       const tenantBUpload = await payload.create({
         collection: mediaWithDynamicPrefixSlug,
         data: { tenant: 'b' },
         filePath: imageFile,
+        overrideAccess: true,
       })
 
-      expect(tenantAUpload.filename).toBe('image.png')
-      expect(tenantBUpload.filename).toBe('image.png')
+      expect(tenantAUpload.filename).toBe('image-original.png')
+      expect(tenantBUpload.filename).toBe('image-original.png')
       expect(tenantAUpload.prefix).toBe('tenant-a')
       expect(tenantBUpload.prefix).toBe('tenant-b')
     })
   })
+
+  runTransformReadsRealSourceTest({ collection: mediaWithPrefixSlug })
 })

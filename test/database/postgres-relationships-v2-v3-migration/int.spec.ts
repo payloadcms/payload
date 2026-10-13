@@ -8,8 +8,9 @@ import { test } from '../../__helpers/int/vitest.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ db: (adapter) => adapter === 'postgres' })(
+test.suite(
   'Postgres relationships v2-v3 migration',
+  { db: (adapter) => adapter === 'postgres' },
   () => {
     test('should execute relationships v2-v3 migration', async () => {
       const { databaseAdapter } = await import(path.resolve(dirname, '../../databaseAdapter.js'))
@@ -30,6 +31,8 @@ test.suite({ db: (adapter) => adapter === 'postgres' })(
         collections: [
           {
             slug: 'users',
+            // Disable authorship so the runtime schema matches the pre-authorship committed migrations.
+            authorship: false,
             auth: true,
             fields: [],
             versions: false,

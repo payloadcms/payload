@@ -1,12 +1,10 @@
 ---
 title: 2.0 to 3.0 Migration Guide
-label: 2.0 to 3.0 Migration Guide
-order: 10
+label: 2.0 to 3.0
+order: 15
 desc: Upgrade guide for Payload 2.x projects migrating to 3.0.
 keywords: local api, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react
 ---
-
-# Payload 2.0 to 3.0 Migration Guide
 
 Payload 3.0 completely replatforms the Admin Panel from a React Router single-page application onto the Next.js App Router with full support for React Server Components. This change completely separates Payload "core" from its rendering and HTTP layers, making it truly Node-safe and portable.
 
@@ -653,7 +651,7 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
    }
    ```
 
-1. The `href` and `isActive` functions on View Tabs no longer includes the `match` or `location` arguments. This is is a property specific to React Router, not Next.js. If you need to do URL matching similar to this, use a custom tab that fires of some hooks, i.e. `usePathname()` and run it through your own utility functions:
+1. The `href` and `isActive` functions on View Tabs no longer includes the `match` or `location` arguments. This is a property specific to React Router, not Next.js. If you need to do URL matching similar to this, use a custom tab that fires off some hooks, i.e. `usePathname()` and run it through your own utility functions:
 
    ```diff
    // collections/Posts.ts

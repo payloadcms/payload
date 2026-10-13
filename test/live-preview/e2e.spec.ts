@@ -91,6 +91,7 @@ describe('Live Preview', () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
       ?.then((res) => res.user) // TODO: this type is wrong
   })
@@ -316,7 +317,7 @@ describe('Live Preview', () => {
 
     test.afterEach(async () => {
       for (const id of documentIDs) {
-        await payload.delete({ id, collection: forbiddenURLSlug })
+        await payload.delete({ id, collection: forbiddenURLSlug, overrideAccess: true })
       }
       documentIDs.length = 0
     })
@@ -326,6 +327,7 @@ describe('Live Preview', () => {
       const doc = await payload.create({
         collection: forbiddenURLSlug,
         data: {},
+        overrideAccess: true,
       })
 
       documentIDs.push(doc.id)
@@ -510,6 +512,7 @@ describe('Live Preview', () => {
         },
         title: initialTitle,
       },
+      overrideAccess: true,
     })
 
     await page.goto(pagesURLUtil.edit(testDoc.id))
@@ -652,6 +655,7 @@ describe('Live Preview', () => {
         },
         title: initialTitle,
       },
+      overrideAccess: true,
     })
 
     await page.goto(ssrAutosavePagesURLUtil.edit(testDoc.id))

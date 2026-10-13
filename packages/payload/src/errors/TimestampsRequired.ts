@@ -7,5 +7,6 @@ export class TimestampsRequired extends APIError {
     super(
       `Timestamps are required in the collection ${collection.slug} because you have opted in to Versions.`,
     )
+    this.name = 'TimestampsRequired'
   }
 }

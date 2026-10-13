@@ -3,9 +3,10 @@ import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
+import { mediaSharpTransformer } from '../__helpers/shared/mediaSharpTransformer.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { MediaCollection } from './collections/Media/index.js'
+import { MediaCollection, mediaSlug } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
 
@@ -26,6 +27,9 @@ export default buildConfigWithDefaults({
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
+    upload: {
+      transformers: [mediaSharpTransformer({ mediaSlug })],
+    },
   },
   seed: async (payload) => {
     await payload.create({
@@ -34,6 +38,7 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -41,6 +46,7 @@ export default buildConfigWithDefaults({
       data: {
         text: 'example post',
       },
+      overrideAccess: true,
     })
 
     const email = await payload.sendEmail({
@@ -56,6 +62,7 @@ export default buildConfigWithDefaults({
       collection: 'media',
       data: {},
       file: imageFile,
+      overrideAccess: true,
     })
   },
 })

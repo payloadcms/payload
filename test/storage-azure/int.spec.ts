@@ -1,3 +1,4 @@
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test"] }] -- Tests use the shared fixture wrapper. */
 import type { ContainerClient } from '@azure/storage-blob'
 import type { CollectionSlug, Payload } from 'payload'
 
@@ -7,7 +8,10 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
+import { copyAzureFile } from '../../packages/storage-azure/src/copyFile.js'
+import { getStoredUploadKeys } from '../__helpers/int/storedUploadKeys.js'
 import { test } from '../__helpers/int/vitest.js'
+import { runTransformReadsRealSourceTest } from '../__helpers/shared/transformSourceTests.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
@@ -18,7 +22,7 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/storage-azure', () => {
+test.suite('@payloadcms/storage-azure', { config: './config.ts', resetBetweenTests: false }, () => {
   let TEST_CONTAINER: string
   let client: ContainerClient
 
@@ -58,11 +62,33 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/sto
     expect(response.headers.get('content-type')).toEqual('image/png')
   })
 
+  test('should copy a private blob without replacing an existing destination', async () => {
+    const source = client.getBlockBlobClient('copy-source.txt')
+    const destination = client.getBlockBlobClient('copy-destination.txt')
+    await source.uploadData(Buffer.from('copy source'), {
+      blobHTTPHeaders: { blobContentType: 'text/plain' },
+      metadata: { owner: 'payload' },
+      tags: { role: 'original' },
+    })
+
+    await copyAzureFile({ client, from: source.name, to: destination.name })
+
+    expect((await destination.getProperties()).contentType).toBe('text/plain')
+    expect((await destination.getProperties()).metadata).toEqual({ owner: 'payload' })
+    expect((await destination.getTags()).tags).toEqual({ role: 'original' })
+    expect((await source.getProperties()).contentLength).toBe(11)
+    await expect(
+      copyAzureFile({ client, from: source.name, to: destination.name }),
+    ).rejects.toThrow()
+    expect((await destination.getProperties()).contentLength).toBe(11)
+  })
+
   test('can upload', async ({ payload }) => {
     const upload = await payload.create({
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -75,6 +101,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/sto
       collection: mediaWithPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -82,8 +109,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/sto
       { payload },
       {
         collectionSlug: mediaWithPrefixSlug,
-        uploadId: upload.id,
         prefix,
+        uploadId: upload.id,
       },
     )
     expect(upload.url).toEqual(
@@ -105,6 +132,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/sto
         prefix: 'test',
       },
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -115,26 +143,38 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/sto
     { payload }: { payload: Payload },
     {
       collectionSlug,
-      uploadId,
       prefix = '',
+      uploadId,
     }: {
       collectionSlug: CollectionSlug
       prefix?: string
       uploadId: number | string
     },
   ) {
-    const uploadData = (await payload.findByID({
+    const uploadData = (await payload.db.findOne({
       collection: collectionSlug,
-      id: uploadId,
-    })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
+      where: { id: { equals: uploadId } },
+    })) as unknown as {
+      filename: string
+      original?: { filename?: string }
+      variants: Record<string, { filename: string }>
+    }
+    const fileKeys = getStoredUploadKeys({ collectionSlug, doc: uploadData, payload })
+    const filenames = [
+      uploadData.filename,
+      uploadData.original?.filename,
+      ...Object.values(uploadData.variants || {}).map(({ filename }) => filename),
+    ].filter((filename): filename is string => Boolean(filename))
 
-    const fileKeys = Object.values(uploadData.sizes || {}).map(({ filename: rawFilename }) =>
-      prefix ? `${prefix}/${rawFilename}` : rawFilename,
-    )
-
-    fileKeys.push(`${prefix ? `${prefix}/` : ''}${uploadData.filename}`)
+    expect(fileKeys.length).toBeGreaterThan(0)
+    for (const filename of filenames) {
+      expect(fileKeys.some((key) => path.basename(key) === filename)).toBe(true)
+    }
 
     for (const key of fileKeys) {
+      if (prefix) {
+        expect(key.startsWith(`${prefix}/`)).toBe(true)
+      }
       const blobClient = client.getBlobClient(key)
       try {
         const props = await blobClient.getProperties()
@@ -146,4 +186,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/sto
       }
     }
   }
+
+  runTransformReadsRealSourceTest({ collection: mediaWithPrefixSlug })
 })

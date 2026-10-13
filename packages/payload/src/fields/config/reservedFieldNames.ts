@@ -37,7 +37,7 @@ export const reservedBaseUploadFieldNames = [
     'url',
     'focalX',
     'focalY',
-    'sizes', */
+    'variants', */
 ]
 
 /**

@@ -4,6 +4,8 @@ import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { AuthenticatedUser, User, UserSession } from '../index.js'
 import type { Payload, PayloadRequest } from '../types/index.js'
 
+import { assertNoValidationWrite } from '../utilities/assertNoValidationWrite.js'
+
 /**
  * Removes expired sessions from an array of sessions
  */
@@ -31,6 +33,8 @@ export const addSessionToUser = async ({
   req: PayloadRequest
   user: AuthenticatedUser
 }): Promise<{ sid?: string }> => {
+  assertNoValidationWrite(req)
+
   let sid: string | undefined
   if (collectionConfig.auth.useSessions) {
     // Add session to user
@@ -82,6 +86,8 @@ export const revokeSession = async ({
   sid: string
   user: null | User
 }): Promise<void> => {
+  assertNoValidationWrite(req)
+
   if (collectionConfig.auth.useSessions && user && user.sessions?.length) {
     user.sessions = user.sessions.filter((session) => session.id !== sid)
     await payload.db.updateOne({

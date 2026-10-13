@@ -5,6 +5,7 @@
     padding: 0;
     cursor: grab;
     opacity: 0;
+    visibility: hidden;
     position: absolute;
     inset-inline-start: 0;
     top: 0;

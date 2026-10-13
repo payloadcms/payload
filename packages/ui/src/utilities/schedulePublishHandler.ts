@@ -95,11 +95,14 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
     if (deleteID) {
       await payload.delete({
         collection: 'payload-jobs',
+        overrideAccess: true,
         req,
         where: {
           and: [{ id: { equals: deleteID } }, { taskSlug: { equals: 'schedulePublish' } }],
         },
       })
+
+      return { message: i18n.t('general:success') }
     }
 
     await payload.jobs.queue({
@@ -117,6 +120,7 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
               }
             : undefined,
       },
+      overrideAccess: true,
       task: 'schedulePublish',
       waitUntil: date,
     })

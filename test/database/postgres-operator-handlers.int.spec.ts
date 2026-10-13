@@ -45,9 +45,10 @@ const runOperatorHandlerConfigSuite = (
       secret: 'secret',
     })
 
-  test
-    .options({ db: (adapter) => adapter.startsWith('postgres') })
-    .describe(`${label} operator handlers - config surface`, () => {
+  test.options.describe(
+    `${label} operator handlers - config surface`,
+    { db: (adapter) => adapter.startsWith('postgres') },
+    () => {
       test('rejects at initialization when a handler requires a Postgres extension that is not configured, naming the handler and the extension', async () => {
         const config = await buildConfigWithOperatorHandlers([
           {
@@ -145,7 +146,8 @@ const runOperatorHandlerConfigSuite = (
           await payload.destroy()
         }
       })
-    })
+    },
+  )
 }
 
 runOperatorHandlerConfigSuite('postgres', 'operator-handlers', (operatorHandlers) =>
@@ -257,8 +259,9 @@ const getAccentCollections = () => [
 const initPayload = async (config: Promise<SanitizedConfig>): Promise<Payload> =>
   new BasePayload().init({ config: await config })
 
-test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
+test.suite(
   'postgres operator handlers - postgresUnaccent() behavior',
+  { db: (adapter) => adapter.startsWith('postgres') },
   () => {
     const activePayloads: Payload[] = []
 
@@ -279,11 +282,12 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
       )
       activePayloads.push(payload)
 
-      await payload.create({ collection: 'accent-items', data: { title: 'Ácido' } })
+      await payload.create({ collection: 'accent-items', data: { title: 'Ácido' }, overrideAccess: true })
 
       const result = await payload.find({
         collection: 'accent-items',
         where: { title: { contains: 'acido' } },
+        overrideAccess: true,
       })
 
       expect(result.docs).toHaveLength(0)
@@ -345,6 +349,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
           const doc = await payload.create({
             collection: 'accent-items',
             data: { title: word },
+            overrideAccess: true,
           })
           seeded[word] = doc.id
         }
@@ -352,6 +357,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
         await payload.create({
           collection: 'accent-items',
           data: { title: 'Apple' },
+          overrideAccess: true,
         })
 
         richDoc = await payload.create({
@@ -366,6 +372,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
             tags: [{ value: 'Ácido tag' }],
             tagsText: ['Ácido hasMany tag'],
           },
+          overrideAccess: true,
         })
 
         await payload.update({
@@ -373,6 +380,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
           id: richDoc.id,
           data: { localizedTitle: 'Ácido' },
           locale: 'es',
+          overrideAccess: true,
         })
 
         await payload.update({
@@ -380,6 +388,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
           id: richDoc.id,
           data: { localizedTitle: 'Acido' },
           locale: 'en',
+          overrideAccess: true,
         })
       })
 
@@ -391,6 +400,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
         const result = await payload.find({
           collection: 'accent-items',
           where: { title: { contains: 'acido' } },
+          overrideAccess: true,
         })
 
         expect(result.docs.map((doc: any) => doc.id)).toEqual(
@@ -402,6 +412,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
         const result = await payload.find({
           collection: 'accent-items',
           where: { title: { like: 'nino' } },
+          overrideAccess: true,
         })
 
         expect(result.docs.map((doc: any) => doc.id)).toEqual([seeded['Niño']])
@@ -411,6 +422,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
         const result = await payload.find({
           collection: 'accent-items',
           where: { title: { not_like: 'nino' } },
+          overrideAccess: true,
         })
 
         const ids = result.docs.map((doc: any) => doc.id)
@@ -422,6 +434,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
         const result = await payload.find({
           collection: 'accent-items',
           where: { title: { contains: 'ACIDO' } },
+          overrideAccess: true,
         })
 
         expect(result.docs.map((doc: any) => doc.id)).toEqual(
@@ -433,6 +446,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
         const result = await payload.find({
           collection: 'accent-items',
           where: { title: { like: 'acido apple' } },
+          overrideAccess: true,
         })
 
         expect(result.docs.map((doc: any) => doc.id)).toEqual([richDoc.id])
@@ -443,6 +457,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
           collection: 'accent-items',
           locale: 'es',
           where: { localizedTitle: { contains: 'acido' } },
+          overrideAccess: true,
         })
 
         expect(result.docs.map((doc: any) => doc.id)).toEqual([richDoc.id])
@@ -452,6 +467,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
         const result = await payload.find({
           collection: 'accent-items',
           where: { 'group.note': { contains: 'acido' } },
+          overrideAccess: true,
         })
 
         expect(result.docs.map((doc: any) => doc.id)).toEqual([richDoc.id])
@@ -461,6 +477,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
         const result = await payload.find({
           collection: 'accent-items',
           where: { 'tags.value': { contains: 'acido' } },
+          overrideAccess: true,
         })
 
         expect(result.docs.map((doc: any) => doc.id)).toEqual([richDoc.id])
@@ -470,6 +487,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
         const result = await payload.find({
           collection: 'accent-items',
           where: { 'sections.value': { contains: 'acido' } },
+          overrideAccess: true,
         })
 
         expect(result.docs.map((doc: any) => doc.id)).toEqual([richDoc.id])
@@ -479,6 +497,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
         const result = await payload.find({
           collection: 'accent-items',
           where: { tagsText: { contains: 'acido' } },
+          overrideAccess: true,
         })
 
         expect(result.docs.map((doc: any) => doc.id)).toEqual([richDoc.id])
@@ -488,12 +507,14 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
         const equalsResult = await payload.find({
           collection: 'accent-items',
           where: { score: { equals: 42 } },
+          overrideAccess: true,
         })
         expect(equalsResult.docs.map((doc: any) => doc.id)).toEqual([richDoc.id])
 
         const existsResult = await payload.find({
           collection: 'accent-items',
           where: { score: { exists: false } },
+          overrideAccess: true,
         })
         expect(existsResult.docs.map((doc: any) => doc.id)).not.toContain(richDoc.id)
       })
@@ -509,6 +530,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
           await payload.find({
             collection: 'accent-items',
             where: { scores: { contains: 2 } },
+            overrideAccess: true,
           })
         } catch (error) {
           thrown = error
@@ -522,6 +544,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
         const result = await payload.find({
           collection: 'accent-items',
           where: { related: { equals: seeded['Ácido'] } },
+          overrideAccess: true,
         })
 
         expect(result.docs.map((doc: any) => doc.id)).toEqual([richDoc.id])
@@ -531,11 +554,13 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
         await payload.create({
           collection: 'accent-custom-id-items',
           data: { id: 'acido-slug-ácido', title: 'Ácido slug' },
+          overrideAccess: true,
         })
 
         const result = await payload.find({
           collection: 'accent-custom-id-items',
           where: { id: { contains: 'acido-slug-acido' } },
+          overrideAccess: true,
         })
 
         expect(result.docs).toHaveLength(1)
@@ -559,7 +584,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
         )
         activePayloads.push(payload)
 
-        const doc = await payload.create({ collection: 'accent-items', data: { title: 'Ácido' } })
+        const doc = await payload.create({ collection: 'accent-items', data: { title: 'Ácido' }, overrideAccess: true })
 
         // Postgres cannot ILIKE a native `uuid` column at all - a pre-existing limitation
         // unrelated to this feature. The PgUUID guard means a `contains` query against the id
@@ -570,6 +595,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
           await payload.find({
             collection: 'accent-items',
             where: { id: { contains: String(doc.id).slice(0, 8) } },
+            overrideAccess: true,
           })
         } catch (error) {
           thrown = error
@@ -581,6 +607,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
         const exactMatch = await payload.find({
           collection: 'accent-items',
           where: { id: { equals: doc.id } },
+          overrideAccess: true,
         })
         expect(exactMatch.docs).toHaveLength(1)
       },
@@ -610,11 +637,12 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
       )
       activePayloads.push(payload)
 
-      await payload.create({ collection: 'accent-items', data: { title: 'HELLO' } })
+      await payload.create({ collection: 'accent-items', data: { title: 'HELLO' }, overrideAccess: true })
 
       const result = await payload.find({
         collection: 'accent-items',
         where: { title: { contains: 'hello' } },
+        overrideAccess: true,
       })
 
       expect(result.docs).toHaveLength(1)
@@ -658,11 +686,12 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
 
       process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'false'
 
-      await payload.create({ collection: 'accent-items', data: { title: 'hello world' } })
+      await payload.create({ collection: 'accent-items', data: { title: 'hello world' }, overrideAccess: true })
 
       const result = await payload.find({
         collection: 'accent-items',
         where: { title: { contains: 'hello' } },
+        overrideAccess: true,
       })
 
       expect(receivedValue).toBe('%hello%')
@@ -700,12 +729,14 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
       const withTitle = await payload.create({
         collection: 'accent-items',
         data: { title: 'hello' },
+        overrideAccess: true,
       })
-      const withoutTitle = await payload.create({ collection: 'accent-items', data: {} })
+      const withoutTitle = await payload.create({ collection: 'accent-items', data: {}, overrideAccess: true })
 
       const result = await payload.find({
         collection: 'accent-items',
         where: { title: { not_equals: 'something-else' } },
+        overrideAccess: true,
       })
 
       const ids = result.docs.map((doc: any) => doc.id)

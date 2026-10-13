@@ -86,7 +86,7 @@ export const runReleaseBump = async ({
 async function main(): Promise<void> {
   const argv = minimist(process.argv.slice(2))
   const bump = typeof argv.bump === 'string' ? argv.bump : 'prerelease'
-  const preid = typeof argv.preid === 'string' ? argv.preid : 'canary'
+  const preid = typeof argv.preid === 'string' ? argv.preid : 'beta'
   const dryRun = Boolean(argv['dry-run'])
 
   const run = (cmd: string): void => {

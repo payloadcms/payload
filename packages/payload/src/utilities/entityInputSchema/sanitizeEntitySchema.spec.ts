@@ -49,7 +49,7 @@ describe('sanitizeEntitySchema', () => {
       },
     }
 
-    expect(sanitizeEntitySchema(standalone)).toStrictEqual({
+    expect(sanitizeEntitySchema({ schema: standalone })).toStrictEqual({
       type: 'object',
       $defs: {
         // The node union is renamed to a short, readable `node`, and stays a strict discriminated
@@ -91,6 +91,39 @@ describe('sanitizeEntitySchema', () => {
           },
         },
       },
+    })
+  })
+
+  describe('deprecated properties', () => {
+    const textNode: JsonSchemaType = {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        text: { type: 'string' },
+        version: { type: 'integer', deprecated: true },
+      },
+      required: ['text'],
+    }
+
+    it('should hide optional deprecated properties from the shown schema', () => {
+      expect(sanitizeEntitySchema({ schema: textNode })).toStrictEqual({
+        type: 'object',
+        additionalProperties: false,
+        properties: { text: { type: 'string' } },
+        required: ['text'],
+      })
+    })
+
+    it('should keep deprecated properties when validating', () => {
+      expect(
+        sanitizeEntitySchema({ schema: textNode, shouldKeepDeprecatedProperties: true }),
+      ).toStrictEqual(textNode)
+    })
+
+    it('should never hide a required deprecated property', () => {
+      const schema: JsonSchemaType = { ...textNode, required: ['text', 'version'] }
+
+      expect(sanitizeEntitySchema({ schema })).toStrictEqual(schema)
     })
   })
 })

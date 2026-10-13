@@ -16,14 +16,16 @@ dotenv.config({ path: path.resolve(dirname, '../../plugin-cloud-storage/.env.emu
 
 const createdDocIDs: Array<number | string> = []
 
-test.suite({ config: './config.compositePrefixes.ts' })(
+test.suite(
   '@payloadcms/storage-vercel-blob clientUploads (composite prefixes)',
+  { config: './config.compositePrefixes.ts' },
   () => {
     test.afterEach(async ({ payload }) => {
       for (const id of createdDocIDs) {
         await payload.delete({
           id,
           collection: mediaWithCompositePrefixesSlug,
+          overrideAccess: true,
         })
       }
 
@@ -62,7 +64,7 @@ test.suite({ config: './config.compositePrefixes.ts' })(
       }
 
       expect(instructions.data.pathname).toBe(
-        `${collectionPrefix}/${instructions.file.uploadReference.prefix}/${instructions.file.uploadReference._objectKey}/${instructions.file.filename}`,
+        `${collectionPrefix}/${instructions.file.uploadReference.prefix}/${instructions.file.uploadReference._objectKey}/client-composite-image-original.png`,
       )
 
       await put(instructions.data.pathname, new Blob([file], { type: 'image/png' }), {
@@ -93,7 +95,7 @@ test.suite({ config: './config.compositePrefixes.ts' })(
       expect(createdDoc?.doc.prefix).toBe(instructions.file.uploadReference.prefix)
 
       const fileResponse = await restClient.GET(
-        `/${mediaWithCompositePrefixesSlug}/file/${instructions.file.filename}?prefix=${encodeURIComponent(instructions.file.uploadReference.prefix)}`,
+        `/${mediaWithCompositePrefixesSlug}/file/${createdDoc.doc.filename}?prefix=${encodeURIComponent(instructions.file.uploadReference.prefix)}`,
       )
 
       expect(fileResponse.status).toBe(200)

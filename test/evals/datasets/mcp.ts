@@ -41,6 +41,7 @@ export const mcpDataset: EvalCase[] = [
       const { docs } = await payload.find({
         collection: 'media',
         where: { alt: { equals: 'Local checklist icon' } },
+        overrideAccess: true,
       })
       const media = docs[0]
 
@@ -101,6 +102,7 @@ export const mcpDataset: EvalCase[] = [
       const { docs } = await payload.find({
         collection: 'media',
         where: { alt: { equals: 'Checklist icon' } },
+        overrideAccess: true,
       })
       const media = docs[0]
 
@@ -141,10 +143,11 @@ export const mcpDataset: EvalCase[] = [
           mimetype: 'image/png',
           size: originalFile.length,
         },
+        overrideAccess: true,
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
-      const { docs } = await payload.find({ collection: 'media' })
+      const { docs } = await payload.find({ collection: 'media', overrideAccess: true })
       const media = docs[0]
 
       expect(docs).toHaveLength(1)
@@ -176,6 +179,7 @@ export const mcpDataset: EvalCase[] = [
       const { docs } = await payload.find({
         collection: 'posts',
         where: { title: { equals: 'Created by Payload MCP eval' } },
+        overrideAccess: true,
       })
 
       expect(docs).toHaveLength(1)
@@ -202,6 +206,7 @@ export const mcpDataset: EvalCase[] = [
         where: {
           title: { in: ['First bulk MCP post', 'Second bulk MCP post'] },
         },
+        overrideAccess: true,
       })
       const createCalls = audit.filter(
         (event) => event.type === 'mcp-tool-call' && event.name === 'createDocuments',
@@ -238,11 +243,13 @@ export const mcpDataset: EvalCase[] = [
       await payload.create({
         collection: 'posts',
         data: { title: 'MCP Update Target' },
+        overrideAccess: true,
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs } = await payload.find({
         collection: 'posts',
+        overrideAccess: true,
       })
 
       expect(docs).toHaveLength(1)
@@ -264,16 +271,18 @@ export const mcpDataset: EvalCase[] = [
     input: 'Delete the post titled "MCP Delete Target".',
     setup: async ({ payload }) => {
       for (const title of ['MCP Delete Target', 'MCP Keep', 'MCP Update Target']) {
-        await payload.create({ collection: 'posts', data: { title } })
+        await payload.create({ collection: 'posts', data: { title }, overrideAccess: true })
       }
     },
     verify: async ({ audit, expect, payload, transcript }) => {
       const deletedPosts = await payload.find({
         collection: 'posts',
         where: { title: { equals: 'MCP Delete Target' } },
+        overrideAccess: true,
       })
       const remainingPosts = await payload.find({
         collection: 'posts',
+        overrideAccess: true,
       })
 
       expect(deletedPosts.docs).toHaveLength(0)
@@ -297,7 +306,10 @@ export const mcpDataset: EvalCase[] = [
     configPath: 'mcp/shared',
     input: 'Change the site tagline to "Updated through Payload MCP".',
     verify: async ({ audit, expect, payload, transcript }) => {
-      const settings = (await payload.findGlobal({ slug: 'site-settings' })) as {
+      const settings = (await payload.findGlobal({
+        slug: 'site-settings',
+        overrideAccess: true,
+      })) as {
         tagline?: unknown
       }
 
@@ -325,17 +337,20 @@ export const mcpDataset: EvalCase[] = [
       await payload.create({
         collection: 'authors',
         data: { name: 'Ada Lovelace' },
+        overrideAccess: true,
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs: authors } = await payload.find({
         collection: 'authors',
         where: { name: { equals: 'Ada Lovelace' } },
+        overrideAccess: true,
       })
       const { docs: posts } = await payload.find({
         collection: 'posts',
         depth: 0,
         where: { title: { equals: 'Relationship created by Payload MCP eval' } },
+        overrideAccess: true,
       })
       const author = authors[0] as Record<string, unknown> | undefined
       const post = posts[0] as Record<string, unknown> | undefined
@@ -367,6 +382,7 @@ export const mcpDataset: EvalCase[] = [
       const { docs } = await payload.find({
         collection: 'posts',
         where: { title: { equals: 'Lexical content created by Payload MCP eval' } },
+        overrideAccess: true,
       })
       const post = docs[0] as Record<string, unknown> | undefined
       const content = post?.content as DefaultTypedEditorState | undefined
@@ -417,6 +433,7 @@ export const mcpDataset: EvalCase[] = [
         collection: 'articles',
         data: { _status: 'published', title: 'MCP Draft Update Target' },
         locale: 'en',
+        overrideAccess: true,
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
@@ -425,6 +442,7 @@ export const mcpDataset: EvalCase[] = [
         draft: true,
         locale: 'en',
         where: { title: { equals: 'MCP Draft Update Saved' } },
+        overrideAccess: true,
       })
       expect(draftArticles).toHaveLength(1)
 
@@ -434,6 +452,7 @@ export const mcpDataset: EvalCase[] = [
         collection: 'articles',
         draft: false,
         locale: 'en',
+        overrideAccess: true,
       })
 
       expect(publishedArticle.title).toBe('MCP Draft Update Target')
@@ -461,6 +480,7 @@ export const mcpDataset: EvalCase[] = [
         collection: 'articles',
         data: { _status: 'published', title: 'MCP Published Update Target' },
         locale: 'en',
+        overrideAccess: true,
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
@@ -469,6 +489,7 @@ export const mcpDataset: EvalCase[] = [
         draft: false,
         locale: 'en',
         where: { title: { equals: 'MCP Published Update Saved' } },
+        overrideAccess: true,
       })
       const publishedArticle = publishedArticles[0]
 
@@ -496,6 +517,7 @@ export const mcpDataset: EvalCase[] = [
         collection: 'articles',
         data: { _status: 'published', title: 'MCP Unpublish Target' },
         locale: 'en',
+        overrideAccess: true,
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
@@ -504,6 +526,7 @@ export const mcpDataset: EvalCase[] = [
         draft: false,
         locale: 'en',
         where: { title: { equals: 'MCP Unpublish Target' } },
+        overrideAccess: true,
       })
       const unpublishedArticle = unpublishedArticles[0]
 
@@ -530,6 +553,7 @@ export const mcpDataset: EvalCase[] = [
         collection: 'articles',
         data: { _status: 'published', title: 'MCP Published Read Target' },
         locale: 'en',
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -538,6 +562,7 @@ export const mcpDataset: EvalCase[] = [
         data: { title: 'MCP Draft Must Not Be Read' },
         draft: true,
         locale: 'en',
+        overrideAccess: true,
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
@@ -546,6 +571,7 @@ export const mcpDataset: EvalCase[] = [
         draft: false,
         locale: 'en',
         where: { title: { equals: 'MCP Published Read Target' } },
+        overrideAccess: true,
       })
       expect(publishedArticles).toHaveLength(1)
 
@@ -555,6 +581,7 @@ export const mcpDataset: EvalCase[] = [
         collection: 'articles',
         draft: true,
         locale: 'en',
+        overrideAccess: true,
       })
       const agentResponse = getFinalAgentResponse({ transcript })
 
@@ -587,6 +614,7 @@ export const mcpDataset: EvalCase[] = [
         collection: 'articles',
         data: { _status: 'published', title: 'MCP Draft Read Published Title' },
         locale: 'en',
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -595,6 +623,7 @@ export const mcpDataset: EvalCase[] = [
         data: { title: 'MCP Draft Read Latest Title' },
         draft: true,
         locale: 'en',
+        overrideAccess: true,
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
@@ -603,6 +632,7 @@ export const mcpDataset: EvalCase[] = [
         draft: true,
         locale: 'en',
         where: { title: { equals: 'MCP Draft Read Latest Title' } },
+        overrideAccess: true,
       })
       const storedDraft = draftArticles[0]
       const agentResponse = getFinalAgentResponse({ transcript })
@@ -635,6 +665,7 @@ export const mcpDataset: EvalCase[] = [
         collection: 'articles',
         data: { _status: 'published', title: 'MCP English Publish Target' },
         locale: 'en',
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -644,6 +675,7 @@ export const mcpDataset: EvalCase[] = [
         draft: false,
         locale: 'es',
         publishAllLocales: false,
+        overrideAccess: true,
       })
       await payload.update({
         id: article.id,
@@ -651,6 +683,7 @@ export const mcpDataset: EvalCase[] = [
         data: { title: 'MCP Spanish Draft Title' },
         draft: true,
         locale: 'es',
+        overrideAccess: true,
       })
     },
     verify: async ({ audit, expect, payload, transcript }) => {
@@ -659,6 +692,7 @@ export const mcpDataset: EvalCase[] = [
         draft: false,
         locale: 'en',
         where: { title: { equals: 'MCP English Published Title' } },
+        overrideAccess: true,
       })
       expect(publishedEnglishArticles).toHaveLength(1)
 
@@ -668,12 +702,14 @@ export const mcpDataset: EvalCase[] = [
         collection: 'articles',
         draft: false,
         locale: 'es',
+        overrideAccess: true,
       })
       const draftSpanish = await payload.findByID({
         id: publishedEnglish!.id,
         collection: 'articles',
         draft: true,
         locale: 'es',
+        overrideAccess: true,
       })
 
       expect(publishedEnglish?.title).toBe('MCP English Published Title')
@@ -704,6 +740,7 @@ export const mcpDataset: EvalCase[] = [
         draft: true,
         locale: 'en',
         where: { title: { equals: 'MCP Newly Created Draft' } },
+        overrideAccess: true,
       })
       const article = docs[0]
 
@@ -730,6 +767,7 @@ export const mcpDataset: EvalCase[] = [
         draft: false,
         locale: 'en',
         where: { title: { equals: 'MCP Newly Created Published' } },
+        overrideAccess: true,
       })
       const article = docs[0]
 

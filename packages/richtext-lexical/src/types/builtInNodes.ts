@@ -23,6 +23,7 @@ export interface SerializedLexicalElementBase<TChildren> {
   indent: number;
   textFormat?: number;
   textStyle?: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 }`
 
@@ -44,6 +45,7 @@ const SERIALIZED_TEXT_NODE_TS = `export interface SerializedTextNode {
   mode: LexicalTextMode;
   style: string;
   text: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 }`
 
@@ -55,12 +57,14 @@ const SERIALIZED_TAB_NODE_TS = `export interface SerializedTabNode {
   mode: LexicalTextMode;
   style: string;
   text: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 }`
 
 /** MUST stay byte-for-byte in sync with `SerializedLineBreakNode` in `types/nodeTypes.ts`. */
 const SERIALIZED_LINE_BREAK_NODE_TS = `export interface SerializedLineBreakNode {
   type: 'linebreak';
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 }`
 
@@ -99,7 +103,7 @@ export const textNodeJSONSchema: JSONSchemaFn = ({ typeStringDefinitions }) => {
       text: { type: 'string' },
       version: versionSchema,
     },
-    required: ['detail', 'format', 'mode', 'style', 'text', 'type', 'version'],
+    required: ['detail', 'format', 'mode', 'style', 'text', 'type'],
     tsType: 'SerializedTextNode',
   }
 }
@@ -121,7 +125,7 @@ export const tabNodeJSONSchema: JSONSchemaFn = ({ typeStringDefinitions }) => {
       text: { const: '\t', description: 'Always a single tab character.' },
       version: versionSchema,
     },
-    required: ['detail', 'format', 'mode', 'style', 'text', 'type', 'version'],
+    required: ['detail', 'format', 'mode', 'style', 'text', 'type'],
     tsType: 'SerializedTabNode',
   }
 }
@@ -135,7 +139,7 @@ export const lineBreakNodeJSONSchema: JSONSchemaFn = ({ typeStringDefinitions })
       type: { type: 'string', const: 'linebreak' },
       version: versionSchema,
     },
-    required: ['type', 'version'],
+    required: ['type'],
     tsType: 'SerializedLineBreakNode',
   }
 }
@@ -166,6 +170,7 @@ export interface LexicalRichText<TNode> {
     format: LexicalElementFormat;
     indent: number;
     type: 'root';
+    /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
     version: number;
   };
 }`

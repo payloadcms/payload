@@ -3,6 +3,9 @@ import { readFileSync } from 'fs'
 import { resolveFrom } from './dependencies/resolveFrom.js'
 
 /**
+ * TODO: Only used to pick the dev HMR path for Next.js versions older than the minimum supported
+ * one, to make migrating easier. Remove together with the legacy path in `nextJsDevReloadStrategy`.
+ *
  * Reads the version of the Next.js installed alongside the running app.
  * Returns undefined if Next.js cannot be resolved, e.g. because Payload runs
  * outside of Next.js or from a directory the app's dependencies are not visible from.
