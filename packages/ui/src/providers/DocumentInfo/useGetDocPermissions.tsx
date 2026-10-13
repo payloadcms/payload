@@ -7,7 +7,7 @@ import React from 'react'
 import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
 import { isEditing as getIsEditing } from '../../utilities/isEditing.js'
 
-export type GetDocPermissions = (data?: Data, isCurrent?: () => boolean) => Promise<void>
+export type GetDocPermissions = (data?: Data, isCurrentRequest?: () => boolean) => Promise<void>
 
 export const useGetDocPermissions = ({
   id,
@@ -33,7 +33,7 @@ export const useGetDocPermissions = ({
   setHasSavePermission: React.Dispatch<React.SetStateAction<boolean>>
 }): GetDocPermissions =>
   React.useCallback(
-    async (data: Data, isCurrent?: () => boolean) => {
+    async (data: Data, isCurrentRequest?: () => boolean) => {
       const params = {
         locale: locale || undefined,
       }
@@ -89,7 +89,7 @@ export const useGetDocPermissions = ({
             },
           ).then((res) => res.json())
 
-          if (isCurrent && !isCurrent()) {
+          if (isCurrentRequest?.() === false) {
             return
           }
 
@@ -113,7 +113,7 @@ export const useGetDocPermissions = ({
           ? permissions?.collections?.[collectionSlug]
           : permissions?.globals?.[globalSlug]
 
-        if (isCurrent && !isCurrent()) {
+        if (isCurrentRequest?.() === false) {
           return
         }
 
