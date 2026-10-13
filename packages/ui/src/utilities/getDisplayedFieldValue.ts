@@ -2,6 +2,7 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { ClientField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { formatFilesize } from 'payload/shared'
 
 import { isValidReactElement } from './isValidReactElement.js'
 
@@ -12,9 +13,30 @@ import { isValidReactElement } from './isValidReactElement.js'
  *   - Translates localized label objects based on the current language.
  *   - Returns string labels directly.
  *   - Falls back to the option value if no valid label is found.
+ * - Formats upload file sizes for display.
  * - For all other field types, returns `cellData` unchanged.
  */
-export const getDisplayedFieldValue = (cellData: any, field: ClientField, i18n: I18nClient) => {
+export const getDisplayedFieldValue = ({
+  cellData,
+  field,
+  i18n,
+  isUploadCollection,
+}: {
+  cellData: any
+  field: ClientField
+  i18n: I18nClient
+  isUploadCollection: boolean
+}) => {
+  if (
+    isUploadCollection &&
+    field.type === 'number' &&
+    'name' in field &&
+    field.name === 'filesize' &&
+    typeof cellData === 'number'
+  ) {
+    return formatFilesize(cellData)
+  }
+
   if ((field?.type === 'select' || field?.type === 'radio') && Array.isArray(field.options)) {
     const selectedOption = field.options.find((opt) =>
       typeof opt === 'object' ? opt.value === cellData : opt === cellData,

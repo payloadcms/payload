@@ -222,6 +222,31 @@ describe('Uploads', () => {
     await expect(imageUpload).toBeVisible()
   })
 
+  test('should show a readable file size in the upload collection list', async () => {
+    await payload.create({
+      collection: mediaSlug,
+      data: {},
+      file: {
+        data: Buffer.alloc(1536, 'a'),
+        name: 'size-test.txt',
+        mimetype: 'text/plain',
+        size: 1536,
+      },
+      overrideAccess: true,
+    })
+
+    await page.goto(mediaURL.list)
+    await toggleColumns({
+      columns: [{ columnLabel: 'File Size', targetState: 'on' }],
+      page,
+      shouldCloseListColumns: true,
+    })
+
+    const row = page.locator('tbody tr', { hasText: 'size-test-original.txt' })
+
+    await expect(row.locator('.cell-filesize')).toHaveText('2KB')
+  })
+
   test('should see upload filename in relation list', async () => {
     await page.goto(relationURL.list)
     const field = page.locator('.cell-image')
