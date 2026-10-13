@@ -34,7 +34,7 @@ export const getDisplayedFieldValue = ({
     field.name === 'filesize' &&
     typeof cellData === 'number'
   ) {
-    return formatFilesize(cellData)
+    return formatFilesize(cellData, 1)
   }
 
   if ((field?.type === 'select' || field?.type === 'radio') && Array.isArray(field.options)) {

@@ -244,7 +244,7 @@ describe('Uploads', () => {
 
     const row = page.locator('tbody tr', { hasText: 'size-test-original.txt' })
 
-    await expect(row.locator('.cell-filesize')).toHaveText('2KB')
+    await expect(row.locator('.cell-filesize')).toHaveText('1.5KB')
   })
 
   test('should see upload filename in relation list', async () => {
