@@ -1,7 +1,7 @@
 import type { CookieOptions, CookieStore, ServerAdapter } from 'payload'
 
 import { notFound, redirect } from '@tanstack/react-router'
-import { getRequest, getResponseHeaders } from '@tanstack/react-start/server'
+import { appendResponseHeader, getRequest } from '@tanstack/react-start/server'
 import { parseCookies } from 'payload'
 
 function buildCookieStore(headers: Headers): CookieStore {
@@ -100,7 +100,7 @@ export const tanstackServerAdapter: ServerAdapter = {
   },
 
   setCookie: (name: string, value: string, options?: CookieOptions) => {
-    getResponseHeaders().append('Set-Cookie', serializeCookie(name, value, options))
+    appendResponseHeader('Set-Cookie', serializeCookie(name, value, options))
   },
 }
 
