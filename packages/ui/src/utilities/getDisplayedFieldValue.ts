@@ -1,5 +1,5 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { ClientField } from 'payload'
+import type { ClientCollectionConfig, ClientField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatFilesize } from 'payload/shared'
@@ -18,17 +18,17 @@ import { isValidReactElement } from './isValidReactElement.js'
  */
 export const getDisplayedFieldValue = ({
   cellData,
+  collectionConfig,
   field,
   i18n,
-  isUploadCollection = false,
 }: {
   cellData: any
+  collectionConfig?: ClientCollectionConfig | null
   field: ClientField
   i18n: I18nClient
-  isUploadCollection?: boolean
 }) => {
   if (
-    isUploadCollection &&
+    collectionConfig?.upload &&
     field.type === 'number' &&
     'name' in field &&
     field.name === 'filesize' &&
