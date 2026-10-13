@@ -114,6 +114,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     let url: string
     let method: string
     let entitySlug: string
+
     const params = qs.stringify(
       {
         autosave: true,

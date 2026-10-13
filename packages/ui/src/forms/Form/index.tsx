@@ -171,6 +171,7 @@ export const Form: React.FC<FormProps> = (props) => {
     {},
     () => initialState,
   )
+
   const dispatchFields = useCallback<React.Dispatch<FieldAction>>((action) => {
     if (changesFormData(action, contextRef.current.fields)) {
       formRevisionRef.current += 1
