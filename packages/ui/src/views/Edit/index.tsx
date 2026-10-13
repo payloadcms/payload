@@ -348,6 +348,14 @@ export function DefaultEditView({
         }
       }
 
+      if (context?.getDocPermissions !== false) {
+        await getDocPermissions(json, ctx?.isCurrent)
+
+        if (!ctx?.isCurrent()) {
+          return
+        }
+      }
+
       // If we're editing the doc of the logged-in user,
       // Refresh the cookie to get new permissions
       if (user && collectionSlug === userSlug && id === user.id) {
@@ -400,10 +408,6 @@ export function DefaultEditView({
         startRouteTransition(() => router.push(redirectRoute))
       } else {
         resetUploadEdits()
-      }
-
-      if (context?.getDocPermissions !== false) {
-        await getDocPermissions(json)
       }
 
       reportUpdate({
