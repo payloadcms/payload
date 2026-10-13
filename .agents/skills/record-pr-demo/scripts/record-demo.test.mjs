@@ -178,6 +178,17 @@ test('recordDemo renders a Mac-style arrow cursor', async () => {
         if ((await graphic.getAttribute('height')) !== '23') {
           throw new Error('Mac-style cursor height is not 23px')
         }
+        const styles = await cursor.evaluate((element) => {
+          const style = getComputedStyle(element)
+          return {
+            backgroundColor: style.backgroundColor,
+            borderWidth: style.borderTopWidth,
+            padding: style.paddingTop,
+          }
+        })
+        if (styles.backgroundColor !== 'rgba(0, 0, 0, 0)' || styles.borderWidth !== '0px' || styles.padding !== '0px') {
+          throw new Error('cursor popover has a visible background, border, or padding')
+        }
       }`,
     )
 

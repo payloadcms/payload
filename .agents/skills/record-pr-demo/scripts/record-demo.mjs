@@ -198,12 +198,16 @@ async function executeDemo({
         <path d="M2 2.2V27l6.7-6.4 5.1 12.7 5-2-5.2-12.2H23L2 2.2Z" fill="#111827" stroke="#fff" stroke-linejoin="round" stroke-width="2.2" />
       </svg>`
       Object.assign(cursor.style, {
+        background: 'transparent',
+        border: '0',
         filter: 'drop-shadow(0 1px 2px rgb(0 0 0 / 65%))',
         height: '23px',
         insetBlockStart: '0',
         insetInlineStart: '0',
         margin: '0',
         opacity: '0',
+        overflow: 'visible',
+        padding: '0',
         pointerEvents: 'none',
         position: 'fixed',
         transform: 'translate(0, 0)',
