@@ -3,6 +3,8 @@ import semver from 'semver'
 type Args = {
   branch: string
   fetchImpl?: typeof fetch
+  /** Whether GitHub marks this release "Latest" once published. */
+  makeLatest: boolean
   releaseNotes: string
   tag: string
 }
@@ -20,6 +22,7 @@ const PER_PAGE = 100
 export const createDraftGitHubRelease = async ({
   branch,
   fetchImpl = fetch,
+  makeLatest,
   releaseNotes,
   tag,
 }: Args): Promise<{ releaseUrl: string }> => {
@@ -38,15 +41,19 @@ export const createDraftGitHubRelease = async ({
     ? `https://api.github.com/repos/${REPO}/releases/${existing.id}`
     : `https://api.github.com/repos/${REPO}/releases`
 
+  // Sent on every request so a re-run converges on the current dist-tag decision.
+  const makeLatestValue = makeLatest ? 'true' : 'false'
+
   const res = await fetchImpl(url, {
     body: JSON.stringify(
       existing
-        ? { body: releaseNotes, name: tag }
+        ? { name: tag, body: releaseNotes, make_latest: makeLatestValue }
         : {
             name: tag,
             body: releaseNotes,
             draft: true,
             generate_release_notes: false,
+            make_latest: makeLatestValue,
             // A prerelease is never marked "Latest", so it cannot displace the stable line.
             prerelease: semver.prerelease(tag) !== null,
             tag_name: tag,

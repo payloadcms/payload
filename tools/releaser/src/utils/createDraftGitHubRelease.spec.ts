@@ -20,6 +20,7 @@ describe('createDraftGitHubRelease', () => {
 
     const { releaseUrl } = await createDraftGitHubRelease({
       branch: 'main',
+      makeLatest: true,
       tag: 'v4.0.0-canary.10',
       releaseNotes: 'notes',
       fetchImpl: fetchImpl as unknown as typeof fetch,
@@ -42,6 +43,7 @@ describe('createDraftGitHubRelease', () => {
 
     await createDraftGitHubRelease({
       branch: 'main',
+      makeLatest: true,
       tag,
       releaseNotes: 'notes',
       fetchImpl: fetchImpl as unknown as typeof fetch,
@@ -63,6 +65,7 @@ describe('createDraftGitHubRelease', () => {
 
     const { releaseUrl } = await createDraftGitHubRelease({
       branch: 'main',
+      makeLatest: true,
       tag: 'v4.0.0-canary.10',
       releaseNotes: 'notes',
       fetchImpl: fetchImpl as unknown as typeof fetch,
@@ -72,6 +75,47 @@ describe('createDraftGitHubRelease', () => {
     const patchCall = fetchImpl.mock.calls.at(-1)!
     expect(patchCall[0]).toContain('/releases/42')
     expect(patchCall[1].method).toBe('PATCH')
+  })
+
+  it('should send make_latest false in the POST body when makeLatest is false', async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse([]))
+      .mockResolvedValueOnce(jsonResponse({ html_url: 'https://gh/new' }))
+
+    await createDraftGitHubRelease({
+      branch: '3.x',
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+      makeLatest: false,
+      releaseNotes: 'notes',
+      tag: 'v3.90.3',
+    })
+
+    const postBody = JSON.parse(fetchImpl.mock.calls.at(-1)![1].body)
+    expect(postBody.make_latest).toBe('false')
+  })
+
+  it('should send make_latest true in the PATCH body when makeLatest is true', async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse([
+          { id: 42, draft: true, tag_name: 'v3.90.3', html_url: 'https://gh/existing' },
+        ]),
+      )
+      .mockResolvedValueOnce(jsonResponse({ html_url: 'https://gh/existing' }))
+
+    await createDraftGitHubRelease({
+      branch: '3.x',
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+      makeLatest: true,
+      releaseNotes: 'notes',
+      tag: 'v3.90.3',
+    })
+
+    const patchCall = fetchImpl.mock.calls.at(-1)!
+    expect(patchCall[1].method).toBe('PATCH')
+    expect(JSON.parse(patchCall[1].body).make_latest).toBe('true')
   })
 
   it('should refuse to overwrite an already-published release', async () => {
@@ -86,6 +130,7 @@ describe('createDraftGitHubRelease', () => {
     await expect(
       createDraftGitHubRelease({
         branch: 'main',
+        makeLatest: true,
         tag: 'v4.0.0-canary.10',
         releaseNotes: 'notes',
         fetchImpl: fetchImpl as unknown as typeof fetch,
@@ -110,6 +155,7 @@ describe('createDraftGitHubRelease', () => {
 
     const { releaseUrl } = await createDraftGitHubRelease({
       branch: 'main',
+      makeLatest: true,
       tag: 'v4.0.0-beta.0',
       releaseNotes: 'notes',
       fetchImpl: fetchImpl as unknown as typeof fetch,

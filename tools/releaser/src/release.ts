@@ -244,6 +244,7 @@ async function main() {
     try {
       const { releaseUrl: draftReleaseUrl } = await createDraftGitHubRelease({
         branch: '3.x',
+        makeLatest: tag === 'latest',
         releaseNotes,
         tag: `v${nextReleaseVersion}`,
       })
