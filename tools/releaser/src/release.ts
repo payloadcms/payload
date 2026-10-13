@@ -25,6 +25,7 @@ import type { PublishResult } from './lib/runPublishSequence.js'
 import { assertBumpPreconditions } from './lib/assertBumpPreconditions.js'
 import { getPackageDetails } from './lib/getPackageDetails.js'
 import { getLatestPublishedVersion } from './lib/getPackageRegistryVersions.js'
+import { publishSinglePackage } from './lib/getWorkspace.js'
 import { RELEASE_BRANCH } from './lib/pinnedMajor.js'
 import { packagePublishList } from './lib/publishList.js'
 import { runPublishSequence } from './lib/runPublishSequence.js'
@@ -234,7 +235,7 @@ async function main() {
             if (pkg === firstPackage) {
               return publishInteractively({ distTag, pkg, runCmd })
             }
-            return await publishSinglePackage(pkg, { distTag, dryRun })
+            return await publishSinglePackage(pkg, { dryRun, tag: distTag })
           },
         })
         if (!result.success) {
@@ -378,65 +379,6 @@ function publishInteractively({
     return {
       name: pkg.name,
       details: `Interactive publish failed for ${pkg.name}: ${err instanceof Error ? err.message : JSON.stringify(err)}`,
-      success: false,
-    }
-  }
-}
-
-async function publishSinglePackage(
-  pkg: PackageDetails,
-  opts: { distTag: string; dryRun?: boolean },
-) {
-  const { distTag, dryRun = false } = opts
-  console.log(chalk.bold(`🚀 ${pkg.name} publishing...`))
-
-  try {
-    const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--tag', distTag]
-    if (dryRun) {
-      cmdArgs.push('--dry-run')
-      console.log(chalk.gray(`\n${logPrefix} pnpm ${cmdArgs.join(' ')}\n`))
-    }
-    const { exitCode, stderr } = await execa('pnpm', cmdArgs, {
-      cwd,
-      stdio: ['ignore', 'ignore', 'pipe'],
-      // stdio: 'inherit',
-    })
-
-    if (exitCode !== 0) {
-      console.log(chalk.bold.red(`\n\n❌ ${pkg.name} ERROR: pnpm publish failed\n\n${stderr}`))
-
-      // Retry publish
-      console.log(chalk.bold.yellow(`\nRetrying publish for ${pkg.name}...`))
-      const { exitCode: retryExitCode, stderr: retryStdError } = await execa('pnpm', cmdArgs, {
-        cwd,
-        stdio: 'inherit', // log full output
-      })
-
-      if (retryExitCode !== 0) {
-        console.error(
-          chalk.bold.red(
-            `\n\n❌ ${pkg.name} ERROR: pnpm publish failed on retry\n\n${retryStdError}`,
-          ),
-        )
-      }
-
-      return {
-        name: pkg.name,
-        details: `Exit Code: ${retryExitCode}, stderr: ${retryStdError}`,
-        success: false,
-      }
-    }
-
-    console.log(`${logPrefix} ${chalk.green(`✅ ${pkg.name} published`)}`)
-    return { name: pkg.name, success: true }
-  } catch (err: unknown) {
-    console.error(err)
-    return {
-      name: pkg.name,
-      details:
-        err instanceof Error
-          ? `Error publishing ${pkg.name}: ${err.message}`
-          : `Unexpected error publishing ${pkg.name}: ${JSON.stringify(err)}`,
       success: false,
     }
   }
