@@ -563,6 +563,10 @@ test.describe('Form State', () => {
 
       const titleField = page.locator('#field-title')
       const computedTitleField = page.locator('#field-computedTitle')
+      const documentInfoState = page.locator('#document-info-state')
+      const initialDocumentInfoState = await documentInfoState.evaluate(
+        (element) => element.outerHTML,
+      )
 
       await expect(computedTitleField).toHaveValue('Initial revision')
 
@@ -576,6 +580,9 @@ test.describe('Form State', () => {
 
       await expect(titleField).toHaveValue('Latest revision')
       await expect(computedTitleField).toHaveValue('Initial revision')
+      expect(await documentInfoState.evaluate((element) => element.outerHTML)).toBe(
+        initialDocumentInfoState,
+      )
 
       releaseSecond.resolve()
       await waitForAutoSaveToRunAndComplete(page)

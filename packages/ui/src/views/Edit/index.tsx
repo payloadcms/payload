@@ -301,9 +301,52 @@ export function DefaultEditView({
     async (json, ctx) => {
       const { context, formState } = ctx || {}
 
+      if (ctx && !ctx.isCurrent()) {
+        return
+      }
+
       const document = json?.doc || json?.result
 
       const updatedAt = document?.updatedAt || new Date().toISOString()
+
+      let docPreferences
+
+      if (id || globalSlug) {
+        docPreferences = await getDocPreferences()
+
+        if (!ctx?.isCurrent()) {
+          return
+        }
+      }
+
+      let formStateResult
+
+      if (id || globalSlug) {
+        const controller = handleAbortRef(abortOnSaveRef)
+        formStateResult = await getFormState({
+          id,
+          collectionSlug,
+          data: document,
+          docPermissions,
+          docPreferences,
+          formState,
+          globalSlug,
+          operation,
+          renderAllFields: false,
+          returnLivePreviewURL: isLivePreviewEnabled && typeofLivePreviewURL === 'function',
+          returnLockStatus: false,
+          returnPreviewURL: isPreviewEnabled,
+          schemaPath: schemaPathSegments.join('.'),
+          signal: controller.signal,
+          skipValidation: true,
+        })
+
+        abortOnSaveRef.current = null
+
+        if (!ctx?.isCurrent()) {
+          return
+        }
+      }
 
       // If we're editing the doc of the logged-in user,
       // Refresh the cookie to get new permissions
@@ -377,38 +420,7 @@ export function DefaultEditView({
       }
 
       if (id || globalSlug) {
-        const docPreferences = await getDocPreferences()
-
-        if (!ctx?.isCurrent()) {
-          return
-        }
-
-        const controller = handleAbortRef(abortOnSaveRef)
-        const result = await getFormState({
-          id,
-          collectionSlug,
-          data: document,
-          docPermissions,
-          docPreferences,
-          formState,
-          globalSlug,
-          operation,
-          renderAllFields: false,
-          returnLivePreviewURL: isLivePreviewEnabled && typeofLivePreviewURL === 'function',
-          returnLockStatus: false,
-          returnPreviewURL: isPreviewEnabled,
-          schemaPath: schemaPathSegments.join('.'),
-          signal: controller.signal,
-          skipValidation: true,
-        })
-
-        abortOnSaveRef.current = null
-
-        if (!ctx?.isCurrent()) {
-          return
-        }
-
-        const { livePreviewURL, previewURL, state } = result
+        const { livePreviewURL, previewURL, state } = formStateResult
 
         // For upload collections, clear the file field from the returned state
         // to prevent the File object from persisting in form state after save

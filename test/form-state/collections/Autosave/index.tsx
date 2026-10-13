@@ -37,6 +37,15 @@ export const AutosavePostsCollection: CollectionConfig = {
       },
     },
     {
+      name: 'documentInfoData',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: './collections/Autosave/DocumentInfoData.js#DocumentInfoData',
+        },
+      },
+    },
+    {
       name: 'restrictedValue',
       type: 'text',
       access: {

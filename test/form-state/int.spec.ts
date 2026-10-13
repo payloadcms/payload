@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 import { expect, vi } from 'vitest'
 
 import { devUser } from '../credentials.js'
+import { DocumentInfoData } from './collections/Autosave/DocumentInfoData.js'
 import { autosavePostsSlug } from './collections/Autosave/index.js'
 import { NonDirtyFieldUpdater } from './collections/Autosave/NonDirtyFieldUpdater.js'
 import { conditionsSlug } from './collections/Conditions/index.js'
@@ -67,6 +68,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     vi.stubGlobal('React', React)
     const previousImportMap = payload.importMap
     payload.importMap = {
+      './collections/Autosave/DocumentInfoData.js#DocumentInfoData': DocumentInfoData,
       './collections/Autosave/NonDirtyFieldUpdater.js#NonDirtyFieldUpdater': NonDirtyFieldUpdater,
     }
 

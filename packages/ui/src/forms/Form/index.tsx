@@ -457,7 +457,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
         if (res.status < 400) {
           if (!requestContext.isCurrent()) {
-            return { res }
+            return
           }
 
           preservePromiseToast = true
@@ -472,18 +472,20 @@ export const Form: React.FC<FormProps> = (props) => {
             })
           }
 
-          if (requestContext.isCurrent()) {
-            if (newFormState) {
-              dispatchFieldsWithoutRevision({
-                type: 'MERGE_SERVER_STATE',
-                acceptValues,
-                prevStateRef: prevFormState,
-                serverState: newFormState,
-              })
-            }
-
-            setSubmitted(false)
+          if (!requestContext.isCurrent()) {
+            return
           }
+
+          if (newFormState) {
+            dispatchFieldsWithoutRevision({
+              type: 'MERGE_SERVER_STATE',
+              acceptValues,
+              prevStateRef: prevFormState,
+              serverState: newFormState,
+            })
+          }
+
+          setSubmitted(false)
 
           if (redirect) {
             if (requestContext.isCurrent()) {
@@ -494,7 +496,7 @@ export const Form: React.FC<FormProps> = (props) => {
           }
         } else {
           if (!requestContext.isCurrent()) {
-            return { res }
+            return
           }
 
           preservePromiseToast = true
