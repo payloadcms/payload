@@ -233,8 +233,7 @@ export const deleteUserDocumentLocks = async ({
 
   await payload.db.deleteMany({
     collection: lockedDocumentsCollectionSlug,
-    // Not passing req fails on postgres
-    req: payload.db.name === 'mongoose' ? undefined : req,
+    req,
     where: {
       and: [{ 'user.relationTo': { equals: collectionSlug } }, { 'user.value': { in: ids } }],
     },

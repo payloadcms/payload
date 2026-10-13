@@ -62,6 +62,55 @@ const createUserWithLockAndPreference = async ({
 }
 
 test.suite('Locked documents - deleting a user', { config: './config.ts' }, () => {
+  test.options(
+    'should retain user-owned locks when deletion rolls back',
+    { db: 'mongo' },
+    async ({ payload }) => {
+      const { lock, user } = await createUserWithLockAndPreference({
+        email: 'rollback-delete-user@payloadcms.com',
+        payload,
+      })
+
+      const hooks = payload.collections[usersSlug].config.hooks
+      const originalAfterDelete = hooks.afterDelete
+
+      hooks.afterDelete = [
+        ...originalAfterDelete,
+        () => {
+          throw new Error('Abort user deletion')
+        },
+      ]
+
+      try {
+        await expect(
+          payload.delete({
+            id: user.id,
+            collection: usersSlug,
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow('Abort user deletion')
+
+        const retainedUser = await payload.findByID({
+          id: user.id,
+          collection: usersSlug,
+          overrideAccess: true,
+        })
+
+        expect(retainedUser.id).toBe(user.id)
+
+        const { docs } = await payload.find({
+          collection: lockedDocumentCollection,
+          overrideAccess: true,
+          where: { id: { equals: lock.id } },
+        })
+
+        expect(docs.map(({ id }) => id)).toEqual([lock.id])
+      } finally {
+        hooks.afterDelete = originalAfterDelete
+      }
+    },
+  )
+
   test('should release locks held by a user deleted by ID', async ({ payload }) => {
     const { lock, post, user } = await createUserWithLockAndPreference({
       email: 'delete-by-id-lock@payloadcms.com',
