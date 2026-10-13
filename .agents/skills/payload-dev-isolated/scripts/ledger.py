@@ -9,11 +9,7 @@ from datetime import datetime, timezone
 from contextlib import contextmanager
 
 def default_path():
-    override = os.environ.get('PAYLOAD_DEV_LEDGER')
-    if override:
-        return Path(override).expanduser()
-    root = os.environ.get('LOCALAPPDATA') if os.name == 'nt' else os.environ.get('XDG_STATE_HOME')
-    return (Path(root) if root else Path.home() / '.local' / 'state') / 'payload-dev-isolated' / 'environments.json'
+    return Path.home() / '.local' / 'state' / 'payload-dev-isolated' / 'environments.json'
 
 
 @contextmanager
@@ -60,9 +56,8 @@ FIELDS = {'id', 'name', 'thread_id', 'pending_thread_id', 'host', 'repo', 'workt
 STATUSES = {'reserved', 'configured', 'running', 'stopped', 'unknown', 'cleaned'}
 
 
-def main():
+def main(*, ledger_path=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--ledger', type=Path, default=default_path())
     sub = parser.add_subparsers(dest='command', required=True)
     ls = sub.add_parser('list')
     ls.add_argument('--json', action='store_true')
@@ -71,7 +66,7 @@ def main():
     show = sub.add_parser('show')
     show.add_argument('id')
     args = parser.parse_args()
-    path = args.ledger.expanduser()
+    path = default_path() if ledger_path is None else Path(ledger_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with ledger_lock(path):
         data = json.loads(path.read_text()) if path.exists() else {'version': 1, 'environments': []}

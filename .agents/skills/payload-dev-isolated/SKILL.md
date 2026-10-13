@@ -30,13 +30,9 @@ python3 scripts/ledger.py show <environment-id>
 python3 scripts/ledger.py upsert /absolute/path/to/record.json
 ```
 
-The ledger path is resolved in this order:
+All chats use `~/.local/state/payload-dev-isolated/environments.json`, outside the repository. There is no command-line or environment-variable override, so separate chats on the same machine and user account share reservations. Tests inject a temporary path into the Python function without exposing it as a CLI option.
 
-1. `--ledger /absolute/path/environments.json` before the subcommand.
-2. `PAYLOAD_DEV_LEDGER`.
-3. `$XDG_STATE_HOME/payload-dev-isolated/environments.json`, or `~/.local/state/payload-dev-isolated/environments.json` on Unix; `%LOCALAPPDATA%/payload-dev-isolated/environments.json` on Windows, with the same home fallback.
-
-Use a local filesystem outside the repository. Pass the resolved absolute ledger path to other chats so all environments on the same machine share reservations. The helper uses locking and atomic replacement; do not hand-edit the ledger. It never stops servers or deletes databases. Network filesystem locking is not supported. An empty ledger does not prove that no older environments exist.
+The helper uses locking and atomic replacement; do not hand-edit the ledger. It never stops servers or deletes databases. Network filesystem locking is not supported. An empty ledger does not prove that no older environments exist.
 
 Reserve a unique stable environment ID, port and database before startup. Read existing reservations and active listeners; a stopped environment still owns its data and port. Upsert only fields that changed. Reuse the same record on later turns. Example record (replace all values with verified choices):
 

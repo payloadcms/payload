@@ -16,8 +16,12 @@ class LedgerTests(unittest.TestCase):
         self.root = Path(self.tmp.name)
         self.ledger = self.root / 'state.json'
 
+    def command(self, *args):
+        code = "import runpy,sys; from pathlib import Path; module=runpy.run_path(sys.argv.pop(1)); path=Path(sys.argv.pop(1)); module['main'](ledger_path=path)"
+        return [sys.executable, '-c', code, str(SCRIPT), str(self.ledger), *args]
+
     def run_cli(self, *args, **kwargs):
-        return subprocess.run([sys.executable, str(SCRIPT), '--ledger', str(self.ledger), *args],
+        return subprocess.run(self.command(*args),
                               capture_output=True, text=True, **kwargs)
 
     def record(self, record):
@@ -55,8 +59,7 @@ class LedgerTests(unittest.TestCase):
             self.assertEqual(original, self.ledger.read_bytes())
 
     def test_concurrent_writers_preserve_records(self):
-        processes = [subprocess.Popen([sys.executable, str(SCRIPT), '--ledger', str(self.ledger),
-                     'upsert', str(self.record({'id': str(i), 'port': 3400 + i}))],
+        processes = [subprocess.Popen(self.command('upsert', str(self.record({'id': str(i), 'port': 3400 + i}))),
                      stdout=subprocess.PIPE, stderr=subprocess.PIPE) for i in range(8)]
         for process in processes:
             _, err = process.communicate(timeout=30)
@@ -64,20 +67,32 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual(len(json.loads(self.ledger.read_text())['environments']), 8)
 
     def test_concurrent_collision_has_only_one_winner(self):
-        processes = [subprocess.Popen([sys.executable, str(SCRIPT), '--ledger', str(self.ledger),
-                     'upsert', str(self.record({'id': str(i), 'port': 3500}))],
+        processes = [subprocess.Popen(self.command('upsert', str(self.record({'id': str(i), 'port': 3500}))),
                      stdout=subprocess.PIPE, stderr=subprocess.PIPE) for i in range(4)]
         for process in processes:
             process.communicate(timeout=30)
         self.assertEqual(sum(p.returncode == 0 for p in processes), 1)
 
-    def test_environment_override_and_missing_list(self):
-        env = {**os.environ, 'PAYLOAD_DEV_LEDGER': str(self.ledger)}
-        result = subprocess.run([sys.executable, str(SCRIPT), 'list', '--json'], env=env,
-                                capture_output=True, text=True)
+    def test_missing_list(self):
+        result = self.run_cli('list', '--json')
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(json.loads(result.stdout)['environments'], [])
         self.assertFalse(self.ledger.exists())
+
+    def test_cli_rejects_path_override(self):
+        result = subprocess.run([sys.executable, str(SCRIPT), '--ledger', str(self.ledger), 'list'],
+                                capture_output=True, text=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse(self.ledger.exists())
+
+    def test_default_ignores_environment_overrides(self):
+        import runpy
+        from unittest.mock import patch
+        module = runpy.run_path(str(SCRIPT))
+        with patch.dict(os.environ, {'PAYLOAD_DEV_LEDGER': str(self.ledger),
+                                    'XDG_STATE_HOME': str(self.root), 'LOCALAPPDATA': str(self.root)}):
+            self.assertEqual(module['default_path'](), Path.home() / '.local' / 'state' /
+                             'payload-dev-isolated' / 'environments.json')
 
     def test_corrupt_ledger_is_preserved(self):
         self.ledger.write_text('{invalid')
