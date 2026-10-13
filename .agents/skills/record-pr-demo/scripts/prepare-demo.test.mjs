@@ -98,6 +98,7 @@ test('packageCandidate converts, verifies, inventories, and cleans up a candidat
     output,
     rawOutput,
     scenario,
+    trimStart: 1.25,
   })
 
   assert.equal(result.manifestPath, manifest)
@@ -116,6 +117,7 @@ test('packageCandidate converts, verifies, inventories, and cleans up a candidat
   assert.equal(savedManifest.scenario, scenario)
   assert.equal(savedManifest.sha256, result.sha256)
   assert.equal(savedManifest.sizeBytes, 9)
+  assert.match(await readFile(path.join(directory, 'convert-args.txt'), 'utf8'), /-ss 1\.25/)
 })
 
 test('runWithScenarioFixture wraps execution in scenario setup and teardown hooks', async () => {
@@ -221,6 +223,7 @@ if [[ "$output" == *.png ]]; then
   printf contact-sheet > "$output"
   exit 0
 fi
+printf '%s ' "$@" > "${directory}/convert-args.txt"
 input=""
 previous=""
 for argument in "$@"; do

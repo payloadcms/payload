@@ -108,6 +108,7 @@ export async function recordDemo({
   interactionPauseMs = DEFAULT_INTERACTION_PAUSE_MS,
   label,
   mouseMoveMs = DEFAULT_MOUSE_MOVE_MS,
+  onOpeningReady,
   output,
   scenario,
   viewport,
@@ -118,6 +119,7 @@ export async function recordDemo({
     interactionPauseMs,
     label,
     mouseMoveMs,
+    onOpeningReady,
     output,
     pauseScale: 1,
     scenario,
@@ -161,6 +163,7 @@ async function executeDemo({
   interactionPauseMs,
   label,
   mouseMoveMs,
+  onOpeningReady,
   output,
   pauseScale,
   scenario,
@@ -263,6 +266,7 @@ async function executeDemo({
     })
   })
 
+  const recordingStartedAt = performance.now()
   const page = await context.newPage()
   const video = output ? page.video() : undefined
   const resolvedOutput = output ? path.resolve(output) : undefined
@@ -272,6 +276,7 @@ async function executeDemo({
     mouseMoveMs,
     page,
   })
+  let isOpeningReady = false
   let scenarioError
 
   try {
@@ -284,8 +289,17 @@ async function executeDemo({
       moveCursor: pointerInteractions.moveCursor,
       page,
       pause: (milliseconds = 700) => page.waitForTimeout(milliseconds * pauseScale),
+      ready: async () => {
+        if (isOpeningReady) throw new Error('Scenario may call ready() only once')
+        isOpeningReady = true
+        onOpeningReady?.((performance.now() - recordingStartedAt) / 1000)
+        await page.waitForTimeout(1200 * pauseScale)
+      },
       scroll: createScrollInteraction({ moveCursor: pointerInteractions.moveCursor, page }),
     })
+    if (output && !isOpeningReady) {
+      throw new Error('Recording scenario must call ready() after its opening state is visible')
+    }
     if (trailingPauseMs > 0) {
       await page.waitForTimeout(trailingPauseMs)
     }

@@ -33,12 +33,12 @@ Prefer 10–45 seconds. Avoid long typing sequences, setup screens, loading wait
 Create the scenario outside the repository, for example `/tmp/payload-pr-demo-relationship-drawer.mjs`. It must default-export an async function:
 
 ```js
-export default async function scenario({ baseURL, click, expect, page, pause }) {
+export default async function scenario({ baseURL, click, expect, page, pause, ready }) {
   await page.goto(`${baseURL}/admin/collections/posts`)
 
   const createButton = page.getByRole('link', { name: 'Create new Post' })
   await expect(createButton).toBeVisible()
-  await pause(1200)
+  await ready()
 
   await click(createButton)
   await expect(page.getByRole('heading', { name: 'Create new Post' })).toBeVisible()
@@ -65,8 +65,10 @@ export async function teardown({ fixture, request }) {
   await request.delete(`/api/posts/${fixture.post.doc.id}`)
 }
 
-export default async function scenario({ baseURL, click, expect, fixture, page, pause }) {
+export default async function scenario({ baseURL, click, expect, fixture, page, ready }) {
   await page.goto(`${baseURL}/admin/collections/posts/${fixture.post.doc.id}`)
+  await expect(page.getByRole('heading', { name: fixture.post.doc.title })).toBeVisible()
+  await ready()
   // Visible demo interactions only.
 }
 ```
@@ -83,6 +85,7 @@ The recorder supplies:
 - `moveCursor(locator, options?)`: smoothly points at a locator and pauses without clicking;
 - `page`: the recorded Playwright page;
 - `pause(milliseconds = 700)`: a short presentation pause;
+- `ready()`: marks the loaded opening state and holds it for 1.2 seconds; call it exactly once before the first visible interaction;
 - `scroll(locator, options?)`: scrolls the actual overflow range with frame-timed easing, or real wheel input when requested;
 - `label`: the normalized recording label.
 
@@ -179,7 +182,7 @@ node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs preview \
 
 `validate` runs the scenario without video or interaction delays. `preview` writes one final-state PNG, including the cursor position, so cursor and layout changes do not require a full recording.
 
-The converter removes the first 0.75 seconds of browser startup. After asserting the first meaningful state, call `await pause(1200)` before the first interaction so the candidate opens on a readable frame.
+After asserting the first meaningful state, call `await ready()` before the first interaction. Candidate mode uses that marker to trim browser startup and leaves a 1.2-second hold on the loaded page. Recording fails if the marker is missing. Inspect the first frame of the candidate, especially after a cold server start.
 
 Useful options:
 

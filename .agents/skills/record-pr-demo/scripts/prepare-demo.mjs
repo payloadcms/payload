@@ -96,7 +96,12 @@ export async function packageCandidate({
   output,
   rawOutput,
   scenario,
+  trimStart,
 }) {
+  if (!Number.isFinite(trimStart) || trimStart < 0) {
+    throw new Error('Candidate is missing a valid opening ready time')
+  }
+
   const resolvedContactSheet = path.resolve(contactSheet)
   const resolvedManifest = path.resolve(manifest)
   const resolvedOutput = path.resolve(output)
@@ -105,7 +110,13 @@ export async function packageCandidate({
 
   await mkdir(path.dirname(resolvedOutput), { recursive: true })
   runCommand({
-    args: [path.join(scriptDirectory, 'convert-demo.sh'), resolvedRawOutput, resolvedOutput],
+    args: [
+      path.join(scriptDirectory, 'convert-demo.sh'),
+      resolvedRawOutput,
+      resolvedOutput,
+      '--trim-start',
+      String(trimStart),
+    ],
     command: 'bash',
     environment,
   })
@@ -308,6 +319,7 @@ export async function runPreparation(options) {
   })
   printStage('Scenario validated', startedAt)
 
+  let trimStart
   await runWithScenarioFixture(options, async (fixture) => {
     await recordDemo({
       baseURL: options.baseURL,
@@ -315,6 +327,9 @@ export async function runPreparation(options) {
       interactionPauseMs: options.interactionPauseMs,
       label: options.label,
       mouseMoveMs: options.mouseMoveMs,
+      onOpeningReady: (seconds) => {
+        trimStart = seconds
+      },
       output: options.rawOutput,
       scenario: options.scenario,
       viewport: options.viewport,
@@ -329,6 +344,7 @@ export async function runPreparation(options) {
     output: options.output,
     rawOutput: options.rawOutput,
     scenario: options.scenario,
+    trimStart,
   })
   printStage('Candidate verified', startedAt)
   printCandidate(result)

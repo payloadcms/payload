@@ -6,7 +6,7 @@ usage() {
 Usage: convert-demo.sh INPUT.webm [OUTPUT.mp4] [options]
 
 Options:
-  --trim-start SECONDS  Trim initial loading frames (default: 0.75)
+  --trim-start SECONDS  Trim initial loading frames (default: 0.75; candidate mode sets this from ready())
   --crf NUMBER          H.264 quality, lower is higher quality (default: 23)
   --max-kb NUMBER       Fail when output exceeds this upload budget (default: 10240)
   --help                Show this help

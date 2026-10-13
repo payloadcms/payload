@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { spawnSync } from 'node:child_process'
 import { mkdtemp, rm, stat, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
@@ -91,8 +92,9 @@ test('recordDemo saves a completed browser recording before closing the browser'
   try {
     await writeFile(
       scenario,
-      `export default async function scenario({ page }) {
+      `export default async function scenario({ page, ready }) {
         await page.goto('data:text/html,<main>Recorded demo</main>')
+        await ready()
         await page.waitForTimeout(100)
       }`,
     )
@@ -113,6 +115,33 @@ test('recordDemo saves a completed browser recording before closing the browser'
   }
 })
 
+test('should reject a recording without an opening ready marker', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-missing-ready-test-'))
+  const scenario = path.join(directory, 'scenario.mjs')
+
+  try {
+    await writeFile(
+      scenario,
+      `export default async function scenario({ page }) {
+        await page.goto('data:text/html,<main>Missing ready marker</main>')
+      }`,
+    )
+
+    await assert.rejects(
+      recorder.recordDemo({
+        baseURL: 'http://localhost:3000',
+        label: 'missing-ready-test',
+        output: path.join(directory, 'demo.webm'),
+        scenario,
+        viewport: { height: 480, width: 640 },
+      }),
+      /must call ready\(\)/,
+    )
+  } finally {
+    await rm(directory, { force: true, recursive: true })
+  }
+})
+
 test('recordDemo exposes a smoothly paced click helper', async () => {
   const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-click-test-'))
   const scenario = path.join(directory, 'scenario.mjs')
@@ -121,8 +150,9 @@ test('recordDemo exposes a smoothly paced click helper', async () => {
   try {
     await writeFile(
       scenario,
-      `export default async function scenario({ click, page }) {
+      `export default async function scenario({ click, page, ready }) {
         await page.goto('data:text/html,<button type="button">Click me</button>')
+        await ready()
         await page.evaluate(() => {
           window.demoPointerState = { clicks: 0, moves: 0 }
           document.addEventListener('mousemove', () => { window.demoPointerState.moves += 1 })
@@ -164,8 +194,9 @@ test('recordDemo renders a Mac-style arrow cursor', async () => {
   try {
     await writeFile(
       scenario,
-      `export default async function scenario({ page }) {
+      `export default async function scenario({ page, ready }) {
         await page.goto('data:text/html,<main>Cursor demo</main>')
+        await ready()
         const cursor = page.locator('[data-pr-demo-cursor="mac-arrow"]')
         await cursor.waitFor()
         const graphic = cursor.locator('svg')
@@ -199,6 +230,73 @@ test('recordDemo renders a Mac-style arrow cursor', async () => {
       scenario,
       viewport: { height: 480, width: 640 },
     })
+  } finally {
+    await rm(directory, { force: true, recursive: true })
+  }
+})
+
+test('should trim startup frames to the ready opening state', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-opening-test-'))
+  const scenario = path.join(directory, 'scenario.mjs')
+  const rawVideo = path.join(directory, 'demo.webm')
+  const convertedVideo = path.join(directory, 'demo.mp4')
+  let trimStart
+
+  try {
+    await writeFile(
+      scenario,
+      `export default async function scenario({ page, ready }) {
+        await page.goto('data:text/html,<body style="margin:0;background:white"><script>setTimeout(() => { document.body.style.background = "rgb(0, 200, 0)"; document.body.id = "ready" }, 1400)</script></body>')
+        await page.locator('#ready').waitFor()
+        await ready()
+      }`,
+    )
+
+    await recorder.recordDemo({
+      baseURL: 'http://localhost:3000',
+      label: 'opening-test',
+      onOpeningReady: (seconds) => {
+        trimStart = seconds
+      },
+      output: rawVideo,
+      scenario,
+      viewport: { height: 480, width: 640 },
+    })
+
+    assert.ok(trimStart > 1.4, `Expected delayed opening marker, got ${trimStart}`)
+    const convert = spawnSync(
+      'bash',
+      [
+        path.join(import.meta.dirname, 'convert-demo.sh'),
+        rawVideo,
+        convertedVideo,
+        '--trim-start',
+        String(trimStart),
+      ],
+      { encoding: 'utf8' },
+    )
+    assert.equal(convert.status, 0, convert.stderr)
+
+    const firstFrame = spawnSync('ffmpeg', [
+      '-v',
+      'error',
+      '-i',
+      convertedVideo,
+      '-frames:v',
+      '1',
+      '-f',
+      'rawvideo',
+      '-pix_fmt',
+      'rgb24',
+      '-',
+    ])
+    assert.equal(firstFrame.status, 0, firstFrame.stderr.toString())
+    assert.ok(
+      firstFrame.stdout[0] < 80 &&
+        firstFrame.stdout[1] > 150 &&
+        firstFrame.stdout[2] < 80,
+      'Opening frame does not show the ready green page',
+    )
   } finally {
     await rm(directory, { force: true, recursive: true })
   }
