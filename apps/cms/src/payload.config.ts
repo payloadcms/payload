@@ -16,6 +16,7 @@ import { sendgridAdapter } from './email/sendgrid'
 import { healthEndpoint } from './endpoints/health'
 import { locales } from './locales'
 import { personalCollections, personalGlobals } from './personal'
+import { photoVariants } from './personal/collections/PersonalPhotos'
 import { requestSizeLimit } from './requestSizeLimit'
 import { s3StorageAdapter } from './storage/s3'
 import { timezones } from './timezones'
@@ -103,7 +104,14 @@ export default buildConfig({
     limits: { fileSize: 50 * 1024 * 1024 },
     requestSizeLimit,
     // Image processing on upload, such as cropping (the top-level `sharp` option before Payload 4)
-    // and the smaller copies of each Media image (`imageSizes` before Payload 4)
-    transformers: [sharpTransformer({ collections: { media: { variants: mediaVariants } } })],
+    // and the smaller copies of each Media image and photo (`imageSizes` before Payload 4)
+    transformers: [
+      sharpTransformer({
+        collections: {
+          media: { variants: mediaVariants },
+          'personal-photos': { variants: photoVariants },
+        },
+      }),
+    ],
   },
 })

@@ -139,6 +139,7 @@ nano .env
 | `CORS_ORIGINS`                                              | optional, comma-separated frontend origins that call the API with cookies                                      |
 | `WEBSITE_URL`, `WEBSITE_REVALIDATE_SECRET`                  | optional, refresh the personal website as soon as its content changes (see "Personal website")                 |
 | `VIGOR_WEBSITE_URL`, `VIGOR_WEBSITE_REVALIDATE_SECRET`      | optional, refresh the Vigor website as soon as its content changes (see "Vigor website")                       |
+| `OPENAI_API_KEY`, `OPENAI_MODEL`                            | optional, write the title, alt text, description and tags of photos with AI (see "Photos")                     |
 | `SENDGRID_API_KEY`, `EMAIL_FROM_ADDRESS`, `EMAIL_FROM_NAME` | optional, send "forgot password" emails (see "Email (SendGrid)")                                               |
 
 URL-encode special characters in the MongoDB password: `@` → `%40`, `:` → `%3A`, `/` → `%2F`,
@@ -318,7 +319,8 @@ S3_PUBLIC_URL=            # empty = https://your-bucket.s3.ap-southeast-1.amazon
 ```
 
 Upload an image in the admin panel. `GET /api/media` should now return `"url": "https://…"`
-pointing at S3, and the file should be in the bucket under `media/`.
+pointing at S3, and the file should be in the bucket under `media/`. Photos of the personal website go to
+`media/photos/` (`S3_PHOTOS_PREFIX` to change it).
 
 ### d) Files uploaded before switching
 
@@ -347,11 +349,14 @@ content without logging in; drafts are only visible to logged-in users.
 | ------------------ | ----------------------------------------------------------------------------------------------------------- |
 | Posts              | The blog: `/blog/<slug>`, the post lists, tag pages, featured posts on the home page, the RSS feed          |
 | Projects           | The cards on `/projects` and a page per project at `/projects/<slug>`                                       |
+| Photos             | The photo portfolio: a page per photo at `/photos/<album>/<slug>`, tag pages at `/photos/tags/<tag>`        |
+| Photo albums       | The albums ("catalogs") on `/photos`, each at `/photos/<slug>`                                              |
 | Site settings      | Site name, browser tab titles, default description, X handle, main menu and social links                    |
 | Home page          | `/`: name, job titles, introduction, button (e.g. your resume), key figures, featured posts, logos          |
 | About page         | `/about`: photo, numbered sections, call to action, skill sets with levels and icons, employment, education |
 | Services page      | `/services`: introduction, button and a tile per service                                                    |
 | Projects page      | The texts of `/projects` and the GitHub repositories shown there                                            |
+| Photos page        | The texts of `/photos`                                                                                      |
 | Blog page          | The texts of `/blog`                                                                                        |
 | Contact page       | The texts of `/contact` and the contact details next to the form                                            |
 | Pages              | Pages whose **Sites** include **Personal website**, at `/<slug>`, e.g. `/privacy-policy`                    |
@@ -361,7 +366,8 @@ name, so all but one of them fail to build): **Save** puts the change live, and 
 earlier save. Until a page or Site settings is saved for the first time, the website keeps showing its own Markdown
 file or `theme.config.js`, so pages can move to the CMS one at a time.
 
-**Posts and projects** have drafts: **Save Draft** keeps changes private, **Publish** makes them public.
+**Posts, projects, photos and photo albums** have drafts: **Save Draft** keeps changes private, **Publish** makes them
+public.
 
 - **Icons** (skills, services, "Expert In" logos, project logos) must be SVG files; only those can be chosen. The
   website puts them inline so they take the theme's colors.
@@ -404,10 +410,51 @@ Locally, run `pnpm payload run scripts/import-personal-website.ts <website-folde
 | Tags         | Tag chips. A tag links to `/tags/<tag>` when the website has `content/tags/<tag>.md`                |
 | SEO          | Optional title and description for search engines and link previews                                 |
 
+### Photos
+
+1. Create an album in **Photo albums** (e.g. "Street", "Japan 2025") and publish it.
+2. In **Photos**, click **Bulk Upload** and drop in your photos (JPEG, PNG or WebP, up to 50 MB each). To set the
+   album of all of them at once, click **Edit all**, choose **Album**, pick the album and click **Apply Changes**.
+3. With `OPENAI_API_KEY` set, uploading fills in each photo's empty title, alt text, description and tags (a few
+   seconds per photo). Review them, then **Publish** (or **Save draft** to publish later).
+
+Each photo is one upload, stored like Media (in S3 when it's on, under `<S3_PREFIX>/photos/`, so the bucket policy and
+IAM role for Media cover it). On upload the CMS:
+
+- reads the capture date, camera, lens and settings from the file's EXIF data into **Taken on** and **Camera**
+- stores the photo turned upright, at most 4096 px on its longer side, and **without its metadata**: the GPS location
+  that most phones record would otherwise be public with the file
+- makes copies whose longer side is at most 480, 960, 1600 and 2560 px (`photoVariants` in
+  `src/personal/collections/PersonalPhotos.ts`); the website picks the size that fits the screen
+
+| Field       | On the website                                                                                    |
+| ----------- | ------------------------------------------------------------------------------------------------- |
+| Title       | The photo's heading, browser tab title and name in search results                                 |
+| Alt text    | What the photo shows, for screen readers and image search; not shown on the page                  |
+| Description | The text below the photo, its search result snippet and link preview text                         |
+| Location    | Shown with the photo, e.g. "Kyoto, Japan". AI uses it too; the CMS never reads the GPS location   |
+| Camera      | Camera, lens and settings below the photo                                                         |
+| Album       | The album it's in (required); its page is `/photos/<album>/<slug>`                                |
+| Tags        | Links to `/photos/tags/<tag>`, the photos of every album with that tag; also filters on the album |
+| Slug        | Generated from the title once and kept when the title changes                                     |
+| Taken on    | The date below the photo                                                                          |
+| Featured    | Shown on `/photos`. Without any featured photos, `/photos` shows the 12 latest                    |
+
+**Order:** drag photos (in **Photos**) and albums (in **Photo albums**) into the order the website shows them in.
+Moving a photo to another album changes its address; its old address redirects to the new one.
+
+**AI texts** come from the OpenAI API (`src/personal/photos/describePhoto.ts`): the CMS sends a 1024 px copy of the
+photo with the album, the location and the tags already in use, so new photos get the same tags. It only fills empty
+fields, and an upload never fails because of it: when OpenAI is unreachable or answers with an error, the photo is saved
+with the file name as its title, and `docker compose logs cms` says `Could not write the texts of <file> with AI`.
+**Generate with AI** in a photo's sidebar writes new texts for a saved photo into the form, unsaved, so you can review
+them first. `OPENAI_MODEL` picks another model that understands images (default `gpt-5-mini`, a small and inexpensive
+one). After setting or changing these, run `./deploy/deploy.sh`.
+
 ### Refreshing the website
 
 The website refreshes its pages from the CMS about once a minute. To update it the moment you save a page or Site
-settings, or publish, edit, unpublish or delete a post, project or page, give both sides the same secret
+settings, or publish, edit, unpublish or delete a post, project, photo, album or page, give both sides the same secret
 (`openssl rand -hex 32`):
 
 1. Website: set `REVALIDATE_SECRET=<secret>` and redeploy it.
@@ -736,6 +783,9 @@ shows whether an email was delivered.
 | Upload works but images are broken (403)                                 | The files aren't public. Add the bucket policy (and untick the bucket-policy public-access blocks), or check the CloudFront origin access settings.                         |
 | Personal website only shows a change after a minute                      | `docker compose logs cms` shows `Could not revalidate`: `401` means the two secrets differ; `ECONNREFUSED` or a timeout means `WEBSITE_URL` is wrong.                       |
 | Personal website still shows its Markdown version of a page              | The page (or Site settings) was never saved in the CMS. Open it in the admin panel and save it, or run the import.                                                          |
+| Uploaded photos get no AI title, description or tags                     | `docker compose logs cms` says `Could not write the texts of … with AI` and why, e.g. a wrong `OPENAI_API_KEY` (401), no credit (429) or a model without image input (400). |
+| **Generate with AI** says to set `OPENAI_API_KEY`                        | The key isn't in the running container. Add it to `.env` and run `./deploy/deploy.sh` (`docker compose restart` doesn't read `.env` again).                                 |
+| A photo or album isn't on the website                                    | It (or the photo's album) is a draft: publish both.                                                                                                                         |
 | Vigor website only shows a change after a minute                         | The same, for `VIGOR_WEBSITE_URL` and `VIGOR_WEBSITE_REVALIDATE_SECRET` (the website's `REVALIDATE_SECRET`).                                                                |
 | A page can't use a slug that another site's page uses ("invalid: slug")  | The database still has the index from before the Sites field. Remove it as described in "Pages for several websites and apps".                                              |
 | A new Vigor product shows in English but not in the other languages      | It is published in English only. Open it and use the arrow next to **Publish in English** → **Publish all locales**.                                                        |

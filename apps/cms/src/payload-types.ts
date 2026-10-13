@@ -74,56 +74,60 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_52BE8802".
+ * via the `definition` "LexicalNodes_AD5CE431".
  */
-export type LexicalNodes_52BE8802 =
+export type LexicalNodes_AD5CE431 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_52BE8802>
+  | SerializedParagraphNode<LexicalNodes_AD5CE431>
   | SerializedBlockNode<Code | YouTubeBlock>
-  | SerializedAutoLinkNode<LexicalNodes_52BE8802, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_52BE8802, LexicalLinkFields>
-  | SerializedHeadingNode<LexicalNodes_52BE8802, 'h2' | 'h3' | 'h4' | 'h5' | 'h6'>
+  | SerializedAutoLinkNode<LexicalNodes_AD5CE431, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_AD5CE431, LexicalLinkFields>
+  | SerializedHeadingNode<LexicalNodes_AD5CE431, 'h2' | 'h3' | 'h4' | 'h5' | 'h6'>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_52BE8802>
-  | SerializedListNode<LexicalNodes_52BE8802>
-  | SerializedListItemNode<LexicalNodes_52BE8802>;
+  | SerializedUploadNode<'personal-photos'>
+  | SerializedQuoteNode<LexicalNodes_AD5CE431>
+  | SerializedListNode<LexicalNodes_AD5CE431>
+  | SerializedListItemNode<LexicalNodes_AD5CE431>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_6B304EA0".
+ * via the `definition` "LexicalNodes_8909F562".
  */
-export type LexicalNodes_6B304EA0 =
+export type LexicalNodes_8909F562 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_6B304EA0>
+  | SerializedParagraphNode<LexicalNodes_8909F562>
   | SerializedBlockNode<Code | YouTubeBlock>
-  | SerializedAutoLinkNode<LexicalNodes_6B304EA0, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_6B304EA0, LexicalLinkFields>
-  | SerializedHeadingNode<LexicalNodes_6B304EA0, 'h2' | 'h3' | 'h4'>
+  | SerializedAutoLinkNode<LexicalNodes_8909F562, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_8909F562, LexicalLinkFields>
+  | SerializedHeadingNode<LexicalNodes_8909F562, 'h2' | 'h3' | 'h4'>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_6B304EA0>
-  | SerializedListNode<LexicalNodes_6B304EA0>
-  | SerializedListItemNode<LexicalNodes_6B304EA0>;
+  | SerializedUploadNode<'personal-photos'>
+  | SerializedQuoteNode<LexicalNodes_8909F562>
+  | SerializedListNode<LexicalNodes_8909F562>
+  | SerializedListItemNode<LexicalNodes_8909F562>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_0D9794BB".
+ * via the `definition` "LexicalNodes_AC9F4BB7".
  */
-export type LexicalNodes_0D9794BB =
+export type LexicalNodes_AC9F4BB7 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_0D9794BB>
+  | SerializedParagraphNode<LexicalNodes_AC9F4BB7>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_0D9794BB>
+  | SerializedUploadNode<'personal-photos'>
+  | SerializedQuoteNode<LexicalNodes_AC9F4BB7>
   | SerializedRelationshipNode<
       | 'users'
       | 'posts'
       | 'personal-projects'
+      | 'personal-photo-albums'
       | 'pages'
       | 'profiles'
       | 'clients'
@@ -137,11 +141,11 @@ export type LexicalNodes_0D9794BB =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_0D9794BB, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_0D9794BB, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_0D9794BB>
-  | SerializedListItemNode<LexicalNodes_0D9794BB>
-  | SerializedHeadingNode<LexicalNodes_0D9794BB>;
+  | SerializedAutoLinkNode<LexicalNodes_AC9F4BB7, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_AC9F4BB7, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_AC9F4BB7>
+  | SerializedListItemNode<LexicalNodes_AC9F4BB7>
+  | SerializedHeadingNode<LexicalNodes_AC9F4BB7>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_3DE324E4".
@@ -165,6 +169,8 @@ export interface Config {
     media: Media;
     posts: Post;
     'personal-projects': PersonalProject;
+    'personal-photos': PersonalPhoto;
+    'personal-photo-albums': PersonalPhotoAlbum;
     pages: Page;
     profiles: Profile;
     clients: Client;
@@ -180,6 +186,9 @@ export interface Config {
     'payload-llm-instructions': PayloadLlmInstruction;
   };
   collectionsJoins: {
+    'personal-photo-albums': {
+      photos: 'personal-photos';
+    };
     clients: {
       events: 'events';
     };
@@ -189,6 +198,8 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     'personal-projects': PersonalProjectsSelect<false> | PersonalProjectsSelect<true>;
+    'personal-photos': PersonalPhotosSelect<false> | PersonalPhotosSelect<true>;
+    'personal-photo-albums': PersonalPhotoAlbumsSelect<false> | PersonalPhotoAlbumsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     profiles: ProfilesSelect<false> | ProfilesSelect<true>;
     clients: ClientsSelect<false> | ClientsSelect<true>;
@@ -214,6 +225,7 @@ export interface Config {
     'personal-about': PersonalAbout;
     'personal-services': PersonalServices;
     'personal-projects-page': PersonalProjectsPage;
+    'personal-photos-page': PersonalPhotosPage;
     'personal-blog-page': PersonalBlogPage;
     'personal-contact': PersonalContact;
     'vigor-settings': VigorSettings;
@@ -226,6 +238,7 @@ export interface Config {
     'personal-about': PersonalAboutSelect<false> | PersonalAboutSelect<true>;
     'personal-services': PersonalServicesSelect<false> | PersonalServicesSelect<true>;
     'personal-projects-page': PersonalProjectsPageSelect<false> | PersonalProjectsPageSelect<true>;
+    'personal-photos-page': PersonalPhotosPageSelect<false> | PersonalPhotosPageSelect<true>;
     'personal-blog-page': PersonalBlogPageSelect<false> | PersonalBlogPageSelect<true>;
     'personal-contact': PersonalContactSelect<false> | PersonalContactSelect<true>;
     'vigor-settings': VigorSettingsSelect<false> | VigorSettingsSelect<true>;
@@ -402,7 +415,7 @@ export interface Post {
    * The first image is the cover on post cards. All images appear in the gallery at the top of the post.
    */
   images?: (string | Media)[] | null;
-  content: LexicalRichText<LexicalNodes_6B304EA0>;
+  content: LexicalRichText<LexicalNodes_8909F562>;
   /**
    * The post is published at /blog/<slug>.
    */
@@ -477,7 +490,7 @@ export interface PersonalProject {
         id?: string | null;
       }[]
     | null;
-  content: LexicalRichText<LexicalNodes_52BE8802>;
+  content: LexicalRichText<LexicalNodes_AD5CE431>;
   /**
    * The project is published at /projects/<slug>.
    */
@@ -517,6 +530,196 @@ export interface PersonalProject {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Drop in many photos at once with Bulk upload.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-photos".
+ */
+export interface PersonalPhoto {
+  id: string;
+  _order?: string | null;
+  /**
+   * Shown on the photo's page and in search results.
+   */
+  title?: string | null;
+  /**
+   * What the photo shows, in one sentence, for screen readers and image search. Not shown on the page.
+   */
+  alt?: string | null;
+  /**
+   * Shown below the photo on its page, and in search results and link previews.
+   */
+  description?: string | null;
+  /**
+   * Optional, e.g. Kyoto, Japan. Shown on the photo's page; AI uses it too.
+   */
+  location?: string | null;
+  /**
+   * Read from the file on upload when the camera recorded them. Shown on the photo's page.
+   */
+  camera?: {
+    model?: string | null;
+    lens?: string | null;
+    focalLength?: string | null;
+    aperture?: string | null;
+    shutterSpeed?: string | null;
+    iso?: string | null;
+  };
+  /**
+   * Bulk upload: set it for all photos at once with "Edit all", then choose Album.
+   */
+  album: string | PersonalPhotoAlbum;
+  /**
+   * Shown as links to every photo with the same tag.
+   */
+  tags?: string[] | null;
+  /**
+   * The photo is at /photos/<album>/<slug>.
+   */
+  slug: string;
+  /**
+   * Read from the file when the camera recorded it.
+   */
+  takenAt?: string | null;
+  /**
+   * Show it on the Photos page (/photos).
+   */
+  featured?: boolean | null;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+  variants?: {
+    max480?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+    };
+    max960?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+    };
+    max1600?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+    };
+    max2560?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+    };
+  };
+}
+/**
+ * The Photos page shows the albums in the order of this list; drag them to change it.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-photo-albums".
+ */
+export interface PersonalPhotoAlbum {
+  id: string;
+  _order?: string | null;
+  /**
+   * e.g. Street, Landscapes, Japan 2025
+   */
+  title: string;
+  /**
+   * Shown below the title on the album page, and in search results.
+   */
+  description?: string | null;
+  /**
+   * Shown for the album on the Photos page. Empty: the album's first photo.
+   */
+  cover?: (string | null) | PersonalPhoto;
+  /**
+   * The album is at /photos/<slug>.
+   */
+  slug: string;
+  /**
+   * The photos of this album. Set the album of a photo in Photos.
+   */
+  photos?: {
+    docs?: (string | PersonalPhoto)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Title and description for search engines and link previews. Empty fields use the defaults from Site settings.
+   */
+  seo?: {
+    /**
+     * The browser tab shows it in the Site settings title template, e.g. "Oskar Wong | <title>".
+     */
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Shown in link previews, e.g. on LinkedIn or X.
+     */
+    image?: (string | null) | Media;
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
@@ -528,7 +731,7 @@ export interface Page {
    */
   description?: string | null;
   heroImage?: (string | null) | Media;
-  content: LexicalRichText<LexicalNodes_6B304EA0>;
+  content: LexicalRichText<LexicalNodes_8909F562>;
   /**
    * The websites and apps that show this page.
    */
@@ -568,7 +771,7 @@ export interface Profile {
    */
   headline?: string | null;
   photo?: (string | null) | Media;
-  bio?: LexicalRichText<LexicalNodes_0D9794BB> | null;
+  bio?: LexicalRichText<LexicalNodes_AC9F4BB7> | null;
   links?:
     | {
         platform: 'github' | 'linkedin' | 'youtube' | 'x' | 'website' | 'other';
@@ -941,6 +1144,14 @@ export interface PayloadLockedDocument {
         value: string | PersonalProject;
       } | null)
     | ({
+        relationTo: 'personal-photos';
+        value: string | PersonalPhoto;
+      } | null)
+    | ({
+        relationTo: 'personal-photo-albums';
+        value: string | PersonalPhotoAlbum;
+      } | null)
+    | ({
         relationTo: 'pages';
         value: string | Page;
       } | null)
@@ -1188,6 +1399,136 @@ export interface PersonalProjectsSelect<T extends boolean = true> {
   slug?: T;
   date?: T;
   tags?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-photos_select".
+ */
+export interface PersonalPhotosSelect<T extends boolean = true> {
+  _order?: T;
+  title?: T;
+  alt?: T;
+  description?: T;
+  location?: T;
+  camera?:
+    | T
+    | {
+        model?: T;
+        lens?: T;
+        focalLength?: T;
+        aperture?: T;
+        shutterSpeed?: T;
+        iso?: T;
+      };
+  album?: T;
+  tags?: T;
+  slug?: T;
+  takenAt?: T;
+  featured?: T;
+  prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
+  focalX?: T;
+  focalY?: T;
+  variants?:
+    | T
+    | {
+        max480?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+            };
+        max960?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+            };
+        max1600?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+            };
+        max2560?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-photo-albums_select".
+ */
+export interface PersonalPhotoAlbumsSelect<T extends boolean = true> {
+  _order?: T;
+  title?: T;
+  description?: T;
+  cover?: T;
+  slug?: T;
+  photos?: T;
   seo?:
     | T
     | {
@@ -1589,7 +1930,7 @@ export interface PersonalHome {
    * Typed out under the name, one after another, e.g. Software Engineer. Press Enter after each.
    */
   roles?: string[] | null;
-  intro?: LexicalRichText<LexicalNodes_52BE8802> | null;
+  intro?: LexicalRichText<LexicalNodes_AD5CE431> | null;
   /**
    * Optional. Shown above the name.
    */
@@ -1711,7 +2052,7 @@ export interface PersonalAbout {
          * e.g. Interests and Hobbies
          */
         title: string;
-        text: LexicalRichText<LexicalNodes_52BE8802>;
+        text: LexicalRichText<LexicalNodes_AD5CE431>;
         id?: string | null;
       }[]
     | null;
@@ -1840,7 +2181,7 @@ export interface PersonalServices {
    * Shown below the title in color, e.g. My Expertise
    */
   subtitle?: string | null;
-  intro?: LexicalRichText<LexicalNodes_52BE8802> | null;
+  intro?: LexicalRichText<LexicalNodes_AD5CE431> | null;
   button?: {
     /**
      * The button text. Leave empty to hide the button.
@@ -1865,7 +2206,7 @@ export interface PersonalServices {
          * An SVG file. The website colors it to match the theme.
          */
         icon?: (string | null) | Media;
-        text?: LexicalRichText<LexicalNodes_52BE8802> | null;
+        text?: LexicalRichText<LexicalNodes_AD5CE431> | null;
         id?: string | null;
       }[]
     | null;
@@ -1920,6 +2261,56 @@ export interface PersonalProjectsPage {
     title?: string | null;
     text?: string | null;
   };
+  /**
+   * Title and description for search engines and link previews. Empty fields use the defaults from Site settings.
+   */
+  seo?: {
+    /**
+     * The browser tab shows it in the Site settings title template, e.g. "Oskar Wong | <title>".
+     */
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Shown in link previews, e.g. on LinkedIn or X.
+     */
+    image?: (string | null) | Media;
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * The photos themselves are under Photos, their catalogs under Photo albums.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-photos-page".
+ */
+export interface PersonalPhotosPage {
+  id: string;
+  /**
+   * e.g. Photography
+   */
+  title: string;
+  /**
+   * Shown below the title in color, e.g. Moments I captured
+   */
+  subtitle?: string | null;
+  intro?: LexicalRichText<LexicalNodes_AD5CE431> | null;
+  /**
+   * Above the photos marked Featured, e.g. Featured. Empty: Latest photos.
+   */
+  featuredTitle?: string | null;
+  /**
+   * Above the albums, e.g. Albums
+   */
+  albumsTitle?: string | null;
   /**
    * Title and description for search engines and link previews. Empty fields use the defaults from Site settings.
    */
@@ -2007,7 +2398,7 @@ export interface PersonalContact {
    * Shown below the title in color, e.g. Let's talk about your project
    */
   subtitle?: string | null;
-  intro?: LexicalRichText<LexicalNodes_52BE8802> | null;
+  intro?: LexicalRichText<LexicalNodes_AD5CE431> | null;
   /**
    * Shown below the introduction, each with its icon.
    */
@@ -2454,6 +2845,29 @@ export interface PersonalProjectsPageSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-photos-page_select".
+ */
+export interface PersonalPhotosPageSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  intro?: T;
+  featuredTitle?: T;
+  albumsTitle?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "personal-blog-page_select".
  */
 export interface PersonalBlogPageSelect<T extends boolean = true> {
@@ -2642,6 +3056,8 @@ export interface CollectionQueryWidget {
       | 'media'
       | 'posts'
       | 'personal-projects'
+      | 'personal-photos'
+      | 'personal-photo-albums'
       | 'pages'
       | 'profiles'
       | 'clients'
@@ -2677,6 +3093,8 @@ export interface ActivityWidget {
           | 'media'
           | 'posts'
           | 'personal-projects'
+          | 'personal-photos'
+          | 'personal-photo-albums'
           | 'pages'
           | 'profiles'
           | 'clients'
@@ -2696,7 +3114,7 @@ export interface ActivityWidget {
  */
 export interface UploadDropzoneWidget {
   data?: {
-    excludedCollections?: 'media'[] | null;
+    excludedCollections?: ('media' | 'personal-photos')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

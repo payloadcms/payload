@@ -21,12 +21,14 @@
     "@payloadcms/transformer-sharp": "4.0.0-canary.39",
     "@payloadcms/ui": "4.0.0-canary.39",
     "cross-env": "10.1.0",
+    "exif-reader": "2.0.3",
     "graphql": "16.8.1",
     "next": "16.4.0",
     "payload": "4.0.0-canary.39",
     "qrcode": "1.5.4",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "sharp": "0.35.4"
   },
   "devDependencies": {
     "@types/js-yaml": "4.0.9",
