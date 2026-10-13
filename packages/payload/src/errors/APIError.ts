@@ -1,4 +1,4 @@
-import { status as httpStatus } from 'http-status'
+import { httpStatus } from '../utilities/httpStatus.js'
 
 /** @deprecated Use `instanceof APIError` instead of name comparison. */
 export const APIErrorName = 'APIError'

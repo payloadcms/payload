@@ -102,6 +102,7 @@ export function buildMutationInputType({
         name: fullName,
         config,
         fields: field.fields,
+        forceNullable,
         graphqlResult,
         parentIsLocalized: parentIsLocalized || field.localized,
         parentName: fullName,
@@ -159,6 +160,7 @@ export function buildMutationInputType({
           name: fullName,
           config,
           fields: field.fields,
+          forceNullable,
           graphqlResult,
           parentIsLocalized: parentIsLocalized || field.localized,
           parentName: fullName,
@@ -168,7 +170,7 @@ export function buildMutationInputType({
           return inputObjectTypeConfig
         }
 
-        if (requiresAtLeastOneField) {
+        if (requiresAtLeastOneField && !forceNullable) {
           type = new GraphQLNonNull(type)
         }
         return {
@@ -321,6 +323,7 @@ export function buildMutationInputType({
             name: fullName,
             config,
             fields: tab.fields,
+            forceNullable,
             graphqlResult,
             parentIsLocalized: parentIsLocalized || tab.localized,
             parentName: fullName,
@@ -330,7 +333,7 @@ export function buildMutationInputType({
             return acc
           }
 
-          if (requiresAtLeastOneField) {
+          if (requiresAtLeastOneField && !forceNullable) {
             type = new GraphQLNonNull(type)
           }
           return {

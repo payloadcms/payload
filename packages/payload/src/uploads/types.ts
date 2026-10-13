@@ -2,12 +2,26 @@ import type { CollectionConfig, TypeWithID } from '../collections/config/types.j
 import type { PayloadComponent } from '../config/types.js'
 import type { UploadCollectionSlug } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
+import type { StagedObject } from './fileVersioning/fileOperationManager.js'
+
+export type OriginalFileData = {
+  _objectKey?: string
+  filename: string
+  filesize: number
+  height?: null | number
+  mimeType: string
+  prefix?: string
+  url: string
+  width?: null | number
+}
 
 export type FileSize = {
+  _objectKey?: string
   filename: null | string
   filesize: null | number
   height: null | number
   mimeType: null | string
+  prefix?: string
   url: null | string
   width: null | number
 }
@@ -17,12 +31,15 @@ export type FileSizes = {
 }
 
 export type FileData = {
+  _objectKey?: string
   filename: string
   filesize: number
   focalX?: number
   focalY?: number
   height: number
   mimeType: string
+  original?: null | OriginalFileData
+  prefix?: string
   tempFilePath?: string
   url?: string
   variants: FileSizes
@@ -222,6 +239,34 @@ export type UploadConfig = {
    * Field slugs to use for a compound index instead of the default filename index.
    */
   filenameCompoundIndex?: string[]
+  /** @internal Set by cloudStoragePlugin for versioned uploads; adapters do not implement this. */
+  fileOperations?: {
+    /** Copy before the document changes. Must preserve object metadata and reject an occupied key. */
+    copy: (args: {
+      from: string
+      req: PayloadRequest
+      to: string
+      trackStagedObject: (object: StagedObject) => void
+    }) => Promise<void>
+    delete: (args: { key: string; req: PayloadRequest }) => Promise<void>
+    hasLegacyFile?: (args: {
+      doc: Record<string, unknown>
+      req: PayloadRequest
+    }) => Promise<boolean>
+    move?: (args: {
+      from: string
+      req: PayloadRequest
+      to: string
+      trackStagedObject: (object: StagedObject) => void
+    }) => Promise<void>
+    resolveStorageKey: (args: { _objectKey?: string; filename: string; prefix?: string }) => string
+    stage: (args: {
+      data: Record<string, unknown>
+      files: FileToSave[]
+      req: PayloadRequest
+      trackStagedObject: (object: StagedObject) => void
+    }) => Promise<{ metadata: Record<string, unknown> }>
+  }
   /**
    * Require files to be uploaded when creating a document.
    * @default true

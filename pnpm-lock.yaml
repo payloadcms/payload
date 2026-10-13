@@ -855,11 +855,8 @@ importers:
       graphql-playground-html:
         specifier: 1.6.30
         version: 1.6.30
-      http-status:
-        specifier: 2.1.0
-        version: 2.1.0
       next:
-        specifier: '>=16.2.6 <17.0.0'
+        specifier: '>=16.4.0 <17.0.0'
         version: 16.4.0(@babel/core@7.27.3)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@24.12.3)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.77.4)
       path-to-regexp:
         specifier: 6.3.0
@@ -973,9 +970,6 @@ importers:
       graphql:
         specifier: 16.8.1
         version: 16.8.1
-      http-status:
-        specifier: 2.1.0
-        version: 2.1.0
       image-dimensions:
         specifier: 2.5.1
         version: 2.5.1
@@ -983,8 +977,8 @@ importers:
         specifier: 2.3.0
         version: 2.3.0
       jose:
-        specifier: 6.2.3
-        version: 6.2.3
+        specifier: 6.2.12
+        version: 6.2.12
       json-schema-to-typescript:
         specifier: 15.0.3
         version: 15.0.3
@@ -1631,9 +1625,15 @@ importers:
 
   packages/storage-r2:
     dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.614.0
+        version: 3.1146.0
       '@payloadcms/plugin-cloud-storage':
         specifier: workspace:*
         version: link:../plugin-cloud-storage
+      '@payloadcms/storage-s3':
+        specifier: workspace:*
+        version: link:../storage-s3
     devDependencies:
       '@cloudflare/workers-types':
         specifier: 4.20260218.0
@@ -1679,12 +1679,21 @@ importers:
 
   packages/tanstack-start:
     dependencies:
+      '@payloadcms/graphql':
+        specifier: workspace:*
+        version: link:../graphql
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../translations
       '@payloadcms/ui':
         specifier: workspace:*
         version: link:../ui
+      graphql:
+        specifier: 16.8.1
+        version: 16.8.1
+      graphql-http:
+        specifier: 1.22.4
+        version: 1.22.4(graphql@16.8.1)
       qs-esm:
         specifier: ^7.0.2
         version: 7.0.3
@@ -12164,8 +12173,8 @@ packages:
   jose@6.0.12:
     resolution: {integrity: sha512-T8xypXs8CpmiIi78k0E+Lk7T2zlK4zDyg+o1CZ4AkOHgDg98ogdP2BeZ61lTFKFyoEwJ9RgAgN+SdM3iPgNonQ==}
 
-  jose@6.2.3:
-    resolution: {integrity: sha512-YYVDInQKFJfR/xa3ojUTl8c2KoTwiL1R5Wg9YCydwH0x0B9grbzlg5HC7mMjCtUJjbQ/YnGEZIhI5tCgfTb4Hw==}
+  jose@6.2.12:
+    resolution: {integrity: sha512-9NiFmJEex0sy2Dk58j2UGBSHgUs2ypF9eZSu4L6vjOX3Dp96Sw1F3uL+H+D1sx02jZZdzUT0HgvCy59CuvXcWw==}
 
   joycon@3.1.1:
     resolution: {integrity: sha512-34wB/Y7MW7bzjKRjUKTa46I2Z7eV62Rkhva+KkopW7Qvv/OSWBqvkSY7vusOPrNuZcUG3tApvdVgNB8POj3SPw==}
@@ -19140,7 +19149,7 @@ snapshots:
       cross-spawn: 7.0.6
       eventsource: 3.0.7
       eventsource-parser: 3.1.1
-      jose: 6.2.3
+      jose: 6.2.12
       pkce-challenge: 5.0.1
       zod: 4.6.5
 
@@ -26649,7 +26658,7 @@ snapshots:
 
   jose@6.0.12: {}
 
-  jose@6.2.3: {}
+  jose@6.2.12: {}
 
   joycon@3.1.1: {}
 

@@ -2,9 +2,11 @@ import type { Storage } from '@google-cloud/storage'
 import type {
   Adapter,
   ClientUploadsConfig,
+  DeleteFile,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
+import { copyGcsFile } from './copyFile.js'
 import { deleteFile } from './deleteFile.js'
 import { generateUploadInstructions } from './generateUploadInstructions.js'
 import { generateURL } from './generateURL.js'
@@ -26,8 +28,15 @@ export function createGcsAdapter({
   getStorageClient,
   useCompositePrefixes = false,
 }: CreateGcsAdapterArgs): Adapter {
+  const deleteStoredFile: DeleteFile = ({ storageFilePath }) =>
+    deleteFile({ bucket, client: getStorageClient(), storageFilePath })
+
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'gcs',
+
+    copyFile: ({ from, req, to }) =>
+      copyGcsFile({ acl, bucket, client: getStorageClient(), from, req, to }),
+    deleteFile: deleteStoredFile,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({
@@ -52,12 +61,7 @@ export function createGcsAdapter({
       useInAdmin: true,
     },
 
-    handleDelete: ({ storageFilePath }) =>
-      deleteFile({
-        bucket,
-        client: getStorageClient(),
-        storageFilePath,
-      }),
+    handleDelete: deleteStoredFile,
 
     handleUpload: async ({ data, file, storageFilePath }) => {
       await uploadFile({

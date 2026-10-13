@@ -54,11 +54,28 @@ export const getFields = ({
     },
   }
 
-  // Server-owned key segment; hidden from the API and admin, read internally via showHiddenFields.
+  // Server-owned key segment. Field-level `hidden` would remove it before the URL hooks can read it.
   const baseObjectKeyField: TextField = {
     name: '_objectKey',
     type: 'text',
-    hidden: true,
+    admin: {
+      disabled: {
+        bulkEdit: true,
+        column: true,
+        filter: true,
+        groupBy: true,
+      },
+      hidden: true,
+      readOnly: true,
+    },
+  }
+
+  const storedPrefixField: TextField = {
+    ...basePrefixField,
+    admin: {
+      ...basePrefixField.admin,
+      disabled: true,
+    },
   }
 
   const fields = [...collection.fields, ...(adapter?.fields || [])]
@@ -105,6 +122,60 @@ export const getFields = ({
       ...baseURLField,
       ...(existingURLField || {}),
     } as TextField)
+  }
+
+  let originalField = fields.find(
+    (field): field is GroupField =>
+      field.type === 'group' && 'name' in field && field.name === 'original',
+  )
+
+  if (adapter && !originalField) {
+    originalField = {
+      name: 'original',
+      type: 'group',
+      fields: [baseURLField],
+    }
+    fields.push(originalField)
+  }
+
+  const originalURLFieldIndex = originalField?.fields.findIndex(
+    (field) => 'name' in field && field.name === 'url',
+  )
+
+  if (
+    adapter &&
+    originalField &&
+    originalURLFieldIndex !== undefined &&
+    originalURLFieldIndex >= 0
+  ) {
+    const originalURLField = originalField.fields[originalURLFieldIndex] as TextField
+
+    originalField.fields[originalURLFieldIndex] = {
+      ...baseURLField,
+      ...originalURLField,
+      hooks: {
+        afterRead: [
+          getAfterReadHook({
+            adapter,
+            collection,
+            disablePayloadAccessControl,
+            generateFileURL,
+            isOriginal: true,
+          }),
+          ...(originalURLField.hooks?.afterRead || []),
+        ],
+        beforeChange: [
+          getBeforeChangeHook({
+            adapter,
+            collection,
+            disablePayloadAccessControl,
+            generateFileURL,
+            isOriginal: true,
+          }),
+          ...(originalURLField.hooks?.beforeChange || []),
+        ],
+      },
+    } as TextField
   }
 
   // Storage adapters add these fields during their `init`, after transformers (e.g. Sharp) have
@@ -189,7 +260,14 @@ export const getFields = ({
           ...existingSizeField,
           name: size.name,
           type: 'group',
-          fields: [...(adapter?.fields || []), sizeURLField],
+          fields: [
+            ...(adapter?.fields || []).filter(
+              (field) => !('name' in field && ['_objectKey', 'prefix'].includes(field.name)),
+            ),
+            sizeURLField,
+            storedPrefixField,
+            baseObjectKeyField,
+          ],
         } as Field
       }),
     }

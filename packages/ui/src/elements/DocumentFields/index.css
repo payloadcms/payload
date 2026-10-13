@@ -8,7 +8,7 @@
   .document-fields--has-sidebar {
     --main-width: 66.66%;
     --main-border: var(--stroke-width-small) solid var(--color-border);
-    --main-field-margin: calc(var(--gutter-h) * -1);
+    --main-field-margin: calc(var(--gutter-h) * -1 * var(--field-border-bleed, 1));
   }
 
   .document-fields--has-sidebar:has(
@@ -41,12 +41,12 @@
   }
 
   .document-fields--has-sidebar .document-fields__fields > .tabs-field {
-    margin-right: var(--main-field-margin);
+    margin-inline-end: var(--main-field-margin);
   }
 
   /* Extend group border to the main/sidebar divider */
   .document-fields--has-sidebar .document-fields__fields > .group-field::before {
-    right: calc(var(--gutter-h) * -1);
+    inset-inline-end: calc(var(--gutter-h) * -1 * var(--field-border-bleed, 1));
   }
 
   .document-fields__main {
@@ -155,7 +155,7 @@
     }
 
     .document-fields--has-sidebar .document-fields__fields > .tabs-field {
-      margin-right: calc(var(--gutter-h) * -1);
+      margin-inline-end: calc(var(--gutter-h) * -1 * var(--field-border-bleed, 1));
     }
 
     .document-fields__main {
@@ -214,7 +214,7 @@
     }
 
     .document-fields--has-sidebar .document-fields__fields > .tabs-field {
-      margin-right: calc(var(--gutter-h) * -1);
+      margin-inline-end: calc(var(--gutter-h) * -1 * var(--field-border-bleed, 1));
     }
 
     .document-fields {

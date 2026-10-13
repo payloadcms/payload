@@ -1,8 +1,9 @@
 import { fileTypeFromBuffer } from 'file-type'
 import fs from 'fs/promises'
+import { randomUUID } from 'node:crypto'
 import { openAsBlob } from 'node:fs'
 
-import type { Collection } from '../collections/config/types.js'
+import type { Collection, TypeWithID } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Document, PayloadRequest } from '../types/index.js'
 import type { ExternalUploadSource } from './sanitizeUploadData.js'
@@ -10,15 +11,17 @@ import type { PreparedUploadTransformation } from './transformers/uploadTransfor
 import type { FileData, FileSizes, FileToSave, UploadEdits } from './types.js'
 
 import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
+import { formatAdminURL } from '../utilities/formatAdminURL.js'
 import { isNumber } from '../utilities/isNumber.js'
 import { canResizeImage } from './canResizeImage.js'
 import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { downloadFileToBuffer } from './downloadFileToBuffer.js'
+import { getOriginalFilename } from './fileVersioning/naming.js'
 import { generateImageSizeFilename } from './generateImageSizeFilename.js'
 import { getFileByPath } from './getFileByPath.js'
 import { getFileExtension, getSanitizedUploadFilename } from './getFileTypeIdentity.js'
 import { getImageSize } from './getImageSize.js'
-import { getSafeFileName } from './getSafeFilename.js'
+import { getSafeFileName, incrementName } from './getSafeFilename.js'
 import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
 import { hasFullFileContents } from './hasFullFileContents.js'
 import { isProcessableImage } from './isProcessableImage.js'
@@ -151,14 +154,49 @@ export const generateFileData = async <T>({
     focalPoint: focalPointEnabled = true,
     staticDir,
   } = collectionConfig.upload
+  const hasManagedCloudStorage = Boolean(collectionConfig.upload.fileOperations)
+  const uploadReference = file?.uploadReference
+  const hasProviderDirectReference =
+    uploadReference && typeof uploadReference === 'object' && !('uploadId' in uploadReference)
+  const verifiedOriginal = req.context?._payloadVerifiedProviderOriginal as
+    | {
+        _objectKey?: string
+        filename: string
+        key: string
+        prefix?: string
+        signedReceipt: string
+      }
+    | undefined
+  const providerOriginal =
+    hasProviderDirectReference &&
+    'signedReceipt' in uploadReference &&
+    uploadReference.signedReceipt === verifiedOriginal?.signedReceipt &&
+    verifiedOriginal &&
+    typeof collectionConfig.upload.adapter === 'string'
+      ? {
+          _objectKey: verifiedOriginal._objectKey,
+          filename: verifiedOriginal.filename,
+          key: verifiedOriginal.key,
+          prefix: verifiedOriginal.prefix,
+        }
+      : undefined
+  const shouldStageCloudFiles = hasManagedCloudStorage && !hasProviderDirectReference
 
   const staticPath = staticDir
 
   const incomingFileData: Document = isDuplicating ? originalDoc : data
-  const fileDataToReupload: Document | undefined =
-    operation === 'update' ? originalDoc : incomingFileData
-  const fileSourceData =
-    externalUploadSource ?? (fileDataToReupload as unknown as FileData | undefined)
+  const currentFileData = (operation === 'update' ? originalDoc : incomingFileData) as
+    | FileData
+    | undefined
+  const retainedOriginal =
+    operation === 'update' &&
+    !file &&
+    !externalUploadSource &&
+    typeof currentFileData?.original?.filename === 'string' &&
+    typeof currentFileData.original.url === 'string'
+      ? currentFileData.original
+      : undefined
+  const fileSourceData = externalUploadSource ?? retainedOriginal ?? currentFileData
   let isLocalFile = false
 
   if (
@@ -184,6 +222,26 @@ export const generateFileData = async <T>({
         const response = await getFileByPath(filePath)
         file = response
         overwriteExistingFiles = true
+      } else if (filename && retainedOriginal && hasManagedCloudStorage) {
+        const { retrieveFileResponse } = await import('./endpoints/getFile.js')
+        const response = await retrieveFileResponse({
+          collection: { config: collectionConfig },
+          doc: originalDoc as TypeWithID,
+          filename,
+          operation: 'transform',
+          req,
+        })
+        if (!response.ok) {
+          throw new Error(`Unable to read retained original ${filename}`)
+        }
+        const buffer = Buffer.from(await response.arrayBuffer())
+        file = {
+          name: filename,
+          data: buffer,
+          mimetype: retainedOriginal.mimeType,
+          size: buffer.length,
+        }
+        overwriteExistingFiles = true
       } else if (filename && url) {
         // File is remote
         file = await downloadFileToBuffer({
@@ -195,6 +253,10 @@ export const generateFileData = async <T>({
       }
     } catch (err: unknown) {
       throw new FileRetrievalError(req.t, err instanceof Error ? err.message : undefined)
+    }
+
+    if (file && retainedOriginal && currentFileData?.filename) {
+      file = { ...file, name: currentFileData.filename }
     }
   }
 
@@ -234,6 +296,25 @@ export const generateFileData = async <T>({
   let newData = incomingFileData as T
   const filesToSave: FileToSave[] = []
   const fileData: Partial<FileData> = {}
+  const crop = uploadEdits?.crop
+  const isResettingCrop =
+    retainedOriginal &&
+    crop?.unit === '%' &&
+    Number(crop.width) === 100 &&
+    Number(crop.height) === 100 &&
+    Number(crop.x) === 0 &&
+    Number(crop.y) === 0 &&
+    (uploadEdits.widthInPixels === undefined ||
+      Number(uploadEdits.widthInPixels) === retainedOriginal.width) &&
+    (uploadEdits.heightInPixels === undefined ||
+      Number(uploadEdits.heightInPixels) === retainedOriginal.height)
+  const hasFocalPointChange =
+    uploadEdits?.focalPoint &&
+    (Number(uploadEdits.focalPoint.x) !== (currentFileData?.focalX ?? 50) ||
+      Number(uploadEdits.focalPoint.y) !== (currentFileData?.focalY ?? 50))
+  const editsForTransformer = isResettingCrop
+    ? { ...uploadEdits, crop: undefined, heightInPixels: undefined, widthInPixels: undefined }
+    : uploadEdits
 
   try {
     const pipeline = await planTransformerPipeline({
@@ -297,7 +378,7 @@ export const generateFileData = async <T>({
               pipeline: bridgeTaskPipeline,
               req,
             }),
-          uploadEdits,
+          uploadEdits: editsForTransformer,
         })
 
         const mainResult = results.find((result) => result.fieldPath === 'filename')
@@ -334,12 +415,36 @@ export const generateFileData = async <T>({
     }
 
     const fileWasTransformed = Boolean(mainWebFile && mainWebFile !== originalWebFile)
+    const hasReusableOriginalMain = Boolean(
+      isResettingCrop && !fileWasTransformed && retainedOriginal,
+    )
+    if (hasReusableOriginalMain && !hasFocalPointChange && retainedOriginal) {
+      return {
+        data: {
+          ...incomingFileData,
+          _objectKey: retainedOriginal._objectKey,
+          filename: retainedOriginal.filename,
+          filesize: retainedOriginal.filesize,
+          height: retainedOriginal.height,
+          mimeType: retainedOriginal.mimeType,
+          original: retainedOriginal,
+          prefix: retainedOriginal.prefix,
+          url: retainedOriginal.url,
+          variants: currentFileData?.variants,
+          width: retainedOriginal.width,
+          ...(draft ? { _status: 'draft' } : {}),
+        } as T,
+        files: [],
+      }
+    }
     const mainBuffer = fileWasTransformed
       ? Buffer.from(await mainWebFile!.arrayBuffer())
       : undefined
 
     // A transformed file is named after what the transformer returned, not the upload.
-    const outputName = (fileWasTransformed && mainWebFile!.name) || file.name
+    const outputName = hasReusableOriginalMain
+      ? retainedOriginal!.filename
+      : (fileWasTransformed && mainWebFile!.name) || file.name
 
     let mimeType: string
     let ext: string | undefined
@@ -379,8 +484,30 @@ export const generateFileData = async <T>({
     }
 
     let fsSafeName = getSanitizedUploadFilename(outputName, ext)
+    const isDuplicatingAnOriginal =
+      isDuplicating && file.name === (originalDoc as FileData | undefined)?.original?.filename
 
-    if (!overwriteExistingFiles) {
+    // A provider reference without a receipt names an object the client already stored; renaming
+    // it would point the document at a key that was never uploaded.
+    const isUnverifiedProviderReference = Boolean(hasProviderDirectReference && !providerOriginal)
+
+    if (
+      !fileWasTransformed &&
+      !retainedOriginal &&
+      !providerOriginal &&
+      !isDuplicatingAnOriginal &&
+      !isUnverifiedProviderReference
+    ) {
+      fsSafeName = getOriginalFilename({ filename: fsSafeName })
+    }
+
+    if (hasReusableOriginalMain) {
+      fsSafeName = retainedOriginal!.filename
+    } else if (
+      !overwriteExistingFiles ||
+      !disableLocalStorage ||
+      (shouldStageCloudFiles && retainedOriginal)
+    ) {
       // Extract prefix if present (added by plugin-cloud-storage)
       const prefix = (data as Record<string, unknown>)?.prefix as string | undefined
       fsSafeName = await getSafeFileName({
@@ -393,6 +520,85 @@ export const generateFileData = async <T>({
     }
 
     fileData.filename = fsSafeName
+    if (hasReusableOriginalMain) {
+      fileData.url = retainedOriginal!.url
+    }
+
+    const hasGeneratedProviderRepresentations = Boolean(
+      providerOriginal &&
+        (fileWasTransformed || sizeResults.some((result) => Boolean(result.file))),
+    )
+    const newObjectKey =
+      hasManagedCloudStorage && (shouldStageCloudFiles || hasGeneratedProviderRepresentations)
+        ? randomUUID()
+        : undefined
+    if (newObjectKey) {
+      fileData._objectKey = newObjectKey
+    }
+    if (providerOriginal && !fileWasTransformed) {
+      fileData._objectKey = providerOriginal._objectKey
+      fileData.prefix = providerOriginal.prefix
+    }
+    if (hasReusableOriginalMain && retainedOriginal) {
+      fileData._objectKey = retainedOriginal._objectKey
+      fileData.prefix = retainedOriginal.prefix
+    }
+
+    if (!disableLocalStorage || shouldStageCloudFiles || providerOriginal) {
+      const originalFilename =
+        retainedOriginal?.filename ??
+        providerOriginal?.filename ??
+        (fileWasTransformed
+          ? await getSafeFileName({
+              collectionSlug: collectionConfig.slug,
+              desiredFilename: getOriginalFilename({
+                filename: getSanitizedUploadFilename(file.name),
+              }),
+              req,
+              staticPath: staticPath!,
+            })
+          : fsSafeName)
+      const original =
+        retainedOriginal ??
+        ({
+          _objectKey: providerOriginal ? providerOriginal._objectKey : newObjectKey,
+          filename: originalFilename,
+          filesize: file.size,
+          mimeType: file.mimetype,
+          prefix: providerOriginal?.prefix ?? currentFileData?.prefix,
+          url: formatAdminURL({
+            apiRoute: req.payload.config.routes.api,
+            path: `/${collectionConfig.slug}/file/${encodeURIComponent(originalFilename)}`,
+            relative: true,
+            serverURL: req.payload.config.serverURL,
+          }),
+        } as NonNullable<FileData['original']>)
+
+      if (!retainedOriginal && isProcessableImage(file.mimetype)) {
+        try {
+          const dimensions = await getImageSize({ file })
+          original.width = dimensions.width
+          original.height = dimensions.height
+        } catch {
+          // Files with an image MIME type may not have readable dimensions.
+        }
+      }
+
+      fileData.original = original
+
+      if (providerOriginal) {
+        if (!fileWasTransformed) {
+          fileData.filename = originalFilename
+        }
+      }
+
+      if (fileWasTransformed && !retainedOriginal && !providerOriginal) {
+        filesToSave.push({
+          buffer: Buffer.from(await originalWebFile!.arrayBuffer()),
+          path: `${staticPath}/${originalFilename}`,
+        })
+      }
+    }
 
     if (mainBuffer) {
       // The stored bytes are no longer the ones the client uploaded, so the client's upload
@@ -413,11 +619,11 @@ export const generateFileData = async <T>({
           size: mainBuffer.length,
         }
       }
-    } else {
+    } else if (!hasReusableOriginalMain) {
       // file.data is empty when useTempFiles is on, so the real content lives at
       // file.tempFilePath instead (see the function doc for why we avoid buffering it).
       const tempFileHandling = resolveTempFileHandling({
-        disableLocalStorage: Boolean(disableLocalStorage),
+        disableLocalStorage: Boolean(disableLocalStorage) && !shouldStageCloudFiles,
         hasProcessedBuffer: false,
         tempFilePath: file.tempFilePath,
       })
@@ -460,6 +666,8 @@ export const generateFileData = async <T>({
       req.payloadUploadSizes = {}
       const sizes: FileSizes = {}
       const { name: baseName, ext: baseExt } = parseFilename(fsSafeName)
+      const plannedNames = new Set([fileData.original?.filename, fsSafeName])
+      const plannedSizeBuffers = new Map<string, Buffer>()
 
       for (const result of sizeResults) {
         const sizeName = result.fieldPath.slice('variants.'.length)
@@ -502,21 +710,50 @@ export const generateFileData = async <T>({
               width: result.width!,
             })
 
-        const imagePath = `${staticPath}/${imageNameWithDimensions}`
+        let imageName = imageNameWithDimensions
+
+        if (!disableLocalStorage || shouldStageCloudFiles) {
+          const prefix = (data as Record<string, unknown>)?.prefix as string | undefined
+
+          while (true) {
+            imageName = await getSafeFileName({
+              collectionSlug: collectionConfig.slug,
+              desiredFilename: imageName,
+              prefix,
+              req,
+              staticPath: disableLocalStorage ? undefined : staticPath!,
+            })
+            if (plannedSizeBuffers.get(imageName)?.equals(sizeBuffer)) {
+              break
+            }
+            if (!plannedNames.has(imageName)) {
+              break
+            }
+            imageName = incrementName(imageName)
+          }
+          plannedNames.add(imageName)
+        }
+
+        const imagePath = `${staticPath}/${imageName}`
 
         sizes[sizeName] = {
-          filename: imageNameWithDimensions,
+          _objectKey: newObjectKey,
+          filename: imageName,
           filesize: sizeBuffer.length,
           height: result.height!,
           mimeType: sizeMimeType,
+          prefix: providerOriginal?.prefix ?? currentFileData?.prefix,
           url: null,
           width: result.width!,
         }
 
-        filesToSave.push({
-          buffer: sizeBuffer,
-          path: imagePath,
-        })
+        if (!plannedSizeBuffers.has(imageName)) {
+          plannedSizeBuffers.set(imageName, sizeBuffer)
+          filesToSave.push({
+            buffer: sizeBuffer,
+            path: imagePath,
+          })
+        }
       }
 
       fileData.variants = sizes

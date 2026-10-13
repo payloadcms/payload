@@ -42,18 +42,20 @@ export type RootLayoutData = {
 
 type Args = {
   importMap: ImportMap
-} & Pick<AdminContext, 'cookies' | 'headers' | 'languageCode' | 'permissions' | 'req' | 'user'>
+} & Pick<AdminContext, 'cookies' | 'permissions' | 'req' | 'user'>
 
 export async function getRootLayoutData({
   cookies,
-  headers,
   importMap,
-  languageCode,
   permissions,
   req,
   user,
 }: Args): Promise<RootLayoutData> {
-  const { config } = req.payload
+  const {
+    headers,
+    i18n: { language: languageCode },
+    payload: { config },
+  } = req
 
   const { theme, themeSource } = getRequestTheme({ config, cookies, headers })
 

@@ -45,7 +45,11 @@ export const ListDrawer: React.FC<ListDrawerProps> = (props) => {
   const { drawerSlug } = props
 
   return (
-    <Drawer className={baseClass} Header={null} slug={drawerSlug}>
+    <Drawer
+      className={[baseClass, props.className].filter(Boolean).join(' ')}
+      Header={null}
+      slug={drawerSlug}
+    >
       <ListDrawerContent {...props} />
     </Drawer>
   )

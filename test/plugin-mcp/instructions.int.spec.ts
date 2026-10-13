@@ -6,7 +6,7 @@ import { instructionsCollectionSlug } from 'payload/shared'
 import { assert, expect, onTestFinished } from 'vitest'
 
 import type { TestRBAC } from '../__helpers/plugins/rbac/index.js'
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 import type { PayloadLlmInstruction } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -178,7 +178,7 @@ const connectMcp = async ({
 }: {
   payload: Payload
   rbac?: TestRBAC
-  restClient: NextRESTClient
+  restClient: RESTClient
 }) => {
   const { user } = await payload.login({ collection: 'users', data: devUser })
   const apiKey = randomUUID()

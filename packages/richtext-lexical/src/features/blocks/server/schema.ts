@@ -6,7 +6,7 @@ import { fieldsToJSONSchema, flattenAllFields, registerBlockInterface } from 'pa
 import type { LexicalElementFormat } from '../../../types/nodeTypes.js'
 import type { JSONSchemaArgs, JSONSchemaFn } from '../../typesServer.js'
 
-import { formatSchema } from '../../../types/jsonSchemaHelpers.js'
+import { formatSchema, versionSchema } from '../../../types/jsonSchemaHelpers.js'
 
 type BaseBlockFields<TFields extends JsonObject = JsonObject> = {
   blockName?: null | string
@@ -36,6 +36,7 @@ export type SerializedBlockNode<TFields extends { blockType: string } = { blockT
         fields: { blockName?: null | string; id: string } & Omit<TFields, 'blockName' | 'id'>
         format: LexicalElementFormat
         type: 'block'
+        /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
         version: number
       }
     : never
@@ -46,6 +47,7 @@ export type SerializedInlineBlockNode<
   ? {
       fields: { id: string } & Omit<TFields, 'id'>
       type: 'inlineBlock'
+      /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
       version: number
     }
   : never
@@ -57,11 +59,13 @@ export type SerializedInlineBlockNode<
 const BLOCK_NODES_TS = `export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'block';
   format: LexicalElementFormat;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
   fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
 } : never;
 export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'inlineBlock';
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
   fields: { id: string } & Omit<TFields, 'id'>;
 } : never;`
@@ -148,9 +152,9 @@ export const createBlockNodeJSONSchema =
         type: { type: 'string', const: 'block' },
         fields: fieldsSchema,
         format: formatSchema,
-        version: { type: 'integer' },
+        version: versionSchema,
       },
-      required: ['fields', 'format', 'type', 'version'],
+      required: ['fields', 'format', 'type'],
       tsType,
     }
   }
@@ -181,9 +185,9 @@ export const createInlineBlockNodeJSONSchema =
       properties: {
         type: { type: 'string', const: 'inlineBlock' },
         fields: fieldsSchema,
-        version: { type: 'integer' },
+        version: versionSchema,
       },
-      required: ['fields', 'type', 'version'],
+      required: ['fields', 'type'],
       tsType,
     }
   }

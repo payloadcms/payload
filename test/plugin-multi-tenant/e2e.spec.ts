@@ -1204,6 +1204,7 @@ test.describe('Multi Tenant', () => {
       const moveButton = page.getByRole('button', { name: 'Move', exact: true })
       await expect(moveButton).toBeVisible()
       await moveButton.click()
+      await page.getByRole('menuitem', { name: /^Move/ }).click()
 
       // The move drawer should be visible
       const moveModal = page.locator('.hierarchy-modal__content')
