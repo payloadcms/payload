@@ -1,5 +1,5 @@
 /**
- * Usage: GITHUB_TOKEN=$GITHUB_TOKEN pnpm release --bump <minor|patch>
+ * Usage: GITHUB_TOKEN=$GITHUB_TOKEN pnpm release --bump <patch|minor>
  *
  * Ensure your GITHUB_TOKEN is set in your environment variables
  * and also has the ability to create releases in the repository.
@@ -18,10 +18,15 @@ import path from 'path'
 import prompts from 'prompts'
 import semver from 'semver'
 
+import type { StableBump } from './lib/assertBumpPreconditions.js'
 import type { PackageDetails } from './lib/getPackageDetails.js'
 
+import { assertBumpPreconditions } from './lib/assertBumpPreconditions.js'
 import { getPackageDetails } from './lib/getPackageDetails.js'
+import { getLatestPublishedVersion } from './lib/getPackageRegistryVersions.js'
+import { RELEASE_BRANCH } from './lib/pinnedMajor.js'
 import { packagePublishList } from './lib/publishList.js'
+import { resolveStableDistTags } from './lib/stableDistTag.js'
 import { createDraftGitHubRelease } from './utils/createDraftGitHubRelease.js'
 import { generateReleaseNotes } from './utils/generateReleaseNotes.js'
 import { getRecommendedBump } from './utils/getRecommendedBump.js'
@@ -34,12 +39,12 @@ const execaOpts: execa.Options = { stdio: 'inherit', cwd }
 const args = minimist(process.argv.slice(2))
 
 const {
-  bump, // Semver release type: major, minor, patch, premajor, preminor, prepatch, prerelease
+  bump, // Semver release type: patch or minor
   changelog = false, // Whether to update the changelog. WARNING: This gets throttled on too many commits
   'dry-run': dryRun,
   'git-commit': gitCommit = true, // Whether to run git commit operations
   'git-tag': gitTag = true, // Whether to run git tag and commit operations
-  tag, // Tag to publish to: latest, beta, canary
+  tag, // Rejected: the dist-tag is selected per package from npm
 } = args
 
 const logPrefix = dryRun ? chalk.bold.magenta('[dry-run] >') : ''
@@ -67,12 +72,18 @@ const cmdRunnerAsync =
 async function main() {
   console.log({ projectRoot: PROJECT_ROOT })
 
+  if (tag !== undefined) {
+    abort('--tag is not supported; the dist-tag is selected per package from npm.')
+  }
+
+  // Guards run before any pull, prompt, or write so a refused run has no side effects.
+  readGuardedRelease()
+
   header(`⬇️  Pulling latest from remote...`, { enable: true })
   execSync('git pull', execOpts)
 
-  if (!process.env.GITHUB_TOKEN) {
-    throw new Error('GITHUB_TOKEN env var is required')
-  }
+  // The pull can change the committed version, so the guards run again on the pulled state.
+  const { bump, monorepoVersion } = readGuardedRelease()
 
   if (dryRun) {
     console.log(chalk.bold.yellow(chalk.bold.magenta('\n  👀 Dry run mode enabled')))
@@ -85,10 +96,6 @@ async function main() {
   const config = await loadChangelogConfig(process.cwd(), {
     repo: 'payloadcms/payload',
   })
-
-  if (!semver.RELEASE_TYPES.includes(bump)) {
-    abort(`Invalid bump type: ${bump}.\n\nMust be one of: ${semver.RELEASE_TYPES.join(', ')}`)
-  }
 
   const recommendedBump = (await getRecommendedBump(fromVersion, 'HEAD', config)) || 'patch'
 
@@ -107,21 +114,10 @@ async function main() {
   const runCmd = cmdRunner(dryRun, gitTag)
   const runCmdAsync = cmdRunnerAsync(dryRun)
 
-  if (bump.startsWith('pre') && tag === 'latest') {
-    abort(`Prerelease bumps must have tag: beta or canary`)
-  }
-
-  const monorepoVersion = fse.readJSONSync(ROOT_PACKAGE_JSON)?.version
-
-  if (!monorepoVersion) {
-    throw new Error('Could not find version in package.json')
-  }
-
-  const nextReleaseVersion = semver.inc(monorepoVersion, bump, undefined, tag)
+  const nextReleaseVersion = semver.inc(monorepoVersion, bump)
 
   if (!nextReleaseVersion) {
     abort(`Invalid nextReleaseVersion: ${nextReleaseVersion}`)
-    return // For TS type checking
   }
 
   // Preview/Update changelog
@@ -143,12 +139,20 @@ async function main() {
 
   let packageDetails = await getPackageDetails(packagePublishList)
 
+  // Resolved before any write so a registry failure stops the run with nothing to undo.
+  const distTags = await resolveStableDistTags({
+    getLatestVersion: getLatestPublishedVersion,
+    names: packageDetails.map((p) => p.name),
+  })
+  if (!distTags.get('payload')) {
+    abort(`No dist-tag resolved for 'payload'; refusing to publish ${nextReleaseVersion}.`)
+  }
+
   console.log(chalk.bold(`\n  Version: ${monorepoVersion} => ${chalk.green(nextReleaseVersion)}\n`))
-  console.log(chalk.bold.yellow(`  Bump: ${bump}`))
-  console.log(chalk.bold.yellow(`  Tag: ${tag}\n`))
+  console.log(chalk.bold.yellow(`  Bump: ${bump}\n`))
   console.log(chalk.bold.green(`  Changes (${packageDetails.length} packages):\n`))
   console.log(
-    `${packageDetails.map((p) => `  - ${p.name.padEnd(32)} ${p.version} => ${chalk.green(nextReleaseVersion)}`).join('\n')}\n`,
+    `${packageDetails.map((p) => `  - ${p.name.padEnd(32)} ${p.version} => ${chalk.green(nextReleaseVersion)}  ${chalk.yellow(`(${distTags.get(p.name) ?? 'no dist-tag'})`)}`).join('\n')}\n`,
   )
 
   const confirmPublish = await confirm('Are you sure you want to create these versions?')
@@ -210,11 +214,19 @@ async function main() {
 
   // Publish only payload to get 5 min auth token
   packageDetails = packageDetails.filter((p) => p.name !== 'payload')
-  runCmd(`pnpm publish -C packages/payload --no-git-checks --tag ${tag}`, execOpts)
+  const payloadDistTag = distTags.get('payload')
+  if (!payloadDistTag) {
+    abort(`No dist-tag resolved for 'payload'`)
+  }
+  runCmd(`pnpm publish -C packages/payload --no-git-checks --tag ${payloadDistTag}`, execOpts)
 
   const results: PublishResult[] = []
   for (const pkg of packageDetails) {
-    const res = await publishSinglePackage(pkg, { dryRun })
+    const pkgDistTag = distTags.get(pkg.name)
+    if (!pkgDistTag) {
+      abort(`No dist-tag resolved for '${pkg.name}'`)
+    }
+    const res = await publishSinglePackage(pkg, { distTag: pkgDistTag, dryRun })
     results.push(res)
   }
 
@@ -243,8 +255,8 @@ async function main() {
   if (createDraftRelease) {
     try {
       const { releaseUrl: draftReleaseUrl } = await createDraftGitHubRelease({
-        branch: '3.x',
-        makeLatest: tag === 'latest',
+        branch: RELEASE_BRANCH,
+        makeLatest: distTags.get('payload') === 'latest',
         releaseNotes,
         tag: `v${nextReleaseVersion}`,
       })
@@ -273,12 +285,40 @@ main().catch((error) => {
   process.exit(1)
 })
 
-async function publishSinglePackage(pkg: PackageDetails, opts?: { dryRun?: boolean }) {
-  const { dryRun = false } = opts ?? {}
+/** Runs the stable-bump guards against the current branch and committed version. */
+function readGuardedRelease(): { bump: StableBump; monorepoVersion: string } {
+  const branch = execSync('git rev-parse --abbrev-ref HEAD', { cwd }).toString().trim()
+  const monorepoVersion: unknown = fse.readJSONSync(ROOT_PACKAGE_JSON)?.version
+
+  if (typeof monorepoVersion !== 'string' || !monorepoVersion) {
+    return abort('Could not find version in package.json')
+  }
+
+  const preconditions = {
+    branch,
+    bump: typeof bump === 'string' ? bump : String(bump),
+    hasGithubToken: Boolean(process.env.GITHUB_TOKEN),
+    version: monorepoVersion,
+  }
+
+  try {
+    assertBumpPreconditions(preconditions)
+  } catch (error: unknown) {
+    return abort(error instanceof Error ? error.message : JSON.stringify(error))
+  }
+
+  return { bump: preconditions.bump, monorepoVersion }
+}
+
+async function publishSinglePackage(
+  pkg: PackageDetails,
+  opts: { distTag: string; dryRun?: boolean },
+) {
+  const { distTag, dryRun = false } = opts
   console.log(chalk.bold(`🚀 ${pkg.name} publishing...`))
 
   try {
-    const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--tag', tag]
+    const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--tag', distTag]
     if (dryRun) {
       cmdArgs.push('--dry-run')
       console.log(chalk.gray(`\n${logPrefix} pnpm ${cmdArgs.join(' ')}\n`))
@@ -329,7 +369,7 @@ async function publishSinglePackage(pkg: PackageDetails, opts?: { dryRun?: boole
   }
 }
 
-function abort(message = 'Abort', exitCode = 1) {
+function abort(message = 'Abort', exitCode = 1): never {
   console.error(chalk.bold.red(`\n${message}\n`))
   process.exit(exitCode)
 }
