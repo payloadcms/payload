@@ -220,22 +220,37 @@ async function main() {
   // Publishes in topological order and stops at the first failure. The first publish is
   // interactive so the maintainer enters the npm OTP, which npm then honors for 5 minutes.
   const [firstPackage] = packageDetails
-  await runPublishSequence({
-    packages: packageDetails,
-    publishOne: (pkg) =>
-      publishWithStableDistTag({
-        distTags,
-        dryRun,
-        getLatestVersion: getLatestPublishedVersion,
-        pkg,
-        publish: async ({ tag: distTag }) => {
-          if (pkg === firstPackage) {
-            return publishInteractively({ distTag, pkg, runCmd })
-          }
-          return await publishSinglePackage(pkg, { distTag, dryRun })
-        },
-      }),
-  })
+  let failedResult: PublishResult | undefined
+  try {
+    await runPublishSequence({
+      packages: packageDetails,
+      publishOne: async (pkg) => {
+        const result = await publishWithStableDistTag({
+          distTags,
+          dryRun,
+          getLatestVersion: getLatestPublishedVersion,
+          pkg,
+          publish: async ({ tag: distTag }) => {
+            if (pkg === firstPackage) {
+              return publishInteractively({ distTag, pkg, runCmd })
+            }
+            return await publishSinglePackage(pkg, { distTag, dryRun })
+          },
+        })
+        if (!result.success) {
+          failedResult = result
+        }
+        return result
+      },
+    })
+  } catch (error: unknown) {
+    printPartialPublishRecovery({
+      error,
+      failedResult,
+      version: nextReleaseVersion,
+    })
+    process.exit(1)
+  }
 
   header(`🚀 Publishing complete!`)
 
@@ -306,6 +321,44 @@ function readGuardedRelease(): { bump: StableBump; monorepoVersion: string } {
   }
 
   return { bump: preconditions.bump, monorepoVersion }
+}
+
+/**
+ * The release commit and tag exist only locally and npm holds a partial release, so a fresh
+ * `pnpm release` would bump again and split the release across two versions.
+ */
+function printPartialPublishRecovery({
+  error,
+  failedResult,
+  version,
+}: {
+  error: unknown
+  failedResult: PublishResult | undefined
+  version: string
+}): void {
+  const reason =
+    failedResult?.details ?? (error instanceof Error ? error.message : JSON.stringify(error))
+  const stoppedAt = failedResult?.name ?? 'an unknown package'
+
+  console.error(
+    chalk.bold.red(
+      [
+        `\nPublish stopped at ${stoppedAt}: ${reason}`,
+        '',
+        `Commit and tag v${version} exist only locally. npm has a partial release:`,
+        `packages before ${stoppedAt} are published.`,
+        'Do NOT re-run `pnpm release`: it bumps to a new version and splits the release.',
+        '',
+        'Recovery:',
+        '  1. git push --follow-tags',
+        `  2. From this commit, logged in to npm:`,
+        `     GITHUB_REF_NAME=v${version} GITHUB_TOKEN=$(gh auth token) pnpm release-ci`,
+        '     It skips published packages, rechecks dist-tags, publishes the rest,',
+        '     and creates the draft release.',
+        '',
+      ].join('\n'),
+    ),
+  )
 }
 
 /** Inherits stdio so npm can prompt for the OTP. */
