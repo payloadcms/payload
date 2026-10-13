@@ -193,11 +193,13 @@
   }
 
   .collapsible__content {
+    --collapsible-content-padding: var(--spacer-3);
+
     background-color: var(--color-bg);
     border: var(--stroke-width-small) solid var(--color-border);
     border-top: none;
     border-radius: 0 0 var(--button-radius) var(--button-radius);
-    padding: var(--spacer-3);
+    padding: var(--collapsible-content-padding);
     z-index: 1;
   }
 
@@ -212,7 +214,7 @@
   /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .collapsible__content {
-      padding: var(--spacer-2-5);
+      --collapsible-content-padding: var(--spacer-2-5);
     }
   }
 }
