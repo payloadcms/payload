@@ -6,7 +6,7 @@ usage() {
 Usage: convert-demo.sh INPUT.webm [OUTPUT.mp4] [options]
 
 Options:
-  --trim-start SECONDS  Trim initial loading frames (default: 0.75; candidate mode sets this from ready())
+  --trim-start SECONDS  Opening-state offset from ready() (required)
   --crf NUMBER          H.264 quality, lower is higher quality (default: 23)
   --max-kb NUMBER       Fail when output exceeds this upload budget (default: 10240)
   --help                Show this help
@@ -31,7 +31,7 @@ if [ "$#" -gt 0 ] && [[ "$1" != --* ]]; then
   shift
 fi
 
-TRIM_START="0.75"
+TRIM_START=""
 CRF="23"
 MAX_KB="10240"
 
@@ -62,6 +62,10 @@ done
 
 if [ ! -f "$INPUT" ]; then
   echo "Input recording does not exist: $INPUT" >&2
+  exit 1
+fi
+if [ -z "$TRIM_START" ]; then
+  echo "--trim-start is required; use the opening offset from ready()" >&2
   exit 1
 fi
 if ! [[ "$TRIM_START" =~ ^[0-9]+([.][0-9]+)?$ ]]; then

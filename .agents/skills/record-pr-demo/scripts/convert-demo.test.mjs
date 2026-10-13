@@ -48,7 +48,7 @@ test('convert-demo rejects output that exceeds the requested upload budget', asy
   const output = path.join(directory, 'demo.mp4')
   await writeFile(input, 'recording')
 
-  const result = spawnSync('bash', [scriptPath, input, output, '--max-kb', '1'], {
+  const result = spawnSync('bash', [scriptPath, input, output, '--trim-start', '0', '--max-kb', '1'], {
     encoding: 'utf8',
     env: { ...process.env, PATH: `${directory}:${process.env.PATH}` },
   })
@@ -64,6 +64,17 @@ test('convert-demo rejects a missing recording', () => {
 
   assert.equal(result.status, 1)
   assert.match(result.stderr, /Input recording does not exist/)
+})
+
+test('convert-demo requires the opening-state offset', async () => {
+  const directory = await createFakeMediaTools()
+  const input = path.join(directory, 'demo.webm')
+  await writeFile(input, 'recording')
+
+  const result = spawnSync('bash', [scriptPath, input], { encoding: 'utf8' })
+
+  assert.equal(result.status, 1)
+  assert.match(result.stderr, /--trim-start is required/)
 })
 
 async function createFakeMediaTools({ outputBytes } = {}) {
