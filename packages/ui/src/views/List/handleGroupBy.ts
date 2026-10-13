@@ -6,7 +6,6 @@ import type {
   ListViewGroup,
   PaginatedDocs,
   PayloadRequest,
-  PopulateType,
   SanitizedCollectionConfig,
   SanitizedFieldsPermissions,
   SelectType,
@@ -37,8 +36,6 @@ export const handleGroupBy = async ({
   query,
   req,
   select,
-  thumbnailFieldName,
-  thumbnailPopulate,
   trash = false,
   user,
   viewType,
@@ -57,8 +54,6 @@ export const handleGroupBy = async ({
   query?: ListQuery
   req: PayloadRequest
   select?: SelectType
-  thumbnailFieldName?: string
-  thumbnailPopulate?: PopulateType
   trash?: boolean
   user: any
   viewType?: ViewTypes
@@ -126,7 +121,7 @@ export const handleGroupBy = async ({
 
       const groupData = await req.payload.find({
         collection: collectionSlug,
-        depth: thumbnailFieldName ? 1 : 0,
+        depth: 0,
         draft: true,
         fallbackLocale: false,
         includeLockStatus: true,
@@ -138,7 +133,6 @@ export const handleGroupBy = async ({
         page: query?.queryByGroup?.[valueOrRelationshipID]?.page
           ? Number(query.queryByGroup[valueOrRelationshipID].page)
           : undefined,
-        populate: thumbnailPopulate,
         req,
         // Note: if we wanted to enable table-by-table sorting, we could use this:
         // sort: query?.queryByGroup?.[valueOrRelationshipID]?.sort,

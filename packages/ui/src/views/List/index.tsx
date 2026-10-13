@@ -40,11 +40,11 @@ import {
 /* eslint-enable payload/no-imports-from-exports-dir */
 import { getColumns } from '../../utilities/getColumns.js'
 import { getDocumentPermissions } from '../../utilities/getDocumentPermissions.js'
-import { getDocumentThumbnailPopulate } from '../../utilities/getDocumentThumbnailPopulate.js'
 import { getDocumentThumbnailSelect } from '../../utilities/getDocumentThumbnailSelect.js'
 import { renderFilters, renderTable } from '../../utilities/renderTable.js'
 import { upsertPreferences } from '../../utilities/upsertPreferences.js'
 import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
+import { getDocumentThumbnails } from './getDocumentThumbnails.js'
 import { handleGroupBy } from './handleGroupBy.js'
 import { handleHierarchy } from './handleHierarchy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
@@ -292,12 +292,9 @@ export const renderListView = async (
     select[collectionConfig.hierarchy.collectionSpecific.fieldName] = true
   }
 
-  /** Include thumbnail relationships in both layouts so switching to grid needs no refetch. */
+  /** Select thumbnail references for the separately loaded grid previews. */
   const thumbnailFieldName =
-    viewType !== 'hierarchy' ? collectionConfig.admin.useAsThumbnail : undefined
-  const thumbnailPopulate = thumbnailFieldName
-    ? getDocumentThumbnailPopulate({ collectionConfig, collections: payload.config.collections })
-    : undefined
+    !drawerSlug && viewType !== 'hierarchy' ? collectionConfig.admin.useAsThumbnail : undefined
 
   if (thumbnailFieldName) {
     select[thumbnailFieldName] = true
@@ -396,8 +393,6 @@ export const renderListView = async (
         query,
         req,
         select,
-        thumbnailFieldName,
-        thumbnailPopulate,
         trash,
         user,
         viewType,
@@ -413,7 +408,7 @@ export const renderListView = async (
     } else {
       data = await req.payload.find({
         collection: collectionSlug,
-        depth: thumbnailFieldName ? 1 : 0,
+        depth: 0,
         draft: true,
         fallbackLocale: false,
         includeLockStatus: true,
@@ -421,7 +416,6 @@ export const renderListView = async (
         locale: req.locale,
         overrideAccess: false,
         page: query?.page ? Number(query.page) : undefined,
-        populate: thumbnailPopulate,
         req,
         select,
         sort: query?.sort,
@@ -568,10 +562,15 @@ export const renderListView = async (
   })
 
   const isInDrawer = Boolean(drawerSlug)
+  const listDocs = groupedData ? groupedData.flatMap((group) => group.data.docs) : data.docs
+  const documentThumbnails =
+    !isInDrawer && !isHierarchyView
+      ? await getDocumentThumbnails({ collectionConfig, docs: listDocs, req })
+      : undefined
   const documentURLs =
     !isInDrawer && !isHierarchyView && collectionConfig.admin.formatDocURL
       ? Object.fromEntries(
-          (groupedData ? groupedData.flatMap((group) => group.data.docs) : data.docs).map((doc) => [
+          listDocs.map((doc) => [
             doc.id,
             resolveDocumentListItemURL({
               collectionSlug,
@@ -602,6 +601,7 @@ export const renderListView = async (
       disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
       disableQueryPresets,
       documentLayout: collectionPreferences?.documentLayout,
+      documentThumbnails,
       documentURLs,
       enableRowSelections,
       groupedData,

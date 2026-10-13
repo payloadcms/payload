@@ -56,6 +56,7 @@ export function DefaultListView(props: ListViewClientProps) {
     disableBulkEdit,
     disableQueryPresets,
     documentLayout,
+    documentThumbnails,
     documentURLs,
     enableRowSelections,
     groupedData,
@@ -400,6 +401,7 @@ export function DefaultListView(props: ListViewClientProps) {
               shouldRenderGrid && isDataGrouped ? (
                 <GroupedDocumentGrid
                   collectionSlug={collectionSlug}
+                  documentThumbnails={documentThumbnails}
                   documentURLs={documentURLs}
                   enableRowSelections={enableRowSelections}
                   groups={groupedData}
@@ -412,6 +414,7 @@ export function DefaultListView(props: ListViewClientProps) {
                   collectionLabel={collectionLabel}
                   collectionSlug={collectionSlug}
                   docs={docs}
+                  documentThumbnails={documentThumbnails}
                   documentURLs={documentURLs}
                   enableRowSelections={enableRowSelections}
                   hierarchyParentFieldName={hierarchyParentFieldName}

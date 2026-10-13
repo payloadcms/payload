@@ -93,6 +93,8 @@ export type ListViewClientProps = {
   disableBulkEdit?: boolean
   disableQueryPresets?: boolean
   documentLayout?: CollectionPreferences['documentLayout']
+  /** Server-resolved thumbnail URLs shared by table and grid layouts. */
+  documentThumbnails?: Record<string, string>
   /** Server-resolved grid destinations. A null value disables document navigation. */
   documentURLs?: Record<string, null | string>
   enableRowSelections?: boolean

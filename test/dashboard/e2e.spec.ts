@@ -41,76 +41,81 @@ describe('Dashboard', () => {
     await page.goto(url.admin)
   })
 
-  test('should show related thumbnails when switching layouts without fetching the list again', async ({
-    page,
-  }) => {
-    await initPage({ page, serverURL })
+  for (const isGrouped of [false, true]) {
+    test(`should show related thumbnails when switching layouts without fetching the list again${isGrouped ? ' in grouped lists' : ''}`, async ({
+      page,
+    }) => {
+      await initPage({ page, serverURL })
 
-    const uploadResponse = await page.request.post(`${serverURL}/api/media`, {
-      multipart: {
-        _payload: JSON.stringify({}),
-        file: {
-          name: 'grid-thumbnail.jpg',
-          buffer: await readFile(path.resolve(dirname, 'test/select/image.jpg')),
-          mimeType: 'image/jpeg',
-        },
-      },
-    })
-
-    expect(uploadResponse.ok()).toBe(true)
-    const media = await uploadResponse.json()
-
-    try {
-      const documentResponse = await page.request.post(`${serverURL}/api/draft-posts?draft=true`, {
-        data: { cover: media.doc.id, title: 'Grid thumbnail' },
-      })
-
-      expect(documentResponse.ok()).toBe(true)
-      const listURL = `${serverURL}/admin/collections/draft-posts`
-
-      await page.request.post(`${serverURL}/api/payload-preferences/collection-draft-posts`, {
-        data: {
-          value: {
-            columns: [
-              { accessor: 'title', active: true },
-              { accessor: 'cover', active: true },
-            ],
-            documentLayout: 'table',
+      const uploadResponse = await page.request.post(`${serverURL}/api/media`, {
+        multipart: {
+          _payload: JSON.stringify({}),
+          file: {
+            name: 'grid-thumbnail.jpg',
+            buffer: await readFile(path.resolve(dirname, 'test/select/image.jpg')),
+            mimeType: 'image/jpeg',
           },
         },
       })
-      await page.goto(listURL)
-      await expect(page.getByRole('radio', { name: 'Table' })).toBeChecked()
-      const tableThumbnail = page.locator('.cell-cover img')
-      const thumbnailPath = new URL(media.doc.thumbnailURL || media.doc.url, serverURL).pathname
 
-      await expect
-        .poll(async () => {
-          const src = await tableThumbnail.getAttribute('src')
+      expect(uploadResponse.ok()).toBe(true)
+      const media = await uploadResponse.json()
 
-          return src ? new URL(src, serverURL).pathname : undefined
+      try {
+        const documentResponse = await page.request.post(
+          `${serverURL}/api/draft-posts?draft=true`,
+          {
+            data: { cover: media.doc.id, title: 'Grid thumbnail' },
+          },
+        )
+
+        expect(documentResponse.ok()).toBe(true)
+        const listURL = `${serverURL}/admin/collections/draft-posts${isGrouped ? '?groupBy=title' : ''}`
+
+        await page.request.post(`${serverURL}/api/payload-preferences/collection-draft-posts`, {
+          data: {
+            value: {
+              columns: [
+                { accessor: 'title', active: true },
+                { accessor: 'cover', active: true },
+              ],
+              documentLayout: 'table',
+            },
+          },
         })
-        .toBe(thumbnailPath)
+        await page.goto(listURL)
+        await expect(page.getByRole('radio', { name: 'Table' })).toBeChecked()
+        const tableThumbnail = page.locator('.cell-cover img')
+        const thumbnailPath = new URL(media.doc.thumbnailURL || media.doc.url, serverURL).pathname
 
-      await assertNetworkRequests(
-        page,
-        listURL,
-        async () => {
-          await page.getByRole('radio', { name: 'Grid' }).check()
-          await expect(page.locator('.document-card__thumbnail')).toHaveAttribute(
-            'src',
-            media.doc.thumbnailURL || media.doc.url,
-          )
-          await page.getByRole('radio', { name: 'Table' }).check()
-          await expect(page.locator('table tbody tr')).toHaveCount(1)
-          await expect(tableThumbnail).toBeVisible()
-        },
-        { allowedNumberOfRequests: 0 },
-      )
-    } finally {
-      await page.request.delete(`${serverURL}/api/media/${media.doc.id}`)
-    }
-  })
+        await expect
+          .poll(async () => {
+            const src = await tableThumbnail.getAttribute('src')
+
+            return src ? new URL(src, serverURL).pathname : undefined
+          })
+          .toBe(thumbnailPath)
+
+        await assertNetworkRequests(
+          page,
+          listURL,
+          async () => {
+            await page.getByRole('radio', { name: 'Grid' }).check()
+            await expect(page.locator('.document-card__thumbnail')).toHaveAttribute(
+              'src',
+              media.doc.thumbnailURL || media.doc.url,
+            )
+            await page.getByRole('radio', { name: 'Table' }).check()
+            await expect(page.locator('table tbody tr')).toHaveCount(1)
+            await expect(tableThumbnail).toBeVisible()
+          },
+          { allowedNumberOfRequests: 0 },
+        )
+      } finally {
+        await page.request.delete(`${serverURL}/api/media/${media.doc.id}`)
+      }
+    })
+  }
 
   test('should keep dashboard height stable and delay loading feedback', async ({ page }) => {
     test.setTimeout(TEST_TIMEOUT_LONG)

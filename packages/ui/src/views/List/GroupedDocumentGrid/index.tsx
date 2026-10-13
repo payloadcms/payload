@@ -15,6 +15,7 @@ import './index.css'
 
 type GroupedDocumentGridProps = {
   readonly collectionSlug: string
+  readonly documentThumbnails?: Record<string, string>
   readonly documentURLs?: Record<string, null | string>
   readonly enableRowSelections?: boolean
   readonly groups: ListViewGroup[]
@@ -24,6 +25,7 @@ type GroupedDocumentGridProps = {
 
 export const GroupedDocumentGrid: React.FC<GroupedDocumentGridProps> = ({
   collectionSlug,
+  documentThumbnails,
   documentURLs,
   enableRowSelections,
   groups,
@@ -66,6 +68,7 @@ export const GroupedDocumentGrid: React.FC<GroupedDocumentGridProps> = ({
             collectionLabel={heading}
             collectionSlug={collectionSlug}
             docs={data.docs}
+            documentThumbnails={documentThumbnails}
             documentURLs={documentURLs}
             enableRowSelections={enableRowSelections}
             hierarchyParentFieldName={hierarchyParentFieldName}

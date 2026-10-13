@@ -3,7 +3,6 @@ import type {
   DefaultCellComponentProps,
   JoinFieldClient,
   RelationshipFieldClient,
-  TypeWithID,
   UploadFieldClient,
 } from 'payload'
 
@@ -17,9 +16,8 @@ import { canUseDOM } from '../../../../../utilities/canUseDOM.js'
 import { formatDocTitle } from '../../../../../utilities/formatDocTitle/index.js'
 import { useListRelationships } from '../../../RelationshipProvider/index.js'
 import { FileCell } from '../File/index.js'
-import { getPopulatedRelationshipDoc } from './getPopulatedRelationshipDoc.js'
 
-type Value = { doc?: TypeWithID; relationTo: string; value: number | string }
+type Value = { relationTo: string; value: number | string }
 const baseClass = 'relationship-cell'
 const totalToShow = 3
 
@@ -43,6 +41,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   }, [cellDataFromProps, field])
 
   const { config, getEntityConfig } = useConfig()
+  const { collections } = config
   const [intersectionRef, entry] = useIntersect()
   const [values, setValues] = useState<Value[]>([])
   const { documents, getRelationships } = useListRelationships()
@@ -58,48 +57,24 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
       arrayCellData
         .slice(0, arrayCellData.length < totalToShow ? arrayCellData.length : totalToShow)
         .forEach((cell) => {
-          const isPolymorphic =
-            cell && typeof cell === 'object' && 'relationTo' in cell && 'value' in cell
-          const collectionSlug = isPolymorphic ? cell.relationTo : relationTo
-          const relatedValue = isPolymorphic ? cell.value : cell
-          const populatedDoc =
-            relatedValue && typeof relatedValue === 'object' && 'id' in relatedValue
-              ? relatedValue
-              : undefined
-          const id = populatedDoc?.id ?? relatedValue
-
+          if (typeof cell === 'object' && 'relationTo' in cell && 'value' in cell) {
+            formattedValues.push(cell)
+          }
           if (
-            (typeof id === 'number' || typeof id === 'string') &&
-            typeof collectionSlug === 'string'
+            (typeof cell === 'number' || typeof cell === 'string') &&
+            typeof relationTo === 'string'
           ) {
             formattedValues.push({
-              doc: getPopulatedRelationshipDoc({
-                collectionConfig: getEntityConfig({ collectionSlug }),
-                doc: populatedDoc,
-                field,
-              }),
-              relationTo: collectionSlug,
-              value: id,
+              relationTo,
+              value: cell,
             })
           }
         })
-      const unpopulatedValues = formattedValues.filter(({ doc }) => !doc)
-
-      if (unpopulatedValues.length > 0) {
-        getRelationships(unpopulatedValues)
-      }
+      getRelationships(formattedValues)
       setHasRequested(true)
       setValues(formattedValues)
     }
-  }, [
-    cellData,
-    field,
-    relationTo,
-    getEntityConfig,
-    isAboveViewport,
-    hasRequested,
-    getRelationships,
-  ])
+  }, [cellData, relationTo, collections, isAboveViewport, hasRequested, getRelationships])
 
   useEffect(() => {
     if (hasRequested) {
@@ -109,8 +84,8 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
 
   return (
     <div className={baseClass} ref={intersectionRef}>
-      {values.map(({ doc, relationTo, value }, i) => {
-        const document = doc || documents[relationTo]?.[value]
+      {values.map(({ relationTo, value }, i) => {
+        const document = documents[relationTo][value]
         const relatedCollection = getEntityConfig({
           collectionSlug: relationTo,
         })
