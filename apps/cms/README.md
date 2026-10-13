@@ -25,6 +25,7 @@ uses to test templates.
 | `src/payload.config.ts`                    | Payload config: MongoDB via `DATABASE_URL`, `SERVER_URL`, CORS/CSRF                    |
 | `src/endpoints/health.ts`                  | `GET /api/health`: pings MongoDB (used by the Docker healthcheck)                      |
 | `src/storage/s3.ts`                        | Optional S3 storage for uploads, turned on by `S3_BUCKET`                              |
+| `src/collections/Media.ts`                 | Uploads, and the smaller copies made of each image (see "Image sizes")                 |
 | `src/personal/`                            | Pages, settings and projects of the personal website (see "Personal website")          |
 | `src/collections/Posts.ts`                 | Blog posts for the personal website (see "Personal website")                           |
 | `scripts/import-personal-website.ts`       | Copies the personal website's current content into the CMS (see "Personal website")    |
@@ -188,6 +189,40 @@ curl -s localhost/api/health       # {"database":"up","status":"ok"}
 - Uploaded media, on the app EC2 (only while uploads are stored locally, not in S3):
   `docker run --rm -v payload-cms_media:/media -v "$PWD":/backup busybox tar czf /backup/media-$(date +%F).tgz -C /media .`
 - Or snapshot both EBS volumes with AWS Backup. With S3 storage, turn on bucket versioning instead.
+
+## Image sizes
+
+Every image uploaded to Media (JPEG, PNG, WebP, AVIF, GIF, TIFF) is stored as is, plus three smaller
+copies whose longer side (width or height) is at most:
+
+| Name      | Longer side | Example: 4000×3000 photo | Example: 3000×4000 photo |
+| --------- | ----------- | ------------------------ | ------------------------ |
+| `max1440` | 1440 px     | 1440×1080                | 1080×1440                |
+| `max720`  | 720 px      | 720×540                  | 540×720                  |
+| `max640`  | 640 px      | 640×480                  | 480×640                  |
+
+The proportions never change, phone photos are turned upright first, and an image that is already
+smaller keeps its own size rather than being enlarged. The copies drop the photo's metadata (such as
+GPS location); the original keeps it. Other files (PDF, SVG, …) are stored without copies.
+
+The copies are saved next to the original (in S3 when it's on) and deleted or replaced with it.
+Each read returns them under `variants`, with the full-size file in `url`, `width` and `height`:
+
+```json
+{
+  "url": "https://cdn.example.com/media/…",
+  "width": 4000,
+  "height": 3000,
+  "variants": {
+    "max1440": { "url": "https://cdn.example.com/media/…", "width": 1440, "height": 1080 },
+    "max720": { "url": "https://cdn.example.com/media/…", "width": 720, "height": 540 },
+    "max640": { "url": "https://cdn.example.com/media/…", "width": 640, "height": 480 }
+  }
+}
+```
+
+Images uploaded before this was added have no copies; replace the file in the admin panel to make
+them. To change the sizes, edit `mediaVariants` in `src/collections/Media.ts`.
 
 ## Uploads in S3
 

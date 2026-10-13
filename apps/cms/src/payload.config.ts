@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url'
 
 import { Clients } from './collections/Clients'
 import { Events } from './collections/Events'
-import { Media } from './collections/Media'
+import { Media, mediaVariants } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import { Profiles } from './collections/Profiles'
@@ -102,6 +102,7 @@ export default buildConfig({
     limits: { fileSize: 50 * 1024 * 1024 },
     requestSizeLimit: 60 * 1024 * 1024,
     // Image processing on upload, such as cropping (the top-level `sharp` option before Payload 4)
-    transformers: [sharpTransformer()],
+    // and the smaller copies of each Media image (`imageSizes` before Payload 4)
+    transformers: [sharpTransformer({ collections: { media: { variants: mediaVariants } } })],
   },
 })
