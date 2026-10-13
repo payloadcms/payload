@@ -1,5 +1,3 @@
-import type { ReleaseType } from 'semver'
-
 import { PROJECT_ROOT, ROOT_PACKAGE_JSON } from '@tools/constants'
 import { execSync, spawn } from 'child_process'
 import execa from 'execa'
@@ -7,6 +5,7 @@ import fse from 'fs-extra'
 import path from 'path'
 import semver from 'semver'
 
+import type { StableBump } from './assertBumpPreconditions.js'
 import type { PublishResult } from './runPublishSequence.js'
 
 import { getPackageDetails } from './getPackageDetails.js'
@@ -29,7 +28,7 @@ type PackageDetails = {
   version: string
 }
 
-type PackageReleaseType = 'canary' | 'internal' | 'internal-debug' | ReleaseType
+type PackageReleaseType = 'internal' | 'internal-debug' | StableBump
 
 type PublishOpts = {
   dryRun?: boolean
@@ -38,7 +37,7 @@ type PublishOpts = {
 
 export type Workspace = {
   version: () => Promise<string>
-  bumpVersion: (type: PackageReleaseType, opts?: { preid?: 'beta' | 'canary' }) => Promise<string>
+  bumpVersion: (type: PackageReleaseType) => Promise<string>
   build: (opts?: { debug?: boolean }) => Promise<void>
   publish: (opts: PublishOpts) => Promise<void>
 }
@@ -81,12 +80,8 @@ export const getWorkspace = (): Workspace => {
     )
   }
 
-  const bumpVersion = async (
-    bumpType: PackageReleaseType,
-    opts?: { preid?: 'beta' | 'canary' },
-  ): Promise<string> => {
+  const bumpVersion = async (bumpType: PackageReleaseType): Promise<string> => {
     const { version: monorepoVersion, packages: packageDetails } = await getCurrentPackageState()
-    const { preid } = opts ?? {}
 
     let nextReleaseVersion
     if (bumpType === 'internal') {
@@ -95,47 +90,11 @@ export const getWorkspace = (): Workspace => {
     } else if (bumpType === 'internal-debug') {
       const hash = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim().slice(0, 7)
       nextReleaseVersion = semver.inc(monorepoVersion, 'minor') + `-internal-debug.${hash}`
-    } else if (
-      bumpType === 'premajor' ||
-      bumpType === 'preminor' ||
-      bumpType === 'prepatch' ||
-      bumpType === 'prerelease'
-    ) {
-      nextReleaseVersion = semver.inc(monorepoVersion, bumpType, undefined, preid)
-    } else if (bumpType === 'canary') {
-      const minorCandidateBaseVersion = semver.inc(monorepoVersion, 'minor')
-
-      if (!minorCandidateBaseVersion) {
-        throw new Error(`Could not determine minor candidate version from ${monorepoVersion}`)
-      }
-
-      // Get latest canary version from registry
-      const json = await fetch(`https://registry.npmjs.org/payload`).then((res) => res.json())
-      const { canary: latestCanaryVersion } = (json['dist-tags'] ?? {}) as {
-        canary?: string | undefined
-      }
-
-      console.log(`Latest canary version: ${latestCanaryVersion}`)
-
-      if (
-        latestCanaryVersion?.startsWith(minorCandidateBaseVersion) &&
-        latestCanaryVersion.includes('-canary.')
-      ) {
-        const canaryIteration = Number(latestCanaryVersion.split('-canary.')[1])
-        if (isNaN(canaryIteration)) {
-          console.log(`Latest canary version is not a valid canary version, starting from 0`)
-          nextReleaseVersion = semver.inc(monorepoVersion, 'minor') + '-canary.0'
-        } else {
-          console.log(`Incrementing canary version from ${latestCanaryVersion}`)
-          nextReleaseVersion = `${minorCandidateBaseVersion}-canary.${canaryIteration + 1}`
-        }
-      } else {
-        console.log(`Latest canary does not match minor candidate, incrementing minor`)
-        nextReleaseVersion = semver.inc(monorepoVersion, 'minor') + '-canary.0'
-      }
+    } else if (bumpType === 'patch' || bumpType === 'minor') {
+      nextReleaseVersion = semver.inc(monorepoVersion, bumpType)
     } else {
       throw new Error(
-        `Invalid bump type: ${bumpType}. Supported types: internal, internal-debug, canary, premajor, preminor, prepatch, prerelease.`,
+        `Invalid bump type: ${bumpType}. Supported types: internal, internal-debug, patch, minor.`,
       )
     }
 
