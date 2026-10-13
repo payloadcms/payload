@@ -118,6 +118,27 @@ The generated layout, admin pages, and route files contain the following comment
 
 The auto-generated `importMap.js` is the only one of these files that is also regenerated automatically on an ongoing basis; do not edit it by hand.
 
+## Next.js Cache Components
+
+The following setup targets Next.js 16.4 with [Cache Components](https://nextjs.org/docs/app/getting-started/caching) and partial prefetching. Keep your Next.js config wrapped with `withPayload`:
+
+```ts
+import { withPayload } from '@payloadcms/next/withPayload'
+
+export default withPayload({
+  cacheComponents: true,
+  partialPrefetching: true,
+})
+```
+
+No changes to the generated admin route files are needed. When Cache Components is enabled, `withPayload` automatically opts the admin layout and page out of instant-navigation validation during compilation. This works with both Turbopack and Webpack, without modifying your source files. You can disable Cache Components again without removing any route exports.
+
+The integration identifies admin entries by their named imports of `RootLayout` from `@payloadcms/next/layouts` and `RootPage` from `@payloadcms/next/views`, so custom admin URLs and route-group names are supported. If you customize these entries, keep those direct imports. Explicit `instant` exports are preserved.
+
+When Cache Components is enabled, Payload waits for an actual request before rendering the admin layout, rendering admin pages, or generating page metadata. This keeps authentication, database access, and time-dependent server components out of prerendering and runtime prefetching. Frontend routes continue to use Cache Components normally.
+
+This setup makes admin server rendering request-time; it does not disable Next.js page-state preservation through React Activity. Custom components must still clean up effects and handle being hidden and restored. Streaming can also commit response headers before a redirect or not-found result is resolved. Full compatibility with all admin interactions is not guaranteed.
+
 ## Admin Options
 
 All root-level options for the Admin Panel are defined in your [Payload Config](../configuration/overview) under the `admin` property:

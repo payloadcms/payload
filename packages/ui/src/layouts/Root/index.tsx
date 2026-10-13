@@ -1,6 +1,6 @@
 import type { ImportMap, SanitizedConfig, ServerFunctionClient } from 'payload'
 
-import React, { Suspense } from 'react'
+import React from 'react'
 
 import type { InitAdminContextFn } from '../../views/Root/index.js'
 
@@ -69,13 +69,7 @@ type RootLayoutProps = {
 export const RootLayout = (props: RootLayoutProps) => {
   checkDependencies(props.additionalDependencyChecks)
 
-  const content = <RootLayoutContent {...props} />
-
-  if (process.env.PAYLOAD_CACHE_COMPONENTS_ENABLED === 'true') {
-    return <Suspense fallback={null}>{content}</Suspense>
-  }
-
-  return content
+  return <RootLayoutContent {...props} />
 }
 
 const RootLayoutContent = async ({

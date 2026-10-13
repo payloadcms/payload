@@ -5,6 +5,8 @@
  * user projects regardless of their TypeScript setup.
  */
 
+import { fileURLToPath } from 'node:url'
+
 const poweredByHeader = {
   key: 'X-Powered-By',
   value: 'Next.js, Payload',
@@ -16,17 +18,39 @@ const poweredByHeader = {
  * @param {boolean} [options.devBundleServerPackages] - Whether to bundle server packages in development mode. @default false
  * */
 export const withPayload = (nextConfig = {}, options = {}) => {
-  const env = nextConfig.env || {}
+  const env = {
+    ...nextConfig.env,
+    PAYLOAD_CACHE_COMPONENTS_ENABLED: nextConfig.cacheComponents ? 'true' : 'false',
+  }
+  const cacheComponentsLoader = nextConfig.cacheComponents
+    ? typeof import.meta?.resolve === 'function'
+      ? fileURLToPath(import.meta.resolve('@payloadcms/next/cacheComponentsLoader'))
+      : require.resolve('@payloadcms/next/cacheComponentsLoader')
+    : undefined
+  const cacheComponentsRule = '**/{layout,page}.{js,jsx,ts,tsx,mjs,mts,cjs,cts}'
+  const turbopackRules = { ...nextConfig.turbopack?.rules }
+
+  if (cacheComponentsLoader) {
+    const existingRule = turbopackRules[cacheComponentsRule]
+    const existingRules = !existingRule
+      ? []
+      : Array.isArray(existingRule)
+        ? existingRule.every((rule) => typeof rule === 'string' || 'loader' in rule)
+          ? [{ loaders: existingRule }]
+          : existingRule
+        : [existingRule]
+
+    turbopackRules[cacheComponentsRule] = [
+      ...existingRules,
+      { condition: { not: 'foreign' }, loaders: [cacheComponentsLoader] },
+    ]
+  }
 
   if (nextConfig.experimental?.staleTimes?.dynamic) {
     console.warn(
       'Payload: detected a non-zero value for the `staleTimes.dynamic` option in your Next.js config. This will slow down page transitions and may cause stale data to load within the Admin panel. To clear this warning, remove the `staleTimes.dynamic` option from your Next.js config or set it to 0. In the future, Next.js may support scoping this option to specific routes.',
     )
     env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH = 'true'
-  }
-
-  if (nextConfig.cacheComponents) {
-    env.PAYLOAD_CACHE_COMPONENTS_ENABLED = 'true'
   }
 
   const consoleWarn = console.warn
@@ -82,6 +106,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     },
     turbopack: {
       ...(nextConfig.turbopack || {}),
+      ...(cacheComponentsLoader ? { rules: turbopackRules } : {}),
     },
     // We disable the poweredByHeader here because we add it manually in the headers function below
     ...(nextConfig.poweredByHeader !== false ? { poweredByHeader: false } : {}),
@@ -191,6 +216,22 @@ export const withPayload = (nextConfig = {}, options = {}) => {
 
       return {
         ...incomingWebpackConfig,
+        ...(cacheComponentsLoader
+          ? {
+              module: {
+                ...incomingWebpackConfig.module,
+                rules: [
+                  ...(incomingWebpackConfig.module?.rules || []),
+                  {
+                    enforce: 'pre',
+                    exclude: /node_modules/,
+                    test: /[/\\](layout|page)\.(?:[cm]?[jt]s|[jt]sx)$/,
+                    use: [cacheComponentsLoader],
+                  },
+                ],
+              },
+            }
+          : {}),
         externals: [
           ...(incomingWebpackConfig?.externals || []),
           /**

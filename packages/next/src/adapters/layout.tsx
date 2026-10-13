@@ -1,6 +1,7 @@
 import { RootLayout as UIRootLayout } from '@payloadcms/ui/layouts'
 // @ts-expect-error - TS6 NodeNext rejects deep imports into `next` (no `exports` field), but Next.js compiler requires this exact specifier
 import { Inter, Roboto_Mono } from 'next/font/google'
+import { connection } from 'next/server.js'
 import React from 'react'
 
 import { initAdminContext } from '../utilities/initAdminContext.js'
@@ -37,15 +38,21 @@ type Props = Omit<
   'additionalDependencyChecks' | 'fonts' | 'initAdminContext' | 'RouterAdapter'
 >
 
-export const RootLayout = (props: Props) => (
-  <UIRootLayout
-    {...props}
-    additionalDependencyChecks={nextDependencyChecks}
-    fonts={[
-      { className: inter.className, variable: inter.variable },
-      { className: robotoMono.className, variable: robotoMono.variable },
-    ]}
-    initAdminContext={initAdminContext}
-    RouterAdapter={NextRouterAdapter}
-  />
-)
+export const RootLayout = async (props: Props) => {
+  if (process.env.PAYLOAD_CACHE_COMPONENTS_ENABLED === 'true') {
+    await connection()
+  }
+
+  return (
+    <UIRootLayout
+      {...props}
+      additionalDependencyChecks={nextDependencyChecks}
+      fonts={[
+        { className: inter.className, variable: inter.variable },
+        { className: robotoMono.className, variable: robotoMono.variable },
+      ]}
+      initAdminContext={initAdminContext}
+      RouterAdapter={NextRouterAdapter}
+    />
+  )
+}

@@ -813,6 +813,9 @@ importers:
 
   packages/next:
     dependencies:
+      '@babel/parser':
+        specifier: 7.29.9
+        version: 7.29.9
       '@dnd-kit/core':
         specifier: 6.3.1
         version: 6.3.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
