@@ -27,6 +27,7 @@ import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConf
 import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { autosavePostsSlug } from './collections/Autosave/index.js'
+import { conditionsSlug } from './collections/Conditions/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 type StaleErrorTestWindow = {
@@ -48,12 +49,14 @@ test.describe('Form State', () => {
   let page: Page
   let postsUrl: AdminUrlUtil
   let autosavePostsUrl: AdminUrlUtil
+  let conditionsUrl: AdminUrlUtil
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     postsUrl = new AdminUrlUtil(serverURL, postsSlug)
     autosavePostsUrl = new AdminUrlUtil(serverURL, autosavePostsSlug)
+    conditionsUrl = new AdminUrlUtil(serverURL, conditionsSlug)
 
     context = await browser.newContext()
     ;({ page } = await initPage({ context, serverURL }))
@@ -716,6 +719,93 @@ test.describe('Form State', () => {
       await expect.poll(() => requestCount).toBe(2)
       await waitForAutoSaveToRunAndComplete(page)
       await expect(page.locator('#field-programmaticValue')).toHaveValue('Updated programmatically')
+    })
+
+    test('should re-request form state after a late response follows a conditional field change', async () => {
+      const doc = await payload.create({
+        collection: conditionsSlug,
+        data: { showField: false },
+      })
+      await page.goto(conditionsUrl.edit(doc.id))
+      await waitForFormReady(page)
+
+      const formStateCaptured = Promise.withResolvers<void>()
+      let heldRoute: Route | undefined
+      let heldResponse: Awaited<ReturnType<Route['fetch']>> | undefined
+
+      await page.route(conditionsUrl.edit(doc.id), async (route) => {
+        const request = route.request()
+        const isFormStateRequest =
+          request.method() === 'POST' && Boolean(request.headers()['next-action'])
+
+        if (isFormStateRequest && !heldRoute) {
+          heldResponse = await route.fetch()
+          heldRoute = route
+          formStateCaptured.resolve()
+          return
+        }
+
+        await route.continue()
+      })
+
+      const conditionalField = page.locator('#field-conditionalCustomField')
+
+      await page.locator('#field-showField').check()
+      await formStateCaptured.promise
+      await page.locator('#field-showField').uncheck()
+
+      await heldRoute?.fulfill({ response: heldResponse })
+
+      await expect(conditionalField).toBeHidden()
+    })
+
+    test('should keep failed-save field errors after an earlier form-state response', async () => {
+      const doc = await payload.create({
+        collection: postsSlug,
+        data: { title: 'initial' },
+      })
+      await page.goto(postsUrl.edit(doc.id))
+      await waitForFormReady(page)
+
+      const formStateCaptured = Promise.withResolvers<void>()
+      let heldRoute: Route | undefined
+      let heldResponse: Awaited<ReturnType<Route['fetch']>> | undefined
+      let saveRequestStarted = false
+
+      await page.route(postsUrl.edit(doc.id), async (route) => {
+        const request = route.request()
+        const isFormStateRequest =
+          request.method() === 'POST' && Boolean(request.headers()['next-action'])
+
+        if (isFormStateRequest && !heldRoute) {
+          heldResponse = await route.fetch()
+          heldRoute = route
+          formStateCaptured.resolve()
+          return
+        }
+
+        await route.continue()
+      })
+
+      await page.route(`**/api/${postsSlug}/${doc.id}`, async (route) => {
+        if (route.request().method() === 'PATCH') {
+          saveRequestStarted = true
+        }
+        await route.continue()
+      })
+
+      await page.locator('#field-validateUsingEvent').fill('Not allowed')
+      await formStateCaptured.promise
+      await page.click('#action-save')
+
+      expect(saveRequestStarted).toBe(false)
+
+      await heldRoute?.fulfill({ response: heldResponse })
+
+      const titleError = page
+        .locator('.field-type.text', { has: page.locator('#field-validateUsingEvent') })
+        .locator('.field-error')
+      await expect(titleError).toBeVisible()
     })
   })
 

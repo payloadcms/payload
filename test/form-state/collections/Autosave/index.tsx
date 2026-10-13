@@ -11,6 +11,21 @@ export const AutosavePostsCollection: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
+      validate: (value: null | string | undefined) =>
+        value?.startsWith('ok') ? true : 'Must start with "ok".',
+    },
+    {
+      name: 'type',
+      type: 'radio',
+      defaultValue: 'internal',
+      options: ['internal', 'custom'],
+    },
+    {
+      name: 'url',
+      type: 'text',
+      admin: {
+        condition: (_, siblingData) => siblingData?.type === 'custom',
+      },
     },
     {
       name: 'computedTitle',
