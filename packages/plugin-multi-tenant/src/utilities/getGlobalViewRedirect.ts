@@ -99,6 +99,7 @@ export async function getGlobalViewRedirect({
           redirectRoute = await generateCreateRedirect({
             collectionSlug,
             payload,
+            tenantFieldName,
             tenantID: tenant,
           })
         }
@@ -113,6 +114,7 @@ export async function getGlobalViewRedirect({
           redirectRoute = await generateCreateRedirect({
             collectionSlug,
             payload,
+            tenantFieldName,
             tenantID: tenant,
           })
         }
@@ -146,6 +148,7 @@ export async function getGlobalViewRedirect({
 type GenerateCreateArgs = {
   collectionSlug: string
   payload: Payload
+  tenantFieldName: string
   tenantID: number | string
 }
 /**
@@ -157,6 +160,7 @@ type GenerateCreateArgs = {
 async function generateCreateRedirect({
   collectionSlug,
   payload,
+  tenantFieldName,
   tenantID,
 }: GenerateCreateArgs): Promise<`/${string}` | undefined> {
   const collectionConfig = payload.collections[collectionSlug]?.config
@@ -166,7 +170,7 @@ async function generateCreateRedirect({
       const doc = await payload.create({
         collection: collectionSlug,
         data: {
-          tenant: tenantID,
+          [tenantFieldName]: tenantID,
         },
         depth: 0,
         draft: true,
