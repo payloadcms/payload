@@ -4,10 +4,18 @@ import { withPayload } from '@payloadcms/next/withPayload'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { requestSizeLimit } from './src/requestSizeLimit'
+
 const __filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(__filename)
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // Every /api request passes through src/proxy.ts (two-factor check). Next.js cuts bodies that
+    // pass through a proxy at 10 MB by default, so a larger upload reached Payload incomplete and
+    // failed with a 500 ("Unexpected end of form").
+    proxyClientMaxBodySize: requestSizeLimit,
+  },
   images: {
     localPatterns: [
       {
