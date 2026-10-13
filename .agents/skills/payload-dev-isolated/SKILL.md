@@ -5,7 +5,7 @@ description: Configure an isolated Payload development environment with its own 
 
 # Payload isolated development
 
-Give each development environment its own checkout, persistent database and port. Preserve the user's task, branch and suite choices. Python 3.9+ is required for the standard-library ledger helper; server requirements come from the checked-out repository.
+Give each development environment its own checkout, persistent database and port. Preserve the user's task, branch and suite choices. Use the Node.js version required by the checked-out repository. Helpers use only Node built-ins; no Python or additional dependencies are required.
 
 ## Choose the execution context
 
@@ -24,18 +24,18 @@ Treat a returned `clientThreadId` as pending, not a real thread ID. Do not pass 
 Run the helper from this skill directory (substitute its actual path):
 
 ```bash
-python3 scripts/ledger.py allocate --name hierarchy-demo --worktree /absolute/worktree --suite hierarchy
-python3 scripts/ledger.py status <environment-id>
-python3 scripts/configure.py <environment-id> --connection-file /private/path/mongodb-uri.txt
-python3 scripts/ledger.py list
-python3 scripts/ledger.py list --json
-python3 scripts/ledger.py show <environment-id>
-python3 scripts/ledger.py upsert /absolute/path/to/record.json
+node scripts/ledger.mjs allocate --name hierarchy-demo --worktree /absolute/worktree --suite hierarchy
+node scripts/ledger.mjs status <environment-id>
+node scripts/configure.mjs <environment-id> --connection-file /private/path/mongodb-uri.txt
+node scripts/ledger.mjs list
+node scripts/ledger.mjs list --json
+node scripts/ledger.mjs show <environment-id>
+node scripts/ledger.mjs upsert /absolute/path/to/record.json
 ```
 
-All chats use `~/.local/state/payload-dev-isolated/environments.json`, outside the repository. There is no command-line or environment-variable override, so separate chats on the same machine and user account share reservations. Tests inject a temporary path into the Python function without exposing it as a CLI option.
+All chats use `~/.local/state/payload-dev-isolated/environments.json`, outside the repository. There is no command-line or environment-variable override, so separate chats on the same machine and user account share reservations. Tests inject a temporary path into the JavaScript function without exposing it as a CLI option.
 
-The helper uses locking and atomic replacement; do not hand-edit the ledger. It never stops servers or deletes databases. Network filesystem locking is not supported. An empty ledger does not prove that no older environments exist.
+The helper uses an exclusive lock directory and atomic replacement; do not hand-edit the ledger. It never stops servers or deletes databases. Use a local filesystem; network filesystem locking is not supported. A crashed helper can leave an abandoned `.lockdir`: commands time out rather than stealing it. Inspect its `owner.json` and verify no helper is active before removing that directory. Do not run the old Python helper alongside this version; its locking protocol differs. An empty ledger does not prove that no older environments exist.
 
 Use `allocate` for new local MongoDB environments rather than inventing IDs, database names or ports. Under the ledger lock, it validates the suite/worktree, skips reserved and occupied ports, generates a unique database name and saves the reservation atomically. The default server port range is 3100–3999; `--start-port` and `--end-port` can constrain it. It reserves the repository's local MongoDB service at localhost:27018; it does not create or inspect the database. Verify that service and database ownership before startup. For other adapters, use a verified explicit record through `upsert`. A stopped environment still owns its data and port. Upsert only fields that changed. Reuse the same record on later turns. Example record (replace all values with verified choices):
 
@@ -69,7 +69,7 @@ A worktree and port do **not** isolate a database.
 
 1. Run `allocate`, then inspect the current server/test entrypoints, environment loading order and database adapter. Determine the effective suite, port and database after all overrides. Do not assume `.env.local` loads in test mode. Payload versions may use `PORT`, `MONGODB_URL`, `DATABASE_URL`, `PAYLOAD_DATABASE` and a generated database adapter; inspect the actual code rather than hard-coding old defaults.
 2. Allocate a database that is new or demonstrably belongs to this environment, and a free unreserved port. Avoid default/shared databases. For MongoDB, check the URI path and adapter `dbName`; for PostgreSQL, check database/schema and migrations; for SQLite, use a distinct absolute file path.
-3. For the local MongoDB workflow, put the exact dedicated connection URI in a private temporary file and run `configure.py`. It checks the reserved database/service port, suite, and live server port, then writes private startup settings beside the ledger with explicit `MONGODB_URL`, `DATABASE_URL`, `PORT`, `PAYLOAD_DATABASE`, and a non-seeding command. It does not launch anything or overwrite repo env files. Delete the temporary connection file afterward. `configure` only validates supplied settings: arbitrary suite code can override the adapter. Inspect the effective runtime adapter **before** startup or seeding; do not interpret successful configuration as proof of runtime isolation. For other adapters, preserve the same invariant with verified local settings. Never print credentials.
+3. For the local MongoDB workflow, put the exact dedicated connection URI in a private temporary file and run `configure.mjs`. It checks the reserved database/service port, suite, and live server port, then writes private startup settings beside the ledger with explicit `MONGODB_URL`, `DATABASE_URL`, `PORT`, `PAYLOAD_DATABASE`, and a non-seeding command. It does not launch anything or overwrite repo env files. Delete the temporary connection file afterward. `configure` only validates supplied settings: arbitrary suite code can override the adapter. Inspect the effective runtime adapter **before** startup or seeding; do not interpret successful configuration as proof of runtime isolation. For other adapters, preserve the same invariant with verified local settings. Never print credentials.
 4. Use the repository's required Node/package-manager runtime and install dependencies in this checkout. Do not share mutable generated config/build outputs with another environment.
 5. When requested, start from the generated settings after verifying the effective adapter. Initial seeding is a separate explicitly authorized operation; the generated restart command always uses `--no-seed` and disables database dropping. If the port becomes occupied, reallocate and update the ledger rather than killing the listener or silently using its server. Verify the actual bound port, HTTP readiness, selected admin suite and expected seed data. Mark `running` only after verification.
 6. Record the process identity, startup/seed result and a restart command that preserves data. Check the current runner's `--no-seed` option or equivalent; do not assume its existence or behavior. Keep destructive reseeding separate from normal restarts. Automated reset-capable tests must use a separate disposable database and port.
@@ -78,7 +78,7 @@ Do not stop/restart another environment, clear shared databases or overwrite ano
 
 ## List and clean up
 
-For list/cleanup requests, do not create a chat or server. Run `ledger.py status <id>` for a live port probe. It deliberately reports ownership as unverified: an occupied port is not proof that this environment owns its listener. Verify live listener/process identities before calling records current. Present a table of environment, chat (if any), suite, URL/port, database, worktree and verified status. Import existing environments only from verified configurations; label uncertain entries `unknown` without launching/resetting them to investigate.
+For list/cleanup requests, do not create a chat or server. Run `ledger.mjs status <id>` for a live port probe. It deliberately reports ownership as unverified: an occupied port is not proof that this environment owns its listener. Verify live listener/process identities before calling records current. Present a table of environment, chat (if any), suite, URL/port, database, worktree and verified status. Import existing environments only from verified configurations; label uncertain entries `unknown` without launching/resetting them to investigate.
 
 Stopping a selected environment preserves its database and worktree. Before signaling, verify PID, start time, command and cwd against its current listener; PIDs and ports can be reused. Stop only its verified process tree gracefully. Report ambiguity instead of killing by port.
 
@@ -89,7 +89,7 @@ Worktree removal is separate: do it only when requested, inspect unsaved work, a
 ## Helper validation
 
 ```bash
-python3 -m unittest discover -s scripts -p 'test_*.py'
+node --test scripts/ledger.test.mjs
 ```
 
 Tests use temporary ledgers; no running environments or real databases are changed.
