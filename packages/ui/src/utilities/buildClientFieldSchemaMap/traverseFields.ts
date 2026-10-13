@@ -224,10 +224,8 @@ export const traverseFields = ({
 const richTextSubFieldsCache = new WeakMap<FieldSchemaMap, Map<string, FieldSchemaMap>>()
 
 /**
- * Groups the schema map entries under the path of each rich text field they belong to.
- * Without this, every rich text field scans the whole schema map. Each rich text field also
- * adds entries to the schema map, so the build time grows with the square of the number of
- * rich text fields, which takes seconds in configs with many of them (e.g. page builders).
+ * Groups the schema map entries by the rich text field they belong to,
+ * so each rich text field does not have to scan the whole schema map.
  */
 function getRichTextSubFieldsByPath({
   schemaMap,
