@@ -7,6 +7,7 @@ import semver from 'semver'
 
 import type { StableBump } from './assertBumpPreconditions.js'
 import type { PublishResult } from './runPublishSequence.js'
+import type { StableDistTag } from './stableDistTag.js'
 
 import { getPackageDetails } from './getPackageDetails.js'
 import { isVersionPublished } from './getPackageRegistryVersions.js'
@@ -30,9 +31,12 @@ type PackageDetails = {
 
 type PackageReleaseType = 'internal' | 'internal-debug' | StableBump
 
+type PublishTag = 'internal' | 'internal-debug' | StableDistTag
+
 type PublishOpts = {
   dryRun?: boolean
-  tag: 'beta' | 'canary' | 'internal' | 'internal-debug' | 'latest'
+  /** A single tag for every package, or a per-package map of stable dist-tags. */
+  tag: PublishTag | ReadonlyMap<string, StableDistTag>
 }
 
 export type Workspace = {
@@ -60,7 +64,21 @@ export const getWorkspace = (): Workspace => {
     const packageDetails = await getPackageDetails(packagePublishList)
     await runPublishSequence({
       packages: packageDetails,
-      publishOne: (pkg) => publishSinglePackage(pkg, { dryRun, tag }),
+      publishOne: async (pkg) => {
+        if (typeof tag === 'string') {
+          return publishSinglePackage(pkg, { dryRun, tag })
+        }
+
+        // Fail closed: a package without a resolved tag is never published.
+        const packageTag = tag.get(pkg.name)
+        if (!packageTag) {
+          const details = `No dist-tag resolved for ${pkg.name}; refusing to publish it.`
+          console.error(details)
+          return { name: pkg.name, success: false, details }
+        }
+
+        return publishSinglePackage(pkg, { dryRun, tag: packageTag })
+      },
     })
   }
 
@@ -136,7 +154,7 @@ async function getCurrentPackageState(): Promise<{
 
 export async function publishSinglePackage(
   pkg: PackageDetails,
-  opts: PublishOpts,
+  opts: { dryRun?: boolean; tag: PublishTag },
 ): Promise<PublishResult> {
   const { dryRun, tag } = opts
 

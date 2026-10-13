@@ -13,7 +13,7 @@ const pkg = {
   name: 'payload',
   packagePath: 'packages/payload' as const,
   shortName: 'payload',
-  version: '4.0.0-canary.10',
+  version: '3.90.3',
 }
 
 // A fake ChildProcess that streams optional stderr then emits 'close' with the
@@ -41,7 +41,7 @@ describe('publishSinglePackage idempotency + retry', () => {
   it('should skip-as-success when the version is already published', async () => {
     vi.mocked(isVersionPublished).mockResolvedValue(true)
 
-    const result = await publishSinglePackage(pkg, { tag: 'canary' })
+    const result = await publishSinglePackage(pkg, { tag: 'latest' })
 
     expect(result).toEqual({ name: 'payload', success: true })
     expect(spawn).not.toHaveBeenCalled()
@@ -51,7 +51,7 @@ describe('publishSinglePackage idempotency + retry', () => {
     vi.mocked(isVersionPublished).mockResolvedValue(false)
     vi.mocked(spawn).mockImplementation(() => spawnExiting(0) as never)
 
-    const result = await publishSinglePackage(pkg, { tag: 'canary' })
+    const result = await publishSinglePackage(pkg, { tag: 'latest' })
 
     expect(result.success).toBe(true)
     expect(spawn).toHaveBeenCalledTimes(1)
@@ -63,7 +63,7 @@ describe('publishSinglePackage idempotency + retry', () => {
       .mockImplementationOnce(() => spawnExiting(1) as never)
       .mockImplementationOnce(() => spawnExiting(0) as never)
 
-    const result = await publishSinglePackage(pkg, { tag: 'canary' })
+    const result = await publishSinglePackage(pkg, { tag: 'latest' })
 
     expect(result.success).toBe(true)
     expect(spawn).toHaveBeenCalledTimes(2)
@@ -77,11 +77,11 @@ describe('publishSinglePackage idempotency + retry', () => {
       () =>
         spawnExiting(
           1,
-          'npm error code EPUBLISHCONFLICT\nYou cannot publish over the previously published versions: 4.0.0-canary.10',
+          'npm error code EPUBLISHCONFLICT\nYou cannot publish over the previously published versions: 3.90.3',
         ) as never,
     )
 
-    const result = await publishSinglePackage(pkg, { tag: 'canary' })
+    const result = await publishSinglePackage(pkg, { tag: 'latest' })
 
     expect(result.success).toBe(true)
     expect(spawn).toHaveBeenCalledTimes(1)
@@ -93,7 +93,7 @@ describe('publishSinglePackage idempotency + retry', () => {
       .mockImplementationOnce(() => spawnExiting(1) as never)
       .mockImplementationOnce(() => spawnExiting(1) as never)
 
-    const result = await publishSinglePackage(pkg, { tag: 'canary' })
+    const result = await publishSinglePackage(pkg, { tag: 'latest' })
 
     expect(result.success).toBe(true)
   })
@@ -104,7 +104,7 @@ describe('publishSinglePackage idempotency + retry', () => {
       .mockImplementationOnce(() => spawnExiting(1) as never)
       .mockImplementationOnce(() => spawnExiting(1) as never)
 
-    const result = await publishSinglePackage(pkg, { tag: 'canary' })
+    const result = await publishSinglePackage(pkg, { tag: 'latest' })
 
     expect(result.success).toBe(false)
     expect(result.details).toContain('exit code 1')
@@ -115,7 +115,7 @@ describe('publishSinglePackage idempotency + retry', () => {
     vi.mocked(isVersionPublished).mockRejectedValue(new Error('registry down'))
     vi.mocked(spawn).mockImplementation(() => spawnExiting(0) as never)
 
-    const result = await publishSinglePackage(pkg, { tag: 'canary' })
+    const result = await publishSinglePackage(pkg, { tag: 'latest' })
 
     expect(result.success).toBe(true)
     expect(spawn).toHaveBeenCalledTimes(1)
