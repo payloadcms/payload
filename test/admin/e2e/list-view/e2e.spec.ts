@@ -6,6 +6,7 @@ import * as qs from 'qs-esm'
 
 import type { Config, Geo, Post, Virtual } from '../../payload-types.js'
 
+import { assertNetworkRequests } from '../../../__helpers/e2e/assertNetworkRequests.js'
 import { exactText, getRoutes, openColumnControls } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -2256,9 +2257,16 @@ describe('List View', () => {
           response.request().method() === 'POST',
       )
 
-      await page.getByRole('radio', { name: 'Grid' }).check()
-      await gridPreferenceSaved
-      await expect(page.locator('.document-card')).toHaveCount(1)
+      await assertNetworkRequests(
+        page,
+        formatDocURLUrl.list,
+        async () => {
+          await page.getByRole('radio', { name: 'Grid' }).check()
+          await gridPreferenceSaved
+          await expect(page.locator('.document-card')).toHaveCount(1)
+        },
+        { allowedNumberOfRequests: 0 },
+      )
       await page.getByRole('button', { name: 'Select format doc' }).click()
 
       const drawer = page.locator('.list-drawer.drawer--is-open')

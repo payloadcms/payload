@@ -1,14 +1,16 @@
 /* eslint-disable playwright/expect-expect */
 import { expect, test } from '@playwright/test'
-import { rm, rmdir } from 'node:fs/promises'
+import { readFile, rm, rmdir } from 'node:fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
 import { getSelectMenu, openSelectMenu, selectInput } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { DashboardHelper } from './utils.js'
 
@@ -37,6 +39,77 @@ describe('Dashboard', () => {
       serverURL,
     })
     await page.goto(url.admin)
+  })
+
+  test('should show related thumbnails when switching layouts without fetching the list again', async ({
+    page,
+  }) => {
+    await initPage({ page, serverURL })
+
+    const uploadResponse = await page.request.post(`${serverURL}/api/media`, {
+      multipart: {
+        _payload: JSON.stringify({}),
+        file: {
+          name: 'grid-thumbnail.jpg',
+          buffer: await readFile(path.resolve(dirname, 'test/select/image.jpg')),
+          mimeType: 'image/jpeg',
+        },
+      },
+    })
+
+    expect(uploadResponse.ok()).toBe(true)
+    const media = await uploadResponse.json()
+
+    try {
+      const documentResponse = await page.request.post(`${serverURL}/api/draft-posts?draft=true`, {
+        data: { cover: media.doc.id, title: 'Grid thumbnail' },
+      })
+
+      expect(documentResponse.ok()).toBe(true)
+      const listURL = `${serverURL}/admin/collections/draft-posts`
+
+      await page.request.post(`${serverURL}/api/payload-preferences/collection-draft-posts`, {
+        data: {
+          value: {
+            columns: [
+              { accessor: 'title', active: true },
+              { accessor: 'cover', active: true },
+            ],
+            documentLayout: 'table',
+          },
+        },
+      })
+      await page.goto(listURL)
+      await expect(page.getByRole('radio', { name: 'Table' })).toBeChecked()
+      const tableThumbnail = page.locator('.cell-cover img')
+      const thumbnailPath = new URL(media.doc.thumbnailURL || media.doc.url, serverURL).pathname
+
+      await expect
+        .poll(async () => {
+          const src = await tableThumbnail.getAttribute('src')
+
+          return src ? new URL(src, serverURL).pathname : undefined
+        })
+        .toBe(thumbnailPath)
+
+      await assertNetworkRequests(
+        page,
+        listURL,
+        async () => {
+          await page.getByRole('radio', { name: 'Grid' }).check()
+          await expect(page.locator('.document-card__thumbnail')).toHaveAttribute(
+            'src',
+            media.doc.thumbnailURL || media.doc.url,
+          )
+          await page.getByRole('radio', { name: 'Table' }).check()
+          await expect(page.locator('table tbody tr')).toHaveCount(1)
+          await expect(tableThumbnail).toBeVisible()
+        },
+        { allowedNumberOfRequests: 0 },
+      )
+    } finally {
+      await page.request.delete(`${serverURL}/api/media/${media.doc.id}`)
+    }
   })
 
   test('should keep dashboard height stable and delay loading feedback', async ({ page }) => {

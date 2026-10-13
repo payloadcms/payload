@@ -292,11 +292,9 @@ export const renderListView = async (
     select[collectionConfig.hierarchy.collectionSpecific.fieldName] = true
   }
 
-  /** Populate only the configured thumbnail relationship for flat collection grids. */
+  /** Include thumbnail relationships in both layouts so switching to grid needs no refetch. */
   const thumbnailFieldName =
-    collectionPreferences?.documentLayout === 'grid' && viewType !== 'hierarchy'
-      ? collectionConfig.admin.useAsThumbnail
-      : undefined
+    viewType !== 'hierarchy' ? collectionConfig.admin.useAsThumbnail : undefined
   const thumbnailPopulate = thumbnailFieldName
     ? getDocumentThumbnailPopulate({ collectionConfig, collections: payload.config.collections })
     : undefined
