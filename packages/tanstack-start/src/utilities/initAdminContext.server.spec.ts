@@ -18,7 +18,7 @@ vi.mock('payload/internal', () => ({
 
 vi.mock('./devConfigReload.server.js', () => ({}))
 
-vi.mock('./serverAdapter.server.js', () => ({
+vi.mock('../adapters/server.js', () => ({
   tanstackServerAdapter,
 }))
 

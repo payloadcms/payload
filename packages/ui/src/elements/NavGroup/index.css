@@ -22,10 +22,9 @@
     isolation: isolate;
     padding-block: var(--spacer-2);
     padding-inline: var(--spacer-3);
-    font-family: var(--text-body-medium-strong-font-family);
-    font-size: var(--text-body-medium-strong-font-size);
-    font-weight: var(--text-body-medium-strong-font-weight);
-    line-height: var(--text-body-medium-strong-line-height);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
 
     &::before {
       content: '';

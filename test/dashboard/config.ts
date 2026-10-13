@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { DraftPosts } from './collections/DraftPosts.js'
 import { Events } from './collections/Events.js'
 import { Media } from './collections/Media.js'
 import { MediaAlt } from './collections/MediaAlt.js'
@@ -273,6 +274,7 @@ export default buildConfigWithDefaults({
       },
     },
     collections: [
+      DraftPosts,
       Tickets,
       Revenue,
       Events,

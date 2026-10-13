@@ -11,10 +11,10 @@ import {
   useField,
   useListQuery,
 } from '@payloadcms/ui'
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 
 import { useImportExport } from '../ImportExportProvider/index.js'
-import { reduceFields } from './reduceFields.js'
+import { filterSelectableFieldValues, reduceFields } from './reduceFields.js'
 
 const baseClass = 'field-type fields-to-export'
 
@@ -28,32 +28,36 @@ export const FieldsToExport: React.FC<SelectFieldClientProps> = (props) => {
 
   const collectionConfig = getEntityConfig({ collectionSlug: collectionSlug ?? collection })
 
-  const disabledFields =
-    collectionConfig?.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
+  const fieldOptions = useMemo(() => {
+    const disabledFields =
+      collectionConfig?.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
 
-  const fieldOptions = reduceFields({
-    disabledFields,
-    fields: collectionConfig?.fields,
-  })
-
+    return reduceFields({
+      disabledFields,
+      fields: collectionConfig?.fields,
+    })
+  }, [collectionConfig?.admin?.custom, collectionConfig?.fields])
   useEffect(() => {
     if (id || !collectionSlug) {
       return
     }
 
     const queryColumns = query?.columns
+    const initialColumns = Array.isArray(queryColumns)
+      ? queryColumns.filter(
+          (column): column is string => typeof column === 'string' && !column.startsWith('-'),
+        )
+      : (collectionConfig?.admin?.defaultColumns ?? [])
 
-    if (Array.isArray(queryColumns)) {
-      const cleanColumns = queryColumns.filter(
-        (col): col is string => typeof col === 'string' && !col.startsWith('-'),
-      )
-      // If columns are specified in the query, use them
-      setValue(cleanColumns)
-    } else {
-      // Fallback if no columns in query
-      setValue(collectionConfig?.admin?.defaultColumns ?? [])
-    }
-  }, [id, collectionSlug, query?.columns, collectionConfig?.admin?.defaultColumns, setValue])
+    setValue(filterSelectableFieldValues({ fieldOptions, values: initialColumns }))
+  }, [
+    id,
+    collectionSlug,
+    query?.columns,
+    collectionConfig?.admin?.defaultColumns,
+    fieldOptions,
+    setValue,
+  ])
 
   const onChange = (options: { id: string; label: ReactNode; value: string }[]) => {
     if (!options) {

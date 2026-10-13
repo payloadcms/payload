@@ -3,7 +3,7 @@
     display: flex;
     align-items: flex-end;
     flex-wrap: wrap;
-    padding: var(--spacer-2-5) var(--gutter-h);
+    padding: var(--spacer-2) var(--gutter-h) var(--spacer-3);
     border-bottom: var(--stroke-width-small) solid var(--color-border);
   }
 
@@ -21,10 +21,9 @@
   }
 
   .list-header__title {
-    font-size: var(--text-heading-large-font-size);
-    line-height: var(--text-heading-large-line-height);
-    font-weight: var(--text-heading-large-font-weight);
-    font-family: var(--text-heading-large-font-family);
+    font-size: var(--text-heading-xl-font-size);
+    line-height: var(--text-heading-xl-line-height);
+    font-weight: var(--text-heading-xl-font-weight);
   }
 
   .list-header__title-actions {

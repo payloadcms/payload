@@ -48,6 +48,7 @@ export const TreeFocusProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const unregisterItem = useCallback((id: string) => {
     itemsRef.current.delete(id)
+    setFocusedIdState((focusedId) => (focusedId === id ? null : focusedId))
   }, [])
 
   const moveFocus = useCallback(
@@ -121,15 +122,16 @@ export const useTreeFocus = () => {
 export const useFocusableItem = ({
   id,
   type,
+  isInitialTabStop = false,
   ref,
 }: {
   id: string
+  isInitialTabStop?: boolean
   ref: React.RefObject<HTMLElement>
   type: 'load-more' | 'node'
 }) => {
   const { focusedId, registerItem, setFocusedId, unregisterItem } = useTreeFocus()
   const isFocused = focusedId === id
-  const isFirstItemEver = focusedId === null
   const wasFocusedRef = useRef(false)
 
   useEffect(() => {
@@ -156,8 +158,7 @@ export const useFocusableItem = ({
     setFocusedId(id)
   }, [id, setFocusedId])
 
-  // Roving tabindex: focused item gets 0, first item (when nothing focused) gets 0, all others get -1
-  const tabIndex = isFocused ? 0 : isFirstItemEver ? 0 : -1
+  const tabIndex = isFocused || (focusedId === null && isInitialTabStop) ? 0 : -1
 
   return {
     handleFocus,

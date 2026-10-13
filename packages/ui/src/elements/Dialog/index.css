@@ -20,7 +20,6 @@
     background: var(--color-bg);
     border-radius: var(--radius-large);
     overflow: clip;
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
@@ -65,7 +64,7 @@
     flex: 1 0 0;
     min-width: 0;
     margin: 0;
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
     letter-spacing: var(--text-body-medium-letter-spacing);
   }
 

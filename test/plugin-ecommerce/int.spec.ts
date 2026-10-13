@@ -2,7 +2,7 @@ import { createRequire } from 'node:module'
 import { fileURLToPath } from 'url'
 import { expect, vi } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
 
@@ -121,7 +121,7 @@ process.env.STRIPE_SECRET_KEY = 'sk_test_offline'
 
 // Helper to create a guest cart with items
 async function createGuestCartWithItems(
-  client: NextRESTClient,
+  client: RESTClient,
   productId: string,
   variantId?: string,
 ) {

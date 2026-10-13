@@ -12,7 +12,6 @@
       border: var(--stroke-width-small) solid var(--field-color-border);
       border-radius: var(--field-border-radius);
       color: var(--color-text);
-      font-family: var(--text-body-medium-font-family);
       font-size: var(--text-body-medium-font-size);
       font-weight: var(--text-body-medium-font-weight);
       line-height: var(--text-body-medium-line-height);
@@ -113,14 +112,12 @@
   .rs__group-heading {
     color: var(--color-text-tertiary);
     padding: var(--spacer-2-5) var(--spacer-3) var(--spacer-1);
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
   }
 
   .rs__option {
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);

@@ -14,6 +14,7 @@ import './index.css'
 const Editor = 'default' in EditorImport ? EditorImport.default : EditorImport
 
 const baseClass = 'code-editor'
+const initializedTabFocusModes = new WeakSet<Monaco>()
 
 function definePayloadThemes(monaco: Monaco) {
   monaco.editor.defineTheme('payload-light', {
@@ -147,6 +148,13 @@ const CodeEditor: React.FC<Props> = (props) => {
         )
       }}
       onMount={(editor, monaco) => {
+        // Set Monaco's shared default once, so its native toggle and announcements stay in sync.
+        // Mounting another editor must not reset the user's chosen mode.
+        if (!initializedTabFocusModes.has(monaco) && options?.tabFocusMode === undefined) {
+          initializedTabFocusModes.add(monaco)
+          editor.trigger('payload', 'editor.action.toggleTabFocusMode', null)
+        }
+
         rest.onMount?.(editor, monaco)
 
         // Required to prevent copy/cut/paste from being hijacked by Lexical rich text editor

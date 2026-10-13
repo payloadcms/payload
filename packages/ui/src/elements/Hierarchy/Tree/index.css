@@ -42,7 +42,7 @@
     padding-block: var(--spacer-1);
 
     .sidebar-row__title {
-      font-weight: var(--text-body-medium-strong-font-weight);
+      font-weight: var(--text-body-medium-bold-font-weight);
     }
   }
 

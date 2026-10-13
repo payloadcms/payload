@@ -1,4 +1,4 @@
-import type { AuthenticatedUser, CollectionSlug, Payload } from 'payload'
+import type { AuthenticatedUser, ClientField, CollectionSlug, Payload } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
@@ -7,6 +7,10 @@ import { extractID } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
+import {
+  filterSelectableFieldValues,
+  reduceFields,
+} from '../../packages/plugin-import-export/src/components/FieldsToExport/reduceFields.js'
 import { test } from '../__helpers/int/vitest.js'
 import { devUser, regularUser } from '../credentials.js'
 import { clearTestBucket, createTestBucket } from '../storage-s3/test-utils.js'
@@ -6812,6 +6816,26 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
   })
 
   test.describe('collection configuration', () => {
+    test('should exclude disabled default columns from the export field selection', ({
+      payload,
+    }) => {
+      const postsConfig = payload.collections['posts-exports-only'].config
+      const disabledFields =
+        postsConfig.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
+      const fieldOptions = reduceFields({
+        disabledFields,
+        fields: postsConfig.fields as ClientField[],
+      })
+      const initialSelection = filterSelectableFieldValues({
+        fieldOptions,
+        values: postsConfig.admin?.defaultColumns ?? [],
+      })
+
+      expect(postsConfig.admin?.defaultColumns).toContain('disabledForImportExport')
+      expect(disabledFields).toContain('disabledForImportExport')
+      expect(initialSelection).not.toContain('disabledForImportExport')
+    })
+
     test('should exclude collections with custom export collections from base exports', ({
       payload,
     }) => {

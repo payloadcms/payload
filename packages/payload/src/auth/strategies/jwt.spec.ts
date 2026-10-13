@@ -1,7 +1,7 @@
 import type { CollectionConfig } from '../../collections/config/types.js'
 import type { Payload, PayloadRequest } from '../../types/index.js'
 
-import { SignJWT } from 'jose'
+import { SignJWT } from 'jose/jwt/sign'
 import { describe, expect, it, vi } from 'vitest'
 
 import { getFieldsToSign } from '../getFieldsToSign.js'

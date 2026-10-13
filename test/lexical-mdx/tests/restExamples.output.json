@@ -79,7 +79,7 @@
                   "format": "",
                   "indent": 0,
                   "type": "link",
-                  "version": 3,
+                  "version": 1,
                   "fields": {
                     "doc": null,
                     "linkType": "custom",
@@ -123,7 +123,7 @@
                   "format": "",
                   "indent": 0,
                   "type": "link",
-                  "version": 3,
+                  "version": 1,
                   "fields": {
                     "doc": null,
                     "linkType": "custom",
@@ -162,7 +162,7 @@
         {
           "format": "",
           "type": "block",
-          "version": 2,
+          "version": 1,
           "fields": {
             "blockType": "Code",
             "language": "ts",
@@ -173,7 +173,7 @@
         {
           "format": "",
           "type": "block",
-          "version": 2,
+          "version": 1,
           "fields": {
             "blockType": "restExamples",
             "data": [

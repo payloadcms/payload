@@ -5,6 +5,7 @@ import type { User } from '../../index.js'
 import type { Where } from '../../types/index.js'
 import type { AuthStrategyFunction } from '../index.js'
 
+import { stripTrailingSlash } from '../../utilities/formatAdminURL.js'
 import { getAPIKeyLast4 } from '../baseFields/apiKey/getAPIKeyLast4.js'
 import { legacyAPIKeyLast4 } from '../baseFields/apiKey/omitAPIKey.js'
 
@@ -60,8 +61,18 @@ export const APIKeyAuthentication =
         if (userQuery.docs && userQuery.docs.length > 0) {
           const user = userQuery.docs[0]
           const apiKeyLast4 = getAPIKeyLast4(apiKey)
+          const requestPathname = req?.pathname ? stripTrailingSlash(req.pathname) : undefined
+          const isValidationRequest =
+            req?.operation === 'validate' || requestPathname?.endsWith('/validate')
+          // GraphQL authentication runs before the requested resolver is known, so it must remain
+          // read-only to preserve validation's no-write guarantee.
+          const canBackfillAPIKeyLast4 = !isGraphQL && !isValidationRequest
 
-          if (user?.apiKeyLast4 === legacyAPIKeyLast4 && apiKeyLast4 !== legacyAPIKeyLast4) {
+          if (
+            canBackfillAPIKeyLast4 &&
+            user?.apiKeyLast4 === legacyAPIKeyLast4 &&
+            apiKeyLast4 !== legacyAPIKeyLast4
+          ) {
             try {
               await payload.db.updateOne({
                 id: user.id,

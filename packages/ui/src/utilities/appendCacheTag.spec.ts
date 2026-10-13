@@ -21,6 +21,12 @@ describe('appendCacheTag', () => {
     )
   })
 
+  it('should leave a selected file preview URL unchanged when cacheTag is present', () => {
+    const blobURL = 'blob:http://localhost:3000/7f18bc6d-26fd-410b-8d3f-72cf61d92c42'
+
+    expect(appendCacheTag(blobURL, '2026-10-05T13:44:01.601Z')).toBe(blobURL)
+  })
+
   it('should append the cache tag with ? when the url has no query string', () => {
     const result = appendCacheTag('https://example.com/image.jpg', '2024-01-01T00:00:00.000Z')
     expect(result).toBe('https://example.com/image.jpg?2024-01-01T00%3A00%3A00.000Z')

@@ -115,8 +115,9 @@ export function ModularDashboardClient({
           setActiveDragId(null)
         }}
         onDragEnd={(event) => {
+          setActiveDragId(null)
+
           if (!event.over) {
-            setActiveDragId(null)
             return
           }
           const droppableId = event.over.id as string
@@ -139,7 +140,6 @@ export function ModularDashboardClient({
             moveToIndex++
           }
           moveWidget({ moveFromIndex, moveToIndex })
-          setActiveDragId(null)
         }}
         onDragStart={(event) => {
           setActiveDragId(event.active.id as string)

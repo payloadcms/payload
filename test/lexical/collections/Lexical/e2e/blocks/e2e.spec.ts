@@ -975,8 +975,11 @@ describe('lexicalBlocks', () => {
         await expect(uploadListDrawer).toBeVisible()
         await wait(300)
 
-        // find button which has a span with text "payload.jpg" and click it in playwright
-        const uploadButton = uploadListDrawer.locator('button').getByText('payload.jpg').first()
+        // find button which has a span with text "payload-original.jpg" and click it in playwright
+        const uploadButton = uploadListDrawer
+          .locator('button')
+          .getByText('payload-original.jpg')
+          .first()
         await expect(uploadButton).toBeVisible()
         await wait(300)
         await uploadButton.click()
@@ -987,7 +990,7 @@ describe('lexicalBlocks', () => {
           newSubLexicalAndUploadBlock.locator(
             '.field-type.upload .upload-relationship-details__filename a',
           ),
-        ).toHaveText('payload.jpg')
+        ).toHaveText('payload-original.jpg')
       }).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
@@ -1002,7 +1005,7 @@ describe('lexicalBlocks', () => {
         newSubLexicalAndUploadBlock.locator(
           '.field-type.upload .upload-relationship-details__filename a',
         ),
-      ).toHaveText('payload.jpg')
+      ).toHaveText('payload-original.jpg')
       await expect(paragraphInSubEditor).toHaveText('Some subText')
       await wait(300)
 
@@ -1024,7 +1027,7 @@ describe('lexicalBlocks', () => {
         newSubLexicalAndUploadBlock.locator(
           '.field-type.upload .upload-relationship-details__filename a',
         ),
-      ).toHaveText('payload.jpg')
+      ).toHaveText('payload-original.jpg')
       await expect(paragraphInSubEditor).toHaveText('Some subText')
 
       // Check if the API result is populated correctly - Depth 0
@@ -1037,7 +1040,7 @@ describe('lexicalBlocks', () => {
               overrideAccess: true,
               where: {
                 filename: {
-                  equals: 'payload.jpg',
+                  equals: 'payload-original.jpg',
                 },
               },
             })
@@ -1067,7 +1070,7 @@ describe('lexicalBlocks', () => {
               overrideAccess: true,
               where: {
                 filename: {
-                  equals: 'payload.jpg',
+                  equals: 'payload-original.jpg',
                 },
               },
             })
@@ -1277,7 +1280,7 @@ describe('lexicalBlocks', () => {
       await expect(uploadBlock).toBeVisible()
 
       await expect(uploadBlock.locator('.LexicalEditorTheme__upload__filename')).toHaveText(
-        'payload.jpg',
+        'payload-original.jpg',
       )
     })
 
@@ -1617,9 +1620,9 @@ describe('lexicalBlocks', () => {
       await inlineBlockDrawer.getByRole('button', { name: 'Add Avatar' }).click()
       await inlineBlockDrawer.getByRole('button', { name: 'Choose from existing' }).click()
       const uploadDrawer = page.locator('dialog[id^=list-drawer_2_]').first()
-      await uploadDrawer.getByText('payload.jpg').click()
+      await uploadDrawer.getByText('payload-original.jpg').click()
       await expect(inlineBlockDrawer.locator('.upload-relationship-details__filename')).toHaveText(
-        'payload.jpg',
+        'payload-original.jpg',
       )
       await saveDrawer()
       await saveDocAndAssert(page)
@@ -1638,7 +1641,7 @@ describe('lexicalBlocks', () => {
               overrideAccess: true,
               where: {
                 filename: {
-                  equals: 'payload.jpg',
+                  equals: 'payload-original.jpg',
                 },
               },
             })
@@ -1664,7 +1667,7 @@ describe('lexicalBlocks', () => {
               overrideAccess: true,
               where: {
                 filename: {
-                  equals: 'payload.jpg',
+                  equals: 'payload-original.jpg',
                 },
               },
             })

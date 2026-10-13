@@ -39,7 +39,6 @@
     padding-inline: var(--spacer-1);
     background: var(--color-bg-tertiary);
     border-radius: var(--radius-medium);
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
