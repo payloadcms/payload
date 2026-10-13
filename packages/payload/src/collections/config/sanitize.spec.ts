@@ -2,6 +2,8 @@ import type { CollectionConfig } from './types.js'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { HIERARCHY_SLUG_PATH_FIELD, HIERARCHY_TITLE_PATH_FIELD } from '../../hierarchy/constants.js'
+import { resolveHierarchyCollections } from '../../hierarchy/resolveHierarchyCollections.js'
 import { canAccessAdmin } from '../../utilities/canAccessAdmin.js'
 import { isInheritedReadVersionsAccess } from '../../versions/isInheritedReadVersionsAccess.js'
 import { sanitizeCollection, warnOnInvalidCustomViews } from './sanitize.js'
@@ -536,5 +538,83 @@ describe('warnOnInvalidCustomViews', () => {
     warnOnInvalidCustomViews(collection)
 
     expect(warnSpy).not.toHaveBeenCalled()
+  })
+})
+
+describe('hierarchy fields', () => {
+  // A plugin that wraps each collection in a new object (`{ ...collection }`) keeps the
+  // same `fields` array. When the config loads again (e.g. a dev hot reload), the
+  // `_sanitized` flag is not on the new object, so sanitization runs on that array twice.
+  const sanitizeTwiceWithSharedFields = (collection: CollectionConfig) => {
+    const config = {
+      collections: [],
+      globals: [],
+    } as any
+
+    const validRelationships = [collection.slug]
+
+    sanitizeCollection(config, { ...collection }, undefined, validRelationships)
+
+    return sanitizeCollection(config, { ...collection }, undefined, validRelationships)
+  }
+
+  const countFieldsNamed = ({
+    fields,
+    name,
+  }: {
+    fields: CollectionConfig['fields']
+    name: string
+  }) => fields.filter((field) => 'name' in field && field.name === name).length
+
+  it('should add hierarchy path fields once when a folders collection is sanitized twice', () => {
+    const collection: CollectionConfig = {
+      slug: 'folders',
+      admin: {
+        useAsTitle: 'name',
+      },
+      fields: [{ name: 'name', type: 'text' }],
+      folders: true,
+    }
+
+    const result = sanitizeTwiceWithSharedFields(collection)
+
+    expect(countFieldsNamed({ fields: result.fields, name: HIERARCHY_SLUG_PATH_FIELD })).toBe(1)
+    expect(countFieldsNamed({ fields: result.fields, name: HIERARCHY_TITLE_PATH_FIELD })).toBe(1)
+  })
+
+  it('should add hierarchy path fields once when a tags collection is sanitized twice', () => {
+    const collection: CollectionConfig = {
+      slug: 'tags',
+      admin: {
+        useAsTitle: 'name',
+      },
+      fields: [{ name: 'name', type: 'text' }],
+      tags: true,
+    }
+
+    const result = sanitizeTwiceWithSharedFields(collection)
+
+    expect(countFieldsNamed({ fields: result.fields, name: HIERARCHY_SLUG_PATH_FIELD })).toBe(1)
+    expect(countFieldsNamed({ fields: result.fields, name: HIERARCHY_TITLE_PATH_FIELD })).toBe(1)
+  })
+
+  it('should add the collection-specific type field once when hierarchy is resolved twice', () => {
+    const collection: CollectionConfig = {
+      slug: 'categories',
+      admin: {
+        useAsTitle: 'name',
+      },
+      fields: [{ name: 'name', type: 'text' }],
+      hierarchy: {
+        collectionSpecific: true,
+      },
+    }
+
+    const sanitized = sanitizeTwiceWithSharedFields(collection)
+
+    resolveHierarchyCollections({ collections: [{ ...sanitized }] } as any)
+    resolveHierarchyCollections({ collections: [{ ...sanitized }] } as any)
+
+    expect(countFieldsNamed({ fields: sanitized.fields, name: 'hierarchyType' })).toBe(1)
   })
 })

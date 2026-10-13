@@ -1,5 +1,7 @@
 import type { CollectionConfig } from '../collections/config/types.js'
+import type { TextField } from '../fields/config/types.js'
 
+import { fieldAffectsData } from '../fields/config/types.js'
 import { hierarchyCollectionAfterRead } from './hooks/collectionAfterRead.js'
 import { hierarchyCollectionBeforeChange } from './hooks/collectionBeforeChange.js'
 import { hierarchyCollectionBeforeDelete } from './hooks/collectionBeforeDelete.js'
@@ -24,8 +26,10 @@ export const addHierarchyToCollection = ({
   const slugFieldInfo = slugFieldName ? findFieldByName(collectionConfig, slugFieldName) : undefined
   const validatedSlugFieldName = slugFieldInfo ? slugFieldName : undefined
 
-  // Add virtual path fields (computed in afterRead)
-  collectionConfig.fields.push(
+  // Add virtual path fields (computed in afterRead).
+  // Skip fields that already exist: plugins can wrap this collection in a new object that
+  // shares the same `fields` array, so this can run again on fields it already changed.
+  const pathFields: TextField[] = [
     {
       name: slugPathFieldName,
       type: 'text',
@@ -48,7 +52,17 @@ export const addHierarchyToCollection = ({
       label: 'Title Path',
       virtual: true,
     },
-  )
+  ]
+
+  for (const pathField of pathFields) {
+    const hasPathField = collectionConfig.fields.some(
+      (field) => fieldAffectsData(field) && field.name === pathField.name,
+    )
+
+    if (!hasPathField) {
+      collectionConfig.fields.push(pathField)
+    }
+  }
 
   if (!collectionConfig.admin) {
     collectionConfig.admin = {}
