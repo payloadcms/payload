@@ -6,6 +6,7 @@ import { access, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
+import { convertDemo } from './convert-demo.mjs'
 import {
   parseViewport,
   previewDemo,
@@ -20,7 +21,6 @@ const DEFAULT_LABEL = 'feature-demo'
 const DEFAULT_MOUSE_MOVE_MS = 400
 const DEFAULT_VIEWPORT = { height: 900, width: 1440 }
 const MODES = new Set(['candidate', 'preflight', 'preview', 'validate', 'verify'])
-const MAX_VIDEO_BYTES = 10 * 1024 * 1024
 
 export function parseArgs(argv) {
   const args = [...argv]
@@ -108,29 +108,11 @@ export async function packageCandidate({
   const resolvedRawOutput = path.resolve(rawOutput)
   const resolvedScenario = path.resolve(scenario)
 
-  await mkdir(path.dirname(resolvedOutput), { recursive: true })
-  runCommand({
-    args: [
-      '-y',
-      '-ss',
-      String(trimStart),
-      '-i',
-      resolvedRawOutput,
-      '-an',
-      '-c:v',
-      'libx264',
-      '-preset',
-      'medium',
-      '-crf',
-      '23',
-      '-pix_fmt',
-      'yuv420p',
-      '-movflags',
-      '+faststart',
-      resolvedOutput,
-    ],
-    command: 'ffmpeg',
+  await convertDemo({
     environment,
+    input: resolvedRawOutput,
+    output: resolvedOutput,
+    trimStart,
   })
 
   runCommand({
@@ -187,10 +169,6 @@ export async function packageCandidate({
   })
 
   const fileStats = await stat(resolvedOutput)
-  if (fileStats.size > MAX_VIDEO_BYTES) {
-    throw new Error('Converted video exceeds the 10240 KB upload budget. Shorten the demo.')
-  }
-
   const fileBuffer = await readFile(resolvedOutput)
   const sha256 = createHash('sha256').update(fileBuffer).digest('hex')
   const metadata = {

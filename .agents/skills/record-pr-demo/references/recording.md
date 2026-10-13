@@ -194,7 +194,7 @@ Useful options:
 - `--contact-sheet /tmp/custom-demo-contact-sheet.png`
 - `--manifest /tmp/custom-demo.json`
 
-The lower-level `record-demo.mjs` remains available for debugging the recorder itself. Use `prepare-demo.mjs` for PR demos; it converts the recording using the opening state marked by `ready()` and verifies the candidate before cleanup.
+The lower-level `record-demo.mjs` remains available for debugging the recorder itself. `convert-demo.mjs` is used internally by `prepare-demo.mjs` with the opening state marked by `ready()`. Use `prepare-demo.mjs` for PR demos so conversion, verification, and cleanup stay together.
 
 ## Review the candidate
 
