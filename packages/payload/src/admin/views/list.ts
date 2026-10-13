@@ -123,6 +123,11 @@ export type ListViewClientProps = {
    * @deprecated
    */
   preferenceKey?: string
+  /** Selected upload documents shared with the table relationship cache. */
+  prefetchedRelationships?: {
+    documents: Record<string, Record<string, false | TypeWithID>>
+    locale?: string
+  }
   queryPreset?: QueryPreset
   queryPresetPermissions?: SanitizedCollectionPermission
   renderedFilters?: Map<string, React.ReactNode>

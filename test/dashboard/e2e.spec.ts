@@ -1,3 +1,5 @@
+import type { Request } from '@playwright/test'
+
 /* eslint-disable playwright/expect-expect */
 import { expect, test } from '@playwright/test'
 import { readFile, rm, rmdir } from 'node:fs/promises'
@@ -5,6 +7,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
+import { changeLocale } from '../__helpers/e2e/helpers.js'
 import { getSelectMenu, openSelectMenu, selectInput } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -60,6 +63,7 @@ describe('Dashboard', () => {
 
       expect(uploadResponse.ok()).toBe(true)
       const media = await uploadResponse.json()
+      let secondMedia: { doc: { id: string; thumbnailURL?: string; url: string } } | undefined
 
       try {
         const documentResponse = await page.request.post(
@@ -70,7 +74,30 @@ describe('Dashboard', () => {
         )
 
         expect(documentResponse.ok()).toBe(true)
-        const listURL = `${serverURL}/admin/collections/draft-posts${isGrouped ? '?groupBy=title' : ''}`
+        if (!isGrouped) {
+          const secondUploadResponse = await page.request.post(`${serverURL}/api/media`, {
+            multipart: {
+              _payload: JSON.stringify({}),
+              file: {
+                name: 'second-grid-thumbnail.jpg',
+                buffer: await readFile(path.resolve(dirname, 'test/select/image.jpg')),
+                mimeType: 'image/jpeg',
+              },
+            },
+          })
+
+          expect(secondUploadResponse.ok()).toBe(true)
+          secondMedia = await secondUploadResponse.json()
+          const secondDocumentResponse = await page.request.post(
+            `${serverURL}/api/draft-posts?draft=true`,
+            {
+              data: { cover: secondMedia.doc.id, title: 'Second thumbnail' },
+            },
+          )
+
+          expect(secondDocumentResponse.ok()).toBe(true)
+        }
+        const listURL = `${serverURL}/admin/collections/draft-posts${isGrouped ? '?groupBy=title' : '?limit=1&sort=title'}`
 
         await page.request.post(`${serverURL}/api/payload-preferences/collection-draft-posts`, {
           data: {
@@ -83,6 +110,14 @@ describe('Dashboard', () => {
             },
           },
         })
+        const uploadRequests: string[] = []
+        const recordUploadRequest = (request: Request) => {
+          if (new URL(request.url()).pathname === '/api/media') {
+            uploadRequests.push(request.url())
+          }
+        }
+
+        page.on('request', recordUploadRequest)
         await page.goto(listURL)
         await expect(page.getByRole('radio', { name: 'Table' })).toBeChecked()
         const tableThumbnail = page.locator('.cell-cover img')
@@ -111,8 +146,50 @@ describe('Dashboard', () => {
           },
           { allowedNumberOfRequests: 0 },
         )
+        await changeLocale(page, 'es')
+        await expect(page).toHaveURL(/locale=es/)
+        await expect(tableThumbnail).toBeVisible()
+        await assertNetworkRequests(
+          page,
+          `${serverURL}/api/media`,
+          async () => {
+            await page.getByRole('radio', { name: 'Grid' }).check()
+            await expect(page.locator('.document-card__thumbnail')).toBeVisible()
+            await page.getByRole('radio', { name: 'Table' }).check()
+            await expect(tableThumbnail).toBeVisible()
+          },
+          {
+            allowedNumberOfRequests: 0,
+            requestFilter: (request) => new URL(request.url()).pathname === '/api/media',
+          },
+        )
+        if (secondMedia) {
+          await page.getByRole('button', { name: 'Next table page', exact: true }).click()
+          await expect(page.locator('.cell-title')).toContainText('Second thumbnail')
+          await expect
+            .poll(async () => {
+              const src = await tableThumbnail.getAttribute('src')
+
+              return src ? new URL(src, serverURL).pathname : undefined
+            })
+            .toBe(new URL(secondMedia.doc.thumbnailURL || secondMedia.doc.url, serverURL).pathname)
+          await page.getByRole('button', { name: 'Previous table page', exact: true }).click()
+          await expect(page.locator('.cell-title')).toContainText('Grid thumbnail')
+          await expect
+            .poll(async () => {
+              const src = await tableThumbnail.getAttribute('src')
+
+              return src ? new URL(src, serverURL).pathname : undefined
+            })
+            .toBe(thumbnailPath)
+        }
+        expect(uploadRequests).toEqual([])
+        page.off('request', recordUploadRequest)
       } finally {
         await page.request.delete(`${serverURL}/api/media/${media.doc.id}`)
+        if (secondMedia) {
+          await page.request.delete(`${serverURL}/api/media/${secondMedia.doc.id}`)
+        }
       }
     })
   }

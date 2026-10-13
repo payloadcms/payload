@@ -47,9 +47,14 @@ test.suite('List thumbnails', { config: './config.ts' }, () => {
       req,
     })
 
-    expect(result).toEqual({
+    expect(result.thumbnails).toEqual({
       'post-one': '/custom-list-thumbnail.png',
       'post-two': '/custom-list-thumbnail.png',
+    })
+    expect(result.prefetchedRelationships.documents.media[media.id]).toMatchObject({
+      id: media.id,
+      filename: media.filename,
+      previewURL: '/custom-list-thumbnail.png',
     })
     expect(find).toHaveBeenCalledTimes(1)
     expect(find.mock.calls[0][0]).toMatchObject({
@@ -91,13 +96,16 @@ test.suite('List thumbnails', { config: './config.ts' }, () => {
           docs: [{ id: 'post-one', cover: media.id }],
           req,
         }),
-      ).toEqual({})
+      ).toMatchObject({
+        thumbnails: {},
+        prefetchedRelationships: { documents: { media: { [media.id]: false } } },
+      })
     } finally {
       payload.collections.media.config.access.read = previousReadAccess
     }
   })
 
-  test('should batch the first thumbnail of polymorphic upload arrays by collection', async ({
+  test('should share fallback-localized upload titles while batching polymorphic thumbnails', async ({
     payload,
   }) => {
     const owner = await payload.create({
@@ -125,7 +133,7 @@ test.suite('List thumbnails', { config: './config.ts' }, () => {
       { id: media.id, collection: 'media' },
       { id: alternateMedia.id, collection: 'media-alt' },
     )
-    const req = await createPayloadRequest({ payload, req: { user } })
+    const req = await createPayloadRequest({ locale: 'es', payload, req: { user } })
     const collectionConfig = payload.collections['draft-posts'].config
     const find = vi.spyOn(payload, 'find')
     const result = await getDocumentThumbnails({
@@ -154,9 +162,12 @@ test.suite('List thumbnails', { config: './config.ts' }, () => {
       req,
     })
 
-    expect(result).toEqual({
+    expect(result.thumbnails).toEqual({
       'post-one': media.thumbnailURL || media.url,
       'post-two': alternateMedia.thumbnailURL || alternateMedia.url,
+    })
+    expect(result.prefetchedRelationships.documents['media-alt'][alternateMedia.id]).toMatchObject({
+      description: 'Alternate upload',
     })
     expect(find).toHaveBeenCalledTimes(2)
     for (const [args] of find.mock.calls) {
@@ -174,7 +185,7 @@ test.suite('List thumbnails', { config: './config.ts' }, () => {
       req,
     })
 
-    expect(result).toEqual({ 'media-id': '/image.jpg' })
+    expect(result.thumbnails).toEqual({ 'media-id': '/image.jpg' })
     expect(find).not.toHaveBeenCalled()
   })
 })

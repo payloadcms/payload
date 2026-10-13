@@ -563,7 +563,7 @@ export const renderListView = async (
 
   const isInDrawer = Boolean(drawerSlug)
   const listDocs = groupedData ? groupedData.flatMap((group) => group.data.docs) : data.docs
-  const documentThumbnails =
+  const thumbnailData =
     !isInDrawer && !isHierarchyView
       ? await getDocumentThumbnails({ collectionConfig, docs: listDocs, req })
       : undefined
@@ -601,7 +601,7 @@ export const renderListView = async (
       disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
       disableQueryPresets,
       documentLayout: collectionPreferences?.documentLayout,
-      documentThumbnails,
+      documentThumbnails: thumbnailData?.thumbnails,
       documentURLs,
       enableRowSelections,
       groupedData,
@@ -612,6 +612,7 @@ export const renderListView = async (
       HierarchyIcon,
       listPreferences: collectionPreferences,
       newDocumentURL,
+      prefetchedRelationships: thumbnailData?.prefetchedRelationships,
       queryPreset,
       queryPresetPermissions,
       renderedFilters,

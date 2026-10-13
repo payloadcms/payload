@@ -67,6 +67,7 @@ export function DefaultListView(props: ListViewClientProps) {
     listMenuItems,
     newDocumentURL,
     NoResults,
+    prefetchedRelationships,
     queryPreset,
     queryPresetPermissions,
     renderedFilters,
@@ -423,7 +424,9 @@ export function DefaultListView(props: ListViewClientProps) {
                   viewType={viewType}
                 />
               ) : (
-                <RelationshipProvider>{Table}</RelationshipProvider>
+                <RelationshipProvider prefetchedRelationships={prefetchedRelationships}>
+                  {Table}
+                </RelationshipProvider>
               )
             ) : null}
             {/* HierarchyTable handles its own empty state, skip for hierarchy views */}

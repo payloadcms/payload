@@ -1,4 +1,4 @@
-import type { PayloadRequest, SanitizedCollectionConfig } from 'payload'
+import type { ListViewClientProps, PayloadRequest, SanitizedCollectionConfig } from 'payload'
 
 import { getDocumentThumbnail } from '../../utilities/getDocumentThumbnail.js'
 import { getDocumentThumbnailSelect } from '../../utilities/getDocumentThumbnailSelect.js'
@@ -11,8 +11,16 @@ export async function getDocumentThumbnails({
   collectionConfig: SanitizedCollectionConfig
   docs: Record<string, unknown>[]
   req: PayloadRequest
-}): Promise<Record<string, string>> {
+}): Promise<{
+  prefetchedRelationships: NonNullable<ListViewClientProps['prefetchedRelationships']>
+  thumbnails: Record<string, string>
+}> {
   const thumbnails = new Map<string, string>()
+  const documents: NonNullable<ListViewClientProps['prefetchedRelationships']>['documents'] = {}
+  const result = () => ({
+    prefetchedRelationships: { documents, locale: req.locale },
+    thumbnails: Object.fromEntries(thumbnails),
+  })
   const thumbnailField = collectionConfig.flattenedFields.find(
     (field) => field.name === collectionConfig.admin.useAsThumbnail && field.type === 'upload',
   )
@@ -33,7 +41,7 @@ export async function getDocumentThumbnails({
         thumbnails.set(String(id), src)
       }
     }
-    return Object.fromEntries(thumbnails)
+    return result()
   }
 
   const references = new Map<string, Map<number | string, Set<string>>>()
@@ -86,18 +94,26 @@ export async function getDocumentThumbnails({
         depth: 0,
         disableErrors: true,
         draft: true,
-        fallbackLocale: false,
         limit: ids.size,
         locale: req.locale,
         overrideAccess: false,
         pagination: false,
         req,
-        select: getDocumentThumbnailSelect({ collectionConfig: uploadConfig }),
+        select: getDocumentThumbnailSelect({
+          collectionConfig: uploadConfig,
+          select: { [uploadConfig.admin.useAsTitle ?? 'id']: true },
+        }),
         user: req.user,
         where: { id: { in: [...ids.keys()] } },
       })
 
+      const relatedDocuments = Object.fromEntries(
+        [...ids.keys()].map((id) => [id, false as const]),
+      ) as NonNullable<ListViewClientProps['prefetchedRelationships']>['documents'][string]
+
+      documents[collectionSlug] = relatedDocuments
       for (const upload of result.docs) {
+        relatedDocuments[upload.id] = upload
         const src = getDocumentThumbnail({ doc: upload })
 
         if (src) {
@@ -109,5 +125,5 @@ export async function getDocumentThumbnails({
     }),
   )
 
-  return Object.fromEntries(thumbnails)
+  return result()
 }
