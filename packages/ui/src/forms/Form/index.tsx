@@ -149,13 +149,13 @@ export const Form: React.FC<FormProps> = (props) => {
   }, [setBackgroundProcessing])
 
   const [modified, _setModified] = useState(false)
-  const formRevisionRef = useRef(0)
-  const requestQueueOptions = useMemo(() => ({ getVersion: () => formRevisionRef.current }), [])
+  const formSequenceRef = useRef(0)
+  const requestQueueOptions = useMemo(() => ({ getSequence: () => formSequenceRef.current }), [])
   const { reset: resetRequestQueue, schedule: scheduleRequest } = useQueue(requestQueueOptions)
 
   const setModified = useCallback((modified: boolean) => {
     if (modified) {
-      formRevisionRef.current += 1
+      formSequenceRef.current += 1
     }
     _setModified(modified)
   }, [])
@@ -166,7 +166,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const resetSequenceRef = useRef(0)
   const isFirstRenderRef = useRef(true)
 
-  const [formState, dispatchFieldsWithoutRevision] = useReducer(
+  const [formState, dispatchFieldsWithoutIncrementingFormSequence] = useReducer(
     fieldReducer,
     {},
     () => initialState,
@@ -174,10 +174,10 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const dispatchFields = useCallback<React.Dispatch<FieldAction>>((action) => {
     if (changesFormData(action, contextRef.current.fields)) {
-      formRevisionRef.current += 1
+      formSequenceRef.current += 1
     }
 
-    dispatchFieldsWithoutRevision(action)
+    dispatchFieldsWithoutIncrementingFormSequence(action)
   }, [])
 
   contextRef.current.fields = formState
@@ -185,7 +185,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const prevFormState = useRef(formState)
 
   const validateForm = useCallback(
-    async (isCurrent?: () => boolean) => {
+    async (isCurrentRequest?: () => boolean) => {
       const validatedFieldState = {}
       let isValid = true
 
@@ -247,12 +247,15 @@ export const Form: React.FC<FormProps> = (props) => {
 
       await Promise.all(validationPromises)
 
-      if (isCurrent && !isCurrent()) {
+      if (isCurrentRequest?.() === false) {
         return false
       }
 
       if (!dequal(contextRef.current.fields, validatedFieldState)) {
-        dispatchFieldsWithoutRevision({ type: 'REPLACE_STATE', state: validatedFieldState })
+        dispatchFieldsWithoutIncrementingFormSequence({
+          type: 'REPLACE_STATE',
+          state: validatedFieldState,
+        })
       }
 
       setIsValid(isValid)
@@ -362,7 +365,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
           if (!isValid) {
             setSubmitted(true)
-            return dispatchFieldsWithoutRevision({
+            return dispatchFieldsWithoutIncrementingFormSequence({
               type: 'REPLACE_STATE',
               state: revalidatedFormState,
             })
@@ -478,7 +481,7 @@ export const Form: React.FC<FormProps> = (props) => {
           }
 
           if (newFormState) {
-            dispatchFieldsWithoutRevision({
+            dispatchFieldsWithoutIncrementingFormSequence({
               type: 'MERGE_SERVER_STATE',
               acceptValues,
               prevStateRef: prevFormState,
@@ -551,7 +554,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
             setIsValid(false)
 
-            dispatchFieldsWithoutRevision({
+            dispatchFieldsWithoutIncrementingFormSequence({
               type: 'ADD_SERVER_ERRORS',
               errors: fieldErrors,
             })
@@ -577,13 +580,13 @@ export const Form: React.FC<FormProps> = (props) => {
           res,
         }
       } catch (err) {
-        const isCurrent = requestContext.isCurrent()
+        const isCurrentRequest = requestContext.isCurrent()
 
-        if (preservePromiseToast || isCurrent) {
+        if (preservePromiseToast || isCurrentRequest) {
           preservePromiseToast = true
           console.error('Error submitting form', err) // eslint-disable-line no-console
 
-          if (isCurrent) {
+          if (isCurrentRequest) {
             setSubmitted(true)
           }
 
@@ -721,13 +724,13 @@ export const Form: React.FC<FormProps> = (props) => {
     async (data: unknown) => {
       const resetSequence = ++resetSequenceRef.current
       resetRequestQueue()
-      formRevisionRef.current = 0
+      formSequenceRef.current = 0
       restoreRequestState()
 
-      const dispatchedRevision = formRevisionRef.current
+      const dispatchedSequence = formSequenceRef.current
       const controller = handleAbortRef(abortResetFormRef)
       const isCurrentReset = () =>
-        resetSequenceRef.current === resetSequence && formRevisionRef.current === dispatchedRevision
+        resetSequenceRef.current === resetSequence && formSequenceRef.current === dispatchedSequence
       const clearResetController = () => {
         if (abortResetFormRef.current === controller) {
           abortResetFormRef.current = null
@@ -762,11 +765,11 @@ export const Form: React.FC<FormProps> = (props) => {
       }
 
       resetRequestQueue()
-      formRevisionRef.current = 0
+      formSequenceRef.current = 0
       restoreRequestState()
       contextRef.current = { ...initContextState } as FormContextType
       _setModified(false)
-      dispatchFieldsWithoutRevision({ type: 'REPLACE_STATE', state: newState })
+      dispatchFieldsWithoutIncrementingFormSequence({ type: 'REPLACE_STATE', state: newState })
 
       clearResetController()
     },
@@ -788,11 +791,11 @@ export const Form: React.FC<FormProps> = (props) => {
     (state: FormState) => {
       resetSequenceRef.current += 1
       resetRequestQueue()
-      formRevisionRef.current = 0
+      formSequenceRef.current = 0
       restoreRequestState()
       contextRef.current = { ...initContextState } as FormContextType
       _setModified(false)
-      dispatchFieldsWithoutRevision({ type: 'REPLACE_STATE', state })
+      dispatchFieldsWithoutIncrementingFormSequence({ type: 'REPLACE_STATE', state })
     },
     [resetRequestQueue, restoreRequestState],
   )
@@ -920,11 +923,11 @@ export const Form: React.FC<FormProps> = (props) => {
     if (initialState) {
       resetSequenceRef.current += 1
       resetRequestQueue()
-      formRevisionRef.current = 0
+      formSequenceRef.current = 0
       restoreRequestState()
       contextRef.current = { ...initContextState } as FormContextType
       _setModified(false)
-      dispatchFieldsWithoutRevision({
+      dispatchFieldsWithoutIncrementingFormSequence({
         type: 'REPLACE_STATE',
         optimize: false,
         state: initialState,
@@ -935,7 +938,7 @@ export const Form: React.FC<FormProps> = (props) => {
   useEffect(() => {
     resetSequenceRef.current += 1
     resetRequestQueue()
-    formRevisionRef.current = 0
+    formSequenceRef.current = 0
     restoreRequestState()
   }, [resetRequestQueue, restoreRequestState, uuid])
 
@@ -981,7 +984,7 @@ export const Form: React.FC<FormProps> = (props) => {
         }
 
         if (serverState && requestContext.isCurrent()) {
-          dispatchFieldsWithoutRevision({
+          dispatchFieldsWithoutIncrementingFormSequence({
             type: 'MERGE_SERVER_STATE',
             prevStateRef: prevFormState,
             serverState,

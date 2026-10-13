@@ -24,8 +24,8 @@ type Queue = {
 }
 
 export type UseQueueOptions = {
-  /** Returns the external version used to determine whether an active task is still current. */
-  getVersion?: () => unknown
+  /** Returns the external sequence used to determine whether an active task is still current. */
+  getSequence?: () => unknown
 }
 
 type PendingEntry = {
@@ -35,7 +35,7 @@ type PendingEntry = {
   run: (context: QueueContext) => Promise<unknown>
 }
 
-const initializeQueue = ({ getVersion }: { getVersion: () => unknown }): Queue => {
+const initializeQueue = ({ getSequence }: { getSequence: () => unknown }): Queue => {
   let generation = 0
   let isActive = false
   let pending: PendingEntry | undefined
@@ -44,10 +44,10 @@ const initializeQueue = ({ getVersion }: { getVersion: () => unknown }): Queue =
     isActive = true
 
     const activeGeneration = generation
-    const dispatchedVersion = getVersion()
+    const dispatchedSequence = getSequence()
     const isGenerationCurrent = () => generation === activeGeneration
     const context: QueueContext = {
-      isCurrent: () => isGenerationCurrent() && Object.is(getVersion(), dispatchedVersion),
+      isCurrent: () => isGenerationCurrent() && Object.is(getSequence(), dispatchedSequence),
       isGenerationCurrent,
     }
 
@@ -129,11 +129,11 @@ export type UseQueueResult = {
  * `queueTask` preserves the original fire-and-forget API; `schedule` returns the task result.
  */
 export function useQueue(options: UseQueueOptions = {}): UseQueueResult {
-  const getVersionRef = useRef(options.getVersion)
-  getVersionRef.current = options.getVersion
+  const getSequenceRef = useRef(options.getSequence)
+  getSequenceRef.current = options.getSequence
 
   const queueRef = useRef<Queue>(undefined)
-  queueRef.current ??= initializeQueue({ getVersion: () => getVersionRef.current?.() })
+  queueRef.current ??= initializeQueue({ getSequence: () => getSequenceRef.current?.() })
 
   const queueTask = useCallback<UseQueueResult['queueTask']>((fn, taskOptions) => {
     void queueRef.current.schedule({
