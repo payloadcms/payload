@@ -129,21 +129,12 @@ export const withPayload = (nextConfig = {}, options = {}) => {
       ...(process.env.NODE_ENV === 'development' && options.devBundleServerPackages !== true
         ? /**
            * Unless explicitly disabled by the user, by passing `devBundleServerPackages: true` to withPayload, we
-           * do not bundle server-only packages during dev for two reasons:
+           * do not bundle server-only packages during dev. Node.js loads them directly instead, so there are fewer
+           * files to compile, which means faster compilation speeds.
            *
-           * 1. Performance: Fewer files to compile means faster compilation speeds.
-           * 2. Turbopack support: Webpack's externals are not supported by Turbopack.
-           *
-           * Regarding Turbopack support: Unlike webpack.externals, we cannot use serverExternalPackages to
-           * externalized packages that are not resolvable from the project root. So including a package like
-           * "drizzle-kit" in here would do nothing - Next.js will ignore the rule and still bundle the package -
-           * because it detects that the package is not resolvable from the project root (= not directly installed
-           * by the user in their own package.json).
-           *
-           * Instead, we can use serverExternalPackages for the entry-point packages that *are* installed directly
-           * by the user (e.g. db-postgres, which then installs drizzle-kit as a dependency).
-           *
-           *
+           * A package can only be listed here if the import map never loads a client component from it. Node.js
+           * loads external packages as they are, so a `'use client'` file inside one would not become a client
+           * component. That is why packages with client components are not listed (see the TODO below).
            *
            * We should only do this during development, not build, because externalizing these packages can hurt
            * the bundle size. Not only does it disable tree-shaking, it also risks installing duplicate copies of the
@@ -154,8 +145,8 @@ export const withPayload = (nextConfig = {}, options = {}) => {
            * - payload (not in bundle, external) -> installs qs-esm (external because of importer)
            * Result: we have two copies of qs-esm installed - one in the bundle, and one in node_modules.
            *
-           * During development, these bundle size difference do not matter much, and development speed /
-           * turbopack support are more important.
+           * During development, these bundle size differences do not matter much, and development speed is more
+           * important.
            */
           [
             'payload',
@@ -168,8 +159,14 @@ export const withPayload = (nextConfig = {}, options = {}) => {
             '@payloadcms/email-nodemailer',
             '@payloadcms/email-resend',
             '@payloadcms/graphql',
+            '@payloadcms/kv-redis',
             '@payloadcms/payload-cloud',
+            // Its `/client` entry has no exports, so the import map never loads anything from it
+            '@payloadcms/plugin-mcp',
+            '@payloadcms/plugin-nested-docs',
             '@payloadcms/plugin-redirects',
+            '@payloadcms/transformer-sharp',
+            '@payloadcms/translations',
             // TODO: Add the following packages, excluding their /client subpath exports, once Next.js supports it
             // see: https://github.com/vercel/next.js/discussions/76991
             //'@payloadcms/plugin-cloud-storage',
@@ -194,7 +191,6 @@ export const withPayload = (nextConfig = {}, options = {}) => {
         externals: [
           ...(incomingWebpackConfig?.externals || []),
           /**
-           * See the explanation in the serverExternalPackages section above.
            * We need to force Webpack to emit require() calls for these packages, even though they are not
            * resolvable from the project root. You would expect this to error during runtime, but Next.js seems to be able to require these just fine.
            *
