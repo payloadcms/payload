@@ -27,7 +27,7 @@
       &:after {
         content: ' ';
         display: var(--field-tabs-edge-display, block);
-        width: calc(var(--spacer-2) * var(--field-border-bleed, 1));
+        width: 0;
       }
     }
   }
@@ -52,7 +52,7 @@
     &:after {
       content: ' ';
       display: var(--field-tabs-edge-display, block);
-      width: max(0px, calc(var(--gutter-h) * var(--field-border-bleed, 1) - var(--spacer-2)));
+      width: max(0px, calc(var(--gutter-h) * var(--field-border-bleed, 1) - var(--spacer-3)));
       flex-shrink: 0;
     }
   }
