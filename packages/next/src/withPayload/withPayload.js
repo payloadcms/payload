@@ -18,10 +18,7 @@ const poweredByHeader = {
  * @param {boolean} [options.devBundleServerPackages] - Whether to bundle server packages in development mode. @default false
  * */
 export const withPayload = (nextConfig = {}, options = {}) => {
-  const env = {
-    ...nextConfig.env,
-    PAYLOAD_CACHE_COMPONENTS_ENABLED: nextConfig.cacheComponents ? 'true' : 'false',
-  }
+  const env = { ...nextConfig.env }
   const cacheComponentsLoader = nextConfig.cacheComponents
     ? typeof import.meta?.resolve === 'function'
       ? fileURLToPath(import.meta.resolve('@payloadcms/next/cacheComponentsLoader'))

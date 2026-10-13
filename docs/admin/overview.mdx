@@ -135,7 +135,7 @@ No changes to the generated admin route files are needed. When Cache Components 
 
 The integration identifies admin entries by their named imports of `RootLayout` from `@payloadcms/next/layouts` and `RootPage` from `@payloadcms/next/views`, so custom admin URLs and route-group names are supported. If you customize these entries, keep those direct imports. Explicit `instant` exports are preserved.
 
-When Cache Components is enabled, Payload waits for an actual request before rendering the admin layout, rendering admin pages, or generating page metadata. This keeps authentication, database access, and time-dependent server components out of prerendering and runtime prefetching. Frontend routes continue to use Cache Components normally.
+Payload waits for an actual request before it loads the admin context (the user, permissions and other request data) for the admin layout and pages. This keeps authentication, database access, and time-dependent server components out of prerendering and runtime prefetching. Frontend routes continue to use Cache Components normally.
 
 This setup makes admin server rendering request-time; it does not disable Next.js page-state preservation through React Activity. Custom components must still clean up effects and handle being hidden and restored. Streaming can also commit response headers before a redirect or not-found result is resolved. Full compatibility with all admin interactions is not guaranteed.
 

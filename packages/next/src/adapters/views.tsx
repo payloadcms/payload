@@ -10,7 +10,6 @@ import { renderNotFoundPage } from '@payloadcms/ui/views/NotFound/page'
 import { renderRoot } from '@payloadcms/ui/views/Root'
 import { defaultAdminViews } from '@payloadcms/ui/views/Root/adminViews'
 import { notFound, redirect } from 'next/navigation.js'
-import { connection } from 'next/server.js'
 
 import { initAdminContext } from '../utilities/initAdminContext.js'
 
@@ -27,18 +26,7 @@ type PageProps = {
   }>
 }
 
-export const RootPage = async (props: PageProps) => {
-  if (process.env.PAYLOAD_CACHE_COMPONENTS_ENABLED === 'true') {
-    await connection()
-  }
+export const RootPage = (props: PageProps) =>
+  renderRoot({ ...props, adminViews, initAdminContext, notFound, redirect })
 
-  return renderRoot({ ...props, adminViews, initAdminContext, notFound, redirect })
-}
-
-export const NotFoundPage = async (props: PageProps) => {
-  if (process.env.PAYLOAD_CACHE_COMPONENTS_ENABLED === 'true') {
-    await connection()
-  }
-
-  return renderNotFoundPage({ ...props, initAdminContext })
-}
+export const NotFoundPage = (props: PageProps) => renderNotFoundPage({ ...props, initAdminContext })

@@ -10,8 +10,6 @@ describe('withPayload', () => {
 
     expect(Object.values(enabled.turbopack.rules)).toHaveLength(1)
     expect(disabled.turbopack.rules).toBeUndefined()
-    expect(enabled.env.PAYLOAD_CACHE_COMPONENTS_ENABLED).toBe('true')
-    expect(disabled.env.PAYLOAD_CACHE_COMPONENTS_ENABLED).toBe('false')
     expect(env).toEqual({ CUSTOM: 'value' })
     expect(disabled.env.CUSTOM).toBe('value')
   })
