@@ -1,7 +1,7 @@
 ---
 title: 3.0 to 4.0 Migration Guide
 label: 3.0 to 4.0
-order: 15
+order: 20
 desc: Upgrade guide for Payload 3.x projects migrating to 4.0.
 keywords: local api, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react
 ---
@@ -911,15 +911,13 @@ When a missing locale is already valid for the receiving API, optional chaining 
 const locale = useLocale()?.code
 ```
 
-<<<<<<< HEAD
-
 ### `readOnly` removed from the `useField` return type
 
 The deprecated `readOnly` property has been removed from `FieldType`, the object returned by `useField`. `useField` already stopped returning it in 3.x, so it was always `undefined` at runtime.
 
 Read `readOnly` from your field component's props instead:
 
-````diff
+```diff
 'use client'
 import type { TextFieldClientComponent } from 'payload'
 import { useField } from '@payloadcms/ui'
@@ -928,6 +926,7 @@ import { useField } from '@payloadcms/ui'
 -  const { readOnly, value } = useField({ path })
 +export const MyField: TextFieldClientComponent = ({ path, readOnly }) => {
 +  const { value } = useField({ path })
+```
 
 ### Deprecated `TableColumnsProvider` props removed
 
@@ -954,15 +953,9 @@ The following deprecated props have been removed from `TableColumnsProvider` and
 >
   {children}
 </TableColumnsProvider>
-````
-
-### RichText adapter `i18n` property removed
-
-=======
+```
 
 ### Rich text adapters no longer expose translations
-
-> > > > > > > 7dd8d28c6a (cleans up headings that contained code blocks, updates titles on migration guides)
 
 The `i18n` property on `RichTextAdapter` (and its return type from adapter provider functions) has been removed. It was deprecated in v3 in favour of merging translations directly into `config.i18n.translations` inside the adapter provider.
 
@@ -1023,8 +1016,6 @@ If an affected adapter or feature performs asynchronous work, move that work to 
 
 The `transactionIDPromise` property on `PayloadRequest` has been removed. It was deprecated and unused — `transactionID` (which already supports `Promise<number | string>`) is the correct property to use for both resolved values and pending transactions.
 
-<<<<<<< HEAD
-
 ### `headers` and `languageCode` removed from `AdminContext`
 
 The `headers` and `languageCode` properties have been removed from `AdminContext`, the object returned by `initAdminContext`. Both duplicated values that are already available on `req`:
@@ -1071,13 +1062,7 @@ Remove `diffMethod` from your props. If you passed it on to a diffing utility, p
   }) => {
 ```
 
-### Collection `afterOperation` hook: `operation: 'read'` removed
-
-=======
-
 ### Collection after-operation hooks no longer report read operations
-
-> > > > > > > 7dd8d28c6a (cleans up headings that contained code blocks, updates titles on migration guides)
 
 The deprecated `'read'` value for the `operation` argument of collection `afterOperation` hooks has been removed. Payload has not dispatched `afterOperation` with `operation: 'read'` for some time — the `find` and `findByID` operations report their own names (`'find'` and `'findByID'`) instead.
 
@@ -1310,15 +1295,14 @@ If your app imports Lexical types or adds custom features, check these changes f
 
 Stored content is unaffected.
 
-<<<<<<< HEAD
-
 ### Lexical: `LexicalEditorProps` renamed to `LexicalEditorArgs`
 
 The `LexicalEditorProps` type exported from `@payloadcms/richtext-lexical` has been renamed to `LexicalEditorArgs`. It describes the arguments of the `lexicalEditor` function, not component props. The shape is unchanged.
 
-````diff
+```diff
 - import type { LexicalEditorProps } from '@payloadcms/richtext-lexical'
 + import type { LexicalEditorArgs } from '@payloadcms/richtext-lexical'
+```
 
 ### Lexical: `UploadDataImproved` replaced by `UploadData` ([#18606](https://github.com/payloadcms/payload/pull/18606))
 
@@ -1326,7 +1310,7 @@ The internal `UploadDataImproved` type has been removed, and its definition is n
 
 ```ts
 import type { UploadData } from '@payloadcms/richtext-lexical'
-````
+```
 
 ### Lexical: the `version` of nodes is ignored
 
@@ -1349,13 +1333,7 @@ await upgradeLexicalData({ payload })
 
 **Payload doesn't add or remove `version` when it saves rich text.** Rich text created by Lexical, like in the admin panel, still has `version: 1` on every node, because Lexical's JSON export writes it. Payload's own nodes used to write their own numbers instead (like `2` for blocks), and now write `1` as well. Rich text sent through the API, CLI or MCP is saved as sent, so it may not contain `version`. The generated types still include `version`, marked as deprecated, so don't rely on it being there.
 
-### Field `typescriptSchema` renamed to `jsonSchema`
-
-=======
-
 ### Field schema configuration now reflects JSON Schema
-
-> > > > > > > 7dd8d28c6a (cleans up headings that contained code blocks, updates titles on migration guides)
 
 `typescriptSchema` accepted JSON Schema, not TypeScript, so the name lied. Renamed to `jsonSchema`. Same shape, same array of transforms. The underlying schema is now also consumed by the MCP plugin for runtime validation, not just type generation.
 
@@ -2166,21 +2144,13 @@ The `alwaysInsertFields` option (on `cloudStoragePlugin` and every `storage-*` a
 - Remove `alwaysInsertFields` from your storage adapter or `cloudStoragePlugin` config — it has no effect and no longer exists on the option types.
 - For Postgres, SQLite, or D1 projects, run `payload migrate:create` to generate the migration that adds the `prefix` column, then run `payload migrate` to apply it.
 
-<<<<<<< HEAD
-
 ### Upload collections retain originals and file history
 
 Upload collections now store `original` metadata and a `prefix` and `_objectKey` for each stored file (the main file, `original`, and each variant), so saved versions can find their files. New uploads keep their source under an `-original` filename. Update any code or infrastructure that relies on the old filename, URL, or object key.
 
 **Postgres and SQLite:** after updating, run `payload migrate:create`, check that it adds these columns to each upload collection table and its versions table, then run `payload migrate`. Existing rows keep `null` values until their next write.
 
-### `FileSizeImproved` removed — use `FileSize` ([#16593](https://github.com/payloadcms/payload/pull/16593))
-
-=======
-
 ### File size types have been consolidated ([#16593](https://github.com/payloadcms/payload/pull/16593))
-
-> > > > > > > 7dd8d28c6a (cleans up headings that contained code blocks, updates titles on migration guides)
 
 `FileSizeImproved` has been merged into `FileSize`. The `url`, `width`, `height`, `filesize`, `mimeType`, and `filename` properties now accept `null` directly on `FileSize`, matching what the database stores for sizes that were not generated.
 
