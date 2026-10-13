@@ -19,10 +19,12 @@ const poweredByHeader = {
  * */
 export const withPayload = (nextConfig = {}, options = {}) => {
   const env = { ...nextConfig.env }
+  // Adds `export const instant = false` to the admin layout and page. See `instantLoader.js` for
+  // why this cannot live in the generated admin files.
   const cacheComponentsLoader = nextConfig.cacheComponents
     ? typeof import.meta?.resolve === 'function'
-      ? fileURLToPath(import.meta.resolve('@payloadcms/next/cacheComponentsLoader'))
-      : require.resolve('@payloadcms/next/cacheComponentsLoader')
+      ? fileURLToPath(new URL('./instantLoader.js', import.meta.url))
+      : require.resolve('@payloadcms/next/withPayload/instantLoader')
     : undefined
   const cacheComponentsRule = '**/{layout,page}.{js,jsx,ts,tsx,mjs,mts,cjs,cts}'
   const turbopackRules = { ...nextConfig.turbopack?.rules }
@@ -39,7 +41,14 @@ export const withPayload = (nextConfig = {}, options = {}) => {
 
     turbopackRules[cacheComponentsRule] = [
       ...existingRules,
-      { condition: { not: 'foreign' }, loaders: [cacheComponentsLoader] },
+      {
+        // Only send files that import the admin root components to the loader, so Turbopack does
+        // not have to run a JavaScript loader for every other layout and page.
+        condition: {
+          all: [{ not: 'foreign' }, { content: /['"]@payloadcms\/next\/(?:layouts|views)['"]/ }],
+        },
+        loaders: [cacheComponentsLoader],
+      },
     ]
   }
 
