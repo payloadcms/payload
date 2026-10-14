@@ -4,6 +4,7 @@ import { execSync } from 'child_process'
 import minimist from 'minimist'
 import semver from 'semver'
 
+import { extractBreakingChangesSection } from './extractBreakingChangesSection.js'
 import { getLatestCommits } from './getLatestCommits.js'
 import { getRecommendedBump } from './getRecommendedBump.js'
 
@@ -153,10 +154,23 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
     section.sort((a, b) => (a.scope || '').localeCompare(b.scope || ''))
   })
 
+  const breakingNotes = new Map(
+    await Promise.all(
+      (sections.breaking ?? []).map(
+        async (commit) => [commit.shortHash, await getBreakingNotes(commit)] as const,
+      ),
+    ),
+  )
+
   const stringifiedSections = Object.fromEntries(
     Object.entries(sections).map(([key, commits]) => [
       key,
-      commits.map((commit) => formatCommitForChangelog(commit, key === 'breaking')),
+      commits.map((commit) =>
+        formatCommitForChangelog(
+          commit,
+          key === 'breaking' ? breakingNotes.get(commit.shortHash) : undefined,
+        ),
+      ),
     ]),
   )
 
@@ -310,8 +324,57 @@ async function getContributors(commits: GitCommit[]): Promise<Contributor[]> {
 
 type Contributor = { name: string; username: string }
 
-function formatCommitForChangelog(commit: GitCommit, includeBreakingNotes = false): string {
-  const { description, isBreaking, references, scope } = commit
+async function getBreakingNotes(commit: GitCommit): Promise<string> {
+  const prBody = await fetchPullRequestBody(commit)
+  const section = extractBreakingChangesSection(prBody ?? commit.body)
+  if (section) {
+    return section
+  }
+
+  let [firstParagraph = ''] = commit.body.split('\n\n')
+  firstParagraph = firstParagraph.trim()
+
+  // Remove random trailing quotes that sometimes appear
+  if (firstParagraph.endsWith('"')) {
+    firstParagraph = firstParagraph.slice(0, -1)
+  }
+
+  return firstParagraph
+}
+
+async function fetchPullRequestBody(commit: GitCommit): Promise<string | undefined> {
+  const prNumber = commit.references
+    .filter((ref) => ref.type === 'pull-request')
+    .pop()
+    ?.value.replace('#', '')
+  if (!prNumber) {
+    return undefined
+  }
+
+  try {
+    const res = await fetch(`https://api.github.com/repos/payloadcms/payload/pulls/${prNumber}`, {
+      headers: {
+        Accept: 'application/vnd.github.v3+json',
+        Authorization: `token ${process.env.GITHUB_TOKEN}`,
+      },
+    })
+
+    if (!res.ok) {
+      console.log(`Failed to fetch PR #${prNumber}: ${res.status} ${res.statusText}`)
+      return undefined
+    }
+
+    const { body } = (await res.json()) as { body: null | string }
+    return body ?? undefined
+  } catch (error) {
+    console.log(`ERROR: Failed to fetch PR #${prNumber}`)
+    console.error(error)
+    return undefined
+  }
+}
+
+function formatCommitForChangelog(commit: GitCommit, breakingNotes?: string): string {
+  const { description, references, scope } = commit
 
   let formatted = `* ${scope ? `**${scope}:** ` : ''}${description}`
   references.forEach((ref) => {
@@ -326,21 +389,11 @@ function formatCommitForChangelog(commit: GitCommit, includeBreakingNotes = fals
     }
   })
 
-  if (isBreaking && includeBreakingNotes) {
-    // Parse breaking change notes from commit body
-    const [rawNotes, _] = commit.body.split('\n\n')
-    let notes =
-      `  ` +
-      rawNotes
-        ?.split('\n')
-        .map((l) => `  ${l}`) // Indent notes
-        .join('\n')
-        .trim()
-
-    // Remove random trailing quotes that sometimes appear
-    if (notes.endsWith('"')) {
-      notes = notes.slice(0, -1)
-    }
+  if (breakingNotes) {
+    const notes = breakingNotes
+      .split('\n')
+      .map((line) => (line ? `  ${line}` : line))
+      .join('\n')
 
     formatted += `\n\n${notes}\n\n`
   }

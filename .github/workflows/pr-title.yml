@@ -121,6 +121,46 @@ jobs:
           header: pr-title-lint-error
           delete: true
 
+  breaking-changes-section:
+    name: breaking-changes-section
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Require a Breaking changes section on breaking PRs
+        id: check
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if [[ ! "$TITLE" =~ ^[a-z]+(\(.+\))?!: ]]; then
+            echo "Not marked as breaking, nothing to check."
+            exit 0
+          fi
+
+          if printf '%s\n' "$BODY" | perl -0pe 's/<!--.*?-->//gs' \
+            | grep -Eiq '^#{1,6}[[:space:]]+[^[:alnum:]]*breaking changes?([^[:alnum:]]|$)'; then
+            echo "Found a Breaking changes section."
+            exit 0
+          fi
+
+          echo "missing=true" >> "$GITHUB_OUTPUT"
+          echo "::error::PRs marked as breaking ('!' in the title) need a '## Breaking changes' section in the description."
+          exit 1
+
+      - uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
+        if: failure() && steps.check.outputs.missing == 'true'
+        with:
+          header: breaking-changes-section
+          message: |
+            This PR is marked as breaking (`!` in the title), so its description needs a `## Breaking changes` section.
+
+            Explain what changed and what users must do to upgrade. That section is copied into the release notes as is.
+
+      - if: success()
+        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
+        with:
+          header: breaking-changes-section
+          delete: true
+
   label-pr-on-open:
     name: label-pr-on-open
     runs-on: ubuntu-26.04

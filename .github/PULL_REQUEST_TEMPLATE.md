@@ -12,6 +12,7 @@ Please review the [CONTRIBUTING.md](https://github.com/payloadcms/payload/blob/m
 The following items will ensure that your PR is handled as smoothly as possible:
 
 - PR Title must follow conventional commits format. For example, `feat: my new feature`, `fix(plugin-seo): my fix`.
+- If the change is breaking, add `!` to the title (`feat!: ...`) and a `## Breaking changes` section explaining what users must change. That section is copied into the release notes.
 - Minimal description explained as if explained to someone not immediately familiar with the code.
 - Provide before/after screenshots or code diffs if applicable.
 - Link any related issues/discussions from GitHub or Discord.
