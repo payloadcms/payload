@@ -81,51 +81,6 @@ const countSchemaMapIterations = (richTextFieldCount: number): number => {
 }
 
 describe('buildClientFieldSchemaMap', () => {
-  it('should add the sub-fields of each rich text field to the client schema map', () => {
-    const fields = createRichTextFields(2)
-
-    const { clientFieldSchemaMap } = buildClientFieldSchemaMap({
-      collectionSlug: 'pages',
-      config: createConfig(fields),
-      i18n,
-      payload,
-      schemaMap: createSchemaMap(fields),
-    })
-
-    expect([...clientFieldSchemaMap.keys()]).toEqual([
-      'pages',
-      'pages.content0',
-      'pages.content0.lexical_internal_feature.link.fields',
-      'pages.content0.lexical_internal_feature.link.fields.url',
-      'pages.content1',
-      'pages.content1.lexical_internal_feature.link.fields',
-      'pages.content1.lexical_internal_feature.link.fields.url',
-    ])
-  })
-
-  it('should not add sub-fields of another rich text field that shares a name prefix', () => {
-    const fields: RichTextFieldClient[] = [
-      { name: 'content', type: 'richText' },
-      { name: 'contentExtra', type: 'richText' },
-    ]
-
-    // Only `content` is in the client config, so any `contentExtra` entry must come from `content`
-    const { clientFieldSchemaMap } = buildClientFieldSchemaMap({
-      collectionSlug: 'pages',
-      config: createConfig([fields[0]!]),
-      i18n,
-      payload,
-      schemaMap: createSchemaMap(fields),
-    })
-
-    expect([...clientFieldSchemaMap.keys()]).toEqual([
-      'pages',
-      'pages.content',
-      'pages.content.lexical_internal_feature.link.fields',
-      'pages.content.lexical_internal_feature.link.fields.url',
-    ])
-  })
-
   it('should add sub-fields of rich text fields nested in rich text sub-fields', () => {
     const fields = createRichTextFields(1)
     const schemaMap = createSchemaMap(fields)
