@@ -476,7 +476,16 @@ export function RecentsAndPinnedClient({
                   <DocumentCard
                     href={item.href}
                     placeholder={<DocumentIcon />}
-                    thumbnail={item.thumbnailURL ? { alt: '', src: item.thumbnailURL } : undefined}
+                    thumbnail={
+                      item.thumbnailURL
+                        ? {
+                            alt: '',
+                            // Cards past the smallest page size are hidden by CSS in narrow tiers.
+                            loading: items.indexOf(item) < PAGE_SIZES[0] ? 'eager' : 'lazy',
+                            src: item.thumbnailURL,
+                          }
+                        : undefined
+                    }
                     title={item.title}
                   >
                     <div className="recents-widget__meta">
