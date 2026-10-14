@@ -14,9 +14,9 @@ import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   DashboardHelper,
-  getDashboardLayoutShift,
   getExpectedRecentsGrid,
   getRecentsContainerWidth,
+  getRecentsLayoutShiftSum,
 } from './utils.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -106,7 +106,7 @@ describe('Dashboard', () => {
 
       await expect(viewport).toHaveAttribute('aria-busy', 'false')
       await expect(widget.locator('.document-card__title').first()).toBeVisible()
-      expect(await getDashboardLayoutShift({ page })).toBe(0)
+      expect(await getRecentsLayoutShiftSum({ page })).toBe(0)
       const pageSize = await viewport.evaluate((element) =>
         Number(getComputedStyle(element).getPropertyValue('--recents-page-size')),
       )
@@ -266,7 +266,7 @@ describe('Dashboard', () => {
         await expect(serverRenderedPage.locator('.recents-widget__item')).toHaveCount(
           DOCUMENTS_BATCH_SIZE,
         )
-        expect(await getDashboardLayoutShift({ page })).toBe(0)
+        expect(await getRecentsLayoutShiftSum({ page })).toBe(0)
       }
     } finally {
       await serverRenderedContext.close()
@@ -338,7 +338,7 @@ describe('Dashboard', () => {
             viewportBox.y + viewportBox.height - Math.max(...cards.map((card) => card.bottom)),
           ),
         ).toBeLessThanOrEqual(1)
-        expect(await getDashboardLayoutShift({ page })).toBe(0)
+        expect(await getRecentsLayoutShiftSum({ page })).toBe(0)
       }
     }
   })
