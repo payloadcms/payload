@@ -28,8 +28,8 @@ import { getLatestPublishedVersion } from './lib/getPackageRegistryVersions.js'
 import { publishSinglePackage } from './lib/getWorkspace.js'
 import { RELEASE_BRANCH } from './lib/pinnedMajor.js'
 import { packagePublishList } from './lib/publishList.js'
-import { runPublishSequence } from './lib/runPublishSequence.js'
-import { publishWithStableDistTag, resolveStableDistTags } from './lib/stableDistTag.js'
+import { publishLocalRelease } from './lib/publishLocalRelease.js'
+import { resolveStableDistTags } from './lib/stableDistTag.js'
 import {
   createDraftGitHubRelease,
   NOT_LATEST_PUBLISH_REMINDER,
@@ -219,37 +219,22 @@ async function main() {
   header(`🏷️  Tagging release v${nextReleaseVersion}`, { enable: gitTag })
   runCmd(`git tag -a v${nextReleaseVersion} -m "v${nextReleaseVersion}"`, execOpts)
 
-  // Publishes in topological order and stops at the first failure. The first publish is
-  // interactive so the maintainer enters the npm OTP, which npm then honors for 5 minutes.
-  const [firstPackage] = packageDetails
-  let failedResult: PublishResult | undefined
-  try {
-    await runPublishSequence({
-      packages: packageDetails,
-      publishOne: async (pkg) => {
-        const result = await publishWithStableDistTag({
-          distTags,
-          dryRun,
-          getLatestVersion: getLatestPublishedVersion,
-          pkg,
-          publish: async ({ tag: distTag }) => {
-            if (pkg === firstPackage) {
-              return publishInteractively({ distTag, pkg, runCmd })
-            }
-            return await publishSinglePackage(pkg, { dryRun, tag: distTag })
-          },
-          version: nextReleaseVersion,
-        })
-        if (!result.success) {
-          failedResult = result
-        }
-        return result
-      },
-    })
-  } catch (error: unknown) {
+  // The first publish is interactive so the maintainer enters the npm OTP, which npm then
+  // honors for 5 minutes.
+  const publishOutcome = await publishLocalRelease({
+    distTags,
+    dryRun,
+    getLatestVersion: getLatestPublishedVersion,
+    packages: packageDetails,
+    publishFirst: ({ pkg, tag: distTag }) =>
+      Promise.resolve(publishInteractively({ distTag, pkg, runCmd })),
+    publishRest: ({ pkg, tag: distTag }) => publishSinglePackage(pkg, { dryRun, tag: distTag }),
+    version: nextReleaseVersion,
+  })
+  if (!publishOutcome.isComplete) {
     printPartialPublishRecovery({
-      error,
-      failedResult,
+      error: publishOutcome.error,
+      failedResult: publishOutcome.failedResult,
       version: nextReleaseVersion,
     })
     process.exit(1)
