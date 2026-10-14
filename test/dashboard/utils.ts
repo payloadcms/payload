@@ -355,8 +355,12 @@ export function getRecentsContainerWidth({ widget }: { widget: Locator }): Promi
   })
 }
 
-/** Sums the layout shifts since navigation that moved the Recents and Pinned widget or the content below it. */
-export function getDashboardLayoutShift({ page }: { page: Page }): Promise<number> {
+/**
+ * Sums the layout-shift scores recorded since navigation whose sources include the Recents and
+ * Pinned widget or the collections below it. This is not CLS: there are no session windows, shifts
+ * after recent input still count, and shifts after the call are missed.
+ */
+export function getRecentsLayoutShiftSum({ page }: { page: Page }): Promise<number> {
   return page.evaluate(
     () =>
       new Promise<number>((resolve) => {

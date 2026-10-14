@@ -122,6 +122,7 @@ export function RecentsAndPinnedClient({
   const hasAddPinCard = hasPinPlaceholder && items !== undefined && start + windowSize > totalDocs
   const isBusy = isLoading || items === undefined
 
+  // A layout effect, so no click is handled with the full-batch fallback size after hydration.
   useLayoutEffect(() => {
     const element = viewportRef.current
 
@@ -244,19 +245,6 @@ export function RecentsAndPinnedClient({
       loadMissingBatches()
     }
   }, [isLoading, loadError, missingBatchCount])
-
-  const excludedCollectionsKey = JSON.stringify(excludedCollections ?? [])
-  const previousExcludedCollectionsKeyRef = useRef(excludedCollectionsKey)
-
-  useEffect(() => {
-    if (previousExcludedCollectionsKeyRef.current === excludedCollectionsKey) {
-      return
-    }
-    previousExcludedCollectionsKeyRef.current = excludedCollectionsKey
-    // Exclusions only apply to recents, which reloads through the missing-batch effect.
-    setDocumentsByTab((current) => ({ pinned: current.pinned }))
-    setView((current) => (current.tab === 'recents' ? { ...current, offset: 0 } : current))
-  }, [excludedCollectionsKey])
 
   const goToPage = async ({ page }: { page: number }) => {
     if (isLoading || isSaving) {
