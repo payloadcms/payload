@@ -163,14 +163,9 @@ export const ServerFunctionsProvider: React.FC<{
 
       try {
         if (!remoteSignal?.aborted) {
-          const normalizedRest = {
-            ...rest,
-            ...(rest.date instanceof Date ? { date: new Date(rest.date.getTime()) } : {}),
-          }
-
           const result = await serverFunction({
             name: 'schedule-publish',
-            args: normalizedRest,
+            args: { ...rest },
           })
 
           if (!remoteSignal?.aborted) {
