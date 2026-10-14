@@ -444,7 +444,7 @@ test.describe('Form State', () => {
     const doc = await payload.create({
       collection: autosavePostsSlug,
       data: {
-        title: 'Initial Title',
+        title: 'ok Initial Title',
       },
       overrideAccess: true,
     })
@@ -463,7 +463,7 @@ test.describe('Form State', () => {
         serverURL,
       }),
       async () => {
-        await titleField.fill('Updated Title')
+        await titleField.fill('ok Updated Title')
       },
       {
         allowedNumberOfRequests: 0,
@@ -479,7 +479,7 @@ test.describe('Form State', () => {
         serverURL,
       }),
       async () => {
-        await titleField.fill('Updated Title Again')
+        await titleField.fill('ok Updated Title Again')
       },
       {
         allowedNumberOfRequests: 0,
@@ -534,6 +534,7 @@ test.describe('Form State', () => {
       const doc = await payload.create({
         collection: autosavePostsSlug,
         data: { title: 'Initial revision' },
+        draft: true,
       })
       await page.goto(autosavePostsUrl.edit(doc.id))
       await waitForFormReady(page)
@@ -601,6 +602,7 @@ test.describe('Form State', () => {
       const doc = await payload.create({
         collection: autosavePostsSlug,
         data: { title: 'Initial revision' },
+        draft: true,
       })
       await page.goto(autosavePostsUrl.edit(doc.id))
       await waitForFormReady(page)
@@ -686,6 +688,7 @@ test.describe('Form State', () => {
           programmaticValue: 'Initial programmatic value',
           title: 'Initial revision',
         },
+        draft: true,
       })
       await page.goto(autosavePostsUrl.edit(doc.id))
       await waitForFormReady(page)
@@ -806,6 +809,117 @@ test.describe('Form State', () => {
         .locator('.field-type.text', { has: page.locator('#field-validateUsingEvent') })
         .locator('.field-error')
       await expect(titleError).toBeVisible()
+    })
+  })
+
+  describe('form request lifecycle', () => {
+    afterEach(async () => {
+      await page.unrouteAll({ behavior: 'ignoreErrors' })
+    })
+
+    test('should submit computed values merged by the preceding queued autosave', async () => {
+      const doc = await payload.create({
+        collection: autosavePostsSlug,
+        data: { title: 'ok Initial revision' },
+      })
+      await page.goto(autosavePostsUrl.edit(doc.id))
+      await waitForFormReady(page)
+
+      const autosaveStarted = Promise.withResolvers<void>()
+      const releaseAutosave = Promise.withResolvers<void>()
+
+      await page.route(`**/api/${autosavePostsSlug}/${doc.id}**`, async (route) => {
+        if (
+          route.request().method() === 'PATCH' &&
+          route.request().url().includes('autosave=true')
+        ) {
+          autosaveStarted.resolve()
+          await releaseAutosave.promise
+        }
+
+        await route.continue()
+      })
+
+      try {
+        await page.locator('#field-title').fill('ok Latest revision')
+        await autosaveStarted.promise
+        await page.getByRole('button', { name: 'Queue save', exact: true }).click()
+
+        const saveRequest = page.waitForRequest(
+          (request) =>
+            request.method() === 'PATCH' &&
+            request.url().includes(`/api/${autosavePostsSlug}/${doc.id}`) &&
+            !request.url().includes('autosave=true'),
+        )
+
+        releaseAutosave.resolve()
+
+        expect((await saveRequest).postData()).toContain('"computedTitle":"ok Latest revision"')
+        await waitForFormReady(page)
+      } finally {
+        releaseAutosave.resolve()
+      }
+    })
+
+    test('should submit values updated during the autocomplete wait', async () => {
+      await page.route('**/api/form-request', (route) =>
+        route.fulfill({ json: { message: 'Saved' } }),
+      )
+      await page.goto(
+        formatAdminURL({
+          adminRoute: '/admin',
+          path: '/form-requests?scenario=autocomplete',
+          serverURL,
+        }),
+      )
+      await waitForFormReady(page)
+
+      const request = page.waitForRequest(
+        (request) => request.url().endsWith('/api/form-request'),
+        { timeout: 3000 },
+      )
+
+      await page.getByRole('button', { name: 'Submit request' }).click()
+
+      expect((await request).postData()).toContain('"title":"Autofilled value"')
+      await expect(page.locator('#request-title')).toHaveValue('Autofilled value')
+    })
+
+    test('should dismiss the submitting toast when onSuccess resets the form', async () => {
+      const callbackStarted = Promise.withResolvers<void>()
+      const releaseCallback = Promise.withResolvers<void>()
+
+      await page.route('**/api/form-request', (route) =>
+        route.fulfill({ json: { message: 'Saved' } }),
+      )
+      await page.route('**/api/form-request-reset', async (route) => {
+        callbackStarted.resolve()
+        await releaseCallback.promise
+        await route.fulfill({ json: {} })
+      })
+      await page.goto(
+        formatAdminURL({
+          adminRoute: '/admin',
+          path: '/form-requests?scenario=reset',
+          serverURL,
+        }),
+      )
+      await waitForFormReady(page)
+
+      try {
+        await page.getByRole('button', { name: 'Submit request' }).click()
+        await callbackStarted.promise
+
+        const submittingToast = page.locator('[data-sonner-toast]', { hasText: 'Submitting' })
+
+        await expect(submittingToast).toBeVisible()
+        releaseCallback.resolve()
+
+        await expect(page.locator('#request-title')).toHaveValue('Reset value')
+        await expect(submittingToast).toHaveCount(0)
+      } finally {
+        releaseCallback.resolve()
+      }
     })
   })
 

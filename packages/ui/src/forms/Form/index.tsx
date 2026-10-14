@@ -11,7 +11,7 @@ import {
   uploadRequiresServerValidation,
   wait,
 } from 'payload/shared'
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import type {
@@ -166,21 +166,33 @@ export const Form: React.FC<FormProps> = (props) => {
   const resetSequenceRef = useRef(0)
   const isFirstRenderRef = useRef(true)
 
-  const [formState, dispatchFieldsWithoutIncrementingFormSequence] = useReducer(
-    fieldReducer,
-    {},
-    () => initialState,
+  const [formState, setFormState] = useState(initialState)
+  const formStateRef = useRef(formState)
+
+  const dispatchFieldsWithoutIncrementingFormSequence = useCallback<React.Dispatch<FieldAction>>(
+    (action) => {
+      const newState = fieldReducer(formStateRef.current, action)
+
+      // Queued requests can start before React commits the preceding request's state update.
+      formStateRef.current = newState
+      contextRef.current.fields = newState
+      setFormState(newState)
+    },
+    [],
   )
 
-  const dispatchFields = useCallback<React.Dispatch<FieldAction>>((action) => {
-    if (changesFormData(action, contextRef.current.fields)) {
-      formSequenceRef.current += 1
-    }
+  const dispatchFields = useCallback<React.Dispatch<FieldAction>>(
+    (action) => {
+      if (changesFormData(action, contextRef.current.fields)) {
+        formSequenceRef.current += 1
+      }
 
-    dispatchFieldsWithoutIncrementingFormSequence(action)
-  }, [])
+      dispatchFieldsWithoutIncrementingFormSequence(action)
+    },
+    [dispatchFieldsWithoutIncrementingFormSequence],
+  )
 
-  contextRef.current.fields = formState
+  contextRef.current.fields = formStateRef.current
 
   const prevFormState = useRef(formState)
 
@@ -262,7 +274,16 @@ export const Form: React.FC<FormProps> = (props) => {
 
       return isValid
     },
-    [collectionSlug, config, id, operation, t, user, documentForm],
+    [
+      collectionSlug,
+      config,
+      dispatchFieldsWithoutIncrementingFormSequence,
+      id,
+      operation,
+      t,
+      user,
+      documentForm,
+    ],
   )
 
   const executeSubmit = useCallback(
@@ -328,6 +349,16 @@ export const Form: React.FC<FormProps> = (props) => {
       try {
         if (waitForAutocomplete) {
           await wait(100)
+
+          // Autocomplete updates happen before the data snapshot and belong to this submission.
+          const dispatchedSequence = formSequenceRef.current
+          const { isGenerationCurrent } = requestContext
+
+          requestContext = {
+            isCurrent: () =>
+              isGenerationCurrent() && formSequenceRef.current === dispatchedSequence,
+            isGenerationCurrent,
+          }
         }
 
         if (!requestContext.isCurrent()) {
@@ -464,7 +495,6 @@ export const Form: React.FC<FormProps> = (props) => {
             return
           }
 
-          preservePromiseToast = true
           let newFormState: FormState | void
           setSuccessfulSubmitCount((count) => count + 1)
 
@@ -479,6 +509,8 @@ export const Form: React.FC<FormProps> = (props) => {
           if (!requestContext.isCurrent()) {
             return
           }
+
+          preservePromiseToast = true
 
           if (newFormState) {
             dispatchFieldsWithoutIncrementingFormSequence({
@@ -609,6 +641,7 @@ export const Form: React.FC<FormProps> = (props) => {
     },
     [
       beforeSubmit,
+      dispatchFieldsWithoutIncrementingFormSequence,
       startRouteTransition,
       action,
       disableSuccessStatus,
@@ -784,6 +817,7 @@ export const Form: React.FC<FormProps> = (props) => {
       locale,
       resetRequestQueue,
       restoreRequestState,
+      dispatchFieldsWithoutIncrementingFormSequence,
     ],
   )
 
@@ -797,7 +831,7 @@ export const Form: React.FC<FormProps> = (props) => {
       _setModified(false)
       dispatchFieldsWithoutIncrementingFormSequence({ type: 'REPLACE_STATE', state })
     },
-    [resetRequestQueue, restoreRequestState],
+    [dispatchFieldsWithoutIncrementingFormSequence, resetRequestQueue, restoreRequestState],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
@@ -933,7 +967,12 @@ export const Form: React.FC<FormProps> = (props) => {
         state: initialState,
       })
     }
-  }, [initialState, resetRequestQueue, restoreRequestState])
+  }, [
+    dispatchFieldsWithoutIncrementingFormSequence,
+    initialState,
+    resetRequestQueue,
+    restoreRequestState,
+  ])
 
   useEffect(() => {
     resetSequenceRef.current += 1
