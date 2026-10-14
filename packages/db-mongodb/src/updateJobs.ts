@@ -105,6 +105,22 @@ export const updateJobs: UpdateJobs = async function updateMany(
         const doc = await Model.findOneAndUpdate(query, updateData, findOptions)
         result = doc ? [doc] : []
       }
+    } else if (limit === 1) {
+      /**
+       * Select, update, and return one job atomically in a single database call.
+       * We can only do this with limit === 1, which can be expressed as findOne.
+       */
+      const doc = await Model.findOneAndUpdate(query, updateData, {
+        ...findOptions,
+        projection: returning === false ? { _id: 1 } : undefined,
+        sort,
+      })
+
+      if (returning === false) {
+        return null
+      }
+
+      result = doc ? [doc] : []
     } else {
       if (typeof limit === 'number' && limit > 0) {
         const documentsToUpdate = await Model.find(
@@ -116,16 +132,27 @@ export const updateJobs: UpdateJobs = async function updateMany(
           return null
         }
 
-        query = { _id: { $in: documentsToUpdate.map((doc) => doc._id) } }
+        const candidateIDs = documentsToUpdate.map((doc) => doc._id)
+        const claimQuery = {
+          $and: [query, { _id: { $in: candidateIDs } }],
+        }
+
+        await Model.updateMany(claimQuery, updateData, baseOptions)
+
+        if (returning === false) {
+          return null
+        }
+
+        result = await Model.find(claimQuery, {}, { ...findOptions, sort })
+      } else {
+        await Model.updateMany(query, updateData, baseOptions)
+
+        if (returning === false) {
+          return null
+        }
+
+        result = await Model.find(query, {}, { ...findOptions, sort })
       }
-
-      await Model.updateMany(query, updateData, baseOptions)
-
-      if (returning === false) {
-        return null
-      }
-
-      result = await Model.find(query, {}, { ...findOptions, sort })
     }
   } catch (error) {
     handleError({ collection: collectionConfig.slug, error, req })
