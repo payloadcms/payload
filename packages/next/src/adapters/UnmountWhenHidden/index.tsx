@@ -10,7 +10,7 @@ import React, { useLayoutEffect, useState } from 'react'
  *
  * React runs effect cleanups when an `<Activity>` boundary is hidden. This component uses that to
  * render nothing while hidden, so the view is mounted fresh when it becomes visible again, like it
- * is without `cacheComponents`. Without `cacheComponents` this component does nothing.
+ * is without `cacheComponents`. Only rendered when `cacheComponents` is enabled.
  *
  * @see https://github.com/vercel/next.js/issues/86577
  * @see https://react.dev/reference/react/Activity

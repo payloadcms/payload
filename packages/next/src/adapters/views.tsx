@@ -28,12 +28,17 @@ type PageProps = {
   }>
 }
 
-export const RootPage = async (props: PageProps) => (
-  <UnmountWhenHidden>
-    {await renderRoot({ ...props, adminViews, initAdminContext, notFound, redirect })}
-  </UnmountWhenHidden>
-)
+// Set by `withPayload`. Only with `cacheComponents` does Next.js keep hidden pages mounted.
+const isCacheComponentsEnabled = process.env.PAYLOAD_CACHE_COMPONENTS_ENABLED === 'true'
 
-export const NotFoundPage = async (props: PageProps) => (
-  <UnmountWhenHidden>{await renderNotFoundPage({ ...props, initAdminContext })}</UnmountWhenHidden>
-)
+export const RootPage = async (props: PageProps) => {
+  const page = await renderRoot({ ...props, adminViews, initAdminContext, notFound, redirect })
+
+  return isCacheComponentsEnabled ? <UnmountWhenHidden>{page}</UnmountWhenHidden> : page
+}
+
+export const NotFoundPage = async (props: PageProps) => {
+  const page = await renderNotFoundPage({ ...props, initAdminContext })
+
+  return isCacheComponentsEnabled ? <UnmountWhenHidden>{page}</UnmountWhenHidden> : page
+}

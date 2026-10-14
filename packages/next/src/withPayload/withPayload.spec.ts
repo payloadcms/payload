@@ -14,6 +14,14 @@ describe('withPayload', () => {
     expect(disabled.env.CUSTOM).toBe('value')
   })
 
+  it('should tell the admin panel whether Cache Components is enabled', () => {
+    const enabled = withPayload({ cacheComponents: true })
+    const disabled = withPayload({})
+
+    expect(enabled.env?.PAYLOAD_CACHE_COMPONENTS_ENABLED).toBe('true')
+    expect(disabled.env?.PAYLOAD_CACHE_COMPONENTS_ENABLED).toBeUndefined()
+  })
+
   it('should preserve existing Turbopack rules', () => {
     const rule = { loaders: ['custom-loader'] }
     const rules = {
