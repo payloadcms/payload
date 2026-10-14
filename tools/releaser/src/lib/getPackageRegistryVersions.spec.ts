@@ -11,7 +11,9 @@ describe('getLatestPublishedVersion', () => {
     const result = await getLatestPublishedVersion({ name: '@payloadcms/ui', fetchImpl, sleep })
 
     expect(result).toBe('3.90.2')
-    expect(fetchImpl).toHaveBeenCalledWith('https://registry.npmjs.org/@payloadcms/ui/latest')
+    expect(fetchImpl).toHaveBeenCalledWith('https://registry.npmjs.org/@payloadcms/ui/latest', {
+      signal: expect.any(AbortSignal),
+    })
   })
 
   it('should return undefined on 404 without retrying', async () => {
@@ -66,6 +68,18 @@ describe('getLatestPublishedVersion', () => {
     expect(fetchImpl).toHaveBeenCalledTimes(3)
   })
 
+  it('should retry a timed-out attempt and return the version from the next 200', async () => {
+    const fetchImpl = vi
+      .fn<typeof fetch>()
+      .mockRejectedValueOnce(new DOMException('The operation timed out.', 'TimeoutError'))
+      .mockResolvedValueOnce(Response.json({ version: '3.90.2' }))
+
+    const result = await getLatestPublishedVersion({ name: 'payload', fetchImpl, sleep })
+
+    expect(result).toBe('3.90.2')
+    expect(fetchImpl).toHaveBeenCalledTimes(2)
+  })
+
   it('should throw the network error after three rejected fetches', async () => {
     const fetchImpl = vi.fn<typeof fetch>().mockRejectedValue(new TypeError('fetch failed'))
 
@@ -117,7 +131,9 @@ describe('isVersionPublished', () => {
     })
 
     expect(result).toBe(true)
-    expect(fetchImpl).toHaveBeenCalledWith('https://registry.npmjs.org/payload/4.0.0-canary.9')
+    expect(fetchImpl).toHaveBeenCalledWith('https://registry.npmjs.org/payload/4.0.0-canary.9', {
+      signal: expect.any(AbortSignal),
+    })
   })
 
   it('should return false when the registry returns 404 without retrying', async () => {

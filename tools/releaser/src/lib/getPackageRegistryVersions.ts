@@ -75,6 +75,8 @@ export const getLatestPublishedVersion = async ({
 
 const maxAttempts = 3
 const baseBackoffMs = 1000
+/** Bounds a stalled registry connection; a timed-out attempt counts as a network error. */
+const attemptTimeoutMs = 15_000
 
 const defaultSleep = (ms: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, ms))
@@ -100,7 +102,7 @@ const fetchWithRetry = async ({
     const isLastAttempt = attempt === maxAttempts
     let res: Response
     try {
-      res = await fetchImpl(url)
+      res = await fetchImpl(url, { signal: AbortSignal.timeout(attemptTimeoutMs) })
     } catch (err) {
       if (isLastAttempt) {
         throw err
