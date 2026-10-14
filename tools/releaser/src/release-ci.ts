@@ -1,9 +1,9 @@
 /**
  * Publish-workflow entry point. Reads the committed version from the checked-out
  * tag, builds, publishes to npm (fail-fast, idempotent, topological order), moves
- * `latest` for prerelease-only packages, then generates release notes and upserts a
- * DRAFT GitHub release. No version bump — the
- * bump workflow already committed and tagged the version this run publishes.
+ * `latest` for beta-only packages on beta publishes, then generates release notes and
+ * upserts a DRAFT GitHub release. No version bump — the bump workflow already
+ * committed and tagged the version this run publishes.
  *
  * Usage: pnpm release-ci [--dry-run]
  *
@@ -27,11 +27,16 @@ import { createDraftGitHubRelease } from './utils/createDraftGitHubRelease.js'
 import { generateReleaseNotes } from './utils/generateReleaseNotes.js'
 
 /**
- * Packages with no stable v4 release that users run through `npx <name>` without a
- * version, which resolves `latest`. Each prerelease publish moves `latest` so that
- * command runs current code. Remove once v4 stable publishes to `latest` directly.
+ * Packages first published in v4, so they have no stable release for `latest`. A
+ * plain install or `npx` resolves `latest`, so each beta publish moves it there.
+ * Canaries leave it alone to keep plain installs matched with `payload@beta`.
+ * Remove once v4 stable publishes to `latest` directly.
  */
-export const LATEST_FOLLOWS_PRERELEASE_PACKAGES = ['@payloadcms/codemod']
+export const LATEST_FOLLOWS_BETA_PACKAGES = [
+  '@payloadcms/codemod',
+  '@payloadcms/tanstack-start',
+  '@payloadcms/transformer-sharp',
+]
 
 const DIST_TAG_ATTEMPTS = 2
 
@@ -122,10 +127,12 @@ export const runReleaseCi = async ({
   })
   log(`Release URL: ${releaseUrl}`)
 
+  const latestTaggedPackages = tag === 'beta' ? LATEST_FOLLOWS_BETA_PACKAGES : []
+
   if (dryRun) {
     log(`[dry-run] would build all packages`)
     log(`[dry-run] would publish all packages to dist-tag '${tag}'`)
-    for (const name of LATEST_FOLLOWS_PRERELEASE_PACKAGES) {
+    for (const name of latestTaggedPackages) {
       log(`[dry-run] would point dist-tag 'latest' at ${name}@${version}`)
     }
     log(`[dry-run] would create/upsert draft GitHub release for ${releaseTag}`)
@@ -137,7 +144,7 @@ export const runReleaseCi = async ({
 
   // npm accepts dist-tag changes while a new version is still in publish-time
   // scanning, so this runs right after publish without waiting for availability.
-  for (const name of LATEST_FOLLOWS_PRERELEASE_PACKAGES) {
+  for (const name of latestTaggedPackages) {
     await tagLatest({ addDistTag, log, name, version })
   }
 
