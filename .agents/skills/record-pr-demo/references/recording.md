@@ -28,6 +28,38 @@ Keep the recording narrow. A useful plan identifies:
 
 Prefer 10–45 seconds. Avoid long typing sequences, setup screens, loading waits, repeated navigation, and unrelated admin chrome. Use clear fixture labels that make sense without narration.
 
+## Editorial annotations over the recording
+
+Annotations are editorial layers over the video, not Payload UI notifications. Use them only when a short explanation helps the reviewer understand the result.
+
+- **Shared style:** Payload's `--font-body` face (Inter by default), sentence-case text, and grayscale `--color-bg-elevated`, `--color-text`, `--color-text-secondary`, and `--color-border` tokens. No brand colors or decorative effects. Load the font explicitly when compositing outside the admin page.
+- **Floating annotations:** A compact, content-width card with `--radius-medium` corners, a thin `--color-border` outline, and `--elevation-300-tooltip`. Use a regular-weight 12px title in lighter black and a 13px body with an 18px line height. Bottom notes stay about 48px tall; two-line callouts can be taller.
+- **Full-width banners:** A shallow, flat `--color-bg-elevated` strip along the bottom edge with a `--stroke-width-small` solid `--color-border` top rule. Use 12px titles, 18px body text, and 28px prominent figures, with regular or medium weights and tabular numerals for figures. When content has sections, separate them with `border-inline-start: var(--stroke-width-small) solid var(--color-border)` and `padding-inline-start: var(--spacer-3)`.
+
+Keep annotations clear of the cursor and UI needed to understand the demo. Injected layers use `pointer-events: none` and `aria-hidden="true"`; substantive annotation text also appears in the written PR walkthrough or another text alternative. Check placement, contrast, and timing in the rendered MP4.
+
+The recorder provides `showAnnotation` and `hideAnnotation` to apply these styles consistently. Supply only content and placement in the scenario; `showAnnotation` replaces any visible annotation. A banner accepts `title`, `body`, and `figure` directly, or a `sections` array when dividers are needed:
+
+```js
+await showAnnotation({
+  type: 'floating',
+  title: 'What changed',
+  body: 'Rich text subfields are grouped once per schema map.',
+  position: { top: 270, right: 32 },
+})
+await pause(1600)
+
+await showAnnotation({
+  type: 'banner',
+  sections: [
+    { title: 'PR benchmark', body: '1,260 rich text fields' },
+    { title: 'Result', figure: '93% faster' },
+  ],
+})
+await pause(2200)
+await hideAnnotation()
+```
+
 ## Scenario module
 
 Create the scenario outside the repository, for example `/tmp/payload-pr-demo-relationship-drawer.mjs`. It must default-export an async function:
@@ -87,6 +119,7 @@ The recorder supplies:
 - `pause(milliseconds = 700)`: a short presentation pause;
 - `ready()`: marks the loaded opening state and holds it for 1.2 seconds; call it exactly once before the first visible interaction;
 - `scroll(locator, options?)`: scrolls the actual overflow range with frame-timed easing, or real wheel input when requested;
+- `showAnnotation(options)` / `hideAnnotation()`: displays a styled floating annotation or full-width banner, then removes it when done;
 - `label`: the normalized recording label.
 
 The recorder adds a visible cursor above in-page popups and dialogs. Keep the scenario on one page; separate browser-window stitching is outside this skill's current scope.

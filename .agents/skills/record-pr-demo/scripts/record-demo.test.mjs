@@ -116,6 +116,44 @@ test('recordDemo saves a completed browser recording before closing the browser'
   }
 })
 
+test('should expose annotation helpers to recording scenarios', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-annotation-scenario-test-'))
+  const scenario = path.join(directory, 'scenario.mjs')
+
+  try {
+    await writeFile(
+      scenario,
+      `export default async function scenario({ expect, hideAnnotation, page, showAnnotation }) {
+        await page.goto('data:text/html,<main>Annotation demo</main>')
+        await showAnnotation({
+          type: 'floating',
+          title: 'What changed',
+          body: 'The feature works.',
+          position: { top: 24, right: 24 },
+        })
+        await expect(page.locator('[data-pr-demo-annotation="floating"]')).toContainText('The feature works.')
+        await showAnnotation({
+          type: 'banner',
+          sections: [{ title: 'Result', figure: '28 ms' }],
+        })
+        await expect(page.locator('[data-pr-demo-annotation="floating"]')).toHaveCount(0)
+        await expect(page.locator('[data-pr-demo-annotation="banner"]')).toContainText('28 ms')
+        await hideAnnotation()
+        await expect(page.locator('[data-pr-demo-annotation]')).toHaveCount(0)
+      }`,
+    )
+
+    await recorder.validateDemo({
+      baseURL: 'http://localhost:3000',
+      label: 'annotation-scenario-test',
+      scenario,
+      viewport: { height: 480, width: 640 },
+    })
+  } finally {
+    await rm(directory, { force: true, recursive: true })
+  }
+})
+
 test('should reject a recording without an opening ready marker', async () => {
   const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-missing-ready-test-'))
   const scenario = path.join(directory, 'scenario.mjs')

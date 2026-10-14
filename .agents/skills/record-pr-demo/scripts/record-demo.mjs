@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
+import { createAnnotationInteraction } from './annotation-demo.mjs'
 import { createScrollInteraction } from './scroll-demo.mjs'
 
 const DEFAULT_BASE_URL = 'http://localhost:3000'
@@ -276,6 +277,7 @@ async function executeDemo({
     mouseMoveMs,
     page,
   })
+  const annotationInteractions = createAnnotationInteraction({ page })
   let isOpeningReady = false
   let scenarioError
 
@@ -285,6 +287,7 @@ async function executeDemo({
       click: pointerInteractions.click,
       expect,
       fixture,
+      hideAnnotation: annotationInteractions.hideAnnotation,
       label,
       moveCursor: pointerInteractions.moveCursor,
       page,
@@ -296,6 +299,7 @@ async function executeDemo({
         await page.waitForTimeout(1200 * pauseScale)
       },
       scroll: createScrollInteraction({ moveCursor: pointerInteractions.moveCursor, page }),
+      showAnnotation: annotationInteractions.showAnnotation,
     })
     if (output && !isOpeningReady) {
       throw new Error('Recording scenario must call ready() after its opening state is visible')
