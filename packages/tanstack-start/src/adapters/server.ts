@@ -1,7 +1,7 @@
 import type { CookieOptions, CookieStore, ServerAdapter } from 'payload'
 
 import { notFound, redirect } from '@tanstack/react-router'
-import { getRequest, getResponseHeaders } from '@tanstack/react-start/server'
+import { getRequest, setCookie as setTanstackCookie } from '@tanstack/react-start/server'
 import { parseCookies } from 'payload'
 
 function buildCookieStore(headers: Headers): CookieStore {
@@ -16,40 +16,6 @@ function buildCookieStore(headers: Headers): CookieStore {
       return Array.from(cookies.entries()).map(([name, value]) => ({ name, value }))
     },
   }
-}
-
-function serializeCookie(name: string, value: string, options?: CookieOptions): string {
-  let cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}`
-
-  if (options?.path) {
-    cookie += `; Path=${options.path}`
-  }
-
-  if (options?.domain) {
-    cookie += `; Domain=${options.domain}`
-  }
-
-  if (options?.maxAge !== undefined) {
-    cookie += `; Max-Age=${options.maxAge}`
-  }
-
-  if (options?.expires) {
-    cookie += `; Expires=${options.expires.toUTCString()}`
-  }
-
-  if (options?.httpOnly) {
-    cookie += '; HttpOnly'
-  }
-
-  if (options?.secure) {
-    cookie += '; Secure'
-  }
-
-  if (options?.sameSite) {
-    cookie += `; SameSite=${options.sameSite.charAt(0).toUpperCase() + options.sameSite.slice(1)}`
-  }
-
-  return cookie
 }
 
 /**
@@ -99,8 +65,10 @@ export const tanstackServerAdapter: ServerAdapter = {
     throw new Error('Unauthorized')
   },
 
+  // getResponseHeaders() can return a detached copy, so appending to it may not reach the
+  // response. setCookie writes to the outgoing response in every supported TanStack Start version.
   setCookie: (name: string, value: string, options?: CookieOptions) => {
-    getResponseHeaders().append('Set-Cookie', serializeCookie(name, value, options))
+    setTanstackCookie(name, value, options)
   },
 }
 
