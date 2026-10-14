@@ -11,9 +11,16 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  suite: 'form-state',
   config: {
     admin: {
+      components: {
+        views: {
+          formRequests: {
+            Component: './components/FormRequests/index.js#FormRequests',
+            path: '/form-requests',
+          },
+        },
+      },
       importMap: {
         baseDir: path.resolve(dirname),
       },
@@ -41,4 +48,5 @@ export default buildConfigWithDefaults({
       overrideAccess: true,
     })
   },
+  suite: 'form-state',
 })
