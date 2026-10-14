@@ -338,6 +338,14 @@ export function getExpectedRecentsGrid({ containerWidth }: { containerWidth: num
   return { columns, pageSize: columns }
 }
 
+/**
+ * Server-rendered widgets ignore input until React hydrates them. The nav marks itself hydrated
+ * after an async preference read, which runs once hydration is done.
+ */
+export async function waitForDashboardHydration({ page }: { page: Page }): Promise<void> {
+  await expect(page.locator('.template-default--nav-hydrated')).toBeVisible()
+}
+
 /** The content-box width of the Recents and Pinned widget, which its container queries measure. */
 export function getRecentsContainerWidth({ widget }: { widget: Locator }): Promise<number> {
   return widget.evaluate((element) => {

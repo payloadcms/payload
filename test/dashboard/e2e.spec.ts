@@ -17,6 +17,7 @@ import {
   getExpectedRecentsGrid,
   getRecentsContainerWidth,
   getRecentsLayoutShiftSum,
+  waitForDashboardHydration,
 } from './utils.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -44,6 +45,7 @@ describe('Dashboard', () => {
       serverURL,
     })
     await page.goto(url.admin)
+    await waitForDashboardHydration({ page })
   })
 
   test('should keep dashboard height stable and delay loading feedback', async ({ page }) => {
@@ -73,6 +75,11 @@ describe('Dashboard', () => {
     let documentRequests = 0
 
     await page.route('**/*', async (route) => {
+      // Routing disables the HTTP cache, so web fonts would reload and swap in after every navigation.
+      if (route.request().resourceType() === 'font') {
+        await route.abort()
+        return
+      }
       if (
         route.request().method() === 'POST' &&
         route.request().postData()?.includes('get-dashboard-documents')
@@ -96,6 +103,7 @@ describe('Dashboard', () => {
       await page.setViewportSize({ height: 900, width })
       documentRequests = 0
       await page.goto(url.admin)
+      await waitForDashboardHydration({ page })
       const widget = page.locator('.recents-widget')
       const viewport = widget.locator('.recents-widget__viewport')
       const loading = widget.locator('.recents-widget__loading')
@@ -191,6 +199,7 @@ describe('Dashboard', () => {
       })
       await page.clock.resume()
       await page.goto(url.admin)
+      await waitForDashboardHydration({ page })
       await recents.press('Enter')
       await expect(widget.locator('.recents-widget__empty-title')).toHaveText('No recent documents')
       // An empty tab only reserves one row of cards.
@@ -276,6 +285,7 @@ describe('Dashboard', () => {
     // The first card of the current page stays visible when the tier changes.
     await page.setViewportSize({ height: 900, width: 1300 })
     await page.goto(url.admin)
+    await waitForDashboardHydration({ page })
     const pageSize = await widget
       .locator('.recents-widget__viewport')
       .evaluate((element) =>
@@ -321,6 +331,7 @@ describe('Dashboard', () => {
       for (const width of [375, 700]) {
         await page.setViewportSize({ height: 900, width })
         await page.goto(url.admin)
+        await waitForDashboardHydration({ page })
         await expect(widget.locator('.recents-widget__item--add-pin')).toHaveCount(1)
         const { columns } = getExpectedRecentsGrid({
           containerWidth: await getRecentsContainerWidth({ widget }),
@@ -526,6 +537,7 @@ describe('Dashboard', () => {
       },
     ])
     await page.goto(url.admin)
+    await waitForDashboardHydration({ page })
 
     const d = new DashboardHelper(page)
     const timelineCard = d.widgetByPos(11).locator('.collection-query-widget')
@@ -660,6 +672,7 @@ describe('Dashboard', () => {
     await expect(page.locator('#field-title')).toHaveValue(secondDoc.title)
 
     await page.goto(url.admin)
+    await waitForDashboardHydration({ page })
 
     const d = new DashboardHelper(page)
     const activityCard = d.widgetByPos(2).locator('.recently-viewed-widget')
@@ -702,6 +715,7 @@ describe('Dashboard', () => {
     expect(preferenceResponse.ok()).toBe(true)
     await page.setViewportSize({ height: 900, width: 1920 })
     await page.goto(url.admin)
+    await waitForDashboardHydration({ page })
 
     const dashboard = new DashboardHelper(page)
     await dashboard.setEditing()
@@ -748,6 +762,7 @@ describe('Dashboard', () => {
     await expect(widget.locator('.recents-widget__pin')).toHaveCount(0)
 
     await page.reload()
+    await waitForDashboardHydration({ page })
     await page
       .locator('.recents-widget')
       .getByRole('button', { name: 'Pinned', exact: true })
@@ -777,9 +792,11 @@ describe('Dashboard', () => {
     expect(saved.ok()).toBe(true)
     await page.setViewportSize({ height: 900, width: 1920 })
     await page.reload()
+    await waitForDashboardHydration({ page })
     const otherPage = await context.newPage()
 
     await otherPage.goto(url.admin)
+    await waitForDashboardHydration({ page: otherPage })
     for (const tab of [page, otherPage]) {
       await expect(tab.locator('.recents-widget .document-card__title')).toHaveCount(2)
       await tab.route('**/api/payload-preferences/pinned-documents', async (route) => {
@@ -812,6 +829,8 @@ describe('Dashboard', () => {
       })
       .toEqual([])
     await Promise.all([page.reload(), otherPage.reload()])
+    await waitForDashboardHydration({ page })
+    await waitForDashboardHydration({ page: otherPage })
     for (const tab of [page, otherPage]) {
       await expect(tab.locator('.recents-widget__empty-title')).toHaveText('No pinned documents')
     }
@@ -823,6 +842,7 @@ describe('Dashboard', () => {
     test.slow()
     await page.setViewportSize({ height: 900, width: 1920 })
     await page.reload()
+    await waitForDashboardHydration({ page })
     const ticket = (await (await page.request.get(`${serverURL}/api/tickets?limit=1`)).json())
       .docs[0]
     const event = (await (await page.request.get(`${serverURL}/api/events?limit=1`)).json()).docs[0]
@@ -901,6 +921,7 @@ describe('Dashboard', () => {
     await expect(widget.locator('.document-card__title')).toHaveCount(2)
     await expect(widget.locator('.recents-widget__item--add-pin')).toHaveCount(1)
     await page.reload()
+    await waitForDashboardHydration({ page })
     await expect(widget.locator('.document-card__title')).toHaveCount(2)
   })
 
@@ -925,6 +946,7 @@ describe('Dashboard', () => {
     expect(response.ok()).toBe(true)
     await page.setViewportSize({ height: 900, width: 1200 })
     await page.reload()
+    await waitForDashboardHydration({ page })
     const widget = page.locator('.recents-widget')
     const addPin = widget.getByRole('button', { name: 'Select Documents', exact: true })
     const drawer = page.locator('.list-drawer.drawer--is-open')
@@ -1033,6 +1055,7 @@ describe('Dashboard', () => {
     })
     await page.setViewportSize({ height: 900, width: 1200 })
     await page.goto(url.admin)
+    await waitForDashboardHydration({ page })
     const dashboard = new DashboardHelper(page)
 
     await dashboard.setEditing()
@@ -1070,6 +1093,7 @@ describe('Dashboard', () => {
     })
     expect(pin.ok()).toBe(true)
     await page.reload()
+    await waitForDashboardHydration({ page })
     const widget = page.locator('.recents-widget')
 
     await expect(
@@ -1107,6 +1131,7 @@ describe('Dashboard', () => {
     await expect(page.locator('#field-title')).toHaveValue(event.title)
 
     await page.goto(url.admin)
+    await waitForDashboardHydration({ page })
 
     const d = new DashboardHelper(page)
     const activityCard = d.widgetByPos(2).locator('.recently-viewed-widget')
@@ -1407,6 +1432,7 @@ describe('Dashboard', () => {
     await drawer.getByRole('button', { name: 'Save Changes' }).click()
     await d.saveChangesAndValidate()
     await page.reload()
+    await waitForDashboardHydration({ page })
 
     const dropzoneWidget = page.locator('.upload-dropzone-widget')
     await dropzoneWidget.getByRole('button', { name: 'Upload files' }).click()
@@ -1722,6 +1748,7 @@ describe('Dashboard', () => {
 
     // Switch to Spanish locale
     await page.goto(`${url.admin}?locale=es`)
+    await waitForDashboardHydration({ page })
     const d2 = new DashboardHelper(page)
     await d2.setEditing()
 
@@ -1751,6 +1778,7 @@ describe('Dashboard', () => {
 
     // Switch back to English and verify original values persisted
     await page.goto(`${url.admin}?locale=en`)
+    await waitForDashboardHydration({ page })
     const d3 = new DashboardHelper(page)
     await d3.setEditing()
 
