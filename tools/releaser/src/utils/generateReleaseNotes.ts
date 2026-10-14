@@ -4,7 +4,7 @@ import { execSync } from 'child_process'
 import minimist from 'minimist'
 import semver from 'semver'
 
-import { getLatestCommits } from './getLatestCommits.js'
+import { getLatestCommits, getUnconventionalCommits } from './getLatestCommits.js'
 import { getRecommendedBump } from './getRecommendedBump.js'
 
 type Args = {
@@ -100,6 +100,8 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
 
   type Section = (typeof commitTypesForChangelog)[number]
 
+  const commitsOutsideSections: string[] = []
+
   const emojiHeaderMap: Record<Section, string> = {
     breaking: '⚠️ BREAKING CHANGES',
     build: '🔨 Build',
@@ -137,6 +139,8 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
           sections[typedCommitType] = []
         }
         sections[typedCommitType].push(c)
+      } else if (!c.isBreaking) {
+        commitsOutsideSections.push(`${c.shortHash} ${c.message}`)
       }
 
       return sections
@@ -173,8 +177,18 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
     }
   }
 
+  const unconventionalCommits = await getUnconventionalCommits(fromVersion, toVersion)
+  commitsOutsideSections.push(
+    ...unconventionalCommits.map((commit) => `${commit.shortHash} ${commit.message}`),
+  )
+  if (commitsOutsideSections.length) {
+    console.log(
+      `WARNING: ${commitsOutsideSections.length} commit(s) are not conventional commits with a known type and are missing from the sections`,
+    )
+  }
+
   // Add contributors after writing to file
-  const releaseNotes = changelog + contributors
+  const releaseNotes = createReviewComment(commitsOutsideSections) + changelog + contributors
 
   let releaseUrl = `https://github.com/payloadcms/payload/releases/new?tag=${proposedReleaseVersion}&title=${proposedReleaseVersion}&body=${encodeURIComponent(releaseNotes)}`
   if (tag !== 'latest') {
@@ -309,6 +323,24 @@ async function getContributors(commits: GitCommit[]): Promise<Contributor[]> {
 }
 
 type Contributor = { name: string; username: string }
+
+function createReviewComment(commits: string[]): string {
+  if (!commits.length) {
+    return ''
+  }
+
+  const lines = commits.map((line) => `- ${line.replaceAll('-->', '-- >')}`)
+
+  return `<!--
+REVIEW BEFORE PUBLISHING
+
+These commits are not listed below because their title is not a conventional commit with a known type. Add any that matter to a section, then delete this comment.
+
+${lines.join('\n')}
+-->
+
+`
+}
 
 function formatCommitForChangelog(commit: GitCommit, includeBreakingNotes = false): string {
   const { description, isBreaking, references, scope } = commit

@@ -2,7 +2,10 @@ import type { GitCommit } from 'changelogen'
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('./getLatestCommits.js', () => ({ getLatestCommits: vi.fn(async () => []) }))
+vi.mock('./getLatestCommits.js', () => ({
+  getLatestCommits: vi.fn(async () => []),
+  getUnconventionalCommits: vi.fn(async () => []),
+}))
 vi.mock('./getRecommendedBump.js', () => ({ getRecommendedBump: vi.fn(async () => 'patch') }))
 
 import { generateReleaseNotes } from './generateReleaseNotes.js'
