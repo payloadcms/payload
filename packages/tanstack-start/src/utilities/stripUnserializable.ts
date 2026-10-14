@@ -26,6 +26,10 @@ export function stripUnserializable(
     return value.constructor === Date ? value : new Date(value.getTime())
   }
 
+  if (typeof Blob !== 'undefined' && value instanceof Blob) {
+    return undefined
+  }
+
   if (!Array.isArray(value) && !isPlainRecord(value)) {
     return value
   }

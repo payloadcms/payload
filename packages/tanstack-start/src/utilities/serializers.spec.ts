@@ -20,7 +20,8 @@ describe('TanStack serializers', () => {
   it('should preserve native serializable values in server function args', async () => {
     const date = new Date()
     const regexp = /value/g
-    const args = { date, regexp }
+    const blob = new Blob(['file'])
+    const args = { date, regexp, blob }
     let received: unknown
 
     const serverFunction = createServerFunctionClient({
@@ -32,8 +33,9 @@ describe('TanStack serializers', () => {
 
     await serverFunction({ name: 'test', args })
 
-    expect(received).toEqual(args)
+    expect(received).toEqual({ date, regexp })
     expect((received as typeof args).date).toBe(date)
     expect((received as typeof args).regexp).toBe(regexp)
+    expect((received as Partial<typeof args>).blob).toBeUndefined()
   })
 })
