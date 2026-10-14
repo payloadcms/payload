@@ -1,6 +1,6 @@
 import type { Endpoint } from 'payload'
 
-import { requestHandler } from '@tanstack/react-start/server'
+import { createServerEntry, getResponseHeaders } from '@tanstack/react-start/server'
 import assert from 'node:assert/strict'
 import { createPayloadRequest } from 'payload'
 
@@ -21,8 +21,21 @@ const endpoint: Endpoint = {
 test.suite('TanStack server adapter', { config: './config.ts' }, () => {
   test('should preserve multiple cookies in one response', async ({ payload }) => {
     const req = await createPayloadRequest({ payload })
-    const handleRequest = requestHandler(() => endpoint.handler(req))
-    const response = await handleRequest(new Request('http://localhost/api/set-two-cookies'), {})
+    const serverEntry = createServerEntry({
+      fetch: async () => {
+        const response = await endpoint.handler(req)
+
+        return new Response(response.body, {
+          headers: new Headers(getResponseHeaders()),
+          status: response.status,
+          statusText: response.statusText,
+        })
+      },
+    })
+    const response = await serverEntry.fetch(
+      new Request('http://localhost/api/set-two-cookies'),
+      {},
+    )
 
     assert.equal(response.status, 200)
     assert.deepEqual(response.headers.getSetCookie(), [
