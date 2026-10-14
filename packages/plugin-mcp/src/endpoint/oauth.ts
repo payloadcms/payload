@@ -1,5 +1,11 @@
 import type { PayloadHandler, PayloadRequest, SanitizedConfig } from 'payload'
 
+import {
+  bearerAuthChallengeResponse,
+  OAuthError,
+  OAuthErrorCode,
+} from '@modelcontextprotocol/server'
+
 import { getPluginConfig } from '../utils/getPluginConfig.js'
 
 /**
@@ -30,20 +36,13 @@ export const oauthProtectedResourceHandler =
  * Answers an unauthenticated MCP request with a challenge linking to the protected resource
  * metadata, which starts the client's OAuth flow.
  */
-export const oauthChallenge = ({ req }: { req: PayloadRequest }): Response => {
-  const metadataURL = `${getMCPURL({ config: req.payload.config, url: req.url! })}/oauth-protected-resource`
-  const error = req.headers.get('Authorization')?.startsWith('Bearer ')
-    ? 'error="invalid_token", '
-    : ''
-
-  return Response.json(
-    { errors: [{ message: req.t('error:unauthorized') }] },
+export const oauthChallenge = ({ req }: { req: PayloadRequest }): Response =>
+  bearerAuthChallengeResponse(
+    new OAuthError(OAuthErrorCode.InvalidToken, req.t('error:unauthorized')),
     {
-      headers: { 'WWW-Authenticate': `Bearer ${error}resource_metadata="${metadataURL}"` },
-      status: 401,
+      resourceMetadataUrl: `${getMCPURL({ config: req.payload.config, url: req.url! })}/oauth-protected-resource`,
     },
   )
-}
 
 const getMCPURL = ({ config, url }: { config: SanitizedConfig; url: string }): string =>
   new URL(`${config.routes.api}/mcp`, config.serverURL || url).href
@@ -61,9 +60,13 @@ const getMetadataResponse = ({
     return new Response(null, { status: 404 })
   }
 
-  return Response.json({
-    authorization_servers: pluginConfig.oauth.authorizationServers,
-    bearer_methods_supported: ['header'],
-    resource: pluginConfig.oauth.resource ?? getMCPURL({ config, url }),
-  })
+  return Response.json(
+    {
+      authorization_servers: pluginConfig.oauth.authorizationServers,
+      bearer_methods_supported: ['header'],
+      resource: pluginConfig.oauth.resource ?? getMCPURL({ config, url }),
+    },
+    // Public document, readable by browser-based MCP clients on any origin
+    { headers: { 'Access-Control-Allow-Origin': '*' } },
+  )
 }
