@@ -36,7 +36,8 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
     headers.set('DisableAutologin', 'true')
     req.user = (await req.payload.auth({ headers, req })).user
 
-    if (hasAuthorization && !req.user) {
+    // With OAuth, the endpoint answers with a challenge that starts the client's sign-in
+    if (hasAuthorization && !req.user && !pluginConfig.oauth) {
       throw new UnauthorizedError(req.t)
     }
   }

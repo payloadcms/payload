@@ -1,5 +1,5 @@
 import type { Client, JsonSchemaType } from '@modelcontextprotocol/client'
-import type { UploadInstructions } from 'payload'
+import type { Payload, UploadInstructions } from 'payload'
 
 import { readFile } from 'fs/promises'
 import path from 'path'
@@ -9,6 +9,7 @@ import { describe, expect, onTestFinished, vi } from 'vitest'
 import type { TestFileServer } from '../__helpers/shared/startTestFileServer.js'
 
 import { startTestFileServer } from '../__helpers/shared/startTestFileServer.js'
+import { devUser } from '../credentials.js'
 import { getToolDoc, getToolText } from './helpers/mcpClient.js'
 import { createMcpTests, protocolEras, test } from './helpers/mcpFixtures.js'
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -312,6 +313,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         })
         const json: any = await response.json()
         expect(response.status).toBe(401)
+        expect(response.headers.get('WWW-Authenticate')).toBeNull()
         expect(json?.errors).toBeDefined()
         expect(json.errors[0].message).toBe(
           'Unauthorized, you must be logged in to make this request.',
@@ -336,6 +338,78 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         expect(json.errors[0].message).toBe(
           'Unauthorized, you must be logged in to make this request.',
         )
+      })
+    })
+    test.describe('OAuth', () => {
+      const enableOAuth = (payload: Payload) => {
+        const plugin = payload.config.plugins?.find(
+          (plugin) => plugin.slug === '@payloadcms/plugin-mcp',
+        ) as any
+        plugin.sanitizedOptions.oauth = { authorizationServers: ['https://auth.example.com'] }
+        onTestFinished(() => {
+          delete plugin.sanitizedOptions.oauth
+        })
+      }
+
+      it('should challenge requests without an authenticated user', async ({
+        payload,
+        restClient,
+      }) => {
+        enableOAuth(payload)
+        const postWithAuthorization = (authorization?: string) =>
+          restClient.POST('/mcp', {
+            body: JSON.stringify({
+              id: 1,
+              jsonrpc: '2.0',
+              method: 'initialize',
+              params: {
+                capabilities: {},
+                clientInfo: { name: 'oauth-test', version: '1.0.0' },
+                protocolVersion: '2025-11-25',
+              },
+            }),
+            headers: {
+              Accept: 'application/json, text/event-stream',
+              ...(authorization ? { Authorization: authorization } : {}),
+            },
+          })
+        const resourceMetadata = `resource_metadata="${restClient.serverURL}/api/mcp/oauth-protected-resource"`
+
+        const anonymous = await postWithAuthorization()
+        expect(anonymous.status).toBe(401)
+        expect(anonymous.headers.get('WWW-Authenticate')).toBe(`Bearer ${resourceMetadata}`)
+
+        const metadata = await restClient.GET('/mcp/oauth-protected-resource')
+        await expect(metadata.json()).resolves.toEqual({
+          authorization_servers: ['https://auth.example.com'],
+          bearer_methods_supported: ['header'],
+          resource: `${restClient.serverURL}/api/mcp`,
+        })
+
+        const invalidToken = await postWithAuthorization('Bearer invalid-token')
+        expect(invalidToken.status).toBe(401)
+        expect(invalidToken.headers.get('WWW-Authenticate')).toBe(
+          `Bearer error="invalid_token", ${resourceMetadata}`,
+        )
+
+        const { token } = await restClient
+          .POST('/users/login', {
+            body: JSON.stringify({ email: devUser.email, password: devUser.password }),
+          })
+          .then((res) => res.json())
+        expect((await postWithAuthorization(`Bearer ${token}`)).status).toBe(200)
+      })
+      it('should run requests as the authenticated user', async ({
+        getLimitedApiKey,
+        mcp,
+        payload,
+      }) => {
+        enableOAuth(payload)
+        const client = await mcp.connect(await getLimitedApiKey())
+        const { tools } = await client.listTools()
+
+        expect(tools.some((tool) => tool.name === 'findDocuments')).toBe(true)
+        expect(tools.some((tool) => tool.name === 'updateGlobal')).toBe(false)
       })
     })
     test.describe('List', () => {

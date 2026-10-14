@@ -3,6 +3,7 @@ import { definePlugin } from 'payload'
 import type { AuthorizedMCP, MCPPluginConfig, SanitizedMCPPluginConfig } from './types.js'
 
 import { mcpEndpoint } from './endpoint/index.js'
+import { oauthProtectedResourceEndpoint } from './endpoint/oauth.js'
 import { sanitizeMCPConfig } from './mcp/sanitizeMCPConfig.js'
 
 declare module 'payload' {
@@ -18,6 +19,7 @@ declare module 'payload' {
 export type { AuthorizedMCP, MCPPluginConfig, SanitizedMCPPluginConfig }
 
 export { defineCollectionTool, defineGlobalTool, definePrompt, defineTool } from './defineTool.js'
+export { oauthProtectedResourceHandler } from './endpoint/oauth.js'
 
 export const mcpPlugin = definePlugin<MCPPluginConfig>({
   slug: '@payloadcms/plugin-mcp',
@@ -48,6 +50,11 @@ export const mcpPlugin = definePlugin<MCPPluginConfig>({
           handler: () => new Response(null, { headers: { Allow: 'POST' }, status: 405 }),
           method: 'get',
           path: '/mcp',
+        },
+        {
+          handler: oauthProtectedResourceEndpoint,
+          method: 'get',
+          path: '/mcp/oauth-protected-resource',
         },
       ],
     }
