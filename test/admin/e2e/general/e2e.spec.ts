@@ -705,6 +705,67 @@ describe('General', () => {
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain(anchorHref)
     })
 
+    test(
+      'nav — should not show a blank page when navigating to a recently visited view',
+      { tag: '@also-without-cache-components' },
+      async () => {
+        type BlankFrameCounter = { blankFrames?: number; isCounting?: boolean } & Window
+
+        await page.goto(postsUrl.list)
+        await openNav(page)
+
+        // With `cacheComponents`, Next.js keeps recently visited views hidden and shows them again
+        // on a revisit. Count every animation frame in which no admin view is visible.
+        await page.evaluate(() => {
+          const counter = window as BlankFrameCounter
+          counter.blankFrames = 0
+          counter.isCounting = true
+
+          const countBlankFrame = () => {
+            if (!counter.isCounting) {
+              return
+            }
+
+            const isTemplateVisible = [...document.querySelectorAll('.template-default')].some(
+              (template) => template.getClientRects().length > 0,
+            )
+
+            if (!isTemplateVisible) {
+              counter.blankFrames = (counter.blankFrames ?? 0) + 1
+            }
+
+            requestAnimationFrame(countBlankFrame)
+          }
+
+          requestAnimationFrame(countBlankFrame)
+        })
+
+        // A revisit doesn't show a blank page every time, so revisit both views a few times
+        for (const slug of [
+          geoCollectionSlug,
+          postsCollectionSlug,
+          geoCollectionSlug,
+          postsCollectionSlug,
+          geoCollectionSlug,
+          postsCollectionSlug,
+        ]) {
+          // The view that was just hidden is emptied at a low priority, so its nav can still be there
+          await page.locator(`#nav-${slug}`).filter({ visible: true }).click()
+          await page.waitForURL((url) => url.pathname.endsWith(`/collections/${slug}`))
+          await expect(page.locator(`.collection-list--${slug}`)).toBeVisible()
+        }
+
+        const blankFrames = await page.evaluate(() => {
+          const counter = window as BlankFrameCounter
+          counter.isCounting = false
+
+          return counter.blankFrames
+        })
+
+        expect(blankFrames).toBe(0)
+      },
+    )
+
     test('dashboard — should navigate to collection', async () => {
       await page.goto(postsUrl.admin)
       // Wait for hydration - otherwise playwright clicks the card early and nothing happens
