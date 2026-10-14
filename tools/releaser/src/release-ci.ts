@@ -1,7 +1,7 @@
 /**
  * Publish-workflow entry point. Reads the committed version from the checked-out
  * tag, builds, publishes to npm (fail-fast, idempotent, topological order), moves
- * `latest` for beta-only packages on beta publishes, then generates release notes and
+ * `latest` for packages without a stable release, then generates release notes and
  * upserts a DRAFT GitHub release. No version bump — the bump workflow already
  * committed and tagged the version this run publishes.
  *
@@ -28,11 +28,11 @@ import { generateReleaseNotes } from './utils/generateReleaseNotes.js'
 
 /**
  * Packages first published in v4, so they have no stable release for `latest`. A
- * plain install or `npx` resolves `latest`, so each beta publish moves it there.
- * Canaries leave it alone to keep plain installs matched with `payload@beta`.
- * Remove once v4 stable publishes to `latest` directly.
+ * plain install or `npx` resolves `latest`, so each beta publish moves it there to
+ * keep plain installs matched with `payload@beta`. Remove once v4 stable publishes
+ * to `latest` directly.
  */
-export const LATEST_FOLLOWS_BETA_PACKAGES = [
+export const V4_ONLY_PACKAGES = [
   '@payloadcms/codemod',
   '@payloadcms/tanstack-start',
   '@payloadcms/transformer-sharp',
@@ -127,12 +127,13 @@ export const runReleaseCi = async ({
   })
   log(`Release URL: ${releaseUrl}`)
 
-  const latestTaggedPackages = tag === 'beta' ? LATEST_FOLLOWS_BETA_PACKAGES : []
+  // Guards `latest` if another prerelease line joins PREIDS.
+  const v4OnlyPackagesToTag = tag === 'beta' ? V4_ONLY_PACKAGES : []
 
   if (dryRun) {
     log(`[dry-run] would build all packages`)
     log(`[dry-run] would publish all packages to dist-tag '${tag}'`)
-    for (const name of latestTaggedPackages) {
+    for (const name of v4OnlyPackagesToTag) {
       log(`[dry-run] would point dist-tag 'latest' at ${name}@${version}`)
     }
     log(`[dry-run] would create/upsert draft GitHub release for ${releaseTag}`)
@@ -144,7 +145,7 @@ export const runReleaseCi = async ({
 
   // npm accepts dist-tag changes while a new version is still in publish-time
   // scanning, so this runs right after publish without waiting for availability.
-  for (const name of latestTaggedPackages) {
+  for (const name of v4OnlyPackagesToTag) {
     await tagLatest({ addDistTag, log, name, version })
   }
 

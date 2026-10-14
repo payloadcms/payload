@@ -26,20 +26,7 @@ const makeDeps = (
   over: Partial<ReturnType<typeof baseDeps>> = {},
 ): ReturnType<typeof baseDeps> => ({ ...baseDeps(), ...over })
 
-const betaVersion = '4.0.0-beta.3'
-
-const makeBetaDeps = (
-  over: Partial<ReturnType<typeof baseDeps>> = {},
-): ReturnType<typeof baseDeps> =>
-  makeDeps({
-    triggerTag: `v${betaVersion}`,
-    workspace: {
-      build: vi.fn(async () => {}),
-      publish: vi.fn(async () => {}),
-      version: vi.fn(async () => betaVersion),
-    },
-    ...over,
-  })
+const betaVersion = '4.0.0-beta.10'
 
 describe('runReleaseCi', () => {
   it('should build, publish, generate notes, and create a draft in order', async () => {
@@ -67,8 +54,8 @@ describe('runReleaseCi', () => {
     expect(publishOrder).toBeGreaterThan(buildOrder)
   })
 
-  it('should point latest at each beta-only package after a beta publish', async () => {
-    const deps = makeBetaDeps()
+  it('should point latest at each package without a stable release after publish', async () => {
+    const deps = makeDeps()
 
     await runReleaseCi({ deps, dryRun: false })
 
@@ -85,19 +72,11 @@ describe('runReleaseCi', () => {
     expect(draftOrder).toBeGreaterThan(tagOrder)
   })
 
-  it('should leave latest alone on a canary publish', async () => {
-    const deps = makeDeps()
-
-    await runReleaseCi({ deps, dryRun: false })
-
-    expect(deps.addDistTag).not.toHaveBeenCalled()
-  })
-
   it('should retry a failed dist-tag once', async () => {
     const addDistTag = vi
       .fn(async (_args: { name: string; tag: string; version: string }) => {})
       .mockRejectedValueOnce(new Error('ECONNRESET'))
-    const deps = makeBetaDeps({ addDistTag })
+    const deps = makeDeps({ addDistTag })
 
     await runReleaseCi({ deps, dryRun: false })
 
@@ -113,7 +92,7 @@ describe('runReleaseCi', () => {
     const addDistTag = vi.fn(async (_args: { name: string; tag: string; version: string }) => {
       throw new Error('E401')
     })
-    const deps = makeBetaDeps({ addDistTag })
+    const deps = makeDeps({ addDistTag })
 
     await runReleaseCi({ deps, dryRun: false })
 
@@ -133,7 +112,7 @@ describe('runReleaseCi', () => {
     const addDistTag = vi.fn(async (_args: { name: string; tag: string; version: string }) => {
       throw new Error('Command failed\nE403 100% forbidden')
     })
-    const deps = makeBetaDeps({ addDistTag })
+    const deps = makeDeps({ addDistTag })
 
     await runReleaseCi({ deps, dryRun: false })
 
@@ -143,7 +122,7 @@ describe('runReleaseCi', () => {
   })
 
   it('should derive the beta dist-tag from a beta version', async () => {
-    const deps = makeBetaDeps()
+    const deps = makeDeps()
 
     await runReleaseCi({ deps, dryRun: false })
 
@@ -264,8 +243,8 @@ describe('runReleaseCi', () => {
     expect(deps.generateReleaseNotes).toHaveBeenCalledOnce()
   })
 
-  it('should log the planned latest moves without tagging in a beta dry-run', async () => {
-    const deps = makeBetaDeps()
+  it('should log the planned latest moves without tagging in dry-run', async () => {
+    const deps = makeDeps()
 
     await runReleaseCi({ deps, dryRun: true })
 
