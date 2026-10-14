@@ -338,6 +338,23 @@ export function getExpectedRecentsGrid({ containerWidth }: { containerWidth: num
   return { columns, pageSize: columns }
 }
 
+/** The content-box width of the Recents and Pinned widget, which its container queries measure. */
+export function getRecentsContainerWidth({ widget }: { widget: Locator }): Promise<number> {
+  return widget.evaluate((element) => {
+    const style = getComputedStyle(element)
+
+    return [
+      'border-inline-start-width',
+      'border-inline-end-width',
+      'padding-inline-start',
+      'padding-inline-end',
+    ].reduce(
+      (contentWidth, property) => contentWidth - parseFloat(style.getPropertyValue(property)),
+      element.getBoundingClientRect().width,
+    )
+  })
+}
+
 /** Sums the layout shifts since navigation that moved the Recents and Pinned widget or the content below it. */
 export function getDashboardLayoutShift({ page }: { page: Page }): Promise<number> {
   return page.evaluate(
