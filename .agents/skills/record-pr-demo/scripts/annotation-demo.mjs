@@ -50,15 +50,13 @@ const ANNOTATION_STYLES = `
     padding-inline-start: var(--spacer-3);
     border-inline-start: var(--stroke-width-small) solid var(--color-border);
   }
-  [data-pr-demo-annotation="banner"] .pr-demo-annotation-body {
-    font-size: 18px;
+  [data-pr-demo-annotation="banner"] .pr-demo-annotation-body,
+  [data-pr-demo-annotation="banner"] .pr-demo-annotation-figure {
+    font-size: 16px;
     font-weight: 400;
-    line-height: 26px;
+    line-height: 24px;
   }
   [data-pr-demo-annotation="banner"] .pr-demo-annotation-figure {
-    font-size: 28px;
-    font-weight: 500;
-    line-height: 34px;
     font-variant-numeric: tabular-nums;
   }
 `

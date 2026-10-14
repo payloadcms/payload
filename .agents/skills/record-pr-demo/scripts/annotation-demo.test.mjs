@@ -85,6 +85,19 @@ test('should render reusable floating and banner annotations without changing fo
     assert.equal(await floating.count(), 0)
     assert.equal(await banner.locator('.pr-demo-annotation-section').count(), 2)
     assert.equal(await banner.evaluate((element) => element.matches(':popover-open')), true)
+    assert.equal(
+      await banner
+        .locator('.pr-demo-annotation-title')
+        .first()
+        .evaluate((element) => getComputedStyle(element).fontSize),
+      '12px',
+    )
+    assert.equal(
+      await banner
+        .locator('.pr-demo-annotation-body')
+        .evaluate((element) => getComputedStyle(element).fontSize),
+      '16px',
+    )
     assert.deepEqual(
       await banner.evaluate((element) => {
         const rect = element.getBoundingClientRect()
@@ -96,7 +109,7 @@ test('should render reusable floating and banner annotations without changing fo
       await banner
         .locator('.pr-demo-annotation-figure')
         .evaluate((element) => getComputedStyle(element).fontSize),
-      '28px',
+      '16px',
     )
     assert.equal(
       await banner
