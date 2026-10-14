@@ -1183,41 +1183,14 @@ test.describe('WCAG 2.2 Level AA', () => {
       await recents.focus()
       await recents.press('Space')
       await expect(recents).toHaveAttribute('aria-pressed', 'true')
-      const viewport = widget.locator('.recents-widget__viewport')
-
-      await expect(viewport).toHaveAttribute('aria-busy', 'false')
-      let shouldFail = true
-
-      await page.route('**/*', async (route) => {
-        if (
-          shouldFail &&
-          route.request().method() === 'POST' &&
-          route.request().postData()?.includes('get-dashboard-documents')
-        ) {
-          await route.abort('failed')
-          return
-        }
-        await route.continue()
-      })
-      try {
-        await pinned.press('Enter')
-        const retry = widget.getByRole('button', { name: 'Retry', exact: true })
-
-        await expect(retry).toBeVisible()
-        await expect(widget.locator('.recents-widget__status')).toHaveText(
-          'An unknown error has occurred.',
-        )
-        await retry.focus()
-        await expectPaintedFocus({ page })
-        shouldFail = false
-        await retry.press('Enter')
-        await expect(pinned).toBeFocused()
-        await expect(viewport).toHaveAttribute('aria-busy', 'false')
-        await expect(retry).toHaveCount(0)
-        await expectPaintedFocus({ page })
-      } finally {
-        await page.unrouteAll({ behavior: 'wait' })
-      }
+      await expect(widget.locator('.recents-widget__viewport')).toHaveAttribute(
+        'aria-busy',
+        'false',
+      )
+      await pinned.press('Enter')
+      await expect(pinned).toHaveAttribute('aria-pressed', 'true')
+      await expect(pinned).toBeFocused()
+      await expectPaintedFocus({ page })
     })
 
     test('should open the dashboard pin picker by keyboard and restore focus after cancel or selection', async () => {
@@ -1386,6 +1359,43 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(next).toBeFocused()
       await expect(widget.locator('.recents-widget__pagination [aria-live]')).toContainText(
         '2 of 3',
+      )
+      // The server renders the first 8 documents, so only the last page is fetched.
+      let shouldFail = true
+
+      await page.route('**/*', async (route) => {
+        if (
+          shouldFail &&
+          route.request().method() === 'POST' &&
+          route.request().postData()?.includes('get-dashboard-documents')
+        ) {
+          await route.abort('failed')
+          return
+        }
+        await route.continue()
+      })
+      try {
+        await next.press('Enter')
+        const retry = widget.getByRole('button', { name: 'Retry', exact: true })
+
+        await expect(retry).toBeVisible()
+        await expect(widget.locator('.recents-widget__status')).toHaveText(
+          'An unknown error has occurred.',
+        )
+        await retry.focus()
+        await expectPaintedFocus({ page })
+        shouldFail = false
+        await retry.press('Enter')
+        await expect(recents).toBeFocused()
+        await expect(retry).toHaveCount(0)
+        await expectPaintedFocus({ page })
+      } finally {
+        await page.unrouteAll({ behavior: 'wait' })
+      }
+      await expect(widget.locator('.document-card__title')).toHaveText([documents[8].title])
+      await previous.press('Enter')
+      await expect(widget.locator('.document-card__title')).toHaveText(
+        documents.slice(4, 8).map(({ title }) => title),
       )
       await next.press('Enter')
       await expect(widget.locator('.document-card__title')).toHaveText([documents[8].title])
@@ -2528,7 +2538,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         }
       })
 
-      for (let index = 0; index < 5; index++) {
+      for (let index = 0; index < 9; index++) {
         const response = await page.request.post(`${serverURL}/api/posts?draft=true`, {
           data: { accessibilitySelect: 'one', title: `Pagination focus document ${index + 1}` },
         })
@@ -2561,11 +2571,17 @@ test.describe('WCAG 2.2 Level AA', () => {
       const next = widget.getByRole('button', { name: 'Next', exact: true })
 
       await next.focus()
+      await next.press('Enter')
+      await expect(widget.locator('.document-card__title')).toHaveText(
+        documents.slice(4, 8).map(({ title }) => title),
+      )
       await expect(next).toBeFocused()
-      const deleted = await page.request.delete(`${serverURL}/api/posts/${documents[4].id}`)
+      // The server rendered the first 8 documents, so only the third page fetches the new total.
+      for (const document of documents.splice(4)) {
+        const deleted = await page.request.delete(`${serverURL}/api/posts/${document.id}`)
 
-      expect(deleted.ok()).toBe(true)
-      documents.pop()
+        expect(deleted.ok()).toBe(true)
+      }
       await next.press('Enter')
       await expect(widget.locator('.recents-widget__pagination')).toHaveCount(0)
       await expect(widget.locator('.document-card__title')).toHaveText(

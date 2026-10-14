@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 
 import type { DocumentsPage, DocumentsTab } from './getDocuments.js'
 import type { PinnedItem } from './recents.js'
@@ -8,19 +8,17 @@ import type { PinnedItem } from './recents.js'
 import { Button } from '../../elements/Button/index.js'
 import { CardGrid } from '../../elements/CardGrid/index.js'
 import { DocumentCard } from '../../elements/DocumentCard/index.js'
+import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { ClockIcon } from '../../icons/Clock/index.js'
 import { DocumentIcon } from '../../icons/Document/index.js'
 import { PinIcon } from '../../icons/Pin/index.js'
-import { useAuth } from '../../providers/Auth/index.js'
-import { useConfig } from '../../providers/Config/index.js'
-import { useEntityVisibility } from '../../providers/EntityVisibility/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { WidgetCard } from '../WidgetCard/index.js'
 import { PinDocumentPicker } from './PinDocumentPicker/index.js'
 import { updatePinnedPreferences } from './pinnedPreferences.js'
-import { documentKey } from './recents.js'
+import { documentKey, DOCUMENTS_BATCH_SIZE, PAGE_SIZES } from './recents.js'
 import './index.css'
 
 export type RecentDocument = {
@@ -56,154 +54,242 @@ type Labels = {
   title: string
 }
 
+/** Loaded documents of one tab, keyed by batch index. */
+type TabDocuments = {
+  batches: Record<number, RecentDocument[]>
+  totalDocs: number
+}
+
+type DocumentsByTab = Partial<Record<DocumentsTab, TabDocuments>>
+
+type View = {
+  /** Index of a document on the current page. Pages are derived from it for the current page size. */
+  offset: number
+  tab: DocumentsTab
+}
+
 export function RecentsAndPinnedClient({
   excludedCollections,
+  initialPages,
   labels,
+  pinnableCollections,
   pinsURL,
 }: {
   excludedCollections?: string[]
+  initialPages?: Partial<Record<DocumentsTab, DocumentsPage>>
   labels: Labels
+  pinnableCollections: string[]
   pinsURL: string
 }) {
-  const { permissions, user } = useAuth()
   const { t } = useTranslation()
-  const { config } = useConfig()
-  const { isEntityVisible } = useEntityVisibility()
   const { serverFunction } = useServerFunctions()
-  const pinnableCollections = useMemo(
-    () =>
-      config.collections
-        .filter(
-          ({ slug }) =>
-            isEntityVisible({ collectionSlug: slug }) && permissions?.collections?.[slug]?.read,
-        )
-        .map(({ slug }) => slug),
-    [config.collections, isEntityVisible, permissions],
-  )
-  const canAddPin = Boolean(user) && pinnableCollections.length > 0
-  const contentRef = useRef<HTMLDivElement>(null)
+  const canAddPin = pinnableCollections.length > 0
+  const viewportRef = useRef<HTMLDivElement>(null)
   const listID = useId()
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(0)
   const pinnedTabRef = useRef<HTMLButtonElement>(null)
   const recentsTabRef = useRef<HTMLButtonElement>(null)
   const previousPageRef = useRef<HTMLButtonElement>(null)
   const nextPageRef = useRef<HTMLButtonElement>(null)
-  const paginationFocusRef = useRef(false)
-  const [activeTab, setActiveTab] = useState<DocumentsTab>('pinned')
-  const [pageResult, setPageResult] = useState<DocumentsPage>({ items: [], page: 1, totalDocs: 0 })
-  const [isLoading, setIsLoading] = useState(true)
+  const requestIDRef = useRef(0)
+  const [pageSize, setPageSize] = useState<null | number>(null)
+  const [view, setView] = useState<View>({ offset: 0, tab: 'pinned' })
+  const [documentsByTab, setDocumentsByTab] = useState<DocumentsByTab>(() =>
+    getInitialDocuments({ initialPages }),
+  )
+  const [isLoading, setIsLoading] = useState(false)
   const [shouldShowLoading, setShouldShowLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
   const [loadError, setLoadError] = useState('')
-  const [refresh, setRefresh] = useState(0)
-  const shouldIncludePinPlaceholder = activeTab === 'pinned' && canAddPin
-  const totalPages = Math.max(
-    1,
-    Math.ceil((pageResult.totalDocs + Number(shouldIncludePinPlaceholder)) / (pageSize || 1)),
-  )
-  const currentPage = pageResult.page
-  const items = pageResult.items
-  const hasAddPinCard =
-    shouldIncludePinPlaceholder && pageResult.page === totalPages && items.length < pageSize
+  const activeTab = view.tab
+  const tabDocuments = documentsByTab[activeTab]
+  const totalDocs = tabDocuments?.totalDocs ?? 0
+  const hasPinPlaceholder = activeTab === 'pinned' && canAddPin
+  // Until the CSS page size is read, render a full batch and let the CSS tiers hide the overflow.
+  const windowSize = pageSize ?? DOCUMENTS_BATCH_SIZE
+  const { currentPage, start } = getPage({
+    hasPinPlaceholder,
+    offset: view.offset,
+    pageSize: windowSize,
+    totalDocs,
+  })
+  const items = getWindowItems({ documents: tabDocuments, size: windowSize, start })
+  const missingBatchCount = getMissingBatches({
+    documents: tabDocuments,
+    size: windowSize,
+    start,
+  }).length
+  const hasAddPinCard = hasPinPlaceholder && items !== undefined && start + windowSize > totalDocs
+  const isBusy = isLoading || items === undefined
 
-  useEffect(() => {
-    if (!pageSize) {
-      return
-    }
-    let isCurrent = true
-    setIsLoading(true)
-    setShouldShowLoading(false)
-    setLoadError('')
-    const loadingTimeout = setTimeout(() => setShouldShowLoading(true), 180)
-    void (
-      serverFunction({
-        name: 'get-dashboard-documents',
-        args: {
-          excludedCollections,
-          limit: pageSize,
-          page,
-          shouldIncludePinPlaceholder,
-          tab: activeTab,
-        },
-      }) as Promise<DocumentsPage>
-    )
-      .then((result: DocumentsPage) => {
-        if (!isCurrent) {
-          return
-        }
-        setPageResult(result)
-        setPage(result.page)
-        setIsLoading(false)
-        if (paginationFocusRef.current) {
-          paginationFocusRef.current = false
-          const lastPage = Math.max(
-            1,
-            Math.ceil((result.totalDocs + Number(shouldIncludePinPlaceholder)) / pageSize),
-          )
-          requestAnimationFrame(() => {
-            if (lastPage === 1) {
-              const activeTabRef = activeTab === 'pinned' ? pinnedTabRef : recentsTabRef
-
-              activeTabRef.current?.focus()
-            } else if (result.page === 1) {
-              nextPageRef.current?.focus()
-            } else if (result.page === lastPage) {
-              previousPageRef.current?.focus()
-            }
-          })
-        }
-      })
-      .catch(() => {
-        if (isCurrent) {
-          setIsLoading(false)
-          paginationFocusRef.current = false
-          setLoadError(labels.loadError)
-        }
-      })
-      .finally(() => clearTimeout(loadingTimeout))
-    return () => {
-      isCurrent = false
-      clearTimeout(loadingTimeout)
-    }
-  }, [
-    activeTab,
-    excludedCollections,
-    shouldIncludePinPlaceholder,
-    labels.loadError,
-    page,
-    pageSize,
-    refresh,
-    serverFunction,
-  ])
-
-  useEffect(() => {
-    const element = contentRef.current
+  useLayoutEffect(() => {
+    const element = viewportRef.current
 
     if (!element) {
       return
     }
 
-    let observedPageSize = 0
-    const observer = new ResizeObserver(() => {
-      const styles = getComputedStyle(element)
-      const columns = styles.gridTemplateColumns.split(' ').length
-      const rows = Number(styles.getPropertyValue('--recents-rows'))
-      const nextPageSize = columns * rows
+    const readPageSize = () => {
+      const value = Number(getComputedStyle(element).getPropertyValue('--recents-page-size'))
 
-      element.style.setProperty('--recents-columns', String(columns))
-
-      if (nextPageSize !== observedPageSize) {
-        observedPageSize = nextPageSize
-        setPageSize(nextPageSize)
-        setPage(1)
+      if (value > 0) {
+        setPageSize(value)
       }
-    })
+    }
+
+    readPageSize()
+    const observer = new ResizeObserver(readPageSize)
     observer.observe(element)
 
     return () => observer.disconnect()
   }, [])
+
+  /**
+   * Shows `nextView` once its documents are loaded. Page changes keep the current page visible
+   * while loading, tab changes switch immediately. Resolves with the tab's documents, or
+   * `undefined` when the load failed or was superseded.
+   */
+  const showView = async ({
+    isReplacing = false,
+    nextView,
+  }: {
+    isReplacing?: boolean
+    nextView: View
+  }): Promise<TabDocuments | undefined> => {
+    const known = documentsByTab[nextView.tab]
+    const { start: nextStart } = getPage({
+      hasPinPlaceholder: nextView.tab === 'pinned' && canAddPin,
+      offset: nextView.offset,
+      pageSize: windowSize,
+      totalDocs: known?.totalDocs ?? 0,
+    })
+    const missingBatches = getMissingBatches({
+      documents: isReplacing && known ? { ...known, batches: {} } : known,
+      size: windowSize,
+      start: nextStart,
+    })
+    const requestID = ++requestIDRef.current
+
+    setLoadError('')
+
+    if (!missingBatches.length && known) {
+      setIsLoading(false)
+      setView(nextView)
+
+      return known
+    }
+
+    if (nextView.tab !== activeTab) {
+      setView(nextView)
+    }
+    setIsLoading(true)
+    setShouldShowLoading(false)
+    const loadingTimeout = setTimeout(() => setShouldShowLoading(true), 180)
+
+    try {
+      const results = await Promise.all(
+        missingBatches.map(
+          (batch) =>
+            serverFunction({
+              name: 'get-dashboard-documents',
+              args: {
+                excludedCollections,
+                limit: DOCUMENTS_BATCH_SIZE,
+                page: batch + 1,
+                tab: nextView.tab,
+              },
+            }) as Promise<DocumentsPage>,
+        ),
+      )
+
+      if (requestID !== requestIDRef.current) {
+        return undefined
+      }
+
+      const totalDocs = results[results.length - 1].totalDocs
+      // Cached batches are only valid for the total they were loaded with.
+      const batches =
+        isReplacing || !known || known.totalDocs !== totalDocs ? {} : { ...known.batches }
+
+      for (const result of results) {
+        // The server clamps out-of-range pages to the last one and reports the page it returned.
+        batches[result.page - 1] = result.items
+      }
+      const documents: TabDocuments = { batches, totalDocs }
+
+      setDocumentsByTab((current) => ({ ...current, [nextView.tab]: documents }))
+      setView(nextView)
+      setIsLoading(false)
+
+      return documents
+    } catch {
+      if (requestID === requestIDRef.current) {
+        setView(nextView)
+        setIsLoading(false)
+        setLoadError(labels.loadError)
+      }
+
+      return undefined
+    } finally {
+      clearTimeout(loadingTimeout)
+    }
+  }
+
+  const loadMissingBatches = useEffectEvent(() => {
+    void showView({ nextView: view })
+  })
+
+  useEffect(() => {
+    if (missingBatchCount > 0 && !isLoading && !loadError) {
+      loadMissingBatches()
+    }
+  }, [isLoading, loadError, missingBatchCount])
+
+  const excludedCollectionsKey = JSON.stringify(excludedCollections ?? [])
+  const previousExcludedCollectionsKeyRef = useRef(excludedCollectionsKey)
+
+  useEffect(() => {
+    if (previousExcludedCollectionsKeyRef.current === excludedCollectionsKey) {
+      return
+    }
+    previousExcludedCollectionsKeyRef.current = excludedCollectionsKey
+    // Exclusions only apply to recents, which reloads through the missing-batch effect.
+    setDocumentsByTab((current) => ({ pinned: current.pinned }))
+    setView((current) => (current.tab === 'recents' ? { ...current, offset: 0 } : current))
+  }, [excludedCollectionsKey])
+
+  const goToPage = async ({ page }: { page: number }) => {
+    if (isLoading || isSaving) {
+      return
+    }
+
+    const documents = await showView({
+      nextView: { offset: (page - 1) * windowSize, tab: activeTab },
+    })
+
+    if (!documents) {
+      return
+    }
+
+    const { currentPage: shownPage, totalPages: lastPage } = getPage({
+      hasPinPlaceholder,
+      offset: (page - 1) * windowSize,
+      pageSize: windowSize,
+      totalDocs: documents.totalDocs,
+    })
+
+    requestAnimationFrame(() => {
+      if (lastPage === 1) {
+        const activeTabRef = activeTab === 'pinned' ? pinnedTabRef : recentsTabRef
+
+        activeTabRef.current?.focus()
+      } else if (shownPage === 1) {
+        nextPageRef.current?.focus()
+      } else if (shownPage === lastPage) {
+        previousPageRef.current?.focus()
+      }
+    })
+  }
 
   const emptyMessage = activeTab === 'recents' ? labels.recentsEmpty : labels.pinnedEmpty
   const emptyDescription =
@@ -214,11 +300,11 @@ export function RecentsAndPinnedClient({
       return
     }
 
-    const previous = pageResult
+    const previous = documentsByTab.pinned
 
-    setPageResult((current) => ({
+    setDocumentsByTab((current) => ({
       ...current,
-      items: current.items.filter((entry) => documentKey(entry) !== documentKey(item)),
+      pinned: current.pinned && removeDocument({ documents: current.pinned, item }),
     }))
     requestAnimationFrame(() => pinnedTabRef.current?.focus())
     setIsSaving(true)
@@ -226,9 +312,9 @@ export function RecentsAndPinnedClient({
 
     try {
       await updatePinnedPreferences({ document: item, shouldPin: false, url: pinsURL })
-      setRefresh((value) => value + 1)
+      void showView({ isReplacing: true, nextView: view })
     } catch {
-      setPageResult(previous)
+      setDocumentsByTab((current) => ({ ...current, pinned: previous }))
       setSaveError(labels.pinnedSaveError)
     } finally {
       setIsSaving(false)
@@ -244,8 +330,7 @@ export function RecentsAndPinnedClient({
 
     try {
       await updatePinnedPreferences({ document, shouldPin: true, url: pinsURL })
-      setPage(1)
-      setRefresh((value) => value + 1)
+      void showView({ isReplacing: true, nextView: { offset: 0, tab: 'pinned' } })
     } catch {
       setSaveError(labels.pinnedSaveError)
     } finally {
@@ -257,14 +342,17 @@ export function RecentsAndPinnedClient({
   const pinDocumentPicker = canAddPin ? (
     <PinDocumentPicker
       collectionSlugs={pinnableCollections}
-      isDisabled={isLoading || isSaving}
-      isEmpty={pageResult.totalDocs === 0}
+      isDisabled={isBusy || isSaving}
+      isEmpty={totalDocs === 0}
       labels={labels}
       onError={() => setSaveError(labels.pinnedSaveError)}
       onSelect={(args) => void addSelectedPin(args)}
       pinsURL={pinsURL}
     />
   ) : null
+
+  // Before the CSS page size is known, render one pagination per page size and let CSS pick one.
+  const paginationSizes: readonly number[] = pageSize ? [pageSize] : PAGE_SIZES
 
   return (
     <WidgetCard className="recently-viewed-widget recents-widget" title={labels.title}>
@@ -279,16 +367,13 @@ export function RecentsAndPinnedClient({
                 if (isSaving) {
                   return
                 }
-                if (activeTab === tab && page === 1) {
+                if (activeTab === tab && currentPage === 1) {
                   if (loadError) {
-                    setRefresh((value) => value + 1)
+                    void showView({ nextView: view })
                   }
                   return
                 }
-                setPageResult({ items: [], page: 1, totalDocs: 0 })
-                setIsLoading(true)
-                setActiveTab(tab)
-                setPage(1)
+                void showView({ nextView: { offset: 0, tab } })
               }}
               ref={tab === 'pinned' ? pinnedTabRef : recentsTabRef}
               type="button"
@@ -297,55 +382,65 @@ export function RecentsAndPinnedClient({
             </button>
           ))}
         </div>
-        {totalPages > 1 ? (
-          <div aria-label={labels.pagination} className="recents-widget__pagination" role="group">
-            <button
-              aria-controls={listID}
-              aria-disabled={isLoading || isSaving}
-              aria-label={labels.previous}
-              className="recents-widget__previous"
-              disabled={currentPage === 1}
-              onClick={() => {
-                if (isLoading || isSaving) {
-                  return
-                }
-                paginationFocusRef.current = true
-                setPage(currentPage - 1)
-              }}
-              ref={previousPageRef}
-              type="button"
+        {paginationSizes.map((size) => {
+          const page = getPage({
+            hasPinPlaceholder,
+            offset: view.offset,
+            pageSize: size,
+            totalDocs,
+          })
+
+          if (page.totalPages <= 1) {
+            return null
+          }
+
+          return (
+            <div
+              aria-label={labels.pagination}
+              className="recents-widget__pagination"
+              data-page-size={pageSize ? undefined : size}
+              key={size}
+              role="group"
             >
-              <span aria-hidden="true">
-                <ChevronIcon direction="left" />
+              <button
+                aria-controls={listID}
+                aria-disabled={isBusy || isSaving}
+                aria-label={labels.previous}
+                className="recents-widget__previous"
+                disabled={page.currentPage === 1}
+                onClick={() => void goToPage({ page: page.currentPage - 1 })}
+                ref={previousPageRef}
+                type="button"
+              >
+                <span aria-hidden="true">
+                  <ChevronIcon direction="left" />
+                </span>
+              </button>
+              <span aria-atomic="true" aria-live="polite" className="recents-widget__page-status">
+                {t('dashboard:widgetPageCount', {
+                  currentPage: page.currentPage,
+                  totalPages: page.totalPages,
+                })}
               </span>
-            </button>
-            <span aria-atomic="true" aria-live="polite" className="recents-widget__page-status">
-              {t('dashboard:widgetPageCount', { currentPage, totalPages })}
-            </span>
-            <button
-              aria-controls={listID}
-              aria-disabled={isLoading || isSaving}
-              aria-label={labels.next}
-              className="recents-widget__next"
-              disabled={currentPage === totalPages}
-              onClick={() => {
-                if (isLoading || isSaving) {
-                  return
-                }
-                paginationFocusRef.current = true
-                setPage(currentPage + 1)
-              }}
-              ref={nextPageRef}
-              type="button"
-            >
-              <span aria-hidden="true">
-                <ChevronIcon direction="right" />
-              </span>
-            </button>
-          </div>
-        ) : null}
+              <button
+                aria-controls={listID}
+                aria-disabled={isBusy || isSaving}
+                aria-label={labels.next}
+                className="recents-widget__next"
+                disabled={page.currentPage === page.totalPages}
+                onClick={() => void goToPage({ page: page.currentPage + 1 })}
+                ref={nextPageRef}
+                type="button"
+              >
+                <span aria-hidden="true">
+                  <ChevronIcon direction="right" />
+                </span>
+              </button>
+            </div>
+          )
+        })}
       </div>
-      <div aria-busy={isLoading} className="recents-widget__viewport" ref={contentRef}>
+      <div aria-busy={isBusy} className="recents-widget__viewport" ref={viewportRef}>
         {loadError ? (
           <div className="recents-widget__error">
             <span>{loadError}</span>
@@ -356,7 +451,7 @@ export function RecentsAndPinnedClient({
                 const activeTabRef = activeTab === 'pinned' ? pinnedTabRef : recentsTabRef
 
                 activeTabRef.current?.focus()
-                setRefresh((value) => value + 1)
+                void showView({ nextView: view })
               }}
               size="medium"
               type="button"
@@ -364,7 +459,7 @@ export function RecentsAndPinnedClient({
               {labels.retry}
             </Button>
           </div>
-        ) : items.length || (hasAddPinCard && !isLoading) ? (
+        ) : items === undefined ? null : items.length || hasAddPinCard ? (
           <div className="recents-widget__content" id={listID}>
             <CardGrid<null | RecentDocument>
               ariaLabel={activeTab === 'pinned' ? labels.pinned : labels.recents}
@@ -372,7 +467,7 @@ export function RecentsAndPinnedClient({
               getItemClassName={(item) =>
                 item
                   ? 'recents-widget__item'
-                  : `recents-widget__item recents-widget__item--add-pin${pageResult.totalDocs === 0 ? ' recents-widget__item--empty' : ''}`
+                  : `recents-widget__item recents-widget__item--add-pin${totalDocs === 0 ? ' recents-widget__item--empty' : ''}`
               }
               getKey={(item) => (item ? documentKey(item) : 'add-pin')}
               items={hasAddPinCard ? [...items, null] : items}
@@ -405,7 +500,7 @@ export function RecentsAndPinnedClient({
                         aria-label={`${labels.removePin}: ${item.title}`}
                         aria-pressed={true}
                         className="recents-widget__pin"
-                        disabled={isSaving || isLoading}
+                        disabled={isSaving || isBusy}
                         onClick={() => void removePinnedDocument({ item })}
                         type="button"
                       >
@@ -421,7 +516,7 @@ export function RecentsAndPinnedClient({
               }
             />
           </div>
-        ) : isLoading ? null : (
+        ) : (
           <div aria-live="polite" className="recents-widget__empty">
             <span
               aria-hidden="true"
@@ -449,4 +544,112 @@ export function RecentsAndPinnedClient({
       </span>
     </WidgetCard>
   )
+}
+
+function getInitialDocuments({
+  initialPages = {},
+}: {
+  initialPages?: Partial<Record<DocumentsTab, DocumentsPage>>
+}): DocumentsByTab {
+  return Object.fromEntries(
+    Object.entries(initialPages)
+      .filter(([, page]) => page)
+      .map(([tab, page]) => [
+        tab,
+        { batches: { [page.page - 1]: page.items }, totalDocs: page.totalDocs },
+      ]),
+  )
+}
+
+/** Pages are aligned to the page size, so a page change after a resize keeps `offset` visible. */
+function getPage({
+  hasPinPlaceholder,
+  offset,
+  pageSize,
+  totalDocs,
+}: {
+  hasPinPlaceholder: boolean
+  offset: number
+  pageSize: number
+  totalDocs: number
+}) {
+  const totalPages = Math.max(1, Math.ceil((totalDocs + Number(hasPinPlaceholder)) / pageSize))
+  const currentPage = Math.min(Math.floor(offset / pageSize) + 1, totalPages)
+
+  return { currentPage, start: (currentPage - 1) * pageSize, totalPages }
+}
+
+function getMissingBatches({
+  documents,
+  size,
+  start,
+}: {
+  documents: TabDocuments | undefined
+  size: number
+  start: number
+}): number[] {
+  const firstBatch = Math.floor(start / DOCUMENTS_BATCH_SIZE)
+  const lastBatch = documents
+    ? Math.min(
+        Math.floor((start + size - 1) / DOCUMENTS_BATCH_SIZE),
+        Math.max(0, Math.ceil(documents.totalDocs / DOCUMENTS_BATCH_SIZE) - 1),
+      )
+    : firstBatch
+  const missingBatches: number[] = []
+
+  for (let batch = firstBatch; batch <= lastBatch; batch++) {
+    if (!documents?.batches[batch]) {
+      missingBatches.push(batch)
+    }
+  }
+
+  return missingBatches
+}
+
+/** Returns `undefined` until every batch the window touches has loaded. */
+function getWindowItems({
+  documents,
+  size,
+  start,
+}: {
+  documents: TabDocuments | undefined
+  size: number
+  start: number
+}): RecentDocument[] | undefined {
+  if (!documents || getMissingBatches({ documents, size, start }).length) {
+    return undefined
+  }
+
+  const items: RecentDocument[] = []
+
+  for (let index = start; index < Math.min(start + size, documents.totalDocs); index++) {
+    const item =
+      documents.batches[Math.floor(index / DOCUMENTS_BATCH_SIZE)]?.[index % DOCUMENTS_BATCH_SIZE]
+
+    if (item) {
+      items.push(item)
+    }
+  }
+
+  return items
+}
+
+function removeDocument({
+  documents,
+  item,
+}: {
+  documents: TabDocuments
+  item: RecentDocument
+}): TabDocuments {
+  const key = documentKey(item)
+
+  return {
+    batches: Object.fromEntries(
+      Object.entries(documents.batches).map(([batch, batchItems]) => [
+        batch,
+        batchItems.filter((entry) => documentKey(entry) !== key),
+      ]),
+    ),
+    totalDocs: Math.max(0, documents.totalDocs - 1),
+  }
 }
