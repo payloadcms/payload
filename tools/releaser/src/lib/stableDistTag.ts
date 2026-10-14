@@ -32,26 +32,40 @@ export function selectStableDistTag({
 
 /**
  * Guard for a chosen tag against a given npm `latest`. Re-derives the rule from `latestVersion`
- * rather than reusing the selector, so a selector bug cannot also pass the guard.
+ * rather than reusing the selector, so a selector bug cannot also pass the guard. An explicit
+ * `--tag latest` moves `latest` even backwards, so publishing `version` under a newer `latest`
+ * (for example resuming an older release) is refused.
  */
 export function assertStableDistTagSafe(params: {
   latestVersion: string | undefined
   name: string
   tag: string
-}): asserts params is { latestVersion: string | undefined; name: string; tag: StableDistTag } {
-  const { name, latestVersion, tag } = params
+  version: string
+}): asserts params is {
+  latestVersion: string | undefined
+  name: string
+  tag: StableDistTag
+  version: string
+} {
+  const { name, latestVersion, tag, version } = params
 
   if (tag !== 'latest' && tag !== OLD_MAJOR_DIST_TAG) {
     throw new Error(`Refusing to publish ${name}: dist-tag "${tag}" is not allowed for stable.`)
   }
 
-  if (
-    tag === 'latest' &&
-    latestVersion !== undefined &&
-    parseMajor({ latestVersion, name }) > PINNED_MAJOR
-  ) {
+  if (tag !== 'latest' || latestVersion === undefined) {
+    return
+  }
+
+  if (parseMajor({ latestVersion, name }) > PINNED_MAJOR) {
     throw new Error(
       `Refusing to publish ${name} to "latest": npm latest is ${latestVersion}, a newer major than v${PINNED_MAJOR}.`,
+    )
+  }
+
+  if (semver.gt(latestVersion, version)) {
+    throw new Error(
+      `Refusing to publish ${name}@${version} to "latest": npm latest is already ${latestVersion}.`,
     )
   }
 }
@@ -60,16 +74,18 @@ export function assertStableDistTagSafe(params: {
 export async function resolveStableDistTags({
   getLatestVersion,
   names,
+  version,
 }: {
   getLatestVersion: GetLatestVersion
   names: string[]
+  version: string
 }): Promise<Map<string, StableDistTag>> {
   const tags = new Map<string, StableDistTag>()
 
   for (const name of names) {
     const latestVersion = await getLatestVersion({ name })
     const tag = selectStableDistTag({ latestVersion, name })
-    assertStableDistTagSafe({ name, latestVersion, tag })
+    assertStableDistTagSafe({ name, latestVersion, tag, version })
     tags.set(name, tag)
   }
 
@@ -88,12 +104,15 @@ export async function publishWithStableDistTag({
   getLatestVersion,
   pkg,
   publish,
+  version,
 }: {
   distTags: ReadonlyMap<string, StableDistTag>
   dryRun?: boolean
   getLatestVersion: GetLatestVersion
   pkg: Pick<PackageDetails, 'name'>
   publish: (args: { tag: StableDistTag }) => Promise<PublishResult>
+  /** The release version being published, which npm `latest` must not be newer than. */
+  version: string
 }): Promise<PublishResult> {
   const { name } = pkg
   const tag = distTags.get(name)
@@ -108,7 +127,7 @@ export async function publishWithStableDistTag({
   if (!dryRun) {
     try {
       const latestVersion = await getLatestVersion({ name })
-      assertStableDistTagSafe({ latestVersion, name, tag })
+      assertStableDistTagSafe({ latestVersion, name, tag, version })
     } catch (err: unknown) {
       const reason = err instanceof Error ? err.message : String(err)
       return refusePublish({ name, details: `Dist-tag re-check failed for ${name}: ${reason}` })

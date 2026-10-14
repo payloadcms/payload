@@ -149,6 +149,7 @@ async function main() {
   const distTags = await resolveStableDistTags({
     getLatestVersion: getLatestPublishedVersion,
     names: packageDetails.map((p) => p.name),
+    version: nextReleaseVersion,
   })
   if (!distTags.get('payload')) {
     abort(`No dist-tag resolved for 'payload'; refusing to publish ${nextReleaseVersion}.`)
@@ -237,6 +238,7 @@ async function main() {
             }
             return await publishSinglePackage(pkg, { dryRun, tag: distTag })
           },
+          version: nextReleaseVersion,
         })
         if (!result.success) {
           failedResult = result

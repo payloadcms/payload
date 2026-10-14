@@ -46,7 +46,10 @@ type ReleaseCiDeps = {
   hasGithubToken: boolean
   listPackageNames: () => Promise<string[]>
   log: (message: string) => void
-  resolveDistTags: (args: { names: string[] }) => Promise<Map<string, StableDistTag>>
+  resolveDistTags: (args: {
+    names: string[]
+    version: string
+  }) => Promise<Map<string, StableDistTag>>
   /** Tag that triggered the workflow (`GITHUB_REF_NAME`). Required unless dry-run. */
   triggerTag: string | undefined
   workspace: Pick<Workspace, 'build' | 'publish' | 'version'>
@@ -103,7 +106,7 @@ export const runReleaseCi = async ({
 
   // Resolved before building so a registry failure or a missing 'payload' entry
   // stops the run before anything ships; a wrong 'latest' would move every default install.
-  const distTags = await resolveDistTags({ names: await listPackageNames() })
+  const distTags = await resolveDistTags({ names: await listPackageNames(), version })
   const payloadDistTag = distTags.get('payload')
   if (!payloadDistTag) {
     throw new Error(`No dist-tag resolved for 'payload'; refusing to publish ${version}.`)
@@ -169,8 +172,8 @@ async function main(): Promise<void> {
       listPackageNames: async () =>
         (await getPackageDetails(packagePublishList)).map((pkg) => pkg.name),
       log: console.log,
-      resolveDistTags: ({ names }) =>
-        resolveStableDistTags({ getLatestVersion: getLatestPublishedVersion, names }),
+      resolveDistTags: ({ names, version }) =>
+        resolveStableDistTags({ getLatestVersion: getLatestPublishedVersion, names, version }),
       triggerTag: process.env.GITHUB_REF_NAME,
       workspace: getWorkspace(),
     },

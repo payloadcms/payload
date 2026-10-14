@@ -9,6 +9,8 @@ import {
   selectStableDistTag,
 } from './stableDistTag.js'
 
+const version = '3.90.3'
+
 describe('selectStableDistTag', () => {
   it.each([
     [undefined, 'latest'],
@@ -30,43 +32,85 @@ describe('selectStableDistTag', () => {
 describe('assertStableDistTagSafe', () => {
   it('should throw for a tag outside latest and payload-3', () => {
     expect(() =>
-      assertStableDistTagSafe({ name: 'payload', latestVersion: '3.0.0', tag: 'beta' }),
+      assertStableDistTagSafe({ name: 'payload', latestVersion: '3.0.0', tag: 'beta', version }),
     ).toThrow(/beta/)
   })
 
   it('should throw for latest when npm latest is v4', () => {
     expect(() =>
-      assertStableDistTagSafe({ name: '@payloadcms/ui', latestVersion: '4.0.0', tag: 'latest' }),
+      assertStableDistTagSafe({
+        name: '@payloadcms/ui',
+        latestVersion: '4.0.0',
+        tag: 'latest',
+        version,
+      }),
     ).toThrow(/@payloadcms\/ui/)
   })
 
   it('should throw for latest when npm latest is a v4 prerelease', () => {
     expect(() =>
-      assertStableDistTagSafe({ name: 'payload', latestVersion: '4.0.0-beta.1', tag: 'latest' }),
+      assertStableDistTagSafe({
+        name: 'payload',
+        latestVersion: '4.0.0-beta.1',
+        tag: 'latest',
+        version,
+      }),
     ).toThrow(/4\.0\.0-beta\.1/)
   })
 
   it('should throw for latest when npm latest is not valid semver', () => {
     expect(() =>
-      assertStableDistTagSafe({ name: 'payload', latestVersion: 'garbage', tag: 'latest' }),
+      assertStableDistTagSafe({
+        name: 'payload',
+        latestVersion: 'garbage',
+        tag: 'latest',
+        version,
+      }),
     ).toThrow(/garbage/)
+  })
+
+  it('should throw for latest when npm latest is a newer v3 than the version being published', () => {
+    expect(() =>
+      assertStableDistTagSafe({
+        name: 'payload',
+        latestVersion: '3.91.0',
+        tag: 'latest',
+        version,
+      }),
+    ).toThrow(/payload@3\.90\.3 .* already 3\.91\.0/)
   })
 
   it('should pass for payload-3 when npm latest is v4', () => {
     expect(() =>
-      assertStableDistTagSafe({ name: 'payload', latestVersion: '4.0.0', tag: 'payload-3' }),
+      assertStableDistTagSafe({
+        name: 'payload',
+        latestVersion: '4.0.0',
+        tag: 'payload-3',
+        version,
+      }),
     ).not.toThrow()
   })
 
-  it('should pass for latest when npm latest is v3', () => {
+  it('should pass for latest when npm latest is an older v3', () => {
     expect(() =>
-      assertStableDistTagSafe({ name: 'payload', latestVersion: '3.90.2', tag: 'latest' }),
+      assertStableDistTagSafe({ name: 'payload', latestVersion: '3.90.2', tag: 'latest', version }),
+    ).not.toThrow()
+  })
+
+  it('should pass for latest when npm latest is the version being published', () => {
+    expect(() =>
+      assertStableDistTagSafe({ name: 'payload', latestVersion: version, tag: 'latest', version }),
     ).not.toThrow()
   })
 
   it('should pass for latest when the package was never published', () => {
     expect(() =>
-      assertStableDistTagSafe({ name: 'payload', latestVersion: undefined, tag: 'latest' }),
+      assertStableDistTagSafe({
+        name: 'payload',
+        latestVersion: undefined,
+        tag: 'latest',
+        version,
+      }),
     ).not.toThrow()
   })
 })
@@ -82,6 +126,7 @@ describe('resolveStableDistTags', () => {
     const result = await resolveStableDistTags({
       getLatestVersion: async ({ name }) => versions[name],
       names: Object.keys(versions),
+      version,
     })
 
     expect(result.get('payload')).toBe('payload-3')
@@ -99,8 +144,19 @@ describe('resolveStableDistTags', () => {
           return '3.0.0'
         },
         names: ['payload', '@payloadcms/ui'],
+        version,
       }),
     ).rejects.toThrow('registry down')
+  })
+
+  it('should throw when npm latest is newer than the version being published', async () => {
+    await expect(
+      resolveStableDistTags({
+        getLatestVersion: async () => '3.91.0',
+        names: ['payload'],
+        version,
+      }),
+    ).rejects.toThrow(/already 3\.91\.0/)
   })
 })
 
@@ -125,6 +181,7 @@ describe('publishWithStableDistTag', () => {
       getLatestVersion,
       pkg,
       publish,
+      version,
     })
 
     expect(getLatestVersion).toHaveBeenCalledWith({ name: 'payload' })
@@ -138,6 +195,7 @@ describe('publishWithStableDistTag', () => {
       getLatestVersion: async () => '3.90.2',
       pkg,
       publish,
+      version,
     })
 
     expect(result).toMatchObject({ name: 'payload', success: false })
@@ -152,6 +210,7 @@ describe('publishWithStableDistTag', () => {
       },
       pkg,
       publish,
+      version,
     })
 
     expect(result).toMatchObject({ name: 'payload', success: false })
@@ -165,10 +224,25 @@ describe('publishWithStableDistTag', () => {
       getLatestVersion: async () => '4.0.0',
       pkg,
       publish,
+      version,
     })
 
     expect(result).toMatchObject({ name: 'payload', success: false })
     expect(result.details).toMatch(/4\.0\.0/)
+    expect(publish).not.toHaveBeenCalled()
+  })
+
+  it('should fail without publishing when npm latest moved to a newer v3 after resolution', async () => {
+    const result = await publishWithStableDistTag({
+      distTags: latestTags,
+      getLatestVersion: async () => '3.91.0',
+      pkg,
+      publish,
+      version,
+    })
+
+    expect(result).toMatchObject({ name: 'payload', success: false })
+    expect(result.details).toMatch(/already 3\.91\.0/)
     expect(publish).not.toHaveBeenCalled()
   })
 
@@ -181,6 +255,7 @@ describe('publishWithStableDistTag', () => {
       getLatestVersion,
       pkg,
       publish,
+      version,
     })
 
     expect(getLatestVersion).not.toHaveBeenCalled()

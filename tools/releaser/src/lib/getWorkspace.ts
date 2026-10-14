@@ -76,6 +76,7 @@ export const getWorkspace = (): Workspace => {
           getLatestVersion: getLatestPublishedVersion,
           pkg,
           publish: ({ tag: packageTag }) => publishSinglePackage(pkg, { dryRun, tag: packageTag }),
+          version: pkg.version,
         })
       },
     })

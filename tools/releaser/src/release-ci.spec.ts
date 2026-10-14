@@ -23,7 +23,7 @@ const baseDeps = () => ({
   hasGithubToken: true,
   listPackageNames: vi.fn(async () => ['payload', '@payloadcms/ui']),
   log: vi.fn(),
-  resolveDistTags: vi.fn(async (_args: { names: string[] }) => latestMap()),
+  resolveDistTags: vi.fn(async (_args: { names: string[]; version: string }) => latestMap()),
   triggerTag: defaultTriggerTag,
   workspace: {
     build: vi.fn(async () => {}),
@@ -52,7 +52,10 @@ describe('runReleaseCi', () => {
 
     await runReleaseCi({ deps, dryRun: false })
 
-    expect(deps.resolveDistTags).toHaveBeenCalledWith({ names: ['payload', '@payloadcms/ui'] })
+    expect(deps.resolveDistTags).toHaveBeenCalledWith({
+      names: ['payload', '@payloadcms/ui'],
+      version: '3.90.3',
+    })
     expect(deps.workspace.build).toHaveBeenCalledOnce()
     expect(deps.workspace.publish).toHaveBeenCalledWith({ dryRun: false, tag: distTags })
     expect(deps.findChangelogBaseTag).toHaveBeenCalledWith({ version: '3.90.3' })
