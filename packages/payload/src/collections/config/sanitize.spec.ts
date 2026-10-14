@@ -566,30 +566,14 @@ describe('hierarchy fields', () => {
     name: string
   }) => fields.filter((field) => 'name' in field && field.name === name).length
 
-  it('should add hierarchy path fields once when a folders collection is sanitized twice', () => {
+  it('should add hierarchy path fields once when a collection is sanitized twice', () => {
     const collection: CollectionConfig = {
-      slug: 'folders',
+      slug: 'categories',
       admin: {
         useAsTitle: 'name',
       },
       fields: [{ name: 'name', type: 'text' }],
-      folders: true,
-    }
-
-    const result = sanitizeTwiceWithSharedFields(collection)
-
-    expect(countFieldsNamed({ fields: result.fields, name: HIERARCHY_SLUG_PATH_FIELD })).toBe(1)
-    expect(countFieldsNamed({ fields: result.fields, name: HIERARCHY_TITLE_PATH_FIELD })).toBe(1)
-  })
-
-  it('should add hierarchy path fields once when a tags collection is sanitized twice', () => {
-    const collection: CollectionConfig = {
-      slug: 'tags',
-      admin: {
-        useAsTitle: 'name',
-      },
-      fields: [{ name: 'name', type: 'text' }],
-      tags: true,
+      hierarchy: true,
     }
 
     const result = sanitizeTwiceWithSharedFields(collection)
