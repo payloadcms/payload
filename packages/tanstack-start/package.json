@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/tanstack-start",
-  "version": "4.0.0-beta.0",
+  "version": "4.0.0-beta.1",
   "description": "TanStack Start framework adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -75,8 +75,8 @@
     "qs-esm": "^7.0.2"
   },
   "devDependencies": {
-    "@tanstack/react-router": "^1.120.0",
-    "@tanstack/react-start": "^1.168.60",
+    "@tanstack/react-router": "^1.170.44",
+    "@tanstack/react-start": "^1.169.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^6.0.0",
@@ -87,8 +87,8 @@
     "vite": ">=8.0.0"
   },
   "peerDependencies": {
-    "@tanstack/react-router": "^1.120.0",
-    "@tanstack/react-start": "^1.168.60",
+    "@tanstack/react-router": "^1.170.44",
+    "@tanstack/react-start": "^1.169.1",
     "@vitejs/plugin-react": "^6.0.0",
     "@vitejs/plugin-rsc": "^0.5.21",
     "graphql": "^16.8.1",
