@@ -4,6 +4,7 @@ import { runReleaseBump } from './release-bump.js'
 
 const baseDeps = () => ({
   env: { GITHUB_TOKEN: 'token' } as NodeJS.ProcessEnv,
+  getCommitBump: vi.fn(async (): Promise<null | string> => 'minor'),
   isPublished: vi.fn(async () => false),
   log: vi.fn(),
   readBranch: () => 'main',
