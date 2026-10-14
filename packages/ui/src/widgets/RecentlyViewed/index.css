@@ -87,7 +87,7 @@
   }
 
   .recents-widget__viewport {
-    /* Read by the client for pagination. Must equal columns * rows in every tier. */
+    /* Read by the client for pagination. Must equal columns * rows in every tier, except for single-row tabs below. */
     --recents-page-size: 4;
     --recents-columns: 2;
     --recents-rows: 2;
@@ -113,6 +113,19 @@
     gap: var(--spacer-3);
     min-block-size: var(--recents-content-height);
     position: relative;
+  }
+
+  /*
+   * A tab whose items all fit in one row only reserves one row. `data-item-count` is the tab total,
+   * not the current page, so paging never changes the height. The page size stays columns * 2,
+   * which still fits every item on one page.
+   */
+  .recents-widget__viewport:is(
+      [data-item-count='0'],
+      [data-item-count='1'],
+      [data-item-count='2']
+    ) {
+    --recents-rows: 1;
   }
 
   /*
@@ -356,6 +369,10 @@
     .recents-widget__viewport {
       --recents-page-size: 6;
       --recents-columns: 3;
+    }
+
+    .recents-widget__viewport[data-item-count='3'] {
+      --recents-rows: 1;
     }
 
     .recents-widget__item:nth-child(n + 5) {
