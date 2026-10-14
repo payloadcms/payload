@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Share the batch size used by the widget.
 import { DOCUMENTS_BATCH_SIZE } from '../../packages/ui/src/widgets/RecentlyViewed/recents.js'
+import { changeLocale } from '../__helpers/e2e/helpers.js'
 import { getSelectMenu, openSelectMenu, selectInput } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -352,6 +353,44 @@ describe('Dashboard', () => {
         expect(await getRecentsLayoutShiftSum({ page })).toBe(0)
       }
     }
+  })
+
+  test('should replace cached documents when the server re-renders the widget', async ({
+    page,
+  }) => {
+    const tickets = (await (await page.request.get(`${serverURL}/api/tickets?limit=2`)).json()).docs
+    const widget = page.locator('.recents-widget')
+    const viewport = widget.locator('.recents-widget__viewport')
+    const pin = (pinnedTickets: typeof tickets) =>
+      page.request.post(`${serverURL}/api/payload-preferences/pinned-documents`, {
+        data: {
+          value: {
+            items: pinnedTickets.map(({ id }) => ({ id, collectionSlug: 'tickets' })),
+          },
+        },
+      })
+    let documentRequests = 0
+
+    expect((await pin([tickets[0]])).ok()).toBe(true)
+    await page.reload()
+    await waitForDashboardHydration({ page })
+    await expect(widget.locator('.document-card__title')).toHaveText([tickets[0].title])
+    page.on('request', (request) => {
+      if (request.method() === 'POST' && request.postData()?.includes('get-dashboard-documents')) {
+        documentRequests++
+      }
+    })
+    // Pinned elsewhere, so the batch this widget cached is stale.
+    expect((await pin([tickets[1], tickets[0]])).ok()).toBe(true)
+    await viewport.evaluate((element) => element.setAttribute('data-test-mounted', ''))
+    await changeLocale(page, 'es')
+
+    await expect(widget.locator('.document-card__title')).toHaveText([
+      tickets[1].title,
+      tickets[0].title,
+    ])
+    await expect(viewport).toHaveAttribute('data-test-mounted')
+    expect(documentRequests).toBe(0)
   })
 
   test('initial dashboard', async ({ page }) => {
