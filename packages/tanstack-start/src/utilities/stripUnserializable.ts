@@ -10,6 +10,7 @@ export function stripUnserializable(
   }
 
   const type = typeof value
+
   if (type === 'function' || type === 'symbol') {
     return undefined
   }
@@ -40,19 +41,22 @@ export function stripUnserializable(
 
   ancestors.add(value)
 
-  const result: Record<string, unknown> | unknown[] = Array.isArray(value) ? [] : {}
+  const result: Record<string, unknown> | unknown[] = Array.isArray(value)
+    ? new Array(value.length)
+    : {}
+
   const source = value as Record<string, unknown>
 
   for (const key of Object.keys(source)) {
     const serialized = stripUnserializable(source[key], ancestors)
-    if (Array.isArray(result)) {
-      result.push(serialized)
-    } else if (serialized !== undefined) {
+
+    if (serialized !== undefined) {
       setOwnProperty({ key, target: result, value: serialized })
     }
   }
 
   ancestors.delete(value)
+
   return result
 }
 

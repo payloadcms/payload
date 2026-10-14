@@ -56,6 +56,7 @@ async function walk(
 
     if (isReactElementArray) {
       ancestors.delete(obj)
+
       return await renderServerComponent(
         createElement(Fragment, null, ...(obj as React.ReactNode[])),
       )
@@ -69,6 +70,7 @@ async function walk(
     }
 
     ancestors.delete(obj)
+
     return result
   }
 
@@ -81,6 +83,7 @@ async function walk(
     }
 
     ancestors.delete(obj)
+
     return result
   }
 
@@ -93,6 +96,7 @@ async function walk(
     }
 
     ancestors.delete(obj)
+
     return result
   }
 
@@ -101,12 +105,14 @@ async function walk(
 
   for (const key of Object.keys(obj)) {
     const serialized = await walk(obj[key], cache, ancestors)
+
     if (serialized !== undefined) {
       setOwnProperty({ key, target: result, value: serialized })
     }
   }
 
   ancestors.delete(obj)
+
   return result
 }
 

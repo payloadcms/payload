@@ -9,10 +9,12 @@ export type SerializableRecord = Record<string, unknown> & SerializableExtension
  * Adds RSC handles to an otherwise Seroval-compatible layout payload.
  */
 export function toSerializable<T>(value: T): T
+
 export function toSerializable(
   value: Record<string, unknown>,
   additions: Record<string, Serializable>,
 ): SerializableRecord
+
 export function toSerializable(value: unknown, additions?: Record<string, Serializable>): unknown {
   const serialized = stripUnserializable(value)
 

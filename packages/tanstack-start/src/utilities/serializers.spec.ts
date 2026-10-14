@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { serializeForRsc } from './serializeForRsc.js'
 import { createServerFunctionClient } from './serverFunctionClient.js'
+import { stripUnserializable } from './stripUnserializable.js'
 import { toSerializable } from './toSerializable.js'
 
 describe('TanStack serializers', () => {
@@ -36,5 +37,17 @@ describe('TanStack serializers', () => {
     expect(received).toEqual({ date, regexp })
     expect((received as typeof args).date).toBe(date)
     expect((received as typeof args).regexp).toBe(regexp)
+  })
+
+  it('should preserve sparse array indexes and length', () => {
+    const input: unknown[] = []
+    input[2] = 'last'
+
+    const result = stripUnserializable(input) as unknown[]
+
+    expect(result).toHaveLength(3)
+    expect(Object.hasOwn(result, '0')).toBe(false)
+    expect(Object.hasOwn(result, '1')).toBe(false)
+    expect(result[2]).toBe('last')
   })
 })
