@@ -530,7 +530,7 @@ export interface PersonalProject {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * Drop in many photos at once with Bulk upload.
+ * Drop in many photos at once with Bulk upload. With OPENAI_API_KEY set, empty titles, alt texts, descriptions and tags are written by AI on upload; review them before you publish.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "personal-photos".

@@ -68,9 +68,9 @@ export const PersonalPhotos: CollectionConfig = {
   },
   admin: {
     defaultColumns: ['filename', 'title', 'album', '_status', 'updatedAt'],
-    description: isPhotoAIEnabled
-      ? 'Drop in many photos at once with Bulk upload. Empty titles, alt texts, descriptions and tags are written by AI on upload; review them before you publish.'
-      : 'Drop in many photos at once with Bulk upload.',
+    // The same with or without OPENAI_API_KEY, so the generated types don't depend on the .env
+    description:
+      'Drop in many photos at once with Bulk upload. With OPENAI_API_KEY set, empty titles, alt texts, descriptions and tags are written by AI on upload; review them before you publish.',
     group: personalWebsiteGroup,
     listSearchableFields: ['title', 'filename', 'description', 'tags'],
     useAsTitle: 'title',
