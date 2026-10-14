@@ -65,4 +65,37 @@ describe('TanStack serializers', () => {
     expect(result.map).toEqual(new Map([['valid', 'value']]))
     expect(result.set).toEqual(new Set(['valid']))
   })
+
+  it('should preserve shared references across records, arrays, maps, and sets', () => {
+    const item = { id: 'selected' }
+    const selected = new Set([item])
+    const input = {
+      item,
+      items: [item],
+      map: new Map([[item, item]]),
+      selected,
+      selectedAlias: selected,
+    }
+
+    const result = stripUnserializable(input) as typeof input
+
+    expect(result.items[0]).toBe(result.item)
+    expect(result.map.get(result.item)).toBe(result.item)
+    expect(result.selected.has(result.item)).toBe(true)
+    expect(result.selectedAlias).toBe(result.selected)
+  })
+
+  it('should preserve undefined map keys while stripping unsupported keys', () => {
+    const callback = () => undefined
+    const symbol = Symbol('key')
+    const input = new Map<unknown, string>([
+      [undefined, 'default'],
+      [callback, 'callback'],
+      [symbol, 'symbol'],
+    ])
+
+    const result = stripUnserializable(input) as typeof input
+
+    expect(result).toEqual(new Map([[undefined, 'default']]))
+  })
 })

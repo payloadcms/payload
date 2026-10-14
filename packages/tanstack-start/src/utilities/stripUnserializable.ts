@@ -4,6 +4,7 @@ import { setOwnProperty } from 'payload/shared'
 export function stripUnserializable(
   value: unknown,
   ancestors: WeakSet<object> = new WeakSet(),
+  cache: WeakMap<object, unknown> = new WeakMap(),
 ): unknown {
   if (value === null || value === undefined) {
     return value
@@ -36,16 +37,21 @@ export function stripUnserializable(
       return undefined
     }
 
+    if (cache.has(value)) {
+      return cache.get(value)
+    }
+
     ancestors.add(value)
 
     if (value instanceof Map) {
       const result = new Map()
+      cache.set(value, result)
 
       for (const [key, item] of value) {
-        const serializedKey = stripUnserializable(key, ancestors)
-        const serializedItem = stripUnserializable(item, ancestors)
+        const serializedKey = stripUnserializable(key, ancestors, cache)
+        const serializedItem = stripUnserializable(item, ancestors, cache)
 
-        if (serializedKey !== undefined && serializedItem !== undefined) {
+        if ((key === undefined || serializedKey !== undefined) && serializedItem !== undefined) {
           result.set(serializedKey, serializedItem)
         }
       }
@@ -55,9 +61,10 @@ export function stripUnserializable(
     }
 
     const result = new Set()
+    cache.set(value, result)
 
     for (const item of value) {
-      const serialized = stripUnserializable(item, ancestors)
+      const serialized = stripUnserializable(item, ancestors, cache)
       if (serialized !== undefined) {
         result.add(serialized)
       }
@@ -75,16 +82,22 @@ export function stripUnserializable(
     return undefined
   }
 
+  if (cache.has(value)) {
+    return cache.get(value)
+  }
+
   ancestors.add(value)
 
   const result: Record<string, unknown> | unknown[] = Array.isArray(value)
     ? new Array(value.length)
     : {}
 
+  cache.set(value, result)
+
   const source = value as Record<string, unknown>
 
   for (const key of Object.keys(source)) {
-    const serialized = stripUnserializable(source[key], ancestors)
+    const serialized = stripUnserializable(source[key], ancestors, cache)
 
     if (serialized !== undefined) {
       setOwnProperty({ key, target: result, value: serialized })
