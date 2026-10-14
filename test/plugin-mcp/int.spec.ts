@@ -373,24 +373,21 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
               ...(authorization ? { Authorization: authorization } : {}),
             },
           })
-        const resourceMetadata = `resource_metadata="${restClient.serverURL}/api/mcp/oauth-protected-resource"`
+        const challenge = `Bearer error="invalid_token", error_description="Unauthorized, you must be logged in to make this request.", resource_metadata="${restClient.serverURL}/api/mcp/oauth-protected-resource"`
 
-        const anonymous = await postWithAuthorization()
-        expect(anonymous.status).toBe(401)
-        expect(anonymous.headers.get('WWW-Authenticate')).toBe(`Bearer ${resourceMetadata}`)
+        for (const authorization of [undefined, 'Bearer invalid-token']) {
+          const response = await postWithAuthorization(authorization)
+          expect(response.status).toBe(401)
+          expect(response.headers.get('WWW-Authenticate')).toBe(challenge)
+        }
 
         const metadata = await restClient.GET('/mcp/oauth-protected-resource')
+        expect(metadata.headers.get('Access-Control-Allow-Origin')).toBe('*')
         await expect(metadata.json()).resolves.toEqual({
           authorization_servers: ['https://auth.example.com'],
           bearer_methods_supported: ['header'],
           resource: `${restClient.serverURL}/api/mcp`,
         })
-
-        const invalidToken = await postWithAuthorization('Bearer invalid-token')
-        expect(invalidToken.status).toBe(401)
-        expect(invalidToken.headers.get('WWW-Authenticate')).toBe(
-          `Bearer error="invalid_token", ${resourceMetadata}`,
-        )
 
         const { token } = await restClient
           .POST('/users/login', {
