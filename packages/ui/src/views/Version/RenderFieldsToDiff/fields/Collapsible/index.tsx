@@ -13,10 +13,10 @@ const baseClass = 'collapsible-diff'
 
 export const Collapsible: React.FC<CollapsibleFieldDiffClientProps> = ({
   baseVersionField,
-  comparisonValue: valueFrom,
   field,
   parentIsLocalized,
-  versionValue: valueTo,
+  valueFrom,
+  valueTo,
 }) => {
   const { i18n } = useTranslation()
   const { selectedLocales } = useSelectedLocales()

@@ -42,7 +42,7 @@ the prompt instead of prompting.
 `npx @payloadcms/codemod upgrade run` performs the deterministic v3 -> v4 slice against the current
 directory (run it from your project root):
 
-1. Resolves the current Payload version from the npm registry, using the dist-tag this CLI was installed under (`beta` if run as `@payloadcms/codemod@beta`, else `canary`; override with `--tag <dist-tag>`).
+1. Resolves the current Payload version from the npm registry, using the dist-tag this CLI was installed under (its own prerelease id, else `beta`; override with `--tag <dist-tag>`).
 2. Rewrites `package.json`: pins `payload` + every `@payloadcms/*` to that exact version in
    lockstep, removes dependency overrides pinning them, converts their carets to exact, and writes
    the TypeScript / `@types/node` / `engines.node` floors. The `@payloadcms/eslint-*` packages are
@@ -57,7 +57,7 @@ prints the required Next target.
 
 Flags:
 
-- `--tag <dist-tag>`: dist-tag to resolve Payload versions from. Defaults to the dist-tag this CLI was installed under (`beta` when run as `@payloadcms/codemod@beta`, else `canary`).
+- `--tag <dist-tag>`: dist-tag to resolve Payload versions from. Defaults to the dist-tag this CLI was installed under (its own prerelease id, else `beta`).
 - `--dry`: preview the `package.json` changes and planned steps; write and install nothing.
 - `--force`: skip the dirty-git-tree warning.
 
@@ -87,6 +87,7 @@ The tool loads your project via [ts-morph](https://ts-morph.com/), using your `t
 - `globals-components-edit`: Globals: rename `admin.components.elements` to `admin.components.edit` and hoist `Description` to top-level `admin.components.Description` to match Collection conventions.
 - `migrate-force-select`: migrates `forceSelect: { ... }` on Collection/Global configs to a `select` function that augments the caller's `select` when present and returns `undefined` (preserving full-document reads) when not. Shallow values become a spread (`{ ...select, ... }`); nested values use `deepMergeSimple` from `payload/shared` (auto-imported) to preserve the previous deep-merge semantics. Non-literal values, sibling `select` already present, and unsupported member kinds are surfaced as notes for manual review.
 - `migrate-field-component-types`: replaces field component aliases—including concrete fields, canonical generics, labels, descriptions, errors, diffs, and block row labels—with the corresponding props types wrapped in `React.FC`. Generic arguments are preserved. Explicit class components, re-exports, namespace references, and inline imports are left unchanged with notes for manual migration.
+- `rename-diff-value-props`: renames the `comparisonValue` and `versionValue` props read by custom Diff components to `valueFrom` and `valueTo`. Detects components whose props are typed with a Diff type imported from `payload`, in either the v3 component form (`TextFieldDiffClientComponent`) or the props form (`TextFieldDiffClientProps`), including same-file type aliases and interfaces built from one. Renames destructured props (along with the local variables they declare, unless the new name is already taken), `props.comparisonValue` and `props['comparisonValue']` reads, and `TextFieldDiffClientProps['comparisonValue']` indexed access types. Untyped components are not detected; remaining old prop names in property positions (e.g. JSX attributes passed to other components) are surfaced as notes in files that import a Diff type.
 - `migrate-block-references-to-blocks`: renames blocks field `blockReferences` configs to `blocks`, and removes a sibling `blocks: []` placeholder when present. If a non-empty `blocks` sibling already exists, the transform leaves the field untouched and surfaces a note for manual review.
 - `migrate-hide-api-url`: migrates `admin.hideAPIURL: true` to `admin.components.views.edit.api.tab.condition: () => false` on collection and global configs.
 - `migrate-aliased-exports`: rewrites imports of types and utilities that used to be re-exported from `@payloadcms/ui` and `@payloadcms/next/utilities` to their canonical sources in `payload` / `payload/shared`.

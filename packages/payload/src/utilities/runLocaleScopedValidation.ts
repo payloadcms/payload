@@ -11,6 +11,7 @@ import {
   cloneValidationUser,
 } from './cloneValidationRequest.js'
 import { createPayloadRequest } from './createPayloadRequest.js'
+import { flattenDataByLocale } from './flattenDataByLocale.js'
 import { isValidationErrorPathLocalized } from './isValidationErrorPathLocalized.js'
 import {
   resolveValidationConcurrency,
@@ -26,7 +27,7 @@ type ClassifiedValidationError = {
 }
 
 /**
- * Clones the caller's request into one scoped to `validate`, resolves the selected locales, runs
+ * Clones the caller's request, scopes it to the requested operation, resolves the selected locales, runs
  * `runPass` once per locale against an independent request/data clone, and aggregates the field
  * errors. Shared by the collection and global local validate wrappers so the locale-cloning and
  * pass-running plumbing has one owner instead of two copies that can drift apart.
@@ -34,8 +35,10 @@ type ClassifiedValidationError = {
 export async function runLocaleScopedValidation<TData>({
   context,
   data,
+  dataIsLocaleKeyed = false,
   fields,
   locale,
+  operation = 'validate',
   payload,
   req,
   runPass,
@@ -43,8 +46,10 @@ export async function runLocaleScopedValidation<TData>({
 }: {
   context: RequestContext | undefined
   data: TData
+  dataIsLocaleKeyed?: boolean
   fields: Field[]
   locale: undefined | ValidationLocaleSelector
+  operation?: 'create' | 'update' | 'validate'
   payload: Payload
   req: Partial<PayloadRequest> | undefined
   runPass: (args: {
@@ -61,7 +66,7 @@ export async function runLocaleScopedValidation<TData>({
     req: cloneValidationRequest({ request: req }),
     user: cloneValidationUser({ user }),
   })
-  baseReq.operation = 'validate'
+  baseReq.operation = operation
   const localeSelector = locale === undefined ? (baseReq.locale ?? null) : locale
   const locales = await resolveValidationLocales({
     locale: localeSelector,
@@ -77,7 +82,16 @@ export async function runLocaleScopedValidation<TData>({
         payload,
         req: cloneValidationRequest({ request: baseReq }),
       })
-      const validationData = cloneValidationData({ data })
+      const validationCandidateData = cloneValidationData({ data })
+      const validationData =
+        dataIsLocaleKeyed && validationLocale
+          ? (flattenDataByLocale({
+              configBlockReferences: payload.config.blocks,
+              docWithLocales: validationCandidateData as JsonObject,
+              fields,
+              locale: validationLocale,
+            }) as TData)
+          : validationCandidateData
 
       let mergedValidationData = validationData as JsonObject
       const result = await runPass({

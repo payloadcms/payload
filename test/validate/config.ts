@@ -1,4 +1,6 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import { defaultDraftValidationBlock } from './blocks.js'
 import { validationCollections } from './collections.js'
 import { localeFilterOperationEvents } from './events.js'
 import { validationGlobals } from './globals.js'
@@ -11,6 +13,13 @@ import {
 
 export default buildConfigWithDefaults({
   config: {
+    admin: {
+      autoLogin: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    },
+    blocks: [defaultDraftValidationBlock],
     collections: validationCollections,
     globals: validationGlobals,
     jobs: {
@@ -29,6 +38,13 @@ export default buildConfigWithDefaults({
       filterAvailableLocales: ({ locales, req }) => {
         localeFilterOperationEvents.push(req.operation)
         const availableLocaleCodes = req.context.availableLocaleCodes as string[] | undefined
+
+        if (
+          req.context.excludeNonEnglishValidationLocales === true &&
+          req.operation === 'validate'
+        ) {
+          return locales.filter(({ code }) => code === 'en')
+        }
 
         return availableLocaleCodes
           ? locales.filter(({ code }) => availableLocaleCodes.includes(code))
@@ -60,6 +76,17 @@ export default buildConfigWithDefaults({
     },
   },
   seed: async (payload) => {
+    if (process.env.NODE_ENV !== 'test') {
+      await payload.create({
+        collection: 'users',
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+        overrideAccess: true,
+      })
+    }
+
     await payload.updateGlobal({
       slug: validationGlobalSlug,
       data: {

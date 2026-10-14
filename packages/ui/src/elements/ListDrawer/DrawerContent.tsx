@@ -147,7 +147,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
         onSelect({
           collectionSlug: selectedOption?.value,
           doc,
-          docID: doc.id,
         })
       }
 

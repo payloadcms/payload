@@ -32,7 +32,7 @@ export type MultiTenantPluginConfig = {
        *
        * The function receives:
        *  - accessResult: the original result from the access control function
-       *  - accessKey: 'read', 'create', 'update', 'delete', 'readVersions', or 'unlock'
+       *  - accessKey: 'read', 'create', 'update', 'delete', 'readVersions', 'unlock', or 'validate'
        *  - ...restOfAccessArgs: the original arguments passed to the access control function
        */
       accessResultOverride?: CollectionAccessResultOverride
@@ -205,7 +205,7 @@ export type MultiTenantPluginConfig = {
    *
    * The function receives:
    *  - accessResult: the original result from the access control function
-   *  - accessKey: 'read', 'create', 'update', 'delete', 'readVersions', or 'unlock'
+   *  - accessKey: 'read', 'create', 'update', 'delete', 'readVersions', 'unlock', or 'validate'
    *  - ...restOfAccessArgs: the original arguments passed to the access control function
    */
   usersAccessResultOverride?: CollectionAccessResultOverride

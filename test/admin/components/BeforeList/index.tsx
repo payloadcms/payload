@@ -39,8 +39,8 @@ export const SelectFormatDocURLButton = () => {
       <ListDrawer
         allowCreate={false}
         enableRowSelections={false}
-        onSelect={({ docID }) => {
-          setSelectedDocumentID(String(docID))
+        onSelect={({ doc }) => {
+          setSelectedDocumentID(String(doc.id))
           closeDrawer()
         }}
       />

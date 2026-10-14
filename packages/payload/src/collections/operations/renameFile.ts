@@ -245,6 +245,7 @@ export const renameFileOperation = async (
           payload: req.payload,
           req,
           select: undefined!,
+          shouldManageLocalFiles: false,
           showHiddenFields: false,
         })
 

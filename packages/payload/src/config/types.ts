@@ -1144,6 +1144,13 @@ type RootAdminConfig = {
       dashboard?: AdminViewConfig
     }
   }
+  /**
+   * Constrain the Admin Panel content width to 1080px on desktop.
+   *
+   * @experimental This property is subject to change in future releases.
+   * @default false
+   */
+  constrainWidth?: boolean
   /** Extension point to add your custom data. Available in server and client. */
   custom?: Record<string, any>
   /**

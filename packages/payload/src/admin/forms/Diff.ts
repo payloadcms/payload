@@ -30,14 +30,6 @@ export type VersionField = {
 
 export type FieldDiffClientProps<TClientField extends ClientFieldWithOptionalType = ClientField> = {
   baseVersionField: BaseVersionField
-  /**
-   * Field value from the version being compared from
-   */
-  comparisonValue: unknown // TODO: change to valueFrom in 4.0
-  /**
-   * @deprecated remove in 4.0. react-diff-viewer-continued is no longer a dependency
-   */
-  diffMethod: any
   field: TClientField
   /**
    * Permissions at this level of the field. If this field is unnamed, this will be `SanitizedFieldsPermissions` - if it is named, it will be `SanitizedFieldPermissions`
@@ -50,10 +42,13 @@ export type FieldDiffClientProps<TClientField extends ClientFieldWithOptionalTyp
   nestingLevel?: number
   parentIsLocalized: boolean
   /**
-   * Field value from the version being compared to
-   *
+   * Field value from the version being compared from
    */
-  versionValue: unknown // TODO: change to valueTo in 4.0
+  valueFrom: unknown
+  /**
+   * Field value from the version being compared to
+   */
+  valueTo: unknown
 }
 
 export type FieldDiffServerProps<

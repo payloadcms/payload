@@ -13,15 +13,21 @@ import {
   trackLocalePass,
 } from './events.js'
 import {
+  defaultDraftPublishCollectionSlug,
+  defaultDraftPublishUploadCollectionSlug,
+  defaultDraftValidationBlockSlug,
   publishCollectionSlug,
   validateAfterReadPreviousValue,
   validationAuthCollectionSlug,
   validationCollectionSlug,
+  validationCustomButtonsCollectionSlug,
   validationCustomIDCollectionSlug,
   validationDeniedCollectionSlug,
   validationEmptyCollectionSlug,
   validationFallbackCollectionSlug,
   validationNonLocalizedCollectionSlug,
+  validationRequestFailureTitle,
+  validationTranslatedLabelTitle,
   validationUniqueCollectionSlug,
   validationUploadsDir,
   validationUploadsSlug,
@@ -477,8 +483,49 @@ const publishCollection: CollectionConfig = {
       access: {
         validate: ({ req }) => req.context.denyPublishFieldValidation !== true,
       },
+      hooks: {
+        afterRead: [
+          ({ context, operation, req, value }) => {
+            if (context.trackPublishAfterRead === true) {
+              recordHook({
+                context,
+                hook: 'publishTitleAfterRead',
+                operation,
+                requestOperation: req.operation,
+              })
+            }
+
+            return value
+          },
+        ],
+        beforeChange: [
+          ({ context, operation, req, value }) => {
+            if (context.trackPublishBeforeChange === true) {
+              recordHook({
+                context,
+                hook: 'publishTitleBeforeChange',
+                operation,
+                requestOperation: req.operation,
+              })
+            }
+
+            return value
+          },
+        ],
+      },
       localized: true,
       required: true,
+      validate: (value, { data, operation }) => {
+        if (
+          data?._status === 'published' &&
+          operation === 'update' &&
+          value === 'reject only during update validation'
+        ) {
+          return 'The title is invalid during an update'
+        }
+
+        return typeof value === 'string' && value.length > 0 ? true : 'Title is required'
+      },
     },
     {
       name: 'localizedArray',
@@ -580,6 +627,122 @@ const publishCollection: CollectionConfig = {
   versions: {
     drafts: {
       schedulePublish: true,
+      validate: false,
+    },
+  },
+}
+
+const defaultDraftPublishCollection: CollectionConfig = {
+  slug: defaultDraftPublishCollectionSlug,
+  access: {
+    update: () => true,
+  },
+  dbName: 'default_draft',
+  fields: [
+    {
+      name: 'layout',
+      type: 'blocks',
+      blocks: [defaultDraftValidationBlockSlug],
+      minRows: 1,
+      required: true,
+    },
+  ],
+  versions: {
+    drafts: true,
+  },
+}
+
+const defaultDraftPublishUploadCollection: CollectionConfig = {
+  slug: defaultDraftPublishUploadCollectionSlug,
+  access: {
+    update: () => true,
+  },
+  dbName: 'default_upload',
+  fields: [
+    {
+      name: 'layout',
+      type: 'blocks',
+      blocks: [defaultDraftValidationBlockSlug],
+      minRows: 1,
+      required: true,
+    },
+  ],
+  upload: {
+    staticDir: validationUploadsDir,
+  },
+  versions: {
+    drafts: true,
+  },
+}
+
+const validationCustomButtonsCollection: CollectionConfig = {
+  slug: validationCustomButtonsCollectionSlug,
+  access: {
+    validate: ({ data, req }) => {
+      if (!req.user) {
+        return false
+      }
+
+      if (req.method === 'POST' && data?.title === validationRequestFailureTitle) {
+        throw new ValidationError(
+          {
+            errors: [
+              {
+                label: { en: 'Request failure title' },
+                message: 'The validation request failed.',
+                path: 'title',
+              },
+            ],
+            req,
+          },
+          req.t,
+        )
+      }
+
+      return true
+    },
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      localized: true,
+      required: true,
+    },
+    {
+      name: 'summary',
+      type: 'text',
+      required: true,
+    },
+  ],
+  hooks: {
+    beforeValidate: [
+      ({ data, operation, req }) => {
+        if (operation === 'validate' && data?.title === validationTranslatedLabelTitle) {
+          throw new ValidationError(
+            {
+              errors: [
+                {
+                  label: {
+                    de: 'Übersetzter Titel',
+                    en: 'Translated title',
+                  },
+                  message: 'The translated title is invalid.',
+                  path: 'title',
+                },
+              ],
+              req,
+            },
+            req.t,
+          )
+        }
+
+        return data
+      },
+    ],
+  },
+  versions: {
+    drafts: {
       validate: false,
     },
   },
@@ -710,6 +873,9 @@ export const validationCollections: CollectionConfig[] = [
   validationFallbackCollection,
   validationWhereCollection,
   publishCollection,
+  defaultDraftPublishCollection,
+  defaultDraftPublishUploadCollection,
+  validationCustomButtonsCollection,
   validationDeniedCollection,
   validationNonLocalizedCollection,
   defaultUserCollection,

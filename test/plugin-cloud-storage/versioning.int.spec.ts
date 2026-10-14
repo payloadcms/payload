@@ -1535,9 +1535,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     }
   })
 
-  test('should keep the stored object folder in regenerated provider URLs', async ({
-    payload,
-  }) => {
+  test('should keep the stored object folder in regenerated provider URLs', async ({ payload }) => {
     const created = await payload.create({
       collection: versionedPublicCloudMediaSlug,
       data: {},

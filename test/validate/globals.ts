@@ -10,6 +10,8 @@ import {
   scheduledValidationEvents,
 } from './events.js'
 import {
+  defaultDraftPublishGlobalSlug,
+  defaultDraftValidationBlockSlug,
   publishGlobalSlug,
   validateAfterReadPreviousValue,
   validationAccessSourceGlobalSlug,
@@ -295,6 +297,23 @@ const publishGlobal: GlobalConfig = {
   },
 }
 
+const defaultDraftPublishGlobal: GlobalConfig = {
+  slug: defaultDraftPublishGlobalSlug,
+  dbName: 'default_global',
+  fields: [
+    {
+      name: 'layout',
+      type: 'blocks',
+      blocks: [defaultDraftValidationBlockSlug],
+      minRows: 1,
+      required: true,
+    },
+  ],
+  versions: {
+    drafts: true,
+  },
+}
+
 export const validationGlobals: GlobalConfig[] = [
   validationGlobal,
   validationFallbackGlobal,
@@ -303,4 +322,5 @@ export const validationGlobals: GlobalConfig[] = [
   validationDraftSourceGlobal,
   validationAccessSourceGlobal,
   publishGlobal,
+  defaultDraftPublishGlobal,
 ]

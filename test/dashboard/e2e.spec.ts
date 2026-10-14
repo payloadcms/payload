@@ -41,7 +41,7 @@ describe('Dashboard', () => {
 
   test('should keep dashboard height stable and delay loading feedback', async ({ page }) => {
     test.setTimeout(TEST_TIMEOUT_LONG)
-    const documents = (await (await page.request.get(`${serverURL}/api/tickets?limit=5`)).json())
+    const documents = (await (await page.request.get(`${serverURL}/api/tickets?limit=14`)).json())
       .docs
 
     for (const key of ['pinned-documents', 'recently-viewed']) {
@@ -574,7 +574,7 @@ describe('Dashboard', () => {
     await expect(widget.getByRole('button', { name: 'List view' })).toHaveCount(0)
     await expect(widget.locator('.recents-widget__pin')).toHaveCount(0)
     await pinnedButton.click()
-    await widget.getByRole('button', { name: 'Pin document', exact: true }).click()
+    await widget.getByRole('button', { name: 'Select Documents', exact: true }).click()
     const drawer = page.locator('.list-drawer.drawer--is-open')
 
     await selectInput({
@@ -684,7 +684,7 @@ describe('Dashboard', () => {
       .docs[0]
     const event = (await (await page.request.get(`${serverURL}/api/events?limit=1`)).json()).docs[0]
     const widget = page.locator('.recents-widget')
-    const addPin = widget.getByRole('button', { name: 'Pin document', exact: true })
+    const addPin = widget.getByRole('button', { name: 'Select Documents', exact: true })
     const drawer = page.locator('.list-drawer.drawer--is-open')
 
     await expect(widget.locator('.recents-widget__item--add-pin')).toHaveCount(1)
@@ -698,7 +698,7 @@ describe('Dashboard', () => {
 
     expect(emptyBox?.width).toBe(gridBox?.width)
     expect(buttonBox!.width).toBeLessThan(emptyBox!.width)
-    await expect(addPin).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await expect(addPin).toHaveClass(/btn--style-secondary/)
     for (const { collectionLabel, collectionSlug, document } of [
       { collectionLabel: 'Ticket', collectionSlug: 'tickets', document: ticket },
       { collectionLabel: 'Event', collectionSlug: 'events', document: event },
@@ -780,10 +780,10 @@ describe('Dashboard', () => {
     )
 
     expect(response.ok()).toBe(true)
-    await page.setViewportSize({ height: 900, width: 1920 })
+    await page.setViewportSize({ height: 900, width: 1200 })
     await page.reload()
     const widget = page.locator('.recents-widget')
-    const addPin = widget.getByRole('button', { name: 'Pin document', exact: true })
+    const addPin = widget.getByRole('button', { name: 'Select Documents', exact: true })
     const drawer = page.locator('.list-drawer.drawer--is-open')
 
     await expect(widget.locator('.document-card__title')).toHaveCount(4)
@@ -871,7 +871,7 @@ describe('Dashboard', () => {
     await expect(widget.locator('.recents-widget__item--add-pin')).toHaveCount(1)
   })
 
-  test('activity widget paginates one grid row and resets the page when changing tabs', async ({
+  test('activity widget paginates responsive grid rows and resets the page when changing tabs', async ({
     page,
   }) => {
     const tickets = (await (await page.request.get(`${serverURL}/api/tickets?limit=7`)).json()).docs
@@ -888,7 +888,7 @@ describe('Dashboard', () => {
         },
       },
     })
-    await page.setViewportSize({ height: 900, width: 1920 })
+    await page.setViewportSize({ height: 900, width: 1200 })
     await page.goto(url.admin)
     const dashboard = new DashboardHelper(page)
 
@@ -910,8 +910,8 @@ describe('Dashboard', () => {
     await expect(widget.locator('.document-card__title').first()).toHaveText(tickets[0].title)
 
     await page.setViewportSize({ height: 900, width: 375 })
-    await expect(widget.locator('.document-card__title')).toHaveCount(1)
-    await expect(widget.locator('.recents-widget__pagination')).toContainText('1 of 7')
+    await expect(widget.locator('.document-card__title')).toHaveCount(4)
+    await expect(widget.locator('.recents-widget__pagination')).toContainText('1 of 2')
   })
 
   test('activity widget retains pinned draft documents without a separate drafts tab', async ({
