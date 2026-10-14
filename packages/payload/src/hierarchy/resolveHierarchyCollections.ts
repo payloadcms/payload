@@ -335,9 +335,7 @@ function injectTypeField({
 
   hierarchyCollection.fields = hierarchyCollection.fields || []
 
-  // Replace an existing type field instead of adding a second one: plugins can wrap this
-  // collection in a new object that shares the same `fields` array, so this can run again.
-  // Replacing keeps `collectionOptions` up to date with the current related collections.
+  // This can run again on the same `fields` array, so replace the field if it already exists
   const existingTypeFieldIndex = hierarchyCollection.fields.findIndex(
     (field) => fieldAffectsData(field) && field.name === typeFieldName,
   )

@@ -26,9 +26,8 @@ export const addHierarchyToCollection = ({
   const slugFieldInfo = slugFieldName ? findFieldByName(collectionConfig, slugFieldName) : undefined
   const validatedSlugFieldName = slugFieldInfo ? slugFieldName : undefined
 
-  // Add virtual path fields (computed in afterRead).
-  // Skip fields that already exist: plugins can wrap this collection in a new object that
-  // shares the same `fields` array, so this can run again on fields it already changed.
+  // Add virtual path fields (computed in afterRead). This can run again on the same
+  // `fields` array, so skip fields that already exist
   const pathFields: TextField[] = [
     {
       name: slugPathFieldName,
