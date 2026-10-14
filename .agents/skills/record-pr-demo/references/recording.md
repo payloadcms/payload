@@ -60,6 +60,23 @@ await pause(2200)
 await hideAnnotation()
 ```
 
+## Optional elapsed timer
+
+Use `startTimer`, `stopTimer`, and `hideTimer` only when the demo needs to show the time between two explicit events. Show a full-width banner first; the timer adds a compact section to its end rather than creating another overlay. Its label, Payload clock icon, and tabular value are all 12px. The returned duration is elapsed milliseconds, not a Web Vitals or server-only measurement. Name the interval in the label and stop it after asserting the exact state that counts as ready:
+
+```js
+await showAnnotation({ type: 'banner', title: 'Create view', body: 'Loading' })
+await startTimer({ label: 'Page ready' })
+await click(createButton, { before: 0, duration: 0 })
+await expect(page.getByRole('heading', { name: 'Create new Post' })).toBeVisible()
+const elapsedMilliseconds = await stopTimer()
+await pause(1600)
+await hideTimer()
+await hideAnnotation()
+```
+
+Move the cursor onto the button before starting the timer when the measurement should begin at the click rather than include cursor travel. If a full document navigation replaces the banner, show it again before stopping the timer; the start time is retained for same-origin navigation. Include the measured interval and ready condition in the written video description so the timer's meaning is clear without motion.
+
 ## Scenario module
 
 Create the scenario outside the repository, for example `/tmp/payload-pr-demo-relationship-drawer.mjs`. It must default-export an async function:
@@ -120,6 +137,7 @@ The recorder supplies:
 - `ready()`: marks the loaded opening state and holds it for 1.2 seconds; call it exactly once before the first visible interaction;
 - `scroll(locator, options?)`: scrolls the actual overflow range with frame-timed easing, or real wheel input when requested;
 - `showAnnotation(options)` / `hideAnnotation()`: displays a styled floating annotation or full-width banner, then removes it when done;
+- `startTimer({ label })` / `stopTimer()` / `hideTimer()`: optionally adds, freezes, and removes an elapsed timer in a visible banner around a scenario-defined interval;
 - `label`: the normalized recording label.
 
 The recorder adds a visible cursor above in-page popups and dialogs. Keep the scenario on one page; separate browser-window stitching is outside this skill's current scope.

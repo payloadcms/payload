@@ -154,6 +154,39 @@ test('should expose annotation helpers to recording scenarios', async () => {
   }
 })
 
+test('should expose an optional timer to recording scenarios', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-timer-scenario-test-'))
+  const scenario = path.join(directory, 'scenario.mjs')
+
+  try {
+    await writeFile(
+      scenario,
+      `export default async function scenario({ expect, hideTimer, page, showAnnotation, startTimer, stopTimer }) {
+        await page.route('http://timer.test/**', (route) => route.fulfill({ body: '<main>Ready</main>', contentType: 'text/html' }))
+        await page.goto('http://timer.test/first')
+        await showAnnotation({ type: 'banner', title: 'Result', body: 'Loading' })
+        await startTimer({ label: 'Page ready' })
+        await expect(page.locator('.pr-demo-annotation-timer')).toContainText('Page ready')
+        await page.goto('http://timer.test/second')
+        await showAnnotation({ type: 'banner', title: 'Result', body: 'Ready' })
+        const elapsedMilliseconds = await stopTimer()
+        if (elapsedMilliseconds < 0) throw new Error('Timer returned a negative duration')
+        await hideTimer()
+        await expect(page.locator('.pr-demo-annotation-timer')).toHaveCount(0)
+      }`,
+    )
+
+    await recorder.validateDemo({
+      baseURL: 'http://localhost:3000',
+      label: 'timer-scenario-test',
+      scenario,
+      viewport: { height: 480, width: 640 },
+    })
+  } finally {
+    await rm(directory, { force: true, recursive: true })
+  }
+})
+
 test('should reject a recording without an opening ready marker', async () => {
   const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-missing-ready-test-'))
   const scenario = path.join(directory, 'scenario.mjs')

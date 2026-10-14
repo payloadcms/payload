@@ -7,6 +7,7 @@ import { pathToFileURL } from 'node:url'
 
 import { createAnnotationInteraction } from './annotation-demo.mjs'
 import { createScrollInteraction } from './scroll-demo.mjs'
+import { createTimerInteraction } from './timer-demo.mjs'
 
 const DEFAULT_BASE_URL = 'http://localhost:3000'
 const DEFAULT_INTERACTION_PAUSE_MS = 300
@@ -278,6 +279,7 @@ async function executeDemo({
     page,
   })
   const annotationInteractions = createAnnotationInteraction({ page })
+  const timerInteractions = createTimerInteraction({ page })
   let isOpeningReady = false
   let scenarioError
 
@@ -288,6 +290,7 @@ async function executeDemo({
       expect,
       fixture,
       hideAnnotation: annotationInteractions.hideAnnotation,
+      hideTimer: timerInteractions.hideTimer,
       label,
       moveCursor: pointerInteractions.moveCursor,
       page,
@@ -300,6 +303,8 @@ async function executeDemo({
       },
       scroll: createScrollInteraction({ moveCursor: pointerInteractions.moveCursor, page }),
       showAnnotation: annotationInteractions.showAnnotation,
+      startTimer: timerInteractions.startTimer,
+      stopTimer: timerInteractions.stopTimer,
     })
     if (output && !isOpeningReady) {
       throw new Error('Recording scenario must call ready() after its opening state is visible')
