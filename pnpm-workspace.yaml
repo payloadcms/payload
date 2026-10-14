@@ -75,3 +75,15 @@ minimumReleaseAgeExclude:
   - '@next/swc-win32-x64-msvc@16.4.0'
   - eslint-config-next@16.4.0
   - next@16.4.0
+  - '@tanstack/react-router@1.170.44'
+  - '@tanstack/react-start-client@1.168.42'
+  - '@tanstack/react-start-rsc@0.1.62'
+  - '@tanstack/react-start-server@1.167.49'
+  - '@tanstack/react-start@1.169.1'
+  - '@tanstack/router-core@1.171.37'
+  - '@tanstack/router-generator@1.167.43'
+  - '@tanstack/router-plugin@1.168.45'
+  - '@tanstack/start-client-core@1.170.37'
+  - '@tanstack/start-plugin-core@1.171.52'
+  - '@tanstack/start-server-core@1.169.42'
+  - '@tanstack/start-storage-context@1.167.39'
