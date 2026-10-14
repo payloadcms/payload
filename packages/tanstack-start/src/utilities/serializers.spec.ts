@@ -1,17 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
 import { serializeForRsc } from './serializeForRsc.js'
-import { stripUnserializable } from './serverFunctionClient.js'
+import { createServerFunctionClient } from './serverFunctionClient.js'
 import { toSerializable } from './toSerializable.js'
 
 describe('TanStack serializers', () => {
   it('should copy special JSON keys as own data', async () => {
     const input = JSON.parse('{"__proto__":{"label":"value"}}')
-    const results = [
-      toSerializable(input),
-      stripUnserializable(input),
-      await serializeForRsc(input),
-    ]
+    const results = [toSerializable(input), await serializeForRsc(input)]
 
     for (const result of results) {
       expect(Object.getPrototypeOf(result)).toBe(Object.prototype)
@@ -19,5 +15,23 @@ describe('TanStack serializers', () => {
       expect(Reflect.get(result, '__proto__')).toEqual({ label: 'value' })
       expect(Reflect.get(result, 'label')).toBeUndefined()
     }
+  })
+
+  it('should pass native serializable values to server functions unchanged', async () => {
+    const date = new Date()
+    const regexp = /value/g
+    const args = { date, regexp }
+    let received: unknown
+
+    const serverFunction = createServerFunctionClient({
+      runServerFn: async ({ data }) => {
+        received = data.args
+        return null
+      },
+    })
+
+    await serverFunction({ name: 'test', args })
+
+    expect(received).toBe(args)
   })
 })

@@ -73,9 +73,8 @@ export async function getLayoutData({
  * payload for the `/_payload` route loader. The framework adapter wraps this in
  * a `createServerFn` that supplies the app's `config` and generated `importMap`.
  *
- * `toSerializable` strips React elements, so the custom-providers element tree
- * (`config.admin.components.providers`) is rendered to an RSC payload separately
- * and re-attached.
+ * The custom-providers element tree (`config.admin.components.providers`) is
+ * rendered to an RSC payload separately and re-attached.
  */
 export async function loadLayoutData({
   config,
