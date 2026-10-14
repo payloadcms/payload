@@ -105,6 +105,8 @@ export type SubmitOptions<C = Record<string, unknown>> = {
    */
   disableSuccessStatus?: boolean
   method?: string
+  /** @internal Reconcile an autosave invalidated by edits in the current form. */
+  onStaleRequest?: () => void
   overrides?: ((formState) => FormData) | Record<string, unknown>
   /** @internal */
   requestIntent?: 'autosave' | 'submit'

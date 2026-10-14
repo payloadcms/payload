@@ -30,7 +30,7 @@ export function FormRequests() {
   return (
     <Form
       action={action}
-      initialState={initialState}
+      initialState={scenario === 'empty' ? undefined : initialState}
       method="POST"
       onSuccess={onSuccess}
       waitForAutocomplete={scenario === 'autocomplete'}
@@ -63,7 +63,7 @@ function RequestControls({
           disabled={disabled}
           id="request-title"
           onChange={(event) => setValue(event.target.value)}
-          value={value}
+          value={value ?? ''}
         />
       </label>
       <button

@@ -736,10 +736,16 @@ test.describe('Form State', () => {
       let heldRoute: Route | undefined
       let heldResponse: Awaited<ReturnType<Route['fetch']>> | undefined
 
-      await page.route(conditionsUrl.edit(doc.id), async (route) => {
+      const formStateURL =
+        currentFramework === 'tanstack-start' ? '**/_serverFn/**' : conditionsUrl.edit(doc.id)
+
+      await page.route(formStateURL, async (route) => {
         const request = route.request()
         const isFormStateRequest =
-          request.method() === 'POST' && Boolean(request.headers()['next-action'])
+          request.method() === 'POST' &&
+          (currentFramework === 'tanstack-start'
+            ? (request.postData() ?? '').includes('form-state')
+            : Boolean(request.headers()['next-action']))
 
         if (isFormStateRequest && !heldRoute) {
           heldResponse = await route.fetch()
@@ -775,10 +781,16 @@ test.describe('Form State', () => {
       let heldResponse: Awaited<ReturnType<Route['fetch']>> | undefined
       let saveRequestStarted = false
 
-      await page.route(postsUrl.edit(doc.id), async (route) => {
+      const formStateURL =
+        currentFramework === 'tanstack-start' ? '**/_serverFn/**' : postsUrl.edit(doc.id)
+
+      await page.route(formStateURL, async (route) => {
         const request = route.request()
         const isFormStateRequest =
-          request.method() === 'POST' && Boolean(request.headers()['next-action'])
+          request.method() === 'POST' &&
+          (currentFramework === 'tanstack-start'
+            ? (request.postData() ?? '').includes('form-state')
+            : Boolean(request.headers()['next-action']))
 
         if (isFormStateRequest && !heldRoute) {
           heldResponse = await route.fetch()
@@ -815,6 +827,170 @@ test.describe('Form State', () => {
   describe('form request lifecycle', () => {
     afterEach(async () => {
       await page.unrouteAll({ behavior: 'ignoreErrors' })
+    })
+
+    test('should accept field updates without initial form state', async () => {
+      await page.route('**/api/form-request', (route) =>
+        route.fulfill({ json: { message: 'Saved' } }),
+      )
+      await page.goto(
+        formatAdminURL({
+          adminRoute: '/admin',
+          path: '/form-requests?scenario=empty',
+          serverURL,
+        }),
+      )
+      await waitForFormReady(page)
+      await page.getByRole('textbox', { name: 'Title', exact: true }).fill('First input')
+
+      const request = page.waitForRequest(
+        (request) => request.url().endsWith('/api/form-request'),
+        { timeout: 3000 },
+      )
+
+      await page.getByRole('button', { name: 'Submit request' }).click()
+
+      expect((await request).postData()).toContain('"title":"First input"')
+    })
+
+    for (const update of ['reverted edit', 'non-dirty update'] as const) {
+      test(`should reconcile a post-save response invalidated by a ${update}`, async () => {
+        const doc = await payload.create({
+          collection: autosavePostsSlug,
+          data: { programmaticValue: 'Initial value', title: 'ok Initial revision' },
+          draft: true,
+        })
+        await page.goto(autosavePostsUrl.edit(doc.id))
+        await waitForFormReady(page)
+
+        const responseCaptured = Promise.withResolvers<void>()
+        const releaseResponse = Promise.withResolvers<void>()
+        let hasCapturedResponse = false
+        let requestCount = 0
+
+        await page.route(`**/api/${autosavePostsSlug}/${doc.id}**`, async (route) => {
+          if (route.request().method() === 'PATCH') {
+            requestCount += 1
+          }
+          await route.continue()
+        })
+        const formStateURL =
+          currentFramework === 'tanstack-start' ? '**/_serverFn/**' : autosavePostsUrl.edit(doc.id)
+
+        await page.route(formStateURL, async (route) => {
+          const request = route.request()
+          const isFormStateRequest =
+            request.method() === 'POST' &&
+            (currentFramework === 'tanstack-start'
+              ? (request.postData() ?? '').includes('form-state')
+              : Boolean(request.headers()['next-action']))
+
+          if (isFormStateRequest && !hasCapturedResponse) {
+            hasCapturedResponse = true
+            const response = await route.fetch()
+
+            responseCaptured.resolve()
+            await releaseResponse.promise
+            await route.fulfill({ response })
+          } else {
+            await route.continue()
+          }
+        })
+
+        try {
+          const titleField = page.locator('#field-title')
+
+          await titleField.fill('ok Latest revision')
+          await responseCaptured.promise
+
+          if (update === 'reverted edit') {
+            await titleField.fill('ok Temporary edit')
+            await titleField.fill('ok Latest revision')
+          } else {
+            await page.locator('#set-programmatic-value').click()
+          }
+
+          releaseResponse.resolve()
+
+          await expect(page.locator('#field-computedTitle')).toHaveValue('ok Latest revision')
+          await waitForAutoSaveToRunAndComplete(page)
+          expect(requestCount).toBe(2)
+
+          if (update === 'non-dirty update') {
+            await expect(page.locator('#field-programmaticValue')).toHaveValue(
+              'Updated programmatically',
+            )
+          }
+        } finally {
+          releaseResponse.resolve()
+        }
+      })
+    }
+
+    test('should preserve a save queued before pasting an array field', async () => {
+      const doc = await payload.create({
+        collection: postsSlug,
+        data: {
+          array: [{ customTextField: 'Copied value', defaultTextField: 'Copied value' }],
+          title: 'Initial title',
+        },
+      })
+      await page.goto(postsUrl.edit(doc.id))
+      await waitForFormReady(page)
+
+      const clipboardButton = page.locator('#field-array .clipboard-action__button').first()
+
+      await clipboardButton.click()
+      await page.getByRole('menuitem', { name: 'Copy Field', exact: true }).click()
+
+      const responseCaptured = Promise.withResolvers<void>()
+      const releaseResponse = Promise.withResolvers<void>()
+      let hasCapturedResponse = false
+
+      const formStateURL =
+        currentFramework === 'tanstack-start' ? '**/_serverFn/**' : postsUrl.edit(doc.id)
+
+      await page.route(formStateURL, async (route) => {
+        const request = route.request()
+        const isFormStateRequest =
+          request.method() === 'POST' &&
+          (currentFramework === 'tanstack-start'
+            ? (request.postData() ?? '').includes('form-state')
+            : Boolean(request.headers()['next-action']))
+
+        if (isFormStateRequest && !hasCapturedResponse) {
+          hasCapturedResponse = true
+          const response = await route.fetch()
+
+          responseCaptured.resolve()
+          await releaseResponse.promise
+          await route.fulfill({ response })
+        } else {
+          await route.continue()
+        }
+      })
+
+      try {
+        await page.locator('#field-title').fill('Updated title')
+        await responseCaptured.promise
+        await page.locator('#action-save').click()
+        await clipboardButton.click()
+        await page.getByRole('menuitem', { name: 'Paste Field', exact: true }).click()
+
+        const saveRequest = page.waitForRequest(
+          (request) =>
+            request.method() === 'PATCH' && request.url().includes(`/api/${postsSlug}/${doc.id}`),
+          { timeout: 3000 },
+        )
+
+        releaseResponse.resolve()
+
+        expect((await saveRequest).postData()).toContain('"title":"Updated title"')
+        await waitForFormReady(page)
+      } finally {
+        releaseResponse.resolve()
+        await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+      }
     })
 
     test('should submit computed values merged by the preceding queued autosave', async () => {

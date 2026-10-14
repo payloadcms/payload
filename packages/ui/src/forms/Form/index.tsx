@@ -166,7 +166,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const resetSequenceRef = useRef(0)
   const isFirstRenderRef = useRef(true)
 
-  const [formState, setFormState] = useState(initialState)
+  const [formState, setFormState] = useState<FormState>(() => initialState || {})
   const formStateRef = useRef(formState)
 
   const dispatchFieldsWithoutIncrementingFormSequence = useCallback<React.Dispatch<FieldAction>>(
@@ -295,6 +295,7 @@ export const Form: React.FC<FormProps> = (props) => {
         disableFormWhileProcessing = true,
         disableSuccessStatus: disableSuccessStatusFromArgs,
         method: methodToUse = method,
+        onStaleRequest,
         overrides: overridesFromArgs = {},
         requestIntent,
         skipValidation,
@@ -467,12 +468,9 @@ export const Form: React.FC<FormProps> = (props) => {
           res = await action(formData)
         }
 
-        if (requestContext.isCurrent()) {
-          _setModified(false)
-        }
-
         if (typeof handleResponse === 'function') {
           if (requestContext.isCurrent()) {
+            _setModified(false)
             preservePromiseToast = true
             handleResponse(res, successToast, errorToast)
           }
@@ -521,6 +519,7 @@ export const Form: React.FC<FormProps> = (props) => {
             })
           }
 
+          _setModified(false)
           setSubmitted(false)
 
           if (redirect) {
@@ -636,6 +635,10 @@ export const Form: React.FC<FormProps> = (props) => {
 
           setProcessing(false)
           setDisabled(disabledFromPropsRef.current)
+
+          if (requestIntent === 'autosave' && !requestContext.isCurrent()) {
+            onStaleRequest?.()
+          }
         }
       }
     },
