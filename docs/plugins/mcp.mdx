@@ -163,6 +163,7 @@ authenticated user, provide an override object with `access: () => true`.
 | `disabled`                             | `boolean`    | Skip MCP endpoint registration.                                                                                                               |
 | `hooks.afterToolCall`                  | `function[]` | Run cross-cutting hooks after tool handlers return. See [MCP plugin hooks](#mcp-plugin-hooks).                                                |
 | `overrideGetAuthorizedMCP`             | `function`   | Replace the default MCP authorization resolver. See [Custom auth](#custom-auth).                                                              |
+| `oauth`                                | `object`     | Let MCP clients sign in through an OAuth authorization server. See [OAuth](#oauth).                                                           |
 | `mcp.maxRequestBodySize`               | `number`     | Largest HTTP request body in bytes. Larger requests get a `413` response. Base64 file uploads count toward it. Default `4194304` (4 MiB).     |
 | `mcp.serverOptions.serverInfo.name`    | `string`     | The MCP server name advertised to clients. Default `'Payload MCP Server'`.                                                                    |
 | `mcp.serverOptions.serverInfo.version` | `string`     | The MCP server version. Default `'1.0.0'`.                                                                                                    |
@@ -279,6 +280,60 @@ POST /api/mcp?overrideAccess=true
 ```
 
 HTTP rejects the `overrideAccess` URL argument outside development.
+
+### OAuth
+
+Set `oauth` to let MCP clients sign in through an OAuth authorization server. MCP
+requests without an authenticated user then get a `401` whose `WWW-Authenticate`
+header links to the [protected resource metadata](https://www.rfc-editor.org/rfc/rfc9728)
+at `/api/mcp/oauth-protected-resource`, and the client starts its OAuth flow from
+there. No other setup is needed.
+
+```ts
+mcpPlugin({
+  oauth: {
+    authorizationServers: ['https://auth.example.com'],
+    // Optional. Defaults to the absolute URL of /api/mcp.
+    resource: 'https://example.com/api/mcp',
+  },
+})
+```
+
+The plugin does not validate access tokens. Add an auth strategy that turns the
+access token into a Payload user, and MCP runs as that user with access control.
+
+Some clients ignore that link and only look for the metadata at
+`/.well-known/oauth-protected-resource`, outside `/api`. To support them, serve
+the same metadata from the site root. In Next.js, add
+`app/.well-known/oauth-protected-resource/[[...path]]/route.ts`:
+
+```ts
+import config from '@payload-config'
+import { oauthProtectedResourceHandler } from '@payloadcms/plugin-mcp'
+
+export const GET = oauthProtectedResourceHandler(config)
+```
+
+In TanStack Start, add `[.]well-known.oauth-protected-resource.$.ts` to your
+routes directory:
+
+```ts
+import { oauthProtectedResourceHandler } from '@payloadcms/plugin-mcp'
+import { createFileRoute } from '@tanstack/react-router'
+
+export const Route = createFileRoute('/.well-known/oauth-protected-resource/$')(
+  {
+    server: {
+      handlers: {
+        GET: async ({ request }) => {
+          const { default: config } = await import('@payload-config')
+          return oauthProtectedResourceHandler(config)(request)
+        },
+      },
+    },
+  },
+)
+```
 
 ### Custom auth
 

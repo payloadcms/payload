@@ -291,6 +291,21 @@ export type MCPPluginConfig = {
     verboseLogs?: boolean
   }
   /**
+   * Lets MCP clients sign in through an OAuth authorization server. MCP requests without an
+   * authenticated user get a `401` that points to the protected resource metadata (RFC 9728),
+   * served by `oauthProtectedResourceHandler`. Payload's auth strategies must accept the
+   * issued access tokens.
+   */
+  oauth?: {
+    authorizationServers: string[]
+    /**
+     * The URL clients call to reach the MCP endpoint.
+     *
+     * @default the absolute URL of `/api/mcp`, based on `serverURL` or the request URL
+     */
+    resource?: string
+  }
+  /**
    * Replace the default MCP authorization resolver.
    *
    * This hook replaces the default authentication flow. It must set `req.user` to the
@@ -309,7 +324,7 @@ export type MCPPluginConfig = {
 
 export type SanitizedMCPPluginConfig = {
   items: MCPItem[]
-} & Pick<MCPPluginConfig, 'disabled' | 'hooks' | 'mcp' | 'overrideGetAuthorizedMCP'>
+} & Pick<MCPPluginConfig, 'disabled' | 'hooks' | 'mcp' | 'oauth' | 'overrideGetAuthorizedMCP'>
 
 export type MCPServerOptions = {
   options?: McpServerOptions
