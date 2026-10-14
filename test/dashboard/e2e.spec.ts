@@ -194,6 +194,52 @@ describe('Dashboard', () => {
     })
   }
 
+  test('should keep lazily loaded relationships cached across layout changes', async ({ page }) => {
+    await initPage({ page, serverURL })
+    const userResponse = await page.request.get(`${serverURL}/api/users/me`)
+    const { user } = await userResponse.json()
+    const eventResponse = await page.request.post(`${serverURL}/api/events`, {
+      data: {
+        title: 'Cached organizer',
+        startDate: '2026-01-01T12:00:00.000Z',
+        organizer: user.id,
+      },
+    })
+
+    expect(eventResponse.ok()).toBe(true)
+    const { doc } = await eventResponse.json()
+
+    await page.request.post(`${serverURL}/api/payload-preferences/collection-events`, {
+      data: {
+        value: {
+          columns: [
+            { accessor: 'title', active: true },
+            { accessor: 'organizer', active: true },
+          ],
+          documentLayout: 'table',
+        },
+      },
+    })
+    await page.goto(`${serverURL}/admin/collections/events?where[id][equals]=${doc.id}`)
+    const organizer = page.locator('.cell-organizer')
+
+    await expect(organizer).toContainText(user.email)
+    await assertNetworkRequests(
+      page,
+      `${serverURL}/api/users`,
+      async () => {
+        await page.getByRole('radio', { name: 'Grid' }).check()
+        await expect(page.locator('.document-card')).toContainText('Cached organizer')
+        await page.getByRole('radio', { name: 'Table' }).check()
+        await expect(organizer).toContainText(user.email)
+      },
+      {
+        allowedNumberOfRequests: 0,
+        requestFilter: (request) => new URL(request.url()).pathname === '/api/users',
+      },
+    )
+  })
+
   test('should keep dashboard height stable and delay loading feedback', async ({ page }) => {
     test.setTimeout(TEST_TIMEOUT_LONG)
     const documents = (await (await page.request.get(`${serverURL}/api/tickets?limit=14`)).json())

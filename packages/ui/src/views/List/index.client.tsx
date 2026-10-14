@@ -399,35 +399,35 @@ export function DefaultListView(props: ListViewClientProps) {
                 />
               </DocumentSelectionProvider>
             ) : docs?.length > 0 ? (
-              shouldRenderGrid && isDataGrouped ? (
-                <GroupedDocumentGrid
-                  collectionSlug={collectionSlug}
-                  documentThumbnails={documentThumbnails}
-                  documentURLs={documentURLs}
-                  enableRowSelections={enableRowSelections}
-                  groups={groupedData}
-                  hierarchyParentFieldName={hierarchyParentFieldName}
-                  viewType={viewType}
-                />
-              ) : shouldRenderGrid ? (
-                <DocumentGrid
-                  adminRoute={adminRoute}
-                  collectionLabel={collectionLabel}
-                  collectionSlug={collectionSlug}
-                  docs={docs}
-                  documentThumbnails={documentThumbnails}
-                  documentURLs={documentURLs}
-                  enableRowSelections={enableRowSelections}
-                  hierarchyParentFieldName={hierarchyParentFieldName}
-                  useAsThumbnail={collectionConfig.admin.useAsThumbnail}
-                  useAsTitle={collectionConfig.admin.useAsTitle}
-                  viewType={viewType}
-                />
-              ) : (
-                <RelationshipProvider prefetchedRelationships={prefetchedRelationships}>
-                  {Table}
-                </RelationshipProvider>
-              )
+              <RelationshipProvider prefetchedRelationships={prefetchedRelationships}>
+                {shouldRenderGrid && isDataGrouped ? (
+                  <GroupedDocumentGrid
+                    collectionSlug={collectionSlug}
+                    documentThumbnails={documentThumbnails}
+                    documentURLs={documentURLs}
+                    enableRowSelections={enableRowSelections}
+                    groups={groupedData}
+                    hierarchyParentFieldName={hierarchyParentFieldName}
+                    viewType={viewType}
+                  />
+                ) : shouldRenderGrid ? (
+                  <DocumentGrid
+                    adminRoute={adminRoute}
+                    collectionLabel={collectionLabel}
+                    collectionSlug={collectionSlug}
+                    docs={docs}
+                    documentThumbnails={documentThumbnails}
+                    documentURLs={documentURLs}
+                    enableRowSelections={enableRowSelections}
+                    hierarchyParentFieldName={hierarchyParentFieldName}
+                    useAsThumbnail={collectionConfig.admin.useAsThumbnail}
+                    useAsTitle={collectionConfig.admin.useAsTitle}
+                    viewType={viewType}
+                  />
+                ) : (
+                  Table
+                )}
+              </RelationshipProvider>
             ) : null}
             {/* HierarchyTable handles its own empty state, skip for hierarchy views */}
             {docs?.length === 0 &&
