@@ -688,6 +688,11 @@ describe('Trash', () => {
         await expect(page.locator('.step-nav.app-header__step-nav .step-nav__last')).toContainText(
           'Trashed Post',
         )
+        // That re-run also creates a new ResizeObserver, which measures once more on the next frame.
+        // Let it, so it doesn't measure the inflated measurer below before fonts finish loading.
+        await page.evaluate(
+          () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+        )
 
         await page.addStyleTag({ content: '.step-nav__measurer { padding-right: 5000px; }' })
         await expect(collapsedToggle).toBeHidden()
