@@ -4,13 +4,15 @@ import { rm, rmdir } from 'node:fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+// eslint-disable-next-line payload/no-relative-monorepo-imports -- Share the batch size used by the widget.
+import { DOCUMENTS_BATCH_SIZE } from '../../packages/ui/src/widgets/RecentlyViewed/recents.js'
 import { getSelectMenu, openSelectMenu, selectInput } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { DashboardHelper } from './utils.js'
+import { DashboardHelper, getDashboardLayoutShift, getExpectedRecentsGrid } from './utils.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -63,12 +65,14 @@ describe('Dashboard', () => {
     let release = () => {}
     let gate = Promise.resolve()
     let shouldFail = false
+    let documentRequests = 0
 
     await page.route('**/*', async (route) => {
       if (
         route.request().method() === 'POST' &&
         route.request().postData()?.includes('get-dashboard-documents')
       ) {
+        documentRequests++
         await gate
         if (shouldFail) {
           await route.abort('failed')
@@ -77,114 +81,113 @@ describe('Dashboard', () => {
       }
       await route.continue()
     })
+    const holdResponses = () => {
+      gate = new Promise<void>((resolve) => {
+        release = resolve
+      })
+    }
+
     for (const width of [320, 700, 1110, 1600]) {
-      await page.setViewportSize({ width, height: 900 })
+      await page.setViewportSize({ height: 900, width })
+      documentRequests = 0
       await page.goto(url.admin)
       const widget = page.locator('.recents-widget')
       const viewport = widget.locator('.recents-widget__viewport')
       const loading = widget.locator('.recents-widget__loading')
       const collections = page.locator('.collections__wrap')
-
-      await expect(viewport).toHaveAttribute('aria-busy', 'false')
-      await page.clock.pauseAt((await page.evaluate(() => Date.now())) + 100)
-      for (const action of ['tab', 'page'] as const) {
-        const before = await collections.boundingBox()
-
-        gate = new Promise<void>((resolve) => {
-          release = resolve
-        })
-        const button =
-          action === 'tab'
-            ? widget.getByRole('button', { name: 'Recently viewed', exact: true })
-            : widget.getByRole('button', { name: 'Next', exact: true })
-
-        await button.focus()
-        await button.press('Enter')
-        await expect(viewport).toHaveAttribute('aria-busy', 'true')
-        await expect(loading).toBeHidden()
-        await page.clock.runFor(179)
-        await expect(loading).toBeHidden()
-        await page.clock.runFor(1)
-        await expect(loading).toHaveText('Loading')
-        await expect(loading).toBeVisible()
-        await expect(widget.locator('.recents-widget__status')).toHaveAttribute(
-          'aria-live',
-          'polite',
-        )
-        await expect(widget.locator('.recents-widget__status')).toHaveText('Loading')
-        await expect(loading).toHaveAttribute('aria-hidden', 'true')
-        const loadingBox = await viewport.boundingBox()
-        const during = await collections.boundingBox()
-
-        release()
-        await expect(viewport).toHaveAttribute('aria-busy', 'false')
-        await expect(loading).toBeHidden()
-        await page.clock.runFor(20)
-        const loadedBox = await viewport.boundingBox()
-        const after = await collections.boundingBox()
-
-        expect(Math.abs(loadingBox!.height - loadedBox!.height)).toBeLessThanOrEqual(1)
-        expect(Math.abs(before!.y - during!.y)).toBeLessThanOrEqual(1)
-        expect(Math.abs(during!.y - after!.y)).toBeLessThanOrEqual(1)
-      }
-      // A response that completes before the delay must never flash the indicator.
-      gate = new Promise<void>((resolve) => {
-        release = resolve
-      })
       const pinned = widget.getByRole('button', { name: 'Pinned', exact: true })
+      const recents = widget.getByRole('button', { name: 'Recently viewed', exact: true })
+      const next = widget.getByRole('button', { name: 'Next', exact: true })
 
-      await pinned.focus()
-      await pinned.press('Enter')
-      await expect(viewport).toHaveAttribute('aria-busy', 'true')
-      release()
       await expect(viewport).toHaveAttribute('aria-busy', 'false')
-      await page.clock.runFor(200)
-      await expect(loading).toBeHidden()
+      await expect(widget.locator('.document-card__title').first()).toBeVisible()
+      expect(await getDashboardLayoutShift({ page })).toBe(0)
+      const pageSize = await viewport.evaluate((element) =>
+        Number(getComputedStyle(element).getPropertyValue('--recents-page-size')),
+      )
+      // Pages that end inside the server-rendered batch never fetch.
+      const serverRenderedPageCount = Math.floor(DOCUMENTS_BATCH_SIZE / pageSize)
+      const goToFirstFetchedPage = async () => {
+        for (let pageNumber = 1; pageNumber < serverRenderedPageCount; pageNumber++) {
+          await next.press('Enter')
+        }
+        await next.focus()
+        await next.press('Enter')
+      }
+
+      await page.clock.pauseAt(Math.max(Date.now(), await page.evaluate(() => Date.now())) + 100)
       const loadedPosition = await collections.boundingBox()
       const loadedHeight = (await widget.boundingBox())!.height
-      const recents = widget.getByRole('button', { name: 'Recently viewed', exact: true })
+      const expectStableHeight = async () => {
+        expect(Math.abs((await widget.boundingBox())!.height - loadedHeight)).toBeLessThanOrEqual(1)
+        expect(
+          Math.abs((await collections.boundingBox())!.y - loadedPosition!.y),
+        ).toBeLessThanOrEqual(1)
+      }
 
-      shouldFail = true
       await recents.focus()
       await recents.press('Enter')
+      await expect(recents).toHaveAttribute('aria-pressed', 'true')
+      await expect(viewport).toHaveAttribute('aria-busy', 'false')
+      await expect(widget.locator('.document-card__title').first()).toBeVisible()
+      expect(documentRequests).toBe(0)
+      await expectStableHeight()
+
+      shouldFail = true
+      await goToFirstFetchedPage()
       const retry = widget.getByRole('button', { name: 'Retry', exact: true })
 
       await expect(retry).toBeVisible()
       await expect(widget.locator('.recents-widget__error')).toContainText(
         'An unknown error has occurred.',
       )
-      expect(Math.abs((await widget.boundingBox())!.height - loadedHeight)).toBeLessThanOrEqual(1)
-      expect(
-        Math.abs((await collections.boundingBox())!.y - loadedPosition!.y),
-      ).toBeLessThanOrEqual(1)
+      await expectStableHeight()
+      // A response that completes before the delay must never flash the indicator.
       shouldFail = false
-      gate = new Promise<void>((resolve) => {
-        release = resolve
-      })
+      holdResponses()
       await retry.focus()
       await retry.press('Enter')
       await expect(recents).toBeFocused()
       await expect(viewport).toHaveAttribute('aria-busy', 'true')
-      await page.clock.runFor(180)
-      await expect(loading).toBeVisible()
-      expect(Math.abs((await widget.boundingBox())!.height - loadedHeight)).toBeLessThanOrEqual(1)
       release()
       await expect(viewport).toHaveAttribute('aria-busy', 'false')
+      await page.clock.runFor(200)
+      await expect(loading).toBeHidden()
       await expect(retry).toHaveCount(0)
       await expect(widget.locator('.document-card__title').first()).toBeVisible()
-      expect(Math.abs((await widget.boundingBox())!.height - loadedHeight)).toBeLessThanOrEqual(1)
+      await expectStableHeight()
+
+      await pinned.focus()
+      await pinned.press('Enter')
+      await expect(viewport).toHaveAttribute('aria-busy', 'false')
+      holdResponses()
+      await goToFirstFetchedPage()
+      await expect(viewport).toHaveAttribute('aria-busy', 'true')
+      await expect(loading).toBeHidden()
+      await page.clock.runFor(179)
+      await expect(loading).toBeHidden()
+      await page.clock.runFor(1)
+      await expect(loading).toHaveText('Loading')
+      await expect(loading).toBeVisible()
+      await expect(widget.locator('.recents-widget__status')).toHaveAttribute('aria-live', 'polite')
+      await expect(widget.locator('.recents-widget__status')).toHaveText('Loading')
+      await expect(loading).toHaveAttribute('aria-hidden', 'true')
+      await expectStableHeight()
+      release()
+      await expect(viewport).toHaveAttribute('aria-busy', 'false')
+      await expect(loading).toBeHidden()
+      await page.clock.runFor(20)
+      await expectStableHeight()
+      expect(documentRequests).toBe(3)
 
       await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
         data: { value: { items: [] } },
       })
-      await pinned.press('Enter')
-      await expect(viewport).toHaveAttribute('aria-busy', 'false')
+      await page.clock.resume()
+      await page.goto(url.admin)
       await recents.press('Enter')
       await expect(widget.locator('.recents-widget__empty-title')).toHaveText('No recent documents')
-      expect(Math.abs((await widget.boundingBox())!.height - loadedHeight)).toBeLessThanOrEqual(1)
-      expect(
-        Math.abs((await collections.boundingBox())!.y - loadedPosition!.y),
-      ).toBeLessThanOrEqual(1)
+      await expectStableHeight()
       await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
         data: {
           value: {
@@ -196,8 +199,105 @@ describe('Dashboard', () => {
           },
         },
       })
-      await page.clock.resume()
     }
+  })
+
+  test('should server-render the cards that fit each widget width', async ({ browser, page }) => {
+    test.setTimeout(TEST_TIMEOUT_LONG)
+    const tickets = (await (await page.request.get(`${serverURL}/api/tickets?limit=9`)).json()).docs
+    const response = await page.request.post(
+      `${serverURL}/api/payload-preferences/pinned-documents`,
+      {
+        data: {
+          value: { items: tickets.map(({ id }) => ({ id, collectionSlug: 'tickets' })) },
+        },
+      },
+    )
+
+    expect(response.ok()).toBe(true)
+    // Without JavaScript the page shows what the server rendered before hydration.
+    const serverRenderedContext = await browser.newContext({
+      javaScriptEnabled: false,
+      storageState: await page.context().storageState(),
+    })
+    const serverRenderedPage = await serverRenderedContext.newPage()
+    const widget = page.locator('.recents-widget')
+    const testedColumns = new Set<number>()
+
+    try {
+      for (const width of [375, 700, 900, 1000, 1110, 1200, 1300, 1400, 1500, 1600, 1700, 1920]) {
+        for (const target of [serverRenderedPage, page]) {
+          await target.setViewportSize({ height: 900, width })
+          await target.goto(url.admin)
+        }
+        const { columns, pageSize } = getExpectedRecentsGrid({
+          containerWidth: await widget.evaluate((element) => {
+            const style = getComputedStyle(element)
+
+            return [
+              'border-inline-start-width',
+              'border-inline-end-width',
+              'padding-inline-start',
+              'padding-inline-end',
+            ].reduce(
+              (contentWidth, property) =>
+                contentWidth - parseFloat(style.getPropertyValue(property)),
+              element.getBoundingClientRect().width,
+            )
+          }),
+        })
+
+        testedColumns.add(columns)
+        for (const target of [serverRenderedPage, page]) {
+          const targetWidget = target.locator('.recents-widget')
+          const visibleCards = targetWidget.locator('.recents-widget__item:visible')
+
+          await expect(visibleCards).toHaveCount(pageSize)
+          await expect(
+            targetWidget.locator('.recents-widget__items').getByRole('link'),
+          ).toHaveCount(pageSize)
+          await expect(targetWidget.locator('.recents-widget__page-status:visible')).toHaveText(
+            `1 of ${Math.ceil((tickets.length + 1) / pageSize)}`,
+          )
+          const rowTops = await visibleCards.evaluateAll((cards) =>
+            cards.map((card) => Math.round(card.getBoundingClientRect().top)),
+          )
+
+          expect(rowTops.filter((top) => top === rowTops[0])).toHaveLength(columns)
+        }
+        await expect(serverRenderedPage.locator('.recents-widget__item')).toHaveCount(
+          DOCUMENTS_BATCH_SIZE,
+        )
+        expect(await getDashboardLayoutShift({ page })).toBe(0)
+      }
+    } finally {
+      await serverRenderedContext.close()
+    }
+    expect([...testedColumns].sort((a, b) => a - b)).toEqual([2, 3, 4, 5, 6, 7, 8])
+
+    // The first card of the current page stays visible when the tier changes.
+    await page.setViewportSize({ height: 900, width: 1300 })
+    await page.goto(url.admin)
+    const pageSize = await widget
+      .locator('.recents-widget__viewport')
+      .evaluate((element) =>
+        Number(getComputedStyle(element).getPropertyValue('--recents-page-size')),
+      )
+
+    await widget.getByRole('button', { name: 'Next', exact: true }).click()
+    await expect(widget.locator('.recents-widget__page-status')).toHaveText(
+      `2 of ${Math.ceil((tickets.length + 1) / pageSize)}`,
+    )
+    await expect(widget.locator('.document-card__title').first()).toHaveText(
+      tickets[pageSize].title,
+    )
+    await page.setViewportSize({ height: 900, width: 375 })
+    const mobilePage = Math.floor(pageSize / 4) + 1
+
+    await expect(widget.locator('.recents-widget__page-status')).toHaveText(`${mobilePage} of 3`)
+    await expect(widget.locator('.document-card__title').first()).toHaveText(
+      tickets[(mobilePage - 1) * 4].title,
+    )
   })
 
   test('initial dashboard', async ({ page }) => {
