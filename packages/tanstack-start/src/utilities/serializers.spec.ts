@@ -17,7 +17,7 @@ describe('TanStack serializers', () => {
     }
   })
 
-  it('should preserve native serializable values in server function args', async () => {
+  it('should strip unsupported values while preserving native serializable values', async () => {
     const date = new Date()
     const regexp = /value/g
     const blob = new Blob(['file'])
@@ -36,6 +36,5 @@ describe('TanStack serializers', () => {
     expect(received).toEqual({ date, regexp })
     expect((received as typeof args).date).toBe(date)
     expect((received as typeof args).regexp).toBe(regexp)
-    expect((received as Partial<typeof args>).blob).toBeUndefined()
   })
 })
