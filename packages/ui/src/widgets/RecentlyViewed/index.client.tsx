@@ -91,6 +91,8 @@ export function RecentsAndPinnedClient({
   const previousPageRef = useRef<HTMLButtonElement>(null)
   const nextPageRef = useRef<HTMLButtonElement>(null)
   const requestIDRef = useRef(0)
+  const invalidatedTabsRef = useRef(new Set<DocumentsTab>())
+  const previousInitialPagesRef = useRef(initialPages)
   const [pageSize, setPageSize] = useState<null | number>(null)
   const [view, setView] = useState<View>({ offset: 0, tab: 'pinned' })
   const [documentsByTab, setDocumentsByTab] = useState<DocumentsByTab>(() =>
@@ -121,6 +123,23 @@ export function RecentsAndPinnedClient({
   }).length
   const hasAddPinCard = hasPinPlaceholder && items !== undefined && start + windowSize > totalDocs
   const isBusy = isLoading || items === undefined
+
+  useLayoutEffect(() => {
+    if (previousInitialPagesRef.current === initialPages) {
+      return
+    }
+
+    previousInitialPagesRef.current = initialPages
+    // A server refresh replaces the context and supersedes requests for the previous data.
+    requestIDRef.current++
+    invalidatedTabsRef.current.clear()
+    setDocumentsByTab(getInitialDocuments({ initialPages }))
+    setView((current) => ({ ...current, offset: 0 }))
+    setIsLoading(false)
+    setShouldShowLoading(false)
+    setLoadError('')
+    setSaveError('')
+  }, [initialPages])
 
   // A layout effect, so no click is handled with the full-batch fallback size after hydration.
   useLayoutEffect(() => {
@@ -157,6 +176,11 @@ export function RecentsAndPinnedClient({
     isReplacing?: boolean
     nextView: View
   }): Promise<TabDocuments | undefined> => {
+    if (isReplacing) {
+      invalidatedTabsRef.current.add(nextView.tab)
+    }
+    // Failed or superseded reloads must still bypass the cache on the next attempt.
+    const shouldReplace = invalidatedTabsRef.current.has(nextView.tab)
     const known = documentsByTab[nextView.tab]
     const { start: nextStart } = getPage({
       hasPinPlaceholder: nextView.tab === 'pinned' && canAddPin,
@@ -165,7 +189,7 @@ export function RecentsAndPinnedClient({
       totalDocs: known?.totalDocs ?? 0,
     })
     const missingBatches = getMissingBatches({
-      documents: isReplacing && known ? { ...known, batches: {} } : known,
+      documents: shouldReplace && known ? { ...known, batches: {} } : known,
       size: windowSize,
       start: nextStart,
     })
@@ -185,7 +209,11 @@ export function RecentsAndPinnedClient({
     }
     setIsLoading(true)
     setShouldShowLoading(false)
-    const loadingTimeout = setTimeout(() => setShouldShowLoading(true), 180)
+    const loadingTimeout = setTimeout(() => {
+      if (requestID === requestIDRef.current) {
+        setShouldShowLoading(true)
+      }
+    }, 180)
 
     try {
       const results = await Promise.all(
@@ -210,7 +238,7 @@ export function RecentsAndPinnedClient({
       const totalDocs = results[results.length - 1].totalDocs
       // Cached batches are only valid for the total they were loaded with.
       const batches =
-        isReplacing || !known || known.totalDocs !== totalDocs ? {} : { ...known.batches }
+        shouldReplace || !known || known.totalDocs !== totalDocs ? {} : { ...known.batches }
 
       for (const result of results) {
         // The server clamps out-of-range pages to the last one and reports the page it returned.
@@ -218,6 +246,7 @@ export function RecentsAndPinnedClient({
       }
       const documents: TabDocuments = { batches, totalDocs }
 
+      invalidatedTabsRef.current.delete(nextView.tab)
       setDocumentsByTab((current) => ({ ...current, [nextView.tab]: documents }))
       setView(nextView)
       setIsLoading(false)
