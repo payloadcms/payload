@@ -14,7 +14,15 @@ async function walk(
   cache: WeakMap<object, unknown>,
   ancestors: WeakSet<object>,
 ): Promise<unknown> {
-  if (value === null || value === undefined || typeof value !== 'object') {
+  if (value === null || value === undefined) {
+    return value
+  }
+
+  if (typeof value === 'function' || typeof value === 'symbol') {
+    return undefined
+  }
+
+  if (typeof value !== 'object') {
     return value
   }
 
@@ -24,7 +32,11 @@ async function walk(
     return await renderServerComponent(value as React.ReactElement)
   }
 
-  if (obj instanceof Date || obj instanceof RegExp || ArrayBuffer.isView(obj)) {
+  if (obj instanceof Date) {
+    return obj.constructor === Date ? value : new Date(obj.getTime())
+  }
+
+  if (obj instanceof RegExp || ArrayBuffer.isView(obj)) {
     return value
   }
 
@@ -88,7 +100,10 @@ async function walk(
   cache.set(obj, result)
 
   for (const key of Object.keys(obj)) {
-    setOwnProperty({ key, target: result, value: await walk(obj[key], cache, ancestors) })
+    const serialized = await walk(obj[key], cache, ancestors)
+    if (serialized !== undefined) {
+      setOwnProperty({ key, target: result, value: serialized })
+    }
   }
 
   ancestors.delete(obj)

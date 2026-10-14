@@ -1,5 +1,7 @@
 import type { Serializable, SerializableExtensions } from '@tanstack/react-router'
 
+import { stripUnserializable } from './stripUnserializable.js'
+
 /** A record with trusted RSC additions for TanStack's server-function transport. */
 export type SerializableRecord = Record<string, unknown> & SerializableExtensions['TsrSerializable']
 
@@ -12,15 +14,17 @@ export function toSerializable(
   additions: Record<string, Serializable>,
 ): SerializableRecord
 export function toSerializable(value: unknown, additions?: Record<string, Serializable>): unknown {
+  const serialized = stripUnserializable(value)
+
   if (additions) {
-    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    if (typeof serialized !== 'object' || serialized === null || Array.isArray(serialized)) {
       throw new TypeError('Serializable additions require an object source')
     }
 
-    const result = { ...value, ...additions } satisfies Record<string, unknown>
+    const result = { ...serialized, ...additions } satisfies Record<string, unknown>
 
     return result as SerializableRecord
   }
 
-  return value
+  return serialized
 }

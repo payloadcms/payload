@@ -1,5 +1,7 @@
 import type { ServerFunctionClient, ServerFunctionClientArgs } from 'payload'
 
+import { stripUnserializable } from './stripUnserializable.js'
+
 /**
  * Builds the client-side `ServerFunctionClient` wired into
  * `RootProvider.serverFunction`, given the app's `createServerFn`-based
@@ -15,6 +17,6 @@ export function createServerFunctionClient({
   runServerFn: (input: { data: ServerFunctionClientArgs }) => Promise<unknown>
 }): ServerFunctionClient {
   return (async (args: ServerFunctionClientArgs) => {
-    return await runServerFn({ data: args })
+    return await runServerFn({ data: stripUnserializable(args) as ServerFunctionClientArgs })
   }) as ServerFunctionClient
 }

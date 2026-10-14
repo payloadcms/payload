@@ -17,7 +17,7 @@ describe('TanStack serializers', () => {
     }
   })
 
-  it('should pass native serializable values to server functions unchanged', async () => {
+  it('should preserve native serializable values in server function args', async () => {
     const date = new Date()
     const regexp = /value/g
     const args = { date, regexp }
@@ -32,6 +32,8 @@ describe('TanStack serializers', () => {
 
     await serverFunction({ name: 'test', args })
 
-    expect(received).toBe(args)
+    expect(received).toEqual(args)
+    expect((received as typeof args).date).toBe(date)
+    expect((received as typeof args).regexp).toBe(regexp)
   })
 })
