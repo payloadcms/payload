@@ -440,7 +440,12 @@ export function RecentsAndPinnedClient({
           )
         })}
       </div>
-      <div aria-busy={isBusy} className="recents-widget__viewport" ref={viewportRef}>
+      <div
+        aria-busy={isBusy}
+        className="recents-widget__viewport"
+        data-item-count={totalDocs + Number(hasPinPlaceholder)}
+        ref={viewportRef}
+      >
         {loadError ? (
           <div className="recents-widget__error">
             <span>{loadError}</span>

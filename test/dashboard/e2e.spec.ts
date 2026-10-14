@@ -12,7 +12,12 @@ import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { DashboardHelper, getDashboardLayoutShift, getExpectedRecentsGrid } from './utils.js'
+import {
+  DashboardHelper,
+  getDashboardLayoutShift,
+  getExpectedRecentsGrid,
+  getRecentsContainerWidth,
+} from './utils.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -118,6 +123,7 @@ describe('Dashboard', () => {
       await page.clock.pauseAt(Math.max(Date.now(), await page.evaluate(() => Date.now())) + 100)
       const loadedPosition = await collections.boundingBox()
       const loadedHeight = (await widget.boundingBox())!.height
+      const cardHeight = (await widget.locator('.document-card').first().boundingBox())!.height
       const expectStableHeight = async () => {
         expect(Math.abs((await widget.boundingBox())!.height - loadedHeight)).toBeLessThanOrEqual(1)
         expect(
@@ -187,7 +193,12 @@ describe('Dashboard', () => {
       await page.goto(url.admin)
       await recents.press('Enter')
       await expect(widget.locator('.recents-widget__empty-title')).toHaveText('No recent documents')
-      await expectStableHeight()
+      // An empty tab only reserves one row of cards.
+      expect(
+        Math.abs(
+          (await widget.locator('.recents-widget__empty').boundingBox())!.height - cardHeight,
+        ),
+      ).toBeLessThanOrEqual(1)
       await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
         data: {
           value: {
@@ -231,20 +242,7 @@ describe('Dashboard', () => {
           await target.goto(url.admin)
         }
         const { columns, pageSize } = getExpectedRecentsGrid({
-          containerWidth: await widget.evaluate((element) => {
-            const style = getComputedStyle(element)
-
-            return [
-              'border-inline-start-width',
-              'border-inline-end-width',
-              'padding-inline-start',
-              'padding-inline-end',
-            ].reduce(
-              (contentWidth, property) =>
-                contentWidth - parseFloat(style.getPropertyValue(property)),
-              element.getBoundingClientRect().width,
-            )
-          }),
+          containerWidth: await getRecentsContainerWidth({ widget }),
         })
 
         testedColumns.add(columns)
@@ -298,6 +296,51 @@ describe('Dashboard', () => {
     await expect(widget.locator('.document-card__title').first()).toHaveText(
       tickets[(mobilePage - 1) * 4].title,
     )
+  })
+
+  test('should only reserve one row when every pinned card fits in it', async ({ page }) => {
+    const tickets = (await (await page.request.get(`${serverURL}/api/tickets?limit=2`)).json()).docs
+    const widget = page.locator('.recents-widget')
+    const viewport = widget.locator('.recents-widget__viewport')
+
+    for (const pinCount of [0, 1, 2]) {
+      const response = await page.request.post(
+        `${serverURL}/api/payload-preferences/pinned-documents`,
+        {
+          data: {
+            value: {
+              items: tickets
+                .slice(0, pinCount)
+                .map((ticket) => ({ id: ticket.id, collectionSlug: 'tickets' })),
+            },
+          },
+        },
+      )
+
+      expect(response.ok()).toBe(true)
+      for (const width of [375, 700]) {
+        await page.setViewportSize({ height: 900, width })
+        await page.goto(url.admin)
+        await expect(widget.locator('.recents-widget__item--add-pin')).toHaveCount(1)
+        const { columns } = getExpectedRecentsGrid({
+          containerWidth: await getRecentsContainerWidth({ widget }),
+        })
+        const cards = await widget
+          .locator('.recents-widget__item:visible')
+          .evaluateAll((items) => items.map((item) => item.getBoundingClientRect()))
+        const viewportBox = (await viewport.boundingBox())!
+        // Pinned cards plus the add-pin card.
+        const expectedRows = pinCount + 1 <= columns ? 1 : 2
+
+        expect(new Set(cards.map((card) => Math.round(card.top))).size).toBe(expectedRows)
+        expect(
+          Math.abs(
+            viewportBox.y + viewportBox.height - Math.max(...cards.map((card) => card.bottom)),
+          ),
+        ).toBeLessThanOrEqual(1)
+        expect(await getDashboardLayoutShift({ page })).toBe(0)
+      }
+    }
   })
 
   test('initial dashboard', async ({ page }) => {
