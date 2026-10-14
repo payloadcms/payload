@@ -6,11 +6,13 @@ Use this mode only when the user selects **Before and after** or explicitly requ
 
 Read the PR's actual base and head refs. For a stacked PR, **Before** is the parent PR branch, not necessarily `main`. Pin both revisions while recording so a moving branch does not change the comparison midway. If the intended baseline is unclear, ask which revision should be Before.
 
-Use separate checkouts for the pinned revisions. Preserve existing worktrees and uncommitted changes. Run the same relevant Payload test suite in both, with separate ports and databases. Use the `payload-dev-isolated` skill when available for environment allocation and verification; a different port or checkout alone does not isolate data. Keep credentials and database URLs out of the recordings and manifests.
+Use separate checkouts for the pinned revisions. Preserve existing worktrees and uncommitted changes. Run the same relevant Payload test suite in both, with separate ports and databases. Use the `payload-dev-isolated` skill when available for environment allocation and verification; a different port or checkout alone does not isolate data.
+
+Create or reuse an ignored `.env.local` in **each** checkout. Give each file its own `PORT` and `MONGODB_URL`, with a different database name in the URL path; set `PAYLOAD_DATABASE=mongodb` and `PAYLOAD_DROP_DATABASE=false`. The dev runner loads `.env.local` from its checkout. Preserve any existing local settings, verify the effective adapter, database name, and bound port before recording, and never commit or display the env files. Keep credentials and database URLs out of recordings and manifests.
 
 ## Record comparable stories
 
-Plan the same reviewer question, fixture data, viewport, and starting state for both videos. Each checkout must prepare its own fixture and clean it up. Run both scenarios against their respective servers, using `--base-url` and identical `--viewport` values. The recorder can run from the newer checkout against either server; the baseline checkout does not need the latest recording scripts.
+Plan the same reviewer question, fixture data, viewport, and starting state for both videos. Each checkout must prepare its own fixture and clean it up. The two dev servers may stay running concurrently, but record the videos **sequentially**. Run each scenario against its own server, using `--base-url` and identical `--viewport` values. The recorder can run from the newer checkout against either server; the baseline checkout does not need the latest recording scripts.
 
 Reuse one scenario when the interface supports the same actions. When selectors, navigation, or interactions differ, write separate `/tmp` scenarios for Before and After that demonstrate the same user intent. Each scenario calls `ready()` after its own opening UI is visible and before the first recorded interaction. Assert the relevant end state in each. Do not force a baseline failure into a successful flow; show the pre-change behavior honestly.
 
