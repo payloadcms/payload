@@ -37,9 +37,10 @@ export function stripUnserializable(
   ancestors.add(value)
 
   const result: Record<string, unknown> | unknown[] = Array.isArray(value) ? [] : {}
+  const source = value as Record<string, unknown>
 
-  for (const key of Object.keys(value)) {
-    const serialized = stripUnserializable(value[key], ancestors)
+  for (const key of Object.keys(source)) {
+    const serialized = stripUnserializable(source[key], ancestors)
     if (Array.isArray(result)) {
       result.push(serialized)
     } else if (serialized !== undefined) {
