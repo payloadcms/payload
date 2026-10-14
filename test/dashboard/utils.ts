@@ -322,6 +322,51 @@ export class DashboardHelper {
   }
 }
 
+/** The grid the Recents and Pinned widget container queries produce for a container width. */
+export function getExpectedRecentsGrid({ containerWidth }: { containerWidth: number }): {
+  columns: number
+  pageSize: number
+} {
+  if (containerWidth < 600) {
+    return { columns: 2, pageSize: 4 }
+  }
+  if (containerWidth < 800) {
+    return { columns: 3, pageSize: 6 }
+  }
+  const columns = 4 + [964, 1160, 1356, 1552].filter((width) => containerWidth >= width).length
+
+  return { columns, pageSize: columns }
+}
+
+/** Sums the layout shifts since navigation that moved the Recents and Pinned widget or the content below it. */
+export function getDashboardLayoutShift({ page }: { page: Page }): Promise<number> {
+  return page.evaluate(
+    () =>
+      new Promise<number>((resolve) => {
+        let total = 0
+
+        new PerformanceObserver((list) => {
+          for (const entry of list.getEntries() as unknown as Array<{
+            sources: Array<{ node: Node | null }>
+            value: number
+          }>) {
+            const isDashboardShift = entry.sources.some(({ node }) =>
+              (node instanceof Element ? node : node?.parentElement)?.closest(
+                '.recents-widget, .collections__wrap',
+              ),
+            )
+
+            if (isDashboardShift) {
+              total += entry.value
+            }
+          }
+        }).observe({ type: 'layout-shift', buffered: true })
+        // Buffered entries are delivered in the next observer callback, if there are any.
+        setTimeout(() => resolve(total), 100)
+      }),
+  )
+}
+
 // utility function to move an item in an array
 // from and to are 1-based positions (not 0-based indices)
 function moveArrayItem<T>(
