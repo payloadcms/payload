@@ -50,4 +50,19 @@ describe('TanStack serializers', () => {
     expect(Object.hasOwn(result, '1')).toBe(false)
     expect(result[2]).toBe('last')
   })
+
+  it('should strip unsupported values from maps and sets', () => {
+    const input = {
+      map: new Map<string, unknown>([
+        ['valid', 'value'],
+        ['callback', () => undefined],
+      ]),
+      set: new Set<unknown>(['valid', () => undefined]),
+    }
+
+    const result = stripUnserializable(input) as typeof input
+
+    expect(result.map).toEqual(new Map([['valid', 'value']]))
+    expect(result.set).toEqual(new Set(['valid']))
+  })
 })

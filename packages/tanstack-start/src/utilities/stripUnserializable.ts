@@ -31,6 +31,42 @@ export function stripUnserializable(
     return undefined
   }
 
+  if (value instanceof Map || value instanceof Set) {
+    if (ancestors.has(value)) {
+      return undefined
+    }
+
+    ancestors.add(value)
+
+    if (value instanceof Map) {
+      const result = new Map()
+
+      for (const [key, item] of value) {
+        const serializedKey = stripUnserializable(key, ancestors)
+        const serializedItem = stripUnserializable(item, ancestors)
+
+        if (serializedKey !== undefined && serializedItem !== undefined) {
+          result.set(serializedKey, serializedItem)
+        }
+      }
+
+      ancestors.delete(value)
+      return result
+    }
+
+    const result = new Set()
+
+    for (const item of value) {
+      const serialized = stripUnserializable(item, ancestors)
+      if (serialized !== undefined) {
+        result.add(serialized)
+      }
+    }
+
+    ancestors.delete(value)
+    return result
+  }
+
   if (!Array.isArray(value) && !isPlainRecord(value)) {
     return value
   }
