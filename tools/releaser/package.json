@@ -50,6 +50,7 @@
   "devDependencies": {
     "@types/minimist": "1.2.5",
     "@types/prompts": "^2.4.5",
-    "@types/semver": "^7.5.3"
+    "@types/semver": "^7.5.3",
+    "npm": "11.21.0"
   }
 }
