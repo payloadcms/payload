@@ -41,7 +41,10 @@ export { QueryPresetsWhereField } from '../../elements/QueryPresets/fields/Where
 export { QueryPresetsGroupByField } from '../../elements/QueryPresets/fields/GroupByField/index.js'
 export { CollectionCardsClient } from '../../widgets/CollectionCards/index.client.js'
 export { CollectionQuerySortField } from '../../widgets/CollectionQuery/SortField/index.js'
-export { RecentlyViewedCollectionsField } from '../../widgets/Activity/Tabs/RecentDocuments/CollectionsField/index.js'
+export {
+  CollectionFilter,
+  CollectionFilter as RecentlyViewedCollectionsField,
+} from '../../widgets/Components/CollectionFilter/index.js'
 export { UploadDropzoneCollectionsField } from '../../widgets/UploadDropzone/CollectionsField/index.js'
 export { UploadDropzoneWidgetClient } from '../../widgets/UploadDropzone/index.client.js'
 export { QueryPresetsHeading } from '../../elements/QueryPresets/fields/Heading/index.js'

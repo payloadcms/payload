@@ -1189,7 +1189,7 @@ describe('Dashboard', () => {
     const drawer = page.locator('.drawer__content:visible')
     await expect(drawer).toBeVisible()
 
-    const collectionsField = drawer.locator('.recently-viewed-collections-field')
+    const collectionsField = drawer.locator('.collection-filter')
     await expect(collectionsField).toBeVisible()
     await expect(collectionsField).toHaveAccessibleDescription('Filter Recently viewed only.')
     await expect(collectionsField.locator('.field-description')).toHaveText(
@@ -1205,7 +1205,7 @@ describe('Dashboard', () => {
     await expect(collectionsField.locator('.checkbox-input--checked')).toHaveCount(checkboxCount)
 
     // Unchecking "Tickets" adds it to the stored exclusion list.
-    const ticketsOption = collectionsField.locator('.recently-viewed-collections-field__option', {
+    const ticketsOption = collectionsField.locator('.collection-filter__option', {
       hasText: 'Tickets',
     })
     await expect(ticketsOption.locator('input[type="checkbox"]')).toBeEnabled()
@@ -1466,7 +1466,7 @@ describe('Dashboard', () => {
     await widget.locator('.widget-wrapper__edit-btn').click()
 
     const drawer = page.locator('.drawer__content:visible')
-    const collectionsField = drawer.locator('.recently-viewed-collections-field')
+    const collectionsField = drawer.locator('.collection-filter')
     await collectionsField.getByRole('checkbox', { name: 'Media', exact: true }).uncheck()
     await expect(
       collectionsField.getByRole('checkbox', { name: 'Media Alts', exact: true }),

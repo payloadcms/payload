@@ -4,15 +4,15 @@ import type { Option, OptionObject, SelectFieldClientProps } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useId, useMemo } from 'react'
 
-import { RenderCustomComponent } from '../../../../../elements/RenderCustomComponent/index.js'
-import { CheckboxInput } from '../../../../../fields/Checkbox/Input.js'
-import { FieldDescription } from '../../../../../fields/FieldDescription/index.js'
-import { FieldLabel } from '../../../../../fields/FieldLabel/index.js'
-import { useField } from '../../../../../forms/useField/index.js'
-import { useTranslation } from '../../../../../providers/Translation/index.js'
+import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
+import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
+import { FieldDescription } from '../../../fields/FieldDescription/index.js'
+import { FieldLabel } from '../../../fields/FieldLabel/index.js'
+import { useField } from '../../../forms/useField/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 import './index.css'
 
-const baseClass = 'recently-viewed-collections-field'
+const baseClass = 'collection-filter'
 
 const normalizeOption = (option: Option): OptionObject =>
   typeof option === 'string' ? { label: option, value: option } : option
@@ -23,7 +23,7 @@ const normalizeOption = (option: Option): OptionObject =>
  * default and unchecking one adds it to the stored exclusions. Storing exclusions means collections
  * added later are visible by default.
  */
-export const RecentlyViewedCollectionsField: React.FC<SelectFieldClientProps> = ({
+export const CollectionFilter: React.FC<SelectFieldClientProps> = ({
   field,
   path: pathFromProps,
   readOnly,
