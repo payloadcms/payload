@@ -1,6 +1,6 @@
-import type { DocumentsPage } from '../types.js'
+import type { DocumentsPage } from '../../types.js'
 
-import { useDocuments } from '../utils/useDocuments.js'
+import { useDocuments } from '../../utils/useDocuments.js'
 
 export type RecentDocumentsController = ReturnType<typeof useRecentDocuments>
 

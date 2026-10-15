@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
-import type { DocumentReference, DocumentsPage } from '../types.js'
+import type { DocumentReference, DocumentsPage } from '../../types.js'
 
-import { useDocuments } from '../utils/useDocuments.js'
+import { useDocuments } from '../../utils/useDocuments.js'
 import { updatePinnedPreferences } from './preferences.js'
 
 export type PinnedDocumentsController = ReturnType<typeof usePinnedDocuments>

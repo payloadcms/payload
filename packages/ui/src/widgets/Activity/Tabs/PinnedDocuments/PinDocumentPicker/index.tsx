@@ -4,13 +4,13 @@ import type { FilterOptionsResult } from 'payload'
 
 import React, { useId, useMemo, useState } from 'react'
 
-import type { ListDrawerProps } from '../../../../elements/ListDrawer/types.js'
-import type { DocumentReference } from '../../types.js'
+import type { ListDrawerProps } from '../../../../../elements/ListDrawer/types.js'
+import type { DocumentReference } from '../../../types.js'
 
-import { Button } from '../../../../elements/Button/index.js'
-import { useListDrawer } from '../../../../elements/ListDrawer/index.js'
-import { PinIcon } from '../../../../icons/Pin/index.js'
-import { EmptyState } from '../../Components/EmptyState/index.js'
+import { Button } from '../../../../../elements/Button/index.js'
+import { useListDrawer } from '../../../../../elements/ListDrawer/index.js'
+import { PinIcon } from '../../../../../icons/Pin/index.js'
+import { EmptyState } from '../../../Components/EmptyState/index.js'
 import { readPinnedPreferences } from '../preferences.js'
 import './index.css'
 
