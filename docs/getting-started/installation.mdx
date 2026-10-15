@@ -110,9 +110,9 @@ To install a Database Adapter, you can run **one** of the following commands:
   available.
 </Banner>
 
-#### 2. Copy Payload files into your Next.js app folder
+#### 2. Copy Payload files into your app
 
-Payload installs directly in your Next.js `/app` folder, and you'll need to place some files into that folder for Payload to run. You can copy these files from the [Blank Template](https://github.com/payloadcms/payload/tree/main/templates/blank/src/app/%28payload%29) on GitHub. Once you have the required Payload files in place in your `/app` folder, you should have something like this:
+For Next.js, Payload installs directly in your `/app` folder, and you'll need to place some files into that folder for Payload to run. You can copy these files from the [Blank Template](https://github.com/payloadcms/payload/tree/main/templates/blank/src/app/%28payload%29) on GitHub. Once you have the required Payload files in place in your `/app` folder, you should have something like this:
 
 ```plaintext
 app/
@@ -131,7 +131,24 @@ _For an exact reference of the `(payload)` directory, see [Project Structure](..
   i.e. `(my-app)`.
 </Banner>
 
-The files that Payload needs to have in your `/app` folder do not regenerate, and will never change. Once you slot them in, you never have to revisit them. They are not meant to be edited and simply import Payload dependencies from `@payloadcms/next` for the REST / GraphQL API and Admin Panel.
+For TanStack Start, copy the generated routes and supporting files from the [Blank TanStack Start Template](https://github.com/payloadcms/payload/tree/main/templates/blank-tanstack/src/app) into your `src/app` directory. The files are `__root.tsx`, `_payload.tsx`, the `_payload/` route directory, and `router.tsx` at `src/router.tsx`:
+
+```plaintext
+src/
+├─ router.tsx
+└─ app/
+  ├─ __root.tsx
+  ├─ _payload.tsx
+  └─ _payload/
+```
+
+The Next.js files that Payload needs in your `/app` folder do not regenerate and
+will never change. Once you slot them in, you never have to revisit them. They
+are not meant to be edited and simply import Payload dependencies from
+`@payloadcms/next` for the REST / GraphQL API and Admin Panel.
+
+The corresponding TanStack Start files import from `@payloadcms/tanstack-start`
+and `@payloadcms/tanstack-start/client`.
 
 You can name the `(my-app)` folder anything you want. The name does not matter and will just be used to clarify your directory structure for yourself. Common names might be `(frontend)`, `(app)`, or similar. [More details](../admin/overview).
 
@@ -170,10 +187,12 @@ In either case, all `require`s and `export`s in your `next.config` file will nee
 
 <Banner type="info">
   **TanStack Start:** there is no `next.config` step. TanStack Start builds with
-  [Vite](https://vite.dev), so Payload integrates through the `payloadPlugin`
-  Vite plugin exported from `@payloadcms/tanstack-start/vite`, which wraps the
-  `tanstackStart`, React, and RSC Vite plugins. Add it to your `vite.config`
-  instead of wrapping a Next.js config.
+  [Vite](https://vite.dev), so use `withPayload` from
+  `@payloadcms/tanstack-start` in your `vite.config`. Pass it a
+  `payloadConfigPath` and provide the `rsc`, `tanstackStart`, and `viteReact`
+  plugins through its `pluginOptions`. See the [Blank TanStack Start
+  Template](https://github.com/payloadcms/payload/blob/main/templates/blank-tanstack/vite.config.ts)
+  for a complete example.
 </Banner>
 
 #### 4. Create a Payload Config and add it to your TypeScript config
@@ -223,6 +242,10 @@ Once you have a Payload Config, update your `tsconfig` to include a `path` that 
   }
 }
 ```
+
+When using TanStack Start, the `payloadConfigPath` passed to `withPayload` in
+`vite.config.ts` must point to the same config file as this `@payload-config`
+TypeScript alias.
 
 #### 5. Fire it up!
 

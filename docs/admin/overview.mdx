@@ -97,7 +97,7 @@ Payload integrates with TanStack Start through a small set of helpers exported f
 
 The `_payload` directory contains the routes that power the Admin Panel: `admin.$.tsx` and `admin.index.tsx` are the _pages_ of the interface itself, `api.$.ts` mounts the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview) via `payloadApiHandlers`, and `server.functions.ts` defines the [server functions](https://tanstack.com/start/latest/docs/framework/react/server-functions) that load [React Server Components](https://react.dev/reference/rsc/server-components) and dispatch Payload's server actions — the TanStack Start equivalent of Next.js route handlers.
 
-`router.tsx` and `routeTree.gen.ts`, alongside `app`, are where the TanStack Router is created and regenerated. Payload's list-view `where` filter is serialized with `qs` bracket notation, so the router must parse and stringify search params with `qs` to keep the nested query intact across navigations; `routeTree.gen.ts` is regenerated automatically by the TanStack Router Vite plugin and should not be edited by hand.
+`router.tsx` and `routeTree.gen.ts`, alongside `app`, are where the TanStack Router is created and regenerated. Payload's list-view `where` filter is serialized with `qs` bracket notation, so the router must use `payloadParseSearch` and `payloadStringifySearch` from `@payloadcms/tanstack-start/shared` to keep the nested query intact across navigations; `routeTree.gen.ts` is regenerated automatically by the TanStack Router Vite plugin and should not be edited by hand.
 
 ### Shared Behavior
 
