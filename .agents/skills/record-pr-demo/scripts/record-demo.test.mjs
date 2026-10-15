@@ -133,11 +133,13 @@ test('should expose annotation helpers to recording scenarios', async () => {
         })
         await expect(page.locator('[data-pr-demo-annotation="floating"]')).toContainText('The feature works.')
         await showAnnotation({
-          type: 'banner',
-          sections: [{ title: 'Result', figure: '28 ms' }],
+          type: 'floating',
+          title: 'Result',
+          body: 'The second note replaces the first.',
+          position: { bottom: 24, left: 24 },
         })
-        await expect(page.locator('[data-pr-demo-annotation="floating"]')).toHaveCount(0)
-        await expect(page.locator('[data-pr-demo-annotation="banner"]')).toContainText('28 ms')
+        await expect(page.locator('[data-pr-demo-annotation="floating"]')).toHaveCount(1)
+        await expect(page.locator('[data-pr-demo-annotation="floating"]')).toContainText('The second note replaces the first.')
         await hideAnnotation()
         await expect(page.locator('[data-pr-demo-annotation]')).toHaveCount(0)
       }`,
@@ -146,39 +148,6 @@ test('should expose annotation helpers to recording scenarios', async () => {
     await recorder.validateDemo({
       baseURL: 'http://localhost:3000',
       label: 'annotation-scenario-test',
-      scenario,
-      viewport: { height: 480, width: 640 },
-    })
-  } finally {
-    await rm(directory, { force: true, recursive: true })
-  }
-})
-
-test('should expose an optional timer to recording scenarios', async () => {
-  const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-timer-scenario-test-'))
-  const scenario = path.join(directory, 'scenario.mjs')
-
-  try {
-    await writeFile(
-      scenario,
-      `export default async function scenario({ expect, hideTimer, page, showAnnotation, startTimer, stopTimer }) {
-        await page.route('http://timer.test/**', (route) => route.fulfill({ body: '<main>Ready</main>', contentType: 'text/html' }))
-        await page.goto('http://timer.test/first')
-        await showAnnotation({ type: 'banner', title: 'Result', body: 'Loading' })
-        await startTimer({ label: 'Page ready' })
-        await expect(page.locator('.pr-demo-annotation-timer')).toContainText('Page ready')
-        await page.goto('http://timer.test/second')
-        await showAnnotation({ type: 'banner', title: 'Result', body: 'Ready' })
-        const elapsedMilliseconds = await stopTimer()
-        if (elapsedMilliseconds < 0) throw new Error('Timer returned a negative duration')
-        await hideTimer()
-        await expect(page.locator('.pr-demo-annotation-timer')).toHaveCount(0)
-      }`,
-    )
-
-    await recorder.validateDemo({
-      baseURL: 'http://localhost:3000',
-      label: 'timer-scenario-test',
       scenario,
       viewport: { height: 480, width: 640 },
     })

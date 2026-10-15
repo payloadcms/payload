@@ -5,7 +5,7 @@ import { chromium } from '@playwright/test'
 
 import { createAnnotationInteraction } from './annotation-demo.mjs'
 
-test('should render reusable floating and banner annotations without changing focus', async () => {
+test('should replace floating annotations without changing focus', async () => {
   const browser = await chromium.launch({ headless: true })
   const page = await browser.newPage({ viewport: { height: 720, width: 1280 } })
 
@@ -19,9 +19,6 @@ test('should render reusable floating and banner annotations without changing fo
         --color-border: #ddd;
         --stroke-width-small: 1px;
         --radius-medium: 5px;
-        --spacer-2-5: 12px;
-        --spacer-3: 16px;
-        --spacer-4: 24px;
         --elevation-300-tooltip: 0 5px 12px rgb(0 0 0 / 13%);
       }
     </style><input aria-label="Demo input">`)
@@ -64,60 +61,18 @@ test('should render reusable floating and banner annotations without changing fo
       'Demo input',
     )
 
-    await showAnnotation({ body: 'A single result', title: 'Summary', type: 'banner' })
-    assert.equal(await page.locator('.pr-demo-annotation-section').count(), 1)
-    assert.equal(
-      await page
-        .locator('.pr-demo-annotation-section')
-        .evaluate((element) => getComputedStyle(element).borderInlineStartWidth),
-      '0px',
-    )
-
     await showAnnotation({
-      sections: [
-        { body: '1,260 rich text fields', title: 'PR benchmark' },
-        { figure: '93% faster', title: 'Result' },
-      ],
-      type: 'banner',
+      body: 'A second note replaces the first.',
+      position: { bottom: 24, left: 24 },
+      title: 'Result',
+      type: 'floating',
     })
-
-    const banner = page.locator('[data-pr-demo-annotation="banner"]')
-    assert.equal(await floating.count(), 0)
-    assert.equal(await banner.locator('.pr-demo-annotation-section').count(), 2)
-    assert.equal(await banner.evaluate((element) => element.matches(':popover-open')), true)
+    assert.equal(await floating.count(), 1)
     assert.equal(
-      await banner
-        .locator('.pr-demo-annotation-title')
-        .first()
-        .evaluate((element) => getComputedStyle(element).fontSize),
-      '12px',
+      await floating.locator('.pr-demo-annotation-body').textContent(),
+      'A second note replaces the first.',
     )
-    assert.equal(
-      await banner
-        .locator('.pr-demo-annotation-body')
-        .evaluate((element) => getComputedStyle(element).fontSize),
-      '16px',
-    )
-    assert.deepEqual(
-      await banner.evaluate((element) => {
-        const rect = element.getBoundingClientRect()
-        return { left: rect.left, right: rect.right }
-      }),
-      { left: 0, right: 1280 },
-    )
-    assert.equal(
-      await banner
-        .locator('.pr-demo-annotation-figure')
-        .evaluate((element) => getComputedStyle(element).fontSize),
-      '16px',
-    )
-    assert.equal(
-      await banner
-        .locator('.pr-demo-annotation-section')
-        .nth(1)
-        .evaluate((element) => getComputedStyle(element).borderInlineStartWidth),
-      '1px',
-    )
+    assert.equal(await floating.evaluate((element) => getComputedStyle(element).bottom), '24px')
     assert.equal(
       await page.evaluate(() => document.activeElement?.getAttribute('aria-label')),
       'Demo input',
@@ -138,10 +93,5 @@ test('should reject incomplete annotation inputs before changing the page', asyn
     showAnnotation({ type: 'floating', body: 'Missing position' }),
     /require body text and a position/,
   )
-  await assert.rejects(showAnnotation({ type: 'banner', sections: [] }), /non-empty array/)
-  await assert.rejects(showAnnotation({ type: 'banner' }), /needs a title, body, or figure/)
-  await assert.rejects(
-    showAnnotation({ type: 'banner', sections: [{}] }),
-    /needs a title, body, or figure/,
-  )
+  await assert.rejects(showAnnotation({ type: 'unsupported' }), /type must be floating/)
 })
