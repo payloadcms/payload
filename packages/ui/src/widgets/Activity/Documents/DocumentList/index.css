@@ -34,29 +34,6 @@
     grid-column: 1 / -1;
   }
 
-  .activity-widget__status-pill {
-    position: absolute;
-    inset-block-start: var(--spacer-3);
-    inset-inline-start: var(--spacer-3);
-    padding-inline: var(--spacer-1);
-    border-radius: var(--radius-medium);
-    background: var(--color-bg-brand-secondary);
-    color: var(--color-text-onbrand);
-    font-family: var(--text-body-medium-font-family);
-    font-size: var(--text-body-medium-font-size);
-    line-height: var(--text-body-medium-line-height);
-  }
-
-  .activity-widget__status-pill--draft {
-    background: var(--color-bg-tertiary);
-    color: var(--color-text);
-  }
-
-  .activity-widget__status-pill--changed {
-    background: var(--color-bg-warning);
-    color: var(--color-text-onwarning);
-  }
-
   .activity-widget__meta {
     color: var(--activity-text-secondary);
     font-family: var(--text-body-medium-font-family);

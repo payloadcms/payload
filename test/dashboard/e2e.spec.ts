@@ -1146,7 +1146,7 @@ describe('Dashboard', () => {
     ).toHaveCount(2)
     await expect(widget.getByRole('button', { name: 'Recent drafts', exact: true })).toHaveCount(0)
     await expect(widget.locator('.document-card__title')).toHaveText('Widget draft')
-    await expect(widget.locator('.activity-widget__status-pill')).toHaveText('Draft')
+    await expect(widget.locator('.activity-status-pill')).toHaveText('Draft')
     await widget.getByRole('link', { name: /Widget draft/ }).click()
     await expect(page.locator('#field-title')).toHaveValue('Widget draft')
   })

@@ -6,6 +6,7 @@ import { CardGrid } from '../../../../elements/CardGrid/index.js'
 import { DocumentCard } from '../../../../elements/DocumentCard/index.js'
 import { DocumentIcon } from '../../../../icons/Document/index.js'
 import { PAGE_SIZES } from '../constants.js'
+import { StatusPill } from '../StatusPill/index.js'
 import { documentKey } from '../utilities.js'
 import './index.css'
 
@@ -61,13 +62,11 @@ export function DocumentList({
                   </>
                 ) : null}
               </div>
-              {item.statusLabel ? (
-                <span
-                  className={`activity-widget__status-pill${item.isDraft ? ' activity-widget__status-pill--draft' : item.isChanged ? ' activity-widget__status-pill--changed' : ''}`}
-                >
-                  {item.statusLabel}
-                </span>
-              ) : null}
+              <StatusPill
+                isChanged={item.isChanged}
+                isDraft={item.isDraft}
+                label={item.statusLabel}
+              />
               {renderActions?.({ item })}
             </DocumentCard>
           ) : (

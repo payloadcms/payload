@@ -880,7 +880,7 @@ test.describe('WCAG 2.2 Level AA', () => {
           selectors: [
             '.activity-widget__tab',
             '.activity-widget__meta',
-            '.activity-widget__status-pill',
+            '.activity-status-pill',
             '.activity-widget__pagination button:not(:disabled)',
             '.activity-widget__pagination span',
           ],
