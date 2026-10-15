@@ -364,6 +364,28 @@ describe('generateFileData', () => {
       expect(result.files).toHaveLength(1)
     })
 
+    it('should keep a zero focal point override over the source document', async () => {
+      const result = await generateFileData({
+        collection: createCollection({ disableLocalStorage: false, focalPoint: true, staticDir }),
+        config: {} as SanitizedConfig,
+        data: { focalX: 0, focalY: 0 },
+        isDuplicating: true,
+        operation: 'create',
+        originalDoc: {
+          filename: 'source.png',
+          filesize: PNG_SIGNATURE.length,
+          focalX: 30,
+          focalY: 70,
+          mimeType: 'image/png',
+          url: '/api/media/file/source.png',
+        },
+        overwriteExistingFiles: false,
+        req: createDuplicateReq(),
+      })
+
+      expect(result.data).toMatchObject({ focalX: 0, focalY: 0 })
+    })
+
     it('should keep data overrides when the source document has no file', async () => {
       const result = await generateFileData({
         collection: createCollection({ disableLocalStorage: false, staticDir }),

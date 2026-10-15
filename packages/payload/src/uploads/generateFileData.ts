@@ -810,8 +810,8 @@ function parseUploadEditsFromReqOrIncomingData(args: {
 
     if (isDuplicating) {
       uploadEdits.focalPoint = {
-        x: incomingData?.focalX || origDoc.focalX!,
-        y: incomingData?.focalY || origDoc.focalY!,
+        x: incomingData?.focalX ?? origDoc.focalX!,
+        y: incomingData?.focalY ?? origDoc.focalY!,
       }
       return uploadEdits
     }
