@@ -116,7 +116,12 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const { config } = useConfig()
 
-  const [disabled, setDisabled] = useState(disabledFromProps || false)
+  const [disabled, _setDisabled] = useState(disabledFromProps || false)
+  const disabledRef = useRef(disabled)
+  const setDisabled = useCallback((disabled: boolean) => {
+    disabledRef.current = disabled
+    _setDisabled(disabled)
+  }, [])
   const disabledFromPropsRef = useRef(Boolean(disabledFromProps))
   disabledFromPropsRef.current = Boolean(disabledFromProps)
   const [isMounted, setIsMounted] = useState(false)
@@ -148,7 +153,7 @@ export const Form: React.FC<FormProps> = (props) => {
     setBackgroundProcessing(false)
     setProcessing(false)
     setDisabled(disabledFromPropsRef.current)
-  }, [setBackgroundProcessing])
+  }, [setBackgroundProcessing, setDisabled])
 
   const [modified, _setModified] = useState(false)
   const formSequenceRef = useRef(0)
@@ -167,6 +172,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const abortResetFormRef = useRef<AbortController>(null)
   const resetSequenceRef = useRef(0)
   const onChangeSequenceRef = useRef(0)
+  const latestExplicitSubmitRef = useRef<Promise<boolean> | undefined>(undefined)
   const submissionErrorsRef = useRef<{ fields: FormState; isCurrent: () => boolean } | undefined>(
     undefined,
   )
@@ -292,7 +298,15 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const executeSubmit = useCallback(
-    async (options: SubmitOptions | undefined, requestContext: QueueContext) => {
+    async ({
+      onResponse,
+      options,
+      requestContext,
+    }: {
+      onResponse: (args: { res: Response }) => void
+      options: SubmitOptions | undefined
+      requestContext: QueueContext
+    }) => {
       const {
         acceptValues = true,
         action: actionArg = action,
@@ -481,6 +495,8 @@ export const Form: React.FC<FormProps> = (props) => {
         } else if (typeof action === 'function') {
           res = await action(formData)
         }
+
+        onResponse({ res })
 
         if (typeof handleResponse === 'function') {
           if (requestContext.isCurrent()) {
@@ -689,6 +705,7 @@ export const Form: React.FC<FormProps> = (props) => {
       redirect,
       router,
       setBackgroundProcessing,
+      setDisabled,
       t,
       i18n,
       validateDrafts,
@@ -703,18 +720,60 @@ export const Form: React.FC<FormProps> = (props) => {
     async (options, event) => {
       event?.stopPropagation()
       event?.preventDefault()
-      if (disabled) {
+      if (disabledRef.current) {
         return
       }
 
-      const result = await scheduleRequest({
+      const resetSequence = resetSequenceRef.current
+      let didReceiveSuccessfulResponse = false
+      const scheduledRequest = scheduleRequest({
         priority: requestPriority[options?.requestIntent ?? 'submit'],
-        run: (requestContext) => executeSubmit(options, requestContext),
+        run: (requestContext) =>
+          executeSubmit({
+            onResponse: ({ res }) => {
+              didReceiveSuccessfulResponse = Boolean(res?.ok)
+            },
+            options,
+            requestContext,
+          }),
       })
+
+      if (options?.requestIntent !== 'autosave') {
+        latestExplicitSubmitRef.current = scheduledRequest.then(
+          () => didReceiveSuccessfulResponse,
+          () => didReceiveSuccessfulResponse,
+        )
+      }
+
+      const result = await scheduledRequest
+
+      if (result.status === 'superseded' && options?.requestIntent === 'autosave') {
+        let explicitSubmit = latestExplicitSubmitRef.current
+        let didSubmitSucceed = true
+
+        // A successful publish must finish before deciding whether to recover the draft.
+        while (explicitSubmit !== undefined) {
+          didSubmitSucceed = await explicitSubmit
+
+          if (explicitSubmit === latestExplicitSubmitRef.current) {
+            break
+          }
+
+          explicitSubmit = latestExplicitSubmitRef.current
+        }
+
+        if (
+          !didSubmitSucceed &&
+          isMountedRef.current &&
+          resetSequence === resetSequenceRef.current
+        ) {
+          options.onStaleRequest?.()
+        }
+      }
 
       return result.status === 'completed' ? result.value : undefined
     },
-    [disabled, executeSubmit, scheduleRequest],
+    [executeSubmit, scheduleRequest],
   )
 
   const getFields = useCallback(() => contextRef.current.fields, [])
@@ -984,7 +1043,7 @@ export const Form: React.FC<FormProps> = (props) => {
     if (typeof disabledFromProps === 'boolean') {
       setDisabled(disabledFromProps)
     }
-  }, [disabledFromProps])
+  }, [disabledFromProps, setDisabled])
 
   useEffect(() => {
     if (typeof submittedFromProps === 'boolean') {

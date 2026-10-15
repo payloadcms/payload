@@ -148,6 +148,9 @@ export const mergeServerFormState = ({
      */
     if (Array.isArray(incomingField.rows) && path in currentState) {
       if (acceptValues === true) {
+        if (incomingField.disableFormData === undefined) {
+          delete newState[path].disableFormData
+        }
         // Explicit save: server is authoritative, use index-based merging
         newState[path].rows = incomingField.rows.map((serverRow, index) => ({
           ...(currentState[path]?.rows?.[index] || {}),
@@ -214,6 +217,43 @@ export const mergeServerFormState = ({
     // Strip away the `addedByServer` property from the client
     // This will prevent it from being passed back to the server
     delete newState[path].addedByServer
+  }
+
+  if (acceptValues === true) {
+    for (const path of Object.keys(newState)) {
+      if (path in incomingState) {
+        continue
+      }
+
+      const segments = path.split('.')
+
+      for (let index = 1; index < segments.length; index++) {
+        if (!/^\d+$/.test(segments[index])) {
+          continue
+        }
+
+        const arrayPath = segments.slice(0, index).join('.')
+        const incomingRows = incomingState[arrayPath]?.rows
+
+        if (!Array.isArray(incomingRows)) {
+          continue
+        }
+
+        const rowIndex = Number(segments[index])
+        const incomingRow = incomingRows[rowIndex]
+        const currentRow = currentState[arrayPath]?.rows?.[rowIndex]
+
+        // Missing paths from removed or replaced rows must not be serialized on the next save.
+        if (
+          !incomingRow ||
+          (currentRow &&
+            (currentRow.id !== incomingRow.id || currentRow.blockType !== incomingRow.blockType))
+        ) {
+          delete newState[path]
+          break
+        }
+      }
+    }
   }
 
   return dequal(newState, currentState) ? currentState : newState

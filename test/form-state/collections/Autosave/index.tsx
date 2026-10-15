@@ -57,6 +57,14 @@ export const AutosavePostsCollection: CollectionConfig = {
           fields: [{ name: 'text', type: 'text' }],
         },
       ],
+      hooks: {
+        beforeChange: [
+          ({ value }) =>
+            Array.isArray(value)
+              ? value.filter((block) => block.text !== 'Remove on server')
+              : value,
+        ],
+      },
     },
     {
       name: 'nonDirtyFieldUpdater',

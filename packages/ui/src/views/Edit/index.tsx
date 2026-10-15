@@ -349,7 +349,7 @@ export function DefaultEditView({
       }
 
       if (context?.getDocPermissions !== false) {
-        void getDocPermissions(json, ctx?.isCurrent).catch((err) => {
+        void getDocPermissions(json).catch((err) => {
           console.error('Error getting document permissions', err) // eslint-disable-line no-console
         })
       }

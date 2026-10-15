@@ -70,14 +70,25 @@ test.describe('Form State', () => {
     // })
   })
 
-  // Next.js renders the create view then runs an initial client-side form-state
-  // fetch during which fields are disabled. TanStack Start serves the form
-  // already-initialized in the RSC payload, so there is no disabled phase — the
-  // tanstack-start variant below asserts the form is immediately editable instead.
-  test('should disable fields during initialization', { framework: 'next' }, async () => {
-    await page.goto(postsUrl.create, { waitUntil: 'commit' })
-    await expect(page.locator('#field-title')).toBeDisabled()
-  })
+  test(
+    'should disable fields during initialization',
+    { framework: 'next' },
+    async ({ browser }) => {
+      const initializingContext = await browser.newContext({
+        javaScriptEnabled: false,
+        storageState: await page.context().storageState(),
+      })
+
+      try {
+        const initializingPage = await initializingContext.newPage()
+
+        await initializingPage.goto(postsUrl.create)
+        await expect(initializingPage.locator('#field-title')).toBeDisabled()
+      } finally {
+        await initializingContext.close()
+      }
+    },
+  )
 
   test('should render the create form ready to edit', { framework: 'tanstack-start' }, async () => {
     await page.goto(postsUrl.create)
@@ -93,8 +104,23 @@ test.describe('Form State', () => {
     await page.goto(postsUrl.edit(doc.id))
     await waitForFormReady(page)
     await page.locator('#field-title').fill(title)
-    await page.click('#action-save', { delay: 100 })
-    await expect(page.locator('#field-title')).toBeDisabled()
+
+    const save = await holdResponse({
+      method: 'PATCH',
+      page,
+      url: `${formatAdminURL({ apiRoute: '/api', path: `/${postsSlug}/${doc.id}`, serverURL })}**`,
+    })
+    const submission = page.click('#action-save', { delay: 100 })
+
+    try {
+      await save.captured
+      await expect(page.locator('#field-title')).toBeDisabled()
+    } finally {
+      await save.cleanup()
+      await submission
+    }
+
+    await waitForFormReady(page)
   })
 
   test('should re-enable fields after save', async () => {
@@ -789,15 +815,15 @@ test.describe('Form State', () => {
         hasSaveStarted = true
         await releaseSave.promise
         await route.fulfill({
-          status: 400,
           json: {
             errors: [
               {
-                message: 'The following field is invalid: title',
                 data: { errors: [{ message: 'Title must be unique', path: 'title' }] },
+                message: 'The following field is invalid: title',
               },
             ],
           },
+          status: 400,
         })
       })
 
@@ -1293,7 +1319,6 @@ test.describe('Form State', () => {
       await expect(page.locator('#field-array #array-row-0')).toBeVisible()
 
       // use waitForSelector because the shimmer effect is not always visible
-      // eslint-disable-next-line playwright/no-wait-for-selector
       await page.waitForSelector('#field-array #array-row-0 .shimmer-effect')
 
       // Wait for the first request to be sent
@@ -1304,7 +1329,6 @@ test.describe('Form State', () => {
       await expect(page.locator('#field-array #array-row-1')).toBeVisible()
 
       // use waitForSelector because the shimmer effect is not always visible
-      // eslint-disable-next-line playwright/no-wait-for-selector
       await page.waitForSelector('#field-array #array-row-0 .shimmer-effect')
 
       // At this point there should have been a single request sent for the first row
@@ -1370,7 +1394,6 @@ test.describe('Form State', () => {
           await page.locator('#field-title').fill('Test 2')
 
           // use `waitForSelector` to ensure the element doesn't appear and then disappear
-          // eslint-disable-next-line playwright/no-wait-for-selector
           await page.waitForSelector('#field-array #array-row-0 #field-array__0__customTextField', {
             timeout: TEST_TIMEOUT,
           })
@@ -1402,7 +1425,6 @@ test.describe('Form State', () => {
             await addArrayRowAsync(page, 'array')
 
             // use `waitForSelector` to ensure the element doesn't appear and then disappear
-            // eslint-disable-next-line playwright/no-wait-for-selector
             await page.waitForSelector(
               '#field-array #array-row-0 #field-array__0__customTextField',
               {
@@ -1411,7 +1433,6 @@ test.describe('Form State', () => {
             )
 
             // use `waitForSelector` to ensure the element doesn't appear and then disappear
-            // eslint-disable-next-line playwright/no-wait-for-selector
             await page.waitForSelector(
               '#field-array #array-row-1 #field-array__1__customTextField',
               {
@@ -1446,4 +1467,49 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
     },
     overrideAccess: true,
   }) as unknown as Promise<Post>
+}
+
+async function holdResponse({
+  method,
+  page,
+  url,
+}: {
+  method: 'PATCH' | 'POST'
+  page: Page
+  url: string
+}) {
+  const captured = Promise.withResolvers<void>()
+  const finished = Promise.withResolvers<void>()
+  const release = Promise.withResolvers<void>()
+  let hasHeldRequest = false
+  const handler = async (route: Route) => {
+    if (route.request().method() !== method || hasHeldRequest) {
+      return route.fallback()
+    }
+
+    hasHeldRequest = true
+
+    try {
+      const response = await route.fetch()
+
+      captured.resolve()
+      await release.promise
+      await route.fulfill({ response })
+    } finally {
+      finished.resolve()
+    }
+  }
+
+  await page.route(url, handler)
+
+  return {
+    captured: captured.promise,
+    cleanup: async () => {
+      release.resolve()
+      if (hasHeldRequest) {
+        await finished.promise
+      }
+      await page.unroute(url, handler)
+    },
+  }
 }
