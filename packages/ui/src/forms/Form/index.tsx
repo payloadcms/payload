@@ -1,7 +1,8 @@
 'use client'
+import type { FormState, PayloadRequest } from 'payload'
+
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { serialize } from 'object-to-formdata'
-import { type FormState, type PayloadRequest } from 'payload'
 import {
   deepCopyObjectSimpleWithoutReactComponents,
   getDataByPath as getDataByPathFunc,
@@ -119,6 +120,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const disabledFromPropsRef = useRef(Boolean(disabledFromProps))
   disabledFromPropsRef.current = Boolean(disabledFromProps)
   const [isMounted, setIsMounted] = useState(false)
+  const isMountedRef = useRef(false)
 
   const [submitted, setSubmitted] = useState(false)
   const [successfulSubmitCount, setSuccessfulSubmitCount] = useState(0)
@@ -164,7 +166,10 @@ export const Form: React.FC<FormProps> = (props) => {
   const contextRef = useRef({} as FormContextType)
   const abortResetFormRef = useRef<AbortController>(null)
   const resetSequenceRef = useRef(0)
-  const isFirstRenderRef = useRef(true)
+  const onChangeSequenceRef = useRef(0)
+  const submissionErrorsRef = useRef<{ fields: FormState; isCurrent: () => boolean } | undefined>(
+    undefined,
+  )
 
   const [formState, setFormState] = useState<FormState>(() => initialState || {})
   const formStateRef = useRef(formState)
@@ -397,10 +402,15 @@ export const Form: React.FC<FormProps> = (props) => {
 
           if (!isValid) {
             setSubmitted(true)
-            return dispatchFieldsWithoutIncrementingFormSequence({
+            dispatchFieldsWithoutIncrementingFormSequence({
               type: 'REPLACE_STATE',
               state: revalidatedFormState,
             })
+            submissionErrorsRef.current = {
+              fields: revalidatedFormState,
+              isCurrent: requestContext.isCurrent,
+            }
+            return
           }
         }
 
@@ -417,6 +427,10 @@ export const Form: React.FC<FormProps> = (props) => {
 
         // If not valid, prevent submission
         if (!isValid) {
+          submissionErrorsRef.current = {
+            fields: contextRef.current.fields,
+            isCurrent: requestContext.isCurrent,
+          }
           errorToast(t('error:correctInvalidFields'))
           setSubmitted(true)
           return
@@ -494,6 +508,9 @@ export const Form: React.FC<FormProps> = (props) => {
           }
 
           let newFormState: FormState | void
+          const successSequence = formSequenceRef.current
+          const successResetSequence = resetSequenceRef.current
+
           setSuccessfulSubmitCount((count) => count + 1)
 
           if (typeof onSuccess === 'function') {
@@ -505,10 +522,22 @@ export const Form: React.FC<FormProps> = (props) => {
           }
 
           if (!requestContext.isCurrent()) {
+            // A successful drawer callback can unmount the form before its toast resolves.
+            if (
+              !isMountedRef.current &&
+              formSequenceRef.current === successSequence &&
+              resetSequenceRef.current === successResetSequence + 1 &&
+              !redirect &&
+              !disableToast
+            ) {
+              preservePromiseToast = true
+              successToast(json.message || t('general:submissionSuccessful'))
+            }
             return
           }
 
           preservePromiseToast = true
+          submissionErrorsRef.current = undefined
 
           if (newFormState) {
             dispatchFieldsWithoutIncrementingFormSequence({
@@ -589,6 +618,10 @@ export const Form: React.FC<FormProps> = (props) => {
               type: 'ADD_SERVER_ERRORS',
               errors: fieldErrors,
             })
+            submissionErrorsRef.current = {
+              fields: contextRef.current.fields,
+              isCurrent: requestContext.isCurrent,
+            }
 
             nonFieldErrors.forEach((err) => {
               // Pass overridesFromArgs (not the computed overrides) so a retry re-evaluates any function overrides against current fields.
@@ -761,6 +794,7 @@ export const Form: React.FC<FormProps> = (props) => {
       const resetSequence = ++resetSequenceRef.current
       resetRequestQueue()
       formSequenceRef.current = 0
+      onChangeSequenceRef.current = 0
       restoreRequestState()
 
       const dispatchedSequence = formSequenceRef.current
@@ -802,6 +836,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       resetRequestQueue()
       formSequenceRef.current = 0
+      onChangeSequenceRef.current = 0
       restoreRequestState()
       contextRef.current = { ...initContextState } as FormContextType
       _setModified(false)
@@ -829,6 +864,7 @@ export const Form: React.FC<FormProps> = (props) => {
       resetSequenceRef.current += 1
       resetRequestQueue()
       formSequenceRef.current = 0
+      onChangeSequenceRef.current = 0
       restoreRequestState()
       contextRef.current = { ...initContextState } as FormContextType
       _setModified(false)
@@ -961,6 +997,7 @@ export const Form: React.FC<FormProps> = (props) => {
       resetSequenceRef.current += 1
       resetRequestQueue()
       formSequenceRef.current = 0
+      onChangeSequenceRef.current = 0
       restoreRequestState()
       contextRef.current = { ...initContextState } as FormContextType
       _setModified(false)
@@ -981,11 +1018,15 @@ export const Form: React.FC<FormProps> = (props) => {
     resetSequenceRef.current += 1
     resetRequestQueue()
     formSequenceRef.current = 0
+    onChangeSequenceRef.current = 0
     restoreRequestState()
   }, [resetRequestQueue, restoreRequestState, uuid])
 
   useEffect(() => {
+    isMountedRef.current = true
+
     return () => {
+      isMountedRef.current = false
       resetSequenceRef.current += 1
       resetRequestQueue()
     }
@@ -1014,6 +1055,12 @@ export const Form: React.FC<FormProps> = (props) => {
     void scheduleRequest({
       priority: requestPriority.formState,
       run: async (requestContext) => {
+        if (onChangeSequenceRef.current === formSequenceRef.current) {
+          return
+        }
+
+        onChangeSequenceRef.current = formSequenceRef.current
+
         const requestFormState = deepCopyObjectSimpleWithoutReactComponents(
           contextRef.current.fields,
           { excludeFiles: true },
@@ -1031,6 +1078,18 @@ export const Form: React.FC<FormProps> = (props) => {
             prevStateRef: prevFormState,
             serverState,
           })
+
+          // Refreshes cannot reproduce every submit-time validation, including uniqueness checks.
+          if (submissionErrorsRef.current?.isCurrent()) {
+            dispatchFieldsWithoutIncrementingFormSequence({
+              type: 'ADD_SERVER_ERRORS',
+              errors: Object.entries(submissionErrorsRef.current.fields).flatMap(([path, field]) =>
+                field.valid === false
+                  ? [{ message: field.errorMessage || t('error:correctInvalidFields'), path }]
+                  : [],
+              ),
+            })
+          }
         }
       },
     }).catch((err) => {
@@ -1040,12 +1099,11 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useDebouncedEffect(
     () => {
-      if ((isFirstRenderRef.current || !dequal(formState, prevFormState.current)) && modified) {
+      if (onChangeSequenceRef.current !== formSequenceRef.current && modified) {
         executeOnChange(submitted)
       }
 
       prevFormState.current = formState
-      isFirstRenderRef.current = false
     },
     [modified, submitted, formState],
     250,

@@ -768,6 +768,62 @@ test.describe('Form State', () => {
       await expect(conditionalField).toBeHidden()
     })
 
+    test('should retain save errors after a queued form-state refresh', async () => {
+      const doc = await payload.create({
+        collection: postsSlug,
+        data: { title: 'initial' },
+      })
+
+      await page.goto(postsUrl.edit(doc.id))
+      await waitForFormReady(page)
+
+      let hasSaveStarted = false
+      const releaseSave = Promise.withResolvers<void>()
+
+      await page.route(`**/api/${postsSlug}/${doc.id}**`, async (route) => {
+        if (route.request().method() !== 'PATCH') {
+          await route.continue()
+          return
+        }
+
+        hasSaveStarted = true
+        await releaseSave.promise
+        await route.fulfill({
+          status: 400,
+          json: {
+            errors: [
+              {
+                message: 'The following field is invalid: title',
+                data: { errors: [{ message: 'Title must be unique', path: 'title' }] },
+              },
+            ],
+          },
+        })
+      })
+
+      try {
+        await page.locator('#field-title').fill('duplicate')
+        await addArrayRowAsync(page, 'array')
+        await page.click('#action-save')
+        await expect.poll(() => hasSaveStarted).toBe(true)
+
+        // Allow the debounced refresh to queue behind the in-flight save.
+        await page.waitForTimeout(500)
+        releaseSave.resolve()
+
+        await expect(page.locator('#field-array__0__customTextField')).toHaveValue(
+          'This is a default value',
+        )
+        await expect(
+          page
+            .locator('.field-type.text', { has: page.locator('#field-title') })
+            .locator('.field-error'),
+        ).toHaveText('Title must be unique')
+      } finally {
+        releaseSave.resolve()
+      }
+    })
+
     test('should keep failed-save field errors after an earlier form-state response', async () => {
       const doc = await payload.create({
         collection: postsSlug,
