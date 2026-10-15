@@ -230,6 +230,9 @@ export const promise = async ({
       let validationResult: string | true = true
       let failedLocale: string | undefined
 
+      const validationData = deepMergeWithSourceArrays<JsonObject>(doc, data)
+      const validationSiblingData = deepMergeWithSourceArrays<JsonObject>(siblingDoc, siblingData)
+
       for (const { locale, value } of localizedValuesToValidate) {
         // Scope `req.locale` to the locale being validated without mutating the shared request.
         const validationReq = locale ? isolateObjectProperty(req, 'locale') : req
@@ -237,8 +240,6 @@ export const promise = async ({
           validationReq.locale = locale
         }
 
-        const validationData = deepMergeWithSourceArrays<JsonObject>(doc, data)
-        const validationSiblingData = deepMergeWithSourceArrays<JsonObject>(siblingDoc, siblingData)
         const localeContext = locale
           ? {
               blockData:
