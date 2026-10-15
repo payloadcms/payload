@@ -97,6 +97,8 @@ export const mergeServerFormState = ({
       continue
     }
 
+    // Server-added fields need their values even when existing local values are being preserved.
+    // Callers must reject stale responses before merging so accepted server values cannot overwrite newer local edits.
     let shouldAcceptValue =
       incomingField.addedByServer || acceptValues === true || isAutosaveResponse
 
