@@ -27,6 +27,11 @@ export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
      * The form state that was sent with the request when retrieving the `json` arg.
      */
     formState?: FormState
+    /**
+     * Returns `true` while this submission still matches the current form state and form instance.
+     * Local field value changes, resetting or replacing the form, and unmounting invalidate the submission.
+     * Recheck after awaiting work before applying response-driven state changes.
+     */
     isCurrent: () => boolean
   },
 ) => Promise<FormState | void> | void

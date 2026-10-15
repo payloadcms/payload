@@ -1,9 +1,15 @@
 import { useCallback, useRef } from 'react'
 
 export type QueueContext = {
-  /** Whether both the queue generation and external version are still current. */
+  /**
+   * Returns `true` while the queue generation and external sequence still match those captured when this task started.
+   * Recheck after awaiting work before applying results.
+   * Scheduling another task alone does not invalidate this context.
+   */
   isCurrent: () => boolean
-  /** Whether the queue has not been reset since this task began running. */
+  /**
+   * Returns `true` if the queue has not been reset since this task started, regardless of external sequence changes.
+   */
   isGenerationCurrent: () => boolean
 }
 

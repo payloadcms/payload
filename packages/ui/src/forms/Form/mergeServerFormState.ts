@@ -7,7 +7,17 @@ import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
  * If true, will accept all values from the server, overriding any current values in local state.
  * Can also provide an options object for more granular control.
  */
-export type AcceptValues = { overrideLocalChanges?: boolean } | boolean
+export type AcceptValues =
+  | {
+      /**
+       * Set to `false` to accept server field values while preserving local array row order and guarding against mismatched row IDs.
+       * Callers must reject stale responses before merging; this option does not detect local edits made while a request was pending.
+       * When `true` or omitted, existing local field values are preserved unless the field was added by the server.
+       * @default undefined
+       */
+      overrideLocalChanges?: boolean
+    }
+  | boolean
 
 type Args = {
   acceptValues?: AcceptValues

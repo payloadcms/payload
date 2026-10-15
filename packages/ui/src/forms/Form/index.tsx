@@ -173,9 +173,14 @@ export const Form: React.FC<FormProps> = (props) => {
   const resetSequenceRef = useRef(0)
   const onChangeSequenceRef = useRef(0)
   const latestExplicitSubmitRef = useRef<Promise<boolean> | undefined>(undefined)
-  const submissionErrorsRef = useRef<{ fields: FormState; isCurrent: () => boolean } | undefined>(
-    undefined,
-  )
+  const submissionErrorsRef = useRef<
+    | {
+        fields: FormState
+        /** Returns whether these errors still belong to the current form state and form instance. */
+        isCurrent: () => boolean
+      }
+    | undefined
+  >(undefined)
 
   const [formState, setFormState] = useState<FormState>(() => initialState || {})
   const formStateRef = useRef(formState)
