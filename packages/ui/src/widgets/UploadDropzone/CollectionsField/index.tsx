@@ -6,7 +6,7 @@ import React, { useMemo } from 'react'
 
 import { useAuth } from '../../../providers/Auth/index.js'
 import { useEntityVisibility } from '../../../providers/EntityVisibility/index.js'
-import { CollectionFilter } from '../../Components/CollectionFilter/index.js'
+import { CollectionFilter } from '../../shared/CollectionFilter/index.js'
 
 export const UploadDropzoneCollectionsField: React.FC<SelectFieldClientProps> = (props) => {
   const { permissions } = useAuth()

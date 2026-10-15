@@ -44,7 +44,7 @@ export { CollectionQuerySortField } from '../../widgets/CollectionQuery/SortFiel
 export {
   CollectionFilter,
   CollectionFilter as RecentlyViewedCollectionsField,
-} from '../../widgets/Components/CollectionFilter/index.js'
+} from '../../widgets/shared/CollectionFilter/index.js'
 export { UploadDropzoneCollectionsField } from '../../widgets/UploadDropzone/CollectionsField/index.js'
 export { UploadDropzoneWidgetClient } from '../../widgets/UploadDropzone/index.client.js'
 export { QueryPresetsHeading } from '../../elements/QueryPresets/fields/Heading/index.js'

@@ -6,7 +6,7 @@ import type { DocumentsPage, DocumentsTab, Labels } from './types.js'
 
 import { Button } from '../../elements/Button/index.js'
 import { WidgetCard } from '../WidgetCard/index.js'
-import { Pagination } from './Components/Pagination/index.js'
+import { Pagination } from './components/Pagination/index.js'
 import { PinnedDocuments } from './Tabs/PinnedDocuments/index.js'
 import { usePinnedDocuments } from './Tabs/PinnedDocuments/usePinnedDocuments.js'
 import { RecentDocuments } from './Tabs/RecentDocuments/index.js'
