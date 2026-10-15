@@ -65,7 +65,9 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
-  blocks: {};
+  blocks: {
+    'locale-validation-block': LocaleValidationBlock;
+  };
   collections: {
     richText: RichText;
     'blocks-fields': BlocksField;
@@ -74,6 +76,7 @@ export interface Config {
     'localized-drafts': LocalizedDraft;
     'localized-date-fields': LocalizedDateField;
     'all-fields-localized': AllFieldsLocalized;
+    'locale-validation': LocaleValidation;
     users: User;
     'localized-posts': LocalizedPost;
     'no-localized-fields': NoLocalizedField;
@@ -109,6 +112,7 @@ export interface Config {
     'localized-drafts': LocalizedDraftsSelect<false> | LocalizedDraftsSelect<true>;
     'localized-date-fields': LocalizedDateFieldsSelect<false> | LocalizedDateFieldsSelect<true>;
     'all-fields-localized': AllFieldsLocalizedSelect<false> | AllFieldsLocalizedSelect<true>;
+    'locale-validation': LocaleValidationSelect<false> | LocaleValidationSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'no-localized-fields': NoLocalizedFieldsSelect<false> | NoLocalizedFieldsSelect<true>;
@@ -145,6 +149,7 @@ export interface Config {
     | ('xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu')
     | ('xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu')[];
   globals: {
+    'locale-validation-global': LocaleValidationGlobal;
     'global-array': GlobalArray;
     'global-text': GlobalText;
     'global-drafts': GlobalDraft;
@@ -155,6 +160,7 @@ export interface Config {
     'publication-hook-global': PublicationHookGlobal;
   };
   globalsSelect: {
+    'locale-validation-global': LocaleValidationGlobalSelect<false> | LocaleValidationGlobalSelect<true>;
     'global-array': GlobalArraySelect<false> | GlobalArraySelect<true>;
     'global-text': GlobalTextSelect<false> | GlobalTextSelect<true>;
     'global-drafts': GlobalDraftsSelect<false> | GlobalDraftsSelect<true>;
@@ -191,6 +197,20 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locale-validation-block".
+ */
+export interface LocaleValidationBlock {
+  confirmation?: string | null;
+  nested?: {
+    confirmation?: string | null;
+    matchingText?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'locale-validation-block';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -488,6 +508,46 @@ export interface AllFieldsLocalized {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locale-validation".
+ */
+export interface LocaleValidation {
+  id: string;
+  confirmation?: string | null;
+  matchingText?: string | null;
+  sharedJSON?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  localizedJSON?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  jsonText?: string | null;
+  arrayText?: string | null;
+  settings?: {
+    rows?:
+      | {
+          confirmation?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  layout?: LocaleValidationBlock[] | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1008,6 +1068,10 @@ export interface PayloadLockedDocument {
         value: string | AllFieldsLocalized;
       } | null)
     | ({
+        relationTo: 'locale-validation';
+        value: string | LocaleValidation;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null)
@@ -1400,6 +1464,31 @@ export interface AllFieldsLocalizedSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locale-validation_select".
+ */
+export interface LocaleValidationSelect<T extends boolean = true> {
+  confirmation?: T;
+  matchingText?: T;
+  sharedJSON?: T;
+  localizedJSON?: T;
+  jsonText?: T;
+  arrayText?: T;
+  settings?:
+    | T
+    | {
+        rows?:
+          | T
+          | {
+              confirmation?: T;
+              id?: T;
+            };
+      };
+  layout?: T | {};
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1918,6 +2007,46 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locale-validation-global".
+ */
+export interface LocaleValidationGlobal {
+  id: string;
+  confirmation?: string | null;
+  matchingText?: string | null;
+  sharedJSON?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  localizedJSON?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  jsonText?: string | null;
+  arrayText?: string | null;
+  settings?: {
+    rows?:
+      | {
+          confirmation?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  layout?: LocaleValidationBlock[] | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-array".
  */
 export interface GlobalArray {
@@ -2007,6 +2136,32 @@ export interface PublicationHookGlobal {
   updatedAt?: string | null;
   createdAt?: string | null;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locale-validation-global_select".
+ */
+export interface LocaleValidationGlobalSelect<T extends boolean = true> {
+  confirmation?: T;
+  matchingText?: T;
+  sharedJSON?: T;
+  localizedJSON?: T;
+  jsonText?: T;
+  arrayText?: T;
+  settings?:
+    | T
+    | {
+        rows?:
+          | T
+          | {
+              confirmation?: T;
+              id?: T;
+            };
+      };
+  layout?: T | {};
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
