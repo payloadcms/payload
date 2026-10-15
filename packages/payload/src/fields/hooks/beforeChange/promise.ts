@@ -12,6 +12,7 @@ import { getTranslatedLabel } from '../../../utilities/getTranslatedLabel.js'
 import { isolateObjectProperty } from '../../../utilities/isolateObjectProperty.js'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
+import { flattenValidationData } from './flattenValidationData.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -30,6 +31,7 @@ type Args = {
    * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
    */
   blockData?: JsonObject
+  blockFields?: Field[]
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: JsonObject
@@ -73,6 +75,7 @@ type Args = {
 export const promise = async ({
   id,
   blockData,
+  blockFields,
   collection,
   context,
   data,
@@ -234,12 +237,42 @@ export const promise = async ({
           validationReq.locale = locale
         }
 
+        const validationData = deepMergeWithSourceArrays<JsonObject>(doc, data)
+        const validationSiblingData = deepMergeWithSourceArrays<JsonObject>(siblingDoc, siblingData)
+        const localeContext = locale
+          ? {
+              blockData:
+                blockData && blockFields
+                  ? flattenValidationData({
+                      config: req.payload.config,
+                      data: blockData,
+                      fields: blockFields,
+                      locale,
+                      parentIsLocalized,
+                    })
+                  : blockData,
+              data: flattenValidationData({
+                config: req.payload.config,
+                data: validationData,
+                fields: (collection?.fields || global?.fields)!,
+                locale,
+              }),
+              siblingData: flattenValidationData({
+                config: req.payload.config,
+                data: validationSiblingData,
+                fields: siblingFields!,
+                locale,
+                parentIsLocalized,
+              }),
+            }
+          : { blockData, data: validationData, siblingData: validationSiblingData }
+
         validationResult = await validateFn(value as never, {
           ...field,
           id,
-          blockData: blockData!,
+          blockData: localeContext.blockData!,
           collectionSlug: collection?.slug,
-          data: deepMergeWithSourceArrays(doc, data),
+          data: localeContext.data,
           event: 'submit',
           // @ts-expect-error generic validation options cannot infer JSON fields
           jsonError,
@@ -251,7 +284,7 @@ export const promise = async ({
             ? (siblingDoc[field.name] as JsonObject)?.[locale]
             : siblingDoc[field.name],
           req: validationReq,
-          siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
+          siblingData: localeContext.siblingData,
         })
 
         if (typeof validationResult === 'string') {
@@ -376,6 +409,7 @@ export const promise = async ({
             traverseFields({
               id,
               blockData,
+              blockFields,
               collection,
               context,
               data,
@@ -451,6 +485,7 @@ export const promise = async ({
               traverseFields({
                 id,
                 blockData: row,
+                blockFields: block.fields,
                 collection,
                 context,
                 data,
@@ -490,6 +525,7 @@ export const promise = async ({
       await traverseFields({
         id,
         blockData,
+        blockFields,
         collection,
         context,
         data,
@@ -564,6 +600,7 @@ export const promise = async ({
       await traverseFields({
         id,
         blockData,
+        blockFields,
         collection,
         context,
         data,
@@ -695,6 +732,7 @@ export const promise = async ({
       await traverseFields({
         id,
         blockData,
+        blockFields,
         collection,
         context,
         data,
@@ -732,6 +770,7 @@ export const promise = async ({
       await traverseFields({
         id,
         blockData,
+        blockFields,
         collection,
         context,
         data,
