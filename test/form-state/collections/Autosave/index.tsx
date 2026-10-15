@@ -1,6 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
+import { formMediaSlug } from '../Media/index.js'
+
 export const autosavePostsSlug = 'autosave-posts'
+export const draftPostsSlug = 'draft-posts'
 
 export const AutosavePostsCollection: CollectionConfig = {
   slug: autosavePostsSlug,
@@ -42,6 +45,19 @@ export const AutosavePostsCollection: CollectionConfig = {
       name: 'programmaticValue',
       type: 'text',
     },
+    { name: 'content', type: 'text' },
+    { name: 'slug', type: 'slug', required: false, useAsSlug: 'title' },
+    { name: 'media', type: 'upload', relationTo: formMediaSlug },
+    {
+      name: 'blocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'text',
+          fields: [{ name: 'text', type: 'text' }],
+        },
+      ],
+    },
     {
       name: 'nonDirtyFieldUpdater',
       type: 'ui',
@@ -75,4 +91,10 @@ export const AutosavePostsCollection: CollectionConfig = {
       },
     },
   },
+}
+
+export const DraftPostsCollection: CollectionConfig = {
+  ...AutosavePostsCollection,
+  slug: draftPostsSlug,
+  versions: { drafts: true },
 }
