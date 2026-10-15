@@ -196,6 +196,9 @@ export function DefaultEditView({
   // does not recreate the lock after the editor has left the document.
   const unmountedRef = useRef(false)
   const pendingFormStateRef = useRef<Promise<unknown> | undefined>(undefined)
+  // The post-autosave form-state request also creates the lock, and it is not
+  // the onChange request tracked above.
+  const pendingAutosaveFormStateRef = useRef<Promise<unknown> | undefined>(undefined)
 
   const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
   const isLockExpired = Date.now() > lockExpiryTime
@@ -373,9 +376,19 @@ export function DefaultEditView({
       }
 
       if (id || globalSlug) {
+        // Aborting this callback does not stop a form-state call that has
+        // already reached the server. Skip starting one after the editor left.
+        if (context?.autosave && unmountedRef.current) {
+          return
+        }
+
         const docPreferences = await getDocPreferences()
 
-        const { livePreviewURL, previewURL, state } = await getFormState({
+        if (context?.autosave && unmountedRef.current) {
+          return
+        }
+
+        const formStatePromise = getFormState({
           id,
           collectionSlug,
           data: document,
@@ -395,6 +408,20 @@ export function DefaultEditView({
           signal: controller.signal,
           skipValidation: true,
         })
+
+        if (context?.autosave) {
+          const queued = [pendingAutosaveFormStateRef.current, formStatePromise].filter(
+            (promise): promise is Promise<unknown> => promise !== undefined,
+          )
+          pendingAutosaveFormStateRef.current =
+            queued.length > 1 ? Promise.all(queued) : formStatePromise
+        }
+
+        const { livePreviewURL, previewURL, state } = await formStatePromise
+
+        if (context?.autosave && unmountedRef.current) {
+          return
+        }
 
         // For upload collections, clear the file field from the returned state
         // to prevent the File object from persisting in form state after save
@@ -669,14 +696,26 @@ export function DefaultEditView({
     // lock on the server. Delete only after it settles, so the DELETE cannot
     // lose the race. pagehide cannot wait.
     const releaseAfterPending = () => {
-      void Promise.resolve(pendingFormStateRef.current).finally(release)
+      void Promise.all(
+        [pendingFormStateRef.current, pendingAutosaveFormStateRef.current].filter(
+          (promise): promise is Promise<unknown> => Boolean(promise),
+        ),
+      ).finally(release)
     }
 
-    window.addEventListener('pagehide', release)
+    const onPageHide = (event: PageTransitionEvent) => {
+      // The back/forward cache restores this page. Releasing the lock would
+      // leave that restored editor unlocked until the next edit.
+      if (!event.persisted) {
+        release()
+      }
+    }
+
+    window.addEventListener('pagehide', onPageHide)
 
     return () => {
       unmountedRef.current = true
-      window.removeEventListener('pagehide', release)
+      window.removeEventListener('pagehide', onPageHide)
       // Must outlive this effect: the next pathname is only visible on the
       // following turn. Clearing it would skip the release.
       // eslint-disable-next-line @eslint-react/web-api/no-leaked-timeout
