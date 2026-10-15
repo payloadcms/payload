@@ -93,9 +93,9 @@ src
   here](https://tanstack.com/start/latest/docs/framework/react/build-from-scratch).
 </Banner>
 
-Payload integrates with TanStack Start through a small set of helpers exported from `@payloadcms/tanstack-start`. Rather than a Next.js route group, the `_payload` [pathless layout route](https://tanstack.com/router/latest/docs/framework/react/routing/routing-concepts#pathless-layout-routes) creates the boundary that scopes all Admin Panel layouts and styles, mounted in `__root.tsx` via `withPayloadRoot` and `_payload.tsx` via `payloadLayoutRoute`.
+Payload integrates with TanStack Start through a small set of helpers exported from `@payloadcms/tanstack-start`. Rather than a Next.js route group, the `_payload` [pathless layout route](https://tanstack.com/router/latest/docs/framework/react/routing/routing-concepts#pathless-layout-routes) creates the boundary that scopes all Admin Panel layouts and styles.
 
-The `_payload` directory contains the routes that power the Admin Panel: `admin.$.tsx` and `admin.index.tsx` are the _pages_ of the interface itself, `api.$.ts` mounts the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview) via `payloadApiHandlers`, and `server.functions.ts` defines the [server functions](https://tanstack.com/start/latest/docs/framework/react/server-functions) that load [React Server Components](https://react.dev/reference/rsc/server-components) and dispatch Payload's server actions — the TanStack Start equivalent of Next.js route handlers.
+The `_payload` directory contains the routes that power the Admin Panel: `admin.$.tsx` and `admin.index.tsx` are the _pages_ of the interface itself, `api.$.ts` serves the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview), and `server.functions.ts` contains the server functions used by the Admin Panel.
 
 `router.tsx` and `routeTree.gen.ts`, alongside `app`, are where the TanStack Router is created and regenerated. `routeTree.gen.ts` is regenerated automatically by the TanStack Router Vite plugin and should not be edited by hand.
 
@@ -111,7 +111,7 @@ The `_payload` directory contains the routes that power the Admin Panel: `admin.
   Payload when not in use.
 </Banner>
 
-Finally, `custom.css` is where you can add or override globally-oriented styles in the Admin Panel, such as modify the color palette. On TanStack Start, both Admin Panel page routes import `@payloadcms/ui/css/app.css` and the adjacent `custom.css` directly. Customizing the look and feel through CSS alone is a powerful feature of the Admin Panel, [more on that here](./customizing-css).
+Finally, `custom.css` is where you can add or override globally-oriented styles in the Admin Panel, such as modify the color palette. Customizing the look and feel through CSS alone is a powerful feature of the Admin Panel, [more on that here](./customizing-css).
 
 The generated layout, admin pages, and route files contain the following comment at the top of each file, on both frameworks:
 
