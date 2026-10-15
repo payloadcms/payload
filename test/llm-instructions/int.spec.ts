@@ -1,4 +1,3 @@
-/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test"] }] -- Tests use the shared fixture wrapper. */
 import { lexicalEditor, LinkFeature, RelationshipFeature } from '@payloadcms/richtext-lexical'
 import { initI18n } from '@payloadcms/translations'
 import { createPayloadRequest, initTransaction, killTransaction } from 'payload'
