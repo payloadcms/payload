@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
-import type { Transporter } from 'nodemailer'
-import type SMTPConnection from 'nodemailer/lib/smtp-connection/index.js'
+import type { SendMailOptions, Transporter } from 'nodemailer'
+import type SMTPTransport from 'nodemailer/lib/smtp-transport/index.js'
 import type { EmailAdapter } from 'payload'
 
 import nodemailer from 'nodemailer'
@@ -19,7 +19,7 @@ export type NodemailerAdapterArgs = {
    */
   skipVerify?: boolean
   transport?: Transporter
-  transportOptions?: SMTPConnection.Options
+  transportOptions?: SMTPTransport.Options
 }
 
 type NodemailerAdapter = EmailAdapter<unknown>
@@ -40,11 +40,15 @@ export const nodemailerAdapter = async (
     defaultFromAddress,
     defaultFromName,
     sendEmail: async (message) => {
+      const inReplyTo =
+        typeof message.inReplyTo === 'object' ? message.inReplyTo.address : message.inReplyTo
+
       return await transport.sendMail({
         from: `${defaultFromName} <${defaultFromAddress}>`,
         ...message,
+        inReplyTo,
         ...(overrideRecipientAddress ? { to: overrideRecipientAddress } : {}),
-      })
+      } as SendMailOptions)
     },
   })
   return adapter

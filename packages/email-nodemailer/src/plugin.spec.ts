@@ -61,4 +61,19 @@ describe('email-nodemailer', () => {
       expect(mockedVerify.mock.calls).toHaveLength(0)
     })
   })
+
+  describe('sendEmail', () => {
+    it('should send the message ID string when inReplyTo is an address object', async () => {
+      const transport = nodemailer.createTransport({ jsonTransport: true })
+      const sendMail = vitest.spyOn(transport, 'sendMail')
+      const adapter = await nodemailerAdapter({ ...defaultArgs, skipVerify: true, transport })
+
+      await adapter({ payload: {} as never }).sendEmail({
+        inReplyTo: { address: '<original@example.com>', name: 'Original' },
+        to: 'to@example.com',
+      })
+
+      expect(sendMail.mock.calls[0]?.[0]).toMatchObject({ inReplyTo: '<original@example.com>' })
+    })
+  })
 })
