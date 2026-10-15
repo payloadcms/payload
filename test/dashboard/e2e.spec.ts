@@ -333,6 +333,9 @@ describe('Dashboard', () => {
         await page.setViewportSize({ height: 900, width })
         await page.goto(url.admin)
         await waitForDashboardHydration({ page })
+        if (pinCount === 0) {
+          await widget.getByRole('button', { name: 'Pinned', exact: true }).click()
+        }
         await expect(widget.locator('.recents-widget__item--add-pin')).toHaveCount(1)
         const { columns } = getExpectedRecentsGrid({
           containerWidth: await getRecentsContainerWidth({ widget }),
@@ -353,6 +356,30 @@ describe('Dashboard', () => {
         expect(await getRecentsLayoutShiftSum({ page })).toBe(0)
       }
     }
+  })
+
+  test('should open the pinned tab by default only when documents are pinned', async ({ page }) => {
+    const ticket = (await (await page.request.get(`${serverURL}/api/tickets?limit=1`)).json())
+      .docs[0]
+    const widget = page.locator('.recents-widget')
+    const pinned = widget.getByRole('button', { name: 'Pinned', exact: true })
+    const recents = widget.getByRole('button', { name: 'Recently viewed', exact: true })
+
+    await expect(recents).toHaveAttribute('aria-pressed', 'true')
+    await expect(pinned).toHaveAttribute('aria-pressed', 'false')
+    expect(
+      (
+        await page.request.post(`${serverURL}/api/payload-preferences/pinned-documents`, {
+          data: { value: { items: [{ id: ticket.id, collectionSlug: 'tickets' }] } },
+        })
+      ).ok(),
+    ).toBe(true)
+    await page.reload()
+    await waitForDashboardHydration({ page })
+
+    await expect(pinned).toHaveAttribute('aria-pressed', 'true')
+    await expect(widget.locator('.document-card__title')).toHaveText([ticket.title])
+    expect(await getRecentsLayoutShiftSum({ page })).toBe(0)
   })
 
   test('should replace cached documents when the server re-renders the widget', async ({
@@ -871,6 +898,10 @@ describe('Dashboard', () => {
     await waitForDashboardHydration({ page })
     await waitForDashboardHydration({ page: otherPage })
     for (const tab of [page, otherPage]) {
+      await tab
+        .locator('.recents-widget')
+        .getByRole('button', { name: 'Pinned', exact: true })
+        .click()
       await expect(tab.locator('.recents-widget__empty-title')).toHaveText('No pinned documents')
     }
   })
@@ -889,6 +920,7 @@ describe('Dashboard', () => {
     const addPin = widget.getByRole('button', { name: 'Select Documents', exact: true })
     const drawer = page.locator('.list-drawer.drawer--is-open')
 
+    await widget.getByRole('button', { name: 'Pinned', exact: true }).click()
     await expect(widget.locator('.recents-widget__item--add-pin')).toHaveCount(1)
     await expect(addPin).toHaveAttribute('aria-haspopup', 'dialog')
     await expect(widget.locator('.recents-widget__empty-icon--pinned')).toBeVisible()
