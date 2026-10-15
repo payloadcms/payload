@@ -1,0 +1,36 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "plugin-nested-docs": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "breadcrumbsPlural": {
+          "type": "string"
+        },
+        "breadcrumbsSingular": {
+          "type": "string"
+        },
+        "doc": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "parent": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": ["breadcrumbsPlural", "breadcrumbsSingular", "doc", "label", "parent", "url"]
+    }
+  },
+  "required": ["plugin-nested-docs"]
+}
