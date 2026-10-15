@@ -219,6 +219,56 @@ test.describe('Superseded autosaves', () => {
     }
   })
 
+  for (const failure of ['message-only', 'non-JSON'] as const) {
+    test(`should recover conditional fields after a ${failure} autosave failure displaces their refresh`, async ({
+      page,
+    }) => {
+      const doc = await createPost()
+      const state = await queueAutosaveBehindFormState({ id: doc.id, page })
+      const status = failure === 'message-only' ? 400 : 503
+      let rejectedAutosaves = 0
+
+      await page.route(`**/api/${autosavePostsSlug}/${doc.id}**`, async (route) => {
+        const request = route.request()
+
+        if (
+          request.method() !== 'PATCH' ||
+          new URL(request.url()).searchParams.get('autosave') !== 'true'
+        ) {
+          return route.fallback()
+        }
+
+        rejectedAutosaves += 1
+        await route.fulfill(
+          failure === 'message-only'
+            ? { json: { message: 'Autosave rejected' }, status }
+            : { body: '<h1>Service unavailable</h1>', contentType: 'text/html', status },
+        )
+      })
+
+      await page.locator('label[for="field-type-custom"]').click()
+      await expect(page.locator('#field-type-custom')).toBeChecked()
+      await page.clock.runFor(1000)
+
+      const rejected = page.waitForResponse(
+        (response) =>
+          response.status() === status &&
+          response.request().method() === 'PATCH' &&
+          new URL(response.url()).pathname.endsWith(`/${autosavePostsSlug}/${doc.id}`),
+      )
+
+      state.release()
+      await state.finished
+      await rejected
+      await page.clock.runFor(1000)
+      await expect(page.locator('#field-url')).toBeEditable()
+      await expect(page.locator('#field-type-custom')).toBeChecked()
+      await page.clock.runFor(2000)
+      await expect(page.locator('.autosave')).toBeHidden()
+      expect(rejectedAutosaves).toBe(1)
+    })
+  }
+
   async function createPost() {
     const doc = await payload.create({
       collection: autosavePostsSlug,

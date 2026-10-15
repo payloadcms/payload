@@ -188,16 +188,18 @@ export const mergeServerFormState = ({
     // Merge server properties into matching local rows.
     // Read `currentState`, since incoming rows have already been assigned to `newState`.
     //
-    // On explicit save (acceptValues === true), the server is authoritative - accept server row order.
-    // On autosave (acceptValues !== true), the client is source of truth - use ID-based matching.
+    // Authoritative responses determine row membership and order.
+    // Other responses preserve local row membership.
     if (Array.isArray(incomingField.rows) && path in currentState) {
       if (acceptValues === true) {
         if (incomingField.disableFormData === undefined) {
           delete newState[path].disableFormData
         }
-        // Explicit save: server is authoritative, use index-based merging
-        newState[path].rows = incomingField.rows.map((serverRow, index) => ({
-          ...(currentState[path]?.rows?.[index] || {}),
+        const currentRowsByID = new Map(currentState[path].rows?.map((row) => [row.id, row]))
+
+        // Keep metadata attached to row IDs when the server removes or reorders rows.
+        newState[path].rows = incomingField.rows.map((serverRow) => ({
+          ...currentRowsByID.get(serverRow.id),
           ...serverRow,
         }))
       } else {

@@ -752,6 +752,17 @@ export const Form: React.FC<FormProps> = (props) => {
 
       const result = await scheduledRequest
 
+      // A failed submit may have displaced a refresh without returning replacement form state.
+      if (
+        result.status === 'completed' &&
+        !didReceiveSuccessfulResponse &&
+        isMountedRef.current &&
+        resetSequence === resetSequenceRef.current &&
+        onChangeSequenceRef.current !== formSequenceRef.current
+      ) {
+        executeOnChange()
+      }
+
       if (result.status === 'superseded' && options?.requestIntent === 'autosave') {
         let explicitSubmit = latestExplicitSubmitRef.current
         let didSubmitSucceed = true
@@ -1115,7 +1126,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
-  const executeOnChange = useEffectEvent((submitted: boolean) => {
+  const executeOnChange = useEffectEvent(() => {
     void scheduleRequest({
       priority: requestPriority.formState,
       run: async (requestContext) => {
@@ -1164,7 +1175,7 @@ export const Form: React.FC<FormProps> = (props) => {
   useDebouncedEffect(
     () => {
       if (onChangeSequenceRef.current !== formSequenceRef.current && modified) {
-        executeOnChange(submitted)
+        executeOnChange()
       }
 
       prevFormState.current = formState

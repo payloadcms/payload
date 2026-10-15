@@ -195,6 +195,84 @@ test.describe('Authoritative autosave rows', () => {
     })
   }
 
+  for (const field of ['blocks', 'groups'] as const) {
+    test(`should retain expanded ${field} rows after the server removes a collapsed predecessor`, async ({
+      page,
+    }) => {
+      const doc = await payload.create({
+        collection: autosavePostsSlug,
+        data: {
+          blocks: [
+            { blockType: 'text', text: 'Remove this row' },
+            { blockType: 'text', text: 'Keep this row' },
+          ],
+          groups: [{ text: 'Remove this row' }, { text: 'Keep this row' }],
+          title: `ok Retained ${field} expansion`,
+        },
+        draft: true,
+        overrideAccess: true,
+      })
+      const captured = deferred()
+      const released = deferred()
+      let hasCaptured = false
+
+      try {
+        await initPage({ page, serverURL })
+        await page.goto(new AdminUrlUtil(serverURL, autosavePostsSlug).edit(doc.id))
+        await waitForFormReady(page)
+        await page.route(`**/api/${autosavePostsSlug}/${doc.id}**`, async (route) => {
+          const request = route.request()
+
+          if (
+            hasCaptured ||
+            !isSave({ id: doc.id, request }) ||
+            new URL(request.url()).searchParams.get('autosave') !== 'true'
+          ) {
+            return route.continue()
+          }
+
+          hasCaptured = true
+          const response = await route.fetch()
+
+          captured.resolve()
+          await released.promise
+          await route.fulfill({ response })
+        })
+
+        const firstToggle = page.locator(`#${field}-row-0 .collapsible__toggle`).first()
+        const keptToggle = page.locator(`#${field}-row-1 .collapsible__toggle`).first()
+
+        await expect(keptToggle).toHaveAttribute('aria-expanded', 'true')
+        await page.locator(`#field-${field}__0__text`).fill('Remove on server')
+        await captured.promise
+
+        const savedPreferences = page.waitForResponse(
+          (response) =>
+            response.request().method() === 'POST' &&
+            response
+              .url()
+              .includes(`/payload-preferences/collection-${autosavePostsSlug}-${doc.id}`),
+        )
+
+        await firstToggle.press('Enter')
+        await expect(firstToggle).toHaveAttribute('aria-expanded', 'false')
+        await expect(keptToggle).toHaveAttribute('aria-expanded', 'true')
+        await savedPreferences
+        await keptToggle.focus()
+        released.resolve()
+        await expect(page.locator(`#${field}-row-1`)).toHaveCount(0)
+        await expect(firstToggle).toHaveAttribute('aria-expanded', 'true')
+        await expect(firstToggle).toBeFocused()
+        await expect(page.locator(`#field-${field}__0__text`)).toBeVisible()
+        await expect(page.locator(`#field-${field}__0__text`)).toHaveValue('Keep this row')
+      } finally {
+        released.resolve()
+        await page.unrouteAll({ behavior: 'ignoreErrors' })
+        await payload.delete({ id: doc.id, collection: autosavePostsSlug, overrideAccess: true })
+      }
+    })
+  }
+
   test('should retain collapsed rows, custom fields and local-only row state after an authoritative merge', async ({
     page,
   }) => {
@@ -266,4 +344,13 @@ function getBlockFields({
   blocks: { blockName?: null | string }[] | null | undefined
 }) {
   return blocks?.map(({ blockName: _blockName, ...block }) => block)
+}
+
+function deferred() {
+  let resolve!: () => void
+  const promise = new Promise<void>((resolvePromise) => {
+    resolve = resolvePromise
+  })
+
+  return { promise, resolve }
 }
