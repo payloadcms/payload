@@ -181,17 +181,19 @@ async function executeDemo({
     throw new Error(`Scenario must default-export a function: ${scenario}`)
   }
 
+  if (!scenarioModule.presentation?.change) {
+    throw new Error(
+      'Every scenario must export presentation with a change kind, title, and description; recording chrome cannot be disabled',
+    )
+  }
+
   const { chromium, expect } = await import('@playwright/test')
   const rawVideoDirectory = await mkdtemp(path.join(tmpdir(), 'payload-pr-demo-'))
   const browser = await chromium.launch({ headless: true })
-  const recordedViewport = scenarioModule.presentation
-    ? (scenarioModule.presentation.canvas ?? { width: 1600, height: 1000 })
-    : viewport
+  const recordedViewport = scenarioModule.presentation.canvas ?? { width: 1600, height: 1000 }
   const context = await browser.newContext({
     viewport: recordedViewport,
-    ...(scenarioModule.presentation
-      ? { colorScheme: scenarioModule.presentation.theme ?? 'light' }
-      : {}),
+    colorScheme: scenarioModule.presentation.theme ?? 'light',
     ...(output ? { recordVideo: { dir: rawVideoDirectory, size: recordedViewport } } : {}),
   })
 
@@ -273,7 +275,6 @@ async function executeDemo({
 
   const recordingStartedAt = performance.now()
   const recordedPage = await context.newPage()
-  let page = recordedPage
   const video = output ? recordedPage.video() : undefined
   let presentation
   const resolvedOutput = output ? path.resolve(output) : undefined
@@ -282,34 +283,28 @@ async function executeDemo({
   let scenarioError
 
   try {
-    if (scenarioModule.presentation) {
-      presentation = await createPresentation({
-        page: recordedPage,
-        options: scenarioModule.presentation,
-        viewport,
-        baseURL,
-        pauseScale,
-        startedAt: recordingStartedAt,
-      })
-      page = presentation.appPage
-    }
+    presentation = await createPresentation({
+      page: recordedPage,
+      options: scenarioModule.presentation,
+      viewport,
+      baseURL,
+      pauseScale,
+      startedAt: recordingStartedAt,
+    })
+    const page = presentation.appPage
     const pointerInteractions = createPointerInteractions({
       interactionPauseMs,
       mouseMoveMs,
       page,
     })
-    const annotationInteractions = createAnnotationInteraction({ page, presentation })
+    const annotationInteractions = createAnnotationInteraction({ presentation })
     await scenarioModule.default({
-      ...(presentation
-        ? {
-            clearAnnotation: annotationInteractions.hideAnnotation,
-            resizeWindow: presentation.resizeWindow,
-            setAnnotation: (annotation) =>
-              annotation === null
-                ? annotationInteractions.hideAnnotation()
-                : annotationInteractions.showAnnotation(annotation),
-          }
-        : {}),
+      clearAnnotation: annotationInteractions.hideAnnotation,
+      resizeWindow: presentation.resizeWindow,
+      setAnnotation: (annotation) =>
+        annotation === null
+          ? annotationInteractions.hideAnnotation()
+          : annotationInteractions.showAnnotation(annotation),
       baseURL: parsedBaseURL.toString().replace(/\/$/, ''),
       click: pointerInteractions.click,
       expect,
@@ -322,10 +317,8 @@ async function executeDemo({
       ready: async () => {
         if (isOpeningReady) throw new Error('Scenario may call ready() only once')
         isOpeningReady = true
-        await presentation?.flush()
-        onOpeningReady?.(
-          (performance.now() - (presentation?.startedAt ?? recordingStartedAt)) / 1000,
-        )
+        await presentation.flush()
+        onOpeningReady?.((performance.now() - presentation.startedAt) / 1000)
         await page.waitForTimeout(1200 * pauseScale)
       },
       scroll: createScrollInteraction({
@@ -340,10 +333,10 @@ async function executeDemo({
     if (trailingPauseMs > 0) {
       await page.waitForTimeout(trailingPauseMs)
     }
-    await presentation?.flush()
+    await presentation.flush()
     if (resolvedScreenshotOutput) {
       await mkdir(path.dirname(resolvedScreenshotOutput), { recursive: true })
-      await (presentation?.page ?? page).screenshot({ path: resolvedScreenshotOutput })
+      await recordedPage.screenshot({ path: resolvedScreenshotOutput })
     }
   } catch (error) {
     scenarioError = error
@@ -466,8 +459,8 @@ Options:
   --label TEXT         Safe output label (default: ${DEFAULT_LABEL})
   --mouse-move-ms MS   Smooth cursor travel time (default: ${DEFAULT_MOUSE_MOVE_MS})
   --output PATH        WebM output (default: /tmp/payload-pr-demo-<label>.webm)
-  --viewport WxH       Recording viewport (default: 1440x900)
-  --scenario PATH      Scenario module with a default-exported async function
+  --viewport WxH       Initial application viewport inside chrome (default: 1440x900)
+  --scenario PATH      Module exporting presentation metadata and a default async function
   --help               Show this help`)
 }
 

@@ -9,6 +9,9 @@ import * as recorder from './record-demo.mjs'
 import { packageCandidate } from './prepare-demo.mjs'
 
 const { parseArgs, parseViewport, sanitizeLabel } = recorder
+const presentationExport = `export const presentation = {
+  change: { kind: 'Fix', title: 'Recorder test', description: 'Verify the recording behavior.' },
+};\n`
 
 test('parseArgs applies recording defaults and derives a safe output path', () => {
   const options = parseArgs(['--scenario', '/tmp/demo-scenario.mjs'])
@@ -93,7 +96,7 @@ test('recordDemo saves a completed browser recording before closing the browser'
   try {
     await writeFile(
       scenario,
-      `export default async function scenario({ page, ready }) {
+      `${presentationExport}export default async function scenario({ page, ready }) {
         await page.goto('data:text/html,<main>Recorded demo</main>')
         await ready()
         await page.waitForTimeout(100)
@@ -123,25 +126,17 @@ test('should expose annotation helpers to recording scenarios', async () => {
   try {
     await writeFile(
       scenario,
-      `export default async function scenario({ expect, hideAnnotation, page, showAnnotation }) {
+      `${presentationExport}export default async function scenario({ expect, hideAnnotation, page, showAnnotation }) {
         await page.goto('data:text/html,<main>Annotation demo</main>')
-        await showAnnotation({
-          type: 'floating',
-          title: 'What changed',
-          body: 'The feature works.',
-          position: { top: 24, right: 24 },
-        })
-        await expect(page.locator('[data-pr-demo-annotation="floating"]')).toContainText('The feature works.')
-        await showAnnotation({
-          type: 'floating',
-          title: 'Result',
-          body: 'The second note replaces the first.',
-          position: { bottom: 24, left: 24 },
-        })
-        await expect(page.locator('[data-pr-demo-annotation="floating"]')).toHaveCount(1)
-        await expect(page.locator('[data-pr-demo-annotation="floating"]')).toContainText('The second note replaces the first.')
-        await hideAnnotation()
+        const stage = page.context().pages()[0]
+        await showAnnotation({title:'What changed',body:'The feature works.'})
+        await expect(stage.locator('[data-note-body]')).toHaveText('The feature works.')
+        await showAnnotation({title:'Result',body:'The second note replaces the first.'})
+        await expect(stage.locator('[data-note]')).toHaveCount(1)
+        await expect(stage.locator('[data-note-body]')).toHaveText('The second note replaces the first.')
         await expect(page.locator('[data-pr-demo-annotation]')).toHaveCount(0)
+        await hideAnnotation()
+        await expect(stage.locator('[data-note]')).toBeHidden()
       }`,
     )
 
@@ -163,7 +158,7 @@ test('should reject a recording without an opening ready marker', async () => {
   try {
     await writeFile(
       scenario,
-      `export default async function scenario({ page }) {
+      `${presentationExport}export default async function scenario({ page }) {
         await page.goto('data:text/html,<main>Missing ready marker</main>')
       }`,
     )
@@ -191,8 +186,9 @@ test('recordDemo exposes a smoothly paced click helper', async () => {
   try {
     await writeFile(
       scenario,
-      `export default async function scenario({ click, page, ready }) {
+      `${presentationExport}export default async function scenario({ click, moveCursor, page, ready }) {
         await page.goto('data:text/html,<button type="button">Click me</button>')
+        await moveCursor(page.locator('body'), { duration: 0, pauseAfter: 0 })
         await ready()
         await page.evaluate(() => {
           window.demoPointerState = { clicks: 0, moves: 0 }
@@ -235,7 +231,7 @@ test('recordDemo renders a Mac-style arrow cursor', async () => {
   try {
     await writeFile(
       scenario,
-      `export default async function scenario({ page, ready }) {
+      `${presentationExport}export default async function scenario({ page, ready }) {
         await page.goto('data:text/html,<main>Cursor demo</main>')
         await ready()
         const cursor = page.locator('[data-pr-demo-cursor="mac-arrow"]')
@@ -286,7 +282,7 @@ test('should trim startup frames to the ready opening state', async () => {
   try {
     await writeFile(
       scenario,
-      `export default async function scenario({ page, ready }) {
+      `${presentationExport}export default async function scenario({ page, ready }) {
         await page.goto('data:text/html,<body style="margin:0;background:white"><script>setTimeout(() => { document.body.style.background = "rgb(0, 200, 0)"; document.body.id = "ready" }, 1400)</script></body>')
         await page.locator('#ready').waitFor()
         await ready()
@@ -320,6 +316,8 @@ test('should trim startup frames to the ready opening state', async () => {
       'error',
       '-i',
       convertedVideo,
+      '-vf',
+      'crop=2:2:800:500',
       '-frames:v',
       '1',
       '-f',
@@ -345,7 +343,7 @@ test('should keep the recorded cursor visible above a popup and modal dialog', a
   try {
     await writeFile(
       scenario,
-      `export default async function scenario({ moveCursor, page }) {
+      `${presentationExport}export default async function scenario({ moveCursor, page }) {
         await page.goto('data:text/html,<button style="position:fixed;left:125px;top:125px">Behind popup</button>')
         await moveCursor(page.getByRole('button', { name: 'Behind popup' }), { pauseAfter: 150 })
         await page.evaluate(() => {
@@ -407,7 +405,7 @@ test('validateDemo executes a scenario without retaining video and forwards fixt
   try {
     await writeFile(
       scenario,
-      `export default async function scenario({ fixture, page, pause }) {
+      `${presentationExport}export default async function scenario({ fixture, page, pause }) {
         await page.goto('data:text/html,<main>Validation</main>')
         if (fixture.documentTitle !== 'Prepared document') {
           throw new Error('fixture data was not forwarded')
@@ -443,7 +441,7 @@ test('should expose scrolling through the real recorder cursor helper during val
   try {
     await writeFile(
       scenario,
-      `export default async function scenario({ expect, page, scroll }) {
+      `${presentationExport}export default async function scenario({ expect, page, scroll }) {
         await page.goto('data:text/html,<div id="scroller" style="width:200px;height:24px;overflow:auto"><div style="width:264px;height:24px">Tabs</div></div>')
         const result = await scroll(page.locator('#scroller'), { axis: 'x', duration: 100, settle: 0 })
         expect(result).toEqual({ position: 64, target: 64 })
@@ -470,7 +468,7 @@ test('should smoothly scroll an open popup menu list', async () => {
   try {
     await writeFile(
       scenario,
-      `export default async function scenario({ expect, page, scroll }) {
+      `${presentationExport}export default async function scenario({ expect, page, scroll }) {
         await page.goto('data:text/html,<main>Popup scroll</main>')
         await page.evaluate(() => {
           const popup = document.createElement('div')
@@ -495,5 +493,42 @@ test('should smoothly scroll an open popup menu list', async () => {
     })
   } finally {
     await rm(directory, { force: true, recursive: true })
+  }
+})
+
+test('should reject missing or disabled chrome before running a scenario in every mode', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'required-demo-chrome-'))
+  try {
+    for (const [name, header] of [
+      ['missing', ''],
+      ['disabled', 'export const presentation = false;'],
+    ]) {
+      const scenario = path.join(directory, `${name}.mjs`)
+      await writeFile(
+        scenario,
+        `${header}\nexport default async function () { throw new Error('Scenario ran without chrome') }`,
+      )
+      for (const method of ['recordDemo', 'previewDemo', 'validateDemo']) {
+        await assert.rejects(
+          () =>
+            recorder[method]({
+              baseURL: 'http://localhost:3000',
+              label: 'required-chrome',
+              scenario,
+              viewport: { width: 640, height: 480 },
+              output:
+                method === 'validateDemo'
+                  ? undefined
+                  : path.join(
+                      directory,
+                      method === 'previewDemo' ? 'preview.png' : 'recording.webm',
+                    ),
+            }),
+          /must export presentation.*change/,
+        )
+      }
+    }
+  } finally {
+    await rm(directory, { recursive: true, force: true })
   }
 })

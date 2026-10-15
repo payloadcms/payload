@@ -37,7 +37,7 @@ async function withScenario({ run }) {
   }
 }
 
-test('should preview the shared presentation while resizing the original application page', async () => {
+test('should preview the shared presentation while resizing the live application iframe', async () => {
   await withScenario({
     run: async ({ directory, scenario }) => {
       const output = path.join(directory, 'preview.png')
@@ -289,8 +289,14 @@ test('should route the existing annotation API into chrome without floating over
         await expect(page.getByRole('textbox')).toBeFocused()
         await showAnnotation({title:'Next step',body:'Fast validation settles immediately.',index:2,total:2})
         await expect(stage.locator('[data-progress-fill]')).toHaveCSS('transition-duration','0s')
-        await showAnnotation({type:'floating',body:'Legacy note.',position:{top:20,right:20}})
-        await expect(stage.locator('[data-note-body]')).toHaveText('Legacy note.')
+        try {
+          await showAnnotation({type:'floating',body:'Legacy note.',position:{top:20,right:20}})
+          throw new Error('Floating annotation was accepted')
+        } catch(error) {
+          if(!error.message.includes('remove type, position, and width')) throw error
+        }
+        await expect(stage.locator('[data-note-title]')).toHaveText('Next step')
+        await showAnnotation({title:'Single note',body:'No progress ring.'})
         await expect(stage.locator('[data-step-progress]')).toBeHidden()
         await expect(page.locator('[data-pr-demo-annotation]')).toHaveCount(0)
         await hideAnnotation()

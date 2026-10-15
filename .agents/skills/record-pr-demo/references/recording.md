@@ -17,9 +17,9 @@ node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs preflight
 
 If something is missing, report it and obtain any required installation approval rather than substituting an unrelated capture method. Keep the dev server running through candidate review and revisions instead of restarting it for every take.
 
-## Optional window chrome
+## Required window chrome
 
-For a fixed canvas, genuine viewport resizing, and a persistent change description beside step notes and an animated progress ring, read [window-chrome.md](window-chrome.md). Use the live browser preview to iterate on the shared component without recording a video. Scenarios opt in through a named `presentation` export; existing scenarios remain page-only.
+For a fixed canvas, genuine viewport resizing, and a persistent change description beside step notes and an animated progress ring, read [window-chrome.md](window-chrome.md). Use the live browser preview to iterate on the shared component without recording a video. Every scenario must export `presentation` with a change kind, title, and description. Validation, preview, and recording always use the shared chrome; there is no page-only mode.
 
 ## Plan the visible story
 
@@ -34,33 +34,34 @@ Prefer 10–45 seconds. Avoid long typing sequences, setup screens, loading wait
 
 ## Editorial annotations over the recording
 
-Annotations are editorial layers over the video, not Payload UI notifications. Use them only when a short explanation helps the reviewer understand the result.
-
-- **With window chrome:** Use the shared annotation panel and its fixed design from [window-chrome.md](window-chrome.md). `showAnnotation({ title, body, index, total })` updates the panel; `hideAnnotation()` clears the step while preserving the change description. Omit index/total for a single note. Do not add a floating layer or scenario CSS. Legacy floating calls are automatically routed to the panel; their position and width are ignored.
-- **Without chrome:** The existing floating annotation API and styles below remain supported.
-- **Floating style:** Payload's `--font-body` face (Inter by default), sentence-case text, and grayscale `--color-bg-elevated`, `--color-text`, `--color-text-secondary`, and `--color-border` tokens. No brand colors or decorative effects. Load the font explicitly when compositing outside the admin page.
-- **Floating annotations:** A compact, content-width card with `--radius-medium` corners, a thin `--color-border` outline, and `--elevation-300-tooltip`. Use a regular-weight 12px title in lighter black and a 13px body with an 18px line height. Bottom notes stay about 48px tall; two-line callouts can be taller.
-
-Keep annotations clear of the cursor and UI needed to understand the demo. Floating layers use `pointer-events: none` and `aria-hidden="true"`; substantive annotation text also appears in the written PR walkthrough or another text alternative. Check placement, contrast, and timing in the rendered MP4.
-
-Without chrome, use `showAnnotation` and `hideAnnotation` to apply the floating styles consistently. Supply only content and placement in the scenario; `showAnnotation` replaces any visible annotation:
+Annotations live in the shared chrome panel above the application. The change title and description stay constant; step titles and bodies update through `showAnnotation` and `hideAnnotation`. Supply content and optional one-based `index`/`total`, which default to 1. A progress ring appears for multiple steps; exact step text remains available to assistive technology. Step text fades on changes, and forward progress eases the ring. Reduced-motion preferences skip these animations.
 
 ```js
 await showAnnotation({
-  type: 'floating',
   title: 'What changed',
-  body: 'Rich text subfields are grouped once per schema map.',
-  position: { top: 270, right: 32 },
+  body: 'The cursor stays visible above popup controls.',
+  index: 1,
+  total: 2,
 })
 await pause(1600)
 await hideAnnotation()
 ```
 
+Do not inject annotations into the application. Floating annotations and the old `type`, `position`, and `width` options are rejected with a migration error. Use the fixed panel component without scenario CSS. Check text fit, contrast, and timing in the rendered MP4, and include substantive explanation in the written PR walkthrough as a text alternative.
+
 ## Scenario module
 
-Create the scenario outside the repository, for example `/tmp/payload-pr-demo-relationship-drawer.mjs`. It must default-export an async function:
+Create the scenario outside the repository, for example `/tmp/payload-pr-demo-relationship-drawer.mjs`. It must export presentation metadata and default-export an async function:
 
 ```js
+export const presentation = {
+  change: {
+    kind: 'Feature',
+    title: 'Create a post',
+    description: 'Open a new post from the collection list.',
+  },
+}
+
 export default async function scenario({ baseURL, click, expect, page, pause, ready }) {
   await page.goto(`${baseURL}/admin/collections/posts`)
 
@@ -77,6 +78,14 @@ export default async function scenario({ baseURL, click, expect, page, pause, re
 When the scenario needs temporary records, export `setup` and `teardown`. The returned fixture is passed to the default scenario function. Hooks receive a Playwright API request context, so they can prepare data without recording setup screens:
 
 ```js
+export const presentation = {
+  change: {
+    kind: 'Feature',
+    title: 'Edit a prepared post',
+    description: 'Open seeded content and demonstrate the editing flow.',
+  },
+}
+
 export async function setup({ request }) {
   const response = await request.post('/api/posts', {
     data: { title: 'Demo post' },
@@ -111,11 +120,11 @@ The recorder supplies:
 - `click(locator, options?)`: smoothly moves to a locator, pauses, clicks, and pauses again;
 - `expect`: Playwright assertions;
 - `moveCursor(locator, options?)`: smoothly points at a locator and pauses without clicking;
-- `page`: the recorded Playwright page;
+- `page`: the application iframe facade; navigation, locators, and evaluation target the app, while input devices and page events use the recording page;
 - `pause(milliseconds = 700)`: a short presentation pause;
 - `ready()`: marks the loaded opening state and holds it for 1.2 seconds; call it exactly once before the first visible interaction;
 - `scroll(locator, options?)`: scrolls the actual overflow range with frame-timed easing, or real wheel input when requested;
-- `showAnnotation(options)` / `hideAnnotation()`: updates or clears the shared panel with presentation chrome, or a styled floating annotation without chrome;
+- `showAnnotation(options)` / `hideAnnotation()`: updates or clears the step note in the shared chrome panel;
 - `label`: the normalized recording label.
 
 The recorder adds a visible cursor above in-page popups and dialogs. Keep the scenario on one page; separate browser-window stitching is outside this skill's current scope.

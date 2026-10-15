@@ -17,9 +17,9 @@ Before showing the video, record its absolute path and SHA-256 digest. Immediate
 
 Do not upload previews, rejected takes, raw WebM recordings, or files the user has not reviewed. Never commit demo media to the repository.
 
-## Optional presentation chrome
+## Required presentation chrome
 
-When a demo needs window chrome, viewport dimensions, or responsive resizing, read [window-chrome.md](references/window-chrome.md). Use its shared component and the live preview; do not invent wrapper CSS for each scenario. Keep change kind/title/description constant for the take, use `showAnnotation({ title, body, index, total })` / `hideAnnotation()` to update the panel as the story progresses (the ring shows progress; visible numbers are omitted), and use `resizeWindow` to demonstrate genuine responsive reflow inside a fixed recording canvas.
+Every scenario must export `presentation` with a change kind (`Feature` or `Fix`), title, and description. Read [window-chrome.md](references/window-chrome.md) and use the shared component and live preview; do not invent wrapper CSS. Recordings, screenshot previews, and validation always mount the chrome. Keep the change description constant and use `showAnnotation({ title, body, index, total })` / `hideAnnotation()` for panel notes. Floating annotations and placement options (`type`, `position`, `width`) are unsupported. Use `resizeWindow` only when responsive reflow is part of the story.
 
 ## Workflow
 
