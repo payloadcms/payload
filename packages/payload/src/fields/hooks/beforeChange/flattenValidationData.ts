@@ -22,6 +22,7 @@ export function flattenValidationData({
   locale,
   parentIsLocalized = false,
 }: Args): JsonObject {
+  // Each locale needs its own projection. Merged contexts also retain source array references.
   const result = deepCopyObjectSimple(data)
   const localizedFields: { name: string; ref: JsonObject }[] = []
 
