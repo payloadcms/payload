@@ -48,6 +48,8 @@ const baseClass = 'collection-edit'
 const PENDING_SUCCESS_TOAST_KEY = 'payload-pending-success-toast'
 
 export type OnSaveContext = {
+  /** Set by the autosave submit. A publish or unpublish must not recreate the lock. */
+  autosave?: boolean
   getDocPermissions?: boolean
   incrementVersionCount?: boolean
 }
@@ -384,7 +386,10 @@ export function DefaultEditView({
           operation,
           renderAllFields: false,
           returnLivePreviewURL: isLivePreviewEnabled && typeofLivePreviewURL === 'function',
-          returnLockStatus: false,
+          // Autosave can land before the debounced form-state request that
+          // creates the lock. Refreshing after an autosave creates it then.
+          // Publish and unpublish omit this flag, so they stay unlocked.
+          returnLockStatus: Boolean(isLockingEnabled && context?.autosave),
           returnPreviewURL: isPreviewEnabled,
           schemaPath: schemaPathSegments.join('.'),
           signal: controller.signal,
