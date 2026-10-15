@@ -30,8 +30,8 @@
     "dotenv": "16.4.7",
     "graphql": "^16.8.1",
     "payload": "workspace:*",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "srvx": "0.11.21",
     "vite": "8.3.0"
   },
