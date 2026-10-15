@@ -25,6 +25,7 @@ import { assertBumpPreconditions } from './lib/assertBumpPreconditions.js'
 import { isVersionPublished } from './lib/getPackageRegistryVersions.js'
 import { getWorkspace } from './lib/getWorkspace.js'
 import { pushWithRebaseRetry } from './lib/pushWithRebaseRetry.js'
+import { runCommand } from './lib/runCommand.js'
 
 type ReleaseBumpDeps = {
   env: NodeJS.ProcessEnv
@@ -94,7 +95,7 @@ async function main(): Promise<void> {
       console.log(`[dry-run] ${cmd}`)
       return
     }
-    execSync(cmd, { cwd: PROJECT_ROOT, stdio: 'inherit' })
+    runCommand({ cmd, cwd: PROJECT_ROOT })
   }
 
   await runReleaseBump({
