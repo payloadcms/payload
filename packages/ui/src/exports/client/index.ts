@@ -407,10 +407,7 @@ export { FolderIcon } from '../../icons/Folder/index.js'
 export { GearIcon } from '../../icons/Gear/index.js'
 export { DocumentIcon } from '../../icons/Document/index.js'
 export { MoveFolderIcon } from '../../icons/MoveFolder/index.js'
-export {
-  ActivityWidgetClient,
-  ActivityWidgetClient as RecentsAndPinnedClient,
-} from '../../widgets/Activity/index.client.js'
+export { ActivityWidgetClient } from '../../widgets/Activity/index.client.js'
 export { GridViewIcon } from '../../icons/GridView/index.js'
 export { TableIcon } from '../../icons/Table/index.js'
 export { WriteIcon } from '../../icons/Write/index.js'
