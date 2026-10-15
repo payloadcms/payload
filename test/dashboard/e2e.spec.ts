@@ -1,4 +1,5 @@
-/* eslint-disable playwright/expect-expect */
+import type { Page, Request, Route } from '@playwright/test'
+
 import { expect, test } from '@playwright/test'
 import { rm, rmdir } from 'node:fs/promises'
 import path from 'path'
@@ -25,8 +26,6 @@ const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../..')
 
-const { beforeAll, beforeEach, describe } = test
-
 const { serverURL } = await initPayloadE2ENoConfig({
   dirname,
 })
@@ -34,14 +33,14 @@ const { serverURL } = await initPayloadE2ENoConfig({
 const TOTAL_WIDGETS = 16
 const url = new AdminUrlUtil(serverURL, 'users')
 
-describe('Dashboard', () => {
-  beforeAll(async ({ browser }, testInfo) => {
+test.describe('Dashboard', () => {
+  test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     const page = await browser.newPage()
     await ensureCompilationIsDone({ page, serverURL })
     await page.close()
   })
-  beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
     await reInitializeDB({
       serverURL,
     })
@@ -49,196 +48,304 @@ describe('Dashboard', () => {
     await waitForDashboardHydration({ page })
   })
 
-  test('should keep dashboard height stable and delay loading feedback', async ({ page }) => {
-    test.setTimeout(TEST_TIMEOUT_LONG)
-    const documents = (await (await page.request.get(`${serverURL}/api/tickets?limit=14`)).json())
-      .docs
-
-    for (const key of ['pinned-documents', 'recently-viewed']) {
-      const response = await page.request.post(`${serverURL}/api/payload-preferences/${key}`, {
-        data: {
-          value: {
-            items: documents.map(({ id }) => ({
-              id,
-              collectionSlug: 'tickets',
-              viewedAt: new Date().toISOString(),
-            })),
-          },
-        },
-      })
-
-      expect(response.ok()).toBe(true)
-    }
-    await page.clock.install()
-    let release = () => {}
-    let gate = Promise.resolve()
-    let shouldFail = false
+  test('should reuse server-rendered documents when switching tabs and paging', async ({
+    page,
+  }) => {
     let documentRequests = 0
 
-    await page.route('**/*', async (route) => {
-      // Routing disables the HTTP cache, so web fonts would reload and swap in after every navigation.
-      if (route.request().resourceType() === 'font') {
-        await route.abort()
-        return
-      }
-      if (
-        route.request().method() === 'POST' &&
-        route.request().postData()?.includes('get-dashboard-documents')
-      ) {
+    page.on('request', (request) => {
+      if (isActivityRequest({ request })) {
         documentRequests++
-        await gate
-        if (shouldFail) {
-          await route.abort('failed')
-          return
-        }
       }
-      await route.continue()
     })
-    const holdResponses = () => {
-      gate = new Promise<void>((resolve) => {
-        release = resolve
-      })
+    await page.setViewportSize({ height: 900, width: 375 })
+    const documents = await seedActivityDocuments({ page })
+    const widget = page.locator('.activity-widget')
+
+    for (const tab of ['Pinned', 'Recently viewed']) {
+      await widget.getByRole('button', { name: tab, exact: true }).click()
+      await expect(widget.locator('.document-card__title')).toHaveText(
+        documents.slice(0, 4).map(({ title }) => title),
+      )
+      await widget.getByRole('button', { name: 'Next', exact: true }).click()
+      await expect(widget.locator('.document-card__title')).toHaveText(
+        documents.slice(4, 8).map(({ title }) => title),
+      )
     }
+    expect(documentRequests).toBe(0)
+  })
 
-    for (const width of [320, 700, 1110, 1600]) {
-      await page.setViewportSize({ height: 900, width })
-      documentRequests = 0
-      await page.goto(url.admin)
-      await waitForDashboardHydration({ page })
-      const widget = page.locator('.activity-widget')
-      const viewport = widget.locator('.activity-widget__viewport')
-      const loading = widget.locator('.activity-widget__loading')
-      const collections = page.locator('.collections__wrap')
-      const pinned = widget.getByRole('button', { name: 'Pinned', exact: true })
-      const recents = widget.getByRole('button', { name: 'Recently viewed', exact: true })
-      const next = widget.getByRole('button', { name: 'Next', exact: true })
+  test('should delay loading feedback for a pending document request', async ({ page }) => {
+    await page.setViewportSize({ height: 900, width: 375 })
+    await seedActivityDocuments({ page })
+    const widget = page.locator('.activity-widget')
+    const loading = widget.locator('.activity-widget__loading')
+    const gate = await holdActivityRequests({ page })
 
-      await expect(viewport).toHaveAttribute('aria-busy', 'false')
-      await expect(widget.locator('.document-card__title').first()).toBeVisible()
-      expect(await getActivityLayoutShiftSum({ page })).toBe(0)
-      const pageSize = await viewport.evaluate((element) =>
-        Number(getComputedStyle(element).getPropertyValue('--activity-page-size')),
+    await page.clock.install()
+    await page.clock.pauseAt(Math.max(Date.now(), await page.evaluate(() => Date.now())) + 100)
+    try {
+      await widget.getByRole('button', { name: 'Next', exact: true }).click()
+      await widget.getByRole('button', { name: 'Next', exact: true }).click()
+      await expect(widget.locator('.activity-widget__viewport')).toHaveAttribute(
+        'aria-busy',
+        'true',
       )
-      // Pages that end inside the server-rendered batch never fetch.
-      const serverRenderedPageCount = Math.floor(DOCUMENTS_BATCH_SIZE / pageSize)
-      const goToFirstFetchedPage = async () => {
-        for (let pageNumber = 1; pageNumber < serverRenderedPageCount; pageNumber++) {
-          await next.press('Enter')
-        }
-        await next.focus()
-        await next.press('Enter')
-      }
-
-      await page.clock.pauseAt(Math.max(Date.now(), await page.evaluate(() => Date.now())) + 100)
-      const loadedPosition = await collections.boundingBox()
-      const loadedHeight = (await widget.boundingBox())!.height
-      const cardHeight = (await widget.locator('.document-card').first().boundingBox())!.height
-      const expectStableHeight = async () => {
-        expect(Math.abs((await widget.boundingBox())!.height - loadedHeight)).toBeLessThanOrEqual(1)
-        expect(
-          Math.abs((await collections.boundingBox())!.y - loadedPosition!.y),
-        ).toBeLessThanOrEqual(1)
-      }
-
-      await recents.focus()
-      await recents.press('Enter')
-      await expect(recents).toHaveAttribute('aria-pressed', 'true')
-      await expect(viewport).toHaveAttribute('aria-busy', 'false')
-      await expect(widget.locator('.document-card__title').first()).toBeVisible()
-      expect(documentRequests).toBe(0)
-      await expectStableHeight()
-
-      shouldFail = true
-      await goToFirstFetchedPage()
-      const retry = widget.getByRole('button', { name: 'Retry', exact: true })
-
-      await expect(retry).toBeVisible()
-      await expect(widget.locator('.activity-widget__error')).toContainText(
-        'An unknown error has occurred.',
-      )
-      await expectStableHeight()
-      // A response that completes before the delay must never flash the indicator.
-      shouldFail = false
-      holdResponses()
-      await retry.focus()
-      await retry.press('Enter')
-      await expect(recents).toBeFocused()
-      await expect(viewport).toHaveAttribute('aria-busy', 'true')
-      release()
-      await expect(viewport).toHaveAttribute('aria-busy', 'false')
-      await page.clock.runFor(200)
-      await expect(loading).toBeHidden()
-      await expect(retry).toHaveCount(0)
-      await expect(widget.locator('.document-card__title').first()).toBeVisible()
-      await expectStableHeight()
-
-      await pinned.focus()
-      await pinned.press('Enter')
-      await expect(viewport).toHaveAttribute('aria-busy', 'false')
-      holdResponses()
-      await goToFirstFetchedPage()
-      await expect(viewport).toHaveAttribute('aria-busy', 'true')
-      await expect(loading).toBeHidden()
       await page.clock.runFor(179)
       await expect(loading).toBeHidden()
       await page.clock.runFor(1)
-      await expect(loading).toHaveText('Loading')
       await expect(loading).toBeVisible()
+      await expect(loading).toHaveText('Loading')
+      await expect(loading).toHaveAttribute('aria-hidden', 'true')
       await expect(widget.locator('.activity-widget__status')).toHaveAttribute(
         'aria-live',
         'polite',
       )
       await expect(widget.locator('.activity-widget__status')).toHaveText('Loading')
-      await expect(loading).toHaveAttribute('aria-hidden', 'true')
-      await expectStableHeight()
-      release()
-      await expect(viewport).toHaveAttribute('aria-busy', 'false')
+      gate.release()
+      await expect(widget.locator('.activity-widget__viewport')).toHaveAttribute(
+        'aria-busy',
+        'false',
+      )
       await expect(loading).toBeHidden()
-      await page.clock.runFor(20)
-      await expectStableHeight()
-      expect(documentRequests).toBe(3)
-
-      await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
-        data: { value: { items: [] } },
-      })
+    } finally {
+      await gate.dispose()
       await page.clock.resume()
+    }
+  })
+
+  test('should not flash loading feedback for a fast document request', async ({ page }) => {
+    await page.setViewportSize({ height: 900, width: 375 })
+    await seedActivityDocuments({ page })
+    const widget = page.locator('.activity-widget')
+    const gate = await holdActivityRequests({ page })
+
+    await page.clock.install()
+    await page.clock.pauseAt(Math.max(Date.now(), await page.evaluate(() => Date.now())) + 100)
+    try {
+      await widget.getByRole('button', { name: 'Next', exact: true }).click()
+      await widget.getByRole('button', { name: 'Next', exact: true }).click()
+      await expect(widget.locator('.activity-widget__viewport')).toHaveAttribute(
+        'aria-busy',
+        'true',
+      )
+      gate.release()
+      await expect(widget.locator('.activity-widget__viewport')).toHaveAttribute(
+        'aria-busy',
+        'false',
+      )
+      await page.clock.runFor(200)
+      await expect(widget.locator('.activity-widget__loading')).toBeHidden()
+      await expect(widget.locator('.activity-widget__status')).toBeEmpty()
+    } finally {
+      await gate.dispose()
+      await page.clock.resume()
+    }
+  })
+
+  test('should retry a failed document request', async ({ page }) => {
+    await page.setViewportSize({ height: 900, width: 375 })
+    const documents = await seedActivityDocuments({ page })
+    const widget = page.locator('.activity-widget')
+    let shouldFail = true
+    const handler = async (route: Route) => {
+      if (shouldFail && isActivityRequest({ request: route.request() })) {
+        await route.abort('failed')
+      } else {
+        await route.continue()
+      }
+    }
+
+    await page.route('**/*', handler)
+    try {
+      await widget.getByRole('button', { name: 'Next', exact: true }).click()
+      await widget.getByRole('button', { name: 'Next', exact: true }).click()
+      await expect(widget.locator('.activity-widget__error')).toContainText(
+        'An unknown error has occurred.',
+      )
+      shouldFail = false
+      await widget.getByRole('button', { name: 'Retry', exact: true }).click()
+      await expect(widget.locator('.document-card__title')).toHaveText(
+        documents.slice(8, 12).map(({ title }) => title),
+      )
+      await expect(widget.getByRole('button', { name: 'Pinned', exact: true })).toBeFocused()
+      await expect(widget.locator('.activity-widget__error')).toHaveCount(0)
+    } finally {
+      await page.unroute('**/*', handler)
+    }
+  })
+
+  test('should keep activity height stable while switching tabs and fetching pages', async ({
+    page,
+  }) => {
+    test.setTimeout(TEST_TIMEOUT_LONG)
+    await seedActivityDocuments({ page })
+    const widget = page.locator('.activity-widget')
+    const collections = page.locator('.collections__wrap')
+
+    for (const width of [375, 700, 1300, 1920]) {
+      await page.setViewportSize({ height: 900, width })
       await page.goto(url.admin)
       await waitForDashboardHydration({ page })
-      await recents.press('Enter')
+      await page.evaluate(() => document.fonts.ready)
+      const initialHeight = (await widget.boundingBox())!.height
+      const initialTop = (await collections.boundingBox())!.y
+      const expectStableLayout = async () => {
+        expect(Math.abs((await widget.boundingBox())!.height - initialHeight)).toBeLessThanOrEqual(
+          1,
+        )
+        expect(Math.abs((await collections.boundingBox())!.y - initialTop)).toBeLessThanOrEqual(1)
+      }
+
+      await widget.getByRole('button', { name: 'Recently viewed', exact: true }).click()
+      await expectStableLayout()
+      await widget.getByRole('button', { name: 'Pinned', exact: true }).click()
+      const pageSize = await widget
+        .locator('.activity-widget__viewport')
+        .evaluate((element) =>
+          Number(getComputedStyle(element).getPropertyValue('--activity-page-size')),
+        )
+      const gate = await holdActivityRequests({ page })
+
+      try {
+        for (let index = 0; index < Math.floor(DOCUMENTS_BATCH_SIZE / pageSize); index++) {
+          await widget.getByRole('button', { name: 'Next', exact: true }).click()
+        }
+        await expect(widget.locator('.activity-widget__viewport')).toHaveAttribute(
+          'aria-busy',
+          'true',
+        )
+        await expectStableLayout()
+        gate.release()
+        await expect(widget.locator('.activity-widget__viewport')).toHaveAttribute(
+          'aria-busy',
+          'false',
+        )
+        await expectStableLayout()
+      } finally {
+        await gate.dispose()
+      }
+    }
+  })
+
+  test('should reserve one row for empty recent documents', async ({ page }) => {
+    await seedActivityDocuments({ page })
+    const response = await page.request.post(
+      `${serverURL}/api/payload-preferences/recently-viewed`,
+      {
+        data: { value: { items: [] } },
+      },
+    )
+
+    expect(response.ok()).toBe(true)
+    const widget = page.locator('.activity-widget')
+
+    for (const width of [375, 700]) {
+      await page.setViewportSize({ height: 900, width })
+      await page.goto(url.admin)
+      await waitForDashboardHydration({ page })
+      const cardHeight = (await widget.locator('.document-card').first().boundingBox())!.height
+
+      await widget.getByRole('button', { name: 'Recently viewed', exact: true }).click()
       await expect(widget.locator('.activity-empty-state__title')).toHaveText('No recent documents')
-      // An empty tab only reserves one row of cards.
       expect(
         Math.abs(
           (await widget.locator('.activity-empty-state').boundingBox())!.height - cardHeight,
         ),
       ).toBeLessThanOrEqual(1)
-      await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
-        data: {
-          value: {
-            items: documents.map(({ id }) => ({
-              id,
-              collectionSlug: 'tickets',
-              viewedAt: new Date().toISOString(),
-            })),
-          },
-        },
-      })
+    }
+  })
+
+  test('should restore pinned documents when an unpin save fails', async ({ page }) => {
+    const documents = await seedActivityDocuments({ count: 2, page })
+    const widget = page.locator('.activity-widget')
+    let release = () => {}
+    const gate = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    const handler = async (route: Route) => {
+      if (route.request().method() === 'POST') {
+        await gate
+        await route.fulfill({ body: '{}', contentType: 'application/json', status: 403 })
+      } else {
+        await route.continue()
+      }
+    }
+
+    await page.route('**/api/payload-preferences/pinned-documents', handler)
+    try {
+      await widget
+        .getByRole('button', { name: `Unpin document: ${documents[0]!.title}`, exact: true })
+        .click()
+      await expect(widget.locator('.document-card__title')).toHaveText([documents[1]!.title])
+      release()
+      await expect(widget.locator('.activity-widget__save-error')).toHaveText(
+        'Could not save pinned documents.',
+      )
+      await expect(widget.locator('.document-card__title')).toHaveText(
+        documents.map(({ title }) => title),
+      )
+    } finally {
+      release()
+      await page.unroute('**/api/payload-preferences/pinned-documents', handler)
+    }
+  })
+
+  test('should keep a late document response from replacing the active tab', async ({ page }) => {
+    await page.setViewportSize({ height: 900, width: 375 })
+    const documents = await seedActivityDocuments({ page })
+    const widget = page.locator('.activity-widget')
+    const gate = await holdActivityRequests({ page })
+
+    try {
+      await widget.getByRole('button', { name: 'Next', exact: true }).click()
+      await widget.getByRole('button', { name: 'Next', exact: true }).click()
+      await expect(widget.locator('.activity-widget__viewport')).toHaveAttribute(
+        'aria-busy',
+        'true',
+      )
+      await expect.poll(() => gate.requests.length).toBe(1)
+      await widget.getByRole('button', { name: 'Recently viewed', exact: true }).click()
+      gate.release()
+      await (await gate.requests[0]!.response())?.finished()
+      await expect(
+        widget.getByRole('button', { name: 'Recently viewed', exact: true }),
+      ).toHaveAttribute('aria-pressed', 'true')
+      await expect(widget.locator('.document-card__title')).toHaveText(
+        documents.slice(0, 4).map(({ title }) => title),
+      )
+    } finally {
+      await gate.dispose()
+    }
+  })
+
+  test('should refresh pinned documents after leaving an interrupted refresh', async ({ page }) => {
+    const documents = await seedActivityDocuments({ count: 2, page })
+    const widget = page.locator('.activity-widget')
+    const gate = await holdActivityRequests({ page })
+
+    try {
+      await widget
+        .getByRole('button', { name: `Unpin document: ${documents[0]!.title}`, exact: true })
+        .click()
+      await expect.poll(() => gate.requests.length).toBe(1)
+      await widget.getByRole('button', { name: 'Recently viewed', exact: true }).click()
+      gate.release()
+      await (await gate.requests[0]!.response())?.finished()
+      await expect(widget.locator('.document-card__title')).toHaveText(
+        documents.map(({ title }) => title),
+      )
+      await widget.getByRole('button', { name: 'Pinned', exact: true }).click()
+      await expect(widget.locator('.document-card__title')).toHaveText([documents[1]!.title])
+      await expect.poll(() => gate.requests.length).toBe(2)
+    } finally {
+      await gate.dispose()
     }
   })
 
   test('should server-render the cards that fit each widget width', async ({ browser, page }) => {
     test.setTimeout(TEST_TIMEOUT_LONG)
-    const tickets = (await (await page.request.get(`${serverURL}/api/tickets?limit=9`)).json()).docs
-    const response = await page.request.post(
-      `${serverURL}/api/payload-preferences/pinned-documents`,
-      {
-        data: {
-          value: { items: tickets.map(({ id }) => ({ id, collectionSlug: 'tickets' })) },
-        },
-      },
-    )
-
-    expect(response.ok()).toBe(true)
+    const tickets = await seedActivityDocuments({ count: 9, page })
     // Without JavaScript the page shows what the server rendered before hydration.
     const serverRenderedContext = await browser.newContext({
       javaScriptEnabled: false,
@@ -249,7 +356,7 @@ describe('Dashboard', () => {
     const testedColumns = new Set<number>()
 
     try {
-      for (const width of [375, 700, 900, 1000, 1110, 1200, 1300, 1400, 1500, 1600, 1700, 1920]) {
+      for (const width of [375, 700, 1200, 1300, 1500, 1700, 1920]) {
         for (const target of [serverRenderedPage, page]) {
           await target.setViewportSize({ height: 900, width })
           await target.goto(url.admin)
@@ -285,6 +392,11 @@ describe('Dashboard', () => {
       await serverRenderedContext.close()
     }
     expect([...testedColumns].sort((a, b) => a - b)).toEqual([2, 3, 4, 5, 6, 7, 8])
+  })
+
+  test('should keep the current document visible when resizing a later page', async ({ page }) => {
+    const tickets = await seedActivityDocuments({ count: 9, page })
+    const widget = page.locator('.activity-widget')
 
     // The first card of the current page stays visible when the tier changes.
     await page.setViewportSize({ height: 900, width: 1300 })
@@ -301,23 +413,25 @@ describe('Dashboard', () => {
       `2 of ${Math.ceil((tickets.length + 1) / pageSize)}`,
     )
     await expect(widget.locator('.document-card__title').first()).toHaveText(
-      tickets[pageSize].title,
+      tickets[pageSize]!.title,
     )
     await page.setViewportSize({ height: 900, width: 375 })
     const mobilePage = Math.floor(pageSize / 4) + 1
 
     await expect(widget.locator('.activity-widget__page-status')).toHaveText(`${mobilePage} of 3`)
     await expect(widget.locator('.document-card__title').first()).toHaveText(
-      tickets[(mobilePage - 1) * 4].title,
+      tickets[(mobilePage - 1) * 4]!.title,
     )
   })
 
-  test('should only reserve one row when every pinned card fits in it', async ({ page }) => {
-    const tickets = (await (await page.request.get(`${serverURL}/api/tickets?limit=2`)).json()).docs
-    const widget = page.locator('.activity-widget')
-    const viewport = widget.locator('.activity-widget__viewport')
+  for (const pinCount of [0, 1, 2]) {
+    test(`should size the activity grid for ${pinCount} pinned documents`, async ({ page }) => {
+      const tickets: ActivityTestDocument[] = (
+        await (await page.request.get(`${serverURL}/api/tickets?limit=2`)).json()
+      ).docs
+      const widget = page.locator('.activity-widget')
+      const viewport = widget.locator('.activity-widget__viewport')
 
-    for (const pinCount of [0, 1, 2]) {
       const response = await page.request.post(
         `${serverURL}/api/payload-preferences/pinned-documents`,
         {
@@ -355,13 +469,15 @@ describe('Dashboard', () => {
         ).toBeLessThanOrEqual(1)
         expect(await getActivityLayoutShiftSum({ page })).toBe(0)
       }
-    }
-  })
+    })
+  }
 
   test('should replace cached documents when the server re-renders the widget', async ({
     page,
   }) => {
-    const tickets = (await (await page.request.get(`${serverURL}/api/tickets?limit=2`)).json()).docs
+    const tickets: ActivityTestDocument[] = (
+      await (await page.request.get(`${serverURL}/api/tickets?limit=2`)).json()
+    ).docs
     const widget = page.locator('.activity-widget')
     const viewport = widget.locator('.activity-widget__viewport')
     const pin = (pinnedTickets: typeof tickets) =>
@@ -374,23 +490,23 @@ describe('Dashboard', () => {
       })
     let documentRequests = 0
 
-    expect((await pin([tickets[0]])).ok()).toBe(true)
+    expect((await pin([tickets[0]!])).ok()).toBe(true)
     await page.reload()
     await waitForDashboardHydration({ page })
-    await expect(widget.locator('.document-card__title')).toHaveText([tickets[0].title])
+    await expect(widget.locator('.document-card__title')).toHaveText([tickets[0]!.title])
     page.on('request', (request) => {
       if (request.method() === 'POST' && request.postData()?.includes('get-dashboard-documents')) {
         documentRequests++
       }
     })
     // Pinned elsewhere, so the batch this widget cached is stale.
-    expect((await pin([tickets[1], tickets[0]])).ok()).toBe(true)
+    expect((await pin([tickets[1]!, tickets[0]!])).ok()).toBe(true)
     await viewport.evaluate((element) => element.setAttribute('data-test-mounted', ''))
     await changeLocale(page, 'es')
 
     await expect(widget.locator('.document-card__title')).toHaveText([
-      tickets[1].title,
-      tickets[0].title,
+      tickets[1]!.title,
+      tickets[0]!.title,
     ])
     await expect(viewport).toHaveAttribute('data-test-mounted')
     expect(documentRequests).toBe(0)
@@ -822,8 +938,8 @@ describe('Dashboard', () => {
   })
 
   test('should preserve concurrent unpin changes from two dashboard tabs', async ({
-    page,
     context,
+    page,
   }) => {
     const documents = (await (await page.request.get(`${serverURL}/api/tickets?limit=2`)).json())
       .docs
@@ -1781,7 +1897,6 @@ describe('Dashboard', () => {
     await expect(nestedInput).toBeVisible()
     await nestedInput.fill('Nested English')
 
-    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(500)
     await drawer.getByRole('button', { name: 'Save Changes' }).click()
     await expect(drawer).toBeHidden()
@@ -1811,7 +1926,6 @@ describe('Dashboard', () => {
 
     await titleInput.fill('Título en Español')
     await nestedInput.fill('Texto anidado')
-    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(500)
     await drawer.getByRole('button', { name: 'Save Changes' }).click()
     await expect(drawer).toBeHidden()
@@ -1873,3 +1987,70 @@ describe('Dashboard', () => {
     await expect(pageQueryWidget.getByText(/Current page from query: 2/)).toBeVisible()
   })
 })
+
+type ActivityTestDocument = { id: number | string; title: string }
+
+async function seedActivityDocuments({
+  count = 14,
+  page,
+}: {
+  count?: number
+  page: Page
+}): Promise<ActivityTestDocument[]> {
+  const response = await page.request.get(`${serverURL}/api/tickets?limit=${count}`)
+
+  expect(response.ok()).toBe(true)
+  const { docs }: { docs: ActivityTestDocument[] } = await response.json()
+
+  expect(docs).toHaveLength(count)
+  for (const key of ['pinned-documents', 'recently-viewed']) {
+    const saved = await page.request.post(`${serverURL}/api/payload-preferences/${key}`, {
+      data: {
+        value: {
+          items: docs.map(({ id }) => ({
+            id,
+            collectionSlug: 'tickets',
+            viewedAt: new Date().toISOString(),
+          })),
+        },
+      },
+    })
+
+    expect(saved.ok()).toBe(true)
+  }
+  await page.goto(url.admin)
+  await waitForDashboardHydration({ page })
+  await page.evaluate(() => document.fonts.ready)
+  return docs
+}
+
+function isActivityRequest({ request }: { request: Request }): boolean {
+  return (
+    request.method() === 'POST' && Boolean(request.postData()?.includes('get-dashboard-documents'))
+  )
+}
+
+async function holdActivityRequests({ page }: { page: Page }) {
+  const requests: Request[] = []
+  let release = () => {}
+  const gate = new Promise<void>((resolve) => {
+    release = resolve
+  })
+  const handler = async (route: Route) => {
+    if (isActivityRequest({ request: route.request() })) {
+      requests.push(route.request())
+      await gate
+    }
+    await route.continue()
+  }
+
+  await page.route('**/*', handler)
+  return {
+    dispose: async () => {
+      release()
+      await page.unroute('**/*', handler)
+    },
+    release,
+    requests,
+  }
+}

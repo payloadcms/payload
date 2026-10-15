@@ -82,12 +82,12 @@ export class DashboardHelper {
    */
   validateLayout = async () => {
     const WIDTH_TO_COLS = {
-      'x-small': 3,
-      small: 4,
-      medium: 6,
-      large: 8,
-      'x-large': 9,
       full: 12,
+      large: 8,
+      medium: 6,
+      small: 4,
+      'x-large': 9,
+      'x-small': 3,
     }
 
     // Wait for the grid to fully settle before measuring (see waitForStableLayout):
@@ -364,36 +364,45 @@ export function getActivityContainerWidth({ widget }: { widget: Locator }): Prom
 }
 
 /**
- * Sums the layout-shift scores recorded since navigation whose sources include the Recents and
- * Pinned widget or the collections below it. This is not CLS: there are no session windows, shifts
- * after recent input still count, and shifts after the call are missed.
+ * Collects dashboard layout shifts from navigation through font loading and two animation frames.
+ * Includes shifts after recent input; this bounded observation is not a full CLS measurement.
  */
 export function getActivityLayoutShiftSum({ page }: { page: Page }): Promise<number> {
-  return page.evaluate(
-    () =>
-      new Promise<number>((resolve) => {
-        let total = 0
+  return page.evaluate(async () => {
+    await document.fonts.ready
 
-        new PerformanceObserver((list) => {
-          for (const entry of list.getEntries() as unknown as Array<{
+    return new Promise<number>((resolve) => {
+      let total = 0
+      const collect = (entries: PerformanceEntry[]) => {
+        for (const entry of entries as Array<
+          {
             sources: Array<{ node: Node | null }>
             value: number
-          }>) {
-            const isDashboardShift = entry.sources.some(({ node }) =>
+          } & PerformanceEntry
+        >) {
+          if (
+            entry.sources.some(({ node }) =>
               (node instanceof Element ? node : node?.parentElement)?.closest(
                 '.activity-widget, .collections__wrap',
               ),
             )
-
-            if (isDashboardShift) {
-              total += entry.value
-            }
+          ) {
+            total += entry.value
           }
-        }).observe({ type: 'layout-shift', buffered: true })
-        // Buffered entries are delivered in the next observer callback, if there are any.
-        setTimeout(() => resolve(total), 100)
-      }),
-  )
+        }
+      }
+      const observer = new PerformanceObserver((list) => collect(list.getEntries()))
+
+      observer.observe({ type: 'layout-shift', buffered: true })
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          collect(observer.takeRecords())
+          observer.disconnect()
+          resolve(total)
+        }),
+      )
+    })
+  })
 }
 
 // utility function to move an item in an array
