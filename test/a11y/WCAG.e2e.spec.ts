@@ -4613,6 +4613,30 @@ test.describe('WCAG 2.2 Level AA', () => {
       expect(readOnlyScan.violations).toEqual([])
     })
 
+    test('should omit typing prompts from empty read-only system instructions', async () => {
+      await page.goto(
+        formatAdminURL({
+          adminRoute: '/admin',
+          path: `/collections/${instructionsCollectionSlug}/global-menu`,
+          serverURL,
+        }),
+      )
+
+      const field = page.locator('.llm-instructions')
+
+      await field
+        .getByRole('tab', { name: 'System instructions (read-only)', exact: true })
+        .press('Enter')
+
+      const editor = field.getByRole('textbox', { name: 'System instructions (read-only)' })
+
+      await expect(editor).toBeVisible()
+      await expect(editor).toBeEmpty()
+      await expect(editor).not.toBeEditable()
+      await expect(editor).not.toHaveAttribute('aria-placeholder')
+      await expect(field.getByText("Start typing, or press '/' for commands...")).toHaveCount(0)
+    })
+
     test('should expose a labelled region for expanded collapsible field content', async () => {
       // PYLD-3818
       await gotoCreatePost({ page, postsURL })
