@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useId } from 'react'
 
 import type { Labels } from '../../types.js'
 import type { PinnedDocumentsController } from './usePinnedDocuments.js'
@@ -24,28 +24,46 @@ export function PinnedDocuments({
   pinnableCollections: string[]
   pinsURL: string
 }) {
+  const emptyStateID = useId()
+
   if (!documents.items) {
     return null
   }
 
+  const isEmpty = documents.totalDocs === 0
   const hasAddPinCard = canAddPin && documents.currentPage === documents.totalPages
   const isDisabled = documents.isBusy || documents.isSaving
   const picker = hasAddPinCard ? (
     <PinDocumentPicker
       collectionSlugs={pinnableCollections}
+      descriptionID={isEmpty ? emptyStateID : undefined}
       isDisabled={isDisabled}
-      isEmpty={documents.totalDocs === 0}
-      labels={labels}
+      label={labels.addPin}
       onError={documents.onPickerError}
       onSelect={(args) => void documents.onAdd(args)}
       pinsURL={pinsURL}
     />
   ) : null
 
-  return documents.items.length || picker ? (
+  const addPinCard = picker ? (
+    isEmpty ? (
+      <EmptyState
+        description={labels.pinnedEmptyDescription}
+        descriptionID={emptyStateID}
+        icon={<PinIcon />}
+        title={labels.pinnedEmpty}
+      >
+        {picker}
+      </EmptyState>
+    ) : (
+      <div className="activity-widget__add-pin">{picker}</div>
+    )
+  ) : null
+
+  return documents.items.length || addPinCard ? (
     <DocumentList
       id={listID}
-      isEmpty={documents.totalDocs === 0}
+      isEmpty={isEmpty}
       items={documents.items}
       label={labels.pinned}
       renderActions={({ item }) => (
@@ -62,7 +80,7 @@ export function PinnedDocuments({
           </span>
         </button>
       )}
-      trailingItem={picker}
+      trailingItem={addPinCard}
     />
   ) : (
     <EmptyState
