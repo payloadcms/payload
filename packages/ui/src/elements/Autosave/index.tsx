@@ -71,25 +71,25 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const outstandingSubmitCountRef = useRef(0)
   const savingStartTimestampRef = useRef(0)
-  const savingTokenRef = useRef(0)
+  const autosaveSequenceRef = useRef(0)
 
   const handleAutosave = useEffectEvent(async () => {
     const hideIndicator = ({
+      autosaveSequence,
       startTimestamp,
-      token,
     }: {
+      autosaveSequence: number
       startTimestamp: number
-      token: number
     }) => {
       const elapsedTime = new Date().getTime() - startTimestamp
       // If request was faster than minimum animation time, animate the difference
       if (elapsedTime < minimumAnimationTime) {
         autosaveTimeoutRef.current = setTimeout(() => {
-          if (token === savingTokenRef.current) {
+          if (autosaveSequence === autosaveSequenceRef.current) {
             setSaving(false)
           }
         }, minimumAnimationTime - elapsedTime)
-      } else if (token === savingTokenRef.current) {
+      } else if (autosaveSequence === autosaveSequenceRef.current) {
         stopAutoSaveIndicator()
       }
     }
@@ -139,7 +139,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     }
 
     const startTimestamp = new Date().getTime()
-    const token = ++savingTokenRef.current
+    const autosaveSequence = ++autosaveSequenceRef.current
     outstandingSubmitCountRef.current += 1
     savingStartTimestampRef.current = startTimestamp
     setSaving(true)
@@ -155,7 +155,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
         disableFormWhileProcessing: false,
         disableSuccessStatus: true,
         method,
-        onStaleRequest: () => reconcileAutosave({ token }),
+        onStaleRequest: () => reconcileAutosave({ autosaveSequence }),
         overrides: {
           _status: 'draft',
         },
@@ -172,8 +172,8 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
       if (outstandingSubmitCountRef.current === 0) {
         hideIndicator({
+          autosaveSequence: autosaveSequenceRef.current,
           startTimestamp: savingStartTimestampRef.current,
-          token: savingTokenRef.current,
         })
       }
     }
@@ -183,8 +183,8 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const previousDebouncedData = useRef(reduceFieldsToValues(debouncedFormState))
   const previousUploadEdits = useRef(uploadEdits)
 
-  const reconcileAutosave = useEffectEvent(({ token }: { token: number }) => {
-    if (token !== savingTokenRef.current) {
+  const reconcileAutosave = useEffectEvent(({ autosaveSequence }: { autosaveSequence: number }) => {
+    if (autosaveSequence !== autosaveSequenceRef.current) {
       return
     }
 
