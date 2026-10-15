@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
-import type { Transporter } from 'nodemailer'
-import type SMTPConnection from 'nodemailer/lib/smtp-connection'
+import type { SendMailOptions, Transporter } from 'nodemailer'
+import type SMTPTransport from 'nodemailer/lib/smtp-transport'
 import type { EmailAdapter } from 'payload'
 
 import nodemailer from 'nodemailer'
@@ -19,7 +19,7 @@ export type NodemailerAdapterArgs = {
    */
   skipVerify?: boolean
   transport?: Transporter
-  transportOptions?: SMTPConnection.Options
+  transportOptions?: SMTPTransport.Options
 }
 
 type NodemailerAdapter = EmailAdapter<unknown>
@@ -47,11 +47,18 @@ export const nodemailerAdapter = async (
             : message.from.address
           : message.from
 
+      // In-Reply-To holds a message ID, so an address object is reduced to its address string
+      const inReplyTo =
+        typeof message.inReplyTo === 'object' ? message.inReplyTo.address : message.inReplyTo
+
+      // Payload's SendEmailOptions is built from @types/nodemailer, which is looser than the
+      // types nodemailer 10 ships (e.g. `path` may be a legacy `Url`). The runtime handling is the same.
       return await transport.sendMail({
         ...message,
         from: from || `${defaultFromName} <${defaultFromAddress}>`,
+        inReplyTo,
         ...(overrideRecipientAddress ? { to: overrideRecipientAddress } : {}),
-      })
+      } as SendMailOptions)
     },
   })
   return adapter

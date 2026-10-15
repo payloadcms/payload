@@ -549,12 +549,9 @@ importers:
   packages/email-nodemailer:
     dependencies:
       nodemailer:
-        specifier: ^9.1.1
-        version: 9.1.1
+        specifier: ^10.1.1
+        version: 10.1.1
     devDependencies:
-      '@types/nodemailer':
-        specifier: ^8.0.0
-        version: 8.0.0
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -1042,12 +1039,9 @@ importers:
         specifier: ^6.1.2
         version: 6.3.16
       nodemailer:
-        specifier: ^9.1.1
-        version: 9.1.1
+        specifier: ^10.1.1
+        version: 10.1.1
     devDependencies:
-      '@types/nodemailer':
-        specifier: ^8.0.0
-        version: 8.0.0
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -2368,7 +2362,7 @@ importers:
         version: link:../packages/eslint-plugin
       '@payloadcms/figma':
         specifier: latest
-        version: 0.1.0-alpha.10(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(@payloadcms/translations@packages+translations)(@payloadcms/ui@packages+ui)(payload@packages+payload)(react@19.2.6)
+        version: 1.0.0-beta.1(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(@payloadcms/translations@packages+translations)(@payloadcms/ui@packages+ui)(payload@packages+payload)(react@19.2.6)
       '@payloadcms/graphql':
         specifier: workspace:*
         version: link:../packages/graphql
@@ -2529,8 +2523,8 @@ importers:
         specifier: 16.3.3
         version: 16.3.3(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(@types/node@25.9.9)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.77.4)
       nodemailer:
-        specifier: ^8.0.11
-        version: 8.0.11
+        specifier: ^10.1.1
+        version: 10.1.1
       object-to-formdata:
         specifier: 4.5.1
         version: 4.5.1
@@ -6646,15 +6640,15 @@ packages:
     resolution: {integrity: sha512-7FNeNl8NCE7aINx7WXiKQrPYZWC/hvrTsmk6zmxbI7LTXE7hVek/n8AfVgpe2y82zl3w0HvCHN0bVKMBoJcC0w==}
     engines: {node: '>= 10.0.0'}
 
-  '@payloadcms/figma@0.1.0-alpha.10':
-    resolution: {integrity: sha512-hEww919pkLs3EOTjqbYSpDcd0U1f1vwGdOX//hi7uel0jgqkFSo0mlJdWQGY8xGnas9hZRv/EYyhr215GQg3BQ==}
+  '@payloadcms/figma@1.0.0-beta.1':
+    resolution: {integrity: sha512-C2XcRfqqU69V/+Nb4PU08ikRJs9AezERrrcoEPfsPkUSQW6bcAhzu5QgCEnrlNf4Ndire8ScOD2unlAf/Fg1kw==}
     hasBin: true
     peerDependencies:
-      '@payloadcms/plugin-cloud-storage': '>=4.0.0-canary.28 <4.0.0-internal'
-      '@payloadcms/richtext-lexical': '>=4.0.0-canary.28 <4.0.0-internal'
-      '@payloadcms/translations': '>=4.0.0-canary.28 <4.0.0-internal'
-      '@payloadcms/ui': '>=4.0.0-canary.28 <4.0.0-internal'
-      payload: '>=4.0.0-canary.28 <4.0.0-internal'
+      '@payloadcms/plugin-cloud-storage': '>=4.0.0-beta.0 <4.0.0-internal'
+      '@payloadcms/richtext-lexical': '>=4.0.0-beta.0 <4.0.0-internal'
+      '@payloadcms/translations': '>=4.0.0-beta.0 <4.0.0-internal'
+      '@payloadcms/ui': '>=4.0.0-beta.0 <4.0.0-internal'
+      payload: '>=4.0.0-beta.0 <4.0.0-internal'
       react: 19.2.6
     peerDependenciesMeta:
       '@payloadcms/plugin-cloud-storage':
@@ -12579,13 +12573,9 @@ packages:
     resolution: {integrity: sha512-mIrE/Cw9y+9Au6dS5vDKDhQza9YvG6w+ZrS6X+ZzA7yFW/soAeaups4Qzn1bL6g5FVy8WtP79+0j82oPIbqRjQ==}
     engines: {node: '>=18'}
 
-  nodemailer@8.0.11:
-    resolution: {integrity: sha512-nrO/pDAUKl+wXX+lx16tDLbnm0fW6sK/x8mgohaCpg+CdCEl482bD4tCuAZk2DyliruiNTIZxRCoWkDqJEnAiA==}
-    engines: {node: '>=6.0.0'}
-
-  nodemailer@9.1.1:
-    resolution: {integrity: sha512-izw9mVKFix6YSnC9eLgV6g1opl9DUlRio9ZNcq+Wu9Ujn2UwF+8Nl0B8nz22kEC+CTZCvinkxwJ0DeFbb6NwcQ==}
-    engines: {node: '>=6.0.0'}
+  nodemailer@10.1.1:
+    resolution: {integrity: sha512-pbqZRoeYUO+1E8TJ/11WeY4D2EVujj1hsYjz3qff/vUFDtGnmi7p3iqzTFslYOfQ6PnjVcWxx/CIUSHCSrO/QA==}
+    engines: {node: '>=20.0.0'}
 
   noms@0.0.0:
     resolution: {integrity: sha512-lNDU9VJaOPxUmXcLb+HQFeUgQQPtMI24Gt6hgfuMHRJgMRHMF/qZ4HJD3GDru4sSw9IQl2jPjAYnQrdIeLbwow==}
@@ -19695,7 +19685,7 @@ snapshots:
       '@parcel/watcher-win32-x64': 2.6.0
     optional: true
 
-  '@payloadcms/figma@0.1.0-alpha.10(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(@payloadcms/translations@packages+translations)(@payloadcms/ui@packages+ui)(payload@packages+payload)(react@19.2.6)':
+  '@payloadcms/figma@1.0.0-beta.1(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(@payloadcms/translations@packages+translations)(@payloadcms/ui@packages+ui)(payload@packages+payload)(react@19.2.6)':
     dependencies:
       '@clack/prompts': 0.11.0
       '@cloudflare/workers-types': 5.20260716.1
@@ -19707,6 +19697,7 @@ snapshots:
       arg: 5.0.2
       conf: 13.1.0
       cross-spawn: 7.0.6
+      dotenv: 16.4.7
       env-paths: 3.0.0
       figures: 6.1.0
       jose: 6.0.12
@@ -26805,9 +26796,7 @@ snapshots:
 
   node-releases@2.0.55: {}
 
-  nodemailer@8.0.11: {}
-
-  nodemailer@9.1.1: {}
+  nodemailer@10.1.1: {}
 
   noms@0.0.0:
     dependencies:
