@@ -2265,7 +2265,13 @@ describe('List View', () => {
           await gridPreferenceSaved
           await expect(page.locator('.document-card')).toHaveCount(1)
         },
-        { allowedNumberOfRequests: 0 },
+        {
+          allowedNumberOfRequests: 0,
+          requestFilter: (request) =>
+            request.method() === 'GET' ||
+            request.url().includes('/_serverFn/') ||
+            request.url().includes('/api/server-function'),
+        },
       )
       await page.getByRole('button', { name: 'Select format doc' }).click()
 

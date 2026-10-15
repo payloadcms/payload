@@ -224,6 +224,16 @@ export function DefaultListView(props: ListViewClientProps) {
     }
   }, [data?.docs, isUploadCollection])
 
+  const documentVersion = React.useMemo(() => {
+    const listDocs = isDataGrouped ? groupedData.flatMap((group) => group.data.docs) : docs
+
+    return JSON.stringify(
+      listDocs
+        ?.map((doc) => [doc.id, doc.updatedAt])
+        .sort(([firstID], [secondID]) => String(firstID).localeCompare(String(secondID))),
+    )
+  }, [docs, groupedData, isDataGrouped])
+
   useEffect(() => {
     if (!isInDrawer) {
       const baseLabel = {
@@ -399,7 +409,10 @@ export function DefaultListView(props: ListViewClientProps) {
                 />
               </DocumentSelectionProvider>
             ) : docs?.length > 0 ? (
-              <RelationshipProvider prefetchedRelationships={prefetchedRelationships}>
+              <RelationshipProvider
+                documentVersion={documentVersion}
+                prefetchedRelationships={prefetchedRelationships}
+              >
                 {shouldRenderGrid && isDataGrouped ? (
                   <GroupedDocumentGrid
                     collectionSlug={collectionSlug}

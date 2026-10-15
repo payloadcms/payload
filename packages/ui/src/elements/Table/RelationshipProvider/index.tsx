@@ -3,7 +3,7 @@ import type { ListViewClientProps, SelectType, TypeWithID } from 'payload'
 
 import { appendUploadSelectFields, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { createContext, use, useCallback, useEffect, useReducer, useState } from 'react'
+import React, { createContext, use, useCallback, useEffect, useReducer } from 'react'
 
 import { useDebounce } from '../../../hooks/useDebounce.js'
 import { useConfig } from '../../../providers/Config/index.js'
@@ -36,11 +36,13 @@ const emptyDocuments: Documents = {}
 
 type RelationshipProviderProps = {
   readonly children?: React.ReactNode
+  documentVersion?: string
   prefetchedRelationships?: ListViewClientProps['prefetchedRelationships']
 }
 
 export const RelationshipProvider: React.FC<RelationshipProviderProps> = ({
   children,
+  documentVersion,
   prefetchedRelationships,
 }) => {
   const currentLocale = useLocale()
@@ -50,15 +52,11 @@ export const RelationshipProvider: React.FC<RelationshipProviderProps> = ({
       ? (prefetchedRelationships?.documents ?? emptyDocuments)
       : emptyDocuments
 
-  const [cache, setCache] = useState({ documents: initialDocuments, version: 0 })
-
-  // Remount cells with new list data so unchanged relationship IDs request their data again.
-  if (cache.documents !== initialDocuments) {
-    setCache({ documents: initialDocuments, version: cache.version + 1 })
-  }
+  // Keep the table mounted when a server render sends equivalent list data (for example, after changing columns).
+  const cacheKey = JSON.stringify([locale, documentVersion, initialDocuments])
 
   return (
-    <RelationshipCache initialDocuments={initialDocuments} key={`${locale}:${cache.version}`}>
+    <RelationshipCache initialDocuments={initialDocuments} key={cacheKey}>
       {children}
     </RelationshipCache>
   )
