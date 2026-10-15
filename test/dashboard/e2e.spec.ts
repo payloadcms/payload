@@ -705,20 +705,21 @@ describe('Dashboard', () => {
     ]) {
       await addPin.click()
       await expect(drawer).toBeVisible()
+      await openSelectMenu({
+        page,
+        selectLocator: drawer.locator('.list-header__select-collection'),
+      })
+      await expect(
+        getSelectMenu({ page }).getByText(
+          /Pinned documents|Preferences|Locked documents|LLM Instructions/i,
+        ),
+      ).toHaveCount(0)
       await selectInput({
         multiSelect: false,
         option: collectionLabel,
         page,
         selectLocator: drawer.locator('.list-header__select-collection'),
       })
-      await openSelectMenu({
-        page,
-        selectLocator: drawer.locator('.list-header__select-collection'),
-      })
-      await expect(
-        getSelectMenu({ page }).getByText(/Pinned documents|Preferences|Locked documents/i),
-      ).toHaveCount(0)
-      await getSelectMenu({ page }).getByText(collectionLabel, { exact: true }).click()
       await expect(drawer.getByRole('link', { name: 'Create New', exact: true })).toHaveCount(0)
       await drawer.getByRole('button', { name: document.title, exact: true }).click()
       await expect(drawer).toBeHidden()
