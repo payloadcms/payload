@@ -352,7 +352,10 @@ test.describe('Linked autosave issues', () => {
       .poll(async () => {
         const saved = await readDocument({ id: doc.id, collection: autosavePostsSlug, page })
 
-        return saved.blocks?.map(({ id, text }) => ({ id, text }))
+        return saved.blocks?.map((block) => ({
+          id: block.id,
+          text: 'text' in block ? block.text : undefined,
+        }))
       })
       .toEqual([
         { id: doc.blocks![2]!.id, text: 'Block C' },

@@ -1,9 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
+import { autosavePostsSlug, draftPostsSlug } from '../../slugs.js'
 import { formMediaSlug } from '../Media/index.js'
 
-export const autosavePostsSlug = 'autosave-posts'
-export const draftPostsSlug = 'draft-posts'
+export { autosavePostsSlug, draftPostsSlug } from '../../slugs.js'
 
 export const AutosavePostsCollection: CollectionConfig = {
   slug: autosavePostsSlug,
@@ -56,12 +56,58 @@ export const AutosavePostsCollection: CollectionConfig = {
           slug: 'text',
           fields: [{ name: 'text', type: 'text' }],
         },
+        {
+          slug: 'number',
+          fields: [{ name: 'number', type: 'number' }],
+        },
       ],
       hooks: {
         beforeChange: [
           ({ value }) =>
             Array.isArray(value)
-              ? value.filter((block) => block.text !== 'Remove on server')
+              ? value
+                  .filter((block) => block.text !== 'Remove on server')
+                  .map((block) =>
+                    block.text === 'Replace on server'
+                      ? { id: block.id, blockType: 'number', number: 42 }
+                      : block,
+                  )
+              : value,
+        ],
+      },
+    },
+    {
+      name: 'groups',
+      type: 'array',
+      admin: { components: { RowLabel: './collections/Posts/ArrayRowLabel.js#ArrayRowLabel' } },
+      fields: [
+        { name: 'text', type: 'text' },
+        {
+          name: 'localState',
+          type: 'ui',
+          admin: {
+            components: { Field: './collections/Autosave/LocalRowState/index.js#LocalRowState' },
+          },
+        },
+        {
+          name: 'items',
+          type: 'array',
+          fields: [{ name: 'text', type: 'text' }],
+          hooks: {
+            beforeChange: [
+              ({ value }) =>
+                Array.isArray(value)
+                  ? value.filter((item) => item.text !== 'Remove on server')
+                  : value,
+            ],
+          },
+        },
+      ],
+      hooks: {
+        beforeChange: [
+          ({ value }) =>
+            Array.isArray(value)
+              ? value.filter((group) => group.text !== 'Remove on server')
               : value,
         ],
       },

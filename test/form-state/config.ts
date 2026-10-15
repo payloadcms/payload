@@ -7,6 +7,7 @@ import { AutosavePostsCollection, DraftPostsCollection } from './collections/Aut
 import { ConditionsCollection } from './collections/Conditions/index.js'
 import { FormMediaCollection } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
+import { permissionSettingsSlug } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -19,6 +20,10 @@ export default buildConfigWithDefaults({
           formRequests: {
             Component: './components/FormRequests/index.js#FormRequests',
             path: '/form-requests',
+          },
+          permissionRequests: {
+            Component: './components/PermissionRequests/index.js#PermissionRequests',
+            path: '/permission-requests',
           },
         },
       },
@@ -33,6 +38,8 @@ export default buildConfigWithDefaults({
       ConditionsCollection,
       FormMediaCollection,
     ],
+    globals: [{ slug: permissionSettingsSlug, fields: [{ name: 'title', type: 'text' }] }],
+    localization: { defaultLocale: 'en', locales: ['en', 'fr'] },
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },

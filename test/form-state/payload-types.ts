@@ -108,10 +108,14 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
-  locale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'fr') | ('en' | 'fr')[];
+  globals: {
+    'permission-settings': PermissionSetting;
+  };
+  globalsSelect: {
+    'permission-settings': PermissionSettingsSelect<false> | PermissionSettingsSelect<true>;
+  };
+  locale: 'en' | 'fr';
   widgets: {
     welcome: WelcomeWidget;
     collections: CollectionsWidget;
@@ -264,7 +268,19 @@ export interface AutosavePost {
   content?: string | null;
   slug?: string | null;
   media?: (string | null) | FormMedia;
-  blocks?: Text[] | null;
+  blocks?: (Text | Number)[] | null;
+  groups?:
+    | {
+        text?: string | null;
+        items?:
+          | {
+              text?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
   restrictedValue?: string | null;
   createdBy?: {
     relationTo: 'users';
@@ -332,7 +348,19 @@ export interface DraftPost {
   content?: string | null;
   slug?: string | null;
   media?: (string | null) | FormMedia;
-  blocks?: Text[] | null;
+  blocks?: (Text | Number)[] | null;
+  groups?:
+    | {
+        text?: string | null;
+        items?:
+          | {
+              text?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
   restrictedValue?: string | null;
   createdBy?: {
     relationTo: 'users';
@@ -558,6 +586,25 @@ export interface AutosavePostsSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        number?:
+          | T
+          | {
+              number?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  groups?:
+    | T
+    | {
+        text?: T;
+        items?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        id?: T;
       };
   restrictedValue?: T;
   createdBy?: T;
@@ -589,6 +636,25 @@ export interface DraftPostsSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        number?:
+          | T
+          | {
+              number?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  groups?:
+    | T
+    | {
+        text?: T;
+        items?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        id?: T;
       };
   restrictedValue?: T;
   createdBy?: T;
@@ -723,6 +789,36 @@ export interface PayloadLlmInstructionsSelect<T extends boolean = true> {
   updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "permission-settings".
+ */
+export interface PermissionSetting {
+  id: string;
+  title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "permission-settings_select".
+ */
+export interface PermissionSettingsSelect<T extends boolean = true> {
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
