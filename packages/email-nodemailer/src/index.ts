@@ -47,13 +47,10 @@ export const nodemailerAdapter = async (
             : message.from.address
           : message.from
 
-      const inReplyTo =
-        typeof message.inReplyTo === 'object' ? message.inReplyTo.address : message.inReplyTo
-
       return await transport.sendMail({
         ...message,
         from: from || `${defaultFromName} <${defaultFromAddress}>`,
-        inReplyTo,
+        ...(typeof message.inReplyTo === 'object' ? { inReplyTo: message.inReplyTo.address } : {}),
         ...(overrideRecipientAddress ? { to: overrideRecipientAddress } : {}),
       } as SendMailOptions)
     },
