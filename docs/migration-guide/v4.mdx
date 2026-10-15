@@ -771,7 +771,7 @@ export const myPlugin = definePlugin<MyPluginOptions>({
 
 ### Admin routing is now framework-agnostic
 
-`@payloadcms/ui` no longer depends on `next` directly. Custom admin components (field components, custom views, plugins) that previously imported router hooks or the `Link` component from `next/*` must now import the framework-agnostic equivalents from `@payloadcms/ui`. Behavior is identical when running on Next.js — the `NextRouterAdapter` shipped by `@payloadcms/next` wires `next/navigation` hooks and `next/link` into the same context — but ui code can now also run on non-Next adapters (e.g. TanStack Start) without modification.
+`@payloadcms/ui` no longer depends on `next` directly. Custom admin components (field components, custom views, plugins) that previously imported router hooks or the `Link` component from `next/*` must now import the framework-agnostic equivalents from `@payloadcms/ui`. Behavior is identical when running on Next.js — the `NextRouterAdapter` shipped by `@payloadcms/next` wires `next/navigation` hooks and `next/link` into the same context — but UI code can now also run on non-Next adapters such as TanStack Start without modification.
 
 **Hooks** — import from `@payloadcms/ui` instead of `next/navigation`:
 
