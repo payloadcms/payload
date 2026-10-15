@@ -2,11 +2,16 @@ import type { CollectionAfterChangeHook } from 'payload'
 
 import { definePlugin } from 'payload'
 
+import { deepMergeSimple } from 'payload/shared'
+
 import type { SanitizedSearchPluginConfig, SearchPluginConfig } from './types.js'
 
 import { deleteFromSearch } from './Search/hooks/deleteFromSearch.js'
 import { syncWithSearch } from './Search/hooks/syncWithSearch.js'
 import { generateSearchCollection } from './Search/index.js'
+import { translations } from './translations/index.js'
+
+export { translations as searchTranslations } from './translations/index.js'
 
 type CollectionAfterChangeHookArgs = Parameters<CollectionAfterChangeHook>[0]
 
@@ -83,6 +88,10 @@ export const searchPlugin = definePlugin<SearchPluginConfig>({
           ...(collectionsWithSearchHooks || []),
           generateSearchCollection(pluginConfig),
         ],
+        i18n: {
+          ...config.i18n,
+          translations: deepMergeSimple(translations, config.i18n?.translations ?? {}),
+        },
       }
     }
 
