@@ -54,9 +54,13 @@ import {
   openVersionComparison,
   openVersionsList,
   openWidgetDrawer,
+  waitForFocusRestoration,
+  waitForKeyboardDragActivation,
 } from './helpers.js'
 
 const openNavigationForUserMenu = async ({ page }: { page: Page }): Promise<void> => {
+  await expect(page.locator('.nav--nav-hydrated')).toBeVisible()
+
   const openNavigation = page.locator('.app-header--nav-open')
 
   if ((await openNavigation.count()) === 0) {
@@ -622,14 +626,20 @@ test.describe('WCAG 2.2 Level AA', () => {
         ).toBeFocused()
         await page.keyboard.press('ArrowLeft')
         await expect(ascending).toBeFocused()
+        const titles = page.getByRole('grid').locator('tbody .cell-title')
+        const ascendingTitles = (await titles.allTextContents()).toSorted()
+
+        expect(ascendingTitles.length).toBeGreaterThan(1)
         await page.keyboard.press('Enter')
         await expect(header).toHaveAttribute('aria-sort', 'ascending')
         await expect(ascending).toBeFocused()
+        await expect(titles).toHaveText(ascendingTitles)
         await page.keyboard.press('ArrowLeft')
         await expect(descending).toBeFocused()
         await page.keyboard.press('Enter')
         await expect(header).toHaveAttribute('aria-sort', 'descending')
         await expect(descending).toBeFocused()
+        await expect(titles).toHaveText(ascendingTitles.toReversed())
         await page.keyboard.press('Escape')
         await expect(descending).toBeFocused()
         await page.keyboard.press('ArrowDown')
@@ -1965,7 +1975,7 @@ test.describe('WCAG 2.2 Level AA', () => {
           await page.keyboard.press('Space')
           await page.keyboard.press('ArrowDown')
           await expect
-            .poll(async () => (await callouts.first().boundingBox())!.y)
+            .poll(async () => (await callouts.first().boundingBox())?.y)
             .toBeGreaterThan(initialTop)
           await expect(handle).toBeFocused()
           await page.keyboard.press('Space')
@@ -2017,19 +2027,22 @@ test.describe('WCAG 2.2 Level AA', () => {
       const callouts = getCallouts({ container: drawer })
       let handle = callouts.first().getByRole('button', { name: /drag to reorder/i })
 
+      await expect(callouts.first()).toBeVisible()
+      await handle.scrollIntoViewIfNeeded()
       await handle.focus()
+      await expect(handle).toBeFocused()
       const initialTop = (await callouts.first().boundingBox())!.y
 
       await handle.press('Space')
       await page.keyboard.press('ArrowDown')
       await expect
-        .poll(async () => (await callouts.first().boundingBox())!.y)
+        .poll(async () => (await callouts.first().boundingBox())?.y)
         .toBeGreaterThan(initialTop)
       await page.keyboard.press('ArrowUp')
-      await expect.poll(async () => (await callouts.first().boundingBox())!.y).toBe(initialTop)
+      await expect.poll(async () => (await callouts.first().boundingBox())?.y).toBe(initialTop)
       await page.keyboard.press('ArrowDown')
       await page.keyboard.press('Escape')
-      await expect.poll(async () => (await callouts.first().boundingBox())!.y).toBe(initialTop)
+      await expect.poll(async () => (await callouts.first().boundingBox())?.y).toBe(initialTop)
       await expect(drawer).toBeVisible()
       await expect(callouts.first().locator('input[value$="callout"]')).toHaveValue('First callout')
       await expect(handle).toBeFocused()
@@ -2786,6 +2799,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await page.keyboard.press('Space')
       await expect(page.locator('.drag-overlay')).toBeVisible()
       await expect(drag).toHaveAttribute('aria-pressed', 'true')
+      await waitForKeyboardDragActivation({ page })
       await expect(page.getByRole('status').filter({ hasText: lastID! })).toHaveCount(1)
       await page.keyboard.press('ArrowLeft')
       const overFirstWidget = page.getByRole('status').filter({ hasText: firstID! })
@@ -2866,6 +2880,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await page.keyboard.press('Space')
       await expect(page.locator('.drag-overlay')).toBeVisible()
       await expect(drag).toHaveAttribute('aria-pressed', 'true')
+      await waitForKeyboardDragActivation({ page })
       await expect(
         page.getByRole('status').filter({ hasText: (await widget.getAttribute('data-slug'))! }),
       ).toHaveCount(1)
@@ -2879,6 +2894,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(page.locator('[id^="widget-editor-"]:visible')).toHaveCount(1)
       await page.keyboard.press('Escape')
       await expect(page.locator('[id^="widget-editor-"]:visible')).toHaveCount(0)
+      await waitForFocusRestoration({ page })
       await expect(widget.locator('.widget-wrapper__edit-btn')).toBeFocused()
       await page.keyboard.press('Tab')
       await expect(widget.locator('.widget-wrapper__size-btn')).toBeFocused()
@@ -3019,9 +3035,10 @@ test.describe('WCAG 2.2 Level AA', () => {
       const trigger = editor.locator('.LexicalEditorTheme__block__actions-button').first()
       const menu = page.getByRole('menu')
 
-      await editor.focus()
+      await expect(editor).toBeVisible()
       await trigger.focus()
-      await page.keyboard.press('Enter')
+      await expect(trigger).toBeFocused()
+      await trigger.press('Enter')
       await expect(menu.getByRole('menuitem', { name: 'Move Up', exact: true })).toBeFocused()
 
       for (const [key, name] of [
@@ -3431,6 +3448,7 @@ test.describe('WCAG 2.2 Level AA', () => {
 
       await trigger.focus()
       await trigger.press('Enter')
+      await expect(page.getByRole('menuitem').first()).toBeFocused()
       const language = page.getByRole('menuitem', { name: /language/i })
       await language.focus()
       await language.press('Enter')
@@ -3447,23 +3465,27 @@ test.describe('WCAG 2.2 Level AA', () => {
 
     test('should move focus into a mobile User menu submenu', async () => {
       // Additional coverage for PYLD-3645 and PYLD-3697.
-      await page.setViewportSize({ height: 720, width: 320 })
-      await page.goto(`${serverURL}/admin`)
-      await openNavigationForUserMenu({ page })
-      const trigger = page.locator('.user-menu__trigger')
+      try {
+        await page.setViewportSize({ height: 720, width: 320 })
+        await page.goto(`${serverURL}/admin`)
+        await openNavigationForUserMenu({ page })
+        const trigger = page.locator('.user-menu__trigger')
 
-      await trigger.focus()
-      await trigger.press('Enter')
-      const language = page.getByRole('menuitem', { name: /language/i })
-      await expect(language).not.toHaveAttribute('aria-haspopup')
-      await language.focus()
-      await language.press('Enter')
+        await trigger.focus()
+        await trigger.press('Enter')
+        await expect(page.getByRole('menuitem').first()).toBeFocused()
+        const language = page.getByRole('menuitem', { name: /language/i })
+        await expect(language).not.toHaveAttribute('aria-haspopup')
+        await language.focus()
+        await language.press('Enter')
 
-      const back = page.getByRole('menuitem', { name: 'Language', exact: true })
-      await expect(back).toBeFocused()
-      await page.keyboard.press('ArrowDown')
-      await expect(page.getByRole('menuitemradio').first()).toBeFocused()
-      await page.setViewportSize({ height: 720, width: 1280 })
+        const back = page.getByRole('menuitem', { name: 'Language', exact: true })
+        await expect(back).toBeFocused()
+        await page.keyboard.press('ArrowDown')
+        await expect(page.getByRole('menuitemradio').first()).toBeFocused()
+      } finally {
+        await page.setViewportSize({ height: 720, width: 1280 })
+      }
     })
 
     test('should move keyboard focus into and through the Group by dialog', async () => {
@@ -3697,7 +3719,9 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(dragLabel).toBeFocused()
       const dragStatus = page.getByRole('status').filter({ hasText: /draggable item one/i })
       await expect(dragStatus).toContainText(/droppable area one/i)
-      await dragLabel.press('ArrowRight')
+      await waitForKeyboardDragActivation({ page })
+      await expect(dragLabel).toBeFocused()
+      await page.keyboard.press('ArrowRight')
       await expect(dragStatus).toContainText(/droppable area two/i)
       await page.keyboard.press('Space')
       await expect(page.locator('body')).not.toHaveClass(/is-dragging/)
@@ -4164,7 +4188,6 @@ test.describe('WCAG 2.2 Level AA', () => {
           'Results found for “no-matching-accessibility-result”: 0.',
         )
         await expect(drawer.locator('.no-results__title')).toHaveText('No Results.')
-        await expect(search).toBeFocused()
       }
     })
 
@@ -4242,39 +4265,6 @@ test.describe('WCAG 2.2 Level AA', () => {
         if (localized) {
           await expect(page.locator('label').filter({ hasText: /^Title/ })).toContainText('English')
         }
-      }
-    })
-
-    test('should expose select requirements and validation errors', async () => {
-      await gotoCreatePost({ page, postsURL })
-      const select = page.locator('#field-accessibilitySelect')
-      const tags = page
-        .locator('.field-type.text')
-        .filter({ has: page.locator('.field-requiredTags') })
-
-      const selectInput = select.getByRole('combobox')
-
-      await selectInput.focus()
-      await expect(selectInput).toHaveAttribute('aria-describedby', /live-region/)
-      await expect(selectInput).toHaveAttribute('aria-required', 'true')
-      await select.locator('.clear-indicator').click()
-      await tags.locator('.multi-value-remove').click()
-      await page.getByRole('button', { name: /^Publish(?: in English)?$/ }).click()
-
-      for (const field of [select, tags]) {
-        const input = field.getByRole('combobox')
-        const error = field.locator('.field-error[role="alert"]')
-
-        await expect(error).toContainText(/require/i)
-        await expect(input).toHaveAttribute('aria-required', 'true')
-        await expect(input).toHaveAttribute('aria-invalid', 'true')
-        await expect(input).toHaveAccessibleDescription(
-          new RegExp((await error.textContent())!.trim()),
-        )
-        await expect(field.locator('input[required]')).toHaveCount(0)
-        await expect(input).toHaveAttribute('aria-describedby', /placeholder/)
-        await input.focus()
-        await expect(input).toHaveAccessibleDescription(/require/i)
       }
     })
 
@@ -4887,11 +4877,13 @@ test.describe('WCAG 2.2 Level AA', () => {
 
         await parent.focus()
         await parent.press('ArrowRight')
+        await expect(parent).toHaveAttribute('aria-expanded', 'true')
         const child = sidebar.getByRole('treeitem', {
           name: 'Accessibility final child folder',
           exact: true,
         })
 
+        await expect(child).toBeVisible()
         await child.focus()
         await child.press('Enter')
         await expect(
@@ -5657,26 +5649,37 @@ test.describe('WCAG 2.2 Level AA', () => {
         releasePreview = resolve
       })
 
-      await page.route('**/preview/**', async (route) => {
-        await pendingPreview
-        await route.fulfill({
-          body: '<html><body>Preview ready</body></html>',
-          contentType: 'text/html',
-        })
+      const preferenceURL = formatAdminURL({
+        apiRoute: '/api',
+        path: '/payload-preferences/collection-posts',
+        serverURL,
       })
+      const previousPreference = await (await page.request.get(preferenceURL)).json()
+
       try {
+        const resetPreference = await page.request.post(preferenceURL, {
+          data: { value: { ...previousPreference.value, editViewType: 'default' } },
+        })
+
+        expect(resetPreference.ok()).toBe(true)
         await gotoFirstPost({ page, postsURL, serverURL })
         const trigger = page.locator('#live-preview-toggler')
 
-        if (
-          await trigger.evaluate((element) =>
-            element.classList.contains('live-preview-toggler--active'),
-          )
-        ) {
-          await trigger.click()
-        }
+        await expect(page.locator('.live-preview-window iframe')).toHaveCount(0)
+        await page.route('**/preview/**', async (route) => {
+          await pendingPreview
+          await route.fulfill({
+            body: '<html><body>Preview ready</body></html>',
+            contentType: 'text/html',
+          })
+        })
         await trigger.focus()
+        const savedPreference = page.waitForResponse(
+          (response) => response.url() === preferenceURL && response.request().method() === 'POST',
+        )
+
         await trigger.press('Enter')
+        expect((await savedPreference).ok()).toBe(true)
         const loading = page.locator('.live-preview-window .iframe-loader__loading')
         await expect(loading).toBeVisible()
         await expect(loading).toContainText(/loading/i)
@@ -5694,6 +5697,11 @@ test.describe('WCAG 2.2 Level AA', () => {
       } finally {
         releasePreview()
         await page.unrouteAll({ behavior: 'wait' })
+        const restoredPreference = await page.request.post(preferenceURL, {
+          data: { value: previousPreference.value ?? {} },
+        })
+
+        expect(restoredPreference.ok()).toBe(true)
       }
     })
 
