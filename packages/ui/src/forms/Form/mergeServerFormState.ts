@@ -102,15 +102,12 @@ export const mergeServerFormState = ({
     let shouldAcceptValue =
       incomingField.addedByServer || acceptValues === true || isAutosaveResponse
 
-    /**
-     * For array row fields, verify the row IDs match at the given index before accepting
-     * server values. If rows were reordered or deleted while the request was in-flight,
-     * the same index may refer to different rows, and accepting the server value would
-     * overwrite the wrong row's data.
-     *
-     * This guard only applies during autosave. On explicit save (acceptValues === true),
-     * the server response is authoritative and this check is bypassed.
-     */
+    // For array row fields, verify the row IDs match at the given index before accepting server values.
+    // If rows were reordered or deleted while the request was in-flight,
+    // the same index may refer to different rows, and accepting the server value would overwrite the wrong row's data.
+    //
+    // This guard only applies during autosave.
+    // On explicit save (acceptValues === true), the server response is authoritative and this check is bypassed.
     if (shouldAcceptValue && !incomingField.addedByServer && acceptValues !== true) {
       const parsed = parseArrayFieldPath(path)
       if (parsed) {
@@ -127,11 +124,8 @@ export const mergeServerFormState = ({
     let sanitizedIncomingField = incomingField
 
     if (!shouldAcceptValue) {
-      /**
-       * Note: do not delete properties off `incomingField` as this will mutate the original object
-       * Instead, omit them from the destructured object by excluding specific keys
-       * This will also ensure we don't set `undefined` into the result unnecessarily
-       */
+      // Do not delete properties from `incomingField`; this would mutate the original object.
+      // Omit them via destructuring to avoid introducing unnecessary `undefined` values.
       const { initialValue, value, ...rest } = incomingField
       sanitizedIncomingField = rest
     }
@@ -149,15 +143,13 @@ export const mergeServerFormState = ({
       newState[path].errorPaths = []
     }
 
-    /**
-     * Deeply merge the rows array to ensure changes to local state are not lost while the request was pending
-     * For example, the server response could come back with a row which has been deleted on the client
-     * Loop over the incoming rows, if it exists in client side form state, merge in any new properties from the server
-     * Note: read `currentState` and not `newState` here, as the `rows` property have already been merged above
-     *
-     * On explicit save (acceptValues === true), the server is authoritative - accept server row order.
-     * On autosave (acceptValues !== true), the client is source of truth - use ID-based matching.
-     */
+    // Deeply merge the rows array to preserve local changes made while the request was pending.
+    // For example, the server response could contain a row that was deleted locally.
+    // Merge server properties into matching local rows.
+    // Read `currentState`, since incoming rows have already been assigned to `newState`.
+    //
+    // On explicit save (acceptValues === true), the server is authoritative - accept server row order.
+    // On autosave (acceptValues !== true), the client is source of truth - use ID-based matching.
     if (Array.isArray(incomingField.rows) && path in currentState) {
       if (acceptValues === true) {
         if (incomingField.disableFormData === undefined) {
@@ -183,24 +175,17 @@ export const mergeServerFormState = ({
               ...row,
             }
           } else if (row.addedByServer) {
-            /**
-             * Note: This is a known limitation of computed array and block rows
-             * If a new row was added by the server, we append it to the _end_ of this array
-             * This is because the client is the source of truth, and it has arrays ordered in a certain position
-             * For example, the user may have re-ordered rows client-side while a long running request is processing
-             * This means that we _cannot_ slice a new row into the second position on the server, for example
-             * By the time it gets back to the client, its index is stale
-             */
+            // Computed array and block rows are appended to the end of the local array.
+            // Local rows may have been reordered while the request was pending,
+            // so the server's insertion index may be stale and cannot safely determine the local position.
             const newRow = { ...row }
             delete newRow.addedByServer
             newState[path].rows.push(newRow)
           }
         })
 
-        /**
-         * Sync the value field to match the actual row count after merging.
-         * Client is source of truth for row count when rows were added/removed during the request.
-         */
+        // Sync the value field to match the actual row count after merging.
+        // Client is source of truth for row count when rows were added/removed during the request.
         if ('value' in incomingField && newState[path].rows.length !== incomingField.value) {
           newState[path].value = newState[path].rows.length
         }
@@ -217,11 +202,8 @@ export const mergeServerFormState = ({
       newState[path].passesCondition = true
     }
 
-    /**
-     * Undefined values for blocksFilterOptions coming back should be treated as "all blocks allowed" and
-     * should always be merged in.
-     * Without this, an undefined value coming back will incorrectly be ignored, and the previous filter will remain.
-     */
+    // Undefined values for blocksFilterOptions coming back should be treated as "all blocks allowed" and should always be merged in.
+    // Without this, an undefined value coming back will incorrectly be ignored, and the previous filter will remain.
     if (!incomingField.blocksFilterOptions) {
       delete newState[path].blocksFilterOptions
     }
@@ -268,5 +250,7 @@ export const mergeServerFormState = ({
     }
   }
 
+  // Return the original object reference if the state is unchanged.
+  // This will avoid unnecessary re-renders and dependency updates.
   return dequal(newState, currentState) ? currentState : newState
 }
