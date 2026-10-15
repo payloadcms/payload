@@ -101,14 +101,11 @@ The `_payload` directory contains the routes that power the Admin Panel: `admin.
 
 ### Shared Behavior
 
-<Banner type="warning">
-  **Note:** If you don't intend to use the Admin Panel or
-  [REST](../rest-api/overview)/[GraphQL](../graphql/overview) APIs, you can opt
-  out by deleting their corresponding directories (Next.js) or route files
-  (TanStack Start). On TanStack Start, `api.$.ts` serves both REST and GraphQL
-  together, so deleting it disables both at once. The overhead, either way, is
-  completely constrained to these routes and will not slow down or affect
-  Payload when not in use.
+If you don't intend to use the Admin Panel or [REST](../rest-api/overview)/[GraphQL](../graphql/overview) APIs, you can opt out by deleting their corresponding directories or route files. The overhead is completely constrained to these routes and will not slow down or affect Payload when not in use.
+
+<Banner type="info">
+  **TanStack Start:** `api.$.ts` serves both REST and GraphQL, so deleting it
+  disables both APIs.
 </Banner>
 
 Finally, `custom.css` is where you can add or override globally-oriented styles in the Admin Panel, such as modify the color palette. Customizing the look and feel through CSS alone is a powerful feature of the Admin Panel, [more on that here](./customizing-css).
