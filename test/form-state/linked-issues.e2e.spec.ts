@@ -359,6 +359,11 @@ test.describe('Linked autosave issues', () => {
         { id: doc.blocks![1]!.id, text: 'Block B' },
         { id: expect.any(String), text: 'Block D' },
       ])
+    const saved = await readDocument({ id: doc.id, collection: autosavePostsSlug, page })
+    const savedIDs = saved.blocks!.map(({ id }) => id)
+
+    expect(new Set(savedIDs).size).toBe(3)
+    expect(doc.blocks!.map(({ id }) => id)).not.toContain(savedIDs[2])
     await page.reload()
     await waitForFormReady(page)
     await expect(page.locator('#field-blocks__0__text')).toHaveValue('Block C')
@@ -436,6 +441,43 @@ test.describe('Linked autosave issues', () => {
     await expect(page.locator('#field-type-custom')).toBeChecked()
   })
 
+  test('should render editable block fields when added before the form-state debounce (#18638)', async ({
+    page,
+  }) => {
+    const doc = await payload.create({
+      collection: postsSlug,
+      data: { title: 'Initial title' },
+      overrideAccess: true,
+    })
+
+    await page.goto(postsURL.edit(doc.id))
+    await waitForFormReady(page)
+
+    const heldRequests = await holdFormState({ documentURL: postsURL.edit(doc.id), page })
+    const state = heldRequests[0]!
+
+    await pauseClock({ page })
+    await page.locator('#field-title').fill('Updated immediately before adding a block')
+    await addBlock({ blockToSelect: 'Text', fieldName: 'blocks', page })
+    await page.clock.runFor(1000)
+    await state.captured
+    state.release()
+    await state.finished
+    await page.clock.runFor(1000)
+
+    const text = page.locator('#field-blocks__0__text')
+
+    await expect(text).toBeEditable()
+    await text.fill('Editable before the debounce')
+    await page.locator('#action-save').click()
+    await expect
+      .poll(async () => (await readDocument({ id: doc.id, collection: postsSlug, page })).blocks)
+      .toMatchObject([{ blockType: 'text', text: 'Editable before the debounce' }])
+    await page.reload()
+    await waitForFormReady(page)
+    await expect(text).toHaveValue('Editable before the debounce')
+  })
+
   for (const order of ['form state before save', 'form state during save'] as const) {
     test(`should retain server validation errors with ${order} (#18425)`, async ({ page }) => {
       const doc = await createDraftPost()
@@ -473,8 +515,13 @@ test.describe('Linked autosave issues', () => {
       await save.finished
 
       const titleField = page.locator('#field-title')
+      const error = page
+        .locator('.field-type.text')
+        .filter({ has: titleField })
+        .locator('.field-error')
 
       await expect(titleField).toHaveAttribute('aria-invalid', 'true')
+      await expect(error).toHaveText('Must start with "ok".')
 
       const errorMonitor = await titleField.evaluateHandle((input) => {
         let didClearError = false
@@ -510,6 +557,7 @@ test.describe('Linked autosave issues', () => {
       expect(await errorMonitor.evaluate((monitor) => monitor.stop())).toBe(false)
       await errorMonitor.dispose()
       await expect(titleField).toHaveAttribute('aria-invalid', 'true')
+      await expect(error).toHaveText('Must start with "ok".')
       await expect(page.locator('#action-save')).toBeEnabled()
     })
   }
