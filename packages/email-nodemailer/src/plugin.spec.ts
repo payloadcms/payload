@@ -75,5 +75,19 @@ describe('email-nodemailer', () => {
 
       expect(sendMail.mock.calls[0]?.[0]).toMatchObject({ inReplyTo: '<original@example.com>' })
     })
+
+    it('should keep the transport default inReplyTo when the message omits it', async () => {
+      const transport = nodemailer.createTransport(
+        { jsonTransport: true },
+        { inReplyTo: '<default@example.com>' },
+      )
+      const adapter = await nodemailerAdapter({ ...defaultArgs, skipVerify: true, transport })
+
+      const info = (await adapter({ payload: {} as never }).sendEmail({
+        to: 'to@example.com',
+      })) as { message: string }
+
+      expect(JSON.parse(info.message)).toMatchObject({ inReplyTo: '<default@example.com>' })
+    })
   })
 })
