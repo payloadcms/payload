@@ -96,6 +96,22 @@ describe('createDraftGitHubRelease', () => {
     expect(fetchImpl).toHaveBeenCalledTimes(1)
   })
 
+  it('should throw when the release response has no html_url', async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse([]))
+      .mockResolvedValueOnce(jsonResponse({}))
+
+    await expect(
+      createDraftGitHubRelease({
+        branch: 'main',
+        tag: 'v4.0.0-canary.10',
+        releaseNotes: 'notes',
+        fetchImpl: fetchImpl as unknown as typeof fetch,
+      }),
+    ).rejects.toThrow(/html_url/)
+  })
+
   it('should scan only the newest page and treat a not-found tag as new (with a warning)', async () => {
     const fullPage = Array.from({ length: 100 }, (_, i) => ({
       id: i,
