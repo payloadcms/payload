@@ -319,6 +319,69 @@ describe('generateFileData', () => {
     ])
   })
 
+  describe('duplicating', () => {
+    let staticDir: string
+
+    beforeEach(async () => {
+      staticDir = await fs.mkdtemp(path.join(os.tmpdir(), 'generate-file-data-duplicate-'))
+      await fs.writeFile(path.join(staticDir, 'source.png'), PNG_SIGNATURE)
+    })
+
+    afterEach(async () => {
+      await fs.rm(staticDir, { force: true, recursive: true })
+    })
+
+    const createDuplicateReq = () =>
+      ({
+        payload: {
+          collections: { media: { config: { fields: [], upload: {} } } },
+          config: { routes: { api: '/api' }, sharp: undefined },
+          db: { findOne: vi.fn(async () => null) },
+          logger: { error: vi.fn() },
+        },
+      }) as unknown as PayloadRequest
+
+    it('should keep data overrides over the source document', async () => {
+      const result = await generateFileData({
+        collection: createCollection({ disableLocalStorage: false, staticDir }),
+        config: {} as SanitizedConfig,
+        data: { alt: 'override' },
+        isDuplicating: true,
+        operation: 'create',
+        originalDoc: {
+          alt: 'source',
+          caption: 'source caption',
+          filename: 'source.png',
+          filesize: PNG_SIGNATURE.length,
+          mimeType: 'image/png',
+          url: '/api/media/file/source.png',
+        },
+        overwriteExistingFiles: false,
+        req: createDuplicateReq(),
+      })
+
+      expect(result.data).toMatchObject({ alt: 'override', caption: 'source caption' })
+      expect(result.files).toHaveLength(1)
+    })
+
+    it('should keep data overrides when the source document has no file', async () => {
+      const result = await generateFileData({
+        collection: createCollection({ disableLocalStorage: false, staticDir }),
+        config: {} as SanitizedConfig,
+        data: { alt: 'override' },
+        isDuplicating: true,
+        operation: 'create',
+        originalDoc: { alt: 'source', caption: 'source caption' },
+        overwriteExistingFiles: false,
+        req: createDuplicateReq(),
+        throwOnMissingFile: false,
+      })
+
+      expect(result.data).toMatchObject({ alt: 'override', caption: 'source caption' })
+      expect(result.files).toEqual([])
+    })
+  })
+
   it('does not save anything when local storage is disabled and no processing is needed', async () => {
     const req = {
       file: {

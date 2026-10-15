@@ -3331,6 +3331,36 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       await payload.delete({ id: duplicatedDoc.id, collection: 'media', overrideAccess: true })
     })
 
+    test('should apply data overrides when duplicating an upload collection doc', async ({
+      payload,
+    }) => {
+      const filePath = path.resolve(dirname, './image.png')
+      const file = await getFileByPath(filePath)
+      file.name = 'file-to-duplicate-with-data.png'
+
+      const mediaDoc = await payload.create({
+        collection: mediaSlug,
+        data: { alt: 'source alt' },
+        file,
+        overrideAccess: true,
+      })
+
+      const duplicatedDoc = await payload.duplicate({
+        id: mediaDoc.id,
+        collection: mediaSlug,
+        data: { alt: 'override alt' },
+        overrideAccess: true,
+      })
+
+      expect(duplicatedDoc.alt).toBe('override alt')
+      expect(
+        await fileExists(path.join(dirname, './media', duplicatedDoc.filename as string)),
+      ).toBe(true)
+
+      await payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true })
+      await payload.delete({ id: duplicatedDoc.id, collection: mediaSlug, overrideAccess: true })
+    })
+
     test('should not leak req.file between sequential duplicate() calls on a shared req', async ({
       payload,
     }) => {
