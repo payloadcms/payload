@@ -32,6 +32,9 @@ import {
   englishTitle,
   globalWithDraftsSlug,
   hungarianLocale,
+  localeValidationBlockSlug,
+  localeValidationGlobalSlug,
+  localeValidationSlug,
   localizedDateFieldsSlug,
   localizedDraftsSlug,
   localizedPostsSlug,
@@ -1054,6 +1057,200 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
 
           expect(result4.docs[0].id).toEqual(withRelationship.id)
         })
+      })
+    })
+
+    test.describe('Localized - custom validator context', () => {
+      const translations = { en: 'English text', es: 'Spanish text' }
+
+      test.afterEach(async ({ payload }) => {
+        await payload.delete({ collection: localeValidationSlug, overrideAccess: true, where: {} })
+      })
+
+      test('should validate matching translated siblings and persist every locale', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: localeValidationSlug,
+          data: { confirmation: translations, matchingText: translations } as any,
+          // @ts-expect-error locale all writes are supported at runtime
+          locale: 'all',
+          overrideAccess: true,
+        })
+        const refetched: any = await payload.findByID({
+          collection: localeValidationSlug,
+          id: doc.id,
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        expect(refetched.matchingText).toEqual(translations)
+        expect(refetched.confirmation).toEqual(translations)
+      })
+
+      test('should reject a mismatched translation and identify its locale', async ({
+        payload,
+      }) => {
+        await expect(
+          payload.create({
+            collection: localeValidationSlug,
+            data: {
+              confirmation: { ...translations, es: 'Different' },
+              matchingText: translations,
+            } as any,
+            // @ts-expect-error locale all writes are supported at runtime
+            locale: 'all',
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow('Matching Text (es)')
+      })
+
+      test('should validate a partial update against stored translated siblings', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: localeValidationSlug,
+          data: { confirmation: translations, matchingText: translations } as any,
+          // @ts-expect-error locale all writes are supported at runtime
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        await payload.update({
+          collection: localeValidationSlug,
+          id: doc.id,
+          data: { matchingText: { es: translations.es } } as any,
+          // @ts-expect-error locale all writes are supported at runtime
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        const refetched: any = await payload.findByID({
+          collection: localeValidationSlug,
+          id: doc.id,
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        expect(refetched.matchingText).toEqual(translations)
+        expect(refetched.confirmation).toEqual(translations)
+      })
+
+      test('should project nested arrays inside named tabs for a custom validator', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: localeValidationSlug,
+          data: {
+            arrayText: translations,
+            settings: { rows: [{ confirmation: translations }] },
+          } as any,
+          // @ts-expect-error locale all writes are supported at runtime
+          locale: 'all',
+          overrideAccess: true,
+        })
+        const refetched: any = await payload.findByID({
+          collection: localeValidationSlug,
+          id: doc.id,
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        expect(refetched.arrayText).toEqual(translations)
+        expect(refetched.settings.rows[0].confirmation).toEqual(translations)
+      })
+
+      test('should project the nearest referenced block context through nested groups', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: localeValidationSlug,
+          data: {
+            confirmation: translations,
+            layout: [
+              {
+                blockType: localeValidationBlockSlug,
+                confirmation: translations,
+                nested: { confirmation: translations, matchingText: translations },
+              },
+            ],
+          } as any,
+          // @ts-expect-error locale all writes are supported at runtime
+          locale: 'all',
+          overrideAccess: true,
+        })
+        const refetched: any = await payload.findByID({
+          collection: localeValidationSlug,
+          id: doc.id,
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        expect(refetched.layout[0].nested.matchingText).toEqual(translations)
+        expect(refetched.layout[0].confirmation).toEqual(translations)
+      })
+
+      test('should preserve JSON locale-like keys while projecting validation context', async ({
+        payload,
+      }) => {
+        const localizedJSON = { en: { en: 'English JSON' }, es: { en: 'Spanish JSON' } }
+        const sharedJSON = { en: 'shared JSON' }
+        const doc = await payload.create({
+          collection: localeValidationSlug,
+          data: {
+            localizedJSON,
+            sharedJSON,
+            jsonText: { en: 'English JSON', es: 'Spanish JSON' },
+          } as any,
+          // @ts-expect-error locale all writes are supported at runtime
+          locale: 'all',
+          overrideAccess: true,
+        })
+        const refetched: any = await payload.findByID({
+          collection: localeValidationSlug,
+          id: doc.id,
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        expect(refetched.localizedJSON).toEqual(localizedJSON)
+        expect(refetched.sharedJSON).toEqual(sharedJSON)
+      })
+
+      test('should project global validation context for each locale', async ({ payload }) => {
+        await payload.updateGlobal({
+          slug: localeValidationGlobalSlug,
+          data: { confirmation: translations, matchingText: translations } as any,
+          locale: 'all',
+          overrideAccess: true,
+        })
+        const refetched: any = await payload.findGlobal({
+          slug: localeValidationGlobalSlug,
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        expect(refetched.matchingText).toEqual(translations)
+        expect(refetched.confirmation).toEqual(translations)
+      })
+
+      test('should keep single locale custom validation behavior unchanged', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: localeValidationSlug,
+          data: { confirmation: translations.en, matchingText: translations.en },
+          locale: 'en',
+          overrideAccess: true,
+        })
+        const refetched = await payload.findByID({
+          collection: localeValidationSlug,
+          id: doc.id,
+          locale: 'en',
+          overrideAccess: true,
+        })
+
+        expect(refetched.matchingText).toBe(translations.en)
       })
     })
 
