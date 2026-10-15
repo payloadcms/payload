@@ -680,6 +680,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
                             role: 'button',
                             tabIndex: 0,
                           },
+                          draggable: true,
                           listeners: { onBlur },
                         }
                       : undefined

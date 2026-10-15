@@ -412,6 +412,7 @@
     "bson-objectid": "2.0.4",
     "date-fns": "4.4.0",
     "dequal": "2.0.3",
+    "dom-accessibility-api": "0.5.16",
     "md5": "2.3.0",
     "object-to-formdata": "4.5.1",
     "path-to-regexp": "6.3.0",

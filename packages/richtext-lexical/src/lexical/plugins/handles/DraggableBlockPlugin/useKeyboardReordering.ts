@@ -8,8 +8,11 @@ import {
   COMMAND_PRIORITY_HIGH,
   KEY_ARROW_DOWN_COMMAND,
   KEY_ARROW_UP_COMMAND,
+  KEY_DOWN_COMMAND,
 } from 'lexical'
 import { useEffect } from 'react'
+
+import { $moveBlock } from './moveBlock.js'
 
 /** Move the current top-level line, including decorator nodes, without a pointer. */
 export function useKeyboardReordering({
@@ -43,19 +46,18 @@ export function useKeyboardReordering({
         return false
       }
       event.preventDefault()
-      const sibling = direction === -1 ? node.getPreviousSibling() : node.getNextSibling()
-
-      if (sibling) {
-        if (direction === -1) {
-          sibling.insertBefore(node)
-        } else {
-          sibling.insertAfter(node)
-        }
-      }
+      $moveBlock({ direction, node })
       return true
     }
 
     return mergeRegister(
+      editor.registerCommand(
+        KEY_DOWN_COMMAND,
+        (event) =>
+          event.target instanceof HTMLElement &&
+          Boolean(event.target.closest('.draggable-block-menu')),
+        COMMAND_PRIORITY_HIGH,
+      ),
       editor.registerCommand(
         KEY_ARROW_UP_COMMAND,
         (event) => moveLine({ direction: -1, event }),

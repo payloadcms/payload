@@ -371,6 +371,13 @@ export const bnInTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'এই নথিটি সম্প্রতি অন্য ব্যবহারকারীর দ্বারা আপডেট করা হয়েছে। আপনার দেখানো ভার্সন আপ টু ডেট নয়।',
     documents: 'ডকুমেন্টগুলি',
+    dragCancelled: '{{label}} টেনে সরানো বাতিল হয়েছে।',
+    dragDropped: '{{label}} ছেড়ে দেওয়া হয়েছে। {{count}}টির মধ্যে অবস্থান {{position}}।',
+    dragInstructions:
+      'একটি সারি তুলতে Space বা Enter চাপুন। সরাতে তীর চিহ্নের কী ব্যবহার করুন। VoiceOver ব্যবহার করলে Quick Nav বন্ধ করে Command + তীর চিহ্নের কী ব্যবহার করুন। ছেড়ে দিতে Space বা Enter, অথবা বাতিল করতে Escape চাপুন।',
+    dragMoved: '{{label}}: {{direction}}. {{count}}টির মধ্যে অবস্থান {{position}}।',
+    dragPickedUp: '{{label}} তুলে নেওয়া হয়েছে। {{count}}টির মধ্যে অবস্থান {{position}}।',
+    dragToMove: 'সরাতে টেনে আনুন',
     dragToReorder: 'টেনে অর্ডার পরিবর্তন করুন',
     duplicate: 'ডুপ্লিকেট করুন',
     duplicateWithoutSaving: 'পরিবর্তনগুলি সংরক্ষণ না করে ডুপ্লিকেট করুন',
