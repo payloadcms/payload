@@ -6,7 +6,7 @@ import { getDefaultLayoutHandler, renderWidgetHandler } from '../views/Dashboard
 import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
 import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
 import { renderListHandler } from '../views/List/handleServerFunction.js'
-import { getDashboardDocumentsHandler } from '../widgets/RecentlyViewed/getDocuments.js'
+import { getDashboardDocumentsHandler } from '../widgets/Activity/Documents/getDocuments.js'
 import { buildFormStateHandler } from './buildFormState.js'
 import { buildTableStateHandler } from './buildTableState.js'
 import { copyDataFromLocaleHandler } from './copyDataFromLocale.js'

@@ -3,23 +3,23 @@ import type { PayloadRequest, WidgetServerProps } from 'payload'
 import { formatAdminURL, PREFERENCE_KEYS } from 'payload/shared'
 import React from 'react'
 
-import type { DocumentsPage, DocumentsTab } from './getDocuments.js'
+import type { DocumentsPage, DocumentsTab } from './Documents/types.js'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
-import { RecentsAndPinnedClient } from '../../exports/client/index.js'
+import { ActivityWidgetClient } from '../../exports/client/index.js'
 import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
-import { getDashboardDocuments } from './getDocuments.js'
-import { DOCUMENTS_BATCH_SIZE } from './recents.js'
+import { DOCUMENTS_BATCH_SIZE } from './Documents/constants.js'
+import { getDashboardDocuments } from './Documents/getDocuments.js'
 
-type RecentlyViewedWidgetData = {
+type ActivityWidgetData = {
   excludedCollections?: string[]
 }
 
-export async function RecentlyViewedWidget({
+export async function ActivityWidget({
   permissions,
   req,
   widgetData,
-}: WidgetServerProps<{ data?: RecentlyViewedWidgetData }>) {
+}: WidgetServerProps<{ data?: ActivityWidgetData }>) {
   const { i18n, payload, user } = req
   if (!user) {
     return null
@@ -38,7 +38,7 @@ export async function RecentlyViewedWidget({
   )
 
   return (
-    <RecentsAndPinnedClient
+    <ActivityWidgetClient
       excludedCollections={excludedCollections}
       initialPages={{ pinned, recents }}
       labels={{

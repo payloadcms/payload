@@ -867,22 +867,22 @@ test.describe('WCAG 2.2 Level AA', () => {
         },
       })
       await page.goto(`${serverURL}/admin`)
-      const widget = page.locator('.recents-widget')
+      const widget = page.locator('.activity-widget')
 
       for (const theme of ['light', 'dark']) {
         await page
           .locator('html')
           .evaluate((element, value) => element.setAttribute('data-theme', value), theme)
         await widget.getByRole('button', { name: 'Recently viewed' }).click()
-        await expect(widget.locator('.recents-widget__meta').first()).toBeVisible()
+        await expect(widget.locator('.activity-widget__meta').first()).toBeVisible()
         const ratios = await getTextContrastRatios({
           container: widget,
           selectors: [
-            '.recents-widget__tab',
-            '.recents-widget__meta',
-            '.recents-widget__status-pill',
-            '.recents-widget__pagination button:not(:disabled)',
-            '.recents-widget__pagination span',
+            '.activity-widget__tab',
+            '.activity-widget__meta',
+            '.activity-widget__status-pill',
+            '.activity-widget__pagination button:not(:disabled)',
+            '.activity-widget__pagination span',
           ],
         })
 
@@ -1168,7 +1168,7 @@ test.describe('WCAG 2.2 Level AA', () => {
 
     test('should switch dashboard document tabs with keyboard and expose pressed states', async () => {
       await page.goto(`${serverURL}/admin`)
-      const widget = page.locator('.recents-widget')
+      const widget = page.locator('.activity-widget')
       const pinned = widget.getByRole('button', { name: 'Pinned', exact: true })
       const recents = widget.getByRole('button', { name: 'Recently viewed' })
 
@@ -1183,7 +1183,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await recents.focus()
       await recents.press('Space')
       await expect(recents).toHaveAttribute('aria-pressed', 'true')
-      await expect(widget.locator('.recents-widget__viewport')).toHaveAttribute(
+      await expect(widget.locator('.activity-widget__viewport')).toHaveAttribute(
         'aria-busy',
         'false',
       )
@@ -1198,7 +1198,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       const testInfo = test.info()
 
       await page.goto(`${serverURL}/admin`)
-      const widget = page.locator('.recents-widget')
+      const widget = page.locator('.activity-widget')
       const opener = widget.getByRole('button', {
         name: 'Select Documents',
         exact: true,
@@ -1217,7 +1217,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         })
       })
 
-      await widget.locator('.recents-widget__empty-icon--pinned').click()
+      await widget.locator('.activity-empty-state__icon').click()
       await expect(drawer).toHaveCount(0)
       await expect(opener).toHaveAttribute('aria-expanded', 'false')
       await expect(opener).toHaveAccessibleDescription(
@@ -1275,7 +1275,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       ).json()
 
       expect(pins.value.items).toContainEqual({ id: document.id, collectionSlug: 'posts' })
-      const widgetResults = await runAxeScan({ include: ['.recents-widget'], page, testInfo })
+      const widgetResults = await runAxeScan({ include: ['.activity-widget'], page, testInfo })
 
       expect(widgetResults.violations).toEqual([])
     })
@@ -1338,7 +1338,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       })
       await page.setViewportSize({ height: 900, width: 375 })
       await page.goto(`${serverURL}/admin`)
-      const widget = page.locator('.recents-widget')
+      const widget = page.locator('.activity-widget')
       const recents = widget.getByRole('button', { name: 'Recently viewed' })
       const next = widget.getByRole('button', { name: 'Next', exact: true })
       const previous = widget.getByRole('button', { name: 'Previous', exact: true })
@@ -1357,7 +1357,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         documents.slice(4, 8).map(({ title }) => title),
       )
       await expect(next).toBeFocused()
-      await expect(widget.locator('.recents-widget__pagination [aria-live]')).toContainText(
+      await expect(widget.locator('.activity-widget__pagination [aria-live]')).toContainText(
         '2 of 3',
       )
       // The server renders the first 8 documents, so only the last page is fetched.
@@ -1379,7 +1379,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         const retry = widget.getByRole('button', { name: 'Retry', exact: true })
 
         await expect(retry).toBeVisible()
-        await expect(widget.locator('.recents-widget__status')).toHaveText(
+        await expect(widget.locator('.activity-widget__status')).toHaveText(
           'An unknown error has occurred.',
         )
         await retry.focus()
@@ -1401,7 +1401,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(widget.locator('.document-card__title')).toHaveText([documents[8].title])
       await expect(previous).toBeFocused()
       await previous.press('Space')
-      await expect(widget.locator('.recents-widget__pagination [aria-live]')).toContainText(
+      await expect(widget.locator('.activity-widget__pagination [aria-live]')).toContainText(
         '2 of 3',
       )
       await previous.focus()
@@ -1409,7 +1409,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(next).toBeFocused()
       await widget.locator('.document-card__title').first().focus()
       await expectPaintedFocus({ page })
-      await expect(widget.locator('.recents-widget__pin')).toHaveCount(0)
+      await expect(widget.locator('.activity-widget__pin')).toHaveCount(0)
       const pinned = widget.getByRole('button', { name: 'Pinned', exact: true })
 
       await pinned.focus()
@@ -1423,7 +1423,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(unpin).toHaveCSS('opacity', '1')
       await unpin.press('Space')
       await expect(pinned).toBeFocused()
-      await expect(widget.locator('.recents-widget__empty-title')).toHaveText('No pinned documents')
+      await expect(widget.locator('.activity-empty-state__title')).toHaveText('No pinned documents')
       await expect
         .poll(() => widget.evaluate((element) => element.scrollWidth <= element.clientWidth))
         .toBe(true)
@@ -2517,7 +2517,7 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.3 Focus Order (A)', () => {
-    test('should return focus to the active dashboard tab when pagination disappears', async () => {
+    test('should preserve dashboard pagination focus across resizing and disappearing controls', async () => {
       const previousViewport = page.viewportSize()
       const preference = await (
         await page.request.get(`${serverURL}/api/payload-preferences/recently-viewed`)
@@ -2560,7 +2560,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       expect(preferenceResponse.ok()).toBe(true)
       await page.setViewportSize({ height: 900, width: 375 })
       await page.goto(`${serverURL}/admin`)
-      const widget = page.locator('.recents-widget')
+      const widget = page.locator('.activity-widget')
       const recents = widget.getByRole('button', { name: 'Recently viewed', exact: true })
 
       await recents.focus()
@@ -2576,6 +2576,14 @@ test.describe('WCAG 2.2 Level AA', () => {
         documents.slice(4, 8).map(({ title }) => title),
       )
       await expect(next).toBeFocused()
+      await page.setViewportSize({ height: 900, width: 1920 })
+      await expect(widget.locator('.activity-widget__page-status')).toContainText('1 of')
+      await expect(next).toBeFocused()
+      await page.setViewportSize({ height: 900, width: 375 })
+      await expect(widget.locator('.document-card__title')).toHaveText(
+        documents.slice(4, 8).map(({ title }) => title),
+      )
+      await expect(next).toBeFocused()
       // The server rendered the first 8 documents, so only the third page fetches the new total.
       for (const document of documents.splice(4)) {
         const deleted = await page.request.delete(`${serverURL}/api/posts/${document.id}`)
@@ -2583,7 +2591,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         expect(deleted.ok()).toBe(true)
       }
       await next.press('Enter')
-      await expect(widget.locator('.recents-widget__pagination')).toHaveCount(0)
+      await expect(widget.locator('.activity-widget__pagination')).toHaveCount(0)
       await expect(widget.locator('.document-card__title')).toHaveText(
         documents.slice(0, 4).map(({ title }) => title),
       )

@@ -1,0 +1,46 @@
+@layer payload-default {
+  .activity-widget__pin {
+    border: 0;
+    background: transparent;
+    color: var(--activity-text-secondary);
+    cursor: pointer;
+  }
+
+  .activity-widget__pin {
+    position: absolute;
+    inset-block-start: var(--spacer-2-5);
+    inset-inline-end: var(--spacer-2-5);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--spacer-4);
+    height: var(--spacer-4);
+    padding: 0;
+    border-radius: var(--radius-medium);
+    background: var(--color-bg);
+    opacity: 0;
+  }
+
+  .activity-widget .document-card .document-card__metadata .activity-widget__pin {
+    position: absolute;
+  }
+
+  .activity-widget__item:hover .activity-widget__pin,
+  .activity-widget__item:focus-within .activity-widget__pin {
+    opacity: 1;
+  }
+
+  .activity-widget__pin-icon {
+    display: flex;
+    color: var(--color-icon-warning);
+  }
+
+  .activity-widget__pin:disabled {
+    cursor: progress;
+  }
+
+  .activity-widget__pin:focus-visible {
+    outline: var(--accessibility-outline);
+    outline-offset: var(--accessibility-outline-offset);
+  }
+}

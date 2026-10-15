@@ -4,32 +4,21 @@ import { getTranslation } from '@payloadcms/translations'
 import { UnauthorizedError } from 'payload'
 import { formatAdminURL, PREFERENCE_KEYS } from 'payload/shared'
 
-import type { RecentDocument } from './index.client.js'
-import type { PinnedItem } from './recents.js'
+import type {
+  ActivityDocument,
+  DocumentReference,
+  DocumentsPage,
+  DocumentsPageArgs,
+} from './types.js'
 
-import { formatRelativeDate, getRelativeTimeFormat } from '../../utilities/formatRelativeDate.js'
-import { getDocumentThumbnail } from '../../utilities/getDocumentThumbnail.js'
-import { getDocumentThumbnailPopulate } from '../../utilities/getDocumentThumbnailPopulate.js'
-import { getDocumentThumbnailSelect } from '../../utilities/getDocumentThumbnailSelect.js'
-import { enrichDocsWithVersionStatus } from '../../views/List/enrichDocsWithVersionStatus.js'
-import { getPinnedItems } from './pinnedPreferences.js'
-import { documentKey, getValueByPath } from './recents.js'
+import { formatRelativeDate, getRelativeTimeFormat } from '../../../utilities/formatRelativeDate.js'
+import { getDocumentThumbnail } from '../../../utilities/getDocumentThumbnail.js'
+import { getDocumentThumbnailPopulate } from '../../../utilities/getDocumentThumbnailPopulate.js'
+import { getDocumentThumbnailSelect } from '../../../utilities/getDocumentThumbnailSelect.js'
+import { enrichDocsWithVersionStatus } from '../../../views/List/enrichDocsWithVersionStatus.js'
+import { documentKey, getDocumentReferences, getValueByPath } from './utilities.js'
 
-export type DocumentsTab = 'pinned' | 'recents'
-export type DocumentsPageArgs = {
-  excludedCollections?: string[]
-  limit: number
-  page: number
-  shouldIncludePinPlaceholder?: boolean
-  tab: DocumentsTab
-}
-export type DocumentsPage = {
-  items: RecentDocument[]
-  page: number
-  totalDocs: number
-}
-
-type Reference = { viewedAt?: string } & PinnedItem
+type Reference = { viewedAt?: string } & DocumentReference
 type QueryDoc = { id: number | string; updatedAt?: string } & Record<string, unknown>
 
 export const getDashboardDocumentsHandler: ServerFunction<
@@ -72,7 +61,7 @@ export async function getDashboardDocuments({
     where: { and: [ownerWhere({ req }), { key: { equals: key } }] },
   })
   const excluded = new Set(tab === 'recents' ? excludedCollections : [])
-  const storedReferences = getPinnedItems({ value: preference.docs[0]?.value }).filter(
+  const storedReferences = getDocumentReferences({ value: preference.docs[0]?.value }).filter(
     ({ collectionSlug }) =>
       !excluded.has(collectionSlug) && req.payload.collections[collectionSlug],
   )
@@ -88,7 +77,7 @@ export async function getDashboardDocuments({
 
   const documents = await loadDocuments({ references, req })
   const items = references
-    .map((reference): RecentDocument | undefined => {
+    .map((reference): ActivityDocument | undefined => {
       const document = documents.get(documentKey(reference))
       if (!document || tab !== 'recents') {
         return document
@@ -108,7 +97,7 @@ export async function getDashboardDocuments({
         viewedAt,
       }
     })
-    .filter((item): item is RecentDocument => Boolean(item))
+    .filter((item): item is ActivityDocument => Boolean(item))
 
   return { items, page, totalDocs }
 }
@@ -172,8 +161,8 @@ async function loadDocuments({
 }: {
   references: Reference[]
   req: PayloadRequest
-}): Promise<Map<string, RecentDocument>> {
-  const documents = new Map<string, RecentDocument>()
+}): Promise<Map<string, ActivityDocument>> {
+  const documents = new Map<string, ActivityDocument>()
   await Promise.all(
     [...groupReferenceIDs({ references }).entries()].map(async ([collectionSlug, ids]) => {
       const config = req.payload.collections[collectionSlug].config
@@ -237,7 +226,7 @@ function enrichDocument({
   collectionSlug: string
   doc: QueryDoc
   req: PayloadRequest
-}): RecentDocument {
+}): ActivityDocument {
   const { i18n, payload } = req
   const config = payload.collections[collectionSlug].config
   const rawTitle = getValueByPath({ object: doc, path: config.admin?.useAsTitle || 'id' })

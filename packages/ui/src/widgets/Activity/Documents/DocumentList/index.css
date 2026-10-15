@@ -1,0 +1,72 @@
+@layer payload-default {
+  .card-grid.activity-widget__items {
+    display: grid;
+    gap: var(--spacer-3);
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .card-grid.activity-widget__items--grid {
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+  }
+
+  .activity-widget__content {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    align-content: start;
+  }
+
+  .activity-widget .document-card {
+    min-block-size: var(--activity-row-height);
+  }
+
+  .activity-widget .document-card__thumbnail {
+    height: var(--activity-thumbnail-height);
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+
+  .activity-widget__item--empty {
+    grid-column: 1 / -1;
+  }
+
+  .activity-widget__status-pill {
+    position: absolute;
+    inset-block-start: var(--spacer-3);
+    inset-inline-start: var(--spacer-3);
+    padding-inline: var(--spacer-1);
+    border-radius: var(--radius-medium);
+    background: var(--color-bg-brand-secondary);
+    color: var(--color-text-onbrand);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+  }
+
+  .activity-widget__status-pill--draft {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text);
+  }
+
+  .activity-widget__status-pill--changed {
+    background: var(--color-bg-warning);
+    color: var(--color-text-onwarning);
+  }
+
+  .activity-widget__meta {
+    color: var(--activity-text-secondary);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+  }
+
+  .activity-widget__meta {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

@@ -5,7 +5,7 @@ import { PREFERENCE_KEYS } from 'payload/shared'
 import { expect } from 'vitest'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercise the internal server handler against the real database.
-import { getDashboardDocuments } from '../../packages/ui/src/widgets/RecentlyViewed/getDocuments.js'
+import { getDashboardDocuments } from '../../packages/ui/src/widgets/Activity/Documents/getDocuments.js'
 import { test } from '../__helpers/int/vitest.js'
 
 test.suite('Dashboard upload thumbnails', { config: './config.ts' }, () => {

@@ -4,13 +4,14 @@ import type { FilterOptionsResult } from 'payload'
 
 import React, { useId, useMemo, useState } from 'react'
 
-import type { ListDrawerProps } from '../../../elements/ListDrawer/types.js'
-import type { PinnedItem } from '../recents.js'
+import type { ListDrawerProps } from '../../../../elements/ListDrawer/types.js'
+import type { DocumentReference } from '../../Documents/types.js'
 
-import { Button } from '../../../elements/Button/index.js'
-import { useListDrawer } from '../../../elements/ListDrawer/index.js'
-import { PinIcon } from '../../../icons/Pin/index.js'
-import { readPinnedPreferences } from '../pinnedPreferences.js'
+import { Button } from '../../../../elements/Button/index.js'
+import { useListDrawer } from '../../../../elements/ListDrawer/index.js'
+import { PinIcon } from '../../../../icons/Pin/index.js'
+import { EmptyState } from '../../Documents/EmptyState/index.js'
+import { readPinnedPreferences } from '../preferences.js'
 import './index.css'
 
 export function PinDocumentPicker({
@@ -27,7 +28,7 @@ export function PinDocumentPicker({
   isEmpty?: boolean
   labels: { addPin: string; pinnedEmpty: string; pinnedEmptyDescription: string }
   onError: () => void
-  onSelect: (args: { document: PinnedItem }) => void
+  onSelect: (args: { document: DocumentReference }) => void
   pinsURL: string
 }) {
   const emptyStateID = useId()
@@ -82,7 +83,7 @@ export function PinDocumentPicker({
       aria-haspopup="dialog"
       aria-label={labels.addPin}
       buttonStyle="secondary"
-      className="recents-widget__select-documents"
+      className="activity-widget__select-documents"
       extraButtonProps={{
         'aria-busy': isPreparing,
         'aria-describedby': isEmpty ? emptyStateID : undefined,
@@ -100,27 +101,20 @@ export function PinDocumentPicker({
   return (
     <>
       {isEmpty ? (
-        <div className="recents-widget__empty">
-          <span
-            aria-hidden="true"
-            className="recents-widget__empty-icon recents-widget__empty-icon--pinned"
-          >
-            <PinIcon />
-          </span>
-          <span className="recents-widget__empty-text" id={emptyStateID}>
-            <span className="recents-widget__empty-title">{labels.pinnedEmpty}</span>
-            <span className="recents-widget__empty-description">
-              {labels.pinnedEmptyDescription}
-            </span>
-          </span>
+        <EmptyState
+          description={labels.pinnedEmptyDescription}
+          descriptionID={emptyStateID}
+          icon={<PinIcon />}
+          title={labels.pinnedEmpty}
+        >
           {addPinButton}
-        </div>
+        </EmptyState>
       ) : (
-        <div className="recents-widget__add-pin">{addPinButton}</div>
+        <div className="activity-widget__add-pin">{addPinButton}</div>
       )}
       <ListDrawer
         allowCreate={false}
-        className="recents-widget__pin-picker"
+        className="activity-widget__pin-picker"
         disableQueryPresets
         enableRowSelections={false}
         onSelect={handleSelect}

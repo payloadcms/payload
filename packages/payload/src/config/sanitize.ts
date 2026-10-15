@@ -240,7 +240,7 @@ const addDefaultDashboardWidgets = ({
   })
   dashboard.widgets.push({
     slug: 'activity',
-    Component: '@payloadcms/ui/rsc#RecentlyViewedWidget',
+    Component: '@payloadcms/ui/rsc#ActivityWidget',
     fields: sanitizeFields({
       config: config as unknown as Config,
       existingFieldNames: new Set(),

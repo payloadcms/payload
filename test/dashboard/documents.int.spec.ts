@@ -4,9 +4,9 @@ import { PREFERENCE_KEYS } from 'payload/shared'
 import { expect, vi } from 'vitest'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercise the internal server handler against the real database.
-import { getDashboardDocuments } from '../../packages/ui/src/widgets/RecentlyViewed/getDocuments.js'
+import { getDashboardDocuments } from '../../packages/ui/src/widgets/Activity/Documents/getDocuments.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Share the batch size used by the widget.
-import { DOCUMENTS_BATCH_SIZE } from '../../packages/ui/src/widgets/RecentlyViewed/recents.js'
+import { DOCUMENTS_BATCH_SIZE } from '../../packages/ui/src/widgets/Activity/Documents/constants.js'
 import { test } from '../__helpers/int/vitest.js'
 
 test.suite('Dashboard document pagination', { config: './config.ts' }, () => {

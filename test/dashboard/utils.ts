@@ -323,7 +323,7 @@ export class DashboardHelper {
 }
 
 /** The grid the Recents and Pinned widget container queries produce for a container width. */
-export function getExpectedRecentsGrid({ containerWidth }: { containerWidth: number }): {
+export function getExpectedActivityGrid({ containerWidth }: { containerWidth: number }): {
   columns: number
   pageSize: number
 } {
@@ -347,7 +347,7 @@ export async function waitForDashboardHydration({ page }: { page: Page }): Promi
 }
 
 /** The content-box width of the Recents and Pinned widget, which its container queries measure. */
-export function getRecentsContainerWidth({ widget }: { widget: Locator }): Promise<number> {
+export function getActivityContainerWidth({ widget }: { widget: Locator }): Promise<number> {
   return widget.evaluate((element) => {
     const style = getComputedStyle(element)
 
@@ -368,7 +368,7 @@ export function getRecentsContainerWidth({ widget }: { widget: Locator }): Promi
  * Pinned widget or the collections below it. This is not CLS: there are no session windows, shifts
  * after recent input still count, and shifts after the call are missed.
  */
-export function getRecentsLayoutShiftSum({ page }: { page: Page }): Promise<number> {
+export function getActivityLayoutShiftSum({ page }: { page: Page }): Promise<number> {
   return page.evaluate(
     () =>
       new Promise<number>((resolve) => {
@@ -381,7 +381,7 @@ export function getRecentsLayoutShiftSum({ page }: { page: Page }): Promise<numb
           }>) {
             const isDashboardShift = entry.sources.some(({ node }) =>
               (node instanceof Element ? node : node?.parentElement)?.closest(
-                '.recents-widget, .collections__wrap',
+                '.activity-widget, .collections__wrap',
               ),
             )
 
