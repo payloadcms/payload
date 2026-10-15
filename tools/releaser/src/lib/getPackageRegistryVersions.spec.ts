@@ -65,6 +65,24 @@ describe('isVersionPublished', () => {
     expect(fetchImpl).toHaveBeenCalledTimes(2)
   })
 
+  it('should retry a 429 and return true from the next 200', async () => {
+    const tooManyRequests = { ok: false, status: 429, statusText: 'Too Many Requests' } as Response
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(tooManyRequests)
+      .mockResolvedValueOnce(okResponse)
+
+    const result = await isVersionPublished({
+      name: 'payload',
+      sleep: vi.fn(async () => {}),
+      version: '4.0.0-canary.10',
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    })
+
+    expect(result).toBe(true)
+    expect(fetchImpl).toHaveBeenCalledTimes(2)
+  })
+
   it('should throw after three attempts on persistent 503', async () => {
     const fetchImpl = vi.fn(async () => serviceUnavailable)
 

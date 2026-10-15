@@ -100,13 +100,12 @@ const findReleaseByTag = async ({
     throw new Error(`Failed to list releases: ${await res.text()}`)
   }
 
-  const releasesBody: unknown = await res.json()
+  const releases: unknown = await res.json()
 
-  if (!isGitHubReleaseList(releasesBody)) {
+  if (!isGitHubReleaseList(releases)) {
     throw new Error('Unexpected GitHub releases list response')
   }
 
-  const releases = releasesBody
   const match = releases.find((release) => release.tag_name === tag)
 
   if (!match && releases.length === PER_PAGE) {

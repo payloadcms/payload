@@ -96,8 +96,8 @@ export const runReleaseBump = async ({
 
   log(`\n  ${validated.version} => ${nextVersion}  (tag ${tag})\n`)
 
-  // The tag's range differs from base..HEAD only by its own bump commit, which the
-  // notes filter drops, so this preview matches the draft release CI writes.
+  // The tag's range differs from base..HEAD only by its own bump commit, which the notes
+  // filter drops, so for the same commits this preview has the same entries as the CI draft.
   if (dryRun) {
     const fromVersion = await findChangelogBaseTag({ version: nextVersion })
     if (!fromVersion) {

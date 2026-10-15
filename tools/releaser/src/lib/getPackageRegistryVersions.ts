@@ -11,6 +11,7 @@ const npmRequestLimit = pLimit(40)
  * `GET /{name}/{version}` returns 200 when published and 404 when not. Any other
  * status (5xx, 429, etc.) throws rather than being conflated with "not published",
  * so callers can distinguish a genuine absence from a transient registry failure.
+ * Network errors, timeouts, 429, and 5xx are retried first (3 attempts, 15 s timeout each).
  */
 export const isVersionPublished = async ({
   fetchImpl = fetch,
