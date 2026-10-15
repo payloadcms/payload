@@ -32,7 +32,23 @@ const ANNOTATION_STYLES = `
   }
 `
 
-export function createAnnotationInteraction({ page }) {
+export function createAnnotationInteraction({ page, presentation }) {
+  if (presentation) {
+    return {
+      hideAnnotation: presentation.clearAnnotation,
+      showAnnotation: async ({ body, index = 1, total = 1, title, type = 'panel' }) => {
+        if (!['panel', 'floating'].includes(type)) {
+          throw new Error('Annotation type must be panel or floating')
+        }
+        await presentation.setAnnotation({
+          body,
+          index,
+          total,
+          title: title ?? (type === 'floating' ? 'Note' : undefined),
+        })
+      },
+    }
+  }
   return {
     hideAnnotation: async () => {
       await page.evaluate(() => {

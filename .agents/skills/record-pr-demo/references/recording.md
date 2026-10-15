@@ -17,6 +17,10 @@ node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs preflight
 
 If something is missing, report it and obtain any required installation approval rather than substituting an unrelated capture method. Keep the dev server running through candidate review and revisions instead of restarting it for every take.
 
+## Optional window chrome
+
+For a fixed canvas, genuine viewport resizing, and a persistent change description beside step notes and an animated progress ring, read [window-chrome.md](window-chrome.md). Use the live browser preview to iterate on the shared component without recording a video. Scenarios opt in through a named `presentation` export; existing scenarios remain page-only.
+
 ## Plan the visible story
 
 Keep the recording narrow. A useful plan identifies:
@@ -32,12 +36,14 @@ Prefer 10–45 seconds. Avoid long typing sequences, setup screens, loading wait
 
 Annotations are editorial layers over the video, not Payload UI notifications. Use them only when a short explanation helps the reviewer understand the result.
 
-- **Shared style:** Payload's `--font-body` face (Inter by default), sentence-case text, and grayscale `--color-bg-elevated`, `--color-text`, `--color-text-secondary`, and `--color-border` tokens. No brand colors or decorative effects. Load the font explicitly when compositing outside the admin page.
+- **With window chrome:** Use the shared annotation panel and its fixed design from [window-chrome.md](window-chrome.md). `showAnnotation({ title, body, index, total })` updates the panel; `hideAnnotation()` clears the step while preserving the change description. Omit index/total for a single note. Do not add a floating layer or scenario CSS. Legacy floating calls are automatically routed to the panel; their position and width are ignored.
+- **Without chrome:** The existing floating annotation API and styles below remain supported.
+- **Floating style:** Payload's `--font-body` face (Inter by default), sentence-case text, and grayscale `--color-bg-elevated`, `--color-text`, `--color-text-secondary`, and `--color-border` tokens. No brand colors or decorative effects. Load the font explicitly when compositing outside the admin page.
 - **Floating annotations:** A compact, content-width card with `--radius-medium` corners, a thin `--color-border` outline, and `--elevation-300-tooltip`. Use a regular-weight 12px title in lighter black and a 13px body with an 18px line height. Bottom notes stay about 48px tall; two-line callouts can be taller.
 
-Keep annotations clear of the cursor and UI needed to understand the demo. Injected layers use `pointer-events: none` and `aria-hidden="true"`; substantive annotation text also appears in the written PR walkthrough or another text alternative. Check placement, contrast, and timing in the rendered MP4.
+Keep annotations clear of the cursor and UI needed to understand the demo. Floating layers use `pointer-events: none` and `aria-hidden="true"`; substantive annotation text also appears in the written PR walkthrough or another text alternative. Check placement, contrast, and timing in the rendered MP4.
 
-The recorder provides `showAnnotation` and `hideAnnotation` to apply these styles consistently. Supply only content and placement in the scenario; `showAnnotation` replaces any visible annotation:
+Without chrome, use `showAnnotation` and `hideAnnotation` to apply the floating styles consistently. Supply only content and placement in the scenario; `showAnnotation` replaces any visible annotation:
 
 ```js
 await showAnnotation({
@@ -109,7 +115,7 @@ The recorder supplies:
 - `pause(milliseconds = 700)`: a short presentation pause;
 - `ready()`: marks the loaded opening state and holds it for 1.2 seconds; call it exactly once before the first visible interaction;
 - `scroll(locator, options?)`: scrolls the actual overflow range with frame-timed easing, or real wheel input when requested;
-- `showAnnotation(options)` / `hideAnnotation()`: displays or removes a styled floating annotation;
+- `showAnnotation(options)` / `hideAnnotation()`: updates or clears the shared panel with presentation chrome, or a styled floating annotation without chrome;
 - `label`: the normalized recording label.
 
 The recorder adds a visible cursor above in-page popups and dialogs. Keep the scenario on one page; separate browser-window stitching is outside this skill's current scope.

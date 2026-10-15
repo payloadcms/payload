@@ -17,6 +17,10 @@ Before showing the video, record its absolute path and SHA-256 digest. Immediate
 
 Do not upload previews, rejected takes, raw WebM recordings, or files the user has not reviewed. Never commit demo media to the repository.
 
+## Optional presentation chrome
+
+When a demo needs window chrome, viewport dimensions, or responsive resizing, read [window-chrome.md](references/window-chrome.md). Use its shared component and the live preview; do not invent wrapper CSS for each scenario. Keep change kind/title/description constant for the take, use `showAnnotation({ title, body, index, total })` / `hideAnnotation()` to update the panel as the story progresses (the ring shows progress; visible numbers are omitted), and use `resizeWindow` to demonstrate genuine responsive reflow inside a fixed recording canvas.
+
 ## Workflow
 
 1. Inspect the feature, relevant diff, and available test configs. Choose the smallest existing Payload config that demonstrates the real feature. Create a temporary config only when no existing config can show it clearly.

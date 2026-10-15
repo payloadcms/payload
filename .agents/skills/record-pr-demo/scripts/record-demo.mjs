@@ -6,6 +6,7 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 import { createAnnotationInteraction } from './annotation-demo.mjs'
+import { createPresentation } from './presentation-demo.mjs'
 import { createScrollInteraction } from './scroll-demo.mjs'
 
 const DEFAULT_BASE_URL = 'http://localhost:3000'
@@ -183,17 +184,20 @@ async function executeDemo({
   const { chromium, expect } = await import('@playwright/test')
   const rawVideoDirectory = await mkdtemp(path.join(tmpdir(), 'payload-pr-demo-'))
   const browser = await chromium.launch({ headless: true })
-  const context = await browser.newContext(
-    output
-      ? {
-          recordVideo: { dir: rawVideoDirectory, size: viewport },
-          viewport,
-        }
-      : { viewport },
-  )
+  const recordedViewport = scenarioModule.presentation
+    ? (scenarioModule.presentation.canvas ?? { width: 1600, height: 1000 })
+    : viewport
+  const context = await browser.newContext({
+    viewport: recordedViewport,
+    ...(scenarioModule.presentation
+      ? { colorScheme: scenarioModule.presentation.theme ?? 'light' }
+      : {}),
+    ...(output ? { recordVideo: { dir: rawVideoDirectory, size: recordedViewport } } : {}),
+  })
 
   await context.addInitScript(() => {
     window.addEventListener('DOMContentLoaded', () => {
+      if (document.documentElement.hasAttribute('data-pr-demo-stage')) return
       const cursor = document.createElement('div')
       cursor.setAttribute('data-pr-demo-cursor', 'mac-arrow')
       cursor.setAttribute('aria-hidden', 'true')
@@ -268,21 +272,44 @@ async function executeDemo({
   })
 
   const recordingStartedAt = performance.now()
-  const page = await context.newPage()
-  const video = output ? page.video() : undefined
+  const recordedPage = await context.newPage()
+  let page = recordedPage
+  const video = output ? recordedPage.video() : undefined
+  let presentation
   const resolvedOutput = output ? path.resolve(output) : undefined
   const resolvedScreenshotOutput = screenshotOutput ? path.resolve(screenshotOutput) : undefined
-  const pointerInteractions = createPointerInteractions({
-    interactionPauseMs,
-    mouseMoveMs,
-    page,
-  })
-  const annotationInteractions = createAnnotationInteraction({ page })
   let isOpeningReady = false
   let scenarioError
 
   try {
+    if (scenarioModule.presentation) {
+      presentation = await createPresentation({
+        page: recordedPage,
+        options: scenarioModule.presentation,
+        viewport,
+        baseURL,
+        pauseScale,
+        startedAt: recordingStartedAt,
+      })
+      page = presentation.appPage
+    }
+    const pointerInteractions = createPointerInteractions({
+      interactionPauseMs,
+      mouseMoveMs,
+      page,
+    })
+    const annotationInteractions = createAnnotationInteraction({ page, presentation })
     await scenarioModule.default({
+      ...(presentation
+        ? {
+            clearAnnotation: annotationInteractions.hideAnnotation,
+            resizeWindow: presentation.resizeWindow,
+            setAnnotation: (annotation) =>
+              annotation === null
+                ? annotationInteractions.hideAnnotation()
+                : annotationInteractions.showAnnotation(annotation),
+          }
+        : {}),
       baseURL: parsedBaseURL.toString().replace(/\/$/, ''),
       click: pointerInteractions.click,
       expect,
@@ -295,10 +322,16 @@ async function executeDemo({
       ready: async () => {
         if (isOpeningReady) throw new Error('Scenario may call ready() only once')
         isOpeningReady = true
-        onOpeningReady?.((performance.now() - recordingStartedAt) / 1000)
+        await presentation?.flush()
+        onOpeningReady?.(
+          (performance.now() - (presentation?.startedAt ?? recordingStartedAt)) / 1000,
+        )
         await page.waitForTimeout(1200 * pauseScale)
       },
-      scroll: createScrollInteraction({ moveCursor: pointerInteractions.moveCursor, page }),
+      scroll: createScrollInteraction({
+        moveCursor: pointerInteractions.moveCursor,
+        page: recordedPage,
+      }),
       showAnnotation: annotationInteractions.showAnnotation,
     })
     if (output && !isOpeningReady) {
@@ -307,14 +340,16 @@ async function executeDemo({
     if (trailingPauseMs > 0) {
       await page.waitForTimeout(trailingPauseMs)
     }
+    await presentation?.flush()
     if (resolvedScreenshotOutput) {
       await mkdir(path.dirname(resolvedScreenshotOutput), { recursive: true })
-      await page.screenshot({ path: resolvedScreenshotOutput })
+      await (presentation?.page ?? page).screenshot({ path: resolvedScreenshotOutput })
     }
   } catch (error) {
     scenarioError = error
   } finally {
     try {
+      await presentation?.stop()
       if (video && resolvedOutput) {
         await mkdir(path.dirname(resolvedOutput), { recursive: true })
         const saveVideo = video.saveAs(resolvedOutput)
@@ -351,7 +386,22 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
       throw new Error('Cannot move the demo cursor to an element without a bounding box')
     }
 
-    const relativePosition = position ?? { x: box.width / 2, y: box.height / 2 }
+    let relativePosition = { x: box.width / 2, y: box.height / 2 }
+    if (position) {
+      const localBox = await locator.evaluate((element) => {
+        const rect = element.getBoundingClientRect()
+        return {
+          width: rect.width,
+          height: rect.height,
+          borderX: element.clientLeft,
+          borderY: element.clientTop,
+        }
+      })
+      relativePosition = {
+        x: (position.x + localBox.borderX) * (box.width / localBox.width),
+        y: (position.y + localBox.borderY) * (box.height / localBox.height),
+      }
+    }
     const targetPosition = {
       x: box.x + relativePosition.x,
       y: box.y + relativePosition.y,
@@ -391,7 +441,12 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
     } = {},
   ) => {
     await moveCursor(locator, { duration, pauseAfter: before, position })
-    await locator.click(position ? { position } : undefined)
+    if (position) {
+      // Click at the same outer-page point as the cursor, including iframe scaling.
+      await page.mouse.click(pointerPosition.x, pointerPosition.y)
+    } else {
+      await locator.click()
+    }
 
     if (after > 0) {
       await page.waitForTimeout(after)
