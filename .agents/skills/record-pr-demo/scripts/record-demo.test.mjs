@@ -549,3 +549,53 @@ test('should reject missing or invalid presentation before running a scenario in
     await rm(directory, { recursive: true, force: true })
   }
 })
+
+test('should show a temporary click ring at the click point above popups', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'demo-click-indicator-'))
+  const scenario = path.join(directory, 'scenario.mjs')
+  try {
+    await writeFile(
+      scenario,
+      `${presentationExport}
+      export default async function({page,click,moveCursor,expect}) {
+        await page.goto('data:text/html,'+encodeURIComponent('<style>:root{--color-bg-brand:rgb(21,125,230)}</style><div id="popup" popover="manual" style="position:fixed;left:80px;top:80px;margin:0;padding:20px"><button>Click target</button><button style="margin-left:180px">Next target</button></div><script>document.querySelector("#popup").showPopover()</script>'))
+        const first=page.getByRole('button',{name:'Click target',exact:true})
+        const next=page.getByRole('button',{name:'Next target',exact:true})
+        await click(first,{duration:0,before:0,after:0})
+        const ring=page.locator('[data-pr-demo-click]')
+        await expect(ring).toBeVisible()
+        await expect(ring).toHaveAttribute('aria-hidden','true')
+        await expect(ring).toHaveCSS('pointer-events','none')
+        await expect(ring).toHaveCSS('border-top-color','rgb(21, 125, 230)')
+        const isInTopLayer=await ring.evaluate(el=>el.parentElement.matches('[data-pr-demo-cursor]:popover-open'))
+        if(!isInTopLayer)throw new Error('Click indicator is below the popup layer')
+        const initial=await ring.boundingBox()
+        const original=await ring.elementHandle()
+        await moveCursor(next,{duration:0,pauseAfter:0})
+        const moved=await ring.boundingBox()
+        if(Math.abs(initial.x+initial.width/2-moved.x-moved.width/2)>1 || Math.abs(initial.y+initial.height/2-moved.y-moved.height/2)>1)throw new Error('Click ring followed the cursor instead of staying at the click point')
+        await click(next,{duration:0,before:0,after:0})
+        await expect(ring).toHaveCount(1)
+        if(await original.evaluate(el=>el.isConnected))throw new Error('Prior click indicator was not cleaned up')
+        await original.dispose()
+        await page.waitForTimeout(500)
+        await expect(ring).toHaveCount(0)
+        await page.emulateMedia({reducedMotion:'reduce'})
+        await click(first,{duration:0,before:0,after:0})
+        const frames=await ring.evaluate(el=>el.getAnimations()[0].effect.getKeyframes())
+        if(frames.some(frame=>frame.transform))throw new Error('Reduced-motion click indicator should not expand')
+        await page.waitForTimeout(500)
+        await expect(ring).toHaveCount(0)
+      }
+    `,
+    )
+    await recorder.validateDemo({
+      baseURL: 'http://localhost:3000',
+      label: 'click-indicator',
+      scenario,
+      viewport: { width: 640, height: 480 },
+    })
+  } finally {
+    await rm(directory, { force: true, recursive: true })
+  }
+})

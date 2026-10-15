@@ -42,7 +42,7 @@ Every scenario must export `presentation` with a change kind (`Feature` or `Fix`
 
 - The recording tells one understandable visual story and ends on visible proof.
 - The first decoded frame shows the intended opening UI, without a blank startup screen.
-- Pointer movement is smooth, clicks have readable dwell time, and the cursor stays visible above popup menus and dialogs.
+- Pointer movement is smooth, clicks have readable dwell time and visible ring feedback, and the cursor stays visible above popup menus and dialogs.
 - Editorial annotations follow the [recording.md style specification](references/recording.md#editorial-annotations-over-the-recording) and leave important UI visible.
 - Overflowing content, including popup menu lists, uses the scenario `scroll` helper for paced movement.
 - The approved artifact is an H.264 `.mp4`, within GitHub's applicable upload limit.

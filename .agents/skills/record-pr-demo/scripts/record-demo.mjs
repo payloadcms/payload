@@ -218,7 +218,6 @@ async function executeDemo({
       Object.assign(cursor.style, {
         background: 'transparent',
         border: '0',
-        filter: 'drop-shadow(0 1px 2px rgb(0 0 0 / 65%))',
         height: '23px',
         insetBlockStart: '0',
         insetInlineStart: '0',
@@ -235,6 +234,7 @@ async function executeDemo({
       })
       const cursorGraphic = cursor.querySelector('svg')
       Object.assign(cursorGraphic.style, {
+        filter: 'drop-shadow(0 1px 2px rgb(0 0 0 / 65%))',
         transformOrigin: '2px 2px',
         transition: 'transform 100ms ease',
       })
@@ -263,21 +263,78 @@ async function executeDemo({
         subtree: true,
       })
 
+      let pointer = { x: 0, y: 0 }
+      let clickPulse
+      let clickPoint
+      let clickAnimation
+      const positionClickPulse = () => {
+        if (!clickPulse) return
+        clickPulse.style.left = `${clickPoint.x - pointer.x}px`
+        clickPulse.style.top = `${clickPoint.y - pointer.y}px`
+      }
+      const positionCursor = ({ clientX, clientY }) => {
+        pointer = { x: clientX, y: clientY }
+        promoteCursor()
+        cursor.style.opacity = '1'
+        cursor.style.transform = `translate(${clientX}px, ${clientY}px)`
+        positionClickPulse()
+      }
+      document.addEventListener('mousemove', positionCursor, { passive: true })
       document.addEventListener(
-        'mousemove',
+        'mousedown',
         (event) => {
-          promoteCursor()
-          cursor.style.opacity = '1'
-          cursor.style.transform = `translate(${event.clientX}px, ${event.clientY}px)`
+          positionCursor(event)
+          cursorGraphic.style.transform = 'scale(0.82)'
+          clickAnimation?.cancel()
+          clickPulse?.remove()
+          const pulse = document.createElement('span')
+          pulse.setAttribute('data-pr-demo-click', '')
+          pulse.setAttribute('aria-hidden', 'true')
+          Object.assign(pulse.style, {
+            position: 'absolute',
+            width: '28px',
+            height: '28px',
+            boxSizing: 'border-box',
+            border: '2px solid var(--color-bg-brand, #0d99ff)',
+            borderRadius: '50%',
+            background: 'color-mix(in srgb, var(--color-bg-brand, #0d99ff) 12%, transparent)',
+            pointerEvents: 'none',
+            transform: 'translate(-50%, -50%)',
+            zIndex: '-1',
+          })
+          clickPulse = pulse
+          clickPoint = { ...pointer }
+          cursor.prepend(pulse)
+          positionClickPulse()
+          const isReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches
+          const animation = pulse.animate(
+            isReducedMotion
+              ? [{ opacity: 0.9 }, { opacity: 0.9, offset: 0.7 }, { opacity: 0 }]
+              : [
+                  { opacity: 0.9, transform: 'translate(-50%, -50%) scale(0.55)' },
+                  { opacity: 0.55, offset: 0.5 },
+                  { opacity: 0, transform: 'translate(-50%, -50%) scale(1.4)' },
+                ],
+            { duration: 420, easing: 'ease-out' },
+          )
+          clickAnimation = animation
+          animation.onfinish = () => {
+            pulse.remove()
+            if (clickPulse === pulse) {
+              clickPulse = undefined
+              clickAnimation = undefined
+            }
+          }
         },
-        { passive: true },
+        true,
       )
-      document.addEventListener('mousedown', () => {
-        cursorGraphic.style.transform = 'scale(0.82)'
-      })
-      document.addEventListener('mouseup', () => {
-        cursorGraphic.style.transform = 'scale(1)'
-      })
+      document.addEventListener(
+        'mouseup',
+        () => {
+          cursorGraphic.style.transform = 'scale(1)'
+        },
+        true,
+      )
     })
   })
 
