@@ -127,6 +127,8 @@ The recorder supplies:
 - `showAnnotation(options)` / `hideAnnotation()`: updates or clears the step note in the shared chrome panel;
 - `label`: the normalized recording label.
 
+Use `await page.reload()` for an on-camera refresh. The shared header automatically shows a rotating refresh icon during the actual iframe reload, then a brief checkmark; assert the expected application state afterward. Refresh feedback sits beside the optional window dimensions and respects reduced motion.
+
 The recorder adds a visible cursor above in-page popups and dialogs. Mouse presses show a brief primary-brand ring at the click point. It stays at that point as the cursor moves away, expands and fades over 420ms, and uses a stationary fade with reduced motion. Repeated clicks replace the prior indicator. This feedback is automatic; scenarios do not mount or style it. Keep the scenario on one page; separate browser-window stitching is outside this skill's current scope.
 
 Use `click` for visible interactions instead of calling `locator.click()` directly. Its defaults are a 400 ms eased cursor movement plus a 300 ms dwell before and after the click. `moveCursor` uses the same travel time and pauses for 300 ms after arriving. Override an individual action when the story needs more time:

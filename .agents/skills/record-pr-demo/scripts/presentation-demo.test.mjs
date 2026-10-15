@@ -322,3 +322,58 @@ test('should route the existing annotation API into chrome without floating over
     await rm(directory, { force: true, recursive: true })
   }
 })
+
+test('should indicate real reloads through completion and failure while viewport dimensions remain visible', async () => {
+  const { chromium, expect } = await import('@playwright/test')
+  const { createPresentation } = await import('./presentation-demo.mjs')
+  const browser = await chromium.launch({ headless: true })
+  let presentation
+  let release
+  try {
+    const context = await browser.newContext({ viewport: { width: 1600, height: 1000 } })
+    let requests = 0
+    await context.route('http://app.test/reload', async (route) => {
+      requests++
+      if (requests === 2)
+        await new Promise((resolve) => {
+          release = resolve
+        })
+      if (requests === 3) return route.abort('failed')
+      await route.fulfill({ contentType: 'text/html', body: `<button>Loaded ${requests}</button>` })
+    })
+    const stage = await context.newPage()
+    presentation = await createPresentation({
+      page: stage,
+      baseURL: 'http://app.test',
+      viewport: { width: 1280, height: 720 },
+      pauseScale: 1,
+      options: {
+        change: { kind: 'Fix', title: 'Refresh status', description: 'See the real frame reload.' },
+      },
+    })
+    await presentation.appPage.goto('http://app.test/reload')
+    const initialPanel = await stage.locator('[data-footer]').boundingBox()
+    const pending = presentation.appPage.reload()
+    await expect(stage.getByRole('status')).toHaveText('Refreshing…')
+    await expect.poll(() => Boolean(release)).toBe(true)
+    await assert.rejects(() => presentation.appPage.reload(), /Await the previous/)
+    await presentation.resizeWindow({ width: 390, height: 720, duration: 100 })
+    await expect(stage.locator('[data-size]')).toHaveText('390 × 720')
+    await expect(stage.getByRole('status')).toHaveText('Refreshing…')
+    assert.deepEqual(await stage.locator('[data-footer]').boundingBox(), initialPanel)
+    release()
+    const response = await pending
+    assert.equal(response.status(), 200)
+    assert.equal(requests, 2)
+    await expect(presentation.appPage.getByRole('button')).toHaveText('Loaded 2')
+    await expect(stage.getByRole('status')).toHaveText('Refreshed')
+    await assert.rejects(() => presentation.appPage.reload({ timeout: 3000 }))
+    await expect(stage.getByRole('status')).toHaveText('Refresh failed')
+    await stage.waitForTimeout(1100)
+    await expect(stage.getByRole('status')).toHaveText('Refresh failed')
+  } finally {
+    release?.()
+    await presentation?.stop()
+    await browser.close()
+  }
+})

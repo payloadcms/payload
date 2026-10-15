@@ -69,3 +69,35 @@ test('should scrub real responsive content without changing the title or footer 
     await new Promise((resolve) => server.close(resolve))
   }
 })
+
+test('should preview a real frame refresh beside dimensions with keyboard controls', async () => {
+  const { server, url } = await startChromePreview({ port: 0 })
+  const browser = await chromium.launch({ headless: true })
+  try {
+    const { expect } = await import('@playwright/test')
+    const page = await browser.newPage({ viewport: { width: 1120, height: 1000 } })
+    let loads = 0
+    page.on('request', (request) => {
+      if (request.url().endsWith('/preview/application.html')) loads++
+    })
+    await page.goto(url)
+    await page.frameLocator('iframe').getByRole('heading', { name: 'Posts', exact: true }).waitFor()
+    await page.getByRole('button', { name: 'Mobile', exact: true }).click()
+    const button = page.getByRole('button', { name: 'Refresh frame', exact: true })
+    await button.focus()
+    await page.keyboard.press('Enter')
+    await expect(page.locator('#chrome').getByRole('status')).toHaveText('Refreshing…')
+    await expect(page.locator('[data-size]')).toHaveText('390 × 720')
+    await expect(page.locator('#chrome').getByRole('status')).toHaveText('Refreshed')
+    assert.equal(loads, 2)
+    assert.equal(await button.evaluate((e) => e === document.activeElement), true)
+    await expect(page.locator('#chrome').getByRole('status')).toBeHidden()
+    await page.getByLabel('Dimensions', { exact: true }).uncheck()
+    await button.click()
+    await expect(page.locator('#chrome').getByRole('status')).toHaveText('Refreshing…')
+    await expect(page.locator('[data-size]')).toBeHidden()
+  } finally {
+    await browser.close()
+    await new Promise((resolve) => server.close(resolve))
+  }
+})

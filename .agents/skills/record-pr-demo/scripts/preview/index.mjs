@@ -103,3 +103,21 @@ play.addEventListener('click', () => {
   animation = requestAnimationFrame(tick)
 })
 renderAt({ milliseconds: 0 })
+
+const refresh = document.querySelector('#refresh')
+refresh.addEventListener('click', async () => {
+  if (refresh.getAttribute('aria-disabled') === 'true') return
+  refresh.setAttribute('aria-disabled', 'true')
+  chrome.setRefreshState({ state: 'refreshing' })
+  const started = performance.now()
+  const loaded = new Promise((resolve) =>
+    application.addEventListener('load', resolve, { once: true }),
+  )
+  application.contentWindow.location.reload()
+  await loaded
+  await new Promise((resolve) =>
+    setTimeout(resolve, Math.max(0, 300 - (performance.now() - started))),
+  )
+  chrome.setRefreshState({ state: 'refreshed' })
+  refresh.setAttribute('aria-disabled', 'false')
+})

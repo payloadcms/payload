@@ -57,6 +57,7 @@ export async function createPresentation({
       )
     let currentViewport = { ...viewport }
     let isResizing = false
+    let isRefreshing = false
     const resizeWindow = async ({ width, height, duration = 1000 }) => {
       if (isResizing) throw new Error('Await the previous resizeWindow before starting another')
       isResizing = true
@@ -79,11 +80,35 @@ export async function createPresentation({
           return (value) => resizeWindow({ ...value, duration: 0 })
         if (property === 'reload')
           return async (options) => {
-            const [response] = await Promise.all([
-              target.waitForNavigation(options),
-              target.evaluate(() => location.reload()),
-            ])
-            return response
+            if (isRefreshing)
+              throw new Error('Await the previous page.reload() before refreshing again')
+            isRefreshing = true
+            try {
+              await call({ method: 'setRefreshState', value: { state: 'refreshing' } })
+              await stage.evaluate(
+                () =>
+                  new Promise((resolve) =>
+                    requestAnimationFrame(() => requestAnimationFrame(resolve)),
+                  ),
+              )
+              const started = performance.now()
+              const [response] = await Promise.all([
+                target.waitForNavigation(options),
+                target.evaluate(() => location.reload()),
+              ])
+              if (response && response.status() >= 400)
+                throw new Error(`Refresh failed: HTTP ${response.status()}`)
+              await stage.waitForTimeout(
+                Math.max(0, 300 * pauseScale - (performance.now() - started)),
+              )
+              await call({ method: 'setRefreshState', value: { state: 'refreshed' } })
+              return response
+            } catch (error) {
+              await call({ method: 'setRefreshState', value: { state: 'failed' } }).catch(() => {})
+              throw error
+            } finally {
+              isRefreshing = false
+            }
           }
         if (property === 'goBack' || property === 'goForward')
           return async () => {

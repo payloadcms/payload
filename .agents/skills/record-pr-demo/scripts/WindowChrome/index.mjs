@@ -34,6 +34,13 @@ export function mountDemoChrome({
     .header { height:36px; display:flex; align-items:center; justify-content:space-between; padding:0 12px 8px; gap:18px; }
     .dots { display:flex; gap:8px; }
     .dots span { width:10px; height:10px; border-radius:100%; background:var(--sub); opacity:.6; }
+    .header-info { display:flex; align-items:center; justify-content:flex-end; gap:12px; min-width:0; }
+    .refresh { display:flex; align-items:center; gap:0; color:var(--sub); font:12px/1.5 system-ui,sans-serif; white-space:nowrap; }
+    .refresh[hidden] { display:none; }
+    .refresh svg { width:14px; height:14px; flex:none; }
+    .refresh[data-state=refreshing] svg { animation:refresh-spin 650ms linear infinite; }
+    @keyframes refresh-spin { to { transform:rotate(360deg); } }
+    @media (prefers-reduced-motion:reduce) { .refresh[data-state=refreshing] svg { animation:none; } }
     .size { padding:5px 9px; border-radius:8px; background:var(--badge); color:var(--sub); font:12px/1.5 ui-monospace,monospace; font-variant-numeric:tabular-nums; }
     .content { position:relative; overflow:hidden; border-radius:8px; background:var(--paper); }
     ::slotted([slot=content]) { display:block; width:100%; height:100%; border:0; }
@@ -51,7 +58,7 @@ export function mountDemoChrome({
     .progress-fill { stroke:var(--color-bg-brand, #0d99ff); stroke-dasharray:100; stroke-dashoffset:100; transition-property:stroke-dashoffset; transition-timing-function:cubic-bezier(.4,0,.2,1); }
     @media (prefers-reduced-motion:reduce) { .progress-fill { transition-property:none; } }
     .step-progress[hidden] { display:none; }
-    [data-step-count] { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
+    [data-step-count], [data-refresh-text] { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
     .note-title { font-size:16px; font-weight:500; overflow-wrap:anywhere; }
     .body { font-size:16px; color:var(--sub); overflow-wrap:anywhere; }
   </style>
@@ -61,7 +68,7 @@ export function mountDemoChrome({
       <div class="note" data-note hidden aria-live="polite"><div class="heading"><span class="pagination" data-pagination><svg class="step-progress" data-step-progress aria-hidden="true" viewBox="0 0 20 20"><circle class="progress-track" cx="10" cy="10" r="8"/><circle class="progress-fill" data-progress-fill cx="10" cy="10" r="8" pathLength="100"/></svg><span data-step-count></span></span><span class="note-title" data-note-title></span></div><div class="body" data-note-body></div></div>
     </section>
     <div class="window" data-window>
-      <div class="header"><div class="dots" aria-hidden="true"><span></span><span></span><span></span></div><span class="size" data-size></span></div>
+      <div class="header"><div class="dots" aria-hidden="true"><span></span><span></span><span></span></div><div class="header-info" data-header-info><span class="refresh" data-refresh role="status" aria-live="polite" aria-atomic="true" hidden><svg data-refresh-icon aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path data-refresh-path d="M13 6a5.2 5.2 0 1 0 .1 4M13 2v4H9" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-refresh-text></span></span><span class="size" data-size></span></div></div>
       <div class="content" data-content><slot name="content"></slot></div>
     </div>
   </div>`
@@ -70,6 +77,7 @@ export function mountDemoChrome({
   find('[data-title]').textContent = change.title
   find('[data-description]').textContent = change.description
   find('[data-size]').hidden = !showSize
+  let refreshTimer
   let currentViewport = viewport
   let isDestroyed = false
 
@@ -237,6 +245,36 @@ export function mountDemoChrome({
       currentViewport = { width: value.width, height: value.height }
       layout()
     },
+    setRefreshState({ state }) {
+      if (!['idle', 'refreshing', 'refreshed', 'failed'].includes(state)) {
+        throw new Error('Invalid refresh state')
+      }
+      clearTimeout(refreshTimer)
+      if (isDestroyed) return
+      const status = find('[data-refresh]')
+      status.hidden = state === 'idle'
+      status.dataset.state = state
+      find('[data-refresh-path]').setAttribute(
+        'd',
+        {
+          idle: '',
+          refreshing: 'M13 6a5.2 5.2 0 1 0 .1 4M13 2v4H9',
+          refreshed: 'M3 8l3.2 3.2L13 4.5',
+          failed: 'M4 4l8 8M12 4l-8 8',
+        }[state],
+      )
+      find('[data-refresh-text]').textContent = {
+        idle: '',
+        refreshing: 'Refreshing…',
+        refreshed: 'Refreshed',
+        failed: 'Refresh failed',
+      }[state]
+      if (state === 'refreshed')
+        refreshTimer = setTimeout(() => {
+          status.hidden = true
+          find('[data-refresh-text]').textContent = ''
+        }, 650)
+    },
     setSizeVisible({ isVisible }) {
       find('[data-size]').hidden = !isVisible
     },
@@ -279,6 +317,7 @@ export function mountDemoChrome({
       animateAnnotationText({ previousText, hasAnnotation: true })
     },
     destroy() {
+      clearTimeout(refreshTimer)
       cancelAnnotationAnimations()
       cancelAnimation()
       isDestroyed = true
