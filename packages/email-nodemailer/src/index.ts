@@ -47,12 +47,9 @@ export const nodemailerAdapter = async (
             : message.from.address
           : message.from
 
-      // In-Reply-To holds a message ID, so an address object is reduced to its address string
       const inReplyTo =
         typeof message.inReplyTo === 'object' ? message.inReplyTo.address : message.inReplyTo
 
-      // Payload's SendEmailOptions is built from @types/nodemailer, which is looser than the
-      // types nodemailer 10 ships (e.g. `path` may be a legacy `Url`). The runtime handling is the same.
       return await transport.sendMail({
         ...message,
         from: from || `${defaultFromName} <${defaultFromAddress}>`,
