@@ -1,4 +1,4 @@
-import type { DocumentReference } from './types.js'
+import type { DocumentReference } from '../types.js'
 
 export const documentKey = ({ id, collectionSlug }: DocumentReference): string =>
   `${collectionSlug}:${String(id)}`

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useReducer } from 'react'
 
-import type { DocumentReference, DocumentsPage, DocumentsTab } from './types.js'
+import type { DocumentReference, DocumentsPage, DocumentsTab } from '../types.js'
 
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { getDocumentPage } from './cache.js'

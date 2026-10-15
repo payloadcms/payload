@@ -4,8 +4,8 @@ import type { Labels } from '../types.js'
 import type { PinnedDocumentsController } from './usePinnedDocuments.js'
 
 import { PinIcon } from '../../../icons/Pin/index.js'
-import { DocumentList } from '../Documents/DocumentList/index.js'
-import { EmptyState } from '../Documents/EmptyState/index.js'
+import { DocumentList } from '../Components/DocumentList/index.js'
+import { EmptyState } from '../Components/EmptyState/index.js'
 import { PinDocumentPicker } from './PinDocumentPicker/index.js'
 import './index.css'
 

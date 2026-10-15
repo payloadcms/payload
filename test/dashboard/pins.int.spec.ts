@@ -8,7 +8,7 @@ import { findOne } from '../../packages/payload/src/preferences/operations/findO
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercise the existing preference endpoint operations.
 import { update } from '../../packages/payload/src/preferences/operations/update.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercise the real document handler.
-import { getDashboardDocuments } from '../../packages/ui/src/widgets/Activity/Documents/getDocuments.js'
+import { getDashboardDocuments } from '../../packages/ui/src/widgets/Activity/utils/getDocuments.js'
 import { test } from '../__helpers/int/vitest.js'
 
 test.suite('Pinned document preferences', { config: './config.ts' }, () => {

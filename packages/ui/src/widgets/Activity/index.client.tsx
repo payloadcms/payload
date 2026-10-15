@@ -2,21 +2,20 @@
 
 import React, { useId, useRef, useState } from 'react'
 
-import type { DocumentsPage, DocumentsTab } from './Documents/types.js'
-import type { Labels } from './types.js'
+import type { DocumentsPage, DocumentsTab, Labels } from './types.js'
 
 import { Button } from '../../elements/Button/index.js'
 import { WidgetCard } from '../WidgetCard/index.js'
-import { DOCUMENTS_BATCH_SIZE } from './Documents/constants.js'
-import { Pagination } from './Documents/Pagination/index.js'
-import { usePageSize } from './Documents/Pagination/usePageSize.js'
+import { Pagination } from './Components/Pagination/index.js'
 import { PinnedDocuments } from './PinnedDocuments/index.js'
 import { usePinnedDocuments } from './PinnedDocuments/usePinnedDocuments.js'
 import { RecentDocuments } from './RecentDocuments/index.js'
 import { useRecentDocuments } from './RecentDocuments/useRecentDocuments.js'
+import { DOCUMENTS_BATCH_SIZE } from './utils/constants.js'
+import { usePageSize } from './utils/usePageSize.js'
 import './index.css'
 
-export type { ActivityDocument } from './Documents/types.js'
+export type { ActivityDocument } from './types.js'
 
 type View = { offset: number; tab: DocumentsTab }
 

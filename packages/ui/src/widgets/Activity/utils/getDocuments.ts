@@ -9,14 +9,14 @@ import type {
   DocumentReference,
   DocumentsPage,
   DocumentsPageArgs,
-} from './types.js'
+} from '../types.js'
 
 import { formatRelativeDate, getRelativeTimeFormat } from '../../../utilities/formatRelativeDate.js'
 import { getDocumentThumbnail } from '../../../utilities/getDocumentThumbnail.js'
 import { getDocumentThumbnailPopulate } from '../../../utilities/getDocumentThumbnailPopulate.js'
 import { getDocumentThumbnailSelect } from '../../../utilities/getDocumentThumbnailSelect.js'
 import { enrichDocsWithVersionStatus } from '../../../views/List/enrichDocsWithVersionStatus.js'
-import { documentKey, getDocumentReferences, getValueByPath } from './utilities.js'
+import { documentKey, getDocumentReferences, getValueByPath } from './documents.js'
 
 type Reference = { viewedAt?: string } & DocumentReference
 type QueryDoc = { id: number | string; updatedAt?: string } & Record<string, unknown>

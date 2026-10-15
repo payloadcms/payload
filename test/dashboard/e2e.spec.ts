@@ -5,7 +5,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Share the batch size used by the widget.
-import { DOCUMENTS_BATCH_SIZE } from '../../packages/ui/src/widgets/Activity/Documents/constants.js'
+import { DOCUMENTS_BATCH_SIZE } from '../../packages/ui/src/widgets/Activity/utils/constants.js'
 import { changeLocale } from '../__helpers/e2e/helpers.js'
 import { getSelectMenu, openSelectMenu, selectInput } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
@@ -23,7 +23,7 @@ import {
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
-const dirname = path.resolve(currentFolder, '../../')
+const dirname = path.resolve(currentFolder, '../..')
 
 const { beforeAll, beforeEach, describe } = test
 

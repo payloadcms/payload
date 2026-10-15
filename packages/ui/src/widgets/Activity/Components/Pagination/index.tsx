@@ -4,8 +4,8 @@ import type { Labels } from '../../types.js'
 
 import { ChevronIcon } from '../../../../icons/Chevron/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
-import { getDocumentPage } from '../cache.js'
-import { DOCUMENTS_BATCH_SIZE, PAGE_SIZES } from '../constants.js'
+import { getDocumentPage } from '../../utils/cache.js'
+import { DOCUMENTS_BATCH_SIZE, PAGE_SIZES } from '../../utils/constants.js'
 import './index.css'
 
 export function Pagination({

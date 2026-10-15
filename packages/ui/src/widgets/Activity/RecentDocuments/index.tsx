@@ -4,8 +4,8 @@ import type { Labels } from '../types.js'
 import type { RecentDocumentsController } from './useRecentDocuments.js'
 
 import { ClockIcon } from '../../../icons/Clock/index.js'
-import { DocumentList } from '../Documents/DocumentList/index.js'
-import { EmptyState } from '../Documents/EmptyState/index.js'
+import { DocumentList } from '../Components/DocumentList/index.js'
+import { EmptyState } from '../Components/EmptyState/index.js'
 
 export function RecentDocuments({
   documents,

@@ -1,8 +1,8 @@
 import type { PinnedDocumentsPreferences } from 'payload'
 
-import type { DocumentReference } from '../Documents/types.js'
+import type { DocumentReference } from '../types.js'
 
-import { documentKey, getDocumentReferences } from '../Documents/utilities.js'
+import { documentKey, getDocumentReferences } from '../utils/documents.js'
 
 export async function readPinnedPreferences({
   url,

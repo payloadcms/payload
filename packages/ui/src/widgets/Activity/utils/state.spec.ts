@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import type { DocumentsPage } from './types.js'
+import type { DocumentsPage } from '../types.js'
 
 import { createDocumentState, documentReducer } from './state.js'
 

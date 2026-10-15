@@ -3,13 +3,13 @@ import type { PayloadRequest, WidgetServerProps } from 'payload'
 import { formatAdminURL, PREFERENCE_KEYS } from 'payload/shared'
 import React from 'react'
 
-import type { DocumentsPage, DocumentsTab } from './Documents/types.js'
+import type { DocumentsPage, DocumentsTab } from './types.js'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
 import { ActivityWidgetClient } from '../../exports/client/index.js'
 import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
-import { DOCUMENTS_BATCH_SIZE } from './Documents/constants.js'
-import { getDashboardDocuments } from './Documents/getDocuments.js'
+import { DOCUMENTS_BATCH_SIZE } from './utils/constants.js'
+import { getDashboardDocuments } from './utils/getDocuments.js'
 
 type ActivityWidgetData = {
   excludedCollections?: string[]

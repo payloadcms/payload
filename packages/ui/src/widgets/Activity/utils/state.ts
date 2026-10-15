@@ -1,8 +1,8 @@
+import type { DocumentReference, DocumentsPage } from '../types.js'
 import type { DocumentCache } from './cache.js'
-import type { DocumentReference, DocumentsPage } from './types.js'
 
 import { createDocumentCache, mergeDocumentPages } from './cache.js'
-import { documentKey } from './utilities.js'
+import { documentKey } from './documents.js'
 
 export type DocumentState = {
   cache?: DocumentCache

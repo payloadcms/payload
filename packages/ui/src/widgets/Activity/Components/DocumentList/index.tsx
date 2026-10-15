@@ -1,13 +1,13 @@
 import React from 'react'
 
-import type { ActivityDocument } from '../types.js'
+import type { ActivityDocument } from '../../types.js'
 
 import { CardGrid } from '../../../../elements/CardGrid/index.js'
 import { DocumentCard } from '../../../../elements/DocumentCard/index.js'
 import { DocumentIcon } from '../../../../icons/Document/index.js'
-import { PAGE_SIZES } from '../constants.js'
+import { PAGE_SIZES } from '../../utils/constants.js'
+import { documentKey } from '../../utils/documents.js'
 import { StatusPill } from '../StatusPill/index.js'
-import { documentKey } from '../utilities.js'
 import './index.css'
 
 export function DocumentList({

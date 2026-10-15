@@ -1,4 +1,4 @@
-import type { ActivityDocument, DocumentsPage } from './types.js'
+import type { ActivityDocument, DocumentsPage } from '../types.js'
 
 import { DOCUMENTS_BATCH_SIZE } from './constants.js'
 

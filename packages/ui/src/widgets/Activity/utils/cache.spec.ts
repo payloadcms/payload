@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import type { DocumentsPage } from './types.js'
-import type { ActivityDocument } from './types.js'
+import type { DocumentsPage } from '../types.js'
+import type { ActivityDocument } from '../types.js'
 
 import { createDocumentCache, getDocumentPage, mergeDocumentPages } from './cache.js'
 
