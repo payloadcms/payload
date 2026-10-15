@@ -1483,7 +1483,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         await page.goto(formatAdminURL({ adminRoute: '/admin', path, serverURL }))
 
         const trigger = page.getByRole('button', { name: 'More options', exact: true })
-        const item = page.getByRole('menuitem', { name: 'Edit LLM instructions', exact: true })
+        const item = page.getByRole('menuitem', { name: 'Edit agent instructions', exact: true })
 
         await trigger.focus()
         await page.keyboard.press('Enter')
