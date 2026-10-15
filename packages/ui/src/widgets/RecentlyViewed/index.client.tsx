@@ -94,7 +94,10 @@ export function RecentsAndPinnedClient({
   const invalidatedTabsRef = useRef(new Set<DocumentsTab>())
   const previousInitialPagesRef = useRef(initialPages)
   const [pageSize, setPageSize] = useState<null | number>(null)
-  const [view, setView] = useState<View>({ offset: 0, tab: 'pinned' })
+  const [view, setView] = useState<View>(() => ({
+    offset: 0,
+    tab: initialPages?.pinned?.totalDocs ? 'pinned' : 'recents',
+  }))
   const [documentsByTab, setDocumentsByTab] = useState<DocumentsByTab>(() =>
     getInitialDocuments({ initialPages }),
   )
