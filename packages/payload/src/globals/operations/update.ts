@@ -30,6 +30,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { getTopLevelFieldNames } from '../../utilities/getTopLevelFieldNames.js'
 import {
+  hasAutosaveEnabled,
   hasDraftsEnabled,
   hasDraftValidationEnabled,
   hasLocalizeStatusEnabled,
@@ -262,6 +263,7 @@ export const updateOperation = async <
       globalSlug: slug,
       lockErrorMessage: `Global with slug "${slug}" is currently locked by another user and cannot be updated.`,
       overrideLock,
+      preserveLock: hasAutosaveEnabled(globalConfig) && isSavingDraft,
       req,
     })
 

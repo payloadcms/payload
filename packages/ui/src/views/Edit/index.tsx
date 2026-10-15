@@ -3,6 +3,7 @@
 import type { DocumentViewClientProps, User } from 'payload'
 
 import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -127,7 +128,7 @@ export function DefaultEditView({
     config,
     config: {
       admin: { user: userSlug },
-      routes: { admin: adminRoute },
+      routes: { admin: adminRoute, api: apiRoute },
       serverURL,
     },
     getEntityConfig,
@@ -189,6 +190,10 @@ export function DefaultEditView({
   const originalUpdatedAtRef = useRef(data?.updatedAt)
   const saveCounterRef = useRef(0)
   const isSavingRef = useRef(false)
+  // Set in the autosave lock-release cleanup so a queued form-state request
+  // does not recreate the lock after the editor has left the document.
+  const unmountedRef = useRef(false)
+  const pendingFormStateRef = useRef<Promise<unknown> | undefined>(undefined)
 
   const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
   const isLockExpired = Date.now() > lockExpiryTime
@@ -469,6 +474,10 @@ export function DefaultEditView({
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState, submitted }) => {
+      if (autosaveEnabled && unmountedRef.current) {
+        return
+      }
+
       const controller = handleAbortRef(abortOnChangeRef)
 
       // Capture save state before the async form-state request so we can detect
@@ -508,7 +517,11 @@ export function DefaultEditView({
 
       const docPreferences = await getDocPreferences()
 
-      const result = await getFormState({
+      if (autosaveEnabled && unmountedRef.current) {
+        return
+      }
+
+      const formStatePromise = getFormState({
         id,
         checkForStaleData,
         collectionSlug,
@@ -526,6 +539,16 @@ export function DefaultEditView({
         skipValidation: !submitted,
         updateLastEdited,
       })
+
+      if (autosaveEnabled) {
+        pendingFormStateRef.current = formStatePromise
+      }
+
+      const result = await formStatePromise
+
+      if (autosaveEnabled && unmountedRef.current) {
+        return
+      }
 
       if (!result) {
         return
@@ -587,6 +610,90 @@ export function DefaultEditView({
       abortAndIgnore(abortOnSave)
     }
   }, [])
+
+  // Autosave never renders LeaveWithoutSaving, so the lock would otherwise
+  // survive navigation. Release only this user's row, and only when the
+  // document URL is actually left (take-over refreshes the same path).
+  useEffect(() => {
+    if (
+      !isLockingEnabled ||
+      !autosaveEnabled ||
+      !user?.id ||
+      !user.collection ||
+      !(id || globalSlug)
+    ) {
+      return
+    }
+
+    unmountedRef.current = false
+
+    const docPath = formatAdminURL({
+      adminRoute,
+      path: globalSlug ? `/globals/${globalSlug}` : `/collections/${collectionSlug}/${id}`,
+    })
+
+    const releaseURL = `${formatAdminURL({
+      apiRoute,
+      path: '/payload-locked-documents',
+      serverURL,
+    })}${qs.stringify(
+      {
+        where: {
+          and: [
+            globalSlug
+              ? { globalSlug: { equals: globalSlug } }
+              : { 'document.relationTo': { equals: collectionSlug } },
+            ...(globalSlug ? [] : [{ 'document.value': { equals: id } }]),
+            { 'user.relationTo': { equals: user.collection } },
+            { 'user.value': { equals: user.id } },
+          ],
+        },
+      },
+      { addQueryPrefix: true },
+    )}`
+
+    const release = () => {
+      void fetch(releaseURL, {
+        credentials: 'include',
+        keepalive: true,
+        method: 'DELETE',
+      })
+    }
+
+    // A form-state request already in flight still creates or refreshes the
+    // lock on the server. Delete only after it settles, so the DELETE cannot
+    // lose the race. pagehide cannot wait.
+    const releaseAfterPending = () => {
+      void Promise.resolve(pendingFormStateRef.current).finally(release)
+    }
+
+    window.addEventListener('pagehide', release)
+
+    return () => {
+      unmountedRef.current = true
+      window.removeEventListener('pagehide', release)
+      // Must outlive this effect: the next pathname is only visible on the
+      // following turn. Clearing it would skip the release.
+      // eslint-disable-next-line @eslint-react/web-api/no-leaked-timeout
+      setTimeout(() => {
+        const { pathname } = window.location
+        if (pathname !== docPath && !pathname.startsWith(`${docPath}/`)) {
+          releaseAfterPending()
+        }
+      }, 0)
+    }
+  }, [
+    adminRoute,
+    apiRoute,
+    autosaveEnabled,
+    collectionSlug,
+    globalSlug,
+    id,
+    isLockingEnabled,
+    serverURL,
+    user?.collection,
+    user?.id,
+  ])
 
   // Show pending success toast after redirect from create
   useEffect(() => {
