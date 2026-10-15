@@ -1,3 +1,5 @@
+import { importDateFNSLocale } from '#importDateFNSLocale'
+
 import type {
   DefaultTranslationKeys,
   DefaultTranslationsObject,
@@ -7,7 +9,6 @@ import type {
   Language,
 } from '../types.js'
 
-import { importDateFNSLocale } from '../importDateFNSLocale.js'
 import { deepMergeSimple } from './deepMergeSimple.js'
 import { getTranslationsByContext } from './getTranslationsByContext.js'
 

@@ -18,6 +18,12 @@
   ],
   "sideEffects": false,
   "type": "module",
+  "imports": {
+    "#importDateFNSLocale": {
+      "types": "./src/importDateFNSLocale.ts",
+      "default": "./src/importDateFNSLocale.ts"
+    }
+  },
   "exports": {
     ".": {
       "import": "./src/exports/index.ts",
@@ -68,6 +74,13 @@
     "typescript": "catalog:"
   },
   "publishConfig": {
+    "imports": {
+      "#importDateFNSLocale": {
+        "types": "./dist/importDateFNSLocale.d.ts",
+        "browser": "./dist/importDateFNSLocale.js",
+        "default": "./dist/importDateFNSLocale.server.js"
+      }
+    },
     "exports": {
       ".": {
         "import": "./dist/exports/index.js",

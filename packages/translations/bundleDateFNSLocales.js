@@ -6,6 +6,11 @@
 // `importDateFNSLocale` at those files instead of `date-fns/locale/*`. en-US stays a plain date-fns
 // import: date-fns' own `format` imports it as its default locale, so apps load it anyway, and a
 // bundled copy would load it twice.
+//
+// Servers don't download anything, so `dist/importDateFNSLocale.server.js` loads every locale
+// from one file instead, which compiles much faster than 40. `package.json` maps
+// `#importDateFNSLocale` to the per-locale version for browsers and to the server version
+// everywhere else.
 import * as esbuild from 'esbuild'
 import fs from 'node:fs'
 import { createRequire } from 'node:module'
@@ -18,8 +23,10 @@ const require = createRequire(import.meta.url)
 const dateFNSDir = path.dirname(require.resolve('date-fns/package.json'))
 const dateFNSExports = require('date-fns/package.json').exports
 
-const dist = path.join(path.dirname(fileURLToPath(import.meta.url)), 'dist')
+const packageDir = path.dirname(fileURLToPath(import.meta.url))
+const dist = path.join(packageDir, 'dist')
 const importerFile = path.join(dist, 'importDateFNSLocale.js')
+const serverImporterFile = path.join(dist, 'importDateFNSLocale.server.js')
 const localeImport = /import\((['"])date-fns\/locale\/((?!en-US\1)[^'"]+)\1\)/g
 
 fs.rmSync(path.join(dist, 'dateFNS'), { force: true, recursive: true })
@@ -76,6 +83,27 @@ fs.writeFileSync(
   ),
 )
 
-verifyDateFNSLocales({ dist, metafile })
+const { metafile: serverMetafile } = await esbuild.build({
+  bundle: true,
+  format: 'esm',
+  metafile: true,
+  minify: true,
+  outfile: path.join(dist, 'dateFNS/all.js'),
+  platform: 'neutral',
+  plugins: [importFunctionsFromDateFNS],
+  stdin: {
+    contents: locales.map((locale) => `export * from 'date-fns/locale/${locale}'`).join('\n'),
+    resolveDir: packageDir,
+  },
+})
 
-console.log(`Bundled ${locales.length} date-fns locales into dist/dateFNS`)
+fs.writeFileSync(
+  serverImporterFile,
+  code.replace(localeImport, (_match, quote) => `import(${quote}./dateFNS/all.js${quote})`),
+)
+
+await verifyDateFNSLocales({ dist, metafiles: [metafile, serverMetafile], serverImporterFile })
+
+console.log(
+  `Bundled ${locales.length} date-fns locales into dist/dateFNS, one by one and all together`,
+)
