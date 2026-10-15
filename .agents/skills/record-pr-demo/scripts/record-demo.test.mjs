@@ -496,12 +496,29 @@ test('should smoothly scroll an open popup menu list', async () => {
   }
 })
 
-test('should reject missing or disabled chrome before running a scenario in every mode', async () => {
+test('should reject missing or invalid presentation before running a scenario in every mode', async () => {
   const directory = await mkdtemp(path.join(tmpdir(), 'required-demo-chrome-'))
   try {
     for (const [name, header] of [
       ['missing', ''],
       ['disabled', 'export const presentation = false;'],
+      ['empty-change', 'export const presentation = { change: {} };'],
+      [
+        'invalid-kind',
+        "export const presentation = { change: { kind: 'Other', title: 'Demo', description: 'Details' } };",
+      ],
+      [
+        'blank-title',
+        "export const presentation = { change: { kind: 'Fix', title: ' ', description: 'Details' } };",
+      ],
+      [
+        'missing-description',
+        "export const presentation = { change: { kind: 'Fix', title: 'Demo' } };",
+      ],
+      [
+        'non-string-description',
+        "export const presentation = { change: { kind: 'Fix', title: 'Demo', description: 42 } };",
+      ],
     ]) {
       const scenario = path.join(directory, `${name}.mjs`)
       await writeFile(

@@ -181,7 +181,15 @@ async function executeDemo({
     throw new Error(`Scenario must default-export a function: ${scenario}`)
   }
 
-  if (!scenarioModule.presentation?.change) {
+  const change = scenarioModule.presentation?.change
+
+  if (
+    !['Feature', 'Fix'].includes(change?.kind) ||
+    typeof change.title !== 'string' ||
+    !change.title.trim() ||
+    typeof change.description !== 'string' ||
+    !change.description.trim()
+  ) {
     throw new Error(
       'Every scenario must export presentation with a change kind, title, and description; recording chrome cannot be disabled',
     )
@@ -273,8 +281,8 @@ async function executeDemo({
     })
   })
 
-  const recordingStartedAt = performance.now()
   const recordedPage = await context.newPage()
+  const recordingStartedAt = performance.now()
   const video = output ? recordedPage.video() : undefined
   let presentation
   const resolvedOutput = output ? path.resolve(output) : undefined
