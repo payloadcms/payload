@@ -85,12 +85,12 @@ describe('useQueue', () => {
   it('should keep the active context current when work is queued at the same version', async () => {
     const active = deferred()
     let isCurrent: (() => boolean) | undefined
-    let isGenerationCurrent: (() => boolean) | undefined
+    let isQueueReset: (() => boolean) | undefined
     const queue = renderQueue({ getSequence: () => 0 })
     const running = queue.schedule({
       run: async (context) => {
         isCurrent = context.isCurrent
-        isGenerationCurrent = context.isGenerationCurrent
+        isQueueReset = context.isQueueReset
         await active.promise
       },
     })
@@ -104,7 +104,7 @@ describe('useQueue', () => {
 
     await expect(superseded).resolves.toEqual({ status: 'superseded' })
     expect(isCurrent?.()).toBe(true)
-    expect(isGenerationCurrent?.()).toBe(true)
+    expect(isQueueReset?.()).toBe(false)
     active.resolve()
     await running
     await pending
@@ -115,12 +115,12 @@ describe('useQueue', () => {
     const active = deferred()
     const queue = renderQueue({ getSequence: () => version })
     const running = queue.schedule({
-      run: async ({ isCurrent, isGenerationCurrent }) => {
+      run: async ({ isCurrent, isQueueReset }) => {
         expect(isCurrent()).toBe(true)
-        expect(isGenerationCurrent()).toBe(true)
+        expect(isQueueReset()).toBe(false)
         await active.promise
         expect(isCurrent()).toBe(false)
-        expect(isGenerationCurrent()).toBe(true)
+        expect(isQueueReset()).toBe(false)
       },
     })
 
@@ -208,12 +208,12 @@ describe('useQueue', () => {
   it('should supersede pending work on reset and invalidate the active context', async () => {
     const active = deferred()
     let isCurrent: (() => boolean) | undefined
-    let isGenerationCurrent: (() => boolean) | undefined
+    let isQueueReset: (() => boolean) | undefined
     const queue = renderQueue({ getSequence: () => 0 })
     const running = queue.schedule({
       run: async (context) => {
         isCurrent = context.isCurrent
-        isGenerationCurrent = context.isGenerationCurrent
+        isQueueReset = context.isQueueReset
         await active.promise
       },
     })
@@ -223,7 +223,7 @@ describe('useQueue', () => {
 
     await expect(pending).resolves.toEqual({ status: 'superseded' })
     expect(isCurrent?.()).toBe(false)
-    expect(isGenerationCurrent?.()).toBe(false)
+    expect(isQueueReset?.()).toBe(true)
     active.resolve()
     await running
   })

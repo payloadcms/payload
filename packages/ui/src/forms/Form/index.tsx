@@ -377,12 +377,11 @@ export const Form: React.FC<FormProps> = (props) => {
 
           // Autocomplete updates happen before the data snapshot and belong to this submission.
           const dispatchedSequence = formSequenceRef.current
-          const { isGenerationCurrent } = requestContext
+          const { isQueueReset } = requestContext
 
           requestContext = {
-            isCurrent: () =>
-              isGenerationCurrent() && formSequenceRef.current === dispatchedSequence,
-            isGenerationCurrent,
+            isCurrent: () => !isQueueReset() && formSequenceRef.current === dispatchedSequence,
+            isQueueReset,
           }
         }
 
@@ -682,7 +681,7 @@ export const Form: React.FC<FormProps> = (props) => {
           toast.dismiss(promiseToastID)
         }
 
-        if (requestContext.isGenerationCurrent()) {
+        if (!requestContext.isQueueReset()) {
           if (requestIntent === 'autosave') {
             setBackgroundProcessing(false)
           }

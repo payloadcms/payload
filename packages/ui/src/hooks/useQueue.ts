@@ -2,15 +2,15 @@ import { useCallback, useRef } from 'react'
 
 export type QueueContext = {
   /**
-   * Returns `true` while the queue generation and external sequence still match those captured when this task started.
+   * Returns `true` if the queue has not been reset and the external sequence still matches the one captured when this task started.
    * Recheck after awaiting work before applying results.
    * Scheduling another task alone does not invalidate this context.
    */
   isCurrent: () => boolean
   /**
-   * Returns `true` if the queue has not been reset since this task started, regardless of external sequence changes.
+   * Returns `true` if the queue has been reset since this task started, regardless of external sequence changes.
    */
-  isGenerationCurrent: () => boolean
+  isQueueReset: () => boolean
 }
 
 export type QueueTask<T> = {
@@ -42,19 +42,19 @@ type PendingEntry = {
 }
 
 const initializeQueue = ({ getSequence }: { getSequence: () => unknown }): Queue => {
-  let generation = 0
+  let resetCount = 0
   let isActive = false
   let pending: PendingEntry | undefined
 
   const start = ({ entry }: { entry: PendingEntry }): void => {
     isActive = true
 
-    const activeGeneration = generation
+    const resetCountAtStart = resetCount
     const dispatchedSequence = getSequence()
-    const isGenerationCurrent = () => generation === activeGeneration
+    const isQueueReset = () => resetCount !== resetCountAtStart
     const context: QueueContext = {
-      isCurrent: () => isGenerationCurrent() && Object.is(getSequence(), dispatchedSequence),
-      isGenerationCurrent,
+      isCurrent: () => !isQueueReset() && Object.is(getSequence(), dispatchedSequence),
+      isQueueReset,
     }
 
     const taskPromise = (async () => entry.run(context))()
@@ -77,7 +77,7 @@ const initializeQueue = ({ getSequence }: { getSequence: () => unknown }): Queue
   }
 
   const reset = (): void => {
-    generation += 1
+    resetCount += 1
 
     if (pending) {
       pending.resolve({ status: 'superseded' })
