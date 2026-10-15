@@ -4592,6 +4592,14 @@ test.describe('WCAG 2.2 Level AA', () => {
 
       await expect(editor).toHaveAccessibleName('Additional instructions')
       await expect(editor).toBeEditable()
+      await editor.fill('')
+      await expect(editor).toHaveAttribute(
+        'aria-placeholder',
+        "Start typing, or press '/' for commands...",
+      )
+      await expect(
+        field.getByText("Start typing, or press '/' for commands...", { exact: true }),
+      ).toBeVisible()
 
       const editableScan = await runAxeScan({ include: ['.llm-instructions'], page, testInfo })
 
