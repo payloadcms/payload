@@ -2498,3 +2498,19 @@ export default buildConfig({
   },
 })
 ```
+
+### Nodemailer adapter now uses nodemailer 10 ([#18737](https://github.com/payloadcms/payload/pull/18737))
+
+`@payloadcms/email-nodemailer` now depends on nodemailer 10, which ships its own types. If you pass your own `transport` created with nodemailer 9, it no longer type-checks against the adapter. Upgrade `nodemailer` and remove `@types/nodemailer`:
+
+```diff
+  "dependencies": {
+-   "nodemailer": "^9.1.1"
++   "nodemailer": "^10.1.1"
+  },
+  "devDependencies": {
+-   "@types/nodemailer": "^8.0.0"
+  }
+```
+
+If you use `transportOptions`, or pass no config, no changes are needed.
