@@ -2,6 +2,7 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
+import { devUser } from '../credentials.js'
 import {
   applicationEndpoint,
   collectionSlug,
@@ -11,6 +12,7 @@ import {
   noEndpointsCollectionSlug,
   noEndpointsGlobalSlug,
   rootEndpoint,
+  userEndpoint,
 } from './shared.js'
 
 test.suite('Endpoints', { config: './config.ts' }, () => {
@@ -109,6 +111,25 @@ test.suite('Endpoints', { config: './config.ts' }, () => {
       expect(response.headers.get('Access-Control-Allow-Origin')).toBe('https://custom-domain.com')
       expect(response.headers.get('Access-Control-Allow-Methods')).toBe('POST, GET, OPTIONS')
       expect(response.headers.get('Access-Control-Allow-Headers')).toBe('X-Custom-Header')
+    })
+  })
+
+  test.describe('Authentication', () => {
+    test('should not authenticate requests to endpoints with disableAuth', async ({
+      restClient,
+    }) => {
+      const { token } = await restClient
+        .POST('/users/login', {
+          body: JSON.stringify({ email: devUser.email, password: devUser.password }),
+        })
+        .then((res) => res.json())
+      const headers = { Authorization: `JWT ${token}` }
+
+      const authenticated = await restClient.GET(`/${userEndpoint}`, { headers })
+      const withoutAuth = await restClient.GET(`/${userEndpoint}/without-auth`, { headers })
+
+      await expect(authenticated.json()).resolves.toEqual({ email: devUser.email })
+      await expect(withoutAuth.json()).resolves.toEqual({ email: null })
     })
   })
 })
