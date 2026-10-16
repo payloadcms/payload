@@ -73,7 +73,6 @@
     "@types/pg": "8.20.0",
     "console-table-printer": "2.15.0",
     "drizzle-kit": "0.31.7",
-    "drizzle-orm": "0.45.2",
     "pg": "8.20.0",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
@@ -83,10 +82,12 @@
     "@hyrious/esbuild-plugin-commonjs": "0.2.6",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/to-snake-case": "1.0.0",
+    "drizzle-orm": "0.45.2",
     "esbuild": "0.27.1",
     "payload": "workspace:*"
   },
   "peerDependencies": {
+    "drizzle-orm": "0.45.2",
     "payload": "workspace:*"
   },
   "publishConfig": {
