@@ -180,7 +180,7 @@
     text-align: center;
     cursor: pointer;
     top: 0;
-    margin: var(--spacer-2) var(--spacer-1);
+    margin: var(--spacer-2) var(--spacer-1-5);
     border: none;
     z-index: 1;
     height: var(--spacer-4);
@@ -202,6 +202,10 @@
   .date-time-picker__appearance--monthOnly .react-datepicker__navigation {
     font-size: 18px;
     font-weight: 300;
+  }
+
+  .react-datepicker:has(.react-datepicker__monthPicker) .react-datepicker__navigation {
+    margin-inline: var(--spacer-2);
   }
 
   .react-datepicker__navigation-icon {
@@ -374,6 +378,9 @@
 
   .react-datepicker__month-container {
     position: relative;
+  }
+
+  .react-datepicker__month-container:has(.react-datepicker__day-names) {
     width: calc(var(--spacer-5) * 8);
   }
 
