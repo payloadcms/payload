@@ -6,8 +6,7 @@ export default buildConfig({
     {
       slug: 'posts',
       versions: {
-        drafts: {
-        },
+        drafts: {},
       },
       fields: [{ name: 'title', type: 'text', localized: true }],
     },
