@@ -599,3 +599,38 @@ test('should show a temporary click ring at the click point above popups', async
     await rm(directory, { force: true, recursive: true })
   }
 })
+
+test('should click scaled targets, type with keys, and require wheel input to reveal targets', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'demo-gestures-'))
+  const scenario = path.join(directory, 'scenario.mjs')
+  try {
+    await writeFile(
+      scenario,
+      `${presentationExport}
+      export default async function({page,click,typeText,expect,scroll}) {
+        await page.goto('data:text/html,'+encodeURIComponent('<style>body{margin:0}button,input{display:block;margin:30px}#scroller{height:180px;overflow:auto}#spacer{height:800px}</style><input aria-label="Title" value="Old title" onkeydown="this.dataset.key=event.key" oninput="this.dataset.trusted=event.isTrusted"><button onclick="this.textContent=String.fromCharCode(67,108,105,99,107,101,100)">Click target</button><div id="scroller"><div id="spacer"></div><button>Offscreen</button></div>'))
+        await click(page.getByRole('button',{name:'Click target',exact:true}))
+        await expect(page.getByRole('button',{name:'Clicked',exact:true})).toBeVisible()
+        await typeText({locator:page.getByRole('textbox',{name:'Title'}),text:'New title',clear:true,delay:1})
+        await expect(page.getByRole('textbox',{name:'Title'})).toHaveValue('New title')
+        await expect(page.getByRole('textbox',{name:'Title'})).toHaveAttribute('data-key','e')
+        await expect(page.getByRole('textbox',{name:'Title'})).toHaveAttribute('data-trusted','true')
+        let rejected=false
+        try { await click(page.getByRole('button',{name:'Offscreen',exact:true})) } catch(error) { rejected=/wheel|visible/.test(error.message) }
+        if(!rejected)throw new Error('Offscreen click silently scrolled')
+        await expect(page.locator('#scroller')).toHaveJSProperty('scrollTop',0)
+        await scroll(page.locator('#scroller'),{duration:100,settle:0})
+        await click(page.getByRole('button',{name:'Offscreen',exact:true}))
+      }
+    `,
+    )
+    await recorder.validateDemo({
+      baseURL: 'http://localhost:3000',
+      label: 'gestures',
+      scenario,
+      viewport: { width: 1800, height: 1100 },
+    })
+  } finally {
+    await rm(directory, { force: true, recursive: true })
+  }
+})

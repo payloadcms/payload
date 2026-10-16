@@ -8,6 +8,7 @@ import { pathToFileURL } from 'node:url'
 
 import { convertDemo } from './convert-demo.mjs'
 import {
+  assertGestureScenario,
   parseViewport,
   previewDemo,
   recordDemo,
@@ -262,7 +263,10 @@ export async function runPreparation(options) {
     return result
   }
 
-  await runPreflight({ baseURL: options.baseURL, requiresServer: options.mode !== 'preflight' })
+  await runPreflight({
+    baseURL: options.baseURL,
+    requiresServer: options.mode !== 'preflight',
+  })
   printStage('Environment ready', startedAt)
 
   if (options.mode === 'preflight') {
@@ -360,7 +364,10 @@ async function runPreflight({ baseURL, requiresServer }) {
 
   let response
   try {
-    response = await fetch(baseURL, { redirect: 'manual', signal: AbortSignal.timeout(5000) })
+    response = await fetch(baseURL, {
+      redirect: 'manual',
+      signal: AbortSignal.timeout(5000),
+    })
   } catch (error) {
     throw new Error(`Payload server is not reachable at ${baseURL}: ${error.message}`)
   }
@@ -373,37 +380,8 @@ async function runPreflight({ baseURL, requiresServer }) {
 export async function runWithScenarioFixture(options, action) {
   const scenarioURL = pathToFileURL(path.resolve(options.scenario)).href
   const scenarioModule = await import(scenarioURL)
-  const { request } = await import('@playwright/test')
-  const requestContext = await request.newContext({ baseURL: options.baseURL })
-  const hasSetup = typeof scenarioModule.setup === 'function'
-  let isSetupComplete = !hasSetup
-  let fixture
-
-  try {
-    if (hasSetup) {
-      fixture = await scenarioModule.setup({
-        baseURL: options.baseURL,
-        label: options.label,
-        request: requestContext,
-      })
-      isSetupComplete = true
-    }
-
-    await action(fixture)
-  } finally {
-    try {
-      if (isSetupComplete && typeof scenarioModule.teardown === 'function') {
-        await scenarioModule.teardown({
-          baseURL: options.baseURL,
-          fixture,
-          label: options.label,
-          request: requestContext,
-        })
-      }
-    } finally {
-      await requestContext.dispose()
-    }
-  }
+  assertGestureScenario({ scenarioModule })
+  await action()
 }
 
 function parseTiming({ name, value }) {

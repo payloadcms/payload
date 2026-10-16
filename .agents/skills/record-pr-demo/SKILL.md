@@ -17,6 +17,10 @@ Before showing the video, record its absolute path and SHA-256 digest. Immediate
 
 Do not upload previews, rejected takes, raw WebM recordings, or files the user has not reviewed. Never commit demo media to the repository.
 
+## Gesture-based scenarios
+
+Drive the application through browser gestures: paced pointer clicks, keystrokes, and wheel scrolling. Open the starting URL once, then navigate through visible controls. Prepare any additional recording data through the UI before `ready()`; use existing seeded data when possible. Do not use API or Local API calls, direct navigation between steps, field filling, DOM mutations, or programmatic scrolling to produce the demonstrated state. Assertions and read-only DOM inspection may observe the result. Recording chrome, encoding, and verification remain harness operations. See [recording.md](references/recording.md#gesture-based-interactions) for the interaction contract and examples.
+
 ## Required presentation chrome
 
 Every scenario must export `presentation` with a change kind (`Feature` or `Fix`), title, and description. Read [window-chrome.md](references/window-chrome.md) and use the shared component and live preview; do not invent wrapper CSS. Recordings, screenshot previews, and validation always mount the chrome. Keep the change description constant and use `showAnnotation({ title, body, index, total })` / `hideAnnotation()` for panel notes. Floating annotations and placement options (`type`, `position`, `width`) are unsupported. Use `resizeWindow` only when responsive reflow is part of the story.
@@ -26,7 +30,7 @@ Every scenario must export `presentation` with a change kind (`Feature` or `Fix`
 1. Inspect the feature, relevant diff, and available test configs. Choose the smallest existing Payload config that demonstrates the real feature. Create a temporary config only when no existing config can show it clearly.
 2. Write a brief plan in `/tmp` with the opening state, 2–6 visible actions, and the final proof a reviewer should see. Default to one current-state feature demo; create Before/After recordings only when requested. For editorial annotations, use the [recording.md style specification](references/recording.md#editorial-annotations-over-the-recording).
 3. Start the relevant dev server and make its initial state deterministic. Do not expose credentials, personal data, tokens, or unrelated records.
-4. Read [recording.md](references/recording.md) and create a temporary scenario module in `/tmp`. Call `ready()` once after the opening UI is visible; this marks where the finished video starts. Put deterministic recording-only data in optional scenario `setup` and `teardown` exports instead of recreating it manually between takes.
+4. Read [recording.md](references/recording.md) and create a temporary scenario module in `/tmp`. Call `ready()` once after the opening UI is visible; this marks where the finished video starts. Make UI preparation repeatable before `ready()` so validation and recording each begin in the same state. Keep recording data in a disposable database; do not seed it through API hooks.
 5. Use a take-specific label and run the candidate command from the repository root, for example `node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs candidate --scenario /tmp/payload-pr-demo-feature.mjs --label feature-take-1`. It performs preflight checks, fast validation, human-paced recording, conversion, full decode verification, contact-sheet generation, hashing, manifest creation, and raw-video cleanup. Keep the demo concise enough to stay below the converter's default 10 MB budget.
 6. Watch the entire MP4, use the contact sheet for a quick state check, and show the exact local video inline using its absolute path:
 
@@ -41,6 +45,7 @@ Every scenario must export `presentation` with a change kind (`Feature` or `Fix`
 ## Completion criteria
 
 - The recording tells one understandable visual story and ends on visible proof.
+- Application setup and the recorded walkthrough use browser gestures; each demonstrated state is reached through the UI.
 - The first decoded frame shows the intended opening UI, without a blank startup screen.
 - Pointer movement is smooth, clicks have readable dwell time and visible ring feedback, and the cursor stays visible above popup menus and dialogs.
 - Editorial annotations follow the [recording.md style specification](references/recording.md#editorial-annotations-over-the-recording) and leave important UI visible.

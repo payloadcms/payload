@@ -75,42 +75,7 @@ export default async function scenario({ baseURL, click, expect, page, pause, re
 }
 ```
 
-When the scenario needs temporary records, export `setup` and `teardown`. The returned fixture is passed to the default scenario function. Hooks receive a Playwright API request context, so they can prepare data without recording setup screens:
-
-```js
-export const presentation = {
-  change: {
-    kind: 'Feature',
-    title: 'Edit a prepared post',
-    description: 'Open seeded content and demonstrate the editing flow.',
-  },
-}
-
-export async function setup({ request }) {
-  const response = await request.post('/api/posts', {
-    data: { title: 'Demo post' },
-  })
-
-  if (!response.ok()) {
-    throw new Error(`Could not create demo post: ${response.status()}`)
-  }
-
-  return { post: await response.json() }
-}
-
-export async function teardown({ fixture, request }) {
-  await request.delete(`/api/posts/${fixture.post.doc.id}`)
-}
-
-export default async function scenario({ baseURL, click, expect, fixture, page, ready }) {
-  await page.goto(`${baseURL}/admin/collections/posts/${fixture.post.doc.id}`)
-  await expect(page.getByRole('heading', { name: fixture.post.doc.title })).toBeVisible()
-  await ready()
-  // Visible demo interactions only.
-}
-```
-
-Prefer existing seeded data when it already tells the story. When hooks are needed, authenticate the request context as required by the selected test config and keep hooks idempotent because candidate mode creates and removes one fixture for fast validation, then creates a fresh fixture for the real recording. Teardown runs only after setup succeeds, so setup errors remain visible.
+Prefer existing seeded data. Create or reset additional records through UI gestures in the scenario before `ready()`. Make this preparation repeatable: candidate mode validates the scenario and then runs it again for recording. Use a disposable database for recording-only data instead of API `setup`/`teardown` hooks. Discard that database when review and any revisions are complete.
 
 Use semantic locators where practical. Assert each important state before continuing so the recording fails instead of capturing the wrong screen. Let the final proof remain visible for at least a moment.
 
@@ -123,11 +88,31 @@ The recorder supplies:
 - `page`: the application iframe facade; navigation, locators, and evaluation target the app, while input devices and page events use the recording page;
 - `pause(milliseconds = 700)`: a short presentation pause;
 - `ready()`: marks the loaded opening state and holds it for 1.2 seconds; call it exactly once before the first visible interaction;
-- `scroll(locator, options?)`: scrolls the actual overflow range with frame-timed easing, or real wheel input when requested;
+- `typeText({ locator, text, clear = false, delay = 80 })`: click to focus, optionally select all with `ControlOrMeta+A`, then type character by character;
+- `scroll(locator, options?)`: defaults to wheel input with the cursor inside the visible target; use `{ input: 'wheel', cursorPlacement: 'inside' }` for paced wheel scrolling with position verification;
 - `showAnnotation(options)` / `hideAnnotation()`: updates or clears the step note in the shared chrome panel;
 - `label`: the normalized recording label.
 
-Use `await page.reload()` for an on-camera refresh. The shared header automatically shows a rotating refresh icon during the actual iframe reload, then a brief checkmark; assert the expected application state afterward. Refresh feedback sits beside the optional window dimensions and respects reduced motion.
+## Gesture-based interactions
+
+The scenario drives the same controls a person uses:
+
+- Open the starting route with one `page.goto()` before UI preparation and `ready()`. Reach subsequent routes by clicking visible links, navigation items, breadcrumbs, or buttons. Do not jump to known document URLs between steps.
+- Use the recorder's `click` helper for pointer actions. Use `page.keyboard.press()` and `page.keyboard.type()` for shortcuts and paced typing after focusing the control with a click. Do not use `fill()`, `selectOption()`, synthetic event dispatch, or DOM value assignments.
+- Use `scroll` with `input: 'wheel'` and `cursorPlacement: 'inside'` for visible scrolling. Reveal offscreen controls with a wheel gesture before clicking them; do not rely on locator auto-scrolling.
+- Create and reset content through these same gestures, including preparation before `ready()`. Do not call REST endpoints, the Local API, application functions, or mutate browser storage to stage a result.
+- Locators, assertions, network observation, and read-only DOM measurements may verify state. Presentation annotations, window framing, recording, encoding, and verification are harness operations.
+
+For example, edit a focused field through keyboard input:
+
+```js
+await click(page.getByRole('textbox', { name: 'Title', exact: true }))
+await page.keyboard.press('ControlOrMeta+A')
+await page.keyboard.type('Halloween Sale', { delay: 80 })
+await click(page.getByRole('button', { name: 'Save', exact: true }))
+```
+
+If a refresh is part of the story, send the browser reload shortcut through keyboard input and assert the resulting UI. Do not call `page.reload()` to advance the application during the walkthrough. The shared refresh indicator remains available for recorder development and preview controls.
 
 The recorder adds a visible cursor above in-page popups and dialogs. Mouse presses show a brief primary-brand ring at the click point. It stays at that point as the cursor moves away, expands and fades over 420ms, and uses a stationary fade with reduced motion. Repeated clicks replace the prior indicator. This feedback is automatic; scenarios do not mount or style it. Keep the scenario on one page; separate browser-window stitching is outside this skill's current scope.
 
@@ -140,51 +125,28 @@ await moveCursor(disabledDestination, { duration: 900, pauseAfter: 1200 })
 
 Change the recording-wide defaults with `--mouse-move-ms` and `--interaction-pause-ms`. Keep a nonzero dwell for review recordings; faster values are mainly useful for recorder tests.
 
-## Scroll without hover churn
+## Scroll with wheel gestures
 
-Destructure `scroll` from the scenario argument and use it for every visible overflow movement, including the vertical list inside a popup menu. Target the element whose `scrollTop` or `scrollLeft` changes, not the popup container if it does not overflow:
+Destructure `scroll` from the scenario argument and target the element whose `scrollTop` or `scrollLeft` changes, including an overflowing popup list. Always select wheel input and keep the pointer inside the target for real hit testing:
 
 ```js
 await scroll(tabsScroller, {
   axis: 'x',
   to: 'end',
   duration: 950,
-  easing: 'easeInOutSine',
-  cursorPlacement: 'outside',
-})
-await moveCursor(revealedTab)
-await click(revealedTab)
-```
-
-For a popup menu, open it with `click`, then scroll its list with the same helper before selecting an item:
-
-```js
-await click(columnsButton)
-const menuList = page.getByRole('menu').locator('[data-scroll-container]')
-await scroll(menuList, { duration: 950 })
-await click(revealedMenuItem)
-```
-
-Use a selector from the actual menu markup. The example's `data-scroll-container` is only illustrative. Avoid `page.mouse.wheel()`, `locator.evaluate()` scroll assignments, and repeated `scrollIntoViewIfNeeded()` calls for a scroll that reviewers need to see; they bypass the helper's pacing and position checks. If moving the pointer outside the list dismisses that menu, pass `cursorPlacement: 'inside'` while keeping `input: 'animation'`.
-
-Defaults are `axis: 'y'`, `to: 'end'`, `duration: 950`, `easing: 'easeInOutSine'`, `cursorPlacement: 'outside'`, `input: 'animation'`, and `settle: 150` (times are milliseconds). `to` accepts `'start'`, `'end'`, or a numeric pixel distance from the start, clamped to the real range and rounded to whole pixels. Horizontal RTL targets use distance from the right-hand start.
-
-The helper moves the cursor to a temporary invisible anchor just outside the scroller, animates `scrollLeft` or `scrollTop` using `requestAnimationFrame`, checks monotonic progress and the final position within half a CSS pixel, and removes the anchor in `finally`. It fails clearly if the selected axis does not overflow. Animation timing also runs during candidate validation so movement checks are exercised. About 750–1000 ms worked well for a short 64 px range at the recorder's 25 fps; choose timing for the actual story.
-
-Moving the cursor away avoids tooltips changing as tabs move beneath it. Do not hide tooltips with temporary CSS. An oversized wheel delta can exhaust a short range in one frame; splitting deltas improves motion but still causes hover churn when every point in a nested scroller belongs to a tab.
-
-Programmatic scrolling demonstrates overflow, reachability, and presentation. It does not prove wheel or trackpad input handling. When real input semantics are part of the claim, use wheel mode or separate browser assertions:
-
-```js
-await scroll(tabsScroller, {
-  axis: 'x',
-  to: 'end',
   input: 'wheel',
   cursorPlacement: 'inside',
 })
+await click(revealedTab)
 ```
 
-Wheel mode keeps the pointer over the target for actual hit testing, emits smaller timed wheel deltas, and verifies their resulting positions. Prevented wheel events or scroll snapping that prevents reaching the target fail validation; the helper never repairs wheel results by assigning a scroll position. Hover changes are expected in this mode.
+For menus, click the trigger, wheel-scroll the actual overflowing list, then click the revealed item. Use a selector from the real markup. The helper sends small timed wheel deltas and verifies the resulting position; it never repairs a failed wheel gesture by assigning scroll offsets. Hover changes are expected. Choose a cursor position or pause that keeps the interaction readable rather than hiding tooltips or mutating application styles.
+
+`click` and `moveCursor` target the visible, unobstructed part of a control and never auto-scroll. Both the pointer and click use the same outer-page coordinates, including iframe scaling. An optional `position: { x, y }` is relative to the control's padding box in application CSS pixels.
+
+Wait for completed application state before the next gesture. A selected label may update before server-rendered form data arrives: start `page.waitForResponse()` before the selection click, await the relevant successful refresh response, then assert the resulting form values before typing. Match an item's name independently of status badges (for example a Merged badge) so repeat validation can find it.
+
+The lower-level helper also supports `input: 'animation'` for recorder development. It assigns scroll offsets and is not permitted in feature demo scenarios. Raw wheel calls bypass the helper's pacing and verification; use the helper instead.
 
 ## Fast path
 

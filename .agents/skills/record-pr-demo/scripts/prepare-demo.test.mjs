@@ -3,7 +3,6 @@ import { chmod, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterEach, test } from 'node:test'
-import { pathToFileURL } from 'node:url'
 
 import * as preparation from './prepare-demo.mjs'
 
@@ -121,7 +120,9 @@ test('packageCandidate converts, verifies, inventories, and cleans up a candidat
 })
 
 test('packageCandidate rejects video that exceeds the upload budget', async () => {
-  const directory = await createFakeMediaTools({ outputBytes: 10 * 1024 * 1024 + 1 })
+  const directory = await createFakeMediaTools({
+    outputBytes: 10 * 1024 * 1024 + 1,
+  })
   const rawOutput = path.join(directory, 'demo.webm')
   await writeFile(rawOutput, 'recording')
 
@@ -140,66 +141,19 @@ test('packageCandidate rejects video that exceeds the upload budget', async () =
   )
 })
 
-test('runWithScenarioFixture wraps execution in scenario setup and teardown hooks', async () => {
-  const directory = await mkdtemp(path.join(tmpdir(), 'prepare-pr-demo-fixture-test-'))
+test('should reject API fixture hooks before executing them or the scenario', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'demo-legacy-hooks-'))
   testDirectories.push(directory)
-  const scenario = path.join(directory, 'scenario.mjs')
-
-  await writeFile(
-    scenario,
-    `export const events = []
-export async function setup({ label }) {
-  events.push('setup:' + label)
-  return { title: 'Prepared document' }
-}
-export async function teardown({ fixture }) {
-  events.push('teardown:' + fixture.title)
-}
-export default async function scenario() {}`,
-  )
-
-  assert.equal(typeof preparation.runWithScenarioFixture, 'function')
-
-  let receivedFixture
-  await preparation.runWithScenarioFixture(
-    {
-      baseURL: 'http://localhost:3000',
-      label: 'fixture-demo',
-      scenario,
-    },
-    async (fixture) => {
-      receivedFixture = fixture
-    },
-  )
-
-  assert.deepEqual(receivedFixture, { title: 'Prepared document' })
-  const scenarioModule = await import(pathToFileURL(scenario).href)
-  assert.deepEqual(scenarioModule.events, ['setup:fixture-demo', 'teardown:Prepared document'])
-})
-
-test('runWithScenarioFixture preserves setup failures without running teardown on an absent fixture', async () => {
-  const directory = await mkdtemp(path.join(tmpdir(), 'prepare-pr-demo-setup-failure-test-'))
-  testDirectories.push(directory)
-  const scenario = path.join(directory, 'scenario.mjs')
-
-  await writeFile(
-    scenario,
-    `export async function setup() {
-  throw new Error('fixture setup failed')
-}
-export async function teardown() {
-  throw new Error('teardown masked setup failure')
-}
-export default async function scenario() {}`,
-  )
-
-  await assert.rejects(
-    preparation.runWithScenarioFixture(
-      { baseURL: 'http://localhost:3000', label: 'failure-demo', scenario },
-      async () => {},
-    ),
-    /fixture setup failed/,
-  )
+  for (const hook of ['setup', 'teardown']) {
+    const scenario = path.join(directory, hook + '.mjs')
+    await writeFile(scenario, `export function ${hook}() { throw new Error('Hook executed') }`)
+    await assert.rejects(
+      preparation.runWithScenarioFixture({ scenario }, async () => {
+        throw new Error('Scenario executed')
+      }),
+      /UI gestures before ready/,
+    )
+  }
 })
 
 test('verifyCandidateManifest accepts unchanged reviewed bytes and rejects replacements', async () => {
