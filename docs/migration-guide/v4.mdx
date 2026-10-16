@@ -1791,6 +1791,8 @@ pnpm payload migrate:create --file @payloadcms/db-postgres/localize-status
 pnpm payload migrate:create --file @payloadcms/db-sqlite/localize-status
 ```
 
+For Postgres and SQLite projects with existing migration snapshots, this command also writes a `.json` schema snapshot containing only the changes performed by `localize-status`. Commit it alongside the generated migration. Later migrations will still detect unrelated schema changes from the upgrade. Projects without an existing snapshot do not get one from this migration.
+
 Then run the generated migration before serving requests with Payload 4:
 
 ```bash
