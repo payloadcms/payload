@@ -1080,3 +1080,31 @@ describe('mergeLocalizedData', () => {
     })
   })
 })
+
+describe('clearing non-localized rows', () => {
+  it.each(['array', 'blocks'] as const)(
+    'should preserve an explicit null for a non-localized %s field',
+    (type) => {
+      const fields: Field[] =
+        type === 'array'
+          ? [{ name: 'rows', type: 'array', fields: [{ name: 'text', type: 'text' }] }]
+          : [
+              {
+                name: 'rows',
+                type: 'blocks',
+                blocks: [{ slug: 'text', fields: [{ name: 'text', type: 'text' }] }],
+              },
+            ]
+
+      const result = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales: { rows: null },
+        docWithLocales: { rows: [{ id: 'row-1', blockType: 'text', text: 'Published' }] },
+        fields,
+        localesToUpdate: ['en'],
+      })
+
+      expect(result.rows).toBeNull()
+    },
+  )
+})

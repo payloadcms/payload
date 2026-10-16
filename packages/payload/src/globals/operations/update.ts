@@ -440,7 +440,7 @@ export const updateOperation = async <
           for (const localeCode of accessibleLocaleCodes) {
             result._status[localeCode] = unpublishAllLocales ? 'draft' : 'published'
           }
-        } else if (isSavingDraft) {
+        } else if (isSavingDraft && statusFieldAccess) {
           const shouldDraftAllLocales = hasNonLocalizedDataChanged({
             after: result,
             before: globalJSON,
