@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/codemod",
-  "version": "4.0.0-beta.1",
+  "version": "4.0.0-beta.2",
   "description": "Codemods for migrating Payload projects across versions.",
   "homepage": "https://payloadcms.com",
   "repository": {
