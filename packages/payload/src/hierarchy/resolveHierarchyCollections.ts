@@ -334,7 +334,17 @@ function injectTypeField({
   }
 
   hierarchyCollection.fields = hierarchyCollection.fields || []
-  hierarchyCollection.fields.push(typeField)
+
+  // This can run again on the same `fields` array, so replace the field if it already exists
+  const existingTypeFieldIndex = hierarchyCollection.fields.findIndex(
+    (field) => fieldAffectsData(field) && field.name === typeFieldName,
+  )
+
+  if (existingTypeFieldIndex === -1) {
+    hierarchyCollection.fields.push(typeField)
+  } else {
+    hierarchyCollection.fields[existingTypeFieldIndex] = typeField
+  }
 
   // Recompute flattenedFields since we added a field after initial sanitization
   // This is required for the field to be queryable

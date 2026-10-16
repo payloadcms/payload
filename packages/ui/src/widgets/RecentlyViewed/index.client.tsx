@@ -17,6 +17,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useEntityVisibility } from '../../providers/EntityVisibility/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { isNavEntityVisible } from '../../utilities/isNavEntityVisible.js'
 import { WidgetCard } from '../WidgetCard/index.js'
 import { PinDocumentPicker } from './PinDocumentPicker/index.js'
 import { updatePinnedPreferences } from './pinnedPreferences.js'
@@ -74,8 +75,12 @@ export function RecentsAndPinnedClient({
     () =>
       config.collections
         .filter(
-          ({ slug }) =>
-            isEntityVisible({ collectionSlug: slug }) && permissions?.collections?.[slug]?.read,
+          ({ slug, admin }) =>
+            isEntityVisible({ collectionSlug: slug }) &&
+            isNavEntityVisible({
+              adminGroup: admin.group,
+              entityPermissions: permissions?.collections?.[slug],
+            }),
         )
         .map(({ slug }) => slug),
     [config.collections, isEntityVisible, permissions],
