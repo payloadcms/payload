@@ -5,6 +5,7 @@ import { test } from '../__helpers/int/vitest.js'
 import {
   allFieldsLocalizedSlug,
   defaultLocale,
+  localizedStatusSharedGlobalSlug,
   publicationFieldAccessGlobalSlug,
   publicationFieldAccessSlug,
   spanishLocale,
@@ -74,6 +75,10 @@ test.suite('Localized draft preservation', { config: './config.ts' }, () => {
   })
 
   test('should draft all locales when a shared array is cleared with null', async ({ payload }) => {
+    expect(payload.collections[allFieldsLocalizedSlug].config.versions).toMatchObject({
+      drafts: { localizeStatus: true },
+    })
+
     const doc = await payload.create({
       collection: allFieldsLocalizedSlug,
       data: {
@@ -114,4 +119,60 @@ test.suite('Localized draft preservation', { config: './config.ts' }, () => {
     expect(draft._status!.en).toBe('draft')
     expect(draft._status!.es).toBe('draft')
   })
+
+  for (const field of ['sharedRows', 'sharedBlocks'] as const) {
+    test(`should preserve other global locale statuses when only a localized ${field} child changes`, async ({
+      payload,
+    }) => {
+      const row = {
+        ...(field === 'sharedBlocks' ? { blockType: 'sharedTextBlock' as const } : {}),
+        localizedText: 'English published',
+        sharedText: 'Shared published',
+      }
+      const english = await payload.updateGlobal({
+        slug: localizedStatusSharedGlobalSlug,
+        data: { _status: 'published', [field]: [row] },
+        locale: defaultLocale,
+        overrideAccess: true,
+      })
+      const rowID = english[field]![0]!.id
+
+      await payload.updateGlobal({
+        slug: localizedStatusSharedGlobalSlug,
+        data: {
+          _status: 'published',
+          [field]: [{ ...row, id: rowID, localizedText: 'Spanish published' }],
+        },
+        locale: spanishLocale,
+        overrideAccess: true,
+      })
+      await payload.updateGlobal({
+        slug: localizedStatusSharedGlobalSlug,
+        data: {
+          _status: 'draft',
+          [field]: [
+            {
+              id: rowID,
+              ...(field === 'sharedBlocks' ? { blockType: 'sharedTextBlock' } : {}),
+              localizedText: 'English draft',
+            },
+          ],
+        },
+        draft: true,
+        locale: defaultLocale,
+        overrideAccess: true,
+      })
+
+      const draft = await payload.findGlobal({
+        slug: localizedStatusSharedGlobalSlug,
+        draft: true,
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      expect(draft[field]![0]!.sharedText).toBe('Shared published')
+      expect(draft._status!.en).toBe('draft')
+      expect(draft._status!.es).toBe('published')
+    })
+  }
 })

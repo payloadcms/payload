@@ -2380,6 +2380,14 @@ export interface LocalizedStatusSharedGlobal {
   id: string;
   localizedText?: string | null;
   sharedText?: string | null;
+  sharedRows?:
+    | {
+        localizedText?: string | null;
+        sharedText?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  sharedBlocks?: SharedTextBlock[] | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -2391,6 +2399,17 @@ export interface LocalizedStatusSharedGlobal {
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SharedTextBlock".
+ */
+export interface SharedTextBlock {
+  localizedText?: string | null;
+  sharedText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'sharedTextBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2603,6 +2622,25 @@ export interface PublicationHookGlobal {
 export interface LocalizedStatusSharedGlobalSelect<T extends boolean = true> {
   localizedText?: T;
   sharedText?: T;
+  sharedRows?:
+    | T
+    | {
+        localizedText?: T;
+        sharedText?: T;
+        id?: T;
+      };
+  sharedBlocks?:
+    | T
+    | {
+        sharedTextBlock?:
+          | T
+          | {
+              localizedText?: T;
+              sharedText?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   createdBy?: T;
   updatedBy?: T;
   _status?: T;
