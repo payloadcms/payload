@@ -136,6 +136,38 @@ describe('Live Preview', () => {
     })
   })
 
+  test('collection — can collapse live preview after expanding it', async () => {
+    await navigateToDoc(page, pagesURLUtil)
+    await toggleLivePreview(page, { targetState: 'on' })
+
+    const expandButton = page.getByRole('button', { name: 'Expand' })
+    const openInNewWindowButton = page.getByRole('button', {
+      name: 'Open in new window',
+    })
+
+    await expect(expandButton).toBeVisible()
+    await expect(openInNewWindowButton).toBeVisible()
+
+    await expandButton.click()
+
+    const collapseButton = page.getByRole('button', { name: 'Collapse' })
+
+    await expect(collapseButton).toBeVisible()
+    await expect(openInNewWindowButton).toBeVisible()
+
+    const viewport = page.viewportSize()
+    const box = await collapseButton.boundingBox()
+
+    expect(viewport).not.toBeNull()
+    expect(box).not.toBeNull()
+    expect(box!.x).toBeGreaterThanOrEqual(0)
+    expect(box!.x + box!.width).toBeLessThanOrEqual(viewport!.width)
+
+    await collapseButton.click()
+
+    await expect(expandButton).toBeVisible()
+  })
+
   test('collection — does not render live preview when creating a new doc', async () => {
     await page.goto(pagesURLUtil.create)
     await expect(page.locator('button#live-preview-toggler')).toBeHidden()
