@@ -119,7 +119,7 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
       localeCandidate && typeof localeCandidate === 'string' ? localeCandidate : defaultLocale
 
     const sanitizedFallback = sanitizeFallbackLocale({
-      fallbackLocale: fallbackLocale!,
+      fallbackLocale: (fallbackLocale ?? (locale ? undefined : req?.fallbackLocale))!,
       locale: req.locale,
       localization,
     })
