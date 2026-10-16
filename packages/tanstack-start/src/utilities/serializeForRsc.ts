@@ -2,7 +2,7 @@ import type React from 'react'
 
 import { renderServerComponent } from '@tanstack/react-start/rsc'
 import { setOwnProperty } from 'payload/shared'
-import { createElement, Fragment } from 'react'
+import { createElement, Fragment, isValidElement } from 'react'
 
 /** Converts raw React elements in a server-function result into RSC handles. */
 export async function serializeForRsc<T>(value: T): Promise<T> {
@@ -28,7 +28,7 @@ async function walk(
 
   const obj = value as Record<string, unknown>
 
-  if (isReactElement(obj)) {
+  if (isValidElement(obj)) {
     return await renderServerComponent(value as React.ReactElement)
   }
 
@@ -52,7 +52,7 @@ async function walk(
 
   if (Array.isArray(obj)) {
     const items = obj.filter((item) => item !== null && item !== undefined)
-    const isReactElementArray = items.length > 0 && items.every(isReactElement)
+    const isReactElementArray = items.length > 0 && items.every(isValidElement)
 
     if (isReactElementArray) {
       ancestors.delete(obj)
@@ -62,11 +62,13 @@ async function walk(
       )
     }
 
-    const result: unknown[] = []
+    const result: unknown[] = new Array(obj.length)
     cache.set(obj, result)
 
-    for (const item of obj) {
-      result.push(await walk(item, cache, ancestors))
+    for (let index = 0; index < obj.length; index++) {
+      if (index in obj) {
+        result[index] = await walk(obj[index], cache, ancestors)
+      }
     }
 
     ancestors.delete(obj)
@@ -114,12 +116,4 @@ async function walk(
   ancestors.delete(obj)
 
   return result
-}
-
-function isReactElement(value: unknown): value is React.ReactElement {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    typeof (value as { $$typeof?: unknown }).$$typeof === 'symbol'
-  )
 }

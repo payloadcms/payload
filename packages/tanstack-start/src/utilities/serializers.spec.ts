@@ -51,6 +51,38 @@ describe('TanStack serializers', () => {
     expect(result[2]).toBe('last')
   })
 
+  it('should preserve sparse RSC array holes and explicit undefined values', async () => {
+    const input: unknown[] = []
+    input[2] = 'value'
+    input[3] = undefined
+    input.length = 5
+
+    const result = await serializeForRsc(input)
+
+    expect(result).toHaveLength(5)
+    expect(Object.hasOwn(result, '0')).toBe(false)
+    expect(Object.hasOwn(result, '1')).toBe(false)
+    expect(result[2]).toBe('value')
+    expect(Object.hasOwn(result, '3')).toBe(true)
+    expect(result[3]).toBeUndefined()
+    expect(Object.hasOwn(result, '4')).toBe(false)
+  })
+
+  it.each([Symbol('data'), Symbol.for('react.portal')])(
+    'should serialize objects tagged with %s as data',
+    async ($$typeof) => {
+      const input = { $$typeof, label: 'value' }
+
+      expect(await serializeForRsc(input)).toEqual({ label: 'value' })
+    },
+  )
+
+  it('should serialize arrays of symbol-tagged objects as data', async () => {
+    const input = [{ $$typeof: Symbol('data'), label: 'value' }]
+
+    expect(await serializeForRsc(input)).toEqual([{ label: 'value' }])
+  })
+
   it('should strip unsupported values from maps and sets', () => {
     const input = {
       map: new Map<string, unknown>([
