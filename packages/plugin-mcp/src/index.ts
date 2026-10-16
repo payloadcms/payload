@@ -55,11 +55,13 @@ export const mcpPlugin = definePlugin<MCPPluginConfig>({
         // Streamable HTTP's optional server=>client GET stream. We don't offer
         // one, so answer 405 per spec-— clients then skip it cleanly
         {
+          disableAuth: true,
           handler: () => new Response(null, { headers: { Allow: 'POST' }, status: 405 }),
           method: 'get',
           path: '/mcp',
         },
         {
+          disableAuth: true,
           handler: oauthProtectedResourceEndpoint,
           method: 'get',
           path: '/mcp/oauth-protected-resource',
