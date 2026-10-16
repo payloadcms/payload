@@ -1248,9 +1248,11 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(collectionInput).toHaveAccessibleName('Select a Collection to Browse')
       await collectionInput.press('ArrowDown')
       await expect(
-        getSelectMenu({ page }).getByText(/pinned documents|preferences|locked documents/i),
+        getSelectMenu({ page }).getByText(
+          /pinned documents|preferences|locked documents|LLM instructions/i,
+        ),
       ).toHaveCount(0)
-      await expect(getSelectMenu({ page }).getByRole('option', { name: /folder/i })).toHaveCount(1)
+      await expect(getSelectMenu({ page }).getByRole('option', { name: /folder/i })).toHaveCount(0)
       await collectionInput.fill('Post')
       await collectionInput.press('ArrowDown')
       await collectionInput.press('Enter')

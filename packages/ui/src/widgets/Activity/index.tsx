@@ -8,6 +8,7 @@ import type { DocumentsPage, DocumentsTab } from './types.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
 import { ActivityWidgetClient } from '../../exports/client/index.js'
 import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
+import { isNavEntityVisible } from '../../utilities/isNavEntityVisible.js'
 import { DOCUMENTS_BATCH_SIZE } from './utils/constants.js'
 import { getDashboardDocuments } from './utils/getDocuments.js'
 
@@ -28,7 +29,12 @@ export async function ActivityWidget({
   const visibleCollections = getVisibleEntities({ req }).collections
   const pinnableCollections = payload.config.collections
     .filter(
-      ({ slug }) => visibleCollections.includes(slug) && permissions?.collections?.[slug]?.read,
+      ({ slug, admin }) =>
+        visibleCollections.includes(slug) &&
+        isNavEntityVisible({
+          adminGroup: admin.group,
+          entityPermissions: permissions?.collections?.[slug],
+        }),
     )
     .map(({ slug }) => slug)
   const [pinned, recents] = await Promise.all(

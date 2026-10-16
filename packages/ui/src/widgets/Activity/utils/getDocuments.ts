@@ -62,8 +62,11 @@ export async function getDashboardDocuments({
   })
   const excluded = new Set(tab === 'recents' ? excludedCollections : [])
   const storedReferences = getDocumentReferences({ value: preference.docs[0]?.value }).filter(
-    ({ collectionSlug }) =>
-      !excluded.has(collectionSlug) && req.payload.collections[collectionSlug],
+    ({ collectionSlug }) => {
+      const collection = req.payload.collections[collectionSlug]
+
+      return !excluded.has(collectionSlug) && collection && collection.config.admin.group !== false
+    },
   )
   const availableReferences = await getAvailableReferences({ references: storedReferences, req })
   const totalDocs = availableReferences.length
