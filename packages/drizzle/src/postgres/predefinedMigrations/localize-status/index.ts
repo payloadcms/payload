@@ -264,7 +264,9 @@ export async function migratePostgresLocalizeStatus(args: LocalizeStatusArgs): P
     `,
   })
 
-  if (localesTableCheck.rows[0]?.exists) {
+  const hasMainLocalesTable = Boolean(localesTableCheck.rows[0]?.exists)
+
+  if (hasMainLocalesTable) {
     // Check if _status column already exists in the locales table
     const statusColumnCheck = await db.execute({
       drizzle: db.drizzle,
@@ -304,7 +306,7 @@ export async function migratePostgresLocalizeStatus(args: LocalizeStatusArgs): P
     }
   } else {
     payload.logger.info({
-      msg: `No locales table found: ${mainLocalesTable} (collection/global not localized)`,
+      msg: `No main locales table found: ${mainLocalesTable}; preserving the existing _status column`,
     })
   }
 
@@ -321,7 +323,7 @@ export async function migratePostgresLocalizeStatus(args: LocalizeStatusArgs): P
     `,
   })
 
-  if (mainTableStatusCheck.rows[0]?.exists) {
+  if (hasMainLocalesTable && mainTableStatusCheck.rows[0]?.exists) {
     await db.execute({
       drizzle: db.drizzle,
       sql: sql`

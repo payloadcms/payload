@@ -216,6 +216,25 @@ describe.each(['postgres', 'sqlite'])('localize-status snapshot (%s)', (dialect)
     ).toEqual([])
   })
 
+  it('should preserve main status when the destination locales table is missing', async () => {
+    const { before, filePath, payload } = await setup()
+    const mainKey = dialect === 'postgres' ? 'cms.posts' : 'posts'
+
+    delete before.tables[`${mainKey}_locales`]
+    fs.writeFileSync(
+      path.join(payload.db.migrationDir, '20260101_initial.json'),
+      JSON.stringify(before),
+    )
+
+    await buildDynamicPredefinedLocalizeStatusMigration({
+      packageName: `@payloadcms/db-${dialect}`,
+    })({ filePath, payload })
+
+    const written = JSON.parse(fs.readFileSync(`${filePath}.json`, 'utf8'))
+
+    expect(written.tables[mainKey]).toEqual(before.tables[mainKey])
+  })
+
   it('should leave entities without localized status unchanged', async () => {
     const { before, filePath, payload } = await setup()
     payload.config.collections[0].versions.drafts.localizeStatus = false

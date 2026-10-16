@@ -101,7 +101,7 @@ export const buildDynamicPredefinedLocalizeStatusMigration = ({
             }
           }
 
-          if (main) {
+          if (main && mainLocales) {
             removeColumns({ names: ['_status'], table: main })
           }
         }
