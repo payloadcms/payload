@@ -2,11 +2,11 @@
   "name": "payload-monorepo",
   "version": "4.0.0-beta.2",
   "private": true,
-  "type": "module",
   "workspaces": [
     "packages/*",
     "test/*"
   ],
+  "type": "module",
   "scripts": {
     "bf": "pnpm run build:force",
     "build": "pnpm run build:core",
@@ -100,6 +100,7 @@
     "prepare-run-test-against-prod": "pnpm build:all && rm -rf test/packed && rm -rf test/node_modules && rm -rf app && rm -f test/pnpm-lock.yaml && pnpm run script:pack --all --no-build --dest test/packed && pnpm runts test/setupProd.ts && cd test && pnpm i && cd ..",
     "prepare-run-test-against-prod:ci": "rm -rf test/packed && rm -rf test/node_modules && rm -rf app && rm -f test/pnpm-lock.yaml && pnpm run script:pack --all --no-build --dest test/packed && pnpm runts test/setupProd.ts && cd test && pnpm i && cd ..",
     "prepare-run-test-against-prod:ci:frozen": "rm -rf test/packed && rm -rf test/node_modules && rm -rf app && pnpm run script:pack --all --no-build --dest test/packed && pnpm runts test/setupProd.ts && cd test && pnpm i --frozen-lockfile && cd ..",
+    "pretest": "pnpm build",
     "publish-prerelease": "pnpm --filter releaser publish-prerelease",
     "reinstall": "pnpm clean:all && pnpm install",
     "release": "pnpm --filter releaser release --tag beta",
@@ -120,7 +121,6 @@
     "script:list-published": "pnpm --filter releaser list-published",
     "script:pack": "pnpm --filter scripts pack-all-to-dest",
     "script:setup-figma": "./scripts/setup-figma-dev.sh",
-    "pretest": "pnpm build",
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
     "test:a11y:screen-reader": "pnpm runts ./test/runE2E.ts a11y --screen-reader",
     "test:components": "vitest run --project components",

@@ -942,23 +942,20 @@ describe('Live Preview', () => {
   })
 
   describe.skip('A11y', () => {
-    test.fixme(
-      'Live preview and edit view should have no accessibility violations',
-      async ({}, testInfo) => {
-        await goToCollectionLivePreview(page, pagesURLUtil)
-        const { iframe } = await getLivePreviewIframe(page)
-        await expect(iframe).toBeVisible()
-        await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview/)
+    test.fixme('Live preview and edit view should have no accessibility violations', async ({}, testInfo) => {
+      await goToCollectionLivePreview(page, pagesURLUtil)
+      const { iframe } = await getLivePreviewIframe(page)
+      await expect(iframe).toBeVisible()
+      await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview/)
 
-        const scanResults = await runAxeScan({
-          exclude: ['.document-fields__main'], // we don't need to test fields here
-          include: ['.collection-edit'],
-          page,
-          testInfo,
-        })
+      const scanResults = await runAxeScan({
+        exclude: ['.document-fields__main'], // we don't need to test fields here
+        include: ['.collection-edit'],
+        page,
+        testInfo,
+      })
 
-        expect(scanResults.violations.length).toBe(0)
-      },
-    )
+      expect(scanResults.violations.length).toBe(0)
+    })
   })
 })

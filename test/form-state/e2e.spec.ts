@@ -202,7 +202,7 @@ test.describe('Form State', () => {
       expect: (body) =>
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
-            body[0].args.formState['array'].lastRenderedPath === 'array',
+          body[0].args.formState['array'].lastRenderedPath === 'array',
         ),
       url: postsUrl.create,
     })
@@ -221,9 +221,9 @@ test.describe('Form State', () => {
       expect: (body) =>
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
-            body[0].args.formState['array'].lastRenderedPath === 'array' &&
-            body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
-              'array.0.customTextField',
+          body[0].args.formState['array'].lastRenderedPath === 'array' &&
+          body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
+            'array.0.customTextField',
         ),
       url: postsUrl.create,
     })
@@ -243,11 +243,11 @@ test.describe('Form State', () => {
       expect: (body) =>
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
-            body[0].args.formState['array'].lastRenderedPath &&
-            body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
-              'array.0.customTextField' &&
-            body[0].args.formState['array.1.customTextField']?.lastRenderedPath ===
-              'array.1.customTextField',
+          body[0].args.formState['array'].lastRenderedPath &&
+          body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
+            'array.0.customTextField' &&
+          body[0].args.formState['array.1.customTextField']?.lastRenderedPath ===
+            'array.1.customTextField',
         ),
       url: postsUrl.create,
     })
@@ -780,52 +780,43 @@ test.describe('Form State', () => {
       )
     })
 
-    test.fixme(
-      'should not cause nested custom components to disappear when adding rows back-to-back',
-      async () => {
-        // TODO: This test is too flaky
-        // Add two rows quickly
-        // Test that the custom text field within the rows do not disappear
-        await assertNetworkRequests(
-          page,
-          postsUrl.create,
-          async () => {
-            await addArrayRowAsync(page, 'array')
-            await addArrayRowAsync(page, 'array')
+    test.fixme('should not cause nested custom components to disappear when adding rows back-to-back', async () => {
+      // TODO: This test is too flaky
+      // Add two rows quickly
+      // Test that the custom text field within the rows do not disappear
+      await assertNetworkRequests(
+        page,
+        postsUrl.create,
+        async () => {
+          await addArrayRowAsync(page, 'array')
+          await addArrayRowAsync(page, 'array')
 
-            // use `waitForSelector` to ensure the element doesn't appear and then disappear
-            // eslint-disable-next-line playwright/no-wait-for-selector
-            await page.waitForSelector(
-              '#field-array #array-row-0 #field-array__0__customTextField',
-              {
-                timeout: TEST_TIMEOUT,
-              },
-            )
+          // use `waitForSelector` to ensure the element doesn't appear and then disappear
+          // eslint-disable-next-line playwright/no-wait-for-selector
+          await page.waitForSelector('#field-array #array-row-0 #field-array__0__customTextField', {
+            timeout: TEST_TIMEOUT,
+          })
 
-            // use `waitForSelector` to ensure the element doesn't appear and then disappear
-            // eslint-disable-next-line playwright/no-wait-for-selector
-            await page.waitForSelector(
-              '#field-array #array-row-1 #field-array__1__customTextField',
-              {
-                timeout: TEST_TIMEOUT,
-              },
-            )
+          // use `waitForSelector` to ensure the element doesn't appear and then disappear
+          // eslint-disable-next-line playwright/no-wait-for-selector
+          await page.waitForSelector('#field-array #array-row-1 #field-array__1__customTextField', {
+            timeout: TEST_TIMEOUT,
+          })
 
-            await expect(
-              page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
-            ).toBeVisible()
+          await expect(
+            page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
+          ).toBeVisible()
 
-            await expect(
-              page.locator('#field-array #array-row-1 #field-array__1__customTextField'),
-            ).toBeVisible()
-          },
-          {
-            allowedNumberOfRequests: 2,
-            timeout: 10000,
-          },
-        )
-      },
-    )
+          await expect(
+            page.locator('#field-array #array-row-1 #field-array__1__customTextField'),
+          ).toBeVisible()
+        },
+        {
+          allowedNumberOfRequests: 2,
+          timeout: 10000,
+        },
+      )
+    })
   })
 })
 

@@ -6,12 +6,12 @@
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "type": "module",
+  "main": "src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts"
     }
   },
-  "main": "src/index.ts",
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
     "build-template-with-local-pkgs": "pnpm runts src/build-template-with-local-pkgs.ts",
