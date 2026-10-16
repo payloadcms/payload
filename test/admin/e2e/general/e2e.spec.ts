@@ -709,7 +709,14 @@ describe('General', () => {
     test('nav — should save group collapse preferences', async () => {
       await page.goto(postsUrl.admin)
       await openNav(page)
-      await page.locator('#nav-group-One .nav-group__toggle').click()
+      await Promise.all([
+        page.waitForResponse(
+          (response) =>
+            new URL(response.url()).pathname.endsWith('/payload-preferences/nav') &&
+            response.request().method() === 'POST',
+        ),
+        page.locator('#nav-group-One .nav-group__toggle').click(),
+      ])
       const link = page.locator('#nav-group-one-collection-ones')
       await expect(link).toBeHidden()
     })
@@ -1206,8 +1213,6 @@ describe('General', () => {
 
     test('should allow custom translation of locale labels', async () => {
       await page.goto(postsUrl.account)
-      // Wait for hydration - otherwise playwright clicks the localizer early and nothing happens
-      await wait(1000)
 
       const selectOptionClass = '.popup__content .popup-button-list__button'
       const localeListItem1 = page.locator(selectOptionClass).nth(0)
@@ -1233,12 +1238,15 @@ describe('General', () => {
       // Change language to Spanish
       await languageField.click()
       await options.locator('text=Español').click()
+      await expect(page.locator('.step-nav__first')).toHaveText('Panel de Control')
 
       await checkLocaleLabels('Español (es)', 'Inglés (en)')
 
       // Change locale and language back to English
       await languageField.click()
       await options.locator('text=English').click()
+      await expect(page.locator('.step-nav__first')).toHaveText('Home')
+
       await openLocaleSelector(page)
       await expect(localeListItem1).toContainText('Spanish (es)')
     })
