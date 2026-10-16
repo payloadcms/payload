@@ -1089,6 +1089,78 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.1.1 Keyboard (A)', () => {
+    test('should retain layout control focus after saving each keyboard selection', async () => {
+      await page.goto(postsURL.list)
+
+      const table = page.getByRole('radio', { name: 'Table', exact: true })
+      const grid = page.getByRole('radio', { name: 'Grid', exact: true })
+      const serverProvider = page.locator('.custom-provider-server')
+
+      await expect(table).toBeVisible()
+
+      const resetLayout = async () => {
+        if (await table.isChecked()) {
+          return
+        }
+
+        const renderID = await serverProvider.getAttribute('data-render-id')
+        const saved = page.waitForResponse(
+          (response) =>
+            response.url().includes('/payload-preferences/collection-posts') &&
+            response.request().method() === 'POST',
+        )
+
+        await table.check()
+        await saved
+        await expect(serverProvider).not.toHaveAttribute('data-render-id', renderID!)
+      }
+
+      await resetLayout()
+      await expect(page.locator('.custom-provider')).toHaveCount(1)
+      await expect(page.locator('.custom-provider-server')).toContainText('payload: true')
+      const originalTable = await table.elementHandle()
+      const originalGroup = await page.getByRole('radiogroup', { name: 'Layout' }).elementHandle()
+      const originalNavigation = await page.locator('.nav').elementHandle()
+
+      try {
+        await table.focus()
+
+        for (const key of ['ArrowRight', 'ArrowLeft', 'ArrowRight', 'ArrowLeft']) {
+          const selected = key === 'ArrowRight' ? grid : table
+          const renderID = await serverProvider.getAttribute('data-render-id')
+          const saved = page.waitForResponse(
+            (response) =>
+              response.url().includes('/payload-preferences/collection-posts') &&
+              response.request().method() === 'POST',
+          )
+
+          await page.keyboard.press(key)
+          await saved
+          // Selection is optimistic; focus must survive the subsequent server refresh too.
+          await expect(serverProvider).not.toHaveAttribute('data-render-id', renderID!)
+          await expect(selected).toBeChecked()
+          await expect(selected).toBeFocused()
+          await expect
+            .poll(() => originalTable.evaluate((element) => element.isConnected))
+            .toBe(true)
+          await expect
+            .poll(() => originalGroup.evaluate((element) => element.isConnected))
+            .toBe(true)
+          await expect
+            .poll(() => originalNavigation.evaluate((element) => element.isConnected))
+            .toBe(true)
+        }
+
+        await table.press('Tab')
+        await expect(table).not.toBeFocused()
+      } finally {
+        await originalTable.dispose()
+        await originalGroup.dispose()
+        await originalNavigation.dispose()
+        await resetLayout()
+      }
+    })
+
     test('should increase and decrease Number and Point values with arrow keys', async () => {
       // PYLD-3574
       await gotoCreatePost({ page, postsURL })
