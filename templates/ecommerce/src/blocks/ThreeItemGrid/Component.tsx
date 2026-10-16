@@ -1,4 +1,4 @@
-import type { Media, Product, ThreeItemGridBlock as ThreeItemGridBlockProps } from '@/payload-types'
+import type { Product, ThreeItemGridBlock as ThreeItemGridBlockProps } from '@/payload-types'
 
 import { GridTileImage } from '@/components/Grid/tile'
 import Link from 'next/link'
@@ -29,7 +29,7 @@ export const ThreeItemGridItem: React.FC<Props> = ({ item, size }) => {
             position: size === 'full' ? 'center' : 'bottom',
             title: item.title,
           }}
-          media={item.meta?.image as Media}
+          media={item.meta?.image}
         />
       </Link>
     </div>

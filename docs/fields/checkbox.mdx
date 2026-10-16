@@ -44,7 +44,7 @@ export const MyCheckboxField: Field = {
 | **`admin`**        | Admin-specific configuration. [More details](./overview#admin-options).                                                                                                                                                                                                                                 |
 | **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                                                               |
 | **`jsonSchema`**   | Override field JSON Schema used for type generation and MCP validation                                                                                                                                                                                                                                  |
-| **`virtual`**      | Provide `true` to disable field in the database, or provide a string path to [link the field with a relationship](/docs/fields/relationship#linking-virtual-fields-with-relationships). See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges) |
+| **`virtual`**      | Provide `true` to disable field in the database, or provide a string path to [link the field with a relationship](/docs/fields/overview#string-path-virtual-fields). See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges) |
 
 _\* An asterisk denotes that a property is required._
 
@@ -77,9 +77,9 @@ export const ExampleCollection: CollectionConfig = {
 ```tsx
 import type React from 'react'
 import { CheckboxField } from '@payloadcms/ui'
-import type { CheckboxFieldServerComponent } from 'payload'
+import type { CheckboxFieldServerProps } from 'payload'
 
-export const CustomCheckboxFieldServer: CheckboxFieldServerComponent = ({
+export const CustomCheckboxFieldServer: React.FC<CheckboxFieldServerProps> = ({
   clientField,
   path,
   schemaPath,
@@ -102,9 +102,9 @@ export const CustomCheckboxFieldServer: CheckboxFieldServerComponent = ({
 'use client'
 import React from 'react'
 import { CheckboxField } from '@payloadcms/ui'
-import type { CheckboxFieldClientComponent } from 'payload'
+import type { CheckboxFieldClientProps } from 'payload'
 
-export const CustomCheckboxFieldClient: CheckboxFieldClientComponent = (
+export const CustomCheckboxFieldClient: React.FC<CheckboxFieldClientProps> = (
   props,
 ) => {
   return <CheckboxField {...props} />
@@ -118,18 +118,19 @@ export const CustomCheckboxFieldClient: CheckboxFieldClientComponent = (
 ```tsx
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { CheckboxFieldLabelServerComponent } from 'payload'
+import type { CheckboxFieldLabelServerProps } from 'payload'
 
-export const CustomCheckboxFieldLabelServer: CheckboxFieldLabelServerComponent =
-  ({ clientField, path }) => {
-    return (
-      <FieldLabel
-        label={clientField?.label || clientField?.name}
-        path={path}
-        required={clientField?.required}
-      />
-    )
-  }
+export const CustomCheckboxFieldLabelServer: React.FC<
+  CheckboxFieldLabelServerProps
+> = ({ clientField, path }) => {
+  return (
+    <FieldLabel
+      label={clientField?.label || clientField?.name}
+      path={path}
+      required={clientField?.required}
+    />
+  )
+}
 ```
 
 #### Client Component
@@ -138,16 +139,17 @@ export const CustomCheckboxFieldLabelServer: CheckboxFieldLabelServerComponent =
 'use client'
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { CheckboxFieldLabelClientComponent } from 'payload'
+import type { CheckboxFieldLabelClientProps } from 'payload'
 
-export const CustomCheckboxFieldLabelClient: CheckboxFieldLabelClientComponent =
-  ({ label, path, required }) => {
-    return (
-      <FieldLabel
-        label={field?.label || field?.name}
-        path={path}
-        required={field?.required}
-      />
-    )
-  }
+export const CustomCheckboxFieldLabelClient: React.FC<
+  CheckboxFieldLabelClientProps
+> = ({ field, path }) => {
+  return (
+    <FieldLabel
+      label={field?.label || field?.name}
+      path={path}
+      required={field?.required}
+    />
+  )
+}
 ```

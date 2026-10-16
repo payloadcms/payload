@@ -52,7 +52,7 @@ export const MyRadioField: Field = {
 | **`enumName`**      | Custom enum name for this field when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from name if not defined.                                                                                                                                                         |
 | **`interfaceName`** | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas).                                                                                                                     |
 | **`jsonSchema`**    | Override field JSON Schema used for type generation and MCP validation                                                                                                                                                                                                                                  |
-| **`virtual`**       | Provide `true` to disable field in the database, or provide a string path to [link the field with a relationship](/docs/fields/relationship#linking-virtual-fields-with-relationships). See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges) |
+| **`virtual`**       | Provide `true` to disable field in the database, or provide a string path to [link the field with a relationship](/docs/fields/overview#string-path-virtual-fields). See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges) |
 
 _\* An asterisk denotes that a property is required._
 
@@ -128,9 +128,9 @@ export const ExampleCollection: CollectionConfig = {
 ```tsx
 import type React from 'react'
 import { RadioGroupField } from '@payloadcms/ui'
-import type { RadioFieldServerComponent } from 'payload'
+import type { RadioFieldServerProps } from 'payload'
 
-export const CustomRadioFieldServer: RadioFieldServerComponent = ({
+export const CustomRadioFieldServer: React.FC<RadioFieldServerProps> = ({
   clientField,
   path,
   schemaPath,
@@ -153,9 +153,11 @@ export const CustomRadioFieldServer: RadioFieldServerComponent = ({
 'use client'
 import React from 'react'
 import { RadioGroupField } from '@payloadcms/ui'
-import type { RadioFieldClientComponent } from 'payload'
+import type { RadioFieldClientProps } from 'payload'
 
-export const CustomRadioFieldClient: RadioFieldClientComponent = (props) => {
+export const CustomRadioFieldClient: React.FC<RadioFieldClientProps> = (
+  props,
+) => {
   return <RadioGroupField {...props} />
 }
 ```
@@ -167,13 +169,11 @@ export const CustomRadioFieldClient: RadioFieldClientComponent = (props) => {
 ```tsx
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { RadioFieldLabelServerComponent } from 'payload'
+import type { RadioFieldLabelServerProps } from 'payload'
 
-export const CustomRadioFieldLabelServer: RadioFieldLabelServerComponent = ({
-  clientField,
-  path,
-  required,
-}) => {
+export const CustomRadioFieldLabelServer: React.FC<
+  RadioFieldLabelServerProps
+> = ({ clientField, path, required }) => {
   return (
     <FieldLabel
       label={clientField?.label || clientField?.name}
@@ -190,12 +190,11 @@ export const CustomRadioFieldLabelServer: RadioFieldLabelServerComponent = ({
 'use client'
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { RadioFieldLabelClientComponent } from 'payload'
+import type { RadioFieldLabelClientProps } from 'payload'
 
-export const CustomRadioFieldLabelClient: RadioFieldLabelClientComponent = ({
-  field,
-  path,
-}) => {
+export const CustomRadioFieldLabelClient: React.FC<
+  RadioFieldLabelClientProps
+> = ({ field, path }) => {
   return (
     <FieldLabel
       label={field?.label || field?.name}

@@ -1,7 +1,7 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 /* eslint-disable no-restricted-exports */
 import { defaultPostgresUrl } from '../dbAdapters.js'
-import { getConfig } from './getConfig.js'
+import { getConfig, seed } from './getConfig.js'
 
 const config = getConfig()
 
@@ -14,12 +14,12 @@ export const databaseAdapter = postgresAdapter({
   logger: true,
 })
 
-export default buildConfigWithDefaults(
-  {
+export default buildConfigWithDefaults({
+  suite: 'access-control-postgreslogs',
+  config: {
     ...config,
     db: databaseAdapter,
   },
-  {
-    disableAutoLogin: true,
-  },
-)
+  seed,
+  disableAutoLogin: true,
+})

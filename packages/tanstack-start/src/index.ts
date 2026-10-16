@@ -1,6 +1,1 @@
-export { TanStackComponentRenderer } from './elements/RenderComponent/index.js'
-export { TanStackRouterAdapter } from './elements/RouterAdapter/index.js'
-export { payloadApiHandlers } from './routes/apiRoute.js'
-export { viteDevReloadStrategy } from './utilities/devReloadStrategy.js'
-export { type AdminPageMetadata, getAdminMeta } from './utilities/meta.js'
-export { payloadParseSearch, payloadStringifySearch } from './utilities/routerSearch.js'
+export { withPayload } from './withPayload/index.js'

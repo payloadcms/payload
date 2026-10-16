@@ -1,9 +1,5 @@
 'use client'
-import type {
-  ArrayFieldClientComponent,
-  ArrayFieldClientProps,
-  ArrayField as ArrayFieldType,
-} from 'payload'
+import type { ArrayFieldClientProps, ArrayField as ArrayFieldType } from 'payload'
 
 import { verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { getTranslation } from '@payloadcms/translations'
@@ -17,6 +13,7 @@ import { Button } from '../../elements/Button/index.js'
 import { clipboardCopy, clipboardPaste } from '../../elements/ClipboardAction/clipboardUtilities.js'
 import { ClipboardAction } from '../../elements/ClipboardAction/index.js'
 import {
+  insertRowFromClipboard,
   mergeFormStateFromClipboard,
   reduceFormStateByPath,
 } from '../../elements/ClipboardAction/mergeFormStateFromClipboard.js'
@@ -43,12 +40,13 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { scrollToID } from '../../utilities/scrollToID.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
+import { useRowFocus } from '../shared/useRowFocus.js'
 import { ArrayRow } from './ArrayRow.js'
 import './index.css'
 
 const baseClass = 'array-field'
 
-export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
+export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
   const {
     field,
     field: {
@@ -85,7 +83,9 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     setModified,
   } = useForm()
   const submitted = useFormSubmitted()
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
+  const rowsID = useId()
   const { i18n, t } = useTranslation()
 
   const {
@@ -151,6 +151,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const componentId = useId()
   const scrollIdPrefix = useMemo(() => `scroll-${componentId}`, [componentId])
+  const { fieldRef, focusRow } = useRowFocus()
 
   const addRow = useCallback(
     (rowIndex: number) => {
@@ -160,11 +161,9 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         schemaPath,
       })
 
-      setTimeout(() => {
-        scrollToID(`${scrollIdPrefix}-row-${rowIndex}`)
-      }, 0)
+      focusRow(`${path.split('.').join('-')}-row-${rowIndex}`)
     },
-    [addFieldRow, path, schemaPath, scrollIdPrefix],
+    [addFieldRow, focusRow, path, schemaPath],
   )
 
   const duplicateRow = useCallback(
@@ -252,9 +251,9 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const pasteRow = useCallback(
     (rowIndex: number) => {
-      const formState = { ...getFields() }
       const pasteArgs = {
         onPaste: (dataFromClipboard: ClipboardPasteData) => {
+          const formState = { ...getFields() }
           const newState = mergeFormStateFromClipboard({
             dataFromClipboard,
             formState,
@@ -276,6 +275,38 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       }
     },
     [fields, getFields, path, replaceState, setModified, t],
+  )
+
+  const pasteRowBelow = useCallback(
+    (rowIndex: number) => {
+      const pasteArgs = {
+        onPaste: (dataFromClipboard: ClipboardPasteData) => {
+          const formState = { ...getFields() }
+          const newState = insertRowFromClipboard({
+            dataFromClipboard,
+            formState,
+            path,
+            rowIndex: rowIndex + 1,
+          })
+          replaceState(newState)
+          setModified(true)
+
+          setTimeout(() => {
+            scrollToID(`${scrollIdPrefix}-row-${rowIndex + 1}`)
+          }, 0)
+        },
+        path,
+        schemaFields: fields,
+        t,
+      }
+
+      const clipboardResult = clipboardPaste(pasteArgs)
+
+      if (typeof clipboardResult === 'string') {
+        toast.error(clipboardResult)
+      }
+    },
+    [fields, getFields, path, replaceState, scrollIdPrefix, setModified, t],
   )
 
   const pasteField = useCallback(
@@ -348,6 +379,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         .filter(Boolean)
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
+      ref={fieldRef}
       style={styles}
     >
       {shouldShowFieldError && (
@@ -378,7 +410,14 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
             )}
           </div>
           <ul className={`${baseClass}__header-actions`}>
-            {rows?.length > 0 && <CollapseAllToggle onClick={toggleCollapseAll} />}
+            {rows?.length > 0 && (
+              <CollapseAllToggle
+                controls={rowsID}
+                isExpanded={rows.some((row) => !row.collapsed)}
+                label={getTranslation(label || labels?.plural || name, i18n)}
+                onClick={toggleCollapseAll}
+              />
+            )}
             <li>
               <ClipboardAction
                 allowCopy={rows?.length > 0}
@@ -409,6 +448,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       {(rows?.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
           className={`${baseClass}__draggable-rows`}
+          id={rowsID}
           ids={rows.map((row) => row.id)}
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
           renderDragOverlay={isSortable && !readOnly && !disabled ? renderDragOverlay : undefined}
@@ -446,6 +486,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     moveRow={moveRow}
                     parentPath={path}
                     pasteRow={pasteRow}
+                    pasteRowBelow={pasteRowBelow}
                     path={rowPath}
                     permissions={permissions}
                     readOnly={readOnly || disabled}

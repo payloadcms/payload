@@ -43,8 +43,8 @@ const MiniCarouselItem: React.FC<MiniCarouselItemProps> = ({
 
 export type MiniCarouselProps = {
   doc: {
-    sizes?: FileSizes
     url?: string
+    variants?: FileSizes
   } & Data
   imageCacheTag?: false | string
   onSelect: (sizeKey: null | string) => void
@@ -60,15 +60,15 @@ export const MiniCarousel: React.FC<MiniCarouselProps> = ({
   uploadConfig,
 }) => {
   const { t } = useTranslation()
-  const { imageSizes } = uploadConfig
-  const { sizes, url: originalUrl } = doc
+  const { variants } = uploadConfig
+  const { url: originalUrl, variants: sizes } = doc
 
   const orderedSizeKeys = React.useMemo(() => {
-    if (!imageSizes || imageSizes.length === 0) {
+    if (!variants || variants.length === 0) {
       return Object.keys(sizes || {})
     }
-    return imageSizes.map(({ name }) => name).filter((name) => sizes?.[name]?.url)
-  }, [imageSizes, sizes])
+    return variants.map(({ name }) => name).filter((name) => sizes?.[name]?.url)
+  }, [variants, sizes])
 
   if (!originalUrl) {
     return null

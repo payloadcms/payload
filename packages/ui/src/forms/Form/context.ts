@@ -22,6 +22,7 @@ const ProcessingContext = createContext(false)
 const BackgroundProcessingContext = createContext(false)
 const ModifiedContext = createContext(false)
 const InitializingContext = createContext(false)
+const SuccessfulSubmitCountContext = createContext(0)
 const FormFieldsContext = createSelectorContext<FormFieldsContextType>([{}, () => null])
 
 export type RenderedFieldSlots = Map<string, RenderedField>
@@ -48,6 +49,7 @@ const useFormProcessing = (): boolean => use(ProcessingContext)
 const useFormBackgroundProcessing = (): boolean => use(BackgroundProcessingContext)
 const useFormModified = (): boolean => use(ModifiedContext)
 const useFormInitializing = (): boolean => use(InitializingContext)
+const useFormSuccessfulSubmitCount = (): number => use(SuccessfulSubmitCountContext)
 
 /**
  * Get and set the value of a form field based on a selector
@@ -75,6 +77,7 @@ export {
   ModifiedContext,
   ProcessingContext,
   SubmittedContext,
+  SuccessfulSubmitCountContext,
   useAllFormFields,
   useDocumentForm,
   useForm,
@@ -84,5 +87,6 @@ export {
   useFormModified,
   useFormProcessing,
   useFormSubmitted,
+  useFormSuccessfulSubmitCount,
   useWatchForm,
 }

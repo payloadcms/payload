@@ -1152,7 +1152,6 @@ export function ResultsTable({ codegenHtml, entries }: Props) {
                         gap: '0 12px',
                         gridTemplateColumns: '1fr 100px 70px 80px 120px 100px 100px 32px',
                         padding: '10px 12px',
-                        transition: 'background 0.1s',
                       }}
                       tabIndex={0}
                     >

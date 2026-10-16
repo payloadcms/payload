@@ -8,24 +8,11 @@ import type { Config, StorageAdapter, UploadCollectionSlug } from 'payload'
 
 import { Storage } from '@google-cloud/storage'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
-import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
 import { createGcsAdapter } from './adapter.js'
-import { getGenerateSignedURLHandler } from './generateSignedURL.js'
 
 export interface GcsStorageOptions {
   acl?: 'Private' | 'Public'
-
-  /**
-   * When enabled, fields (like the prefix field) will always be inserted into
-   * the collection schema regardless of whether the plugin is enabled. This
-   * ensures a consistent schema across all environments.
-   *
-   * This will be enabled by default in Payload v4.
-   *
-   * @default false
-   */
-  alwaysInsertFields?: boolean
 
   /**
    * The name of the bucket to use.
@@ -39,7 +26,7 @@ export interface GcsStorageOptions {
    */
   clientCacheKey?: string
   /**
-   * Do uploads directly on the client to bypass limits on Vercel. You must allow CORS PUT method for the bucket to your website.
+   * Upload directly to GCS instead of through Payload. You must allow CORS PUT requests from your website.
    */
   clientUploads?: ClientUploadsConfig
   /**
@@ -61,14 +48,15 @@ export interface GcsStorageOptions {
 
   /**
    * When true, the collection-level prefix and document-level prefix are combined
-   * (compositional). When false (default), document prefix overrides collection
-   * prefix entirely.
+   * (compositional). When false (default), a document prefix already within the
+   * collection prefix is used as-is for new uploads; otherwise it is nested beneath it.
+   * Existing files retain their stored prefixes for reads, URLs, and cleanup.
    *
-   * Example:
-   * - collection prefix: `collection-prefix/`
-   * - document prefix: `document-prefix/`
-   * - resulting prefix with useCompositePrefixes=true: `collection-prefix/document-prefix/`
-   * - resulting prefix with useCompositePrefixes=false: `document-prefix/`
+   * Example with a document prefix already contained by the collection prefix:
+   * - collection prefix: `uploads/`
+   * - document prefix: `uploads/documents/`
+   * - resulting prefix with useCompositePrefixes=true: `uploads/uploads/documents/`
+   * - resulting prefix with useCompositePrefixes=false: `uploads/documents/`
    *
    * @default false
    */
@@ -106,26 +94,24 @@ export const gcsStorage: GcsStorageFactory = (
 
     const isPluginDisabled = gcsStorageOptions.enabled === false
 
-    initClientUploads({
-      clientHandler: '@payloadcms/storage-gcs/client#GcsClientUploadHandler',
-      collections: gcsStorageOptions.collections,
-      config: incomingConfig,
-      enabled: !isPluginDisabled && Boolean(gcsStorageOptions.clientUploads),
-      serverHandler: getGenerateSignedURLHandler({
-        access:
-          typeof gcsStorageOptions.clientUploads === 'object'
-            ? gcsStorageOptions.clientUploads.access
-            : undefined,
-        bucket: gcsStorageOptions.bucket,
-        collections: gcsStorageOptions.collections,
-        getStorageClient,
-        useCompositePrefixes: gcsStorageOptions.useCompositePrefixes,
-      }),
-      serverHandlerPath: '/storage-gcs-generate-signed-url',
-    })
-
     if (isPluginDisabled) {
-      return incomingConfig
+      // Still call cloudStoragePlugin with adapter: null so fields (like prefix) are
+      // inserted into the schema, keeping it consistent across environments.
+      const collectionsWithoutAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
+        gcsStorageOptions.collections,
+      ).reduce(
+        (acc, [slug, collOptions]) => ({
+          ...acc,
+          [slug]: { ...(collOptions === true ? {} : collOptions), adapter: null },
+        }),
+        {} as Record<string, CollectionOptions>,
+      )
+
+      return cloudStoragePlugin({
+        collections: collectionsWithoutAdapter,
+        enabled: false,
+        useCompositePrefixes: gcsStorageOptions.useCompositePrefixes,
+      })(incomingConfig)
     }
 
     // Add adapter to each collection option object
@@ -161,7 +147,6 @@ export const gcsStorage: GcsStorageFactory = (
     }
 
     return cloudStoragePlugin({
-      alwaysInsertFields: gcsStorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
       useCompositePrefixes: gcsStorageOptions.useCompositePrefixes,
     })(config)

@@ -18,7 +18,7 @@ describe('reservedFieldNames - collections -', () => {
       upload: true,
     }
 
-    it('should throw on file', async () => {
+    it('should throw on file', () => {
       const fields: Field[] = [
         {
           name: 'file',
@@ -27,8 +27,8 @@ describe('reservedFieldNames - collections -', () => {
         },
       ]
 
-      await expect(async () => {
-        await sanitizeCollection(
+      expect(() => {
+        sanitizeCollection(
           // @ts-expect-error
           {
             ...config,
@@ -44,10 +44,10 @@ describe('reservedFieldNames - collections -', () => {
             fields,
           },
         )
-      }).rejects.toThrow(ReservedFieldName)
+      }).toThrow(ReservedFieldName)
     })
 
-    it('should not throw on a custom field', async () => {
+    it('should not throw on a custom field', () => {
       const fields: Field[] = [
         {
           name: 'customField',
@@ -56,8 +56,8 @@ describe('reservedFieldNames - collections -', () => {
         },
       ]
 
-      await expect(async () => {
-        await sanitizeCollection(
+      expect(() => {
+        sanitizeCollection(
           // @ts-expect-error
           {
             ...config,
@@ -88,7 +88,7 @@ describe('reservedFieldNames - collections -', () => {
       fields: [],
     }
 
-    it('should throw on hash', async () => {
+    it('should throw on hash', () => {
       const fields: Field[] = [
         {
           name: 'hash',
@@ -97,8 +97,8 @@ describe('reservedFieldNames - collections -', () => {
         },
       ]
 
-      await expect(async () => {
-        await sanitizeCollection(
+      expect(() => {
+        sanitizeCollection(
           // @ts-expect-error
           {
             ...config,
@@ -114,10 +114,10 @@ describe('reservedFieldNames - collections -', () => {
             fields,
           },
         )
-      }).rejects.toThrow(ReservedFieldName)
+      }).toThrow(ReservedFieldName)
     })
 
-    it('should throw on salt', async () => {
+    it('should throw on salt', () => {
       const fields: Field[] = [
         {
           name: 'salt',
@@ -126,8 +126,8 @@ describe('reservedFieldNames - collections -', () => {
         },
       ]
 
-      await expect(async () => {
-        await sanitizeCollection(
+      expect(() => {
+        sanitizeCollection(
           // @ts-expect-error
           {
             ...config,
@@ -143,10 +143,10 @@ describe('reservedFieldNames - collections -', () => {
             fields,
           },
         )
-      }).rejects.toThrow(ReservedFieldName)
+      }).toThrow(ReservedFieldName)
     })
 
-    it('should not throw on a custom field', async () => {
+    it('should not throw on a custom field', () => {
       const fields: Field[] = [
         {
           name: 'customField',
@@ -155,8 +155,8 @@ describe('reservedFieldNames - collections -', () => {
         },
       ]
 
-      await expect(async () => {
-        await sanitizeCollection(
+      expect(() => {
+        sanitizeCollection(
           // @ts-expect-error
           {
             ...config,

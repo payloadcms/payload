@@ -1,5 +1,17 @@
 export const categoriesSlug = 'categories'
 
+export const accessJoinArticlesSlug = 'access-join-articles'
+
+export const accessJoinNotesSlug = 'access-join-notes'
+
+export const accessJoinParentsSlug = 'access-join-parents'
+
+export const operatorHandlerJoinArticlesSlug = 'operator-handler-join-articles'
+
+export const operatorHandlerJoinNotesSlug = 'operator-handler-join-notes'
+
+export const operatorHandlerJoinParentsSlug = 'operator-handler-join-parents'
+
 export const categories2Slug = 'categories-2'
 
 export const postsSlug = 'posts'

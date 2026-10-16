@@ -49,7 +49,7 @@ export async function handleSchedules({
   })
 
   if (Object.keys(queuesWithSchedules).length === 0) {
-    // No schedules defined => return early, before fetching jobsStatsGlobal, as the global may not even exist
+    // No schedules defined => return early before fetching the stats global.
     return {
       errored: [],
       queued: [],
@@ -163,7 +163,7 @@ export async function scheduleQueueable({
   req: PayloadRequest
   stats: JobStats
 }): Promise<{
-  job?: Job<false>
+  job?: Job
   status: 'error' | 'skipped' | 'success'
 }> {
   if (!queueable.taskConfig && !queueable.workflowConfig) {
@@ -205,12 +205,13 @@ export async function scheduleQueueable({
       meta: {
         scheduled: true,
       },
+      overrideAccess: true,
       queue: queueable.scheduleConfig.queue,
       req,
       task: queueable?.taskConfig?.slug,
       waitUntil: beforeScheduleResult.waitUntil,
       workflow: queueable.workflowConfig?.slug,
-    } as Parameters<typeof req.payload.jobs.queue>[0])) as unknown as Job<false>
+    } as Parameters<typeof req.payload.jobs.queue>[0])) as unknown as Job
 
     await (afterScheduleFN ?? defaultAfterSchedule)({
       // @ts-expect-error we know defaultAfterchedule will never call itself => pass null

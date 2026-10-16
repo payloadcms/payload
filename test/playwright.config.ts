@@ -37,11 +37,40 @@ export default defineConfig({
   },
   expect: {
     timeout: EXPECT_TIMEOUT,
+    toHaveScreenshot: {
+      // Tolerate a small amount of anti-aliasing noise, not real visual drift.
+      maxDiffPixelRatio: 0.01,
+    },
   },
+  /**
+   * Drops the platform/project suffix Playwright normally appends (e.g. `-chromium-darwin`).
+   * Visual regression baselines are only ever generated/compared inside the pinned Playwright
+   * Docker image (see `pnpm test:visual`), so there is only ever one valid environment
+   * for a given snapshot and the suffix would just be dead weight in the path.
+   */
+  snapshotPathTemplate: '{testDir}/{testFileDir}/__snapshots__/{testFileName}/{arg}{ext}',
+  /**
+   * Overridable via env var so `run-visual-suites.sh` can give each suite its own subdirectory
+   * when looping over multiple suites in one CI job — Playwright clears `outputDir` at the start
+   * of every run, so a shared directory would let a later suite's run delete an earlier suite's
+   * diff images before the visual-regression job's manifest step ever reads them.
+   */
+  outputDir: path.resolve(dirname, process.env.PLAYWRIGHT_OUTPUT_DIR ?? 'test-results'),
   workers: 16,
   maxFailures: CI && isTanStack ? 30 : undefined,
   retries: CI ? (isTanStack ? 2 : 5) : undefined,
-  reporter: CI ? [['list', { printSteps: true }], ['json']] : [['list', { printSteps: true }]],
+  /**
+   * `PLAYWRIGHT_HTML_REPORT` (a Playwright-native env var that also controls the html reporter's
+   * output folder) opts into an interactive HTML report locally — see `pnpm test:visual:preview`.
+   */
+  reporter: CI
+    ? [['list', { printSteps: true }], ['json']]
+    : process.env.PLAYWRIGHT_HTML_REPORT
+      ? [
+          ['list', { printSteps: true }],
+          ['html', { open: 'never' }],
+        ]
+      : [['list', { printSteps: true }]],
   projects: [
     {
       name: 'chromium',

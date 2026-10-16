@@ -1,7 +1,6 @@
 'use client'
+import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useRef, useState } from 'react'
-
-import type { UserMenuSettingsGroup } from '../UserMenu/SettingsMenu/index.js'
 
 import { useElementHeightVariable } from '../../hooks/useElementHeightVariable.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
@@ -9,29 +8,25 @@ import { LanguageIcon } from '../../icons/Language/index.js'
 import { SidebarIcon } from '../../icons/Sidebar/index.js'
 import { useActions } from '../../providers/Actions/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useEmbed } from '../../providers/Embed/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { Localizer } from '../Localizer/index.js'
 import { useNav } from '../Nav/context.js'
 import { StepNav } from '../StepNav/index.js'
-import { UserMenu } from '../UserMenu/index.js'
 import './index.css'
 
 const baseClass = 'app-header'
 
-type Props = {
-  CustomAvatar?: React.ReactNode
-  CustomLogoutButton?: React.ReactNode
-  settingsItemGroups?: UserMenuSettingsGroup[]
-}
-export function AppHeader({ CustomAvatar, CustomLogoutButton, settingsItemGroups }: Props) {
-  const { t } = useTranslation()
+export function AppHeader() {
+  const { i18n, t } = useTranslation()
   const locale = useLocale()
-
+  const localeLabel = locale && getTranslation(locale.label, i18n)
   const { Actions } = useActions()
 
   const { navOpen, setNavOpen } = useNav()
+  const { isEmbedded } = useEmbed()
 
   const {
     config: { localization },
@@ -64,7 +59,13 @@ export function AppHeader({ CustomAvatar, CustomLogoutButton, settingsItemGroups
 
   return (
     <header
-      className={[baseClass, navOpen && `${baseClass}--nav-open`].filter(Boolean).join(' ')}
+      className={[
+        baseClass,
+        navOpen && `${baseClass}--nav-open`,
+        isEmbedded && `${baseClass}--embedded`,
+      ]
+        .filter(Boolean)
+        .join(' ')}
       ref={headerRef}
     >
       <div className={`${baseClass}__content`}>
@@ -72,11 +73,12 @@ export function AppHeader({ CustomAvatar, CustomLogoutButton, settingsItemGroups
           <div className={`${baseClass}__controls-wrapper`}>
             <div className={`${baseClass}__step-nav-wrapper`}>
               <Button
+                aria-expanded={navOpen}
                 aria-label={`${navOpen ? t('general:close') : t('general:open')} ${t('general:menu')}`}
                 buttonStyle="ghost"
                 className={`${baseClass}__sidebar-toggle`}
                 icon={<SidebarIcon />}
-                onClick={() => setNavOpen(!navOpen)}
+                onClick={() => setNavOpen(!navOpen, true)}
                 type="button"
               />
               <div className={`${baseClass}__step-nav-wrapper`}>
@@ -115,7 +117,7 @@ export function AppHeader({ CustomAvatar, CustomLogoutButton, settingsItemGroups
                     {...ariaProps}
                   >
                     <div className="localizer__button-content">
-                      {locale.code}
+                      {localeLabel}
                       <ChevronIcon direction={active ? 'up' : 'down'} size={16} />
                     </div>
                   </Button>
@@ -123,11 +125,6 @@ export function AppHeader({ CustomAvatar, CustomLogoutButton, settingsItemGroups
               />
             )}
           </div>
-          <UserMenu
-            CustomAvatar={CustomAvatar}
-            CustomLogoutButton={CustomLogoutButton}
-            settingsItemGroups={settingsItemGroups}
-          />
         </div>
       </div>
     </header>

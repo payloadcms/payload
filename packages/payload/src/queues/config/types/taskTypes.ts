@@ -44,8 +44,10 @@ export type TaskHandlerArgs<
 /**
  * Inline tasks in JSON workflows have no input, as they can just get the input from job.taskStatus
  */
-export type TaskHandlerArgsNoInput<TWorkflowInput extends false | object = false> = {
-  job: Job<TWorkflowInput>
+export type TaskHandlerArgsNoInput<
+  TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object = object,
+> = {
+  job: Job<TWorkflowSlugOrInput>
   req: PayloadRequest
 }
 
@@ -56,10 +58,7 @@ export type TaskHandler<
   args: TaskHandlerArgs<TTaskSlugOrInputOutput, TWorkflowSlug>,
 ) => MaybePromise<TaskHandlerResult<TTaskSlugOrInputOutput>>
 
-/**
- * @todo rename to TaskSlug in 4.0, similar to CollectionSlug
- */
-export type TaskType = StringKeyOf<TypedJobs['tasks']>
+export type TaskSlug = StringKeyOf<TypedJobs['tasks']>
 
 // Extracts the type of `input` corresponding to each task
 export type TaskInput<T extends keyof TypedJobs['tasks']> = TypedJobs['tasks'][T]['input']
@@ -191,7 +190,7 @@ export type RetryConfig = {
 }
 
 export type TaskConfig<
-  TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput = TaskType,
+  TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput = TaskSlug,
 > = {
   /**
    * Job concurrency controls for preventing race conditions.

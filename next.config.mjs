@@ -21,6 +21,9 @@ const config = withBundleAnalyzer(
       },
       experimental: {
         fullySpecified: true,
+        // The `typescript` dependency is aliased to `@typescript/typescript6`, which only ships a
+        // `tsc6` bin. Next's CLI mode looks for `typescript/bin/tsc`, so use the compiler API instead.
+        useTypeScriptCli: false,
         serverActions: {
           bodySizeLimit: '5mb',
         },
@@ -28,8 +31,6 @@ const config = withBundleAnalyzer(
       env: {
         PAYLOAD_CORE_DEV: 'true',
         ROOT_DIR: path.resolve(dirname),
-        // @todo remove in 4.0 - will behave like this by default in 4.0
-        PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY: 'true',
       },
       async redirects() {
         return [

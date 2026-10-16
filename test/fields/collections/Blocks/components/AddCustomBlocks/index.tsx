@@ -3,7 +3,7 @@
 import { Button, useField, useForm } from '@payloadcms/ui'
 import * as React from 'react'
 
-import './index.scss'
+import './index.css'
 
 const baseClass = 'custom-blocks-field-management'
 

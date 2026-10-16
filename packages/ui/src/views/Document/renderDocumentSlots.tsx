@@ -26,6 +26,7 @@ import { hasDraftsEnabled, matchMimeType } from 'payload/shared'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
 import { ViewDescription } from '../../exports/client/index.js'
+import { filterLLMInstructionsMenuItems } from '../../utilities/filterLLMInstructionsMenuItems.js'
 import { getDocumentPermissions } from '../../utilities/getDocumentPermissions.js'
 
 export const renderDocumentSlots: (args: {
@@ -37,9 +38,19 @@ export const renderDocumentSlots: (args: {
   locale: Locale
   permissions: SanitizedPermissions
   req: PayloadRequest
-}) => DocumentSlots = (args) => {
-  const { id, collectionConfig, doc, globalConfig, hasSavePermission, locale, permissions, req } =
-    args
+  user?: PayloadRequest['user']
+}) => Promise<DocumentSlots> = async (args) => {
+  const {
+    id,
+    collectionConfig,
+    doc,
+    globalConfig,
+    hasSavePermission,
+    locale,
+    permissions,
+    req,
+    user,
+  } = args
 
   const components: DocumentSlots = {} as DocumentSlots
 
@@ -54,7 +65,7 @@ export const renderDocumentSlots: (args: {
     payload: req.payload,
     permissions,
     server: req.server,
-    user: req.user,
+    user,
     // TODO: Add remaining serverProps
   }
 
@@ -82,9 +93,17 @@ export const renderDocumentSlots: (args: {
     })
   }
 
-  const EditMenuItems = collectionConfig?.admin?.components?.edit?.editMenuItems
+  const EditMenuItems = await filterLLMInstructionsMenuItems({
+    collectionSlug: collectionConfig?.slug,
+    globalSlug: globalConfig?.slug,
+    menuItems:
+      collectionConfig?.admin?.components?.edit?.editMenuItems ||
+      globalConfig?.admin?.components?.edit?.editMenuItems,
+    permissions,
+    req,
+  })
 
-  if (EditMenuItems) {
+  if (EditMenuItems?.length) {
     components.EditMenuItems = RenderServerComponent({
       Component: EditMenuItems,
       importMap: req.payload.importMap,
@@ -267,7 +286,7 @@ export const renderDocumentSlotsHandler: ServerFunction<{
   collectionSlug: string
   id?: number | string
 }> = async (args) => {
-  const { id, collectionSlug, locale, permissions, req } = args
+  const { id, collectionSlug, locale, permissions, req, user } = args
 
   const collectionConfig = req.payload.collections[collectionSlug]?.config
 
@@ -310,5 +329,6 @@ export const renderDocumentSlotsHandler: ServerFunction<{
     locale,
     permissions,
     req,
+    user,
   })
 }

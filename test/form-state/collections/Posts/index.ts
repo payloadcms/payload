@@ -153,6 +153,16 @@ export const PostsCollection: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'selectWithAsyncFilterOptions',
+      type: 'select',
+      filterOptions: async ({ options }) => {
+        await Promise.resolve()
+
+        return (options as string[]).filter((option) => option !== 'excluded')
+      },
+      options: ['allowed', 'excluded'],
+    },
   ],
   versions: false,
 }

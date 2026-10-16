@@ -1,11 +1,10 @@
-import type { RefreshHook } from 'node_modules/payload/src/collections/config/types.js'
+import type { CollectionRefreshHook } from 'payload'
 
-export const refreshHook: RefreshHook = ({ user }) => {
+export const refreshHook: CollectionRefreshHook = ({ user }) => {
   if (user.email === 'dontrefresh@payloadcms.com') {
     return {
       exp: 1,
       refreshedToken: 'fake',
-      strategy: 'local-jwt',
       user,
     }
   }

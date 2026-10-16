@@ -60,6 +60,8 @@ export const booleanParams = [
   'overrideLock',
   'pagination',
   'flattenLocales',
+  'publishAllLocales',
+  'unpublishAllLocales',
 ]
 
 export const numberParams = ['depth', 'limit', 'page']

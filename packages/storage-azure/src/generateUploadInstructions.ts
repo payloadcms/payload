@@ -1,0 +1,87 @@
+import type { ContainerClient, StorageSharedKeyCredential } from '@azure/storage-blob'
+import type { GenerateUploadInstructions, UploadInstructionsAccess } from 'payload'
+
+import { BlobSASPermissions, generateBlobSASQueryParameters } from '@azure/storage-blob'
+import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
+import { APIError, Forbidden } from 'payload'
+import { assertClientUploadAllowed } from 'payload/internal'
+
+import { isClientUploadAllowed } from './isClientUploadAllowed.js'
+
+interface Args {
+  access?: UploadInstructionsAccess
+  collectionPrefix: string
+  containerName: string
+  getStorageClient: () => ContainerClient
+  useCompositePrefixes?: boolean
+}
+
+export const generateUploadInstructions = ({
+  access,
+  collectionPrefix,
+  containerName,
+  getStorageClient,
+  useCompositePrefixes = false,
+}: Args): GenerateUploadInstructions => {
+  return async ({
+    collectionSlug,
+    docPrefix,
+    filename,
+    filesize,
+    mimeType,
+    overrideAccess,
+    req,
+  }) => {
+    if (!overrideAccess && (access ? !(await access({ collectionSlug, req })) : !req.user)) {
+      throw new Forbidden(req.t)
+    }
+
+    const collection = req.payload.collections[collectionSlug]?.config
+    if (!isClientUploadAllowed(collection)) {
+      throw new APIError(
+        'Azure client uploads require allowRestrictedFileTypes to be enabled.',
+        400,
+      )
+    }
+
+    assertClientUploadAllowed({ collection, filename, mimeType })
+
+    const { sanitizedFilename, storageFilePath, uploadReference } = await resolveSignedURLKey({
+      collectionPrefix,
+      collectionSlug,
+      docPrefix,
+      filename,
+      req,
+      useCompositePrefixes,
+    })
+
+    const blobClient = getStorageClient().getBlobClient(storageFilePath)
+
+    const sasToken = generateBlobSASQueryParameters(
+      {
+        blobName: storageFilePath,
+        containerName,
+        contentType: mimeType,
+        expiresOn: new Date(Date.now() + 3 * 60 * 60 * 1000),
+        permissions: BlobSASPermissions.parse('c'),
+        startsOn: new Date(),
+        version: '2026-04-06',
+      },
+      getStorageClient().credential as StorageSharedKeyCredential,
+    )
+
+    return {
+      name: 'uploadToAzure',
+      type: 'dispatch',
+      data: {
+        url: `${blobClient.url}?${sasToken.toString()}`,
+      },
+      file: {
+        filename: sanitizedFilename,
+        mimeType,
+        size: filesize,
+        uploadReference,
+      },
+    }
+  }
+}

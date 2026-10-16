@@ -1,3 +1,5 @@
+import { v4 as uuid } from 'uuid'
+
 import type { Job } from '../../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../../types/index.js'
 import type { WorkflowJSON } from '../../config/types/workflowJSONTypes.js'
@@ -8,9 +10,10 @@ import type { RunJobResult } from './runJob/index.js'
 import { Forbidden } from '../../../errors/Forbidden.js'
 import { isolateObjectProperty } from '../../../utilities/isolateObjectProperty.js'
 import { jobsCollectionSlug } from '../../config/collection.js'
-import { JobCancelledError } from '../../errors/index.js'
+import { JobCancelledError, JobRunAbortedError } from '../../errors/index.js'
 import { getCurrentDate } from '../../utilities/getCurrentDate.js'
-import { updateJob, updateJobs } from '../../utilities/updateJob.js'
+import { updateJobs } from '../../utilities/updateJob.js'
+import { startProcessingLeaseHeartbeat } from './heartbeat.js'
 import { getUpdateJobFunction } from './runJob/getUpdateJobFunction.js'
 import { importHandlerPath } from './runJob/importHandlerPath.js'
 import { runJob } from './runJob/index.js'
@@ -109,6 +112,12 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       throw new Forbidden(req.t)
     }
   }
+  const now = getCurrentDate()
+  const { duration: processingLeaseDuration, safetyBuffer: processingLeaseSafetyBuffer } =
+    jobsConfig.processingLease
+  const nowISOString = now.toISOString()
+  const processingUntil = new Date(now.getTime() + processingLeaseDuration).toISOString()
+  const processingToken = uuid()
   const and: Where[] = [
     {
       completedAt: {
@@ -121,9 +130,10 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       },
     },
     {
-      processing: {
-        equals: false,
-      },
+      or: [
+        { processingUntil: { exists: false } },
+        { processingUntil: { less_than_equal: nowISOString } },
+      ],
     },
     {
       or: [
@@ -134,14 +144,14 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         },
         {
           waitUntil: {
-            less_than: getCurrentDate().toISOString(),
+            less_than: nowISOString,
           },
         },
       ],
     },
   ]
 
-  if (allQueues !== true) {
+  if (!id && allQueues !== true) {
     and.push({
       queue: {
         equals: queue ?? 'default',
@@ -153,10 +163,13 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     and.push(whereFromProps)
   }
 
-  // Only enforce concurrency controls if the feature is enabled
-  if (jobsConfig.enableConcurrencyControl) {
-    // Find currently running jobs with concurrency keys to enforce exclusive concurrency
-    // Jobs with the same concurrencyKey should not run in parallel
+  if (id) {
+    and.push({ id: { equals: id } })
+  }
+
+  if (jobsConfig.hasConcurrency) {
+    // Find currently running jobs with concurrency keys to enforce exclusive concurrency.
+    // Jobs with the same concurrencyKey should not run in parallel.
     const runningJobsWithConcurrency = await payload.db.find({
       collection: jobsCollectionSlug,
       limit: 0,
@@ -166,7 +179,10 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         concurrencyKey: true,
       },
       where: {
-        and: [{ processing: { equals: true } }, { concurrencyKey: { exists: true } }],
+        and: [
+          { processingUntil: { greater_than: nowISOString } },
+          { concurrencyKey: { exists: true } },
+        ],
       },
     })
 
@@ -193,22 +209,23 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
   }
 
-  // Find all jobs and ensure we set job to processing: true as early as possible to reduce the chance of
-  // the same job being picked up by another worker
+  // Claim jobs before running them so another worker cannot pick up the same jobs.
+  // `processingToken` identifies which jobs were claimed by this runner.
   let jobs: Job[] = []
 
   if (id) {
-    // Only one job to run
-    const job = await updateJob({
-      id,
+    const updatedDocs = await updateJobs({
       data: {
-        processing: true,
+        processingToken,
+        processingUntil,
       },
+      limit: 1,
       req,
       returning: true,
+      where: { and },
     })
-    if (job) {
-      jobs = [job]
+    if (updatedDocs) {
+      jobs = updatedDocs
     }
   } else {
     let defaultProcessingOrder: Sort =
@@ -233,7 +250,8 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
     const updatedDocs = await updateJobs({
       data: {
-        processing: true,
+        processingToken,
+        processingUntil,
       },
       limit,
       req,
@@ -254,10 +272,9 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
   }
 
-  // Only handle concurrency deduplication if the feature is enabled
-  if (jobsConfig.enableConcurrencyControl) {
-    // Handle the case where multiple jobs with the same concurrencyKey were picked up in the same batch
-    // We should only run one job per concurrencyKey, release the others back to pending
+  if (jobsConfig.hasConcurrency) {
+    // Handle the case where multiple jobs with the same concurrencyKey were picked up in the same batch.
+    // We should only run one job per concurrencyKey, releasing the others back to pending.
     const seenConcurrencyKeys = new Set<string>()
     const jobsToRun: Job[] = []
     const jobsToRelease: Job[] = []
@@ -280,21 +297,33 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     if (jobsToRelease.length > 0) {
       const releaseIds = jobsToRelease.map((job) => job.id)
       await updateJobs({
-        data: { processing: false },
+        data: { processingUntil: null },
         req,
         returning: false,
-        where: { id: { in: releaseIds } },
+        where: {
+          and: [
+            { id: { in: releaseIds } },
+            { processingToken: { equals: processingToken } },
+            {
+              processingUntil: {
+                greater_than: new Date(
+                  getCurrentDate().getTime() + processingLeaseSafetyBuffer,
+                ).toISOString(),
+              },
+            },
+          ],
+        },
       })
     }
 
     // Use only the filtered jobs going forward
     jobs = jobsToRun
-  }
 
-  if (!jobs.length) {
-    return {
-      noJobsRemaining: false,
-      remainingJobsFromQueried: 0,
+    if (!jobs.length) {
+      return {
+        noJobsRemaining: false,
+        remainingJobsFromQueried: 0,
+      }
     }
   }
 
@@ -324,7 +353,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
   ): Promise<{
     id: number | string
     result: RunJobResult
-  }> => {
+  } | null> => {
     if (!job.workflowSlug && !job.taskSlug) {
       throw new Error('Job must have either a workflowSlug or a taskSlug')
     }
@@ -348,33 +377,33 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       }
     }
 
-    if (!workflowConfig) {
-      // Permanently fail jobs whose task/workflow slug is no longer registered in config — they can never complete.
-      const errorMessage = `${job.taskSlug ? `Task '${job.taskSlug}'` : `Workflow '${job.workflowSlug}'`} is not registered in payload.config.jobs.`
-
-      if (!silent || (typeof silent === 'object' && !silent.error)) {
-        payload.logger.error({
-          msg: `Error running job ${job.workflowSlug || `Task: ${job.taskSlug}`} id: ${job.id} - ${errorMessage}`,
-        })
-      }
-
-      const updateJob = getUpdateJobFunction(job, jobReq)
-      await updateJob({
-        error: { message: errorMessage },
-        hasError: true,
-        processing: false,
-        totalTried: (job.totalTried ?? 0) + 1,
-      })
-
-      return {
-        id: job.id,
-        result: {
-          status: 'error-reached-max-retries',
-        },
-      }
-    }
-
     try {
+      if (!workflowConfig) {
+        // Permanently fail jobs whose task/workflow slug is no longer registered in config — they can never complete.
+        const errorMessage = `${job.taskSlug ? `Task '${job.taskSlug}'` : `Workflow '${job.workflowSlug}'`} is not registered in payload.config.jobs.`
+
+        if (!silent || (typeof silent === 'object' && !silent.error)) {
+          payload.logger.error({
+            msg: `Error running job ${job.workflowSlug || `Task: ${job.taskSlug}`} id: ${job.id} - ${errorMessage}`,
+          })
+        }
+
+        const updateJob = getUpdateJobFunction(job, jobReq)
+        await updateJob({
+          error: { message: errorMessage },
+          hasError: true,
+          processingUntil: null,
+          totalTried: (job.totalTried ?? 0) + 1,
+        })
+
+        return {
+          id: job.id,
+          result: {
+            status: 'error-reached-max-retries',
+          },
+        }
+      }
+
       const updateJob = getUpdateJobFunction(job, jobReq)
 
       // the runner will either be passed to the config
@@ -401,7 +430,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
               error: errorMessage,
             },
             hasError: true,
-            processing: false,
+            processingUntil: null,
           })
 
           return {
@@ -445,30 +474,30 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         return { id: job.id, result }
       }
     } catch (error) {
+      if (error instanceof JobRunAbortedError) {
+        return null
+      }
       if (error instanceof JobCancelledError) {
         if (
           !(job.error as Record<string, unknown> | undefined)?.cancelled ||
           !job.hasError ||
-          job.processing ||
+          job.processingUntil ||
           job.completedAt ||
           job.waitUntil
         ) {
           // When using the local API to cancel jobs, the local API will update the job data for us to ensure the job is cancelled.
           // But when throwing a JobCancelledError within a task or workflow handler, we are responsible for updating the job data ourselves.
+          // Use the lease-protected getUpdateJobFunction so an old worker cannot cancel the job after another worker claims it.
+          const updateJob = getUpdateJobFunction(job, jobReq)
           await updateJob({
-            id: job.id,
-            data: {
-              completedAt: null,
-              error: {
-                cancelled: true,
-                message: error.message,
-              },
-              hasError: true,
-              processing: false,
-              waitUntil: null,
+            completedAt: null,
+            error: {
+              cancelled: true,
+              message: error.message,
             },
-            req,
-            returning: false,
+            hasError: true,
+            processingUntil: null,
+            waitUntil: null,
           })
         }
 
@@ -483,20 +512,30 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
   }
 
+  const stopHeartbeat = startProcessingLeaseHeartbeat({
+    jobIDs: jobs.map((job) => job.id),
+    processingLeaseDuration,
+    processingLeaseSafetyBuffer,
+    processingToken,
+    req,
+    silent,
+  })
+
   let resultsArray: { id: number | string; result: RunJobResult }[] = []
-  if (sequential) {
-    for (const job of jobs) {
-      const result = await runSingleJob(job)
-      if (result) {
-        resultsArray.push(result)
+  try {
+    if (sequential) {
+      for (const job of jobs) {
+        const result = await runSingleJob(job)
+        if (result) {
+          resultsArray.push(result)
+        }
       }
+    } else {
+      const jobPromises = jobs.map(runSingleJob)
+      resultsArray = (await Promise.all(jobPromises)).filter((result) => result !== null)
     }
-  } else {
-    const jobPromises = jobs.map(runSingleJob)
-    resultsArray = (await Promise.all(jobPromises)) as {
-      id: number | string
-      result: RunJobResult
-    }[]
+  } finally {
+    stopHeartbeat()
   }
 
   if (jobsConfig.deleteJobOnComplete && successfullyCompletedJobs.length) {

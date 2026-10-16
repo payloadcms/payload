@@ -62,13 +62,13 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_3DC54BD0".
+ * via the `definition` "LexicalNodes_BEFF7149".
  */
-export type LexicalNodes_3DC54BD0 =
+export type LexicalNodes_BEFF7149 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_3DC54BD0>
+  | SerializedParagraphNode<LexicalNodes_BEFF7149>
   | SerializedHorizontalRuleNode
   | {
       type: 'upload';
@@ -78,7 +78,7 @@ export type LexicalNodes_3DC54BD0 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_3DC54BD0>
+  | SerializedQuoteNode<LexicalNodes_BEFF7149>
   | SerializedRelationshipNode<
       | 'richText'
       | 'blocks-fields'
@@ -103,16 +103,21 @@ export type LexicalNodes_3DC54BD0 =
       | 'blocks-same-name'
       | 'localized-within-localized'
       | 'array-with-fallback-fields'
+      | 'publication-access'
+      | 'publication-field-access'
+      | 'publication-before-operation'
+      | 'publication-async-field-hook'
+      | 'publication-hook'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_3DC54BD0, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_3DC54BD0, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_3DC54BD0>
-  | SerializedListItemNode<LexicalNodes_3DC54BD0>
-  | SerializedHeadingNode<LexicalNodes_3DC54BD0>;
+  | SerializedAutoLinkNode<LexicalNodes_BEFF7149, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_BEFF7149, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_BEFF7149>
+  | SerializedListItemNode<LexicalNodes_BEFF7149>
+  | SerializedHeadingNode<LexicalNodes_BEFF7149>;
 
 export interface Config {
   auth: {
@@ -143,6 +148,11 @@ export interface Config {
     'blocks-same-name': BlocksSameName;
     'localized-within-localized': LocalizedWithinLocalized;
     'array-with-fallback-fields': ArrayWithFallbackField;
+    'publication-access': PublicationAccess;
+    'publication-field-access': PublicationFieldAccess;
+    'publication-before-operation': PublicationBeforeOperation;
+    'publication-async-field-hook': PublicationAsyncFieldHook;
+    'publication-hook': PublicationHook;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -173,6 +183,11 @@ export interface Config {
     'blocks-same-name': BlocksSameNameSelect<false> | BlocksSameNameSelect<true>;
     'localized-within-localized': LocalizedWithinLocalizedSelect<false> | LocalizedWithinLocalizedSelect<true>;
     'array-with-fallback-fields': ArrayWithFallbackFieldsSelect<false> | ArrayWithFallbackFieldsSelect<true>;
+    'publication-access': PublicationAccessSelect<false> | PublicationAccessSelect<true>;
+    'publication-field-access': PublicationFieldAccessSelect<false> | PublicationFieldAccessSelect<true>;
+    'publication-before-operation': PublicationBeforeOperationSelect<false> | PublicationBeforeOperationSelect<true>;
+    'publication-async-field-hook': PublicationAsyncFieldHookSelect<false> | PublicationAsyncFieldHookSelect<true>;
+    'publication-hook': PublicationHookSelect<false> | PublicationHookSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -188,18 +203,32 @@ export interface Config {
     | ('xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu')
     | ('xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu')[];
   globals: {
+    'localized-status-shared-global': LocalizedStatusSharedGlobal;
     'global-array': GlobalArray;
     'global-text': GlobalText;
     'global-drafts': GlobalDraft;
+    'publication-access-global': PublicationAccessGlobal;
+    'publication-before-operation-global': PublicationBeforeOperationGlobal;
+    'publication-sanitize-global': PublicationSanitizeGlobal;
+    'publication-field-access-global': PublicationFieldAccessGlobal;
+    'publication-hook-global': PublicationHookGlobal;
   };
   globalsSelect: {
+    'localized-status-shared-global': LocalizedStatusSharedGlobalSelect<false> | LocalizedStatusSharedGlobalSelect<true>;
     'global-array': GlobalArraySelect<false> | GlobalArraySelect<true>;
     'global-text': GlobalTextSelect<false> | GlobalTextSelect<true>;
     'global-drafts': GlobalDraftsSelect<false> | GlobalDraftsSelect<true>;
+    'publication-access-global': PublicationAccessGlobalSelect<false> | PublicationAccessGlobalSelect<true>;
+    'publication-before-operation-global': PublicationBeforeOperationGlobalSelect<false> | PublicationBeforeOperationGlobalSelect<true>;
+    'publication-sanitize-global': PublicationSanitizeGlobalSelect<false> | PublicationSanitizeGlobalSelect<true>;
+    'publication-field-access-global': PublicationFieldAccessGlobalSelect<false> | PublicationFieldAccessGlobalSelect<true>;
+    'publication-hook-global': PublicationHookGlobalSelect<false> | PublicationHookGlobalSelect<true>;
   };
   locale: 'xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -231,7 +260,77 @@ export interface UserAuthOperations {
  */
 export interface RichText {
   id: string;
-  lexical?: LexicalRichText<LexicalNodes_3DC54BD0> | null;
+  lexical?: LexicalRichText<LexicalNodes_BEFF7149> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  name?: string | null;
+  relation?: (string | null) | LocalizedPost;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-posts".
+ */
+export interface LocalizedPost {
+  id: string;
+  title?: string | null;
+  description?: string | null;
+  localizedDescription?: string | null;
+  localizedCheckbox?: boolean | null;
+  children?: (string | LocalizedPost)[] | null;
+  group?: {
+    children?: string | null;
+  };
+  unique?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -244,6 +343,14 @@ export interface BlocksField {
   title?: string | null;
   tabContent?: BlockInsideTab[] | null;
   content?: BlockInsideBlock[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -305,6 +412,14 @@ export interface NestedArray {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -321,24 +436,6 @@ export interface SomeBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'someBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localized-posts".
- */
-export interface LocalizedPost {
-  id: string;
-  title?: string | null;
-  description?: string | null;
-  localizedDescription?: string | null;
-  localizedCheckbox?: boolean | null;
-  children?: (string | LocalizedPost)[] | null;
-  group?: {
-    children?: string | null;
-  };
-  unique?: string | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -366,6 +463,14 @@ export interface NestedFieldTable {
       }[]
     | null;
   blocks?: Block[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -408,6 +513,14 @@ export interface Content {
 export interface LocalizedDraft {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -420,6 +533,14 @@ export interface LocalizedDateField {
   id: string;
   localizedDate?: string | null;
   date?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -492,6 +613,14 @@ export interface AllFieldsLocalized {
     };
   };
   selfRelation?: (string | null) | AllFieldsLocalized;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -523,33 +652,6 @@ export interface NestedBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  name?: string | null;
-  relation?: (string | null) | LocalizedPost;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "no-localized-fields".
  */
 export interface NoLocalizedField {
@@ -560,6 +662,14 @@ export interface NoLocalizedField {
       text?: string | null;
     };
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -573,9 +683,23 @@ export interface ArrayField {
   items?:
     | {
         text?: string | null;
+        nestedItems?:
+          | {
+              text?: string | null;
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -602,6 +726,14 @@ export interface LocalizedRequired {
       nestedText?: string | null;
     };
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -676,6 +808,14 @@ export interface WithLocalizedRelationship {
           }
       )[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -686,6 +826,14 @@ export interface WithLocalizedRelationship {
 export interface CannotCreateDefaultLocale {
   id: string;
   name?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -724,6 +872,14 @@ export interface RelationshipLocalized {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -734,6 +890,14 @@ export interface RelationshipLocalized {
 export interface LocaleRestricted {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -757,6 +921,14 @@ export interface Nested {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -803,6 +975,14 @@ export interface Group {
       | null;
     blocks?: First[] | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -846,6 +1026,14 @@ export interface Tab {
       | null;
     blocks?: First[] | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -857,6 +1045,14 @@ export interface LocalizedSort {
   id: string;
   title?: string | null;
   date?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -867,6 +1063,14 @@ export interface LocalizedSort {
 export interface BlocksSameName {
   id: string;
   blocks?: (BlockFirst | BlockSecond)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -909,6 +1113,14 @@ export interface LocalizedWithinLocalized {
   myGroup?: {
     shouldNotBeLocalized?: string | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -938,8 +1150,111 @@ export interface ArrayWithFallbackField {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-access".
+ */
+export interface PublicationAccess {
+  id: string;
+  title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-field-access".
+ */
+export interface PublicationFieldAccess {
+  id: string;
+  title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-before-operation".
+ */
+export interface PublicationBeforeOperation {
+  id: string;
+  title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-async-field-hook".
+ */
+export interface PublicationAsyncFieldHook {
+  id: string;
+  title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-hook".
+ */
+export interface PublicationHook {
+  id: string;
+  title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1056,6 +1371,26 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'array-with-fallback-fields';
         value: string | ArrayWithFallbackField;
+      } | null)
+    | ({
+        relationTo: 'publication-access';
+        value: string | PublicationAccess;
+      } | null)
+    | ({
+        relationTo: 'publication-field-access';
+        value: string | PublicationFieldAccess;
+      } | null)
+    | ({
+        relationTo: 'publication-before-operation';
+        value: string | PublicationBeforeOperation;
+      } | null)
+    | ({
+        relationTo: 'publication-async-field-hook';
+        value: string | PublicationAsyncFieldHook;
+      } | null)
+    | ({
+        relationTo: 'publication-hook';
+        value: string | PublicationHook;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1105,6 +1440,8 @@ export interface PayloadMigration {
  */
 export interface RichTextSelect<T extends boolean = true> {
   lexical?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1157,6 +1494,8 @@ export interface BlocksFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1193,6 +1532,8 @@ export interface NestedArraysSelect<T extends boolean = true> {
         localizedRelation?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1240,6 +1581,8 @@ export interface NestedFieldTablesSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1249,6 +1592,8 @@ export interface NestedFieldTablesSelect<T extends boolean = true> {
  */
 export interface LocalizedDraftsSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1260,6 +1605,8 @@ export interface LocalizedDraftsSelect<T extends boolean = true> {
 export interface LocalizedDateFieldsSelect<T extends boolean = true> {
   localizedDate?: T;
   date?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1361,6 +1708,8 @@ export interface AllFieldsLocalizedSelect<T extends boolean = true> {
             };
       };
   selfRelation?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1372,6 +1721,8 @@ export interface AllFieldsLocalizedSelect<T extends boolean = true> {
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
   relation?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1379,6 +1730,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1405,6 +1757,8 @@ export interface LocalizedPostsSelect<T extends boolean = true> {
         children?: T;
       };
   unique?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1423,6 +1777,8 @@ export interface NoLocalizedFieldsSelect<T extends boolean = true> {
               text?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1436,8 +1792,16 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
     | T
     | {
         text?: T;
+        nestedItems?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1508,6 +1872,8 @@ export interface LocalizedRequiredSelect<T extends boolean = true> {
               nestedText?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1520,6 +1886,8 @@ export interface WithLocalizedRelationshipSelect<T extends boolean = true> {
   localizedRelationHasManyField?: T;
   localizedRelationMultiRelationTo?: T;
   localizedRelationMultiRelationToHasMany?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1538,6 +1906,8 @@ export interface RelationshipLocalizedSelect<T extends boolean = true> {
         nestedRelation?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1547,6 +1917,8 @@ export interface RelationshipLocalizedSelect<T extends boolean = true> {
  */
 export interface CannotCreateDefaultLocaleSelect<T extends boolean = true> {
   name?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1556,6 +1928,8 @@ export interface CannotCreateDefaultLocaleSelect<T extends boolean = true> {
  */
 export interface LocaleRestrictedSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1595,6 +1969,8 @@ export interface NestedSelect<T extends boolean = true> {
         text?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1639,6 +2015,8 @@ export interface GroupsSelect<T extends boolean = true> {
                   };
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1689,6 +2067,8 @@ export interface TabsSelect<T extends boolean = true> {
                   };
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1699,6 +2079,8 @@ export interface TabsSelect<T extends boolean = true> {
 export interface LocalizedSortSelect<T extends boolean = true> {
   title?: T;
   date?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1725,6 +2107,8 @@ export interface BlocksSameNameSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1760,6 +2144,8 @@ export interface LocalizedWithinLocalizedSelect<T extends boolean = true> {
     | {
         shouldNotBeLocalized?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1780,8 +2166,70 @@ export interface ArrayWithFallbackFieldsSelect<T extends boolean = true> {
         text?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-access_select".
+ */
+export interface PublicationAccessSelect<T extends boolean = true> {
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-field-access_select".
+ */
+export interface PublicationFieldAccessSelect<T extends boolean = true> {
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-before-operation_select".
+ */
+export interface PublicationBeforeOperationSelect<T extends boolean = true> {
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-async-field-hook_select".
+ */
+export interface PublicationAsyncFieldHookSelect<T extends boolean = true> {
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-hook_select".
+ */
+export interface PublicationHookSelect<T extends boolean = true> {
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1825,6 +2273,26 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-status-shared-global".
+ */
+export interface LocalizedStatusSharedGlobal {
+  id: string;
+  localizedText?: string | null;
+  sharedText?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-array".
  */
 export interface GlobalArray {
@@ -1835,6 +2303,14 @@ export interface GlobalArray {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1845,6 +2321,14 @@ export interface GlobalArray {
 export interface GlobalText {
   id: string;
   text?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1855,9 +2339,126 @@ export interface GlobalText {
 export interface GlobalDraft {
   id: string;
   text?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-access-global".
+ */
+export interface PublicationAccessGlobal {
+  id: string;
+  title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-before-operation-global".
+ */
+export interface PublicationBeforeOperationGlobal {
+  id: string;
+  title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-sanitize-global".
+ */
+export interface PublicationSanitizeGlobal {
+  id: string;
+  title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-field-access-global".
+ */
+export interface PublicationFieldAccessGlobal {
+  id: string;
+  title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-hook-global".
+ */
+export interface PublicationHookGlobal {
+  id: string;
+  title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-status-shared-global_select".
+ */
+export interface LocalizedStatusSharedGlobalSelect<T extends boolean = true> {
+  localizedText?: T;
+  sharedText?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1870,6 +2471,8 @@ export interface GlobalArraySelect<T extends boolean = true> {
         text?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1880,6 +2483,8 @@ export interface GlobalArraySelect<T extends boolean = true> {
  */
 export interface GlobalTextSelect<T extends boolean = true> {
   text?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1890,9 +2495,76 @@ export interface GlobalTextSelect<T extends boolean = true> {
  */
 export interface GlobalDraftsSelect<T extends boolean = true> {
   text?: T;
+  createdBy?: T;
+  updatedBy?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-access-global_select".
+ */
+export interface PublicationAccessGlobalSelect<T extends boolean = true> {
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-before-operation-global_select".
+ */
+export interface PublicationBeforeOperationGlobalSelect<T extends boolean = true> {
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-sanitize-global_select".
+ */
+export interface PublicationSanitizeGlobalSelect<T extends boolean = true> {
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-field-access-global_select".
+ */
+export interface PublicationFieldAccessGlobalSelect<T extends boolean = true> {
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-hook-global_select".
+ */
+export interface PublicationHookGlobalSelect<T extends boolean = true> {
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
   globalType?: T;
 }
 /**
@@ -1904,6 +2576,98 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'richText'
+      | 'blocks-fields'
+      | 'nested-arrays'
+      | 'nested-field-tables'
+      | 'localized-drafts'
+      | 'localized-date-fields'
+      | 'all-fields-localized'
+      | 'users'
+      | 'localized-posts'
+      | 'no-localized-fields'
+      | 'array-fields'
+      | 'localized-required'
+      | 'with-localized-relationship'
+      | 'relationship-localized'
+      | 'cannot-create-default-locale'
+      | 'locale-restricted'
+      | 'nested'
+      | 'groups'
+      | 'tabs'
+      | 'localized-sort'
+      | 'blocks-same-name'
+      | 'localized-within-localized'
+      | 'array-with-fallback-fields'
+      | 'publication-access'
+      | 'publication-field-access'
+      | 'publication-before-operation'
+      | 'publication-async-field-hook'
+      | 'publication-hook';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'richText'
+          | 'blocks-fields'
+          | 'nested-arrays'
+          | 'nested-field-tables'
+          | 'localized-drafts'
+          | 'localized-date-fields'
+          | 'all-fields-localized'
+          | 'users'
+          | 'localized-posts'
+          | 'no-localized-fields'
+          | 'array-fields'
+          | 'localized-required'
+          | 'with-localized-relationship'
+          | 'relationship-localized'
+          | 'cannot-create-default-locale'
+          | 'locale-restricted'
+          | 'nested'
+          | 'groups'
+          | 'tabs'
+          | 'localized-sort'
+          | 'blocks-same-name'
+          | 'localized-within-localized'
+          | 'array-with-fallback-fields'
+          | 'publication-access'
+          | 'publication-field-access'
+          | 'publication-before-operation'
+          | 'publication-async-field-hook'
+          | 'publication-hook'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

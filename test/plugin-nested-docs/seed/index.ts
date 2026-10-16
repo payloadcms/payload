@@ -10,6 +10,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         email: 'demo@payloadcms.com',
         password: 'demo',
       },
+      overrideAccess: true,
     })
 
     const { id: parentID } = await payload.create({
@@ -19,6 +20,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         title: 'Parent page',
         _status: 'published',
       },
+      overrideAccess: true,
     })
 
     const { id: childID } = await payload.create({
@@ -29,6 +31,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         title: 'Child page',
         _status: 'published',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -39,6 +42,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         title: 'Grandchild page',
         _status: 'published',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -48,6 +52,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         title: 'Sister page',
         _status: 'published',
       },
+      overrideAccess: true,
     })
     return true
   } catch (err) {

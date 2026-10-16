@@ -2,6 +2,7 @@
 import type { EditorState, SerializedEditorState } from 'lexical'
 import type { FallbackProps } from 'react-error-boundary'
 
+import { getTranslation } from '@payloadcms/translations'
 import {
   BulkUploadProvider,
   FieldDescription,
@@ -14,6 +15,7 @@ import {
   useEffectEvent,
   useField,
   useLocale,
+  useTranslation,
 } from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
 import { dequal } from 'dequal/lite'
@@ -55,6 +57,8 @@ const RichTextComponent: React.FC<
     schemaPath,
     validate, // Users can pass in client side validation if they WANT to, but it's not required anymore
   } = props
+
+  const { i18n } = useTranslation()
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
@@ -193,16 +197,24 @@ const RichTextComponent: React.FC<
 
   return (
     <div
+      aria-label={getTranslation(label || '', i18n)}
       className={classes}
       data-field-path={path}
       data-field-schemapath={schemaPath}
       data-lexical-view={editorConfig?.view}
       key={pathWithEditDepth}
+      role="group"
       style={styles}
     >
       <div className={`${baseClass}__label-row`}>
         {Label || (
-          <FieldLabel label={label} localized={localized} path={path} required={required} />
+          <FieldLabel
+            hasRequiredAccessibleState
+            label={label}
+            localized={localized}
+            path={path}
+            required={required}
+          />
         )}
         {!isControlledByParent && <ViewSelector />}
       </div>

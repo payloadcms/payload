@@ -62,10 +62,6 @@ export class RelationshipNode extends RelationshipServerNode {
   }
 
   static override importJSON(serializedNode: SerializedRelationshipNode): RelationshipNode {
-    if (serializedNode.version === 1 && (serializedNode?.value as unknown as { id: string })?.id) {
-      serializedNode.value = (serializedNode.value as unknown as { id: string }).id
-    }
-
     const importedData: RelationshipData = {
       relationTo: serializedNode.relationTo,
       value: serializedNode.value,

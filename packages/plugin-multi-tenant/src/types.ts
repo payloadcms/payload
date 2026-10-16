@@ -11,6 +11,8 @@ import type {
   User,
 } from 'payload'
 
+export type TenantValue = (number | string)[] | (number | string)
+
 export type MultiTenantPluginConfig = {
   /**
    * After a tenant is deleted, the plugin will attempt to clean up related documents
@@ -30,7 +32,7 @@ export type MultiTenantPluginConfig = {
        *
        * The function receives:
        *  - accessResult: the original result from the access control function
-       *  - accessKey: 'read', 'create', 'update', 'delete', 'readVersions', or 'unlock'
+       *  - accessKey: 'read', 'create', 'update', 'delete', 'readVersions', 'unlock', or 'validate'
        *  - ...restOfAccessArgs: the original arguments passed to the access control function
        */
       accessResultOverride?: CollectionAccessResultOverride
@@ -203,7 +205,7 @@ export type MultiTenantPluginConfig = {
    *
    * The function receives:
    *  - accessResult: the original result from the access control function
-   *  - accessKey: 'read', 'create', 'update', 'delete', 'readVersions', or 'unlock'
+   *  - accessKey: 'read', 'create', 'update', 'delete', 'readVersions', 'unlock', or 'validate'
    *  - ...restOfAccessArgs: the original arguments passed to the access control function
    */
   usersAccessResultOverride?: CollectionAccessResultOverride
@@ -268,7 +270,7 @@ type AllAccessKeysT<T extends readonly string[]> = T[number] extends keyof Omit<
   : never
 
 export type AllAccessKeys = AllAccessKeysT<
-  ['create', 'read', 'update', 'delete', 'readVersions', 'unlock']
+  ['create', 'read', 'update', 'delete', 'readVersions', 'unlock', 'validate']
 >
 
 export type CollectionAccessResultOverride = ({

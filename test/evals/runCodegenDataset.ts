@@ -6,6 +6,7 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import ts from 'typescript'
 import { expect as vitestExpect } from 'vitest'
+import { getPayload as getPayloadInstance } from 'payload'
 
 import type { MCPEvalDatabase } from './mcpDatabase.js'
 import type {
@@ -30,6 +31,7 @@ import { findReusableResult, recordRunResult, shouldRerun } from './runResults.j
 import { scoreConfigChange, scoreEvidence } from './scorer/index.js'
 import { accuracySummary, writeFailedCodegenAssertion } from './utils/index.js'
 import { validateConfigTypes } from './validate.js'
+import { runInit } from '../runInit.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const fixturesDir = path.join(__dirname, 'fixtures')
@@ -466,12 +468,15 @@ function createLazyPayload({
         }
 
         try {
-          const { initPayloadInt } = await import('../__helpers/shared/initPayloadInt.js')
-          payload = (
-            await initPayloadInt(configDir, suiteName, undefined, configFile, {
-              payloadKey: configFile,
-            })
-          ).payload
+          await runInit(suiteName, false, true, configFile)
+          const { default: configPromise } = (await import(pathToFileURL(configFilePath).href)) as {
+            default: Promise<import('payload').SanitizedConfig>
+          }
+          payload = await getPayloadInstance({
+            config: await configPromise,
+            cron: true,
+            key: configFile,
+          })
           return payload
         } finally {
           if (restoreMCPEnvironment) {

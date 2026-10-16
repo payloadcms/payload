@@ -22,7 +22,6 @@ const navItemStyle = (hovered: boolean): React.CSSProperties => ({
   gap: '8px',
   padding: '6px 10px',
   textDecoration: 'none',
-  transition: 'background 0.15s',
 })
 
 function InternalNavItem({
@@ -98,7 +97,7 @@ export const EvalDashboardNavLink: PayloadClientReactComponent<
       <InternalNavItem adminRoute={adminRoute} href="/eval-dashboard" icon={<ListIcon size={20} />}>
         Eval Results
       </InternalNavItem>
-      <ExternalNavItem href="/api/eval-report/report.html" icon={<FlaskIcon size={20} />}>
+      <ExternalNavItem href="/api/eval-report/index.html" icon={<FlaskIcon size={20} />}>
         Vitest Report
       </ExternalNavItem>
     </div>

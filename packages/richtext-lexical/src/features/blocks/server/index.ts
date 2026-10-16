@@ -35,10 +35,10 @@ export type BlocksFeatureProps = {
 }
 
 export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatureProps>({
-  feature: async ({ config: _config, isRoot, parentIsLocalized, props: _props }) => {
+  feature: ({ config: _config, isRoot, parentIsLocalized, props: _props }) => {
     const validRelationships = _config.collections.map((c) => c.slug) || []
 
-    const sanitized = await sanitizeFields({
+    const sanitized = sanitizeFields({
       config: _config as unknown as Config,
       fields: [
         {

@@ -1,0 +1,31 @@
+@layer payload-default {
+  .upload-dropzone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacer-2);
+    width: 100%;
+  }
+
+  .upload-dropzone-content__buttons {
+    display: flex;
+    gap: var(--spacer-2);
+    align-items: center;
+  }
+
+  .upload-dropzone-content__or-text {
+    color: var(--color-text-tertiary);
+    text-transform: lowercase;
+  }
+
+  .upload-dropzone-content__drag-text {
+    flex-shrink: 0;
+    margin: 0;
+    text-transform: lowercase;
+    color: var(--color-text-tertiary);
+  }
+
+  .upload-dropzone-content__hidden-input {
+    display: none;
+  }
+}

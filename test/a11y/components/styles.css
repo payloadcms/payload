@@ -97,7 +97,6 @@
       inset: -4px;
       border-radius: 6px;
       outline: 0px solid transparent;
-      transition: outline 0.2s;
     }
 
     &:focus {
@@ -125,7 +124,6 @@
       inset: -4px;
       border-radius: 6px;
       border: 0px solid transparent;
-      transition: border 0.2s;
     }
 
     &:focus {
@@ -154,7 +152,6 @@
       inset: -4px;
       border-radius: 6px;
       box-shadow: 0 0 0 0 rgba(153, 0, 204, 0);
-      transition: box-shadow 0.2s;
     }
 
     &:focus {

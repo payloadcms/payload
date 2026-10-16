@@ -50,6 +50,7 @@ export const createVariantOptionsCollection: (props: Props) => CollectionConfig 
       group: false,
       useAsTitle: 'label',
     },
+    authorship: false,
     fields,
     labels: {
       plural: ({ t }) =>

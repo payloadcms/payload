@@ -29,22 +29,10 @@ export class AutoLinkNode extends LinkNode {
     return null
   }
 
-  static override importJSON(serializedNode: SerializedAutoLinkNode): AutoLinkNode {
-    const node = $createAutoLinkNode({}).updateFromJSON(serializedNode)
-
-    /**
-     * @todo remove in 4.0
-     */
-    if (
-      serializedNode.version === 1 &&
-      typeof serializedNode.fields?.doc?.value === 'object' &&
-      serializedNode.fields?.doc?.value?.id
-    ) {
-      serializedNode.fields.doc.value = serializedNode.fields.doc.value.id
-      serializedNode.version = 2
-    }
-
-    return node
+  static override importJSON(
+    serializedNode: Record<string, unknown> & SerializedAutoLinkNode,
+  ): AutoLinkNode {
+    return $createAutoLinkNode({}).updateFromJSON(serializedNode)
   }
 
   // @ts-expect-error
@@ -57,7 +45,7 @@ export class AutoLinkNode extends LinkNode {
       fields: serialized.fields,
       format: serialized.format,
       indent: serialized.indent,
-      version: 2,
+      version: serialized.version,
     }
   }
 

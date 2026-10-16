@@ -1,0 +1,3 @@
+src/app/_payload/importMap.js
+src/payload-types.ts
+src/routeTree.gen.ts

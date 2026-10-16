@@ -19,11 +19,6 @@
     font-size: var(--text-body);
     color: var(--color-text-default-primary);
 
-    /* Transitions */
-    transition-property: border, box-shadow, background-color;
-    transition-duration: 100ms, 100ms, 500ms;
-    transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
-
     &:focus-within {
       border-color: var(--field-color-border-focus);
     }

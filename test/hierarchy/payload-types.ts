@@ -71,6 +71,7 @@ export interface Config {
     departments: Department;
     divisions: Division;
     folders: Folder;
+    'folder-tag-documents': FolderTagDocument;
     organizations: Organization;
     pages: Page;
     products: Product;
@@ -87,6 +88,7 @@ export interface Config {
     departments: DepartmentsSelect<false> | DepartmentsSelect<true>;
     divisions: DivisionsSelect<false> | DivisionsSelect<true>;
     folders: FoldersSelect<false> | FoldersSelect<true>;
+    'folder-tag-documents': FolderTagDocumentsSelect<false> | FolderTagDocumentsSelect<true>;
     organizations: OrganizationsSelect<false> | OrganizationsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
@@ -105,7 +107,10 @@ export interface Config {
   globalsSelect: {};
   locale: 'en' | 'es' | 'de';
   widgets: {
+    welcome: WelcomeWidget;
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -139,10 +144,52 @@ export interface Category {
   id: string;
   parent?: (string | null) | Category;
   name: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -152,6 +199,14 @@ export interface Department {
   id: string;
   parentDept?: (string | null) | Department;
   deptName: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _breadcrumbSlug?: string | null;
@@ -165,6 +220,14 @@ export interface Division {
   id: string;
   parent?: (string | null) | Division;
   title: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _h_slugPath?: string | null;
@@ -178,11 +241,39 @@ export interface Folder {
   id: string;
   parentFolder?: (string | null) | Folder;
   name: string;
+  isLocked?: boolean | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
-  allowedTypes?: ('organizations' | 'products')[] | null;
+  allowedTypes?: ('folder-tag-documents' | 'organizations' | 'products')[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folder-tag-documents".
+ */
+export interface FolderTagDocument {
+  id: string;
+  title: string;
+  parentFolder?: (string | Folder)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -194,6 +285,15 @@ export interface Organization {
   title: string;
   content?: string | null;
   parentFolder?: (string | null) | Folder;
+  restrictedFolder?: (string | null) | Folder;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -209,6 +309,14 @@ export interface Page {
   parent?: (string | null) | Page;
   title: string;
   slug?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _h_slugPath?: string | null;
@@ -224,6 +332,14 @@ export interface Product {
   name: string;
   description?: string | null;
   parentFolder?: (string | null) | Folder;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -238,6 +354,14 @@ export interface Region {
   id: string;
   parent?: (string | null) | Region;
   name: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _h_slugPath?: string | null;
@@ -262,31 +386,6 @@ export interface PayloadKv {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -307,6 +406,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'folders';
         value: string | Folder;
+      } | null)
+    | ({
+        relationTo: 'folder-tag-documents';
+        value: string | FolderTagDocument;
       } | null)
     | ({
         relationTo: 'organizations';
@@ -377,6 +480,8 @@ export interface PayloadMigration {
 export interface CategoriesSelect<T extends boolean = true> {
   parent?: T;
   name?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _h_slugPath?: T;
@@ -389,6 +494,8 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface DepartmentsSelect<T extends boolean = true> {
   parentDept?: T;
   deptName?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _breadcrumbSlug?: T;
@@ -401,6 +508,8 @@ export interface DepartmentsSelect<T extends boolean = true> {
 export interface DivisionsSelect<T extends boolean = true> {
   parent?: T;
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _h_slugPath?: T;
@@ -413,11 +522,26 @@ export interface DivisionsSelect<T extends boolean = true> {
 export interface FoldersSelect<T extends boolean = true> {
   parentFolder?: T;
   name?: T;
+  isLocked?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _h_slugPath?: T;
   _h_titlePath?: T;
   allowedTypes?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folder-tag-documents_select".
+ */
+export interface FolderTagDocumentsSelect<T extends boolean = true> {
+  title?: T;
+  parentFolder?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -428,6 +552,9 @@ export interface OrganizationsSelect<T extends boolean = true> {
   title?: T;
   content?: T;
   parentFolder?: T;
+  restrictedFolder?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -442,6 +569,8 @@ export interface PagesSelect<T extends boolean = true> {
   parent?: T;
   title?: T;
   slug?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _h_slugPath?: T;
@@ -456,6 +585,8 @@ export interface ProductsSelect<T extends boolean = true> {
   name?: T;
   description?: T;
   parentFolder?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -469,6 +600,8 @@ export interface ProductsSelect<T extends boolean = true> {
 export interface RegionsSelect<T extends boolean = true> {
   parent?: T;
   name?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _h_slugPath?: T;
@@ -487,6 +620,8 @@ export interface PayloadKvSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -494,6 +629,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -538,6 +674,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "welcome_widget".
+ */
+export interface WelcomeWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -545,6 +691,62 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'categories'
+      | 'departments'
+      | 'divisions'
+      | 'folders'
+      | 'folder-tag-documents'
+      | 'organizations'
+      | 'pages'
+      | 'products'
+      | 'regions'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'categories'
+          | 'departments'
+          | 'divisions'
+          | 'folders'
+          | 'folder-tag-documents'
+          | 'organizations'
+          | 'pages'
+          | 'products'
+          | 'regions'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

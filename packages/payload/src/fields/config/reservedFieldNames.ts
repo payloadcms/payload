@@ -20,7 +20,7 @@ export const reservedVerifyFieldNames = [
  * Reserved field names for auth collections with useApiKey: true
  */
 export const reservedAPIKeyFieldNames = [
-  /* 'enableAPIKey', 'apiKeyIndex', 'apiKey' */
+  /* 'apiKeyIndex', 'apiKeyLast4', 'apiKey' */
 ]
 
 /**
@@ -37,7 +37,7 @@ export const reservedBaseUploadFieldNames = [
     'url',
     'focalX',
     'focalY',
-    'sizes', */
+    'variants', */
 ]
 
 /**

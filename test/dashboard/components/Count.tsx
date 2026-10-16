@@ -22,6 +22,7 @@ export default async function Count({ req, widgetData }: WidgetServerProps<Count
   try {
     const result = await payload.count({
       collection: selectedCollection,
+      overrideAccess: true,
     })
     count = result.totalDocs
   } catch (err) {

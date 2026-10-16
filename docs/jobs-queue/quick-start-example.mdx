@@ -81,6 +81,7 @@ This defines a reusable task with a unique `slug`, an `inputSchema` that validat
               userEmail: doc.email,
               userName: doc.name,
             },
+            overrideAccess: true,
           })
         }
       },
@@ -110,7 +111,7 @@ export default buildConfig({
 })
 ```
 
-The [`autoRun`](/docs/jobs-queue/queues#cron-jobs) configuration automatically processes queued jobs on a schedule using cron syntax. In this example, Payload checks for pending jobs every 5 minutes and executes them. Alternatively, you can [manually trigger job processing](/docs/jobs-queue/queues#local-api) with `payload.jobs.run()` or use the [API endpoint](/docs/jobs-queue/queues#endpoint) for serverless platforms.
+The [`autoRun`](/docs/jobs-queue/queues#autorun-alternative-for-dedicated-servers) configuration automatically processes queued jobs on a schedule using cron syntax. In this example, Payload checks for pending jobs every 5 minutes and executes them. Alternatively, you can [manually trigger job processing](/docs/jobs-queue/queues#local-api) with `payload.jobs.run()` or use the [API endpoint](/docs/jobs-queue/queues#endpoint) for serverless platforms.
 
 That's it! Now when users sign up, a job is queued and will be processed within 5 minutes without blocking the API response.
 
@@ -162,6 +163,7 @@ export default buildConfig({
 
           const analytics = await req.payload.find({
             collection: 'analytics',
+            overrideAccess: true,
             where: {
               createdAt: {
                 greater_than_equal: yesterday.toISOString(),
@@ -172,6 +174,7 @@ export default buildConfig({
           // Save the report
           const report = await req.payload.create({
             collection: 'reports',
+            overrideAccess: true,
             data: {
               date: new Date().toISOString(),
               totalEvents: analytics.totalDocs,
@@ -290,6 +293,7 @@ export default buildConfig({
 await payload.jobs.queue({
   task: 'publishPost',
   input: { postId: '123' },
+  overrideAccess: true,
   waitUntil: new Date('2024-12-25T15:00:00Z'), // Runs once at this time
 })
 ```

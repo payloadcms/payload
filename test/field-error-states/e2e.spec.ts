@@ -9,20 +9,16 @@ import type { Config } from './payload-types.js'
 
 import { addArrayRow, removeArrayRow } from '../__helpers/e2e/fields/array/index.js'
 import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
-import {
-  ensureCompilationIsDone,
-  getRoutes,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-  waitForFormReady,
-} from '../__helpers/e2e/helpers.js'
+import { getRoutes, saveDocAndAssert, waitForFormReady } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { collectionSlugs } from './shared.js'
 
-const { beforeAll, describe, beforeEach } = test
+const { beforeAll, beforeEach, describe } = test
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -34,6 +30,7 @@ describe('Field Error States', () => {
   let prevValue: AdminUrlUtil
   let prevValueRelation: AdminUrlUtil
   let errorFieldsURL: AdminUrlUtil
+  let tabErrorReset: AdminUrlUtil
   let adminRoute: string
 
   beforeAll(async ({ browser }, testInfo) => {
@@ -48,24 +45,20 @@ describe('Field Error States', () => {
     prevValue = new AdminUrlUtil(serverURL, collectionSlugs.prevValue!)
     prevValueRelation = new AdminUrlUtil(serverURL, collectionSlugs.prevValueRelation!)
     errorFieldsURL = new AdminUrlUtil(serverURL, collectionSlugs.errorFields!)
+    tabErrorReset = new AdminUrlUtil(serverURL, collectionSlugs.tabErrorReset!)
 
     const {
       routes: { admin: adminRouteFromConfig },
     } = getRoutes({})
     adminRoute = adminRouteFromConfig
-
-    await ensureCompilationIsDone({ browser, serverURL })
   })
 
   beforeEach(async ({ page }) => {
-    initPageConsoleErrorCatch(page)
+    await initPage({ page, serverURL })
 
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fielderrorstates',
     })
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   test('Remove row should remove error states from parent fields', async ({ page }) => {
@@ -333,7 +326,7 @@ describe('Field Error States', () => {
       await expect(
         page.locator('#field-arrayWithMinRows .banner.banner--type-danger'),
       ).toBeVisible()
-      await expect(page.locator('#field-arrayWithMinRows .field-error')).toHaveCount(0)
+      await expect(page.locator('.field-error')).toHaveCount(0)
     })
 
     test('blocks error pill should show for minRows errors before child edits', async ({
@@ -344,9 +337,9 @@ describe('Field Error States', () => {
       await prefillBaseRequiredFields(page)
 
       await addBlock({
-        page,
         blockToSelect: 'Min Rows Block',
         fieldName: 'blocksWithMinRows',
+        page,
       })
       await saveDocAndAssert(page, '#action-save', 'error')
 
@@ -358,7 +351,47 @@ describe('Field Error States', () => {
       await expect(
         page.locator('#field-blocksWithMinRows .banner.banner--type-danger'),
       ).toBeVisible()
-      await expect(page.locator('#field-blocksWithMinRows .field-error')).toHaveCount(0)
+      await expect(page.locator('.field-error')).toHaveCount(0)
+    })
+  })
+
+  describe('tab error badge reset', () => {
+    test('should clear tab error badge after fixing a child field and re-saving', async ({
+      page,
+    }) => {
+      // Create a valid document so we land on the edit view (no redirect on subsequent saves).
+      await page.goto(tabErrorReset.create)
+      await waitForFormReady(page)
+      await page.locator('#field-title').fill('Reset badge')
+      await page.locator('#field-errorTab__requiredInTab').fill('valid')
+      await saveDocAndAssert(page, '#action-save')
+
+      // Clear the required child field and save -> the tab shows an error badge.
+      await page.locator('#field-errorTab__requiredInTab').fill('')
+      await saveDocAndAssert(page, '#action-save', 'error')
+
+      const tabErrorBadge = page.locator('.tabs-field__tab-button--active .error-pill')
+      await expect(tabErrorBadge).toBeVisible()
+      await expect(tabErrorBadge).toContainText('1')
+
+      // Fix the field and save in the same tick. This coalesces the throttled error
+      // recompute with the successful-save state transition (submitted -> false), which
+      // previously left the tab badge stranded because the recompute was gated on the
+      // submitted flag still being true.
+      await page.evaluate(() => {
+        const input = document.querySelector<HTMLInputElement>('#field-errorTab__requiredInTab')!
+        const nativeSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype,
+          'value',
+        )!.set!
+        nativeSetter.call(input, 'fixed')
+        input.dispatchEvent(new Event('input', { bubbles: true }))
+        document.querySelector<HTMLButtonElement>('#action-save')!.click()
+      })
+
+      // The save succeeds and the field-level error clears, so the tab badge must clear too.
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      await expect(tabErrorBadge).toBeHidden()
     })
   })
 })

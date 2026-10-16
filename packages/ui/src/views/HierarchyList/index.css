@@ -45,13 +45,14 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--spacer-3);
+    gap: var(--spacer-2-5);
   }
 
   .hierarchy-list__no-results > * {
     margin: 0;
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .hierarchy-list {
       margin-top: var(--spacer-1);

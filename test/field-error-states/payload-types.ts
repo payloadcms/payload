@@ -62,21 +62,21 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_1486C0E2".
+ * via the `definition` "LexicalNodes_DFDE7E69".
  */
-export type LexicalNodes_1486C0E2 =
+export type LexicalNodes_DFDE7E69 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_1486C0E2>
+  | SerializedParagraphNode<LexicalNodes_DFDE7E69>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_1486C0E2>
+  | SerializedHeadingNode<LexicalNodes_DFDE7E69>
   | SerializedUploadNode<'uploads'>
-  | SerializedQuoteNode<LexicalNodes_1486C0E2>
-  | SerializedListNode<LexicalNodes_1486C0E2>
-  | SerializedListItemNode<LexicalNodes_1486C0E2>
-  | SerializedAutoLinkNode<LexicalNodes_1486C0E2, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_1486C0E2, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_DFDE7E69>
+  | SerializedListNode<LexicalNodes_DFDE7E69>
+  | SerializedListItemNode<LexicalNodes_DFDE7E69>
+  | SerializedAutoLinkNode<LexicalNodes_DFDE7E69, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_DFDE7E69, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'error-fields'
       | 'validate-drafts-on'
@@ -84,6 +84,7 @@ export type LexicalNodes_1486C0E2 =
       | 'validate-drafts-on-autosave'
       | 'prev-value'
       | 'prev-value-relation'
+      | 'tab-error-reset'
       | 'payload-kv'
       | 'users'
       | 'payload-locked-documents'
@@ -104,6 +105,7 @@ export interface Config {
     'validate-drafts-on-autosave': ValidateDraftsOnAutosave;
     'prev-value': PrevValue;
     'prev-value-relation': PrevValueRelation;
+    'tab-error-reset': TabErrorReset;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -119,6 +121,7 @@ export interface Config {
     'validate-drafts-on-autosave': ValidateDraftsOnAutosaveSelect<false> | ValidateDraftsOnAutosaveSelect<true>;
     'prev-value': PrevValueSelect<false> | PrevValueSelect<true>;
     'prev-value-relation': PrevValueRelationSelect<false> | PrevValueRelationSelect<true>;
+    'tab-error-reset': TabErrorResetSelect<false> | TabErrorResetSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -138,6 +141,8 @@ export interface Config {
   locale: null;
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -209,7 +214,7 @@ export interface ErrorField {
           point: [number, number];
           radio: 'mint' | 'dark_gray';
           relationship: string | User;
-          richtext: LexicalRichText<LexicalNodes_1486C0E2>;
+          richtext: LexicalRichText<LexicalNodes_DFDE7E69>;
           select: 'mint' | 'dark_gray';
           upload: string | Upload;
           text: string;
@@ -248,7 +253,7 @@ export interface ErrorField {
         point: [number, number];
         radio: 'mint' | 'dark_gray';
         relationship: string | User;
-        richtext: LexicalRichText<LexicalNodes_1486C0E2>;
+        richtext: LexicalRichText<LexicalNodes_DFDE7E69>;
         select: 'mint' | 'dark_gray';
         upload: string | Upload;
         text: string;
@@ -267,9 +272,24 @@ export interface ErrorField {
     id?: string | null;
   }[];
   layout?: Block1[] | null;
+  arrayWithMinRows?:
+    | {
+        name?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocksWithMinRows?: MinRowsBlock[] | null;
   group: {
     text: string;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -279,6 +299,14 @@ export interface ErrorField {
  */
 export interface User {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -286,6 +314,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -306,7 +335,15 @@ export interface Upload {
   id: string;
   text?: string | null;
   media?: (string | null) | Upload;
-  richText?: LexicalRichText<LexicalNodes_1486C0E2> | null;
+  richText?: LexicalRichText<LexicalNodes_DFDE7E69> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -354,7 +391,7 @@ export interface Block1 {
         point: [number, number];
         radio: 'mint' | 'dark_gray';
         relationship: string | User;
-        richtext: LexicalRichText<LexicalNodes_1486C0E2>;
+        richtext: LexicalRichText<LexicalNodes_DFDE7E69>;
         select: 'mint' | 'dark_gray';
         upload: string | Upload;
         text: string;
@@ -365,6 +402,16 @@ export interface Block1 {
   id?: string | null;
   blockName?: string | null;
   blockType: 'block1';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MinRowsBlock".
+ */
+export interface MinRowsBlock {
+  name?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'minRowsBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -381,6 +428,14 @@ export interface ValidateDraftsOn {
    * This field will fail validation if "Fail Validation" checkbox is checked. This simulates validation failures from business logic, network errors, or third-party validation.
    */
   validatedField?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -400,6 +455,14 @@ export interface ValidateDraftsOff {
    * This field will fail validation if "Fail Validation" checkbox is checked. This simulates validation failures from business logic, network errors, or third-party validation.
    */
   validatedField?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -419,6 +482,14 @@ export interface ValidateDraftsOnAutosave {
    * This field will fail validation if "Fail Validation" checkbox is checked. This simulates validation failures from business logic, network errors, or third-party validation.
    */
   validatedField?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -431,6 +502,14 @@ export interface PrevValue {
   id: string;
   title: string;
   description?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -441,6 +520,35 @@ export interface PrevValue {
 export interface PrevValueRelation {
   id: string;
   previousValueRelation?: (string | null) | PrevValue;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tab-error-reset".
+ */
+export interface TabErrorReset {
+  id: string;
+  title?: string | null;
+  errorTab: {
+    requiredInTab: string;
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -495,6 +603,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'prev-value-relation';
         value: string | PrevValueRelation;
+      } | null)
+    | ({
+        relationTo: 'tab-error-reset';
+        value: string | TabErrorReset;
       } | null)
     | ({
         relationTo: 'users';
@@ -672,11 +784,30 @@ export interface ErrorFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  arrayWithMinRows?:
+    | T
+    | {
+        name?: T;
+        id?: T;
+      };
+  blocksWithMinRows?:
+    | T
+    | {
+        minRowsBlock?:
+          | T
+          | {
+              name?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   group?:
     | T
     | {
         text?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -688,6 +819,8 @@ export interface UploadsSelect<T extends boolean = true> {
   text?: T;
   media?: T;
   richText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -708,6 +841,8 @@ export interface ValidateDraftsOnSelect<T extends boolean = true> {
   title?: T;
   failValidation?: T;
   validatedField?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -720,6 +855,8 @@ export interface ValidateDraftsOffSelect<T extends boolean = true> {
   title?: T;
   failValidation?: T;
   validatedField?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -732,6 +869,8 @@ export interface ValidateDraftsOnAutosaveSelect<T extends boolean = true> {
   title?: T;
   failValidation?: T;
   validatedField?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -743,6 +882,8 @@ export interface ValidateDraftsOnAutosaveSelect<T extends boolean = true> {
 export interface PrevValueSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -752,6 +893,24 @@ export interface PrevValueSelect<T extends boolean = true> {
  */
 export interface PrevValueRelationSelect<T extends boolean = true> {
   previousValueRelation?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tab-error-reset_select".
+ */
+export interface TabErrorResetSelect<T extends boolean = true> {
+  title?: T;
+  errorTab?:
+    | T
+    | {
+        requiredInTab?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -768,6 +927,8 @@ export interface PayloadKvSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -775,6 +936,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -826,6 +988,14 @@ export interface GlobalValidateDraftsOn {
   group: {
     title: string;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -840,6 +1010,8 @@ export interface GlobalValidateDraftsOnSelect<T extends boolean = true> {
     | {
         title?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -854,6 +1026,60 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'error-fields'
+      | 'uploads'
+      | 'validate-drafts-on'
+      | 'validate-drafts-off'
+      | 'validate-drafts-on-autosave'
+      | 'prev-value'
+      | 'prev-value-relation'
+      | 'tab-error-reset'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'error-fields'
+          | 'uploads'
+          | 'validate-drafts-on'
+          | 'validate-drafts-off'
+          | 'validate-drafts-on-autosave'
+          | 'prev-value'
+          | 'prev-value-relation'
+          | 'tab-error-reset'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

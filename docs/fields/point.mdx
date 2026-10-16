@@ -49,7 +49,7 @@ export const MyPointField: Field = {
 | **`admin`**        | Admin-specific configuration. [More details](./overview#admin-options).                                                                                                                                                                                                                                 |
 | **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                                                               |
 | **`jsonSchema`**   | Override field JSON Schema used for type generation and MCP validation                                                                                                                                                                                                                                  |
-| **`virtual`**      | Provide `true` to disable field in the database, or provide a string path to [link the field with a relationship](/docs/fields/relationship#linking-virtual-fields-with-relationships). See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges) |
+| **`virtual`**      | Provide `true` to disable field in the database, or provide a string path to [link the field with a relationship](/docs/fields/overview#string-path-virtual-fields). See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges) |
 
 _\* An asterisk denotes that a property is required._
 
@@ -90,6 +90,7 @@ const polygon: Point[] = [
 
 payload.find({
   collection: 'points',
+  overrideAccess: true,
   where: {
     point: {
       within: {
@@ -117,6 +118,7 @@ const polygon: Point[] = [
 
 payload.find({
   collection: 'points',
+  overrideAccess: true,
   where: {
     point: {
       intersects: {
@@ -137,9 +139,9 @@ payload.find({
 ```tsx
 import type React from 'react'
 import { PointField } from '@payloadcms/ui'
-import type { PointFieldServerComponent } from 'payload'
+import type { PointFieldServerProps } from 'payload'
 
-export const CustomPointFieldServer: PointFieldServerComponent = ({
+export const CustomPointFieldServer: React.FC<PointFieldServerProps> = ({
   clientField,
   path,
   schemaPath,
@@ -162,9 +164,11 @@ export const CustomPointFieldServer: PointFieldServerComponent = ({
 'use client'
 import React from 'react'
 import { PointField } from '@payloadcms/ui'
-import type { PointFieldClientComponent } from 'payload'
+import type { PointFieldClientProps } from 'payload'
 
-export const CustomPointFieldClient: PointFieldClientComponent = (props) => {
+export const CustomPointFieldClient: React.FC<PointFieldClientProps> = (
+  props,
+) => {
   return <PointField {...props} />
 }
 ```
@@ -176,12 +180,11 @@ export const CustomPointFieldClient: PointFieldClientComponent = (props) => {
 ```tsx
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { PointFieldLabelServerComponent } from 'payload'
+import type { PointFieldLabelServerProps } from 'payload'
 
-export const CustomPointFieldLabelServer: PointFieldLabelServerComponent = ({
-  clientField,
-  path,
-}) => {
+export const CustomPointFieldLabelServer: React.FC<
+  PointFieldLabelServerProps
+> = ({ clientField, path }) => {
   return (
     <FieldLabel
       label={clientField?.label || clientField?.name}
@@ -198,12 +201,11 @@ export const CustomPointFieldLabelServer: PointFieldLabelServerComponent = ({
 'use client'
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { PointFieldLabelClientComponent } from 'payload'
+import type { PointFieldLabelClientProps } from 'payload'
 
-export const CustomPointFieldLabelClient: PointFieldLabelClientComponent = ({
-  field,
-  path,
-}) => {
+export const CustomPointFieldLabelClient: React.FC<
+  PointFieldLabelClientProps
+> = ({ field, path }) => {
   return (
     <FieldLabel
       label={field?.label || field?.name}

@@ -37,21 +37,30 @@ export type FieldSelectProps = {
 }
 
 export const FieldSelect: React.FC<FieldSelectProps> = ({ fields, onChange, permissions }) => {
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const { dispatchFields, getFields } = useForm()
 
   const [options] = useState<FieldOption[]>(() =>
     reduceFieldOptions({
       fields: filterOutUploadFields(fields),
       formState: getFields(),
+      i18n,
       permissions,
     }),
   )
+  const selectLabel = t('fields:selectFieldsToEdit')
 
   return (
     <div className={baseClass}>
-      <FieldLabel label={t('fields:selectFieldsToEdit')} />
+      <FieldLabel label={selectLabel} />
       <ReactSelect
+        aria-label={selectLabel}
+        customProps={{
+          clearValueLabel: `${t('general:clear')} ${selectLabel}`,
+          removeValueLabel: t('general:remove'),
+        }}
+        formatOptionLabel={(option) => (option as FieldOption).label}
+        getOptionLabel={(option) => (option as FieldOption).plainTextLabel}
         getOptionValue={(option) => {
           if (typeof option.value === 'object' && 'path' in option.value) {
             return String(option.value.path)

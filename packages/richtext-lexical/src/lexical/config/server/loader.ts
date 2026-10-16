@@ -106,7 +106,7 @@ export function sortFeaturesForOptimalLoading(
   return topologicallySortFeatures(featureProviders)
 }
 
-export async function loadFeatures({
+export function loadFeatures({
   config,
   isRoot,
   parentIsLocalized,
@@ -116,7 +116,7 @@ export async function loadFeatures({
   isRoot?: boolean
   parentIsLocalized: boolean
   unSanitizedEditorConfig: ServerEditorConfig
-}): Promise<ResolvedServerFeatureMap> {
+}): ResolvedServerFeatureMap {
   // First remove all duplicate features. The LAST feature with a given key wins,
   // and keeps the position of its last occurrence (matching the prior reverse/filter/reverse semantics).
   const dedupedByKey = new Map<string, FeatureProviderServer<unknown, unknown, unknown>>()
@@ -176,7 +176,7 @@ export async function loadFeatures({
 
     const feature =
       typeof featureProvider.feature === 'function'
-        ? await featureProvider.feature({
+        ? featureProvider.feature({
             config,
             featureProviderMap,
             isRoot,

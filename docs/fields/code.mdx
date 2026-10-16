@@ -48,7 +48,7 @@ export const MyBlocksField: Field = {
 | **`admin`**        | Admin-specific configuration. See below for [more detail](#admin-options).                                                                                                                                                                                                                              |
 | **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                                                               |
 | **`jsonSchema`**   | Override field JSON Schema used for type generation and MCP validation                                                                                                                                                                                                                                  |
-| **`virtual`**      | Provide `true` to disable field in the database, or provide a string path to [link the field with a relationship](/docs/fields/relationship#linking-virtual-fields-with-relationships). See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges) |
+| **`virtual`**      | Provide `true` to disable field in the database, or provide a string path to [link the field with a relationship](/docs/fields/overview#string-path-virtual-fields). See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges) |
 
 _\* An asterisk denotes that a property is required._
 
@@ -106,9 +106,9 @@ export const ExampleCollection: CollectionConfig = {
 ```tsx
 import type React from 'react'
 import { CodeField } from '@payloadcms/ui'
-import type { CodeFieldServerComponent } from 'payload'
+import type { CodeFieldServerProps } from 'payload'
 
-export const CustomCodeFieldServer: CodeFieldServerComponent = ({
+export const CustomCodeFieldServer: React.FC<CodeFieldServerProps> = ({
   clientField,
   path,
   schemaPath,
@@ -131,9 +131,11 @@ export const CustomCodeFieldServer: CodeFieldServerComponent = ({
 'use client'
 import React from 'react'
 import { CodeField } from '@payloadcms/ui'
-import type { CodeFieldClientComponent } from 'payload'
+import type { CodeFieldClientProps } from 'payload'
 
-export const CustomCodeFieldClient: CodeFieldClientComponent = (props) => {
+export const CustomCodeFieldClient: React.FC<CodeFieldClientProps> = (
+  props,
+) => {
   return <CodeField {...props} />
 }
 ```
@@ -145,12 +147,11 @@ export const CustomCodeFieldClient: CodeFieldClientComponent = (props) => {
 ```tsx
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { CodeFieldLabelServerComponent } from 'payload'
+import type { CodeFieldLabelServerProps } from 'payload'
 
-export const CustomCodeFieldLabelServer: CodeFieldLabelServerComponent = ({
-  clientField,
-  path,
-}) => {
+export const CustomCodeFieldLabelServer: React.FC<
+  CodeFieldLabelServerProps
+> = ({ clientField, path }) => {
   return (
     <FieldLabel
       label={clientField?.label || clientField?.name}
@@ -167,12 +168,11 @@ export const CustomCodeFieldLabelServer: CodeFieldLabelServerComponent = ({
 'use client'
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { CodeFieldLabelClientComponent } from 'payload'
+import type { CodeFieldLabelClientProps } from 'payload'
 
-export const CustomCodeFieldLabelClient: CodeFieldLabelClientComponent = ({
-  field,
-  path,
-}) => {
+export const CustomCodeFieldLabelClient: React.FC<
+  CodeFieldLabelClientProps
+> = ({ field, path }) => {
   return (
     <FieldLabel
       label={field?.label || field?.name}

@@ -1,5 +1,5 @@
 'use client'
-import type { Media, Product } from '@/payload-types'
+import type { Product } from '@/payload-types'
 
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel'
 import AutoScroll from 'embla-carousel-auto-scroll'
@@ -38,7 +38,7 @@ export const CarouselClient: React.FC<{ products: Product[] }> = async ({ produc
                   amount: product.priceInUSD!,
                   title: product.title,
                 }}
-                media={product.meta?.image as Media}
+                media={product.meta?.image}
               />
             </Link>
           </CarouselItem>

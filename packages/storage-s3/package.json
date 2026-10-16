@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/storage-s3",
-  "version": "4.0.0-beta.0",
+  "version": "4.0.0-beta.2",
   "description": "Payload storage adapter for Amazon S3",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -25,10 +25,10 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
-    "./client": {
-      "import": "./src/exports/client.ts",
-      "types": "./src/exports/client.ts",
-      "default": "./src/exports/client.ts"
+    "./copy-file": {
+      "import": "./src/copyFile.ts",
+      "types": "./src/copyFile.ts",
+      "default": "./src/copyFile.ts"
     }
   },
   "main": "./src/index.ts",
@@ -69,10 +69,10 @@
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
       },
-      "./client": {
-        "import": "./dist/exports/client.js",
-        "types": "./dist/exports/client.d.ts",
-        "default": "./dist/exports/client.js"
+      "./copy-file": {
+        "import": "./dist/copyFile.js",
+        "types": "./dist/copyFile.d.ts",
+        "default": "./dist/copyFile.js"
       }
     },
     "main": "./dist/index.js",

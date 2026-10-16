@@ -1,9 +1,9 @@
+import { validateJSONSchema } from '#validateJSONSchema'
 import ObjectIdImport from 'bson-objectid'
 
 const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 import type { TFunction } from '@payloadcms/translations'
-import type { JSONSchema4 } from 'json-schema'
 
 import type { RichTextAdapter } from '../admin/types.js'
 import type { CollectionSlug } from '../index.js'
@@ -104,13 +104,11 @@ export const text: TextFieldValidation = (
 
 export type SlugFieldValidation = Validate<string, unknown, unknown, SlugField>
 
-export const slug: SlugFieldValidation = (value, { req: { t }, required }) => {
-  if (required && !value) {
-    return t('validation:required')
-  }
-
-  return true
-}
+// A slug is always populated by the field's hooks (source-derived or the `<singular>-<N>` fallback),
+// so an empty value is never a user error — `required` only drives the admin asterisk. Uniqueness is
+// enforced in the field's `beforeChange` hook (see generateSlug) rather than here, because draft
+// saves skip validation but still run hooks.
+export const slug: SlugFieldValidation = () => true
 
 export type PasswordFieldValidation = Validate<string, unknown, unknown, TextField>
 
@@ -342,31 +340,6 @@ export const json: JSONFieldValidation = async (
     return true
   }
 
-  const fetchSchema = ({ schema, uri }: { schema: JSONSchema4; uri: string }) => {
-    if (uri && schema) {
-      return schema
-    }
-    return fetch(uri)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok')
-        }
-        return response.json()
-      })
-      .then((_json) => {
-        const json = _json as {
-          id: string
-        }
-        const jsonSchemaSanitizations = {
-          id: undefined,
-          $id: json.id,
-          $schema: 'http://json-schema.org/draft-07/schema#',
-        }
-
-        return Object.assign(json, jsonSchemaSanitizations)
-      })
-  }
-
   if (required && !value) {
     return t('validation:required')
   }
@@ -376,23 +349,7 @@ export const json: JSONFieldValidation = async (
   }
 
   if (jsonSchema && isNotEmpty(value)) {
-    try {
-      jsonSchema.schema = fetchSchema(jsonSchema)
-      const { schema } = jsonSchema
-      const AjvModule = await import('ajv')
-      // Handle both ESM default export and CJS interop where the module itself is the constructor
-      const AjvClass: any =
-        'default' in AjvModule && typeof AjvModule.default === 'function'
-          ? AjvModule.default
-          : AjvModule
-      const ajv = new AjvClass()
-
-      if (!ajv.validate(schema, value)) {
-        return ajv.errorsText()
-      }
-    } catch (error) {
-      return error instanceof Error ? error.message : 'Unknown error'
-    }
+    return validateJSONSchema({ jsonSchema, value })
   }
   return true
 }
@@ -647,7 +604,17 @@ const validateFilterOptions: Validate<
   RelationshipField | UploadField
 > = async (
   value,
-  { id, blockData, data, filterOptions, relationTo, req, req: { t, user }, siblingData },
+  {
+    id,
+    blockData,
+    data,
+    filterOptions,
+    overrideAccess,
+    relationTo,
+    req,
+    req: { t, user },
+    siblingData,
+  },
 ) => {
   if (typeof filterOptions !== 'undefined' && value) {
     const options: {
@@ -710,7 +677,9 @@ const validateFilterOptions: Validate<
           const result = await req.payloadDataLoader.find({
             collection,
             depth: 0,
+            disableErrors: true,
             limit: 0,
+            overrideAccess: overrideAccess ?? false,
             pagination: false,
             req,
             where: findWhere,
@@ -972,13 +941,13 @@ export type SelectFieldManyValidation = Validate<string[], unknown, unknown, Sel
 
 export type SelectFieldSingleValidation = Validate<string, unknown, unknown, SelectField>
 
-export const select: SelectFieldValidation = (
+export const select: SelectFieldValidation = async (
   value,
   { data, filterOptions, hasMany, options, req, req: { t }, required, siblingData },
 ) => {
   const filteredOptions =
     typeof filterOptions === 'function'
-      ? filterOptions({
+      ? await filterOptions({
           data,
           options,
           req,

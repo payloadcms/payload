@@ -1,27 +1,13 @@
-import type { Payload } from 'payload'
-
-import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { arraySlug, complexSlug } from './shared.js'
 
-let payload: Payload
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('array-update', () => {
-  beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  it('should persist existing array-based data while updating and passing row ID', async () => {
+test.suite('array-update', { config: './config.ts' }, () => {
+  test('should persist existing array-based data while updating and passing row ID', async ({
+    payload,
+  }) => {
     const originalText = 'some optional text'
 
     const doc = await payload.create({
@@ -38,6 +24,7 @@ describe('array-update', () => {
           },
         ],
       },
+      overrideAccess: true,
     })
 
     const arrayWithExistingValues = [...doc.arrayOfFields]
@@ -55,6 +42,7 @@ describe('array-update', () => {
       data: {
         arrayOfFields: arrayWithExistingValues,
       },
+      overrideAccess: true,
     })
 
     expect(updatedDoc.arrayOfFields?.[0]).toMatchObject({
@@ -63,7 +51,9 @@ describe('array-update', () => {
     })
   })
 
-  it('should disregard existing array-based data while updating and NOT passing row ID', async () => {
+  test('should disregard existing array-based data while updating and NOT passing row ID', async ({
+    payload,
+  }) => {
     const updatedText = 'here is some new text'
 
     const secondArrayItem = {
@@ -82,6 +72,7 @@ describe('array-update', () => {
           secondArrayItem,
         ],
       },
+      overrideAccess: true,
     })
 
     const updatedDoc = await payload.update({
@@ -100,6 +91,7 @@ describe('array-update', () => {
           },
         ],
       },
+      overrideAccess: true,
     })
 
     expect(updatedDoc.arrayOfFields?.[0].required).toStrictEqual(updatedText)
@@ -108,14 +100,18 @@ describe('array-update', () => {
     expect(updatedDoc.arrayOfFields?.[1]).toMatchObject(secondArrayItem)
   })
 
-  it('should assign fresh row IDs to each doc on bulk update when row IDs are reused', async () => {
+  test('should assign fresh row IDs to each doc on bulk update when row IDs are reused', async ({
+    payload,
+  }) => {
     const docA = await payload.create({
       collection: arraySlug,
       data: { arrayOfFields: [] },
+      overrideAccess: true,
     })
     const docB = await payload.create({
       collection: arraySlug,
       data: { arrayOfFields: [] },
+      overrideAccess: true,
     })
 
     const reusedRowID = '6116a7f0f0f0f0f0f0f0f0f0'
@@ -133,13 +129,14 @@ describe('array-update', () => {
         ],
       },
       where: { id: { in: [docA.id, docB.id] } },
+      overrideAccess: true,
     })
 
     expect(errors).toHaveLength(0)
     expect(docs).toHaveLength(2)
 
-    const updatedA = await payload.findByID({ id: docA.id, collection: arraySlug })
-    const updatedB = await payload.findByID({ id: docB.id, collection: arraySlug })
+    const updatedA = await payload.findByID({ id: docA.id, collection: arraySlug, overrideAccess: true })
+    const updatedB = await payload.findByID({ id: docB.id, collection: arraySlug, overrideAccess: true })
 
     expect(updatedA.arrayOfFields?.[0].required).toBe('bulk value')
     expect(updatedB.arrayOfFields?.[0].required).toBe('bulk value')
@@ -152,14 +149,18 @@ describe('array-update', () => {
     )
   })
 
-  it('should preserve existing row IDs of the matching doc during bulk update', async () => {
+  test('should preserve existing row IDs of the matching doc during bulk update', async ({
+    payload,
+  }) => {
     const docWithExistingRow = await payload.create({
       collection: arraySlug,
       data: { arrayOfFields: [{ required: 'existing row' }] },
+      overrideAccess: true,
     })
     const otherDoc = await payload.create({
       collection: arraySlug,
       data: { arrayOfFields: [] },
+      overrideAccess: true,
     })
 
     const existingRowID = docWithExistingRow.arrayOfFields![0].id
@@ -173,6 +174,7 @@ describe('array-update', () => {
         ],
       },
       where: { id: { in: [docWithExistingRow.id, otherDoc.id] } },
+      overrideAccess: true,
     })
 
     expect(errors).toHaveLength(0)
@@ -180,8 +182,9 @@ describe('array-update', () => {
     const updatedWithExistingRow = await payload.findByID({
       id: docWithExistingRow.id,
       collection: arraySlug,
+      overrideAccess: true,
     })
-    const updatedOther = await payload.findByID({ id: otherDoc.id, collection: arraySlug })
+    const updatedOther = await payload.findByID({ id: otherDoc.id, collection: arraySlug, overrideAccess: true })
 
     expect(updatedWithExistingRow.arrayOfFields?.[0].id).toBe(existingRowID)
     expect(updatedWithExistingRow.arrayOfFields?.[0].required).toBe('updated existing row')
@@ -190,9 +193,11 @@ describe('array-update', () => {
     expect(updatedOther.arrayOfFields?.[0].required).toBe('updated existing row')
   })
 
-  it('should assign fresh row IDs for localized arrays, groups and blocks on bulk update', async () => {
-    const docA = await payload.create({ collection: complexSlug, data: {} })
-    const docB = await payload.create({ collection: complexSlug, data: {} })
+  test('should assign fresh row IDs for localized arrays, groups and blocks on bulk update', async ({
+    payload,
+  }) => {
+    const docA = await payload.create({ collection: complexSlug, data: {}, overrideAccess: true })
+    const docB = await payload.create({ collection: complexSlug, data: {}, overrideAccess: true })
 
     const { docs, errors } = await payload.update({
       collection: complexSlug,
@@ -214,13 +219,14 @@ describe('array-update', () => {
         },
       },
       where: { id: { in: [docA.id, docB.id] } },
+      overrideAccess: true,
     })
 
     expect(errors).toHaveLength(0)
     expect(docs).toHaveLength(2)
 
-    const updatedA = await payload.findByID({ id: docA.id, collection: complexSlug })
-    const updatedB = await payload.findByID({ id: docB.id, collection: complexSlug })
+    const updatedA = await payload.findByID({ id: docA.id, collection: complexSlug, overrideAccess: true })
+    const updatedB = await payload.findByID({ id: docB.id, collection: complexSlug, overrideAccess: true })
 
     expect(updatedA.localizedArray?.[0].text).toBe('localized value')
     expect(updatedB.localizedArray?.[0].text).toBe('localized value')

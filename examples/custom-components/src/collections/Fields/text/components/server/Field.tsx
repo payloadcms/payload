@@ -1,9 +1,9 @@
-import type { TextFieldServerComponent } from 'payload'
+import type { TextFieldServerProps } from 'payload'
 import type React from 'react'
 
 import { TextField } from '@payloadcms/ui'
 
-export const CustomTextFieldServer: TextFieldServerComponent = ({
+export const CustomTextFieldServer: React.FC<TextFieldServerProps> = ({
   clientField,
   path,
   schemaPath,

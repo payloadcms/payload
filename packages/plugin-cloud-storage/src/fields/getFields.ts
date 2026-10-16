@@ -1,4 +1,4 @@
-import type { CollectionConfig, Field, GroupField, TextField } from 'payload'
+import type { CollectionConfig, Field, GroupField, SanitizedUploadConfig, TextField } from 'payload'
 
 import path from 'path'
 
@@ -6,13 +6,10 @@ import type { GeneratedAdapter, GenerateFileURL } from '../types.js'
 
 import { getAfterReadHook } from '../hooks/afterRead.js'
 import { getBeforeChangeHook } from '../hooks/beforeChange.js'
+import { getNormalizeUploadPrefixFieldHook } from '../hooks/normalizeUploadPrefix.js'
 
 interface Args {
   adapter?: GeneratedAdapter
-  /**
-   * When true, always insert the prefix field regardless of whether a prefix is configured.
-   */
-  alwaysInsertFields?: boolean
   collection: CollectionConfig
   disablePayloadAccessControl?: true
   generateFileURL?: GenerateFileURL
@@ -26,7 +23,6 @@ interface Args {
 
 export const getFields = ({
   adapter,
-  alwaysInsertFields,
   collection,
   disablePayloadAccessControl,
   generateFileURL,
@@ -47,8 +43,38 @@ export const getFields = ({
     name: 'prefix',
     type: 'text',
     admin: {
+      disabled: {
+        bulkEdit: true,
+        column: true,
+        filter: true,
+        groupBy: true,
+      },
       hidden: true,
       readOnly: true,
+    },
+  }
+
+  // Server-owned key segment. Field-level `hidden` would remove it before the URL hooks can read it.
+  const baseObjectKeyField: TextField = {
+    name: '_objectKey',
+    type: 'text',
+    admin: {
+      disabled: {
+        bulkEdit: true,
+        column: true,
+        filter: true,
+        groupBy: true,
+      },
+      hidden: true,
+      readOnly: true,
+    },
+  }
+
+  const storedPrefixField: TextField = {
+    ...basePrefixField,
+    admin: {
+      ...basePrefixField.admin,
+      disabled: true,
     },
   }
 
@@ -98,11 +124,72 @@ export const getFields = ({
     } as TextField)
   }
 
-  if (typeof collection.upload === 'object' && collection.upload.imageSizes) {
+  let originalField = fields.find(
+    (field): field is GroupField =>
+      field.type === 'group' && 'name' in field && field.name === 'original',
+  )
+
+  if (adapter && !originalField) {
+    originalField = {
+      name: 'original',
+      type: 'group',
+      fields: [baseURLField],
+    }
+    fields.push(originalField)
+  }
+
+  const originalURLFieldIndex = originalField?.fields.findIndex(
+    (field) => 'name' in field && field.name === 'url',
+  )
+
+  if (
+    adapter &&
+    originalField &&
+    originalURLFieldIndex !== undefined &&
+    originalURLFieldIndex >= 0
+  ) {
+    const originalURLField = originalField.fields[originalURLFieldIndex] as TextField
+
+    originalField.fields[originalURLFieldIndex] = {
+      ...baseURLField,
+      ...originalURLField,
+      hooks: {
+        afterRead: [
+          getAfterReadHook({
+            adapter,
+            collection,
+            disablePayloadAccessControl,
+            generateFileURL,
+            isOriginal: true,
+          }),
+          ...(originalURLField.hooks?.afterRead || []),
+        ],
+        beforeChange: [
+          getBeforeChangeHook({
+            adapter,
+            collection,
+            disablePayloadAccessControl,
+            generateFileURL,
+            isOriginal: true,
+          }),
+          ...(originalURLField.hooks?.beforeChange || []),
+        ],
+      },
+    } as TextField
+  }
+
+  // Storage adapters add these fields during their `init`, after transformers (e.g. Sharp) have
+  // written each collection's image sizes onto its upload config.
+  const variants =
+    typeof collection.upload === 'object'
+      ? (collection.upload as SanitizedUploadConfig).variants
+      : undefined
+
+  if (variants) {
     let existingSizesFieldIndex = -1
 
     const existingSizesField = fields.find((existingField, i) => {
-      if ('name' in existingField && existingField.name === 'sizes') {
+      if ('name' in existingField && existingField.name === 'variants') {
         existingSizesFieldIndex = i
         return true
       }
@@ -116,12 +203,12 @@ export const getFields = ({
 
     const sizesField: Field = {
       ...(existingSizesField || {}),
-      name: 'sizes',
+      name: 'variants',
       type: 'group',
       admin: {
         hidden: true,
       },
-      fields: collection.upload.imageSizes.map((size) => {
+      fields: variants.map((size) => {
         const existingSizeField = existingSizesField?.fields.find(
           (existingField) => 'name' in existingField && existingField.name === size.name,
         ) as GroupField
@@ -173,7 +260,14 @@ export const getFields = ({
           ...existingSizeField,
           name: size.name,
           type: 'group',
-          fields: [...(adapter?.fields || []), sizeURLField],
+          fields: [
+            ...(adapter?.fields || []).filter(
+              (field) => !('name' in field && ['_objectKey', 'prefix'].includes(field.name)),
+            ),
+            sizeURLField,
+            storedPrefixField,
+            baseObjectKeyField,
+          ],
         } as Field
       }),
     }
@@ -181,30 +275,45 @@ export const getFields = ({
     fields.push(sizesField)
   }
 
-  // If prefix is enabled or alwaysInsertFields is true, save it to db
-  if (typeof prefix !== 'undefined' || alwaysInsertFields) {
-    let existingPrefixFieldIndex = -1
+  // Always insert the prefix field so the schema stays consistent regardless of
+  // whether the plugin is enabled or a prefix is configured.
+  let existingPrefixFieldIndex = -1
 
-    const existingPrefixField = fields.find((existingField, i) => {
-      if ('name' in existingField && existingField.name === 'prefix') {
-        existingPrefixFieldIndex = i
-        return true
-      }
-      return false
-    }) as TextField
-
-    if (existingPrefixFieldIndex > -1) {
-      fields.splice(existingPrefixFieldIndex, 1)
+  const existingPrefixField = fields.find((existingField, i) => {
+    if ('name' in existingField && existingField.name === 'prefix') {
+      existingPrefixFieldIndex = i
+      return true
     }
+    return false
+  }) as TextField
 
-    fields.push({
-      ...basePrefixField,
-      ...(existingPrefixField || {}),
-      defaultValue:
-        existingPrefixField?.defaultValue ??
-        (useCompositePrefixes ? '' : prefix ? path.posix.join(prefix) : ''),
-    } as TextField)
+  if (existingPrefixFieldIndex > -1) {
+    fields.splice(existingPrefixFieldIndex, 1)
   }
+
+  fields.push({
+    ...basePrefixField,
+    ...(existingPrefixField || {}),
+    defaultValue:
+      existingPrefixField?.defaultValue ??
+      (useCompositePrefixes ? '' : prefix ? path.posix.join(prefix) : ''),
+    hooks: {
+      ...existingPrefixField?.hooks,
+      beforeChange: [
+        ...(existingPrefixField?.hooks?.beforeChange || []),
+        getNormalizeUploadPrefixFieldHook({ collectionPrefix: prefix, useCompositePrefixes }),
+      ],
+    },
+  } as TextField)
+
+  const existingObjectKeyFieldIndex = fields.findIndex(
+    (existingField) => 'name' in existingField && existingField.name === '_objectKey',
+  )
+  if (existingObjectKeyFieldIndex > -1) {
+    fields.splice(existingObjectKeyFieldIndex, 1)
+  }
+
+  fields.push({ ...baseObjectKeyField } as TextField)
 
   return fields
 }

@@ -21,22 +21,18 @@ import type {
 } from './payload-types.js'
 
 import { goToNextPage } from '../__helpers/e2e/goToNextPage.js'
-import {
-  ensureCompilationIsDone,
-  exactText,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-} from '../__helpers/e2e/helpers.js'
+import { exactText, saveDocAndAssert } from '../__helpers/e2e/helpers.js'
 import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { beforeAll, describe, beforeEach } = test
+const { beforeAll, beforeEach, describe } = test
 
 const lockedDocumentCollection = 'payload-locked-documents'
 
@@ -67,17 +63,12 @@ describe('Locked Documents', () => {
     autosaveUrl = new AdminUrlUtil(serverURL, 'autosave')
 
     const context = await browser.newContext()
-    page = await context.newPage()
-
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'lockedDocumentsTest',
     })
   })
 
@@ -90,7 +81,6 @@ describe('Locked Documents', () => {
       const textInput = page.locator('#field-text')
       await textInput.fill('hello world')
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       const lockedDocs = await payload.find({
@@ -100,6 +90,7 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: id },
         },
+        overrideAccess: true,
       })
 
       expect(lockedDocs.docs.length).toBe(0)
@@ -134,6 +125,7 @@ describe('Locked Documents', () => {
           password: '1234',
           roles: ['is_user'],
         },
+        overrideAccess: true,
       })
 
       lockedDoc = await payload.create({
@@ -149,6 +141,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       testLockedDoc = await payload.create({
@@ -164,6 +157,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
     })
 
@@ -171,6 +165,17 @@ describe('Locked Documents', () => {
       await page.goto(postsUrl.list)
 
       await expect(page.locator('.table .row-2 .locked svg.icon--lock')).toBeVisible()
+    })
+
+    test('should show tooltip with editing user when hovering the lock icon on a document row', async () => {
+      await page.goto(postsUrl.list)
+
+      const lockIcon = page.locator('.table .row-2 .locked')
+      await lockIcon.hover()
+
+      await expect(
+        page.locator('.tooltip--show', { hasText: exactText(`${user2.email} is editing`) }),
+      ).toBeVisible()
     })
 
     test('should not show lock icon on document row if unlocked', async () => {
@@ -183,7 +188,7 @@ describe('Locked Documents', () => {
       await page.goto(testsUrl.list)
 
       // Need to wait for lock duration to expire (lockDuration: 5 seconds)
-      // eslint-disable-next-line payload/no-wait-function
+
       await wait(5000)
 
       await page.reload()
@@ -206,9 +211,21 @@ describe('Locked Documents', () => {
 
     test('should only allow bulk delete on unlocked documents on current page', async () => {
       await page.goto(postsUrl.list)
+      const grid = page.getByRole('grid')
+      const lockedRow = grid.getByRole('row').filter({ has: page.locator('.locked') })
+      const selectableRows = grid.getByRole('row').filter({
+        has: page.locator('.select-row__checkbox'),
+      })
+
+      await expect(lockedRow).toHaveCount(1)
+      await expect(lockedRow).not.toHaveAttribute('aria-selected')
+      await expect(selectableRows).toHaveCount(2)
+      await expect(selectableRows.nth(0)).toHaveAttribute('aria-selected', 'false')
       await page.locator('input#select-all').click()
+      await expect(lockedRow).not.toHaveAttribute('aria-selected')
+      await expect(selectableRows.nth(0)).toHaveAttribute('aria-selected', 'true')
       // Should be partial since one doc is locked and cannot be selected
-      await expect(page.locator('.select-all .checkbox-input__icon.partial')).toBeVisible()
+      await expect(page.locator('input#select-all')).toHaveJSProperty('indeterminate', true)
       await page.locator('.delete-documents__toggle').click()
       await expect(page.locator('#confirm-delete-many-docs .dialog__body p')).toHaveText(
         'You are about to delete 2 Posts',
@@ -257,8 +274,8 @@ describe('Locked Documents', () => {
     test('should only allow bulk unpublish on unlocked documents on all pages', async () => {
       await mapAsync([...Array(10)], async () => {
         await createPostDoc({
-          text: 'Ready for publish',
           _status: 'published',
+          text: 'Ready for publish',
         })
       })
 
@@ -276,8 +293,8 @@ describe('Locked Documents', () => {
     test('should only allow bulk edit on unlocked documents on all pages', async () => {
       await mapAsync([...Array(8)], async () => {
         await createPostDoc({
-          text: 'doc',
           _status: 'draft',
+          text: 'doc',
         })
       })
       await page.goto(postsUrl.list)
@@ -285,7 +302,7 @@ describe('Locked Documents', () => {
       const bulkText = 'Bulk update title'
       await page.locator('input#select-all').click()
       // Should be partial since one doc is locked and cannot be selected
-      await expect(page.locator('.select-all .checkbox-input__icon.partial')).toBeVisible()
+      await expect(page.locator('input#select-all')).toHaveJSProperty('indeterminate', true)
       await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
       await page.locator('.edit-many__toggle').click()
 
@@ -346,6 +363,7 @@ describe('Locked Documents', () => {
           password: '1234',
           roles: ['is_user'],
         },
+        overrideAccess: true,
       })
 
       expiredDocOne = await createTestDoc({
@@ -365,6 +383,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       expiredDocTwo = await createTestDoc({
@@ -384,6 +403,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       testDoc = await createTestDoc({ text: 'hello' })
@@ -395,7 +415,6 @@ describe('Locked Documents', () => {
       await expect(page.locator('.table .row-2 .locked svg.icon--lock')).toBeVisible()
       await expect(page.locator('.table .row-3 .locked svg.icon--lock')).toBeVisible()
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(5000)
 
       await page.reload()
@@ -406,6 +425,7 @@ describe('Locked Documents', () => {
       const lockedTestDocs = await payload.find({
         collection: lockedDocumentCollection,
         pagination: false,
+        overrideAccess: true,
       })
 
       expect(lockedTestDocs.docs.length).toBe(2)
@@ -415,12 +435,12 @@ describe('Locked Documents', () => {
       const textInput = page.locator('#field-text')
       await textInput.fill('some test doc')
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       const lockedDocs = await payload.find({
         collection: lockedDocumentCollection,
         pagination: false,
+        overrideAccess: true,
       })
 
       expect(lockedDocs.docs.length).toBe(1)
@@ -432,7 +452,6 @@ describe('Locked Documents', () => {
       const textInput = page.locator('#field-text')
       await textInput.fill('hello world')
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       const lockedDocs = await payload.find({
@@ -442,6 +461,7 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
 
       expect(lockedDocs.docs.length).toBe(1)
@@ -453,7 +473,6 @@ describe('Locked Documents', () => {
       const textInput = page.locator('#field-text')
       await textInput.fill('hello world')
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       const lockedDocs = await payload.find({
@@ -463,13 +482,13 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
 
       expect(lockedDocs.docs.length).toBe(1)
 
       await saveDocAndAssert(page)
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       const unlockedDocs = await payload.find({
@@ -479,6 +498,7 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
 
       expect(unlockedDocs.docs.length).toBe(0)
@@ -490,7 +510,6 @@ describe('Locked Documents', () => {
       const textInput = page.locator('#field-text')
       await textInput.fill('testing tab navigation...')
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       const lockedDocs = await payload.find({
@@ -500,11 +519,12 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
 
       expect(lockedDocs.docs.length).toBe(1)
 
-      await page.locator('a[aria-label="API"]').click()
+      await page.getByRole('link', { name: 'API', exact: true }).click()
 
       // Locate the modal container
       const modalContainer = page.locator('.payload__modal-container')
@@ -513,7 +533,6 @@ describe('Locked Documents', () => {
       // Click the "Leave anyway" button
       await page.locator('#leave-without-saving .dialog__footer .btn--style-primary').click()
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       const unlockedDocs = await payload.find({
@@ -523,6 +542,7 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
 
       expect(unlockedDocs.docs.length).toBe(1)
@@ -532,6 +552,7 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
     })
 
@@ -541,7 +562,6 @@ describe('Locked Documents', () => {
       const textInput = page.locator('#field-text')
       await textInput.fill('hello world')
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(1000)
 
       const lockedDocs = await payload.find({
@@ -551,6 +571,7 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDocTwo.id },
         },
+        overrideAccess: true,
       })
 
       expect(lockedDocs.docs.length).toBe(1)
@@ -564,7 +585,6 @@ describe('Locked Documents', () => {
       // Click the "Leave anyway" button
       await page.locator('#leave-without-saving .dialog__footer .btn--style-primary').click()
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       expect(page.url()).toContain(postsUrl.list)
@@ -576,6 +596,7 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
 
       expect(unlockedDocs.docs.length).toBe(0)
@@ -602,6 +623,7 @@ describe('Locked Documents', () => {
       serverComponentDoc = await payload.create({
         collection: 'server-components',
         data: {},
+        overrideAccess: true,
       })
 
       expiredTestDoc = await createTestDoc({
@@ -615,6 +637,7 @@ describe('Locked Documents', () => {
           password: '1234',
           roles: ['is_user'],
         },
+        overrideAccess: true,
       })
 
       lockedDoc = await payload.create({
@@ -630,6 +653,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       expiredTestLockedDoc = await payload.create({
@@ -645,6 +669,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       expiredPostDoc = await createPostDoc({
@@ -654,18 +679,19 @@ describe('Locked Documents', () => {
       expiredPostLockedDoc = await payload.create({
         collection: lockedDocumentCollection,
         data: {
+          createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
           document: {
             relationTo: 'posts',
             value: expiredPostDoc.id,
           },
           globalSlug: undefined,
+          updatedAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
           user: {
             relationTo: 'users',
             value: user2.id,
           },
-          createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
-          updatedAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
         },
+        overrideAccess: true,
       })
 
       lockedServerComponentDoc = await payload.create({
@@ -681,13 +707,13 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
     })
 
     test('should show Document Locked modal for incoming user when entering locked document', async () => {
       await page.goto(postsUrl.list)
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       await page.goto(postsUrl.edit(postDoc.id))
@@ -704,7 +730,6 @@ describe('Locked Documents', () => {
     test('should properly close modal and allow re-opening after clicking Go Back', async () => {
       await page.goto(postsUrl.list)
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       // First time: navigate to locked document
@@ -734,7 +759,7 @@ describe('Locked Documents', () => {
       await page.goto(testsUrl.list)
 
       // Need to wait for lock duration to expire (lockDuration: 5 seconds)
-      // eslint-disable-next-line payload/no-wait-function
+
       await wait(5000)
 
       await page.reload()
@@ -825,6 +850,7 @@ describe('Locked Documents', () => {
       serverComponentDoc = await payload.create({
         collection: 'server-components',
         data: {},
+        overrideAccess: true,
       })
 
       user2 = await payload.create({
@@ -834,6 +860,7 @@ describe('Locked Documents', () => {
           password: '1234',
           roles: ['is_user'],
         },
+        overrideAccess: true,
       })
 
       lockedDoc = await payload.create({
@@ -849,6 +876,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       lockedServerComponentsDoc = await payload.create({
@@ -864,6 +892,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
     })
 
@@ -876,7 +905,6 @@ describe('Locked Documents', () => {
       // Click take-over button to take over editing rights of locked doc
       await page.locator('#document-locked-confirm').click()
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(1000)
 
       const lockedDoc = await payload.find({
@@ -886,9 +914,9 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       expect(lockedDoc.docs.length).toBe(1)
@@ -935,6 +963,7 @@ describe('Locked Documents', () => {
       serverComponentsDoc = await payload.create({
         collection: 'server-components',
         data: {},
+        overrideAccess: true,
       })
 
       user2 = await payload.create({
@@ -944,6 +973,7 @@ describe('Locked Documents', () => {
           password: '1234',
           roles: ['is_user'],
         },
+        overrideAccess: true,
       })
 
       lockedDoc = await payload.create({
@@ -959,6 +989,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       lockedServerComponentsDoc = await payload.create({
@@ -974,6 +1005,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
     })
 
@@ -988,7 +1020,6 @@ describe('Locked Documents', () => {
 
       await page.locator('#take-over').click()
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       const lockedDoc = await payload.find({
@@ -998,9 +1029,9 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       expect(lockedDoc.docs.length).toBe(1)
@@ -1031,7 +1062,6 @@ describe('Locked Documents', () => {
 
       await page.locator('#take-over').click()
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       await expect(page.locator('#field-customTextServer')).toBeEnabled()
@@ -1051,6 +1081,7 @@ describe('Locked Documents', () => {
       serverComponentsDoc = await payload.create({
         collection: 'server-components',
         data: {},
+        overrideAccess: true,
       })
 
       user2 = await payload.create({
@@ -1060,6 +1091,7 @@ describe('Locked Documents', () => {
           password: '1234',
           roles: ['is_user'],
         },
+        overrideAccess: true,
       })
     })
 
@@ -1069,7 +1101,6 @@ describe('Locked Documents', () => {
       const textInput = page.locator('#field-text')
       await textInput.fill('hello world')
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       // Retrieve document id from payload locks collection
@@ -1080,9 +1111,9 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       // Update payload-locks collection document with different user
@@ -1095,9 +1126,9 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(1000)
 
       // Try to edit the document again as the "old" user
@@ -1108,8 +1139,9 @@ describe('Locked Documents', () => {
       await expect(modalContainer).toBeVisible()
 
       await payload.delete({
-        collection: lockedDocumentCollection,
         id: lockedDoc.docs[0]?.id,
+        collection: lockedDocumentCollection,
+        overrideAccess: true,
       })
     })
 
@@ -1119,7 +1151,6 @@ describe('Locked Documents', () => {
       const textInput = page.locator('#field-text')
       await textInput.fill('hello world')
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       // Retrieve document id from payload locks collection
@@ -1130,9 +1161,9 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       // Update payload-locks collection document with different user
@@ -1145,9 +1176,9 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(1000)
 
       // Try to edit the document again as the "old" user
@@ -1163,8 +1194,9 @@ describe('Locked Documents', () => {
       expect(page.url()).toContain(postsUrl.admin)
 
       await payload.delete({
-        collection: lockedDocumentCollection,
         id: lockedDoc.docs[0]?.id,
+        collection: lockedDocumentCollection,
+        overrideAccess: true,
       })
     })
 
@@ -1174,7 +1206,6 @@ describe('Locked Documents', () => {
       const textInput = page.locator('#field-text')
       await textInput.fill('hello world')
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       // Retrieve document id from payload locks collection
@@ -1185,9 +1216,9 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       // Update payload-locks collection document with different user
@@ -1200,9 +1231,9 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       // Try to edit the document again as the "old" user
@@ -1229,7 +1260,6 @@ describe('Locked Documents', () => {
       const textInput = page.locator('#field-customTextServer')
       await textInput.fill('hello world')
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       // Retrieve document id from payload locks collection
@@ -1240,9 +1270,9 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: serverComponentsDoc.id },
         },
+        overrideAccess: true,
       })
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       // Update payload-locks collection document with different user
@@ -1255,9 +1285,9 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       // Try to edit the document again as the "old" user
@@ -1288,6 +1318,7 @@ describe('Locked Documents', () => {
           password: '1234',
           roles: ['is_user'],
         },
+        overrideAccess: true,
       })
 
       lockedAdminGlobal = await payload.create({
@@ -1300,6 +1331,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       lockedMenuGlobal = await payload.create({
@@ -1312,6 +1344,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
     })
 
@@ -1325,11 +1358,11 @@ describe('Locked Documents', () => {
 
     test('should not show lock on document card in dashboard view if unlocked', async () => {
       await payload.delete({
-        collection: lockedDocumentCollection,
         id: lockedMenuGlobal.id,
+        collection: lockedDocumentCollection,
+        overrideAccess: true,
       })
 
-      // eslint-disable-next-line payload/no-wait-function
       await wait(500)
 
       await page.goto(postsUrl.admin)
@@ -1339,8 +1372,9 @@ describe('Locked Documents', () => {
 
     test('should not show lock on document card in dashboard view if locked by current user', async () => {
       await payload.delete({
-        collection: lockedDocumentCollection,
         id: lockedMenuGlobal.id,
+        collection: lockedDocumentCollection,
+        overrideAccess: true,
       })
 
       await page.goto(globalUrl.global('menu'))
@@ -1363,7 +1397,7 @@ describe('Locked Documents', () => {
       ).toBeVisible()
 
       // Need to wait for lock duration to expire (lockDuration: 10 seconds)
-      // eslint-disable-next-line payload/no-wait-function
+
       await wait(10000)
 
       await page.reload()
@@ -1371,8 +1405,9 @@ describe('Locked Documents', () => {
       await expect(page.locator('.collections__card-list #card-admin .locked')).toBeHidden()
 
       await payload.delete({
-        collection: lockedDocumentCollection,
         id: lockedAdminGlobal.id,
+        collection: lockedDocumentCollection,
+        overrideAccess: true,
       })
     })
 
@@ -1387,6 +1422,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       await page.goto(postsUrl.admin)
@@ -1396,7 +1432,7 @@ describe('Locked Documents', () => {
       ).toBeVisible()
 
       // Need to wait for lock duration to expire (lockDuration: 10 seconds)
-      // eslint-disable-next-line payload/no-wait-function
+
       await wait(10000)
 
       await page.reload()
@@ -1425,6 +1461,7 @@ describe('Locked Documents', () => {
           fieldA: 'Original A',
           fieldB: 'Original B',
         },
+        overrideAccess: true,
       })) as unknown as Simple
 
       simpleWithVersionsDoc = (await payload.create({
@@ -1433,6 +1470,7 @@ describe('Locked Documents', () => {
           fieldA: 'Original A',
           fieldB: 'Original B',
         },
+        overrideAccess: true,
       })) as unknown as SimpleWithVersion
 
       // Create a second browser context for user 2 (user 1 uses the parent test's page)
@@ -1463,14 +1501,12 @@ describe('Locked Documents', () => {
         await user1FieldA.fill('User 1 Change')
         await saveDocAndAssert(page)
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 2 tries to edit (should trigger stale data check)
         const user2FieldA = user2Page.locator('#field-fieldA')
         await user2FieldA.fill('User 2 Change')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Stale data modal should appear for user 2
@@ -1491,20 +1527,17 @@ describe('Locked Documents', () => {
         await user1FieldA.fill('User 1 Updated Value')
         await saveDocAndAssert(page)
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 2 tries to edit
         const user2FieldA = user2Page.locator('#field-fieldA')
         await user2FieldA.fill('Should be discarded')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 2 clicks reload button in modal
         await user2Page.locator('#document-stale-data-confirm').click()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         const modalContainer = user2Page.locator('.payload__modal-container')
@@ -1524,14 +1557,12 @@ describe('Locked Documents', () => {
         await user1FieldA.fill('Cycle 1 - User 1')
         await saveDocAndAssert(page)
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 2 tries to edit and sees modal
         let user2FieldA = user2Page.locator('#field-fieldA')
         await user2FieldA.fill('Cycle 1 - User 2 attempt')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         let modalContainer = user2Page.locator('.payload__modal-container')
@@ -1540,7 +1571,6 @@ describe('Locked Documents', () => {
         // User 2 reloads
         await user2Page.locator('#document-stale-data-confirm').click()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Cycle 2: User 2 now saves
@@ -1548,14 +1578,12 @@ describe('Locked Documents', () => {
         await user2FieldA.fill('Cycle 2 - User 2')
         await saveDocAndAssert(user2Page)
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 1 tries to edit and should see modal again
         user1FieldA = page.locator('#field-fieldA')
         await user1FieldA.fill('Cycle 2 - User 1 attempt')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         modalContainer = page.locator('.payload__modal-container')
@@ -1564,7 +1592,6 @@ describe('Locked Documents', () => {
         // User 1 reloads
         await page.locator('#document-stale-data-confirm').click()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Cycle 3: User 1 now saves
@@ -1572,14 +1599,12 @@ describe('Locked Documents', () => {
         await user1FieldA.fill('Cycle 3 - User 1')
         await saveDocAndAssert(page)
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 2 tries to edit and should see modal again
         user2FieldA = user2Page.locator('#field-fieldA')
         await user2FieldA.fill('Cycle 3 - User 2 attempt')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         modalContainer = user2Page.locator('.payload__modal-container')
@@ -1588,7 +1613,6 @@ describe('Locked Documents', () => {
         // User 2 reloads
         await user2Page.locator('#document-stale-data-confirm').click()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Cycle 4: User 2 now saves
@@ -1596,14 +1620,12 @@ describe('Locked Documents', () => {
         await user2FieldA.fill('Cycle 4 - User 2')
         await saveDocAndAssert(user2Page)
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 1 tries to edit and should see modal again
         user1FieldA = page.locator('#field-fieldA')
         await user1FieldA.fill('Cycle 4 - User 1 attempt')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         modalContainer = page.locator('.payload__modal-container')
@@ -1620,14 +1642,12 @@ describe('Locked Documents', () => {
         await user1FieldA.fill('Cycle 1 - User 1')
         await saveDocAndAssert(page)
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 2 tries to edit and sees modal
         let user2FieldA = user2Page.locator('#field-fieldA')
         await user2FieldA.fill('Cycle 1 - User 2 attempt')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         let modalContainer = user2Page.locator('.payload__modal-container')
@@ -1636,7 +1656,6 @@ describe('Locked Documents', () => {
         // User 2 reloads
         await user2Page.locator('#document-stale-data-confirm').click()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Cycle 2: User 2 now saves
@@ -1644,14 +1663,12 @@ describe('Locked Documents', () => {
         await user2FieldA.fill('Cycle 2 - User 2')
         await saveDocAndAssert(user2Page)
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 1 tries to edit and should see modal again
         user1FieldA = page.locator('#field-fieldA')
         await user1FieldA.fill('Cycle 2 - User 1 attempt')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         modalContainer = page.locator('.payload__modal-container')
@@ -1660,7 +1677,6 @@ describe('Locked Documents', () => {
         // User 1 reloads
         await page.locator('#document-stale-data-confirm').click()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Cycle 3: User 1 now saves
@@ -1668,14 +1684,12 @@ describe('Locked Documents', () => {
         await user1FieldA.fill('Cycle 3 - User 1')
         await saveDocAndAssert(page)
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 2 tries to edit and should see modal again
         user2FieldA = user2Page.locator('#field-fieldA')
         await user2FieldA.fill('Cycle 3 - User 2 attempt')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         modalContainer = user2Page.locator('.payload__modal-container')
@@ -1684,7 +1698,6 @@ describe('Locked Documents', () => {
         // User 2 reloads
         await user2Page.locator('#document-stale-data-confirm').click()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Cycle 4: User 2 now saves
@@ -1692,14 +1705,12 @@ describe('Locked Documents', () => {
         await user2FieldA.fill('Cycle 4 - User 2')
         await saveDocAndAssert(user2Page)
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 1 tries to edit and should see modal again
         user1FieldA = page.locator('#field-fieldA')
         await user1FieldA.fill('Cycle 4 - User 1 attempt')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         modalContainer = page.locator('.payload__modal-container')
@@ -1714,13 +1725,11 @@ describe('Locked Documents', () => {
         await user1FieldA.fill('My First Change')
         await page.locator('#action-save-draft').click()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 1 edits again (their own save)
         await user1FieldA.fill('My Second Change')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Modal should NOT appear
@@ -1730,13 +1739,11 @@ describe('Locked Documents', () => {
         // User 1 saves draft again
         await page.locator('#action-save-draft').click()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 1 edits a third time
         await user1FieldA.fill('My Third Change')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Modal should still NOT appear
@@ -1753,6 +1760,7 @@ describe('Locked Documents', () => {
             fieldA: 'Initial Value',
             fieldB: 'Initial Value B',
           },
+          overrideAccess: true,
         })) as unknown as Autosave
 
         createdAutosaveIDs.push(autosaveDoc.id)
@@ -1770,17 +1778,17 @@ describe('Locked Documents', () => {
           // Make many rapid edits to create multiple queued autosaves
           for (let i = 1; i <= 10; i++) {
             await fieldA.fill(`Edit ${i}`)
-            // eslint-disable-next-line payload/no-wait-function
+
             await wait(30)
           }
 
           // Wait for all autosaves to process
-          // eslint-disable-next-line payload/no-wait-function
+
           await wait(2000)
 
           // Make one more edit to trigger stale data check
           await fieldA.fill('Final Edit')
-          // eslint-disable-next-line payload/no-wait-function
+
           await wait(500)
 
           // Modal should NOT appear because it's the same user
@@ -1791,7 +1799,7 @@ describe('Locked Documents', () => {
 
           // Clean up created autosave document
           for (const id of createdAutosaveIDs) {
-            await payload.delete({ collection: 'autosave', id }).catch(() => {
+            await payload.delete({ id, collection: 'autosave', overrideAccess: true }).catch(() => {
               // Ignore deletion errors (document might already be deleted)
             })
           }
@@ -1824,7 +1832,7 @@ describe('Locked Documents', () => {
         await page.route(editUrl, async (route) => {
           if (route.request().method() === 'POST' && !firstPostDelayed) {
             firstPostDelayed = true
-            // eslint-disable-next-line payload/no-wait-function
+
             await wait(3000)
           }
           try {
@@ -1847,7 +1855,7 @@ describe('Locked Documents', () => {
         await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 
         await page.unroute(editUrl)
-        // eslint-disable-next-line payload/no-wait-function
+
         await wait(4000)
 
         await expect(modalContainer).toBeHidden()
@@ -1862,7 +1870,6 @@ describe('Locked Documents', () => {
         await user1GlobalText.fill('Initial Global State')
         await saveDocAndAssert(page)
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Both users now open the same global
@@ -1874,14 +1881,12 @@ describe('Locked Documents', () => {
         await user1GlobalText.fill('User 1 Global Change')
         await saveDocAndAssert(page)
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 2 tries to edit (should trigger stale data check)
         const user2GlobalText = user2Page.locator('#field-globalText')
         await user2GlobalText.fill('User 2 Global Change')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Stale data modal should appear for user 2
@@ -1899,7 +1904,6 @@ describe('Locked Documents', () => {
         await user1GlobalText.fill('Initial Global State')
         await saveDocAndAssert(page)
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Both users now open the same global
@@ -1911,20 +1915,17 @@ describe('Locked Documents', () => {
         await user1GlobalText.fill('User 1 Updated Global Value')
         await saveDocAndAssert(page)
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 2 tries to edit
         const user2GlobalText = user2Page.locator('#field-globalText')
         await user2GlobalText.fill('Should be discarded')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 2 clicks reload button in modal
         await user2Page.locator('#document-stale-data-confirm').click()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         const modalContainer = user2Page.locator('.payload__modal-container')
@@ -1941,7 +1942,6 @@ describe('Locked Documents', () => {
         await user1GlobalText.fill('Initial Global State')
         await saveDocAndAssert(page)
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Both users now open the same global
@@ -1953,14 +1953,12 @@ describe('Locked Documents', () => {
         await user1GlobalText.fill('Cycle 1 - User 1')
         await saveDocAndAssert(page)
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 2 tries to edit and sees modal
         let user2GlobalText = user2Page.locator('#field-globalText')
         await user2GlobalText.fill('Cycle 1 - User 2 attempt')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         let modalContainer = user2Page.locator('.payload__modal-container')
@@ -1969,7 +1967,6 @@ describe('Locked Documents', () => {
         // User 2 reloads
         await user2Page.locator('#document-stale-data-confirm').click()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Cycle 2: User 2 now saves
@@ -1977,14 +1974,12 @@ describe('Locked Documents', () => {
         await user2GlobalText.fill('Cycle 2 - User 2')
         await saveDocAndAssert(user2Page)
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 1 tries to edit and should see modal again
         user1GlobalText = page.locator('#field-globalText')
         await user1GlobalText.fill('Cycle 2 - User 1 attempt')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         modalContainer = page.locator('.payload__modal-container')
@@ -1993,7 +1988,6 @@ describe('Locked Documents', () => {
         // User 1 reloads
         await page.locator('#document-stale-data-confirm').click()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Cycle 3: User 1 now saves
@@ -2001,14 +1995,12 @@ describe('Locked Documents', () => {
         await user1GlobalText.fill('Cycle 3 - User 1')
         await saveDocAndAssert(page)
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 2 tries to edit and should see modal again
         user2GlobalText = user2Page.locator('#field-globalText')
         await user2GlobalText.fill('Cycle 3 - User 2 attempt')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         modalContainer = user2Page.locator('.payload__modal-container')
@@ -2017,7 +2009,6 @@ describe('Locked Documents', () => {
         // User 2 reloads
         await user2Page.locator('#document-stale-data-confirm').click()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Cycle 4: User 2 now saves
@@ -2025,14 +2016,12 @@ describe('Locked Documents', () => {
         await user2GlobalText.fill('Cycle 4 - User 2')
         await saveDocAndAssert(user2Page)
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 1 tries to edit and should see modal again
         user1GlobalText = page.locator('#field-globalText')
         await user1GlobalText.fill('Cycle 4 - User 1 attempt')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         modalContainer = page.locator('.payload__modal-container')
@@ -2046,7 +2035,6 @@ describe('Locked Documents', () => {
         await user1TextField.fill('Initial Published Version')
         await saveDocAndAssert(page)
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Both users now open the same global
@@ -2059,20 +2047,17 @@ describe('Locked Documents', () => {
         const user2TextField = user2Page.locator('#field-text')
         await expect(user2TextField).toBeVisible()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 1 makes a change and saves as draft
         await user1TextField.fill('User 1 Draft Change')
         await page.locator('#action-save-draft').click()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 2 tries to edit (should trigger stale data check)
         await user2TextField.fill('User 2 Draft Change')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Stale data modal should appear for user 2
@@ -2090,7 +2075,6 @@ describe('Locked Documents', () => {
         await user1TextField.fill('Initial Published Version')
         await saveDocAndAssert(page)
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Both users now open the same global
@@ -2103,20 +2087,17 @@ describe('Locked Documents', () => {
         let user2TextField = user2Page.locator('#field-text')
         await expect(user2TextField).toBeVisible()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Cycle 1: User 1 saves draft
         await user1TextField.fill('Cycle 1 - User 1')
         await page.locator('#action-save-draft').click()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 2 tries to edit and sees modal
         await user2TextField.fill('Cycle 1 - User 2 attempt')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         let modalContainer = user2Page.locator('.payload__modal-container')
@@ -2125,7 +2106,6 @@ describe('Locked Documents', () => {
         // User 2 reloads
         await user2Page.locator('#document-stale-data-confirm').click()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Cycle 2: User 2 now saves draft
@@ -2133,14 +2113,12 @@ describe('Locked Documents', () => {
         await user2TextField.fill('Cycle 2 - User 2')
         await user2Page.locator('#action-save-draft').click()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 1 tries to edit and should see modal again
         user1TextField = page.locator('#field-text')
         await user1TextField.fill('Cycle 2 - User 1 attempt')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         modalContainer = page.locator('.payload__modal-container')
@@ -2149,7 +2127,6 @@ describe('Locked Documents', () => {
         // User 1 reloads
         await page.locator('#document-stale-data-confirm').click()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Cycle 3: User 1 now saves draft
@@ -2157,14 +2134,12 @@ describe('Locked Documents', () => {
         await user1TextField.fill('Cycle 3 - User 1')
         await page.locator('#action-save-draft').click()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 2 tries to edit and should see modal again
         user2TextField = user2Page.locator('#field-text')
         await user2TextField.fill('Cycle 3 - User 2 attempt')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         modalContainer = user2Page.locator('.payload__modal-container')
@@ -2173,7 +2148,6 @@ describe('Locked Documents', () => {
         // User 2 reloads
         await user2Page.locator('#document-stale-data-confirm').click()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // Cycle 4: User 2 now saves draft
@@ -2181,14 +2155,12 @@ describe('Locked Documents', () => {
         await user2TextField.fill('Cycle 4 - User 2')
         await user2Page.locator('#action-save-draft').click()
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         // User 1 tries to edit and should see modal again
         user1TextField = page.locator('#field-text')
         await user1TextField.fill('Cycle 4 - User 1 attempt')
 
-        // eslint-disable-next-line payload/no-wait-function
         await wait(500)
 
         modalContainer = page.locator('.payload__modal-container')
@@ -2209,17 +2181,17 @@ describe('Locked Documents', () => {
           // Make many rapid edits to create multiple queued autosaves
           for (let i = 1; i <= 10; i++) {
             await textField.fill(`Edit ${i}`)
-            // eslint-disable-next-line payload/no-wait-function
+
             await wait(30)
           }
 
           // Wait for all autosaves to process
-          // eslint-disable-next-line payload/no-wait-function
+
           await wait(2000)
 
           // Make one more edit to trigger stale data check
           await textField.fill('Final Edit')
-          // eslint-disable-next-line payload/no-wait-function
+
           await wait(500)
 
           // Modal should NOT appear because stale check is disabled for autosave-enabled globals
@@ -2237,6 +2209,7 @@ async function createPageDoc(data: Partial<PageType>): Promise<PageType> {
   return payload.create({
     collection: 'pages',
     data,
+    overrideAccess: true,
   }) as unknown as Promise<PageType>
 }
 
@@ -2244,6 +2217,7 @@ async function createPostDoc(data: Partial<Post>): Promise<Post> {
   return payload.create({
     collection: 'posts',
     data,
+    overrideAccess: true,
   }) as unknown as Promise<Post>
 }
 
@@ -2251,5 +2225,6 @@ async function createTestDoc(data: Partial<Test>): Promise<Test> {
   return payload.create({
     collection: 'tests',
     data,
+    overrideAccess: true,
   }) as unknown as Promise<Test>
 }

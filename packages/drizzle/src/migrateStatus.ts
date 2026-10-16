@@ -1,3 +1,5 @@
+import type { MigrationStatus } from 'payload'
+
 import { Table } from 'console-table-printer'
 import { getMigrations, readMigrationFiles } from 'payload'
 
@@ -5,7 +7,7 @@ import type { DrizzleAdapter } from './types.js'
 
 import { migrationTableExists } from './utilities/migrationTableExists.js'
 
-export async function migrateStatus(this: DrizzleAdapter): Promise<void> {
+export async function migrateStatus(this: DrizzleAdapter): Promise<MigrationStatus[]> {
   const { payload } = this
   const migrationFiles = await readMigrationFiles({ payload })
 
@@ -22,26 +24,30 @@ export async function migrateStatus(this: DrizzleAdapter): Promise<void> {
 
   if (!migrationFiles.length) {
     payload.logger.info({ msg: 'No migrations found.' })
-    return
+    return []
   }
 
   // Compare migration files to existing migrations
   const statuses = migrationFiles.map((migration) => {
     const existingMigration = existingMigrations.find((m) => m.name === migration.name)
     return {
-      Name: migration.name,
-
-      Batch: existingMigration?.batch,
-      Ran: existingMigration ? 'Yes' : 'No',
+      name: migration.name,
+      batch: existingMigration?.batch,
+      ran: Boolean(existingMigration),
     }
   })
 
   const p = new Table()
 
   statuses.forEach((s) => {
-    p.addRow(s, {
-      color: s.Ran === 'Yes' ? 'green' : 'red',
-    })
+    p.addRow(
+      { Batch: s.batch, Name: s.name, Ran: s.ran ? 'Yes' : 'No' },
+      {
+        color: s.ran ? 'green' : 'red',
+      },
+    )
   })
   p.printTable()
+
+  return statuses
 }

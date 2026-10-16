@@ -24,8 +24,9 @@ export { migrateReset } from './migrateReset.js'
 export { migrateStatus } from './migrateStatus.js'
 export { buildQuery } from './queries/buildQuery.js'
 export { operatorMap } from './queries/operatorMap.js'
-export type { Operators } from './queries/operatorMap.js'
+export type { DrizzleResolvedOperator, Operators } from './queries/operatorMap.js'
 export { parseParams } from './queries/parseParams.js'
+export { validateOperatorHandlers } from './queries/validateOperatorHandlers.js'
 export { queryDrafts } from './queryDrafts.js'
 export { buildDrizzleRelations } from './schema/buildDrizzleRelations.js'
 export { buildRawSchema } from './schema/buildRawSchema.js'
@@ -42,6 +43,11 @@ export type {
   CreateJSONQueryArgs,
   DeleteWhere,
   DrizzleAdapter,
+  DrizzleOperandTransformHandler,
+  DrizzleOperatorHandler,
+  DrizzleOperatorHandlerContext,
+  DrizzleOperatorReplacementHandler,
+  DrizzleQueryConfig,
   DrizzleTransaction,
   DropDatabase,
   EnumRawColumn,
@@ -85,6 +91,7 @@ export {
   getBlocksToJsonMigrator,
 } from './utilities/blocksToJsonMigrator.js'
 export { buildCreateMigration } from './utilities/buildCreateMigration.js'
+export { buildDynamicPredefinedSizesToVariantsMigration } from './utilities/buildDynamicPredefinedSizesToVariantsMigration.js'
 export { buildIndexName } from './utilities/buildIndexName.js'
 export { createSchemaGenerator } from './utilities/createSchemaGenerator.js'
 export { executeSchemaHooks } from './utilities/executeSchemaHooks.js'
@@ -92,13 +99,3 @@ export { extendDrizzleTable } from './utilities/extendDrizzleTable.js'
 export { hasLocalesTable } from './utilities/hasLocalesTable.js'
 export { pushDevSchema } from './utilities/pushDevSchema.js'
 export { validateExistingBlockIsIdentical } from './utilities/validateExistingBlockIsIdentical.js'
-import { findMigrationDir as payloadFindMigrationDir } from 'payload'
-
-/**
- * @deprecated remove in 4.0
- * use
- * ```ts
- * import { findMigrationDir } from 'payload'
- * ```
- */
-export const findMigrationDir = payloadFindMigrationDir

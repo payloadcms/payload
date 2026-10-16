@@ -1,7 +1,7 @@
 import type { CollectionConfig, FileData, PayloadRequest, UploadConfig } from 'payload'
 
 import { FileRetrievalError, getFileByPath } from 'payload'
-import { getExternalFile } from 'payload/internal'
+import { downloadFileToBuffer } from 'payload/internal'
 import { formatAdminURL } from 'payload/shared'
 
 type Args = {
@@ -56,7 +56,7 @@ export const getFileFromDoc = async ({ collectionConfig, doc, req }: Args): Prom
 
   if (doc.filename && doc.url) {
     // Cloud storage or external - fetch via Payload's file endpoint
-    // getExternalFile constructs full URL, includes cookies for auth, and
+    // downloadFileToBuffer constructs full URL, includes cookies for auth, and
     // the request goes through Payload's handler chain (including storage adapter)
 
     // For relative URLs, construct a full URL using formatAdminURL which properly
@@ -71,7 +71,7 @@ export const getFileFromDoc = async ({ collectionConfig, doc, req }: Args): Prom
           serverURL: serverURL || req.origin,
         })
 
-    const file = await getExternalFile({
+    const file = await downloadFileToBuffer({
       data: { filename: doc.filename, url: fileUrl } as FileData,
       req,
       uploadConfig,

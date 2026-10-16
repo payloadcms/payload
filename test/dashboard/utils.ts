@@ -2,7 +2,7 @@
 
 import type { WidgetWidth } from 'payload'
 
-import { expect, type Page } from '@playwright/test'
+import { expect, type Locator, type Page } from '@playwright/test'
 
 export class DashboardHelper {
   private page: Page
@@ -23,7 +23,15 @@ export class DashboardHelper {
     return this.page.locator('.step-nav__last')
   }
 
+  get stepNavButtons() {
+    return this.stepNavLast.locator(
+      '.dashboard-breadcrumb-dropdown__actions button, .dashboard-breadcrumb-dropdown > .popup__trigger-wrap > button',
+    )
+  }
+
   widgetByPos = (pos: number) => this.page.locator(`.modular-dashboard > :nth-child(${pos})`)
+
+  getDeleteWidgetButton = (widget: Locator) => widget.locator('.widget-wrapper__delete-btn')
 
   getSnapshot = async (): Promise<[slug: string, width: WidgetWidth][]> => {
     const widgets: [slug: string, width: WidgetWidth][] = await Promise.all(
@@ -170,32 +178,32 @@ export class DashboardHelper {
   }
 
   setEditing = async () => {
-    await this.stepNavLast.locator('button').click()
-    await this.page.getByRole('button', { name: 'Edit Dashboard' }).click()
+    await this.stepNavButtons.click()
+    await this.page.getByRole('menuitem', { name: 'Edit Dashboard' }).click()
     await expect(this.stepNavLast.getByText('Editing Dashboard')).toBeVisible()
   }
 
   resetLayout = async () => {
-    await this.stepNavLast.locator('button').click()
-    await this.page.getByRole('button', { name: 'Reset Layout' }).click()
+    await this.stepNavButtons.click()
+    await this.page.getByRole('menuitem', { name: 'Reset Layout' }).click()
   }
 
   assertIsEditing = async (shouldBe: boolean) => {
     if (shouldBe) {
       await expect(this.stepNavLast.getByText('Editing Dashboard')).toBeVisible()
-      await expect(this.stepNavLast.locator('button')).toHaveCount(3)
-      await expect(this.stepNavLast.locator('button').nth(0)).toHaveText('Add +')
-      await expect(this.stepNavLast.locator('button').nth(1)).toHaveText('Save changes')
-      await expect(this.stepNavLast.locator('button').nth(2)).toHaveText('Cancel')
+      await expect(this.stepNavButtons).toHaveCount(3)
+      await expect(this.stepNavButtons.nth(0)).toHaveText('Add +')
+      await expect(this.stepNavButtons.nth(1)).toHaveText('Save changes')
+      await expect(this.stepNavButtons.nth(2)).toHaveText('Cancel')
     } else {
-      await expect(this.stepNavLast.locator('button')).toHaveCount(1)
+      await expect(this.stepNavButtons).toHaveCount(1)
       await expect(this.stepNavLast.getByLabel('Dashboard')).toBeVisible()
     }
   }
 
   addWidget = async (slug: string) => {
     const widgetsCount = await this.widgets.count()
-    await this.stepNavLast.locator('button').nth(0).click()
+    await this.stepNavButtons.nth(0).click()
     await this.page.locator('.drawer__content').getByText(slug).click()
     await expect(this.widgets).toHaveCount(widgetsCount + 1)
     // Wait for highlight animation to complete (1.5s animation + buffer)
@@ -203,7 +211,7 @@ export class DashboardHelper {
   }
 
   openAddWidgetDrawer = async () => {
-    await this.stepNavLast.locator('button').nth(0).click()
+    await this.stepNavButtons.nth(0).click()
     await expect(this.page.locator('.drawer__content')).toBeVisible()
   }
 
@@ -225,7 +233,7 @@ export class DashboardHelper {
     const widget = this.widgetByPos(position)
     const widgetDomElem = await widget.elementHandle()
     await widget.hover()
-    await widget.getByText('Delete widget').click()
+    await this.getDeleteWidgetButton(widget).click()
     expect(await widgetDomElem?.isHidden()).toBe(true)
     await expect(this.widgets).toHaveCount(widgetsCount - 1)
   }
@@ -245,7 +253,7 @@ export class DashboardHelper {
   }
 
   cancelEditing = async () => {
-    await this.stepNavLast.locator('button').nth(2).click()
+    await this.stepNavButtons.nth(2).click()
     const confirmButton = this.page.locator(
       '#cancel-dashboard-changes [data-dialog-action="confirm"]',
     )
@@ -258,7 +266,7 @@ export class DashboardHelper {
   saveChangesAndValidate = async () => {
     const snapshot = await this.getSnapshot()
     await this.assertIsEditing(true)
-    await this.stepNavLast.locator('button').nth(1).click()
+    await this.stepNavButtons.nth(1).click()
     await this.assertIsEditing(false)
     // The widget set must be fully (re)rendered before `validateLayout` measures
     // bounding boxes — both after the edit→view re-render and after the reload,
@@ -274,7 +282,8 @@ export class DashboardHelper {
 
   moveWidget = async (from: number, to: number, place: 'after' | 'before' = 'before') => {
     const srcWidget = this.widgetByPos(from)
-    const srcWidgetBox = (await srcWidget.boundingBox())!
+    await srcWidget.hover()
+    const srcWidgetBox = (await srcWidget.locator('.widget-wrapper__drag-btn').boundingBox())!
     const targetWidget = this.widgetByPos(to)
     const snapshot = await this.getSnapshot()
 

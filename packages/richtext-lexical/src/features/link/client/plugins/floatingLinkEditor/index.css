@@ -13,7 +13,6 @@
     inset-inline-start: 0;
     opacity: 0;
     border-radius: var(--radius-large);
-    transition: opacity 0.2s;
     will-change: transform;
     overflow: clip;
     box-shadow: var(--elevation-100-canvas);
@@ -30,7 +29,6 @@
       border: 0;
       outline: 0;
       position: relative;
-      font-family: var(--font-body);
 
       > .icon:first-child {
         color: var(--color-icon-onbrand-secondary);

@@ -82,9 +82,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
   const [editor] = useLexicalComposerContext()
 
   const { enabledCollectionSlugs } = useEnabledRelationships({
-    collectionSlugsBlacklist: clientProps?.disabledCollections,
-    collectionSlugsWhitelist: clientProps?.enabledCollections,
-    uploads: true,
+    enabledCollectionSlugs: clientProps.enabledCollectionSlugs,
   })
 
   const {
@@ -172,15 +170,20 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
       throw new Error('UploadPlugin: UploadNode not registered on editor')
     }
 
+    const pendingUploads = new WeakSet<NonNullable<Internal_UploadData['pending']>>()
+
     return mergeRegister(
       /**
        * Handle auto-uploading files if you copy & paste an image dom element from the clipboard
        */
       editor.registerNodeTransform(UploadNode, (node) => {
         const nodeData: Internal_UploadData = node.getData()
-        if (!nodeData?.pending) {
+        if (!nodeData?.pending || pendingUploads.has(nodeData.pending)) {
           return
         }
+
+        // Transforms can run again before the pending node is replaced. Queue each upload once.
+        pendingUploads.add(nodeData.pending)
 
         async function upload() {
           let transformedImage: FileToUpload | null = null
