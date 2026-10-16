@@ -1,7 +1,7 @@
 @layer payload-default {
   .collection-edit:has(.live-preview-window--is-expanded) {
     .document-fields {
-      width: 0;
+      display: none;
     }
   }
 
