@@ -11,7 +11,7 @@ import { APIError } from 'payload'
 import { buildMcpServer } from '../mcp/buildMcpServer.js'
 import { getPluginConfig } from '../utils/getPluginConfig.js'
 import { getAuthorizedMCP } from './access.js'
-import { oauthChallenge } from './oauth.js'
+import { getMCPResource, oauthChallenge } from './oauth.js'
 
 export const mcpEndpoint: PayloadHandler = async (req) => {
   if (!req.url) {
@@ -19,6 +19,8 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
   }
 
   req.payloadAPI = 'MCP' as const
+  // Lets auth strategies check that an OAuth access token was issued for this MCP server
+  req.context.mcp = { resource: getMCPResource({ config: req.payload.config, url: req.url }) }
 
   const pluginConfig = getPluginConfig({ config: req.payload.config })
   const overrideAccessParam = new URL(req.url).searchParams.get('overrideAccess')

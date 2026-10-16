@@ -46,6 +46,13 @@ export const oauthChallenge = ({ req }: { req: PayloadRequest }): Response =>
     },
   )
 
+/**
+ * The MCP endpoint's address, as advertised in the metadata's `resource`. Clients send it when
+ * they sign in, and authorization servers that support it put it in the access token's audience.
+ */
+export const getMCPResource = ({ config, url }: { config: SanitizedConfig; url: string }): string =>
+  getPluginConfig({ config }).oauth?.resource ?? getMCPURL({ config, url })
+
 const getMCPURL = ({ config, url }: { config: SanitizedConfig; url: string }): string =>
   new URL(`${config.routes.api}/mcp`, config.serverURL || url).href
 
@@ -62,7 +69,7 @@ const getMetadataResponse = async ({
     return new Response(null, { status: 404 })
   }
 
-  const { authorizationServers, resource, scopes } = pluginConfig.oauth
+  const { authorizationServers, scopes } = pluginConfig.oauth
 
   return Response.json(
     {
@@ -71,7 +78,7 @@ const getMetadataResponse = async ({
           ? await authorizationServers()
           : authorizationServers,
       bearer_methods_supported: ['header'],
-      resource: resource ?? getMCPURL({ config, url }),
+      resource: getMCPResource({ config, url }),
       scopes_supported: scopes,
     } satisfies OAuthProtectedResourceMetadata,
     // Public document, readable by browser-based MCP clients on any origin
