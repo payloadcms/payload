@@ -1194,8 +1194,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expectPaintedFocus({ page })
     })
 
-    // TODO: Re-enable with enhanced-contrast coverage after https://github.com/payloadcms/payload/pull/18354.
-    test.skip('should open the dashboard pin picker by keyboard and restore focus after cancel or selection', async () => {
+    test('should open the dashboard pin picker by keyboard and restore focus after cancel or selection', async () => {
       test.slow()
       const testInfo = test.info()
 
@@ -1281,7 +1280,8 @@ test.describe('WCAG 2.2 Level AA', () => {
       expect(pins.value.items).toContainEqual({ id: document.id, collectionSlug: 'posts' })
       const widgetResults = await runAxeScan({ include: ['.activity-widget'], page, testInfo })
 
-      expect(widgetResults.violations).toEqual([])
+      // TODO: Include color contrast after https://github.com/payloadcms/payload/pull/18354.
+      expect(widgetResults.violations.filter(({ id }) => id !== 'color-contrast')).toEqual([])
     })
 
     test('should paginate and unpin dashboard documents with the keyboard while retaining focus', async () => {
