@@ -64,6 +64,10 @@
       "import": "./src/exports/views.ts",
       "types": "./src/exports/views.ts",
       "default": "./src/exports/views.ts"
+    },
+    "./withPayload/instantLoader": {
+      "import": "./src/withPayload/instantLoader.js",
+      "default": "./src/withPayload/instantLoader.js"
     }
   },
   "publishConfig": {
@@ -104,6 +108,10 @@
         "import": "./dist/exports/views.js",
         "types": "./dist/exports/views.d.ts",
         "default": "./dist/exports/views.js"
+      },
+      "./withPayload/instantLoader": {
+        "import": "./dist/withPayload/instantLoader.js",
+        "default": "./dist/withPayload/instantLoader.js"
       }
     },
     "registry": "https://registry.npmjs.org/"
