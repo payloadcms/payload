@@ -1,6 +1,6 @@
 import type { PayloadRequest, SanitizedPermissions } from 'payload'
 
-import { getAccessResults, UnauthorizedError } from 'payload'
+import { executeAuthStrategies, getAccessResults, UnauthorizedError } from 'payload'
 import { extractBearerToken } from 'payload/shared'
 
 import type { AuthorizedMCP, MCPItem } from '../types.js'
@@ -42,7 +42,8 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
     const hasAuthorization = headers.has('Authorization')
 
     headers.set('DisableAutologin', 'true')
-    req.user = (await req.payload.auth({ headers, req })).user
+    // Not `payload.auth()`, which also computes permissions that filterMCPItems computes anyway
+    req.user = (await executeAuthStrategies({ headers, payload: req.payload, req })).user
 
     // Only bearer tokens that no auth strategy accepted reach the hook, e.g. an OAuth access token.
     // API keys use the `<collection> API-Key <key>` scheme instead of `Bearer`, so they never do.
