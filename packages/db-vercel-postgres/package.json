@@ -1,13 +1,8 @@
 {
   "name": "@payloadcms/db-vercel-postgres",
-  "version": "4.0.0-beta.1",
+  "version": "4.0.0-beta.2",
   "description": "Vercel Postgres adapter for Payload",
   "homepage": "https://payloadcms.com",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/db-vercel-postgres"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -17,8 +12,19 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/db-vercel-postgres"
+  },
+  "files": [
+    "dist",
+    "mock.js"
+  ],
   "type": "module",
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts",
@@ -51,12 +57,42 @@
       "default": "./src/drizzle-proxy/relations.ts"
     }
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "files": [
-    "dist",
-    "mock.js"
-  ],
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./migration-utils": {
+        "import": "./dist/exports/migration-utils.js",
+        "types": "./dist/exports/migration-utils.d.ts",
+        "default": "./dist/exports/migration-utils.js"
+      },
+      "./drizzle": {
+        "import": "./dist/drizzle-proxy/index.js",
+        "types": "./dist/drizzle-proxy/index.d.ts",
+        "default": "./dist/drizzle-proxy/index.js"
+      },
+      "./drizzle/pg-core": {
+        "import": "./dist/drizzle-proxy/pg-core.js",
+        "types": "./dist/drizzle-proxy/pg-core.d.ts",
+        "default": "./dist/drizzle-proxy/pg-core.js"
+      },
+      "./drizzle/node-postgres": {
+        "import": "./dist/drizzle-proxy/node-postgres.js",
+        "types": "./dist/drizzle-proxy/node-postgres.d.ts",
+        "default": "./dist/drizzle-proxy/node-postgres.js"
+      },
+      "./drizzle/relations": {
+        "import": "./dist/drizzle-proxy/relations.js",
+        "types": "./dist/drizzle-proxy/relations.d.ts",
+        "default": "./dist/drizzle-proxy/relations.js"
+      }
+    }
+  },
   "scripts": {
     "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo  && pnpm build:types && pnpm build:swc && pnpm build:esbuild && pnpm renamePredefinedMigrations",
     "build:debug": "pnpm build",
@@ -89,41 +125,5 @@
   },
   "peerDependencies": {
     "payload": "workspace:*"
-  },
-  "publishConfig": {
-    "exports": {
-      ".": {
-        "import": "./dist/index.js",
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "./migration-utils": {
-        "import": "./dist/exports/migration-utils.js",
-        "types": "./dist/exports/migration-utils.d.ts",
-        "default": "./dist/exports/migration-utils.js"
-      },
-      "./drizzle": {
-        "import": "./dist/drizzle-proxy/index.js",
-        "types": "./dist/drizzle-proxy/index.d.ts",
-        "default": "./dist/drizzle-proxy/index.js"
-      },
-      "./drizzle/pg-core": {
-        "import": "./dist/drizzle-proxy/pg-core.js",
-        "types": "./dist/drizzle-proxy/pg-core.d.ts",
-        "default": "./dist/drizzle-proxy/pg-core.js"
-      },
-      "./drizzle/node-postgres": {
-        "import": "./dist/drizzle-proxy/node-postgres.js",
-        "types": "./dist/drizzle-proxy/node-postgres.d.ts",
-        "default": "./dist/drizzle-proxy/node-postgres.js"
-      },
-      "./drizzle/relations": {
-        "import": "./dist/drizzle-proxy/relations.js",
-        "types": "./dist/drizzle-proxy/relations.d.ts",
-        "default": "./dist/drizzle-proxy/relations.js"
-      }
-    },
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts"
   }
 }

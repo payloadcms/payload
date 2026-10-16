@@ -230,7 +230,8 @@ export type MigrateDownArgs = {
 
 declare module 'payload' {
   export interface DatabaseAdapter
-    extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool' | 'prodMigrations'>,
+    extends
+      Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool' | 'prodMigrations'>,
       SQLiteDrizzleAdapter {
     beginTransaction: (options?: SQLiteTransactionConfig) => Promise<null | number | string>
     busyTimeout: number

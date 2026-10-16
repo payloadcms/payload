@@ -17,10 +17,7 @@ export type ListDrawerContextProps = {
     collectionSlug?: CollectionSlug,
   ) => void
   readonly onQueryChange?: (query: ListQuery) => void
-  readonly onSelect?: (args: {
-    collectionSlug: CollectionSlug
-    doc: Data
-  }) => void
+  readonly onSelect?: (args: { collectionSlug: CollectionSlug; doc: Data }) => void
   readonly selectedOption?: Option<CollectionSlug>
   readonly setSelectedOption?: (option: Option<CollectionSlug>) => void
 }

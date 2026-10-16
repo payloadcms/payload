@@ -5,6 +5,8 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
+import { createAnnotationInteraction } from './annotation-demo.mjs'
+import { createPresentation } from './presentation-demo.mjs'
 import { createScrollInteraction } from './scroll-demo.mjs'
 
 const DEFAULT_BASE_URL = 'http://localhost:3000'
@@ -108,6 +110,7 @@ export async function recordDemo({
   interactionPauseMs = DEFAULT_INTERACTION_PAUSE_MS,
   label,
   mouseMoveMs = DEFAULT_MOUSE_MOVE_MS,
+  onOpeningReady,
   output,
   scenario,
   viewport,
@@ -118,6 +121,7 @@ export async function recordDemo({
     interactionPauseMs,
     label,
     mouseMoveMs,
+    onOpeningReady,
     output,
     pauseScale: 1,
     scenario,
@@ -161,6 +165,7 @@ async function executeDemo({
   interactionPauseMs,
   label,
   mouseMoveMs,
+  onOpeningReady,
   output,
   pauseScale,
   scenario,
@@ -176,31 +181,50 @@ async function executeDemo({
     throw new Error(`Scenario must default-export a function: ${scenario}`)
   }
 
+  const change = scenarioModule.presentation?.change
+
+  if (
+    !['Feature', 'Fix'].includes(change?.kind) ||
+    typeof change.title !== 'string' ||
+    !change.title.trim() ||
+    typeof change.description !== 'string' ||
+    !change.description.trim()
+  ) {
+    throw new Error(
+      'Every scenario must export presentation with a change kind, title, and description; recording chrome cannot be disabled',
+    )
+  }
+
   const { chromium, expect } = await import('@playwright/test')
   const rawVideoDirectory = await mkdtemp(path.join(tmpdir(), 'payload-pr-demo-'))
   const browser = await chromium.launch({ headless: true })
-  const context = await browser.newContext(
-    output
-      ? {
-          recordVideo: { dir: rawVideoDirectory, size: viewport },
-          viewport,
-        }
-      : { viewport },
-  )
+  const recordedViewport = scenarioModule.presentation.canvas ?? { width: 1600, height: 1000 }
+  const context = await browser.newContext({
+    viewport: recordedViewport,
+    colorScheme: scenarioModule.presentation.theme ?? 'light',
+    ...(output ? { recordVideo: { dir: rawVideoDirectory, size: recordedViewport } } : {}),
+  })
 
   await context.addInitScript(() => {
     window.addEventListener('DOMContentLoaded', () => {
+      if (document.documentElement.hasAttribute('data-pr-demo-stage')) return
       const cursor = document.createElement('div')
       cursor.setAttribute('data-pr-demo-cursor', 'mac-arrow')
+      cursor.setAttribute('aria-hidden', 'true')
+      cursor.setAttribute('popover', 'manual')
       cursor.innerHTML = `<svg aria-hidden="true" height="23" viewBox="0 0 28 36" width="18" xmlns="http://www.w3.org/2000/svg">
         <path d="M2 2.2V27l6.7-6.4 5.1 12.7 5-2-5.2-12.2H23L2 2.2Z" fill="#111827" stroke="#fff" stroke-linejoin="round" stroke-width="2.2" />
       </svg>`
       Object.assign(cursor.style, {
-        filter: 'drop-shadow(0 1px 2px rgb(0 0 0 / 65%))',
+        background: 'transparent',
+        border: '0',
         height: '23px',
         insetBlockStart: '0',
         insetInlineStart: '0',
+        margin: '0',
         opacity: '0',
+        overflow: 'visible',
+        padding: '0',
         pointerEvents: 'none',
         position: 'fixed',
         transform: 'translate(0, 0)',
@@ -210,62 +234,180 @@ async function executeDemo({
       })
       const cursorGraphic = cursor.querySelector('svg')
       Object.assign(cursorGraphic.style, {
+        filter: 'drop-shadow(0 1px 2px rgb(0 0 0 / 65%))',
         transformOrigin: '2px 2px',
         transition: 'transform 100ms ease',
       })
       document.documentElement.append(cursor)
+      cursor.showPopover()
+
+      const promoteCursor = () => {
+        if (cursor.matches(':popover-open')) cursor.hidePopover()
+        cursor.showPopover()
+      }
 
       document.addEventListener(
-        'mousemove',
+        'toggle',
         (event) => {
-          cursor.style.opacity = '1'
-          cursor.style.transform = `translate(${event.clientX}px, ${event.clientY}px)`
+          if (event.target !== cursor && event.newState === 'open') promoteCursor()
         },
-        { passive: true },
+        true,
       )
-      document.addEventListener('mousedown', () => {
-        cursorGraphic.style.transform = 'scale(0.82)'
+      new MutationObserver((records) => {
+        if (records.some(({ target }) => target instanceof HTMLDialogElement && target.open)) {
+          promoteCursor()
+        }
+      }).observe(document.documentElement, {
+        attributeFilter: ['open'],
+        attributes: true,
+        subtree: true,
       })
-      document.addEventListener('mouseup', () => {
-        cursorGraphic.style.transform = 'scale(1)'
-      })
+
+      let pointer = { x: 0, y: 0 }
+      let clickPulse
+      let clickPoint
+      let clickAnimation
+      const positionClickPulse = () => {
+        if (!clickPulse) return
+        clickPulse.style.left = `${clickPoint.x - pointer.x}px`
+        clickPulse.style.top = `${clickPoint.y - pointer.y}px`
+      }
+      const positionCursor = ({ clientX, clientY }) => {
+        pointer = { x: clientX, y: clientY }
+        promoteCursor()
+        cursor.style.opacity = '1'
+        cursor.style.transform = `translate(${clientX}px, ${clientY}px)`
+        positionClickPulse()
+      }
+      document.addEventListener('mousemove', positionCursor, { passive: true })
+      document.addEventListener(
+        'mousedown',
+        (event) => {
+          positionCursor(event)
+          cursorGraphic.style.transform = 'scale(0.82)'
+          clickAnimation?.cancel()
+          clickPulse?.remove()
+          const pulse = document.createElement('span')
+          pulse.setAttribute('data-pr-demo-click', '')
+          pulse.setAttribute('aria-hidden', 'true')
+          Object.assign(pulse.style, {
+            position: 'absolute',
+            width: '28px',
+            height: '28px',
+            boxSizing: 'border-box',
+            border: '2px solid var(--color-bg-brand, #0d99ff)',
+            borderRadius: '50%',
+            background: 'color-mix(in srgb, var(--color-bg-brand, #0d99ff) 12%, transparent)',
+            pointerEvents: 'none',
+            transform: 'translate(-50%, -50%)',
+            zIndex: '-1',
+          })
+          clickPulse = pulse
+          clickPoint = { ...pointer }
+          cursor.prepend(pulse)
+          positionClickPulse()
+          const isReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches
+          const animation = pulse.animate(
+            isReducedMotion
+              ? [{ opacity: 0.9 }, { opacity: 0.9, offset: 0.7 }, { opacity: 0 }]
+              : [
+                  { opacity: 0.9, transform: 'translate(-50%, -50%) scale(0.55)' },
+                  { opacity: 0.55, offset: 0.5 },
+                  { opacity: 0, transform: 'translate(-50%, -50%) scale(1.4)' },
+                ],
+            { duration: 420, easing: 'ease-out' },
+          )
+          clickAnimation = animation
+          animation.onfinish = () => {
+            pulse.remove()
+            if (clickPulse === pulse) {
+              clickPulse = undefined
+              clickAnimation = undefined
+            }
+          }
+        },
+        true,
+      )
+      document.addEventListener(
+        'mouseup',
+        () => {
+          cursorGraphic.style.transform = 'scale(1)'
+        },
+        true,
+      )
     })
   })
 
-  const page = await context.newPage()
-  const video = output ? page.video() : undefined
+  const recordedPage = await context.newPage()
+  const recordingStartedAt = performance.now()
+  const video = output ? recordedPage.video() : undefined
+  let presentation
   const resolvedOutput = output ? path.resolve(output) : undefined
   const resolvedScreenshotOutput = screenshotOutput ? path.resolve(screenshotOutput) : undefined
-  const pointerInteractions = createPointerInteractions({
-    interactionPauseMs,
-    mouseMoveMs,
-    page,
-  })
+  let isOpeningReady = false
   let scenarioError
 
   try {
+    presentation = await createPresentation({
+      page: recordedPage,
+      options: scenarioModule.presentation,
+      viewport,
+      baseURL,
+      pauseScale,
+      startedAt: recordingStartedAt,
+    })
+    const page = presentation.appPage
+    const pointerInteractions = createPointerInteractions({
+      interactionPauseMs,
+      mouseMoveMs,
+      page,
+    })
+    const annotationInteractions = createAnnotationInteraction({ presentation })
     await scenarioModule.default({
+      clearAnnotation: annotationInteractions.hideAnnotation,
+      resizeWindow: presentation.resizeWindow,
+      setAnnotation: (annotation) =>
+        annotation === null
+          ? annotationInteractions.hideAnnotation()
+          : annotationInteractions.showAnnotation(annotation),
       baseURL: parsedBaseURL.toString().replace(/\/$/, ''),
       click: pointerInteractions.click,
       expect,
       fixture,
+      hideAnnotation: annotationInteractions.hideAnnotation,
       label,
       moveCursor: pointerInteractions.moveCursor,
       page,
       pause: (milliseconds = 700) => page.waitForTimeout(milliseconds * pauseScale),
-      scroll: createScrollInteraction({ moveCursor: pointerInteractions.moveCursor, page }),
+      ready: async () => {
+        if (isOpeningReady) throw new Error('Scenario may call ready() only once')
+        isOpeningReady = true
+        await presentation.flush()
+        onOpeningReady?.((performance.now() - presentation.startedAt) / 1000)
+        await page.waitForTimeout(1200 * pauseScale)
+      },
+      scroll: createScrollInteraction({
+        moveCursor: pointerInteractions.moveCursor,
+        page: recordedPage,
+      }),
+      showAnnotation: annotationInteractions.showAnnotation,
     })
+    if (output && !isOpeningReady) {
+      throw new Error('Recording scenario must call ready() after its opening state is visible')
+    }
     if (trailingPauseMs > 0) {
       await page.waitForTimeout(trailingPauseMs)
     }
+    await presentation.flush()
     if (resolvedScreenshotOutput) {
       await mkdir(path.dirname(resolvedScreenshotOutput), { recursive: true })
-      await page.screenshot({ path: resolvedScreenshotOutput })
+      await recordedPage.screenshot({ path: resolvedScreenshotOutput })
     }
   } catch (error) {
     scenarioError = error
   } finally {
     try {
+      await presentation?.stop()
       if (video && resolvedOutput) {
         await mkdir(path.dirname(resolvedOutput), { recursive: true })
         const saveVideo = video.saveAs(resolvedOutput)
@@ -302,7 +444,22 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
       throw new Error('Cannot move the demo cursor to an element without a bounding box')
     }
 
-    const relativePosition = position ?? { x: box.width / 2, y: box.height / 2 }
+    let relativePosition = { x: box.width / 2, y: box.height / 2 }
+    if (position) {
+      const localBox = await locator.evaluate((element) => {
+        const rect = element.getBoundingClientRect()
+        return {
+          width: rect.width,
+          height: rect.height,
+          borderX: element.clientLeft,
+          borderY: element.clientTop,
+        }
+      })
+      relativePosition = {
+        x: (position.x + localBox.borderX) * (box.width / localBox.width),
+        y: (position.y + localBox.borderY) * (box.height / localBox.height),
+      }
+    }
     const targetPosition = {
       x: box.x + relativePosition.x,
       y: box.y + relativePosition.y,
@@ -342,7 +499,12 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
     } = {},
   ) => {
     await moveCursor(locator, { duration, pauseAfter: before, position })
-    await locator.click(position ? { position } : undefined)
+    if (position) {
+      // Click at the same outer-page point as the cursor, including iframe scaling.
+      await page.mouse.click(pointerPosition.x, pointerPosition.y)
+    } else {
+      await locator.click()
+    }
 
     if (after > 0) {
       await page.waitForTimeout(after)
@@ -362,8 +524,8 @@ Options:
   --label TEXT         Safe output label (default: ${DEFAULT_LABEL})
   --mouse-move-ms MS   Smooth cursor travel time (default: ${DEFAULT_MOUSE_MOVE_MS})
   --output PATH        WebM output (default: /tmp/payload-pr-demo-<label>.webm)
-  --viewport WxH       Recording viewport (default: 1440x900)
-  --scenario PATH      Scenario module with a default-exported async function
+  --viewport WxH       Initial application viewport inside chrome (default: 1440x900)
+  --scenario PATH      Module exporting presentation metadata and a default async function
   --help               Show this help`)
 }
 

@@ -263,6 +263,8 @@ visual('renders the posts list view', async () => {
 
 - `pnpm run lint` - Run linter across all packages
 - `pnpm run lint:fix` - Fix linting issues
+- `pnpm run format` - Format the repo with [oxfmt](https://oxc.rs/docs/guide/usage/formatter) (config: `oxfmt.config.ts`)
+- `pnpm run format:check` - Check formatting (runs in CI)
 
 ## Internationalization
 
