@@ -1,0 +1,17 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": false,
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "rootDir": ".",
+    "types": ["node", "vite/client", "@vitejs/plugin-rsc/types"]
+  },
+  "include": ["."],
+  "references": [
+    { "path": "../../payload" },
+    { "path": "../../richtext-lexical" },
+    { "path": "../../translations" },
+    { "path": "../../ui" }
+  ]
+}

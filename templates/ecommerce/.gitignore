@@ -41,3 +41,5 @@ next-env.d.ts
 
 public/media
 
+# Custom admin components compiled by @payloadcms/admin-runtime
+/.payload

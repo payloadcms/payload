@@ -72,6 +72,16 @@ export const withPayload = (nextConfig = {}, options = {}) => {
        */
       silenceDeprecations: [...(nextConfig.sassOptions?.silenceDeprecations || []), 'import'],
     },
+    outputFileTracingIncludes: {
+      ...(nextConfig.outputFileTracingIncludes || {}),
+      // The prebuilt admin (`@payloadcms/admin-runtime`) and the custom components it compiled are
+      // loaded from disk at runtime, out of the bundler's sight, so tracing can't find them.
+      '**/*': [
+        ...(nextConfig.outputFileTracingIncludes?.['**/*'] || []),
+        './node_modules/@payloadcms/admin-runtime/**/*',
+        './.payload/admin/**/*',
+      ],
+    },
     outputFileTracingExcludes: {
       ...(nextConfig.outputFileTracingExcludes || {}),
       '**/*': [

@@ -46,6 +46,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
+    "@payloadcms/admin-runtime": "3.82.1",
     "@payloadcms/db-mongodb": "3.82.1",
     "@payloadcms/db-postgres": "3.82.1",
     "@payloadcms/db-sqlite": "3.82.1",
