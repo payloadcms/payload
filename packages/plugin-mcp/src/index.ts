@@ -14,6 +14,13 @@ declare module 'payload' {
     /** After the plugin's `plugin` callback runs, `options` holds the sanitized config. */
     '@payloadcms/plugin-mcp': MCPPluginConfig
   }
+  export interface RequestContext {
+    /** Set on MCP requests before they're authenticated. */
+    mcp?: {
+      /** The MCP endpoint's address, which OAuth access tokens for MCP are issued for. */
+      resource: string
+    }
+  }
 }
 
 export type { AuthorizedMCP, MCPPluginConfig, SanitizedMCPPluginConfig }
