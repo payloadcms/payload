@@ -7,5 +7,6 @@ export class InvalidFieldName extends APIError {
     super(
       `Field ${field.label} has invalid name '${fieldName}'. Field names can not include periods (.) and must be alphanumeric.`,
     )
+    this.name = 'InvalidFieldName'
   }
 }

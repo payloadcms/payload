@@ -12,5 +12,6 @@ export class FileRetrievalError extends APIError {
       msg += ` ${message}`
     }
     super(msg, httpStatus.INTERNAL_SERVER_ERROR)
+    this.name = 'FileRetrievalError'
   }
 }
