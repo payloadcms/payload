@@ -39,14 +39,20 @@ export const oauthProtectedResourceHandler =
  * Answers an unauthenticated MCP request with a challenge linking to the protected resource
  * metadata, which starts the client's OAuth flow.
  */
-export const oauthChallenge = ({ req }: { req: PayloadRequest }): Response =>
-  bearerAuthChallengeResponse(
+export const oauthChallenge = ({ req }: { req: PayloadRequest }): Response => {
+  const response = bearerAuthChallengeResponse(
     new OAuthError(OAuthErrorCode.InvalidToken, req.t('error:unauthorized')),
     {
       requiredScopes: getPluginConfig({ config: req.payload.config }).oauth?.scopes,
       resourceMetadataUrl: `${getMCPURL({ config: req.payload.config, url: req.url! })}/oauth-protected-resource`,
     },
   )
+
+  // Lets browser-based MCP clients read the challenge, when Payload's `cors` setting allows them
+  response.headers.set('Access-Control-Expose-Headers', 'WWW-Authenticate')
+
+  return response
+}
 
 /**
  * The MCP endpoint's address, as advertised in the metadata's `resource`. Clients send it when
