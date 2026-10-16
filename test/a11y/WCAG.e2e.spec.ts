@@ -1275,9 +1275,11 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(collectionInput).toHaveAccessibleName('Select a Collection to Browse')
       await collectionInput.press('ArrowDown')
       await expect(
-        getSelectMenu({ page }).getByText(/pinned documents|preferences|locked documents/i),
+        getSelectMenu({ page }).getByText(
+          /pinned documents|preferences|locked documents|LLM instructions/i,
+        ),
       ).toHaveCount(0)
-      await expect(getSelectMenu({ page }).getByRole('option', { name: /folder/i })).toHaveCount(1)
+      await expect(getSelectMenu({ page }).getByRole('option', { name: /folder/i })).toHaveCount(0)
       await collectionInput.fill('Post')
       await collectionInput.press('ArrowDown')
       await collectionInput.press('Enter')
@@ -1483,7 +1485,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         await page.goto(formatAdminURL({ adminRoute: '/admin', path, serverURL }))
 
         const trigger = page.getByRole('button', { name: 'More options', exact: true })
-        const item = page.getByRole('menuitem', { name: 'Edit LLM instructions', exact: true })
+        const item = page.getByRole('menuitem', { name: 'Edit agent instructions', exact: true })
 
         await trigger.focus()
         await page.keyboard.press('Enter')
@@ -4592,6 +4594,14 @@ test.describe('WCAG 2.2 Level AA', () => {
 
       await expect(editor).toHaveAccessibleName('Additional instructions')
       await expect(editor).toBeEditable()
+      await editor.fill('')
+      await expect(editor).toHaveAttribute(
+        'aria-placeholder',
+        "Start typing, or press '/' for commands...",
+      )
+      await expect(
+        field.getByText("Start typing, or press '/' for commands...", { exact: true }),
+      ).toBeVisible()
 
       const editableScan = await runAxeScan({ include: ['.llm-instructions'], page, testInfo })
 
@@ -4611,6 +4621,30 @@ test.describe('WCAG 2.2 Level AA', () => {
       const readOnlyScan = await runAxeScan({ include: ['.llm-instructions'], page, testInfo })
 
       expect(readOnlyScan.violations).toEqual([])
+    })
+
+    test('should omit typing prompts from empty read-only system instructions', async () => {
+      await page.goto(
+        formatAdminURL({
+          adminRoute: '/admin',
+          path: `/collections/${instructionsCollectionSlug}/global-menu`,
+          serverURL,
+        }),
+      )
+
+      const field = page.locator('.llm-instructions')
+
+      await field
+        .getByRole('tab', { name: 'System instructions (read-only)', exact: true })
+        .press('Enter')
+
+      const editor = field.getByRole('textbox', { name: 'System instructions (read-only)' })
+
+      await expect(editor).toBeVisible()
+      await expect(editor).toBeEmpty()
+      await expect(editor).not.toBeEditable()
+      await expect(editor).not.toHaveAttribute('aria-placeholder')
+      await expect(field.getByText("Start typing, or press '/' for commands...")).toHaveCount(0)
     })
 
     test('should expose a labelled region for expanded collapsible field content', async () => {

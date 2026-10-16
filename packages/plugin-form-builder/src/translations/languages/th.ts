@@ -17,8 +17,7 @@ export const thTranslations: PluginDefaultTranslationsObject = {
     checkboxPlural: 'ช่องช่องทำเครื่องหมาย',
     checkboxSingular: 'ช่องทำเครื่องหมาย',
     checkedByDefault: 'ตรวจสอบโดยค่าเริ่มต้น',
-    chooseConfirmationType:
-      'เลือกว่าจะแสดงข้อความบนเพจหรือเปลี่ยนเส้นทางไปยังหน้าอื่นหลังจากที่ส่งแบบฟอร์มแล้ว',
+    chooseConfirmationType: 'เลือกว่าจะแสดงข้อความบนเพจหรือเปลี่ยนเส้นทางไปยังหน้าอื่นหลังจากที่ส่งแบบฟอร์มแล้ว',
     condition: 'สภาพ',
     confirmationMessage: 'ข้อความยืนยัน',
     confirmationType: 'ประเภทการยืนยัน',

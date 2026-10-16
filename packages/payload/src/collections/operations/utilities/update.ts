@@ -235,11 +235,11 @@ export const updateDocument = async <
   const password = data?.password
   const shouldSavePassword = Boolean(
     password &&
-      collectionConfig.auth &&
-      (!collectionConfig.auth.disableLocalStrategy ||
-        (typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
-          collectionConfig.auth.disableLocalStrategy.enableFields)) &&
-      !isSavingDraft,
+    collectionConfig.auth &&
+    (!collectionConfig.auth.disableLocalStrategy ||
+      (typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
+        collectionConfig.auth.disableLocalStrategy.enableFields)) &&
+    !isSavingDraft,
   )
 
   const publicationHookDoc = buildAllLocalesPublicationHookDoc({

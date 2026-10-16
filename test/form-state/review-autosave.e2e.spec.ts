@@ -153,11 +153,9 @@ test.describe('Superseded autosaves', () => {
     const doc = await createPost()
     const state = await queueAutosaveBehindFormState({ id: doc.id, page })
     const failureMonitor = await page.evaluateHandle(() => {
-      // eslint-disable-next-line no-console
       const originalError = console.error
       let hasParsingError = false
 
-      // eslint-disable-next-line no-console
       console.error = (...args) => {
         if (args[0] === 'Error submitting form' && args[1] instanceof SyntaxError) {
           hasParsingError = true
@@ -170,7 +168,6 @@ test.describe('Superseded autosaves', () => {
       return {
         hasParsingError: () => hasParsingError,
         restore: () => {
-          // eslint-disable-next-line no-console
           console.error = originalError
         },
       }

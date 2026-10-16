@@ -96,6 +96,65 @@ test.describe('Document submission outcomes', () => {
     expect(docs[0]).toMatchObject({ id: createdID, content: 'Saved to the existing document' })
   })
 
+  test('should count a saved draft when slug generation makes its response stale', async ({
+    page,
+  }) => {
+    const suffix = randomUUID()
+    const title = `ok Late ${suffix}`
+    const doc = await payload.create({
+      collection: draftPostsSlug,
+      data: { slug: `original-${suffix}`, _status: 'published', title: `ok Published ${suffix}` },
+      overrideAccess: true,
+    })
+
+    createdIDs.add(doc.id)
+    await page.goto(url.edit(doc.id))
+    await waitForFormReady(page)
+    await expect(page.locator('.status__value')).toHaveText('Published')
+    await expect(page.locator('.pill-version-count')).toHaveText('1')
+    await page.locator('#field-title').fill(title)
+    await page.locator('#field-slug-lock').click()
+
+    const slug = await holdServerFunction({ name: 'slugify', page })
+    const captured = Promise.withResolvers<void>()
+    const released = Promise.withResolvers<void>()
+
+    releases.add(released.resolve)
+    await page.route(`**/api/${draftPostsSlug}/${doc.id}?**`, async (route) => {
+      if (route.request().method() !== 'PATCH') {
+        return route.continue()
+      }
+
+      const response = await route.fetch()
+
+      expect(response.ok()).toBe(true)
+      captured.resolve()
+      await released.promise
+      await route.fulfill({ response })
+    })
+    await page.locator('#field-slug-generate').click()
+    await slug.captured
+    await page.locator('#action-save-draft').click()
+    await captured.promise
+    slug.release()
+    await expect(page.locator('#field-slug')).toHaveValue(`ok-late-${suffix}`)
+    released.resolve()
+    await expect(page.locator('.status__value')).toHaveText('Changed')
+    await expect(page.locator('#document-info-state')).toHaveAttribute('data-version-count', '1')
+    await expect(page.locator('.pill-version-count')).toHaveText('2')
+    await expect(page.locator('#field-slug')).toHaveValue(`ok-late-${suffix}`)
+    await expect(page.locator('#action-save-draft')).toBeEnabled()
+
+    const { docs } = await payload.find({
+      collection: draftPostsSlug,
+      draft: true,
+      overrideAccess: true,
+      where: { id: { equals: doc.id } },
+    })
+
+    expect(docs[0]).toMatchObject({ slug: doc.slug, _status: 'draft', title })
+  })
+
   test('should ignore a create response after its form is reset', async ({ page }) => {
     await page.goto(url.create)
     await waitForFormReady(page)

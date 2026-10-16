@@ -38,6 +38,8 @@ export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
      * Field value changes alone leave this `false`.
      */
     isQueueReset: () => boolean
+    /** Identifies background autosaves; omitted values represent explicit submissions. */
+    requestIntent?: SubmitOptions['requestIntent']
   },
 ) => Promise<FormState | void> | void
 
@@ -79,6 +81,10 @@ export type FormProps = {
   log?: boolean
   onChange?: ((args: { formState: FormState; submitted?: boolean }) => Promise<FormState>)[]
   onSubmit?: (fields: FormState, data: Data) => void
+  /**
+   * Handles successful submissions, including stale explicit document saves that still need metadata updates.
+   * Check `ctx.isCurrent()` before applying response values.
+   */
   onSuccess?: FormOnSuccess
   redirect?: string
   submitted?: boolean

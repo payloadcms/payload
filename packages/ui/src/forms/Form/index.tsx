@@ -525,24 +525,33 @@ export const Form: React.FC<FormProps> = (props) => {
         if (res.status < 400) {
           const hasCreatedDocument = Boolean(
             isDocumentForm &&
-              collectionSlug &&
-              operation === 'create' &&
-              (json?.doc || json?.result)?.id != null,
+            collectionSlug &&
+            operation === 'create' &&
+            (json?.doc || json?.result)?.id != null,
           )
 
-          // A successful create must establish its ID even if an async field update made its values stale.
+          const shouldHandleStaleSuccess =
+            hasCreatedDocument || (isDocumentForm && requestIntent !== 'autosave')
+
+          // Document forms still record explicit saves when newer edits make the response values stale.
           if (
             !requestContext.isCurrent() &&
-            (!hasCreatedDocument || requestContext.isQueueReset())
+            (!shouldHandleStaleSuccess || requestContext.isQueueReset())
           ) {
-            return
+            // Completed explicit saves still count when newer edits prevent merging their values.
+            // Autosaves reconcile stale submissions through onStaleRequest instead.
+            return requestIntent !== 'autosave' && !requestContext.isQueueReset()
+              ? { res }
+              : undefined
           }
 
           let newFormState: FormState | void
           const successSequence = formSequenceRef.current
           const successResetSequence = resetSequenceRef.current
 
-          setSuccessfulSubmitCount((count) => count + 1)
+          if (requestContext.isCurrent() || hasCreatedDocument) {
+            setSuccessfulSubmitCount((count) => count + 1)
+          }
 
           if (typeof onSuccess === 'function') {
             newFormState = await onSuccess(json, {
@@ -550,6 +559,7 @@ export const Form: React.FC<FormProps> = (props) => {
               formState: serializableFormState,
               isCurrent: requestContext.isCurrent,
               isQueueReset: requestContext.isQueueReset,
+              requestIntent,
             })
           }
 
@@ -565,7 +575,9 @@ export const Form: React.FC<FormProps> = (props) => {
               preservePromiseToast = true
               successToast(json.message || t('general:submissionSuccessful'))
             }
-            return
+            return requestIntent !== 'autosave' && !requestContext.isQueueReset()
+              ? { res }
+              : undefined
           }
 
           preservePromiseToast = true

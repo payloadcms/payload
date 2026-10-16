@@ -242,9 +242,8 @@ test.suite('create-payload-app', {}, () => {
       expectLocalPayloadPackages({ projectDir })
 
       // Configure payload config to use postgres (mimics main.ts flow)
-      const { configurePayloadConfig: configureFromLib } = await import(
-        '../../packages/create-payload-app/src/lib/configure-payload-config.js'
-      )
+      const { configurePayloadConfig: configureFromLib } =
+        await import('../../packages/create-payload-app/src/lib/configure-payload-config.js')
       await configureFromLib({
         dbType: 'postgres',
         projectDirOrConfigPath: {
@@ -485,9 +484,8 @@ test.suite('create-payload-app', {}, () => {
       expect(packageJson.dependencies['@payloadcms/db-mongodb']).toBeDefined()
 
       // Now replace with postgres using AST (simulates manual adapter replacement)
-      const { configurePayloadConfig } = await import(
-        '../../packages/create-payload-app/src/lib/ast/payload-config.js'
-      )
+      const { configurePayloadConfig } =
+        await import('../../packages/create-payload-app/src/lib/ast/payload-config.js')
       const payloadConfig = path.resolve(
         projectDir,
         mongoResult.isSrcDir ? 'src/payload.config.ts' : 'payload.config.ts',

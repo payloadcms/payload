@@ -305,11 +305,32 @@ export function DefaultEditView({
       const hasCreatedDocument =
         operation === 'create' && Boolean(collectionSlug) && document?.id != null
 
-      if (ctx && !ctx.isCurrent() && (!hasCreatedDocument || ctx.isQueueReset())) {
+      if (ctx?.isQueueReset()) {
         return
       }
 
       const updatedAt = document?.updatedAt || new Date().toISOString()
+      const recordSaveMetadata = () => {
+        setLastUpdateTime(new Date(updatedAt).getTime())
+
+        // Update stale data check refs after successful save
+        // This allows detecting if another user modifies the document after this save
+        originalUpdatedAtRef.current = updatedAt
+        hasCheckedForStaleDataRef.current = false
+        isSavingRef.current = false
+
+        if (context?.incrementVersionCount !== false) {
+          incrementVersionCount()
+        }
+      }
+
+      if (ctx?.requestIntent !== 'autosave') {
+        recordSaveMetadata()
+      }
+
+      if (ctx && !ctx.isCurrent() && !hasCreatedDocument) {
+        return
+      }
 
       let docPreferences
 
@@ -362,16 +383,8 @@ export function DefaultEditView({
         void refreshCookieAsync()
       }
 
-      setLastUpdateTime(new Date(updatedAt).getTime())
-
-      // Update stale data check refs after successful save
-      // This allows detecting if another user modifies the document after this save
-      originalUpdatedAtRef.current = updatedAt
-      hasCheckedForStaleDataRef.current = false
-      isSavingRef.current = false
-
-      if (context?.incrementVersionCount !== false) {
-        incrementVersionCount()
+      if (ctx?.requestIntent === 'autosave') {
+        recordSaveMetadata()
       }
 
       if (typeof setData === 'function') {
@@ -633,8 +646,8 @@ export function DefaultEditView({
 
   const isFolderCollection = Boolean(
     collectionConfig?.hierarchy &&
-      typeof collectionConfig.hierarchy === 'object' &&
-      collectionConfig.hierarchy.allowHasMany === false,
+    typeof collectionConfig.hierarchy === 'object' &&
+    collectionConfig.hierarchy.allowHasMany === false,
   )
 
   const documentControlsProps: Omit<React.ComponentProps<typeof DocumentControls>, 'variant'> = {

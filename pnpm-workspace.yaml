@@ -14,8 +14,8 @@ catalog:
   copyfiles: '2.4.1'
   cross-env: '10.1.0'
   dotenv: '16.4.7'
-  react: '19.3.0'
-  react-dom: '19.3.0'
+  react: '19.3.1'
+  react-dom: '19.3.1'
   typescript: 'npm:@typescript/typescript6@6.0.2'
   zod: '^4.6.0'
 
@@ -58,23 +58,6 @@ allowBuilds:
   workerd: true
 
 minimumReleaseAgeExclude:
-  - '@faceless-ui/modal@3.0.2'
-  - '@modelcontextprotocol/client@2.3.1'
-  - '@modelcontextprotocol/core@2.3.1'
-  - '@modelcontextprotocol/server@2.3.1'
-  - '@next/bundle-analyzer@16.4.0'
-  - '@next/env@16.4.0'
-  - '@next/eslint-plugin-next@16.4.0'
-  - '@next/swc-darwin-arm64@16.4.0'
-  - '@next/swc-darwin-x64@16.4.0'
-  - '@next/swc-linux-arm64-gnu@16.4.0'
-  - '@next/swc-linux-arm64-musl@16.4.0'
-  - '@next/swc-linux-x64-gnu@16.4.0'
-  - '@next/swc-linux-x64-musl@16.4.0'
-  - '@next/swc-win32-arm64-msvc@16.4.0'
-  - '@next/swc-win32-x64-msvc@16.4.0'
-  - eslint-config-next@16.4.0
-  - next@16.4.0
   - '@tanstack/react-router@1.170.44'
   - '@tanstack/react-start-client@1.168.42'
   - '@tanstack/react-start-rsc@0.1.62'
@@ -87,3 +70,16 @@ minimumReleaseAgeExclude:
   - '@tanstack/start-plugin-core@1.171.52'
   - '@tanstack/start-server-core@1.169.42'
   - '@tanstack/start-storage-context@1.167.39'
+  - '@next/bundle-analyzer@16.4.2'
+  - '@next/env@16.4.2'
+  - '@next/eslint-plugin-next@16.4.2'
+  - '@next/swc-darwin-arm64@16.4.2'
+  - '@next/swc-darwin-x64@16.4.2'
+  - '@next/swc-linux-arm64-gnu@16.4.2'
+  - '@next/swc-linux-arm64-musl@16.4.2'
+  - '@next/swc-linux-x64-gnu@16.4.2'
+  - '@next/swc-linux-x64-musl@16.4.2'
+  - '@next/swc-win32-arm64-msvc@16.4.2'
+  - '@next/swc-win32-x64-msvc@16.4.2'
+  - eslint-config-next@16.4.2
+  - next@16.4.2
