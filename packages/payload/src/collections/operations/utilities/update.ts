@@ -361,6 +361,7 @@ export const updateDocument = async <
 
   const shouldDraftAllLocales =
     isSavingDraft &&
+    statusFieldAccess &&
     config.localization &&
     hasLocalizeStatusEnabled(collectionConfig) &&
     hasNonLocalizedDataChanged({
@@ -384,7 +385,12 @@ export const updateDocument = async <
     for (const localeCode of config.localization.localeCodes) {
       ;(result._status as Record<string, unknown>)[localeCode] = 'draft'
     }
-  } else if (isSavingDraft && config.localization && hasLocalizeStatusEnabled(collectionConfig)) {
+  } else if (
+    isSavingDraft &&
+    statusFieldAccess &&
+    config.localization &&
+    hasLocalizeStatusEnabled(collectionConfig)
+  ) {
     const existingStatus =
       docWithLocales._status &&
       typeof docWithLocales._status === 'object' &&

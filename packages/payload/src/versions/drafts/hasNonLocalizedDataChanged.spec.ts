@@ -342,3 +342,32 @@ describe('hasNonLocalizedDataChanged', () => {
     ).toBe(false)
   })
 })
+
+describe('virtual fields', () => {
+  it('should ignore computed virtual values absent from stored data', () => {
+    expect(
+      hasNonLocalizedDataChanged({
+        after: { computed: 'Computed value' },
+        before: {},
+        configBlockReferences: [],
+        fields: [{ name: 'computed', type: 'text', virtual: true }],
+      }),
+    ).toBe(false)
+  })
+
+  it('should ignore children of virtual named tabs', () => {
+    expect(
+      hasNonLocalizedDataChanged({
+        after: { computed: { text: 'Computed value' } },
+        before: {},
+        configBlockReferences: [],
+        fields: [
+          {
+            type: 'tabs',
+            tabs: [{ name: 'computed', virtual: true, fields: [{ name: 'text', type: 'text' }] }],
+          },
+        ],
+      }),
+    ).toBe(false)
+  })
+})

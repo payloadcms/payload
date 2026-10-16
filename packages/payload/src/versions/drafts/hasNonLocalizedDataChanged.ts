@@ -2,7 +2,12 @@ import type { Block, Field, FlattenedBlock } from '../../fields/config/types.js'
 import type { SanitizedConfig } from '../../index.js'
 import type { JsonObject } from '../../types/index.js'
 
-import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../fields/config/types.js'
+import {
+  fieldAffectsData,
+  fieldIsVirtual,
+  fieldShouldBeLocalized,
+  tabHasName,
+} from '../../fields/config/types.js'
 
 type ComparableValue =
   | { [key: string]: ComparableValue }
@@ -79,6 +84,10 @@ const normalizeNonLocalizedData = ({
   const result: Record<string, ComparableValue> = {}
 
   for (const field of fields) {
+    if (fieldIsVirtual(field)) {
+      continue
+    }
+
     if (fieldAffectsData(field)) {
       if (!(field.name in data)) {
         continue
@@ -150,6 +159,10 @@ const normalizeNonLocalizedData = ({
       )
     } else if (field.type === 'tabs') {
       for (const tab of field.tabs) {
+        if (fieldIsVirtual(tab)) {
+          continue
+        }
+
         const tabIsLocalized = fieldShouldBeLocalized({ field: tab, parentIsLocalized })
 
         if (tabHasName(tab)) {

@@ -480,6 +480,7 @@ export default buildConfigWithDefaults({
       access: openAccess,
       fields: [
         ...localizedPublicationFields,
+        { name: 'sharedText', type: 'text' },
         {
           name: '_status',
           access: {
@@ -640,6 +641,27 @@ export default buildConfigWithDefaults({
           name: 'sharedText',
           type: 'text',
         },
+        {
+          name: 'sharedArray',
+          type: 'array',
+          fields: [
+            { name: 'sharedText', type: 'text' },
+            { name: 'localizedText', type: 'text', localized: true },
+          ],
+        },
+        {
+          name: 'sharedBlocks',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'shared-content',
+              fields: [
+                { name: 'sharedText', type: 'text' },
+                { name: 'localizedText', type: 'text', localized: true },
+              ],
+            },
+          ],
+        },
       ],
       slug: localizedStatusSharedGlobalSlug,
       versions: {
@@ -729,6 +751,7 @@ export default buildConfigWithDefaults({
       },
       fields: [
         ...localizedPublicationFields,
+        { name: 'sharedText', type: 'text' },
         {
           name: '_status',
           access: {
