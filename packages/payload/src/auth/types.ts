@@ -350,7 +350,8 @@ export type VerifyConfig = {
 }
 
 export interface Auth
-  extends Omit<
+  extends
+    Omit<
       IncomingAuthType,
       | 'cookies'
       | 'forgotPassword'

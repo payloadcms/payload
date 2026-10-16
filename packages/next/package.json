@@ -2,11 +2,6 @@
   "name": "@payloadcms/next",
   "version": "4.0.0-beta.2",
   "homepage": "https://payloadcms.com",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/next"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -16,10 +11,20 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/next"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
   "sideEffects": [
     "*.css"
   ],
-  "type": "module",
+  "main": "./src/index.js",
+  "types": "./src/index.js",
   "exports": {
     "./css": {
       "types": "./src/exports/css.ts",
@@ -61,11 +66,48 @@
       "default": "./src/exports/views.ts"
     }
   },
-  "main": "./src/index.js",
-  "types": "./src/index.js",
-  "files": [
-    "dist"
-  ],
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.js",
+    "exports": {
+      "./css": {
+        "types": "./dist/exports/css.d.ts",
+        "import": "./dist/prod/styles.css",
+        "default": "./dist/prod/styles.css"
+      },
+      "./withPayload": {
+        "import": "./dist/withPayload/withPayload.js",
+        "require": "./dist/cjs/withPayload.cjs",
+        "default": "./dist/withPayload/withPayload.js"
+      },
+      "./layouts": {
+        "import": "./dist/exports/layouts.js",
+        "types": "./dist/exports/layouts.d.ts",
+        "default": "./dist/exports/layouts.js"
+      },
+      "./routes": {
+        "import": "./dist/exports/routes.js",
+        "types": "./dist/exports/routes.d.ts",
+        "default": "./dist/exports/routes.js"
+      },
+      "./auth": {
+        "import": "./dist/exports/auth.js",
+        "types": "./dist/exports/auth.d.ts",
+        "default": "./dist/exports/auth.js"
+      },
+      "./utilities": {
+        "import": "./dist/exports/utilities.js",
+        "types": "./dist/exports/utilities.d.ts",
+        "default": "./dist/exports/utilities.js"
+      },
+      "./views": {
+        "import": "./dist/exports/views.js",
+        "types": "./dist/exports/views.d.ts",
+        "default": "./dist/exports/views.js"
+      }
+    },
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "build": "pnpm build:reactcompiler",
     "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
@@ -83,14 +125,6 @@
     "copyfiles:debug": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
-  },
-  "lint-staged": {
-    "*.{cjs,css,cts,graphql,html,json,jsonc,md,mdx,mjs,mts,scss,toml,yaml,yml}": "oxfmt --no-error-on-unmatched-pattern",
-    ".swcrc": "oxfmt --no-error-on-unmatched-pattern",
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --flag v10_config_lookup_from_file --cache --fix",
-      "oxfmt --no-error-on-unmatched-pattern"
-    ]
   },
   "dependencies": {
     "@dnd-kit/core": "6.3.1",
@@ -131,49 +165,15 @@
     "next": ">=16.4.0 <17.0.0",
     "payload": "workspace:*"
   },
+  "lint-staged": {
+    "*.{cjs,css,cts,graphql,html,json,jsonc,md,mdx,mjs,mts,scss,toml,yaml,yml}": "oxfmt --no-error-on-unmatched-pattern",
+    ".swcrc": "oxfmt --no-error-on-unmatched-pattern",
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --flag v10_config_lookup_from_file --cache --fix",
+      "oxfmt --no-error-on-unmatched-pattern"
+    ]
+  },
   "engines": {
     "node": ">=24.15.0"
-  },
-  "publishConfig": {
-    "exports": {
-      "./css": {
-        "types": "./dist/exports/css.d.ts",
-        "import": "./dist/prod/styles.css",
-        "default": "./dist/prod/styles.css"
-      },
-      "./withPayload": {
-        "import": "./dist/withPayload/withPayload.js",
-        "require": "./dist/cjs/withPayload.cjs",
-        "default": "./dist/withPayload/withPayload.js"
-      },
-      "./layouts": {
-        "import": "./dist/exports/layouts.js",
-        "types": "./dist/exports/layouts.d.ts",
-        "default": "./dist/exports/layouts.js"
-      },
-      "./routes": {
-        "import": "./dist/exports/routes.js",
-        "types": "./dist/exports/routes.d.ts",
-        "default": "./dist/exports/routes.js"
-      },
-      "./auth": {
-        "import": "./dist/exports/auth.js",
-        "types": "./dist/exports/auth.d.ts",
-        "default": "./dist/exports/auth.js"
-      },
-      "./utilities": {
-        "import": "./dist/exports/utilities.js",
-        "types": "./dist/exports/utilities.d.ts",
-        "default": "./dist/exports/utilities.js"
-      },
-      "./views": {
-        "import": "./dist/exports/views.js",
-        "types": "./dist/exports/views.d.ts",
-        "default": "./dist/exports/views.js"
-      }
-    },
-    "main": "./dist/index.js",
-    "registry": "https://registry.npmjs.org/",
-    "types": "./dist/index.js"
   }
 }

@@ -6,6 +6,7 @@
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "type": "module",
+  "main": "src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts",
@@ -23,7 +24,6 @@
       "default": "./src/utils/*.ts"
     }
   },
-  "main": "src/index.ts",
   "scripts": {
     "build": "tsc",
     "lint": "eslint .",
