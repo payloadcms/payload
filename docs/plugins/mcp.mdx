@@ -299,6 +299,11 @@ mcpPlugin({
 })
 ```
 
+Clients require each authorization server to match the `issuer` in that server's
+metadata character for character, including any trailing `/`. If the exact value
+is only known at runtime, pass a function instead, for example
+`authorizationServers: async () => [await getIssuer()]`.
+
 The plugin does not validate access tokens. Add an auth strategy that turns the
 access token into a Payload user, and MCP runs as that user with access control.
 

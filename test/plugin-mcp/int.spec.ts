@@ -341,11 +341,14 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
       })
     })
     test.describe('OAuth', () => {
-      const enableOAuth = (payload: Payload) => {
+      const enableOAuth = (
+        payload: Payload,
+        oauth: Record<string, unknown> = { authorizationServers: ['https://auth.example.com'] },
+      ) => {
         const plugin = payload.config.plugins?.find(
           (plugin) => plugin.slug === '@payloadcms/plugin-mcp',
         ) as any
-        plugin.sanitizedOptions.oauth = { authorizationServers: ['https://auth.example.com'] }
+        plugin.sanitizedOptions.oauth = oauth
         onTestFinished(() => {
           delete plugin.sanitizedOptions.oauth
         })
@@ -395,6 +398,18 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           })
           .then((res) => res.json())
         expect((await postWithAuthorization(`Bearer ${token}`)).status).toBe(200)
+      })
+      it('should serve authorization servers returned by a function', async ({
+        payload,
+        restClient,
+      }) => {
+        enableOAuth(payload, { authorizationServers: async () => ['https://issuer.example.com/'] })
+
+        const metadata = await restClient
+          .GET('/mcp/oauth-protected-resource')
+          .then((res) => res.json())
+
+        expect(metadata.authorization_servers).toEqual(['https://issuer.example.com/'])
       })
       it('should run requests as the authenticated user', async ({
         getLimitedApiKey,
