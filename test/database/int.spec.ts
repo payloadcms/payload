@@ -14,6 +14,7 @@ import {
   migrateVersionsV1_V2,
 } from '@payloadcms/db-mongodb/migration-utils'
 import { randomUUID } from 'crypto'
+import { sql } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
@@ -3815,6 +3816,90 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
       }
     })
   })
+
+  test.options.describe(
+    'locale table indexes (Postgres)',
+    { db: (adapter) => adapter.startsWith('postgres') || adapter.startsWith('vercel-postgres') },
+    () => {
+      const getUniqueLocaleIndexColumns = async ({
+        payload,
+        tableName,
+      }: {
+        payload: Payload
+        tableName: string
+      }): Promise<string> => {
+        const schemaName = (payload.db as any).schemaName || 'public'
+        const result = await (payload.db as any).drizzle.execute(sql`
+          SELECT indexdef FROM pg_indexes
+          WHERE schemaname = ${schemaName}
+            AND tablename = ${tableName}
+            AND indexdef ILIKE '%unique%'
+            AND indexdef ILIKE '%_parent_id%'
+            AND indexdef ILIKE '%_locale%'
+        `)
+
+        const indexdef = result.rows[0]?.indexdef as string | undefined
+
+        if (!indexdef) {
+          throw new Error(`Expected a unique locale index on ${tableName}`)
+        }
+
+        // Return only the parenthesized column list, e.g. "_parent_id, _locale".
+        return indexdef.slice(indexdef.lastIndexOf('(') + 1, indexdef.lastIndexOf(')'))
+      }
+
+      for (const tableName of ['customs_locales', '_customs_v_locales']) {
+        test(`should lead the ${tableName} unique index with _parent_id`, async ({ payload }) => {
+          const columns = await getUniqueLocaleIndexColumns({ payload, tableName })
+
+          expect(columns).toContain('_parent_id')
+          expect(columns.indexOf('_parent_id')).toBeLessThan(columns.indexOf('_locale'))
+        })
+      }
+    },
+  )
+
+  test.options.describe(
+    'locale table indexes (SQLite)',
+    { db: (adapter) => adapter.startsWith('sqlite') },
+    () => {
+      const getUniqueLocaleIndexColumns = async ({
+        payload,
+        tableName,
+      }: {
+        payload: Payload
+        tableName: string
+      }): Promise<string> => {
+        const rows = (await payload.db.drizzle.all(
+          sql.raw(
+            `SELECT name, sql FROM sqlite_master WHERE type='index' AND tbl_name='${tableName}'`,
+          ),
+        )) as { name: string; sql: null | string }[]
+
+        const indexdef = rows.find(
+          (row) =>
+            typeof row.sql === 'string' &&
+            row.sql.includes('_parent_id') &&
+            row.sql.includes('_locale'),
+        )?.sql
+
+        if (!indexdef) {
+          throw new Error(`Expected a unique locale index on ${tableName}`)
+        }
+
+        return indexdef.slice(indexdef.lastIndexOf('(') + 1, indexdef.lastIndexOf(')'))
+      }
+
+      for (const tableName of ['customs_locales', '_customs_v_locales']) {
+        test(`should lead the ${tableName} unique index with _parent_id`, async ({ payload }) => {
+          const columns = await getUniqueLocaleIndexColumns({ payload, tableName })
+
+          expect(columns).toContain('_parent_id')
+          expect(columns.indexOf('_parent_id')).toBeLessThan(columns.indexOf('_locale'))
+        })
+      }
+    },
+  )
 
   test.describe('drizzle: schema hooks', () => {
     test.beforeAll(() => {
