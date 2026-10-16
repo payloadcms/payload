@@ -13,6 +13,11 @@ import { ArrayCollection } from './collections/Array/index.js'
 import { ArrayWithFallbackCollection } from './collections/ArrayWithFallback/index.js'
 import { BlocksCollection } from './collections/Blocks/index.js'
 import { Group } from './collections/Group/index.js'
+import {
+  getLocaleValidationFields,
+  LocaleValidation,
+  LocaleValidationBlock,
+} from './collections/LocaleValidation/index.js'
 import { LocalizedDateFields } from './collections/LocalizedDateFields/index.js'
 import { LocalizedDrafts } from './collections/LocalizedDrafts/index.js'
 import { LocalizedWithinLocalized } from './collections/LocalizedWithinLocalized/index.js'
@@ -30,6 +35,7 @@ import {
   globalWithDraftsSlug,
   hungarianLocale,
   localeRestrictedSlug,
+  localeValidationGlobalSlug,
   localizedDateFieldsSlug,
   localizedPostsSlug,
   localizedSortSlug,
@@ -90,6 +96,7 @@ export default buildConfigWithDefaults({
   experimental: {
     localizeStatus: true,
   },
+  blocks: [LocaleValidationBlock],
   collections: [
     RichTextCollection,
     BlocksCollection,
@@ -98,6 +105,7 @@ export default buildConfigWithDefaults({
     LocalizedDrafts,
     LocalizedDateFields,
     AllFieldsLocalized,
+    LocaleValidation,
     {
       admin: {
         listSearchableFields: 'name',
@@ -587,6 +595,7 @@ export default buildConfigWithDefaults({
     },
   ],
   globals: [
+    { slug: localeValidationGlobalSlug, fields: getLocaleValidationFields(), versions: false },
     {
       fields: [
         {
@@ -609,6 +618,13 @@ export default buildConfigWithDefaults({
           name: 'text',
           localized: true,
           type: 'text',
+        },
+        {
+          name: 'localizedTextWithLength',
+          type: 'text',
+          localized: true,
+          maxLength: 20,
+          minLength: 5,
         },
       ],
       slug: 'global-text',
