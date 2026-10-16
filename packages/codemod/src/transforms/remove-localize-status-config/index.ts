@@ -1,12 +1,12 @@
 import type { Transform } from '../../types.js'
 
 /**
- * Removes `localizeStatus: true` from `versions.drafts` objects and
- * `experimental.localizeStatus: true` from the root Payload config object.
+ * Removes `localizeStatus: true` and `localizeStatus: false` from `versions.drafts` objects and
+ * `experimental.localizeStatus` from the root Payload config object.
  *
  * Per-locale status is now automatic when localization is configured and the
  * collection/global has localized fields. The config property is no longer needed.
- * Setting `localizeStatus: false` is still valid as an explicit opt-out and is preserved.
+ * Neither boolean value is a supported input option; `false` does not opt out.
  */
 export const removeLocalizeStatusConfig: Transform = {
   name: 'remove-localize-status-config',
@@ -17,8 +17,8 @@ export const removeLocalizeStatusConfig: Transform = {
       let text = sourceFile.getFullText()
       const original = text
 
-      // Remove `localizeStatus: true,` lines (with any leading whitespace and trailing newline)
-      text = text.replace(/^[^\S\n]*localizeStatus:\s*true,?\s*\n/gm, '')
+      // Remove obsolete boolean localizeStatus settings.
+      text = text.replace(/^[^\S\n]*localizeStatus:\s*(?:true|false),?\s*\n/gm, '')
 
       // Remove now-empty `experimental: {}` blocks (with optional whitespace inside braces)
       // Handles: `experimental: {\n  },` or `experimental: {\n},` etc.
@@ -33,5 +33,5 @@ export const removeLocalizeStatusConfig: Transform = {
     return { filesChanged: [...filesChanged] }
   },
   description:
-    'Remove `localizeStatus: true` from versions.drafts config and `experimental.localizeStatus` from root Payload config. Per-locale status is now automatically enabled when localization is configured and the collection/global has localized fields.',
+    'Remove `localizeStatus` boolean settings from versions.drafts config and `experimental.localizeStatus` from root Payload config. Per-locale status is now automatically enabled when localization is configured and the collection/global has localized fields.',
 }

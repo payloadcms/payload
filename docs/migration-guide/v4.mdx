@@ -1764,7 +1764,7 @@ The same change applies to `upload` fields with `hasMany: true`.
 
 When localization is configured, Payload now automatically localizes `_status` for collections and globals that have drafts enabled and contain at least one localized field. Publication status is tracked independently for each locale. Collections and globals without localized fields keep a single `_status` value.
 
-Remove `experimental.localizeStatus` and `versions.drafts.localizeStatus: true` from your config. The feature no longer requires opting in. To remove these settings automatically, run:
+Remove `experimental.localizeStatus` and `versions.drafts.localizeStatus` from your config, whether set to `true` or `false`. Localized status is automatic; `localizeStatus: false` no longer opts out. Existing projects that previously set it to `false` must also run the data migration below when they have localized fields and drafts enabled. To remove these settings automatically, run:
 
 ```bash
 npx @payloadcms/codemod --transform remove-localize-status-config

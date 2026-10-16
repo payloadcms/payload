@@ -10,7 +10,7 @@ const here = dirname(fileURLToPath(import.meta.url))
 const fixture = (name: string) => readFile(join(here, name), 'utf8')
 
 describe('remove-localize-status-config', () => {
-  it('removes localizeStatus: true and empty experimental block', async () => {
+  it('should remove localizeStatus: true and empty experimental block', async () => {
     const input = await fixture('basic.input.ts')
     const output = await fixture('basic.output.ts')
 
@@ -19,20 +19,28 @@ describe('remove-localize-status-config', () => {
     expect(result).toBe(output)
   })
 
-  it('is idempotent', async () => {
-    const output = await fixture('basic.output.ts')
+  it.each(['basic', 'remove-false'])('should be idempotent for %s', async (name) => {
+    const output = await fixture(`${name}.output.ts`)
 
     const result = await runTransform({ source: output, transform: removeLocalizeStatusConfig })
 
     expect(result).toBe(output)
   })
 
-  it('preserves localizeStatus: false (explicit opt-out)', async () => {
-    const input = await fixture('preserve-false.input.ts')
-    const output = await fixture('preserve-false.output.ts')
+  it('should remove localizeStatus: false because localized status is automatic', async () => {
+    const input = await fixture('remove-false.input.ts')
+    const output = await fixture('remove-false.output.ts')
 
     const result = await runTransform({ source: input, transform: removeLocalizeStatusConfig })
 
     expect(result).toBe(output)
+  })
+
+  it('should leave unrelated drafts options unchanged', async () => {
+    const source = `export const drafts = { autosave: false, validate: true }\n`
+
+    const result = await runTransform({ source, transform: removeLocalizeStatusConfig })
+
+    expect(result).toBe(source)
   })
 })
