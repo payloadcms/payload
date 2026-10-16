@@ -297,7 +297,12 @@ export type MCPPluginConfig = {
    * issued access tokens.
    */
   oauth?: {
-    authorizationServers: string[]
+    /**
+     * The authorization servers that issue access tokens for MCP clients. Clients require each one
+     * to exactly match the `issuer` in that server's metadata, so pass a function when the exact
+     * value is only known at runtime, e.g. from the server's OpenID configuration.
+     */
+    authorizationServers: (() => MaybePromise<string[]>) | string[]
     /**
      * The URL clients call to reach the MCP endpoint.
      *
