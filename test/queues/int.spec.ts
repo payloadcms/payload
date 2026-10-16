@@ -14,8 +14,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 import { clearAndSeedEverything } from './seed.js'
 import { waitUntilAutorunIsDone } from './utilities.js'
 
@@ -74,6 +74,100 @@ describe('Queues - Payload', () => {
   })
 
   describe('access control', () => {
+    it('should deny raw job creation when access control is enabled', async () => {
+      const req = await createLocalReq({ user }, payload)
+
+      await expect(
+        payload.create({
+          collection: 'payload-jobs',
+          data: {
+            input: {
+              message: 'raw job',
+            },
+            taskSlug: 'CreateSimple',
+          },
+          overrideAccess: false,
+          req,
+        }),
+      ).rejects.toThrow()
+    })
+
+    it('should deny raw job reads when access control is enabled', async () => {
+      const req = await createLocalReq({ user }, payload)
+      const job = await payload.jobs.queue({
+        input: {
+          message: 'protected job',
+        },
+        task: 'CreateSimple',
+      })
+
+      await expect(
+        payload.findByID({
+          id: job.id,
+          collection: 'payload-jobs',
+          overrideAccess: false,
+          req,
+        }),
+      ).rejects.toThrow()
+    })
+
+    it('should deny raw job updates when access control is enabled', async () => {
+      const req = await createLocalReq({ user }, payload)
+      const job = await payload.jobs.queue({
+        input: {
+          message: 'protected job',
+        },
+        task: 'CreateSimple',
+      })
+
+      await expect(
+        payload.update({
+          id: job.id,
+          collection: 'payload-jobs',
+          data: {
+            input: {
+              message: 'attacker update',
+            },
+          },
+          overrideAccess: false,
+          req,
+        }),
+      ).rejects.toThrow()
+
+      const unchangedJob = await payload.findByID({
+        id: job.id,
+        collection: 'payload-jobs',
+      })
+
+      expect(unchangedJob.input).toEqual({ message: 'protected job' })
+    })
+
+    it('should deny raw job deletion when access control is enabled', async () => {
+      const req = await createLocalReq({ user }, payload)
+      const job = await payload.jobs.queue({
+        input: {
+          message: 'protected job',
+        },
+        task: 'CreateSimple',
+      })
+
+      await expect(
+        payload.delete({
+          id: job.id,
+          collection: 'payload-jobs',
+          overrideAccess: false,
+          req,
+        }),
+      ).rejects.toThrow()
+
+      const unchangedJob = await payload.findByID({
+        id: job.id,
+        collection: 'payload-jobs',
+      })
+
+      expect(unchangedJob.id).toBe(job.id)
+    })
+
     it('will run access control on jobs runner run endpoint', async () => {
       const response = await restClient.GET('/payload-jobs/run?silent=true', {
         headers: {
@@ -919,6 +1013,40 @@ describe('Queues - Payload', () => {
     expect(after?.id).toBe(id)
   })
 
+  it('should complete a job and save its log with runHooks enabled', async () => {
+    const originalRunHooks = payload.config.jobs.runHooks
+    const originalDeleteJobOnComplete = payload.config.jobs.deleteJobOnComplete
+    const job = await payload.jobs.queue({
+      task: 'DoNothingTask',
+      input: { message: 'runHooks test' },
+    })
+
+    try {
+      payload.config.jobs.runHooks = true
+      payload.config.jobs.deleteJobOnComplete = false
+
+      await payload.jobs.run({ silent: true })
+
+      const jobAfterRun = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+      })
+
+      expect(jobAfterRun.error).toBeFalsy()
+      expect(jobAfterRun.hasError).toBe(false)
+      expect(jobAfterRun.completedAt).toBeTruthy()
+      expect(jobAfterRun.log).toHaveLength(1)
+      expect(jobAfterRun.log?.[0]).toMatchObject({
+        state: 'succeeded',
+        taskSlug: 'DoNothingTask',
+      })
+    } finally {
+      payload.config.jobs.runHooks = originalRunHooks
+      payload.config.jobs.deleteJobOnComplete = originalDeleteJobOnComplete
+      await payload.delete({ collection: 'payload-jobs', id: job.id })
+    }
+  })
+
   it('can queue single tasks', async () => {
     await payload.jobs.queue({
       task: 'CreateSimple',
@@ -936,6 +1064,115 @@ describe('Queues - Payload', () => {
 
     expect(allSimples.totalDocs).toBe(1)
     expect(allSimples.docs[0]?.title).toBe('from single task')
+  })
+
+  describe('when a queued task slug is no longer registered in config', () => {
+    let originalTasks: typeof payload.config.jobs.tasks
+
+    beforeEach(() => {
+      originalTasks = payload.config.jobs.tasks
+    })
+
+    afterEach(() => {
+      payload.config.jobs.tasks = originalTasks
+    })
+
+    it('should permanently fail the job after one attempt instead of retrying forever', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      const job = await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'queued before task removal',
+        },
+      })
+
+      // Simulate a deploy that removed the 'CreateSimple' task from config
+      payload.config.jobs.tasks = originalTasks!.filter((t) => t.slug !== 'CreateSimple')
+
+      await payload.jobs.run({ silent: true })
+
+      const jobAfterRun = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+      })
+
+      expect(jobAfterRun.hasError).toBe(true)
+      expect(jobAfterRun.processing).toBe(false)
+      expect(jobAfterRun.totalTried).toBe(1)
+    })
+
+    it('should permanently fail when a workflow handler calls a task that has been removed', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      const job = await payload.jobs.queue({
+        workflow: 'workflowNoRetriesSet',
+        input: {
+          message: 'queued before referenced task removal',
+        },
+      })
+
+      payload.config.jobs.tasks = originalTasks!.filter((t) => t.slug !== 'CreateSimple')
+
+      await payload.jobs.run({ silent: true })
+
+      const jobAfterRun = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+      })
+
+      expect(jobAfterRun.hasError).toBe(true)
+      expect(jobAfterRun.processing).toBe(false)
+      expect(jobAfterRun.totalTried).toBe(1)
+    })
+  })
+
+  it('should not retry a workflow with no retries configured when its handler throws', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      workflow: 'throwsInHandlerNoRetries',
+      input: {},
+    })
+
+    await payload.jobs.run({ silent: true })
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    expect(jobAfterRun.hasError).toBe(true)
+    expect(jobAfterRun.processing).toBe(false)
+    expect(jobAfterRun.totalTried).toBe(1)
+  })
+
+  it('should retry a workflow with retries=1 exactly once when its handler throws', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      workflow: 'throwsInHandlerRetries1',
+      input: {},
+    })
+
+    let hasJobsRemaining = true
+    while (hasJobsRemaining) {
+      const response = await payload.jobs.run({ silent: true })
+      if (response.noJobsRemaining) {
+        hasJobsRemaining = false
+      }
+    }
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    // Initial attempt + 1 retry = 2. Once hasError is true the queue stops picking it up,
+    // so the loop naturally bounds at exactly 2 attempts.
+    expect(jobAfterRun.totalTried).toBe(2)
+    expect(jobAfterRun.hasError).toBe(true)
+    expect(jobAfterRun.processing).toBe(false)
   })
 
   it('can queue and run via the endpoint single tasks without workflows', async () => {

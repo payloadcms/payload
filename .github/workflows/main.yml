@@ -15,16 +15,23 @@ concurrency:
 env:
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
+  NODE_OPTIONS: --max-old-space-size=4096
+  NODE_HEAP_HIGH: --max-old-space-size=8192
+
+permissions:
+  contents: read
 
 jobs:
   changes:
     runs-on: ubuntu-24.04
     permissions:
+      contents: read
       pull-requests: read
     outputs:
       needs_build: ${{ steps.filter.outputs.needs_build }}
       needs_tests: ${{ steps.filter.outputs.needs_tests }}
       templates: ${{ steps.filter.outputs.templates }}
+      build_approvals: ${{ steps.filter.outputs.build_approvals }}
     steps:
       # https://github.com/actions/virtual-environments/issues/1187
       - name: tune linux network
@@ -44,17 +51,25 @@ jobs:
               - 'templates/**'
             needs_tests:
               - '.github/workflows/main.yml'
+              - '.github/actions/start-services/**'
               - 'packages/**'
               - 'test/**'
               - 'pnpm-lock.yaml'
               - 'package.json'
             templates:
               - 'templates/**'
+            build_approvals:
+              - '.github/workflows/main.yml'
+              # Any dependency-graph change (packages/* or the blank workspace member) lands in
+              # the root lockfile; that, plus the allowlist itself, is what can introduce drift.
+              - 'pnpm-lock.yaml'
+              - 'packages/create-payload-app/src/lib/configure-pnpm-builds.ts'
       - name: Log filter results
         run: |
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
           echo "needs_tests: ${{ steps.filter.outputs.needs_tests }}"
           echo "templates: ${{ steps.filter.outputs.templates }}"
+          echo "build_approvals: ${{ steps.filter.outputs.build_approvals }}"
 
   lint:
     runs-on: ubuntu-24.04
@@ -68,6 +83,8 @@ jobs:
 
       - name: Lint TypeScript/JavaScript
         run: pnpm lint -- --quiet
+        env:
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
 
       - name: Lint SCSS
         run: pnpm run lint:scss
@@ -108,7 +125,7 @@ jobs:
       - name: Unit Tests
         run: pnpm test:unit
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
 
   tests-types:
     runs-on: ubuntu-24.04
@@ -125,7 +142,7 @@ jobs:
       - name: Types Tests
         run: pnpm test:types --target '>=5.7'
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
 
   # Generate the integration test matrix from TypeScript config
   int-matrix:
@@ -195,7 +212,7 @@ jobs:
       - name: Integration Tests
         run: pnpm test:int --shard=${{ matrix.shard }}/${{ matrix.total-shards }}
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
@@ -302,8 +319,9 @@ jobs:
 
       - name: Store Playwright's Version
         run: |
-          # Extract the version number using a more targeted regex pattern with awk
-          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2}')
+          # `exit` after the first match: v11's `pnpm ls` lists the dep across every workspace
+          # project, and a multi-line value would break the GITHUB_ENV write.
+          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2; exit}')
           echo "Playwright's Version: $PLAYWRIGHT_VERSION"
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
 
@@ -419,16 +437,17 @@ jobs:
 
       - name: Build Template
         run: |
-          pnpm run script:pack --dest templates/${{ matrix.template }}
+          pnpm run script:pack --all --dest templates/${{ matrix.template }}
           pnpm run script:build-template-with-local-pkgs ${{ matrix.template }} $DB_CONNECTION
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           DB_CONNECTION: ${{ steps.db.outputs.POSTGRES_URL || steps.db.outputs.MONGODB_URL }}
 
       - name: Store Playwright's Version
         run: |
-          # Extract the version number using a more targeted regex pattern with awk
-          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2}')
+          # `exit` after the first match: v11's `pnpm ls` lists the dep across every workspace
+          # project, and a multi-line value would break the GITHUB_ENV write.
+          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2; exit}')
           echo "Playwright's Version: $PLAYWRIGHT_VERSION"
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
 
@@ -450,7 +469,7 @@ jobs:
       - name: Runs Template Int Tests
         run: pnpm --filter ${{ matrix.template }} run test:int
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
@@ -458,11 +477,26 @@ jobs:
       - name: Runs Template E2E Tests
         run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.template }}.json pnpm --filter ${{ matrix.template }} test:e2e
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
           NEXT_TELEMETRY_DISABLED: 1
+
+  # Fails if create-payload-app's build-script allowlist drifts from the blank template's deps:
+  # scaffolds blank, installs it standalone under pnpm v11, and asserts no ERR_PNPM_IGNORED_BUILDS.
+  check-template-build-approvals:
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: needs.changes.outputs.build_approvals == 'true'
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+
+      - name: Check create-payload-app build approvals
+        run: pnpm --filter scripts check-template-build-approvals
 
   tests-type-generation:
     runs-on: ubuntu-24.04
@@ -502,7 +536,7 @@ jobs:
       contents: read
     services:
       postgres:
-        image: postgres:13
+        image: postgres:15
         env:
           POSTGRES_DB: figma_content_api
           POSTGRES_USER: postgres
@@ -611,7 +645,7 @@ jobs:
         continue-on-error: true
         run: pnpm test:int:summary
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           PAYLOAD_DATABASE: content-api
 
       - name: Dump Content API logs on failure

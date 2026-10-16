@@ -3,6 +3,18 @@ import type { ClientField } from 'payload'
 import { fieldAffectsData, fieldHasSubFields } from 'payload/shared'
 import React, { Fragment } from 'react'
 
+export const filterSelectableFieldValues = ({
+  fieldOptions,
+  values,
+}: {
+  fieldOptions: { value: string }[]
+  values: string[]
+}): string[] => {
+  const selectableValues = new Set(fieldOptions.map((field) => field.value))
+
+  return values.filter((value) => selectableValues.has(value))
+}
+
 const createNestedClientFieldPath = (parentPath: string, field: ClientField): string => {
   if (parentPath) {
     if (fieldAffectsData(field)) {

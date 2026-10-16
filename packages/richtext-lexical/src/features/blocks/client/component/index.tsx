@@ -24,7 +24,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
-import { $getNodeByKey } from 'lexical'
+import { $getNodeByKey, SKIP_DOM_SELECTION_TAG } from 'lexical'
 import {
   type BlocksFieldClient,
   type ClientBlock,
@@ -120,6 +120,18 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
   const isEditable = useLexicalEditable()
 
   const blockType = formData.blockType
+
+  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}`
+  const clientSchemaMap = featureClientSchemaMap['blocks']
+  const blocksField = clientSchemaMap?.[componentMapRenderedBlockPath]?.[0] as
+    | BlocksFieldClient
+    | undefined
+
+  const clientBlock: ClientBlock | undefined = blocksField?.blockReferences
+    ? typeof blocksField.blockReferences[0] === 'string'
+      ? config.blocksMap[blocksField.blockReferences[0]]
+      : blocksField.blockReferences[0]
+    : blocksField?.blocks?.[0]
 
   const { getFormState } = useServerFunctions()
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}.fields`
@@ -269,15 +281,20 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
         ) as BlockFields
 
         // Things like default values may come back from the server => update the node with the new data
-        editor.update(() => {
-          const node = $getNodeByKey(nodeKey)
-          if (node && $isBlockNode(node)) {
-            const newData = newFormStateData
-            newData.blockType = blockType
+        editor.update(
+          () => {
+            const node = $getNodeByKey(nodeKey)
+            if (node && $isBlockNode(node)) {
+              const newData = newFormStateData
+              newData.blockType = blockType
 
-            node.setFields(newData, true)
-          }
-        })
+              node.setFields(newData, true)
+            }
+          },
+          // Without this, the outer editor's reconciler resets DOM selection
+          // back into its own root, kicking focus out of any nested richText.
+          { tag: SKIP_DOM_SELECTION_TAG },
+        )
 
         setInitialState(state)
         if (!CustomLabelFromProps) {
@@ -289,7 +306,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       }
     }
 
-    if (formData && !initialState) {
+    if (clientBlock && formData && !initialState) {
       void awaitInitialState()
     }
 
@@ -312,25 +329,12 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     getDocPreferences,
     parentDocumentFields,
     blockType,
+    clientBlock,
   ])
 
   const [isCollapsed, setIsCollapsed] = React.useState<boolean>(
     initialLexicalFormState?.[formData.id]?.collapsed ?? false,
   )
-
-  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}`
-
-  const clientSchemaMap = featureClientSchemaMap['blocks']
-
-  const blocksField: BlocksFieldClient | undefined = clientSchemaMap?.[
-    componentMapRenderedBlockPath
-  ]?.[0] as BlocksFieldClient
-
-  const clientBlock: ClientBlock | undefined = blocksField.blockReferences
-    ? typeof blocksField?.blockReferences?.[0] === 'string'
-      ? config.blocksMap[blocksField?.blockReferences?.[0]]
-      : blocksField?.blockReferences?.[0]
-    : blocksField?.blocks?.[0]
 
   const { i18n, t } = useTranslation<object, string>()
 
@@ -377,14 +381,19 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       ) as BlockFields
 
       setTimeout(() => {
-        editor.update(() => {
-          const node = $getNodeByKey(nodeKey)
-          if (node && $isBlockNode(node)) {
-            const newData = newFormStateData
-            newData.blockType = blockType
-            node.setFields(newData, true)
-          }
-        })
+        editor.update(
+          () => {
+            const node = $getNodeByKey(nodeKey)
+            if (node && $isBlockNode(node)) {
+              const newData = newFormStateData
+              newData.blockType = blockType
+              node.setFields(newData, true)
+            }
+          },
+          // Without this, the outer editor's reconciler resets DOM selection
+          // back into its own root, kicking focus out of any nested richText.
+          { tag: SKIP_DOM_SELECTION_TAG },
+        )
       }, 0)
 
       if (submit) {
@@ -677,12 +686,17 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           onSubmit={(formState, newData) => {
             // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
             newData.blockType = blockType
-            editor.update(() => {
-              const node = $getNodeByKey(nodeKey)
-              if (node && $isBlockNode(node)) {
-                node.setFields(newData as BlockFields, true)
-              }
-            })
+            editor.update(
+              () => {
+                const node = $getNodeByKey(nodeKey)
+                if (node && $isBlockNode(node)) {
+                  node.setFields(newData as BlockFields, true)
+                }
+              },
+              // Without this, the outer editor's reconciler resets DOM selection
+              // back into its own root, kicking focus out of any nested richText.
+              { tag: SKIP_DOM_SELECTION_TAG },
+            )
             toggleDrawer()
           }}
           submitted={submitted}

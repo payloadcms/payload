@@ -8,7 +8,7 @@ export const lexicalViews: LexicalEditorViewMap<LexicalViewsNodes> = {
     nodes: {
       blocks: {
         viewsTestBlock: {
-          Component: () => {
+          Block: () => {
             return <div>This block is always a div</div>
           },
         },

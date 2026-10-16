@@ -12,7 +12,10 @@ export type ListDrawerContextProps = {
   readonly DocumentDrawerToggler?: ReturnType<UseDocumentDrawer>[1]
   readonly drawerSlug?: string
   readonly enabledCollections?: CollectionSlug[]
-  readonly onBulkSelect?: (selected: ReturnType<typeof useSelection>['selected']) => void
+  readonly onBulkSelect?: (
+    selected: ReturnType<typeof useSelection>['selected'],
+    collectionSlug?: CollectionSlug,
+  ) => void
   readonly onQueryChange?: (query: ListQuery) => void
   readonly onSelect?: (args: {
     collectionSlug: CollectionSlug

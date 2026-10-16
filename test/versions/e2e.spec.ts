@@ -74,6 +74,7 @@ import {
   draftWithChangeHookCollectionSlug,
   draftWithMaxCollectionSlug,
   draftWithMaxGlobalSlug,
+  draftWithUploadCollectionSlug,
   draftWithValidateCollectionSlug,
   errorOnUnpublishSlug,
   localizedCollectionSlug,
@@ -94,6 +95,13 @@ let payload: PayloadTestSDK<Config>
 let context: BrowserContext
 
 const londonTimezone = 'Europe/London'
+
+async function waitForVersionViewToLoad(page: Page): Promise<void> {
+  const versionView = page.locator('.view-version')
+
+  await expect(versionView).not.toContainText('Loading...')
+  await expect(versionView.locator('.render-field-diffs').first()).toBeVisible()
+}
 
 describe('Versions', () => {
   let page: Page
@@ -296,7 +304,7 @@ describe('Versions', () => {
       const row2 = page.locator('tbody .row-2')
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
-      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+      await waitForVersionViewToLoad(page)
       await page.locator('.restore-version__restore-as-draft-button').click()
       await page.locator('button:has-text("Confirm")').click()
       await page.waitForURL(savedDocURL)
@@ -319,7 +327,7 @@ describe('Versions', () => {
       const row2 = page.locator('tbody .row-2')
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
-      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+      await waitForVersionViewToLoad(page)
       await page.locator('.restore-version .popup__trigger-wrap button').click()
       await page.getByRole('button', { name: 'Restore as draft' }).click()
       await page.locator('button:has-text("Confirm")').click()
@@ -1128,6 +1136,130 @@ describe('Versions', () => {
         await openDocControls(page)
         await expect(page.locator('#action-unpublish')).toBeHidden()
       })
+    })
+  })
+
+  describe('draft upload collections', () => {
+    let uploadURL: AdminUrlUtil
+
+    beforeAll(() => {
+      uploadURL = new AdminUrlUtil(serverURL, draftWithUploadCollectionSlug)
+    })
+
+    test('should keep published status after reuploading a file and saving as draft', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Original image',
+        },
+        filePath: path.resolve(dirname, './image.jpg'),
+      })
+
+      await page.goto(uploadURL.edit(publishedDoc.id))
+      await waitForFormReady(page)
+
+      await expect(page.locator('.doc-controls__status .status__value')).toContainText('Published')
+
+      // The file input is only rendered once the existing file is removed.
+      // Click the remove button on the current file to reveal the file input.
+      await page.locator('.file-details__remove').click()
+      await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'), {
+        force: true,
+      })
+
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await expect(page.locator('.doc-controls__status .status__value')).toContainText('Changed')
+
+      await expect(async () => {
+        const { docs } = await payload.find({
+          collection: draftWithUploadCollectionSlug,
+          where: { id: { equals: publishedDoc.id } },
+        })
+        expect(docs[0]!._status).toStrictEqual('published')
+        expect(docs[0]!.filename).toStrictEqual(publishedDoc.filename)
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+    })
+
+    test('should create a draft version with the new file without altering the published doc', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Original image',
+        },
+        filePath: path.resolve(dirname, './image.jpg'),
+      })
+
+      await page.goto(uploadURL.edit(publishedDoc.id))
+      await waitForFormReady(page)
+
+      // The file input is only rendered once the existing file is removed.
+      // Click the remove button on the current file to reveal the file input.
+      await page.locator('.file-details__remove').click()
+      await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'), {
+        force: true,
+      })
+
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await expect(async () => {
+        const { docs: draftDocs } = await payload.find({
+          collection: draftWithUploadCollectionSlug,
+          draft: true,
+          where: { id: { equals: publishedDoc.id } },
+        })
+        expect(draftDocs[0]!._status).toStrictEqual('draft')
+        expect(draftDocs[0]!.filename).not.toStrictEqual(publishedDoc.filename)
+
+        const { docs: mainDocs } = await payload.find({
+          collection: draftWithUploadCollectionSlug,
+          where: { id: { equals: publishedDoc.id } },
+        })
+        expect(mainDocs[0]!.filename).toStrictEqual(publishedDoc.filename)
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+    })
+
+    test('should create a draft when duplicating a published upload document', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Original image',
+        },
+        filePath: path.resolve(dirname, './image.jpg'),
+      })
+
+      await page.goto(uploadURL.edit(publishedDoc.id))
+      await waitForFormReady(page)
+
+      await openDocControls(page)
+      await page.locator('#action-duplicate').click()
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      await expect
+        .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+        .not.toContain(publishedDoc.id)
+
+      await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
+      await waitForFormReady(page)
+
+      const duplicatedDocID = new URL(page.url()).pathname.split('/').pop()
+
+      await expect(async () => {
+        const { docs: draftDocs } = await payload.find({
+          collection: draftWithUploadCollectionSlug,
+          draft: true,
+          where: { id: { equals: duplicatedDocID } },
+        })
+        expect(draftDocs[0]!._status).toStrictEqual('draft')
+
+        const { docs: mainDocs } = await payload.find({
+          collection: draftWithUploadCollectionSlug,
+          where: { id: { equals: duplicatedDocID } },
+        })
+        expect(mainDocs[0]!._status).toStrictEqual('draft')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
   })
 
@@ -2087,7 +2219,7 @@ describe('Versions', () => {
         serverURL,
       })
       await page.goto(versionURL)
-      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+      await waitForVersionViewToLoad(page)
     }
 
     async function navigateToDiffVersionView(versionID?: string) {
@@ -2257,6 +2389,67 @@ describe('Versions', () => {
       )
       await expect(textInBlock.locator('.html-diff__diff-new')).toHaveText(
         'textInRowInCollapsibleBlock2',
+      )
+    })
+
+    test('should render a replaced block when both block schemas contain unnamed layouts', async () => {
+      await payload.update({
+        id: diffID,
+        collection: diffCollectionSlug,
+        data: {
+          blocks: diffDoc.blocks?.map((block, i) => {
+            if (i === 1) {
+              return {
+                blockType: 'TabsBlock',
+                namedTab1InBlock: {
+                  textInNamedTab1InBlock: 'replacement named tab',
+                },
+                textInRowInUnnamedTab2InBlock: 'replacement row',
+                textInUnnamedTab2InBlock: 'replacement unnamed tab',
+              }
+            }
+
+            return block
+          }),
+        },
+      })
+
+      const latestVersionDiff = (
+        await payload.findVersions({
+          collection: diffCollectionSlug,
+          depth: 0,
+          limit: 1,
+          where: {
+            parent: { equals: diffID },
+          },
+        })
+      ).docs[0] as Diff
+
+      await navigateToDiffVersionView(latestVersionDiff.id)
+
+      const sourceField = page.locator('[data-field-path="blocks.1.textInRowInCollapsibleBlock"]')
+      await expect(sourceField.locator('.html-diff__diff-old')).toHaveText(
+        'textInRowInCollapsibleBlock2',
+      )
+
+      const replacementField = page.locator(
+        '[data-field-path="blocks.1.textInRowInUnnamedTab2InBlock"]',
+      )
+      await expect(replacementField.locator('.html-diff__diff-new')).toHaveText('replacement row')
+
+      const blocks = page.locator('[data-field-path="blocks"]')
+      await blocks.locator('.diff-collapser__toggle-button').first().click()
+      await expect(blocks.locator('.diff-collapser__field-change-count').first()).toHaveText(
+        '5 changed fields',
+      )
+
+      await blocks.locator('.diff-collapser__toggle-button').first().click()
+      const changedRow = blocks.locator('.iterable-diff__row', {
+        has: page.getByText('Block 02', { exact: true }),
+      })
+      await changedRow.locator('.diff-collapser__toggle-button').first().click()
+      await expect(changedRow.locator('.diff-collapser__field-change-count')).toHaveText(
+        '5 changed fields',
       )
     })
 
@@ -2459,6 +2652,21 @@ describe('Versions', () => {
 
       expect(await oldDiff.locator('p').first().innerHTML()).toEqual(oldHTML)
       expect(await newDiff.locator('p').first().innerHTML()).toEqual(newHTML)
+    })
+
+    test('should respect relationship read access in rich text diffs', async () => {
+      await navigateToDiffVersionView()
+
+      const richtext = page.locator('[data-field-path="richtextWithConstrainedRelationship"]')
+      const oldRelationshipLink = richtext.locator(
+        '.html-diff__diff-old .lexical-relationship-diff__link',
+      )
+      const newRelationshipLink = richtext.locator(
+        '.html-diff__diff-new .lexical-relationship-diff__link',
+      )
+
+      await expect(oldRelationshipLink).toHaveCount(0)
+      await expect(newRelationshipLink).toHaveText('Document 2')
     })
 
     test('correctly renders diff for richtext fields with custom Diff component', async () => {

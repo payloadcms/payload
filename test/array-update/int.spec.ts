@@ -1,11 +1,11 @@
 import type { Payload } from 'payload'
-import { describe, beforeAll, afterAll, it, expect } from 'vitest'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { arraySlug } from './shared.js'
+import { arraySlug, complexSlug } from './shared.js'
 
 let payload: Payload
 
@@ -106,5 +106,139 @@ describe('array-update', () => {
     expect(updatedDoc.arrayOfFields?.[0].optional).toBeFalsy()
 
     expect(updatedDoc.arrayOfFields?.[1]).toMatchObject(secondArrayItem)
+  })
+
+  it('should assign fresh row IDs to each doc on bulk update when row IDs are reused', async () => {
+    const docA = await payload.create({
+      collection: arraySlug,
+      data: { arrayOfFields: [] },
+    })
+    const docB = await payload.create({
+      collection: arraySlug,
+      data: { arrayOfFields: [] },
+    })
+
+    const reusedRowID = '6116a7f0f0f0f0f0f0f0f0f0'
+    const reusedInnerRowID = '6116a7f0f0f0f0f0f0f0f0f1'
+
+    const { docs, errors } = await payload.update({
+      collection: arraySlug,
+      data: {
+        arrayOfFields: [
+          {
+            id: reusedRowID,
+            innerArrayOfFields: [{ id: reusedInnerRowID, required: 'inner value' }],
+            required: 'bulk value',
+          },
+        ],
+      },
+      where: { id: { in: [docA.id, docB.id] } },
+    })
+
+    expect(errors).toHaveLength(0)
+    expect(docs).toHaveLength(2)
+
+    const updatedA = await payload.findByID({ id: docA.id, collection: arraySlug })
+    const updatedB = await payload.findByID({ id: docB.id, collection: arraySlug })
+
+    expect(updatedA.arrayOfFields?.[0].required).toBe('bulk value')
+    expect(updatedB.arrayOfFields?.[0].required).toBe('bulk value')
+    expect(updatedA.arrayOfFields?.[0].innerArrayOfFields?.[0].required).toBe('inner value')
+    expect(updatedB.arrayOfFields?.[0].innerArrayOfFields?.[0].required).toBe('inner value')
+
+    expect(updatedA.arrayOfFields?.[0].id).not.toBe(updatedB.arrayOfFields?.[0].id)
+    expect(updatedA.arrayOfFields?.[0].innerArrayOfFields?.[0].id).not.toBe(
+      updatedB.arrayOfFields?.[0].innerArrayOfFields?.[0].id,
+    )
+  })
+
+  it('should preserve existing row IDs of the matching doc during bulk update', async () => {
+    const docWithExistingRow = await payload.create({
+      collection: arraySlug,
+      data: { arrayOfFields: [{ required: 'existing row' }] },
+    })
+    const otherDoc = await payload.create({
+      collection: arraySlug,
+      data: { arrayOfFields: [] },
+    })
+
+    const existingRowID = docWithExistingRow.arrayOfFields![0].id
+
+    const { errors } = await payload.update({
+      collection: arraySlug,
+      data: {
+        arrayOfFields: [
+          { id: existingRowID, required: 'updated existing row' },
+          { required: 'new row' },
+        ],
+      },
+      where: { id: { in: [docWithExistingRow.id, otherDoc.id] } },
+    })
+
+    expect(errors).toHaveLength(0)
+
+    const updatedWithExistingRow = await payload.findByID({
+      id: docWithExistingRow.id,
+      collection: arraySlug,
+    })
+    const updatedOther = await payload.findByID({ id: otherDoc.id, collection: arraySlug })
+
+    expect(updatedWithExistingRow.arrayOfFields?.[0].id).toBe(existingRowID)
+    expect(updatedWithExistingRow.arrayOfFields?.[0].required).toBe('updated existing row')
+
+    expect(updatedOther.arrayOfFields?.[0].id).not.toBe(existingRowID)
+    expect(updatedOther.arrayOfFields?.[0].required).toBe('updated existing row')
+  })
+
+  it('should assign fresh row IDs for localized arrays, groups and blocks on bulk update', async () => {
+    const docA = await payload.create({ collection: complexSlug, data: {} })
+    const docB = await payload.create({ collection: complexSlug, data: {} })
+
+    const { docs, errors } = await payload.update({
+      collection: complexSlug,
+      data: {
+        blocks: [
+          {
+            id: '6116a7f0f0f0f0f0f0f0f0f2',
+            blockType: 'content',
+            innerArray: [{ id: '6116a7f0f0f0f0f0f0f0f0f3', text: 'inner block' }],
+            text: 'block value',
+          },
+        ],
+        group: {
+          groupArray: [{ id: '6116a7f0f0f0f0f0f0f0f0f4', text: 'group value' }],
+        },
+        localizedArray: [{ id: '6116a7f0f0f0f0f0f0f0f0f5', text: 'localized value' }],
+        localizedGroup: {
+          localizedGroupArray: [{ id: '6116a7f0f0f0f0f0f0f0f0f6', text: 'localized group value' }],
+        },
+      },
+      where: { id: { in: [docA.id, docB.id] } },
+    })
+
+    expect(errors).toHaveLength(0)
+    expect(docs).toHaveLength(2)
+
+    const updatedA = await payload.findByID({ id: docA.id, collection: complexSlug })
+    const updatedB = await payload.findByID({ id: docB.id, collection: complexSlug })
+
+    expect(updatedA.localizedArray?.[0].text).toBe('localized value')
+    expect(updatedB.localizedArray?.[0].text).toBe('localized value')
+    expect(updatedA.group?.groupArray?.[0].text).toBe('group value')
+    expect(updatedB.group?.groupArray?.[0].text).toBe('group value')
+    expect(updatedA.localizedGroup?.localizedGroupArray?.[0].text).toBe('localized group value')
+    expect(updatedB.localizedGroup?.localizedGroupArray?.[0].text).toBe('localized group value')
+    expect(updatedA.blocks?.[0].text).toBe('block value')
+    expect(updatedB.blocks?.[0].text).toBe('block value')
+
+    expect(updatedA.localizedArray?.[0].id).not.toBe(updatedB.localizedArray?.[0].id)
+    expect(updatedA.group?.groupArray?.[0].id).not.toBe(updatedB.group?.groupArray?.[0].id)
+    expect(updatedA.localizedGroup?.localizedGroupArray?.[0].id).not.toBe(
+      updatedB.localizedGroup?.localizedGroupArray?.[0].id,
+    )
+    expect(updatedA.blocks?.[0].id).not.toBe(updatedB.blocks?.[0].id)
+    expect(updatedA.blocks?.[0].innerArray?.[0].id).not.toBe(
+      updatedB.blocks?.[0].innerArray?.[0].id,
+    )
   })
 })

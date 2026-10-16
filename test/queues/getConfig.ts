@@ -38,6 +38,8 @@ import { selfCancelWorkflow } from './workflows/selfCancel.js'
 import { subTaskWorkflow } from './workflows/subTask.js'
 import { subTaskFailsWorkflow } from './workflows/subTaskFails.js'
 import { supersedesConcurrencyWorkflow } from './workflows/supersedesConcurrency.js'
+import { throwsInHandlerNoRetriesWorkflow } from './workflows/throwsInHandlerNoRetries.js'
+import { throwsInHandlerRetries1Workflow } from './workflows/throwsInHandlerRetries1.js'
 import { updatePostWorkflow } from './workflows/updatePost.js'
 import { updatePostJSONWorkflow } from './workflows/updatePostJSON.js'
 import { workflowAndTasksRetriesUndefinedWorkflow } from './workflows/workflowAndTasksRetriesUndefined.js'
@@ -179,6 +181,8 @@ export const getConfig: () => Partial<Config> = () => ({
       noConcurrencyWorkflow,
       queueSpecificConcurrencyWorkflow,
       supersedesConcurrencyWorkflow,
+      throwsInHandlerNoRetriesWorkflow,
+      throwsInHandlerRetries1Workflow,
     ],
   },
   editor: lexicalEditor(),

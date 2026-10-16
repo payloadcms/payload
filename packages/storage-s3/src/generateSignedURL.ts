@@ -3,8 +3,13 @@ import type { PayloadHandler } from 'payload'
 
 import * as AWS from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
+import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { APIError, Forbidden } from 'payload'
+import {
+  assertClientUploadAccess,
+  assertClientUploadAllowed,
+  assertClientUploadFileSize,
+} from 'payload/internal'
 
 import type { S3StorageOptions } from './index.js'
 
@@ -50,6 +55,8 @@ export const getGenerateSignedURLHandler = ({
       mimeType: string
     }
 
+    await assertClientUploadAccess({ collectionSlug, req })
+
     const collectionS3Config = collections[collectionSlug]
     if (!collectionS3Config) {
       throw new APIError(`Collection ${collectionSlug} was not found in S3 options`)
@@ -62,16 +69,31 @@ export const getGenerateSignedURLHandler = ({
       throw new Forbidden()
     }
 
-    const { fileKey, sanitizedDocPrefix } = getFileKey({
-      collectionPrefix,
-      docPrefix,
+    assertClientUploadAllowed({
+      collection: req.payload.collections[collectionSlug]?.config,
       filename,
-      useCompositePrefixes,
+      mimeType,
     })
+
+    const { clientUploadContext, fileKey, sanitizedDocPrefix, sanitizedFilename } =
+      await resolveSignedURLKey({
+        collectionPrefix,
+        collectionSlug,
+        docPrefix,
+        filename,
+        req,
+        useCompositePrefixes,
+      })
 
     const signableHeaders = new Set<string>()
 
+    if (typeof mimeType === 'string' && mimeType) {
+      signableHeaders.add('content-type')
+    }
+
     if (filesizeLimit) {
+      assertClientUploadFileSize(filesize)
+
       if (filesize > filesizeLimit) {
         throw new APIError(
           `Exceeded file size limit. Limit: ${bytesToMB(filesizeLimit).toFixed(2)}MB, got: ${bytesToMB(filesize).toFixed(2)}MB`,
@@ -90,6 +112,7 @@ export const getGenerateSignedURLHandler = ({
         Bucket: bucket,
         ContentLength: filesizeLimit ? Math.min(filesize, filesizeLimit) : undefined,
         ContentType: mimeType,
+        IfNoneMatch: '*',
         Key: fileKey,
       }),
       {
@@ -99,7 +122,14 @@ export const getGenerateSignedURLHandler = ({
     )
 
     return Response.json({
+      clientUploadContext,
       docPrefix: sanitizedDocPrefix,
+      filename: sanitizedFilename,
+      headers: {
+        'Content-Length': String(filesize),
+        'Content-Type': mimeType,
+        'If-None-Match': '*',
+      },
       url,
     })
   }

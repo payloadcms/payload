@@ -34,6 +34,16 @@ import {
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
+  publicationAccessGlobalSlug,
+  publicationAccessSlug,
+  publicationAsyncFieldHookSlug,
+  publicationBeforeOperationGlobalSlug,
+  publicationBeforeOperationSanitizeGlobalSlug,
+  publicationBeforeOperationSlug,
+  publicationFieldAccessGlobalSlug,
+  publicationFieldAccessSlug,
+  publicationHookGlobalSlug,
+  publicationHookSlug,
   relationEnglishTitle,
   relationEnglishTitle2,
   relationshipLocalizedSlug,
@@ -57,6 +67,18 @@ const openAccess: CollectionConfig['access'] = {
   read: () => true,
   update: () => true,
 }
+
+const preventPublicationStatusChange = ({ data }: { data?: Record<string, unknown> }) => {
+  return typeof data?._status === 'undefined'
+}
+
+const localizedPublicationFields: CollectionConfig['fields'] = [
+  {
+    name: 'title',
+    localized: true,
+    type: 'text',
+  },
+]
 
 export default buildConfigWithDefaults({
   admin: {
@@ -431,6 +453,137 @@ export default buildConfigWithDefaults({
     },
     LocalizedWithinLocalized,
     ArrayWithFallbackCollection,
+    {
+      slug: publicationAccessSlug,
+      access: {
+        create: preventPublicationStatusChange,
+        update: preventPublicationStatusChange,
+      },
+      fields: localizedPublicationFields,
+      versions: {
+        drafts: {
+          localizeStatus: true,
+        },
+      },
+    },
+    {
+      slug: publicationFieldAccessSlug,
+      access: openAccess,
+      fields: [
+        ...localizedPublicationFields,
+        {
+          name: '_status',
+          access: {
+            create: () => false,
+            update: ({ data, doc, req }) =>
+              Boolean(req.context.comparePublicationStatus && data?._status === doc?._status),
+          },
+          hooks: {
+            beforeValidate: [
+              ({ context, previousValue, value }) => {
+                if (context.validatePublicationStatus && value !== previousValue) {
+                  throw new Error('Publication status validation is not allowed')
+                }
+
+                return value
+              },
+            ],
+          },
+          options: [],
+          type: 'select',
+        },
+      ],
+      versions: {
+        drafts: {
+          localizeStatus: true,
+        },
+      },
+    },
+    {
+      slug: publicationBeforeOperationSlug,
+      access: openAccess,
+      fields: localizedPublicationFields,
+      hooks: {
+        beforeOperation: [
+          ({ args }) => {
+            if (args.data?._status === 'published') {
+              throw new Error('Publication is not allowed in beforeOperation')
+            }
+
+            return args
+          },
+        ],
+      },
+      versions: {
+        drafts: {
+          localizeStatus: true,
+        },
+      },
+    },
+    {
+      slug: publicationAsyncFieldHookSlug,
+      access: openAccess,
+      fields: [
+        {
+          name: 'title',
+          hooks: {
+            beforeChange: [
+              async ({ context, siblingData }) => {
+                if (context.removePublicationIntent) {
+                  await new Promise((resolve) => setTimeout(resolve, 25))
+                  delete siblingData._status
+                }
+              },
+            ],
+          },
+          localized: true,
+          type: 'text',
+        },
+      ],
+      hooks: {
+        beforeOperation: [
+          ({ args, context }) => {
+            if (context.saveAsDraft) {
+              args.draft = true
+              args.publishAllLocales = false
+            }
+
+            return args
+          },
+        ],
+      },
+      versions: {
+        drafts: {
+          localizeStatus: true,
+        },
+      },
+    },
+    {
+      slug: publicationHookSlug,
+      access: openAccess,
+      fields: localizedPublicationFields,
+      hooks: {
+        beforeChange: [
+          ({ context, data, operation, originalDoc }) => {
+            if (
+              !context.seedPublicationStatus &&
+              operation === 'update' &&
+              data?._status &&
+              data._status !== originalDoc?._status
+            ) {
+              throw new Error('Publication status changes are not allowed')
+            }
+
+            return data
+          },
+        ],
+      },
+      versions: {
+        drafts: {
+          localizeStatus: true,
+        },
+      },
+    },
   ],
   globals: [
     {
@@ -468,6 +621,127 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: globalWithDraftsSlug,
+      versions: {
+        drafts: {
+          localizeStatus: true,
+        },
+      },
+    },
+    {
+      slug: publicationAccessGlobalSlug,
+      access: {
+        update: preventPublicationStatusChange,
+      },
+      fields: localizedPublicationFields,
+      versions: {
+        drafts: {
+          localizeStatus: true,
+        },
+      },
+    },
+    {
+      slug: publicationBeforeOperationGlobalSlug,
+      access: {
+        update: () => true,
+      },
+      fields: localizedPublicationFields,
+      hooks: {
+        beforeOperation: [
+          ({ args }) => {
+            if (args.data?._status === 'published') {
+              throw new Error('Publication is not allowed in beforeOperation')
+            }
+
+            return args
+          },
+        ],
+      },
+      versions: {
+        drafts: {
+          localizeStatus: true,
+        },
+      },
+    },
+    {
+      slug: publicationBeforeOperationSanitizeGlobalSlug,
+      access: {
+        update: () => true,
+      },
+      fields: localizedPublicationFields,
+      hooks: {
+        beforeOperation: [
+          ({ args, context }) => {
+            if (context.sanitizePublicationIntent && args.data?._status === 'published') {
+              delete args.data._status
+              args.publishAllLocales = false
+            }
+
+            return args
+          },
+        ],
+      },
+      versions: {
+        drafts: {
+          localizeStatus: true,
+        },
+      },
+    },
+    {
+      slug: publicationFieldAccessGlobalSlug,
+      access: {
+        update: () => true,
+      },
+      fields: [
+        ...localizedPublicationFields,
+        {
+          name: '_status',
+          access: {
+            create: () => false,
+            update: ({ data, doc, req }) =>
+              Boolean(req.context.comparePublicationStatus && data?._status === doc?._status),
+          },
+          hooks: {
+            beforeValidate: [
+              ({ context, previousValue, value }) => {
+                if (context.validatePublicationStatus && value !== previousValue) {
+                  throw new Error('Publication status validation is not allowed')
+                }
+
+                return value
+              },
+            ],
+          },
+          options: [],
+          type: 'select',
+        },
+      ],
+      versions: {
+        drafts: {
+          localizeStatus: true,
+        },
+      },
+    },
+    {
+      slug: publicationHookGlobalSlug,
+      access: {
+        update: () => true,
+      },
+      fields: localizedPublicationFields,
+      hooks: {
+        beforeChange: [
+          ({ context, data, originalDoc }) => {
+            if (
+              !context.seedPublicationStatus &&
+              data?._status &&
+              data._status !== originalDoc?._status
+            ) {
+              throw new Error('Publication status changes are not allowed')
+            }
+
+            return data
+          },
+        ],
+      },
       versions: {
         drafts: {
           localizeStatus: true,

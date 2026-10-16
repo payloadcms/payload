@@ -5,6 +5,7 @@ import type { PayloadRequest } from '../types/index.js'
 import type { WithMetadata } from './optionallyAppendMetadata.js'
 import type { UploadEdits } from './types.js'
 
+import { isAnimatedImage } from './isAnimatedImage.js'
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
 
 const percentToPixel = (value: number, dimension: number) => {
@@ -35,7 +36,7 @@ export async function cropImage({
     const { x, y } = cropData!
     const file = fileArg!
 
-    const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
+    const fileIsAnimatedType = isAnimatedImage(file.mimetype)
 
     const sharpOptions: SharpOptions = {}
 

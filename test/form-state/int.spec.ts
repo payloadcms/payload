@@ -1,24 +1,30 @@
 import type { FieldState, FormState, Payload, User } from 'payload'
-import type React from 'react'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import path from 'path'
-import { createLocalReq } from 'payload'
+import { createLocalReq, getAccessResults } from 'payload'
+import React from 'react'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
+import { autosavePostsSlug } from './collections/Autosave/index.js'
+import { conditionsSlug } from './collections/Conditions/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { renderDocumentHandler } from '../../packages/next/src/views/Document/handleServerFunction.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { mergeServerFormState } from '../../packages/ui/src/forms/Form/mergeServerFormState.js'
 
 let payload: Payload
 let restClient: NextRESTClient
 let user: User
+const createdAutosavePostTitles: string[] = []
+const createdUserIDs: (number | string)[] = []
 
 const { email, password } = devUser
 const filename = fileURLToPath(import.meta.url)
@@ -48,8 +54,78 @@ describe('Form State', () => {
     user = data.user
   })
 
+  afterEach(async () => {
+    vi.unstubAllGlobals()
+
+    for (const title of createdAutosavePostTitles) {
+      await payload.delete({
+        collection: autosavePostsSlug,
+        where: {
+          title: {
+            equals: title,
+          },
+        },
+      })
+    }
+    createdAutosavePostTitles.length = 0
+
+    for (const id of createdUserIDs) {
+      await payload.delete({ id, collection: 'users' })
+    }
+    createdUserIDs.length = 0
+  })
+
   afterAll(async () => {
     await payload.destroy()
+  })
+
+  it('should respect field create access when initializing an autosave draft', async () => {
+    const editor = await payload.create({
+      collection: 'users',
+      data: {
+        email: 'editor@example.com',
+        password: 'test-password',
+      },
+    })
+    createdUserIDs.push(editor.id)
+
+    const req = await createLocalReq({ user: editor }, payload)
+    const permissions = await getAccessResults({ req })
+    const restrictedValue = 'client supplied'
+    const title = 'Access filtered autosave'
+    createdAutosavePostTitles.push(title)
+    vi.stubGlobal('React', React)
+
+    await renderDocumentHandler({
+      collectionSlug: autosavePostsSlug,
+      cookies: new Map(),
+      docID: undefined as never,
+      importMap: payload.importMap,
+      initialData: {
+        restrictedValue,
+        title,
+      },
+      locale: undefined,
+      permissions,
+      redirectAfterCreate: false,
+      redirectAfterDelete: false,
+      redirectAfterDuplicate: false,
+      req,
+    })
+
+    const { docs } = await payload.find({
+      collection: autosavePostsSlug,
+      draft: true,
+      overrideAccess: true,
+      where: {
+        title: {
+          equals: title,
+        },
+      },
+    })
+
+    expect(docs).toHaveLength(1)
+    expect(docs[0]).not.toHaveProperty('restrictedValue', restrictedValue)
   })
 
   it('should build entire form state', async () => {
@@ -138,6 +214,12 @@ describe('Form State', () => {
     })
 
     expect(state).toStrictEqual({
+      '_index-7': {
+        disableFormData: true,
+      },
+      '_index-7-0-0': {
+        disableFormData: true,
+      },
       title: {
         value: postData.title,
         initialValue: postData.title,
@@ -228,6 +310,196 @@ describe('Form State', () => {
     expect(stateWithTitle?.['array.1.customTextField']).toHaveProperty('lastRenderedPath')
     expect(stateWithTitle?.['array.1.customTextField']).toHaveProperty('customComponents')
     expect(stateWithTitle?.['array.1.customTextField']?.customComponents?.Field).toBeDefined()
+  })
+
+  it('should not render custom Field components for fields hidden by admin.condition', async () => {
+    const req = await createLocalReq({ user }, payload)
+
+    const hiddenDoc = await payload.create({
+      collection: conditionsSlug,
+      data: {
+        showField: false,
+      },
+    })
+
+    const { state: stateHidden } = await buildFormState({
+      mockRSCs: true,
+      id: hiddenDoc.id,
+      collectionSlug: conditionsSlug,
+      data: hiddenDoc,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: true,
+      req,
+      schemaPath: conditionsSlug,
+    })
+
+    expect(stateHidden?.conditionalCustomField).toBeDefined()
+    expect(stateHidden?.conditionalCustomField?.passesCondition).toBe(false)
+    expect(stateHidden?.conditionalCustomField).not.toHaveProperty('customComponents')
+    expect(stateHidden?.conditionalCustomField?.lastRenderedPath).toBeUndefined()
+
+    const visibleDoc = await payload.create({
+      collection: conditionsSlug,
+      data: {
+        showField: true,
+      },
+    })
+
+    const { state: stateVisible } = await buildFormState({
+      mockRSCs: true,
+      id: visibleDoc.id,
+      collectionSlug: conditionsSlug,
+      data: visibleDoc,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: true,
+      req,
+      schemaPath: conditionsSlug,
+    })
+
+    expect(stateVisible?.conditionalCustomField?.passesCondition).not.toBe(false)
+    expect(stateVisible?.conditionalCustomField).toHaveProperty('customComponents')
+    expect(stateVisible?.conditionalCustomField?.customComponents?.Field).toBeDefined()
+
+    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id })
+    await payload.delete({ collection: conditionsSlug, id: visibleDoc.id })
+  })
+
+  it('should preserve values of fields nested inside a row hidden by admin.condition', async () => {
+    const req = await createLocalReq({ user }, payload)
+
+    const hiddenDoc = await payload.create({
+      collection: conditionsSlug,
+      data: {
+        showField: false,
+        conditionalRowField: 'value in db',
+      },
+    })
+
+    const { state: stateHidden } = await buildFormState({
+      mockRSCs: true,
+      id: hiddenDoc.id,
+      collectionSlug: conditionsSlug,
+      data: hiddenDoc,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: true,
+      req,
+      schemaPath: conditionsSlug,
+    })
+
+    // The field is nested inside a `row` whose condition is false. Its value exists in
+    // the DB and must survive in client form state (only its rendering should be skipped).
+    expect(stateHidden?.conditionalRowField).toBeDefined()
+    expect(stateHidden?.conditionalRowField?.value).toBe('value in db')
+
+    // The row itself must still carry `passesCondition: false` so the client hides it via
+    // `withCondition` (rather than rendering an empty, visible row).
+    expect(stateHidden?.['_index-2']?.passesCondition).toBe(false)
+
+    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id })
+  })
+
+  it('should preserve values of fields nested inside a collapsible hidden by admin.condition', async () => {
+    const req = await createLocalReq({ user }, payload)
+
+    const hiddenDoc = await payload.create({
+      collection: conditionsSlug,
+      data: {
+        showField: false,
+        conditionalCollapsibleField: 'collapsible db value',
+      },
+    })
+
+    const { state: stateHidden } = await buildFormState({
+      mockRSCs: true,
+      id: hiddenDoc.id,
+      collectionSlug: conditionsSlug,
+      data: hiddenDoc,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: true,
+      req,
+      schemaPath: conditionsSlug,
+    })
+
+    // Same regression class as `row`: a collapsible is a presentational container, so its
+    // nested field's value must survive even though the collapsible is hidden.
+    expect(stateHidden?.conditionalCollapsibleField?.value).toBe('collapsible db value')
+
+    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id })
+  })
+
+  it('should render custom Field component when admin.condition flips from false to true via onChange', async () => {
+    const req = await createLocalReq({ user }, payload)
+
+    const doc = await payload.create({
+      collection: conditionsSlug,
+      data: {
+        showField: false,
+      },
+    })
+
+    const { state: initialState } = await buildFormState({
+      mockRSCs: true,
+      id: doc.id,
+      collectionSlug: conditionsSlug,
+      data: doc,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: true,
+      req,
+      schemaPath: conditionsSlug,
+    })
+
+    expect(initialState?.conditionalCustomField).not.toHaveProperty('customComponents')
+
+    // Simulate condition flipping true (user toggles checkbox) by re-requesting
+    // form state with `renderAllFields: false` and updated value — same flow as onChange.
+    initialState.showField!.value = true
+
+    const { state: flippedState } = await buildFormState({
+      mockRSCs: true,
+      id: doc.id,
+      collectionSlug: conditionsSlug,
+      formState: initialState,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: false,
+      req,
+      schemaPath: conditionsSlug,
+    })
+
+    expect(flippedState?.conditionalCustomField?.passesCondition).not.toBe(false)
+    expect(flippedState?.conditionalCustomField).toHaveProperty('customComponents')
+    expect(flippedState?.conditionalCustomField?.customComponents?.Field).toBeDefined()
+
+    await payload.delete({ collection: conditionsSlug, id: doc.id })
   })
 
   it('should add `addedByServer` flag to fields that originate on the server', async () => {

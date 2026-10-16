@@ -45,4 +45,24 @@ describe('withPayload', () => {
       }
     }
   })
+
+  it('should mirror nextConfig.trailingSlash in process.env.NEXT_TRAILING_SLASH', () => {
+    const originalTrailingSlash = process.env.NEXT_TRAILING_SLASH
+
+    try {
+      process.env.NEXT_TRAILING_SLASH = 'true'
+
+      withPayload({ trailingSlash: false })
+      expect(process.env.NEXT_TRAILING_SLASH).toBe('false')
+
+      withPayload({ trailingSlash: true })
+      expect(process.env.NEXT_TRAILING_SLASH).toBe('true')
+    } finally {
+      if (originalTrailingSlash === undefined) {
+        delete process.env.NEXT_TRAILING_SLASH
+      } else {
+        process.env.NEXT_TRAILING_SLASH = originalTrailingSlash
+      }
+    }
+  })
 })

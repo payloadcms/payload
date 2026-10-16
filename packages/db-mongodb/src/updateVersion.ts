@@ -1,4 +1,4 @@
-import type { MongooseUpdateQueryOptions } from 'mongoose'
+import type { QueryOptions } from 'mongoose'
 
 import { buildVersionCollectionFields, type UpdateVersion } from 'payload'
 
@@ -44,8 +44,15 @@ export const updateVersion: UpdateVersion = async function updateVersion(
 
   transform({ adapter: this, data: versionData, fields, operation: 'write' })
 
-  const options: MongooseUpdateQueryOptions = {
+  const baseOptions = {
     ...optionsArgs,
+    session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
+  } satisfies QueryOptions
+
+  const findOptions: QueryOptions = {
+    ...baseOptions,
     lean: true,
     new: true,
     projection: buildProjectionFromSelect({
@@ -53,17 +60,14 @@ export const updateVersion: UpdateVersion = async function updateVersion(
       fields: flattenedFields,
       select,
     }),
-    session: await getSession(this, req),
-    // Timestamps are manually added by the write transform
-    timestamps: false,
   }
 
   if (returning === false) {
-    await Model.updateOne(query, versionData, options)
+    await Model.updateOne(query, versionData, baseOptions)
     return null
   }
 
-  const doc = await Model.findOneAndUpdate(query, versionData, options)
+  const doc = await Model.findOneAndUpdate(query, versionData, findOptions)
 
   if (!doc) {
     return null

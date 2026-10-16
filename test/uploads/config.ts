@@ -8,6 +8,7 @@ import { AdminThumbnailWithSearchQueries } from './collections/AdminThumbnailWit
 import { AdminUploadControl } from './collections/AdminUploadControl/index.js'
 import { AnyImageTypeCollection } from './collections/AnyImageType/index.js'
 import { BulkUploadsCollection } from './collections/BulkUploads/index.js'
+import { BulkUploadsHookErrorCollection } from './collections/BulkUploadsHookError/index.js'
 import { CustomUploadFieldCollection } from './collections/CustomUploadField/index.js'
 import { FileMimeType } from './collections/FileMimeType/index.js'
 import { NoFilesRequired } from './collections/NoFilesRequired/index.js'
@@ -22,7 +23,9 @@ import {
   audioSlug,
   constructorOptionsSlug,
   customFileNameMediaSlug,
+  draftReuploadMediaSlug,
   enlargeSlug,
+  fileAccessMediaSlug,
   focalNoSizesSlug,
   hideFileInputOnCreateSlug,
   imageSizesOnlySlug,
@@ -84,6 +87,12 @@ export default buildConfigWithDefaults({
           name: 'hideFileInputOnCreate',
           type: 'upload',
           relationTo: hideFileInputOnCreateSlug,
+        },
+        {
+          name: 'polymorphicUploads',
+          type: 'upload',
+          relationTo: ['uploads-1', 'uploads-2'],
+          hasMany: true,
         },
         {
           type: 'tabs',
@@ -1004,6 +1013,7 @@ export default buildConfigWithDefaults({
       },
     },
     BulkUploadsCollection,
+    BulkUploadsHookErrorCollection,
     SimpleRelationshipCollection,
     FileMimeType,
     {
@@ -1072,6 +1082,72 @@ export default buildConfigWithDefaults({
       ],
       upload: {
         staticDir: path.resolve(dirname, './prefix-media'),
+      },
+    },
+    {
+      slug: fileAccessMediaSlug,
+      access: {
+        read: () => ({
+          visibility: {
+            equals: 'public',
+          },
+        }),
+      },
+      fields: [
+        {
+          name: 'prefix',
+          type: 'text',
+        },
+        {
+          name: 'requestMetadata',
+          type: 'text',
+        },
+        {
+          name: 'visibility',
+          type: 'select',
+          options: ['public', 'restricted'],
+          required: true,
+        },
+      ],
+      hooks: {
+        beforeChange: [
+          ({ data, req }) => ({
+            ...data,
+            requestMetadata: `${req.method}:${req.headers.get('content-type') ?? ''}:${new URL(req.url!).pathname}`,
+          }),
+        ],
+      },
+      upload: {
+        imageSizes: [
+          {
+            name: 'thumbnail',
+            height: 100,
+            width: 100,
+          },
+        ],
+        staticDir: path.resolve(dirname, `./${fileAccessMediaSlug}`),
+      },
+      versions: true,
+    },
+    {
+      // Drafts + a `prefix` field reproduce the reupload-on-draft access bug:
+      // the file endpoint's access check queries the base row (published state),
+      // which misses a filename that only exists on the latest draft version.
+      slug: draftReuploadMediaSlug,
+      access: {
+        read: () => true,
+      },
+      fields: [
+        {
+          name: 'prefix',
+          type: 'text',
+        },
+      ],
+      upload: {
+        staticDir: path.resolve(dirname, `./${draftReuploadMediaSlug}`),
+      },
+      versions: {
+        drafts: true,
       },
     },
   ],

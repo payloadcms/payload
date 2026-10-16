@@ -1,4 +1,4 @@
-import type { CollectionSlug, Payload } from 'payload'
+import type { ClientField, CollectionSlug, Payload } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
@@ -9,6 +9,10 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
+import {
+  filterSelectableFieldValues,
+  reduceFields,
+} from '../../packages/plugin-import-export/src/components/FieldsToExport/reduceFields.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser, regularUser } from '../credentials.js'
 import { clearTestBucket, createTestBucket } from '../storage-s3/test-utils.js'
@@ -956,6 +960,43 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].hasManyPolymorphic_1_relationTo).toBe('posts')
     })
 
+    it('should not produce duplicate columns for hasOne polymorphic relationship export', async () => {
+      const doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          fields: ['id', 'hasOnePolymorphic'],
+          format: 'csv',
+          where: {
+            title: { contains: 'Polymorphic' },
+          },
+        },
+      })
+
+      await payload.jobs.run()
+
+      const exportDoc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(exportDoc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const buffer = fs.readFileSync(expectedPath)
+      const headerLine = buffer.toString().split('\n')[0] ?? ''
+      const headers = headerLine.split(',').map((h) => h.replace(/^\ufeff/, '').trim())
+
+      expect(headers).toContain('hasOnePolymorphic_id')
+      expect(headers).toContain('hasOnePolymorphic_relationTo')
+
+      const leakedColumns = headers.filter(
+        (h) =>
+          h.startsWith('hasOnePolymorphic_value') || h.startsWith('hasOnePolymorphic_relationTo_'),
+      )
+      expect(leakedColumns).toEqual([])
+    })
+
     it('should export hasMany monomorphic relationship fields to CSV', async () => {
       const doc = await payload.create({
         collection: 'exports',
@@ -1814,6 +1855,88 @@ describe('@payloadcms/plugin-import-export', () => {
           where: {
             title: { equals: 'JSON Roundtrip CSV Test' },
           },
+        })
+      })
+
+      it('should roundtrip a block containing a nested array with richText through CSV export/import', async () => {
+        const testPage = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'FAQ Block Roundtrip Test',
+            blocks: [
+              {
+                blockType: 'faqSection',
+                faqs: [
+                  { question: 'What is Payload?', answer: richTextData },
+                  { question: 'Is it open source?', answer: richTextData },
+                ],
+              },
+            ],
+          },
+        })
+
+        let exportDoc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            format: 'csv',
+            where: { id: { equals: testPage.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        exportDoc = await payload.findByID({ collection: 'exports', id: exportDoc.id })
+
+        const csvPath = path.join(dirname, './uploads', exportDoc.filename as string)
+
+        await payload.delete({ collection: 'pages', id: testPage.id })
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: { collectionSlug: 'pages', importMode: 'create' },
+          file: {
+            data: fs.readFileSync(csvPath),
+            mimetype: 'text/csv',
+            name: 'faq-roundtrip.csv',
+            size: fs.statSync(csvPath).size,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(1)
+
+        const importedPages = await payload.find({
+          collection: 'pages',
+          where: { title: { equals: 'FAQ Block Roundtrip Test' } },
+        })
+
+        expect(importedPages.docs).toHaveLength(1)
+        const imported = importedPages.docs[0]
+
+        expect(imported?.blocks).toHaveLength(1)
+        const faqBlock = imported?.blocks?.[0]
+        expect(faqBlock?.blockType).toBe('faqSection')
+
+        const faqs = (faqBlock as any)?.faqs
+        expect(Array.isArray(faqs)).toBe(true)
+        expect(faqs).toHaveLength(2)
+
+        expect(faqs[0]?.question).toBe('What is Payload?')
+        expect(typeof faqs[0]?.answer).not.toBe('string')
+        expect(faqs[0]?.answer?.root?.type).toBe('root')
+
+        expect(faqs[1]?.question).toBe('Is it open source?')
+        expect(typeof faqs[1]?.answer).not.toBe('string')
+
+        await payload.delete({
+          collection: 'pages',
+          where: { title: { equals: 'FAQ Block Roundtrip Test' } },
         })
       })
 
@@ -5793,6 +5916,24 @@ describe('@payloadcms/plugin-import-export', () => {
   })
 
   describe('collection configuration', () => {
+    it('should exclude disabled default columns from the export field selection', () => {
+      const postsConfig = payload.collections['posts-exports-only'].config
+      const disabledFields =
+        postsConfig.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
+      const fieldOptions = reduceFields({
+        disabledFields,
+        fields: postsConfig.fields as ClientField[],
+      })
+      const initialSelection = filterSelectableFieldValues({
+        fieldOptions,
+        values: postsConfig.admin?.defaultColumns ?? [],
+      })
+
+      expect(postsConfig.admin?.defaultColumns).toContain('disabledForImportExport')
+      expect(disabledFields).toContain('disabledForImportExport')
+      expect(initialSelection).not.toContain('disabledForImportExport')
+    })
+
     it('should exclude collections with custom export collections from base exports', () => {
       const exportsConfig = payload.collections['exports'].config
       const validSlugs =
@@ -6298,6 +6439,48 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(response.status).toBe(400)
       const data = await response.json()
       expect(data.error).toContain('not found')
+    })
+
+    it('rejects an invalid preview field path and keeps collection access unchanged', async () => {
+      const post = await payload.create({
+        collection: 'posts-imports-only',
+        data: {
+          title: 'Preview field validation',
+        },
+      })
+      const objectPrototypeBefore = Object.getOwnPropertyDescriptors(Object.prototype)
+
+      try {
+        const previewResponse = await restClient.POST('/exports/export-preview', {
+          auth: false,
+          body: JSON.stringify({
+            collectionSlug: 'posts-imports-only',
+            fields: ['__proto__.overrideAccess'],
+            format: 'json',
+          }),
+        })
+        const objectPrototypeAfterPreview = Object.getOwnPropertyDescriptors(Object.prototype)
+
+        const updateResponse = await restClient.PATCH(`/posts-imports-only/${post.id}`, {
+          auth: false,
+          body: JSON.stringify({ title: 'Updated preview field validation' }),
+        })
+        const unchangedPost = await payload.findByID({
+          collection: 'posts-imports-only',
+          id: post.id,
+        })
+
+        expect(previewResponse.status).toBe(400)
+        expect(objectPrototypeAfterPreview).toEqual(objectPrototypeBefore)
+        expect(updateResponse.status).toBe(403)
+        expect(unchangedPost.title).toBe('Preview field validation')
+      } finally {
+        delete (Object.prototype as Record<string, unknown>).overrideAccess
+        await payload.delete({
+          collection: 'posts-imports-only',
+          id: post.id,
+        })
+      }
     })
 
     it('should apply toCSV customizations in export preview and remove replaced columns', async () => {

@@ -186,6 +186,27 @@ describe('SlugField', () => {
     })
   })
 
+  describe('validation error', () => {
+    test('should keep the lock button clickable when the slug field has a validation error', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-title').waitFor()
+
+      const slugFieldComponent = page
+        .locator('.slug-field-component')
+        .filter({ has: page.locator('#field-slug') })
+
+      // Save without filling required fields to surface validation errors
+      await page.locator('#action-save').click()
+
+      // The slug field error tooltip should render
+      await expect(slugFieldComponent.locator('.field-error')).toBeVisible()
+
+      await slugFieldComponent.locator('.lock-button').click()
+
+      await expect(page.locator('#field-slug')).toBeEnabled()
+    })
+  })
+
   describe('A11y', () => {
     test('Edit view should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.create)

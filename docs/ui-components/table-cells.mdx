@@ -1,0 +1,101 @@
+---
+title: Table Cells
+label: Table Cells
+order: 251
+desc: Render Payload field values and create custom cells for Admin Panel tables.
+keywords: ui, components, table, cells, columns, default cell, custom cell, date cell
+---
+
+Payload's table-cell components format field values inside Admin Panel tables. Use `DefaultCell` when a custom table should follow Payload's built-in field formatting, or register a custom Cell Component when a column needs purpose-specific output.
+
+This guide covers the table-cell primitives exported from `@payloadcms/ui`. The Field Config shown below is the registration point for a custom cell, not a general guide to Payload fields.
+
+## Import
+
+```tsx
+import {
+  DateCell,
+  DefaultCell,
+  RenderDefaultCell,
+  useCellProps,
+} from '@payloadcms/ui'
+import type {
+  DefaultCellComponentProps,
+  DefaultServerCellComponentProps,
+} from 'payload'
+```
+
+## Custom cell
+
+A custom Cell Component receives the current value as `cellData` and the complete document as `rowData`. Use the value to apply a distinct visual treatment to each option your field supports.
+
+<ComponentPreview component="TableCells" example="custom" />
+
+This example derives a stable `custom-cell--{value}` modifier from an allowlist. A shared CSS rule defines the cell treatment, while each modifier supplies its background, text, and border colors. Unexpected values fall back to the neutral Payload theme colors.
+
+Register the component through `admin.components.Cell` on the field whose column it replaces:
+
+```ts
+import type { Field } from 'payload'
+
+export const variantField: Field = {
+  name: 'variant',
+  type: 'select',
+  options: ['alpha', 'beta', 'gamma', 'delta', 'epsilon'],
+  admin: {
+    components: {
+      Cell: '/components/CustomCell',
+    },
+  },
+}
+```
+
+Use `DefaultCellComponentProps` for a Client Component and `DefaultServerCellComponentProps` for a Server Component. The prop types come from `payload`, while any visual primitives used by the cell—such as `Pill` in this example—come from `@payloadcms/ui`.
+
+## Default field rendering
+
+`DefaultCell` selects Payload's standard renderer for the supplied field type. For types without a specialized renderer, it displays the value directly.
+
+<ComponentPreview component="TableCells" example="defaults" />
+
+Pass the same field configuration and row data used to build the surrounding column. Set `link` when the value should navigate to the document, or provide `onClick` when the cell performs a custom selection action.
+
+`DateCell` is the specialized date renderer used by `DefaultCell`. It applies the field's `admin.date.displayFormat`, the root Admin date format, and timezone data when configured. Most custom tables should use `DefaultCell` for a date field rather than call `DateCell` directly.
+
+## Advanced cell composition
+
+`RenderDefaultCell` is the lower-level wrapper used by Payload's List View. In addition to rendering `DefaultCell`, it coordinates linked cells with `TableColumnsProvider` and a List Drawer.
+
+`useCellProps` reads the current `DefaultCellComponentProps` from that wrapper. It is useful when replacing Payload's linked-cell output, but it returns `null` outside `RenderDefaultCell`.
+
+For an ordinary custom Cell Component, use the props passed directly to the component instead of adding either API.
+
+## Common props
+
+These are the props most commonly used with `DefaultCell`. See `DefaultCellComponentProps` from `payload` for the complete type.
+
+| Prop              | Type          | Description                                              |
+| ----------------- | ------------- | -------------------------------------------------------- |
+| `cellData*`       | `unknown`     | Supplies the value for the current field and row.        |
+| `collectionSlug*` | `string`      | Identifies the Collection represented by the table.      |
+| `field*`          | `ClientField` | Selects Payload's renderer and formatting configuration. |
+| `rowData*`        | `RowData`     | Supplies the complete document represented by the row.   |
+| `link`            | `boolean`     | Wraps the displayed value in a document link.            |
+| `linkURL`         | `string`      | Overrides the URL generated for a linked cell.           |
+| `onClick`         | `function`    | Replaces linked behavior with a cell action.             |
+| `customCellProps` | `object`      | Supplies project-specific data to a custom cell.         |
+
+_\* An asterisk denotes that a prop is required._
+
+## Accessibility
+
+- Render text alongside color when a custom cell communicates status.
+- Use a link only when the cell navigates and a button only when it performs an action.
+- Keep custom output concise so the table remains readable at narrow widths.
+- Preserve an understandable text value when adding icons or visual formatting.
+
+## Provider requirements
+
+`DefaultCell` and `DateCell` use the Config and Translation providers supplied by the Payload Admin Panel. `RenderDefaultCell` additionally expects Table Columns and List Drawer context. Custom Cell Components registered through a Field Config receive their props from Payload automatically.
+
+See [Fields](/docs/fields/overview#cell) for the complete Cell Component extension point and [Table](/docs/ui-components/table) for composing rows and columns.

@@ -49,6 +49,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'authentication:newPassword',
   'authentication:passed',
   'authentication:passwordResetSuccessfully',
+  'authentication:resend',
   'authentication:resetPassword',
   'authentication:stayLoggedIn',
   'authentication:successfullyRegisteredFirstUser',

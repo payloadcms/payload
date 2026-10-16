@@ -14,6 +14,14 @@ keywords: rest, api, documentation, Content Management System, cms, headless, ja
 The REST API is a fully functional HTTP client that allows you to interact with your Documents in a RESTful manner. It supports all CRUD operations and is equipped with automatic pagination, depth, and sorting.
 All Payload API routes are mounted and prefixed to your config's `routes.api` URL segment (default: `/api`).
 
+For example, if you have a Collection called `pages`, you can fetch its documents directly from the browser or any HTTP client:
+
+```ts
+fetch('https://localhost:3000/api/pages') // highlight-line
+  .then((res) => res.json())
+  .then((data) => console.log(data))
+```
+
 To enhance DX, you can use [Payload SDK](#payload-rest-api-sdk) to query your REST API.
 
 **REST query parameters:**
@@ -577,13 +585,12 @@ Additional REST API endpoints can be added to your application by providing an a
 
 Each endpoint object needs to have:
 
-| Property      | Description                                                                                                                                                                                                                                                |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`path`**    | A string for the endpoint route after the collection or globals slug                                                                                                                                                                                       |
-| **`method`**  | The lowercase HTTP verb to use: 'get', 'head', 'post', 'put', 'delete', 'connect' or 'options'                                                                                                                                                             |
-| **`handler`** | A function that accepts **req** - `PayloadRequest` object which contains [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) properties, currently authenticated `user` and the Local API instance `payload`.                          |
-| **`root`**    | When `true`, defines the endpoint on the root Next.js app, bypassing Payload handlers and the `routes.api` subpath. Note: this only applies to top-level endpoints of your Payload Config, endpoints defined on `collections` or `globals` cannot be root. |
-| **`custom`**  | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                  |
+| Property      | Description                                                                                                                                                                                                                       |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`path`**    | A string for the endpoint route after the collection or globals slug                                                                                                                                                              |
+| **`method`**  | The lowercase HTTP verb to use: 'get', 'head', 'post', 'put', 'delete', 'connect' or 'options'                                                                                                                                    |
+| **`handler`** | A function that accepts **req** - `PayloadRequest` object which contains [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) properties, currently authenticated `user` and the Local API instance `payload`. |
+| **`custom`**  | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                         |
 
 Example:
 
@@ -659,6 +666,20 @@ export const Orders: CollectionConfig = {
   of [Access Control](../access-control/overview) and
   [Hooks](../hooks/overview).
 </Banner>
+
+#### Root-level routes
+
+Custom endpoints defined in your Payload Config are always mounted under your configured `routes.api` path (default: `/api`). To define a route that is not prefixed by this path, add a Next.js [Route Handler](https://nextjs.org/docs/app/api-reference/file-conventions/route) at the desired location in your app directory:
+
+```ts
+// src/app/my-route/route.ts
+
+export const GET = async () => {
+  return Response.json({
+    message: 'This is an example of a custom route.',
+  })
+}
+```
 
 #### Helpful tips
 

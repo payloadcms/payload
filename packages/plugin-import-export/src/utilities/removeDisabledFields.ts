@@ -33,7 +33,7 @@ export const removeDisabledFields = (
      * @param target - The current object or array being traversed
      * @param i - The index of the current path part
      */
-    const removeRecursively = (target: any, i = 0): void => {
+    const removeRecursively = (target: unknown, i = 0): void => {
       if (target == null) {
         return
       }
@@ -46,11 +46,11 @@ export const removeDisabledFields = (
         if (Array.isArray(target)) {
           for (const item of target) {
             if (item && typeof item === 'object' && key !== undefined) {
-              delete item[key as keyof typeof item]
+              delete (item as Record<string, unknown>)[key]
             }
           }
         } else if (typeof target === 'object' && key !== undefined) {
-          delete target[key]
+          delete (target as Record<string, unknown>)[key]
         }
         return
       }
@@ -60,7 +60,7 @@ export const removeDisabledFields = (
       }
 
       // Traverse to the next level in the path
-      const next = target[key]
+      const next = (target as Record<string, unknown>)[key]
 
       if (Array.isArray(next)) {
         // If the next value is an array, recurse into each item

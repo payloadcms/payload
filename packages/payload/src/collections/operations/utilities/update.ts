@@ -1,5 +1,6 @@
 import type { DeepPartial } from 'ts-essentials'
 
+import type { UserSession } from '../../../auth/types.js'
 import type { Args } from '../../../fields/hooks/beforeChange/index.js'
 import type {
   CollectionSlug,
@@ -23,6 +24,7 @@ import type {
 } from '../../config/types.js'
 
 import { ensureUsernameOrEmail } from '../../../auth/ensureUsernameOrEmail.js'
+import { removeExpiredSessions } from '../../../auth/sessions.js'
 import { generatePasswordSaltHash } from '../../../auth/strategies/local/generatePasswordSaltHash.js'
 import { afterChange } from '../../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../../fields/hooks/afterRead/index.js'
@@ -32,12 +34,19 @@ import { deepCopyObjectSimple, getLatestCollectionVersion, saveVersion } from '.
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
+import { getTopLevelFieldNames } from '../../../utilities/getTopLevelFieldNames.js'
 import {
   hasDraftsEnabled,
   hasDraftValidationEnabled,
   hasLocalizeStatusEnabled,
 } from '../../../utilities/getVersionsConfig.js'
 import { mergeLocalizedData } from '../../../utilities/mergeLocalizedData.js'
+import {
+  buildAllLocalesPublicationHookDoc,
+  getAllLocalesPublicationStatus,
+  hasAuthorizedAllLocalesPublicationStatus,
+  validateAllLocalesPublicationFlags,
+} from '../../../versions/allLocalesPublicationStatus.js'
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
   collectionConfig: SanitizedCollectionConfig
@@ -101,29 +110,28 @@ export const updateDocument = async <
   showHiddenFields,
   unpublishAllLocales: unpublishAllLocalesArg,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
-  const password = data?.password
+  validateAllLocalesPublicationFlags({
+    publishAllLocales: publishAllLocalesArg,
+    unpublishAllLocales: unpublishAllLocalesArg,
+  })
+
   const publishAllLocales =
-    !draftArg &&
-    (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true))
+    !draftArg && (publishAllLocalesArg ?? !hasLocalizeStatusEnabled(collectionConfig))
   const unpublishAllLocales =
     typeof unpublishAllLocalesArg === 'string'
       ? unpublishAllLocalesArg === 'true'
       : !!unpublishAllLocalesArg
+  const allLocalesPublicationStatus = getAllLocalesPublicationStatus({
+    hasLocalizedStatus: Boolean(config.localization && hasLocalizeStatusEnabled(collectionConfig)),
+    publishAllLocales,
+    unpublishAllLocales,
+  })
   const isSavingDraft =
     Boolean(draftArg && hasDraftsEnabled(collectionConfig)) &&
     data._status !== 'published' &&
     !publishAllLocales
-  const shouldSavePassword = Boolean(
-    password &&
-      collectionConfig.auth &&
-      (!collectionConfig.auth.disableLocalStrategy ||
-        (typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
-          collectionConfig.auth.disableLocalStrategy.enableFields)) &&
-      !isSavingDraft,
-  )
-
-  if (isSavingDraft) {
-    data._status = 'draft'
+  if (allLocalesPublicationStatus || isSavingDraft) {
+    data._status = allLocalesPublicationStatus ?? 'draft'
   }
 
   // /////////////////////////////////////
@@ -153,6 +161,12 @@ export const updateDocument = async <
   })
 
   const isRestoringDraftFromTrash = Boolean(originalDoc?.deletedAt) && data?._status !== 'published'
+  const shouldLimitValidationToSubmittedFields =
+    (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)) ||
+    unpublishAllLocales
+  const submittedTopLevelFieldNames = shouldLimitValidationToSubmittedFields
+    ? getTopLevelFieldNames(data)
+    : undefined
 
   if (collectionConfig.auth) {
     ensureUsernameOrEmail<TSlug>({
@@ -169,18 +183,34 @@ export const updateDocument = async <
   // Delete any associated files
   // /////////////////////////////////////
 
-  await deleteAssociatedFiles({
-    collectionConfig,
-    config,
-    doc: docWithLocales,
-    files: filesToUpload,
-    overrideDelete: false,
-    req,
-  })
+  // When saving a draft on a document whose latest version is published, the file
+  // referenced by docWithLocales is still actively used by the published main document.
+  // Deleting it here would break the published document's file even though no publish
+  // is happening. Only skip deletion in this case; when the latest version is already a
+  // draft, it is safe to delete the old draft file as it is being replaced.
+  const isDraftOverPublished = isSavingDraft && docWithLocales._status === 'published'
+
+  if (!isDraftOverPublished) {
+    await deleteAssociatedFiles({
+      collectionConfig,
+      config,
+      doc: docWithLocales,
+      files: filesToUpload,
+      overrideDelete: false,
+      req,
+    })
+  }
 
   // /////////////////////////////////////
   // beforeValidate - Fields
   // /////////////////////////////////////
+
+  let statusFieldAccess = false
+  const publicationFieldPolicyDoc = buildAllLocalesPublicationHookDoc({
+    doc: originalDoc,
+    docWithLocales,
+    status: allLocalesPublicationStatus,
+  })
 
   data = await beforeValidate<DeepPartial<DataFromCollectionSlug<TSlug>>>({
     id,
@@ -188,10 +218,35 @@ export const updateDocument = async <
     context: req.context,
     data,
     doc: originalDoc,
+    docForHooks: publicationFieldPolicyDoc,
     global: null,
+    onFieldAccess: ({ accessResult, path }) => {
+      if (path === '_status') {
+        statusFieldAccess = accessResult
+      }
+    },
     operation: 'update',
     overrideAccess,
     req,
+  })
+
+  const password = data?.password
+  const shouldSavePassword = Boolean(
+    password &&
+      collectionConfig.auth &&
+      (!collectionConfig.auth.disableLocalStrategy ||
+        (typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
+          collectionConfig.auth.disableLocalStrategy.enableFields)) &&
+      !isSavingDraft,
+  )
+
+  const publicationStatusIsAuthorized =
+    statusFieldAccess && data._status === allLocalesPublicationStatus
+
+  const publicationHookDoc = buildAllLocalesPublicationHookDoc({
+    doc: originalDoc,
+    docWithLocales,
+    status: publicationStatusIsAuthorized ? allLocalesPublicationStatus : undefined,
   })
 
   // /////////////////////////////////////
@@ -206,7 +261,7 @@ export const updateDocument = async <
           context: req.context,
           data,
           operation: 'update',
-          originalDoc,
+          originalDoc: publicationHookDoc,
           req,
         })) || data
     }
@@ -232,11 +287,13 @@ export const updateDocument = async <
           context: req.context,
           data,
           operation: 'update',
-          originalDoc,
+          originalDoc: publicationHookDoc,
           req,
         })) || data
     }
   }
+
+  const publicationData = { ...data }
 
   // /////////////////////////////////////
   // beforeChange - Fields
@@ -247,34 +304,54 @@ export const updateDocument = async <
     collection: collectionConfig,
     context: req.context,
     data: { ...data, id },
-    doc: originalDoc,
+    doc: publicationHookDoc,
     docWithLocales,
+    fieldsToValidate: submittedTopLevelFieldNames,
     global: null,
     operation: 'update',
     overrideAccess,
     req,
-    skipValidation:
-      // only skip validation for drafts when draft validation is false
-      (isSavingDraft && !hasDraftValidationEnabled(collectionConfig)) ||
-      // Skip validation for trash operations since they're just metadata updates
-      (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)) ||
-      // Skip validation for unpublish operations — they only change _status, not document data
-      unpublishAllLocales,
+    // only skip validation for drafts when draft validation is false
+    skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
   }
 
   // /////////////////////////////////////
   // Handle Localized Data Merging
   // /////////////////////////////////////
 
-  let result: JsonObject = await beforeChange(beforeChangeArgs)
+  let statusFieldValue: unknown
+
+  let result: JsonObject = await beforeChange({
+    ...beforeChangeArgs,
+    onDataProcessed: (processedData) => {
+      statusFieldValue = processedData._status
+    },
+  })
+
+  const hasAuthorizedPublicationStatus = hasAuthorizedAllLocalesPublicationStatus({
+    data: publicationData,
+    fieldAccessDenied: !statusFieldAccess,
+    fieldValue: statusFieldValue,
+    status: allLocalesPublicationStatus,
+  })
+  if (
+    allLocalesPublicationStatus &&
+    !hasAuthorizedPublicationStatus &&
+    typeof statusFieldValue === 'undefined' &&
+    typeof docWithLocales._status === 'object' &&
+    docWithLocales._status !== null
+  ) {
+    result._status = { ...docWithLocales._status }
+  }
+
   let snapshotToSave: JsonObject | undefined
 
   if (config.localization && collectionConfig.versions) {
     let snapshotData: JsonObject | undefined
     let currentDoc
 
-    if (collectionConfig.versions.drafts && collectionConfig.versions.drafts.localizeStatus) {
-      if (publishAllLocales || unpublishAllLocales) {
+    if (hasLocalizeStatusEnabled(collectionConfig)) {
+      if (hasAuthorizedPublicationStatus) {
         let accessibleLocaleCodes = config.localization.localeCodes
 
         if (config.localization.filterAvailableLocales) {
@@ -353,6 +430,20 @@ export const updateDocument = async <
     dataToUpdate.hash = hash
     delete dataToUpdate.password
     delete data.password
+
+    if (collectionConfig.auth?.useSessions) {
+      const currentSid =
+        req.user?.collection === collectionConfig.slug && String(req.user.id) === String(id)
+          ? req.user._sid
+          : undefined
+      const existingSessions = removeExpiredSessions(
+        (docWithLocales.sessions as undefined | UserSession[]) ?? [],
+      )
+
+      dataToUpdate.sessions = currentSid
+        ? existingSessions.filter((session) => session.id === currentSid)
+        : []
+    }
   }
 
   // /////////////////////////////////////

@@ -33,6 +33,7 @@ import {
   adminUploadControlSlug,
   animatedTypeMedia,
   audioSlug,
+  bulkUploadsHookErrorSlug,
   bulkUploadsSlug,
   constructorOptionsSlug,
   customFileNameMediaSlug,
@@ -109,6 +110,7 @@ let consoleErrorsFromPage: string[] = []
 let collectErrorsFromPage: () => boolean
 let stopCollectingErrorsFromPage: () => boolean
 let bulkUploadsURL: AdminUrlUtil
+let bulkUploadsHookErrorURL: AdminUrlUtil
 let fileMimeTypeURL: AdminUrlUtil
 let svgOnlyURL: AdminUrlUtil
 let mediaWithoutDeleteAccessURL: AdminUrlUtil
@@ -153,6 +155,7 @@ describe('Uploads', () => {
     threeDimensionalURL = new AdminUrlUtil(serverURL, threeDimensionalSlug)
     constructorOptionsURL = new AdminUrlUtil(serverURL, constructorOptionsSlug)
     bulkUploadsURL = new AdminUrlUtil(serverURL, bulkUploadsSlug)
+    bulkUploadsHookErrorURL = new AdminUrlUtil(serverURL, bulkUploadsHookErrorSlug)
     fileMimeTypeURL = new AdminUrlUtil(serverURL, fileMimeTypeSlug)
     svgOnlyURL = new AdminUrlUtil(serverURL, svgOnlySlug)
     mediaWithoutDeleteAccessURL = new AdminUrlUtil(serverURL, mediaWithoutDeleteAccessSlug)
@@ -273,6 +276,65 @@ describe('Uploads', () => {
     await expect(filename).toContainText('test-image.png')
   })
 
+  test('should preserve collection when bulk selecting polymorphic uploads', async () => {
+    await page.goto(uploadsTwo.create)
+    await page.locator('#field-prefix').fill('video')
+    await page.locator('#field-title').fill('Polymorphic upload two')
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+    await saveDocAndAssert(page)
+
+    const uploadTwoID = page.url().split('/').pop()
+    const relationDoc = await payload.create({
+      collection: relationSlug,
+      data: {},
+    })
+
+    await page.goto(relationURL.edit(relationDoc.id))
+    await openDocDrawer({ page, selector: '#field-polymorphicUploads .upload__listToggler' })
+
+    const listDrawer = page.locator('[id^=list-drawer_1_]')
+    await expect(listDrawer).toBeVisible()
+
+    await listDrawer.locator('.list-header__select-collection').click()
+    await page.getByText('Uploads 2', { exact: true }).click()
+    await expect(
+      listDrawer.locator('.cell-title', { hasText: 'Polymorphic upload two' }),
+    ).toBeVisible()
+
+    await listDrawer
+      .locator('tr', { hasText: 'Polymorphic upload two' })
+      .locator('.select-row__checkbox')
+      .click()
+    await listDrawer.getByRole('button', { name: 'Select 1' }).click()
+
+    await saveDocAndAssert(page)
+
+    const updatedRelationDoc = (
+      await payload.find({
+        collection: relationSlug,
+        depth: 0,
+        where: {
+          id: {
+            equals: relationDoc.id,
+          },
+        },
+      })
+    ).docs[0] as any
+
+    expect(updatedRelationDoc.polymorphicUploads).toEqual([
+      {
+        relationTo: 'uploads-2',
+        value: uploadTwoID,
+      },
+    ])
+    expect(updatedRelationDoc.polymorphicUploads).not.toEqual([
+      {
+        relationTo: 'uploads-1',
+        value: uploadTwoID,
+      },
+    ])
+  })
+
   test('should copy the file url field to the clipboard', async () => {
     const mediaDoc = (
       await payload.find({
@@ -319,7 +381,13 @@ describe('Uploads', () => {
 
     await expect(filename).toHaveValue('ios-image.jpeg')
 
-    await saveDocAndAssert(page)
+    await saveDocAndAssert(page, '#action-save', 'success', {
+      waitForAfterSave: async () => {
+        const progressBar = page.locator('.progress-bar')
+        await expect(progressBar).toBeVisible()
+        await expect(progressBar).toBeHidden()
+      },
+    })
   })
 
   test('should properly convert avif image to png', async () => {
@@ -1670,6 +1738,51 @@ describe('Uploads', () => {
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
       await expect(errorCount).toHaveText('1')
+    })
+
+    test('should report failure when beforeChange hook throws non-field error', async () => {
+      await page.goto(bulkUploadsHookErrorURL.list)
+
+      await expect(page.locator('.list-header__title')).toBeVisible()
+
+      const bulkUploadButton = page.locator('.list-header__title-actions button', {
+        hasText: 'Bulk Upload',
+      })
+      await expect(bulkUploadButton).toBeEnabled()
+
+      const dropzoneInput = page.locator('.dropzone input[type="file"]')
+      await expect(async () => {
+        await bulkUploadButton.click()
+        await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
+      }).toPass({ timeout: 5000, intervals: [500] })
+
+      await page
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles([path.resolve(dirname, './image.png'), path.resolve(dirname, './small.png')])
+
+      const nextButton = page.locator('.bulk-upload--actions-bar__controls button:nth-of-type(2)')
+      await nextButton.click()
+
+      await page.locator('#field-shouldFail').check()
+
+      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+        'Successfully saved 1 files',
+      )
+      await expect(
+        page.locator('.payload-toast-container .toast-error:has-text("Failed to save 1 files")'),
+      ).toBeVisible()
+      await expect(
+        page.locator(
+          '.payload-toast-container .toast-error:has-text("Simulated hook error in beforeChange")',
+        ),
+      ).toBeVisible()
+
+      await expect(page.locator('.file-selections .file-selections__fileRowContainer')).toHaveCount(
+        1,
+      )
     })
   })
 

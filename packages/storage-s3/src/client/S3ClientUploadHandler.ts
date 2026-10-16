@@ -1,9 +1,19 @@
 'use client'
+import type { ClientUploadContext } from '@payloadcms/plugin-cloud-storage/types'
+
 import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
 import { formatAdminURL } from 'payload/shared'
 
 export const S3ClientUploadHandler = createClientUploadHandler({
-  handler: async ({ apiRoute, collectionSlug, docPrefix, file, serverHandlerPath, serverURL }) => {
+  handler: async ({
+    apiRoute,
+    collectionSlug,
+    docPrefix,
+    file,
+    serverHandlerPath,
+    serverURL,
+    updateFilename,
+  }): Promise<ClientUploadContext> => {
     const endpointRoute = formatAdminURL({
       apiRoute,
       path: serverHandlerPath,
@@ -31,19 +41,34 @@ export const S3ClientUploadHandler = createClientUploadHandler({
       throw new Error(errors.reduce((acc, err) => `${acc ? `${acc}, ` : ''}${err.message}`, ''))
     }
 
-    const { docPrefix: sanitizedDocPrefix, url } = (await response.json()) as {
-      docPrefix: string
+    const {
+      clientUploadContext,
+      filename: sanitizedFilename,
+      headers,
+      url,
+    } = (await response.json()) as {
+      clientUploadContext: ClientUploadContext
+      filename?: string
+      headers: Record<string, string>
       url: string
     }
 
+    if (sanitizedFilename && sanitizedFilename !== file.name) {
+      updateFilename(sanitizedFilename)
+    }
+
     // upload the file directly to S3 using the signed URL
-    await fetch(url, {
+    const upload = await fetch(url, {
       body: file,
-      headers: { 'Content-Length': file.size.toString(), 'Content-Type': file.type },
+      headers,
       method: 'PUT',
     })
 
-    // return the docPrefix so the client can update the field value accordingly
-    return { prefix: sanitizedDocPrefix }
+    if (!upload.ok) {
+      throw new Error(`Upload failed with status ${upload.status}`)
+    }
+
+    // Return the server-issued upload context for the document request.
+    return { prefix: clientUploadContext.prefix, signedReceipt: clientUploadContext.signedReceipt }
   },
 })

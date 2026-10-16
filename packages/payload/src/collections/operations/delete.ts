@@ -52,6 +52,10 @@ export const deleteOperation = async <
 ): Promise<BulkOperationResult<TSlug, TSelect>> => {
   let args = incomingArgs
 
+  if (args.collection.config.disableBulkDelete && !args.overrideAccess) {
+    throw new APIError(`Collection ${args.collection.config.slug} has disabled bulk delete`, 403)
+  }
+
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
     // /////////////////////////////////////

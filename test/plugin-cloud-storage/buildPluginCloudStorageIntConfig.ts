@@ -15,17 +15,22 @@ import { Media } from './collections/Media.js'
 import { MediaWithCompositePrefixes } from './collections/MediaWithCompositePrefixes.js'
 import { MediaWithCustomURL } from './collections/MediaWithCustomURL.js'
 import { MediaWithGenerateFileURL } from './collections/MediaWithGenerateFileURL.js'
+import { MediaWithOverwrite } from './collections/MediaWithOverwrite.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
+import { MediaWithThrowingHook } from './collections/MediaWithThrowingHook.js'
 import { RestrictedMedia } from './collections/RestrictedMedia.js'
 import { TestMetadata } from './collections/TestMetadata.js'
 import { Users } from './collections/Users.js'
+import { r2UploadEndpoints } from './r2.js'
 import {
   collectionPrefix,
   mediaSlug,
   mediaWithCompositePrefixesSlug,
   mediaWithCustomURLSlug,
   mediaWithGenerateFileURLSlug,
+  mediaWithOverwriteSlug,
   mediaWithPrefixSlug,
+  mediaWithThrowingHookSlug,
   prefix,
   restrictedMediaSlug,
   testMetadataSlug,
@@ -39,6 +44,8 @@ export type BuildPluginCloudStorageIntConfigArgs = {
   /** When false, S3 uses non-composite prefix resolution (single stored prefix segment; pre-composite behavior). */
   useCompositePrefixes: boolean
 }
+
+export const recordedCleanupTargets: Array<{ filename: string; prefix?: string }> = []
 
 export function buildPluginCloudStorageIntConfig({
   useCompositePrefixes,
@@ -113,9 +120,11 @@ export function buildPluginCloudStorageIntConfig({
               : null,
           prefix,
         } as S3StorageOptions['collections'][keyof S3StorageOptions['collections']],
+        [mediaWithOverwriteSlug]: true,
         [mediaWithPrefixSlug]: {
           prefix,
         },
+        [mediaWithThrowingHookSlug]: true,
         [restrictedMediaSlug]: true,
       },
       config: {
@@ -157,7 +166,10 @@ export function buildPluginCloudStorageIntConfig({
       [testMetadataSlug]: {
         adapter: () => ({
           name: 'test-metadata-adapter',
-          handleDelete: () => Promise.resolve(),
+          handleDelete: ({ doc, filename }) => {
+            recordedCleanupTargets.push({ filename, prefix: doc.prefix })
+            return Promise.resolve()
+          },
           handleUpload: ({ data, file }) => {
             const metadata = {
               ...data,
@@ -173,6 +185,7 @@ export function buildPluginCloudStorageIntConfig({
           },
           staticHandler: () => new Response('Not found', { status: 404 }),
         }),
+        prefix: 'test-metadata',
       },
     },
   })
@@ -188,11 +201,14 @@ export function buildPluginCloudStorageIntConfig({
       MediaWithCompositePrefixes,
       MediaWithCustomURL,
       MediaWithGenerateFileURL,
+      MediaWithOverwrite,
       MediaWithPrefix,
+      MediaWithThrowingHook,
       RestrictedMedia,
       TestMetadata,
       Users,
     ],
+    endpoints: r2UploadEndpoints,
     onInit: async (payload) => {
       /*const client = new AWS.S3({
       endpoint: process.env.S3_ENDPOINT,

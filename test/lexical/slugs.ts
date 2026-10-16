@@ -12,11 +12,13 @@ export const lexicalViewsProviderDefaultSlug = 'lexical-views-provider-default'
 export const lexicalViewsProviderFallbackSlug = 'lexical-views-provider-fallback'
 export const lexicalViewsNestedSlug = 'lexical-views-nested'
 export const lexicalLinkFeatureSlug = 'lexical-link-feature'
+export const lexicalLinkFeatureAutosaveSlug = 'lexical-link-feature-autosave'
 export const lexicalLocalizedFieldsSlug = 'lexical-localized-fields'
 export const lexicalMigrateFieldsSlug = 'lexical-migrate-fields'
 export const lexicalRelationshipFieldsSlug = 'lexical-relationship-fields'
 export const lexicalAccessControlSlug = 'lexical-access-control'
 export const lexicalAutosaveSlug = 'lexical-autosave'
+export const lexicalAutosaveBlockSlug = 'lexical-autosave-block'
 export const richTextFieldsSlug = 'rich-text-fields'
 
 // Auxiliary slugs
@@ -27,6 +29,7 @@ export const uploads2Slug = 'uploads2'
 export const arrayFieldsSlug = 'array-fields'
 
 export const lexicalCustomCellSlug = 'lexical-custom-cell'
+export const lexicalCopyPasteSlug = 'lexical-copy-paste'
 export const lexicalNestedBlocksSlug = 'lexical-nested-blocks'
 export const lexicalBenchmarkSlug = 'lexical-benchmark'
 
@@ -52,5 +55,6 @@ export const collectionSlugs = [
   lexicalViewsProviderFallbackSlug,
   lexicalViewsNestedSlug,
   lexicalCustomCellSlug,
+  lexicalCopyPasteSlug,
   lexicalNestedBlocksSlug,
 ]

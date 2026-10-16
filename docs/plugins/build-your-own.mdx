@@ -273,6 +273,49 @@ export interface PluginTypes {
 
 If possible, include [JSDoc comments](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html#types-1) to describe the options and their types. This allows a developer to see details about the options in their editor.
 
+### Consuming generated types
+
+A common question when building a plugin is how to reference the type of a collection that belongs to the _end user_. At authoring time you don't know which collections the user has, so it's tempting to hand-copy a subset of their interfaces — but that is fragile and quickly drifts out of sync.
+
+Instead, use Payload's generic [type helpers](../typescript/overview#type-helpers). Because a consuming project augments the `GeneratedTypes` interface when it runs `payload generate:types`, helpers like `CollectionSlug` and `DataFromCollectionSlug` resolve to the user's _actual_ collections wherever your plugin's source is type-checked in their project:
+
+```ts
+import type {
+  CollectionSlug,
+  DataFromCollectionSlug,
+  CollectionAfterChangeHook,
+} from 'payload'
+
+export interface PluginTypes {
+  /**
+   * Collections to enable this plugin for
+   */
+  collections?: CollectionSlug[]
+}
+
+// Stays generic over whichever collection slug is passed in
+const createHook = <TSlug extends CollectionSlug>(slug: TSlug) => {
+  const hook: CollectionAfterChangeHook<DataFromCollectionSlug<TSlug>> = ({
+    doc,
+  }) => {
+    // `doc` is typed to the user's collection at `slug`
+    return doc
+  }
+  return hook
+}
+```
+
+<Banner type="info">
+  Within your plugin's own repository, `GeneratedTypes` is not augmented, so
+  these helpers fall back to loose types. To develop against real types,
+  generate them inside your `dev/` project (see the `dev:generate-types` script
+  in the [plugin template](#plugin-template)) — the concrete types materialize
+  once the plugin is installed in a project that has run `payload
+  generate:types`.
+</Banner>
+
+If your plugin needs to contribute its _own_ reusable types into the user's generated file, extend the JSON schema via [`typescript.schema`](../typescript/generating-types#custom-generated-types).
+
 ## Best practices
 
 In addition to the setup covered above, here are other best practices to follow:

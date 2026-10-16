@@ -28,6 +28,7 @@ import { useUploadHandlers } from '../../../providers/UploadHandlers/index.js'
 import { hasSavePermission as getHasSavePermission } from '../../../utilities/hasSavePermission.js'
 import { LoadingOverlay } from '../../Loading/index.js'
 import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
+import { FieldErrorsToast } from '../../Toasts/fieldErrors.js'
 import { useBulkUpload } from '../index.js'
 import { createFormData } from './createFormData.js'
 import { formsManagementReducer } from './reducer.js'
@@ -147,20 +148,18 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const initialStateRef = React.useRef<FormState>(null)
   const getFormDataRef = React.useRef<() => Data>(() => ({}))
 
-  const baseAPIPath = formatAdminURL({
+  const actionURL = formatAdminURL({
     apiRoute: api,
-    path: '',
+    path: `/${collectionSlug}`,
   })
-
-  const actionURL = `${baseAPIPath}/${collectionSlug}`
 
   const initializeSharedDocPermissions = React.useCallback(async () => {
     const params = {
       locale: code || undefined,
     }
 
-    const docAccessURL = `/${collectionSlug}/access`
-    const res = await fetch(`${baseAPIPath}${docAccessURL}?${qs.stringify(params)}`, {
+    const docAccessPath: `/${string}/access?${string}` = `/${collectionSlug}/access?${qs.stringify(params)}`
+    const res = await fetch(formatAdminURL({ apiRoute: api, path: docAccessPath }), {
       credentials: 'include',
       headers: {
         'Accept-Language': i18n.language,
@@ -171,7 +170,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
     const json: SanitizedDocumentPermissions = await res.json()
     const publishedAccessJSON = await fetch(
-      `${baseAPIPath}${docAccessURL}?${qs.stringify(params)}`,
+      formatAdminURL({ apiRoute: api, path: docAccessPath }),
       {
         body: JSON.stringify({
           _status: 'published',
@@ -197,7 +196,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
     setHasPublishPermission(publishedAccessJSON?.update)
     setHasInitializedDocPermissions(true)
-  }, [baseAPIPath, code, collectionSlug, i18n.language])
+  }, [api, code, collectionSlug, i18n.language])
 
   const initializeSharedFormState = React.useCallback(
     async (abortController?: AbortController) => {
@@ -397,6 +396,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
               overrides,
               collectionSlug,
               getUploadHandler({ collectionSlug }),
+              config.collections.find(({ slug }) => slug === collectionSlug)?.upload
+                ?.allowRestrictedFileTypes,
             ),
             credentials: 'include',
             method: 'POST',
@@ -404,7 +405,9 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
           const json = await req.json()
 
-          if (req.status === 201 && json?.doc) {
+          const wasSuccessful = req.status === 201 && json?.doc
+
+          if (wasSuccessful) {
             newDocs.push({
               collectionSlug,
               doc: json.doc,
@@ -490,13 +493,28 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
             toast.error(nonFieldErrors[0]?.message)
           } else {
+            let errorCount = fieldErrors.length
+
+            // Fall back to non-field errors when no field errors are present
+            // (e.g., APIError thrown from a hook).
+            if (!wasSuccessful && errorCount === 0) {
+              errorCount = nonFieldErrors.length || 1
+            }
+
             currentForms[i] = {
-              errorCount: fieldErrors.length,
+              errorCount,
               formID: currentForms[i].formID,
               formState: fieldReducer(currentForms[i].formState, {
                 type: 'ADD_SERVER_ERRORS',
                 errors: fieldErrors,
               }),
+            }
+
+            // Mimic forms/Form/index.tsx.
+            if (!wasSuccessful) {
+              nonFieldErrors.forEach((err) => {
+                toast.error(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
+              })
             }
           }
         } catch (_) {
@@ -560,6 +578,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       actionURL,
       code,
       collectionSlug,
+      config.collections,
       getUploadHandler,
       getFormState,
       docPermissions,

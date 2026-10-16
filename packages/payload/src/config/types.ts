@@ -181,6 +181,13 @@ export type LivePreviewConfig = {
     width: number | string
   }[]
   /**
+   * When `true`, Live Preview opens automatically the first time a user views a document,
+   * before they have manually toggled it on. Once the user toggles Live Preview on or off,
+   * their stored preference takes precedence and this setting is ignored.
+   * @default false
+   */
+  openByDefault?: boolean
+  /**
    * The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
    * Payload will send a `window.postMessage()` to this URL with the document data in real-time.
    * The frontend application is responsible for receiving the message and updating the UI accordingly.
@@ -334,6 +341,8 @@ export type InitOptions = {
 export type AccessResult = boolean | Where
 
 export type AccessArgs<TData = any> = {
+  /** The collection whose access control is being evaluated */
+  collectionConfig?: SanitizedCollectionConfig
   /**
    * The relevant resource that is being accessed.
    *
@@ -445,6 +454,10 @@ export type ServerProps = {
   readonly payload: Payload
   readonly permissions?: SanitizedPermissions
   readonly searchParams?: Params
+  /**
+   * Authenticated user with field read access applied. Use for values sent to the client.
+   * For access-control checks use the full principal at `req.user`.
+   */
   readonly user?: TypedUser
   readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities
@@ -631,7 +644,7 @@ export type FetchAPIFileUploadOptions = {
   /**
    * Returns a HTTP 413 when the file is bigger than the size limit if `true`.
    * Otherwise, it will add a `truncated = true` to the resulting file structure.
-   * @default false
+   * @default true
    */
   abortOnLimit?: boolean | undefined
   /**
@@ -677,6 +690,12 @@ export type FetchAPIFileUploadOptions = {
    * // myFileName.ext --> myFileNamee.xt
    */
   preserveExtension?: boolean | number | undefined
+  /**
+   * Maximum size in bytes for the complete raw multipart request, including files, fields, headers, and boundaries.
+   * Must be a non-negative safe integer. Set to `Infinity` to disable the request-wide limit.
+   * @default 50 * 1024 * 1024
+   */
+  requestSizeLimit?: number | undefined
   /**
    * Response which will be send to client if file size limit exceeded when `abortOnLimit` set to `true`.
    * @default 'File size limit has been reached'

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-sqlite",
-  "version": "3.84.1",
+  "version": "3.91.0",
   "description": "The officially supported SQLite database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -79,7 +79,7 @@
     "drizzle-orm": "0.45.2",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
-    "uuid": "11.1.0"
+    "uuid": "13.0.2"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",

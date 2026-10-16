@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-sentry",
-  "version": "3.84.1",
+  "version": "3.91.0",
   "description": "Sentry plugin for Payload",
   "keywords": [
     "payload",
@@ -59,7 +59,7 @@
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "19.2.9",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "payload": "workspace:*"
   },

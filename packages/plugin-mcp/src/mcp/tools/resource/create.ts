@@ -29,7 +29,7 @@ export const createResourceTool = (
     draft: boolean,
     locale?: string,
     fallbackLocale?: string,
-    select?: string,
+    select?: Record<string, unknown>,
   ): Promise<{
     content: Array<{
       text: string
@@ -68,25 +68,6 @@ export const createResourceTool = (
         }
       }
 
-      let selectClause: SelectType | undefined
-      if (select) {
-        try {
-          selectClause = JSON.parse(select) as SelectType
-        } catch (_parseError) {
-          payload.logger.warn(`[payload-mcp] Invalid select clause JSON: ${select}`)
-          const response = {
-            content: [{ type: 'text' as const, text: 'Error: Invalid JSON in select clause' }],
-          }
-          return (collections?.[collectionSlug]?.overrideResponse?.(response, {}, req) ||
-            response) as {
-            content: Array<{
-              text: string
-              type: 'text'
-            }>
-          }
-        }
-      }
-
       // Create the resource
       const result = await payload.create({
         collection: collectionSlug,
@@ -98,7 +79,7 @@ export const createResourceTool = (
         user,
         ...(locale && { locale }),
         ...(fallbackLocale && { fallbackLocale }),
-        ...(selectClause && { select: selectClause }),
+        ...(select && { select: select as SelectType }),
       })
 
       if (verboseLogs) {
@@ -181,10 +162,10 @@ ${JSON.stringify(result)}
           'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
         ),
       select: z
-        .string()
+        .record(z.string(), z.unknown())
         .optional()
         .describe(
-          'Optional: define exactly which fields you\'d like to create (JSON), e.g., \'{"title": "My Post"}\'',
+          "Optional: define exactly which fields you'd like to return in the response, e.g., {\"title\": true}",
         ),
     })
 
@@ -203,7 +184,7 @@ ${JSON.stringify(result)}
           draft as boolean,
           locale as string | undefined,
           fallbackLocale as string | undefined,
-          select as string | undefined,
+          select as Record<string, unknown> | undefined,
         )
       },
     )

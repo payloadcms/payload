@@ -33,7 +33,7 @@ export const Pages: CollectionConfig = {
       defaultValue: 'my custom csv transformer',
       custom: {
         'plugin-import-export': {
-          toCSV: ({ value, columnName, row, siblingDoc }) => {
+          toCSV: ({ value }) => {
             return String(value) + ' toCSV'
           },
         },
@@ -147,7 +147,7 @@ export const Pages: CollectionConfig = {
           defaultValue: 'my custom csv transformer',
           custom: {
             'plugin-import-export': {
-              toCSV: ({ value, columnName, row, siblingDoc, doc }) => {
+              toCSV: ({ value }) => {
                 return String(value) + ' toCSV'
               },
             },
@@ -167,7 +167,7 @@ export const Pages: CollectionConfig = {
               defaultValue: 'my custom csv transformer',
               custom: {
                 'plugin-import-export': {
-                  toCSV: ({ value, columnName, row, siblingDoc, doc }) => {
+                  toCSV: ({ value }) => {
                     return String(value) + ' toCSV'
                   },
                 },
@@ -187,7 +187,7 @@ export const Pages: CollectionConfig = {
               defaultValue: 'my custom csv transformer',
               custom: {
                 'plugin-import-export': {
-                  toCSV: ({ value, columnName, row, siblingDoc, doc }) => {
+                  toCSV: ({ value }) => {
                     return String(value) + ' toCSV'
                   },
                 },
@@ -230,6 +230,25 @@ export const Pages: CollectionConfig = {
             {
               name: 'richText',
               type: 'richText',
+            },
+          ],
+        },
+        {
+          slug: 'faqSection',
+          fields: [
+            {
+              name: 'faqs',
+              type: 'array',
+              fields: [
+                {
+                  name: 'question',
+                  type: 'text',
+                },
+                {
+                  name: 'answer',
+                  type: 'richText',
+                },
+              ],
             },
           ],
         },

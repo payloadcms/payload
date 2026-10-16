@@ -3,10 +3,13 @@ import type { ClientUploadsAccess } from '@payloadcms/plugin-cloud-storage/types
 import type { PayloadHandler } from 'payload'
 
 import { BlobSASPermissions, generateBlobSASQueryParameters } from '@azure/storage-blob'
-import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
+import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { APIError, Forbidden } from 'payload'
+import { assertClientUploadAccess, assertClientUploadAllowed } from 'payload/internal'
 
 import type { AzureStorageOptions } from './index.js'
+
+import { isAzureClientUploadAllowed } from './isClientUploadAllowed.js'
 
 interface Args {
   access?: ClientUploadsAccess
@@ -37,9 +40,15 @@ export const getGenerateSignedURLHandler = ({
       mimeType: string
     }
 
+    await assertClientUploadAccess({ collectionSlug, req })
+
     const collectionStorageConfig = collections[collectionSlug]
     if (!collectionStorageConfig) {
       throw new APIError(`Collection ${collectionSlug} was not found in Azure storage options`)
+    }
+
+    if (!isAzureClientUploadAllowed(req.payload.collections[collectionSlug]?.config)) {
+      throw new APIError('Azure client uploads require allowRestrictedFileTypes.', 400)
     }
 
     const collectionPrefix =
@@ -49,12 +58,21 @@ export const getGenerateSignedURLHandler = ({
       throw new Forbidden()
     }
 
-    const { fileKey, sanitizedDocPrefix } = getFileKey({
-      collectionPrefix,
-      docPrefix: docPrefix || '',
+    assertClientUploadAllowed({
+      collection: req.payload.collections[collectionSlug]?.config,
       filename,
-      useCompositePrefixes,
+      mimeType,
     })
+
+    const { clientUploadContext, fileKey, sanitizedDocPrefix, sanitizedFilename } =
+      await resolveSignedURLKey({
+        collectionPrefix,
+        collectionSlug,
+        docPrefix,
+        filename,
+        req,
+        useCompositePrefixes,
+      })
 
     const blobClient = getStorageClient().getBlobClient(fileKey)
 
@@ -63,15 +81,18 @@ export const getGenerateSignedURLHandler = ({
         blobName: fileKey,
         containerName,
         contentType: mimeType,
-        expiresOn: new Date(Date.now() + 30 * 60 * 1000),
-        permissions: BlobSASPermissions.parse('w'),
+        expiresOn: new Date(Date.now() + 60 * 60 * 1000),
+        permissions: BlobSASPermissions.parse('c'),
         startsOn: new Date(),
+        version: '2026-04-06',
       },
       getStorageClient().credential as StorageSharedKeyCredential,
     )
 
     return Response.json({
+      clientUploadContext,
       docPrefix: sanitizedDocPrefix,
+      filename: sanitizedFilename,
       url: `${blobClient.url}?${sasToken.toString()}`,
     })
   }

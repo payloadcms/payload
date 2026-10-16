@@ -163,7 +163,7 @@ The import map is **never regenerated** during:
   **Important:** The import map file should never be manually edited. However,
   the `layout.tsx` file that imports it is safe to modify when customizing your
   folder structure. See [Customizing Admin Panel
-  Location](../admin/customizing-location) for details.
+  Location](../admin/admin-panel-location) for details.
 </Banner>
 
 #### Overriding Import Map Location
@@ -263,6 +263,19 @@ Each Custom Component receives the following props by default:
   Components](../configuration/globals#custom-components), or [Field
   Components](../fields/overview#custom-components) for a complete list of all
   default props per component.
+</Banner>
+
+#### Server principal vs. read-filtered user
+
+Server Components that render an authenticated user receive two representations of that user, and choosing the wrong one either leaks data or breaks access checks:
+
+- **`user`** (the top-level prop, e.g. on views and field components) is the authenticated user with **field read access applied** — read-restricted fields are removed and relationships are populated according to read access. Use it for anything passed toward Client Components or rendered to the page, so restricted data never reaches the client.
+- **`req.user`** (from the `req` prop, or `initPageResult.req.user` in views) is the **complete server principal** with access bypassed. Use it for access-control checks, Local API queries, and role/authorization gating — `user` may omit fields your access logic relies on (for example a role stored in a read-restricted field).
+
+<Banner type="warning">
+  **Security:** Never pass `req.user` toward a Client Component or into client
+  React state — use `user`. Conversely, never rely on `user` for authorization
+  decisions — use `req.user`.
 </Banner>
 
 ### Custom Props

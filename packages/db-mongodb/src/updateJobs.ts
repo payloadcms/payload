@@ -1,4 +1,4 @@
-import type { MongooseUpdateQueryOptions, UpdateQuery } from 'mongoose'
+import type { QueryOptions, UpdateQuery } from 'mongoose'
 import type { Job, UpdateJobs, Where } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -80,12 +80,16 @@ export const updateJobs: UpdateJobs = async function updateMany(
     updateData = updateOps
   }
 
-  const options: MongooseUpdateQueryOptions = {
-    lean: true,
-    new: true,
+  const baseOptions = {
     session: await getSession(this, req),
     // Timestamps are manually added by the write transform
     timestamps: false,
+  } satisfies QueryOptions
+
+  const findOptions: QueryOptions = {
+    ...baseOptions,
+    lean: true,
+    new: true,
   }
 
   let result: Job[] = []
@@ -93,12 +97,12 @@ export const updateJobs: UpdateJobs = async function updateMany(
   try {
     if (id) {
       if (returning === false) {
-        await Model.updateOne(query, updateData, options)
+        await Model.updateOne(query, updateData, baseOptions)
         transform({ adapter: this, data, fields: collectionConfig.fields, operation: 'read' })
 
         return null
       } else {
-        const doc = await Model.findOneAndUpdate(query, updateData, options)
+        const doc = await Model.findOneAndUpdate(query, updateData, findOptions)
         result = doc ? [doc] : []
       }
     } else {
@@ -106,7 +110,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
         const documentsToUpdate = await Model.find(
           query,
           {},
-          { ...options, limit, projection: { _id: 1 }, sort },
+          { ...findOptions, limit, projection: { _id: 1 }, sort },
         )
         if (documentsToUpdate.length === 0) {
           return null
@@ -115,20 +119,13 @@ export const updateJobs: UpdateJobs = async function updateMany(
         query = { _id: { $in: documentsToUpdate.map((doc) => doc._id) } }
       }
 
-      await Model.updateMany(query, updateData, options)
+      await Model.updateMany(query, updateData, baseOptions)
 
       if (returning === false) {
         return null
       }
 
-      result = await Model.find(
-        query,
-        {},
-        {
-          ...options,
-          sort,
-        },
-      )
+      result = await Model.find(query, {}, { ...findOptions, sort })
     }
   } catch (error) {
     handleError({ collection: collectionConfig.slug, error, req })

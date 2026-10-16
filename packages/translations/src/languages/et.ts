@@ -55,6 +55,7 @@ export const etTranslations: DefaultTranslationsObject = {
     newPassword: 'Uus parool',
     passed: 'Autentimine õnnestus',
     passwordResetSuccessfully: 'Parool edukalt lähtestatud.',
+    resend: 'Saada uuesti',
     resetPassword: 'Lähtesta parool',
     resetPasswordExpiration: 'Parooli lähtestamise aegumistähtaeg',
     resetPasswordToken: 'Parooli lähtestamise võti',

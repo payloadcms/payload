@@ -56,10 +56,13 @@ export type ClientCollectionConfig = {
     | 'preview'
     | ServerOnlyCollectionAdminProperties
   >
-  auth?: { verify?: true } & Omit<
-    SanitizedCollectionConfig['auth'],
-    'forgotPassword' | 'strategies' | 'verify'
-  >
+  auth?: {
+    forgotPassword?: Pick<
+      NonNullable<SanitizedCollectionConfig['auth']['forgotPassword']>,
+      'minRequestInterval'
+    >
+    verify?: true
+  } & Omit<SanitizedCollectionConfig['auth'], 'forgotPassword' | 'strategies' | 'verify'>
   fields: ClientField[]
   labels: {
     plural: StaticLabel
@@ -182,6 +185,10 @@ export const createClientCollectionConfig = ({
         }
 
         clientCollection.auth = {} as { verify?: true } & SanitizedCollectionConfig['auth']
+
+        clientCollection.auth.forgotPassword = {
+          minRequestInterval: collection.auth.forgotPassword?.minRequestInterval,
+        }
 
         if (collection.auth.cookies) {
           clientCollection.auth.cookies = collection.auth.cookies

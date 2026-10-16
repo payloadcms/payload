@@ -1,4 +1,4 @@
-import type { MongooseUpdateQueryOptions } from 'mongoose'
+import type { QueryOptions } from 'mongoose'
 import type { DeleteOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -22,14 +22,14 @@ export const deleteOne: DeleteOne = async function deleteOne(
     where,
   })
 
-  const options: MongooseUpdateQueryOptions = {
+  const options = {
     projection: buildProjectionFromSelect({
       adapter: this,
       fields: collectionConfig.flattenedFields,
       select,
     }),
     session: await getSession(this, req),
-  }
+  } satisfies QueryOptions
 
   if (returning === false) {
     await Model.deleteOne(query, options)?.lean()

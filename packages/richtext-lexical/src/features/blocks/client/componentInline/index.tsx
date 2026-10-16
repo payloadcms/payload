@@ -22,7 +22,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
-import { $getNodeByKey } from 'lexical'
+import { $getNodeByKey, SKIP_DOM_SELECTION_TAG } from 'lexical'
 
 import './index.scss'
 
@@ -191,14 +191,14 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
 
   const clientSchemaMap = featureClientSchemaMap['blocks']
 
-  const blocksField: BlocksFieldClient = clientSchemaMap?.[
-    componentMapRenderedBlockPath
-  ]?.[0] as BlocksFieldClient
+  const blocksField = clientSchemaMap?.[componentMapRenderedBlockPath]?.[0] as
+    | BlocksFieldClient
+    | undefined
 
-  const clientBlock: ClientBlock | undefined = blocksField.blockReferences
-    ? typeof blocksField?.blockReferences?.[0] === 'string'
-      ? config.blocksMap[blocksField?.blockReferences?.[0]]
-      : blocksField?.blockReferences?.[0]
+  const clientBlock: ClientBlock | undefined = blocksField?.blockReferences
+    ? typeof blocksField.blockReferences[0] === 'string'
+      ? config.blocksMap[blocksField.blockReferences[0]]
+      : blocksField.blockReferences[0]
     : blocksField?.blocks?.[0]
 
   const clientBlockFields = clientBlock?.fields ?? []
@@ -264,15 +264,20 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
         ) as InlineBlockFields
 
         // Things like default values may come back from the server => update the node with the new data
-        editor.update(() => {
-          const node = $getNodeByKey(nodeKey)
-          if (node && $isInlineBlockNode(node)) {
-            const newData = newFormStateData
-            newData.blockType = formData.blockType
+        editor.update(
+          () => {
+            const node = $getNodeByKey(nodeKey)
+            if (node && $isInlineBlockNode(node)) {
+              const newData = newFormStateData
+              newData.blockType = formData.blockType
 
-            node.setFields(newData, true)
-          }
-        })
+              node.setFields(newData, true)
+            }
+          },
+          // Without this, the outer editor's reconciler resets DOM selection
+          // back into its own root, kicking focus out of any nested richText.
+          { tag: SKIP_DOM_SELECTION_TAG },
+        )
 
         setInitialState(state)
         if (!CustomLabelFromProps) {
@@ -284,7 +289,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
       }
     }
 
-    if (formData && !initialState) {
+    if (clientBlock && formData && !initialState) {
       void awaitInitialState()
     }
 
@@ -306,6 +311,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
     globalSlug,
     getDocPreferences,
     parentDocumentFields,
+    clientBlock,
   ])
 
   /**
@@ -392,12 +398,17 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
     (formState: FormState, newData: Data) => {
       newData.blockType = formData.blockType
 
-      editor.update(() => {
-        const node = $getNodeByKey(nodeKey)
-        if (node && $isInlineBlockNode(node)) {
-          node.setFields(newData as InlineBlockFields, true)
-        }
-      })
+      editor.update(
+        () => {
+          const node = $getNodeByKey(nodeKey)
+          if (node && $isInlineBlockNode(node)) {
+            node.setFields(newData as InlineBlockFields, true)
+          }
+        },
+        // Without this, the outer editor's reconciler resets DOM selection
+        // back into its own root, kicking focus out of any nested richText.
+        { tag: SKIP_DOM_SELECTION_TAG },
+      )
     },
     [editor, nodeKey, formData],
   )
