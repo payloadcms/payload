@@ -5,8 +5,8 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { AutosavePostsCollection, DraftPostsCollection } from './collections/Autosave/index.js'
 import { ConditionsCollection } from './collections/Conditions/index.js'
-import { FormMediaCollection } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
+import { UploadsCollection } from './collections/Uploads/index.js'
 import { permissionSettingsSlug } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -36,7 +36,7 @@ export default buildConfigWithDefaults({
       AutosavePostsCollection,
       DraftPostsCollection,
       ConditionsCollection,
-      FormMediaCollection,
+      UploadsCollection,
     ],
     globals: [{ slug: permissionSettingsSlug, fields: [{ name: 'title', type: 'text' }] }],
     localization: { defaultLocale: 'en', locales: ['en', 'fr'] },

@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { autosavePostsSlug, draftPostsSlug } from '../../slugs.js'
-import { formMediaSlug } from '../Media/index.js'
+import { uploadsSlug } from '../Uploads/index.js'
 
 export { autosavePostsSlug, draftPostsSlug } from '../../slugs.js'
 
@@ -18,6 +18,17 @@ export const AutosavePostsCollection: CollectionConfig = {
         value?.startsWith('ok') ? true : 'Must start with "ok".',
     },
     {
+      name: 'computedTitle',
+      type: 'text',
+      admin: {
+        description: 'Edits are replaced by a server-computed value after autosave.',
+        readOnly: true,
+      },
+      hooks: {
+        beforeChange: [({ data }) => data?.title],
+      },
+    },
+    {
       name: 'type',
       type: 'radio',
       defaultValue: 'internal',
@@ -31,23 +42,12 @@ export const AutosavePostsCollection: CollectionConfig = {
       },
     },
     {
-      name: 'computedTitle',
-      type: 'text',
-      admin: {
-        description: 'Edits are replaced by a server-computed value after autosave.',
-        readOnly: true,
-      },
-      hooks: {
-        beforeChange: [({ data }) => data?.title],
-      },
-    },
-    {
       name: 'programmaticValue',
       type: 'text',
     },
     { name: 'content', type: 'text' },
     { name: 'slug', type: 'slug', required: false, useAsSlug: 'title' },
-    { name: 'media', type: 'upload', relationTo: formMediaSlug },
+    { name: 'media', type: 'upload', relationTo: uploadsSlug },
     {
       name: 'blocks',
       type: 'blocks',

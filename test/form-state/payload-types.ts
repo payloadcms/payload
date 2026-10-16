@@ -83,7 +83,7 @@ export interface Config {
     'autosave-posts': AutosavePost;
     'draft-posts': DraftPost;
     conditions: Condition;
-    'form-media': FormMedia;
+    uploads: Upload;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -97,7 +97,7 @@ export interface Config {
     'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
     'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
     conditions: ConditionsSelect<false> | ConditionsSelect<true>;
-    'form-media': FormMediaSelect<false> | FormMediaSelect<true>;
+    uploads: UploadsSelect<false> | UploadsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -258,16 +258,16 @@ export interface User {
 export interface AutosavePost {
   id: string;
   title?: string | null;
-  type?: ('internal' | 'custom') | null;
-  url?: string | null;
   /**
    * Edits are replaced by a server-computed value after autosave.
    */
   computedTitle?: string | null;
+  type?: ('internal' | 'custom') | null;
+  url?: string | null;
   programmaticValue?: string | null;
   content?: string | null;
   slug?: string | null;
-  media?: (string | null) | FormMedia;
+  media?: (string | null) | Upload;
   blocks?: (Text | Number)[] | null;
   groups?:
     | {
@@ -296,9 +296,9 @@ export interface AutosavePost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "form-media".
+ * via the `definition` "uploads".
  */
-export interface FormMedia {
+export interface Upload {
   id: string;
   alt?: string | null;
   createdBy?: {
@@ -338,16 +338,16 @@ export interface FormMedia {
 export interface DraftPost {
   id: string;
   title?: string | null;
-  type?: ('internal' | 'custom') | null;
-  url?: string | null;
   /**
    * Edits are replaced by a server-computed value after autosave.
    */
   computedTitle?: string | null;
+  type?: ('internal' | 'custom') | null;
+  url?: string | null;
   programmaticValue?: string | null;
   content?: string | null;
   slug?: string | null;
-  media?: (string | null) | FormMedia;
+  media?: (string | null) | Upload;
   blocks?: (Text | Number)[] | null;
   groups?:
     | {
@@ -436,8 +436,8 @@ export interface PayloadLockedDocument {
         value: string | Condition;
       } | null)
     | ({
-        relationTo: 'form-media';
-        value: string | FormMedia;
+        relationTo: 'uploads';
+        value: string | Upload;
       } | null)
     | ({
         relationTo: 'users';
@@ -569,9 +569,9 @@ export interface PostsSelect<T extends boolean = true> {
  */
 export interface AutosavePostsSelect<T extends boolean = true> {
   title?: T;
+  computedTitle?: T;
   type?: T;
   url?: T;
-  computedTitle?: T;
   programmaticValue?: T;
   content?: T;
   slug?: T;
@@ -619,9 +619,9 @@ export interface AutosavePostsSelect<T extends boolean = true> {
  */
 export interface DraftPostsSelect<T extends boolean = true> {
   title?: T;
+  computedTitle?: T;
   type?: T;
   url?: T;
-  computedTitle?: T;
   programmaticValue?: T;
   content?: T;
   slug?: T;
@@ -679,9 +679,9 @@ export interface ConditionsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "form-media_select".
+ * via the `definition` "uploads_select".
  */
-export interface FormMediaSelect<T extends boolean = true> {
+export interface UploadsSelect<T extends boolean = true> {
   alt?: T;
   createdBy?: T;
   updatedBy?: T;
@@ -847,7 +847,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'posts' | 'autosave-posts' | 'draft-posts' | 'conditions' | 'form-media' | 'users';
+    relatedCollection: 'posts' | 'autosave-posts' | 'draft-posts' | 'conditions' | 'uploads' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -869,7 +869,7 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('posts' | 'autosave-posts' | 'draft-posts' | 'conditions' | 'form-media' | 'users')[] | null;
+    excludedCollections?: ('posts' | 'autosave-posts' | 'draft-posts' | 'conditions' | 'uploads' | 'users')[] | null;
   };
   width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
@@ -879,7 +879,7 @@ export interface ActivityWidget {
  */
 export interface UploadDropzoneWidget {
   data?: {
-    excludedCollections?: 'form-media'[] | null;
+    excludedCollections?: 'uploads'[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

@@ -18,8 +18,8 @@ import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
 import { autosavePostsSlug, draftPostsSlug } from './collections/Autosave/index.js'
-import { formMediaSlug } from './collections/Media/index.js'
 import { postsSlug } from './collections/Posts/index.js'
+import { uploadsSlug } from './collections/Uploads/index.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -124,7 +124,7 @@ test.describe('Linked autosave issues', () => {
     page,
   }) => {
     const media = await payload.create({
-      collection: formMediaSlug,
+      collection: uploadsSlug,
       data: { alt: 'Autosave picker fixture' },
       filePath: path.resolve(dirname, '../uploads/image.png'),
       overrideAccess: true,
@@ -187,7 +187,7 @@ test.describe('Linked autosave issues', () => {
       await expect(drawer.locator('table')).toBeVisible()
       page.off('request', recordRefresh)
     } finally {
-      await payload.delete({ id: media.id, collection: formMediaSlug, overrideAccess: true })
+      await payload.delete({ id: media.id, collection: uploadsSlug, overrideAccess: true })
     }
   })
 
