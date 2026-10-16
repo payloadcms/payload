@@ -36,6 +36,13 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
     headers.set('DisableAutologin', 'true')
     req.user = (await req.payload.auth({ headers, req })).user
 
+    // Only bearer tokens that no auth strategy accepted reach the hook, e.g. an OAuth access token.
+    // API keys use the `<collection> API-Key <key>` scheme instead of `Bearer`, so they never do.
+    const bearerToken = headers.get('Authorization')?.match(/^Bearer (.+)$/)?.[1]
+    if (!req.user && bearerToken && pluginConfig.oauth?.authenticate) {
+      req.user = await pluginConfig.oauth.authenticate({ req, token: bearerToken })
+    }
+
     // With OAuth, the endpoint answers with a challenge that starts the client's sign-in
     if (hasAuthorization && !req.user && !pluginConfig.oauth) {
       throw new UnauthorizedError(req.t)

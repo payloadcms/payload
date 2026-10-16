@@ -313,6 +313,30 @@ instead, for example `authorizationServers: async ({ req }) => [await getIssuer(
 The plugin does not validate access tokens. Add an auth strategy that turns the
 access token into a Payload user, and MCP runs as that user with access control.
 
+If your auth strategies don't accept these access tokens directly, turn them into a user with
+`oauth.authenticate`. It runs for MCP requests whose bearer token no auth strategy
+accepted, so API keys and Payload tokens keep working as before. Unlike an auth
+strategy, it only applies to MCP. Return the Payload user, including its
+`collection`, or `null` to send the `401`:
+
+```ts
+mcpPlugin({
+  oauth: {
+    authenticate: async ({ req, token }) => {
+      const email = await getEmailFromAccessToken(token) // ask your authorization server
+      const { docs } = await req.payload.find({
+        collection: 'users',
+        overrideAccess: true,
+        where: { email: { equals: email } },
+      })
+
+      return docs[0] ? { ...docs[0], collection: 'users' } : null
+    },
+    authorizationServers: ['https://auth.example.com'],
+  },
+})
+```
+
 Some clients ignore that link and only look for the metadata at
 `/.well-known/oauth-protected-resource`, outside `/api`. To support them, serve
 the same metadata from the site root. In Next.js, add
