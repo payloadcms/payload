@@ -186,7 +186,7 @@ const addDefaultDashboardWidgets = ({
         components: {
           // Presents an inclusion filter (all collections checked by default) while persisting the
           // inverse as an exclusion list, so collections added later stay visible by default.
-          Field: '@payloadcms/ui#RecentlyViewedCollectionsField',
+          Field: '@payloadcms/ui#CollectionFilter',
         },
         description: ({ t }) => t('dashboard:widgetRecentlyViewedFilterDescription'),
       },
@@ -240,7 +240,7 @@ const addDefaultDashboardWidgets = ({
   })
   dashboard.widgets.push({
     slug: 'activity',
-    Component: '@payloadcms/ui/rsc#RecentlyViewedWidget',
+    Component: '@payloadcms/ui/rsc#ActivityWidget',
     fields: sanitizeFields({
       config: config as unknown as Config,
       existingFieldNames: new Set(),

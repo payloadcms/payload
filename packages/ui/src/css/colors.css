@@ -184,6 +184,8 @@
     --color-icon-onsuccess-secondary: var(--ramp-white-600);
     --color-icon-success: var(--ramp-green-600);
 
+    --color-icon-favorite: var(--ramp-yellow-500);
+
     --color-icon-warning: var(--ramp-yellow-1000);
     --color-icon-warning-pressed: var(--ramp-yellow-1000);
 

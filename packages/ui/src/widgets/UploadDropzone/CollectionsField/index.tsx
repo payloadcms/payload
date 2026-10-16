@@ -6,7 +6,7 @@ import React, { useMemo } from 'react'
 
 import { useAuth } from '../../../providers/Auth/index.js'
 import { useEntityVisibility } from '../../../providers/EntityVisibility/index.js'
-import { RecentlyViewedCollectionsField } from '../../RecentlyViewed/CollectionsField/index.js'
+import { CollectionFilter } from '../../shared/CollectionFilter/index.js'
 
 export const UploadDropzoneCollectionsField: React.FC<SelectFieldClientProps> = (props) => {
   const { permissions } = useAuth()
@@ -26,5 +26,5 @@ export const UploadDropzoneCollectionsField: React.FC<SelectFieldClientProps> = 
     [isEntityVisible, permissions, props.field],
   )
 
-  return <RecentlyViewedCollectionsField {...props} field={field} />
+  return <CollectionFilter {...props} field={field} />
 }

@@ -82,12 +82,12 @@ export class DashboardHelper {
    */
   validateLayout = async () => {
     const WIDTH_TO_COLS = {
-      'x-small': 3,
-      small: 4,
-      medium: 6,
-      large: 8,
-      'x-large': 9,
       full: 12,
+      large: 8,
+      medium: 6,
+      small: 4,
+      'x-large': 9,
+      'x-small': 3,
     }
 
     // Wait for the grid to fully settle before measuring (see waitForStableLayout):
@@ -320,6 +320,89 @@ export class DashboardHelper {
     const expectedSnapshot = moveArrayItem(snapshot, from, to, place)
     expect(snapshotAfter).toEqual(expectedSnapshot)
   }
+}
+
+/** The grid the Recents and Pinned widget container queries produce for a container width. */
+export function getExpectedActivityGrid({ containerWidth }: { containerWidth: number }): {
+  columns: number
+  pageSize: number
+} {
+  if (containerWidth < 600) {
+    return { columns: 2, pageSize: 4 }
+  }
+  if (containerWidth < 800) {
+    return { columns: 3, pageSize: 6 }
+  }
+  const columns = 4 + [964, 1160, 1356, 1552].filter((width) => containerWidth >= width).length
+
+  return { columns, pageSize: columns }
+}
+
+/**
+ * Server-rendered widgets ignore input until React hydrates them. The nav marks itself hydrated
+ * after an async preference read, which runs once hydration is done.
+ */
+export async function waitForDashboardHydration({ page }: { page: Page }): Promise<void> {
+  await expect(page.locator('.template-default--nav-hydrated')).toBeVisible()
+}
+
+/** The content-box width of the Recents and Pinned widget, which its container queries measure. */
+export function getActivityContainerWidth({ widget }: { widget: Locator }): Promise<number> {
+  return widget.evaluate((element) => {
+    const style = getComputedStyle(element)
+
+    return [
+      'border-inline-start-width',
+      'border-inline-end-width',
+      'padding-inline-start',
+      'padding-inline-end',
+    ].reduce(
+      (contentWidth, property) => contentWidth - parseFloat(style.getPropertyValue(property)),
+      element.getBoundingClientRect().width,
+    )
+  })
+}
+
+/**
+ * Collects dashboard layout shifts from navigation through font loading and two animation frames.
+ * Includes shifts after recent input; this bounded observation is not a full CLS measurement.
+ */
+export function getActivityLayoutShiftSum({ page }: { page: Page }): Promise<number> {
+  return page.evaluate(async () => {
+    await document.fonts.ready
+
+    return new Promise<number>((resolve) => {
+      let total = 0
+      const collect = (entries: PerformanceEntry[]) => {
+        for (const entry of entries as Array<
+          {
+            sources: Array<{ node: Node | null }>
+            value: number
+          } & PerformanceEntry
+        >) {
+          if (
+            entry.sources.some(({ node }) =>
+              (node instanceof Element ? node : node?.parentElement)?.closest(
+                '.activity-widget, .collections__wrap',
+              ),
+            )
+          ) {
+            total += entry.value
+          }
+        }
+      }
+      const observer = new PerformanceObserver((list) => collect(list.getEntries()))
+
+      observer.observe({ type: 'layout-shift', buffered: true })
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          collect(observer.takeRecords())
+          observer.disconnect()
+          resolve(total)
+        }),
+      )
+    })
+  })
 }
 
 // utility function to move an item in an array
