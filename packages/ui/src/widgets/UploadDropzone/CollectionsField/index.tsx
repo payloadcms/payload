@@ -8,6 +8,9 @@ import { useAuth } from '../../../providers/Auth/index.js'
 import { useEntityVisibility } from '../../../providers/EntityVisibility/index.js'
 import { RecentlyViewedCollectionsField } from '../../RecentlyViewed/CollectionsField/index.js'
 
+/**
+ * @internal - may change or be removed without a major version bump
+ */
 export const UploadDropzoneCollectionsField: React.FC<SelectFieldClientProps> = (props) => {
   const { permissions } = useAuth()
   const { isEntityVisible } = useEntityVisibility()
