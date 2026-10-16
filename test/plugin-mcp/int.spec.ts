@@ -1,5 +1,5 @@
 import type { Client, JsonSchemaType } from '@modelcontextprotocol/client'
-import type { Payload, UploadInstructions } from 'payload'
+import type { Payload, PayloadRequest, UploadInstructions } from 'payload'
 
 import { readFile } from 'fs/promises'
 import path from 'path'
@@ -399,17 +399,21 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           .then((res) => res.json())
         expect((await postWithAuthorization(`Bearer ${token}`)).status).toBe(200)
       })
-      it('should serve authorization servers returned by a function', async ({
+      it('should serve authorization servers returned by a function of the request', async ({
         payload,
         restClient,
       }) => {
-        enableOAuth(payload, { authorizationServers: async () => ['https://issuer.example.com/'] })
+        enableOAuth(payload, {
+          authorizationServers: ({ req }: { req: PayloadRequest }) => [
+            `${new URL(req.url!).origin}/issuer/`,
+          ],
+        })
 
         const metadata = await restClient
           .GET('/mcp/oauth-protected-resource')
           .then((res) => res.json())
 
-        expect(metadata.authorization_servers).toEqual(['https://issuer.example.com/'])
+        expect(metadata.authorization_servers).toEqual([`${restClient.serverURL}/issuer/`])
       })
       it('should tell clients which scopes to request', async ({ payload, restClient }) => {
         enableOAuth(payload, {

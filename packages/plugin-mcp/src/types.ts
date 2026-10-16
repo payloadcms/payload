@@ -300,9 +300,9 @@ export type MCPPluginConfig = {
     /**
      * The authorization servers that issue access tokens for MCP clients. Clients require each one
      * to exactly match the `issuer` in that server's metadata, so pass a function when the exact
-     * value is only known at runtime, e.g. from the server's OpenID configuration.
+     * value is only known at runtime, e.g. from the server's OpenID configuration or per host.
      */
-    authorizationServers: (() => MaybePromise<string[]>) | string[]
+    authorizationServers: ((args: { req: PayloadRequest }) => MaybePromise<string[]>) | string[]
     /**
      * The URL clients call to reach the MCP endpoint.
      *
