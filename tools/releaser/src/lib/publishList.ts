@@ -62,10 +62,4 @@ export const packagePublishList = [
   'plugin-stripe',
 
   'typescript-plugin',
-
-  // Unpublished
-  // 'storage-uploadthing',
-  // 'eslint-config',
-  // 'eslint-plugin',
-  // 'live-preview-vue',
 ]
