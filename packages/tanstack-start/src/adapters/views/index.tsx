@@ -11,13 +11,24 @@ import { getAdminMeta } from '../metadata.js'
  */
 export type AdminLoad = (opts: {
   data: { _splat: string; search: Record<string, string | string[]> }
+  signal?: AbortSignal
 }) => Promise<any>
 
 const searchToRecord = (searchStr: string): Record<string, string | string[]> =>
   Object.fromEntries(new URLSearchParams(searchStr)) as Record<string, string | string[]>
 
-const runLoader = async (load: AdminLoad, splat: string, searchStr: string) => {
-  const data = await load({ data: { _splat: splat, search: searchToRecord(searchStr) } })
+const runLoader = async ({
+  load,
+  searchStr,
+  signal,
+  splat,
+}: {
+  load: AdminLoad
+  searchStr: string
+  signal: AbortSignal
+  splat: string
+}) => {
+  const data = await load({ data: { _splat: splat, search: searchToRecord(searchStr) }, signal })
   if (data?._redirect) {
     // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router requires throwing redirect objects
     throw redirect({ to: data._redirect })
@@ -56,8 +67,21 @@ const adminRouteOptions = ({
   // instead of the default background SWR that flashes the pre-navigation list
   // (e.g. a just-created doc missing) until the reload lands.
   loader: {
-    handler: async ({ location, params }: { location: any; params: any }) => {
-      const data = await runLoader(load, resolveSplat(params), location.searchStr)
+    handler: async ({
+      abortController,
+      location,
+      params,
+    }: {
+      abortController: AbortController
+      location: any
+      params: any
+    }) => {
+      const data = await runLoader({
+        load,
+        searchStr: location.searchStr,
+        signal: abortController.signal,
+        splat: resolveSplat(params),
+      })
       if (data?._notFound) {
         // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router requires throwing notFound objects
         throw notFound(
