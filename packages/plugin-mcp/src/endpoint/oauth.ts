@@ -47,24 +47,29 @@ export const oauthChallenge = ({ req }: { req: PayloadRequest }): Response =>
 const getMCPURL = ({ config, url }: { config: SanitizedConfig; url: string }): string =>
   new URL(`${config.routes.api}/mcp`, config.serverURL || url).href
 
-const getMetadataResponse = ({
+const getMetadataResponse = async ({
   config,
   url,
 }: {
   config: SanitizedConfig
   url: string
-}): Response => {
+}): Promise<Response> => {
   const pluginConfig = getPluginConfig({ config })
 
   if (!pluginConfig.oauth) {
     return new Response(null, { status: 404 })
   }
 
+  const { authorizationServers, resource } = pluginConfig.oauth
+
   return Response.json(
     {
-      authorization_servers: pluginConfig.oauth.authorizationServers,
+      authorization_servers:
+        typeof authorizationServers === 'function'
+          ? await authorizationServers()
+          : authorizationServers,
       bearer_methods_supported: ['header'],
-      resource: pluginConfig.oauth.resource ?? getMCPURL({ config, url }),
+      resource: resource ?? getMCPURL({ config, url }),
     },
     // Public document, readable by browser-based MCP clients on any origin
     { headers: { 'Access-Control-Allow-Origin': '*' } },
