@@ -653,6 +653,54 @@ describe('General', () => {
     )
 
     test(
+      'should preserve unsaved edits during hash-only navigation and browser history traversal',
+      { tag: '@also-without-cache-components' },
+      async () => {
+        const { id } = await createPost({ title: 'Saved title' })
+
+        await page.goto(postsUrl.list)
+        await page.locator('.table a').filter({ hasText: id }).click()
+        await page.waitForURL(postsUrl.edit(id))
+        await expect(page.locator('.template-default--nav-hydrated')).toBeVisible()
+
+        const titleField = page.locator('#field-title')
+        const unsavedTitle = 'Unsaved title'
+
+        await titleField.fill(unsavedTitle)
+        await page.evaluate(() => {
+          const link = document.createElement('a')
+
+          link.id = 'hash-navigation-test-link'
+          link.href = '#field-description'
+          link.textContent = 'Jump to description'
+          document.body.appendChild(link)
+        })
+
+        try {
+          await page.locator('#hash-navigation-test-link').focus()
+          await page.keyboard.press('Enter')
+          await expect(page).toHaveURL(`${postsUrl.edit(id)}#field-description`)
+
+          // Allow a deferred popstate refresh to finish before checking the form is unchanged.
+          await page.waitForTimeout(1000)
+          await expect(titleField).toHaveValue(unsavedTitle)
+
+          await page.goBack()
+          await expect(page).toHaveURL(postsUrl.edit(id))
+          await page.waitForTimeout(1000)
+          await expect(titleField).toHaveValue(unsavedTitle)
+
+          await page.goForward()
+          await expect(page).toHaveURL(`${postsUrl.edit(id)}#field-description`)
+          await page.waitForTimeout(1000)
+          await expect(titleField).toHaveValue(unsavedTitle)
+        } finally {
+          await page.evaluate(() => document.getElementById('hash-navigation-test-link')?.remove())
+        }
+      },
+    )
+
+    test(
       'should not get stuck in a render loop when navigating while the page is still hydrating',
       { framework: 'next', tag: '@also-without-cache-components' },
       async () => {

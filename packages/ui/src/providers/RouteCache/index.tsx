@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, use, useCallback, useEffect } from 'react'
+import React, { createContext, use, useCallback, useEffect, useRef } from 'react'
 
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { usePathname, useRouter } from '../RouterAdapter/index.js'
@@ -21,6 +21,7 @@ export const RouteCache: React.FC<{ cachingEnabled?: boolean; children: React.Re
 }) => {
   const pathname = usePathname()
   const router = useRouter()
+  const previousPathnameRef = useRef('')
 
   const clearRouteCache = useCallback(() => {
     router.refresh()
@@ -39,9 +40,20 @@ export const RouteCache: React.FC<{ cachingEnabled?: boolean; children: React.Re
       return
     }
 
+    previousPathnameRef.current = window.location.pathname
+
     let refreshTimeout: ReturnType<typeof setTimeout> | undefined
 
     const handlePopState = () => {
+      const currentPathname = window.location.pathname
+
+      // Fragment navigation also fires popstate. Refreshing the same route resets unsaved forms.
+      if (previousPathnameRef.current === currentPathname) {
+        return
+      }
+
+      previousPathnameRef.current = currentPathname
+
       // Next.js restores the previous page in its own `popstate` listener. With `cacheComponents`,
       // that happens synchronously and may run before or after this listener, so refreshing right
       // away (or in a microtask) could refresh the page we are leaving. A timeout runs after all
@@ -57,14 +69,23 @@ export const RouteCache: React.FC<{ cachingEnabled?: boolean; children: React.Re
     }
   }, [cachingEnabled, clearRouteCache])
 
-  const handlePathnameChange = useEffectEvent((pathname: string) => {
+  const handlePathnameChange = useEffectEvent(() => {
     if (cachingEnabled) {
       clearRouteCache()
     }
   })
 
   useEffect(() => {
-    handlePathnameChange(pathname)
+    handlePathnameChange()
+
+    const currentPathname = window.location.pathname
+
+    // Next.js may commit the restored route before popstate runs. Keep the previous path until then.
+    const timeout = setTimeout(() => {
+      previousPathnameRef.current = currentPathname
+    }, 0)
+
+    return () => clearTimeout(timeout)
   }, [pathname])
 
   return <Context value={{ cachingEnabled, clearRouteCache }}>{children}</Context>
