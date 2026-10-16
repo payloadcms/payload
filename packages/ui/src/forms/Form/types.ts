@@ -33,6 +33,11 @@ export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
      * Recheck after awaiting work before applying response-driven state changes.
      */
     isCurrent: () => boolean
+    /**
+     * Returns `true` after the form's request queue is reset, including form replacement or unmounting.
+     * Field value changes alone leave this `false`.
+     */
+    isQueueReset: () => boolean
   },
 ) => Promise<FormState | void> | void
 

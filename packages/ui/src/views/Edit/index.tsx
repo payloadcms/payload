@@ -301,11 +301,13 @@ export function DefaultEditView({
     async (json, ctx) => {
       const { context, formState } = ctx || {}
 
-      if (ctx && !ctx.isCurrent()) {
+      const document = json?.doc || json?.result
+      const hasCreatedDocument =
+        operation === 'create' && Boolean(collectionSlug) && document?.id != null
+
+      if (ctx && !ctx.isCurrent() && (!hasCreatedDocument || ctx.isQueueReset())) {
         return
       }
-
-      const document = json?.doc || json?.result
 
       const updatedAt = document?.updatedAt || new Date().toISOString()
 

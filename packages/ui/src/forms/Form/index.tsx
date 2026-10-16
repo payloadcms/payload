@@ -523,7 +523,18 @@ export const Form: React.FC<FormProps> = (props) => {
         }
 
         if (res.status < 400) {
-          if (!requestContext.isCurrent()) {
+          const hasCreatedDocument = Boolean(
+            isDocumentForm &&
+              collectionSlug &&
+              operation === 'create' &&
+              (json?.doc || json?.result)?.id != null,
+          )
+
+          // A successful create must establish its ID even if an async field update made its values stale.
+          if (
+            !requestContext.isCurrent() &&
+            (!hasCreatedDocument || requestContext.isQueueReset())
+          ) {
             return
           }
 
@@ -538,6 +549,7 @@ export const Form: React.FC<FormProps> = (props) => {
               context,
               formState: serializableFormState,
               isCurrent: requestContext.isCurrent,
+              isQueueReset: requestContext.isQueueReset,
             })
           }
 
@@ -697,6 +709,9 @@ export const Form: React.FC<FormProps> = (props) => {
     },
     [
       beforeSubmit,
+      collectionSlug,
+      isDocumentForm,
+      operation,
       dispatchFieldsWithoutIncrementingFormSequence,
       startRouteTransition,
       action,
