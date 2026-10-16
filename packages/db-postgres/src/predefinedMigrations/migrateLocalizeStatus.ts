@@ -1,3 +1,4 @@
+import type { BasePostgresAdapter, PostgresDB } from '@payloadcms/drizzle/postgres'
 import type { Payload, PayloadRequest } from 'payload'
 
 import { migratePostgresLocalizeStatus } from '@payloadcms/drizzle/postgres'
@@ -17,7 +18,10 @@ export async function migrateLocalizeStatus({
   req,
   sql,
 }: {
-  db: any
+  /**
+   * The Drizzle instance from the migration arguments, so every query runs in the migration's transaction
+   */
+  db: PostgresDB
   payload: Payload
   req: PayloadRequest
   sql: any
@@ -75,48 +79,39 @@ async function _cleanupSnapshotColumn({
   sql,
   versionsTable,
 }: {
-  db: any
+  db: PostgresDB
   payload: Payload
   sql: any
   versionsTable: string
 }): Promise<void> {
-  const schemaName = db.schemaName ?? 'public'
+  const schemaName = (payload.db as unknown as BasePostgresAdapter).schemaName || 'public'
 
-  const columnCheck = await db.execute({
-    drizzle: db.drizzle,
-    sql: sql`
+  const columnCheck = await db.execute(sql`
       SELECT EXISTS (
         SELECT FROM information_schema.columns
         WHERE table_schema = ${schemaName}
         AND table_name = ${versionsTable}
         AND column_name = 'snapshot'
       ) as exists
-    `,
-  })
+    `)
 
   if (!columnCheck.rows[0]?.exists) {
     return
   }
 
-  const deleteResult = await db.execute({
-    drizzle: db.drizzle,
-    sql: sql`
+  const deleteResult = await db.execute(sql`
       DELETE FROM ${sql.identifier(versionsTable)} WHERE snapshot = true
-    `,
-  })
+    `)
 
-  if (deleteResult.rowCount > 0) {
+  if (deleteResult.rowCount) {
     payload.logger.info({
       msg: `Deleted ${deleteResult.rowCount} snapshot rows from ${versionsTable}`,
     })
   }
 
-  await db.execute({
-    drizzle: db.drizzle,
-    sql: sql`
+  await db.execute(sql`
       ALTER TABLE ${sql.identifier(versionsTable)} DROP COLUMN snapshot
-    `,
-  })
+    `)
 
   payload.logger.info({ msg: `Dropped snapshot column from ${versionsTable}` })
 }
