@@ -7,9 +7,14 @@ import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
+import { hookSpy } from './hookSpy.js'
 import { branchesSlug, restrictedSlug } from './shared.js'
 
 test.suite('Scheduled merge access', { config: './config.ts' }, () => {
+  test.afterEach(() => {
+    hookSpy.branchValidation = undefined
+  })
+
   test('should check an explicit merging user instead of the request user', async ({ payload }) => {
     const { admin, branch, doc, editor } = await createPendingChange({ payload })
     const req = await createPayloadRequest({ payload, user: admin })
@@ -52,6 +57,78 @@ test.suite('Scheduled merge access', { config: './config.ts' }, () => {
     expect(req.user).toEqual(admin)
   })
 
+  test('should fail an access-refused job run by an authenticated admin', async ({ payload }) => {
+    const { admin, branch, doc, editor } = await createPendingChange({ payload })
+    const req = await createPayloadRequest({ payload, user: admin })
+    const jobID = await runScheduledMerge({
+      branch: branch.slug,
+      payload,
+      req,
+      userID: editor.id,
+    })
+    const job = await payload.findByID({
+      id: jobID,
+      collection: 'payload-jobs',
+      overrideAccess: true,
+    })
+    const onMain = await payload.findByID({
+      id: doc.id,
+      collection: restrictedSlug,
+      overrideAccess: true,
+    })
+    const afterMerge = await payload.findByID({
+      id: branch.id,
+      collection: branchesSlug,
+      overrideAccess: true,
+    })
+
+    expect(job.hasError).toBe(true)
+    expect(job.completedAt).toBeFalsy()
+    expect(job.error?.message).toContain(`Scheduled merge of branch "${branch.slug}" was refused:`)
+    expect(onMain.title).toBe('original on main')
+    expect(afterMerge.mergeProgress).toBeFalsy()
+    expect(afterMerge.status).toBe('open')
+    expect(req.user).toEqual(admin)
+  })
+
+  test('should preserve validation refusal details in the failed job', async ({ payload }) => {
+    const { admin, branch, doc } = await createPendingChange({ payload })
+    const req = await createPayloadRequest({ payload, user: admin })
+    const message = 'The campaign has not been approved.'
+
+    hookSpy.branchValidation = ({ candidates }) => ({
+      errors: [{ changeID: candidates[0]!.changeID, message }],
+      valid: false,
+    })
+
+    const jobID = await runScheduledMerge({
+      branch: branch.slug,
+      payload,
+      req,
+      userID: admin.id,
+    })
+    const job = await payload.findByID({
+      id: jobID,
+      collection: 'payload-jobs',
+      overrideAccess: true,
+    })
+    const onMain = await payload.findByID({
+      id: doc.id,
+      collection: restrictedSlug,
+      overrideAccess: true,
+    })
+    const afterMerge = await payload.findByID({
+      id: branch.id,
+      collection: branchesSlug,
+      overrideAccess: true,
+    })
+
+    expect(job.hasError).toBe(true)
+    expect(job.error?.message).toContain(message)
+    expect(onMain.title).toBe('original on main')
+    expect(afterMerge.mergeProgress).toBeFalsy()
+  })
+
   test('should use the scheduling admin permissions when the runner has fewer permissions', async ({
     payload,
   }) => {
@@ -68,6 +145,28 @@ test.suite('Scheduled merge access', { config: './config.ts' }, () => {
 
     expect(onMain.title).toBe('edited on branch')
     expect(req.user).toEqual(editor)
+  })
+
+  test('should complete a scheduled merge when no changes remain pending', async ({ payload }) => {
+    const { admin, branch } = await createPendingChange({ payload })
+
+    await payload.branches.discard({ branch: branch.slug, overrideAccess: true })
+
+    const req = await createPayloadRequest({ payload, user: admin })
+    const jobID = await runScheduledMerge({
+      branch: branch.slug,
+      payload,
+      req,
+      userID: admin.id,
+    })
+    const job = await payload.findByID({
+      id: jobID,
+      collection: 'payload-jobs',
+      disableErrors: true,
+      overrideAccess: true,
+    })
+
+    expect(job).toBeNull()
   })
 })
 
