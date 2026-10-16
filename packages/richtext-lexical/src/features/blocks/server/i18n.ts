@@ -91,6 +91,15 @@ export const i18n: Partial<GenericLanguages> = {
     },
     label: 'بلوک ها',
   },
+  fi: {
+    inlineBlocks: {
+      create: 'Luo {{label}}',
+      edit: 'Muokkaa {{label}}',
+      label: 'Tekstinsisäiset lohkot',
+      remove: 'Poista {{label}}',
+    },
+    label: 'Lohko',
+  },
   fr: {
     inlineBlocks: {
       create: 'Créer {{label}}',
