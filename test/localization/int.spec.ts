@@ -42,6 +42,7 @@ import {
   localizedDraftsSlug,
   localizedPostsSlug,
   localizedSortSlug,
+  localizedStatusSharedGlobalSlug,
   portugueseLocale,
   publicationAccessGlobalSlug,
   publicationAccessSlug,
@@ -79,6 +80,230 @@ describe('Localization', () => {
 
   afterAll(async () => {
     await payload.destroy()
+  })
+
+  describe('localized draft preservation', () => {
+    const createdDocuments: { collection: string; id: number | string }[] = []
+
+    afterEach(async () => {
+      for (const doc of createdDocuments) {
+        await payload.delete({ id: doc.id, collection: doc.collection as any })
+      }
+      createdDocuments.length = 0
+    })
+
+    it.each(['localized', 'shared'] as const)(
+      'should preserve collection status when field access denies draft status changes during a %s edit',
+      async (editType) => {
+        const doc = await payload.create({
+          collection: publicationFieldAccessSlug as any,
+          data: { _status: 'published', sharedText: 'Published shared value', title: 'Published' },
+          overrideAccess: true,
+        })
+
+        createdDocuments.push({ id: doc.id, collection: publicationFieldAccessSlug })
+
+        await payload.update({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          data: {
+            _status: 'draft',
+            title: 'Localized draft',
+            ...(editType === 'shared' ? { sharedText: 'Shared draft' } : {}),
+          },
+          draft: true,
+          locale: defaultLocale,
+          overrideAccess: false,
+        })
+
+        const draft = await payload.findByID({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          draft: true,
+          locale: defaultLocale,
+          overrideAccess: true,
+        })
+
+        expect(draft.title).toBe('Localized draft')
+        expect(draft._status).toBe('published')
+        expect(draft.sharedText).toBe(
+          editType === 'shared' ? 'Shared draft' : 'Published shared value',
+        )
+      },
+    )
+
+    it.each(['localized', 'shared'] as const)(
+      'should preserve global status when field access denies draft status changes during a %s edit',
+      async (editType) => {
+        await payload.updateGlobal({
+          slug: publicationFieldAccessGlobalSlug as any,
+          data: { _status: 'published', sharedText: 'Published shared value', title: 'Published' },
+          overrideAccess: true,
+        })
+
+        await payload.updateGlobal({
+          slug: publicationFieldAccessGlobalSlug as any,
+          data: {
+            _status: 'draft',
+            title: 'Localized draft',
+            ...(editType === 'shared' ? { sharedText: 'Shared draft' } : {}),
+          },
+          draft: true,
+          locale: defaultLocale,
+          overrideAccess: false,
+        })
+
+        const versions = await payload.findGlobalVersions({
+          slug: publicationFieldAccessGlobalSlug as any,
+          limit: 1,
+          locale: defaultLocale,
+          overrideAccess: true,
+          sort: '-updatedAt',
+          where: { latest: { equals: true } },
+        })
+
+        const draft = versions.docs[0]!.version
+
+        expect(draft.title).toBe('Localized draft')
+        expect(draft._status).toBe('published')
+        expect(draft.sharedText).toBe(
+          editType === 'shared' ? 'Shared draft' : 'Published shared value',
+        )
+      },
+    )
+
+    it.each(['sharedArray', 'sharedBlocks'] as const)(
+      'should preserve other locale status when only a localized child of global %s changes',
+      async (fieldName) => {
+        const row = {
+          ...(fieldName === 'sharedBlocks' ? { blockType: 'shared-content' } : {}),
+          localizedText: 'English published',
+          sharedText: 'Shared published value',
+        }
+        const published = await payload.updateGlobal({
+          slug: localizedStatusSharedGlobalSlug as any,
+          data: { _status: 'published', [fieldName]: [row] },
+          locale: defaultLocale,
+        })
+        const id = published[fieldName][0].id
+
+        await payload.updateGlobal({
+          slug: localizedStatusSharedGlobalSlug as any,
+          data: {
+            _status: 'published',
+            [fieldName]: [{ ...row, id, localizedText: 'Spanish published' }],
+          },
+          locale: spanishLocale,
+        })
+        await payload.updateGlobal({
+          slug: localizedStatusSharedGlobalSlug as any,
+          data: {
+            _status: 'draft',
+            [fieldName]: [
+              {
+                id,
+                ...(fieldName === 'sharedBlocks' ? { blockType: 'shared-content' } : {}),
+                localizedText: 'English draft',
+              },
+            ],
+          },
+          draft: true,
+          locale: defaultLocale,
+        })
+        const draft = await payload.findGlobal({
+          slug: localizedStatusSharedGlobalSlug as any,
+          draft: true,
+          locale: 'all',
+        })
+
+        expect(draft._status.en).toBe('draft')
+        expect(draft._status.es).toBe('published')
+        expect(draft[fieldName][0].sharedText).toBe('Shared published value')
+        expect(draft[fieldName][0].localizedText.en).toBe('English draft')
+        expect(draft[fieldName][0].localizedText.es).toBe('Spanish published')
+      },
+    )
+
+    it('should retain other locale content when publishing a shared array deletion', async () => {
+      const doc = await payload.create({
+        collection: allFieldsLocalizedSlug,
+        data: {
+          _status: 'published',
+          nonLocalizedArray: [{ localizedItem: 'Published row' }],
+          text: 'English published',
+        },
+        locale: defaultLocale,
+      })
+      createdDocuments.push({ id: doc.id, collection: allFieldsLocalizedSlug })
+
+      await payload.update({
+        id: doc.id,
+        collection: allFieldsLocalizedSlug,
+        data: { _status: 'published', text: 'Spanish published' },
+        locale: spanishLocale,
+      })
+      await payload.update({
+        id: doc.id,
+        collection: allFieldsLocalizedSlug,
+        data: { _status: 'published', nonLocalizedArray: null },
+        locale: defaultLocale,
+      })
+      const published = await payload.findByID({
+        id: doc.id,
+        collection: allFieldsLocalizedSlug,
+        draft: false,
+        locale: 'all',
+      })
+
+      expect(published.nonLocalizedArray).toEqual([])
+      expect(published.text!.en).toBe('English published')
+      expect(published.text!.es).toBe('Spanish published')
+      expect(published._status!.en).toBe('published')
+      expect(published._status!.es).toBe('published')
+    })
+
+    it('should draft all locales when a shared array is cleared with null', async () => {
+      const doc = await payload.create({
+        collection: allFieldsLocalizedSlug,
+        data: {
+          _status: 'published',
+          nonLocalizedArray: [{ localizedItem: 'Published row' }],
+          text: 'English',
+        },
+        locale: defaultLocale,
+        overrideAccess: true,
+      })
+      createdDocuments.push({ id: doc.id, collection: allFieldsLocalizedSlug })
+
+      await payload.update({
+        id: doc.id,
+        collection: allFieldsLocalizedSlug,
+        data: { _status: 'published', text: 'Spanish' },
+        locale: spanishLocale,
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        id: doc.id,
+        collection: allFieldsLocalizedSlug,
+        data: { _status: 'draft', nonLocalizedArray: null },
+        draft: true,
+        locale: defaultLocale,
+        overrideAccess: true,
+      })
+
+      const draft = await payload.findByID({
+        id: doc.id,
+        collection: allFieldsLocalizedSlug,
+        draft: true,
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      expect(draft.nonLocalizedArray).toEqual([])
+      expect(draft._status!.en).toBe('draft')
+      expect(draft._status!.es).toBe('draft')
+    })
   })
 
   describe('count with localized field query', () => {
@@ -5096,6 +5321,235 @@ describe('Localization', () => {
           expect(latestVersionDoc.text!.es).toBe('spanish draft 2')
         })
 
+        it('should mark all locales as draft when a draft save changes a non-localized field', async () => {
+          const doc = await payload.create({
+            collection: allFieldsLocalizedSlug,
+            data: {
+              nonLocalizedGroup: {
+                nonLocalizedText: 'shared published',
+              },
+              text: 'english published',
+              _status: 'published',
+            },
+            locale: defaultLocale,
+          })
+
+          await payload.update({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            data: {
+              text: 'spanish published',
+              _status: 'published',
+            },
+            locale: spanishLocale,
+          })
+
+          await payload.update({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            data: {
+              nonLocalizedGroup: {
+                nonLocalizedText: 'shared draft',
+              },
+              text: 'english draft',
+              _status: 'draft',
+            },
+            draft: true,
+            locale: defaultLocale,
+          })
+
+          const allLocalesDraft = await payload.findByID({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            draft: true,
+            locale: 'all',
+          })
+
+          expect(allLocalesDraft._status!.en).toBe('draft')
+          expect(allLocalesDraft._status!.es).toBe('draft')
+          expect(allLocalesDraft.text!.en).toBe('english draft')
+          expect(allLocalesDraft.text!.es).toBe('spanish published')
+          expect(allLocalesDraft.nonLocalizedGroup?.nonLocalizedText).toBe('shared draft')
+
+          const spanishView = await payload.findByID({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            draft: true,
+            locale: spanishLocale,
+          })
+
+          expect(spanishView._status).toBe('draft')
+          expect(spanishView.text).toBe('spanish published')
+          expect(spanishView.nonLocalizedGroup?.nonLocalizedText).toBe('shared draft')
+        })
+
+        it('should preserve non-localized draft changes when another locale saves a localized draft', async () => {
+          const doc = await payload.create({
+            collection: allFieldsLocalizedSlug,
+            data: {
+              nonLocalizedGroup: {
+                nonLocalizedText: 'shared published before second locale draft',
+              },
+              text: 'english published before second locale draft',
+              _status: 'published',
+            },
+            locale: defaultLocale,
+          })
+
+          await payload.update({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            data: {
+              text: 'spanish published before second locale draft',
+              _status: 'published',
+            },
+            locale: spanishLocale,
+          })
+
+          await payload.update({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            data: {
+              nonLocalizedGroup: {
+                nonLocalizedText: 'shared draft from english',
+              },
+              text: 'english draft before second locale draft',
+              _status: 'draft',
+            },
+            draft: true,
+            locale: defaultLocale,
+          })
+
+          await payload.update({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            data: {
+              text: 'spanish draft after shared english draft',
+              _status: 'draft',
+            },
+            draft: true,
+            locale: spanishLocale,
+          })
+
+          const englishDraft = await payload.findByID({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            draft: true,
+            locale: defaultLocale,
+          })
+
+          expect(englishDraft._status).toBe('draft')
+          expect(englishDraft.nonLocalizedGroup?.nonLocalizedText).toBe('shared draft from english')
+
+          const allLocalesDraft = await payload.findByID({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            draft: true,
+            locale: 'all',
+          })
+
+          expect(allLocalesDraft._status!.en).toBe('draft')
+          expect(allLocalesDraft._status!.es).toBe('draft')
+          expect(allLocalesDraft.nonLocalizedGroup?.nonLocalizedText).toBe(
+            'shared draft from english',
+          )
+        })
+
+        it('should keep published locales published when a draft save changes only localized fields', async () => {
+          const doc = await payload.create({
+            collection: allFieldsLocalizedSlug,
+            data: {
+              nonLocalizedGroup: {
+                nonLocalizedText: 'shared published localized-only test',
+              },
+              text: 'english published localized-only test',
+              _status: 'published',
+            },
+            locale: defaultLocale,
+          })
+
+          await payload.update({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            data: {
+              text: 'spanish published localized-only test',
+              _status: 'published',
+            },
+            locale: spanishLocale,
+          })
+
+          await payload.update({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            data: {
+              text: 'english draft localized-only test',
+              _status: 'draft',
+            },
+            draft: true,
+            locale: defaultLocale,
+          })
+
+          const allLocalesDraft = await payload.findByID({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            draft: true,
+            locale: 'all',
+          })
+
+          expect(allLocalesDraft._status!.en).toBe('draft')
+          expect(allLocalesDraft._status!.es).toBe('published')
+          expect(allLocalesDraft.text!.en).toBe('english draft localized-only test')
+          expect(allLocalesDraft.text!.es).toBe('spanish published localized-only test')
+          expect(allLocalesDraft.nonLocalizedGroup?.nonLocalizedText).toBe(
+            'shared published localized-only test',
+          )
+        })
+
+        it('should mark all locales as draft when saving a draft with locale all', async () => {
+          const doc = await payload.create({
+            collection: publicationAccessSlug as any,
+            data: {
+              title: 'english published all-locale draft',
+              _status: 'published',
+            },
+            locale: defaultLocale,
+          })
+
+          await payload.update({
+            collection: publicationAccessSlug as any,
+            id: doc.id,
+            data: {
+              title: 'spanish published all-locale draft',
+              _status: 'published',
+            },
+            locale: spanishLocale,
+          })
+
+          await payload.update({
+            collection: publicationAccessSlug as any,
+            id: doc.id,
+            data: {
+              title: {
+                en: 'english draft all-locale draft',
+                es: 'spanish draft all-locale draft',
+              },
+              _status: 'draft',
+            },
+            draft: true,
+            locale: 'all',
+          })
+
+          const allLocalesDraft = await payload.findByID({
+            collection: publicationAccessSlug as any,
+            id: doc.id,
+            draft: true,
+            locale: 'all',
+          })
+
+          expect(allLocalesDraft._status!.en).toBe('draft')
+          expect(allLocalesDraft._status!.es).toBe('draft')
+        })
+
         it('should allow querying metadata per locale', async () => {
           const doc = await payload.create({
             collection: allFieldsLocalizedSlug,
@@ -5299,6 +5753,135 @@ describe('Localization', () => {
 
           expect(unpublishedDocument._status!.en).toBe('draft')
           expect(unpublishedDocument._status!.es).toBe('draft')
+        })
+
+        it('should mark all locales as draft when a global draft save changes a non-localized field', async () => {
+          await payload.updateGlobal({
+            slug: localizedStatusSharedGlobalSlug,
+            data: {
+              localizedText: englishTitle,
+              sharedText: 'english global published',
+              _status: 'published',
+            },
+            locale: defaultLocale,
+          })
+
+          await payload.updateGlobal({
+            slug: localizedStatusSharedGlobalSlug,
+            data: {
+              localizedText: spanishTitle,
+              sharedText: 'spanish global published',
+              _status: 'published',
+            },
+            locale: spanishLocale,
+          })
+
+          await payload.updateGlobal({
+            slug: localizedStatusSharedGlobalSlug,
+            data: {
+              sharedText: 'english global draft',
+              _status: 'draft',
+            },
+            draft: true,
+            locale: defaultLocale,
+          })
+
+          const allLocalesDraft = await payload.findGlobal({
+            slug: localizedStatusSharedGlobalSlug,
+            draft: true,
+            locale: 'all',
+          })
+
+          expect(allLocalesDraft._status!.en).toBe('draft')
+          expect(allLocalesDraft._status!.es).toBe('draft')
+        })
+
+        it('should keep published locales published when a global draft save changes only localized fields', async () => {
+          await payload.updateGlobal({
+            slug: localizedStatusSharedGlobalSlug,
+            data: {
+              localizedText: englishTitle,
+              sharedText: 'english global published localized-only',
+              _status: 'published',
+            },
+            locale: defaultLocale,
+          })
+
+          await payload.updateGlobal({
+            slug: localizedStatusSharedGlobalSlug,
+            data: {
+              localizedText: spanishTitle,
+              sharedText: 'spanish global published localized-only',
+              _status: 'published',
+            },
+            locale: spanishLocale,
+          })
+
+          await payload.updateGlobal({
+            slug: localizedStatusSharedGlobalSlug,
+            data: {
+              localizedText: 'english global draft localized-only',
+              _status: 'draft',
+            },
+            draft: true,
+            locale: defaultLocale,
+          })
+
+          const allLocalesDraft = await payload.findGlobal({
+            slug: localizedStatusSharedGlobalSlug,
+            draft: true,
+            locale: 'all',
+          })
+
+          expect(allLocalesDraft._status!.en).toBe('draft')
+          expect(allLocalesDraft._status!.es).toBe('published')
+          expect(allLocalesDraft.localizedText!.en).toBe('english global draft localized-only')
+          expect(allLocalesDraft.localizedText!.es).toBe(spanishTitle)
+          expect(allLocalesDraft.sharedText).toBe('spanish global published localized-only')
+        })
+
+        it('should mark all locales as draft when saving a global draft with locale all', async () => {
+          await payload.updateGlobal({
+            slug: localizedStatusSharedGlobalSlug,
+            data: {
+              localizedText: englishTitle,
+              sharedText: 'english global published all-locale draft',
+              _status: 'published',
+            },
+            locale: defaultLocale,
+          })
+
+          await payload.updateGlobal({
+            slug: localizedStatusSharedGlobalSlug,
+            data: {
+              localizedText: spanishTitle,
+              sharedText: 'spanish global published all-locale draft',
+              _status: 'published',
+            },
+            locale: spanishLocale,
+          })
+
+          await payload.updateGlobal({
+            slug: localizedStatusSharedGlobalSlug,
+            data: {
+              localizedText: {
+                en: 'english global draft all-locale draft',
+                es: 'spanish global draft all-locale draft',
+              },
+              _status: 'draft',
+            },
+            draft: true,
+            locale: 'all',
+          })
+
+          const allLocalesDraft = await payload.findGlobal({
+            slug: localizedStatusSharedGlobalSlug,
+            draft: true,
+            locale: 'all',
+          })
+
+          expect(allLocalesDraft._status!.en).toBe('draft')
+          expect(allLocalesDraft._status!.es).toBe('draft')
         })
       })
     })
