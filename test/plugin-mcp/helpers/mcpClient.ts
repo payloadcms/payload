@@ -8,8 +8,8 @@ import { connectMcpClient } from './realMcpClient.js'
 export type McpClient = {
   /** Disconnects every client opened during the test. */
   close: () => Promise<void>
-  /** Returns a connected MCP client for the given API key and access mode (reused). */
-  connect: (apiKey: string, options?: { overrideAccess?: boolean }) => Promise<Client>
+  /** Returns a connected MCP client for the given API key (reused). */
+  connect: (apiKey: string) => Promise<Client>
   /** Returns the HTTP responses observed by the real MCP transport. */
   getHTTPResponses: () => McpHTTPResponse[]
   /** Sends a raw POST to `/mcp` — for the auth/malformed-request tests a real client can't make. */
@@ -23,7 +23,7 @@ export function createMcpClient({
   protocolEra: ProtocolEra
   restClient: RESTClient
 }): McpClient {
-  // One connected client per API key and access mode — the handshake runs once, then reused.
+  // One connected client per API key — the handshake runs once, then reused.
   const clients = new Map<string, Promise<Client>>()
   const httpResponses: McpHTTPResponse[] = []
 
@@ -41,18 +41,16 @@ export function createMcpClient({
         }),
       )
     },
-    connect: (apiKey, { overrideAccess = false } = {}) => {
-      const cacheKey = `${apiKey}:${overrideAccess}`
-      let client = clients.get(cacheKey)
+    connect: (apiKey) => {
+      let client = clients.get(apiKey)
       if (!client) {
         client = connectMcpClient({
           apiKey,
           onResponse: (response) => httpResponses.push(response),
-          overrideAccess,
           protocolEra,
           restClient,
         })
-        clients.set(cacheKey, client)
+        clients.set(apiKey, client)
       }
       return client
     },

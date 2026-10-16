@@ -19,7 +19,7 @@ export const findGlobalVersionsTool = defineGlobalTool({
   },
   description: DEFAULT_DESCRIPTION,
   input: findGlobalVersionsInputSchema,
-}).handler(async ({ slug, authorizedMCP, input, req }) => {
+}).handler(async ({ slug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
   const { depth, fallbackLocale, limit, locale, page, pagination, populate, select, sort, where } =
@@ -32,7 +32,7 @@ export const findGlobalVersionsTool = defineGlobalTool({
       slug,
       depth,
       limit,
-      overrideAccess: authorizedMCP.overrideAccess,
+      overrideAccess: false,
       page,
       req,
       ...(fallbackLocale !== undefined ? { fallbackLocale } : {}),

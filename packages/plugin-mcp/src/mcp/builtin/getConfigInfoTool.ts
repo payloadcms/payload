@@ -14,7 +14,7 @@ export const getConfigInfoTool = defineTool({
   input: getConfigInfoInputSchema,
 }).handler(async ({ authorizedMCP, req }) => {
   const user = req.user
-  const permissions = authorizedMCP.overrideAccess ? null : await getAccessResults({ req })
+  const permissions = await getAccessResults({ req })
   const authorizedCollectionSlugs = new Set<string>()
   const authorizedGlobalSlugs = new Set<string>()
 
@@ -36,7 +36,7 @@ export const getConfigInfoTool = defineTool({
     if (user && isEntityHidden({ hidden: collection.admin.hidden, user })) {
       continue
     }
-    if (!authorizedMCP.overrideAccess && !permissions?.collections?.[collection.slug]?.read) {
+    if (!permissions?.collections?.[collection.slug]?.read) {
       continue
     }
 
@@ -50,7 +50,7 @@ export const getConfigInfoTool = defineTool({
     if (user && isEntityHidden({ hidden: global.admin.hidden, user })) {
       continue
     }
-    if (!authorizedMCP.overrideAccess && !permissions?.globals?.[global.slug]?.read) {
+    if (!permissions?.globals?.[global.slug]?.read) {
       continue
     }
 

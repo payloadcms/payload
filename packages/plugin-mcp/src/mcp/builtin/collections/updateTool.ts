@@ -31,7 +31,7 @@ export const updateDocumentTool = defineCollectionTool({
   },
   description: DEFAULT_DESCRIPTION,
   input: updateDocumentInputSchema({ file: fileInputSchema }),
-}).handler(async ({ slug, authorizedMCP, input, req }) => {
+}).handler(async ({ slug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
 
@@ -83,7 +83,7 @@ export const updateDocumentTool = defineCollectionTool({
         draft,
         fallbackLocale,
         locale,
-        overrideAccess: authorizedMCP.overrideAccess,
+        overrideAccess: false,
         overrideLock,
         populate,
         publishAllLocales,
@@ -115,7 +115,7 @@ export const updateDocumentTool = defineCollectionTool({
       fallbackLocale,
       limit,
       locale,
-      overrideAccess: authorizedMCP.overrideAccess,
+      overrideAccess: false,
       overrideLock,
       populate,
       publishAllLocales,
