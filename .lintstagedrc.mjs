@@ -10,8 +10,10 @@ const quote = (files) => files.map((file) => `'${file}'`).join(' ')
 const oxfmt = 'oxfmt --no-error-on-unmatched-pattern'
 
 export default {
-  // oxfmt also sorts package.json keys (`sortPackageJson` in oxfmt.config.ts)
-  '*.{md,mdx,yml,json}': oxfmt,
+  // Every file type `pnpm format:check` checks in CI, except JS/TS (ESLint + oxfmt below).
+  // oxfmt also sorts package.json keys (`sortPackageJson` in oxfmt.config.ts).
+  '*.{cjs,css,cts,graphql,html,json,jsonc,md,mdx,mjs,mts,scss,toml,yaml,yml}': oxfmt,
+  '.swcrc': oxfmt,
   '*.{js,jsx,ts,tsx}': (files) => {
     const commands = []
     const lintable = files.filter((file) => !isTemplateFile(file))

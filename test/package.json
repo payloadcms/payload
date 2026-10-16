@@ -14,7 +14,8 @@
     "typecheck:app-tanstack": "pnpm -C .. exec tsc --project test/app-tanstack/tsconfig.json && pnpm -C .. exec tsc --project test/admin-bar/app-tanstack/tsconfig.json && pnpm -C .. exec tsc --project test/live-preview/app-tanstack/tsconfig.json"
   },
   "lint-staged": {
-    "*.{md,mdx,yml,json}": "oxfmt --no-error-on-unmatched-pattern",
+    "*.{cjs,css,cts,graphql,html,json,jsonc,md,mdx,mjs,mts,scss,toml,yaml,yml}": "oxfmt --no-error-on-unmatched-pattern",
+    ".swcrc": "oxfmt --no-error-on-unmatched-pattern",
     "*.{js,jsx,ts,tsx}": [
       "eslint --flag v10_config_lookup_from_file --cache --fix",
       "oxfmt --no-error-on-unmatched-pattern"

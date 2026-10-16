@@ -20,7 +20,7 @@ fi
 
 # Format based on file type
 case "$FILE" in
-  *.yml|*.json)
+  *.cjs|*.css|*.cts|*.graphql|*.html|*.json|*.jsonc|*.mjs|*.mts|*.scss|*.toml|*.yaml|*.yml|*/.swcrc)
     pnpm oxfmt "$FILE" >/dev/null 2>&1
     ;;
   *.md|*.mdx)
