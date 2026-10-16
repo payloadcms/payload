@@ -82,47 +82,72 @@ function parseArrayFieldPath(path: string): {
  */
 export const mergeServerFormState = ({
   acceptValues,
-  currentState = {},
+  currentState: previousState = {},
   incomingState,
 }: Args): FormState => {
-  const newState: FormState = acceptValues === true ? {} : { ...currentState }
+  const currentState: FormState = acceptValues === true ? {} : previousState
+  const newState: FormState = acceptValues === true ? {} : { ...previousState }
 
-  // Prune removed row fields while copying local state to avoid a separate cleanup pass.
+  // Keep local fields attached to row IDs when authoritative responses change their paths.
   if (acceptValues === true) {
-    for (const path of Object.keys(currentState)) {
-      newState[path] = currentState[path]
+    const incomingRowIndexesByPath = new Map<string, Map<string, number>>()
 
-      if (path in incomingState) {
-        continue
-      }
-
+    for (const [path, field] of Object.entries(previousState)) {
       const segments = path.split('.')
+      const incomingSegments = [...segments]
+      let shouldKeepField = true
 
       for (let index = 1; index < segments.length; index++) {
-        if (!/^\d+$/.test(segments[index])) {
+        const segment = segments[index]
+        const isRowIndex = /^\d+$/.test(segment)
+
+        if (!isRowIndex) {
           continue
         }
 
-        const arrayPath = segments.slice(0, index).join('.')
-        const incomingRows = incomingState[arrayPath]?.rows
+        const currentArrayPath = segments.slice(0, index).join('.')
+        const incomingArrayPath = incomingSegments.slice(0, index).join('.')
+        const incomingRows = incomingState[incomingArrayPath]?.rows
 
         if (!Array.isArray(incomingRows)) {
           continue
         }
 
-        const rowIndex = Number(segments[index])
-        const incomingRow = incomingRows[rowIndex]
-        const currentRow = currentState[arrayPath]?.rows?.[rowIndex]
+        const currentRow = previousState[currentArrayPath]?.rows?.[Number(segment)]
 
-        // Missing paths from removed or replaced rows must not be serialized on the next save.
-        if (
-          !incomingRow ||
-          (currentRow &&
-            (currentRow.id !== incomingRow.id || currentRow.blockType !== incomingRow.blockType))
-        ) {
-          delete newState[path]
+        if (!currentRow) {
+          shouldKeepField = false
           break
         }
+
+        let incomingRowIndexes = incomingRowIndexesByPath.get(incomingArrayPath)
+
+        if (!incomingRowIndexes) {
+          incomingRowIndexes = new Map<string, number>(
+            incomingRows.map((row, rowIndex) => [row.id, rowIndex]),
+          )
+          incomingRowIndexesByPath.set(incomingArrayPath, incomingRowIndexes)
+        }
+
+        const incomingRowIndex = incomingRowIndexes.get(currentRow.id)
+
+        // Removed or replaced rows must not contribute fields to the next save.
+        if (
+          incomingRowIndex === undefined ||
+          incomingRows[incomingRowIndex]?.blockType !== currentRow.blockType
+        ) {
+          shouldKeepField = false
+          break
+        }
+
+        incomingSegments[index] = String(incomingRowIndex)
+      }
+
+      if (shouldKeepField) {
+        const incomingPath = incomingSegments.join('.')
+
+        currentState[incomingPath] = field
+        newState[incomingPath] = field
       }
     }
   }
@@ -133,7 +158,7 @@ export const mergeServerFormState = ({
     acceptValues.overrideLocalChanges === false
 
   for (const [path, incomingField] of Object.entries(incomingState || {})) {
-    if (!(path in currentState) && !incomingField.addedByServer) {
+    if (!(path in previousState) && !incomingField.addedByServer) {
       continue
     }
 
@@ -257,5 +282,5 @@ export const mergeServerFormState = ({
 
   // Return the original object reference if the state is unchanged.
   // This will avoid unnecessary re-renders and dependency updates.
-  return dequal(newState, currentState) ? currentState : newState
+  return dequal(newState, previousState) ? previousState : newState
 }

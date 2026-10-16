@@ -273,6 +273,104 @@ test.describe('Authoritative autosave rows', () => {
     })
   }
 
+  for (const scenario of ['outer row', 'nested row', 'block', 'reordered row'] as const) {
+    test(`should retain local child state after the server changes paths for ${scenario}`, async ({
+      page,
+    }) => {
+      const doc = await payload.create({
+        collection: autosavePostsSlug,
+        data: {
+          blocks: [
+            { blockType: 'text', text: 'First block' },
+            { blockType: 'text', text: 'Keep this block' },
+          ],
+          groups: [
+            { text: 'First group' },
+            {
+              items: [{ text: 'First item' }, { text: 'Keep this item' }],
+              text: 'Keep this group',
+            },
+          ],
+          title: `ok Local child state for ${scenario}`,
+        },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      try {
+        await initPage({ page, serverURL })
+        await page.goto(new AdminUrlUtil(serverURL, autosavePostsSlug).edit(doc.id))
+        await waitForFormReady(page)
+
+        const localState = ({ rowID }: { rowID: string }) =>
+          page
+            .locator(`[id="${rowID}"]`)
+            .getByRole('button', { name: 'Keep local row state', exact: true })
+
+        await localState({ rowID: 'groups-row-1' }).first().press('Enter')
+        await localState({ rowID: 'groups-1-items-row-1' }).press('Enter')
+        await localState({ rowID: 'blocks-row-1' }).press('Enter')
+        await expect(localState({ rowID: 'groups-row-1' }).first()).toHaveAttribute(
+          'aria-pressed',
+          'true',
+        )
+        await expect(localState({ rowID: 'groups-1-items-row-1' })).toHaveAttribute(
+          'aria-pressed',
+          'true',
+        )
+        await expect(localState({ rowID: 'blocks-row-1' })).toHaveAttribute('aria-pressed', 'true')
+
+        if (scenario === 'block') {
+          await page.locator('#field-blocks__0__text').fill('Remove on server')
+          await expect(page.locator('#blocks-row-1')).toHaveCount(0)
+          await expect(page.locator('#field-blocks__0__text')).toHaveValue('Keep this block')
+          await expect(localState({ rowID: 'blocks-row-0' })).toHaveAttribute(
+            'aria-pressed',
+            'true',
+          )
+        } else if (scenario === 'nested row') {
+          await page.locator('#field-groups__1__items__0__text').fill('Remove on server')
+          await expect(page.locator('[id="groups-1-items-row-1"]')).toHaveCount(0)
+          await expect(page.locator('#field-groups__1__items__0__text')).toHaveValue(
+            'Keep this item',
+          )
+          await expect(localState({ rowID: 'groups-1-items-row-0' })).toHaveAttribute(
+            'aria-pressed',
+            'true',
+          )
+        } else {
+          const isReorder = scenario === 'reordered row'
+
+          await page
+            .locator(isReorder ? '#field-groups__1__text' : '#field-groups__0__text')
+            .fill(isReorder ? 'Move to start on server' : 'Remove on server')
+          await expect(page.locator('#field-groups__0__text')).toHaveValue(
+            isReorder ? 'Move to start on server' : 'Keep this group',
+          )
+          await expect(localState({ rowID: 'groups-row-0' }).first()).toHaveAttribute(
+            'aria-pressed',
+            'true',
+          )
+          await expect(localState({ rowID: 'groups-0-items-row-1' })).toHaveAttribute(
+            'aria-pressed',
+            'true',
+          )
+
+          if (isReorder) {
+            await expect(localState({ rowID: 'groups-row-1' })).toHaveAttribute(
+              'aria-pressed',
+              'false',
+            )
+          } else {
+            await expect(page.locator('#groups-row-1')).toHaveCount(0)
+          }
+        }
+      } finally {
+        await payload.delete({ id: doc.id, collection: autosavePostsSlug, overrideAccess: true })
+      }
+    })
+  }
+
   test('should retain collapsed rows, custom fields and local-only row state after an authoritative merge', async ({
     page,
   }) => {
@@ -292,7 +390,7 @@ test.describe('Authoritative autosave rows', () => {
       await waitForFormReady(page)
 
       const row = page.locator('#groups-row-0')
-      const localState = row.getByRole('button', { name: 'Keep local row state' })
+      const localState = row.getByRole('button', { name: 'Keep local row state' }).first()
       const toggle = row.locator('.collapsible__toggle').first()
 
       await localState.click()

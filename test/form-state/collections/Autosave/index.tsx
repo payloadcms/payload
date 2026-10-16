@@ -54,7 +54,18 @@ export const AutosavePostsCollection: CollectionConfig = {
       blocks: [
         {
           slug: 'text',
-          fields: [{ name: 'text', type: 'text' }],
+          fields: [
+            { name: 'text', type: 'text' },
+            {
+              name: 'localState',
+              type: 'ui',
+              admin: {
+                components: {
+                  Field: './collections/Autosave/LocalRowState/index.js#LocalRowState',
+                },
+              },
+            },
+          ],
         },
         {
           slug: 'number',
@@ -92,7 +103,18 @@ export const AutosavePostsCollection: CollectionConfig = {
         {
           name: 'items',
           type: 'array',
-          fields: [{ name: 'text', type: 'text' }],
+          fields: [
+            { name: 'text', type: 'text' },
+            {
+              name: 'localState',
+              type: 'ui',
+              admin: {
+                components: {
+                  Field: './collections/Autosave/LocalRowState/index.js#LocalRowState',
+                },
+              },
+            },
+          ],
           hooks: {
             beforeChange: [
               ({ value }) =>
@@ -107,7 +129,13 @@ export const AutosavePostsCollection: CollectionConfig = {
         beforeChange: [
           ({ value }) =>
             Array.isArray(value)
-              ? value.filter((group) => group.text !== 'Remove on server')
+              ? value
+                  .filter((group) => group.text !== 'Remove on server')
+                  .sort(
+                    (left, right) =>
+                      Number(right.text === 'Move to start on server') -
+                      Number(left.text === 'Move to start on server'),
+                  )
               : value,
         ],
       },
