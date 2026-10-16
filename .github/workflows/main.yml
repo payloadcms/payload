@@ -465,7 +465,7 @@ jobs:
         # `visual-regression` job (gated on `needs_visual`), never by this unconditional matrix —
         # otherwise a `@visual` test would also run here on every PR that touches test/packages
         # code, including under the tanstack-start framework it was never baselined against.
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}.json pnpm test:e2e:prod:server:run:noturbo ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel --grep-invert="@visual"${{ matrix.parallel == false && ' --workers=1' || '' }}
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}.json pnpm test:e2e:prod:server:run ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel --grep-invert="@visual"${{ matrix.parallel == false && ' --workers=1' || '' }}
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}.json
           NEXT_TELEMETRY_DISABLED: 1
