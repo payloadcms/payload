@@ -428,6 +428,32 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         expect(challenge.headers.get('WWW-Authenticate')).toContain('scope="openid email"')
         expect(metadata.scopes_supported).toEqual(['openid', 'email'])
       })
+      it('should tell auth strategies which address MCP access tokens are for', async ({
+        getApiKey,
+        mcp,
+        payload,
+      }) => {
+        enableOAuth(payload, {
+          authorizationServers: ['https://auth.example.com'],
+          resource: 'https://mcp.example.com/api/mcp',
+        })
+        const apiKeyStrategy = payload.authStrategies.find(({ name }) => name === 'users-api-key')!
+        const { authenticate } = apiKeyStrategy
+        const resources: Array<string | undefined> = []
+        const spy = vi.spyOn(apiKeyStrategy, 'authenticate').mockImplementation((args) => {
+          resources.push(args.req?.context.mcp?.resource)
+          return authenticate(args)
+        })
+        onTestFinished(() => spy.mockRestore())
+
+        await mcp.rawPost({
+          apiKey: await getApiKey(),
+          body: { id: 1, jsonrpc: '2.0', method: 'tools/list', params: {} },
+        })
+
+        // plugin-mcp's own check, which decides the MCP user, runs last
+        expect(resources.at(-1)).toBe('https://mcp.example.com/api/mcp')
+      })
       it('should run requests as the authenticated user', async ({
         getLimitedApiKey,
         mcp,
