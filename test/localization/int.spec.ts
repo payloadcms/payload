@@ -5716,13 +5716,10 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
           payload,
         }) => {
           const doc = await payload.create({
-            collection: allFieldsLocalizedSlug,
+            collection: localizedDraftsSlug,
             data: {
               _status: 'published',
-              nonLocalizedGroup: {
-                nonLocalizedText: 'shared published all-locale draft',
-              },
-              text: 'english published all-locale draft',
+              title: 'english published all-locale draft',
             },
             locale: defaultLocale,
             overrideAccess: true,
@@ -5730,10 +5727,10 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
 
           await payload.update({
             id: doc.id,
-            collection: allFieldsLocalizedSlug,
+            collection: localizedDraftsSlug,
             data: {
               _status: 'published',
-              text: 'spanish published all-locale draft',
+              title: 'spanish published all-locale draft',
             },
             locale: spanishLocale,
             overrideAccess: true,
@@ -5741,12 +5738,10 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
 
           await payload.update({
             id: doc.id,
-            collection: allFieldsLocalizedSlug,
+            collection: localizedDraftsSlug,
             data: {
               _status: 'draft',
-              localizedArray: null,
-              localizedBlocks: null,
-              text: {
+              title: {
                 en: 'english draft all-locale draft',
                 es: 'spanish draft all-locale draft',
               },
@@ -5758,7 +5753,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
 
           const allLocalesDraft = await payload.findByID({
             id: doc.id,
-            collection: allFieldsLocalizedSlug,
+            collection: localizedDraftsSlug,
             draft: true,
             locale: 'all',
             overrideAccess: true,
