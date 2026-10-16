@@ -168,6 +168,9 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
 
+      # - name: Check formatting
+      #   run: pnpm format:check
+
       - name: Lint TypeScript/JavaScript
         run: pnpm lint -- --quiet
         env:

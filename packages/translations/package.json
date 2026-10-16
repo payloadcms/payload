@@ -64,7 +64,6 @@
     "@types/react-dom": "19.3.0",
     "dotenv": "catalog:",
     "esbuild": "0.27.1",
-    "prettier": "3.5.3",
     "typescript": "catalog:"
   },
   "publishConfig": {

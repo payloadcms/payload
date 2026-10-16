@@ -47,6 +47,7 @@
     "@payloadcms/plugin-import-export": "workspace:*",
     "@payloadcms/plugin-multi-tenant": "workspace:*",
     "@payloadcms/richtext-lexical": "workspace:*",
-    "@payloadcms/translations": "workspace:*"
+    "@payloadcms/translations": "workspace:*",
+    "oxfmt": "0.73.0"
   }
 }
