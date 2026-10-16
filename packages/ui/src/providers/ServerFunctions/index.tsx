@@ -30,6 +30,8 @@ import type {
   SchedulePublishHandlerArgs,
 } from '../../utilities/schedulePublishHandler.js'
 
+import { buildFormStateRequest } from './buildFormStateRequest.js'
+
 type GetFormStateClient = (
   args: {
     signal?: AbortSignal
@@ -152,7 +154,7 @@ export const ServerFunctionsProvider: React.FC<{
     async (args) =>
       await serverFunction({
         name: 'render-document-slots',
-        args,
+        args: { id: args.id, collectionSlug: args.collectionSlug },
       }),
     [serverFunction],
   )
@@ -165,7 +167,17 @@ export const ServerFunctionsProvider: React.FC<{
         if (!remoteSignal?.aborted) {
           const result = await serverFunction({
             name: 'schedule-publish',
-            args: { ...rest },
+            args: {
+              type: rest.type,
+              date: rest.date ? new Date(rest.date.getTime()) : rest.date,
+              deleteID: rest.deleteID,
+              doc: rest.doc
+                ? { relationTo: rest.doc.relationTo, value: rest.doc.value }
+                : undefined,
+              global: rest.global,
+              localeToPublish: rest.localeToPublish,
+              timezone: rest.timezone,
+            } satisfies SchedulePublishHandlerArgs,
           })
 
           if (!remoteSignal?.aborted) {
@@ -197,7 +209,11 @@ export const ServerFunctionsProvider: React.FC<{
 
       const result = (await serverFunction({
         name: 'get-upcoming-scheduled-publish',
-        args: rest,
+        args: {
+          id: rest.id,
+          collectionSlug: rest.collectionSlug,
+          globalSlug: rest.globalSlug,
+        } satisfies GetUpcomingScheduledPublishHandlerArgs,
       })) as Awaited<ReturnType<typeof getUpcomingScheduledPublishHandler>>
 
       return remoteSignal?.aborted ? [] : result
@@ -207,16 +223,59 @@ export const ServerFunctionsProvider: React.FC<{
 
   const getFormState = useCallback<GetFormStateClient>(
     async (args) => {
-      const { signal: remoteSignal, ...rest } = args || {}
+      const { signal: remoteSignal, ...rest } = args
 
       try {
         if (!remoteSignal?.aborted) {
           const result = (await serverFunction({
             name: 'form-state',
-            args: { fallbackLocale: false, ...rest },
+            args: {
+              id: rest.id,
+              checkForStaleData: rest.checkForStaleData,
+              collectionSlug: rest.collectionSlug,
+              data: rest.data,
+              docPermissions: rest.docPermissions,
+              docPreferences: rest.docPreferences,
+              documentFormState: buildFormStateRequest({ formState: rest.documentFormState }),
+              fallbackLocale: rest.fallbackLocale ?? false,
+              formState: buildFormStateRequest({ formState: rest.formState }),
+              globalSlug: rest.globalSlug,
+              initialBlockData: rest.initialBlockData,
+              initialBlockFormState: buildFormStateRequest({
+                formState: rest.initialBlockFormState,
+              }),
+              language: rest.language,
+              locale: rest.locale,
+              mockRSCs: rest.mockRSCs,
+              operation: rest.operation,
+              originalUpdatedAt: rest.originalUpdatedAt,
+              readOnly: rest.readOnly,
+              renderAllFields: rest.renderAllFields,
+              returnLivePreviewURL: rest.returnLivePreviewURL,
+              returnLockStatus: rest.returnLockStatus,
+              returnPreviewURL: rest.returnPreviewURL,
+              schemaPath: rest.schemaPath,
+              select: rest.select,
+              skipClientConfigAuth: rest.skipClientConfigAuth,
+              skipValidation: rest.skipValidation,
+              updateLastEdited: rest.updateLastEdited,
+              widgetSlug: rest.widgetSlug,
+            } satisfies Parameters<GetFormStateClient>[0],
           })) as Awaited<ReturnType<typeof buildFormStateHandler>> // TODO: infer this type when `strictNullChecks` is enabled
 
           if (!remoteSignal?.aborted) {
+            const file = rest.formState?.file
+
+            if (typeof File !== 'undefined' && result.state?.file) {
+              if (file?.initialValue instanceof File) {
+                result.state.file.initialValue = file.initialValue
+              }
+
+              if (file?.value instanceof File) {
+                result.state.file.value = file.value
+              }
+            }
+
             return result
           }
         }
@@ -231,13 +290,24 @@ export const ServerFunctionsProvider: React.FC<{
 
   const getTableState = useCallback<GetTableStateClient>(
     async (args) => {
-      const { signal: remoteSignal, ...rest } = args || {}
+      const { signal: remoteSignal, ...rest } = args
 
       try {
         if (!remoteSignal?.aborted) {
           const result = (await serverFunction({
             name: 'table-state',
-            args: { fallbackLocale: false, ...rest },
+            args: {
+              collectionSlug: rest.collectionSlug,
+              columns: rest.columns,
+              data: rest.data,
+              docs: rest.docs,
+              enableRowSelections: rest.enableRowSelections,
+              orderableFieldName: rest.orderableFieldName,
+              parent: rest.parent,
+              query: rest.query,
+              renderRowTypes: rest.renderRowTypes,
+              tableAppearance: rest.tableAppearance,
+            } satisfies BuildTableStateArgs,
           })) as Awaited<ReturnType<typeof buildTableStateHandler>> // TODO: infer this type when `strictNullChecks` is enabled
 
           if (!remoteSignal?.aborted) {
@@ -254,15 +324,26 @@ export const ServerFunctionsProvider: React.FC<{
   )
 
   const renderDocument = useCallback<RenderDocumentServerFunctionHookFn>(
-    async (args) => {
-      const { signal: remoteSignal, ...rest } = args || {}
+    async (rest) => {
       try {
         const result = (await serverFunction({
           name: 'render-document',
           args: {
-            fallbackLocale: false,
-            ...rest,
-          } as Parameters<RenderDocumentServerFunctionHookFn>[0],
+            collectionSlug: rest.collectionSlug,
+            disableActions: rest.disableActions,
+            docID: rest.docID,
+            drawerSlug: rest.drawerSlug,
+            initialData: rest.initialData,
+            initialState: buildFormStateRequest({ formState: rest.initialState }),
+            overrideEntityVisibility: rest.overrideEntityVisibility,
+            paramsOverride: rest.paramsOverride,
+            redirectAfterCreate: rest.redirectAfterCreate,
+            redirectAfterDelete: rest.redirectAfterDelete,
+            redirectAfterDuplicate: rest.redirectAfterDuplicate,
+            redirectAfterRestore: rest.redirectAfterRestore,
+            searchParams: rest.searchParams,
+            versions: rest.versions,
+          } satisfies RenderDocumentBaseArgs,
         })) as Awaited<ReturnType<RenderDocumentServerFunctionHookFn>> // TODO: infer this type when `strictNullChecks` is enabled
 
         return result
@@ -275,11 +356,18 @@ export const ServerFunctionsProvider: React.FC<{
 
   const copyDataFromLocale = useCallback<CopyDataFromLocaleClient>(
     async (args) => {
-      const { signal: remoteSignal, ...rest } = args || {}
+      const { signal: remoteSignal, ...rest } = args
 
       const result = (await serverFunction({
         name: 'copy-data-from-locale',
-        args: rest,
+        args: {
+          collectionSlug: rest.collectionSlug,
+          docID: rest.docID,
+          fromLocale: rest.fromLocale,
+          globalSlug: rest.globalSlug,
+          overrideData: rest.overrideData,
+          toLocale: rest.toLocale,
+        } satisfies Omit<CopyDataFromLocaleArgs, 'req'>,
       })) as Data
 
       if (!remoteSignal?.aborted) {
@@ -294,7 +382,14 @@ export const ServerFunctionsProvider: React.FC<{
       try {
         const result = (await serverFunction({
           name: 'render-field',
-          args,
+          args: {
+            name: args.name,
+            hidden: args.hidden,
+            initialValue: args.initialValue,
+            label: args.label,
+            path: args.path,
+            schemaPath: args.schemaPath,
+          } satisfies RenderFieldServerFnArgs,
         })) as RenderFieldServerFnReturnType
 
         return result
@@ -306,13 +401,19 @@ export const ServerFunctionsProvider: React.FC<{
   )
 
   const slugify = useCallback<SlugifyClient>(
-    async (args) => {
-      const { signal: remoteSignal, ...rest } = args || {}
-
+    async (rest) => {
       try {
         const result = (await serverFunction({
           name: 'slugify',
-          args: { ...rest },
+          args: {
+            id: rest.id,
+            collectionSlug: rest.collectionSlug,
+            data: rest.data,
+            globalSlug: rest.globalSlug,
+            locale: rest.locale,
+            path: rest.path,
+            valueToSlugify: rest.valueToSlugify,
+          } satisfies SlugifyServerFunctionArgs,
         })) as Awaited<ReturnType<Slugify>> // TODO: infer this type when `strictNullChecks` is enabled
 
         return result
