@@ -307,8 +307,8 @@ reject.
 
 Clients require each authorization server to match the `issuer` in that server's
 metadata character for character, including any trailing `/`. If the exact value
-is only known at runtime, pass a function instead, for example
-`authorizationServers: async () => [await getIssuer()]`.
+is only known at runtime, or differs per host, pass a function of the request
+instead, for example `authorizationServers: async ({ req }) => [await getIssuer(req)]`.
 
 The plugin does not validate access tokens. Add an auth strategy that turns the
 access token into a Payload user, and MCP runs as that user with access control.

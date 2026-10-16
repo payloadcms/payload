@@ -6,6 +6,7 @@ import {
   OAuthError,
   OAuthErrorCode,
 } from '@modelcontextprotocol/server'
+import { createPayloadRequest, getPayload } from 'payload'
 
 import { getPluginConfig } from '../utils/getPluginConfig.js'
 
@@ -13,8 +14,7 @@ import { getPluginConfig } from '../utils/getPluginConfig.js'
  * Serves the OAuth protected resource metadata (RFC 9728) at `/api/mcp/oauth-protected-resource`.
  * The OAuth challenge links here, so MCP clients find the authorization server without setup.
  */
-export const oauthProtectedResourceEndpoint: PayloadHandler = (req) =>
-  getMetadataResponse({ config: req.payload.config, url: req.url! })
+export const oauthProtectedResourceEndpoint: PayloadHandler = (req) => getMetadataResponse({ req })
 
 /**
  * Serves the same metadata for clients that ignore the challenge's link and only look at
@@ -31,7 +31,9 @@ export const oauthProtectedResourceEndpoint: PayloadHandler = (req) =>
 export const oauthProtectedResourceHandler =
   (config: Promise<SanitizedConfig> | SanitizedConfig) =>
   async (request: Request): Promise<Response> =>
-    getMetadataResponse({ config: await config, url: request.url })
+    getMetadataResponse({
+      req: await createPayloadRequest({ payload: await getPayload({ config }), req: request }),
+    })
 
 /**
  * Answers an unauthenticated MCP request with a challenge linking to the protected resource
@@ -56,13 +58,8 @@ export const getMCPResource = ({ config, url }: { config: SanitizedConfig; url: 
 const getMCPURL = ({ config, url }: { config: SanitizedConfig; url: string }): string =>
   new URL(`${config.routes.api}/mcp`, config.serverURL || url).href
 
-const getMetadataResponse = async ({
-  config,
-  url,
-}: {
-  config: SanitizedConfig
-  url: string
-}): Promise<Response> => {
+const getMetadataResponse = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
+  const { config } = req.payload
   const pluginConfig = getPluginConfig({ config })
 
   if (!pluginConfig.oauth) {
@@ -75,10 +72,10 @@ const getMetadataResponse = async ({
     {
       authorization_servers:
         typeof authorizationServers === 'function'
-          ? await authorizationServers()
+          ? await authorizationServers({ req })
           : authorizationServers,
       bearer_methods_supported: ['header'],
-      resource: getMCPResource({ config, url }),
+      resource: getMCPResource({ config, url: req.url! }),
       scopes_supported: scopes,
     } satisfies OAuthProtectedResourceMetadata,
     // Public document, readable by browser-based MCP clients on any origin
