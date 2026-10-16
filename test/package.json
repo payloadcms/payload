@@ -14,11 +14,10 @@
     "typecheck:app-tanstack": "pnpm -C .. exec tsc --project test/app-tanstack/tsconfig.json && pnpm -C .. exec tsc --project test/admin-bar/app-tanstack/tsconfig.json && pnpm -C .. exec tsc --project test/live-preview/app-tanstack/tsconfig.json"
   },
   "lint-staged": {
-    "**/package.json": "sort-package-json",
-    "*.{md,mdx,yml,json}": "prettier --write",
+    "*.{md,mdx,yml,json}": "oxfmt --no-error-on-unmatched-pattern",
     "*.{js,jsx,ts,tsx}": [
       "eslint --flag v10_config_lookup_from_file --cache --fix",
-      "prettier --write"
+      "oxfmt --no-error-on-unmatched-pattern"
     ],
     "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --ignore-workspace --frozen-lockfile; pnpm run lint --fix\"",
     "tsconfig.json": "node scripts/reset-tsconfig.js"

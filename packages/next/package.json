@@ -85,11 +85,10 @@
     "lint:fix": "eslint . --fix"
   },
   "lint-staged": {
-    "**/package.json": "sort-package-json",
-    "*.{md,mdx,yml,json}": "prettier --write",
+    "*.{md,mdx,yml,json}": "oxfmt --no-error-on-unmatched-pattern",
     "*.{js,jsx,ts,tsx}": [
       "eslint --flag v10_config_lookup_from_file --cache --fix",
-      "prettier --write"
+      "oxfmt --no-error-on-unmatched-pattern"
     ]
   },
   "dependencies": {
