@@ -6,9 +6,9 @@ import { formatAdminURL, PREFERENCE_KEYS } from 'payload/shared'
 
 import type {
   ActivityDocument,
+  ActivityDocumentsArgs,
+  ActivityDocumentsPage,
   DocumentReference,
-  DocumentsPage,
-  DocumentsPageArgs,
 } from '../types.js'
 
 import { formatRelativeDate, getRelativeTimeFormat } from '../../../utilities/formatRelativeDate.js'
@@ -21,19 +21,19 @@ import { documentKey, getDocumentReferences, getValueByPath } from './documents.
 type Reference = { viewedAt?: string } & DocumentReference
 type QueryDoc = { id: number | string; updatedAt?: string } & Record<string, unknown>
 
-export const getDashboardDocumentsHandler: ServerFunction<
-  DocumentsPageArgs,
-  Promise<DocumentsPage>
-> = getDashboardDocuments
+export const getActivityWidgetDocsHandler: ServerFunction<
+  ActivityDocumentsArgs,
+  Promise<ActivityDocumentsPage>
+> = getActivityWidgetDocs
 
-export async function getDashboardDocuments({
+export async function getActivityWidgetDocs({
   excludedCollections = [],
   limit,
   page,
   req,
   shouldIncludePinPlaceholder = false,
   tab,
-}: { req: PayloadRequest } & DocumentsPageArgs): Promise<DocumentsPage> {
+}: { req: PayloadRequest } & ActivityDocumentsArgs): Promise<ActivityDocumentsPage> {
   if (!req.user) {
     throw new UnauthorizedError(req.t)
   }

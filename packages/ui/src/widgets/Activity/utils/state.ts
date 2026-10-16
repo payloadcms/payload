@@ -1,4 +1,4 @@
-import type { DocumentReference, DocumentsPage } from '../types.js'
+import type { ActivityDocumentsPage, DocumentReference } from '../types.js'
 import type { DocumentCache } from './cache.js'
 
 import { createDocumentCache, mergeDocumentPages } from './cache.js'
@@ -6,7 +6,7 @@ import { documentKey } from './documents.js'
 
 export type DocumentState = {
   cache?: DocumentCache
-  initialPage?: DocumentsPage
+  initialPage?: ActivityDocumentsPage
   isStale: boolean
   offset: number
   revision: number
@@ -16,8 +16,8 @@ export type DocumentState = {
 type Action =
   | { cache?: DocumentCache; type: 'restore' }
   | { document: DocumentReference; type: 'remove' }
-  | { initialPage?: DocumentsPage; type: 'reset' }
-  | { offset: number; pages: DocumentsPage[]; type: 'receive' }
+  | { initialPage?: ActivityDocumentsPage; type: 'reset' }
+  | { offset: number; pages: ActivityDocumentsPage[]; type: 'receive' }
   | { offset: number; type: 'show' }
   | { status: DocumentState['status']; type: 'status' }
   | { type: 'refresh' }
@@ -26,7 +26,7 @@ type Action =
 export function createDocumentState({
   initialPage,
 }: {
-  initialPage?: DocumentsPage
+  initialPage?: ActivityDocumentsPage
 }): DocumentState {
   return {
     cache: createDocumentCache({ page: initialPage }),

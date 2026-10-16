@@ -1,7 +1,7 @@
 import React from 'react'
 
 import type { Labels } from '../../types.js'
-import type { RecentDocumentsController } from './useRecentDocuments.js'
+import type { useActivityDocuments } from '../../utils/useActivityDocuments.js'
 
 import { ClockIcon } from '../../../../icons/Clock/index.js'
 import { DocumentList } from '../../components/DocumentList/index.js'
@@ -12,7 +12,7 @@ export function RecentDocuments({
   labels,
   listID,
 }: {
-  documents: RecentDocumentsController
+  documents: ReturnType<typeof useActivityDocuments>
   labels: Labels
   listID: string
 }) {

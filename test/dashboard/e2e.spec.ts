@@ -495,7 +495,7 @@ test.describe('Dashboard', () => {
     await waitForDashboardHydration({ page })
     await expect(widget.locator('.document-card__title')).toHaveText([tickets[0]!.title])
     page.on('request', (request) => {
-      if (request.method() === 'POST' && request.postData()?.includes('get-dashboard-documents')) {
+      if (request.method() === 'POST' && request.postData()?.includes('get-activity-widget-docs')) {
         documentRequests++
       }
     })
@@ -2028,7 +2028,7 @@ async function seedActivityDocuments({
 
 function isActivityRequest({ request }: { request: Request }): boolean {
   return (
-    request.method() === 'POST' && Boolean(request.postData()?.includes('get-dashboard-documents'))
+    request.method() === 'POST' && Boolean(request.postData()?.includes('get-activity-widget-docs'))
   )
 }
 

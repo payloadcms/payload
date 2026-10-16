@@ -1,4 +1,4 @@
-import type { ActivityDocument, DocumentsPage } from '../types.js'
+import type { ActivityDocument, ActivityDocumentsPage } from '../types.js'
 
 import { DOCUMENTS_BATCH_SIZE } from './constants.js'
 
@@ -7,7 +7,11 @@ export type DocumentCache = {
   totalDocs: number
 }
 
-export function createDocumentCache({ page }: { page?: DocumentsPage }): DocumentCache | undefined {
+export function createDocumentCache({
+  page,
+}: {
+  page?: ActivityDocumentsPage
+}): DocumentCache | undefined {
   return page && { batches: { [page.page - 1]: page.items }, totalDocs: page.totalDocs }
 }
 
@@ -18,7 +22,7 @@ export function mergeDocumentPages({
 }: {
   cache?: DocumentCache
   isReplacing: boolean
-  pages: DocumentsPage[]
+  pages: ActivityDocumentsPage[]
 }): DocumentCache {
   const totalDocs = pages[pages.length - 1].totalDocs
   const batches = isReplacing || cache?.totalDocs !== totalDocs ? {} : { ...cache.batches }

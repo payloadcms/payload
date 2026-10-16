@@ -3,14 +3,14 @@ import type { PayloadRequest, WidgetServerProps } from 'payload'
 import { formatAdminURL, PREFERENCE_KEYS } from 'payload/shared'
 import React from 'react'
 
-import type { DocumentsPage, DocumentsTab } from './types.js'
+import type { ActivityDocumentsPage, ActivityDocumentType } from './types.js'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
 import { ActivityWidgetClient } from '../../exports/client/index.js'
 import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
 import { isNavEntityVisible } from '../../utilities/isNavEntityVisible.js'
 import { DOCUMENTS_BATCH_SIZE } from './utils/constants.js'
-import { getDashboardDocuments } from './utils/getDocuments.js'
+import { getActivityWidgetDocs } from './utils/getActivityWidgetDocs.js'
 
 type ActivityWidgetData = {
   excludedCollections?: string[]
@@ -83,10 +83,10 @@ async function getInitialPage({
 }: {
   excludedCollections?: string[]
   req: PayloadRequest
-  tab: DocumentsTab
-}): Promise<DocumentsPage | undefined> {
+  tab: ActivityDocumentType
+}): Promise<ActivityDocumentsPage | undefined> {
   try {
-    return await getDashboardDocuments({
+    return await getActivityWidgetDocs({
       excludedCollections,
       limit: DOCUMENTS_BATCH_SIZE,
       page: 1,

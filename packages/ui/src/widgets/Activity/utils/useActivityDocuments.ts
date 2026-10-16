@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useReducer } from 'react'
 
-import type { DocumentReference, DocumentsPage, DocumentsTab } from '../types.js'
+import type { ActivityDocumentsPage, ActivityDocumentType, DocumentReference } from '../types.js'
 
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { getDocumentPage } from './cache.js'
 import { DOCUMENTS_BATCH_SIZE } from './constants.js'
 import { createDocumentState, documentReducer } from './state.js'
 
-export function useDocuments({
+export function useActivityDocuments({
+  type,
   excludedCollections,
   hasPinPlaceholder = false,
   initialPage,
@@ -15,16 +16,15 @@ export function useDocuments({
   isPaused = false,
   offset,
   pageSize,
-  tab,
 }: {
   excludedCollections?: string[]
   hasPinPlaceholder?: boolean
-  initialPage?: DocumentsPage
+  initialPage?: ActivityDocumentsPage
   isActive: boolean
   isPaused?: boolean
   offset: number
   pageSize: number
-  tab: DocumentsTab
+  type: ActivityDocumentType
 }) {
   const { serverFunction } = useServerFunctions()
   const [state, dispatch] = useReducer(documentReducer, { initialPage }, createDocumentState)
@@ -75,14 +75,14 @@ export function useDocuments({
       missingBatches.map(
         (batch) =>
           serverFunction({
-            name: 'get-dashboard-documents',
+            name: 'get-activity-widget-docs',
             args: {
               excludedCollections,
               limit: DOCUMENTS_BATCH_SIZE,
               page: batch + 1,
-              tab,
+              tab: type,
             },
-          }) as Promise<DocumentsPage>,
+          }) as Promise<ActivityDocumentsPage>,
       ),
     )
       .then((pages) => {
@@ -110,7 +110,7 @@ export function useDocuments({
     offset,
     serverFunction,
     state.revision,
-    tab,
+    type,
   ])
 
   return {

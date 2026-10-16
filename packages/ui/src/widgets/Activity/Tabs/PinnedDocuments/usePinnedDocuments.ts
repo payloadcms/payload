@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
-import type { DocumentReference, DocumentsPage } from '../../types.js'
+import type { ActivityDocumentsPage, DocumentReference } from '../../types.js'
 
-import { useDocuments } from '../../utils/useDocuments.js'
+import { useActivityDocuments } from '../../utils/useActivityDocuments.js'
 import { updatePinnedPreferences } from './preferences.js'
 
 export type PinnedDocumentsController = ReturnType<typeof usePinnedDocuments>
@@ -18,7 +18,7 @@ export function usePinnedDocuments({
   pinsURL,
 }: {
   canAddPin: boolean
-  initialPage?: DocumentsPage
+  initialPage?: ActivityDocumentsPage
   isActive: boolean
   offset: number
   onFocusTab: () => void
@@ -26,22 +26,22 @@ export function usePinnedDocuments({
   pageSize: number
   pinsURL: string
 }) {
-  const [isSaving, setIsSaving] = useState(false)
-  const [hasSaveError, setHasSaveError] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<'error' | 'idle' | 'saving'>('idle')
+  const isSaving = saveStatus === 'saving'
   const [previousInitialPage, setPreviousInitialPage] = useState(initialPage)
-  const documents = useDocuments({
+  const documents = useActivityDocuments({
+    type: 'pinned',
     hasPinPlaceholder: canAddPin,
     initialPage,
     isActive,
     isPaused: isSaving,
     offset,
     pageSize,
-    tab: 'pinned',
   })
 
   if (previousInitialPage !== initialPage) {
     setPreviousInitialPage(initialPage)
-    setHasSaveError(false)
+    setSaveStatus((current) => (current === 'error' ? 'idle' : current))
   }
 
   const savePin = async ({
@@ -57,33 +57,32 @@ export function usePinnedDocuments({
 
     const restore = shouldPin ? undefined : documents.removeDocument({ document })
 
-    setIsSaving(true)
-    setHasSaveError(false)
+    setSaveStatus('saving')
     if (!shouldPin) {
       onFocusTab()
     }
     try {
       await updatePinnedPreferences({ document, shouldPin, url: pinsURL })
+      setSaveStatus('idle')
       documents.refresh()
       if (shouldPin) {
         onPinAdded()
       }
     } catch {
       restore?.()
-      setHasSaveError(true)
+      setSaveStatus('error')
     } finally {
-      setIsSaving(false)
       onFocusTab()
     }
   }
 
   return {
     ...documents,
-    hasSaveError,
+    hasSaveError: saveStatus === 'error',
     isSaving,
     onAdd: ({ document }: { document: DocumentReference }) =>
       savePin({ document, shouldPin: true }),
-    onPickerError: () => setHasSaveError(true),
+    onPickerError: () => setSaveStatus('error'),
     onRemove: ({ document }: { document: DocumentReference }) =>
       savePin({ document, shouldPin: false }),
   }

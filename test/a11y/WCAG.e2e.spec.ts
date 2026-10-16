@@ -1369,7 +1369,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         if (
           shouldFail &&
           route.request().method() === 'POST' &&
-          route.request().postData()?.includes('get-dashboard-documents')
+          route.request().postData()?.includes('get-activity-widget-docs')
         ) {
           await route.abort('failed')
           return

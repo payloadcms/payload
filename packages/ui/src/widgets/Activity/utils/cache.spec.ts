@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import type { DocumentsPage } from '../types.js'
+import type { ActivityDocumentsPage } from '../types.js'
 import type { ActivityDocument } from '../types.js'
 
 import { createDocumentCache, getDocumentPage, mergeDocumentPages } from './cache.js'
@@ -12,8 +12,8 @@ const documents: ActivityDocument[] = Array.from({ length: 20 }, (_, id) => ({
   title: `Document ${id}`,
   typeLabel: 'Posts',
 }))
-const first: DocumentsPage = { items: documents.slice(0, 8), page: 1, totalDocs: 20 }
-const second: DocumentsPage = { items: documents.slice(8, 16), page: 2, totalDocs: 20 }
+const first: ActivityDocumentsPage = { items: documents.slice(0, 8), page: 1, totalDocs: 20 }
+const second: ActivityDocumentsPage = { items: documents.slice(8, 16), page: 2, totalDocs: 20 }
 
 describe('Dashboard document cache', () => {
   it('should page through the server overfetch without missing batches', () => {

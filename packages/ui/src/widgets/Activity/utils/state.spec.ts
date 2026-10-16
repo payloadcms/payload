@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import type { DocumentsPage } from '../types.js'
+import type { ActivityDocumentsPage } from '../types.js'
 
 import { createDocumentState, documentReducer } from './state.js'
 
-const initialPage: DocumentsPage = {
+const initialPage: ActivityDocumentsPage = {
   items: [{ id: 1, collectionSlug: 'posts', href: '/posts/1', title: 'One', typeLabel: 'Posts' }],
   page: 1,
   totalDocs: 1,

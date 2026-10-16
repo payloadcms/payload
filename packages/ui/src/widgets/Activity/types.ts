@@ -16,15 +16,15 @@ export type ActivityDocument = {
   viewedAt?: string
 } & DocumentReference
 
-export type DocumentsTab = 'pinned' | 'recents'
-export type DocumentsPageArgs = {
+export type ActivityDocumentType = 'pinned' | 'recents'
+export type ActivityDocumentsArgs = {
   excludedCollections?: string[]
   limit: number
   page: number
   shouldIncludePinPlaceholder?: boolean
-  tab: DocumentsTab
+  tab: ActivityDocumentType
 }
-export type DocumentsPage = {
+export type ActivityDocumentsPage = {
   items: ActivityDocument[]
   page: number
   totalDocs: number

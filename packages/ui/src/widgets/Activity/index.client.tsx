@@ -2,7 +2,7 @@
 
 import React, { useId, useRef, useState } from 'react'
 
-import type { DocumentsPage, DocumentsTab, Labels } from './types.js'
+import type { ActivityDocumentsPage, ActivityDocumentType, Labels } from './types.js'
 
 import { Button } from '../../elements/Button/index.js'
 import { WidgetCard } from '../WidgetCard/index.js'
@@ -10,14 +10,14 @@ import { Pagination } from './components/Pagination/index.js'
 import { PinnedDocuments } from './Tabs/PinnedDocuments/index.js'
 import { usePinnedDocuments } from './Tabs/PinnedDocuments/usePinnedDocuments.js'
 import { RecentDocuments } from './Tabs/RecentDocuments/index.js'
-import { useRecentDocuments } from './Tabs/RecentDocuments/useRecentDocuments.js'
 import { DOCUMENTS_BATCH_SIZE } from './utils/constants.js'
+import { useActivityDocuments } from './utils/useActivityDocuments.js'
 import { usePageSize } from './utils/usePageSize.js'
 import './index.css'
 
 export type { ActivityDocument } from './types.js'
 
-type View = { offset: number; tab: DocumentsTab }
+type View = { offset: number; tab: ActivityDocumentType }
 
 export function ActivityWidgetClient({
   excludedCollections,
@@ -27,7 +27,7 @@ export function ActivityWidgetClient({
   pinsURL,
 }: {
   excludedCollections?: string[]
-  initialPages?: Partial<Record<DocumentsTab, DocumentsPage>>
+  initialPages?: Partial<Record<ActivityDocumentType, ActivityDocumentsPage>>
   labels: Labels
   pinnableCollections: string[]
   pinsURL: string
@@ -61,7 +61,8 @@ export function ActivityWidgetClient({
     pageSize: windowSize,
     pinsURL,
   })
-  const recents = useRecentDocuments({
+  const recents = useActivityDocuments({
+    type: 'recents',
     excludedCollections,
     initialPage: initialPages?.recents,
     isActive: view.tab === 'recents',
@@ -73,7 +74,7 @@ export function ActivityWidgetClient({
   const loadError = documents.hasLoadError ? labels.loadError : ''
   const saveError = view.tab === 'pinned' && pinned.hasSaveError ? labels.pinnedSaveError : ''
 
-  const selectTab = ({ tab }: { tab: DocumentsTab }) => {
+  const selectTab = ({ tab }: { tab: ActivityDocumentType }) => {
     if (pinned.isSaving) {
       return
     }

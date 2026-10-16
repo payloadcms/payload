@@ -45,7 +45,23 @@
 
   .activity-widget__pin-icon {
     display: flex;
-    color: var(--color-icon-warning);
+    color: var(--color-icon-secondary);
+  }
+
+  .activity-widget__pin-filled {
+    color: var(--color-icon-favorite);
+  }
+
+  .activity-widget__pin-remove {
+    display: none;
+  }
+
+  .activity-widget__pin:is(:hover, :focus-visible):not(:disabled) .activity-widget__pin-filled {
+    display: none;
+  }
+
+  .activity-widget__pin:is(:hover, :focus-visible):not(:disabled) .activity-widget__pin-remove {
+    display: block;
   }
 
   .activity-widget__pin:disabled {
