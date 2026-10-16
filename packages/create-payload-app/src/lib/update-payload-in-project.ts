@@ -72,7 +72,23 @@ export async function updatePayloadInNextProject({
     )
   }
 
+  // The admin is served by `@payloadcms/admin-runtime` from a route handler, which can't coexist with
+  // the Next.js layout and pages it replaces.
+  for (const legacyFile of [
+    'layout.tsx',
+    'admin/[[...segments]]/page.tsx',
+    'admin/[[...segments]]/not-found.tsx',
+  ]) {
+    fse.removeSync(path.resolve(payloadDirPath, legacyFile))
+  }
   copyRecursiveSync(templateSrcDir, payloadDirPath, ['custom.css$'])
+
+  const version = await resolvePackageVersion({ packageName: 'payload', versionOrTag })
+  await installPackages({
+    packageManager: await getPackageManager({ projectDir }),
+    packagesToInstall: [`@payloadcms/admin-runtime@${version}`],
+    projectDir,
+  })
 
   return { message: packageUpdate.message, success: packageUpdate.success }
 }

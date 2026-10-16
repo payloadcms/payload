@@ -9,6 +9,7 @@ export {
   type PartialAdminContext,
 } from '../admin/initAdminContext.js'
 export { applyUserReadAccess } from '../auth/applyUserReadAccess.js'
+export { resolveImportMapFilePath } from '../cli/commands/generateImportMap/utilities/resolveImportMapFilePath.js'
 export { createCLI } from '../cli/index.js'
 export { getCommandInput } from '../cli/runtime/getCommandInput.js'
 export { createSchemaBuildContext } from '../database/createSchemaBuildContext.js'

@@ -52,3 +52,6 @@ node_modules/
 # OpenNext
 .open-next
 .wrangler
+
+# Custom admin components compiled by @payloadcms/admin-runtime
+/.payload

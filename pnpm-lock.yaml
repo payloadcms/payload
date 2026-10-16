@@ -273,6 +273,52 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
+  packages/admin-runtime:
+    dependencies:
+      esbuild:
+        specifier: 0.28.2
+        version: 0.28.2
+    devDependencies:
+      '@payloadcms/richtext-lexical':
+        specifier: workspace:*
+        version: link:../richtext-lexical
+      '@payloadcms/tanstack-start':
+        specifier: workspace:*
+        version: link:../tanstack-start
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:../translations
+      '@payloadcms/ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@types/react':
+        specifier: 19.3.0
+        version: 19.3.0
+      '@types/react-dom':
+        specifier: 19.3.0
+        version: 19.3.0(@types/react@19.3.0)
+      '@vitejs/plugin-react':
+        specifier: ^6.0.0
+        version: 6.0.3(vite@8.3.0(@types/node@25.9.9)(esbuild@0.28.2)(jiti@2.7.0)(sass-embedded@1.105.1)(sass@1.105.1)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+      '@vitejs/plugin-rsc':
+        specifier: ^0.5.21
+        version: 0.5.35(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(vite@8.3.0(@types/node@25.9.9)(esbuild@0.28.2)(jiti@2.7.0)(sass-embedded@1.105.1)(sass@1.105.1)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+      react:
+        specifier: 19.3.1
+        version: 19.3.1
+      react-dom:
+        specifier: 19.3.1
+        version: 19.3.1(react@19.3.1)
+      rsc-html-stream:
+        specifier: 0.0.7
+        version: 0.0.7
+      vite:
+        specifier: '>=8.0.0'
+        version: 8.3.0(@types/node@25.9.9)(esbuild@0.28.2)(jiti@2.7.0)(sass-embedded@1.105.1)(sass@1.105.1)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1)
+
   packages/codemod:
     dependencies:
       '@clack/prompts':
@@ -1899,6 +1945,9 @@ importers:
 
   templates/blank:
     dependencies:
+      '@payloadcms/admin-runtime':
+        specifier: workspace:*
+        version: link:../../packages/admin-runtime
       '@payloadcms/db-mongodb':
         specifier: workspace:*
         version: link:../../packages/db-mongodb
@@ -2087,6 +2136,9 @@ importers:
       '@payloadcms/admin-bar':
         specifier: workspace:*
         version: link:../../packages/admin-bar
+      '@payloadcms/admin-runtime':
+        specifier: workspace:*
+        version: link:../../packages/admin-runtime
       '@payloadcms/db-mongodb':
         specifier: workspace:*
         version: link:../../packages/db-mongodb
@@ -2301,6 +2353,9 @@ importers:
       '@payloadcms/admin-bar':
         specifier: workspace:*
         version: link:../../packages/admin-bar
+      '@payloadcms/admin-runtime':
+        specifier: workspace:*
+        version: link:../../packages/admin-runtime
       '@payloadcms/db-mongodb':
         specifier: workspace:*
         version: link:../../packages/db-mongodb
@@ -2501,6 +2556,9 @@ importers:
       '@payloadcms/admin-bar':
         specifier: workspace:*
         version: link:../packages/admin-bar
+      '@payloadcms/admin-runtime':
+        specifier: workspace:*
+        version: link:../packages/admin-runtime
       '@payloadcms/db-d1-sqlite':
         specifier: workspace:*
         version: link:../packages/db-d1-sqlite
@@ -14320,6 +14378,9 @@ packages:
   router@2.2.0:
     resolution: {integrity: sha512-nLTrUKm2UyiL7rlhapu/Zl45FwNgkZGaCpZbIHajDYgwlJCOzLSk+cIPAnsEqV955GjILJnKbdQC1nVPz+gAYQ==}
     engines: {node: '>= 18'}
+
+  rsc-html-stream@0.0.7:
+    resolution: {integrity: sha512-v9+fuY7usTgvXdNl8JmfXCvSsQbq2YMd60kOeeMIqCJFZ69fViuIxztHei7v5mlMMa2h3SqS+v44Gu9i9xANZA==}
 
   run-applescript@7.1.0:
     resolution: {integrity: sha512-DPe5pVFaAsinSaV6QjQ6gdiedWDcRCbUuiQfQa2wmWV7+xC9bGulGI8+TdRmoFkAPaBXk8CrAbnlY2ISniJ47Q==}
@@ -29127,6 +29188,8 @@ snapshots:
       path-to-regexp: 8.4.2
     transitivePeerDependencies:
       - supports-color
+
+  rsc-html-stream@0.0.7: {}
 
   run-applescript@7.1.0: {}
 

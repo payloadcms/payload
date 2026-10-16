@@ -3,6 +3,7 @@ import { spawn } from 'node:child_process'
 import fs, { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
+import { pathToFileURL } from 'node:url'
 
 import type { SanitizedConfig } from '../../../config/types.js'
 
@@ -50,6 +51,7 @@ export async function build({
     if (!skipTypes) {
       await generateTypes(config, { log: !isJSON })
     }
+    await compilePrebuiltAdminComponents(config)
   } catch (err) {
     console.error('Pre-build generation failed:')
     console.error(err)
@@ -180,6 +182,23 @@ export function resolveBuildCommand({
 }): { args: string[]; bin: string } {
   const bin = framework === 'next' ? resolveNextBin(cwd) : resolveViteBin(cwd)
   return { args: ['build', ...forwardedArgs], bin }
+}
+
+/**
+ * Apps that serve the admin from the prebuilt `@payloadcms/admin-runtime` compile their custom
+ * components here, so that production never has to.
+ */
+async function compilePrebuiltAdminComponents(config: SanitizedConfig): Promise<void> {
+  let runtimePath: string
+  try {
+    runtimePath = createRequire(path.join(process.cwd(), 'package.json')).resolve(
+      '@payloadcms/admin-runtime',
+    )
+  } catch {
+    return
+  }
+  const { compileCustomComponents } = await import(pathToFileURL(runtimePath).href)
+  await compileCustomComponents({ config })
 }
 
 function isFramework(value: string): value is Framework {

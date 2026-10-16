@@ -18,6 +18,7 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
+    "@payloadcms/admin-runtime": "workspace:*",
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/next": "workspace:*",
     "@payloadcms/plugin-mcp": "workspace:*",
