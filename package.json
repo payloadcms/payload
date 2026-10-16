@@ -207,6 +207,7 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "rimraf": "6.0.1",
+    "seroval": "1.6.8",
     "sharp": "0.35.4",
     "shelljs": "0.8.5",
     "slash": "3.0.0",
