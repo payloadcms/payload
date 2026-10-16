@@ -453,7 +453,12 @@ export const Form: React.FC<FormProps> = (props) => {
             }
           }
 
-          setSubmitted(false)
+          // A submit that skipped validation cannot know the form is valid, so it
+          // must not clear the submitted state. Otherwise a successful autosave
+          // or draft save would hide validation errors from a failed publish.
+          if (!skipValidation) {
+            setSubmitted(false)
+          }
           setProcessing(false)
 
           if (redirect) {
