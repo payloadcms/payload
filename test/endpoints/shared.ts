@@ -8,6 +8,8 @@ export const applicationEndpoint = 'path'
 
 export const rootEndpoint = 'root'
 
+export const userEndpoint = 'user'
+
 export const noEndpointsCollectionSlug = 'no-endpoints'
 
 export const noEndpointsGlobalSlug = 'global-no-endpoints'

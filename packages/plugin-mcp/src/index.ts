@@ -49,8 +49,9 @@ export const mcpPlugin = definePlugin<MCPPluginConfig>({
       ...config,
       endpoints: [
         ...(config.endpoints ?? []),
-        // Payload prefixes /api, so the full path is /api/mcp.
-        { handler: mcpEndpoint, method: 'post', path: '/mcp' },
+        // Payload prefixes /api, so the full path is /api/mcp. getAuthorizedMCP authenticates the
+        // request with dev auto-login turned off, so Payload doesn't authenticate it first.
+        { disableAuth: true, handler: mcpEndpoint, method: 'post', path: '/mcp' },
         // Streamable HTTP's optional server=>client GET stream. We don't offer
         // one, so answer 405 per spec-— clients then skip it cleanly
         {
