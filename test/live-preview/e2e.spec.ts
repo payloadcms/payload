@@ -180,6 +180,55 @@ describe('Live Preview', () => {
     }
   })
 
+  test('should hide collection fields while live previewing at narrow viewport widths', async () => {
+    const originalViewport = page.viewportSize()
+
+    try {
+      await page.setViewportSize({ height: 900, width: 940 })
+      await navigateToDoc(page, pagesURLUtil)
+      await toggleLivePreview(page, { targetState: 'on' })
+
+      const titleField = page.locator('#field-title')
+
+      await expect(titleField).toBeHidden()
+      await toggleLivePreview(page, { targetState: 'off' })
+      await expect(titleField).toBeVisible()
+    } finally {
+      if (originalViewport) {
+        await page.setViewportSize(originalViewport)
+      }
+    }
+  })
+
+  test('should keep initial collection live preview controls in a narrow viewport', async () => {
+    const originalViewport = page.viewportSize()
+
+    try {
+      await page.setViewportSize({ height: 900, width: 940 })
+      await navigateToDoc(page, pagesURLUtil)
+      await toggleLivePreview(page, { targetState: 'on' })
+
+      const expandButton = page.getByRole('button', { name: 'Expand' })
+      const openInNewWindowButton = page.getByRole('button', {
+        name: 'Open in new window',
+      })
+
+      for (const button of [expandButton, openInNewWindowButton]) {
+        const box = await button.boundingBox()
+        const viewport = page.viewportSize()
+
+        expect(box).not.toBeNull()
+        expect(viewport).not.toBeNull()
+        expect(box!.x).toBeGreaterThanOrEqual(0)
+        expect(box!.x + box!.width).toBeLessThanOrEqual(viewport!.width)
+      }
+    } finally {
+      if (originalViewport) {
+        await page.setViewportSize(originalViewport)
+      }
+    }
+  })
+
   test('collection — does not render live preview when creating a new doc', async () => {
     await page.goto(pagesURLUtil.create)
     await expect(page.locator('button#live-preview-toggler')).toBeHidden()
