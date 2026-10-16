@@ -374,6 +374,7 @@
 
   .react-datepicker__month-container {
     position: relative;
+    width: calc(var(--spacer-5) * 8);
   }
 
   .react-datepicker__month {
@@ -430,13 +431,15 @@
     white-space: nowrap;
     margin-bottom: 0;
     background-color: transparent;
-    padding: var(--spacer-2);
-    padding-bottom: 0;
+    padding: var(--spacer-2) var(--spacer-1) 0;
     border-top: var(--stroke-width-small) solid var(--color-border);
     width: 100%;
   }
 
+  .react-datepicker__day-names,
   .react-datepicker__week {
+    display: flex;
+    justify-content: space-between;
     white-space: nowrap;
   }
 
