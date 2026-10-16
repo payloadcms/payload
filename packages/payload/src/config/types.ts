@@ -496,6 +496,11 @@ export type PayloadHandler = (req: PayloadRequest) => Promise<Response> | Respon
 export type Endpoint = {
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
+  /**
+   * Skip Payload's authentication before the handler runs, so `req.user` is `null`. Use this when
+   * the handler authenticates the request itself, e.g. with `req.payload.auth()`.
+   */
+  disableAuth?: boolean
 
   /**
    * Middleware that will be called when the path/method matches
