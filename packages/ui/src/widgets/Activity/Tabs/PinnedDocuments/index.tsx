@@ -3,6 +3,7 @@ import React, { useId } from 'react'
 import type { Labels } from '../../types.js'
 import type { PinnedDocumentsController } from './usePinnedDocuments.js'
 
+import { LineIcon } from '../../../../icons/Line/index.js'
 import { PinIcon } from '../../../../icons/Pin/index.js'
 import { DocumentList } from '../../components/DocumentList/index.js'
 import { EmptyState } from '../../components/EmptyState/index.js'
@@ -73,7 +74,8 @@ export function PinnedDocuments({
           type="button"
         >
           <span aria-hidden="true" className="activity-widget__pin-icon">
-            <PinIcon isFilled />
+            <PinIcon className="activity-widget__pin-filled" isFilled />
+            <LineIcon className="activity-widget__pin-remove" size={16} />
           </span>
         </button>
       )}
