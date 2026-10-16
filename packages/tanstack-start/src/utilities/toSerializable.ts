@@ -15,11 +15,6 @@ export type SerializableRecord = Record<string, unknown> & SerializableExtension
  * the data through this function before returning from a `createServerFn`
  * handler keeps the transfer safe.
  *
- * For server functions whose payloads contain React elements (e.g. the
- * shared `form-state` / `render-list` / `render-document` handlers), use
- * `serializeForRsc` instead — it converts elements into RSC handles rather
- * than stripping them.
- *
  * Uses a WeakMap cache so that shared object references (e.g. the same array
  * referenced by both `doc.hasMany` and `formState.hasMany.value`) are
  * returned correctly instead of being dropped as "already seen".
