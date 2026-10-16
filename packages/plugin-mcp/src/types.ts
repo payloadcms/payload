@@ -309,6 +309,12 @@ export type MCPPluginConfig = {
      * @default the absolute URL of `/api/mcp`, based on `serverURL` or the request URL
      */
     resource?: string
+    /**
+     * Scopes MCP clients should request, e.g. `['openid', 'email', 'profile']`. Without them,
+     * clients request none, which some authorization servers reject or answer with a token that
+     * doesn't identify the user.
+     */
+    scopes?: string[]
   }
   /**
    * Replace the default MCP authorization resolver.

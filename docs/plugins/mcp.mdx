@@ -295,9 +295,15 @@ mcpPlugin({
     authorizationServers: ['https://auth.example.com'],
     // Optional. Defaults to the absolute URL of /api/mcp.
     resource: 'https://example.com/api/mcp',
+    // Optional. The scopes clients should request.
+    scopes: ['openid', 'email', 'profile'],
   },
 })
 ```
+
+Set `scopes` to what your authorization server needs to issue a token that
+identifies the user. Without it, clients request no scopes, which some servers
+reject.
 
 Clients require each authorization server to match the `issuer` in that server's
 metadata character for character, including any trailing `/`. If the exact value
