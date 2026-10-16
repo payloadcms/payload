@@ -239,7 +239,12 @@ export const ExampleCollection: CollectionConfig = {
     // highlight-line
     slugField({
       overrides: (defaultField) => {
-        defaultField.fields[1].label = 'Custom Slug Label'
+        const slugTextField = defaultField.fields[1]
+
+        if (slugTextField?.type === 'text') {
+          slugTextField.label = 'Custom Slug Label'
+        }
+
         return defaultField
       },
     }),

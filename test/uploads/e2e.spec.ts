@@ -381,7 +381,13 @@ describe('Uploads', () => {
 
     await expect(filename).toHaveValue('ios-image.jpeg')
 
-    await saveDocAndAssert(page)
+    await saveDocAndAssert(page, '#action-save', 'success', {
+      waitForAfterSave: async () => {
+        const progressBar = page.locator('.progress-bar')
+        await expect(progressBar).toBeVisible()
+        await expect(progressBar).toBeHidden()
+      },
+    })
   })
 
   test('should properly convert avif image to png', async () => {

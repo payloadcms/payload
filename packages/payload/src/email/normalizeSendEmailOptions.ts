@@ -1,4 +1,4 @@
-import type { Address } from 'nodemailer/lib/mailer'
+type Address = { address: string; name?: string }
 
 /**
  * @todo: Remove in v4.

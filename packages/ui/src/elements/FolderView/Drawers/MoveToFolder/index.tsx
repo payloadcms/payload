@@ -19,7 +19,6 @@ import { useDocumentDrawer } from '../../../DocumentDrawer/index.js'
 import { Drawer } from '../../../Drawer/index.js'
 import { DrawerActionHeader } from '../../../DrawerActionHeader/index.js'
 import { DrawerContentContainer } from '../../../DrawerContentContainer/index.js'
-import { ListCreateNewDocInFolderButton } from '../../../ListHeader/TitleActions/ListCreateNewDocInFolderButton.js'
 import { LoadingOverlay } from '../../../Loading/index.js'
 import { NoListResults } from '../../../NoListResults/index.js'
 import { Translation } from '../../../Translation/index.js'
@@ -102,7 +101,7 @@ function LoadFolderData(props: MoveToFolderDrawerProps) {
         setFolderResultsComponent(result.FolderResultsComponent || null)
         setFolderID(folderIDToPopulate)
         setHasLoaded(true)
-      } catch (e) {
+      } catch (_error) {
         setBreadcrumbs([])
         setSubfolders([])
         setDocuments([])
@@ -178,6 +177,8 @@ function Content({
     useDocumentDrawer({
       collectionSlug: folderCollectionSlug,
     })
+  const newFolderAssignedCollections =
+    folderID == null ? props.folderAssignedCollections : folderType
 
   const getSelectedFolder = React.useCallback((): {
     id: null | number | string
@@ -286,36 +287,34 @@ function Content({
           ]}
         />
         {subfolders.length > 0 && (
-          <>
-            <Button
-              buttonStyle="pill"
-              className={`${baseClass}__add-folder-button`}
-              margin={false}
-              onClick={() => {
-                openFolderDrawer()
-              }}
-            >
-              {t('fields:addLabel', {
-                label: getTranslation(folderCollectionConfig.labels?.singular, i18n),
-              })}
-            </Button>
-            <FolderDocumentDrawer
-              initialData={{
-                [folderFieldName]: folderID,
-                folderType,
-              }}
-              onSave={(result) => {
-                void onCreateSuccess({
-                  collectionSlug: folderCollectionConfig.slug,
-                  doc: result.doc,
-                })
-                closeFolderDrawer()
-              }}
-              redirectAfterCreate={false}
-            />
-          </>
+          <Button
+            buttonStyle="pill"
+            className={`${baseClass}__add-folder-button`}
+            margin={false}
+            onClick={() => {
+              openFolderDrawer()
+            }}
+          >
+            {t('fields:addLabel', {
+              label: getTranslation(folderCollectionConfig.labels?.singular, i18n),
+            })}
+          </Button>
         )}
       </div>
+      <FolderDocumentDrawer
+        initialData={{
+          [folderFieldName]: folderID,
+          folderType: newFolderAssignedCollections,
+        }}
+        onSave={(result) => {
+          void onCreateSuccess({
+            collectionSlug: folderCollectionConfig.slug,
+            doc: result.doc,
+          })
+          closeFolderDrawer()
+        }}
+        redirectAfterCreate={false}
+      />
 
       <DrawerContentContainer className={`${baseClass}__body-section`}>
         {subfolders.length > 0 ? (
@@ -323,16 +322,17 @@ function Content({
         ) : (
           <NoListResults
             Actions={[
-              <ListCreateNewDocInFolderButton
-                buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
-                buttonSize="medium"
+              <Button
                 buttonStyle="primary"
-                collectionSlugs={[folderCollectionSlug]}
-                folderAssignedCollections={props.folderAssignedCollections}
+                className={`${baseClass}__create-folder-button`}
                 key="create-folder"
-                onCreateSuccess={onCreateSuccess}
-                slugPrefix="create-new-folder-from-drawer--no-results"
-              />,
+                onClick={() => {
+                  openFolderDrawer()
+                }}
+                size="medium"
+              >
+                {`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
+              </Button>,
             ]}
             Message={
               <>

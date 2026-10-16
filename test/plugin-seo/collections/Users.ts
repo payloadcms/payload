@@ -7,6 +7,7 @@ export const Users: CollectionConfig = {
     useAsTitle: 'email',
   },
   access: {
+    admin: ({ req }) => req.user?.email !== 'non-admin@example.com',
     read: () => true,
   },
   fields: [

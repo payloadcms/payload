@@ -59,7 +59,7 @@ import { goToNextPage, goToPreviousPage } from '../../../__helpers/e2e/goToNextP
 import { goToFirstCell } from '../../../__helpers/e2e/navigateToDoc.js'
 import { deletePreferences } from '../../../__helpers/e2e/preferences.js'
 import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
-import { closeListDrawer } from '../../../__helpers/e2e/toggleListDrawer.js'
+import { closeListDrawer, openListDrawer } from '../../../__helpers/e2e/toggleListDrawer.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
@@ -208,12 +208,13 @@ describe('List View', () => {
 
       const drawerButton = page.locator('button', { hasText: 'Select Posts' })
       await expect(drawerButton).toBeVisible()
-      await drawerButton.click()
 
-      const drawer = page.locator('.drawer__content')
-      await expect(drawer).toBeVisible()
+      const drawer = await openListDrawer({
+        openDrawer: () => drawerButton.click(),
+        page,
+      })
 
-      const createButton = page.locator('button', { hasText: 'Create New' })
+      const createButton = drawer.locator('button', { hasText: 'Create New' })
       await expect(createButton).toBeHidden()
     })
   })
@@ -1668,13 +1669,10 @@ describe('List View', () => {
       const selectButton = page.locator('button:has-text("Select posts")')
       await selectButton.waitFor({ state: 'visible' })
 
-      await selectButton.click()
-
-      await wait(1000)
-
-      const listDrawer = page.locator('.list-drawer.drawer--is-open')
-      await listDrawer.waitFor({ state: 'visible' })
-      await expect(listDrawer).toBeVisible()
+      const listDrawer = await openListDrawer({
+        openDrawer: () => selectButton.click(),
+        page,
+      })
 
       await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 10')
       await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(10)
@@ -1691,9 +1689,11 @@ describe('List View', () => {
 
       // Reopen the drawer
       await selectButton.waitFor({ state: 'visible' })
-      await selectButton.click()
-      await listDrawer.waitFor({ state: 'visible' })
-      await expect(listDrawer).toBeVisible()
+      await openListDrawer({
+        drawer: listDrawer,
+        openDrawer: () => selectButton.click(),
+        page,
+      })
 
       await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 5')
       await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(5)
@@ -2052,9 +2052,10 @@ describe('List View', () => {
 
     await page.goto(url.edit(id))
 
-    await page.locator('#open-custom-list-drawer').click()
-    const drawer = page.locator('[id^=list-drawer_1_]')
-    await expect(drawer).toBeVisible()
+    const drawer = await openListDrawer({
+      openDrawer: () => page.locator('#open-custom-list-drawer').click(),
+      page,
+    })
 
     await expect(drawer.locator('.table > table > tbody > tr')).toHaveCount(1)
 
@@ -2222,14 +2223,15 @@ describe('List View', () => {
       })
 
       await page.goto(formatDocURLUrl.list)
+      await expect(page).toHaveURL(/depth=1&limit=10/)
 
       const selectButton = page.locator('button:has-text("Select format doc")')
       await selectButton.waitFor({ state: 'visible' })
-      await selectButton.click()
 
-      const listDrawer = page.locator('.list-drawer.drawer--is-open')
-      await listDrawer.waitFor({ state: 'visible' })
-      await expect(listDrawer).toBeVisible()
+      const listDrawer = await openListDrawer({
+        openDrawer: () => selectButton.click(),
+        page,
+      })
 
       await expect(listDrawer.locator('table tbody tr')).toHaveCount(2)
 

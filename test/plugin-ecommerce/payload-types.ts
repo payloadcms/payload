@@ -439,7 +439,14 @@ export interface Transaction {
     country?: string | null;
     phone?: string | null;
   };
-  status: 'pending' | 'succeeded' | 'failed' | 'cancelled' | 'expired' | 'refunded';
+  status:
+    | 'pending'
+    | 'processing'
+    | 'succeeded'
+    | 'failed'
+    | 'cancelled'
+    | 'expired'
+    | 'refunded';
   customer?: (string | null) | User;
   customerEmail?: string | null;
   order?: (string | null) | Order;

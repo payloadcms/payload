@@ -13,7 +13,7 @@ import { defaults } from 'payload'
 import { formatAdminURL, wait } from 'payload/shared'
 import { setTimeout } from 'timers/promises'
 
-import { POLL_TOPASS_TIMEOUT } from '../../playwright.config.js'
+import { EXPECT_TIMEOUT, POLL_TOPASS_TIMEOUT } from '../../playwright.config.js'
 
 export type AdminRoutes = NonNullable<NonNullable<Config['admin']>['routes']>
 
@@ -220,6 +220,10 @@ export async function saveDocAndAssert(
      * If true, the all toasts will not be dismissed after the save operation.
      */
     disableDismissAllToasts?: boolean
+    /**
+     * If provided, run this wait after submitting the form and before checking for toasts.
+     */
+    waitForAfterSave?: () => Promise<void>
   },
 ): Promise<void> {
   await wait(500) // TODO: Fix this
@@ -229,6 +233,10 @@ export async function saveDocAndAssert(
     await chevronButton.click()
   }
   await page.click(selector, { delay: 100 })
+
+  if (options?.waitForAfterSave) {
+    await options.waitForAfterSave()
+  }
 
   if (expectation === 'success') {
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
@@ -249,12 +257,17 @@ export async function saveDocAndAssert(
 
 export async function closeAllToasts(page: Locator | Page): Promise<void> {
   const toastCloseSelector = '.payload-toast-container button.payload-toast-close-button'
-  let count = await page.locator(toastCloseSelector).count()
+  const closeButtons = page.locator(toastCloseSelector)
 
-  while (count > 0) {
-    await page.locator(toastCloseSelector).first().click()
-    await expect(page.locator(toastCloseSelector)).toHaveCount(count - 1)
-    count--
+  while (true) {
+    const count = await closeButtons.count()
+
+    if (count === 0) {
+      break
+    }
+
+    await closeButtons.first().dispatchEvent('click')
+    await expect.poll(() => closeButtons.count()).toBeLessThan(count)
   }
 }
 
@@ -315,21 +328,19 @@ export async function changeLocale(page: Page, newLocale: string) {
 
     await expect(page).toHaveURL(regexPattern)
 
-    // Wait for form to finish re-initializing after locale change.
-    // When locale changes, the form fetches new data asynchronously.
-    // The Form exposes a data-form-ready attribute that indicates initialization is complete.
-    await waitForFormReady(page)
+    const formReadyIndicator = page.locator('[data-form-ready]')
+    if (await formReadyIndicator.isVisible()) {
+      await waitForFormReady(page)
+    }
   }
 
   await closeLocaleSelector(page)
 }
 
 export async function waitForFormReady(page: Page) {
-  await expect
-    .poll(async () => (await page.locator('[data-form-ready="false"]').count()) === 0, {
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
-    .toBe(true)
+  await expect(page.locator('form[data-form-ready="true"]')).toBeVisible({
+    timeout: POLL_TOPASS_TIMEOUT,
+  })
 }
 
 export function exactText(text: string) {
@@ -378,10 +389,18 @@ export const findTableRow = async (page: Page, title: string): Promise<Locator> 
   return row
 }
 
+/**
+ * The tab button is server-rendered, so a click can land before React has
+ * hydrated and attached its handler. Retry the click until the tab reports
+ * itself as active instead of asserting once and failing on a slow first load.
+ */
 export async function switchTab(page: Page, selector: string) {
-  await page.locator(selector).click()
-  await wait(300)
-  await expect(page.locator(`${selector}.tabs-field__tab-button--active`)).toBeVisible()
+  const activeTab = page.locator(`${selector}.tabs-field__tab-button--active`)
+
+  await expect(async () => {
+    await page.locator(selector).click()
+    await expect(activeTab).toBeVisible({ timeout: EXPECT_TIMEOUT / 2 })
+  }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 }
 
 export const openColumnControls = async (page: Page) => {

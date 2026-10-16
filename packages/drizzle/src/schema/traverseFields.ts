@@ -395,15 +395,18 @@ export const traverseFields = ({
             throwValidationError,
             versionsCustomName: versions,
           })
-
+          const isLocalizedBlockTable =
+            Boolean(isFieldLocalized && adapter.payload.config.localization) ||
+            withinLocalizedArrayOrBlock ||
+            forceLocalized
           if (typeof blocksTableNameMap[blockTableName] === 'undefined') {
             blocksTableNameMap[blockTableName] = 1
           } else if (
             !adapter.rawTables[blockTableName] ||
             !validateExistingBlockIsIdentical({
               block,
-              localized: field.localized,
-              rootTableName,
+              localized: isLocalizedBlockTable,
+              parentIsLocalized,
               table: adapter.rawTables[blockTableName],
               tableLocales: adapter.rawTables[`${blockTableName}${adapter.localesSuffix}`],
             })
@@ -465,12 +468,7 @@ export const traverseFields = ({
               },
             }
 
-            const isLocalized =
-              Boolean(isFieldLocalized && adapter.payload.config.localization) ||
-              withinLocalizedArrayOrBlock ||
-              forceLocalized
-
-            if (isLocalized) {
+            if (isLocalizedBlockTable) {
               baseColumns._locale = {
                 name: '_locale',
                 type: 'enum',
@@ -510,7 +508,7 @@ export const traverseFields = ({
               setColumnID,
               tableName: blockTableName,
               versions,
-              withinLocalizedArrayOrBlock: isLocalized,
+              withinLocalizedArrayOrBlock: isLocalizedBlockTable,
             })
 
             if (subHasLocalizedManyNumberField) {

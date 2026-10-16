@@ -1,0 +1,49 @@
+@layer payload-default {
+  .auth-session-debug {
+    background: rgba(20, 20, 24, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    bottom: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    color: #fff;
+    display: grid;
+    font-family: monospace;
+    font-size: 13px;
+    gap: 6px;
+    line-height: 1.4;
+    padding: 12px 14px;
+    pointer-events: none;
+    position: fixed;
+    right: 16px;
+    z-index: 1000;
+  }
+
+  .auth-session-debug__activity {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+  }
+
+  .auth-session-debug__activity-indicator {
+    border-radius: 50%;
+    height: 8px;
+    width: 8px;
+  }
+
+  .auth-session-debug__activity--waiting .auth-session-debug__activity-indicator {
+    background: #a1a1aa;
+  }
+
+  .auth-session-debug__activity--tracking .auth-session-debug__activity-indicator {
+    background: #f59e0b;
+  }
+
+  .auth-session-debug__activity--will-refresh .auth-session-debug__activity-indicator {
+    background: #22c55e;
+  }
+
+  .auth-session-debug__activity--closed .auth-session-debug__activity-indicator {
+    background: #ef4444;
+  }
+}
+

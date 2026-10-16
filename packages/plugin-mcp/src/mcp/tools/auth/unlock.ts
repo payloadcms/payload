@@ -19,7 +19,8 @@ export const unlockTool = (server: McpServer, req: PayloadRequest, verboseLogs: 
         data: {
           email,
         },
-        overrideAccess: true,
+        overrideAccess: false,
+        req,
       })
 
       if (verboseLogs) {

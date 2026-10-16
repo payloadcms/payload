@@ -1,5 +1,5 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import type { PayloadRequest, SelectType, TypedUser } from 'payload'
+import type { PayloadRequest, PopulateType, SelectType, TypedUser } from 'payload'
 
 import type { MCPPluginConfig } from '../../../types.js'
 
@@ -18,7 +18,8 @@ export const findGlobalTool = (
     depth: number = 0,
     locale?: string,
     fallbackLocale?: string,
-    select?: string,
+    select?: Record<string, unknown>,
+    populate?: Record<string, unknown>,
   ): Promise<{
     content: Array<{
       text: string
@@ -37,25 +38,9 @@ export const findGlobalTool = (
       const findOptions: Parameters<typeof payload.findGlobal>[0] = {
         slug: globalSlug,
         depth,
+        overrideAccess: false,
+        req,
         user,
-      }
-
-      let selectClause: SelectType | undefined
-      if (select) {
-        try {
-          selectClause = JSON.parse(select) as SelectType
-        } catch (_parseError) {
-          payload.logger.warn(`[payload-mcp] Invalid select clause JSON for global: ${select}`)
-          const response = {
-            content: [{ type: 'text' as const, text: 'Error: Invalid JSON in select clause' }],
-          }
-          return (globals?.[globalSlug]?.overrideResponse?.(response, {}, req) || response) as {
-            content: Array<{
-              text: string
-              type: 'text'
-            }>
-          }
-        }
       }
 
       // Add locale parameters if provided
@@ -65,8 +50,11 @@ export const findGlobalTool = (
       if (fallbackLocale) {
         findOptions.fallbackLocale = fallbackLocale
       }
-      if (selectClause) {
-        findOptions.select = selectClause
+      if (select) {
+        findOptions.select = select as SelectType
+      }
+      if (populate) {
+        findOptions.populate = populate as PopulateType
       }
 
       const result = await payload.findGlobal(findOptions)
@@ -120,8 +108,8 @@ ${JSON.stringify(result)}
         description: `${toolSchemas.findGlobal.description.trim()}\n\n${globals?.[globalSlug]?.description || ''}`,
         inputSchema: toolSchemas.findGlobal.parameters.shape,
       },
-      async ({ depth, fallbackLocale, locale, select }) => {
-        return await tool(depth, locale, fallbackLocale, select)
+      async ({ depth, fallbackLocale, locale, populate, select }) => {
+        return await tool(depth, locale, fallbackLocale, select, populate)
       },
     )
   }

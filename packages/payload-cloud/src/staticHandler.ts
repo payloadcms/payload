@@ -1,6 +1,8 @@
 import type { CollectionConfig } from 'payload'
 import type { Readable } from 'stream'
 
+import { isXmlMimeType, UPLOAD_CONTENT_SECURITY_POLICY } from 'payload/internal'
+
 import type { CollectionCachingConfig, PluginOptions, StaticHandler } from './types.js'
 
 import { createKey } from './utilities/createKey.js'
@@ -92,13 +94,21 @@ export const getStaticHandler = ({ cachingOptions, collection, debug }: Args): S
         ETag: object.ETag,
       }
 
-      // Add Content-Security-Policy header for SVG files to prevent executable code
-      if (object.ContentType === 'image/svg+xml') {
-        responseHeaders['Content-Security-Policy'] = "script-src 'none'"
+      // Add Content-Security-Policy header for XML-family files
+      if (isXmlMimeType(object.ContentType)) {
+        responseHeaders['Content-Security-Policy'] = UPLOAD_CONTENT_SECURITY_POLICY
+      }
+
+      let headers = new Headers(responseHeaders)
+      if (
+        typeof collection.upload === 'object' &&
+        typeof collection.upload.modifyResponseHeaders === 'function'
+      ) {
+        headers = collection.upload.modifyResponseHeaders({ headers }) || headers
       }
 
       return new Response(bodyBuffer, {
-        headers: new Headers(responseHeaders),
+        headers,
         status: 200,
       })
     } catch (err: unknown) {

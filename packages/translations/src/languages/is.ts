@@ -57,6 +57,7 @@ export const isTranslations: DefaultTranslationsObject = {
     newPassword: 'Nýtt lykilorð',
     passed: 'Auðkenning tókst',
     passwordResetSuccessfully: 'Lykilorð endursett.',
+    resend: 'Senda aftur',
     resetPassword: 'Endursetja lykilorð',
     resetPasswordExpiration: 'Endursetning lykilorðs rennur út',
     resetPasswordToken: 'Endursetja lykilorðs tóka',

@@ -1,8 +1,12 @@
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { CollectionConfig, PayloadRequest, TypeWithID } from 'payload'
 
 import { getFilePrefix as getDocPrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import { BlobNotFoundError, head } from '@vercel/blob'
-import { getRangeRequestInfo } from 'payload/internal'
+import {
+  getRangeRequestInfo,
+  isXmlMimeType,
+  UPLOAD_CONTENT_SECURITY_POLICY,
+} from 'payload/internal'
 
 import { generateURL } from './generateURL.js'
 
@@ -12,9 +16,9 @@ interface GetFileArgs {
   clientUploadContext?: unknown
   collection: CollectionConfig
   collectionPrefix?: string
+  doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
-  prefixQueryParam?: string
   req: PayloadRequest
   token: string
   useCompositePrefixes?: boolean
@@ -26,9 +30,9 @@ export async function getFile({
   clientUploadContext,
   collection,
   collectionPrefix = '',
+  doc,
   filename,
   incomingHeaders,
-  prefixQueryParam,
   req,
   token,
   useCompositePrefixes = false,
@@ -37,9 +41,11 @@ export async function getFile({
     const docPrefix = await getDocPrefix({
       clientUploadContext,
       collection,
+      collectionPrefix,
+      doc,
       filename,
-      prefixQueryParam,
       req,
+      useCompositePrefixes,
     })
 
     const fileUrl = generateURL({
@@ -79,9 +85,9 @@ export async function getFile({
     headers.append('Content-Type', contentType)
     headers.append('ETag', ETag)
 
-    // Add Content-Security-Policy header for SVG files to prevent executable code
-    if (contentType === 'image/svg+xml') {
-      headers.append('Content-Security-Policy', "script-src 'none'")
+    // Add Content-Security-Policy header for XML-family files
+    if (isXmlMimeType(contentType)) {
+      headers.append('Content-Security-Policy', UPLOAD_CONTENT_SECURITY_POLICY)
     }
 
     if (

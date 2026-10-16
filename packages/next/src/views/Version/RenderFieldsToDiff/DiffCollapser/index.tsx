@@ -11,6 +11,7 @@ import { countChangedFields, countChangedFieldsInRows } from '../utilities/count
 const baseClass = 'diff-collapser'
 
 type Props = {
+  changeCount?: number
   hideGutter?: boolean
   initCollapsed?: boolean
   Label: React.ReactNode
@@ -37,6 +38,7 @@ type Props = {
 )
 
 export const DiffCollapser: React.FC<Props> = ({
+  changeCount: changeCountFromProps,
   children,
   field,
   fields,
@@ -53,9 +55,11 @@ export const DiffCollapser: React.FC<Props> = ({
   const [isCollapsed, setIsCollapsed] = useState(initCollapsed)
   const { config } = useConfig()
 
-  let changeCount = 0
+  let changeCount: number
 
-  if (isIterable) {
+  if (typeof changeCountFromProps === 'number') {
+    changeCount = changeCountFromProps
+  } else if (isIterable) {
     if (!fieldIsArrayType(field) && !fieldIsBlockType(field)) {
       throw new Error(
         'DiffCollapser: field must be an array or blocks field when isIterable is true',

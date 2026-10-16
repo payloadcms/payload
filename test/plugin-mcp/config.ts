@@ -124,6 +124,13 @@ export default buildConfigWithDefaults({
       //   } as MCPAccessSettings
       // },
       overrideApiKeyCollection: (collection) => {
+        collection.access = {
+          create: ({ req }) => Boolean(req.user),
+          delete: ({ req }) => Boolean(req.user),
+          read: ({ req }) => Boolean(req.user),
+          unlock: ({ req }) => Boolean(req.user),
+          update: ({ req }) => Boolean(req.user),
+        }
         collection.fields.push({
           name: 'override',
           type: 'text',

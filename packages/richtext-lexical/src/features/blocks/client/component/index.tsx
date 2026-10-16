@@ -121,6 +121,18 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
 
   const blockType = formData.blockType
 
+  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}`
+  const clientSchemaMap = featureClientSchemaMap['blocks']
+  const blocksField = clientSchemaMap?.[componentMapRenderedBlockPath]?.[0] as
+    | BlocksFieldClient
+    | undefined
+
+  const clientBlock: ClientBlock | undefined = blocksField?.blockReferences
+    ? typeof blocksField.blockReferences[0] === 'string'
+      ? config.blocksMap[blocksField.blockReferences[0]]
+      : blocksField.blockReferences[0]
+    : blocksField?.blocks?.[0]
+
   const { getFormState } = useServerFunctions()
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}.fields`
 
@@ -294,7 +306,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       }
     }
 
-    if (formData && !initialState) {
+    if (clientBlock && formData && !initialState) {
       void awaitInitialState()
     }
 
@@ -317,25 +329,12 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     getDocPreferences,
     parentDocumentFields,
     blockType,
+    clientBlock,
   ])
 
   const [isCollapsed, setIsCollapsed] = React.useState<boolean>(
     initialLexicalFormState?.[formData.id]?.collapsed ?? false,
   )
-
-  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}`
-
-  const clientSchemaMap = featureClientSchemaMap['blocks']
-
-  const blocksField: BlocksFieldClient | undefined = clientSchemaMap?.[
-    componentMapRenderedBlockPath
-  ]?.[0] as BlocksFieldClient
-
-  const clientBlock: ClientBlock | undefined = blocksField.blockReferences
-    ? typeof blocksField?.blockReferences?.[0] === 'string'
-      ? config.blocksMap[blocksField?.blockReferences?.[0]]
-      : blocksField?.blockReferences?.[0]
-    : blocksField?.blocks?.[0]
 
   const { i18n, t } = useTranslation<object, string>()
 

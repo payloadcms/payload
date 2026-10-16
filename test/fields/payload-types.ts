@@ -87,6 +87,7 @@ export interface Config {
     'custom-tab-id': CustomTabId;
     'custom-row-id': CustomRowId;
     'date-fields': DateField;
+    'duplicate-fields': DuplicateField;
     'email-fields': EmailField;
     'radio-fields': RadioField;
     'group-fields': GroupField;
@@ -131,6 +132,7 @@ export interface Config {
     'custom-tab-id': CustomTabIdSelect<false> | CustomTabIdSelect<true>;
     'custom-row-id': CustomRowIdSelect<false> | CustomRowIdSelect<true>;
     'date-fields': DateFieldsSelect<false> | DateFieldsSelect<true>;
+    'duplicate-fields': DuplicateFieldsSelect<false> | DuplicateFieldsSelect<true>;
     'email-fields': EmailFieldsSelect<false> | EmailFieldsSelect<true>;
     'radio-fields': RadioFieldsSelect<false> | RadioFieldsSelect<true>;
     'group-fields': GroupFieldsSelect<false> | GroupFieldsSelect<true>;
@@ -1135,6 +1137,43 @@ export interface DateField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "duplicate-fields".
+ */
+export interface DuplicateField {
+  id: string;
+  text: string;
+  disabledText?: string | null;
+  disabledGroup?: {
+    value?: string | null;
+  };
+  disabledArray?:
+    | {
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  disabledBlocks?:
+    | {
+        value?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'disabledBlock';
+      }[]
+    | null;
+  childDisabledArray?:
+    | {
+        preserved?: string | null;
+        reset?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  disabledLocalizedText?: string | null;
+  disabledHookText?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "email-fields".
  */
 export interface EmailField {
@@ -2050,6 +2089,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'date-fields';
         value: string | DateField;
+      } | null)
+    | ({
+        relationTo: 'duplicate-fields';
+        value: string | DuplicateField;
       } | null)
     | ({
         relationTo: 'email-fields';
@@ -3049,6 +3092,47 @@ export interface DateFieldsSelect<T extends boolean = true> {
   dateWithTimezoneNoDefault_tz?: T;
   dateWithTimezoneWithDisabledColumns?: T;
   dateWithTimezoneWithDisabledColumns_tz?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "duplicate-fields_select".
+ */
+export interface DuplicateFieldsSelect<T extends boolean = true> {
+  text?: T;
+  disabledText?: T;
+  disabledGroup?:
+    | T
+    | {
+        value?: T;
+      };
+  disabledArray?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  disabledBlocks?:
+    | T
+    | {
+        disabledBlock?:
+          | T
+          | {
+              value?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  childDisabledArray?:
+    | T
+    | {
+        preserved?: T;
+        reset?: T;
+        id?: T;
+      };
+  disabledLocalizedText?: T;
+  disabledHookText?: T;
   updatedAt?: T;
   createdAt?: T;
 }
