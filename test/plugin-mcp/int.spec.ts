@@ -382,6 +382,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           const response = await postWithAuthorization(authorization)
           expect(response.status).toBe(401)
           expect(response.headers.get('WWW-Authenticate')).toBe(challenge)
+          expect(response.headers.get('Access-Control-Expose-Headers')).toBe('WWW-Authenticate')
         }
 
         const metadata = await restClient.GET('/mcp/oauth-protected-resource')
