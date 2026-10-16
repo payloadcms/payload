@@ -63,7 +63,7 @@ export const prepareMerge = async ({
     ? withoutBranch(incomingReq)
     : await createPayloadRequest({ branch: false, payload, user })
 
-  if (user && !req.user) {
+  if (user) {
     req.user = user
   }
 
