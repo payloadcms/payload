@@ -26,7 +26,6 @@ import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
-import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -57,6 +56,7 @@ export function DefaultListView(props: ListViewClientProps) {
     disableBulkEdit,
     disableQueryPresets,
     documentLayout,
+    documentThumbnails,
     documentURLs,
     enableRowSelections,
     groupedData,
@@ -67,6 +67,7 @@ export function DefaultListView(props: ListViewClientProps) {
     listMenuItems,
     newDocumentURL,
     NoResults,
+    prefetchedRelationships,
     queryPreset,
     queryPresetPermissions,
     renderedFilters,
@@ -80,7 +81,6 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const { allowCreate, createNewDrawerSlug, isInDrawer } = useListDrawerContext()
   const { setPreference } = usePreferences()
-  const router = useRouter()
 
   const hasCreatePermission =
     allowCreate !== undefined
@@ -134,7 +134,6 @@ export function DefaultListView(props: ListViewClientProps) {
       ...(preferences ?? {}),
       documentLayout: nextLayout,
     }))
-    router.refresh()
   }
 
   const { labels, upload } = collectionConfig
@@ -224,6 +223,16 @@ export function DefaultListView(props: ListViewClientProps) {
       return data?.docs
     }
   }, [data?.docs, isUploadCollection])
+
+  const documentVersion = React.useMemo(() => {
+    const listDocs = isDataGrouped ? groupedData.flatMap((group) => group.data.docs) : docs
+
+    return JSON.stringify(
+      listDocs
+        ?.map((doc) => [doc.id, doc.updatedAt])
+        .sort(([firstID], [secondID]) => String(firstID).localeCompare(String(secondID))),
+    )
+  }, [docs, groupedData, isDataGrouped])
 
   useEffect(() => {
     if (!isInDrawer) {
@@ -400,31 +409,38 @@ export function DefaultListView(props: ListViewClientProps) {
                 />
               </DocumentSelectionProvider>
             ) : docs?.length > 0 ? (
-              shouldRenderGrid && isDataGrouped ? (
-                <GroupedDocumentGrid
-                  collectionSlug={collectionSlug}
-                  documentURLs={documentURLs}
-                  enableRowSelections={enableRowSelections}
-                  groups={groupedData}
-                  hierarchyParentFieldName={hierarchyParentFieldName}
-                  viewType={viewType}
-                />
-              ) : shouldRenderGrid ? (
-                <DocumentGrid
-                  adminRoute={adminRoute}
-                  collectionLabel={collectionLabel}
-                  collectionSlug={collectionSlug}
-                  docs={docs}
-                  documentURLs={documentURLs}
-                  enableRowSelections={enableRowSelections}
-                  hierarchyParentFieldName={hierarchyParentFieldName}
-                  useAsThumbnail={collectionConfig.admin.useAsThumbnail}
-                  useAsTitle={collectionConfig.admin.useAsTitle}
-                  viewType={viewType}
-                />
-              ) : (
-                <RelationshipProvider>{Table}</RelationshipProvider>
-              )
+              <RelationshipProvider
+                documentVersion={documentVersion}
+                prefetchedRelationships={prefetchedRelationships}
+              >
+                {shouldRenderGrid && isDataGrouped ? (
+                  <GroupedDocumentGrid
+                    collectionSlug={collectionSlug}
+                    documentThumbnails={documentThumbnails}
+                    documentURLs={documentURLs}
+                    enableRowSelections={enableRowSelections}
+                    groups={groupedData}
+                    hierarchyParentFieldName={hierarchyParentFieldName}
+                    viewType={viewType}
+                  />
+                ) : shouldRenderGrid ? (
+                  <DocumentGrid
+                    adminRoute={adminRoute}
+                    collectionLabel={collectionLabel}
+                    collectionSlug={collectionSlug}
+                    docs={docs}
+                    documentThumbnails={documentThumbnails}
+                    documentURLs={documentURLs}
+                    enableRowSelections={enableRowSelections}
+                    hierarchyParentFieldName={hierarchyParentFieldName}
+                    useAsThumbnail={collectionConfig.admin.useAsThumbnail}
+                    useAsTitle={collectionConfig.admin.useAsTitle}
+                    viewType={viewType}
+                  />
+                ) : (
+                  Table
+                )}
+              </RelationshipProvider>
             ) : null}
             {/* HierarchyTable handles its own empty state, skip for hierarchy views */}
             {docs?.length === 0 &&

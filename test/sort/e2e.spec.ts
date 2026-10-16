@@ -141,9 +141,9 @@ describe('Sort functionality', () => {
 
     // Dragging the handle with the mouse should not start a drag when not sorted by order
     await moveRow(page, {
+      expected: 'disabled',
       fromIndex: 0,
       toIndex: 2,
-      expected: 'disabled',
     })
 
     await assertRows(['A', 'B', 'C', 'D'])
@@ -228,7 +228,9 @@ async function assertRows(
 ) {
   const { scope } = options
   const table = (scope || page).locator('tbody').first()
-  await table.scrollIntoViewIfNeeded()
+  await expect(async () => {
+    await table.scrollIntoViewIfNeeded()
+  }).toPass()
   // const cellTitle = table.locator('.cell-title > :first-child')
 
   const rows = table.locator('tr')

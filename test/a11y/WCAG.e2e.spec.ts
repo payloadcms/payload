@@ -1430,8 +1430,12 @@ test.describe('WCAG 2.2 Level AA', () => {
           response.request().method() === 'POST',
       )
 
-      await page.getByRole('radio', { name: 'Grid' }).check()
+      const gridToggle = page.getByRole('radio', { name: 'Grid' })
+
+      await gridToggle.focus()
+      await gridToggle.press('Space')
       await gridPreferenceSaved
+      await expect(gridToggle).toBeFocused()
       await expect(page.locator('.document-card').first()).toBeVisible()
 
       try {

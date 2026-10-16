@@ -19,37 +19,36 @@ type Action = AddLoadedDocuments | RequestDocuments
 export function reducer(state: Documents, action: Action): Documents {
   switch (action.type) {
     case 'ADD_LOADED': {
-      const newState = { ...state }
-      if (typeof newState[action.relationTo] !== 'object') {
-        newState[action.relationTo] = {}
-      }
-      const unreturnedIDs = [...action.idsToLoad]
+      const relatedDocuments = { ...state[action.relationTo] }
+      let hasChanges = false
+      const loadedDocuments = new Map(action.docs.map((doc) => [String(doc.id), doc]))
 
-      if (Array.isArray(action.docs)) {
-        action.docs.forEach((doc) => {
-          unreturnedIDs.splice(unreturnedIDs.indexOf(doc.id), 1)
-          newState[action.relationTo][doc.id] = doc
-        })
-      }
-
-      unreturnedIDs.forEach((id) => {
-        newState[action.relationTo][id] = false
+      action.idsToLoad.forEach((id) => {
+        // Only fill pending entries; prefetched documents are already complete.
+        if (relatedDocuments[id] === null) {
+          relatedDocuments[id] = loadedDocuments.get(String(id)) ?? false
+          hasChanges = true
+        }
       })
 
-      return newState
+      return hasChanges ? { ...state, [action.relationTo]: relatedDocuments } : state
     }
 
     case 'REQUEST': {
       const newState = { ...state }
+      let hasChanges = false
 
       action.docs.forEach(({ relationTo, value }) => {
         if (typeof newState[relationTo] !== 'object') {
           newState[relationTo] = {}
         }
-        newState[relationTo][value] = null
+        if (!Object.hasOwn(newState[relationTo], value)) {
+          newState[relationTo] = { ...newState[relationTo], [value]: null }
+          hasChanges = true
+        }
       })
 
-      return newState
+      return hasChanges ? newState : state
     }
 
     default: {

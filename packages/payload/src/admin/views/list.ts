@@ -93,6 +93,8 @@ export type ListViewClientProps = {
   disableBulkEdit?: boolean
   disableQueryPresets?: boolean
   documentLayout?: CollectionPreferences['documentLayout']
+  /** Server-resolved thumbnail URLs shared by table and grid layouts. */
+  documentThumbnails?: Record<string, string>
   /** Server-resolved grid destinations. A null value disables document navigation. */
   documentURLs?: Record<string, null | string>
   enableRowSelections?: boolean
@@ -121,6 +123,11 @@ export type ListViewClientProps = {
    * @deprecated
    */
   preferenceKey?: string
+  /** Selected upload documents shared with the table relationship cache. */
+  prefetchedRelationships?: {
+    documents: Record<string, Record<string, false | TypeWithID>>
+    locale?: string
+  }
   queryPreset?: QueryPreset
   queryPresetPermissions?: SanitizedCollectionPermission
   renderedFilters?: Map<string, React.ReactNode>

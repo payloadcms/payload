@@ -10,6 +10,7 @@ export const MediaAlt: CollectionConfig = {
     {
       name: 'description',
       type: 'text',
+      localized: true,
       required: true,
     },
   ],

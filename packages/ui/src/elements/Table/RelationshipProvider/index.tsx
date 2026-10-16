@@ -1,9 +1,9 @@
 'use client'
-import type { SelectType, TypeWithID } from 'payload'
+import type { ListViewClientProps, SelectType, TypeWithID } from 'payload'
 
 import { appendUploadSelectFields, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { createContext, use, useCallback, useEffect, useReducer, useRef } from 'react'
+import React, { createContext, use, useCallback, useEffect, useReducer } from 'react'
 
 import { useDebounce } from '../../../hooks/useDebounce.js'
 import { useConfig } from '../../../providers/Config/index.js'
@@ -32,10 +32,41 @@ type ListRelationshipContext = {
 
 const Context = createContext({} as ListRelationshipContext)
 
-export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNode }> = ({
+const emptyDocuments: Documents = {}
+
+type RelationshipProviderProps = {
+  readonly children?: React.ReactNode
+  documentVersion?: string
+  prefetchedRelationships?: ListViewClientProps['prefetchedRelationships']
+}
+
+export const RelationshipProvider: React.FC<RelationshipProviderProps> = ({
   children,
+  documentVersion,
+  prefetchedRelationships,
 }) => {
-  const [documents, dispatchDocuments] = useReducer(reducer, {})
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
+  const initialDocuments =
+    prefetchedRelationships?.locale === locale
+      ? (prefetchedRelationships?.documents ?? emptyDocuments)
+      : emptyDocuments
+
+  // Keep the table mounted when a server render sends equivalent list data (for example, after changing columns).
+  const cacheKey = JSON.stringify([locale, documentVersion, initialDocuments])
+
+  return (
+    <RelationshipCache initialDocuments={initialDocuments} key={cacheKey}>
+      {children}
+    </RelationshipCache>
+  )
+}
+
+const RelationshipCache: React.FC<{
+  readonly children?: React.ReactNode
+  initialDocuments: Documents
+}> = ({ children, initialDocuments }) => {
+  const [documents, dispatchDocuments] = useReducer(reducer, initialDocuments)
   const debouncedDocuments = useDebounce(documents, 100)
 
   const {
@@ -48,81 +79,79 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
   const { i18n } = useTranslation()
   const currentLocale = useLocale()
   const locale = currentLocale?.code
-  const prevLocale = useRef(locale)
 
-  const loadRelationshipDocs = useCallback(
-    (reloadAll = false) => {
-      Object.entries(debouncedDocuments).forEach(async ([slug, docs]) => {
-        const idsToLoad: (number | string)[] = []
+  const loadRelationshipDocs = useCallback(() => {
+    if (documents !== debouncedDocuments) {
+      return
+    }
+    Object.entries(debouncedDocuments).forEach(async ([slug, docs]) => {
+      const idsToLoad: (number | string)[] = []
 
-        Object.entries(docs).forEach(([id, value]) => {
-          if (value === null || reloadAll) {
-            idsToLoad.push(id)
-          }
-        })
-
-        if (idsToLoad.length > 0) {
-          const url = formatAdminURL({ apiRoute: api, path: `/${slug}` })
-
-          const params = new URLSearchParams()
-          const select: SelectType = {}
-
-          params.append('depth', '0')
-          params.append('draft', 'true')
-          params.append('limit', '250')
-
-          const collection = collections.find((c) => c.slug === slug)
-
-          if (!collection) {
-            return
-          }
-
-          const fieldToSelect = collection.admin.useAsTitle ?? 'id'
-
-          select[fieldToSelect] = true
-
-          if (collection.upload) {
-            appendUploadSelectFields({ collectionConfig: collection, select })
-          }
-
-          if (locale) {
-            params.append('locale', locale)
-          }
-
-          const idsToString = idsToLoad.map((id) => String(id))
-          params.append('where[id][in]', idsToString.join(','))
-
-          const query = `?${params.toString()}&${qs.stringify({ select })}`
-
-          const result = await fetch(`${url}${query}`, {
-            credentials: 'include',
-            headers: {
-              'Accept-Language': i18n.language,
-            },
-          })
-
-          if (result.ok) {
-            const json = await result.json()
-            if (json.docs) {
-              dispatchDocuments({
-                type: 'ADD_LOADED',
-                docs: json.docs,
-                idsToLoad,
-                relationTo: slug,
-              })
-            }
-          } else {
-            dispatchDocuments({ type: 'ADD_LOADED', docs: [], idsToLoad, relationTo: slug })
-          }
+      Object.entries(docs).forEach(([id, value]) => {
+        if (value === null) {
+          idsToLoad.push(id)
         }
       })
-    },
-    [debouncedDocuments, api, i18n, locale, collections],
-  )
+
+      if (idsToLoad.length > 0) {
+        const url = formatAdminURL({ apiRoute: api, path: `/${slug}` })
+
+        const params = new URLSearchParams()
+        const select: SelectType = {}
+
+        params.append('depth', '0')
+        params.append('draft', 'true')
+        params.append('limit', '250')
+
+        const collection = collections.find((c) => c.slug === slug)
+
+        if (!collection) {
+          return
+        }
+
+        const fieldToSelect = collection.admin.useAsTitle ?? 'id'
+
+        select[fieldToSelect] = true
+
+        if (collection.upload) {
+          appendUploadSelectFields({ collectionConfig: collection, select })
+        }
+
+        if (locale) {
+          params.append('locale', locale)
+        }
+
+        const idsToString = idsToLoad.map((id) => String(id))
+        params.append('where[id][in]', idsToString.join(','))
+
+        const query = `?${params.toString()}&${qs.stringify({ select })}`
+
+        const result = await fetch(`${url}${query}`, {
+          credentials: 'include',
+          headers: {
+            'Accept-Language': i18n.language,
+          },
+        })
+
+        if (result.ok) {
+          const json = await result.json()
+          if (json.docs) {
+            dispatchDocuments({
+              type: 'ADD_LOADED',
+              docs: json.docs,
+              idsToLoad,
+              relationTo: slug,
+            })
+          }
+        } else {
+          dispatchDocuments({ type: 'ADD_LOADED', docs: [], idsToLoad, relationTo: slug })
+        }
+      }
+    })
+  }, [debouncedDocuments, documents, api, i18n, locale, collections])
 
   useEffect(() => {
-    void loadRelationshipDocs(locale && prevLocale.current !== locale)
-    prevLocale.current = locale
+    void loadRelationshipDocs()
   }, [locale, loadRelationshipDocs])
 
   const getRelationships = useCallback(

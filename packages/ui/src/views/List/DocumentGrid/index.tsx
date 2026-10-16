@@ -16,6 +16,7 @@ type DocumentGridProps = {
   readonly collectionLabel: string
   readonly collectionSlug: string
   readonly docs: Record<string, unknown>[]
+  readonly documentThumbnails?: Record<string, string>
   readonly documentURLs?: Record<string, null | string>
   readonly enableRowSelections?: boolean
   readonly hierarchyParentFieldName?: string
@@ -47,6 +48,7 @@ export const DocumentGrid: React.FC<DocumentGridProps> = ({
   collectionLabel,
   collectionSlug,
   docs,
+  documentThumbnails,
   documentURLs,
   enableRowSelections = true,
   hierarchyParentFieldName,
@@ -71,7 +73,10 @@ export const DocumentGrid: React.FC<DocumentGridProps> = ({
       renderItem={(doc) => {
         const id = doc.id
         const documentID = getDocumentID(doc)
-        const thumbnailSrc = getDocumentThumbnail({ doc, useAsThumbnail })
+        const thumbnailSrc =
+          documentThumbnails && Object.hasOwn(documentThumbnails, documentID)
+            ? documentThumbnails[documentID]
+            : getDocumentThumbnail({ doc, useAsThumbnail })
         const title = getDocumentTitle({ doc, useAsTitle })
 
         return (
