@@ -12,7 +12,7 @@ import { rscStream } from 'rsc-html-stream/client'
 import type { NavigateOptions } from './client/navigationStore.js'
 import type { ActionPayload, RscPayload } from './entry.rsc.js'
 
-import { clearReplacedURL, navigate, setNavigator } from './client/navigationStore.js'
+import { clearReplacedURL, navigate, refresh, setNavigator } from './client/navigationStore.js'
 import { registerShared } from './shared/registry.js'
 
 type RootState = { payload: Promise<RscPayload>; url: string } & NavigateOptions
@@ -87,6 +87,23 @@ setServerCallback(async (id, args) => {
   })
   return (await createFromFetch<ActionPayload>(response, { temporaryReferences })).returnValue
 })
+
+// In development, refresh once the config or custom components changed, keeping client state.
+if (globalThis.__PAYLOAD_ENV__?.PAYLOAD_DEV_REFRESH) {
+  let version: string | undefined
+  setInterval(async () => {
+    if (document.visibilityState !== 'visible') {
+      return
+    }
+    const latest = await fetch(`${import.meta.env.BASE_URL}dev`)
+      .then((response) => response.text())
+      .catch(() => version)
+    if (version && latest !== version) {
+      void refresh()
+    }
+    version = latest
+  }, 1000)
+}
 
 window.addEventListener('popstate', () => {
   void navigate(`${window.location.pathname}${window.location.search}`, {

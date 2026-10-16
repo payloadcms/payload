@@ -11,6 +11,8 @@ declare global {
   var __payload_shared__: Partial<Record<SharedEnvironment, SharedRegistry>> | undefined
   /** The host's `payload` modules, set by `src/index.ts`. */
   var __payload_host__: Record<string, unknown> | undefined
+  /** The environment the server renders into the page (see entry.ssr.tsx). */
+  var __PAYLOAD_ENV__: Record<string, string> | undefined
 }
 
 export const registerShared = (env: SharedEnvironment, registry: SharedRegistry) => {

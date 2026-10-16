@@ -23,6 +23,9 @@ if (Reflect.get(process.env, 'NODE_ENV') === 'development') {
   })
 }
 
+/** How many times the host evaluated the admin route, i.e. loaded the config. */
+export const getConfigGeneration = () => handlerCount
+
 export function onAdminHandlerCreated() {
   handlerCount++
 

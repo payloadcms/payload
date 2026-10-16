@@ -13,6 +13,8 @@ export type CustomComponentsOptions = {
 }
 
 export type CustomComponents = {
+  /** When these were compiled. */
+  builtAt: number
   cssURLs: string[]
   importMap: ImportMap
   /** Client reference ID (the browser URL of its chunk) -> compiled SSR module. */
@@ -192,7 +194,11 @@ async function load({
     Object.entries(manifest.ssrFiles).map(([url, file]) => [url, path.join(outDir, file)]),
   )
 
-  return { components: { cssURLs: manifest.cssURLs, importMap, ssrFiles }, inputs, startedAt }
+  return {
+    components: { builtAt: startedAt, cssURLs: manifest.cssURLs, importMap, ssrFiles },
+    inputs,
+    startedAt,
+  }
 }
 
 /**

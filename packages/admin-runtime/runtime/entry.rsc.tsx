@@ -22,7 +22,7 @@ import type { NavIntent } from './server/serverAdapter.js'
 import { LocationProvider, RouterAdapter } from './client/RouterAdapter.js'
 import { serverFunctionContext } from './server/context.js'
 import { compile, createCustomComponentsCompiler } from './server/customComponents.js'
-import { onAdminHandlerCreated } from './server/devConfigReload.js'
+import { getConfigGeneration, onAdminHandlerCreated } from './server/devConfigReload.js'
 import { builtInImportMap } from './server/importMap.js'
 import { createInitAdminContext } from './server/initAdminContext.js'
 import { serveAsset } from './server/serveAsset.js'
@@ -98,8 +98,9 @@ export function createAdminHandler({
     const sanitizedConfig = await configPromise
     const adminRoute = sanitizedConfig.routes.admin
     const assetsURL = `${adminRoute}${ASSETS_PATH}`
+    const devVersionURL = `${assetsURL}dev`
 
-    if (url.pathname.startsWith(assetsURL)) {
+    if (url.pathname.startsWith(assetsURL) && url.pathname !== devVersionURL) {
       const file = url.pathname.slice(assetsURL.length)
       return file.startsWith('custom/')
         ? serveAsset({
@@ -114,6 +115,16 @@ export function createAdminHandler({
     )
     const custom = await (await getCustomComponents)()
     globalThis.__payload_custom_ssr_files__ = custom.ssrFiles
+
+    // Polled by the browser in development (see entry.browser.tsx). Being an admin request, it's also
+    // what makes the host re-evaluate a changed config and the runtime recompile changed components.
+    if (url.pathname === devVersionURL) {
+      return Reflect.get(process.env, 'NODE_ENV') === 'development'
+        ? new Response(`${getConfigGeneration()}:${custom.builtAt}`, {
+            headers: { 'Cache-Control': 'no-store' },
+          })
+        : new Response('Not found', { status: 404 })
+    }
 
     const importMap = { ...builtInImportMap, ...custom.importMap }
     const nav: NavIntent = {}

@@ -56,6 +56,8 @@ export async function renderHTML(rscStream: ReadableStream<Uint8Array>) {
     NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH:
       process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH ?? '',
     NEXT_TRAILING_SLASH: process.env.NEXT_TRAILING_SLASH ?? 'false',
+    // `Reflect.get`: the bundle's static `process.env.NODE_ENV` is pinned to production.
+    PAYLOAD_DEV_REFRESH: Reflect.get(process.env, 'NODE_ENV') === 'development' ? 'true' : '',
   }
   const bootstrapScriptContent = await import.meta.viteRsc.loadBootstrapScriptContent('index')
 
