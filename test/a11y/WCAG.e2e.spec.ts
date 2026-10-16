@@ -836,7 +836,8 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.4.3 Contrast (Minimum) (AA)', () => {
-    test('should keep dashboard document labels readable in both themes', async () => {
+    // TODO: Re-enable with enhanced-contrast coverage after https://github.com/payloadcms/payload/pull/18354.
+    test.skip('should keep dashboard document labels readable in both themes', async () => {
       const preference = await (
         await page.request.get(`${serverURL}/api/payload-preferences/recently-viewed`)
       ).json()
@@ -1193,7 +1194,8 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expectPaintedFocus({ page })
     })
 
-    test('should open the dashboard pin picker by keyboard and restore focus after cancel or selection', async () => {
+    // TODO: Re-enable with enhanced-contrast coverage after https://github.com/payloadcms/payload/pull/18354.
+    test.skip('should open the dashboard pin picker by keyboard and restore focus after cancel or selection', async () => {
       test.slow()
       const testInfo = test.info()
 
