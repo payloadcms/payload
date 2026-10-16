@@ -20,6 +20,12 @@
     letter-spacing: var(--text-body-medium-letter-spacing);
   }
 
+  html[data-enhanced-contrast]
+    :is(.rs__option--is-focused, .rs__option--is-selected)
+    .version-pill-label-date {
+    color: inherit;
+  }
+
   /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .version-pill-label {

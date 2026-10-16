@@ -48,7 +48,7 @@
 
   .checkbox-input__visuals {
     --checkbox-bg: var(--color-bg-secondary);
-    --checkbox-border-color: var(--special-border-translucent-strong);
+    --checkbox-border-color: var(--color-border-control, var(--special-border-translucent-strong));
     --checkbox-focus-ring-color: transparent;
     --checkbox-mark-color: var(--color-icon);
     --checkbox-mark-halo-color: transparent;
@@ -147,7 +147,7 @@
     + .checkbox-input__visuals,
   .checkbox-input__control:not(.checkbox-input__control--muted, :disabled):indeterminate:hover
     + .checkbox-input__visuals {
-    --checkbox-border-color: var(--special-border-translucent-strong);
+    --checkbox-border-color: var(--color-border-control, var(--special-border-translucent-strong));
   }
 
   .checkbox-input__control:not(.checkbox-input__control--muted, :disabled):checked:active
@@ -169,7 +169,7 @@
   .checkbox-input__control.checkbox-input__control--muted:checked:hover + .checkbox-input__visuals,
   .checkbox-input__control.checkbox-input__control--muted:indeterminate:hover
     + .checkbox-input__visuals {
-    --checkbox-border-color: var(--special-border-translucent-strong);
+    --checkbox-border-color: var(--color-border-control, var(--special-border-translucent-strong));
   }
 
   .checkbox-input__control.checkbox-input__control--muted:checked:active + .checkbox-input__visuals,

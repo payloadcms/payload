@@ -3,7 +3,7 @@
     &.rs__multi-value {
       display: flex;
       padding: 0;
-      border: var(--stroke-width-small) solid var(--color-border);
+      border: var(--stroke-width-small) solid var(--contrast-chip-border, var(--color-border));
       border-radius: var(--radius-chip);
       background: var(--color-bg);
       height: 1.25rem;

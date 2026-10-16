@@ -1,5 +1,7 @@
 'use client'
 
+import '../enhancedContrast.css'
+
 import type { FieldType } from '@payloadcms/ui'
 import type { TextareaFieldClientProps } from 'payload'
 
@@ -165,7 +167,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
         </div>
         <div
           style={{
-            color: '#9A9A9A',
+            color: 'var(--seo-description-color, #9A9A9A)',
           }}
         >
           {t('plugin-seo:lengthTipDescription', { maxLength, minLength })}

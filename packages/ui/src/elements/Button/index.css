@@ -69,7 +69,8 @@
   .btn.btn--style-secondary {
     color: var(--color-text);
     background-color: var(--color-bg);
-    border: var(--stroke-width-small) solid var(--special-border-translucent);
+    border: var(--stroke-width-small) solid
+      var(--contrast-button-border, var(--special-border-translucent));
 
     &:hover:not(.btn--disabled) {
       background-color: var(--color-bg-secondary-hover);
@@ -393,7 +394,7 @@
   }
 
   .btn--withPopup.btn--style-secondary {
-    --separator-color: var(--special-border-translucent);
+    --separator-color: var(--color-border-control, var(--special-border-translucent));
     .btn,
     .popup-button {
       color: var(--color-text);

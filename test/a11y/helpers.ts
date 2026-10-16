@@ -1,7 +1,7 @@
 import type { ScreenReaderPlaywright } from '@guidepup/playwright'
 import type { Browser, Locator, Page, TestInfo } from '@playwright/test'
 
-import { expect } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -476,6 +476,252 @@ export async function expectPopupCursorToMove({
   await trigger.page().keyboard.press('Escape')
 }
 
+export async function inContrastThemes({
+  page,
+  run,
+  serverURL,
+  themes,
+}: {
+  page: Page
+  run: () => Promise<void>
+  serverURL: string
+  themes: ('dark' | 'light')[]
+}) {
+  test.setTimeout(90_000)
+
+  for (const theme of themes) {
+    await test.step(`${theme} theme`, async () => {
+      await page.context().addCookies([
+        { name: 'payload-theme', url: serverURL, value: theme },
+        { name: 'payload-high-contrast-mode', url: serverURL, value: 'true' },
+      ])
+      await page.mouse.move(0, 0)
+      await run()
+      await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
+      await expect(page.locator('html')).toHaveAttribute('data-enhanced-contrast', '')
+    })
+  }
+}
+
+export async function expectTextContrast({
+  placeholder = false,
+  targets,
+}: {
+  placeholder?: boolean
+  targets: Locator
+}) {
+  await expectPaintContrast({ minimum: 4.5, placeholder, property: 'color', targets })
+}
+
+/**
+ * Measures solid CSS paint, including alpha and ancestor group opacity, without rounding ratios.
+ * Boundary checks accept a contrasting fill, border, or outline.
+ */
+export async function expectPaintContrast({
+  againstParent = false,
+  minimum,
+  placeholder = false,
+  property,
+  pseudo,
+  targets,
+}: {
+  againstParent?: boolean
+  minimum: number
+  placeholder?: boolean
+  property:
+    | 'backgroundColor'
+    | 'borderBottomColor'
+    | 'borderTopColor'
+    | 'color'
+    | 'fill'
+    | 'outlineColor'
+    | 'stroke'
+  pseudo?: '::after'
+  targets: Locator
+}) {
+  await expect(targets.first()).toBeVisible()
+  const results = await targets.evaluateAll(
+    (roots, { againstParent, minimum, placeholder, property, pseudo }) => {
+      type Color = [number, number, number, number]
+      const canvas = document.createElement('canvas')
+      canvas.width = canvas.height = 1
+      const context = canvas.getContext('2d')!
+      const parse = (value: string): Color => {
+        const rgb = value.match(/^rgba?\(([^)]+)\)$/)
+        if (rgb) {
+          const channels = rgb[1]!.split(',').map(Number)
+          return [channels[0]!, channels[1]!, channels[2]!, channels[3] ?? 1]
+        }
+        if (!CSS.supports('color', value)) {
+          throw new Error(`Unsupported paint: ${value}`)
+        }
+        context.clearRect(0, 0, 1, 1)
+        context.fillStyle = value
+        context.fillRect(0, 0, 1, 1)
+        const [r, g, b, a] = context.getImageData(0, 0, 1, 1).data
+        return [r!, g!, b!, a! / 255]
+      }
+      const over = (foreground: Color, background: Color): Color => {
+        const alpha = foreground[3] + background[3] * (1 - foreground[3])
+        return [
+          ...[0, 1, 2].map((channel) =>
+            alpha
+              ? (foreground[channel]! * foreground[3] +
+                  background[channel]! * background[3] * (1 - foreground[3])) /
+                alpha
+              : 0,
+          ),
+          alpha,
+        ] as Color
+      }
+      const luminance = (color: Color) => {
+        const [r, g, b] = color.slice(0, 3).map((channel) => {
+          const value = channel / 255
+          return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
+        })
+        return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!
+      }
+      const elements = new Set<Element>()
+      for (const root of roots) {
+        for (const element of property === 'color' && !placeholder
+          ? [root, ...root.querySelectorAll('*')]
+          : [root]) {
+          if (!element.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) {
+            continue
+          }
+          const hasText = [...element.childNodes].some(
+            (node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim(),
+          )
+          const hasValue =
+            (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) &&
+            element.value.length > 0
+          if (property !== 'color' || placeholder || hasText || hasValue) {
+            elements.add(element)
+          }
+        }
+      }
+      return [...elements].map((element) => {
+        const style = getComputedStyle(element, placeholder ? '::placeholder' : pseudo)
+        const label = placeholder
+          ? element.getAttribute('placeholder')
+          : element.textContent?.trim() || element.getAttribute('aria-label') || element.tagName
+        const paints: ('outlineColor' | typeof property)[] = [property]
+        if (againstParent && property === 'backgroundColor') {
+          if (style.borderTopStyle !== 'none' && parseFloat(style.borderTopWidth) > 0) {
+            paints.push('borderTopColor')
+          }
+          if (style.outlineStyle !== 'none' && parseFloat(style.outlineWidth) > 0) {
+            paints.push('outlineColor')
+          }
+        }
+        const candidates = paints.map((paintProperty) => {
+          let foreground = parse(style[paintProperty])
+          let background: Color = [0, 0, 0, 0]
+          if (placeholder || pseudo) {
+            foreground[3] *= Number(style.opacity)
+          }
+          const unsupported: string[] = []
+          if (
+            pseudo &&
+            (style.content === 'none' ||
+              style.display === 'none' ||
+              parseFloat(style.width) <= 0 ||
+              parseFloat(style.height) <= 0 ||
+              style.backgroundImage !== 'none' ||
+              style.filter !== 'none' ||
+              style.mixBlendMode !== 'normal')
+          ) {
+            unsupported.push('pseudo-element is not a visible solid paint')
+          }
+          if (
+            placeholder &&
+            (!(element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) ||
+              element.value !== '')
+          ) {
+            unsupported.push('placeholder is not rendered on an empty input or textarea')
+          }
+          if (
+            paintProperty.startsWith('border') &&
+            (style[
+              paintProperty === 'borderBottomColor' ? 'borderBottomStyle' : 'borderTopStyle'
+            ] === 'none' ||
+              parseFloat(
+                style[
+                  paintProperty === 'borderBottomColor' ? 'borderBottomWidth' : 'borderTopWidth'
+                ],
+              ) === 0)
+          ) {
+            unsupported.push('border is not painted')
+          }
+          if (paintProperty === 'stroke') {
+            foreground[3] *= Number(style.strokeOpacity)
+          }
+          if (paintProperty === 'fill') {
+            foreground[3] *= Number(style.fillOpacity)
+          }
+          let ancestor: Element | null = element
+          while (ancestor) {
+            const ancestorStyle = getComputedStyle(ancestor)
+            if (
+              ancestorStyle.backgroundImage !== 'none' ||
+              !['blur(0px)', 'none'].includes(ancestorStyle.filter) ||
+              ancestorStyle.mixBlendMode !== 'normal'
+            ) {
+              unsupported.push(`unsupported background/filter/blending on ${ancestor.tagName}`)
+            }
+            const paint = parse(ancestorStyle.backgroundColor)
+            // A component's own fill is compared to its adjacent parent surface.
+            if (ancestor === element && againstParent) {
+              // Borders are painted over the element background; outlines are outside it.
+              if (paintProperty.startsWith('border')) {
+                foreground = over(foreground, paint)
+              }
+            } else {
+              foreground = over(foreground, paint)
+              background = over(background, paint)
+            }
+            foreground[3] *= Number(ancestorStyle.opacity)
+            background[3] *= Number(ancestorStyle.opacity)
+            ancestor = ancestor.parentElement
+          }
+          const canvasColor: Color = [255, 255, 255, 1]
+          foreground = over(foreground, canvasColor)
+          background = over(background, canvasColor)
+          const foregroundLuminance = luminance(foreground)
+          const backgroundLuminance = luminance(background)
+          const ratio =
+            (Math.max(foregroundLuminance, backgroundLuminance) + 0.05) /
+            (Math.min(foregroundLuminance, backgroundLuminance) + 0.05)
+          const isLargeText =
+            parseFloat(style.fontSize) >= 24 ||
+            (parseFloat(style.fontSize) >= 18.6666666667 && Number(style.fontWeight) >= 700)
+          return {
+            background,
+            foreground,
+            label,
+            minimum: property === 'color' && isLargeText ? 3 : minimum,
+            property: paintProperty,
+            ratio,
+            selector: `${element.tagName}.${[...element.classList].join('.')}${pseudo ?? ''}`,
+            unsupported,
+          }
+        })
+        const strongest = candidates.reduce((best, candidate) =>
+          candidate.ratio > best.ratio ? candidate : best,
+        )
+        return { ...strongest, candidates }
+      })
+    },
+    { againstParent, minimum, placeholder, property, pseudo },
+  )
+
+  expect(results.length, `No rendered contrast targets in ${targets.toString()}`).toBeGreaterThan(0)
+  for (const result of results) {
+    expect.soft(result.unsupported, JSON.stringify(result)).toEqual([])
+    expect.soft(result.ratio, JSON.stringify(result)).toBeGreaterThanOrEqual(result.minimum)
+  }
+}
+
 export async function openWidgetDrawer({ page, serverURL }: { page: Page; serverURL: string }) {
   await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
   await new DashboardHelper(page).setEditing()
@@ -621,6 +867,17 @@ export async function openDrawerFilters({
   return comboboxes
 }
 
+/** Measures block movement independently of page layout and ancestor scrolling. */
+export async function getTopWithinEditor({ target }: { target: Locator }): Promise<number> {
+  return target.evaluate((element) => {
+    const parent = element.closest('.ContentEditable__root')!
+
+    return (
+      element.getBoundingClientRect().top - parent.getBoundingClientRect().top + parent.scrollTop
+    )
+  })
+}
+
 export async function openDashboardEditor({ page, serverURL }: { page: Page; serverURL: string }) {
   await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
   const trigger = page.locator('.dashboard-breadcrumb-dropdown .popup__trigger-wrap button')
@@ -691,6 +948,34 @@ export async function expectPaintedFocus({ page }: { page: Page }) {
     .toBe(true)
 }
 
+/** Let dnd-kit's deferred keyboard listener attach after drag activation is painted. */
+export async function waitForDashboardDragReady({ page }: { page: Page }) {
+  await expect(page.locator('.drag-overlay')).toBeVisible()
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      ),
+  )
+}
+
+export async function readBorderStyles({ targets }: { targets: Locator }) {
+  await expect(targets.first()).toBeVisible()
+  return targets.evaluateAll((elements) =>
+    elements.map((element) => {
+      const style = getComputedStyle(element)
+      return {
+        borderTop: style.borderTop,
+        borderRight: style.borderRight,
+        borderBottom: style.borderBottom,
+        borderLeft: style.borderLeft,
+        outline: style.outline,
+        outlineOffset: style.outlineOffset,
+      }
+    }),
+  )
+}
+
 export async function openGlobalAPI({ page, serverURL }: { page: Page; serverURL: string }) {
   await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/globals/menu', serverURL }))
   await page.getByRole('link', { name: 'API', exact: true }).click()
@@ -727,6 +1012,40 @@ export async function openNavigationFolders({
     sidebar.locator('.tree-node__title', { hasText: /^Accessibility folder$/ }),
   ).toBeVisible()
   return sidebar
+}
+
+/** Checks the rendered divider in enhanced mode and exact restoration when disabled. */
+export async function expectEnhancedDividerContrast({
+  page,
+  property,
+  pseudo,
+  targets,
+}: {
+  page: Page
+  property: 'backgroundColor' | 'borderBottomColor' | 'borderTopColor'
+  pseudo?: '::after'
+  targets: Locator
+}) {
+  await expect(targets.first()).toBeVisible()
+  const readPaint = () =>
+    targets.evaluateAll(
+      (elements, { property, pseudo }) =>
+        elements.map((element) => getComputedStyle(element, pseudo)[property]),
+      { property, pseudo },
+    )
+  const defaultPaint = await readPaint()
+
+  await page
+    .locator('html')
+    .evaluate((element) => element.setAttribute('data-enhanced-contrast', ''))
+  try {
+    await expectPaintContrast({ againstParent: true, minimum: 3, property, pseudo, targets })
+  } finally {
+    await page
+      .locator('html')
+      .evaluate((element) => element.removeAttribute('data-enhanced-contrast'))
+  }
+  expect(await readPaint()).toEqual(defaultPaint)
 }
 
 /** Measure text against the composited backgrounds of its rendered ancestors. */
