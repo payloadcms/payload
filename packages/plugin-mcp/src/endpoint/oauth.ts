@@ -1,3 +1,4 @@
+import type { OAuthProtectedResourceMetadata } from '@modelcontextprotocol/server'
 import type { PayloadHandler, PayloadRequest, SanitizedConfig } from 'payload'
 
 import {
@@ -40,6 +41,7 @@ export const oauthChallenge = ({ req }: { req: PayloadRequest }): Response =>
   bearerAuthChallengeResponse(
     new OAuthError(OAuthErrorCode.InvalidToken, req.t('error:unauthorized')),
     {
+      requiredScopes: getPluginConfig({ config: req.payload.config }).oauth?.scopes,
       resourceMetadataUrl: `${getMCPURL({ config: req.payload.config, url: req.url! })}/oauth-protected-resource`,
     },
   )
@@ -60,7 +62,7 @@ const getMetadataResponse = async ({
     return new Response(null, { status: 404 })
   }
 
-  const { authorizationServers, resource } = pluginConfig.oauth
+  const { authorizationServers, resource, scopes } = pluginConfig.oauth
 
   return Response.json(
     {
@@ -70,7 +72,8 @@ const getMetadataResponse = async ({
           : authorizationServers,
       bearer_methods_supported: ['header'],
       resource: resource ?? getMCPURL({ config, url }),
-    },
+      scopes_supported: scopes,
+    } satisfies OAuthProtectedResourceMetadata,
     // Public document, readable by browser-based MCP clients on any origin
     { headers: { 'Access-Control-Allow-Origin': '*' } },
   )

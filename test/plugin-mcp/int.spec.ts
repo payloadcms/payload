@@ -411,6 +411,23 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
 
         expect(metadata.authorization_servers).toEqual(['https://issuer.example.com/'])
       })
+      it('should tell clients which scopes to request', async ({ payload, restClient }) => {
+        enableOAuth(payload, {
+          authorizationServers: ['https://auth.example.com'],
+          scopes: ['openid', 'email'],
+        })
+
+        const challenge = await restClient.POST('/mcp', {
+          body: JSON.stringify({ id: 1, jsonrpc: '2.0', method: 'tools/list', params: {} }),
+          headers: { Accept: 'application/json, text/event-stream' },
+        })
+        const metadata = await restClient
+          .GET('/mcp/oauth-protected-resource')
+          .then((res) => res.json())
+
+        expect(challenge.headers.get('WWW-Authenticate')).toContain('scope="openid email"')
+        expect(metadata.scopes_supported).toEqual(['openid', 'email'])
+      })
       it('should run requests as the authenticated user', async ({
         getLimitedApiKey,
         mcp,
