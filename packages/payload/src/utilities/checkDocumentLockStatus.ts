@@ -12,6 +12,11 @@ type CheckDocumentLockStatusArgs = {
   lockDurationDefault?: number
   lockErrorMessage?: string
   overrideLock?: boolean
+  /**
+   * Skip deleting the lock after the check. Used so autosave collections keep
+   * their lock across saves. The foreign-lock check above still runs.
+   */
+  preserveLock?: boolean
   req: PayloadRequest
 }
 
@@ -22,6 +27,7 @@ export const checkDocumentLockStatus = async ({
   lockDurationDefault = 300, // Default 5 minutes in seconds
   lockErrorMessage,
   overrideLock = true,
+  preserveLock = false,
   req,
 }: CheckDocumentLockStatusArgs): Promise<void> => {
   const { payload } = req
@@ -94,6 +100,11 @@ export const checkDocumentLockStatus = async ({
         throw new Locked(finalLockErrorMessage)
       }
     }
+  }
+
+  // Autosave keeps the row. Delete, trash, and collections without autosave still clear it.
+  if (preserveLock) {
+    return
   }
 
   // Perform the delete operation regardless of overrideLock status

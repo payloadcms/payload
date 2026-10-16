@@ -7,6 +7,8 @@ export const AutosaveCollection: CollectionConfig = {
   admin: {
     useAsTitle: 'fieldA',
   },
+  // Trashing is a PATCH. The lock tests assert that it releases the lock.
+  trash: true,
   fields: [
     {
       name: 'fieldA',
