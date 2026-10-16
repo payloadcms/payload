@@ -183,6 +183,8 @@ test.describe('Form State', () => {
     )
   })
 
+  // Asserts the lastRenderedPath optimization by inspecting outgoing form-state requests on both frameworks.
+  // Previously rendered fields should retain their rendering paths as new array rows are added.
   test('should send `lastRenderedPath` only when necessary', async () => {
     await page.goto(postsUrl.create)
     await waitForFormReady(page)
@@ -224,11 +226,11 @@ test.describe('Form State', () => {
       const formState = readFormState({ request })
       const response = await request.response()
 
-      // The array was rendered on initial load, so every request should include its lastRenderedPath.
+      // The `array` itself SHOULD have a `lastRenderedPath` because it was rendered on initial load.
       expect(formState?.array.lastRenderedPath).toBe('array')
 
-      // The second request should remember the first row's custom field; the third should remember both earlier rows.
-      // The row being added has not been rendered yet, so it is outside these assertions.
+      // Each earlier row's custom text field SHOULD ALSO have a `lastRenderedPath` because it was rendered in a previous request.
+      // The second request checks the first row; the third request checks both earlier rows.
       for (let renderedRowIndex = 0; renderedRowIndex < rowIndex; renderedRowIndex++) {
         const fieldPath = `array.${renderedRowIndex}.customTextField`
 
