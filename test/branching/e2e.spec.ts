@@ -1467,6 +1467,31 @@ test.describe('Branching', () => {
         'Spooky Exclusive',
       ])
       expect(changes.docs).toHaveLength(1)
+
+      const remainingRows = page.locator('.changed-docs__row')
+      const merge = page.locator('.branch-changes__actions .btn--style-primary')
+      const selectAll = page.locator('.changed-docs__controls input[type="checkbox"]')
+
+      await expect(remainingRows).toHaveCount(1)
+      await expect(remainingRows.getByRole('checkbox')).not.toBeChecked()
+      await expect(selectAll).not.toBeChecked()
+      await expect(merge).toBeDisabled()
+      await expect(discard).toBeDisabled()
+
+      await selectAll.focus()
+      await page.keyboard.press('Space')
+
+      await expect(selectAll).toBeChecked()
+      await expect(remainingRows.getByRole('checkbox')).toBeChecked()
+      await expect(merge).toBeEnabled()
+      await expect(discard).toBeEnabled()
+
+      await remainingRows.getByRole('checkbox').focus()
+      await page.keyboard.press('Space')
+
+      await expect(selectAll).not.toBeChecked()
+      await expect(merge).toBeDisabled()
+      await expect(discard).toBeDisabled()
     })
 
     test('should merge only the selected changes, leaving the rest on the branch', async () => {

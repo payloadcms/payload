@@ -141,6 +141,16 @@ export const getScheduleMergeTask = ({
         req,
         user,
       })
+
+      const problems = [...result.blocked, ...result.validationErrors]
+
+      if (problems.length) {
+        throw new Error(
+          `Scheduled merge of branch "${input.branch}" was refused: ${problems
+            .map(({ message }) => message)
+            .join('; ')}`,
+        )
+      }
     } catch (error) {
       try {
         await writeProgress({ mergeProgress: null })

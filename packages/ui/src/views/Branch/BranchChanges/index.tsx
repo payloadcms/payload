@@ -49,16 +49,21 @@ export const BranchChanges: React.FC<{
 
   // Everything selected to begin with: the common intent is to merge the branch,
   // and deselecting the exceptions is less work than selecting the rule.
-  const [selected, setSelected] = useState<Set<string>>(() => new Set(changes.map((c) => c.id)))
+  const [selectedIDs, setSelectedIDs] = useState<Set<string>>(
+    () => new Set(changes.map((c) => c.id)),
+  )
+  const selected = useMemo(
+    () =>
+      new Set(changes.filter((change) => selectedIDs.has(change.id)).map((change) => change.id)),
+    [changes, selectedIDs],
+  )
 
   const toggleAll = useCallback(() => {
-    setSelected((prev) =>
-      prev.size === changes.length ? new Set() : new Set(changes.map((c) => c.id)),
-    )
-  }, [changes])
+    setSelectedIDs(selected.size === changes.length ? new Set() : new Set(changes.map((c) => c.id)))
+  }, [changes, selected.size])
 
   const toggleSelected = useCallback((id: string) => {
-    setSelected((prev) => {
+    setSelectedIDs((prev) => {
       const next = new Set(prev)
 
       if (next.has(id)) {
