@@ -9,6 +9,7 @@ import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { GeneratedTypes } from '../__helpers/shared/sdk/types.js'
 import type { Config, LocalizedPost } from './payload-types.js'
 
+import { sortColumn } from '../__helpers/e2e/columns/sortColumn.js'
 import { addArrayRow } from '../__helpers/e2e/fields/array/index.js'
 import { addBlock } from '../__helpers/e2e/fields/blocks/addBlock.js'
 import {
@@ -659,6 +660,57 @@ describe('Localization', () => {
           timeout: POLL_TOPASS_TIMEOUT,
         })
         .not.toBe(title)
+    })
+
+    test('should warn before discarding unsaved changes on locale change', async () => {
+      const unsavedTitle = 'unsaved title'
+
+      await page.goto(url.create)
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+      await page.locator('#field-title').fill(unsavedTitle)
+
+      await openLocaleSelector(page)
+      await page
+        .locator('.popup__content .popup-button-list__button')
+        .filter({ has: page.locator(`[data-locale="${spanishLocale}"]`) })
+        .click()
+
+      await expect(page.locator('#leave-without-saving')).toBeVisible()
+      await expect(page).not.toHaveURL(new RegExp(`locale=${spanishLocale}`))
+
+      await page.locator('#leave-without-saving [data-dialog-action="cancel"]').click()
+
+      await expect(page.locator('#leave-without-saving')).toBeHidden()
+      await expect(page.locator('#field-title')).toHaveValue(unsavedTitle)
+    })
+
+    test('should change locale after confirming leave without saving', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+      await page.locator('#field-title').fill('unsaved title')
+
+      await openLocaleSelector(page)
+      await page
+        .locator('.popup__content .popup-button-list__button')
+        .filter({ has: page.locator(`[data-locale="${spanishLocale}"]`) })
+        .click()
+
+      await page.locator('#leave-without-saving [data-dialog-action="confirm"]').click()
+
+      await expect(page).toHaveURL(new RegExp(`locale=${spanishLocale}`))
+      await waitForFormReady(page)
+      await expect(page.locator('#field-title')).not.toHaveValue('unsaved title')
+    })
+
+    test('should keep list view query params on locale change', async () => {
+      await page.goto(url.list)
+      await sortColumn(page, { fieldPath: 'title', targetState: 'desc' })
+
+      await changeLocale(page, spanishLocale)
+
+      await expect(page).toHaveURL(/sort=-title/)
     })
   })
 
