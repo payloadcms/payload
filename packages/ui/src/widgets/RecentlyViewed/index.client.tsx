@@ -22,6 +22,9 @@ type View = {
   tab: DocumentsTab
 }
 
+/**
+ * @internal - may change or be removed without a major version bump
+ */
 export function RecentsAndPinnedClient({
   excludedCollections,
   initialPages,

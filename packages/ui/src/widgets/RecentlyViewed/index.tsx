@@ -16,6 +16,9 @@ type RecentlyViewedWidgetData = {
   excludedCollections?: string[]
 }
 
+/**
+ * @internal - may change or be removed without a major version bump
+ */
 export async function RecentlyViewedWidget({
   permissions,
   req,
