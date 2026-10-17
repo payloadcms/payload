@@ -807,6 +807,47 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         expect(visibleResult.docs[0].id).toBe(publicReference.id)
       })
 
+      test('should keep every condition on a related field when its access constraint is applied', async ({
+        payload,
+        restClient,
+      }) => {
+        const posts = await Promise.all(
+          ['public', 'public draft'].map((title) =>
+            payload.create({ collection: slug, data: { title }, overrideAccess: true }),
+          ),
+        )
+        createdPostIDs.push(...posts.map((post) => post.id))
+
+        const references = await Promise.all(
+          posts.map((post) =>
+            payload.create({
+              collection: postReferencesSlug,
+              data: { singlePost: post.id },
+              overrideAccess: true,
+            }),
+          ),
+        )
+        createdPostReferenceIDs.push(...references.map((reference) => reference.id))
+
+        const response = await restClient.GET(`/${postReferencesSlug}`, {
+          auth: false,
+          query: {
+            where: {
+              'singlePost.title': {
+                in: ['public', 'public draft'],
+                not_equals: 'public draft',
+              },
+            },
+          },
+        })
+        const result = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(result.docs.map((doc: { id: number | string }) => doc.id)).toEqual([
+          references[0]!.id,
+        ])
+      })
+
       test('should apply related collection access constraints to join field queries', async ({
         payload,
         restClient,
