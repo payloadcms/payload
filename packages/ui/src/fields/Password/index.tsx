@@ -26,7 +26,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
         description,
         placeholder,
         rtl,
-      } = {} as PasswordFieldProps['field']['admin'],
+      } = {},
       label,
       localized,
       required,

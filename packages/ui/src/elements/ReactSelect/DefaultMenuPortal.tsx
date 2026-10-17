@@ -136,7 +136,7 @@ export function DefaultMenuPortal<Opt, IsMulti extends boolean, Group extends Gr
           position: 'fixed',
           top: 0,
           zIndex: 'var(--z-portal-element)',
-        } as FloatingMenuPortalStyle
+        }
       }
     >
       {children}

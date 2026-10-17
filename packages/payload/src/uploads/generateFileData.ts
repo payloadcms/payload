@@ -572,7 +572,7 @@ export const generateFileData = async <T>({
             relative: true,
             serverURL: req.payload.config.serverURL,
           }),
-        } as NonNullable<FileData['original']>)
+        })
 
       if (!retainedOriginal && isProcessableImage(file.mimetype)) {
         try {

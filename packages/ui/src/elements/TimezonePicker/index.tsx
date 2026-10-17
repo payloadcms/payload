@@ -156,7 +156,7 @@ export const TimezonePicker: React.FC<Props> = (props) => {
               gap: 'var(--spacer-1)',
               minWidth: 0,
             }),
-          } as StylesConfig<OptionType>
+          }
         }
         value={selectedTimezone}
       />

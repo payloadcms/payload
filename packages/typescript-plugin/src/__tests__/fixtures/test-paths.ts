@@ -1,4 +1,4 @@
-// @ts-ignore - ambient type declarations
+// @ts-expect-error - ambient type declarations
 import './payload-types.d.ts'
 
 // --- Valid: @/ alias with named export ---

@@ -158,7 +158,7 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
     expect(collection.fields).not.toContainEqual(expect.objectContaining({ name: 'enableAPIKey' }))
     expect(collection.fields).not.toContainEqual(expect.objectContaining({ name: 'hasAPIKey' }))
     expect('access' in apiKeyField && apiKeyField.access?.read).toBeTypeOf('function')
-    expect(await apiKeyField.access!.read!({} as never)).toBe(false)
+    expect(await apiKeyField.access!.read!({})).toBe(false)
   })
 
   test('should omit secrets before hooks and return only the final four characters', async ({
@@ -282,14 +282,14 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
     )!
 
     expect('access' in apiKeyField && apiKeyField.access?.update).toBeTypeOf('function')
-    expect(await apiKeyField.access!.update!({ id: target.id, req } as never)).toBe(true)
+    expect(await apiKeyField.access!.update!({ id: target.id, req })).toBe(true)
 
     const unauthenticatedReq = await createPayloadRequestFromWebRequest({
       config: payload.config,
       request: new Request('http://localhost/api'),
     })
     expect(
-      await apiKeyField.access!.update!({ id: target.id, req: unauthenticatedReq } as never),
+      await apiKeyField.access!.update!({ id: target.id, req: unauthenticatedReq }),
     ).toBe(false)
   })
 

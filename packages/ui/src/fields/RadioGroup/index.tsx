@@ -27,7 +27,7 @@ const RadioGroupFieldComponent: React.FC<RadioFieldClientProps> = (props) => {
         className,
         description,
         layout = 'horizontal',
-      } = {} as RadioFieldClientProps['field']['admin'],
+      } = {},
       label,
       localized,
       options = [],

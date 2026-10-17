@@ -57,7 +57,7 @@ export const mergeQuery = (
     sort:
       'sort' in newQuery
         ? newQuery.sort
-        : ((currentQuery?.sort as string) ?? options?.defaults?.sort),
+        : ((currentQuery?.sort) ?? options?.defaults?.sort),
     where: 'where' in newQuery ? newQuery.where : currentQuery?.where,
   }
 

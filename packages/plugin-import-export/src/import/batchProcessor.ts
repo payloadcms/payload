@@ -653,13 +653,13 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
         hooks?.before && currentBatch.length > 0
           ? ((await hooks.before({
               batchNumber,
-              data: currentBatch as Parameters<ImportBeforeHook>[0]['data'],
+              data: currentBatch,
               format,
               importDoc,
               originalData: originalBatch,
               req,
               totalBatches,
-            })) as Record<string, unknown>[])
+            })))
           : currentBatch
 
       const batchResult = await processImportBatch({

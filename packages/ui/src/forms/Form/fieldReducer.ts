@@ -418,7 +418,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
           return field
         },
-        state?.[action.path] || ({} as FormField),
+        state?.[action.path] || ({}),
       )
 
       const newState = {
@@ -433,7 +433,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         for (const [path, field] of Object.entries(newState)) {
           if (path !== action.path && 'isModified' in field) {
             const { isModified: _, ...fieldWithoutIsModified } = field
-            newState[path] = fieldWithoutIsModified as typeof field
+            newState[path] = fieldWithoutIsModified
           }
         }
       }
