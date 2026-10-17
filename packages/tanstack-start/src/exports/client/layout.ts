@@ -1,3 +1,3 @@
 'use client'
 
-export { PayloadOutlet } from '../../adapters/layout/Outlet/index.js'
+export { PayloadOutlet } from '../../adapters/layout/outlet.js'
