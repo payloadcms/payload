@@ -14,9 +14,9 @@ ELAPSED=0
 echo "Waiting for version ${TARGET_VERSION} of '${PACKAGE_NAME}' to resolve... (timeout: ${TIMEOUT} seconds)"
 
 while [[ ${ELAPSED} -lt ${TIMEOUT} ]]; do
-  latest_version=$(npm show "${PACKAGE_NAME}" version 2>/dev/null)
+  resolved_version=$(npm view "${PACKAGE_NAME}@${TARGET_VERSION}" version 2>/dev/null)
 
-  if [[ ${latest_version} == "${TARGET_VERSION}" ]]; then
+  if [[ ${resolved_version} == "${TARGET_VERSION}" ]]; then
     echo "SUCCCESS: Version ${TARGET_VERSION} of ${PACKAGE_NAME} is available."
     exit 0
   else

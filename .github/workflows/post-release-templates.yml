@@ -1,11 +1,9 @@
 name: post-release-templates
 
 on:
-  # Release trigger disabled: the wait step and template generator both read the npm
-  # `latest` dist-tag, so v4 prerelease tags never resolve and the job times out.
-  # release:
-  #   types:
-  #     - published
+  release:
+    types:
+      - published
   workflow_dispatch:
 
 env:
@@ -56,7 +54,7 @@ jobs:
             echo "target_branch=main" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Wait until latest versions resolve on npm registry
+      - name: Wait until the release versions resolve on npm registry
         env:
           RELEASE_TAG: ${{ steps.determine_tag.outputs.release_tag }}
         run: |
@@ -99,8 +97,9 @@ jobs:
           DATABASE_URL: ${{ steps.postgres.outputs.POSTGRES_URL }}
 
       - name: Update template lockfiles and migrations
-        run: pnpm script:gen-templates
+        run: pnpm script:gen-templates --payload-version "${RELEASE_TAG#v}"
         env:
+          RELEASE_TAG: ${{ needs.wait_for_release.outputs.release_tag }}
           POSTGRES_URL: ${{ steps.postgres.outputs.POSTGRES_URL }}
           DATABASE_URL: ${{ steps.postgres.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.mongodb.outputs.MONGODB_URL }}
