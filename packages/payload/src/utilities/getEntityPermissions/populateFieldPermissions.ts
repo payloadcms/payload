@@ -13,6 +13,18 @@ import type { BlockReferencesPermissions } from './getEntityPermissions.js'
 
 import { type Field, tabHasName } from '../../fields/config/types.js'
 
+type Traversal = {
+  hasAccess: WeakMap<Field[], boolean>
+  visited: WeakMap<
+    FieldsPermissions,
+    {
+      fields: Field[]
+      inherited: unknown[]
+      operations: AllOperations[]
+    }
+  >
+}
+
 const isThenable = (value: unknown): value is Promise<unknown> =>
   value != null && typeof (value as { then?: unknown }).then === 'function'
 
@@ -59,6 +71,7 @@ export const populateFieldPermissions = ({
   permissionsObject,
   promises,
   req,
+  traversal = { hasAccess: new WeakMap(), visited: new WeakMap() },
 }: {
   blockReferencesPermissions: BlockReferencesPermissions
   data: JsonObject | undefined
@@ -72,7 +85,31 @@ export const populateFieldPermissions = ({
   permissionsObject: FieldsPermissions
   promises: Promise<void>[]
   req: PayloadRequest
+  traversal?: Traversal
 }): void => {
+  // Shared block references target the same output object. Only reuse access-free
+  // traversal with identical operations and inherited permissions, within this call.
+  if (!fieldsHaveAccess(fields, req.payload.blocks, traversal.hasAccess)) {
+    const inherited = operations.map(
+      (operation) =>
+        (parentPermissionsObject[operation as keyof typeof parentPermissionsObject] as Permission)
+          ?.permission,
+    )
+    const previous = traversal.visited.get(permissionsObject)
+    if (
+      previous?.fields === fields &&
+      previous.operations.length === operations.length &&
+      operations.every(
+        (operation, index) =>
+          operation === previous.operations[index] &&
+          inherited[index] === previous.inherited[index],
+      )
+    ) {
+      return
+    }
+    traversal.visited.set(permissionsObject, { fields, inherited, operations: [...operations] })
+  }
+
   for (const field of fields) {
     // Set up permissions for all operations
     for (const operation of operations) {
@@ -135,6 +172,7 @@ export const populateFieldPermissions = ({
           permissionsObject: fieldPermissions.fields,
           promises,
           req,
+          traversal,
         })
       }
 
@@ -231,6 +269,7 @@ export const populateFieldPermissions = ({
             permissionsObject: blockPermission.fields,
             promises,
             req,
+            traversal,
           })
         }
       }
@@ -250,6 +289,7 @@ export const populateFieldPermissions = ({
         permissionsObject,
         promises,
         req,
+        traversal,
       })
     }
 
@@ -299,6 +339,7 @@ export const populateFieldPermissions = ({
             permissionsObject: tabPermissions.fields,
             promises,
             req,
+            traversal,
           })
         } else {
           // Tab does not have a name => same parentPermissionsObject
@@ -313,9 +354,41 @@ export const populateFieldPermissions = ({
             permissionsObject,
             promises,
             req,
+            traversal,
           })
         }
       }
     }
   }
+}
+
+/** Cache schema structure only; custom access functions must always execute. */
+function fieldsHaveAccess(
+  fields: Field[],
+  blocks: PayloadRequest['payload']['blocks'],
+  cache: WeakMap<Field[], boolean>,
+  visiting = new Set<Field[]>(),
+): boolean {
+  const cached = cache.get(fields)
+  if (cached !== undefined) return cached
+  // Recursive schemas are conservatively ineligible for reuse.
+  if (visiting.has(fields)) return true
+  visiting.add(fields)
+  const hasAccess = fields.some(
+    (field) =>
+      ('access' in field &&
+        field.access &&
+        Object.values(field.access).some((value) => typeof value === 'function')) ||
+      ('fields' in field && fieldsHaveAccess(field.fields, blocks, cache, visiting)) ||
+      (field.type === 'tabs' &&
+        field.tabs.some((tab) => fieldsHaveAccess(tab.fields, blocks, cache, visiting))) ||
+      (field.type === 'blocks' &&
+        [...(field.blocks || []), ...(field.blockReferences || [])].some((reference) => {
+          const block = typeof reference === 'string' ? blocks[reference] : reference
+          return block && fieldsHaveAccess(block.fields, blocks, cache, visiting)
+        })),
+  )
+  visiting.delete(fields)
+  cache.set(fields, hasAccess)
+  return hasAccess
 }
