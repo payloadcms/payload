@@ -1561,7 +1561,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
               where: {
                 id: { equals: post.id },
               },
-              req: { query: { depth: 5 } } as Partial<PayloadRequest>,
+              req: { query: { depth: 5 } },
               overrideAccess: true,
             })
 
@@ -1581,7 +1581,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
               where: {
                 id: { equals: post.id },
               },
-              req: { query: { depth: 0 } } as Partial<PayloadRequest>,
+              req: { query: { depth: 0 } },
               overrideAccess: true,
             })
 

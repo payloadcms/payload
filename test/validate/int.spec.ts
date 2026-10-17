@@ -1191,7 +1191,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
         locale: ['en', 'es'],
         overrideAccess: false,
         req,
-        user: user,
+        user,
       })
 
       expect(result.valid).toBe(true)
