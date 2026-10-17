@@ -38,6 +38,26 @@ export const PostsCollection: CollectionConfig = {
       },
     },
     {
+      name: 'contextualText',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '/components/ContextualTextField/index.js#ContextualTextField',
+        },
+      },
+      label: 'Contextual text',
+    },
+    {
+      name: 'secondContextualText',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '/components/ContextualTextField/index.js#ContextualTextField',
+        },
+      },
+      label: 'Second contextual text',
+    },
+    {
       name: 'accessibilitySelect',
       type: 'select',
       defaultValue: 'one',
