@@ -533,6 +533,21 @@ describe('List View', () => {
       await expect(whereBuilder.locator('.condition__value input')).toHaveValue('')
     })
 
+    test('should reset filter value when the operator changes from exists', async () => {
+      const { whereBuilder } = await addListFilter({
+        page,
+        fieldLabel: 'Title',
+        operatorLabel: 'exists',
+        value: 'True',
+      })
+
+      const operatorInput = whereBuilder.locator('.condition__operator')
+      await operatorInput.click()
+      await operatorInput.locator('.rs__option', { hasText: exactText('equals') }).click()
+
+      await expect(whereBuilder.locator('.condition__value input')).toHaveValue('')
+    })
+
     test('should remove condition from URL when value is cleared', async () => {
       await page.goto(postsUrl.list)
 
