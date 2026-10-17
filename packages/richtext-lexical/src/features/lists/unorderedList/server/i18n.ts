@@ -31,6 +31,9 @@ export const i18n: Partial<GenericLanguages> = {
   fa: {
     label: 'لیست بدون ترتیب',
   },
+  fi: {
+    label: 'Järjestämätön lista',
+  },
   fr: {
     label: 'Liste non ordonnée',
   },
