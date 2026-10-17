@@ -20,7 +20,8 @@ const sanitizeField = (incomingField: FormField): FormField => {
 }
 
 /**
- * Removes field and row components and field validators without changing field values.
+ * Takes in FormState and removes fields that are not serializable.
+ * Returns FormState without blacklisted keys.
  */
 export const reduceToSerializableFields = (
   fields: FormState,
