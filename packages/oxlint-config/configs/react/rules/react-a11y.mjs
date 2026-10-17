@@ -1,4 +1,5 @@
 // Sourced from https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb/rules/react-a11y.js
+// Without `accessible-emoji`, `label-has-for` and `no-onchange`: they're deprecated, and oxlint doesn't have them.
 
 /** @type {import('eslint').Linter.Config} */
 export const index = {
@@ -8,7 +9,7 @@ export const index = {
 
   // Require ARIA roles to be valid and non-abstract
   // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/aria-role.md
-  'jsx-a11y/aria-role': ['error', { ignoreNonDom: false }],
+  'jsx-a11y/aria-role': ['error', { ignoreNonDOM: false }],
 
   // Enforce all aria-* props are valid.
   // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/aria-props.md
@@ -39,20 +40,6 @@ export const index = {
   // Prevent img alt text from containing redundant words like "image", "picture", or "photo"
   // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/img-redundant-alt.md
   'jsx-a11y/img-redundant-alt': 'error',
-
-  // require that JSX labels use "htmlFor"
-  // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/label-has-for.md
-  // deprecated: replaced by `label-has-associated-control` rule
-  'jsx-a11y/label-has-for': [
-    'off',
-    {
-      components: [],
-      required: {
-        every: ['nesting', 'id'],
-      },
-      allowChildren: false,
-    },
-  ],
 
   // Enforce that a label tag has a text label and an associated control.
   // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/b800f40a2a69ad48015ae9226fbe879f946757ed/docs/rules/label-has-associated-control.md
@@ -98,10 +85,6 @@ export const index = {
   // Prevent use of `accessKey`
   // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/no-access-key.md
   'jsx-a11y/no-access-key': 'error',
-
-  // require onBlur instead of onChange
-  // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/no-onchange.md
-  'jsx-a11y/no-onchange': 'off',
 
   // Elements with an interactive role and interaction handlers must be focusable
   // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/interactive-supports-focus.md
@@ -167,10 +150,6 @@ export const index = {
       handlers: ['onClick', 'onMouseDown', 'onMouseUp', 'onKeyPress', 'onKeyDown', 'onKeyUp'],
     },
   ],
-
-  // ensure emoji are accessible
-  // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/accessible-emoji.md
-  'jsx-a11y/accessible-emoji': 'error',
 
   // elements with aria-activedescendant must be tabbable
   // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/aria-activedescendant-has-tabindex.md

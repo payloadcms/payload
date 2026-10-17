@@ -1,4 +1,4 @@
-import { RuleTester } from 'eslint'
+import { RuleTester } from 'oxlint/plugins-dev'
 import rule from '../customRules/proper-payload-logger-usage.js'
 
 const ruleTester = new RuleTester()

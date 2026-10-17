@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 
-/** @type {import('eslint').Rule.RuleModule} */
+/** @type {import('@oxlint/plugins').Rule} */
 export const rule = {
   meta: {
     docs: {
@@ -33,7 +33,7 @@ export const rule = {
 export default rule
 
 /**
- * @param {import('eslint').Rule.RuleContext} context
+ * @param {import('@oxlint/plugins').Context} context
  * @param {string|undefined} packageName
  */
 function getPackageName(context, packageName) {

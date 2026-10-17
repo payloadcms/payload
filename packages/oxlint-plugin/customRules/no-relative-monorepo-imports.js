@@ -4,7 +4,7 @@
  * ie. `import { mongooseAdapter } from '../../../packages/mongoose-adapter/src'`
  */
 
-/** @type {import('eslint').Rule.RuleModule} */
+/** @type {import('@oxlint/plugins').Rule} */
 export const rule = {
   meta: {
     type: 'problem',
