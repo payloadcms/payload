@@ -65,21 +65,16 @@ const getFieldLocales = (
   collectionSlug: string,
   fieldName: string,
 ): string[] | undefined => {
-  const localeCodes = req.payload.config?.localization?.localeCodes
-  if (!localeCodes?.length) {
+  const localization = req.payload.config?.localization
+  if (!localization || !localization.localeCodes?.length) {
     return undefined
   }
+  const { localeCodes } = localization
   const fields = req.payload.collections?.[collectionSlug]?.config?.fields
   const field = Array.isArray(fields)
-    ? fields.find(
-        (candidate): candidate is { name: string; localized?: boolean } =>
-          !!candidate &&
-          typeof candidate === 'object' &&
-          'name' in candidate &&
-          candidate.name === fieldName,
-      )
+    ? fields.find((candidate) => !!candidate && 'name' in candidate && candidate.name === fieldName)
     : undefined
-  return field?.localized === true ? localeCodes : undefined
+  return field && 'localized' in field && field.localized === true ? localeCodes : undefined
 }
 
 export const hierarchyCollectionAfterDelete =
