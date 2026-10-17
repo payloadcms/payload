@@ -28,4 +28,11 @@ describe('hasCropOrResizeEdit', () => {
   it('returns false when uploadEdits is undefined', () => {
     expect(hasCropOrResizeEdit(undefined)).toBe(false)
   })
+it('returns false when crop covers the entire image (100% width/height at 0,0)', () => {
+    expect(
+      hasCropOrResizeEdit({
+        crop: { height: 100, unit: '%', width: 100, x: 0, y: 0 },
+      }),
+    ).toBe(false)
+  })
 })
