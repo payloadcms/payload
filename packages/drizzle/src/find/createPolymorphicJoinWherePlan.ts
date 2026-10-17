@@ -20,7 +20,7 @@ export type WherePathPlan = {
   columnPath: string
   fieldsByCollection: Map<string, CollectionWhereField>
   schemaPath: string
-  type: 'hasManySelect' | 'invalid' | 'scalar'
+  type: 'hasManySelect' | 'invalid' | 'mixedSelect' | 'scalar'
 }
 
 export type PolymorphicJoinWherePlan = Map<string, WherePathPlan>
@@ -80,8 +80,11 @@ export const createPolymorphicJoinWherePlan = ({
     const fieldsByCollection = new Map<string, CollectionWhereField>()
     let isFieldPresent = schemaPath === 'id' || schemaPath === 'relationTo'
     let hasManySelect = false
+    let hasScalarSelect = false
+    let hasScalarNonOption = false
     let hasUnsupportedFieldShape = false
     const scalarQueryValueSignatures = new Set<string>()
+    const optionSignatures = new Set<string>()
 
     for (const { collection, collectionConfig, table } of collectionContexts) {
       const fieldAtPath = getFieldByPath({
@@ -136,6 +139,7 @@ export const createPolymorphicJoinWherePlan = ({
 
       if (fieldAtPath.field.type === 'select' && fieldAtPath.field.hasMany) {
         hasManySelect = true
+        optionSignatures.add(getOptionSignature(fieldAtPath.field))
         fieldsByCollection.set(collection, {
           type: 'hasManySelect',
           field: fieldAtPath.field,
@@ -150,6 +154,13 @@ export const createPolymorphicJoinWherePlan = ({
         continue
       }
 
+      if (isOptionField(fieldAtPath.field)) {
+        hasScalarSelect = true
+        optionSignatures.add(getOptionSignature(fieldAtPath.field))
+      } else {
+        hasScalarNonOption = true
+      }
+
       fieldsByCollection.set(collection, {
         type: 'scalar',
         field: fieldAtPath.field,
@@ -161,15 +172,33 @@ export const createPolymorphicJoinWherePlan = ({
     }
 
     const hasColumnPathCollision = (schemaPathsByColumnPath.get(columnPath)?.size ?? 0) > 1
+    const isBaseInvalid = hasColumnPathCollision || !isFieldPresent || hasUnsupportedFieldShape
+
+    // A field can be stored as a has-many select (separate value rows) in one target collection and
+    // as a single select column in another. Both compile per-branch with their own storage handler,
+    // so the mix is safe as long as every target is option-based with identical option values. Any
+    // shape mismatch outside that (e.g. text vs number) stays invalid to avoid unsound coercion.
+    const isMixedSelect =
+      !isBaseInvalid &&
+      hasManySelect &&
+      hasScalarSelect &&
+      !hasScalarNonOption &&
+      optionSignatures.size === 1
+
     const isInvalid =
-      hasColumnPathCollision ||
-      !isFieldPresent ||
-      hasUnsupportedFieldShape ||
-      (hasManySelect && scalarQueryValueSignatures.size > 0) ||
-      scalarQueryValueSignatures.size > 1
+      isBaseInvalid ||
+      (!isMixedSelect &&
+        ((hasManySelect && scalarQueryValueSignatures.size > 0) ||
+          scalarQueryValueSignatures.size > 1))
 
     plan.set(schemaPath, {
-      type: isInvalid ? 'invalid' : hasManySelect ? 'hasManySelect' : 'scalar',
+      type: isInvalid
+        ? 'invalid'
+        : isMixedSelect
+          ? 'mixedSelect'
+          : hasManySelect
+            ? 'hasManySelect'
+            : 'scalar',
       columnPath,
       fieldsByCollection,
       schemaPath,
@@ -187,6 +216,18 @@ const textQueryFieldTypes = new Set<FlattenedField['type']>([
   'textarea',
 ])
 
+const isOptionField = (field: FlattenedField): boolean =>
+  field.type === 'select' || field.type === 'radio'
+
+const getOptionSignature = (field: FlattenedField): string => {
+  const optionValues =
+    'options' in field
+      ? field.options.map((option) => (typeof option === 'string' ? option : option.value))
+      : []
+
+  return `${field.type}:${JSON.stringify(optionValues)}`
+}
+
 const getScalarQueryValueSignature = ({
   column,
   field,
@@ -195,11 +236,7 @@ const getScalarQueryValueSignature = ({
   field: FlattenedField
 }): string => {
   if (field.type === 'select' || field.type === 'radio') {
-    const optionValues = field.options.map((option) =>
-      typeof option === 'string' ? option : option.value,
-    )
-
-    return `${field.type}:${JSON.stringify(optionValues)}`
+    return getOptionSignature(field)
   }
 
   if (textQueryFieldTypes.has(field.type)) {
