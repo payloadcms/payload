@@ -512,10 +512,15 @@ export const ltTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Pridėti failą',
     addFiles: 'Pridėti failus',
+    aspectRatio: 'Kraštinių santykis',
+    aspectRatioCustom: 'Pasirinktinis',
+    aspectRatioFreeform: 'Laisvas',
+    aspectRatioOriginal: 'Originalus vaizdas',
     bulkUpload: 'Masinis įkėlimas',
     crop: 'Pasėlis',
     cropToolDescription:
       'Temkite pasirinktos srities kampus, nubrėžkite naują sritį arba koreguokite žemiau esančias reikšmes.',
+    customAspectRatio: 'Pasirinktinis santykis',
     download: 'Atsisiųsti',
     dragAndDrop: 'Temkite ir numeskite failą',
     dragAndDropHere: 'arba nuvilkite failą čia',
@@ -528,6 +533,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Temkite fokusavimo tašką tiesiogiai peržiūroje arba reguliuokite žemiau esančias reikšmes.',
     height: 'Aukštis',
+    invalidAspectRatio: 'Įveskite santykį formatu plotis:aukštis, pavyzdžiui, 16:9.',
     lessInfo: 'Mažiau informacijos',
     moreInfo: 'Daugiau informacijos',
     noFile: 'Nėra failo',

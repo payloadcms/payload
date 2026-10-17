@@ -517,10 +517,15 @@ export const bnInTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'ফাইল যোগ করুন',
     addFiles: 'ফাইলগুলি যোগ করুন',
+    aspectRatio: 'আকৃতির অনুপাত',
+    aspectRatioCustom: 'কাস্টম',
+    aspectRatioFreeform: 'মুক্ত',
+    aspectRatioOriginal: 'মূল ছবি',
     bulkUpload: 'বাল্ক আপলোড',
     crop: 'ক্রপ করুন',
     cropToolDescription:
       'নির্বাচিত অঞ্চলের কোণগুলি টানুন, একটি নতুন অঞ্চল আঁকুন বা নিচের মানগুলি সামঞ্জস্য করুন।',
+    customAspectRatio: 'কাস্টম অনুপাত',
     download: 'ডাউনলোড করুন',
     dragAndDrop: 'একটি ফাইল টেনে এনে ছেড়ে দিন',
     dragAndDropHere: 'অথবা একটি ফাইল টেনে এনে এখানে ছেড়ে দিন',
@@ -532,6 +537,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     focalPoint: 'ফোকাল পয়েন্ট',
     focalPointDescription: 'প্রিভিউতে সরাসরি ফোকাল পয়েন্ট টানুন বা নিচের মানগুলি সামঞ্জস্য করুন।',
     height: 'উচ্চতা',
+    invalidAspectRatio: 'প্রস্থ:উচ্চতা হিসেবে অনুপাত লিখুন, যেমন 16:9।',
     lessInfo: 'কম তথ্য',
     moreInfo: 'আরও তথ্য',
     noFile: 'কোনো ফাইল নেই',

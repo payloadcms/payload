@@ -509,10 +509,15 @@ export const plTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Dodaj plik',
     addFiles: 'Dodaj pliki',
+    aspectRatio: 'Proporcje',
+    aspectRatioCustom: 'Niestandardowe',
+    aspectRatioFreeform: 'Swobodne',
+    aspectRatioOriginal: 'Oryginalny obraz',
     bulkUpload: 'Załaduj masowo',
     crop: 'Przytnij',
     cropToolDescription:
       'Przeciągnij narożniki wybranego obszaru, narysuj nowy obszar lub dostosuj poniższe wartości.',
+    customAspectRatio: 'Niestandardowe proporcje',
     download: 'Pobierz',
     dragAndDrop: 'Przeciągnij i upuść plik',
     dragAndDropHere: 'lub złap i upuść plik tutaj',
@@ -525,6 +530,7 @@ export const plTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Przeciągnij punkt centralny bezpośrednio na podglądzie lub dostosuj wartości poniżej.',
     height: 'Wysokość',
+    invalidAspectRatio: 'Wprowadź proporcje w formacie szerokość:wysokość, na przykład 16:9.',
     lessInfo: 'Mniej informacji',
     moreInfo: 'Więcej informacji',
     noFile: 'Brak pliku',

@@ -508,10 +508,15 @@ export const isTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Bæta við skrá',
     addFiles: 'Bæta við skrám',
+    aspectRatio: 'Myndhlutföll',
+    aspectRatioCustom: 'Sérsniðið',
+    aspectRatioFreeform: 'Frjálst',
+    aspectRatioOriginal: 'Upprunaleg mynd',
     bulkUpload: 'Magn upphal',
     crop: 'Skera',
     cropToolDescription:
       'Dragðu horn valda svæðisins, teiknaðu nýtt svæði eða stilltu gildin hér að neðan.',
+    customAspectRatio: 'Sérsniðin hlutföll',
     download: 'Sækja',
     dragAndDrop: 'Dragðu og slepptu skrá',
     dragAndDropHere: 'eða dragðu og slepptu skrá hér',
@@ -524,6 +529,7 @@ export const isTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Dragðu brennipunktinn beint á forskoðunina eða stilltu gildin hér að neðan.',
     height: 'Hæð',
+    invalidAspectRatio: 'Sláðu inn hlutfall sem breidd:hæð, t.d. 16:9.',
     lessInfo: 'Minni upplýsingar',
     moreInfo: 'Fleiri upplýsingar',
     noFile: 'Engin skrá',

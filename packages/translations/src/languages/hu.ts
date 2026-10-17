@@ -515,10 +515,15 @@ export const huTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Fájl hozzáadása',
     addFiles: 'Fájlok hozzáadása',
+    aspectRatio: 'Képarány',
+    aspectRatioCustom: 'Egyéni',
+    aspectRatioFreeform: 'Szabad',
+    aspectRatioOriginal: 'Eredeti kép',
     bulkUpload: 'Tömeges feltöltés',
     crop: 'Termés',
     cropToolDescription:
       'Húzza a kijelölt terület sarkait, rajzoljon új területet, vagy igazítsa a lentebb található értékeket.',
+    customAspectRatio: 'Egyéni képarány',
     download: 'Letöltés',
     dragAndDrop: 'Húzzon ide egy fájlt',
     dragAndDropHere: 'vagy húzzon ide egy fájlt',
@@ -531,6 +536,7 @@ export const huTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Húzza az érdekes pontot közvetlenül az előnézetre, vagy állítsa be az alábbi értékeket.',
     height: 'Magasság',
+    invalidAspectRatio: 'Adja meg az arányt szélesség:magasság formában, például 16:9.',
     lessInfo: 'Kevesebb információ',
     moreInfo: 'További információ',
     noFile: 'Nincs fájl',
