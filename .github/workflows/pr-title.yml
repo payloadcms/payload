@@ -62,6 +62,7 @@ jobs:
             plugin-cloud-storage
             plugin-ecommerce
             plugin-form-builder
+            plugin-exif
             plugin-import-export
             plugin-mcp
             plugin-multi-tenant
