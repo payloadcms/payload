@@ -1,21 +1,26 @@
-import { type FormField, type FormState } from 'payload'
+import type { FormField, FormState } from 'payload'
+
+import { setOwnProperty } from 'payload/shared'
 
 type BlacklistedKeys = 'customComponents' | 'validate'
 const blacklistedKeys: BlacklistedKeys[] = ['validate', 'customComponents']
 
 const sanitizeField = (incomingField: FormField): FormField => {
-  const field = { ...incomingField } // shallow copy, as we only need to remove top-level keys
+  const field = { ...incomingField }
 
   for (const key of blacklistedKeys) {
     delete field[key]
+  }
+
+  if (field.rows) {
+    field.rows = field.rows.map(({ customComponents: _customComponents, ...row }) => row)
   }
 
   return field
 }
 
 /**
- * Takes in FormState and removes fields that are not serializable.
- * Returns FormState without blacklisted keys.
+ * Removes field and row components and field validators without changing field values.
  */
 export const reduceToSerializableFields = (
   fields: FormState,
@@ -25,7 +30,7 @@ export const reduceToSerializableFields = (
   const result: Record<string, Omit<FormField, BlacklistedKeys>> = {}
 
   for (const key in fields) {
-    result[key] = sanitizeField(fields[key])
+    setOwnProperty({ key, target: result, value: sanitizeField(fields[key]) })
   }
 
   return result
