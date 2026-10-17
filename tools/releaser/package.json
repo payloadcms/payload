@@ -26,8 +26,6 @@
   },
   "scripts": {
     "build": "tsc",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "list-published": "tsx src/list-published.ts",
     "publish-prerelease": "tsx src/publish-prerelease.ts",
     "release": "tsx src/release.ts",
