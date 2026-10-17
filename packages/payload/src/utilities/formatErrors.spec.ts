@@ -33,6 +33,28 @@ describe('formatErrors', () => {
     })
   })
 
+  it('should keep data for a Payload error thrown by another copy of the error classes', () => {
+    // Simulates a ValidationError created by a second bundled copy of payload, where
+    // instanceof fails and the class name has been minified
+    class ValidationErrorCopy extends Error {
+      data = { collection: 'posts', errors: [{ message: 'Field is required', path: 'title' }] }
+      isOperational = true
+      isPublic = true
+      status = 400
+    }
+
+    const err = new ValidationErrorCopy('The following field is invalid: title')
+    err.name = 'l'
+
+    const result = formatErrors(err as any)
+
+    expect(result.errors).toHaveLength(1)
+    expect(result.errors[0]).toMatchObject({
+      message: 'The following field is invalid: title',
+      data: { collection: 'posts', errors: [{ message: 'Field is required', path: 'title' }] },
+    })
+  })
+
   it('should format a Mongoose-style ValidationError', () => {
     const mongooseError = {
       name: 'ValidationError',
