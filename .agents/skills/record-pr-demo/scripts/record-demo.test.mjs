@@ -599,3 +599,86 @@ test('should show a temporary click ring at the click point above popups', async
     await rm(directory, { force: true, recursive: true })
   }
 })
+
+test('should click scaled targets, type with keys, and require wheel input to reveal targets', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'demo-gestures-'))
+  const scenario = path.join(directory, 'scenario.mjs')
+  try {
+    await writeFile(
+      scenario,
+      `${presentationExport}
+      export default async function({page,click,typeText,expect,scroll}) {
+        await page.goto('data:text/html,'+encodeURIComponent('<style>body{margin:0}button,input{display:block;margin:30px}#scroller{height:180px;overflow:auto}#spacer{height:800px}</style><input aria-label="Title" value="Old title" onkeydown="this.dataset.key=event.key" oninput="this.dataset.trusted=event.isTrusted"><button onclick="this.textContent=String.fromCharCode(67,108,105,99,107,101,100)">Click target</button><div id="scroller"><div id="spacer"></div><button>Offscreen</button></div>'))
+        await click(page.getByRole('button',{name:'Click target',exact:true}))
+        await expect(page.getByRole('button',{name:'Clicked',exact:true})).toBeVisible()
+        await typeText({locator:page.getByRole('textbox',{name:'Title'}),text:'New title',clear:true,delay:1})
+        await expect(page.getByRole('textbox',{name:'Title'})).toHaveValue('New title')
+        await expect(page.getByRole('textbox',{name:'Title'})).toHaveAttribute('data-key','e')
+        await expect(page.getByRole('textbox',{name:'Title'})).toHaveAttribute('data-trusted','true')
+        let rejected=false
+        try { await click(page.getByRole('button',{name:'Offscreen',exact:true})) } catch(error) { rejected=/wheel|visible/.test(error.message) }
+        if(!rejected)throw new Error('Offscreen click silently scrolled')
+        await expect(page.locator('#scroller')).toHaveJSProperty('scrollTop',0)
+        await scroll(page.locator('#scroller'),{duration:100,settle:0})
+        await click(page.getByRole('button',{name:'Offscreen',exact:true}))
+      }
+    `,
+    )
+    await recorder.validateDemo({
+      baseURL: 'http://localhost:3000',
+      label: 'gestures',
+      scenario,
+      viewport: { width: 1800, height: 1100 },
+    })
+  } finally {
+    await rm(directory, { force: true, recursive: true })
+  }
+})
+
+for (const mode of ['disabled', 'moving', 'covered', 'partial', 'explicit']) {
+  test(`should handle ${mode} click targets safely`, async () => {
+    const directory = await mkdtemp(path.join(tmpdir(), 'demo-click-safety-'))
+    const scenario = path.join(directory, 'scenario.mjs')
+    try {
+      await writeFile(
+        scenario,
+        `${presentationExport}
+        export default async function({page,click,expect}) {
+          const mode = ${JSON.stringify(mode)}
+          await page.goto('data:text/html,' + encodeURIComponent(
+            '<style>body{margin:0}button{position:absolute;left:60px;top:60px;width:240px;height:80px}#cover{position:absolute;left:140px;top:60px;width:80px;height:80px}</style>' +
+            '<button '+(mode==='disabled'?'disabled':'')+' onclick="this.dataset.clicked=String(event.isTrusted)">Target</button>' +
+            (mode==='partial'||mode==='explicit'?'<div id="cover"></div>':'')
+          ))
+          const target=page.getByRole('button',{name:'Target'})
+          if(mode==='disabled') await target.evaluate(el=>setTimeout(()=>{el.disabled=false},200))
+          if(mode==='moving'||mode==='covered') await target.evaluate((el,mode)=>{
+            el.addEventListener('pointerenter',()=>setTimeout(()=>{
+              if(mode==='moving') el.style.left='400px'
+              else { const cover=document.createElement('div');cover.style='position:absolute;inset:0;background:white';document.body.append(cover) }
+            },30),{once:true})
+          },mode)
+          if(mode==='moving'||mode==='covered'||mode==='explicit') {
+            let rejected=false
+            try { await click(target,{duration:0,before:250,after:0,...(mode==='explicit'?{position:{x:120,y:40}}:{})}) }
+            catch(error) { rejected=/visible|unobstructed/.test(error.message) }
+            if(!rejected)throw new Error('Unsafe click returned success')
+            await expect(target).not.toHaveAttribute('data-clicked','true')
+          } else {
+            await click(target,{duration:0,before:0,after:0})
+            await expect(target).toHaveAttribute('data-clicked','true')
+          }
+        }
+      `,
+      )
+      await recorder.validateDemo({
+        baseURL: 'http://localhost:3000',
+        label: 'click-safety',
+        scenario,
+        viewport: { width: 1800, height: 1100 },
+      })
+    } finally {
+      await rm(directory, { force: true, recursive: true })
+    }
+  })
+}

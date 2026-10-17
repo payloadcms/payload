@@ -96,17 +96,25 @@ export async function packageCandidate({
   output,
   rawOutput,
   scenario,
+  scenarioSource,
   trimStart,
 }) {
   if (!Number.isFinite(trimStart) || trimStart < 0) {
     throw new Error('Candidate is missing a valid opening ready time')
   }
 
+  await assertCandidatePathsAvailable({ contactSheet, manifest, output, rawOutput })
+
   const resolvedContactSheet = path.resolve(contactSheet)
   const resolvedManifest = path.resolve(manifest)
   const resolvedOutput = path.resolve(output)
   const resolvedRawOutput = path.resolve(rawOutput)
   const resolvedScenario = path.resolve(scenario)
+  if (scenarioSource && !(await readFile(resolvedScenario)).equals(scenarioSource)) {
+    throw new Error(
+      'The scenario changed during this take. Use a new --label and record again so the script matches the video.',
+    )
+  }
 
   await convertDemo({
     environment,
@@ -177,6 +185,11 @@ export async function packageCandidate({
     height: videoStream.height,
     width: videoStream.width,
   }
+  const script = await saveScenarioSnapshot({
+    output: resolvedOutput,
+    scenario: resolvedScenario,
+    source: scenarioSource,
+  })
   const candidateManifest = {
     contactSheet: resolvedContactSheet,
     createdAt: new Date().toISOString(),
@@ -184,6 +197,8 @@ export async function packageCandidate({
     metadata,
     mp4: resolvedOutput,
     scenario: resolvedScenario,
+    scenarioSnapshot: script.path,
+    scenarioSha256: script.sha256,
     sha256,
     sizeBytes: fileStats.size,
   }
@@ -197,9 +212,19 @@ export async function packageCandidate({
     manifestPath: resolvedManifest,
     metadata,
     outputPath: resolvedOutput,
+    scenarioSnapshotPath: script.path,
     sha256,
     sizeBytes: fileStats.size,
   }
+}
+
+export async function saveScenarioSnapshot({ output, scenario, source }) {
+  const scriptPath = scenarioSnapshotPath({ output })
+  const scriptSource = source ?? (await readFile(scenario))
+  const sha256 = createHash('sha256').update(scriptSource).digest('hex')
+  await mkdir(path.dirname(scriptPath), { recursive: true })
+  await writeFile(scriptPath, scriptSource, { flag: 'wx' })
+  return { path: scriptPath, sha256 }
 }
 
 export async function verifyCandidateManifest(manifestPath) {
@@ -209,7 +234,9 @@ export async function verifyCandidateManifest(manifestPath) {
   if (
     typeof candidateManifest.mp4 !== 'string' ||
     typeof candidateManifest.sha256 !== 'string' ||
-    !Number.isFinite(candidateManifest.sizeBytes)
+    !Number.isFinite(candidateManifest.sizeBytes) ||
+    typeof candidateManifest.scenarioSnapshot !== 'string' ||
+    typeof candidateManifest.scenarioSha256 !== 'string'
   ) {
     throw new Error(`Candidate manifest is incomplete: ${resolvedManifest}`)
   }
@@ -224,13 +251,30 @@ export async function verifyCandidateManifest(manifestPath) {
     )
   }
 
+  const scriptBuffer = await readFile(candidateManifest.scenarioSnapshot)
+  const scenarioSha256 = createHash('sha256').update(scriptBuffer).digest('hex')
+
+  if (scenarioSha256 !== candidateManifest.scenarioSha256) {
+    throw new Error(
+      `The scenario snapshot does not match the reviewed candidate in ${resolvedManifest}. Review it again before upload.`,
+    )
+  }
+
   return { manifest: resolvedManifest, mp4: candidateManifest.mp4, sha256 }
 }
 
-export async function assertCandidatePathsAvailable({ contactSheet, manifest, output }) {
-  const protectedPaths = [contactSheet, manifest, output].map((candidatePath) =>
-    path.resolve(candidatePath),
+export async function assertCandidatePathsAvailable({ contactSheet, manifest, output, rawOutput }) {
+  const protectedPaths = [contactSheet, manifest, output, scenarioSnapshotPath({ output })].map(
+    (candidatePath) => path.resolve(candidatePath),
   )
+  const allPaths = rawOutput ? [...protectedPaths, path.resolve(rawOutput)] : protectedPaths
+
+  if (new Set(allPaths).size !== allPaths.length) {
+    throw new Error(
+      'Candidate artifact paths must be distinct, including the scenario snapshot and raw recording',
+    )
+  }
+
   const existingPaths = []
 
   for (const candidatePath of protectedPaths) {
@@ -262,7 +306,10 @@ export async function runPreparation(options) {
     return result
   }
 
-  await runPreflight({ baseURL: options.baseURL, requiresServer: options.mode !== 'preflight' })
+  await runPreflight({
+    baseURL: options.baseURL,
+    requiresServer: options.mode !== 'preflight',
+  })
   printStage('Environment ready', startedAt)
 
   if (options.mode === 'preflight') {
@@ -301,6 +348,7 @@ export async function runPreparation(options) {
   }
 
   await assertCandidatePathsAvailable(options)
+  const scenarioSource = await readFile(options.scenario)
 
   await runWithScenarioFixture(options, async (fixture) => {
     await validateDemo({
@@ -338,6 +386,7 @@ export async function runPreparation(options) {
     output: options.output,
     rawOutput: options.rawOutput,
     scenario: options.scenario,
+    scenarioSource,
     trimStart,
   })
   printStage('Candidate verified', startedAt)
@@ -360,7 +409,10 @@ async function runPreflight({ baseURL, requiresServer }) {
 
   let response
   try {
-    response = await fetch(baseURL, { redirect: 'manual', signal: AbortSignal.timeout(5000) })
+    response = await fetch(baseURL, {
+      redirect: 'manual',
+      signal: AbortSignal.timeout(5000),
+    })
   } catch (error) {
     throw new Error(`Payload server is not reachable at ${baseURL}: ${error.message}`)
   }
@@ -378,6 +430,7 @@ export async function runWithScenarioFixture(options, action) {
   const hasSetup = typeof scenarioModule.setup === 'function'
   let isSetupComplete = !hasSetup
   let fixture
+  const errors = []
 
   try {
     if (hasSetup) {
@@ -390,20 +443,41 @@ export async function runWithScenarioFixture(options, action) {
     }
 
     await action(fixture)
-  } finally {
-    try {
-      if (isSetupComplete && typeof scenarioModule.teardown === 'function') {
-        await scenarioModule.teardown({
-          baseURL: options.baseURL,
-          fixture,
-          label: options.label,
-          request: requestContext,
-        })
-      }
-    } finally {
-      await requestContext.dispose()
-    }
+  } catch (error) {
+    errors.push(error)
   }
+
+  try {
+    if (isSetupComplete && typeof scenarioModule.teardown === 'function') {
+      await scenarioModule.teardown({
+        baseURL: options.baseURL,
+        fixture,
+        label: options.label,
+        request: requestContext,
+      })
+    }
+  } catch (error) {
+    errors.push(error)
+  }
+
+  try {
+    await requestContext.dispose()
+  } catch (error) {
+    errors.push(error)
+  }
+
+  if (errors.length === 1) throw errors[0]
+  if (errors.length > 1) {
+    throw new AggregateError(
+      errors,
+      `Scenario execution and cleanup failed: ${errors.map((error) => (error instanceof Error ? error.message : String(error))).join('; ')}`,
+      { cause: errors[0] },
+    )
+  }
+}
+
+function scenarioSnapshotPath({ output }) {
+  return path.resolve(`${output.replace(/\.[^.]+$/, '')}.scenario.mjs`)
 }
 
 function parseTiming({ name, value }) {
@@ -443,6 +517,7 @@ function printCandidate(result) {
   console.log(`Duration: ${result.metadata.durationSeconds.toFixed(2)}s`)
   console.log(`Size: ${(result.sizeBytes / 1024).toFixed(0)} KiB`)
   console.log(`SHA256: ${result.sha256}`)
+  console.log(`Review script: ${result.scenarioSnapshotPath}`)
   console.log(`Review sheet: ${result.contactSheetPath}`)
   console.log(`Manifest: ${result.manifestPath}`)
   console.log('Awaiting approval — nothing uploaded.')

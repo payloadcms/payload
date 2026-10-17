@@ -198,7 +198,10 @@ async function executeDemo({
   const { chromium, expect } = await import('@playwright/test')
   const rawVideoDirectory = await mkdtemp(path.join(tmpdir(), 'payload-pr-demo-'))
   const browser = await chromium.launch({ headless: true })
-  const recordedViewport = scenarioModule.presentation.canvas ?? { width: 1600, height: 1000 }
+  const recordedViewport = scenarioModule.presentation.canvas ?? {
+    width: 1600,
+    height: 1000,
+  }
   const context = await browser.newContext({
     viewport: recordedViewport,
     colorScheme: scenarioModule.presentation.theme ?? 'light',
@@ -311,7 +314,10 @@ async function executeDemo({
             isReducedMotion
               ? [{ opacity: 0.9 }, { opacity: 0.9, offset: 0.7 }, { opacity: 0 }]
               : [
-                  { opacity: 0.9, transform: 'translate(-50%, -50%) scale(0.55)' },
+                  {
+                    opacity: 0.9,
+                    transform: 'translate(-50%, -50%) scale(0.55)',
+                  },
                   { opacity: 0.55, offset: 0.5 },
                   { opacity: 0, transform: 'translate(-50%, -50%) scale(1.4)' },
                 ],
@@ -362,7 +368,9 @@ async function executeDemo({
       mouseMoveMs,
       page,
     })
-    const annotationInteractions = createAnnotationInteraction({ presentation })
+    const annotationInteractions = createAnnotationInteraction({
+      presentation,
+    })
     await scenarioModule.default({
       clearAnnotation: annotationInteractions.hideAnnotation,
       resizeWindow: presentation.resizeWindow,
@@ -372,6 +380,11 @@ async function executeDemo({
           : annotationInteractions.showAnnotation(annotation),
       baseURL: parsedBaseURL.toString().replace(/\/$/, ''),
       click: pointerInteractions.click,
+      typeText: async ({ locator, text, clear = false, delay = 80 }) => {
+        await pointerInteractions.click(locator)
+        if (clear) await page.keyboard.press('ControlOrMeta+A')
+        await page.keyboard.type(text, { delay })
+      },
       expect,
       fixture,
       hideAnnotation: annotationInteractions.hideAnnotation,
@@ -433,37 +446,84 @@ async function executeDemo({
 function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
   let pointerPosition = { x: 0, y: 0 }
 
+  const getTargetPoint = async ({ locator, position, pagePoint }) => {
+    await locator.waitFor({ state: 'visible' })
+    const box = await locator.boundingBox()
+    if (!box) throw new Error('Cannot move the demo cursor to an element without a bounding box')
+    const local = await locator.evaluate(
+      (element, { position, pagePoint, box }) => {
+        const rect = element.getBoundingClientRect()
+        let left = Math.max(0, rect.left)
+        let top = Math.max(0, rect.top)
+        let right = Math.min(innerWidth, rect.right)
+        let bottom = Math.min(innerHeight, rect.bottom)
+        for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+          const style = getComputedStyle(parent)
+          const clip = parent.getBoundingClientRect()
+          if (/(auto|scroll|hidden|clip)/.test(style.overflowX)) {
+            left = Math.max(left, clip.left)
+            right = Math.min(right, clip.right)
+          }
+          if (/(auto|scroll|hidden|clip)/.test(style.overflowY)) {
+            top = Math.max(top, clip.top)
+            bottom = Math.min(bottom, clip.bottom)
+          }
+        }
+        const points = pagePoint
+          ? [
+              {
+                x: rect.left + ((pagePoint.x - box.x) * rect.width) / box.width,
+                y: rect.top + ((pagePoint.y - box.y) * rect.height) / box.height,
+              },
+            ]
+          : position
+            ? [
+                {
+                  x: rect.left + element.clientLeft + position.x,
+                  y: rect.top + element.clientTop + position.y,
+                },
+              ]
+            : [
+                { x: (left + right) / 2, y: (top + bottom) / 2 },
+                ...[0.1, 0.5, 0.9].flatMap((x) =>
+                  [0.1, 0.5, 0.9].map((y) => ({
+                    x: left + (right - left) * x,
+                    y: top + (bottom - top) * y,
+                  })),
+                ),
+              ]
+        const point = points.find(({ x, y }) => {
+          if (right <= left || bottom <= top || x < left || x >= right || y < top || y >= bottom)
+            return false
+          const hit = document.elementFromPoint(x, y)
+          return hit && element.contains(hit)
+        })
+        if (!point) {
+          throw new Error(
+            'Demo target must be visible and unobstructed; reveal it with wheel scrolling before clicking',
+          )
+        }
+        const { x, y } = point
+        return {
+          x: x - rect.left,
+          y: y - rect.top,
+          width: rect.width,
+          height: rect.height,
+        }
+      },
+      { position, pagePoint, box },
+    )
+    return {
+      x: box.x + local.x * (box.width / local.width),
+      y: box.y + local.y * (box.height / local.height),
+    }
+  }
+
   const moveCursor = async (
     locator,
     { duration = mouseMoveMs, pauseAfter = interactionPauseMs, position } = {},
   ) => {
-    await locator.scrollIntoViewIfNeeded()
-
-    const box = await locator.boundingBox()
-    if (!box) {
-      throw new Error('Cannot move the demo cursor to an element without a bounding box')
-    }
-
-    let relativePosition = { x: box.width / 2, y: box.height / 2 }
-    if (position) {
-      const localBox = await locator.evaluate((element) => {
-        const rect = element.getBoundingClientRect()
-        return {
-          width: rect.width,
-          height: rect.height,
-          borderX: element.clientLeft,
-          borderY: element.clientTop,
-        }
-      })
-      relativePosition = {
-        x: (position.x + localBox.borderX) * (box.width / localBox.width),
-        y: (position.y + localBox.borderY) * (box.height / localBox.height),
-      }
-    }
-    const targetPosition = {
-      x: box.x + relativePosition.x,
-      y: box.y + relativePosition.y,
-    }
+    const targetPosition = await getTargetPoint({ locator, position })
     const steps = duration === 0 ? 1 : Math.max(2, Math.round(duration / 16))
     const stepDelay = steps === 1 ? 0 : duration / steps
 
@@ -498,12 +558,20 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
       position,
     } = {},
   ) => {
-    await moveCursor(locator, { duration, pauseAfter: before, position })
-    if (position) {
-      // Click at the same outer-page point as the cursor, including iframe scaling.
+    const target = await locator.elementHandle()
+    if (!target) throw new Error('Demo click target is unavailable')
+
+    try {
+      await target.waitForElementState('enabled', { timeout: 10_000 })
+      await target.waitForElementState('stable', { timeout: 10_000 })
+      await moveCursor(locator, { duration, pauseAfter: before, position })
+      await target.waitForElementState('enabled', { timeout: 10_000 })
+      await target.waitForElementState('stable', { timeout: 10_000 })
+      await getTargetPoint({ locator, pagePoint: pointerPosition })
+      // Use the same outer-page point for the visible cursor and the actual click.
       await page.mouse.click(pointerPosition.x, pointerPosition.y)
-    } else {
-      await locator.click()
+    } finally {
+      await target.dispose()
     }
 
     if (after > 0) {
