@@ -236,3 +236,24 @@ test('should send real wheel events and never repair prevented input', async () 
     },
   })
 })
+
+test('should pace whole-pixel wheel deltas over a short overflow range', async () => {
+  await withScroller({
+    run: async ({ locator, page, scroll }) => {
+      await locator.locator('#content').evaluate((element) => {
+        element.style.height = '168px'
+        element.addEventListener('wheel', (event) => {
+          window.wheelDeltas ??= []
+          window.wheelDeltas.push(event.deltaY)
+        })
+      })
+      assert.deepEqual(await scroll(locator, { duration: 1000, settle: 0 }), {
+        position: 144,
+        target: 144,
+      })
+      const deltas = await page.evaluate(() => window.wheelDeltas)
+      assert.ok(deltas.length > 5)
+      assert.ok(deltas.every(Number.isInteger))
+    },
+  })
+})

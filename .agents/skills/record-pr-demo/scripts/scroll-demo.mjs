@@ -122,7 +122,9 @@ export function createScrollInteraction({ moveCursor, page }) {
 
         for (let step = 1; step <= steps; step += 1) {
           const eased = (1 - Math.cos((Math.PI * step) / steps)) / 2
-          const next = step === steps ? target : range.start + (target - range.start) * eased
+          // Chromium exposes whole-pixel scroll positions, so each checkpoint must be attainable.
+          const next =
+            step === steps ? target : Math.round(range.start + (target - range.start) * eased)
           const delta = next - previous
 
           await page.mouse.wheel(axis === 'x' ? delta : 0, axis === 'y' ? delta : 0)
