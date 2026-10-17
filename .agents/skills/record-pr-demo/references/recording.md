@@ -34,7 +34,7 @@ Prefer 10–45 seconds. Avoid long typing sequences, setup screens, loading wait
 
 ## Editorial annotations over the recording
 
-Annotations live in the shared chrome panel above the application. The change title and description stay constant; step titles and bodies update through `showAnnotation` and `hideAnnotation`. Supply content and optional one-based `index`/`total`, which default to 1. A progress ring appears for multiple steps; exact step text remains available to assistive technology. Step text fades on changes, and forward progress eases the ring. Reduced-motion preferences skip these animations.
+Annotations live in the shared chrome panel above the application. The change title and description stay constant; step titles and bodies update through `showAnnotation` and `hideAnnotation`. Supply content and optional one-based `index`/`total`, which default to 1. A progress ring appears for multiple steps; exact step text remains available to assistive technology. The opening annotation and any return to step 1 appear immediately. Later step text fades on changes, and forward progress eases the ring. Reduced-motion preferences skip these animations.
 
 ```js
 await showAnnotation({

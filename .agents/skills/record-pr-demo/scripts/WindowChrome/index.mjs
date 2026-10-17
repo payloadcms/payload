@@ -170,9 +170,9 @@ export function mountDemoChrome({
       }
     })
   }
-  const animateAnnotationText = ({ previousText, hasAnnotation }) => {
+  const animateAnnotationText = ({ previousText, hasAnnotation, shouldAnimate = true }) => {
     cancelAnnotationAnimations()
-    if (!canAnimateAnnotationText()) return
+    if (!shouldAnimate || !canAnimateAnnotationText()) return
     for (const snapshot of previousText) {
       const ghost = document.createElement('div')
       ghost.setAttribute('data-annotation-ghost', '')
@@ -312,6 +312,7 @@ export function mountDemoChrome({
         )
       )
         return
+      const shouldAnimate = previousAnnotation !== null && index !== 1
       const previousText = captureAnnotationText()
       renderAnnotation(annotation)
       if (find('[data-note]').offsetHeight > find('[data-footer]').clientHeight - 24) {
@@ -319,7 +320,7 @@ export function mountDemoChrome({
         throw new Error('Shorten the annotation to fit the fixed footer')
       }
       previousAnnotation = { index, total, title, body }
-      animateAnnotationText({ previousText, hasAnnotation: true })
+      animateAnnotationText({ previousText, hasAnnotation: true, shouldAnimate })
     },
     destroy() {
       clearTimeout(refreshTimer)
