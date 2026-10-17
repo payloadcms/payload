@@ -172,7 +172,9 @@ export async function migrateSqliteLocalizeStatus(args: LocalizeStatusArgs): Pro
   const mainTable = collectionSlug ? toSnakeCase(collectionSlug) : toSnakeCase(globalSlug)
   const mainLocalesTable = `${mainTable}_locales`
 
-  if (await tableExists({ db, tableName: mainLocalesTable })) {
+  const hasMainLocalesTable = await tableExists({ db, tableName: mainLocalesTable })
+
+  if (hasMainLocalesTable) {
     if (!(await columnExists({ columnName: '_status', db, tableName: mainLocalesTable }))) {
       await db.run(
         sql.raw(`ALTER TABLE "${mainLocalesTable}" ADD COLUMN _status TEXT DEFAULT 'draft'`),
@@ -192,12 +194,15 @@ export async function migrateSqliteLocalizeStatus(args: LocalizeStatusArgs): Pro
     }
   } else {
     payload.logger.info({
-      msg: `No locales table found: ${mainLocalesTable} (collection/global not localized)`,
+      msg: `No main locales table found: ${mainLocalesTable}; preserving the existing _status column`,
     })
   }
 
   // Drop _status from main table if it exists (it will be in locales table now)
-  if (await columnExists({ columnName: '_status', db, tableName: mainTable })) {
+  if (
+    hasMainLocalesTable &&
+    (await columnExists({ columnName: '_status', db, tableName: mainTable }))
+  ) {
     await dropColumn({ columnName: '_status', db, tableName: mainTable })
   }
 

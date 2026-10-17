@@ -1760,6 +1760,83 @@ The same change applies to `upload` fields with `hasMany: true`.
 - Remove the `compatibility` block from your config. If your MongoDB data still has the redundant nested-localized shape, flatten the config and run a data migration.
 - Replace any direct `field.localized` reads in custom code with `fieldShouldBeLocalized({ field, parentIsLocalized })` from `payload/shared`.
 
+### Localized drafts require a status data migration ([#16945](https://github.com/payloadcms/payload/pull/16945))
+
+When localization is configured, Payload now automatically localizes `_status` for collections and globals that have drafts enabled and contain at least one localized field. Publication status is tracked independently for each locale. Collections and globals without localized fields keep a single `_status` value.
+
+Remove `experimental.localizeStatus` and `versions.drafts.localizeStatus` from your config, whether set to `true` or `false`. Localized status is automatic; `localizeStatus: false` no longer opts out. Existing projects that previously set it to `false` must also run the data migration below when they have localized fields and drafts enabled. To remove these settings automatically, run:
+
+```bash
+npx @payloadcms/codemod --transform remove-localize-status-config
+```
+
+#### Required database migration
+
+Existing projects with affected collections or globals must generate and run the predefined `localize-status` migration for their database adapter. New writes use localized status, but existing documents and versions retain the old scalar status until migrated. This migration is required even if you never used `publishSpecificLocale` or opted into localized status in Payload 3.
+
+The migration converts status in existing documents and versions to per-locale values, reconstructs per-locale publication history, and deletes obsolete snapshot versions. It also removes the old `snapshot` field or column.
+
+Back up your database before running the migration. For Postgres and SQLite, run it against the existing schema before applying schema changes that drop the old status or snapshot columns: the migration needs those values to preserve publication history.
+
+Generate **one** migration, using the command for your adapter:
+
+```bash
+# MongoDB
+pnpm payload migrate:create --file @payloadcms/db-mongodb/localize-status
+
+# Postgres
+pnpm payload migrate:create --file @payloadcms/db-postgres/localize-status
+
+# SQLite
+pnpm payload migrate:create --file @payloadcms/db-sqlite/localize-status
+```
+
+For Postgres and SQLite projects with existing migration snapshots, this command also writes a `.json` schema snapshot containing only the changes performed by `localize-status`. Commit it alongside the generated migration. Later migrations will still detect unrelated schema changes from the upgrade. Projects without an existing snapshot do not get one from this migration.
+
+Then run the generated migration before serving requests with Payload 4:
+
+```bash
+pnpm payload migrate
+```
+
+MongoDB does not run this migration automatically. Postgres and SQLite development `push` mode does not perform the data transformation, so it does not replace this migration. See [Migrations](../database/migrations) for configuring and running migrations in your deployment pipeline.
+
+#### Publishing and unpublishing through the API
+
+When `_status` is localized, publishing and unpublishing now affect only the request locale by default. To preserve the previous behavior of changing every locale, pass `publishAllLocales: true` when publishing or `unpublishAllLocales: true` when unpublishing:
+
+```ts
+await payload.update({
+  collection: 'posts',
+  id,
+  publishAllLocales: true,
+  data: { _status: 'published' },
+})
+
+await payload.update({
+  collection: 'posts',
+  id,
+  unpublishAllLocales: true,
+  data: { _status: 'draft' },
+})
+```
+
+The same options apply to `payload.updateGlobal()`.
+
+`publishSpecificLocale` has been removed from the Local and REST APIs. Use `locale` to select the locale to publish instead:
+
+```diff
+await payload.update({
+  collection: 'posts',
+  id,
+- publishSpecificLocale: 'en',
++ locale: 'en',
+  data: { _status: 'published' },
+})
+```
+
+Run `npx @payloadcms/codemod --transform remove-publish-specific-locale` to migrate Local API call sites automatically. The codemod renames `publishSpecificLocale` to `locale` when `locale` is not already set, and removes it otherwise. These codemods update code only; you must still run the database migration above.
+
 ### Publishing now defaults to the active locale
 
 The Admin UI Publish button now always defaults to publishing only the active locale when a collection or global has localized fields and you have publish permission. "Publish all locales" is available as a secondary option in the Publish button's dropdown. This previously required opting in via `localization.defaultLocalePublishOption: 'active'`; the config option has been removed since active-locale-only is now the permanent default.
