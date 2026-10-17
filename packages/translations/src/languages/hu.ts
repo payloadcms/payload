@@ -208,6 +208,7 @@ export const huTranslations: DefaultTranslationsObject = {
     browseByFolder: 'Mappa szerint böngészés',
     byFolder: 'Mappánként',
     deleteFolder: 'Mappa törlése',
+    folder: 'Mappa',
     folderName: 'Mappa neve',
     folders: 'Mappák',
     folderTypeDescription:
@@ -268,7 +269,6 @@ export const huTranslations: DefaultTranslationsObject = {
     changesNotSaved:
       'A módosítások nem lettek mentve. Ha most távozik, elveszíti a változtatásokat.',
     clear: 'Tiszta',
-    clearAll: 'Törölj mindent',
     close: 'Bezárás',
     collapse: 'Összecsukás',
     collections: 'Gyűjtemények',
@@ -315,6 +315,7 @@ export const huTranslations: DefaultTranslationsObject = {
     deleting: 'Törlés...',
     depth: 'Mélység',
     descending: 'Csökkenő',
+    deselectAll: 'Összes kijelölés törlése',
     deselectAllRows: 'Jelölje ki az összes sort',
     document: 'Dokumentum',
     documentIsTrashed: 'Ez a {{label}} szemétdobozba került, és csak olvasható.',
@@ -441,6 +442,7 @@ export const huTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Mutasd az összes {{címke}}',
     sorryNotFound: 'Sajnáljuk – nincs semmi, ami megfelelne a kérésének.',
     sort: 'Rendezés',
+    sortBy: 'Rendezés szerint',
     sortByLabelDirection: 'Rendezés {{label}} {{direction}} szerint',
     stayOnThisPage: 'Maradjon ezen az oldalon',
     submissionSuccessful: 'Beküldés sikeres.',

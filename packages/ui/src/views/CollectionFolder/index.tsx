@@ -303,7 +303,9 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                   buttonLabel={
                     allowCreateCollectionSlugs.length > 1
                       ? t('general:createNew')
-                      : `${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`
+                      : t('general:createNewLabel', {
+                          label: getTranslation(folderCollectionConfig.labels?.singular, i18n),
+                        })
                   }
                   collectionSlugs={allowCreateCollectionSlugs}
                   key="create-new-button"
@@ -341,7 +343,9 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
               Actions={[
                 allowCreateCollectionSlugs.includes(folderCollectionSlug) && (
                   <ListCreateNewDocInFolderButton
-                    buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
+                    buttonLabel={t('general:createNewLabel', {
+                      label: getTranslation(folderCollectionConfig.labels?.singular, i18n),
+                    })}
                     buttonSize="medium"
                     buttonStyle="primary"
                     collectionSlugs={[folderCollectionConfig.slug]}
@@ -351,7 +355,9 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                 ),
                 allowCreateCollectionSlugs.includes(collectionSlug) && (
                   <ListCreateNewDocInFolderButton
-                    buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
+                    buttonLabel={t('general:createNewLabel', {
+                      label: t('general:document'),
+                    })}
                     buttonSize="medium"
                     buttonStyle="primary"
                     collectionSlugs={[collectionSlug]}
