@@ -23,11 +23,7 @@ const RadioGroupFieldComponent: React.FC<RadioFieldClientProps> = (props) => {
     disableModifyingForm: disableModifyingFormFromProps,
     field,
     field: {
-      admin: {
-        className,
-        description,
-        layout = 'horizontal',
-      } = {},
+      admin: { className, description, layout = 'horizontal' } = {},
       label,
       localized,
       options = [],

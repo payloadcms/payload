@@ -558,21 +558,19 @@ export const generateFileData = async <T>({
               staticPath: staticPath!,
             })
           : fsSafeName)
-      const original =
-        retainedOriginal ??
-        ({
-          _objectKey: providerOriginal ? providerOriginal._objectKey : newObjectKey,
-          filename: originalFilename,
-          filesize: file.size,
-          mimeType: file.mimetype,
-          prefix: providerOriginal?.prefix ?? currentFileData?.prefix,
-          url: formatAdminURL({
-            apiRoute: req.payload.config.routes.api,
-            path: `/${collectionConfig.slug}/file/${encodeURIComponent(originalFilename)}`,
-            relative: true,
-            serverURL: req.payload.config.serverURL,
-          }),
-        })
+      const original = retainedOriginal ?? {
+        _objectKey: providerOriginal ? providerOriginal._objectKey : newObjectKey,
+        filename: originalFilename,
+        filesize: file.size,
+        mimeType: file.mimetype,
+        prefix: providerOriginal?.prefix ?? currentFileData?.prefix,
+        url: formatAdminURL({
+          apiRoute: req.payload.config.routes.api,
+          path: `/${collectionConfig.slug}/file/${encodeURIComponent(originalFilename)}`,
+          relative: true,
+          serverURL: req.payload.config.serverURL,
+        }),
+      }
 
       if (!retainedOriginal && isProcessableImage(file.mimetype)) {
         try {

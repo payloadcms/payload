@@ -56,7 +56,7 @@ const traverseFields = ({
     const fieldPath = joinPath(path, field.name)
     const fieldSchemaPath = joinPath(schemaPath, field.name)
     const entry = fieldHooks[fieldSchemaPath]
-    const hook = entry?.type === type ? (entry.fn) : undefined
+    const hook = entry?.type === type ? entry.fn : undefined
 
     if (typeof hook === 'function' && field.name in result) {
       try {

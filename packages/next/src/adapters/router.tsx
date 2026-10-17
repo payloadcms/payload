@@ -23,9 +23,8 @@ type LinkComponent = React.FC<
   } & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>
 >
 
-const NextLink: LinkComponent = 'default' in NextLinkImport
-  ? NextLinkImport.default
-  : NextLinkImport
+const NextLink: LinkComponent =
+  'default' in NextLinkImport ? NextLinkImport.default : NextLinkImport
 
 const NextLinkAdapter: React.FC<LinkAdapterProps> = ({
   children,

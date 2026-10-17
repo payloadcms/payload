@@ -101,7 +101,7 @@ export function patchPageMethods(page: Page) {
 
   const originalGoto = page.goto.bind(page)
 
-  page.goto = (async (...args: Parameters<Page['goto']>) => {
+  page.goto = async (...args: Parameters<Page['goto']>) => {
     const response = await originalGoto(...args)
 
     if (requiresHydrationWait(args[0])) {
@@ -109,11 +109,11 @@ export function patchPageMethods(page: Page) {
     }
 
     return response
-  })
+  }
 
   const originalReload = page.reload.bind(page)
 
-  page.reload = (async (...args: Parameters<Page['reload']>) => {
+  page.reload = async (...args: Parameters<Page['reload']>) => {
     const response = await originalReload(...args)
 
     if (requiresHydrationWait(page.url())) {
@@ -121,13 +121,13 @@ export function patchPageMethods(page: Page) {
     }
 
     return response
-  })
+  }
 
   const originalLocator = page.locator.bind(page)
   const outsideHiddenActivity = () => originalLocator(outsideHiddenActivitySelector)
 
-  page.locator = ((...args: Parameters<Page['locator']>) =>
-    originalLocator(...args).and(outsideHiddenActivity()))
+  page.locator = (...args: Parameters<Page['locator']>) =>
+    originalLocator(...args).and(outsideHiddenActivity())
 
   // `getByRole` already ignores hidden elements
   for (const method of [
@@ -140,21 +140,18 @@ export function patchPageMethods(page: Page) {
   ] as const) {
     const originalGetBy = page[method].bind(page) as (...args: unknown[]) => Locator
 
-    page[method] = ((...args: unknown[]) =>
-      originalGetBy(...args).and(outsideHiddenActivity()))
+    page[method] = (...args: unknown[]) => originalGetBy(...args).and(outsideHiddenActivity())
   }
 
   // Selector-based actions act on the first match, so keep that and only skip hidden pages
-  page.click = ((selector, options) =>
-    page.locator(selector).first().click(options))
+  page.click = (selector, options) => page.locator(selector).first().click(options)
 
-  page.fill = ((selector, value, options) =>
-    page.locator(selector).first().fill(value, options))
+  page.fill = (selector, value, options) => page.locator(selector).first().fill(value, options)
 
-  page.isVisible = ((selector) => page.locator(selector).first().isVisible())
+  page.isVisible = (selector) => page.locator(selector).first().isVisible()
 
-  page.setInputFiles = ((selector, files, options) =>
-    page.locator(selector).first().setInputFiles(files, options))
+  page.setInputFiles = (selector, files, options) =>
+    page.locator(selector).first().setInputFiles(files, options)
 
   page.waitForSelector = (async (
     selector: string,

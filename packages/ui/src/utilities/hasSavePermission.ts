@@ -26,7 +26,7 @@ export const hasSavePermission = (args: {
   }
 
   if (globalSlug) {
-    return Boolean((docPermissions)?.update)
+    return Boolean(docPermissions?.update)
   }
 
   return false

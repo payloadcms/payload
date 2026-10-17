@@ -70,7 +70,7 @@ export const resolveHierarchyCollections = (config: Config): void => {
         fieldAffectsData(field) &&
         field.name === parentFieldName &&
         field.type === 'relationship' &&
-        (field).relationTo === hierarchyCollection.slug,
+        field.relationTo === hierarchyCollection.slug,
     ) as RelationshipField | undefined
 
     // Check if the hierarchy collection's own parent field should be replaced with a header button
@@ -95,7 +95,7 @@ export const resolveHierarchyCollections = (config: Config): void => {
           fieldAffectsData(field) &&
           field.name === defaultFieldName &&
           field.type === 'relationship' &&
-          (field).relationTo === hierarchyCollection.slug,
+          field.relationTo === hierarchyCollection.slug,
       ) as RelationshipField | undefined
 
       // If parentFieldName is overridden, rename the field to match

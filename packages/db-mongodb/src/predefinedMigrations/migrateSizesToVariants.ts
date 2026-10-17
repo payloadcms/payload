@@ -372,9 +372,7 @@ function getDestinationIndexOptions({
       : undefined,
   }
 
-  return Object.fromEntries(
-    Object.entries(options).filter(([, value]) => value !== undefined),
-  )
+  return Object.fromEntries(Object.entries(options).filter(([, value]) => value !== undefined))
 }
 
 function rekeyDocumentPaths({

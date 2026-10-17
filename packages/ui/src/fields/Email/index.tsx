@@ -22,12 +22,7 @@ const EmailFieldComponent: React.FC<EmailFieldClientProps> = (props) => {
   const {
     field,
     field: {
-      admin: {
-        autoComplete,
-        className,
-        description,
-        placeholder,
-      } = {},
+      admin: { autoComplete, className, description, placeholder } = {},
       label,
       localized,
       required,
