@@ -108,4 +108,39 @@ describe('sanitizeConfig', () => {
       locales: [],
     })
   })
+
+  it('should throw DuplicateCollection error when duplicate collection slugs are present', () => {
+    const config: Config = {
+      ...configDefaults,
+      collections: [
+        { slug: 'posts', fields: [] },
+        { slug: 'posts', fields: [] },
+      ],
+    }
+
+    expect(() => sanitizeConfig(config)).toThrowError('Collection slug already in use: "posts"')
+  })
+
+  it('should throw DuplicateGlobal error when duplicate global slugs are present', () => {
+    const config: Config = {
+      ...configDefaults,
+      globals: [
+        { slug: 'header', fields: [] },
+        { slug: 'header', fields: [] },
+      ],
+    }
+
+    expect(() => sanitizeConfig(config)).toThrowError('Global slug already in use: "header"')
+  })
+
+  it('should throw DuplicateGlobal error when a global slug collides with a collection slug', () => {
+    const config: Config = {
+      ...configDefaults,
+      collections: [{ slug: 'settings', fields: [] }],
+      globals: [{ slug: 'settings', fields: [] }],
+    }
+
+    expect(() => sanitizeConfig(config)).toThrowError('Global slug already in use: "settings"')
+  })
+
 })
