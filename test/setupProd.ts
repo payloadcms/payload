@@ -16,8 +16,6 @@ export const tgzToPkgNameMap = {
   '@payloadcms/drizzle': 'payloadcms-drizzle-*',
   '@payloadcms/email-nodemailer': 'payloadcms-email-nodemailer-*',
   '@payloadcms/email-resend': 'payloadcms-email-resend-*',
-  '@payloadcms/oxlint-config': 'payloadcms-oxlint-config-*',
-  '@payloadcms/oxlint-plugin': 'payloadcms-oxlint-plugin-*',
   '@payloadcms/figma': 'payloadcms-figma-*',
   '@payloadcms/graphql': 'payloadcms-graphql-*',
   '@payloadcms/live-preview': 'payloadcms-live-preview-*',

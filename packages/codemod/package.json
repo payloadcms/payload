@@ -33,8 +33,6 @@
     "build:copy-docs": "node scripts/copy-migration-guide.mjs",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "test": "vitest --run",
     "typecheck": "tsc"
   },
