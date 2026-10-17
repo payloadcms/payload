@@ -30,6 +30,8 @@ export function mountDemoChrome({
     .stage { position:absolute; inset:0 auto auto 0; width:${canvas.width}px; height:${canvas.height}px; transform-origin:top left; overflow:hidden; color:var(--ink); background:var(--stage); }
     .light { --paper:#fff; --ink:#252422; --sub:#66635e; --stage:#f1f0ed; --shell:#e7e5e0; --line:#00000016; --rim:#ffffffa6; --badge:#ffffff70; --progress-track:#00000020; }
     .dark { --paper:#191919; --ink:#ededeb; --sub:#bbb8b0; --stage:#232321; --shell:#333330; --line:#ffffff22; --rim:#ffffff12; --badge:#ffffff0b; --progress-track:#ffffff30; }
+    .light { --kind-feature-bg:var(--color-bg-brand-tertiary,#e5f4ff); --kind-feature-border:var(--color-border-brand,#bde3ff); --kind-feature-text:color-mix(in srgb,var(--color-text-brand,#007be5) 70%,var(--ink)); --kind-fix-bg:var(--color-bg-success-tertiary,#d5f7da); --kind-fix-border:var(--color-border-success,#aff4c6); --kind-fix-text:color-mix(in srgb,var(--color-text-success,#009951) 70%,var(--ink)); }
+    .dark { --kind-feature-bg:var(--color-bg-brand-tertiary,#394360); --kind-feature-border:var(--color-border-brand,#536383); --kind-feature-text:color-mix(in srgb,var(--color-text-brand,#80caff) 70%,var(--ink)); --kind-fix-bg:var(--color-bg-success-tertiary,#2f483c); --kind-fix-border:var(--color-border-success,#517361); --kind-fix-text:color-mix(in srgb,var(--color-text-success,#85e0a3) 70%,var(--ink)); }
     .window { position:absolute; padding:10px; border:1px solid var(--rim); border-radius:18px; background:var(--shell); transform-origin:top left; }
     .header { height:36px; display:flex; align-items:center; justify-content:space-between; padding:0 12px 8px; gap:18px; }
     .dots { display:flex; gap:8px; }
@@ -46,7 +48,9 @@ export function mountDemoChrome({
     ::slotted([slot=content]) { display:block; width:100%; height:100%; border:0; }
     .footer { position:absolute; top:32px; left:50%; transform:translateX(-50%); width:min(1302px,calc(100% - 64px)); height:112px; display:grid; grid-template-rows:minmax(0,1fr); grid-template-columns:minmax(0,420fr) minmax(0,826fr); align-items:center; padding:12px 24px; border-radius:12px; color:var(--ink); background:var(--paper); }
     .change { min-height:0; align-self:stretch; display:flex; flex-direction:column; justify-content:center; gap:2px; padding-inline-end:28px; border-inline-end:1px solid var(--line); }
-    .kind { align-self:flex-start; padding-inline:6px; border:1px solid var(--line); border-radius:4px; background:var(--shell); color:var(--ink); font-size:12px; font-weight:500; line-height:16px; }
+    .kind { align-self:flex-start; padding-inline:6px; border:1px solid var(--kind-border); border-radius:4px; background:var(--kind-bg); color:var(--kind-text); font-size:12px; font-weight:500; line-height:16px; }
+    .kind[data-kind="Feature"] { --kind-bg:var(--kind-feature-bg); --kind-border:var(--kind-feature-border); --kind-text:var(--kind-feature-text); }
+    .kind[data-kind="Fix"] { --kind-bg:var(--kind-fix-bg); --kind-border:var(--kind-fix-border); --kind-text:var(--kind-fix-text); }
     .title { font-size:18px; font-weight:400; letter-spacing:-.1px; margin:0; overflow-wrap:anywhere; }
     .description { font-size:13px; color:var(--sub); overflow-wrap:anywhere; }
     .note { padding-inline-start:28px; min-width:0; }
@@ -74,6 +78,7 @@ export function mountDemoChrome({
   </div>`
   const find = (selector) => shadow.querySelector(selector)
   find('[data-kind]').textContent = change.kind
+  find('[data-kind]').dataset.kind = change.kind
   find('[data-title]').textContent = change.title
   find('[data-description]').textContent = change.description
   find('[data-size]').hidden = !showSize
