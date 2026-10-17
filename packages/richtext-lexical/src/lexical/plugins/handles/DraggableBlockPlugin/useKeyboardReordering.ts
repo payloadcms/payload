@@ -20,7 +20,7 @@ export function useKeyboardReordering({
   instructionsID: string
 }) {
   useEffect(() => {
-    const moveLine = ({ direction, event }: { direction: -1 | 1; event: KeyboardEvent }) => {
+    const $moveLine = ({ direction, event }: { direction: -1 | 1; event: KeyboardEvent }) => {
       if (
         !editor.isEditable() ||
         !event.altKey ||
@@ -58,12 +58,12 @@ export function useKeyboardReordering({
     return mergeRegister(
       editor.registerCommand(
         KEY_ARROW_UP_COMMAND,
-        (event) => moveLine({ direction: -1, event }),
+        (event) => $moveLine({ direction: -1, event }),
         COMMAND_PRIORITY_HIGH,
       ),
       editor.registerCommand(
         KEY_ARROW_DOWN_COMMAND,
-        (event) => moveLine({ direction: 1, event }),
+        (event) => $moveLine({ direction: 1, event }),
         COMMAND_PRIORITY_HIGH,
       ),
     )
