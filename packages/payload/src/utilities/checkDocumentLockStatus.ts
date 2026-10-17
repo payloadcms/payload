@@ -70,6 +70,7 @@ export const checkDocumentLockStatus = async ({
       collection: lockedDocumentsCollectionSlug,
       limit: 1,
       pagination: false,
+      req: payload.db.name === 'mongoose' ? undefined : req,
       sort: '-updatedAt',
       where: lockedDocumentQuery,
     })
@@ -153,6 +154,7 @@ export const getLockedDocumentIds = async ({
     collection: lockedDocumentsCollectionSlug,
     limit: 0,
     pagination: false,
+    req: payload.db.name === 'mongoose' ? undefined : req,
     sort: '-updatedAt',
     where: buildBulkLockedDocumentQuery(collectionSlug, ids),
   })
