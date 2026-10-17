@@ -5,7 +5,7 @@ const chrome = mountDemoChrome({
   root,
   theme: new URLSearchParams(location.search).get('theme') === 'dark' ? 'dark' : 'light',
   change: {
-    kind: 'Feature',
+    kind: new URLSearchParams(location.search).get('kind') === 'fix' ? 'Fix' : 'Feature',
     title: 'Responsive collection lists',
     description: 'Browse and manage content on desktop, tablet, and mobile.',
   },
