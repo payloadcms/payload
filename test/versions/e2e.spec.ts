@@ -36,6 +36,7 @@ import type { Config, Diff } from './payload-types.js'
 
 import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
 import { checkFocusIndicators } from '../__helpers/e2e/checkFocusIndicators.js'
+import { expectScreenshot } from '../__helpers/e2e/expectScreenshot.js'
 import {
   changeLocale,
   exactText,
@@ -49,6 +50,7 @@ import { navigateToDiffVersionView as _navigateToDiffVersionView } from '../__he
 import { openDocControls } from '../__helpers/e2e/openDocControls.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
+import { visual } from '../__helpers/e2e/visual.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -152,6 +154,211 @@ describe('Versions', () => {
       errorOnUnpublishURL = new AdminUrlUtil(serverURL, errorOnUnpublishSlug)
       draftsNoReadVersionsURL = new AdminUrlUtil(serverURL, draftsNoReadVersionsSlug)
       versionURL = new AdminUrlUtil(serverURL, versionCollectionSlug)
+    })
+
+    visual('should render draft document controls', async () => {
+      const { docs } = await payload.find({
+        collection: draftCollectionSlug,
+        draft: true,
+        limit: 1,
+        overrideAccess: true,
+        where: {
+          title: {
+            equals: 'Draft Title',
+          },
+        },
+      })
+      const draftDocument = docs[0]
+
+      if (!draftDocument) {
+        throw new Error('Expected the seeded draft document to exist')
+      }
+
+      await page.goto(url.edit(draftDocument.id))
+      await waitForFormReady(page)
+
+      const documentControls = page.locator('.doc-controls')
+
+      await expect(documentControls.locator('.status__value')).toHaveText('Draft')
+      await expect(documentControls.locator('#action-save-draft')).toBeVisible()
+      await expect(documentControls.locator('#action-save')).toBeVisible()
+      await expectScreenshot({
+        name: 'draft-document-controls.png',
+        mask: [documentControls.locator('.doc-controls__value-wrap')],
+        page,
+        target: documentControls,
+      })
+    })
+
+    visual('should render changed document controls', async () => {
+      const publishedDocument = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          _status: 'published',
+          description: 'Published description',
+          title: 'Lifecycle Published Document',
+        },
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        id: publishedDocument.id,
+        collection: draftCollectionSlug,
+        data: {
+          _status: 'draft',
+          description: 'Draft changes',
+          title: 'Lifecycle Published Document',
+        },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      await page.goto(url.edit(publishedDocument.id))
+      await waitForFormReady(page)
+
+      const documentControls = page.locator('.doc-controls')
+
+      await expect(documentControls.locator('.status__value')).toHaveText('Changed')
+      await expect(documentControls.locator('#action-revert-to-published')).toBeVisible()
+      await expect(documentControls.locator('#action-save')).toBeVisible()
+      await expectScreenshot({
+        name: 'changed-document-controls.png',
+        mask: [documentControls.locator('.doc-controls__value-wrap')],
+        page,
+        target: documentControls,
+      })
+    })
+
+    visual('should render autosave in progress', async () => {
+      const autosaveDocument = await payload.create({
+        collection: autosaveCollectionSlug,
+        data: {
+          description: 'Visual autosave description',
+          title: 'Visual autosave title',
+        },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      await page.goto(autosaveURL.edit(autosaveDocument.id))
+      await waitForFormReady(page)
+
+      let markAutosaveRequestStarted!: () => void
+      let markAutosaveRouteHandled!: () => void
+      let releaseAutosaveRequest!: () => void
+      const autosaveRequestStarted = new Promise<void>((resolve) => {
+        markAutosaveRequestStarted = resolve
+      })
+      const autosaveRouteHandled = new Promise<void>((resolve) => {
+        markAutosaveRouteHandled = resolve
+      })
+      const autosaveRequestCanComplete = new Promise<void>((resolve) => {
+        releaseAutosaveRequest = resolve
+      })
+      const autosaveRequestPattern = `**/api/${autosaveCollectionSlug}/**`
+
+      await page.route(autosaveRequestPattern, async (route) => {
+        if (route.request().method() !== 'PATCH') {
+          await route.continue()
+          return
+        }
+
+        markAutosaveRequestStarted()
+        await autosaveRequestCanComplete
+
+        try {
+          await route.continue()
+        } finally {
+          markAutosaveRouteHandled()
+        }
+      })
+
+      const autosaveIndicator = page.locator('.autosave')
+      const documentControls = page.locator('.doc-controls')
+
+      try {
+        await page.locator('#field-title').fill('Updated visual autosave title')
+        await autosaveRequestStarted
+        await expect(autosaveIndicator).toContainText('Saving...')
+        await expectScreenshot({
+          name: 'autosave-in-progress.png',
+          mask: [documentControls.locator('.doc-controls__value-wrap')],
+          page,
+          target: documentControls,
+        })
+      } finally {
+        releaseAutosaveRequest()
+        await autosaveRouteHandled
+        await page.unroute(autosaveRequestPattern)
+      }
+    })
+
+    visual('should render the document versions list', async () => {
+      const { docs } = await payload.find({
+        collection: draftCollectionSlug,
+        draft: true,
+        limit: 1,
+        overrideAccess: true,
+        where: {
+          title: {
+            equals: 'Title With Many Versions 11',
+          },
+        },
+      })
+      const documentWithVersions = docs[0]
+
+      if (!documentWithVersions) {
+        throw new Error('Expected the seeded document with versions to exist')
+      }
+
+      await page.goto(`${url.edit(documentWithVersions.id)}/versions`)
+
+      const versionsView = page.locator('main.versions')
+
+      await expect(versionsView.locator('tbody tr').first()).toBeVisible()
+      await expectScreenshot({
+        name: 'document-versions-list.png',
+        mask: [versionsView.locator('.cell-updatedAt'), versionsView.locator('.cell-id')],
+        page,
+        target: versionsView,
+      })
+    })
+
+    visual('should render a document version comparison', async () => {
+      const { docs } = await payload.find({
+        collection: diffCollectionSlug,
+        draft: true,
+        limit: 1,
+        overrideAccess: true,
+      })
+      const documentWithDifferences = docs[0]
+
+      if (!documentWithDifferences) {
+        throw new Error('Expected the seeded document with differences to exist')
+      }
+
+      await _navigateToDiffVersionView({
+        adminRoute,
+        collectionSlug: diffCollectionSlug,
+        docID: documentWithDifferences.id,
+        page,
+        serverURL,
+      })
+
+      const versionComparison = page.locator('main.view-version')
+
+      await expect(versionComparison.locator('.render-field-diffs').first()).toBeVisible()
+      await expectScreenshot({
+        name: 'document-version-comparison.png',
+        mask: [
+          versionComparison.locator('[data-field-path="richtextWithConstrainedRelationship"]'),
+          versionComparison.locator('[data-field-path="updatedAt"]'),
+          versionComparison.locator('.version-pill-label-date'),
+          versionComparison.locator('.view-version__time-elapsed'),
+        ],
+        page,
+        target: versionComparison,
+      })
     })
 
     test('collection — should show "has published version" status in list view when draft is saved after publish', async () => {
