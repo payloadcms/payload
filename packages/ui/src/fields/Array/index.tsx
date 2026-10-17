@@ -465,6 +465,9 @@ export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
 
             return (
               <DraggableSortableItem
+                data={{
+                  label: `${getTranslation(labels.singular, i18n)} ${i + 1}`,
+                }}
                 disabled={readOnly || disabled || !isSortable}
                 id={rowID}
                 key={rowID}

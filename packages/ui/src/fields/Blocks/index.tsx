@@ -512,6 +512,9 @@ const BlocksFieldComponent: React.FC<BlocksFieldClientProps> = (props) => {
 
               return (
                 <DraggableSortableItem
+                  data={{
+                    label: `${getTranslation(blockConfig.labels.singular, i18n)} ${i + 1}`,
+                  }}
                   disabled={readOnly || disabled || !isSortable}
                   id={row.id}
                   key={row.id}
