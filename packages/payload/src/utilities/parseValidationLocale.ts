@@ -11,7 +11,7 @@ import { httpStatus } from './httpStatus.js'
 export function parseValidationLocaleSelector(locale: unknown): ValidationLocaleSelector {
   if (typeof locale === 'string') {
     if (locale.length === 0) {
-      throw new APIError('Validation requires a locale.', httpStatus.BAD_REQUEST)
+      throw new APIError('Validation requires a locale.', 400)
     }
 
     if (locale === 'all') {
@@ -27,18 +27,18 @@ export function parseValidationLocaleSelector(locale: unknown): ValidationLocale
     locale.every((value) => typeof value === 'string')
   ) {
     if (locale.some((value) => value.length === 0)) {
-      throw new APIError('Validation requires a locale.', httpStatus.BAD_REQUEST)
+      throw new APIError('Validation requires a locale.', 400)
     }
 
     return locale as [TypedLocale, ...TypedLocale[]]
   }
 
-  throw new APIError('Validation requires a locale.', httpStatus.BAD_REQUEST)
+  throw new APIError('Validation requires a locale.', 400)
 }
 
 /** Ensures a REST validation request body is a non-null JSON object. */
 export function assertValidationData(data: unknown): asserts data is Record<string, unknown> {
   if (!data || Array.isArray(data) || typeof data !== 'object') {
-    throw new APIError('Validation data must be an object.', httpStatus.BAD_REQUEST)
+    throw new APIError('Validation data must be an object.', 400)
   }
 }

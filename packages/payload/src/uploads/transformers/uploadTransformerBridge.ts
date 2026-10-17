@@ -1,5 +1,6 @@
 import type { PayloadRequest } from '../../types/index.js'
 import type { UploadEdits } from '../types.js'
+import type { UploadDocument } from './types.js'
 
 /**
  * Private v4 compatibility bridge, attached to a transformer object under this
@@ -47,8 +48,11 @@ export type UploadTransformerInternal = {
    * collection, falling back to the first bridge when none does.
    */
   handlesCollection?: (args: { collectionSlug: string }) => boolean
+  /** Byte bound for the private whole-file variant bridge. */
+  maxSourceBytes?: number
   prepareUpload?: (args: {
     collectionSlug: string
+    doc: UploadDocument
     file: File
     req: PayloadRequest
     transform: (task: UploadTransformTask) => Promise<File>

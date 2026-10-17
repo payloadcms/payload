@@ -51,7 +51,11 @@ export const runLocalFileUpdate = async <T>({
     config: req.payload.config,
     doc: current,
   })
-  const nextDoc = { ...storedCurrent, ...next }
+  const nextDoc = withLegacyUploadFileData({
+    collection,
+    config: req.payload.config,
+    doc: { ...storedCurrent, ...next },
+  })
 
   if (
     !hasLocalFileChange({

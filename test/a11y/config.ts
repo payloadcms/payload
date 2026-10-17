@@ -44,7 +44,18 @@ const MediaAltCollection = {
 export default buildConfigWithDefaults({
   config: {
     upload: {
-      transformers: [mediaSharpTransformer({ mediaSlug })],
+      transformers: [
+        mediaSharpTransformer({ mediaSlug }),
+        {
+          slug: 'editorial-intent',
+          canTransform: ({ doc, operation }) =>
+            operation === 'upload' && doc._transforms?.custom
+              ? { canTransform: true, handledTransformKeys: ['custom'] }
+              : false,
+          mimeTypes: ['image/*'],
+          transformFile: () => Promise.resolve({ status: 'continue' }),
+        },
+      ],
     },
     // ...extend config here
     admin: {

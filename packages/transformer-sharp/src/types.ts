@@ -145,6 +145,16 @@ export type DynamicResizeParseResult =
       isRouted: false
     }
 
+/** Output resource bounds for saved transforms, including all animation frames. */
+export type SharpTransformLimits = {
+  /** @default 4096 */
+  maxHeight: number
+  /** @default 16_777_216 */
+  maxPixels: number
+  /** @default 4096 */
+  maxWidth: number
+}
+
 export type SharpTransformerOptions = {
   /** Per-collection upload-time image processing settings. */
   collections?: Partial<Record<UploadCollectionSlug, SharpCollectionConfig>>
@@ -156,10 +166,14 @@ export type SharpTransformerOptions = {
    * @default false
    */
   dynamic?: boolean | SharpDynamicOptions
+  /** Maximum bytes buffered from a source. Defaults to 64 MiB. */
+  maxSourceBytes?: number
   /** Inject a compatible custom Sharp build or version. Defaults to the bundled dependency. */
   sharp?: SharpDependency
   /** @default 'sharp' */
   slug?: string
+  /** Bounds for upload-time and request-time saved transforms. */
+  transformLimits?: Partial<SharpTransformLimits>
 }
 
 /**
@@ -183,5 +197,6 @@ export type SharpUploadTaskOptions =
       focalPoint?: FocalPoint
       imageResizeConfig: ImageSize
       kind: 'size'
+      metadataFormat?: SharpMetadata['format']
       originalDimensions: ProbedImageSize
     }

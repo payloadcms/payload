@@ -1,0 +1,162 @@
+---
+title: File Transform State
+label: Transform State
+order: 35
+desc: Save reversible editorial intent with an upload and replay it from the retained original.
+keywords: uploads, transforms, crop, focal point, versions, media
+---
+
+Every upload collection has an API-visible `_transforms` JSON field. It records editorial intent alongside the retained `original`. The Admin hides the generic JSON field and uses it to save crop and focal edits.
+
+```ts
+import type { TransformState } from 'payload'
+
+const transforms: TransformState = {
+  crop: { x: 400, y: 450, width: 2000, height: 1200 },
+  focalPoint: { x: 0, y: 40.25 },
+  providerAdjustment: { preset: 'editorial', strength: 0.8 },
+}
+
+await payload.update({
+  collection: 'media',
+  id: imageID,
+  data: { _transforms: transforms },
+})
+```
+
+Built-in keys retain their standard shapes and validation and cannot be redefined. An adapter needing a different shape must use a different custom key. Additional keys accept arbitrary JSON values without a registration step or database migration. Adapters can import the individual shape types and validate their custom values in `canTransform` before processing. Functions, non-finite numbers, cycles, and other values that cannot round-trip as JSON are rejected.
+
+## Optional adapter definitions
+
+Adapters may provide `transformDefinitions` to give custom keys stronger generated types and JSDoc. Each entry is a JSON schema for one custom value; `description` becomes generated documentation. Definitions are optional: undeclared keys remain accepted, and adding them requires no database migration.
+
+```ts
+import type { UploadTransformer } from 'payload'
+
+const transformer: UploadTransformer = {
+  slug: 'watermark',
+  mimeTypes: ['image/*'],
+  transformDefinitions: {
+    watermark: {
+      type: 'object',
+      description: 'Watermark intent interpreted by this adapter.',
+      properties: {
+        text: { type: 'string', description: 'Visible watermark text.' },
+      },
+      required: ['text'],
+      additionalProperties: false,
+    },
+  },
+  // Add canTransform and transformFile or handleRequest for execution.
+}
+```
+
+These definitions enrich the collection's `_transforms` generated type; the exported general `TransformState` remains open. Definitions do not schedule execution or add core runtime validation for custom values. Each adapter validates its custom values before effects, claims the keys it handles, and defines its operation order. Core still validates JSON compatibility and built-in shapes. Redefining a built-in or providing conflicting schemas for the same custom key fails during configuration; identical custom definitions may be shared by adapters.
+
+MCP and CLI input schemas validate built-in shapes and leave custom values to adapters, matching ordinary Payload writes. Optional definitions remain in generated output types and JSDoc; generated input types accept additional custom keys without imposing those optional shapes.
+
+## Replacing state
+
+`_transforms` is a complete replacement:
+
+| Submitted data                              | Result                                           |
+| ------------------------------------------- | ------------------------------------------------ |
+| Omit `_transforms`                          | Preserve saved intent.                           |
+| `_transforms: null`                         | Clear saved intent.                              |
+| `_transforms: {}`                           | Normalize to `null`.                             |
+| `_transforms: { crop: ... }`                | Replace all saved keys with this object.         |
+| Replace the original and omit `_transforms` | Clear intent belonging to the previous original. |
+
+Read access and update access use the collection's normal policies. REST, GraphQL's JSON scalar, and the Local API share field validation. Invalid built-in values identify the failed path, such as `_transforms.crop.width`.
+
+## Built-in conventions
+
+Omission generally means no operation. Defaults supplied by an adapter or collection configuration do not need to be persisted.
+
+| Key and exported type                        | Shape and convention                                                                                                                                                                                    | Default when omitted                            |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `crop` / `CropTransform`                     | `{ x, y, width, height }`: integer pixels in the orientation-normalized original, before resizing; offsets are non-negative, dimensions positive, and the rectangle stays within known original bounds. | Full source rectangle.                          |
+| `focalPoint` / `FocalPointTransform`         | `{ x, y }`: original-space percentages from 0 through 100; zero and fractional values are valid.                                                                                                        | Adapter positioning, conventionally the center. |
+| `resize` / `ResizeTransform`                 | Positive integer `width` and/or `height`; optional `fit` (`cover`, `contain`, `fill`, `inside`, `outside`) and `withoutEnlargement`.                                                                    | Preserve dimensions.                            |
+| `rotate` / `RotateTransform`                 | `{ angle }`: finite clockwise degrees; equivalent angles wrap modulo 360.                                                                                                                               | Zero additional rotation.                       |
+| `flip` / `FlipTransform`                     | `{ horizontal?, vertical? }`: boolean mirror axes; at least one must be true.                                                                                                                           | No mirroring.                                   |
+| `clip` / `ClipTransform`                     | `{ startMs, endMs }`: integer milliseconds in the original timeline, inclusive start and exclusive end; end follows start.                                                                              | Whole timeline.                                 |
+| `pageRange` / `PageRangeTransform`           | `{ startPage, endPage }`: positive, one-based, inclusive integer bounds.                                                                                                                                | All pages.                                      |
+| `posterFrame` / `PosterFrameTransform`       | `{ timestampMs }`: non-negative integer position in the original timeline.                                                                                                                              | No poster selection.                            |
+| `metadataPolicy` / `MetadataPolicyTransform` | `{ mode: 'preserve' \| 'strip' }`: embedded output metadata policy.                                                                                                                                     | Adapter or collection policy.                   |
+| `encoding` / `EncodingTransform`             | MIME-specific settings below, without a target MIME selector.                                                                                                                                           | Adapter or collection encoding settings.        |
+
+Image encoding accepts `quality` (integer 1–100) and `progressive`. Video encoding accepts `videoCodec`, `audioCodec`, `profile`, positive integer `videoBitrate`, and positive `frameRate`. PDF encoding accepts `profile`, positive integer `downsampleImagesToDpi`, `linearize`, `removeHiddenObjects`, and `stripMetadata`. The resolved default MIME selects the applicable branch after conversion; there is no universal compression scalar. `metadataPolicy` does not modify separately extracted document metadata.
+
+Core checks shape rules and known image bounds. Media adapters own format applicability, actual duration/page-count checks, provider limits, and any cross-operation constraints requiring their media engine. Video and PDF engines are separate integrations; the built-in vocabulary alone does not add transcoding or PDF processing.
+
+## Executing saved intent
+
+[File transformers](./transformers) claim the saved keys they execute through `canTransform`:
+
+```ts
+canTransform: ({ doc, operation, purpose }) => {
+  if (operation === 'request' && purpose !== 'persisted-default') {
+    return false
+  }
+
+  const handledTransformKeys = Object.keys(doc._transforms ?? {}).filter(
+    (key) => ['crop', 'focalPoint', 'resize'].includes(key),
+  )
+
+  return handledTransformKeys.length
+    ? {
+        canTransform: true,
+        handledTransformKeys,
+        options: { preset: 'editorial' },
+      }
+    : false
+}
+```
+
+Each saved key needs exactly one executor before replay consumes the source. Missing or duplicate ownership fails clearly. Boolean predicates claim no saved keys. Custom keys need an executor when replay is required, even though they need no schema registration to be stored.
+
+Adapters receive the complete mutable `doc` and a deeply frozen `originalDoc` snapshot of pipeline entry. Later stages see changes made to `doc`. Upload stages receive the lazy current `source` and retained `originalSource`; request stages receive `getSourceFile` and `getOriginalFile`. Source retrieval is separate from provider/editorial JSON. Whole-file reads require an explicit byte bound.
+
+Core preserves declaration order across stages. Each adapter owns its internal operation order. Sharp normalizes orientation, crops, mirrors, rotates, resizes around the focal point, applies metadata policy, and encodes. Configured Sharp variants derive from the effective main result. Repeated crop edits start from the retained original, so expanding or removing a crop can recover source pixels.
+
+A conversion updates the current MIME from the replacement `File.type` or response `Content-Type`. `original.mimeType` remains unchanged. Top-level metadata describes the default, and each variant describes its own output. An incompatible required stage or an early `complete` with outstanding work fails the operation.
+
+## Stored and dynamic defaults
+
+An upload-capable pipeline can materialize the default and configured variants while saving an edit. Files and document changes participate in the managed-file operation and its compensation. Invalid final values fail before publication. Transaction-backed writes roll back failed operations; deployments without transactions retain the existing behavior when a hook fails after a durable database write.
+
+A request-only pipeline stores the original and intent, without storing transformed responses. Default and variant filenames are logical Payload endpoints. The default filename has no format extension, and its MIME type and other output metadata remain null until delivery. Routing starts with the retained original MIME; each returned response must declare its actual `Content-Type`. A normal request resolves saved intent before applying transient query overrides. Query-only size or format choices never change `_transforms` or saved metadata. The distinct original endpoint bypasses editorial transforms.
+
+A stored default can remain readable after its executor is removed when the server-owned stored-file descriptors identify physical bytes. A dynamic default, changed intent, or version replay requires current compatible executors. Arbitrary URLs or keys inside custom JSON never grant managed-file ownership or drive cleanup.
+
+## Versions and migration
+
+Drafts, publishing, duplication, and version restoration carry the original and intent together. Duplication independently owns its managed files. Restoring a version replays its intent through the current compatible pipeline, so current encodings and configured variants can differ from historical bytes. Historical file delivery can still serve retained managed objects without replay. Version pruning uses stored-file references.
+
+`focalX` and `focalY` are legacy read-only compatibility fields. New clients write `_transforms.focalPoint`; legacy percent crop and focal upload-edit query writes are retired. Valid old coordinates, including zero, can seed the editor without writing on read. A canonical write clears the legacy coordinates so a later clear cannot revive them.
+
+Backfill current documents with a complete object, preserving existing custom and built-in keys:
+
+```ts
+const focalPoint = { x: doc.focalX, y: doc.focalY }
+const isValid = Object.values(focalPoint).every(
+  (value) =>
+    typeof value === 'number' &&
+    Number.isFinite(value) &&
+    value >= 0 &&
+    value <= 100,
+)
+
+if (isValid && doc._transforms == null) {
+  await payload.update({
+    collection: 'media',
+    id: doc.id,
+    data: { _transforms: { focalPoint } },
+  })
+}
+```
+
+Backfill retained versions in a database migration using the same validation rule, preserving each version's original and stored-file references. Keep legacy columns until current documents and historical versions have been backfilled, then remove them in a separate schema migration. Output dimensions cannot recover an exact historical crop; do not invent crop intent for legacy derivatives.
+
+File localization follows its separate foundation delivery. This change does not introduce `upload.localized` or independently falling back transform keys.

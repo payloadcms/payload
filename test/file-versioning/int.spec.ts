@@ -195,7 +195,10 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       const bytes = await readFile(imageFixture)
       const created = await payload.create({
         collection: transformedMediaSlug,
-        data: { alt: 'before' },
+        data: {
+          _transforms: { crop: { height: 800, width: 800, x: 0, y: 0 } },
+          alt: 'before',
+        },
         file: { name: 'metadata.png', data: bytes, mimetype: 'image/png', size: bytes.length },
         req: {
           query: {
@@ -420,14 +423,17 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       data: { alt: 'source' },
       file: { name: 'landscape.png', data: bytes, mimetype: 'image/png', size: bytes.length },
     })
-    const originalSizePixels = await sharp(
-      path.join(transformedMediaDir, created.variants!.small!.filename!),
-    )
+    const croppedSizePixels = await sharp(bytes)
+      .extract({ height: 800, left: 0, top: 0, width: 800 })
+      .resize(200, 200)
       .raw()
       .toBuffer()
 
     const response = await restClient.PATCH(`/${transformedMediaSlug}/${created.id}`, {
-      body: JSON.stringify({ alt: 'cropped' }),
+      body: JSON.stringify({
+        _transforms: { crop: { height: 800, width: 800, x: 0, y: 0 } },
+        alt: 'cropped',
+      }),
       query: {
         uploadEdits: {
           crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
@@ -471,8 +477,12 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       sharp(path.join(transformedMediaDir, stored!.variants.small.filename)).metadata(),
     ).resolves.toMatchObject({ height: 200, width: 200 })
     expect(
-      await sharp(path.join(transformedMediaDir, stored!.variants.small.filename)).raw().toBuffer(),
-    ).toEqual(originalSizePixels)
+      (
+        await sharp(path.join(transformedMediaDir, stored!.variants.small.filename))
+          .raw()
+          .toBuffer()
+      ).equals(croppedSizePixels),
+    ).toBe(true)
   })
 
   test('should reset a saved crop to the retained original without copying its bytes', async ({
@@ -486,7 +496,10 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       file: { name: 'landscape.png', data: bytes, mimetype: 'image/png', size: bytes.length },
     })
     const crop = await restClient.PATCH(`/${transformedMediaSlug}/${created.id}`, {
-      body: JSON.stringify({ alt: 'cropped' }),
+      body: JSON.stringify({
+        _transforms: { crop: { height: 800, width: 800, x: 0, y: 0 } },
+        alt: 'cropped',
+      }),
       query: {
         uploadEdits: {
           crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
@@ -499,7 +512,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     const cropped = (await crop.json()).doc as typeof created
 
     const reset = await restClient.PATCH(`/${transformedMediaSlug}/${created.id}`, {
-      body: JSON.stringify({ alt: 'reset' }),
+      body: JSON.stringify({ _transforms: null, alt: 'reset' }),
       query: {
         uploadEdits: {
           crop: { height: 100, unit: '%', width: 100, x: 0, y: 0 },
@@ -520,7 +533,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     expect(resetDoc.url).toBe(created.original!.url)
     expect(current.filename).toBe(current.original?.filename)
     expect(await readFile(path.join(transformedMediaDir, resetDoc.filename!))).toEqual(bytes)
-    expect(current.variants?.small?.filename).toBe(cropped.variants?.small?.filename)
+    expect(current.variants?.small?.filename).not.toBe(cropped.variants?.small?.filename)
 
     const { docs: versions } = await payload.db.findVersions({
       collection: transformedMediaSlug,
@@ -549,7 +562,10 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       file: { name: 'landscape.png', data: bytes, mimetype: 'image/png', size: bytes.length },
     })
     const crop = await restClient.PATCH(`/${transformedMediaSlug}/${created.id}`, {
-      body: JSON.stringify({ alt: 'cropped' }),
+      body: JSON.stringify({
+        _transforms: { crop: { height: 800, width: 800, x: 0, y: 0 } },
+        alt: 'cropped',
+      }),
       query: {
         uploadEdits: {
           crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
@@ -562,7 +578,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     const cropped = (await crop.json()).doc as typeof created
 
     const reset = await restClient.PATCH(`/${transformedMediaSlug}/${created.id}`, {
-      body: JSON.stringify({ alt: 'reset', focalX: 75, focalY: 25 }),
+      body: JSON.stringify({ _transforms: { focalPoint: { x: 75, y: 25 } }, alt: 'reset' }),
       query: {
         uploadEdits: {
           crop: { height: 100, unit: '%', width: 100, x: 0, y: 0 },
@@ -581,8 +597,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
 
     expect(resetDoc.filename).toBe(created.original!.filename)
     expect(resetDoc.url).toBe(created.original!.url)
-    expect(current.focalX).toBe(75)
-    expect(current.focalY).toBe(25)
+    expect(current._transforms).toEqual({ focalPoint: { x: 75, y: 25 } })
     expect(current.variants?.small?.filename).not.toBe(cropped.variants?.small?.filename)
     expect(current.filename).toBe(current.original?.filename)
     expect(await readFile(path.join(transformedMediaDir, resetDoc.filename!))).toEqual(bytes)
@@ -605,7 +620,10 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       ['second crop', 25],
     ] as const) {
       const response = await restClient.PATCH(`/${transformedMediaSlug}/${created.id}`, {
-        body: JSON.stringify({ alt }),
+        body: JSON.stringify({
+          _transforms: { crop: { height: 800, width: 800, x: (1600 * x) / 100, y: 0 } },
+          alt,
+        }),
         query: {
           uploadEdits: {
             crop: { height: 50, unit: '%', width: 50, x, y: 0 },

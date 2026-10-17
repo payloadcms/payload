@@ -23,6 +23,7 @@ export const reservedAPIKeyFieldNames = [/* 'apiKeyIndex', 'apiKeyLast4', 'apiKe
  * Reserved field names for collections with upload config enabled
  */
 export const reservedBaseUploadFieldNames = [
+  '_transforms',
   'file',
   /* 'mimeType',
     'thumbnailURL',

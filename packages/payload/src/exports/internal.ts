@@ -30,6 +30,7 @@ export { getSafeFileName, incrementName } from '../uploads/getSafeFilename.js'
 export { parseRangeHeader } from '../uploads/parseRangeHeader.js'
 export { externalURLInputSchema, resolveURLUploadInput } from '../uploads/resolveURLUploadInput.js'
 export type { ExternalURLInput } from '../uploads/resolveURLUploadInput.js'
+export { createFileSource } from '../uploads/transformers/createFileSource.js'
 export {
   getUploadFilePath,
   getUploadTransformerInternal,

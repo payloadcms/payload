@@ -375,7 +375,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       createdIDs.push(doc.id)
 
       const updateResponse = await restClient.PATCH(`/${fileAccessMediaSlug}/${doc.id}`, {
-        body: JSON.stringify({ focalX: 75, focalY: 25 }),
+        body: JSON.stringify({ _transforms: { focalPoint: { x: 75, y: 25 } } }),
       })
       expect(updateResponse.status).toBe(200)
 
@@ -386,10 +386,15 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       })
 
       expect(updatedDoc.filename).toBe(doc.filename)
-      expect(updatedDoc.focalX).toBe(75)
-      expect(updatedDoc.focalY).toBe(25)
+      expect(updatedDoc._transforms?.focalPoint.x).toEqual(75)
+      expect(updatedDoc._transforms?.focalPoint.y).toEqual(25)
       expect(updatedDoc.prefix).toBe('public')
-      expect(updatedDoc.variants.thumbnail.filename).toBe(doc.variants.thumbnail.filename)
+      expect(updatedDoc.variants.thumbnail.filename).not.toBe(doc.variants.thumbnail.filename)
+      expect(updatedDoc.variants.thumbnail).toMatchObject({
+        height: 100,
+        mimeType: 'image/png',
+        width: 100,
+      })
       expect(updatedDoc.url).toBe(doc.url)
     })
 
@@ -435,6 +440,11 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         expect(updatedDoc.prefix).toBe(doc.prefix)
         expect(updatedDoc.requestMetadata).toContain('PATCH:application/json:')
         expect(updatedDoc.variants.thumbnail.filename).toBe(doc.variants.thumbnail.filename)
+        expect(updatedDoc.variants.thumbnail).toMatchObject({
+          height: 100,
+          mimeType: 'image/png',
+          width: 100,
+        })
         expect(updatedDoc.url).toBe(doc.url)
       }
     })
@@ -464,7 +474,13 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       const width = Math.floor(metadata.width / 2)
       const { file, handle } = await createStreamableFile(replacementPath)
       const formData = new FormData()
-      formData.append('_payload', JSON.stringify({ prefix: 'replacement' }))
+      formData.append(
+        '_payload',
+        JSON.stringify({
+          _transforms: { crop: { height, width, x: 0, y: 0 } },
+          prefix: 'replacement',
+        }),
+      )
       formData.append('file', file)
 
       const uploadConfig = payload.config.upload
@@ -476,11 +492,6 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           body: formData,
           file,
           query: {
-            uploadEdits: {
-              crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
-              heightInPixels: height,
-              widthInPixels: width,
-            },
             where: { id: { in: docs.map(({ id }) => id) } },
           },
         })
@@ -641,8 +652,6 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           ...version.version,
           filename: otherDoc.filename,
           filesize: 1,
-          focalX: 1,
-          focalY: 1,
           height: 1,
           mimeType: 'image/jpeg',
           prefix: otherDoc.prefix,
@@ -670,7 +679,19 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       expect(restoredDoc.height).toBe(currentDoc.height)
       expect(restoredDoc.mimeType).toBe(currentDoc.mimeType)
       expect(restoredDoc.prefix).toBe(currentDoc.prefix)
-      expect(restoredDoc.variants).toEqual(currentDoc.variants)
+      expect(restoredDoc.variants.thumbnail).toMatchObject({
+        height: currentDoc.variants.thumbnail.height,
+        mimeType: currentDoc.variants.thumbnail.mimeType,
+        width: currentDoc.variants.thumbnail.width,
+      })
+      await expect(
+        sharp(
+          path.join(
+            payload.collections[fileAccessMediaSlug].config.upload.staticDir,
+            restoredDoc.variants.thumbnail.filename,
+          ),
+        ).metadata(),
+      ).resolves.toMatchObject({ height: 100, width: 100 })
       expect(restoredDoc.thumbnailURL).toBe(currentDoc.thumbnailURL)
       expect(restoredDoc.url).toBe(currentDoc.url)
       expect(restoredDoc.width).toBe(currentDoc.width)
@@ -904,8 +925,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
         // Check api response
         expect(doc.mimeType).toEqual('image/png')
-        expect(doc.focalX).toEqual(50)
-        expect(doc.focalY).toEqual(50)
+        expect(doc._transforms).toBeNull()
         expect(variants.maintainedAspectRatio.url).toContain('/api/media/file/image')
         expect(variants.maintainedAspectRatio.url).toContain('.png')
         expect(variants.maintainedAspectRatio.width).toEqual(1024)
@@ -1737,22 +1757,11 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
           const response = await restClient.PATCH(`/${mediaSlug}/${sourceDoc.id}`, {
             body: JSON.stringify({
+              _transforms: { crop: { height: 40, width: 40, x: 0, y: 0 } },
               filename: targetDoc.filename,
               url: targetDoc.url,
             }),
-            query: {
-              uploadEdits: {
-                crop: {
-                  height: 50,
-                  unit: '%',
-                  width: 50,
-                  x: 0,
-                  y: 0,
-                },
-                heightInPixels: 40,
-                widthInPixels: 40,
-              },
-            },
+            query: {},
           })
           const { doc } = await response.json()
 
@@ -1791,19 +1800,8 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           const sourcePath = path.join(dirname, './media', sourceDoc.filename)
 
           const response = await restClient.PATCH(`/${mediaSlug}`, {
-            body: JSON.stringify({}),
+            body: JSON.stringify({ _transforms: { crop: { height: 40, width: 40, x: 0, y: 0 } } }),
             query: {
-              uploadEdits: {
-                crop: {
-                  height: 50,
-                  unit: '%',
-                  width: 50,
-                  x: 0,
-                  y: 0,
-                },
-                heightInPixels: 40,
-                widthInPixels: 40,
-              },
               where: {
                 id: {
                   equals: sourceDoc.id,
@@ -1896,23 +1894,12 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           const result = await payload.update({
             collection: mediaSlug,
             data: {
+              _transforms: { crop: { height: 40, width: 40, x: 0, y: 0 } },
               alt: observationValue,
             },
             overrideAccess: true,
             req: {
-              query: {
-                uploadEdits: {
-                  crop: {
-                    height: 50,
-                    unit: '%',
-                    width: 50,
-                    x: 0,
-                    y: 0,
-                  },
-                  heightInPixels: 40,
-                  widthInPixels: 40,
-                },
-              },
+              query: {},
             },
             where: {
               id: {
@@ -1925,9 +1912,10 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           expect(result.docs).toHaveLength(2)
           expect(observedStates).toHaveLength(2)
           for (const state of observedStates) {
-            expect(state.requestFilename).toBe(state.documentFilename)
-            expect(Object.keys(state.uploadSizes ?? {})).toContain('icon')
+            expect(state.requestFilename).toBeUndefined()
+            expect(state.uploadSizes).toEqual({})
           }
+          expect(observedStates[0]?.documentFilename).not.toBe(observedStates[1]?.documentFilename)
           expect(observedStates[0]?.uploadSizes).not.toBe(observedStates[1]?.uploadSizes)
         } finally {
           collectionHooks.beforeChange = originalBeforeChange
@@ -2950,28 +2938,26 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       const doc = await payload.create({
         collection: focalOnlySlug,
         data: {
-          focalX: 5,
-          focalY: 5,
+          _transforms: { focalPoint: { x: 5, y: 5 } },
         },
         file,
         overrideAccess: true,
       })
 
-      expect(doc.focalX).toEqual(5)
-      expect(doc.focalY).toEqual(5)
+      expect(doc._transforms?.focalPoint.x).toEqual(5)
+      expect(doc._transforms?.focalPoint.y).toEqual(5)
 
       const updatedFocal = await payload.update({
         id: doc.id,
         collection: focalOnlySlug,
         data: {
-          focalX: 10,
-          focalY: 10,
+          _transforms: { focalPoint: { x: 10, y: 10 } },
         },
         overrideAccess: true,
       })
 
-      expect(updatedFocal.focalX).toEqual(10)
-      expect(updatedFocal.focalY).toEqual(10)
+      expect(updatedFocal._transforms?.focalPoint.x).toEqual(10)
+      expect(updatedFocal._transforms?.focalPoint.y).toEqual(10)
 
       const updateWithoutFocal = await payload.update({
         id: doc.id,
@@ -2981,13 +2967,15 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       })
 
       // Expect focal point to be the same
-      expect(updateWithoutFocal.focalX).toEqual(10)
-      expect(updateWithoutFocal.focalY).toEqual(10)
+      expect(updateWithoutFocal._transforms?.focalPoint.x).toEqual(10)
+      expect(updateWithoutFocal._transforms?.focalPoint.y).toEqual(10)
 
       await payload.delete({ id: doc.id, collection: focalOnlySlug, overrideAccess: true })
     })
 
-    test('should default focal point to 50, 50', async ({ payload }) => {
+    test('should keep the implicit centered focal point out of saved intent', async ({
+      payload,
+    }) => {
       const doc = await payload.create({
         collection: focalOnlySlug,
         data: {
@@ -2997,8 +2985,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         overrideAccess: true,
       })
 
-      expect(doc.focalX).toEqual(50)
-      expect(doc.focalY).toEqual(50)
+      expect(doc._transforms).toBeNull()
 
       const updateWithoutFocal = await payload.update({
         id: doc.id,
@@ -3007,13 +2994,12 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         overrideAccess: true,
       })
 
-      expect(updateWithoutFocal.focalX).toEqual(50)
-      expect(updateWithoutFocal.focalY).toEqual(50)
+      expect(updateWithoutFocal._transforms).toBeNull()
 
       await payload.delete({ id: doc.id, collection: focalOnlySlug, overrideAccess: true })
     })
 
-    test('should set focal point even if no sizes defined', async ({ payload }) => {
+    test('should leave focal intent absent when no sizes are defined', async ({ payload }) => {
       const doc = await payload.create({
         collection: focalNoSizesSlug, // config without sizes
         data: {
@@ -3023,15 +3009,14 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         overrideAccess: true,
       })
 
-      expect(doc.focalX).toEqual(50)
-      expect(doc.focalY).toEqual(50)
+      expect(doc._transforms).toBeNull()
 
       await payload.delete({ id: doc.id, collection: focalNoSizesSlug, overrideAccess: true })
     })
   })
 
   test.describe('Image Manipulation', () => {
-    test('should generate image sizes from the retained original after cropping', async ({
+    test('should generate image sizes from the effective cropped source', async ({
       payload,
       restClient,
     }) => {
@@ -3047,26 +3032,20 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       try {
         const response = await restClient.PATCH(`/${mediaSlug}/${sourceDoc.id}`, {
-          body: JSON.stringify({}),
-          query: {
-            uploadEdits: {
-              crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
-              heightInPixels: 800,
-              widthInPixels: 800,
-            },
-          },
+          body: JSON.stringify({ _transforms: { crop: { height: 800, width: 800, x: 0, y: 0 } } }),
+          query: {},
         })
         const { doc } = (await response.json()) as { doc: Media }
 
         expect(response.status).toBe(200)
         expect(doc).toMatchObject({ height: 800, width: 800 })
-        expect(doc.variants?.maintainedImageSize).toMatchObject({ height: 1600, width: 1600 })
+        expect(doc.variants?.maintainedImageSize).toMatchObject({ height: 800, width: 800 })
 
         const sizePath = path.join(dirname, './media', doc.variants!.maintainedImageSize!.filename!)
 
         await expect(sharp(sizePath).metadata()).resolves.toMatchObject({
-          height: 1600,
-          width: 1600,
+          height: 800,
+          width: 800,
         })
       } finally {
         await payload.delete({ id: sourceDoc.id, collection: mediaSlug, overrideAccess: true })
@@ -3541,15 +3520,14 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           id: mediaDoc.id,
           collection: mediaSlug,
           data: {
-            focalX: 75,
-            focalY: 25,
+            _transforms: { focalPoint: { x: 75, y: 25 } },
           },
           overrideAccess: true,
         })) as unknown as Media
 
         expect(updatedDoc).toBeDefined()
-        expect(updatedDoc.focalX).toEqual(75)
-        expect(updatedDoc.focalY).toEqual(25)
+        expect(updatedDoc._transforms?.focalPoint.x).toEqual(75)
+        expect(updatedDoc._transforms?.focalPoint.y).toEqual(25)
 
         // Direct database query on updated doc should return relative URLs
         const dbDoc = (await payload.db.findOne({

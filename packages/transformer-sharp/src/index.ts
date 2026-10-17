@@ -6,4 +6,5 @@ export type {
   SharpDynamicDefaults,
   SharpDynamicOptions,
   SharpTransformerOptions,
+  SharpTransformLimits,
 } from './types.js'

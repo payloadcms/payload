@@ -6,6 +6,7 @@ import path from 'node:path'
 
 import type { AccessResult } from '../../config/types.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
+import type { FileToSave } from '../../uploads/types.js'
 import type {
   BulkOperationResult,
   Collection,
@@ -30,6 +31,7 @@ import {
 } from '../../uploads/fileVersioning/fileOperationManager.js'
 import { withLegacyCloudUploadFileData } from '../../uploads/fileVersioning/storedFiles.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
+import { prepareUploadData } from '../../uploads/prepareUploadData.js'
 import {
   getLocalizedUploadProperties,
   getUploadDestination,
@@ -61,7 +63,7 @@ import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { copyDataWithFreshRowIDs } from './utilities/copyDataWithFreshRowIDs.js'
 import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
-import { updateDocument } from './utilities/update.js'
+import { prepareUpdateDocument } from './utilities/update.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
   autosave?: boolean
@@ -325,17 +327,8 @@ export const updateOperation = async <
       docs = query.docs
     }
 
-    const sharedGeneratedFileData = !collectionConfig.upload
-      ? await generateFileData({
-          collection,
-          config,
-          data: bulkUpdateData,
-          operation: 'update',
-          overwriteExistingFiles,
-          req,
-          throwOnMissingFile: false,
-        })
-      : null
+    const sharedGeneratedFileData: { data: typeof bulkUpdateData; files: FileToSave[] } | null =
+      collectionConfig.upload ? null : { data: bulkUpdateData, files: [] }
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
 
@@ -363,7 +356,7 @@ export const updateOperation = async <
           documentFile.tempFilePath = documentTempFilePath
         }
 
-        if (collectionConfig.upload && sharedGeneratedFileData === null) {
+        if (collectionConfig.upload) {
           documentReq = isolateObjectProperty(req, ['file', 'payloadUploadSizes'])
           // A document that commits its own transaction must not roll back files committed by
           // earlier documents, so it only shares the operation's file scope inside one transaction.
@@ -380,11 +373,9 @@ export const updateOperation = async <
             req: documentReq,
           })
         }
-        const generatedFileData =
-          sharedGeneratedFileData ??
-          (await generateFileData({
-            collection,
-            config,
+        let generatedFileData = sharedGeneratedFileData ?? {
+          data: await prepareUploadData({
+            collection: collectionConfig,
             data: mergeUploadDataWithDocument(bulkUpdateData, docWithLocales, {
               locale:
                 locale === 'all' || !locale
@@ -394,12 +385,11 @@ export const updateOperation = async <
                   : locale,
               localizedProperties: getLocalizedUploadProperties(collectionConfig.flattenedFields),
             }),
-            operation: 'update',
             originalDoc: docWithLocales,
-            overwriteExistingFiles,
             req: documentReq,
-            throwOnMissingFile: false,
-          }))
+          }),
+          files: [],
+        }
 
         const select = sanitizeSelect({
           fields: collectionConfig.flattenedFields,
@@ -443,13 +433,28 @@ export const updateOperation = async <
           showHiddenFields: showHiddenFields!,
           unpublishAllLocales,
         } as const
-        const write = () => updateDocument(updateArgs)
+        const prepared = await prepareUpdateDocument(updateArgs)
+        generatedFileData = collectionConfig.upload
+          ? await generateFileData({
+              collection,
+              config,
+              data: prepared.data,
+              operation: 'update',
+              originalDoc: docWithLocales,
+              overrideAccess,
+              overwriteExistingFiles,
+              req: documentReq,
+              throwOnMissingFile: false,
+            })
+          : { data: prepared.data, files: generatedFileData.files }
+        const write = () =>
+          prepared.write({ data: generatedFileData.data, filesToUpload: generatedFileData.files })
         let updatedDoc = collectionConfig.upload.fileOperations
           ? await runCloudFileUpdate({
               id,
               collection: collectionConfig,
               current: incomingDoc,
-              data: updateArgs.data,
+              data: generatedFileData.data,
               files: generatedFileData.files,
               req: documentReq,
               write,

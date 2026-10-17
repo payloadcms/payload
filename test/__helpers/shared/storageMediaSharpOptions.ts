@@ -2,7 +2,7 @@ import type { SharpCollectionConfig } from '@payloadcms/transformer-sharp'
 
 /**
  * Sharp options shared by the storage adapter suites: a 200x200 centered resize of the
- * original plus `square` and `sixteenByNineMedium` variants.
+ * original plus smaller variants so both are generated without enlargement.
  */
 export const storageMediaSharpOptions: SharpCollectionConfig = {
   resizeOptions: {
@@ -11,7 +11,7 @@ export const storageMediaSharpOptions: SharpCollectionConfig = {
     width: 200,
   },
   variants: [
-    { name: 'square', crop: 'center', height: 400, width: 400 },
-    { name: 'sixteenByNineMedium', crop: 'center', height: 450, width: 900 },
+    { name: 'square', crop: 'center', height: 100, width: 100 },
+    { name: 'sixteenByNineMedium', crop: 'center', height: 90, width: 160 },
   ],
 }

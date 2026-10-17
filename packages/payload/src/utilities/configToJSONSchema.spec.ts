@@ -258,6 +258,52 @@ describe('configToJSONSchema', () => {
     expect((schema?.$defs?.posts_input as JSONSchema4).properties!.custom.description).toBe('input')
   })
 
+  it('should use a JSON input schema override while retaining the output schema', () => {
+    const outputSchema: JSONSchema4 = { type: 'object', properties: { text: { type: 'string' } } }
+    const inputSchema: JSONSchema4 = { type: ['object', 'number'] }
+    const config = sanitizeConfig({
+      collections: [
+        {
+          slug: 'posts',
+          fields: [
+            {
+              name: 'custom',
+              type: 'json',
+              jsonSchema: { fileMatch: [], inputSchema, schema: outputSchema, uri: 'a://custom' },
+            },
+          ],
+        },
+      ],
+      typescript: { generateInputTypes: true },
+    } as Config)
+    const { jsonSchema: schema } = configToJSONSchema(config, 'text')
+
+    expect((schema.$defs!.posts as JSONSchema4).properties!.custom).toEqual(outputSchema)
+    expect((schema.$defs!.posts_input as JSONSchema4).properties!.custom).toEqual(inputSchema)
+  })
+
+  it('should retain JSON structural input validation without an input override', () => {
+    const jsonSchema: JSONSchema4 = { type: 'object', properties: { text: { type: 'string' } } }
+    const config = sanitizeConfig({
+      collections: [
+        {
+          slug: 'posts',
+          fields: [
+            {
+              name: 'custom',
+              type: 'json',
+              jsonSchema: { fileMatch: [], schema: jsonSchema, uri: 'a://custom' },
+            },
+          ],
+        },
+      ],
+      typescript: { generateInputTypes: true },
+    } as Config)
+    const { jsonSchema: schema } = configToJSONSchema(config, 'text')
+
+    expect((schema.$defs!.posts_input as JSONSchema4).properties!.custom).toEqual(jsonSchema)
+  })
+
   it('should handle block fields with no blocks', () => {
     // @ts-expect-error
     const config: Config = {

@@ -1,4 +1,4 @@
-import type { CanTransformArgs, UploadTransformer } from './types.js'
+import type { CanTransformArgs, PlannedTransformer, UploadTransformer } from './types.js'
 
 import { matchesMimeType } from './matchesMimeType.js'
 
@@ -12,28 +12,45 @@ import { matchesMimeType } from './matchesMimeType.js'
 export async function planTransformerPipeline({
   args,
   capability,
+  mimeType,
   transformers,
 }: {
   args: CanTransformArgs
   capability: TransformerCapability
+  mimeType?: string
   transformers: UploadTransformer[]
-}): Promise<UploadTransformer[]> {
-  const pipeline: UploadTransformer[] = []
+}): Promise<PlannedTransformer[]> {
+  const pipeline: PlannedTransformer[] = []
 
-  for (const transformer of getCandidateTransformers({
-    capability,
-    mimeType: args.mimeType,
-    transformers,
-  })) {
-    if (typeof transformer.canTransform === 'function') {
-      const isEligible = await transformer.canTransform(args)
+  // Saved intent is claimed before source reads, including stages that may become
+  // compatible after an earlier conversion. Execution checks the actual stage MIME.
+  const hasSavedWork =
+    args.doc._transforms &&
+    Object.keys(args.doc._transforms).length &&
+    (args.operation === 'upload' || args.purpose === 'persisted-default')
+  const candidates = hasSavedWork
+    ? transformers.filter((transformer) => typeof transformer[capability] === 'function')
+    : getCandidateTransformers({
+        capability,
+        mimeType: mimeType ?? args.doc.mimeType,
+        transformers,
+      })
 
-      if (!isEligible) {
-        continue
-      }
+  for (const transformer of candidates) {
+    const result =
+      typeof transformer.canTransform === 'function' ? await transformer.canTransform(args) : true
+
+    if (!result) {
+      continue
     }
 
-    pipeline.push(transformer)
+    pipeline.push({
+      ...(typeof result === 'object' && result.handledTransformKeys
+        ? { handledTransformKeys: result.handledTransformKeys }
+        : {}),
+      options: typeof result === 'object' ? result.options : undefined,
+      transformer,
+    })
   }
 
   return pipeline

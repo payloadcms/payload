@@ -6,7 +6,8 @@ import { planTransformerPipeline } from './planTransformerPipeline.js'
 
 const makeArgs = (overrides: Partial<CanTransformArgs> = {}): CanTransformArgs => ({
   collectionSlug: 'media',
-  mimeType: 'image/png',
+  doc: { mimeType: 'image/png' },
+  originalDoc: { mimeType: 'image/png' },
   operation: 'request',
   req: {} as CanTransformArgs['req'],
   ...overrides,
@@ -35,8 +36,8 @@ describe('planTransformerPipeline', () => {
       transformers,
     })
 
-    expect(requestPipeline).toEqual([requestOnly])
-    expect(filePipeline).toEqual([fileOnly])
+    expect(requestPipeline).toEqual([{ transformer: requestOnly }])
+    expect(filePipeline).toEqual([{ transformer: fileOnly }])
   })
 
   it('should reject planning without evaluating later transformers when canTransform throws', async () => {

@@ -11,6 +11,7 @@ import { initSharpCollections } from './initSharpCollections.js'
 import { parseDynamicResize } from './parseDynamicResize.js'
 import { createPrepareLegacyUpload } from './prepareLegacyUpload.js'
 import { createTransformFile } from './transformFile.js'
+import { sharpTransformKeys } from './transformState.js'
 
 const DEFAULT_MIME_TYPES = [
   'image/jpeg',
@@ -59,16 +60,52 @@ export function sharpTransformer(
   const dynamicDefaults = resolveSharpDynamicDefaults(dynamicOptions || undefined)
   const sharpDependency = options.sharp ?? bundledSharp
   const collections = options.collections ?? {}
+  const variantSources = new WeakMap<File, File>()
+  const transformLimits = {
+    maxHeight: options.transformLimits?.maxHeight ?? 4096,
+    maxPixels: options.transformLimits?.maxPixels ?? 16_777_216,
+    maxWidth: options.transformLimits?.maxWidth ?? 4096,
+  }
+
+  if (Object.values(transformLimits).some((value) => !Number.isSafeInteger(value) || value <= 0)) {
+    throw new Error('Sharp transformLimits must be positive safe integers.')
+  }
   const handlesCollection = ({ collectionSlug }: { collectionSlug: string }) =>
     Boolean(collections[collectionSlug])
+  const maxSourceBytes = options.maxSourceBytes ?? 64 * 1024 * 1024
+
+  if (!Number.isSafeInteger(maxSourceBytes) || maxSourceBytes <= 0) {
+    throw new Error('Sharp maxSourceBytes must be a positive safe integer.')
+  }
 
   const transformer: TransformerWithInternalBridge & UploadTransformer = {
     slug: options.slug ?? 'sharp',
     canTransform: (args) => {
+      if (
+        args.doc?.mimeType &&
+        !args.doc.mimeType.startsWith('image/') &&
+        !args.doc._transforms?.posterFrame
+      ) {
+        return false
+      }
       // Upload-time eligibility is already decided by the MIME match that ran
       // before `canTransform`; only dynamic request routing needs the query.
       if (args.operation === 'upload') {
-        return true
+        return {
+          canTransform: true,
+          handledTransformKeys: Object.keys(args.doc._transforms ?? {}).filter((key) =>
+            sharpTransformKeys.includes(key),
+          ),
+          options: { collectionUpload: collections[args.collectionSlug] ?? {}, kind: 'main' },
+        }
+      }
+
+      if (args.purpose === 'persisted-default') {
+        const handledTransformKeys = Object.keys(args.doc._transforms ?? {}).filter((key) =>
+          sharpTransformKeys.includes(key),
+        )
+
+        return handledTransformKeys.length ? { canTransform: true, handledTransformKeys } : false
       }
 
       if (
@@ -85,7 +122,13 @@ export function sharpTransformer(
 
       return result.isRouted
     },
-    handleRequest: createHandleRequest({ dynamicDefaults, sharpDependency }),
+    handleRequest: createHandleRequest({
+      collections,
+      dynamicDefaults,
+      maxSourceBytes,
+      sharpDependency,
+      transformLimits,
+    }),
     init: (config) => {
       assertDynamicCollectionsExist({ config, dynamicOptions })
       assertCollectionsOwnedOnce({ collections, config, transformer })
@@ -95,13 +138,17 @@ export function sharpTransformer(
     mimeTypes: DEFAULT_MIME_TYPES,
     [uploadTransformerInternal]: {
       handlesCollection,
-      prepareUpload: createPrepareLegacyUpload({ collections, sharpDependency }),
+      maxSourceBytes,
+      prepareUpload: createPrepareLegacyUpload({ collections, sharpDependency, variantSources }),
     },
     // `options` here is always what this transformer computed via `prepareUpload`'s
     // `transform` callback; the public contract's `unknown` just reflects that core never inspects it.
-    transformFile: createTransformFile({ sharpDependency }) as (
-      args: TransformFileArgs,
-    ) => Promise<TransformFileResult>,
+    transformFile: createTransformFile({
+      maxSourceBytes,
+      sharpDependency,
+      transformLimits,
+      variantSources,
+    }) as (args: TransformFileArgs) => Promise<TransformFileResult>,
   }
 
   return transformer

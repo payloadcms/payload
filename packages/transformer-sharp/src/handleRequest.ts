@@ -1,9 +1,20 @@
 import type { HandleTransformRequestArgs, HandleTransformRequestResult } from 'payload'
 import type { SharpOptions } from 'sharp'
 
-import type { SharpDependency, SharpDynamicDefaults } from './types.js'
+import { createFileSource } from 'payload/internal'
 
+import type {
+  SharpCollectionConfig,
+  SharpDependency,
+  SharpDynamicDefaults,
+  SharpTransformLimits,
+} from './types.js'
+
+import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
 import { parseDynamicResize } from './parseDynamicResize.js'
+import { resolveFocalPoint } from './resolveFocalPoint.js'
+import { getOutputDimensions } from './resolveResizeDimensions.js'
+import { resolveOutputFormat, resolveWithMetadata, transformState } from './transformState.js'
 
 // Must match generateFileData.ts's allow-list — the only MIME types Sharp auto-detects multi-frame animation for.
 const ANIMATED_MIME_TYPES = ['image/avif', 'image/gif', 'image/webp']
@@ -16,13 +27,114 @@ const ANIMATED_MIME_TYPES = ['image/avif', 'image/gif', 'image/webp']
  * uncaught; Payload's orchestrator logs and aborts the pipeline.
  */
 export function createHandleRequest({
+  collections = {},
   dynamicDefaults,
+  maxSourceBytes = 64 * 1024 * 1024,
   sharpDependency,
+  transformLimits,
 }: {
+  collections?: Partial<Record<string, SharpCollectionConfig>>
   dynamicDefaults: Required<SharpDynamicDefaults>
+  maxSourceBytes?: number
   sharpDependency: SharpDependency
+  transformLimits?: SharpTransformLimits
 }): (args: HandleTransformRequestArgs) => Promise<HandleTransformRequestResult> {
-  return async ({ getSourceFile, mimeType, req }) => {
+  return async ({ collectionSlug: argumentsCollectionSlug, doc, getSourceFile, purpose, req }) => {
+    const collectionConfig = collections[argumentsCollectionSlug]
+    const withMetadata = resolveWithMetadata({
+      state: doc._transforms,
+      withMetadata: collectionConfig?.withMetadata,
+    })
+    if (purpose === 'persisted-default') {
+      const source = await getSourceFile()
+      const variantKey = Object.keys(doc.variants ?? {}).find(
+        (key) => doc.variants[key]?.filename === req.routeParams?.filename,
+      )
+      const variant =
+        variantKey &&
+        (
+          collectionConfig?.variants ??
+          req.payload?.collections?.[argumentsCollectionSlug]?.config.upload.variants
+        )?.find(({ name }) => name === variantKey)
+
+      const shouldTransformVariant = Boolean(
+        variant && (variant.width || variant.height || variant.formatOptions),
+      )
+      let file = await transformState({
+        buffer: Buffer.from(
+          await createFileSource({
+            filename: doc.original?.filename ?? doc.filename,
+            mimeType: doc.original?.mimeType ?? doc.mimeType,
+            retrieve: () => Promise.resolve(source),
+          }).arrayBuffer({ maxBytes: maxSourceBytes }),
+        ),
+        filename: doc.original?.filename ?? doc.filename,
+        formatOptions: shouldTransformVariant ? undefined : collectionConfig?.formatOptions,
+        limits: transformLimits,
+        metadataOptions: shouldTransformVariant ? undefined : { req, withMetadata },
+        mimeType:
+          source.headers.get('Content-Type')?.split(';')[0]?.trim() ??
+          doc.original?.mimeType ??
+          doc.mimeType,
+        sharpDependency,
+        state: shouldTransformVariant
+          ? {
+              ...doc._transforms,
+              encoding: undefined,
+              metadataPolicy: {
+                mode:
+                  withMetadata === true || typeof withMetadata === 'function'
+                    ? 'preserve'
+                    : 'strip',
+              },
+            }
+          : doc._transforms,
+      })
+      if (variant && shouldTransformVariant) {
+        const original = doc.original ?? doc
+        const focalPoint =
+          original.width && original.height
+            ? resolveFocalPoint({
+                height: original.height,
+                state: doc._transforms,
+                width: original.width,
+              })
+            : undefined
+
+        file = await transformState({
+          buffer: Buffer.from(await file.arrayBuffer()),
+          filename: file.name,
+          formatOptions: variant.formatOptions ?? collectionConfig?.formatOptions,
+          limits: transformLimits,
+          metadataOptions: { req, withMetadata },
+          mimeType: file.type,
+          sharpDependency,
+          state: {
+            encoding: doc._transforms.encoding,
+            focalPoint,
+            metadataPolicy: doc._transforms.metadataPolicy,
+            resize:
+              variant.width || variant.height
+                ? {
+                    ...(variant.width
+                      ? { height: variant.height, width: variant.width }
+                      : { height: variant.height! }),
+                    fit: variant.fit,
+                    withoutEnlargement: variant.withoutEnlargement,
+                  }
+                : undefined,
+          },
+        })
+      }
+      const buffer = Buffer.from(await file.arrayBuffer())
+
+      return {
+        response: new Response(buffer, {
+          headers: { 'Content-Length': String(buffer.length), 'Content-Type': file.type },
+        }),
+        status: 'continue',
+      }
+    }
     const parseResult = parseDynamicResize({
       limits: dynamicDefaults,
       searchParams: req.searchParams ?? new URLSearchParams(),
@@ -49,7 +161,14 @@ export function createHandleRequest({
       return { response: source, status: 'complete' }
     }
 
-    const sourceBuffer = Buffer.from(await source.arrayBuffer())
+    const mimeType = source.headers.get('Content-Type')?.split(';')[0]?.trim() ?? ''
+    const sourceBuffer = Buffer.from(
+      await createFileSource({
+        filename: doc.filename,
+        mimeType,
+        retrieve: () => Promise.resolve(source),
+      }).arrayBuffer({ maxBytes: maxSourceBytes }),
+    )
 
     const isAnimated = ANIMATED_MIME_TYPES.includes(mimeType)
     const sharpOptions: SharpOptions = isAnimated ? { animated: true } : {}
@@ -104,18 +223,56 @@ export function createHandleRequest({
       }
     }
 
-    // Sharp drops the EXIF orientation tag on output, so apply it to the pixels first.
-    const resizedBuffer = await sharpDependency(sourceBuffer, sharpOptions)
-      .rotate()
-      .resize({
+    let resizedBuffer: Buffer
+
+    const original = doc.original ?? doc
+    const focalPoint =
+      doc._transforms && original.width && original.height
+        ? resolveFocalPoint({
+            height: original.height,
+            state: doc._transforms,
+            width: original.width,
+          })
+        : undefined
+
+    if (focalPoint && dynamicDefaults.fit === 'cover' && parseResult.width && parseResult.height) {
+      const file = await transformState({
+        buffer: sourceBuffer,
+        filename: doc.filename,
+        limits: dynamicDefaults,
+        metadataOptions: { req, withMetadata },
+        mimeType,
+        sharpDependency,
+        state: {
+          encoding: doc._transforms?.encoding,
+          focalPoint,
+          metadataPolicy: doc._transforms?.metadataPolicy,
+          resize: {
+            fit: 'cover',
+            height: parseResult.height,
+            width: parseResult.width,
+            withoutEnlargement,
+          },
+        },
+      })
+
+      resizedBuffer = Buffer.from(await file.arrayBuffer())
+    } else {
+      // Normalize EXIF orientation before producing the query-sized output.
+      let image = sharpDependency(sourceBuffer, sharpOptions).rotate().resize({
         fit: dynamicDefaults.fit,
         height: parseResult.height,
         position: dynamicDefaults.position,
         width: parseResult.width,
         withoutEnlargement,
       })
-      .toBuffer()
-
+      const outputFormat = resolveOutputFormat({ encoding: doc._transforms?.encoding, mimeType })
+      if (outputFormat) {
+        image = image.toFormat(outputFormat.format, outputFormat.options)
+      }
+      image = await optionallyAppendMetadata({ req, sharpFile: image, withMetadata })
+      resizedBuffer = await image.toBuffer()
+    }
     const headers = new Headers()
     headers.set('Content-Type', mimeType)
     headers.set('Content-Length', String(resizedBuffer.length))
@@ -127,49 +284,5 @@ export function createHandleRequest({
       }),
       status: 'continue',
     }
-  }
-}
-
-/**
- * The per-frame output size. When both dimensions are requested with any `fit` other
- * than `'outside'` this is the requested box, an upper bound (`fit: 'contain'`/`'inside'`
- * or `withoutEnlargement` can render smaller), which is what a resource budget needs.
- * `'outside'` scales to cover the box, so one axis can exceed it.
- */
-function getOutputDimensions({
-  fit,
-  height,
-  sourceHeight,
-  sourceWidth,
-  width,
-  withoutEnlargement,
-}: {
-  fit: SharpDynamicDefaults['fit']
-  height: number | undefined
-  sourceHeight: number | undefined
-  sourceWidth: number | undefined
-  width: number | undefined
-  withoutEnlargement: boolean
-}): { height: number; width: number } | undefined {
-  const hasBothDimensions = width !== undefined && height !== undefined
-
-  if (hasBothDimensions && fit !== 'outside') {
-    return { height, width }
-  }
-
-  if (!sourceWidth || !sourceHeight) {
-    return undefined
-  }
-
-  const scale = hasBothDimensions
-    ? Math.max(width / sourceWidth, height / sourceHeight)
-    : width !== undefined
-      ? width / sourceWidth
-      : height! / sourceHeight
-  const effectiveScale = withoutEnlargement ? Math.min(scale, 1) : scale
-
-  return {
-    height: Math.round(sourceHeight * effectiveScale),
-    width: Math.round(sourceWidth * effectiveScale),
   }
 }

@@ -2064,7 +2064,36 @@ export type { ValidationResult } from './types/validation.js'
 export { generatePayloadFileURL } from './uploads/generatePayloadFileURL.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
-export type * from './uploads/transformers/types.js'
+export type {
+  CanTransformArgs,
+  CanTransformResult,
+  FileSource,
+  HandleTransformRequestArgs,
+  HandleTransformRequestResult,
+  PlannedTransformer,
+  TransformDefinition,
+  TransformFileArgs,
+  TransformFileResult,
+  UploadDocument,
+  UploadTransformer,
+} from './uploads/transformers/types.js'
+export type {
+  BuiltInTransforms,
+  ClipTransform,
+  CropTransform,
+  EncodingTransform,
+  FlipTransform,
+  FocalPointTransform,
+  ImageEncodingTransform,
+  MetadataPolicyTransform,
+  PageRangeTransform,
+  PDFEncodingTransform,
+  PosterFrameTransform,
+  ResizeTransform,
+  RotateTransform,
+  TransformState,
+  VideoEncodingTransform,
+} from './uploads/transformState/types.js'
 export type * from './uploads/types.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
