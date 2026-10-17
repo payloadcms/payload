@@ -11,6 +11,8 @@ import { File } from '../../graphics/File/index.js'
 import { appendCacheTag } from '../../utilities/appendCacheTag.js'
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
 
+type ImageLoadState = 'error' | 'loaded' | undefined
+
 export type ThumbnailProps = {
   className?: string
   collectionSlug?: string
@@ -33,7 +35,6 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
     size,
     width,
   } = props
-  const [fileExists, setFileExists] = React.useState(undefined)
 
   const classNames = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
 
@@ -42,28 +43,9 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
     [fileSrc, imageCacheTag],
   )
 
-  React.useEffect(() => {
-    if (!src) {
-      setFileExists(false)
-      return
-    }
-    setFileExists(undefined)
-
-    const img = new Image()
-    img.src = src
-    img.onload = () => {
-      setFileExists(true)
-    }
-    img.onerror = () => {
-      setFileExists(false)
-    }
-  }, [src])
-
   return (
     <div className={classNames}>
-      {fileExists === undefined && <ShimmerEffect height="100%" />}
-      {fileExists && <img alt={filename as string} height={height} src={src} width={width} />}
-      {fileExists === false && <File />}
+      <ThumbnailImage alt={filename as string} height={height} src={src} width={width} />
     </div>
   )
 }
@@ -78,7 +60,6 @@ type ThumbnailComponentProps = {
 }
 export function ThumbnailComponent(props: ThumbnailComponentProps) {
   const { alt, className = '', filename, fileSrc, imageCacheTag, size } = props
-  const [fileExists, setFileExists] = React.useState(undefined)
 
   const classNames = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
 
@@ -87,28 +68,64 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
     [fileSrc, imageCacheTag],
   )
 
-  React.useEffect(() => {
-    if (!src) {
-      setFileExists(false)
-      return
-    }
-    setFileExists(undefined)
-
-    const img = new Image()
-    img.src = src
-    img.onload = () => {
-      setFileExists(true)
-    }
-    img.onerror = () => {
-      setFileExists(false)
-    }
-  }, [src])
-
   return (
     <div className={classNames}>
-      {fileExists === undefined && <ShimmerEffect height="100%" />}
-      {fileExists && <img alt={alt || filename} src={src} />}
-      {fileExists === false && <File />}
+      <ThumbnailImage alt={alt || filename} src={src} />
     </div>
+  )
+}
+
+export function getImageLoadState({
+  complete,
+  naturalWidth,
+}: Pick<HTMLImageElement, 'complete' | 'naturalWidth'>): ImageLoadState {
+  if (!complete) {
+    return undefined
+  }
+
+  return naturalWidth > 0 ? 'loaded' : 'error'
+}
+
+function ThumbnailImage({
+  alt,
+  height,
+  src,
+  width,
+}: {
+  alt: string
+  height?: number
+  src: null | string
+  width?: number
+}) {
+  const [hasLoaded, setHasLoaded] = React.useState(false)
+  const [hasError, setHasError] = React.useState(false)
+  const imageRef = React.useRef<HTMLImageElement>(null)
+
+  React.useEffect(() => {
+    const loadState = imageRef.current ? getImageLoadState(imageRef.current) : undefined
+
+    setHasLoaded(loadState === 'loaded')
+    setHasError(loadState === 'error')
+  }, [src])
+
+  if (!src || hasError) {
+    return <File />
+  }
+
+  return (
+    <React.Fragment>
+      {!hasLoaded && <ShimmerEffect height="100%" />}
+      <img
+        alt={alt}
+        decoding="async"
+        height={height}
+        loading="lazy"
+        onError={() => setHasError(true)}
+        onLoad={() => setHasLoaded(true)}
+        ref={imageRef}
+        src={src}
+        width={width}
+      />
+    </React.Fragment>
   )
 }
