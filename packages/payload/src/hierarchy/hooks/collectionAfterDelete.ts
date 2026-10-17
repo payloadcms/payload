@@ -52,15 +52,22 @@ export const hierarchyCollectionAfterDelete =
       for (const doc of docs) {
         const values = (doc[fieldName] as (number | string)[] | null) ?? []
 
-        await req.payload.update({
-          id: doc.id,
-          collection: collectionSlug,
-          data: {
-            [fieldName]: values.filter((value) => value !== id),
-          },
-          overrideAccess: true,
-          req,
-        })
+        try {
+          await req.payload.update({
+            id: doc.id,
+            collection: collectionSlug,
+            data: {
+              [fieldName]: values.filter((value) => value !== id),
+            },
+            overrideAccess: true,
+            req,
+          })
+        } catch (err) {
+          req.payload.logger.error({
+            err,
+            msg: `Failed to remove deleted ${String(id)} from ${collectionSlug} ${String(doc.id)}`,
+          })
+        }
       }
     }
   }
