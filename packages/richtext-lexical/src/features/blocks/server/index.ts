@@ -85,8 +85,20 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
       })
     }
 
+    let blockSchemaMap: FieldSchemaMap | undefined
+
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#BlocksFeatureClient',
+      clientSchemaMapKeys: [
+        ...blockConfigs.flatMap((block) => [
+          `lexical_blocks.${block.slug}.fields`,
+          `lexical_blocks.${block.slug}`,
+        ]),
+        ...inlineBlockConfigs.flatMap((block) => [
+          `lexical_inline_blocks.${block.slug}.fields`,
+          `lexical_inline_blocks.${block.slug}`,
+        ]),
+      ],
       generatedTypes: {
         modifyOutputSchema: ({
           collectionIDFieldTypes,
@@ -143,6 +155,7 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
         },
       },
       generateSchemaMap: ({ config }) => {
+        if (blockSchemaMap) return blockSchemaMap
         /**
          * Add sub-fields to the schemaMap. E.g. if you have an array field as part of the block, and it runs addRow, it will request these
          * sub-fields from the component map. Thus, we need to put them in the component map here.
@@ -206,6 +219,7 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           }
         }
 
+        blockSchemaMap = schemaMap
         return schemaMap
       },
       i18n,

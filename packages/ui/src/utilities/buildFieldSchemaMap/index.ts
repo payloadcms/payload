@@ -3,6 +3,7 @@ import type { Field, FieldSchemaMap, SanitizedConfig, TextField } from 'payload'
 
 import { confirmPassword, password } from 'payload/shared'
 
+import { DeferredSchemaMap } from './DeferredSchemaMap.js'
 import { traverseFields } from './traverseFields.js'
 
 const baseAuthFields: Field[] = [
@@ -32,7 +33,7 @@ export const buildFieldSchemaMap = (args: {
 }): { fieldSchemaMap: FieldSchemaMap } => {
   const { collectionSlug, config, globalSlug, i18n, widgetSlug } = args
 
-  const schemaMap: FieldSchemaMap = new Map()
+  const schemaMap: FieldSchemaMap = new DeferredSchemaMap()
 
   if (collectionSlug) {
     const matchedCollection = config.collections.find(

@@ -1,13 +1,18 @@
 import type { I18n } from '@payloadcms/translations'
 import type {
+  ClientBlock,
   ClientConfig,
   ClientField,
   ClientFieldSchemaMap,
+  Field,
   FieldSchemaMap,
   Payload,
   TextFieldClient,
 } from 'payload'
 
+import { createClientBlocks, createClientFields } from 'payload'
+
+import { LazySchemaMap } from './LazySchemaMap.js'
 import { traverseFields } from './traverseFields.js'
 
 const baseAuthFields: ClientField[] = [
@@ -37,7 +42,34 @@ export const buildClientFieldSchemaMap = (args: {
 }): { clientFieldSchemaMap: ClientFieldSchemaMap } => {
   const { collectionSlug, config, globalSlug, i18n, payload, schemaMap, widgetSlug } = args
 
-  const clientSchemaMap: ClientFieldSchemaMap = new Map()
+  const schemaCache = new WeakMap<object, unknown>()
+  const options = {
+    defaultIDType: payload.config.db.defaultIDType,
+    i18n,
+    importMap: payload.importMap,
+    schemaCache,
+  }
+  type ClientSchema = ClientFieldSchemaMap extends Map<string, infer Value> ? Value : never
+  const clientSchemaMap = new LazySchemaMap({
+    source: schemaMap,
+    convert: (field): ClientSchema => {
+      if (schemaCache.has(field)) return schemaCache.get(field) as ClientSchema
+      const client =
+        'slug' in field
+          ? (createClientBlocks({ ...options, blocks: [field] })[0] as ClientBlock)
+          : 'type' in field
+            ? createClientFields({ ...options, disableAddingID: true, fields: [field as Field] })[0]
+            : {
+                fields: createClientFields({
+                  ...options,
+                  disableAddingID: true,
+                  fields: field.fields,
+                }),
+              }
+      schemaCache.set(field, client)
+      return client
+    },
+  })
 
   if (collectionSlug) {
     const matchedCollection = config.collections.find(
