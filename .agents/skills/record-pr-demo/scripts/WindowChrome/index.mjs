@@ -46,7 +46,7 @@ export function mountDemoChrome({
     ::slotted([slot=content]) { display:block; width:100%; height:100%; border:0; }
     .footer { position:absolute; top:32px; left:50%; transform:translateX(-50%); width:min(1302px,calc(100% - 64px)); height:112px; display:grid; grid-template-rows:minmax(0,1fr); grid-template-columns:minmax(0,420fr) minmax(0,826fr); align-items:center; padding:12px 24px; border-radius:12px; color:var(--ink); background:var(--paper); }
     .change { min-height:0; align-self:stretch; display:flex; flex-direction:column; justify-content:center; gap:2px; padding-inline-end:28px; border-inline-end:1px solid var(--line); }
-    .kind { color:var(--sub); font-size:12px; }
+    .kind { align-self:flex-start; padding-inline:6px; border:1px solid var(--line); border-radius:4px; background:var(--shell); color:var(--ink); font-size:12px; font-weight:500; line-height:16px; }
     .title { font-size:18px; font-weight:400; letter-spacing:-.1px; margin:0; overflow-wrap:anywhere; }
     .description { font-size:13px; color:var(--sub); overflow-wrap:anywhere; }
     .note { padding-inline-start:28px; min-width:0; }
