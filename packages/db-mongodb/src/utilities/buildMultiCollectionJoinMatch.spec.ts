@@ -41,6 +41,9 @@ const evaluate = (
     const [a, b] = expr.$eq.map((operand: unknown) => resolveOperand(operand))
     return JSON.stringify(a) === JSON.stringify(b)
   }
+  if (expr.$and) {
+    return expr.$and.every((operand: unknown) => resolveOperand(operand) === true)
+  }
   if (expr.$in) {
     const [needle, haystack] = expr.$in.map((operand: unknown) => resolveOperand(operand))
     return (
@@ -115,38 +118,56 @@ describe('previous behavior (regression)', () => {
 
 describe('polymorphic target fields', () => {
   it('should match scalar polymorphic values by their .value', () => {
-    const expr = buildMultiCollectionJoinMatch('_h_tags', true)
+    const expr = buildMultiCollectionJoinMatch('_h_tags', true, 'posts')
 
     expect(
-      evaluate(expr, { _h_tags: { relationTo: 'tags', value: 'news-id' } }, 'news-id'),
+      evaluate(expr, { _h_tags: { relationTo: 'posts', value: 'news-id' } }, 'news-id'),
     ).toBe(true)
     expect(
-      evaluate(expr, { _h_tags: { relationTo: 'tags', value: 'other-id' } }, 'news-id'),
+      evaluate(expr, { _h_tags: { relationTo: 'posts', value: 'other-id' } }, 'news-id'),
+    ).toBe(false)
+  })
+
+  it('should not match a colliding id that references a different collection (scalar)', () => {
+    const expr = buildMultiCollectionJoinMatch('_h_tags', true, 'posts')
+
+    // Same id value, but the stored reference points at another collection:
+    // without the relationTo check this would be a false join.
+    expect(
+      evaluate(expr, { _h_tags: { relationTo: 'authors', value: 'news-id' } }, 'news-id'),
     ).toBe(false)
   })
 
   it('should match polymorphic arrays by member .value', () => {
-    const expr = buildMultiCollectionJoinMatch('_h_tags', true)
+    const expr = buildMultiCollectionJoinMatch('_h_tags', true, 'posts')
 
     expect(
       evaluate(
         expr,
         {
           _h_tags: [
-            { relationTo: 'tags', value: 'news-id' },
-            { relationTo: 'tags', value: 'sport-id' },
+            { relationTo: 'posts', value: 'news-id' },
+            { relationTo: 'posts', value: 'sport-id' },
           ],
         },
         'news-id',
       ),
     ).toBe(true)
     expect(
-      evaluate(expr, { _h_tags: [{ relationTo: 'tags', value: 'sport-id' }] }, 'news-id'),
+      evaluate(expr, { _h_tags: [{ relationTo: 'posts', value: 'sport-id' }] }, 'news-id'),
+    ).toBe(false)
+  })
+
+  it('should not match a colliding id that references a different collection (array)', () => {
+    const expr = buildMultiCollectionJoinMatch('_h_tags', true, 'posts')
+
+    expect(
+      evaluate(expr, { _h_tags: [{ relationTo: 'authors', value: 'news-id' }] }, 'news-id'),
     ).toBe(false)
   })
 
   it('should not match raw ids in polymorphic mode', () => {
-    const expr = buildMultiCollectionJoinMatch('_h_tags', true)
+    const expr = buildMultiCollectionJoinMatch('_h_tags', true, 'posts')
 
     // Guards against passing the flag for non-polymorphic fields: raw ids
     // are objects-free, so `.value` is undefined and nothing matches.
@@ -155,15 +176,34 @@ describe('polymorphic target fields', () => {
   })
 
   it('should pin the polymorphic expression shape', () => {
-    const expr = buildMultiCollectionJoinMatch('_h_tags', true)
+    const expr = buildMultiCollectionJoinMatch('_h_tags', true, 'posts')
 
     expect(expr).toEqual({
       $cond: {
         if: { $isArray: '$_h_tags' },
         then: {
-          $in: ['$$root_id_', { $map: { input: '$_h_tags', as: 'ref', in: '$$ref.value' } }],
+          $in: [
+            true,
+            {
+              $map: {
+                input: '$_h_tags',
+                as: 'ref',
+                in: {
+                  $and: [
+                    { $eq: ['$$ref.value', '$$root_id_'] },
+                    { $eq: ['$$ref.relationTo', 'posts'] },
+                  ],
+                },
+              },
+            },
+          ],
         },
-        else: { $eq: ['$_h_tags.value', '$$root_id_'] },
+        else: {
+          $and: [
+            { $eq: ['$_h_tags.value', '$$root_id_'] },
+            { $eq: ['$_h_tags.relationTo', 'posts'] },
+          ],
+        },
       },
     })
   })
