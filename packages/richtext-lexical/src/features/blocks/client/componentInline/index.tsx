@@ -379,17 +379,15 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
   )
   // cleanup effect
   useEffect(() => {
-    const isStateOutOfSync = (formData: InlineBlockFields, initialState: FormState) => {
-      return Object.keys(initialState).some(
-        (key) => initialState[key] && formData[key] !== initialState[key].value,
-      )
-    }
-
     return () => {
       // If the component is unmounted (either via removeInlineBlock or via lexical itself) and the form state got changed before,
       // we need to reset the initial state to force a re-fetch of the initial state when it gets mounted again (e.g. via lexical history undo).
       // Otherwise it would use an outdated initial state.
-      if (initialState && isStateOutOfSync(formData, initialState)) {
+      // Form state is keyed by field path (`group.field`), so compare reduced values instead of top-level keys.
+      if (
+        initialState &&
+        !getCachedFormStateIfDataMatches({ cachedFormState: initialState, formData })
+      ) {
         setInitialState(false)
       }
       abortAndIgnore(onChangeAbortControllerRef.current)
