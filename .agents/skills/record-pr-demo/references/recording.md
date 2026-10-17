@@ -190,12 +190,12 @@ Candidate mode automatically:
 2. validates the scenario without retaining video or presentation delays;
 3. records once with human-readable pacing;
 4. converts to H.264 MP4 and fully decodes it to detect corruption;
-5. writes a six-frame contact sheet and a JSON manifest containing metadata and SHA-256;
+5. writes a six-frame contact sheet, a take-specific `.scenario.mjs` copy, and a JSON manifest containing metadata and hashes;
 6. removes the intermediate WebM after successful packaging.
 
 It ends at the local review gate and never uploads.
 
-Candidate mode refuses to overwrite an existing MP4, contact sheet, or manifest. Use a new take-specific `--label` for a revision so previously reviewed evidence remains intact.
+Candidate mode refuses to overwrite an existing MP4, script snapshot, contact sheet, or manifest. It also rejects packaging if the scenario source changed during the take. Use a new take-specific `--label` for a revision so previously reviewed evidence remains intact.
 
 During scenario development, use the faster modes independently:
 
@@ -224,8 +224,14 @@ Useful options:
 
 The lower-level `record-demo.mjs` remains available for debugging the recorder itself. `convert-demo.mjs` is used internally by `prepare-demo.mjs` with the opening state marked by `ready()`. Use `prepare-demo.mjs` for PR demos so conversion, verification, and cleanup stay together.
 
+## Review the recording script
+
+Each candidate saves the scenario module beside its MP4 as `<video-name>.scenario.mjs`. The manifest records `scenarioSnapshot` and `scenarioSha256`; the original scenario path remains in `scenario`. Later edits to the working scenario do not change an earlier take's copy. The snapshot contains the scenario module, not its imported dependencies or the recorder runtime.
+
+Present the script link alongside the video, using the absolute snapshot path, and open it in the Codex editor when available. Keep scenarios readable: use multi-line JavaScript and identify preparation, annotations, interactions, and assertions clearly. For another take, edit the working scenario and use a new label; preserve earlier snapshots with their videos.
+
 ## Review the candidate
 
-The command prints the MP4, duration, size, SHA-256, contact sheet, and manifest paths. Inspect the contact sheet first, then watch the entire video. Confirm that the opening frame is meaningful, actions are readable, no sensitive data is visible, and the final state proves the feature. Show the local MP4 to the user and stop for review.
+The command prints the MP4, duration, size, SHA-256, script snapshot, contact sheet, and manifest paths. Inspect the contact sheet first, then watch the entire video. Confirm that the opening frame is meaningful, actions are readable, no sensitive data is visible, and the final state proves the feature. Show the local MP4 and a clickable script snapshot link to the user, then stop for review.
 
 If the file exceeds 10 MB, shorten the scenario first. Adjusting conversion quality with the lower-level converter is secondary. Do not silently raise the size budget because the applicable GitHub limit depends on the repository's plan and the uploader's access.

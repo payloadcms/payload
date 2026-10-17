@@ -96,6 +96,7 @@ export async function packageCandidate({
   output,
   rawOutput,
   scenario,
+  scenarioSource,
   trimStart,
 }) {
   if (!Number.isFinite(trimStart) || trimStart < 0) {
@@ -107,6 +108,11 @@ export async function packageCandidate({
   const resolvedOutput = path.resolve(output)
   const resolvedRawOutput = path.resolve(rawOutput)
   const resolvedScenario = path.resolve(scenario)
+  if (scenarioSource && !(await readFile(resolvedScenario)).equals(scenarioSource)) {
+    throw new Error(
+      'The scenario changed during this take. Use a new --label and record again so the script matches the video.',
+    )
+  }
 
   await convertDemo({
     environment,
@@ -177,6 +183,11 @@ export async function packageCandidate({
     height: videoStream.height,
     width: videoStream.width,
   }
+  const script = await saveScenarioSnapshot({
+    output: resolvedOutput,
+    scenario: resolvedScenario,
+    source: scenarioSource,
+  })
   const candidateManifest = {
     contactSheet: resolvedContactSheet,
     createdAt: new Date().toISOString(),
@@ -184,6 +195,8 @@ export async function packageCandidate({
     metadata,
     mp4: resolvedOutput,
     scenario: resolvedScenario,
+    scenarioSnapshot: script.path,
+    scenarioSha256: script.sha256,
     sha256,
     sizeBytes: fileStats.size,
   }
@@ -197,9 +210,19 @@ export async function packageCandidate({
     manifestPath: resolvedManifest,
     metadata,
     outputPath: resolvedOutput,
+    scenarioSnapshotPath: script.path,
     sha256,
     sizeBytes: fileStats.size,
   }
+}
+
+export async function saveScenarioSnapshot({ output, scenario, source }) {
+  const scriptPath = scenarioSnapshotPath({ output })
+  const scriptSource = source ?? (await readFile(scenario))
+  const sha256 = createHash('sha256').update(scriptSource).digest('hex')
+  await mkdir(path.dirname(scriptPath), { recursive: true })
+  await writeFile(scriptPath, scriptSource, { flag: 'wx' })
+  return { path: scriptPath, sha256 }
 }
 
 export async function verifyCandidateManifest(manifestPath) {
@@ -228,9 +251,12 @@ export async function verifyCandidateManifest(manifestPath) {
 }
 
 export async function assertCandidatePathsAvailable({ contactSheet, manifest, output }) {
-  const protectedPaths = [contactSheet, manifest, output].map((candidatePath) =>
-    path.resolve(candidatePath),
-  )
+  const protectedPaths = [
+    contactSheet,
+    manifest,
+    output,
+    scenarioSnapshotPath({ output }),
+  ].map((candidatePath) => path.resolve(candidatePath))
   const existingPaths = []
 
   for (const candidatePath of protectedPaths) {
@@ -304,6 +330,7 @@ export async function runPreparation(options) {
   }
 
   await assertCandidatePathsAvailable(options)
+  const scenarioSource = await readFile(options.scenario)
 
   await runWithScenarioFixture(options, async (fixture) => {
     await validateDemo({
@@ -341,6 +368,7 @@ export async function runPreparation(options) {
     output: options.output,
     rawOutput: options.rawOutput,
     scenario: options.scenario,
+    scenarioSource,
     trimStart,
   })
   printStage('Candidate verified', startedAt)
@@ -412,6 +440,10 @@ export async function runWithScenarioFixture(options, action) {
   }
 }
 
+function scenarioSnapshotPath({ output }) {
+  return path.resolve(`${output.replace(/\.[^.]+$/, '')}.scenario.mjs`)
+}
+
 function parseTiming({ name, value }) {
   const milliseconds = Number(value)
 
@@ -449,6 +481,7 @@ function printCandidate(result) {
   console.log(`Duration: ${result.metadata.durationSeconds.toFixed(2)}s`)
   console.log(`Size: ${(result.sizeBytes / 1024).toFixed(0)} KiB`)
   console.log(`SHA256: ${result.sha256}`)
+  console.log(`Review script: ${result.scenarioSnapshotPath}`)
   console.log(`Review sheet: ${result.contactSheetPath}`)
   console.log(`Manifest: ${result.manifestPath}`)
   console.log('Awaiting approval — nothing uploaded.')

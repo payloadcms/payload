@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { createHash } from 'node:crypto'
 import { chmod, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
@@ -117,6 +118,14 @@ test('packageCandidate converts, verifies, inventories, and cleans up a candidat
   assert.equal(savedManifest.scenario, scenario)
   assert.equal(savedManifest.sha256, result.sha256)
   assert.equal(savedManifest.sizeBytes, 9)
+  const scriptPath = path.join(directory, 'demo.scenario.mjs')
+  const originalSource = await readFile(scenario, 'utf8')
+  assert.equal(result.scenarioSnapshotPath, scriptPath)
+  assert.equal(savedManifest.scenarioSnapshot, scriptPath)
+  assert.equal(await readFile(scriptPath, 'utf8'), originalSource)
+  await writeFile(scenario, 'export default async function revisedScenario() {}')
+  assert.equal(await readFile(scriptPath, 'utf8'), originalSource)
+  assert.equal(savedManifest.scenarioSha256, createHash('sha256').update(originalSource).digest('hex'))
   assert.match(await readFile(path.join(directory, 'convert-args.txt'), 'utf8'), /-ss 1\.25/)
 })
 
@@ -144,7 +153,6 @@ test('packageCandidate rejects video that exceeds the upload budget', async () =
 
 test('runWithScenarioFixture wraps execution in scenario setup and teardown hooks', async () => {
   const directory = await mkdtemp(path.join(tmpdir(), 'prepare-pr-demo-fixture-test-'))
-  testDirectories.push(directory)
   testDirectories.push(directory)
   const scenario = path.join(directory, 'scenario.mjs')
 
@@ -182,7 +190,6 @@ export default async function scenario() {}`,
 
 test('runWithScenarioFixture preserves setup failures without running teardown on an absent fixture', async () => {
   const directory = await mkdtemp(path.join(tmpdir(), 'prepare-pr-demo-setup-failure-test-'))
-  testDirectories.push(directory)
   testDirectories.push(directory)
   const scenario = path.join(directory, 'scenario.mjs')
 
@@ -293,4 +300,31 @@ export async function teardown({ fixture, request }) {
   }), /Walkthrough failed/)
   const module = await import(pathToFileURL(scenario).href)
   assert.deepEqual(module.events, ['setup', 'cleanup:recording-only'])
+})
+
+test('should protect an existing script snapshot from being overwritten by another take', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'demo-existing-script-'))
+  testDirectories.push(directory)
+  const output = path.join(directory, 'demo.mp4')
+  await writeFile(path.join(directory, 'demo.scenario.mjs'), 'reviewed script')
+  await assert.rejects(preparation.assertCandidatePathsAvailable({
+    output,
+    contactSheet: path.join(directory, 'demo.png'),
+    manifest: path.join(directory, 'demo.json'),
+  }), /Use a new --label/)
+})
+
+test('should reject packaging when the scenario changes during a take', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'demo-script-changed-'))
+  testDirectories.push(directory)
+  const scenario = path.join(directory, 'scenario.mjs')
+  const scenarioSource = Buffer.from('export default async function original() {}')
+  await writeFile(scenario, 'export default async function revised() {}')
+  await assert.rejects(packageCandidate({
+    scenario, scenarioSource, trimStart: 0,
+    output: path.join(directory, 'demo.mp4'),
+    rawOutput: path.join(directory, 'demo.webm'),
+    manifest: path.join(directory, 'demo.json'),
+    contactSheet: path.join(directory, 'demo.png'),
+  }), /scenario changed during this take/)
 })
