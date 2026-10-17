@@ -32,6 +32,12 @@ export const incrementName = (name: string): string => {
 type Args = {
   collectionSlug: string
   desiredFilename: string
+  /**
+   * When provided, this document ID is excluded from the filename conflict
+   * check. Pass the ID of the document being updated so it does not collide
+   * with its own existing filename and receive a spurious `-1` suffix.
+   */
+  docId?: number | string
   prefix?: string
   req: PayloadRequest
   /**
@@ -49,6 +55,7 @@ type Args = {
  *
  * @param args.collectionSlug - The slug of the upload collection
  * @param args.desiredFilename - The original filename to make safe
+ * @param args.docId - ID of the document being updated; excluded from conflict checks
  * @param args.prefix - Optional prefix path for cloud storage adapters
  * @param args.req - The Payload request object
  * @param args.staticPath - The filesystem path where uploads are stored
@@ -66,6 +73,7 @@ type Args = {
 export async function getSafeFileName({
   collectionSlug,
   desiredFilename,
+  docId,
   prefix,
   req,
   staticPath,
@@ -75,6 +83,7 @@ export async function getSafeFileName({
   while (
     (await docWithFilenameExists({
       collectionSlug,
+      docId,
       filename: modifiedFilename,
       path: staticPath ?? '',
       prefix,
