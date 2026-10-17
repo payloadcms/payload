@@ -1120,6 +1120,108 @@ test.suite('Lexical', { config: './config.ts' }, () => {
   })
 
   test.describe('Hooks', () => {
+    test('should run beforeValidate hooks for fields inside lexical blocks', async ({
+      payload,
+    }) => {
+      const lexicalDocument = await payload.create({
+        collection: lexicalFieldsSlug,
+        data: {
+          lexicalWithBlocks: {
+            root: {
+              type: 'root',
+              children: [
+                {
+                  type: 'block',
+                  fields: {
+                    id: 'nested-before-validate-block',
+                    blockName: '',
+                    blockType: 'asyncHooksBlock',
+                    test1: ' nested hook value ',
+                  },
+                  format: '',
+                  version: 2,
+                },
+              ],
+              direction: null,
+              format: '',
+              indent: 0,
+              version: 1,
+            },
+          },
+          title: 'Nested beforeValidate hook',
+        },
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      const lexicalBlock = lexicalDocument.lexicalWithBlocks.root.children[0] as SerializedBlockNode
+
+      expect((lexicalBlock.fields as { test1: string }).test1).toBe('NESTED HOOK VALUE')
+    })
+
+    test('should run beforeValidate hooks for fields inside lexical links without IDs', async ({
+      payload,
+    }) => {
+      const lexicalDocument = await payload.create({
+        collection: lexicalFieldsSlug,
+        data: {
+          lexicalWithBlocks: {
+            root: {
+              type: 'root',
+              children: [
+                {
+                  type: 'paragraph',
+                  children: [
+                    {
+                      type: 'link',
+                      children: [
+                        {
+                          type: 'text',
+                          detail: 0,
+                          format: 0,
+                          mode: 'normal',
+                          style: '',
+                          text: 'Payload',
+                          version: 1,
+                        },
+                      ],
+                      direction: null,
+                      fields: {
+                        linkType: 'custom',
+                        newTab: false,
+                        rel: [' noopener '],
+                        url: 'https://payloadcms.com',
+                      },
+                      format: '',
+                      indent: 0,
+                      version: 3,
+                    },
+                  ],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  version: 1,
+                },
+              ],
+              direction: null,
+              format: '',
+              indent: 0,
+              version: 1,
+            },
+          },
+          title: 'Nested link beforeValidate hook',
+        },
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      const lexicalParagraph = lexicalDocument.lexicalWithBlocks.root
+        .children[0] as SerializedParagraphNode
+      const lexicalLink = lexicalParagraph.children[0] as SerializedLinkNode
+
+      expect(lexicalLink.fields.rel).toEqual(['noopener'])
+    })
+
     test('ensure hook within number field within lexical block runs', async ({ payload }) => {
       const lexicalDocEN = await payload.create({
         collection: 'lexical-localized-fields',
