@@ -381,7 +381,7 @@ export function getRecentsLayoutShiftSum({ page }: { page: Page }): Promise<numb
           }>) {
             const isDashboardShift = entry.sources.some(({ node }) =>
               (node instanceof Element ? node : node?.parentElement)?.closest(
-                '.recents-widget, .collections__wrap',
+                '.activity-widget, .collections__wrap',
               ),
             )
 
