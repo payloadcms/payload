@@ -79,7 +79,7 @@
     "uuid": "14.0.0"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/oxlint-config": "workspace:*",
     "@types/mongoose-aggregate-paginate-v2": "1.0.12",
     "@types/prompts": "^2.4.5",
     "mongodb": "7.5.0",

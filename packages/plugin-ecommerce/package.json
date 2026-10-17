@@ -135,8 +135,8 @@
     "qs-esm": "8.0.1"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/next": "workspace:*",
+    "@payloadcms/oxlint-config": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@types/json-schema": "7.0.15",
     "@types/react": "19.3.0",

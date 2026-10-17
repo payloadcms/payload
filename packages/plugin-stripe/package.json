@@ -91,8 +91,8 @@
     "uuid": "14.0.0"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/next": "workspace:*",
+    "@payloadcms/oxlint-config": "workspace:*",
     "@types/lodash.get": "^4.4.7",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",

@@ -80,7 +80,7 @@
     "tsx": "4.23.15"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/oxlint-config": "workspace:*",
     "@types/pluralize": "^0.0.33",
     "graphql-http": "1.22.4",
     "payload": "workspace:*"

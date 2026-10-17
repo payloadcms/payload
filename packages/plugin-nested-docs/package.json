@@ -64,7 +64,7 @@
     "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/oxlint-config": "workspace:*",
     "payload": "workspace:*"
   },
   "peerDependencies": {
