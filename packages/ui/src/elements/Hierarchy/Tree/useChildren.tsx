@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { TreeCache, TreeDocument, TreeInitialData } from './types.js'
 
+import { useBranchParam } from '../../../providers/Branch/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { isSuperset } from '../../../utilities/isSuperset.js'
 
@@ -38,6 +39,14 @@ type UseChildrenReturn = {
   totalDocs: number
 }
 
+export const getBranchAwareChildrenCacheKey = ({
+  branch,
+  cacheKey,
+}: {
+  branch?: string
+  cacheKey: string
+}): string => JSON.stringify([branch ?? null, cacheKey])
+
 export const useChildren = ({
   allPossibleTypeValues,
   baseFilter,
@@ -53,11 +62,13 @@ export const useChildren = ({
   typeFieldName,
   useAsTitle,
 }: UseChildrenArgs): UseChildrenReturn => {
+  const branch = useBranchParam()
   const filterKey = filterByCollections?.length ? filterByCollections.slice().sort().join(',') : ''
   const baseFilterKey = baseFilter ? JSON.stringify(baseFilter) : ''
   // Use provided cacheKey for consistency with cache population, or compute if not provided
-  const cacheKey =
+  const cacheKeyWithoutBranch =
     cacheKeyProp ?? `${collectionSlug}-${String(parentId)}-${filterKey}-${baseFilterKey}`
+  const cacheKey = getBranchAwareChildrenCacheKey({ branch, cacheKey: cacheKeyWithoutBranch })
   const cachedData = cache?.current.get(cacheKey)
 
   // Check if we have initial data for this specific parent
@@ -88,9 +99,13 @@ export const useChildren = ({
   const [totalDocs, setTotalDocs] = useState(parentMeta?.totalDocs || cachedData?.totalDocs || 0)
   const [hasMore, setHasMore] = useState(parentMeta?.hasMore || cachedData?.hasMore || false)
   const initializedRef = useRef(!!hasInitialData)
+  const activeCacheKeyRef = useRef(cacheKey)
+  activeCacheKeyRef.current = cacheKey
+  const stateCacheKeyRef = useRef(cacheKey)
+  const stateFilterKeyRef = useRef(filterKey)
   // Refs for stable access inside load() without adding state to its dep array
   const childrenRef = useRef(children)
-  childrenRef.current = children
+  childrenRef.current = stateCacheKeyRef.current === cacheKey ? children : null
   const isLoadingRef = useRef(isLoading)
   isLoadingRef.current = isLoading
   const {
@@ -99,13 +114,14 @@ export const useChildren = ({
       serverURL,
     },
   } = useConfig()
-
   const fetchPage = useCallback(
     async (
       pageToFetch: number,
       currentChildren: null | TreeDocument[],
     ): Promise<TreeDocument[]> => {
-      setIsLoading(true)
+      if (activeCacheKeyRef.current === cacheKey) {
+        setIsLoading(true)
+      }
 
       try {
         const parentCondition =
@@ -141,6 +157,7 @@ export const useChildren = ({
         const where = combineWhereConstraints([parentCondition, filterCondition, baseFilter])
 
         const queryParams: Record<string, unknown> = {
+          branch,
           limit,
           page: pageToFetch,
           sort: useAsTitle ?? 'id',
@@ -175,11 +192,6 @@ export const useChildren = ({
 
         const newChildren = pageToFetch === 1 ? newDocs : [...(currentChildren || []), ...newDocs]
 
-        setChildren(newChildren)
-        setTotalDocs(data.totalDocs || 0)
-        setHasMore(data.hasNextPage || false)
-        setPage(pageToFetch)
-
         if (cache) {
           cache.current.set(cacheKey, {
             children: newChildren,
@@ -189,12 +201,17 @@ export const useChildren = ({
           })
         }
 
+        if (activeCacheKeyRef.current === cacheKey) {
+          setChildren(newChildren)
+          setTotalDocs(data.totalDocs || 0)
+          setHasMore(data.hasNextPage || false)
+          setPage(pageToFetch)
+        }
+
         return newDocs
       } catch {
         if (pageToFetch === 1) {
           const emptyChildren: TreeDocument[] = []
-          setChildren(emptyChildren)
-          setHasMore(false)
 
           if (cache) {
             cache.current.set(cacheKey, {
@@ -204,14 +221,22 @@ export const useChildren = ({
               totalDocs: 0,
             })
           }
+
+          if (activeCacheKeyRef.current === cacheKey) {
+            setChildren(emptyChildren)
+            setHasMore(false)
+          }
         }
 
         return []
       } finally {
-        setIsLoading(false)
+        if (activeCacheKeyRef.current === cacheKey) {
+          setIsLoading(false)
+        }
       }
     },
     [
+      branch,
       allPossibleTypeValues,
       baseFilter,
       parentId,
@@ -228,21 +253,35 @@ export const useChildren = ({
     ],
   )
 
-  // Reset state and reload when filter changes
-  const prevFilterKeyRef = useRef(filterKey)
+  // Reset state whenever the cache identity changes, including branch and filter changes.
   useEffect(() => {
-    if (prevFilterKeyRef.current !== filterKey) {
-      prevFilterKeyRef.current = filterKey
-      setChildren(null)
-      setPage(1)
-      setTotalDocs(0)
-      setHasMore(false)
-      // If the node is currently expanded, immediately reload with the new filter
-      if (enabled) {
+    const hasFilterChanged = stateFilterKeyRef.current !== filterKey
+
+    if (stateCacheKeyRef.current !== cacheKey || hasFilterChanged) {
+      stateCacheKeyRef.current = cacheKey
+      stateFilterKeyRef.current = filterKey
+      initializedRef.current = false
+
+      if (hasFilterChanged) {
+        cache?.current.delete(cacheKey)
+      }
+
+      const cachedDataForActiveBranch = hasFilterChanged ? undefined : cache?.current.get(cacheKey)
+      const nextChildren = enabled ? (cachedDataForActiveBranch?.children ?? null) : null
+
+      childrenRef.current = nextChildren
+      isLoadingRef.current = false
+      setChildren(nextChildren)
+      setIsLoading(false)
+      setPage(enabled ? (cachedDataForActiveBranch?.page ?? 1) : 1)
+      setTotalDocs(enabled ? (cachedDataForActiveBranch?.totalDocs ?? 0) : 0)
+      setHasMore(enabled ? (cachedDataForActiveBranch?.hasMore ?? false) : false)
+
+      if (enabled && !cachedDataForActiveBranch) {
         void fetchPage(1, null)
       }
     }
-  }, [filterKey, enabled, fetchPage])
+  }, [cache, cacheKey, enabled, fetchPage, filterKey])
 
   // Load children explicitly. Safe to call multiple times — no-ops if already loaded or loading.
   const load = useCallback(async (): Promise<TreeDocument[]> => {
@@ -298,7 +337,10 @@ export const useChildren = ({
   // If state hasn't been loaded yet, read directly from cache as a synchronous fallback.
   // Tree's useMemo pre-populates the cache before child TreeNodes render, so this eliminates
   // the brief null-children flash that occurs when a node becomes expanded after context updates.
-  const effectiveChildren = children ?? cache?.current.get(cacheKey)?.children ?? null
+  const effectiveChildren =
+    stateCacheKeyRef.current === cacheKey
+      ? (children ?? cache?.current.get(cacheKey)?.children ?? null)
+      : null
 
   return { children: effectiveChildren, hasMore, isLoading, load, loadMore, refresh, totalDocs }
 }

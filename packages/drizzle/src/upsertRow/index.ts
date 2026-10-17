@@ -3,6 +3,7 @@ import type { SelectedFields } from 'drizzle-orm/sqlite-core'
 import type { TypeWithID } from 'payload'
 
 import { and, desc, eq, isNull, or } from 'drizzle-orm'
+import { branchField, MAIN_BRANCH } from 'payload'
 
 import type { BlockRowToInsert } from '../transform/write/types.js'
 import type { Args } from './types.js'
@@ -52,6 +53,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   req,
   select,
   tableName,
+  upsertConflictData,
   upsertTarget,
   where,
 }: Args): Promise<null | T> => {
@@ -216,6 +218,18 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     path,
     tableName,
   })
+  const conflictWrite = upsertConflictData
+    ? transformForWrite({
+        adapter,
+        data: upsertConflictData,
+        enableAtomicWrites: false,
+        fields,
+        path,
+        tableName,
+      })
+    : rowToInsert
+  let nestedWrite = rowToInsert
+  let isUpdatingAfterInsertConflict = false
 
   if (customID) {
     rowToInsert.row.id = customID
@@ -242,15 +256,63 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
           ;[insertedRow] = await adapter.insert({
             db,
             onConflictDoUpdate: where
-              ? { set: rowToInsert.row, target, where }
-              : { set: rowToInsert.row, target },
+              ? { set: conflictWrite.row, target, where }
+              : { set: conflictWrite.row, target },
             tableName,
             values: rowToInsert.row,
           })
+        } else if (upsertConflictData && upsertTarget) {
+          // The parent conflict is atomic. Child-table replacements are serialized only
+          // when the caller's transaction spans this complete upsert.
+          const targetKey = Object.entries(adapter.tables[tableName]).find(
+            ([, column]) => column === target,
+          )?.[0]
+          const targetValue = targetKey ? rowToInsert.row[targetKey] : undefined
+
+          if (!targetKey || typeof targetValue === 'undefined') {
+            throw new Error(`Could not resolve the upsert target value for table "${tableName}".`)
+          }
+
+          for (let attempt = 0; attempt < 10; attempt++) {
+            ;[insertedRow] = await adapter.insert({
+              db,
+              onConflictDoNothing: { target },
+              tableName,
+              values: rowToInsert.row,
+            })
+
+            if (insertedRow) {
+              break
+            }
+
+            const updateWhere = where
+              ? and(eq(target, targetValue), where)
+              : eq(target, targetValue)
+            const updatedRows = await (db as LibSQLDatabase)
+              .update(adapter.tables[tableName])
+              .set(conflictWrite.row)
+              .where(updateWhere)
+              .returning()
+
+            if (updatedRows[0]) {
+              insertedRow = updatedRows[0]
+              nestedWrite = conflictWrite
+              isUpdatingAfterInsertConflict = true
+              break
+            }
+
+            if (where) {
+              return null
+            }
+          }
+
+          if (!insertedRow) {
+            throw new Error(`Could not upsert a stable row in table "${tableName}".`)
+          }
         } else {
           ;[insertedRow] = await adapter.insert({
             db,
-            onConflictDoUpdate: { set: rowToInsert.row, target, where },
+            onConflictDoUpdate: { set: conflictWrite.row, target, where },
             tableName,
             values: rowToInsert.row,
           })
@@ -280,35 +342,42 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     const numbersToInsert: Record<string, unknown>[] = []
     const blocksToInsert: { [blockType: string]: BlockRowToInsert[] } = {}
     const selectsToInsert: { [selectTableName: string]: Record<string, unknown>[] } = {}
+    const localeTableName = `${tableName}${adapter.localesSuffix}`
+    const shouldStampLocaleBranch = Boolean(
+      adapter.rawTables[localeTableName]?.columns[branchField],
+    )
 
     // If there are locale rows with data, add the parent and locale to each
-    if (Object.keys(rowToInsert.locales).length > 0) {
-      Object.entries(rowToInsert.locales).forEach(([locale, localeRow]) => {
+    if (Object.keys(nestedWrite.locales).length > 0) {
+      Object.entries(nestedWrite.locales).forEach(([locale, localeRow]) => {
         localeRow._parentID = insertedRow.id
         localeRow._locale = locale
+        if (shouldStampLocaleBranch) {
+          localeRow[branchField] = insertedRow[branchField] ?? data[branchField] ?? MAIN_BRANCH
+        }
         localesToInsert.push(localeRow)
       })
     }
 
     // If there are relationships, add parent to each
-    if (rowToInsert.relationships.length > 0) {
-      rowToInsert.relationships.forEach((relation) => {
+    if (nestedWrite.relationships.length > 0) {
+      nestedWrite.relationships.forEach((relation) => {
         relation.parent = insertedRow.id
         relationsToInsert.push(relation)
       })
     }
 
     // If there are texts, add parent to each
-    if (rowToInsert.texts.length > 0) {
-      rowToInsert.texts.forEach((textRow) => {
+    if (nestedWrite.texts.length > 0) {
+      nestedWrite.texts.forEach((textRow) => {
         textRow.parent = insertedRow.id
         textsToInsert.push(textRow)
       })
     }
 
     // If there are numbers, add parent to each
-    if (rowToInsert.numbers.length > 0) {
-      rowToInsert.numbers.forEach((numberRow) => {
+    if (nestedWrite.numbers.length > 0) {
+      nestedWrite.numbers.forEach((numberRow) => {
         numberRow.parent = insertedRow.id
         numbersToInsert.push(numberRow)
       })
@@ -316,8 +385,8 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     // If there are selects, add parent to each, and then
     // store by table name and rows
-    if (Object.keys(rowToInsert.selects).length > 0) {
-      Object.entries(rowToInsert.selects).forEach(([selectTableName, selectRows]) => {
+    if (Object.keys(nestedWrite.selects).length > 0) {
+      Object.entries(nestedWrite.selects).forEach(([selectTableName, selectRows]) => {
         selectsToInsert[selectTableName] = []
 
         selectRows.forEach((row) => {
@@ -332,8 +401,8 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     // If there are blocks, add parent to each, and then
     // store by table name and rows
-    Object.keys(rowToInsert.blocks).forEach((tableName) => {
-      rowToInsert.blocks[tableName].forEach((blockRow) => {
+    Object.keys(nestedWrite.blocks).forEach((tableName) => {
+      nestedWrite.blocks[tableName].forEach((blockRow) => {
         blockRow.row._parentID = insertedRow.id
         if (!blocksToInsert[tableName]) {
           blocksToInsert[tableName] = []
@@ -350,22 +419,35 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // //////////////////////////////////
 
     if (localesToInsert.length > 0) {
-      const localeTableName = `${tableName}${adapter.localesSuffix}`
       const localeTable = adapter.tables[`${tableName}${adapter.localesSuffix}`]
 
-      if (operation === 'update') {
-        await adapter.deleteWhere({
+      if (operation === 'update' && isUpdatingAfterInsertConflict) {
+        for (const localeRow of localesToInsert) {
+          await adapter.insert({
+            db,
+            onConflictDoUpdate: {
+              set: localeRow,
+              target: [localeTable._locale, localeTable._parentID],
+            },
+            tableName: localeTableName,
+            values: localeRow,
+          })
+        }
+      } else {
+        if (operation === 'update') {
+          await adapter.deleteWhere({
+            db,
+            tableName: localeTableName,
+            where: eq(localeTable._parentID, insertedRow.id),
+          })
+        }
+
+        await adapter.insert({
           db,
           tableName: localeTableName,
-          where: eq(localeTable._parentID, insertedRow.id),
+          values: localesToInsert,
         })
       }
-
-      await adapter.insert({
-        db,
-        tableName: localeTableName,
-        values: localesToInsert,
-      })
     }
 
     // //////////////////////////////////
@@ -376,7 +458,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     if (operation === 'update') {
       // Filter out specific item deletions (those with itemToRemove) from general path deletions
-      const generalRelationshipDeletes = rowToInsert.relationshipsToDelete.filter(
+      const generalRelationshipDeletes = nestedWrite.relationshipsToDelete.filter(
         (rel) => !('itemToRemove' in rel),
       )
 
@@ -404,9 +486,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // HANDLE RELATIONSHIP $push OPERATIONS
     // //////////////////////////////////
 
-    if (rowToInsert.relationshipsToAppend.length > 0) {
+    if (nestedWrite.relationshipsToAppend.length > 0) {
       // Prepare all relationships for batch insert (order will be set after max query)
-      const relationshipsToInsert = rowToInsert.relationshipsToAppend.map((rel) => {
+      const relationshipsToInsert = nestedWrite.relationshipsToAppend.map((rel) => {
         const parentId = id || insertedRow.id
         const row: Record<string, unknown> = {
           parent: parentId as number | string, // Use 'parent' key for Drizzle table
@@ -531,11 +613,11 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // HANDLE RELATIONSHIP $remove OPERATIONS
     // //////////////////////////////////
 
-    if (rowToInsert.relationshipsToDelete.some((rel) => 'itemToRemove' in rel)) {
+    if (nestedWrite.relationshipsToDelete.some((rel) => 'itemToRemove' in rel)) {
       const relationshipTable = adapter.tables[relationshipsTableName]
 
       if (relationshipTable) {
-        for (const relToDelete of rowToInsert.relationshipsToDelete) {
+        for (const relToDelete of nestedWrite.relationshipsToDelete) {
           if ('itemToRemove' in relToDelete && relToDelete.itemToRemove) {
             const item = relToDelete.itemToRemove
             const parentId = (id || insertedRow.id) as number | string
@@ -594,7 +676,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         parentColumnName: 'parent',
         parentID: insertedRow.id,
         pathColumnName: 'path',
-        rows: [...textsToInsert, ...rowToInsert.textsToDelete],
+        rows: [...textsToInsert, ...nestedWrite.textsToDelete],
         tableName: textsTableName,
       })
     }
@@ -621,7 +703,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         parentColumnName: 'parent',
         parentID: insertedRow.id,
         pathColumnName: 'path',
-        rows: [...numbersToInsert, ...rowToInsert.numbersToDelete],
+        rows: [...numbersToInsert, ...nestedWrite.numbersToDelete],
         tableName: numbersTableName,
       })
     }
@@ -641,7 +723,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     const insertedBlockRows: Record<string, Record<string, unknown>[]> = {}
 
     if (operation === 'update') {
-      for (const tableName of rowToInsert.blocksToDelete) {
+      for (const tableName of nestedWrite.blocksToDelete) {
         const blockTable = adapter.tables[tableName]
         await adapter.deleteWhere({
           db,
@@ -710,7 +792,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // //////////////////////////////////
 
     if (operation === 'update') {
-      for (const arrayTableName of Object.keys(rowToInsert.arrays)) {
+      for (const arrayTableName of Object.keys(nestedWrite.arrays)) {
         await deleteExistingArrayRows({
           adapter,
           db,
@@ -722,7 +804,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     await insertArrays({
       adapter,
-      arrays: [rowToInsert.arrays, rowToInsert.arraysToPush],
+      arrays: [nestedWrite.arrays, nestedWrite.arraysToPush],
       db,
       parentRows: [insertedRow, insertedRow],
       uuidMap: arraysBlocksUUIDMap,
@@ -732,14 +814,45 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // INSERT hasMany SELECTS
     // //////////////////////////////////
 
-    for (const [selectTableName, tableRows] of Object.entries(selectsToInsert)) {
+    const selectTableNames = new Set([
+      ...Object.keys(nestedWrite.selectsToDelete),
+      ...Object.keys(selectsToInsert),
+    ])
+
+    for (const selectTableName of selectTableNames) {
+      const tableRows = selectsToInsert[selectTableName] ?? []
       const selectTable = adapter.tables[selectTableName]
       if (operation === 'update') {
-        await adapter.deleteWhere({
-          db,
-          tableName: selectTableName,
-          where: eq(selectTable.parent, insertedRow.id),
-        })
+        for (const selectToDelete of nestedWrite.selectsToDelete[selectTableName] ?? []) {
+          let selectParent = selectToDelete.parent ?? insertedRow.id
+
+          if (
+            (typeof selectParent === 'number' || typeof selectParent === 'string') &&
+            selectParent in arraysBlocksUUIDMap
+          ) {
+            selectParent = arraysBlocksUUIDMap[selectParent]
+          }
+
+          const deleteConstraints = [eq(selectTable.parent, selectParent)]
+
+          if (typeof selectToDelete.locale === 'string') {
+            if (!selectTable.locale) {
+              throw new Error(
+                `Could not limit the select replacement for table "${selectTableName}" to locale "${selectToDelete.locale}".`,
+              )
+            }
+
+            deleteConstraints.push(eq(selectTable.locale, selectToDelete.locale))
+          } else if (selectTable.locale) {
+            deleteConstraints.push(isNull(selectTable.locale))
+          }
+
+          await adapter.deleteWhere({
+            db,
+            tableName: selectTableName,
+            where: and(...deleteConstraints),
+          })
+        }
       }
 
       if (Object.keys(arraysBlocksUUIDMap).length > 0) {

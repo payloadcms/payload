@@ -24,6 +24,7 @@ import { RenderField } from '../../forms/RenderFields/RenderField.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
+import { useBranchParam } from '../../providers/Branch/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -171,6 +172,7 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
   const { permissions, user } = useAuth()
   const currentLocale = useLocale()
   const locale = currentLocale?.code
+  const branch = useBranchParam()
 
   const { closeModal } = useModal()
 
@@ -267,13 +269,14 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
 
     return qs.stringify(
       {
+        branch,
         locale,
         select: {},
         where: combineWhereConstraints(whereConstraints),
       },
       { addQueryPrefix: true },
     )
-  }, [collection, searchParams, selectAll, ids, locale, where])
+  }, [branch, collection, searchParams, selectAll, ids, locale, where])
 
   const onSuccess = () => {
     router.replace(

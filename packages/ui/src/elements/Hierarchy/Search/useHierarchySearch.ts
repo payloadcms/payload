@@ -6,6 +6,7 @@ import { useCallback, useState } from 'react'
 
 import type { SearchResult } from './types.js'
 
+import { useBranchParam } from '../../../providers/Branch/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
 
@@ -49,6 +50,7 @@ export const useHierarchySearch = ({
   } = useConfig()
   const currentLocale = useLocale()
   const locale = currentLocale?.code
+  const branch = useBranchParam()
 
   const fetchResults = useCallback(
     async ({
@@ -65,6 +67,7 @@ export const useHierarchySearch = ({
       try {
         const queryString = qs.stringify(
           {
+            branch,
             computeHierarchyPaths: true,
             limit,
             locale,
@@ -114,7 +117,17 @@ export const useHierarchySearch = ({
         setIsLoading(false)
       }
     },
-    [api, collectionSlug, limit, locale, parentFieldName, serverURL, titleField, titlePathField],
+    [
+      api,
+      branch,
+      collectionSlug,
+      limit,
+      locale,
+      parentFieldName,
+      serverURL,
+      titleField,
+      titlePathField,
+    ],
   )
 
   const search = useCallback(

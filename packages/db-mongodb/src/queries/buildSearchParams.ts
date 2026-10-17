@@ -1,14 +1,24 @@
-import type { QueryFilter } from 'mongoose'
+import type { PipelineStage, QueryFilter } from 'mongoose'
 import type {
   FlattenedField,
   HasManyRelationshipOperator,
   Operator,
   PathToQuery,
   Payload,
+  PayloadRequest,
+  Where,
 } from 'payload'
 
 import { Types } from 'mongoose'
-import { APIError, escapeRegExp, getFieldByPath, getLocalizedPaths } from 'payload'
+import {
+  APIError,
+  escapeRegExp,
+  getFieldByPath,
+  getLocalizedPaths,
+  resolveBranchQuery,
+  resolveBranchReadState,
+  rewriteBranchIDs,
+} from 'payload'
 import {
   hasManyRelationshipOperatorSet,
   isNestedRelationshipQuery,
@@ -16,10 +26,12 @@ import {
 } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
+import type { CollectionModel } from '../types.js'
 import type { OperatorMapKey } from './operatorMap.js'
 
 import { getCollection } from '../utilities/getEntity.js'
 import { isObjectID } from '../utilities/isObjectID.js'
+import { buildBranchVisibilityStages } from './buildBranchVisibility.js'
 import { operatorMap } from './operatorMap.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
@@ -29,14 +41,84 @@ type SearchParam = {
   value?: unknown
 }
 
-const subQueryOptions = {
-  lean: true,
+const resolveRelatedBranchQuery = async ({
+  branch,
+  collectionSlug,
+  payload,
+  req,
+  where,
+}: {
+  branch?: false | string
+  collectionSlug: string
+  payload: Payload
+  req?: Partial<PayloadRequest>
+  where: Where
+}) => {
+  const adapter = payload.db as MongooseAdapter
+  const branchReadState = resolveBranchReadState({ branch, collectionSlug, req })
+  const resolvedWhere = branchReadState.useBranching
+    ? rewriteBranchIDs(where)
+    : await resolveBranchQuery({ branch, collectionSlug, req, where })
+
+  return {
+    branchVisibility: branchReadState.useBranching
+      ? buildBranchVisibilityStages({
+          adapter,
+          branch: branchReadState.branch,
+          collectionSlug,
+        })
+      : [],
+    where: resolvedWhere ?? {},
+  }
+}
+
+const findRelatedDocuments = async ({
+  branchVisibility,
+  Model,
+  projection,
+  query,
+}: {
+  branchVisibility: PipelineStage[]
+  Model: CollectionModel
+  projection: Record<string, boolean>
+  query: Record<string, unknown>
+}) => {
+  if (branchVisibility.length) {
+    return Model.aggregate([{ $match: query }, ...branchVisibility, { $project: projection }])
+  }
+
+  return Model.find(query).lean().select(projection)
+}
+
+const findRelatedDistinctValues = async ({
+  branchVisibility,
+  Model,
+  path,
+  query,
+}: {
+  branchVisibility: PipelineStage[]
+  Model: CollectionModel
+  path: string
+  query: Record<string, unknown>
+}) => {
+  if (!branchVisibility.length) {
+    return Model.distinct(path, query)
+  }
+
+  return Model.aggregate([
+    { $match: query },
+    ...branchVisibility,
+    { $project: { value: `$${path}` } },
+    { $unwind: '$value' },
+    { $group: { _id: '$value' } },
+  ]).then((results) => results.map(({ _id }) => _id))
 }
 
 /**
  * Convert the Payload key / value / operator into a MongoDB query
  */
 export async function buildSearchParam({
+  branch,
   collectionSlug,
   fields,
   globalSlug,
@@ -45,8 +127,10 @@ export async function buildSearchParam({
   operator,
   parentIsLocalized,
   payload,
+  req,
   val,
 }: {
+  branch?: false | string
   collectionSlug?: string
   fields: FlattenedField[]
   globalSlug?: string
@@ -55,6 +139,7 @@ export async function buildSearchParam({
   operator: Operator
   parentIsLocalized: boolean
   payload: Payload
+  req?: Partial<PayloadRequest>
   val: unknown
 }): Promise<SearchParam | undefined> {
   // Replace GraphQL nested field double underscore formatting
@@ -116,12 +201,14 @@ export async function buildSearchParam({
     isNestedRelationshipQuery(val)
   ) {
     return buildHasManyRelationshipSearchParam({
+      branch,
       field,
       locale,
       nestedWhere: val,
       operator: operator as HasManyRelationshipOperator,
       path,
       payload,
+      req,
     })
   }
 
@@ -133,10 +220,12 @@ export async function buildSearchParam({
     isNestedRelationshipQuery(val)
   ) {
     return buildJoinContainsSearchParam({
+      branch,
       field,
       locale,
       nestedWhere: val,
       payload,
+      req,
     })
   }
 
@@ -182,9 +271,8 @@ export async function buildSearchParam({
       const pathsToQuery = paths.slice(1).reverse()
       const parentPaths = paths.slice(0, -1).reverse()
 
-      let relationshipQuery: SearchParam = {
-        value: {},
-      }
+      let relationshipQuery: SearchParam = { value: {} }
+      let relationshipWhere: undefined | Where
 
       for (const [i, { collectionSlug, path: subPath }] of pathsToQuery.entries()) {
         // The arrays are reversed together, so both entries describe the same relationship hop.
@@ -204,18 +292,28 @@ export async function buildSearchParam({
         })
 
         if (i === 0) {
-          const subQuery = await SubModel.buildQuery({
-            locale,
+          const { branchVisibility, where: relatedWhere } = await resolveRelatedBranchQuery({
+            branch,
+            collectionSlug,
             payload,
+            req,
             where: {
               [subPath]: {
                 [formattedOperator]: val,
               },
             },
           })
+          const subQuery = await SubModel.buildQuery({
+            branch,
+            locale,
+            payload,
+            req,
+            where: relatedWhere ?? {},
+          })
 
           const select: Record<string, boolean> = {
             _id: true,
+            _branchDocID: true,
           }
 
           let joinPath: null | string = null
@@ -242,7 +340,12 @@ export async function buildSearchParam({
             select[joinPath] = true
           }
 
-          const result = await SubModel.find(subQuery).lean().select(select)
+          const result = await findRelatedDocuments({
+            branchVisibility,
+            Model: SubModel,
+            projection: select,
+            query: subQuery,
+          })
 
           const $in: unknown[] = []
 
@@ -274,9 +377,10 @@ export async function buildSearchParam({
                 $in.push(ref)
               }
             } else {
-              const stringID = doc._id.toString()
+              const documentID = doc._branchDocID ?? doc._id
+              const stringID = documentID.toString()
               if (Types.ObjectId.isValid(stringID)) {
-                $in.push(doc._id)
+                $in.push(documentID)
               } else {
                 $in.push(stringID)
               }
@@ -293,15 +397,30 @@ export async function buildSearchParam({
           const nextSubPath = pathsToQuery[i + 1]?.path
 
           if (nextSubPath) {
-            relationshipQuery = {
-              value: joinPath ? { _id: { $in } } : { [nextSubPath]: { $in } },
-            }
+            relationshipWhere = joinPath ? { id: { in: $in } } : { [nextSubPath]: { in: $in } }
           }
 
           continue
         }
 
-        const subQuery = relationshipQuery.value as QueryFilter<any>
+        if (!relationshipWhere) {
+          return undefined
+        }
+
+        const { branchVisibility, where: relatedWhere } = await resolveRelatedBranchQuery({
+          branch,
+          collectionSlug,
+          payload,
+          req,
+          where: relationshipWhere,
+        })
+        const subQuery = (await SubModel.buildQuery({
+          branch,
+          locale,
+          payload,
+          req,
+          where: relatedWhere ?? {},
+        })) as QueryFilter<any>
 
         /**
          * Follow this join back to its parent IDs.
@@ -324,18 +443,28 @@ export async function buildSearchParam({
             )
           }
 
-          const $in = await SubModel.distinct(joinPath, subQuery)
+          const $in = await findRelatedDistinctValues({
+            branchVisibility,
+            Model: SubModel,
+            path: joinPath,
+            query: subQuery,
+          })
           if (i + 1 === pathsToQuery.length) {
             return { path: '_id', value: { $in } }
           }
 
-          relationshipQuery = { value: { _id: { $in } } }
+          relationshipWhere = { id: { in: $in } }
           continue
         }
 
-        const result = await SubModel.find(subQuery, subQueryOptions)
+        const result = await findRelatedDocuments({
+          branchVisibility,
+          Model: SubModel,
+          projection: { _id: true, _branchDocID: true },
+          query: subQuery,
+        })
 
-        const $in = result.map((doc) => doc._id)
+        const $in = result.map((doc) => doc._branchDocID ?? doc._id)
 
         // If it is the last recursion
         // then pass through the search param
@@ -347,11 +476,7 @@ export async function buildSearchParam({
         } else {
           const nextSubPath = pathsToQuery[i + 1]?.path
           if (nextSubPath) {
-            relationshipQuery = {
-              value: {
-                [nextSubPath]: { $in },
-              },
-            }
+            relationshipWhere = { [nextSubPath]: { in: $in } }
           }
         }
       }
@@ -477,19 +602,23 @@ export async function buildSearchParam({
  * ```
  */
 async function buildHasManyRelationshipSearchParam({
+  branch,
   field,
   locale,
   nestedWhere,
   operator,
   path,
   payload,
+  req,
 }: {
+  branch?: false | string
   field: FlattenedField
   locale?: string
   nestedWhere: unknown
   operator: HasManyRelationshipOperator
   path: string
   payload: Payload
+  req?: Partial<PayloadRequest>
 }): Promise<SearchParam | undefined> {
   if (
     (field.type !== 'relationship' && field.type !== 'upload') ||
@@ -509,14 +638,30 @@ async function buildHasManyRelationshipSearchParam({
         (localeCode) => path.split('.').at(-1) === localeCode,
       )
     : undefined
+  const { branchVisibility, where: relatedWhere } = await resolveRelatedBranchQuery({
+    branch,
+    collectionSlug: field.relationTo,
+    payload,
+    req,
+    where: nestedWhere,
+  })
   const matchingRelatedDocumentsQuery = await RelatedModel.buildQuery({
+    branch,
     locale: pathLocale ?? locale,
     payload,
-    where: nestedWhere,
+    req,
+    where: relatedWhere ?? {},
   })
 
   const findRelatedDocumentIDs = async (query: Record<string, unknown>) =>
-    (await RelatedModel.find(query).lean().select({ _id: true })).map((document) => document._id)
+    (
+      await findRelatedDocuments({
+        branchVisibility,
+        Model: RelatedModel,
+        projection: { _id: true, _branchDocID: true },
+        query,
+      })
+    ).map((document) => document._branchDocID ?? document._id)
 
   switch (operator) {
     case 'contains': {
@@ -530,7 +675,7 @@ async function buildHasManyRelationshipSearchParam({
 
     case 'equals': {
       // Every related document satisfies an empty nested query.
-      if (!Object.keys(matchingRelatedDocumentsQuery).length) {
+      if (!Object.keys(nestedWhere).length) {
         return {
           path,
           value: { $nin: [] },
@@ -567,15 +712,19 @@ async function buildHasManyRelationshipSearchParam({
  * constraint must be satisfied by the same document.
  */
 async function buildJoinContainsSearchParam({
+  branch,
   field,
   locale,
   nestedWhere,
   payload,
+  req,
 }: {
+  branch?: false | string
   field: FlattenedField
   locale?: string
   nestedWhere: unknown
   payload: Payload
+  req?: Partial<PayloadRequest>
 }): Promise<SearchParam | undefined> {
   if (
     field.type !== 'join' ||
@@ -604,13 +753,27 @@ async function buildJoinContainsSearchParam({
     joinPath = joinPath.replace('<locale>', locale || payload.config.localization.defaultLocale)
   }
 
-  const subQuery = await JoinedModel.buildQuery({
-    locale,
+  const { branchVisibility, where: relatedWhere } = await resolveRelatedBranchQuery({
+    branch,
+    collectionSlug: field.collection,
     payload,
+    req,
     where: nestedWhere,
   })
+  const subQuery = await JoinedModel.buildQuery({
+    branch,
+    locale,
+    payload,
+    req,
+    where: relatedWhere ?? {},
+  })
 
-  const parentIDs = await JoinedModel.distinct(joinPath, subQuery)
+  const parentIDs = await findRelatedDistinctValues({
+    branchVisibility,
+    Model: JoinedModel,
+    path: joinPath,
+    query: subQuery,
+  })
 
   return {
     path: '_id',

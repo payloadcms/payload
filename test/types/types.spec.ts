@@ -12,6 +12,9 @@ import type {
   BlocksField,
   BlocksFieldLabelClientProps,
   BlocksFieldLabelServerProps,
+  BranchingConfig,
+  BranchOperation,
+  branchOperations,
   BulkOperationResult,
   CollapsibleField,
   CollectionAfterChangeHook,
@@ -41,6 +44,10 @@ import type {
   JoinFieldServerProps,
   JoinQuery,
   MeOperationResult,
+  MergeableChange,
+  MergeProgress,
+  MergeStreamEvent,
+  MergeWarning,
   NamedGroupField,
   NamedTab,
   Operation,
@@ -133,6 +140,33 @@ import type {
 } from './payload-types.js'
 
 describe('Types testing', () => {
+  describe('branching', () => {
+    test('should expose exact merge hook argument types', () => {
+      type AfterMergeArgs = Parameters<
+        NonNullable<NonNullable<BranchingConfig['hooks']>['afterMerge']>
+      >[0]
+      type BeforeMergeArgs = Parameters<
+        NonNullable<NonNullable<BranchingConfig['hooks']>['beforeMerge']>
+      >[0]
+
+      expect<AfterMergeArgs['req']>().type.toBe<PayloadRequest>()
+      expect<AfterMergeArgs['results']>().type.toBe<MergeableChange[]>()
+      expect<BeforeMergeArgs['changes']>().type.toBe<MergeableChange[]>()
+      expect<BeforeMergeArgs['req']>().type.toBe<PayloadRequest>()
+      expect<BeforeMergeArgs['warnings']>().type.toBe<MergeWarning[]>()
+    })
+
+    test('should derive branch operations from the shared values', () => {
+      expect<(typeof branchOperations)[number]>().type.toBe<BranchOperation>()
+    })
+
+    test('should require complete progress data in merge stream events', () => {
+      type ProgressEvent = Extract<MergeStreamEvent, { type: 'progress' }>
+
+      expect<Omit<ProgressEvent, 'type'>>().type.toBe<MergeProgress>()
+    })
+  })
+
   describe('validate operation types', () => {
     test('should expose beforeValidate operations', () => {
       expect<BeforeValidateOperation>().type.toBe<'create' | 'update' | 'validate'>()
@@ -936,6 +970,16 @@ describe('Types testing', () => {
     expect(
       payload.findGlobalVersionByID({ id: 'id', slug: 'menu', overrideAccess: true }),
     ).type.toBe<Promise<TypeWithVersion<Menu>>>()
+  })
+
+  test('branch-aware Local API options', () => {
+    void payload.duplicate({ id: 'id', branch: 'campaign', collection: 'posts' })
+    void payload.findDistinct({ branch: 'campaign', collection: 'posts', field: 'id' })
+    void payload.findVersionByID({ id: 'id', branch: 'campaign', collection: 'posts' })
+    void payload.restoreVersion({ id: 'id', branch: false, collection: 'posts' })
+    void payload.countGlobalVersions({ branch: 'campaign', global: 'menu' })
+    void payload.findGlobalVersionByID({ id: 'id', slug: 'menu', branch: 'campaign' })
+    void payload.restoreGlobalVersion({ id: 'id', slug: 'menu', branch: false })
   })
 
   describe('select', () => {

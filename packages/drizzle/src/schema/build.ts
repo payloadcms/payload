@@ -1,6 +1,6 @@
 import type { FlattenedField, SanitizedCompoundIndex } from 'payload'
 
-import { InvalidConfiguration } from 'payload'
+import { branchField, InvalidConfiguration, MAIN_BRANCH } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type {
@@ -284,40 +284,47 @@ export const buildTable = ({
 
   if (compoundIndexes) {
     for (const index of compoundIndexes) {
-      let someLocalized: boolean | null = null
+      const hasLocalizedField = index.fields.some((field) => field.pathHasLocalized)
+      const canStoreInLocalesTable = index.fields.every(
+        ({ path, pathHasLocalized }) => pathHasLocalized || path === branchField,
+      )
+      const shouldUseLocalesTable = hasLocalizedField && canStoreInLocalesTable
       const columns: string[] = []
 
-      const getTableToUse = () => {
-        if (someLocalized) {
-          return localesTable
-        }
-
-        return table
-      }
+      const tableToUse = shouldUseLocalesTable ? localesTable : table
 
       for (const { path, pathHasLocalized } of index.fields) {
-        if (someLocalized === null) {
-          someLocalized = pathHasLocalized
-        }
+        const canStoreFieldInTable =
+          pathHasLocalized === shouldUseLocalesTable ||
+          (shouldUseLocalesTable && path === branchField)
 
-        if (someLocalized !== pathHasLocalized) {
+        if (!canStoreFieldInTable) {
           throw new InvalidConfiguration(
-            `Compound indexes within localized and non localized fields are not supported in SQL. Expected ${path} to be ${someLocalized ? 'non' : ''} localized.`,
+            `Compound indexes within localized and non localized fields are not supported in SQL. Expected ${path} to be ${shouldUseLocalesTable ? '' : 'non'} localized.`,
           )
         }
 
         const columnPath = path.replaceAll('.', '_')
 
-        if (!getTableToUse().columns[columnPath]) {
+        if (shouldUseLocalesTable && path === branchField && !tableToUse.columns[columnPath]) {
+          tableToUse.columns[columnPath] = {
+            name: branchField,
+            type: 'varchar',
+            default: MAIN_BRANCH,
+            notNull: true,
+          }
+        }
+
+        if (!tableToUse.columns[columnPath]) {
           throw new InvalidConfiguration(
-            `Column ${columnPath} for compound index on ${path} was not found in the ${getTableToUse().name} table.`,
+            `Column ${columnPath} for compound index on ${path} was not found in the ${tableToUse.name} table.`,
           )
         }
 
         columns.push(columnPath)
       }
 
-      if (someLocalized) {
+      if (shouldUseLocalesTable) {
         columns.push('_locale')
       }
 
@@ -329,7 +336,7 @@ export const buildTable = ({
 
       const indexName = buildIndexName({ name, adapter })
 
-      getTableToUse().indexes[indexName] = {
+      tableToUse.indexes[indexName] = {
         name: indexName,
         on: columns,
         unique: disableUnique ? false : index.unique,

@@ -8,6 +8,8 @@ import type { FileToSave } from '../types.js'
 import type { StagedObject } from './fileOperationManager.js'
 import type { StoredFileList } from './types.js'
 
+import { resolveBranchRowID } from '../../branching/resolveBranchRowID.js'
+import { branchField, branchParentField } from '../../branching/types.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 import { removeUnreferencedStagedObjects, scheduleUnreferencedFileCleanup } from './cleanup.js'
 import { runFileOperationPlan, stageLocalUploadFiles } from './fileOperationManager.js'
@@ -20,6 +22,8 @@ import {
 } from './storedFiles.js'
 
 type VersionRow = {
+  [branchField]?: null | string
+  [branchParentField]?: null | number | string
   createdAt: string
   id: number | string
   latest?: boolean
@@ -251,6 +255,10 @@ export const archiveOutgoingLocalFiles = async ({
       collection: collection.slug,
       req,
       versionData: {
+        ...(row[branchField] !== undefined ? { [branchField]: row[branchField] } : {}),
+        ...(row[branchParentField] !== undefined
+          ? { [branchParentField]: row[branchParentField] }
+          : {}),
         createdAt: row.createdAt,
         latest: row.latest,
         parent: row.parent,
@@ -291,13 +299,19 @@ const getVersions = async ({
   id: number | string
   req: PayloadRequest
 }): Promise<VersionRow[]> => {
+  const versionParent = await resolveBranchRowID({
+    id,
+    collectionSlug: collection.slug,
+    req,
+  })
   const { docs } = await req.payload.db.findVersions<JsonObject>({
+    branch: false,
     collection: collection.slug,
     limit: 0,
     pagination: false,
     req,
     sort: '-updatedAt',
-    where: { parent: { equals: id } },
+    where: { parent: { equals: versionParent } },
   })
 
   return docs as VersionRow[]

@@ -13,6 +13,13 @@ export { extractJWT } from '../auth/extractJWT.js'
 export { getLoginOptions } from '../auth/getLoginOptions.js'
 export { addSessionToUser, removeExpiredSessions } from '../auth/sessions.js'
 
+export {
+  branchChangesCollectionSlug,
+  branchesCollectionSlug,
+  branchMergesCollectionSlug,
+  type ClientBranchingConfig,
+  MAIN_BRANCH,
+} from '../branching/types.js'
 export { getFromImportMap } from '../cli/commands/generateImportMap/utilities/getFromImportMap.js'
 export { parsePayloadComponent } from '../cli/commands/generateImportMap/utilities/parsePayloadComponent.js'
 export {
@@ -142,6 +149,7 @@ export {
   deepMergeWithSourceArrays,
 } from '../utilities/deepMerge.js'
 export { extractID } from '../utilities/extractID.js'
+export { extractRelationshipID } from '../utilities/extractRelationshipID.js'
 
 export {
   expandOwnDottedKey,

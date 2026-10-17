@@ -57,7 +57,9 @@ type Args = {
   showHiddenFields: boolean
   siblingDoc: JsonObject
   triggerAccessControl?: boolean
+  triggerDefaultValue?: boolean
   triggerHooks?: boolean
+  triggerPopulation?: boolean
 }
 
 export const traverseFields = ({
@@ -89,7 +91,9 @@ export const traverseFields = ({
   showHiddenFields,
   siblingDoc,
   triggerAccessControl = true,
+  triggerDefaultValue = true,
   triggerHooks = true,
+  triggerPopulation = true,
 }: Args): void => {
   fields.forEach((field, fieldIndex) => {
     fieldPromises.push(
@@ -124,7 +128,9 @@ export const traverseFields = ({
         siblingDoc,
         siblingFields: fields,
         triggerAccessControl,
+        triggerDefaultValue,
         triggerHooks,
+        triggerPopulation,
       }),
     )
   })

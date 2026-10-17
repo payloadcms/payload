@@ -1,5 +1,25 @@
+import type { NavGroupPreferences } from '../admin/elements/Nav.js'
 import type { DefaultDocumentIDType } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
+
+/**
+ * The `admin` preference value: the stored shape of everything global to the
+ * admin panel. Read once per admin render, so each addition here is free rather
+ * than another query.
+ */
+export type AdminPreferences = {
+  /**
+   * Slug of the content branch the user is working on.
+   *
+   * A preference rather than a cookie so the selection follows the user across
+   * browsers and machines.
+   */
+  branch?: string
+  /** Collapse/expand state per navigation group, keyed by group label. */
+  groups?: NavGroupPreferences
+  /** Whether the nav sidebar is open. */
+  open?: boolean
+}
 
 export type PreferenceRequest = {
   key: string

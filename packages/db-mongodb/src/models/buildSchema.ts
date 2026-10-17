@@ -213,21 +213,44 @@ export const buildSchema = (args: {
 
   if (args.compoundIndexes) {
     for (const index of args.compoundIndexes) {
-      const indexDefinition: Record<string, 1> = {}
+      const hasLocalizedField = index.fields.some((field) => field.pathHasLocalized)
+      const locales =
+        hasLocalizedField && payload.config.localization
+          ? payload.config.localization.locales
+          : [undefined]
 
-      for (const field of index.fields) {
-        if (field.pathHasLocalized && payload.config.localization) {
-          for (const locale of payload.config.localization.locales) {
-            indexDefinition[field.localizedPath.replace('<locale>', locale.code)] = 1
+      for (const locale of locales) {
+        const indexDefinition: Record<string, 1> = {}
+        const resolveIndexPath = (path: string): string => {
+          const indexField = index.fields.find((field) => field.path === path)
+
+          if (indexField?.pathHasLocalized && locale) {
+            return indexField.localizedPath.replace('<locale>', locale.code)
           }
-        } else {
-          indexDefinition[field.path] = 1
-        }
-      }
 
-      schema.index(indexDefinition, {
-        unique: args.buildSchemaOptions.disableUnique ? false : index.unique,
-      })
+          return path
+        }
+
+        for (const field of index.fields) {
+          indexDefinition[resolveIndexPath(field.path)] = 1
+        }
+
+        const indexOptions: IndexOptions = {
+          unique: args.buildSchemaOptions.disableUnique ? false : index.unique,
+        }
+
+        // A missing field is an ordinary value to a MongoDB unique index, unlike a
+        // NULL column in a Postgres or SQLite composite unique constraint, which
+        // always excludes that row from the comparison. `partialFilterExpression`
+        // is what makes the two behave the same.
+        if (index.requireExists?.length) {
+          indexOptions.partialFilterExpression = Object.fromEntries(
+            index.requireExists.map((field) => [resolveIndexPath(field), { $exists: true }]),
+          )
+        }
+
+        schema.index(indexDefinition, indexOptions)
+      }
     }
   }
 

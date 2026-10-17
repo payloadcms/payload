@@ -11,7 +11,9 @@
     color: var(--color-text);
   }
 
-  .doc-tab:hover .pill-version-count {
+  /* Every count pill in a tab, so a new one reads as part of the same family
+     rather than sitting flat against the tab it lives in. */
+  .doc-tab:hover :is(.pill-version-count, .pill-branch-changes) {
     background-color: var(--color-bg-tertiary);
     color: var(--color-text);
   }
@@ -20,12 +22,12 @@
     color: var(--color-text);
   }
 
-  .doc-tab--active .pill-version-count {
+  .doc-tab--active :is(.pill-version-count, .pill-branch-changes) {
     background-color: var(--color-bg-tertiary);
     color: var(--color-text);
   }
 
-  .doc-tab--active:hover .pill-version-count {
+  .doc-tab--active:hover :is(.pill-version-count, .pill-branch-changes) {
     background-color: var(--color-bg-tertiary);
     color: var(--color-text);
   }

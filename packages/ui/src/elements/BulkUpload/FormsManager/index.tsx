@@ -20,6 +20,7 @@ import type { State } from './reducer.js'
 
 import { fieldReducer } from '../../../forms/Form/fieldReducer.js'
 import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
+import { useBranchParam } from '../../../providers/Branch/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
@@ -110,6 +111,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   } = config
   const locale = useLocale()
   const code = locale?.code
+  const branch = useBranchParam()
   const { i18n, t } = useTranslation()
 
   const { getDocumentSlots, getFormState } = useServerFunctions()
@@ -219,6 +221,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
   const initializeSharedDocPermissions = React.useCallback(async () => {
     const params = {
+      branch,
       locale: code || undefined,
     }
 
@@ -265,7 +268,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     setHasPublishPermission(publishedAccessJSON?.update)
     initializedPermissionsCollectionSlugRef.current = collectionSlug
     setHasInitializedDocPermissions(true)
-  }, [api, code, collectionSlug, i18n.language])
+  }, [api, branch, code, collectionSlug, i18n.language])
 
   const initializeSharedFormState = React.useCallback(
     async (abortController?: AbortController) => {
@@ -485,6 +488,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
           const actionURLWithParams = `${actionURL}${qs.stringify(
             {
+              branch,
               locale: code,
               uploadEdits: form?.uploadEdits || undefined,
             },
@@ -674,6 +678,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       }
     },
     [
+      branch,
       forms,
       activeIndex,
       t,

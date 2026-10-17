@@ -1,13 +1,17 @@
+import type { GraphQLResolveInfo } from 'graphql'
 import type { Collection, CollectionSlug, DataFromCollectionSlug, PayloadRequest } from 'payload'
 
-import { isolateObjectProperty, updateByIDOperation } from 'payload'
+import { updateByIDOperation } from 'payload'
 
 import type { Context } from '../types.js'
+
+import { getGraphQLRequest } from '../getGraphQLRequest.js'
 
 export type Resolver<TSlug extends CollectionSlug> = (
   _: unknown,
   args: {
     autosave: boolean
+    branch?: string
     data: DataFromCollectionSlug<TSlug>
     draft: boolean
     fallbackLocale?: string
@@ -18,22 +22,21 @@ export type Resolver<TSlug extends CollectionSlug> = (
   context: {
     req: PayloadRequest
   },
+  info: GraphQLResolveInfo,
 ) => Promise<DataFromCollectionSlug<TSlug>>
 
 export function updateResolver<TSlug extends CollectionSlug>(
   collection: Collection,
 ): Resolver<TSlug> {
-  return async function resolver(_, args, context: Context) {
-    let { req } = context
-    const locale = req.locale
-    const fallbackLocale = req.fallbackLocale
-    req = isolateObjectProperty(req, 'locale')
-    req = isolateObjectProperty(req, 'fallbackLocale')
-    req.locale = args.locale || locale
-    req.fallbackLocale = args.fallbackLocale || fallbackLocale
-    if (!req.query) {
-      req.query = {}
-    }
+  return async function resolver(_, args, context: Context, info) {
+    const req = await getGraphQLRequest({
+      branch: args.branch,
+      collectionSlug: collection.config.slug,
+      context,
+      fallbackLocale: args.fallbackLocale,
+      info,
+      locale: args.locale,
+    })
 
     const draft: boolean =
       (args.draft ?? req.query?.draft === 'false')
@@ -45,8 +48,6 @@ export function updateResolver<TSlug extends CollectionSlug>(
       req.query.draft = String(draft)
     }
 
-    context.req = req
-
     const options = {
       id: args.id,
       autosave: args.autosave,
@@ -54,7 +55,7 @@ export function updateResolver<TSlug extends CollectionSlug>(
       data: args.data as any,
       depth: 0,
       draft: args.draft,
-      req: isolateObjectProperty(req, 'transactionID'),
+      req,
       trash: args.trash,
     }
 

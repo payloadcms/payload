@@ -4,6 +4,7 @@ import type { ClientCollectionConfig, ClientGlobalConfig, SanitizedCollectionCon
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { Fragment, useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -11,6 +12,7 @@ import { Button } from '../../../elements/Button/index.js'
 import { ConfirmationModal } from '../../../elements/ConfirmationModal/index.js'
 import { useModal } from '../../../elements/Modal/index.js'
 import * as PopupList from '../../../elements/Popup/PopupButtonList/index.js'
+import { useBranchParam } from '../../../providers/Branch/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useRouter } from '../../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../../providers/RouteTransition/index.js'
@@ -51,6 +53,7 @@ export const Restore: React.FC<Props> = ({
   const { toggleModal } = useModal()
   const router = useRouter()
   const { i18n, t } = useTranslation()
+  const branch = useBranchParam()
   const [draft, setDraft] = useState(false)
   const { startRouteTransition } = useRouteTransition()
 
@@ -65,13 +68,17 @@ export const Restore: React.FC<Props> = ({
   const canRestoreAsDraft = status !== 'draft' && collectionConfig?.versions?.drafts
 
   const handleRestore = useCallback(async () => {
+    const queryString = qs.stringify(
+      { branch: branch || undefined, draft },
+      { addQueryPrefix: true },
+    )
     let fetchURL: string
     let redirectURL: string
 
     if (collectionConfig) {
       fetchURL = formatAdminURL({
         apiRoute,
-        path: `/${collectionConfig.slug}/versions/${versionID}?draft=${draft}`,
+        path: `/${collectionConfig.slug}/versions/${versionID}${queryString}`,
       })
       redirectURL = formatAdminURL({
         adminRoute,
@@ -82,7 +89,7 @@ export const Restore: React.FC<Props> = ({
     if (globalConfig) {
       fetchURL = formatAdminURL({
         apiRoute,
-        path: `/globals/${globalConfig.slug}/versions/${versionID}?draft=${draft}`,
+        path: `/globals/${globalConfig.slug}/versions/${versionID}${queryString}`,
       })
       redirectURL = formatAdminURL({
         adminRoute,
@@ -104,6 +111,7 @@ export const Restore: React.FC<Props> = ({
       toast.error(t('version:problemRestoringVersion'))
     }
   }, [
+    branch,
     apiRoute,
     collectionConfig,
     globalConfig,
