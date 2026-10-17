@@ -55,15 +55,15 @@ importers:
       '@payloadcms/db-postgres':
         specifier: workspace:*
         version: link:packages/db-postgres
-      '@payloadcms/eslint-config':
-        specifier: workspace:*
-        version: link:packages/eslint-config
-      '@payloadcms/eslint-plugin':
-        specifier: workspace:*
-        version: link:packages/eslint-plugin
       '@payloadcms/live-preview-react':
         specifier: workspace:*
         version: link:packages/live-preview-react
+      '@payloadcms/oxlint-config':
+        specifier: workspace:*
+        version: link:packages/oxlint-config
+      '@payloadcms/oxlint-plugin':
+        specifier: workspace:*
+        version: link:packages/oxlint-plugin
       '@payloadcms/typescript-plugin':
         specifier: workspace:*
         version: link:packages/typescript-plugin
@@ -257,9 +257,9 @@ importers:
         specifier: 19.3.1
         version: 19.3.1(react@19.3.1)
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       '@types/react':
         specifier: 19.3.0
         version: 19.3.0
@@ -383,9 +383,9 @@ importers:
         specifier: 14.0.0
         version: 14.0.0
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       '@types/pg':
         specifier: 8.20.0
         version: 8.20.0
@@ -411,9 +411,9 @@ importers:
         specifier: 14.0.0
         version: 14.0.0
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       '@types/mongoose-aggregate-paginate-v2':
         specifier: 1.0.12
         version: 1.0.12(@aws-sdk/credential-providers@3.1146.0)
@@ -463,9 +463,9 @@ importers:
       '@hyrious/esbuild-plugin-commonjs':
         specifier: 0.2.6
         version: 0.2.6(cjs-module-lexer@1.4.3)(esbuild@0.27.1)
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       '@types/to-snake-case':
         specifier: 1.0.0
         version: 1.0.0
@@ -503,9 +503,9 @@ importers:
         specifier: 14.0.0
         version: 14.0.0
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       '@types/pg':
         specifier: 8.20.0
         version: 8.20.0
@@ -549,9 +549,9 @@ importers:
       '@hyrious/esbuild-plugin-commonjs':
         specifier: 0.2.6
         version: 0.2.6(cjs-module-lexer@1.4.3)(esbuild@0.27.1)
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       '@types/pg':
         specifier: 8.20.0
         version: 8.20.0
@@ -589,9 +589,9 @@ importers:
       '@libsql/client':
         specifier: 0.14.0
         version: 0.14.0(bufferutil@4.1.0)
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       '@types/pg':
         specifier: 8.20.0
         version: 8.20.0
@@ -618,108 +618,6 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
-  packages/eslint-config:
-    dependencies:
-      '@eslint-react/eslint-plugin':
-        specifier: 1.53.1
-        version: 1.53.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))(ts-api-utils@2.5.0(@typescript/typescript6@6.0.2))
-      '@eslint/js':
-        specifier: 9.39.2
-        version: 9.39.2
-      '@payloadcms/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
-      '@types/eslint':
-        specifier: 9.6.1
-        version: 9.6.1
-      '@typescript-eslint/parser':
-        specifier: 8.26.1
-        version: 8.26.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))
-      '@vitest/eslint-plugin':
-        specifier: 1.6.27
-        version: 1.6.27(@typescript-eslint/eslint-plugin@8.71.1(@typescript-eslint/parser@8.26.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0)))(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0)))(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))(vitest@5.0.1)
-      eslint:
-        specifier: 9.39.2
-        version: 9.39.2(jiti@2.7.0)
-      eslint-config-prettier:
-        specifier: 10.1.8
-        version: 10.1.8(eslint@9.39.2(jiti@2.7.0))
-      eslint-plugin-import-x:
-        specifier: 4.6.1
-        version: 4.6.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))
-      eslint-plugin-jsx-a11y:
-        specifier: 6.10.2
-        version: 6.10.2(eslint@9.39.2(jiti@2.7.0))
-      eslint-plugin-perfectionist:
-        specifier: 3.9.1
-        version: 3.9.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))
-      eslint-plugin-react-compiler:
-        specifier: 19.1.0-rc.2
-        version: 19.1.0-rc.2(eslint@9.39.2(jiti@2.7.0))
-      eslint-plugin-react-hooks:
-        specifier: 0.0.0-experimental-d331ba04-20250307
-        version: 0.0.0-experimental-d331ba04-20250307(eslint@9.39.2(jiti@2.7.0))
-      eslint-plugin-regexp:
-        specifier: 2.7.0
-        version: 2.7.0(eslint@9.39.2(jiti@2.7.0))
-      globals:
-        specifier: 16.0.0
-        version: 16.0.0
-      typescript:
-        specifier: npm:@typescript/typescript6@6.0.2
-        version: '@typescript/typescript6@6.0.2'
-      typescript-eslint:
-        specifier: 8.26.1
-        version: 8.26.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))
-
-  packages/eslint-plugin:
-    dependencies:
-      '@eslint-react/eslint-plugin':
-        specifier: 1.31.0
-        version: 1.31.0(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))(ts-api-utils@2.5.0(@typescript/typescript6@6.0.2))
-      '@eslint/js':
-        specifier: 9.39.2
-        version: 9.39.2
-      '@types/eslint':
-        specifier: 9.6.1
-        version: 9.6.1
-      '@typescript-eslint/parser':
-        specifier: 8.26.1
-        version: 8.26.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))
-      '@vitest/eslint-plugin':
-        specifier: 1.6.27
-        version: 1.6.27(@typescript-eslint/eslint-plugin@8.71.1(@typescript-eslint/parser@8.26.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0)))(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0)))(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))(vitest@5.0.1)
-      eslint:
-        specifier: 9.39.2
-        version: 9.39.2(jiti@2.7.0)
-      eslint-config-prettier:
-        specifier: 10.1.8
-        version: 10.1.8(eslint@9.39.2(jiti@2.7.0))
-      eslint-plugin-import-x:
-        specifier: 4.6.1
-        version: 4.6.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))
-      eslint-plugin-jsx-a11y:
-        specifier: 6.10.2
-        version: 6.10.2(eslint@9.39.2(jiti@2.7.0))
-      eslint-plugin-perfectionist:
-        specifier: 3.9.1
-        version: 3.9.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))
-      eslint-plugin-react-hooks:
-        specifier: 0.0.0-experimental-d331ba04-20250307
-        version: 0.0.0-experimental-d331ba04-20250307(eslint@9.39.2(jiti@2.7.0))
-      eslint-plugin-regexp:
-        specifier: 2.7.0
-        version: 2.7.0(eslint@9.39.2(jiti@2.7.0))
-      globals:
-        specifier: 16.0.0
-        version: 16.0.0
-      typescript:
-        specifier: npm:@typescript/typescript6@6.0.2
-        version: '@typescript/typescript6@6.0.2'
-      typescript-eslint:
-        specifier: 8.26.1
-        version: 8.26.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))
-
   packages/graphql:
     dependencies:
       graphql:
@@ -738,9 +636,9 @@ importers:
         specifier: 4.23.15
         version: 4.23.15
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       '@types/pluralize':
         specifier: ^0.0.33
         version: 0.0.33
@@ -763,9 +661,9 @@ importers:
 
   packages/live-preview:
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -782,9 +680,9 @@ importers:
         specifier: 19.3.1
         version: 19.3.1(react@19.3.1)
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       '@types/react':
         specifier: 19.3.0
         version: 19.3.0
@@ -801,9 +699,9 @@ importers:
         specifier: workspace:*
         version: link:../live-preview
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -883,9 +781,9 @@ importers:
       '@next/eslint-plugin-next':
         specifier: 16.4.2
         version: 16.4.2(eslint@9.39.2(jiti@2.7.0))
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       '@types/busboy':
         specifier: 1.5.4
         version: 1.5.4
@@ -910,6 +808,108 @@ importers:
       swc-plugin-transform-remove-imports:
         specifier: 8.3.0
         version: 8.3.0
+
+  packages/oxlint-config:
+    dependencies:
+      '@eslint-react/eslint-plugin':
+        specifier: 1.53.1
+        version: 1.53.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))(ts-api-utils@2.5.0(@typescript/typescript6@6.0.2))
+      '@eslint/js':
+        specifier: 9.39.2
+        version: 9.39.2
+      '@payloadcms/oxlint-plugin':
+        specifier: workspace:*
+        version: link:../oxlint-plugin
+      '@types/eslint':
+        specifier: 9.6.1
+        version: 9.6.1
+      '@typescript-eslint/parser':
+        specifier: 8.26.1
+        version: 8.26.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))
+      '@vitest/eslint-plugin':
+        specifier: 1.6.27
+        version: 1.6.27(@typescript-eslint/eslint-plugin@8.71.1(@typescript-eslint/parser@8.26.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0)))(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0)))(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))(vitest@5.0.1)
+      eslint:
+        specifier: 9.39.2
+        version: 9.39.2(jiti@2.7.0)
+      eslint-config-prettier:
+        specifier: 10.1.8
+        version: 10.1.8(eslint@9.39.2(jiti@2.7.0))
+      eslint-plugin-import-x:
+        specifier: 4.6.1
+        version: 4.6.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))
+      eslint-plugin-jsx-a11y:
+        specifier: 6.10.2
+        version: 6.10.2(eslint@9.39.2(jiti@2.7.0))
+      eslint-plugin-perfectionist:
+        specifier: 3.9.1
+        version: 3.9.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))
+      eslint-plugin-react-compiler:
+        specifier: 19.1.0-rc.2
+        version: 19.1.0-rc.2(eslint@9.39.2(jiti@2.7.0))
+      eslint-plugin-react-hooks:
+        specifier: 0.0.0-experimental-d331ba04-20250307
+        version: 0.0.0-experimental-d331ba04-20250307(eslint@9.39.2(jiti@2.7.0))
+      eslint-plugin-regexp:
+        specifier: 2.7.0
+        version: 2.7.0(eslint@9.39.2(jiti@2.7.0))
+      globals:
+        specifier: 16.0.0
+        version: 16.0.0
+      typescript:
+        specifier: npm:@typescript/typescript6@6.0.2
+        version: '@typescript/typescript6@6.0.2'
+      typescript-eslint:
+        specifier: 8.26.1
+        version: 8.26.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))
+
+  packages/oxlint-plugin:
+    dependencies:
+      '@eslint-react/eslint-plugin':
+        specifier: 1.31.0
+        version: 1.31.0(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))(ts-api-utils@2.5.0(@typescript/typescript6@6.0.2))
+      '@eslint/js':
+        specifier: 9.39.2
+        version: 9.39.2
+      '@types/eslint':
+        specifier: 9.6.1
+        version: 9.6.1
+      '@typescript-eslint/parser':
+        specifier: 8.26.1
+        version: 8.26.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))
+      '@vitest/eslint-plugin':
+        specifier: 1.6.27
+        version: 1.6.27(@typescript-eslint/eslint-plugin@8.71.1(@typescript-eslint/parser@8.26.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0)))(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0)))(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))(vitest@5.0.1)
+      eslint:
+        specifier: 9.39.2
+        version: 9.39.2(jiti@2.7.0)
+      eslint-config-prettier:
+        specifier: 10.1.8
+        version: 10.1.8(eslint@9.39.2(jiti@2.7.0))
+      eslint-plugin-import-x:
+        specifier: 4.6.1
+        version: 4.6.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))
+      eslint-plugin-jsx-a11y:
+        specifier: 6.10.2
+        version: 6.10.2(eslint@9.39.2(jiti@2.7.0))
+      eslint-plugin-perfectionist:
+        specifier: 3.9.1
+        version: 3.9.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))
+      eslint-plugin-react-hooks:
+        specifier: 0.0.0-experimental-d331ba04-20250307
+        version: 0.0.0-experimental-d331ba04-20250307(eslint@9.39.2(jiti@2.7.0))
+      eslint-plugin-regexp:
+        specifier: 2.7.0
+        version: 2.7.0(eslint@9.39.2(jiti@2.7.0))
+      globals:
+        specifier: 16.0.0
+        version: 16.0.0
+      typescript:
+        specifier: npm:@typescript/typescript6@6.0.2
+        version: '@typescript/typescript6@6.0.2'
+      typescript-eslint:
+        specifier: 8.26.1
+        version: 8.26.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))
 
   packages/payload:
     dependencies:
@@ -1025,9 +1025,9 @@ importers:
       '@monaco-editor/react':
         specifier: 4.7.0
         version: 4.7.0(monaco-editor@0.57.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       '@types/json-schema':
         specifier: 7.0.15
         version: 7.0.15
@@ -1148,12 +1148,12 @@ importers:
         specifier: 19.3.1
         version: 19.3.1(react@19.3.1)
     devDependencies:
-      '@payloadcms/eslint-config':
-        specifier: workspace:*
-        version: link:../eslint-config
       '@payloadcms/next':
         specifier: workspace:*
         version: link:../next
+      '@payloadcms/oxlint-config':
+        specifier: workspace:*
+        version: link:../oxlint-config
       '@types/json-schema':
         specifier: 7.0.15
         version: 7.0.15
@@ -1188,9 +1188,9 @@ importers:
         specifier: 19.3.1
         version: 19.3.1(react@19.3.1)
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       '@types/escape-html':
         specifier: ^1.0.4
         version: 1.0.4
@@ -1231,9 +1231,9 @@ importers:
         specifier: 8.0.1
         version: 8.0.1
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -1247,18 +1247,18 @@ importers:
         specifier: 4.23.15
         version: 4.23.15
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       payload:
         specifier: workspace:*
         version: link:../payload
 
   packages/plugin-multi-tenant:
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../translations
@@ -1271,9 +1271,9 @@ importers:
 
   packages/plugin-nested-docs:
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -1287,9 +1287,9 @@ importers:
         specifier: workspace:*
         version: link:../payload
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
 
   packages/plugin-search:
     dependencies:
@@ -1306,9 +1306,9 @@ importers:
         specifier: 19.3.1
         version: 19.3.1(react@19.3.1)
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       '@types/react':
         specifier: 19.3.0
         version: 19.3.0
@@ -1334,9 +1334,9 @@ importers:
         specifier: 19.3.1
         version: 19.3.1(react@19.3.1)
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       '@types/react':
         specifier: 19.3.0
         version: 19.3.0
@@ -1362,12 +1362,12 @@ importers:
         specifier: 19.3.1
         version: 19.3.1(react@19.3.1)
     devDependencies:
-      '@payloadcms/eslint-config':
-        specifier: workspace:*
-        version: link:../eslint-config
       '@payloadcms/next':
         specifier: workspace:*
         version: link:../next
+      '@payloadcms/oxlint-config':
+        specifier: workspace:*
+        version: link:../oxlint-config
       '@types/react':
         specifier: 19.3.0
         version: 19.3.0
@@ -1396,12 +1396,12 @@ importers:
         specifier: 14.0.0
         version: 14.0.0
     devDependencies:
-      '@payloadcms/eslint-config':
-        specifier: workspace:*
-        version: link:../eslint-config
       '@payloadcms/next':
         specifier: workspace:*
         version: link:../next
+      '@payloadcms/oxlint-config':
+        specifier: workspace:*
+        version: link:../oxlint-config
       '@types/lodash.get':
         specifier: ^4.4.7
         version: 4.4.9
@@ -1532,9 +1532,9 @@ importers:
       '@lexical/eslint-plugin':
         specifier: 0.52.0
         version: 0.52.0(eslint@9.39.2(jiti@2.7.0))(typescript@7.0.2)
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       '@types/escape-html':
         specifier: 1.0.4
         version: 1.0.4
@@ -1581,9 +1581,9 @@ importers:
         specifier: 10.0.3
         version: 10.0.3(typescript@7.0.2)
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
 
   packages/storage-azure:
     dependencies:
@@ -1736,9 +1736,9 @@ importers:
         specifier: 4.4.0
         version: 4.4.0
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       '@types/react':
         specifier: 19.3.0
         version: 19.3.0
@@ -1869,9 +1869,9 @@ importers:
       '@hyrious/esbuild-plugin-commonjs':
         specifier: 0.2.6
         version: 0.2.6(cjs-module-lexer@1.4.3)(esbuild@0.27.1)
-      '@payloadcms/eslint-config':
+      '@payloadcms/oxlint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../oxlint-config
       '@types/react':
         specifier: 19.3.0
         version: 19.3.0
@@ -2516,12 +2516,6 @@ importers:
       '@payloadcms/email-resend':
         specifier: workspace:*
         version: link:../packages/email-resend
-      '@payloadcms/eslint-config':
-        specifier: workspace:*
-        version: link:../packages/eslint-config
-      '@payloadcms/eslint-plugin':
-        specifier: workspace:*
-        version: link:../packages/eslint-plugin
       '@payloadcms/figma':
         specifier: latest
         version: 1.0.0-beta.1(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(@payloadcms/translations@packages+translations)(@payloadcms/ui@packages+ui)(payload@packages+payload)(react@19.3.1)
@@ -2540,6 +2534,12 @@ importers:
       '@payloadcms/next':
         specifier: workspace:*
         version: link:../packages/next
+      '@payloadcms/oxlint-config':
+        specifier: workspace:*
+        version: link:../packages/oxlint-config
+      '@payloadcms/oxlint-plugin':
+        specifier: workspace:*
+        version: link:../packages/oxlint-plugin
       '@payloadcms/payload-cloud':
         specifier: workspace:*
         version: link:../packages/payload-cloud
