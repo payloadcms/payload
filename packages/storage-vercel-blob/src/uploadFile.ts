@@ -1,4 +1,5 @@
 import { put } from '@vercel/blob'
+import { openAsBlob } from 'node:fs'
 import path from 'path'
 
 interface UploadFileArgs {
@@ -8,6 +9,7 @@ interface UploadFileArgs {
   cacheControlMaxAge?: number
   mimeType: string
   storageFilePath: string
+  tempFilePath?: string
   token: string
 }
 
@@ -22,9 +24,11 @@ export async function uploadFile({
   cacheControlMaxAge,
   mimeType,
   storageFilePath,
+  tempFilePath,
   token,
 }: UploadFileArgs): Promise<UploadFileResult> {
-  const result = await put(storageFilePath, buffer, {
+  const body = tempFilePath ? await openAsBlob(tempFilePath) : buffer
+  const result = await put(storageFilePath, body, {
     access,
     addRandomSuffix,
     allowOverwrite: true,

@@ -347,10 +347,20 @@ export const updateOperation = async <
         }
 
         let documentReq = req
-        if (collectionConfig.upload && sharedGeneratedFileData === null) {
-          documentReq = isolateObjectProperty(req, ['file', 'payloadUploadSizes'])
+        if (collectionConfig.upload) {
+          documentReq = isolateObjectProperty(req, [
+            'context',
+            'file',
+            'payloadUploadSizes',
+            'query',
+          ])
+          documentReq.context = { ...req.context }
+          documentReq.query = { ...req.query }
           documentReq.file = documentFile
-          documentReq.payloadUploadSizes = {}
+          documentReq.payloadUploadSizes = sharedGeneratedFileData
+            ? { ...req.payloadUploadSizes }
+            : {}
+          delete documentReq.context._payloadCloudStorage
         }
         const generatedFileData =
           sharedGeneratedFileData ??

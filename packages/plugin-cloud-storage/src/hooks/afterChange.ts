@@ -1,5 +1,9 @@
 import type { CollectionAfterChangeHook, CollectionConfig, FileData, TypeWithID } from 'payload'
 
+import path from 'node:path'
+import { isDeepStrictEqual } from 'node:util'
+import { isolateObjectProperty } from 'payload'
+
 import type { GeneratedAdapter } from '../types.js'
 
 import { buildPrefixWithObjectKey } from '../utilities/buildPrefixWithObjectKey.js'
@@ -8,6 +12,8 @@ import {
   buildUploadStoragePathData,
 } from '../utilities/buildStoragePathData.js'
 import { getIncomingFiles } from '../utilities/getIncomingFiles.js'
+
+type StorageFileData = { _objectKey?: string } & FileData & TypeWithID
 
 interface Args {
   adapter: GeneratedAdapter
@@ -28,55 +34,107 @@ export const getAfterChangeHook =
     collection,
     collectionPrefix,
     useCompositePrefixes,
-  }: Args): CollectionAfterChangeHook<FileData & TypeWithID> =>
-  async ({ doc, operation, previousDoc, req }) => {
+  }: Args): CollectionAfterChangeHook<StorageFileData> =>
+  async ({ data, doc, operation, previousDoc, req }) => {
     // Skip if this is an internal update to prevent infinite loop
     if (req.context?.skipCloudStorage) {
       return doc
     }
 
+    const uploadData = { ...doc, _objectKey: data?._objectKey ?? doc._objectKey }
     const isDraftSave = (doc as { _status?: string })._status === 'draft'
     const isDraftOverPublished =
       isDraftSave && (previousDoc as { _status?: string } | undefined)?._status === 'published'
 
     try {
-      const files = getIncomingFiles({ data: doc, req })
+      const files = getIncomingFiles({ data: uploadData, req })
+      const mainClientUpload = files.find((file) => !file.sizeName)?.clientUpload
 
       if (files.length > 0) {
         // Fold `_objectKey` so generated sizes land in the same folder as the original.
-        const dataForUpload = { ...doc, prefix: getObjectFolder(doc) }
+        const dataForUpload = { ...uploadData, prefix: getObjectFolder(uploadData) }
 
+        const filesToUpload = files.filter((file) =>
+          file.clientUpload ? file.clientUpload.isProcessed : !file.clientUploadContext,
+        )
+        const originalDataForUpload = filesToUpload.length
+          ? structuredClone(dataForUpload)
+          : dataForUpload
         const uploadResults = await Promise.all(
-          files
-            // Files with a clientUploadContext are already in storage (uploaded
-            // directly by the browser), so skip re-uploading them here.
-            .filter((file) => !file.clientUploadContext)
-            .map((file) =>
-              adapter.handleUpload({
-                clientUploadContext: file.clientUploadContext,
-                collection,
-                data: dataForUpload,
-                file,
-                req,
-                storageFilePath: buildUploadStoragePathData({
-                  collectionPrefix,
-                  docPrefix: dataForUpload.prefix,
-                  filename: file.filename,
-                  useCompositePrefixes,
-                }).storageFilePath,
-              }),
-            ),
+          filesToUpload.map(async (file) => {
+            const dataForFile = structuredClone(originalDataForUpload)
+            const metadata = await adapter.handleUpload({
+              clientUploadContext: file.clientUploadContext,
+              collection,
+              data: dataForFile,
+              file,
+              req,
+              storageFilePath: buildUploadStoragePathData({
+                collectionPrefix,
+                docPrefix: dataForUpload.prefix,
+                filename: file.filename,
+                useCompositePrefixes,
+              }).storageFilePath,
+            })
+
+            return { file, metadata }
+          }),
         )
 
-        const uploadMetadata = uploadResults
-          .filter(
-            (result): result is Partial<FileData & TypeWithID> =>
-              result != null && typeof result === 'object',
-          )
-          .reduce(
-            (acc, metadata) => ({ ...acc, ...metadata }),
-            {} as Partial<FileData & TypeWithID>,
-          )
+        const uploadMetadata = {} as Partial<FileData & TypeWithID>
+        uploadResults.forEach(({ file, metadata }) => {
+          if (!metadata || typeof metadata !== 'object') {
+            return
+          }
+
+          const changedMetadata = Object.fromEntries(
+            Object.entries(metadata).filter(([key, value]) => {
+              const originalValue = originalDataForUpload[key as keyof StorageFileData]
+              return !Object.is(value, originalValue) && !isDeepStrictEqual(value, originalValue)
+            }),
+          ) as Partial<StorageFileData>
+
+          if (file.sizeName) {
+            const { sizes, ...fileMetadata } = changedMetadata
+            const originalSize = originalDataForUpload.sizes?.[file.sizeName] as
+              | Record<string, unknown>
+              | undefined
+            const changedSizeMetadata = Object.fromEntries(
+              Object.entries(sizes?.[file.sizeName] ?? {}).filter(([key, value]) => {
+                const originalValue = originalSize?.[key]
+                return !Object.is(value, originalValue) && !isDeepStrictEqual(value, originalValue)
+              }),
+            )
+            const sizeMetadata = { ...fileMetadata, ...changedSizeMetadata }
+            if (Object.keys(sizeMetadata).length > 0) {
+              uploadMetadata.sizes = {
+                ...uploadData.sizes,
+                ...uploadMetadata.sizes,
+                [file.sizeName]: {
+                  ...uploadData.sizes[file.sizeName],
+                  ...uploadMetadata.sizes?.[file.sizeName],
+                  ...sizeMetadata,
+                } as FileData['sizes'][string],
+              }
+            }
+          } else {
+            Object.assign(uploadMetadata, changedMetadata)
+          }
+        })
+
+        const tempFilePath =
+          req.file?.tempFilePath ??
+          (req.context?._payloadCloudStorage as { file?: typeof req.file } | undefined)?.file
+            ?.tempFilePath
+        if (tempFilePath) {
+          req.context ??= {}
+          req.context._payloadCloudStorageTempFilePath = tempFilePath
+        }
+        req.file = undefined
+        req.payloadUploadSizes = undefined
+        if (req.context) {
+          delete req.context._payloadCloudStorage
+        }
 
         // Adapters may echo `data` back as metadata; keep the document's own `prefix`/`_objectKey`.
         delete (uploadMetadata as Record<string, unknown>).prefix
@@ -85,110 +143,97 @@ export const getAfterChangeHook =
         let docWithMetadata = doc
 
         if (Object.keys(uploadMetadata).length > 0) {
-          if (!req.context) {
-            req.context = {}
-          }
-          req.context.skipCloudStorage = true
+          const metadataReq = isolateObjectProperty(req, [
+            'context',
+            'file',
+            'payloadUploadSizes',
+            'query',
+          ])
+          metadataReq.context = { ...req.context, skipCloudStorage: true }
+          metadataReq.query = { ...req.query }
+          metadataReq.file = undefined
+          metadataReq.payloadUploadSizes = undefined
+          delete metadataReq.query.uploadEdits
+          delete metadataReq.context._payloadCloudStorage
+          delete metadataReq.context._payloadCloudStorageTempFilePath
+          delete metadataReq.context.payloadClientUploadTempFilePath
 
-          // Clear to prevent re-processing
-          req.file = undefined
-          req.payloadUploadSizes = undefined
-
-          try {
-            await req.payload.update({
-              id: doc.id,
-              collection: collection.slug,
-              data: uploadMetadata,
-              depth: 0,
-              draft: isDraftSave,
-              req,
-            })
-          } finally {
-            delete req.context.skipCloudStorage
-          }
+          const updatedDoc = await req.payload.update({
+            id: doc.id,
+            collection: collection.slug,
+            data: uploadMetadata,
+            depth: 0,
+            draft: isDraftSave,
+            overrideAccess: true,
+            req: metadataReq,
+          })
 
           docWithMetadata = { ...doc, ...uploadMetadata }
+          if (updatedDoc.url !== undefined) {
+            docWithMetadata.url = updatedDoc.url
+          }
+          if (updatedDoc.sizes) {
+            // Only return size fields that the collection actually persisted.
+            docWithMetadata.sizes = updatedDoc.sizes
+          }
         }
 
         // Delete previous files only after the new upload and metadata
         // persistence have succeeded. Deleting earlier would orphan the
         // record if a later step throws (e.g. a user-defined afterChange
         // hook on the same collection).
+        const locationArgs = { collectionPrefix, useCompositePrefixes }
+        const newLocations = getFileLocations({
+          ...locationArgs,
+          data: {
+            ...uploadData,
+            ...uploadMetadata,
+            ...docWithMetadata,
+          },
+        })
+        const previousLocations = previousDoc
+          ? getFileLocations({ ...locationArgs, data: previousDoc })
+          : new Map<string, string>()
+        const filesToDelete = new Map<string, { doc: StorageFileData; filename: string }>()
+
         if (previousDoc && operation === 'update' && !isDraftOverPublished) {
-          let filesToDelete: string[] = []
-
-          if (typeof previousDoc?.filename === 'string') {
-            filesToDelete.push(previousDoc.filename)
-          }
-
-          if (typeof previousDoc.sizes === 'object') {
-            filesToDelete = filesToDelete.concat(
-              Object.values(previousDoc?.sizes || []).map(
-                (resizedFileData) => resizedFileData?.filename as string,
-              ),
-            )
-          }
-
-          // Compare full locations: a replacement can reuse a filename while moving
-          // a legacy object beneath the collection prefix.
-          const newFilenames = new Set<string>()
-          if (typeof docWithMetadata.filename === 'string') {
-            newFilenames.add(docWithMetadata.filename)
-          }
-          if (typeof docWithMetadata.sizes === 'object') {
-            for (const size of Object.values(docWithMetadata.sizes || {})) {
-              if (size?.filename && typeof size.filename === 'string') {
-                newFilenames.add(size.filename)
-              }
+          for (const [storageFilePath, filename] of previousLocations) {
+            if (!newLocations.has(storageFilePath)) {
+              filesToDelete.set(storageFilePath, { doc: previousDoc, filename })
             }
           }
-
-          // Resolve each object's real location, folding `_objectKey` so a client-uploaded
-          // original is compared and deleted at `prefix/_objectKey/filename`.
-          const resolveKey = ({
-            data,
-            filename,
-          }: {
-            data: { _objectKey?: string; prefix?: string }
-            filename: string
-          }) =>
-            buildStoragePathData({
-              collectionPrefix,
-              docPrefix: getObjectFolder(data),
-              filename,
-              useCompositePrefixes,
-            }).storageFilePath
-
-          const newKeys = new Set(
-            [...newFilenames].map((filename) =>
-              resolveKey({
-                data: docWithMetadata as { _objectKey?: string; prefix?: string },
-                filename,
-              }),
-            ),
-          )
-
-          const deletionPromises = filesToDelete.map(async (filename) => {
-            if (!filename) {
-              return
-            }
-            const storageFilePath = resolveKey({
-              data: previousDoc as { _objectKey?: string; prefix?: string },
-              filename,
-            })
-            if (!newKeys.has(storageFilePath)) {
-              await adapter.handleDelete({
-                collection,
-                doc: previousDoc,
-                filename,
-                req,
-                storageFilePath,
-              })
-            }
-          })
-
-          await Promise.all(deletionPromises)
         }
+
+        if (mainClientUpload?.isProcessed) {
+          const originalSegments = mainClientUpload.originalStorageFilePath.split('/')
+          const originalFilename = originalSegments.pop()!
+          const { storageFilePath: originalStorageFilePath } = buildStoragePathData({
+            collectionPrefix,
+            docPrefix: originalSegments.join('/'),
+            filename: originalFilename,
+            useCompositePrefixes,
+          })
+          const isRetainedPublishedFile =
+            isDraftOverPublished && previousLocations.has(originalStorageFilePath)
+          if (!newLocations.has(originalStorageFilePath) && !isRetainedPublishedFile) {
+            filesToDelete.set(originalStorageFilePath, {
+              doc: previousDoc ?? uploadData,
+              filename: path.posix.basename(originalStorageFilePath),
+            })
+          }
+        }
+
+        await Promise.all(
+          [...filesToDelete].map(([storageFilePath, { doc: deletedFileDoc, filename }]) =>
+            adapter.handleDelete({
+              collection,
+              doc: deletedFileDoc,
+              filename,
+              req,
+              storageFilePath,
+            }),
+          ),
+        )
 
         if (docWithMetadata !== doc) {
           return docWithMetadata
@@ -203,3 +248,33 @@ export const getAfterChangeHook =
     }
     return doc
   }
+
+const getFileLocations = ({
+  collectionPrefix,
+  data,
+  useCompositePrefixes,
+}: {
+  collectionPrefix?: string
+  data: StorageFileData
+  useCompositePrefixes?: boolean
+}): Map<string, string> => {
+  const filenames = [
+    data.filename,
+    ...Object.values(data.sizes ?? {}).map((size) => size?.filename),
+  ]
+  const locations = new Map<string, string>()
+
+  for (const filename of filenames) {
+    if (typeof filename === 'string' && filename) {
+      const { storageFilePath } = buildStoragePathData({
+        collectionPrefix,
+        docPrefix: getObjectFolder(data),
+        filename,
+        useCompositePrefixes,
+      })
+      locations.set(storageFilePath, filename)
+    }
+  }
+
+  return locations
+}

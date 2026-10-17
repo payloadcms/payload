@@ -336,7 +336,16 @@ export type SanitizedUploadConfig = {
   staticDir: UploadConfig['staticDir']
 } & UploadConfig
 
+export type ClientUploadState = {
+  /** Whether Payload generated new bytes that must replace the client-uploaded file. */
+  isProcessed: boolean
+  /** The original object path from the verified upload receipt. */
+  originalStorageFilePath: string
+}
+
 export type File = {
+  /** Verified provider-upload state, set by Payload rather than submitted file metadata. */
+  clientUpload?: ClientUploadState
   /**
    * The buffer of the file.
    */

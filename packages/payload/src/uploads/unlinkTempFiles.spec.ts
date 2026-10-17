@@ -35,6 +35,25 @@ const collectionConfig = {
 const nonUploadCollectionConfig = {} as unknown as SanitizedCollectionConfig
 
 describe('unlinkTempFiles', () => {
+  it('should clean a processed client file after its old context is removed', async () => {
+    const tempFilePath = await createTempFile()
+    const req = {
+      file: {
+        data: Buffer.alloc(0),
+        tempFilePath,
+        clientUpload: { isProcessed: true, originalStorageFilePath: 'image.png' },
+      },
+    } as PayloadRequest
+
+    await unlinkTempFiles({
+      collectionConfig,
+      config: { upload: { useTempFiles: false } } as SanitizedConfig,
+      req,
+    })
+
+    expect(await fileExists(tempFilePath)).toBe(false)
+  })
+
   const tempFilesToRemove: string[] = []
 
   afterEach(async () => {
@@ -133,6 +152,23 @@ describe('unlinkTempFiles', () => {
 
     expect(await fileExists(tempFilePath)).toBe(false)
     expect(req.context[CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY]).toBeUndefined()
+  })
+
+  it('should remove a multipart temp file after a storage hook clears req.file', async () => {
+    const tempFilePath = await createTempFile()
+    tempFilesToRemove.push(tempFilePath)
+    const req = {
+      context: { _payloadCloudStorageTempFilePath: tempFilePath },
+      file: undefined,
+    } as unknown as PayloadRequest
+
+    await unlinkTempFiles({
+      collectionConfig,
+      config: { upload: { useTempFiles: true } } as unknown as SanitizedConfig,
+      req,
+    })
+
+    expect(await fileExists(tempFilePath)).toBe(false)
   })
 
   it('does not attempt a second unlink when the context-tracked path matches req.file.tempFilePath', async () => {

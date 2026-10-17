@@ -306,9 +306,10 @@ export const generateFileData = async <T>({
     fileData.filename = fsSafeName
 
     let fileForResize = file
+    let processedBuffer = fileBuffer?.data
 
     if (cropData && fileSupportsResize && sharp) {
-      const { data: croppedImage, info } = await cropImage({
+      let { data: croppedImage, info } = await cropImage({
         cropData,
         dimensions: dimensions!,
         file,
@@ -319,9 +320,15 @@ export const generateFileData = async <T>({
         withMetadata,
       })
 
+      if (formatOptions) {
+        ;({ data: croppedImage, info } = await sharp(croppedImage, sharpOptions)
+          .toFormat(formatOptions.format, formatOptions.options)
+          .toBuffer({ resolveWithObject: true }))
+      }
+
       // Apply resize after cropping to ensure it conforms to resizeOptions
       if (resizeOptions && !resizeOptions.withoutEnlargement) {
-        const resizedAfterCrop = await sharp(croppedImage)
+        const resizedAfterCrop = await sharp(croppedImage, sharpOptions)
           .resize({
             fit: resizeOptions?.fit || 'cover',
             height: resizeOptions?.height,
@@ -374,8 +381,9 @@ export const generateFileData = async <T>({
 
       delete file.clientUploadContext
       delete fileForResize.clientUploadContext
+      processedBuffer = fileForResize.data
       if (file.tempFilePath) {
-        await fs.writeFile(file.tempFilePath, croppedImage) // write fileBuffer to the temp path
+        await fs.writeFile(file.tempFilePath, fileForResize.data)
       } else {
         req.file = fileForResize
       }
@@ -427,12 +435,24 @@ export const generateFileData = async <T>({
               req.file = {
                 ...file,
                 data: fileBuffer?.data || bufferToSave,
-                size: fileBuffer?.info.size,
+                size: fileBuffer?.info.size ?? file.size,
               }
             }
           }
         }
       }
+    }
+
+    if (processedBuffer) {
+      req.file = {
+        ...file,
+        name: fileData.filename,
+        clientUpload: file.clientUpload ? { ...file.clientUpload, isProcessed: true } : undefined,
+        data: file.tempFilePath ? Buffer.alloc(0) : processedBuffer,
+        mimetype: fileData.mimeType,
+        size: processedBuffer.length,
+      }
+      delete req.file.clientUploadContext
     }
 
     if (fileSupportsResize && (Array.isArray(imageSizes) || focalPointEnabled !== false)) {

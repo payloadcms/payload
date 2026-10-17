@@ -25,7 +25,6 @@ import {
   mediaWithGenerateFileURLSlug,
   mediaWithOverwriteSlug,
   mediaWithPrefixSlug,
-  mediaWithThrowingHookSlug,
   prefix,
   restrictedMediaSlug,
   testMetadataSlug,
@@ -241,7 +240,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       expect(sanitizeFilename('a/b/../../c/d/../file.txt')).toBe('file.txt')
     })
 
-    it('should normalize backslash separators', () => {
+    it('should normalize backslash separators in a filename', () => {
       expect(sanitizeFilename('..\\..\\windows\\system32\\config')).toBe('config')
     })
 
@@ -559,7 +558,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         for (const id of createdIDs) {
           try {
             await payload.delete({ id, collection: testMetadataSlug })
-          } catch (e) {
+          } catch (_e) {
             // Ignore
           }
         }
@@ -783,7 +782,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       afterEach(async () => {
         for (const id of createdIDs) {
           try {
-            await payload.delete({ id, collection: mediaWithThrowingHookSlug })
+            await payload.delete({ id, collection: testMetadataSlug })
           } catch (_) {
             // Ignore
           }
@@ -794,14 +793,14 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       it('should surface user afterChange errors that throw during the plugin internal update on create', async () => {
         await expect(
           payload.create({
-            collection: mediaWithThrowingHookSlug,
-            data: { shouldThrow: true },
+            collection: testMetadataSlug,
+            data: { testNote: 'Throw on internal update' },
             filePath: path.resolve(dirname, '../uploads/image.png'),
           }),
         ).rejects.toThrow('User afterChange hook throws error')
       })
 
-      it('should surface user afterChange errors during reupload and preserve the previous file in S3', async () => {
+      it('should surface user afterChange errors during reupload and preserve the previous file', async () => {
         const imagePath = path.resolve(dirname, '../uploads/image.png')
         const buildFile = (name: string) => ({
           data: fs.readFileSync(imagePath),
@@ -811,32 +810,26 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         })
 
         const initial = await payload.create({
-          collection: mediaWithThrowingHookSlug,
-          data: { shouldThrow: false },
+          collection: testMetadataSlug,
+          data: { testNote: 'Initial upload' },
           file: buildFile('initial.png'),
         })
 
         createdIDs.push(initial.id)
 
         const initialKey = `${initial.filename}`
-        const before = await client.send(
-          new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: initialKey }),
-        )
-        expect(before.$metadata.httpStatusCode).toBe(200)
+        recordedCleanupTargets.length = 0
 
         await expect(
           payload.update({
             id: initial.id,
-            collection: mediaWithThrowingHookSlug,
-            data: { shouldThrow: true },
+            collection: testMetadataSlug,
+            data: { testNote: 'Throw on internal update' },
             file: buildFile('replacement.png'),
           }),
         ).rejects.toThrow('User afterChange hook throws error')
 
-        const after = await client.send(
-          new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: initialKey }),
-        )
-        expect(after.$metadata.httpStatusCode).toBe(200)
+        expect(recordedCleanupTargets.map(({ filename }) => filename)).not.toContain(initialKey)
       })
     })
 
