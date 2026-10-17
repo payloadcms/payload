@@ -38,6 +38,7 @@ export const validateOptions: (props?: Props) => Validate =
           },
         },
       },
+      req,
       select: {
         variants: true,
         variantTypes: true,
