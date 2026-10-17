@@ -496,8 +496,7 @@ export const itTranslations: DefaultTranslationsObject = {
     restore: 'Ripristina',
     restoreAsPublished: 'Ripristina come versione pubblicata',
     restoredCountSuccessfully: 'Ripristinato {{count}} {{label}} con successo.',
-    restoring:
-      "Rispetta il significato del testo originale nel contesto di Payload. Ecco una lista di termini comuni di Payload che hanno significati molto specifici:\n    - Raccolta: Una raccolta è un gruppo di documenti che condividono una struttura e una finalità comuni. Le raccolte vengono utilizzate per organizzare e gestire i contenuti in Payload.\n    - Campo: Un campo è un pezzo specifico di dati all'interno di un documento in una raccolta. I campi definiscono la struttura e il tipo di dati che possono essere memorizzati in un documento.\n    - Documento: Un documento",
+    restoring: 'Ripristino in corso...',
     retry: 'Riprova',
     row: 'Riga',
     rows: 'Righe',
@@ -752,7 +751,7 @@ export const itTranslations: DefaultTranslationsObject = {
     noFurtherVersionsFound: 'Non sono state trovate ulteriori versioni',
     noLabelGroup: 'Gruppo Senza Nome',
     noRowsFound: 'Nessun {{label}} trovato',
-    noRowsSelected: 'Nessuna {{etichetta}} selezionata',
+    noRowsSelected: 'Nessuna {{label}} selezionata',
     preview: 'Anteprima',
     previouslyDraft: 'Precedentemente una Bozza',
     previouslyPublished: 'Precedentemente Pubblicato',
@@ -795,9 +794,9 @@ export const itTranslations: DefaultTranslationsObject = {
     versionID: 'ID Versione',
     versions: 'Versioni',
     viewingVersion: 'Visualizzazione della versione per {{entityLabel}} {{documentTitle}}',
-    viewingVersionGlobal: '`Visualizzazione della versione per {{entityLabel}}',
+    viewingVersionGlobal: 'Visualizzazione della versione per {{entityLabel}}',
     viewingVersions: 'Visualizzazione delle versioni per {{entityLabel}} {{documentTitle}}',
-    viewingVersionsGlobal: '`Visualizzazione delle versioni per {{entityLabel}}',
+    viewingVersionsGlobal: 'Visualizzazione delle versioni per {{entityLabel}}',
   },
 }
 
