@@ -2042,6 +2042,65 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
 
       expect(parent.children?.totalDocs).toBe(1)
     })
+
+    test.options(
+      'should join across multiple collections on a hasMany relationship',
+      { db: 'mongo' },
+      async ({ payload }) => {
+        const parent = await payload.create({
+          collection: 'multiple-collections-has-many-parents',
+          data: {},
+          depth: 0,
+          overrideAccess: true,
+        })
+
+        const otherParent = await payload.create({
+          collection: 'multiple-collections-has-many-parents',
+          data: {},
+          depth: 0,
+          overrideAccess: true,
+        })
+
+        const child_1 = await payload.create({
+          collection: 'multiple-collections-1',
+          data: {
+            hasManyParents: [parent.id, otherParent.id],
+            title: 'doc-1',
+          },
+          depth: 0,
+          overrideAccess: true,
+        })
+
+        const child_2 = await payload.create({
+          collection: 'multiple-collections-2',
+          data: {
+            hasManyParents: [otherParent.id, parent.id],
+            title: 'doc-2',
+          },
+          depth: 0,
+          overrideAccess: true,
+        })
+
+        const result = await payload.findByID({
+          id: parent.id,
+          collection: 'multiple-collections-has-many-parents',
+          depth: 0,
+          joins: {
+            children: {
+              count: true,
+              sort: 'title',
+            },
+          },
+          overrideAccess: true,
+        })
+
+        expect(result.children?.docs?.map(({ value }) => value)).toStrictEqual([
+          child_1.id,
+          child_2.id,
+        ])
+        expect(result.children?.totalDocs).toBe(2)
+      },
+    )
   })
 
   test.options.describe('Constrained joins', { db: 'drizzle' }, () => {
