@@ -75,7 +75,33 @@ export default async function scenario({ baseURL, click, expect, page, pause, re
 }
 ```
 
-Prefer existing seeded data. Create or reset additional records through UI gestures in the scenario before `ready()`. Make this preparation repeatable: candidate mode validates the scenario and then runs it again for recording. Use a disposable database for recording-only data instead of API `setup`/`teardown` hooks. Discard that database when review and any revisions are complete.
+Prefer existing seeded data. Prepare additional starting data through UI gestures before `ready()` or optional API fixture hooks. API seeding is useful for larger datasets and specific starting states; when creating content is itself part of the demonstration, show it through the Admin.
+
+### Optional API fixtures
+
+The `prepare-demo.mjs` command calls `setup({ request, baseURL, label })` before opening the walkthrough and passes its return value as `fixture` to the scenario. `teardown({ request, fixture, baseURL, label })` runs afterward, including when the walkthrough fails. Both hooks share an isolated Playwright API request context; authenticate it as needed. These hooks are outside the recorded interaction sequence.
+
+```js
+export async function setup({ request }) {
+  const login = await request.post('/api/users/login', {
+    data: { email: 'dev@payloadcms.com', password: 'test' },
+  })
+  if (!login.ok()) throw new Error(`Fixture login failed: ${login.status()}`)
+
+  const response = await request.post('/api/posts', {
+    data: { title: 'Autumn launch' },
+  })
+  if (!response.ok()) throw new Error(`Fixture creation failed: ${response.status()}`)
+  return { post: (await response.json()).doc }
+}
+
+export async function teardown({ request, fixture }) {
+  const response = await request.delete(`/api/posts/${fixture.post.id}`)
+  if (!response.ok()) throw new Error(`Fixture cleanup failed: ${response.status()}`)
+}
+```
+
+Candidate mode prepares and removes a separate fixture for validation and recording. Make hooks repeatable, use a dedicated demo database, and remove only records the hook created. If setup fails after partial creation, setup must undo that partial work itself; teardown runs only after setup succeeds. The lower-level recorder functions do not orchestrate hooks; use `prepare-demo.mjs` when a scenario exports them.
 
 Use semantic locators where practical. Assert each important state before continuing so the recording fails instead of capturing the wrong screen. Let the final proof remain visible for at least a moment.
 
@@ -100,7 +126,7 @@ The scenario drives the same controls a person uses:
 - Open the starting route with one `page.goto()` before UI preparation and `ready()`. Reach subsequent routes by clicking visible links, navigation items, breadcrumbs, or buttons. Do not jump to known document URLs between steps.
 - Use the recorder's `click` helper for pointer actions. Use `page.keyboard.press()` and `page.keyboard.type()` for shortcuts and paced typing after focusing the control with a click. Do not use `fill()`, `selectOption()`, synthetic event dispatch, or DOM value assignments.
 - Use `scroll` with `input: 'wheel'` and `cursorPlacement: 'inside'` for visible scrolling. Reveal offscreen controls with a wheel gesture before clicking them; do not rely on locator auto-scrolling.
-- Create and reset content through these same gestures, including preparation before `ready()`. Do not call REST endpoints, the Local API, application functions, or mutate browser storage to stage a result.
+- In the scenario function, create and reset content through these same gestures, including UI preparation before `ready()`. Put optional API seeding and cleanup in `setup`/`teardown`, outside the walkthrough. Do not call REST endpoints, the Local API, application functions, or mutate browser storage to advance the demonstrated interaction.
 - Locators, assertions, network observation, and read-only DOM measurements may verify state. Presentation annotations, window framing, recording, encoding, and verification are harness operations.
 
 For example, edit a focused field through keyboard input:

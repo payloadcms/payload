@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { chmod, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { afterEach, test } from 'node:test'
 
 import * as preparation from './prepare-demo.mjs'
@@ -141,19 +142,68 @@ test('packageCandidate rejects video that exceeds the upload budget', async () =
   )
 })
 
-test('should reject API fixture hooks before executing them or the scenario', async () => {
-  const directory = await mkdtemp(path.join(tmpdir(), 'demo-legacy-hooks-'))
+test('runWithScenarioFixture wraps execution in scenario setup and teardown hooks', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'prepare-pr-demo-fixture-test-'))
   testDirectories.push(directory)
-  for (const hook of ['setup', 'teardown']) {
-    const scenario = path.join(directory, hook + '.mjs')
-    await writeFile(scenario, `export function ${hook}() { throw new Error('Hook executed') }`)
-    await assert.rejects(
-      preparation.runWithScenarioFixture({ scenario }, async () => {
-        throw new Error('Scenario executed')
-      }),
-      /UI gestures before ready/,
-    )
-  }
+  testDirectories.push(directory)
+  const scenario = path.join(directory, 'scenario.mjs')
+
+  await writeFile(
+    scenario,
+    `export const events = []
+export async function setup({ label }) {
+  events.push('setup:' + label)
+  return { title: 'Prepared document' }
+}
+export async function teardown({ fixture }) {
+  events.push('teardown:' + fixture.title)
+}
+export default async function scenario() {}`,
+  )
+
+  assert.equal(typeof preparation.runWithScenarioFixture, 'function')
+
+  let receivedFixture
+  await preparation.runWithScenarioFixture(
+    {
+      baseURL: 'http://localhost:3000',
+      label: 'fixture-demo',
+      scenario,
+    },
+    async (fixture) => {
+      receivedFixture = fixture
+    },
+  )
+
+  assert.deepEqual(receivedFixture, { title: 'Prepared document' })
+  const scenarioModule = await import(pathToFileURL(scenario).href)
+  assert.deepEqual(scenarioModule.events, ['setup:fixture-demo', 'teardown:Prepared document'])
+})
+
+test('runWithScenarioFixture preserves setup failures without running teardown on an absent fixture', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'prepare-pr-demo-setup-failure-test-'))
+  testDirectories.push(directory)
+  testDirectories.push(directory)
+  const scenario = path.join(directory, 'scenario.mjs')
+
+  await writeFile(
+    scenario,
+    `export async function setup() {
+  throw new Error('fixture setup failed')
+}
+export async function teardown() {
+  throw new Error('teardown masked setup failure')
+}
+export default async function scenario() {}`,
+  )
+
+  await assert.rejects(
+    preparation.runWithScenarioFixture(
+      { baseURL: 'http://localhost:3000', label: 'failure-demo', scenario },
+      async () => {},
+    ),
+    /fixture setup failed/,
+  )
 })
 
 test('verifyCandidateManifest accepts unchanged reviewed bytes and rejects replacements', async () => {
@@ -223,3 +273,24 @@ fi
 
   return directory
 }
+
+test('should clean up a prepared fixture when the walkthrough fails', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'demo-failed-walkthrough-'))
+  testDirectories.push(directory)
+  const scenario = path.join(directory, 'scenario.mjs')
+  await writeFile(scenario, `export const events = []
+export async function setup({ request }) {
+  if (typeof request.post !== 'function') throw new Error('API context missing')
+  events.push('setup')
+  return { id: 'recording-only' }
+}
+export async function teardown({ fixture, request }) {
+  if (typeof request.delete !== 'function') throw new Error('API context missing')
+  events.push('cleanup:' + fixture.id)
+}`)
+  await assert.rejects(preparation.runWithScenarioFixture({scenario,baseURL:'http://localhost:3000'}, async () => {
+    throw new Error('Walkthrough failed')
+  }), /Walkthrough failed/)
+  const module = await import(pathToFileURL(scenario).href)
+  assert.deepEqual(module.events, ['setup', 'cleanup:recording-only'])
+})

@@ -181,8 +181,6 @@ async function executeDemo({
     throw new Error(`Scenario must default-export a function: ${scenario}`)
   }
 
-  assertGestureScenario({ scenarioModule })
-
   const change = scenarioModule.presentation?.change
 
   if (
@@ -545,14 +543,6 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
   }
 
   return { click, moveCursor }
-}
-
-export function assertGestureScenario({ scenarioModule }) {
-  if (typeof scenarioModule.setup === 'function' || typeof scenarioModule.teardown === 'function') {
-    throw new Error(
-      'Scenario setup/teardown hooks are unsupported; prepare content through UI gestures before ready() in a disposable database',
-    )
-  }
 }
 
 function printHelp() {
