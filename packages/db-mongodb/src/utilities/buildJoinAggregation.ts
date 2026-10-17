@@ -18,6 +18,7 @@ import type { CollectionModel } from '../types.js'
 
 import { buildQuery } from '../queries/buildQuery.js'
 import { buildSortParam } from '../queries/buildSortParam.js'
+import { buildMultiCollectionJoinMatch } from './buildMultiCollectionJoinMatch.js'
 import { getCollection } from './getEntity.js'
 
 type BuildJoinAggregationArgs = {
@@ -33,6 +34,8 @@ type BuildJoinAggregationArgs = {
   /** whether the query is from drafts */
   versions?: boolean
 }
+
+
 
 export const buildJoinAggregation = async ({
   adapter,
@@ -137,9 +140,13 @@ export const buildJoinAggregation = async ({
           $match: {
             $and: [
               {
-                $expr: {
-                  $eq: [`$${join.field.on}`, '$$root_id_'],
-                },
+                $expr: buildMultiCollectionJoinMatch(
+                  join.field.on,
+                  Array.isArray(join.targetField.relationTo),
+                  // the stored `{ relationTo, value }` reference must point
+                  // back at the parent (aggregation root) collection
+                  collection,
+                ),
               },
               $match,
             ],
