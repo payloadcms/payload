@@ -13,7 +13,39 @@ const reactA11yRules = {
   // ESLint ran this with jsx-a11y's defaults, which check `<input>` and `<textarea>` too. oxlint's
   // defaults skip them, so pass jsx-a11y's defaults explicitly.
   'jsx-a11y/control-has-associated-label': ['warn', { ignoreElements: [], ignoreRoles: [] }],
-  'jsx-a11y/no-static-element-interactions': 'warn',
+  // ESLint ran this with jsx-a11y's default handlers, which include `onMouseEnter` and
+  // `onMouseLeave`. oxlint's defaults skip them, so pass jsx-a11y's defaults explicitly.
+  'jsx-a11y/no-static-element-interactions': [
+    'warn',
+    {
+      handlers: [
+        'onFocus',
+        'onBlur',
+        'onKeyDown',
+        'onKeyPress',
+        'onKeyUp',
+        'onClick',
+        'onContextMenu',
+        'onDblClick',
+        'onDoubleClick',
+        'onDrag',
+        'onDragEnd',
+        'onDragEnter',
+        'onDragExit',
+        'onDragLeave',
+        'onDragOver',
+        'onDragStart',
+        'onDrop',
+        'onMouseDown',
+        'onMouseEnter',
+        'onMouseLeave',
+        'onMouseMove',
+        'onMouseOut',
+        'onMouseOver',
+        'onMouseUp',
+      ],
+    },
+  ],
   'jsx-a11y/label-has-associated-control': 'warn',
 }
 
