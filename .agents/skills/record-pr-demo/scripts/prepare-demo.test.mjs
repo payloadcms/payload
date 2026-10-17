@@ -125,7 +125,10 @@ test('packageCandidate converts, verifies, inventories, and cleans up a candidat
   assert.equal(await readFile(scriptPath, 'utf8'), originalSource)
   await writeFile(scenario, 'export default async function revisedScenario() {}')
   assert.equal(await readFile(scriptPath, 'utf8'), originalSource)
-  assert.equal(savedManifest.scenarioSha256, createHash('sha256').update(originalSource).digest('hex'))
+  assert.equal(
+    savedManifest.scenarioSha256,
+    createHash('sha256').update(originalSource).digest('hex'),
+  )
   assert.match(await readFile(path.join(directory, 'convert-args.txt'), 'utf8'), /-ss 1\.25/)
 })
 
@@ -285,7 +288,9 @@ test('should clean up a prepared fixture when the walkthrough fails', async () =
   const directory = await mkdtemp(path.join(tmpdir(), 'demo-failed-walkthrough-'))
   testDirectories.push(directory)
   const scenario = path.join(directory, 'scenario.mjs')
-  await writeFile(scenario, `export const events = []
+  await writeFile(
+    scenario,
+    `export const events = []
 export async function setup({ request }) {
   if (typeof request.post !== 'function') throw new Error('API context missing')
   events.push('setup')
@@ -294,10 +299,14 @@ export async function setup({ request }) {
 export async function teardown({ fixture, request }) {
   if (typeof request.delete !== 'function') throw new Error('API context missing')
   events.push('cleanup:' + fixture.id)
-}`)
-  await assert.rejects(preparation.runWithScenarioFixture({scenario,baseURL:'http://localhost:3000'}, async () => {
-    throw new Error('Walkthrough failed')
-  }), /Walkthrough failed/)
+}`,
+  )
+  await assert.rejects(
+    preparation.runWithScenarioFixture({ scenario, baseURL: 'http://localhost:3000' }, async () => {
+      throw new Error('Walkthrough failed')
+    }),
+    /Walkthrough failed/,
+  )
   const module = await import(pathToFileURL(scenario).href)
   assert.deepEqual(module.events, ['setup', 'cleanup:recording-only'])
 })
@@ -307,11 +316,14 @@ test('should protect an existing script snapshot from being overwritten by anoth
   testDirectories.push(directory)
   const output = path.join(directory, 'demo.mp4')
   await writeFile(path.join(directory, 'demo.scenario.mjs'), 'reviewed script')
-  await assert.rejects(preparation.assertCandidatePathsAvailable({
-    output,
-    contactSheet: path.join(directory, 'demo.png'),
-    manifest: path.join(directory, 'demo.json'),
-  }), /Use a new --label/)
+  await assert.rejects(
+    preparation.assertCandidatePathsAvailable({
+      output,
+      contactSheet: path.join(directory, 'demo.png'),
+      manifest: path.join(directory, 'demo.json'),
+    }),
+    /Use a new --label/,
+  )
 })
 
 test('should reject packaging when the scenario changes during a take', async () => {
@@ -320,11 +332,16 @@ test('should reject packaging when the scenario changes during a take', async ()
   const scenario = path.join(directory, 'scenario.mjs')
   const scenarioSource = Buffer.from('export default async function original() {}')
   await writeFile(scenario, 'export default async function revised() {}')
-  await assert.rejects(packageCandidate({
-    scenario, scenarioSource, trimStart: 0,
-    output: path.join(directory, 'demo.mp4'),
-    rawOutput: path.join(directory, 'demo.webm'),
-    manifest: path.join(directory, 'demo.json'),
-    contactSheet: path.join(directory, 'demo.png'),
-  }), /scenario changed during this take/)
+  await assert.rejects(
+    packageCandidate({
+      scenario,
+      scenarioSource,
+      trimStart: 0,
+      output: path.join(directory, 'demo.mp4'),
+      rawOutput: path.join(directory, 'demo.webm'),
+      manifest: path.join(directory, 'demo.json'),
+      contactSheet: path.join(directory, 'demo.png'),
+    }),
+    /scenario changed during this take/,
+  )
 })

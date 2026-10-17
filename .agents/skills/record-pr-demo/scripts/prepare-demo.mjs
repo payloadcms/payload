@@ -251,12 +251,9 @@ export async function verifyCandidateManifest(manifestPath) {
 }
 
 export async function assertCandidatePathsAvailable({ contactSheet, manifest, output }) {
-  const protectedPaths = [
-    contactSheet,
-    manifest,
-    output,
-    scenarioSnapshotPath({ output }),
-  ].map((candidatePath) => path.resolve(candidatePath))
+  const protectedPaths = [contactSheet, manifest, output, scenarioSnapshotPath({ output })].map(
+    (candidatePath) => path.resolve(candidatePath),
+  )
   const existingPaths = []
 
   for (const candidatePath of protectedPaths) {
