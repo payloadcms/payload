@@ -23,11 +23,19 @@ const sanitizeField = (incomingField: FormField): FormField => {
  * Takes in FormState and removes fields that are not serializable.
  * Returns FormState without blacklisted keys.
  */
-export const reduceToSerializableFields = (
+export function reduceToSerializableFields(
   fields: FormState,
-): {
-  [key: string]: Omit<FormField, BlacklistedKeys>
-} => {
+): Record<string, Omit<FormField, BlacklistedKeys>>
+export function reduceToSerializableFields(
+  fields?: false | FormState | null,
+): Record<string, Omit<FormField, BlacklistedKeys>> | undefined
+export function reduceToSerializableFields(
+  fields?: false | FormState | null,
+): Record<string, Omit<FormField, BlacklistedKeys>> | undefined {
+  if (!fields) {
+    return undefined
+  }
+
   const result: Record<string, Omit<FormField, BlacklistedKeys>> = {}
 
   for (const key in fields) {

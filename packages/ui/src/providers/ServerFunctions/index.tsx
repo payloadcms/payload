@@ -216,13 +216,19 @@ export const ServerFunctionsProvider: React.FC<{
 
       try {
         if (!remoteSignal?.aborted) {
-          const formState = rest.formState && reduceToSerializableFields(rest.formState)
-          const documentFormState =
-            rest.documentFormState && reduceToSerializableFields(rest.documentFormState)
-          const initialBlockFormState =
-            rest.initialBlockFormState && reduceToSerializableFields(rest.initialBlockFormState)
+          const requestArgs = {
+            fallbackLocale: false,
+            ...rest,
+            documentFormState: reduceToSerializableFields(rest.documentFormState),
+            formState: reduceToSerializableFields(rest.formState),
+            initialBlockFormState: reduceToSerializableFields(rest.initialBlockFormState),
+          } satisfies Parameters<GetFormStateClient>[0]
 
-          for (const state of [formState, documentFormState, initialBlockFormState]) {
+          for (const state of [
+            requestArgs.formState,
+            requestArgs.documentFormState,
+            requestArgs.initialBlockFormState,
+          ]) {
             if (state?.file) {
               state.file.initialValue = getFileMetadata({ value: state.file.initialValue })
               state.file.value = getFileMetadata({ value: state.file.value })
@@ -231,13 +237,7 @@ export const ServerFunctionsProvider: React.FC<{
 
           const result = (await serverFunction({
             name: 'form-state',
-            args: {
-              ...rest,
-              documentFormState,
-              fallbackLocale: rest.fallbackLocale ?? false,
-              formState,
-              initialBlockFormState,
-            } satisfies Parameters<GetFormStateClient>[0],
+            args: requestArgs,
           })) as Awaited<ReturnType<typeof buildFormStateHandler>> // TODO: infer this type when `strictNullChecks` is enabled
 
           if (!remoteSignal?.aborted) {
@@ -273,7 +273,7 @@ export const ServerFunctionsProvider: React.FC<{
         if (!remoteSignal?.aborted) {
           const result = (await serverFunction({
             name: 'table-state',
-            args: rest,
+            args: { fallbackLocale: false, ...rest },
           })) as Awaited<ReturnType<typeof buildTableStateHandler>> // TODO: infer this type when `strictNullChecks` is enabled
 
           if (!remoteSignal?.aborted) {
@@ -292,21 +292,24 @@ export const ServerFunctionsProvider: React.FC<{
   const renderDocument = useCallback<RenderDocumentServerFunctionHookFn>(
     async ({ signal: _signal, ...rest }) => {
       try {
-        const initialState = rest.initialState && reduceToSerializableFields(rest.initialState)
+        const requestArgs = {
+          fallbackLocale: false,
+          ...rest,
+          initialState: reduceToSerializableFields(rest.initialState),
+        }
 
-        if (initialState?.file) {
-          initialState.file.initialValue = getFileMetadata({
-            value: initialState.file.initialValue,
+        if (requestArgs.initialState?.file) {
+          requestArgs.initialState.file.initialValue = getFileMetadata({
+            value: requestArgs.initialState.file.initialValue,
           })
-          initialState.file.value = getFileMetadata({ value: initialState.file.value })
+          requestArgs.initialState.file.value = getFileMetadata({
+            value: requestArgs.initialState.file.value,
+          })
         }
 
         const result = (await serverFunction({
           name: 'render-document',
-          args: {
-            ...rest,
-            initialState,
-          } satisfies RenderDocumentBaseArgs,
+          args: requestArgs satisfies RenderDocumentBaseArgs,
         })) as Awaited<ReturnType<RenderDocumentServerFunctionHookFn>> // TODO: infer this type when `strictNullChecks` is enabled
 
         return result
