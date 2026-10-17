@@ -47,6 +47,7 @@ type BlocksFieldProps = {
   rowIndex: number
   schemaPath: string
   setCollapse: (id: string, collapsed: boolean) => void
+  filteredBlocks?: (ClientBlock | string)[]
 } & UseDraggableSortableReturn
 
 export const BlockRow: React.FC<BlocksFieldProps> = ({
@@ -58,6 +59,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   duplicateRow,
   errorCount,
   fields,
+  filteredBlocks,
   hasMaxRows,
   isDragging,
   isLoading: isLoadingFromProps,
@@ -161,6 +163,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
               copyRow={copyRow}
               duplicateRow={duplicateRow}
               fields={block.fields}
+              filteredBlocks={filteredBlocks}
               hasMaxRows={hasMaxRows}
               isSortable={isSortable}
               labels={labels}

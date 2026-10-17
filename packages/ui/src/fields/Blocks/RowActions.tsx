@@ -19,6 +19,7 @@ export const RowActions: React.FC<{
   readonly copyRow: (rowIndex: number) => void
   readonly duplicateRow: (rowIndex: number, blockType: string) => void
   readonly fields: ClientField[]
+  readonly filteredBlocks?: (ClientBlock | string)[]
   readonly hasMaxRows?: boolean
   readonly isSortable?: boolean
   readonly labels: Labels
@@ -36,6 +37,7 @@ export const RowActions: React.FC<{
     blockType,
     copyRow,
     duplicateRow,
+    filteredBlocks,
     hasMaxRows,
     isSortable,
     labels,
@@ -69,7 +71,7 @@ export const RowActions: React.FC<{
           closeModal(drawerSlug)
         }}
         addRowIndex={rowIndex}
-        blocks={blocks}
+        blocks={filteredBlocks ?? blocks}
         drawerSlug={drawerSlug}
         labels={labels}
       />
