@@ -6,6 +6,7 @@ import type { UploadFieldClientProps } from 'payload'
 import {
   FieldLabel,
   RenderCustomComponent,
+  toast,
   UploadInput,
   useConfig,
   useDocumentInfo,
@@ -94,6 +95,12 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
       method: 'POST',
     })
 
+    if (!genImageResponse.ok) {
+      const error = await genImageResponse.json().catch(() => null)
+      toast.error(error?.errors?.[0]?.message || t('error:unknown'))
+      return
+    }
+
     const { result: generatedImage } = await genImageResponse.json()
 
     // string ids, number ids or nullish values
@@ -119,6 +126,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
     getData,
     locale,
     setValue,
+    t,
     title,
   ])
 

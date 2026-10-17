@@ -86,6 +86,10 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
         method: 'POST',
       })
 
+      if (!genURLResponse.ok) {
+        return
+      }
+
       const { result: newHref } = await genURLResponse.json()
 
       setHref(newHref)

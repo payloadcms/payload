@@ -6,6 +6,7 @@ import type { TextFieldClientProps } from 'payload'
 import {
   FieldLabel,
   TextInput,
+  toast,
   useConfig,
   useDocumentInfo,
   useDocumentTitle,
@@ -103,6 +104,12 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
       method: 'POST',
     })
 
+    if (!genTitleResponse.ok) {
+      const error = await genTitleResponse.json().catch(() => null)
+      toast.error(error?.errors?.[0]?.message || t('error:unknown'))
+      return
+    }
+
     const { result: generatedTitle } = await genTitleResponse.json()
 
     setValue(generatedTitle || '')
@@ -120,6 +127,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
     getData,
     locale,
     setValue,
+    t,
     title,
   ])
 
