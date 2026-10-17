@@ -277,7 +277,11 @@ describe('Join Field', () => {
     const toggler = actionColumn.locator('button.drawer-link__doc-drawer-toggler')
     await toggler.click()
 
-    const drawer = page.locator('[id^=doc-drawer_undefined]')
+    await expect(page.locator('[id^=doc-drawer_undefined]')).toBeHidden()
+
+    const drawer = page.locator('[id^=doc-drawer_posts_1_]')
+    await expect(drawer.locator('#field-title')).toBeVisible()
+    await page.keyboard.press('Escape')
     await expect(drawer).toBeHidden()
   })
 

@@ -228,6 +228,14 @@ test.describe('Form State', () => {
 
       // The `array` itself SHOULD have a `lastRenderedPath` because it was rendered on initial load.
       expect(formState?.array.lastRenderedPath).toBe('array')
+      expect(formState?.array.customComponents).toBeUndefined()
+      expect(formState?.array.rows).toHaveLength(rowIndex + 1)
+      expect(formState?.title.value).toBe('Test')
+
+      for (const [index, row] of (formState?.array.rows ?? []).entries()) {
+        expect(row.id).toBe(formState?.[`array.${index}.id`]?.value)
+        expect(row.customComponents).toBeUndefined()
+      }
 
       // Each earlier row's custom text field SHOULD ALSO have a `lastRenderedPath` because it was rendered in a previous request.
       // The second request checks the first row; the third request checks both earlier rows.
@@ -235,6 +243,11 @@ test.describe('Form State', () => {
         const fieldPath = `array.${renderedRowIndex}.customTextField`
 
         expect(formState?.[fieldPath]?.lastRenderedPath).toBe(fieldPath)
+        expect(formState?.array.rows?.[renderedRowIndex]?.lastRenderedPath).toBe(
+          `array.${renderedRowIndex}`,
+        )
+        expect(formState?.[fieldPath]?.initialValue).toBe('This is a default value')
+        expect(formState?.[fieldPath]?.customComponents).toBeUndefined()
       }
 
       expect(response?.status()).toBe(200)
