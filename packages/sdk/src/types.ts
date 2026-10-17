@@ -76,15 +76,14 @@ export type RequiredDataFromCollectionSlug<
 > = RequiredDataFromCollection<T['collections'][TSlug]>
 
 export type JoinQuery<T extends PayloadTypesShape, TSlug extends CollectionSlug<T>> =
-  T['collectionsJoins'][TSlug] extends Record<string, string>
-    ?
-        | false
-        | Partial<{
-            [K in keyof T['collectionsJoins'][TSlug]]:
-              | { count?: boolean; limit?: number; page?: number; sort?: Sort; where?: Where }
-              | false
-          }>
-    : never
+  | false
+  | (T['collectionsJoins'][TSlug] extends Record<string, string>
+      ? Partial<{
+          [K in keyof T['collectionsJoins'][TSlug]]:
+            | { count?: boolean; limit?: number; page?: number; sort?: Sort; where?: Where }
+            | false
+        }>
+      : never)
 
 export type PopulateType<T extends PayloadTypesShape> = Partial<T['collectionsSelect']>
 
