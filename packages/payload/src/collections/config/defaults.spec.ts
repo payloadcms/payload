@@ -21,6 +21,27 @@ describe('addDefaultsToAuthConfig', () => {
 
     expect(auth.forgotPassword.minRequestInterval).toBe(0)
   })
+
+  it('should leave password hash iterations unset so the runtime default applies', () => {
+    const auth = addDefaultsToAuthConfig({})
+
+    expect(auth.passwordHashing?.iterations).toBeUndefined()
+  })
+
+  it('should keep configured password hash iterations', () => {
+    const auth = addDefaultsToAuthConfig({ passwordHashing: { iterations: 100000 } })
+
+    expect(auth.passwordHashing?.iterations).toBe(100000)
+  })
+
+  it.each([0, -1, 1.5, Number.NaN])(
+    'should reject %s as password hash iterations',
+    (iterations) => {
+      expect(() => addDefaultsToAuthConfig({ passwordHashing: { iterations } })).toThrow(
+        /passwordHashing\.iterations/,
+      )
+    },
+  )
 })
 
 const req = {} as PayloadRequest

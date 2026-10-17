@@ -93,6 +93,7 @@ The following options are available:
 | **`lockTime`**                 | Set the time (in milliseconds) that a user should be locked out if they fail authentication more times than `maxLoginAttempts` allows for.                                                                                  |
 | **`loginWithUsername`**        | Ability to allow users to login with username/password. [More](/docs/authentication/overview#login-with-username)                                                                                                           |
 | **`maxLoginAttempts`**         | Only allow a user to attempt logging in X amount of times. Automatically locks out a user from authenticating if this limit is passed. Set to `0` to disable.                                                               |
+| **`passwordHashing`**          | Configure how the local strategy hashes passwords. [More details](#password-hashing).                                                                                                                                       |
 | **`removeTokenFromResponses`** | Set to true if you want to remove the token from the returned authentication API responses such as login or refresh.                                                                                                        |
 | **`strategies`**               | Advanced - an array of custom authentication strategies to extend this collection's authentication with. [More details](./custom-strategies).                                                                               |
 | **`tokenExpiration`**          | How long (in seconds) to keep the user logged in. JWTs and HTTP-only cookies will both expire at the same time.                                                                                                             |
@@ -157,6 +158,32 @@ If set to `true`, users can log in with either their username or email address. 
 **`requireEmail`**
 
 If set to `true`, an email address is required when creating a new user. If set to `false`, email is not required upon creation.
+
+### Password Hashing
+
+The local strategy hashes passwords with PBKDF2-SHA256. Each hash records the iteration count it was created with, so a hash created with one count can be verified anywhere, whatever the current setting.
+
+By default new hashes use 600,000 iterations. On Cloudflare Workers, which rejects PBKDF2 counts above 100,000, the default is 100,000.
+
+Set `passwordHashing.iterations` to use one count everywhere:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Users: CollectionConfig = {
+  slug: 'users',
+  auth: {
+    passwordHashing: {
+      iterations: 100000,
+    },
+  },
+  fields: [],
+}
+```
+
+Set it when users are created or log in from more than one runtime, e.g. a Workers deployment whose users are seeded by a Node.js script. Without it, the Node.js script creates 600,000-iteration hashes that the Worker cannot verify.
+
+When `iterations` is set, a stored hash with a different count is rehashed with the configured count on the user's next successful login. Without it, existing hashes keep their count, so a login in one runtime never rehashes a password to a count another runtime cannot verify.
 
 ## Auto-Login
 
