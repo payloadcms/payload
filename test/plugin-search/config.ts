@@ -9,16 +9,21 @@ import type { Config } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { LocalizedStatusPosts } from './collections/LocalizedStatusPosts.js'
 import { Pages } from './collections/Pages.js'
 import { Posts } from './collections/Posts.js'
 import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
 
 export default buildConfigWithDefaults({
+  experimental: {
+    localizeStatus: true,
+  },
   collections: [
     Users,
     Pages,
     Posts,
+    LocalizedStatusPosts,
     {
       slug: 'custom-ids-1',
       fields: [{ type: 'text', name: 'id' }],
@@ -72,7 +77,14 @@ export default buildConfigWithDefaults({
           slug: originalDoc.slug,
         }
       },
-      collections: ['pages', 'posts', 'custom-ids-1', 'custom-ids-2', 'filtered-locales'],
+      collections: [
+        'pages',
+        'posts',
+        'custom-ids-1',
+        'custom-ids-2',
+        'filtered-locales',
+        'localized-status-posts',
+      ],
       skipSync: ({ locale, doc, collectionSlug }) => {
         if (collectionSlug === 'filtered-locales' && doc.syncEnglishOnly) {
           return locale !== 'en'
