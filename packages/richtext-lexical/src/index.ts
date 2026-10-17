@@ -946,7 +946,12 @@ export {
 export { $createLinkNode, $isLinkNode, LinkNode } from './features/link/nodes/LinkNode.js'
 
 export type { LinkFields } from './features/link/nodes/types.js'
-export { LinkFeature, type LinkFeatureServerProps } from './features/link/server/index.js'
+export {
+  type AutoLinkFields,
+  type AutoLinksProps,
+  LinkFeature,
+  type LinkFeatureServerProps,
+} from './features/link/server/index.js'
 
 export { ChecklistFeature } from './features/lists/checklist/server/index.js'
 export { OrderedListFeature } from './features/lists/orderedList/server/index.js'
