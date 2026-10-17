@@ -5,6 +5,10 @@ export const cloneDataFromOriginalDoc = (
 ): JsonArray | JsonObject => {
   if (Array.isArray(originalDocData)) {
     return originalDocData.map((row) => {
+      if (Array.isArray(row)) {
+        return [...row]
+      }
+
       if (typeof row === 'object' && row != null) {
         return {
           ...row,
