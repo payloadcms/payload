@@ -2788,9 +2788,6 @@ importers:
       p-limit:
         specifier: ^5.0.0
         version: 5.0.0
-      prompts:
-        specifier: 2.4.2
-        version: 2.4.2
       semver:
         specifier: ^7.5.4
         version: 7.8.5
@@ -2801,9 +2798,6 @@ importers:
       '@types/minimist':
         specifier: 1.2.5
         version: 1.2.5
-      '@types/prompts':
-        specifier: ^2.4.5
-        version: 2.4.9
       '@types/semver':
         specifier: ^7.5.3
         version: 7.8.0
