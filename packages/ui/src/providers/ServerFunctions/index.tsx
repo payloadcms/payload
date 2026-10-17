@@ -219,7 +219,6 @@ export const ServerFunctionsProvider: React.FC<{
           const result = (await serverFunction({
             name: 'form-state',
             args: {
-              fallbackLocale: false,
               ...rest,
               documentFormState: reduceToSerializableFields(rest.documentFormState),
               formState: reduceToSerializableFields(rest.formState),
@@ -260,7 +259,7 @@ export const ServerFunctionsProvider: React.FC<{
         if (!remoteSignal?.aborted) {
           const result = (await serverFunction({
             name: 'table-state',
-            args: { fallbackLocale: false, ...rest },
+            args: rest,
           })) as Awaited<ReturnType<typeof buildTableStateHandler>> // TODO: infer this type when `strictNullChecks` is enabled
 
           if (!remoteSignal?.aborted) {
@@ -282,10 +281,9 @@ export const ServerFunctionsProvider: React.FC<{
         const result = (await serverFunction({
           name: 'render-document',
           args: {
-            fallbackLocale: false,
             ...rest,
             initialState: reduceToSerializableFields(rest.initialState),
-          } satisfies { fallbackLocale: false } & RenderDocumentBaseArgs,
+          } satisfies RenderDocumentBaseArgs,
         })) as Awaited<ReturnType<RenderDocumentServerFunctionHookFn>> // TODO: infer this type when `strictNullChecks` is enabled
 
         return result
