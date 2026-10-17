@@ -378,4 +378,37 @@ test.suite('Collection-specific hierarchy scope inheritance', { config: './confi
       },
     })
   })
+
+  test('should only remove the deleted value from a hasMany hierarchy selection', async ({
+    payload,
+  }) => {
+    const keptFolder = await payload.create({
+      collection: foldersSlug,
+      data: { name: 'Kept folder', allowedTypes: [folderTagDocumentsSlug] },
+      overrideAccess: true,
+    })
+
+    const deletedFolder = await payload.create({
+      collection: foldersSlug,
+      data: { name: 'Deleted folder', allowedTypes: [folderTagDocumentsSlug] },
+      overrideAccess: true,
+    })
+
+    const document = await payload.create({
+      collection: folderTagDocumentsSlug,
+      data: { parentFolder: [keptFolder.id, deletedFolder.id], title: 'Tagged document' },
+      overrideAccess: true,
+    })
+
+    await payload.delete({ id: deletedFolder.id, collection: foldersSlug, overrideAccess: true })
+
+    const updatedDocument = await payload.findByID({
+      id: document.id,
+      collection: folderTagDocumentsSlug,
+      depth: 0,
+      overrideAccess: true,
+    })
+
+    expect(updatedDocument.parentFolder).toEqual([keptFolder.id])
+  })
 })
