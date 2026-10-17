@@ -6,7 +6,7 @@ type BlacklistedKeys = 'customComponents' | 'validate'
 const blacklistedKeys: BlacklistedKeys[] = ['validate', 'customComponents']
 
 const sanitizeField = (incomingField: FormField): FormField => {
-  const field = { ...incomingField }
+  const field = { ...incomingField } // shallow copy, as we only need to remove top-level keys
 
   for (const key of blacklistedKeys) {
     delete field[key]
