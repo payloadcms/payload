@@ -6,6 +6,7 @@
  */
 
 import type { CollectionAfterDeleteHook } from '../../index.js'
+import type { PayloadRequest } from '../../index.js'
 
 import { extractID } from '../../utilities/extractID.js'
 
@@ -48,67 +49,136 @@ const removeIDFromValue = (value: unknown, id: string | number): unknown => {
   return value
 }
 
+/**
+ * Locales the hook must sweep for the given field. A localized relationship
+ * field can hold the deleted id in any locale, so every configured locale is
+ * visited for such fields. Returns undefined for non-localized fields (and
+ * when localization is disabled), meaning a single pass with no locale
+ * override.
+ *
+ * Note: `locale: 'all'` is deliberately not used here. The database adapters
+ * resolve it to the default locale for query paths, so it would not match ids
+ * stored in other locales.
+ */
+const getFieldLocales = (
+  req: PayloadRequest,
+  collectionSlug: string,
+  fieldName: string,
+): string[] | undefined => {
+  const localeCodes = req.payload.config?.localization?.localeCodes
+  if (!localeCodes?.length) {
+    return undefined
+  }
+  const fields = req.payload.collections?.[collectionSlug]?.config?.fields
+  const field = Array.isArray(fields)
+    ? fields.find(
+        (candidate): candidate is { name: string; localized?: boolean } =>
+          !!candidate &&
+          typeof candidate === 'object' &&
+          'name' in candidate &&
+          candidate.name === fieldName,
+      )
+    : undefined
+  return field?.localized === true ? localeCodes : undefined
+}
+
 export const hierarchyCollectionAfterDelete =
   ({ relatedCollections }: Args): CollectionAfterDeleteHook =>
   async ({ id, req }) => {
     for (const [collectionSlug, { fieldName, hasMany }] of Object.entries(relatedCollections)) {
+      const locales = getFieldLocales(req, collectionSlug, fieldName)
+
+      // Run once per locale for localized fields, once without a locale
+      // override otherwise.
+      const forEachLocale = async (fn: (locale?: string) => Promise<void>): Promise<void> => {
+        if (locales) {
+          for (const locale of locales) {
+            await fn(locale)
+          }
+        } else {
+          await fn(undefined)
+        }
+      }
+
       if (!hasMany) {
         // Single-value field (e.g. a folder reference): clear it entirely
-        await req.payload.update({
-          collection: collectionSlug,
-          data: {
-            [fieldName]: null,
-          },
-          overrideAccess: true,
-          req,
-          where: {
-            [fieldName]: {
-              equals: id,
+        await forEachLocale(async (locale) => {
+          await req.payload.update({
+            collection: collectionSlug,
+            data: {
+              [fieldName]: null,
             },
-          },
+            ...(locale ? { locale } : {}),
+            overrideAccess: true,
+            req,
+            where: {
+              [fieldName]: {
+                equals: id,
+              },
+            },
+          })
         })
         continue
       }
 
       // Multi-value field (e.g. tags): remove only the deleted id from each
-      // document's list, keeping the remaining values
-      let page = 1
-      const limit = 100
+      // document's list, keeping the remaining values.
+      //
+      // Every matching document is collected before any update runs: each
+      // update removes the deleted id from the query result set, so advancing
+      // `page` while updating would skip documents that shift forward into
+      // already-visited pages.
+      const docsToUpdate: Array<{ docID: number | string; locale?: string; value: unknown }> = []
 
-      for (;;) {
-        const { docs, hasNextPage } = await req.payload.find({
-          collection: collectionSlug,
-          depth: 0,
-          limit,
-          overrideAccess: true,
-          page,
-          req,
-          select: {
-            [fieldName]: true,
-          },
-          where: {
-            [fieldName]: {
-              equals: id,
-            },
-          },
-        })
+      await forEachLocale(async (locale) => {
+        let page = 1
+        const limit = 100
 
-        for (const doc of docs) {
-          await req.payload.update({
-            id: doc.id,
+        for (;;) {
+          const { docs, hasNextPage } = await req.payload.find({
             collection: collectionSlug,
-            data: {
-              [fieldName]: removeIDFromValue(doc[fieldName as keyof typeof doc], id),
-            },
+            depth: 0,
+            limit,
+            ...(locale ? { locale } : {}),
             overrideAccess: true,
+            page,
             req,
+            select: {
+              [fieldName]: true,
+            },
+            where: {
+              [fieldName]: {
+                equals: id,
+              },
+            },
           })
-        }
 
-        if (!hasNextPage) {
-          break
+          for (const doc of docs) {
+            docsToUpdate.push({
+              docID: doc.id,
+              locale,
+              value: removeIDFromValue(doc[fieldName as keyof typeof doc], id),
+            })
+          }
+
+          if (!hasNextPage) {
+            break
+          }
+          page += 1
         }
-        page += 1
+      })
+
+      for (const { docID, locale, value } of docsToUpdate) {
+        await req.payload.update({
+          id: docID,
+          collection: collectionSlug,
+          data: {
+            [fieldName]: value,
+          },
+          ...(locale ? { locale } : {}),
+          overrideAccess: true,
+          req,
+        })
       }
     }
   }
