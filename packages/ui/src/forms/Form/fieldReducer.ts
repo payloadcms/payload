@@ -396,30 +396,27 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     }
 
     case 'UPDATE': {
-      const newField = Object.entries(action).reduce(
-        (field, [key, value]) => {
-          if (
-            [
-              'disableFormData',
-              'errorMessage',
-              'initialValue',
-              'rows',
-              'valid',
-              'validate',
-              'value',
-            ].includes(key)
-          ) {
-            return {
-              ...field,
-              [key]: value,
-              ...(key === 'value' ? { isModified: true } : {}),
-            }
+      const newField = Object.entries(action).reduce((field, [key, value]) => {
+        if (
+          [
+            'disableFormData',
+            'errorMessage',
+            'initialValue',
+            'rows',
+            'valid',
+            'validate',
+            'value',
+          ].includes(key)
+        ) {
+          return {
+            ...field,
+            [key]: value,
+            ...(key === 'value' ? { isModified: true } : {}),
           }
+        }
 
-          return field
-        },
-        state?.[action.path] || ({}),
-      )
+        return field
+      }, state?.[action.path] || {})
 
       const newState = {
         ...state,

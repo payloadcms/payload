@@ -63,7 +63,7 @@ export async function handleDynamicFileRequest({
 
     return retrieveFileResponse({
       collection,
-      doc: (permittedDocument ?? resolvedDocument),
+      doc: permittedDocument ?? resolvedDocument,
       filename,
       prefix,
       req,

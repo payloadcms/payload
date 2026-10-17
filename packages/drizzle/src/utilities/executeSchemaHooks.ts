@@ -27,7 +27,7 @@ type Args = {
 }
 
 export const executeSchemaHooks = async ({ type, adapter }: Args): Promise<void> => {
-  for (const hook of (adapter)[type]) {
+  for (const hook of adapter[type]) {
     const result = await hook({
       adapter,
       extendTable: extendDrizzleTable,

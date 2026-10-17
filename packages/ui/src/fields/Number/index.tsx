@@ -17,12 +17,7 @@ const NumberFieldComponent: React.FC<NumberFieldClientProps> = (props) => {
   const {
     field,
     field: {
-      admin: {
-        className,
-        description,
-        placeholder,
-        step = 1,
-      } = {},
+      admin: { className, description, placeholder, step = 1 } = {},
       hasMany = false,
       label,
       localized,

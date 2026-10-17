@@ -55,7 +55,7 @@ export const appendDateTimezoneSelectFields = ({
         if (typeof block === 'string') {
           continue
         }
-        const blockSelect = (value)[block.slug]
+        const blockSelect = value[block.slug]
         if (blockSelect && typeof blockSelect === 'object') {
           appendDateTimezoneSelectFields({
             fields: block.flattenedFields,

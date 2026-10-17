@@ -262,7 +262,7 @@ export const Form: React.FC<FormProps> = (props) => {
         method: methodToUse = method,
         overrides: overridesFromArgs = {},
         skipValidation,
-      } = options || ({})
+      } = options || {}
 
       const disableToast = disableSuccessStatusFromArgs ?? disableSuccessStatus
 

@@ -288,9 +288,9 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
       config: payload.config,
       request: new Request('http://localhost/api'),
     })
-    expect(
-      await apiKeyField.access!.update!({ id: target.id, req: unauthenticatedReq }),
-    ).toBe(false)
+    expect(await apiKeyField.access!.update!({ id: target.id, req: unauthenticatedReq })).toBe(
+      false,
+    )
   })
 
   test('should allow applications to further restrict API key management', async ({
