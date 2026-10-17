@@ -4,6 +4,7 @@ import type { RichTextField, Validate } from 'payload'
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
 
 import { hasText } from './hasText.js'
+import { validateLexicalStateParsable } from './validateLexicalStateParsable.js'
 import { validateNodes } from './validateNodes.js'
 
 export const richTextValidateHOC = ({
@@ -29,7 +30,7 @@ export const richTextValidateHOC = ({
 
     const rootNodes = value?.root?.children
     if (rootNodes && Array.isArray(rootNodes) && rootNodes?.length) {
-      return await validateNodes({
+      const nodesResult = await validateNodes({
         nodes: rootNodes,
         nodeValidations: editorConfig.features.validations,
         validation: {
@@ -37,6 +38,14 @@ export const richTextValidateHOC = ({
           value,
         },
       })
+
+      if (nodesResult !== true) {
+        return nodesResult
+      }
+
+      if (!validateLexicalStateParsable(value, editorConfig)) {
+        return t('validation:lexicalUnsupportedNodes')
+      }
     }
 
     return true
