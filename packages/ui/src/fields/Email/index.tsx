@@ -27,7 +27,7 @@ const EmailFieldComponent: React.FC<EmailFieldClientProps> = (props) => {
         className,
         description,
         placeholder,
-      } = {} as EmailFieldClientProps['field']['admin'],
+      } = {},
       label,
       localized,
       required,

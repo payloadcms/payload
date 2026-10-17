@@ -150,7 +150,7 @@ export function toSerializable(value: unknown, additions?: Record<string, Serial
 
     const result = { ...serialized, ...additions } satisfies Record<string, unknown>
 
-    return result as SerializableRecord
+    return result
   }
 
   return serialized

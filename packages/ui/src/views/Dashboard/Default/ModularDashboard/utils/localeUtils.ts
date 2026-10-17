@@ -60,7 +60,7 @@ export function extractLocaleData(
     const value = widgetData[name]
 
     if (fieldHasSubFields(field)) {
-      result[name] = extractLocaleData(getObjectValue(value), locale, field.fields as AnyField[])
+      result[name] = extractLocaleData(getObjectValue(value), locale, field.fields)
       continue
     }
 
@@ -130,7 +130,7 @@ export function mergeLocaleData(
         getObjectValue(result[name]),
         getObjectValue(formData[name]),
         locale,
-        field.fields as AnyField[],
+        field.fields,
       )
       continue
     }

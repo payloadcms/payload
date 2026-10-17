@@ -26,7 +26,7 @@ export function createServerFunctionClient({
   return (async (args: ServerFunctionClientArgs) => {
     const safeArgs = stripUnserializable(args) as ServerFunctionClientArgs
     return await runServerFn({ data: safeArgs })
-  }) as ServerFunctionClient
+  })
 }
 
 /**

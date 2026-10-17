@@ -109,7 +109,7 @@ export function patchPageMethods(page: Page) {
     }
 
     return response
-  }) as Page['goto']
+  })
 
   const originalReload = page.reload.bind(page)
 
@@ -121,13 +121,13 @@ export function patchPageMethods(page: Page) {
     }
 
     return response
-  }) as Page['reload']
+  })
 
   const originalLocator = page.locator.bind(page)
   const outsideHiddenActivity = () => originalLocator(outsideHiddenActivitySelector)
 
   page.locator = ((...args: Parameters<Page['locator']>) =>
-    originalLocator(...args).and(outsideHiddenActivity())) as Page['locator']
+    originalLocator(...args).and(outsideHiddenActivity()))
 
   // `getByRole` already ignores hidden elements
   for (const method of [
@@ -141,20 +141,20 @@ export function patchPageMethods(page: Page) {
     const originalGetBy = page[method].bind(page) as (...args: unknown[]) => Locator
 
     page[method] = ((...args: unknown[]) =>
-      originalGetBy(...args).and(outsideHiddenActivity())) as never
+      originalGetBy(...args).and(outsideHiddenActivity()))
   }
 
   // Selector-based actions act on the first match, so keep that and only skip hidden pages
   page.click = ((selector, options) =>
-    page.locator(selector).first().click(options)) as Page['click']
+    page.locator(selector).first().click(options))
 
   page.fill = ((selector, value, options) =>
-    page.locator(selector).first().fill(value, options)) as Page['fill']
+    page.locator(selector).first().fill(value, options))
 
-  page.isVisible = ((selector) => page.locator(selector).first().isVisible()) as Page['isVisible']
+  page.isVisible = ((selector) => page.locator(selector).first().isVisible())
 
   page.setInputFiles = ((selector, files, options) =>
-    page.locator(selector).first().setInputFiles(files, options)) as Page['setInputFiles']
+    page.locator(selector).first().setInputFiles(files, options))
 
   page.waitForSelector = (async (
     selector: string,

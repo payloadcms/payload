@@ -374,7 +374,7 @@ function getDestinationIndexOptions({
 
   return Object.fromEntries(
     Object.entries(options).filter(([, value]) => value !== undefined),
-  ) as CreateIndexesOptions
+  )
 }
 
 function rekeyDocumentPaths({
@@ -430,7 +430,7 @@ function rekeyDocumentValue({
     typeof value === 'object' &&
     (Object.getPrototypeOf(value) === Object.prototype || Object.getPrototypeOf(value) === null)
   ) {
-    return rekeyDocumentPaths({ document: value as Document, fromPath, toPath })
+    return rekeyDocumentPaths({ document: value, fromPath, toPath })
   }
 
   return value

@@ -131,7 +131,7 @@ export const buildPolymorphicJoinQuery = ({
     }
 
     if (unionQuery === null) {
-      unionQuery = collectionQuery as unknown as SQLiteSelect
+      unionQuery = collectionQuery
     } else {
       unionQuery = unionQuery.unionAll(collectionQuery)
     }

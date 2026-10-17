@@ -34,7 +34,7 @@ const SelectFieldComponent: React.FC<SelectFieldClientProps> = (props) => {
         isClearable = true,
         isSortable = true,
         placeholder,
-      } = {} as SelectFieldClientProps['field']['admin'],
+      } = {},
       hasMany = false,
       label,
       localized,

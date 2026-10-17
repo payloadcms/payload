@@ -22,7 +22,7 @@ const NumberFieldComponent: React.FC<NumberFieldClientProps> = (props) => {
         description,
         placeholder,
         step = 1,
-      } = {} as NumberFieldClientProps['field']['admin'],
+      } = {},
       hasMany = false,
       label,
       localized,

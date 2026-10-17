@@ -72,11 +72,11 @@ test.suite('@payloadcms/plugin-form-builder', suiteOptions, () => {
       title: 'Test Form',
     }
 
-    form = (await payload.create({
+    form = await payload.create({
       collection: formsSlug,
       data: formConfig,
       overrideAccess: true,
-    })) as unknown as Form
+    })
   })
 
   test.describe('plugin collections', () => {
