@@ -77,7 +77,7 @@
     "payload": "workspace:*"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*"
+    "@payloadcms/oxlint-config": "workspace:*"
   },
   "peerDependencies": {
     "payload": "workspace:*"

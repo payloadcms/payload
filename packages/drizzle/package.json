@@ -82,7 +82,7 @@
   },
   "devDependencies": {
     "@libsql/client": "0.14.0",
-    "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/oxlint-config": "workspace:*",
     "@types/pg": "8.20.0",
     "@types/to-snake-case": "1.0.0",
     "payload": "workspace:*"
