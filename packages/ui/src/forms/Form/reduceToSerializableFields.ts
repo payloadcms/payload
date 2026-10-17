@@ -22,6 +22,12 @@ const sanitizeField = (incomingField: FormField): FormField => {
 /**
  * Takes in FormState and removes fields that are not serializable.
  * Returns FormState without blacklisted keys.
+ *
+ * Removes custom components from rows as well as fields.
+ * Converts upload `File` values and initial values in `file` to `{ name }` metadata.
+ *
+ * Returns a new state without mutating the source fields, rows, or upload files.
+ * Returns `undefined` for falsy input.
  */
 export function reduceToSerializableFields(
   fields: FormState,
