@@ -10,7 +10,9 @@ import reactExtends from './configs/react/index.mjs'
 
 const reactA11yRules = {
   'jsx-a11y/anchor-is-valid': 'warn',
-  'jsx-a11y/control-has-associated-label': 'warn',
+  // ESLint ran this with jsx-a11y's defaults, which check `<input>` and `<textarea>` too. oxlint's
+  // defaults skip them, so pass jsx-a11y's defaults explicitly.
+  'jsx-a11y/control-has-associated-label': ['warn', { ignoreElements: [], ignoreRoles: [] }],
   'jsx-a11y/no-static-element-interactions': 'warn',
   'jsx-a11y/label-has-associated-control': 'warn',
 }
