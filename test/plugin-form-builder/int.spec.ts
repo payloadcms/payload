@@ -93,7 +93,6 @@ test.suite('@payloadcms/plugin-form-builder', suiteOptions, () => {
       expect(formSubmissions).toHaveLength(1)
     })
 
-    /* eslint-disable vitest/no-standalone-expect -- test is a custom Vitest test registrar. */
     test('should restrict form data reads to admin collection users', async ({ payload }) => {
       const formsCollection = payload.config.collections.find(({ slug }) => slug === formsSlug)!
       const submissionsCollection = payload.config.collections.find(
@@ -116,7 +115,6 @@ test.suite('@payloadcms/plugin-form-builder', suiteOptions, () => {
       expect(await emailsField.access?.read?.({ req: adminRequest })).toBe(true)
       expect(await emailsField.access?.read?.({ req: unrelatedRequest })).toBe(false)
     })
-    /* eslint-enable vitest/no-standalone-expect */
   })
 
   test.describe('form building', () => {
