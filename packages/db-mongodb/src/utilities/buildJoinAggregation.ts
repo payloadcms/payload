@@ -138,7 +138,16 @@ export const buildJoinAggregation = async ({
             $and: [
               {
                 $expr: {
-                  $eq: [`$${join.field.on}`, '$$root_id_'],
+                  $in: [
+                    '$$root_id_',
+                    {
+                      $cond: [
+                        { $isArray: `$${join.field.on}` },
+                        `$${join.field.on}`,
+                        [`$${join.field.on}`],
+                      ],
+                    },
+                  ],
                 },
               },
               $match,

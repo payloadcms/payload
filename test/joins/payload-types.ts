@@ -92,6 +92,7 @@ export interface Config {
     'depth-joins-2': DepthJoins2;
     'depth-joins-3': DepthJoins3;
     'multiple-collections-parents': MultipleCollectionsParent;
+    'multiple-collections-has-many-parents': MultipleCollectionsHasManyParent;
     'multiple-collections-1': MultipleCollections1;
     'multiple-collections-2': MultipleCollections2;
     folders: Folder;
@@ -166,6 +167,9 @@ export interface Config {
     'multiple-collections-parents': {
       children: 'multiple-collections-1' | 'multiple-collections-2';
     };
+    'multiple-collections-has-many-parents': {
+      children: 'multiple-collections-1' | 'multiple-collections-2';
+    };
     folders: {
       children: 'folders' | 'example-pages' | 'example-posts' | 'folderPoly1' | 'folderPoly2';
     };
@@ -196,6 +200,7 @@ export interface Config {
     'depth-joins-2': DepthJoins2Select<false> | DepthJoins2Select<true>;
     'depth-joins-3': DepthJoins3Select<false> | DepthJoins3Select<true>;
     'multiple-collections-parents': MultipleCollectionsParentsSelect<false> | MultipleCollectionsParentsSelect<true>;
+    'multiple-collections-has-many-parents': MultipleCollectionsHasManyParentsSelect<false> | MultipleCollectionsHasManyParentsSelect<true>;
     'multiple-collections-1': MultipleCollections1Select<false> | MultipleCollections1Select<true>;
     'multiple-collections-2': MultipleCollections2Select<false> | MultipleCollections2Select<true>;
     folders: FoldersSelect<false> | FoldersSelect<true>;
@@ -1130,8 +1135,40 @@ export interface MultipleCollectionsParent {
 export interface MultipleCollections1 {
   id: string;
   parent?: (string | null) | MultipleCollectionsParent;
+  hasManyParents?: (string | MultipleCollectionsHasManyParent)[] | null;
   title?: string | null;
   name?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "multiple-collections-has-many-parents".
+ */
+export interface MultipleCollectionsHasManyParent {
+  id: string;
+  children?: {
+    docs?: (
+      | {
+          relationTo?: 'multiple-collections-1';
+          value: string | MultipleCollections1;
+        }
+      | {
+          relationTo?: 'multiple-collections-2';
+          value: string | MultipleCollections2;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -1150,6 +1187,7 @@ export interface MultipleCollections1 {
 export interface MultipleCollections2 {
   id: string;
   parent?: (string | null) | MultipleCollectionsParent;
+  hasManyParents?: (string | MultipleCollectionsHasManyParent)[] | null;
   title?: string | null;
   description?: string | null;
   createdBy?: {
@@ -1412,6 +1450,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'multiple-collections-parents';
         value: string | MultipleCollectionsParent;
+      } | null)
+    | ({
+        relationTo: 'multiple-collections-has-many-parents';
+        value: string | MultipleCollectionsHasManyParent;
       } | null)
     | ({
         relationTo: 'multiple-collections-1';
@@ -1952,10 +1994,22 @@ export interface MultipleCollectionsParentsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "multiple-collections-has-many-parents_select".
+ */
+export interface MultipleCollectionsHasManyParentsSelect<T extends boolean = true> {
+  children?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "multiple-collections-1_select".
  */
 export interface MultipleCollections1Select<T extends boolean = true> {
   parent?: T;
+  hasManyParents?: T;
   title?: T;
   name?: T;
   createdBy?: T;
@@ -1969,6 +2023,7 @@ export interface MultipleCollections1Select<T extends boolean = true> {
  */
 export interface MultipleCollections2Select<T extends boolean = true> {
   parent?: T;
+  hasManyParents?: T;
   title?: T;
   description?: T;
   createdBy?: T;
@@ -2124,6 +2179,7 @@ export interface CollectionQueryWidget {
       | 'depth-joins-2'
       | 'depth-joins-3'
       | 'multiple-collections-parents'
+      | 'multiple-collections-has-many-parents'
       | 'multiple-collections-1'
       | 'multiple-collections-2'
       | 'folders'
@@ -2178,6 +2234,7 @@ export interface ActivityWidget {
           | 'depth-joins-2'
           | 'depth-joins-3'
           | 'multiple-collections-parents'
+          | 'multiple-collections-has-many-parents'
           | 'multiple-collections-1'
           | 'multiple-collections-2'
           | 'folders'
