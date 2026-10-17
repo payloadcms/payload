@@ -3,6 +3,7 @@ import type { FieldState, FormState, Payload, User } from 'payload'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import path from 'path'
 import { createLocalReq, getAccessResults } from 'payload'
+import { reduceFieldsToValues } from 'payload/shared'
 import React from 'react'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
@@ -12,7 +13,7 @@ import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import { autosavePostsSlug } from './collections/Autosave/index.js'
-import { conditionsSlug } from './collections/Conditions/index.js'
+import { conditionalTabsBlockSlug, conditionsSlug } from './collections/Conditions/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
@@ -445,6 +446,83 @@ describe('Form State', () => {
     expect(stateHidden?.conditionalCollapsibleField?.value).toBe('collapsible db value')
 
     await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id })
+  })
+
+  it('should not submit conditional tab visibility as document data', async () => {
+    const req = await createLocalReq({ user }, payload)
+
+    const doc = await payload.create({
+      collection: conditionsSlug,
+      data: {
+        showExtra: true,
+      },
+    })
+
+    const { state } = await buildFormState({
+      id: doc.id,
+      collectionSlug: conditionsSlug,
+      data: doc,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      mockRSCs: true,
+      operation: 'update',
+      renderAllFields: true,
+      req,
+      schemaPath: conditionsSlug,
+    })
+
+    // Same reduction `Form` performs on submit
+    const submittedData = reduceFieldsToValues(state, true)
+
+    expect(state['_index-4.extra']?.passesCondition).toBe(true)
+    expect(Object.keys(submittedData).filter((key) => key.startsWith('_index-'))).toEqual([])
+
+    await payload.delete({ id: doc.id, collection: conditionsSlug })
+  })
+
+  it('should not submit conditional tab visibility inside a referenced block as document data', async () => {
+    const req = await createLocalReq({ user }, payload)
+
+    const doc = await payload.create({
+      collection: conditionsSlug,
+      data: {
+        layout: [
+          {
+            blockType: conditionalTabsBlockSlug,
+            showExtra: true,
+          },
+        ],
+      },
+    })
+
+    const { state } = await buildFormState({
+      id: doc.id,
+      collectionSlug: conditionsSlug,
+      data: doc,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      mockRSCs: true,
+      operation: 'update',
+      renderAllFields: true,
+      req,
+      schemaPath: conditionsSlug,
+    })
+
+    const submittedData = reduceFieldsToValues(state, true)
+
+    expect(state['_index-0.extra']?.passesCondition).toBe(true)
+    expect(Object.keys(submittedData).filter((key) => key.startsWith('_index-'))).toEqual([])
+    expect(Object.keys(submittedData.layout[0]).filter((key) => key.startsWith('_index-'))).toEqual(
+      [],
+    )
+
+    await payload.delete({ id: doc.id, collection: conditionsSlug })
   })
 
   it('should render custom Field component when admin.condition flips from false to true via onChange', async () => {
