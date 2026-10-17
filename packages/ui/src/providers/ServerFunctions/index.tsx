@@ -216,28 +216,15 @@ export const ServerFunctionsProvider: React.FC<{
 
       try {
         if (!remoteSignal?.aborted) {
-          const requestArgs = {
-            fallbackLocale: false,
-            ...rest,
-            documentFormState: reduceToSerializableFields(rest.documentFormState),
-            formState: reduceToSerializableFields(rest.formState),
-            initialBlockFormState: reduceToSerializableFields(rest.initialBlockFormState),
-          } satisfies Parameters<GetFormStateClient>[0]
-
-          for (const state of [
-            requestArgs.formState,
-            requestArgs.documentFormState,
-            requestArgs.initialBlockFormState,
-          ]) {
-            if (state?.file) {
-              state.file.initialValue = getFileMetadata({ value: state.file.initialValue })
-              state.file.value = getFileMetadata({ value: state.file.value })
-            }
-          }
-
           const result = (await serverFunction({
             name: 'form-state',
-            args: requestArgs,
+            args: {
+              fallbackLocale: false,
+              ...rest,
+              documentFormState: reduceToSerializableFields(rest.documentFormState),
+              formState: reduceToSerializableFields(rest.formState),
+              initialBlockFormState: reduceToSerializableFields(rest.initialBlockFormState),
+            } satisfies Parameters<GetFormStateClient>[0],
           })) as Awaited<ReturnType<typeof buildFormStateHandler>> // TODO: infer this type when `strictNullChecks` is enabled
 
           if (!remoteSignal?.aborted) {
@@ -292,24 +279,13 @@ export const ServerFunctionsProvider: React.FC<{
   const renderDocument = useCallback<RenderDocumentServerFunctionHookFn>(
     async ({ signal: _signal, ...rest }) => {
       try {
-        const requestArgs = {
-          fallbackLocale: false,
-          ...rest,
-          initialState: reduceToSerializableFields(rest.initialState),
-        }
-
-        if (requestArgs.initialState?.file) {
-          requestArgs.initialState.file.initialValue = getFileMetadata({
-            value: requestArgs.initialState.file.initialValue,
-          })
-          requestArgs.initialState.file.value = getFileMetadata({
-            value: requestArgs.initialState.file.value,
-          })
-        }
-
         const result = (await serverFunction({
           name: 'render-document',
-          args: requestArgs satisfies RenderDocumentBaseArgs,
+          args: {
+            fallbackLocale: false,
+            ...rest,
+            initialState: reduceToSerializableFields(rest.initialState),
+          } satisfies { fallbackLocale: false } & RenderDocumentBaseArgs,
         })) as Awaited<ReturnType<RenderDocumentServerFunctionHookFn>> // TODO: infer this type when `strictNullChecks` is enabled
 
         return result
@@ -399,9 +375,4 @@ export const ServerFunctionsProvider: React.FC<{
       {children}
     </ServerFunctionsContext>
   )
-}
-
-function getFileMetadata({ value }: { value: unknown }): unknown {
-  // Validation needs the filename; the browser retains the bytes for submission and retries.
-  return typeof File !== 'undefined' && value instanceof File ? { name: value.name } : value
 }
