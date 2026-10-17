@@ -149,7 +149,11 @@ export const getInitialTreeData = async ({
       currentPage++
     }
 
-    allDocs.push(...accumulatedDocs)
+    const existingIds = new Set(allDocs.map((d) => String(d.id)))
+    const uniqueAccumulatedDocs = accumulatedDocs.filter(
+      (d) => !existingIds.has(String(d.id)),
+    )
+    allDocs.push(...uniqueAccumulatedDocs)
     loadedParents[parentKey] = {
       hasMore,
       loadedCount: accumulatedDocs.length,
