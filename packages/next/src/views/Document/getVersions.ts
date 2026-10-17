@@ -237,6 +237,7 @@ export const getVersions = async ({
           depth: 0,
           locale,
           select: {
+            _status: true,
             updatedAt: true,
           },
           user,
@@ -267,7 +268,7 @@ export const getVersions = async ({
         }
       }
 
-      if (publishedDoc?.updatedAt) {
+      if (hasPublishedDoc && publishedDoc?.updatedAt) {
         ;({ totalDocs: unpublishedVersionCount } = await payload.countGlobalVersions({
           global: globalConfig.slug,
           locale,
