@@ -34,6 +34,7 @@ uses to test templates.
 | `src/collections/Clients.ts`               | Private client records: contacts, business type, importance (see "Clients and events") |
 | `src/collections/Events.ts`                | Private records of sales events and exhibitions worldwide                              |
 | `scripts/import-events.ts`                 | Imports events from a JSON file (see "Importing events")                               |
+| `src/endpoints/appEvents.ts`               | Upcoming events for the VgemsAI app (see "Events in the VgemsAI app")                  |
 | `src/vigor/`, `src/locales.ts`             | Content of the Vigor website in four languages (see "Vigor website")                   |
 | `scripts/import-vigor.ts`                  | Copies the Vigor website's current content into the CMS (see "Vigor website")          |
 | `src/timezones.ts`                         | Time zones offered for event dates                                                     |
@@ -703,6 +704,23 @@ How the file becomes events:
   city is `TBC`.
 
 Locally, run `pnpm payload run scripts/import-events.ts <file.json> [--dry-run]` in this folder instead.
+
+### Events in the VgemsAI app
+
+The VgemsAI app shows upcoming events through its own backend, awoz-api, which reads them from
+`GET /api/app/events`. A server can't pass two-factor, so instead of logging in it sends a shared key:
+
+```bash
+curl -H "X-API-Key: $APP_API_KEY" https://cms.example.com/api/app/events
+```
+
+1. Generate a key with `openssl rand -hex 32`.
+2. Set it as `APP_API_KEY` in this server's `.env` and as `PAYLOAD_API_KEY` on awoz-api, then redeploy both.
+
+The endpoint returns events that aren't over yet and start within the next 12 months, soonest first, without
+cancelled ones. Each event has its name, type, description, start and end date with time zone, location
+(venue, booth, address, city, country), organizer, website and status. **Clients, notes and attachments are
+never included.** A wrong or missing key gets `401`; while `APP_API_KEY` is empty the endpoint returns `404`.
 
 ## Two-factor authentication
 
