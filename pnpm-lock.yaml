@@ -202,6 +202,9 @@ importers:
       rimraf:
         specifier: 6.0.1
         version: 6.0.1
+      seroval:
+        specifier: 1.6.8
+        version: 1.6.8
       sharp:
         specifier: 0.35.4
         version: 0.35.4(@types/node@24.12.3)

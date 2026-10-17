@@ -1,17 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { serializeForRsc } from './serializeForRsc.js'
 import { stripUnserializable } from './serverFunctionClient.js'
 import { toSerializable } from './toSerializable.js'
 
 describe('TanStack serializers', () => {
-  it('should copy special JSON keys as own data', async () => {
+  it('should copy special JSON keys as own data', () => {
     const input = JSON.parse('{"__proto__":{"label":"value"}}')
-    const results = [
-      toSerializable(input),
-      stripUnserializable(input),
-      await serializeForRsc(input),
-    ]
+    const results = [toSerializable(input), stripUnserializable(input)]
 
     for (const result of results) {
       expect(Object.getPrototypeOf(result)).toBe(Object.prototype)

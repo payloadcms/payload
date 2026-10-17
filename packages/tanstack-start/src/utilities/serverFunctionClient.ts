@@ -2,30 +2,31 @@ import type { ServerFunctionClient, ServerFunctionClientArgs } from 'payload'
 
 import { setOwnProperty } from 'payload/shared'
 
-/**
- * Builds the client-side `ServerFunctionClient` wired into
- * `RootProvider.serverFunction`, given the app's `createServerFn`-based
- * dispatcher (`runServerFn`).
- *
- * Strips functions / symbols / RegExps / React elements from the args before
- * dispatching: the previous `fetch + JSON.stringify` pipeline silently dropped
- * those, but TanStack Start's seroval-based wire format errors instead. We
- * mirror the relaxed behaviour so existing callers (e.g. `getFormState` in
- * `ServerFunctionsProvider`) that may pass the live form state — which can
- * carry stray functions — keep working without each call site sanitising.
- *
- * Delegates to `runServerFn`, so the response (including any RSC handles for
- * server-rendered custom components) is decoded by TanStack Start back into
- * renderable React nodes on the client.
- */
+/** Builds the admin dispatcher with native Flight response decoding. */
 export function createServerFunctionClient({
   runServerFn,
 }: {
-  runServerFn: (input: { data: ServerFunctionClientArgs }) => Promise<unknown>
+  runServerFn: (input: { data: ServerFunctionClientArgs }) => Promise<Response>
 }): ServerFunctionClient {
   return (async (args: ServerFunctionClientArgs) => {
     const safeArgs = stripUnserializable(args) as ServerFunctionClientArgs
-    return await runServerFn({ data: safeArgs })
+    const response = await runServerFn({ data: safeArgs })
+
+    if (!response.ok) {
+      throw new Error(`Payload server function failed with status ${response.status}`)
+    }
+
+    if (response.headers.get('content-type')?.split(';')[0]?.trim() !== 'text/x-component') {
+      throw new Error('Expected a React Flight response from the Payload server function')
+    }
+
+    if (!response.body) {
+      throw new Error('The Payload server function returned an empty Flight response')
+    }
+
+    const { createFromReadableStream } = await import('@tanstack/react-start/rsc')
+
+    return await createFromReadableStream(response.body)
   }) as ServerFunctionClient
 }
 
