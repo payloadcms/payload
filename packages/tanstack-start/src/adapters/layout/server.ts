@@ -9,10 +9,9 @@ import { createElement } from 'react'
 
 import type { SerializableRecord } from '../../utilities/toSerializable.js'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir -- Register the client boundary in the Flight model.
-import { PayloadOutlet } from '../../exports/client/layout.js'
 import { initAdminContext } from '../../utilities/initAdminContext.server.js'
 import { toSerializable } from '../../utilities/toSerializable.js'
+import { PayloadOutlet } from './outlet.js'
 
 export type LoadLayoutDataResult = SerializableRecord
 
