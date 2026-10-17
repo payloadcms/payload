@@ -134,25 +134,7 @@ export const buildJoinAggregation = async ({
           },
         },
         {
-          $match: {
-            $and: [
-              {
-                $expr: {
-                  $in: [
-                    '$$root_id_',
-                    {
-                      $cond: [
-                        { $isArray: `$${join.field.on}` },
-                        `$${join.field.on}`,
-                        [`$${join.field.on}`],
-                      ],
-                    },
-                  ],
-                },
-              },
-              $match,
-            ],
-          },
+          $match,
         },
       ]
 
@@ -161,10 +143,9 @@ export const buildJoinAggregation = async ({
       aggregate.push({
         $lookup: {
           as: alias,
+          foreignField: join.field.on,
           from: JoinModel.collection.name,
-          let: {
-            root_id_: '$_id',
-          },
+          localField: '_id',
           pipeline: [
             ...basePipeline,
             {
@@ -193,10 +174,9 @@ export const buildJoinAggregation = async ({
         aggregate.push({
           $lookup: {
             as: `${as}.totalDocs.${alias}`,
+            foreignField: join.field.on,
             from: JoinModel.collection.name,
-            let: {
-              root_id_: '$_id',
-            },
+            localField: '_id',
             pipeline: [
               ...basePipeline,
               {
