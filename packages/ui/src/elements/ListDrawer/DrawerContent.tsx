@@ -87,6 +87,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const refresh = useCallback(
     async ({ slug, query }: { query?: ListQuery; slug: string }) => {
       try {
+        setIsLoading(true)
         const newQuery: ListQuery = { ...(query || {}), where: { ...(query?.where || {}) } }
 
         const filterOption = filterOptions?.[slug]
