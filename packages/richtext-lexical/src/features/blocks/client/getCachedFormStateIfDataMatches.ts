@@ -39,7 +39,6 @@ export const reduceFormStateToBlockData = (formState: FormState, currentData?: D
       if (
         fieldState.value === undefined ||
         (fieldState.disableFormData !== false &&
-          fieldState.isModified !== true &&
           fieldState.rows.length === 0 &&
           getValueAtPath(currentData, path) === null)
       ) {
