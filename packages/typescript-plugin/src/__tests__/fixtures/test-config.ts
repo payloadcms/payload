@@ -1,4 +1,3 @@
-// @ts-expect-error - ambient type declarations
 import './payload-types.d.ts'
 
 const validField: FieldConfig = {
