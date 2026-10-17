@@ -446,59 +446,84 @@ async function executeDemo({
 function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
   let pointerPosition = { x: 0, y: 0 }
 
+  const getTargetPoint = async ({ locator, position, pagePoint }) => {
+    await locator.waitFor({ state: 'visible' })
+    const box = await locator.boundingBox()
+    if (!box) throw new Error('Cannot move the demo cursor to an element without a bounding box')
+    const local = await locator.evaluate(
+      (element, { position, pagePoint, box }) => {
+        const rect = element.getBoundingClientRect()
+        let left = Math.max(0, rect.left)
+        let top = Math.max(0, rect.top)
+        let right = Math.min(innerWidth, rect.right)
+        let bottom = Math.min(innerHeight, rect.bottom)
+        for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+          const style = getComputedStyle(parent)
+          const clip = parent.getBoundingClientRect()
+          if (/(auto|scroll|hidden|clip)/.test(style.overflowX)) {
+            left = Math.max(left, clip.left)
+            right = Math.min(right, clip.right)
+          }
+          if (/(auto|scroll|hidden|clip)/.test(style.overflowY)) {
+            top = Math.max(top, clip.top)
+            bottom = Math.min(bottom, clip.bottom)
+          }
+        }
+        const points = pagePoint
+          ? [
+              {
+                x: rect.left + ((pagePoint.x - box.x) * rect.width) / box.width,
+                y: rect.top + ((pagePoint.y - box.y) * rect.height) / box.height,
+              },
+            ]
+          : position
+            ? [
+                {
+                  x: rect.left + element.clientLeft + position.x,
+                  y: rect.top + element.clientTop + position.y,
+                },
+              ]
+            : [
+                { x: (left + right) / 2, y: (top + bottom) / 2 },
+                ...[0.1, 0.5, 0.9].flatMap((x) =>
+                  [0.1, 0.5, 0.9].map((y) => ({
+                    x: left + (right - left) * x,
+                    y: top + (bottom - top) * y,
+                  })),
+                ),
+              ]
+        const point = points.find(({ x, y }) => {
+          if (right <= left || bottom <= top || x < left || x >= right || y < top || y >= bottom)
+            return false
+          const hit = document.elementFromPoint(x, y)
+          return hit && element.contains(hit)
+        })
+        if (!point) {
+          throw new Error(
+            'Demo target must be visible and unobstructed; reveal it with wheel scrolling before clicking',
+          )
+        }
+        const { x, y } = point
+        return {
+          x: x - rect.left,
+          y: y - rect.top,
+          width: rect.width,
+          height: rect.height,
+        }
+      },
+      { position, pagePoint, box },
+    )
+    return {
+      x: box.x + local.x * (box.width / local.width),
+      y: box.y + local.y * (box.height / local.height),
+    }
+  }
+
   const moveCursor = async (
     locator,
     { duration = mouseMoveMs, pauseAfter = interactionPauseMs, position } = {},
   ) => {
-    await locator.waitFor({ state: 'visible' })
-    const box = await locator.boundingBox()
-    if (!box) throw new Error('Cannot move the demo cursor to an element without a bounding box')
-    const local = await locator.evaluate((element, position) => {
-      const rect = element.getBoundingClientRect()
-      let left = Math.max(0, rect.left)
-      let top = Math.max(0, rect.top)
-      let right = Math.min(innerWidth, rect.right)
-      let bottom = Math.min(innerHeight, rect.bottom)
-      for (let parent = element.parentElement; parent; parent = parent.parentElement) {
-        const style = getComputedStyle(parent)
-        const clip = parent.getBoundingClientRect()
-        if (/(auto|scroll|hidden|clip)/.test(style.overflowX)) {
-          left = Math.max(left, clip.left)
-          right = Math.min(right, clip.right)
-        }
-        if (/(auto|scroll|hidden|clip)/.test(style.overflowY)) {
-          top = Math.max(top, clip.top)
-          bottom = Math.min(bottom, clip.bottom)
-        }
-      }
-      const x = position ? rect.left + element.clientLeft + position.x : (left + right) / 2
-      const y = position ? rect.top + element.clientTop + position.y : (top + bottom) / 2
-      const hit = document.elementFromPoint(x, y)
-      if (
-        right <= left ||
-        bottom <= top ||
-        x < left ||
-        x >= right ||
-        y < top ||
-        y >= bottom ||
-        !hit ||
-        !element.contains(hit)
-      ) {
-        throw new Error(
-          'Demo target must be visible and unobstructed; reveal it with wheel scrolling before clicking',
-        )
-      }
-      return {
-        x: x - rect.left,
-        y: y - rect.top,
-        width: rect.width,
-        height: rect.height,
-      }
-    }, position)
-    const targetPosition = {
-      x: box.x + local.x * (box.width / local.width),
-      y: box.y + local.y * (box.height / local.height),
-    }
+    const targetPosition = await getTargetPoint({ locator, position })
     const steps = duration === 0 ? 1 : Math.max(2, Math.round(duration / 16))
     const stepDelay = steps === 1 ? 0 : duration / steps
 
@@ -533,9 +558,21 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
       position,
     } = {},
   ) => {
-    await moveCursor(locator, { duration, pauseAfter: before, position })
-    // Use the same outer-page point for the visible cursor and the actual click.
-    await page.mouse.click(pointerPosition.x, pointerPosition.y)
+    const target = await locator.elementHandle()
+    if (!target) throw new Error('Demo click target is unavailable')
+
+    try {
+      await target.waitForElementState('enabled', { timeout: 10_000 })
+      await target.waitForElementState('stable', { timeout: 10_000 })
+      await moveCursor(locator, { duration, pauseAfter: before, position })
+      await target.waitForElementState('enabled', { timeout: 10_000 })
+      await target.waitForElementState('stable', { timeout: 10_000 })
+      await getTargetPoint({ locator, pagePoint: pointerPosition })
+      // Use the same outer-page point for the visible cursor and the actual click.
+      await page.mouse.click(pointerPosition.x, pointerPosition.y)
+    } finally {
+      await target.dispose()
+    }
 
     if (after > 0) {
       await page.waitForTimeout(after)

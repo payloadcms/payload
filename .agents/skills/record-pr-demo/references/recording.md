@@ -168,7 +168,7 @@ await click(revealedTab)
 
 For menus, click the trigger, wheel-scroll the actual overflowing list, then click the revealed item. Use a selector from the real markup. The helper sends small timed wheel deltas and verifies the resulting position; it never repairs a failed wheel gesture by assigning scroll offsets. Hover changes are expected. Choose a cursor position or pause that keeps the interaction readable rather than hiding tooltips or mutating application styles.
 
-`click` and `moveCursor` target the visible, unobstructed part of a control and never auto-scroll. Both the pointer and click use the same outer-page coordinates, including iframe scaling. An optional `position: { x, y }` is relative to the control's padding box in application CSS pixels.
+`click` and `moveCursor` target the visible, unobstructed part of a control and never auto-scroll. Both the pointer and click use the same outer-page coordinates, including iframe scaling. An optional `position: { x, y }` is relative to the control's padding box in application CSS pixels and never falls back to another point. Clicks wait for enabled, stable controls and recheck the actual pointer position after the dwell; if the target moves away or becomes covered, the take fails rather than reporting a successful click.
 
 Wait for completed application state before the next gesture. A selected label may update before server-rendered form data arrives: start `page.waitForResponse()` before the selection click, await the relevant successful refresh response, then assert the resulting form values before typing. Match an item's name independently of status badges (for example a Merged badge) so repeat validation can find it.
 

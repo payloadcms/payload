@@ -222,11 +222,15 @@ test('verifyCandidateManifest accepts unchanged reviewed bytes and rejects repla
   const output = path.join(directory, 'demo.mp4')
   const manifest = path.join(directory, 'demo.json')
 
+  const scenarioSnapshot = path.join(directory, 'demo.scenario.mjs')
+  await writeFile(scenarioSnapshot, 'reviewed script')
   await writeFile(output, 'recording')
   await writeFile(
     manifest,
     JSON.stringify({
       mp4: output,
+      scenarioSnapshot,
+      scenarioSha256: createHash('sha256').update('reviewed script').digest('hex'),
       sha256: '3ebb153fb24e4411400e94a9a92b0ec458c3a8473e51e03cd37d4a34c99dfda6',
       sizeBytes: 9,
     }),
@@ -343,5 +347,93 @@ test('should reject packaging when the scenario changes during a take', async ()
       contactSheet: path.join(directory, 'demo.png'),
     }),
     /scenario changed during this take/,
+  )
+})
+
+test('should reject colliding candidate paths before any artifacts exist', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'prepare-pr-demo-collision-'))
+  testDirectories.push(directory)
+  const output = path.join(directory, 'demo.mp4')
+  for (const overrides of [
+    { manifest: path.join(directory, 'demo.scenario.mjs') },
+    { contactSheet: output },
+    { rawOutput: output },
+  ]) {
+    await assert.rejects(
+      preparation.assertCandidatePathsAvailable({
+        contactSheet: path.join(directory, 'sheet.png'),
+        manifest: path.join(directory, 'demo.json'),
+        rawOutput: path.join(directory, 'demo.webm'),
+        output,
+        ...overrides,
+      }),
+      /distinct|collision/i,
+    )
+  }
+})
+
+test('should reject a modified or missing scenario snapshot during verification', async () => {
+  const directory = await createFakeMediaTools()
+  const output = path.join(directory, 'demo.mp4')
+  const rawOutput = path.join(directory, 'demo.webm')
+  const manifest = path.join(directory, 'demo.json')
+  const scenario = path.join(directory, 'source.mjs')
+  await writeFile(rawOutput, 'recording')
+  await writeFile(scenario, 'export default async function scenario() {}')
+  const result = await packageCandidate({
+    contactSheet: path.join(directory, 'sheet.png'),
+    environment: { ...process.env, PATH: `${directory}:${process.env.PATH}` },
+    label: 'demo',
+    manifest,
+    output,
+    rawOutput,
+    scenario,
+    trimStart: 0,
+  })
+  await verifyCandidateManifest(manifest)
+  await writeFile(result.scenarioSnapshotPath, 'changed after review')
+  await assert.rejects(verifyCandidateManifest(manifest), /scenario snapshot.*does not match/i)
+  await rm(result.scenarioSnapshotPath)
+  await assert.rejects(verifyCandidateManifest(manifest))
+})
+
+test('should preserve walkthrough errors alongside teardown errors', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'prepare-pr-demo-cleanup-'))
+  testDirectories.push(directory)
+  const scenario = path.join(directory, 'scenario.mjs')
+  await writeFile(
+    scenario,
+    `export async function teardown() { throw new Error('cleanup failed') }`,
+  )
+  const original = new Error('walkthrough failed')
+  await assert.rejects(
+    preparation.runWithScenarioFixture(
+      {
+        baseURL: 'http://localhost:3000',
+        scenario,
+      },
+      async () => {
+        throw original
+      },
+    ),
+    (error) => {
+      assert.equal(error.cause, original)
+      assert.deepEqual(
+        error.errors.map((error) => error.message),
+        ['walkthrough failed', 'cleanup failed'],
+      )
+      assert.match(error.message, /walkthrough failed/)
+      return true
+    },
+  )
+  await assert.rejects(
+    preparation.runWithScenarioFixture(
+      {
+        baseURL: 'http://localhost:3000',
+        scenario,
+      },
+      async () => {},
+    ),
+    /cleanup failed/,
   )
 })

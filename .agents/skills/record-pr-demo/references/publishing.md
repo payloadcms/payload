@@ -11,7 +11,7 @@ node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs verify \
   --manifest /tmp/payload-pr-demo-feature.json
 ```
 
-This recomputes the SHA-256 digest and file size for the manifest's MP4. If verification fails, do not upload. Show the changed file and request approval again.
+This recomputes the SHA-256 digest and file size for the manifest's MP4 and checks the saved scenario snapshot against its recorded hash. If verification fails, do not upload. Show the changed file and request approval again.
 
 Confirm `gh auth status` succeeds and that the installed GitHub CLI command supports `--attach`. If it does not, use available browser automation to attach the approved local file through GitHub's PR description editor. Use the comment editor only when the user explicitly requests a comment. If the environment cannot select a local file, give the approved MP4 to the user for manual drag-and-drop into the same destination; do not commit it or substitute a release, LFS, or repository URL.
 

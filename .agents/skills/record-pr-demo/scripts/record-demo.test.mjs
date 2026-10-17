@@ -634,3 +634,51 @@ test('should click scaled targets, type with keys, and require wheel input to re
     await rm(directory, { force: true, recursive: true })
   }
 })
+
+for (const mode of ['disabled', 'moving', 'covered', 'partial', 'explicit']) {
+  test(`should handle ${mode} click targets safely`, async () => {
+    const directory = await mkdtemp(path.join(tmpdir(), 'demo-click-safety-'))
+    const scenario = path.join(directory, 'scenario.mjs')
+    try {
+      await writeFile(
+        scenario,
+        `${presentationExport}
+        export default async function({page,click,expect}) {
+          const mode = ${JSON.stringify(mode)}
+          await page.goto('data:text/html,' + encodeURIComponent(
+            '<style>body{margin:0}button{position:absolute;left:60px;top:60px;width:240px;height:80px}#cover{position:absolute;left:140px;top:60px;width:80px;height:80px}</style>' +
+            '<button '+(mode==='disabled'?'disabled':'')+' onclick="this.dataset.clicked=String(event.isTrusted)">Target</button>' +
+            (mode==='partial'||mode==='explicit'?'<div id="cover"></div>':'')
+          ))
+          const target=page.getByRole('button',{name:'Target'})
+          if(mode==='disabled') await target.evaluate(el=>setTimeout(()=>{el.disabled=false},200))
+          if(mode==='moving'||mode==='covered') await target.evaluate((el,mode)=>{
+            el.addEventListener('pointerenter',()=>setTimeout(()=>{
+              if(mode==='moving') el.style.left='400px'
+              else { const cover=document.createElement('div');cover.style='position:absolute;inset:0;background:white';document.body.append(cover) }
+            },30),{once:true})
+          },mode)
+          if(mode==='moving'||mode==='covered'||mode==='explicit') {
+            let rejected=false
+            try { await click(target,{duration:0,before:250,after:0,...(mode==='explicit'?{position:{x:120,y:40}}:{})}) }
+            catch(error) { rejected=/visible|unobstructed/.test(error.message) }
+            if(!rejected)throw new Error('Unsafe click returned success')
+            await expect(target).not.toHaveAttribute('data-clicked','true')
+          } else {
+            await click(target,{duration:0,before:0,after:0})
+            await expect(target).toHaveAttribute('data-clicked','true')
+          }
+        }
+      `,
+      )
+      await recorder.validateDemo({
+        baseURL: 'http://localhost:3000',
+        label: 'click-safety',
+        scenario,
+        viewport: { width: 1800, height: 1100 },
+      })
+    } finally {
+      await rm(directory, { force: true, recursive: true })
+    }
+  })
+}

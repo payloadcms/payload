@@ -103,6 +103,8 @@ export async function packageCandidate({
     throw new Error('Candidate is missing a valid opening ready time')
   }
 
+  await assertCandidatePathsAvailable({ contactSheet, manifest, output, rawOutput })
+
   const resolvedContactSheet = path.resolve(contactSheet)
   const resolvedManifest = path.resolve(manifest)
   const resolvedOutput = path.resolve(output)
@@ -232,7 +234,9 @@ export async function verifyCandidateManifest(manifestPath) {
   if (
     typeof candidateManifest.mp4 !== 'string' ||
     typeof candidateManifest.sha256 !== 'string' ||
-    !Number.isFinite(candidateManifest.sizeBytes)
+    !Number.isFinite(candidateManifest.sizeBytes) ||
+    typeof candidateManifest.scenarioSnapshot !== 'string' ||
+    typeof candidateManifest.scenarioSha256 !== 'string'
   ) {
     throw new Error(`Candidate manifest is incomplete: ${resolvedManifest}`)
   }
@@ -247,13 +251,30 @@ export async function verifyCandidateManifest(manifestPath) {
     )
   }
 
+  const scriptBuffer = await readFile(candidateManifest.scenarioSnapshot)
+  const scenarioSha256 = createHash('sha256').update(scriptBuffer).digest('hex')
+
+  if (scenarioSha256 !== candidateManifest.scenarioSha256) {
+    throw new Error(
+      `The scenario snapshot does not match the reviewed candidate in ${resolvedManifest}. Review it again before upload.`,
+    )
+  }
+
   return { manifest: resolvedManifest, mp4: candidateManifest.mp4, sha256 }
 }
 
-export async function assertCandidatePathsAvailable({ contactSheet, manifest, output }) {
+export async function assertCandidatePathsAvailable({ contactSheet, manifest, output, rawOutput }) {
   const protectedPaths = [contactSheet, manifest, output, scenarioSnapshotPath({ output })].map(
     (candidatePath) => path.resolve(candidatePath),
   )
+  const allPaths = rawOutput ? [...protectedPaths, path.resolve(rawOutput)] : protectedPaths
+
+  if (new Set(allPaths).size !== allPaths.length) {
+    throw new Error(
+      'Candidate artifact paths must be distinct, including the scenario snapshot and raw recording',
+    )
+  }
+
   const existingPaths = []
 
   for (const candidatePath of protectedPaths) {
@@ -409,6 +430,7 @@ export async function runWithScenarioFixture(options, action) {
   const hasSetup = typeof scenarioModule.setup === 'function'
   let isSetupComplete = !hasSetup
   let fixture
+  const errors = []
 
   try {
     if (hasSetup) {
@@ -421,19 +443,36 @@ export async function runWithScenarioFixture(options, action) {
     }
 
     await action(fixture)
-  } finally {
-    try {
-      if (isSetupComplete && typeof scenarioModule.teardown === 'function') {
-        await scenarioModule.teardown({
-          baseURL: options.baseURL,
-          fixture,
-          label: options.label,
-          request: requestContext,
-        })
-      }
-    } finally {
-      await requestContext.dispose()
+  } catch (error) {
+    errors.push(error)
+  }
+
+  try {
+    if (isSetupComplete && typeof scenarioModule.teardown === 'function') {
+      await scenarioModule.teardown({
+        baseURL: options.baseURL,
+        fixture,
+        label: options.label,
+        request: requestContext,
+      })
     }
+  } catch (error) {
+    errors.push(error)
+  }
+
+  try {
+    await requestContext.dispose()
+  } catch (error) {
+    errors.push(error)
+  }
+
+  if (errors.length === 1) throw errors[0]
+  if (errors.length > 1) {
+    throw new AggregateError(
+      errors,
+      `Scenario execution and cleanup failed: ${errors.map((error) => (error instanceof Error ? error.message : String(error))).join('; ')}`,
+      { cause: errors[0] },
+    )
   }
 }
 
