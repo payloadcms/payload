@@ -18,6 +18,7 @@ import { initGlobals } from './schema/initGlobals.js'
 import { wrapCustomFields } from './utilities/wrapCustomResolver.js'
 
 export function configToSchema(config: SanitizedConfig): {
+  execute: typeof GraphQL.execute
   schema: GraphQL.GraphQLSchema
   validationRules: (args: OperationArgs<any>) => GraphQL.ValidationRule[]
 } {
@@ -122,6 +123,7 @@ export function configToSchema(config: SanitizedConfig): {
   ]
 
   return {
+    execute: GraphQL.execute,
     schema,
     validationRules,
   }
