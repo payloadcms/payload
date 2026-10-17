@@ -103,7 +103,7 @@ export const updateDocumentTool = defineCollectionTool({
             text: `Document updated successfully in collection "${slug}"!\nResult:\n\`\`\`json\n${JSON.stringify(responseResult)}\n\`\`\``,
           },
         ],
-        doc: responseResult as Record<string, unknown>,
+        doc: responseResult,
       }
     }
 

@@ -123,7 +123,7 @@ export const BlocksFeatureClient = createClientFeature(
                         blockType: inlineBlock.slug,
                       })
                     },
-                  } as SlashMenuItem
+                  }
                 }),
                 key: 'inlineBlocks',
                 label: ({
@@ -161,7 +161,7 @@ export const BlocksFeatureClient = createClientFeature(
                       })
                     },
                     order: index,
-                  } as ToolbarGroupItem
+                  }
                 }),
                 key: 'blocks',
                 order: 20,
@@ -189,7 +189,7 @@ export const BlocksFeatureClient = createClientFeature(
                       })
                     },
                     order: index,
-                  } as ToolbarGroupItem
+                  }
                 }),
                 key: 'inlineBlocks',
                 order: 25,

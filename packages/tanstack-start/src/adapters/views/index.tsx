@@ -14,7 +14,7 @@ export type AdminLoad = (opts: {
 }) => Promise<any>
 
 const searchToRecord = (searchStr: string): Record<string, string | string[]> =>
-  Object.fromEntries(new URLSearchParams(searchStr)) as Record<string, string | string[]>
+  Object.fromEntries(new URLSearchParams(searchStr))
 
 const runLoader = async (load: AdminLoad, splat: string, searchStr: string) => {
   const data = await load({ data: { _splat: splat, search: searchToRecord(searchStr) } })

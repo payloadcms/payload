@@ -77,7 +77,7 @@ export const confirmOrderHandler: ConfirmOrderHandler =
 
     const data = req.data
     const payload = req.payload
-    const user = req.user as null | UserWithCart
+    const user = req.user
 
     let currency: string = currenciesConfig.defaultCurrency
     let cartID: DefaultDocumentIDType = data?.cartID

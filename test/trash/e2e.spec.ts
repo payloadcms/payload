@@ -1437,7 +1437,7 @@ async function createPostDoc(data: RequiredDataFromCollectionSlug<'posts'>): Pro
     collection: postsSlug,
     data,
     overrideAccess: true,
-  }) as unknown as Promise<Post>
+  })
 }
 
 async function createTrashedPostDoc(data: RequiredDataFromCollectionSlug<'posts'>): Promise<Post> {
@@ -1449,5 +1449,5 @@ async function createTrashedPostDoc(data: RequiredDataFromCollectionSlug<'posts'
       deletedAt: new Date().toISOString(), // Set the post as trashed
     },
     overrideAccess: true,
-  }) as unknown as Promise<Post>
+  })
 }

@@ -103,41 +103,41 @@ describe('Relationship Field', () => {
     })*/
 
     // Create docs to relate to
-    relationOneDoc = (await payload.create({
+    relationOneDoc = await payload.create({
       collection: relationOneSlug,
       data: {
         name: 'relation',
       },
       overrideAccess: true,
-    })) as any
+    })
 
-    anotherRelationOneDoc = (await payload.create({
+    anotherRelationOneDoc = await payload.create({
       collection: relationOneSlug,
       data: {
         name: 'relation',
       },
       overrideAccess: true,
-    })) as any
+    })
 
-    relationTwoDoc = (await payload.create({
+    relationTwoDoc = await payload.create({
       collection: relationTwoSlug,
       data: {
         name: 'second-relation',
       },
       overrideAccess: true,
-    })) as any
+    })
 
     // Create restricted doc
-    restrictedRelation = (await payload.create({
+    restrictedRelation = await payload.create({
       collection: relationRestrictedSlug,
       data: {
         name: 'restricted',
       },
       overrideAccess: true,
-    })) as any
+    })
 
     // Doc with useAsTitle
-    relationWithTitle = (await payload.create({
+    relationWithTitle = await payload.create({
       collection: relationWithTitleSlug,
       data: {
         name: 'relation-title',
@@ -146,7 +146,7 @@ describe('Relationship Field', () => {
         },
       },
       overrideAccess: true,
-    })) as any
+    })
 
     // Doc with useAsTitle for word boundary test
     await payload.create({
@@ -161,16 +161,16 @@ describe('Relationship Field', () => {
     })
 
     // Collection 1 Doc
-    collectionOneDoc = (await payload.create({
+    collectionOneDoc = await payload.create({
       collection: collection1Slug,
       data: {
         name: 'One',
       },
       overrideAccess: true,
-    })) as any
+    })
 
     // Add restricted doc as relation
-    docWithExistingRelations = (await payload.create({
+    docWithExistingRelations = await payload.create({
       collection: slug,
       data: {
         name: 'with-existing-relations',
@@ -180,7 +180,7 @@ describe('Relationship Field', () => {
         relationshipWithTitle: relationWithTitle.id,
       },
       overrideAccess: true,
-    })) as any
+    })
   })
 
   const tableRowLocator = 'table > tbody > tr'
@@ -1246,5 +1246,5 @@ async function createVersionedRelationshipFieldDoc(
       ...overrides,
     },
     overrideAccess: true,
-  }) as unknown as Promise<VersionedRelationshipField>
+  })
 }

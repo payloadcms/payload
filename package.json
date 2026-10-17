@@ -93,7 +93,7 @@
     "lint": "oxlint packages tools",
     "lint-staged": "lint-staged",
     "lint:css": "stylelint \"packages/ui/src/**/*.css\" \"templates/**/*.css\"",
-    "lint:fix": "oxlint --fix packages tools",
+    "lint:fix": "oxlint --fix packages tools test",
     "obliterate-playwright-cache-macos": "rm -rf ~/Library/Caches/ms-playwright && find /System/Volumes/Data/private/var/folders -type d -name 'playwright*' -exec rm -rf {} +",
     "payload": "pnpm runts ./test/payloadCLI.ts",
     "prepare": "husky && pnpm turbo build --filter @payloadcms/typescript-plugin",

@@ -23,10 +23,10 @@ export function createServerFunctionClient({
 }: {
   runServerFn: (input: { data: ServerFunctionClientArgs }) => Promise<unknown>
 }): ServerFunctionClient {
-  return (async (args: ServerFunctionClientArgs) => {
+  return async (args: ServerFunctionClientArgs) => {
     const safeArgs = stripUnserializable(args) as ServerFunctionClientArgs
     return await runServerFn({ data: safeArgs })
-  }) as ServerFunctionClient
+  }
 }
 
 /**

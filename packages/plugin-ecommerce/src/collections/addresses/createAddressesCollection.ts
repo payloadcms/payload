@@ -56,7 +56,7 @@ export const createAddressesCollection: (props: Props) => CollectionConfig = (pr
                 defaultValue: supportedCountries?.[0].value,
               }
             : {}),
-        } as Field
+        }
       }
 
       return field

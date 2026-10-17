@@ -262,7 +262,7 @@ export const ServerFunctionsProvider: React.FC<{
           args: {
             fallbackLocale: false,
             ...rest,
-          } as Parameters<RenderDocumentServerFunctionHookFn>[0],
+          },
         })) as Awaited<ReturnType<RenderDocumentServerFunctionHookFn>> // TODO: infer this type when `strictNullChecks` is enabled
 
         return result
