@@ -260,10 +260,21 @@ const resolveWherePath = ({
     }
   }
 
-  if (pathPlan.type === 'hasManySelect') {
-    const fieldContext = [...pathPlan.fieldsByCollection.values()].find(
-      (field) => field.type === 'hasManySelect',
-    )?.field
+  const collectionFieldForBranch = pathPlan.fieldsByCollection.get(collection)
+
+  // A `mixedSelect` path is a has-many select in some target collections and a single select column
+  // in others. Each branch is resolved with its own storage handler: has-many branches use the JSON
+  // value-table subquery, single-select branches fall through to the scalar handler below.
+  const useHasManySelectBranch =
+    pathPlan.type === 'hasManySelect' ||
+    (pathPlan.type === 'mixedSelect' && collectionFieldForBranch?.type === 'hasManySelect')
+
+  if (useHasManySelectBranch) {
+    const fieldContext =
+      collectionFieldForBranch?.type === 'hasManySelect'
+        ? collectionFieldForBranch.field
+        : [...pathPlan.fieldsByCollection.values()].find((field) => field.type === 'hasManySelect')
+            ?.field
 
     if (!fieldContext) {
       return { type: 'invalid', pathPlan }
