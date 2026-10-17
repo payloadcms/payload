@@ -27,6 +27,26 @@ The Payload Config is strongly typed and ties directly into Payload's TypeScript
   details](#customizing-the-config-location).
 </Banner>
 
+#### Functionally building your config
+
+You can optionally pass a function to `buildConfig` which is helpful if you need to first fetch secrets or define how you want Payload to work prior to initializing it.
+
+Here's an example:
+
+```ts
+import { buildConfig } from 'payload'
+import { fetchMySecrets } from './secrets'
+
+export default buildConfig(async () => {
+  const mySecrets = await fetchMySecrets()
+
+  return {
+    secret: mySecrets.PAYLOAD_SECRET,
+    // The rest of your config goes here
+  }
+})
+```
+
 ## Config Options
 
 To author your Payload Config, first determine which [Database](../database/overview) you'd like to use, then use [Collections](./collections) or [Globals](./globals) to define the schema of your data through [Fields](../fields/overview).
