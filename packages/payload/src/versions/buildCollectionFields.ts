@@ -4,11 +4,37 @@ import type { Field, FlattenedField } from '../fields/config/types.js'
 
 import { hasAutosaveEnabled, hasDraftsEnabled } from '../utilities/getVersionsConfig.js'
 
+// Cache the version schema per collection. It derives only from the (stable)
+// collection config, so rebuilding a fresh array on every call is wasted work
+// and — since `flattenAllFields` keys `flattenedFieldsCache` by array identity —
+// leaks one cache entry per request. WeakMap so discarded configs are reclaimed;
+// flattened/unflattened are cached separately (flatten changes the version group).
+type VersionCollectionFieldsCacheEntry = {
+  flattened?: FlattenedField[]
+  unflattened?: Field[]
+}
+
+const versionCollectionFieldsCache = new WeakMap<
+  SanitizedCollectionConfig,
+  VersionCollectionFieldsCacheEntry
+>()
+
 export const buildVersionCollectionFields = <T extends boolean = false>(
   config: SanitizedConfig,
   collection: SanitizedCollectionConfig,
   flatten?: T,
 ): true extends T ? FlattenedField[] : Field[] => {
+  let cacheEntry = versionCollectionFieldsCache.get(collection)
+  if (!cacheEntry) {
+    cacheEntry = {}
+    versionCollectionFieldsCache.set(collection, cacheEntry)
+  }
+
+  const cached = flatten ? cacheEntry.flattened : cacheEntry.unflattened
+  if (cached) {
+    return cached as true extends T ? FlattenedField[] : Field[]
+  }
+
   const fields: FlattenedField[] = [
     {
       name: 'parent',
@@ -77,6 +103,12 @@ export const buildVersionCollectionFields = <T extends boolean = false>(
         index: true,
       })
     }
+  }
+
+  if (flatten) {
+    cacheEntry.flattened = fields
+  } else {
+    cacheEntry.unflattened = fields as Field[]
   }
 
   return fields as true extends T ? FlattenedField[] : Field[]
