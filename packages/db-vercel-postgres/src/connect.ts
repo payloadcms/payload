@@ -90,7 +90,7 @@ export const connect: Connect = async function connect(
     }
 
     if (typeof this.rejectInitializing === 'function') {
-      this.rejectInitializing()
+      this.rejectInitializing(err)
     }
     throw new Error(`Error: cannot connect to Postgres: ${err.message}`)
   }
