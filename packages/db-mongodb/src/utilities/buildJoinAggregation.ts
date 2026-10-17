@@ -140,7 +140,10 @@ export const buildJoinAggregation = async ({
           $match: {
             $and: [
               {
-                $expr: buildMultiCollectionJoinMatch(join.field.on),
+                $expr: buildMultiCollectionJoinMatch(
+                  join.field.on,
+                  Array.isArray(join.targetField.relationTo),
+                ),
               },
               $match,
             ],

@@ -3,34 +3,64 @@ import { describe, expect, it } from 'vitest'
 import { buildMultiCollectionJoinMatch } from './buildMultiCollectionJoinMatch.js'
 
 // Minimal evaluator for the aggregation operators this helper emits.
-// `$$root_id_` is the joined document's id; `$<field>` reads the stored value.
-const evaluate = (expr: any, doc: Record<string, unknown>, rootId: unknown): unknown => {
-  const resolve = (operand: unknown): unknown => {
-    if (operand === '$$root_id_') {
-      return rootId
+// `$$root_id_` is the joined document's id; `$<field>` reads the stored value;
+// dotted paths (`$field.value`, `$$var.value`) traverse objects.
+const evaluate = (
+  expr: any,
+  doc: Record<string, unknown>,
+  rootId: unknown,
+  vars: Record<string, unknown> = {},
+): unknown => {
+  const resolve = (operand: unknown, scope: Record<string, unknown> = vars): unknown => {
+    if (typeof operand !== 'string' || !operand.startsWith('$')) {
+      return operand
     }
-    if (typeof operand === 'string' && operand.startsWith('$')) {
-      return doc[operand.slice(1)]
+    const [head, ...tail] = operand.split('.')
+    let value: unknown
+    if (head === '$$root_id_') {
+      value = rootId
+    } else if (head.startsWith('$$')) {
+      value = scope[head.slice(2)]
+    } else {
+      value = doc[head.slice(1)]
     }
-    return operand
+    for (const segment of tail) {
+      value = (value as Record<string, unknown> | null | undefined)?.[segment]
+    }
+    return value
+  }
+
+  const resolveOperand = (operand: unknown, scope: Record<string, unknown> = vars): unknown => {
+    if (operand !== null && typeof operand === 'object' && !Array.isArray(operand)) {
+      return evaluate(operand, doc, rootId, scope)
+    }
+    return resolve(operand, scope)
   }
 
   if (expr.$eq) {
-    const [a, b] = expr.$eq.map(resolve)
+    const [a, b] = expr.$eq.map((operand: unknown) => resolveOperand(operand))
     return JSON.stringify(a) === JSON.stringify(b)
   }
   if (expr.$in) {
-    const [needle, haystack] = expr.$in.map(resolve)
+    const [needle, haystack] = expr.$in.map((operand: unknown) => resolveOperand(operand))
     return (
       Array.isArray(haystack) &&
       haystack.some((item) => JSON.stringify(item) === JSON.stringify(needle))
     )
   }
+  if (expr.$map) {
+    const { input, as, in: mapExpr } = expr.$map
+    const arr = resolve(input)
+    if (!Array.isArray(arr)) {
+      return []
+    }
+    return arr.map((item) => resolveOperand(mapExpr, { ...vars, [as]: item }))
+  }
   if (expr.$cond) {
     const isArrayOperand = expr.$cond.if?.$isArray
     const condition =
       typeof isArrayOperand === 'string' ? Array.isArray(resolve(isArrayOperand)) : false
-    return evaluate(condition ? expr.$cond.then : expr.$cond.else, doc, rootId)
+    return evaluate(condition ? expr.$cond.then : expr.$cond.else, doc, rootId, vars)
   }
   throw new Error(`unsupported operator in ${JSON.stringify(expr)}`)
 }
@@ -80,5 +110,61 @@ describe('previous behavior (regression)', () => {
     const oldExpr = { $eq: ['$_h_tags', '$$root_id_'] }
 
     expect(evaluate(oldExpr, { _h_tags: ['news-id', 'sport-id'] }, 'news-id')).toBe(false)
+  })
+})
+
+describe('polymorphic target fields', () => {
+  it('should match scalar polymorphic values by their .value', () => {
+    const expr = buildMultiCollectionJoinMatch('_h_tags', true)
+
+    expect(
+      evaluate(expr, { _h_tags: { relationTo: 'tags', value: 'news-id' } }, 'news-id'),
+    ).toBe(true)
+    expect(
+      evaluate(expr, { _h_tags: { relationTo: 'tags', value: 'other-id' } }, 'news-id'),
+    ).toBe(false)
+  })
+
+  it('should match polymorphic arrays by member .value', () => {
+    const expr = buildMultiCollectionJoinMatch('_h_tags', true)
+
+    expect(
+      evaluate(
+        expr,
+        {
+          _h_tags: [
+            { relationTo: 'tags', value: 'news-id' },
+            { relationTo: 'tags', value: 'sport-id' },
+          ],
+        },
+        'news-id',
+      ),
+    ).toBe(true)
+    expect(
+      evaluate(expr, { _h_tags: [{ relationTo: 'tags', value: 'sport-id' }] }, 'news-id'),
+    ).toBe(false)
+  })
+
+  it('should not match raw ids in polymorphic mode', () => {
+    const expr = buildMultiCollectionJoinMatch('_h_tags', true)
+
+    // Guards against passing the flag for non-polymorphic fields: raw ids
+    // are objects-free, so `.value` is undefined and nothing matches.
+    expect(evaluate(expr, { _h_tags: ['news-id'] }, 'news-id')).toBe(false)
+    expect(evaluate(expr, { _h_tags: 'news-id' }, 'news-id')).toBe(false)
+  })
+
+  it('should pin the polymorphic expression shape', () => {
+    const expr = buildMultiCollectionJoinMatch('_h_tags', true)
+
+    expect(expr).toEqual({
+      $cond: {
+        if: { $isArray: '$_h_tags' },
+        then: {
+          $in: ['$$root_id_', { $map: { input: '$_h_tags', as: 'ref', in: '$$ref.value' } }],
+        },
+        else: { $eq: ['$_h_tags.value', '$$root_id_'] },
+      },
+    })
   })
 })
