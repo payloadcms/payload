@@ -32,7 +32,7 @@ export const updateResourceTool = (
     overrideLock: boolean = true,
     locale?: string,
     fallbackLocale?: string,
-    select?: string,
+    select?: Record<string, unknown>,
   ): Promise<{
     content: Array<{
       text: string
@@ -118,25 +118,6 @@ export const updateResourceTool = (
         }
       }
 
-      let selectClause: SelectType | undefined
-      if (select) {
-        try {
-          selectClause = JSON.parse(select) as SelectType
-        } catch (_parseError) {
-          payload.logger.warn(`[payload-mcp] Invalid select clause JSON: ${select}`)
-          const response = {
-            content: [{ type: 'text' as const, text: 'Error: Invalid JSON in select clause' }],
-          }
-          return (collections?.[collectionSlug]?.overrideResponse?.(response, {}, req) ||
-            response) as {
-            content: Array<{
-              text: string
-              type: 'text'
-            }>
-          }
-        }
-      }
-
       // Update by ID or where clause
       if (id) {
         // Single document update
@@ -152,7 +133,7 @@ export const updateResourceTool = (
           user,
           ...(locale && { locale }),
           ...(fallbackLocale && { fallbackLocale }),
-          ...(selectClause && { select: selectClause }),
+          ...(select && { select: select as SelectType }),
         }
 
         if (verboseLogs) {
@@ -201,7 +182,7 @@ ${JSON.stringify(result)}
           where: whereClause,
           ...(locale && { locale }),
           ...(fallbackLocale && { fallbackLocale }),
-          ...(selectClause && { select: selectClause }),
+          ...(select && { select: select as SelectType }),
         }
 
         if (verboseLogs) {
@@ -319,10 +300,10 @@ ${JSON.stringify(errors)}
         .default(true)
         .describe('Whether to override document locks'),
       select: z
-        .string()
+        .record(z.string(), z.unknown())
         .optional()
         .describe(
-          'Optional: define exactly which fields you\'d like to return in the response (JSON), e.g., \'{"title": "My Post"}\'',
+          "Optional: define exactly which fields you'd like to return in the response, e.g., {\"title\": true}",
         ),
       where: z
         .string()
@@ -359,7 +340,7 @@ ${JSON.stringify(errors)}
           overrideLock as boolean,
           locale as string | undefined,
           fallbackLocale as string | undefined,
-          select as string | undefined,
+          select as Record<string, unknown> | undefined,
         )
       },
     )

@@ -11,7 +11,7 @@ Payload's navigation controls support the Admin Panel's menu, collapsible groups
 ## Import
 
 ```tsx
-import { Hamburger, NavGroup, NavToggler, SetStepNav } from '@payloadcms/ui'
+import { Hamburger, NavGroup, NavToggler } from '@payloadcms/ui'
 ```
 
 ## Menu state
@@ -40,18 +40,7 @@ import { Hamburger, NavGroup, NavToggler, SetStepNav } from '@payloadcms/ui'
 
 ## Step navigation
 
-`SetStepNav` updates the Admin Panel's current step navigation and renders no visible element itself.
-
-```tsx
-<SetStepNav
-  nav={[
-    { label: 'Collection', url: '/admin/collections/example' },
-    { label: 'Document' },
-  ]}
-/>
-```
-
-Each item accepts a `label` and an optional `url`. Keep the `nav` array stable when possible so the context is not updated on every render.
+Use `SetStepNav` or `useStepNav` to populate the breadcrumb trail in the Admin header from a Custom View. See [Step Navigation](/docs/ui-components/step-navigation) for complete examples and API guidance.
 
 ## Common props
 
@@ -78,4 +67,4 @@ _\* An asterisk denotes that a prop is required._
 
 ## Provider requirements
 
-`NavToggler` and `NavGroup` depend on the navigation, preferences, translation, and window information supplied by the Admin Panel. `SetStepNav` depends on Payload's step navigation context. Use them within Admin Panel Custom Components rather than as standalone website navigation primitives.
+`NavToggler` and `NavGroup` depend on the navigation, preferences, translation, and window information supplied by the Admin Panel. Use them within Admin Panel Custom Components rather than as standalone website navigation primitives.

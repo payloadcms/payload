@@ -21,6 +21,7 @@ import { MediaWithThrowingHook } from './collections/MediaWithThrowingHook.js'
 import { RestrictedMedia } from './collections/RestrictedMedia.js'
 import { TestMetadata } from './collections/TestMetadata.js'
 import { Users } from './collections/Users.js'
+import { r2UploadEndpoints } from './r2.js'
 import {
   collectionPrefix,
   mediaSlug,
@@ -43,6 +44,8 @@ export type BuildPluginCloudStorageIntConfigArgs = {
   /** When false, S3 uses non-composite prefix resolution (single stored prefix segment; pre-composite behavior). */
   useCompositePrefixes: boolean
 }
+
+export const recordedCleanupTargets: Array<{ filename: string; prefix?: string }> = []
 
 export function buildPluginCloudStorageIntConfig({
   useCompositePrefixes,
@@ -163,7 +166,10 @@ export function buildPluginCloudStorageIntConfig({
       [testMetadataSlug]: {
         adapter: () => ({
           name: 'test-metadata-adapter',
-          handleDelete: () => Promise.resolve(),
+          handleDelete: ({ doc, filename }) => {
+            recordedCleanupTargets.push({ filename, prefix: doc.prefix })
+            return Promise.resolve()
+          },
           handleUpload: ({ data, file }) => {
             const metadata = {
               ...data,
@@ -179,6 +185,7 @@ export function buildPluginCloudStorageIntConfig({
           },
           staticHandler: () => new Response('Not found', { status: 404 }),
         }),
+        prefix: 'test-metadata',
       },
     },
   })
@@ -201,6 +208,7 @@ export function buildPluginCloudStorageIntConfig({
       TestMetadata,
       Users,
     ],
+    endpoints: r2UploadEndpoints,
     onInit: async (payload) => {
       /*const client = new AWS.S3({
       endpoint: process.env.S3_ENDPOINT,

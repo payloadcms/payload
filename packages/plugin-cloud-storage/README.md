@@ -98,6 +98,8 @@ Instead, all uploads will still be reached from the default `/:collectionSlug/fi
 
 If this does not apply to you (your upload collection has `read: () => true` or similar) you can disable this functionality by setting `disablePayloadAccessControl` to `true`. When this setting is in place, this plugin will update your file URLs to point directly to your cloud host.
 
+`disablePayloadAccessControl` does not disable safe outbound fetching. If Payload needs to fetch files from a private or internal storage endpoint, configure the upload collection's [`skipSafeFetch`](https://payloadcms.com/docs/upload/overview#skip-safe-fetch) option with an explicit allowlist for the trusted destination. Set `skipSafeFetch: true` only when every URL accepted by the collection is trusted.
+
 ## Credit
 
 This plugin was created with significant help, and code, from [Alex Bechmann](https://github.com/alexbechmann) and [Richard VanBergen](https://github.com/richardvanbergen). Thank you!!

@@ -29,7 +29,7 @@ export const updateGlobalTool = (
     depth: number = 0,
     locale?: string,
     fallbackLocale?: string,
-    select?: string,
+    select?: Record<string, unknown>,
   ): Promise<{
     content: Array<{
       text: string
@@ -71,24 +71,6 @@ export const updateGlobalTool = (
         }
       }
 
-      let selectClause: SelectType | undefined
-      if (select) {
-        try {
-          selectClause = JSON.parse(select) as SelectType
-        } catch (_parseError) {
-          payload.logger.warn(`[payload-mcp] Invalid select clause JSON for global: ${select}`)
-          const response = {
-            content: [{ type: 'text' as const, text: 'Error: Invalid JSON in select clause' }],
-          }
-          return (globals?.[globalSlug]?.overrideResponse?.(response, {}, req) || response) as {
-            content: Array<{
-              text: string
-              type: 'text'
-            }>
-          }
-        }
-      }
-
       const updateOptions: Parameters<typeof payload.updateGlobal>[0] = {
         slug: globalSlug,
         data: parsedData,
@@ -106,8 +88,8 @@ export const updateGlobalTool = (
       if (fallbackLocale) {
         updateOptions.fallbackLocale = fallbackLocale
       }
-      if (selectClause) {
-        updateOptions.select = selectClause
+      if (select) {
+        updateOptions.select = select as SelectType
       }
 
       const result = await payload.updateGlobal(updateOptions)
@@ -179,10 +161,10 @@ ${JSON.stringify(result)}
           'Optional: locale code to update data in (e.g., "en", "es"). Use "all" to update all locales for localized fields',
         ),
       select: z
-        .string()
+        .record(z.string(), z.unknown())
         .optional()
         .describe(
-          'Optional: define exactly which fields you\'d like to return in the response (JSON), e.g., \'{"siteName": "My Site"}\'',
+          "Optional: define exactly which fields you'd like to return in the response, e.g., {\"siteName\": true}",
         ),
     })
 
@@ -201,7 +183,7 @@ ${JSON.stringify(result)}
           depth as number,
           locale as string,
           fallbackLocale as string,
-          select as string | undefined,
+          select as Record<string, unknown> | undefined,
         )
       },
     )

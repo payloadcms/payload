@@ -924,8 +924,6 @@ test.describe('Multi Tenant', () => {
       await wait(500)
 
       await page.locator('#field-name').fill('House Rules')
-      await wait(500)
-
       await page.locator('#field-domain').fill('house-rules.com')
       await wait(500)
 

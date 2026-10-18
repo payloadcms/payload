@@ -20,6 +20,8 @@ import { Dropzone } from '@payloadcms/ui'
 
 `Dropzone` does not render a file input or open the system file picker. Render those controls as children when users should be able to browse for files in addition to dropping them.
 
+It also has no awareness of Collections or existing documents, so controls such as **Create New** and **Choose from existing** must come from the surrounding field interface.
+
 When `multipleFiles` is disabled, dropping more than one file passes only the first file to `onChange`.
 
 ## Common props

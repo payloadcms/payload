@@ -63,13 +63,15 @@ export const Media: CollectionConfig = {
 }
 ```
 
-## File selection
+## Empty state
 
-The empty `Upload` state composes Payload's `Dropzone` for drag, drop, paste, and file selection behavior.
+The empty `Upload` state composes Payload's `Dropzone` with controls for selecting a local file or pasting a remote URL.
 
-<ComponentPreview component="Dropzone" example="basic" />
+<ComponentPreview component="Dropzone" example="uploadEmptyState" />
 
 Use [`Dropzone`](/docs/ui-components/dropzone) directly when you only need file intake. Use `Upload` when the file must participate in an upload-enabled Collection's form and persistence workflow.
+
+The **Create New** and **Choose from existing** controls shown by an Upload field belong to the relationship field interface, which selects documents from an upload-enabled Collection. They are not rendered by this `Upload` component or by `Dropzone`.
 
 ## Custom actions
 

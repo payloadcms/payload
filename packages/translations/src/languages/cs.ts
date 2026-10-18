@@ -56,6 +56,7 @@ export const csTranslations: DefaultTranslationsObject = {
     newPassword: 'Nové heslo',
     passed: 'Ověření prošlo',
     passwordResetSuccessfully: 'Heslo bylo úspěšně resetováno.',
+    resend: 'Odeslat znovu',
     resetPassword: 'Resetovat heslo',
     resetPasswordExpiration: 'Expirace resetování hesla',
     resetPasswordToken: 'Token pro resetování hesla',

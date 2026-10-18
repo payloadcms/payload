@@ -65,7 +65,9 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
-  blocks: {};
+  blocks: {
+    'locale-validation-block': LocaleValidationBlock;
+  };
   collections: {
     richText: RichText;
     'blocks-fields': BlocksField;
@@ -74,6 +76,7 @@ export interface Config {
     'localized-drafts': LocalizedDraft;
     'localized-date-fields': LocalizedDateField;
     'all-fields-localized': AllFieldsLocalized;
+    'locale-validation': LocaleValidation;
     users: User;
     'localized-posts': LocalizedPost;
     'no-localized-fields': NoLocalizedField;
@@ -90,6 +93,11 @@ export interface Config {
     'blocks-same-name': BlocksSameName;
     'localized-within-localized': LocalizedWithinLocalized;
     'array-with-fallback-fields': ArrayWithFallbackField;
+    'publication-access': PublicationAccess;
+    'publication-field-access': PublicationFieldAccess;
+    'publication-before-operation': PublicationBeforeOperation;
+    'publication-async-field-hook': PublicationAsyncFieldHook;
+    'publication-hook': PublicationHook;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -104,6 +112,7 @@ export interface Config {
     'localized-drafts': LocalizedDraftsSelect<false> | LocalizedDraftsSelect<true>;
     'localized-date-fields': LocalizedDateFieldsSelect<false> | LocalizedDateFieldsSelect<true>;
     'all-fields-localized': AllFieldsLocalizedSelect<false> | AllFieldsLocalizedSelect<true>;
+    'locale-validation': LocaleValidationSelect<false> | LocaleValidationSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'no-localized-fields': NoLocalizedFieldsSelect<false> | NoLocalizedFieldsSelect<true>;
@@ -120,6 +129,11 @@ export interface Config {
     'blocks-same-name': BlocksSameNameSelect<false> | BlocksSameNameSelect<true>;
     'localized-within-localized': LocalizedWithinLocalizedSelect<false> | LocalizedWithinLocalizedSelect<true>;
     'array-with-fallback-fields': ArrayWithFallbackFieldsSelect<false> | ArrayWithFallbackFieldsSelect<true>;
+    'publication-access': PublicationAccessSelect<false> | PublicationAccessSelect<true>;
+    'publication-field-access': PublicationFieldAccessSelect<false> | PublicationFieldAccessSelect<true>;
+    'publication-before-operation': PublicationBeforeOperationSelect<false> | PublicationBeforeOperationSelect<true>;
+    'publication-async-field-hook': PublicationAsyncFieldHookSelect<false> | PublicationAsyncFieldHookSelect<true>;
+    'publication-hook': PublicationHookSelect<false> | PublicationHookSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -135,14 +149,26 @@ export interface Config {
     | ('xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu')
     | ('xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu')[];
   globals: {
+    'locale-validation-global': LocaleValidationGlobal;
     'global-array': GlobalArray;
     'global-text': GlobalText;
     'global-drafts': GlobalDraft;
+    'publication-access-global': PublicationAccessGlobal;
+    'publication-before-operation-global': PublicationBeforeOperationGlobal;
+    'publication-sanitize-global': PublicationSanitizeGlobal;
+    'publication-field-access-global': PublicationFieldAccessGlobal;
+    'publication-hook-global': PublicationHookGlobal;
   };
   globalsSelect: {
+    'locale-validation-global': LocaleValidationGlobalSelect<false> | LocaleValidationGlobalSelect<true>;
     'global-array': GlobalArraySelect<false> | GlobalArraySelect<true>;
     'global-text': GlobalTextSelect<false> | GlobalTextSelect<true>;
     'global-drafts': GlobalDraftsSelect<false> | GlobalDraftsSelect<true>;
+    'publication-access-global': PublicationAccessGlobalSelect<false> | PublicationAccessGlobalSelect<true>;
+    'publication-before-operation-global': PublicationBeforeOperationGlobalSelect<false> | PublicationBeforeOperationGlobalSelect<true>;
+    'publication-sanitize-global': PublicationSanitizeGlobalSelect<false> | PublicationSanitizeGlobalSelect<true>;
+    'publication-field-access-global': PublicationFieldAccessGlobalSelect<false> | PublicationFieldAccessGlobalSelect<true>;
+    'publication-hook-global': PublicationHookGlobalSelect<false> | PublicationHookGlobalSelect<true>;
   };
   locale: 'xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu';
   widgets: {
@@ -171,6 +197,20 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locale-validation-block".
+ */
+export interface LocaleValidationBlock {
+  confirmation?: string | null;
+  nested?: {
+    confirmation?: string | null;
+    matchingText?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'locale-validation-block';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -471,6 +511,46 @@ export interface AllFieldsLocalized {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locale-validation".
+ */
+export interface LocaleValidation {
+  id: string;
+  confirmation?: string | null;
+  matchingText?: string | null;
+  sharedJSON?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  localizedJSON?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  jsonText?: string | null;
+  arrayText?: string | null;
+  settings?: {
+    rows?:
+      | {
+          confirmation?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  layout?: LocaleValidationBlock[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -484,6 +564,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -881,6 +962,61 @@ export interface ArrayWithFallbackField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-access".
+ */
+export interface PublicationAccess {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-field-access".
+ */
+export interface PublicationFieldAccess {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-before-operation".
+ */
+export interface PublicationBeforeOperation {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-async-field-hook".
+ */
+export interface PublicationAsyncFieldHook {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-hook".
+ */
+export interface PublicationHook {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -930,6 +1066,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'all-fields-localized';
         value: string | AllFieldsLocalized;
+      } | null)
+    | ({
+        relationTo: 'locale-validation';
+        value: string | LocaleValidation;
       } | null)
     | ({
         relationTo: 'users';
@@ -994,6 +1134,26 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'array-with-fallback-fields';
         value: string | ArrayWithFallbackField;
+      } | null)
+    | ({
+        relationTo: 'publication-access';
+        value: string | PublicationAccess;
+      } | null)
+    | ({
+        relationTo: 'publication-field-access';
+        value: string | PublicationFieldAccess;
+      } | null)
+    | ({
+        relationTo: 'publication-before-operation';
+        value: string | PublicationBeforeOperation;
+      } | null)
+    | ({
+        relationTo: 'publication-async-field-hook';
+        value: string | PublicationAsyncFieldHook;
+      } | null)
+    | ({
+        relationTo: 'publication-hook';
+        value: string | PublicationHook;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1307,6 +1467,31 @@ export interface AllFieldsLocalizedSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locale-validation_select".
+ */
+export interface LocaleValidationSelect<T extends boolean = true> {
+  confirmation?: T;
+  matchingText?: T;
+  sharedJSON?: T;
+  localizedJSON?: T;
+  jsonText?: T;
+  arrayText?: T;
+  settings?:
+    | T
+    | {
+        rows?:
+          | T
+          | {
+              confirmation?: T;
+              id?: T;
+            };
+      };
+  layout?: T | {};
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -1319,6 +1504,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1731,6 +1917,56 @@ export interface ArrayWithFallbackFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-access_select".
+ */
+export interface PublicationAccessSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-field-access_select".
+ */
+export interface PublicationFieldAccessSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-before-operation_select".
+ */
+export interface PublicationBeforeOperationSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-async-field-hook_select".
+ */
+export interface PublicationAsyncFieldHookSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-hook_select".
+ */
+export interface PublicationHookSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1771,6 +2007,46 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locale-validation-global".
+ */
+export interface LocaleValidationGlobal {
+  id: string;
+  confirmation?: string | null;
+  matchingText?: string | null;
+  sharedJSON?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  localizedJSON?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  jsonText?: string | null;
+  arrayText?: string | null;
+  settings?: {
+    rows?:
+      | {
+          confirmation?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  layout?: LocaleValidationBlock[] | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-array".
  */
 export interface GlobalArray {
@@ -1791,6 +2067,7 @@ export interface GlobalArray {
 export interface GlobalText {
   id: string;
   text?: string | null;
+  localizedTextWithLength?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1804,6 +2081,87 @@ export interface GlobalDraft {
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-access-global".
+ */
+export interface PublicationAccessGlobal {
+  id: string;
+  title?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-before-operation-global".
+ */
+export interface PublicationBeforeOperationGlobal {
+  id: string;
+  title?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-sanitize-global".
+ */
+export interface PublicationSanitizeGlobal {
+  id: string;
+  title?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-field-access-global".
+ */
+export interface PublicationFieldAccessGlobal {
+  id: string;
+  title?: string | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-hook-global".
+ */
+export interface PublicationHookGlobal {
+  id: string;
+  title?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locale-validation-global_select".
+ */
+export interface LocaleValidationGlobalSelect<T extends boolean = true> {
+  confirmation?: T;
+  matchingText?: T;
+  sharedJSON?: T;
+  localizedJSON?: T;
+  jsonText?: T;
+  arrayText?: T;
+  settings?:
+    | T
+    | {
+        rows?:
+          | T
+          | {
+              confirmation?: T;
+              id?: T;
+            };
+      };
+  layout?: T | {};
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1826,6 +2184,7 @@ export interface GlobalArraySelect<T extends boolean = true> {
  */
 export interface GlobalTextSelect<T extends boolean = true> {
   text?: T;
+  localizedTextWithLength?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1839,6 +2198,61 @@ export interface GlobalDraftsSelect<T extends boolean = true> {
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-access-global_select".
+ */
+export interface PublicationAccessGlobalSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-before-operation-global_select".
+ */
+export interface PublicationBeforeOperationGlobalSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-sanitize-global_select".
+ */
+export interface PublicationSanitizeGlobalSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-field-access-global_select".
+ */
+export interface PublicationFieldAccessGlobalSelect<T extends boolean = true> {
+  title?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publication-hook-global_select".
+ */
+export interface PublicationHookGlobalSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
   globalType?: T;
 }
 /**

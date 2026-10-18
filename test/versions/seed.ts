@@ -7,7 +7,10 @@ import type { DraftPost } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { executePromises } from '../__helpers/shared/executePromises.js'
-import { generateLexicalData } from './collections/Diff/generateLexicalData.js'
+import {
+  generateLexicalData,
+  generateRelationshipLexicalData,
+} from './collections/Diff/generateLexicalData.js'
 import {
   autosaveWithDraftValidateSlug,
   diffCollectionSlug,
@@ -63,6 +66,16 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     data: {
       email: devUser.email,
       password: devUser.password,
+    },
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const { id: otherUserID } = await _payload.create({
+    collection: 'users',
+    data: {
+      email: 'editor@payloadcms.com',
+      password: 'test',
     },
     depth: 0,
     overrideAccess: true,
@@ -150,6 +163,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   const { id: doc1ID } = await _payload.create({
     collection: 'text',
     data: {
+      owner: devUserID,
       text: 'Document 1',
     },
   })
@@ -157,7 +171,16 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   const { id: doc2ID } = await _payload.create({
     collection: 'text',
     data: {
+      owner: devUserID,
       text: 'Document 2',
+    },
+  })
+
+  const { id: otherUserDocID } = await _payload.create({
+    collection: 'text',
+    data: {
+      owner: otherUserID,
+      text: 'Document 3',
     },
   })
 
@@ -273,6 +296,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
         textID: doc1ID,
         updated: false,
       }) as any,
+      richtextWithConstrainedRelationship: generateRelationshipLexicalData(otherUserDocID),
       richtextWithCustomDiff: buildEditorState<DefaultNodeTypes>({
         text: 'richtextWithCustomDiff',
       }),
@@ -444,6 +468,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
         textID: doc2ID,
         updated: true,
       }) as any,
+      richtextWithConstrainedRelationship: generateRelationshipLexicalData(doc2ID),
       richtextWithCustomDiff: buildEditorState<DefaultNodeTypes>({
         text: 'richtextWithCustomDiff2',
       }),

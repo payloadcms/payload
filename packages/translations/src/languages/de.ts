@@ -58,6 +58,7 @@ export const deTranslations: DefaultTranslationsObject = {
     newPassword: 'Neues Passwort',
     passed: 'Authentifizierung erfolgreich',
     passwordResetSuccessfully: 'Passwort erfolgreich zurückgesetzt.',
+    resend: 'Erneut senden',
     resetPassword: 'Passwort zurücksetzen',
     resetPasswordExpiration: 'Passwort-Gültigkeitsdauer zurücksetzen',
     resetPasswordToken: 'Passwort-Token zurücksetzen',

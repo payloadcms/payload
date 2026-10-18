@@ -15,6 +15,11 @@ concurrency:
 env:
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
+  NODE_OPTIONS: --max-old-space-size=4096
+  NODE_HEAP_HIGH: --max-old-space-size=8192
+
+permissions:
+  contents: read
 
 jobs:
   changes:
@@ -78,6 +83,8 @@ jobs:
 
       - name: Lint TypeScript/JavaScript
         run: pnpm lint -- --quiet
+        env:
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
 
       - name: Lint SCSS
         run: pnpm run lint:scss
@@ -118,7 +125,7 @@ jobs:
       - name: Unit Tests
         run: pnpm test:unit
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
 
   tests-types:
     runs-on: ubuntu-24.04
@@ -135,7 +142,7 @@ jobs:
       - name: Types Tests
         run: pnpm test:types --target '>=5.7'
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
 
   # Generate the integration test matrix from TypeScript config
   int-matrix:
@@ -205,7 +212,7 @@ jobs:
       - name: Integration Tests
         run: pnpm test:int --shard=${{ matrix.shard }}/${{ matrix.total-shards }}
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
@@ -433,7 +440,7 @@ jobs:
           pnpm run script:pack --all --dest templates/${{ matrix.template }}
           pnpm run script:build-template-with-local-pkgs ${{ matrix.template }} $DB_CONNECTION
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           DB_CONNECTION: ${{ steps.db.outputs.POSTGRES_URL || steps.db.outputs.MONGODB_URL }}
 
       - name: Store Playwright's Version
@@ -462,7 +469,7 @@ jobs:
       - name: Runs Template Int Tests
         run: pnpm --filter ${{ matrix.template }} run test:int
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
@@ -470,7 +477,7 @@ jobs:
       - name: Runs Template E2E Tests
         run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.template }}.json pnpm --filter ${{ matrix.template }} test:e2e
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
@@ -638,7 +645,7 @@ jobs:
         continue-on-error: true
         run: pnpm test:int:summary
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           PAYLOAD_DATABASE: content-api
 
       - name: Dump Content API logs on failure

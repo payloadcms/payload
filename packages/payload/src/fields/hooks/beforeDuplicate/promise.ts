@@ -60,6 +60,11 @@ export const promise = async <T>({
   const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
 
   if (fieldAffectsData(field)) {
+    if ('disableDuplicate' in field && field.disableDuplicate) {
+      delete siblingDoc[field.name]
+      return
+    }
+
     let fieldData = siblingDoc?.[field.name!]
     const fieldIsLocalized = localization && fieldShouldBeLocalized({ field, parentIsLocalized })
 

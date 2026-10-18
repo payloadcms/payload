@@ -446,12 +446,12 @@ All collection and global tools accept an optional `select` parameter. It limits
 fields are returned in the response, which can significantly reduce token consumption
 when working with large documents.
 
-`select` is a JSON string that follows [Payload's Select API](https://payloadcms.com/docs/queries/select)
+`select` is an object that follows [Payload's Select API](https://payloadcms.com/docs/queries/select)
 syntax — set a field to `true` to include it:
 
 ```ts
-// In a tool call, pass select as a JSON string:
-// arguments: { select: '{"title": true, "slug": true}' }
+// In a tool call, pass select as an object:
+// arguments: { select: { title: true, slug: true } }
 ```
 
 For example, to list only post titles:
@@ -469,7 +469,7 @@ curl -i 'http://localhost:3000/api/mcp' \
     "params": {
       "name": "findPosts",
       "arguments": {
-        "select": "{\"title\": true, \"slug\": true}"
+        "select": { "title": true, "slug": true }
       }
     }
   }'
@@ -759,11 +759,11 @@ mcpPlugin({
 
 By default, the full document is returned for every operation. On collections with
 many fields, rich text, or deeply nested relationships this can be very large. Pass
-a `select` JSON string to limit what comes back:
+a `select` object to limit what comes back:
 
 ```bash
 # Return only title and slug instead of the full document
--d '{"jsonrpc":"2.0","id":"1","method":"tools/call","params":{"name":"findPosts","arguments":{"select":"{\"title\": true, \"slug\": true}"}}}'
+-d '{"jsonrpc":"2.0","id":"1","method":"tools/call","params":{"name":"findPosts","arguments":{"select":{"title":true,"slug":true}}}}'
 ```
 
 See [Reducing Token Usage with `select`](#reducing-token-usage-with-select) for more detail.

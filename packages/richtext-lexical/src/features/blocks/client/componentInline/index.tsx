@@ -191,14 +191,14 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
 
   const clientSchemaMap = featureClientSchemaMap['blocks']
 
-  const blocksField: BlocksFieldClient = clientSchemaMap?.[
-    componentMapRenderedBlockPath
-  ]?.[0] as BlocksFieldClient
+  const blocksField = clientSchemaMap?.[componentMapRenderedBlockPath]?.[0] as
+    | BlocksFieldClient
+    | undefined
 
-  const clientBlock: ClientBlock | undefined = blocksField.blockReferences
-    ? typeof blocksField?.blockReferences?.[0] === 'string'
-      ? config.blocksMap[blocksField?.blockReferences?.[0]]
-      : blocksField?.blockReferences?.[0]
+  const clientBlock: ClientBlock | undefined = blocksField?.blockReferences
+    ? typeof blocksField.blockReferences[0] === 'string'
+      ? config.blocksMap[blocksField.blockReferences[0]]
+      : blocksField.blockReferences[0]
     : blocksField?.blocks?.[0]
 
   const clientBlockFields = clientBlock?.fields ?? []
@@ -289,7 +289,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
       }
     }
 
-    if (formData && !initialState) {
+    if (clientBlock && formData && !initialState) {
       void awaitInitialState()
     }
 
@@ -311,6 +311,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
     globalSlug,
     getDocPreferences,
     parentDocumentFields,
+    clientBlock,
   ])
 
   /**
