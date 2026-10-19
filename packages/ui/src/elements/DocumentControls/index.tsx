@@ -210,9 +210,9 @@ export const DocumentControls: React.FC<DocumentControlsProps> = (props) => {
 
   const showDotMenu = Boolean(
     !disableActions &&
-      (EditMenuItems ||
-        (collectionConfig && id && (hasCreatePermission || hasDeletePermission)) ||
-        (globalConfig && (globalHasDraftsEnabled || localization))),
+    (EditMenuItems ||
+      (collectionConfig && id && (hasCreatePermission || hasDeletePermission)) ||
+      (globalConfig && (globalHasDraftsEnabled || localization))),
   )
   const collectionAutosaveEnabled = hasAutosaveEnabled(collectionConfig)
   const globalAutosaveEnabled = hasAutosaveEnabled(globalConfig)

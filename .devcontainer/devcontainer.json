@@ -29,7 +29,7 @@
       "extensions": [
         "anthropic.claude-code",
         "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode",
+        "oxc.oxc-vscode",
         "eamodio.gitlens",
         "hverlin.mise-vscode",
         "stylelint.vscode-stylelint",

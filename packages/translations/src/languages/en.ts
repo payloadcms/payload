@@ -589,7 +589,7 @@ export const enTranslations = {
       'Add custom instructions for the {{label}} collection to help LLMs tailor better prompt responses.',
     collectionSystemDescription:
       'These system instructions are provided by the collection’s config file and are always included.',
-    editInstructions: 'Edit LLM instructions',
+    editInstructions: 'Edit agent instructions',
     global: 'Global',
     globalDescription:
       'Add custom instructions for the {{label}} global to help LLMs tailor better prompt responses.',
