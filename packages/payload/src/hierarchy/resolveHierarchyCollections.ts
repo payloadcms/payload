@@ -70,7 +70,7 @@ export const resolveHierarchyCollections = (config: Config): void => {
         fieldAffectsData(field) &&
         field.name === parentFieldName &&
         field.type === 'relationship' &&
-        (field as RelationshipField).relationTo === hierarchyCollection.slug,
+        field.relationTo === hierarchyCollection.slug,
     ) as RelationshipField | undefined
 
     // Check if the hierarchy collection's own parent field should be replaced with a header button
@@ -95,7 +95,7 @@ export const resolveHierarchyCollections = (config: Config): void => {
           fieldAffectsData(field) &&
           field.name === defaultFieldName &&
           field.type === 'relationship' &&
-          (field as RelationshipField).relationTo === hierarchyCollection.slug,
+          field.relationTo === hierarchyCollection.slug,
       ) as RelationshipField | undefined
 
       // If parentFieldName is overridden, rename the field to match
@@ -139,7 +139,7 @@ export const resolveHierarchyCollections = (config: Config): void => {
     if (hierarchyConfig.collectionSpecific) {
       injectTypeField({
         config,
-        hierarchyCollection: hierarchyCollection as SanitizedCollectionConfig,
+        hierarchyCollection,
         parentFieldName: hierarchyConfig.parentFieldName,
         sanitizedRelatedCollections,
         typeFieldName: hierarchyConfig.collectionSpecific.fieldName,
@@ -165,7 +165,7 @@ export const resolveHierarchyCollections = (config: Config): void => {
     // Add afterDelete hook to clear folder references from related documents
     if (Object.keys(sanitizedRelatedCollections).length > 0) {
       injectAfterDeleteHook({
-        hierarchyCollection: hierarchyCollection as SanitizedCollectionConfig,
+        hierarchyCollection,
         sanitizedRelatedCollections,
       })
     }

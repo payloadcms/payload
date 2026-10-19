@@ -1165,7 +1165,7 @@ async function createTextFieldDoc(overrides?: Partial<TextField>): Promise<TextF
       ...overrides,
     },
     overrideAccess: true,
-  }) as unknown as Promise<TextField>
+  })
 }
 
 async function createRelationshipFieldDoc(
@@ -1179,5 +1179,5 @@ async function createRelationshipFieldDoc(
       ...overrides,
     },
     overrideAccess: true,
-  }) as unknown as Promise<RelationshipField>
+  })
 }

@@ -1455,23 +1455,23 @@ describe('Locked Documents', () => {
     beforeEach(async ({ browser }, testInfo) => {
       testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
-      simpleDoc = (await payload.create({
+      simpleDoc = await payload.create({
         collection: 'simple',
         data: {
           fieldA: 'Original A',
           fieldB: 'Original B',
         },
         overrideAccess: true,
-      })) as unknown as Simple
+      })
 
-      simpleWithVersionsDoc = (await payload.create({
+      simpleWithVersionsDoc = await payload.create({
         collection: 'simple-with-versions',
         data: {
           fieldA: 'Original A',
           fieldB: 'Original B',
         },
         overrideAccess: true,
-      })) as unknown as SimpleWithVersion
+      })
 
       // Create a second browser context for user 2 (user 1 uses the parent test's page)
       user2Context = await browser.newContext()
@@ -1754,14 +1754,14 @@ describe('Locked Documents', () => {
         const createdAutosaveIDs: string[] = []
 
         // Create an autosave document
-        const autosaveDoc = (await payload.create({
+        const autosaveDoc = await payload.create({
           collection: 'autosave',
           data: {
             fieldA: 'Initial Value',
             fieldB: 'Initial Value B',
           },
           overrideAccess: true,
-        })) as unknown as Autosave
+        })
 
         createdAutosaveIDs.push(autosaveDoc.id)
 
@@ -2210,7 +2210,7 @@ async function createPageDoc(data: Partial<PageType>): Promise<PageType> {
     collection: 'pages',
     data,
     overrideAccess: true,
-  }) as unknown as Promise<PageType>
+  })
 }
 
 async function createPostDoc(data: Partial<Post>): Promise<Post> {
@@ -2218,7 +2218,7 @@ async function createPostDoc(data: Partial<Post>): Promise<Post> {
     collection: 'posts',
     data,
     overrideAccess: true,
-  }) as unknown as Promise<Post>
+  })
 }
 
 async function createTestDoc(data: Partial<Test>): Promise<Test> {
@@ -2226,5 +2226,5 @@ async function createTestDoc(data: Partial<Test>): Promise<Test> {
     collection: 'tests',
     data,
     overrideAccess: true,
-  }) as unknown as Promise<Test>
+  })
 }
