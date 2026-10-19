@@ -46,6 +46,7 @@ import {
   openVersionComparison,
   openVersionsList,
   openWidgetDrawer,
+  waitForKeyboardDragActivation,
 } from './helpers.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -168,6 +169,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
         await handle.focus()
         await screenReader.press('Space')
         await expect(handle).toHaveAttribute('aria-pressed', 'true')
+        await waitForKeyboardDragActivation({ page })
         try {
           const output = await captureScreenReaderOutput({
             action: () =>
@@ -452,6 +454,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
         try {
           await screenReader.press('Space')
           await expect(handle).toHaveAttribute('aria-pressed', 'true')
+          await waitForKeyboardDragActivation({ page })
           await screenReader.press(process.platform === 'darwin' ? 'Meta+ArrowDown' : 'ArrowDown')
           await expect
             .poll(async () => (await rows.nth(1).boundingBox())!.y)
