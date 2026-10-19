@@ -4,6 +4,7 @@ import { chromium, expect } from '@playwright/test'
 import { createPresentation } from './presentation-demo.mjs'
 
 const html = `<!doctype html><html><body style="margin:40px;font:20px system-ui">
+<style>button:focus-visible { outline:2px solid rgb(120,50,180); outline-offset:3px }</style>
 <button id="first">First control</button><button id="second">Second control</button>
 <input aria-label="Private" type="password"><input aria-label="Title">
 <div role="status" id="status"></div><div aria-live="off" id="off"></div>
@@ -82,38 +83,30 @@ test('should show trusted navigation keys without exposing ordinary or password 
   })
 })
 
-test('should track focus in scaled application and dialogs without covering controls', async () => {
+test('should preserve application focus styling in dialogs and scaled views without adding an outline', async () => {
   await withPresentation({
     run: async ({ stage, app, presentation }) => {
-      await app.locator('#second').focus()
-      const highlight = stage.locator('[data-focus-highlight]')
-      await expect(highlight).toBeVisible()
-      const target = await app.locator('#second').boundingBox()
-      const box = await highlight.boundingBox()
-      for (const key of ['x', 'y', 'width', 'height'])
-        assert.ok(Math.abs(target[key] - box[key]) < 2, key)
-      await expect(highlight).toHaveCSS('pointer-events', 'none')
+      await app.locator('#first').focus()
+      await stage.keyboard.press('Tab')
+      await expect(app.locator('#second')).toBeFocused()
+      await expect(app.locator('#second')).toHaveCSS('outline-color', 'rgb(120, 50, 180)')
+      await expect(app.locator('#second')).toHaveCSS('outline-width', '2px')
+      await expect(app.locator('#second')).toHaveCSS('outline-offset', '3px')
+      await expect(stage.locator('[data-focus-highlight]')).toHaveCount(0)
       const panel = await stage.locator('[data-accessibility]').boundingBox()
       const application = await stage.locator('[data-pr-demo-app]').boundingBox()
       assert.ok(panel.y + panel.height <= application.y)
       await app.locator('dialog').evaluate((el) => el.showModal())
-      await expect(app.getByRole('button', { name: 'Dialog action' })).toBeFocused()
-      await expect
-        .poll(async () => {
-          const focused = await app.getByRole('button', { name: 'Dialog action' }).boundingBox()
-          const overlay = await highlight.boundingBox()
-          return Math.abs(focused.x - overlay.x) < 2 && Math.abs(focused.y - overlay.y) < 2
-        })
-        .toBe(true)
+      const action = app.getByRole('button', { name: 'Dialog action' })
+      await expect(action).toBeFocused()
+      await expect(action).toHaveCSS('outline-color', 'rgb(120, 50, 180)')
+      await expect(stage.locator('[data-focus-highlight]')).toHaveCount(0)
       await app.locator('dialog').evaluate((el) => el.close())
       await presentation.resizeWindow({ width: 600, height: 700, duration: 0 })
-      await expect
-        .poll(async () => {
-          const focused = await app.locator('#second').boundingBox()
-          const overlay = await highlight.boundingBox()
-          return Math.abs(focused.x - overlay.x) < 2 && Math.abs(focused.y - overlay.y) < 2
-        })
-        .toBe(true)
+      await expect(app.locator('#second')).toBeFocused()
+      await expect(app.locator('#second')).toHaveCSS('outline-width', '2px')
+      await expect(app.locator('#second')).toHaveCSS('outline-color', 'rgb(120, 50, 180)')
+      await expect(stage.locator('[data-focus-highlight]')).toHaveCount(0)
     },
   })
 })

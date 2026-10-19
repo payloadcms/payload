@@ -246,20 +246,20 @@ export const presentation = {
   change: {
     kind: 'Fix',
     title: 'Reorder sections with the keyboard',
-    description: 'Keep focus and movement feedback visible.',
+    description: 'Follow keyboard commands and movement announcements.',
   },
 }
 ```
 
 Navigation keys and shortcuts appear horizontally on the right of a full-width feedback row beneath the change description and current annotation step. The latest command is first and visually stronger, followed by up to three previous commands in muted neutral colors. Each shortcut key has its own keycap, with plain `+` separators (for example, `Shift` + `Tab`). History persists until navigation or a presentation reset; oldest commands may clip when space is limited. Ordinary character typing, spaces typed into editable fields, and input originating in password fields or `[data-private]` containers are excluded.
 
-To show observed live-region text, also set `presentation.showAnnouncements: true`. The text appears on one line beside a speaking-person icon and blue a11y badge on the left of the feedback row, with animated key history on the right. A horizontal divider separates the row from the main content. Long announcements ellipsize rather than expanding the panel. This captures DOM text, not actual screen-reader audio. The entire feedback area is hidden from assistive technology and cannot intercept pointer input. The row remains visible when the step annotation is hidden. The supplemental focus outline follows the actual focused element, including dialogs, scrolling, and viewport scaling, without replacing native focus styling or changing focus.
+To show observed live-region text, also set `presentation.showAnnouncements: true`. The text appears on one line beside a speaking-person icon and blue a11y badge on the left of the feedback row, with animated key history on the right. A horizontal divider separates the row from the main content. Long announcements ellipsize rather than expanding the panel. This captures DOM text, not actual screen-reader audio. The entire feedback area is hidden from assistive technology and cannot intercept pointer input. The row remains visible when the step annotation is hidden. The recorder leaves application focus and native focus styling unchanged; it adds no focus outline or focus-tracking loop.
 
 Use real keyboard events such as `page.keyboard.press('Tab')` and `page.keyboard.press('Enter')`. Keep pauses around important commands so viewers can follow them. Accessibility mode reserves a fixed 168px annotation panel rather than the usual 112px; there is no separate bottom panel. Arriving commands do not shift the panel or application. Preview at `http://127.0.0.1:4400/?accessibility&announcements&kind=fix` after starting the chrome preview server.
 
 ### Reuse a scenario with or without a11y feedback
 
-Pass `--a11y on` or `--a11y off` to `prepare-demo.mjs` for candidate, preview, or validate mode, or to `record-demo.mjs`. `on` enables the integrated feedback, key history, supplemental focus outline, and observed announcement captions; `off` disables the entire a11y presentation and observer. Omitting the flag preserves `presentation.accessibility` and `presentation.showAnnouncements`. These options do not change application accessibility or the walkthrough script. Use different take labels to keep each result reviewable. The candidate manifest records the override, cursor timing, click pauses, and viewport alongside the unchanged scenario snapshot.
+Pass `--a11y on` or `--a11y off` to `prepare-demo.mjs` for candidate, preview, or validate mode, or to `record-demo.mjs`. `on` enables the integrated feedback, key history, and observed announcement captions; `off` disables the entire a11y presentation and observer. Omitting the flag preserves `presentation.accessibility` and `presentation.showAnnouncements`. These options do not change application accessibility or the walkthrough script. Use different take labels to keep each result reviewable. The candidate manifest records the override, cursor timing, click pauses, and viewport alongside the unchanged scenario snapshot.
 
 ```sh
 node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs candidate --scenario /tmp/demo.mjs --a11y on --label demo-a11y

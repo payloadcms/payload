@@ -13,7 +13,7 @@ const chrome = mountDemoChrome({
     kind: new URLSearchParams(location.search).get('kind') === 'fix' ? 'Fix' : 'Feature',
     title: isAccessibility ? 'Make keyboard interactions visible' : 'Responsive collection lists',
     description: isAccessibility
-      ? 'Follow keyboard input and the active control.'
+      ? 'Follow keyboard input and movement announcements.'
       : 'Browse and manage content on desktop, tablet, and mobile.',
   },
 })

@@ -76,7 +76,7 @@ export function mountDemoChrome({
     .body { font-size:16px; color:var(--sub); overflow-wrap:anywhere; }
     .accessibility { grid-column:1 / -1; align-self:stretch; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,420px); align-items:center; gap:28px; padding-block-start:12px; border-block-start:1px solid var(--line); pointer-events:none; }
     .a11y-badge { flex:none; align-self:center; --kind-bg:var(--kind-feature-bg); --kind-border:var(--kind-feature-border); --kind-text:var(--kind-feature-text); }
-    .accessibility[hidden], .focus-highlight[hidden], .keystroke-overlay[hidden] { display:none; }
+    .accessibility[hidden], .keystroke-overlay[hidden] { display:none; }
     .announcement-line { display:flex; align-items:center; gap:8px; min-width:0; color:var(--sub); font-size:13px; line-height:20px; }
     .speaking-icon { width:18px; height:18px; flex:none; }
     .announcement { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -87,7 +87,7 @@ export function mountDemoChrome({
     .keystroke[data-keystroke] { font-weight:600; }
     .keystroke kbd { display:inline-block; padding:1px 7px; border:1px solid var(--keycap-border); border-radius:var(--radius-medium,5px); background:var(--keycap-bg); color:var(--keycap-text); box-shadow:var(--elevation-300-tooltip,0 3px 8px #00000024); font:inherit; white-space:nowrap; }
     .key-separator { font:inherit; }
-    .focus-highlight { position:absolute; z-index:2; pointer-events:none; border:3px solid var(--color-bg-brand,#007be5); box-shadow:0 0 0 2px white, inset 0 0 0 1px white; border-radius:4px; }
+
   </style>
   <div class="stage ${theme}" data-canvas>
     <section class="footer" data-footer aria-label="Demo description">
@@ -97,7 +97,7 @@ export function mountDemoChrome({
     </section>
     <div class="window" data-window>
       <div class="header"><div class="dots" aria-hidden="true"><span></span><span></span><span></span></div><div class="header-info" data-header-info><span class="refresh" data-refresh role="status" aria-live="polite" aria-atomic="true" hidden><svg data-refresh-icon aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path data-refresh-path d="M13 6a5.2 5.2 0 1 0 .1 4M13 2v4H9" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-refresh-text></span></span><span class="size" data-size></span></div></div>
-      <div class="content" data-content><slot name="content"></slot>${accessibility ? '<div class="focus-highlight" data-focus-highlight aria-hidden="true" hidden></div>' : ''}</div>
+      <div class="content" data-content><slot name="content"></slot></div>
     </div>
 
   </div>`
@@ -112,7 +112,6 @@ export function mountDemoChrome({
     for (const animation of keyAnimations) animation.cancel()
     keyAnimations.clear()
   }
-  let focusRect
   let refreshTimer
   let currentViewport = viewport
   let isDestroyed = false
@@ -243,7 +242,7 @@ export function mountDemoChrome({
   }
 
   return {
-    setAccessibilityState({ key, focus, announcement, reset = false }) {
+    setAccessibilityState({ key, announcement, reset = false }) {
       if (!accessibility || isDestroyed) return
       if (reset) {
         cancelKeyAnimations()
@@ -251,7 +250,6 @@ export function mountDemoChrome({
         find('[data-keystroke-overlay]').innerHTML =
           '<span class="keystroke" data-keystroke></span>'
         if (hasAnnouncements) find('[data-announcement]').textContent = 'Waiting for an update…'
-        find('[data-focus-highlight]').hidden = true
       }
       if (key) {
         const history = find('[data-keystroke-overlay]')
@@ -308,18 +306,6 @@ export function mountDemoChrome({
             animation.onfinish = () => keyAnimations.delete(animation)
           }
         }
-      }
-      if (focus !== undefined) {
-        focusRect = focus
-        const highlight = find('[data-focus-highlight]')
-        highlight.hidden = !focusRect
-        if (focusRect)
-          Object.assign(highlight.style, {
-            left: `${focusRect.x}px`,
-            top: `${focusRect.y}px`,
-            width: `${focusRect.width}px`,
-            height: `${focusRect.height}px`,
-          })
       }
       if (hasAnnouncements && announcement) find('[data-announcement]').textContent = announcement
     },

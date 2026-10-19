@@ -2,9 +2,6 @@
 export function observeAccessibility({ window: target = window, report }) {
   const document = target.document
   let observer
-  let animation
-  let lastFocus = ''
-  let isStopped = false
   const regionSelector = '[aria-live], [role="status"], [role="alert"], [role="log"]'
   const normalize = (text) => (text ?? '').replace(/\s+/g, ' ').trim()
   const keys = {
@@ -50,29 +47,6 @@ export function observeAccessibility({ window: target = window, report }) {
         .filter(Boolean)
         .join(' + '),
     })
-  }
-  const trackFocus = () => {
-    if (isStopped) return
-    let element = document.activeElement
-    while (element?.shadowRoot?.activeElement) element = element.shadowRoot.activeElement
-    let focus = null
-    if (document.hasFocus() && element && !['BODY', 'HTML', 'IFRAME'].includes(element.tagName)) {
-      const rect = element.getBoundingClientRect()
-      if (
-        element.isConnected &&
-        rect.width &&
-        rect.height &&
-        target.getComputedStyle(element).visibility !== 'hidden'
-      ) {
-        focus = { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
-      }
-    }
-    const serialized = JSON.stringify(focus)
-    if (serialized !== lastFocus) {
-      lastFocus = serialized
-      report({ focus })
-    }
-    animation = target.requestAnimationFrame(trackFocus)
   }
   const captionRegion = (region) => {
     if (!region?.isConnected) return
@@ -122,15 +96,12 @@ export function observeAccessibility({ window: target = window, report }) {
       attributes: true,
       attributeFilter: ['aria-busy', 'aria-hidden', 'aria-live', 'hidden'],
     })
-    trackFocus()
   }
   if (document.readyState === 'loading')
     document.addEventListener('DOMContentLoaded', start, { once: true })
   else start()
   return () => {
-    isStopped = true
     observer?.disconnect()
-    target.cancelAnimationFrame(animation)
     document.removeEventListener('keydown', keydown, true)
     document.removeEventListener('DOMContentLoaded', start)
   }

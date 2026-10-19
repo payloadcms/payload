@@ -122,7 +122,7 @@ test('should preview accessibility observations from real keyboard interactions'
     await expect(page.locator('[data-keystroke]')).toHaveText('Shift + Tab')
     await page.keyboard.press('Enter')
     await expect(page.locator('[data-keystroke]')).toHaveText('Enter')
-    await expect(page.locator('[data-focus-highlight]')).toBeVisible()
+    await expect(page.locator('[data-focus-highlight]')).toHaveCount(0)
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await page.getByRole('button', { name: 'Refresh frame', exact: true }).click()
     await clickIntroduction()
