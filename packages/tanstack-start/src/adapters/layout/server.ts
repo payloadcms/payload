@@ -5,13 +5,13 @@ import type { ReactElement, ReactNode } from 'react'
 
 import { NestProviders } from '@payloadcms/ui/layouts/NestProviders'
 import { getRootLayoutData } from '@payloadcms/ui/layouts/Root/getRootLayoutData'
-import { Outlet } from '@tanstack/react-router'
 import { renderServerComponent } from '@tanstack/react-start/rsc'
 import { createElement } from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Register the client boundary in the Flight model.
 import { PayloadRootProviders } from '../../exports/client/layout.js'
 import { initAdminContext } from '../../utilities/initAdminContext.server.js'
+import { PayloadOutlet } from './outlet.js'
 
 export type LoadLayoutDataResult = {
   layout: RenderableServerComponent<ReactElement>
@@ -63,7 +63,7 @@ export async function getLayoutData({
     }
 
     providers = createElement(NestProviders, {
-      children: createElement(Outlet),
+      children: createElement(PayloadOutlet),
       importMap,
       providers: providerPaths,
       serverProps,
