@@ -473,8 +473,7 @@ export const arTranslations: DefaultTranslationsObject = {
     requiredFields: 'الحقول المميزة بعلامة * مطلوبة.',
     reset: 'إعادة تعيين',
     resetPreferences: 'إعادة تعيين التفضيلات',
-    resetPreferencesDescription:
-      'سيؤدي ذلك إلى إعادة تعيين جميع تفضيلاتك إلى الإعدادات الافتراضية.',
+    resetPreferencesDescription: 'سيؤدي ذلك إلى إعادة تعيين جميع تفضيلاتك إلى الإعدادات الافتراضية.',
     resettingPreferences: 'إعادة تعيين التفضيلات.',
     restore: 'استعادة',
     restoreAsPublished: 'استعادة كإصدار منشور',

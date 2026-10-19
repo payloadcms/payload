@@ -11,7 +11,7 @@ permissions: {}
 jobs:
   dispatch-sync:
     if: ${{ github.repository == 'payloadcms/payload' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     environment: mirror-dispatch
     steps:
       - name: Require mirror target

@@ -1,8 +1,8 @@
 @layer payload-default {
   .tabs-field {
     margin-top: var(--spacer-6);
-    margin-left: calc(var(--gutter-h) * -1);
-    margin-right: calc(var(--gutter-h) * -1);
+    margin-inline-start: calc(var(--gutter-h) * -1 * var(--field-border-bleed, 1));
+    margin-inline-end: calc(var(--gutter-h) * -1 * var(--field-border-bleed, 1));
   }
 
   .tabs-field--hidden {
@@ -10,24 +10,24 @@
   }
 
   .tabs-field__content-wrap {
-    padding-left: var(--gutter-h);
-    padding-right: var(--gutter-h);
+    padding-inline-start: calc(var(--gutter-h) * var(--field-border-bleed, 1));
+    padding-inline-end: calc(var(--gutter-h) * var(--field-border-bleed, 1));
   }
 
   .tabs-field--within-collapsible {
-    margin: 0 calc(var(--spacer-3) * -1);
+    margin: 0 calc(var(--spacer-3) * -1 * var(--field-border-bleed, 1));
 
     .tabs-field__content-wrap {
-      padding-left: var(--spacer-3);
-      padding-right: var(--spacer-3);
+      padding-inline-start: calc(var(--spacer-3) * var(--field-border-bleed, 1));
+      padding-inline-end: calc(var(--spacer-3) * var(--field-border-bleed, 1));
     }
 
     .tabs-field__tabs {
       &:before,
       &:after {
         content: ' ';
-        display: block;
-        width: var(--spacer-2);
+        display: var(--field-tabs-edge-display, block);
+        width: calc(var(--spacer-2) * var(--field-border-bleed, 1));
       }
     }
   }
@@ -51,8 +51,8 @@
     &:before,
     &:after {
       content: ' ';
-      display: block;
-      width: calc(var(--gutter-h) - var(--spacer-2));
+      display: var(--field-tabs-edge-display, block);
+      width: max(0px, calc(var(--gutter-h) * var(--field-border-bleed, 1) - var(--spacer-2)));
       flex-shrink: 0;
     }
   }
@@ -62,14 +62,14 @@
   }
 
   .tabs-field__description {
-    margin-bottom: var(--spacer-4);
+    margin-bottom: var(--spacer-6);
   }
 
   /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .tabs-field--within-collapsible {
-      margin-left: calc(var(--gutter-h) * -1);
-      margin-right: calc(var(--gutter-h) * -1);
+      margin-inline-start: calc(var(--gutter-h) * -1 * var(--field-border-bleed, 1));
+      margin-inline-end: calc(var(--gutter-h) * -1 * var(--field-border-bleed, 1));
     }
   }
 }

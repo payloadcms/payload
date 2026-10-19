@@ -222,6 +222,31 @@ describe('Uploads', () => {
     await expect(imageUpload).toBeVisible()
   })
 
+  test('should show a readable file size in the upload collection list', async () => {
+    await payload.create({
+      collection: mediaSlug,
+      data: {},
+      file: {
+        data: Buffer.alloc(1536, 'a'),
+        name: 'size-test.txt',
+        mimetype: 'text/plain',
+        size: 1536,
+      },
+      overrideAccess: true,
+    })
+
+    await page.goto(mediaURL.list)
+    await toggleColumns({
+      columns: [{ columnLabel: 'File Size', targetState: 'on' }],
+      page,
+      shouldCloseListColumns: true,
+    })
+
+    const row = page.locator('tbody tr', { hasText: 'size-test-original.txt' })
+
+    await expect(row.locator('.cell-filesize')).toHaveText('1.5KB')
+  })
+
   test('should see upload filename in relation list', async () => {
     await page.goto(relationURL.list)
     const field = page.locator('.cell-image')
@@ -1397,6 +1422,32 @@ describe('Uploads', () => {
 
     expect(href).toMatch(/\/api\/admin-thumbnail-size\/file\/test-image-original(-\d+)?\.png$/i)
     expect(href).not.toMatch(/-\d+x\d+\.png$/)
+  })
+
+  test('should add uploads to a hasMany field after the bulk upload drawer was closed without uploading', async () => {
+    await gotoAndWaitForForm(page, uploadsOne.create)
+
+    const createNewButton = page.locator('#field-hasManyThumbnailUpload button', {
+      hasText: exactText('Create New'),
+    })
+    const bulkUploadModal = page.locator('#hasManyThumbnailUpload-bulk-upload-modal-slug-1')
+
+    await createNewButton.click()
+    await expect(bulkUploadModal).toBeVisible()
+    await bulkUploadModal.getByRole('button', { name: 'Close' }).click()
+    await expect(bulkUploadModal).toBeHidden()
+
+    await createNewButton.click()
+    await expect(bulkUploadModal).toBeVisible()
+    await bulkUploadModal
+      .locator('.dropzone input[type="file"]')
+      .setInputFiles([path.resolve(dirname, './test-image.png')])
+    await bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button').click()
+    await closeAllToasts(page)
+
+    await expect(
+      page.locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem'),
+    ).toHaveCount(1)
   })
 
   test('should show preview button if image sizes are defined but crop and focal point are not', async () => {
