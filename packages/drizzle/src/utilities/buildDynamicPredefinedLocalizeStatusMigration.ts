@@ -88,7 +88,7 @@ export const buildDynamicPredefinedLocalizeStatusMigration = ({
             snapshot.tables[localesKey] = locales
           }
 
-          locales.columns.version__status = statusColumn({ isPostgres, name: 'version__status' })
+          locales.columns.version__status = statusColumn({ name: 'version__status', isPostgres })
           removeColumns({ names: ['version__status'], table: versions })
 
           const main = snapshot.tables[tableKey]
@@ -101,7 +101,7 @@ export const buildDynamicPredefinedLocalizeStatusMigration = ({
 
           if (mainLocales && !mainLocales.columns._status) {
             mainLocales.columns._status = {
-              ...statusColumn({ isPostgres, name: '_status' }),
+              ...statusColumn({ name: '_status', isPostgres }),
               default: "'draft'",
             }
           }
@@ -144,13 +144,13 @@ function removeColumns({ names, table }: { names: string[]; table: SnapshotTable
   return table
 }
 
-function statusColumn({ isPostgres, name }: { isPostgres: boolean; name: string }): SnapshotColumn {
+function statusColumn({ name, isPostgres }: { isPostgres: boolean; name: string }): SnapshotColumn {
   // The predefined migration creates VARCHAR/TEXT columns, not the config's enum columns.
   return {
     name,
+    type: isPostgres ? 'varchar' : 'text',
     notNull: false,
     primaryKey: false,
-    type: isPostgres ? 'varchar' : 'text',
     ...(!isPostgres && { autoincrement: false }),
   }
 }
@@ -165,56 +165,57 @@ function buildLocalesTable({
   const name = `${parentTable.name}_locales`
   const idType = parentTable.columns.id.type
   const parentIDType =
-    { serial: 'integer', bigserial: 'bigint', smallserial: 'smallint' }[idType] ??
+    { bigserial: 'bigint', serial: 'integer', smallserial: 'smallint' }[idType] ??
     (isPostgres && idType.startsWith('varchar(') ? 'varchar' : idType)
   const column = ({
+    type,
     columnName,
     notNull,
-    type,
   }: {
     columnName: string
     notNull: boolean
     type: string
   }): SnapshotColumn => ({
     name: columnName,
+    type,
     notNull,
     primaryKey: false,
-    type,
     ...(!isPostgres && { autoincrement: false }),
   })
 
   return {
     name,
     ...(isPostgres && { schema: parentTable.schema ?? '' }),
+    checkConstraints: {},
     columns: {
       id: {
         name: 'id',
+        type: isPostgres ? 'serial' : 'integer',
         notNull: true,
         primaryKey: true,
-        type: isPostgres ? 'serial' : 'integer',
         ...(!isPostgres && { autoincrement: false }),
       },
       _locale: column({
+        type: isPostgres ? 'varchar' : 'text',
         columnName: '_locale',
         notNull: true,
-        type: isPostgres ? 'varchar' : 'text',
       }),
-      _parent_id: column({ columnName: '_parent_id', notNull: true, type: parentIDType }),
+      _parent_id: column({ type: parentIDType, columnName: '_parent_id', notNull: true }),
     },
-    indexes: {},
+    compositePrimaryKeys: {},
     foreignKeys: {
       [`${name}__parent_id_fkey`]: {
         name: `${name}__parent_id_fkey`,
-        tableFrom: name,
-        tableTo: parentTable.name,
         columnsFrom: ['_parent_id'],
         columnsTo: ['id'],
         onDelete: 'cascade',
         onUpdate: 'no action',
+        tableFrom: name,
+        tableTo: parentTable.name,
         ...(isPostgres && parentTable.schema && { schemaTo: parentTable.schema }),
       },
     },
-    compositePrimaryKeys: {},
+    indexes: {},
     uniqueConstraints: {
       [`${name}__locale__parent_id_key`]: {
         name: `${name}__locale__parent_id_key`,
@@ -222,7 +223,6 @@ function buildLocalesTable({
         ...(isPostgres && { nullsNotDistinct: false }),
       },
     },
-    checkConstraints: {},
-    ...(isPostgres && { policies: {}, isRLSEnabled: false }),
+    ...(isPostgres && { isRLSEnabled: false, policies: {} }),
   } as SnapshotTable
 }

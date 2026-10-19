@@ -19,7 +19,7 @@ export const removeLocalizeStatusConfig: Transform = {
         if (Node.isCallExpression(node)) {
           const expression = node.getExpression()
 
-          if (isPayloadImport({ expression, name: 'buildConfig' })) {
+          if (isPayloadImport({ name: 'buildConfig', expression })) {
             const config = resolveObject({ expression: node.getArguments()[0] as Expression })
 
             if (config) {
@@ -57,7 +57,7 @@ export const removeLocalizeStatusConfig: Transform = {
 
     for (const config of configs) {
       const experimentalProperty = config.getProperty('experimental')
-      const experimental = resolvePropertyObject({ object: config, name: 'experimental' })
+      const experimental = resolvePropertyObject({ name: 'experimental', object: config })
 
       if (experimental && removeSetting({ notes, object: experimental })) {
         if (experimental.getProperties().length === 0) {
@@ -70,7 +70,7 @@ export const removeLocalizeStatusConfig: Transform = {
 
         if (array && Node.isArrayLiteralExpression(array)) {
           for (const element of array.getElements()) {
-            const entity = resolveObject({ expression: element as Expression })
+            const entity = resolveObject({ expression: element })
 
             if (entity) {
               entities.add(entity)
@@ -104,7 +104,7 @@ export const removeLocalizeStatusConfig: Transform = {
     'Remove `localizeStatus` boolean settings from versions.drafts config and `experimental.localizeStatus` from root Payload config. Per-locale status is now automatically enabled when localization is configured and the collection/global has localized fields.',
 }
 
-function isPayloadImport({ expression, name }: { expression: Node; name: string }): boolean {
+function isPayloadImport({ name, expression }: { expression: Node; name: string }): boolean {
   return (
     Node.isIdentifier(expression) &&
     Boolean(
@@ -125,7 +125,7 @@ function isPayloadImport({ expression, name }: { expression: Node; name: string 
 
 function isPayloadType({ name, type }: { name: string; type: TypeNode | undefined }): boolean {
   return Boolean(
-    type && Node.isTypeReference(type) && isPayloadImport({ expression: type.getTypeName(), name }),
+    type && Node.isTypeReference(type) && isPayloadImport({ name, expression: type.getTypeName() }),
   )
 }
 
@@ -235,7 +235,7 @@ function removeSetting({
 
   if (
     initializer &&
-    [SyntaxKind.TrueKeyword, SyntaxKind.FalseKeyword].includes(initializer.getKind())
+    [SyntaxKind.FalseKeyword, SyntaxKind.TrueKeyword].includes(initializer.getKind())
   ) {
     property.remove()
     return true
