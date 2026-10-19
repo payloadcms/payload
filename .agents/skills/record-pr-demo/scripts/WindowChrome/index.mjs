@@ -86,7 +86,8 @@ export function mountDemoChrome({
     .speaking-icon { width:18px; height:18px; flex:none; }
     .announcement { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .key-slot { flex:1; height:24px; min-width:0; padding-inline-start:12px; border-inline-start:1px solid var(--line); }
-    .keystroke-overlay { display:flex; align-items:center; gap:14px; width:100%; overflow:hidden; pointer-events:none; color:var(--ink); }
+    .keystroke-overlay { position:relative; display:flex; align-items:center; gap:14px; width:100%; overflow:hidden; pointer-events:none; color:var(--ink); }
+    .keystroke-overlay::after { content:""; position:absolute; inset-block:0; inset-inline-start:var(--history-fade-start,100%); width:var(--history-fade-width,0px); background:linear-gradient(to right,transparent,color-mix(in srgb,var(--paper) 65%,transparent)); pointer-events:none; }
     .keystroke { display:flex; flex:none; align-items:center; gap:6px; font:13px/1.5 ui-monospace,monospace; }
     .keystroke[data-key-history-entry] kbd { color:var(--sub); background:var(--paper); box-shadow:none; }
     .keystroke[data-keystroke] { font-weight:600; }
@@ -289,6 +290,13 @@ export function mountDemoChrome({
         history.prepend(chord)
         while (history.children.length > 4) history.lastElementChild.remove()
         history.hidden = false
+        const firstPrevious = history.children[1]
+        const lastPrevious = history.lastElementChild
+        history.style.setProperty('--history-fade-start', `${firstPrevious?.offsetLeft ?? 0}px`)
+        history.style.setProperty(
+          '--history-fade-width',
+          `${firstPrevious ? lastPrevious.offsetLeft + lastPrevious.offsetWidth - firstPrevious.offsetLeft : 0}px`,
+        )
         if (canAnimateAnnotationText() && history.offsetWidth > 0) {
           const scale = root.clientWidth / canvas.width
           for (const el of history.children) {
