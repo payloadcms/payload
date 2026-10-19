@@ -110,11 +110,9 @@ export const ToolbarDropdown = ({
       ? item.label({ featureClientSchemaMap, i18n, schemaPath })
       : item.label || item.key,
   )
-  const dropdownLabel =
-    groupKey === 'text' ? i18n.t('lexical:general:textStyle') : `${groupKey} dropdown`
-  const buttonAriaLabel = [
-    ...new Set([label, ...activeItemLabels, dropdownLabel].filter(Boolean)),
-  ].join(', ')
+  const dropdownLabel = groupKey === 'text' ? i18n.t('lexical:general:textStyle') : undefined
+  const buttonAriaLabel =
+    [...new Set([label, ...activeItemLabels, dropdownLabel].filter(Boolean))].join(', ') || groupKey
 
   const renderedItems = useMemo(() => {
     return items?.length
