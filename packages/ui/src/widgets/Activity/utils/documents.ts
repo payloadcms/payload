@@ -1,8 +1,8 @@
 import type { PinnedDocument } from 'payload'
 
-export type PinnedItem = PinnedDocument
+export type DocumentReference = PinnedDocument
 
-export const documentKey = ({ id, collectionSlug }: PinnedItem): string =>
+export const documentKey = ({ id, collectionSlug }: DocumentReference): string =>
   `${collectionSlug}:${String(id)}`
 
 export function getValueByPath({
@@ -25,13 +25,13 @@ export function getValueByPath({
   }, object)
 }
 
-export function getPinnedItems({ value }: { value: unknown }): PinnedItem[] {
+export function getDocumentReferences({ value }: { value: unknown }): DocumentReference[] {
   if (!value || typeof value !== 'object' || !('items' in value) || !Array.isArray(value.items)) {
     return []
   }
   const keys = new Set<string>()
 
-  return value.items.filter((item): item is PinnedItem => {
+  return value.items.filter((item): item is DocumentReference => {
     if (
       !item ||
       typeof item !== 'object' ||

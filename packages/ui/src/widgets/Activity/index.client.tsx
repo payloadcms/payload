@@ -3,7 +3,7 @@
 import React, { useId, useRef, useState } from 'react'
 
 import type { Labels } from './types.js'
-import type { DocumentsPage, DocumentsTab } from './utils/getActivityWidgetDocs.js'
+import type { ActivityDocumentsPage, ActivityDocumentType } from './utils/getActivityWidgetDocs.js'
 
 import { Button } from '../../elements/Button/index.js'
 import { WidgetCard } from '../WidgetCard/index.js'
@@ -19,7 +19,7 @@ import './index.css'
 type View = {
   /** Index of a document on the current page. Pages are derived from it for the current page size. */
   offset: number
-  tab: DocumentsTab
+  tab: ActivityDocumentType
 }
 
 /**
@@ -33,7 +33,7 @@ export function ActivityWidgetClient({
   pinsURL,
 }: {
   excludedCollections?: string[]
-  initialPages?: Partial<Record<DocumentsTab, DocumentsPage>>
+  initialPages?: Partial<Record<ActivityDocumentType, ActivityDocumentsPage>>
   labels: Labels
   pinnableCollections: string[]
   pinsURL: string
@@ -69,19 +69,19 @@ export function ActivityWidgetClient({
     pinsURL,
   })
   const recents = useActivityDocuments({
+    type: 'recents',
     excludedCollections,
     initialPage: initialPages?.recents,
     isActive: view.tab === 'recents',
     offset: view.tab === 'recents' ? view.offset : 0,
     pageSize: windowSize,
-    tab: 'recents',
   })
   const documents = view.tab === 'pinned' ? pinned : recents
   const hasPinPlaceholder = view.tab === 'pinned' && canAddPin
   const loadError = documents.hasLoadError ? labels.loadError : ''
   const saveError = view.tab === 'pinned' && pinned.hasSaveError ? labels.pinnedSaveError : ''
 
-  const selectTab = ({ tab }: { tab: DocumentsTab }) => {
+  const selectTab = ({ tab }: { tab: ActivityDocumentType }) => {
     if (pinned.isSaving) {
       return
     }

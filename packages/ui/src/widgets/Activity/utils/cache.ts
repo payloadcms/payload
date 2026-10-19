@@ -1,15 +1,19 @@
-import type { RecentDocument } from '../types.js'
-import type { DocumentsPage } from './getActivityWidgetDocs.js'
+import type { ActivityDocument } from '../types.js'
+import type { ActivityDocumentsPage } from './getActivityWidgetDocs.js'
 
 import { DOCUMENTS_BATCH_SIZE } from './constants.js'
 
 /** Loaded documents of one tab, keyed by batch index. */
 export type DocumentCache = {
-  batches: Record<number, RecentDocument[]>
+  batches: Record<number, ActivityDocument[]>
   totalDocs: number
 }
 
-export function createDocumentCache({ page }: { page?: DocumentsPage }): DocumentCache | undefined {
+export function createDocumentCache({
+  page,
+}: {
+  page?: ActivityDocumentsPage
+}): DocumentCache | undefined {
   return (
     page && {
       batches: { [page.page - 1]: page.items },
@@ -25,7 +29,7 @@ export function mergeDocumentPages({
 }: {
   cache?: DocumentCache
   isReplacing: boolean
-  pages: DocumentsPage[]
+  pages: ActivityDocumentsPage[]
 }): DocumentCache {
   const totalDocs = pages[pages.length - 1].totalDocs
   // Cached batches are only valid for the total they were loaded with.
@@ -73,7 +77,7 @@ export function getDocumentPage({
     }
   }
 
-  let items: RecentDocument[] | undefined
+  let items: ActivityDocument[] | undefined
 
   if (cache && !missingBatches.length) {
     items = []

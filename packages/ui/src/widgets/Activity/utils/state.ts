@@ -1,13 +1,13 @@
 import type { DocumentCache } from './cache.js'
-import type { PinnedItem } from './documents.js'
-import type { DocumentsPage } from './getActivityWidgetDocs.js'
+import type { DocumentReference } from './documents.js'
+import type { ActivityDocumentsPage } from './getActivityWidgetDocs.js'
 
 import { createDocumentCache, mergeDocumentPages } from './cache.js'
 import { documentKey } from './documents.js'
 
 export type DocumentState = {
   cache?: DocumentCache
-  initialPage?: DocumentsPage
+  initialPage?: ActivityDocumentsPage
   /** Set after a pin change, so cached batches are bypassed until a reload succeeds. */
   isStale: boolean
   /** Offset of the page currently shown. It only moves once the target page has loaded. */
@@ -19,9 +19,9 @@ export type DocumentState = {
 
 type Action =
   | { cache?: DocumentCache; type: 'restore' }
-  | { document: PinnedItem; type: 'remove' }
-  | { initialPage?: DocumentsPage; type: 'reset' }
-  | { offset: number; pages: DocumentsPage[]; type: 'receive' }
+  | { document: DocumentReference; type: 'remove' }
+  | { initialPage?: ActivityDocumentsPage; type: 'reset' }
+  | { offset: number; pages: ActivityDocumentsPage[]; type: 'receive' }
   | { offset: number; type: 'show' }
   | { status: DocumentState['status']; type: 'status' }
   | { type: 'refresh' }
@@ -30,7 +30,7 @@ type Action =
 export function createDocumentState({
   initialPage,
 }: {
-  initialPage?: DocumentsPage
+  initialPage?: ActivityDocumentsPage
 }): DocumentState {
   return {
     cache: createDocumentCache({ page: initialPage }),

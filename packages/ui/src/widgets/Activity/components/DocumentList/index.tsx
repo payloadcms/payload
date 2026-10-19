@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { RecentDocument } from '../../types.js'
+import type { ActivityDocument } from '../../types.js'
 
 import { CardGrid } from '../../../../elements/CardGrid/index.js'
 import { DocumentCard } from '../../../../elements/DocumentCard/index.js'
@@ -21,14 +21,14 @@ export function DocumentList({
   id: string
   /** Whether the tab has no documents, so the trailing item spans the whole row. */
   isEmpty?: boolean
-  items: RecentDocument[]
+  items: ActivityDocument[]
   label: string
-  renderActions?: (args: { item: RecentDocument }) => React.ReactNode
+  renderActions?: (args: { item: ActivityDocument }) => React.ReactNode
   trailingItem?: React.ReactNode
 }) {
   return (
     <div className="activity-widget__content" id={id}>
-      <CardGrid<null | RecentDocument>
+      <CardGrid<ActivityDocument | null>
         ariaLabel={label}
         className="activity-widget__items activity-widget__items--grid"
         getItemClassName={(item) =>

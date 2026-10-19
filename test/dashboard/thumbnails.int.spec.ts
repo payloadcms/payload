@@ -54,8 +54,8 @@ test.suite('Dashboard upload thumbnails', { config: './config.ts' }, () => {
     }
     const req = await createPayloadRequest({ payload, req: { user } })
 
-    for (const tab of ['pinned', 'recents'] as const) {
-      const result = await getActivityWidgetDocs({ limit: 4, page: 1, req, tab })
+    for (const type of ['pinned', 'recents'] as const) {
+      const result = await getActivityWidgetDocs({ type, limit: 4, page: 1, req })
 
       expect(result.items).toHaveLength(1)
       expect(result.items[0].thumbnailURL).toBe(media.thumbnailURL || media.url)
@@ -88,7 +88,7 @@ test.suite('Dashboard upload thumbnails', { config: './config.ts' }, () => {
       user,
     })
     const req = await createPayloadRequest({ payload, req: { user } })
-    const result = await getActivityWidgetDocs({ limit: 4, page: 1, req, tab: 'pinned' })
+    const result = await getActivityWidgetDocs({ type: 'pinned', limit: 4, page: 1, req })
 
     expect(result.items[0]).toMatchObject({
       thumbnailURL: media.url,
@@ -138,8 +138,8 @@ test.suite('Dashboard upload thumbnails', { config: './config.ts' }, () => {
     }
     const req = await createPayloadRequest({ payload, req: { user } })
 
-    for (const tab of ['pinned', 'recents'] as const) {
-      const result = await getActivityWidgetDocs({ limit: 4, page: 1, req, tab })
+    for (const type of ['pinned', 'recents'] as const) {
+      const result = await getActivityWidgetDocs({ type, limit: 4, page: 1, req })
 
       expect(result.items.map(({ thumbnailURL }) => thumbnailURL)).toEqual([previewURL, previewURL])
     }

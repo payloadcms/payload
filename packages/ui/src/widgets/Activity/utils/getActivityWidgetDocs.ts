@@ -4,46 +4,46 @@ import { getTranslation } from '@payloadcms/translations'
 import { UnauthorizedError } from 'payload'
 import { formatAdminURL, PREFERENCE_KEYS } from 'payload/shared'
 
-import type { RecentDocument } from '../types.js'
-import type { PinnedItem } from './documents.js'
+import type { ActivityDocument } from '../types.js'
+import type { DocumentReference } from './documents.js'
 
 import { formatRelativeDate, getRelativeTimeFormat } from '../../../utilities/formatRelativeDate.js'
 import { getDocumentThumbnail } from '../../../utilities/getDocumentThumbnail.js'
 import { getDocumentThumbnailPopulate } from '../../../utilities/getDocumentThumbnailPopulate.js'
 import { getDocumentThumbnailSelect } from '../../../utilities/getDocumentThumbnailSelect.js'
 import { enrichDocsWithVersionStatus } from '../../../views/List/enrichDocsWithVersionStatus.js'
-import { documentKey, getPinnedItems, getValueByPath } from './documents.js'
+import { documentKey, getDocumentReferences, getValueByPath } from './documents.js'
 
-export type DocumentsTab = 'pinned' | 'recents'
-export type DocumentsPageArgs = {
+export type ActivityDocumentType = 'pinned' | 'recents'
+export type ActivityDocumentsArgs = {
   excludedCollections?: string[]
   limit: number
   page: number
   shouldIncludePinPlaceholder?: boolean
-  tab: DocumentsTab
+  type: ActivityDocumentType
 }
-export type DocumentsPage = {
-  items: RecentDocument[]
+export type ActivityDocumentsPage = {
+  items: ActivityDocument[]
   page: number
   totalDocs: number
 }
 
-type Reference = { viewedAt?: string } & PinnedItem
+type Reference = { viewedAt?: string } & DocumentReference
 type QueryDoc = { id: number | string; updatedAt?: string } & Record<string, unknown>
 
 export const getActivityWidgetDocsHandler: ServerFunction<
-  DocumentsPageArgs,
-  Promise<DocumentsPage>
+  ActivityDocumentsArgs,
+  Promise<ActivityDocumentsPage>
 > = getActivityWidgetDocs
 
 export async function getActivityWidgetDocs({
+  type,
   excludedCollections = [],
   limit,
   page,
   req,
   shouldIncludePinPlaceholder = false,
-  tab,
-}: { req: PayloadRequest } & DocumentsPageArgs): Promise<DocumentsPage> {
+}: { req: PayloadRequest } & ActivityDocumentsArgs): Promise<ActivityDocumentsPage> {
   if (!req.user) {
     throw new UnauthorizedError(req.t)
   }
@@ -56,11 +56,11 @@ export async function getActivityWidgetDocs({
   ) {
     throw new Error('Invalid dashboard page')
   }
-  if (tab !== 'pinned' && tab !== 'recents') {
-    throw new Error('Invalid dashboard tab')
+  if (type !== 'pinned' && type !== 'recents') {
+    throw new Error('Invalid activity document type')
   }
 
-  const key = tab === 'pinned' ? PREFERENCE_KEYS.PINNED_DOCUMENTS : PREFERENCE_KEYS.RECENTLY_VIEWED
+  const key = type === 'pinned' ? PREFERENCE_KEYS.PINNED_DOCUMENTS : PREFERENCE_KEYS.RECENTLY_VIEWED
   const preference = await req.payload.find({
     collection: 'payload-preferences',
     depth: 0,
@@ -70,8 +70,8 @@ export async function getActivityWidgetDocs({
     user: req.user,
     where: { and: [ownerWhere({ req }), { key: { equals: key } }] },
   })
-  const excluded = new Set(tab === 'recents' ? excludedCollections : [])
-  const storedReferences = getPinnedItems({ value: preference.docs[0]?.value }).filter(
+  const excluded = new Set(type === 'recents' ? excludedCollections : [])
+  const storedReferences = getDocumentReferences({ value: preference.docs[0]?.value }).filter(
     ({ collectionSlug }) => {
       const collection = req.payload.collections[collectionSlug]
 
@@ -82,7 +82,7 @@ export async function getActivityWidgetDocs({
   const totalDocs = availableReferences.length
   const lastPage = Math.max(
     1,
-    Math.ceil((totalDocs + Number(tab === 'pinned' && shouldIncludePinPlaceholder)) / limit),
+    Math.ceil((totalDocs + Number(type === 'pinned' && shouldIncludePinPlaceholder)) / limit),
   )
 
   page = Math.min(page, lastPage)
@@ -90,9 +90,9 @@ export async function getActivityWidgetDocs({
 
   const documents = await loadDocuments({ references, req })
   const items = references
-    .map((reference): RecentDocument | undefined => {
+    .map((reference): ActivityDocument | undefined => {
       const document = documents.get(documentKey(reference))
-      if (!document || tab !== 'recents') {
+      if (!document || type !== 'recents') {
         return document
       }
 
@@ -110,7 +110,7 @@ export async function getActivityWidgetDocs({
         viewedAt,
       }
     })
-    .filter((item): item is RecentDocument => Boolean(item))
+    .filter((item): item is ActivityDocument => Boolean(item))
 
   return { items, page, totalDocs }
 }
@@ -174,8 +174,8 @@ async function loadDocuments({
 }: {
   references: Reference[]
   req: PayloadRequest
-}): Promise<Map<string, RecentDocument>> {
-  const documents = new Map<string, RecentDocument>()
+}): Promise<Map<string, ActivityDocument>> {
+  const documents = new Map<string, ActivityDocument>()
   await Promise.all(
     [...groupReferenceIDs({ references }).entries()].map(async ([collectionSlug, ids]) => {
       const config = req.payload.collections[collectionSlug].config
@@ -239,7 +239,7 @@ function enrichDocument({
   collectionSlug: string
   doc: QueryDoc
   req: PayloadRequest
-}): RecentDocument {
+}): ActivityDocument {
   const { i18n, payload } = req
   const config = payload.collections[collectionSlug].config
   const rawTitle = getValueByPath({ object: doc, path: config.admin?.useAsTitle || 'id' })

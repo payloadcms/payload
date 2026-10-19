@@ -57,8 +57,8 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
     admin.group = false
 
     try {
-      for (const tab of ['pinned', 'recents'] as const) {
-        const result = await getActivityWidgetDocs({ limit: 1, page: 2, req, tab })
+      for (const type of ['pinned', 'recents'] as const) {
+        const result = await getActivityWidgetDocs({ type, limit: 1, page: 2, req })
 
         expect(result.totalDocs).toBe(2)
         expect(result.page).toBe(2)
@@ -107,7 +107,7 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
     const find = vi.spyOn(payload, 'find')
 
     try {
-      const first = await getActivityWidgetDocs({ limit: 4, page: 1, req, tab: 'recents' })
+      const first = await getActivityWidgetDocs({ type: 'recents', limit: 4, page: 1, req })
 
       expect(first.totalDocs).toBe(9)
       expect(first.items.map((item) => item.id)).toEqual(documents.slice(0, 4).map((doc) => doc.id))
@@ -117,8 +117,8 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
 
       expect(hydrated).toHaveLength(1)
       expect(hydrated[0][0].select).toEqual({
-        _status: true,
         id: true,
+        _status: true,
         title: true,
         updatedAt: true,
       })
@@ -140,7 +140,7 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
         id: { in: documents.slice(0, 4).map((doc) => doc.id) },
       })
       find.mockClear()
-      const second = await getActivityWidgetDocs({ limit: 4, page: 2, req, tab: 'recents' })
+      const second = await getActivityWidgetDocs({ type: 'recents', limit: 4, page: 2, req })
 
       expect(second.items.map((item) => item.id)).toEqual(
         documents.slice(4, 8).map((doc) => doc.id),
@@ -150,11 +150,11 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
           .limit,
       ).toBe(4)
       const filtered = await getActivityWidgetDocs({
+        type: 'recents',
         excludedCollections: ['tickets'],
         limit: 4,
         page: 1,
         req,
-        tab: 'recents',
       })
 
       expect(filtered.items).toHaveLength(0)
@@ -208,18 +208,18 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
 
     try {
       const first = await getActivityWidgetDocs({
+        type: 'pinned',
         excludedCollections: ['tickets'],
         limit: 4,
         page: 1,
         req,
-        tab: 'pinned',
       })
       const second = await getActivityWidgetDocs({
+        type: 'pinned',
         excludedCollections: ['tickets'],
         limit: 4,
         page: 2,
         req,
-        tab: 'pinned',
       })
 
       expect(first.totalDocs).toBe(6)
@@ -273,16 +273,16 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
 
     try {
       const first = await getActivityWidgetDocs({
+        type: 'pinned',
         limit: DOCUMENTS_BATCH_SIZE,
         page: 1,
         req,
-        tab: 'pinned',
       })
       const second = await getActivityWidgetDocs({
+        type: 'pinned',
         limit: DOCUMENTS_BATCH_SIZE,
         page: 2,
         req,
-        tab: 'pinned',
       })
 
       expect(first.totalDocs).toBe(DOCUMENTS_BATCH_SIZE + 2)
@@ -336,11 +336,11 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
 
     try {
       const result = await getActivityWidgetDocs({
+        type: 'pinned',
         limit: 4,
         page: 2,
         req,
         shouldIncludePinPlaceholder: true,
-        tab: 'pinned',
       })
 
       expect(result).toEqual({ items: [], page: 2, totalDocs: 4 })
@@ -348,11 +348,11 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
         find.mock.calls.filter(([args]) => args.collection === 'tickets' && args.depth === 1),
       ).toHaveLength(0)
       const clamped = await getActivityWidgetDocs({
+        type: 'pinned',
         limit: 4,
         page: 99,
         req,
         shouldIncludePinPlaceholder: true,
-        tab: 'pinned',
       })
 
       expect(clamped).toEqual(result)
@@ -393,17 +393,17 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
       })
     }
     for (const document of documents.slice(0, 4)) {
-      await payload.delete({ collection: 'tickets', id: document.id, overrideAccess: false, user })
+      await payload.delete({ id: document.id, collection: 'tickets', overrideAccess: false, user })
     }
     const req = await createPayloadRequest({ payload, req: { user } })
 
-    for (const tab of ['pinned', 'recents'] as const) {
+    for (const type of ['pinned', 'recents'] as const) {
       const result = await getActivityWidgetDocs({
+        type,
         limit: 4,
         page: 99,
         req,
         shouldIncludePinPlaceholder: true,
-        tab,
       })
 
       expect(result.totalDocs).toBe(1)
@@ -449,8 +449,8 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
     })
     const req = await createPayloadRequest({ payload, req: { user } })
 
-    for (const tab of ['pinned', 'recents'] as const) {
-      const result = await getActivityWidgetDocs({ limit: 4, page: 1, req, tab })
+    for (const type of ['pinned', 'recents'] as const) {
+      const result = await getActivityWidgetDocs({ type, limit: 4, page: 1, req })
 
       expect(result.items).toHaveLength(1)
       expect(result.items[0]).toMatchObject({
@@ -461,16 +461,16 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
     }
     await expect(
       // @ts-expect-error The removed drafts tab must also be rejected at runtime.
-      getActivityWidgetDocs({ limit: 4, page: 1, req, tab: 'drafts' }),
-    ).rejects.toThrow('Invalid dashboard tab')
+      getActivityWidgetDocs({ type: 'drafts', limit: 4, page: 1, req }),
+    ).rejects.toThrow('Invalid activity document type')
   })
 
   test('should reject anonymous requests and unsupported page sizes', async ({ payload }) => {
     const req = await createPayloadRequest({ payload })
 
-    await expect(getActivityWidgetDocs({ limit: 4, page: 1, req, tab: 'recents' })).rejects.toThrow(
-      UnauthorizedError,
-    )
+    await expect(
+      getActivityWidgetDocs({ type: 'recents', limit: 4, page: 1, req }),
+    ).rejects.toThrow(UnauthorizedError)
     const owner = await payload.create({
       collection: 'users',
       data: { email: 'invalid-pages@payloadcms.com', password: 'test' },
@@ -482,7 +482,7 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
     })
 
     await expect(
-      getActivityWidgetDocs({ limit: 101, page: 1, req: authenticatedReq, tab: 'recents' }),
+      getActivityWidgetDocs({ type: 'recents', limit: 101, page: 1, req: authenticatedReq }),
     ).rejects.toThrow('Invalid dashboard page')
   })
 
@@ -522,8 +522,8 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
       ).rejects.toThrow()
       const req = await createPayloadRequest({ payload, req: { user } })
 
-      for (const tab of ['pinned', 'recents'] as const) {
-        const result = await getActivityWidgetDocs({ limit: 4, page: 1, req, tab })
+      for (const type of ['pinned', 'recents'] as const) {
+        const result = await getActivityWidgetDocs({ type, limit: 4, page: 1, req })
 
         expect(result.items.map(({ id }) => id)).toEqual(items.map(({ id }) => id))
       }
@@ -561,7 +561,7 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
         user,
       })
       const req = await createPayloadRequest({ payload, req: { user } })
-      const result = await getActivityWidgetDocs({ limit: 4, page: 1, req, tab: 'recents' })
+      const result = await getActivityWidgetDocs({ type: 'recents', limit: 4, page: 1, req })
 
       expect(result.items[0]).toMatchObject({
         dateTime: viewedAt,
@@ -623,7 +623,7 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
       user,
     })
     const req = await createPayloadRequest({ payload, req: { user } })
-    const result = await getActivityWidgetDocs({ limit: 4, page: 1, req, tab: 'pinned' })
+    const result = await getActivityWidgetDocs({ type: 'pinned', limit: 4, page: 1, req })
 
     expect(result.items.map(({ isDraft, statusLabel }) => ({ isDraft, statusLabel }))).toEqual([
       { isDraft: true, statusLabel: 'Draft' },

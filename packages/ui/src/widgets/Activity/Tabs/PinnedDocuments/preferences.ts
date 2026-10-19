@@ -1,10 +1,14 @@
 import type { PinnedDocumentsPreferences } from 'payload'
 
-import type { PinnedItem } from '../../utils/documents.js'
+import type { DocumentReference } from '../../utils/documents.js'
 
-import { documentKey, getPinnedItems } from '../../utils/documents.js'
+import { documentKey, getDocumentReferences } from '../../utils/documents.js'
 
-export async function readPinnedPreferences({ url }: { url: string }): Promise<PinnedItem[]> {
+export async function readPinnedPreferences({
+  url,
+}: {
+  url: string
+}): Promise<DocumentReference[]> {
   const response = await fetch(url, { credentials: 'include' })
 
   if (!response.ok) {
@@ -12,7 +16,7 @@ export async function readPinnedPreferences({ url }: { url: string }): Promise<P
   }
   const preference: { value?: unknown } = await response.json()
 
-  return getPinnedItems({ value: preference.value })
+  return getDocumentReferences({ value: preference.value })
 }
 
 /** Serialize the read/modify/write operation across same-origin admin tabs. */
@@ -21,7 +25,7 @@ export async function updatePinnedPreferences({
   shouldPin,
   url,
 }: {
-  document: PinnedItem
+  document: DocumentReference
   shouldPin: boolean
   url: string
 }): Promise<void> {
@@ -48,7 +52,7 @@ export async function savePinnedPreferences({
   items,
   url,
 }: {
-  items: PinnedItem[]
+  items: DocumentReference[]
   url: string
 }): Promise<void> {
   const response = await fetch(url, {

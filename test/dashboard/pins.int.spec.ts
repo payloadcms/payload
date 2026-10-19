@@ -89,7 +89,7 @@ test.suite('Pinned document preferences', { config: './config.ts' }, () => {
       user: req.user,
       value: { items: [{ id: ticket.id, collectionSlug: 'tickets' }] },
     })
-    const result = await getActivityWidgetDocs({ limit: 4, page: 1, req, tab: 'pinned' })
+    const result = await getActivityWidgetDocs({ type: 'pinned', limit: 4, page: 1, req })
 
     expect(result.items).toEqual([])
     expect(result.totalDocs).toBe(0)
@@ -128,7 +128,7 @@ test.suite('Pinned document preferences', { config: './config.ts' }, () => {
         ],
       },
     })
-    const result = await getActivityWidgetDocs({ limit: 4, page: 1, req, tab: 'pinned' })
+    const result = await getActivityWidgetDocs({ type: 'pinned', limit: 4, page: 1, req })
 
     expect(result.totalDocs).toBe(1)
     expect(result.items.map(({ id }) => id)).toEqual([ticket.id])

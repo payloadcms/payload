@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { DocumentsTab } from '../../utils/getActivityWidgetDocs.js'
+import type { ActivityDocumentType } from '../../utils/getActivityWidgetDocs.js'
 
 import { ClockIcon } from '../../../../icons/Clock/index.js'
 import { PinIcon } from '../../../../icons/Pin/index.js'
@@ -17,7 +17,7 @@ export function EmptyState({
   children?: React.ReactNode
   description: string
   descriptionID?: string
-  tab: DocumentsTab
+  tab: ActivityDocumentType
   title: string
 }) {
   return (

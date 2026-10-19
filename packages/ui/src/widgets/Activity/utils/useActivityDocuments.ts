@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useReducer } from 'react'
 
-import type { PinnedItem } from './documents.js'
-import type { DocumentsPage, DocumentsTab } from './getActivityWidgetDocs.js'
+import type { DocumentReference } from './documents.js'
+import type { ActivityDocumentsPage, ActivityDocumentType } from './getActivityWidgetDocs.js'
 
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { getDocumentPage } from './cache.js'
@@ -15,6 +15,7 @@ const LOADING_FEEDBACK_DELAY_MS = 180
  * page loads, and loading feedback only appears after a short delay.
  */
 export function useActivityDocuments({
+  type,
   excludedCollections,
   hasPinPlaceholder = false,
   initialPage,
@@ -22,16 +23,15 @@ export function useActivityDocuments({
   isPaused = false,
   offset,
   pageSize,
-  tab,
 }: {
   excludedCollections?: string[]
   hasPinPlaceholder?: boolean
-  initialPage?: DocumentsPage
+  initialPage?: ActivityDocumentsPage
   isActive: boolean
   isPaused?: boolean
   offset: number
   pageSize: number
-  tab: DocumentsTab
+  type: ActivityDocumentType
 }) {
   const { serverFunction } = useServerFunctions()
   const [state, dispatch] = useReducer(documentReducer, { initialPage }, createDocumentState)
@@ -98,12 +98,12 @@ export function useActivityDocuments({
           serverFunction({
             name: 'get-activity-widget-docs',
             args: {
+              type,
               excludedCollections,
               limit: DOCUMENTS_BATCH_SIZE,
               page: batch + 1,
-              tab,
             },
-          }) as Promise<DocumentsPage>,
+          }) as Promise<ActivityDocumentsPage>,
       ),
     )
       .then((pages) => {
@@ -131,7 +131,7 @@ export function useActivityDocuments({
     offset,
     serverFunction,
     state.revision,
-    tab,
+    type,
   ])
 
   return {
@@ -141,7 +141,7 @@ export function useActivityDocuments({
     /** Reloads the tab from the server, bypassing cached batches until the reload succeeds. */
     refresh: () => dispatch({ type: 'refresh' }),
     /** Removes a document optimistically and returns a function that restores it. */
-    removeDocument: ({ document }: { document: PinnedItem }) => {
+    removeDocument: ({ document }: { document: DocumentReference }) => {
       const cache = state.cache
 
       dispatch({ type: 'remove', document })

@@ -5,7 +5,7 @@ import type { FilterOptionsResult } from 'payload'
 import React, { useMemo, useState } from 'react'
 
 import type { ListDrawerProps } from '../../../../../elements/ListDrawer/types.js'
-import type { PinnedItem } from '../../../utils/documents.js'
+import type { DocumentReference } from '../../../utils/documents.js'
 
 import { Button } from '../../../../../elements/Button/index.js'
 import { useListDrawer } from '../../../../../elements/ListDrawer/index.js'
@@ -27,7 +27,7 @@ export function PinDocumentPicker({
   isDisabled: boolean
   label: string
   onError: () => void
-  onSelect: (args: { document: PinnedItem }) => void
+  onSelect: (args: { document: DocumentReference }) => void
   pinsURL: string
 }) {
   const [filterOptions, setFilterOptions] = useState<FilterOptionsResult>({})

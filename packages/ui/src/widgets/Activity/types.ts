@@ -1,6 +1,6 @@
-import type { PinnedItem } from './utils/documents.js'
+import type { DocumentReference } from './utils/documents.js'
 
-export type RecentDocument = {
+export type ActivityDocument = {
   dateLabel?: string
   dateTime?: string
   href: string
@@ -12,7 +12,7 @@ export type RecentDocument = {
   typeLabel: string
   updatedAt?: string
   viewedAt?: string
-} & PinnedItem
+} & DocumentReference
 
 export type Labels = {
   addPin: string

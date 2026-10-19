@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import type { PinnedItem } from '../../utils/documents.js'
-import type { DocumentsPage } from '../../utils/getActivityWidgetDocs.js'
+import type { DocumentReference } from '../../utils/documents.js'
+import type { ActivityDocumentsPage } from '../../utils/getActivityWidgetDocs.js'
 
 import { useActivityDocuments } from '../../utils/useActivityDocuments.js'
 import { updatePinnedPreferences } from './preferences.js'
@@ -18,7 +18,7 @@ export function usePinnedDocuments({
   pinsURL,
 }: {
   canAddPin: boolean
-  initialPage?: DocumentsPage
+  initialPage?: ActivityDocumentsPage
   isActive: boolean
   offset: number
   onFocusTab: () => void
@@ -30,13 +30,13 @@ export function usePinnedDocuments({
   const [previousInitialPage, setPreviousInitialPage] = useState(initialPage)
   const isSaving = saveStatus === 'saving'
   const documents = useActivityDocuments({
+    type: 'pinned',
     hasPinPlaceholder: canAddPin,
     initialPage,
     isActive,
     isPaused: isSaving,
     offset,
     pageSize,
-    tab: 'pinned',
   })
 
   if (previousInitialPage !== initialPage) {
@@ -44,7 +44,13 @@ export function usePinnedDocuments({
     setSaveStatus((current) => (current === 'error' ? 'idle' : current))
   }
 
-  const savePin = async ({ document, shouldPin }: { document: PinnedItem; shouldPin: boolean }) => {
+  const savePin = async ({
+    document,
+    shouldPin,
+  }: {
+    document: DocumentReference
+    shouldPin: boolean
+  }) => {
     if (isSaving || documents.isBusy) {
       return
     }
@@ -75,9 +81,11 @@ export function usePinnedDocuments({
     ...documents,
     hasSaveError: saveStatus === 'error',
     isSaving,
-    onAdd: ({ document }: { document: PinnedItem }) => savePin({ document, shouldPin: true }),
+    onAdd: ({ document }: { document: DocumentReference }) =>
+      savePin({ document, shouldPin: true }),
     onPickerError: () => setSaveStatus('error'),
-    onRemove: ({ document }: { document: PinnedItem }) => savePin({ document, shouldPin: false }),
+    onRemove: ({ document }: { document: DocumentReference }) =>
+      savePin({ document, shouldPin: false }),
   }
 }
 
