@@ -31,6 +31,16 @@ describe('findChangelogBaseTag', () => {
     expect(base).toBe('v3.90.1')
   })
 
+  it('should skip a tag newer than the release version', async () => {
+    const base = await findChangelogBaseTag({
+      version: '3.90.2',
+      listTags: () => ['v3.90.1', 'v3.90.2', 'v3.90.3'],
+      isPublished: vi.fn(async () => true),
+    })
+
+    expect(base).toBe('v3.90.1')
+  })
+
   it('should ignore v4 tags', async () => {
     const base = await findChangelogBaseTag({
       version: '3.90.3',

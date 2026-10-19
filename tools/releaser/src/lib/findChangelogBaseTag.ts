@@ -21,8 +21,8 @@ export const lineFromVersion = (version: string): ReleaseLine => {
 type Candidate = { tag: string; version: string }
 
 /**
- * Selects the changelog range start: the latest PUBLISHED tag on the same major
- * and same line as `version`. Tolerates a dangling (tagged-but-unpublished) tag
+ * Selects the changelog range start: the latest PUBLISHED tag lower than `version`, on the same
+ * major and same line. Tolerates a dangling (tagged-but-unpublished) tag
  * with no tag mutation. Falls back to the latest published same-major tag of any
  * line, else undefined (range = repo start).
  */
@@ -41,7 +41,8 @@ export const findChangelogBaseTag = async ({
   const candidates: Candidate[] = (await listTags())
     .map((tag) => ({ tag, version: tag.replace(/^v/, '') }))
     .filter((candidate) => semver.valid(candidate.version) !== null)
-    .filter((candidate) => candidate.version !== version)
+    // A re-run of an older release must not use a newer release as its base.
+    .filter((candidate) => semver.lt(candidate.version, version))
     .filter((candidate) => semver.major(candidate.version) === major)
 
   const firstPublished = async (list: Candidate[]): Promise<string | undefined> => {
