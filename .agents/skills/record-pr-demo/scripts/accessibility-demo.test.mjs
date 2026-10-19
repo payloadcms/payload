@@ -229,12 +229,13 @@ test('should overlay keystrokes without reserving space for captions by default'
       assert.ok(box.x >= application.x && box.y >= application.y)
       assert.ok(box.x + box.width <= application.x + application.width)
       assert.ok(box.y + box.height <= application.y + application.height)
+      assert.ok(Math.abs(box.x + box.width / 2 - application.x - application.width / 2) < 2)
       await expect(overlay).toBeHidden({ timeout: 3000 })
     },
   })
 })
 
-test('should keep the keystroke overlay away from a focused corner control', async () => {
+test('should keep the keystroke overlay away from a focused bottom-center control', async () => {
   await withPresentation({
     showAnnouncements: false,
     run: async ({ stage, app }) => {
@@ -242,7 +243,8 @@ test('should keep the keystroke overlay away from a focused corner control', asy
         .locator('#first')
         .evaluate(
           (el) =>
-            (el.style.cssText = 'position:fixed;right:24px;bottom:24px;width:180px;height:48px'),
+            (el.style.cssText =
+              'position:fixed;left:50%;transform:translateX(-50%);bottom:24px;width:180px;height:48px'),
         )
       await app.locator('#first').focus()
       await stage.keyboard.press('ArrowRight')
@@ -260,6 +262,29 @@ test('should keep the keystroke overlay away from a focused corner control', asy
           )
         })
         .toBe(true)
+    },
+  })
+})
+
+test('should show each shortcut key in a separate keycap with plain plus separators', async () => {
+  await withPresentation({
+    showAnnouncements: false,
+    run: async ({ stage, app }) => {
+      await app.locator('#second').focus()
+      await stage.keyboard.press('Shift+Tab')
+      const chord = stage.locator('[data-keystroke]')
+      await expect(chord.locator('kbd')).toHaveText(['Shift', 'Tab'])
+      await expect(chord.locator('[data-key-separator]')).toHaveText('+')
+      await stage.keyboard.press('ControlOrMeta+Shift+ArrowDown')
+      await expect(chord.locator('kbd')).toHaveText([
+        process.platform === 'darwin' ? '⌘' : 'Ctrl',
+        'Shift',
+        '↓',
+      ])
+      await expect(chord.locator('[data-key-separator]')).toHaveCount(2)
+      await stage.keyboard.press('ArrowRight')
+      await expect(chord.locator('kbd')).toHaveText(['→'])
+      await expect(chord.locator('[data-key-separator]')).toHaveCount(0)
     },
   })
 })

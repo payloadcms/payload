@@ -39,6 +39,8 @@ export function mountDemoChrome({
     .dark { --paper:#191919; --ink:#ededeb; --sub:#bbb8b0; --stage:#232321; --shell:#333330; --line:#ffffff22; --rim:#ffffff12; --badge:#ffffff0b; --progress-track:#ffffff30; }
     .light { --kind-feature-bg:var(--color-bg-brand-tertiary,#e5f4ff); --kind-feature-border:var(--color-border-brand,#bde3ff); --kind-feature-text:color-mix(in srgb,var(--color-text-brand,#007be5) 70%,var(--ink)); --kind-fix-bg:var(--color-bg-warning-tertiary,#fff1c2); --kind-fix-border:var(--color-border-warning,#f5dfa8); --kind-fix-text:color-mix(in srgb,var(--color-text-warning,#b86200) 70%,var(--ink)); }
     .dark { --kind-feature-bg:var(--color-bg-brand-tertiary,#394360); --kind-feature-border:var(--color-border-brand,#536383); --kind-feature-text:color-mix(in srgb,var(--color-text-brand,#80caff) 70%,var(--ink)); --kind-fix-bg:var(--color-bg-warning-tertiary,#5c4100); --kind-fix-border:var(--color-border-warning,#7a5800); --kind-fix-text:color-mix(in srgb,var(--color-text-warning,#ffd966) 70%,var(--ink)); }
+    .light { --keycap-bg:var(--color-bg-secondary,#f5f5f5); --keycap-border:var(--color-border,#e6e6e6); --keycap-text:var(--color-text,rgba(0,0,0,.9)); }
+    .dark { --keycap-bg:var(--color-bg-secondary,#383838); --keycap-border:var(--color-border,#444444); --keycap-text:var(--color-text,#fff); }
     .window { position:absolute; padding:10px; border:1px solid var(--rim); border-radius:18px; background:var(--shell); transform-origin:top left; }
     .header { height:36px; display:flex; align-items:center; justify-content:space-between; padding:0 12px 8px; gap:18px; }
     .dots { display:flex; gap:8px; }
@@ -75,8 +77,10 @@ export function mountDemoChrome({
     .accessibility { position:absolute; inset:auto 0 32px; margin-inline:auto; width:min(1302px,calc(100% - 64px)); height:88px; padding:12px 20px; border-radius:12px; background:var(--paper); pointer-events:none; }
     .accessibility[hidden], .focus-highlight[hidden], .keystroke-overlay[hidden] { display:none; }
     .accessibility-label { color:var(--sub); font-size:11px; letter-spacing:.3px; margin-block-end:4px; }
-    .keystroke-overlay { position:absolute; inset:auto 24px 24px auto; z-index:3; pointer-events:none; max-width:calc(100% - 48px); padding:8px 16px; border:1px solid var(--rim); border-radius:8px; background:var(--ink); color:var(--paper); box-shadow:0 4px 12px #00000024; }
-    .keystroke { font:16px/1.5 ui-monospace,monospace; overflow-wrap:anywhere; }
+    .keystroke-overlay { position:absolute; inset:auto auto 24px 24px; z-index:3; pointer-events:none; max-width:calc(100% - 48px); color:var(--ink); }
+    .keystroke { display:flex; align-items:center; flex-wrap:wrap; gap:8px; font:16px/1.5 ui-monospace,monospace; }
+    .keystroke kbd { display:inline-block; padding:6px 10px; border:1px solid var(--keycap-border); border-radius:var(--radius-medium,5px); background:var(--keycap-bg); color:var(--keycap-text); box-shadow:var(--elevation-300-tooltip,0 3px 8px #00000024); font:inherit; white-space:nowrap; }
+    .key-separator { font:inherit; text-shadow:0 0 3px var(--paper); }
     .announcement { font-size:16px; line-height:22px; max-height:44px; overflow:hidden; overflow-wrap:anywhere; }
     .focus-highlight { position:absolute; z-index:2; pointer-events:none; border:3px solid var(--color-bg-brand,#007be5); box-shadow:0 0 0 2px white, inset 0 0 0 1px white; border-radius:4px; }
   </style>
@@ -87,7 +91,7 @@ export function mountDemoChrome({
     </section>
     <div class="window" data-window>
       <div class="header"><div class="dots" aria-hidden="true"><span></span><span></span><span></span></div><div class="header-info" data-header-info><span class="refresh" data-refresh role="status" aria-live="polite" aria-atomic="true" hidden><svg data-refresh-icon aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path data-refresh-path d="M13 6a5.2 5.2 0 1 0 .1 4M13 2v4H9" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-refresh-text></span></span><span class="size" data-size></span></div></div>
-      <div class="content" data-content><slot name="content"></slot>${accessibility ? '<div class="focus-highlight" data-focus-highlight aria-hidden="true" hidden></div><div class="keystroke-overlay" data-keystroke-overlay aria-hidden="true" hidden><kbd class="keystroke" data-keystroke></kbd></div>' : ''}</div>
+      <div class="content" data-content><slot name="content"></slot>${accessibility ? '<div class="focus-highlight" data-focus-highlight aria-hidden="true" hidden></div><div class="keystroke-overlay" data-keystroke-overlay aria-hidden="true" hidden><span class="keystroke" data-keystroke></span></div>' : ''}</div>
     </div>
     ${hasAnnouncements ? '<div class="accessibility" data-accessibility aria-hidden="true"><div class="accessibility-label">LIVE REGION · OBSERVED TEXT, NOT SCREEN-READER AUDIO</div><div class="announcement" data-announcement>Waiting for an update…</div></div>' : ''}
   </div>`
@@ -107,13 +111,12 @@ export function mountDemoChrome({
     const overlay = find('[data-keystroke-overlay]')
     if (!overlay || overlay.hidden) return
     const content = find('[data-content]')
-    const end = content.clientWidth - overlay.offsetWidth - 24
+    Object.assign(overlay.style, { inset: 'auto', left: '24px', top: '24px' })
+    const center = (content.clientWidth - overlay.offsetWidth) / 2
     const bottom = content.clientHeight - overlay.offsetHeight - 24
     const positions = [
-      { x: end, y: bottom },
-      { x: 24, y: bottom },
-      { x: end, y: 24 },
-      { x: 24, y: 24 },
+      { x: center, y: bottom },
+      { x: center, y: 24 },
     ]
     const point =
       positions.find(
@@ -264,7 +267,20 @@ export function mountDemoChrome({
       }
       if (key) {
         clearTimeout(keyTimer)
-        find('[data-keystroke]').textContent = key
+        const chord = find('[data-keystroke]')
+        chord.replaceChildren()
+        key.split(' + ').forEach((label, index) => {
+          if (index > 0) {
+            const separator = document.createElement('span')
+            separator.className = 'key-separator'
+            separator.setAttribute('data-key-separator', '')
+            separator.textContent = ' + '
+            chord.append(separator)
+          }
+          const keycap = document.createElement('kbd')
+          keycap.textContent = label
+          chord.append(keycap)
+        })
         find('[data-keystroke-overlay]').hidden = false
         keyTimer = setTimeout(() => {
           find('[data-keystroke-overlay]').hidden = true
