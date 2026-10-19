@@ -255,7 +255,7 @@ Navigation keys and shortcuts appear horizontally on the right of a full-width f
 
 To show observed live-region text, also set `presentation.showAnnouncements: true`. The text appears on one line beside a speaking-person icon and blue a11y badge on the left of the feedback row, immediately followed by animated key history. A horizontal divider separates the row from the main content. Long announcements ellipsize rather than expanding the panel. This captures DOM text, not actual screen-reader audio. The entire feedback area is hidden from assistive technology and cannot intercept pointer input. The row remains visible when the step annotation is hidden. The recorder leaves application focus and native focus styling unchanged; it adds no focus outline or focus-tracking loop.
 
-Use real keyboard events such as `page.keyboard.press('Tab')` and `page.keyboard.press('Enter')`. Keep pauses around important commands so viewers can follow them. Accessibility mode reserves a fixed 152px annotation panel rather than the usual 112px; there is no separate bottom panel. Arriving commands do not shift the panel or application. Preview at `http://127.0.0.1:4400/?accessibility&announcements&kind=fix` after starting the chrome preview server.
+Use real keyboard events such as `page.keyboard.press('Tab')` and `page.keyboard.press('Enter')`. Keep pauses around important commands so viewers can follow them. Accessibility mode reserves a fixed 144px annotation panel rather than the usual 104px; there is no separate bottom panel. Arriving commands do not shift the panel or application. Preview at `http://127.0.0.1:4400/?accessibility&announcements&kind=fix` after starting the chrome preview server.
 
 ### Reuse a scenario with or without a11y feedback
 
@@ -268,6 +268,6 @@ node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs candidate --scenario
 
 When a command arrives, retained commands slide right from their current visible positions over 220ms while the new command enters from the left. Rapid input interrupts and resumes from the current visual positions. Reduced-motion preferences and fast validation/preview apply the final positions immediately. Navigation reset and destruction cancel pending key animations.
 
-Step titles and descriptions share one row, left-aligned and vertically centered with the step circle, with a 12px gap between the heading and body. Title and body both use 13px; title weight and color provide emphasis. Longer descriptions may wrap within the remaining width; oversized notes are still rejected without replacing the current annotation.
+Step descriptions sit below their titles with a 2px gap. Both retain 13px sizing and their existing foreground/muted colors. The progress circle sits beside the stacked text, vertically centered across both lines; single-step notes have no circle inset. Row gaps above and below the step are 4px. Longer descriptions may wrap, and oversized notes are still rejected without replacing the current annotation.
 
 The recording metadata sits in its own full-width background band at the top of the panel, using the theme’s secondary background. The band reaches the panel edges with matching top corner radii and a bottom divider, separating metadata from the step and a11y rows.
