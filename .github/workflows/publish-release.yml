@@ -19,7 +19,7 @@ jobs:
   publish:
     name: publish-release-${{ github.ref_name }}
     if: github.repository == 'payloadcms/payload'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     environment: release
     permissions:
       id-token: write

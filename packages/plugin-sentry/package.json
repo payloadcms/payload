@@ -1,20 +1,15 @@
 {
   "name": "@payloadcms/plugin-sentry",
-  "version": "4.0.0-beta.0",
+  "version": "4.0.0-beta.2",
   "description": "Sentry plugin for Payload",
   "keywords": [
-    "payload",
     "cms",
+    "error handling",
+    "payload",
     "plugin",
-    "typescript",
     "sentry",
-    "error handling"
+    "typescript"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/plugin-sentry"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -24,8 +19,18 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-sentry"
+  },
+  "files": [
+    "dist"
+  ],
   "type": "module",
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts",
@@ -38,11 +43,22 @@
       "default": "./src/exports/client.ts"
     }
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "files": [
-    "dist"
-  ],
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./client": {
+        "import": "./dist/exports/client.js",
+        "types": "./dist/exports/client.d.ts",
+        "default": "./dist/exports/client.js"
+      }
+    }
+  },
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
     "build:debug": "pnpm build",
@@ -67,22 +83,6 @@
     "payload": "workspace:*",
     "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
     "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
-  },
-  "publishConfig": {
-    "exports": {
-      ".": {
-        "import": "./dist/index.js",
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "./client": {
-        "import": "./dist/exports/client.js",
-        "types": "./dist/exports/client.d.ts",
-        "default": "./dist/exports/client.js"
-      }
-    },
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts"
   },
   "homepage:": "https://payloadcms.com"
 }

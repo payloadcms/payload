@@ -17,6 +17,10 @@ node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs preflight
 
 If something is missing, report it and obtain any required installation approval rather than substituting an unrelated capture method. Keep the dev server running through candidate review and revisions instead of restarting it for every take.
 
+## Required window chrome
+
+For a fixed canvas, genuine viewport resizing, and a persistent change description beside step notes and an animated progress ring, read [window-chrome.md](window-chrome.md). Use the live browser preview to iterate on the shared component without recording a video. Every scenario must export `presentation` with a change kind, title, and description. Validation, preview, and recording always use the shared chrome; there is no page-only mode.
+
 ## Plan the visible story
 
 Keep the recording narrow. A useful plan identifies:
@@ -28,17 +32,42 @@ Keep the recording narrow. A useful plan identifies:
 
 Prefer 10–45 seconds. Avoid long typing sequences, setup screens, loading waits, repeated navigation, and unrelated admin chrome. Use clear fixture labels that make sense without narration.
 
-## Scenario module
+## Editorial annotations over the recording
 
-Create the scenario outside the repository, for example `/tmp/payload-pr-demo-relationship-drawer.mjs`. It must default-export an async function:
+Annotations live in the shared chrome panel above the application. The change title and description stay constant; step titles and bodies update through `showAnnotation` and `hideAnnotation`. Supply content and optional one-based `index`/`total`, which default to 1. A progress ring appears for multiple steps; exact step text remains available to assistive technology. Step text fades on changes, and forward progress eases the ring. Reduced-motion preferences skip these animations.
 
 ```js
-export default async function scenario({ baseURL, click, expect, page, pause }) {
+await showAnnotation({
+  title: 'What changed',
+  body: 'The cursor stays visible above popup controls.',
+  index: 1,
+  total: 2,
+})
+await pause(1600)
+await hideAnnotation()
+```
+
+Do not inject annotations into the application. Floating annotations and the old `type`, `position`, and `width` options are rejected with a migration error. Use the fixed panel component without scenario CSS. Check text fit, contrast, and timing in the rendered MP4, and include substantive explanation in the written PR walkthrough as a text alternative.
+
+## Scenario module
+
+Create the scenario outside the repository, for example `/tmp/payload-pr-demo-relationship-drawer.mjs`. It must export presentation metadata and default-export an async function:
+
+```js
+export const presentation = {
+  change: {
+    kind: 'Feature',
+    title: 'Create a post',
+    description: 'Open a new post from the collection list.',
+  },
+}
+
+export default async function scenario({ baseURL, click, expect, page, pause, ready }) {
   await page.goto(`${baseURL}/admin/collections/posts`)
 
   const createButton = page.getByRole('link', { name: 'Create new Post' })
   await expect(createButton).toBeVisible()
-  await pause(1200)
+  await ready()
 
   await click(createButton)
   await expect(page.getByRole('heading', { name: 'Create new Post' })).toBeVisible()
@@ -49,6 +78,14 @@ export default async function scenario({ baseURL, click, expect, page, pause }) 
 When the scenario needs temporary records, export `setup` and `teardown`. The returned fixture is passed to the default scenario function. Hooks receive a Playwright API request context, so they can prepare data without recording setup screens:
 
 ```js
+export const presentation = {
+  change: {
+    kind: 'Feature',
+    title: 'Edit a prepared post',
+    description: 'Open seeded content and demonstrate the editing flow.',
+  },
+}
+
 export async function setup({ request }) {
   const response = await request.post('/api/posts', {
     data: { title: 'Demo post' },
@@ -65,8 +102,10 @@ export async function teardown({ fixture, request }) {
   await request.delete(`/api/posts/${fixture.post.doc.id}`)
 }
 
-export default async function scenario({ baseURL, click, expect, fixture, page, pause }) {
+export default async function scenario({ baseURL, click, expect, fixture, page, ready }) {
   await page.goto(`${baseURL}/admin/collections/posts/${fixture.post.doc.id}`)
+  await expect(page.getByRole('heading', { name: fixture.post.doc.title })).toBeVisible()
+  await ready()
   // Visible demo interactions only.
 }
 ```
@@ -81,12 +120,16 @@ The recorder supplies:
 - `click(locator, options?)`: smoothly moves to a locator, pauses, clicks, and pauses again;
 - `expect`: Playwright assertions;
 - `moveCursor(locator, options?)`: smoothly points at a locator and pauses without clicking;
-- `page`: the recorded Playwright page;
+- `page`: the application iframe facade; navigation, locators, and evaluation target the app, while input devices and page events use the recording page;
 - `pause(milliseconds = 700)`: a short presentation pause;
+- `ready()`: marks the loaded opening state and holds it for 1.2 seconds; call it exactly once before the first visible interaction;
 - `scroll(locator, options?)`: scrolls the actual overflow range with frame-timed easing, or real wheel input when requested;
+- `showAnnotation(options)` / `hideAnnotation()`: updates or clears the step note in the shared chrome panel;
 - `label`: the normalized recording label.
 
-The recorder adds a visible cursor to the page. Keep the scenario on one page; popup stitching is outside this skill's current scope.
+Use `await page.reload()` for an on-camera refresh. The shared header automatically shows a rotating refresh icon during the actual iframe reload, then a brief checkmark; assert the expected application state afterward. Refresh feedback sits beside the optional window dimensions and respects reduced motion.
+
+The recorder adds a visible cursor above in-page popups and dialogs. Mouse presses show a brief primary-brand ring at the click point. It stays at that point as the cursor moves away, expands and fades over 420ms, and uses a stationary fade with reduced motion. Repeated clicks replace the prior indicator. This feedback is automatic; scenarios do not mount or style it. Keep the scenario on one page; separate browser-window stitching is outside this skill's current scope.
 
 Use `click` for visible interactions instead of calling `locator.click()` directly. Its defaults are a 400 ms eased cursor movement plus a 300 ms dwell before and after the click. `moveCursor` uses the same travel time and pauses for 300 ms after arriving. Override an individual action when the story needs more time:
 
@@ -99,7 +142,7 @@ Change the recording-wide defaults with `--mouse-move-ms` and `--interaction-pau
 
 ## Scroll without hover churn
 
-Destructure `scroll` from the scenario argument and use it for overflow demonstrations:
+Destructure `scroll` from the scenario argument and use it for every visible overflow movement, including the vertical list inside a popup menu. Target the element whose `scrollTop` or `scrollLeft` changes, not the popup container if it does not overflow:
 
 ```js
 await scroll(tabsScroller, {
@@ -112,6 +155,17 @@ await scroll(tabsScroller, {
 await moveCursor(revealedTab)
 await click(revealedTab)
 ```
+
+For a popup menu, open it with `click`, then scroll its list with the same helper before selecting an item:
+
+```js
+await click(columnsButton)
+const menuList = page.getByRole('menu').locator('[data-scroll-container]')
+await scroll(menuList, { duration: 950 })
+await click(revealedMenuItem)
+```
+
+Use a selector from the actual menu markup. The example's `data-scroll-container` is only illustrative. Avoid `page.mouse.wheel()`, `locator.evaluate()` scroll assignments, and repeated `scrollIntoViewIfNeeded()` calls for a scroll that reviewers need to see; they bypass the helper's pacing and position checks. If moving the pointer outside the list dismisses that menu, pass `cursorPlacement: 'inside'` while keeping `input: 'animation'`.
 
 Defaults are `axis: 'y'`, `to: 'end'`, `duration: 950`, `easing: 'easeInOutSine'`, `cursorPlacement: 'outside'`, `input: 'animation'`, and `settle: 150` (times are milliseconds). `to` accepts `'start'`, `'end'`, or a numeric pixel distance from the start, clamped to the real range and rounded to whole pixels. Horizontal RTL targets use distance from the right-hand start.
 
@@ -168,7 +222,7 @@ node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs preview \
 
 `validate` runs the scenario without video or interaction delays. `preview` writes one final-state PNG, including the cursor position, so cursor and layout changes do not require a full recording.
 
-The converter removes the first 0.75 seconds of browser startup. After asserting the first meaningful state, call `await pause(1200)` before the first interaction so the candidate opens on a readable frame.
+After asserting the first meaningful state, call `await ready()` before the first interaction. Candidate mode uses that marker to trim browser startup and leaves a 1.2-second hold on the loaded page. Recording fails if the marker is missing. Inspect the first frame of the candidate, especially after a cold server start.
 
 Useful options:
 
@@ -180,7 +234,7 @@ Useful options:
 - `--contact-sheet /tmp/custom-demo-contact-sheet.png`
 - `--manifest /tmp/custom-demo.json`
 
-The lower-level `record-demo.mjs` and `convert-demo.sh` remain available for debugging the recorder itself. Use `prepare-demo.mjs` for PR demos so verification and cleanup are not skipped.
+The lower-level `record-demo.mjs` remains available for debugging the recorder itself. `convert-demo.mjs` is used internally by `prepare-demo.mjs` with the opening state marked by `ready()`. Use `prepare-demo.mjs` for PR demos so conversion, verification, and cleanup stay together.
 
 ## Review the candidate
 

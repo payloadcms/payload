@@ -1,4 +1,14 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
+
+/**
+ * Elements outside the pages Next.js keeps hidden in React `<Activity>` boundaries when
+ * `cacheComponents` is enabled. React hides such a page by setting an inline
+ * `display: none !important` on its top-level elements, which in the admin panel are direct
+ * children of `<body>`. Elements hidden any other way (collapsed fields, closed popups, elements
+ * with a plain `display: none`) still match.
+ */
+const outsideHiddenActivitySelector =
+  ':not(body > [style*="display: none !important"], body > [style*="display: none !important"] *)'
 
 /**
  * Patches `page.goto()` / `page.reload()` so it only returns once the admin view is interactive.
@@ -15,6 +25,11 @@ import type { Page } from '@playwright/test'
  * that the loader has settled.
  *
  * No-op for Next.js, which never renders the marker, so tests don't branch on framework.
+ *
+ * Also scopes locators and selector-based actions to elements outside hidden `<Activity>` pages.
+ * `UnmountWhenHidden` empties those pages, but React only does that at its lowest priority, so
+ * right after a navigation the previous page can still be in the DOM. Without this, a selector
+ * that matches on both pages trips strict mode or `.first()` picks the hidden copy.
  *
  * Idempotent: calling this more than once on the same page is safe.
  */
@@ -107,4 +122,50 @@ export function patchPageMethods(page: Page) {
 
     return response
   }) as Page['reload']
+
+  const originalLocator = page.locator.bind(page)
+  const outsideHiddenActivity = () => originalLocator(outsideHiddenActivitySelector)
+
+  page.locator = ((...args: Parameters<Page['locator']>) =>
+    originalLocator(...args).and(outsideHiddenActivity())) as Page['locator']
+
+  // `getByRole` already ignores hidden elements
+  for (const method of [
+    'getByAltText',
+    'getByLabel',
+    'getByPlaceholder',
+    'getByTestId',
+    'getByText',
+    'getByTitle',
+  ] as const) {
+    const originalGetBy = page[method].bind(page) as (...args: unknown[]) => Locator
+
+    page[method] = ((...args: unknown[]) =>
+      originalGetBy(...args).and(outsideHiddenActivity())) as never
+  }
+
+  // Selector-based actions act on the first match, so keep that and only skip hidden pages
+  page.click = ((selector, options) =>
+    page.locator(selector).first().click(options)) as Page['click']
+
+  page.fill = ((selector, value, options) =>
+    page.locator(selector).first().fill(value, options)) as Page['fill']
+
+  page.isVisible = ((selector) => page.locator(selector).first().isVisible()) as Page['isVisible']
+
+  page.setInputFiles = ((selector, files, options) =>
+    page.locator(selector).first().setInputFiles(files, options)) as Page['setInputFiles']
+
+  page.waitForSelector = (async (
+    selector: string,
+    options?: Parameters<Page['waitForSelector']>[1],
+  ) => {
+    const locator = page.locator(selector).first()
+
+    await locator.waitFor({ state: options?.state, timeout: options?.timeout })
+
+    return options?.state === 'hidden' || options?.state === 'detached'
+      ? null
+      : locator.elementHandle()
+  }) as Page['waitForSelector']
 }

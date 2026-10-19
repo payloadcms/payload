@@ -526,7 +526,7 @@ export const generateFileData = async <T>({
 
     const hasGeneratedProviderRepresentations = Boolean(
       providerOriginal &&
-        (fileWasTransformed || sizeResults.some((result) => Boolean(result.file))),
+      (fileWasTransformed || sizeResults.some((result) => Boolean(result.file))),
     )
     const newObjectKey =
       hasManagedCloudStorage && (shouldStageCloudFiles || hasGeneratedProviderRepresentations)
