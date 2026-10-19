@@ -57,6 +57,7 @@ export function mountDemoChrome({
     ::slotted([slot=content]) { display:block; width:100%; height:100%; border:0; }
     .footer { position:absolute; top:32px; left:50%; transform:translateX(-50%); width:min(1302px,calc(100% - 64px)); height:${accessibility ? 144 : 104}px; display:grid; grid-template-rows:${accessibility ? '32px minmax(0,1fr) 36px' : '32px minmax(0,1fr)'}; row-gap:4px; grid-template-columns:minmax(0,1fr); align-items:center; padding:12px 24px; border:1px solid var(--line); border-radius:12px; color:var(--ink); background:var(--paper); }
     .change { grid-row:1; min-width:0; min-height:0; align-self:stretch; display:flex; align-items:center; gap:12px; margin-inline:-24px; margin-block-start:-12px; padding:12px 24px; border-radius:11px 11px 0 0; background:var(--color-bg-secondary,var(--keycap-bg)); white-space:nowrap; }
+    .footer:has(.note:not([hidden]),.accessibility:not([hidden])) .change { border-block-end:1px solid var(--line); }
     .change .kind { align-self:center; flex:none; }
 
     .kind { align-self:flex-start; padding-inline:6px; border:1px solid var(--kind-border); border-radius:4px; background:var(--kind-bg); color:var(--kind-text); font-size:13px; font-weight:500; line-height:16px; }

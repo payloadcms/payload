@@ -389,3 +389,44 @@ test('should show the first step immediately when opening or restarting annotati
     },
   })
 })
+
+test('should divide the header only when annotation or accessibility content is visible', async () => {
+  await withChrome({
+    run: async ({ page }) => {
+      const dividerWidth = () =>
+        page
+          .locator('#root')
+          .locator('.change')
+          .evaluate((el) => getComputedStyle(el).borderBottomWidth)
+      assert.equal(await dividerWidth(), '0px')
+      await page.evaluate(() =>
+        window.chromeDemo.setAnnotation({
+          index: 1,
+          total: 1,
+          title: 'Visible step',
+          body: 'Supporting content.',
+        }),
+      )
+      assert.equal(await dividerWidth(), '1px')
+      await page.evaluate(() => window.chromeDemo.setAnnotation(null))
+      assert.equal(await dividerWidth(), '0px')
+      await page.evaluate(() => {
+        const root = document.createElement('div')
+        root.id = 'a11y-root'
+        document.body.append(root)
+        window.mountDemoChrome({
+          root,
+          accessibility: true,
+          change: { kind: 'Fix', title: 'Keyboard feedback', description: 'Visible commands.' },
+        })
+      })
+      assert.equal(
+        await page
+          .locator('#a11y-root')
+          .locator('.change')
+          .evaluate((el) => getComputedStyle(el).borderBottomWidth),
+        '1px',
+      )
+    },
+  })
+})
