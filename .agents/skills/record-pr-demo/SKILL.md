@@ -23,7 +23,9 @@ Drive the application through browser gestures: paced pointer clicks, keystrokes
 
 ## Required presentation chrome
 
-Every scenario must export `presentation` with a change kind (`Feature` or `Fix`), title, and description. Read [window-chrome.md](references/window-chrome.md) and use the shared component and live preview; do not invent wrapper CSS. Recordings, screenshot previews, and validation always mount the chrome. Keep the change description constant and use `showAnnotation({ title, body, index, total })` / `hideAnnotation()` for panel notes. Floating annotations and placement options (`type`, `position`, `width`) are unsupported. Use `resizeWindow` only when responsive reflow is part of the story.
+Every scenario must export `presentation` with a change kind (`Feature` or `Fix`), title, and description. Read [window-chrome.md](references/window-chrome.md) and use the shared component and live preview; do not invent wrapper CSS. Recordings, screenshot previews, and validation always mount the chrome. Keep the change description constant and use `showAnnotation({ title, body, index, total })` / `hideAnnotation()` for panel notes. Floating annotations and placement options (`type`, `position`, `width`) are unsupported.
+
+Keep the default canvas and desktop viewport for ordinary demos. Use a smaller `--viewport` or `resizeWindow` only when demonstrating responsive reflow or breakpoints, or when the user explicitly requests different dimensions. Keep the canvas fixed while resizing the application. Do not shrink the viewport or canvas merely to crop surrounding content or emphasize a visual change.
 
 ## Accessibility demonstrations
 
