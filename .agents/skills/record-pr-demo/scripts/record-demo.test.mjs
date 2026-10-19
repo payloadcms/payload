@@ -20,7 +20,7 @@ test('parseArgs applies recording defaults and derives a safe output path', () =
     baseURL: 'http://localhost:3000',
     interactionPauseMs: 300,
     label: 'feature-demo',
-    mouseMoveMs: 400,
+    mouseMoveMs: 300,
     output: '/tmp/payload-pr-demo-feature-demo.webm',
     scenario: '/tmp/demo-scenario.mjs',
     viewport: { height: 900, width: 1440 },
@@ -707,5 +707,56 @@ test('should keep wheel scrolling the document after its root border box leaves 
     })
   } finally {
     await rm(directory, { force: true, recursive: true })
+  }
+})
+
+test('should accept a11y overrides and reject invalid modes', () => {
+  for (const a11y of ['on', 'off']) {
+    assert.equal(parseArgs(['--scenario', './demo.mjs', '--a11y', a11y]).a11y, a11y)
+  }
+  assert.throws(
+    () => parseArgs(['--scenario', './demo.mjs', '--a11y', 'maybe']),
+    /--a11y must be on or off/,
+  )
+})
+
+test('should toggle a11y feedback for the same scenario without changing its exported defaults', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-a11y-override-'))
+  try {
+    for (const isEnabled of [false, true]) {
+      const scenario = path.join(directory, `scenario-${isEnabled}.mjs`)
+      await writeFile(
+        scenario,
+        `${presentationExport.replace('change:', `accessibility: ${isEnabled}, showAnnouncements: ${isEnabled}, change:`)}
+        Object.freeze(presentation)
+        export default async function ({ page, ready, fixture, expect }) {
+          await page.route('**/fixture', route => route.fulfill({contentType:'text/html',body:'<button>First control</button><div role="status">Ready</div>'}))
+          await page.goto('http://localhost:3000/fixture')
+          const feedback = await page.evaluate(() => {
+            const chrome = window.parent.document.querySelector('#demo-stage').shadowRoot
+            return {
+              panel: Boolean(chrome.querySelector('[data-accessibility]')),
+              captions: Boolean(chrome.querySelector('[data-announcement]')),
+              observer: typeof window.__stopDemoAccessibility === 'function',
+            }
+          })
+          expect(feedback).toEqual({panel: fixture.isEnabled, captions: fixture.isEnabled, observer: fixture.isEnabled})
+          expect(presentation.accessibility).toBe(${isEnabled})
+          await ready()
+        }`,
+      )
+      for (const a11y of [undefined, 'on', 'off']) {
+        await recorder.validateDemo({
+          a11y,
+          baseURL: 'http://localhost:3000',
+          fixture: { isEnabled: a11y === undefined ? isEnabled : a11y === 'on' },
+          label: 'a11y-override',
+          scenario,
+          viewport: { width: 1280, height: 720 },
+        })
+      }
+    }
+  } finally {
+    await rm(directory, { recursive: true, force: true })
   }
 })

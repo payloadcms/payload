@@ -28,7 +28,7 @@ test('parseArgs makes candidate creation the one-command default', () => {
     label: 'hierarchy-move',
     manifest: '/tmp/payload-pr-demo-hierarchy-move.json',
     mode: 'candidate',
-    mouseMoveMs: 400,
+    mouseMoveMs: 300,
     output: '/tmp/payload-pr-demo-hierarchy-move.mp4',
     rawOutput: '/tmp/payload-pr-demo-hierarchy-move.webm',
     scenario: '/tmp/demo.mjs',
@@ -99,6 +99,7 @@ test('packageCandidate converts, verifies, inventories, and cleans up a candidat
     output,
     rawOutput,
     scenario,
+    recordingOptions: { a11y: 'off', mouseMoveMs: 300 },
     trimStart: 1.25,
   })
 
@@ -113,6 +114,7 @@ test('packageCandidate converts, verifies, inventories, and cleans up a candidat
   await assert.rejects(stat(rawOutput), { code: 'ENOENT' })
 
   const savedManifest = JSON.parse(await readFile(manifest, 'utf8'))
+  assert.deepEqual(savedManifest.recordingOptions, { a11y: 'off', mouseMoveMs: 300 })
   assert.equal(savedManifest.mp4, output)
   assert.equal(savedManifest.contactSheet, contactSheet)
   assert.equal(savedManifest.scenario, scenario)
@@ -435,5 +437,15 @@ test('should preserve walkthrough errors alongside teardown errors', async () =>
       async () => {},
     ),
     /cleanup failed/,
+  )
+})
+
+test('should accept a11y overrides and reject invalid modes', () => {
+  for (const a11y of ['on', 'off']) {
+    assert.equal(parseArgs(['--scenario', './demo.mjs', '--a11y', a11y]).a11y, a11y)
+  }
+  assert.throws(
+    () => parseArgs(['--scenario', './demo.mjs', '--a11y', 'maybe']),
+    /--a11y must be on or off/,
   )
 })

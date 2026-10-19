@@ -12,12 +12,13 @@ import { createScrollInteraction } from './scroll-demo.mjs'
 const DEFAULT_BASE_URL = 'http://localhost:3000'
 const DEFAULT_INTERACTION_PAUSE_MS = 300
 const DEFAULT_LABEL = 'feature-demo'
-const DEFAULT_MOUSE_MOVE_MS = 400
+const DEFAULT_MOUSE_MOVE_MS = 300
 const DEFAULT_VIEWPORT = { height: 900, width: 1440 }
 
 export function parseArgs(argv) {
   const values = new Map()
   const supportedOptions = new Set([
+    '--a11y',
     '--base-url',
     '--interaction-pause-ms',
     '--label',
@@ -46,9 +47,15 @@ export function parseArgs(argv) {
     throw new Error('--scenario is required')
   }
 
+  const a11y = values.get('--a11y')
+  if (a11y !== undefined && !['on', 'off'].includes(a11y)) {
+    throw new Error('--a11y must be on or off')
+  }
+
   const label = sanitizeLabel(values.get('--label') ?? DEFAULT_LABEL)
 
   return {
+    ...(a11y === undefined ? {} : { a11y }),
     baseURL: values.get('--base-url') ?? DEFAULT_BASE_URL,
     interactionPauseMs: parseTiming({
       name: '--interaction-pause-ms',
@@ -105,6 +112,7 @@ export function sanitizeLabel(value) {
 }
 
 export async function recordDemo({
+  a11y,
   baseURL,
   fixture,
   interactionPauseMs = DEFAULT_INTERACTION_PAUSE_MS,
@@ -116,6 +124,7 @@ export async function recordDemo({
   viewport,
 }) {
   return executeDemo({
+    a11y,
     baseURL,
     fixture,
     interactionPauseMs,
@@ -130,8 +139,9 @@ export async function recordDemo({
   })
 }
 
-export async function validateDemo({ baseURL, fixture, label, scenario, viewport }) {
+export async function validateDemo({ a11y, baseURL, fixture, label, scenario, viewport }) {
   await executeDemo({
+    a11y,
     baseURL,
     fixture,
     interactionPauseMs: 0,
@@ -144,8 +154,9 @@ export async function validateDemo({ baseURL, fixture, label, scenario, viewport
   })
 }
 
-export async function previewDemo({ baseURL, fixture, label, output, scenario, viewport }) {
+export async function previewDemo({ a11y, baseURL, fixture, label, output, scenario, viewport }) {
   return executeDemo({
+    a11y,
     baseURL,
     fixture,
     interactionPauseMs: 0,
@@ -160,6 +171,7 @@ export async function previewDemo({ baseURL, fixture, label, output, scenario, v
 }
 
 async function executeDemo({
+  a11y,
   baseURL,
   fixture,
   interactionPauseMs,
@@ -173,6 +185,9 @@ async function executeDemo({
   trailingPauseMs,
   viewport,
 }) {
+  if (a11y !== undefined && !['on', 'off'].includes(a11y)) {
+    throw new Error('--a11y must be on or off')
+  }
   const parsedBaseURL = new URL(baseURL)
   const scenarioURL = pathToFileURL(path.resolve(scenario)).href
   const scenarioModule = await import(scenarioURL)
@@ -356,7 +371,12 @@ async function executeDemo({
   try {
     presentation = await createPresentation({
       page: recordedPage,
-      options: scenarioModule.presentation,
+      options: {
+        ...scenarioModule.presentation,
+        ...(a11y === undefined
+          ? {}
+          : { accessibility: a11y === 'on', showAnnouncements: a11y === 'on' }),
+      },
       viewport,
       baseURL,
       pauseScale,
@@ -592,6 +612,7 @@ function printHelp() {
   console.log(`Usage: record-demo.mjs --scenario PATH [options]
 
 Options:
+  --a11y on|off        Override a11y feedback; omit to use the scenario setting
   --base-url URL       Running Payload URL (default: ${DEFAULT_BASE_URL})
   --interaction-pause-ms MS
                        Dwell before and after clicks (default: ${DEFAULT_INTERACTION_PAUSE_MS})

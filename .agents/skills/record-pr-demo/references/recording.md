@@ -142,7 +142,7 @@ If a refresh is part of the story, send the browser reload shortcut through keyb
 
 The recorder adds a visible cursor above in-page popups and dialogs. Mouse presses show a brief primary-brand ring at the click point. It stays at that point as the cursor moves away, expands and fades over 420ms, and uses a stationary fade with reduced motion. Repeated clicks replace the prior indicator. This feedback is automatic; scenarios do not mount or style it. Keep the scenario on one page; separate browser-window stitching is outside this skill's current scope.
 
-Use `click` for visible interactions instead of calling `locator.click()` directly. Its defaults are a 400 ms eased cursor movement plus a 300 ms dwell before and after the click. `moveCursor` uses the same travel time and pauses for 300 ms after arriving. Override an individual action when the story needs more time:
+Use `click` for visible interactions instead of calling `locator.click()` directly. Its defaults are a 300 ms eased cursor movement plus a 300 ms dwell before and after the click. `moveCursor` uses the same travel time and pauses for 300 ms after arriving. Override an individual action when the story needs more time:
 
 ```js
 await click(saveButton, { after: 900 })
@@ -217,7 +217,7 @@ Useful options:
 - `--base-url http://localhost:4000`
 - `--viewport 1280x720`
 - `--output /tmp/custom-demo.mp4`
-- `--mouse-move-ms 400`
+- `--mouse-move-ms 300`
 - `--interaction-pause-ms 300`
 - `--contact-sheet /tmp/custom-demo-contact-sheet.png`
 - `--manifest /tmp/custom-demo.json`
@@ -251,8 +251,17 @@ export const presentation = {
 }
 ```
 
-Navigation keys and shortcuts appear for two seconds on the right of a dedicated a11y panel below the window chrome, then disappear. Each key has its own keycap, with plain `+` separators between combination keys (for example, `Shift` + `Tab`). The panel has a blue `a11y` badge stacked above its first section, matching the annotation badges, and compact neutral gray keycaps from the Payload semantic palette. To show the most recent live-region update on the left, labeled “Live region,” also set `presentation.showAnnouncements: true`. Ordinary character typing, spaces typed into editable fields, and input originating in password fields or `[data-private]` containers are excluded from the keystroke display. The supplemental focus outline follows the actual focused element, including dialogs, scrolling, and viewport scaling. It does not replace native focus styling or alter application focus. Observer and overlay elements cannot take focus or intercept pointer input, and the entire panel are hidden from assistive technology to avoid duplicate announcements.
+Navigation keys and shortcuts appear for two seconds on the right of a dedicated a11y panel below the window chrome, then disappear. Each key has its own keycap, with plain `+` separators between combination keys (for example, `Shift` + `Tab`). The panel has a blue `a11y` badge stacked above its first section, matching the annotation badges, and compact neutral gray keycaps from the Payload semantic palette. To show the most recent live-region update on the left, labeled “Announcements,” also set `presentation.showAnnouncements: true`. Ordinary character typing, spaces typed into editable fields, and input originating in password fields or `[data-private]` containers are excluded from the keystroke display. The supplemental focus outline follows the actual focused element, including dialogs, scrolling, and viewport scaling. It does not replace native focus styling or alter application focus. Observer and overlay elements cannot take focus or intercept pointer input, and the entire panel is hidden from assistive technology to avoid duplicate announcements.
 
 Use real keyboard events such as `page.keyboard.press('Tab')` and `page.keyboard.press('Enter')`. Add pauses around the important commands so viewers can follow them. Existing click, typing, and wheel helpers still work. Accessibility mode reserves a fixed-height panel below the window, even while keys are hidden, so key presses never shift the window or cover application content. Optional live-region captions share that panel rather than reserving extra space. The app may scale down slightly to fit the panel. Preview this mode at `http://127.0.0.1:4400/?accessibility&kind=fix` after starting the chrome preview server. Add `&announcements` to preview live-region captions too.
 
 Live-region captions observe the main application document's `[aria-live]`, `status`, `alert`, and `log` regions. Existing text is not announced at startup; subsequent changes and newly inserted regions are observed. Off, hidden, and busy regions are skipped, with busy regions revisited when they become available. Captions normalize whitespace and show the latest region's complete DOM text, with the visible display limited to two lines. Keep the demo's messages concise. These are observations, not a simulation of screen-reader scheduling, atomicity, relevance, or spoken output. Nested frames and live regions inside shadow roots are not observed. Actual VoiceOver or NVDA speech requires a separate recording with that assistive technology active.
+
+### Reuse a scenario with or without a11y feedback
+
+Pass `--a11y on` or `--a11y off` to `prepare-demo.mjs` for candidate, preview, or validate mode, or to `record-demo.mjs`. `on` enables the panel, keys, supplemental focus outline, and observed announcement captions; `off` disables the entire a11y presentation and observer. Omitting the flag preserves `presentation.accessibility` and `presentation.showAnnouncements`. These options do not change application accessibility or the walkthrough script. Use different take labels to keep each result reviewable. The candidate manifest records the override, cursor timing, click pauses, and viewport alongside the unchanged scenario snapshot.
+
+```sh
+node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs candidate --scenario /tmp/demo.mjs --a11y on --label demo-a11y
+node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs candidate --scenario /tmp/demo.mjs --a11y off --label demo-clean
+```

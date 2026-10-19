@@ -18,7 +18,7 @@ import {
 const DEFAULT_BASE_URL = 'http://localhost:3000'
 const DEFAULT_INTERACTION_PAUSE_MS = 300
 const DEFAULT_LABEL = 'feature-demo'
-const DEFAULT_MOUSE_MOVE_MS = 400
+const DEFAULT_MOUSE_MOVE_MS = 300
 const DEFAULT_VIEWPORT = { height: 900, width: 1440 }
 const MODES = new Set(['candidate', 'preflight', 'preview', 'validate', 'verify'])
 
@@ -32,6 +32,7 @@ export function parseArgs(argv) {
 
   const values = new Map()
   const supportedOptions = new Set([
+    '--a11y',
     '--base-url',
     '--contact-sheet',
     '--interaction-pause-ms',
@@ -63,11 +64,17 @@ export function parseArgs(argv) {
     throw new Error(`--scenario is required for ${requestedMode} mode`)
   }
 
+  const a11y = values.get('--a11y')
+  if (a11y !== undefined && !['on', 'off'].includes(a11y)) {
+    throw new Error('--a11y must be on or off')
+  }
+
   const label = sanitizeLabel(values.get('--label') ?? DEFAULT_LABEL)
   const output = values.get('--output') ?? `/tmp/payload-pr-demo-${label}.mp4`
   const outputBase = output.replace(/\.[^.]+$/, '')
 
   return {
+    ...(a11y === undefined ? {} : { a11y }),
     baseURL: values.get('--base-url') ?? DEFAULT_BASE_URL,
     contactSheet: values.get('--contact-sheet') ?? `${outputBase}-contact-sheet.png`,
     interactionPauseMs: parseTiming({
@@ -95,6 +102,7 @@ export async function packageCandidate({
   manifest,
   output,
   rawOutput,
+  recordingOptions,
   scenario,
   scenarioSource,
   trimStart,
@@ -196,6 +204,7 @@ export async function packageCandidate({
     label,
     metadata,
     mp4: resolvedOutput,
+    ...(recordingOptions ? { recordingOptions } : {}),
     scenario: resolvedScenario,
     scenarioSnapshot: script.path,
     scenarioSha256: script.sha256,
@@ -319,6 +328,7 @@ export async function runPreparation(options) {
   if (options.mode === 'validate') {
     await runWithScenarioFixture(options, async (fixture) => {
       await validateDemo({
+        a11y: options.a11y,
         baseURL: options.baseURL,
         fixture,
         label: options.label,
@@ -335,6 +345,7 @@ export async function runPreparation(options) {
 
     await runWithScenarioFixture(options, async (fixture) => {
       await previewDemo({
+        a11y: options.a11y,
         baseURL: options.baseURL,
         fixture,
         label: options.label,
@@ -352,6 +363,7 @@ export async function runPreparation(options) {
 
   await runWithScenarioFixture(options, async (fixture) => {
     await validateDemo({
+      a11y: options.a11y,
       baseURL: options.baseURL,
       fixture,
       label: options.label,
@@ -364,6 +376,7 @@ export async function runPreparation(options) {
   let trimStart
   await runWithScenarioFixture(options, async (fixture) => {
     await recordDemo({
+      a11y: options.a11y,
       baseURL: options.baseURL,
       fixture,
       interactionPauseMs: options.interactionPauseMs,
@@ -387,6 +400,12 @@ export async function runPreparation(options) {
     rawOutput: options.rawOutput,
     scenario: options.scenario,
     scenarioSource,
+    recordingOptions: {
+      a11y: options.a11y ?? 'scenario',
+      mouseMoveMs: options.mouseMoveMs,
+      interactionPauseMs: options.interactionPauseMs,
+      viewport: options.viewport,
+    },
     trimStart,
   })
   printStage('Candidate verified', startedAt)
@@ -534,6 +553,7 @@ Modes:
   verify               Confirm an MP4 still matches its reviewed candidate manifest
 
 Options:
+  --a11y on|off        Override a11y feedback; omit to use the scenario setting
   --scenario PATH      Scenario module; required for candidate, validate, and preview
   --label TEXT         Safe output label (default: ${DEFAULT_LABEL})
   --base-url URL       Running Payload URL (default: ${DEFAULT_BASE_URL})
