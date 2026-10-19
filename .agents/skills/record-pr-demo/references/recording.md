@@ -271,3 +271,5 @@ When a command arrives, retained commands slide right from their current visible
 Step descriptions sit below their titles with a 2px gap. Both retain 13px sizing and their existing foreground/muted colors. The progress circle sits beside the stacked text, vertically centered across both lines; single-step notes have no circle inset. Row gaps above and below the step are 4px. Longer descriptions may wrap, and oversized notes are still rejected without replacing the current annotation.
 
 The recording metadata sits in its own full-width background band at the top of the panel, using the theme’s secondary background. The band reaches the panel edges with matching top corner radii and a bottom divider, separating metadata from the step and a11y rows.
+
+The a11y row is a full-width footer band matching the metadata header’s secondary background, with a top divider and matching lower corner radii. The history gradient blends into this footer surface, and active keycaps use the paper background for separation from the band. The footer remains part of the fixed annotation panel, with no extra application overlay.
