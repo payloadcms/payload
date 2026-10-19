@@ -122,4 +122,4 @@ Step descriptions sit below their titles with a 2px gap. Both retain 13px sizing
 
 The recording metadata sits in its own full-width background band at the top of the panel, using the theme’s secondary background. The band reaches the panel edges with matching top corner radii and a bottom divider, separating metadata from the step and a11y rows.
 
-The a11y row is a full-width footer band matching the metadata header’s secondary background, with a top divider and matching lower corner radii. The history gradient blends into this footer surface, and active keycaps use the paper background for separation from the band. The footer remains part of the fixed annotation panel, with no extra application overlay.
+The a11y row is a full-width footer with the panel’s paper background, a full-width top divider and matching lower corner radii. The metadata header retains its secondary background. The history gradient blends into this footer surface, and active keycaps retain their neutral secondary background. The footer remains part of the fixed annotation panel, with no extra application overlay.
