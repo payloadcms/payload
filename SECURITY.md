@@ -6,7 +6,7 @@ Please report any security issues or concerns to [security@payloadcms.com](mailt
 
 ## Development Environments
 
-Development mode enables framework debugging features that can expose server-component props, source code, stack traces, and other internal data to the browser. React Flight debug metadata may include sensitive values held in server-component props. Payload authentication does not restrict access to framework development tooling.
+Development mode enables framework debugging features that can expose source code, stack traces, and server-component props—including sensitive values—to the browser. Payload authentication does not restrict access to framework development tooling.
 
 Run production builds for deployed applications, and restrict development-server access to trusted developers.
 
