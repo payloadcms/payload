@@ -13,16 +13,6 @@
     "typecheck": "pnpm turbo build --filter payload-test-suite && tsc --project tsconfig.typecheck.json",
     "typecheck:app-tanstack": "pnpm -C .. exec tsc --project test/app-tanstack/tsconfig.json && pnpm -C .. exec tsc --project test/admin-bar/app-tanstack/tsconfig.json && pnpm -C .. exec tsc --project test/live-preview/app-tanstack/tsconfig.json"
   },
-  "lint-staged": {
-    "**/package.json": "sort-package-json",
-    "*.{md,mdx,yml,json}": "prettier --write",
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --flag v10_config_lookup_from_file --cache --fix",
-      "prettier --write"
-    ],
-    "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --ignore-workspace --frozen-lockfile; pnpm run lint --fix\"",
-    "tsconfig.json": "node scripts/reset-tsconfig.js"
-  },
   "dependencies": {
     "recharts": "3.2.1"
   },
@@ -36,7 +26,7 @@
     "@miniflare/shared": "2.14.4",
     "@modelcontextprotocol/client": "2.3.1",
     "@modelcontextprotocol/server": "2.3.1",
-    "@next/env": "16.4.0",
+    "@next/env": "16.4.2",
     "@opennextjs/cloudflare": "1.16.1",
     "@payloadcms/admin-bar": "workspace:*",
     "@payloadcms/db-d1-sqlite": "workspace:*",
@@ -83,8 +73,8 @@
     "@sentry/react": "^7.77.0",
     "@stripe/react-stripe-js": "3.7.0",
     "@stripe/stripe-js": "7.3.1",
-    "@tanstack/react-router": "^1.120.0",
-    "@tanstack/react-start": "^1.168.60",
+    "@tanstack/react-router": "1.170.44",
+    "@tanstack/react-start": "1.169.1",
     "@types/diff": "^8.0.0",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
@@ -108,14 +98,14 @@
     "http-status": "2.1.0",
     "jwt-decode": "4.0.0",
     "mongoose": "9.9.2",
-    "next": "16.4.0",
-    "nodemailer": "^8.0.5",
+    "next": "16.4.2",
+    "nodemailer": "^10.1.1",
     "object-to-formdata": "4.5.1",
     "payload": "workspace:*",
     "pg": "8.16.3",
     "qs-esm": "8.0.1",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "sass": "1.77.4",
     "server-only": "^0.0.1",
     "sharp": "0.35.4",
@@ -129,5 +119,15 @@
     "vitest": "5.0.1",
     "wrangler": "~4.61.1",
     "zod": "^4.2.0"
+  },
+  "lint-staged": {
+    "*.{cjs,css,cts,graphql,html,json,jsonc,md,mdx,mjs,mts,scss,toml,yaml,yml}": "oxfmt --no-error-on-unmatched-pattern",
+    ".swcrc": "oxfmt --no-error-on-unmatched-pattern",
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --flag v10_config_lookup_from_file --cache --fix",
+      "oxfmt --no-error-on-unmatched-pattern"
+    ],
+    "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --ignore-workspace --frozen-lockfile; pnpm run lint --fix\"",
+    "tsconfig.json": "node scripts/reset-tsconfig.js"
   }
 }

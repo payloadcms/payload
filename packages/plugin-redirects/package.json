@@ -1,21 +1,16 @@
 {
   "name": "@payloadcms/plugin-redirects",
-  "version": "4.0.0-canary.38",
+  "version": "4.0.0-beta.2",
   "description": "Redirects plugin for Payload",
   "keywords": [
-    "payload",
     "cms",
+    "nextjs",
+    "payload",
     "plugin",
-    "typescript",
     "react",
     "redirects",
-    "nextjs"
+    "typescript"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/plugin-redirects"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -25,8 +20,20 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-redirects"
+  },
+  "files": [
+    "dist",
+    "types.js",
+    "types.d.ts"
+  ],
   "type": "module",
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts",
@@ -39,13 +46,22 @@
       "default": "./src/exports/types.ts"
     }
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "files": [
-    "dist",
-    "types.js",
-    "types.d.ts"
-  ],
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./types": {
+        "import": "./dist/exports/types.js",
+        "types": "./dist/exports/types.d.ts",
+        "default": "./dist/exports/types.js"
+      }
+    }
+  },
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
     "build:debug": "pnpm build",
@@ -65,22 +81,6 @@
   },
   "peerDependencies": {
     "payload": "workspace:*"
-  },
-  "publishConfig": {
-    "exports": {
-      ".": {
-        "import": "./dist/index.js",
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "./types": {
-        "import": "./dist/exports/types.js",
-        "types": "./dist/exports/types.d.ts",
-        "default": "./dist/exports/types.js"
-      }
-    },
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts"
   },
   "homepage:": "https://payloadcms.com"
 }

@@ -3,9 +3,8 @@ name: publish-release
 on:
   push:
     tags:
-      # Only the canary and beta lines publish here; stable and internal
+      # Only the beta line publishes here; stable, canary, and internal
       # (internal/internal-debug) tags never match.
-      - 'v4.*-canary.*'
       - 'v4.*-beta.*'
 
 env:
@@ -20,7 +19,7 @@ jobs:
   publish:
     name: publish-release-${{ github.ref_name }}
     if: github.repository == 'payloadcms/payload'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     environment: release
     permissions:
       id-token: write

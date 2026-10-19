@@ -1,12 +1,7 @@
 {
   "name": "@payloadcms/ui",
-  "version": "4.0.0-canary.38",
+  "version": "4.0.0-beta.2",
   "homepage": "https://payloadcms.com",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/ui"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -16,10 +11,20 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/ui"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
   "sideEffects": [
     "*.css"
   ],
-  "type": "module",
+  "main": "./src/exports/client/index.ts",
+  "types": "./src/exports/client/index.ts",
   "exports": {
     ".": {
       "import": "./src/exports/client/index.ts",
@@ -373,83 +378,9 @@
       "default": "./src/utilities/serverFunctionRegistry.ts"
     }
   },
-  "main": "./src/exports/client/index.ts",
-  "types": "./src/exports/client/index.ts",
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "pnpm build:reactcompiler",
-    "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
-    "build:bundle-for-analysis": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild esbuild --no-split",
-    "build:debug": "rm -rf dist esbuild && rm -rf tsconfig.tsbuildinfo && pnpm build:swc:debug && pnpm copyfiles && pnpm build:types",
-    "build:esbuild": "node bundle.js",
-    "build:esbuild:postprocess": "rm -rf dist/exports/client && mv dist/exports/client_optimized dist/exports/client && rm -rf dist/exports/shared && mv dist/exports/shared_optimized dist/exports/shared",
-    "build:reactcompiler": "rm -rf dist esbuild && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild && pnpm build:esbuild:postprocess && pnpm build:types",
-    "build:remove-artifact": "rm dist/prod/index.js",
-    "build:swc": "swc ./src -d dist --config-file .swcrc --strip-leading-paths",
-    "build:swc:debug": "swc ./src -d ./dist --config-file .swcrc-debug --strip-leading-paths",
-    "build:types": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" tsc --emitDeclarationOnly --outDir dist",
-    "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc",
-    "clean": "rimraf -g {dist,*.tsbuildinfo,esbuild}",
-    "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "lint": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" eslint .",
-    "lint:fix": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" eslint . --fix"
-  },
-  "dependencies": {
-    "@date-fns/tz": "1.2.0",
-    "@dnd-kit/core": "6.3.1",
-    "@dnd-kit/modifiers": "9.0.0",
-    "@dnd-kit/sortable": "10.0.0",
-    "@dnd-kit/utilities": "3.2.2",
-    "@faceless-ui/modal": "3.0.2",
-    "@faceless-ui/scroll-info": "2.0.0",
-    "@faceless-ui/window-info": "3.0.1",
-    "@floating-ui/dom": "1.7.6",
-    "@monaco-editor/react": "4.7.0",
-    "@payloadcms/translations": "workspace:*",
-    "@swc/helpers": ">=0.5.17",
-    "bson-objectid": "2.0.4",
-    "date-fns": "4.4.0",
-    "dequal": "2.0.3",
-    "dom-accessibility-api": "0.5.16",
-    "md5": "2.3.0",
-    "object-to-formdata": "4.5.1",
-    "path-to-regexp": "6.3.0",
-    "qs-esm": "8.0.1",
-    "react-datepicker": "9.1.0",
-    "react-image-crop": "10.1.8",
-    "react-select": "5.9.0",
-    "scheduler": "0.25.0",
-    "sonner": "^1.7.2",
-    "ts-essentials": "10.0.3",
-    "use-context-selector": "2.0.0",
-    "uuid": "14.0.0"
-  },
-  "devDependencies": {
-    "@babel/cli": "7.27.2",
-    "@babel/core": "7.27.3",
-    "@babel/preset-env": "7.27.2",
-    "@babel/preset-react": "7.27.1",
-    "@babel/preset-typescript": "7.27.1",
-    "@hyrious/esbuild-plugin-commonjs": "0.2.6",
-    "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "19.3.0",
-    "@types/react-dom": "19.3.0",
-    "babel-plugin-react-compiler": "19.1.0-rc.3",
-    "esbuild": "0.27.1",
-    "esbuild-sass-plugin": "3.3.1",
-    "payload": "workspace:*"
-  },
-  "peerDependencies": {
-    "payload": "workspace:*",
-    "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
-    "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
-  },
-  "engines": {
-    "node": ">=24.15.0"
-  },
   "publishConfig": {
+    "main": "./dist/exports/client/index.js",
+    "types": "./dist/exports/client/index.d.ts",
     "exports": {
       ".": {
         "import": "./dist/exports/client/index.js",
@@ -717,8 +648,77 @@
         "types": "./dist/utilities/serverFunctionRegistry.d.ts",
         "default": "./dist/utilities/serverFunctionRegistry.js"
       }
-    },
-    "main": "./dist/exports/client/index.js",
-    "types": "./dist/exports/client/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "pnpm build:reactcompiler",
+    "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
+    "build:bundle-for-analysis": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild esbuild --no-split",
+    "build:debug": "rm -rf dist esbuild && rm -rf tsconfig.tsbuildinfo && pnpm build:swc:debug && pnpm copyfiles && pnpm build:types",
+    "build:esbuild": "node bundle.js",
+    "build:esbuild:postprocess": "rm -rf dist/exports/client && mv dist/exports/client_optimized dist/exports/client && rm -rf dist/exports/shared && mv dist/exports/shared_optimized dist/exports/shared",
+    "build:reactcompiler": "rm -rf dist esbuild && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild && pnpm build:esbuild:postprocess && pnpm build:types",
+    "build:remove-artifact": "rm dist/prod/index.js",
+    "build:swc": "swc ./src -d dist --config-file .swcrc --strip-leading-paths",
+    "build:swc:debug": "swc ./src -d ./dist --config-file .swcrc-debug --strip-leading-paths",
+    "build:types": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" tsc --emitDeclarationOnly --outDir dist",
+    "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc",
+    "clean": "rimraf -g {dist,*.tsbuildinfo,esbuild}",
+    "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "lint": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" eslint .",
+    "lint:fix": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" eslint . --fix"
+  },
+  "dependencies": {
+    "@date-fns/tz": "1.2.0",
+    "@dnd-kit/core": "6.3.1",
+    "@dnd-kit/modifiers": "9.0.0",
+    "@dnd-kit/sortable": "10.0.0",
+    "@dnd-kit/utilities": "3.2.2",
+    "@faceless-ui/modal": "3.0.2",
+    "@faceless-ui/scroll-info": "2.0.0",
+    "@faceless-ui/window-info": "3.0.1",
+    "@floating-ui/dom": "1.7.6",
+    "@monaco-editor/react": "4.7.0",
+    "@payloadcms/translations": "workspace:*",
+    "@swc/helpers": ">=0.5.17",
+    "bson-objectid": "2.0.4",
+    "date-fns": "4.4.0",
+    "dequal": "2.0.3",
+    "dom-accessibility-api": "0.5.16",
+    "md5": "2.3.0",
+    "object-to-formdata": "4.5.1",
+    "path-to-regexp": "6.3.0",
+    "qs-esm": "8.0.1",
+    "react-datepicker": "9.1.0",
+    "react-image-crop": "10.1.8",
+    "react-select": "5.9.0",
+    "scheduler": "0.25.0",
+    "sonner": "^1.7.2",
+    "ts-essentials": "10.0.3",
+    "use-context-selector": "2.0.0",
+    "uuid": "14.0.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "7.27.2",
+    "@babel/core": "7.27.3",
+    "@babel/preset-env": "7.27.2",
+    "@babel/preset-react": "7.27.1",
+    "@babel/preset-typescript": "7.27.1",
+    "@hyrious/esbuild-plugin-commonjs": "0.2.6",
+    "@payloadcms/eslint-config": "workspace:*",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "babel-plugin-react-compiler": "19.1.0-rc.3",
+    "esbuild": "0.27.1",
+    "esbuild-sass-plugin": "3.3.1",
+    "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "payload": "workspace:*",
+    "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
+    "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
+  },
+  "engines": {
+    "node": ">=24.15.0"
   }
 }

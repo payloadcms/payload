@@ -713,9 +713,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
                             <SectionTitle path="blockName" readOnly={!isEditable} />
                           )}
 
-                          {fieldHasErrors && (
-                            <ErrorPill count={errorCount ?? 0} i18n={i18n} withMessage />
-                          )}
+                          {fieldHasErrors && <BlockErrorPill count={errorCount ?? 0} />}
                         </div>
                       )}
                     </div>
@@ -755,7 +753,6 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       baseClass,
       clientBlock?.admin?.disableBlockName,
       blockType,
-      i18n,
       isCollapsed,
       onCollapsedChange,
       isEditable,
@@ -903,4 +900,15 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
   }
 
   return Block
+}
+
+/**
+ * Reads `i18n` itself so `BlockCollapsible` does not depend on it. `BlockCollapsible` is created in
+ * a `useMemo`, so each new `i18n` object (e.g. once the date-fns locale is set after mount) would
+ * remount the whole block, closing its open menus and dropping focus.
+ */
+const BlockErrorPill: React.FC<{ readonly count: number }> = ({ count }) => {
+  const { i18n } = useTranslation()
+
+  return <ErrorPill count={count} i18n={i18n} withMessage />
 }

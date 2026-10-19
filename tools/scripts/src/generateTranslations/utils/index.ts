@@ -8,9 +8,9 @@ import type {
 
 import { acceptedLanguages } from '@payloadcms/translations'
 import fs from 'fs'
+import { format } from 'oxfmt'
 import path from 'path'
 import { deepMergeSimple } from 'payload/shared'
-import { format } from 'prettier'
 
 import { applyEslintFixes } from './applyEslintFixes.js'
 import { findMissingKeys } from './findMissingKeys.js'
@@ -205,14 +205,15 @@ export async function translateObject(props: {
     // eslint
     fileContent = await applyEslintFixes(fileContent, filePath)
 
-    // prettier
-    fileContent = await format(fileContent, {
-      parser: 'typescript',
-      printWidth: 100,
-      semi: false,
-      singleQuote: true,
-      trailingComma: 'all',
-    })
+    // oxfmt
+    fileContent = (
+      await format(filePath, fileContent, {
+        printWidth: 100,
+        semi: false,
+        singleQuote: true,
+        trailingComma: 'all',
+      })
+    ).code
 
     fs.writeFileSync(filePath, fileContent, 'utf8')
   } else {
@@ -240,14 +241,15 @@ export async function translateObject(props: {
       // eslint
       fileContent = await applyEslintFixes(fileContent, filePath)
 
-      // prettier
-      fileContent = await format(fileContent, {
-        parser: 'typescript',
-        printWidth: 100,
-        semi: false,
-        singleQuote: true,
-        trailingComma: 'all',
-      })
+      // oxfmt
+      fileContent = (
+        await format(filePath, fileContent, {
+          printWidth: 100,
+          semi: false,
+          singleQuote: true,
+          trailingComma: 'all',
+        })
+      ).code
 
       fs.writeFileSync(filePath, fileContent, 'utf8')
     }
