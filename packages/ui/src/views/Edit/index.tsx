@@ -356,7 +356,7 @@ export function DefaultEditView({
           path: `/collections/${collectionSlug}/${document?.id}${locale ? `?locale=${locale}` : ''}`,
         })
 
-        startRouteTransition(() => router.push(redirectRoute))
+        void startRouteTransition(() => router.push(redirectRoute))
       } else {
         resetUploadEdits()
       }
