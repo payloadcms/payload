@@ -418,8 +418,8 @@ async function main() {
     await bumpPluginTemplate()
   }
 
-  log('Running prettier on generated files...')
-  execSyncSafe(`pnpm prettier --write templates "*.{js,jsx,ts,tsx}"`, { cwd: PROJECT_ROOT })
+  log('Running oxfmt on generated files...')
+  execSyncSafe(`pnpm oxfmt templates`, { cwd: PROJECT_ROOT })
 
   log('Template generation complete!')
 }

@@ -21,7 +21,7 @@ export const hasSavePermission = (args: {
   if (collectionSlug) {
     return Boolean(
       (isEditing && docPermissions?.update) ||
-        (!isEditing && (docPermissions as SanitizedCollectionPermission)?.create),
+      (!isEditing && (docPermissions as SanitizedCollectionPermission)?.create),
     )
   }
 

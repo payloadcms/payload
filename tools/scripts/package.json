@@ -6,12 +6,12 @@
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "type": "module",
+  "main": "src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts"
     }
   },
-  "main": "src/index.ts",
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
     "build-template-with-local-pkgs": "pnpm runts src/build-template-with-local-pkgs.ts",
@@ -47,6 +47,7 @@
     "@payloadcms/plugin-import-export": "workspace:*",
     "@payloadcms/plugin-multi-tenant": "workspace:*",
     "@payloadcms/richtext-lexical": "workspace:*",
-    "@payloadcms/translations": "workspace:*"
+    "@payloadcms/translations": "workspace:*",
+    "oxfmt": "0.73.0"
   }
 }

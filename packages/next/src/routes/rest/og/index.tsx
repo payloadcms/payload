@@ -46,17 +46,15 @@ export const generateOGImage: PayloadHandler = async (req) => {
     const fontFamily = 'Roboto, sans-serif'
 
     return new ImageResponse(
-      (
-        <OGImage
-          description={description}
-          Fallback={PayloadIcon}
-          fontFamily={fontFamily}
-          Icon={config.admin?.components?.graphics?.Icon}
-          importMap={req.payload.importMap}
-          leader={leader}
-          title={title}
-        />
-      ),
+      <OGImage
+        description={description}
+        Fallback={PayloadIcon}
+        fontFamily={fontFamily}
+        Icon={config.admin?.components?.graphics?.Icon}
+        importMap={req.payload.importMap}
+        leader={leader}
+        title={title}
+      />,
       {
         ...(fontData
           ? {

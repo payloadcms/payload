@@ -1,21 +1,16 @@
 {
   "name": "@payloadcms/plugin-seo",
-  "version": "4.0.0-canary.39",
+  "version": "4.0.0-beta.2",
   "description": "SEO plugin for Payload",
   "keywords": [
-    "payload",
     "cms",
+    "payload",
     "plugin",
-    "typescript",
     "react",
     "seo",
+    "typescript",
     "yoast"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/plugin-seo"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -25,10 +20,20 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-seo"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
   "sideEffects": [
     "*.css"
   ],
-  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts",
@@ -51,11 +56,33 @@
       "default": "./src/exports/client.ts"
     }
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "files": [
-    "dist"
-  ],
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./types": {
+        "import": "./dist/exports/types.js",
+        "types": "./dist/exports/types.d.ts",
+        "default": "./dist/exports/types.js"
+      },
+      "./fields": {
+        "import": "./dist/exports/fields.js",
+        "types": "./dist/exports/fields.d.ts",
+        "default": "./dist/exports/fields.js"
+      },
+      "./client": {
+        "import": "./dist/exports/client.js",
+        "types": "./dist/exports/client.d.ts",
+        "default": "./dist/exports/client.js"
+      }
+    },
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
     "build:debug": "pnpm build",
@@ -81,33 +108,6 @@
     "payload": "workspace:*",
     "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
     "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
-  },
-  "publishConfig": {
-    "exports": {
-      ".": {
-        "import": "./dist/index.js",
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "./types": {
-        "import": "./dist/exports/types.js",
-        "types": "./dist/exports/types.d.ts",
-        "default": "./dist/exports/types.js"
-      },
-      "./fields": {
-        "import": "./dist/exports/fields.js",
-        "types": "./dist/exports/fields.d.ts",
-        "default": "./dist/exports/fields.js"
-      },
-      "./client": {
-        "import": "./dist/exports/client.js",
-        "types": "./dist/exports/client.d.ts",
-        "default": "./dist/exports/client.js"
-      }
-    },
-    "main": "./dist/index.js",
-    "registry": "https://registry.npmjs.org/",
-    "types": "./dist/index.d.ts"
   },
   "homepage:": "https://payloadcms.com"
 }

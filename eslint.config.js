@@ -9,6 +9,7 @@ export const defaultESLintIgnores = [
   '**/.hg',
   '**/.pnp.*',
   '**/.svn',
+  '**/oxfmt.config.ts',
   '**/playwright.config.ts',
   '**/vite.tanstack.config.ts',
   '**/vitest.config.ts',

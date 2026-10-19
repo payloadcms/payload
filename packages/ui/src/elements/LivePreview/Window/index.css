@@ -1,7 +1,7 @@
 @layer payload-default {
   .collection-edit:has(.live-preview-window--is-expanded) {
     .document-fields {
-      width: 0;
+      display: none;
     }
   }
 
@@ -50,6 +50,12 @@
 
   /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1024px) {
+    .collection-edit:has(.live-preview-window--is-live-previewing) {
+      .document-fields {
+        display: none;
+      }
+    }
+
     .live-preview-window {
       width: 100%;
     }
