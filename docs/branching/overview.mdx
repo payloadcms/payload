@@ -280,6 +280,18 @@ The callback runs against candidates prepared for `main` and replaces only the d
 
 When the Jobs Queue is configured, the Admin Panel can schedule a merge and cancel a job that has not started. The job stores the selected work and user. When it runs, it reloads current candidates and repeats access, dependency, and validation checks. It uses the same main-only merge and cleanup behavior as an immediate merge.
 
+Scheduling does not freeze the branch or capture a content snapshot. Editors can continue changing content until the merge starts. The branch enters `merging`, which blocks content writes, when execution begins rather than when the job is scheduled.
+
+The scheduled job resolves its selection at execution time:
+
+| Job input | Content selected when the job runs |
+| --- | --- |
+| `changes` omitted | All pending changes, including changes added after scheduling. |
+| Nonempty `changes` array | The latest content for matching pending change IDs, including edits made after scheduling. |
+| `changes: []` | Currently treated as all pending changes, unlike an immediate merge, where an empty array selects nothing. |
+
+Selected change IDs that have already been merged or discarded are skipped. If no selected changes remain, no content is merged. A scheduled merge is therefore not a guarantee that the exact content reviewed when scheduling will be applied.
+
 Do not treat permission at schedule time as permission at execution time. A scheduled merge can fail if the stored user loses access or if the selected content becomes invalid.
 
 ## Transactions, recovery, and visibility
