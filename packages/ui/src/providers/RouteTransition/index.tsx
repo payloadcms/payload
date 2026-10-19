@@ -63,14 +63,17 @@ export const RouteTransitionProvider: React.FC<RouteTransitionProps> = ({ childr
   }, [isTransitioning, initiateProgress])
 
   const startRouteTransition: StartRouteTransition = useCallback(
-    (callback?: () => void) => {
+    (callback?: () => Promise<void> | void) => {
+      let result: Promise<void> | void = undefined
+
       startTransition(() => {
         setIsOptimisticallyTransitioning(true)
 
-        if (typeof callback === 'function') {
-          callback()
-        }
+        result = callback?.()
+        return result
       })
+
+      return result
     },
     [setIsOptimisticallyTransitioning],
   )
@@ -108,7 +111,7 @@ type RouteTransitionProps = {
   children: React.ReactNode
 }
 
-type StartRouteTransition = (callback?: () => void) => void
+type StartRouteTransition = (callback?: () => Promise<void> | void) => Promise<void> | void
 
 type RouteTransitionContextValue = {
   /** Keeps the transition active until the returned release function is called. */
@@ -123,9 +126,7 @@ const RouteTransitionContext = React.createContext<RouteTransitionContextValue>(
   isTransitioning: false,
   // Default implementation: just call the callback directly (no transition animation)
   startRouteTransition: (callback) => {
-    if (typeof callback === 'function') {
-      callback()
-    }
+    return callback?.()
   },
   transitionProgress: 0,
 })

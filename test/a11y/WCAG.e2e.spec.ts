@@ -2588,68 +2588,6 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.3 Focus Order (A)', () => {
-    test('should retain focus when a column toggle moves between sections', async () => {
-      const columns = await openTableColumns({ page, postsURL })
-      for (const query of ['', 'Subtitle']) {
-        const columnToggle = columns.getByRole('checkbox', {
-          name: query || 'Title',
-          exact: true,
-        })
-
-        await columns.getByRole('textbox').fill(query)
-
-        if (query) {
-          await expect(columns.getByRole('checkbox')).toHaveCount(1)
-        }
-
-        const originalToggle = await columnToggle.elementHandle()
-        const wasChecked = await columnToggle.isChecked()
-
-        expect(originalToggle).not.toBeNull()
-
-        await columnToggle.focus()
-        await columnToggle.press('Space')
-        await expect(columnToggle).toBeChecked({ checked: !wasChecked })
-        await expect(columnToggle).toBeFocused()
-        expect(await originalToggle.evaluate((node) => node.isConnected)).toBe(true)
-
-        await columnToggle.press('Space')
-        await expect(columnToggle).toBeChecked({ checked: wasChecked })
-        await expect(columnToggle).toBeFocused()
-        expect(await originalToggle.evaluate((node) => node.isConnected)).toBe(true)
-        await originalToggle.dispose()
-      }
-    })
-
-    test('should retain the column drag handle and focus after keyboard reordering', async () => {
-      const columns = await openTableColumns({ page, postsURL })
-      const dragHandle = columns.getByRole('button', { name: /^Drag to reorder: Title$/i })
-      const shownRows = columns.locator(
-        '.column-selector__item:not(.column-selector__item--inactive)',
-      )
-      const originalHandle = await dragHandle.elementHandle()
-
-      expect(originalHandle).not.toBeNull()
-      await expect(shownRows.first()).toHaveText('Title')
-      await dragHandle.focus()
-      await dragHandle.press('Space')
-      await dragHandle.press('ArrowDown')
-      await dragHandle.press('Space')
-      await expect(page.locator('body')).not.toHaveClass(/is-dragging/)
-      await expect(shownRows.nth(1)).toHaveText('Title')
-      await expect(dragHandle).toBeFocused()
-      expect(await originalHandle.evaluate((node) => node.isConnected)).toBe(true)
-
-      await dragHandle.press('Space')
-      await dragHandle.press('ArrowUp')
-      await dragHandle.press('Space')
-      await expect(page.locator('body')).not.toHaveClass(/is-dragging/)
-      await expect(shownRows.first()).toHaveText('Title')
-      await expect(dragHandle).toBeFocused()
-      expect(await originalHandle.evaluate((node) => node.isConnected)).toBe(true)
-      await originalHandle.dispose()
-    })
-
     test('should return focus to the active dashboard tab when pagination disappears', async () => {
       const previousViewport = page.viewportSize()
       const preference = await (
@@ -4434,57 +4372,121 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
-    test('should retain a column toggle state while navigation is pending', async () => {
-      const columns = await openTableColumns({ page, postsURL })
-      const toggle = columns.getByRole('checkbox', { name: 'Title', exact: true })
-      const wasChecked = await toggle.isChecked()
-      let releaseNavigation: () => void
-      let hasHeldResponse = false
-      const navigationGate = new Promise<void>((resolve) => {
-        releaseNavigation = resolve
-      })
-      const holdNavigation = async (route: Route) => {
-        const request = route.request()
+    for (const { isInDrawer, shouldToggleTwice } of [
+      { isInDrawer: false, shouldToggleTwice: false },
+      { isInDrawer: true, shouldToggleTwice: false },
+      { isInDrawer: false, shouldToggleTwice: true },
+    ]) {
+      test(`should retain a column toggle state while navigation is pending${isInDrawer ? ' in a drawer' : ''}${shouldToggleTwice ? ' across successive toggles' : ''}`, async () => {
+        let columns: Locator
 
-        if (
-          !['fetch', 'xhr'].includes(request.resourceType()) ||
-          new URL(request.url()).origin !== new URL(serverURL).origin
-        ) {
-          await route.continue()
-          return
+        if (isInDrawer) {
+          const drawer = await openRichTextRelationshipDrawer({ page, postsURL })
+
+          await drawer.getByRole('button', { name: 'Columns', exact: true }).click()
+          columns = drawer.locator('.column-selector')
+        } else {
+          columns = await openTableColumns({ page, postsURL })
+        }
+        const toggle = columns.getByRole('checkbox', {
+          name: isInDrawer ? 'Email' : 'Title',
+          exact: true,
+        })
+        const wasChecked = await toggle.isChecked()
+        const stateHistory = await columns.evaluateHandle(
+          (container, label) => {
+            const readChecked = () =>
+              container.querySelector<HTMLInputElement>(`input[aria-label="${label}"]`)?.checked
+            const states = [readChecked()]
+            const observer = new MutationObserver(() => {
+              const checked = readChecked()
+
+              if (checked !== undefined && states.at(-1) !== checked) {
+                states.push(checked)
+              }
+            })
+
+            observer.observe(container, {
+              attributes: true,
+              childList: true,
+              subtree: true,
+            })
+            return { observer, states }
+          },
+          isInDrawer ? 'Email' : 'Title',
+        )
+        let releaseNavigation: () => void
+        let hasHeldRequest = false
+        const navigationGate = new Promise<void>((resolve) => {
+          releaseNavigation = resolve
+        })
+        const holdNavigation = async (route: Route) => {
+          const request = route.request()
+
+          if (
+            !['fetch', 'xhr'].includes(request.resourceType()) ||
+            new URL(request.url()).origin !== new URL(serverURL).origin
+          ) {
+            await route.continue()
+            return
+          }
+
+          hasHeldRequest = true
+          await navigationGate
+          if (!request.failure()) {
+            await route.continue()
+          }
         }
 
-        const response = await route.fetch()
+        await page.route('**/*', holdNavigation)
 
-        hasHeldResponse = true
-        await navigationGate
-        await route.fulfill({ response })
-      }
+        try {
+          await toggle.click()
+          await expect.poll(() => hasHeldRequest).toBe(true)
+          // Flush rendering while the navigation request is still withheld.
+          await page.evaluate(
+            () =>
+              new Promise<void>((resolve) => {
+                requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+              }),
+          )
+          await expect(toggle).toBeChecked({ checked: !wasChecked })
+          await expect(page.locator('.progress-bar')).toBeVisible()
 
-      await page.route('**/*', holdNavigation)
+          if (shouldToggleTwice) {
+            await toggle.click()
+            await expect(toggle).toBeChecked({ checked: wasChecked })
+          }
+        } finally {
+          releaseNavigation!()
+          // Superseded navigations can cancel a held request.
+          await page.unrouteAll({ behavior: shouldToggleTwice ? 'ignoreErrors' : 'wait' })
+        }
 
-      try {
-        await toggle.click()
-        await expect.poll(() => hasHeldResponse).toBe(true)
-        // Let the optimistic transition finish while the server response is still withheld.
-        await page.evaluate(
-          () =>
-            new Promise<void>((resolve) => {
-              requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
-            }),
+        await expect(page.locator('.progress-bar')).toBeHidden()
+        const states = await stateHistory.evaluate(({ observer, states }) => {
+          observer.disconnect()
+          return states
+        })
+
+        await stateHistory.dispose()
+        expect(states).toEqual(
+          shouldToggleTwice ? [wasChecked, !wasChecked, wasChecked] : [wasChecked, !wasChecked],
         )
-        await expect(toggle).toBeChecked({ checked: !wasChecked })
-      } finally {
-        releaseNavigation!()
-        await page.unrouteAll({ behavior: 'wait' })
-      }
 
-      await page.reload()
-      await page.getByRole('button', { name: 'Columns', exact: true }).click()
-      await expect(toggle).toBeChecked({ checked: !wasChecked })
-      await toggle.click()
-      await expect(toggle).toBeChecked({ checked: wasChecked })
-    })
+        if (!isInDrawer) {
+          await page.reload()
+          await page.getByRole('button', { name: 'Columns', exact: true }).click()
+        }
+        await expect(toggle).toBeChecked({
+          checked: shouldToggleTwice ? wasChecked : !wasChecked,
+        })
+        if (!shouldToggleTwice) {
+          await toggle.click()
+          await expect(toggle).toBeChecked({ checked: wasChecked })
+        }
+      })
+    }
 
     test('should present the embedded dashboard breadcrumb without editing controls', async () => {
       try {

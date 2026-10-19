@@ -5,9 +5,9 @@ import React, { useCallback, useRef } from 'react'
 
 import type { ITableColumns, TableColumnsProviderProps } from './types.js'
 
-import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
+import { useRouteTransition } from '../RouteTransition/index.js'
 import { TableColumnContext } from './context.js'
 
 export { useTableColumns } from './context.js'
@@ -20,14 +20,28 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
 }) => {
   const { getEntityConfig } = useConfig()
   const { query: currentQuery, refineListData } = useListQuery()
+  const { startRouteTransition } = useRouteTransition()
 
   const { admin: { defaultColumns } = {} } = getEntityConfig({
     collectionSlug,
   })
 
-  const [columnState, setColumnState] = useControllableState(columnStateFromProps)
+  const [columnState, setOptimisticColumnState] = React.useOptimistic(columnStateFromProps)
 
   const contextRef = useRef({} as ITableColumns)
+
+  const setColumns = useCallback(
+    async (newColumns: Column[]) => {
+      await startRouteTransition(async () => {
+        setOptimisticColumnState(newColumns)
+
+        await refineListData({
+          columns: transformColumnsToSearchParams(newColumns),
+        })
+      })
+    },
+    [refineListData, setOptimisticColumnState, startRouteTransition],
+  )
 
   const toggleColumn = useCallback(
     async (column: string) => {
@@ -46,13 +60,9 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
         return col
       })
 
-      setColumnState(newColumnState)
-
-      await refineListData({
-        columns: transformColumnsToSearchParams(newColumnState),
-      })
+      await setColumns(newColumnState)
     },
-    [refineListData, columnState, setColumnState],
+    [columnState, setColumns],
   )
 
   const moveColumn = useCallback(
@@ -62,13 +72,9 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
       const [columnToMove] = newColumnState.splice(fromIndex, 1)
       newColumnState.splice(toIndex, 0, columnToMove)
 
-      setColumnState(newColumnState)
-
-      await refineListData({
-        columns: transformColumnsToSearchParams(newColumnState),
-      })
+      await setColumns(newColumnState)
     },
-    [columnState, refineListData, setColumnState],
+    [columnState, setColumns],
   )
 
   const setActiveColumns = useCallback(
@@ -92,17 +98,6 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
   const resetColumnsState = React.useCallback(async () => {
     await refineListData({ columns: defaultColumns || [] })
   }, [defaultColumns, refineListData])
-
-  const setColumns = useCallback(
-    async (newColumns: Column[]) => {
-      setColumnState(newColumns)
-
-      await refineListData({
-        columns: transformColumnsToSearchParams(newColumns),
-      })
-    },
-    [refineListData, setColumnState],
-  )
 
   return (
     <TableColumnContext

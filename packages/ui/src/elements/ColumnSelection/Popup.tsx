@@ -133,7 +133,6 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
   onClose,
 }) => {
   const { i18n, t } = useTranslation()
-  const containerRef = useRef<HTMLDivElement>(null)
 
   const toggleColumn = useCallback(
     (column: string) => {
@@ -157,6 +156,7 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
   const uuid = useId()
   const editDepth = useEditDepth()
   const [searchQuery, setSearchQuery] = useState('')
+  const containerRef = useRef<HTMLDivElement>(null)
   const [lockedWidth, setLockedWidth] = useState<null | number>(null)
 
   // Lock the width when search starts to prevent layout shift
@@ -205,7 +205,7 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
         typeof label === 'string' ? label : getTranslation(label as StaticLabel, i18n)
 
       return {
-        id: `${collectionSlug}-${accessor}${editDepth ? `-${editDepth}-` : ''}${uuid}`,
+        id: `${collectionSlug}-${accessor}-${i}${editDepth ? `-${editDepth}-` : ''}${uuid}`,
         accessor,
         active,
         index: i,
@@ -271,11 +271,6 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
   // Combined IDs: shown items first, then hidden items
   const allIds = [...columnItems.shown, ...columnItems.hidden].map((item) => item.id)
 
-  const columnSections = [
-    { columns: columnItems.shown, key: 'shown', label: t('general:shownInTable') },
-    { columns: columnItems.hidden, key: 'hidden', label: t('general:notShownInTable') },
-  ]
-
   const containerStyle = lockedWidth
     ? ({ '--column-selector-locked-width': `${lockedWidth}px` } as React.CSSProperties)
     : undefined
@@ -318,29 +313,41 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
         </div>
       </div>
       <div className={`${baseClass}__content`}>
-        <DraggableSortable className={`${baseClass}__list`} ids={allIds} onDragEnd={handleDragEnd}>
+        <DraggableSortable ids={allIds} onDragEnd={handleDragEnd}>
           {columnItems.shown.length === 0 && columnItems.hidden.length === 0 && searchQuery && (
             <div className={`${baseClass}__no-results`}>{t('general:noMatchesFound')}</div>
           )}
-          {columnSections.flatMap(({ columns: sectionColumns, key, label }) =>
-            sectionColumns.length > 0
-              ? [
-                  <h3 className={`${baseClass}__section-header`} key={`section-${key}`}>
-                    {label}
-                  </h3>,
-                  ...sectionColumns.map((item) => (
-                    <ColumnItem
-                      active={item.active}
-                      id={item.id}
-                      key={item.id}
-                      labelText={item.labelText}
-                      onToggle={() => {
-                        void toggleColumn(item.accessor)
-                      }}
-                    />
-                  )),
-                ]
-              : [],
+          {columnItems.shown.length > 0 && (
+            <div className={`${baseClass}__section`}>
+              <h3 className={`${baseClass}__section-header`}>{t('general:shownInTable')}</h3>
+              {columnItems.shown.map((item) => (
+                <ColumnItem
+                  active={item.active}
+                  id={item.id}
+                  key={item.id}
+                  labelText={item.labelText}
+                  onToggle={() => {
+                    void toggleColumn(item.accessor)
+                  }}
+                />
+              ))}
+            </div>
+          )}
+          {columnItems.hidden.length > 0 && (
+            <div className={`${baseClass}__section`}>
+              <h3 className={`${baseClass}__section-header`}>{t('general:notShownInTable')}</h3>
+              {columnItems.hidden.map((item) => (
+                <ColumnItem
+                  active={item.active}
+                  id={item.id}
+                  key={item.id}
+                  labelText={item.labelText}
+                  onToggle={() => {
+                    void toggleColumn(item.accessor)
+                  }}
+                />
+              ))}
+            </div>
           )}
         </DraggableSortable>
       </div>

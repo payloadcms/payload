@@ -15,7 +15,8 @@ type ContextHandlers = {
   handleWhereChange?: (where: Where) => Promise<void>
 }
 
-export type OnListQueryChange = (query: ListQuery) => void
+/** Async handlers resolve after the updated list is ready to render. */
+export type OnListQueryChange = (query: ListQuery) => Promise<void> | void
 
 export type ListQueryProps = {
   readonly children: React.ReactNode
