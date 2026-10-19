@@ -75,7 +75,7 @@ function renderAt({ milliseconds }) {
             index: 1,
             total: 1,
             title: 'Try it with the keyboard',
-            body: 'Click a Move down button, then use Tab and Enter. Commands appear on the left of the a11y panel.',
+            body: 'Click a Move down button, then use Tab and Enter. Commands appear on the right of the a11y panel.',
           }
         : { ...step, total: 3 }
       : null,

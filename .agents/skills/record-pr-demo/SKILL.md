@@ -27,7 +27,7 @@ Every scenario must export `presentation` with a change kind (`Feature` or `Fix`
 
 ## Accessibility demonstrations
 
-Set `presentation.accessibility: true` to show an a11y panel below the window chrome with a blue badge and brief navigation/shortcut keycaps on the left and a supplemental outline around the actual focused element. Add `presentation.showAnnouncements: true` only when the demo needs observed live-region captions on the right of that panel. Use this for keyboard and announcement demonstrations; see [recording.md](references/recording.md#accessibility-observations). Captions are DOM observations, not synthesized speech or evidence of what a screen reader announces. Leave the mode off for ordinary visual demos.
+Set `presentation.accessibility: true` to show an a11y panel below the window chrome with a blue badge stacked above the first section and brief navigation/shortcut keycaps on the right and a supplemental outline around the actual focused element. Add `presentation.showAnnouncements: true` only when the demo needs observed live-region captions in the left section of that panel. Use this for keyboard and announcement demonstrations; see [recording.md](references/recording.md#accessibility-observations). Captions are DOM observations, not synthesized speech or evidence of what a screen reader announces. Leave the mode off for ordinary visual demos.
 
 ## Workflow
 

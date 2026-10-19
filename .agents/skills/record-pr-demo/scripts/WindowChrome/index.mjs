@@ -74,17 +74,17 @@ export function mountDemoChrome({
     [data-step-count], [data-refresh-text] { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
     .note-title { font-size:16px; font-weight:500; overflow-wrap:anywhere; }
     .body { font-size:16px; color:var(--sub); overflow-wrap:anywhere; }
-    .accessibility { position:absolute; inset:auto 0 32px; margin-inline:auto; width:min(1302px,calc(100% - 64px)); height:88px; padding:12px 24px; border-radius:12px; background:var(--paper); pointer-events:none; display:grid; grid-template-columns:auto minmax(0,360px) minmax(0,1fr); align-items:center; gap:24px; }
+    .accessibility { position:absolute; inset:auto 0 32px; margin-inline:auto; width:min(1302px,calc(100% - 64px)); height:112px; padding:12px 24px; border-radius:12px; background:var(--paper); pointer-events:none; display:grid; grid-template-columns:minmax(0,420fr) minmax(0,826fr); align-items:center; }
     .accessibility[hidden], .focus-highlight[hidden], .keystroke-overlay[hidden] { display:none; }
-    .a11y-badge { padding:2px 8px; border:1px solid var(--kind-feature-border); border-radius:var(--radius-full,9999px); background:var(--kind-feature-bg); color:var(--kind-feature-text); font-size:12px; font-weight:500; line-height:18px; }
+    .a11y-badge { --kind-bg:var(--kind-feature-bg); --kind-border:var(--kind-feature-border); --kind-text:var(--kind-feature-text); }
     .keyboard-feedback { min-width:0; }
-    .live-region { min-width:0; padding-inline-start:24px; border-inline-start:1px solid var(--line); }
-    .accessibility-label { color:var(--sub); font-size:11px; letter-spacing:.3px; margin-block-end:4px; }
+    .keyboard-feedback .heading { margin-block-end:6px; }
+    .key-slot { min-height:24px; }
     .keystroke-overlay { pointer-events:none; width:100%; color:var(--ink); }
-    .keystroke { display:flex; align-items:center; flex-wrap:wrap; gap:8px; font:16px/1.5 ui-monospace,monospace; }
-    .keystroke kbd { display:inline-block; padding:6px 10px; border:1px solid var(--keycap-border); border-radius:var(--radius-medium,5px); background:var(--keycap-bg); color:var(--keycap-text); box-shadow:var(--elevation-300-tooltip,0 3px 8px #00000024); font:inherit; white-space:nowrap; }
+    .keystroke { display:flex; align-items:center; flex-wrap:wrap; gap:6px; font:13px/1.5 ui-monospace,monospace; }
+    .keystroke kbd { display:inline-block; padding:1px 7px; border:1px solid var(--keycap-border); border-radius:var(--radius-medium,5px); background:var(--keycap-bg); color:var(--keycap-text); box-shadow:var(--elevation-300-tooltip,0 3px 8px #00000024); font:inherit; white-space:nowrap; }
     .key-separator { font:inherit; text-shadow:0 0 3px var(--paper); }
-    .announcement { font-size:16px; line-height:22px; max-height:44px; overflow:hidden; overflow-wrap:anywhere; }
+    .announcement { max-height:39px; overflow:hidden; overflow-wrap:anywhere; }
     .focus-highlight { position:absolute; z-index:2; pointer-events:none; border:3px solid var(--color-bg-brand,#007be5); box-shadow:0 0 0 2px white, inset 0 0 0 1px white; border-radius:4px; }
   </style>
   <div class="stage ${theme}" data-canvas>
@@ -96,7 +96,7 @@ export function mountDemoChrome({
       <div class="header"><div class="dots" aria-hidden="true"><span></span><span></span><span></span></div><div class="header-info" data-header-info><span class="refresh" data-refresh role="status" aria-live="polite" aria-atomic="true" hidden><svg data-refresh-icon aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path data-refresh-path d="M13 6a5.2 5.2 0 1 0 .1 4M13 2v4H9" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-refresh-text></span></span><span class="size" data-size></span></div></div>
       <div class="content" data-content><slot name="content"></slot>${accessibility ? '<div class="focus-highlight" data-focus-highlight aria-hidden="true" hidden></div>' : ''}</div>
     </div>
-    ${accessibility ? `<div class="accessibility" data-accessibility aria-hidden="true"><span class="a11y-badge" data-a11y-badge>a11y</span><div class="keyboard-feedback"><div class="keystroke-overlay" data-keystroke-overlay aria-hidden="true" hidden><span class="keystroke" data-keystroke></span></div></div>${hasAnnouncements ? '<div class="live-region"><div class="accessibility-label">Live region</div><div class="announcement" data-announcement>Waiting for an update…</div></div>' : ''}</div>` : ''}
+    ${accessibility ? `<div class="accessibility" data-accessibility aria-hidden="true"><div class="change"><span class="kind a11y-badge" data-a11y-badge>a11y</span><div class="title" data-accessibility-heading>${hasAnnouncements ? 'Live region' : 'Keyboard input'}</div>${hasAnnouncements ? '<div class="description announcement" data-announcement>Waiting for an update…</div>' : ''}</div><div class="note keyboard-feedback"><div class="heading"><span class="note-title">Keys</span></div><div class="key-slot"><div class="keystroke-overlay" data-keystroke-overlay aria-hidden="true" hidden><span class="keystroke" data-keystroke></span></div></div></div></div>` : ''}
   </div>`
   const find = (selector) => shadow.querySelector(selector)
   find('[data-kind]').textContent = change.kind
@@ -118,7 +118,7 @@ export function mountDemoChrome({
     const windowHeight = height + 58
     const panelHeight = find('[data-footer]').offsetHeight
     const windowTop = 32 + panelHeight + 22
-    const availableHeight = canvas.height - windowTop - 32 - (accessibility ? 110 : 0)
+    const availableHeight = canvas.height - windowTop - 32 - (accessibility ? 134 : 0)
     const scale = Math.min(1, (canvas.width - 64) / windowWidth, availableHeight / windowHeight)
     if (scale <= 0) throw new Error('Presentation text leaves no room for the application')
     const windowY = windowTop + (availableHeight - windowHeight * scale) / 2

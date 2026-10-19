@@ -241,7 +241,7 @@ test('should keep transient keycaps inside a stable accessibility panel', async 
   })
 })
 
-test('should keep keys on the left and live-region text on the right below the resized window', async () => {
+test('should stack the a11y badge over live-region text with keys in the right section', async () => {
   await withPresentation({
     run: async ({ stage, app, presentation }) => {
       await app.locator('#first').focus()
@@ -264,8 +264,9 @@ test('should keep keys on the left and live-region text on the right below the r
           assert.ok(box.x + box.width <= panel.x + panel.width)
           assert.ok(box.y + box.height <= panel.y + panel.height)
         }
-        assert.ok(badge.x + badge.width < keycaps.x)
-        assert.ok(keycaps.x + keycaps.width < message.x)
+        assert.ok(badge.y + badge.height <= message.y)
+        assert.ok(Math.abs(badge.x - message.x) < 2)
+        assert.ok(message.x + message.width < keycaps.x)
       }
     },
   })
