@@ -50,6 +50,10 @@ export default buildConfigWithDefaults({
     // ...extend config here
     admin: {
       components: {
+        providers: [
+          '../admin/components/CustomProviderServer/index.js#CustomProviderServer',
+          '../admin/components/CustomProvider/index.js#CustomProvider',
+        ],
         views: {
           BreadcrumbCurrentPage: {
             Component: '/components/BreadcrumbCurrentPage/index.js#BreadcrumbCurrentPage',

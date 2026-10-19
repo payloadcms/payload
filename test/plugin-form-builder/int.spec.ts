@@ -86,7 +86,10 @@ test.suite('@payloadcms/plugin-form-builder', suiteOptions, () => {
     })
 
     test('adds form submissions collection', async ({ payload }) => {
-      const { docs: formSubmissions } = await payload.find({ collection: formSubmissionsSlug, overrideAccess: true })
+      const { docs: formSubmissions } = await payload.find({
+        collection: formSubmissionsSlug,
+        overrideAccess: true,
+      })
       expect(formSubmissions).toHaveLength(1)
     })
 
@@ -2075,7 +2078,11 @@ test.suite('@payloadcms/plugin-form-builder', suiteOptions, () => {
         createdFormIds.push(testForm.id)
 
         // Capture media count before the submission attempt
-        const mediaBefore = await payload.find({ collection: mediaSlug, limit: 0, overrideAccess: true })
+        const mediaBefore = await payload.find({
+          collection: mediaSlug,
+          limit: 0,
+          overrideAccess: true,
+        })
         const countBefore = mediaBefore.totalDocs
 
         const formData = new FormData()
@@ -2106,7 +2113,11 @@ test.suite('@payloadcms/plugin-form-builder', suiteOptions, () => {
         expect(response.status).toBe(400)
 
         // The image doc created before the PDF validation failure should have been cleaned up
-        const mediaAfter = await payload.find({ collection: mediaSlug, limit: 0, overrideAccess: true })
+        const mediaAfter = await payload.find({
+          collection: mediaSlug,
+          limit: 0,
+          overrideAccess: true,
+        })
 
         expect(mediaAfter.totalDocs).toBe(countBefore)
       })

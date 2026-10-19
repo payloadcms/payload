@@ -4,8 +4,9 @@ import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { access, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { pathToFileURL } from 'node:url'
 
+import { convertDemo } from './convert-demo.mjs'
 import {
   parseViewport,
   previewDemo,
@@ -20,7 +21,6 @@ const DEFAULT_LABEL = 'feature-demo'
 const DEFAULT_MOUSE_MOVE_MS = 400
 const DEFAULT_VIEWPORT = { height: 900, width: 1440 }
 const MODES = new Set(['candidate', 'preflight', 'preview', 'validate', 'verify'])
-const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 
 export function parseArgs(argv) {
   const args = [...argv]
@@ -96,18 +96,23 @@ export async function packageCandidate({
   output,
   rawOutput,
   scenario,
+  trimStart,
 }) {
+  if (!Number.isFinite(trimStart) || trimStart < 0) {
+    throw new Error('Candidate is missing a valid opening ready time')
+  }
+
   const resolvedContactSheet = path.resolve(contactSheet)
   const resolvedManifest = path.resolve(manifest)
   const resolvedOutput = path.resolve(output)
   const resolvedRawOutput = path.resolve(rawOutput)
   const resolvedScenario = path.resolve(scenario)
 
-  await mkdir(path.dirname(resolvedOutput), { recursive: true })
-  runCommand({
-    args: [path.join(scriptDirectory, 'convert-demo.sh'), resolvedRawOutput, resolvedOutput],
-    command: 'bash',
+  await convertDemo({
     environment,
+    input: resolvedRawOutput,
+    output: resolvedOutput,
+    trimStart,
   })
 
   runCommand({
@@ -163,8 +168,8 @@ export async function packageCandidate({
     environment,
   })
 
-  const fileBuffer = await readFile(resolvedOutput)
   const fileStats = await stat(resolvedOutput)
+  const fileBuffer = await readFile(resolvedOutput)
   const sha256 = createHash('sha256').update(fileBuffer).digest('hex')
   const metadata = {
     codec: videoStream.codec_name,
@@ -308,6 +313,7 @@ export async function runPreparation(options) {
   })
   printStage('Scenario validated', startedAt)
 
+  let trimStart
   await runWithScenarioFixture(options, async (fixture) => {
     await recordDemo({
       baseURL: options.baseURL,
@@ -315,6 +321,9 @@ export async function runPreparation(options) {
       interactionPauseMs: options.interactionPauseMs,
       label: options.label,
       mouseMoveMs: options.mouseMoveMs,
+      onOpeningReady: (seconds) => {
+        trimStart = seconds
+      },
       output: options.rawOutput,
       scenario: options.scenario,
       viewport: options.viewport,
@@ -329,6 +338,7 @@ export async function runPreparation(options) {
     output: options.output,
     rawOutput: options.rawOutput,
     scenario: options.scenario,
+    trimStart,
   })
   printStage('Candidate verified', startedAt)
   printCandidate(result)

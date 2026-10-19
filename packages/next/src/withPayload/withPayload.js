@@ -5,6 +5,8 @@
  * user projects regardless of their TypeScript setup.
  */
 
+import { fileURLToPath } from 'node:url'
+
 const poweredByHeader = {
   key: 'X-Powered-By',
   value: 'Next.js, Payload',
@@ -16,7 +18,15 @@ const poweredByHeader = {
  * @param {boolean} [options.devBundleServerPackages] - Whether to bundle server packages in development mode. @default false
  * */
 export const withPayload = (nextConfig = {}, options = {}) => {
-  const env = nextConfig.env || {}
+  const env = { ...nextConfig.env }
+  // Adds `export const instant = false` to the admin layout and page. See `instantLoader.js` for
+  // why this cannot live in the generated admin files.
+  const instantLoader = nextConfig.cacheComponents
+    ? typeof import.meta?.resolve === 'function'
+      ? fileURLToPath(new URL('./instantLoader.js', import.meta.url))
+      : require.resolve('@payloadcms/next/withPayload/instantLoader')
+    : undefined
+  const instantLoaderRule = '**/{layout,page}.{js,jsx,ts,tsx,mjs,mts,cjs,cts}'
 
   if (nextConfig.experimental?.staleTimes?.dynamic) {
     console.warn(
@@ -82,6 +92,27 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     },
     turbopack: {
       ...(nextConfig.turbopack || {}),
+      ...(instantLoader
+        ? {
+            rules: {
+              ...nextConfig.turbopack?.rules,
+              [instantLoaderRule]: [
+                ...[].concat(nextConfig.turbopack?.rules?.[instantLoaderRule] ?? []),
+                {
+                  // Only send files that import the admin root components to the loader, so
+                  // Turbopack does not run a JavaScript loader for every other layout and page.
+                  condition: {
+                    all: [
+                      { not: 'foreign' },
+                      { content: /['"]@payloadcms\/next\/(?:layouts|views)['"]/ },
+                    ],
+                  },
+                  loaders: [instantLoader],
+                },
+              ],
+            },
+          }
+        : {}),
     },
     // We disable the poweredByHeader here because we add it manually in the headers function below
     ...(nextConfig.poweredByHeader !== false ? { poweredByHeader: false } : {}),
@@ -191,6 +222,22 @@ export const withPayload = (nextConfig = {}, options = {}) => {
 
       return {
         ...incomingWebpackConfig,
+        ...(instantLoader
+          ? {
+              module: {
+                ...incomingWebpackConfig.module,
+                rules: [
+                  ...(incomingWebpackConfig.module?.rules || []),
+                  {
+                    enforce: 'pre',
+                    exclude: /node_modules/,
+                    test: /[/\\](layout|page)\.(?:[cm]?[jt]s|[jt]sx)$/,
+                    use: [instantLoader],
+                  },
+                ],
+              },
+            }
+          : {}),
         externals: [
           ...(incomingWebpackConfig?.externals || []),
           /**

@@ -7,9 +7,8 @@ on:
         description: Prerelease identifier
         type: choice
         options:
-          - canary
           - beta
-        default: canary
+        default: beta
       bump:
         description: Semver bump
         type: choice
@@ -35,7 +34,7 @@ jobs:
   bump:
     name: release-bump
     if: github.repository == 'payloadcms/payload'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     # Scopes the App credentials to this environment, whose branch policy
     # limits them to workflows running on main.
     environment: bump
