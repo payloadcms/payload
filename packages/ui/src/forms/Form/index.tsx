@@ -166,6 +166,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const contextRef = useRef({} as FormContextType)
   const abortResetFormRef = useRef<AbortController>(null)
   const isFirstRenderRef = useRef(true)
+  const appliedInitialStateRef = useRef<FormState>(undefined)
 
   const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
 
@@ -807,7 +808,10 @@ export const Form: React.FC<FormProps> = (props) => {
   }, [submittedFromProps])
 
   useEffect(() => {
-    if (initialState) {
+    // Effects can re-run without prop changes, e.g. when a parent Suspense boundary re-reveals
+    // this form. Re-applying the same initial state then would discard unsaved field changes.
+    if (initialState && initialState !== appliedInitialStateRef.current) {
+      appliedInitialStateRef.current = initialState
       contextRef.current = { ...initContextState } as FormContextType
       dispatchFields({
         type: 'REPLACE_STATE',
@@ -855,6 +859,7 @@ export const Form: React.FC<FormProps> = (props) => {
         dispatchFields({
           type: 'MERGE_SERVER_STATE',
           prevStateRef: prevFormState,
+          sentState: formState,
           serverState,
         })
       }

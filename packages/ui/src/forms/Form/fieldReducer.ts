@@ -217,7 +217,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     }
 
     case 'MERGE_SERVER_STATE': {
-      const { acceptValues, prevStateRef, serverState } = action
+      const { acceptValues, prevStateRef, sentState, serverState } = action
 
       const newState = mergeServerFormState({
         acceptValues,
@@ -225,7 +225,9 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         incomingState: serverState,
       })
 
-      prevStateRef.current = newState
+      if (!sentState || sentState === state) {
+        prevStateRef.current = newState
+      }
 
       return newState
     }

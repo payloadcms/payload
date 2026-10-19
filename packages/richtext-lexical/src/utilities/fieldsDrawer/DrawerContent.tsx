@@ -51,36 +51,62 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 
   const fields: any = fieldMapOverride ?? featureClientSchemaMap[featureKey]?.[schemaFieldsPath] // Field Schema
 
+  // React can re-run the initial state effect with unchanged inputs, e.g. when a parent Suspense
+  // boundary re-reveals this drawer. Refetching then would discard the drawer's unsaved form state.
+  const initializedInputsRef = useRef<undefined | unknown[]>(undefined)
+
   // Parent form state changes after autosave. Read its latest value when initializing without
   // reinitializing this drawer and discarding its unsaved form state after every parent update.
-  const getInitialState = useEffectEvent(async (controller: AbortController) => {
-    const { state } = await getFormState({
-      id,
-      collectionSlug,
-      data: data ?? {},
-      docPermissions: {
-        fields: true,
-      },
-      docPreferences: await getDocPreferences(),
-      documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
-        excludeFiles: true,
-      }),
-      globalSlug,
-      initialBlockData: data,
-      operation: 'update',
-      readOnly: !isEditable,
-      renderAllFields: true,
-      schemaPath: schemaFieldsPath,
-      signal: controller.signal,
-    })
+  const getInitialState = useEffectEvent(
+    async ({ controller, inputs }: { controller: AbortController; inputs: unknown[] }) => {
+      const { state } = await getFormState({
+        id,
+        collectionSlug,
+        data: data ?? {},
+        docPermissions: {
+          fields: true,
+        },
+        docPreferences: await getDocPreferences(),
+        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
+          excludeFiles: true,
+        }),
+        globalSlug,
+        initialBlockData: data,
+        operation: 'update',
+        readOnly: !isEditable,
+        renderAllFields: true,
+        schemaPath: schemaFieldsPath,
+        signal: controller.signal,
+      })
 
-    setInitialState(state)
-  })
+      if (controller.signal.aborted) {
+        return
+      }
+
+      initializedInputsRef.current = inputs
+      setInitialState(state)
+    },
+  )
 
   useEffect(() => {
+    const inputs = [
+      schemaFieldsPath,
+      id,
+      data,
+      getFormState,
+      collectionSlug,
+      isEditable,
+      globalSlug,
+      getDocPreferences,
+    ]
+
+    if (initializedInputsRef.current?.every((input, index) => Object.is(input, inputs[index]))) {
+      return
+    }
+
     const controller = new AbortController()
 
-    void getInitialState(controller)
+    void getInitialState({ controller, inputs })
 
     return () => {
       abortAndIgnore(controller)

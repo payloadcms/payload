@@ -202,6 +202,11 @@ export type ADD_ROW = {
 export type MERGE_SERVER_STATE = {
   acceptValues?: AcceptValues
   prevStateRef: React.RefObject<FormState>
+  /**
+   * The form state that the server state was computed from. If the form state changed since then,
+   * `prevStateRef` is not updated, so the debounced onChange sends those unsent changes.
+   */
+  sentState?: FormState
   serverState: FormState
   type: 'MERGE_SERVER_STATE'
 }
