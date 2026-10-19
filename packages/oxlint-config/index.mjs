@@ -1,264 +1,280 @@
-import js from '@eslint/js'
-import tseslint from 'typescript-eslint'
-import perfectionist from 'eslint-plugin-perfectionist'
-import { configs as regexpPluginConfigs } from 'eslint-plugin-regexp'
-import eslintConfigPrettier from 'eslint-config-prettier/flat'
-import payloadPlugin from '@payloadcms/oxlint-plugin'
-import reactExtends from './configs/react/index.mjs'
-import globals from 'globals'
-import importX from 'eslint-plugin-import-x'
-import typescriptParser from '@typescript-eslint/parser'
-import { deepMerge } from './deepMerge.js'
-import reactCompiler from 'eslint-plugin-react-compiler'
+import eslintReact from '@eslint-react/eslint-plugin'
 import vitest from '@vitest/eslint-plugin'
+import perfectionist from 'eslint-plugin-perfectionist'
+import playwright from 'eslint-plugin-playwright'
+import reactCompiler from 'eslint-plugin-react-compiler'
+import { configs as regexpConfigs } from 'eslint-plugin-regexp'
+import { createRequire } from 'node:module'
 
-const baseRules = {
-  // This rule makes no sense when overriding class methods. This is used a lot in richtext-lexical.
-  'class-methods-use-this': 'off',
-  curly: ['warn', 'all'],
-  'arrow-body-style': 0,
-  'import-x/prefer-default-export': 'off',
-  'no-restricted-exports': ['warn', { restrictDefaultExports: { direct: true } }],
-  'no-console': 'warn',
-  'no-sparse-arrays': 'off',
-  'no-underscore-dangle': 'off',
-  'no-use-before-define': 'off',
-  'object-shorthand': 'warn',
-  'no-useless-escape': 'warn',
-  'import-x/no-duplicates': 'warn',
-  'perfectionist/sort-objects': [
-    'error',
-    {
-      type: 'natural',
-      order: 'asc',
-      partitionByComment: true,
-      partitionByNewLine: true,
-      groups: ['top', 'unknown'],
-      customGroups: {
-        top: ['_id', 'id', 'name', 'slug', 'type'],
-      },
-    },
-  ],
-  /*'perfectionist/sort-object-types': [
-    'error',
-    {
-      partitionByNewLine: true,
-    },
-  ],
-  'perfectionist/sort-interfaces': [
-    'error',
-    {
-      partitionByNewLine': true,
-    },
-  ],*/
-  'payload/no-jsx-import-statements': 'error',
-  'payload/no-conflicting-lexical-markdown-imports': 'warn',
-}
+import reactExtends from './configs/react/index.mjs'
 
 const reactA11yRules = {
   'jsx-a11y/anchor-is-valid': 'warn',
-  'jsx-a11y/control-has-associated-label': 'warn',
-  'jsx-a11y/no-static-element-interactions': 'warn',
+  // ESLint ran this with jsx-a11y's defaults, which check `<input>` and `<textarea>` too. oxlint's
+  // defaults skip them, so pass jsx-a11y's defaults explicitly.
+  'jsx-a11y/control-has-associated-label': ['warn', { ignoreElements: [], ignoreRoles: [] }],
+  // ESLint ran this with jsx-a11y's default handlers, which include `onMouseEnter` and
+  // `onMouseLeave`. oxlint's defaults skip them, so pass jsx-a11y's defaults explicitly.
+  'jsx-a11y/no-static-element-interactions': [
+    'warn',
+    {
+      handlers: [
+        'onFocus',
+        'onBlur',
+        'onKeyDown',
+        'onKeyPress',
+        'onKeyUp',
+        'onClick',
+        'onContextMenu',
+        'onDblClick',
+        'onDoubleClick',
+        'onDrag',
+        'onDragEnd',
+        'onDragEnter',
+        'onDragExit',
+        'onDragLeave',
+        'onDragOver',
+        'onDragStart',
+        'onDrop',
+        'onMouseDown',
+        'onMouseEnter',
+        'onMouseLeave',
+        'onMouseMove',
+        'onMouseOut',
+        'onMouseOver',
+        'onMouseUp',
+      ],
+    },
+  ],
   'jsx-a11y/label-has-associated-control': 'warn',
 }
 
-const typescriptRules = {
-  '@typescript-eslint/no-use-before-define': 'off',
+const require = createRequire(import.meta.url)
+const requireFromESLintReact = createRequire(require.resolve('@eslint-react/eslint-plugin'))
 
-  // Type-aware any rules:
-  '@typescript-eslint/no-unsafe-assignment': 'off',
-  '@typescript-eslint/no-unsafe-member-access': 'off',
-  '@typescript-eslint/no-unsafe-call': 'off',
-  '@typescript-eslint/no-unsafe-argument': 'off',
-  '@typescript-eslint/no-unsafe-return': 'off',
-  '@typescript-eslint/unbound-method': 'warn',
-  '@typescript-eslint/consistent-type-imports': 'warn',
-  '@typescript-eslint/no-explicit-any': 'warn',
-  // Type-aware any rules end
+/** eslint-plugin-playwright's recommended rules, for the e2e test override in the root config. */
+export const playwrightRecommendedRules = playwright.configs['flat/recommended'].rules
 
-  // ts-expect preferred over ts-ignore. It will error if the expected error is no longer present.
-  '@typescript-eslint/ban-ts-comment': 'warn', // Recommended over deprecated @typescript-eslint/prefer-ts-expect-error: https://github.com/typescript-eslint/typescript-eslint/issues/8333. Set to warn to ease migration.
-  // By default, it errors for unused variables. This is annoying, warnings are enough.
-  '@typescript-eslint/no-unused-vars': [
-    'warn',
+/**
+ * Payload's shared oxlint config. It runs the ESLint plugins Payload used before as oxlint JS
+ * plugins, so rule names and existing `eslint-disable` comments keep working.
+ *
+ * @satisfies {import('oxlint').OxlintConfig}
+ */
+const config = {
+  categories: {
+    correctness: 'off',
+  },
+  env: {
+    builtin: true,
+    commonjs: true,
+    es2026: true,
+    node: true,
+  },
+  jsPlugins: [
+    { name: 'payload', specifier: require.resolve('@payloadcms/oxlint-plugin') },
+    { name: 'perfectionist', specifier: require.resolve('eslint-plugin-perfectionist') },
+    { name: 'playwright', specifier: require.resolve('eslint-plugin-playwright') },
+    { name: 'react-compiler', specifier: require.resolve('eslint-plugin-react-compiler') },
+    { name: 'regexp', specifier: require.resolve('eslint-plugin-regexp') },
+    // `vitest` is reserved for oxlint's native plugin, which can't recognize custom `test` imports
+    { name: '@vitest', specifier: require.resolve('@vitest/eslint-plugin') },
+    // `@eslint-react/eslint-plugin` bundles these plugins. oxlint reads `@eslint-react/dom/rule` as
+    // plugin `@eslint-react/dom`, so each one is loaded under the name ESLint used.
+    { name: '@eslint-react', specifier: requireFromESLintReact.resolve('eslint-plugin-react-x') },
     {
-      vars: 'all',
-      args: 'after-used',
-      ignoreRestSiblings: false,
-      argsIgnorePattern: '^_',
-      varsIgnorePattern: '^_',
-      destructuredArrayIgnorePattern: '^_',
-      caughtErrorsIgnorePattern: '^(_|ignore)',
+      name: '@eslint-react/dom',
+      specifier: requireFromESLintReact.resolve('eslint-plugin-react-dom'),
+    },
+    {
+      name: '@eslint-react/hooks-extra',
+      specifier: requireFromESLintReact.resolve('eslint-plugin-react-hooks-extra'),
+    },
+    {
+      name: '@eslint-react/naming-convention',
+      specifier: requireFromESLintReact.resolve('eslint-plugin-react-naming-convention'),
+    },
+    {
+      name: '@eslint-react/web-api',
+      specifier: requireFromESLintReact.resolve('eslint-plugin-react-web-api'),
     },
   ],
-  '@typescript-eslint/no-base-to-string': 'warn',
-  '@typescript-eslint/restrict-template-expressions': 'warn',
-  '@typescript-eslint/no-redundant-type-constituents': 'warn',
-  '@typescript-eslint/no-unnecessary-type-constraint': 'warn',
-  '@typescript-eslint/no-misused-promises': [
-    'error',
+  // Native versions of ESLint plugins whose names oxlint reserves (`import-x` is `import`,
+  // `react-hooks` rules are in `react`). Existing `eslint-disable` comments for them still apply.
+  // `typescript` also runs the type-aware rules, which JS plugins can't.
+  plugins: ['typescript', 'import', 'react', 'jsx-a11y'],
+  settings: eslintReact.configs['recommended-type-checked'].settings,
+  overrides: [
     {
-      // See https://github.com/typescript-eslint/typescript-eslint/issues/4619 and https://github.com/typescript-eslint/typescript-eslint/pull/4623
-      // Don't want something like <button onClick={someAsyncFunction}> to error
-      checksVoidReturn: {
-        attributes: false,
-        arguments: false,
+      files: ['**/*.{ts,tsx}'],
+      rules: {
+        ...perfectionist.configs['recommended-natural'].rules,
+        ...regexpConfigs['flat/recommended'].rules,
+        'for-direction': 'error',
+        'no-async-promise-executor': 'error',
+        'no-case-declarations': 'error',
+        'no-compare-neg-zero': 'error',
+        'no-cond-assign': 'error',
+        'no-constant-binary-expression': 'error',
+        'no-constant-condition': 'error',
+        'no-debugger': 'error',
+        'no-delete-var': 'error',
+        'no-dupe-else-if': 'error',
+        'no-duplicate-case': 'error',
+        'no-empty': 'error',
+        'no-empty-pattern': 'error',
+        'no-empty-static-block': 'error',
+        'no-ex-assign': 'error',
+        'no-extra-boolean-cast': 'error',
+        'no-fallthrough': 'error',
+        'no-global-assign': 'error',
+        'no-irregular-whitespace': 'error',
+        'no-loss-of-precision': 'error',
+        'no-nonoctal-decimal-escape': 'error',
+        'no-prototype-builtins': 'error',
+        'no-self-assign': 'error',
+        'no-shadow-restricted-names': 'error',
+        'no-unsafe-finally': 'error',
+        // TODO: back to 'error' once fixed. This version flags more than the ESLint one.
+        'no-unsafe-optional-chaining': 'warn',
+        'no-unused-labels': 'error',
+        'no-unused-private-class-members': 'error',
+        'no-unused-vars': [
+          'warn',
+          {
+            vars: 'all',
+            args: 'after-used',
+            ignoreRestSiblings: false,
+            argsIgnorePattern: '^_',
+            varsIgnorePattern: '^_',
+            destructuredArrayIgnorePattern: '^_',
+            caughtErrorsIgnorePattern: '^(_|ignore)',
+          },
+        ],
+        'no-useless-catch': 'error',
+        'no-useless-escape': 'warn',
+        'no-with': 'error',
+        'require-yield': 'error',
+        'use-isnan': 'error',
+        'valid-typeof': 'error',
+        'perfectionist/sort-objects': [
+          'error',
+          {
+            type: 'natural',
+            order: 'asc',
+            partitionByComment: true,
+            partitionByNewLine: true,
+            groups: ['top', 'unknown'],
+            customGroups: {
+              top: ['_id', 'id', 'name', 'slug', 'type'],
+            },
+          },
+        ],
+        'no-var': 'error',
+        'prefer-const': 'error',
+        'prefer-rest-params': 'error',
+        'prefer-spread': 'error',
+        'no-array-constructor': 'error',
+        'no-unused-expressions': 'error',
+        curly: ['warn', 'all'],
+        'no-console': 'warn',
+        'object-shorthand': 'warn',
+        'payload/no-conflicting-lexical-markdown-imports': 'warn',
+        'import/no-duplicates': 'warn',
+        // TODO: back to 'error' once fixed. This version flags more than the ESLint one.
+        'typescript/await-thenable': 'warn',
+        'typescript/ban-ts-comment': 'warn',
+        'typescript/no-array-delete': 'error',
+        'typescript/no-base-to-string': 'warn',
+        'typescript/no-duplicate-enum-values': 'error',
+        'typescript/no-duplicate-type-constituents': 'error',
+        'typescript/no-empty-object-type': 'warn',
+        'typescript/no-explicit-any': 'warn',
+        'typescript/no-extra-non-null-assertion': 'error',
+        'typescript/no-floating-promises': 'error',
+        'typescript/no-for-in-array': 'error',
+        'typescript/no-implied-eval': 'error',
+        'typescript/no-misused-new': 'error',
+        'typescript/no-misused-promises': [
+          'error',
+          {
+            checksVoidReturn: {
+              attributes: false,
+              arguments: false,
+            },
+          },
+        ],
+        'typescript/no-namespace': 'error',
+        'typescript/no-non-null-asserted-optional-chain': 'error',
+        'typescript/no-redundant-type-constituents': 'warn',
+        'typescript/no-require-imports': 'error',
+        'typescript/no-this-alias': 'error',
+        /**
+         * Off because its autofix breaks code. tsgolint ports the check typescript-eslint added in
+         * 8.59.0, which reports an assertion as unnecessary if the value would fit where it's used
+         * without it. The rule only sees the types with the assertion in place, so it can't tell
+         * when the code around it depends on the assertion (typescript-eslint#12376).
+         *
+         * In this monorepo it reported 368 assertions that ESLint's version (typescript-eslint
+         * 8.26.1) didn't. 10 of them were false positives: removing them with `--fix` broke the
+         * build of payload, plugin-ecommerce and richtext-lexical (9) and a tstyche type test (1).
+         */
+        'typescript/no-unnecessary-type-assertion': 'off',
+        'typescript/no-unnecessary-type-constraint': 'warn',
+        'typescript/no-unsafe-declaration-merging': 'error',
+        'typescript/no-unsafe-enum-comparison': 'error',
+        'typescript/no-unsafe-function-type': 'error',
+        'typescript/no-unsafe-unary-minus': 'error',
+        'typescript/no-wrapper-object-types': 'error',
+        'typescript/only-throw-error': 'error',
+        'typescript/prefer-as-const': 'error',
+        'typescript/prefer-namespace-keyword': 'error',
+        'typescript/prefer-promise-reject-errors': 'error',
+        'typescript/require-await': 'error',
+        'typescript/restrict-plus-operands': 'error',
+        'typescript/restrict-template-expressions': 'warn',
+        'typescript/triple-slash-reference': 'error',
+        'typescript/unbound-method': 'warn',
+        'typescript/consistent-type-imports': 'warn',
+        'no-restricted-exports': [
+          'warn',
+          {
+            restrictDefaultExports: {
+              direct: true,
+            },
+          },
+        ],
+      },
+    },
+    {
+      files: ['**/*.tsx'],
+      ...reactExtends,
+      rules: {
+        ...reactExtends.rules,
+        ...reactA11yRules,
+        // TODO: back to 'error' once fixed. This version flags more than the ESLint one.
+        'jsx-a11y/role-has-required-aria-props': 'warn',
+      },
+    },
+    {
+      files: ['**/*.spec.ts'],
+      excludeFiles: ['**/*.e2e.spec.ts'],
+      // `vitest` is loaded as `@vitest` (see `jsPlugins`), so the preset's rule names need the new prefix
+      rules: Object.fromEntries(
+        Object.entries(vitest.configs.recommended.rules).map(([rule, value]) => [
+          rule.replace('vitest/', '@vitest/'),
+          value,
+        ]),
+      ),
+    },
+    { files: ['**/*.tsx'], rules: reactCompiler.configs.recommended.rules },
+    {
+      files: ['**/*.config.ts', '**/config.ts'],
+      rules: {
+        'no-restricted-exports': 'off',
       },
     },
   ],
-  '@typescript-eslint/no-empty-object-type': 'warn',
 }
 
-/** @typedef {import('eslint').Linter.Config} Config */
-
-/** @type {FlatConfig} */
-const baseExtends = deepMerge(
-  js.configs.recommended,
-  perfectionist.configs['recommended-natural'],
-  regexpPluginConfigs['flat/recommended'],
-)
-
-/** @type {Config[]} */
-export const rootEslintConfig = [
-  {
-    name: 'Settings',
-    languageOptions: {
-      parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
-        projectService: {
-          // This is necessary because `tsconfig.base.json` defines `"rootDir": "${configDir}/src"`,
-          // And the following files aren't in src because they aren't transpiled.
-          // This is typescript-eslint's way of adding files that aren't included in tsconfig.
-          // See: https://typescript-eslint.io/troubleshooting/typed-linting/#i-get-errors-telling-me--was-not-found-by-the-project-service-consider-either-including-it-in-the-tsconfigjson-or-including-it-in-allowdefaultproject
-          // The best practice is to have a tsconfig.json that covers ALL files and is used for
-          // typechecking (with noEmit), and a `tsconfig.build.json` that is used for the build
-          // (or alternatively, swc, tsup or tsdown). That's what we should ideally do, in which case
-          // this hardcoded list wouldn't be necessary. Note that these files don't currently go
-          // through ts, only through eslint.
-          allowDefaultProject: [
-            '../payload/bin.js',
-            '../payload/bundle.js',
-            '../next/babel.config.cjs',
-            '../next/bundleScss.js',
-            '../ui/babel.config.cjs',
-            '../ui/bundle.js',
-            '../graphql/bin.js',
-            '../richtext-lexical/babel.config.cjs',
-            '../richtext-lexical/bundle.js',
-            '../richtext-lexical/scripts/translateNewKeys.ts',
-            '../db-postgres/bundle.js',
-            '../db-postgres/relationships-v2-v3.mjs',
-            '../db-postgres/scripts/renamePredefinedMigrations.ts',
-            '../db-sqlite/bundle.js',
-            '../db-d1-sqlite/bundle.js',
-            '../db-vercel-postgres/relationships-v2-v3.mjs',
-            '../db-vercel-postgres/scripts/renamePredefinedMigrations.ts',
-            '../plugin-cloud-storage/azure.d.ts',
-            '../plugin-cloud-storage/azure.js',
-            '../plugin-cloud-storage/gcs.d.ts',
-            '../plugin-cloud-storage/gcs.js',
-            '../plugin-cloud-storage/s3.d.ts',
-            '../plugin-cloud-storage/s3.js',
-            '../plugin-redirects/types.d.ts',
-            '../plugin-redirects/types.js',
-            '../translations/scripts/translateNewKeys/applyEslintFixes.ts',
-            '../translations/scripts/translateNewKeys/findMissingKeys.ts',
-            '../translations/scripts/translateNewKeys/generateTsObjectLiteral.ts',
-            '../translations/scripts/translateNewKeys/index.ts',
-            '../translations/scripts/translateNewKeys/run.ts',
-            '../translations/scripts/translateNewKeys/sortKeys.ts',
-            '../translations/scripts/translateNewKeys/translateText.ts',
-            '../create-payload-app/bin/cli.js',
-            '../codemod/bin/cli.js',
-          ],
-        },
-        tsconfigRootDir: import.meta.dirname,
-      },
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-      globals: {
-        ...globals.node,
-      },
-      parser: typescriptParser,
-    },
-    linterOptions: {
-      reportUnusedDisableDirectives: 'error',
-    },
-    plugins: {
-      'import-x': importX,
-    },
-  },
-  {
-    name: 'TypeScript',
-    // has 3 entries: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/typescript-eslint/src/configs/recommended-type-checked.ts
-    ...deepMerge(
-      baseExtends,
-      tseslint.configs.recommendedTypeChecked[0],
-      tseslint.configs.recommendedTypeChecked[1],
-      tseslint.configs.recommendedTypeChecked[2],
-      eslintConfigPrettier,
-      {
-        plugins: {
-          payload: payloadPlugin,
-        },
-        rules: {
-          ...baseRules,
-          ...typescriptRules,
-        },
-      },
-    ),
-    files: ['**/*.ts'],
-  },
-  {
-    name: 'TypeScript-React',
-    ...deepMerge(
-      baseExtends,
-      tseslint.configs.recommendedTypeChecked[0],
-      tseslint.configs.recommendedTypeChecked[1],
-      tseslint.configs.recommendedTypeChecked[2],
-      reactExtends,
-      eslintConfigPrettier,
-      {
-        plugins: {
-          payload: payloadPlugin,
-        },
-        rules: {
-          ...baseRules,
-          ...typescriptRules,
-          ...reactA11yRules,
-        },
-      },
-    ),
-    files: ['**/*.tsx'],
-  },
-  {
-    name: 'Unit and Integration Tests',
-    plugins: {
-      vitest,
-    },
-    rules: {
-      ...vitest.configs.recommended.rules,
-    },
-    files: ['**/*.spec.ts'],
-    ignores: ['**/*.e2e.spec.ts'],
-  },
-  {
-    name: 'Payload Config',
-    plugins: {
-      payload: payloadPlugin,
-    },
-    rules: {
-      'no-restricted-exports': 'off',
-    },
-    files: ['*.config.ts', 'config.ts'],
-  },
-  {
-    name: 'React Compiler',
-    ...reactCompiler.configs.recommended,
-    files: ['**/*.tsx'],
-  },
-]
-
-export default rootEslintConfig
+export default config

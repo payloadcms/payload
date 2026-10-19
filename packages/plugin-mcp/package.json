@@ -87,8 +87,6 @@
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "pack:plugin": "pnpm build && pnpm pack"
   },
   "dependencies": {
@@ -96,7 +94,6 @@
     "tsx": "4.23.15"
   },
   "devDependencies": {
-    "@payloadcms/oxlint-config": "workspace:*",
     "payload": "workspace:*"
   },
   "peerDependencies": {

@@ -79,9 +79,7 @@
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/"
   },
   "dependencies": {
     "@payloadcms/translations": "workspace:*",
@@ -92,7 +90,6 @@
   },
   "devDependencies": {
     "@payloadcms/next": "workspace:*",
-    "@payloadcms/oxlint-config": "workspace:*",
     "@types/lodash.get": "^4.4.7",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",

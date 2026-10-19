@@ -96,9 +96,7 @@
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
-    "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/"
   },
   "dependencies": {
     "@faceless-ui/modal": "3.0.2",
@@ -109,7 +107,6 @@
     "qs-esm": "8.0.1"
   },
   "devDependencies": {
-    "@payloadcms/oxlint-config": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "payload": "workspace:*"
   },

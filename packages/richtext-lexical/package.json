@@ -810,9 +810,7 @@
     "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:esbuild && pnpm build:esbuild:postproces && rm -rf dist/exports/client && mv dist/exports/client_unoptimized dist/exports/client",
     "clean": "rimraf -g {dist,*.tsbuildinfo,esbuild}",
     "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "copyfiles:debug": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "copyfiles:debug": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/"
   },
   "dependencies": {
     "@lexical/clipboard": "0.52.0",
@@ -851,7 +849,6 @@
     "@babel/preset-react": "7.27.1",
     "@babel/preset-typescript": "7.27.1",
     "@lexical/eslint-plugin": "0.52.0",
-    "@payloadcms/oxlint-config": "workspace:*",
     "@types/escape-html": "1.0.4",
     "@types/json-schema": "7.0.15",
     "@types/node": "24.12.3",
@@ -875,7 +872,7 @@
     "*.{cjs,css,cts,graphql,html,json,jsonc,md,mdx,mjs,mts,scss,toml,yaml,yml}": "oxfmt --no-error-on-unmatched-pattern",
     ".swcrc": "oxfmt --no-error-on-unmatched-pattern",
     "*.{js,jsx,ts,tsx}": [
-      "eslint --flag v10_config_lookup_from_file --cache --fix",
+      "oxlint -c ../../oxlint.config.ts --fix --no-error-on-unmatched-pattern",
       "oxfmt --no-error-on-unmatched-pattern"
     ]
   },

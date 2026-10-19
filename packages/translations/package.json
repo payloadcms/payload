@@ -77,15 +77,12 @@
     "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "clean": "rimraf -g {dist,*.tsbuildinfo}"
   },
   "dependencies": {
     "date-fns": "4.4.0"
   },
   "devDependencies": {
-    "@payloadcms/oxlint-config": "workspace:*",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "dotenv": "catalog:",

@@ -69,9 +69,7 @@
     "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "clean": "rimraf -g {dist,*.tsbuildinfo}"
   },
   "dependencies": {
     "graphql-scalars": "1.22.2",
@@ -80,7 +78,6 @@
     "tsx": "4.23.15"
   },
   "devDependencies": {
-    "@payloadcms/oxlint-config": "workspace:*",
     "@types/pluralize": "^0.0.33",
     "graphql-http": "1.22.4",
     "payload": "workspace:*"

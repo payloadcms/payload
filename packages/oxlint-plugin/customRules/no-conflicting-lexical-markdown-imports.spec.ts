@@ -1,28 +1,18 @@
-import { RuleTester } from 'eslint'
-import * as tsParser from '@typescript-eslint/parser'
-import { afterAll, describe, it } from 'vitest'
+import { RuleTester } from 'oxlint/plugins-dev'
+import { describe, it } from 'vitest'
 
 import rule from './no-conflicting-lexical-markdown-imports.js'
 
-// Wire ESLint's RuleTester into Vitest so each case becomes a real test. These
-// static hooks exist at runtime but are not declared in `@types/eslint`.
-const ruleTesterHooks = RuleTester as unknown as {
-  afterAll: typeof afterAll
-  describe: typeof describe
-  it: typeof it
-  itOnly: typeof it.only
-}
-ruleTesterHooks.afterAll = afterAll
-ruleTesterHooks.describe = describe
-ruleTesterHooks.it = it
-ruleTesterHooks.itOnly = it.only
+// Wire oxlint's RuleTester into Vitest so each case becomes a real test
+RuleTester.describe = describe
+RuleTester.it = it
+RuleTester.itOnly = it.only
 
-// Use the TypeScript parser so `import type { ... }` and inline `type` specifiers
+// Parse as TypeScript so `import type { ... }` and inline `type` specifiers
 // (which carry the `importKind` the rule inspects) parse correctly.
 const ruleTester = new RuleTester({
   languageOptions: {
-    ecmaVersion: 2022,
-    parser: tsParser,
+    parserOptions: { lang: 'ts' },
     sourceType: 'module',
   },
 })
