@@ -28,9 +28,11 @@
     "build": "tsc",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "list-published": "tsx src/lib/getPackageRegistryVersions.ts",
+    "list-published": "tsx src/list-published.ts",
     "publish-prerelease": "tsx src/publish-prerelease.ts",
     "release": "tsx src/release.ts",
+    "release-bump": "tsx src/release-bump.ts",
+    "release-ci": "tsx src/release-ci.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
@@ -40,7 +42,6 @@
     "changelogen": "^0.6.2",
     "execa": "5.1.1",
     "minimist": "1.2.8",
-    "open": "^10.1.0",
     "p-limit": "^5.0.0",
     "prompts": "2.4.2",
     "semver": "^7.5.4",

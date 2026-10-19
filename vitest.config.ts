@@ -44,7 +44,11 @@ export default defineConfig({
         },
         test: {
           exclude: [...defaultExclude, '**/*.rsc.spec.ts'],
-          include: ['packages/**/*.spec.ts', 'test/benchmark-blocks/**/*.unit.spec.ts'],
+          include: [
+            'packages/**/*.spec.ts',
+            'test/benchmark-blocks/**/*.unit.spec.ts',
+            'tools/**/*.spec.ts',
+          ],
           name: 'unit',
           environment: 'node',
           execArgv: ['--expose-gc'],
