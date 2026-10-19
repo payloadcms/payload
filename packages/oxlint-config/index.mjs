@@ -209,8 +209,17 @@ const config = {
         'typescript/no-redundant-type-constituents': 'warn',
         'typescript/no-require-imports': 'error',
         'typescript/no-this-alias': 'error',
-        // TODO: back to 'error' once fixed. This version flags more than the ESLint one.
-        'typescript/no-unnecessary-type-assertion': 'warn',
+        /**
+         * Off because its autofix breaks code. tsgolint ports the check typescript-eslint added in
+         * 8.59.0, which reports an assertion as unnecessary if the value would fit where it's used
+         * without it. The rule only sees the types with the assertion in place, so it can't tell
+         * when the code around it depends on the assertion (typescript-eslint#12376).
+         *
+         * In this monorepo it reported 368 assertions that ESLint's version (typescript-eslint
+         * 8.26.1) didn't. 10 of them were false positives: removing them with `--fix` broke the
+         * build of payload, plugin-ecommerce and richtext-lexical (9) and a tstyche type test (1).
+         */
+        'typescript/no-unnecessary-type-assertion': 'off',
         'typescript/no-unnecessary-type-constraint': 'warn',
         'typescript/no-unsafe-declaration-merging': 'error',
         'typescript/no-unsafe-enum-comparison': 'error',
