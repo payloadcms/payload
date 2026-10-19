@@ -41,13 +41,15 @@ export function useRowAccessibility({
         return t('general:dragCancelled', { label: pickedUpLabel.current })
       },
       onDragEnd({ over }) {
-        if (!over) {
+        const nextPosition = over ? position({ id: over.id }) : 0
+
+        if (!nextPosition) {
           return t('general:dragCancelled', { label: pickedUpLabel.current })
         }
         return t('general:dragDropped', {
           count: ids.length,
           label: pickedUpLabel.current,
-          position: previousPosition.current,
+          position: nextPosition,
         })
       },
       onDragOver({ over }) {

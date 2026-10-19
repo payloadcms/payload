@@ -367,7 +367,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Dette dokumentet ble nylig oppdatert av en annen bruker. Visningen din er utdatert.',
     documents: 'Dokumenter',
-    dragCancelled: 'Draoperasjonen for {{label}} er avbrutt.',
+    dragCancelled: 'Draingen av {{label}} er avbrutt.',
     dragDropped: '{{label}} er sluppet. Posisjon {{position}} av {{count}}.',
     dragInstructions:
       'Trykk Space eller Enter for å plukke opp en rad. Bruk piltastene for å flytte den. Med VoiceOver slår du av Quick Nav og bruker Command + piltastene. Trykk Space eller Enter for å slippe, eller Escape for å avbryte.',
