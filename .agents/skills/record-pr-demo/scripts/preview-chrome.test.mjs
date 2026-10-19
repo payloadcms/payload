@@ -108,7 +108,7 @@ test('should preview accessibility observations from real keyboard interactions'
   try {
     const { expect } = await import('@playwright/test')
     const page = await browser.newPage({ viewport: { width: 1600, height: 1200 } })
-    await page.goto(`${url}/?accessibility&kind=fix`)
+    await page.goto(`${url}/?accessibility&announcements&kind=fix`)
     const app = page.frameLocator('iframe')
     const clickIntroduction = async () => {
       const box = await app.getByRole('button', { name: 'Move Introduction down' }).boundingBox()

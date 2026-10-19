@@ -7,12 +7,13 @@ const root = document.querySelector('#chrome')
 const chrome = mountDemoChrome({
   root,
   accessibility: isAccessibility,
+  showAnnouncements: new URLSearchParams(location.search).has('announcements'),
   theme: new URLSearchParams(location.search).get('theme') === 'dark' ? 'dark' : 'light',
   change: {
     kind: new URLSearchParams(location.search).get('kind') === 'fix' ? 'Fix' : 'Feature',
     title: isAccessibility ? 'Make keyboard interactions visible' : 'Responsive collection lists',
     description: isAccessibility
-      ? 'See input, focus, and live-region updates together.'
+      ? 'Follow keyboard input and the active control.'
       : 'Browse and manage content on desktop, tablet, and mobile.',
   },
 })
@@ -74,7 +75,7 @@ function renderAt({ milliseconds }) {
             index: 1,
             total: 1,
             title: 'Try it with the keyboard',
-            body: 'Click a Move down button, then use Tab and Enter. Watch the strip below.',
+            body: 'Click a Move down button, then use Tab and Enter. Commands appear over the app.',
           }
         : { ...step, total: 3 }
       : null,

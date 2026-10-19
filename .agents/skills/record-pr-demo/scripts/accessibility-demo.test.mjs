@@ -13,7 +13,7 @@ const html = `<!doctype html><html><body style="margin:40px;font:20px system-ui"
 <script>document.querySelector('#second').addEventListener('keydown',e=>{if(e.key==='ArrowDown')document.querySelector('#status').textContent='Moved to position 2'})</script>
 </body></html>`
 
-async function withPresentation({ accessibility = true, run }) {
+async function withPresentation({ accessibility = true, showAnnouncements = true, run }) {
   const browser = await chromium.launch({ headless: true })
   const context = await browser.newContext({ viewport: { width: 1600, height: 1000 } })
   await context.route('http://localhost:3000/fixture*', (route) =>
@@ -26,6 +26,7 @@ async function withPresentation({ accessibility = true, run }) {
       page: stage,
       options: {
         accessibility,
+        showAnnouncements,
         change: {
           kind: 'Fix',
           title: 'Keyboard reordering',
@@ -149,7 +150,8 @@ test('should clear transient key captions and stop observing when the presentati
       await app.locator('#first').focus()
       await stage.keyboard.press('ArrowRight')
       await expect(stage.locator('[data-keystroke]')).toHaveText('→')
-      await expect(stage.locator('[data-keystroke]')).toHaveText('—', { timeout: 3000 })
+      await expect(stage.locator('[data-keystroke-overlay]')).toBeVisible()
+      await expect(stage.locator('[data-keystroke-overlay]')).toBeHidden({ timeout: 3000 })
       await app.locator('#status').evaluate((el) => (el.textContent = 'Before stop'))
       await expect(stage.locator('[data-announcement]')).toHaveText('Before stop')
       await presentation.stop()
@@ -194,7 +196,70 @@ test('should suppress keys from inputs inside private shadow hosts', async () =>
       await app.getByRole('textbox', { name: 'Private shadow input' }).focus()
       await stage.keyboard.press('ControlOrMeta+A')
       await stage.waitForTimeout(100)
-      assert.equal(await stage.locator('[data-keystroke]').textContent(), '—')
+      assert.equal(await stage.locator('[data-keystroke-overlay]').isVisible(), false)
+    },
+  })
+})
+
+test('should overlay keystrokes without reserving space for captions by default', async () => {
+  let plainWindow
+  await withPresentation({
+    accessibility: false,
+    showAnnouncements: false,
+    run: async ({ stage }) => {
+      plainWindow = await stage.locator('[data-window]').boundingBox()
+    },
+  })
+  await withPresentation({
+    showAnnouncements: false,
+    run: async ({ stage, app }) => {
+      await expect(stage.locator('[data-accessibility]')).toHaveCount(0)
+      assert.deepEqual(await stage.locator('[data-window]').boundingBox(), plainWindow)
+      const overlay = stage.locator('[data-keystroke-overlay]')
+      await expect(overlay).toBeHidden()
+      await app.locator('#first').focus()
+      await stage.keyboard.press('Tab')
+      await expect(app.locator('#second')).toBeFocused()
+      await expect(overlay).toBeVisible()
+      await expect(stage.locator('[data-keystroke]')).toHaveText('Tab')
+      await expect(overlay).toHaveCSS('pointer-events', 'none')
+      await expect(overlay).toHaveAttribute('aria-hidden', 'true')
+      const box = await overlay.boundingBox()
+      const application = await stage.locator('[data-pr-demo-app]').boundingBox()
+      assert.ok(box.x >= application.x && box.y >= application.y)
+      assert.ok(box.x + box.width <= application.x + application.width)
+      assert.ok(box.y + box.height <= application.y + application.height)
+      await expect(overlay).toBeHidden({ timeout: 3000 })
+    },
+  })
+})
+
+test('should keep the keystroke overlay away from a focused corner control', async () => {
+  await withPresentation({
+    showAnnouncements: false,
+    run: async ({ stage, app }) => {
+      await app
+        .locator('#first')
+        .evaluate(
+          (el) =>
+            (el.style.cssText = 'position:fixed;right:24px;bottom:24px;width:180px;height:48px'),
+        )
+      await app.locator('#first').focus()
+      await stage.keyboard.press('ArrowRight')
+      const overlay = stage.locator('[data-keystroke-overlay]')
+      await expect(overlay).toBeVisible()
+      await expect
+        .poll(async () => {
+          const focused = await app.locator('#first').boundingBox()
+          const key = await overlay.boundingBox()
+          return (
+            key.x + key.width <= focused.x ||
+            key.x >= focused.x + focused.width ||
+            key.y + key.height <= focused.y ||
+            key.y >= focused.y + focused.height
+          )
+        })
+        .toBe(true)
     },
   })
 })
