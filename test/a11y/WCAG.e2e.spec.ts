@@ -619,6 +619,8 @@ test.describe('WCAG 2.2 Level AA', () => {
         await page.keyboard.press('ArrowLeft')
         await expect(ascending).toBeFocused()
         const titles = page.getByRole('grid').locator('tbody .cell-title')
+
+        await expect(titles).toHaveCount(3)
         const ascendingTitles = (await titles.allTextContents()).toSorted()
 
         expect(ascendingTitles.length).toBeGreaterThan(1)
