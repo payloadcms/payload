@@ -267,3 +267,5 @@ node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs candidate --scenario
 ```
 
 When a command arrives, retained commands slide right from their current visible positions over 220ms while the new command enters from the left. Rapid input interrupts and resumes from the current visual positions. Reduced-motion preferences and fast validation/preview apply the final positions immediately. Navigation reset and destruction cancel pending key animations.
+
+Step titles and descriptions share one row, aligned on their text baseline with a 12px gap between the heading and body. The title retains its 16px emphasis and the body uses 13px. Longer descriptions may wrap within the remaining width; oversized notes are still rejected without replacing the current annotation.

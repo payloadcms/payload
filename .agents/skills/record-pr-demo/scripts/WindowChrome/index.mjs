@@ -64,10 +64,10 @@ export function mountDemoChrome({
     .kind[data-kind="Fix"] { --kind-bg:var(--kind-fix-bg); --kind-border:var(--kind-fix-border); --kind-text:var(--kind-fix-text); }
     .title { flex:none; font-size:13px; font-weight:400; letter-spacing:-.1px; margin:0; overflow-wrap:anywhere; }
     .description { font-size:13px; color:var(--sub); overflow-wrap:anywhere; }
-    .note { grid-row:2; min-width:0; min-height:0; align-self:stretch; display:flex; flex-direction:column; justify-content:center; }
+    .note { grid-row:2; min-width:0; min-height:0; max-height:100%; align-self:center; display:flex; align-items:baseline; gap:12px; text-align:start; }
     .note[hidden] { display:none; }
-    .heading { display:flex; align-items:center; gap:12px; margin-block-end:4px; }
-    .heading:has(.step-progress[hidden]) { gap:0; }
+    .heading { display:contents; }
+    .pagination:has(.step-progress[hidden]) { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
     .pagination { display:inline-flex; align-items:center; gap:8px; color:var(--sub); font:12px/1.5 ui-monospace,monospace; font-variant-numeric:tabular-nums; white-space:nowrap; }
     .step-progress { display:block; flex:none; width:20px; height:20px; transform:rotate(-90deg); }
     .step-progress circle { fill:none; stroke-width:3.5; }
@@ -77,7 +77,7 @@ export function mountDemoChrome({
     .step-progress[hidden] { display:none; }
     [data-step-count], [data-refresh-text] { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
     .note-title { font-size:16px; font-weight:500; overflow-wrap:anywhere; }
-    .body { font-size:13px; color:var(--sub); overflow-wrap:anywhere; }
+    .body { min-width:0; font-size:13px; color:var(--sub); overflow-wrap:anywhere; }
     .accessibility { grid-row:3; grid-column:1 / -1; align-self:stretch; display:flex; align-items:center; gap:12px; padding-block-start:8px; border-block-start:1px solid var(--line); pointer-events:none; }
 
     .a11y-badge { flex:none; align-self:center; --kind-bg:var(--kind-feature-bg); --kind-border:var(--kind-feature-border); --kind-text:var(--kind-feature-text); }
@@ -426,7 +426,10 @@ export function mountDemoChrome({
       const shouldAnimate = previousAnnotation !== null && index !== 1
       const previousText = captureAnnotationText()
       renderAnnotation(annotation)
-      if (find('[data-note]').scrollHeight > find('[data-note]').clientHeight) {
+      if (
+        find('[data-note]').scrollHeight > find('[data-note]').clientHeight ||
+        find('[data-note]').scrollWidth > find('[data-note]').clientWidth
+      ) {
         renderAnnotation(previousAnnotation)
         throw new Error('Shorten the annotation to fit the fixed footer')
       }
