@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test'
+import type { Locator, Page, Route } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { fileURLToPath } from 'node:url'
@@ -2588,6 +2588,26 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.3 Focus Order (A)', () => {
+    test('should retain focus when a column toggle moves between sections', async () => {
+      const columns = await openTableColumns({ page, postsURL })
+      const toggle = columns.getByRole('checkbox').first()
+      const label = toggle
+
+      await expect(label).toHaveAttribute('aria-label')
+
+      const columnToggle = columns.getByRole('checkbox', { name: label, exact: true })
+      const wasChecked = await columnToggle.isChecked()
+
+      await columnToggle.focus()
+      await columnToggle.press('Space')
+      await expect(columnToggle).toBeChecked({ checked: !wasChecked })
+      await expect(columnToggle).toBeFocused()
+
+      await columnToggle.press('Space')
+      await expect(columnToggle).toBeChecked({ checked: wasChecked })
+      await expect(columnToggle).toBeFocused()
+    })
+
     test('should return focus to the active dashboard tab when pagination disappears', async () => {
       const previousViewport = page.viewportSize()
       const preference = await (
@@ -4372,6 +4392,58 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should retain a column toggle state while navigation is pending', async () => {
+      const columns = await openTableColumns({ page, postsURL })
+      const toggle = columns.getByRole('checkbox', { name: 'Title', exact: true })
+      const wasChecked = await toggle.isChecked()
+      let releaseNavigation: () => void
+      let hasHeldResponse = false
+      const navigationGate = new Promise<void>((resolve) => {
+        releaseNavigation = resolve
+      })
+      const holdNavigation = async (route: Route) => {
+        const request = route.request()
+
+        if (
+          !['fetch', 'xhr'].includes(request.resourceType()) ||
+          new URL(request.url()).origin !== new URL(serverURL).origin
+        ) {
+          await route.continue()
+          return
+        }
+
+        const response = await route.fetch()
+
+        hasHeldResponse = true
+        await navigationGate
+        await route.fulfill({ response })
+      }
+
+      await page.route('**/*', holdNavigation)
+
+      try {
+        await toggle.click()
+        await expect.poll(() => hasHeldResponse).toBe(true)
+        // Let the optimistic transition finish while the server response is still withheld.
+        await page.evaluate(
+          () =>
+            new Promise<void>((resolve) => {
+              requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+            }),
+        )
+        await expect(toggle).toBeChecked({ checked: !wasChecked })
+      } finally {
+        releaseNavigation!()
+        await page.unrouteAll({ behavior: 'wait' })
+      }
+
+      await page.reload()
+      await page.getByRole('button', { name: 'Columns', exact: true }).click()
+      await expect(toggle).toBeChecked({ checked: !wasChecked })
+      await toggle.click()
+      await expect(toggle).toBeChecked({ checked: wasChecked })
+    })
+
     test('should present the embedded dashboard breadcrumb without editing controls', async () => {
       try {
         await page.goto(`${serverURL}/admin?embed=true`)

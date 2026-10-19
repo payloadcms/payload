@@ -121,7 +121,7 @@ const ColumnItem: React.FC<ColumnItemProps> = ({ id, active, labelText, onToggle
       <span className={`${baseClass}__item-label`}>
         <NestedLabel label={labelText} />
       </span>
-      <Switch ariaLabel={labelText} checked={active} onChange={onToggle} />
+      <Switch ariaLabel={labelText} checked={active} id={`${id}-toggle`} onChange={onToggle} />
     </div>
   )
 }
@@ -133,9 +133,21 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
   onClose,
 }) => {
   const { i18n, t } = useTranslation()
+  const containerRef = useRef<HTMLDivElement>(null)
+  const focusedToggleRef = useRef<HTMLInputElement | null>(null)
 
   const toggleColumn = useCallback(
     (column: string) => {
+      const focusedElement = document.activeElement
+
+      if (
+        focusedElement instanceof HTMLInputElement &&
+        focusedElement.type === 'checkbox' &&
+        containerRef.current?.contains(focusedElement)
+      ) {
+        focusedToggleRef.current = focusedElement
+      }
+
       onChange(
         columns.map((col) => (col.accessor === column ? { ...col, active: !col.active } : col)),
       )
@@ -156,8 +168,20 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
   const uuid = useId()
   const editDepth = useEditDepth()
   const [searchQuery, setSearchQuery] = useState('')
-  const containerRef = useRef<HTMLDivElement>(null)
   const [lockedWidth, setLockedWidth] = useState<null | number>(null)
+
+  useLayoutEffect(() => {
+    const previousToggle = focusedToggleRef.current
+
+    // Moving between sections remounts the toggle, so restore focus before paint.
+    if (previousToggle && !previousToggle.isConnected && document.activeElement === document.body) {
+      containerRef.current
+        ?.querySelector<HTMLInputElement>(`#${CSS.escape(previousToggle.id)}`)
+        ?.focus()
+    }
+
+    focusedToggleRef.current = null
+  }, [columns])
 
   // Lock the width when search starts to prevent layout shift
   useLayoutEffect(() => {
