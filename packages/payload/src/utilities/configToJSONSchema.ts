@@ -1583,7 +1583,7 @@ export function configToJSONSchema(
         acc.auth[authCollection.slug] = authCollectionToOperationsJSONSchema(authCollection)
         return acc
       },
-      { auth: {} },
+      { auth: {} as Record<string, JSONSchema4> },
     )
 
   const jobsSchemas = config.jobs

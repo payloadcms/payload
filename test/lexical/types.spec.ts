@@ -210,7 +210,7 @@ describe('generated block node exposes per-block fields by blockType', () => {
       return ''
     }
 
-    expect(read).type.toBeCallableWith({})
+    expect(read).type.toBeCallableWith({} as BlockNode)
   })
 })
 

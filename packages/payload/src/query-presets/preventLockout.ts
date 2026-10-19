@@ -88,5 +88,5 @@ export const preventLockout: Validate = async (
     }
   }
 
-  return true
+  return true as unknown as true
 }
