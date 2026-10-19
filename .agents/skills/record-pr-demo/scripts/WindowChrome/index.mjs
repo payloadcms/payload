@@ -7,6 +7,7 @@ export function mountDemoChrome({
   theme = 'light',
   showSize = true,
   shouldAnimateAnnotations = true,
+  accessibility = false,
 }) {
   validateSize({ ...canvas, name: 'Canvas' })
   validateSize({ ...viewport, name: 'Viewport' })
@@ -22,6 +23,8 @@ export function mountDemoChrome({
   ) {
     throw new Error('Presentation requires kind (Feature or Fix), title, and description')
   }
+  if (typeof accessibility !== 'boolean')
+    throw new Error('Presentation accessibility must be a boolean')
   const shadow = root.attachShadow({ mode: 'open' })
   shadow.innerHTML = `<style>
     :host { display:block; position:relative; width:100%; aspect-ratio:${canvas.width}/${canvas.height}; font:16px/1.5 system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
@@ -65,6 +68,12 @@ export function mountDemoChrome({
     [data-step-count], [data-refresh-text] { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
     .note-title { font-size:16px; font-weight:500; overflow-wrap:anywhere; }
     .body { font-size:16px; color:var(--sub); overflow-wrap:anywhere; }
+    .accessibility { position:absolute; inset:auto 0 32px; margin-inline:auto; width:min(1302px,calc(100% - 64px)); height:88px; padding:12px 20px; border-radius:12px; background:var(--paper); display:grid; grid-template-columns:240px minmax(0,1fr); gap:24px; pointer-events:none; }
+    .accessibility[hidden], .focus-highlight[hidden] { display:none; }
+    .accessibility-label { color:var(--sub); font-size:11px; letter-spacing:.3px; margin-block-end:4px; }
+    .keystroke { display:inline-block; min-width:36px; padding:2px 10px; border:1px solid var(--line); border-radius:5px; background:var(--shell); font:16px/1.5 ui-monospace,monospace; }
+    .announcement { font-size:16px; line-height:22px; max-height:44px; overflow:hidden; overflow-wrap:anywhere; }
+    .focus-highlight { position:absolute; z-index:2; pointer-events:none; border:3px solid var(--color-bg-brand,#007be5); box-shadow:0 0 0 2px white, inset 0 0 0 1px white; border-radius:4px; }
   </style>
   <div class="stage ${theme}" data-canvas>
     <section class="footer" data-footer aria-label="Demo description">
@@ -73,8 +82,9 @@ export function mountDemoChrome({
     </section>
     <div class="window" data-window>
       <div class="header"><div class="dots" aria-hidden="true"><span></span><span></span><span></span></div><div class="header-info" data-header-info><span class="refresh" data-refresh role="status" aria-live="polite" aria-atomic="true" hidden><svg data-refresh-icon aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path data-refresh-path d="M13 6a5.2 5.2 0 1 0 .1 4M13 2v4H9" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-refresh-text></span></span><span class="size" data-size></span></div></div>
-      <div class="content" data-content><slot name="content"></slot></div>
+      <div class="content" data-content><slot name="content"></slot>${accessibility ? '<div class="focus-highlight" data-focus-highlight aria-hidden="true" hidden></div>' : ''}</div>
     </div>
+    ${accessibility ? '<div class="accessibility" data-accessibility aria-hidden="true"><div><div class="accessibility-label">KEYBOARD INPUT</div><span class="keystroke" data-keystroke>—</span></div><div><div class="accessibility-label">LIVE REGION · OBSERVED TEXT, NOT SCREEN-READER AUDIO</div><div class="announcement" data-announcement>Waiting for an update…</div></div></div>' : ''}
   </div>`
   const find = (selector) => shadow.querySelector(selector)
   find('[data-kind]').textContent = change.kind
@@ -82,6 +92,8 @@ export function mountDemoChrome({
   find('[data-title]').textContent = change.title
   find('[data-description]').textContent = change.description
   find('[data-size]').hidden = !showSize
+  let keyTimer
+  let focusRect
   let refreshTimer
   let currentViewport = viewport
   let isDestroyed = false
@@ -94,7 +106,7 @@ export function mountDemoChrome({
     const windowHeight = height + 58
     const panelHeight = find('[data-footer]').offsetHeight
     const windowTop = 32 + panelHeight + 22
-    const availableHeight = canvas.height - windowTop - 32
+    const availableHeight = canvas.height - windowTop - 32 - (accessibility ? 110 : 0)
     const scale = Math.min(1, (canvas.width - 64) / windowWidth, availableHeight / windowHeight)
     if (scale <= 0) throw new Error('Presentation text leaves no room for the application')
     Object.assign(find('[data-window]').style, {
@@ -211,6 +223,35 @@ export function mountDemoChrome({
   }
 
   return {
+    setAccessibilityState({ key, focus, announcement, reset = false }) {
+      if (!accessibility || isDestroyed) return
+      if (reset) {
+        clearTimeout(keyTimer)
+        find('[data-keystroke]').textContent = '—'
+        find('[data-announcement]').textContent = 'Waiting for an update…'
+        find('[data-focus-highlight]').hidden = true
+      }
+      if (key) {
+        clearTimeout(keyTimer)
+        find('[data-keystroke]').textContent = key
+        keyTimer = setTimeout(() => {
+          find('[data-keystroke]').textContent = '—'
+        }, 2000)
+      }
+      if (focus !== undefined) {
+        focusRect = focus
+        const highlight = find('[data-focus-highlight]')
+        highlight.hidden = !focusRect
+        if (focusRect)
+          Object.assign(highlight.style, {
+            left: `${focusRect.x}px`,
+            top: `${focusRect.y}px`,
+            width: `${focusRect.width}px`,
+            height: `${focusRect.height}px`,
+          })
+      }
+      if (announcement) find('[data-announcement]').textContent = announcement
+    },
     animateViewport({ width, height, duration = 1000 }) {
       validateSize({ width, height, name: 'Viewport' })
       if (!Number.isFinite(duration) || duration < 0)
@@ -323,6 +364,7 @@ export function mountDemoChrome({
       animateAnnotationText({ previousText, hasAnnotation: true, shouldAnimate })
     },
     destroy() {
+      clearTimeout(keyTimer)
       clearTimeout(refreshTimer)
       cancelAnnotationAnimations()
       cancelAnimation()

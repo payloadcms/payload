@@ -1,19 +1,36 @@
 import { mountDemoChrome } from '../WindowChrome/index.mjs'
+import { observeAccessibility } from '../accessibility-demo.mjs'
+
+const isAccessibility = new URLSearchParams(location.search).has('accessibility')
 
 const root = document.querySelector('#chrome')
 const chrome = mountDemoChrome({
   root,
+  accessibility: isAccessibility,
   theme: new URLSearchParams(location.search).get('theme') === 'dark' ? 'dark' : 'light',
   change: {
     kind: new URLSearchParams(location.search).get('kind') === 'fix' ? 'Fix' : 'Feature',
-    title: 'Responsive collection lists',
-    description: 'Browse and manage content on desktop, tablet, and mobile.',
+    title: isAccessibility ? 'Make keyboard interactions visible' : 'Responsive collection lists',
+    description: isAccessibility
+      ? 'See input, focus, and live-region updates together.'
+      : 'Browse and manage content on desktop, tablet, and mobile.',
   },
 })
 const application = document.createElement('iframe')
 application.slot = 'content'
 application.title = 'Responsive sample application'
-application.src = '/preview/application.html'
+application.src = isAccessibility
+  ? '/preview/accessibility-application.html'
+  : '/preview/application.html'
+let stopAccessibility
+if (isAccessibility)
+  application.addEventListener('load', () => {
+    stopAccessibility?.()
+    stopAccessibility = observeAccessibility({
+      window: application.contentWindow,
+      report: (state) => chrome.setAccessibilityState(state),
+    })
+  })
 root.append(application)
 const timeline = document.querySelector('#timeline')
 const play = document.querySelector('#play')
@@ -50,7 +67,18 @@ function renderAt({ milliseconds }) {
             title: 'Make room for content',
             body: 'The sidebar collapses so the post list can use the full width.',
           }
-  chrome.setAnnotation(document.querySelector('#annotation').checked ? { ...step, total: 3 } : null)
+  chrome.setAnnotation(
+    document.querySelector('#annotation').checked
+      ? isAccessibility
+        ? {
+            index: 1,
+            total: 1,
+            title: 'Try it with the keyboard',
+            body: 'Click a Move down button, then use Tab and Enter. Watch the strip below.',
+          }
+        : { ...step, total: 3 }
+      : null,
+  )
   chrome.setSizeVisible({ isVisible: document.querySelector('#dimensions').checked })
   timeline.value = String(time)
   document.querySelector('#time').textContent =

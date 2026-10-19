@@ -25,6 +25,10 @@ Drive the application through browser gestures: paced pointer clicks, keystrokes
 
 Every scenario must export `presentation` with a change kind (`Feature` or `Fix`), title, and description. Read [window-chrome.md](references/window-chrome.md) and use the shared component and live preview; do not invent wrapper CSS. Recordings, screenshot previews, and validation always mount the chrome. Keep the change description constant and use `showAnnotation({ title, body, index, total })` / `hideAnnotation()` for panel notes. Floating annotations and placement options (`type`, `position`, `width`) are unsupported. Use `resizeWindow` only when responsive reflow is part of the story.
 
+## Accessibility demonstrations
+
+Set `presentation.accessibility: true` to show navigation/shortcut keys, a supplemental outline around the actual focused element, and observed live-region text below the application. Use this for keyboard and announcement demonstrations; see [recording.md](references/recording.md#accessibility-observations). Captions are DOM observations, not synthesized speech or evidence of what a screen reader announces. Leave the mode off for ordinary visual demos.
+
 ## Workflow
 
 1. Inspect the feature, relevant diff, and available test configs. Choose the smallest existing Payload config that demonstrates the real feature. Create a temporary config only when no existing config can show it clearly.

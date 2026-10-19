@@ -235,3 +235,24 @@ Present the script link alongside the video, using the absolute snapshot path, a
 The command prints the MP4, duration, size, SHA-256, script snapshot, contact sheet, and manifest paths. Inspect the contact sheet first, then watch the entire video. Confirm that the opening frame is meaningful, actions are readable, no sensitive data is visible, and the final state proves the feature. Show the local MP4 and a clickable script snapshot link to the user, then stop for review.
 
 If the file exceeds 10 MB, shorten the scenario first. Adjusting conversion quality with the lower-level converter is secondary. Do not silently raise the size budget because the applicable GitHub limit depends on the repository's plan and the uploader's access.
+
+## Accessibility observations
+
+Opt in per scenario:
+
+```js
+export const presentation = {
+  accessibility: true,
+  change: {
+    kind: 'Fix',
+    title: 'Reorder sections with the keyboard',
+    description: 'Keep focus and movement feedback visible.',
+  },
+}
+```
+
+The fixed strip below the application shows navigation keys and shortcuts for two seconds and the most recent live-region update. Ordinary character typing, spaces typed into editable fields, and input originating in password fields or `[data-private]` containers are excluded from the keystroke display. The supplemental focus outline follows the actual focused element, including dialogs, scrolling, and viewport scaling. It does not replace native focus styling or alter application focus. Observer and overlay elements cannot take focus or intercept pointer input, and the strip is hidden from assistive technology to avoid duplicate announcements.
+
+Use real keyboard events such as `page.keyboard.press('Tab')` and `page.keyboard.press('Enter')`. Add pauses around the important commands so viewers can follow them. Existing click, typing, and wheel helpers still work. The presentation reserves space for the strip, so the application may be scaled down slightly more than in a regular recording. Preview this mode at `http://127.0.0.1:4400/?accessibility&kind=fix` after starting the chrome preview server.
+
+Live-region captions observe the main application document's `[aria-live]`, `status`, `alert`, and `log` regions. Existing text is not announced at startup; subsequent changes and newly inserted regions are observed. Off, hidden, and busy regions are skipped, with busy regions revisited when they become available. Captions normalize whitespace and show the latest region's complete DOM text, with the visible display limited to two lines. Keep the demo's messages concise. These are observations, not a simulation of screen-reader scheduling, atomicity, relevance, or spoken output. Nested frames and live regions inside shadow roots are not observed. Actual VoiceOver or NVDA speech requires a separate recording with that assistive technology active.

@@ -101,3 +101,36 @@ test('should preview a real frame refresh beside dimensions with keyboard contro
     await new Promise((resolve) => server.close(resolve))
   }
 })
+
+test('should preview accessibility observations from real keyboard interactions', async () => {
+  const { server, url } = await startChromePreview({ port: 0 })
+  const browser = await chromium.launch({ headless: true })
+  try {
+    const { expect } = await import('@playwright/test')
+    const page = await browser.newPage({ viewport: { width: 1600, height: 1200 } })
+    await page.goto(`${url}/?accessibility&kind=fix`)
+    const app = page.frameLocator('iframe')
+    const clickIntroduction = async () => {
+      const box = await app.getByRole('button', { name: 'Move Introduction down' }).boundingBox()
+      await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+    }
+    await clickIntroduction()
+    await expect(page.locator('[data-announcement]')).toHaveText(
+      'Introduction moved to position 2 of 3.',
+    )
+    await page.keyboard.press('Shift+Tab')
+    await expect(page.locator('[data-keystroke]')).toHaveText('Shift + Tab')
+    await page.keyboard.press('Enter')
+    await expect(page.locator('[data-keystroke]')).toHaveText('Enter')
+    await expect(page.locator('[data-focus-highlight]')).toBeVisible()
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await page.getByRole('button', { name: 'Refresh frame', exact: true }).click()
+    await clickIntroduction()
+    await expect(page.locator('[data-announcement]')).toHaveText(
+      'Introduction moved to position 2 of 3.',
+    )
+  } finally {
+    await browser.close()
+    await new Promise((resolve) => server.close(resolve))
+  }
+})
