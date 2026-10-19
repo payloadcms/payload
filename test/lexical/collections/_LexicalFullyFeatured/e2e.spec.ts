@@ -84,7 +84,7 @@ describe('Lexical Fully Featured', () => {
     const img = lexical.editor.locator('.LexicalEditorTheme__upload img').first()
     await img.click()
     const imgBoxBeforeCenter = await img.boundingBox()
-    await lexical.clickInlineToolbarButton({
+    await lexical.clickFixedToolbarButton({
       buttonKey: 'alignCenter',
       dropdownKey: 'align',
     })
