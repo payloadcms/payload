@@ -55,7 +55,7 @@ export function mountDemoChrome({
     .size { padding:5px 9px; border-radius:8px; background:var(--badge); color:var(--sub); font:12px/1.5 ui-monospace,monospace; font-variant-numeric:tabular-nums; }
     .content { position:relative; overflow:hidden; border-radius:8px; background:var(--paper); }
     ::slotted([slot=content]) { display:block; width:100%; height:100%; border:0; }
-    .footer { position:absolute; top:32px; left:50%; transform:translateX(-50%); width:min(1302px,calc(100% - 64px)); height:${accessibility ? 176 : 112}px; display:grid; grid-template-rows:minmax(0,1fr); grid-template-columns:minmax(0,420fr) minmax(0,826fr); align-items:center; padding:12px 24px; border-radius:12px; color:var(--ink); background:var(--paper); }
+    .footer { position:absolute; top:32px; left:50%; transform:translateX(-50%); width:min(1302px,calc(100% - 64px)); height:${accessibility ? 168 : 112}px; display:grid; grid-template-rows:${accessibility ? 'minmax(0,1fr) 44px' : 'minmax(0,1fr)'}; row-gap:${accessibility ? 12 : 0}px; grid-template-columns:minmax(0,420fr) minmax(0,826fr); align-items:center; padding:12px 24px; border-radius:12px; color:var(--ink); background:var(--paper); }
     .change { min-height:0; align-self:stretch; display:flex; flex-direction:column; justify-content:center; gap:2px; padding-inline-end:28px; border-inline-end:1px solid var(--line); }
     .kind { align-self:flex-start; padding-inline:6px; border:1px solid var(--kind-border); border-radius:4px; background:var(--kind-bg); color:var(--kind-text); font-size:12px; font-weight:500; line-height:16px; }
     .kind[data-kind="Feature"] { --kind-bg:var(--kind-feature-bg); --kind-border:var(--kind-feature-border); --kind-text:var(--kind-feature-text); }
@@ -74,12 +74,13 @@ export function mountDemoChrome({
     [data-step-count], [data-refresh-text] { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
     .note-title { font-size:16px; font-weight:500; overflow-wrap:anywhere; }
     .body { font-size:16px; color:var(--sub); overflow-wrap:anywhere; }
-    .accessibility { height:52px; margin-block-start:8px; display:flex; flex-direction:column; justify-content:flex-end; gap:6px; pointer-events:none; }
+    .accessibility { grid-column:1 / -1; align-self:stretch; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,420px); align-items:center; gap:28px; padding-block-start:12px; border-block-start:1px solid var(--line); pointer-events:none; }
+    .a11y-badge { flex:none; align-self:center; --kind-bg:var(--kind-feature-bg); --kind-border:var(--kind-feature-border); --kind-text:var(--kind-feature-text); }
     .accessibility[hidden], .focus-highlight[hidden], .keystroke-overlay[hidden] { display:none; }
     .announcement-line { display:flex; align-items:center; gap:8px; min-width:0; color:var(--sub); font-size:13px; line-height:20px; }
     .speaking-icon { width:18px; height:18px; flex:none; }
     .announcement { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .key-slot { height:24px; }
+    .key-slot { height:24px; min-width:0; padding-inline-start:28px; border-inline-start:1px solid var(--line); }
     .keystroke-overlay { display:flex; align-items:center; gap:14px; width:100%; overflow:hidden; pointer-events:none; color:var(--ink); }
     .keystroke { display:flex; flex:none; align-items:center; gap:6px; font:13px/1.5 ui-monospace,monospace; }
     .keystroke[data-key-history-entry] kbd { color:var(--sub); background:var(--paper); box-shadow:none; }
@@ -91,7 +92,8 @@ export function mountDemoChrome({
   <div class="stage ${theme}" data-canvas>
     <section class="footer" data-footer aria-label="Demo description">
       <div class="change"><div class="kind" data-kind></div><h2 class="title" data-title></h2><div class="description" data-description></div></div>
-      <div class="note" data-note hidden aria-live="polite"><div class="heading"><span class="pagination" data-pagination><svg class="step-progress" data-step-progress aria-hidden="true" viewBox="0 0 20 20"><circle class="progress-track" cx="10" cy="10" r="8"/><circle class="progress-fill" data-progress-fill cx="10" cy="10" r="8" pathLength="100"/></svg><span data-step-count></span></span><span class="note-title" data-note-title></span></div><div class="body" data-note-body></div>${accessibility ? `<div class="accessibility" data-accessibility aria-hidden="true">${hasAnnouncements ? '<div class="announcement-line"><svg class="speaking-icon" data-speaking-icon aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2.5"/><path d="M2 17v-3a4 4 0 0 1 8 0v3M12 7a4 4 0 0 1 0 6M15 4a8 8 0 0 1 0 12"/></svg><span class="announcement" data-announcement>Waiting for an update…</span></div>' : ''}<div class="key-slot"><div class="keystroke-overlay" data-keystroke-overlay aria-hidden="true" hidden><span class="keystroke" data-keystroke></span></div></div></div>` : ''}</div>
+      <div class="note" data-note hidden aria-live="polite"><div class="heading"><span class="pagination" data-pagination><svg class="step-progress" data-step-progress aria-hidden="true" viewBox="0 0 20 20"><circle class="progress-track" cx="10" cy="10" r="8"/><circle class="progress-fill" data-progress-fill cx="10" cy="10" r="8" pathLength="100"/></svg><span data-step-count></span></span><span class="note-title" data-note-title></span></div><div class="body" data-note-body></div></div>
+      ${accessibility ? `<div class="accessibility" data-accessibility aria-hidden="true"><div class="announcement-line"><span class="kind a11y-badge" data-a11y-badge>a11y</span>${hasAnnouncements ? '<svg class="speaking-icon" data-speaking-icon aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2.5"/><path d="M2 17v-3a4 4 0 0 1 8 0v3M12 7a4 4 0 0 1 0 6M15 4a8 8 0 0 1 0 12"/></svg><span class="announcement" data-announcement>Waiting for an update…</span>' : ''}</div><div class="key-slot"><div class="keystroke-overlay" data-keystroke-overlay aria-hidden="true" hidden><span class="keystroke" data-keystroke></span></div></div></div>` : ''}
     </section>
     <div class="window" data-window>
       <div class="header"><div class="dots" aria-hidden="true"><span></span><span></span><span></span></div><div class="header-info" data-header-info><span class="refresh" data-refresh role="status" aria-live="polite" aria-atomic="true" hidden><svg data-refresh-icon aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path data-refresh-path d="M13 6a5.2 5.2 0 1 0 .1 4M13 2v4H9" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-refresh-text></span></span><span class="size" data-size></span></div></div>
@@ -425,7 +427,7 @@ export function mountDemoChrome({
       const shouldAnimate = previousAnnotation !== null && index !== 1
       const previousText = captureAnnotationText()
       renderAnnotation(annotation)
-      if (find('[data-note]').offsetHeight > find('[data-footer]').clientHeight - 24) {
+      if (find('[data-note]').offsetHeight > find('.change').clientHeight) {
         renderAnnotation(previousAnnotation)
         throw new Error('Shorten the annotation to fit the fixed footer')
       }

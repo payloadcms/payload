@@ -223,7 +223,7 @@ test('should keep key history inside the annotation panel without moving the app
   await withPresentation({
     showAnnouncements: false,
     run: async ({ stage, app }) => {
-      await expect(stage.locator('[data-a11y-badge]')).toHaveCount(0)
+      await expect(stage.locator('[data-a11y-badge]')).toHaveText('a11y')
       await expect(stage.locator('[data-announcement]')).toHaveCount(0)
       const initialPanel = await stage.locator('[data-footer]').boundingBox()
       const initialWindow = await stage.locator('[data-window]').boundingBox()
@@ -252,7 +252,7 @@ test('should keep key history inside the annotation panel without moving the app
   })
 })
 
-test('should place icon captions and key history below the step inside the annotation panel', async () => {
+test('should place badge captions and key history in one full-width row below the annotation content', async () => {
   await withPresentation({
     run: async ({ stage, app, presentation }) => {
       await app.locator('#first').focus()
@@ -289,7 +289,14 @@ test('should place icon captions and key history below the step inside the annot
           assert.ok(box.y + box.height <= panel.y + panel.height)
         }
         assert.ok(step.y + step.height <= caption.y)
-        assert.ok(caption.y + caption.height <= history.y)
+        assert.ok(Math.abs(caption.y + caption.height / 2 - history.y - history.height / 2) < 2)
+        assert.ok(caption.x + caption.width <= history.x)
+        const row = await stage.locator('[data-accessibility]').boundingBox()
+        const badge = await stage.locator('[data-a11y-badge]').boundingBox()
+        const change = await stage.locator('.change').boundingBox()
+        assert.ok(row.width > panel.width * 0.9)
+        assert.ok(change.y + change.height <= row.y)
+        assert.ok(badge.x + badge.width < caption.x)
       }
     },
   })
@@ -344,13 +351,13 @@ test('should slide the previous command right at a scaled size and respect reduc
       assert.ok(positions[0].x < positions[1].x && positions[1].x < positions[2].x)
       await stage.emulateMedia({ reducedMotion: 'reduce' })
       await stage.keyboard.press('ArrowLeft')
+      await expect(stage.locator('[data-keystroke]')).toHaveText('←')
       assert.equal(
         await stage
           .locator('[data-keystroke-overlay]')
           .evaluate((el) => el.getAnimations({ subtree: true }).length),
         0,
       )
-      await expect(stage.locator('[data-keystroke]')).toHaveText('←')
       await expect(stage.locator('[data-key-history-entry]')).toHaveText(['↓', '↑'])
     },
   })
