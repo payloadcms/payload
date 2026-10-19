@@ -1,23 +1,18 @@
 {
   "name": "@payloadcms/plugin-form-builder",
-  "version": "4.0.0-beta.0",
+  "version": "4.0.0-beta.2",
   "description": "Form builder plugin for Payload CMS",
   "keywords": [
-    "payload",
     "cms",
-    "plugin",
-    "typescript",
-    "react",
-    "forms",
     "fields",
     "form builder",
-    "payments"
+    "forms",
+    "payload",
+    "payments",
+    "plugin",
+    "react",
+    "typescript"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/plugin-form-builder"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -27,8 +22,18 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-form-builder"
+  },
+  "files": [
+    "dist"
+  ],
   "type": "module",
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts",
@@ -56,11 +61,38 @@
       "default": "./src/translations/languages/*.ts"
     }
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "files": [
-    "dist"
-  ],
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./types": {
+        "import": "./dist/exports/types.js",
+        "types": "./dist/exports/types.d.ts",
+        "default": "./dist/exports/types.js"
+      },
+      "./client": {
+        "import": "./dist/exports/client.js",
+        "types": "./dist/exports/client.d.ts",
+        "default": "./dist/exports/client.js"
+      },
+      "./translations/languages/all": {
+        "import": "./dist/translations/index.js",
+        "types": "./dist/translations/index.d.ts",
+        "default": "./dist/translations/index.js"
+      },
+      "./translations/languages/*": {
+        "import": "./dist/translations/languages/*.js",
+        "types": "./dist/translations/languages/*.d.ts",
+        "default": "./dist/translations/languages/*.js"
+      }
+    },
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "build": "pnpm build:types && pnpm build:swc",
     "build:debug": "pnpm build",
@@ -89,38 +121,6 @@
     "payload": "workspace:*",
     "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
     "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
-  },
-  "publishConfig": {
-    "exports": {
-      ".": {
-        "import": "./dist/index.js",
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "./types": {
-        "import": "./dist/exports/types.js",
-        "types": "./dist/exports/types.d.ts",
-        "default": "./dist/exports/types.js"
-      },
-      "./client": {
-        "import": "./dist/exports/client.js",
-        "types": "./dist/exports/client.d.ts",
-        "default": "./dist/exports/client.js"
-      },
-      "./translations/languages/all": {
-        "import": "./dist/translations/index.js",
-        "types": "./dist/translations/index.d.ts",
-        "default": "./dist/translations/index.js"
-      },
-      "./translations/languages/*": {
-        "import": "./dist/translations/languages/*.js",
-        "types": "./dist/translations/languages/*.d.ts",
-        "default": "./dist/translations/languages/*.js"
-      }
-    },
-    "main": "./dist/index.js",
-    "registry": "https://registry.npmjs.org/",
-    "types": "./dist/index.d.ts"
   },
   "homepage:": "https://payloadcms.com"
 }

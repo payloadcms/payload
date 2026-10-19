@@ -554,7 +554,7 @@ The `currencies` option is used to configure the supported currencies by the sto
 
 | Option                | Type         | Description                                                                                                                     |
 | --------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| `supportedCurrencies` | `Currency[]` | An array of supported currencies by the store. Defaults to `USD`. See [Currencies](#currencies-list) for available currencies.  |
+| `supportedCurrencies` | `Currency[]` | An array of supported currencies by the store. Defaults to `USD`. See [Currencies](#currencies) for available currencies.       |
 | `defaultCurrency`     | `string`     | The default currency code to use for the store. Defaults to the first currency. Must be one of the `supportedCurrencies` codes. |
 
 The `Currency` type is as follows:
@@ -953,11 +953,7 @@ export default buildConfig({
       en: ecommerceEn,
     },
   },
-  plugins: [
-    ecommercePlugin({
-      /* ... */
-    }),
-  ],
+  plugins: [ecommercePlugin({/* ... */})],
 })
 ```
 
@@ -986,10 +982,6 @@ export default buildConfig({
       },
     },
   },
-  plugins: [
-    ecommercePlugin({
-      /* ... */
-    }),
-  ],
+  plugins: [ecommercePlugin({/* ... */})],
 })
 ```

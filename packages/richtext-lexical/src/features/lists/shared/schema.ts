@@ -11,8 +11,9 @@ export interface SerializedListItemNode<
   value: number
 }
 
-export interface SerializedListNode<TChildren extends SerializedLexicalNode = SerializedLexicalNode>
-  extends SerializedLexicalElementBase<TChildren> {
+export interface SerializedListNode<
+  TChildren extends SerializedLexicalNode = SerializedLexicalNode,
+> extends SerializedLexicalElementBase<TChildren> {
   checked?: boolean
   listType: 'bullet' | 'check' | 'number'
   start: number
