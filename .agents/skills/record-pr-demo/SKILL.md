@@ -56,7 +56,7 @@ Set `presentation.accessibility: true` to integrate a full-width feedback row be
 - Pointer movement is smooth, clicks have readable dwell time and visible ring feedback, and the cursor stays visible above popup menus and dialogs.
 - Editorial annotations follow the [recording.md style specification](references/recording.md#editorial-annotations-over-the-recording) and leave important UI visible.
 - Overflowing content, including popup menu lists, uses the scenario `scroll` helper for paced movement.
-- The approved artifact is an H.264 `.mp4`, within GitHub's applicable upload limit.
+- The approved artifact is an H.264 `.mp4`, within GitHub's applicable upload limit. Capture at the default 2× resolution for crisp UI text; use `--recording-scale 1` only when native-density output is intentional.
 - The candidate command produced a contact sheet, manifest, and take-specific script snapshot. The video review includes a link to that script, and the manifest still matches before upload.
 - The user reviewed the exact bytes that were uploaded.
 - The existing PR description is preserved and ends with `## Preview` and the approved inline player, unless the user explicitly requested a comment.

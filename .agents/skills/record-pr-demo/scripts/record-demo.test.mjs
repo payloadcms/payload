@@ -22,6 +22,7 @@ test('parseArgs applies recording defaults and derives a safe output path', () =
     label: 'feature-demo',
     mouseMoveMs: 300,
     output: '/tmp/payload-pr-demo-feature-demo.webm',
+    recordingScale: 2,
     scenario: '/tmp/demo-scenario.mjs',
     viewport: { height: 900, width: 1440 },
   })
@@ -51,6 +52,7 @@ test('parseArgs accepts explicit recording options', () => {
     label: 'relationship-drawer',
     mouseMoveMs: 900,
     output: '/tmp/relationship-demo.webm',
+    recordingScale: 2,
     scenario: './scenario.mjs',
     viewport: { height: 720, width: 1280 },
   })
@@ -106,6 +108,7 @@ test('recordDemo saves a completed browser recording before closing the browser'
     assert.equal(typeof recorder.recordDemo, 'function')
 
     await recorder.recordDemo({
+      recordingScale: 1,
       baseURL: 'http://localhost:3000',
       label: 'browser-test',
       output,
@@ -141,6 +144,7 @@ test('should expose annotation helpers to recording scenarios', async () => {
     )
 
     await recorder.validateDemo({
+      recordingScale: 1,
       baseURL: 'http://localhost:3000',
       label: 'annotation-scenario-test',
       scenario,
@@ -165,6 +169,7 @@ test('should reject a recording without an opening ready marker', async () => {
 
     await assert.rejects(
       recorder.recordDemo({
+        recordingScale: 1,
         baseURL: 'http://localhost:3000',
         label: 'missing-ready-test',
         output: path.join(directory, 'demo.webm'),
@@ -210,6 +215,7 @@ test('recordDemo exposes a smoothly paced click helper', async () => {
     )
 
     await recorder.recordDemo({
+      recordingScale: 1,
       baseURL: 'http://localhost:3000',
       interactionPauseMs: 30,
       label: 'click-test',
@@ -261,6 +267,7 @@ test('recordDemo renders a Mac-style arrow cursor', async () => {
     )
 
     await recorder.recordDemo({
+      recordingScale: 1,
       baseURL: 'http://localhost:3000',
       label: 'cursor-test',
       output,
@@ -290,6 +297,7 @@ test('should trim startup frames to the ready opening state', async () => {
     )
 
     await recorder.recordDemo({
+      recordingScale: 1,
       baseURL: 'http://localhost:3000',
       label: 'opening-test',
       onOpeningReady: (seconds) => {
@@ -388,6 +396,7 @@ test('should keep the recorded cursor visible above a popup and modal dialog', a
     )
 
     await recorder.validateDemo({
+      recordingScale: 1,
       baseURL: 'http://localhost:3000',
       label: 'top-layer-test',
       scenario,
@@ -421,6 +430,7 @@ test('validateDemo executes a scenario without retaining video and forwards fixt
     assert.equal(typeof recorder.validateDemo, 'function')
 
     const result = await recorder.validateDemo({
+      recordingScale: 1,
       baseURL: 'http://localhost:3000',
       fixture: { documentTitle: 'Prepared document' },
       label: 'validation-test',
@@ -451,6 +461,7 @@ test('should expose scrolling through the real recorder cursor helper during val
     )
 
     await recorder.validateDemo({
+      recordingScale: 1,
       baseURL: 'http://localhost:3000',
       label: 'scroll-test',
       scenario,
@@ -486,6 +497,7 @@ test('should smoothly scroll an open popup menu list', async () => {
     )
 
     await recorder.validateDemo({
+      recordingScale: 1,
       baseURL: 'http://localhost:3000',
       label: 'popup-scroll-test',
       scenario,
@@ -590,6 +602,7 @@ test('should show a temporary click ring at the click point above popups', async
     `,
     )
     await recorder.validateDemo({
+      recordingScale: 1,
       baseURL: 'http://localhost:3000',
       label: 'click-indicator',
       scenario,
@@ -625,6 +638,7 @@ test('should click scaled targets, type with keys, and require wheel input to re
     `,
     )
     await recorder.validateDemo({
+      recordingScale: 1,
       baseURL: 'http://localhost:3000',
       label: 'gestures',
       scenario,
@@ -672,6 +686,7 @@ for (const mode of ['disabled', 'moving', 'covered', 'partial', 'explicit']) {
       `,
       )
       await recorder.validateDemo({
+        recordingScale: 1,
         baseURL: 'http://localhost:3000',
         label: 'click-safety',
         scenario,
@@ -700,6 +715,7 @@ test('should keep wheel scrolling the document after its root border box leaves 
     `,
     )
     await recorder.validateDemo({
+      recordingScale: 1,
       baseURL: 'http://localhost:3000',
       label: 'document-wheel',
       scenario,
@@ -747,6 +763,7 @@ test('should toggle a11y feedback for the same scenario without changing its exp
       )
       for (const a11y of [undefined, 'on', 'off']) {
         await recorder.validateDemo({
+          recordingScale: 1,
           a11y,
           baseURL: 'http://localhost:3000',
           fixture: { isEnabled: a11y === undefined ? isEnabled : a11y === 'on' },
@@ -758,5 +775,67 @@ test('should toggle a11y feedback for the same scenario without changing its exp
     }
   } finally {
     await rm(directory, { recursive: true, force: true })
+  }
+})
+
+test('should default to 2x capture and allow explicit native resolution', () => {
+  assert.equal(parseArgs(['--scenario', './demo.mjs']).recordingScale, 2)
+  assert.equal(parseArgs(['--scenario', './demo.mjs', '--recording-scale', '1']).recordingScale, 1)
+  assert.throws(
+    () => parseArgs(['--scenario', './demo.mjs', '--recording-scale', '3']),
+    /must be 1 or 2/,
+  )
+})
+
+test('should capture real double-resolution browser frames without changing application layout or clicks', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-density-'))
+  const scenario = path.join(directory, 'scenario.mjs')
+  const output = path.join(directory, 'dense.webm')
+  try {
+    await writeFile(
+      scenario,
+      `${presentationExport.replace('change:', 'canvas: {width:800,height:600}, change:')}
+      export default async function({page, click, ready, expect}) {
+        await page.goto('data:text/html,' + encodeURIComponent('<button style="margin:30px" data-result="Clicked" onclick="this.textContent=this.dataset.result">Activate</button>'))
+        expect(page.viewportSize()).toEqual({width:640,height:480})
+        const stage = page.context().pages()[0]
+        expect(stage.viewportSize()).toEqual({width:1600,height:1200})
+        const scale = await stage.locator('[data-canvas]').evaluate(el => getComputedStyle(el).transform)
+        expect(scale).toBe('matrix(2, 0, 0, 2, 0, 0)')
+        await ready()
+        await click(page.getByRole('button', {name:'Activate'}))
+        await expect(page.getByRole('button', {name:'Clicked'})).toBeVisible()
+      }`,
+    )
+    await recorder.recordDemo({
+      baseURL: 'http://localhost:3000',
+      label: 'density',
+      output,
+      scenario,
+      viewport: { width: 640, height: 480 },
+      interactionPauseMs: 0,
+      mouseMoveMs: 0,
+    })
+    const probe = spawnSync(
+      'ffprobe',
+      [
+        '-v',
+        'error',
+        '-select_streams',
+        'v:0',
+        '-show_entries',
+        'stream=width,height',
+        '-of',
+        'json',
+        output,
+      ],
+      { encoding: 'utf8' },
+    )
+    assert.equal(probe.status, 0, probe.stderr)
+    const stream = JSON.parse(probe.stdout).streams[0]
+    assert.equal(stream.width, 1600)
+    assert.equal(stream.height, 1200)
+  } finally {
+    await rm(directory, { force: true, recursive: true })
   }
 })

@@ -8,6 +8,7 @@ import { pathToFileURL } from 'node:url'
 
 import { convertDemo } from './convert-demo.mjs'
 import {
+  parseRecordingScale,
   parseViewport,
   previewDemo,
   recordDemo,
@@ -41,6 +42,7 @@ export function parseArgs(argv) {
     '--mouse-move-ms',
     '--output',
     '--raw-output',
+    '--recording-scale',
     '--scenario',
     '--viewport',
   ])
@@ -90,6 +92,7 @@ export function parseArgs(argv) {
     }),
     output,
     rawOutput: values.get('--raw-output') ?? `${outputBase}.webm`,
+    recordingScale: parseRecordingScale({ value: values.get('--recording-scale') ?? 2 }),
     scenario,
     viewport: parseViewport(values.get('--viewport') ?? '1440x900'),
   }
@@ -329,6 +332,7 @@ export async function runPreparation(options) {
     await runWithScenarioFixture(options, async (fixture) => {
       await validateDemo({
         a11y: options.a11y,
+        recordingScale: options.recordingScale,
         baseURL: options.baseURL,
         fixture,
         label: options.label,
@@ -346,6 +350,7 @@ export async function runPreparation(options) {
     await runWithScenarioFixture(options, async (fixture) => {
       await previewDemo({
         a11y: options.a11y,
+        recordingScale: options.recordingScale,
         baseURL: options.baseURL,
         fixture,
         label: options.label,
@@ -364,6 +369,7 @@ export async function runPreparation(options) {
   await runWithScenarioFixture(options, async (fixture) => {
     await validateDemo({
       a11y: options.a11y,
+      recordingScale: options.recordingScale,
       baseURL: options.baseURL,
       fixture,
       label: options.label,
@@ -377,6 +383,7 @@ export async function runPreparation(options) {
   await runWithScenarioFixture(options, async (fixture) => {
     await recordDemo({
       a11y: options.a11y,
+      recordingScale: options.recordingScale,
       baseURL: options.baseURL,
       fixture,
       interactionPauseMs: options.interactionPauseMs,
@@ -402,6 +409,7 @@ export async function runPreparation(options) {
     scenarioSource,
     recordingOptions: {
       a11y: options.a11y ?? 'scenario',
+      recordingScale: options.recordingScale ?? 2,
       mouseMoveMs: options.mouseMoveMs,
       interactionPauseMs: options.interactionPauseMs,
       viewport: options.viewport,
@@ -561,6 +569,7 @@ Options:
   --raw-output PATH    Intermediate WebM output
   --contact-sheet PATH Contact sheet PNG output
   --manifest PATH      Candidate JSON manifest output
+  --recording-scale N  Capture at 1× or 2× the design canvas (default: 2)
   --viewport WxH       Viewport (default: ${DEFAULT_VIEWPORT.width}x${DEFAULT_VIEWPORT.height})
   --mouse-move-ms MS   Cursor travel time (default: ${DEFAULT_MOUSE_MOVE_MS})
   --interaction-pause-ms MS

@@ -275,3 +275,9 @@ The recording metadata sits in its own full-width background band at the top of 
 The a11y row is a full-width footer with the panel’s paper background, a full-width top divider and matching lower corner radii. The metadata header retains its secondary background. The history gradient blends into this footer surface, and active keycaps retain their neutral secondary background. The footer remains part of the fixed annotation panel, with no extra application overlay.
 
 The complete annotation card has a 1px outer border using the same theme-aware line color as its dividers. There is no divider immediately below the metadata header. The full-width a11y divider remains. Inner band radii account for the outer border, and annotation text crossfades account for its thickness.
+
+### Capture resolution and encoding
+
+The recorder captures at 2× the design canvas by default: a 1600×1000 composition produces a 3200×2000 video. The containing browser viewport and video capture size are both doubled, and the shared renderer scales the same composition into that viewport. This captures browser-rendered detail at the larger size rather than enlarging an already-recorded frame. Application CSS viewport dimensions, layout breakpoints, font sizes, and interaction timing stay the same.
+
+Use `--recording-scale 2` explicitly, or `--recording-scale 1` for the original native-density output. Candidate, validate, and preview modes apply the same capture scale, and the manifest records it alongside other recording options. Low-level APIs accept `recordingScale` with the same values and default. The MP4 converter uses H.264 CRF 18 rather than CRF 23 to preserve more detail through conversion; the existing 10 MB review/upload budget still applies.
