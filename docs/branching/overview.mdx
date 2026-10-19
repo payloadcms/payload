@@ -210,6 +210,15 @@ The merge body supports `changes`, `closeBranch`, `dryRun`, and `stream`. A stre
 
 A branch merge uses source-wins behavior. Payload writes the latest branch state to `main`; it does not reconcile fields. Normal target access control, field access, validation, hooks, versions, and database constraints run again during the real write.
 
+For collections and globals with drafts enabled, merging preserves whether the latest branch state is draft or published. Content with `_status: 'draft'` is saved as a draft on `main`; merging does not automatically publish it. For an existing published document, merging a draft leaves the published content unchanged and updates its draft.
+
+For example, if a document on `main` has the published title “Original”:
+
+| Latest branch state | Result on `main` after merge |
+| --- | --- |
+| Draft title: “Campaign” | Published title remains “Original”; draft title becomes “Campaign”. |
+| Published title: “Campaign” | Published title becomes “Campaign”. |
+
 <Banner type="warning">
   A successful dry run is not an authorization token or a guarantee that the
   real merge will succeed. Hooks, permissions, content, and database constraints
