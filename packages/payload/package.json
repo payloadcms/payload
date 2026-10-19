@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "4.0.0-beta.0",
+  "version": "4.0.0-beta.2",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -23,11 +23,6 @@
   "bugs": {
     "url": "https://github.com/payloadcms/payload"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/payload"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -37,8 +32,23 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/payload"
+  },
+  "bin": {
+    "payload": "bin.js"
+  },
+  "files": [
+    "dist",
+    "bin.js",
+    "skills"
+  ],
   "type": "module",
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "imports": {
     "#validateJSONSchema": {
       "types": "./src/fields/validateJSONSchema.ts",
@@ -98,16 +108,70 @@
       "default": "./src/__testing__/predefinedMigration.js"
     }
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "bin": {
-    "payload": "bin.js"
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "imports": {
+      "#validateJSONSchema": {
+        "types": "./dist/fields/validateJSONSchema.d.ts",
+        "browser": "./dist/fields/validateJSONSchema.browser.js",
+        "default": "./dist/fields/validateJSONSchema.js"
+      }
+    },
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "browser": "./dist/exports/shared.js",
+        "import": "./dist/index.js",
+        "default": "./dist/index.js"
+      },
+      "./internal": {
+        "import": "./dist/exports/internal.js",
+        "types": "./dist/exports/internal.d.ts",
+        "default": "./dist/exports/internal.js"
+      },
+      "./node": {
+        "import": "./dist/exports/node.js",
+        "types": "./dist/exports/node.d.ts",
+        "default": "./dist/exports/node.js"
+      },
+      "./shared": {
+        "import": "./dist/exports/shared.js",
+        "types": "./dist/exports/shared.d.ts",
+        "default": "./dist/exports/shared.js"
+      },
+      "./auth": {
+        "import": "./dist/exports/auth.js",
+        "types": "./dist/exports/auth.d.ts",
+        "default": "./dist/exports/auth.js"
+      },
+      "./cli": {
+        "import": "./dist/exports/cli.js",
+        "types": "./dist/exports/cli.d.ts",
+        "default": "./dist/exports/cli.js"
+      },
+      "./cli/builtin": {
+        "import": "./dist/exports/cliBuiltin.js",
+        "types": "./dist/exports/cliBuiltin.d.ts",
+        "default": "./dist/exports/cliBuiltin.js"
+      },
+      "./i18n/*": {
+        "import": "./dist/exports/i18n/*.js",
+        "types": "./dist/exports/i18n/*.d.ts",
+        "default": "./dist/exports/i18n/*.js"
+      },
+      "./migrations": {
+        "import": "./dist/exports/migrations.js",
+        "types": "./dist/exports/migrations.d.ts",
+        "default": "./dist/exports/migrations.js"
+      },
+      "./__testing__/predefinedMigration": {
+        "import": "./dist/__testing__/predefinedMigration.js",
+        "default": "./dist/__testing__/predefinedMigration.js"
+      }
+    },
+    "registry": "https://registry.npmjs.org/"
   },
-  "files": [
-    "dist",
-    "bin.js",
-    "skills"
-  ],
   "scripts": {
     "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm bundle:types && echo skipping esbuild",
     "build:bundle-for-analysis": "node ./bundle.js esbuild",
@@ -123,7 +187,7 @@
     "pretest": "pnpm build"
   },
   "dependencies": {
-    "@next/env": "16.4.0",
+    "@next/env": "16.4.2",
     "@payloadcms/translations": "workspace:*",
     "@standard-schema/spec": "1.1.0",
     "@types/busboy": "1.5.4",
@@ -182,69 +246,5 @@
   },
   "engines": {
     "node": ">=24.15.0"
-  },
-  "publishConfig": {
-    "exports": {
-      ".": {
-        "types": "./dist/index.d.ts",
-        "browser": "./dist/exports/shared.js",
-        "import": "./dist/index.js",
-        "default": "./dist/index.js"
-      },
-      "./internal": {
-        "import": "./dist/exports/internal.js",
-        "types": "./dist/exports/internal.d.ts",
-        "default": "./dist/exports/internal.js"
-      },
-      "./node": {
-        "import": "./dist/exports/node.js",
-        "types": "./dist/exports/node.d.ts",
-        "default": "./dist/exports/node.js"
-      },
-      "./shared": {
-        "import": "./dist/exports/shared.js",
-        "types": "./dist/exports/shared.d.ts",
-        "default": "./dist/exports/shared.js"
-      },
-      "./auth": {
-        "import": "./dist/exports/auth.js",
-        "types": "./dist/exports/auth.d.ts",
-        "default": "./dist/exports/auth.js"
-      },
-      "./cli": {
-        "import": "./dist/exports/cli.js",
-        "types": "./dist/exports/cli.d.ts",
-        "default": "./dist/exports/cli.js"
-      },
-      "./cli/builtin": {
-        "import": "./dist/exports/cliBuiltin.js",
-        "types": "./dist/exports/cliBuiltin.d.ts",
-        "default": "./dist/exports/cliBuiltin.js"
-      },
-      "./i18n/*": {
-        "import": "./dist/exports/i18n/*.js",
-        "types": "./dist/exports/i18n/*.d.ts",
-        "default": "./dist/exports/i18n/*.js"
-      },
-      "./migrations": {
-        "import": "./dist/exports/migrations.js",
-        "types": "./dist/exports/migrations.d.ts",
-        "default": "./dist/exports/migrations.js"
-      },
-      "./__testing__/predefinedMigration": {
-        "import": "./dist/__testing__/predefinedMigration.js",
-        "default": "./dist/__testing__/predefinedMigration.js"
-      }
-    },
-    "imports": {
-      "#validateJSONSchema": {
-        "types": "./dist/fields/validateJSONSchema.d.ts",
-        "browser": "./dist/fields/validateJSONSchema.browser.js",
-        "default": "./dist/fields/validateJSONSchema.js"
-      }
-    },
-    "main": "./dist/index.js",
-    "registry": "https://registry.npmjs.org/",
-    "types": "./dist/index.d.ts"
   }
 }

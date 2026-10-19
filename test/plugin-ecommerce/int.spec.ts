@@ -120,11 +120,7 @@ const originalStripeSecretKey = process.env.STRIPE_SECRET_KEY
 process.env.STRIPE_SECRET_KEY = 'sk_test_offline'
 
 // Helper to create a guest cart with items
-async function createGuestCartWithItems(
-  client: RESTClient,
-  productId: string,
-  variantId?: string,
-) {
+async function createGuestCartWithItems(client: RESTClient, productId: string, variantId?: string) {
   const createResponse = await client
     .POST('/carts', {
       auth: false,

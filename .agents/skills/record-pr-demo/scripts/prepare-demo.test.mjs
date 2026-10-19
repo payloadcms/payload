@@ -98,6 +98,7 @@ test('packageCandidate converts, verifies, inventories, and cleans up a candidat
     output,
     rawOutput,
     scenario,
+    trimStart: 1.25,
   })
 
   assert.equal(result.manifestPath, manifest)
@@ -116,6 +117,27 @@ test('packageCandidate converts, verifies, inventories, and cleans up a candidat
   assert.equal(savedManifest.scenario, scenario)
   assert.equal(savedManifest.sha256, result.sha256)
   assert.equal(savedManifest.sizeBytes, 9)
+  assert.match(await readFile(path.join(directory, 'convert-args.txt'), 'utf8'), /-ss 1\.25/)
+})
+
+test('packageCandidate rejects video that exceeds the upload budget', async () => {
+  const directory = await createFakeMediaTools({ outputBytes: 10 * 1024 * 1024 + 1 })
+  const rawOutput = path.join(directory, 'demo.webm')
+  await writeFile(rawOutput, 'recording')
+
+  await assert.rejects(
+    packageCandidate({
+      contactSheet: path.join(directory, 'demo-contact-sheet.png'),
+      environment: { ...process.env, PATH: `${directory}:${process.env.PATH}` },
+      label: 'demo',
+      manifest: path.join(directory, 'demo.json'),
+      output: path.join(directory, 'demo.mp4'),
+      rawOutput,
+      scenario: path.join(directory, 'scenario.mjs'),
+      trimStart: 0,
+    }),
+    /exceeds the 10240 KB upload budget/,
+  )
 })
 
 test('runWithScenarioFixture wraps execution in scenario setup and teardown hooks', async () => {
@@ -204,7 +226,7 @@ test('verifyCandidateManifest accepts unchanged reviewed bytes and rejects repla
   await assert.rejects(verifyCandidateManifest(manifest), /does not match the reviewed candidate/)
 })
 
-async function createFakeMediaTools() {
+async function createFakeMediaTools({ outputBytes } = {}) {
   const directory = await mkdtemp(path.join(tmpdir(), 'prepare-pr-demo-test-'))
   testDirectories.push(directory)
 
@@ -221,6 +243,7 @@ if [[ "$output" == *.png ]]; then
   printf contact-sheet > "$output"
   exit 0
 fi
+printf '%s ' "$@" > "${directory}/convert-args.txt"
 input=""
 previous=""
 for argument in "$@"; do
@@ -228,6 +251,7 @@ for argument in "$@"; do
   previous="$argument"
 done
 cp "$input" "$output"
+${outputBytes ? `truncate -s ${outputBytes} "$output"` : ''}
 `,
   )
   await writeFile(
