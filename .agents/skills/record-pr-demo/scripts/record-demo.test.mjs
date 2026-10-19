@@ -682,3 +682,30 @@ for (const mode of ['disabled', 'moving', 'covered', 'partial', 'explicit']) {
     }
   })
 }
+
+test('should keep wheel scrolling the document after its root border box leaves the viewport', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'demo-document-wheel-'))
+  const scenario = path.join(directory, 'scenario.mjs')
+  try {
+    await writeFile(
+      scenario,
+      `${presentationExport}
+      export default async function({page,scroll,expect}) {
+        await page.goto('data:text/html,'+encodeURIComponent('<!doctype html><style>html{height:100%}body{margin:0;min-height:3000px}</style><button>Page content</button>'))
+        const document=page.locator('html')
+        await scroll(document,{to:800,duration:120,settle:0})
+        await scroll(document,{to:120,duration:120,settle:0})
+        await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBe(120)
+      }
+    `,
+    )
+    await recorder.validateDemo({
+      baseURL: 'http://localhost:3000',
+      label: 'document-wheel',
+      scenario,
+      viewport: { width: 1280, height: 720 },
+    })
+  } finally {
+    await rm(directory, { force: true, recursive: true })
+  }
+})

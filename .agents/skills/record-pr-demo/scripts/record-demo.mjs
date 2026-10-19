@@ -453,11 +453,17 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
     const local = await locator.evaluate(
       (element, { position, pagePoint, box }) => {
         const rect = element.getBoundingClientRect()
-        let left = Math.max(0, rect.left)
-        let top = Math.max(0, rect.top)
-        let right = Math.min(innerWidth, rect.right)
-        let bottom = Math.min(innerHeight, rect.bottom)
-        for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+        // The document remains the wheel surface after its border box scrolls away.
+        const isDocumentScroller = element === document.scrollingElement
+        let left = isDocumentScroller ? 0 : Math.max(0, rect.left)
+        let top = isDocumentScroller ? 0 : Math.max(0, rect.top)
+        let right = isDocumentScroller ? innerWidth : Math.min(innerWidth, rect.right)
+        let bottom = isDocumentScroller ? innerHeight : Math.min(innerHeight, rect.bottom)
+        for (
+          let parent = isDocumentScroller ? null : element.parentElement;
+          parent;
+          parent = parent.parentElement
+        ) {
           const style = getComputedStyle(parent)
           const clip = parent.getBoundingClientRect()
           if (/(auto|scroll|hidden|clip)/.test(style.overflowX)) {
