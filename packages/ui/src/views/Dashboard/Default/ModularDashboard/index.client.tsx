@@ -123,7 +123,21 @@ export function ModularDashboardClient({
 
     return {
       onDragCancel: announceCancel,
-      onDragEnd: (event) => announceMove(event) ?? announceCancel(event),
+      onDragEnd: (event) => {
+        if (event.over) {
+          const { moveFromIndex, moveToIndex } = getWidgetMoveIndexes({
+            activeID: event.active.id,
+            layout: currentLayout,
+            overID: event.over.id,
+          })
+
+          if (moveFromIndex !== moveToIndex) {
+            return announceMove(event)
+          }
+        }
+
+        return announceCancel(event)
+      },
       onDragOver: (event) => {
         const message = announceMove(event)
 
