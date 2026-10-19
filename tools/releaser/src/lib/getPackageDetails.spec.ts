@@ -34,10 +34,16 @@ describe('getPackageDetails', () => {
     expect(details.map((pkg) => pkg.shortName)).toEqual(['translations', 'payload', 'ui', 'next'])
   })
 
-  it('should skip whitelist entries that are private or missing', async () => {
-    const details = await getPackageDetails(['translations', 'private-pkg', 'missing', 'payload'])
+  it('should throw when a whitelist entry is missing', async () => {
+    await expect(getPackageDetails(['translations', 'missing', 'payload'])).rejects.toThrow(
+      'Package "missing" in publish list is missing or private',
+    )
+  })
 
-    expect(details.map((pkg) => pkg.shortName)).toEqual(['translations', 'payload'])
+  it('should throw when a whitelist entry is private', async () => {
+    await expect(getPackageDetails(['translations', 'private-pkg'])).rejects.toThrow(
+      'Package "private-pkg" in publish list is missing or private',
+    )
   })
 
   it('should return every public package when no whitelist is given', async () => {

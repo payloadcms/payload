@@ -22,6 +22,7 @@ export type PackageDetails = {
  * Accepts package whitelist (directory names inside packages dir) and returns details for each
  * public package. With a whitelist, results follow the whitelist order, so a topologically ordered
  * list publishes every dependency before its dependents. Without one, results follow glob order.
+ * Throws when a whitelist entry is missing or private, so no listed package drops out of a release.
  */
 export const getPackageDetails = async (packages?: null | string[]): Promise<PackageDetails[]> => {
   const packageJsons = await globby('packages/*/package.json', {
@@ -52,8 +53,11 @@ export const getPackageDetails = async (packages?: null | string[]): Promise<Pac
   }
 
   const detailsByShortName = new Map(publicDetails.map((details) => [details.shortName, details]))
-  return packages.flatMap((shortName) => {
+  return packages.map((shortName) => {
     const details = detailsByShortName.get(shortName)
-    return details ? [details] : []
+    if (!details) {
+      throw new Error(`Package "${shortName}" in publish list is missing or private`)
+    }
+    return details
   })
 }
