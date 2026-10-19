@@ -2658,10 +2658,11 @@ test.describe('WCAG 2.2 Level AA', () => {
       )
       await expect(next).toBeFocused()
       // The server rendered the first 8 documents, so only the third page fetches the new total.
-      for (const document of documents.splice(4)) {
-        const deleted = await page.request.delete(`${serverURL}/api/posts/${document.id}`)
+      while (documents.length > 4) {
+        const deleted = await page.request.delete(`${serverURL}/api/posts/${documents[4].id}`)
 
         expect(deleted.ok()).toBe(true)
+        documents.splice(4, 1)
       }
       await next.press('Enter')
       await expect(widget.locator('.recents-widget__pagination')).toHaveCount(0)
