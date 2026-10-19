@@ -272,19 +272,38 @@ test('recordDemo renders a Mac-style arrow cursor', async () => {
   }
 })
 
-test('should trim startup frames to the ready opening state', async () => {
+test('should trim startup frames to the ready opening state', async ({ mock }) => {
   const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-opening-test-'))
   const scenario = path.join(directory, 'scenario.mjs')
   const rawVideo = path.join(directory, 'demo.webm')
   const convertedVideo = path.join(directory, 'demo.mp4')
   let trimStart
+  const { chromium } = await import('@playwright/test')
+  const launch = chromium.launch.bind(chromium)
+  mock.method(chromium, 'launch', async (options) => {
+    const browser = await launch(options)
+    const newContext = browser.newContext.bind(browser)
+    mock.method(browser, 'newContext', async (options) => {
+      const context = await newContext(options)
+      const newPage = context.newPage.bind(context)
+      mock.method(context, 'newPage', async () => {
+        const page = await newPage()
+        // Capture starts before page creation resolves to the caller.
+        await new Promise((resolve) => setTimeout(resolve, 350))
+        return page
+      })
+      return context
+    })
+    return browser
+  })
 
   try {
     await writeFile(
       scenario,
-      `${presentationExport}export default async function scenario({ page, ready }) {
+      `${presentationExport}export default async function scenario({ page, ready, showAnnotation }) {
         await page.goto('data:text/html,<body style="margin:0;background:white"><script>setTimeout(() => { document.body.style.background = "rgb(0, 200, 0)"; document.body.id = "ready" }, 1400)</script></body>')
         await page.locator('#ready').waitFor()
+        await showAnnotation({title:'Opening annotation', body:'Visible from the first frame.'})
         await ready()
       }`,
     )
@@ -331,6 +350,32 @@ test('should trim startup frames to the ready opening state', async () => {
       firstFrame.stdout[0] < 80 && firstFrame.stdout[1] > 150 && firstFrame.stdout[2] < 80,
       'Opening frame does not show the ready green page',
     )
+    const annotationFrame = spawnSync('ffmpeg', [
+      '-v',
+      'error',
+      '-i',
+      convertedVideo,
+      '-vf',
+      'crop=900:44:174:80',
+      '-frames:v',
+      '1',
+      '-f',
+      'rawvideo',
+      '-pix_fmt',
+      'rgb24',
+      '-',
+    ])
+    assert.equal(annotationFrame.status, 0, annotationFrame.stderr.toString())
+    let darkPixels = 0
+    for (let index = 0; index < annotationFrame.stdout.length; index += 3) {
+      if (
+        annotationFrame.stdout[index] < 180 &&
+        annotationFrame.stdout[index + 1] < 180 &&
+        annotationFrame.stdout[index + 2] < 180
+      )
+        darkPixels++
+    }
+    assert.ok(darkPixels > 100, 'Opening frame has an empty annotation section')
   } finally {
     await rm(directory, { force: true, recursive: true })
   }
@@ -809,6 +854,64 @@ test('should capture native canvas dimensions without changing application layou
     const stream = JSON.parse(probe.stdout).streams[0]
     assert.equal(stream.width, 800)
     assert.equal(stream.height, 600)
+  } finally {
+    await rm(directory, { force: true, recursive: true })
+  }
+})
+
+test('should click visible controls after scrolling when body overflow propagates to the viewport', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-body-overflow-'))
+  const scenario = path.join(directory, 'scenario.mjs')
+  try {
+    await writeFile(
+      scenario,
+      `${presentationExport}
+      export default async function ({page, click, scroll, ready, expect}) {
+        await page.goto('data:text/html,' + encodeURIComponent('<!doctype html><style>html,body{margin:0;height:100%}body{overflow-x:hidden}</style><div style="height:900px"></div><button data-result="Clicked" onclick="this.textContent=this.dataset.result">Activate</button><div style="height:40px"></div>'))
+        await ready()
+        await scroll(page.locator('html'), {to:'end', duration:100, settle:0})
+        await click(page.getByRole('button',{name:'Activate'}))
+        await expect(page.getByRole('button',{name:'Clicked'})).toBeVisible()
+      }
+    `,
+    )
+    await recorder.validateDemo({
+      baseURL: 'http://localhost:3000',
+      label: 'body-overflow',
+      scenario,
+      viewport: { width: 1280, height: 720 },
+    })
+  } finally {
+    await rm(directory, { force: true, recursive: true })
+  }
+})
+
+test('should reject notes introduced after an unannotated ready marker through either API', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-opening-note-'))
+  try {
+    for (const method of ['showAnnotation', 'setAnnotation']) {
+      const scenario = path.join(directory, `${method}.mjs`)
+      await writeFile(
+        scenario,
+        `${presentationExport}
+        export default async function ({page, ready, ${method}}) {
+          await page.goto('data:text/html,<main>Loaded app</main>')
+          await ready()
+          await ${method}({title:'Too late',body:'No annotation was visible at ready.'})
+        }
+      `,
+      )
+      await assert.rejects(
+        () =>
+          recorder.validateDemo({
+            baseURL: 'http://localhost:3000',
+            label: 'opening-note',
+            scenario,
+            viewport: { width: 1280, height: 720 },
+          }),
+        /annotation.*before.*ready\(\)/i,
+      )
+    }
   } finally {
     await rm(directory, { force: true, recursive: true })
   }

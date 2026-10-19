@@ -359,8 +359,9 @@ async function executeDemo({
     })
   })
 
-  const recordedPage = await context.newPage()
+  // Video capture can start before newPage() resolves. Include page creation in the trim clock.
   const recordingStartedAt = performance.now()
+  const recordedPage = await context.newPage()
   const video = output ? recordedPage.video() : undefined
   let presentation
   const resolvedOutput = output ? path.resolve(output) : undefined
@@ -414,6 +415,7 @@ async function executeDemo({
       pause: (milliseconds = 700) => page.waitForTimeout(milliseconds * pauseScale),
       ready: async () => {
         if (isOpeningReady) throw new Error('Scenario may call ready() only once')
+        annotationInteractions.markReady()
         isOpeningReady = true
         await presentation.flush()
         onOpeningReady?.((performance.now() - presentation.startedAt) / 1000)
@@ -479,11 +481,20 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
         let top = isDocumentScroller ? 0 : Math.max(0, rect.top)
         let right = isDocumentScroller ? innerWidth : Math.min(innerWidth, rect.right)
         let bottom = isDocumentScroller ? innerHeight : Math.min(innerHeight, rect.bottom)
+        const rootStyle = getComputedStyle(document.documentElement)
         for (
           let parent = isDocumentScroller ? null : element.parentElement;
           parent;
           parent = parent.parentElement
         ) {
+          // Root overflow, and body overflow propagated from a visible root, clip at the viewport.
+          const isViewportOverflow =
+            parent === document.documentElement ||
+            (parent === document.body &&
+              document.scrollingElement === document.documentElement &&
+              rootStyle.overflowX === 'visible' &&
+              rootStyle.overflowY === 'visible')
+          if (isViewportOverflow) continue
           const style = getComputedStyle(parent)
           const clip = parent.getBoundingClientRect()
           if (/(auto|scroll|hidden|clip)/.test(style.overflowX)) {
