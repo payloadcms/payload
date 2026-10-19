@@ -31,6 +31,8 @@ test.suite(
         collections: [
           {
             slug: 'users',
+            // Disable authorship so the runtime schema matches the pre-authorship committed migrations.
+            authorship: false,
             auth: true,
             fields: [],
             versions: false,

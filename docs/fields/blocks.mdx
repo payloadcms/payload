@@ -348,9 +348,9 @@ If you provide `admin.components.Label`, that component replaces both the name a
 ```tsx
 import type React from 'react'
 import { BlocksField } from '@payloadcms/ui'
-import type { BlocksFieldServerComponent } from 'payload'
+import type { BlocksFieldServerProps } from 'payload'
 
-export const CustomBlocksFieldServer: BlocksFieldServerComponent = ({
+export const CustomBlocksFieldServer: React.FC<BlocksFieldServerProps> = ({
   clientField,
   path,
   schemaPath,
@@ -373,9 +373,11 @@ export const CustomBlocksFieldServer: BlocksFieldServerComponent = ({
 'use client'
 import React from 'react'
 import { BlocksField } from '@payloadcms/ui'
-import type { BlocksFieldClientComponent } from 'payload'
+import type { BlocksFieldClientProps } from 'payload'
 
-export const CustomBlocksFieldClient: BlocksFieldClientComponent = (props) => {
+export const CustomBlocksFieldClient: React.FC<BlocksFieldClientProps> = (
+  props,
+) => {
   return <BlocksField {...props} />
 }
 ```
@@ -387,12 +389,11 @@ export const CustomBlocksFieldClient: BlocksFieldClientComponent = (props) => {
 ```tsx
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { BlocksFieldLabelServerComponent } from 'payload'
+import type { BlocksFieldLabelServerProps } from 'payload'
 
-export const CustomBlocksFieldLabelServer: BlocksFieldLabelServerComponent = ({
-  clientField,
-  path,
-}) => {
+export const CustomBlocksFieldLabelServer: React.FC<
+  BlocksFieldLabelServerProps
+> = ({ clientField, path }) => {
   return (
     <FieldLabel
       label={clientField?.label || clientField?.name}
@@ -409,13 +410,11 @@ export const CustomBlocksFieldLabelServer: BlocksFieldLabelServerComponent = ({
 'use client'
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { BlocksFieldLabelClientComponent } from 'payload'
+import type { BlocksFieldLabelClientProps } from 'payload'
 
-export const CustomBlocksFieldLabelClient: BlocksFieldLabelClientComponent = ({
-  label,
-  path,
-  required,
-}) => {
+export const CustomBlocksFieldLabelClient: React.FC<
+  BlocksFieldLabelClientProps
+> = ({ field, path }) => {
   return (
     <FieldLabel
       label={field?.label || field?.name}

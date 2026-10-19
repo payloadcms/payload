@@ -39,22 +39,28 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
   const fromVersion =
     args.fromVersion || execSync('git describe --match "v*" --tags --abbrev=0').toString().trim()
 
-  const tag = fromVersion.match(/-(\w+)\.\d+$/)?.[1] || 'latest'
+  const isTaggedRelease = toVersion.startsWith('v') && semver.valid(toVersion) !== null
+  const tag = (isTaggedRelease ? toVersion : fromVersion).match(/-(\w+)\.\d+$/)?.[1] || 'latest'
 
-  const recommendedBump =
-    tag !== 'latest' ? 'prerelease' : await getRecommendedBump(fromVersion, toVersion)
+  let recommendedBump: Awaited<ReturnType<typeof getRecommendedBump>> | undefined
+  if (!isTaggedRelease) {
+    recommendedBump =
+      tag !== 'latest' ? 'prerelease' : await getRecommendedBump(fromVersion, toVersion)
+  }
 
-  if (bump && bump !== recommendedBump) {
+  if (bump && recommendedBump && bump !== recommendedBump) {
     console.log(`WARNING: Recommended bump is '${recommendedBump}', but you specified '${bump}'`)
   }
 
   const calculatedBump = bump || recommendedBump
 
-  if (!calculatedBump) {
-    throw new Error('Could not determine bump type')
+  let proposedReleaseVersion = isTaggedRelease ? toVersion : undefined
+  if (!proposedReleaseVersion) {
+    if (!calculatedBump) {
+      throw new Error('Could not determine bump type')
+    }
+    proposedReleaseVersion = 'v' + semver.inc(fromVersion, calculatedBump, undefined, tag)
   }
-
-  const proposedReleaseVersion = 'v' + semver.inc(fromVersion, calculatedBump, undefined, tag)
 
   console.log(`Generating release notes for ${fromVersion} to ${toVersion}...`)
 
@@ -66,7 +72,15 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
     toVersion,
   })
 
-  const conventionalCommits = await getLatestCommits(fromVersion, toVersion)
+  const conventionalCommits = (await getLatestCommits(fromVersion, toVersion)).filter(
+    (commit) =>
+      !(
+        isTaggedRelease &&
+        commit.type === 'chore' &&
+        commit.scope === 'release' &&
+        semver.valid(commit.description)
+      ),
+  )
 
   const commitTypesForChangelog = [
     'feat',
@@ -129,6 +143,10 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
     },
     {} as Record<Section, GitCommit[]>,
   )
+
+  if (isTaggedRelease && !Object.values(sections).some((commits) => commits.length > 0)) {
+    console.log(`WARNING: No changelog items between ${fromVersion} and ${toVersion}`)
+  }
 
   // Sort commits by scope, unscoped first
   Object.values(sections).forEach((section) => {

@@ -15,6 +15,7 @@ test.suite('@payloadcms/plugin-redirects', { config: './config.ts' }, () => {
       data: {
         title: 'Test',
       },
+      overrideAccess: true,
     })
   })
 
@@ -23,6 +24,7 @@ test.suite('@payloadcms/plugin-redirects', { config: './config.ts' }, () => {
       collection: 'redirects',
       depth: 0,
       limit: 1,
+      overrideAccess: true,
     })
 
     expect(redirect).toBeTruthy()
@@ -42,6 +44,7 @@ test.suite('@payloadcms/plugin-redirects', { config: './config.ts' }, () => {
         },
         type: '301',
       },
+      overrideAccess: true,
     })
 
     expect(redirect).toBeTruthy()
@@ -60,6 +63,7 @@ test.suite('@payloadcms/plugin-redirects', { config: './config.ts' }, () => {
         },
         type: '301',
       },
+      overrideAccess: true,
     })
 
     expect(redirect).toBeTruthy()

@@ -60,6 +60,7 @@ test.suite('graphql', { config: './config.ts' }, () => {
         data: {
           title: 'example post',
         },
+        overrideAccess: true,
       })
       await payload.update({
         collection: 'posts',
@@ -67,6 +68,7 @@ test.suite('graphql', { config: './config.ts' }, () => {
         data: {
           relationToSelf: post.id,
         },
+        overrideAccess: true,
       })
 
       const query = `query {
@@ -99,6 +101,7 @@ test.suite('graphql', { config: './config.ts' }, () => {
           title: 'example post',
           'hyphenated-name': 'example-hyphenated-name',
         },
+        overrideAccess: true,
       })
 
       const query = `query {
@@ -117,7 +120,7 @@ test.suite('graphql', { config: './config.ts' }, () => {
     })
 
     test('should not error because of non nullable fields', async ({ payload, restClient }) => {
-      await payload.delete({ collection: 'posts', where: {} })
+      await payload.delete({ collection: 'posts', where: {}, overrideAccess: true })
 
       // this is an array if any errors
       const res_1 = await restClient
@@ -141,6 +144,7 @@ query {
       await payload.create({
         collection: 'posts',
         data: { title: 'any-title' },
+        overrideAccess: true,
       })
 
       const res_2 = await restClient
@@ -173,6 +177,7 @@ query {
             },
           ],
         },
+        overrideAccess: true,
       })
 
       // Query without select: true
@@ -227,7 +232,44 @@ query {
       await payload.delete({
         collection: 'posts',
         id: createdPost.id,
+        overrideAccess: true,
       })
+    })
+
+    test('should keep a relationship selection inside an aliased array', async ({
+      payload,
+      restClient,
+    }) => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: 'Aliased array post' },
+        overrideAccess: true,
+      })
+
+      await payload.updateGlobal({
+        slug: 'home',
+        data: {
+          topPosts: [{ caption: 'Featured', post: post.id }],
+        },
+        overrideAccess: true,
+      })
+
+      const query = `query {
+        Home(select: true) {
+          featured: topPosts {
+            post { title }
+          }
+        }
+      }`
+
+      const { data, errors } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((response) => response.json())
+
+      expect(errors).toBeUndefined()
+      expect(data.Home.featured).toEqual([
+        expect.objectContaining({ post: { title: 'Aliased array post' } }),
+      ])
     })
 
     test('should not error when querying a global with a deleted relationship in an array', async ({
@@ -239,6 +281,7 @@ query {
         data: {
           title: 'Post 1',
         },
+        overrideAccess: true,
       })
 
       await payload.updateGlobal({
@@ -251,6 +294,7 @@ query {
             },
           ],
         },
+        overrideAccess: true,
       })
 
       const query = `query {
@@ -275,6 +319,7 @@ query {
       await payload.delete({
         collection: 'posts',
         id: post1.id,
+        overrideAccess: true,
       })
 
       const afterDelete = await restClient

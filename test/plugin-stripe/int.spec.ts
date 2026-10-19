@@ -51,6 +51,7 @@ test.suite('Stripe Plugin', { config: './config.ts' }, () => {
       data: {
         name: 'Test Product',
       },
+      overrideAccess: true,
     })
 
     expect(product).toHaveProperty('name', 'Test Product')
@@ -78,6 +79,7 @@ test.suite('Stripe Plugin', { config: './config.ts' }, () => {
           ...regularUser,
           roles: ['user'],
         },
+        overrideAccess: true,
       })
       const loginResult = await payload.login({
         collection: 'users',
@@ -85,6 +87,7 @@ test.suite('Stripe Plugin', { config: './config.ts' }, () => {
           email: regularUser.email,
           password: regularUser.password,
         },
+        overrideAccess: true,
       })
 
       const response = await restClient.POST('/stripe/rest', {
@@ -153,6 +156,7 @@ test.suite('Stripe Plugin', { config: './config.ts' }, () => {
       data: {
         name: 'Managed Product',
       },
+      overrideAccess: true,
     })
     vi.stubEnv('NODE_ENV', 'development')
 

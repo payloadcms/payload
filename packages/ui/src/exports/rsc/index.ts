@@ -11,6 +11,7 @@ export {
   getHTMLDiffComponents,
   unescapeDiffHTML,
 } from '../../elements/HTMLDiff/index.js'
+export { LLMInstructionsCell } from '../../elements/LLMInstructionsCell/index.js'
 export { Logo } from '../../elements/Logo/index.js'
 export { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 export { DefaultNav, type NavProps } from '../../elements/Nav/index.js'
@@ -36,3 +37,5 @@ export { upsertPreferences } from '../../utilities/upsertPreferences.js'
 export { CollectionCards } from '../../widgets/CollectionCards/index.js'
 export { CollectionQueryWidget } from '../../widgets/CollectionQuery/index.js'
 export { RecentlyViewedWidget } from '../../widgets/RecentlyViewed/index.js'
+export { UploadDropzoneWidget } from '../../widgets/UploadDropzone/index.js'
+export { WelcomeWidget } from '../../widgets/Welcome/index.js'

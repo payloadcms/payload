@@ -10,7 +10,7 @@ export const meta: MetaFunction = () => {
 export const loader = async () => {
   const payload = await getPayload({ config })
 
-  const posts = await payload.find({ collection: 'posts', sort: 'createdAt' })
+  const posts = await payload.find({ collection: 'posts', sort: 'createdAt', overrideAccess: true })
 
   return Response.json(posts)
 }
@@ -26,6 +26,7 @@ export async function action({ request }: ActionFunctionArgs) {
     await payload.delete({
       collection: 'posts',
       id: postId,
+      overrideAccess: true,
     })
     return Response.json({ message: 'Post deleted' })
   }
@@ -35,6 +36,7 @@ export async function action({ request }: ActionFunctionArgs) {
     data: {
       title: (body.get('title') as string) || 'Untitled',
     },
+    overrideAccess: true,
   })
 
   return Response.json(post)

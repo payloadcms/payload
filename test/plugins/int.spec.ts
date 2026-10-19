@@ -13,6 +13,7 @@ test.suite('Collections - Plugins', { config: './config.ts' }, () => {
       data: {
         title: 'Test Page',
       },
+      overrideAccess: true,
     })
 
     expect(id).toBeDefined()

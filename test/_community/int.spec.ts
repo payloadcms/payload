@@ -37,6 +37,7 @@ test.suite('_Community Tests', { config: './config.ts' }, () => {
         title: 'LOCAL API EXAMPLE',
       },
       context: {},
+      overrideAccess: true,
     })
 
     expect(newPost.title).toEqual('LOCAL API EXAMPLE')

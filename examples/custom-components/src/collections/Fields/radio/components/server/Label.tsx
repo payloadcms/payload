@@ -1,9 +1,9 @@
-import type { RadioFieldLabelServerComponent } from 'payload'
+import type { RadioFieldLabelServerProps } from 'payload'
 
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomRadioFieldLabelServer: RadioFieldLabelServerComponent = ({
+export const CustomRadioFieldLabelServer: React.FC<RadioFieldLabelServerProps> = ({
   clientField,
   path,
 }) => {

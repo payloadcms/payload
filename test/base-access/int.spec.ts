@@ -1,4 +1,4 @@
-import { createLocalReq, Forbidden, getAccessResults } from 'payload'
+import { createPayloadRequest, Forbidden, getAccessResults } from 'payload'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -9,16 +9,14 @@ const createRequest = async ({
   payload,
 }: {
   headers: Record<string, string>
-  payload: Parameters<typeof createLocalReq>[1]
+  payload: Parameters<typeof createPayloadRequest>[0]['payload']
 }) =>
-  createLocalReq(
-    {
-      req: {
-        headers: new Headers(headers),
-      },
-    },
+  createPayloadRequest({
     payload,
-  )
+    req: {
+      headers: new Headers(headers),
+    },
+  })
 
 test.suite('baseAccess', { config: './config.ts' }, () => {
   test('should combine base and collection query constraints', async ({ payload }) => {
@@ -42,6 +40,7 @@ test.suite('baseAccess', { config: './config.ts' }, () => {
       await payload.create({
         collection: postsSlug,
         data,
+        overrideAccess: true,
       })
     }
     const req = await createRequest({
@@ -86,6 +85,7 @@ test.suite('baseAccess', { config: './config.ts' }, () => {
       collection: postsSlug,
       data,
       req,
+      overrideAccess: true,
     })
 
     expect(doc.title).toBe(data.title)
@@ -105,6 +105,50 @@ test.suite('baseAccess', { config: './config.ts' }, () => {
         data: {
           title: 'denied',
         },
+        overrideAccess: false,
+        req,
+      }),
+    ).rejects.toThrow(Forbidden)
+  })
+
+  test('should enforce base access for collection validate operation', async ({ payload }) => {
+    const req = await createRequest({
+      headers: {
+        [denyHeader]: 'true',
+      },
+      payload,
+    })
+
+    await expect(
+      payload.validate({
+        collection: postsSlug,
+        data: {
+          status: 'published',
+          tenant: 'tenant-1',
+          title: 'denied',
+        },
+        locale: null,
+        overrideAccess: false,
+        req,
+      }),
+    ).rejects.toThrow(Forbidden)
+  })
+
+  test('should enforce base access for globals validate operation', async ({ payload }) => {
+    const req = await createRequest({
+      headers: {
+        [denyHeader]: 'true',
+      },
+      payload,
+    })
+
+    await expect(
+      payload.validateGlobal({
+        slug: settingsSlug,
+        data: {
+          title: 'denied',
+        },
+        locale: null,
         overrideAccess: false,
         req,
       }),

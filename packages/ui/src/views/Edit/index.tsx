@@ -613,8 +613,8 @@ export function DefaultEditView({
 
   const isFolderCollection = Boolean(
     collectionConfig?.hierarchy &&
-      typeof collectionConfig.hierarchy === 'object' &&
-      collectionConfig.hierarchy.allowHasMany === false,
+    typeof collectionConfig.hierarchy === 'object' &&
+    collectionConfig.hierarchy.allowHasMany === false,
   )
 
   const documentControlsProps: Omit<React.ComponentProps<typeof DocumentControls>, 'variant'> = {
@@ -694,6 +694,7 @@ export function DefaultEditView({
     <main
       className={[
         baseClass,
+        config.admin.constrainWidth && `${baseClass}--constrain-document-width`,
         (id || globalSlug) && `${baseClass}--is-editing`,
         globalSlug && `global-edit--${globalSlug}`,
         collectionSlug && `collection-edit--${collectionSlug}`,

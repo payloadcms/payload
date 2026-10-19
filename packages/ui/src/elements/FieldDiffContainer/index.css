@@ -66,7 +66,6 @@
     background-color: var(--color-bg-secondary);
     border-radius: var(--radius-medium);
     color: var(--color-text-secondary);
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);

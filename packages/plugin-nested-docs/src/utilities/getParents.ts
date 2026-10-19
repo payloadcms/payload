@@ -21,6 +21,7 @@ export const getParents = async (
         collection: collection.slug,
         depth: 0,
         disableErrors: true,
+        overrideAccess: true,
         req,
       })
     }

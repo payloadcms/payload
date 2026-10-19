@@ -7,8 +7,7 @@ import type {
   RequiredDataFromCollectionSlug,
 } from 'payload'
 
-import path from 'path'
-import { AuthenticationError, createLocalReq, docAccessOperation, Forbidden } from 'payload'
+import { AuthenticationError, createPayloadRequest, docAccessOperation, Forbidden } from 'payload'
 import { getEntityPermissions } from 'payload/internal'
 import { expect, vitest } from 'vitest'
 
@@ -68,11 +67,13 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
     post1 = await payload.create({
       collection: slug,
       data: {},
+      overrideAccess: true,
     })
 
     restricted = await payload.create({
       collection: fullyRestrictedSlug,
       data: { name: 'restricted' },
+      overrideAccess: true,
     })
   })
 
@@ -92,6 +93,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             value: 'private_value',
           },
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -100,11 +102,13 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         data: {
           title: 'Doc Title',
         },
+        overrideAccess: true,
       })
 
       const updatedDoc = await payload.findByID({
         id: doc.id,
         collection: hiddenFieldsSlug,
+        overrideAccess: true,
         showHiddenFields: true,
       })
 
@@ -129,6 +133,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             value: 'private_value',
           },
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -136,6 +141,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         data: {
           title: 'Doc Title',
         },
+        overrideAccess: true,
         where: {
           id: { equals: docsMany.id },
         },
@@ -144,6 +150,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
       const updatedMany = await payload.findByID({
         id: docsMany.id,
         collection: hiddenFieldsSlug,
+        overrideAccess: true,
         showHiddenFields: true,
       })
 
@@ -166,6 +173,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             },
           ],
         },
+        overrideAccess: true,
       })
 
       const doc = await payload.findByID({
@@ -178,10 +186,10 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
       // Should respect PublicReadabilityAccess function and not be sent
       expect(doc.array?.[1].text).toBeUndefined()
 
-      // Retrieve with default of overriding access
       const docOverride = await payload.findByID({
         id,
         collection: siblingDataSlug,
+        overrideAccess: true,
       })
 
       expect(docOverride.array?.[0].text).toBe(firstArrayText)
@@ -196,16 +204,17 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         data: {
           cannotMutateRequired: 'original',
         },
+        overrideAccess: true,
       })
 
       const updatedDoc = await payload.update({
         id: doc.id,
         collection: hooksSlug,
-        overrideAccess: false,
         data: {
-          cannotMutateRequired: 'new',
           canMutate: 'canMutate',
+          cannotMutateRequired: 'new',
         },
+        overrideAccess: false,
       })
 
       expect(updatedDoc.cannotMutateRequired).toBe('original')
@@ -217,15 +226,16 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         data: {
           cannotMutateRequired: 'original',
         },
+        overrideAccess: true,
       })
 
       const updatedDoc = await payload.update({
         id: doc.id,
         collection: hooksSlug,
-        overrideAccess: false,
         data: {
           canMutate: 'canMutate',
         },
+        overrideAccess: false,
       })
 
       // should fallback to original data and not throw validation error
@@ -238,18 +248,19 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
       const doc = await payload.create({
         collection: hooksSlug,
         data: {
-          cannotMutateRequired: 'cannotMutateRequired',
           cannotMutateNotRequired: 'cannotMutateNotRequired',
+          cannotMutateRequired: 'cannotMutateRequired',
         },
+        overrideAccess: true,
       })
 
       const updatedDoc = await payload.update({
         id: doc.id,
         collection: hooksSlug,
-        overrideAccess: false,
         data: {
           cannotMutateNotRequired: 'updated',
         },
+        overrideAccess: false,
       })
 
       // should fallback to original data and not throw validation error
@@ -263,16 +274,18 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
 
       test.afterEach(async ({ payload }) => {
         for (const id of createdAdminUserIDs) {
-          await payload.delete({ id, collection: usersSlug })
+          await payload.delete({ id, collection: usersSlug, overrideAccess: true })
         }
         for (const id of createdAuthIDs) {
-          await payload.delete({ id, collection: authSlug })
+          await payload.delete({ id, collection: authSlug, overrideAccess: true })
         }
         createdAdminUserIDs.length = 0
         createdAuthIDs.length = 0
       })
 
-      it('should allow a user to update their own password based on the document id', async () => {
+      test('should allow a user to update their own password based on the document id', async ({
+        payload,
+      }) => {
         const originalPassword = 'OriginalPassword123!'
         const replacementPassword = 'ReplacementPassword123!'
 
@@ -284,6 +297,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             password: originalPassword,
             roles: ['user'],
           },
+          overrideAccess: true,
         })
 
         createdAuthIDs.push(account.id)
@@ -295,7 +309,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             password: replacementPassword,
           },
           overrideAccess: false,
-          user: account,
+          user: { ...account, collection: authSlug },
         })
 
         await expect(
@@ -319,7 +333,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         ).rejects.toThrow(AuthenticationError)
       })
 
-      it('should pass the document id to password field update access', async () => {
+      test('should pass the document id to password field update access', async ({ payload }) => {
         const account = await payload.create({
           collection: authSlug,
           data: {
@@ -328,21 +342,27 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             password: 'OriginalPassword123!',
             roles: ['user'],
           },
+          overrideAccess: true,
         })
 
         createdAuthIDs.push(account.id)
 
-        const req = await createLocalReq({ user: account }, payload)
+        const req = await createPayloadRequest({
+          payload,
+          user: { ...account, collection: authSlug },
+        })
         const permissions = await docAccessOperation({
-          collection: payload.collections[authSlug],
           id: account.id,
+          collection: payload.collections[authSlug],
           req,
         })
 
         expect(permissions.fields?.password).toBe(true)
       })
 
-      it('should preserve credentials when password update access is denied', async () => {
+      test('should preserve credentials when password update access is denied', async ({
+        payload,
+      }) => {
         const originalPassword = 'OriginalPassword123!'
         const replacementPassword = 'ReplacementPassword123!'
 
@@ -353,6 +373,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             password: 'CallerPassword123!',
             roles: ['user'],
           },
+          overrideAccess: true,
         })
 
         createdAdminUserIDs.push(caller.id)
@@ -365,6 +386,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             password: originalPassword,
             roles: ['user'],
           },
+          overrideAccess: true,
         })
 
         createdAuthIDs.push(account.id)
@@ -372,6 +394,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         const credentialsBefore = await payload.findByID({
           id: account.id,
           collection: authSlug,
+          overrideAccess: true,
           showHiddenFields: true,
         })
 
@@ -388,6 +411,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         const credentialsAfter = await payload.findByID({
           id: account.id,
           collection: authSlug,
+          overrideAccess: true,
           showHiddenFields: true,
         })
 
@@ -402,6 +426,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             email: account.email,
             password: originalPassword,
           },
+          overrideAccess: true,
         })
 
         expect(authenticated.user.id).toBe(account.id)
@@ -412,6 +437,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
               email: account.email,
               password: replacementPassword,
             },
+            overrideAccess: true,
           }),
         ).rejects.toThrow(AuthenticationError)
       })
@@ -423,6 +449,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         data: {
           title: 'Test Title',
         },
+        overrideAccess: true,
         showHiddenFields: true,
       })
 
@@ -444,12 +471,12 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdAuthCollectionIDs) {
-        await payload.delete({ id, collection: authSlug })
+        await payload.delete({ id, collection: authSlug, overrideAccess: true })
       }
       createdAuthCollectionIDs.length = 0
 
       for (const id of createdPublicUserIDs) {
-        await payload.delete({ id, collection: publicUsersSlug })
+        await payload.delete({ id, collection: publicUsersSlug, overrideAccess: true })
       }
       createdPublicUserIDs.length = 0
     })
@@ -467,6 +494,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
       const sourceResult = await payload.find({
         collection: publicUsersSlug,
         limit: 1,
+        overrideAccess: true,
         where: {
           email: {
             equals: publicUserEmail,
@@ -487,6 +515,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
       )
       const duplicateResult = await payload.find({
         collection: publicUsersSlug,
+        overrideAccess: true,
         where: {
           email: {
             equals: duplicateEmail,
@@ -506,6 +535,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
       const sourceResult = await payload.find({
         collection: publicUsersSlug,
         limit: 1,
+        overrideAccess: true,
         where: {
           email: {
             equals: publicUserEmail,
@@ -528,6 +558,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
 
       const duplicateResult = await payload.find({
         collection: publicUsersSlug,
+        overrideAccess: true,
         where: {
           email: {
             equals: duplicateEmail,
@@ -552,6 +583,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
           password: 'test-password',
           roles: ['admin'],
         },
+        overrideAccess: true,
       })
       const duplicateEmail = 'duplicate-request@payloadcms.com'
 
@@ -579,6 +611,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
       const duplicated = await payload.findByID({
         id: doc.id,
         collection: authSlug,
+        overrideAccess: true,
         showHiddenFields: true,
       })
 
@@ -605,6 +638,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
       test.afterEach(async ({ payload }) => {
         await payload.delete({
           collection: docLevelAccessSlug,
+          overrideAccess: true,
           where: {
             id: {
               in: createdDocumentIDs,
@@ -623,6 +657,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
           data: {
             approvedForRemoval: false,
           },
+          overrideAccess: true,
         })
 
         createdDocumentIDs.push(doc.id)
@@ -647,6 +682,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
           data: {
             approvedForRemoval: true,
           },
+          overrideAccess: true,
         })
 
         createdDocumentIDs.push(doc.id)
@@ -669,12 +705,12 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
 
       test.afterEach(async ({ payload }) => {
         for (const id of createdPostReferenceIDs) {
-          await payload.delete({ collection: postReferencesSlug, id })
+          await payload.delete({ id, collection: postReferencesSlug, overrideAccess: true })
         }
         createdPostReferenceIDs.length = 0
 
         for (const id of createdPostIDs) {
-          await payload.delete({ collection: slug, id })
+          await payload.delete({ id, collection: slug, overrideAccess: true })
         }
         createdPostIDs.length = 0
       })
@@ -688,6 +724,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
           data: {
             title: 'archived',
           },
+          overrideAccess: true,
         })
 
         const postWithVisibleField = await payload.create({
@@ -695,6 +732,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
           data: {
             title: 'public',
           },
+          overrideAccess: true,
         })
 
         createdPostIDs.push(postWithHiddenField.id, postWithVisibleField.id)
@@ -704,6 +742,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
           data: {
             post: [postWithHiddenField.id, postWithVisibleField.id],
           },
+          overrideAccess: true,
         })
 
         createdPostReferenceIDs.push(postReference.id)
@@ -733,6 +772,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             title: 'archived',
             title2: 'archived test',
           },
+          overrideAccess: true,
         })
 
         const postWithVisibleField = await payload.create({
@@ -741,6 +781,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             title: 'public',
             title2: 'public test',
           },
+          overrideAccess: true,
         })
 
         createdPostIDs.push(postWithHiddenField.id, postWithVisibleField.id)
@@ -750,6 +791,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
           data: {
             post: [postWithHiddenField.id, postWithVisibleField.id],
           },
+          overrideAccess: true,
         })
 
         createdPostReferenceIDs.push(postReference.id)
@@ -779,6 +821,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
           data: {
             title: 'archived',
           },
+          overrideAccess: true,
         })
 
         const publicPost = await payload.create({
@@ -786,6 +829,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
           data: {
             title: 'public',
           },
+          overrideAccess: true,
         })
 
         createdPostIDs.push(archivedPost.id, publicPost.id)
@@ -795,6 +839,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
           data: {
             singlePost: archivedPost.id,
           },
+          overrideAccess: true,
         })
 
         const publicReference = await payload.create({
@@ -802,6 +847,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
           data: {
             singlePost: publicPost.id,
           },
+          overrideAccess: true,
         })
 
         createdPostReferenceIDs.push(archivedReference.id, publicReference.id)
@@ -845,6 +891,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         const postReference = await payload.create({
           collection: postReferencesSlug,
           data: {},
+          overrideAccess: true,
         })
 
         createdPostReferenceIDs.push(postReference.id)
@@ -855,6 +902,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             reference: postReference.id,
             title: 'archived',
           },
+          overrideAccess: true,
         })
 
         const publicPost = await payload.create({
@@ -863,6 +911,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             reference: postReference.id,
             title: 'public',
           },
+          overrideAccess: true,
         })
 
         createdPostIDs.push(archivedPost.id, publicPost.id)
@@ -906,6 +955,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         const postReference = await payload.create({
           collection: postReferencesSlug,
           data: {},
+          overrideAccess: true,
         })
 
         createdPostReferenceIDs.push(postReference.id)
@@ -916,6 +966,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             references: [postReference.id],
             title: 'archived',
           },
+          overrideAccess: true,
         })
 
         const publicPost = await payload.create({
@@ -924,6 +975,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             references: [postReference.id],
             title: 'public',
           },
+          overrideAccess: true,
         })
 
         createdPostIDs.push(archivedPost.id, publicPost.id)
@@ -967,6 +1019,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         const postReference = await payload.create({
           collection: postReferencesSlug,
           data: {},
+          overrideAccess: true,
         })
 
         createdPostReferenceIDs.push(postReference.id)
@@ -977,6 +1030,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             reference: postReference.id,
             title: 'archived',
           },
+          overrideAccess: true,
         })
 
         createdPostIDs.push(archivedPost.id)
@@ -1004,6 +1058,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         const postReference = await payload.create({
           collection: postReferencesSlug,
           data: {},
+          overrideAccess: true,
         })
 
         createdPostReferenceIDs.push(postReference.id)
@@ -1014,6 +1069,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             reference: postReference.id,
             title: 'archived',
           },
+          overrideAccess: true,
         })
 
         createdPostIDs.push(archivedPost.id)
@@ -1037,6 +1093,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         const postReference = await payload.create({
           collection: postReferencesSlug,
           data: {},
+          overrideAccess: true,
         })
 
         createdPostReferenceIDs.push(postReference.id)
@@ -1047,6 +1104,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             polymorphicReference: { relationTo: postReferencesSlug, value: postReference.id },
             title: 'archived',
           },
+          overrideAccess: true,
         })
 
         createdPostIDs.push(archivedPost.id)
@@ -1185,7 +1243,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         payload,
       }) => {
         const post = await createDoc({ payload }, {})
-        await createDoc({ payload }, { post: post.id, name: 'test' }, 'relation-restricted')
+        await createDoc({ payload }, { name: 'test', post: post.id }, 'relation-restricted')
         await expect(
           payload.find({
             collection: 'relation-restricted',
@@ -1270,7 +1328,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         )
       })
 
-      test('field without read access should not show when overrideAccess: true', async ({
+      test('should show a field without read access when overrideAccess is true', async ({
         payload,
       }) => {
         const { id, restrictedField } = await createDoc(
@@ -1283,17 +1341,14 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         expect(retrievedDoc.restrictedField).toStrictEqual(restrictedField)
       })
 
-      test('field without read access should not show when overrideAccess default', async ({
+      test('should hide a field without read access when overrideAccess defaults to false', async ({
         payload,
       }) => {
-        const { id, restrictedField } = await createDoc(
-          { payload },
-          { restrictedField: 'restricted' },
-        )
+        const { id } = await createDoc({ payload }, { restrictedField: 'restricted' })
 
         const retrievedDoc = await payload.findByID({ id, collection: slug })
 
-        expect(retrievedDoc.restrictedField).toStrictEqual(restrictedField)
+        expect(retrievedDoc.restrictedField).toBeUndefined()
       })
     })
     test.describe('non-enumerated request properties passed to access control', () => {
@@ -1361,7 +1416,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
 
   test.describe('Override Access', () => {
     test.describe('Fields', () => {
-      test('should allow overrideAccess: false', async ({ payload }) => {
+      test('should reject field update with overrideAccess: false', async ({ payload }) => {
         const req = async () =>
           await payload.update({
             id: post1.id,
@@ -1373,7 +1428,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         await expect(req).rejects.toThrow(Forbidden)
       })
 
-      test('should allow overrideAccess: true', async ({ payload }) => {
+      test('should allow field update with overrideAccess: true', async ({ payload }) => {
         const doc = await payload.update({
           id: post1.id,
           collection: slug,
@@ -1384,17 +1439,18 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         expect(doc).toMatchObject({ id: post1.id })
       })
 
-      test('should allow overrideAccess by default', async ({ payload }) => {
-        const doc = await payload.update({
-          id: post1.id,
-          collection: slug,
-          data: { restrictedField: restricted.id },
-        })
+      test('should respect field access control by default', async ({ payload }) => {
+        const req = async () =>
+          await payload.update({
+            id: post1.id,
+            collection: slug,
+            data: { restrictedField: restricted.id },
+          })
 
-        expect(doc).toMatchObject({ id: post1.id })
+        await expect(req).rejects.toThrow(Forbidden)
       })
 
-      test('should allow overrideAccess: false - update many', async ({ payload }) => {
+      test('should reject field update many with overrideAccess: false', async ({ payload }) => {
         const req = async () =>
           await payload.update({
             collection: slug,
@@ -1408,7 +1464,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         await expect(req).rejects.toThrow(Forbidden)
       })
 
-      test('should allow overrideAccess: true - update many', async ({ payload }) => {
+      test('should allow field update many with overrideAccess: true', async ({ payload }) => {
         const doc = await payload.update({
           collection: slug,
           data: { restrictedField: restricted.id },
@@ -1421,23 +1477,24 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         expect(doc.docs[0]).toMatchObject({ id: post1.id })
       })
 
-      test('should allow overrideAccess by default - update many', async ({ payload }) => {
-        const doc = await payload.update({
-          collection: slug,
-          data: { restrictedField: restricted.id },
-          where: {
-            id: { equals: post1.id },
-          },
-        })
+      test('should respect field access control by default - update many', async ({ payload }) => {
+        const req = async () =>
+          await payload.update({
+            collection: slug,
+            data: { restrictedField: restricted.id },
+            where: {
+              id: { equals: post1.id },
+            },
+          })
 
-        expect(doc.docs[0]).toMatchObject({ id: post1.id })
+        await expect(req).rejects.toThrow(Forbidden)
       })
     })
 
     test.describe('Collections', () => {
       const updatedName = 'updated'
 
-      test('should allow overrideAccess: false', async ({ payload }) => {
+      test('should reject collection update with overrideAccess: false', async ({ payload }) => {
         const req = async () =>
           await payload.update({
             id: restricted.id,
@@ -1449,7 +1506,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         await expect(req).rejects.toThrow(Forbidden)
       })
 
-      test('should allow overrideAccess: true', async ({ payload }) => {
+      test('should allow collection update with overrideAccess: true', async ({ payload }) => {
         const doc = await payload.update({
           id: restricted.id,
           collection: fullyRestrictedSlug,
@@ -1460,17 +1517,20 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         expect(doc).toMatchObject({ id: restricted.id, name: updatedName })
       })
 
-      test('should allow overrideAccess by default', async ({ payload }) => {
-        const doc = await payload.update({
-          id: restricted.id,
-          collection: fullyRestrictedSlug,
-          data: { name: updatedName },
-        })
+      test('should respect collection access control by default', async ({ payload }) => {
+        const req = async () =>
+          await payload.update({
+            id: restricted.id,
+            collection: fullyRestrictedSlug,
+            data: { name: updatedName },
+          })
 
-        expect(doc).toMatchObject({ id: restricted.id, name: updatedName })
+        await expect(req).rejects.toThrow(Forbidden)
       })
 
-      test('should allow overrideAccess: false - update many', async ({ payload }) => {
+      test('should reject collection update many with overrideAccess: false', async ({
+        payload,
+      }) => {
         const req = async () =>
           await payload.update({
             collection: fullyRestrictedSlug,
@@ -1484,7 +1544,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         await expect(req).rejects.toThrow(Forbidden)
       })
 
-      test('should allow overrideAccess: true - update many', async ({ payload }) => {
+      test('should allow collection update many with overrideAccess: true', async ({ payload }) => {
         const doc = await payload.update({
           collection: fullyRestrictedSlug,
           data: { name: updatedName },
@@ -1497,16 +1557,19 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         expect(doc.docs[0]).toMatchObject({ id: restricted.id, name: updatedName })
       })
 
-      test('should allow overrideAccess by default - update many', async ({ payload }) => {
-        const doc = await payload.update({
-          collection: fullyRestrictedSlug,
-          data: { name: updatedName },
-          where: {
-            id: { equals: restricted.id },
-          },
-        })
+      test('should respect collection access control by default - update many', async ({
+        payload,
+      }) => {
+        const req = async () =>
+          await payload.update({
+            collection: fullyRestrictedSlug,
+            data: { name: updatedName },
+            where: {
+              id: { equals: restricted.id },
+            },
+          })
 
-        expect(doc.docs[0]).toMatchObject({ id: restricted.id, name: updatedName })
+        await expect(req).rejects.toThrow(Forbidden)
       })
     })
   })
@@ -1519,16 +1582,18 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
 
       test.afterEach(async ({ payload }) => {
         await Promise.all(
-          parentDocumentIDs.map((id) => payload.delete({ id, collection: unrestrictedSlug })),
+          parentDocumentIDs.map((id) =>
+            payload.delete({ id, collection: unrestrictedSlug, overrideAccess: true }),
+          ),
         )
         await Promise.all(
           createNotUpdateDocumentIDs.map((id) =>
-            payload.delete({ id, collection: createNotUpdateCollectionSlug }),
+            payload.delete({ id, collection: createNotUpdateCollectionSlug, overrideAccess: true }),
           ),
         )
         await Promise.all(
           userRestrictedDocumentIDs.map((id) =>
-            payload.delete({ id, collection: userRestrictedCollectionSlug }),
+            payload.delete({ id, collection: userRestrictedCollectionSlug, overrideAccess: true }),
           ),
         )
 
@@ -1543,15 +1608,18 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         const availableDocument = await payload.create({
           collection: userRestrictedCollectionSlug,
           data: { name: 'available' },
+          overrideAccess: true,
         })
         const archivedDocument = await payload.create({
           collection: userRestrictedCollectionSlug,
           data: { name: 'archived' },
+          overrideAccess: true,
         })
         userRestrictedDocumentIDs.push(availableDocument.id, archivedDocument.id)
         const parentDocument = await payload.create({
           collection: unrestrictedSlug,
           data: { userRestrictedDocs: [availableDocument.id, archivedDocument.id] },
+          overrideAccess: true,
         })
         parentDocumentIDs.push(parentDocument.id)
 
@@ -1623,11 +1691,13 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         const relatedDocument = await payload.create({
           collection: createNotUpdateCollectionSlug,
           data: { name: 'available' },
+          overrideAccess: true,
         })
         createNotUpdateDocumentIDs.push(relatedDocument.id)
         const parentDocument = await payload.create({
           collection: unrestrictedSlug,
           data: { createNotUpdateDocs: [relatedDocument.id] },
+          overrideAccess: true,
         })
         parentDocumentIDs.push(parentDocument.id)
 
@@ -1646,11 +1716,13 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         const relatedDocument = await payload.create({
           collection: userRestrictedCollectionSlug,
           data: { name: 'archived' },
+          overrideAccess: true,
         })
         userRestrictedDocumentIDs.push(relatedDocument.id)
         const parentDocument = await payload.create({
           collection: unrestrictedSlug,
           data: { userRestrictedDoc: relatedDocument.id },
+          overrideAccess: true,
         })
         parentDocumentIDs.push(parentDocument.id)
 
@@ -1669,11 +1741,13 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         const relatedDocument = await payload.create({
           collection: userRestrictedCollectionSlug,
           data: { name: 'archived' },
+          overrideAccess: true,
         })
         userRestrictedDocumentIDs.push(relatedDocument.id)
         const parentDocument = await payload.create({
           collection: unrestrictedSlug,
           data: { userRestrictedDocs: [relatedDocument.id] },
+          overrideAccess: true,
         })
         parentDocumentIDs.push(parentDocument.id)
 
@@ -1692,6 +1766,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         const parentDocument = await payload.create({
           collection: unrestrictedSlug,
           data: { hiddenName: 'visible by request' } as any,
+          overrideAccess: true,
         })
         parentDocumentIDs.push(parentDocument.id)
 
@@ -1710,12 +1785,14 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
       }) => {
         const relatedDocument = await payload.create({
           collection: createNotUpdateCollectionSlug,
-          data: { hiddenName: 'visible by request', name: 'available' } as any,
+          data: { name: 'available', hiddenName: 'visible by request' } as any,
+          overrideAccess: true,
         })
         createNotUpdateDocumentIDs.push(relatedDocument.id)
         const parentDocument = await payload.create({
           collection: unrestrictedSlug,
           data: { createNotUpdateDocs: [relatedDocument.id] },
+          overrideAccess: true,
         })
         parentDocumentIDs.push(parentDocument.id)
 
@@ -1785,6 +1862,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         data: {
           title: 'hello',
         },
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -1793,6 +1871,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
           hidden: true,
           title: 'hello',
         },
+        overrideAccess: true,
       })
 
       const { docs } = await payload.find({
@@ -1809,6 +1888,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         data: {
           title: 'hello',
         },
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -1817,6 +1897,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
           hidden: true,
           title: 'hello',
         },
+        overrideAccess: true,
       })
 
       const { totalDocs } = await payload.count({
@@ -1834,6 +1915,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
           name: 'match',
           hidden: true,
         },
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -1842,6 +1924,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
           name: 'match',
           hidden: false,
         },
+        overrideAccess: true,
       })
 
       const { docs } = await payload.findVersions({
@@ -1861,29 +1944,32 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
       await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
+        overrideAccess: true,
       })
       const { id: hitID } = await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-success-access-read' },
+        overrideAccess: true,
       })
       await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
+        overrideAccess: true,
       })
 
       // assert find, only will-success should be in the result
       const resFind = await payload.find({
-        overrideAccess: false,
         collection: 'fields-and-top-access',
+        overrideAccess: false,
       })
       expect(resFind.docs[0].id).toBe(hitID)
       expect(resFind.docs).toHaveLength(1)
 
       // assert find draft: true
       const resFindDraft = await payload.find({
+        collection: 'fields-and-top-access',
         draft: true,
         overrideAccess: false,
-        collection: 'fields-and-top-access',
       })
 
       expect(resFindDraft.docs).toHaveLength(1)
@@ -1903,25 +1989,28 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
       payload,
     }) => {
       // clean up
-      await payload.delete({ collection: 'fields-and-top-access', where: {} })
+      await payload.delete({ collection: 'fields-and-top-access', overrideAccess: true, where: {} })
 
       await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
+        overrideAccess: true,
       })
       const { id: hitID } = await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-success-access-read' },
+        overrideAccess: true,
       })
       await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
+        overrideAccess: true,
       })
 
       // Assert findVersions only will-success should be in the result
       const resFind = await payload.findVersions({
-        overrideAccess: false,
         collection: 'fields-and-top-access',
+        overrideAccess: false,
       })
       expect(resFind.docs).toHaveLength(1)
 
@@ -1939,15 +2028,21 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
     })
 
     test('should use the query fallback from id-based read access for version lists', async () => {
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
 
       await payload.create({
         collection: inheritedReadVersionsSlug,
         data: { secret: 'denied' },
+        overrideAccess: true,
       })
       const { id: allowedID } = await payload.create({
         collection: inheritedReadVersionsSlug,
         data: { secret: 'allowed' },
+        overrideAccess: true,
       })
       setInheritedReadVersionsAllowedID(allowedID)
 
@@ -1966,19 +2061,29 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
 
       expect(allowedVersionsCount.totalDocs).toBe(1)
 
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
     })
 
     test('should preserve the document id when checking inherited version permissions', async () => {
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
 
       const { id: allowedID } = await payload.create({
         collection: inheritedReadVersionsSlug,
         data: { secret: 'denied' },
+        overrideAccess: true,
       })
       const deniedDoc = await payload.create({
         collection: inheritedReadVersionsSlug,
         data: { secret: 'allowed' },
+        overrideAccess: true,
       })
       setInheritedReadVersionsAllowedID(allowedID)
 
@@ -1989,25 +2094,35 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         entityType: 'collection',
         fetchData: true,
         operations: ['read', 'readVersions'],
-        req: await createLocalReq({}, payload),
+        req: await createPayloadRequest({ payload }),
       })
 
       expect(permissions.read?.permission).toBe(false)
       expect(permissions.readVersions?.permission).toBe(false)
 
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
     })
 
     test('should pass the parent document id to inherited read access for findVersionByID', async () => {
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
 
       const { id: deniedID } = await payload.create({
         collection: inheritedReadVersionsSlug,
         data: { secret: 'denied' },
+        overrideAccess: true,
       })
       const { id: allowedID } = await payload.create({
         collection: inheritedReadVersionsSlug,
         data: { secret: 'allowed' },
+        overrideAccess: true,
       })
       setInheritedReadVersionsAllowedID(allowedID)
 
@@ -2036,20 +2151,30 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         }),
       ).resolves.toBeNull()
 
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
     })
 
     test('should pass the version id to base readVersions access for findVersionByID', async () => {
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
 
       const { id: allowedParentID } = await payload.create({
         collection: inheritedReadVersionsSlug,
         data: { secret: 'allowed' },
+        overrideAccess: true,
       })
       await payload.update({
         id: allowedParentID,
         collection: inheritedReadVersionsSlug,
         data: { secret: 'allowed' },
+        overrideAccess: true,
       })
 
       const { docs } = await payload.findVersions({
@@ -2084,15 +2209,24 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         }),
       ).resolves.toBeNull()
 
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
     })
 
     test('should reuse the version lookup when inherited read access returns a boolean', async () => {
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
 
       const { id: allowedID } = await payload.create({
         collection: inheritedReadVersionsSlug,
         data: { secret: 'allowed' },
+        overrideAccess: true,
       })
       setInheritedReadVersionsAllowedID(allowedID)
 
@@ -2116,15 +2250,24 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         findVersions.mockRestore()
       }
 
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
     })
 
     test('should omit the parent field from findVersionByID when it is not selected', async () => {
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
 
       const { id: allowedID } = await payload.create({
         collection: inheritedReadVersionsSlug,
         data: { secret: 'allowed' },
+        overrideAccess: true,
       })
       setInheritedReadVersionsAllowedID(allowedID)
 
@@ -2142,15 +2285,24 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
 
       expect(res.parent).toBeUndefined()
 
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
     })
 
     test('should include the parent field on findVersionByID when it is selected', async () => {
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
 
       const { id: allowedID } = await payload.create({
         collection: inheritedReadVersionsSlug,
         data: { secret: 'allowed' },
+        overrideAccess: true,
       })
       setInheritedReadVersionsAllowedID(allowedID)
 
@@ -2168,17 +2320,23 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
 
       expect(res.parent).toBe(allowedID)
 
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
     })
 
     test('should inherit global read access for version operations', async () => {
       await payload.updateGlobal({
         slug: inheritedReadVersionsGlobalSlug,
         data: { visible: false },
+        overrideAccess: true,
       })
       await payload.updateGlobal({
         slug: inheritedReadVersionsGlobalSlug,
         data: { visible: true },
+        overrideAccess: true,
       })
 
       const allVersions = await payload.findGlobalVersions({
@@ -2225,7 +2383,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
     })
 
     test('should evaluate inherited global read version permissions against versions', async () => {
-      const req = await createLocalReq({}, payload)
+      const req = await createPayloadRequest({ payload })
 
       await payload.db.deleteVersions({
         globalSlug: inheritedReadVersionsGlobalSlug,
@@ -2237,6 +2395,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         await payload.updateGlobal({
           slug: inheritedReadVersionsGlobalSlug,
           data: { visible: false },
+          overrideAccess: true,
         })
 
         const permissions = await getEntityPermissions({
@@ -2256,6 +2415,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         await payload.updateGlobal({
           slug: inheritedReadVersionsGlobalSlug,
           data: { visible: true },
+          overrideAccess: true,
         })
         await payload.db.deleteVersions({
           globalSlug: inheritedReadVersionsGlobalSlug,
@@ -2266,16 +2426,26 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
     })
 
     test('should resolve virtual-field constraints from inherited read access on findVersionByID', async () => {
-      await payload.delete({ collection: inheritedReadVersionsVirtualSlug, where: {} })
-      await payload.delete({ collection: inheritedReadVersionsVirtualRelatedSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsVirtualSlug,
+        overrideAccess: true,
+        where: {},
+      })
+      await payload.delete({
+        collection: inheritedReadVersionsVirtualRelatedSlug,
+        overrideAccess: true,
+        where: {},
+      })
 
       const { id: relatedID } = await payload.create({
         collection: inheritedReadVersionsVirtualRelatedSlug,
         data: { label: 'allowed' },
+        overrideAccess: true,
       })
       const parent = await payload.create({
         collection: inheritedReadVersionsVirtualSlug,
         data: { related: relatedID },
+        overrideAccess: true,
       })
 
       const versions = await payload.findVersions({
@@ -2292,37 +2462,53 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         }),
       ).resolves.toMatchObject({ parent: parent.id })
 
-      await payload.delete({ collection: inheritedReadVersionsVirtualSlug, where: {} })
-      await payload.delete({ collection: inheritedReadVersionsVirtualRelatedSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsVirtualSlug,
+        overrideAccess: true,
+        where: {},
+      })
+      await payload.delete({
+        collection: inheritedReadVersionsVirtualRelatedSlug,
+        overrideAccess: true,
+        where: {},
+      })
     })
 
     test('should sanitize virtual-field constraints from inherited global read access', async () => {
-      const req = await createLocalReq({}, payload)
+      const req = await createPayloadRequest({ payload })
 
       await payload.db.deleteVersions({
         globalSlug: inheritedReadVersionsVirtualGlobalSlug,
         req,
         where: {},
       })
-      await payload.delete({ collection: inheritedReadVersionsVirtualRelatedSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsVirtualRelatedSlug,
+        overrideAccess: true,
+        where: {},
+      })
 
       const { id: allowedID } = await payload.create({
         collection: inheritedReadVersionsVirtualRelatedSlug,
         data: { label: 'allowed' },
+        overrideAccess: true,
       })
       const { id: deniedID } = await payload.create({
         collection: inheritedReadVersionsVirtualRelatedSlug,
         data: { label: 'denied' },
+        overrideAccess: true,
       })
 
       try {
         await payload.updateGlobal({
           slug: inheritedReadVersionsVirtualGlobalSlug,
           data: { related: deniedID },
+          overrideAccess: true,
         })
         await payload.updateGlobal({
           slug: inheritedReadVersionsVirtualGlobalSlug,
           data: { related: allowedID },
+          overrideAccess: true,
         })
 
         const allVersions = await payload.findGlobalVersions({
@@ -2373,7 +2559,11 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
           req,
           where: {},
         })
-        await payload.delete({ collection: inheritedReadVersionsVirtualRelatedSlug, where: {} })
+        await payload.delete({
+          collection: inheritedReadVersionsVirtualRelatedSlug,
+          overrideAccess: true,
+          where: {},
+        })
       }
     })
   })
@@ -2397,6 +2587,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
           data: {
             email: 'dev@payloadcms.com',
           },
+          overrideAccess: true,
         })
       } finally {
         // Restore the original Date.now() after the forgotPassword call
@@ -2426,21 +2617,20 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         data: {
           title: 'Test Document',
         },
+        overrideAccess: true,
       })
 
-      const req = await createLocalReq(
-        {
-          user: {
-            id: 123 as any,
-            collection: 'users',
-            roles: ['admin'],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            email: 'test@test.com',
-          },
-        },
+      const req = await createPayloadRequest({
         payload,
-      )
+        user: {
+          id: 123 as any,
+          collection: 'users',
+          createdAt: new Date().toISOString(),
+          email: 'test@test.com',
+          roles: ['admin'],
+          updatedAt: new Date().toISOString(),
+        },
+      })
 
       // Get permissions with admin user (should have access)
       const permissions = await getEntityPermissions({
@@ -2448,23 +2638,19 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         blockReferencesPermissions: {} as any,
         entity: payload.collections[asyncParentSlug].config,
         entityType: 'collection',
-        operations: ['read', 'update'],
         fetchData: true,
+        operations: ['read', 'update'],
         req,
       })
 
       expect(permissions).toEqual({
         fields: {
-          title: { read: { permission: true }, update: { permission: true } },
+          createdAt: { read: { permission: true }, update: { permission: true } },
           parentField: {
-            read: { permission: true },
-            update: { permission: true },
             fields: {
               childField1: { read: { permission: true }, update: { permission: true } },
               childField2: { read: { permission: true }, update: { permission: true } },
               nestedGroup: {
-                read: { permission: true },
-                update: { permission: true },
                 fields: {
                   deepChild1: {
                     read: { permission: true },
@@ -2475,11 +2661,17 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
                     update: { permission: true },
                   },
                 },
+                read: { permission: true },
+                update: { permission: true },
               },
             },
+            read: { permission: true },
+            update: { permission: true },
           },
+          title: { read: { permission: true }, update: { permission: true } },
+          createdBy: { read: { permission: true }, update: { permission: false } },
+          updatedBy: { read: { permission: true }, update: { permission: false } },
           updatedAt: { read: { permission: true }, update: { permission: true } },
-          createdAt: { read: { permission: true }, update: { permission: true } },
         },
         read: { permission: true },
         update: { permission: true },
@@ -2494,45 +2686,40 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         data: {
           title: 'Test Document 2',
         },
+        overrideAccess: true,
       })
 
       // Create non-admin user request
-      const nonAdminReq = await createLocalReq(
-        {
-          user: {
-            id: 456 as any,
-            collection: 'users',
-            roles: ['user'], // Not admin
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            email: 'user@test.com',
-          },
-        },
+      const nonAdminReq = await createPayloadRequest({
         payload,
-      )
+        user: {
+          id: 456 as any,
+          collection: 'users',
+          createdAt: new Date().toISOString(),
+          email: 'user@test.com',
+          roles: ['user'], // Not admin
+          updatedAt: new Date().toISOString(),
+        },
+      })
 
       const permissions = await getEntityPermissions({
         id: doc.id,
         blockReferencesPermissions: {} as any,
         entity: payload.collections[asyncParentSlug].config,
         entityType: 'collection',
-        operations: ['read', 'update'],
         fetchData: true,
+        operations: ['read', 'update'],
         req: nonAdminReq,
       })
 
       expect(permissions).toEqual({
         fields: {
-          title: { read: { permission: true }, update: { permission: true } },
+          createdAt: { read: { permission: true }, update: { permission: true } },
           parentField: {
-            read: { permission: false },
-            update: { permission: false },
             fields: {
               childField1: { read: { permission: false }, update: { permission: false } },
               childField2: { read: { permission: false }, update: { permission: false } },
               nestedGroup: {
-                read: { permission: false },
-                update: { permission: false },
                 fields: {
                   deepChild1: {
                     read: { permission: false },
@@ -2543,11 +2730,17 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
                     update: { permission: false },
                   },
                 },
+                read: { permission: false },
+                update: { permission: false },
               },
             },
+            read: { permission: false },
+            update: { permission: false },
           },
+          title: { read: { permission: true }, update: { permission: true } },
+          createdBy: { read: { permission: true }, update: { permission: false } },
+          updatedBy: { read: { permission: true }, update: { permission: false } },
           updatedAt: { read: { permission: true }, update: { permission: true } },
-          createdAt: { read: { permission: true }, update: { permission: true } },
         },
         read: { permission: true },
         update: { permission: true },
@@ -2563,6 +2756,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
       const { docs: adminDocs } = await payload.find({
         collection: 'users',
         limit: 1,
+        overrideAccess: true,
         where: { email: { equals: 'dev@payloadcms.com' } },
       })
       adminUser = { ...adminDocs[0], collection: 'users' }
@@ -2570,6 +2764,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
       const { docs: publicDocs } = await payload.find({
         collection: publicUsersSlug,
         limit: 1,
+        overrideAccess: true,
         where: { email: { equals: publicUserEmail } },
       })
       publicUser = { ...publicDocs[0], collection: publicUsersSlug }
@@ -2615,5 +2810,6 @@ async function createDoc<TSlug extends CollectionSlug = 'posts'>(
     collection: overrideSlug ?? slug,
     // @ts-expect-error
     data: data ?? {},
+    overrideAccess: options?.overrideAccess ?? true,
   })
 }

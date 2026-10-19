@@ -1,10 +1,10 @@
 'use client'
-import type { DateFieldClientComponent, DateFieldValidation } from 'payload'
+import type { DateFieldClientProps, DateFieldValidation } from 'payload'
 
 import { TZDateMini as TZDate } from '@date-fns/tz/date/mini'
 import { getTranslation } from '@payloadcms/translations'
 import { transpose } from 'date-fns'
-import { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import { DatePickerField } from '../../elements/DatePicker/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
@@ -17,13 +17,15 @@ import { useField } from '../../forms/useField/index.js'
 import './index.css'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 
 const baseClass = 'date-time-field'
 
-const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
+const DateTimeFieldComponent: React.FC<DateFieldClientProps> = (props) => {
   const {
     field,
     field: {
@@ -45,7 +47,8 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
 
   const { config } = useConfig()
   const { i18n } = useTranslation()
-  const { dispatchFields, setModified } = useForm()
+  const { dispatchFields, setModified, uuid } = useForm()
+  const editDepth = useEditDepth()
 
   const memoizedValidate: DateFieldValidation = useCallback(
     (value, options) => {
@@ -68,6 +71,9 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
+  const inputId =
+    datePickerProps?.overrides?.id ||
+    generateFieldID(path ?? '', editDepth, uuid ?? '', 'date-input')
   const timezonePath = path + '_tz'
   const timezoneField = useFormFields(([fields, _]) => fields?.[timezonePath])
 
@@ -178,7 +184,13 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
       <RenderCustomComponent
         CustomComponent={Label}
         Fallback={
-          <FieldLabel label={label} localized={localized} path={path} required={required} />
+          <FieldLabel
+            htmlFor={inputId}
+            label={label}
+            localized={localized}
+            path={path}
+            required={required}
+          />
         }
       />
       <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
@@ -192,6 +204,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
           onChange={onChange}
           overrides={{
             ...datePickerProps?.overrides,
+            id: inputId,
           }}
           placeholder={getTranslation(placeholder, i18n)}
           readOnly={readOnly || disabled}

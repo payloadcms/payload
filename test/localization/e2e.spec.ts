@@ -156,21 +156,17 @@ describe('Localization', () => {
       await expect(page.locator('.popup__content')).not.toContainText('FILTERED')
     })
 
-    test('should disable control for active locale', async () => {
+    test('should identify the active locale as selected', async () => {
       await page.goto(url.create)
 
       await openLocaleSelector(page)
 
       await expect(page.locator('.popup__content')).toBeVisible()
 
-      const activeOption = page.locator(`.popup__content .popup-button-list__button--selected`)
+      const activeOption = page.getByRole('menuitemradio', { checked: true })
 
       await expect(activeOption).toBeVisible()
-      const tagName = await activeOption.evaluate((node) => node.tagName)
-      expect(tagName).not.toBe('A')
       await expect(activeOption).not.toHaveAttribute('href')
-      expect(tagName).not.toBe('BUTTON')
-      expect(tagName).toBe('DIV')
     })
   })
 
@@ -274,6 +270,7 @@ describe('Localization', () => {
           title: englishTitle,
         },
         locale: defaultLocale,
+        overrideAccess: true,
       })
 
       const id = localizedPost.id.toString()
@@ -286,6 +283,7 @@ describe('Localization', () => {
           title: spanishTitle,
         },
         locale: spanishLocale,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(id))
@@ -372,12 +370,12 @@ describe('Localization', () => {
 
       await page.goto(url.list)
 
-      // The localizer now shows just the locale code in .localizer__button-content
+      // The localizer renders the translated locale label in .localizer__button-content
       const localeLabel = page.locator(
         '.localizer.app-header__localizer .localizer__button-content',
       )
 
-      await expect(localeLabel).not.toHaveText('en')
+      await expect(localeLabel).toHaveText('Spanish')
     })
   })
 
@@ -622,7 +620,7 @@ describe('Localization', () => {
         })
 
       // only throttle test after initial load to avoid timeouts
-      const cdpSession = await throttleTest({
+      const stopThrottling = await throttleTest({
         context,
         delay: 'Fast 4G',
         page,
@@ -636,14 +634,7 @@ describe('Localization', () => {
       await expect(page.locator('#field-title')).toBeEnabled()
       await closeLocaleSelector(page)
 
-      await cdpSession.send('Network.emulateNetworkConditions', {
-        downloadThroughput: -1,
-        latency: 0,
-        offline: false,
-        uploadThroughput: -1,
-      })
-
-      await cdpSession.detach()
+      await stopThrottling()
     })
 
     test('should not show fallback data after saving data', async () => {
@@ -773,6 +764,7 @@ describe('Localization', () => {
         collection: 'blocks-fields',
         locale: 'all',
         where: { id: { equals: docID } },
+        overrideAccess: true,
       })
 
       expect(doc.docs).toHaveLength(1)
@@ -901,7 +893,7 @@ describe('Localization', () => {
       await page.waitForURL((url) => !url.toString().includes(id))
 
       // Wait for page to be ready after duplicate redirect
-      await expect(page.locator('.localizer button')).toBeVisible()
+      await expect(page.locator('.localizer .popup__trigger-wrap > button')).toBeVisible()
       await waitForFormReady(page)
       await changeLocale(page, defaultLocale)
       await expect(page.locator('#field-title')).toHaveValue('English Title')
@@ -1025,6 +1017,7 @@ describe('Localization', () => {
           title: 'Existing doc title',
         },
         locale: defaultLocale,
+        overrideAccess: true,
       })
 
       // seoTitle is in the SEO tab (active by default) — fill it first

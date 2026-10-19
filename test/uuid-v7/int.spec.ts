@@ -22,6 +22,7 @@ test.suite(
       const doc = await payload.create({
         collection: 'posts',
         data: { title: 'uuid v7 post' },
+        overrideAccess: true,
       })
 
       expect(typeof doc.id).toBe('string')
@@ -36,10 +37,12 @@ test.suite(
       const first = await payload.create({
         collection: 'posts',
         data: { title: 'first' },
+        overrideAccess: true,
       })
       const second = await payload.create({
         collection: 'posts',
         data: { title: 'second' },
+        overrideAccess: true,
       })
 
       expect(second.id > first.id).toBe(true)
@@ -49,11 +52,13 @@ test.suite(
       const created = await payload.create({
         collection: 'posts',
         data: { title: 'find me' },
+        overrideAccess: true,
       })
 
       const found = await payload.findByID({
         collection: 'posts',
         id: created.id,
+        overrideAccess: true,
       })
 
       expect(found.id).toBe(created.id)
@@ -64,6 +69,7 @@ test.suite(
       const category = await payload.create({
         collection: 'categories',
         data: { name: 'Cat A' },
+        overrideAccess: true,
       })
       const article = await payload.create({
         collection: 'articles',
@@ -72,6 +78,7 @@ test.suite(
           category: category.id,
         },
         depth: 1,
+        overrideAccess: true,
       })
 
       expect(article.category).toMatchObject({ id: category.id })
@@ -81,11 +88,13 @@ test.suite(
       const created = await payload.create({
         collection: 'posts',
         data: { title: 'query by id' },
+        overrideAccess: true,
       })
 
       const res = await payload.find({
         collection: 'posts',
         where: { id: { equals: created.id } },
+        overrideAccess: true,
       })
 
       expect(res.docs).toHaveLength(1)

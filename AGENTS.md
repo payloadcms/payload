@@ -61,6 +61,7 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - Use `import type` for types, regular `import` for values, separate statements even from same module
 - Prefix booleans with `is`/`has`/`can`/`should` (e.g., `isValid`, `hasData`) for clarity
 - Prefer self describing function and variable names over generic names with comments to explain their purpose
+- For changes affecting rendered UI, user interaction, focus, keyboard behavior, content, or component semantics, use the `payload-accessibility` skill and report the WCAG 2.2 Level A and AA criteria assessed, automated evidence, and any required manual or assistive-technology verification.
 - **Translation/Label handling**: Always use `getTranslation` from `@payloadcms/translations` when you need to render labels defined in the config - it already handles functions, strings, and translation objects correctly. Don't write custom if/else logic to handle different label types.
 - **Memoize arrays/objects passed to hooks**: Never pass inline array/object literals to custom hooks - they create new references on every render, breaking memoization and causing unnecessary re-renders or remounts.
 
@@ -258,10 +259,26 @@ visual('renders the posts list view', async () => {
 - If the `visual-regression` CI job fails, reproduce and inspect the diff locally with
   `pnpm test:visual` — there is no CI-posted comment.
 
+### Cache Components
+
+The dev server and e2e tests run with Next.js `cacheComponents` enabled. To disable it, set
+`PAYLOAD_DISABLE_CACHE_COMPONENTS=true` (e.g. `PAYLOAD_DISABLE_CACHE_COMPONENTS=true pnpm dev`).
+
+Tag a test `@also-without-cache-components` to run it a second time with it disabled, in one extra
+CI job that collects these tests from every suite. Use it for behavior that differs between modes:
+
+```ts
+test('should show fresh data', { tag: '@also-without-cache-components' }, async () => {
+  // ...
+})
+```
+
 ## Linting & Formatting
 
 - `pnpm run lint` - Run linter across all packages
 - `pnpm run lint:fix` - Fix linting issues
+- `pnpm run format` - Format the repo with [oxfmt](https://oxc.rs/docs/guide/usage/formatter) (config: `oxfmt.config.ts`)
+- `pnpm run format:check` - Check formatting (runs in CI)
 
 ## Internationalization
 
@@ -340,14 +357,15 @@ const queryString = qs.stringify({ limit, page, where }, { addQueryPrefix: true 
 const url = formatAdminURL({ apiRoute: api, path: `/${collectionSlug}${queryString}`, serverURL })
 ```
 
-**Building server functions, views, or endpoints:** Always use `overrideAccess: false` and pass the `user` to payload operations. Without these, the operation runs with access control disabled, which is a security vulnerability.
+**Building server functions, views, or endpoints:** Keep `overrideAccess` set to `false` (the default) and pass the authenticated `user` to payload operations. Setting `overrideAccess: true` bypasses access control and is a security vulnerability when an operation acts on behalf of a user.
 
 Incorrect:
 
 ```typescript
-// INSECURE - runs with full access, bypassing all access control
+// INSECURE - explicitly bypasses all access control
 const docs = await payload.find({
   collection: 'posts',
+  overrideAccess: true,
 })
 ```
 

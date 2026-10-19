@@ -143,5 +143,10 @@ export function DefaultMenuPortal<Opt, IsMulti extends boolean, Group extends Gr
     </div>
   )
 
-  return createPortal(menuWrapper, appendTo)
+  const portalTarget =
+    appendTo === document.body
+      ? (controlElement.closest('dialog, [role="dialog"]') ?? appendTo)
+      : appendTo
+
+  return createPortal(menuWrapper, portalTarget)
 }

@@ -1,18 +1,18 @@
 import type { CollectionRefreshHook, Payload } from 'payload'
 
 import { jwtDecode } from 'jwt-decode'
-import { createPayloadRequest } from 'payload'
+import { createPayloadRequestFromWebRequest } from 'payload'
 import { v4 as uuid } from 'uuid'
 import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
+import type { RESTClient } from '../../__helpers/shared/RESTClient.js'
 
 import { test } from '../../__helpers/int/vitest.js'
 import { devUser } from '../../credentials.js'
 import { jwtUsersSlug, restrictedRelationshipsSlug } from '../shared.js'
 
 let payload: Payload
-let restClient: NextRESTClient
+let restClient: RESTClient
 
 const { password } = devUser
 test.suite(
@@ -29,11 +29,15 @@ test.suite(
 
     test.afterEach(async () => {
       for (const id of createdJWTUserIDs) {
-        await payload.delete({ id, collection: jwtUsersSlug as any })
+        await payload.delete({ id, collection: jwtUsersSlug as any, overrideAccess: true })
       }
 
       for (const id of createdRestrictedRelationshipIDs) {
-        await payload.delete({ id, collection: restrictedRelationshipsSlug as any })
+        await payload.delete({
+          id,
+          collection: restrictedRelationshipsSlug as any,
+          overrideAccess: true,
+        })
       }
 
       createdJWTUserIDs.length = 0
@@ -47,6 +51,7 @@ test.suite(
           privateField: 'private value',
           publicField: 'public value',
         },
+        overrideAccess: true,
       })
 
       const email = `jwt-user-${uuid()}@example.com`
@@ -58,6 +63,7 @@ test.suite(
           restrictedField: 'restricted value',
           restrictedRelationship: restrictedRelationship.id,
         },
+        overrideAccess: true,
       })
 
       createdRestrictedRelationshipIDs.push(restrictedRelationship.id)
@@ -66,6 +72,7 @@ test.suite(
       const { token } = await payload.login({
         collection: jwtUsersSlug as any,
         data: { email, password },
+        overrideAccess: true,
       })
 
       const authenticated = await restClient
@@ -99,6 +106,7 @@ test.suite(
         data: {
           publicField: 'public relationship',
         },
+        overrideAccess: true,
       })
       const email = `jwt-req-user-${uuid()}@example.com`
       const user = await payload.create({
@@ -109,6 +117,7 @@ test.suite(
           restrictedField: 'restricted value',
           restrictedRelationship: restrictedRelationship.id,
         },
+        overrideAccess: true,
       })
 
       createdRestrictedRelationshipIDs.push(restrictedRelationship.id)
@@ -117,16 +126,17 @@ test.suite(
       const { token } = await payload.login({
         collection: jwtUsersSlug as any,
         data: { email, password },
+        overrideAccess: true,
       })
       const headers = { Authorization: `JWT ${token}` }
-      const req = await createPayloadRequest({
+      const req = await createPayloadRequestFromWebRequest({
         config: payload.config,
         request: new Request(
           'http://localhost/api/auth-read-hook?locale=fr&fallbackLocale=none&depth=2',
           { headers },
         ),
       })
-      const graphQLReq = await createPayloadRequest({
+      const graphQLReq = await createPayloadRequestFromWebRequest({
         config: payload.config,
         request: new Request('http://localhost/api/graphql', { headers }),
       })
@@ -172,6 +182,7 @@ test.suite(
           password,
           restrictedField,
         },
+        overrideAccess: true,
       })
 
       createdJWTUserIDs.push(user.id)
@@ -179,6 +190,7 @@ test.suite(
       const authenticated = await payload.login({
         collection: jwtUsersSlug as any,
         data: { email, password },
+        overrideAccess: true,
       })
       const refreshHooks = payload.collections[jwtUsersSlug]!.config.hooks.refresh
       const hookEmail = `hook-${email}`

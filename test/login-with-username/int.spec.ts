@@ -14,6 +14,7 @@ test.suite('Login With Username Feature', { config: './config.ts' }, () => {
           email: null,
           username: null,
         },
+        overrideAccess: true,
       })
     } catch (error) {
       errors = error.data.errors
@@ -32,6 +33,7 @@ test.suite('Login With Username Feature', { config: './config.ts' }, () => {
         username: usernameToUse,
         password: 'test',
       },
+      overrideAccess: true,
     })
 
     let errors = []
@@ -43,6 +45,7 @@ test.suite('Login With Username Feature', { config: './config.ts' }, () => {
           email: null,
           username: null,
         },
+        overrideAccess: true,
       })
     } catch (error) {
       errors = error.data.errors
@@ -56,6 +59,7 @@ test.suite('Login With Username Feature', { config: './config.ts' }, () => {
       data: {
         username: null,
       },
+      overrideAccess: true,
     })
     expect(errors).toHaveLength(0)
 
@@ -66,6 +70,7 @@ test.suite('Login With Username Feature', { config: './config.ts' }, () => {
         data: {
           email: null,
         },
+        overrideAccess: true,
       })
     } catch (error) {
       errors = error.data.errors
@@ -81,6 +86,7 @@ test.suite('Login With Username Feature', { config: './config.ts' }, () => {
         username: 'dev',
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     const loginWithEmail = await payload.login({
@@ -89,6 +95,7 @@ test.suite('Login With Username Feature', { config: './config.ts' }, () => {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
     expect(loginWithEmail).toHaveProperty('token')
 
@@ -98,6 +105,7 @@ test.suite('Login With Username Feature', { config: './config.ts' }, () => {
         username: 'dev',
         password: devUser.password,
       },
+      overrideAccess: true,
     })
     expect(loginWithUsername).toHaveProperty('token')
   })
@@ -110,6 +118,7 @@ test.suite('Login With Username Feature', { config: './config.ts' }, () => {
         email: 'email1@mail.com',
         password: 'test',
       },
+      overrideAccess: true,
     })
 
     // create second user with just email
@@ -119,6 +128,7 @@ test.suite('Login With Username Feature', { config: './config.ts' }, () => {
         email: 'email2@mail.com',
         password: 'test',
       },
+      overrideAccess: true,
     })
     expect(emailUser2).toHaveProperty('id')
 
@@ -129,6 +139,7 @@ test.suite('Login With Username Feature', { config: './config.ts' }, () => {
         username: 'username1',
         password: 'test',
       },
+      overrideAccess: true,
     })
 
     // create second user with just username
@@ -138,6 +149,7 @@ test.suite('Login With Username Feature', { config: './config.ts' }, () => {
         username: 'username2',
         password: 'test',
       },
+      overrideAccess: true,
     })
     expect(usernameUser2).toHaveProperty('id')
   })

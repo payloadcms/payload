@@ -104,7 +104,7 @@ Payload ensures that the same, uniform [Access Control](../access-control/overvi
 
 ### API Key Only Auth
 
-If you want to use API keys as the only authentication method for a collection, you can disable the default local strategy by setting `disableLocalStrategy` to `true` on the collection's `auth` property. This will disable the ability to authenticate with email and password, and will only allow for authentication via API key.
+If you want to use API keys as the only authentication method for a collection, you can disable the default local strategy by setting `disableLocalStrategy` to `true` on the collection's `auth` property. Setting it to `false` keeps local authentication enabled. Disabling the local strategy prevents authentication with email and password, leaving API keys as the collection's authentication method.
 
 ```ts
 import type { CollectionConfig } from 'payload'

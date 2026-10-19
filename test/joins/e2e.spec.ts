@@ -88,6 +88,7 @@ describe('Join Field', () => {
           equals: 'example',
         },
       },
+      overrideAccess: true,
     })
 
     if (!docs[0]) {
@@ -96,7 +97,12 @@ describe('Join Field', () => {
 
     ;({ id: categoryID } = docs[0])
 
-    const folder = await payload.find({ collection: 'folders', depth: 0, sort: 'createdAt' })
+    const folder = await payload.find({
+      collection: 'folders',
+      depth: 0,
+      sort: 'createdAt',
+      overrideAccess: true,
+    })
     rootParentID = folder.docs[0]!.id
   })
 
@@ -127,6 +133,7 @@ describe('Join Field', () => {
     const result = await payload.find({
       collection: categoriesSlug,
       limit: 1,
+      overrideAccess: true,
     })
     const category = result.docs[0]
 
@@ -141,6 +148,7 @@ describe('Join Field', () => {
         category: category.id,
         title: 'a',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -149,6 +157,7 @@ describe('Join Field', () => {
         category: category.id,
         title: 'b',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -157,6 +166,7 @@ describe('Join Field', () => {
         category: category.id,
         title: 'z',
       },
+      overrideAccess: true,
     })
 
     await navigateToDoc(page, categoriesURL)
@@ -267,7 +277,11 @@ describe('Join Field', () => {
     const toggler = actionColumn.locator('button.drawer-link__doc-drawer-toggler')
     await toggler.click()
 
-    const drawer = page.locator('[id^=doc-drawer_undefined]')
+    await expect(page.locator('[id^=doc-drawer_undefined]')).toBeHidden()
+
+    const drawer = page.locator('[id^=doc-drawer_posts_1_]')
+    await expect(drawer.locator('#field-title')).toBeVisible()
+    await page.keyboard.press('Escape')
     await expect(drawer).toBeHidden()
   })
 
@@ -523,6 +537,7 @@ describe('Join Field', () => {
         category: categoryID as string,
         title,
       },
+      overrideAccess: true,
     })
 
     await page.goto(categoriesURL.edit(categoryID))
@@ -577,6 +592,7 @@ describe('Join Field', () => {
         title,
         category: categoryID as string,
       },
+      overrideAccess: true,
     })
 
     await page.goto(categoriesURL.edit(categoryID))
@@ -632,6 +648,7 @@ describe('Join Field', () => {
       data: {
         title: 'Test Category (With Versions)',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -640,6 +657,7 @@ describe('Join Field', () => {
         categoryVersion: categoryVersionsDoc.id,
         title: 'Test Post',
       },
+      overrideAccess: true,
     })
 
     await page.goto(categoriesVersionsURL.edit(categoryVersionsDoc.id))
@@ -823,6 +841,13 @@ describe('Join Field', () => {
     await expect(joinField.locator('.cell-canRead')).not.toContainText('false')
   })
 
+  test('should hide the add new button when create access is denied', async () => {
+    await navigateToDoc(page, categoriesJoinRestrictedURL)
+    const joinField = page.locator('#field-collectionRestrictedJoin.field-type.join')
+    await expect(joinField.locator('.relationship-table table')).toBeVisible()
+    await expect(joinField.locator('.relationship-table__add-new')).toHaveCount(0)
+  })
+
   test('should render join field with array of collections', async () => {
     await page.goto(foldersURL.edit(rootParentID))
     const joinField = page.locator('#field-children.field-type.join')
@@ -868,7 +893,7 @@ describe('Join Field', () => {
   })
 
   test('should render create-first-user with when users collection has a join field and hide it', async () => {
-    await payload.delete({ collection: 'users', where: {} })
+    await payload.delete({ collection: 'users', where: {}, overrideAccess: true })
     const url = new AdminUrlUtil(serverURL, 'users')
     await page.goto(url.admin + '/create-first-user')
     await expect(page.locator('.field-type.join')).toBeHidden()
@@ -905,6 +930,7 @@ describe('Join Field', () => {
       data: {
         title: 'Category Versions',
       },
+      overrideAccess: true,
     })
 
     const versionDoc = await payload.create({
@@ -913,6 +939,7 @@ describe('Join Field', () => {
         categoryVersion: categoryVersionsDoc.id,
         title: 'Version 1',
       },
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -922,6 +949,7 @@ describe('Join Field', () => {
         title: 'Version 1 - Draft',
       },
       draft: true,
+      overrideAccess: true,
     })
 
     await page.goto(categoriesVersionsURL.edit(categoryVersionsDoc.id))

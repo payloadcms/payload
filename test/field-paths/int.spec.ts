@@ -46,12 +46,14 @@ test.suite('Field Paths', { config: './config.ts' }, () => {
       const originalDoc = await payload.create({
         collection: fieldPathsSlug,
         data: testDoc,
+        overrideAccess: true,
       })
 
       // duplicate the doc to ensure that the beforeDuplicate hook is run
       const doc = await payload.duplicate({
         id: originalDoc.id,
         collection: fieldPathsSlug,
+        overrideAccess: true,
       })
 
       const expectedDoc = {
@@ -191,6 +193,8 @@ test.suite('Field Paths', { config: './config.ts' }, () => {
         'blocks.CollapsibleBlock._index-0-0.textInCollapsibleInCollapsibleBlock',
         'blocks.CollapsibleBlock.id',
         'blocks.CollapsibleBlock.blockName',
+        'createdBy',
+        'updatedBy',
         'updatedAt',
         'createdAt',
         '_status',

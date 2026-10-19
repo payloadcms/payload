@@ -5,6 +5,8 @@
  * user projects regardless of their TypeScript setup.
  */
 
+import { fileURLToPath } from 'node:url'
+
 const poweredByHeader = {
   key: 'X-Powered-By',
   value: 'Next.js, Payload',
@@ -16,7 +18,15 @@ const poweredByHeader = {
  * @param {boolean} [options.devBundleServerPackages] - Whether to bundle server packages in development mode. @default false
  * */
 export const withPayload = (nextConfig = {}, options = {}) => {
-  const env = nextConfig.env || {}
+  const env = { ...nextConfig.env }
+  // Adds `export const instant = false` to the admin layout and page. See `instantLoader.js` for
+  // why this cannot live in the generated admin files.
+  const instantLoader = nextConfig.cacheComponents
+    ? typeof import.meta?.resolve === 'function'
+      ? fileURLToPath(new URL('./instantLoader.js', import.meta.url))
+      : require.resolve('@payloadcms/next/withPayload/instantLoader')
+    : undefined
+  const instantLoaderRule = '**/{layout,page}.{js,jsx,ts,tsx,mjs,mts,cjs,cts}'
 
   if (nextConfig.experimental?.staleTimes?.dynamic) {
     console.warn(
@@ -51,10 +61,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
   /** @type {import('next').NextConfig} */
   const baseConfig = {
     ...nextConfig,
-    devIndicators:
-      nextConfig.devIndicators !== undefined
-        ? nextConfig.devIndicators
-        : { position: 'bottom-left' },
+    devIndicators: nextConfig.devIndicators !== undefined ? nextConfig.devIndicators : false,
     env,
     experimental: {
       ...(nextConfig.experimental || {}),
@@ -85,6 +92,27 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     },
     turbopack: {
       ...(nextConfig.turbopack || {}),
+      ...(instantLoader
+        ? {
+            rules: {
+              ...nextConfig.turbopack?.rules,
+              [instantLoaderRule]: [
+                ...[].concat(nextConfig.turbopack?.rules?.[instantLoaderRule] ?? []),
+                {
+                  // Only send files that import the admin root components to the loader, so
+                  // Turbopack does not run a JavaScript loader for every other layout and page.
+                  condition: {
+                    all: [
+                      { not: 'foreign' },
+                      { content: /['"]@payloadcms\/next\/(?:layouts|views)['"]/ },
+                    ],
+                  },
+                  loaders: [instantLoader],
+                },
+              ],
+            },
+          }
+        : {}),
     },
     // We disable the poweredByHeader here because we add it manually in the headers function below
     ...(nextConfig.poweredByHeader !== false ? { poweredByHeader: false } : {}),
@@ -132,21 +160,12 @@ export const withPayload = (nextConfig = {}, options = {}) => {
       ...(process.env.NODE_ENV === 'development' && options.devBundleServerPackages !== true
         ? /**
            * Unless explicitly disabled by the user, by passing `devBundleServerPackages: true` to withPayload, we
-           * do not bundle server-only packages during dev for two reasons:
+           * do not bundle server-only packages during dev. Node.js loads them directly instead, so there are fewer
+           * files to compile, which means faster compilation speeds.
            *
-           * 1. Performance: Fewer files to compile means faster compilation speeds.
-           * 2. Turbopack support: Webpack's externals are not supported by Turbopack.
-           *
-           * Regarding Turbopack support: Unlike webpack.externals, we cannot use serverExternalPackages to
-           * externalized packages that are not resolvable from the project root. So including a package like
-           * "drizzle-kit" in here would do nothing - Next.js will ignore the rule and still bundle the package -
-           * because it detects that the package is not resolvable from the project root (= not directly installed
-           * by the user in their own package.json).
-           *
-           * Instead, we can use serverExternalPackages for the entry-point packages that *are* installed directly
-           * by the user (e.g. db-postgres, which then installs drizzle-kit as a dependency).
-           *
-           *
+           * A package can only be listed here if the import map never loads a client component from it. Node.js
+           * loads external packages as they are, so a `'use client'` file inside one would not become a client
+           * component. That is why packages with client components are not listed (see the TODO below).
            *
            * We should only do this during development, not build, because externalizing these packages can hurt
            * the bundle size. Not only does it disable tree-shaking, it also risks installing duplicate copies of the
@@ -157,8 +176,8 @@ export const withPayload = (nextConfig = {}, options = {}) => {
            * - payload (not in bundle, external) -> installs qs-esm (external because of importer)
            * Result: we have two copies of qs-esm installed - one in the bundle, and one in node_modules.
            *
-           * During development, these bundle size difference do not matter much, and development speed /
-           * turbopack support are more important.
+           * During development, these bundle size differences do not matter much, and development speed is more
+           * important.
            */
           [
             'payload',
@@ -171,8 +190,14 @@ export const withPayload = (nextConfig = {}, options = {}) => {
             '@payloadcms/email-nodemailer',
             '@payloadcms/email-resend',
             '@payloadcms/graphql',
+            '@payloadcms/kv-redis',
             '@payloadcms/payload-cloud',
+            // Its `/client` entry has no exports, so the import map never loads anything from it
+            '@payloadcms/plugin-mcp',
+            '@payloadcms/plugin-nested-docs',
             '@payloadcms/plugin-redirects',
+            '@payloadcms/transformer-sharp',
+            '@payloadcms/translations',
             // TODO: Add the following packages, excluding their /client subpath exports, once Next.js supports it
             // see: https://github.com/vercel/next.js/discussions/76991
             //'@payloadcms/plugin-cloud-storage',
@@ -194,10 +219,25 @@ export const withPayload = (nextConfig = {}, options = {}) => {
 
       return {
         ...incomingWebpackConfig,
+        ...(instantLoader
+          ? {
+              module: {
+                ...incomingWebpackConfig.module,
+                rules: [
+                  ...(incomingWebpackConfig.module?.rules || []),
+                  {
+                    enforce: 'pre',
+                    exclude: /node_modules/,
+                    test: /[/\\](layout|page)\.(?:[cm]?[jt]s|[jt]sx)$/,
+                    use: [instantLoader],
+                  },
+                ],
+              },
+            }
+          : {}),
         externals: [
           ...(incomingWebpackConfig?.externals || []),
           /**
-           * See the explanation in the serverExternalPackages section above.
            * We need to force Webpack to emit require() calls for these packages, even though they are not
            * resolvable from the project root. You would expect this to error during runtime, but Next.js seems to be able to require these just fine.
            *

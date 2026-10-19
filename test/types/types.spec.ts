@@ -1,38 +1,76 @@
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import type { useAuth } from '@payloadcms/ui'
+import type { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToFormState'
 import type {
   Access,
   ArrayField,
   AuthenticatedUser,
+  BeforeValidateOperation,
+  Block,
+  BlockRowLabelClientProps,
+  BlockRowLabelServerProps,
   BlocksField,
+  BlocksFieldLabelClientProps,
+  BlocksFieldLabelServerProps,
   BulkOperationResult,
   CollapsibleField,
+  CollectionAfterChangeHook,
+  CollectionBeforeChangeHook,
+  CollectionBeforeValidateHook,
+  CollectionConfig,
+  CollectionPermission,
   CollectionSlug,
   CustomDocumentViewConfig,
   DefaultDocumentViewConfig,
+  Field,
+  FieldClientProps,
+  FieldErrorServerProps,
+  FieldHookArgs,
+  FieldOperation,
+  FieldPermissions,
+  FieldServerProps,
   GeneratedTypes,
+  GlobalAfterChangeHook,
+  GlobalBeforeChangeHook,
+  GlobalBeforeValidateHook,
+  GlobalConfig,
+  GlobalPermission,
   Job,
   JobTaskStatus,
+  JoinFieldLabelServerProps,
+  JoinFieldServerProps,
   JoinQuery,
   MeOperationResult,
   NamedGroupField,
   NamedTab,
+  Operation,
   PaginatedDocs,
+  PayloadClientComponentProps,
   PayloadRequest,
+  PayloadServerComponentProps,
   PayloadTypesShape,
+  RowField,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
-  RowField,
   SelectType,
+  ServerComponentProps,
   TabsField,
   TextField,
+  TextFieldClientProps,
+  TextFieldDiffClientProps,
+  TextFieldServerProps,
   TypedCollectionSelect,
   TypeWithVersion,
   UnnamedGroupField,
   UnnamedTab,
   UntypedPayloadTypes,
+  UploadFieldErrorServerProps,
+  Validate,
+  ValidationFieldError,
+  ValidationResult,
   Where,
 } from 'payload'
+import type { FC } from 'react'
 
 import {
   buildEditorState,
@@ -95,6 +133,164 @@ import type {
 } from './payload-types.js'
 
 describe('Types testing', () => {
+  describe('validate operation types', () => {
+    test('should expose beforeValidate operations', () => {
+      expect<BeforeValidateOperation>().type.toBe<'create' | 'update' | 'validate'>()
+      expect<FieldOperation>().type.toBe<'create' | 'read' | 'update' | 'validate'>()
+      expect<Operation>().type.toBe<'create' | 'delete' | 'read' | 'update' | 'validate'>()
+      expect<PayloadRequest['operation']>().type.toBe<Operation | undefined>()
+    })
+
+    test('should limit form state operations to field operations', () => {
+      expect<Parameters<typeof fieldSchemasToFormState>[0]['operation']>().type.toBe<
+        FieldOperation | undefined
+      >()
+      expect<ServerComponentProps['operation']>().type.toBe<FieldOperation>()
+    })
+
+    test('should expose validate only to validation lifecycle types', () => {
+      expect<{
+        locale?: string
+        message: string
+        path: string
+      }>().type.toBeAssignableTo<ValidationFieldError>()
+      expect<'validate'>().type.toBeAssignableTo<PayloadRequest['operation']>()
+      expect<'validate'>().type.toBeAssignableTo<FieldHookArgs['operation']>()
+      expect<'validate'>().type.toBeAssignableTo<Parameters<Validate>[1]['operation']>()
+      expect<'validate'>().type.toBeAssignableTo<
+        Parameters<CollectionBeforeValidateHook>[0]['operation']
+      >()
+      expect<'validate'>().type.toBeAssignableTo<
+        Parameters<CollectionBeforeChangeHook>[0]['operation']
+      >()
+      expect<'validate'>().type.not.toBeAssignableTo<
+        Parameters<CollectionAfterChangeHook>[0]['operation']
+      >()
+      expect<'validate'>().type.toBeAssignableTo<
+        Parameters<GlobalBeforeValidateHook>[0]['operation']
+      >()
+      expect<'validate'>().type.toBeAssignableTo<
+        Parameters<GlobalBeforeChangeHook>[0]['operation']
+      >()
+      expect<'validate'>().type.not.toBeAssignableTo<
+        Parameters<GlobalAfterChangeHook>[0]['operation']
+      >()
+      expect<CollectionConfig>().type.toBeAssignableFrom<{
+        access: { validate: () => true }
+        fields: []
+        slug: 'posts'
+      }>()
+      expect<GlobalConfig>().type.toBeAssignableFrom<{
+        access: { validate: () => true }
+        fields: []
+        slug: 'settings'
+      }>()
+      expect<Field>().type.toBeAssignableFrom<{
+        access: { validate: () => true }
+        name: 'title'
+        type: 'text'
+      }>()
+      expect<CollectionPermission>().type.toHaveProperty('validate')
+      expect<GlobalPermission>().type.toHaveProperty('validate')
+      expect<FieldPermissions>().type.toHaveProperty('validate')
+    })
+
+    test('should require collection create data and allow the locale to be omitted', () => {
+      expect(payload.validate).type.toBeCallableWith({
+        collection: 'pages',
+        data: {},
+        locale: null,
+      })
+      expect(payload.validate).type.toBeCallableWith({
+        collection: 'pages',
+        data: {},
+      })
+      expect(payload.validate).type.not.toBeCallableWith({
+        collection: 'pages',
+        locale: null,
+      })
+      expect(payload.validate).type.not.toBeCallableWith({
+        collection: 'pages',
+        data: {},
+        fallbackLocale: null,
+        locale: null,
+      })
+    })
+
+    test('should allow collection update and global validation data to be omitted', () => {
+      expect(payload.validate).type.toBeCallableWith({
+        id: 'document-id',
+        collection: 'pages',
+      })
+      expect(payload.validate).type.toBeCallableWith({
+        id: 'document-id',
+        collection: 'pages',
+        locale: null,
+      })
+      expect(payload.validateGlobal).type.toBeCallableWith({
+        slug: 'menu',
+      })
+      expect(payload.validateGlobal).type.toBeCallableWith({
+        slug: 'menu',
+        locale: null,
+      })
+      expect(payload.validateGlobal).type.not.toBeCallableWith({
+        slug: 'menu',
+        fallbackLocale: null,
+        locale: null,
+      })
+      expect(
+        payload.validate({
+          collection: 'pages',
+          data: {},
+          locale: null,
+        }),
+      ).type.toBe<Promise<ValidationResult>>()
+      expect(
+        payload.validateGlobal({
+          slug: 'menu',
+          locale: null,
+        }),
+      ).type.toBe<Promise<ValidationResult>>()
+    })
+
+    test('should accept multi-locale selectors without exposing concurrency controls', () => {
+      const mutableLocales: [null, ...null[]] = [null]
+      const readonlyLocales = [null] as const
+
+      expect(payload.validate).type.toBeCallableWith({
+        collection: 'pages',
+        data: {},
+        locale: mutableLocales,
+      })
+      expect(payload.validate).type.toBeCallableWith({
+        collection: 'pages',
+        data: {},
+        locale: readonlyLocales,
+      })
+      expect(payload.validate).type.toBeCallableWith({
+        collection: 'pages',
+        data: {},
+        locale: 'all',
+      })
+      expect(payload.validateGlobal).type.toBeCallableWith({
+        slug: 'menu',
+        locale: 'all',
+      })
+      expect(payload.validate).type.not.toBeCallableWith({
+        collection: 'pages',
+        concurrency: 4,
+        data: {},
+        locale: 'all',
+      })
+      expect(payload.validate).type.not.toBeCallableWith({
+        collection: 'pages',
+        data: {},
+        locale: [],
+      })
+    })
+  })
+
   test('sanitized collection readVersions access is required', () => {
     expect<SanitizedCollectionConfig['access']['readVersions']>().type.toBe<Access>()
   })
@@ -119,6 +315,524 @@ describe('Types testing', () => {
     })
   })
 
+  describe('field component props', () => {
+    test('should expose standalone props for canonical and specialized field components', () => {
+      const GenericClientField: FC<FieldClientProps> = () => null
+      const GenericServerError: FC<FieldErrorServerProps<TextField>> = () => null
+      const BlocksServerLabel: FC<BlocksFieldLabelServerProps> = () => null
+      const TextClientDiff: FC<TextFieldDiffClientProps> = () => null
+      const BlockServerRowLabel: FC<BlockRowLabelServerProps> = () => null
+
+      expect(GenericClientField).type.toBe<FC<FieldClientProps>>()
+      expect(GenericServerError).type.toBe<FC<FieldErrorServerProps<TextField>>>()
+      expect(BlocksServerLabel).type.toBe<FC<BlocksFieldLabelServerProps>>()
+      expect(TextClientDiff).type.toBe<FC<TextFieldDiffClientProps>>()
+      expect(BlockServerRowLabel).type.toBe<FC<BlockRowLabelServerProps>>()
+      expect<JoinFieldLabelServerProps['clientField']['collection']>().type.toBeAssignableTo<
+        CollectionSlug | CollectionSlug[]
+      >()
+      expect<UploadFieldErrorServerProps['clientField']['relationTo']>().type.toBeAssignableTo<
+        CollectionSlug | CollectionSlug[]
+      >()
+    })
+
+    test('should preserve separate server and client props in field component configuration', () => {
+      type BlocksLabel = NonNullable<
+        NonNullable<NonNullable<BlocksField['admin']>['components']>['Label']
+      >
+      type GenericField = NonNullable<
+        NonNullable<NonNullable<TextField['admin']>['components']>['Field']
+      >
+      type BlockLabel = NonNullable<NonNullable<NonNullable<Block['admin']>['components']>['Label']>
+
+      expect<
+        PayloadServerComponentProps<BlocksLabel>
+      >().type.toBeAssignableTo<BlocksFieldLabelServerProps>()
+      expect<
+        PayloadClientComponentProps<BlocksLabel>
+      >().type.toBeAssignableTo<BlocksFieldLabelClientProps>()
+      expect<PayloadServerComponentProps<GenericField>>().type.toBeAssignableTo<FieldServerProps>()
+      expect<PayloadClientComponentProps<GenericField>>().type.toBeAssignableTo<FieldClientProps>()
+      expect<
+        PayloadServerComponentProps<BlockLabel>
+      >().type.toBeAssignableTo<BlockRowLabelServerProps>()
+      expect<
+        PayloadClientComponentProps<BlockLabel>
+      >().type.toBeAssignableTo<BlockRowLabelClientProps>()
+    })
+
+    test('should use props types for field client and server components', () => {
+      const ClientField: FC<TextFieldClientProps> = () => null
+      const JoinServerField = ({ clientField }: JoinFieldServerProps) => clientField.collection
+      const ServerField: FC<TextFieldServerProps> = () => null
+
+      expect(ClientField).type.toBe<FC<TextFieldClientProps>>()
+      expect(JoinServerField).type.toBe<
+        (props: JoinFieldServerProps) => JoinFieldServerProps['clientField']['collection']
+      >()
+      expect(ServerField).type.toBe<FC<TextFieldServerProps>>()
+    })
+
+    test('should not export concrete field component aliases', () => {
+      type RemovedFieldComponentAliases = [
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').ArrayFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').ArrayFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').BlocksFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').BlocksFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').CheckboxFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').CheckboxFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').CodeFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').CodeFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').CollapsibleFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').CollapsibleFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').DateFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').DateFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').EmailFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').EmailFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').GroupFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').GroupFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').JoinFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').JoinFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').JSONFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').JSONFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').NumberFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').NumberFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').PointFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').PointFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RadioFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RadioFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RelationshipFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RelationshipFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RichTextFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RichTextFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RowFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RowFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').SelectFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').SelectFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').TabsFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').TabsFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').TextFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').TextFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').TextareaFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').TextareaFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').UIFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').UIFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').UploadFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').UploadFieldServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').FieldClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').FieldServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').FieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').FieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').FieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').FieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').FieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').FieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').FieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').FieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').BlockRowLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').BlockRowLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').ArrayFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').ArrayFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').ArrayFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').ArrayFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').ArrayFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').ArrayFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').ArrayFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').ArrayFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').BlocksFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').BlocksFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').BlocksFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').BlocksFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').BlocksFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').BlocksFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').BlocksFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').BlocksFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CheckboxFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CheckboxFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CheckboxFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CheckboxFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CheckboxFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CheckboxFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CheckboxFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CheckboxFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CodeFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CodeFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CodeFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CodeFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CodeFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CodeFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CodeFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CodeFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CollapsibleFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CollapsibleFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CollapsibleFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CollapsibleFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CollapsibleFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CollapsibleFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CollapsibleFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CollapsibleFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').DateFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').DateFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').DateFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').DateFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').DateFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').DateFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').DateFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').DateFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').EmailFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').EmailFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').EmailFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').EmailFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').EmailFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').EmailFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').EmailFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').EmailFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').GroupFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').GroupFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').GroupFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').GroupFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').GroupFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').GroupFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').GroupFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').GroupFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JSONFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JSONFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JSONFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JSONFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JSONFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JSONFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JSONFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JSONFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JoinFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JoinFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JoinFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JoinFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JoinFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JoinFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JoinFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JoinFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').NumberFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').NumberFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').NumberFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').NumberFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').NumberFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').NumberFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').NumberFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').NumberFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').PointFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').PointFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').PointFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').PointFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').PointFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').PointFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').PointFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').PointFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RadioFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RadioFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RadioFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RadioFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RadioFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RadioFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RadioFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RadioFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RelationshipFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RelationshipFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RelationshipFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RelationshipFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RelationshipFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RelationshipFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RelationshipFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RelationshipFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RichTextFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RichTextFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RichTextFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RichTextFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RichTextFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RichTextFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RichTextFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RichTextFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RowFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RowFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RowFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RowFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RowFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RowFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RowFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RowFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').SelectFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').SelectFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').SelectFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').SelectFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').SelectFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').SelectFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').SelectFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').SelectFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TabsFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TabsFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TabsFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TabsFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TabsFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TabsFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TabsFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TabsFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextareaFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextareaFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextareaFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextareaFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextareaFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextareaFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextareaFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextareaFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').UIFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').UIFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').UploadFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').UploadFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').UploadFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').UploadFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').UploadFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').UploadFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').UploadFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').UploadFieldLabelServerComponent,
+      ]
+
+      expect<RemovedFieldComponentAliases>().type.toBeAssignableTo<unknown[]>()
+    })
+  })
+
   test('should fall back when generated types do not include jobs', () => {
     expect<Job['id']>().type.toBe<number | string>()
     expect<Job['processingToken']>().type.toBe<null | string | undefined>()
@@ -139,93 +853,117 @@ describe('Types testing', () => {
   })
 
   test('payload.find', () => {
-    expect(payload.find({ collection: 'users' })).type.toBe<Promise<PaginatedDocs<User>>>()
-  })
-
-  test('payload.findByID', () => {
-    expect(payload.findByID({ id: 1, collection: 'users' })).type.toBe<Promise<User>>()
-  })
-
-  test('payload.findByID with disableErrors: true', () => {
-    expect(payload.findByID({ id: 1, collection: 'users', disableErrors: true })).type.toBe<
-      Promise<null | User>
+    expect(payload.find({ collection: 'users', overrideAccess: true })).type.toBe<
+      Promise<PaginatedDocs<User>>
     >()
   })
 
-  test('payload.create', () => {
-    expect(payload.create({ collection: 'users', data: { email: 'user@email.com' } })).type.toBe<
+  test('payload.findByID', () => {
+    expect(payload.findByID({ id: 1, collection: 'users', overrideAccess: true })).type.toBe<
       Promise<User>
     >()
   })
 
+  test('payload.findByID with disableErrors: true', () => {
+    expect(
+      payload.findByID({ id: 1, collection: 'users', disableErrors: true, overrideAccess: true }),
+    ).type.toBe<Promise<null | User>>()
+  })
+
+  test('payload.create', () => {
+    expect(
+      payload.create({
+        collection: 'users',
+        data: { email: 'user@email.com' },
+        overrideAccess: true,
+      }),
+    ).type.toBe<Promise<User>>()
+  })
+
   test('payload.update by ID', () => {
-    expect(payload.update({ id: 1, collection: 'users', data: {} })).type.toBe<Promise<User>>()
+    expect(
+      payload.update({ id: 1, collection: 'users', data: {}, overrideAccess: true }),
+    ).type.toBe<Promise<User>>()
   })
 
   test('payload.update many', () => {
-    expect(payload.update({ collection: 'users', data: {}, where: {} })).type.toBe<
-      Promise<BulkOperationResult<'users', SelectType>>
-    >()
+    expect(
+      payload.update({ collection: 'users', data: {}, where: {}, overrideAccess: true }),
+    ).type.toBe<Promise<BulkOperationResult<'users', SelectType>>>()
   })
 
   test('payload.delete by ID', () => {
-    expect(payload.delete({ id: 1, collection: 'users' })).type.toBe<Promise<User>>()
+    expect(payload.delete({ id: 1, collection: 'users', overrideAccess: true })).type.toBe<
+      Promise<User>
+    >()
   })
 
   test('payload.delete many', () => {
-    expect(payload.delete({ collection: 'users', where: {} })).type.toBe<
+    expect(payload.delete({ collection: 'users', where: {}, overrideAccess: true })).type.toBe<
       Promise<BulkOperationResult<'users', SelectType>>
     >()
   })
 
   test('payload.findGlobal', () => {
-    expect(payload.findGlobal({ slug: 'menu' })).type.toBe<Promise<Menu>>()
+    expect(payload.findGlobal({ slug: 'menu', overrideAccess: true })).type.toBe<Promise<Menu>>()
   })
 
   test('payload.updateGlobal', () => {
-    expect(payload.updateGlobal({ slug: 'menu', data: {} })).type.toBe<Promise<Menu>>()
+    expect(payload.updateGlobal({ slug: 'menu', data: {}, overrideAccess: true })).type.toBe<
+      Promise<Menu>
+    >()
   })
 
   test('payload.findVersions', () => {
-    expect(payload.findVersions({ collection: 'posts' })).type.toBe<
+    expect(payload.findVersions({ collection: 'posts', overrideAccess: true })).type.toBe<
       Promise<PaginatedDocs<TypeWithVersion<Post>>>
     >()
   })
 
   test('payload.findVersionByID', () => {
-    expect(payload.findVersionByID({ id: 'id', collection: 'posts' })).type.toBe<
-      Promise<TypeWithVersion<Post>>
-    >()
+    expect(
+      payload.findVersionByID({ id: 'id', collection: 'posts', overrideAccess: true }),
+    ).type.toBe<Promise<TypeWithVersion<Post>>>()
   })
 
   test('payload.findGlobalVersions', () => {
-    expect(payload.findGlobalVersions({ slug: 'menu' })).type.toBe<
+    expect(payload.findGlobalVersions({ slug: 'menu', overrideAccess: true })).type.toBe<
       Promise<PaginatedDocs<TypeWithVersion<Menu>>>
     >()
   })
 
   test('payload.findGlobalVersionByID', () => {
-    expect(payload.findGlobalVersionByID({ id: 'id', slug: 'menu' })).type.toBe<
-      Promise<TypeWithVersion<Menu>>
-    >()
+    expect(
+      payload.findGlobalVersionByID({ id: 'id', slug: 'menu', overrideAccess: true }),
+    ).type.toBe<Promise<TypeWithVersion<Menu>>>()
   })
 
   describe('select', () => {
     test('should include only ID if select is an empty object', () => {
-      expect(payload.findByID({ id: 'id', collection: 'posts', select: {} })).type.toBe<
-        Promise<{ id: Post['id'] }>
-      >()
+      expect(
+        payload.findByID({ id: 'id', collection: 'posts', select: {}, overrideAccess: true }),
+      ).type.toBe<Promise<{ id: Post['id'] }>>()
     })
 
     test('should include only title and ID', () => {
       expect(
-        payload.findByID({ id: 'id', collection: 'posts', select: { title: true } }),
+        payload.findByID({
+          id: 'id',
+          collection: 'posts',
+          select: { title: true },
+          overrideAccess: true,
+        }),
       ).type.toBe<Promise<{ id: Post['id']; title?: Post['title'] }>>()
     })
 
     test('should exclude title', () => {
       expect(
-        payload.findByID({ id: 'id', collection: 'posts', select: { title: false } }),
+        payload.findByID({
+          id: 'id',
+          collection: 'posts',
+          select: { title: false },
+          overrideAccess: true,
+        }),
       ).type.toBe<Promise<Omit<Post, 'title'>>>()
     })
   })
@@ -267,7 +1005,7 @@ describe('Types testing', () => {
     })
 
     test('payload operations return users with collection property', async () => {
-      const user = await payload.findByID({ id: 'id', collection: 'users' })
+      const user = await payload.findByID({ id: 'id', collection: 'users', overrideAccess: true })
       expect(user.collection).type.toBe<'users'>()
     })
 
@@ -1538,6 +2276,7 @@ describe('Types testing', () => {
         const result = await payload.find({
           collection: 'draft-posts',
           draft: true,
+          overrideAccess: true,
         })
 
         const doc = result.docs[0]!
@@ -1555,6 +2294,7 @@ describe('Types testing', () => {
       test('non-draft find query returns required fields as required', async () => {
         const result = await payload.find({
           collection: 'draft-posts',
+          overrideAccess: true,
         })
 
         const doc = result.docs[0]!

@@ -266,7 +266,7 @@ import type { Config, SanitizedConfig } from 'payload'
 
 The Payload Config only lives on the server and is not allowed to contain any client-side code. That way, you can load up the Payload Config in any server environment or standalone script, without having to use Bundlers or Node.js loaders to handle importing client-only modules (e.g. scss files or React Components) without any errors.
 
-Behind the curtains, the Next.js-based Admin Panel generates a ClientConfig, which strips away any server-only code and enriches the config with React Components.
+Behind the curtains, the Admin Panel generates a ClientConfig, which strips away any server-only code and enriches the config with React Components.
 
 ## Logger
 

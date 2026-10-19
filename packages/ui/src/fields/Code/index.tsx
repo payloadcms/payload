@@ -1,6 +1,7 @@
 'use client'
-import type { CodeFieldClientComponent } from 'payload'
+import type { CodeFieldClientProps } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
@@ -10,6 +11,7 @@ import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.css'
@@ -22,7 +24,7 @@ const prismToMonacoLanguageMap = {
 
 const baseClass = 'code-field'
 
-const CodeFieldComponent: CodeFieldClientComponent = (props) => {
+const CodeFieldComponent: React.FC<CodeFieldClientProps> = (props) => {
   const {
     field,
     field: {
@@ -36,6 +38,15 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
     readOnly,
     validate,
   } = props
+
+  const { i18n } = useTranslation()
+  const codeEditorProps = editorProps as
+    | Partial<React.ComponentProps<typeof CodeEditor>>
+    | undefined
+  const editorRef =
+    React.useRef<Parameters<NonNullable<React.ComponentProps<typeof CodeEditor>['onMount']>>[0]>(
+      null,
+    )
 
   const inputChangeFromRef = React.useRef<'formState' | 'internalEditor'>('formState')
   const [recalculatedHeightAt, setRecalculatedHeightAt] = useState<number | undefined>(Date.now())
@@ -112,7 +123,15 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
       <RenderCustomComponent
         CustomComponent={Label}
         Fallback={
-          <FieldLabel label={label} localized={localized} path={path} required={required} />
+          <FieldLabel
+            as="span"
+            hasRequiredAccessibleState
+            label={label}
+            localized={localized}
+            onClick={() => editorRef.current?.focus()}
+            path={path}
+            required={required}
+          />
         }
       />
       <div className={`${fieldBaseClass}__wrap`}>
@@ -124,15 +143,22 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
         <CodeEditor
           defaultLanguage={prismToMonacoLanguageMap[language] || language}
           onChange={handleChange}
-          onMount={onMount}
-          options={editorOptions}
           readOnly={readOnly || disabled}
           recalculatedHeightAt={recalculatedHeightAt}
           value={stringValueRef.current}
           wrapperProps={{
             id: `field-${path?.replace(/\./g, '__')}`,
           }}
-          {...(editorProps || {})}
+          {...(codeEditorProps || {})}
+          onMount={(editor, monaco) => {
+            editorRef.current = editor
+            ;(codeEditorProps?.onMount ?? onMount)?.(editor, monaco)
+          }}
+          options={{
+            ariaLabel: getTranslation(label || '', i18n) || undefined,
+            ariaRequired: required,
+            ...((codeEditorProps?.options ?? editorOptions) || {}),
+          }}
         />
         {AfterInput}
       </div>

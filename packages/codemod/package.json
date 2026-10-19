@@ -1,13 +1,8 @@
 {
   "name": "@payloadcms/codemod",
-  "version": "4.0.0-canary.36",
+  "version": "4.0.0-beta.2",
   "description": "Codemods for migrating Payload projects across versions.",
   "homepage": "https://payloadcms.com",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/codemod"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -17,8 +12,11 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
-  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/codemod"
+  },
   "bin": {
     "payload-codemod": "bin/cli.js"
   },
@@ -28,8 +26,11 @@
     "dist",
     "README.md"
   ],
+  "type": "module",
+  "sideEffects": false,
   "scripts": {
-    "build": "pnpm typecheck && pnpm build:swc",
+    "build": "pnpm typecheck && pnpm build:swc && pnpm build:copy-docs",
+    "build:copy-docs": "node scripts/copy-migration-guide.mjs",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
@@ -38,11 +39,14 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "ts-morph": "^21.0.1"
+    "@clack/prompts": "1.2.0",
+    "semver": "^7.8.5",
+    "ts-morph": "^28.0.0"
   },
   "devDependencies": {
     "@swc/core": "1.15.3",
     "@types/node": "24.12.3",
+    "@types/semver": "^7.7.1",
     "rimraf": "6.0.1",
     "typescript": "catalog:",
     "vitest": "5.0.1"

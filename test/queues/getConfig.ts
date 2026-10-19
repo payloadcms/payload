@@ -93,6 +93,7 @@ export const getConfig: () => Partial<Config> = () => ({
               },
               req,
               workflow: context.useJSONWorkflow ? 'updatePostJSONWorkflow' : 'updatePost',
+              overrideAccess: true,
             })
           },
         ],

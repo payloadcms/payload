@@ -327,6 +327,52 @@ describe('General', () => {
   })
 
   describe('theme', () => {
+    test('should resolve the automatic dark theme before hydration without a usable client hint', async ({
+      browser,
+    }) => {
+      const themeContext = await browser.newContext({ colorScheme: 'dark' })
+      const themePage = await themeContext.newPage()
+
+      try {
+        const themeCookies = (await themeContext.cookies(postsUrl.admin)).filter(({ name }) =>
+          name.endsWith('-theme'),
+        )
+
+        expect(themeCookies).toHaveLength(0)
+
+        await themePage.route('**/*', async (route) => {
+          const request = route.request()
+
+          if (request.resourceType() === 'script') {
+            await route.abort()
+            return
+          }
+
+          if (request.isNavigationRequest()) {
+            const headers = { ...request.headers() }
+
+            // Chromium can re-inject secured client hints after interception.
+            // Fetching outside its network stack forces the server fallback path.
+            headers['sec-ch-prefers-color-scheme'] = 'unsupported'
+            const response = await route.fetch({ headers })
+
+            await route.fulfill({ response })
+            return
+          }
+
+          await route.continue()
+        })
+
+        const response = await themePage.goto(postsUrl.admin, { waitUntil: 'domcontentloaded' })
+        const serverHTML = await response?.text()
+
+        expect(serverHTML).toMatch(/<html[^>]*data-theme="light"/)
+        await expect(themePage.locator('html')).toHaveAttribute('data-theme', 'dark')
+      } finally {
+        await themeContext.close()
+      }
+    })
+
     test('should default to automatic theme mode', async () => {
       await page.goto(postsUrl.admin)
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
@@ -366,17 +412,35 @@ describe('General', () => {
 
     describe('user menu', () => {
       const openThemeSubMenu = async () => {
+        await openNav(page)
         await page.locator('button[aria-label="Account"]').click()
-        await page
-          .locator('.popup-button-list__button--submenu-trigger')
-          .filter({ hasText: 'Theme' })
-          .click()
+        await page.getByRole('menuitem', { name: 'Theme' }).hover()
       }
 
       const closePopups = async () => {
         await page.keyboard.press('Escape')
         await page.keyboard.press('Escape')
       }
+
+      test('should keep the open submenu parent highlighted while hovering a child item', async () => {
+        await page.goto(postsUrl.admin)
+        await openNav(page)
+        await page.locator('button[aria-label="Account"]').click()
+
+        const language = page.getByRole('menuitem', { name: 'Language' })
+
+        await language.hover()
+        await expect(language).toHaveAttribute('aria-expanded', 'true')
+
+        const highlightedBackground = await language.evaluate(
+          (element) => getComputedStyle(element).backgroundColor,
+        )
+
+        expect(highlightedBackground).not.toBe('rgba(0, 0, 0, 0)')
+
+        await page.getByRole('menuitemradio').first().hover()
+        await expect(language).toHaveCSS('background-color', highlightedBackground)
+      })
 
       test('should switch to dark theme via user menu and reflect correct active state', async () => {
         await page.goto(postsUrl.admin)
@@ -442,6 +506,7 @@ describe('General', () => {
         await page.goto(postsUrl.admin)
 
         // Logout lives inside the user menu popup
+        await openNav(page)
         await page.locator('button[aria-label="Account"]').click()
 
         // The custom Logout component (admin.components.logout.Button) renders an
@@ -550,38 +615,125 @@ describe('General', () => {
       await expect.poll(() => page.url()).toBe(formatAdminURL({ adminRoute, path: '', serverURL }))
     })
 
-    /**
-     * This test is skipped because `page.goBack()` and `page.goForward()` do not trigger navigation in the Next.js app.
-     * I also tried rendering buttons that call `router.back()` and click those instead, but that also does not work.
-     */
-    test.skip("should clear the router's bfcache when navigating via the forward/back browser controls", async () => {
-      const { id } = await createPost({
-        title: 'Post to test bfcache',
-      })
+    test(
+      "should clear the router's bfcache when navigating via the forward/back browser controls",
+      { tag: '@also-without-cache-components' },
+      async () => {
+        const { id } = await createPost({
+          title: 'Post to test bfcache',
+        })
 
-      // check for it in the list view first
-      await page.goto(postsUrl.list)
-      const cell = page.locator('.table td').filter({ hasText: 'Post to test bfcache' })
-      await page.locator('.table a').filter({ hasText: id }).click()
+        // Open the list view client-side: going back to a directly loaded list view does not render
+        // it, because the list syncs its query to the URL before Next.js patches `history.replaceState`
+        await page.goto(postsUrl.admin)
+        await openNav(page)
+        await page.locator(`#nav-${postsCollectionSlug}`).click()
+        await page.locator('.table a').filter({ hasText: id }).click()
 
-      await page.waitForURL(`${postsUrl.edit(id)}`)
-      const titleField = page.locator('#field-title')
-      await expect(titleField).toHaveValue('Post to test bfcache')
+        await page.waitForURL(`${postsUrl.edit(id)}`)
+        const titleField = page.locator('#field-title')
+        await expect(titleField).toHaveValue('Post to test bfcache')
 
-      // change the title to something else
-      await titleField.fill('Post to test bfcache - updated')
-      await saveDocAndAssert(page)
+        // change the title to something else
+        await titleField.fill('Post to test bfcache - updated')
+        await saveDocAndAssert(page)
 
-      // now use the browser controls to go back to the list
-      await page.goBack()
-      await page.waitForURL(postsUrl.list)
-      await expect(cell).toBeVisible()
+        // now use the browser controls to go back to the list (its URL includes query params like `?limit=5`)
+        await page.goBack()
+        await page.waitForURL((url) => url.pathname === new URL(postsUrl.list).pathname)
+        await expect(
+          page.locator('.table td').filter({ hasText: 'Post to test bfcache - updated' }),
+        ).toBeVisible()
 
-      // and then forward to the edit page again
-      await page.goForward()
-      await page.waitForURL(`${postsUrl.edit(id)}`)
-      await expect(titleField).toHaveValue('Post to test bfcache - updated')
-    })
+        // and then forward to the edit page again
+        await page.goForward()
+        await page.waitForURL(`${postsUrl.edit(id)}`)
+        await expect(titleField).toHaveValue('Post to test bfcache - updated')
+      },
+    )
+
+    test(
+      'should preserve unsaved edits during hash-only navigation and browser history traversal',
+      // Next.js only: TanStack Router re-runs the admin route loader on hash-only navigation, which
+      // resets the form. That's unrelated to the `RouteCache` refresh this test covers.
+      { framework: 'next', tag: '@also-without-cache-components' },
+      async () => {
+        const { id } = await createPost({ title: 'Saved title' })
+
+        await page.goto(postsUrl.list)
+        await page.locator('.table a').filter({ hasText: id }).click()
+        await page.waitForURL(postsUrl.edit(id))
+        await expect(page.locator('.template-default--nav-hydrated')).toBeVisible()
+
+        const titleField = page.locator('#field-title')
+        const unsavedTitle = 'Unsaved title'
+
+        await titleField.fill(unsavedTitle)
+        await page.evaluate(() => {
+          const link = document.createElement('a')
+
+          link.id = 'hash-navigation-test-link'
+          link.href = '#field-description'
+          link.textContent = 'Jump to description'
+          document.body.appendChild(link)
+        })
+
+        try {
+          await page.locator('#hash-navigation-test-link').focus()
+          await page.keyboard.press('Enter')
+          await expect(page).toHaveURL(`${postsUrl.edit(id)}#field-description`)
+
+          // Allow a deferred popstate refresh to finish before checking the form is unchanged.
+          await page.waitForTimeout(1000)
+          await expect(titleField).toHaveValue(unsavedTitle)
+
+          await page.goBack()
+          await expect(page).toHaveURL(postsUrl.edit(id))
+          await page.waitForTimeout(1000)
+          await expect(titleField).toHaveValue(unsavedTitle)
+
+          await page.goForward()
+          await expect(page).toHaveURL(`${postsUrl.edit(id)}#field-description`)
+          await page.waitForTimeout(1000)
+          await expect(titleField).toHaveValue(unsavedTitle)
+        } finally {
+          await page.evaluate(() => document.getElementById('hash-navigation-test-link')?.remove())
+        }
+      },
+    )
+
+    test(
+      'should not get stuck in a render loop when navigating while the page is still hydrating',
+      { framework: 'next', tag: '@also-without-cache-components' },
+      async () => {
+        // Clicking a link before hydration finished used to make `CloseModalOnRouteChange` send a
+        // no-op modal action that React kept replaying until it threw "Maximum update depth
+        // exceeded". It doesn't happen on every page load, so try a few.
+        for (let attempt = 0; attempt < 3; attempt++) {
+          const freshPage = await context.newPage()
+          const renderLoopErrors: string[] = []
+          const collectRenderLoopError = (message: string) => {
+            if (/Maximum update depth exceeded|Minified React error #185/.test(message)) {
+              renderLoopErrors.push(message)
+            }
+          }
+
+          freshPage.on('console', (message) => collectRenderLoopError(message.text()))
+          freshPage.on('pageerror', (error) => collectRenderLoopError(String(error)))
+
+          await freshPage.goto(postsUrl.admin, { waitUntil: 'domcontentloaded' })
+          await freshPage.locator(`#card-${postsCollectionSlug} .card__actions a`).click()
+
+          // The loop keeps the create view from rendering. Report the loop error itself, not a timeout
+          await expect(async () => {
+            expect(renderLoopErrors).toEqual([])
+            await expect(freshPage.locator('#field-title')).toBeVisible({ timeout: 100 })
+          }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+          await freshPage.close()
+        }
+      },
+    )
   })
 
   describe('navigation', () => {
@@ -603,6 +755,67 @@ describe('General', () => {
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain(anchorHref)
     })
 
+    test(
+      'nav — should not show a blank page when navigating to a recently visited view',
+      { tag: '@also-without-cache-components' },
+      async () => {
+        type BlankFrameCounter = { blankFrames?: number; isCounting?: boolean } & Window
+
+        await page.goto(postsUrl.list)
+        await openNav(page)
+
+        // With `cacheComponents`, Next.js keeps recently visited views hidden and shows them again
+        // on a revisit. Count every animation frame in which no admin view is visible.
+        await page.evaluate(() => {
+          const counter = window as BlankFrameCounter
+          counter.blankFrames = 0
+          counter.isCounting = true
+
+          const countBlankFrame = () => {
+            if (!counter.isCounting) {
+              return
+            }
+
+            const isTemplateVisible = [...document.querySelectorAll('.template-default')].some(
+              (template) => template.getClientRects().length > 0,
+            )
+
+            if (!isTemplateVisible) {
+              counter.blankFrames = (counter.blankFrames ?? 0) + 1
+            }
+
+            requestAnimationFrame(countBlankFrame)
+          }
+
+          requestAnimationFrame(countBlankFrame)
+        })
+
+        // A revisit doesn't show a blank page every time, so revisit both views a few times
+        for (const slug of [
+          geoCollectionSlug,
+          postsCollectionSlug,
+          geoCollectionSlug,
+          postsCollectionSlug,
+          geoCollectionSlug,
+          postsCollectionSlug,
+        ]) {
+          // The view that was just hidden is emptied at a low priority, so its nav can still be there
+          await page.locator(`#nav-${slug}`).filter({ visible: true }).click()
+          await page.waitForURL((url) => url.pathname.endsWith(`/collections/${slug}`))
+          await expect(page.locator(`.collection-list--${slug}`)).toBeVisible()
+        }
+
+        const blankFrames = await page.evaluate(() => {
+          const counter = window as BlankFrameCounter
+          counter.isCounting = false
+
+          return counter.blankFrames
+        })
+
+        expect(blankFrames).toBe(0)
+      },
+    )
+
     test('dashboard — should navigate to collection', async () => {
       await page.goto(postsUrl.admin)
       // Wait for hydration - otherwise playwright clicks the card early and nothing happens
@@ -611,7 +824,6 @@ describe('General', () => {
       const anchorHref = await anchor.getAttribute('href')
       await anchor.click()
       // flaky
-      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(1000)
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain(anchorHref)
     })
@@ -645,18 +857,93 @@ describe('General', () => {
     test('nav — should save group collapse preferences', async () => {
       await page.goto(postsUrl.admin)
       await openNav(page)
-      await page.locator('#nav-group-One .nav-group__toggle').click()
+      await Promise.all([
+        page.waitForResponse(
+          (response) =>
+            new URL(response.url()).pathname.endsWith('/payload-preferences/nav') &&
+            response.request().method() === 'POST',
+        ),
+        page.locator('#nav-group-One .nav-group__toggle').click(),
+      ])
       const link = page.locator('#nav-group-one-collection-ones')
       await expect(link).toBeHidden()
     })
 
-    test('should disable active nav item', async () => {
+    test('nav — should persist explicit open and close preferences without overwriting group preferences', async () => {
+      await page.setViewportSize({ height: 800, width: 1280 })
+      await page.goto(postsUrl.admin)
+      await openNav(page)
+
+      const groupToggle = page.locator('#nav-group-One .nav-group__toggle')
+      const groupLink = page.locator('#nav-group-one-collection-ones')
+      const navColumnWidth = () =>
+        page
+          .locator('.template-default')
+          .evaluate((element) => Number.parseFloat(getComputedStyle(element).gridTemplateColumns))
+      const waitForNavPreferenceUpdate = () =>
+        page.waitForResponse(
+          (response) =>
+            new URL(response.url()).pathname.endsWith('/payload-preferences/nav') &&
+            response.request().method() === 'POST',
+        )
+
+      await expect.poll(navColumnWidth).toBeGreaterThan(0)
+
+      await Promise.all([waitForNavPreferenceUpdate(), groupToggle.click()])
+      await expect(groupLink).toBeHidden()
+
+      await Promise.all([waitForNavPreferenceUpdate(), page.locator('.nav__close').click()])
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
+      await expect.poll(navColumnWidth).toBe(0)
+
+      await page.reload()
+      await expect(page.locator('.template-default--nav-hydrated')).toBeVisible()
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
+      await expect.poll(navColumnWidth).toBe(0)
+
+      await Promise.all([
+        waitForNavPreferenceUpdate(),
+        page.locator('.app-header__sidebar-toggle').click(),
+      ])
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
+      await expect.poll(navColumnWidth).toBeGreaterThan(0)
+
+      await page.reload()
+      await expect(page.locator('.template-default--nav-hydrated')).toBeVisible()
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
+      await expect.poll(navColumnWidth).toBeGreaterThan(0)
+      await expect(groupLink).toBeHidden()
+    })
+
+    test('nav — should not persist an automatic responsive close', async () => {
+      await page.setViewportSize({ height: 800, width: 1280 })
+      await page.goto(postsUrl.admin)
+      await openNav(page)
+
+      await page.setViewportSize({ height: 800, width: 500 })
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
+
+      await page.reload()
+      await expect(page.locator('.template-default--nav-hydrated')).toBeVisible()
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
+
+      await page.setViewportSize({ height: 800, width: 1280 })
+      await page.reload()
+      await expect(page.locator('.template-default--nav-hydrated')).toBeVisible()
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
+    })
+
+    test('should keep the active nav item keyboard-accessible in the list view', async () => {
       await page.goto(postsUrl.list)
       await openNav(page)
       const activeItem = page.locator('.nav .nav__link--selected')
       await expect(activeItem).toBeVisible()
-      const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
-      expect(tagName).toBe('div')
+      await expect(activeItem).toHaveRole('link')
+      await expect(activeItem).toHaveJSProperty('href', postsUrl.list)
+      await expect(activeItem).toHaveAttribute('aria-current', 'page')
+      await expect(activeItem).toHaveJSProperty('tabIndex', 0)
+      await activeItem.focus()
+      await expect(activeItem).toBeFocused()
     })
 
     test('should keep active nav item enabled in the edit view', async () => {
@@ -664,8 +951,8 @@ describe('General', () => {
       await openNav(page)
       const activeItem = page.locator('.nav .nav__link--selected')
       await expect(activeItem).toBeVisible()
-      const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
-      expect(tagName).toBe('a')
+      await expect(activeItem).toHaveRole('link')
+      await expect(activeItem).toHaveJSProperty('href', postsUrl.list)
     })
 
     test('should only have one nav item active at a time', async () => {
@@ -749,7 +1036,6 @@ describe('General', () => {
       await wait(1000)
       await page.locator('.collections__card-list .card__click').first().click()
       // flaky
-      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(1000)
       // wait for the search params to get injected into the URL
       const escapedAdminURL = postsUrl.admin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -1075,8 +1361,6 @@ describe('General', () => {
 
     test('should allow custom translation of locale labels', async () => {
       await page.goto(postsUrl.account)
-      // Wait for hydration - otherwise playwright clicks the localizer early and nothing happens
-      await wait(1000)
 
       const selectOptionClass = '.popup__content .popup-button-list__button'
       const localeListItem1 = page.locator(selectOptionClass).nth(0)
@@ -1102,12 +1386,15 @@ describe('General', () => {
       // Change language to Spanish
       await languageField.click()
       await options.locator('text=Español').click()
+      await expect(page.locator('.step-nav__first')).toHaveText('Panel de Control')
 
       await checkLocaleLabels('Español (es)', 'Inglés (en)')
 
       // Change locale and language back to English
       await languageField.click()
       await options.locator('text=English').click()
+      await expect(page.locator('.step-nav__first')).toHaveText('Home')
+
       await openLocaleSelector(page)
       await expect(localeListItem1).toContainText('Spanish (es)')
     })
@@ -1258,6 +1545,7 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
       title,
       ...overrides,
     },
+    overrideAccess: true,
   }) as unknown as Promise<Post>
 }
 
@@ -1268,5 +1556,6 @@ async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
       point: [4, -4],
       ...overrides,
     },
+    overrideAccess: true,
   }) as unknown as Promise<Geo>
 }

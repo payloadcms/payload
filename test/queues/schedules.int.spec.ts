@@ -66,6 +66,7 @@ test.suite(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(1)
@@ -89,6 +90,7 @@ test.suite(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(1)
@@ -112,6 +114,7 @@ test.suite(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(0)
@@ -139,6 +142,7 @@ test.suite(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(1)
@@ -165,6 +169,7 @@ test.suite(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(1)
@@ -191,6 +196,7 @@ test.suite(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(0)
@@ -214,6 +220,7 @@ test.suite(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(1)
@@ -231,6 +238,7 @@ test.suite(
             input: {
               message: 'This task runs every second',
             },
+            overrideAccess: true,
           })
         }
         for (let i = 0; i < 3; i++) {
@@ -247,6 +255,7 @@ test.suite(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(3)
@@ -264,6 +273,7 @@ test.suite(
             input: {
               message: 'This task runs every second - max 2 per second',
             },
+            overrideAccess: true,
           })
         }
         for (let i = 0; i < 3; i++) {
@@ -276,11 +286,13 @@ test.suite(
       await payload.jobs.run({
         limit: 100,
         silent: true,
+        overrideAccess: true,
       })
 
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(2) // Would be 4 by default, if only scheduled jobs were respected in handleSchedules condition
@@ -301,11 +313,13 @@ test.suite(
       // default queue is not scheduled to autorun
       await payload.jobs.run({
         silent: true,
+        overrideAccess: true,
       })
 
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(2)
@@ -333,6 +347,7 @@ test.suite(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(3)
@@ -356,6 +371,7 @@ test.suite(
         // default queue is not scheduled to autorun => run manually
         await payload.jobs.run({
           silent: true,
+          overrideAccess: true,
         })
       }
 
@@ -367,6 +383,7 @@ test.suite(
             equals: 'This task runs every second - max 2 per second',
           },
         },
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(6)
@@ -382,6 +399,7 @@ test.suite(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(0)
