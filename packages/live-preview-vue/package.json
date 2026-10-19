@@ -57,7 +57,7 @@
     "@payloadcms/live-preview": "workspace:*"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/oxlint-config": "workspace:*",
     "payload": "workspace:*",
     "vue": "^3.0.0"
   },

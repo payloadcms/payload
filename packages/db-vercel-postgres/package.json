@@ -117,7 +117,7 @@
   },
   "devDependencies": {
     "@hyrious/esbuild-plugin-commonjs": "0.2.6",
-    "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/oxlint-config": "workspace:*",
     "@types/pg": "8.20.0",
     "@types/to-snake-case": "1.0.0",
     "esbuild": "0.27.1",

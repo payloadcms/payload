@@ -1,6 +1,6 @@
-import payloadEsLintConfig from '@payloadcms/eslint-config'
-import payloadPlugin from '@payloadcms/eslint-plugin'
-import mdxTextParser from '@payloadcms/eslint-plugin/customRules/mdx-text-parser.js'
+import payloadEsLintConfig from '@payloadcms/oxlint-config'
+import payloadPlugin from '@payloadcms/oxlint-plugin'
+import mdxTextParser from '@payloadcms/oxlint-plugin/customRules/mdx-text-parser.js'
 
 export const defaultESLintIgnores = [
   '**/.temp',
@@ -55,7 +55,7 @@ export const rootEslintConfig = [
   {
     ignores: [
       ...defaultESLintIgnores,
-      'packages/eslint-*/**',
+      'packages/oxlint-*/**',
       'test/live-preview/next-app',
       'packages/**/*.spec.*',
       'templates/**',
@@ -130,7 +130,7 @@ export const rootEslintConfig = [
 export default [
   ...rootEslintConfig,
   {
-    files: ['packages/eslint-config/**/*.ts'],
+    files: ['packages/oxlint-config/**/*.ts'],
     rules: {
       'perfectionist/sort-objects': 'off',
     },

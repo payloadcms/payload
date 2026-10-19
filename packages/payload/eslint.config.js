@@ -20,7 +20,7 @@ export const index = [
         ...rootParserOptions,
         tsconfigRootDir: import.meta.dirname,
         projectService: {
-            // See comment in packages/eslint-config/index.mjs
+            // See comment in packages/oxlint-config/index.mjs
             allowDefaultProject: ['bin.js', 'bundle.js', 'rollup.dts.config.mjs'],
           },
       },

@@ -53,7 +53,7 @@
     "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/oxlint-config": "workspace:*",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "payload": "workspace:*"

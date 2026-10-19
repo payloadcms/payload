@@ -851,7 +851,7 @@
     "@babel/preset-react": "7.27.1",
     "@babel/preset-typescript": "7.27.1",
     "@lexical/eslint-plugin": "0.52.0",
-    "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/oxlint-config": "workspace:*",
     "@types/escape-html": "1.0.4",
     "@types/json-schema": "7.0.15",
     "@types/node": "24.12.3",
