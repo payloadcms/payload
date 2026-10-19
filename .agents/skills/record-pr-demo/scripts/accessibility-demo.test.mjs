@@ -201,7 +201,7 @@ test('should suppress keys from inputs inside private shadow hosts', async () =>
   })
 })
 
-test('should center transient keycaps below the window in a stable reserved gap', async () => {
+test('should keep transient keycaps inside a stable accessibility panel', async () => {
   let plainWindow
   await withPresentation({
     accessibility: false,
@@ -213,7 +213,9 @@ test('should center transient keycaps below the window in a stable reserved gap'
   await withPresentation({
     showAnnouncements: false,
     run: async ({ stage, app }) => {
-      await expect(stage.locator('[data-accessibility]')).toHaveCount(0)
+      await expect(stage.locator('[data-a11y-badge]')).toHaveText('a11y')
+      await expect(stage.locator('[data-announcement]')).toHaveCount(0)
+      const initialPanel = await stage.locator('[data-accessibility]').boundingBox()
       const initialWindow = await stage.locator('[data-window]').boundingBox()
       assert.ok(initialWindow.height < plainWindow.height)
       const overlay = stage.locator('[data-keystroke-overlay]')
@@ -227,18 +229,19 @@ test('should center transient keycaps below the window in a stable reserved gap'
       await expect(overlay).toHaveAttribute('aria-hidden', 'true')
       const box = await overlay.boundingBox()
       const windowBox = await stage.locator('[data-window]').boundingBox()
-      const canvas = await stage.locator('[data-canvas]').boundingBox()
-      assert.ok(box.y >= windowBox.y + windowBox.height)
-      assert.ok(box.y + box.height <= canvas.y + canvas.height)
-      assert.ok(Math.abs(box.x + box.width / 2 - windowBox.x - windowBox.width / 2) < 2)
+      assert.ok(initialPanel.y >= windowBox.y + windowBox.height)
+      assert.ok(box.x >= initialPanel.x && box.y >= initialPanel.y)
+      assert.ok(box.x + box.width <= initialPanel.x + initialPanel.width)
+      assert.ok(box.y + box.height <= initialPanel.y + initialPanel.height)
       assert.deepEqual(windowBox, initialWindow)
       await expect(overlay).toBeHidden({ timeout: 3000 })
       assert.deepEqual(await stage.locator('[data-window]').boundingBox(), initialWindow)
+      assert.deepEqual(await stage.locator('[data-accessibility]').boundingBox(), initialPanel)
     },
   })
 })
 
-test('should keep keycaps between the resized window and the optional caption strip', async () => {
+test('should keep keys on the left and live-region text on the right below the resized window', async () => {
   await withPresentation({
     run: async ({ stage, app, presentation }) => {
       await app.locator('#first').focus()
@@ -252,10 +255,17 @@ test('should keep keycaps between the resized window and the optional caption st
         await presentation.resizeWindow({ ...viewport, duration: 0 })
         const keycaps = await overlay.boundingBox()
         const windowBox = await stage.locator('[data-window]').boundingBox()
-        const captions = await stage.locator('[data-accessibility]').boundingBox()
-        assert.ok(keycaps.y >= windowBox.y + windowBox.height)
-        assert.ok(keycaps.y + keycaps.height <= captions.y)
-        assert.ok(Math.abs(keycaps.x + keycaps.width / 2 - windowBox.x - windowBox.width / 2) < 2)
+        const panel = await stage.locator('[data-accessibility]').boundingBox()
+        const message = await stage.locator('[data-announcement]').boundingBox()
+        const badge = await stage.locator('[data-a11y-badge]').boundingBox()
+        assert.ok(panel.y >= windowBox.y + windowBox.height)
+        for (const box of [keycaps, message, badge]) {
+          assert.ok(box.x >= panel.x && box.y >= panel.y)
+          assert.ok(box.x + box.width <= panel.x + panel.width)
+          assert.ok(box.y + box.height <= panel.y + panel.height)
+        }
+        assert.ok(badge.x + badge.width < keycaps.x)
+        assert.ok(keycaps.x + keycaps.width < message.x)
       }
     },
   })
