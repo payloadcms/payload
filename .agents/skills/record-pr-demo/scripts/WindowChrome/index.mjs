@@ -91,7 +91,7 @@ export function mountDemoChrome({
     .keystroke { display:flex; flex:none; align-items:center; gap:6px; font:13px/1.5 ui-monospace,monospace; }
     .keystroke[data-key-history-entry] kbd { color:var(--sub); background:var(--paper); box-shadow:none; }
     .keystroke[data-keystroke] { font-weight:600; }
-    .keystroke kbd { display:inline-block; padding:1px 7px; border:1px solid var(--keycap-border); border-radius:var(--radius-medium,5px); background:var(--keycap-bg); color:var(--keycap-text); box-shadow:var(--elevation-300-tooltip,0 3px 8px #00000024); font:inherit; white-space:nowrap; }
+    .keystroke kbd { display:inline-block; padding:1px 7px; border:1px solid var(--keycap-border); border-radius:var(--radius-medium,5px); background:var(--keycap-bg); color:var(--keycap-text); font:inherit; white-space:nowrap; }
     .key-separator { font:inherit; }
 
   </style>
