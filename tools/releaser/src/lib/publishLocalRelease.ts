@@ -1,6 +1,6 @@
 import type { PackageDetails } from './getPackageDetails.js'
 import type { PublishResult } from './runPublishSequence.js'
-import type { GetLatestVersion, StableDistTag } from './stableDistTag.js'
+import type { GetDistTagVersion, StableDistTag } from './stableDistTag.js'
 
 import { runPublishSequence } from './runPublishSequence.js'
 import { publishWithStableDistTag } from './stableDistTag.js'
@@ -19,7 +19,7 @@ export type LocalPublishOutcome =
 export const publishLocalRelease = async ({
   distTags,
   dryRun,
-  getLatestVersion,
+  getDistTagVersion,
   packages,
   publishFirst,
   publishRest,
@@ -27,7 +27,7 @@ export const publishLocalRelease = async ({
 }: {
   distTags: ReadonlyMap<string, StableDistTag>
   dryRun?: boolean
-  getLatestVersion: GetLatestVersion
+  getDistTagVersion: GetDistTagVersion
   packages: PackageDetails[]
   /** Publishes the first package, which prompts for the npm OTP. */
   publishFirst: PublishPackage
@@ -46,7 +46,7 @@ export const publishLocalRelease = async ({
         const result = await publishWithStableDistTag({
           distTags,
           dryRun,
-          getLatestVersion,
+          getDistTagVersion,
           pkg,
           publish: ({ tag }) => publish({ pkg, tag }),
           version,

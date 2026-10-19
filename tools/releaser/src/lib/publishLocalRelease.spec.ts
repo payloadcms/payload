@@ -19,7 +19,7 @@ const packages = ['translations', 'payload', 'ui'].map(mkPkg)
 
 const distTags = new Map<string, StableDistTag>(packages.map((pkg) => [pkg.name, 'latest']))
 
-const getLatestVersion = vi.fn(async () => previousVersion)
+const getDistTagVersion = vi.fn(async () => previousVersion)
 
 /** Mirrors the publish pre-check: a version npm already has is skipped as a success. */
 const publishedOnNpm = new Set([previousVersion])
@@ -37,7 +37,7 @@ describe('publishLocalRelease', () => {
 
     const outcome = await publishLocalRelease({
       distTags,
-      getLatestVersion,
+      getDistTagVersion,
       packages,
       publishFirst,
       publishRest,
@@ -62,7 +62,7 @@ describe('publishLocalRelease', () => {
 
     await publishLocalRelease({
       distTags,
-      getLatestVersion,
+      getDistTagVersion,
       packages,
       publishFirst,
       publishRest,
@@ -79,7 +79,7 @@ describe('publishLocalRelease', () => {
 
     const outcome = await publishLocalRelease({
       distTags,
-      getLatestVersion,
+      getDistTagVersion,
       packages,
       publishFirst: publishUnlessOnNpm,
       publishRest,
@@ -95,7 +95,7 @@ describe('publishLocalRelease', () => {
 
     const outcome = await publishLocalRelease({
       distTags,
-      getLatestVersion: async () => '4.0.0',
+      getDistTagVersion: async () => '4.0.0',
       packages,
       publishFirst,
       publishRest: publishUnlessOnNpm,

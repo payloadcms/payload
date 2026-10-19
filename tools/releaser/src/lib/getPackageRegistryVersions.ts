@@ -40,35 +40,37 @@ export const isVersionPublished = async ({
 }
 
 /**
- * Reads the version npm currently serves as `latest` for a package.
- * Returns `undefined` only on 404 (package never published). Any other status or a
+ * Reads the version a dist-tag points to for a package.
+ * Returns `undefined` only on 404 (the package or the tag does not exist). Any other status or a
  * malformed body throws, so dist-tag selection fails closed instead of guessing.
  */
-export const getLatestPublishedVersion = async ({
+export const getDistTagVersion = async ({
   fetchImpl = fetch,
   name,
   sleep = defaultSleep,
+  tag,
 }: {
   fetchImpl?: typeof fetch
   name: string
   sleep?: (ms: number) => Promise<void>
+  tag: string
 }): Promise<string | undefined> => {
   const res = await fetchWithRetry({
     fetchImpl,
     sleep,
-    url: `https://registry.npmjs.org/${name}/latest`,
+    url: `https://registry.npmjs.org/${name}/${tag}`,
   })
   if (res.status === 404) {
     return undefined
   }
   if (!res.ok) {
     throw new Error(
-      `Failed to read latest version of ${name} from the npm registry: ${res.status} ${res.statusText}`,
+      `Failed to read ${tag} version of ${name} from the npm registry: ${res.status} ${res.statusText}`,
     )
   }
   const body: unknown = await res.json()
   if (!hasVersion(body)) {
-    throw new Error(`npm registry response for ${name}/latest has no version`)
+    throw new Error(`npm registry response for ${name}/${tag} has no version`)
   }
   return body.version
 }

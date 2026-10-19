@@ -10,7 +10,7 @@ import type { PublishResult } from './runPublishSequence.js'
 import type { StableDistTag } from './stableDistTag.js'
 
 import { getPackageDetails } from './getPackageDetails.js'
-import { getLatestPublishedVersion, isVersionPublished } from './getPackageRegistryVersions.js'
+import { getDistTagVersion, isVersionPublished } from './getPackageRegistryVersions.js'
 import { packagePublishList } from './publishList.js'
 import { runPublishSequence } from './runPublishSequence.js'
 import { publishWithStableDistTag } from './stableDistTag.js'
@@ -73,7 +73,7 @@ export const getWorkspace = (): Workspace => {
         return publishWithStableDistTag({
           distTags: tag,
           dryRun,
-          getLatestVersion: getLatestPublishedVersion,
+          getDistTagVersion,
           pkg,
           publish: ({ tag: packageTag }) => publishSinglePackage(pkg, { dryRun, tag: packageTag }),
           version: pkg.version,

@@ -1,14 +1,19 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { getLatestPublishedVersion, isVersionPublished } from './getPackageRegistryVersions.js'
+import { getDistTagVersion, isVersionPublished } from './getPackageRegistryVersions.js'
 
 const sleep = vi.fn(async () => {})
 
-describe('getLatestPublishedVersion', () => {
+describe('getDistTagVersion', () => {
   it('should return the latest version on 200', async () => {
     const fetchImpl = vi.fn(async () => Response.json({ version: '3.90.2' }))
 
-    const result = await getLatestPublishedVersion({ name: '@payloadcms/ui', fetchImpl, sleep })
+    const result = await getDistTagVersion({
+      name: '@payloadcms/ui',
+      fetchImpl,
+      sleep,
+      tag: 'latest',
+    })
 
     expect(result).toBe('3.90.2')
     expect(fetchImpl).toHaveBeenCalledWith('https://registry.npmjs.org/@payloadcms/ui/latest', {
@@ -16,10 +21,21 @@ describe('getLatestPublishedVersion', () => {
     })
   })
 
+  it('should read the requested dist-tag', async () => {
+    const fetchImpl = vi.fn(async () => Response.json({ version: '3.91.0' }))
+
+    const result = await getDistTagVersion({ name: 'payload', fetchImpl, sleep, tag: 'payload-3' })
+
+    expect(result).toBe('3.91.0')
+    expect(fetchImpl).toHaveBeenCalledWith('https://registry.npmjs.org/payload/payload-3', {
+      signal: expect.any(AbortSignal),
+    })
+  })
+
   it('should return undefined on 404 without retrying', async () => {
     const fetchImpl = vi.fn(async () => new Response(null, { status: 404 }))
 
-    const result = await getLatestPublishedVersion({ name: 'payload', fetchImpl, sleep })
+    const result = await getDistTagVersion({ name: 'payload', fetchImpl, sleep, tag: 'latest' })
 
     expect(result).toBeUndefined()
     expect(fetchImpl).toHaveBeenCalledTimes(1)
@@ -28,9 +44,9 @@ describe('getLatestPublishedVersion', () => {
   it('should throw after three attempts on persistent 500', async () => {
     const fetchImpl = vi.fn(async () => new Response(null, { status: 500 }))
 
-    await expect(getLatestPublishedVersion({ name: 'payload', fetchImpl, sleep })).rejects.toThrow(
-      /500/,
-    )
+    await expect(
+      getDistTagVersion({ name: 'payload', fetchImpl, sleep, tag: 'latest' }),
+    ).rejects.toThrow(/500/)
     expect(fetchImpl).toHaveBeenCalledTimes(3)
   })
 
@@ -40,7 +56,7 @@ describe('getLatestPublishedVersion', () => {
       .mockResolvedValueOnce(new Response(null, { status: 500 }))
       .mockResolvedValueOnce(Response.json({ version: '3.90.2' }))
 
-    const result = await getLatestPublishedVersion({ name: 'payload', fetchImpl, sleep })
+    const result = await getDistTagVersion({ name: 'payload', fetchImpl, sleep, tag: 'latest' })
 
     expect(result).toBe('3.90.2')
     expect(fetchImpl).toHaveBeenCalledTimes(2)
@@ -49,9 +65,9 @@ describe('getLatestPublishedVersion', () => {
   it('should throw after three 429 responses', async () => {
     const fetchImpl = vi.fn(async () => new Response(null, { status: 429 }))
 
-    await expect(getLatestPublishedVersion({ name: 'payload', fetchImpl, sleep })).rejects.toThrow(
-      /429/,
-    )
+    await expect(
+      getDistTagVersion({ name: 'payload', fetchImpl, sleep, tag: 'latest' }),
+    ).rejects.toThrow(/429/)
     expect(fetchImpl).toHaveBeenCalledTimes(3)
   })
 
@@ -62,7 +78,7 @@ describe('getLatestPublishedVersion', () => {
       .mockRejectedValueOnce(new TypeError('fetch failed'))
       .mockResolvedValueOnce(Response.json({ version: '3.90.2' }))
 
-    const result = await getLatestPublishedVersion({ name: 'payload', fetchImpl, sleep })
+    const result = await getDistTagVersion({ name: 'payload', fetchImpl, sleep, tag: 'latest' })
 
     expect(result).toBe('3.90.2')
     expect(fetchImpl).toHaveBeenCalledTimes(3)
@@ -74,7 +90,7 @@ describe('getLatestPublishedVersion', () => {
       .mockRejectedValueOnce(new DOMException('The operation timed out.', 'TimeoutError'))
       .mockResolvedValueOnce(Response.json({ version: '3.90.2' }))
 
-    const result = await getLatestPublishedVersion({ name: 'payload', fetchImpl, sleep })
+    const result = await getDistTagVersion({ name: 'payload', fetchImpl, sleep, tag: 'latest' })
 
     expect(result).toBe('3.90.2')
     expect(fetchImpl).toHaveBeenCalledTimes(2)
@@ -83,9 +99,9 @@ describe('getLatestPublishedVersion', () => {
   it('should throw the network error after three rejected fetches', async () => {
     const fetchImpl = vi.fn<typeof fetch>().mockRejectedValue(new TypeError('fetch failed'))
 
-    await expect(getLatestPublishedVersion({ name: 'payload', fetchImpl, sleep })).rejects.toThrow(
-      /fetch failed/,
-    )
+    await expect(
+      getDistTagVersion({ name: 'payload', fetchImpl, sleep, tag: 'latest' }),
+    ).rejects.toThrow(/fetch failed/)
     expect(fetchImpl).toHaveBeenCalledTimes(3)
   })
 
@@ -94,7 +110,7 @@ describe('getLatestPublishedVersion', () => {
     const fetchImpl = vi.fn(async () => new Response(null, { status: 503 }))
 
     await expect(
-      getLatestPublishedVersion({ name: 'payload', fetchImpl, sleep: localSleep }),
+      getDistTagVersion({ name: 'payload', fetchImpl, sleep: localSleep, tag: 'latest' }),
     ).rejects.toThrow(/503/)
 
     expect(localSleep.mock.calls).toEqual([[1000], [2000]])
@@ -103,18 +119,18 @@ describe('getLatestPublishedVersion', () => {
   it('should not retry other 4xx and should throw', async () => {
     const fetchImpl = vi.fn(async () => new Response(null, { status: 400 }))
 
-    await expect(getLatestPublishedVersion({ name: 'payload', fetchImpl, sleep })).rejects.toThrow(
-      /400/,
-    )
+    await expect(
+      getDistTagVersion({ name: 'payload', fetchImpl, sleep, tag: 'latest' }),
+    ).rejects.toThrow(/400/)
     expect(fetchImpl).toHaveBeenCalledTimes(1)
   })
 
   it('should throw without retrying when the body has no version', async () => {
     const fetchImpl = vi.fn(async () => Response.json({ name: 'payload' }))
 
-    await expect(getLatestPublishedVersion({ name: 'payload', fetchImpl, sleep })).rejects.toThrow(
-      /version/,
-    )
+    await expect(
+      getDistTagVersion({ name: 'payload', fetchImpl, sleep, tag: 'latest' }),
+    ).rejects.toThrow(/version/)
     expect(fetchImpl).toHaveBeenCalledTimes(1)
   })
 })

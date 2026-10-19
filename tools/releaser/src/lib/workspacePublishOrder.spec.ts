@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('child_process', () => ({ execSync: vi.fn(), spawn: vi.fn() }))
 vi.mock('./getPackageRegistryVersions.js', () => ({
-  getLatestPublishedVersion: vi.fn(),
+  getDistTagVersion: vi.fn(),
   isVersionPublished: vi.fn(),
 }))
 vi.mock('globby', () => ({ default: vi.fn() }))
@@ -15,7 +15,7 @@ import globby from 'globby'
 
 import type { StableDistTag } from './stableDistTag.js'
 
-import { getLatestPublishedVersion, isVersionPublished } from './getPackageRegistryVersions.js'
+import { getDistTagVersion, isVersionPublished } from './getPackageRegistryVersions.js'
 import { getWorkspace } from './getWorkspace.js'
 import { packagePublishList } from './publishList.js'
 
@@ -49,7 +49,7 @@ describe('workspace.publish order', () => {
       name: nameFor(packageJsonPath.split('/').at(-2) ?? ''),
       version: '3.90.3',
     }))
-    vi.mocked(getLatestPublishedVersion).mockResolvedValue('3.90.2')
+    vi.mocked(getDistTagVersion).mockResolvedValue('3.90.2')
     vi.mocked(isVersionPublished).mockResolvedValue(false)
     vi.mocked(spawn).mockImplementation(() => spawnExiting(0) as never)
   })

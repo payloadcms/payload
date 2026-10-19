@@ -24,7 +24,7 @@ import type { PublishResult } from './lib/runPublishSequence.js'
 
 import { assertBumpPreconditions } from './lib/assertBumpPreconditions.js'
 import { getPackageDetails } from './lib/getPackageDetails.js'
-import { getLatestPublishedVersion } from './lib/getPackageRegistryVersions.js'
+import { getDistTagVersion } from './lib/getPackageRegistryVersions.js'
 import { publishSinglePackage } from './lib/getWorkspace.js'
 import { RELEASE_BRANCH } from './lib/pinnedMajor.js'
 import { packagePublishList } from './lib/publishList.js'
@@ -147,7 +147,7 @@ async function main() {
 
   // Resolved before any write so a registry failure stops the run with nothing to undo.
   const distTags = await resolveStableDistTags({
-    getLatestVersion: getLatestPublishedVersion,
+    getDistTagVersion,
     names: packageDetails.map((p) => p.name),
     version: nextReleaseVersion,
   })
@@ -224,7 +224,7 @@ async function main() {
   const publishOutcome = await publishLocalRelease({
     distTags,
     dryRun,
-    getLatestVersion: getLatestPublishedVersion,
+    getDistTagVersion,
     packages: packageDetails,
     publishFirst: ({ pkg, tag: distTag }) =>
       Promise.resolve(publishInteractively({ distTag, pkg, runCmd })),

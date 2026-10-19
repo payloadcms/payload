@@ -20,7 +20,7 @@ import type { StableDistTag } from './lib/stableDistTag.js'
 
 import { findChangelogBaseTag } from './lib/findChangelogBaseTag.js'
 import { getPackageDetails } from './lib/getPackageDetails.js'
-import { getLatestPublishedVersion, isVersionPublished } from './lib/getPackageRegistryVersions.js'
+import { getDistTagVersion, isVersionPublished } from './lib/getPackageRegistryVersions.js'
 import { getWorkspace } from './lib/getWorkspace.js'
 import { PINNED_MAJOR, pinnedMajorTagGlob, RELEASE_BRANCH } from './lib/pinnedMajor.js'
 import { packagePublishList } from './lib/publishList.js'
@@ -173,7 +173,7 @@ async function main(): Promise<void> {
         (await getPackageDetails(packagePublishList)).map((pkg) => pkg.name),
       log: console.log,
       resolveDistTags: ({ names, version }) =>
-        resolveStableDistTags({ getLatestVersion: getLatestPublishedVersion, names, version }),
+        resolveStableDistTags({ getDistTagVersion, names, version }),
       triggerTag: process.env.GITHUB_REF_NAME,
       workspace: getWorkspace(),
     },
