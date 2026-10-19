@@ -38,6 +38,7 @@ import type {
   GlobalBeforeValidateHook,
   GlobalConfig,
   GlobalPermission,
+  GlobalSlug,
   Job,
   JobTaskStatus,
   JoinFieldLabelServerProps,
@@ -141,6 +142,14 @@ import type {
 
 describe('Types testing', () => {
   describe('branching', () => {
+    test('should accept collection and global slugs in branching exclusions', () => {
+      expect<NonNullable<BranchingConfig['exclude']>>().type.toBe<
+        (CollectionSlug | GlobalSlug)[]
+      >()
+      expect<['posts', 'menu']>().type.toBeAssignableTo<BranchingConfig['exclude']>()
+      expect<['not-a-configured-slug']>().type.not.toBeAssignableTo<BranchingConfig['exclude']>()
+    })
+
     test('should expose exact merge hook argument types', () => {
       type AfterMergeArgs = Parameters<
         NonNullable<NonNullable<BranchingConfig['hooks']>['afterMerge']>
