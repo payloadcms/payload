@@ -4,6 +4,8 @@ import { runReleaseBump } from './release-bump.js'
 
 const baseDeps = () => ({
   env: { GITHUB_TOKEN: 'token' } as NodeJS.ProcessEnv,
+  findChangelogBaseTag: vi.fn(async (): Promise<string | undefined> => 'v4.0.0-beta.9'),
+  generateReleaseNotes: vi.fn(async () => ({ releaseNotes: '## notes' })),
   isPublished: vi.fn(async () => false),
   log: vi.fn(),
   readBranch: () => 'main',
@@ -12,6 +14,7 @@ const baseDeps = () => ({
     bumpVersion: vi.fn(async () => '4.0.0-beta.10'),
     version: vi.fn(async () => '4.0.0-beta.9'),
   },
+  writeSummary: vi.fn(),
 })
 
 const makeDeps = (
@@ -108,5 +111,42 @@ describe('runReleaseBump', () => {
 
     const logs = deps.log.mock.calls.map((call) => call[0] as string)
     expect(logs.some((line) => line.includes('git push --atomic'))).toBe(true)
+  })
+
+  it('should preview release notes for the bumped version in dry-run', async () => {
+    const deps = makeDeps()
+
+    await runReleaseBump({ bump: 'prerelease', deps, dryRun: true, preid: 'beta' })
+
+    expect(deps.findChangelogBaseTag).toHaveBeenCalledWith({ version: '4.0.0-beta.10' })
+    expect(deps.generateReleaseNotes).toHaveBeenCalledWith({
+      fromVersion: 'v4.0.0-beta.9',
+      releaseTag: 'v4.0.0-beta.10',
+      toVersion: 'HEAD',
+    })
+
+    const logs = deps.log.mock.calls.map((call) => call[0] as string)
+    expect(logs.some((line) => line.includes('## notes'))).toBe(true)
+    expect(deps.writeSummary).toHaveBeenCalledWith('## notes')
+  })
+
+  it('should fail the dry run when no changelog base tag exists', async () => {
+    const deps = makeDeps({ findChangelogBaseTag: vi.fn(async () => undefined) })
+
+    await expect(
+      runReleaseBump({ bump: 'prerelease', deps, dryRun: true, preid: 'beta' }),
+    ).rejects.toThrow(/changelog base tag/)
+
+    expect(deps.run).not.toHaveBeenCalled()
+  })
+
+  it('should not generate notes on a real run', async () => {
+    const deps = makeDeps()
+
+    await runReleaseBump({ bump: 'prerelease', deps, dryRun: false, preid: 'beta' })
+
+    expect(deps.findChangelogBaseTag).not.toHaveBeenCalled()
+    expect(deps.generateReleaseNotes).not.toHaveBeenCalled()
+    expect(deps.writeSummary).not.toHaveBeenCalled()
   })
 })

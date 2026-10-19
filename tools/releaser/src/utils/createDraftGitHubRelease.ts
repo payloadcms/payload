@@ -9,7 +9,6 @@ type Args = {
 
 type GitHubRelease = {
   draft: boolean
-  html_url: string
   id: number
   tag_name: string
 }
@@ -64,7 +63,12 @@ export const createDraftGitHubRelease = async ({
     throw new Error(`Failed to ${existing ? 'update' : 'create'} release: ${await res.text()}`)
   }
 
-  const resBody = (await res.json()) as GitHubRelease
+  const resBody: unknown = await res.json()
+
+  if (!hasHtmlUrl(resBody)) {
+    throw new Error('GitHub release response has no html_url')
+  }
+
   return { releaseUrl: resBody.html_url }
 }
 
@@ -96,7 +100,12 @@ const findReleaseByTag = async ({
     throw new Error(`Failed to list releases: ${await res.text()}`)
   }
 
-  const releases = (await res.json()) as GitHubRelease[]
+  const releases: unknown = await res.json()
+
+  if (!isGitHubReleaseList(releases)) {
+    throw new Error('Unexpected GitHub releases list response')
+  }
+
   const match = releases.find((release) => release.tag_name === tag)
 
   if (!match && releases.length === PER_PAGE) {
@@ -107,3 +116,19 @@ const findReleaseByTag = async ({
 
   return match
 }
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null
+
+const hasHtmlUrl = (body: unknown): body is { html_url: string } =>
+  isRecord(body) && typeof body.html_url === 'string'
+
+const isGitHubReleaseList = (body: unknown): body is GitHubRelease[] =>
+  Array.isArray(body) &&
+  body.every(
+    (item: unknown) =>
+      isRecord(item) &&
+      typeof item.id === 'number' &&
+      typeof item.draft === 'boolean' &&
+      typeof item.tag_name === 'string',
+  )
