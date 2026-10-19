@@ -80,7 +80,7 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
   const location = useLocation()
   const params = useParams({ strict: false })
   const isRouterLoading = useRouterState({ select: (state) => state.isLoading })
-  const { holdRouteTransition, waitForRouteTransitionHolds } = useRouteTransition()
+  const { holdRouteTransition } = useRouteTransition()
 
   useEffect(() => {
     if (!isRouterLoading) {
@@ -146,11 +146,10 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
   }, [router])
 
   const replace = useCallback(
-    async (path: string, options?: { scroll?: boolean }) => {
-      await router.navigate({ ...toNavOptions(path), replace: true, resetScroll: options?.scroll })
-      await waitForRouteTransitionHolds()
+    (path: string, options?: { scroll?: boolean }) => {
+      return router.navigate({ ...toNavOptions(path), replace: true, resetScroll: options?.scroll })
     },
-    [router, toNavOptions, waitForRouteTransitionHolds],
+    [router, toNavOptions],
   )
 
   // Mirror Next.js' router behavior to allow syncing client state to the URL without triggering a second server load.

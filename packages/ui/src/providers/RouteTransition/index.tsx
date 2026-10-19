@@ -63,6 +63,12 @@ export const RouteTransitionProvider: React.FC<RouteTransitionProps> = ({ childr
     }
   }, [isTransitioning, initiateProgress])
 
+  const waitForHoldsToRelease = useCallback(async () => {
+    while (routeTransitionHolds.current.size > 0) {
+      await Promise.all(routeTransitionHolds.current)
+    }
+  }, [])
+
   const startRouteTransition: StartRouteTransition = useCallback(
     (callback?: () => Promise<void> | void) => {
       let result: Promise<void> | void = undefined
@@ -70,13 +76,18 @@ export const RouteTransitionProvider: React.FC<RouteTransitionProps> = ({ childr
       startTransition(() => {
         setIsOptimisticallyTransitioning(true)
 
-        result = callback?.()
+        const navigation = callback?.()
+
+        if (navigation) {
+          result = navigation.then(waitForHoldsToRelease)
+        }
+
         return result
       })
 
       return result
     },
-    [setIsOptimisticallyTransitioning],
+    [setIsOptimisticallyTransitioning, waitForHoldsToRelease],
   )
 
   const holdRouteTransition = useCallback(() => {
@@ -101,12 +112,6 @@ export const RouteTransitionProvider: React.FC<RouteTransitionProps> = ({ childr
     }
   }, [])
 
-  const waitForRouteTransitionHolds = useCallback(async () => {
-    while (routeTransitionHolds.current.size > 0) {
-      await Promise.all(routeTransitionHolds.current)
-    }
-  }, [])
-
   return (
     <RouteTransitionContext
       value={{
@@ -114,7 +119,6 @@ export const RouteTransitionProvider: React.FC<RouteTransitionProps> = ({ childr
         isTransitioning,
         startRouteTransition,
         transitionProgress,
-        waitForRouteTransitionHolds,
       }}
     >
       {children}
@@ -134,8 +138,6 @@ type RouteTransitionContextValue = {
   isTransitioning: boolean
   startRouteTransition: StartRouteTransition
   transitionProgress: number
-  /** Waits for outstanding router and deferred-render holds to be released. */
-  waitForRouteTransitionHolds: () => Promise<void>
 }
 
 const RouteTransitionContext = React.createContext<RouteTransitionContextValue>({
@@ -146,7 +148,6 @@ const RouteTransitionContext = React.createContext<RouteTransitionContextValue>(
     return callback?.()
   },
   transitionProgress: 0,
-  waitForRouteTransitionHolds: () => Promise.resolve(),
 })
 
 /**

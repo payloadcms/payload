@@ -38,7 +38,6 @@ export type RouterAdapterRouter = {
   refresh: () => void
   /**
    * Replace the current path with a new one.
-   * Async adapters resolve after the destination renders.
    */
   replace: (path: string, options?: { scroll?: boolean }) => Promise<void> | void
   /**

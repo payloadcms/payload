@@ -4442,28 +4442,25 @@ test.describe('WCAG 2.2 Level AA', () => {
         await page.route('**/*', holdNavigation)
 
         try {
-          try {
-            await toggle.click()
-            await expect.poll(() => hasHeldRequest).toBe(true)
-            // Flush rendering while the navigation request is still withheld.
-            await page.evaluate(
-              () =>
-                new Promise<void>((resolve) => {
-                  requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
-                }),
-            )
-            await expect(toggle).toBeChecked({ checked: !wasChecked })
-            await expect(page.locator('.progress-bar')).toBeVisible()
+          await toggle.click()
+          await expect.poll(() => hasHeldRequest).toBe(true)
+          // Flush rendering while the navigation request is still withheld.
+          await page.evaluate(
+            () =>
+              new Promise<void>((resolve) => {
+                requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+              }),
+          )
+          await expect(toggle).toBeChecked({ checked: !wasChecked })
+          await expect(page.locator('.progress-bar')).toBeVisible()
 
-            if (shouldToggleTwice) {
-              await toggle.click()
-              await expect(toggle).toBeChecked({ checked: wasChecked })
-            }
-          } finally {
-            releaseNavigation!()
-            // Superseded navigations can cancel a held request.
-            await page.unrouteAll({ behavior: shouldToggleTwice ? 'ignoreErrors' : 'wait' })
+          if (shouldToggleTwice) {
+            await toggle.click()
+            await expect(toggle).toBeChecked({ checked: wasChecked })
           }
+          releaseNavigation!()
+          // Superseded navigations can cancel a held request.
+          await page.unrouteAll({ behavior: shouldToggleTwice ? 'ignoreErrors' : 'wait' })
 
           await expect(page.locator('.progress-bar')).toBeHidden()
           const states = await stateHistory.evaluate(({ observer, states }) => {
