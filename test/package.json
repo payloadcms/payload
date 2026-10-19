@@ -29,6 +29,7 @@
     "@next/env": "16.4.2",
     "@opennextjs/cloudflare": "1.16.1",
     "@payloadcms/admin-bar": "workspace:*",
+    "@payloadcms/admin-runtime": "workspace:*",
     "@payloadcms/db-d1-sqlite": "workspace:*",
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/db-postgres": "workspace:*",

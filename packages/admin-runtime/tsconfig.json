@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "strict": true
+  },
+  // `runtime/` is prebuilt by Vite and type-checked through `runtime/tsconfig.json`.
+  "include": ["src"],
+  "references": [{ "path": "../payload" }]
+}

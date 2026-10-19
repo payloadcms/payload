@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@payloadcms/admin-bar": "3.82.1",
+    "@payloadcms/admin-runtime": "3.82.1",
     "@payloadcms/db-vercel-postgres": "3.82.1",
     "@payloadcms/live-preview-react": "3.82.1",
     "@payloadcms/next": "3.82.1",

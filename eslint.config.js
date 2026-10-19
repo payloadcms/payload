@@ -11,6 +11,7 @@ export const defaultESLintIgnores = [
   '**/.svn',
   '**/oxfmt.config.ts',
   '**/playwright.config.ts',
+  '**/vite.config.ts',
   '**/vite.tanstack.config.ts',
   '**/vitest.config.ts',
   '**/vitest.setup.ts',

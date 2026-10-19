@@ -82,6 +82,35 @@ export const withPayload = (nextConfig = {}, options = {}) => {
        */
       silenceDeprecations: [...(nextConfig.sassOptions?.silenceDeprecations || []), 'import'],
     },
+    logging:
+      nextConfig.logging === false
+        ? false
+        : {
+            ...nextConfig.logging,
+            incomingRequests:
+              nextConfig.logging?.incomingRequests === false
+                ? false
+                : {
+                    ...(typeof nextConfig.logging?.incomingRequests === 'object'
+                      ? nextConfig.logging.incomingRequests
+                      : {}),
+                    // The prebuilt admin's assets, and the request it polls in dev to refresh after edits.
+                    ignore: [
+                      ...(nextConfig.logging?.incomingRequests?.ignore || []),
+                      /\/__payload\//,
+                    ],
+                  },
+          },
+    outputFileTracingIncludes: {
+      ...(nextConfig.outputFileTracingIncludes || {}),
+      // The prebuilt admin (`@payloadcms/admin-runtime`) and the custom components it compiled are
+      // loaded from disk at runtime, out of the bundler's sight, so tracing can't find them.
+      '**/*': [
+        ...(nextConfig.outputFileTracingIncludes?.['**/*'] || []),
+        './node_modules/@payloadcms/admin-runtime/**/*',
+        './.payload/admin/**/*',
+      ],
+    },
     outputFileTracingExcludes: {
       ...(nextConfig.outputFileTracingExcludes || {}),
       '**/*': [

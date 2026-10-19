@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@payloadcms/admin-bar": "workspace:*",
+    "@payloadcms/admin-runtime": "workspace:*",
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/email-nodemailer": "workspace:*",
     "@payloadcms/live-preview-react": "workspace:*",

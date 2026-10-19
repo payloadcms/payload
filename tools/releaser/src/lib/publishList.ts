@@ -17,6 +17,7 @@ export const packagePublishList = [
   'next',
   'richtext-lexical',
   'tanstack-start',
+  'admin-runtime',
 
   // DB
   'drizzle',

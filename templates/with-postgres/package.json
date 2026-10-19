@@ -19,6 +19,7 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
+    "@payloadcms/admin-runtime": "3.82.1",
     "@payloadcms/db-postgres": "3.82.1",
     "@payloadcms/next": "3.82.1",
     "@payloadcms/richtext-lexical": "3.82.1",

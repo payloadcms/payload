@@ -48,3 +48,6 @@ next-env.d.ts
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Custom admin components compiled by @payloadcms/admin-runtime
+/.payload

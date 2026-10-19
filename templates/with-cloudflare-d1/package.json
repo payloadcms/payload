@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@opennextjs/cloudflare": "^1.11.0",
+    "@payloadcms/admin-runtime": "3.82.1",
     "@payloadcms/db-d1-sqlite": "3.82.1",
     "@payloadcms/next": "3.82.1",
     "@payloadcms/richtext-lexical": "3.82.1",
