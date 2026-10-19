@@ -509,17 +509,28 @@ export async function inContrastThemes({
 }) {
   test.setTimeout(90_000)
 
-  for (const theme of themes) {
-    await test.step(`${theme} theme`, async () => {
-      await page.context().addCookies([
-        { name: 'payload-theme', url: serverURL, value: theme },
-        { name: 'payload-high-contrast-mode', url: serverURL, value: 'true' },
-      ])
-      await page.mouse.move(0, 0)
-      await run()
-      await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
-      await expect(page.locator('html')).toHaveAttribute('data-enhanced-contrast', '')
-    })
+  const context = page.context()
+  const preferenceCookieNames = /^(payload-theme|payload-high-contrast-mode)$/
+  const previousCookies = (await context.cookies()).filter(({ name }) =>
+    preferenceCookieNames.test(name),
+  )
+
+  try {
+    for (const theme of themes) {
+      await test.step(`${theme} theme`, async () => {
+        await page.context().addCookies([
+          { name: 'payload-theme', url: serverURL, value: theme },
+          { name: 'payload-high-contrast-mode', url: serverURL, value: 'true' },
+        ])
+        await page.mouse.move(0, 0)
+        await run()
+        await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
+        await expect(page.locator('html')).toHaveAttribute('data-enhanced-contrast', '')
+      })
+    }
+  } finally {
+    await context.clearCookies({ name: preferenceCookieNames })
+    await context.addCookies(previousCookies)
   }
 }
 

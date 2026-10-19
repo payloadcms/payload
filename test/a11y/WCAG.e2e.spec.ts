@@ -1765,6 +1765,54 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.4.11 Non-text Contrast (AA)', () => {
+    test('should strengthen both secondary split-button boundaries only in enhanced contrast', async () => {
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await page.goto(`${serverURL}/admin/focus-indicators`)
+          const splitButton = page.locator('.btn--withPopup.btn--style-secondary')
+          const segments = splitButton.getByRole('button')
+          const previousDirection = await page.locator('html').getAttribute('dir')
+
+          await expect(segments).toHaveCount(2)
+          try {
+            for (const direction of ['LTR', 'RTL']) {
+              await page.locator('html').evaluate((element, dir) => {
+                element.setAttribute('dir', dir)
+                element.removeAttribute('data-enhanced-contrast')
+              }, direction)
+              const normalBorders = await readBorderStyles({ targets: segments })
+
+              await page
+                .locator('html')
+                .evaluate((element) => element.setAttribute('data-enhanced-contrast', ''))
+              await expectPaintContrast({
+                againstParent: true,
+                minimum: 3,
+                property: 'borderTopColor',
+                targets: segments,
+              })
+              await page
+                .locator('html')
+                .evaluate((element) => element.removeAttribute('data-enhanced-contrast'))
+              expect(await readBorderStyles({ targets: segments })).toEqual(normalBorders)
+            }
+          } finally {
+            await page.locator('html').evaluate((element, direction) => {
+              if (direction === null) {
+                element.removeAttribute('dir')
+              } else {
+                element.setAttribute('dir', direction)
+              }
+              element.setAttribute('data-enhanced-contrast', '')
+            }, previousDirection)
+          }
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
     for (const theme of ['light', 'dark'] as const) {
       test(`should strengthen UI dividers only in enhanced ${theme} mode`, async () => {
         test.setTimeout(90_000)

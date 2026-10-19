@@ -132,6 +132,7 @@
     --color-border-danger-strong: var(--ramp-red-600);
 
     --color-border: var(--ramp-grey-200);
+    --color-border-menu-separator: var(--ramp-white-200);
     --color-border-strong: var(--ramp-grey-800);
 
     --color-border-disabled: var(--ramp-grey-200);
