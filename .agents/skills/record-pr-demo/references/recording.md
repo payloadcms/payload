@@ -268,6 +268,6 @@ node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs candidate --scenario
 
 ### Capture resolution and encoding
 
-The recorder captures at 2× the design canvas by default: a 1600×1000 composition produces a 3200×2000 video. The containing browser viewport and video capture size are both doubled, and the shared renderer scales the same composition into that viewport. This captures browser-rendered detail at the larger size rather than enlarging an already-recorded frame. Application CSS viewport dimensions, layout breakpoints, font sizes, and interaction timing stay the same.
+The recorder captures at the composition's native dimensions: a 1600×1000 canvas produces a 1600×1000 video. `--viewport` controls the application iframe's CSS dimensions independently of that canvas.
 
-Use `--recording-scale 2` explicitly, or `--recording-scale 1` for the original native-density output. Candidate, validate, and preview modes apply the same capture scale, and the manifest records it alongside other recording options. Low-level APIs accept `recordingScale` with the same values and default. The MP4 converter uses H.264 CRF 18 rather than CRF 23 to preserve more detail through conversion; the existing 10 MB review/upload budget still applies.
+The MP4 converter uses H.264 CRF 18 to preserve detail through conversion. The existing 10 MB review/upload budget still applies.

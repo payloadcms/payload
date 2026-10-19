@@ -31,7 +31,7 @@ export const presentation = {
 }
 ```
 
-`--viewport` sets the initial application's CSS viewport. `presentation.canvas` sets the composition's layout dimensions; `--recording-scale` controls capture density. See [capture resolution and encoding](recording.md#capture-resolution-and-encoding).
+`--viewport` sets the initial application's CSS viewport. `presentation.canvas` sets both the composition and encoded video dimensions. See [capture resolution and encoding](recording.md#capture-resolution-and-encoding).
 
 ## Presentation helpers
 

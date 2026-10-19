@@ -31,7 +31,6 @@ test('parseArgs makes candidate creation the one-command default', () => {
     mouseMoveMs: 300,
     output: '/tmp/payload-pr-demo-hierarchy-move.mp4',
     rawOutput: '/tmp/payload-pr-demo-hierarchy-move.webm',
-    recordingScale: 2,
     scenario: '/tmp/demo.mjs',
     viewport: { height: 900, width: 1440 },
   })
@@ -448,14 +447,5 @@ test('should accept a11y overrides and reject invalid modes', () => {
   assert.throws(
     () => parseArgs(['--scenario', './demo.mjs', '--a11y', 'maybe']),
     /--a11y must be on or off/,
-  )
-})
-
-test('should default to 2x capture and allow explicit native resolution', () => {
-  assert.equal(parseArgs(['--scenario', './demo.mjs']).recordingScale, 2)
-  assert.equal(parseArgs(['--scenario', './demo.mjs', '--recording-scale', '1']).recordingScale, 1)
-  assert.throws(
-    () => parseArgs(['--scenario', './demo.mjs', '--recording-scale', '3']),
-    /must be 1 or 2/,
   )
 })

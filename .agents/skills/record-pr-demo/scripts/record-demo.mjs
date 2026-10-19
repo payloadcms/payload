@@ -24,7 +24,6 @@ export function parseArgs(argv) {
     '--label',
     '--mouse-move-ms',
     '--output',
-    '--recording-scale',
     '--scenario',
     '--viewport',
   ])
@@ -68,7 +67,6 @@ export function parseArgs(argv) {
       value: values.get('--mouse-move-ms') ?? DEFAULT_MOUSE_MOVE_MS,
     }),
     output: values.get('--output') ?? `/tmp/payload-pr-demo-${label}.webm`,
-    recordingScale: parseRecordingScale({ value: values.get('--recording-scale') ?? 2 }),
     scenario,
     viewport: parseViewport(values.get('--viewport') ?? '1440x900'),
   }
@@ -82,12 +80,6 @@ function parseTiming({ name, value }) {
   }
 
   return milliseconds
-}
-
-export function parseRecordingScale({ value }) {
-  const scale = Number(value)
-  if (![1, 2].includes(scale)) throw new Error('--recording-scale must be 1 or 2')
-  return scale
 }
 
 export function parseViewport(value) {
@@ -128,7 +120,6 @@ export async function recordDemo({
   mouseMoveMs = DEFAULT_MOUSE_MOVE_MS,
   onOpeningReady,
   output,
-  recordingScale = 2,
   scenario,
   viewport,
 }) {
@@ -141,7 +132,6 @@ export async function recordDemo({
     mouseMoveMs,
     onOpeningReady,
     output,
-    recordingScale,
     pauseScale: 1,
     scenario,
     trailingPauseMs: 900,
@@ -149,15 +139,7 @@ export async function recordDemo({
   })
 }
 
-export async function validateDemo({
-  a11y,
-  baseURL,
-  fixture,
-  label,
-  recordingScale = 2,
-  scenario,
-  viewport,
-}) {
+export async function validateDemo({ a11y, baseURL, fixture, label, scenario, viewport }) {
   await executeDemo({
     a11y,
     baseURL,
@@ -165,7 +147,6 @@ export async function validateDemo({
     interactionPauseMs: 0,
     label,
     mouseMoveMs: 0,
-    recordingScale,
     pauseScale: 0,
     scenario,
     trailingPauseMs: 0,
@@ -173,16 +154,7 @@ export async function validateDemo({
   })
 }
 
-export async function previewDemo({
-  a11y,
-  baseURL,
-  fixture,
-  label,
-  output,
-  recordingScale = 2,
-  scenario,
-  viewport,
-}) {
+export async function previewDemo({ a11y, baseURL, fixture, label, output, scenario, viewport }) {
   return executeDemo({
     a11y,
     baseURL,
@@ -190,7 +162,6 @@ export async function previewDemo({
     interactionPauseMs: 0,
     label,
     mouseMoveMs: 0,
-    recordingScale,
     pauseScale: 0,
     scenario,
     screenshotOutput: output,
@@ -209,7 +180,6 @@ async function executeDemo({
   onOpeningReady,
   output,
   pauseScale,
-  recordingScale,
   scenario,
   screenshotOutput,
   trailingPauseMs,
@@ -218,7 +188,6 @@ async function executeDemo({
   if (a11y !== undefined && !['on', 'off'].includes(a11y)) {
     throw new Error('--a11y must be on or off')
   }
-  const captureScale = parseRecordingScale({ value: recordingScale })
   const parsedBaseURL = new URL(baseURL)
   const scenarioURL = pathToFileURL(path.resolve(scenario)).href
   const scenarioModule = await import(scenarioURL)
@@ -244,13 +213,9 @@ async function executeDemo({
   const { chromium, expect } = await import('@playwright/test')
   const rawVideoDirectory = await mkdtemp(path.join(tmpdir(), 'payload-pr-demo-'))
   const browser = await chromium.launch({ headless: true })
-  const designCanvas = scenarioModule.presentation.canvas ?? {
+  const recordedViewport = scenarioModule.presentation.canvas ?? {
     width: 1600,
     height: 1000,
-  }
-  const recordedViewport = {
-    width: designCanvas.width * captureScale,
-    height: designCanvas.height * captureScale,
   }
   const context = await browser.newContext({
     viewport: recordedViewport,
@@ -654,7 +619,6 @@ Options:
   --label TEXT         Safe output label (default: ${DEFAULT_LABEL})
   --mouse-move-ms MS   Smooth cursor travel time (default: ${DEFAULT_MOUSE_MOVE_MS})
   --output PATH        WebM output (default: /tmp/payload-pr-demo-<label>.webm)
-  --recording-scale N  Capture at 1× or 2× the design canvas (default: 2)
   --viewport WxH       Initial application viewport inside chrome (default: 1440x900)
   --scenario PATH      Module exporting presentation metadata and a default async function
   --help               Show this help`)

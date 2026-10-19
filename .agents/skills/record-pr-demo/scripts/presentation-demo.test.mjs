@@ -42,7 +42,6 @@ test('should preview the shared presentation while resizing the live application
     run: async ({ directory, scenario }) => {
       const output = path.join(directory, 'preview.png')
       await previewDemo({
-        recordingScale: 1,
         baseURL: 'http://localhost:3000',
         label: 'preview',
         output,
@@ -90,7 +89,6 @@ test('should record a fixed-size canvas across genuine viewport changes and reta
       const output = path.join(directory, 'recording.webm')
       let readyTime
       await recordDemo({
-        recordingScale: 1,
         baseURL: 'http://localhost:3000',
         label: 'record',
         output,
@@ -166,7 +164,6 @@ test('should exercise the same presentation helpers during fast validation', asy
   await withScenario({
     run: async ({ scenario }) => {
       await validateDemo({
-        recordingScale: 1,
         baseURL: 'http://localhost:3000',
         label: 'validation',
         scenario,
@@ -263,7 +260,6 @@ test('should preserve app-relative pointer positions when the iframe is scaled t
     `,
     )
     await validateDemo({
-      recordingScale: 1,
       baseURL: 'http://localhost:3000',
       label: 'scaled-pointer',
       scenario,
@@ -317,7 +313,6 @@ test('should route the existing annotation API into chrome without floating over
     `,
     )
     await validateDemo({
-      recordingScale: 1,
       baseURL: 'http://localhost:3000',
       label: 'panel-api',
       scenario,
