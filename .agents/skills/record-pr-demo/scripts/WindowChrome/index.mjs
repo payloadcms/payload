@@ -55,8 +55,8 @@ export function mountDemoChrome({
     .size { padding:5px 9px; border-radius:8px; background:var(--badge); color:var(--sub); font:12px/1.5 ui-monospace,monospace; font-variant-numeric:tabular-nums; }
     .content { position:relative; overflow:hidden; border-radius:8px; background:var(--paper); }
     ::slotted([slot=content]) { display:block; width:100%; height:100%; border:0; }
-    .footer { position:absolute; top:32px; left:50%; transform:translateX(-50%); width:min(1302px,calc(100% - 64px)); height:${accessibility ? 152 : 112}px; display:grid; grid-template-rows:${accessibility ? '20px minmax(0,1fr) 36px' : '20px minmax(0,1fr)'}; row-gap:8px; grid-template-columns:minmax(0,1fr); align-items:center; padding:12px 24px; border-radius:12px; color:var(--ink); background:var(--paper); }
-    .change { grid-row:1; min-width:0; display:flex; align-items:center; gap:12px; white-space:nowrap; }
+    .footer { position:absolute; top:32px; left:50%; transform:translateX(-50%); width:min(1302px,calc(100% - 64px)); height:${accessibility ? 152 : 112}px; display:grid; grid-template-rows:${accessibility ? '32px minmax(0,1fr) 36px' : '32px minmax(0,1fr)'}; row-gap:8px; grid-template-columns:minmax(0,1fr); align-items:center; padding:12px 24px; border-radius:12px; color:var(--ink); background:var(--paper); }
+    .change { grid-row:1; min-width:0; min-height:0; align-self:stretch; display:flex; align-items:center; gap:12px; margin-inline:-24px; margin-block-start:-12px; padding:12px 24px; border-block-end:1px solid var(--line); border-radius:12px 12px 0 0; background:var(--color-bg-secondary,var(--keycap-bg)); white-space:nowrap; }
     .change .kind { align-self:center; flex:none; }
 
     .kind { align-self:flex-start; padding-inline:6px; border:1px solid var(--kind-border); border-radius:4px; background:var(--kind-bg); color:var(--kind-text); font-size:13px; font-weight:500; line-height:16px; }
@@ -64,11 +64,11 @@ export function mountDemoChrome({
     .kind[data-kind="Fix"] { --kind-bg:var(--kind-fix-bg); --kind-border:var(--kind-fix-border); --kind-text:var(--kind-fix-text); }
     .title { flex:none; font-size:13px; font-weight:400; letter-spacing:-.1px; margin:0; overflow-wrap:anywhere; }
     .description { font-size:13px; color:var(--sub); overflow-wrap:anywhere; }
-    .note { grid-row:2; min-width:0; min-height:0; max-height:100%; align-self:center; display:flex; align-items:baseline; gap:12px; text-align:start; }
+    .note { grid-row:2; min-width:0; min-height:0; max-height:100%; align-self:center; display:flex; align-items:center; gap:12px; text-align:start; }
     .note[hidden] { display:none; }
     .heading { display:contents; }
     .pagination:has(.step-progress[hidden]) { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
-    .pagination { display:inline-flex; align-items:center; gap:8px; color:var(--sub); font:12px/1.5 ui-monospace,monospace; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    .pagination { align-self:center; display:inline-flex; align-items:center; gap:8px; color:var(--sub); font:12px/1.5 ui-monospace,monospace; font-variant-numeric:tabular-nums; white-space:nowrap; }
     .step-progress { display:block; flex:none; width:20px; height:20px; transform:rotate(-90deg); }
     .step-progress circle { fill:none; stroke-width:3.5; }
     .progress-track { stroke:var(--progress-track); }
@@ -76,7 +76,7 @@ export function mountDemoChrome({
     @media (prefers-reduced-motion:reduce) { .progress-fill { transition-property:none; } }
     .step-progress[hidden] { display:none; }
     [data-step-count], [data-refresh-text] { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
-    .note-title { font-size:16px; font-weight:500; overflow-wrap:anywhere; }
+    .note-title { font-size:13px; font-weight:500; overflow-wrap:anywhere; }
     .body { min-width:0; font-size:13px; color:var(--sub); overflow-wrap:anywhere; }
     .accessibility { grid-row:3; grid-column:1 / -1; align-self:stretch; display:flex; align-items:center; gap:12px; padding-block-start:8px; border-block-start:1px solid var(--line); pointer-events:none; }
 
