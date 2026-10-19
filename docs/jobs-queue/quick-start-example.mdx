@@ -99,9 +99,7 @@ This uses [`payload.jobs.queue()`](/docs/jobs-queue/jobs#queuing-a-new-job) to c
 export default buildConfig({
   // ... other config
   jobs: {
-    tasks: [
-      /* ... */
-    ],
+    tasks: [/* ... */],
     autoRun: [
       {
         cron: '*/5 * * * *', // Run every 5 minutes
@@ -111,7 +109,7 @@ export default buildConfig({
 })
 ```
 
-The [`autoRun`](/docs/jobs-queue/queues#cron-jobs) configuration automatically processes queued jobs on a schedule using cron syntax. In this example, Payload checks for pending jobs every 5 minutes and executes them. Alternatively, you can [manually trigger job processing](/docs/jobs-queue/queues#local-api) with `payload.jobs.run()` or use the [API endpoint](/docs/jobs-queue/queues#endpoint) for serverless platforms.
+The [`autoRun`](/docs/jobs-queue/queues#autorun-alternative-for-dedicated-servers) configuration automatically processes queued jobs on a schedule using cron syntax. In this example, Payload checks for pending jobs every 5 minutes and executes them. Alternatively, you can [manually trigger job processing](/docs/jobs-queue/queues#local-api) with `payload.jobs.run()` or use the [API endpoint](/docs/jobs-queue/queues#endpoint) for serverless platforms.
 
 That's it! Now when users sign up, a job is queued and will be processed within 5 minutes without blocking the API response.
 
@@ -204,9 +202,7 @@ To actually queue and execute scheduled jobs, you need to configure the `autoRun
 export default buildConfig({
   // ... other config
   jobs: {
-    tasks: [
-      /* task from step 1 */
-    ],
+    tasks: [/* task from step 1 */],
 
     // This processes jobs from the 'reports' queue
     autoRun: [

@@ -613,8 +613,8 @@ export function DefaultEditView({
 
   const isFolderCollection = Boolean(
     collectionConfig?.hierarchy &&
-      typeof collectionConfig.hierarchy === 'object' &&
-      collectionConfig.hierarchy.allowHasMany === false,
+    typeof collectionConfig.hierarchy === 'object' &&
+    collectionConfig.hierarchy.allowHasMany === false,
   )
 
   const documentControlsProps: Omit<React.ComponentProps<typeof DocumentControls>, 'variant'> = {
