@@ -84,7 +84,7 @@ export const buildDynamicPredefinedLocalizeStatusMigration = ({
           let locales = snapshot.tables[localesKey]
 
           if (!locales) {
-            locales = buildVersionLocalesTable({ isPostgres, versions })
+            locales = buildLocalesTable({ isPostgres, parentTable: versions })
             snapshot.tables[localesKey] = locales
           }
 
@@ -92,7 +92,12 @@ export const buildDynamicPredefinedLocalizeStatusMigration = ({
           removeColumns({ names: ['version__status'], table: versions })
 
           const main = snapshot.tables[tableKey]
-          const mainLocales = snapshot.tables[`${tableKey}_locales`]
+          let mainLocales = snapshot.tables[`${tableKey}_locales`]
+
+          if (main && !mainLocales) {
+            mainLocales = buildLocalesTable({ isPostgres, parentTable: main })
+            snapshot.tables[`${tableKey}_locales`] = mainLocales
+          }
 
           if (mainLocales && !mainLocales.columns._status) {
             mainLocales.columns._status = {
@@ -150,14 +155,18 @@ function statusColumn({ isPostgres, name }: { isPostgres: boolean; name: string 
   }
 }
 
-function buildVersionLocalesTable({
+function buildLocalesTable({
   isPostgres,
-  versions,
+  parentTable,
 }: {
   isPostgres: boolean
-  versions: SnapshotTable
+  parentTable: SnapshotTable
 }): SnapshotTable {
-  const name = `${versions.name}_locales`
+  const name = `${parentTable.name}_locales`
+  const idType = parentTable.columns.id.type
+  const parentIDType =
+    { serial: 'integer', bigserial: 'bigint', smallserial: 'smallint' }[idType] ??
+    (isPostgres && idType.startsWith('varchar(') ? 'varchar' : idType)
   const column = ({
     columnName,
     notNull,
@@ -176,7 +185,7 @@ function buildVersionLocalesTable({
 
   return {
     name,
-    ...(isPostgres && { schema: versions.schema ?? '' }),
+    ...(isPostgres && { schema: parentTable.schema ?? '' }),
     columns: {
       id: {
         name: 'id',
@@ -190,19 +199,19 @@ function buildVersionLocalesTable({
         notNull: true,
         type: isPostgres ? 'varchar' : 'text',
       }),
-      _parent_id: column({ columnName: '_parent_id', notNull: true, type: 'integer' }),
+      _parent_id: column({ columnName: '_parent_id', notNull: true, type: parentIDType }),
     },
     indexes: {},
     foreignKeys: {
       [`${name}__parent_id_fkey`]: {
         name: `${name}__parent_id_fkey`,
         tableFrom: name,
-        tableTo: versions.name,
+        tableTo: parentTable.name,
         columnsFrom: ['_parent_id'],
         columnsTo: ['id'],
         onDelete: 'cascade',
         onUpdate: 'no action',
-        ...(isPostgres && versions.schema && { schemaTo: versions.schema }),
+        ...(isPostgres && parentTable.schema && { schemaTo: parentTable.schema }),
       },
     },
     compositePrimaryKeys: {},

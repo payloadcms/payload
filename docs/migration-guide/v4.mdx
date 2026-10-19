@@ -1774,7 +1774,7 @@ npx @payloadcms/codemod --transform remove-localize-status-config
 
 Existing projects with affected collections or globals must generate and run the predefined `localize-status` migration for their database adapter. New writes use localized status, but existing documents and versions retain the old scalar status until migrated. This migration is required even if you never used `publishSpecificLocale` or opted into localized status in Payload 3.
 
-The migration converts status in existing documents and versions to per-locale values, reconstructs per-locale publication history, and deletes obsolete snapshot versions. It also removes the old `snapshot` field or column.
+The migration converts status in existing documents and versions to per-locale values, reconstructs per-locale publication history, and deletes obsolete snapshot versions. It also removes the old `snapshot` field or column. For Postgres and SQLite, if a collection or global has no main locales table yet (for example, because only fields inside arrays were localized), the migration creates and backfills it before removing the old `_status` column. Documents without version history retain their existing status in each configured locale.
 
 Back up your database before running the migration. For Postgres and SQLite, run it against the existing schema before applying schema changes that drop the old status or snapshot columns: the migration needs those values to preserve publication history.
 

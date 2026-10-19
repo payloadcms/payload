@@ -4,6 +4,7 @@ import { sql } from 'drizzle-orm'
 import { calculateVersionLocaleStatuses } from 'payload/migrations'
 import toSnakeCase from 'to-snake-case'
 
+import { createMainLocalesTable, getLocaleParentInfo } from './createMainLocalesTable.js'
 import { migrateMainCollectionStatus } from './migrateMainCollection.js'
 import { migrateMainGlobalStatus } from './migrateMainGlobal.js'
 
@@ -90,11 +91,13 @@ export async function migrateSqliteLocalizeStatus(args: LocalizeStatusArgs): Pro
     // SCENARIO 1: Create the locales table (first localized field in versions)
     payload.logger.info({ msg: `Creating new locales table: ${localesTable}` })
 
+    const { parentType } = await getLocaleParentInfo({ db, tableName: versionsTable })
+
     await db.run(
       sql.raw(`CREATE TABLE "${localesTable}" (
         id INTEGER PRIMARY KEY,
         _locale TEXT NOT NULL,
-        _parent_id INTEGER NOT NULL,
+        _parent_id ${parentType} NOT NULL,
         version__status TEXT,
         UNIQUE(_locale, _parent_id),
         FOREIGN KEY (_parent_id) REFERENCES "${versionsTable}"(id) ON DELETE CASCADE
@@ -116,54 +119,53 @@ export async function migrateSqliteLocalizeStatus(args: LocalizeStatusArgs): Pro
     payload.logger.info({ msg: `Adding version__status column to existing table: ${localesTable}` })
 
     await db.run(sql.raw(`ALTER TABLE "${localesTable}" ADD COLUMN version__status TEXT`))
-
-    payload.logger.info({ msg: 'Processing version history to determine status per locale...' })
-
-    const existingLocaleRows: any[] = await db.all(
-      sql.raw(`SELECT DISTINCT _locale FROM "${localesTable}" ORDER BY _locale`),
-    )
-    const existingLocales = existingLocaleRows.map((row: any) => row._locale as string)
-    payload.logger.info({
-      msg: `Found existing locales in table: ${existingLocales.join(', ')}`,
-    })
-
-    // Check if the snapshot column exists (only present on DBs that used publishSpecificLocale)
-    const hasSnapshotColumn = await columnExists({
-      columnName: 'snapshot',
-      db,
-      tableName: versionsTable,
-    })
-
-    const versionRows: any[] = await db.all(
-      sql.raw(
-        hasSnapshotColumn
-          ? `SELECT id, parent_id as parent, version__status as _status, published_locale, snapshot, created_at FROM "${versionsTable}" ORDER BY parent_id, created_at ASC`
-          : `SELECT id, parent_id as parent, version__status as _status, published_locale, created_at FROM "${versionsTable}" ORDER BY parent_id, created_at ASC`,
-      ),
-    )
-
-    const versionLocaleStatus = calculateVersionLocaleStatuses(
-      versionRows,
-      existingLocales,
-      payload,
-    )
-
-    payload.logger.info({ msg: 'Updating locales table with calculated statuses...' })
-
-    let updateCount = 0
-    for (const [versionId, localeMap] of versionLocaleStatus.entries()) {
-      for (const [locale, status] of localeMap.entries()) {
-        await db.run(
-          sql.raw(
-            `UPDATE "${localesTable}" SET version__status = '${status}' WHERE _parent_id = ${versionId} AND _locale = '${locale}'`,
-          ),
-        )
-        updateCount++
-      }
-    }
-
-    payload.logger.info({ msg: `Updated ${updateCount} locale rows with status` })
   }
+
+  payload.logger.info({ msg: 'Processing version history to determine status per locale...' })
+
+  const existingLocaleRows: any[] = await db.all(
+    sql.raw(`SELECT DISTINCT _locale FROM "${localesTable}" ORDER BY _locale`),
+  )
+  const existingLocales = existingLocaleRows.map((row: any) => row._locale as string)
+  payload.logger.info({
+    msg: `Found existing locales in table: ${existingLocales.join(', ')}`,
+  })
+
+  // Check if the snapshot column exists (only present on DBs that used publishSpecificLocale)
+  const hasSnapshotColumn = await columnExists({
+    columnName: 'snapshot',
+    db,
+    tableName: versionsTable,
+  })
+
+  const versionRows: any[] = await db.all(
+    sql.raw(
+      hasSnapshotColumn
+        ? `SELECT id, parent_id as parent, version__status as _status, published_locale, snapshot, created_at FROM "${versionsTable}" ORDER BY parent_id, created_at ASC`
+        : `SELECT id, parent_id as parent, version__status as _status, published_locale, created_at FROM "${versionsTable}" ORDER BY parent_id, created_at ASC`,
+    ),
+  )
+
+  const versionLocaleStatus = calculateVersionLocaleStatuses(
+    versionRows.map((version) => ({ ...version, snapshot: Boolean(version.snapshot) })),
+    existingLocales,
+    payload,
+  )
+
+  payload.logger.info({ msg: 'Updating locales table with calculated statuses...' })
+
+  let updateCount = 0
+  for (const [versionId, localeMap] of versionLocaleStatus.entries()) {
+    for (const [locale, status] of localeMap.entries()) {
+      await db.run(sql`
+        UPDATE ${sql.identifier(localesTable)} SET version__status = ${status}
+        WHERE _parent_id = ${versionId} AND _locale = ${locale}
+      `)
+      updateCount++
+    }
+  }
+
+  payload.logger.info({ msg: `Updated ${updateCount} locale rows with status` })
 
   // Drop the old version__status column from the versions table
   await dropColumn({ columnName: 'version__status', db, tableName: versionsTable })
@@ -180,29 +182,24 @@ export async function migrateSqliteLocalizeStatus(args: LocalizeStatusArgs): Pro
         sql.raw(`ALTER TABLE "${mainLocalesTable}" ADD COLUMN _status TEXT DEFAULT 'draft'`),
       )
     }
-
-    if (collectionSlug) {
-      await migrateMainCollectionStatus({
-        collectionSlug,
-        db,
-        locales,
-        payload,
-        versionsTable,
-      })
-    } else if (globalSlug) {
-      await migrateMainGlobalStatus({ db, globalSlug, locales, payload, versionsTable })
-    }
   } else {
-    payload.logger.info({
-      msg: `No main locales table found: ${mainLocalesTable}; preserving the existing _status column`,
+    await createMainLocalesTable({ db, locales, mainTable })
+  }
+
+  if (collectionSlug) {
+    await migrateMainCollectionStatus({
+      collectionSlug,
+      db,
+      locales,
+      payload,
+      versionsTable,
     })
+  } else if (globalSlug) {
+    await migrateMainGlobalStatus({ db, globalSlug, locales, payload, versionsTable })
   }
 
   // Drop _status from main table if it exists (it will be in locales table now)
-  if (
-    hasMainLocalesTable &&
-    (await columnExists({ columnName: '_status', db, tableName: mainTable }))
-  ) {
+  if (await columnExists({ columnName: '_status', db, tableName: mainTable })) {
     await dropColumn({ columnName: '_status', db, tableName: mainTable })
   }
 

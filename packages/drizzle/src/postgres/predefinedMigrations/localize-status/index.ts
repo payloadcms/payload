@@ -3,6 +3,7 @@ import type { Payload } from 'payload'
 import { calculateVersionLocaleStatuses } from 'payload/migrations'
 import toSnakeCase from 'to-snake-case'
 
+import { createMainLocalesTable, getLocaleParentInfo } from './createMainLocalesTable.js'
 import { migrateMainCollectionStatus } from './migrateMainCollection.js'
 import { migrateMainGlobalStatus } from './migrateMainGlobal.js'
 
@@ -120,13 +121,15 @@ export async function migratePostgresLocalizeStatus(args: LocalizeStatusArgs): P
     // SCENARIO 1: Create the locales table (first localized field in versions)
     payload.logger.info({ msg: `Creating new locales table: ${localesTable}` })
 
+    const { parentType } = await getLocaleParentInfo({ db, tableName: versionsTable, schemaName })
+
     await db.execute({
       drizzle: db.drizzle,
       sql: sql`
         CREATE TABLE ${sql.identifier(localesTable)} (
           id SERIAL PRIMARY KEY,
           _locale VARCHAR NOT NULL,
-          _parent_id INTEGER NOT NULL,
+          _parent_id ${sql.raw(parentType)} NOT NULL,
           version__status VARCHAR,
           UNIQUE(_locale, _parent_id),
           FOREIGN KEY (_parent_id) REFERENCES ${sql.identifier(versionsTable)}(id) ON DELETE CASCADE
@@ -160,84 +163,84 @@ export async function migratePostgresLocalizeStatus(args: LocalizeStatusArgs): P
         ALTER TABLE ${sql.identifier(localesTable)} ADD COLUMN version__status VARCHAR
       `,
     })
-
-    // INTELLIGENT DATA MIGRATION using historical publishedLocale data
-    payload.logger.info({ msg: 'Processing version history to determine status per locale...' })
-
-    // First, get the list of locales that actually exist in the locales table
-    // This is important because the config may have more locales defined than what's in the OLD schema
-    const existingLocalesResult = await db.execute({
-      drizzle: db.drizzle,
-      sql: sql`
-        SELECT DISTINCT _locale
-        FROM ${sql.identifier(localesTable)}
-        ORDER BY _locale
-      `,
-    })
-    const existingLocales = existingLocalesResult.rows.map((row: any) => row._locale as string)
-    payload.logger.info({
-      msg: `Found existing locales in table: ${existingLocales.join(', ')}`,
-    })
-
-    // Check if the snapshot column exists (only present on DBs that used publishSpecificLocale)
-    const snapshotColumnCheckResult = await db.execute({
-      drizzle: db.drizzle,
-      sql: sql`
-        SELECT EXISTS (
-          SELECT FROM information_schema.columns
-          WHERE table_schema = ${schemaName}
-          AND table_name = ${versionsTable}
-          AND column_name = 'snapshot'
-        ) as exists
-      `,
-    })
-    const hasSnapshotColumn = snapshotColumnCheckResult.rows[0]?.exists === true
-
-    // Get all version records grouped by parent document, ordered chronologically
-    const versionsResult = await db.execute({
-      drizzle: db.drizzle,
-      sql: hasSnapshotColumn
-        ? sql`
-          SELECT id, parent_id as parent, version__status as _status, published_locale, snapshot, created_at
-          FROM ${sql.identifier(versionsTable)}
-          ORDER BY parent_id, created_at ASC
-        `
-        : sql`
-          SELECT id, parent_id as parent, version__status as _status, published_locale, created_at
-          FROM ${sql.identifier(versionsTable)}
-          ORDER BY parent_id, created_at ASC
-        `,
-    })
-
-    // Use shared function to calculate version locale statuses
-    // Only process locales that actually exist in the locales table
-    const versionLocaleStatus = calculateVersionLocaleStatuses(
-      versionsResult.rows,
-      existingLocales,
-      payload,
-    )
-
-    // Now update the locales table with the calculated status for each version
-    payload.logger.info({ msg: 'Updating locales table with calculated statuses...' })
-
-    let updateCount = 0
-    for (const [versionId, localeMap] of versionLocaleStatus.entries()) {
-      for (const [locale, status] of localeMap.entries()) {
-        await db.execute({
-          drizzle: db.drizzle,
-          sql: sql`
-            UPDATE ${sql.identifier(localesTable)}
-            SET version__status = ${status}
-            WHERE _parent_id = ${versionId}
-            AND _locale = ${locale}
-          `,
-        })
-        updateCount++
-      }
-    }
-
-    payload.logger.info({ msg: `Updated ${updateCount} locale rows with status` })
   }
+
+  // INTELLIGENT DATA MIGRATION using historical publishedLocale data
+  payload.logger.info({ msg: 'Processing version history to determine status per locale...' })
+
+  // First, get the list of locales that actually exist in the locales table
+  // This is important because the config may have more locales defined than what's in the OLD schema
+  const existingLocalesResult = await db.execute({
+    drizzle: db.drizzle,
+    sql: sql`
+      SELECT DISTINCT _locale
+      FROM ${sql.identifier(localesTable)}
+      ORDER BY _locale
+    `,
+  })
+  const existingLocales = existingLocalesResult.rows.map((row: any) => row._locale as string)
+  payload.logger.info({
+    msg: `Found existing locales in table: ${existingLocales.join(', ')}`,
+  })
+
+  // Check if the snapshot column exists (only present on DBs that used publishSpecificLocale)
+  const snapshotColumnCheckResult = await db.execute({
+    drizzle: db.drizzle,
+    sql: sql`
+      SELECT EXISTS (
+        SELECT FROM information_schema.columns
+        WHERE table_schema = ${schemaName}
+        AND table_name = ${versionsTable}
+        AND column_name = 'snapshot'
+      ) as exists
+    `,
+  })
+  const hasSnapshotColumn = snapshotColumnCheckResult.rows[0]?.exists === true
+
+  // Get all version records grouped by parent document, ordered chronologically
+  const versionsResult = await db.execute({
+    drizzle: db.drizzle,
+    sql: hasSnapshotColumn
+      ? sql`
+        SELECT id, parent_id as parent, version__status as _status, published_locale, snapshot, created_at
+        FROM ${sql.identifier(versionsTable)}
+        ORDER BY parent_id, created_at ASC
+      `
+      : sql`
+        SELECT id, parent_id as parent, version__status as _status, published_locale, created_at
+        FROM ${sql.identifier(versionsTable)}
+        ORDER BY parent_id, created_at ASC
+      `,
+  })
+
+  // Use shared function to calculate version locale statuses
+  // Only process locales that actually exist in the locales table
+  const versionLocaleStatus = calculateVersionLocaleStatuses(
+    versionsResult.rows,
+    existingLocales,
+    payload,
+  )
+
+  // Now update the locales table with the calculated status for each version
+  payload.logger.info({ msg: 'Updating locales table with calculated statuses...' })
+
+  let updateCount = 0
+  for (const [versionId, localeMap] of versionLocaleStatus.entries()) {
+    for (const [locale, status] of localeMap.entries()) {
+      await db.execute({
+        drizzle: db.drizzle,
+        sql: sql`
+          UPDATE ${sql.identifier(localesTable)}
+          SET version__status = ${status}
+          WHERE _parent_id = ${versionId}
+          AND _locale = ${locale}
+        `,
+      })
+      updateCount++
+    }
+  }
+
+  payload.logger.info({ msg: `Updated ${updateCount} locale rows with status` })
 
   // 3. Drop the old version__status column from main versions table
   await db.execute({
@@ -290,24 +293,21 @@ export async function migratePostgresLocalizeStatus(args: LocalizeStatusArgs): P
         `,
       })
     }
-
-    // Now populate the _status values from the latest version
-    if (collectionSlug) {
-      await migrateMainCollectionStatus({
-        collectionSlug,
-        db,
-        locales,
-        payload,
-        sql,
-        versionsTable,
-      })
-    } else if (globalSlug) {
-      await migrateMainGlobalStatus({ db, globalSlug, locales, payload, sql, versionsTable })
-    }
   } else {
-    payload.logger.info({
-      msg: `No main locales table found: ${mainLocalesTable}; preserving the existing _status column`,
+    await createMainLocalesTable({ db, locales, mainTable, schemaName })
+  }
+
+  if (collectionSlug) {
+    await migrateMainCollectionStatus({
+      collectionSlug,
+      db,
+      locales,
+      payload,
+      sql,
+      versionsTable,
     })
+  } else if (globalSlug) {
+    await migrateMainGlobalStatus({ db, globalSlug, locales, payload, sql, versionsTable })
   }
 
   // 5. Drop _status from main table if it exists (it will be in locales table now)
@@ -323,7 +323,7 @@ export async function migratePostgresLocalizeStatus(args: LocalizeStatusArgs): P
     `,
   })
 
-  if (hasMainLocalesTable && mainTableStatusCheck.rows[0]?.exists) {
+  if (mainTableStatusCheck.rows[0]?.exists) {
     await db.execute({
       drizzle: db.drizzle,
       sql: sql`

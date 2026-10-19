@@ -53,6 +53,8 @@ function buildSchema({
       }),
       locales: schema.table('posts_locales', {
         id: serial().primaryKey(),
+        _locale: varchar().notNull(),
+        _parent_id: pgInteger().notNull(),
         title: varchar(),
         ...(localized && { _status: varchar().default('draft') }),
         ...(extra && { pending_change: varchar() }),
@@ -86,6 +88,8 @@ function buildSchema({
     }),
     locales: sqliteTable('posts_locales', {
       id: integer().primaryKey(),
+      _locale: text().notNull(),
+      _parent_id: integer().notNull(),
       title: text(),
       ...(localized && { _status: text().default('draft') }),
       ...(extra && { pending_change: text() }),
@@ -216,7 +220,7 @@ describe.each(['postgres', 'sqlite'])('localize-status snapshot (%s)', (dialect)
     ).toEqual([])
   })
 
-  it('should preserve main status when the destination locales table is missing', async () => {
+  it('should record a newly created main locales table without repeating the status migration', async () => {
     const { before, filePath, payload } = await setup()
     const mainKey = dialect === 'postgres' ? 'cms.posts' : 'posts'
 
@@ -232,8 +236,37 @@ describe.each(['postgres', 'sqlite'])('localize-status snapshot (%s)', (dialect)
 
     const written = JSON.parse(fs.readFileSync(`${filePath}.json`, 'utf8'))
 
-    expect(written.tables[mainKey]).toEqual(before.tables[mainKey])
+    expect(written.tables[mainKey].columns._status).toBeUndefined()
+    expect(written.tables[`${mainKey}_locales`].columns._status).toBeDefined()
+    const statements = await diff(written, (await generate(payload.db.schema)) as any)
+    expect(statements.join('\n')).not.toMatch(/CREATE TABLE [`"](?:cms[`.]+)?posts_locales/)
+    expect(statements.join('\n')).not.toContain('DROP COLUMN `_status`')
   })
+
+  it.each(dialect === 'postgres' ? ['text', 'uuid', 'varchar(255)'] : ['text'])(
+    'should use the legacy %s ID type for a new main locales table',
+    async (idType) => {
+      const { before, filePath, payload } = await setup()
+      const mainKey = dialect === 'postgres' ? 'cms.posts' : 'posts'
+
+      before.tables[mainKey].columns.id.type = idType
+      delete before.tables[`${mainKey}_locales`]
+      fs.writeFileSync(
+        path.join(payload.db.migrationDir, '20260101_initial.json'),
+        JSON.stringify(before),
+      )
+
+      await buildDynamicPredefinedLocalizeStatusMigration({
+        packageName: `@payloadcms/db-${dialect}`,
+      })({ filePath, payload })
+
+      const written = JSON.parse(fs.readFileSync(`${filePath}.json`, 'utf8'))
+
+      expect(written.tables[`${mainKey}_locales`].columns._parent_id.type).toBe(
+        idType === 'varchar(255)' ? 'varchar' : idType,
+      )
+    },
+  )
 
   it('should leave entities without localized status unchanged', async () => {
     const { before, filePath, payload } = await setup()
