@@ -27,7 +27,7 @@ Every scenario must export `presentation` with a change kind (`Feature` or `Fix`
 
 ## Accessibility demonstrations
 
-Set `presentation.accessibility: true` to show a brief navigation/shortcut key overlay inside the application and a supplemental outline around the actual focused element. Add `presentation.showAnnouncements: true` only when the demo needs observed live-region captions below the application. Use this for keyboard and announcement demonstrations; see [recording.md](references/recording.md#accessibility-observations). Captions are DOM observations, not synthesized speech or evidence of what a screen reader announces. Leave the mode off for ordinary visual demos.
+Set `presentation.accessibility: true` to show brief navigation/shortcut keycaps centered just below the window chrome and a supplemental outline around the actual focused element. Add `presentation.showAnnouncements: true` only when the demo needs observed live-region captions below the application. Use this for keyboard and announcement demonstrations; see [recording.md](references/recording.md#accessibility-observations). Captions are DOM observations, not synthesized speech or evidence of what a screen reader announces. Leave the mode off for ordinary visual demos.
 
 ## Workflow
 

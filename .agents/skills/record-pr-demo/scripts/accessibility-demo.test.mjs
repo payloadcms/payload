@@ -201,7 +201,7 @@ test('should suppress keys from inputs inside private shadow hosts', async () =>
   })
 })
 
-test('should overlay keystrokes without reserving space for captions by default', async () => {
+test('should center transient keycaps below the window in a stable reserved gap', async () => {
   let plainWindow
   await withPresentation({
     accessibility: false,
@@ -214,7 +214,8 @@ test('should overlay keystrokes without reserving space for captions by default'
     showAnnouncements: false,
     run: async ({ stage, app }) => {
       await expect(stage.locator('[data-accessibility]')).toHaveCount(0)
-      assert.deepEqual(await stage.locator('[data-window]').boundingBox(), plainWindow)
+      const initialWindow = await stage.locator('[data-window]').boundingBox()
+      assert.ok(initialWindow.height < plainWindow.height)
       const overlay = stage.locator('[data-keystroke-overlay]')
       await expect(overlay).toBeHidden()
       await app.locator('#first').focus()
@@ -225,43 +226,37 @@ test('should overlay keystrokes without reserving space for captions by default'
       await expect(overlay).toHaveCSS('pointer-events', 'none')
       await expect(overlay).toHaveAttribute('aria-hidden', 'true')
       const box = await overlay.boundingBox()
-      const application = await stage.locator('[data-pr-demo-app]').boundingBox()
-      assert.ok(box.x >= application.x && box.y >= application.y)
-      assert.ok(box.x + box.width <= application.x + application.width)
-      assert.ok(box.y + box.height <= application.y + application.height)
-      assert.ok(Math.abs(box.x + box.width / 2 - application.x - application.width / 2) < 2)
+      const windowBox = await stage.locator('[data-window]').boundingBox()
+      const canvas = await stage.locator('[data-canvas]').boundingBox()
+      assert.ok(box.y >= windowBox.y + windowBox.height)
+      assert.ok(box.y + box.height <= canvas.y + canvas.height)
+      assert.ok(Math.abs(box.x + box.width / 2 - windowBox.x - windowBox.width / 2) < 2)
+      assert.deepEqual(windowBox, initialWindow)
       await expect(overlay).toBeHidden({ timeout: 3000 })
+      assert.deepEqual(await stage.locator('[data-window]').boundingBox(), initialWindow)
     },
   })
 })
 
-test('should keep the keystroke overlay away from a focused bottom-center control', async () => {
+test('should keep keycaps between the resized window and the optional caption strip', async () => {
   await withPresentation({
-    showAnnouncements: false,
-    run: async ({ stage, app }) => {
-      await app
-        .locator('#first')
-        .evaluate(
-          (el) =>
-            (el.style.cssText =
-              'position:fixed;left:50%;transform:translateX(-50%);bottom:24px;width:180px;height:48px'),
-        )
+    run: async ({ stage, app, presentation }) => {
       await app.locator('#first').focus()
       await stage.keyboard.press('ArrowRight')
       const overlay = stage.locator('[data-keystroke-overlay]')
       await expect(overlay).toBeVisible()
-      await expect
-        .poll(async () => {
-          const focused = await app.locator('#first').boundingBox()
-          const key = await overlay.boundingBox()
-          return (
-            key.x + key.width <= focused.x ||
-            key.x >= focused.x + focused.width ||
-            key.y + key.height <= focused.y ||
-            key.y >= focused.y + focused.height
-          )
-        })
-        .toBe(true)
+      for (const viewport of [
+        { width: 1800, height: 1100 },
+        { width: 600, height: 700 },
+      ]) {
+        await presentation.resizeWindow({ ...viewport, duration: 0 })
+        const keycaps = await overlay.boundingBox()
+        const windowBox = await stage.locator('[data-window]').boundingBox()
+        const captions = await stage.locator('[data-accessibility]').boundingBox()
+        assert.ok(keycaps.y >= windowBox.y + windowBox.height)
+        assert.ok(keycaps.y + keycaps.height <= captions.y)
+        assert.ok(Math.abs(keycaps.x + keycaps.width / 2 - windowBox.x - windowBox.width / 2) < 2)
+      }
     },
   })
 })

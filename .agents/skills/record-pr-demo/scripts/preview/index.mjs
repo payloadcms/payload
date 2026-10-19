@@ -75,7 +75,7 @@ function renderAt({ milliseconds }) {
             index: 1,
             total: 1,
             title: 'Try it with the keyboard',
-            body: 'Click a Move down button, then use Tab and Enter. Commands appear over the app.',
+            body: 'Click a Move down button, then use Tab and Enter. Commands appear just below the window.',
           }
         : { ...step, total: 3 }
       : null,

@@ -77,7 +77,7 @@ export function mountDemoChrome({
     .accessibility { position:absolute; inset:auto 0 32px; margin-inline:auto; width:min(1302px,calc(100% - 64px)); height:88px; padding:12px 20px; border-radius:12px; background:var(--paper); pointer-events:none; }
     .accessibility[hidden], .focus-highlight[hidden], .keystroke-overlay[hidden] { display:none; }
     .accessibility-label { color:var(--sub); font-size:11px; letter-spacing:.3px; margin-block-end:4px; }
-    .keystroke-overlay { position:absolute; inset:auto auto 24px 24px; z-index:3; pointer-events:none; max-width:calc(100% - 48px); color:var(--ink); }
+    .keystroke-overlay { position:absolute; inset:auto auto auto 50%; transform:translateX(-50%); z-index:3; pointer-events:none; width:max-content; max-width:calc(100% - 64px); color:var(--ink); }
     .keystroke { display:flex; align-items:center; flex-wrap:wrap; gap:8px; font:16px/1.5 ui-monospace,monospace; }
     .keystroke kbd { display:inline-block; padding:6px 10px; border:1px solid var(--keycap-border); border-radius:var(--radius-medium,5px); background:var(--keycap-bg); color:var(--keycap-text); box-shadow:var(--elevation-300-tooltip,0 3px 8px #00000024); font:inherit; white-space:nowrap; }
     .key-separator { font:inherit; text-shadow:0 0 3px var(--paper); }
@@ -91,8 +91,9 @@ export function mountDemoChrome({
     </section>
     <div class="window" data-window>
       <div class="header"><div class="dots" aria-hidden="true"><span></span><span></span><span></span></div><div class="header-info" data-header-info><span class="refresh" data-refresh role="status" aria-live="polite" aria-atomic="true" hidden><svg data-refresh-icon aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path data-refresh-path d="M13 6a5.2 5.2 0 1 0 .1 4M13 2v4H9" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-refresh-text></span></span><span class="size" data-size></span></div></div>
-      <div class="content" data-content><slot name="content"></slot>${accessibility ? '<div class="focus-highlight" data-focus-highlight aria-hidden="true" hidden></div><div class="keystroke-overlay" data-keystroke-overlay aria-hidden="true" hidden><span class="keystroke" data-keystroke></span></div>' : ''}</div>
+      <div class="content" data-content><slot name="content"></slot>${accessibility ? '<div class="focus-highlight" data-focus-highlight aria-hidden="true" hidden></div>' : ''}</div>
     </div>
+    ${accessibility ? '<div class="keystroke-overlay" data-keystroke-overlay aria-hidden="true" hidden><span class="keystroke" data-keystroke></span></div>' : ''}
     ${hasAnnouncements ? '<div class="accessibility" data-accessibility aria-hidden="true"><div class="accessibility-label">LIVE REGION · OBSERVED TEXT, NOT SCREEN-READER AUDIO</div><div class="announcement" data-announcement>Waiting for an update…</div></div>' : ''}
   </div>`
   const find = (selector) => shadow.querySelector(selector)
@@ -107,29 +108,6 @@ export function mountDemoChrome({
   let currentViewport = viewport
   let isDestroyed = false
 
-  const positionKeystroke = () => {
-    const overlay = find('[data-keystroke-overlay]')
-    if (!overlay || overlay.hidden) return
-    const content = find('[data-content]')
-    Object.assign(overlay.style, { inset: 'auto', left: '24px', top: '24px' })
-    const center = (content.clientWidth - overlay.offsetWidth) / 2
-    const bottom = content.clientHeight - overlay.offsetHeight - 24
-    const positions = [
-      { x: center, y: bottom },
-      { x: center, y: 24 },
-    ]
-    const point =
-      positions.find(
-        ({ x, y }) =>
-          !focusRect ||
-          x + overlay.offsetWidth + 8 <= focusRect.x ||
-          x >= focusRect.x + focusRect.width + 8 ||
-          y + overlay.offsetHeight + 8 <= focusRect.y ||
-          y >= focusRect.y + focusRect.height + 8,
-      ) ?? positions[0]
-    Object.assign(overlay.style, { inset: 'auto', left: `${point.x}px`, top: `${point.y}px` })
-  }
-
   const layout = () => {
     if (isDestroyed) return
     find('[data-canvas]').style.transform = `scale(${root.clientWidth / canvas.width})`
@@ -138,18 +116,21 @@ export function mountDemoChrome({
     const windowHeight = height + 58
     const panelHeight = find('[data-footer]').offsetHeight
     const windowTop = 32 + panelHeight + 22
-    const availableHeight = canvas.height - windowTop - 32 - (hasAnnouncements ? 110 : 0)
+    const availableHeight =
+      canvas.height - windowTop - 32 - (accessibility ? 64 : 0) - (hasAnnouncements ? 110 : 0)
     const scale = Math.min(1, (canvas.width - 64) / windowWidth, availableHeight / windowHeight)
     if (scale <= 0) throw new Error('Presentation text leaves no room for the application')
+    const windowY = windowTop + (availableHeight - windowHeight * scale) / 2
     Object.assign(find('[data-window]').style, {
       width: `${windowWidth}px`,
       left: `${(canvas.width - windowWidth * scale) / 2}px`,
-      top: `${windowTop + (availableHeight - windowHeight * scale) / 2}px`,
+      top: `${windowY}px`,
       transform: `scale(${scale})`,
     })
     Object.assign(find('[data-content]').style, { width: `${width}px`, height: `${height}px` })
     find('[data-size]').textContent = `${width} × ${height}`
-    positionKeystroke()
+    if (accessibility)
+      find('[data-keystroke-overlay]').style.top = `${windowY + windowHeight * scale + 14}px`
   }
   layout()
   if (find('.change').scrollHeight > find('.change').clientHeight) {
@@ -298,7 +279,6 @@ export function mountDemoChrome({
             height: `${focusRect.height}px`,
           })
       }
-      positionKeystroke()
       if (hasAnnouncements && announcement) find('[data-announcement]').textContent = announcement
     },
     animateViewport({ width, height, duration = 1000 }) {
