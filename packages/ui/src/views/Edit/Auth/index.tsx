@@ -1,6 +1,6 @@
 'use client'
 
-import { formatAdminURL, getFieldPermissions } from 'payload/shared'
+import { flattenTopLevelFields, formatAdminURL, getFieldPermissions } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -46,15 +46,24 @@ export const Auth: React.FC<Props> = (props) => {
     config: {
       routes: { api },
     },
+    getEntityConfig,
   } = useConfig()
 
-  let showPasswordFields: boolean = docPermissions.fields === true
+  const hasPasswordField = useMemo(
+    () =>
+      flattenTopLevelFields(getEntityConfig({ collectionSlug }).fields).some(
+        (field) => field.name === 'password',
+      ),
+    [collectionSlug, getEntityConfig],
+  )
+
+  let showPasswordFields = Boolean(docPermissions[operation])
   let showUnlock = true
   const hasLoginFieldOverride =
     typeof docPermissions.fields === 'object' &&
     ('username' in docPermissions.fields || 'email' in docPermissions.fields)
 
-  if (docPermissions.fields !== null && typeof docPermissions.fields === 'object') {
+  if (hasPasswordField) {
     const { operation: passwordPermission } = getFieldPermissions({
       field: { name: 'password', type: 'text' },
       operation,

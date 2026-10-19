@@ -280,7 +280,7 @@ describe('Access Control', () => {
             password: replacementPassword,
           },
           overrideAccess: false,
-          user: account,
+          user: { ...account, collection: authSlug },
         })
 
         await expect(
@@ -317,7 +317,7 @@ describe('Access Control', () => {
 
         createdAuthIDs.push(account.id)
 
-        const req = await createLocalReq({ user: account }, payload)
+        const req = await createLocalReq({ user: { ...account, collection: authSlug } }, payload)
         const permissions = await docAccessOperation({
           collection: payload.collections[authSlug],
           id: account.id,
