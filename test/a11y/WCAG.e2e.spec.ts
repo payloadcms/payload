@@ -4415,6 +4415,7 @@ test.describe('WCAG 2.2 Level AA', () => {
           },
           isInDrawer ? 'Email' : 'Title',
         )
+        let hasDisposedHistory = false
         let releaseNavigation: () => void
         let hasHeldRequest = false
         const navigationGate = new Promise<void>((resolve) => {
@@ -4441,49 +4442,61 @@ test.describe('WCAG 2.2 Level AA', () => {
         await page.route('**/*', holdNavigation)
 
         try {
-          await toggle.click()
-          await expect.poll(() => hasHeldRequest).toBe(true)
-          // Flush rendering while the navigation request is still withheld.
-          await page.evaluate(
-            () =>
-              new Promise<void>((resolve) => {
-                requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
-              }),
-          )
-          await expect(toggle).toBeChecked({ checked: !wasChecked })
-          await expect(page.locator('.progress-bar')).toBeVisible()
-
-          if (shouldToggleTwice) {
+          try {
             await toggle.click()
-            await expect(toggle).toBeChecked({ checked: wasChecked })
+            await expect.poll(() => hasHeldRequest).toBe(true)
+            // Flush rendering while the navigation request is still withheld.
+            await page.evaluate(
+              () =>
+                new Promise<void>((resolve) => {
+                  requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+                }),
+            )
+            await expect(toggle).toBeChecked({ checked: !wasChecked })
+            await expect(page.locator('.progress-bar')).toBeVisible()
+
+            if (shouldToggleTwice) {
+              await toggle.click()
+              await expect(toggle).toBeChecked({ checked: wasChecked })
+            }
+          } finally {
+            releaseNavigation!()
+            // Superseded navigations can cancel a held request.
+            await page.unrouteAll({ behavior: shouldToggleTwice ? 'ignoreErrors' : 'wait' })
           }
+
+          await expect(page.locator('.progress-bar')).toBeHidden()
+          const states = await stateHistory.evaluate(({ observer, states }) => {
+            observer.disconnect()
+            return states
+          })
+
+          await stateHistory.dispose()
+          hasDisposedHistory = true
+          expect(states).toEqual(
+            shouldToggleTwice ? [wasChecked, !wasChecked, wasChecked] : [wasChecked, !wasChecked],
+          )
+
+          if (!isInDrawer) {
+            await page.reload()
+            await page.getByRole('button', { name: 'Columns', exact: true }).click()
+          }
+          await expect(toggle).toBeChecked({
+            checked: shouldToggleTwice ? wasChecked : !wasChecked,
+          })
         } finally {
           releaseNavigation!()
-          // Superseded navigations can cancel a held request.
-          await page.unrouteAll({ behavior: shouldToggleTwice ? 'ignoreErrors' : 'wait' })
-        }
-
-        await expect(page.locator('.progress-bar')).toBeHidden()
-        const states = await stateHistory.evaluate(({ observer, states }) => {
-          observer.disconnect()
-          return states
-        })
-
-        await stateHistory.dispose()
-        expect(states).toEqual(
-          shouldToggleTwice ? [wasChecked, !wasChecked, wasChecked] : [wasChecked, !wasChecked],
-        )
-
-        if (!isInDrawer) {
-          await page.reload()
-          await page.getByRole('button', { name: 'Columns', exact: true }).click()
-        }
-        await expect(toggle).toBeChecked({
-          checked: shouldToggleTwice ? wasChecked : !wasChecked,
-        })
-        if (!shouldToggleTwice) {
-          await toggle.click()
+          await page.unrouteAll({ behavior: 'ignoreErrors' })
+          if (!hasDisposedHistory) {
+            await stateHistory.evaluate(({ observer }) => observer.disconnect())
+            await stateHistory.dispose()
+          }
+          await expect(page.locator('.progress-bar')).toBeHidden()
+          if ((await toggle.isChecked()) !== wasChecked) {
+            await toggle.click()
+          }
           await expect(toggle).toBeChecked({ checked: wasChecked })
+          await expect(page.locator('.progress-bar')).toBeHidden()
         }
       })
     }
