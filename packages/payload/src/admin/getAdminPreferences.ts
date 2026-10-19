@@ -45,7 +45,7 @@ export function getAdminPreferences({ req }: { req: PayloadRequest }): Promise<A
         and: [
           {
             key: {
-              equals: PREFERENCE_KEYS.ADMIN,
+              equals: PREFERENCE_KEYS.NAV,
             },
           },
           {

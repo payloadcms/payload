@@ -9,12 +9,11 @@ export const PREFERENCE_KEYS = {
    * collection or a document: the active content branch, navigation group
    * collapse/expand state, and nav open/closed state.
    *
-   * Deliberately one key rather than one per concern. An admin render needs all
-   * of it, so a single key resolves the lot in a single query — see
-   * `getAdminPreferences` in `payload`. New globally-scoped admin state
-   * belongs here rather than in a key of its own.
+   * Retains the existing `nav` key so saved navigation state remains available
+   * without a migration. Branch selection shares this record, allowing
+   * `getAdminPreferences` to resolve both in a single query.
    */
-  ADMIN: 'admin',
+  NAV: 'nav',
 
   /**
    * Stores dashboard layout configuration
