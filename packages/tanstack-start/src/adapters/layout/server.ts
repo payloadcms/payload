@@ -4,7 +4,6 @@ import type { ReactNode } from 'react'
 
 import { NestProviders } from '@payloadcms/ui/layouts/NestProviders'
 import { getRootLayoutData } from '@payloadcms/ui/layouts/Root/getRootLayoutData'
-import { Outlet } from '@tanstack/react-router'
 import { renderServerComponent } from '@tanstack/react-start/rsc'
 import { createElement } from 'react'
 
@@ -12,6 +11,7 @@ import type { SerializableRecord } from '../../utilities/toSerializable.js'
 
 import { initAdminContext } from '../../utilities/initAdminContext.server.js'
 import { toSerializable } from '../../utilities/toSerializable.js'
+import { PayloadOutlet } from './outlet.js'
 
 export type LoadLayoutDataResult = SerializableRecord
 
@@ -32,13 +32,11 @@ export async function getLayoutData({
 }: GetLayoutDataArgs): Promise<RootLayoutData> {
   const context = await initAdminContext({ configPromise, importMap })
 
-  const { cookies, headers, languageCode, permissions, req, user } = context
+  const { cookies, permissions, req, user } = context
 
   const data = await getRootLayoutData({
     cookies,
-    headers,
     importMap,
-    languageCode,
     permissions,
     req,
     user,
@@ -60,7 +58,7 @@ export async function getLayoutData({
     }
 
     providers = createElement(NestProviders, {
-      children: createElement(Outlet),
+      children: createElement(PayloadOutlet),
       importMap,
       providers: providerPaths,
       serverProps,

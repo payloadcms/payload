@@ -1,6 +1,6 @@
 import type { ImportMap, SanitizedConfig, ServerFunctionClient } from 'payload'
 
-import React, { Suspense } from 'react'
+import React from 'react'
 
 import type { InitAdminContextFn } from '../../views/Root/index.js'
 
@@ -66,19 +66,8 @@ type RootLayoutProps = {
   readonly serverFunction: ServerFunctionClient
 }
 
-export const RootLayout = (props: RootLayoutProps) => {
-  checkDependencies(props.additionalDependencyChecks)
-
-  const content = <RootLayoutContent {...props} />
-
-  if (process.env.PAYLOAD_CACHE_COMPONENTS_ENABLED === 'true') {
-    return <Suspense fallback={null}>{content}</Suspense>
-  }
-
-  return content
-}
-
-const RootLayoutContent = async ({
+export const RootLayout = async ({
+  additionalDependencyChecks,
   children,
   config: configPromise,
   fonts = [],
@@ -89,17 +78,17 @@ const RootLayoutContent = async ({
   RouterAdapter,
   serverFunction,
 }: RootLayoutProps) => {
+  checkDependencies(additionalDependencyChecks)
+
   const context = await initAdminContext({ configPromise, importMap, key: 'RootLayout' })
 
-  const { cookies, headers, languageCode, permissions, req, user } = context
+  const { cookies, permissions, req, user } = context
 
   const { config } = req.payload
 
   const data = await getRootLayoutData({
     cookies,
-    headers,
     importMap,
-    languageCode,
     permissions,
     req,
     user,
@@ -116,7 +105,7 @@ const RootLayoutContent = async ({
       suppressHydrationWarning={data.suppressHydrationWarning}
       theme={data.theme}
       themeSource={data.themeSource}
-      viewport={getViewportMeta(headers.get('user-agent') ?? undefined)}
+      viewport={getViewportMeta(req.headers.get('user-agent') ?? undefined)}
     >
       <RootProviders data={data} RouterAdapter={RouterAdapter} serverFunction={serverFunction}>
         {Array.isArray(config.admin?.components?.providers) &&

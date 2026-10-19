@@ -400,6 +400,7 @@ export type GraphQLInfo = {
     groupTypes: Record<string, GraphQL.GraphQLObjectType>
     localeInputType?: GraphQL.GraphQLEnumType | GraphQL.GraphQLScalarType
     tabTypes: Record<string, GraphQL.GraphQLObjectType>
+    validationResultType?: GraphQL.GraphQLObjectType
   }
 }
 export type GraphQLExtension = (
@@ -727,7 +728,8 @@ export type SanitizedLocalizationConfig = Prettify<
      * @example `["en", "es", "fr", "nl", "de", "jp"]`
      */
     localeCodes: string[]
-  } & Omit<LocalizationConfigWithLabels, 'fallback'> &
+    locales: Locale[]
+  } & Omit<LocalizationConfigWithLabels, 'fallback' | 'locales'> &
     Required<Pick<LocalizationConfigWithLabels, 'fallback'>>
 >
 
@@ -1142,6 +1144,13 @@ type RootAdminConfig = {
       dashboard?: AdminViewConfig
     }
   }
+  /**
+   * Constrain the Admin Panel content width to 1080px on desktop.
+   *
+   * @experimental This property is subject to change in future releases.
+   * @default false
+   */
+  constrainWidth?: boolean
   /** Extension point to add your custom data. Available in server and client. */
   custom?: Record<string, any>
   /**
@@ -1772,7 +1781,8 @@ export type Config = {
 }
 
 interface SanitizedAdminConfig
-  extends Omit<
+  extends
+    Omit<
       RootAdminConfig,
       | 'avatar'
       | 'components'
@@ -1823,7 +1833,8 @@ type SanitizedTypeScriptConfig = Omit<RootTypeScriptConfig, 'autoGenerate' | 'ou
   Required<Pick<RootTypeScriptConfig, 'autoGenerate' | 'outputFile'>>
 
 export interface SanitizedConfig
-  extends Omit<
+  extends
+    Omit<
       Config,
       | 'admin'
       | 'auth'

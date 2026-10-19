@@ -1,5 +1,4 @@
-import { status as httpStatus } from 'http-status'
-
+import { httpStatus } from '../utilities/httpStatus.js'
 import { APIError } from './APIError.js'
 
 export class QueryError extends APIError<{ path: string }[]> {

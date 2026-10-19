@@ -2,7 +2,6 @@ import type { Stats } from 'fs'
 
 import { fileTypeFromFile } from 'file-type'
 import fsPromises from 'fs/promises'
-import { status as httpStatus } from 'http-status'
 import path from 'path'
 
 import type { Collection, TypeWithID } from '../../collections/config/types.js'
@@ -11,14 +10,18 @@ import type { PayloadRequest } from '../../types/index.js'
 import type { FileHandlerOperation } from '../types.js'
 
 import { APIError } from '../../errors/APIError.js'
+import { NotFound } from '../../errors/NotFound.js'
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { checkFileAccess } from '../checkFileAccess.js'
 import { streamFile } from '../fetchAPI-stream-file/index.js'
+import { resolveHistoricalFile } from '../fileVersioning/resolveHistoricalFile.js'
 import { getFileTypeFallback } from '../getFileTypeFallback.js'
 import { getFileExtension, isXmlMimeType } from '../getFileTypeIdentity.js'
 import { parseRangeHeader } from '../parseRangeHeader.js'
 import { handleDynamicFileRequest } from '../transformers/handleDynamicFileRequest.js'
+import { resolveUploadDocument } from '../transformers/resolveUploadDocument.js'
 import { uploadContentSecurityPolicy } from '../uploadContentSecurityPolicy.js'
 
 export const getFileHandler: PayloadHandler = async (req) => {
@@ -32,6 +35,20 @@ export const getFileHandler: PayloadHandler = async (req) => {
       `This collection is not an upload collection: ${collection.config.slug}`,
       httpStatus.BAD_REQUEST,
     )
+  }
+
+  const versionID = req.searchParams?.get('version')
+
+  if (collection.config.versions && versionID) {
+    const historical = await resolveHistoricalFile({
+      collection,
+      filename,
+      prefix,
+      req,
+      versionID,
+    })
+
+    return retrieveFileResponse({ collection, doc: historical, filename, prefix, req })
   }
 
   if (req.payload.config.upload.transformers.length > 0) {
@@ -49,7 +66,15 @@ export const getFileHandler: PayloadHandler = async (req) => {
     return accessResult
   }
 
-  return retrieveFileResponse({ collection, doc: accessResult, filename, prefix, req })
+  const current = collection.config.versions
+    ? (accessResult ?? (await resolveUploadDocument({ collection, filename, prefix, req })))
+    : undefined
+
+  if (collection.config.versions && !current) {
+    throw new NotFound(req.t)
+  }
+
+  return retrieveFileResponse({ collection, doc: accessResult ?? current, filename, prefix, req })
 }
 
 /**

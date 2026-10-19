@@ -22,27 +22,6 @@
     min-width: 0;
   }
 
-  .hierarchy-tables__edit-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-text);
-    flex-shrink: 0;
-    padding: 0;
-    background: none;
-    border: none;
-    cursor: pointer;
-    border-radius: var(--radius-small);
-    border: var(--stroke-width-small) solid transparent;
-
-    &:hover,
-    &:focus-visible {
-      color: var(--color-text);
-      background-color: var(--color-bg-hover);
-      border-color: var(--color-border);
-    }
-  }
-
   .hierarchy-tables__name-link {
     display: flex;
     align-items: center;

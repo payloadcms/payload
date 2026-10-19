@@ -132,10 +132,10 @@ type PayloadRequestData = {
   files?: Record<string, File | File[]>
 }
 export interface PayloadRequest
-  extends CustomPayloadRequestProperties,
-    Partial<Request>,
-    PayloadRequestData {
+  extends CustomPayloadRequestProperties, Partial<Request>, PayloadRequestData {
   headers: Request['headers']
+  /** The active Payload operation. */
+  operation?: Operation
 }
 
 export type { HasManyRelationshipOperator, Operator }
@@ -196,7 +196,15 @@ export type JoinQuery<TSlug extends CollectionSlug = string> =
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Document = any
 
-export type Operation = 'create' | 'delete' | 'read' | 'update'
+/**
+ * Operations exposed to access control and request lifecycle functions.
+ *
+ * On-demand validation uses the first-class `validate` value rather than substituting `create`
+ * or `update`.
+ */
+export type Operation = 'create' | 'delete' | 'read' | 'update' | 'validate'
+export type FieldOperation = Exclude<Operation, 'delete'>
+export type BeforeValidateOperation = Extract<FieldOperation, 'create' | 'update' | 'validate'>
 export type VersionOperations = 'readVersions'
 export type AuthOperations = 'unlock'
 export type AllOperations = AuthOperations | Operation | VersionOperations
@@ -296,22 +304,26 @@ export type TransformDataWithSelect<
         // Handle include mode
         Select extends SelectIncludeType
         ? {
-            [K in keyof Data as K extends keyof Select
-              ? Select[K] extends object | true
-                ? K
-                : never
-              : // select 'id' always
-                K extends 'id'
-                ? K
-                : never]: Data[K]
+            [
+              K in keyof Data as K extends keyof Select
+                ? Select[K] extends object | true
+                  ? K
+                  : never
+                : // select 'id' always
+                  K extends 'id'
+                  ? K
+                  : never
+            ]: Data[K]
           }
         : // Handle exclude mode
           {
-            [K in keyof Data as K extends keyof Select
-              ? Select[K] extends object | undefined
-                ? K
-                : never
-              : K]: Data[K]
+            [
+              K in keyof Data as K extends keyof Select
+                ? Select[K] extends object | undefined
+                  ? K
+                  : never
+                : K
+            ]: Data[K]
           }
 
 export type TransformCollectionWithSelect<

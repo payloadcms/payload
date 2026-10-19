@@ -101,7 +101,7 @@ export async function loadAdminPage({
       overrides: args.overrides,
       serverAdapter: pageServerAdapter,
     })
-    userAgent = result.headers.get('user-agent') ?? undefined
+    userAgent = result.req.headers.get('user-agent') ?? undefined
     return result
   }
 

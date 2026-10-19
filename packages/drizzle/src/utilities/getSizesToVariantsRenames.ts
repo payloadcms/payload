@@ -94,10 +94,12 @@ const columnPrefixes = [
   { current: 'version_variants_', legacy: 'version_sizes_' },
 ]
 const generatedVariantMetadataFieldNames = [
+  '_objectKey',
   'filename',
   'filesize',
   'height',
   'mimeType',
+  'prefix',
   'url',
   'width',
 ]

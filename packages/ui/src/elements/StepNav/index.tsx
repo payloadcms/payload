@@ -105,6 +105,7 @@ const StepNav: React.FC<{
     { isFirst, isLast }: { isFirst: boolean; isLast: boolean },
   ) => {
     const StepLabel = getTranslation(item.label, i18n)
+    const isCurrent = item.isCurrent ?? isLast
     const itemClassName = [
       `${baseClass}__item`,
       isLast ? `${baseClass}__last` : undefined,
@@ -115,13 +116,23 @@ const StepNav: React.FC<{
 
     if (item.url) {
       return (
-        <Button buttonStyle="ghost" className={itemClassName} el="link" url={item.url}>
+        <Button
+          buttonStyle="ghost"
+          className={itemClassName}
+          el="link"
+          extraButtonProps={{ 'aria-current': isCurrent ? 'page' : false }}
+          url={item.url}
+        >
           {StepLabel}
         </Button>
       )
     }
 
-    return <span className={itemClassName}>{StepLabel}</span>
+    return (
+      <span aria-current={isCurrent ? 'page' : undefined} className={itemClassName}>
+        {StepLabel}
+      </span>
+    )
   }
 
   const separator = <span className={`${baseClass}__separator`}>/</span>
@@ -132,7 +143,11 @@ const StepNav: React.FC<{
 
   return (
     <Fragment>
-      <nav className={[baseClass, className].filter(Boolean).join(' ')} ref={navRef}>
+      <nav
+        aria-label={t('general:breadcrumb')}
+        className={[baseClass, className].filter(Boolean).join(' ')}
+        ref={navRef}
+      >
         {shouldCollapse ? (
           <Fragment>
             {renderItem(stepNavItems[0], { isFirst: true, isLast: false })}
@@ -149,7 +164,12 @@ const StepNav: React.FC<{
               render={({ close }) => (
                 <PopupList.ButtonGroup className={`${baseClass}__collapsed-list`}>
                   {collapsedItems.map((item, i) => (
-                    <PopupList.Button href={item.url} key={i} onClick={close}>
+                    <PopupList.Button
+                      ariaCurrent={item.isCurrent ? 'page' : false}
+                      href={item.url}
+                      key={i}
+                      onClick={close}
+                    >
                       {getTranslation(item.label, i18n)}
                     </PopupList.Button>
                   ))}

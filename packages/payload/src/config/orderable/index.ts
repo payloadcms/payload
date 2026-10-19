@@ -1,5 +1,3 @@
-import { status as httpStatus } from 'http-status'
-
 import type { BeforeChangeHook, CollectionConfig } from '../../collections/config/types.js'
 import type { Config } from '../../config/types.js'
 import type { Field, TextField } from '../../fields/config/types.js'
@@ -13,6 +11,7 @@ import { sanitizeField } from '../../fields/config/sanitize.js'
 import { combineWhereConstraints } from '../../utilities/combineWhereConstraints.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'

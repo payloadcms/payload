@@ -3,6 +3,7 @@ import type { Transform } from './types.js'
 import { addOverrideAccessTrue } from './transforms/add-override-access-true/index.js'
 import { exampleNoop } from './transforms/example-noop/index.js'
 import { globalsComponentsEdit } from './transforms/globals-components-edit/index.js'
+import { migrateAdminContextProperties } from './transforms/migrate-admin-context-properties/index.js'
 import { migrateAfterOperationRead } from './transforms/migrate-after-operation-read/index.js'
 import { migrateAliasedExports } from './transforms/migrate-aliased-exports/index.js'
 import { migrateAuthorshipDefault } from './transforms/migrate-authorship-default/index.js'
@@ -11,6 +12,7 @@ import { migrateBlockReferencesToBlocks } from './transforms/migrate-block-refer
 import { migrateBuildScript } from './transforms/migrate-build-script/index.js'
 import { migrateDbTypesSubpath } from './transforms/migrate-db-types-subpath/index.js'
 import { migrateDisabledFields } from './transforms/migrate-disabled-fields/index.js'
+import { migrateDisplayedFieldValueArgs } from './transforms/migrate-displayed-field-value-args/index.js'
 import { migrateDocumentTitleContext } from './transforms/migrate-document-title-context/index.js'
 import { migrateFieldComponentTypes } from './transforms/migrate-field-component-types/index.js'
 import { migrateForceSelect } from './transforms/migrate-force-select/index.js'
@@ -30,6 +32,7 @@ import { removeLocalizeStatusConfig } from './transforms/remove-localize-status-
 import { removePublishSpecificLocale } from './transforms/remove-publish-specific-locale/index.js'
 import { removeStorageAlwaysInsertFields } from './transforms/remove-storage-always-insert-fields/index.js'
 import { removeVersionsTrue } from './transforms/remove-versions-true/index.js'
+import { renameDiffValueProps } from './transforms/rename-diff-value-props/index.js'
 import { renameExperimentalTableFeature } from './transforms/rename-experimental-table-feature/index.js'
 import { renameStorageAdaptersToStorage } from './transforms/rename-storage-adapters-to-storage/index.js'
 import { renameTypescriptSchemaToJsonSchema } from './transforms/rename-typescript-schema-to-json-schema/index.js'
@@ -42,10 +45,13 @@ export const transforms: Transform[] = [
   globalsComponentsEdit,
   migrateListViewSelectAPI,
   migrateDisabledFields,
+  migrateDisplayedFieldValueArgs,
   migrateForceSelect,
   migrateFieldComponentTypes,
+  renameDiffValueProps,
   migrateAliasedExports,
   migratePayloadRequestCreation,
+  migrateAdminContextProperties,
   migrateBlockReferencesToBlocks,
   migrateBuildScript,
   migrateDocumentTitleContext,

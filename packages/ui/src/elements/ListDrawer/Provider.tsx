@@ -17,16 +17,7 @@ export type ListDrawerContextProps = {
     collectionSlug?: CollectionSlug,
   ) => void
   readonly onQueryChange?: (query: ListQuery) => void
-  readonly onSelect?: (args: {
-    collectionSlug: CollectionSlug
-    doc: Data
-    /**
-     * @deprecated
-     * The `docID` property is deprecated and will be removed in the next major version of Payload.
-     * Use `doc.id` instead.
-     */
-    docID: string
-  }) => void
+  readonly onSelect?: (args: { collectionSlug: CollectionSlug; doc: Data }) => void
   readonly selectedOption?: Option<CollectionSlug>
   readonly setSelectedOption?: (option: Option<CollectionSlug>) => void
 }

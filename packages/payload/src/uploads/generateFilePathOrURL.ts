@@ -20,14 +20,14 @@ export function generateFilePathOrURL({
   urlOrPath,
 }: {
   collectionSlug: string
-  config: Config
+  config: Pick<Config, 'routes' | 'serverURL'>
   filename?: string
   relative: boolean
   serverURL?: string
   urlOrPath: string | undefined
 }): null | string {
   if (urlOrPath) {
-    if (!urlOrPath.startsWith('/') && !urlOrPath.startsWith(serverURL || '')) {
+    if (!urlOrPath.startsWith('/') && (!serverURL || !urlOrPath.startsWith(serverURL))) {
       // external url
       return urlOrPath
     }

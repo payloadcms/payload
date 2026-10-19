@@ -16,11 +16,11 @@ const baseClass = 'group-diff'
 
 export const Group: React.FC<GroupFieldDiffClientProps> = ({
   baseVersionField,
-  comparisonValue: valueFrom,
   field,
   locale,
   parentIsLocalized,
-  versionValue: valueTo,
+  valueFrom,
+  valueTo,
 }) => {
   const { i18n } = useTranslation()
   const { selectedLocales } = useSelectedLocales()

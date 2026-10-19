@@ -172,8 +172,10 @@ export type HookOperationType =
   | 'resetPassword'
   | 'restoreVersion'
   | 'update'
+  | 'validate'
 
 type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>
+type CreateUpdateOrValidateOperation = Extract<HookOperationType, 'create' | 'update' | 'validate'>
 
 export type BeforeOperationHook<TOperationGeneric extends CollectionSlug = string> = (
   arg: BeforeOperationArg<TOperationGeneric>,
@@ -191,7 +193,7 @@ export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
   /**
    * Hook operation being performed
    */
-  operation: CreateOrUpdateOperation
+  operation: CreateUpdateOrValidateOperation
   /**
    * Original document before change
    *
@@ -209,7 +211,7 @@ export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
   /**
    * Hook operation being performed
    */
-  operation: CreateOrUpdateOperation
+  operation: CreateUpdateOrValidateOperation
   /**
    * Original document before change
    *
@@ -502,7 +504,10 @@ export type CollectionAdminOptions = {
    * Specify a navigational group for collections in the admin sidebar.
    * - Provide a string to place the entity in a custom group.
    * - Provide a record to define localized group names.
-   * - Set to `false` to exclude the entity from the sidebar / dashboard without disabling its routes.
+   * - Set to `false` to exclude the collection from the sidebar, command palette, dashboard collection cards,
+   *   and pin picker, and its documents from both the Pinned and Recently viewed dashboard tabs, including existing pins.
+   * This does not disable routes or change access control or rich text link and relationship eligibility.
+   * Use `enableRichTextLink` and `enableRichTextRelationship` to configure rich text eligibility separately.
    */
   group?: false | Record<string, string> | string
   /**
@@ -546,6 +551,13 @@ export type CollectionAccess<TData = any> = {
   readVersions?: Access<TData>
   unlock?: Access<TData>
   update?: Access<TData>
+  /**
+   * Controls on-demand validation for this collection.
+   * Falls back to `update` access when omitted.
+   * The access function receives `req.operation === 'validate'`.
+   * @see https://payloadcms.com/docs/validation/overview#access-control-and-hooks
+   */
+  validate?: Access<TData>
 }
 
 type CollectionHooks<TSlug extends CollectionSlug = any> = {
@@ -815,7 +827,8 @@ export type SanitizedJoins = {
  * preserve their incoming optionality.
  */
 export interface SanitizedCollectionConfig
-  extends Omit<
+  extends
+    Omit<
       CollectionConfig,
       | '_sanitized'
       | 'access'
@@ -840,7 +853,10 @@ export interface SanitizedCollectionConfig
   _sanitized: true
   access: Pick<CollectionAccess, 'admin'> &
     Required<
-      Pick<CollectionAccess, 'create' | 'delete' | 'read' | 'readVersions' | 'unlock' | 'update'>
+      Pick<
+        CollectionAccess,
+        'create' | 'delete' | 'read' | 'readVersions' | 'unlock' | 'update' | 'validate'
+      >
     >
   auth: Auth
   authorship: SanitizedAuthorship

@@ -203,6 +203,10 @@ export const Organizations: CollectionConfig = {
 // Folders collection with collectionSpecific (enables filter in tree search)
 export const Folders: CollectionConfig = {
   slug: foldersSlug,
+  access: {
+    // Row-level update access: locked folders are read-only
+    update: () => ({ isLocked: { not_equals: true } }),
+  },
   admin: {
     defaultColumns: ['name', 'parentFolder'],
     useAsTitle: 'name',
@@ -212,6 +216,10 @@ export const Folders: CollectionConfig = {
       name: 'name',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'isLocked',
+      type: 'checkbox',
     },
   ],
   folders: {

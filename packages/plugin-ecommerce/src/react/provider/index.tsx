@@ -130,11 +130,8 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
   const [cartSecret, setCartSecret] = useState<string | undefined>(undefined)
   const [cart, setCart] = useState<CartsCollection>()
 
-  const [selectedCurrency, setSelectedCurrency] = useState<Currency>(
-    () =>
-      currenciesConfig.supportedCurrencies.find(
-        (c) => c.code === currenciesConfig.defaultCurrency,
-      )!,
+  const [selectedCurrency, setSelectedCurrency] = useState<Currency>(() =>
+    currenciesConfig.supportedCurrencies.find((c) => c.code === currenciesConfig.defaultCurrency)!,
   )
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<null | string>(null)

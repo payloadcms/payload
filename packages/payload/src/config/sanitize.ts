@@ -188,6 +188,7 @@ const addDefaultDashboardWidgets = ({
           // inverse as an exclusion list, so collections added later stay visible by default.
           Field: '@payloadcms/ui#RecentlyViewedCollectionsField',
         },
+        description: ({ t }) => t('dashboard:widgetRecentlyViewedFilterDescription'),
       },
       hasMany: true,
       label: ({ t }) => t('general:collections'),
@@ -248,8 +249,8 @@ const addDefaultDashboardWidgets = ({
       richTextSanitizers,
       validRelationships,
     }),
-    label: ({ t }) => t('dashboard:widgetRecentlyViewedTitle'),
-    minWidth: 'x-small',
+    label: ({ t }) => t('dashboard:widgetRecentsAndPinned'),
+    minWidth: 'small',
   })
   if (uploadCollections.length > 0) {
     dashboard.widgets.push({
@@ -559,12 +560,12 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
 
   ;(config.jobs ??= {} as SanitizedJobsConfig).enabled = Boolean(
     (Array.isArray(configWithDefaults.jobs?.tasks) && configWithDefaults.jobs?.tasks?.length) ||
-      (Array.isArray(configWithDefaults.jobs?.workflows) &&
-        configWithDefaults.jobs?.workflows?.length),
+    (Array.isArray(configWithDefaults.jobs?.workflows) &&
+      configWithDefaults.jobs?.workflows?.length),
   )
   config.jobs.hasConcurrency = Boolean(
     config.jobs.tasks?.some((task) => task.concurrency) ||
-      config.jobs.workflows?.some((workflow) => workflow.concurrency),
+    config.jobs.workflows?.some((workflow) => workflow.concurrency),
   )
 
   // Need to add default jobs collection before locked documents collections

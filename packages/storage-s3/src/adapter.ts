@@ -2,6 +2,7 @@ import type { S3, S3ClientConfig } from '@aws-sdk/client-s3'
 import type {
   Adapter,
   ClientUploadsConfig,
+  DeleteFile,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
@@ -29,8 +30,20 @@ export function createS3Adapter({
   signedDownloads,
   useCompositePrefixes = false,
 }: CreateS3AdapterArgs): Adapter {
+  const deleteStoredFile: DeleteFile = async ({ storageFilePath }) => {
+    const { deleteFile } = await import('./deleteFile.js')
+    return deleteFile({ bucket, client: getStorageClient(), storageFilePath })
+  }
+
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 's3',
+    supportsTempFiles: true,
+
+    copyFile: async ({ from, req, to }) => {
+      const { copyS3File } = await import('./copyFile.js')
+      await copyS3File({ acl, bucket, client: getStorageClient(), from, req, to })
+    },
+    deleteFile: deleteStoredFile,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({
@@ -58,14 +71,7 @@ export function createS3Adapter({
 
     // Helpers below dynamic-import their @aws-sdk dependencies so the SDK only
     // loads on the first request that actually needs it.
-    handleDelete: async ({ storageFilePath }) => {
-      const { deleteFile } = await import('./deleteFile.js')
-      return deleteFile({
-        bucket,
-        client: getStorageClient(),
-        storageFilePath,
-      })
-    },
+    handleDelete: deleteStoredFile,
 
     handleUpload: async ({ data, file, storageFilePath }) => {
       const { uploadFile } = await import('./uploadFile.js')

@@ -22,8 +22,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     emailOrUsername: 'ইমেইল বা ব্যবহারকারীর নাম',
     emailSent: 'ইমেইল পাঠানো হয়েছে',
     emailVerified: 'ইমেইল সফলভাবে যাচাই করা হয়েছে।',
-    emailVerifiedRedirecting:
-      'ইমেইল সফলভাবে যাচাই করা হয়েছে। আপনাকে লগইন পৃষ্ঠায় পুনঃনির্দেশিত করা হচ্ছে...',
+    emailVerifiedRedirecting: 'ইমেইল সফলভাবে যাচাই করা হয়েছে। আপনাকে লগইন পৃষ্ঠায় পুনঃনির্দেশিত করা হচ্ছে...',
     enableAPIKey: 'এপিআই কী সক্ষম করুন',
     failedToUnlock: 'আনলক করতে ব্যর্থ হয়েছে',
     forceUnlock: 'জোরপূর্বক আনলক করুন',
@@ -117,6 +116,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     resetLayout: 'লেআউট পুনরায় সেট করুন',
     resizeWidget: '{{label}}-এর আকার পরিবর্তন করুন, বর্তমান আকার: {{size}}',
     searchWidgets: 'উইজেট অনুসন্ধান করুন...',
+    widgetAddPin: 'ডকুমেন্ট পিন করুন',
     widgetCollectionRequired: 'Collection প্রয়োজনীয়।',
     widgetConfigurationError: 'উইজেট কনফিগারেশন ত্রুটি',
     widgetDropFilesToUpload: 'একটি ফাইল টেনে এনে ছেড়ে দিন',
@@ -128,9 +128,20 @@ export const bnInTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'সীমা',
     widgetNonSortableSortField:
       'সংগ্রহ "{{collection}}"-এ শ্রেণীবিন্যাস ক্ষেত্র "{{field}}" শ্রেণীবিন্যাসযোগ্য নয়।',
+    widgetPageCount: '{{totalPages}} এর মধ্যে {{currentPage}}',
+    widgetPagination: 'নথির পৃষ্ঠাবিন্যাস',
+    widgetPinned: 'পিন করা',
+    widgetPinnedEmpty: 'কোনো পিন করা ডকুমেন্ট নেই',
+    widgetPinnedEmptyDescription: 'আপনি যে ডকুমেন্ট পিন করবেন, তা এখানে দেখা যাবে',
+    widgetPinnedSaveError: 'পিন করা ডকুমেন্ট সংরক্ষণ করা যায়নি।',
     widgetQueryError: 'এই উইজেটের জন্য ডকুমেন্ট লোড করতে ব্যর্থ হয়েছে।',
-    widgetRecentlyViewedEmpty: 'আপনি এখনও কোনো Document দেখেননি।',
-    widgetRecentlyViewedTitle: 'আপনি সম্প্রতি দেখেছেন',
+    widgetRecentlyViewedEmpty: 'কোনো সাম্প্রতিক ডকুমেন্ট নেই',
+    widgetRecentlyViewedEmptyDescription:
+      'আপনি সম্প্রতি যে Document-গুলি দেখেছেন সেগুলি এখানে প্রদর্শিত হবে',
+    widgetRecentlyViewedFilterDescription: 'শুধুমাত্র সম্প্রতি দেখা হয়েছে এমনগুলি ফিল্টার করুন।',
+    widgetRecentlyViewedTitle: 'সাম্প্রতিক দেখা',
+    widgetRecentsAndPinned: 'সাম্প্রতিক ও পিন করা',
+    widgetRemovePin: 'ডকুমেন্ট আনপিন করুন',
     widgetSelectCollectionFirst: 'সর্ট নির্বাচন করার আগে একটি Collection নির্বাচন করুন',
     widgetSelectSortField: 'সাজানোর জন্য একটি ক্ষেত্র নির্বাচন করুন',
     widgetSortDirectionLabel: 'সাজানোর দিক',
@@ -146,8 +157,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     autosaving: 'এই ডকুমেন্টটি স্বয়ংক্রিয়ভাবে সংরক্ষণ করার সময় একটি সমস্যা হয়েছে।',
     correctInvalidFields: 'অবৈধ ক্ষেত্রগুলি সংশোধন করুন।',
     deletingFile: 'ফাইল মুছতে একটি ত্রুটি হয়েছে।',
-    deletingTitle:
-      '{{title}} মুছতে একটি ত্রুটি হয়েছে। আপনার সংযোগ পরীক্ষা করুন এবং আবার চেষ্টা করুন।',
+    deletingTitle: '{{title}} মুছতে একটি ত্রুটি হয়েছে। আপনার সংযোগ পরীক্ষা করুন এবং আবার চেষ্টা করুন।',
     documentNotFound:
       'ID সহ {{id}} ডকুমেন্টটি পাওয়া যায়নি। এটি মুছে ফেলা হতে পারে বা কখনই ছিল না, অথবা আপনার এটির অ্যাক্সেস নেই।',
     emailOrPasswordIncorrect: 'প্রদত্ত ইমেইল বা পাসওয়ার্ড ভুল।',
@@ -200,8 +210,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     urlNotAllowed: 'প্রদত্ত URL অনুমোদিত নয়।',
     userEmailAlreadyRegistered: 'প্রদত্ত ইমেইল সহ একটি ব্যবহারকারী ইতিমধ্যে নিবন্ধিত হয়েছে।',
     userLocked: 'অনেকগুলি ব্যর্থ লগইন প্রচেষ্টার কারণে এই ব্যবহারকারী লক করা হয়েছে।',
-    usernameAlreadyRegistered:
-      'প্রদত্ত ব্যবহারকারীর নাম সহ একটি ব্যবহারকারী ইতিমধ্যে নিবন্ধিত হয়েছে।',
+    usernameAlreadyRegistered: 'প্রদত্ত ব্যবহারকারীর নাম সহ একটি ব্যবহারকারী ইতিমধ্যে নিবন্ধিত হয়েছে।',
     usernameOrPasswordIncorrect: 'প্রদত্ত ব্যবহারকারীর নাম বা পাসওয়ার্ড ভুল।',
     valueMustBeUnique: 'মানটি অনন্য হতে হবে',
     verificationTokenInvalid: 'যাচাইকরণ টোকেন অবৈধ।',
@@ -217,8 +226,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     blockName: 'ব্লক নাম',
     blocks: 'ব্লকগুলি',
     blockType: 'ব্লক প্রকার',
-    chooseBetweenCustomTextOrDocument:
-      'একটি কাস্টম টেক্সট URL লিখুন বা অন্য একটি ডকুমেন্টে লিঙ্ক করুন।',
+    chooseBetweenCustomTextOrDocument: 'একটি কাস্টম টেক্সট URL লিখুন বা অন্য একটি ডকুমেন্টে লিঙ্ক করুন।',
     chooseDocumentToLink: 'লিঙ্ক করার জন্য একটি ডকুমেন্ট নির্বাচন করুন',
     chooseFromExisting: 'বিদ্যমান থেকে নির্বাচন করুন',
     chooseLabel: '{{label}} নির্বাচন করুন',
@@ -269,8 +277,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     aboutToRestore: 'আপনি চলেছেন {{label}} <1>{{title}}</1> পুনরুদ্ধার করতে। আপনি কি নিশ্চিত?',
     aboutToRestoreAsDraft:
       'আপনি যে {{label}} <1>{{title}}</1> একটি খসড়া হিসাবে পুনঃস্থাপন করতে যাচ্ছেন । আপনি কি নিশ্চিত?',
-    aboutToRestoreAsDraftCount:
-      'আপনি প্রস্তাবিত {{count}} {{label}} ড্রাফ্ট হিসেবে পুনরুদ্ধার করতে যাচ্ছেন',
+    aboutToRestoreAsDraftCount: 'আপনি প্রস্তাবিত {{count}} {{label}} ড্রাফ্ট হিসেবে পুনরুদ্ধার করতে যাচ্ছেন',
     aboutToRestoreCount: 'আপনি একটি পুনরুদ্ধার করতে যাচ্ছেন {{count}} {{label}}',
     aboutToTrash:
       'আপনি সত্যিই স্থানান্তর করতে চাইছেন {{label}} <1>{{title}}</1> কে আবর্জনায়? আপনি কি নিশ্চিত?',
@@ -292,6 +299,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     auto: 'স্বয়ংক্রিয়',
     automatic: 'স্বয়ংক্রিয়',
     backToDashboard: 'ড্যাশবোর্ডে ফিরে যান',
+    breadcrumb: 'নেভিগেশন পথ',
     by: 'দ্বারা',
     cancel: 'বাতিল করুন',
     changesNotSaved:
@@ -462,8 +470,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     pasteRow: 'সারি পেস্ট করুন',
     payloadSettings: 'পেলোড সেটিংস',
     permanentlyDelete: 'স্থায়ীভাবে মুছে ফেলুন',
-    permanentlyDeletedCountSuccessfully:
-      'স্থায়ীভাবে {{count}} টি {{label}} সফলভাবে মুছে ফেলা হয়েছে।',
+    permanentlyDeletedCountSuccessfully: 'স্থায়ীভাবে {{count}} টি {{label}} সফলভাবে মুছে ফেলা হয়েছে।',
     perPage: 'প্রতি পৃষ্ঠায়: {{limit}}',
     perPageLabel: 'প্রতি পৃষ্ঠা:',
     presets: 'প্রিসেটসমূহ',
@@ -513,8 +520,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'দুঃখিত—আপনার অনুরোধের সাথে মিলে এমন কিছুই নেই।',
     sort: 'সাজান',
     sortByLabelDirection: '{{label}} দ্বারা {{direction}} সাজান',
-    sortByOrderToReorder:
-      'সারিগুলিকে পুনরায় সাজাতে হলে আপনাকে প্রথমে "Order" কলাম অনুযায়ী সেগুলি সাজাতে হবে।',
+    sortByOrderToReorder: 'সারিগুলিকে পুনরায় সাজাতে হলে আপনাকে প্রথমে "Order" কলাম অনুযায়ী সেগুলি সাজাতে হবে।',
     stayOnThisPage: 'এই পৃষ্ঠায় থাকুন',
     submissionSuccessful: 'জমা সফল হয়েছে।',
     submit: 'জমা দিন',
@@ -540,8 +546,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     unauthorized: 'অননুমোদিত',
     unchecked: 'অচিহ্নিত',
     unlock: 'আনলক করুন',
-    unsavedChanges:
-      'আপনার কাছে সংরক্ষণ না করা পরিবর্তনগুলি রয়েছে। চালিয়ে যাওয়ার আগে সংরক্ষণ করুন বা বাতিল করুন।',
+    unsavedChanges: 'আপনার কাছে সংরক্ষণ না করা পরিবর্তনগুলি রয়েছে। চালিয়ে যাওয়ার আগে সংরক্ষণ করুন বা বাতিল করুন।',
     unsavedChangesDuplicate:
       'আপনার কাছে সংরক্ষণ না করা পরিবর্তনগুলি রয়েছে। আপনি কি ডুপ্লিকেট করতে চালিয়ে যেতে চান?',
     untitled: 'শিরোনামহীন',
@@ -567,13 +572,14 @@ export const bnInTranslations: DefaultTranslationsObject = {
     yes: 'হ্যাঁ',
   },
   hierarchy: {
+    goTo: '"{{name}}" তে যান',
     itemsMovedTo: '{{title}} টি {{destination}} এ সরিয়ে নেওয়া হলো।',
     itemsMovedToRoot: '{{title}} মূলে সরিয়ে নেওয়া হয়েছে',
-    moveItemsToRootConfirmation:
-      'আপনি <1>{{count}} {{label}}</1> কে রুট এ সরিয়ে দিতে চলেছেন। আপনি কি নিশ্চিত?',
+    moveTo: 'সরানো হোক...',
     moveToRoot: 'রুটে সরান',
     noParent: 'কোন মাতা-পিতা নেই',
     noResults: 'No results for "{{query}}"',
+    removeFrom: '{{label}} থেকে সরান',
     searchLabel: '{{label}} অনুসন্ধান করুন',
     searchResults: '{{count}}টি পাওয়া গেছে',
   },
@@ -634,8 +640,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     cropBottomRight: 'ছাঁটাইয়ের নীচের ডান হ্যান্ডেল',
     cropLeft: 'ছাঁটাইয়ের বাঁ হ্যান্ডেল',
     cropRight: 'ছাঁটাইয়ের ডান হ্যান্ডেল',
-    cropToolDescription:
-      'নির্বাচিত অঞ্চলের কোণগুলি টানুন, একটি নতুন অঞ্চল আঁকুন বা নিচের মানগুলি সামঞ্জস্য করুন।',
+    cropToolDescription: 'নির্বাচিত অঞ্চলের কোণগুলি টানুন, একটি নতুন অঞ্চল আঁকুন বা নিচের মানগুলি সামঞ্জস্য করুন।',
     cropTop: 'ছাঁটাইয়ের উপরের হ্যান্ডেল',
     cropTopLeft: 'ছাঁটাইয়ের উপরের বাঁ হ্যান্ডেল',
     cropTopRight: 'ছাঁটাইয়ের উপরের ডান হ্যান্ডেল',
@@ -691,8 +696,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     shorterThanMax: 'এই মানটি সর্বাধিক {{maxLength}} অক্ষরের চেয়ে ছোট হতে হবে।',
     timezoneRequired: 'একটি টাইমজোন প্রয়োজন।',
     trueOrFalse: 'এই ক্ষেত্রটি শুধুমাত্র সত্য বা মিথ্যা হতে পারে।',
-    username:
-      'একটি বৈধ ব্যবহারকারীর নাম লিখুন। এতে অক্ষর, সংখ্যা, হাইফেন, পিরিয়ড এবং আন্ডারস্কোর থাকতে পারে।',
+    username: 'একটি বৈধ ব্যবহারকারীর নাম লিখুন। এতে অক্ষর, সংখ্যা, হাইফেন, পিরিয়ড এবং আন্ডারস্কোর থাকতে পারে।',
     validUploadID: 'এই ক্ষেত্রটি একটি বৈধ আপলোড আইডি নয়।',
   },
   version: {
@@ -705,10 +709,8 @@ export const bnInTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'আপনি এই ডকুমেন্টের পরিবর্তনগুলি তার প্রকাশিত অবস্থায় ফিরিয়ে আনতে চলেছেন। আপনি কি নিশ্চিত?',
     aboutToUnpublish: 'আপনি এই ডকুমেন্টটি আনপাবলিশ করতে চলেছেন। আপনি কি নিশ্চিত?',
-    aboutToUnpublishIn:
-      'আপনি এই দস্তাবেজটি {{locale}} থেকে প্রকাশনা বাতিল করার ব্যাপারে নিশ্চিত আছেন তো?',
-    aboutToUnpublishSelection:
-      'আপনি নির্বাচনে সমস্ত {{label}} আনপাবলিশ করতে চলেছেন। আপনি কি নিশ্চিত?',
+    aboutToUnpublishIn: 'আপনি এই দস্তাবেজটি {{locale}} থেকে প্রকাশনা বাতিল করার ব্যাপারে নিশ্চিত আছেন তো?',
+    aboutToUnpublishSelection: 'আপনি নির্বাচনে সমস্ত {{label}} আনপাবলিশ করতে চলেছেন। আপনি কি নিশ্চিত?',
     autosave: 'স্বয়ংক্রিয় সংরক্ষণ',
     autosavedSuccessfully: 'স্বয়ংক্রিয়ভাবে সংরক্ষণ করা হয়েছে।',
     autosavedVersion: 'স্বয়ংক্রিয়ভাবে সংরক্ষণ করা সংস্করণ',

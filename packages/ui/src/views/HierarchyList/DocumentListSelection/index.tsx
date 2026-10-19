@@ -192,7 +192,6 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
             hierarchySlug={hierarchySlug}
             Icon={hierarchyIcon}
             key="bulk-move"
-            modalPrefix="hierarchy-list"
             onSuccess={handleActionSuccess}
             requiredCollections={requiredCollections}
             selections={groupedSelections}

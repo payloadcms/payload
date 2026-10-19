@@ -67,7 +67,6 @@ type FieldType<T> = {
   initialValue?: T
   path: string
   permissions: FieldPermissions
-  readOnly?: boolean
   rows?: Row[]
   schemaPath: string
   setValue: (val: unknown, disableModifyingForm?: boolean) => void
@@ -100,13 +99,7 @@ export const MyComponent: React.FC = () => {
   }
 
   return (
-    <button
-      onClick={() =>
-        updateRichTextField({
-          /* new editor state */
-        })
-      }
-    >
+    <button onClick={() => updateRichTextField({/* new editor state */})}>
       Update
     </button>
   )
@@ -1264,13 +1257,12 @@ const MyComponent = () => {
 }
 ```
 
-You can also trigger route transitions programmatically, such as when using `router.push` from `next/router`. To do this, wrap your function calls with the `startRouteTransition` method provided by the `useRouteTransition` hook.
+You can also trigger route transitions programmatically, such as when calling `router.push`. To do this, wrap your function calls with the `startRouteTransition` method provided by the `useRouteTransition` hook. Import `useRouter` from `@payloadcms/ui` (not `next/navigation`) so your component works on both the Next.js and TanStack Start adapters.
 
 ```ts
 'use client'
 import React, { useCallback } from 'react'
-import { useTransition } from '@payloadcms/ui'
-import { useRouter } from 'next/navigation'
+import { useRouter, useTransition } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   const router = useRouter()

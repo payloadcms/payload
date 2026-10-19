@@ -8,7 +8,13 @@ import { getNextVersion } from './getNextVersion.js'
 /** Next.js serves the dev HMR WebSocket on this path from 16.3 onwards. */
 const modernHMRPath = '/_next/hmr'
 
-/** Next.js served the dev HMR WebSocket on this path before 16.3. */
+/**
+ * Next.js served the dev HMR WebSocket on this path before 16.3.
+ *
+ * TODO: Payload requires Next.js 16.4+, so this legacy path, along with `getHMRPath` and
+ * `getNextVersion`, is only kept temporarily so dev config reloading keeps working for projects
+ * that are still migrating from an older Next.js version. It can be removed in the future.
+ */
 const legacyHMRPath = '/_next/webpack-hmr'
 
 const firstModernHMRPathVersion = '16.3.0'

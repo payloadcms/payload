@@ -6,6 +6,7 @@ import type {
   ImageSize,
   PayloadHandler,
   PayloadRequest,
+  SanitizedCollectionConfig,
   TypeWithID,
   UploadCollectionSlug,
   UploadInstructionsAccess,
@@ -66,6 +67,26 @@ export type HandleDelete = (args: {
   storageFilePath: string
 }) => Promise<void> | void
 
+/** Deletes a stored object without requiring a saved document. */
+export type DeleteFile = (args: {
+  collection: CollectionConfig
+  req: PayloadRequest
+  /** Complete storage path, with prefixes and `_objectKey` already resolved. */
+  storageFilePath: string
+}) => Promise<void> | void
+
+/** Complete storage keys are resolved before invoking a provider operation. */
+export type FileOperationArgs = {
+  collection: SanitizedCollectionConfig
+  from: string
+  mimeType?: string
+  req: PayloadRequest
+  to: string
+}
+
+export type CopyFile = (args: FileOperationArgs) => Promise<void>
+export type MoveFile = (args: FileOperationArgs) => Promise<void>
+
 export type GenerateURL = (args: {
   collection: CollectionConfig
   data: any
@@ -89,6 +110,9 @@ export type StaticHandler = (
 ) => Promise<Response> | Response
 
 export interface GeneratedAdapter {
+  /** Preserve object metadata and fail if `to` already exists. Rename retains `from` for history. */
+  copyFile: CopyFile
+  deleteFile: DeleteFile
   /**
    * Additional fields to be injected into the base collection and image sizes
    */
@@ -99,9 +123,12 @@ export interface GeneratedAdapter {
   generateURL?: GenerateURL
   handleDelete: HandleDelete
   handleUpload: HandleUpload
+  moveFile?: MoveFile
   name: string
   onInit?: () => Promise<void> | void
   staticHandler: StaticHandler
+  /** Reads source files by path when staging server-mediated uploads. */
+  supportsTempFiles?: boolean
   /** Generates upload instructions when supported. */
   uploadInstructions?: {
     adminHandler?: {

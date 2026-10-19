@@ -24,7 +24,8 @@ export type VercelBlobStorageOptions = {
   access?: 'public'
 
   /**
-   * Add a random suffix to the uploaded file name in Vercel Blob storage
+   * Must be false or omitted for enabled adapters with configured collections.
+   * Payload requires exact storage paths and allocates unique object folders.
    *
    * @default false
    */
@@ -130,6 +131,12 @@ export const vercelBlobStorage: VercelBlobStorageFactory = (
           enabled: false,
           useCompositePrefixes: options.useCompositePrefixes,
         })(incomingConfig)
+      }
+
+      if (options.addRandomSuffix && storageAdapter.collections.length > 0) {
+        throw new Error(
+          'Vercel Blob addRandomSuffix must be false. Payload requires exact storage paths and already allocates unique object folders.',
+        )
       }
 
       const adapter = createVercelBlobAdapter({
