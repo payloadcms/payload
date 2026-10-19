@@ -105,7 +105,11 @@ export function mountDemoChrome({
   find('[data-title]').textContent = change.title
   find('[data-description]').textContent = change.description
   find('[data-size]').hidden = !showSize
-  let recentKeys = []
+  const keyAnimations = new Set()
+  const cancelKeyAnimations = () => {
+    for (const animation of keyAnimations) animation.cancel()
+    keyAnimations.clear()
+  }
   let focusRect
   let refreshTimer
   let currentViewport = viewport
@@ -240,7 +244,7 @@ export function mountDemoChrome({
     setAccessibilityState({ key, focus, announcement, reset = false }) {
       if (!accessibility || isDestroyed) return
       if (reset) {
-        recentKeys = []
+        cancelKeyAnimations()
         find('[data-keystroke-overlay]').hidden = true
         find('[data-keystroke-overlay]').innerHTML =
           '<span class="keystroke" data-keystroke></span>'
@@ -248,28 +252,60 @@ export function mountDemoChrome({
         find('[data-focus-highlight]').hidden = true
       }
       if (key) {
-        recentKeys = [key, ...recentKeys].slice(0, 4)
         const history = find('[data-keystroke-overlay]')
-        history.replaceChildren()
-        recentKeys.forEach((command, commandIndex) => {
-          const chord = document.createElement('span')
-          chord.className = 'keystroke'
-          chord.setAttribute(commandIndex === 0 ? 'data-keystroke' : 'data-key-history-entry', '')
-          command.split(' + ').forEach((label, index) => {
-            if (index > 0) {
-              const separator = document.createElement('span')
-              separator.className = 'key-separator'
-              separator.setAttribute('data-key-separator', '')
-              separator.textContent = ' + '
-              chord.append(separator)
-            }
-            const keycap = document.createElement('kbd')
-            keycap.textContent = label
-            chord.append(keycap)
-          })
-          history.append(chord)
+        const previousPositions = new Map(
+          [...history.children]
+            .filter((el) => el.textContent)
+            .map((el) => [el, el.getBoundingClientRect().left]),
+        )
+        cancelKeyAnimations()
+        for (const el of history.children) {
+          if (!el.textContent) el.remove()
+          else {
+            el.removeAttribute('data-keystroke')
+            el.setAttribute('data-key-history-entry', '')
+          }
+        }
+        const chord = document.createElement('span')
+        chord.className = 'keystroke'
+        chord.setAttribute('data-keystroke', '')
+        key.split(' + ').forEach((label, index) => {
+          if (index > 0) {
+            const separator = document.createElement('span')
+            separator.className = 'key-separator'
+            separator.setAttribute('data-key-separator', '')
+            separator.textContent = ' + '
+            chord.append(separator)
+          }
+          const keycap = document.createElement('kbd')
+          keycap.textContent = label
+          chord.append(keycap)
         })
+        history.prepend(chord)
+        while (history.children.length > 4) history.lastElementChild.remove()
         history.hidden = false
+        if (canAnimateAnnotationText() && history.offsetWidth > 0) {
+          const scale = root.clientWidth / canvas.width
+          for (const el of history.children) {
+            const previousLeft = previousPositions.get(el)
+            const offset =
+              previousLeft === undefined
+                ? -8
+                : (previousLeft - el.getBoundingClientRect().left) / scale
+            const animation = el.animate(
+              [
+                {
+                  transform: `translateX(${offset}px)`,
+                  opacity: previousLeft === undefined ? 0 : 1,
+                },
+                { transform: 'translateX(0)', opacity: 1 },
+              ],
+              { duration: 220, easing: 'cubic-bezier(.2,.8,.2,1)' },
+            )
+            keyAnimations.add(animation)
+            animation.onfinish = () => keyAnimations.delete(animation)
+          }
+        }
       }
       if (focus !== undefined) {
         focusRect = focus
@@ -397,6 +433,7 @@ export function mountDemoChrome({
       animateAnnotationText({ previousText, hasAnnotation: true, shouldAnimate })
     },
     destroy() {
+      cancelKeyAnimations()
       clearTimeout(refreshTimer)
       cancelAnnotationAnimations()
       cancelAnimation()

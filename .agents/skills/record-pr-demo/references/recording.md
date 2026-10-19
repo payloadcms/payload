@@ -265,3 +265,5 @@ Pass `--a11y on` or `--a11y off` to `prepare-demo.mjs` for candidate, preview, o
 node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs candidate --scenario /tmp/demo.mjs --a11y on --label demo-a11y
 node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs candidate --scenario /tmp/demo.mjs --a11y off --label demo-clean
 ```
+
+When a command arrives, retained commands slide right from their current visible positions over 220ms while the new command enters from the left. Rapid input interrupts and resumes from the current visual positions. Reduced-motion preferences and fast validation/preview apply the final positions immediately. Navigation reset and destruction cancel pending key animations.

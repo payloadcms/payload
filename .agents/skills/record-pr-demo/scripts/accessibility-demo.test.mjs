@@ -317,3 +317,41 @@ test('should show each shortcut key in a separate keycap with plain plus separat
     },
   })
 })
+
+test('should slide the previous command right at a scaled size and respect reduced motion', async () => {
+  await withPresentation({
+    run: async ({ stage, app }) => {
+      await stage.setViewportSize({ width: 1000, height: 800 })
+      await app.locator('#first').focus()
+      await stage.keyboard.press('ArrowUp')
+      await stage.waitForTimeout(250)
+      const previousLeft = await stage.locator('[data-keystroke]').evaluate((el) => {
+        window.previousCommand = el
+        return el.getBoundingClientRect().left
+      })
+      await stage.keyboard.press('ArrowDown')
+      const positions = await stage.locator('[data-key-history-entry]').evaluate((el) => {
+        const animation = el.getAnimations()[0]
+        if (!animation) throw new Error('Expected the prior command to animate')
+        animation.pause()
+        return [0, 110, 220].map((time) => {
+          animation.currentTime = time
+          return { x: el.getBoundingClientRect().left, isSameNode: el === window.previousCommand }
+        })
+      })
+      assert.ok(positions.every((position) => position.isSameNode))
+      assert.ok(Math.abs(positions[0].x - previousLeft) < 2)
+      assert.ok(positions[0].x < positions[1].x && positions[1].x < positions[2].x)
+      await stage.emulateMedia({ reducedMotion: 'reduce' })
+      await stage.keyboard.press('ArrowLeft')
+      assert.equal(
+        await stage
+          .locator('[data-keystroke-overlay]')
+          .evaluate((el) => el.getAnimations({ subtree: true }).length),
+        0,
+      )
+      await expect(stage.locator('[data-keystroke]')).toHaveText('←')
+      await expect(stage.locator('[data-key-history-entry]')).toHaveText(['↓', '↑'])
+    },
+  })
+})
