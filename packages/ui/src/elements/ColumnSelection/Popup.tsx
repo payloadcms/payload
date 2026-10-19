@@ -121,7 +121,7 @@ const ColumnItem: React.FC<ColumnItemProps> = ({ id, active, labelText, onToggle
       <span className={`${baseClass}__item-label`}>
         <NestedLabel label={labelText} />
       </span>
-      <Switch ariaLabel={labelText} checked={active} id={`${id}-toggle`} onChange={onToggle} />
+      <Switch ariaLabel={labelText} checked={active} onChange={onToggle} />
     </div>
   )
 }
@@ -134,20 +134,9 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
 }) => {
   const { i18n, t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
-  const focusedToggleRef = useRef<HTMLInputElement | null>(null)
 
   const toggleColumn = useCallback(
     (column: string) => {
-      const focusedElement = document.activeElement
-
-      if (
-        focusedElement instanceof HTMLInputElement &&
-        focusedElement.type === 'checkbox' &&
-        containerRef.current?.contains(focusedElement)
-      ) {
-        focusedToggleRef.current = focusedElement
-      }
-
       onChange(
         columns.map((col) => (col.accessor === column ? { ...col, active: !col.active } : col)),
       )
@@ -169,19 +158,6 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
   const editDepth = useEditDepth()
   const [searchQuery, setSearchQuery] = useState('')
   const [lockedWidth, setLockedWidth] = useState<null | number>(null)
-
-  useLayoutEffect(() => {
-    const previousToggle = focusedToggleRef.current
-
-    // Moving between sections remounts the toggle, so restore focus before paint.
-    if (previousToggle && !previousToggle.isConnected && document.activeElement === document.body) {
-      containerRef.current
-        ?.querySelector<HTMLInputElement>(`#${CSS.escape(previousToggle.id)}`)
-        ?.focus()
-    }
-
-    focusedToggleRef.current = null
-  }, [columns])
 
   // Lock the width when search starts to prevent layout shift
   useLayoutEffect(() => {
@@ -229,7 +205,7 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
         typeof label === 'string' ? label : getTranslation(label as StaticLabel, i18n)
 
       return {
-        id: `${collectionSlug}-${accessor}-${i}${editDepth ? `-${editDepth}-` : ''}${uuid}`,
+        id: `${collectionSlug}-${accessor}${editDepth ? `-${editDepth}-` : ''}${uuid}`,
         accessor,
         active,
         index: i,
@@ -295,6 +271,11 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
   // Combined IDs: shown items first, then hidden items
   const allIds = [...columnItems.shown, ...columnItems.hidden].map((item) => item.id)
 
+  const columnSections = [
+    { columns: columnItems.shown, key: 'shown', label: t('general:shownInTable') },
+    { columns: columnItems.hidden, key: 'hidden', label: t('general:notShownInTable') },
+  ]
+
   const containerStyle = lockedWidth
     ? ({ '--column-selector-locked-width': `${lockedWidth}px` } as React.CSSProperties)
     : undefined
@@ -337,41 +318,29 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
         </div>
       </div>
       <div className={`${baseClass}__content`}>
-        <DraggableSortable ids={allIds} onDragEnd={handleDragEnd}>
+        <DraggableSortable className={`${baseClass}__list`} ids={allIds} onDragEnd={handleDragEnd}>
           {columnItems.shown.length === 0 && columnItems.hidden.length === 0 && searchQuery && (
             <div className={`${baseClass}__no-results`}>{t('general:noMatchesFound')}</div>
           )}
-          {columnItems.shown.length > 0 && (
-            <div className={`${baseClass}__section`}>
-              <h3 className={`${baseClass}__section-header`}>{t('general:shownInTable')}</h3>
-              {columnItems.shown.map((item) => (
-                <ColumnItem
-                  active={item.active}
-                  id={item.id}
-                  key={item.id}
-                  labelText={item.labelText}
-                  onToggle={() => {
-                    void toggleColumn(item.accessor)
-                  }}
-                />
-              ))}
-            </div>
-          )}
-          {columnItems.hidden.length > 0 && (
-            <div className={`${baseClass}__section`}>
-              <h3 className={`${baseClass}__section-header`}>{t('general:notShownInTable')}</h3>
-              {columnItems.hidden.map((item) => (
-                <ColumnItem
-                  active={item.active}
-                  id={item.id}
-                  key={item.id}
-                  labelText={item.labelText}
-                  onToggle={() => {
-                    void toggleColumn(item.accessor)
-                  }}
-                />
-              ))}
-            </div>
+          {columnSections.flatMap(({ columns: sectionColumns, key, label }) =>
+            sectionColumns.length > 0
+              ? [
+                  <h3 className={`${baseClass}__section-header`} key={`section-${key}`}>
+                    {label}
+                  </h3>,
+                  ...sectionColumns.map((item) => (
+                    <ColumnItem
+                      active={item.active}
+                      id={item.id}
+                      key={item.id}
+                      labelText={item.labelText}
+                      onToggle={() => {
+                        void toggleColumn(item.accessor)
+                      }}
+                    />
+                  )),
+                ]
+              : [],
           )}
         </DraggableSortable>
       </div>

@@ -2590,22 +2590,64 @@ test.describe('WCAG 2.2 Level AA', () => {
   test.describe('2.4.3 Focus Order (A)', () => {
     test('should retain focus when a column toggle moves between sections', async () => {
       const columns = await openTableColumns({ page, postsURL })
-      const toggle = columns.getByRole('checkbox').first()
-      const label = toggle
+      for (const query of ['', 'Subtitle']) {
+        const columnToggle = columns.getByRole('checkbox', {
+          name: query || 'Title',
+          exact: true,
+        })
 
-      await expect(label).toHaveAttribute('aria-label')
+        await columns.getByRole('textbox').fill(query)
 
-      const columnToggle = columns.getByRole('checkbox', { name: label, exact: true })
-      const wasChecked = await columnToggle.isChecked()
+        if (query) {
+          await expect(columns.getByRole('checkbox')).toHaveCount(1)
+        }
 
-      await columnToggle.focus()
-      await columnToggle.press('Space')
-      await expect(columnToggle).toBeChecked({ checked: !wasChecked })
-      await expect(columnToggle).toBeFocused()
+        const originalToggle = await columnToggle.elementHandle()
+        const wasChecked = await columnToggle.isChecked()
 
-      await columnToggle.press('Space')
-      await expect(columnToggle).toBeChecked({ checked: wasChecked })
-      await expect(columnToggle).toBeFocused()
+        expect(originalToggle).not.toBeNull()
+
+        await columnToggle.focus()
+        await columnToggle.press('Space')
+        await expect(columnToggle).toBeChecked({ checked: !wasChecked })
+        await expect(columnToggle).toBeFocused()
+        expect(await originalToggle.evaluate((node) => node.isConnected)).toBe(true)
+
+        await columnToggle.press('Space')
+        await expect(columnToggle).toBeChecked({ checked: wasChecked })
+        await expect(columnToggle).toBeFocused()
+        expect(await originalToggle.evaluate((node) => node.isConnected)).toBe(true)
+        await originalToggle.dispose()
+      }
+    })
+
+    test('should retain the column drag handle and focus after keyboard reordering', async () => {
+      const columns = await openTableColumns({ page, postsURL })
+      const dragHandle = columns.getByRole('button', { name: /^Drag to reorder: Title$/i })
+      const shownRows = columns.locator(
+        '.column-selector__item:not(.column-selector__item--inactive)',
+      )
+      const originalHandle = await dragHandle.elementHandle()
+
+      expect(originalHandle).not.toBeNull()
+      await expect(shownRows.first()).toHaveText('Title')
+      await dragHandle.focus()
+      await dragHandle.press('Space')
+      await dragHandle.press('ArrowDown')
+      await dragHandle.press('Space')
+      await expect(page.locator('body')).not.toHaveClass(/is-dragging/)
+      await expect(shownRows.nth(1)).toHaveText('Title')
+      await expect(dragHandle).toBeFocused()
+      expect(await originalHandle.evaluate((node) => node.isConnected)).toBe(true)
+
+      await dragHandle.press('Space')
+      await dragHandle.press('ArrowUp')
+      await dragHandle.press('Space')
+      await expect(page.locator('body')).not.toHaveClass(/is-dragging/)
+      await expect(shownRows.first()).toHaveText('Title')
+      await expect(dragHandle).toBeFocused()
+      expect(await originalHandle.evaluate((node) => node.isConnected)).toBe(true)
+      await originalHandle.dispose()
     })
 
     test('should return focus to the active dashboard tab when pagination disappears', async () => {
