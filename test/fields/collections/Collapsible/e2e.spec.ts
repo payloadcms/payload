@@ -61,7 +61,9 @@ describe('Collapsibles', () => {
   test('should force render nested fields outside the observer root margin', async () => {
     await page.goto(url.create)
 
-    const offscreenCollapsible = page.locator('#field-collapsible-_index-5')
+    const offscreenCollapsible = page
+      .locator('.collapsible-field')
+      .filter({ hasText: 'Offscreen Collapsible Field' })
     await expect(offscreenCollapsible).toBeAttached()
 
     const viewportHeight = await page.evaluate(() => window.innerHeight)
