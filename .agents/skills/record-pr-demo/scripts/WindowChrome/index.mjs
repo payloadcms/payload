@@ -55,15 +55,19 @@ export function mountDemoChrome({
     .size { padding:5px 9px; border-radius:8px; background:var(--badge); color:var(--sub); font:12px/1.5 ui-monospace,monospace; font-variant-numeric:tabular-nums; }
     .content { position:relative; overflow:hidden; border-radius:8px; background:var(--paper); }
     ::slotted([slot=content]) { display:block; width:100%; height:100%; border:0; }
-    .footer { position:absolute; top:32px; left:50%; transform:translateX(-50%); width:min(1302px,calc(100% - 64px)); height:${accessibility ? 168 : 112}px; display:grid; grid-template-rows:${accessibility ? 'minmax(0,1fr) 44px' : 'minmax(0,1fr)'}; row-gap:${accessibility ? 12 : 0}px; grid-template-columns:minmax(0,420fr) minmax(0,826fr); align-items:center; padding:12px 24px; border-radius:12px; color:var(--ink); background:var(--paper); }
-    .change { min-height:0; align-self:stretch; display:flex; flex-direction:column; justify-content:center; gap:2px; padding-inline-end:28px; border-inline-end:1px solid var(--line); }
-    .kind { align-self:flex-start; padding-inline:6px; border:1px solid var(--kind-border); border-radius:4px; background:var(--kind-bg); color:var(--kind-text); font-size:12px; font-weight:500; line-height:16px; }
+    .footer { position:absolute; top:32px; left:50%; transform:translateX(-50%); width:min(1302px,calc(100% - 64px)); height:${accessibility ? 152 : 112}px; display:grid; grid-template-rows:${accessibility ? '20px minmax(0,1fr) 36px' : '20px minmax(0,1fr)'}; row-gap:8px; grid-template-columns:minmax(0,1fr); align-items:center; padding:12px 24px; border-radius:12px; color:var(--ink); background:var(--paper); }
+    .change { grid-row:1; min-width:0; display:flex; align-items:center; gap:12px; white-space:nowrap; }
+    .change .kind { align-self:center; flex:none; }
+
+    .kind { align-self:flex-start; padding-inline:6px; border:1px solid var(--kind-border); border-radius:4px; background:var(--kind-bg); color:var(--kind-text); font-size:13px; font-weight:500; line-height:16px; }
     .kind[data-kind="Feature"] { --kind-bg:var(--kind-feature-bg); --kind-border:var(--kind-feature-border); --kind-text:var(--kind-feature-text); }
     .kind[data-kind="Fix"] { --kind-bg:var(--kind-fix-bg); --kind-border:var(--kind-fix-border); --kind-text:var(--kind-fix-text); }
-    .title { font-size:18px; font-weight:400; letter-spacing:-.1px; margin:0; overflow-wrap:anywhere; }
+    .title { flex:none; font-size:13px; font-weight:400; letter-spacing:-.1px; margin:0; overflow-wrap:anywhere; }
     .description { font-size:13px; color:var(--sub); overflow-wrap:anywhere; }
-    .note { padding-inline-start:28px; min-width:0; }
+    .note { grid-row:2; min-width:0; min-height:0; align-self:stretch; display:flex; flex-direction:column; justify-content:center; }
+    .note[hidden] { display:none; }
     .heading { display:flex; align-items:center; gap:12px; margin-block-end:4px; }
+    .heading:has(.step-progress[hidden]) { gap:0; }
     .pagination { display:inline-flex; align-items:center; gap:8px; color:var(--sub); font:12px/1.5 ui-monospace,monospace; font-variant-numeric:tabular-nums; white-space:nowrap; }
     .step-progress { display:block; flex:none; width:20px; height:20px; transform:rotate(-90deg); }
     .step-progress circle { fill:none; stroke-width:3.5; }
@@ -73,14 +77,15 @@ export function mountDemoChrome({
     .step-progress[hidden] { display:none; }
     [data-step-count], [data-refresh-text] { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
     .note-title { font-size:16px; font-weight:500; overflow-wrap:anywhere; }
-    .body { font-size:16px; color:var(--sub); overflow-wrap:anywhere; }
-    .accessibility { grid-column:1 / -1; align-self:stretch; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,420px); align-items:center; gap:28px; padding-block-start:12px; border-block-start:1px solid var(--line); pointer-events:none; }
+    .body { font-size:13px; color:var(--sub); overflow-wrap:anywhere; }
+    .accessibility { grid-row:3; grid-column:1 / -1; align-self:stretch; display:flex; align-items:center; gap:12px; padding-block-start:8px; border-block-start:1px solid var(--line); pointer-events:none; }
+
     .a11y-badge { flex:none; align-self:center; --kind-bg:var(--kind-feature-bg); --kind-border:var(--kind-feature-border); --kind-text:var(--kind-feature-text); }
     .accessibility[hidden], .keystroke-overlay[hidden] { display:none; }
-    .announcement-line { display:flex; align-items:center; gap:8px; min-width:0; color:var(--sub); font-size:13px; line-height:20px; }
+    .announcement-line { max-width:65%; flex:0 1 auto; display:flex; align-items:center; gap:8px; min-width:0; color:var(--sub); font-size:13px; line-height:20px; }
     .speaking-icon { width:18px; height:18px; flex:none; }
     .announcement { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .key-slot { height:24px; min-width:0; padding-inline-start:28px; border-inline-start:1px solid var(--line); }
+    .key-slot { flex:1; height:24px; min-width:0; padding-inline-start:12px; border-inline-start:1px solid var(--line); }
     .keystroke-overlay { display:flex; align-items:center; gap:14px; width:100%; overflow:hidden; pointer-events:none; color:var(--ink); }
     .keystroke { display:flex; flex:none; align-items:center; gap:6px; font:13px/1.5 ui-monospace,monospace; }
     .keystroke[data-key-history-entry] kbd { color:var(--sub); background:var(--paper); box-shadow:none; }
@@ -138,7 +143,7 @@ export function mountDemoChrome({
     find('[data-size]').textContent = `${width} × ${height}`
   }
   layout()
-  if (find('.change').scrollHeight > find('.change').clientHeight) {
+  if (find('.change').scrollWidth > find('.change').clientWidth) {
     shadow.replaceChildren()
     throw new Error('Shorten the change title or description to fit the fixed footer')
   }
@@ -413,7 +418,7 @@ export function mountDemoChrome({
       const shouldAnimate = previousAnnotation !== null && index !== 1
       const previousText = captureAnnotationText()
       renderAnnotation(annotation)
-      if (find('[data-note]').offsetHeight > find('.change').clientHeight) {
+      if (find('[data-note]').scrollHeight > find('[data-note]').clientHeight) {
         renderAnnotation(previousAnnotation)
         throw new Error('Shorten the annotation to fit the fixed footer')
       }

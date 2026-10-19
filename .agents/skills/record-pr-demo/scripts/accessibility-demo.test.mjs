@@ -284,6 +284,10 @@ test('should place badge captions and key history in one full-width row below th
         assert.ok(step.y + step.height <= caption.y)
         assert.ok(Math.abs(caption.y + caption.height / 2 - history.y - history.height / 2) < 2)
         assert.ok(caption.x + caption.width <= history.x)
+        assert.ok(
+          history.x - caption.x - caption.width < 40,
+          'Keys should stay beside the announcement',
+        )
         const row = await stage.locator('[data-accessibility]').boundingBox()
         const badge = await stage.locator('[data-a11y-badge]').boundingBox()
         const change = await stage.locator('.change').boundingBox()
