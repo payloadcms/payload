@@ -19,7 +19,7 @@ If something is missing, report it and obtain any required installation approval
 
 ## Required window chrome
 
-For a fixed canvas, genuine viewport resizing, and a persistent change description beside step notes and an animated progress ring, read [window-chrome.md](window-chrome.md). Use the live browser preview to iterate on the shared component without recording a video. Every scenario must export `presentation` with a change kind, title, and description. Validation, preview, and recording always use the shared chrome; there is no page-only mode.
+For presentation metadata, viewport resizing, and annotation APIs, read [window-chrome.md](window-chrome.md). Use the live browser preview to iterate on the shared component without recording a video. Every scenario must export `presentation` with a change kind, title, and description. Validation, preview, and recording always use the shared chrome; there is no page-only mode.
 
 ## Plan the visible story
 
@@ -34,7 +34,7 @@ Prefer 10–45 seconds. Avoid long typing sequences, setup screens, loading wait
 
 ## Editorial annotations over the recording
 
-Annotations live in the shared chrome panel above the application. The change title and description stay constant; step titles and bodies update through `showAnnotation` and `hideAnnotation`. Supply content and optional one-based `index`/`total`, which default to 1. A progress ring appears for multiple steps; exact step text remains available to assistive technology. The opening annotation and any return to step 1 appear immediately. Later step text fades on changes, and forward progress eases the ring. Reduced-motion preferences skip these animations.
+Annotations live in the shared chrome panel above the application. The change title and description stay constant; step titles and bodies update through `showAnnotation` and `hideAnnotation`. Supply content and optional one-based `index`/`total`, which default to 1. The shared component controls layout, progress, and transitions; see [window-chrome.md](window-chrome.md).
 
 ```js
 await showAnnotation({
@@ -140,7 +140,7 @@ await click(page.getByRole('button', { name: 'Save', exact: true }))
 
 If a refresh is part of the story, send the browser reload shortcut through keyboard input and assert the resulting UI. Do not call `page.reload()` to advance the application during the walkthrough. The shared refresh indicator remains available for recorder development and preview controls.
 
-The recorder adds a visible cursor above in-page popups and dialogs. Mouse presses show a brief primary-brand ring at the click point. It stays at that point as the cursor moves away, expands and fades over 420ms, and uses a stationary fade with reduced motion. Repeated clicks replace the prior indicator. This feedback is automatic; scenarios do not mount or style it. Keep the scenario on one page; separate browser-window stitching is outside this skill's current scope.
+The recorder supplies cursor and click feedback automatically. Scenarios do not mount or style it. Keep the scenario on one page; separate browser-window stitching is outside this skill's current scope.
 
 Use `click` for visible interactions instead of calling `locator.click()` directly. Its defaults are a 300 ms eased cursor movement plus a 300 ms dwell before and after the click. `moveCursor` uses the same travel time and pauses for 300 ms after arriving. Override an individual action when the story needs more time:
 
@@ -251,11 +251,11 @@ export const presentation = {
 }
 ```
 
-Navigation keys and shortcuts appear horizontally on the right of a full-width feedback row beneath the compact change header and current annotation step. The latest command is first and visually stronger, followed by up to three previous commands in muted neutral colors. Each shortcut key has its own keycap, with plain `+` separators (for example, `Shift` + `Tab`). History persists until navigation or a presentation reset; oldest commands may clip when space is limited. Ordinary character typing, spaces typed into editable fields, and input originating in password fields or `[data-private]` containers are excluded.
+Set `presentation.accessibility: true` to show navigation keys and shortcuts. Ordinary character typing, spaces typed into editable fields, and input originating in password fields or `[data-private]` containers are excluded. Command history resets on navigation or presentation reset.
 
-To show observed live-region text, also set `presentation.showAnnouncements: true`. The text appears on one line beside a speaking-person icon and blue a11y badge on the left of the feedback row, immediately followed by animated key history. A horizontal divider separates the row from the main content. Long announcements ellipsize rather than expanding the panel. This captures DOM text, not actual screen-reader audio. The entire feedback area is hidden from assistive technology and cannot intercept pointer input. The row remains visible when the step annotation is hidden. The recorder leaves application focus and native focus styling unchanged; it adds no focus outline or focus-tracking loop.
+Also set `presentation.showAnnouncements: true` to display observed live-region text. This captures DOM text, not actual screen-reader audio. Feedback remains available when the step note is hidden. The recorder preserves application focus and native focus styling; it adds no focus outline.
 
-Use real keyboard events such as `page.keyboard.press('Tab')` and `page.keyboard.press('Enter')`. Keep pauses around important commands so viewers can follow them. Accessibility mode reserves a fixed 144px annotation panel rather than the usual 104px; there is no separate bottom panel. Arriving commands do not shift the panel or application. Preview at `http://127.0.0.1:4400/?accessibility&announcements&kind=fix` after starting the chrome preview server.
+Use real keyboard events such as `page.keyboard.press('Tab')` and `page.keyboard.press('Enter')`, with pauses around important commands. Long announcements and older history may truncate, so verify the relevant evidence in the finished take. Preview with `?accessibility&announcements&kind=fix`; layout and styling come from the shared component.
 
 ### Reuse a scenario with or without a11y feedback
 
@@ -265,16 +265,6 @@ Pass `--a11y on` or `--a11y off` to `prepare-demo.mjs` for candidate, preview, o
 node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs candidate --scenario /tmp/demo.mjs --a11y on --label demo-a11y
 node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs candidate --scenario /tmp/demo.mjs --a11y off --label demo-clean
 ```
-
-When a command arrives, retained commands slide right from their current visible positions over 220ms while the new command enters from the left. Rapid input interrupts and resumes from the current visual positions. Reduced-motion preferences and fast validation/preview apply the final positions immediately. Navigation reset and destruction cancel pending key animations.
-
-Step descriptions sit below their titles with a 2px gap. Both retain 13px sizing and their existing foreground/muted colors. The progress circle sits beside the stacked text, vertically centered across both lines; single-step notes have no circle inset. Row gaps above and below the step are 4px. Longer descriptions may wrap, and oversized notes are still rejected without replacing the current annotation.
-
-The recording metadata sits in its own full-width background band at the top of the panel, using the theme’s secondary background. The band reaches the panel edges with matching top corner radii with a matching 1px divider below it when annotations or a11y content are visible, separating metadata from the step and a11y rows.
-
-The a11y row is a full-width footer with the panel’s paper background, a full-width top divider and matching lower corner radii. The metadata header retains its secondary background. The history gradient blends into this footer surface, and active keycaps retain their neutral secondary background. The footer remains part of the fixed annotation panel, with no extra application overlay.
-
-The complete annotation card has a 1px outer border using the same theme-aware line color as its dividers. The metadata header has a matching 1px bottom divider only when annotations or a11y content are visible below it. The full-width a11y divider remains. Inner band radii account for the outer border, and annotation text crossfades account for its thickness.
 
 ### Capture resolution and encoding
 
