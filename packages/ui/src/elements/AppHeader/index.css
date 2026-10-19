@@ -125,7 +125,7 @@
     margin-right: var(--spacer-3);
   }
 
-  .app-header--nav-open .app-header__sidebar-toggle {
+  .app-header--nav-open:not(.app-header--embedded) .app-header__sidebar-toggle {
     display: none;
   }
 

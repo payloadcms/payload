@@ -80,10 +80,10 @@ export function PublishButton({
     () =>
       Boolean(
         entityConfig?.fields &&
-          traverseForLocalizedFields({
-            blocksMap,
-            fields: entityConfig.fields,
-          }),
+        traverseForLocalizedFields({
+          blocksMap,
+          fields: entityConfig.fields,
+        }),
       ),
     [blocksMap, entityConfig?.fields],
   )

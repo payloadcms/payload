@@ -48,7 +48,13 @@ export async function getDashboardDocuments({
   if (!req.user) {
     throw new UnauthorizedError(req.t)
   }
-  if (![1, 2, 4].includes(limit) || !Number.isSafeInteger(page) || page < 1) {
+  if (
+    !Number.isSafeInteger(limit) ||
+    limit < 1 ||
+    limit > 100 ||
+    !Number.isSafeInteger(page) ||
+    page < 1
+  ) {
     throw new Error('Invalid dashboard page')
   }
   if (tab !== 'pinned' && tab !== 'recents') {
@@ -67,8 +73,11 @@ export async function getDashboardDocuments({
   })
   const excluded = new Set(tab === 'recents' ? excludedCollections : [])
   const storedReferences = getPinnedItems({ value: preference.docs[0]?.value }).filter(
-    ({ collectionSlug }) =>
-      !excluded.has(collectionSlug) && req.payload.collections[collectionSlug],
+    ({ collectionSlug }) => {
+      const collection = req.payload.collections[collectionSlug]
+
+      return !excluded.has(collectionSlug) && collection && collection.config.admin.group !== false
+    },
   )
   const availableReferences = await getAvailableReferences({ references: storedReferences, req })
   const totalDocs = availableReferences.length
@@ -250,6 +259,7 @@ function enrichDocument({
       adminRoute: payload.config.routes.admin,
       path: `/collections/${collectionSlug}/${encodeURIComponent(String(doc.id))}`,
     }),
+    isChanged: status === 'changed',
     isDraft: status === 'draft',
     statusLabel:
       status === 'draft'

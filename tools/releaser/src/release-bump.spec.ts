@@ -9,8 +9,8 @@ const baseDeps = () => ({
   readBranch: () => 'main',
   run: vi.fn(),
   workspace: {
-    bumpVersion: vi.fn(async () => '4.0.0-canary.10'),
-    version: vi.fn(async () => '4.0.0-canary.9'),
+    bumpVersion: vi.fn(async () => '4.0.0-beta.10'),
+    version: vi.fn(async () => '4.0.0-beta.9'),
   },
 })
 
@@ -22,17 +22,17 @@ describe('runReleaseBump', () => {
   it('should bump, configure identity, commit, tag, then push in order', async () => {
     const deps = makeDeps()
 
-    const next = await runReleaseBump({ bump: 'prerelease', deps, dryRun: false, preid: 'canary' })
+    const next = await runReleaseBump({ bump: 'prerelease', deps, dryRun: false, preid: 'beta' })
 
-    expect(next).toBe('4.0.0-canary.10')
-    expect(deps.workspace.bumpVersion).toHaveBeenCalledWith('prerelease', { preid: 'canary' })
+    expect(next).toBe('4.0.0-beta.10')
+    expect(deps.workspace.bumpVersion).toHaveBeenCalledWith('prerelease', { preid: 'beta' })
 
     const cmds = deps.run.mock.calls.map((call) => call[0] as string)
     expect(cmds).toContain('git add packages/**/package.json package.json')
-    expect(cmds).toContain('git commit -m "chore(release): v4.0.0-canary.10"')
-    expect(cmds).toContain('git tag -a v4.0.0-canary.10 -m v4.0.0-canary.10')
+    expect(cmds).toContain('git commit -m "chore(release): v4.0.0-beta.10"')
+    expect(cmds).toContain('git tag -a v4.0.0-beta.10 -m v4.0.0-beta.10')
 
-    const tagIdx = cmds.indexOf('git tag -a v4.0.0-canary.10 -m v4.0.0-canary.10')
+    const tagIdx = cmds.indexOf('git tag -a v4.0.0-beta.10 -m v4.0.0-beta.10')
     const pushIdx = cmds.findIndex((cmd) => cmd.startsWith('git push --atomic'))
     expect(pushIdx).toBeGreaterThan(tagIdx)
   })
@@ -41,14 +41,14 @@ describe('runReleaseBump', () => {
     const deps = makeDeps({ readBranch: () => 'feature' })
 
     await expect(
-      runReleaseBump({ bump: 'prerelease', deps, dryRun: false, preid: 'canary' }),
+      runReleaseBump({ bump: 'prerelease', deps, dryRun: false, preid: 'beta' }),
     ).rejects.toThrow(/main/)
 
     expect(deps.run).not.toHaveBeenCalled()
     expect(deps.workspace.bumpVersion).not.toHaveBeenCalled()
   })
 
-  it('should pass the requested preid through to bumpVersion (not hardcode canary)', async () => {
+  it('should bump a canary version onto the requested beta line', async () => {
     const deps = makeDeps({
       workspace: {
         bumpVersion: vi.fn(async () => '4.0.0-beta.0'),
@@ -66,12 +66,12 @@ describe('runReleaseBump', () => {
     const deps = makeDeps({ isPublished: vi.fn(async () => true) })
 
     await expect(
-      runReleaseBump({ bump: 'prerelease', deps, dryRun: false, preid: 'canary' }),
+      runReleaseBump({ bump: 'prerelease', deps, dryRun: false, preid: 'beta' }),
     ).rejects.toThrow(/already published/)
 
     expect(deps.isPublished).toHaveBeenCalledWith({
       name: 'payload',
-      version: '4.0.0-canary.10',
+      version: '4.0.0-beta.10',
     })
     expect(deps.run).not.toHaveBeenCalled()
   })
@@ -84,7 +84,7 @@ describe('runReleaseBump', () => {
     })
 
     await expect(
-      runReleaseBump({ bump: 'prerelease', deps, dryRun: false, preid: 'canary' }),
+      runReleaseBump({ bump: 'prerelease', deps, dryRun: false, preid: 'beta' }),
     ).rejects.toThrow(/503/)
 
     expect(deps.run).not.toHaveBeenCalled()
@@ -94,14 +94,14 @@ describe('runReleaseBump', () => {
     const deps = makeDeps({ isPublished: vi.fn(async () => true) })
 
     await expect(
-      runReleaseBump({ bump: 'prerelease', deps, dryRun: true, preid: 'canary' }),
+      runReleaseBump({ bump: 'prerelease', deps, dryRun: true, preid: 'beta' }),
     ).rejects.toThrow(/already published/)
   })
 
   it('should log the push and never execute it in dry-run', async () => {
     const deps = makeDeps()
 
-    await runReleaseBump({ bump: 'prerelease', deps, dryRun: true, preid: 'canary' })
+    await runReleaseBump({ bump: 'prerelease', deps, dryRun: true, preid: 'beta' })
 
     const runCmds = deps.run.mock.calls.map((call) => call[0] as string)
     expect(runCmds.some((cmd) => cmd.startsWith('git push'))).toBe(false)
