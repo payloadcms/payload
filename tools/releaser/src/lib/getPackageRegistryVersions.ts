@@ -103,6 +103,8 @@ const fetchWithRetry = async ({
     if (!isTransientStatus(res.status) || isLastAttempt) {
       return res
     }
+    // Releases the pooled connection; an unread body holds it until GC
+    await res.body?.cancel()
     await sleep(baseBackoffMs * 2 ** (attempt - 1))
   }
 }

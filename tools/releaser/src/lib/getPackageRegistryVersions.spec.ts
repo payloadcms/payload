@@ -83,6 +83,24 @@ describe('isVersionPublished', () => {
     expect(fetchImpl).toHaveBeenCalledTimes(2)
   })
 
+  it('should cancel the transient response body before retrying', async () => {
+    const cancel = vi.fn(async () => {})
+    const transientWithBody = { ...serviceUnavailable, body: { cancel } } as unknown as Response
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(transientWithBody)
+      .mockResolvedValueOnce(okResponse)
+
+    await isVersionPublished({
+      name: 'payload',
+      sleep: vi.fn(async () => {}),
+      version: '4.0.0-canary.10',
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    })
+
+    expect(cancel).toHaveBeenCalledTimes(1)
+  })
+
   it('should throw after three attempts on persistent 503', async () => {
     const fetchImpl = vi.fn(async () => serviceUnavailable)
 
