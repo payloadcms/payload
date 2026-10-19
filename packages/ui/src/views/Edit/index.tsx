@@ -301,11 +301,81 @@ export function DefaultEditView({
     async (json, ctx) => {
       const { context, formState } = ctx || {}
 
-      const controller = handleAbortRef(abortOnSaveRef)
-
       const document = json?.doc || json?.result
+      const hasCreatedDocument =
+        operation === 'create' && Boolean(collectionSlug) && document?.id != null
+
+      if (ctx?.isQueueReset()) {
+        return
+      }
 
       const updatedAt = document?.updatedAt || new Date().toISOString()
+      const recordSaveMetadata = () => {
+        setLastUpdateTime(new Date(updatedAt).getTime())
+
+        // Update stale data check refs after successful save
+        // This allows detecting if another user modifies the document after this save
+        originalUpdatedAtRef.current = updatedAt
+        hasCheckedForStaleDataRef.current = false
+        isSavingRef.current = false
+
+        if (context?.incrementVersionCount !== false) {
+          incrementVersionCount()
+        }
+      }
+
+      if (ctx?.requestIntent !== 'autosave') {
+        recordSaveMetadata()
+      }
+
+      if (ctx && !ctx.isCurrent() && !hasCreatedDocument) {
+        return
+      }
+
+      let docPreferences
+
+      if (id || globalSlug) {
+        docPreferences = await getDocPreferences()
+
+        if (!ctx?.isCurrent()) {
+          return
+        }
+      }
+
+      let formStateResult
+
+      if (id || globalSlug) {
+        const controller = handleAbortRef(abortOnSaveRef)
+        formStateResult = await getFormState({
+          id,
+          collectionSlug,
+          data: document,
+          docPermissions,
+          docPreferences,
+          formState,
+          globalSlug,
+          operation,
+          renderAllFields: false,
+          returnLivePreviewURL: isLivePreviewEnabled && typeofLivePreviewURL === 'function',
+          returnLockStatus: false,
+          returnPreviewURL: isPreviewEnabled,
+          schemaPath: schemaPathSegments.join('.'),
+          signal: controller.signal,
+          skipValidation: true,
+        })
+
+        abortOnSaveRef.current = null
+
+        if (!ctx?.isCurrent()) {
+          return
+        }
+      }
+
+      if (context?.getDocPermissions !== false) {
+        void getDocPermissions(json).catch((err) => {
+          console.error('Error getting document permissions', err) // eslint-disable-line no-console
+        })
+      }
 
       // If we're editing the doc of the logged-in user,
       // Refresh the cookie to get new permissions
@@ -313,16 +383,8 @@ export function DefaultEditView({
         void refreshCookieAsync()
       }
 
-      setLastUpdateTime(new Date(updatedAt).getTime())
-
-      // Update stale data check refs after successful save
-      // This allows detecting if another user modifies the document after this save
-      originalUpdatedAtRef.current = updatedAt
-      hasCheckedForStaleDataRef.current = false
-      isSavingRef.current = false
-
-      if (context?.incrementVersionCount !== false) {
-        incrementVersionCount()
+      if (ctx?.requestIntent === 'autosave') {
+        recordSaveMetadata()
       }
 
       if (typeof setData === 'function') {
@@ -361,30 +423,21 @@ export function DefaultEditView({
         resetUploadEdits()
       }
 
-      if (context?.getDocPermissions !== false) {
-        await getDocPermissions(json)
+      reportUpdate({
+        id,
+        doc: document,
+        drawerSlug,
+        entitySlug,
+        operation: id || globalSlug ? 'update' : 'create',
+        updatedAt,
+      })
+
+      if (!ctx?.isCurrent()) {
+        return
       }
 
       if (id || globalSlug) {
-        const docPreferences = await getDocPreferences()
-
-        const { livePreviewURL, previewURL, state } = await getFormState({
-          id,
-          collectionSlug,
-          data: document,
-          docPermissions,
-          docPreferences,
-          formState,
-          globalSlug,
-          operation,
-          renderAllFields: false,
-          returnLivePreviewURL: isLivePreviewEnabled && typeofLivePreviewURL === 'function',
-          returnLockStatus: false,
-          returnPreviewURL: isPreviewEnabled,
-          schemaPath: schemaPathSegments.join('.'),
-          signal: controller.signal,
-          skipValidation: true,
-        })
+        const { livePreviewURL, previewURL, state } = formStateResult
 
         // For upload collections, clear the file field from the returned state
         // to prevent the File object from persisting in form state after save
@@ -405,27 +458,7 @@ export function DefaultEditView({
           setPreviewURL(previewURL)
         }
 
-        reportUpdate({
-          id,
-          doc: document,
-          drawerSlug,
-          entitySlug,
-          operation: 'update',
-          updatedAt,
-        })
-
-        abortOnSaveRef.current = null
-
         return state
-      } else {
-        reportUpdate({
-          id,
-          doc: document,
-          drawerSlug,
-          entitySlug,
-          operation: 'create',
-          updatedAt,
-        })
       }
     },
     [

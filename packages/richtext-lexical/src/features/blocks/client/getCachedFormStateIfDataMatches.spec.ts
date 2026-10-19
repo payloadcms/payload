@@ -276,7 +276,7 @@ describe('getCachedFormStateIfDataMatches', () => {
       reduceFormStateToBlockData(
         {
           items: {
-            isModified: true,
+            disableFormData: false,
             rows: [],
             value: 0,
           },

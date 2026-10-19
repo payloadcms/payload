@@ -38,6 +38,7 @@ export const DrawerContent: React.FC<
   const { fields: parentDocumentFields } = useDocumentForm()
   const isEditable = useLexicalEditable()
 
+  const [formUUID] = useState(() => uuid())
   const onChangeAbortControllerRef = useRef(new AbortController())
 
   const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
@@ -162,7 +163,7 @@ export const DrawerContent: React.FC<
       initialState={initialState}
       onChange={[onChange]}
       onSubmit={handleDrawerSubmit}
-      uuid={uuid()}
+      uuid={formUUID}
     >
       <RenderFields
         fields={Array.isArray(fields) ? fields : []}
