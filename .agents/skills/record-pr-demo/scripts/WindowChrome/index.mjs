@@ -55,7 +55,7 @@ export function mountDemoChrome({
     .size { padding:5px 9px; border-radius:8px; background:var(--badge); color:var(--sub); font:12px/1.5 ui-monospace,monospace; font-variant-numeric:tabular-nums; }
     .content { position:relative; overflow:hidden; border-radius:8px; background:var(--paper); }
     ::slotted([slot=content]) { display:block; width:100%; height:100%; border:0; }
-    .footer { position:absolute; top:32px; left:50%; transform:translateX(-50%); width:min(1302px,calc(100% - 64px)); height:112px; display:grid; grid-template-rows:minmax(0,1fr); grid-template-columns:minmax(0,420fr) minmax(0,826fr); align-items:center; padding:12px 24px; border-radius:12px; color:var(--ink); background:var(--paper); }
+    .footer { position:absolute; top:32px; left:50%; transform:translateX(-50%); width:min(1302px,calc(100% - 64px)); height:${accessibility ? 176 : 112}px; display:grid; grid-template-rows:minmax(0,1fr); grid-template-columns:minmax(0,420fr) minmax(0,826fr); align-items:center; padding:12px 24px; border-radius:12px; color:var(--ink); background:var(--paper); }
     .change { min-height:0; align-self:stretch; display:flex; flex-direction:column; justify-content:center; gap:2px; padding-inline-end:28px; border-inline-end:1px solid var(--line); }
     .kind { align-self:flex-start; padding-inline:6px; border:1px solid var(--kind-border); border-radius:4px; background:var(--kind-bg); color:var(--kind-text); font-size:12px; font-weight:500; line-height:16px; }
     .kind[data-kind="Feature"] { --kind-bg:var(--kind-feature-bg); --kind-border:var(--kind-feature-border); --kind-text:var(--kind-feature-text); }
@@ -74,29 +74,30 @@ export function mountDemoChrome({
     [data-step-count], [data-refresh-text] { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
     .note-title { font-size:16px; font-weight:500; overflow-wrap:anywhere; }
     .body { font-size:16px; color:var(--sub); overflow-wrap:anywhere; }
-    .accessibility { position:absolute; inset:auto 0 32px; margin-inline:auto; width:min(1302px,calc(100% - 64px)); height:112px; padding:12px 24px; border-radius:12px; background:var(--paper); pointer-events:none; display:grid; grid-template-columns:minmax(0,420fr) minmax(0,826fr); align-items:center; }
+    .accessibility { height:52px; margin-block-start:8px; display:flex; flex-direction:column; justify-content:flex-end; gap:6px; pointer-events:none; }
     .accessibility[hidden], .focus-highlight[hidden], .keystroke-overlay[hidden] { display:none; }
-    .a11y-badge { --kind-bg:var(--kind-feature-bg); --kind-border:var(--kind-feature-border); --kind-text:var(--kind-feature-text); }
-    .keyboard-feedback { min-width:0; }
-    .keyboard-feedback .heading { margin-block-end:6px; }
-    .key-slot { min-height:24px; }
-    .keystroke-overlay { pointer-events:none; width:100%; color:var(--ink); }
-    .keystroke { display:flex; align-items:center; flex-wrap:wrap; gap:6px; font:13px/1.5 ui-monospace,monospace; }
+    .announcement-line { display:flex; align-items:center; gap:8px; min-width:0; color:var(--sub); font-size:13px; line-height:20px; }
+    .speaking-icon { width:18px; height:18px; flex:none; }
+    .announcement { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .key-slot { height:24px; }
+    .keystroke-overlay { display:flex; align-items:center; gap:14px; width:100%; overflow:hidden; pointer-events:none; color:var(--ink); }
+    .keystroke { display:flex; flex:none; align-items:center; gap:6px; font:13px/1.5 ui-monospace,monospace; }
+    .keystroke[data-key-history-entry] kbd { color:var(--sub); background:var(--paper); box-shadow:none; }
+    .keystroke[data-keystroke] { font-weight:600; }
     .keystroke kbd { display:inline-block; padding:1px 7px; border:1px solid var(--keycap-border); border-radius:var(--radius-medium,5px); background:var(--keycap-bg); color:var(--keycap-text); box-shadow:var(--elevation-300-tooltip,0 3px 8px #00000024); font:inherit; white-space:nowrap; }
-    .key-separator { font:inherit; text-shadow:0 0 3px var(--paper); }
-    .announcement { max-height:39px; overflow:hidden; overflow-wrap:anywhere; }
+    .key-separator { font:inherit; }
     .focus-highlight { position:absolute; z-index:2; pointer-events:none; border:3px solid var(--color-bg-brand,#007be5); box-shadow:0 0 0 2px white, inset 0 0 0 1px white; border-radius:4px; }
   </style>
   <div class="stage ${theme}" data-canvas>
     <section class="footer" data-footer aria-label="Demo description">
       <div class="change"><div class="kind" data-kind></div><h2 class="title" data-title></h2><div class="description" data-description></div></div>
-      <div class="note" data-note hidden aria-live="polite"><div class="heading"><span class="pagination" data-pagination><svg class="step-progress" data-step-progress aria-hidden="true" viewBox="0 0 20 20"><circle class="progress-track" cx="10" cy="10" r="8"/><circle class="progress-fill" data-progress-fill cx="10" cy="10" r="8" pathLength="100"/></svg><span data-step-count></span></span><span class="note-title" data-note-title></span></div><div class="body" data-note-body></div></div>
+      <div class="note" data-note hidden aria-live="polite"><div class="heading"><span class="pagination" data-pagination><svg class="step-progress" data-step-progress aria-hidden="true" viewBox="0 0 20 20"><circle class="progress-track" cx="10" cy="10" r="8"/><circle class="progress-fill" data-progress-fill cx="10" cy="10" r="8" pathLength="100"/></svg><span data-step-count></span></span><span class="note-title" data-note-title></span></div><div class="body" data-note-body></div>${accessibility ? `<div class="accessibility" data-accessibility aria-hidden="true">${hasAnnouncements ? '<div class="announcement-line"><svg class="speaking-icon" data-speaking-icon aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2.5"/><path d="M2 17v-3a4 4 0 0 1 8 0v3M12 7a4 4 0 0 1 0 6M15 4a8 8 0 0 1 0 12"/></svg><span class="announcement" data-announcement>Waiting for an update…</span></div>' : ''}<div class="key-slot"><div class="keystroke-overlay" data-keystroke-overlay aria-hidden="true" hidden><span class="keystroke" data-keystroke></span></div></div></div>` : ''}</div>
     </section>
     <div class="window" data-window>
       <div class="header"><div class="dots" aria-hidden="true"><span></span><span></span><span></span></div><div class="header-info" data-header-info><span class="refresh" data-refresh role="status" aria-live="polite" aria-atomic="true" hidden><svg data-refresh-icon aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path data-refresh-path d="M13 6a5.2 5.2 0 1 0 .1 4M13 2v4H9" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-refresh-text></span></span><span class="size" data-size></span></div></div>
       <div class="content" data-content><slot name="content"></slot>${accessibility ? '<div class="focus-highlight" data-focus-highlight aria-hidden="true" hidden></div>' : ''}</div>
     </div>
-    ${accessibility ? `<div class="accessibility" data-accessibility aria-hidden="true"><div class="change"><span class="kind a11y-badge" data-a11y-badge>a11y</span><div class="title" data-accessibility-heading>${hasAnnouncements ? 'Announcements' : 'Keyboard input'}</div>${hasAnnouncements ? '<div class="description announcement" data-announcement>Waiting for an update…</div>' : ''}</div><div class="note keyboard-feedback"><div class="heading"><span class="note-title">Keys</span></div><div class="key-slot"><div class="keystroke-overlay" data-keystroke-overlay aria-hidden="true" hidden><span class="keystroke" data-keystroke></span></div></div></div></div>` : ''}
+
   </div>`
   const find = (selector) => shadow.querySelector(selector)
   find('[data-kind]').textContent = change.kind
@@ -104,7 +105,7 @@ export function mountDemoChrome({
   find('[data-title]').textContent = change.title
   find('[data-description]').textContent = change.description
   find('[data-size]').hidden = !showSize
-  let keyTimer
+  let recentKeys = []
   let focusRect
   let refreshTimer
   let currentViewport = viewport
@@ -118,7 +119,7 @@ export function mountDemoChrome({
     const windowHeight = height + 58
     const panelHeight = find('[data-footer]').offsetHeight
     const windowTop = 32 + panelHeight + 22
-    const availableHeight = canvas.height - windowTop - 32 - (accessibility ? 134 : 0)
+    const availableHeight = canvas.height - windowTop - 32
     const scale = Math.min(1, (canvas.width - 64) / windowWidth, availableHeight / windowHeight)
     if (scale <= 0) throw new Error('Presentation text leaves no room for the application')
     const windowY = windowTop + (availableHeight - windowHeight * scale) / 2
@@ -239,32 +240,36 @@ export function mountDemoChrome({
     setAccessibilityState({ key, focus, announcement, reset = false }) {
       if (!accessibility || isDestroyed) return
       if (reset) {
-        clearTimeout(keyTimer)
+        recentKeys = []
         find('[data-keystroke-overlay]').hidden = true
-        find('[data-keystroke]').textContent = ''
+        find('[data-keystroke-overlay]').innerHTML =
+          '<span class="keystroke" data-keystroke></span>'
         if (hasAnnouncements) find('[data-announcement]').textContent = 'Waiting for an update…'
         find('[data-focus-highlight]').hidden = true
       }
       if (key) {
-        clearTimeout(keyTimer)
-        const chord = find('[data-keystroke]')
-        chord.replaceChildren()
-        key.split(' + ').forEach((label, index) => {
-          if (index > 0) {
-            const separator = document.createElement('span')
-            separator.className = 'key-separator'
-            separator.setAttribute('data-key-separator', '')
-            separator.textContent = ' + '
-            chord.append(separator)
-          }
-          const keycap = document.createElement('kbd')
-          keycap.textContent = label
-          chord.append(keycap)
+        recentKeys = [key, ...recentKeys].slice(0, 4)
+        const history = find('[data-keystroke-overlay]')
+        history.replaceChildren()
+        recentKeys.forEach((command, commandIndex) => {
+          const chord = document.createElement('span')
+          chord.className = 'keystroke'
+          chord.setAttribute(commandIndex === 0 ? 'data-keystroke' : 'data-key-history-entry', '')
+          command.split(' + ').forEach((label, index) => {
+            if (index > 0) {
+              const separator = document.createElement('span')
+              separator.className = 'key-separator'
+              separator.setAttribute('data-key-separator', '')
+              separator.textContent = ' + '
+              chord.append(separator)
+            }
+            const keycap = document.createElement('kbd')
+            keycap.textContent = label
+            chord.append(keycap)
+          })
+          history.append(chord)
         })
-        find('[data-keystroke-overlay]').hidden = false
-        keyTimer = setTimeout(() => {
-          find('[data-keystroke-overlay]').hidden = true
-        }, 2000)
+        history.hidden = false
       }
       if (focus !== undefined) {
         focusRect = focus
@@ -392,7 +397,6 @@ export function mountDemoChrome({
       animateAnnotationText({ previousText, hasAnnotation: true, shouldAnimate })
     },
     destroy() {
-      clearTimeout(keyTimer)
       clearTimeout(refreshTimer)
       cancelAnnotationAnimations()
       cancelAnimation()

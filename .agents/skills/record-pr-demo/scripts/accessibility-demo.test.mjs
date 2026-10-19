@@ -36,6 +36,12 @@ async function withPresentation({ accessibility = true, showAnnouncements = true
       viewport: { width: 1800, height: 1100 },
       pauseScale: 1,
     })
+    await presentation.setAnnotation({
+      title: 'Move a row',
+      body: 'Use the keyboard to reorder content.',
+      index: 1,
+      total: 2,
+    })
     await presentation.appPage.goto('http://localhost:3000/fixture')
     await run({ stage, app: presentation.appPage, presentation })
   } finally {
@@ -89,7 +95,7 @@ test('should track focus in scaled application and dialogs without covering cont
       await expect(highlight).toHaveCSS('pointer-events', 'none')
       const panel = await stage.locator('[data-accessibility]').boundingBox()
       const application = await stage.locator('[data-pr-demo-app]').boundingBox()
-      assert.ok(application.y + application.height <= panel.y)
+      assert.ok(panel.y + panel.height <= application.y)
       await app.locator('dialog').evaluate((el) => el.showModal())
       await expect(app.getByRole('button', { name: 'Dialog action' })).toBeFocused()
       await expect
@@ -144,14 +150,18 @@ test('should caption region changes while ignoring off hidden and busy regions',
   })
 })
 
-test('should clear transient key captions and stop observing when the presentation stops', async () => {
+test('should reset key history on navigation and stop observing when the presentation stops', async () => {
   await withPresentation({
     run: async ({ stage, app, presentation }) => {
       await app.locator('#first').focus()
       await stage.keyboard.press('ArrowRight')
       await expect(stage.locator('[data-keystroke]')).toHaveText('→')
       await expect(stage.locator('[data-keystroke-overlay]')).toBeVisible()
-      await expect(stage.locator('[data-keystroke-overlay]')).toBeHidden({ timeout: 3000 })
+      await stage.keyboard.press('ArrowLeft')
+      await expect(stage.locator('[data-key-history-entry]')).toHaveText('→')
+      await app.goto('http://localhost:3000/fixture?reset')
+      await expect(stage.locator('[data-keystroke-overlay]')).toBeHidden()
+      await expect(stage.locator('[data-key-history-entry]')).toHaveCount(0)
       await app.locator('#status').evaluate((el) => (el.textContent = 'Before stop'))
       await expect(stage.locator('[data-announcement]')).toHaveText('Before stop')
       await presentation.stop()
@@ -201,7 +211,7 @@ test('should suppress keys from inputs inside private shadow hosts', async () =>
   })
 })
 
-test('should keep transient keycaps inside a stable accessibility panel', async () => {
+test('should keep key history inside the annotation panel without moving the application', async () => {
   let plainWindow
   await withPresentation({
     accessibility: false,
@@ -213,9 +223,9 @@ test('should keep transient keycaps inside a stable accessibility panel', async 
   await withPresentation({
     showAnnouncements: false,
     run: async ({ stage, app }) => {
-      await expect(stage.locator('[data-a11y-badge]')).toHaveText('a11y')
+      await expect(stage.locator('[data-a11y-badge]')).toHaveCount(0)
       await expect(stage.locator('[data-announcement]')).toHaveCount(0)
-      const initialPanel = await stage.locator('[data-accessibility]').boundingBox()
+      const initialPanel = await stage.locator('[data-footer]').boundingBox()
       const initialWindow = await stage.locator('[data-window]').boundingBox()
       assert.ok(initialWindow.height < plainWindow.height)
       const overlay = stage.locator('[data-keystroke-overlay]')
@@ -229,44 +239,57 @@ test('should keep transient keycaps inside a stable accessibility panel', async 
       await expect(overlay).toHaveAttribute('aria-hidden', 'true')
       const box = await overlay.boundingBox()
       const windowBox = await stage.locator('[data-window]').boundingBox()
-      assert.ok(initialPanel.y >= windowBox.y + windowBox.height)
+      assert.ok(initialPanel.y + initialPanel.height <= windowBox.y)
       assert.ok(box.x >= initialPanel.x && box.y >= initialPanel.y)
       assert.ok(box.x + box.width <= initialPanel.x + initialPanel.width)
       assert.ok(box.y + box.height <= initialPanel.y + initialPanel.height)
       assert.deepEqual(windowBox, initialWindow)
-      await expect(overlay).toBeHidden({ timeout: 3000 })
+      await stage.waitForTimeout(2100)
+      await expect(overlay).toBeVisible()
       assert.deepEqual(await stage.locator('[data-window]').boundingBox(), initialWindow)
-      assert.deepEqual(await stage.locator('[data-accessibility]').boundingBox(), initialPanel)
+      assert.deepEqual(await stage.locator('[data-footer]').boundingBox(), initialPanel)
     },
   })
 })
 
-test('should stack the a11y badge over live-region text with keys in the right section', async () => {
+test('should place icon captions and key history below the step inside the annotation panel', async () => {
   await withPresentation({
     run: async ({ stage, app, presentation }) => {
       await app.locator('#first').focus()
-      await stage.keyboard.press('ArrowRight')
-      const overlay = stage.locator('[data-keystroke-overlay]')
-      await expect(overlay).toBeVisible()
+      for (const key of ['ArrowUp', 'ArrowLeft', 'ArrowRight', 'ArrowDown', 'Enter']) {
+        await stage.keyboard.press(key)
+      }
+      await expect(stage.locator('[data-keystroke]')).toHaveText('Enter')
+      await expect(stage.locator('[data-key-history-entry]')).toHaveText(['↓', '→', '←'])
+      const previousColor = await stage
+        .locator('[data-key-history-entry] kbd')
+        .first()
+        .evaluate((el) => getComputedStyle(el).color)
+      const currentColor = await stage
+        .locator('[data-keystroke] kbd')
+        .first()
+        .evaluate((el) => getComputedStyle(el).color)
+      assert.notEqual(previousColor, currentColor)
+      await expect(stage.locator('[data-speaking-icon]')).toHaveCount(1)
+      await expect(stage.locator('[data-announcement]')).toHaveCSS('white-space', 'nowrap')
       for (const viewport of [
         { width: 1800, height: 1100 },
         { width: 600, height: 700 },
       ]) {
         await presentation.resizeWindow({ ...viewport, duration: 0 })
-        const keycaps = await overlay.boundingBox()
-        const windowBox = await stage.locator('[data-window]').boundingBox()
-        const panel = await stage.locator('[data-accessibility]').boundingBox()
-        const message = await stage.locator('[data-announcement]').boundingBox()
-        const badge = await stage.locator('[data-a11y-badge]').boundingBox()
-        assert.ok(panel.y >= windowBox.y + windowBox.height)
-        for (const box of [keycaps, message, badge]) {
+        const panel = await stage.locator('[data-footer]').boundingBox()
+        const appBox = await stage.locator('[data-window]').boundingBox()
+        const step = await stage.locator('[data-note-body]').boundingBox()
+        const caption = await stage.locator('[data-announcement]').boundingBox()
+        const history = await stage.locator('[data-keystroke-overlay]').boundingBox()
+        assert.ok(panel.y + panel.height <= appBox.y)
+        for (const box of [caption, history]) {
           assert.ok(box.x >= panel.x && box.y >= panel.y)
           assert.ok(box.x + box.width <= panel.x + panel.width)
           assert.ok(box.y + box.height <= panel.y + panel.height)
         }
-        assert.ok(badge.y + badge.height <= message.y)
-        assert.ok(Math.abs(badge.x - message.x) < 2)
-        assert.ok(message.x + message.width < keycaps.x)
+        assert.ok(step.y + step.height <= caption.y)
+        assert.ok(caption.y + caption.height <= history.y)
       }
     },
   })
