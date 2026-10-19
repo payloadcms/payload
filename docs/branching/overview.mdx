@@ -124,7 +124,20 @@ The active branch affects reads and writes throughout the Admin Panel. A documen
 
 If a branch has no replacement for a document, reads inherit the current document from `main`. After a document changes on the branch, branch reads use that branch-owned state. Deletes and Trash changes on a branch do not alter `main` before a merge.
 
+A branch can have one of four statuses:
+
+| Status | Meaning |
+| --- | --- |
+| `open` | Accepts content changes and merges. |
+| `merging` | A merge is in progress; content writes are temporarily blocked. |
+| `merged` | All pending changes have been merged. New content changes reopen the branch. |
+| `closed` | Terminal: further content changes and merges are blocked. |
+
+Merging keeps the branch available by default. Pass `closeBranch: true` to close it once all pending work has been merged. If changes remain, the branch stays open. Branch records remain available after merging or closing; they are not automatically deleted.
+
 ## Use branches through APIs
+
+Create, list, update metadata, and delete branches through ordinary collection operations on `payload-branches`. The `payload.branches` Local API exposes only `merge` and `discard`.
 
 Omitting `branch` uses `main`. Pass a branch slug to supported Local API operations:
 
