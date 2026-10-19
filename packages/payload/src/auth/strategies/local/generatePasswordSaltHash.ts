@@ -1,6 +1,7 @@
 import crypto from 'crypto'
 
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+import type { TextField } from '../../../fields/config/types.js'
 import type { PayloadRequest } from '../../../types/index.js'
 
 import { ValidationError } from '../../../errors/index.js'
@@ -32,12 +33,20 @@ export const generatePasswordSaltHash = async ({
   req,
 }: Args): Promise<{ hash: string; salt: string }> => {
   if (!isPasswordAuthenticated) {
+    // Pick up minLength/maxLength from the collection's password field override so that
+    // reset-password enforces the same constraints as create/update.
+    const passwordField = collection.flattenedFields.find(
+      (f): f is TextField => f.name === 'password' && f.type === 'text',
+    )
+
     const validationResult = password(passwordToSet, {
       name: 'password',
       type: 'text',
       blockData: {},
       data: {},
       event: 'submit',
+      maxLength: passwordField?.maxLength,
+      minLength: passwordField?.minLength,
       path: ['password'],
       preferences: { fields: {} },
       req,
