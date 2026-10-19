@@ -87,7 +87,7 @@ export function mountDemoChrome({
     .announcement { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .key-slot { flex:1; height:24px; min-width:0; padding-inline-start:12px; border-inline-start:1px solid var(--line); }
     .keystroke-overlay { position:relative; display:flex; align-items:center; gap:14px; width:100%; overflow:hidden; pointer-events:none; color:var(--ink); }
-    .keystroke-overlay::after { content:""; position:absolute; inset-block:0; inset-inline-start:var(--history-fade-start,100%); width:var(--history-fade-width,0px); background:linear-gradient(to right,transparent,color-mix(in srgb,var(--paper) 65%,transparent)); pointer-events:none; }
+    .keystroke-overlay::after { content:""; position:absolute; inset-block:0; inset-inline-start:var(--history-fade-start,100%); width:var(--history-fade-width,0px); background:linear-gradient(to right,color-mix(in srgb,var(--paper) 35%,transparent),color-mix(in srgb,var(--paper) 90%,transparent)); pointer-events:none; }
     .keystroke { display:flex; flex:none; align-items:center; gap:6px; font:13px/1.5 ui-monospace,monospace; }
     .keystroke[data-key-history-entry] kbd { color:var(--sub); background:var(--paper); box-shadow:none; }
     .keystroke[data-keystroke] { font-weight:600; }
