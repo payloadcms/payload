@@ -22,6 +22,8 @@ const normalizeOption = (option: Option): OptionObject =>
  * (`excludedCollections`), but the user sees an inclusion filter: every collection is checked by
  * default and unchecking one adds it to the stored exclusions. Storing exclusions means collections
  * added later are visible by default.
+ *
+ * @internal - may change or be removed without a major version bump
  */
 export const RecentlyViewedCollectionsField: React.FC<SelectFieldClientProps> = ({
   field,

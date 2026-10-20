@@ -5,6 +5,9 @@ import React from 'react'
 import { getWelcomeDisplay } from './getWelcomeDisplay.js'
 import './index.css'
 
+/**
+ * @internal - may change or be removed without a major version bump
+ */
 export function WelcomeWidget({ req, user }: WidgetServerProps) {
   const userCollection = req.payload.config.collections.find(
     ({ slug }) => slug === req.payload.config.admin.user,

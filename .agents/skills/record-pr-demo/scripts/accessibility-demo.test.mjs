@@ -26,6 +26,7 @@ async function withPresentation({ accessibility = true, showAnnouncements = true
     presentation = await createPresentation({
       page: stage,
       options: {
+        canvas: { width: 1600, height: 1000 },
         accessibility,
         showAnnouncements,
         change: {
