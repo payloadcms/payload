@@ -16,7 +16,7 @@ type ContextHandlers = {
 }
 
 /** Async handlers resolve after the updated list is ready to render. */
-export type OnListQueryChange = (query: ListQuery) => Promise<void> | void
+export type OnListQueryChange = (query: ListQuery) => Promise<unknown> | void
 
 export type ListQueryProps = {
   readonly children: React.ReactNode

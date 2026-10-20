@@ -68,7 +68,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         },
       })
 
-      let pendingUpdate: Promise<void> | void = undefined
+      let pendingUpdate: Promise<unknown> | void = undefined
 
       if (modifySearchParams) {
         const search = getSearchWithListQuery({
