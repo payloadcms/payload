@@ -158,15 +158,6 @@ export type BranchingConfig = {
     }) => Promise<void> | void
   }
   /**
-   * Ceiling on the number of shadowed document IDs injected into a single read
-   * predicate by database adapters that use the legacy branch visibility fallback.
-   * Official adapters use database-native branch visibility instead.
-   *
-   * @deprecated Retained for adapters that use the legacy branch visibility fallback.
-   * @default 2000
-   */
-  maxShadowedIDs?: number
-  /**
    * Replaces the default best-effort pre-merge content validation policy.
    * Ordinary write validation, hooks, access control, and database constraints still apply.
    */
@@ -179,7 +170,6 @@ export type SanitizedBranchingConfig = {
   /** Slugs of every global branching is active for. */
   branchableGlobals: Set<string>
   enabled: boolean
-  maxShadowedIDs: number
   validate: BranchMergeValidate
 } & Omit<BranchingConfig, 'exclude' | 'validate'>
 

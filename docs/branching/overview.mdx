@@ -51,7 +51,7 @@ export const Media: CollectionConfig = {
 
 You can opt an eligible internal collection in with `branching: true`. The `payload-branches`, `payload-branch-changes`, and `payload-branch-merges` collections cannot themselves use branching.
 
-The object form supports lifecycle access, merge hooks, validation, exclusions, and the branch-read threshold:
+The object form supports lifecycle access, merge hooks, validation, and exclusions:
 
 ```ts
 import type { Access, Config } from 'payload'
@@ -77,7 +77,6 @@ export const config: Config = {
         // This runs after the target transaction commits.
       },
     },
-    maxShadowedIDs: 2000,
   },
 }
 ```

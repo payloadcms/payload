@@ -34,8 +34,6 @@ export const hardExcludedSlugs = [
   branchMergesCollectionSlug,
 ] as const
 
-const DEFAULT_MAX_SHADOWED_IDS = 2000
-
 /**
  * Resolves which collections and globals branching is active for.
  *
@@ -60,7 +58,6 @@ export const sanitizeBranchingConfig = (config: Config): SanitizedBranchingConfi
     branchableCollections: new Set<string>(),
     branchableGlobals: new Set<string>(),
     enabled: false,
-    maxShadowedIDs: branching.maxShadowedIDs ?? DEFAULT_MAX_SHADOWED_IDS,
     validate: branching.validate ?? defaultBranchMergeValidation,
   }
 
@@ -144,7 +141,6 @@ export const sanitizeBranchingConfig = (config: Config): SanitizedBranchingConfi
     branchableGlobals,
     enabled: true,
     hooks: branching.hooks,
-    maxShadowedIDs: branching.maxShadowedIDs ?? DEFAULT_MAX_SHADOWED_IDS,
     validate: branching.validate ?? defaultBranchMergeValidation,
   }
 }
