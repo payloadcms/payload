@@ -2482,6 +2482,46 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.1.1 Keyboard (A)', () => {
+    test('should open draft restoration by keyboard in enhanced contrast themes and return focus after cancellation', async ({}, testInfo) => {
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await openVersionComparison({ page, postsURL, serverURL })
+
+          const restore = page.getByRole('button', { name: 'Restore as draft', exact: true })
+
+          await restore.focus()
+          await restore.press('Enter')
+
+          const dialog = page.getByRole('dialog', { name: 'Restore as draft', exact: true })
+
+          await expect(dialog).toBeVisible()
+          await expectFocusInside({ container: dialog, page })
+
+          const scan = await runAxeScan({
+            include: ['[data-payload-modal-slug="restore-version"]'],
+            page,
+            testInfo,
+          })
+
+          expect(scan.violations).toEqual([])
+
+          await dialog.getByRole('button', { name: 'Cancel', exact: true }).focus()
+          await page.keyboard.press('Enter')
+          await expect(dialog).toBeHidden()
+          await expect(restore).toBeFocused()
+
+          await restore.press('Space')
+          await expect(dialog).toBeVisible()
+          await page.keyboard.press('Escape')
+          await expect(dialog).toBeHidden()
+          await expect(restore).toBeFocused()
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
     test('should isolate nested rich-text move menu keys and mouse dragging from the enclosing editor', async () => {
       await gotoCreatePost({ page, postsURL })
       const richText = page.locator('.rich-text-lexical[data-field-path="content"]')

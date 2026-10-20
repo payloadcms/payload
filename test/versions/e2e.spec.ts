@@ -294,7 +294,7 @@ describe('Versions', () => {
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
-      await page.locator('.restore-version__restore-as-draft-button').click()
+      await page.getByRole('button', { name: 'Restore as draft', exact: true }).click()
       await page.locator('button:has-text("Confirm")').click()
       await page.waitForURL(savedDocURL)
       await expect(page.locator('#field-title')).toHaveValue('v1')
@@ -317,8 +317,7 @@ describe('Versions', () => {
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
-      await page.locator('.restore-version .popup__trigger-wrap button').click()
-      await page.getByRole('menuitem', { name: 'Restore as draft' }).click()
+      await page.getByRole('button', { name: 'Restore as draft', exact: true }).click()
       await page.locator('button:has-text("Confirm")').click()
       await page.waitForURL(savedDocURL)
 

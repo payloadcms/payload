@@ -606,6 +606,8 @@ export const clientTranslationKeys = createClientTranslationKeys([
 
   'version:aboutToPublishSelection',
   'version:aboutToRestore',
+  'version:aboutToRestoreAsDraft',
+  'version:aboutToRestoreAsDraftAllLocales',
   'version:aboutToRestoreGlobal',
   'version:aboutToRevertToPublished',
   'version:aboutToUnpublish',
