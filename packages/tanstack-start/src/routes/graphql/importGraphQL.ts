@@ -21,6 +21,7 @@ const importOptional = async ({
     if (isModuleNotFound({ err, packageName })) {
       throw new Error(
         `Cannot find module '${packageName}', required to serve GraphQL. ${INSTALL_HINT}`,
+        { cause: err },
       )
     }
 
@@ -30,7 +31,9 @@ const importOptional = async ({
 
 /**
  * Only treat a missing-module error for `packageName` itself as "not installed" - an unrelated
- * resolution failure from inside the package should surface as-is.
+ * resolution failure from inside the package should surface as-is. The quoted specifier is matched
+ * rather than any occurrence, because Node also names the importing file ("imported from
+ * .../node_modules/graphql-http/...") when one of the package's own dependencies is missing.
  */
 const isModuleNotFound = ({ err, packageName }: { err: unknown; packageName: string }): boolean => {
   if (!err || typeof err !== 'object') {
@@ -43,7 +46,11 @@ const isModuleNotFound = ({ err, packageName }: { err: unknown; packageName: str
     return false
   }
 
-  return typeof message === 'string' && message.includes(packageName)
+  if (typeof message !== 'string') {
+    return false
+  }
+
+  return message.includes(`'${packageName}'`) || message.includes(`'${packageName}/`)
 }
 
 export const importConfigToSchema = async () =>

@@ -107,6 +107,40 @@ describe('add-graphql-dependencies', () => {
     expect(result).toBe(output)
   })
 
+  it('adds the packages to devDependencies when @payloadcms/next is a devDependency', async () => {
+    const input = JSON.stringify({
+      name: 'my-plugin',
+      devDependencies: { '@payloadcms/next': '^3.0.0', payload: '^3.0.0' },
+      peerDependencies: { payload: '^3.0.0' },
+    })
+
+    const { packageJson } = await runOnProject({ files: {}, packageJson: input })
+    const data = JSON.parse(packageJson) as Record<string, Record<string, string>>
+
+    expect(data.dependencies).toBeUndefined()
+    expect(Object.keys(data.devDependencies!)).toStrictEqual([
+      '@payloadcms/graphql',
+      '@payloadcms/next',
+      'graphql',
+      'graphql-http',
+      'graphql-playground-html',
+      'payload',
+    ])
+  })
+
+  it('adds nothing and notes it when @payloadcms/next is only a peer dependency', async () => {
+    const input = JSON.stringify({
+      name: 'my-plugin',
+      peerDependencies: { '@payloadcms/next': '^3.0.0', payload: '^3.0.0' },
+    })
+
+    const { packageJson, result } = await runOnProject({ files: {}, packageJson: input })
+
+    expect(JSON.parse(packageJson)).toStrictEqual(JSON.parse(input))
+    expect(result.filesChanged).toStrictEqual([])
+    expect(result.notes).toHaveLength(1)
+  })
+
   it('adds the packages and keeps the routes when GraphQL is not disabled', async () => {
     const input = await fixture('basic.input.json')
     const output = await fixture('basic.output.json')

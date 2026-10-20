@@ -77,9 +77,17 @@ function addMissingGraphQLDependencies(packageJsons: PackageJsonFile[]) {
       continue
     }
 
-    const dependencies = isRecord(pkg.data.dependencies) ? pkg.data.dependencies : {}
+    const targetField = getNextDependencyField(pkg.data)
+    if (!targetField) {
+      notes.push(
+        `${pkg.path}: \`@payloadcms/next\` is only a peer dependency, so nothing was added. If this package serves GraphQL, declare ${missing.join(', ')} the same way \`@payloadcms/next\` is declared.`,
+      )
+      continue
+    }
+
+    const dependencies = isRecord(pkg.data[targetField]) ? pkg.data[targetField] : {}
     const additions = Object.fromEntries(missing.map((name) => [name, requiredRanges[name]]))
-    pkg.data.dependencies = mergeDependencies({ additions, dependencies })
+    pkg.data[targetField] = mergeDependencies({ additions, dependencies })
 
     filesChanged.push(pkg.path)
     notes.push(
@@ -190,6 +198,20 @@ function normalizeStatements(sourceFile: SourceFile): string {
         .replace(/\s*\}/g, ' }'),
     )
     .join('\n')
+}
+
+/**
+ * The section the GraphQL packages are added to: wherever `@payloadcms/next` is installed, so a
+ * plugin that only develops against it does not push them onto its consumers. `undefined` when it
+ * is only a peer, since the consuming project is then the one that installs it.
+ */
+function getNextDependencyField(
+  data: Record<string, unknown>,
+): 'dependencies' | 'devDependencies' | undefined {
+  return (['dependencies', 'devDependencies'] as const).find((field) => {
+    const deps = data[field]
+    return isRecord(deps) && typeof deps['@payloadcms/next'] === 'string'
+  })
 }
 
 function getDependencyRange({

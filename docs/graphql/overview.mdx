@@ -43,8 +43,9 @@ export const GET = GRAPHQL_PLAYGROUND_GET(config)
 
 <Banner type="info">
   To remove GraphQL from a project, delete those two route files and uninstall
-  the packages above. Setting `graphQL.disable` to `true` also turns the
-  endpoints off, but keeps the packages installed.
+  the packages above. Setting `graphQL.disable` to `true` turns the GraphQL
+  endpoint off but keeps the packages installed. Outside production, the
+  playground route is still served.
 </Banner>
 
 The labels you provide for your Collections and Globals are used to name the GraphQL types that are created to correspond to your config. Special characters and spaces are removed.

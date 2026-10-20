@@ -7,8 +7,8 @@ import {
   importRenderPlaygroundPage,
 } from './importGraphQL.js'
 
-const moduleNotFound = (packageName: string) =>
-  Object.assign(new Error(`Cannot find package '${packageName}' imported from /app/route.js`), {
+const moduleNotFound = (packageName: string, importer = '/app/route.js') =>
+  Object.assign(new Error(`Cannot find package '${packageName}' imported from ${importer}`), {
     code: 'ERR_MODULE_NOT_FOUND',
   })
 
@@ -32,6 +32,37 @@ describe('importGraphQL', () => {
       await expect(promise).rejects.toThrow(
         /Cannot find module 'graphql-http', required to serve GraphQL\. GraphQL is opt-in\./,
       )
+    })
+
+    it('should keep the original error as the cause', async () => {
+      const err = moduleNotFound('graphql-http')
+
+      await expect(
+        importOptional({
+          importer: () => Promise.reject(err),
+          packageName: 'graphql-http',
+        }),
+      ).rejects.toMatchObject({ cause: err })
+    })
+
+    it('should explain how to install the package when a subpath is missing', async () => {
+      const promise = importOptional({
+        importer: () => Promise.reject(moduleNotFound('graphql-http/lib/use/fetch')),
+        packageName: 'graphql-http',
+      })
+
+      await expect(promise).rejects.toThrow(/Cannot find module 'graphql-http', required/)
+    })
+
+    it('should rethrow untouched when a dependency of the installed package is missing', async () => {
+      const err = moduleNotFound('graphql', '/app/node_modules/graphql-http/lib/use/fetch.mjs')
+
+      await expect(
+        importOptional({
+          importer: () => Promise.reject(err),
+          packageName: 'graphql-http',
+        }),
+      ).rejects.toBe(err)
     })
 
     it('should rethrow a missing-module error for a different package untouched', async () => {
