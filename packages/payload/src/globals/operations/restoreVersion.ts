@@ -11,7 +11,6 @@ import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
-import { hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
@@ -93,12 +92,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
 
     // Overwrite draft status if draft is true
     if (draft) {
-      rawVersion.version._status =
-        payload.config.localization && hasLocalizeStatusEnabled(globalConfig)
-          ? Object.fromEntries(
-              payload.config.localization.localeCodes.map((code) => [code, 'draft']),
-            )
-          : 'draft'
+      rawVersion.version._status = 'draft'
     }
 
     // A localized `_status` can publish and unpublish locales in one restore, so authorize every
