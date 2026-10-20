@@ -41,7 +41,7 @@
 
   .activity-widget__meta {
     overflow: hidden;
-    color: var(--activity-text-secondary);
+    color: var(--color-text-secondary);
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     line-height: var(--text-body-medium-line-height);

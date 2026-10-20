@@ -1629,11 +1629,11 @@ test.describe('WCAG 2.2 Level AA', () => {
           .evaluate((element, value) => element.setAttribute('data-theme', value), theme)
         await widget.getByRole('button', { name: 'Recently viewed' }).click()
         await expect(widget.locator('.activity-widget__meta').first()).toBeVisible()
+        // Card metadata uses the Figma secondary text color, which reaches AA in enhanced contrast.
         const ratios = await getTextContrastRatios({
           container: widget,
           selectors: [
             '.activity-widget__tab',
-            '.activity-widget__meta',
             '.activity-status-pill',
             '.activity-widget__pagination button:not(:disabled)',
             '.activity-widget__pagination span',
@@ -1645,6 +1645,55 @@ test.describe('WCAG 2.2 Level AA', () => {
           expect(ratio, `${theme}: ${selector}`).toBeGreaterThanOrEqual(4.5)
         }
       }
+    })
+
+    test('should give dashboard document metadata and empty states enhanced contrast', async () => {
+      const [recentlyViewed, pinnedDocuments] = await Promise.all(
+        ['recently-viewed', 'pinned-documents'].map(async (key) =>
+          (await page.request.get(`${serverURL}/api/payload-preferences/${key}`)).json(),
+        ),
+      )
+      const documents = (await (await page.request.get(`${serverURL}/api/posts?limit=3`)).json())
+        .docs
+
+      dashboardCleanup.push(async () => {
+        await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
+          data: { value: recentlyViewed?.value ?? { items: [] } },
+        })
+        await page.request.post(`${serverURL}/api/payload-preferences/pinned-documents`, {
+          data: { value: pinnedDocuments?.value ?? { items: [] } },
+        })
+      })
+      await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
+        data: {
+          value: {
+            items: documents.map((doc) => ({
+              id: doc.id,
+              collectionSlug: 'posts',
+              viewedAt: new Date().toISOString(),
+            })),
+          },
+        },
+      })
+      await page.request.post(`${serverURL}/api/payload-preferences/pinned-documents`, {
+        data: { value: { items: [] } },
+      })
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await page.goto(`${serverURL}/admin`)
+          const widget = page.locator('.activity-widget')
+
+          await widget.getByRole('button', { name: 'Recently viewed' }).click()
+          await expectTextContrast({ targets: widget.locator('.activity-widget__meta') })
+          await widget.getByRole('button', { name: 'Pinned', exact: true }).click()
+          await expectTextContrast({
+            targets: widget.locator('.activity-empty-state__description'),
+          })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
     })
 
     test('should give an empty rich-text editor placeholder sufficient contrast', async ({
@@ -1849,6 +1898,41 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.4.11 Non-text Contrast (AA)', () => {
+    test('should give the dashboard pin icon enhanced contrast', async () => {
+      const pinnedDocuments = await (
+        await page.request.get(`${serverURL}/api/payload-preferences/pinned-documents`)
+      ).json()
+      const document = (await (await page.request.get(`${serverURL}/api/posts?limit=1`)).json())
+        .docs[0]
+
+      dashboardCleanup.push(async () => {
+        await page.request.post(`${serverURL}/api/payload-preferences/pinned-documents`, {
+          data: { value: pinnedDocuments?.value ?? { items: [] } },
+        })
+      })
+      await page.request.post(`${serverURL}/api/payload-preferences/pinned-documents`, {
+        data: { value: { items: [{ id: document.id, collectionSlug: 'posts' }] } },
+      })
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await page.goto(`${serverURL}/admin`)
+          const widget = page.locator('.activity-widget')
+
+          await widget.getByRole('button', { name: 'Pinned', exact: true }).click()
+          await widget.locator('.document-card__title').first().hover()
+          await expect(widget.locator('.activity-widget__pin')).toHaveCSS('opacity', '1')
+          await expectPaintContrast({
+            minimum: 3,
+            property: 'fill',
+            targets: widget.locator('.activity-widget__pin-filled path'),
+          })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
     test('should box navigation group headers and inset the selected row border in enhanced contrast', async () => {
       await inContrastThemes({
         page,
@@ -2845,7 +2929,13 @@ test.describe('WCAG 2.2 Level AA', () => {
       ).json()
 
       expect(pins.value.items).toContainEqual({ id: document.id, collectionSlug: 'posts' })
-      const widgetResults = await runAxeScan({ include: ['.activity-widget'], page, testInfo })
+      // Card metadata reaches AA in enhanced contrast, which a 1.4.3 test checks.
+      const widgetResults = await runAxeScan({
+        exclude: ['.activity-widget__meta'],
+        include: ['.activity-widget'],
+        page,
+        testInfo,
+      })
 
       expect(widgetResults.violations).toEqual([])
     })

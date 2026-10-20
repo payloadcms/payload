@@ -187,7 +187,7 @@
     --color-icon-onsuccess-secondary: var(--ramp-white-600);
     --color-icon-success: var(--ramp-green-600);
 
-    --color-icon-favorite: var(--ramp-yellow-1000);
+    --color-icon-favorite: var(--ramp-yellow-500);
 
     --color-icon-warning: var(--ramp-yellow-1000);
     --color-icon-warning-pressed: var(--ramp-yellow-1000);
@@ -409,8 +409,6 @@
 
     --color-icon-success: var(--ramp-green-400);
 
-    --color-icon-favorite: var(--ramp-yellow-500);
-
     --color-icon-warning: var(--ramp-yellow-400);
     --color-icon-warning-pressed: var(--ramp-yellow-400);
 
@@ -519,6 +517,7 @@
     --field-color-border-hover: var(--color-border-control);
     --color-border-control: var(--ramp-black-500);
     --color-border-selected: var(--ramp-blue-700);
+    --color-icon-favorite: var(--ramp-yellow-1000);
     --color-icon-tertiary: var(--ramp-black-500);
     --color-text-brand: var(--ramp-blue-700);
     --color-text-danger: var(--ramp-red-700);
@@ -543,6 +542,7 @@
     --field-color-border-hover: var(--color-border-control);
     --color-border-control: var(--ramp-white-500);
     --color-border-selected: var(--ramp-blue-400);
+    --color-icon-favorite: var(--ramp-yellow-500);
     --color-icon-tertiary: var(--ramp-white-400);
     --color-text-brand: var(--ramp-blue-400);
     --color-text-danger: var(--ramp-red-400);
