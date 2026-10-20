@@ -5,7 +5,6 @@ export const getLivePreviewDoc = createServerFn({ method: 'GET' })
   .handler(async ({ data: { slug, collection } }) => {
     const config = (await import('@payload-config')).default
     const { getPayload } = await import('payload')
-    const { toSerializable } = await import('@payloadcms/tanstack-start/server')
     const payload = await getPayload({ config })
 
     try {
@@ -13,12 +12,12 @@ export const getLivePreviewDoc = createServerFn({ method: 'GET' })
         collection,
         depth: 2,
         draft: true,
+        overrideAccess: true,
         trash: true,
         where: { slug: { equals: slug } },
-        overrideAccess: true,
       })
 
-      return docs[0] ? toSerializable({ ...docs[0] }, {}) : null
+      return docs[0] ?? null
     } catch {
       return null
     }

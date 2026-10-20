@@ -364,6 +364,13 @@ export const slTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Ta dokument je bil pred kratkim posodobljen od drugega uporabnika. Vaš pogled je zastarel.',
     documents: 'Dokumenti',
+    dragCancelled: 'Vlečenje {{label}} je preklicano.',
+    dragDropped: '{{label}} je spuščen. Položaj {{position}} od {{count}}.',
+    dragInstructions:
+      'Pritisnite Space ali Enter, da dvignete vrstico. Premaknite jo s puščičnimi tipkami. Z VoiceOver izklopite Quick Nav in uporabite Command + puščične tipke. Pritisnite Space ali Enter za spust ali Escape za preklic.',
+    dragMoved: '{{label}}: {{direction}}. Položaj {{position}} od {{count}}.',
+    dragPickedUp: '{{label}} je dvignjen. Položaj {{position}} od {{count}}.',
+    dragToMove: 'Povlecite za premik',
     dragToReorder: 'Povlecite za spremembo vrstnega reda',
     duplicate: 'Podvoji',
     duplicateWithoutSaving: 'Podvoji brez shranjevanja sprememb',

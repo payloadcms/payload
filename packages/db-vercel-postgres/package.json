@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-vercel-postgres",
-  "version": "4.0.0-beta.2",
+  "version": "4.0.0-beta.3",
   "description": "Vercel Postgres adapter for Payload",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
@@ -100,8 +100,6 @@
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "renamePredefinedMigrations": "node --no-deprecation --import @swc-node/register/esm-register ./scripts/renamePredefinedMigrations.ts"
   },
   "dependencies": {
@@ -117,7 +115,6 @@
   },
   "devDependencies": {
     "@hyrious/esbuild-plugin-commonjs": "0.2.6",
-    "@payloadcms/eslint-config": "workspace:*",
     "@types/pg": "8.20.0",
     "@types/to-snake-case": "1.0.0",
     "esbuild": "0.27.1",

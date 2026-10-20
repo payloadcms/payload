@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-sqlite",
-  "version": "4.0.0-beta.2",
+  "version": "4.0.0-beta.3",
   "description": "The officially supported SQLite database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
@@ -98,9 +98,7 @@
     "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "clean": "rimraf -g {dist,*.tsbuildinfo}"
   },
   "dependencies": {
     "@libsql/client": "0.14.0",
@@ -113,7 +111,6 @@
     "uuid": "14.0.0"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
     "@types/pg": "8.20.0",
     "@types/to-snake-case": "1.0.0",
     "payload": "workspace:*"

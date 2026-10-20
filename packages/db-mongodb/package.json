@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-mongodb",
-  "version": "4.0.0-beta.2",
+  "version": "4.0.0-beta.3",
   "description": "The officially supported MongoDB database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
@@ -68,9 +68,7 @@
     "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc-build --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "clean": "rimraf -g {dist,*.tsbuildinfo}"
   },
   "dependencies": {
     "mongoose": "9.9.2",
@@ -79,7 +77,6 @@
     "uuid": "14.0.0"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
     "@types/mongoose-aggregate-paginate-v2": "1.0.12",
     "@types/prompts": "^2.4.5",
     "mongodb": "7.5.0",
