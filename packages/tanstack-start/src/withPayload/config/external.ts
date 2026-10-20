@@ -78,6 +78,14 @@ export const serverExternalPackages: string[] = [
   '@payloadcms/db-d1-sqlite',
 ]
 
+/** Additional installed packages that can bypass Vite's development server transforms. */
+export const devExternalPackages: string[] = [
+  ...serverExternalPackages,
+  '@payloadcms/plugin-mcp',
+  'date-fns',
+  'undici',
+]
+
 /**
  * Externalizes package boundaries so packages resolve their own transitive dependencies under pnpm.
  * Leaves that must bundle in production are excluded; see {@link buildBundledPackages}.

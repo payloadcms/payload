@@ -10,8 +10,8 @@ import { createLogger, mergeConfig } from 'vite'
 
 import {
   buildExternalPackages,
+  devExternalPackages,
   payloadNoExternalPatterns,
-  serverExternalPackages,
   ssrExternalPackages,
 } from './config/external.js'
 import { optimizeDepsExcludeDefaults, optimizeDepsIncludeDefaults } from './config/optimizeDeps.js'
@@ -199,7 +199,7 @@ export function withPayload(
       ? buildExternalPackages
       : [
           ...new Set([
-            ...(devBundleServerPackages ? [] : serverExternalPackages),
+            ...(devBundleServerPackages ? [] : devExternalPackages),
             ...devServerExternalPackages,
             ...ssrExternalPackages,
           ]),
@@ -223,11 +223,17 @@ export function withPayload(
       environments: {
         rsc: {
           build: { rollupOptions: { external: buildExternalPackages } },
-          resolve: { noExternal: noExternalPatterns },
+          resolve: {
+            external: isBuild ? undefined : ssrExternal,
+            noExternal: noExternalPatterns,
+          },
         },
         ssr: {
           build: { rollupOptions: { external: buildExternalPackages } },
-          resolve: { noExternal: noExternalPatterns },
+          resolve: {
+            external: isBuild ? undefined : ssrExternal,
+            noExternal: noExternalPatterns,
+          },
         },
       } as any,
       optimizeDeps: {
