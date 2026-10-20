@@ -274,6 +274,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
       setActive(false)
     },
+    triggerRef,
   })
 
   // /////////////////////////////////////

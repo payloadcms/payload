@@ -2,6 +2,10 @@ import type { PointerEvent, RefObject } from 'react'
 
 import { useCallback, useEffect, useRef } from 'react'
 
+import type { PointerPosition } from '../../hooks/usePointerCorridor.js'
+
+import { usePointerCorridor } from '../../hooks/usePointerCorridor.js'
+
 type UseSubmenuPointerIntentArgs = {
   active: boolean
   contentRef: RefObject<HTMLElement | null>
@@ -9,11 +13,8 @@ type UseSubmenuPointerIntentArgs = {
   onClose: () => void
   onOpen: () => void
   onSafeAreaExpire: (pointer: PointerPosition) => void
+  triggerRef: RefObject<HTMLElement | null>
 }
-
-type PointerPosition = { x: number; y: number }
-
-const SAFE_AREA_TIMEOUT_MS = 300
 
 export const useSubmenuPointerIntent = ({
   active,
@@ -22,138 +23,40 @@ export const useSubmenuPointerIntent = ({
   onClose,
   onOpen,
   onSafeAreaExpire,
+  triggerRef,
 }: UseSubmenuPointerIntentArgs) => {
   const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  const pointerOrigin = useRef<PointerPosition | undefined>(undefined)
-  const latestPointer = useRef<PointerPosition | undefined>(undefined)
-  const triggerBounds = useRef<DOMRect | undefined>(undefined)
-  const safeAreaTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-
-  const cancelSafeAreaTimeout = useCallback(() => {
-    if (safeAreaTimer.current) {
-      clearTimeout(safeAreaTimer.current)
-      safeAreaTimer.current = undefined
-    }
-  }, [])
-
-  const clearSafeArea = useCallback(() => {
-    cancelSafeAreaTimeout()
-    contentRef.current?.style.removeProperty('--popup-safe-area')
-    contentRef.current?.removeAttribute('data-submenu-safe-area')
-    pointerOrigin.current = undefined
-    latestPointer.current = undefined
-    triggerBounds.current = undefined
-  }, [cancelSafeAreaTimeout, contentRef])
-
-  const updateSafeAreaTimeout = useCallback(
-    ({ x, y }: PointerPosition) => {
-      latestPointer.current = { x, y }
-      const bounds = triggerBounds.current
-
-      cancelSafeAreaTimeout()
-      if (!bounds || (y >= bounds.top && y <= bounds.bottom)) {
-        return
-      }
-
-      // Keep slow movement protected; release the corridor only after inactivity
-      // outside the trigger row, then reconcile the stationary pointer's item.
-      safeAreaTimer.current = setTimeout(() => {
-        const pointer = latestPointer.current
-
-        clearSafeArea()
-        if (pointer) {
-          onSafeAreaExpire(pointer)
-        }
-      }, SAFE_AREA_TIMEOUT_MS)
-    },
-    [cancelSafeAreaTimeout, clearSafeArea, onSafeAreaExpire],
-  )
-
-  const updateSafeArea = useCallback(
-    ({ pointer }: { pointer?: PointerPosition } = {}) => {
+  const renderCorridor = useCallback(
+    ({ polygon }: { polygon: null | string }) => {
       const content = contentRef.current
-      const origin = pointerOrigin.current
 
-      if (
-        !enabled ||
-        !active ||
-        !content ||
-        !origin ||
-        !content.matches(':popover-open') ||
-        (!pointer && !content.hasAttribute('data-submenu-safe-area'))
-      ) {
-        return false
+      if (polygon) {
+        content?.style.setProperty('--popup-safe-area', polygon)
+        content?.setAttribute('data-submenu-safe-area', '')
+      } else {
+        content?.style.removeProperty('--popup-safe-area')
+        content?.removeAttribute('data-submenu-safe-area')
       }
-
-      const rect = content.getBoundingClientRect()
-      const isOnRight = rect.left > origin.x
-      const isOnLeft = rect.right < origin.x
-
-      if (!isOnRight && !isOnLeft) {
-        clearSafeArea()
-        return false
-      }
-
-      const edgeX = isOnRight ? rect.left : rect.right
-
-      if (pointer) {
-        const progress = (pointer.x - origin.x) / (edgeX - origin.x)
-        const top = origin.y - 4 + (rect.top - origin.y + 4) * progress
-        const bottom = origin.y + 4 + (rect.bottom - origin.y - 4) * progress
-
-        // Only protect departures toward the menu and inside its corridor. Vertical
-        // travel and jumps elsewhere must still reach the underlying parent items.
-        if (progress <= 0 || progress >= 1 || pointer.y < top || pointer.y > bottom) {
-          return false
-        }
-      }
-
-      content.style.setProperty(
-        '--popup-safe-area',
-        `polygon(${origin.x}px ${origin.y - 4}px, ${edgeX}px ${rect.top}px, ${edgeX}px ${rect.bottom}px, ${origin.x}px ${origin.y + 4}px)`,
-      )
-      content.setAttribute('data-submenu-safe-area', '')
-      if (pointer) {
-        updateSafeAreaTimeout(pointer)
-      }
-      return true
     },
-    [active, clearSafeArea, contentRef, enabled, updateSafeAreaTimeout],
+    [contentRef],
   )
 
-  const handleTriggerMove = useCallback((event: PointerEvent) => {
-    if (event.pointerType !== 'mouse') {
-      return
-    }
-
-    pointerOrigin.current = { x: event.clientX, y: event.clientY }
-    triggerBounds.current ??= event.currentTarget.getBoundingClientRect()
-  }, [])
+  const corridor = usePointerCorridor({
+    enabled: enabled && active,
+    from: triggerRef,
+    onChange: renderCorridor,
+    onIdle: onSafeAreaExpire,
+    to: contentRef,
+  })
+  const { clear, protect, refresh, trackSource, trackTarget } = corridor
 
   const handleContentMove = useCallback(
     (event: PointerEvent) => {
-      const content = contentRef.current
-
-      if (event.pointerType !== 'mouse' || !content?.hasAttribute('data-submenu-safe-area')) {
-        return
-      }
-
-      const rect = content.getBoundingClientRect()
-
-      // The pseudo-element also receives these events. Retire the corridor only once
-      // the pointer reaches the actual menu, allowing a direct return to the parent.
-      if (
-        event.clientX >= rect.left &&
-        event.clientX <= rect.right &&
-        event.clientY >= rect.top &&
-        event.clientY <= rect.bottom
-      ) {
-        clearSafeArea()
-      } else {
-        updateSafeAreaTimeout({ x: event.clientX, y: event.clientY })
+      if (event.pointerType === 'mouse') {
+        trackTarget({ x: event.clientX, y: event.clientY })
       }
     },
-    [clearSafeArea, contentRef, updateSafeAreaTimeout],
+    [trackTarget],
   )
 
   const cancelClose = useCallback(() => {
@@ -171,11 +74,11 @@ export const useSubmenuPointerIntent = ({
 
       cancelClose()
       if (event.currentTarget !== contentRef.current) {
-        handleTriggerMove(event)
+        trackSource({ x: event.clientX, y: event.clientY })
       }
       onOpen()
     },
-    [cancelClose, contentRef, handleTriggerMove, onOpen],
+    [cancelClose, contentRef, onOpen, trackSource],
   )
 
   const handleLeave = useCallback(
@@ -192,32 +95,28 @@ export const useSubmenuPointerIntent = ({
 
       if (
         event.currentTarget !== contentRef.current &&
-        updateSafeArea({ pointer: { x: event.clientX, y: event.clientY } })
+        protect({ pointer: { x: event.clientX, y: event.clientY } })
       ) {
         cancelClose()
         return
       }
 
-      clearSafeArea()
+      clear()
       cancelClose()
       closeTimer.current = setTimeout(() => {
         closeTimer.current = undefined
         onClose()
       }, 250)
     },
-    [cancelClose, clearSafeArea, contentRef, onClose, updateSafeArea],
+    [cancelClose, clear, contentRef, onClose, protect],
   )
 
   useEffect(() => {
     if (!enabled || !active) {
       cancelClose()
-      clearSafeArea()
     }
-    return () => {
-      cancelClose()
-      cancelSafeAreaTimeout()
-    }
-  }, [active, cancelClose, cancelSafeAreaTimeout, clearSafeArea, enabled])
+    return cancelClose
+  }, [active, cancelClose, enabled])
 
   return {
     contentProps: {
@@ -230,6 +129,6 @@ export const useSubmenuPointerIntent = ({
       onPointerLeave: enabled ? handleLeave : undefined,
       onPointerMove: enabled ? handleEnter : undefined,
     },
-    updateSafeArea,
+    updateSafeArea: refresh,
   }
 }
