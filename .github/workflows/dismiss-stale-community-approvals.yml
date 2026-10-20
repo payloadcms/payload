@@ -4,6 +4,7 @@ on:
   pull_request_target:
     types:
       - synchronize
+      - edited
 
 permissions:
   pull-requests: write
@@ -12,29 +13,36 @@ jobs:
   dismiss:
     name: dismiss-stale-community-approvals
     runs-on: ubuntu-24.04
+    if: github.event.action == 'synchronize' || github.event.changes.base
     steps:
       # Never check out the PR code here: pull_request_target runs with a write token
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
+          retries: 3
           script: |
             const { owner, repo } = context.repo
             const pull_number = context.payload.pull_request.number
-            const pusher = context.payload.sender.login
+            const sender = context.payload.sender.login
 
             let permission = 'none'
             try {
               const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
                 owner,
                 repo,
-                username: pusher,
+                username: sender,
               })
               permission = data.permission
             } catch {}
 
             if (['admin', 'maintain', 'write'].includes(permission)) {
-              core.info(`@${pusher} has ${permission} access, keeping approvals`)
+              core.info(`@${sender} has ${permission} access, keeping approvals`)
               return
             }
+
+            const reason =
+              context.payload.action === 'synchronize'
+                ? `New commits were pushed by @${sender}`
+                : `The base branch was changed by @${sender}`
 
             const reviews = await github.paginate(github.rest.pulls.listReviews, {
               owner,
@@ -42,13 +50,23 @@ jobs:
               pull_number,
             })
 
+            const failedReviewIds = []
             for (const review of reviews.filter((review) => review.state === 'APPROVED')) {
-              await github.rest.pulls.dismissReview({
-                owner,
-                repo,
-                pull_number,
-                review_id: review.id,
-                message: `New commits were pushed by @${pusher}. Please re-review.`,
-              })
-              core.info(`Dismissed approval ${review.id} from @${review.user.login}`)
+              try {
+                await github.rest.pulls.dismissReview({
+                  owner,
+                  repo,
+                  pull_number,
+                  review_id: review.id,
+                  message: `${reason}. Please re-review.`,
+                })
+                core.info(`Dismissed approval ${review.id} from @${review.user?.login}`)
+              } catch (err) {
+                failedReviewIds.push(review.id)
+                core.error(`Could not dismiss approval ${review.id}: ${err.message}`)
+              }
+            }
+
+            if (failedReviewIds.length > 0) {
+              core.setFailed(`Approvals still active: ${failedReviewIds.join(', ')}`)
             }
