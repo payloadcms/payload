@@ -134,6 +134,11 @@
     --color-border: var(--ramp-grey-200);
     --color-border-menu-separator: var(--ramp-white-200);
     --color-border-strong: var(--ramp-grey-800);
+    --color-border-control: var(--special-border-translucent);
+    --color-border-control-strong: var(--special-border-translucent-strong);
+    --color-border-command-palette: color-mix(in srgb, var(--color-border) 50%, transparent);
+    --color-border-search: transparent;
+    --color-border-nav-selected: transparent;
 
     --color-border-disabled: var(--ramp-grey-200);
 
@@ -154,6 +159,7 @@
     --color-icon-onassistive-tertiary: var(--ramp-white-400);
 
     --color-icon-brand: var(--ramp-blue-600);
+    --color-icon-calendar-today: var(--color-bg-brand);
     --color-icon-onbrand: var(--ramp-white-1000);
     --color-icon-onbrand-secondary: var(--ramp-white-600);
 
@@ -213,6 +219,7 @@
 
     --color-text: var(--ramp-black-800);
     --color-text-secondary: var(--ramp-black-500);
+    --color-text-option-secondary: var(--color-text-secondary);
     --color-text-tertiary: var(--ramp-black-400);
 
     --color-text-disabled: var(--ramp-black-400);
@@ -258,6 +265,7 @@
 
     --field-color-bg: var(--color-bg);
     --field-color-border: var(--special-border-translucent);
+    --field-color-block-title-border: transparent;
     --field-color-text: var(--color-text);
     --field-color-placeholder: var(--color-text-tertiary);
 
@@ -367,6 +375,11 @@
 
     --color-border: var(--ramp-grey-600);
     --color-border-strong: var(--ramp-white-800);
+    --color-border-control: var(--special-border-translucent);
+    --color-border-control-strong: var(--special-border-translucent-strong);
+    --color-border-command-palette: color-mix(in srgb, var(--color-border) 50%, transparent);
+    --color-border-search: transparent;
+    --color-border-nav-selected: transparent;
 
     --color-border-disabled: var(--ramp-grey-600);
 
@@ -380,6 +393,7 @@
 
     /* Icon */
     --color-icon-brand: var(--ramp-blue-400);
+    --color-icon-calendar-today: var(--color-bg-brand);
 
     --color-icon-component: var(--ramp-purple-400);
     --color-icon-component-pressed: var(--ramp-purple-300);
@@ -418,6 +432,7 @@
 
     --color-text: var(--ramp-white-1000);
     --color-text-secondary: var(--ramp-white-500);
+    --color-text-option-secondary: var(--color-text-secondary);
     --color-text-tertiary: var(--ramp-white-400);
 
     --color-text-disabled: var(--ramp-white-400);
@@ -448,6 +463,7 @@
 
     --field-color-bg: var(--color-bg);
     --field-color-border: var(--special-border-translucent);
+    --field-color-block-title-border: transparent;
     --field-color-text: var(--color-text);
     --field-color-placeholder: var(--color-text-tertiary);
 
@@ -488,14 +504,23 @@
        End Field Tokens
        ————————————————————————————————————————————— */
   }
-  /* Enhanced contrast preserves the standard palette when disabled. */
+  /* Contrast is a palette variant. Keep overrides at theme boundaries so aliases
+     resolve against the local theme, including portaled menus. Components consume
+     these tokens in both modes instead of testing whether a token exists. */
   html[data-enhanced-contrast],
   html[data-enhanced-contrast] [data-theme] {
     --color-border: var(--color-border-control);
-    --contrast-menu-border: var(--ramp-white-500);
-    --contrast-chip-border: var(--color-border-control);
-    --contrast-button-border: var(--color-border-control);
-    --contrast-nav-border: var(--color-border-control);
+    --color-border-control-strong: var(--color-border-control);
+    --color-border-menu-separator: var(--ramp-white-500);
+    --color-border-command-palette: var(--color-border-control);
+    --color-border-search: var(--color-border-control);
+    --color-border-nav-selected: var(--color-border-selected);
+    --color-icon-calendar-today: var(--color-icon-brand);
+    --color-text-option-secondary: var(--color-text);
+    --field-color-block-title-border: var(--color-border-control);
+    --diff-create-pill-color: var(--color-text-selected);
+    --diff-delete-pill-color: var(--color-text);
+    --diff-delete-parent-color: var(--color-text);
   }
 
   html[data-enhanced-contrast],

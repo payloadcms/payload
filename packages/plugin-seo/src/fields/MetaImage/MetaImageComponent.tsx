@@ -1,6 +1,6 @@
 'use client'
 
-import '../enhancedContrast.css'
+import '../colors.css'
 
 import type { FieldType } from '@payloadcms/ui'
 import type { UploadFieldClientProps } from 'payload'
@@ -174,7 +174,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
         {hasGenerateImageFn && (
           <div
             style={{
-              color: 'var(--seo-description-color, #9A9A9A)',
+              color: 'var(--seo-description-color)',
             }}
           >
             {t('plugin-seo:imageAutoGenerationTip')}

@@ -126,6 +126,11 @@
     color: var(--color-text);
   }
 
+  .rs__option--is-focused,
+  .rs__option--is-selected {
+    --color-text-secondary: var(--color-text-option-secondary);
+  }
+
   .rs__option--is-focused {
     background-color: var(--color-bg-secondary);
   }

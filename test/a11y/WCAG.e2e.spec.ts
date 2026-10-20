@@ -891,6 +891,44 @@ test.describe('WCAG 2.2 Level AA', () => {
       })
     }
 
+    for (const theme of ['light', 'dark'] as const) {
+      test(`should restore nested dark menu paint after toggling contrast in ${theme} mode`, async () => {
+        await page.context().addCookies([
+          { name: 'payload-theme', url: serverURL, value: theme },
+          { name: 'payload-high-contrast-mode', url: serverURL, value: 'false' },
+        ])
+        const menu = await openFirstBlockActions({ page, postsURL })
+        const buttons = menu.locator('.popup-button-list__button:not(:disabled)')
+
+        await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
+        await expect(menu).toHaveAttribute('data-theme', 'dark')
+        await buttons.first().hover()
+        const readPaint = () =>
+          buttons.evaluateAll((elements) =>
+            elements.map((element) => {
+              const style = getComputedStyle(element)
+
+              return { background: style.backgroundColor, color: style.color }
+            }),
+          )
+        const normalPaint = await readPaint()
+
+        try {
+          await page
+            .locator('html')
+            .evaluate((element) => element.setAttribute('data-enhanced-contrast', ''))
+          await expectTextContrast({ targets: buttons })
+          await expect(buttons.first()).toHaveCSS('background-color', 'rgb(7, 104, 207)')
+        } finally {
+          await page
+            .locator('html')
+            .evaluate((element) => element.removeAttribute('data-enhanced-contrast'))
+        }
+
+        expect(await readPaint()).toEqual(normalPaint)
+      })
+    }
+
     test('should provide contrast for authentication field errors and error toast text', async () => {
       // PYLD-3608
       await inContrastThemes({
@@ -5086,6 +5124,50 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.7 Focus Visible (AA)', () => {
+    for (const theme of ['light', 'dark'] as const) {
+      test(`should preserve selected navigation keyboard focus in both contrast modes in ${theme} theme`, async () => {
+        await page.context().addCookies([
+          { name: 'payload-theme', url: serverURL, value: theme },
+          { name: 'payload-high-contrast-mode', url: serverURL, value: 'false' },
+        ])
+        await gotoPostsList({ page, postsURL })
+        await openNav(page)
+        await page.getByRole('tab', { name: 'Collections', exact: true }).click()
+        const selected = page.locator('.nav__link--selected').first()
+
+        try {
+          for (const isEnhanced of [false, true]) {
+            await page.locator('html').evaluate((element, enabled) => {
+              element.toggleAttribute('data-enhanced-contrast', enabled)
+            }, isEnhanced)
+            await selected.focus()
+            await page.keyboard.press('Shift+Tab')
+            await page.keyboard.press('Tab')
+            await expect(selected).toBeFocused()
+            await expectPaintedFocus({ page })
+            await expect(selected).toHaveCSS('outline-style', 'none')
+            expect(
+              await selected.evaluate((element) => {
+                const style = getComputedStyle(element, '::before')
+
+                return (
+                  element.matches(':focus-visible') &&
+                  style.outlineStyle !== 'none' &&
+                  Number.parseFloat(style.outlineWidth) > 0 &&
+                  style.outlineColor !== 'transparent' &&
+                  !/rgba\([^)]*,\s*0\)$/.test(style.outlineColor)
+                )
+              }),
+            ).toBe(true)
+          }
+        } finally {
+          await page
+            .locator('html')
+            .evaluate((element) => element.removeAttribute('data-enhanced-contrast'))
+        }
+      })
+    }
+
     test('should paint keyboard focus on image crop and focal-point controls', async () => {
       // PYLD-3602
       const dialog = await openEditImageDialog({ page, serverURL })
