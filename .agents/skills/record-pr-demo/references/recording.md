@@ -268,6 +268,6 @@ node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs candidate --scenario
 
 ### Capture resolution and encoding
 
-The recorder captures at the composition's native dimensions: a 1600×1000 canvas produces a 1600×1000 video. `--viewport` controls the application iframe's CSS dimensions independently of that canvas.
+The default canvas fits the initial application viewport at 1:1 scale, including space for chrome and annotations. A 1440×900 viewport produces a 1600×1148 video, or 1600×1188 with accessibility feedback. The canvas stays fixed during responsive resizing. An explicit `presentation.canvas` overrides those dimensions and can scale the app to fit. `--viewport` controls the application iframe's CSS dimensions.
 
 The MP4 converter uses H.264 CRF 18 to preserve detail through conversion. The existing 10 MB review/upload budget still applies.

@@ -2,13 +2,13 @@
 export function mountDemoChrome({
   root,
   change,
-  canvas = { width: 1600, height: 1000 },
   viewport = { width: 1280, height: 720 },
   theme = 'light',
   showSize = true,
   shouldAnimateAnnotations = true,
   accessibility = false,
   showAnnouncements = false,
+  canvas = getDefaultCanvas({ viewport, accessibility }),
 }) {
   validateSize({ ...canvas, name: 'Canvas' })
   validateSize({ ...viewport, name: 'Viewport' })
@@ -463,5 +463,14 @@ function validateSize({ width, height, name }) {
     height > 4320
   ) {
     throw new Error(`${name} dimensions must be positive integers up to 7680×4320`)
+  }
+}
+
+/** Reserve room for the initial viewport, window chrome, description, and outer margins. */
+export function getDefaultCanvas({ viewport, accessibility = false }) {
+  const panelHeight = accessibility ? 144 : 104
+  return {
+    width: Math.ceil(Math.max(1600, viewport.width + 22 + 64) / 2) * 2,
+    height: Math.ceil(Math.max(1000, viewport.height + 58 + 32 + panelHeight + 22 + 32) / 2) * 2,
   }
 }
