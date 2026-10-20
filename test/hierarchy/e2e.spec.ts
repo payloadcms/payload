@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { CDPSession, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -108,7 +108,12 @@ test.describe('Hierarchy Sidebar', () => {
   })
 
   test.describe('Document layouts', () => {
+    let network: CDPSession | undefined
+
     test.afterEach(async () => {
+      await network?.detach()
+      network = undefined
+
       await page.goto(organizationsURL.hierarchy)
       const tableLayout = page.getByRole('radio', { name: 'Table' })
 
@@ -282,6 +287,17 @@ test.describe('Hierarchy Sidebar', () => {
       const stepNav = page.locator('.step-nav')
 
       await page.goto(organizationsURL.hierarchy)
+
+      // Keep the RSC response streaming long enough for the next folder navigation to overlap it.
+      network = await page.context().newCDPSession(page)
+      await network.send('Network.enable')
+      await network.send('Network.emulateNetworkConditions', {
+        downloadThroughput: 100_000,
+        latency: 100,
+        offline: false,
+        uploadThroughput: 1_000_000,
+      })
+
       await expect(
         stepNav.getByRole('link', { name: 'Organizations', exact: true }),
       ).toHaveAttribute('href', '/admin/collections/organizations?view=hierarchy')
