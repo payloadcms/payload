@@ -25,6 +25,7 @@ import { deleteExistingRowsByPath } from './deleteExistingRowsByPath.js'
 import { handleUpsertError } from './handleUpsertError.js'
 import { insertArrays } from './insertArrays.js'
 import { shouldUseOptimizedUpsertRow } from './shouldUseOptimizedUpsertRow.js'
+import { upsertLocales } from './upsertLocales.js'
 
 /**
  * If `id` is provided, it will update the row with that ID.
@@ -72,12 +73,27 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         tableName,
       })
       const { row } = transformedForWrite
-      const { arraysToPush } = transformedForWrite
+      const { arraysToPush, locales } = transformedForWrite
+      const hasLocales = Object.keys(locales).length > 0
 
       const drizzle = db as LibSQLDatabase
       const updateWhere = where
         ? and(eq(adapter.tables[tableName].id, id), where)
         : eq(adapter.tables[tableName].id, id)
+
+      const updateRow = async (returning?: SelectedFields) => {
+        const docs = await drizzle
+          .update(adapter.tables[tableName])
+          .set(row)
+          .where(updateWhere)
+          .returning(returning)
+
+        if (docs[0] && hasLocales) {
+          await upsertLocales({ adapter, db, locales, parentID: id, tableName })
+        }
+
+        return docs
+      }
 
       // First, handle $push arrays
 
@@ -99,12 +115,17 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
       const hasDataToUpdate = row && Object.keys(row)?.length
 
+      if (!hasDataToUpdate && hasLocales) {
+        // `updatedAt: null` leaves no main row update to match `where` against
+        await upsertLocales({ adapter, db, locales, parentID: id, tableName })
+      }
+
       // Then, handle regular row update
       if (ignoreResult) {
         if (hasDataToUpdate) {
           // Only update row if there is something to update.
           // Example: if the data only consists of a single $push, calling insertArrays is enough - we don't need to update the row.
-          await drizzle.update(adapter.tables[tableName]).set(row).where(updateWhere)
+          await updateRow({ id: adapter.tables[tableName].id })
         }
         return ignoreResult === 'idOnly' ? ({ id } as T) : null
       }
@@ -119,7 +140,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       })
 
       const findManyKeysLength = Object.keys(findManyArgs).length
-      const hasOnlyColumns = Object.keys(findManyArgs.columns || {}).length > 0
+      // `returning()` only reads the main table, so selected localized fields need a find
+      const hasOnlyColumns =
+        Object.keys(findManyArgs.columns || {}).length > 0 && !findManyArgs.with
 
       if (!hasDataToUpdate) {
         // Nothing to update => just fetch current row and return
@@ -154,11 +177,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
           }
         }
 
-        const docs = await drizzle
-          .update(adapter.tables[tableName])
-          .set(row)
-          .where(updateWhere)
-          .returning(Object.keys(selectedFields).length ? selectedFields : undefined)
+        const docs = await updateRow(
+          Object.keys(selectedFields).length ? selectedFields : undefined,
+        )
 
         if (!docs[0]) {
           return null
@@ -176,13 +197,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
       // DB Update that needs the result, potentially with joins => need to update first, then find. returning() does not work with joins.
 
-      const docs = await drizzle
-        .update(adapter.tables[tableName])
-        .set(row)
-        .where(updateWhere)
-        .returning({
-          id: adapter.tables[tableName].id,
-        })
+      const docs = await updateRow({ id: adapter.tables[tableName].id })
 
       if (!docs[0]) {
         return null

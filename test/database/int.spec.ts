@@ -5581,6 +5581,58 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
     expect(res.docs[0].id).toBe(category.id)
   })
 
+  test('should only replace the provided localized fields with db.updateOne', async ({
+    payload,
+  }) => {
+    const post = await payload.create({
+      collection: postsSlug,
+      data: {
+        localized: 'en',
+        testNestedGroup: { nestedLocalizedText: 'nested en' },
+        title: 'post',
+      },
+      locale: 'en',
+      overrideAccess: true,
+    })
+
+    await payload.update({
+      id: post.id,
+      collection: postsSlug,
+      data: { localized: 'es' },
+      locale: 'es',
+      overrideAccess: true,
+    })
+
+    const result = (await payload.db.updateOne({
+      id: post.id,
+      collection: postsSlug,
+      data: { localized: { en: 'en updated' } },
+      select: { localized: true, testNestedGroup: true, title: true },
+    })) as any
+
+    expect(result.title).toBe('post')
+    expect(result.localized.en).toBe('en updated')
+    expect(result.localized.es).toBeFalsy()
+    expect(result.testNestedGroup.nestedLocalizedText.en).toBe('nested en')
+  })
+
+  test('should update localized fields with db.updateOne by where', async ({ payload }) => {
+    const post = await payload.create({
+      collection: postsSlug,
+      data: { localized: 'en', title: 'post' },
+      locale: 'en',
+      overrideAccess: true,
+    })
+
+    const result = (await payload.db.updateOne({
+      collection: postsSlug,
+      data: { localized: { en: 'en updated' } },
+      where: { id: { equals: post.id } },
+    })) as any
+
+    expect(result.localized.en).toBe('en updated')
+  })
+
   test('should allow incremental number update', async ({ payload }) => {
     const post = await payload.create({
       collection: 'posts',
