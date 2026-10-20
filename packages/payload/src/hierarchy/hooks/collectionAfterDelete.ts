@@ -116,13 +116,9 @@ export const hierarchyCollectionAfterDelete =
         continue
       }
 
-      // Multi-value field (e.g. tags): remove only the deleted id from each
-      // document's list, keeping the remaining values.
-      //
-      // Every matching document is collected before any update runs: each
-      // update removes the deleted id from the query result set, so advancing
-      // `page` while updating would skip documents that shift forward into
-      // already-visited pages.
+      // Multi-value field (e.g. tags): remove only the deleted id, keeping the
+      // remaining values. Collect every match before updating, because each
+      // update shrinks the find result set and would skew pagination.
       const docsToUpdate: Array<{ docID: number | string; locale?: string; value: unknown }> = []
 
       await forEachLocale(async (locale) => {
