@@ -355,6 +355,7 @@ export function payloadTanstackStartOptions(
   return {
     importProtection: {
       client: { excludeFiles: [], specifiers: serverOnlyClientSpecifiers },
+      exclude: ['**/node_modules/**'],
       ignoreImporters: [...defaultImportProtectionIgnoreImporters, ...additionalIgnoreImporters],
       include: ['**/*'],
       mockAccess: 'warn',
