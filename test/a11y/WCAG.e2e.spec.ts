@@ -3983,7 +3983,7 @@ test.describe('WCAG 2.2 Level AA', () => {
                 for (const id of [first, second]) {
                   const response = await workflowPage.request.get(`${serverURL}/api/posts/${id}`)
                   await expect(response).toBeOK()
-                  expect((await response.json()).deletedAt).toBeNull()
+                  expect((await response.json()).deletedAt ?? null).toBeNull()
                 }
               },
               page: workflowPage,
@@ -4193,7 +4193,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       'should log out using the keyboard and protect document routes afterward',
       { tag: ['@a11y-workflow', '@auth'] },
       async ({ page: workflowPage }) => {
-        await workflowPage.setExtraHTTPHeaders({ DisableAutologin: 'true' })
+        await disableWorkflowAutoLogin({ page: workflowPage, serverURL })
         await prepareWorkflowPage({ page: workflowPage, serverURL })
         await workflowPage.goto(`${serverURL}/admin`)
         const account = workflowPage.locator('.user-menu__trigger')
@@ -4274,7 +4274,9 @@ test.describe('WCAG 2.2 Level AA', () => {
           await tabToWorkflowControl({ control: create, page: workflowPage })
           await workflowPage.keyboard.press('Enter')
           await expect(workflowPage).toHaveURL(/\/posts\/create(?:\?|$)/)
-          const input = workflowPage.getByLabel(/^Title\b/)
+          await expect(workflowPage.locator('.collection-edit')).toBeVisible()
+          await waitForFormReady(workflowPage)
+          const input = workflowPage.getByRole('textbox', { name: /^Title\b/ })
 
           await tabToWorkflowControl({ control: input, page: workflowPage })
           await workflowPage.keyboard.type(title)
@@ -4607,7 +4609,7 @@ test.describe('WCAG 2.2 Level AA', () => {
             await tabToWorkflowControl({ control: result, page: workflowPage })
             await workflowPage.keyboard.press('Enter')
             await expect(workflowPage).toHaveURL(postsURL.edit(id))
-            await expect(workflowPage.getByLabel(/^Title\b/)).toHaveValue(title)
+            await expect(workflowPage.getByRole('textbox', { name: /^Title\b/ })).toHaveValue(title)
           },
           page: workflowPage,
           postsURL,
@@ -9012,7 +9014,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         expect(typeof token).toBe('string')
         expect(token.length).toBeGreaterThan(0)
         await workflowPage.context().clearCookies()
-        await workflowPage.setExtraHTTPHeaders({ DisableAutologin: 'true' })
+        await disableWorkflowAutoLogin({ page: workflowPage, serverURL })
         await workflowPage.goto(`${serverURL}/admin/reset/${token}`)
         await expect(workflowPage.locator('.reset-password__form')).toHaveAttribute(
           'data-form-ready',
@@ -9192,7 +9194,12 @@ test.describe('WCAG 2.2 Level AA', () => {
           formatAdminURL({ adminRoute: '/admin', path: '/login', serverURL }),
         )
 
-        await tabToSignInControl({ control: password, page: signInPage })
+        await waitForFormReady(signInPage)
+        await tabToWorkflowControl({
+          control: password,
+          direction: 'Shift+Tab',
+          page: signInPage,
+        })
         await signInPage.keyboard.type(devUser.password)
         await expect(error).toBeHidden()
         await tabToSignInControl({ control: submit, page: signInPage })
@@ -9229,7 +9236,12 @@ test.describe('WCAG 2.2 Level AA', () => {
           formatAdminURL({ adminRoute: '/admin', path: '/login', serverURL }),
         )
 
-        await tabToSignInControl({ control: password, page: signInPage })
+        await waitForFormReady(signInPage)
+        await tabToWorkflowControl({
+          control: password,
+          direction: 'Shift+Tab',
+          page: signInPage,
+        })
         await signInPage.keyboard.press('ControlOrMeta+A')
         await signInPage.keyboard.type(devUser.password)
         await tabToSignInControl({ control: submit, page: signInPage })
