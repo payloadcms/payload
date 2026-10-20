@@ -85,6 +85,125 @@ const attachFakeURLProperties = (req: Partial<PayloadRequest>, urlSuffix?: strin
   }
 }
 
+/**
+ * Properties of the request that belong to the operation being built, not to the
+ * caller that passed its `req` in: the operation's `locale`, `fallbackLocale`
+ * and the `depth` inside `query`.
+ *
+ * Shared between nested operations.
+ */
+const requestScopeProperties = ['locale', 'fallbackLocale', 'query'] as const
+
+/**
+ * Returns a request view over `req` that reads and writes the operation scoped
+ * properties against a delegate, leaving the underlying object untouched.
+ *
+ * see https://github.com/payloadcms/payload/issues/18844
+ */
+function scopeRequestProperties<T extends object>(req: T, properties: (keyof T)[]): T {
+  const delegate = {} as Record<PropertyKey, unknown>
+  const boundMethods = new Map<
+    PropertyKey,
+    { bound: (...args: unknown[]) => unknown; source: unknown }
+  >()
+
+  for (const property of properties) {
+    if (property in req) {
+      const value = req[property]
+
+      // Objects with a plain prototype are shallow-copied so that a write into
+      // a nested value (like `req.query.depth = …`) lands on the operation's
+      // copy instead of mutating the caller's object. Anything else — a class
+      // instance such as a URLSearchParams, an array — is shared by reference,
+      // as it was before this helper existed, because a spread would silently
+      // strip it (a spread of a URLSearchParams yields `{}`).
+      const isPlainObject =
+        value !== null &&
+        (typeof value === 'object' || typeof value === 'function') &&
+        (Object.getPrototypeOf(value) === Object.prototype || Object.getPrototypeOf(value) === null)
+
+      delegate[property] = isPlainObject ? { ...value } : value
+    }
+  }
+
+  const isScoped = (property: PropertyKey) => properties.includes(property as keyof T)
+
+  return new Proxy(req, {
+    deleteProperty(target, property) {
+      return Reflect.deleteProperty(isScoped(property) ? delegate : target, property)
+    },
+    get(target, property, _receiver) {
+      if (isScoped(property)) {
+        return delegate[property]
+      }
+
+      const value = Reflect.get(target, property, target)
+
+      // `constructor` is never called as a method, so it is returned as it is.
+      // Binding it would change the identity of the request's prototype: a
+      // bound constructor is a different function object, so `req.constructor`
+      // would no longer be `Object`, and a structural comparison of two objects
+      // compares their constructors before it compares their values.
+      if (typeof value !== 'function' || property === 'constructor') {
+        return value
+      }
+
+      // Methods must keep the underlying object as their receiver: web Request
+      // methods brand-check `this` against their private fields (#state), which
+      // the proxy cannot satisfy itself. `addDataAndFileToRequest` calls
+      // `req.text?.()` on the request this helper returns, so the bound
+      // receiver is what keeps the REST and GraphQL body parsing working.
+      //
+      // The bound method is cached, so that reading the same method twice
+      // returns the same function, the way it does on an ordinary object. A
+      // comparison of two requests compares their function properties by
+      // reference, so a fresh bound function on every read made a request
+      // unequal to a plain copy of itself. The cache remembers the function it
+      // wraps, so that replacing a method on the request is still visible.
+      const cached = boundMethods.get(property)
+
+      if (cached && cached.source === value) {
+        return cached.bound
+      }
+
+      const bound = value.bind(target)
+
+      boundMethods.set(property, { bound, source: value })
+
+      return bound
+    },
+    getOwnPropertyDescriptor(target, property) {
+      if (!isScoped(property) || property in target) {
+        return Reflect.getOwnPropertyDescriptor(target, property)
+      }
+
+      return Reflect.getOwnPropertyDescriptor(delegate, property)
+    },
+    has(target, property) {
+      return isScoped(property) ? property in delegate : Reflect.has(target, property)
+    },
+    ownKeys(target) {
+      const keys = Reflect.ownKeys(target)
+
+      for (const property of properties) {
+        if (!(property in target) && property in delegate) {
+          keys.push(property)
+        }
+      }
+
+      return keys
+    },
+    set(target, property, newValue, _receiver) {
+      if (isScoped(property)) {
+        delegate[property] = newValue
+        return true
+      }
+
+      return Reflect.set(target, property, newValue, target)
+    },
+  })
+}
+
 export type CreatePayloadRequestArgs = {
   context?: RequestContext
   depth?: number
@@ -104,10 +223,11 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
   fallbackLocale,
   locale: localeArg,
   payload,
-  req = {},
+  req: incomingReq = {},
   urlSuffix,
   user,
 }): Promise<PayloadRequest> => {
+  const req = scopeRequestProperties(incomingReq, [...requestScopeProperties])
   const localization = payload.config?.localization
 
   if (localization) {
