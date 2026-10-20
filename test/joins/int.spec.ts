@@ -2091,7 +2091,11 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
     })
   })
 
-  test.describe('Array of collection with hasMany relationship', () => {
+  // MongoDB only: the drizzle polymorphic join builder requires a real column
+  // for the join `on` field and throws for hasMany relationship fields, which
+  // are stored in a relationships table instead. Verified locally on SQLite:
+  // buildPolymorphicJoinQuery throws `has no "parents" column`.
+  test.options.describe('Array of collection with hasMany relationship', { db: 'mongo' }, () => {
     test('should join across multiple collections through a hasMany relationship field', async ({
       payload,
     }) => {
