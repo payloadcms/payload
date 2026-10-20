@@ -1,0 +1,54 @@
+name: dismiss-stale-community-approvals
+
+on:
+  pull_request_target:
+    types:
+      - synchronize
+
+permissions:
+  pull-requests: write
+
+jobs:
+  dismiss:
+    name: dismiss-stale-community-approvals
+    runs-on: ubuntu-24.04
+    steps:
+      # Never check out the PR code here: pull_request_target runs with a write token
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const { owner, repo } = context.repo
+            const pull_number = context.payload.pull_request.number
+            const pusher = context.payload.sender.login
+
+            let permission = 'none'
+            try {
+              const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
+                owner,
+                repo,
+                username: pusher,
+              })
+              permission = data.permission
+            } catch {}
+
+            if (['admin', 'maintain', 'write'].includes(permission)) {
+              core.info(`@${pusher} has ${permission} access, keeping approvals`)
+              return
+            }
+
+            const reviews = await github.paginate(github.rest.pulls.listReviews, {
+              owner,
+              repo,
+              pull_number,
+            })
+
+            for (const review of reviews.filter((review) => review.state === 'APPROVED')) {
+              await github.rest.pulls.dismissReview({
+                owner,
+                repo,
+                pull_number,
+                review_id: review.id,
+                message: `New commits were pushed by @${pusher}. Please re-review.`,
+              })
+              core.info(`Dismissed approval ${review.id} from @${review.user.login}`)
+            }
