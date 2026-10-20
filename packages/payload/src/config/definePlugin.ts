@@ -9,7 +9,7 @@ function buildPluginsMap(plugins: Plugin[] | undefined): PluginsMap {
       }
     }
   }
-  return map as PluginsMap
+  return map
 }
 
 /**

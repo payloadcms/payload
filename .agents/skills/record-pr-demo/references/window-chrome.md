@@ -23,7 +23,7 @@ export const presentation = {
     title: 'Responsive collection lists',
     description: 'Browse and manage content on desktop, tablet, and mobile.',
   },
-  canvas: { width: 1600, height: 1000 }, // default; even dimensions, at least 800×600
+  // Optional canvas override: even dimensions, at least 800×600.
   showSize: true, // default
   theme: 'light', // 'light' or 'dark', fixed for the take
   accessibility: false,
@@ -31,7 +31,7 @@ export const presentation = {
 }
 ```
 
-`--viewport` sets the initial application's CSS viewport. `presentation.canvas` sets both the composition and encoded video dimensions. See [capture resolution and encoding](recording.md#capture-resolution-and-encoding).
+`--viewport` sets the initial application's CSS viewport. By default, the canvas fits that viewport at native scale, with room for the chrome and description: 1600×1148 for the default 1440×900 viewport, or 1600×1188 with accessibility feedback. It stays fixed during responsive resizing. An explicit `presentation.canvas` overrides both the composition and encoded video dimensions and may scale the app to fit. See [capture resolution and encoding](recording.md#capture-resolution-and-encoding).
 
 ## Presentation helpers
 

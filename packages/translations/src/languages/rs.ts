@@ -365,6 +365,13 @@ export const rsTranslations: DefaultTranslationsObject = {
     documentModified: 'Izmenjen dokument',
     documentOutOfDate: 'Ovaj dokument je nedavno ažurirao drugi korisnik. Vaš pogled je zastareo.',
     documents: 'Dokumenti',
+    dragCancelled: 'Превлачење {{label}} је отказано.',
+    dragDropped: '{{label}} је спуштен. Положај {{position}} од {{count}}.',
+    dragInstructions:
+      'Притисните Space или Enter да подигнете ред. Користите стрелице да га преместите. Уз VoiceOver искључите Quick Nav и користите Command + стрелице. Притисните Space или Enter за спуштање или Escape за отказивање.',
+    dragMoved: '{{label}}: {{direction}}. Положај {{position}} од {{count}}.',
+    dragPickedUp: '{{label}} је подигнут. Положај {{position}} од {{count}}.',
+    dragToMove: 'Превуците за премештање',
     dragToReorder: 'Prevucite da biste promenili redosled',
     duplicate: 'Дупликат',
     duplicateWithoutSaving: 'Понови без чувања промена',

@@ -28,7 +28,6 @@
     "vscode": {
       "extensions": [
         "anthropic.claude-code",
-        "dbaeumer.vscode-eslint",
         "oxc.oxc-vscode",
         "eamodio.gitlens",
         "hverlin.mise-vscode",
