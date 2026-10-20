@@ -1,17 +1,4 @@
 @layer payload-default {
-  .recents-widget__add-pin {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    min-block-size: var(--recents-row-height);
-    padding: var(--spacer-2);
-    border: var(--stroke-width-small) dashed var(--color-border);
-    border-radius: var(--radius-large);
-    background: var(--color-bg);
-    text-align: center;
-  }
-
   .recents-widget__select-documents {
     height: auto;
     min-block-size: var(--spacer-4);

@@ -5,6 +5,8 @@ import { expect, vi } from 'vitest'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercise the internal server handler against the real database.
 import { getDashboardDocuments } from '../../packages/ui/src/widgets/RecentlyViewed/getDocuments.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports -- Share the batch size used by the widget.
+import { DOCUMENTS_BATCH_SIZE } from '../../packages/ui/src/widgets/RecentlyViewed/recents.js'
 import { test } from '../__helpers/int/vitest.js'
 
 test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
@@ -233,6 +235,69 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
           ([args]) => args.overrideAccess === false && args.user.id === owner.id,
         ),
       ).toBe(true)
+    } finally {
+      find.mockRestore()
+    }
+  })
+
+  test('should load pins in fixed batches that fill the largest widget page', async ({
+    payload,
+  }) => {
+    const owner = await payload.create({
+      collection: 'users',
+      data: { email: 'pin-batches@payloadcms.com', password: 'test' },
+      overrideAccess: true,
+    })
+    const user = { ...owner, collection: 'users' as const }
+    const documents = await Promise.all(
+      Array.from({ length: DOCUMENTS_BATCH_SIZE + 2 }, (_, index) =>
+        payload.create({
+          collection: 'tickets',
+          data: { title: `Batch ${index}` },
+          overrideAccess: true,
+        }),
+      ),
+    )
+
+    await payload.create({
+      collection: 'payload-preferences',
+      data: {
+        key: PREFERENCE_KEYS.PINNED_DOCUMENTS,
+        value: { items: documents.map((doc) => ({ id: doc.id, collectionSlug: 'tickets' })) },
+      },
+      overrideAccess: false,
+      user,
+    })
+    const req = await createPayloadRequest({ payload, req: { user } })
+    const find = vi.spyOn(payload, 'find')
+
+    try {
+      const first = await getDashboardDocuments({
+        limit: DOCUMENTS_BATCH_SIZE,
+        page: 1,
+        req,
+        tab: 'pinned',
+      })
+      const second = await getDashboardDocuments({
+        limit: DOCUMENTS_BATCH_SIZE,
+        page: 2,
+        req,
+        tab: 'pinned',
+      })
+
+      expect(first.totalDocs).toBe(DOCUMENTS_BATCH_SIZE + 2)
+      expect(first.items.map((item) => item.id)).toEqual(
+        documents.slice(0, DOCUMENTS_BATCH_SIZE).map((doc) => doc.id),
+      )
+      expect(second.page).toBe(2)
+      expect(second.items.map((item) => item.id)).toEqual(
+        documents.slice(DOCUMENTS_BATCH_SIZE).map((doc) => doc.id),
+      )
+      expect(
+        find.mock.calls
+          .filter(([args]) => args.collection === 'tickets' && args.depth === 1)
+          .map(([args]) => args.limit),
+      ).toEqual([DOCUMENTS_BATCH_SIZE, 2])
     } finally {
       find.mockRestore()
     }
