@@ -281,7 +281,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
       // Apply field-level export hooks for JSON format
       let output: Record<string, unknown> = applyFieldHooks({
         type: 'beforeExport',
-        data: doc as Record<string, unknown>,
+        data: doc,
         fieldHooks: exportFieldHooks,
         fields: targetCollection.config.flattenedFields,
         format: 'json',

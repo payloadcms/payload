@@ -67,7 +67,6 @@ export const FocusIndicatorsView = () => {
 
       {/* Section 4: BAD - No focus indicators */}
       <section className="test-section" data-testid="section-bad">
-        {/* eslint-disable-next-line jsx-a11y/accessible-emoji */}
         <h2>⚠️ Bad Focus Indicators (Should Fail)</h2>
         <div className="button-group">
           <button className="no-focus" id="bad-button-1" type="button">

@@ -212,11 +212,11 @@ export const buildTable = ({
 
     localesIndexes._localeParent = {
       name: buildIndexName({
-        name: `${localeTableName}_locale_parent_id_unique`,
+        name: `${localeTableName}_parent_id_locale_unique`,
         adapter,
         appendSuffix: false,
       }),
-      on: ['_locale', '_parentID'],
+      on: ['_parentID', '_locale'],
       unique: true,
     }
 

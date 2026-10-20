@@ -17,6 +17,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useEntityVisibility } from '../../providers/EntityVisibility/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { isNavEntityVisible } from '../../utilities/isNavEntityVisible.js'
 import { WidgetCard } from '../WidgetCard/index.js'
 import { PinDocumentPicker } from './PinDocumentPicker/index.js'
 import { updatePinnedPreferences } from './pinnedPreferences.js'
@@ -27,6 +28,7 @@ export type RecentDocument = {
   dateLabel?: string
   dateTime?: string
   href: string
+  isChanged?: boolean
   isDraft?: boolean
   statusLabel?: string
   thumbnailURL?: string
@@ -73,8 +75,12 @@ export function RecentsAndPinnedClient({
     () =>
       config.collections
         .filter(
-          ({ slug }) =>
-            isEntityVisible({ collectionSlug: slug }) && permissions?.collections?.[slug]?.read,
+          ({ slug, admin }) =>
+            isEntityVisible({ collectionSlug: slug }) &&
+            isNavEntityVisible({
+              adminGroup: admin.group,
+              entityPermissions: permissions?.collections?.[slug],
+            }),
         )
         .map(({ slug }) => slug),
     [config.collections, isEntityVisible, permissions],
@@ -185,9 +191,13 @@ export function RecentsAndPinnedClient({
     }
 
     let observedPageSize = 0
-    const observer = new ResizeObserver(([entry]) => {
-      const width = entry.contentRect.width
-      const nextPageSize = width >= 768 ? 4 : width >= 400 ? 2 : 1
+    const observer = new ResizeObserver(() => {
+      const styles = getComputedStyle(element)
+      const columns = styles.gridTemplateColumns.split(' ').length
+      const rows = Number(styles.getPropertyValue('--recents-rows'))
+      const nextPageSize = columns * rows
+
+      element.style.setProperty('--recents-columns', String(columns))
 
       if (nextPageSize !== observedPageSize) {
         observedPageSize = nextPageSize
@@ -390,7 +400,7 @@ export function RecentsAndPinnedClient({
                     </div>
                     {item.statusLabel ? (
                       <span
-                        className={`recents-widget__status-pill${item.isDraft ? ' recents-widget__status-pill--draft' : ''}`}
+                        className={`recents-widget__status-pill${item.isDraft ? ' recents-widget__status-pill--draft' : item.isChanged ? ' recents-widget__status-pill--changed' : ''}`}
                       >
                         {item.statusLabel}
                       </span>

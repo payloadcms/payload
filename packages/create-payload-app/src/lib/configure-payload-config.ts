@@ -80,7 +80,7 @@ export async function configurePayloadConfig(args: {
         type: args.dbType,
         envVarName,
       },
-      formatWithPrettier: true,
+      formatWithOxfmt: true,
       removeSharp: args.sharp === false,
       storage: args.storageAdapter,
       validateStructure: false,
