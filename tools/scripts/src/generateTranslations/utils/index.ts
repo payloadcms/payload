@@ -12,7 +12,7 @@ import { format } from 'oxfmt'
 import path from 'path'
 import { deepMergeSimple } from 'payload/shared'
 
-import { applyEslintFixes } from './applyEslintFixes.js'
+import { applyOxlintFixes } from './applyOxlintFixes.js'
 import { findMissingKeys } from './findMissingKeys.js'
 import { generateTsObjectLiteral } from './generateTsObjectLiteral.js'
 import { sortKeys } from './sortKeys.js'
@@ -202,8 +202,8 @@ export async function translateObject(props: {
     // suffix
     fileContent += `${tsFileSuffix}\n`
 
-    // eslint
-    fileContent = await applyEslintFixes(fileContent, filePath)
+    // oxlint
+    fileContent = applyOxlintFixes(fileContent, filePath)
 
     // oxfmt
     fileContent = (
@@ -238,8 +238,8 @@ export async function translateObject(props: {
       // suffix
       fileContent += `${tsFileSuffix.replaceAll('{{locale}}', sanitizedKey).replaceAll('{{dateFNSKey}}', `'${allTranslatedTranslationsObject[key]?.dateFNSKey}'`)}\n`
 
-      // eslint
-      fileContent = await applyEslintFixes(fileContent, filePath)
+      // oxlint
+      fileContent = applyOxlintFixes(fileContent, filePath)
 
       // oxfmt
       fileContent = (

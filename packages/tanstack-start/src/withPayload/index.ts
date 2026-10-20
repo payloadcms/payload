@@ -219,7 +219,7 @@ export function withPayload(
           build: { rollupOptions: { external: buildExternalPackages } },
           resolve: { noExternal: noExternalPatterns },
         },
-      } as any,
+      },
       optimizeDeps: {
         exclude: optimizeDepsExcludeDefaults,
         include: optimizeDepsIncludeDefaults,
@@ -247,7 +247,7 @@ export function withPayload(
         ],
         extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
         tsconfigPaths: true,
-      } as any,
+      },
       ssr: {
         external: ssrExternal,
         noExternal: noExternalPatterns,
@@ -355,7 +355,7 @@ export function payloadTanstackStartOptions(
       // (they define `createServerFn`s, not routes).
       routeFileIgnorePattern: 'importMap\\.(?:d\\.ts|js|server\\.ts)$|\\.functions\\.',
       routesDirectory,
-    } as any,
+    },
     rsc: { enabled: true },
     srcDirectory,
   }

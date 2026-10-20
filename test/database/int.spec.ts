@@ -163,7 +163,7 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
 
       const versionsQuery = await payload.db.findVersions({
         collection: 'custom-ids',
-        req: {} as PayloadRequest,
+        req: {},
         where: {
           latest: {
             equals: true,
@@ -4149,7 +4149,7 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
 
       const resDb = (await payload.db.findOne({
         collection: 'fields-persistance',
-        req: {} as PayloadRequest,
+        req: {},
         where: { id: { equals: createRes.id } },
       })) as Record<string, unknown>
 
@@ -4195,7 +4195,7 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
 
       const resDb = (await payload.db.findOne({
         collection: fieldsPersistanceSlug,
-        req: {} as PayloadRequest,
+        req: {},
         where: { id: { equals: created.id } },
       })) as Record<string, unknown>
 
@@ -4941,7 +4941,7 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
         publishDate: unixTimestamp,
         title: 'testing-date-coercion',
       },
-      req: {} as any,
+      req: {},
     })
 
     // Should be converted to ISO string

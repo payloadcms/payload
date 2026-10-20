@@ -1,4 +1,4 @@
-// @ts-ignore
+// @ts-expect-error
 import { type MongooseAdapter } from '@payloadcms/db-mongodb'
 import { buildConfig, getPayload } from 'payload'
 import { expect, vi } from 'vitest'

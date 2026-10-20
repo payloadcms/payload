@@ -104,7 +104,7 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
   fallbackLocale,
   locale: localeArg,
   payload,
-  req = {} as PayloadRequest,
+  req = {},
   urlSuffix,
   user,
 }): Promise<PayloadRequest> => {
