@@ -363,6 +363,13 @@ export const koTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       '이 문서는 최근에 다른 사용자에 의해 업데이트되었습니다. 귀하의 보기는 낡았습니다.',
     documents: '문서들',
+    dragCancelled: '{{label}} 드래그가 취소되었습니다.',
+    dragDropped: '{{label}}을 놓았습니다. {{count}}개 중 {{position}}번째 위치.',
+    dragInstructions:
+      'Space 또는 Enter를 눌러 행을 집으세요. 화살표 키로 이동하세요. VoiceOver에서는 Quick Nav를 끄고 Command + 화살표 키를 사용하세요. Space 또는 Enter를 눌러 놓거나 Escape를 눌러 취소하세요.',
+    dragMoved: '{{label}}: {{direction}}. {{count}}개 중 {{position}}번째 위치.',
+    dragPickedUp: '{{label}}을 집었습니다. {{count}}개 중 {{position}}번째 위치.',
+    dragToMove: '드래그하여 이동',
     dragToReorder: '드래그하여 순서 변경',
     duplicate: '복제',
     duplicateWithoutSaving: '변경 사항 저장 없이 복제',

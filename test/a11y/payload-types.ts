@@ -62,21 +62,18 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_1D0CDD79".
+ * via the `definition` "LexicalNodes_FC139D9D".
  */
-export type LexicalNodes_1D0CDD79 =
+export type LexicalNodes_FC139D9D =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_1D0CDD79>
-  | SerializedBlockNode<Callout | NoHandle>
-  | SerializedTableNode<LexicalNodes_1D0CDD79>
-  | SerializedTableCellNode<LexicalNodes_1D0CDD79>
-  | SerializedTableRowNode<LexicalNodes_1D0CDD79>
+  | SerializedParagraphNode<LexicalNodes_FC139D9D>
+  | SerializedBlockNode<Callout>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
   | SerializedUploadNode<'media-alt'>
-  | SerializedQuoteNode<LexicalNodes_1D0CDD79>
+  | SerializedQuoteNode<LexicalNodes_FC139D9D>
   | SerializedRelationshipNode<
       | 'users'
       | 'payload-folders'
@@ -87,11 +84,43 @@ export type LexicalNodes_1D0CDD79 =
       | 'payload-migrations'
       | 'payload-llm-instructions'
     >
-  | SerializedAutoLinkNode<LexicalNodes_1D0CDD79, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_1D0CDD79, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_1D0CDD79>
-  | SerializedListItemNode<LexicalNodes_1D0CDD79>
-  | SerializedHeadingNode<LexicalNodes_1D0CDD79>;
+  | SerializedAutoLinkNode<LexicalNodes_FC139D9D, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_FC139D9D, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_FC139D9D>
+  | SerializedListItemNode<LexicalNodes_FC139D9D>
+  | SerializedHeadingNode<LexicalNodes_FC139D9D>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_6A80DA5E".
+ */
+export type LexicalNodes_6A80DA5E =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_6A80DA5E>
+  | SerializedBlockNode<Callout | NestedRichText | NoHandle>
+  | SerializedTableNode<LexicalNodes_6A80DA5E>
+  | SerializedTableCellNode<LexicalNodes_6A80DA5E>
+  | SerializedTableRowNode<LexicalNodes_6A80DA5E>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'media'>
+  | SerializedUploadNode<'media-alt'>
+  | SerializedQuoteNode<LexicalNodes_6A80DA5E>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'payload-folders'
+      | 'posts'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-llm-instructions'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_6A80DA5E, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_6A80DA5E, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_6A80DA5E>
+  | SerializedListItemNode<LexicalNodes_6A80DA5E>
+  | SerializedHeadingNode<LexicalNodes_6A80DA5E>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_D80343AC".
@@ -300,7 +329,7 @@ export interface Post {
   relatedPost?: (string | null) | Post;
   status?: ('draft' | 'published') | null;
   publishedOn?: string | null;
-  content?: LexicalRichText<LexicalNodes_1D0CDD79> | null;
+  content?: LexicalRichText<LexicalNodes_6A80DA5E> | null;
   items?:
     | {
         label?: string | null;
@@ -310,6 +339,12 @@ export interface Post {
     | null;
   layout?: (TextBlock | ImageBlock)[] | null;
   publishingNote?: string | null;
+  customLabelRows?:
+    | {
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   customLabelNote?: string | null;
   '_h_payload-folders'?: (string | null) | PayloadFolder;
   readOnlyHierarchy?: (string | PayloadFolder)[] | null;
@@ -675,6 +710,12 @@ export interface PostsSelect<T extends boolean = true> {
             };
       };
   publishingNote?: T;
+  customLabelRows?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
   customLabelNote?: T;
   '_h_payload-folders'?: T;
   readOnlyHierarchy?: T;
@@ -956,6 +997,16 @@ export interface Callout {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NestedRichText".
+ */
+export interface NestedRichText {
+  id: string;
+  blockType: 'nestedRichText';
+  body?: LexicalRichText<LexicalNodes_FC139D9D> | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "NoHandle".
  */
 export interface NoHandle {
@@ -1035,27 +1086,6 @@ export type SerializedInlineBlockNode<TFields extends { blockType: string }> = T
   version: number;
   fields: { id: string } & Omit<TFields, 'id'>;
 } : never;
-
-export interface SerializedTableNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
-  type: 'table';
-  colWidths?: number[];
-  frozenColumnCount?: number;
-  frozenRowCount?: number;
-  rowStriping?: boolean;
-}
-export interface SerializedTableRowNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
-  type: 'tablerow';
-  height?: number;
-}
-export interface SerializedTableCellNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
-  type: 'tablecell';
-  backgroundColor?: string | null;
-  colSpan?: number;
-  headerState: number;
-  rowSpan?: number;
-  verticalAlign?: string;
-  width?: number;
-}
 
 export interface SerializedHorizontalRuleNode {
   type: 'horizontalrule';
@@ -1146,6 +1176,27 @@ export interface LexicalRichText<TNode> {
     /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
     version: number;
   };
+}
+
+export interface SerializedTableNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'table';
+  colWidths?: number[];
+  frozenColumnCount?: number;
+  frozenRowCount?: number;
+  rowStriping?: boolean;
+}
+export interface SerializedTableRowNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'tablerow';
+  height?: number;
+}
+export interface SerializedTableCellNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'tablecell';
+  backgroundColor?: string | null;
+  colSpan?: number;
+  headerState: number;
+  rowSpan?: number;
+  verticalAlign?: string;
+  width?: number;
 }
 
 

@@ -363,6 +363,13 @@ export const isTranslations: DefaultTranslationsObject = {
     documentModified: 'Skjal breytt',
     documentOutOfDate: 'Þetta skjal var nýlega uppfært af öðrum notanda. Yfirlitið þitt er úrelt.',
     documents: 'Færslur',
+    dragCancelled: 'Hætt við að draga {{label}}.',
+    dragDropped: '{{label}} sleppt. Staða {{position}} af {{count}}.',
+    dragInstructions:
+      'Ýttu á Space eða Enter til að taka upp röð. Notaðu örvatakkana til að færa hana. Með VoiceOver skaltu slökkva á Quick Nav og nota Command + örvatakkana. Ýttu á Space eða Enter til að sleppa, eða Escape til að hætta við.',
+    dragMoved: '{{label}}: {{direction}}. Staða {{position}} af {{count}}.',
+    dragPickedUp: '{{label}} tekið upp. Staða {{position}} af {{count}}.',
+    dragToMove: 'Dragðu til að færa',
     dragToReorder: 'Dragðu til að endurraða',
     duplicate: 'Tvöfalda',
     duplicateWithoutSaving: 'Tvöfalda án þess að vista breytingar',

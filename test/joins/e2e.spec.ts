@@ -277,6 +277,8 @@ describe('Join Field', () => {
     const toggler = actionColumn.locator('button.drawer-link__doc-drawer-toggler')
     await toggler.click()
 
+    await expect(page.locator('[id^=doc-drawer_undefined]')).toBeHidden()
+
     const drawer = page.getByRole('dialog', { name: 'Editing Post', exact: true })
     await expect(drawer.getByRole('textbox', { name: 'Title', exact: true })).toBeVisible()
     await page.keyboard.press('Escape')

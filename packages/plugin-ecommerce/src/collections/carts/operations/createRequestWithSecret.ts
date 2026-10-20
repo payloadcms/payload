@@ -22,5 +22,5 @@ export const createRequestWithSecret = (
       ...req.context,
       cartSecret: secret,
     },
-  } as PayloadRequest
+  }
 }

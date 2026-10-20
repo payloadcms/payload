@@ -44,7 +44,7 @@ const tenantAccess: Access = ({ req }) => {
     isPublic: {
       equals: true,
     },
-  } as Where
+  }
 }
 
 export const Tenants: CollectionConfig = {

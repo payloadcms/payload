@@ -172,7 +172,7 @@ jobs:
         run: pnpm format:check
 
       - name: Lint TypeScript/JavaScript
-        run: pnpm lint -- --quiet
+        run: pnpm lint --quiet
         env:
           NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
 

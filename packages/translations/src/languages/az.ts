@@ -369,6 +369,13 @@ export const azTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Bu sənəd yeni başqa bir istifadəçi tərəfindən yenilənib. Sizin baxışınız köhnədir.',
     documents: 'Sənədlər',
+    dragCancelled: '{{label}} sürüklənməsi ləğv edildi.',
+    dragDropped: '{{label}} buraxıldı. Mövqe {{position}} / {{count}}.',
+    dragInstructions:
+      'Sətri götürmək üçün Space və ya Enter düyməsini basın. Daşımaq üçün ox düymələrindən istifadə edin. VoiceOver ilə Quick Nav rejimini söndürün və Command + ox düymələrindən istifadə edin. Buraxmaq üçün Space və ya Enter, ləğv etmək üçün Escape düyməsini basın.',
+    dragMoved: '{{label}}: {{direction}}. Mövqe {{position}} / {{count}}.',
+    dragPickedUp: '{{label}} götürüldü. Mövqe {{position}} / {{count}}.',
+    dragToMove: 'Daşımaq üçün sürükləyin',
     dragToReorder: 'Sıralamaq üçün sürükləyin',
     duplicate: 'Dublikat',
     duplicateWithoutSaving: 'Dəyişiklikləri saxlamadan dublikatla',

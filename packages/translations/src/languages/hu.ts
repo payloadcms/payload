@@ -372,6 +372,13 @@ export const huTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Ezt a dokumentumot nemrégiben frissítette egy másik felhasználó. A megtekintése elavult.',
     documents: 'Dokumentumok',
+    dragCancelled: '{{label}} húzása megszakítva.',
+    dragDropped: '{{label}} elhelyezve. Pozíció: {{position}} / {{count}}.',
+    dragInstructions:
+      'Egy sor felvételéhez nyomja meg a Space vagy Enter billentyűt. A mozgatáshoz használja a nyílbillentyűket. VoiceOver használatakor kapcsolja ki a Quick Nav funkciót, és használja a Command + nyílbillentyűket. Az elhelyezéshez nyomja meg a Space vagy Enter, a megszakításhoz az Escape billentyűt.',
+    dragMoved: '{{label}}: {{direction}}. Pozíció: {{position}} / {{count}}.',
+    dragPickedUp: '{{label}} felvéve. Pozíció: {{position}} / {{count}}.',
+    dragToMove: 'Húzza az áthelyezéshez',
     dragToReorder: 'Húzza át a rendezéshez',
     duplicate: 'Duplikálás',
     duplicateWithoutSaving: 'Duplikálás a módosítások mentése nélkül',

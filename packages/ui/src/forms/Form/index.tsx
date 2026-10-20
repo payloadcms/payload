@@ -281,7 +281,7 @@ export const Form: React.FC<FormProps> = (props) => {
         method: methodToUse = method,
         overrides: overridesFromArgs = {},
         skipValidation,
-      } = options || ({} as SubmitOptions)
+      } = options || {}
 
       const disableToast = disableSuccessStatusFromArgs ?? disableSuccessStatus
 
@@ -690,7 +690,7 @@ export const Form: React.FC<FormProps> = (props) => {
         skipValidation: true,
       })
 
-      contextRef.current = { ...initContextState } as FormContextType
+      contextRef.current = { ...initContextState }
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state: newState })
 
@@ -712,7 +712,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const replaceState = useCallback(
     (state: FormState) => {
-      contextRef.current = { ...initContextState } as FormContextType
+      contextRef.current = { ...initContextState }
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state })
     },
@@ -840,7 +840,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useEffect(() => {
     if (initialState) {
-      contextRef.current = { ...initContextState } as FormContextType
+      contextRef.current = { ...initContextState }
       dispatchFields({
         type: 'REPLACE_STATE',
         optimize: false,
