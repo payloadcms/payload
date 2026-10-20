@@ -1,12 +1,7 @@
 {
   "name": "@payloadcms/translations",
-  "version": "4.0.0-beta.1",
+  "version": "4.0.0-beta.3",
   "homepage": "https://payloadcms.com",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/translations"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -16,8 +11,18 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/translations"
+  },
+  "files": [
+    "dist"
+  ],
   "type": "module",
+  "sideEffects": false,
+  "main": "./src/exports/index.ts",
+  "types": "./src/exports/index.ts",
   "exports": {
     ".": {
       "import": "./src/exports/index.ts",
@@ -40,34 +45,9 @@
       "default": "./src/languages/*.ts"
     }
   },
-  "main": "./src/exports/index.ts",
-  "types": "./src/exports/index.ts",
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "pnpm build:types && pnpm build:swc && pnpm build:dateFNS",
-    "build:dateFNS": "node bundleDateFNSLocales.js",
-    "build:debug": "pnpm build",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
-  },
-  "dependencies": {
-    "date-fns": "4.4.0"
-  },
-  "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "19.3.0",
-    "@types/react-dom": "19.3.0",
-    "dotenv": "catalog:",
-    "esbuild": "0.27.1",
-    "prettier": "3.5.3",
-    "typescript": "catalog:"
-  },
   "publishConfig": {
+    "main": "./dist/exports/index.js",
+    "types": "./dist/exports/index.d.ts",
     "exports": {
       ".": {
         "import": "./dist/exports/index.js",
@@ -89,8 +69,24 @@
         "types": "./dist/languages/*.d.ts",
         "default": "./dist/languages/*.js"
       }
-    },
-    "main": "./dist/exports/index.js",
-    "types": "./dist/exports/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "pnpm build:types && pnpm build:swc && pnpm build:dateFNS",
+    "build:dateFNS": "node bundleDateFNSLocales.js",
+    "build:debug": "pnpm build",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf -g {dist,*.tsbuildinfo}"
+  },
+  "dependencies": {
+    "date-fns": "4.4.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "dotenv": "catalog:",
+    "esbuild": "0.27.1",
+    "typescript": "catalog:"
   }
 }

@@ -1,6 +1,44 @@
 'use client'
 
-import { AlignJustifiedIcon, ArrowIcon, CalendarIcon, CheckIcon, ChevronIcon, CircledXIcon, CirclePlusIcon, ClipboardIcon, CloseMenuIcon, CodeBlockIcon, CopyIcon, DocumentIcon, Dots, DuplicateIcon, EditIcon, EyeIcon, FolderIcon, GearIcon, GridViewIcon, LineIcon, LinkIcon, LockIcon, LogOutIcon, MinimizeMaximizeIcon, MoreIcon, MoveFolderIcon, NewTabIcon, PeopleIcon, PlusIcon, SearchIcon, SortDownIcon, SortUpIcon, SwapIcon, ThreeDotsIcon, TrashIcon, WriteIcon, XIcon } from '@payloadcms/ui'
+import {
+  AlignJustifiedIcon,
+  ArrowIcon,
+  CalendarIcon,
+  CheckIcon,
+  ChevronIcon,
+  CircledXIcon,
+  CirclePlusIcon,
+  ClipboardIcon,
+  CloseMenuIcon,
+  CodeBlockIcon,
+  CopyIcon,
+  DocumentIcon,
+  Dots,
+  DuplicateIcon,
+  EditIcon,
+  EyeIcon,
+  FolderIcon,
+  GearIcon,
+  GridViewIcon,
+  LineIcon,
+  LinkIcon,
+  LockIcon,
+  LogOutIcon,
+  MinimizeMaximizeIcon,
+  MoreIcon,
+  MoveFolderIcon,
+  NewTabIcon,
+  PeopleIcon,
+  PlusIcon,
+  SearchIcon,
+  SortDownIcon,
+  SortUpIcon,
+  SwapIcon,
+  ThreeDotsIcon,
+  TrashIcon,
+  WriteIcon,
+  XIcon,
+} from '@payloadcms/ui'
 import Link from 'next/link'
 
 import './index.css'

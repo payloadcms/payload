@@ -1092,5 +1092,5 @@ async function createPost(
       title: 'Post Title',
       ...(dataOverrides || {}),
     },
-  }) as unknown as Promise<Post>
+  })
 }

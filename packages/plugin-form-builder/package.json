@@ -1,23 +1,18 @@
 {
   "name": "@payloadcms/plugin-form-builder",
-  "version": "4.0.0-beta.1",
+  "version": "4.0.0-beta.3",
   "description": "Form builder plugin for Payload CMS",
   "keywords": [
-    "payload",
     "cms",
-    "plugin",
-    "typescript",
-    "react",
-    "forms",
     "fields",
     "form builder",
-    "payments"
+    "forms",
+    "payload",
+    "payments",
+    "plugin",
+    "react",
+    "typescript"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/plugin-form-builder"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -27,8 +22,18 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-form-builder"
+  },
+  "files": [
+    "dist"
+  ],
   "type": "module",
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts",
@@ -56,41 +61,9 @@
       "default": "./src/translations/languages/*.ts"
     }
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "pnpm build:types && pnpm build:swc",
-    "build:debug": "pnpm build",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "test": "echo \"No tests available.\""
-  },
-  "dependencies": {
-    "@payloadcms/translations": "workspace:*",
-    "@payloadcms/ui": "workspace:*",
-    "escape-html": "^1.0.3"
-  },
-  "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
-    "@types/escape-html": "^1.0.4",
-    "@types/react": "19.3.0",
-    "@types/react-dom": "19.3.0",
-    "copyfiles": "catalog:",
-    "cross-env": "catalog:",
-    "payload": "workspace:*"
-  },
-  "peerDependencies": {
-    "payload": "workspace:*",
-    "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
-    "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
-  },
   "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "exports": {
       ".": {
         "import": "./dist/index.js",
@@ -118,9 +91,33 @@
         "default": "./dist/translations/languages/*.js"
       }
     },
-    "main": "./dist/index.js",
-    "registry": "https://registry.npmjs.org/",
-    "types": "./dist/index.d.ts"
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf -g {dist,*.tsbuildinfo}",
+    "test": "echo \"No tests available.\""
+  },
+  "dependencies": {
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
+    "escape-html": "^1.0.3"
+  },
+  "devDependencies": {
+    "@types/escape-html": "^1.0.4",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "copyfiles": "catalog:",
+    "cross-env": "catalog:",
+    "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "payload": "workspace:*",
+    "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
+    "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },
   "homepage:": "https://payloadcms.com"
 }

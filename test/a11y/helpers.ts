@@ -9,7 +9,11 @@ import { formatAdminURL, instructionsCollectionSlug } from 'payload/shared'
 
 import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
-import { openLocaleSelector, waitForFormReady } from '../__helpers/e2e/helpers.js'
+import {
+  openLocaleSelector,
+  waitForFormReady,
+  waitForLexicalReady,
+} from '../__helpers/e2e/helpers.js'
 import { toggleLivePreview } from '../__helpers/e2e/live-preview/toggleLivePreview.js'
 import { selectInput } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
@@ -47,6 +51,21 @@ export async function openAccessibilityTestPage({
   page.removeAllListeners('console')
 
   return { page, postsURL, serverURL }
+}
+
+export async function waitForFocusRestoration({ page }: { page: Page }) {
+  // Modal traps restore focus in a deferred task after the drawer becomes hidden.
+  await page.evaluate(() => new Promise<void>((resolve) => setTimeout(resolve, 0)))
+}
+
+export async function waitForKeyboardDragActivation({ page }: { page: Page }) {
+  // dnd-kit registers keyboard listeners after activation and measures targets on the next frame.
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve, 0))),
+      ),
+  )
 }
 
 export async function expectFocusInside({ container, page }: { container: Locator; page: Page }) {
@@ -164,6 +183,7 @@ function isPaintedColor(color: string) {
 
 export async function gotoCreatePost({ page, postsURL }: { page: Page; postsURL: AdminUrlUtil }) {
   await page.goto(postsURL.create)
+  await expect(page.locator('[data-form-ready="true"]').first()).toBeVisible()
   await waitForFormReady(page)
 }
 
@@ -496,7 +516,9 @@ export async function openRelationshipCreationDrawer({
   const drawer = page.locator('dialog[id^="doc-drawer_posts_"]')
 
   await expect(drawer).toBeVisible()
+  await expect(drawer.locator('[data-form-ready="true"]').first()).toBeVisible()
   await expect(drawer.locator('#field-title')).toBeVisible()
+  await waitForLexicalReady(drawer.locator('[data-field-path="content"]'))
   return drawer
 }
 
@@ -719,7 +741,14 @@ export async function openNavigationFolders({
   await openNavigation({ page })
   const tab = page.getByRole('tab', { name: /folders/i })
 
-  await tab.click()
+  if ((await tab.getAttribute('aria-selected')) !== 'true') {
+    const response = page.waitForResponse((response) =>
+      (response.request().postData() || '').includes('render-tab'),
+    )
+
+    await tab.click()
+    await response
+  }
   const sidebar = page.locator('.hierarchy-sidebar-tab:visible')
 
   await expect(sidebar.getByRole('tree')).toBeVisible()
@@ -809,4 +838,59 @@ export async function openLLMInstructions({ page, serverURL }: { page: Page; ser
   ).toBeVisible()
 
   return field
+}
+
+export async function openDragReorderField({
+  kind,
+  page,
+  postsURL,
+  rowCount = 2,
+}: {
+  kind: 'Array' | 'Blocks'
+  page: Page
+  postsURL: AdminUrlUtil
+  rowCount?: 2 | 3
+}) {
+  await gotoCreatePost({ page, postsURL })
+
+  if (kind === 'Array') {
+    await page.locator('#field-items .array-field__add-row').click()
+    await expect(page.locator('#field-items input[name$=".label"]')).toBeVisible()
+    for (let index = 1; index < rowCount; index++) {
+      await page.locator('#field-items .array-field__add-row').click()
+    }
+  } else {
+    await addBlock({ blockToSelect: 'Text block', fieldName: 'layout', page })
+    await expect(page.locator('#field-layout input[name$=".text"]')).toBeVisible()
+    for (let index = 1; index < rowCount; index++) {
+      await addBlock({ blockToSelect: 'Text block', fieldName: 'layout', page })
+    }
+  }
+
+  const field = page.locator(kind === 'Array' ? '#field-items' : '#field-layout')
+  const rows = field.locator(kind === 'Array' ? '.array-field__row' : '.blocks-field__row')
+  const values = rows.locator(kind === 'Array' ? 'input[name$=".label"]' : 'input[name$=".text"]')
+
+  await expect(rows).toHaveCount(rowCount)
+  await expect(rows.locator('.shimmer-effect')).toHaveCount(0, { timeout: 15000 })
+  await field.getByRole('button', { name: /show all/i }).click()
+  await expect(values).toHaveCount(rowCount)
+  for (const [index, label] of ['First', 'Second', 'Third'].slice(0, rowCount).entries()) {
+    await values.nth(index).fill(`${label} drag row`)
+  }
+  const firstRowLabel = (
+    await rows
+      .first()
+      .locator(kind === 'Array' ? '.row-label' : '.blocks-field__block-pill')
+      .innerText()
+  ).trim()
+  await field.getByRole('button', { name: /collapse all/i }).click()
+  for (const content of await rows.locator('.collapsible__content').all()) {
+    await expect(content).toBeHidden()
+  }
+  const handle = rows.first().getByRole('button', { name: /drag to reorder/i })
+
+  await expect(handle).toBeVisible()
+  expect(firstRowLabel).not.toBe('')
+  return { field, firstRowLabel, handle, rows, values }
 }

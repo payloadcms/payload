@@ -1,13 +1,74 @@
 /* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test"] }] -- Tests use the shared fixture wrapper. */
 import { createPayloadRequest, UnauthorizedError } from 'payload'
-import { PREFERENCE_KEYS } from 'payload/shared'
+import { instructionsCollectionSlug, PREFERENCE_KEYS } from 'payload/shared'
 import { expect, vi } from 'vitest'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercise the internal server handler against the real database.
 import { getDashboardDocuments } from '../../packages/ui/src/widgets/RecentlyViewed/getDocuments.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports -- Share the batch size used by the widget.
+import { DOCUMENTS_BATCH_SIZE } from '../../packages/ui/src/widgets/RecentlyViewed/recents.js'
 import { test } from '../__helpers/int/vitest.js'
 
 test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
+  test('should exclude group false collections from both tabs before pagination', async ({
+    payload,
+  }) => {
+    const owner = await payload.create({
+      collection: 'users',
+      data: { email: 'dashboard-visibility@payloadcms.com', password: 'test' },
+      overrideAccess: true,
+    })
+    const user = { ...owner, collection: 'users' as const }
+    const event = await payload.create({
+      collection: 'events',
+      data: { startDate: '2026-01-01T12:00:00.000Z', title: 'Excluded event' },
+      user,
+    })
+    const instructions = await payload.findByID({
+      id: 'collection-tickets',
+      collection: instructionsCollectionSlug,
+      overrideAccess: false,
+      user,
+    })
+    const tickets = await Promise.all(
+      ['First visible ticket', 'Second visible ticket'].map((title) =>
+        payload.create({ collection: 'tickets', data: { title }, user }),
+      ),
+    )
+    const items = [
+      { id: event.id, collectionSlug: 'events' },
+      { id: instructions.id, collectionSlug: instructionsCollectionSlug },
+      ...tickets.map(({ id }) => ({ id, collectionSlug: 'tickets' })),
+    ]
+
+    for (const key of [PREFERENCE_KEYS.PINNED_DOCUMENTS, PREFERENCE_KEYS.RECENTLY_VIEWED]) {
+      await payload.create({
+        collection: 'payload-preferences',
+        data: { key, value: { items } },
+        overrideAccess: false,
+        user,
+      })
+    }
+
+    const req = await createPayloadRequest({ payload, req: { user } })
+    const admin = payload.collections.events.config.admin
+    const previousGroup = admin.group
+
+    admin.group = false
+
+    try {
+      for (const tab of ['pinned', 'recents'] as const) {
+        const result = await getDashboardDocuments({ limit: 1, page: 2, req, tab })
+
+        expect(result.totalDocs).toBe(2)
+        expect(result.page).toBe(2)
+        expect(result.items.map(({ id }) => id)).toEqual([tickets[1].id])
+      }
+    } finally {
+      admin.group = previousGroup
+    }
+  })
+
   test('should populate only the requested recent page and load the next page on demand', async ({
     payload,
   }) => {
@@ -174,6 +235,69 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
           ([args]) => args.overrideAccess === false && args.user.id === owner.id,
         ),
       ).toBe(true)
+    } finally {
+      find.mockRestore()
+    }
+  })
+
+  test('should load pins in fixed batches that fill the largest widget page', async ({
+    payload,
+  }) => {
+    const owner = await payload.create({
+      collection: 'users',
+      data: { email: 'pin-batches@payloadcms.com', password: 'test' },
+      overrideAccess: true,
+    })
+    const user = { ...owner, collection: 'users' as const }
+    const documents = await Promise.all(
+      Array.from({ length: DOCUMENTS_BATCH_SIZE + 2 }, (_, index) =>
+        payload.create({
+          collection: 'tickets',
+          data: { title: `Batch ${index}` },
+          overrideAccess: true,
+        }),
+      ),
+    )
+
+    await payload.create({
+      collection: 'payload-preferences',
+      data: {
+        key: PREFERENCE_KEYS.PINNED_DOCUMENTS,
+        value: { items: documents.map((doc) => ({ id: doc.id, collectionSlug: 'tickets' })) },
+      },
+      overrideAccess: false,
+      user,
+    })
+    const req = await createPayloadRequest({ payload, req: { user } })
+    const find = vi.spyOn(payload, 'find')
+
+    try {
+      const first = await getDashboardDocuments({
+        limit: DOCUMENTS_BATCH_SIZE,
+        page: 1,
+        req,
+        tab: 'pinned',
+      })
+      const second = await getDashboardDocuments({
+        limit: DOCUMENTS_BATCH_SIZE,
+        page: 2,
+        req,
+        tab: 'pinned',
+      })
+
+      expect(first.totalDocs).toBe(DOCUMENTS_BATCH_SIZE + 2)
+      expect(first.items.map((item) => item.id)).toEqual(
+        documents.slice(0, DOCUMENTS_BATCH_SIZE).map((doc) => doc.id),
+      )
+      expect(second.page).toBe(2)
+      expect(second.items.map((item) => item.id)).toEqual(
+        documents.slice(DOCUMENTS_BATCH_SIZE).map((doc) => doc.id),
+      )
+      expect(
+        find.mock.calls
+          .filter(([args]) => args.collection === 'tickets' && args.depth === 1)
+          .map(([args]) => args.limit),
+      ).toEqual([DOCUMENTS_BATCH_SIZE, 2])
     } finally {
       find.mockRestore()
     }

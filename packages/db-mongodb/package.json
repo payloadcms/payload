@@ -1,13 +1,8 @@
 {
   "name": "@payloadcms/db-mongodb",
-  "version": "4.0.0-beta.1",
+  "version": "4.0.0-beta.3",
   "description": "The officially supported MongoDB database adapter for Payload",
   "homepage": "https://payloadcms.com",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/db-mongodb"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -17,8 +12,19 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/db-mongodb"
+  },
+  "files": [
+    "dist",
+    "predefinedMigrations"
+  ],
   "type": "module",
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts",
@@ -36,39 +42,9 @@
       "default": "./src/exports/internal.ts"
     }
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "files": [
-    "dist",
-    "predefinedMigrations"
-  ],
-  "scripts": {
-    "build": "pnpm build:types && pnpm build:swc",
-    "build:debug": "pnpm build",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc-build --strip-leading-paths",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
-  },
-  "dependencies": {
-    "mongoose": "9.9.2",
-    "mongoose-paginate-v2": "1.9.4",
-    "prompts": "2.4.2",
-    "uuid": "14.0.0"
-  },
-  "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
-    "@types/mongoose-aggregate-paginate-v2": "1.0.12",
-    "@types/prompts": "^2.4.5",
-    "mongodb": "7.5.0",
-    "mongodb-memory-server": "10.1.4",
-    "payload": "workspace:*"
-  },
-  "peerDependencies": {
-    "payload": "workspace:*"
-  },
   "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "exports": {
       ".": {
         "import": "./dist/index.js",
@@ -85,8 +61,29 @@
         "types": "./dist/exports/internal.d.ts",
         "default": "./dist/exports/internal.js"
       }
-    },
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc-build --strip-leading-paths",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf -g {dist,*.tsbuildinfo}"
+  },
+  "dependencies": {
+    "mongoose": "9.9.2",
+    "mongoose-paginate-v2": "1.9.4",
+    "prompts": "2.4.2",
+    "uuid": "14.0.0"
+  },
+  "devDependencies": {
+    "@types/mongoose-aggregate-paginate-v2": "1.0.12",
+    "@types/prompts": "^2.4.5",
+    "mongodb": "7.5.0",
+    "mongodb-memory-server": "10.1.4",
+    "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "payload": "workspace:*"
   }
 }

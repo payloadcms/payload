@@ -339,7 +339,7 @@ export const ecommercePlugin = definePlugin<EcommercePluginConfig | undefined>({
       incomingConfig.i18n.translations[typedLocale] = {
         ...existing,
         'plugin-ecommerce': pluginEntry.translations['plugin-ecommerce'],
-      } as PluginDefaultTranslationsObject
+      }
     }
 
     if (!incomingConfig.typescript) {

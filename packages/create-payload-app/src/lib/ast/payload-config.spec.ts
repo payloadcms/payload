@@ -314,7 +314,7 @@ export default buildConfig({
     const { configurePayloadConfig } = await import('./payload-config')
     const result = await configurePayloadConfig(filePath, {
       db: { type: 'postgres', envVarName: 'DATABASE_URL' },
-      formatWithPrettier: false,
+      formatWithOxfmt: false,
       storage: 'vercelBlobStorage',
     })
 
@@ -340,7 +340,7 @@ export default buildConfig({
     const { configurePayloadConfig } = await import('./payload-config')
     const result = await configurePayloadConfig(filePath, {
       db: { type: 'mongodb', envVarName: 'MONGO_URL' },
-      formatWithPrettier: false,
+      formatWithOxfmt: false,
     })
 
     expect(result.success).toBe(true)
@@ -367,7 +367,7 @@ export default buildConfig({
 
     const { configurePayloadConfig } = await import('./payload-config')
     const result = await configurePayloadConfig(filePath, {
-      formatWithPrettier: false,
+      formatWithOxfmt: false,
       removeSharp: true,
     })
 
@@ -422,7 +422,7 @@ export default buildConfig({
     const { configurePayloadConfig } = await import('./payload-config')
     const result = await configurePayloadConfig(filePath, {
       db: { type: 'postgres', envVarName: 'DATABASE_URL' },
-      formatWithPrettier: false,
+      formatWithOxfmt: false,
     })
 
     expect(result.success).toBe(true)

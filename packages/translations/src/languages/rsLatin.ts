@@ -365,6 +365,13 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     documentModified: 'Dokument izmenjen',
     documentOutOfDate: 'Ovaj dokument je nedavno ažurirao drugi korisnik. Vaš pregled je zastareo.',
     documents: 'Dokumenti',
+    dragCancelled: 'Prevlačenje {{label}} je otkazano.',
+    dragDropped: '{{label}} je spušten. Položaj {{position}} od {{count}}.',
+    dragInstructions:
+      'Pritisnite Space ili Enter da podignete red. Koristite strelice da ga premestite. Uz VoiceOver isključite Quick Nav i koristite Command + strelice. Pritisnite Space ili Enter za spuštanje ili Escape za otkazivanje.',
+    dragMoved: '{{label}}: {{direction}}. Položaj {{position}} od {{count}}.',
+    dragPickedUp: '{{label}} je podignut. Položaj {{position}} od {{count}}.',
+    dragToMove: 'Prevucite za premeštanje',
     dragToReorder: 'Prevucite za promenu redosleda',
     duplicate: 'Duplikat',
     duplicateWithoutSaving: 'Ponovi bez čuvanja promena',

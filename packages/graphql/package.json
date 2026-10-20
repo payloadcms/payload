@@ -1,12 +1,7 @@
 {
   "name": "@payloadcms/graphql",
-  "version": "4.0.0-beta.1",
+  "version": "4.0.0-beta.3",
   "homepage": "https://payloadcms.com",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/graphql"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -16,8 +11,21 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/graphql"
+  },
+  "bin": {
+    "payload-graphql": "bin.js"
+  },
+  "files": [
+    "dist"
+  ],
   "type": "module",
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts",
@@ -35,40 +43,9 @@
       "default": "./src/exports/utilities.ts"
     }
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "bin": {
-    "payload-graphql": "bin.js"
-  },
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "pnpm build:types && pnpm build:swc",
-    "build:debug": "pnpm build",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
-  },
-  "dependencies": {
-    "graphql-scalars": "1.22.2",
-    "pluralize": "8.0.0",
-    "ts-essentials": "10.0.3",
-    "tsx": "4.23.15"
-  },
-  "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
-    "@types/pluralize": "^0.0.33",
-    "graphql-http": "1.22.4",
-    "payload": "workspace:*"
-  },
-  "peerDependencies": {
-    "graphql": "^16.8.1",
-    "payload": "workspace:*"
-  },
   "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "exports": {
       ".": {
         "import": "./dist/index.js",
@@ -85,8 +62,28 @@
         "types": "./dist/exports/utilities.d.ts",
         "default": "./dist/exports/utilities.js"
       }
-    },
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf -g {dist,*.tsbuildinfo}"
+  },
+  "dependencies": {
+    "graphql-scalars": "1.22.2",
+    "pluralize": "8.0.0",
+    "ts-essentials": "10.0.3",
+    "tsx": "4.23.15"
+  },
+  "devDependencies": {
+    "@types/pluralize": "^0.0.33",
+    "graphql-http": "1.22.4",
+    "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "graphql": "^16.8.1",
+    "payload": "workspace:*"
   }
 }

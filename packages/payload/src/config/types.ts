@@ -1781,7 +1781,8 @@ export type Config = {
 }
 
 interface SanitizedAdminConfig
-  extends Omit<
+  extends
+    Omit<
       RootAdminConfig,
       | 'avatar'
       | 'components'
@@ -1832,7 +1833,8 @@ type SanitizedTypeScriptConfig = Omit<RootTypeScriptConfig, 'autoGenerate' | 'ou
   Required<Pick<RootTypeScriptConfig, 'autoGenerate' | 'outputFile'>>
 
 export interface SanitizedConfig
-  extends Omit<
+  extends
+    Omit<
       Config,
       | 'admin'
       | 'auth'
