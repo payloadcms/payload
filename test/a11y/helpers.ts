@@ -2,6 +2,7 @@ import type { ScreenReaderPlaywright } from '@guidepup/playwright'
 import type { Browser, Locator, Page, TestInfo } from '@playwright/test'
 
 import { expect } from '@playwright/test'
+import { randomUUID } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -809,4 +810,111 @@ export async function openLLMInstructions({ page, serverURL }: { page: Page; ser
   ).toBeVisible()
 
   return field
+}
+
+export async function withWorkflowPost({
+  action,
+  initialStatus = 'published',
+  page,
+  postsURL,
+  serverURL,
+}: {
+  action: (post: { id: number | string; title: string }) => Promise<void>
+  initialStatus?: 'draft' | 'published'
+  page: Page
+  postsURL: AdminUrlUtil
+  serverURL: string
+}) {
+  const title = `Accessibility workflow ${randomUUID()}`
+  const response = await page.request.post(`${serverURL}/api/posts`, {
+    data: { _status: initialStatus, title },
+  })
+
+  expect(response.ok()).toBe(true)
+  const { doc } = (await response.json()) as { doc: { id: number | string } }
+
+  try {
+    await page.goto(postsURL.edit(doc.id))
+    await waitForFormReady(page)
+    await action({ id: doc.id, title })
+  } finally {
+    const cleanup = await page.request.delete(`${serverURL}/api/posts/${doc.id}?trash=true`)
+
+    // A destructive regression may already have removed this disposable document.
+    // Do not mask its primary assertion failure with a second cleanup failure.
+    expect(cleanup.ok() || cleanup.status() === 404).toBe(true)
+  }
+}
+
+export async function expectPersistedWorkflowPost({
+  id,
+  draft = false,
+  page,
+  serverURL,
+  status,
+  subtitle,
+  title,
+}: {
+  draft?: boolean
+  id: number | string
+  page: Page
+  serverURL: string
+  status?: 'draft' | 'published'
+  subtitle?: string
+  title: string
+}) {
+  await expect
+    .poll(async () => {
+      const response = await page.request.get(`${serverURL}/api/posts/${id}?draft=${draft}`)
+
+      expect(response.ok()).toBe(true)
+      const doc = (await response.json()) as { _status: string; subtitle?: string; title: string }
+
+      return {
+        ...(status !== undefined ? { status: doc._status } : {}),
+        title: doc.title,
+        ...(subtitle !== undefined ? { subtitle: doc.subtitle } : {}),
+      }
+    })
+    .toEqual({
+      ...(status !== undefined ? { status } : {}),
+      title,
+      ...(subtitle !== undefined ? { subtitle } : {}),
+    })
+}
+
+export async function withWorkflowPosts({
+  action,
+  labels,
+  page,
+  serverURL,
+}: {
+  action: (posts: Array<{ id: number | string; title: string }>) => Promise<void>
+  labels: string[]
+  page: Page
+  serverURL: string
+}) {
+  const prefix = 'Accessibility collection ' + randomUUID()
+  const posts: Array<{ id: number | string; title: string }> = []
+
+  try {
+    for (const label of labels) {
+      const title = prefix + ' ' + label
+      const response = await page.request.post(serverURL + '/api/posts', {
+        data: { _status: 'published', title },
+      })
+
+      expect(response.ok()).toBe(true)
+      const { doc } = await response.json()
+      posts.push({ id: doc.id, title })
+    }
+    await action(posts)
+  } finally {
+    const responses = await Promise.all(
+      posts.map(({ id }) => page.request.delete(serverURL + '/api/posts/' + id + '?trash=true')),
+    )
+    for (const response of responses) {
+      expect(response.ok() || response.status() === 404).toBe(true)
+    }
+  }
 }

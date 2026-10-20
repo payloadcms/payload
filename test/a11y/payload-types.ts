@@ -157,9 +157,11 @@ export interface Config {
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {
     menu: Menu;
+    'workflow-menu': WorkflowMenu;
   };
   globalsSelect: {
     menu: MenuSelect<false> | MenuSelect<true>;
+    'workflow-menu': WorkflowMenuSelect<false> | WorkflowMenuSelect<true>;
   };
   locale: 'en' | 'es';
   widgets: {
@@ -756,9 +758,39 @@ export interface Menu {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workflow-menu".
+ */
+export interface WorkflowMenu {
+  id: string;
+  globalText?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "menu_select".
  */
 export interface MenuSelect<T extends boolean = true> {
+  globalText?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workflow-menu_select".
+ */
+export interface WorkflowMenuSelect<T extends boolean = true> {
   globalText?: T;
   createdBy?: T;
   updatedBy?: T;
