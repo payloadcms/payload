@@ -188,29 +188,28 @@ describe('Auth', () => {
         })
       })
 
-      // TODO: This test is unreliable. During development, the bundle sent to the client will include debug information.
-      // For example, arguments passed from one RSC to another RSC may be sent to the client by Next.js for debug reasons.
-      // In production however, this would never happen.
-      // In this case, simply using console.log on the permissions object
-      // may cause `shouldNotShowInClientConfigUnlessAuthenticated` to be included in the bundle,
-      // even though we're never actually sending it to the client.
-      // We'll need to run this test in production to ensure it passes.
-      test.skip('should protect field schemas behind authentication', async () => {
+      // In dev, RSC payloads can include the full client config for debugging, even when we're not intentionally sending it to the client.
+      // For example, arguments passed between server components can show up in the page source with field schemas included.
+      // We need a prod server to reliably check the page source, which is why those assertions are gated behind prod.
+      test('should protect field schemas behind authentication', async () => {
         await logout(page, serverURL)
 
         // Inspect the page source (before authentication)
         const loginPageRes = await page.goto(
           formatAdminURL({ adminRoute, path: '/login', serverURL }),
         )
-        const loginPageSource = await loginPageRes?.text()
-        expect(loginPageSource).not.toContain('shouldNotShowInClientConfigUnlessAuthenticated')
+
+        if (process.env.PAYLOAD_TEST_PROD === 'true') {
+          const loginPageSource = await loginPageRes?.text()
+          expect(loginPageSource).not.toContain('onlyShowInClientConfigWhenAuthenticated')
+        }
 
         // Inspect the client config (before authentication)
         await expect(page.locator('#unauthenticated-client-config')).toBeAttached()
 
         await expect(
           page.locator('#unauthenticated-client-config', {
-            hasText: 'shouldNotShowInClientConfigUnlessAuthenticated',
+            hasText: 'onlyShowInClientConfigWhenAuthenticated',
           }),
         ).toHaveCount(0)
 
@@ -223,7 +222,7 @@ describe('Auth', () => {
 
         await expect(
           page.locator('#authenticated-client-config', {
-            hasText: 'shouldNotShowInClientConfigUnlessAuthenticated',
+            hasText: 'onlyShowInClientConfigWhenAuthenticated',
           }),
         ).toHaveCount(1)
 
@@ -231,8 +230,11 @@ describe('Auth', () => {
         const dashboardPageRes = await page.goto(
           formatAdminURL({ adminRoute, path: '', serverURL }),
         )
-        const dashboardPageSource = await dashboardPageRes?.text()
-        expect(dashboardPageSource).toContain('shouldNotShowInClientConfigUnlessAuthenticated')
+
+        if (process.env.PAYLOAD_TEST_PROD === 'true') {
+          const dashboardPageSource = await dashboardPageRes?.text()
+          expect(dashboardPageSource).toContain('onlyShowInClientConfigWhenAuthenticated')
+        }
       })
 
       test('should allow change password', async () => {

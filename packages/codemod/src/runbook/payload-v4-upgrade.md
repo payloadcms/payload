@@ -19,11 +19,11 @@ while the v3 packages are still installed:
 
 ## 1. Next.js 16
 
-Payload v4 requires Next 16. The command did not touch Next. Run Next's own recommended agent
+Payload v4 requires Next 16.4 or higher. The command did not touch Next. Run Next's own recommended agent
 workflow, which bumps Next + React and migrates the code as one unit:
 <https://nextjs.org/docs/app/guides/upgrading/version-16#use-an-ai-agent-recommended>
 
-Keep the resulting Next version within `>=16.2.6 <17` (the exact target is printed in the
+Keep the resulting Next version within `>=16.4.0 <17` (the exact target is printed in the
 upgrade report), since Next's `upgrade latest` may point past 16 in future.
 
 ## 2. Regenerate generated files

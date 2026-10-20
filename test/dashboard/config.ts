@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { DraftPosts } from './collections/DraftPosts.js'
 import { Events } from './collections/Events.js'
 import { Media } from './collections/Media.js'
 import { MediaAlt } from './collections/MediaAlt.js'
@@ -44,17 +45,14 @@ export default buildConfigWithDefaults({
               widgetSlug: 'collections',
               width: 'full',
             },
-            ...Array.from(
-              { length: 4 },
-              (_value, index): WidgetInstance<'count'> => ({
-                data: {
-                  collection: index % 2 === 0 ? 'tickets' : 'events',
-                  title: index % 2 === 0 ? 'Tickets' : 'Events',
-                },
-                widgetSlug: 'count',
-                width: 'x-small',
-              }),
-            ),
+            ...Array.from({ length: 4 }, (_value, index): WidgetInstance<'count'> => ({
+              data: {
+                collection: index % 2 === 0 ? 'tickets' : 'events',
+                title: index % 2 === 0 ? 'Tickets' : 'Events',
+              },
+              widgetSlug: 'count',
+              width: 'x-small',
+            })),
             {
               data: {
                 timeframe: 'monthly',
@@ -273,6 +271,7 @@ export default buildConfigWithDefaults({
       },
     },
     collections: [
+      DraftPosts,
       Tickets,
       Revenue,
       Events,

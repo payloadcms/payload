@@ -34,7 +34,9 @@ export const collectionEndpoints: CollectionConfig['endpoints'] = [
         data = {}
       }
 
-      if (data) req.data = data
+      if (data) {
+        req.data = data
+      }
 
       return Response.json({
         name: req.data.name,

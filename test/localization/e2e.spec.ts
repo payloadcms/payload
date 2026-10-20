@@ -370,12 +370,12 @@ describe('Localization', () => {
 
       await page.goto(url.list)
 
-      // The localizer now shows just the locale code in .localizer__button-content
+      // The localizer renders the translated locale label in .localizer__button-content
       const localeLabel = page.locator(
         '.localizer.app-header__localizer .localizer__button-content',
       )
 
-      await expect(localeLabel).not.toHaveText('en')
+      await expect(localeLabel).toHaveText('Spanish')
     })
   })
 

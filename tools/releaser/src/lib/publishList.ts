@@ -9,6 +9,7 @@ export const packagePublishList = [
   // Foundation
   'translations',
   'payload',
+  'transformer-sharp',
 
   // Core UI/API
   'ui',

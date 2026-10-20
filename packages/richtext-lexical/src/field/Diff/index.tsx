@@ -26,15 +26,7 @@ import { UploadDiffHTMLConverterAsync } from './converters/upload/index.js'
 const baseClass = 'lexical-diff'
 
 export const LexicalDiffComponent: React.FC<RichTextFieldDiffServerProps> = async (args) => {
-  const {
-    comparisonValue: valueFrom,
-    field,
-    i18n,
-    locale,
-    nestingLevel,
-    req,
-    versionValue: valueTo,
-  } = args
+  const { field, i18n, locale, nestingLevel, req, valueFrom, valueTo } = args
 
   const internalDocToHref = async ({
     linkNode,

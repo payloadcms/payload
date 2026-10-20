@@ -1,8 +1,11 @@
 import { azureStorage } from '@payloadcms/storage-azure'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { storageMediaSharpOptions } from '../__helpers/shared/storageMediaSharpOptions.js'
+import { proveSourceHashTransformer } from '../__helpers/shared/transformSourceTests.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
@@ -18,7 +21,16 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-let uploadOptions
+const uploadOptions = {
+  transformers: [
+    proveSourceHashTransformer,
+    sharpTransformer({
+      collections: {
+        [mediaSlug]: storageMediaSharpOptions,
+      },
+    }),
+  ],
+}
 
 // Load config to work with emulated services
 dotenv.config({

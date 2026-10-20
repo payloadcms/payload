@@ -1,4 +1,4 @@
-export function formatFilesize(bytes: number, decimals = 0): string {
+export function formatFilesize(bytes: number, decimals = 1): string {
   if (bytes === 0) {
     return '0 bytes'
   }

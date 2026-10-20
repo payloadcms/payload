@@ -3,7 +3,15 @@
 import { Button, Link } from '@payloadcms/ui'
 import React from 'react'
 
-const buttonStyles = ['primary', 'secondary', 'pill', 'dashed', 'destructive', 'ghost'] as const
+const buttonStyles = [
+  'primary',
+  'primary-ghost',
+  'secondary',
+  'pill',
+  'dashed',
+  'destructive',
+  'ghost',
+] as const
 
 const sizes = ['medium', 'large'] as const
 

@@ -1,6 +1,6 @@
-export { getLayoutData, loadLayoutData } from '../adapters/layout.server.js'
+export { getLayoutData, loadLayoutData } from '../adapters/layout/server.js'
 export type {
   GetLayoutDataArgs,
   LoadLayoutDataResult,
   RootLayoutData,
-} from '../adapters/layout.server.js'
+} from '../adapters/layout/server.js'

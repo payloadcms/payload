@@ -4,6 +4,7 @@ export const MediaAlt: CollectionConfig = {
   slug: 'media-alt',
   admin: {
     group: 'Dashboard Data',
+    useAsTitle: 'description',
   },
   fields: [
     {

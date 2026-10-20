@@ -3988,254 +3988,254 @@
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_thumbnail_url": {
-          "name": "sizes_thumbnail_url",
+        "variants_thumbnail_url": {
+          "name": "variants_thumbnail_url",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_thumbnail_width": {
-          "name": "sizes_thumbnail_width",
+        "variants_thumbnail_width": {
+          "name": "variants_thumbnail_width",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_thumbnail_height": {
-          "name": "sizes_thumbnail_height",
+        "variants_thumbnail_height": {
+          "name": "variants_thumbnail_height",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_thumbnail_mime_type": {
-          "name": "sizes_thumbnail_mime_type",
+        "variants_thumbnail_mime_type": {
+          "name": "variants_thumbnail_mime_type",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_thumbnail_filesize": {
-          "name": "sizes_thumbnail_filesize",
+        "variants_thumbnail_filesize": {
+          "name": "variants_thumbnail_filesize",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_thumbnail_filename": {
-          "name": "sizes_thumbnail_filename",
+        "variants_thumbnail_filename": {
+          "name": "variants_thumbnail_filename",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_square_url": {
-          "name": "sizes_square_url",
+        "variants_square_url": {
+          "name": "variants_square_url",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_square_width": {
-          "name": "sizes_square_width",
+        "variants_square_width": {
+          "name": "variants_square_width",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_square_height": {
-          "name": "sizes_square_height",
+        "variants_square_height": {
+          "name": "variants_square_height",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_square_mime_type": {
-          "name": "sizes_square_mime_type",
+        "variants_square_mime_type": {
+          "name": "variants_square_mime_type",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_square_filesize": {
-          "name": "sizes_square_filesize",
+        "variants_square_filesize": {
+          "name": "variants_square_filesize",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_square_filename": {
-          "name": "sizes_square_filename",
+        "variants_square_filename": {
+          "name": "variants_square_filename",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_small_url": {
-          "name": "sizes_small_url",
+        "variants_small_url": {
+          "name": "variants_small_url",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_small_width": {
-          "name": "sizes_small_width",
+        "variants_small_width": {
+          "name": "variants_small_width",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_small_height": {
-          "name": "sizes_small_height",
+        "variants_small_height": {
+          "name": "variants_small_height",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_small_mime_type": {
-          "name": "sizes_small_mime_type",
+        "variants_small_mime_type": {
+          "name": "variants_small_mime_type",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_small_filesize": {
-          "name": "sizes_small_filesize",
+        "variants_small_filesize": {
+          "name": "variants_small_filesize",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_small_filename": {
-          "name": "sizes_small_filename",
+        "variants_small_filename": {
+          "name": "variants_small_filename",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_medium_url": {
-          "name": "sizes_medium_url",
+        "variants_medium_url": {
+          "name": "variants_medium_url",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_medium_width": {
-          "name": "sizes_medium_width",
+        "variants_medium_width": {
+          "name": "variants_medium_width",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_medium_height": {
-          "name": "sizes_medium_height",
+        "variants_medium_height": {
+          "name": "variants_medium_height",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_medium_mime_type": {
-          "name": "sizes_medium_mime_type",
+        "variants_medium_mime_type": {
+          "name": "variants_medium_mime_type",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_medium_filesize": {
-          "name": "sizes_medium_filesize",
+        "variants_medium_filesize": {
+          "name": "variants_medium_filesize",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_medium_filename": {
-          "name": "sizes_medium_filename",
+        "variants_medium_filename": {
+          "name": "variants_medium_filename",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_large_url": {
-          "name": "sizes_large_url",
+        "variants_large_url": {
+          "name": "variants_large_url",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_large_width": {
-          "name": "sizes_large_width",
+        "variants_large_width": {
+          "name": "variants_large_width",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_large_height": {
-          "name": "sizes_large_height",
+        "variants_large_height": {
+          "name": "variants_large_height",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_large_mime_type": {
-          "name": "sizes_large_mime_type",
+        "variants_large_mime_type": {
+          "name": "variants_large_mime_type",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_large_filesize": {
-          "name": "sizes_large_filesize",
+        "variants_large_filesize": {
+          "name": "variants_large_filesize",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_large_filename": {
-          "name": "sizes_large_filename",
+        "variants_large_filename": {
+          "name": "variants_large_filename",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_xlarge_url": {
-          "name": "sizes_xlarge_url",
+        "variants_xlarge_url": {
+          "name": "variants_xlarge_url",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_xlarge_width": {
-          "name": "sizes_xlarge_width",
+        "variants_xlarge_width": {
+          "name": "variants_xlarge_width",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_xlarge_height": {
-          "name": "sizes_xlarge_height",
+        "variants_xlarge_height": {
+          "name": "variants_xlarge_height",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_xlarge_mime_type": {
-          "name": "sizes_xlarge_mime_type",
+        "variants_xlarge_mime_type": {
+          "name": "variants_xlarge_mime_type",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_xlarge_filesize": {
-          "name": "sizes_xlarge_filesize",
+        "variants_xlarge_filesize": {
+          "name": "variants_xlarge_filesize",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_xlarge_filename": {
-          "name": "sizes_xlarge_filename",
+        "variants_xlarge_filename": {
+          "name": "variants_xlarge_filename",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_og_url": {
-          "name": "sizes_og_url",
+        "variants_og_url": {
+          "name": "variants_og_url",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_og_width": {
-          "name": "sizes_og_width",
+        "variants_og_width": {
+          "name": "variants_og_width",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_og_height": {
-          "name": "sizes_og_height",
+        "variants_og_height": {
+          "name": "variants_og_height",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_og_mime_type": {
-          "name": "sizes_og_mime_type",
+        "variants_og_mime_type": {
+          "name": "variants_og_mime_type",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_og_filesize": {
-          "name": "sizes_og_filesize",
+        "variants_og_filesize": {
+          "name": "variants_og_filesize",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "sizes_og_filename": {
-          "name": "sizes_og_filename",
+        "variants_og_filename": {
+          "name": "variants_og_filename",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
@@ -4302,11 +4302,11 @@
           "method": "btree",
           "with": {}
         },
-        "media_sizes_thumbnail_sizes_thumbnail_filename_idx": {
-          "name": "media_sizes_thumbnail_sizes_thumbnail_filename_idx",
+        "media_variants_thumbnail_variants_thumbnail_filename_idx": {
+          "name": "media_variants_thumbnail_variants_thumbnail_filename_idx",
           "columns": [
             {
-              "expression": "sizes_thumbnail_filename",
+              "expression": "variants_thumbnail_filename",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -4317,11 +4317,11 @@
           "method": "btree",
           "with": {}
         },
-        "media_sizes_square_sizes_square_filename_idx": {
-          "name": "media_sizes_square_sizes_square_filename_idx",
+        "media_variants_square_variants_square_filename_idx": {
+          "name": "media_variants_square_variants_square_filename_idx",
           "columns": [
             {
-              "expression": "sizes_square_filename",
+              "expression": "variants_square_filename",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -4332,11 +4332,11 @@
           "method": "btree",
           "with": {}
         },
-        "media_sizes_small_sizes_small_filename_idx": {
-          "name": "media_sizes_small_sizes_small_filename_idx",
+        "media_variants_small_variants_small_filename_idx": {
+          "name": "media_variants_small_variants_small_filename_idx",
           "columns": [
             {
-              "expression": "sizes_small_filename",
+              "expression": "variants_small_filename",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -4347,11 +4347,11 @@
           "method": "btree",
           "with": {}
         },
-        "media_sizes_medium_sizes_medium_filename_idx": {
-          "name": "media_sizes_medium_sizes_medium_filename_idx",
+        "media_variants_medium_variants_medium_filename_idx": {
+          "name": "media_variants_medium_variants_medium_filename_idx",
           "columns": [
             {
-              "expression": "sizes_medium_filename",
+              "expression": "variants_medium_filename",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -4362,11 +4362,11 @@
           "method": "btree",
           "with": {}
         },
-        "media_sizes_large_sizes_large_filename_idx": {
-          "name": "media_sizes_large_sizes_large_filename_idx",
+        "media_variants_large_variants_large_filename_idx": {
+          "name": "media_variants_large_variants_large_filename_idx",
           "columns": [
             {
-              "expression": "sizes_large_filename",
+              "expression": "variants_large_filename",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -4377,11 +4377,11 @@
           "method": "btree",
           "with": {}
         },
-        "media_sizes_xlarge_sizes_xlarge_filename_idx": {
-          "name": "media_sizes_xlarge_sizes_xlarge_filename_idx",
+        "media_variants_xlarge_variants_xlarge_filename_idx": {
+          "name": "media_variants_xlarge_variants_xlarge_filename_idx",
           "columns": [
             {
-              "expression": "sizes_xlarge_filename",
+              "expression": "variants_xlarge_filename",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -4392,11 +4392,11 @@
           "method": "btree",
           "with": {}
         },
-        "media_sizes_og_sizes_og_filename_idx": {
-          "name": "media_sizes_og_sizes_og_filename_idx",
+        "media_variants_og_variants_og_filename_idx": {
+          "name": "media_variants_og_variants_og_filename_idx",
           "columns": [
             {
-              "expression": "sizes_og_filename",
+              "expression": "variants_og_filename",
               "isExpression": false,
               "asc": true,
               "nulls": "last"

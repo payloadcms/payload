@@ -1,7 +1,6 @@
 import type { GraphQLError, GraphQLFormattedError } from 'graphql'
 import type { APIError, Payload, PayloadRequest, SanitizedConfig } from 'payload'
 
-import { status as httpStatus } from 'http-status'
 import {
   addDataAndFileToRequest,
   addLocalesToRequestFromData,
@@ -10,6 +9,7 @@ import {
   logError,
   mergeHeaders,
 } from 'payload'
+import { httpStatus } from 'payload/internal'
 
 import { importConfigToSchema, importCreateHandler } from './importGraphQL.js'
 

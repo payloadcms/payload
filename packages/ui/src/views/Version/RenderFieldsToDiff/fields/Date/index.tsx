@@ -17,11 +17,11 @@ import './index.css'
 const baseClass = 'date-diff'
 
 export const DateDiffComponent: React.FC<DateFieldDiffClientProps> = ({
-  comparisonValue: valueFrom,
   field,
   locale,
   nestingLevel,
-  versionValue: valueTo,
+  valueFrom,
+  valueTo,
 }) => {
   const { i18n } = useTranslation()
   const {

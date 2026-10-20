@@ -134,6 +134,34 @@ Note that the `fields` property is a function that receives an object with a `de
 }
 ```
 
+<Banner type="warning">
+  Search records should contain only data that is safe to expose through your
+  search API. Access control from the source collection is not inherited by
+  copied fields. If you intentionally sync a sensitive field, define its own
+  field-level `access.read` rule in `searchOverrides`.
+</Banner>
+
+```ts
+// payload.config.ts
+{
+  // ...
+  searchPlugin({
+    searchOverrides: {
+      fields: ({ defaultFields }) => [
+        ...defaultFields,
+        {
+          name: 'internalNotes',
+          type: 'textarea',
+          access: {
+            read: ({ req }) => Boolean(req.user),
+          },
+        },
+      ],
+    },
+  }),
+}
+```
+
 #### `beforeSync`
 
 Before creating or updating a search record, the `beforeSync` function runs. This is an [afterChange](https://payloadcms.com/docs/hooks/globals#afterchange) hook that allows you to modify the data or provide fallbacks before its search record is created or updated.

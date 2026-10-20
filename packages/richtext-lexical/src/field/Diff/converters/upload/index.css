@@ -11,7 +11,6 @@
       outline-offset: calc(var(--stroke-width-small) * -1);
       position: relative;
       z-index: 2;
-      font-family: var(--text-body-medium-font-family);
       padding: var(--spacer-2);
 
       &[data-match-type='create'] {

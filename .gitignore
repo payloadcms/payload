@@ -6,6 +6,7 @@ dist
 /.idea/runConfigurations/_template*
 !/.idea/payload.iml
 .pnpm-store
+*.code-workspace
 
 # Local AI Agent files
 AGENTS.local.md

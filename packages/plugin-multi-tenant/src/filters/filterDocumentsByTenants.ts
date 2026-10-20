@@ -45,7 +45,7 @@ export const filterDocumentsByTenants = ({
     }
   }
 
-  if (req.user && userHasAccessToAllTenants(req?.user as User)) {
+  if (req.user && userHasAccessToAllTenants(req?.user)) {
     return null
   }
 

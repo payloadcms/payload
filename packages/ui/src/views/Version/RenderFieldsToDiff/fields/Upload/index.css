@@ -69,7 +69,6 @@
     background-color: var(--color-bg-secondary);
     border-radius: var(--radius-medium);
     position: relative;
-    font-family: var(--text-body-medium-font-family);
     padding: var(--spacer-1);
 
     &[data-match-type] {

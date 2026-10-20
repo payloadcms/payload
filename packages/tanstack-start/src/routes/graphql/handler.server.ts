@@ -9,6 +9,8 @@ import {
   mergeHeaders,
 } from 'payload'
 
+import { importConfigToSchema, importCreateHandler } from './importGraphQL.js'
+
 const handleError = async ({
   err,
   payload,
@@ -69,12 +71,11 @@ const getGraphql = async (config: Promise<SanitizedConfig> | SanitizedConfig) =>
 
   if (!cached.promise) {
     const resolvedConfig = await config
-    const graphqlPackage = '@payloadcms/graphql'
-    const { configToSchema } = await import(/* @vite-ignore */ graphqlPackage)
-    cached.promise = new Promise((resolve) => {
-      const schema = configToSchema(resolvedConfig)
-      resolve(cached.graphql || schema)
-    })
+    cached.promise = (async () => {
+      const configToSchema = await importConfigToSchema()
+
+      return cached.graphql || configToSchema(resolvedConfig)
+    })()
   }
 
   try {
@@ -90,8 +91,6 @@ const getGraphql = async (config: Promise<SanitizedConfig> | SanitizedConfig) =>
 /**
  * Handles GraphQL HTTP requests for TanStack Start apps.
  * Mirrors the behaviour of `@payloadcms/next`'s GraphQL route handler.
- *
- * Requires `@payloadcms/graphql` and `graphql-http` to be installed in the consuming app.
  */
 export const handleGraphQL = async ({
   config,
@@ -108,15 +107,20 @@ export const handleGraphQL = async ({
     request,
   })
 
+  const { payload } = req
+
+  if (payload.config.graphQL?.disable) {
+    return new Response(null, {
+      status: 404,
+    })
+  }
+
   await addDataAndFileToRequest(req)
   addLocalesToRequestFromData(req)
 
   const { schema, validationRules } = await getGraphql(config)
 
-  const { payload } = req
-
-  const graphqlHttpHandlerPath = 'graphql-http/lib/use/fetch'
-  const { createHandler } = await import(/* @vite-ignore */ graphqlHttpHandlerPath)
+  const createHandler = await importCreateHandler()
 
   const headers: Record<string, string> = {}
   const apiResponse = await createHandler({
