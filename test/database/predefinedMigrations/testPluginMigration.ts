@@ -9,4 +9,3 @@ export const downSQL = `  // Test predefined migration DOWN from plugin
   await db.execute(sql\`SELECT 0\`)`
 
 export const imports = `import { sql } from 'drizzle-orm'`
-

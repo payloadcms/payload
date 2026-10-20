@@ -99,5 +99,5 @@ const resolveVersionFile = async ({
     return
   }
 
-  return { ...saved, id: row.parent } as TypeWithID
+  return { ...saved, id: row.parent }
 }

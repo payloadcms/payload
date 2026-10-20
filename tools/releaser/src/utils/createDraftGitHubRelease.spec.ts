@@ -30,6 +30,27 @@ describe('createDraftGitHubRelease', () => {
     expect(lastCall[1].method).toBe('POST')
   })
 
+  it.each([
+    { tag: 'v4.0.0-beta.0', isPrerelease: true },
+    { tag: 'v4.0.0-canary.10', isPrerelease: true },
+    { tag: 'v4.0.0', isPrerelease: false },
+  ])('should set prerelease=$isPrerelease for $tag', async ({ tag, isPrerelease }) => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse([]))
+      .mockResolvedValueOnce(jsonResponse({ html_url: 'https://gh/new' }))
+
+    await createDraftGitHubRelease({
+      branch: 'main',
+      tag,
+      releaseNotes: 'notes',
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    })
+
+    const postBody = JSON.parse(fetchImpl.mock.calls.at(-1)![1].body)
+    expect(postBody.prerelease).toBe(isPrerelease)
+  })
+
   it('should PATCH an existing draft release found by tag_name', async () => {
     const fetchImpl = vi
       .fn()
@@ -73,6 +94,22 @@ describe('createDraftGitHubRelease', () => {
 
     // Only the list call happened — no PATCH/POST was attempted.
     expect(fetchImpl).toHaveBeenCalledTimes(1)
+  })
+
+  it('should throw when the release response has no html_url', async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse([]))
+      .mockResolvedValueOnce(jsonResponse({}))
+
+    await expect(
+      createDraftGitHubRelease({
+        branch: 'main',
+        tag: 'v4.0.0-canary.10',
+        releaseNotes: 'notes',
+        fetchImpl: fetchImpl as unknown as typeof fetch,
+      }),
+    ).rejects.toThrow(/html_url/)
   })
 
   it('should scan only the newest page and treat a not-found tag as new (with a warning)', async () => {

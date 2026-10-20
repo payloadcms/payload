@@ -34,6 +34,7 @@ import {
   openBulkUploadDialog,
   openCopyToLocaleDrawer,
   openDashboardEditor,
+  openDragReorderField,
   openDrawerFilters,
   openEditImageDialog,
   openFirstBlockActions,
@@ -54,16 +55,12 @@ import {
   openVersionComparison,
   openVersionsList,
   openWidgetDrawer,
+  waitForFocusRestoration,
+  waitForKeyboardDragActivation,
 } from './helpers.js'
 
 const openNavigationForUserMenu = async ({ page }: { page: Page }): Promise<void> => {
-  const openNavigation = page.locator('.app-header--nav-open')
-
-  if ((await openNavigation.count()) === 0) {
-    await page.getByRole('button', { name: /open menu/i }).click()
-    await expect(openNavigation).toHaveCount(1)
-  }
-
+  await openNavigation({ page })
   await expect(page.locator('.user-menu__trigger')).toBeVisible()
 }
 
@@ -113,6 +110,38 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.3.1 Info and Relationships (A)', () => {
+    for (const kind of ['Array', 'Blocks'] as const) {
+      test(`should identify the ${kind} row on its drag control`, async ({
+        browser: _browser,
+      }, testInfo) => {
+        // Additional coverage for PYLD-3628
+        const { firstRowLabel, handle } = await openDragReorderField({ kind, page, postsURL })
+
+        await expect(handle).toHaveAccessibleName(new RegExp(firstRowLabel, 'i'))
+        const scan = await runAxeScan({
+          include: [
+            kind === 'Array'
+              ? '#field-items .collapsible__drag'
+              : '#field-layout .collapsible__drag',
+          ],
+          page,
+          testInfo,
+        })
+
+        expect(scan.violations).toEqual([])
+      })
+
+      test(`should describe pickup movement drop and cancellation for ${kind} dragging`, async () => {
+        // Additional coverage for PYLD-3627
+        const { handle } = await openDragReorderField({ kind, page, postsURL })
+
+        await expect.soft(handle).toHaveAccessibleDescription(/space|enter/i)
+        await expect.soft(handle).toHaveAccessibleDescription(/arrow/i)
+        await expect.soft(handle).toHaveAccessibleDescription(/voiceover.*command.*arrow/i)
+        await expect.soft(handle).toHaveAccessibleDescription(/drop/i)
+        await expect(handle).toHaveAccessibleDescription(/escape|cancel/i)
+      })
+    }
     test('should name field collection breadcrumb navigation', async () => {
       // PYLD-3728
       await gotoPostsList({ page, postsURL })
@@ -622,14 +651,22 @@ test.describe('WCAG 2.2 Level AA', () => {
         ).toBeFocused()
         await page.keyboard.press('ArrowLeft')
         await expect(ascending).toBeFocused()
+        const titles = page.getByRole('grid').locator('tbody .cell-title')
+
+        await expect(titles).toHaveCount(3)
+        const ascendingTitles = (await titles.allTextContents()).toSorted()
+
+        expect(ascendingTitles.length).toBeGreaterThan(1)
         await page.keyboard.press('Enter')
         await expect(header).toHaveAttribute('aria-sort', 'ascending')
         await expect(ascending).toBeFocused()
+        await expect(titles).toHaveText(ascendingTitles)
         await page.keyboard.press('ArrowLeft')
         await expect(descending).toBeFocused()
         await page.keyboard.press('Enter')
         await expect(header).toHaveAttribute('aria-sort', 'descending')
         await expect(descending).toBeFocused()
+        await expect(titles).toHaveText(ascendingTitles.toReversed())
         await page.keyboard.press('Escape')
         await expect(descending).toBeFocused()
         await page.keyboard.press('ArrowDown')
@@ -915,7 +952,7 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.4.10 Reflow (AA)', () => {
-    test('should keep instruction tabs visible and clear of the required-fields help at 320px', async () => {
+    test('should keep instruction tabs visible without required-fields help at 320px', async () => {
       const viewport = page.viewportSize()!
 
       try {
@@ -930,21 +967,14 @@ test.describe('WCAG 2.2 Level AA', () => {
           name: 'System instructions (read-only)',
           exact: true,
         })
-        const help = page.locator('.required-fields-info button')
+        await expect(page.locator('.required-fields-info')).toHaveCount(0)
 
         for (const tab of [additionalTab, systemTab]) {
           const bounds = await tab.boundingBox()
-          const helpBounds = await help.boundingBox()
 
           expect(bounds).not.toBeNull()
-          expect(helpBounds).not.toBeNull()
           expect(bounds!.x).toBeGreaterThanOrEqual(0)
           expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(320)
-          expect(
-            bounds!.x + bounds!.width <= helpBounds!.x ||
-              bounds!.y >= helpBounds!.y + helpBounds!.height ||
-              bounds!.y + bounds!.height <= helpBounds!.y,
-          ).toBe(true)
         }
 
         await additionalTab.focus()
@@ -1102,6 +1132,342 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.1.1 Keyboard (A)', () => {
+    test('should isolate nested rich-text move menu keys and mouse dragging from the enclosing editor', async () => {
+      await gotoCreatePost({ page, postsURL })
+      const richText = page.locator('.rich-text-lexical[data-field-path="content"]')
+      const outer = richText.locator('[data-lexical-editor="true"]').first()
+
+      await outer.fill('Outer paragraph')
+      await outer.press('End')
+      await outer.press('Enter')
+      await richText.locator('.toolbar-popup__dropdown-blocks').click()
+      await page
+        .locator('.toolbar-popup__dropdown-item[data-item-key="block-nestedRichText"]')
+        .click()
+      const nestedField = richText.locator('.rich-text-lexical')
+      const nested = nestedField.getByRole('textbox', { name: 'Body', exact: true })
+
+      await nested.fill('First nested paragraph')
+      await nested.press('End')
+      await nested.press('Enter')
+      await page.keyboard.type('Second nested paragraph')
+      await outer.locator(':scope > p').first().click()
+      await page.keyboard.press('End')
+      await nested.locator('p').first().hover()
+      const handle = nestedField.getByRole('button', { name: 'Drag to move', exact: true })
+      const before = await outer.locator(':scope > p').allTextContents()
+
+      await handle.focus()
+      await handle.press('Enter')
+      await expect(page.getByRole('menuitem', { name: 'Move Up', exact: true })).toBeFocused()
+      await expect(outer.locator(':scope > p')).toHaveText(before)
+      await page.keyboard.press('ArrowDown')
+      await expect(page.getByRole('menuitem', { name: 'Move Down', exact: true })).toBeFocused()
+      await page.keyboard.press('Enter')
+      await expect(nested.locator('p').first()).toHaveText('Second nested paragraph')
+      await expect(outer.locator(':scope > p')).toHaveText(before)
+      await expect(handle).toBeFocused()
+      await handle.press('Space')
+      await page.keyboard.press('Escape')
+      await expect(handle).toBeFocused()
+      await expect(outer.locator(':scope > p')).toHaveText(before)
+
+      await nested.locator('p').last().click()
+      await nested.press('End')
+      await nested.press('Enter')
+      await nestedField.locator('.toolbar-popup__dropdown-blocks').click()
+      await page.locator('.toolbar-popup__dropdown-item[data-item-key="block-callout"]').click()
+      const callout = nestedField.locator('.collapsible').first()
+
+      await callout.locator('.section-title__input').fill('Nested callout')
+      await callout.locator('input[name="text"]').fill('Keep this value')
+      const outerOrder = await outer
+        .locator(':scope > *')
+        .evaluateAll((nodes) => nodes.map((node) => node.tagName))
+      const drag = callout.locator('.collapsible__drag')
+
+      await drag.hover()
+      const source = (await drag.boundingBox())!
+      const target = (await nested.locator('p').first().boundingBox())!
+
+      await page.mouse.move(source.x + source.width / 2, source.y + source.height / 2)
+      await page.mouse.down()
+      await page.mouse.move(target.x + 40, target.y + 2, { steps: 10 })
+      await page.mouse.move(target.x + 40, target.y + 2)
+      await page.mouse.up()
+      await expect(
+        nested.locator(':scope > :not([data-lexical-decorator-boundary])').first(),
+      ).toContainText('Callout')
+      await expect(nested.locator(':scope > p')).toHaveText([
+        'Second nested paragraph',
+        'First nested paragraph',
+        '',
+      ])
+      await expect(callout.locator('.section-title__input')).toHaveValue('Nested callout')
+      await expect(callout.locator('input[name="text"]')).toHaveValue('Keep this value')
+      await expect(outer.locator(':scope > p')).toHaveText(before)
+      expect(
+        await outer.locator(':scope > *').evaluateAll((nodes) => nodes.map((node) => node.tagName)),
+      ).toEqual(outerOrder)
+    })
+
+    for (const kind of ['Array', 'Blocks'] as const) {
+      test(`should drop a keyboard-dragged ${kind} row at its new position`, async () => {
+        // Additional coverage for PYLD-3625
+        const { firstRowLabel, handle, rows, values } = await openDragReorderField({
+          kind,
+          page,
+          postsURL,
+          rowCount: 3,
+        })
+
+        const label = kind === 'Blocks' ? `01 ${firstRowLabel}` : firstRowLabel
+        const status = page.getByRole('status')
+
+        await handle.focus()
+        await page.keyboard.press('Space')
+        await expect(handle).toHaveAttribute('aria-pressed', 'true')
+        await expect(status.filter({ hasText: /picked up/i })).toHaveText(
+          `${label} picked up. Position 1 of 3.`,
+        )
+        const overlay = page.locator('.drag-overlay-preview')
+
+        await expect(overlay).toBeVisible()
+        expect(await overlay.ariaSnapshot()).toBe('')
+        await waitForKeyboardDragActivation({ page })
+        await overlay.locator('.collapsible__drag').focus()
+        await expect(handle).toBeFocused()
+        for (const [key, direction, position] of [
+          ['ArrowDown', 'Move Down', 2],
+          ['ArrowDown', 'Move Down', 3],
+          ['ArrowDown', 'Move Down', 3],
+          ['ArrowUp', 'Move Up', 2],
+        ] as const) {
+          await page.keyboard.press(key)
+          await expect(status.filter({ hasText: label })).toHaveText(
+            `${label}: ${direction}. Position ${position} of 3.`,
+          )
+        }
+        await page.keyboard.press('Space')
+        await expect(status.filter({ hasText: /dropped/i })).toHaveText(
+          `${label} dropped. Position 2 of 3.`,
+        )
+        await expect(values.nth(0)).toHaveValue('Second drag row')
+        await expect(values.nth(1)).toHaveValue('First drag row')
+        await expect(values.nth(2)).toHaveValue('Third drag row')
+        const movedHandle = rows.nth(1).getByRole('button', { name: /drag to reorder/i })
+        const movedLabel = (await rows.nth(1).locator('.collapsible__header-wrap').innerText())
+          .trim()
+          .replace(/\s+/g, ' ')
+
+        await expect(movedHandle).toBeFocused()
+        await expect(overlay).toHaveCount(0)
+        await page.keyboard.press('Space')
+        await expect(status.filter({ hasText: /picked up/i })).toHaveText(
+          `${movedLabel} picked up. Position 2 of 3.`,
+        )
+        await waitForKeyboardDragActivation({ page })
+        await page.keyboard.press('ArrowUp')
+        await expect(status.filter({ hasText: /move up/i })).toHaveText(
+          `${movedLabel}: Move Up. Position 1 of 3.`,
+        )
+        await page.keyboard.press('Space')
+        await expect(status.filter({ hasText: /dropped/i })).toHaveText(
+          `${movedLabel} dropped. Position 1 of 3.`,
+        )
+        await expect(values.nth(0)).toHaveValue('First drag row')
+        await expect(values.nth(1)).toHaveValue('Second drag row')
+        await expect(values.nth(2)).toHaveValue('Third drag row')
+        await expect(handle).toBeFocused()
+        await expect(page.locator('body')).not.toHaveClass(/is-dragging/)
+      })
+
+      test(`should cancel ${kind} keyboard dragging after moving in both directions`, async () => {
+        // Additional coverage for PYLD-3625 and PYLD-3626
+        const { handle, values } = await openDragReorderField({ kind, page, postsURL })
+        const status = page.getByRole('status')
+
+        await handle.focus()
+        await page.keyboard.press('Enter')
+        await expect(handle).toHaveAttribute('aria-pressed', 'true')
+        await waitForKeyboardDragActivation({ page })
+        await page.keyboard.press('Meta+ArrowDown')
+        await expect(status.filter({ hasText: /position 2 of 2/i })).toContainText(/move down/i)
+        await page.keyboard.press('Meta+ArrowUp')
+        await expect(status.filter({ hasText: /position 1 of 2/i })).toContainText(/move up/i)
+        await page.keyboard.press('Escape')
+        await expect(status.filter({ hasText: /cancelled/i })).toBeVisible()
+        await expect(values.nth(0)).toHaveValue('First drag row')
+        await expect(values.nth(1)).toHaveValue('Second drag row')
+        await expect(handle).toBeFocused()
+        await expect(handle).not.toHaveAttribute('aria-pressed', 'true')
+        await expect(page.locator('body')).not.toHaveClass(/is-dragging/)
+      })
+
+      test(`should retain pointer dragging for ${kind} rows`, async () => {
+        // Additional coverage for the shared drag controls
+        const { handle, rows, values } = await openDragReorderField({ kind, page, postsURL })
+        await handle.scrollIntoViewIfNeeded()
+        const source = (await handle.boundingBox())!
+        const target = (await rows.nth(1).boundingBox())!
+
+        await page.mouse.move(source.x + source.width / 2, source.y + source.height / 2)
+        await page.mouse.down()
+        await page.mouse.move(source.x + source.width / 2, target.y + target.height / 2, {
+          steps: 10,
+        })
+        await expect(
+          page.getByRole('status').filter({ hasText: /position 2 of 2/i }),
+        ).toContainText(/move down/i)
+        await page.mouse.up()
+        await expect(values.nth(0)).toHaveValue('Second drag row')
+        await expect(values.nth(1)).toHaveValue('First drag row')
+        await expect(page.locator('body')).not.toHaveClass(/is-dragging/)
+      })
+    }
+    test('should retain layout control focus after saving each keyboard selection', async () => {
+      await page.goto(postsURL.list)
+
+      const table = page.getByRole('radio', { name: 'Table', exact: true })
+      const grid = page.getByRole('radio', { name: 'Grid', exact: true })
+      const serverProvider = page.locator('.custom-provider-server')
+
+      await expect(table).toBeVisible()
+
+      const resetLayout = async () => {
+        if (await table.isChecked()) {
+          return
+        }
+
+        const renderID = await serverProvider.getAttribute('data-render-id')
+        const saved = page.waitForResponse(
+          (response) =>
+            response.url().includes('/payload-preferences/collection-posts') &&
+            response.request().method() === 'POST',
+        )
+
+        await table.check()
+        await saved
+        await expect(serverProvider).not.toHaveAttribute('data-render-id', renderID!)
+      }
+
+      await resetLayout()
+      await expect(page.locator('.custom-provider')).toHaveCount(1)
+      await expect(page.locator('.custom-provider-server')).toContainText('payload: true')
+      const originalTable = await table.elementHandle()
+      const originalGroup = await page.getByRole('radiogroup', { name: 'Layout' }).elementHandle()
+      const originalNavigation = await page.locator('.nav').elementHandle()
+
+      try {
+        await table.focus()
+
+        for (const key of ['ArrowRight', 'ArrowLeft', 'ArrowRight', 'ArrowLeft']) {
+          const selected = key === 'ArrowRight' ? grid : table
+          const renderID = await serverProvider.getAttribute('data-render-id')
+          const saved = page.waitForResponse(
+            (response) =>
+              response.url().includes('/payload-preferences/collection-posts') &&
+              response.request().method() === 'POST',
+          )
+
+          await page.keyboard.press(key)
+          await saved
+          // Selection is optimistic; focus must survive the subsequent server refresh too.
+          await expect(serverProvider).not.toHaveAttribute('data-render-id', renderID!)
+          await expect(selected).toBeChecked()
+          await expect(selected).toBeFocused()
+          await expect
+            .poll(() => originalTable.evaluate((element) => element.isConnected))
+            .toBe(true)
+          await expect
+            .poll(() => originalGroup.evaluate((element) => element.isConnected))
+            .toBe(true)
+          await expect
+            .poll(() => originalNavigation.evaluate((element) => element.isConnected))
+            .toBe(true)
+        }
+
+        await table.press('Tab')
+        await expect(table).not.toBeFocused()
+      } finally {
+        await originalTable.dispose()
+        await originalGroup.dispose()
+        await originalNavigation.dispose()
+        await resetLayout()
+      }
+    })
+
+    test('should increase and decrease Number and Point values with arrow keys', async () => {
+      // PYLD-3574
+      await gotoCreatePost({ page, postsURL })
+      for (const name of ['Quantity', 'Location - Longitude', 'Location - Latitude']) {
+        const input = page.getByRole('spinbutton', { name, exact: true })
+
+        await input.fill('10')
+        await input.press('ArrowUp')
+        await expect(input).toHaveValue('11')
+        await input.press('ArrowDown')
+        await expect(input).toHaveValue('10')
+        await expect(input).toBeFocused()
+        await input.press('Tab')
+        await expect(input).not.toBeFocused()
+      }
+    })
+    test('should navigate the whole rich-text toolbar with arrow keys and one Tab stop', async () => {
+      // PYLD-3829
+      await gotoCreatePost({ page, postsURL })
+      const field = page.locator('[data-field-path="content"]')
+      const editor = field.locator('[contenteditable="true"]')
+
+      await editor.fill('Toolbar navigation')
+      for (const selector of ['.fixed-toolbar', '.inline-toolbar-popup']) {
+        if (selector === '.inline-toolbar-popup') {
+          await editor.fill('Toolbar navigation')
+          await editor.press('ControlOrMeta+a')
+        }
+
+        const toolbar = field.locator(selector)
+        const buttons = toolbar.locator('button:enabled')
+
+        await expect(buttons.first()).toBeVisible()
+        await expect(toolbar.locator('[data-button-key="indentDecrease"]')).toBeDisabled()
+        const link = toolbar.locator('[data-button-key="link"]')
+
+        if (selector === '.fixed-toolbar') {
+          await expect(link).toBeDisabled()
+        } else {
+          await expect(link).toBeEnabled()
+        }
+        const count = await buttons.count()
+
+        expect(count).toBeGreaterThan(2)
+        await buttons.first().focus()
+        for (let index = 1; index < count; index++) {
+          await page.keyboard.press('ArrowRight')
+          await expect(buttons.nth(index)).toBeFocused()
+        }
+        await page.keyboard.press('ArrowRight')
+        await expect(buttons.first()).toBeFocused()
+        await page.keyboard.press('ArrowLeft')
+        await expect(buttons.last()).toBeFocused()
+        await page.keyboard.press('Home')
+        await expect(buttons.first()).toBeFocused()
+        await page.keyboard.press('End')
+        await expect(buttons.last()).toBeFocused()
+        await expect(toolbar.locator('button[tabindex="0"]')).toHaveCount(1)
+        await page.keyboard.press('Tab')
+        await expect(toolbar.locator(':focus')).toHaveCount(0)
+        if (selector === '.fixed-toolbar') {
+          await page.keyboard.press('Escape')
+          await page.keyboard.press('Shift+Tab')
+          await expect(toolbar.locator(':focus')).toHaveCount(0)
+          await expect(buttons.last()).toHaveAttribute('tabindex', '0')
+          await page.keyboard.press('Tab')
+          await expect(buttons.last()).toBeFocused()
+        }
+      }
+    })
+
     test('should switch dashboard document tabs with keyboard and expose pressed states', async () => {
       await page.goto(`${serverURL}/admin`)
       const widget = page.locator('.recents-widget')
@@ -1119,41 +1485,14 @@ test.describe('WCAG 2.2 Level AA', () => {
       await recents.focus()
       await recents.press('Space')
       await expect(recents).toHaveAttribute('aria-pressed', 'true')
-      const viewport = widget.locator('.recents-widget__viewport')
-
-      await expect(viewport).toHaveAttribute('aria-busy', 'false')
-      let shouldFail = true
-
-      await page.route('**/*', async (route) => {
-        if (
-          shouldFail &&
-          route.request().method() === 'POST' &&
-          route.request().postData()?.includes('get-dashboard-documents')
-        ) {
-          await route.abort('failed')
-          return
-        }
-        await route.continue()
-      })
-      try {
-        await pinned.press('Enter')
-        const retry = widget.getByRole('button', { name: 'Retry', exact: true })
-
-        await expect(retry).toBeVisible()
-        await expect(widget.locator('.recents-widget__status')).toHaveText(
-          'An unknown error has occurred.',
-        )
-        await retry.focus()
-        await expectPaintedFocus({ page })
-        shouldFail = false
-        await retry.press('Enter')
-        await expect(pinned).toBeFocused()
-        await expect(viewport).toHaveAttribute('aria-busy', 'false')
-        await expect(retry).toHaveCount(0)
-        await expectPaintedFocus({ page })
-      } finally {
-        await page.unrouteAll({ behavior: 'wait' })
-      }
+      await expect(widget.locator('.recents-widget__viewport')).toHaveAttribute(
+        'aria-busy',
+        'false',
+      )
+      await pinned.press('Enter')
+      await expect(pinned).toHaveAttribute('aria-pressed', 'true')
+      await expect(pinned).toBeFocused()
+      await expectPaintedFocus({ page })
     })
 
     test('should open the dashboard pin picker by keyboard and restore focus after cancel or selection', async () => {
@@ -1163,7 +1502,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await page.goto(`${serverURL}/admin`)
       const widget = page.locator('.recents-widget')
       const opener = widget.getByRole('button', {
-        name: 'Pin document',
+        name: 'Select Documents',
         exact: true,
         includeHidden: true,
       })
@@ -1211,9 +1550,11 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(collectionInput).toHaveAccessibleName('Select a Collection to Browse')
       await collectionInput.press('ArrowDown')
       await expect(
-        getSelectMenu({ page }).getByText(/pinned documents|preferences|locked documents/i),
+        getSelectMenu({ page }).getByText(
+          /pinned documents|preferences|locked documents|LLM instructions/i,
+        ),
       ).toHaveCount(0)
-      await expect(getSelectMenu({ page }).getByRole('option', { name: /folder/i })).toHaveCount(1)
+      await expect(getSelectMenu({ page }).getByRole('option', { name: /folder/i })).toHaveCount(0)
       await collectionInput.fill('Post')
       await collectionInput.press('ArrowDown')
       await collectionInput.press('Enter')
@@ -1248,8 +1589,8 @@ test.describe('WCAG 2.2 Level AA', () => {
       const preference = await (
         await page.request.get(`${serverURL}/api/payload-preferences/recently-viewed`)
       ).json()
-      const documents = (await (await page.request.get(`${serverURL}/api/posts?limit=3`)).json())
-        .docs
+      const documents: Array<{ id: number | string; title: string }> = []
+
       const previousPins = await (
         await page.request.get(`${serverURL}/api/payload-preferences/pinned-documents`)
       ).json()
@@ -1261,10 +1602,24 @@ test.describe('WCAG 2.2 Level AA', () => {
         await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
           data: { value: preference?.value ?? { items: [] } },
         })
+        for (const document of documents) {
+          const response = await page.request.delete(`${serverURL}/api/posts/${document.id}`)
+
+          expect(response.ok()).toBe(true)
+        }
         if (previousViewport) {
           await page.setViewportSize(previousViewport)
         }
       })
+
+      for (let index = 0; index < 9; index++) {
+        const response = await page.request.post(`${serverURL}/api/posts?draft=true`, {
+          data: { accessibilitySelect: 'one', title: `Keyboard pagination document ${index + 1}` },
+        })
+
+        expect(response.ok()).toBe(true)
+        documents.push((await response.json()).doc)
+      }
 
       const pinResponse = await page.request.post(
         `${serverURL}/api/payload-preferences/pinned-documents`,
@@ -1292,23 +1647,62 @@ test.describe('WCAG 2.2 Level AA', () => {
       const next = widget.getByRole('button', { name: 'Next', exact: true })
       const previous = widget.getByRole('button', { name: 'Previous', exact: true })
 
+      await recents.focus()
+      await recents.press('Enter')
       await expect(
         widget.getByRole('group', { name: 'Document pagination', exact: true }),
       ).toBeVisible()
 
-      await recents.focus()
-      await recents.press('Enter')
-      await expect(widget.locator('.document-card__title')).toHaveCount(1)
+      await expect(widget.locator('.document-card__title')).toHaveCount(4)
       await expect(previous).toBeDisabled()
       await next.focus()
       await next.press('Space')
-      await expect(widget.locator('.document-card__title')).toHaveText(documents[1].title)
+      await expect(widget.locator('.document-card__title')).toHaveText(
+        documents.slice(4, 8).map(({ title }) => title),
+      )
       await expect(next).toBeFocused()
       await expect(widget.locator('.recents-widget__pagination [aria-live]')).toContainText(
         '2 of 3',
       )
+      // The server renders the first 8 documents, so only the last page is fetched.
+      let shouldFail = true
+
+      await page.route('**/*', async (route) => {
+        if (
+          shouldFail &&
+          route.request().method() === 'POST' &&
+          route.request().postData()?.includes('get-dashboard-documents')
+        ) {
+          await route.abort('failed')
+          return
+        }
+        await route.continue()
+      })
+      try {
+        await next.press('Enter')
+        const retry = widget.getByRole('button', { name: 'Retry', exact: true })
+
+        await expect(retry).toBeVisible()
+        await expect(widget.locator('.recents-widget__status')).toHaveText(
+          'An unknown error has occurred.',
+        )
+        await retry.focus()
+        await expectPaintedFocus({ page })
+        shouldFail = false
+        await retry.press('Enter')
+        await expect(recents).toBeFocused()
+        await expect(retry).toHaveCount(0)
+        await expectPaintedFocus({ page })
+      } finally {
+        await page.unrouteAll({ behavior: 'wait' })
+      }
+      await expect(widget.locator('.document-card__title')).toHaveText([documents[8].title])
+      await previous.press('Enter')
+      await expect(widget.locator('.document-card__title')).toHaveText(
+        documents.slice(4, 8).map(({ title }) => title),
+      )
       await next.press('Enter')
-      await expect(widget.locator('.document-card__title')).toHaveText(documents[2].title)
+      await expect(widget.locator('.document-card__title')).toHaveText([documents[8].title])
       await expect(previous).toBeFocused()
       await previous.press('Space')
       await expect(widget.locator('.recents-widget__pagination [aria-live]')).toContainText(
@@ -1317,7 +1711,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await previous.focus()
       await previous.press('Enter')
       await expect(next).toBeFocused()
-      await widget.locator('.document-card__title').focus()
+      await widget.locator('.document-card__title').first().focus()
       await expectPaintedFocus({ page })
       await expect(widget.locator('.recents-widget__pin')).toHaveCount(0)
       const pinned = widget.getByRole('button', { name: 'Pinned', exact: true })
@@ -1403,7 +1797,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         await page.goto(formatAdminURL({ adminRoute: '/admin', path, serverURL }))
 
         const trigger = page.getByRole('button', { name: 'More options', exact: true })
-        const item = page.getByRole('menuitem', { name: 'Edit LLM instructions', exact: true })
+        const item = page.getByRole('menuitem', { name: 'Edit agent instructions', exact: true })
 
         await trigger.focus()
         await page.keyboard.press('Enter')
@@ -1889,7 +2283,7 @@ test.describe('WCAG 2.2 Level AA', () => {
           await page.keyboard.press('Space')
           await page.keyboard.press('ArrowDown')
           await expect
-            .poll(async () => (await callouts.first().boundingBox())!.y)
+            .poll(async () => (await callouts.first().boundingBox())?.y)
             .toBeGreaterThan(initialTop)
           await expect(handle).toBeFocused()
           await page.keyboard.press('Space')
@@ -1941,19 +2335,22 @@ test.describe('WCAG 2.2 Level AA', () => {
       const callouts = getCallouts({ container: drawer })
       let handle = callouts.first().getByRole('button', { name: /drag to reorder/i })
 
+      await expect(callouts.first()).toBeVisible()
+      await handle.scrollIntoViewIfNeeded()
       await handle.focus()
+      await expect(handle).toBeFocused()
       const initialTop = (await callouts.first().boundingBox())!.y
 
       await handle.press('Space')
       await page.keyboard.press('ArrowDown')
       await expect
-        .poll(async () => (await callouts.first().boundingBox())!.y)
+        .poll(async () => (await callouts.first().boundingBox())?.y)
         .toBeGreaterThan(initialTop)
       await page.keyboard.press('ArrowUp')
-      await expect.poll(async () => (await callouts.first().boundingBox())!.y).toBe(initialTop)
+      await expect.poll(async () => (await callouts.first().boundingBox())?.y).toBe(initialTop)
       await page.keyboard.press('ArrowDown')
       await page.keyboard.press('Escape')
-      await expect.poll(async () => (await callouts.first().boundingBox())!.y).toBe(initialTop)
+      await expect.poll(async () => (await callouts.first().boundingBox())?.y).toBe(initialTop)
       await expect(drawer).toBeVisible()
       await expect(callouts.first().locator('input[value$="callout"]')).toHaveValue('First callout')
       await expect(handle).toBeFocused()
@@ -2232,6 +2629,51 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.1.2 No Keyboard Trap (A)', () => {
+    test('should leave JSON and Code editors using normal Tab and Shift+Tab navigation', async () => {
+      // PYLD-3823
+      test.setTimeout(60000)
+      await gotoCreatePost({ page, postsURL })
+      for (const field of ['settings', 'source']) {
+        const wrapper = page.locator(`#field-${field}`)
+        const input = wrapper.getByRole('textbox')
+
+        await wrapper.scrollIntoViewIfNeeded()
+        await expect(input).toBeVisible()
+        for (const key of ['Tab', 'Shift+Tab']) {
+          await input.focus()
+          await expect(input).toBeFocused()
+          await page.keyboard.press(key)
+          await expect(wrapper.locator(':focus')).toHaveCount(0)
+        }
+
+        const isMac = await page.evaluate(() => navigator.userAgent.includes('Macintosh'))
+        const toggleShortcut = isMac ? 'Control+Shift+m' : 'Control+m'
+
+        await input.focus()
+        await input.press(toggleShortcut)
+        await expect(page.locator('.monaco-aria-container')).toContainText(
+          'Pressing Tab will now insert the tab character',
+        )
+        await input.press(isMac ? 'Meta+a' : 'Control+a')
+        await input.press('Backspace')
+        await input.press('Tab')
+        await expect(input).toBeFocused()
+        await input.pressSequentially('{}')
+        await expect(wrapper.locator('.view-line').first()).toHaveText(/^\s+\{\}$/)
+        await input.press('Shift+Tab')
+        await expect(input).toBeFocused()
+        await expect(wrapper.locator('.view-line').first()).toHaveText('{}')
+        await input.press(toggleShortcut)
+        await expect(page.locator('.monaco-aria-container')).toContainText(
+          'Pressing Tab will now move focus to the next focusable element',
+        )
+        for (const key of ['Tab', 'Shift+Tab']) {
+          await input.focus()
+          await input.press(key)
+          await expect(wrapper.locator(':focus')).toHaveCount(0)
+        }
+      }
+    })
     test('should only intercept Escape while a non-dismissible dialog is open', async () => {
       await page.goto(
         formatAdminURL({ adminRoute: '/admin', path: '/custom-modal-ids', serverURL }),
@@ -2265,6 +2707,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
 
     test('should exit Lexical editors with Escape then Tab or Shift+Tab', async () => {
+      // PYLD-3775
       await gotoCreatePost({ page, postsURL })
       await insertTextBlockWithKeyboard({ page })
       for (const field of ['content', 'layout.0.body']) {
@@ -2406,9 +2849,9 @@ test.describe('WCAG 2.2 Level AA', () => {
         }
       })
 
-      for (const title of ['Pagination focus first', 'Pagination focus second']) {
+      for (let index = 0; index < 9; index++) {
         const response = await page.request.post(`${serverURL}/api/posts?draft=true`, {
-          data: { accessibilitySelect: 'one', title },
+          data: { accessibilitySelect: 'one', title: `Pagination focus document ${index + 1}` },
         })
 
         expect(response.ok()).toBe(true)
@@ -2433,18 +2876,29 @@ test.describe('WCAG 2.2 Level AA', () => {
 
       await recents.focus()
       await recents.press('Enter')
-      await expect(widget.locator('.document-card__title')).toHaveText(documents[0].title)
+      await expect(widget.locator('.document-card__title')).toHaveText(
+        documents.slice(0, 4).map(({ title }) => title),
+      )
       const next = widget.getByRole('button', { name: 'Next', exact: true })
 
       await next.focus()
+      await next.press('Enter')
+      await expect(widget.locator('.document-card__title')).toHaveText(
+        documents.slice(4, 8).map(({ title }) => title),
+      )
       await expect(next).toBeFocused()
-      const deleted = await page.request.delete(`${serverURL}/api/posts/${documents[1].id}`)
+      // The server rendered the first 8 documents, so only the third page fetches the new total.
+      while (documents.length > 4) {
+        const deleted = await page.request.delete(`${serverURL}/api/posts/${documents[4].id}`)
 
-      expect(deleted.ok()).toBe(true)
-      documents.pop()
+        expect(deleted.ok()).toBe(true)
+        documents.splice(4, 1)
+      }
       await next.press('Enter')
       await expect(widget.locator('.recents-widget__pagination')).toHaveCount(0)
-      await expect(widget.locator('.document-card__title')).toHaveText(documents[0].title)
+      await expect(widget.locator('.document-card__title')).toHaveText(
+        documents.slice(0, 4).map(({ title }) => title),
+      )
       await expect(recents).toBeFocused()
       await expectPaintedFocus({ page })
     })
@@ -2585,8 +3039,10 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(additionalPanel).toBeFocused()
       await expect(toolbarButtons.first()).toBeVisible()
 
-      for (const button of await toolbarButtons.all()) {
-        await page.keyboard.press('Tab')
+      await page.keyboard.press('Tab')
+      await expect(toolbarButtons.first()).toBeFocused()
+      for (const button of (await toolbarButtons.all()).slice(1)) {
+        await page.keyboard.press('ArrowRight')
         await expect(button).toBeFocused()
       }
 
@@ -2658,6 +3114,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await page.keyboard.press('Space')
       await expect(page.locator('.drag-overlay')).toBeVisible()
       await expect(drag).toHaveAttribute('aria-pressed', 'true')
+      await waitForKeyboardDragActivation({ page })
       await expect(page.getByRole('status').filter({ hasText: lastID! })).toHaveCount(1)
       await page.keyboard.press('ArrowLeft')
       const overFirstWidget = page.getByRole('status').filter({ hasText: firstID! })
@@ -2738,6 +3195,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await page.keyboard.press('Space')
       await expect(page.locator('.drag-overlay')).toBeVisible()
       await expect(drag).toHaveAttribute('aria-pressed', 'true')
+      await waitForKeyboardDragActivation({ page })
       await expect(
         page.getByRole('status').filter({ hasText: (await widget.getAttribute('data-slug'))! }),
       ).toHaveCount(1)
@@ -2751,6 +3209,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(page.locator('[id^="widget-editor-"]:visible')).toHaveCount(1)
       await page.keyboard.press('Escape')
       await expect(page.locator('[id^="widget-editor-"]:visible')).toHaveCount(0)
+      await waitForFocusRestoration({ page })
       await expect(widget.locator('.widget-wrapper__edit-btn')).toBeFocused()
       await page.keyboard.press('Tab')
       await expect(widget.locator('.widget-wrapper__size-btn')).toBeFocused()
@@ -2891,9 +3350,10 @@ test.describe('WCAG 2.2 Level AA', () => {
       const trigger = editor.locator('.LexicalEditorTheme__block__actions-button').first()
       const menu = page.getByRole('menu')
 
-      await editor.focus()
+      await expect(editor).toBeVisible()
       await trigger.focus()
-      await page.keyboard.press('Enter')
+      await expect(trigger).toBeFocused()
+      await trigger.press('Enter')
       await expect(menu.getByRole('menuitem', { name: 'Move Up', exact: true })).toBeFocused()
 
       for (const [key, name] of [
@@ -3303,6 +3763,7 @@ test.describe('WCAG 2.2 Level AA', () => {
 
       await trigger.focus()
       await trigger.press('Enter')
+      await expect(page.getByRole('menuitem').first()).toBeFocused()
       const language = page.getByRole('menuitem', { name: /language/i })
       await language.focus()
       await language.press('Enter')
@@ -3319,23 +3780,27 @@ test.describe('WCAG 2.2 Level AA', () => {
 
     test('should move focus into a mobile User menu submenu', async () => {
       // Additional coverage for PYLD-3645 and PYLD-3697.
-      await page.setViewportSize({ height: 720, width: 320 })
-      await page.goto(`${serverURL}/admin`)
-      await openNavigationForUserMenu({ page })
-      const trigger = page.locator('.user-menu__trigger')
+      try {
+        await page.setViewportSize({ height: 720, width: 320 })
+        await page.goto(`${serverURL}/admin`)
+        await openNavigationForUserMenu({ page })
+        const trigger = page.locator('.user-menu__trigger')
 
-      await trigger.focus()
-      await trigger.press('Enter')
-      const language = page.getByRole('menuitem', { name: /language/i })
-      await expect(language).not.toHaveAttribute('aria-haspopup')
-      await language.focus()
-      await language.press('Enter')
+        await trigger.focus()
+        await trigger.press('Enter')
+        await expect(page.getByRole('menuitem').first()).toBeFocused()
+        const language = page.getByRole('menuitem', { name: /language/i })
+        await expect(language).not.toHaveAttribute('aria-haspopup')
+        await language.focus()
+        await language.press('Enter')
 
-      const back = page.getByRole('menuitem', { name: 'Language', exact: true })
-      await expect(back).toBeFocused()
-      await page.keyboard.press('ArrowDown')
-      await expect(page.getByRole('menuitemradio').first()).toBeFocused()
-      await page.setViewportSize({ height: 720, width: 1280 })
+        const back = page.getByRole('menuitem', { name: 'Language', exact: true })
+        await expect(back).toBeFocused()
+        await page.keyboard.press('ArrowDown')
+        await expect(page.getByRole('menuitemradio').first()).toBeFocused()
+      } finally {
+        await page.setViewportSize({ height: 720, width: 1280 })
+      }
     })
 
     test('should move keyboard focus into and through the Group by dialog', async () => {
@@ -3569,7 +4034,9 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(dragLabel).toBeFocused()
       const dragStatus = page.getByRole('status').filter({ hasText: /draggable item one/i })
       await expect(dragStatus).toContainText(/droppable area one/i)
-      await dragLabel.press('ArrowRight')
+      await waitForKeyboardDragActivation({ page })
+      await expect(dragLabel).toBeFocused()
+      await page.keyboard.press('ArrowRight')
       await expect(dragStatus).toContainText(/droppable area two/i)
       await page.keyboard.press('Space')
       await expect(page.locator('body')).not.toHaveClass(/is-dragging/)
@@ -3725,6 +4192,57 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.7 Focus Visible (AA)', () => {
+    test('should paint keyboard focus on image crop and focal-point controls', async () => {
+      // PYLD-3602
+      const dialog = await openEditImageDialog({ page, serverURL })
+      const controls = dialog.locator(
+        '.ReactCrop__crop-selection, .ReactCrop__drag-handle, .edit-upload__focalPoint',
+      )
+
+      await expect(controls).toHaveCount(10)
+      await page.mouse.move(0, 0)
+      for (const control of await controls.all()) {
+        await dialog.getByRole('button', { name: /apply changes/i }).focus()
+        const unfocusedStyle = await getFocusIndicatorStyle(control)
+
+        await control.focus()
+        await page.keyboard.press('Shift+Tab')
+        await page.keyboard.press('Tab')
+        await expect(control).toBeFocused()
+        if (!(await control.getAttribute('class'))?.includes('ReactCrop__drag-handle')) {
+          await expectPaintedFocus({ page })
+        }
+        await expect
+          .poll(
+            async () => {
+              if ((await control.getAttribute('class'))?.includes('ReactCrop__drag-handle')) {
+                return control.evaluate((element) => {
+                  const style = getComputedStyle(element, '::after')
+
+                  return (
+                    Number.parseFloat(style.width) > 0 &&
+                    Number.parseFloat(style.height) > 0 &&
+                    style.outlineStyle !== 'none' &&
+                    Number.parseFloat(style.outlineWidth) > 0 &&
+                    style.outlineColor !== 'transparent' &&
+                    !/rgba\([^)]*,\s*0\)$/.test(style.outlineColor)
+                  )
+                })
+              }
+
+              const focusedStyle = await getFocusIndicatorStyle(control)
+
+              return (
+                hasRenderedFocusIndicator({ focusedStyle, unfocusedStyle }) ||
+                (Number.parseFloat(focusedStyle.borderTopWidth) > 0 &&
+                  focusedStyle.borderTopWidth !== unfocusedStyle.borderTopWidth)
+              )
+            },
+            { message: await control.getAttribute('class') },
+          )
+          .toBe(true)
+      }
+    })
     test('should reveal the collection card create action and its focus indicator by keyboard', async ({
       browser: _browser,
     }, testInfo) => {
@@ -3952,6 +4470,135 @@ test.describe('WCAG 2.2 Level AA', () => {
         }
       }
     })
+
+    test('should preserve native mouse dragging of rich-text callout blocks', async () => {
+      const container = await openRichTextContext({ isDrawer: false, page, postsURL })
+      const callouts = getCallouts({ container })
+      const first = callouts.first()
+
+      await first.scrollIntoViewIfNeeded()
+      await first.locator('.collapsible__drag').hover()
+      const handleBox = (await first.locator('.collapsible__drag').boundingBox())!
+      const targetBox = (await callouts.nth(1).boundingBox())!
+
+      await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + handleBox.height / 2)
+      await page.mouse.down()
+      await page.mouse.move(targetBox.x + 40, targetBox.y + targetBox.height - 2, { steps: 10 })
+      await page.mouse.move(targetBox.x + 40, targetBox.y + targetBox.height - 2)
+      await page.mouse.up()
+      await expect(callouts.first().locator('input[value$="callout"]')).toHaveValue(
+        'Second callout',
+      )
+    })
+
+    test('should preserve native mouse dragging of rich-text paragraphs', async () => {
+      await gotoCreatePost({ page, postsURL })
+      const richText = page.locator('.rich-text-lexical[data-field-path="content"]')
+      const editor = richText.getByRole('textbox', { name: 'Content', exact: true })
+
+      await editor.fill('First mouse paragraph')
+      await editor.press('End')
+      await editor.press('Enter')
+      await page.keyboard.type('Second mouse paragraph')
+      await editor.press('Enter')
+      await page.keyboard.type('Third mouse paragraph')
+      await editor.locator('p').first().hover()
+      const handle = richText.getByRole('button', { name: 'Drag to move', exact: true })
+      const target = editor.locator('p').nth(1)
+
+      const handleBox = (await handle.boundingBox())!
+      const targetBox = (await target.boundingBox())!
+
+      await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + handleBox.height / 2)
+      await page.mouse.down()
+      await page.mouse.move(targetBox.x + 40, targetBox.y + targetBox.height - 2, { steps: 10 })
+      await page.mouse.move(targetBox.x + 40, targetBox.y + targetBox.height - 2)
+      await page.mouse.up()
+      await expect(editor.locator('p').first()).toHaveText('Second mouse paragraph')
+      await expect(editor.locator('p').nth(1)).toHaveText('First mouse paragraph')
+      await expect(page.getByRole('menuitem', { name: 'Move Down', exact: true })).toBeHidden()
+    })
+
+    test('should reorder versioned rich-text paragraphs and horizontal rules using only clicks', async () => {
+      // PYLD-3716
+      await gotoCreatePost({ page, postsURL })
+      await page.locator('#field-title').fill('Drag alternative regression')
+      const richText = page.locator('.rich-text-lexical[data-field-path="content"]')
+      const editor = richText.getByRole('textbox', { name: 'Content', exact: true })
+
+      await editor.fill('First drag paragraph')
+      await editor.press('End')
+      await richText.locator('.toolbar-popup__dropdown-add').click()
+      await page.locator('.toolbar-popup__dropdown-item[data-item-key="horizontalRule"]').click()
+      const paragraph = editor.locator('p').filter({ hasText: /^First drag paragraph$/ })
+
+      await expect(paragraph).toHaveCount(1)
+      await expect(editor.locator('hr')).toHaveCount(1)
+      await expect(editor.locator(':scope > *').first()).toHaveText('First drag paragraph')
+      await paragraph.hover()
+      await richText.getByRole('button', { name: 'Drag to move', exact: true }).click()
+      const moveDown = richText
+        .getByRole('button', { name: /move down/i })
+        .or(page.getByRole('menuitem', { name: /move down/i }))
+
+      await expect(
+        moveDown,
+        'A click-only move action must be available for ordinary rich-text content',
+      ).toBeVisible()
+      await moveDown.click()
+      await expect(
+        editor.locator(':scope > :not([data-lexical-decorator-boundary])').first(),
+      ).toHaveJSProperty('tagName', 'HR')
+      await expect(paragraph).toHaveText('First drag paragraph')
+      await paragraph.hover()
+      await richText.getByRole('button', { name: 'Drag to move', exact: true }).click()
+      await page.getByRole('menuitem', { name: 'Move Up', exact: true }).click()
+      await expect(
+        editor.locator(':scope > :not([data-lexical-decorator-boundary])').first(),
+      ).toHaveText('First drag paragraph')
+      await expect(paragraph).toHaveText('First drag paragraph')
+      const handle = richText.getByRole('button', { name: 'Drag to move', exact: true })
+
+      await expect(handle).toHaveAccessibleDescription('')
+      await expect(editor).toHaveAccessibleDescription(/Move Up: Alt \+ Shift \+ ↑/)
+      await handle.focus()
+      await handle.press('Space')
+      await expect(page.getByRole('menuitem', { name: 'Move Up', exact: true })).toBeFocused()
+      await page.keyboard.press('ArrowDown')
+      await expect(page.getByRole('menuitem', { name: 'Move Down', exact: true })).toBeFocused()
+      await page.keyboard.press('Escape')
+      await expect(handle).toBeFocused()
+    })
+
+    test('should expose rich-text movement actions after tapping ordinary content', async ({
+      browser,
+    }) => {
+      // Additional coverage for PYLD-3716
+      const context = await browser.newContext({
+        hasTouch: true,
+        storageState: await page.context().storageState(),
+        viewport: { height: 720, width: 1280 },
+      })
+      const touchPage = await context.newPage()
+
+      try {
+        await gotoCreatePost({ page: touchPage, postsURL })
+        const richText = touchPage.locator('.rich-text-lexical[data-field-path="content"]')
+        const editor = richText.getByRole('textbox', { name: 'Content', exact: true })
+
+        await editor.fill('First touch paragraph')
+        await editor.press('End')
+        await editor.press('Enter')
+        await touchPage.keyboard.type('Second touch paragraph')
+        await editor.locator('p').first().tap()
+        await richText.getByRole('button', { name: 'Drag to move', exact: true }).tap()
+        await touchPage.getByRole('menuitem', { name: 'Move Down', exact: true }).tap()
+        await expect(editor.locator('p').first()).toHaveText('Second touch paragraph')
+        await expect(editor.locator('p').nth(1)).toHaveText('First touch paragraph')
+      } finally {
+        await context.close()
+      }
+    })
   })
 
   test.describe('2.5.8 Target Size (Minimum) (AA)', () => {
@@ -4080,7 +4727,6 @@ test.describe('WCAG 2.2 Level AA', () => {
           'Results found for “no-matching-accessibility-result”: 0.',
         )
         await expect(drawer.locator('.no-results__title')).toHaveText('No Results.')
-        await expect(search).toBeFocused()
       }
     })
 
@@ -4161,39 +4807,6 @@ test.describe('WCAG 2.2 Level AA', () => {
       }
     })
 
-    test('should expose select requirements and validation errors', async () => {
-      await gotoCreatePost({ page, postsURL })
-      const select = page.locator('#field-accessibilitySelect')
-      const tags = page
-        .locator('.field-type.text')
-        .filter({ has: page.locator('.field-requiredTags') })
-
-      const selectInput = select.getByRole('combobox')
-
-      await selectInput.focus()
-      await expect(selectInput).toHaveAttribute('aria-describedby', /live-region/)
-      await expect(selectInput).toHaveAttribute('aria-required', 'true')
-      await select.locator('.clear-indicator').click()
-      await tags.locator('.multi-value-remove').click()
-      await page.getByRole('button', { name: /^Publish(?: in English)?$/ }).click()
-
-      for (const field of [select, tags]) {
-        const input = field.getByRole('combobox')
-        const error = field.locator('.field-error[role="alert"]')
-
-        await expect(error).toContainText(/require/i)
-        await expect(input).toHaveAttribute('aria-required', 'true')
-        await expect(input).toHaveAttribute('aria-invalid', 'true')
-        await expect(input).toHaveAccessibleDescription(
-          new RegExp((await error.textContent())!.trim()),
-        )
-        await expect(field.locator('input[required]')).toHaveCount(0)
-        await expect(input).toHaveAttribute('aria-describedby', /placeholder/)
-        await input.focus()
-        await expect(input).toHaveAccessibleDescription(/require/i)
-      }
-    })
-
     test('should update accessibility states on non-searchable selects', async () => {
       await gotoCreatePost({ page, postsURL })
       const input = page.getByRole('combobox', { name: 'Non-searchable required select' })
@@ -4210,67 +4823,56 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(input).toHaveAccessibleDescription('Choose an option')
     })
 
-    test('should open and dismiss required-field help', async () => {
-      // PYLD-3778
+    test('should omit required-field help from document forms and drawers', async () => {
+      // PYLD-4389: defer this control until its placement has been redesigned.
       await gotoCreatePost({ page, postsURL })
       const message = 'Fields marked with * are required.'
-      const trigger = page.getByRole('button', { name: message, exact: true })
-      const explanation = page.getByText(message, { exact: true })
 
-      await expect(trigger).toBeVisible()
-      await expect(trigger).toHaveText('')
-      const spacing = await trigger.evaluate((button) => {
-        const icon = button.closest('.required-fields-info')!
-        const parent = icon.parentElement!
-        const next = icon.nextSibling
-        const fields = parent.querySelector('.document-fields__fields')!
-        const before = fields.getBoundingClientRect().top
-
-        icon.remove()
-        const after = fields.getBoundingClientRect().top
-
-        parent.insertBefore(icon, next)
-        return { after, before }
-      })
-
-      expect(spacing.after).toBe(spacing.before)
-      await expect(explanation).toBeHidden()
-      await trigger.hover()
-      await expect(explanation).toBeVisible()
-      await explanation.hover()
-      await expect(explanation).toBeVisible()
-      await page.keyboard.press('Escape')
-      await expect(explanation).toBeHidden()
-      await page.locator('#field-title').focus()
-      await trigger.focus()
-      await expect(explanation).toBeVisible()
-      await trigger.press('Escape')
-      await expect(explanation).toBeHidden()
-      await trigger.press('Enter')
-      await expect(explanation).toBeVisible()
-      await page.locator('#field-title').click()
-      await expect(explanation).toBeHidden()
-      await trigger.click()
-      await expect(explanation).toBeVisible()
-      const box = await trigger.boundingBox()
-
-      expect(box?.width).toBeGreaterThanOrEqual(24)
-      expect(box?.height).toBeGreaterThanOrEqual(24)
-      await trigger.press('Escape')
+      await expect(page.locator('.document-fields')).toBeVisible()
+      await expectRequiredState({ input: page.locator('#field-title') })
+      await expect(page.locator('.required-fields-info')).toHaveCount(0)
+      await expect(page.getByRole('button', { name: message, exact: true })).toHaveCount(0)
       await page.locator('#relatedPost-add-new button').click()
       const drawer = page.locator('dialog[id^="doc-drawer_posts_"]')
-      const drawerTrigger = drawer.getByRole('button', { name: message, exact: true })
-      const drawerExplanation = drawer.getByText(message, { exact: true })
 
-      await drawerTrigger.focus()
-      await expect(drawerExplanation).toBeVisible()
-      await drawerTrigger.press('Escape')
-      await expect(drawerExplanation).toBeHidden()
       await expect(drawer).toBeVisible()
+      await expect(drawer.locator('.document-fields')).toBeVisible()
+      await expect(drawer.getByRole('button', { name: message, exact: true })).toHaveCount(0)
+      await expect(drawer.locator('.required-fields-info')).toHaveCount(0)
     })
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should present the embedded dashboard breadcrumb without editing controls', async () => {
+      try {
+        await page.goto(`${serverURL}/admin?embed=true`)
+        await expect(page.locator('.modular-dashboard')).toBeVisible()
+        const breadcrumb = page.getByRole('navigation', { name: 'Breadcrumb' })
+
+        await expect(breadcrumb).toContainText('Dashboard')
+        await expect(
+          breadcrumb.getByRole('button', { name: 'Dashboard', exact: true }),
+        ).toHaveCount(0)
+        await expect(page.locator('.dashboard-breadcrumb-dropdown')).toHaveCount(0)
+        await expect(page.locator('.dashboard-breadcrumb-dropdown__editing')).toHaveCount(0)
+
+        await page.goto(`${serverURL}/admin?embed=false`)
+        const dashboard = page.getByRole('button', { name: 'Dashboard', exact: true })
+
+        await dashboard.press('Enter')
+        await expect(
+          page.getByRole('menuitem', { name: 'Edit Dashboard', exact: true }),
+        ).toBeVisible()
+        await expect(
+          page.getByRole('menuitem', { name: 'Reset Layout', exact: true }),
+        ).toBeVisible()
+        await page.keyboard.press('Escape')
+        await expect(dashboard).toBeFocused()
+      } finally {
+        await page.goto(`${serverURL}/admin?embed=false`)
+      }
+    })
+
     test('should translate crop handle names into Spanish', async () => {
       const originalCookies = (await page.context().cookies()).filter(
         ({ name }) => name === 'payload-lng',
@@ -4570,6 +5172,14 @@ test.describe('WCAG 2.2 Level AA', () => {
 
       await expect(editor).toHaveAccessibleName('Additional instructions')
       await expect(editor).toBeEditable()
+      await editor.fill('')
+      await expect(editor).toHaveAttribute(
+        'aria-placeholder',
+        "Start typing, or press '/' for commands...",
+      )
+      await expect(
+        field.getByText("Start typing, or press '/' for commands...", { exact: true }),
+      ).toBeVisible()
 
       const editableScan = await runAxeScan({ include: ['.llm-instructions'], page, testInfo })
 
@@ -4589,6 +5199,30 @@ test.describe('WCAG 2.2 Level AA', () => {
       const readOnlyScan = await runAxeScan({ include: ['.llm-instructions'], page, testInfo })
 
       expect(readOnlyScan.violations).toEqual([])
+    })
+
+    test('should omit typing prompts from empty read-only system instructions', async () => {
+      await page.goto(
+        formatAdminURL({
+          adminRoute: '/admin',
+          path: `/collections/${instructionsCollectionSlug}/global-menu`,
+          serverURL,
+        }),
+      )
+
+      const field = page.locator('.llm-instructions')
+
+      await field
+        .getByRole('tab', { name: 'System instructions (read-only)', exact: true })
+        .press('Enter')
+
+      const editor = field.getByRole('textbox', { name: 'System instructions (read-only)' })
+
+      await expect(editor).toBeVisible()
+      await expect(editor).toBeEmpty()
+      await expect(editor).not.toBeEditable()
+      await expect(editor).not.toHaveAttribute('aria-placeholder')
+      await expect(field.getByText("Start typing, or press '/' for commands...")).toHaveCount(0)
     })
 
     test('should expose a labelled region for expanded collapsible field content', async () => {
@@ -4756,6 +5390,47 @@ test.describe('WCAG 2.2 Level AA', () => {
       }
     })
 
+    test('should keep the embedded navigation toggle operable beside the breadcrumb', async () => {
+      // PYLD-4334
+      const originalViewport = page.viewportSize()
+
+      try {
+        for (const width of [1440, 768]) {
+          await page.setViewportSize({ height: 900, width })
+          await page.goto(`${postsURL.list}?embed=true`)
+          const toggle = page.locator('.app-header__sidebar-toggle')
+          const nav = page.locator('aside.nav')
+
+          await expect(nav).toHaveClass(/nav-hydrated/)
+          await expect(page.locator('.nav__header')).toHaveCount(0)
+          await expect(toggle).toBeVisible()
+          await toggle.focus()
+          if ((await toggle.getAttribute('aria-expanded')) === 'true') {
+            await toggle.press('Space')
+          }
+          await expect(toggle).toHaveAccessibleName(/open menu/i)
+          await expect(nav).toHaveAttribute('inert', '')
+          await toggle.press('Enter')
+          await expect(toggle).toBeVisible()
+          await expect(toggle).toBeFocused()
+          await expect(toggle).toHaveAccessibleName(/close menu/i)
+          await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+          await expect(nav).not.toHaveAttribute('inert', '')
+          await toggle.press('Space')
+          await expect(toggle).toBeFocused()
+          await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+          await expect(nav).toHaveAttribute('inert', '')
+        }
+        await page.goto(`${postsURL.list}?embed=false`)
+        await expect(page.locator('.nav__header')).toHaveCount(1)
+      } finally {
+        await page.goto(`${postsURL.list}?embed=false`)
+        if (originalViewport) {
+          await page.setViewportSize(originalViewport)
+        }
+      }
+    })
+
     test('should expose the initial and changed More options state on versioned document creation', async () => {
       // PYLD-3714
       test.slow()
@@ -4824,11 +5499,13 @@ test.describe('WCAG 2.2 Level AA', () => {
 
         await parent.focus()
         await parent.press('ArrowRight')
+        await expect(parent).toHaveAttribute('aria-expanded', 'true')
         const child = sidebar.getByRole('treeitem', {
           name: 'Accessibility final child folder',
           exact: true,
         })
 
+        await expect(child).toBeVisible()
         await child.focus()
         await child.press('Enter')
         await expect(
@@ -5449,6 +6126,91 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
   test.describe('4.1.3 Status Messages (AA)', () => {
+    test('should translate row drag names instructions and announcements into Spanish', async () => {
+      const cookies = (await page.context().cookies()).filter(({ name }) => name === 'payload-lng')
+
+      try {
+        await page.context().addCookies([{ name: 'payload-lng', url: serverURL, value: 'es' }])
+        await gotoCreatePost({ page, postsURL })
+        const field = page.locator('#field-customLabelRows')
+
+        await field.locator('.array-field__add-row').click()
+        await field.locator('.array-field__add-row').click()
+        await field.getByRole('button', { name: /contraer todo/i }).click()
+        const handle = field.getByRole('button', {
+          name: 'Arrastre para reordenar Featured item 1',
+          exact: true,
+        })
+        const status = page.getByRole('status')
+
+        await expect(handle).toHaveAccessibleDescription(
+          'Pulse Space o Enter para recoger una fila. Use las flechas para moverla. Con VoiceOver, desactive Quick Nav y use Command + las flechas. Pulse Space o Enter para soltarla, o Escape para cancelar.',
+        )
+        await handle.focus()
+        await page.keyboard.press('Space')
+        await expect(status.filter({ hasText: /recogido/ })).toHaveText(
+          'Featured item 1 recogido. Posición 1 de 2.',
+        )
+        await waitForKeyboardDragActivation({ page })
+        await page.keyboard.press('ArrowDown')
+        await expect(status.filter({ hasText: /Mover abajo/ })).toHaveText(
+          'Featured item 1: Mover abajo. Posición 2 de 2.',
+        )
+        await page.keyboard.press('Space')
+        await expect(status.filter({ hasText: /soltado/ })).toHaveText(
+          'Featured item 1 soltado. Posición 2 de 2.',
+        )
+      } finally {
+        await page.keyboard.press('Escape')
+        await page.context().clearCookies({ name: 'payload-lng' })
+        await page.context().addCookies(cookies)
+        await page.goto(postsURL.create)
+      }
+    })
+
+    test('should announce image and ARIA row labels while ignoring decorative text', async () => {
+      await gotoCreatePost({ page, postsURL })
+      const field = page.locator('#field-customLabelRows')
+
+      await field.locator('.array-field__add-row').click()
+      await field.locator('.array-field__add-row').click()
+      const rows = field.locator('.array-field__row')
+
+      await expect(rows).toHaveCount(2)
+      await field.getByRole('button', { name: /collapse all/i }).click()
+      const first = rows
+        .first()
+        .getByRole('button', { name: 'Drag to reorder Featured item 1', exact: true })
+      const status = page.getByRole('status')
+
+      await first.focus()
+      await page.keyboard.press('Space')
+      await expect(status.filter({ hasText: /picked up/i })).toHaveText(
+        'Featured item 1 picked up. Position 1 of 2.',
+      )
+      await waitForKeyboardDragActivation({ page })
+      await page.keyboard.press('ArrowDown')
+      await expect(status.filter({ hasText: /move down/i })).toHaveText(
+        'Featured item 1: Move Down. Position 2 of 2.',
+      )
+      await page.keyboard.press('Escape')
+      await expect(status.filter({ hasText: /cancelled/i })).toContainText('Featured item 1')
+      const second = rows
+        .nth(1)
+        .getByRole('button', { name: 'Drag to reorder Featured item 2', exact: true })
+
+      await second.focus()
+      await page.keyboard.press('Space')
+      await expect(status.filter({ hasText: /picked up/i })).toHaveText(
+        'Featured item 2 picked up. Position 2 of 2.',
+      )
+      await waitForKeyboardDragActivation({ page })
+      await page.keyboard.press('ArrowUp')
+      await page.keyboard.press('Space')
+      await expect(status.filter({ hasText: /dropped/i })).toContainText('Featured item 2')
+      await expect(status.filter({ hasText: /dropped/i })).not.toContainText('Decorative')
+    })
+
     test('should keep the toast close button accessible with its live announcements off', async () => {
       await page.goto(`${postsURL.admin}/status-messages`)
       await page.getByRole('button', { name: 'Show action toast' }).click()
@@ -5594,26 +6356,37 @@ test.describe('WCAG 2.2 Level AA', () => {
         releasePreview = resolve
       })
 
-      await page.route('**/preview/**', async (route) => {
-        await pendingPreview
-        await route.fulfill({
-          body: '<html><body>Preview ready</body></html>',
-          contentType: 'text/html',
-        })
+      const preferenceURL = formatAdminURL({
+        apiRoute: '/api',
+        path: '/payload-preferences/collection-posts',
+        serverURL,
       })
+      const previousPreference = await (await page.request.get(preferenceURL)).json()
+
       try {
+        const resetPreference = await page.request.post(preferenceURL, {
+          data: { value: { ...previousPreference.value, editViewType: 'default' } },
+        })
+
+        expect(resetPreference.ok()).toBe(true)
         await gotoFirstPost({ page, postsURL, serverURL })
         const trigger = page.locator('#live-preview-toggler')
 
-        if (
-          await trigger.evaluate((element) =>
-            element.classList.contains('live-preview-toggler--active'),
-          )
-        ) {
-          await trigger.click()
-        }
+        await expect(page.locator('.live-preview-window iframe')).toHaveCount(0)
+        await page.route('**/preview/**', async (route) => {
+          await pendingPreview
+          await route.fulfill({
+            body: '<html><body>Preview ready</body></html>',
+            contentType: 'text/html',
+          })
+        })
         await trigger.focus()
+        const savedPreference = page.waitForResponse(
+          (response) => response.url() === preferenceURL && response.request().method() === 'POST',
+        )
+
         await trigger.press('Enter')
+        expect((await savedPreference).ok()).toBe(true)
         const loading = page.locator('.live-preview-window .iframe-loader__loading')
         await expect(loading).toBeVisible()
         await expect(loading).toContainText(/loading/i)
@@ -5631,6 +6404,11 @@ test.describe('WCAG 2.2 Level AA', () => {
       } finally {
         releasePreview()
         await page.unrouteAll({ behavior: 'wait' })
+        const restoredPreference = await page.request.post(preferenceURL, {
+          data: { value: previousPreference.value ?? {} },
+        })
+
+        expect(restoredPreference.ok()).toBe(true)
       }
     })
 

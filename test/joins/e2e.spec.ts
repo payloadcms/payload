@@ -277,7 +277,11 @@ describe('Join Field', () => {
     const toggler = actionColumn.locator('button.drawer-link__doc-drawer-toggler')
     await toggler.click()
 
-    const drawer = page.locator('[id^=doc-drawer_undefined]')
+    await expect(page.locator('[id^=doc-drawer_undefined]')).toBeHidden()
+
+    const drawer = page.locator('[id^=doc-drawer_posts_1_]')
+    await expect(drawer.locator('#field-title')).toBeVisible()
+    await page.keyboard.press('Escape')
     await expect(drawer).toBeHidden()
   })
 
@@ -835,6 +839,13 @@ describe('Join Field', () => {
     const rows = joinField.locator('.relationship-table tbody tr')
     await expect(rows).toHaveCount(1)
     await expect(joinField.locator('.cell-canRead')).not.toContainText('false')
+  })
+
+  test('should hide the add new button when create access is denied', async () => {
+    await navigateToDoc(page, categoriesJoinRestrictedURL)
+    const joinField = page.locator('#field-collectionRestrictedJoin.field-type.join')
+    await expect(joinField.locator('.relationship-table table')).toBeVisible()
+    await expect(joinField.locator('.relationship-table__add-new')).toHaveCount(0)
   })
 
   test('should render join field with array of collections', async () => {

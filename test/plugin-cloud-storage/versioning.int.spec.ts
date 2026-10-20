@@ -748,7 +748,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       if (args.collection === unversionedCloudMediaSlug) {
         throw new Error('Cloud test document write failed')
       }
-      return updateOne(args as never)
+      return updateOne(args)
     })
 
     try {
@@ -1895,7 +1895,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
         if (args.collection === versionedCloudMediaSlug && 'filename' in args.data) {
           throw new Error('Cloud test document write failed')
         }
-        return updateOne(args as never)
+        return updateOne(args)
       })
 
       try {
@@ -1934,7 +1934,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
         if (args.collection === versionedCloudMediaSlug && 'filename' in args.data) {
           throw new Error('Cloud test document write failed')
         }
-        return updateOne(args as never)
+        return updateOne(args)
       })
 
       try {

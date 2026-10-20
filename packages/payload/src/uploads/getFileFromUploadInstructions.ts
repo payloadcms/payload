@@ -259,7 +259,7 @@ const requestHasSizeEdits = (req: PayloadRequest): boolean => {
     return false
   }
 
-  return hasCropOrResizeEdit(uploadEdits as UploadEdits)
+  return hasCropOrResizeEdit(uploadEdits)
 }
 
 /**

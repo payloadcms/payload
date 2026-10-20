@@ -65,7 +65,7 @@ export async function handleDynamicFileRequest({
 
     return retrieveFileResponse({
       collection,
-      doc: (permittedDocument ?? resolvedDocument) as ResolvedUploadDocument,
+      doc: permittedDocument ?? resolvedDocument,
       filename,
       prefix,
       req,
@@ -493,8 +493,8 @@ function hasPersistedTransformWork({
 }): boolean {
   return Boolean(
     doc._transforms &&
-      Object.keys(doc._transforms).length &&
-      !canReuseStoredDefault({ collection: collection.config, doc, filename, req }),
+    Object.keys(doc._transforms).length &&
+    !canReuseStoredDefault({ collection: collection.config, doc, filename, req }),
   )
 }
 

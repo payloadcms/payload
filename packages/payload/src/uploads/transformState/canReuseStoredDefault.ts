@@ -21,12 +21,12 @@ export function canReuseStoredDefault({
 
   return Boolean(
     filename &&
-      collectStoredFiles({ collection, doc, req }).some(({ roles }) =>
-        roles.some((role) =>
-          variant
-            ? role.type === 'size' && role.sizeKey === variant[0]
-            : filename === doc.filename && role.type === 'default',
-        ),
+    collectStoredFiles({ collection, doc, req }).some(({ roles }) =>
+      roles.some((role) =>
+        variant
+          ? role.type === 'size' && role.sizeKey === variant[0]
+          : filename === doc.filename && role.type === 'default',
       ),
+    ),
   )
 }

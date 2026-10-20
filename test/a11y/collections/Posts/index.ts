@@ -143,6 +143,24 @@ export const PostsCollection: CollectionConfig = {
             blocks: [
               { slug: 'callout', fields: [{ name: 'text', type: 'text' }] },
               {
+                slug: 'nestedRichText',
+                fields: [
+                  {
+                    name: 'body',
+                    type: 'richText',
+                    editor: lexicalEditor({
+                      features: ({ defaultFeatures }) => [
+                        ...defaultFeatures,
+                        FixedToolbarFeature(),
+                        BlocksFeature({
+                          blocks: [{ slug: 'callout', fields: [{ name: 'text', type: 'text' }] }],
+                        }),
+                      ],
+                    }),
+                  },
+                ],
+              },
+              {
                 slug: 'noHandle',
                 admin: {
                   components: {
@@ -227,6 +245,16 @@ export const PostsCollection: CollectionConfig = {
       label: 'Publishing details',
     },
     {
+      name: 'customLabelRows',
+      type: 'array',
+      admin: {
+        components: {
+          RowLabel: '/components/AccessibleRowLabel/index.js#AccessibleRowLabel',
+        },
+      },
+      fields: [{ name: 'label', type: 'text' }],
+    },
+    {
       type: 'collapsible',
       admin: {
         components: { Label: '/components/CustomCollapsibleLabel/index.js#CustomCollapsibleLabel' },
@@ -248,6 +276,11 @@ export const PostsCollection: CollectionConfig = {
       name: 'featuredImage',
       type: 'upload',
       relationTo: mediaSlug,
+    },
+    {
+      name: 'quantity',
+      type: 'number',
+      defaultValue: 10,
     },
     {
       name: 'location',

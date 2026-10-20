@@ -372,8 +372,8 @@ export const restoreVersionOperation = async <
 
     const shouldReplayTransforms = Boolean(
       collectionConfig.upload &&
-        result.original?.filename &&
-        Object.prototype.hasOwnProperty.call(result, '_transforms'),
+      result.original?.filename &&
+      Object.prototype.hasOwnProperty.call(result, '_transforms'),
     )
 
     if (shouldReplayTransforms) {

@@ -155,10 +155,10 @@ async function transformMain({
   const fileIsAnimatedType = ANIMATED_MIME_TYPES.includes(file.type)
   const fileHasAdjustments = Boolean(
     resizeOptions ||
-      formatOptions ||
-      trimOptions ||
-      constructorOptions ||
-      shouldApplyMetadataPolicy,
+    formatOptions ||
+    trimOptions ||
+    constructorOptions ||
+    shouldApplyMetadataPolicy,
   )
 
   if (crop) {

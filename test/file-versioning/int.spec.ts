@@ -73,7 +73,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       data: {
         alt: 'client data',
         original,
-      } as never,
+      },
     })
 
     const internal = await payload.findByID({
@@ -675,7 +675,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       data: {
         alt: 'changed metadata',
         original: { ...original, filename: 'forged.jpg' },
-      } as never,
+      },
     })
 
     expect(updated.original).toMatchObject(original)

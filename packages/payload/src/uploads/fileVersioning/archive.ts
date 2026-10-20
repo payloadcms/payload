@@ -304,7 +304,7 @@ const getVersions = async ({
     where: { parent: { equals: id } },
   })
 
-  return docs as VersionRow[]
+  return docs
 }
 
 export const replaceStoredFileReferences = ({
