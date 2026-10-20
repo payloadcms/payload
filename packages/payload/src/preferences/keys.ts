@@ -5,16 +5,10 @@
 
 export const PREFERENCE_KEYS = {
   /**
-   * Stores state global to the admin panel, as opposed to state scoped to a
-   * collection or a document: the active content branch, navigation group
-   * collapse/expand state, and nav open/closed state.
-   *
-   * Deliberately one key rather than one per concern. An admin render needs all
-   * of it, so a single key resolves the lot in a single query — see
-   * `getAdminPreferences` in `payload`. New globally-scoped admin state
-   * belongs here rather than in a key of its own.
+   * Stores state global to the admin panel: active content branch, navigation group
+   * collapse/expand state, and nav open/closed state
    */
-  ADMIN: 'admin',
+  NAV: 'nav',
 
   /**
    * Stores dashboard layout configuration

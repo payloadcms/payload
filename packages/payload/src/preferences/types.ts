@@ -3,7 +3,7 @@ import type { DefaultDocumentIDType } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
 /**
- * The `admin` preference value: the stored shape of everything global to the
+ * The `nav` preference value: the stored shape of everything global to the
  * admin panel. Read once per admin render, so each addition here is free rather
  * than another query.
  */

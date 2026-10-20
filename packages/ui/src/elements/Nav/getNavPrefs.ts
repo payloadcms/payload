@@ -9,7 +9,7 @@ import { getPreferences } from '../../utilities/getPreferences.js'
 /**
  * Assembles the nav's view of the user's preferences.
  *
- * The group and open state come from the shared `admin` preference, so this is
+ * The group and open state come from the shared `nav` preference, so this is
  * the same read that resolved the request's branch rather than a second query.
  */
 export const getNavPrefs = cache(async (req: PayloadRequest): Promise<NavPreferences> => {

@@ -59,7 +59,7 @@ export type BranchProviderProps = {
 /**
  * Holds the active branch for the admin UI.
  *
- * The selection lives in the user's `admin` preference and nowhere else, so it
+ * The selection lives in the user's `nav` preference and nowhere else, so it
  * follows them between browsers and machines. The server resolves it during
  * request initialization, which is why switching is a preference write followed
  * by a refresh rather than any client-side state that has to be kept in sync.
@@ -96,12 +96,12 @@ export const BranchProvider: React.FC<BranchProviderProps> = ({
 
       setActiveBranchState(slug)
 
-      // Merged, not replaced: the `admin` preference also carries nav state, and
+      // Merged, not replaced: the `nav` preference also carries nav state, and
       // a plain write would drop it. Awaited before refreshing, because the
       // server re-reads this preference to resolve the branch — refreshing first
       // would race the write and re-render against the branch we just left.
       void (async () => {
-        await setPreference(PREFERENCE_KEYS.ADMIN, { branch: slug }, true)
+        await setPreference(PREFERENCE_KEYS.NAV, { branch: slug }, true)
 
         if (refresh) {
           startRouteTransition(() => {
@@ -140,7 +140,7 @@ export const BranchProvider: React.FC<BranchProviderProps> = ({
   // the next request starts clean on main instead of resurrecting it.
   useEffect(() => {
     if (staleBranch) {
-      void setPreference(PREFERENCE_KEYS.ADMIN, { branch: MAIN_BRANCH }, true)
+      void setPreference(PREFERENCE_KEYS.NAV, { branch: MAIN_BRANCH }, true)
     }
   }, [setPreference, staleBranch])
 
