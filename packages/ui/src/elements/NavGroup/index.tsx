@@ -35,7 +35,7 @@ export const NavGroup: React.FC<Props> = ({ children, isOpen: isOpenFromProps, l
         newGroupPrefs[label].open = Boolean(collapsed)
       }
 
-      void setPreference(PREFERENCE_KEYS.ADMIN, { groups: newGroupPrefs }, true)
+      void setPreference(PREFERENCE_KEYS.NAV, { groups: newGroupPrefs }, true)
       setCollapsed(!collapsed)
     }
 
