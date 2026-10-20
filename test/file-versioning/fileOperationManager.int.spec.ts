@@ -1,5 +1,5 @@
 /* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test"] }] -- Tests use the shared fixture wrapper. */
-/* eslint @typescript-eslint/require-await: off -- Storage callbacks are asynchronous in production; these fakes record synchronous effects. */
+/* eslint-disable @typescript-eslint/require-await -- Storage callbacks are asynchronous in production; these fakes record synchronous effects. */
 import { expect } from 'vitest'
 
 /* eslint-disable payload/no-relative-monorepo-imports -- The file operation manager is internal until upload writers use it. */

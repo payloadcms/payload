@@ -491,6 +491,7 @@ const BlocksFieldComponent: React.FC<BlocksFieldClientProps> = (props) => {
       />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
+          announceRows
           className={`${baseClass}__rows`}
           id={rowsID}
           ids={rows.map((row) => row.id)}

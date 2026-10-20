@@ -997,5 +997,5 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
       ...overrides,
     },
     overrideAccess: true,
-  }) as unknown as Promise<Post>
+  })
 }

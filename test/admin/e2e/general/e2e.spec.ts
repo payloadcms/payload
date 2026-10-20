@@ -1546,7 +1546,7 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
       ...overrides,
     },
     overrideAccess: true,
-  }) as unknown as Promise<Post>
+  })
 }
 
 async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
@@ -1557,5 +1557,5 @@ async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
       ...overrides,
     },
     overrideAccess: true,
-  }) as unknown as Promise<Geo>
+  })
 }

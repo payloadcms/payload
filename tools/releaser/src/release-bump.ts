@@ -12,7 +12,8 @@
  * In --dry-run, git commands are logged (not executed) and nothing is pushed, but
  * the version bump is still written to local package.json (bumpVersion has no
  * dry-run path). Discarded on ephemeral CI; locally revert with
- * `git checkout -- packages package.json`.
+ * `git checkout -- packages package.json`. The dry run also previews the release
+ * notes CI drafts for the tag, in the log and the job summary.
  */
 import { PROJECT_ROOT } from '@tools/constants'
 import { execSync } from 'child_process'
@@ -22,17 +23,30 @@ import { pathToFileURL } from 'url'
 import type { Workspace } from './lib/getWorkspace.js'
 
 import { assertBumpPreconditions } from './lib/assertBumpPreconditions.js'
+import { findChangelogBaseTag } from './lib/findChangelogBaseTag.js'
 import { isVersionPublished } from './lib/getPackageRegistryVersions.js'
 import { getWorkspace } from './lib/getWorkspace.js'
+import { listReleaseTags } from './lib/listReleaseTags.js'
 import { pushWithRebaseRetry } from './lib/pushWithRebaseRetry.js'
+import { runCommand } from './lib/runCommand.js'
+import { writeStepSummary } from './lib/writeStepSummary.js'
+import { generateReleaseNotes } from './utils/generateReleaseNotes.js'
 
 type ReleaseBumpDeps = {
   env: NodeJS.ProcessEnv
+  findChangelogBaseTag: (args: { version: string }) => Promise<string | undefined>
+  generateReleaseNotes: (args: {
+    fromVersion: string
+    releaseTag: string
+    toVersion: string
+  }) => Promise<{ releaseNotes: string }>
   isPublished: (args: { name: string; version: string }) => Promise<boolean>
   log: (message: string) => void
   readBranch: () => string
   run: (cmd: string) => void
   workspace: Pick<Workspace, 'bumpVersion' | 'version'>
+  /** Appends markdown to the CI job summary */
+  writeSummary: (markdown: string) => void
 }
 
 /** Package for the already-published guard */
@@ -49,7 +63,17 @@ export const runReleaseBump = async ({
   dryRun: boolean
   preid: string
 }): Promise<string> => {
-  const { env, isPublished, log, readBranch, run, workspace } = deps
+  const {
+    env,
+    findChangelogBaseTag,
+    generateReleaseNotes,
+    isPublished,
+    log,
+    readBranch,
+    run,
+    workspace,
+    writeSummary,
+  } = deps
 
   const validated = {
     branch: readBranch(),
@@ -71,6 +95,23 @@ export const runReleaseBump = async ({
   }
 
   log(`\n  ${validated.version} => ${nextVersion}  (tag ${tag})\n`)
+
+  // The tag's range differs from base..HEAD only by its own bump commit, which the notes
+  // filter drops, so for the same commits this preview has the same entries as the CI draft.
+  if (dryRun) {
+    const fromVersion = await findChangelogBaseTag({ version: nextVersion })
+    if (!fromVersion) {
+      throw new Error(`Could not determine changelog base tag for ${tag}`)
+    }
+
+    const { releaseNotes } = await generateReleaseNotes({
+      fromVersion,
+      releaseTag: tag,
+      toVersion: 'HEAD',
+    })
+    log(releaseNotes)
+    writeSummary(releaseNotes)
+  }
 
   run(`git config user.name "github-actions[bot]"`)
   run(`git config user.email "github-actions[bot]@users.noreply.github.com"`)
@@ -94,18 +135,27 @@ async function main(): Promise<void> {
       console.log(`[dry-run] ${cmd}`)
       return
     }
-    execSync(cmd, { cwd: PROJECT_ROOT, stdio: 'inherit' })
+    runCommand({ cmd, cwd: PROJECT_ROOT })
   }
 
   await runReleaseBump({
     bump,
     deps: {
       env: process.env,
+      findChangelogBaseTag: ({ version }) =>
+        findChangelogBaseTag({
+          isPublished: isVersionPublished,
+          listTags: listReleaseTags,
+          version,
+        }),
+      generateReleaseNotes,
       isPublished: isVersionPublished,
       log: console.log,
       readBranch: () => execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim(),
       run,
       workspace: getWorkspace(),
+      writeSummary: (markdown) =>
+        writeStepSummary({ markdown, summaryPath: process.env.GITHUB_STEP_SUMMARY }),
     },
     dryRun,
     preid,
