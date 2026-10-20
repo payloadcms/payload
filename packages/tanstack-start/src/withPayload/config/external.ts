@@ -81,9 +81,18 @@ export const serverExternalPackages: string[] = [
 /** Additional installed packages that can bypass Vite's development server transforms. */
 export const devExternalPackages: string[] = [
   ...serverExternalPackages,
+  '@payloadcms/email-nodemailer',
+  '@payloadcms/email-resend',
+  '@payloadcms/graphql',
+  '@payloadcms/kv-redis',
+  '@payloadcms/payload-cloud',
   '@payloadcms/plugin-mcp',
+  '@payloadcms/plugin-nested-docs',
+  '@payloadcms/plugin-redirects',
+  '@payloadcms/transformer-sharp',
+  '@payloadcms/translations',
+  // Vite otherwise transforms date-fns' full module graph during SSR.
   'date-fns',
-  'undici',
 ]
 
 /**
