@@ -292,6 +292,8 @@ export const Form: React.FC<FormProps> = (props) => {
         return
       }
 
+      modifiedWhileProcessingRef.current = false
+
       // create new toast promise which will resolve manually later
       let errorToast, successToast
 
