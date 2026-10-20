@@ -6,13 +6,19 @@ import { expect, test } from 'vitest'
 import { FolderIcon } from '../../../icons/Folder/index.js'
 import { HierarchyButton } from './index.server.js'
 
-function renderHierarchyButton({ Icon }: { Icon: PayloadComponent }) {
+function renderHierarchyButton({
+  Icon,
+  SmallIcon = Icon,
+}: {
+  Icon: PayloadComponent
+  SmallIcon?: PayloadComponent
+}) {
   const payload = {
     config: {
       collections: [
         {
           slug: 'folders',
-          hierarchy: { admin: { components: { Icon, SmallIcon: Icon } } },
+          hierarchy: { admin: { components: { Icon, SmallIcon } } },
         },
       ],
     },
@@ -55,4 +61,22 @@ test('should pass the className from clientProps to the default folder icon', ()
 
   expect(button.props.Icon.props.className).toBe('muted')
   expect(button.props.SmallIcon.props.className).toBe('muted')
+})
+
+test('should pass the size from clientProps to the default folder icon', () => {
+  const button = renderHierarchyButton({
+    Icon: { clientProps: { size: 16 }, path: '@payloadcms/ui#FolderIcon' },
+  })
+
+  expect(button.props.Icon.props.size).toBe(16)
+})
+
+test('should render a default small icon given separately from the icon', () => {
+  const button = renderHierarchyButton({
+    Icon: '@payloadcms/ui#FolderIcon',
+    SmallIcon: { clientProps: { className: 'small' }, path: '@payloadcms/ui#FolderIcon' },
+  })
+
+  expect(button.props.SmallIcon.type).toBe(FolderIcon)
+  expect(button.props.SmallIcon.props.className).toBe('small')
 })

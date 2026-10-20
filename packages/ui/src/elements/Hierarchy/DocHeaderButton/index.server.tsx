@@ -84,7 +84,7 @@ function isFolderIcon({ component }: { component?: PayloadComponent }): boolean 
 
 /**
  * Renders the default folder icon without the import map. The object form gets what the import map
- * would have rendered: `FolderIcon` at its default size with the `className` from `clientProps`.
+ * would have rendered: `FolderIcon` with the props it supports from `clientProps`.
  */
 function renderFolderIcon({
   component,
@@ -94,25 +94,28 @@ function renderFolderIcon({
   size?: 16 | 24
 }): React.ReactElement {
   if (component && typeof component === 'object') {
-    return <FolderIcon className={getClassName({ component })} />
+    return <FolderIcon {...getFolderIconProps({ clientProps: component.clientProps })} />
   }
 
   return <FolderIcon size={size} />
 }
 
-/**
- * `FolderIcon` is rendered directly, so pass on the one prop it supports from `clientProps`.
- */
-function getClassName({ component }: { component?: PayloadComponent }): string | undefined {
-  if (!component || typeof component !== 'object') {
-    return undefined
+function getFolderIconProps({ clientProps }: { clientProps?: object }): {
+  className?: string
+  size?: 16 | 24
+} {
+  if (!clientProps) {
+    return {}
   }
 
-  const { clientProps } = component
+  const className =
+    'className' in clientProps && typeof clientProps.className === 'string'
+      ? clientProps.className
+      : undefined
+  const size =
+    'size' in clientProps && (clientProps.size === 16 || clientProps.size === 24)
+      ? clientProps.size
+      : undefined
 
-  if (!clientProps || !('className' in clientProps)) {
-    return undefined
-  }
-
-  return typeof clientProps.className === 'string' ? clientProps.className : undefined
+  return { className, size }
 }
