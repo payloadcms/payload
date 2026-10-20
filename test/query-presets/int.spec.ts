@@ -228,6 +228,39 @@ describe('Query Presets', () => {
       }
     })
 
+    it('should not duplicate the current user when saving "specificUsers"', async () => {
+      const access = {
+        update: {
+          constraint: 'specificUsers' as const,
+          users: [adminUser.id, editorUser.id],
+        },
+      }
+
+      const preset = await payload.create({
+        collection: queryPresetsCollectionSlug,
+        user: adminUser,
+        overrideAccess: false,
+        data: {
+          title: 'Specific Users (No Duplicates)',
+          access,
+          relatedCollection: 'pages',
+        },
+      })
+
+      const updatedPreset = await payload.update({
+        collection: queryPresetsCollectionSlug,
+        id: preset.id,
+        user: adminUser,
+        overrideAccess: false,
+        depth: 0,
+        data: {
+          access,
+        },
+      })
+
+      expect(updatedPreset.access?.update?.users).toEqual([adminUser.id, editorUser.id])
+    })
+
     it('should respect access when set to "onlyMe"', async () => {
       const presetForOnlyMe = await payload.create({
         collection: queryPresetsCollectionSlug,
