@@ -1,0 +1,62 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`withPayload > server externals > should externalize server packages by default in development and honor the bundle opt-in > development 1`] = `
+[
+  "custom-server-dependency",
+  "graphql",
+  "graphql",
+  "drizzle-kit",
+  "drizzle-kit/api",
+  "sharp",
+  "libsql",
+  "require-in-the-middle",
+  "json-schema-to-typescript",
+  "pino",
+  "file-type",
+  "payload",
+  "@payloadcms/db-mongodb",
+  "@payloadcms/db-postgres",
+  "@payloadcms/db-sqlite",
+  "@payloadcms/db-vercel-postgres",
+  "@payloadcms/db-d1-sqlite",
+  "@payloadcms/drizzle",
+  "@payloadcms/email-nodemailer",
+  "@payloadcms/email-resend",
+  "@payloadcms/graphql",
+  "@payloadcms/kv-redis",
+  "@payloadcms/payload-cloud",
+  "@payloadcms/plugin-mcp",
+  "@payloadcms/plugin-nested-docs",
+  "@payloadcms/plugin-redirects",
+  "@payloadcms/transformer-sharp",
+  "@payloadcms/translations",
+]
+`;
+
+exports[`withPayload > server externals > should preserve production externals and Webpack exceptions regardless of the dev option > production 1`] = `
+[
+  "custom-server-dependency",
+  "graphql",
+  "graphql",
+  "drizzle-kit",
+  "drizzle-kit/api",
+  "sharp",
+  "libsql",
+  "require-in-the-middle",
+  "json-schema-to-typescript",
+  "pino",
+  "file-type",
+]
+`;
+
+exports[`withPayload > server externals > should preserve production externals and Webpack exceptions regardless of the dev option > webpack 1`] = `
+[
+  "custom-webpack-external",
+  "drizzle-kit",
+  "drizzle-kit/api",
+  "sharp",
+  "libsql",
+  "require-in-the-middle",
+  "json-schema-to-typescript",
+]
+`;
