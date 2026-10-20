@@ -74,7 +74,7 @@ export const duplicateDocumentTool = defineCollectionTool({
           text: `Document duplicated successfully in collection "${slug}"!\nDuplicated document:\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
         },
       ],
-      doc: result as Record<string, unknown>,
+      doc: result,
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'

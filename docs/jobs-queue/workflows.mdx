@@ -250,12 +250,8 @@ handler: async ({ job, tasks }) => {
 job.taskStatus = {
   [taskSlug]: {
     [taskId]: {
-      input: {
-        /* the input you passed */
-      },
-      output: {
-        /* the output returned by the task */
-      },
+      input: {/* the input you passed */},
+      output: {/* the output returned by the task */},
       complete: true,
       totalTried: 1,
     },
@@ -303,9 +299,7 @@ await tasks.addToMailingList('add-to-list', { input })
 // Passing large objects
 await tasks.processUser('process', {
   input: {
-    user: {
-      /* entire user object with all fields */
-    },
+    user: {/* entire user object with all fields */},
   },
 })
 

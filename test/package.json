@@ -13,16 +13,6 @@
     "typecheck": "pnpm turbo build --filter payload-test-suite && tsc --project tsconfig.typecheck.json",
     "typecheck:app-tanstack": "pnpm -C .. exec tsc --project test/app-tanstack/tsconfig.json && pnpm -C .. exec tsc --project test/admin-bar/app-tanstack/tsconfig.json && pnpm -C .. exec tsc --project test/live-preview/app-tanstack/tsconfig.json"
   },
-  "lint-staged": {
-    "**/package.json": "sort-package-json",
-    "*.{md,mdx,yml,json}": "prettier --write",
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --flag v10_config_lookup_from_file --cache --fix",
-      "prettier --write"
-    ],
-    "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --ignore-workspace --frozen-lockfile; pnpm run lint --fix\"",
-    "tsconfig.json": "node scripts/reset-tsconfig.js"
-  },
   "dependencies": {
     "recharts": "3.2.1"
   },
@@ -47,8 +37,6 @@
     "@payloadcms/drizzle": "workspace:*",
     "@payloadcms/email-nodemailer": "workspace:*",
     "@payloadcms/email-resend": "workspace:*",
-    "@payloadcms/eslint-config": "workspace:*",
-    "@payloadcms/eslint-plugin": "workspace:*",
     "@payloadcms/figma": "latest",
     "@payloadcms/graphql": "workspace:*",
     "@payloadcms/kv-redis": "workspace:*",
@@ -102,7 +90,6 @@
     "drizzle-kit": "0.31.7",
     "drizzle-orm": "0.44.7",
     "escape-html": "1.0.3",
-    "eslint-plugin-playwright": "2.3.0",
     "execa": "5.1.1",
     "file-type": "22.0.1",
     "http-status": "2.1.0",
@@ -129,5 +116,15 @@
     "vitest": "5.0.1",
     "wrangler": "~4.61.1",
     "zod": "^4.2.0"
+  },
+  "lint-staged": {
+    "*.{cjs,css,cts,graphql,html,json,jsonc,md,mdx,mjs,mts,scss,toml,yaml,yml}": "oxfmt --no-error-on-unmatched-pattern",
+    ".swcrc": "oxfmt --no-error-on-unmatched-pattern",
+    "*.{js,jsx,ts,tsx}": [
+      "oxlint -c ../oxlint.config.ts --fix --no-error-on-unmatched-pattern",
+      "oxfmt --no-error-on-unmatched-pattern"
+    ],
+    "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --ignore-workspace --frozen-lockfile; pnpm run lint --fix\"",
+    "tsconfig.json": "node scripts/reset-tsconfig.js"
   }
 }

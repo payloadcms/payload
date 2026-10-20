@@ -6,6 +6,7 @@
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "type": "module",
+  "main": "src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts",
@@ -23,14 +24,10 @@
       "default": "./src/utils/*.ts"
     }
   },
-  "main": "src/index.ts",
   "scripts": {
     "build": "tsc",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "list-published": "tsx src/list-published.ts",
     "publish-prerelease": "tsx src/publish-prerelease.ts",
-    "release": "tsx src/release.ts",
     "release-bump": "tsx src/release-bump.ts",
     "release-ci": "tsx src/release-ci.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -43,13 +40,11 @@
     "execa": "5.1.1",
     "minimist": "1.2.8",
     "p-limit": "^5.0.0",
-    "prompts": "2.4.2",
     "semver": "^7.5.4",
     "tsx": "^4.19.2"
   },
   "devDependencies": {
     "@types/minimist": "1.2.5",
-    "@types/prompts": "^2.4.5",
     "@types/semver": "^7.5.3",
     "npm": "11.21.0"
   }

@@ -827,7 +827,8 @@ export type SanitizedJoins = {
  * preserve their incoming optionality.
  */
 export interface SanitizedCollectionConfig
-  extends Omit<
+  extends
+    Omit<
       CollectionConfig,
       | '_sanitized'
       | 'access'
