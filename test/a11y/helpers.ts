@@ -845,7 +845,16 @@ export async function openLLMInstructions({ page, serverURL }: { page: Page; ser
 
 export async function prepareSignInPage({ page, serverURL }: { page: Page; serverURL: string }) {
   await page.context().clearCookies()
-  await page.setExtraHTTPHeaders({ DisableAutologin: 'true' })
+  const serverOrigin = new URL(serverURL).origin
+
+  await page.route(
+    (url) => url.origin === serverOrigin,
+    async (route) => {
+      await route.continue({
+        headers: { ...route.request().headers(), DisableAutologin: 'true' },
+      })
+    },
+  )
   await initPage({ noAutoLogin: true, page, serverURL })
   const loginURL = formatAdminURL({ adminRoute: '/admin', path: '/login', serverURL })
 
