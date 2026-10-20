@@ -214,10 +214,18 @@ export const populateFieldPermissions = ({
             blockPermission.fields = {}
           }
 
-          // Handle block references with caching - store as promise that will be resolved later
-          if (typeof _block === 'string' && !blockReferencesPermissions[_block]) {
-            // Mark this block as being processed by storing a reference
-            blockReferencesPermissions[_block] = blockPermission
+          if (typeof _block === 'string') {
+            const blockReferencePermissions = blockReferencesPermissions[_block]
+
+            // Skip only when this block uses the cached object, which is already populated. A block that
+            // got its own object before an earlier block of this field cached it must still be walked.
+            if (blockReferencePermissions === blockPermission) {
+              continue
+            }
+
+            if (!blockReferencePermissions) {
+              blockReferencesPermissions[_block] = blockPermission
+            }
           }
 
           // Recursively process block fields synchronously
