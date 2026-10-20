@@ -105,7 +105,6 @@ export default buildConfigWithDefaults({
       hooks: {
         beforeMerge: (args) => hookSpy.beforeMerge?.(args),
       },
-      maxShadowedIDs: 1,
       validate: (args) =>
         hookSpy.branchValidation
           ? hookSpy.branchValidation(args)

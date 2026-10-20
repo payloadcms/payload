@@ -137,12 +137,6 @@ export const resolveBranchQuery = async ({
   // constraint has to be redirected before the branch predicate is applied.
   const rewritten = rewriteBranchIDs(where ?? {})
 
-  if (shadowedIDs.length > branching.maxShadowedIDs) {
-    req.payload.logger.warn(
-      `Branch "${branch}" has shadowed ${shadowedIDs.length} documents in "${collectionSlug}", above maxShadowedIDs (${branching.maxShadowedIDs}). Read performance will degrade.`,
-    )
-  }
-
   return appendBranchFilter({
     branch,
     deletedIDs,

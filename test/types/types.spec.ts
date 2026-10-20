@@ -57,6 +57,7 @@ import type {
   PayloadServerComponentProps,
   PayloadTypesShape,
   RowField,
+  SanitizedBranchingConfig,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   SelectType,
@@ -141,6 +142,11 @@ import type {
 
 describe('Types testing', () => {
   describe('branching', () => {
+    test('should not expose a shadowed-ID threshold in branching config', () => {
+      expect<'maxShadowedIDs'>().type.not.toBeAssignableTo<keyof BranchingConfig>()
+      expect<'maxShadowedIDs'>().type.not.toBeAssignableTo<keyof SanitizedBranchingConfig>()
+    })
+
     test('should expose exact merge hook argument types', () => {
       type AfterMergeArgs = Parameters<
         NonNullable<NonNullable<BranchingConfig['hooks']>['afterMerge']>

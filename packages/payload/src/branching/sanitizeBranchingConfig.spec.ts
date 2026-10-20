@@ -27,6 +27,12 @@ describe('sanitizeBranchingConfig', () => {
     vi.restoreAllMocks()
   })
 
+  it.each([true, false])('should omit the removed threshold with branching %s', (enabled) => {
+    const config = { branching: enabled, collections: [] } as Config
+
+    expect(sanitizeBranchingConfig(config)).not.toHaveProperty('maxShadowedIDs')
+  })
+
   it('should use the default merge validator when branching is enabled as true', () => {
     const config = {
       branching: true,

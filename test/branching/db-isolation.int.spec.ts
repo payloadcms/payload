@@ -101,7 +101,7 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
   })
 
   test('should use database-native branch visibility for reads and joins', async ({ payload }) => {
-    const warningSpy = vi.spyOn(payload.logger, 'warn')
+    const findSpy = vi.spyOn(payload.db, 'find')
 
     try {
       const branch = await payload.create({
@@ -162,7 +162,7 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
         overrideAccess: true,
       })
 
-      warningSpy.mockClear()
+      findSpy.mockClear()
 
       const firstPage = await payload.find({
         branch: branch.slug,
@@ -223,6 +223,9 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
       expect(foundByID.id).toBe(second.id)
       expect(categoryWithPosts.posts.totalDocs).toBe(4)
       expect(categoryWithPosts.posts.docs.map((doc) => doc.title)).toEqual(visibleTitles)
+      expect(findSpy).not.toHaveBeenCalledWith(
+        expect.objectContaining({ collection: branchChangesSlug }),
+      )
 
       const versionedMainDocs = await Promise.all(
         ['versioned first', 'versioned second'].map((title) =>
@@ -246,7 +249,7 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
         })
       }
 
-      warningSpy.mockClear()
+      findSpy.mockClear()
 
       const versionedOnBranch = await payload.find({
         branch: branch.slug,
@@ -261,9 +264,11 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
         'branch versioned 2',
       ])
       expect(versionedOnBranch.totalDocs).toBe(2)
-      expect(warningSpy).not.toHaveBeenCalledWith(expect.stringContaining('above maxShadowedIDs'))
+      expect(findSpy).not.toHaveBeenCalledWith(
+        expect.objectContaining({ collection: branchChangesSlug }),
+      )
     } finally {
-      warningSpy.mockRestore()
+      findSpy.mockRestore()
     }
   })
 
