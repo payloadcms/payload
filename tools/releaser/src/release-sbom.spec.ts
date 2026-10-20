@@ -9,7 +9,6 @@ import type { ReleaseSbomDeps } from './release-sbom.js'
 
 import { cdx, spdxDoc } from './lib/sbom/fixtures.js'
 import { SPDX_ROOT_SUPPLIER } from './lib/sbom/setSpdxRootSupplier.js'
-import { BUNDLE_LABEL } from './lib/sbom/writeReleaseBundle.js'
 import { runReleaseSbom } from './release-sbom.js'
 
 const VERSION = '4.0.0-beta.3'
@@ -87,11 +86,11 @@ describe('runReleaseSbom', () => {
     ...overrides,
   })
 
-  it('should write the bundle folder, its zip and the manifest', async () => {
+  it('should write the bundle folder and its zip', async () => {
     const { fileCount } = await runReleaseSbom({ deps: makeDeps(), outDir })
 
     expect(fileCount).toBe(4)
-    expect(fs.readdirSync(outDir).sort()).toEqual([BUNDLE, `${BUNDLE}.zip`, 'sbom-manifest.json'])
+    expect(fs.readdirSync(outDir).sort()).toEqual([BUNDLE, `${BUNDLE}.zip`])
     expect(fs.readdirSync(bundleDir).sort()).toEqual([
       'SHA256SUMS',
       'payload-4.0.0-beta.3.cdx.json',
@@ -107,14 +106,6 @@ describe('runReleaseSbom', () => {
     const { stdout } = await execa('unzip', ['-Z1', path.join(outDir, `${BUNDLE}.zip`)])
 
     expect(stdout.split('\n').filter((entry) => !entry.endsWith('/'))).toHaveLength(5)
-  })
-
-  it('should list only the zip in the manifest', async () => {
-    await runReleaseSbom({ deps: makeDeps(), outDir })
-
-    const manifest = JSON.parse(fs.readFileSync(path.join(outDir, 'sbom-manifest.json'), 'utf8'))
-
-    expect(manifest).toEqual({ assets: [{ file: `${BUNDLE}.zip`, label: BUNDLE_LABEL }] })
   })
 
   it('should set the SPDX root supplier', async () => {

@@ -5,7 +5,7 @@ import os from 'os'
 import path from 'path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { BUNDLE_LABEL, toBundleName, writeReleaseBundle } from './writeReleaseBundle.js'
+import { toBundleName, writeReleaseBundle } from './writeReleaseBundle.js'
 
 const VERSION = '4.0.0-beta.3'
 
@@ -58,12 +58,12 @@ describe('writeReleaseBundle', () => {
     ])
   })
 
-  it('should write a manifest that lists only the zip', async () => {
-    const { manifestPath } = await writeReleaseBundle({ files, outDir, version: VERSION })
+  it('should write only the zip next to the bundle folder', async () => {
+    await writeReleaseBundle({ files, outDir, version: VERSION })
 
-    expect(manifestPath).toBe(path.join(outDir, 'sbom-manifest.json'))
-    expect(JSON.parse(fs.readFileSync(manifestPath, 'utf8'))).toEqual({
-      assets: [{ file: 'payload-sboms-4.0.0-beta.3.zip', label: BUNDLE_LABEL }],
-    })
+    expect(fs.readdirSync(outDir).sort()).toEqual([
+      'payload-sboms-4.0.0-beta.3',
+      'payload-sboms-4.0.0-beta.3.zip',
+    ])
   })
 })

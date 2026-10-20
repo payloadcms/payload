@@ -1,8 +1,8 @@
 /**
  * Writes one CycloneDX 1.6 and one SPDX 2.3 SBOM per published package, plus
- * `SHA256SUMS`, into `payload-sboms-<version>/` in an empty output dir. Zips that
- * folder and writes `sbom-manifest.json`, which lists the zip as the release asset.
- * Fails on any check problem, so a bad SBOM never reaches a release.
+ * `SHA256SUMS`, into `payload-sboms-<version>/` in an empty output dir, then zips
+ * that folder as the release asset. Fails on any check problem, so a bad SBOM never
+ * reaches a release.
  *
  * Usage: pnpm release-sbom --out-dir <absolute dir>
  *
