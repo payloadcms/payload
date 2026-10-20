@@ -17,6 +17,9 @@ import {
   accessJoinParentsSlug,
   categoriesJoinRestrictedSlug,
   categoriesSlug,
+  multipleCollectionsMany1Slug,
+  multipleCollectionsMany2Slug,
+  multipleCollectionsManyParentsSlug,
   operatorHandlerJoinArticlesSlug,
   operatorHandlerJoinNotesSlug,
   operatorHandlerJoinParentsSlug,
@@ -2085,6 +2088,97 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
 
       expect(parent.children.docs).toHaveLength(2)
       expect(parent.children?.hasNextPage).toBe(false)
+    })
+  })
+
+  test.describe('Array of collection with hasMany relationship', () => {
+    test('should join across multiple collections through a hasMany relationship field', async ({
+      payload,
+    }) => {
+      const newsParent = await payload.create({
+        collection: multipleCollectionsManyParentsSlug,
+        data: { name: 'news' },
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      const sportParent = await payload.create({
+        collection: multipleCollectionsManyParentsSlug,
+        data: { name: 'sport' },
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      const child1 = await payload.create({
+        collection: multipleCollectionsMany1Slug,
+        data: {
+          parents: [newsParent.id, sportParent.id],
+          title: 'child-1',
+        },
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      const child2 = await payload.create({
+        collection: multipleCollectionsMany2Slug,
+        data: {
+          parents: [newsParent.id],
+          title: 'child-2',
+        },
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      const parent = await payload.findByID({
+        id: newsParent.id,
+        collection: multipleCollectionsManyParentsSlug,
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      expect(parent.children.totalDocs).toBe(2)
+
+      const child1Reference = parent.children.docs.find(
+        ({ relationTo }) => relationTo === multipleCollectionsMany1Slug,
+      )
+      const child2Reference = parent.children.docs.find(
+        ({ relationTo }) => relationTo === multipleCollectionsMany2Slug,
+      )
+
+      expect(child1Reference?.value).toBe(child1.id)
+      expect(child2Reference?.value).toBe(child2.id)
+
+      const otherParent = await payload.findByID({
+        id: sportParent.id,
+        collection: multipleCollectionsManyParentsSlug,
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      expect(otherParent.children.totalDocs).toBe(1)
+      expect(otherParent.children.docs[0]?.relationTo).toBe(multipleCollectionsMany1Slug)
+      expect(otherParent.children.docs[0]?.value).toBe(child1.id)
+    })
+
+    test('should return no joined docs when nothing references the parent through the hasMany field', async ({
+      payload,
+    }) => {
+      const parent = await payload.create({
+        collection: multipleCollectionsManyParentsSlug,
+        data: { name: 'empty' },
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      const found = await payload.findByID({
+        id: parent.id,
+        collection: multipleCollectionsManyParentsSlug,
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      expect(found.children.docs).toHaveLength(0)
+      expect(found.children.totalDocs).toBe(0)
     })
   })
 

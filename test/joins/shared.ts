@@ -14,6 +14,12 @@ export const operatorHandlerJoinParentsSlug = 'operator-handler-join-parents'
 
 export const categories2Slug = 'categories-2'
 
+export const multipleCollectionsManyParentsSlug = 'multiple-collections-many-parents'
+
+export const multipleCollectionsMany1Slug = 'multiple-collections-many-1'
+
+export const multipleCollectionsMany2Slug = 'multiple-collections-many-2'
+
 export const postsSlug = 'posts'
 
 export const hiddenPostsSlug = 'hidden-posts'

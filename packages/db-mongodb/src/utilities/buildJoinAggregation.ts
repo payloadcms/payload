@@ -143,8 +143,6 @@ export const buildJoinAggregation = async ({
                 $expr: buildMultiCollectionJoinMatch(
                   join.field.on,
                   Array.isArray(join.targetField.relationTo),
-                  // the stored `{ relationTo, value }` reference must point
-                  // back at the parent (aggregation root) collection
                   collection,
                 ),
               },
