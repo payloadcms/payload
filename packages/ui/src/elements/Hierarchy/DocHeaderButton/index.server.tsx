@@ -35,31 +35,27 @@ export const HierarchyButton: React.FC<HierarchyButtonServerProps> = ({
   // Important: Must render the icon here on server to avoid hydration mismatch
   // For default FolderIcon path, render directly to avoid import map requirement
   const isDefaultFolderIcon = isFolderIcon({ component: IconComponent })
-  const renderedIcon = isDefaultFolderIcon ? (
-    <FolderIcon className={getClassName({ component: IconComponent })} size={16} />
-  ) : (
-    RenderServerComponent({
-      Component: IconComponent,
-      importMap: payload.importMap,
-      key: `hierarchy-button-icon-${hierarchyCollectionSlug}`,
-    })
-  )
+  const renderedIcon = isDefaultFolderIcon
+    ? renderFolderIcon({ component: IconComponent, size: 16 })
+    : RenderServerComponent({
+        Component: IconComponent,
+        importMap: payload.importMap,
+        key: `hierarchy-button-icon-${hierarchyCollectionSlug}`,
+      })
 
   // Render the small icon for compact display (pill button)
   // Reuse the full icon if SmallIcon is the same component
   const isDefaultSmallIcon = isFolderIcon({ component: SmallIconComponent })
   const renderedSmallIcon =
-    SmallIconComponent === IconComponent ? (
-      renderedIcon
-    ) : isDefaultSmallIcon ? (
-      <FolderIcon className={getClassName({ component: SmallIconComponent })} />
-    ) : (
-      RenderServerComponent({
-        Component: SmallIconComponent,
-        importMap: payload.importMap,
-        key: `hierarchy-button-small-icon-${hierarchyCollectionSlug}`,
-      })
-    )
+    SmallIconComponent === IconComponent
+      ? renderedIcon
+      : isDefaultSmallIcon
+        ? renderFolderIcon({ component: SmallIconComponent })
+        : RenderServerComponent({
+            Component: SmallIconComponent,
+            importMap: payload.importMap,
+            key: `hierarchy-button-small-icon-${hierarchyCollectionSlug}`,
+          })
 
   return (
     <HierarchyButtonClient
@@ -84,6 +80,24 @@ function isFolderIcon({ component }: { component?: PayloadComponent }): boolean 
   const { exportName, path } = parsePayloadComponent(component)
 
   return path === '@payloadcms/ui' && exportName === 'FolderIcon'
+}
+
+/**
+ * Renders the default folder icon without the import map. The object form gets what the import map
+ * would have rendered: `FolderIcon` at its default size with the `className` from `clientProps`.
+ */
+function renderFolderIcon({
+  component,
+  size,
+}: {
+  component?: PayloadComponent
+  size?: 16 | 24
+}): React.ReactElement {
+  if (component && typeof component === 'object') {
+    return <FolderIcon className={getClassName({ component })} />
+  }
+
+  return <FolderIcon size={size} />
 }
 
 /**
