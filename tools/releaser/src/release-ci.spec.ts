@@ -20,7 +20,6 @@ const baseDeps = () => ({
     publish: vi.fn(async () => {}),
     version: vi.fn(async () => '4.0.0-beta.10'),
   },
-  writeSummary: vi.fn(),
 })
 
 const makeDeps = (
@@ -71,27 +70,6 @@ describe('runReleaseCi', () => {
     const draftOrder = deps.createDraftGitHubRelease.mock.invocationCallOrder[0]
     expect(tagOrder).toBeGreaterThan(publishOrder)
     expect(draftOrder).toBeGreaterThan(tagOrder)
-  })
-
-  it('should write the draft URL and SBOM reminder to the job summary after creating the draft', async () => {
-    const deps = makeDeps()
-
-    await runReleaseCi({ deps, dryRun: false })
-
-    expect(deps.writeSummary).toHaveBeenCalledWith(
-      'Draft release: https://gh/release\n\nSBOMs attach in the `attach-sboms` job. Wait for it to pass before you publish the draft.',
-    )
-    expect(deps.writeSummary.mock.invocationCallOrder[0]).toBeGreaterThan(
-      deps.createDraftGitHubRelease.mock.invocationCallOrder[0] ?? Infinity,
-    )
-  })
-
-  it('should not write the job summary in dry-run', async () => {
-    const deps = makeDeps()
-
-    await runReleaseCi({ deps, dryRun: true })
-
-    expect(deps.writeSummary).not.toHaveBeenCalled()
   })
 
   it('should retry a failed dist-tag once', async () => {

@@ -17,9 +17,6 @@ export async function attachSboms({ core, dir, github, owner, repo, tag }) {
   }
 
   const release = await findReleaseByTag({ github, owner, repo, tag })
-  if (!release.draft) {
-    core.warning(`${tag} is already published; uploading anyway`)
-  }
 
   const existingAssets = await github.paginate(github.rest.repos.listReleaseAssets, {
     owner,

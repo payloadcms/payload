@@ -23,7 +23,6 @@ import { getWorkspace } from './lib/getWorkspace.js'
 import { listReleaseTags } from './lib/listReleaseTags.js'
 import { PINNED_MAJOR } from './lib/pinnedMajor.js'
 import { isPreid, PREIDS } from './lib/preids.js'
-import { writeStepSummary } from './lib/writeStepSummary.js'
 import { createDraftGitHubRelease } from './utils/createDraftGitHubRelease.js'
 import { generateReleaseNotes } from './utils/generateReleaseNotes.js'
 
@@ -58,8 +57,6 @@ type ReleaseCiDeps = {
   /** Tag that triggered the workflow (`GITHUB_REF_NAME`). Required unless dry-run. */
   triggerTag: string | undefined
   workspace: Pick<Workspace, 'build' | 'publish' | 'version'>
-  /** Appends markdown to the GitHub Actions job summary */
-  writeSummary: (markdown: string) => void
 }
 
 export const runReleaseCi = async ({
@@ -78,7 +75,6 @@ export const runReleaseCi = async ({
     log,
     triggerTag,
     workspace,
-    writeSummary,
   } = deps
 
   // Fail fast before publishing: release notes and the draft release both need a
@@ -159,10 +155,6 @@ export const runReleaseCi = async ({
     tag: releaseTag,
   })
   log(`Draft release: ${draftUrl}`)
-  // Publishing the draft before `attach-sboms` passes ships a release without SBOMs.
-  writeSummary(
-    `Draft release: ${draftUrl}\n\nSBOMs attach in the \`attach-sboms\` job. Wait for it to pass before you publish the draft.`,
-  )
 }
 
 async function main(): Promise<void> {
@@ -184,8 +176,6 @@ async function main(): Promise<void> {
       log: console.log,
       triggerTag: process.env.GITHUB_REF_NAME,
       workspace: getWorkspace(),
-      writeSummary: (markdown) =>
-        writeStepSummary({ markdown, summaryPath: process.env.GITHUB_STEP_SUMMARY }),
     },
     dryRun,
   })

@@ -132,13 +132,11 @@ describe('attachSboms', () => {
     expect(github.rest.repos.uploadReleaseAsset).not.toHaveBeenCalled()
   })
 
-  it('warns but uploads when the release is published', async () => {
-    const core = makeCore()
+  it('uploads when the release is published', async () => {
     const github = makeGithub({ releasePages: [[release({ draft: false })]] })
 
-    await run({ core, github })
+    await run({ github })
 
-    expect(core.warning).toHaveBeenCalledWith(expect.stringContaining(TAG))
     expect(github.rest.repos.uploadReleaseAsset).toHaveBeenCalledOnce()
   })
 
