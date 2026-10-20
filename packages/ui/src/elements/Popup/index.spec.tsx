@@ -1,9 +1,145 @@
 import type { CSSProperties } from 'react'
 
 import { expect, test } from 'vitest'
+import { page, userEvent } from 'vitest/browser'
 import { render } from 'vitest-browser-react'
 
 import { Popup, PopupList } from './index.js'
+
+test.each([
+  { direction: 'left', hasFineMovement: true, shouldExpire: false, side: 'left', width: 1000 },
+  { direction: 'right', hasFineMovement: true, shouldExpire: false, side: 'right', width: 1000 },
+  {
+    direction: 'left after flipping',
+    hasFineMovement: true,
+    shouldExpire: false,
+    side: 'right',
+    width: 414,
+  },
+  {
+    direction: 'right in one movement',
+    hasFineMovement: false,
+    shouldExpire: false,
+    side: 'right',
+    width: 1000,
+  },
+  {
+    direction: 'left until pausing over a sibling',
+    hasFineMovement: false,
+    shouldExpire: true,
+    side: 'left',
+    width: 1000,
+  },
+  {
+    direction: 'right until pausing over a sibling',
+    hasFineMovement: false,
+    shouldExpire: true,
+    side: 'right',
+    width: 1000,
+  },
+] as const)(
+  'should protect slow diagonal movement toward a submenu opening to the $direction',
+  async ({ direction, hasFineMovement, shouldExpire, side, width }) => {
+    await page.viewport(width, 720)
+
+    const screen = await render(
+      <div
+        data-testid="pointer-surface"
+        style={{ inset: 0, padding: '64px 300px', position: 'fixed' }}
+      >
+        <Popup button="Root" popupType="menu" size="large" theme="auto">
+          <PopupList.MenuItem>
+            {['Theme', 'Language'].map((label) => (
+              <Popup
+                hoverSubmenu
+                key={label}
+                popupAriaLabel={`${label} menu`}
+                popupType="menu"
+                renderButton={(buttonProps) => (
+                  <PopupList.SubmenuTrigger buttonProps={buttonProps}>
+                    {label}
+                  </PopupList.SubmenuTrigger>
+                )}
+                side={side}
+                theme="auto"
+              >
+                {Array.from({ length: 8 }, (_, index) => (
+                  <PopupList.Button key={index} onClick={() => {}}>
+                    {`${label} option ${index}`}
+                  </PopupList.Button>
+                ))}
+              </Popup>
+            ))}
+          </PopupList.MenuItem>
+        </Popup>
+      </div>,
+    )
+
+    await screen.getByRole('button', { name: 'Root' }).click()
+    const theme = screen.getByRole('menuitem', { name: 'Theme', exact: true })
+    const language = screen.getByRole('menuitem', { name: 'Language', exact: true })
+
+    await theme.hover()
+    await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
+
+    const triggerBox = theme.element().getBoundingClientRect()
+    const siblingBox = language.element().getBoundingClientRect()
+    const menuBox = screen
+      .getByRole('menu', { name: 'Theme menu' })
+      .element()
+      .getBoundingClientRect()
+    const startX = triggerBox.left + triggerBox.width / 2
+    const isOnLeft = direction.startsWith('left')
+    const edgeX = isOnLeft ? menuBox.right : menuBox.left
+    const diagonalPoint = {
+      x: startX + (edgeX - startX) * 0.85,
+      y: siblingBox.top + siblingBox.height / 2,
+    }
+
+    expect(isOnLeft ? menuBox.right < startX : menuBox.left > startX).toBe(true)
+
+    const startY = triggerBox.top + triggerBox.height / 2
+    const steps = hasFineMovement ? Math.ceil(Math.abs(diagonalPoint.x - startX)) : 1
+
+    // Keep moving by at most one horizontal pixel per event, even when crossing
+    // the corridor takes longer than its 300 ms inactivity timeout.
+    for (let step = 1; step <= steps; step++) {
+      await userEvent.hover(screen.getByTestId('pointer-surface'), {
+        force: true,
+        position: {
+          x: startX + ((diagonalPoint.x - startX) * step) / steps,
+          y: startY + ((diagonalPoint.y - startY) * step) / steps,
+        },
+      })
+    }
+    if (shouldExpire) {
+      await expect
+        .poll(
+          () =>
+            document
+              .elementFromPoint(diagonalPoint.x, diagonalPoint.y)
+              ?.closest('[role="menuitem"]')?.textContent,
+        )
+        .toBe('Language')
+      await expect.element(language).toHaveAttribute('aria-expanded', 'true')
+      await expect.element(theme).toHaveAttribute('aria-expanded', 'false')
+      return
+    }
+
+    expect(document.elementFromPoint(diagonalPoint.x, diagonalPoint.y)).toBe(
+      screen.getByRole('menu', { name: 'Theme menu' }).element(),
+    )
+    await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
+    await expect.element(language).toHaveAttribute('aria-expanded', 'false')
+    await screen.getByRole('menuitem', { name: 'Theme option 7' }).hover()
+    await new Promise((resolve) => setTimeout(resolve, 350))
+    await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
+
+    // Once inside the child, returning to a sibling must not be blocked by the corridor.
+    await language.hover()
+    await expect.element(language).toHaveAttribute('aria-expanded', 'true')
+  },
+)
 
 test('should preserve ancestor menus while nested hover menus are active', async () => {
   const screen = await render(

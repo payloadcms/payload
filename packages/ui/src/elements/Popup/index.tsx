@@ -247,6 +247,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
   }, [closePopup, contentId, isSubmenu, openFromParent, parentPopup])
 
   const pointerIntent = useSubmenuPointerIntent({
+    active,
     contentRef: popupRef,
     enabled: isSubmenu && hoverSubmenu,
     onClose: () => setActive(false),
@@ -255,6 +256,24 @@ export const Popup: React.FC<PopupProps> = (props) => {
         id: contentId,
         delay: Boolean(parentPopup.submenuScope.activeChildId),
       }),
+    onSafeAreaExpire: ({ x, y }) => {
+      const target = document.elementFromPoint(x, y)
+      const parentContent = parentPopup?.popupRef.current
+
+      if (parentContent && target?.closest(POPUP_CONTENT_SELECTOR) === parentContent) {
+        const trigger = target
+          .closest('.popup__submenu-hover-watch')
+          ?.querySelector<HTMLElement>('[aria-haspopup="menu"][aria-controls]')
+        const siblingId = trigger?.getAttribute('aria-controls')
+
+        if (siblingId && trigger?.getAttribute('aria-disabled') !== 'true') {
+          parentPopup?.submenuScope.requestOpen({ id: siblingId, delay: false })
+          return
+        }
+      }
+
+      setActive(false)
+    },
   })
 
   // /////////////////////////////////////
@@ -423,6 +442,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     if (popup.style.getPropertyValue('--caret-left') !== newCaretLeft) {
       popup.style.setProperty('--caret-left', newCaretLeft)
     }
+    pointerIntent.updateSafeArea()
   })
 
   // /////////////////////////////////////
@@ -715,7 +735,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
             {Trigger}
           </div>
         ) : hoverSubmenu && isSubmenu ? (
-          <div {...pointerIntent} className={`${baseClass}__submenu-hover-watch`}>
+          <div {...pointerIntent.triggerProps} className={`${baseClass}__submenu-hover-watch`}>
             {Trigger}
           </div>
         ) : (
@@ -724,9 +744,8 @@ export const Popup: React.FC<PopupProps> = (props) => {
       </div>
 
       <PopupContext value={{ closePopupChain, popupRef, popupRole, submenuScope }}>
-        {/* The menu surface tracks pointer intent while preserving its menu semantics. */}
-        {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
         <div
+          {...pointerIntent.contentProps}
           aria-label={popupAriaLabel}
           className={
             active
@@ -749,8 +768,6 @@ export const Popup: React.FC<PopupProps> = (props) => {
           data-popup-id={id || undefined}
           data-theme={theme === 'auto' ? undefined : theme}
           id={contentId}
-          onMouseEnter={pointerIntent.onMouseEnter}
-          onMouseLeave={pointerIntent.onMouseLeave}
           popover="manual"
           ref={popupRef}
           role={popupRole}

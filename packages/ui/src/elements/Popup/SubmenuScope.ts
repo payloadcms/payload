@@ -86,6 +86,10 @@ export const createSubmenuScope = ({
         return
       }
 
+      if (pendingChildId === id) {
+        return
+      }
+
       cancelPending()
       pendingChildId = id
       pendingTimer = setTimeout(() => {
