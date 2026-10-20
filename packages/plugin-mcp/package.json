@@ -1,17 +1,12 @@
 {
   "name": "@payloadcms/plugin-mcp",
-  "version": "4.0.0-beta.1",
+  "version": "4.0.0-beta.3",
   "description": "MCP (Model Context Protocol) capabilities with Payload",
   "keywords": [
-    "plugin",
     "mcp",
-    "model context protocol"
+    "model context protocol",
+    "plugin"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/plugin-mcp"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -21,7 +16,22 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-mcp"
+  },
+  "bin": {
+    "payload-mcp": "./bin.js"
+  },
+  "files": [
+    "src",
+    "dist",
+    "bin.js"
+  ],
   "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts",
@@ -44,39 +54,9 @@
       "default": "./src/exports/internal.ts"
     }
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "bin": {
-    "payload-mcp": "./bin.js"
-  },
-  "files": [
-    "src",
-    "dist",
-    "bin.js"
-  ],
-  "scripts": {
-    "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
-    "build:debug": "pnpm build",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
-    "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "pack:plugin": "pnpm build && pnpm pack"
-  },
-  "dependencies": {
-    "@modelcontextprotocol/server": "2.3.1",
-    "tsx": "4.23.15"
-  },
-  "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
-    "payload": "workspace:*"
-  },
-  "peerDependencies": {
-    "payload": "workspace:*"
-  },
   "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "exports": {
       ".": {
         "import": "./dist/index.js",
@@ -98,9 +78,26 @@
         "types": "./dist/exports/internal.d.ts",
         "default": "./dist/exports/internal.js"
       }
-    },
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "pack:plugin": "pnpm build && pnpm pack"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.3.1",
+    "tsx": "4.23.15"
+  },
+  "devDependencies": {
+    "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "payload": "workspace:*"
   },
   "//deps_notes": {
     "tsx": "Required by the `bin.js` stdio mcp. Keep the version pinned to whatever `payload` ships to avoid duplicate installs."

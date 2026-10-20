@@ -4,16 +4,15 @@ import { getTranslation } from '@payloadcms/translations'
 import { UnauthorizedError } from 'payload'
 import { formatAdminURL, PREFERENCE_KEYS } from 'payload/shared'
 
-import type { RecentDocument } from './index.client.js'
 import type { PinnedItem } from './recents.js'
+import type { RecentDocument } from './types.js'
 
 import { formatRelativeDate, getRelativeTimeFormat } from '../../utilities/formatRelativeDate.js'
 import { getDocumentThumbnail } from '../../utilities/getDocumentThumbnail.js'
 import { getDocumentThumbnailPopulate } from '../../utilities/getDocumentThumbnailPopulate.js'
 import { getDocumentThumbnailSelect } from '../../utilities/getDocumentThumbnailSelect.js'
 import { enrichDocsWithVersionStatus } from '../../views/List/enrichDocsWithVersionStatus.js'
-import { getPinnedItems } from './pinnedPreferences.js'
-import { documentKey, getValueByPath } from './recents.js'
+import { documentKey, getPinnedItems, getValueByPath } from './recents.js'
 
 export type DocumentsTab = 'pinned' | 'recents'
 export type DocumentsPageArgs = {
@@ -73,8 +72,11 @@ export async function getDashboardDocuments({
   })
   const excluded = new Set(tab === 'recents' ? excludedCollections : [])
   const storedReferences = getPinnedItems({ value: preference.docs[0]?.value }).filter(
-    ({ collectionSlug }) =>
-      !excluded.has(collectionSlug) && req.payload.collections[collectionSlug],
+    ({ collectionSlug }) => {
+      const collection = req.payload.collections[collectionSlug]
+
+      return !excluded.has(collectionSlug) && collection && collection.config.admin.group !== false
+    },
   )
   const availableReferences = await getAvailableReferences({ references: storedReferences, req })
   const totalDocs = availableReferences.length

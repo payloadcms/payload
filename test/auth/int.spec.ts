@@ -628,7 +628,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       try {
         traverseFields({ fields: [], fillEmpty: false, ref: sharedData })
         transformForWrite({
-          adapter: payload.db as DrizzleAdapter,
+          adapter: payload.db,
           data: drizzleData,
           fields: [],
           tableName: 'session_users',
@@ -3074,7 +3074,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       expect(decodedRefreshed.sid).toStrictEqual(decoded.sid)
 
       expect(new Date(matchedSession?.expiresAt as unknown as string).getTime()).toBeLessThan(
-        new Date(matchedRefreshedSession?.expiresAt as unknown as string).getTime(),
+        new Date(matchedRefreshedSession?.expiresAt).getTime(),
       )
     })
 

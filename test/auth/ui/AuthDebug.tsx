@@ -4,7 +4,7 @@ import { useAuth } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
 
 export const AuthDebug: React.FC<UIField> = () => {
-  const [state, setState] = useState<User | null | undefined>()
+  const [state, setState] = useState<null | undefined | User>()
   const { user } = useAuth()
 
   useEffect(() => {

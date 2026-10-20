@@ -4766,9 +4766,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
     test('should respond with 404 instead of 500 for REST versions of a collection without versions', async ({
       restClient,
     }) => {
-      const response = await restClient.GET(
-        `/${versionsDisabledCollectionSlug}/versions`,
-      )
+      const response = await restClient.GET(`/${versionsDisabledCollectionSlug}/versions`)
 
       expect(response.status).toBe(404)
     })
@@ -4776,9 +4774,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
     test('should respond with 404 instead of 500 for a REST version by ID of a collection without versions', async ({
       restClient,
     }) => {
-      const response = await restClient.GET(
-        `/${versionsDisabledCollectionSlug}/versions/1`,
-      )
+      const response = await restClient.GET(`/${versionsDisabledCollectionSlug}/versions/1`)
 
       expect(response.status).toBe(404)
     })
