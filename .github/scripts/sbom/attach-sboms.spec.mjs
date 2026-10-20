@@ -162,6 +162,22 @@ describe('attachSboms', () => {
     expect(github.rest.repos.uploadReleaseAsset).not.toHaveBeenCalled()
   })
 
+  it.each([
+    ['a path outside dir', { file: '../../proc/self/environ', label: 'payload (CycloneDX 1.6)' }],
+    ['an unexpected file type', { file: 'install.sh', label: 'payload (CycloneDX 1.6)' }],
+    ['an unexpected label', { file: 'payload-4.0.0-beta.4.cdx.json', label: 'Download me' }],
+  ])('rejects a manifest entry with %s before any API call', async (_, entry) => {
+    writeFileSync(
+      path.join(dir, 'sbom-manifest.json'),
+      JSON.stringify({ assets: [...ASSETS, entry] }),
+    )
+    const github = makeGithub()
+
+    await expect(run({ github })).rejects.toThrow(/Unexpected manifest entry/)
+    expect(github.paginate.iterator).not.toHaveBeenCalled()
+    expect(github.rest.repos.uploadReleaseAsset).not.toHaveBeenCalled()
+  })
+
   it('writes the asset count and release URL to the job summary', async () => {
     const core = makeCore()
 

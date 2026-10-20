@@ -5,8 +5,18 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
+const SBOM_FILE = /^[a-z0-9][a-z0-9.-]*\.(cdx|spdx)\.json$/
+const SBOM_LABEL = /^(@[a-z0-9-]+\/)?[a-z0-9.-]+ \((CycloneDX 1\.6|SPDX 2\.3)\)$/
+
 export async function attachSboms({ core, dir, github, owner, repo, tag }) {
   const { assets } = JSON.parse(readFileSync(path.join(dir, 'sbom-manifest.json'), 'utf8'))
+  // The manifest comes from a job that runs installed dependency code; only SBOM-shaped
+  // names may reach the write token, so a tampered entry cannot read or publish other files.
+  const unexpected = assets.filter((asset) => !isExpectedAsset(asset))
+  if (unexpected.length > 0) {
+    throw new Error(`Unexpected manifest entry: ${JSON.stringify(unexpected)}`)
+  }
+
   const missing = assets.filter(({ file }) => !existsSync(path.join(dir, file)))
   if (missing.length > 0) {
     throw new Error(
@@ -68,4 +78,11 @@ async function findReleaseByTag({ github, owner, repo, tag }) {
     }
   }
   throw new Error(`No GitHub release found for ${tag}`)
+}
+
+function isExpectedAsset({ file, label }) {
+  if (file === 'SHA256SUMS') {
+    return label === 'SHA-256 checksums'
+  }
+  return SBOM_FILE.test(file) && SBOM_LABEL.test(label)
 }
