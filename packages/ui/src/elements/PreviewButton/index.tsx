@@ -50,6 +50,8 @@ export function PreviewButton() {
     >
       <Button
         buttonStyle="ghost"
+        // Passed directly so Button doesn't also add a native `title` next to the custom tooltip
+        extraButtonProps={{ 'aria-label': label }}
         icon={<LinkIcon size={24} />}
         id="preview-button"
         onClick={handleClick}

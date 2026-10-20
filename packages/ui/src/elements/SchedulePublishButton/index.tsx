@@ -68,6 +68,8 @@ export const SchedulePublishButton: React.FC<{ disabled?: boolean }> = ({ disabl
         <Button
           buttonStyle="ghost"
           disabled={disabled}
+          // Passed directly so Button doesn't also add a native `title` next to the custom tooltip
+          extraButtonProps={{ 'aria-label': label }}
           icon={<ScheduleIcon active={hasScheduledPublish} />}
           id="schedule-publish-button"
           onClick={() => toggleModal(drawerSlug)}
