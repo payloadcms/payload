@@ -69,11 +69,11 @@ async function main() {
 
   const shouldBuild = args['build']
 
-  const payloadVersion =
-    args['payload-version'] || (await getLatestPackageVersion({ packageName: 'payload' }))
-  if (!payloadVersion) {
-    throw new Error('Could not resolve the payload version for the templates')
-  }
+  const payloadVersion: string =
+    args['payload-version'] ||
+    JSON.parse(
+      await fs.readFile(path.resolve(PROJECT_ROOT, 'packages/payload/package.json'), 'utf8'),
+    ).version
   log(`Using payload version ${payloadVersion}`)
 
   const templateRepoUrlBase = `https://github.com/payloadcms/payload/tree/main/templates`

@@ -160,13 +160,13 @@ jobs:
         run: |
           set -euo pipefail
           PATCH="$RUNNER_TEMP/templates.patch"
-          OUTSIDE=$(git apply --numstat "$PATCH" | cut -f3 | grep -v '^templates/' || true)
+          git apply --binary "$PATCH"
+          OUTSIDE=$(git status --porcelain --untracked-files=all | cut -c4- | grep -v '^templates/' || true)
           if [[ -n "$OUTSIDE" ]]; then
             echo "::error::The templates patch changes files outside templates/:"
             echo "$OUTSIDE"
             exit 1
           fi
-          git apply --binary "$PATCH"
           echo "branch=templates/bump-${RELEASE_TAG}-$(date +%s)" >> "$GITHUB_OUTPUT"
 
       - name: Create pull request
