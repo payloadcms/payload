@@ -1,7 +1,8 @@
 /**
  * Writes one CycloneDX 1.6 and one SPDX 2.3 SBOM per published package, plus
- * `SHA256SUMS` and `sbom-manifest.json` (file -> release asset label), to an empty
- * output dir. Fails on any check problem, so a bad SBOM never reaches a release.
+ * `SHA256SUMS`, into `payload-sboms-<version>/` in an empty output dir. Zips that
+ * folder and writes `sbom-manifest.json`, which lists the zip as the release asset.
+ * Fails on any check problem, so a bad SBOM never reaches a release.
  *
  * Usage: pnpm release-sbom --out-dir <absolute dir>
  *
@@ -16,15 +17,14 @@ import path from 'path'
 import { pathToFileURL } from 'url'
 
 import type { SbomPackage } from './lib/sbom/formats.js'
-import type { ReleaseAsset } from './lib/sbom/writeReleaseFiles.js'
 
 import { getPackageDetails } from './lib/getPackageDetails.js'
 import { packagePublishList } from './lib/publishList.js'
 import { assertPnpmVersion } from './lib/sbom/assertPnpmVersion.js'
-import { buildSbomArgs, SBOM_FORMATS, toSbomFileName, toSbomLabel } from './lib/sbom/formats.js'
+import { buildSbomArgs, SBOM_FORMATS, toSbomFileName } from './lib/sbom/formats.js'
 import { setSpdxRootSupplier } from './lib/sbom/setSpdxRootSupplier.js'
 import { validateSbom } from './lib/sbom/validateSbom.js'
-import { writeReleaseFiles } from './lib/sbom/writeReleaseFiles.js'
+import { toBundleName, writeReleaseBundle } from './lib/sbom/writeReleaseBundle.js'
 import { writeStepSummary } from './lib/writeStepSummary.js'
 
 export type ReleaseSbomDeps = {
@@ -53,10 +53,12 @@ export const runReleaseSbom = async ({
   fs.mkdirSync(outDir, { recursive: true })
 
   const packages = await getPackages()
+  const version = getReleaseVersion({ packages })
+  const bundleDir = path.join(outDir, toBundleName({ version }))
 
   for (const format of SBOM_FORMATS) {
     log(`Generating ${format.labelSuffix} SBOMs for ${packages.length} packages`)
-    await runPnpm({ args: buildSbomArgs({ format, outDir, packages }) })
+    await runPnpm({ args: buildSbomArgs({ format, outDir: bundleDir, packages }) })
   }
 
   const expected = packages.flatMap((pkg) =>
@@ -66,11 +68,12 @@ export const runReleaseSbom = async ({
       pkg,
     })),
   )
-  assertFileSet({ actual: fs.readdirSync(outDir), expected: expected.map(({ file }) => file) })
+  const files = expected.map(({ file }) => file)
+  assertFileSet({ actual: fs.readdirSync(bundleDir), expected: files })
 
   const problems: string[] = []
   for (const { file, format, pkg } of expected) {
-    const filePath = path.join(outDir, file)
+    const filePath = path.join(bundleDir, file)
     const document: unknown = JSON.parse(fs.readFileSync(filePath, 'utf8'))
     const fileProblems = validateSbom({ document, format, pkg })
     problems.push(...fileProblems)
@@ -83,17 +86,13 @@ export const runReleaseSbom = async ({
     throw new Error(`SBOM checks failed:\n${problems.join('\n')}`)
   }
 
-  const assets: ReleaseAsset[] = expected.map(({ file, format, pkg }) => ({
-    file,
-    label: toSbomLabel({ format, name: pkg.name }),
-  }))
-  writeReleaseFiles({ assets, outDir })
+  const { zipPath } = await writeReleaseBundle({ files, outDir, version })
 
-  const summary = `Generated ${assets.length} SBOMs for ${packages.length} packages`
-  log(`${summary} in ${outDir}`)
+  const summary = `Generated ${files.length} SBOMs for ${packages.length} packages in ${path.basename(zipPath)}`
+  log(summary)
   writeSummary(summary)
 
-  return { fileCount: assets.length }
+  return { fileCount: files.length }
 }
 
 async function main(): Promise<void> {
@@ -131,6 +130,16 @@ function assertFileSet({ actual, expected }: { actual: string[]; expected: strin
   throw new Error(
     `pnpm sbom wrote an unexpected file set.\nmissing: ${missing.join(', ') || '(none)'}\nextra: ${extra.join(', ') || '(none)'}`,
   )
+}
+
+/** The bundle is named for one release version, so every package must share it. */
+function getReleaseVersion({ packages }: { packages: SbomPackage[] }): string {
+  const versions = [...new Set(packages.map((pkg) => pkg.version))]
+  const [version] = versions
+  if (version === undefined || versions.length > 1) {
+    throw new Error(`Expected one release version across packages, found: ${versions.join(', ')}`)
+  }
+  return version
 }
 
 async function getPackages(): Promise<SbomPackage[]> {

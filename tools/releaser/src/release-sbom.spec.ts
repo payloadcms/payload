@@ -1,15 +1,19 @@
+import execa from 'execa'
 import fs from 'fs'
 import os from 'os'
 import path from 'path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { SbomPackage } from './lib/sbom/formats.js'
+import type { ReleaseSbomDeps } from './release-sbom.js'
 
 import { cdx, spdxDoc } from './lib/sbom/fixtures.js'
 import { SPDX_ROOT_SUPPLIER } from './lib/sbom/setSpdxRootSupplier.js'
+import { BUNDLE_LABEL } from './lib/sbom/writeReleaseBundle.js'
 import { runReleaseSbom } from './release-sbom.js'
 
 const VERSION = '4.0.0-beta.3'
+const BUNDLE = `payload-sboms-${VERSION}`
 
 const PACKAGES: SbomPackage[] = [
   {
@@ -54,6 +58,7 @@ const fakePnpm = ({
       const file = outTemplate
         .replace('%s', pkg.name.replace('@', '').replace('/', '-'))
         .replace('%v', version ?? pkg.version)
+      fs.mkdirSync(path.dirname(file), { recursive: true })
       fs.writeFileSync(file, JSON.stringify(makeDocument({ format, pkg })))
     }
   })
@@ -61,17 +66,19 @@ const fakePnpm = ({
 describe('runReleaseSbom', () => {
   let tempDir: string
   let outDir: string
+  let bundleDir: string
 
   beforeEach(() => {
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'release-sbom-'))
     outDir = path.join(tempDir, 'sboms')
+    bundleDir = path.join(outDir, BUNDLE)
   })
 
   afterEach(() => {
     fs.rmSync(tempDir, { force: true, recursive: true })
   })
 
-  const makeDeps = (overrides: Partial<Parameters<typeof runReleaseSbom>[0]['deps']> = {}) => ({
+  const makeDeps = (overrides: Partial<ReleaseSbomDeps> = {}) => ({
     getPackages: async () => PACKAGES,
     getPnpmVersion: async () => '11.28.6',
     log: vi.fn(),
@@ -80,37 +87,41 @@ describe('runReleaseSbom', () => {
     ...overrides,
   })
 
-  it('should write 2 SBOMs per package, SHA256SUMS and manifest', async () => {
+  it('should write the bundle folder, its zip and the manifest', async () => {
     const { fileCount } = await runReleaseSbom({ deps: makeDeps(), outDir })
 
     expect(fileCount).toBe(4)
-    expect(fs.readdirSync(outDir).sort()).toEqual([
+    expect(fs.readdirSync(outDir).sort()).toEqual([BUNDLE, `${BUNDLE}.zip`, 'sbom-manifest.json'])
+    expect(fs.readdirSync(bundleDir).sort()).toEqual([
       'SHA256SUMS',
       'payload-4.0.0-beta.3.cdx.json',
       'payload-4.0.0-beta.3.spdx.json',
       'payloadcms-ui-4.0.0-beta.3.cdx.json',
       'payloadcms-ui-4.0.0-beta.3.spdx.json',
-      'sbom-manifest.json',
     ])
   })
 
-  it('should label manifest assets with the npm name and format', async () => {
+  it('should zip every SBOM and SHA256SUMS', async () => {
+    await runReleaseSbom({ deps: makeDeps(), outDir })
+
+    const { stdout } = await execa('unzip', ['-Z1', path.join(outDir, `${BUNDLE}.zip`)])
+
+    expect(stdout.split('\n').filter((entry) => !entry.endsWith('/'))).toHaveLength(5)
+  })
+
+  it('should list only the zip in the manifest', async () => {
     await runReleaseSbom({ deps: makeDeps(), outDir })
 
     const manifest = JSON.parse(fs.readFileSync(path.join(outDir, 'sbom-manifest.json'), 'utf8'))
 
-    expect(manifest.assets).toContainEqual({
-      file: 'payloadcms-ui-4.0.0-beta.3.spdx.json',
-      label: '@payloadcms/ui (SPDX 2.3)',
-    })
-    expect(manifest.assets).toHaveLength(5)
+    expect(manifest).toEqual({ assets: [{ file: `${BUNDLE}.zip`, label: BUNDLE_LABEL }] })
   })
 
   it('should set the SPDX root supplier', async () => {
     await runReleaseSbom({ deps: makeDeps(), outDir })
 
     const document = JSON.parse(
-      fs.readFileSync(path.join(outDir, 'payloadcms-ui-4.0.0-beta.3.spdx.json'), 'utf8'),
+      fs.readFileSync(path.join(bundleDir, 'payloadcms-ui-4.0.0-beta.3.spdx.json'), 'utf8'),
     )
 
     expect(document.packages[0].supplier).toBe(SPDX_ROOT_SUPPLIER)
@@ -121,7 +132,9 @@ describe('runReleaseSbom', () => {
 
     await runReleaseSbom({ deps, outDir })
 
-    expect(deps.writeSummary).toHaveBeenCalledWith('Generated 4 SBOMs for 2 packages')
+    expect(deps.writeSummary).toHaveBeenCalledWith(
+      `Generated 4 SBOMs for 2 packages in ${BUNDLE}.zip`,
+    )
   })
 
   it('should throw before running pnpm when pnpm is too old', async () => {
@@ -141,6 +154,21 @@ describe('runReleaseSbom', () => {
     expect(deps.runPnpm).not.toHaveBeenCalled()
   })
 
+  it('should throw before running pnpm when packages have different versions', async () => {
+    const [first, second] = PACKAGES
+    const deps = makeDeps({
+      getPackages: async () => [
+        ...(first ? [first] : []),
+        ...(second ? [{ ...second, version: '4.0.0-beta.2' }] : []),
+      ],
+    })
+
+    await expect(runReleaseSbom({ deps, outDir })).rejects.toThrow(
+      /4\.0\.0-beta\.2.*4\.0\.0-beta\.3|4\.0\.0-beta\.3.*4\.0\.0-beta\.2/,
+    )
+    expect(deps.runPnpm).not.toHaveBeenCalled()
+  })
+
   it('should throw listing missing and extra files', async () => {
     const deps = makeDeps({ runPnpm: fakePnpm({ version: '4.0.0-beta.2' }) })
 
@@ -149,7 +177,7 @@ describe('runReleaseSbom', () => {
     )
   })
 
-  it('should throw with every validation problem', async () => {
+  it('should throw with every validation problem and write no zip', async () => {
     const makeDocument = ({ format, pkg }: FakeDocumentArgs) =>
       format === 'cyclonedx'
         ? cdx({
@@ -168,6 +196,6 @@ describe('runReleaseSbom', () => {
     expect(String(error)).toContain(
       '@payloadcms/ui (CycloneDX 1.6): @payloadcms/translations has no license',
     )
-    expect(fs.existsSync(path.join(outDir, 'SHA256SUMS'))).toBe(false)
+    expect(fs.existsSync(path.join(outDir, `${BUNDLE}.zip`))).toBe(false)
   })
 })

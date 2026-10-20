@@ -6,7 +6,7 @@ export type SbomFormat = {
   /** `pnpm sbom` flags that select this format */
   flags: string[]
   id: 'cyclonedx' | 'spdx'
-  /** Appended to the npm name in the release asset label */
+  /** Format name and version, used to prefix check problems */
   labelSuffix: 'CycloneDX 1.6' | 'SPDX 2.3'
 }
 
@@ -55,9 +55,6 @@ export const toSbomFileName = ({
   name: string
   version: string
 }): string => `${name.replace(/^@/, '').replace('/', '-')}-${version}${format.extension}`
-
-export const toSbomLabel = ({ format, name }: { format: SbomFormat; name: string }): string =>
-  `${name} (${format.labelSuffix})`
 
 /** Args for one `pnpm sbom --split` call that writes one file per package. */
 export const buildSbomArgs = ({

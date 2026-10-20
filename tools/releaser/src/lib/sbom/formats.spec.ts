@@ -2,7 +2,7 @@ import type { SbomFormat, SbomPackage } from './formats.js'
 
 import { describe, expect, it } from 'vitest'
 
-import { buildSbomArgs, SBOM_FORMATS, toSbomFileName, toSbomLabel } from './formats.js'
+import { buildSbomArgs, SBOM_FORMATS, toSbomFileName } from './formats.js'
 
 const getFormat = (id: SbomFormat['id']): SbomFormat => {
   const format = SBOM_FORMATS.find((entry) => entry.id === id)
@@ -42,14 +42,6 @@ describe('toSbomFileName', () => {
   it('should keep unscoped names', () => {
     expect(toSbomFileName({ format: spdx, name: 'payload', version: '4.0.0-beta.3' })).toBe(
       'payload-4.0.0-beta.3.spdx.json',
-    )
-  })
-})
-
-describe('toSbomLabel', () => {
-  it('should append the format and version', () => {
-    expect(toSbomLabel({ format: spdx, name: '@payloadcms/db-postgres' })).toBe(
-      '@payloadcms/db-postgres (SPDX 2.3)',
     )
   })
 })
