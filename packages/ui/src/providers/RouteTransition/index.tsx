@@ -70,22 +70,23 @@ export const RouteTransitionProvider: React.FC<RouteTransitionProps> = ({ childr
   }, [])
 
   const startRouteTransition: StartRouteTransition = useCallback(
-    (callback?: () => Promise<void> | void) => {
-      let result: Promise<void> | void = undefined
-
-      startTransition(() => {
+    (callback?: () => unknown) => {
+      const runAction = async () => {
         setIsOptimisticallyTransitioning(true)
 
-        const navigation = callback?.()
+        await callback?.()
+        await waitForHoldsToRelease()
+      }
 
-        if (navigation) {
-          result = navigation.then(waitForHoldsToRelease)
-        }
+      // React runs the scope synchronously but does not return its promise.
+      let action = Promise.resolve()
 
-        return result
+      startTransition(() => {
+        action = runAction()
+        return action
       })
 
-      return result
+      return action
     },
     [setIsOptimisticallyTransitioning, waitForHoldsToRelease],
   )
@@ -130,12 +131,13 @@ type RouteTransitionProps = {
   children: React.ReactNode
 }
 
-type StartRouteTransition = (callback?: () => Promise<void> | void) => Promise<void> | void
+type StartRouteTransition = (callback?: () => unknown) => Promise<void>
 
 type RouteTransitionContextValue = {
   /** Keeps the transition active until the returned release function is called. */
   holdRouteTransition: () => () => void
   isTransitioning: boolean
+  /** Resolves after the callback and active route transition holds complete. */
   startRouteTransition: StartRouteTransition
   transitionProgress: number
 }
@@ -144,8 +146,8 @@ const RouteTransitionContext = React.createContext<RouteTransitionContextValue>(
   holdRouteTransition: () => () => undefined,
   isTransitioning: false,
   // Default implementation: just call the callback directly (no transition animation)
-  startRouteTransition: (callback) => {
-    return callback?.()
+  startRouteTransition: async (callback) => {
+    await callback?.()
   },
   transitionProgress: 0,
 })
@@ -164,7 +166,7 @@ const RouteTransitionContext = React.createContext<RouteTransitionContextValue>(
  *   const { startRouteTransition } = useRouteTransition()
  *
  *   const redirectSomewhere = useCallback(() => {
- *     startRouteTransition(() => router.push('/somewhere'))
+ *     void startRouteTransition(() => router.push('/somewhere'))
  *   }, [startRouteTransition, router])
  *
  *   // ...
