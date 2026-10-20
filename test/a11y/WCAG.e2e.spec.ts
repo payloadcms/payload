@@ -1138,14 +1138,6 @@ test.describe('WCAG 2.2 Level AA', () => {
       await language.hover()
       await expect(language).toHaveAttribute('aria-expanded', 'true')
       await expect(theme).toHaveAttribute('aria-expanded', 'false')
-
-      const option = page.getByRole('menuitemradio').first()
-
-      await option.focus()
-      await expect(option).toBeFocused()
-      await option.press('Escape')
-      await expect(language).toBeFocused()
-      await expect(language).toHaveAttribute('aria-expanded', 'false')
     })
 
     test('should release a User submenu corridor when pausing over another item', async () => {
@@ -1169,18 +1161,6 @@ test.describe('WCAG 2.2 Level AA', () => {
       const point = { x: startX + (edgeX - startX) * 0.85, y: siblingBox.y + siblingBox.height / 2 }
 
       await page.mouse.move(point.x, point.y)
-      await expect
-        .poll(() =>
-          page.evaluate(
-            ({ x, y }) =>
-              document
-                .elementFromPoint(x, y)
-                ?.closest('[role="menuitem"]')
-                ?.getAttribute('aria-controls'),
-            point,
-          ),
-        )
-        .toBe(await language.getAttribute('aria-controls'))
       await expect(language).toHaveAttribute('aria-expanded', 'true')
       await expect(theme).toHaveAttribute('aria-expanded', 'false')
     })

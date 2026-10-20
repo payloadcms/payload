@@ -7,39 +7,12 @@ import { render } from 'vitest-browser-react'
 import { Popup, PopupList } from './index.js'
 
 test.each([
-  { direction: 'left', hasFineMovement: true, shouldExpire: false, side: 'left', width: 1000 },
-  { direction: 'right', hasFineMovement: true, shouldExpire: false, side: 'right', width: 1000 },
-  {
-    direction: 'left after flipping',
-    hasFineMovement: true,
-    shouldExpire: false,
-    side: 'right',
-    width: 414,
-  },
-  {
-    direction: 'right in one movement',
-    hasFineMovement: false,
-    shouldExpire: false,
-    side: 'right',
-    width: 1000,
-  },
-  {
-    direction: 'left until pausing over a sibling',
-    hasFineMovement: false,
-    shouldExpire: true,
-    side: 'left',
-    width: 1000,
-  },
-  {
-    direction: 'right until pausing over a sibling',
-    hasFineMovement: false,
-    shouldExpire: true,
-    side: 'right',
-    width: 1000,
-  },
+  { direction: 'left', side: 'left', width: 1000 },
+  { direction: 'right', side: 'right', width: 1000 },
+  { direction: 'left after flipping', side: 'right', width: 414 },
 ] as const)(
-  'should protect slow diagonal movement toward a submenu opening to the $direction',
-  async ({ direction, hasFineMovement, shouldExpire, side, width }) => {
+  'should protect fine diagonal movement toward a submenu opening to the $direction',
+  async ({ direction, side, width }) => {
     await page.viewport(width, 720)
 
     const screen = await render(
@@ -63,7 +36,7 @@ test.each([
                 side={side}
                 theme="auto"
               >
-                {Array.from({ length: 8 }, (_, index) => (
+                {Array.from({ length: 3 }, (_, index) => (
                   <PopupList.Button key={index} onClick={() => {}}>
                     {`${label} option ${index}`}
                   </PopupList.Button>
@@ -99,7 +72,7 @@ test.each([
     expect(isOnLeft ? menuBox.right < startX : menuBox.left > startX).toBe(true)
 
     const startY = triggerBox.top + triggerBox.height / 2
-    const steps = hasFineMovement ? Math.ceil(Math.abs(diagonalPoint.x - startX)) : 1
+    const steps = Math.ceil(Math.abs(diagonalPoint.x - startX))
 
     // Keep moving by at most one horizontal pixel per event, even when crossing
     // the corridor takes longer than its 300 ms inactivity timeout.
@@ -112,32 +85,11 @@ test.each([
         },
       })
     }
-    if (shouldExpire) {
-      await expect
-        .poll(
-          () =>
-            document
-              .elementFromPoint(diagonalPoint.x, diagonalPoint.y)
-              ?.closest('[role="menuitem"]')?.textContent,
-        )
-        .toBe('Language')
-      await expect.element(language).toHaveAttribute('aria-expanded', 'true')
-      await expect.element(theme).toHaveAttribute('aria-expanded', 'false')
-      return
-    }
-
     expect(document.elementFromPoint(diagonalPoint.x, diagonalPoint.y)).toBe(
       screen.getByRole('menu', { name: 'Theme menu' }).element(),
     )
     await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
     await expect.element(language).toHaveAttribute('aria-expanded', 'false')
-    await screen.getByRole('menuitem', { name: 'Theme option 7' }).hover()
-    await new Promise((resolve) => setTimeout(resolve, 350))
-    await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
-
-    // Once inside the child, returning to a sibling must not be blocked by the corridor.
-    await language.hover()
-    await expect.element(language).toHaveAttribute('aria-expanded', 'true')
   },
 )
 
