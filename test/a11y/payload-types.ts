@@ -326,6 +326,26 @@ export interface Post {
   accessibilityDisabledSelect?: ('one' | 'two') | null;
   requiredTags: string[];
   relatedPost?: (string | null) | Post;
+  contrastRelationships?: (string | Post)[] | null;
+  contrastDisabledSelect?: ('one' | 'two')[] | null;
+  contrastDate?: string | null;
+  contrastDate_tz?: SupportedTimezones;
+  /**
+   * Group description for contrast measurement.
+   */
+  contrastGroup?: {
+    text?: string | null;
+  };
+  contrastFirst?: string | null;
+  contrastSecond?: string | null;
+  /**
+   * Choose a media file for this post.
+   */
+  contrastUpload?: (string | null) | Media;
+  contrastSEO?: {
+    title?: string | null;
+    description?: string | null;
+  };
   status?: ('draft' | 'published') | null;
   publishedOn?: string | null;
   content?: LexicalRichText<LexicalNodes_6A80DA5E> | null;
@@ -386,28 +406,6 @@ export interface Post {
   createdAt: string;
   deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TextBlock".
- */
-export interface TextBlock {
-  body?: LexicalRichText<LexicalNodes_D80343AC> | null;
-  text?: string | null;
-  date?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'textBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ImageBlock".
- */
-export interface ImageBlock {
-  alt?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'imageBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -477,6 +475,28 @@ export interface Media {
       _objectKey?: string | null;
     };
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextBlock".
+ */
+export interface TextBlock {
+  body?: LexicalRichText<LexicalNodes_D80343AC> | null;
+  text?: string | null;
+  date?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'textBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ImageBlock".
+ */
+export interface ImageBlock {
+  alt?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'imageBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -677,6 +697,24 @@ export interface PostsSelect<T extends boolean = true> {
   accessibilityDisabledSelect?: T;
   requiredTags?: T;
   relatedPost?: T;
+  contrastRelationships?: T;
+  contrastDisabledSelect?: T;
+  contrastDate?: T;
+  contrastDate_tz?: T;
+  contrastGroup?:
+    | T
+    | {
+        text?: T;
+      };
+  contrastFirst?: T;
+  contrastSecond?: T;
+  contrastUpload?: T;
+  contrastSEO?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
   status?: T;
   publishedOn?: T;
   content?: T;
