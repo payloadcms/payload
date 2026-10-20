@@ -269,9 +269,10 @@ const config = {
       files: ['**/*.tsx'],
       // React's recommended React Compiler checks (the `recommended-latest` preset of
       // `eslint-plugin-react-hooks`), using oxlint's built-in port of the compiler. `hooks`,
-      // `invariant`, `rule-suppression`, `syntax` and `todo` aren't in the preset, but React Compiler
-      // skips optimizing components they report. Severities are the ones React gives each rule,
-      // except where noted.
+      // `invariant`, `rule-suppression` and `syntax` aren't in the preset, but React Compiler skips
+      // optimizing components they report. Severities are the ones React gives each rule, except
+      // where noted. `todo` is left out: it reports syntax the compiler doesn't support yet, which
+      // React treats as a hint.
       rules: {
         'react-hooks/error-boundaries': 'error',
         'react-hooks/globals': 'error',
@@ -291,8 +292,6 @@ const config = {
         // TODO: 'error' once all its findings are fixed
         'react-hooks/static-components': 'warn',
         'react-hooks/syntax': 'error',
-        // React gives this one a "hint" severity, which oxlint doesn't have
-        'react-hooks/todo': 'warn',
         'react-hooks/unsupported-syntax': 'warn',
         'react-hooks/use-memo': 'error',
         'react-hooks/void-use-memo': 'error',
