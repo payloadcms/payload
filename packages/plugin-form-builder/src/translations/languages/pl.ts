@@ -69,7 +69,7 @@ export const plTranslations: PluginDefaultTranslationsObject = {
     priceConditionsSingular: 'Warunek cenowy',
     radioOptions: 'Opcje do wyboru',
     radioPlural: 'Pola przycisków opcji',
-    radioSingular: 'Przyciski opcji',
+    radioSingular: 'Pole przycisków opcji',
     redirect: 'Przekieruj',
     replyTo: 'Odpowiedz na',
     required: 'Wymagane',

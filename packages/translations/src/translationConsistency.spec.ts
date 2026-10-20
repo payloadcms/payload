@@ -125,7 +125,9 @@ describe('translations consistency with English', () => {
           }
         }
 
-        const englishValue = englishValues.get(key)
+        // A plural form English does not have (e.g. `_few`) is compared with English `_other`
+        const englishValue =
+          englishValues.get(key) ?? englishValues.get(`${key.replace(pluralSuffix, '')}_other`)
 
         if (englishValue === undefined) {
           continue
