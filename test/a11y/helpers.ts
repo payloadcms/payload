@@ -451,9 +451,15 @@ export async function captureScreenReaderOutput({
 
 export async function navigateScreenReaderTo({
   matches,
+  onVisit,
   screenReader,
 }: {
   matches: RegExp
+  onVisit?: (args: {
+    index: number
+    itemText: string
+    spokenPhrase: string
+  }) => Promise<void> | void
   screenReader: ScreenReaderPlaywright
 }) {
   await screenReader.clearItemTextLog()
@@ -461,10 +467,11 @@ export async function navigateScreenReaderTo({
   await screenReader.navigateToWebContent()
 
   for (let index = 0; index < 150; index++) {
-    const output = `${await screenReader.itemText()} ${await screenReader.lastSpokenPhrase()}`
-      .replace(/\s+/g, ' ')
-      .trim()
+    const itemText = await screenReader.itemText()
+    const spokenPhrase = await screenReader.lastSpokenPhrase()
+    const output = `${itemText} ${spokenPhrase}`.replace(/\s+/g, ' ').trim()
 
+    await onVisit?.({ index, itemText, spokenPhrase })
     matches.lastIndex = 0
     if (matches.test(output)) {
       return output

@@ -232,9 +232,26 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       await gotoFirstPost({ page, postsURL, serverURL })
       await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
       await page.getByRole('menuitem', { name: 'Delete', exact: true }).click()
-      await expect(page.getByRole('dialog', { name: /confirm deletion/i })).toBeVisible()
+      const dialog = page.getByRole('dialog', { name: /confirm deletion/i })
+
+      await expect(dialog).toBeVisible()
+      await expect(
+        dialog.getByRole('checkbox', { name: 'Delete permanently', exact: true }),
+      ).toBeVisible()
+      console.info('[deletion-cursor] Starting VoiceOver navigation')
       await navigateScreenReaderTo({
         matches: /delete permanently.*check\s?box|check\s?box.*delete permanently/i,
+        onVisit: async ({ index, itemText, spokenPhrase }) => {
+          console.info(
+            '[deletion-cursor]',
+            JSON.stringify({
+              index,
+              isDialogVisible: await dialog.isVisible(),
+              itemText,
+              spokenPhrase,
+            }),
+          )
+        },
         screenReader,
       })
 
@@ -244,6 +261,10 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       await screenReader.next()
       const next = await screenReader.itemText()
 
+      console.info(
+        '[deletion-cursor] After checkbox',
+        JSON.stringify({ itemText: next, spokenPhrase: await screenReader.lastSpokenPhrase() }),
+      )
       expect(next).not.toMatch(/delete permanently/i)
       expect(next).toMatch(/Cancel.*button|button.*Cancel/i)
     })
