@@ -567,7 +567,7 @@ export async function expectPaintContrast({
     | 'fill'
     | 'outlineColor'
     | 'stroke'
-  pseudo?: '::after'
+  pseudo?: '::after' | '::before'
   targets: Locator
 }) {
   await expect(targets.first()).toBeVisible()
@@ -1052,7 +1052,7 @@ export async function expectEnhancedDividerContrast({
 }: {
   page: Page
   property: 'backgroundColor' | 'borderBottomColor' | 'borderTopColor'
-  pseudo?: '::after'
+  pseudo?: '::after' | '::before'
   targets: Locator
 }) {
   await expect(targets.first()).toBeVisible()

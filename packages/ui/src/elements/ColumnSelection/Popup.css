@@ -63,7 +63,6 @@
     padding-inline-end: var(--spacer-2);
     background: var(--color-bg-secondary);
     border-radius: var(--button-radius);
-    outline: var(--stroke-width-small) solid var(--color-border-search);
   }
 
   .column-selector__search-bar svg {
@@ -229,5 +228,9 @@
     height: var(--stroke-width-medium);
     background: var(--color-icon);
     margin-inline: var(--spacer-3);
+  }
+
+  html[data-enhanced-contrast] .column-selector__search-bar {
+    outline: var(--stroke-width-small) solid var(--color-border-control);
   }
 }

@@ -126,11 +126,6 @@
     color: var(--color-text);
   }
 
-  .rs__option--is-focused,
-  .rs__option--is-selected {
-    --color-text-secondary: var(--color-text-option-secondary);
-  }
-
   .rs__option--is-focused {
     background-color: var(--color-bg-secondary);
   }
@@ -162,5 +157,9 @@
     div.rs__control {
       border-color: var(--field-color-border-focus);
     }
+  }
+
+  html[data-enhanced-contrast] :is(.rs__option--is-focused, .rs__option--is-selected) {
+    --color-text-secondary: var(--color-text);
   }
 }

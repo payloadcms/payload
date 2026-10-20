@@ -25,7 +25,8 @@
     line-height: var(--text-body-medium-line-height);
     color: var(--color-text);
     background: transparent;
-    border-bottom: var(--stroke-width-small) solid var(--color-border-command-palette);
+    border-bottom: var(--stroke-width-small) solid
+      color-mix(in srgb, var(--color-border) 50%, transparent);
     /* Straight muted hairline under the input as the separator. The global
        :focus-visible rule adds an outline AND a border-radius to the focused
        input; both are reset here so the hairline stays square and uncluttered. */
@@ -158,7 +159,7 @@
      two hints, so a single hint shows no divider regardless of which hints are present. */
   .cmd-palette__hint + .cmd-palette__hint::before {
     content: '|';
-    color: var(--color-border-command-palette);
+    color: color-mix(in srgb, var(--color-border) 50%, transparent);
   }
 
   /* Groups multiple key chips for a single shortcut (e.g. ⌘ + ⏎). */
@@ -184,5 +185,13 @@
     background: var(--color-bg-secondary);
     border: 0;
     border-radius: var(--radius-small);
+  }
+
+  html[data-enhanced-contrast] .cmd-palette__input {
+    border-bottom-color: var(--color-border-control);
+  }
+
+  html[data-enhanced-contrast] .cmd-palette__hint + .cmd-palette__hint::before {
+    color: var(--color-border-control);
   }
 }

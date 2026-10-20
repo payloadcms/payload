@@ -138,8 +138,8 @@
     }
   }
 
-  .nav__link--selected:not(:focus-visible) {
-    outline: var(--stroke-width-small) solid var(--color-border-nav-selected);
-    outline-offset: calc(-1 * var(--stroke-width-small));
+  html[data-enhanced-contrast] .nav__link--selected::before {
+    background: var(--color-bg-secondary);
+    border: var(--stroke-width-small) solid var(--color-border-selected);
   }
 }

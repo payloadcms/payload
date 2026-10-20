@@ -1803,6 +1803,79 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.4.11 Non-text Contrast (AA)', () => {
+    test('should box navigation group headers and inset the selected row border in enhanced contrast', async () => {
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoPostsList({ page, postsURL })
+          await openNav(page)
+          await page.getByRole('tab', { name: 'Collections', exact: true }).click()
+          const header = page.locator('.nav-group__toggle').first()
+          const selected = page.locator('.nav__link--selected').first()
+
+          await selected.scrollIntoViewIfNeeded()
+          await page.mouse.move(0, 0)
+          await expect(header).toHaveCSS('border-top-style', 'solid')
+          await expectPaintContrast({
+            againstParent: true,
+            minimum: 3,
+            property: 'borderTopColor',
+            targets: header,
+          })
+          await expect(selected).toHaveCSS('outline-style', 'none')
+          expect(
+            await selected.evaluate((element) => {
+              const style = getComputedStyle(element, '::before')
+              const surface = document.createElement('div')
+
+              surface.style.background = 'var(--color-bg-secondary)'
+              element.append(surface)
+              const neutralBackground = getComputedStyle(surface).backgroundColor
+              surface.remove()
+
+              return {
+                borderStyle: style.borderTopStyle,
+                hasNeutralBackground: style.backgroundColor === neutralBackground,
+                hasRoundedCorners: Number.parseFloat(style.borderRadius) > 0,
+                isInset: Number.parseFloat(style.insetInlineStart) > 0,
+              }
+            }),
+          ).toEqual({
+            borderStyle: 'solid',
+            hasNeutralBackground: true,
+            hasRoundedCorners: true,
+            isInset: true,
+          })
+          await expectPaintContrast({
+            againstParent: true,
+            minimum: 3,
+            property: 'borderTopColor',
+            pseudo: '::before',
+            targets: selected,
+          })
+          await expectTextContrast({ targets: selected })
+
+          const isExpanded = await header.getAttribute('aria-expanded')
+
+          await header.click()
+          await expect(header).toHaveAttribute('aria-expanded', String(isExpanded !== 'true'))
+          await expect(header).toHaveCSS('border-top-style', 'solid')
+          await header.click()
+          await expect(header).toHaveAttribute('aria-expanded', isExpanded!)
+          await page.mouse.move(0, 0)
+          await page.locator('.nav').screenshot({
+            path: test
+              .info()
+              .outputPath(
+                `navigation-${await page.locator('html').getAttribute('data-theme')}.png`,
+              ),
+          })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
     test('should strengthen both secondary split-button boundaries only in enhanced contrast', async () => {
       await inContrastThemes({
         page,
@@ -1954,12 +2027,12 @@ test.describe('WCAG 2.2 Level AA', () => {
         await page.getByRole('tab', { name: 'Collections', exact: true }).click()
         const buttons = page.locator('.list-controls .btn--style-secondary')
         await expect(buttons).toHaveCount(3)
-        const separators = page.locator('.nav-group + .nav-group')
+        const groupHeaders = page.locator('.nav-group__toggle')
         const selected = page.locator('.nav__link--selected').first()
         await selected.scrollIntoViewIfNeeded()
         await page.mouse.move(0, 0)
         const targets = page.locator(
-          '.list-controls .btn--style-secondary, .nav, .nav-group + .nav-group, .nav__link--selected',
+          '.list-controls .btn--style-secondary, .nav, .nav-group__toggle, .nav__link--selected',
         )
         const normalControls = await readBorderStyles({ targets })
         await page
@@ -1983,13 +2056,14 @@ test.describe('WCAG 2.2 Level AA', () => {
           againstParent: true,
           minimum: 3,
           property: 'borderTopColor',
-          targets: separators,
+          targets: groupHeaders,
         })
-        await expect(selected).toHaveCSS('outline-style', 'solid')
+        await expect(selected).toHaveCSS('outline-style', 'none')
         await expectPaintContrast({
           againstParent: true,
           minimum: 3,
-          property: 'outlineColor',
+          property: 'borderTopColor',
+          pseudo: '::before',
           targets: selected,
         })
         await page
