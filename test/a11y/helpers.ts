@@ -239,7 +239,8 @@ export async function gotoFirstPost({
   await expect(postLink).toHaveAttribute('href')
   const href = await postLink.getAttribute('href')
 
-  await page.goto(new URL(href!, serverURL).toString())
+  await postLink.click()
+  await expect(page).toHaveURL(new URL(href!, serverURL).toString())
   await waitForFormReady(page)
 }
 
