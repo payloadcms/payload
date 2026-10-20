@@ -85,7 +85,7 @@ export function DefaultEditView({
     disableLeaveWithoutSaving,
     docPermissions,
     documentIsLocked,
-    documentLockState,
+    documentLockState: documentLockStateRef,
     getDocPermissions,
     getDocPreferences,
     globalSlug,
@@ -183,7 +183,7 @@ export function DefaultEditView({
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
   const [showStaleDataModal, setShowStaleDataModal] = useState(false)
 
-  const [editSessionStartTime, setEditSessionStartTime] = useState(Date.now())
+  const [editSessionStartTime, setEditSessionStartTime] = useState(() => Date.now())
 
   const hasCheckedForStaleDataRef = useRef(false)
   const originalUpdatedAtRef = useRef(data?.updatedAt)
@@ -191,7 +191,27 @@ export function DefaultEditView({
   const isSavingRef = useRef(false)
 
   const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
-  const isLockExpired = Date.now() > lockExpiryTime
+  // Render can't read the current time, so a timer records when the lock expires
+  const [expiredLockTime, setExpiredLockTime] = useState(() =>
+    Date.now() > lockExpiryTime ? lockExpiryTime : undefined,
+  )
+  const isLockExpired = expiredLockTime === lockExpiryTime
+
+  useEffect(() => {
+    const msUntilExpiry = lockExpiryTime - Date.now()
+
+    // `setTimeout` runs right away for NaN and for delays longer than about 24.8 days
+    if (Number.isNaN(msUntilExpiry) || msUntilExpiry > 2_147_483_647) {
+      return
+    }
+
+    const timeout = setTimeout(
+      () => setExpiredLockTime(lockExpiryTime),
+      Math.max(0, msUntilExpiry + 1),
+    )
+
+    return () => clearTimeout(timeout)
+  }, [lockExpiryTime])
 
   const preventLeaveWithoutSaving =
     !isReadOnlyForIncomingUser &&
@@ -215,9 +235,9 @@ export function DefaultEditView({
     (lockedState: LockedState) => {
       setDocumentIsLocked(true)
       const previousOwnerID =
-        typeof documentLockState.current?.user === 'object'
-          ? documentLockState.current?.user?.id
-          : documentLockState.current?.user
+        typeof documentLockStateRef.current?.user === 'object'
+          ? documentLockStateRef.current?.user?.id
+          : documentLockStateRef.current?.user
 
       if (lockedState && lockedState.user) {
         const lockedUserID =
@@ -225,14 +245,14 @@ export function DefaultEditView({
             ? lockedState.user
             : lockedState.user.id
 
-        if (!documentLockState.current || lockedUserID !== previousOwnerID) {
+        if (!documentLockStateRef.current || lockedUserID !== previousOwnerID) {
           if (previousOwnerID === user.id && lockedUserID !== user.id) {
             setShowTakeOverModal(true)
-            documentLockState.current.hasShownLockedModal = true
+            documentLockStateRef.current.hasShownLockedModal = true
           }
 
-          documentLockState.current = {
-            hasShownLockedModal: documentLockState.current?.hasShownLockedModal || false,
+          documentLockStateRef.current = {
+            hasShownLockedModal: documentLockStateRef.current?.hasShownLockedModal || false,
             isLocked: true,
             user: lockedState.user,
           }
@@ -245,7 +265,7 @@ export function DefaultEditView({
         }
       }
     },
-    [documentLockState, setCurrentEditor, setDocumentIsLocked, setLastUpdateTime, user?.id],
+    [documentLockStateRef, setCurrentEditor, setDocumentIsLocked, setLastUpdateTime, user?.id],
   )
 
   const handleStaleDataReload = useCallback(() => {
@@ -261,7 +281,7 @@ export function DefaultEditView({
   }, [])
 
   const handleLeaveConfirm = useCallback(async () => {
-    const lockUser = documentLockState.current?.user
+    const lockUser = documentLockStateRef.current?.user
 
     const isLockOwnedByCurrentUser =
       typeof lockUser === 'object' ? lockUser?.id === user?.id : lockUser === user?.id
@@ -287,7 +307,7 @@ export function DefaultEditView({
   }, [
     collectionSlug,
     documentIsLocked,
-    documentLockState,
+    documentLockStateRef,
     globalSlug,
     id,
     isLockingEnabled,
@@ -608,7 +628,7 @@ export function DefaultEditView({
       : currentEditor !== user?.id) &&
     !isReadOnlyForIncomingUser &&
     !showTakeOverModal &&
-    !documentLockState.current?.hasShownLockedModal &&
+    !documentLockStateRef.current?.hasShownLockedModal &&
     !isLockExpired
 
   const isFolderCollection = Boolean(
@@ -650,7 +670,7 @@ export function DefaultEditView({
         id,
         clearRouteCache,
         collectionSlug,
-        documentLockStateRef: documentLockState,
+        documentLockStateRef,
         globalSlug,
         isLockingEnabled,
         isWithinDoc: true,
@@ -749,7 +769,7 @@ export function DefaultEditView({
                   id,
                   clearRouteCache,
                   collectionSlug,
-                  documentLockStateRef: documentLockState,
+                  documentLockStateRef,
                   globalSlug,
                   isLockingEnabled,
                   isWithinDoc: false,

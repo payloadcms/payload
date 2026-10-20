@@ -49,6 +49,8 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
   const [hoveredTab, setHoveredTab] = useState<null | string>(null)
   const loadingTabsRef = useRef<Set<string>>(new Set())
   const tabContentRef = useRef(initialTabContents)
+  // The retry button calls loadTabContent through this, since loadTabContent can't call itself
+  const loadTabContentRef = useRef<typeof loadTabContent>(null)
 
   // Update cached content when server provides new initialTabContents
   // This is needed because useState only uses initialValue on first mount
@@ -106,7 +108,7 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
           delete clearedContent[tabSlug]
           tabContentRef.current = clearedContent
           setTabContent(clearedContent)
-          void loadTabContent(tabSlug, { serverArgs })
+          void loadTabContentRef.current?.(tabSlug, { serverArgs })
         }
 
         const newContent = {
@@ -123,6 +125,10 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
     },
     [serverFunction],
   )
+
+  React.useEffect(() => {
+    loadTabContentRef.current = loadTabContent
+  }, [loadTabContent])
 
   const reloadTabContent = useCallback(
     (tabSlug: string, serverArgs?: Partial<RenderTabServerFnArgs>) => {
