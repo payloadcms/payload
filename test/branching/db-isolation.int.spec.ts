@@ -223,6 +223,8 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
       expect(foundByID.id).toBe(second.id)
       expect(categoryWithPosts.posts.totalDocs).toBe(4)
       expect(categoryWithPosts.posts.docs.map((doc) => doc.title)).toEqual(visibleTitles)
+      // Native visibility checks branch changes inside the database instead of loading
+      // a manifest through db.find and building a filter from every changed document ID.
       expect(findSpy).not.toHaveBeenCalledWith(
         expect.objectContaining({ collection: branchChangesSlug }),
       )
@@ -264,6 +266,7 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
         'branch versioned 2',
       ])
       expect(versionedOnBranch.totalDocs).toBe(2)
+      // Draft visibility should also stay database-native, without a separate manifest read.
       expect(findSpy).not.toHaveBeenCalledWith(
         expect.objectContaining({ collection: branchChangesSlug }),
       )
