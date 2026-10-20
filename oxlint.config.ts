@@ -6,7 +6,7 @@ const requireFromRichtextLexical = createRequire(
   new URL('./packages/richtext-lexical/package.json', import.meta.url),
 )
 
-export default defineConfig({
+const config = defineConfig({
   ...payloadConfig,
   jsPlugins: [
     ...payloadConfig.jsPlugins,
@@ -200,3 +200,26 @@ export default defineConfig({
     },
   ],
 })
+
+// `--quiet` only hides warnings, so don't run `warn` rules then, like ESLint since v9. Their disable
+// comments would then look unused, so those are only reported without `--quiet`.
+const isQuiet = process.argv.includes('--quiet')
+const turnOffWarnRules = (rules: typeof config.rules = {}) =>
+  Object.fromEntries(
+    Object.entries(rules).map(([rule, value]) => {
+      const severity = Array.isArray(value) ? value[0] : value
+      return [rule, severity === 'warn' || severity === 1 ? 'off' : value]
+    }),
+  )
+
+export default isQuiet
+  ? defineConfig({
+      ...config,
+      options: { ...config.options, reportUnusedDisableDirectives: 'off' },
+      overrides: config.overrides?.map((override) => ({
+        ...override,
+        rules: turnOffWarnRules(override.rules),
+      })),
+      rules: turnOffWarnRules(config.rules),
+    })
+  : config
