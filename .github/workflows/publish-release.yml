@@ -72,6 +72,8 @@ jobs:
           name: sboms-${{ github.ref_name }}
           path: ${{ runner.temp }}/sboms
           if-no-files-found: error
+          # A rerun of this job uploads the same artifact name again.
+          overwrite: true
 
   # Separate job: holds contents: write and runs no installed dependency code.
   attach-sboms:

@@ -113,6 +113,9 @@ jobs:
               - 'tools/releaser/src/release-sbom.ts'
               - 'tools/releaser/src/lib/sbom/**'
               - 'tools/releaser/src/lib/publishList.ts'
+              - 'tools/releaser/src/lib/getPackageDetails.ts'
+              - 'package.json'
+              - '.github/actions/setup/**'
       - name: Log filter results
         run: |
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"

@@ -19,7 +19,7 @@ Each Payload v4 beta release on GitHub includes one SBOM per published npm packa
 
 https://github.com/payloadcms/payload/releases/download/v4.0.0-beta.4/payloadcms-db-postgres-4.0.0-beta.4.cdx.json
 
-Each SBOM lists the production dependencies that Payload built and tested the package with, from the repository lockfile. Other `@payloadcms/*` packages appear with their release version. Direct peer dependencies (for example `next` or `payload`) are excluded, because your project provides them. Peer dependencies of transitive dependencies can appear.
+Each SBOM lists the production dependencies that Payload built and tested the package with, from the repository lockfile. Other `@payloadcms/*` packages appear with their release version. Direct peer dependencies (for example `next` or `payload`) are excluded, because your project provides them, unless the package also lists them in `dependencies`. Peer dependencies of transitive dependencies can appear.
 
 For the dependencies your project installs, generate an SBOM from your own lockfile.
 
