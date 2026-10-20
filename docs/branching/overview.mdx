@@ -141,7 +141,7 @@ Merging keeps the branch available by default. Pass `closeBranch: true` to close
 
 Create, list, update metadata, and delete branches through ordinary collection operations on `payload-branches`. The `payload.branches` Local API exposes only `merge` and `discard`.
 
-Omitting `branch` uses `main`. Pass a branch slug to supported Local API operations:
+Local API operations inherit the branch associated with `req` unless explicitly overridden with `branch`, falling back to `main` when no branch context is available. Pass a branch slug to supported Local API operations:
 
 ```ts
 const page = await payload.findByID({
