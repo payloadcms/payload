@@ -540,10 +540,13 @@ export const Form: React.FC<FormProps> = (props) => {
 
             setIsValid(false)
 
-            dispatchFields({
-              type: 'ADD_SERVER_ERRORS',
+            const serverErrorAction = {
+              type: 'ADD_SERVER_ERRORS' as const,
               errors: fieldErrors,
-            })
+            }
+
+            prevFormState.current = fieldReducer(prevFormState.current, serverErrorAction)
+            dispatchFields(serverErrorAction)
 
             nonFieldErrors.forEach((err) => {
               // Pass overridesFromArgs (not the computed overrides) so a retry re-evaluates any function overrides against current fields.
