@@ -169,6 +169,8 @@ export default defineConfig({
               'assertNetworkRequests',
               'assertRequestBody',
               'expectNoResultsAndCreateFolderButton',
+              'expectPaintContrast',
+              'expectTextContrast',
               'createFolder',
               'createFolderFromDoc',
               'assertURLParams',
