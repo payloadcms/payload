@@ -6167,12 +6167,9 @@ test.describe('WCAG 2.2 Level AA', () => {
         await expect(filters).toBeVisible()
         await expect(conditions.locator('.condition__value input')).toHaveValue('post')
       } finally {
-        for (let index = 0; index < 2; index++) {
-          const remove = conditions.first().locator('.condition__actions-remove')
-
-          if (await remove.isVisible()) {
-            await remove.click()
-          }
+        for (let count = await conditions.count(); count > 0; count = await conditions.count()) {
+          await conditions.first().locator('.condition__actions-remove').click()
+          await expect(conditions).toHaveCount(count - 1)
         }
       }
     })
