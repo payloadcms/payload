@@ -47,16 +47,14 @@ export async function attachSboms({ core, dir, github, owner, repo, tag }) {
 }
 
 async function findReleaseByTag({ github, owner, repo, tag }) {
-  const pages = github.paginate.iterator(github.rest.repos.listReleases, {
+  const releases = await github.paginate(github.rest.repos.listReleases, {
     owner,
     per_page: 100,
     repo,
   })
-  for await (const { data } of pages) {
-    const match = data.find((release) => release.tag_name === tag)
-    if (match) {
-      return match
-    }
+  const match = releases.find((release) => release.tag_name === tag)
+  if (!match) {
+    throw new Error(`No GitHub release found for ${tag}`)
   }
-  throw new Error(`No GitHub release found for ${tag}`)
+  return match
 }

@@ -16,7 +16,7 @@ const release = (overrides = {}) => ({
   ...overrides,
 })
 
-const makeGithub = ({ existingAssets = [], releasePages = [[release()]] } = {}) => {
+const makeGithub = ({ existingAssets = [], releases = [release()] } = {}) => {
   const rest = {
     repos: {
       deleteReleaseAsset: vi.fn(async () => ({})),
@@ -25,21 +25,15 @@ const makeGithub = ({ existingAssets = [], releasePages = [[release()]] } = {}) 
       uploadReleaseAsset: vi.fn(async () => ({})),
     },
   }
+  const results = new Map([
+    [rest.repos.listReleaseAssets, existingAssets],
+    [rest.repos.listReleases, releases],
+  ])
   const paginate = vi.fn(async (method) => {
-    if (method !== rest.repos.listReleaseAssets) {
+    if (!results.has(method)) {
       throw new Error('unexpected paginate call')
     }
-    return existingAssets
-  })
-  paginate.iterator = vi.fn((method) => {
-    if (method !== rest.repos.listReleases) {
-      throw new Error('unexpected paginate.iterator call')
-    }
-    return (async function* () {
-      for (const data of releasePages) {
-        yield { data }
-      }
-    })()
+    return results.get(method)
   })
   return { paginate, rest }
 }
@@ -93,9 +87,9 @@ describe('attachSboms', () => {
     expect(args.headers).toEqual({ 'content-length': 2, 'content-type': 'application/zip' })
   })
 
-  it('finds a draft release on a later page', async () => {
+  it('picks the release that matches the tag', async () => {
     const github = makeGithub({
-      releasePages: [[release({ id: 1, tag_name: 'v4.0.0-beta.3' })], [release()]],
+      releases: [release({ id: 1, tag_name: 'v4.0.0-beta.3' }), release()],
     })
 
     await run({ github })
@@ -133,7 +127,7 @@ describe('attachSboms', () => {
   })
 
   it('uploads when the release is published', async () => {
-    const github = makeGithub({ releasePages: [[release({ draft: false })]] })
+    const github = makeGithub({ releases: [release({ draft: false })] })
 
     await run({ github })
 
@@ -146,7 +140,7 @@ describe('attachSboms', () => {
     const github = makeGithub()
 
     await expect(run({ github })).rejects.toThrow(ZIP)
-    expect(github.paginate.iterator).not.toHaveBeenCalled()
+    expect(github.paginate).not.toHaveBeenCalled()
     expect(github.rest.repos.uploadReleaseAsset).not.toHaveBeenCalled()
   })
 
