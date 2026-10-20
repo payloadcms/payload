@@ -358,6 +358,13 @@ export const myTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'ဤစာရွက်စာတမ်းကို အခြားအသုံးပြုသူတစ်ဦးက မကြာသေးမီက အပ်ဒိတ်လုပ်ထားသည်။ သင့်ကြည့်ရှုမှုသည် နောက်ကျနေပါသည်။',
     documents: 'စာရွက်စာတမ်းများ',
+    dragCancelled: '{{label}} ကို ဆွဲရွှေ့ခြင်း ပယ်ဖျက်ထားသည်။',
+    dragDropped: '{{label}} ကို ချထားသည်။ {{count}} ခုအနက် နေရာ {{position}}။',
+    dragInstructions:
+      'အတန်းတစ်ခုကို ကောက်ယူရန် Space သို့မဟုတ် Enter ကို နှိပ်ပါ။ ရွှေ့ရန် မြားခလုတ်များကို အသုံးပြုပါ။ VoiceOver ဖြင့် Quick Nav ကို ပိတ်ပြီး Command + မြားခလုတ်များကို အသုံးပြုပါ။ ချရန် Space သို့မဟုတ် Enter၊ ပယ်ဖျက်ရန် Escape ကို နှိပ်ပါ။',
+    dragMoved: '{{label}}: {{direction}}. {{count}} ခုအနက် နေရာ {{position}}။',
+    dragPickedUp: '{{label}} ကို ကောက်ယူထားသည်။ {{count}} ခုအနက် နေရာ {{position}}။',
+    dragToMove: 'ရွှေ့ရန် ဆွဲပါ',
     dragToReorder: 'ဆွဲ၍ အမျိုးအစား ပြန်စဉ်ပါ',
     duplicate: 'ပုံတူပွားမည်။',
     duplicateWithoutSaving: 'သေချာပါပြီ။',

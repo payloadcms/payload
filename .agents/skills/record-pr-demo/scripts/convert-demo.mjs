@@ -24,7 +24,7 @@ export async function convertDemo({ environment = process.env, input, output, tr
       '-preset',
       'medium',
       '-crf',
-      '23',
+      '18',
       '-pix_fmt',
       'yuv420p',
       '-movflags',

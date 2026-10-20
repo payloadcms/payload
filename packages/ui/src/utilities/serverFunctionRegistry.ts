@@ -24,13 +24,8 @@ import { switchLanguageHandler } from './switchLanguageHandler.js'
  * from this single registry via `createServerFunctionHandler`, so a handler
  * added here reaches every framework and the adapter lists can't drift.
  *
- * Handlers may return values containing React elements (e.g. `customComponents`
- * inside form state, the `Document` / `List` nodes from render-document /
- * render-list, the render-field / render-widget output). Adapters ship those
- * over the wire as RSC payloads: Next.js does this natively, while the TanStack
- * Start adapter passes a `transformResult` (`serializeForRsc`) to
- * `createServerFunctionHandler` that converts elements into
- * `renderServerComponent` handles.
+ * Handlers may return React elements alongside ordinary data. Each framework
+ * adapter sends the complete result through its native React Flight transport.
  */
 export const sharedServerFunctions: Record<string, ServerFunction<any, any>> = {
   'copy-data-from-locale': copyDataFromLocaleHandler,

@@ -447,6 +447,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
       {BeforeInput}
       {(rows?.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
+          announceRows
           className={`${baseClass}__draggable-rows`}
           id={rowsID}
           ids={rows.map((row) => row.id)}
