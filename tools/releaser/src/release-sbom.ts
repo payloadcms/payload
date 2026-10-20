@@ -20,7 +20,6 @@ import type { SbomPackage } from './lib/sbom/formats.js'
 
 import { getPackageDetails } from './lib/getPackageDetails.js'
 import { packagePublishList } from './lib/publishList.js'
-import { assertPnpmVersion } from './lib/sbom/assertPnpmVersion.js'
 import { buildSbomArgs, SBOM_FORMATS, toSbomFileName } from './lib/sbom/formats.js'
 import { setSpdxRootSupplier } from './lib/sbom/setSpdxRootSupplier.js'
 import { validateSbom } from './lib/sbom/validateSbom.js'
@@ -29,7 +28,6 @@ import { writeStepSummary } from './lib/writeStepSummary.js'
 
 export type ReleaseSbomDeps = {
   getPackages: () => Promise<SbomPackage[]>
-  getPnpmVersion: () => Promise<string>
   log: (message: string) => void
   runPnpm: (args: { args: string[] }) => Promise<void>
   writeSummary: (markdown: string) => void
@@ -42,9 +40,7 @@ export const runReleaseSbom = async ({
   deps: ReleaseSbomDeps
   outDir: string
 }): Promise<{ fileCount: number }> => {
-  const { getPackages, getPnpmVersion, log, runPnpm, writeSummary } = deps
-
-  assertPnpmVersion({ version: await getPnpmVersion() })
+  const { getPackages, log, runPnpm, writeSummary } = deps
 
   // pnpm overwrites only the files it writes; anything else left here would ship.
   if (fs.existsSync(outDir) && fs.readdirSync(outDir).length > 0) {
@@ -106,7 +102,6 @@ async function main(): Promise<void> {
   await runReleaseSbom({
     deps: {
       getPackages,
-      getPnpmVersion: async () => (await execa('pnpm', ['--version'])).stdout.trim(),
       log: console.log,
       runPnpm: async ({ args }) => {
         await execa('pnpm', args, { cwd: PROJECT_ROOT, stdio: 'inherit' })

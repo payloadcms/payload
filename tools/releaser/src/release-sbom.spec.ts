@@ -79,7 +79,6 @@ describe('runReleaseSbom', () => {
 
   const makeDeps = (overrides: Partial<ReleaseSbomDeps> = {}) => ({
     getPackages: async () => PACKAGES,
-    getPnpmVersion: async () => '11.28.6',
     log: vi.fn(),
     runPnpm: fakePnpm(),
     writeSummary: vi.fn(),
@@ -126,13 +125,6 @@ describe('runReleaseSbom', () => {
     expect(deps.writeSummary).toHaveBeenCalledWith(
       `Generated 4 SBOMs for 2 packages in ${BUNDLE}.zip`,
     )
-  })
-
-  it('should throw before running pnpm when pnpm is too old', async () => {
-    const deps = makeDeps({ getPnpmVersion: async () => '11.9.0' })
-
-    await expect(runReleaseSbom({ deps, outDir })).rejects.toThrow(/11\.28\.6/)
-    expect(deps.runPnpm).not.toHaveBeenCalled()
   })
 
   it('should throw when the output dir is not empty', async () => {
