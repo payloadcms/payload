@@ -4,6 +4,7 @@ on:
   pull_request_target:
     types:
       - synchronize
+      - reopened
       - edited
 
 permissions:
@@ -13,7 +14,7 @@ jobs:
   dismiss:
     name: dismiss-stale-community-approvals
     runs-on: ubuntu-24.04
-    if: github.event.action == 'synchronize' || github.event.changes.base
+    if: github.event.action != 'edited' || github.event.changes.base
     steps:
       # Never check out the PR code here: pull_request_target runs with a write token
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
@@ -21,28 +22,38 @@ jobs:
           retries: 3
           script: |
             const { owner, repo } = context.repo
-            const pull_number = context.payload.pull_request.number
-            const sender = context.payload.sender.login
+            const { action, pull_request, sender } = context.payload
+            const pull_number = pull_request.number
+            const isReopened = action === 'reopened'
 
-            let permission = 'none'
-            try {
-              const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
-                owner,
-                repo,
-                username: sender,
-              })
-              permission = data.permission
-            } catch {}
+            // A reopened PR may include commits pushed while it was closed, by anyone,
+            // so any approval that isn't on the current head is dismissed regardless of sender
+            if (!isReopened) {
+              let permission = 'none'
+              try {
+                const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
+                  owner,
+                  repo,
+                  username: sender.login,
+                })
+                permission = data.permission
+              } catch (err) {
+                core.warning(
+                  `Could not look up permission for @${sender.login} (${err.status ?? 'no status'}: ${err.message}), treating as untrusted`,
+                )
+              }
 
-            if (['admin', 'maintain', 'write'].includes(permission)) {
-              core.info(`@${sender} has ${permission} access, keeping approvals`)
-              return
+              if (['admin', 'maintain', 'write'].includes(permission)) {
+                core.info(`@${sender.login} has ${permission} access, keeping approvals`)
+                return
+              }
             }
 
-            const reason =
-              context.payload.action === 'synchronize'
-                ? `New commits were pushed by @${sender}`
-                : `The base branch was changed by @${sender}`
+            const reason = {
+              edited: `The base branch was changed by @${sender.login}`,
+              reopened: 'The pull request was reopened with commits that were not approved',
+              synchronize: `New commits were pushed by @${sender.login}`,
+            }[action]
 
             const reviews = await github.paginate(github.rest.pulls.listReviews, {
               owner,
@@ -50,8 +61,14 @@ jobs:
               pull_number,
             })
 
+            const staleApprovals = reviews.filter(
+              (review) =>
+                review.state === 'APPROVED' &&
+                (!isReopened || review.commit_id !== pull_request.head.sha),
+            )
+
             const failedReviewIds = []
-            for (const review of reviews.filter((review) => review.state === 'APPROVED')) {
+            for (const review of staleApprovals) {
               try {
                 await github.rest.pulls.dismissReview({
                   owner,
@@ -60,7 +77,7 @@ jobs:
                   review_id: review.id,
                   message: `${reason}. Please re-review.`,
                 })
-                core.info(`Dismissed approval ${review.id} from @${review.user?.login}`)
+                core.info(`Dismissed approval ${review.id} from @${review.user?.login ?? 'ghost'}`)
               } catch (err) {
                 failedReviewIds.push(review.id)
                 core.error(`Could not dismiss approval ${review.id}: ${err.message}`)
