@@ -68,7 +68,7 @@ export const config: Config = {
       readBranch: canUseBranches,
       updateBranch: canUseBranches,
     },
-    exclude: ['audit-events'],
+    exclude: ['audit-events', 'header'],
     hooks: {
       beforeMerge: async ({ branch, changes, req, warnings }) => {
         // Throw to stop the merge.
@@ -80,6 +80,8 @@ export const config: Config = {
   },
 }
 ```
+
+`exclude` accepts collection and global slugs. In the example above, `audit-events` is a collection and `header` is a global. An exclusion takes precedence over `branching: true` on the collection or global. Eligible entities not excluded participate by default unless they set `branching: false`.
 
 All six callbacks use the standard `Access` type:
 
@@ -138,7 +140,7 @@ Merging keeps the branch available by default. Pass `closeBranch: true` to close
 
 Create, list, update metadata, and delete branches through ordinary collection operations on `payload-branches`. The `payload.branches` Local API exposes only `merge` and `discard`.
 
-Omitting `branch` uses `main`. Pass a branch slug to supported Local API operations:
+Local API operations inherit the branch associated with `req` unless explicitly overridden with `branch`, falling back to `main` when no branch context is available. Pass a branch slug to supported Local API operations:
 
 ```ts
 const page = await payload.findByID({
@@ -278,6 +280,18 @@ The callback runs against candidates prepared for `main` and replaces only the d
 ## Schedule a merge
 
 When the Jobs Queue is configured, the Admin Panel can schedule a merge and cancel a job that has not started. The job stores the selected work and user. When it runs, it reloads current candidates and repeats access, dependency, and validation checks. It uses the same main-only merge and cleanup behavior as an immediate merge.
+
+Scheduling does not freeze the branch or capture a content snapshot. Editors can continue changing content until the merge starts. The branch enters `merging`, which blocks content writes, when execution begins rather than when the job is scheduled.
+
+The scheduled job resolves its selection at execution time:
+
+| Job input | Content selected when the job runs |
+| --- | --- |
+| `changes` omitted | All pending changes, including changes added after scheduling. |
+| Nonempty `changes` array | The latest content for matching pending change IDs, including edits made after scheduling. |
+| `changes: []` | Currently treated as all pending changes, unlike an immediate merge, where an empty array selects nothing. |
+
+Selected change IDs that have already been merged or discarded are skipped. If no selected changes remain, no content is merged. A scheduled merge is therefore not a guarantee that the exact content reviewed when scheduling will be applied.
 
 Do not treat permission at schedule time as permission at execution time. A scheduled merge can fail if the stored user loses access or if the selected content becomes invalid.
 

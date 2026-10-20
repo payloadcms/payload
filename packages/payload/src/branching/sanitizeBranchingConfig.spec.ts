@@ -52,6 +52,25 @@ describe('sanitizeBranchingConfig', () => {
     expect(sanitizeBranchingConfig(config).validate).toBe(validate)
   })
 
+  it('should exclude collections and globals even when they explicitly opt in', () => {
+    const config = {
+      branching: { exclude: ['posts', 'header'] },
+      collections: [
+        { branching: true, fields: [], slug: 'posts' },
+        { fields: [], slug: 'pages' },
+      ],
+      globals: [
+        { branching: true, fields: [], slug: 'header' },
+        { fields: [], slug: 'footer' },
+      ],
+    } as Config
+
+    const branching = sanitizeBranchingConfig(config)
+
+    expect(branching.branchableCollections).toEqual(new Set(['pages']))
+    expect(branching.branchableGlobals).toEqual(new Set(['footer']))
+  })
+
   it('should reject an auth-enabled collection that opts into branching', () => {
     const config = {
       branching: true,

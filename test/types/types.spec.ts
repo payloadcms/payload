@@ -38,6 +38,7 @@ import type {
   GlobalBeforeValidateHook,
   GlobalConfig,
   GlobalPermission,
+  GlobalSlug,
   Job,
   JobTaskStatus,
   JoinFieldLabelServerProps,
@@ -145,6 +146,14 @@ describe('Types testing', () => {
     test('should not expose a shadowed-ID threshold in branching config', () => {
       expect<'maxShadowedIDs'>().type.not.toBeAssignableTo<keyof BranchingConfig>()
       expect<'maxShadowedIDs'>().type.not.toBeAssignableTo<keyof SanitizedBranchingConfig>()
+    })
+
+    test('should accept collection and global slugs in branching exclusions', () => {
+      expect<NonNullable<BranchingConfig['exclude']>>().type.toBe<
+        (CollectionSlug | GlobalSlug)[]
+      >()
+      expect<['posts', 'menu']>().type.toBeAssignableTo<BranchingConfig['exclude']>()
+      expect<['not-a-configured-slug']>().type.not.toBeAssignableTo<BranchingConfig['exclude']>()
     })
 
     test('should expose exact merge hook argument types', () => {
