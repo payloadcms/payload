@@ -1,45 +1,45 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig } from "payload";
 
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import { fileURLToPath } from 'node:url'
-import path from 'path'
+import { lexicalEditor } from "@payloadcms/richtext-lexical";
+import { fileURLToPath } from "node:url";
+import path from "path";
 
-import { mediaSharpTransformer } from '../__helpers/shared/mediaSharpTransformer.js'
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
-import { MediaCollection, mediaSlug } from './collections/Media/index.js'
-import { PostsCollection, postsSlug } from './collections/Posts/index.js'
-import { UsersCollection, usersSlug } from './collections/Users/index.js'
-import { seededAPIKey } from './constants.js'
-import { MenuGlobal } from './globals/Menu/index.js'
+import { mediaSharpTransformer } from "../__helpers/shared/mediaSharpTransformer.js";
+import { buildConfigWithDefaults } from "../buildConfigWithDefaults.js";
+import { devUser } from "../credentials.js";
+import { MediaCollection, mediaSlug } from "./collections/Media/index.js";
+import { PostsCollection, postsSlug } from "./collections/Posts/index.js";
+import { UsersCollection, usersSlug } from "./collections/Users/index.js";
+import { seededAPIKey } from "./constants.js";
+import { MenuGlobal } from "./globals/Menu/index.js";
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
 
 const FolderCollection = {
-  slug: 'payload-folders',
+  slug: "payload-folders",
   admin: {
-    useAsTitle: 'name',
+    useAsTitle: "name",
   },
   fields: [
     {
-      name: 'name',
-      type: 'text',
+      name: "name",
+      type: "text",
       required: true,
     },
   ],
   folders: {
     joinField: {
-      name: 'documentsAndFolders',
+      name: "documentsAndFolders",
     },
   },
-} satisfies CollectionConfig
+} satisfies CollectionConfig;
 
 const MediaAltCollection = {
-  slug: 'media-alt',
+  slug: "media-alt",
   fields: [],
   upload: true,
-} satisfies CollectionConfig
+} satisfies CollectionConfig;
 
 export default buildConfigWithDefaults({
   config: {
@@ -50,33 +50,35 @@ export default buildConfigWithDefaults({
     admin: {
       components: {
         providers: [
-          '../admin/components/CustomProviderServer/index.js#CustomProviderServer',
-          '../admin/components/CustomProvider/index.js#CustomProvider',
+          "../admin/components/CustomProviderServer/index.js#CustomProviderServer",
+          "../admin/components/CustomProvider/index.js#CustomProvider",
         ],
         views: {
           BreadcrumbCurrentPage: {
-            Component: '/components/BreadcrumbCurrentPage/index.js#BreadcrumbCurrentPage',
-            path: '/breadcrumb-current-page',
+            Component:
+              "/components/BreadcrumbCurrentPage/index.js#BreadcrumbCurrentPage",
+            path: "/breadcrumb-current-page",
           },
           CustomIDModals: {
-            Component: '/components/CustomIDModals/index.js#CustomIDModals',
-            path: '/custom-modal-ids',
+            Component: "/components/CustomIDModals/index.js#CustomIDModals",
+            path: "/custom-modal-ids",
           },
           FocusIndicatorsView: {
-            Component: '/components/FocusIndicatorsView.js#FocusIndicatorsView',
-            path: '/focus-indicators',
+            Component: "/components/FocusIndicatorsView.js#FocusIndicatorsView",
+            path: "/focus-indicators",
           },
           StatusMessages: {
-            Component: '/components/StatusMessages/index.js#StatusMessages',
-            path: '/status-messages',
+            Component: "/components/StatusMessages/index.js#StatusMessages",
+            path: "/status-messages",
           },
         },
       },
       dashboard: {
         defaultLayout: [
-          { widgetSlug: 'collections', width: 'full' },
-          { widgetSlug: 'upload-dropzone', width: 'small' },
-          { widgetSlug: 'activity', width: 'full' },
+          { widgetSlug: "welcome", width: "full" },
+          { widgetSlug: "collections", width: "full" },
+          { widgetSlug: "upload-dropzone", width: "small" },
+          { widgetSlug: "activity", width: "full" },
         ],
         widgets: [],
       },
@@ -98,20 +100,20 @@ export default buildConfigWithDefaults({
     ],
     indexSortableFields: true,
     localization: {
-      defaultLocale: 'en',
+      defaultLocale: "en",
       locales: [
         {
-          code: 'en',
-          label: 'English',
+          code: "en",
+          label: "English",
         },
         {
-          code: 'es',
-          label: 'Spanish',
+          code: "es",
+          label: "Spanish",
         },
       ],
     },
     typescript: {
-      outputFile: path.resolve(dirname, 'payload-types.ts'),
+      outputFile: path.resolve(dirname, "payload-types.ts"),
     },
   },
   seed: async (payload) => {
@@ -123,94 +125,98 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
       overrideAccess: true,
-    })
+    });
 
     const parentFolder = await payload.create({
-      collection: 'payload-folders',
+      collection: "payload-folders",
       data: {
-        name: 'Accessibility folder',
+        name: "Accessibility folder",
       },
       overrideAccess: true,
-    })
+    });
 
     await payload.create({
-      collection: 'payload-folders',
+      collection: "payload-folders",
       data: {
-        name: 'Accessibility child folder',
-        '_h_payload-folders': parentFolder.id,
+        name: "Accessibility child folder",
+        "_h_payload-folders": parentFolder.id,
       },
       overrideAccess: true,
-    })
+    });
 
-    for (const globalText of ['Original menu text', 'Updated menu text', 'Current menu text']) {
+    for (const globalText of [
+      "Original menu text",
+      "Updated menu text",
+      "Current menu text",
+    ]) {
       await payload.updateGlobal({
-        slug: 'menu',
+        slug: "menu",
         data: { globalText },
         overrideAccess: true,
-      })
+      });
     }
 
     await payload.create({
-      collection: 'payload-folders',
+      collection: "payload-folders",
       data: {
-        name: 'Accessibility final child folder',
-        '_h_payload-folders': parentFolder.id,
+        name: "Accessibility final child folder",
+        "_h_payload-folders": parentFolder.id,
       },
       overrideAccess: true,
-    })
+    });
 
     const firstPost = await payload.create({
       collection: postsSlug,
       data: {
-        accessibilitySelect: 'one',
-        title: 'Example post one',
+        accessibilitySelect: "one",
+        title: "Example post one",
       },
       draft: true,
       overrideAccess: true,
-    })
+    });
 
     await payload.update({
       id: firstPost.id,
       collection: postsSlug,
       data: {
-        title: 'Example post one, second version',
+        title: "Example post one, second version",
       },
       draft: true,
       overrideAccess: true,
-    })
+    });
 
     await payload.update({
       id: firstPost.id,
       collection: postsSlug,
       data: {
-        _status: 'published',
-        title: 'Example post one, third version',
+        _status: "published",
+        title: "Example post one, third version",
       },
       draft: false,
       overrideAccess: true,
-    })
+    });
 
     await payload.create({
       collection: postsSlug,
       data: {
-        accessibilitySelect: 'two',
+        accessibilitySelect: "two",
         relatedPost: firstPost.id,
-        title: 'Example post two',
+        title: "Example post two",
       },
       draft: false,
       overrideAccess: true,
-    })
+    });
 
     await payload.create({
       collection: postsSlug,
       data: {
-        accessibilitySelect: 'one',
+        accessibilitySelect: "one",
         relatedPost: firstPost.id,
-        title: 'Example post three',
+        title: "Example post three",
       },
       draft: false,
       overrideAccess: true,
-    })
+    });
   },
-  suite: 'a11y',
-})
+  suite: "a11y",
+});
