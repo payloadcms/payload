@@ -54,12 +54,12 @@ Prefer `SetStepNav` unless you need direct access to the current `stepNav` value
 
 Each item contains a `label` and may contain a `url`.
 
-| Property   | Type                                          | Description                                                 |
-| ---------- | --------------------------------------------- | ----------------------------------------------------------- |
-| `label` \* | `StaticLabel \| LabelFunction \| JSX.Element` | Displays the translated or custom breadcrumb label.         |
-| `url`      | `string`                                      | Makes a non-current breadcrumb item navigable when present. |
+| Property   | Type                                          | Description                                         |
+| ---------- | --------------------------------------------- | --------------------------------------------------- |
+| `label` \* | `StaticLabel \| LabelFunction \| JSX.Element` | Displays the translated or custom breadcrumb label. |
+| `url`      | `string`                                      | Renders the item as a link when present.            |
 
-The final item represents the current location and is rendered as text. Earlier items with a `url` are rendered as links.
+Items with a `url` are rendered as links. Items without a `url` are rendered as text. The final item is considered current by default, but it remains a link when a `url` is provided.
 
 _\* An asterisk denotes that a property is required._
 

@@ -34,7 +34,7 @@ Pass `label` to `SaveButton` when a replacement component needs a more specific 
 
 ## Draft and publish actions
 
-When drafts are enabled, Payload uses `SaveDraftButton` and `PublishButton` instead of `SaveButton`. Saving a draft skips validation; publishing submits the document with a published status.
+When drafts are enabled, Payload uses `PublishButton` instead of `SaveButton`. `SaveDraftButton` is shown by default when autosave is disabled. When autosave is enabled, set `versions.drafts.autosave.showSaveDraftButton` to `true` to keep the manual draft action visible. Payload also shows it for a new Collection document when draft validation is enabled. Saving a draft skips validation; publishing submits the document with a published status.
 
 <ComponentPreview component="DocumentActions" example="editView" />
 

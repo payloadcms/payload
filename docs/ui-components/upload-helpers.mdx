@@ -34,6 +34,8 @@ The available options come from `uploadConfig.variants` and matching entries in 
 
 `EditUpload` provides Payload's crop and focal-point controls. Use `showCrop` and `showFocalPoint` to expose the adjustments enabled by the upload Collection.
 
+`EditUpload` renders inside Payload's shared upload-edit modal; rendering the component does not open it. Mount it as part of an existing upload workflow and open it through the image-adjustment action supplied by `Upload` or `FileDetails`.
+
 ```tsx
 <EditUpload
   fileName={doc.filename}
