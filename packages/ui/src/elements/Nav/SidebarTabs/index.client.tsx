@@ -119,7 +119,7 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
         setTabContent(newContent)
       } finally {
         loadingTabsRef.current.delete(tabSlug)
-        setLoadingTab(null)
+        setLoadingTab((currentTab) => (currentTab === tabSlug ? null : currentTab))
       }
     },
     [serverFunction],

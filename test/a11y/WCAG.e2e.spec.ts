@@ -483,6 +483,7 @@ test.describe('WCAG 2.2 Level AA', () => {
               .trim(),
           )
 
+          expect.soft(label).toMatch(/\S/)
           await expect.soft(item.getByRole('checkbox')).toHaveAccessibleName(label)
         }
       })
@@ -6061,7 +6062,9 @@ test.describe('WCAG 2.2 Level AA', () => {
     }, testInfo) => {
       // PYLD-3827
       await gotoCreatePost({ page, postsURL })
-      const field = page.locator('.tabs-field')
+      const field = page.locator('.tabs-field').filter({
+        has: page.getByRole('tab', { name: 'Post details', exact: true }),
+      })
       const tabs = field.getByRole('tab')
 
       await expect(field.getByRole('tablist')).toHaveCount(1)
