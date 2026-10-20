@@ -2,7 +2,6 @@ import eslintReact from '@eslint-react/eslint-plugin'
 import vitest from '@vitest/eslint-plugin'
 import perfectionist from 'eslint-plugin-perfectionist'
 import playwright from 'eslint-plugin-playwright'
-import reactCompiler from 'eslint-plugin-react-compiler'
 import { configs as regexpConfigs } from 'eslint-plugin-regexp'
 import { createRequire } from 'node:module'
 
@@ -75,7 +74,6 @@ const config = {
     { name: 'payload', specifier: require.resolve('@payloadcms/oxlint-plugin') },
     { name: 'perfectionist', specifier: require.resolve('eslint-plugin-perfectionist') },
     { name: 'playwright', specifier: require.resolve('eslint-plugin-playwright') },
-    { name: 'react-compiler', specifier: require.resolve('eslint-plugin-react-compiler') },
     { name: 'regexp', specifier: require.resolve('eslint-plugin-regexp') },
     // `vitest` is reserved for oxlint's native plugin, which can't recognize custom `test` imports
     { name: '@vitest', specifier: require.resolve('@vitest/eslint-plugin') },
@@ -267,7 +265,39 @@ const config = {
         ]),
       ),
     },
-    { files: ['**/*.tsx'], rules: reactCompiler.configs.recommended.rules },
+    {
+      files: ['**/*.tsx'],
+      // React's recommended React Compiler checks (the `recommended-latest` preset of
+      // `eslint-plugin-react-hooks`), using oxlint's built-in port of the compiler. `hooks`,
+      // `invariant`, `rule-suppression`, `syntax` and `todo` aren't in the preset, but React Compiler
+      // skips optimizing components they report. Severities are the ones React gives each rule,
+      // except where noted.
+      rules: {
+        'react-hooks/error-boundaries': 'error',
+        'react-hooks/globals': 'error',
+        'react-hooks/hooks': 'error',
+        'react-hooks/immutability': 'error',
+        'react-hooks/incompatible-library': 'warn',
+        'react-hooks/invariant': 'error',
+        // TODO: 'error' once all its findings are fixed
+        'react-hooks/preserve-manual-memoization': 'warn',
+        'react-hooks/purity': 'error',
+        // TODO: 'error' once all its findings are fixed
+        'react-hooks/refs': 'warn',
+        'react-hooks/rule-suppression': 'error',
+        // TODO: 'error' once all its findings are fixed
+        'react-hooks/set-state-in-effect': 'warn',
+        'react-hooks/set-state-in-render': 'error',
+        // TODO: 'error' once all its findings are fixed
+        'react-hooks/static-components': 'warn',
+        'react-hooks/syntax': 'error',
+        // React gives this one a "hint" severity, which oxlint doesn't have
+        'react-hooks/todo': 'warn',
+        'react-hooks/unsupported-syntax': 'warn',
+        'react-hooks/use-memo': 'error',
+        'react-hooks/void-use-memo': 'error',
+      },
+    },
     {
       files: ['**/*.config.ts', '**/config.ts'],
       rules: {
