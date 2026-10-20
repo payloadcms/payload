@@ -296,7 +296,11 @@ const resolveWherePath = ({
 
   return {
     type: 'scalar',
-    column: fieldContext ? table[pathPlan.columnPath] : (sql`null` as unknown as Column),
+    column: fieldContext
+      ? fieldContext.isLocalized
+        ? adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`][pathPlan.columnPath]
+        : table[pathPlan.columnPath]
+      : (sql`null` as unknown as Column),
     pathPlan,
     queryValueContext,
   }
