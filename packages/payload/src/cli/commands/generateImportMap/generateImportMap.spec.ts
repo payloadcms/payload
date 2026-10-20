@@ -1,5 +1,10 @@
 import { describe, beforeEach, expect, it, vitest } from 'vitest'
+import type { CollectionConfig } from '../../../collections/config/types.js'
+import type { Config } from '../../../config/types.js'
 import type { PayloadComponent } from '../../../index.js'
+import type { AddToImportMap, Imports, InternalImportMap } from './generateImportMap.js'
+import { sanitizeConfig } from '../../../config/sanitize.js'
+import { iterateConfig } from './iterateConfig.js'
 import { addPayloadComponentToImportMap } from './utilities/addPayloadComponentToImportMap.js'
 import { getImportMapToBaseDirPath } from './utilities/getImportMapToBaseDirPath.js'
 
@@ -211,5 +216,110 @@ describe('addPayloadComponentToImportMap', () => {
       expectedPath: './components/MyComponent.js',
       expectedSpecifier: 'MyExport',
     })
+  })
+})
+
+describe('iterateConfig - hierarchy icons', () => {
+  function getImportMapKeys(collections: CollectionConfig[]): string[] {
+    const config = sanitizeConfig({
+      collections,
+      db: {
+        defaultIDType: 'text',
+        // @ts-expect-error partial config
+        init: () => {},
+      },
+      secret: 'secret',
+    } satisfies Config)
+
+    const importMap: InternalImportMap = {}
+    const imports: Imports = {}
+    const addToImportMap: AddToImportMap = (payloadComponent) => {
+      if (!payloadComponent) {
+        return
+      }
+      for (const component of Array.isArray(payloadComponent)
+        ? payloadComponent
+        : [payloadComponent]) {
+        addPayloadComponentToImportMap({
+          importMap,
+          importMapToBaseDirPath: './',
+          imports,
+          payloadComponent: component,
+        })
+      }
+    }
+
+    iterateConfig({
+      addToImportMap,
+      baseDir: config.admin.importMap.baseDir,
+      config,
+      importMap,
+      imports,
+    })
+
+    return Object.keys(importMap)
+  }
+
+  it('adds the default folder icon for a folders collection', () => {
+    expect(getImportMapKeys([{ slug: 'folders', fields: [], folders: true }])).toContain(
+      '@payloadcms/ui#FolderIcon',
+    )
+  })
+
+  it('adds the default folder icon when the sidebar tab is disabled', () => {
+    expect(
+      getImportMapKeys([
+        { slug: 'folders', fields: [], folders: { admin: { injectSidebarTab: false } } },
+      ]),
+    ).toContain('@payloadcms/ui#FolderIcon')
+  })
+
+  it('adds the default tag icon for a tags collection', () => {
+    expect(getImportMapKeys([{ slug: 'tags', fields: [], tags: true }])).toContain(
+      '@payloadcms/ui#TagIcon',
+    )
+  })
+
+  it('adds the default tag icon when the sidebar tab is disabled', () => {
+    expect(
+      getImportMapKeys([
+        { slug: 'tags', fields: [], tags: { admin: { injectSidebarTab: false } } },
+      ]),
+    ).toContain('@payloadcms/ui#TagIcon')
+  })
+
+  it('adds custom Icon and SmallIcon in string and object form', () => {
+    const keys = getImportMapKeys([
+      {
+        slug: 'categories',
+        fields: [],
+        hierarchy: {
+          admin: {
+            components: {
+              Icon: { clientProps: { size: 24 }, path: './CategoryIcon.js#CategoryIcon' },
+              SmallIcon: './CategorySmallIcon.js#CategorySmallIcon',
+            },
+            injectSidebarTab: false,
+          },
+        },
+      },
+    ])
+
+    expect(keys).toContain('./CategoryIcon.js#CategoryIcon')
+    expect(keys).toContain('./CategorySmallIcon.js#CategorySmallIcon')
+  })
+
+  it('adds a custom SmallIcon when the sidebar tab is enabled', () => {
+    expect(
+      getImportMapKeys([
+        {
+          slug: 'categories',
+          fields: [],
+          hierarchy: {
+            admin: { components: { SmallIcon: './CategorySmallIcon.js#CategorySmallIcon' } },
+          },
+        },
+      ]),
+    ).toContain('./CategorySmallIcon.js#CategorySmallIcon')
   })
 })

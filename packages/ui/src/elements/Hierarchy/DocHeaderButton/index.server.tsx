@@ -1,5 +1,6 @@
-import type { Payload } from 'payload'
+import type { Payload, PayloadComponent } from 'payload'
 
+import { parsePayloadComponent } from 'payload/shared'
 import React from 'react'
 
 import { FolderIcon } from '../../../icons/Folder/index.js'
@@ -33,7 +34,7 @@ export const HierarchyButton: React.FC<HierarchyButtonServerProps> = ({
   // Render the custom icon if provided, otherwise use FolderIcon directly
   // Important: Must render the icon here on server to avoid hydration mismatch
   // For default FolderIcon path, render directly to avoid import map requirement
-  const isDefaultFolderIcon = !IconComponent || IconComponent === '@payloadcms/ui#FolderIcon'
+  const isDefaultFolderIcon = isFolderIcon({ component: IconComponent })
   const renderedIcon = isDefaultFolderIcon ? (
     <FolderIcon size={16} />
   ) : (
@@ -46,8 +47,7 @@ export const HierarchyButton: React.FC<HierarchyButtonServerProps> = ({
 
   // Render the small icon for compact display (pill button)
   // Reuse the full icon if SmallIcon is the same component
-  const isDefaultSmallIcon =
-    !SmallIconComponent || SmallIconComponent === '@payloadcms/ui#FolderIcon'
+  const isDefaultSmallIcon = isFolderIcon({ component: SmallIconComponent })
   const renderedSmallIcon =
     SmallIconComponent === IconComponent ? (
       renderedIcon
@@ -70,4 +70,18 @@ export const HierarchyButton: React.FC<HierarchyButtonServerProps> = ({
       SmallIcon={renderedSmallIcon}
     />
   )
+}
+
+/**
+ * Matches the default folder icon in both string and object form, e.g. the folders preset's
+ * `{ path: '@payloadcms/ui#FolderIcon', clientProps }`, so it renders without the import map.
+ */
+function isFolderIcon({ component }: { component?: PayloadComponent }): boolean {
+  if (!component) {
+    return true
+  }
+
+  const { exportName, path } = parsePayloadComponent(component)
+
+  return path === '@payloadcms/ui' && exportName === 'FolderIcon'
 }
