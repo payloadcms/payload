@@ -5,6 +5,7 @@ import React, { Fragment, useEffect, useState } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../translations/index.js'
 
+import '../fields/colors.css'
 import { Pill } from './Pill.js'
 
 export const LengthIndicator: React.FC<{
@@ -29,8 +30,8 @@ export const LengthIndicator: React.FC<{
     if (textLength === 0) {
       setLabel(t('plugin-seo:missing'))
       setLabelStyle({
-        backgroundColor: 'red',
-        color: 'white',
+        backgroundColor: 'var(--seo-danger-bg)',
+        color: 'var(--seo-danger-text)',
       })
       setBarWidth(0)
     } else {
@@ -42,14 +43,14 @@ export const LengthIndicator: React.FC<{
         if (ratioUntilMin > 0.9) {
           setLabel(t('plugin-seo:almostThere'))
           setLabelStyle({
-            backgroundColor: 'orange',
-            color: 'white',
+            backgroundColor: 'var(--seo-warning-bg)',
+            color: 'var(--seo-warning-text)',
           })
         } else {
           setLabel(t('plugin-seo:tooShort'))
           setLabelStyle({
-            backgroundColor: 'orangered',
-            color: 'white',
+            backgroundColor: 'var(--seo-short-bg)',
+            color: 'var(--seo-danger-text)',
           })
         }
 
@@ -59,8 +60,8 @@ export const LengthIndicator: React.FC<{
       if (progress >= 0 && progress <= 1) {
         setLabel(t('plugin-seo:good'))
         setLabelStyle({
-          backgroundColor: 'green',
-          color: 'white',
+          backgroundColor: 'var(--seo-success-bg)',
+          color: 'var(--seo-success-text)',
         })
         setBarWidth(progress)
       }
@@ -68,8 +69,8 @@ export const LengthIndicator: React.FC<{
       if (progress > 1) {
         setLabel(t('plugin-seo:tooLong'))
         setLabelStyle({
-          backgroundColor: 'red',
-          color: 'white',
+          backgroundColor: 'var(--seo-danger-bg)',
+          color: 'var(--seo-danger-text)',
         })
         setBarWidth(1)
       }
@@ -115,7 +116,7 @@ export const LengthIndicator: React.FC<{
       </div>
       <div
         style={{
-          backgroundColor: '#F3F3F3',
+          backgroundColor: 'var(--seo-track-bg)',
           height: '2px',
           position: 'relative',
           width: '100%',
