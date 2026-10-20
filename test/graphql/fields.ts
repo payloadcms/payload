@@ -87,7 +87,7 @@ export const hiddenFields: Field[] = [
     type: 'blocks',
     blocks: [
       {
-        slug: 'content',
+        slug: 'hidden-fields-content',
         fields: [
           { name: 'visible', type: 'text' },
           { name: 'secret', type: 'text', hidden: true },

@@ -140,7 +140,7 @@ test.suite('GraphQL hidden mutation fields', { config: './config.ts' }, () => {
       collapsibleVisible: 'collapsible',
       unnamedGroupVisible: 'unnamed group',
       tabVisible: 'unnamed tab',
-      blocks: [{ blockType: 'content', visible: 'block' }],
+      blocks: [{ blockType: 'hidden-fields-content', visible: 'block' }],
     }
     const created = await restClient
       .GRAPHQL_POST({
