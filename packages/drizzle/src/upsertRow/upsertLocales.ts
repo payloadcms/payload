@@ -26,6 +26,12 @@ export const upsertLocales = async ({
   const localesTableName = `${tableName}${adapter.localesSuffix}`
   const localesTable = adapter.tables[localesTableName]
   const columns = [...new Set(Object.values(locales).flatMap((row) => Object.keys(row)))]
+
+  // `undefined` locale values leave empty locale rows, with nothing to write
+  if (!columns.length) {
+    return
+  }
+
   const nulls = Object.fromEntries(columns.map((column) => [column, null]))
 
   await adapter.insert({

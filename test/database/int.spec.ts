@@ -5633,6 +5633,23 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
     expect(result.localized.en).toBe('en updated')
   })
 
+  test('should ignore undefined localized values with db.updateOne', async ({ payload }) => {
+    const post = await payload.create({
+      collection: postsSlug,
+      data: { localized: 'en', title: 'post' },
+      locale: 'en',
+      overrideAccess: true,
+    })
+
+    const result = (await payload.db.updateOne({
+      id: post.id,
+      collection: postsSlug,
+      data: { localized: { en: undefined }, title: 'post updated' },
+    })) as any
+
+    expect(result.title).toBe('post updated')
+  })
+
   test('should allow incremental number update', async ({ payload }) => {
     const post = await payload.create({
       collection: 'posts',
