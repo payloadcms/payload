@@ -365,6 +365,13 @@ export const lvTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Šis dokuments nesen tika atjaunināts ar citu lietotāju. Jūsu skatījums ir novecojis.',
     documents: 'Dokumenti',
+    dragCancelled: '{{label}} vilkšana atcelta.',
+    dragDropped: '{{label}} nolikts. Pozīcija {{position}} no {{count}}.',
+    dragInstructions:
+      'Nospiediet Space vai Enter, lai paņemtu rindu. Pārvietojiet to ar bulttaustiņiem. Izmantojot VoiceOver, izslēdziet Quick Nav un izmantojiet Command + bulttaustiņus. Nospiediet Space vai Enter, lai noliktu, vai Escape, lai atceltu.',
+    dragMoved: '{{label}}: {{direction}}. Pozīcija {{position}} no {{count}}.',
+    dragPickedUp: '{{label}} paņemts. Pozīcija {{position}} no {{count}}.',
+    dragToMove: 'Velciet, lai pārvietotu',
     dragToReorder: 'Velciet, lai pārkārtotu',
     duplicate: 'Dublēt',
     duplicateWithoutSaving: 'Dublēt bez izmaiņu saglabāšanas',

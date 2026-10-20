@@ -239,11 +239,11 @@ export const updateDocument = async <
   const password = data?.password
   const shouldSavePassword = Boolean(
     password &&
-      collectionConfig.auth &&
-      (!collectionConfig.auth.disableLocalStrategy ||
-        (typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
-          collectionConfig.auth.disableLocalStrategy.enableFields)) &&
-      !isSavingDraft,
+    collectionConfig.auth &&
+    (!collectionConfig.auth.disableLocalStrategy ||
+      (typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
+        collectionConfig.auth.disableLocalStrategy.enableFields)) &&
+    !isSavingDraft,
   )
 
   const publicationHookDoc = buildAllLocalesPublicationHookDoc({
@@ -426,7 +426,7 @@ export const updateDocument = async <
 
         localizedPublishData = buildLocalizedPublishData({
           config,
-          currentDoc: currentDoc as JsonObject,
+          currentDoc,
           fields: collectionConfig.fields,
           locale,
           result,
@@ -659,7 +659,7 @@ export const updateDocument = async <
     collection: collectionConfig,
     current: docWithLocales,
     files: hasManagedLocalUpload ? filesToUpload : [],
-    next: nextFileData as JsonObject,
+    next: nextFileData,
     req,
     write: writeDocument,
   })

@@ -4,9 +4,9 @@ import { randomUUID } from 'node:crypto'
 import { readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { getPayload as getPayloadInstance } from 'payload'
 import ts from 'typescript'
 import { expect as vitestExpect } from 'vitest'
-import { getPayload as getPayloadInstance } from 'payload'
 
 import type { MCPEvalDatabase } from './mcpDatabase.js'
 import type {
@@ -20,6 +20,7 @@ import type {
   TokenUsage,
 } from './types.js'
 
+import { runInit } from '../runInit.js'
 import { parseConfig } from './assertions/parseConfig.js'
 import { buildEvalConfig, missingEvalConfig, unwrapEvalConfigValue } from './evalConfig.js'
 import { createMCPEvalDatabase, setMCPEvalDatabaseEnvironment } from './mcpDatabase.js'
@@ -31,7 +32,6 @@ import { findReusableResult, recordRunResult, shouldRerun } from './runResults.j
 import { scoreConfigChange, scoreEvidence } from './scorer/index.js'
 import { accuracySummary, writeFailedCodegenAssertion } from './utils/index.js'
 import { validateConfigTypes } from './validate.js'
-import { runInit } from '../runInit.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const fixturesDir = path.join(__dirname, 'fixtures')

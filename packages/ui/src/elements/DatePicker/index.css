@@ -239,8 +239,8 @@
   }
 
   .react-datepicker__navigation--next--with-time:not(
-      .react-datepicker__navigation--next--with-today-button
-    ) {
+    .react-datepicker__navigation--next--with-today-button
+  ) {
     right: var(--time-column-width);
   }
 
@@ -573,29 +573,29 @@
 
   /* In-range selecting (partial selection) */
   .react-datepicker__day--in-selecting-range:not(
-      .react-datepicker__day--in-range,
-      .react-datepicker__month-text--in-range,
-      .react-datepicker__quarter-text--in-range,
-      .react-datepicker__year-text--in-range
-    ),
+    .react-datepicker__day--in-range,
+    .react-datepicker__month-text--in-range,
+    .react-datepicker__quarter-text--in-range,
+    .react-datepicker__year-text--in-range
+  ),
   .react-datepicker__month-text--in-selecting-range:not(
-      .react-datepicker__day--in-range,
-      .react-datepicker__month-text--in-range,
-      .react-datepicker__quarter-text--in-range,
-      .react-datepicker__year-text--in-range
-    ),
+    .react-datepicker__day--in-range,
+    .react-datepicker__month-text--in-range,
+    .react-datepicker__quarter-text--in-range,
+    .react-datepicker__year-text--in-range
+  ),
   .react-datepicker__quarter-text--in-selecting-range:not(
-      .react-datepicker__day--in-range,
-      .react-datepicker__month-text--in-range,
-      .react-datepicker__quarter-text--in-range,
-      .react-datepicker__year-text--in-range
-    ),
+    .react-datepicker__day--in-range,
+    .react-datepicker__month-text--in-range,
+    .react-datepicker__quarter-text--in-range,
+    .react-datepicker__year-text--in-range
+  ),
   .react-datepicker__year-text--in-selecting-range:not(
-      .react-datepicker__day--in-range,
-      .react-datepicker__month-text--in-range,
-      .react-datepicker__quarter-text--in-range,
-      .react-datepicker__year-text--in-range
-    ) {
+    .react-datepicker__day--in-range,
+    .react-datepicker__month-text--in-range,
+    .react-datepicker__quarter-text--in-range,
+    .react-datepicker__year-text--in-range
+  ) {
     background-color: var(--color-bg-selected);
   }
 
@@ -953,5 +953,10 @@
       top: 50%;
       transform: translateY(-50%);
     }
+  }
+
+  html[data-enhanced-contrast]
+    .react-datepicker__day--today:not(.react-datepicker__day--selected)::after {
+    background-color: var(--color-icon-brand);
   }
 }

@@ -372,6 +372,13 @@ export const esTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Este documento ha sido actualizado recientemente por otro usuario. Su vista está desactualizada.',
     documents: 'Documentos',
+    dragCancelled: 'Arrastre de {{label}} cancelado.',
+    dragDropped: '{{label}} soltado. Posición {{position}} de {{count}}.',
+    dragInstructions:
+      'Pulse Space o Enter para recoger una fila. Use las flechas para moverla. Con VoiceOver, desactive Quick Nav y use Command + las flechas. Pulse Space o Enter para soltarla, o Escape para cancelar.',
+    dragMoved: '{{label}}: {{direction}}. Posición {{position}} de {{count}}.',
+    dragPickedUp: '{{label}} recogido. Posición {{position}} de {{count}}.',
+    dragToMove: 'Arrastrar para mover',
     dragToReorder: 'Arrastre para reordenar',
     duplicate: 'Duplicar',
     duplicateWithoutSaving: 'Duplicar sin guardar cambios',
