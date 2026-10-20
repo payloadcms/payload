@@ -89,7 +89,11 @@ describe('attachSboms', () => {
 
   it('picks the release that matches the tag', async () => {
     const github = makeGithub({
-      releases: [release({ id: 1, tag_name: 'v4.0.0-beta.3' }), release()],
+      releases: [
+        release({ id: 1, tag_name: 'v4.0.0-beta.3' }),
+        release(),
+        release({ id: 3, tag_name: 'v4.0.0-beta.2' }),
+      ],
     })
 
     await run({ github })
