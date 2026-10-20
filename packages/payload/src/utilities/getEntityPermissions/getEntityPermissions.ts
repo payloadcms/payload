@@ -18,6 +18,13 @@ import { populateFieldPermissions } from './populateFieldPermissions.js'
 
 type WhereQueryCache = { result: Promise<boolean>; where: Where }[]
 
+/**
+ * Permissions of referenced blocks, keyed by block slug. Each block's fields are walked once, by the first
+ * entity that reaches it, and later entities that share this object reuse that result.
+ *
+ * Async field access results are awaited by the `getEntityPermissions` call that walked the block, so read
+ * the permissions only after every call that shares this object has resolved.
+ */
 export type BlockReferencesPermissions = Record<
   BlockSlug,
   BlockPermissions | Promise<BlockPermissions>

@@ -245,8 +245,8 @@ export const populateFieldPermissions = ({
           if (typeof _block === 'string') {
             const blockReferencePermissions = blockReferencesPermissions[_block]
 
-            // Skip blocks that use the cached permissions, as those are already populated. Compare by
-            // identity: a block first cached inside an earlier block of this field has its own object here.
+            // Skip only when this block uses the cached object, which is already populated. A block that
+            // got its own object before an earlier block of this field cached it must still be walked.
             if (blockReferencePermissions === blockPermission) {
               continue
             }

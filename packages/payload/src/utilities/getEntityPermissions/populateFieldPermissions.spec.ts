@@ -92,4 +92,35 @@ describe('populateFieldPermissions', () => {
       },
     })
   })
+
+  it('should resolve async field access of a referenced block in every place that uses it', async () => {
+    const containers = createContainerBlocks(2)
+    const leafBlock: Block = {
+      slug: 'leaf',
+      fields: [
+        {
+          name: 'heading',
+          type: 'text',
+          access: { read: () => new Promise((resolve) => setTimeout(() => resolve(true))) },
+        },
+      ],
+    }
+
+    const permissions = await getPermissions({
+      blocks: [leafBlock, ...containers],
+      fields: [{ name: 'layout', type: 'blocks', blocks: containers.map((block) => block.slug) }],
+    })
+
+    const leafInContainer = {
+      fields: {
+        children: {
+          blocks: { leaf: { fields: { heading: { read: { permission: true } } } } },
+        },
+      },
+    }
+
+    expect(permissions).toMatchObject({
+      layout: { blocks: { container0: leafInContainer, container1: leafInContainer } },
+    })
+  })
 })
