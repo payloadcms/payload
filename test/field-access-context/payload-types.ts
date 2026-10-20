@@ -65,7 +65,9 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
-  blocks: {};
+  blocks: {
+    'owner-scoped': OwnerScoped;
+  };
   collections: {
     'field-access-context-parents': FieldAccessContextParent;
     'field-access-context-children': FieldAccessContextChild;
@@ -127,6 +129,16 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "OwnerScoped".
+ */
+export interface OwnerScoped {
+  globalOnlyProbe?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'owner-scoped';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "field-access-context-parents".
  */
 export interface FieldAccessContextParent {
@@ -138,6 +150,7 @@ export interface FieldAccessContextParent {
   distinctProbe?: string | null;
   permissionsProbe?: string | null;
   child?: (string | null) | FieldAccessContextChild;
+  ownerScopedBlocks?: OwnerScoped[] | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -292,6 +305,7 @@ export interface FieldAccessContextParentsSelect<T extends boolean = true> {
   distinctProbe?: T;
   permissionsProbe?: T;
   child?: T;
+  ownerScopedBlocks?: T | {};
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -382,6 +396,7 @@ export interface FieldAccessContextGlobal {
   id: string;
   globalReadProbe?: string | null;
   globalChild?: (string | null) | FieldAccessContextChild;
+  ownerScopedBlocks?: OwnerScoped[] | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -400,6 +415,7 @@ export interface FieldAccessContextGlobal {
 export interface FieldAccessContextGlobalSelect<T extends boolean = true> {
   globalReadProbe?: T;
   globalChild?: T;
+  ownerScopedBlocks?: T | {};
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
