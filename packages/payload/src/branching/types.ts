@@ -1,4 +1,4 @@
-import type { CollectionSlug } from '../index.js'
+import type { CollectionSlug, GlobalSlug } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { Access } from './../config/types.js'
 import type { BranchMergeValidate } from './validation.js'
@@ -132,9 +132,12 @@ export type BranchingConfig = {
     updateBranch?: Access
   }
   /**
-   * Collections to exclude from branching, in addition to the defaults.
+   * Collection and global slugs to exclude from branching, in addition to the defaults.
+   * Exclusions take precedence over an entity's `branching: true` setting.
    */
-  exclude?: CollectionSlug[]
+  // Both slug types fall back to string without generated types.
+  // eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents
+  exclude?: (CollectionSlug | GlobalSlug)[]
   /**
    * Branch lifecycle hooks. Document hooks are unaffected — every one of them
    * runs on merge, since merge is a genuine write to main.
