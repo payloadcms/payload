@@ -8,10 +8,10 @@ import rsc from '@vitejs/plugin-rsc'
 import path from 'node:path'
 import { createLogger, mergeConfig } from 'vite'
 
-import { getPublishedServerExternalPackages } from './config/devExternal.js'
 import {
   buildExternalPackages,
   payloadNoExternalPatterns,
+  serverExternalPackages,
   ssrExternalPackages,
 } from './config/external.js'
 import { optimizeDepsExcludeDefaults, optimizeDepsIncludeDefaults } from './config/optimizeDeps.js'
@@ -83,7 +83,7 @@ export type WithPayloadOptions = {
   additionalIgnoreImporters?: RegExp[]
   /** Extra globs exempted from the `.client.*` SSR denial (beyond the default node_modules exemption). */
   clientDenialExcludeFiles?: string[]
-  /** Keep installed server packages in Vite's dev transform graph. Defaults to `false`. */
+  /** Transform server packages in development. Enable when linking Payload source. Defaults to `false`. */
   devBundleServerPackages?: boolean
   /**
    * Packages added to `ssr.external` on dev serve only (the build bundles them).
@@ -199,9 +199,7 @@ export function withPayload(
       ? buildExternalPackages
       : [
           ...new Set([
-            ...(devBundleServerPackages
-              ? []
-              : getPublishedServerExternalPackages({ payloadConfigPath })),
+            ...(devBundleServerPackages ? [] : serverExternalPackages),
             ...devServerExternalPackages,
             ...ssrExternalPackages,
           ]),
@@ -231,7 +229,7 @@ export function withPayload(
           build: { rollupOptions: { external: buildExternalPackages } },
           resolve: { noExternal: noExternalPatterns },
         },
-      },
+      } as any,
       optimizeDeps: {
         exclude: optimizeDepsExcludeDefaults,
         include: optimizeDepsIncludeDefaults,
@@ -259,7 +257,7 @@ export function withPayload(
         ],
         extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
         tsconfigPaths: true,
-      },
+      } as any,
       ssr: {
         external: ssrExternal,
         noExternal: noExternalPatterns,
@@ -367,7 +365,7 @@ export function payloadTanstackStartOptions(
       // (they define `createServerFn`s, not routes).
       routeFileIgnorePattern: 'importMap\\.(?:d\\.ts|js|server\\.ts)$|\\.functions\\.',
       routesDirectory,
-    },
+    } as any,
     rsc: { enabled: true },
     srcDirectory,
   }

@@ -66,20 +66,8 @@ export const buildBundledPackages: string[] = [
   '@google-cloud/storage',
 ]
 
-/**
- * External packages for the production `vite build` only (not dev serve).
- *
- * Externalizes the `@payloadcms/*` package boundaries — plus `payload` — so each
- * resolves its own transitive Node deps (`pino`, `drizzle-orm`, `libsql`, …) from
- * its own `node_modules` at runtime. Externalizing only the leaf deps breaks under
- * pnpm: a leaf imported by bundled code becomes an unresolvable bare specifier from
- * `dist/`, since pnpm does not hoist it; see {@link buildBundledPackages}.
- *
- * Development only externalizes these when they resolve to installed JavaScript.
- * Workspace TypeScript source (`.ts` imported via `.js` specifiers) still needs
- * Vite's transform to resolve the `.js`→`.ts` mismatch.
- */
-export const buildExternalPackages: string[] = [
+/** Server-only package boundaries loaded directly by Node in development and production. */
+export const serverExternalPackages: string[] = [
   'payload',
   'payload/node',
   '@payloadcms/drizzle',
@@ -88,6 +76,14 @@ export const buildExternalPackages: string[] = [
   '@payloadcms/db-vercel-postgres',
   '@payloadcms/db-sqlite',
   '@payloadcms/db-d1-sqlite',
+]
+
+/**
+ * Externalizes package boundaries so packages resolve their own transitive dependencies under pnpm.
+ * Leaves that must bundle in production are excluded; see {@link buildBundledPackages}.
+ */
+export const buildExternalPackages: string[] = [
+  ...serverExternalPackages,
   ...ssrExternalPackages.filter((pkg) => !buildBundledPackages.includes(pkg)),
 ]
 
