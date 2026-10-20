@@ -6,7 +6,7 @@
     (var(--tree-depth, 0) * var(--tree-indent)) + (var(--spacer-1) * var(--tree-depth)) +
       var(--spacer-2-5) - 2px
   );
-  height: var(--tree-node-content-height);
+  min-height: var(--tree-node-content-height);
   position: relative;
   margin-block: var(--spacer-1) var(--spacer-2);
 }
