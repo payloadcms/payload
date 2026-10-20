@@ -225,5 +225,5 @@
     "wrangler": "~4.61.1",
     "zod": "catalog:"
   },
-  "packageManager": "pnpm@11.9.0"
+  "packageManager": "pnpm@11.28.6"
 }
