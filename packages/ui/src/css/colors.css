@@ -134,6 +134,8 @@
     --color-border: var(--ramp-grey-200);
     --color-border-menu-separator: var(--ramp-white-200);
     --color-border-strong: var(--ramp-grey-800);
+    --color-border-control: var(--special-border-translucent);
+    --color-border-control-strong: var(--special-border-translucent-strong);
 
     --color-border-disabled: var(--ramp-grey-200);
 
@@ -367,6 +369,8 @@
 
     --color-border: var(--ramp-grey-600);
     --color-border-strong: var(--ramp-white-800);
+    --color-border-control: var(--special-border-translucent);
+    --color-border-control-strong: var(--special-border-translucent-strong);
 
     --color-border-disabled: var(--ramp-grey-600);
 
@@ -488,14 +492,13 @@
        End Field Tokens
        ————————————————————————————————————————————— */
   }
-  /* Enhanced contrast preserves the standard palette when disabled. */
+  /* Reapply the contrast palette at theme boundaries, including portaled menus.
+     Component-specific mappings live with their component styles. */
   html[data-enhanced-contrast],
   html[data-enhanced-contrast] [data-theme] {
     --color-border: var(--color-border-control);
-    --contrast-menu-border: var(--ramp-white-500);
-    --contrast-chip-border: var(--color-border-control);
-    --contrast-button-border: var(--color-border-control);
-    --contrast-nav-border: var(--color-border-control);
+    --color-border-control-strong: var(--color-border-control);
+    --color-border-menu-separator: var(--ramp-white-500);
   }
 
   html[data-enhanced-contrast],

@@ -33,10 +33,6 @@
     border: var(--stroke-width-small) solid transparent;
     border-radius: var(--radius-medium);
 
-    &:not([readonly]) {
-      border-color: var(--color-border-control, transparent);
-    }
-
     &::placeholder {
       color: var(--color-text-tertiary);
       font-weight: var(--text-body-medium-font-weight);
@@ -72,5 +68,9 @@
 
   .collapsible--collapsed .section-title--empty {
     display: none;
+  }
+
+  html[data-enhanced-contrast] .section-title__input:not([readonly]):not(:focus) {
+    border-color: var(--color-border-control);
   }
 }

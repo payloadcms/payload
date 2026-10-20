@@ -8,7 +8,7 @@
     flex-shrink: 0;
     height: 100vh;
     width: var(--nav-width);
-    border-right: var(--stroke-width-small) solid var(--contrast-nav-border, var(--color-border));
+    border-right: var(--stroke-width-small) solid var(--color-border);
     overflow: hidden;
     --nav-padding-inline-start: var(--spacer-2-5);
     --nav-padding-inline-end: var(--spacer-2-5);
@@ -18,7 +18,7 @@
 
   [dir='rtl'] .nav {
     border-right: none;
-    border-left: var(--stroke-width-small) solid var(--contrast-nav-border, var(--color-border));
+    border-left: var(--stroke-width-small) solid var(--color-border);
   }
 
   .nav__close {
@@ -138,8 +138,8 @@
     }
   }
 
-  html[data-enhanced-contrast] .nav__link--selected:not(:focus-visible) {
-    outline: var(--stroke-width-small) solid var(--color-border-selected);
-    outline-offset: calc(-1 * var(--stroke-width-small));
+  html[data-enhanced-contrast] .nav__link--selected::before {
+    background: var(--color-bg-secondary);
+    border: var(--stroke-width-small) solid var(--color-border-selected);
   }
 }
