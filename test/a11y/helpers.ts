@@ -841,6 +841,21 @@ export async function openLLMInstructions({ page, serverURL }: { page: Page; ser
   return field
 }
 
+export async function disableWorkflowAutoLogin({
+  page,
+  serverURL,
+}: {
+  page: Page
+  serverURL: string
+}) {
+  // Keep the test-only header off cross-origin assets, where it triggers CORS preflights.
+  await page.route(`${serverURL}/**`, async (route) => {
+    await route.continue({
+      headers: { ...route.request().headers(), DisableAutologin: 'true' },
+    })
+  })
+}
+
 export async function withWorkflowPost({
   action,
   initialStatus = 'published',
