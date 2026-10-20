@@ -611,7 +611,7 @@ export async function writeTransformedFile(
   sourceFile: SourceFile,
   options: WriteOptions = {},
 ): Promise<WriteResult> {
-  const { formatWithPrettier = true, validateStructure: shouldValidate = true } = options
+  const { formatWithOxfmt = true, validateStructure: shouldValidate = true } = options
 
   debug(`[AST] Writing transformed file: ${sourceFile.getFilePath()}`)
 
@@ -634,31 +634,31 @@ export async function writeTransformedFile(
   debug('[AST] Writing file to disk')
   await sourceFile.save()
 
-  // Format with prettier if requested
-  if (formatWithPrettier) {
-    debug('[AST] Running prettier formatting via CLI')
+  // Format with oxfmt if requested
+  if (formatWithOxfmt) {
+    debug('[AST] Running oxfmt formatting via CLI')
     try {
       // Detect project directory (go up from file until we find package.json or use dirname)
       const projectDir = path.dirname(filePath)
 
-      // Run prettier via CLI (avoids Jest/ESM compatibility issues)
-      const prettierCmd = `npx prettier --write "${filePath}"`
+      // Run oxfmt via CLI (avoids Jest/ESM compatibility issues)
+      const oxfmtCmd = `npx oxfmt "${filePath}"`
 
-      debug(`[AST] Executing: ${prettierCmd}`)
-      execSync(prettierCmd, {
+      debug(`[AST] Executing: ${oxfmtCmd}`)
+      execSync(oxfmtCmd, {
         cwd: projectDir,
         stdio: 'pipe', // Suppress output
       })
-      debug('[AST] ✓ Prettier formatting successful')
+      debug('[AST] ✓ Oxfmt formatting successful')
     } catch (error) {
-      // Log but don't fail if prettier fails (might not be installed)
+      // Log but don't fail if oxfmt fails (might not be installed)
       debug(
-        `[AST] ⚠ Prettier formatting failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `[AST] ⚠ Oxfmt formatting failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       )
       debug('[AST] Continuing with unformatted output')
     }
   } else {
-    debug('[AST] Skipping prettier formatting (disabled)')
+    debug('[AST] Skipping oxfmt formatting (disabled)')
   }
 
   debug('[AST] ✓ File written successfully')
@@ -791,7 +791,7 @@ export async function configurePayloadConfig(
 
     // Write transformed file with validation and formatting
     return await writeTransformedFile(sourceFile, {
-      formatWithPrettier: options.formatWithPrettier,
+      formatWithOxfmt: options.formatWithOxfmt,
       validateStructure: options.validateStructure ?? true,
     })
   } catch (error) {

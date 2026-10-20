@@ -1,13 +1,8 @@
 {
   "name": "@payloadcms/db-d1-sqlite",
-  "version": "4.0.0-beta.1",
+  "version": "4.0.0-beta.3",
   "description": "The officially supported D1 SQLite database adapter for Payload",
   "homepage": "https://payloadcms.com",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/db-d1-sqlite"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -17,7 +12,18 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/db-d1-sqlite"
+  },
+  "files": [
+    "dist",
+    "mock.js"
+  ],
   "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts",
@@ -50,40 +56,9 @@
       "default": "./src/drizzle-proxy/relations.ts"
     }
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "files": [
-    "dist",
-    "mock.js"
-  ],
-  "scripts": {
-    "build": "pnpm build:swc && pnpm build:types",
-    "build:debug": "pnpm build",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
-  },
-  "dependencies": {
-    "@payloadcms/drizzle": "workspace:*",
-    "console-table-printer": "2.15.0",
-    "drizzle-kit": "0.31.7",
-    "drizzle-orm": "0.45.2",
-    "prompts": "2.4.2",
-    "to-snake-case": "1.0.0",
-    "uuid": "14.0.0"
-  },
-  "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
-    "@types/pg": "8.20.0",
-    "@types/to-snake-case": "1.0.0",
-    "payload": "workspace:*"
-  },
-  "peerDependencies": {
-    "payload": "workspace:*"
-  },
   "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "exports": {
       ".": {
         "import": "./dist/index.js",
@@ -115,8 +90,30 @@
         "types": "./dist/drizzle-proxy/relations.d.ts",
         "default": "./dist/drizzle-proxy/relations.js"
       }
-    },
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "pnpm build:swc && pnpm build:types",
+    "build:debug": "pnpm build",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf -g {dist,*.tsbuildinfo}"
+  },
+  "dependencies": {
+    "@payloadcms/drizzle": "workspace:*",
+    "console-table-printer": "2.15.0",
+    "drizzle-kit": "0.31.7",
+    "drizzle-orm": "0.45.2",
+    "prompts": "2.4.2",
+    "to-snake-case": "1.0.0",
+    "uuid": "14.0.0"
+  },
+  "devDependencies": {
+    "@types/pg": "8.20.0",
+    "@types/to-snake-case": "1.0.0",
+    "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "payload": "workspace:*"
   }
 }

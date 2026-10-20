@@ -1,21 +1,16 @@
 {
   "name": "@payloadcms/plugin-multi-tenant",
-  "version": "4.0.0-beta.1",
+  "version": "4.0.0-beta.3",
   "description": "Multi Tenant plugin for Payload",
   "keywords": [
-    "payload",
     "cms",
-    "plugin",
-    "typescript",
-    "react",
     "multi-tenant",
-    "nextjs"
+    "nextjs",
+    "payload",
+    "plugin",
+    "react",
+    "typescript"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/plugin-multi-tenant"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -25,10 +20,22 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-multi-tenant"
+  },
+  "files": [
+    "dist",
+    "types.js",
+    "types.d.ts"
+  ],
+  "type": "module",
   "sideEffects": [
     "*.css"
   ],
-  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts",
@@ -71,35 +78,9 @@
       "default": "./src/translations/languages/*.ts"
     }
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "files": [
-    "dist",
-    "types.js",
-    "types.d.ts"
-  ],
-  "scripts": {
-    "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
-    "build:debug": "pnpm build",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
-    "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "pack:plugin": "pnpm build && pnpm pack"
-  },
-  "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
-    "@payloadcms/translations": "workspace:*",
-    "@payloadcms/ui": "workspace:*",
-    "payload": "workspace:*"
-  },
-  "peerDependencies": {
-    "@payloadcms/ui": "workspace:*",
-    "payload": "workspace:*"
-  },
   "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "exports": {
       ".": {
         "import": "./dist/index.js",
@@ -141,9 +122,25 @@
         "types": "./dist/translations/languages/*.d.ts",
         "default": "./dist/translations/languages/*.js"
       }
-    },
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "pack:plugin": "pnpm build && pnpm pack"
+  },
+  "devDependencies": {
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
+    "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "@payloadcms/ui": "workspace:*",
+    "payload": "workspace:*"
   },
   "homepage:": "https://payloadcms.com"
 }

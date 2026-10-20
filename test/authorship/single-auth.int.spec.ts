@@ -16,7 +16,7 @@ const createdPostIDs: (number | string)[] = []
 const createPost = async ({ data, user }: { data: Record<string, unknown>; user?: TestUser }) => {
   const doc = await payload.create({
     collection: postsSlug,
-    data: data as never,
+    data,
     depth: 0,
     user: user as never,
   })

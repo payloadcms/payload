@@ -31,7 +31,7 @@ export const LogoutView: React.FC<
   // to where they were headed instead of rendering the logout overlay indefinitely.
   if (inactivity && user) {
     req.server.redirect(
-      getSafeRedirect({ fallbackTo: adminRoute, redirectTo: searchParams.redirect as string }),
+      getSafeRedirect({ fallbackTo: adminRoute, redirectTo: searchParams.redirect }),
     )
   }
 

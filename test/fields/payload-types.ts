@@ -292,9 +292,11 @@ export interface Config {
   globalsSelect: {};
   locale: 'en' | 'es';
   widgets: {
+    welcome: WelcomeWidget;
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
+    'upload-dropzone': UploadDropzoneWidget;
   };
   user: User;
   jobs: {
@@ -895,6 +897,7 @@ export interface TextField {
   disabledTextField?: string | null;
   localizedText?: string | null;
   localizedRequiredText: string;
+  localizedCustomValidate?: string | null;
   /**
    * en description
    */
@@ -4244,6 +4247,7 @@ export interface TextFieldsSelect<T extends boolean = true> {
   disabledTextField?: T;
   localizedText?: T;
   localizedRequiredText?: T;
+  localizedCustomValidate?: T;
   i18nText?: T;
   defaultString?: T;
   defaultEmptyString?: T;
@@ -4471,6 +4475,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "welcome_widget".
+ */
+export interface WelcomeWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -4590,6 +4604,16 @@ export interface ActivityWidget {
           | 'ui-fields'
         )[]
       | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "upload-dropzone_widget".
+ */
+export interface UploadDropzoneWidget {
+  data?: {
+    excludedCollections?: ('uploads' | 'uploads2' | 'uploads3')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

@@ -6,7 +6,7 @@ import { getDefaultLayoutHandler, renderWidgetHandler } from '../views/Dashboard
 import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
 import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
 import { renderListHandler } from '../views/List/handleServerFunction.js'
-import { getDashboardDocumentsHandler } from '../widgets/RecentlyViewed/getDocuments.js'
+import { getActivityWidgetDocsHandler } from '../widgets/Activity/utils/getActivityWidgetDocs.js'
 import { buildFormStateHandler } from './buildFormState.js'
 import { buildTableStateHandler } from './buildTableState.js'
 import { copyDataFromLocaleHandler } from './copyDataFromLocale.js'
@@ -24,18 +24,13 @@ import { switchLanguageHandler } from './switchLanguageHandler.js'
  * from this single registry via `createServerFunctionHandler`, so a handler
  * added here reaches every framework and the adapter lists can't drift.
  *
- * Handlers may return values containing React elements (e.g. `customComponents`
- * inside form state, the `Document` / `List` nodes from render-document /
- * render-list, the render-field / render-widget output). Adapters ship those
- * over the wire as RSC payloads: Next.js does this natively, while the TanStack
- * Start adapter passes a `transformResult` (`serializeForRsc`) to
- * `createServerFunctionHandler` that converts elements into
- * `renderServerComponent` handles.
+ * Handlers may return React elements alongside ordinary data. Each framework
+ * adapter sends the complete result through its native React Flight transport.
  */
 export const sharedServerFunctions: Record<string, ServerFunction<any, any>> = {
   'copy-data-from-locale': copyDataFromLocaleHandler,
   'form-state': buildFormStateHandler,
-  'get-dashboard-documents': getDashboardDocumentsHandler,
+  'get-activity-widget-docs': getActivityWidgetDocsHandler,
   'get-default-layout': getDefaultLayoutHandler,
   'get-upcoming-scheduled-publish': getUpcomingScheduledPublishHandler,
   'render-document': renderDocumentHandler,

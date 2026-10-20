@@ -1,20 +1,15 @@
 {
   "name": "@payloadcms/plugin-ecommerce",
-  "version": "4.0.0-beta.1",
+  "version": "4.0.0-beta.3",
   "description": "Ecommerce plugin for Payload",
   "keywords": [
-    "payload",
     "cms",
+    "ecommerce",
+    "payload",
     "plugin",
-    "typescript",
     "react",
-    "ecommerce"
+    "typescript"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/plugin-ecommerce"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -24,7 +19,17 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-ecommerce"
+  },
+  "files": [
+    "dist"
+  ],
   "type": "module",
+  "main": "./src/index.tsx",
+  "types": "./src/index.tsx",
   "exports": {
     ".": {
       "import": "./src/index.ts",
@@ -67,42 +72,9 @@
       "default": "./src/exports/client/react.ts"
     }
   },
-  "main": "./src/index.tsx",
-  "types": "./src/index.tsx",
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
-    "build:debug": "pnpm build",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
-  },
-  "dependencies": {
-    "@payloadcms/translations": "workspace:*",
-    "@payloadcms/ui": "workspace:*",
-    "qs-esm": "8.0.1"
-  },
-  "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
-    "@payloadcms/next": "workspace:*",
-    "@payloadcms/translations": "workspace:*",
-    "@types/json-schema": "7.0.15",
-    "@types/react": "19.3.0",
-    "@types/react-dom": "19.3.0",
-    "payload": "workspace:*",
-    "stripe": "18.3.0"
-  },
-  "peerDependencies": {
-    "payload": "workspace:*",
-    "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
-    "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
-  },
   "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "exports": {
       ".": {
         "import": "./dist/index.js",
@@ -145,9 +117,34 @@
         "default": "./dist/translations/languages/*.js"
       }
     },
-    "main": "./dist/index.js",
-    "registry": "https://registry.npmjs.org/",
-    "types": "./dist/index.d.ts"
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf -g {dist,*.tsbuildinfo}",
+    "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/"
+  },
+  "dependencies": {
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
+    "qs-esm": "8.0.1"
+  },
+  "devDependencies": {
+    "@payloadcms/next": "workspace:*",
+    "@payloadcms/translations": "workspace:*",
+    "@types/json-schema": "7.0.15",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "payload": "workspace:*",
+    "stripe": "18.3.0"
+  },
+  "peerDependencies": {
+    "payload": "workspace:*",
+    "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
+    "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },
   "homepage:": "https://payloadcms.com"
 }
