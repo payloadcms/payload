@@ -4,6 +4,7 @@ import type { Locator } from '@playwright/test'
 import { NVDAKeyCodeCommands } from '@guidepup/guidepup'
 import { screenReaderTest as test } from '@guidepup/playwright'
 import { expect } from '@playwright/test'
+import { randomUUID } from 'node:crypto'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { formatAdminURL } from 'payload/shared'
@@ -1284,17 +1285,16 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       async ({ page, screenReader }) => {
         // PYLD-3580: six seconds is extra reading time, not virtual-cursor persistence.
         const apiURL = formatAdminURL({ apiRoute: '/api', path: '/posts', serverURL })
+        const title = `Toast cursor persistence regression ${randomUUID()}`
         const response = await page.request.post(apiURL, {
-          data: { title: 'Toast cursor persistence regression' },
+          data: { title },
         })
         expect(response.ok()).toBe(true)
         const { doc } = await response.json()
 
         try {
           await gotoPostsList({ page, postsURL })
-          const row = page
-            .locator('tbody tr')
-            .filter({ hasText: 'Toast cursor persistence regression' })
+          const row = page.locator('tbody tr').filter({ hasText: title })
           await row.locator('.cell-_select input').check()
           await page.locator('.list-selection__button[aria-label="Delete"]').click()
           await screenReader.navigateToWebContent()
