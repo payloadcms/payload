@@ -498,6 +498,7 @@ export const heTranslations: DefaultTranslationsObject = {
     selectValue: 'בחר ערך',
     settings: 'הגדרות',
     showAllLabel: 'הצג את כל ה{{label}}',
+    showingCurrentOfTotal: 'מוצגים {{current}} מתוך {{total}}',
     shownInTable: 'מוצג בטבלה',
     showSidebar: 'הצג סרגל צד',
     skipToContent: 'דילוג לתוכן',

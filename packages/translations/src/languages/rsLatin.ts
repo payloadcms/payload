@@ -513,6 +513,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     selectValue: 'Odaberi vrednost',
     settings: 'Podešavanja',
     showAllLabel: 'Prikaži sve {{label}}',
+    showingCurrentOfTotal: 'Prikazano {{current}} od {{total}}',
     shownInTable: 'Prikazano u tabeli',
     showSidebar: 'Prikaži bočnu traku',
     skipToContent: 'Pređi na sadržaj',
