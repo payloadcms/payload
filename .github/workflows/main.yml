@@ -33,6 +33,7 @@ jobs:
       needs_visual: ${{ steps.filter.outputs.needs_visual }}
       templates: ${{ steps.filter.outputs.templates }}
       build_approvals: ${{ steps.filter.outputs.build_approvals }}
+      needs_sbom: ${{ steps.filter.outputs.needs_sbom }}
     steps:
       # https://github.com/actions/virtual-environments/issues/1187
       - name: tune linux network
@@ -103,6 +104,15 @@ jobs:
               # the root lockfile; that, plus the allowlist itself, is what can introduce drift.
               - 'pnpm-lock.yaml'
               - 'packages/create-payload-app/src/lib/configure-pnpm-builds.ts'
+            # Inputs of the release SBOMs: the dependency graph, the pnpm version, and the generator.
+            needs_sbom:
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'packages/*/package.json'
+              - '.tool-versions'
+              - 'tools/releaser/src/release-sbom.ts'
+              - 'tools/releaser/src/lib/sbom/**'
+              - 'tools/releaser/src/lib/publishList.ts'
       - name: Log filter results
         run: |
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
@@ -110,6 +120,7 @@ jobs:
           echo "needs_visual: ${{ steps.filter.outputs.needs_visual }}"
           echo "templates: ${{ steps.filter.outputs.templates }}"
           echo "build_approvals: ${{ steps.filter.outputs.build_approvals }}"
+          echo "needs_sbom: ${{ steps.filter.outputs.needs_sbom }}"
 
   # Detects upstream Next.js canary publishes that are missing `@next/env` or
   # `@next/eslint-plugin-next` for the same version (would break
@@ -210,6 +221,21 @@ jobs:
         with:
           path: packages/*/dist
           key: dist-${{ github.sha }}
+
+  # Catches SBOM generation regressions before a release. Push to main only, not part of all-green.
+  sbom:
+    needs: changes
+    if: github.event_name == 'push' && needs.changes.outputs.needs_sbom == 'true'
+    runs-on: ubuntu-26.04
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+
+      - name: Generate SBOMs
+        run: pnpm release-sbom --out-dir "$RUNNER_TEMP/sboms"
 
   tests-unit:
     runs-on: ubuntu-26.04
