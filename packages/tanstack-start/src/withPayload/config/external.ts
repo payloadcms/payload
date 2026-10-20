@@ -75,10 +75,9 @@ export const buildBundledPackages: string[] = [
  * pnpm: a leaf imported by bundled code becomes an unresolvable bare specifier from
  * `dist/`, since pnpm does not hoist it; see {@link buildBundledPackages}.
  *
- * Kept out of dev's `ssr.external` on purpose: the monorepo resolves these to
- * TypeScript source (`.ts` imported via `.js` specifiers), which only Vite's
- * transform can resolve — an externalized copy would hit Node's raw resolver and
- * fail on the `.js`→`.ts` mismatch.
+ * Development only externalizes these when they resolve to installed JavaScript.
+ * Workspace TypeScript source (`.ts` imported via `.js` specifiers) still needs
+ * Vite's transform to resolve the `.js`→`.ts` mismatch.
  */
 export const buildExternalPackages: string[] = [
   'payload',

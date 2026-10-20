@@ -8,6 +8,7 @@ import rsc from '@vitejs/plugin-rsc'
 import path from 'node:path'
 import { createLogger, mergeConfig } from 'vite'
 
+import { getPublishedServerExternalPackages } from './config/devExternal.js'
 import {
   buildExternalPackages,
   payloadNoExternalPatterns,
@@ -82,6 +83,8 @@ export type WithPayloadOptions = {
   additionalIgnoreImporters?: RegExp[]
   /** Extra globs exempted from the `.client.*` SSR denial (beyond the default node_modules exemption). */
   clientDenialExcludeFiles?: string[]
+  /** Keep installed server packages in Vite's dev transform graph. Defaults to `false`. */
+  devBundleServerPackages?: boolean
   /**
    * Packages added to `ssr.external` on dev serve only (the build bundles them).
    * List CommonJS deps that 500 with `__cjs_module_runner_transform` — the RSC
@@ -162,6 +165,7 @@ export function withPayload(
   const {
     additionalIgnoreImporters = [],
     clientDenialExcludeFiles = [],
+    devBundleServerPackages = false,
     devServerExternalPackages = [],
     payloadConfigPath,
     routesDirectory = 'app',
@@ -193,7 +197,15 @@ export function withPayload(
     // needs none of it, since Rollup bundles CJS correctly.
     const ssrExternal = isBuild
       ? buildExternalPackages
-      : [...ssrExternalPackages, ...devServerExternalPackages]
+      : [
+          ...new Set([
+            ...(devBundleServerPackages
+              ? []
+              : getPublishedServerExternalPackages({ payloadConfigPath })),
+            ...devServerExternalPackages,
+            ...ssrExternalPackages,
+          ]),
+        ]
 
     const base: UserConfig = {
       build: {
@@ -301,9 +313,9 @@ export function payloadNitroOptions(): PayloadNitroOptions {
   return { traceDeps: ['tslib*'] }
 }
 
-/** `@vitejs/plugin-react` options for Payload: transform every `.[jt]sx?` file. */
+/** Transforms application and workspace source without refreshing installed dependencies. */
 export function payloadReactOptions(): NonNullable<Parameters<typeof viteReact>[0]> {
-  return { exclude: [], include: /\.[jt]sx?$/ }
+  return { exclude: /node_modules/, include: /\.[jt]sx?$/ }
 }
 
 export type PayloadTanstackStartOptionsArgs = {
