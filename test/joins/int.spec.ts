@@ -2133,6 +2133,11 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
         id: newsParent.id,
         collection: multipleCollectionsManyParentsSlug,
         depth: 0,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
         overrideAccess: true,
       })
 
@@ -2152,6 +2157,11 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
         id: sportParent.id,
         collection: multipleCollectionsManyParentsSlug,
         depth: 0,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
         overrideAccess: true,
       })
 
@@ -2174,6 +2184,11 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
         id: parent.id,
         collection: multipleCollectionsManyParentsSlug,
         depth: 0,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
         overrideAccess: true,
       })
 
