@@ -369,6 +369,13 @@ export const caTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Aquest document ha estat actualitzat recentment per un altre usuari. La seva vista està desactualitzada.',
     documents: 'Documents',
+    dragCancelled: 'S’ha cancel·lat l’arrossegament de {{label}}.',
+    dragDropped: 'S’ha deixat anar {{label}}. Posició {{position}} de {{count}}.',
+    dragInstructions:
+      'Premeu Space o Enter per agafar una fila. Utilitzeu les fletxes per moure-la. Amb VoiceOver, desactiveu Quick Nav i utilitzeu Command + les fletxes. Premeu Space o Enter per deixar-la anar, o Escape per cancel·lar.',
+    dragMoved: '{{label}}: {{direction}}. Posició {{position}} de {{count}}.',
+    dragPickedUp: 'S’ha agafat {{label}}. Posició {{position}} de {{count}}.',
+    dragToMove: 'Arrossegueu per moure',
     dragToReorder: 'Arrossegueu per reordenar',
     duplicate: 'Duplicar',
     duplicateWithoutSaving: 'Duplica sense desar',
