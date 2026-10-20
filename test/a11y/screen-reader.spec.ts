@@ -224,7 +224,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       expect(next).toMatch(/Spanish.*check\s?box|check\s?box.*Spanish/i)
     })
 
-    test('should encounter the deletion checkbox label as one screen-reader item', async ({
+    test('should announce the associated label for the deletion checkbox', async ({
       // PYLD-3678
       page,
       screenReader,
@@ -236,7 +236,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
 
       await expect(dialog).toBeVisible()
       await expect(
-        dialog.getByRole('checkbox', { name: 'Delete permanently', exact: true }),
+        dialog.getByRole('checkbox', { name: 'Skip trash and delete permanently', exact: true }),
       ).toBeVisible()
       console.info('[deletion-cursor] Starting VoiceOver navigation')
       await navigateScreenReaderTo({
@@ -259,7 +259,13 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
         /delete permanently.*check\s?box|check\s?box.*delete permanently/i,
       )
       await screenReader.next()
-      const next = await screenReader.itemText()
+      let next = await screenReader.itemText()
+
+      // VoiceOver/WebKit can expose the native label separately, as with the locale checkboxes.
+      if (process.platform === 'darwin' && next.trim() === 'Skip trash and delete permanently') {
+        await screenReader.next()
+        next = await screenReader.itemText()
+      }
 
       console.info(
         '[deletion-cursor] After checkbox',
