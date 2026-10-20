@@ -1474,7 +1474,7 @@ export type Config = {
    * and publish documents on them in isolation, then merge selected changes
    * back to `main`.
    *
-   * Applies to every eligible collection. Built-in Payload collections are
+   * Applies to every eligible collection and global. Built-in Payload collections are
    * excluded by default but can opt in with `branching: true` on the
    * collection itself. Auth-enabled collections cannot use branching.
    *

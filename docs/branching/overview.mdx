@@ -68,7 +68,7 @@ export const config: Config = {
       readBranch: canUseBranches,
       updateBranch: canUseBranches,
     },
-    exclude: ['audit-events'],
+    exclude: ['audit-events', 'header'],
     hooks: {
       beforeMerge: async ({ branch, changes, req, warnings }) => {
         // Throw to stop the merge.
@@ -81,6 +81,8 @@ export const config: Config = {
   },
 }
 ```
+
+`exclude` accepts collection and global slugs. In the example above, `audit-events` is a collection and `header` is a global. An exclusion takes precedence over `branching: true` on the collection or global. Eligible entities not excluded participate by default unless they set `branching: false`.
 
 All six callbacks use the standard `Access` type:
 
