@@ -36,7 +36,7 @@ export const HierarchyButton: React.FC<HierarchyButtonServerProps> = ({
   // For default FolderIcon path, render directly to avoid import map requirement
   const isDefaultFolderIcon = isFolderIcon({ component: IconComponent })
   const renderedIcon = isDefaultFolderIcon ? (
-    <FolderIcon size={16} />
+    <FolderIcon className={getClassName({ component: IconComponent })} size={16} />
   ) : (
     RenderServerComponent({
       Component: IconComponent,
@@ -52,7 +52,7 @@ export const HierarchyButton: React.FC<HierarchyButtonServerProps> = ({
     SmallIconComponent === IconComponent ? (
       renderedIcon
     ) : isDefaultSmallIcon ? (
-      <FolderIcon />
+      <FolderIcon className={getClassName({ component: SmallIconComponent })} />
     ) : (
       RenderServerComponent({
         Component: SmallIconComponent,
@@ -84,4 +84,21 @@ function isFolderIcon({ component }: { component?: PayloadComponent }): boolean 
   const { exportName, path } = parsePayloadComponent(component)
 
   return path === '@payloadcms/ui' && exportName === 'FolderIcon'
+}
+
+/**
+ * `FolderIcon` is rendered directly, so pass on the one prop it supports from `clientProps`.
+ */
+function getClassName({ component }: { component?: PayloadComponent }): string | undefined {
+  if (!component || typeof component !== 'object') {
+    return undefined
+  }
+
+  const { clientProps } = component
+
+  if (!clientProps || !('className' in clientProps)) {
+    return undefined
+  }
+
+  return typeof clientProps.className === 'string' ? clientProps.className : undefined
 }

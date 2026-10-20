@@ -23,7 +23,10 @@ function renderHierarchyButton({ Icon }: { Icon: PayloadComponent }) {
     fieldName: 'folder',
     hierarchyCollectionSlug: 'folders',
     payload,
-  }) as React.ReactElement<{ Icon: React.ReactElement; SmallIcon: React.ReactElement }>
+  }) as React.ReactElement<{
+    Icon: React.ReactElement<{ className?: string }>
+    SmallIcon: React.ReactElement<{ className?: string }>
+  }>
 }
 
 test('should render the default folder icon without the import map when given as a string', () => {
@@ -40,4 +43,13 @@ test('should render the default folder icon without the import map when given as
 
   expect(button.props.Icon.type).toBe(FolderIcon)
   expect(button.props.SmallIcon.type).toBe(FolderIcon)
+})
+
+test('should pass the className from clientProps to the default folder icon', () => {
+  const button = renderHierarchyButton({
+    Icon: { clientProps: { className: 'muted' }, path: '@payloadcms/ui#FolderIcon' },
+  })
+
+  expect(button.props.Icon.props.className).toBe('muted')
+  expect(button.props.SmallIcon.props.className).toBe('muted')
 })
