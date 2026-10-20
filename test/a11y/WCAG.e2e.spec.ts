@@ -17,6 +17,7 @@ import {
   addCollectionQueryWidget,
   addTextBlock,
   cleanupModalMedia,
+  cleanupWorkflowUsers,
   createMediaFixture,
   expectFocusInside,
   expectOptionsToHaveAccessibleNames,
@@ -55,6 +56,8 @@ import {
   openVersionComparison,
   openVersionsList,
   openWidgetDrawer,
+  prepareWorkflowPage,
+  tabToWorkflowControl,
   waitForFocusRestoration,
   waitForKeyboardDragActivation,
 } from './helpers.js'
@@ -84,6 +87,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await cleanup()
     }
     await cleanupModalMedia({ page })
+    await cleanupWorkflowUsers({ serverURL })
   })
 
   test.afterAll(async () => {
@@ -1100,6 +1104,41 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.1.1 Keyboard (A)', () => {
+    test(
+      'should apply and remove a collection filter using the keyboard',
+      { tag: ['@a11y-workflow', '@admin-navigation', '@collection-navigation'] },
+      async ({ page: workflowPage }) => {
+        await prepareWorkflowPage({ page: workflowPage, serverURL })
+        await workflowPage.goto(postsURL.list)
+        const filters = workflowPage.getByRole('button', { name: 'Filters', exact: true })
+        await tabToWorkflowControl({ control: filters, page: workflowPage })
+        await workflowPage.keyboard.press('Enter')
+        await expect(filters).toHaveAttribute('aria-expanded', 'true')
+        const condition = workflowPage.locator('.where-builder .condition').first()
+        const field = condition.locator('.condition__field').getByRole('combobox')
+        await tabToWorkflowControl({ control: field, page: workflowPage })
+        await workflowPage.keyboard.type('Title')
+        await expect(workflowPage.getByRole('option', { name: 'Title', exact: true })).toBeVisible()
+        await workflowPage.keyboard.press('Enter')
+        const operator = condition.locator('.condition__operator').getByRole('combobox')
+        await tabToWorkflowControl({ control: operator, page: workflowPage })
+        await workflowPage.keyboard.press('ArrowDown')
+        await workflowPage.keyboard.press('Enter')
+        const value = condition.locator('.condition__value input')
+        await tabToWorkflowControl({ control: value, page: workflowPage })
+        await workflowPage.keyboard.type('Example post two')
+        const grid = workflowPage.getByRole('grid', { name: 'Posts', exact: true })
+        await expect(grid.locator('tbody tr')).toHaveCount(1)
+        await expect(grid.locator('tbody .cell-title')).toHaveText('Example post two')
+        await expect(value).toBeFocused()
+        const remove = condition.locator('.condition__actions-remove')
+        await expect.soft(remove).toHaveAccessibleName(/remove/i)
+        await tabToWorkflowControl({ control: remove, page: workflowPage })
+        await workflowPage.keyboard.press('Enter')
+        await expect(grid.locator('tbody tr')).toHaveCount(3)
+      },
+    )
+
     test('should retain layout control focus after saving each keyboard selection', async () => {
       await page.goto(postsURL.list)
 

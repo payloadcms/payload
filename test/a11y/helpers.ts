@@ -2,6 +2,7 @@ import type { ScreenReaderPlaywright } from '@guidepup/playwright'
 import type { Browser, Locator, Page, TestInfo } from '@playwright/test'
 
 import { expect } from '@playwright/test'
+import { randomUUID } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -22,6 +23,8 @@ import { initPage } from '../__setup/e2e/initPage.js'
 import { devUser } from '../credentials.js'
 import { DashboardHelper } from '../dashboard/utils.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
+
+const workflowUsers = new Map<Page, number | string>()
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -838,4 +841,61 @@ export async function openLLMInstructions({ page, serverURL }: { page: Page; ser
   ).toBeVisible()
 
   return field
+}
+
+export async function tabToWorkflowControl({
+  control,
+  direction = 'Tab',
+  page,
+}: {
+  control: Locator
+  direction?: 'Shift+Tab' | 'Tab'
+  page: Page
+}) {
+  // Traverse the real tab order, including document controls before the form.
+  for (let tabCount = 0; tabCount < 80; tabCount++) {
+    if (await control.evaluate((element) => element === element.ownerDocument.activeElement)) {
+      return
+    }
+    await page.keyboard.press(workflowTabKey({ direction, page }))
+  }
+  await expect(control).toBeFocused()
+}
+
+export async function prepareWorkflowPage({ page, serverURL }: { page: Page; serverURL: string }) {
+  await expect(await page.request.post(`${serverURL}/api/users/login`, { data: devUser })).toBeOK()
+  const credentials = { email: `workflow-${randomUUID()}@example.com`, password: devUser.password }
+  const created = await page.request.post(`${serverURL}/api/users`, { data: credentials })
+
+  await expect(created).toBeOK()
+  const { doc } = (await created.json()) as { doc: { id: number | string } }
+
+  workflowUsers.set(page, doc.id)
+  await expect(
+    await page.request.post(`${serverURL}/api/users/login`, { data: credentials }),
+  ).toBeOK()
+  await initPage({ page, serverURL })
+  page.removeAllListeners('console')
+}
+
+export async function cleanupWorkflowUsers({ serverURL }: { serverURL: string }) {
+  for (const [page, id] of workflowUsers) {
+    try {
+      // Logout journeys end anonymously; authenticate as the seeded admin to delete the fixture user.
+      await expect(
+        await page.request.post(`${serverURL}/api/users/login`, { data: devUser }),
+      ).toBeOK()
+      await expect(await page.request.delete(`${serverURL}/api/users/${id}`)).toBeOK()
+    } finally {
+      workflowUsers.delete(page)
+    }
+  }
+}
+
+function workflowTabKey({ direction, page }: { direction: 'Shift+Tab' | 'Tab'; page: Page }) {
+  // With default macOS settings, Safari uses Option-Tab to include buttons and links.
+  return process.platform === 'darwin' &&
+    page.context().browser()?.browserType().name() === 'webkit'
+    ? `Alt+${direction}`
+    : direction
 }
