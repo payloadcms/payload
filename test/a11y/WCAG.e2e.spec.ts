@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test'
+import type { Cookie, Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { fileURLToPath } from 'node:url'
@@ -76,6 +76,8 @@ test.describe('WCAG 2.2 Level AA', () => {
   let page: Page
   let postsURL: AdminUrlUtil
   let serverURL: string
+  let preferenceCookies: Cookie[] = []
+  const preferenceCookieNames = /^(payload-theme|payload-high-contrast-mode)$/
   const dashboardCleanup: Array<() => Promise<void>> = []
 
   test.beforeAll(async ({ browser }, testInfo) => {
@@ -85,13 +87,24 @@ test.describe('WCAG 2.2 Level AA', () => {
     }))
   })
 
-  test.afterEach(async () => {
-    const restore = dashboardCleanup.splice(0).reverse()
+  test.beforeEach(async () => {
+    preferenceCookies = (await page.context().cookies()).filter(({ name }) =>
+      preferenceCookieNames.test(name),
+    )
+  })
 
-    for (const cleanup of restore) {
-      await cleanup()
+  test.afterEach(async () => {
+    try {
+      const restore = dashboardCleanup.splice(0).reverse()
+
+      for (const cleanup of restore) {
+        await cleanup()
+      }
+      await cleanupModalMedia({ page })
+    } finally {
+      await page.context().clearCookies({ name: preferenceCookieNames })
+      await page.context().addCookies(preferenceCookies)
     }
-    await cleanupModalMedia({ page })
   })
 
   test.afterAll(async () => {
