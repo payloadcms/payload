@@ -168,6 +168,25 @@ export const Form: React.FC<FormProps> = (props) => {
   }, [])
 
   const formRef = useRef<HTMLFormElement>(null)
+  const submitFocusRef = useRef<HTMLElement | null>(null)
+
+  useEffect(() => {
+    if (processing) {
+      return
+    }
+
+    const previousFocus = submitFocusRef.current
+
+    submitFocusRef.current = null
+    if (
+      previousFocus?.isConnected &&
+      document.activeElement === document.body &&
+      !previousFocus.closest('[inert]') &&
+      !previousFocus.matches(':disabled')
+    ) {
+      previousFocus.focus({ preventScroll: true })
+    }
+  }, [processing])
   const contextRef = useRef({} as FormContextType)
   const abortResetFormRef = useRef<AbortController>(null)
   const isFirstRenderRef = useRef(true)
@@ -307,6 +326,13 @@ export const Form: React.FC<FormProps> = (props) => {
       }
 
       if (disableFormWhileProcessing) {
+        const activeElement = document.activeElement
+
+        // Disabling the active field drops browser focus to the body.
+        submitFocusRef.current =
+          activeElement instanceof HTMLElement && formRef.current?.contains(activeElement)
+            ? activeElement
+            : null
         setProcessing(true)
         setDisabled(true)
       }
@@ -411,11 +437,10 @@ export const Form: React.FC<FormProps> = (props) => {
           res = await action(formData)
         }
 
-        if (!modifiedWhileProcessingRef.current) {
+        if (res.status < 400 && !modifiedWhileProcessingRef.current) {
           setModified(false)
-        } else {
-          modifiedWhileProcessingRef.current = false
         }
+        modifiedWhileProcessingRef.current = false
 
         setDisabled(false)
 

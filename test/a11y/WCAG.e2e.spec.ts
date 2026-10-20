@@ -17,10 +17,12 @@ import {
   addCollectionQueryWidget,
   addTextBlock,
   cleanupModalMedia,
+  cleanupWorkflowUsers,
   createMediaFixture,
   expectFocusInside,
   expectOptionsToHaveAccessibleNames,
   expectPaintedFocus,
+  expectPersistedWorkflowPost,
   getFocusIndicatorStyle,
   getTextContrastRatios,
   gotoCreatePost,
@@ -55,8 +57,12 @@ import {
   openVersionComparison,
   openVersionsList,
   openWidgetDrawer,
+  prepareSignInPage,
+  prepareWorkflowPage,
+  tabToWorkflowControl,
   waitForFocusRestoration,
   waitForKeyboardDragActivation,
+  withWorkflowPost,
 } from './helpers.js'
 
 const openNavigationForUserMenu = async ({ page }: { page: Page }): Promise<void> => {
@@ -84,6 +90,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await cleanup()
     }
     await cleanupModalMedia({ page })
+    await cleanupWorkflowUsers({ serverURL })
   })
 
   test.afterAll(async () => {
@@ -2693,6 +2700,38 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.3 Focus Order (A)', () => {
+    test(
+      'should restore focus to the confirmation trigger after keyboard cancellation',
+      { tag: ['@a11y-workflow', '@dialogs', '@trash'] },
+      async ({ page: workflowPage }) => {
+        await prepareWorkflowPage({ page: workflowPage, serverURL })
+        await withWorkflowPost({
+          action: async ({ id, title }) => {
+            for (const dismissal of ['Escape', 'Cancel', 'Close']) {
+              const { dialog, trigger } = await openWorkflowDeleteDialog({ page: workflowPage })
+
+              if (dismissal === 'Escape') {
+                await workflowPage.keyboard.press('Escape')
+              } else {
+                await tabToWorkflowControl({
+                  control: dialog.getByRole('button', { name: dismissal, exact: true }),
+                  page: workflowPage,
+                })
+                await workflowPage.keyboard.press('Enter')
+              }
+              await expect(dialog).toBeHidden()
+              await expectPersistedWorkflowPost({ id, page: workflowPage, serverURL, title })
+              await expect(trigger, `Focus after ${dismissal}`).toBeFocused()
+              await expect(workflowPage).toHaveURL(postsURL.edit(id))
+            }
+          },
+          page: workflowPage,
+          postsURL,
+          serverURL,
+        })
+      },
+    )
+
     test('should move focus into a named side panel opened from the versioned creation form', async () => {
       // pyld-3718
       const drawer = await openRelationshipCreationDrawer({ page, postsURL })
@@ -4433,6 +4472,104 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
 
+  test.describe('3.3.1 Error Identification (A)', () => {
+    test(
+      'should preserve edits after a failed save and allow a keyboard retry',
+      { tag: ['@a11y-workflow', '@document-editing', '@validation'] },
+      async ({ page: workflowPage }) => {
+        await prepareWorkflowPage({ page: workflowPage, serverURL })
+        await withWorkflowPost({
+          action: async ({ id, title }) => {
+            const subtitle = workflowPage.getByLabel('Subtitle', { exact: true })
+            const value = `${title} retry input`
+            const publish = workflowPage.getByRole('button', { name: /^Publish(?: in English)?$/ })
+            const endpoint = `${serverURL}/api/posts/${id}*`
+            let rejected = false
+
+            await workflowPage.route(endpoint, async (route) => {
+              if (route.request().method() === 'PATCH' && !rejected) {
+                rejected = true
+                await route.fulfill({
+                  body: JSON.stringify({ errors: [{ message: 'Unable to save. Try again.' }] }),
+                  contentType: 'application/json',
+                  status: 500,
+                })
+              } else {
+                await route.continue()
+              }
+            })
+            try {
+              await tabToWorkflowControl({ control: subtitle, page: workflowPage })
+              await workflowPage.keyboard.type(value)
+              await tabToWorkflowControl({
+                control: publish,
+                direction: 'Shift+Tab',
+                page: workflowPage,
+              })
+              await workflowPage.keyboard.press('Enter')
+              const notifications = workflowPage.getByRole('region', { name: /notifications/i })
+
+              await expect(
+                notifications.getByText('Unable to save. Try again.', { exact: true }),
+              ).toBeVisible()
+              await expect(notifications).toHaveAttribute('aria-live', 'polite')
+              await expect(subtitle).toHaveValue(value)
+              await expect
+                .poll(async () => {
+                  const unchanged = await workflowPage.request.get(`${serverURL}/api/posts/${id}`)
+
+                  return (await unchanged.json()).subtitle
+                })
+                .not.toBe(value)
+              await expect(publish).toBeEnabled()
+              await tabToWorkflowControl({ control: publish, page: workflowPage })
+              await workflowPage.keyboard.press('Enter')
+              await expectPersistedWorkflowPost({
+                id,
+                page: workflowPage,
+                serverURL,
+                subtitle: value,
+                title,
+              })
+              await workflowPage.reload()
+              await expect(subtitle).toHaveValue(value)
+            } finally {
+              await workflowPage.unroute(endpoint)
+            }
+          },
+          page: workflowPage,
+          postsURL,
+          serverURL,
+        })
+      },
+    )
+
+    test(
+      'should associate the missing-email error with the password recovery field',
+      { tag: ['@a11y-workflow', '@auth', '@validation'] },
+      async ({ page: workflowPage }) => {
+        await prepareSignInPage({ page: workflowPage, serverURL })
+        await workflowPage.goto(`${serverURL}/admin/forgot`)
+        await expect(workflowPage.locator('.forgot-password__form')).toHaveAttribute(
+          'data-form-ready',
+          'true',
+        )
+        const email = workflowPage.getByRole('textbox', { name: 'Email', exact: true })
+        await expect(email).toHaveValue('')
+        const submit = workflowPage.getByRole('button', { name: 'Submit', exact: true })
+        await tabToWorkflowControl({ control: submit, page: workflowPage })
+        await workflowPage.keyboard.press('Enter')
+        const error = workflowPage.locator('.field-type').filter({ has: email }).getByRole('alert')
+        await expect(error).toBeVisible()
+        await expect(email).toHaveAttribute('aria-invalid', 'true')
+        await expect(email).toHaveAccessibleDescription(/required/i)
+        await expect(
+          workflowPage.getByRole('heading', { name: 'Email Sent', exact: true }),
+        ).toBeHidden()
+      },
+    )
+  })
+
   test.describe('3.3.2 Labels or Instructions (A)', () => {
     test('should describe the dashboard collection filter as applying only to Recently viewed', async () => {
       await openDashboardEditor({ page, serverURL })
@@ -5838,6 +5975,57 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
   test.describe('4.1.3 Status Messages (AA)', () => {
+    test(
+      'should expose a successful document save as a status without moving focus',
+      { tag: ['@a11y-workflow', '@document-editing'] },
+      async ({ page: workflowPage }) => {
+        await prepareWorkflowPage({ page: workflowPage, serverURL })
+        await withWorkflowPost({
+          action: async ({ id, title }) => {
+            const subtitle = workflowPage.getByLabel('Subtitle', { exact: true })
+            const updatedValue = `${title} saved subtitle`
+
+            await tabToWorkflowControl({ control: subtitle, page: workflowPage })
+            await workflowPage.keyboard.type(updatedValue)
+            const saveShortcut = await workflowPage.evaluate(() =>
+              navigator.userAgent.includes('Mac OS X') ? 'Meta+s' : 'Control+s',
+            )
+
+            await workflowPage.keyboard.press(saveShortcut)
+            const notifications = workflowPage.getByRole('region', { name: /notifications/i })
+            const success = notifications
+              .locator('[data-sonner-toast]')
+              .filter({ hasText: /successfully/i })
+
+            await expect(success).toBeVisible()
+            await expect(success).toContainText(/updated|saved|published/i)
+            await expect(notifications).toHaveAttribute('aria-live', 'polite')
+            await expectPersistedWorkflowPost({
+              id,
+              draft: true,
+              page: workflowPage,
+              serverURL,
+              subtitle: updatedValue,
+              title,
+            })
+            await expect(
+              subtitle,
+              await workflowPage.evaluate(() => {
+                const active = document.activeElement
+
+                return `Focus after save: ${active?.tagName} ${active?.id || active?.getAttribute('aria-label') || ''}`
+              }),
+            ).toBeFocused()
+            await workflowPage.reload()
+            await expect(subtitle).toHaveValue(updatedValue)
+          },
+          page: workflowPage,
+          postsURL,
+          serverURL,
+        })
+      },
+    )
+
     test('should announce dashboard widget moves using short positions instead of internal IDs', async () => {
       // pyld-3641
       await openDashboardEditor({ page, serverURL })
@@ -6567,4 +6755,26 @@ async function openMainNavigation({ page, postsURL }: { page: Page; postsURL: Ad
   }
   await expect(group).toBeVisible()
   await expect(page.locator('#nav-posts')).toBeVisible()
+}
+
+async function openWorkflowDeleteDialog({ page }: { page: Page }) {
+  const menu = page.locator('.doc-controls__popup .popup__trigger-wrap button')
+
+  await tabToWorkflowControl({ control: menu, page })
+  await page.keyboard.press('Enter')
+  const trigger = page.getByRole('menuitem', { name: 'Delete', exact: true })
+
+  await expect(trigger).toBeVisible()
+  for (let index = 0; index < 12; index++) {
+    if (await trigger.evaluate((element) => element === element.ownerDocument.activeElement)) {
+      break
+    }
+    await page.keyboard.press('ArrowDown')
+  }
+  await expect(trigger).toBeFocused()
+  await page.keyboard.press('Enter')
+  const dialog = page.getByRole('dialog', { name: /confirm deletion/i })
+
+  await expectFocusInside({ container: dialog, page })
+  return { dialog, trigger: menu }
 }
