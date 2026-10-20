@@ -241,6 +241,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       console.info('[deletion-cursor] Starting VoiceOver navigation')
       await navigateScreenReaderTo({
         matches: /delete permanently.*check\s?box|check\s?box.*delete permanently/i,
+        maxSteps: 12,
         onVisit: async ({ index, itemText, spokenPhrase }) => {
           console.info(
             '[deletion-cursor]',
@@ -253,6 +254,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
           )
         },
         screenReader,
+        shouldEnterDialogs: true,
       })
 
       expect(await screenReader.itemText()).toMatch(

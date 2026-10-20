@@ -452,22 +452,26 @@ export async function captureScreenReaderOutput({
 
 export async function navigateScreenReaderTo({
   matches,
+  maxSteps = 150,
   onVisit,
   screenReader,
+  shouldEnterDialogs = false,
 }: {
   matches: RegExp
+  maxSteps?: number
   onVisit?: (args: {
     index: number
     itemText: string
     spokenPhrase: string
   }) => Promise<void> | void
   screenReader: ScreenReaderPlaywright
+  shouldEnterDialogs?: boolean
 }) {
   await screenReader.clearItemTextLog()
   await screenReader.clearSpokenPhraseLog()
   await screenReader.navigateToWebContent()
 
-  for (let index = 0; index < 150; index++) {
+  for (let index = 0; index < maxSteps; index++) {
     const itemText = await screenReader.itemText()
     const spokenPhrase = await screenReader.lastSpokenPhrase()
     const output = `${itemText} ${spokenPhrase}`.replace(/\s+/g, ' ').trim()
@@ -477,7 +481,15 @@ export async function navigateScreenReaderTo({
     if (matches.test(output)) {
       return output
     }
-    await screenReader.next()
+    if (
+      shouldEnterDialogs &&
+      screenReader.name === 'VoiceOver' &&
+      /\bweb dialog\b/i.test(itemText)
+    ) {
+      await screenReader.interact()
+    } else {
+      await screenReader.next()
+    }
   }
 
   throw new Error(
