@@ -317,6 +317,10 @@ Do not undo a successful target write only because source cleanup failed.
 
 Branching adds branch identity to branchable content, global, and version storage. Unique fields and developer-defined unique indexes include the branch identity so separate branches can use the same value. The normal `main` constraint still applies during merge, so a collision on `main` fails the real write.
 
+Version responses expose `_branch` to identify the owning branch. Collection versions expose the logical document ID through `parent`; `_branchParent` remains internal. This applies to version lists and single-version reads through the Local API, REST, and GraphQL. Global versions also expose `_branch`.
+
+`showHiddenFields: true` does not expose `_branchParent`. Trusted Local API reads using `branch: false` bypass branch filtering and identity projection and retain raw version metadata, including `_branchParent`. Database adapter reads also retain the metadata required by internal version operations.
+
 Review generated migrations before deployment. For Postgres and SQLite, enable branching in the config and generate the normal schema migration:
 
 ```text
