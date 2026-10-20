@@ -73,17 +73,13 @@
     --activity-page-size: 4;
     --activity-columns: 2;
     --activity-rows: 2;
-    --activity-card-width: calc(
-      (100cqw - var(--spacer-3) * (var(--activity-columns) - 1)) / var(--activity-columns)
-    );
-
-    /* Match the thumbnail, two text lines, padding, metadata gap, and card border. */
+    /* Match the thumbnail, two text lines, padding, metadata gap, borders, and divider. */
     --activity-row-height: max(
       calc(var(--spacer-6) * 5),
       calc(
         var(--activity-thumbnail-height) +
           (var(--text-body-medium-line-height) + var(--spacer-2-5)) * 2 + var(--spacer-1) +
-          var(--stroke-width-small) * 2
+          var(--stroke-width-small) * 3
       )
     );
     --activity-thumbnail-height: calc(var(--spacer-6) * 3.5 - var(--stroke-width-small) * 2);
@@ -213,9 +209,7 @@
       --activity-page-size: 4;
       --activity-columns: 4;
       --activity-rows: 1;
-      --activity-thumbnail-height: calc(
-        (var(--activity-card-width) - var(--stroke-width-small) * 2) * 3 / 4
-      );
+      --activity-row-height: calc(var(--spacer-6) * 5 + var(--spacer-4));
     }
 
     .activity-widget__item:nth-child(n + 5) {
