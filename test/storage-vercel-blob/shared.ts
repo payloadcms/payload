@@ -4,6 +4,7 @@ export const mediaWithCompositePrefixesSlug = 'media-with-composite-prefixes'
 export const mediaWithAlwaysInsertFieldsSlug = 'media-with-always-insert-fields'
 export const mediaWithDynamicPrefixSlug = 'media-with-dynamic-prefix'
 export const mediaWithDirectAccessSlug = 'media-with-direct-access'
+export const resizedMediaSlug = 'resized-media'
 export const prefix = 'test-prefix'
 export const collectionPrefix = 'collection-prefix'
 

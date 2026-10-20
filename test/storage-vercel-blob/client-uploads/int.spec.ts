@@ -14,7 +14,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 
 import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
-import { prefix } from '../shared.js'
+import { prefix, resizedMediaSlug } from '../shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -122,6 +122,52 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
     const { blobs } = await list()
     const uploaded = blobs.find((b) => b.pathname === issued.pathname)
     expect(uploaded).toBeDefined()
+  })
+
+  it('should store processed bytes for a resized client upload', async () => {
+    const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+    const issued = await issueClientUpload({
+      collectionSlug: resizedMediaSlug,
+      filename: 'image.png',
+      mimeType: 'image/png',
+    })
+
+    await upload(issued.pathname, new Blob([file], { type: 'image/png' }), {
+      access: 'public',
+      clientPayload: JSON.stringify({
+        collectionSlug: resizedMediaSlug,
+        mimeType: 'image/png',
+        signedReceipt: issued.clientUploadContext.signedReceipt,
+      }),
+      contentType: 'image/png',
+      handleUploadUrl,
+    })
+
+    const formData = new FormData()
+    formData.append('_payload', JSON.stringify({}))
+    formData.append(
+      'file',
+      JSON.stringify({
+        clientUploadContext: issued.clientUploadContext,
+        collectionSlug: resizedMediaSlug,
+        filename: issued.filename,
+        mimeType: 'image/png',
+        size: file.length,
+      }),
+    )
+
+    const response = await restClient.POST(`/${resizedMediaSlug}`, { body: formData })
+
+    expect(response.status).toBe(201)
+
+    const { doc } = await response.json()
+    const { blobs } = await list()
+    const storedMain = blobs.find(({ pathname }) => pathname.endsWith(`/${doc.filename}`))
+
+    expect(doc.width).toBe(10)
+    expect(storedMain?.size).toBe(doc.filesize)
+
+    await payload.delete({ id: doc.id, collection: resizedMediaSlug, overrideAccess: true })
   })
 
   it("should reject upload when 'x-disallow-access' header is set", async () => {
