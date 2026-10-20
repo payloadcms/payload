@@ -144,11 +144,11 @@ Review the results afterwards. Leave the property off, or set it to `overrideAcc
 
 #### Cases the codemod leaves behind
 
-Run a typecheck after the codemod. Three patterns it cannot resolve:
+Three patterns it cannot resolve:
 
-- **Spread arguments** — `payload.find({ ...args })`. The codemod cannot tell whether `args` already supplies the property.
-- **Aliased or cast receivers** — `const db = payload; db.find({ ... })` and `(payload as any).find({ ... })`. It matches `payload`, `.payload`, and their `.jobs` properties only.
-- **Non-literal arguments** — `payload.find(options)`. The codemod cannot safely modify the value at the call site.
+- **Spread arguments** — `payload.find({ ...args })`. The codemod cannot tell whether `args` already supplies the property. Each such call is listed as a `note` with its file and line in the codemod summary.
+- **Non-literal arguments** — `payload.find(options)`. The codemod cannot safely modify the value at the call site. Each such call is listed as a `note` with its file and line in the codemod summary.
+- **Aliased or cast receivers** — `const db = payload; db.find({ ... })` and `(payload as any).find({ ... })`. It matches `payload`, `.payload`, and their `.jobs` properties only. These calls are not reported, so search for them yourself.
 
 #### Jobs operations use the same default
 
