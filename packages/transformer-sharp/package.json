@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/transformer-sharp",
-  "version": "4.0.0-beta.2",
+  "version": "4.0.0-beta.3",
   "description": "Official Sharp-based file transformer for Payload: request-time image resizing and upload-time image processing",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
@@ -48,9 +48,7 @@
     "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "clean": "rimraf -g {dist,*.tsbuildinfo}"
   },
   "dependencies": {
     "sharp": "0.35.4"

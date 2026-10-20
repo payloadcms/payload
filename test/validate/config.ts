@@ -96,7 +96,7 @@ export default buildConfigWithDefaults({
         },
         summary: 'stored global summary',
         title: 'Stored global title',
-      } as never,
+      },
       locale: 'en',
       overrideAccess: true,
     })

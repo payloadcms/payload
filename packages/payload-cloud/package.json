@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/payload-cloud",
-  "version": "4.0.0-beta.2",
+  "version": "4.0.0-beta.3",
   "description": "The official Payload Cloud plugin",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
@@ -48,8 +48,6 @@
     "build:swc": "swc ./src -d ./dist --config-file .swcrc-build --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "test": "jest"
   },
   "dependencies": {

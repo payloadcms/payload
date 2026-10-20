@@ -92,7 +92,7 @@ export async function CollectionQueryWidget({
       where,
     })
 
-    docs = result.docs as QueryDoc[]
+    docs = result.docs
   } catch (err) {
     payload.logger.error({
       err,
