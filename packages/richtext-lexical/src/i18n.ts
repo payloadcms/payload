@@ -200,9 +200,9 @@ export const i18n: Partial<GenericLanguages> = {
   pl: {
     insertParagraph: 'Wstaw akapit',
     placeholder: "Rozpocznij pisanie lub naciśnij '/' dla poleceń...",
-    slashMenuBasicGroupLabel: 'Podstawowy',
+    slashMenuBasicGroupLabel: 'Podstawowe',
     slashMenuListGroupLabel: 'Listy',
-    toolbarItemsActive: '{{count}} aktywny',
+    toolbarItemsActive: 'Aktywne: {{count}}',
   },
   pt: {
     insertParagraph: 'Inserir Parágrafo',
