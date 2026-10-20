@@ -37,6 +37,14 @@ type MouseDraggingDirection = 'bottom' | 'right'
 const MIN_ROW_HEIGHT = 33
 const MIN_COLUMN_WIDTH = 92
 
+const getCellNodeHeight = (
+  cell: TableCellNode,
+  activeEditor: LexicalEditor,
+): number | undefined => {
+  const domCellNode = activeEditor.getElementByKey(cell.getKey())
+  return domCellNode?.clientHeight
+}
+
 function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
   const targetRef = useRef<HTMLElement | null>(null)
   const resizerRef = useRef<HTMLDivElement | null>(null)
@@ -228,14 +236,6 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
     },
     [activeCell, editor],
   )
-
-  const getCellNodeHeight = (
-    cell: TableCellNode,
-    activeEditor: LexicalEditor,
-  ): number | undefined => {
-    const domCellNode = activeEditor.getElementByKey(cell.getKey())
-    return domCellNode?.clientHeight
-  }
 
   const getCellColumnIndex = (tableCellNode: TableCellNode, tableMap: TableMapType) => {
     let columnIndex: number | undefined

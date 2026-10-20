@@ -2,7 +2,7 @@
 
 import '../colors.css'
 
-import type { FormField, UIField } from 'payload'
+import type { UIField } from 'payload'
 
 import {
   useAllFormFields,
@@ -50,10 +50,8 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
   const descriptionPath = descriptionPathFromContext || 'meta.description'
   const titlePath = titlePathFromContext || 'meta.title'
 
-  const {
-    [descriptionPath]: { value: metaDescription } = {} as FormField,
-    [titlePath]: { value: metaTitle } = {} as FormField,
-  } = fields
+  const metaDescription = fields[descriptionPath]?.value
+  const metaTitle = fields[titlePath]?.value
 
   const [href, setHref] = useState<string>()
 
