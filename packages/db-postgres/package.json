@@ -70,7 +70,7 @@
   },
   "dependencies": {
     "@payloadcms/drizzle": "workspace:*",
-    "@types/pg": "8.20.0",
+    "@types/pg": "^8.20.0",
     "console-table-printer": "2.15.0",
     "drizzle-kit": "0.31.7",
     "drizzle-orm": "0.45.2",
