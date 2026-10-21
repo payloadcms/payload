@@ -105,8 +105,8 @@
         "WCAG.e2e.spec.ts :: should give a default toast six seconds before automatic dismissal",
         "screen-reader.spec.ts :: should announce the trash toast and dismiss it after the default timeout"
       ],
-      "limits": "The temporary Sonner patch fixes and browser-tests DOM keyboard-focus persistence, resumption on blur, hover coexistence, and timer cleanup after manual dismissal. The original virtual-cursor-only requirement remains unverified; this is still partial evidence for that broader report.",
-      "manualVerification": "Repeat the real-trash toast flow in Playwright WebKit after installing the branch patch. Virtual-cursor-only focus is distinct from DOM keyboard focus and remains a separate manual VoiceOver check."
+      "limits": "Temporary Sonner patch fixes DOM keyboard-focus persistence, resumption on blur, hover coexistence, and timer cleanup after manual dismissal. Four local Chromium regressions pass; the four requested WebKit browser scenarios also pass in Claude's report. Actual VoiceOver toast navigation and virtual-cursor-only persistence have not yet been verified.",
+      "manualVerification": "With VoiceOver, navigate normally to a real trash toast, then verify it remains while being read after mouse hover is removed. Record whether DOM focus follows the VoiceOver cursor; do not assume a purely virtual or keyboard-focused path."
     },
     {
       "ticket": "PYLD-3581",
@@ -1221,7 +1221,7 @@
       },
       "rootCause": "In installed Sonner 1.7.4, the dismissal timer pauses for expanded/interacting or optional document-hidden state. Focus handlers update restoration refs but do not update pause state.",
       "implementationBoundary": "The branch deliberately registers a pnpm patch for Sonner 1.7.4. This fixes the development/test checkout, but must be replaced with a distributable dependency solution before publishing the Payload UI package.",
-      "status": "Temporary branch-local Sonner patch installed at the user request. Four focused Chromium regressions passed, including the previously failing focus-persistence case. A published-package solution is required before opening the final PR.",
+      "status": "Temporary branch-local Sonner fix passes four focused Chromium regressions and the four reported WebKit browser scenarios. Actual VoiceOver toast navigation remains the outstanding manual check; replace the root patch before the final PR.",
       "manualAT": "Virtual-cursor-only persistence remains unverified; DOM focus is not equivalent to the VoiceOver cursor.",
       "browserRegression": {
         "browser": "Chromium",
@@ -1254,6 +1254,21 @@
           "2.2.1 Timing Adjustable (A): focused timeout behavior only; no complete criterion claim",
           "4.1.3 Status Messages (AA): DOM/close-control behavior only; speech not verified"
         ]
+      },
+      "manualBrowserRetest": {
+        "date": "2026-10-21",
+        "commit": "9a133571bb",
+        "browser": "Playwright WebKit",
+        "source": "Claude report; four real-trash scenarios, no Guidepup or VoiceOver.",
+        "results": {
+          "unfocused": "Dismissed at approximately 6234ms.",
+          "keyboardFocused": "Visible at 8000ms, Close toast retained DOM focus, pointer outside.",
+          "focusLeft": "Dismissal resumed, approximately 6177ms after blur.",
+          "manualDismissal": "Enter closed the focused toast; a subsequent unfocused toast dismissed at approximately 6208ms."
+        },
+        "cleanup": "Four disposable fixture documents deleted successfully.",
+        "reportedError": "One TypeError: Load failed associated with __nextjs_original-stack-frames/access-control checks. Claude attributed it to the dev overlay; the underlying error was not independently confirmed here. No observed failure in the four toast checks.",
+        "limits": "Real DOM keyboard focus only; virtual-cursor behavior remains unverified."
       }
     }
   }
