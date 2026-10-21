@@ -193,7 +193,13 @@ export const generateFileData = async <T>({
     (isProcessableImage(file.mimetype) || isProcessableImage(detectedFileType.mime))
 
   if (shouldUseDetectedFileType && detectedFileType.mime !== file.mimetype) {
+    const isRequestFile = file === req.file
     file = { ...file, mimetype: detectedFileType.mime }
+
+    // Later steps change `file` in place, and storage adapters read `req.file`.
+    if (isRequestFile) {
+      req.file = file
+    }
   }
 
   if (!disableLocalStorage) {
@@ -375,7 +381,7 @@ export const generateFileData = async <T>({
       delete file.clientUploadContext
       delete fileForResize.clientUploadContext
       if (file.tempFilePath) {
-        await fs.writeFile(file.tempFilePath, croppedImage) // write fileBuffer to the temp path
+        await fs.writeFile(file.tempFilePath, fileForResize.data) // write fileBuffer to the temp path
       } else {
         req.file = fileForResize
       }
