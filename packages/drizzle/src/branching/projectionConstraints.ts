@@ -10,6 +10,7 @@ import type { ProjectionQueryAdapter } from './createProjectionQueries.js'
 import { getTableAlias } from '../queries/getTableAlias.js'
 import { parseParams } from '../queries/parseParams.js'
 import { projectionCompilingAccess, projectionQueryContext } from './createProjectionQueries.js'
+import { branchProjectionLocaleKey } from './projectionLocaleNamespace.js'
 
 /** Resolves ordinary logical foreign keys without changing their stored representation. */
 export const getProjectionTarget = ({
@@ -289,6 +290,16 @@ export const guardProjectionJoins = ({
   }
 
   for (const join of joins) {
+    if (adapter.name === 'postgres' && join.table[branchProjectionLocaleKey]) {
+      join.condition = and(
+        join.condition,
+        eq(
+          join.table[branchProjectionLocaleKey],
+          (adapter as ProjectionQueryAdapter)[projectionQueryContext].branchKey,
+        ),
+      )
+    }
+
     const collection = getProjectionCollection({ adapter, table: join.table })
 
     if (collection) {

@@ -437,6 +437,7 @@ export interface BranchQueryDoc {
   rank?: number | null;
   fr?: string | null;
   title?: string | null;
+  _branchProjection_branchKey?: string | null;
   localeTarget?: (number | null) | BranchQueryTag;
   details?: {
     heading?: string | null;
@@ -2112,6 +2113,7 @@ export interface CollectionBranchQueryDocsProjection {
   rank?: number | null;
   fr?: string | null;
   title?: string | null;
+  _branchProjection_branchKey?: string | null;
   localeTarget?: (number | null) | BranchQueryTag;
   details?: {
     heading?: string | null;
@@ -2392,6 +2394,7 @@ export interface BranchQueryDocsSelect<T extends boolean = true> {
   rank?: T;
   fr?: T;
   title?: T;
+  _branchProjection_branchKey?: T;
   localeTarget?: T;
   details?:
     | T
@@ -3345,6 +3348,7 @@ export interface CollectionBranchQueryDocsProjectionSelect<T extends boolean = t
   rank?: T;
   fr?: T;
   title?: T;
+  _branchProjection_branchKey?: T;
   localeTarget?: T;
   details?:
     | T

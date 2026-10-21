@@ -15,6 +15,7 @@ import type {
   SetColumnID,
 } from '../types.js'
 
+import { branchProjectionLocaleKey } from '../branching/projectionLocaleNamespace.js'
 import { createTableName } from '../createTableName.js'
 import { buildForeignKeyName } from '../utilities/buildForeignKeyName.js'
 import { buildIndexName } from '../utilities/buildIndexName.js'
@@ -42,6 +43,7 @@ type Args = {
   disableRelsTableUnique?: boolean
   disableUnique: boolean
   fields: FlattenedField[]
+  isBranchProjection?: boolean
   parentIsLocalized: boolean
   rootRelationships?: Set<string>
   rootRelationsToBuild?: RelationMap
@@ -79,6 +81,7 @@ export const buildTable = ({
   disableRelsTableUnique = false,
   disableUnique = false,
   fields,
+  isBranchProjection = false,
   parentIsLocalized,
   rootRelationships,
   rootRelationsToBuild,
@@ -208,6 +211,18 @@ export const buildTable = ({
       name: '_parent_id',
       type: idColType,
       notNull: true,
+    }
+
+    if (isRoot && isBranchProjection) {
+      localesColumns[branchProjectionLocaleKey] = {
+        name: branchProjectionLocaleKey,
+        type: 'text',
+        notNull: true,
+      }
+      localesIndexes._branchLocale = {
+        name: buildIndexName({ name: `${localeTableName}_branch_key_locale`, adapter }),
+        on: [branchProjectionLocaleKey, '_locale'],
+      }
     }
 
     localesIndexes._localeParent = {

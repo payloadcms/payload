@@ -15,6 +15,7 @@ export const QueryDocs: CollectionConfig = {
     { name: 'rank', type: 'number', index: true },
     { name: 'fr', type: 'text' },
     { name: 'title', type: 'text', localized: true },
+    { name: '_branchProjection_branchKey', type: 'text', localized: true },
     { name: 'localeTarget', type: 'relationship', relationTo: queryTagsSlug, localized: true },
     {
       name: 'details',

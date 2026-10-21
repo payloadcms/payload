@@ -31,6 +31,169 @@ test.suite(
   'Native effective branch query parity',
   { config: './config.ts', ...nativeBranchDatabaseOptions },
   () => {
+    test('should isolate localized filtering and ordering between two working branches', async ({
+      payload,
+    }) => {
+      await seeded({
+        payload,
+        run: async ({ req }) => {
+          const otherBranchID = 'other-review'
+          const target = { collection: heads, parentID: 2 }
+          const original = await payload.db.findVersions({
+            collection: queryDocsSlug,
+            locale: 'all',
+            req,
+            limit: 1,
+            where: { and: [{ parent: { equals: 2 } }, { latest: { equals: true } }] },
+          })
+          const timestamp = new Date().toISOString()
+          const version = await payload.db.createVersion({
+            branchMode: true,
+            collectionSlug: queryDocsSlug,
+            createdAt: timestamp,
+            parent: 2,
+            req,
+            updatedAt: timestamp,
+            versionData: {
+              ...original.docs[0]!.version,
+              title: { en: 'English 2', fr: 'A other branch' },
+              _branchProjection_branchKey: { en: 'Source en 2', fr: 'Other source value' },
+            },
+          })
+          const reference = await initializeBranchVersion({
+            branchID: otherBranchID,
+            isFrozen: false,
+            req,
+            target,
+            versionID: version.id,
+          })
+          const shared = await readBranchHeadToken({
+            branchID: 'main',
+            req,
+            scope: { type: 'shared' },
+            target,
+          })
+
+          if (shared.state?.type !== 'version') {
+            throw new Error('The query fixture requires a main shared version.')
+          }
+
+          await bootstrapBranchProjectionPage({ branchID: otherBranchID, collection: heads, req })
+
+          const expected = await readBranchHeadToken({
+            branchID: otherBranchID,
+            req,
+            scope: { type: 'locale', locale: 'fr' },
+            target,
+          })
+
+          await writeBranchHead({
+            expected,
+            nextState: { type: 'version', structure: shared.state.version, version: reference },
+            req,
+            target,
+          })
+
+          for (const selectedBranch of [branchID, otherBranchID]) {
+            const sorted = await queryBranchContent({
+              branchID: selectedBranch,
+              collection: queryDocsSlug,
+              joins: false,
+              locale: 'fr',
+              req,
+              sort: 'title',
+              limit: 1,
+            })
+            const filtered = await queryBranchContent({
+              branchID: selectedBranch,
+              collection: queryDocsSlug,
+              joins: false,
+              locale: 'fr',
+              req,
+              sort: 'title',
+              where: { _branchProjection_branchKey: { equals: 'Other source value' } },
+            })
+
+            expect(sorted.totalDocs).toBe(3)
+            expect(sorted.docs.map(({ id }) => id)).toEqual([selectedBranch === branchID ? 1 : 2])
+            expect(filtered.totalDocs).toBe(selectedBranch === branchID ? 0 : 1)
+            expect(filtered.docs.map(({ id }) => id)).toEqual(
+              selectedBranch === branchID ? [] : [2],
+            )
+            expect(JSON.stringify(sorted.docs)).not.toContain('__payload.branchKey')
+          }
+
+          const inherited = await queryBranchContent({
+            branchID: otherBranchID,
+            collection: queryDocsSlug,
+            joins: false,
+            locale: 'en',
+            req,
+            sort: 'title',
+            where: { _branchProjection_branchKey: { equals: 'Source en 2' } },
+          })
+
+          expect(inherited.docs.map(({ id }) => id)).toEqual([2])
+          expect(inherited.totalDocs).toBe(1)
+        },
+      })
+    })
+
+    test('should preserve a localized source field that resembles private branch metadata', async ({
+      payload,
+    }) => {
+      await seeded({
+        payload,
+        run: async ({ req }) => {
+          for (const locale of ['en', 'fr'] as const) {
+            const where = {
+              _branchProjection_branchKey: { equals: `Source ${locale} 2` },
+            }
+            const baseline = await payload.find({
+              collection: queryDocsSlug,
+              depth: 0,
+              draft: true,
+              joins: false,
+              locale,
+              req,
+              sort: 'title',
+              where,
+            })
+            const effective = await queryBranchContent({
+              branchID,
+              collection: queryDocsSlug,
+              joins: false,
+              locale,
+              req,
+              sort: 'title',
+              where,
+            })
+
+            expect(effective.docs.map(({ id }) => id)).toEqual([2])
+            expect(effective.totalDocs).toBe(1)
+            expect(effective.docs[0]?._branchProjection_branchKey?.[locale]).toBe(
+              baseline.docs[0]?._branchProjection_branchKey,
+            )
+            expect(JSON.stringify(effective.docs)).not.toContain('__payload.branchKey')
+          }
+
+          const selected = await queryBranchContent({
+            branchID,
+            collection: queryDocsSlug,
+            joins: false,
+            locale: 'all',
+            req,
+            select: { _branchProjection_branchKey: true },
+            where: { id: { equals: 2 } },
+          })
+
+          expect(selected.docs[0]).toMatchObject({
+            _branchProjection_branchKey: { en: 'Source en 2', fr: 'Source fr 2' },
+          })
+        },
+      })
+    })
+
     test('should preserve existing draft filtering, typed identity sorting, array operators and native paging', async ({
       payload,
     }) => {
@@ -1199,6 +1362,7 @@ const seeded = async ({
       rank: hasEqualRank ? 1 : id,
       fr: 'Shared',
       title: `English ${id}`,
+      _branchProjection_branchKey: `Source en ${id}`,
       localeTarget: id === 2 ? null : 20,
       details: id === 2 ? {} : { heading: `Heading ${id}`, target: 20 },
       one: !hasEqualRank && id === 2 ? null : 2,
@@ -1252,6 +1416,7 @@ const seeded = async ({
       locale: 'fr',
       data: {
         title: `French ${id}`,
+        _branchProjection_branchKey: `Source fr ${id}`,
         localeTarget: 30,
         details: { heading: `French heading ${id}`, target: 30 },
       },

@@ -8,6 +8,7 @@ import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter, RawIndex, SetColumnID } from '../types.js'
 
+import { isRegisteredBranchProjection } from '../branching/projectionLocaleNamespace.js'
 import { createTableName } from '../createTableName.js'
 import { buildIndexName } from '../utilities/buildIndexName.js'
 import { buildTable } from './build.js'
@@ -65,6 +66,8 @@ export const buildRawSchema = ({
       disableNotNull: !!collection?.versions?.drafts,
       disableUnique: false,
       fields: collection.flattenedFields,
+      isBranchProjection:
+        adapter.name === 'postgres' && isRegisteredBranchProjection({ collection, config }),
       parentIsLocalized: false,
       setColumnID,
       tableName,

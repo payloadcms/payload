@@ -2,6 +2,7 @@ import type { SQL } from 'drizzle-orm'
 import type { Find, TypeWithID } from 'payload'
 
 import {
+  aliasedTable,
   aliasedTableColumn,
   asc,
   count,
@@ -16,17 +17,25 @@ import {
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../types.js'
+import type { ProjectionQueryAdapter } from './createProjectionQueries.js'
 
 import { buildFindManyArgs } from '../find/buildFindManyArgs.js'
 import { buildQuery } from '../queries/buildQuery.js'
 import { transform } from '../transform/read/index.js'
 import { getTransaction } from '../utilities/getTransaction.js'
+import { projectionQueryContext } from './createProjectionQueries.js'
+import { branchProjectionLocaleKey } from './projectionLocaleNamespace.js'
 
 /** Page selection, raw content, joins and total all share one native statement snapshot. */
 export const findProjection: Find = async function (this: DrizzleAdapter, args) {
   const config = this.payload.collections[args.collection].config
   const tableName = this.tableNameMap.get(toSnakeCase(config.slug))
-  const table = this.tables[tableName]
+  const nativeTable = this.tables[tableName]
+  const nativeLocales = this.tables[`${tableName}${this.localesSuffix}`]
+  const context = (this as ProjectionQueryAdapter)[projectionQueryContext]
+  const hasScopedLocales =
+    this.name === 'postgres' && !!context && !!nativeLocales?.[branchProjectionLocaleKey]
+  const table = hasScopedLocales ? aliasedTable(nativeTable, tableName) : nativeTable
   let totalKey = '__payloadBranchReadTotal'
 
   while (config.flattenedFields.some((field) => field.name === totalKey)) {
@@ -39,6 +48,7 @@ export const findProjection: Find = async function (this: DrizzleAdapter, args) 
   const isPaginationEnabled = args.pagination !== false && limit !== 0
   const { joins, orderBy, where } = buildQuery({
     adapter: this,
+    aliasTable: hasScopedLocales ? table : undefined,
     fields: config.flattenedFields,
     locale: args.locale,
     sort: args.sort ?? config.defaultSort,
@@ -133,6 +143,24 @@ export const findProjection: Find = async function (this: DrizzleAdapter, args) 
       .select({ total: countDistinct(allIDs.id) })
       .from(allIDs)
   } else {
+    const hasScopedLocaleOrdering =
+      hasScopedLocales &&
+      orderBy.some(
+        ({ column, projectionAggregate }) =>
+          !projectionAggregate &&
+          ((column.table as unknown as Record<symbol, string>)[
+            Symbol.for('drizzle:OriginalName')
+          ] ?? getTableName(column.table)) === getTableName(nativeLocales),
+      )
+    const branchRoots = hasScopedLocaleOrdering
+      ? (db as any)
+          .select()
+          .from(nativeTable)
+          .where(eq(nativeTable._branchProjection_branchKey, context.branchKey))
+          // A numeric zero is omitted by Drizzle; retain the native planner fence explicitly.
+          .offset(sql`0`)
+          .as(tableName)
+      : table
     const ordering = orderBy.map(({ column, order, projectionAggregate }) =>
       order(
         projectionAggregate ??
@@ -152,12 +180,23 @@ export const findProjection: Find = async function (this: DrizzleAdapter, args) 
           'projection_rank',
         ),
       })
-      .from(table)
+      .from(branchRoots)
       .where(where)
       .$dynamic()
 
     if (joins.length) {
-      ordered = ordered.groupBy(table.id)
+      ordered = ordered.groupBy(
+        table.id,
+        // The fenced relation has no PostgreSQL primary-key functional dependency.
+        ...(hasScopedLocaleOrdering
+          ? orderBy
+              .filter(
+                ({ column, projectionAggregate }) =>
+                  !projectionAggregate && getTableName(column.table) === tableName,
+              )
+              .map(({ column }) => column)
+          : []),
+      )
     }
 
     for (const join of joins) {

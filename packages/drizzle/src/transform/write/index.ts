@@ -3,6 +3,7 @@ import type { FlattenedField } from 'payload'
 import type { DrizzleAdapter } from '../../types.js'
 import type { RowToInsert } from './types.js'
 
+import { branchProjectionLocaleKey } from '../../branching/projectionLocaleNamespace.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
@@ -70,6 +71,22 @@ export const transformForWrite = ({
     texts: rowToInsert.texts,
     textsToDelete: rowToInsert.textsToDelete,
   })
+
+  if (
+    adapter.name === 'postgres' &&
+    adapter.tables[`${tableName}${adapter.localesSuffix}`]?.[branchProjectionLocaleKey] &&
+    Object.keys(rowToInsert.locales).length
+  ) {
+    const branchKey = rowToInsert.row._branchProjection_branchKey
+
+    if (typeof branchKey !== 'string' || !/^bp2:[\w-]{43}$/.test(branchKey)) {
+      throw new Error('Private branch projection locale writes require an encoded branch key.')
+    }
+
+    for (const locale of Object.values(rowToInsert.locales)) {
+      locale[branchProjectionLocaleKey] = branchKey
+    }
+  }
 
   return rowToInsert
 }

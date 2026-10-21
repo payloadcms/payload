@@ -2,6 +2,10 @@ import type { Block, Config, SanitizedConfig } from 'payload'
 import { sanitizeConfig } from 'payload'
 import { describe, expect, it, vi } from 'vitest'
 
+import {
+  branchProjectionLocaleKey,
+  isRegisteredBranchProjection,
+} from '../branching/projectionLocaleNamespace.js'
 import { setColumnID } from '../postgres/schema/setColumnID.js'
 import type { DrizzleAdapter } from '../types.js'
 import { checkTruncatedIdentifiers } from '../utilities/checkTruncatedIdentifiers.js'
@@ -58,6 +62,119 @@ const createAdapter = (
   }) as unknown as DrizzleAdapter
 
 describe('buildRawSchema', () => {
+  it.each(['postgres', 'sqlite'])(
+    'should scope only registered PostgreSQL root locale tables with adapter %s',
+    (name) => {
+      const config = sanitizeConfig({
+        collections: [
+          {
+            slug: 'source',
+            fields: [{ name: 'title', type: 'text', localized: true }],
+          },
+          {
+            slug: 'projection',
+            dbName: 'p'.repeat(50),
+            versions: false,
+            fields: [
+              { name: 'id', type: 'text' },
+              { name: 'title', type: 'text', localized: true },
+              { name: '_branchProjection_branchKey', type: 'text', localized: true },
+              {
+                name: '_branchProjection',
+                type: 'group',
+                fields: [{ name: 'branchKey', type: 'text', required: true }],
+              },
+              {
+                name: 'rows',
+                type: 'array',
+                fields: [{ name: 'title', type: 'text', localized: true }],
+              },
+            ],
+          },
+          {
+            slug: 'ordinary',
+            custom: { branchProjectionStorage: { collection: 'source' } },
+            fields: [{ name: '_branchProjection_branchKey', type: 'text', localized: true }],
+          },
+        ],
+        localization: { defaultLocale: 'en', locales: ['en', 'fr'] },
+      } as Config)
+      const source = config.collections.find(({ slug }) => slug === 'source')!
+      const projection = config.collections.find(({ slug }) => slug === 'projection')!
+      const ordinary = config.collections.find(({ slug }) => slug === 'ordinary')!
+
+      source.custom = { branchQueryStorage: { projection: projection.slug } }
+      projection.custom = { branchProjectionStorage: { collection: source.slug } }
+
+      const adapter = createAdapter(config)
+
+      adapter.name = name
+      buildRawSchema({ adapter, setColumnID })
+
+      const tableName = adapter.tableNameMap.get('projection')!
+      const localized = adapter.rawTables[`${tableName}_locales`]!
+      const index = localized.indexes._branchLocale
+
+      expect(isRegisteredBranchProjection({ collection: projection, config })).toBe(true)
+      expect(isRegisteredBranchProjection({ collection: ordinary, config })).toBe(false)
+      expect(localized.columns._branchProjection_branchKey).toMatchObject({ type: 'varchar' })
+      if (name === 'postgres') {
+        expect(localized.columns[branchProjectionLocaleKey]).toEqual({
+          name: branchProjectionLocaleKey,
+          type: 'text',
+          notNull: true,
+        })
+        expect(index.on).toEqual([branchProjectionLocaleKey, '_locale'])
+        expect(index.name.length).toBeLessThanOrEqual(63)
+      } else {
+        expect(Object.keys(localized.columns)).not.toContain(branchProjectionLocaleKey)
+        expect(index).toBeUndefined()
+      }
+      for (const table of Object.values(adapter.rawTables)) {
+        if (table !== localized) {
+          expect(Object.keys(table.columns)).not.toContain(branchProjectionLocaleKey)
+        }
+      }
+    },
+  )
+
+  it('should recognize a registered global projection and reject ambiguous descriptors', () => {
+    const config = sanitizeConfig({
+      collections: [
+        {
+          slug: 'projection',
+          fields: [
+            {
+              name: '_branchProjection',
+              type: 'group',
+              fields: [{ name: 'branchKey', type: 'text', required: true }],
+            },
+          ],
+        },
+      ],
+      globals: [{ slug: 'settings', fields: [] }],
+    } as Config)
+    const projection = config.collections.find(({ slug }) => slug === 'projection')!
+    const source = config.globals.find(({ slug }) => slug === 'settings')!
+
+    source.custom = { branchQueryStorage: { projection: projection.slug } }
+    projection.custom = { branchProjectionStorage: { global: source.slug } }
+    expect(isRegisteredBranchProjection({ collection: projection, config })).toBe(true)
+
+    projection.custom.branchProjectionStorage.collection = source.slug
+    expect(isRegisteredBranchProjection({ collection: projection, config })).toBe(false)
+  })
+
+  it('should reject a public field using the private raw namespace delimiter', () => {
+    expect(() =>
+      sanitizeConfig({
+        collections: [
+          { slug: 'source', fields: [{ name: branchProjectionLocaleKey, type: 'text' }] },
+        ],
+      } as Config),
+    ).toThrow('can not include periods')
+  })
+
   it('should create suffixed block tables for different schemas with the same slug', async () => {
     const config = sanitizeConfig({
       collections: [

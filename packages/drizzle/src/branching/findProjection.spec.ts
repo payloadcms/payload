@@ -2,7 +2,7 @@ import type { Field } from 'payload'
 
 import { sql } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { alias, pgSchema, pgTable, text } from 'drizzle-orm/pg-core'
+import { alias, boolean, pgSchema, pgTable, text } from 'drizzle-orm/pg-core'
 import { flattenAllFields } from 'payload'
 import { describe, expect, it } from 'vitest'
 
@@ -13,8 +13,125 @@ import { buildQuery } from '../queries/buildQuery.js'
 import { projectionQueryContext } from './createProjectionQueries.js'
 import { findProjection } from './findProjection.js'
 import { projectionRelationConstraint } from './projectionConstraints.js'
+import { branchProjectionLocaleKey } from './projectionLocaleNamespace.js'
 
 describe('effective projection relational aliases', () => {
+  it.each(
+    [undefined, 'custom', 'custom"schema'].flatMap((schemaName) =>
+      ['title', '-title', 'title.fr', 'id'].map((sort) => ({ schemaName, sort })),
+    ),
+  )('should scope localized ranking for $sort in $schemaName', async ({ schemaName, sort }) => {
+    const tableName = 'branch_projection'
+    const columns = {
+      id: text('source_id').primaryKey(),
+      createdAt: text('created_at'),
+      _branchProjection_branchKey: text('private_branch_key'),
+      _branchProjection_isVisible: boolean('private_visible'),
+      _branchProjection_logicalID: text('logical_id'),
+    }
+    const table = schemaName
+      ? pgSchema(schemaName).table(tableName, columns)
+      : pgTable(tableName, columns)
+    const localesName = `${tableName}_locales`
+    const localeColumns = {
+      id: text('id').primaryKey(),
+      _locale: text('_locale'),
+      _parentID: text('_parent_id'),
+      title: text('title'),
+      [branchProjectionLocaleKey]: text(branchProjectionLocaleKey),
+    }
+    const locales = schemaName
+      ? pgSchema(schemaName).table(localesName, localeColumns)
+      : pgTable(localesName, localeColumns)
+    const fields: Field[] = [
+      { name: 'id', type: 'text' },
+      { name: 'createdAt', type: 'text' },
+      { name: 'title', type: 'text', localized: true },
+      {
+        name: '_branchProjection',
+        type: 'group',
+        fields: [
+          { name: 'branchKey', type: 'text' },
+          { name: 'isVisible', type: 'checkbox' },
+          { name: 'logicalID', type: 'text' },
+        ],
+      },
+    ]
+    let statement = ''
+    let parameters: unknown[] = []
+    const captured = new Error('captured native statement')
+    const db = drizzle({
+      client: {
+        query: ({ text: query }: { text: string }, params: unknown[]) => {
+          statement = query
+          parameters = params
+          throw captured
+        },
+      } as any,
+      schema: { [tableName]: table },
+    })
+    const adapter = {
+      [projectionQueryContext]: { branchKey: 'private-key', relationAccess: { projection: {} } },
+      drizzle: db,
+      idType: 'uuid',
+      name: 'postgres',
+      localesSuffix: '_locales',
+      operatorHandlers: [],
+      operators: operatorMap,
+      payload: {
+        config: {
+          localization: { locales: ['en', 'fr'], localeCodes: ['en', 'fr'], defaultLocale: 'en' },
+        },
+        collections: {
+          projection: {
+            customIDType: 'text',
+            config: {
+              slug: 'projection',
+              custom: { branchProjectionStorage: { collection: 'source' } },
+              fields,
+              flattenedFields: flattenAllFields({ fields }),
+            },
+          },
+        },
+      },
+      tableNameMap: new Map([['projection', tableName]]),
+      tables: { [tableName]: table, [localesName]: locales },
+    } as unknown as DrizzleAdapter
+
+    await expect(
+      findProjection.call(adapter, {
+        collection: 'projection',
+        joins: false,
+        limit: 2,
+        locale: 'fr',
+        select: { id: true },
+        sort: [sort, '_branchProjection.logicalID'],
+        where: { title: { not_equals: null } },
+      }),
+    ).rejects.toMatchObject({ cause: captured })
+
+    expect(statement).toContain(`"${branchProjectionLocaleKey}" = $`)
+    expect(statement).toContain('left join')
+    expect(statement).toContain('row_number() over')
+    if (sort === 'id') {
+      expect(statement).not.toContain('offset 0')
+    } else {
+      expect(statement).toContain('offset 0) "branch_projection"')
+      expect(statement).toContain(
+        'group by "branch_projection"."source_id", "branch_projection"."logical_id", "branch_projection"."created_at"',
+      )
+      expect(statement).toContain(sort === '-title' ? 'max(' : 'min(')
+    }
+    expect(parameters).toContain('private-key')
+    expect(parameters).toContain('fr')
+    if (schemaName) {
+      expect(statement).toContain(`from "${schemaName.replaceAll('"', '""')}"."branch_projection"`)
+      expect(statement).not.toContain(
+        `group by "${schemaName.replaceAll('"', '""')}"."branch_projection"`,
+      )
+    }
+  })
+
   it.each(
     [undefined, 'custom', 'custom"schema'].flatMap((schemaName) =>
       ['root', 'localized', 'joined'].map((mode) => ({ mode, schemaName })),
