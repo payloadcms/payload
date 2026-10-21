@@ -14,7 +14,7 @@
     "screenReaderRun": "Not run on this laptop; do not infer AT success from browser assertions.",
     "screenReaderDiscovery": {
       "before": 54,
-      "after": 35
+      "after": 33
     },
     "followUpBrowserRun": {
       "status": "passed",
@@ -48,7 +48,6 @@
   "outstanding": [
     "PYLD-3671 and PYLD-3678: current assertions permit a native label stop, unlike the original single-stop requirement. Native WebKit baseline also repeats labels. These remain partial coverage.",
     "PYLD-3580: six-second dismissal tests do not establish persistence while the screen-reader cursor is on the toast.",
-    "PYLD-3613: fresh-form edit-and-clear has no visible error under the pre-existing submission gate. Browser edit-and-clear coverage after an initial failed submission now passes; the original reported trigger and VoiceOver error reachability remain unverified.",
     "Reported NVDA/Chrome failures require that platform's evidence; this branch's default Windows Guidepup project uses Firefox.",
     "NVDA browse-mode tests and screen-reader cursor containment must retain AT evidence.",
     "Guidepup queue hazards removed from retained direction/version/widget captures; remote AT verification is still required.",
@@ -119,7 +118,7 @@
         "WCAG.e2e.spec.ts :: should associate ${form} errors with their fields and focus order",
         "screen-reader.spec.ts :: should expose validation errors next to their fields"
       ],
-      "limits": "The browser regression checks adjacent, associated errors on document submission and login edit-and-clear after an initial failed submission. The AT helper still relies on DOM focus as its cursor starting point; original VoiceOver reading-order evidence remains separately required.",
+      "limits": "Document error reading order retains its AT regression. Login error associations and keyboard order remain in the browser regression; post-submission edit-and-clear was manually verified with VoiceOver for PYLD-3613.",
       "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
     },
     {
@@ -195,14 +194,12 @@
       "report": "Payload - Authentication: Password error suggestion is not in focus order",
       "expected": "The error suggestion tooltip is included in focus order.",
       "reportedScreenReaders": ["VoiceOver"],
-      "coverage": "partial",
+      "coverage": "browser-regression-with-manual-at",
       "tests": [
-        "WCAG.e2e.spec.ts :: should associate ${form} errors with their fields and focus order",
-        "screen-reader.spec.ts :: should expose validation errors next to their fields",
-        "screen-reader.spec.ts :: should announce password errors after submission"
+        "WCAG.e2e.spec.ts :: should associate ${form} errors with their fields and focus order"
       ],
-      "limits": "Fresh-form edit-and-clear produces no inline error because useField exposes errors only after submission. This rule predates PR #18408. The browser regression now submits once, corrects the password until its error disappears, then clears it without resubmitting and verifies the returning error, field association, and keyboard order. The existing AT cases still capture submission; the original reported trigger and exact VoiceOver reachability remain unverified.",
-      "manualVerification": "With VoiceOver in WebKit/Safari, submit an initially empty login form once, type a valid password until the error clears, then clear the password without resubmitting. Confirm the returning error is read and reachable. Record the initial-submission prerequisite; do not claim that the fresh-form report was reproduced."
+      "limits": "The returning password error is covered after an initial failed submission, correction, and clearing without resubmission. Browser assertions cover error visibility, association, invalid state, and keyboard order. User-confirmed VoiceOver behavior covers automatic announcement and forward/backward keyboard access in Playwright WebKit. A fresh unsubmitted form renders no error under the pre-existing submission gate; that literal historical trigger remains unreproduced.",
+      "manualVerification": "User confirmed on 2026-10-21: error auto-announces when clearing by mouse and by Cmd+A/Delete; Shift+Tab from Password reaches it directly; forward Tab from Email encounters it before Password. VO-Left/Right inside text editing remains within the text, rather than proving a trap. Exact browser/OS/AT versions were not recorded."
     },
     {
       "ticket": "PYLD-3618",
@@ -747,18 +744,18 @@
   ],
   "remainingScreenReaderReview": {
     "date": "2026-10-21",
-    "scope": "Static review covered all 37 expanded cases at commit 203e115335. Two were subsequently retired with explicit browser replacements; the cases array tracks the 35 remaining cases and retiredCases preserves both decisions.",
+    "scope": "Static review covered all 37 expanded cases at commit 203e115335. Four were subsequently retired with explicit browser replacements and recorded manual limits; cases tracks the 33 remaining cases and retiredCases preserves all four decisions.",
     "interpretation": "Retain means the observable outcome justifies AT evidence, not that the test has passed or proves conformance. Strengthen means current assertions have a concrete false-pass, false-failure, scope, or cursor-start risk.",
     "counts": {
       "retain-at": 12,
-      "scenario-gap": 6,
-      "strengthen-at": 17
+      "scenario-gap": 5,
+      "strengthen-at": 16
     },
     "platformInventory": {
-      "total": 35,
+      "total": 33,
       "nvdaOnly": 5,
       "voiceOverOnly": 1,
-      "both": 29,
+      "both": 27,
       "note": "On macOS the five NVDA-only cases are skipped; they are not passes."
     },
     "sharedRisks": [
@@ -945,28 +942,8 @@
         "screenReaders": "VoiceOver and NVDA",
         "tickets": ["PYLD-3581"],
         "decision": "strengthen-at",
-        "finding": "The original form-error adjacency outcome is virtual reading order. The helper uses DOM blur/focus then a three-step scan, without verifying that the screen-reader cursor actually starts at the intended field.",
-        "next": "Keep the document case and complementary browser associations; verify the AT starting field. The login variant does not replace the separate edit-and-clear requirement in PYLD-3613."
-      },
-      {
-        "test": "should expose validation errors next to their fields",
-        "title": "should expose validation errors next to their fields",
-        "scenario": "login form",
-        "screenReaders": "VoiceOver and NVDA",
-        "tickets": ["PYLD-3581", "PYLD-3613"],
-        "decision": "strengthen-at",
-        "finding": "The original form-error adjacency outcome is virtual reading order. The helper uses DOM blur/focus then a three-step scan, without verifying that the screen-reader cursor actually starts at the intended field.",
-        "next": "Keep the document case and complementary browser associations; verify the AT starting field. The login variant does not replace the separate edit-and-clear requirement in PYLD-3613."
-      },
-      {
-        "test": "should announce password errors after submission",
-        "title": "should announce password errors after submission",
-        "scenario": null,
-        "screenReaders": "VoiceOver and NVDA",
-        "tickets": ["PYLD-3613"],
-        "decision": "scenario-gap",
-        "finding": "The error is captured only after clicking Login; the original report concerns the password being typed and cleared, prior to submission.",
-        "next": "Claude is investigating the exact browser scenario separately; do not change the scenario to force a pass."
+        "finding": "The retained document case checks the original document-submission reading-order report. The helper still starts from DOM focus without first verifying the AT cursor position.",
+        "next": "Verify the AT starting field before the adjacency scan; login coverage is now browser plus recorded manual VoiceOver evidence."
       },
       {
         "test": "should contain screen-reader traversal in bulk-upload and image-edit dialogs",
@@ -1168,6 +1145,34 @@
           "WCAG.e2e.spec.ts :: should preserve accessible names and controls in the native toast content"
         ],
         "manualLimit": "Exact automatic speech remains a manual reported-platform check; browser assertions do not prove synthesized output."
+      },
+      {
+        "test": "should expose validation errors next to their fields",
+        "title": "should expose validation errors next to their fields",
+        "scenario": "login form",
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3581", "PYLD-3613"],
+        "decision": "strengthen-at",
+        "finding": "The original form-error adjacency outcome is virtual reading order. The helper uses DOM blur/focus then a three-step scan, without verifying that the screen-reader cursor actually starts at the intended field.",
+        "next": "Keep the document case and complementary browser associations; verify the AT starting field. The login variant does not replace the separate edit-and-clear requirement in PYLD-3613.",
+        "replacementTests": [
+          "WCAG.e2e.spec.ts :: should associate ${form} errors with their fields and focus order"
+        ],
+        "manualLimit": "User confirmed the returning error auto-announces and is reachable in forward/backward keyboard order in Playwright WebKit with VoiceOver after one failed submission. A fresh-form pre-submit error was not reproduced."
+      },
+      {
+        "test": "should announce password errors after submission",
+        "title": "should announce password errors after submission",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3613"],
+        "decision": "scenario-gap",
+        "finding": "The error is captured only after clicking Login; the original report concerns the password being typed and cleared, prior to submission.",
+        "next": "Claude is investigating the exact browser scenario separately; do not change the scenario to force a pass.",
+        "replacementTests": [
+          "WCAG.e2e.spec.ts :: should associate ${form} errors with their fields and focus order"
+        ],
+        "manualLimit": "User confirmed the returning error auto-announces and is reachable in forward/backward keyboard order in Playwright WebKit with VoiceOver after one failed submission. A fresh-form pre-submit error was not reproduced."
       }
     ]
   },
@@ -1187,8 +1192,22 @@
         "variant": "login",
         "command": "PORT=3001 MONGODB_URL=<isolated test database> pnpm test:e2e a11y --grep 'should associate login errors with their fields and focus order' --workers=1"
       },
-      "conclusion": "Do not introduce fresh-form blur validation merely to recreate the old report. The test now exercises the returning error after correction/clearing in a submitted form. Exact reported-platform AT behavior is pending.",
-      "separateObservation": "Claude reported Tab moving to body in WebKit. This was not investigated here; no product focus-order defect has been established."
+      "conclusion": "Keep automated browser coverage and recorded manual AT evidence for the real rendered-error flow; remove redundant login Guidepup cases. Do not introduce fresh-form blur validation to manufacture the historical trigger.",
+      "separateObservation": "Claude reported Tab moving to body in WebKit. This was not investigated here; no product focus-order defect has been established.",
+      "manualAT": {
+        "date": "2026-10-21",
+        "browser": "Playwright WebKit",
+        "screenReader": "VoiceOver",
+        "source": "User observations relayed through Claude; no Guidepup run.",
+        "scope": "Initial empty submission, valid correction, then clearing without resubmission.",
+        "observations": [
+          "Returning error automatically announced after mouse clearing and keyboard Cmd+A/Delete.",
+          "Shift+Tab from Password reaches the error directly.",
+          "Forward Tab from Email reaches the error before Password.",
+          "VO horizontal navigation while interacting with password text remains in the text."
+        ],
+        "limits": "Fresh unsubmitted-form error absent; exact browser/OS/AT versions not recorded."
+      }
     }
   }
 }

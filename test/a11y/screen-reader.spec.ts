@@ -23,7 +23,6 @@ import {
   expectPopupCursorToMove,
   gotoCreatePost,
   gotoFirstPost,
-  gotoLabelTestLogin,
   gotoPostsList,
   insertTextBlockWithKeyboard,
   navigateScreenReaderTo,
@@ -531,53 +530,23 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
         expect(outputs.join(' ')).not.toMatch(/drag to move|add block|edit link|remove link/i)
       }
     })
-    for (const form of ['document', 'login'] as const) {
-      test.describe(`${form} form`, () => {
-        test('should expose validation errors next to their fields', async ({
-          page,
-          screenReader,
-        }) => {
-          // PYLD-3581; login also covers the reading-order behavior of PYLD-3613.
-          if (form === 'login') {
-            await gotoLabelTestLogin({ page, serverURL })
-            await page.locator('input[name="email"]').fill('dev@payloadcms.com')
-            await page.getByRole('button', { name: 'Login', exact: true }).click()
-          } else {
-            await gotoCreatePost({ page, postsURL })
-            await page.getByRole('button', { name: /^Publish(?: in English)?$/ }).click()
-          }
-
-          const field = page.locator(form === 'login' ? 'input[name="password"]' : '#field-title')
-          const error = page
-            .locator('.field-error')
-            .filter({ hasText: /required/i })
-            .first()
-
-          await expect(error).toBeVisible()
-          await expectAdjacentValidationError({ error, field, screenReader })
-        })
-      })
-    }
-
-    test('should announce password errors after submission', async ({ page, screenReader }) => {
-      // PYLD-3613: partial coverage; submission does not prove the original edit-and-clear error scenario.
-      await gotoLabelTestLogin({ page, serverURL })
-      await page.locator('input[name="email"]').fill('dev@payloadcms.com')
-      const password = page.locator('input[name="password"]')
-
-      await password.fill('temporary')
-      await password.fill('')
-      await password.press('Tab')
-      const error = page.locator('.field-error').filter({ hasText: /required/i })
-      const capture = await captureScreenReader({
-        action: async () => {
-          await page.getByRole('button', { name: 'Login', exact: true }).click()
-          await expect(error).toBeVisible()
-        },
+    test.describe('document form', () => {
+      test('should expose validation errors next to their fields', async ({
+        page,
         screenReader,
-      })
+      }) => {
+        // PYLD-3581
+        await gotoCreatePost({ page, postsURL })
+        await page.getByRole('button', { name: /^Publish(?: in English)?$/ }).click()
+        const field = page.locator('#field-title')
+        const error = page
+          .locator('.field-error')
+          .filter({ hasText: /required/i })
+          .first()
 
-      expect.soft(capture.spokenPhrase).toContain((await error.innerText()).trim())
+        await expect(error).toBeVisible()
+        await expectAdjacentValidationError({ error, field, screenReader })
+      })
     })
 
     test('should contain screen-reader traversal in bulk-upload and image-edit dialogs', async ({
