@@ -21,6 +21,15 @@ export type BranchProjectionQueries = {
   findDistinct: (
     args: { context: BranchProjectionQueryContext } & FindDistinctArgs,
   ) => ReturnType<FindDistinct>
+  /** Optional fixed-snapshot batching of registered private readiness coordinates, never content IDs. */
+  readStates?: (args: {
+    reads: {
+      branchKey: string
+      collection: string
+      scopes: { rowKey: string; scopeKey: string }[]
+    }[]
+    req: PayloadRequest
+  }) => Promise<Record<string, unknown>[]>
 }
 
 export type BranchStorageEntity =

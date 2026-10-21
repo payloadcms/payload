@@ -19,7 +19,7 @@ import { prepareBranchProjectionJoins } from './prepareBranchProjectionJoins.js'
 import { assertBranchQuerySchemaOwnership } from './registerBranchQueryStorage.js'
 import { selectBranchQueryData } from './selectBranchQueryData.js'
 import {
-  captureBranchReadProjectionGuard,
+  captureBranchReadProjectionGuards,
   withBranchReadSnapshot,
 } from './withBranchReadSnapshot.js'
 
@@ -134,7 +134,7 @@ export const prepareBranchContentQuery = async ({
   )
   const relationAccess: Record<string, false | Where> = {}
   const reachable = getReachableCollections({ collection, req })
-  const guards: BranchProjectionGuard[] = []
+  const controls: BranchQueryStorage[] = []
   const localization = req.payload.config.localization
   const locale =
     args.locale ?? req.locale ?? (localization ? localization.defaultLocale : undefined)
@@ -203,9 +203,15 @@ export const prepareBranchContentQuery = async ({
       | BranchQueryStorage
       | undefined
     if (control) {
-      guards.push(await captureBranchReadProjectionGuard({ branchID, control, req, scopes }))
+      controls.push(control)
     }
   }
+  const guards: BranchProjectionGuard[] = await captureBranchReadProjectionGuards({
+    branchID,
+    controls,
+    req,
+    scopes,
+  })
 
   return {
     context: {

@@ -4,10 +4,16 @@ import { sql } from 'drizzle-orm'
 import { randomUUID } from 'node:crypto'
 import { createBranchReadRequest, createBranchReadScope } from 'payload'
 
-import type { DrizzleAdapter, DrizzleTransaction, TransactionPg } from '../types.js'
+import type {
+  DrizzleAdapter,
+  DrizzleTransaction,
+  TransactionPg,
+  TransactionSQLite,
+} from '../types.js'
 
 import { createPostgresReadTrace } from './createPostgresReadTrace.js'
 import { createProjectionQueries } from './createProjectionQueries.js'
+import { readProjectionStates } from './readProjectionStates.js'
 
 export type WithReadTransaction = <T>(args: {
   read: (args: { db: DrizzleTransaction }) => Promise<T>
@@ -132,7 +138,15 @@ const snapshotRead = async <T>({
         reason: 'A branch read snapshot cannot perform branch mutations.',
       }),
     mutateVersion: () => Promise.reject(unsupported()),
-    queryProjection: createProjectionQueries({ adapter: scope.nativeAdapter }),
+    queryProjection: {
+      ...createProjectionQueries({ adapter: scope.nativeAdapter }),
+      ...(adapter.name === 'sqlite'
+        ? {
+            readStates: ({ reads }) =>
+              readProjectionStates({ adapter, db: db as TransactionSQLite, reads }),
+          }
+        : {}),
+    },
     withReadSnapshot: async ({ read, req: nestedReq }) => {
       if (nestedReq.payload.db !== scopedAdapter || (await nestedReq.transactionID) !== id) {
         throw unsupported()

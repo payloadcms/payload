@@ -114,7 +114,10 @@ export const createBranchReadScope = <T extends object>({
         ) {
           throw unsupported()
         }
-        if (isQuery && !['count', 'find', 'findDistinct'].includes(String(property))) {
+        if (
+          isQuery &&
+          !['count', 'find', 'findDistinct', 'readStates'].includes(String(property))
+        ) {
           throw unsupported()
         }
         const value = Reflect.get(target, property, target)
@@ -134,7 +137,7 @@ export const createBranchReadScope = <T extends object>({
                 Reflect.apply(value, target, [{ ...options, req }, ...args.slice(1)]),
               )
             }
-            return reads.has(String(property))
+            return reads.has(String(property)) || (isQuery && property === 'readStates')
               ? invokeRead({ args, method: value as (...args: unknown[]) => unknown, target })
               : Reflect.apply(value, target, args)
           }

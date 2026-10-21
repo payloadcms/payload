@@ -314,35 +314,104 @@ export const captureBranchProjectionGuard = async ({
     },
   })
 
-  if (
-    result.docs.length !== scopeKeys.length ||
-    result.docs.some((state) => !state.isInitialized || state.pendingCount !== 0)
-  ) {
-    const conflict = await req.payload.db.findOne<BranchProjectionInvalidation>({
-      collection: control.invalidations,
-      req,
-      where: {
-        and: [
-          { branchKey: { equals: branchKey } },
-          { scopeKey: { in: scopeKeys } },
-          { state: { equals: 'structural-conflict' } },
-        ],
-      },
-    })
+  return finishGuardCapture({ branchKey, control, req, rows: result.docs, scopeKeys })
+}
 
-    throw new BranchProjectionError({
-      code: conflict ? 'branch-structural-conflict' : 'branch-projection-not-ready',
-    })
+/** Optional native batching preserves the same readiness observations for every requested control. */
+export const captureBranchProjectionGuards = async ({
+  branchID,
+  reads,
+  req,
+}: {
+  branchID: BranchHeadID
+  reads: { control: BranchProjectionControl; scopes: readonly BranchContentScope[] }[]
+  req: PayloadRequest
+}): Promise<BranchProjectionGuard[]> => {
+  const readStates = req.payload.db.branching?.queryProjection?.readStates
+
+  if (!readStates) {
+    const guards: BranchProjectionGuard[] = []
+
+    for (const { control, scopes } of reads) {
+      guards.push(await captureBranchProjectionGuard({ branchID, control, req, scopes }))
+    }
+    return guards
   }
+  const branchKey = getBranchKey({ branchID })
+  const prepared = reads.map(({ control, scopes }) => {
+    const scopeKeys = [...new Set(scopes.map((scope) => getScopeKey({ scope })))]
 
-  for (const row of result.docs) {
+    if (!scopeKeys.length) {
+      throw new Error('A branch query requires at least its shared projection scope.')
+    }
+    return {
+      control,
+      scopeKeys,
+      scopes: scopeKeys.map((scopeKey) => ({
+        rowKey: getBranchStorageKey({ coordinates: [branchKey, scopeKey] }),
+        scopeKey,
+      })),
+    }
+  })
+  const expected = new Set(
+    prepared.flatMap(({ control, scopes }) =>
+      scopes.map(({ rowKey, scopeKey }) =>
+        JSON.stringify([control.states, branchKey, scopeKey, rowKey]),
+      ),
+    ),
+  )
+  const rows = await readStates({
+    reads: prepared.map(({ control, scopes }) => ({
+      branchKey,
+      collection: control.states,
+      scopes,
+    })),
+    req,
+  })
+  const seen = new Set<string>()
+  const identities = new Set<string>()
+  const byCollection = new Map<string, StateRow[]>()
+
+  for (const row of rows) {
+    const coordinate = JSON.stringify([row.collection, row.branchKey, row.scopeKey, row.rowKey])
+    const identity = JSON.stringify([row.collection, typeof row.id, row.id])
+
+    if (
+      !expected.has(coordinate) ||
+      seen.has(coordinate) ||
+      identities.has(identity) ||
+      !(
+        (typeof row.id === 'string' && row.id.length > 0) ||
+        (typeof row.id === 'number' && Number.isFinite(row.id))
+      ) ||
+      typeof row.isInitialized !== 'boolean'
+    ) {
+      throw new BranchProjectionError({ code: 'branch-projection-conflict' })
+    }
     assertCounter({ isPositive: true, value: row.generation })
-  }
+    assertCounter({ isPositive: false, value: row.pendingCount })
+    seen.add(coordinate)
+    identities.add(identity)
+    const collection = row.collection as string
+    const captured = byCollection.get(collection) ?? []
 
-  return {
-    control,
-    observations: result.docs.map(({ id, generation }) => ({ id, generation })),
+    captured.push(row as StateRow)
+    byCollection.set(collection, captured)
   }
+  const guards: BranchProjectionGuard[] = []
+
+  for (const { control, scopeKeys } of prepared) {
+    guards.push(
+      await finishGuardCapture({
+        branchKey,
+        control,
+        req,
+        rows: byCollection.get(control.states) ?? [],
+        scopeKeys,
+      }),
+    )
+  }
+  return guards
 }
 
 /** Fail before decoded content reaches application hooks or callers if any generation moved. */
@@ -499,5 +568,49 @@ const assertCounter = ({ isPositive, value }: { isPositive: boolean; value: unkn
     value === Number.MAX_SAFE_INTEGER
   ) {
     throw new Error('Invalid or exhausted branch projection generation counter.')
+  }
+}
+
+const finishGuardCapture = async ({
+  branchKey,
+  control,
+  req,
+  rows,
+  scopeKeys,
+}: {
+  branchKey: string
+  control: BranchProjectionControl
+  req: PayloadRequest
+  rows: StateRow[]
+  scopeKeys: string[]
+}): Promise<BranchProjectionGuard> => {
+  if (
+    rows.length !== scopeKeys.length ||
+    rows.some((state) => !state.isInitialized || state.pendingCount !== 0)
+  ) {
+    const conflict = await req.payload.db.findOne<BranchProjectionInvalidation>({
+      collection: control.invalidations,
+      req,
+      where: {
+        and: [
+          { branchKey: { equals: branchKey } },
+          { scopeKey: { in: scopeKeys } },
+          { state: { equals: 'structural-conflict' } },
+        ],
+      },
+    })
+
+    throw new BranchProjectionError({
+      code: conflict ? 'branch-structural-conflict' : 'branch-projection-not-ready',
+    })
+  }
+
+  for (const row of rows) {
+    assertCounter({ isPositive: true, value: row.generation })
+  }
+
+  return {
+    control,
+    observations: rows.map(({ id, generation }) => ({ id, generation })),
   }
 }

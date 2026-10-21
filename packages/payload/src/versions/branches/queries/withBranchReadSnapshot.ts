@@ -4,7 +4,10 @@ import type { BranchProjectionControl, BranchProjectionGuard } from './branchPro
 
 import { createBranchReadRequest } from '../../../utilities/createBranchReadRequest.js'
 import { getBranchKey } from '../storage/branchStorage.js'
-import { captureBranchProjectionGuard } from './branchProjectionGuard.js'
+import {
+  captureBranchProjectionGuard,
+  captureBranchProjectionGuards,
+} from './branchProjectionGuard.js'
 
 type Frame = Map<string, Promise<BranchProjectionGuard>>
 const frames = new WeakMap<object, Frame>()
@@ -73,28 +76,77 @@ export const captureBranchReadProjectionGuard = async ({
   req: PayloadRequest
   scopes: readonly BranchContentScope[]
 }): Promise<BranchProjectionGuard> => {
+  return (
+    await captureBranchReadProjectionGuards({ branchID, controls: [control], req, scopes })
+  )[0]!
+}
+
+/** Observe the finite set of reachable controls together when the native snapshot supports it. */
+export const captureBranchReadProjectionGuards = async ({
+  branchID,
+  controls,
+  req,
+  scopes,
+}: {
+  branchID: BranchHeadID
+  controls: BranchProjectionControl[]
+  req: PayloadRequest
+  scopes: readonly BranchContentScope[]
+}): Promise<BranchProjectionGuard[]> => {
+  if (controls.length && !scopes.length) {
+    throw new Error('A branch query requires at least its shared projection scope.')
+  }
   const frame = frames.get(req.payload.db)
 
   if (!frame) {
-    return captureBranchProjectionGuard({ branchID, control, req, scopes })
-  }
-  const coordinate = (scope: BranchContentScope) =>
-    JSON.stringify([getBranchKey({ branchID }), control.states, control.invalidations, scope])
-  const missing = scopes.filter((scope) => !frame.has(coordinate(scope)))
+    const guards: BranchProjectionGuard[] = []
 
-  if (missing.length) {
-    const captured = captureBranchProjectionGuard({ branchID, control, req, scopes: missing })
-
-    for (const scope of missing) {
-      frame.set(coordinate(scope), captured)
+    for (const control of controls) {
+      guards.push(await captureBranchProjectionGuard({ branchID, control, req, scopes }))
     }
+    return guards
   }
-  const guards = await Promise.all(scopes.map((scope) => frame.get(coordinate(scope))!))
-  const observations = new Map(
-    guards
-      .flatMap((guard) => guard.observations)
-      .map((observation) => [observation.id, observation]),
-  )
+  const coordinate = (control: BranchProjectionControl, scope: BranchContentScope) =>
+    JSON.stringify([getBranchKey({ branchID }), control.states, control.invalidations, scope])
+  const scheduled = new Set<string>()
+  const missingReads = controls.flatMap((control) => {
+    const missing = scopes.filter((scope) => {
+      const key = coordinate(control, scope)
 
-  return { control, observations: [...observations.values()] }
+      if (frame.has(key) || scheduled.has(key)) {
+        return false
+      }
+      scheduled.add(key)
+      return true
+    })
+
+    return missing.length ? [{ control, scopes: missing }] : []
+  })
+
+  if (missingReads.length) {
+    const captured = captureBranchProjectionGuards({ branchID, reads: missingReads, req })
+
+    missingReads.forEach(({ control, scopes }, index) => {
+      const guard = captured.then((guards) => guards[index]!)
+
+      for (const scope of scopes) {
+        frame.set(coordinate(control, scope), guard)
+      }
+    })
+  }
+
+  return Promise.all(
+    controls.map(async (control) => {
+      const guards = await Promise.all(
+        scopes.map((scope) => frame.get(coordinate(control, scope))!),
+      )
+      const observations = new Map(
+        guards
+          .flatMap((guard) => guard.observations)
+          .map((observation) => [observation.id, observation]),
+      )
+
+      return { control, observations: [...observations.values()] }
+    }),
+  )
 }
