@@ -3,7 +3,7 @@
 import type { ComponentProps } from 'react'
 
 import { Modal as FacelessModal, useModal } from '@faceless-ui/modal'
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 
 export { useModal } from '@faceless-ui/modal'
 
@@ -19,6 +19,7 @@ export const Modal: React.FC<ComponentProps<typeof FacelessModal>> = (props) => 
   const modalID = id || slug
   const { modalState } = useModal()
   const isOpen = Boolean(modalState[slug]?.isOpen)
+  const popupFocusTargetsRef = useRef<HTMLElement[]>([])
   const options = useMemo(
     () => ({
       escapeDeactivates: false,
@@ -31,10 +32,69 @@ export const Modal: React.FC<ComponentProps<typeof FacelessModal>> = (props) => 
         }
         return heading ?? modal
       },
+      setReturnFocus: (opener: HTMLElement) =>
+        (popupFocusTargetsRef.current.length ? popupFocusTargetsRef.current : [opener]).find(
+          (element) =>
+            element?.isConnected &&
+            element !== document.body &&
+            element !== document.documentElement &&
+            !element.closest('[inert]') &&
+            !element.matches(':disabled') &&
+            element.getClientRects().length > 0 &&
+            getComputedStyle(element).visibility !== 'hidden',
+        ) ?? false,
       ...focusTrapOptions,
     }),
     [modalID, focusTrapOptions],
   )
+
+  useEffect(() => {
+    if (isOpen || focusTrapOptions?.setReturnFocus !== undefined) {
+      return
+    }
+
+    const rememberPopupTriggers = (event?: Event) => {
+      const opener = event?.target instanceof Element ? event.target : document.activeElement
+
+      if (
+        !opener ||
+        opener === document.body ||
+        document.getElementById(modalID)?.contains(opener)
+      ) {
+        return
+      }
+
+      const targets: HTMLElement[] = []
+      let popup = opener.closest('.popup')
+      const popupOpener = popup ? opener.closest<HTMLElement>('button, a[href], [tabindex]') : null
+
+      // Pointer activation does not focus buttons in every browser.
+      if (popupOpener) {
+        targets.push(popupOpener)
+      }
+
+      // Capture ancestors while the opener is still mounted, before opening the modal.
+      while (popup) {
+        const trigger = popup.querySelector<HTMLElement>(
+          ':scope > .popup__trigger-wrap button, :scope > .popup__trigger-wrap [tabindex="0"]',
+        )
+
+        if (trigger) {
+          targets.push(trigger)
+        }
+        popup = popup.parentElement?.closest('.popup')
+      }
+      popupFocusTargetsRef.current = targets
+    }
+
+    rememberPopupTriggers()
+    document.addEventListener('focusin', rememberPopupTriggers)
+    document.addEventListener('pointerdown', rememberPopupTriggers, true)
+    return () => {
+      document.removeEventListener('focusin', rememberPopupTriggers)
+      document.removeEventListener('pointerdown', rememberPopupTriggers, true)
+    }
+  }, [isOpen, modalID, focusTrapOptions?.setReturnFocus])
 
   useEffect(() => {
     if (!isOpen || ariaLabel || ariaLabelledBy) {

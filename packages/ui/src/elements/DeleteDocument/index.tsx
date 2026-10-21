@@ -4,7 +4,7 @@ import type { SanitizedCollectionConfig } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
-import React, { Fragment, useCallback, useRef, useState } from 'react'
+import React, { Fragment, useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
@@ -69,7 +69,6 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   const modalSlug = `delete-${id}`
 
   const [deletePermanently, setDeletePermanently] = useState(false)
-  const returnFocusRef = useRef<HTMLElement | null>(null)
 
   const addDefaultError = useCallback(() => {
     toast.error(t('error:deletingTitle', { title }))
@@ -178,17 +177,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   if (id) {
     return (
       <Fragment>
-        <PopupList.Button
-          id={buttonId}
-          onClick={(event) => {
-            // The menu item disappears while its confirmation is open.
-            returnFocusRef.current =
-              event?.currentTarget
-                .closest('.popup')
-                ?.querySelector<HTMLElement>('.popup__trigger-wrap button') ?? null
-            openModal(modalSlug)
-          }}
-        >
+        <PopupList.Button id={buttonId} onClick={() => openModal(modalSlug)}>
           {t('general:delete')}
         </PopupList.Button>
         <ConfirmationModal
@@ -222,7 +211,6 @@ export const DeleteDocument: React.FC<Props> = (props) => {
           }
           className={baseClass}
           confirmingLabel={t('general:deleting')}
-          focusTrapOptions={{ setReturnFocus: () => returnFocusRef.current || false }}
           heading={t('general:confirmDeletion')}
           modalSlug={modalSlug}
           onConfirm={handleDelete}

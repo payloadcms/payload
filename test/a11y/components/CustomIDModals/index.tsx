@@ -1,12 +1,49 @@
 'use client'
 
-import { DialogModal, FullscreenModal, Modal, useModal } from '@payloadcms/ui'
+import { DialogModal, FullscreenModal, Modal, Popup, PopupList, useModal } from '@payloadcms/ui'
+import { useState } from 'react'
 
 export function CustomIDModals() {
   const { closeModal, openModal } = useModal()
+  const [hasRemovedOpener, setHasRemovedOpener] = useState(false)
 
   return (
     <>
+      <Popup button="Confirmation actions" popupType="menu" theme="auto">
+        {!hasRemovedOpener && (
+          <Popup
+            buttonType="custom"
+            popupType="menu"
+            renderButton={({ active: _active, ...props }) => (
+              <button {...props} type="button">
+                More confirmation actions
+              </button>
+            )}
+            theme="auto"
+          >
+            <PopupList.Button onClick={() => openModal('popup-confirmation')}>
+              Open popup confirmation
+            </PopupList.Button>
+            <PopupList.Button
+              onClick={() => {
+                setHasRemovedOpener(true)
+                openModal('popup-confirmation')
+              }}
+            >
+              Open and remove opener
+            </PopupList.Button>
+          </Popup>
+        )}
+      </Popup>
+      <DialogModal slug="popup-confirmation">
+        <h2>Popup confirmation</h2>
+        <button onClick={() => setHasRemovedOpener(true)} type="button">
+          Remove opener
+        </button>
+        <button onClick={() => closeModal('popup-confirmation')} type="button">
+          Close popup confirmation
+        </button>
+      </DialogModal>
       <button onClick={() => openModal('locked-slug')} type="button">
         Open locked dialog
       </button>

@@ -4393,6 +4393,38 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.3 Focus Order (A)', () => {
+    for (const removal of ['none', 'after opening', 'while opening']) {
+      test(`should return focus to the root popup after a nested confirmation with opener removal ${removal}`, async () => {
+        await page.goto(
+          formatAdminURL({ adminRoute: '/admin', path: '/custom-modal-ids', serverURL }),
+        )
+        const trigger = page.getByRole('button', { name: 'Confirmation actions', exact: true })
+
+        await trigger.press('Enter')
+        await page
+          .getByRole('menuitem', { name: 'More confirmation actions', exact: true })
+          .press('Enter')
+        await page
+          .getByRole('menuitem', {
+            name:
+              removal === 'while opening' ? 'Open and remove opener' : 'Open popup confirmation',
+            exact: true,
+          })
+          .press('Enter')
+        const dialog = page.getByRole('dialog', { name: 'Popup confirmation', exact: true })
+
+        await expect(dialog.getByRole('heading')).toBeFocused()
+        if (removal === 'after opening') {
+          await dialog.getByRole('button', { name: 'Remove opener', exact: true }).click()
+        }
+        await dialog
+          .getByRole('button', { name: 'Close popup confirmation', exact: true })
+          .press('Enter')
+        await expect(dialog).toBeHidden()
+        await expect(trigger).toBeFocused()
+      })
+    }
+
     test(
       'should restore focus to the confirmation trigger after keyboard cancellation',
       { tag: ['@a11y-workflow', '@dialogs', '@trash'] },
