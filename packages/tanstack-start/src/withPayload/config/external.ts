@@ -73,10 +73,12 @@ export const serverExternalPackages: string[] = [
 
 /** Additional installed packages that can bypass Vite's development server transforms. */
 export const devExternalPackages: string[] = [
-  ...serverExternalPackages,
-  ...devServerExternalPayloadPackages.filter((pkg) => !serverExternalPackages.includes(pkg)),
-  // Vite otherwise transforms date-fns' full module graph during SSR.
-  'date-fns',
+  ...new Set([
+    // Vite otherwise transforms date-fns' full module graph during SSR.
+    'date-fns',
+    ...devServerExternalPayloadPackages,
+    ...serverExternalPackages,
+  ]),
 ]
 
 /**

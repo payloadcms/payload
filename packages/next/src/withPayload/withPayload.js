@@ -146,14 +146,16 @@ export const withPayload = (nextConfig = {}, options = {}) => {
       ]
     },
     serverExternalPackages: [
-      ...(nextConfig.serverExternalPackages || []),
-      ...serverExternalPayloadPackages,
-      // file-type v22 uses `import(specifier)` with a non-literal specifier, which Turbopack rejects
-      // with "Cannot find module as expression is too dynamic"
-      'file-type',
-      ...(process.env.NODE_ENV === 'development' && options.devBundleServerPackages !== true
-        ? devServerExternalPayloadPackages
-        : []),
+      ...new Set([
+        ...(nextConfig.serverExternalPackages || []),
+        ...serverExternalPayloadPackages,
+        // file-type v22 uses `import(specifier)` with a non-literal specifier, which Turbopack rejects
+        // with "Cannot find module as expression is too dynamic"
+        'file-type',
+        ...(process.env.NODE_ENV === 'development' && options.devBundleServerPackages !== true
+          ? devServerExternalPayloadPackages
+          : []),
+      ]),
     ],
     webpack: (webpackConfig, webpackOptions) => {
       const incomingWebpackConfig =
