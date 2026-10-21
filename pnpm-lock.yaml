@@ -163,6 +163,9 @@ importers:
       minimist:
         specifier: 1.2.8
         version: 1.2.8
+      monaco-editor:
+        specifier: 0.57.0
+        version: 0.57.0
       mongoose:
         specifier: 9.9.2
         version: 9.9.2(@aws-sdk/credential-providers@3.1146.0)

@@ -349,6 +349,18 @@ export const PostsCollection: CollectionConfig = {
       type: 'code',
     },
     {
+      name: 'readOnlySettings',
+      type: 'json',
+      admin: { readOnly: true },
+      defaultValue: { enabled: true },
+    },
+    {
+      name: 'readOnlySource',
+      type: 'code',
+      admin: { readOnly: true },
+      defaultValue: 'const enabled = true;',
+    },
+    {
       name: 'unlabelledSettings',
       type: 'json',
       admin: {

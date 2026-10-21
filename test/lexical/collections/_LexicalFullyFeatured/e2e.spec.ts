@@ -84,8 +84,10 @@ describe('Lexical Fully Featured', () => {
     const img = lexical.editor.locator('.LexicalEditorTheme__upload img').first()
     await img.click()
     const imgBoxBeforeCenter = await img.boundingBox()
-    await page.getByLabel('align dropdown').click()
-    await page.getByLabel('Align Center').click()
+    await lexical.clickFixedToolbarButton({
+      buttonKey: 'alignCenter',
+      dropdownKey: 'align',
+    })
     expect(imgBoxBeforeCenter).not.toBeNull()
     await expect
       .poll(async () => (await img.boundingBox())?.x)

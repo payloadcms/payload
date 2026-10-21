@@ -413,7 +413,7 @@ describe('General', () => {
     describe('user menu', () => {
       const openThemeSubMenu = async () => {
         await openNav(page)
-        await page.locator('button[aria-label="Account"]').click()
+        await page.getByRole('button', { name: /^Account(?::|$)/ }).click()
         await page.getByRole('menuitem', { name: 'Theme' }).hover()
       }
 
@@ -425,7 +425,7 @@ describe('General', () => {
       test('should keep the open submenu parent highlighted while hovering a child item', async () => {
         await page.goto(postsUrl.admin)
         await openNav(page)
-        await page.locator('button[aria-label="Account"]').click()
+        await page.getByRole('button', { name: /^Account(?::|$)/ }).click()
 
         const language = page.getByRole('menuitem', { name: 'Language' })
 
@@ -507,7 +507,7 @@ describe('General', () => {
 
         // Logout lives inside the user menu popup
         await openNav(page)
-        await page.locator('button[aria-label="Account"]').click()
+        await page.getByRole('button', { name: /^Account(?::|$)/ }).click()
 
         // The custom Logout component (admin.components.logout.Button) renders an
         // anchor ending in `#custom`, replacing the default logout button.

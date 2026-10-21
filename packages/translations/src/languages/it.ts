@@ -300,6 +300,7 @@ export const itTranslations: DefaultTranslationsObject = {
     anotherUser: 'Un altro utente',
     anotherUserTakenOver:
       'Un altro utente ha preso il controllo della modifica di questo documento.',
+    apiResponse: 'Risposta API',
     applyChanges: 'Applica modifiche',
     ascending: 'Ascendente',
     auto: 'Automatico',
@@ -492,6 +493,7 @@ export const itTranslations: DefaultTranslationsObject = {
     reindexingAll: "Rifacendo l'indice di tutte le {{collections}}.",
     reloadDocument: 'Ricarica documento',
     remove: 'Rimuovi',
+    removeFilter: 'Rimuovi filtro',
     rename: 'Rinomina',
     replaceRow: 'Sostituisci riga',
     requiredFields: 'I campi contrassegnati con * sono obbligatori.',
