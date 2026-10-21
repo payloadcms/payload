@@ -3434,10 +3434,20 @@ test.describe('WCAG 2.2 Level AA', () => {
             const password = formPage.locator('input[name="password"]')
 
             await expectRequiredState({ input: password })
+            // Errors are exposed only after a submission; then exercise edit-and-clear without resubmitting.
+            await formPage.getByRole('button', { name: 'Login', exact: true }).click()
+            const passwordError = formPage
+              .locator('.field-type')
+              .filter({ has: password })
+              .getByRole('alert')
+
+            await expect(passwordError).toBeVisible()
             await password.fill('temporary')
+            await expect(passwordError).toHaveCount(0)
             await password.fill('')
             await password.press('Tab')
-            await formPage.getByRole('button', { name: 'Login', exact: true }).click()
+            await expect(passwordError).toBeVisible()
+            await expect(password).toHaveAttribute('aria-invalid', 'true')
           } else {
             await gotoCreatePost({ page: formPage, postsURL })
             await formPage.getByRole('button', { name: /^Publish(?: in English)?$/ }).click()

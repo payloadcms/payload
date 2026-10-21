@@ -48,7 +48,7 @@
   "outstanding": [
     "PYLD-3671 and PYLD-3678: current assertions permit a native label stop, unlike the original single-stop requirement. Native WebKit baseline also repeats labels. These remain partial coverage.",
     "PYLD-3580: six-second dismissal tests do not establish persistence while the screen-reader cursor is on the toast.",
-    "PYLD-3613: submit-time validation tests do not establish the original error/readout after editing and clearing the password.",
+    "PYLD-3613: fresh-form edit-and-clear has no visible error under the pre-existing submission gate. Browser edit-and-clear coverage after an initial failed submission now passes; the original reported trigger and VoiceOver error reachability remain unverified.",
     "Reported NVDA/Chrome failures require that platform's evidence; this branch's default Windows Guidepup project uses Firefox.",
     "NVDA browse-mode tests and screen-reader cursor containment must retain AT evidence.",
     "Guidepup queue hazards removed from retained direction/version/widget captures; remote AT verification is still required.",
@@ -119,7 +119,7 @@
         "WCAG.e2e.spec.ts :: should associate ${form} errors with their fields and focus order",
         "screen-reader.spec.ts :: should expose validation errors next to their fields"
       ],
-      "limits": "Two form cases; genuine browse order. Login currently combines edit-clear-blur+submit scenario in browser coverage; ticket3613 specifically asks error after clear, so submission alone insufficient.",
+      "limits": "The browser regression checks adjacent, associated errors on document submission and login edit-and-clear after an initial failed submission. The AT helper still relies on DOM focus as its cursor starting point; original VoiceOver reading-order evidence remains separately required.",
       "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
     },
     {
@@ -201,8 +201,8 @@
         "screen-reader.spec.ts :: should expose validation errors next to their fields",
         "screen-reader.spec.ts :: should announce password errors after submission"
       ],
-      "limits": "Two form cases; genuine browse order. Login currently combines edit-clear-blur+submit scenario in browser coverage; ticket3613 specifically asks error after clear, so submission alone insufficient. Ticket3613 covers error after typing then clearing password, not merely submitting login. Current test does both and only captures submit.",
-      "manualVerification": "Outstanding: reconcile the original requirement and test scenario; a passing partial test does not establish the remedy."
+      "limits": "Fresh-form edit-and-clear produces no inline error because useField exposes errors only after submission. This rule predates PR #18408. The browser regression now submits once, corrects the password until its error disappears, then clears it without resubmitting and verifies the returning error, field association, and keyboard order. The existing AT cases still capture submission; the original reported trigger and exact VoiceOver reachability remain unverified.",
+      "manualVerification": "With VoiceOver in WebKit/Safari, submit an initially empty login form once, type a valid password until the error clears, then clear the password without resubmitting. Confirm the returning error is read and reachable. Record the initial-submission prerequisite; do not claim that the fresh-form report was reproduced."
     },
     {
       "ticket": "PYLD-3618",
@@ -1170,5 +1170,25 @@
         "manualLimit": "Exact automatic speech remains a manual reported-platform check; browser assertions do not prove synthesized output."
       }
     ]
+  },
+  "investigations": {
+    "PYLD-3613": {
+      "date": "2026-10-21",
+      "remoteObservation": "Claude observed no error on fresh-form typing, clearing, Tab, or mouse blur in Playwright WebKit without submission; no console/page errors were reported.",
+      "sourceEvidence": [
+        "packages/ui/src/forms/useField/index.tsx: showError = valid === false && submitted. The same gate exists before commit 3b91b5db0c.",
+        "PR #18408 / commit 3b91b5db0c added aria-describedby/aria-invalid to PasswordInput and made FieldError a non-portaled, focusable alert; it did not change error timing."
+      ],
+      "browserRun": {
+        "browser": "Chromium",
+        "passed": 1,
+        "duration": "8.5 seconds",
+        "test": "WCAG.e2e.spec.ts :: should associate ${form} errors with their fields and focus order",
+        "variant": "login",
+        "command": "PORT=3001 MONGODB_URL=<isolated test database> pnpm test:e2e a11y --grep 'should associate login errors with their fields and focus order' --workers=1"
+      },
+      "conclusion": "Do not introduce fresh-form blur validation merely to recreate the old report. The test now exercises the returning error after correction/clearing in a submitted form. Exact reported-platform AT behavior is pending.",
+      "separateObservation": "Claude reported Tab moving to body in WebKit. This was not investigated here; no product focus-order defect has been established."
+    }
   }
 }
