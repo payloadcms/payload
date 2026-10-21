@@ -67,7 +67,7 @@ describe('attachSboms', () => {
     expect(github.rest.repos.uploadReleaseAsset).toHaveBeenCalledOnce()
     expect(github.rest.repos.uploadReleaseAsset).toHaveBeenCalledWith(
       expect.objectContaining({
-        label: 'SBOMs (CycloneDX 1.6, SPDX 2.3)',
+        label: 'SBOMs',
         name: ZIP,
         owner: 'payloadcms',
         release_id: 42,

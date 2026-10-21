@@ -5,7 +5,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
-const LABEL = 'SBOMs (CycloneDX 1.6, SPDX 2.3)'
+const LABEL = 'SBOMs'
 
 export async function attachSboms({ core, dir, github, owner, repo, tag }) {
   // The name comes from the tag, not from the artifact: the artifact is written by a job that
