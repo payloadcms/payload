@@ -3,7 +3,9 @@
 import type { ComponentProps } from 'react'
 
 import { Modal as FacelessModal, useModal } from '@faceless-ui/modal'
-import React, { useEffect, useMemo, useRef } from 'react'
+import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+
+import { useModalFocus } from '../../providers/ModalFocus/index.js'
 
 export { useModal } from '@faceless-ui/modal'
 
@@ -19,7 +21,15 @@ export const Modal: React.FC<ComponentProps<typeof FacelessModal>> = (props) => 
   const modalID = id || slug
   const { modalState } = useModal()
   const isOpen = Boolean(modalState[slug]?.isOpen)
-  const popupFocusTargetsRef = useRef<HTMLElement[]>([])
+  const popupFocusTargetsRef = useRef<readonly HTMLElement[]>([])
+  const { getReturnFocusTargets } = useModalFocus()
+
+  useLayoutEffect(() => {
+    if (isOpen) {
+      // Freeze each modal's targets before focus moves into it or a nested modal.
+      popupFocusTargetsRef.current = getReturnFocusTargets()
+    }
+  }, [getReturnFocusTargets, isOpen])
   const options = useMemo(
     () => ({
       escapeDeactivates: false,
@@ -47,54 +57,6 @@ export const Modal: React.FC<ComponentProps<typeof FacelessModal>> = (props) => 
     }),
     [modalID, focusTrapOptions],
   )
-
-  useEffect(() => {
-    if (isOpen || focusTrapOptions?.setReturnFocus !== undefined) {
-      return
-    }
-
-    const rememberPopupTriggers = (event?: Event) => {
-      const opener = event?.target instanceof Element ? event.target : document.activeElement
-
-      if (
-        !opener ||
-        opener === document.body ||
-        document.getElementById(modalID)?.contains(opener)
-      ) {
-        return
-      }
-
-      const targets: HTMLElement[] = []
-      let popup = opener.closest('.popup')
-      const popupOpener = popup ? opener.closest<HTMLElement>('button, a[href], [tabindex]') : null
-
-      // Pointer activation does not focus buttons in every browser.
-      if (popupOpener) {
-        targets.push(popupOpener)
-      }
-
-      // Capture ancestors while the opener is still mounted, before opening the modal.
-      while (popup) {
-        const trigger = popup.querySelector<HTMLElement>(
-          ':scope > .popup__trigger-wrap button, :scope > .popup__trigger-wrap [tabindex="0"]',
-        )
-
-        if (trigger) {
-          targets.push(trigger)
-        }
-        popup = popup.parentElement?.closest('.popup')
-      }
-      popupFocusTargetsRef.current = targets
-    }
-
-    rememberPopupTriggers()
-    document.addEventListener('focusin', rememberPopupTriggers)
-    document.addEventListener('pointerdown', rememberPopupTriggers, true)
-    return () => {
-      document.removeEventListener('focusin', rememberPopupTriggers)
-      document.removeEventListener('pointerdown', rememberPopupTriggers, true)
-    }
-  }, [isOpen, modalID, focusTrapOptions?.setReturnFocus])
 
   useEffect(() => {
     if (!isOpen || ariaLabel || ariaLabelledBy) {

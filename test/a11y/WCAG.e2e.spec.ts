@@ -4422,6 +4422,55 @@ test.describe('WCAG 2.2 Level AA', () => {
       }
     })
 
+    for (const { name, activate } of [
+      { name: 'keyboard', activate: ({ target }: { target: Locator }) => target.press('Enter') },
+      { name: 'pointer', activate: ({ target }: { target: Locator }) => target.click() },
+    ]) {
+      test(`should preserve separate return targets for lazy nested modals using ${name}`, async () => {
+        await page.goto(
+          formatAdminURL({ adminRoute: '/admin', path: '/custom-modal-ids', serverURL }),
+        )
+        const trigger = page.getByRole('button', { name: 'Confirmation actions', exact: true })
+
+        await trigger.press('Enter')
+        await page
+          .getByRole('menuitem', { name: 'More confirmation actions', exact: true })
+          .press('Enter')
+        const opener = page.getByRole('menuitem', { name: 'Open nested modal flow', exact: true })
+
+        await activate({ target: opener })
+        const parent = page.getByRole('dialog', { name: 'Lazy parent', exact: true })
+        const child = page.getByRole('dialog', { name: 'Child title', exact: true })
+        const childOpener = parent.getByRole('button', { name: 'Open nested child', exact: true })
+
+        await expect(parent.getByRole('heading')).toBeFocused()
+        await childOpener.press('Enter')
+        await expect(child.getByRole('heading')).toBeFocused()
+        await child.getByRole('button', { name: 'Close child', exact: true }).press('Enter')
+        await expect(child).toBeHidden()
+        await expect(childOpener).toBeFocused()
+        const childTrigger = parent.getByRole('button', { name: 'Child actions', exact: true })
+
+        await childTrigger.press('Enter')
+        await parent
+          .getByRole('menuitem', { name: 'More child actions', exact: true })
+          .press('Enter')
+        const childMenuItem = parent.getByRole('menuitem', {
+          name: 'Open and remove child opener',
+          exact: true,
+        })
+
+        await activate({ target: childMenuItem })
+        await expect(child.getByRole('heading')).toBeFocused()
+        await child.getByRole('button', { name: 'Close child', exact: true }).press('Enter')
+        await expect(child).toBeHidden()
+        await expect(childTrigger).toBeFocused()
+        await parent.getByRole('button', { name: 'Close lazy parent', exact: true }).press('Enter')
+        await expect(parent).toBeHidden()
+        await expect(trigger).toBeFocused()
+      })
+    }
+
     for (const removal of ['none', 'after opening', 'while opening']) {
       test(`should return focus to the root popup after a nested confirmation with opener removal ${removal}`, async () => {
         await page.goto(
