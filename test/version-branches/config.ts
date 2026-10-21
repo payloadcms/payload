@@ -5,6 +5,7 @@ import { buildBranchHeadCollection } from '../../packages/payload/src/versions/b
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { databaseAdapter } from '../databaseAdapter.js'
 import { Articles } from './collections/Articles/index.js'
+import { ProtectedArticles } from './collections/ProtectedArticles/index.js'
 import { Settings } from './globals/Settings/index.js'
 import { articleHeadsSlug, articlesSlug, settingsHeadsSlug } from './slugs.js'
 
@@ -12,6 +13,7 @@ export default buildConfigWithDefaults({
   config: {
     collections: [
       Articles,
+      ProtectedArticles,
       buildBranchHeadCollection({
         parentCollection: articlesSlug,
         slug: articleHeadsSlug,
@@ -23,6 +25,7 @@ export default buildConfigWithDefaults({
       }),
     ],
     globals: [Settings],
+    jobs: { deleteJobOnComplete: false },
     localization: { defaultLocale: 'en', fallback: false, locales: ['en', 'fr'] },
     typescript: { outputFile: fileURLToPath(new URL('./payload-types.ts', import.meta.url)) },
   },

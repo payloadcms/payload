@@ -1,0 +1,420 @@
+{
+  "views": {
+    "live": {
+      "id": "published",
+      "shared": "live shared",
+      "title": {
+        "en": "English live",
+        "fr": "French live"
+      },
+      "sections": [
+        {
+          "id": "row-a",
+          "label": "Live label",
+          "translation": {
+            "en": "English row",
+            "fr": "French row"
+          }
+        }
+      ],
+      "updatedAt": "2026-10-15T12:00:01.000Z",
+      "createdAt": "2026-10-15T12:00:00.000Z",
+      "_status": "published"
+    },
+    "working": {
+      "id": "published",
+      "shared": "working shared",
+      "title": {
+        "en": "Latest English autosave",
+        "fr": "French working"
+      },
+      "sections": [
+        {
+          "id": "row-a",
+          "label": "Live label",
+          "translation": {
+            "en": "English row",
+            "fr": "French row"
+          }
+        }
+      ],
+      "updatedAt": "2026-10-15T12:00:04.000Z",
+      "createdAt": "2026-10-15T12:00:00.000Z",
+      "_status": "draft"
+    },
+    "globalLive": {
+      "id": 1,
+      "shared": "Global shared",
+      "title": {
+        "en": "Global live"
+      },
+      "sections": [],
+      "_status": "published",
+      "updatedAt": "2026-10-15T12:00:06.000Z",
+      "createdAt": "2026-10-15T12:00:06.000Z",
+      "globalType": "settings"
+    },
+    "globalWorking": {
+      "shared": "Global shared",
+      "title": {
+        "en": "Global working"
+      },
+      "sections": [],
+      "_status": "draft",
+      "updatedAt": "2026-10-15T12:00:07.000Z",
+      "createdAt": "2026-10-15T12:00:06.000Z",
+      "globalType": "settings",
+      "id": 1
+    }
+  },
+  "tables": {
+    "_articles_v": [
+      {
+        "id": 1,
+        "parent_id": "published",
+        "version_shared": "live shared",
+        "version_updated_at": "2026-10-15T12:00:00.000Z",
+        "version_created_at": "2026-10-15T12:00:00.000Z",
+        "version__status": "published",
+        "created_at": "2026-10-15T12:00:00.000Z",
+        "updated_at": "2026-10-15T12:00:00.000Z",
+        "snapshot": null,
+        "published_locale": null,
+        "latest": 0,
+        "autosave": 0
+      },
+      {
+        "id": 2,
+        "parent_id": "published",
+        "version_shared": "live shared",
+        "version_updated_at": "2026-10-15T12:00:01.000Z",
+        "version_created_at": "2026-10-15T12:00:00.000Z",
+        "version__status": "published",
+        "created_at": "2026-10-15T12:00:01.000Z",
+        "updated_at": "2026-10-15T12:00:01.000Z",
+        "snapshot": null,
+        "published_locale": null,
+        "latest": 0,
+        "autosave": 0
+      },
+      {
+        "id": 3,
+        "parent_id": "published",
+        "version_shared": "live shared",
+        "version_updated_at": "2026-10-15T12:00:02.000Z",
+        "version_created_at": "2026-10-15T12:00:00.000Z",
+        "version__status": "draft",
+        "created_at": "2026-10-15T12:00:02.000Z",
+        "updated_at": "2026-10-15T12:00:02.000Z",
+        "snapshot": null,
+        "published_locale": null,
+        "latest": 0,
+        "autosave": 0
+      },
+      {
+        "id": 4,
+        "parent_id": "published",
+        "version_shared": "working shared",
+        "version_updated_at": "2026-10-15T12:00:04.000Z",
+        "version_created_at": "2026-10-15T12:00:00.000Z",
+        "version__status": "draft",
+        "created_at": "2026-10-15T12:00:03.000Z",
+        "updated_at": "2026-10-15T12:00:04.000Z",
+        "snapshot": null,
+        "published_locale": null,
+        "latest": 1,
+        "autosave": 1
+      },
+      {
+        "id": 5,
+        "parent_id": "unpublished",
+        "version_shared": "Incomplete working document",
+        "version_updated_at": "2026-10-15T12:00:05.000Z",
+        "version_created_at": "2026-10-15T12:00:05.000Z",
+        "version__status": "draft",
+        "created_at": "2026-10-15T12:00:05.000Z",
+        "updated_at": "2026-10-15T12:00:05.000Z",
+        "snapshot": null,
+        "published_locale": null,
+        "latest": 1,
+        "autosave": 0
+      }
+    ],
+    "_articles_v_locales": [
+      {
+        "version_title": "English live",
+        "id": 1,
+        "_locale": "en",
+        "_parent_id": 1
+      },
+      {
+        "version_title": "English live",
+        "id": 2,
+        "_locale": "en",
+        "_parent_id": 2
+      },
+      {
+        "version_title": "French live",
+        "id": 3,
+        "_locale": "fr",
+        "_parent_id": 2
+      },
+      {
+        "version_title": "English live",
+        "id": 4,
+        "_locale": "en",
+        "_parent_id": 3
+      },
+      {
+        "version_title": "French working",
+        "id": 5,
+        "_locale": "fr",
+        "_parent_id": 3
+      },
+      {
+        "version_title": "Latest English autosave",
+        "id": 6,
+        "_locale": "en",
+        "_parent_id": 4
+      },
+      {
+        "version_title": "French working",
+        "id": 7,
+        "_locale": "fr",
+        "_parent_id": 4
+      },
+      {
+        "version_title": null,
+        "id": 8,
+        "_locale": "en",
+        "_parent_id": 5
+      },
+      {
+        "version_title": null,
+        "id": 9,
+        "_locale": "fr",
+        "_parent_id": 5
+      }
+    ],
+    "_articles_v_version_sections": [
+      {
+        "_order": 1,
+        "_parent_id": 1,
+        "id": 1,
+        "label": "Live label",
+        "_uuid": "row-a"
+      },
+      {
+        "_order": 1,
+        "_parent_id": 2,
+        "id": 2,
+        "label": "Live label",
+        "_uuid": "row-a"
+      },
+      {
+        "_order": 1,
+        "_parent_id": 3,
+        "id": 3,
+        "label": "Live label",
+        "_uuid": "row-a"
+      },
+      {
+        "_order": 1,
+        "_parent_id": 4,
+        "id": 4,
+        "label": "Live label",
+        "_uuid": "row-a"
+      }
+    ],
+    "_articles_v_version_sections_locales": [
+      {
+        "translation": "English row",
+        "id": 1,
+        "_locale": "en",
+        "_parent_id": 1
+      },
+      {
+        "translation": "English row",
+        "id": 2,
+        "_locale": "en",
+        "_parent_id": 2
+      },
+      {
+        "translation": "French row",
+        "id": 3,
+        "_locale": "fr",
+        "_parent_id": 2
+      },
+      {
+        "translation": "English row",
+        "id": 4,
+        "_locale": "en",
+        "_parent_id": 3
+      },
+      {
+        "translation": "French row",
+        "id": 5,
+        "_locale": "fr",
+        "_parent_id": 3
+      },
+      {
+        "translation": "English row",
+        "id": 6,
+        "_locale": "en",
+        "_parent_id": 4
+      },
+      {
+        "translation": "French row",
+        "id": 7,
+        "_locale": "fr",
+        "_parent_id": 4
+      }
+    ],
+    "_settings_v": [
+      {
+        "id": 1,
+        "version_shared": "Global shared",
+        "version__status": "published",
+        "version_updated_at": "2026-10-15T12:00:06.000Z",
+        "version_created_at": "2026-10-15T12:00:06.000Z",
+        "created_at": "2026-10-15T12:00:06.000Z",
+        "updated_at": "2026-10-15T12:00:06.000Z",
+        "snapshot": null,
+        "published_locale": null,
+        "latest": 0,
+        "autosave": 0
+      },
+      {
+        "id": 2,
+        "version_shared": "Global shared",
+        "version__status": "draft",
+        "version_updated_at": "2026-10-15T12:00:07.000Z",
+        "version_created_at": "2026-10-15T12:00:06.000Z",
+        "created_at": "2026-10-15T12:00:07.000Z",
+        "updated_at": "2026-10-15T12:00:07.000Z",
+        "snapshot": null,
+        "published_locale": null,
+        "latest": 1,
+        "autosave": 0
+      }
+    ],
+    "_settings_v_locales": [
+      {
+        "version_title": "Global live",
+        "id": 1,
+        "_locale": "en",
+        "_parent_id": 1
+      },
+      {
+        "version_title": "Global working",
+        "id": 2,
+        "_locale": "en",
+        "_parent_id": 2
+      }
+    ],
+    "_settings_v_version_sections": [],
+    "_settings_v_version_sections_locales": [],
+    "articles": [
+      {
+        "id": "published",
+        "shared": "live shared",
+        "updated_at": "2026-10-15T12:00:01.000Z",
+        "created_at": "2026-10-15T12:00:00.000Z",
+        "_status": "published"
+      },
+      {
+        "id": "unpublished",
+        "shared": "Incomplete working document",
+        "updated_at": "2026-10-15T12:00:05.000Z",
+        "created_at": "2026-10-15T12:00:05.000Z",
+        "_status": "draft"
+      }
+    ],
+    "articles_locales": [
+      {
+        "title": "English live",
+        "id": 1,
+        "_locale": "en",
+        "_parent_id": "published"
+      },
+      {
+        "title": "French live",
+        "id": 2,
+        "_locale": "fr",
+        "_parent_id": "published"
+      }
+    ],
+    "articles_sections": [
+      {
+        "_order": 1,
+        "_parent_id": "published",
+        "id": "row-a",
+        "label": "Live label"
+      }
+    ],
+    "articles_sections_locales": [
+      {
+        "translation": "English row",
+        "id": 1,
+        "_locale": "en",
+        "_parent_id": "row-a"
+      },
+      {
+        "translation": "French row",
+        "id": 2,
+        "_locale": "fr",
+        "_parent_id": "row-a"
+      }
+    ],
+    "payload_jobs": [
+      {
+        "id": 1,
+        "input": "{\"doc\":{\"relationTo\":\"articles\",\"value\":\"published\"},\"locale\":\"en\",\"type\":\"publish\"}",
+        "completed_at": null,
+        "total_tried": 0,
+        "has_error": 0,
+        "error": null,
+        "task_slug": "schedulePublish",
+        "queue": "default",
+        "wait_until": "2030-01-01T00:00:00.000Z",
+        "processing": 0,
+        "updated_at": "2026-10-15T12:00:08.000Z",
+        "created_at": "2026-10-15T12:00:08.000Z"
+      },
+      {
+        "id": 2,
+        "input": "{\"global\":\"settings\",\"type\":\"unpublish\"}",
+        "completed_at": null,
+        "total_tried": 0,
+        "has_error": 0,
+        "error": null,
+        "task_slug": "schedulePublish",
+        "queue": "default",
+        "wait_until": "2030-01-02T00:00:00.000Z",
+        "processing": 0,
+        "updated_at": "2026-10-15T12:00:08.000Z",
+        "created_at": "2026-10-15T12:00:08.000Z"
+      }
+    ],
+    "payload_jobs_log": [],
+    "settings": [
+      {
+        "id": 1,
+        "shared": "Global shared",
+        "_status": "published",
+        "updated_at": "2026-10-15T12:00:06.000Z",
+        "created_at": "2026-10-15T12:00:06.000Z"
+      }
+    ],
+    "settings_locales": [
+      {
+        "title": "Global live",
+        "id": 1,
+        "_locale": "en",
+        "_parent_id": 1
+      }
+    ],
+    "settings_sections": [],
+    "settings_sections_locales": []
+  }
+}

@@ -324,4 +324,63 @@ test.suite('Existing drafts contracts for branch head migration', { config: './c
     expect(materialized?.title).toMatchObject({ en: 'current live' })
     expect(materialized?._status).toMatchObject({ en: 'published' })
   })
+  test('should restore a global version into materialized storage in the legacy Local API', async ({
+    payload,
+  }) => {
+    await payload.updateGlobal({
+      slug: settingsSlug,
+      data: { _status: 'published', title: 'Original global' },
+      locale: 'en',
+    })
+
+    const versions = await payload.findGlobalVersions({ slug: settingsSlug, locale: 'en' })
+
+    await payload.updateGlobal({
+      slug: settingsSlug,
+      data: { _status: 'published', title: 'Current global' },
+      locale: 'en',
+    })
+    await payload.restoreGlobalVersion({
+      slug: settingsSlug,
+      id: String(versions.docs[0]!.id),
+      locale: 'en',
+      overrideAccess: true,
+    })
+
+    const materialized = await payload.db.findGlobal({ slug: settingsSlug, locale: 'all' })
+
+    // The legacy Local API has no draft option. M4 must intentionally add working-only restoration.
+    expect(materialized?.title).toMatchObject({ en: 'Original global' })
+    expect(materialized?._status).toMatchObject({ en: 'published' })
+  })
+
+  test('should reject incomplete publication while allowing incomplete draft saves', async ({
+    payload,
+  }) => {
+    const article = await payload.create({
+      collection: articlesSlug,
+      data: { shared: 'Incomplete' },
+      draft: true,
+      locale: 'en',
+    })
+
+    await expect(
+      payload.update({
+        collection: articlesSlug,
+        id: article.id,
+        data: { _status: 'published' },
+        locale: 'en',
+      }),
+    ).rejects.toMatchObject({ status: 400 })
+
+    const working = await payload.findByID({
+      collection: articlesSlug,
+      id: article.id,
+      draft: true,
+      locale: 'en',
+    })
+
+    expect(working.shared).toBe('Incomplete')
+    expect(working._status).toBe('draft')
+  })
 })

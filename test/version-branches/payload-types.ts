@@ -80,6 +80,7 @@ export interface Config {
   blocks: {};
   collections: {
     'branch-head-articles': BranchHeadArticle;
+    'branch-head-protected-articles': BranchHeadProtectedArticle;
     'branch-head-article-heads': BranchHeadArticleHead;
     'branch-head-settings-heads': BranchHeadSettingsHead;
     'payload-kv': PayloadKv;
@@ -93,6 +94,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     'branch-head-articles': BranchHeadArticlesSelect<false> | BranchHeadArticlesSelect<true>;
+    'branch-head-protected-articles': BranchHeadProtectedArticlesSelect<false> | BranchHeadProtectedArticlesSelect<true>;
     'branch-head-article-heads': BranchHeadArticleHeadsSelect<false> | BranchHeadArticleHeadsSelect<true>;
     'branch-head-settings-heads': BranchHeadSettingsHeadsSelect<false> | BranchHeadSettingsHeadsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -212,6 +214,33 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "branch-head-protected-articles".
+ */
+export interface BranchHeadProtectedArticle {
+  id: number;
+  shared?: string | null;
+  title: string;
+  sections?:
+    | {
+        label?: string | null;
+        translation?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -417,6 +446,10 @@ export interface PayloadLockedDocument {
         value: number | BranchHeadArticle;
       } | null)
     | ({
+        relationTo: 'branch-head-protected-articles';
+        value: number | BranchHeadProtectedArticle;
+      } | null)
+    | ({
         relationTo: 'users';
         value: number | User;
       } | null);
@@ -489,6 +522,26 @@ export interface PayloadLlmInstruction {
  * via the `definition` "branch-head-articles_select".
  */
 export interface BranchHeadArticlesSelect<T extends boolean = true> {
+  shared?: T;
+  title?: T;
+  sections?:
+    | T
+    | {
+        label?: T;
+        translation?: T;
+        id?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "branch-head-protected-articles_select".
+ */
+export interface BranchHeadProtectedArticlesSelect<T extends boolean = true> {
   shared?: T;
   title?: T;
   sections?:
@@ -749,7 +802,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'branch-head-articles' | 'users';
+    relatedCollection: 'branch-head-articles' | 'branch-head-protected-articles' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -771,7 +824,7 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('branch-head-articles' | 'users')[] | null;
+    excludedCollections?: ('branch-head-articles' | 'branch-head-protected-articles' | 'users')[] | null;
   };
   width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
@@ -783,10 +836,15 @@ export interface TaskSchedulePublish {
   input: {
     type?: ('publish' | 'unpublish') | null;
     locale?: string | null;
-    doc?: {
-      relationTo: 'branch-head-articles';
-      value: number | BranchHeadArticle;
-    } | null;
+    doc?:
+      | ({
+          relationTo: 'branch-head-articles';
+          value: number | BranchHeadArticle;
+        } | null)
+      | ({
+          relationTo: 'branch-head-protected-articles';
+          value: number | BranchHeadProtectedArticle;
+        } | null);
     global?: 'branch-head-settings' | null;
     user?: {
       relationTo: 'users';

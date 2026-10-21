@@ -1,0 +1,77 @@
+{
+  "release": "3.91.0",
+  "packages": {
+    "payload": {
+      "version": "3.91.0",
+      "resolved": "https://registry.npmjs.org/payload/-/payload-3.91.0.tgz",
+      "integrity": "sha512-EF+PXc8iSuo561f82SnAY5YB8Ix6LDN4Xe4ndef0iLDNPkdEykq1vc1mgo82/HsZ4ljSv9u/wP6iP5hyIpM+wA==",
+      "license": "MIT",
+      "dependencies": {
+        "@next/env": "^15.1.5",
+        "@payloadcms/translations": "3.91.0",
+        "@types/busboy": "1.5.4",
+        "ajv": "8.18.0",
+        "bson-objectid": "2.0.4",
+        "busboy": "^1.6.0",
+        "ci-info": "^4.1.0",
+        "console-table-printer": "2.12.1",
+        "croner": "10.0.1",
+        "dataloader": "2.2.3",
+        "deepmerge": "4.3.1",
+        "file-type": "21.3.4",
+        "get-tsconfig": "4.8.1",
+        "http-status": "2.1.0",
+        "image-dimensions": "2.5.1",
+        "ipaddr.js": "2.2.0",
+        "jose": "5.10.0",
+        "json-schema-to-typescript": "15.0.3",
+        "minimist": "1.2.8",
+        "path-to-regexp": "6.3.0",
+        "pino": "9.14.0",
+        "pino-pretty": "13.1.2",
+        "pluralize": "8.0.0",
+        "qs-esm": "8.0.1",
+        "range-parser": "1.2.1",
+        "sanitize-filename": "1.6.3",
+        "sax": "1.6.1",
+        "ts-essentials": "10.0.3",
+        "tsx": "4.23.15",
+        "undici": "7.29.1",
+        "uuid": "13.0.2",
+        "ws": "^8.16.0"
+      },
+      "bin": {
+        "payload": "bin.js"
+      },
+      "engines": {
+        "node": ">=20.18.1"
+      },
+      "peerDependencies": {
+        "graphql": "^16.8.1"
+      }
+    },
+    "@payloadcms/db-sqlite": {
+      "version": "3.91.0",
+      "resolved": "https://registry.npmjs.org/@payloadcms/db-sqlite/-/db-sqlite-3.91.0.tgz",
+      "integrity": "sha512-qdcBY5BHn76IfBdkeGq25EPWHCwHVryKFB6d7uMGD2pN2coAja3WDvlnG+2lPZc/ZKWnS3Jzv6JTl5D2Rmomqw==",
+      "license": "MIT",
+      "dependencies": {
+        "@libsql/client": "0.14.0",
+        "@payloadcms/drizzle": "3.91.0",
+        "console-table-printer": "2.12.1",
+        "drizzle-kit": "0.31.7",
+        "drizzle-orm": "0.45.2",
+        "prompts": "2.4.2",
+        "to-snake-case": "1.0.0",
+        "uuid": "13.0.2"
+      },
+      "peerDependencies": {
+        "payload": "3.91.0"
+      }
+    }
+  },
+  "sha256": {
+    "data.json": "9fc06a8f53a0aab553997ba2d75dc68b58e45aaa4c1b014b00b08f559d3a8ef5",
+    "schema.sql": "eb3d3a0246e3bb5a0f521d5725cef17a073b900f77a852efada7f8aae1e9444a"
+  }
+}
