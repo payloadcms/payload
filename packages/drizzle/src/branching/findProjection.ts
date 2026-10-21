@@ -100,9 +100,11 @@ export const findProjection: Find = async function (this: DrizzleAdapter, args) 
     }
     statementRelations = [sql`${sql.identifier(total._.alias)} as materialized (${total._.sql})`]
     fallbackCount = countQuery
-  } else if (hasRootOrdering) {
+  } else if (hasRootOrdering && this.name === 'sqlite') {
     // Filter joins can multiply a root without changing its ordering. IN deduplicates
     // membership; defer distinctness to the count so matching can use filtering indexes.
+    // PostgreSQL can repeatedly scan this membership CTE while walking the ordered
+    // root index, so keep its joined queries on the grouped, ranked path below.
     let matching = (db as any).select({ id: table.id }).from(table).where(where).$dynamic()
 
     for (const join of joins) {

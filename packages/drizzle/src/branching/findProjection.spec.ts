@@ -1,4 +1,4 @@
-import type { Field, FlattenedField } from 'payload'
+import type { Field } from 'payload'
 
 import { sql } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/node-postgres'
@@ -17,11 +17,11 @@ import { projectionRelationConstraint } from './projectionConstraints.js'
 describe('effective projection relational aliases', () => {
   it.each(
     [undefined, 'custom', 'custom"schema'].flatMap((schemaName) =>
-      [false, true].map((hasLocalizedSort) => ({ hasLocalizedSort, schemaName })),
+      ['root', 'localized', 'joined'].map((mode) => ({ mode, schemaName })),
     ),
   )(
-    'should compile indexed or ranked paging with correct aliases for $schemaName (localized=$hasLocalizedSort)',
-    async ({ hasLocalizedSort, schemaName }) => {
+    'should compile $mode paging with correct aliases for $schemaName',
+    async ({ mode, schemaName }) => {
       const tableName = 'branch_projection'
       const columns = { id: text('source_id').primaryKey(), title: text('title') }
       const table = schemaName
@@ -37,6 +37,15 @@ describe('effective projection relational aliases', () => {
       const locales = schemaName
         ? pgSchema(schemaName).table(localesName, localeColumns)
         : pgTable(localesName, localeColumns)
+      const itemsName = `${tableName}_items`
+      const itemColumns = {
+        id: text('id').primaryKey(),
+        _parentID: text('_parent_id'),
+        label: text('label'),
+      }
+      const items = schemaName
+        ? pgSchema(schemaName).table(itemsName, itemColumns)
+        : pgTable(itemsName, itemColumns)
       let statement = ''
       let parameters: unknown[] = []
       const captured = new Error('captured native statement')
@@ -50,10 +59,12 @@ describe('effective projection relational aliases', () => {
         } as any,
         schema: { [tableName]: table },
       })
-      const fields: FlattenedField[] = [
+      const fields: Field[] = [
         { name: 'id', type: 'text' },
-        { name: 'title', type: 'text', localized: hasLocalizedSort },
+        { name: 'title', type: 'text', localized: mode === 'localized' },
+        { name: 'items', type: 'array', fields: [{ name: 'label', type: 'text' }] },
       ]
+      const flattenedFields = flattenAllFields({ fields })
       const adapter = {
         drizzle: db,
         idType: 'uuid',
@@ -68,12 +79,15 @@ describe('effective projection relational aliases', () => {
           collections: {
             'branch-projection': {
               customIDType: 'text',
-              config: { slug: 'branch-projection', fields, flattenedFields: fields },
+              config: { slug: 'branch-projection', fields, flattenedFields },
             },
           },
         },
-        tableNameMap: new Map([[tableName, tableName]]),
-        tables: { [tableName]: table, [localesName]: locales },
+        tableNameMap: new Map([
+          [tableName, tableName],
+          [itemsName, itemsName],
+        ]),
+        tables: { [tableName]: table, [localesName]: locales, [itemsName]: items },
       } as unknown as DrizzleAdapter
 
       await expect(
@@ -84,12 +98,17 @@ describe('effective projection relational aliases', () => {
           select: { id: true },
           sort: 'title',
           joins: false,
-          where: { title: { equals: 'visible' } },
+          where:
+            mode === 'joined'
+              ? { 'items.label': { equals: 'visible' } }
+              : { title: { equals: 'visible' } },
         }),
       ).rejects.toMatchObject({ cause: captured })
 
-      if (hasLocalizedSort) {
+      if (mode !== 'root') {
         expect(statement).toContain('row_number() over')
+        expect(statement).toContain('group by')
+        expect(statement).not.toContain('count(distinct')
         expect(statement).toContain(
           'where "projection_selected_ids"."source_id" = "branch_projection"."source_id"',
         )
