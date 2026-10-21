@@ -7,6 +7,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { formatAdminURL, instructionsCollectionSlug } from 'payload/shared'
+import * as qs from 'qs-esm'
 
 import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
@@ -237,12 +238,27 @@ export async function gotoFirstPost({
   postsURL: AdminUrlUtil
   serverURL: string
 }) {
-  await gotoPostsList({ page, postsURL })
-  const postLink = page.locator('tbody tr .cell-title a', { hasText: 'Example post one' })
-  await expect(postLink).toHaveAttribute('href')
-  const href = await postLink.getAttribute('href')
+  const query = qs.stringify(
+    { depth: 0, limit: 1, where: { title: { contains: 'Example post one' } } },
+    { addQueryPrefix: true },
+  )
+  const response = await page.request.get(
+    formatAdminURL({ apiRoute: '/api', path: `/${postsURL.entitySlug}${query}`, serverURL }),
+  )
 
-  await page.goto(new URL(href!, serverURL).toString())
+  await expect(response).toBeOK()
+  const { docs } = (await response.json()) as { docs: { id: number | string }[] }
+
+  expect(docs).toHaveLength(1)
+
+  await page.goto(
+    formatAdminURL({
+      adminRoute: postsURL.routes.admin,
+      path: `/collections/${postsURL.entitySlug}/${docs[0].id}`,
+      serverURL,
+    }),
+  )
+  await expect(page.locator('[data-form-ready="true"]').first()).toBeVisible()
   await waitForFormReady(page)
 }
 

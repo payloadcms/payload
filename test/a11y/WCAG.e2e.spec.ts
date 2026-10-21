@@ -6693,6 +6693,8 @@ test.describe('WCAG 2.2 Level AA', () => {
       { isInDrawer: false, shouldToggleTwice: true },
     ]) {
       test(`should retain a column toggle state while navigation is pending${isInDrawer ? ' in a drawer' : ''}${shouldToggleTwice ? ' across successive toggles' : ''}`, async () => {
+        // Column preferences survive browser retries; keep them off the shared seeded user.
+        await prepareWorkflowPage({ page, serverURL })
         let columns: Locator
 
         if (isInDrawer) {
@@ -6738,10 +6740,15 @@ test.describe('WCAG 2.2 Level AA', () => {
         })
         const holdNavigation = async (route: Route) => {
           const request = route.request()
+          const url = new URL(request.url())
+          const isListNavigation = isInDrawer
+            ? request.postData()?.includes('"render-list"')
+            : url.pathname === new URL(postsURL.list).pathname && url.searchParams.has('columns')
 
           if (
             !['fetch', 'xhr'].includes(request.resourceType()) ||
-            new URL(request.url()).origin !== new URL(serverURL).origin
+            url.origin !== new URL(serverURL).origin ||
+            !isListNavigation
           ) {
             await route.continue()
             return
@@ -6954,13 +6961,45 @@ test.describe('WCAG 2.2 Level AA', () => {
 
     test('should name the status clear control while live preview is open', async () => {
       // PYLD-3595
-      await openLivePreview({ page, postsURL, serverURL })
-      const status = page.locator('#field-status')
-      const clear = status.locator('.clear-indicator')
+      const preferencesURL = formatAdminURL({
+        apiRoute: '/api',
+        path: '/payload-preferences/collection-posts',
+        serverURL,
+      })
+      const preferenceResponse = await page.request.get(preferencesURL)
 
-      await expect(status.locator('.rs__single-value')).toHaveText(/published|draft/i)
-      await expect(clear).toBeVisible()
-      await expect(clear).toHaveAccessibleName(/clear|remove/i)
+      await expect(preferenceResponse).toBeOK()
+      const { value: originalPreferences } = await preferenceResponse.json()
+
+      try {
+        await expect(
+          await page.request.post(preferencesURL, {
+            data: {
+              value: {
+                ...originalPreferences,
+                columns: [
+                  { accessor: 'title', active: false },
+                  { accessor: 'accessibilitySelect', active: true },
+                  { accessor: 'updatedAt', active: true },
+                ],
+              },
+            },
+          }),
+        ).toBeOK()
+        await gotoPostsList({ page, postsURL })
+        await expect(page.locator('tbody .cell-title')).toHaveCount(0)
+        await openLivePreview({ page, postsURL, serverURL })
+        const status = page.locator('#field-status')
+        const clear = status.locator('.clear-indicator')
+
+        await expect(status.locator('.rs__single-value')).toHaveText(/published|draft/i)
+        await expect(clear).toBeVisible()
+        await expect(clear).toHaveAccessibleName(/clear|remove/i)
+      } finally {
+        await expect(
+          await page.request.post(preferencesURL, { data: { value: originalPreferences ?? {} } }),
+        ).toBeOK()
+      }
     })
 
     test('should name the callout block more-options control', async () => {
