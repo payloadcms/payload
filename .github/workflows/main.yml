@@ -320,7 +320,7 @@ jobs:
       - name: Integration Tests
         env:
           # Private-repo runners have less memory; leave public CI on its existing Node default.
-          NODE_OPTIONS: ${{ github.event.repository.private && '--max-old-space-size=3072 --no-deprecation --no-experimental-strip-types' || '--no-deprecation --no-experimental-strip-types' }}
+          NODE_OPTIONS: ${{ github.event.repository.private && '--max-old-space-size=3072' || '' }}
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
@@ -328,9 +328,9 @@ jobs:
         run: |
           if [ "${{ needs.probe-next-canary.outputs.healthy }}" = "false" ]; then
             echo "::warning::Next.js canary publish is incomplete on npm (next@${{ needs.probe-next-canary.outputs.next_version }}); skipping Canary tests for this run."
-            pnpm test:int:ci --shard=${{ matrix.shard }}/${{ matrix.total-shards }} -t '^(?!.*Canary).*$'
+            pnpm test:int --shard=${{ matrix.shard }}/${{ matrix.total-shards }} -t '^(?!.*Canary).*$'
           else
-            pnpm test:int:ci --shard=${{ matrix.shard }}/${{ matrix.total-shards }}
+            pnpm test:int --shard=${{ matrix.shard }}/${{ matrix.total-shards }}
           fi
 
   # Generate the E2E test matrix from TypeScript config
