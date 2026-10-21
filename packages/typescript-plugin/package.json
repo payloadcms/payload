@@ -52,6 +52,6 @@
     "typescript": "catalog:"
   },
   "engines": {
-    "node": ">=24.15.0"
+    "node": ">=24.22.1"
   }
 }
