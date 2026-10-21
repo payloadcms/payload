@@ -281,4 +281,47 @@ test.suite('Existing drafts contracts for branch head migration', { config: './c
     expect(live).toMatchObject({ shared: 'shared-live', title: { en: 'live global' } })
     expect(working).toMatchObject({ shared: 'shared-working', title: 'working global' })
   })
+
+  test('should honor draft mode when restoring a collection version through the Local API', async ({
+    payload,
+  }) => {
+    const article = await payload.create({
+      collection: articlesSlug,
+      data: { _status: 'published', title: 'original' },
+      locale: 'en',
+    })
+    const versions = await payload.findVersions({
+      collection: articlesSlug,
+      where: { parent: { equals: article.id } },
+    })
+
+    await payload.update({
+      id: article.id,
+      collection: articlesSlug,
+      data: { _status: 'published', title: 'current live' },
+      locale: 'en',
+    })
+    await payload.restoreVersion({
+      id: versions.docs[0]!.id,
+      collection: articlesSlug,
+      draft: true,
+      locale: 'en',
+    })
+
+    const materialized = await payload.db.findOne({
+      collection: articlesSlug,
+      locale: 'all',
+      where: { id: { equals: article.id } },
+    })
+    const working = await payload.findByID({
+      id: article.id,
+      collection: articlesSlug,
+      draft: true,
+      locale: 'en',
+    })
+
+    expect(working.title).toBe('original')
+    expect(materialized?.title).toMatchObject({ en: 'current live' })
+    expect(materialized?._status).toMatchObject({ en: 'published' })
+  })
 })
