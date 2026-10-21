@@ -6,6 +6,7 @@ const baseDeps = () => ({
   env: { GITHUB_TOKEN: 'token' } as NodeJS.ProcessEnv,
   findChangelogBaseTag: vi.fn(async (): Promise<string | undefined> => 'v4.0.0-beta.9'),
   generateReleaseNotes: vi.fn(async () => ({ releaseNotes: '## notes' })),
+  getCommitBump: vi.fn(async (): Promise<null | string> => 'minor'),
   isPublished: vi.fn(async () => false),
   log: vi.fn(),
   readBranch: () => 'main',
@@ -25,7 +26,7 @@ describe('runReleaseBump', () => {
   it('should bump, configure identity, commit, tag, then push in order', async () => {
     const deps = makeDeps()
 
-    const next = await runReleaseBump({ bump: 'prerelease', deps, dryRun: false, preid: 'beta' })
+    const next = await runReleaseBump({ bump: 'auto', deps, dryRun: false, preid: 'beta' })
 
     expect(next).toBe('4.0.0-beta.10')
     expect(deps.workspace.bumpVersion).toHaveBeenCalledWith('prerelease', { preid: 'beta' })
@@ -44,7 +45,7 @@ describe('runReleaseBump', () => {
     const deps = makeDeps({ readBranch: () => 'feature' })
 
     await expect(
-      runReleaseBump({ bump: 'prerelease', deps, dryRun: false, preid: 'beta' }),
+      runReleaseBump({ bump: 'auto', deps, dryRun: false, preid: 'beta' }),
     ).rejects.toThrow(/main/)
 
     expect(deps.run).not.toHaveBeenCalled()
@@ -59,7 +60,7 @@ describe('runReleaseBump', () => {
       },
     })
 
-    const next = await runReleaseBump({ bump: 'prerelease', deps, dryRun: false, preid: 'beta' })
+    const next = await runReleaseBump({ bump: 'auto', deps, dryRun: false, preid: 'beta' })
 
     expect(next).toBe('4.0.0-beta.0')
     expect(deps.workspace.bumpVersion).toHaveBeenCalledWith('prerelease', { preid: 'beta' })
@@ -69,7 +70,7 @@ describe('runReleaseBump', () => {
     const deps = makeDeps({ isPublished: vi.fn(async () => true) })
 
     await expect(
-      runReleaseBump({ bump: 'prerelease', deps, dryRun: false, preid: 'beta' }),
+      runReleaseBump({ bump: 'auto', deps, dryRun: false, preid: 'beta' }),
     ).rejects.toThrow(/already published/)
 
     expect(deps.isPublished).toHaveBeenCalledWith({
@@ -87,7 +88,7 @@ describe('runReleaseBump', () => {
     })
 
     await expect(
-      runReleaseBump({ bump: 'prerelease', deps, dryRun: false, preid: 'beta' }),
+      runReleaseBump({ bump: 'auto', deps, dryRun: false, preid: 'beta' }),
     ).rejects.toThrow(/503/)
 
     expect(deps.run).not.toHaveBeenCalled()
@@ -97,14 +98,14 @@ describe('runReleaseBump', () => {
     const deps = makeDeps({ isPublished: vi.fn(async () => true) })
 
     await expect(
-      runReleaseBump({ bump: 'prerelease', deps, dryRun: true, preid: 'beta' }),
+      runReleaseBump({ bump: 'auto', deps, dryRun: true, preid: 'beta' }),
     ).rejects.toThrow(/already published/)
   })
 
   it('should log the push and never execute it in dry-run', async () => {
     const deps = makeDeps()
 
-    await runReleaseBump({ bump: 'prerelease', deps, dryRun: true, preid: 'beta' })
+    await runReleaseBump({ bump: 'auto', deps, dryRun: true, preid: 'beta' })
 
     const runCmds = deps.run.mock.calls.map((call) => call[0] as string)
     expect(runCmds.some((cmd) => cmd.startsWith('git push'))).toBe(false)
@@ -116,7 +117,7 @@ describe('runReleaseBump', () => {
   it('should preview release notes for the bumped version in dry-run', async () => {
     const deps = makeDeps()
 
-    await runReleaseBump({ bump: 'prerelease', deps, dryRun: true, preid: 'beta' })
+    await runReleaseBump({ bump: 'auto', deps, dryRun: true, preid: 'beta' })
 
     expect(deps.findChangelogBaseTag).toHaveBeenCalledWith({ version: '4.0.0-beta.10' })
     expect(deps.generateReleaseNotes).toHaveBeenCalledWith({
@@ -134,7 +135,7 @@ describe('runReleaseBump', () => {
     const deps = makeDeps({ findChangelogBaseTag: vi.fn(async () => undefined) })
 
     await expect(
-      runReleaseBump({ bump: 'prerelease', deps, dryRun: true, preid: 'beta' }),
+      runReleaseBump({ bump: 'auto', deps, dryRun: true, preid: 'beta' }),
     ).rejects.toThrow(/changelog base tag/)
 
     expect(deps.run).not.toHaveBeenCalled()
@@ -143,7 +144,7 @@ describe('runReleaseBump', () => {
   it('should not generate notes on a real run', async () => {
     const deps = makeDeps()
 
-    await runReleaseBump({ bump: 'prerelease', deps, dryRun: false, preid: 'beta' })
+    await runReleaseBump({ bump: 'auto', deps, dryRun: false, preid: 'beta' })
 
     expect(deps.findChangelogBaseTag).not.toHaveBeenCalled()
     expect(deps.generateReleaseNotes).not.toHaveBeenCalled()

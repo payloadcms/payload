@@ -571,7 +571,8 @@ jobs:
       - name: Install dependencies
         run: |
           docker exec visual-regression bash -lc "
-            apt-get update -qq && apt-get install -y -qq build-essential python3 > /dev/null &&
+            apt-get update -qq -o Acquire::Retries=5 &&
+            apt-get install -y -qq -o Acquire::Retries=5 build-essential python3 > /dev/null &&
             npm install -g pnpm@\$(grep '^pnpm ' .tool-versions | awk '{print \$2}') &&
             # --location=user avoids writing storeDir into pnpm-workspace.yaml, which pnpm
             # does by default when the cwd is a workspace root.
