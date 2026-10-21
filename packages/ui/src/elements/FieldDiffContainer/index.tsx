@@ -33,15 +33,15 @@ export const FieldDiffContainer: React.FC<{
 
   const labelID = React.useId()
   const labelText = label !== false ? getTranslation(label || '', i18n) : ''
-  const hasLabel = Boolean(locale || labelText)
+  const a11yID = locale || labelText ? labelID : undefined
 
   return (
     <div
-      aria-labelledby={hasLabel ? labelID : undefined}
+      aria-labelledby={a11yID}
       className={`${baseClass}-container${className ? ` ${className}` : ''} nested-level-${nestingLevel}`}
-      role={hasLabel ? 'group' : undefined}
+      role={a11yID ? 'group' : undefined}
     >
-      <FieldDiffLabel id={labelID}>
+      <FieldDiffLabel id={a11yID}>
         {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
         {labelText}
       </FieldDiffLabel>
