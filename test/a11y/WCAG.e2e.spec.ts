@@ -2869,7 +2869,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         })
       })
 
-      await widget.locator('.activity-empty-state__icon--pinned').click()
+      await widget.locator('.activity-empty-state__icon').click()
       await expect(drawer).toHaveCount(0)
       await expect(opener).toHaveAttribute('aria-expanded', 'false')
       await expect(opener).toHaveAccessibleDescription(
