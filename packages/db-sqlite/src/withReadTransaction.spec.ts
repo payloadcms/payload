@@ -18,6 +18,7 @@ import type { SQLiteAdapter } from './types.js'
 
 import { createDrizzleBranchingAdapter } from '../../drizzle/src/branching/createDrizzleBranchingAdapter.js'
 import { getTransaction } from '../../drizzle/src/utilities/getTransaction.js'
+import { configureReadConnections, retireReadConnections } from './readConnection.js'
 import { withReadTransaction } from './withReadTransaction.js'
 
 const records = sqliteTable('records', { id: integer().primaryKey(), title: text() })
@@ -170,6 +171,7 @@ describe('native SQLite branch read transactions', () => {
   })
 
   afterEach(async () => {
+    retireReadConnections({ adapter })
     vi.restoreAllMocks()
     client.close()
     await Promise.all([path, `${path}-wal`, `${path}-shm`].map((path) => rm(path, { force: true })))
@@ -332,6 +334,30 @@ describe('native SQLite branch read transactions', () => {
         delete adapter.sessions.caller
       }
     })
+    expect((await client.execute('SELECT title FROM records')).rows[0]?.title).toBe('after')
+  })
+
+  it('should couple the pooled native connection to expiring real branch read scopes', async () => {
+    adapter.clientConfig = { url: `file:${path}` }
+    adapter.busyTimeout = 0
+    await configureReadConnections({ adapter })
+    const begin = vi.spyOn(client, 'transaction')
+    let readLater: (() => Promise<unknown>) | undefined
+
+    for (let round = 0; round < 2; round++) {
+      await adapter.branching!.withReadSnapshot!({
+        req,
+        read: async ({ req: scoped }) => {
+          readLater = () => scoped.payload.db.find({ collection: 'records', req: scoped })
+          expect(await readLater()).toEqual([{ id: 1, title: 'before' }])
+        },
+      })
+      expect(readLater).toThrowError(
+        expect.objectContaining({ code: 'branch-read-snapshot-unsupported' }),
+      )
+    }
+    expect(begin).not.toHaveBeenCalled()
+    await client.execute("UPDATE records SET title = 'after'")
     expect((await client.execute('SELECT title FROM records')).rows[0]?.title).toBe('after')
   })
 })

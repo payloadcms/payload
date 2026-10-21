@@ -7,6 +7,8 @@ import { drizzle } from 'drizzle-orm/libsql'
 
 import type { SQLiteAdapter } from './types.js'
 
+import { configureReadConnections } from './readConnection.js'
+
 export const connect: Connect = async function connect(
   this: SQLiteAdapter,
   options = {
@@ -40,6 +42,7 @@ export const connect: Connect = async function connect(
 
     const logger = this.logger || false
     this.drizzle = drizzle(this.client, { logger, schema: this.schema })
+    await configureReadConnections({ adapter: this })
 
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {

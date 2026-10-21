@@ -18,7 +18,6 @@ import {
   deleteMany,
   deleteOne,
   deleteVersions,
-  destroy,
   find,
   findDistinct,
   findGlobal,
@@ -63,6 +62,7 @@ import type { Args, SQLiteAdapter, WalConfig } from './types.js'
 
 import { connect } from './connect.js'
 import { createTransactionHandlers } from './createTransactionHandlers.js'
+import { destroy } from './destroy.js'
 import { withReadTransaction } from './withReadTransaction.js'
 
 const filename = fileURLToPath(import.meta.url)

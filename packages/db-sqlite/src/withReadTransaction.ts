@@ -8,6 +8,8 @@ import { SQLiteAsyncDialect } from 'drizzle-orm/sqlite-core'
 
 import type { SQLiteAdapter } from './types.js'
 
+import { createReadTransaction } from './readConnection.js'
+
 const readDialects = new WeakMap<SQLiteAdapter['drizzle'], SQLiteAsyncDialect>()
 
 /** Drizzle's libSQL transaction method ignores the SQLite transaction configuration. */
@@ -18,7 +20,7 @@ export const withReadTransaction = async <T>({
   adapter: SQLiteAdapter
   read: (args: { db: DrizzleTransaction }) => Promise<T>
 }): Promise<T> => {
-  const transaction = await adapter.client.transaction('read')
+  const transaction = await createReadTransaction({ adapter })
   let result!: T
   let primaryError: unknown
   let hasFailed = false
