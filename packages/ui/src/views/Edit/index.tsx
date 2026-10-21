@@ -191,11 +191,19 @@ export function DefaultEditView({
   const isSavingRef = useRef(false)
 
   const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
-  // Render can't read the current time, so check for expiry when the lock changes
+  // Render can't read the current time, so check for expiry when the lock changes and expires
   const [isLockExpired, setIsLockExpired] = useState(() => Date.now() > lockExpiryTime)
 
   useEffect(() => {
-    setIsLockExpired(Date.now() > lockExpiryTime)
+    const msUntilExpiry = lockExpiryTime - Date.now()
+    setIsLockExpired(msUntilExpiry < 0)
+
+    // Start a timer that marks the lock as expired at the moment it expires, which
+    // hides the "document locked" modal
+    if (msUntilExpiry >= 0 && msUntilExpiry <= 2_147_483_647) {
+      const timeout = setTimeout(() => setIsLockExpired(true), msUntilExpiry)
+      return () => clearTimeout(timeout)
+    }
   }, [lockExpiryTime])
 
   const preventLeaveWithoutSaving =
