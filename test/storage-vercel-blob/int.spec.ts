@@ -1,5 +1,6 @@
 import type { Payload } from 'payload'
 
+import { list } from '@vercel/blob'
 import dotenv from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -14,6 +15,7 @@ import {
   mediaWithDirectAccessSlug,
   mediaWithDynamicPrefixSlug,
   mediaWithPrefixSlug,
+  mediaWithRandomSuffixSlug,
   prefix,
 } from './shared.js'
 import { clearTestBlobs, verifyUploads } from './test-utils.js'
@@ -45,6 +47,7 @@ describe('@payloadcms/storage-vercel-blob', () => {
       payload.delete({ collection: mediaWithAlwaysInsertFieldsSlug, where: {} }),
       payload.delete({ collection: mediaWithDirectAccessSlug, where: {} }),
       payload.delete({ collection: mediaWithDynamicPrefixSlug, where: {} }),
+      payload.delete({ collection: mediaWithRandomSuffixSlug, where: {} }),
     ])
   })
 
@@ -64,6 +67,24 @@ describe('@payloadcms/storage-vercel-blob', () => {
     })
 
     expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
+  })
+
+  it('should store the main file and image sizes under their suffixed filenames', async () => {
+    const upload = await payload.create({
+      collection: mediaWithRandomSuffixSlug,
+      data: {},
+      filePath: path.resolve(dirname, '../uploads/image.png'),
+    })
+    const { blobs } = await list()
+    const storedMain = blobs.find(({ pathname }) => pathname === upload.filename)
+
+    expect(storedMain?.size).toBe(upload.filesize)
+
+    await verifyUploads({
+      collectionSlug: mediaWithRandomSuffixSlug,
+      payload,
+      uploadId: upload.id,
+    })
   })
 
   it('can upload with prefix', async () => {

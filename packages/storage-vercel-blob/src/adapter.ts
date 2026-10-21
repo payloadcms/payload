@@ -49,7 +49,14 @@ export function createVercelBlobAdapter({
         token,
       }),
 
-    handleUpload: async ({ data, file: { buffer, mimeType, tempFilePath }, storageFilePath }) => {
+    handleUpload: async ({
+      data,
+      file: { buffer, filename, mimeType, tempFilePath },
+      storageFilePath,
+    }) => {
+      // Image sizes share `data` with the main file, so each upload renames only its own entry.
+      const sizes = data.sizes as Record<string, { filename?: string }> | undefined
+      const imageSize = Object.values(sizes || {}).find((size) => size?.filename === filename)
       const result = await uploadFile({
         access,
         addRandomSuffix,
@@ -61,7 +68,9 @@ export function createVercelBlobAdapter({
         token,
       })
 
-      if (result.filename) {
+      if (result.filename && imageSize) {
+        imageSize.filename = result.filename
+      } else if (result.filename) {
         data.filename = result.filename
       }
 
