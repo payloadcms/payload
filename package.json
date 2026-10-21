@@ -195,6 +195,7 @@
     "husky": "9.0.11",
     "lint-staged": "15.2.7",
     "minimist": "1.2.8",
+    "monaco-editor": "0.57.0",
     "mongoose": "9.9.2",
     "next": "16.4.2",
     "node-gyp": "12.3.0",
