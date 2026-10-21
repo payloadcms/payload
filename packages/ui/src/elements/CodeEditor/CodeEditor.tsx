@@ -70,6 +70,7 @@ const CodeEditor: React.FC<Props> = (props) => {
   const CSS_CONTAINER_PADDING = 16 // 8px top + 8px bottom from CSS
   const prevCalculatedHeightAt = React.useRef<number | undefined>(recalculatedHeightAt)
   const editorRef = React.useRef<Parameters<OnMount>[0]>(null)
+  const isNestedInLexicalRef = React.useRef(false)
   const editableOptionsRef = React.useRef<null | Pick<
     NonNullable<Props['options']>,
     'domReadOnly' | 'editContext'
@@ -134,9 +135,13 @@ const CodeEditor: React.FC<Props> = (props) => {
     } else if (editableOptionsRef.current) {
       editor.updateOptions({
         domReadOnly: domReadOnly ?? editableOptionsRef.current.domReadOnly,
-        editContext: editContext ?? editableOptionsRef.current.editContext,
+        editContext: isNestedInLexicalRef.current
+          ? false
+          : (editContext ?? editableOptionsRef.current.editContext),
       })
       editableOptionsRef.current = null
+    } else if (isNestedInLexicalRef.current && editor.getRawOptions().editContext !== false) {
+      editor.updateOptions({ editContext: false })
     }
 
     return editor
@@ -204,7 +209,11 @@ const CodeEditor: React.FC<Props> = (props) => {
 
         // Required to prevent copy/cut/paste from being hijacked by Lexical rich text editor
         const domNode = editor.getDomNode()
-        if (domNode?.closest('[contenteditable="true"]')) {
+        const isNested = Boolean(domNode?.closest('[contenteditable="true"]'))
+
+        isNestedInLexicalRef.current = isNested
+
+        if (isNested) {
           editor.updateOptions({ editContext: false })
 
           const clipboardEvents = ['copy', 'cut', 'paste']
