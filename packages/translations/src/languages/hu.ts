@@ -300,6 +300,7 @@ export const huTranslations: DefaultTranslationsObject = {
     and: 'És',
     anotherUser: 'Egy másik felhasználó',
     anotherUserTakenOver: 'Egy másik felhasználó átvette ennek a dokumentumnak a szerkesztését.',
+    apiResponse: 'API-válasz',
     applyChanges: 'Változtatások alkalmazása',
     ascending: 'Növekvő',
     auto: 'Automatikus',
@@ -493,6 +494,7 @@ export const huTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Az összes {{collections}} újraindexálása folyamatban.',
     reloadDocument: 'Dokumentum újratöltése',
     remove: 'Törlés',
+    removeFilter: 'Szűrő eltávolítása',
     rename: 'Átnevez',
     replaceRow: 'Sor cseréje',
     requiredFields: 'A *-gal jelölt mezők kitöltése kötelező.',
@@ -587,6 +589,7 @@ export const huTranslations: DefaultTranslationsObject = {
     yes: 'Igen',
   },
   hierarchy: {
+    folderLocation: 'Mappa helye',
     goTo: 'Ugrás ide: "{{name}}"',
     itemsMovedTo: '{{title}} átkerült ide: {{destination}}',
     itemsMovedToRoot: '{{title}} áthelyezve a gyökérbe',

@@ -280,6 +280,7 @@ export const thTranslations: DefaultTranslationsObject = {
     and: 'และ',
     anotherUser: 'ผู้ใช้อื่น',
     anotherUserTakenOver: 'ผู้ใช้อื่นเข้าครอบครองการแก้ไขเอกสารนี้แล้ว',
+    apiResponse: 'การตอบกลับ API',
     applyChanges: 'ใช้การเปลี่ยนแปลง',
     ascending: 'น้อยไปมาก',
     auto: 'อัตโนมัติ',
@@ -467,6 +468,7 @@ export const thTranslations: DefaultTranslationsObject = {
     reindexingAll: 'กำลังทำการจัดทำดัชนีใหม่ทั้งหมดใน {{collections}}.',
     reloadDocument: 'โหลดเอกสารใหม่',
     remove: 'ลบ',
+    removeFilter: 'นำตัวกรองออก',
     rename: 'เปลี่ยนชื่อ',
     replaceRow: 'แทนที่แถว',
     requiredFields: 'จำเป็นต้องกรอกช่องที่มีเครื่องหมาย *',
@@ -558,6 +560,7 @@ export const thTranslations: DefaultTranslationsObject = {
     yes: 'ใช่',
   },
   hierarchy: {
+    folderLocation: 'ตำแหน่งโฟลเดอร์',
     goTo: 'ไปที่ "{{name}}"',
     itemsMovedTo: '{{title}} ย้ายไปที่ {{destination}}',
     itemsMovedToRoot: '{{title}} ถูกย้ายไปยังราก',

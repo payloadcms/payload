@@ -298,6 +298,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     and: 'А также',
     anotherUser: 'Другой пользователь',
     anotherUserTakenOver: 'Другой пользователь взял на себя редактирование этого документа.',
+    apiResponse: 'Ответ API',
     applyChanges: 'Применить изменения',
     ascending: 'Восходящий',
     auto: 'Автоматически',
@@ -491,6 +492,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Переиндексирование всех {{collections}}.',
     reloadDocument: 'Перезагрузить документ',
     remove: 'Удалить',
+    removeFilter: 'Удалить фильтр',
     rename: 'Переименовать',
     replaceRow: 'Заменить строку',
     requiredFields: 'Поля, отмеченные *, обязательны для заполнения.',
@@ -584,6 +586,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     yes: 'Да',
   },
   hierarchy: {
+    folderLocation: 'Расположение папки',
     goTo: 'Перейти к "{{name}}"',
     itemsMovedTo: '{{title}} перемещен в {{destination}}',
     itemsMovedToRoot: '{{title}} перемещен в корень',

@@ -278,6 +278,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     and: '和',
     anotherUser: '另一位用户',
     anotherUserTakenOver: '另一位用户接管了此文档的编辑。',
+    apiResponse: 'API 响应',
     applyChanges: '应用更改',
     ascending: '升序',
     auto: '自动',
@@ -463,6 +464,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     reindexingAll: '正在重新索引所有 {{collections}}。',
     reloadDocument: '重新加载文档',
     remove: '移除',
+    removeFilter: '移除筛选器',
     rename: '重命名',
     replaceRow: '替换行',
     requiredFields: '标有 * 的字段为必填项。',
@@ -553,6 +555,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     yes: '是的',
   },
   hierarchy: {
+    folderLocation: '文件夹位置',
     goTo: '前往“{{name}}”',
     itemsMovedTo: '{{title}} 已移至 {{destination}}',
     itemsMovedToRoot: '{{title}}移至根目录',

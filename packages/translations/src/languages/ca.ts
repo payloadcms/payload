@@ -298,6 +298,7 @@ export const caTranslations: DefaultTranslationsObject = {
     and: 'i',
     anotherUser: 'Altre usuari',
     anotherUserTakenOver: "Un altre usuari ha pres la edició d'aquest document.",
+    apiResponse: 'Resposta de l’API',
     applyChanges: 'Apica els canvis',
     ascending: 'Ascendent',
     auto: 'Automàtic',
@@ -491,6 +492,7 @@ export const caTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Reindexa tots el {{collections}}.',
     reloadDocument: 'Recarrega el document',
     remove: 'Elimina',
+    removeFilter: 'Elimina el filtre',
     rename: 'Canvia el nom',
     replaceRow: 'Reemplaça fila',
     requiredFields: 'Els camps marcats amb * són obligatoris.',
@@ -583,6 +585,7 @@ export const caTranslations: DefaultTranslationsObject = {
     yes: 'Sí',
   },
   hierarchy: {
+    folderLocation: 'Ubicació de la carpeta',
     goTo: 'Vés a "{{name}}"',
     itemsMovedTo: "{{title}} s'ha traslladat a {{destination}}",
     itemsMovedToRoot: "{{title}} s'ha traslladat a l'arrel",

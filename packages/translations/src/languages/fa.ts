@@ -288,6 +288,7 @@ export const faTranslations: DefaultTranslationsObject = {
     and: 'و',
     anotherUser: 'کاربر دیگر',
     anotherUserTakenOver: 'کاربر دیگری ویرایش این صفحه را در دست گرفته است.',
+    apiResponse: 'پاسخ API',
     applyChanges: 'اعمال تغییرات',
     ascending: 'صعودی',
     auto: 'خودکار',
@@ -479,6 +480,7 @@ export const faTranslations: DefaultTranslationsObject = {
     reindexingAll: 'در حال ایندکس مجدد همه {{collections}}...',
     reloadDocument: 'بارگذاری مجدد سند',
     remove: 'حذف',
+    removeFilter: 'حذف فیلتر',
     rename: 'تغییر نام',
     replaceRow: 'جایگزینی سطر',
     requiredFields: 'تکمیل فیلدهای دارای علامت * الزامی است.',
@@ -571,6 +573,7 @@ export const faTranslations: DefaultTranslationsObject = {
     yes: 'بله',
   },
   hierarchy: {
+    folderLocation: 'محل پوشه',
     goTo: 'به "{{name}}" بروید.',
     itemsMovedTo: '{{title}} به {{destination}} منتقل شد.',
     itemsMovedToRoot: '{{title}} به ریشه منتقل شد',

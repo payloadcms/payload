@@ -3,9 +3,19 @@ import type { AriaAttributes, AriaRole, CSSProperties } from 'react'
 
 export * as PopupList from './PopupButtonList/index.js'
 
-import React, { createContext, use, useCallback, useEffect, useId, useRef, useState } from 'react'
+import React, {
+  createContext,
+  use,
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
+import { useModalFocus } from '../../providers/ModalFocus/index.js'
 import { ThemeProvider } from '../../providers/Theme/index.js'
 import './index.css'
 import { type PopupButtonRenderProps, PopupTrigger } from './PopupTrigger/index.js'
@@ -159,7 +169,21 @@ export const Popup: React.FC<PopupProps> = (props) => {
   } = props
 
   const popupRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLDivElement>(null)
+  const { registerPopup } = useModalFocus()
+  const getTrigger = useCallback(
+    () => triggerRef.current?.querySelector<HTMLElement>('button, [tabindex="0"]') ?? null,
+    [],
+  )
+
+  useLayoutEffect(() => {
+    const container = containerRef.current
+
+    if (container) {
+      return registerPopup({ container, getTrigger })
+    }
+  }, [getTrigger, registerPopup])
   const generatedContentId = useId()
   const contentId = `${id || generatedContentId}-content`
 
@@ -206,14 +230,14 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
   const closePopup = useCallback(
     ({ restoreFocus = true }: { restoreFocus?: boolean } = {}) => {
-      const trigger = triggerRef.current?.querySelector<HTMLElement>('button, [tabindex="0"]')
+      const trigger = getTrigger()
 
       setActive(false)
       if (restoreFocus) {
         requestAnimationFrame(() => trigger?.focus())
       }
     },
-    [setActive],
+    [getTrigger, setActive],
   )
   const close = useCallback(() => closePopup(), [closePopup])
   const closePopupChain = useCallback(
@@ -702,7 +726,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
   )
 
   return (
-    <div className={[baseClass, className].filter(Boolean).join(' ')} id={id}>
+    <div className={[baseClass, className].filter(Boolean).join(' ')} id={id} ref={containerRef}>
       <div className={`${baseClass}__trigger-wrap`} ref={triggerRef}>
         {showOnHover ? (
           <div

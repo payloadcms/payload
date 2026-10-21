@@ -276,6 +276,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     and: '與',
     anotherUser: '其他使用者',
     anotherUserTakenOver: '其他使用者已接手編輯此文件。',
+    apiResponse: 'API 回應',
     applyChanges: '套用變更',
     ascending: '遞增',
     auto: '自動',
@@ -461,6 +462,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     reindexingAll: '正在重新索引 {{collections}}。',
     reloadDocument: '重新載入文件',
     remove: '移除',
+    removeFilter: '移除篩選器',
     rename: '重新命名',
     replaceRow: '替換資料列',
     requiredFields: '標有 * 的欄位為必填項。',
@@ -551,6 +553,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     yes: '是',
   },
   hierarchy: {
+    folderLocation: '資料夾位置',
     goTo: '前往「{{name}}」',
     itemsMovedTo: '{{title}} 移至 {{destination}}',
     itemsMovedToRoot: '{{title}} 已移至根目錄',

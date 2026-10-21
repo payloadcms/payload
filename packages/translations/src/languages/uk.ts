@@ -293,6 +293,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     and: 'і',
     anotherUser: 'Інший користувач',
     anotherUserTakenOver: 'Інший користувач взяв на себе редагування цього документа.',
+    apiResponse: 'Відповідь API',
     applyChanges: 'Застосувати зміни',
     ascending: 'В порядку зростання',
     auto: 'Авто',
@@ -483,6 +484,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Перебудова індексів для всіх {{collections}}.',
     reloadDocument: 'Перезавантажити документ',
     remove: 'Видалити',
+    removeFilter: 'Видалити фільтр',
     rename: 'Перейменувати',
     replaceRow: 'Замінити рядок',
     requiredFields: 'Поля, позначені *, є обов’язковими.',
@@ -574,6 +576,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     yes: 'Так',
   },
   hierarchy: {
+    folderLocation: 'Розташування папки',
     goTo: 'Перейти до "{{name}}"',
     itemsMovedTo: '{{title}} перейшов до {{destination}}',
     itemsMovedToRoot: '{{title}} переміщено в корінь',

@@ -305,6 +305,7 @@ export const frTranslations: DefaultTranslationsObject = {
     and: 'Et',
     anotherUser: 'Un autre utilisateur',
     anotherUserTakenOver: 'Un autre utilisateur a pris en charge la modification de ce document.',
+    apiResponse: 'Réponse de l’API',
     applyChanges: 'Appliquer les modifications',
     ascending: 'Ascendant',
     auto: 'Automatique',
@@ -499,6 +500,7 @@ export const frTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Réindexation de toutes les {{collections}}.',
     reloadDocument: 'Recharger le document',
     remove: 'Retirer',
+    removeFilter: 'Supprimer le filtre',
     rename: 'Renommer',
     replaceRow: 'Remplacer la ligne',
     requiredFields: 'Les champs marqués d’un * sont obligatoires.',
@@ -593,6 +595,7 @@ export const frTranslations: DefaultTranslationsObject = {
     yes: 'Oui',
   },
   hierarchy: {
+    folderLocation: 'Emplacement du dossier',
     goTo: 'Aller à « {{name}} »',
     itemsMovedTo: '{{title}} déplacé vers {{destination}}',
     itemsMovedToRoot: '{{title}} déplacé à la racine',

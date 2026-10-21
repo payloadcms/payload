@@ -212,7 +212,11 @@ export const email: EmailFieldValidation = (
   const emailRegex =
     /^(?!.*\.\.)[\w!#$%&'*+/=?^`{|}~-](?:[\w!#$%&'*+/=?^`{|}~.-]*[\w!#$%&'*+/=?^`{|}~-])?@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,}$/i
 
-  if ((value && !emailRegex.test(value)) || (!value && required)) {
+  if (!value && required) {
+    return t('validation:required')
+  }
+
+  if (value && !emailRegex.test(value)) {
     return t('validation:emailAddress')
   }
 

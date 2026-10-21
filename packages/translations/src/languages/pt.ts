@@ -296,6 +296,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     and: 'E',
     anotherUser: 'Outro usuário',
     anotherUserTakenOver: 'Outro usuário assumiu a edição deste documento.',
+    apiResponse: 'Resposta da API',
     applyChanges: 'Aplicar alterações',
     ascending: 'Ascendente',
     auto: 'Automático',
@@ -490,6 +491,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Reindexando todas as {{collections}}.',
     reloadDocument: 'Recarregar documento',
     remove: 'Remover',
+    removeFilter: 'Remover filtro',
     rename: 'Renomear',
     replaceRow: 'Substituir Linha',
     requiredFields: 'Os campos marcados com * são obrigatórios.',
@@ -583,6 +585,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     yes: 'Sim',
   },
   hierarchy: {
+    folderLocation: 'Localização da pasta',
     goTo: 'Ir para "{{name}}"',
     itemsMovedTo: '{{title}} foi movido para {{destination}}',
     itemsMovedToRoot: '{{title}} movido para a raiz',

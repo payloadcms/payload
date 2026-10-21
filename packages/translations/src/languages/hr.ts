@@ -295,6 +295,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     and: 'i',
     anotherUser: 'Drugi korisnik',
     anotherUserTakenOver: 'Drugi korisnik je preuzeo uređivanje ovog dokumenta.',
+    apiResponse: 'API odgovor',
     applyChanges: 'Primijeni promjene',
     ascending: 'Uzlazno',
     auto: 'Automatski',
@@ -486,6 +487,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Ponovno indeksiranje svih {{collections}}.',
     reloadDocument: 'Ponovno učitaj dokument',
     remove: 'Ukloni',
+    removeFilter: 'Ukloni filtar',
     rename: 'Preimenuj',
     replaceRow: 'Zamijeni redak',
     requiredFields: 'Polja označena s * obavezna su.',
@@ -578,6 +580,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     yes: 'Da',
   },
   hierarchy: {
+    folderLocation: 'Lokacija mape',
     goTo: 'Idite na "{{name}}"',
     itemsMovedTo: '{{title}} premješten na {{destination}}',
     itemsMovedToRoot: '{{title}} premješten u korijen',

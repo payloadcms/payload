@@ -200,6 +200,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'fields:toggleBlock',
   'fields:uploadNewLabel',
 
+  'hierarchy:folderLocation',
   'hierarchy:goTo',
   'hierarchy:itemsMovedTo',
   'hierarchy:itemsMovedToRoot',
@@ -233,6 +234,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:anotherUser',
   'general:anotherUserTakenOver',
   'general:applyChanges',
+  'general:apiResponse',
   'general:ascending',
   'general:automatic',
   'general:auto',
@@ -414,6 +416,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:reindexingAll',
   'general:reloadDocument',
   'general:remove',
+  'general:removeFilter',
   'general:rename',
   'general:replaceRow',
   'general:reset',

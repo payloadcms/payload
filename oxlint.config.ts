@@ -138,6 +138,9 @@ export default defineConfig({
       rules: {
         'no-console': 'off',
         'perfectionist/sort-objects': 'off',
+        // Vitest and Playwright fixtures call a `use` callback, and some test helpers are named
+        // `use…`, so this rule mistakes them for React hooks
+        'react-hooks/rules-of-hooks': 'off',
         'no-use-before-define': 'off',
         'typescript/no-unsafe-assignment': 'off',
         'typescript/unbound-method': 'off',

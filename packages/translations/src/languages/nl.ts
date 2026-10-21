@@ -301,6 +301,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     and: 'En',
     anotherUser: 'Een andere gebruiker',
     anotherUserTakenOver: 'Een andere gebruiker heeft de bewerking van dit document overgenomen.',
+    apiResponse: 'API-antwoord',
     applyChanges: 'Breng wijzigingen aan',
     ascending: 'Oplopend',
     auto: 'Automatisch',
@@ -494,6 +495,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Bezig met het opnieuw indexeren van alle {{collections}}.',
     reloadDocument: 'Document opnieuw laden',
     remove: 'Verwijderen',
+    removeFilter: 'Filter verwijderen',
     rename: 'Hernoemen',
     replaceRow: 'Rij vervangen',
     requiredFields: 'Velden gemarkeerd met * zijn verplicht.',
@@ -587,6 +589,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     yes: 'Ja',
   },
   hierarchy: {
+    folderLocation: 'Maplocatie',
     goTo: 'Ga naar "{{name}}"',
     itemsMovedTo: '{{title}} verplaatst naar {{destination}}',
     itemsMovedToRoot: '{{title}} verplaatst naar root',

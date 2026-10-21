@@ -293,6 +293,7 @@ export const daTranslations: DefaultTranslationsObject = {
     and: 'Og',
     anotherUser: 'En anden bruger',
     anotherUserTakenOver: 'En anden bruger har overtaget denne ressource.',
+    apiResponse: 'API-svar',
     applyChanges: 'Tilføj ændringer',
     ascending: 'Stigende',
     auto: 'Automatisk',
@@ -485,6 +486,7 @@ export const daTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Genindekserer alle {{collections}}.',
     reloadDocument: 'Genindlæs dokument',
     remove: 'Fjern',
+    removeFilter: 'Fjern filter',
     rename: 'Omdøb',
     replaceRow: 'Erstat række',
     requiredFields: 'Felter markeret med * er obligatoriske.',
@@ -578,6 +580,7 @@ export const daTranslations: DefaultTranslationsObject = {
     yes: 'Ja',
   },
   hierarchy: {
+    folderLocation: 'Mappeplacering',
     goTo: 'Gå til "{{name}}"',
     itemsMovedTo: '{{title}} flyttet til {{destination}}',
     itemsMovedToRoot: '{{title}} flyttet til rod',

@@ -291,6 +291,7 @@ export const taTranslations: DefaultTranslationsObject = {
     and: 'மற்றும்',
     anotherUser: 'மற்றொரு பயனர்',
     anotherUserTakenOver: 'இந்த ஆவணத்தை மற்றொரு பயனர் திருத்திக் கொண்டிருக்கிறார்.',
+    apiResponse: 'API பதில்',
     applyChanges: 'மாற்றங்களைப் பயன்படுத்தவும்',
     ascending: 'ஏறுவரிசை',
     auto: 'ஆட்டோ',
@@ -480,6 +481,7 @@ export const taTranslations: DefaultTranslationsObject = {
     reindexingAll: 'அனைத்து {{collections}} மறுஅட்டவணை செய்யப்படுகிறது.',
     reloadDocument: 'ஆவணத்தை மீளாக்கு',
     remove: 'நீக்கு',
+    removeFilter: 'வடிகட்டியை அகற்று',
     rename: 'பெயர் மாற்று',
     replaceRow: 'வரிசையை மாற்றவும்',
     requiredFields: '* குறியிடப்பட்ட புலங்கள் கட்டாயமானவை.',
@@ -571,6 +573,7 @@ export const taTranslations: DefaultTranslationsObject = {
     yes: 'ஆம்',
   },
   hierarchy: {
+    folderLocation: 'கோப்புறையின் இருப்பிடம்',
     goTo: '"{{name}}"க்கு செல்லுங்கள்',
     itemsMovedTo: '{{title}} ஐ {{destination}} க்கு நகர்த்தினோம்',
     itemsMovedToRoot: '{{title}} மூலத்திற்கு நகர்த்தப்பட்டது',
