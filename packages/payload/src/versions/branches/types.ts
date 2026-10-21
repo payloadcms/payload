@@ -18,13 +18,15 @@ export type BranchHeadState =
     }>
   | Readonly<{ type: 'withdrawn' }>
 
-/** Tokens describe one entity's scope. Never compare tokens across document identities. */
+/** Tokens describe one entity's scope. Batch operations qualify them with logical identity. */
 export type BranchHeadToken = (
   | Readonly<{ generation: null; state: null }>
   | Readonly<{ generation: number; state: BranchHeadState }>
 ) &
   Readonly<{
     branchID: BranchHeadID
+    /** Durable lifetime counter, advanced when an override is discarded; legacy heads use zero. */
+    incarnation?: number
     scope: BranchContentScope
   }>
 
@@ -33,6 +35,7 @@ export type BranchHead = Readonly<{
   base: BranchHeadToken | null
   branchID: BranchHeadID
   generation: number
+  incarnation?: number
   scope: BranchContentScope
   state: BranchHeadState
 }>

@@ -62,6 +62,7 @@ export const areBranchHeadTokensEqual = ({
 }): boolean => {
   return (
     left.branchID === right.branchID &&
+    (left.incarnation ?? 0) === (right.incarnation ?? 0) &&
     areBranchScopesEqual({ left: left.scope, right: right.scope }) &&
     left.generation === right.generation &&
     areBranchHeadStatesEqual({ left: left.state, right: right.state })

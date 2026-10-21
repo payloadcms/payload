@@ -156,6 +156,35 @@ test.suite('Native branch head storage', { config: './config.ts' }, () => {
     expect((await readBranchHead({ branchID: '1', req, scope, target }))?.branchID).toBe('1')
   })
 
+  test('should refuse nonzero incarnation guards until durable discard storage is implemented', async ({
+    payload,
+  }) => {
+    const req = await createPayloadRequest({ payload })
+    const target = { collection: settingsHeadsSlug }
+
+    for (const hasBaseGuard of [false, true]) {
+      await expect(
+        writeBranchHead({
+          base: hasBaseGuard
+            ? { branchID: 'main', generation: null, incarnation: 1, scope, state: null }
+            : null,
+          expected: {
+            branchID: 'drafts',
+            generation: null,
+            incarnation: hasBaseGuard ? 0 : 1,
+            scope,
+            state: null,
+          },
+          nextState: { type: 'withdrawn' },
+          req,
+          target,
+        }),
+      ).rejects.toThrow('Durable branch incarnation persistence is required')
+    }
+
+    expect((await payload.db.count({ collection: settingsHeadsSlug })).totalDocs).toBe(0)
+  })
+
   test('should refuse ordinary user access to the internal storage', async ({ payload }) => {
     await expect(
       payload.create({

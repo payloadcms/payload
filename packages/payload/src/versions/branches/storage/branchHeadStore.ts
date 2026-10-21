@@ -58,6 +58,12 @@ export const writeBranchHead = async ({
 }): Promise<BranchHead | null> => {
   assertHeadTarget({ req, target })
 
+  if ((expected.incarnation ?? 0) !== 0 || (base?.incarnation ?? 0) !== 0) {
+    throw new Error(
+      'Durable branch incarnation persistence is required before writing discarded scopes.',
+    )
+  }
+
   if (
     expected.generation !== null &&
     (!Number.isSafeInteger(expected.generation) ||

@@ -8,8 +8,9 @@ import {
 } from './compareBranchHeads.js'
 
 /**
- * Plans replacement of one scope, without writing or authorizing it. Callers must freeze
- * the selected versions, authorize overwrite, and atomically check both read sets at commit.
+ * Preliminary comparison of one scope, not a commit-ready transition or authorization result.
+ * Its overwrite and no-op results omit required review/receipt guards. Execution must use
+ * planBranchBatchMerge, which retains reviewed tokens, merge bases, receipts and full closure.
  * `destinationSharedScope` supplies the shared candidate and its original read preconditions.
  * A batch that also replaces shared content must include that replacement's source preconditions.
  */
