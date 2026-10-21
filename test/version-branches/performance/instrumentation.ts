@@ -1,17 +1,36 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- Observe native client boundaries without changing query execution. */
 import type { Payload } from 'payload'
 
+import { observePerformanceSqliteClients } from './sqliteClientObserver.js'
+
 export const instrumentBranchPerformance = ({ payload }: { payload: Payload }) => {
   const adapter = payload.db as any
   const restorers: (() => void)[] = []
   const statements: {
     affectedRows?: number
+    batch?: unknown[]
+    batchMode?: string
     collection?: string
     durationMilliseconds?: number
+    errorCode?: string
+    hasFailed?: boolean
     kind: string
+    nativeClient?: number
     params?: unknown[]
     pipeline?: unknown[]
     sql?: string
+  }[] = []
+  const resources: {
+    client?: number
+    hasFailed?: boolean
+    isClosed?: boolean
+    kind:
+      | 'private-client-close'
+      | 'private-client-created'
+      | 'private-client-creation-failed'
+      | 'private-client-observed'
+      | 'private-transaction-close'
+      | 'private-transaction-created'
   }[] = []
   const intercept = ({
     target,
@@ -23,8 +42,8 @@ export const instrumentBranchPerformance = ({ payload }: { payload: Payload }) =
     target: any
   }) => {
     const original = target[key]
-
-    target[key] = function (...args: any[]) {
+    const descriptor = Object.getOwnPropertyDescriptor(target, key)
+    const wrapper = function (this: any, ...args: any[]) {
       const statement = observe(args)
       const isWrite = statement && /^\s*(?:insert|update|delete)\b/i.test(statement.sql ?? '')
       if (isWrite && typeof args[args.length - 1] === 'function') {
@@ -46,8 +65,15 @@ export const instrumentBranchPerformance = ({ payload }: { payload: Payload }) =
       }
       return result
     }
+    target[key] = wrapper
     restorers.push(() => {
-      target[key] = original
+      if (target[key] === wrapper) {
+        if (descriptor) {
+          Object.defineProperty(target, key, descriptor)
+        } else {
+          delete target[key]
+        }
+      }
     })
   }
 
@@ -139,13 +165,142 @@ export const instrumentBranchPerformance = ({ payload }: { payload: Payload }) =
       adapter.pool.connect = connect
     })
   } else {
+    let nextClient = 0
+    const observed = new WeakSet<object>()
+    const observePrivateClient = ({
+      client,
+      isNew,
+      isTransaction = false,
+    }: {
+      client: any
+      isNew: boolean
+      isTransaction?: boolean
+    }) => {
+      if (client === adapter.client || observed.has(client)) {
+        return
+      }
+      observed.add(client)
+      const id = ++nextClient
+
+      resources.push({
+        client: id,
+        kind: isTransaction
+          ? 'private-transaction-created'
+          : isNew
+            ? 'private-client-created'
+            : 'private-client-observed',
+      })
+      for (const key of [
+        'execute',
+        'batch',
+        'executeMultiple',
+        'transaction',
+        'commit',
+        'rollback',
+        'close',
+      ]) {
+        if (typeof client[key] !== 'function') {
+          continue
+        }
+        const original = client[key]
+        const descriptor = Object.getOwnPropertyDescriptor(client, key)
+        const wrapper = function (this: any, ...args: any[]) {
+          const isClose = key === 'close'
+          const entry = isClose
+            ? undefined
+            : ({
+                kind: ['commit', 'rollback', 'transaction'].includes(key)
+                  ? `transaction-${key === 'transaction' ? 'begin' : key}`
+                  : key,
+                nativeClient: id,
+                ...(key === 'execute' || key === 'executeMultiple'
+                  ? {
+                      sql: typeof args[0] === 'string' ? args[0] : args[0].sql,
+                      params: typeof args[0] === 'string' ? args[1] : args[0].args,
+                    }
+                  : {}),
+                ...(key === 'batch' ? { batch: args[0], batchMode: args[1] } : {}),
+              } as (typeof statements)[number])
+          const resource: (typeof resources)[number] | undefined = isClose
+            ? {
+                client: id,
+                kind: isTransaction
+                  ? ('private-transaction-close' as const)
+                  : ('private-client-close' as const),
+                isClosed: client.closed,
+              }
+            : undefined
+
+          if (entry) {
+            statements.push(entry)
+          }
+          if (resource) {
+            resources.push(resource)
+          }
+          const failed = (error: any) => {
+            if (entry) {
+              entry.hasFailed = true
+              if (typeof error?.code === 'string') {
+                entry.errorCode = error.code
+              }
+            }
+            if (resource) {
+              resource.hasFailed = true
+              resource.isClosed = client.closed
+            }
+          }
+          const succeeded = (result: any) => {
+            if (entry && /^\s*(?:insert|update|delete)\b/i.test(entry.sql ?? '')) {
+              entry.affectedRows = result?.rowsAffected
+            }
+            if (resource) {
+              resource.isClosed = client.closed
+            }
+            if (key === 'transaction') {
+              observePrivateClient({ client: result, isNew: true, isTransaction: true })
+            }
+          }
+          try {
+            const result = original.apply(this, args)
+
+            if (result?.then) {
+              result.then(succeeded, failed)
+            } else {
+              succeeded(result)
+            }
+            return result
+          } catch (error) {
+            failed(error)
+            throw error
+          }
+        }
+
+        client[key] = wrapper
+        restorers.push(() => {
+          if (client[key] === wrapper) {
+            if (descriptor) {
+              Object.defineProperty(client, key, descriptor)
+            } else {
+              delete client[key]
+            }
+          }
+        })
+      }
+    }
+    const stopObserving = observePerformanceSqliteClients({
+      observe: observePrivateClient,
+      onCreationFailed: () =>
+        resources.push({ kind: 'private-client-creation-failed', hasFailed: true }),
+    })
+
+    restorers.push(stopObserving)
     const observe = (args: any[]) => {
       const statement = args[0]
 
       const entry = {
         kind: 'execute',
         sql: typeof statement === 'string' ? statement : statement.sql,
-        params: statement.args,
+        params: typeof statement === 'string' ? args[1] : statement.args,
       }
       statements.push(entry)
       return entry
@@ -153,8 +308,9 @@ export const instrumentBranchPerformance = ({ payload }: { payload: Payload }) =
 
     intercept({ target: adapter.client, key: 'execute', observe })
     const transaction = adapter.client.transaction
+    const transactionDescriptor = Object.getOwnPropertyDescriptor(adapter.client, 'transaction')
 
-    adapter.client.transaction = async function (...args: any[]) {
+    const transactionWrapper = async function (this: any, ...args: any[]) {
       statements.push({ kind: 'transaction-begin' })
       const client = await transaction.apply(this, args)
 
@@ -170,12 +326,28 @@ export const instrumentBranchPerformance = ({ payload }: { payload: Payload }) =
       intercept({ target: client, key: 'execute', observe })
       return client
     }
+    adapter.client.transaction = transactionWrapper
     restorers.push(() => {
-      adapter.client.transaction = transaction
+      if (adapter.client.transaction === transactionWrapper) {
+        if (transactionDescriptor) {
+          Object.defineProperty(adapter.client, 'transaction', transactionDescriptor)
+        } else {
+          delete adapter.client.transaction
+        }
+      }
     })
   }
 
   return {
+    observationBoundary:
+      adapter.name === 'mongoose'
+        ? 'MongoDB native command events'
+        : adapter.pool
+          ? 'PostgreSQL native query invocations'
+          : 'SQLite native Client/Transaction method invocations; batch and executeMultiple each count once; driver-internal statements are not separately traced',
+    get resources() {
+      return resources
+    },
     get statements() {
       return statements
     },
@@ -183,7 +355,9 @@ export const instrumentBranchPerformance = ({ payload }: { payload: Payload }) =
       statements.length = 0
     },
     restore() {
-      restorers.reverse().forEach((restore) => restore())
+      while (restorers.length) {
+        restorers.pop()!()
+      }
     },
     async explain() {
       const results = []

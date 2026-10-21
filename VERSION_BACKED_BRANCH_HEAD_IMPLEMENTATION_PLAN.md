@@ -411,6 +411,7 @@ The stack starts at main. Each layer targets the preceding branch so reviewers s
 | 26    | [#18947](https://github.com/payloadcms/payload/pull/18947) | Indexed joined filters for root sorting, exact native distinct counts and independent SQLite/custom PostgreSQL review |
 | 27    | [#18948](https://github.com/payloadcms/payload/pull/18948) | SQLite snapshot readiness batching with exact scope validation, bounded native SQL and independent protocol review    |
 | 28    | [#18954](https://github.com/payloadcms/payload/pull/18954) | Backend-specific joined paging: retain ranked PostgreSQL/Vercel queries and indexed SQLite/D1 membership paging       |
+| 29    | [#18955](https://github.com/payloadcms/payload/pull/18955) | Exclusively leased local SQLite read clients with native capability checks, scope expiry and generation retirement    |
 
 Current implementation state as of 2026-10-21:
 

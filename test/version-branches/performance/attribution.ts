@@ -5,10 +5,11 @@ import { performance } from 'node:perf_hooks'
 
 type AttributionSample = {
   accessMilliseconds: number
-  callbackAfterGuardMilliseconds?: number
+  adapterFindMilliseconds: number
+  adapterFindTimingBoundary: 'adapter.find only; excludes native readStates'
+  callbackAfterAdapterFindMilliseconds?: number
   callbackMilliseconds: number
   commandMilliseconds?: number
-  guardReadMilliseconds: number
   snapshotCleanupMilliseconds: number
   snapshotSetupMilliseconds: number
   wallMilliseconds?: number
@@ -52,7 +53,7 @@ export const attributeBranchPerformance = async ({
     try {
       return await find.apply(this, args)
     } finally {
-      sample.guardReadMilliseconds += performance.now() - started
+      sample.adapterFindMilliseconds += performance.now() - started
     }
   }
   branching.withReadSnapshot = async function ({ read: callback, ...args }: any) {
@@ -82,7 +83,8 @@ export const attributeBranchPerformance = async ({
         accessMilliseconds: 0,
         snapshotSetupMilliseconds: 0,
         snapshotCleanupMilliseconds: 0,
-        guardReadMilliseconds: 0,
+        adapterFindMilliseconds: 0,
+        adapterFindTimingBoundary: 'adapter.find only; excludes native readStates',
         callbackMilliseconds: 0,
       }
       const firstStatement = statements.length
@@ -98,8 +100,8 @@ export const attributeBranchPerformance = async ({
           0,
         )
       }
-      sample.callbackAfterGuardMilliseconds =
-        sample.callbackMilliseconds - sample.accessMilliseconds - sample.guardReadMilliseconds
+      sample.callbackAfterAdapterFindMilliseconds =
+        sample.callbackMilliseconds - sample.accessMilliseconds - sample.adapterFindMilliseconds
       samples.push(sample)
     }
     return samples

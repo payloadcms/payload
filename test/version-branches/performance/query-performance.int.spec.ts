@@ -1,11 +1,14 @@
 /* eslint-disable payload/no-relative-monorepo-imports -- Opt-in large-scale measurement of the experimental core boundary. */
-import type { PayloadRequest, Where } from 'payload'
+import type * as Sqlite3 from '@libsql/client/sqlite3'
+import type { Payload, PayloadRequest, Where } from 'payload'
 
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { performance } from 'node:perf_hooks'
 import { createPayloadRequest } from 'payload'
-import { expect } from 'vitest'
+import { expect, vi } from 'vitest'
+
+import type { BranchQueryPerformanceScenario } from './scenarios.js'
 
 import { encodeBranchProjectionBranchKey } from '../../../packages/payload/src/versions/branches/queries/branchProjectionCodec.js'
 import {
@@ -37,6 +40,17 @@ import { seedBranchPerformance } from './seed.js'
 import { getPerformanceSourceDigest } from './sourceDigest.mjs'
 import { verifyPerformanceSeed } from './verifySeed.js'
 
+vi.mock('@libsql/client/sqlite3', async (original) => {
+  const module = await original<typeof Sqlite3>()
+  const { createPerformanceSqliteClient } = await import('./sqliteClientObserver.js')
+
+  return {
+    ...module,
+    createClient: (...args: Parameters<typeof module.createClient>) =>
+      createPerformanceSqliteClient({ create: () => module.createClient(...args) }),
+  }
+})
+
 const isEnabled = process.env.PAYLOAD_BRANCH_PERF === 'true'
 
 test.suite(
@@ -50,6 +64,10 @@ test.suite(
       payload,
     }) => {
       const scenario = getPerformanceScenario()
+      if (process.env.PAYLOAD_BRANCH_PERF_WIRING_ONLY === 'true') {
+        await verifySqliteObserverWiring({ payload, scenario: { ...scenario, documents: 200 } })
+        return
+      }
       const { queryBranchContent } =
         await import('../../../packages/payload/src/versions/branches/queries/queryBranchContent.js')
       const { queryBranchContentGraph } =
@@ -86,6 +104,9 @@ test.suite(
       const branchID = getPerformanceBranches({ scenario })[0]!
       const instrumentation = instrumentBranchPerformance({ payload })
       const report: Record<string, any> = {
+        nativeObservationBoundary: instrumentation.observationBoundary,
+        nativeResourceObservationBoundary:
+          'Events through report finalization; excludes later Payload fixture shutdown',
         scenario,
         adapter: payload.db.name,
         measuredAt: new Date().toISOString(),
@@ -108,12 +129,12 @@ test.suite(
         measurements: [],
         environment,
       }
-      report.storage = await readBranchPerformanceStorage({ payload })
-      report.peakResidentSetKilobytes = process.resourceUsage().maxRSS
-      await mkdir(output, { recursive: true })
-      await writeFile(join(output, `${key}.json`), `${JSON.stringify(report, null, 2)}\n`)
       const native = payload.db.branching!.queryProjection!
       try {
+        report.storage = await readBranchPerformanceStorage({ payload })
+        report.peakResidentSetKilobytes = process.resourceUsage().maxRSS
+        await mkdir(output, { recursive: true })
+        await writeFile(join(output, `${key}.json`), `${JSON.stringify(report, null, 2)}\n`)
         instrumentation.reset()
         report.seed.authoritativeSampleRebuild = {
           ...(await verifyPerformanceSeed({ payload, scenario })),
@@ -695,6 +716,7 @@ test.suite(
         report.error = { message: String(error), code: (error as { code?: string }).code }
         throw error
       } finally {
+        report.nativeResources = [...instrumentation.resources]
         instrumentation.restore()
         // Keep evidence when a query, parity assertion or the budget fails.
         await mkdir(output, { recursive: true })
@@ -703,6 +725,89 @@ test.suite(
     }, 3_600_000)
   },
 )
+
+/** Untimed module-boundary proof; deliberately produces no performance report or gate evidence. */
+const verifySqliteObserverWiring = async ({
+  payload,
+  scenario,
+}: {
+  payload: Payload
+  scenario: BranchQueryPerformanceScenario
+}) => {
+  if (
+    payload.db.name !== 'sqlite' ||
+    process.env.PAYLOAD_BRANCH_PERF_EVIDENCE === 'final' ||
+    scenario.branches !== 1 ||
+    scenario.locales !== 2 ||
+    scenario.overrideDensity !== 0.01
+  ) {
+    throw new Error('SQLite observer wiring is diagnostic only and cannot produce final evidence.')
+  }
+  const { queryBranchContent } =
+    await import('../../../packages/payload/src/versions/branches/queries/queryBranchContent.js')
+
+  await seedBranchPerformance({ payload, scenario })
+  const req = await createPayloadRequest({ payload })
+  const logicalID = getPerformanceLogicalID({ ordinal: 100 })
+  const legacy = await payload.db.queryDrafts({
+    collection: performanceSlug,
+    locale: 'en',
+    req,
+    where: { 'version.ordinal': { equals: 100 } },
+  })
+  const observations = []
+
+  for (const phase of ['cold', 'retained'] as const) {
+    const instrumentation = instrumentBranchPerformance({ payload })
+
+    try {
+      const branch = await queryBranchContent({
+        branchID: 'review-1',
+        collection: performanceSlug,
+        locale: 'en',
+        overrideAccess: false,
+        req,
+        where: { id: { equals: logicalID } },
+      })
+      const statements = [...instrumentation.statements]
+      const commands = statements.slice(-4)
+
+      expect(branch.docs).toStrictEqual(legacy.docs)
+      expect(statements.length).toBeGreaterThanOrEqual(4)
+      expect(statements.every(({ nativeClient }) => nativeClient === 1)).toBe(true)
+      expect(commands.map(({ sql }) => sql)).toEqual([
+        'BEGIN DEFERRED',
+        expect.stringMatching(/select .*as "scopeKey".*as "isInitialized"/i),
+        expect.stringMatching(/^\s*(?:select|with)\b/i),
+        'COMMIT',
+      ])
+      expect(instrumentation.resources).toEqual([
+        {
+          client: 1,
+          kind: phase === 'cold' ? 'private-client-created' : 'private-client-observed',
+        },
+      ])
+      if (phase === 'cold') {
+        expect(statements.map(({ sql }) => sql)).toContain('PRAGMA query_only = ON')
+      } else {
+        expect(statements).toHaveLength(4)
+      }
+      observations.push({ phase, statements, resources: [...instrumentation.resources] })
+    } finally {
+      instrumentation.restore()
+    }
+  }
+  console.log(
+    JSON.stringify({
+      event: 'sqlite-observer-wiring-only',
+      evidence: 'untimed-diagnostic; not a performance gate',
+      resourceObservationBoundary:
+        'Events through each observation window; excludes later fixture shutdown',
+      scenario,
+      observations,
+    }),
+  )
+}
 
 const prefixVersionWhere = ({ where }: { where: Where }): Where =>
   Object.fromEntries(
