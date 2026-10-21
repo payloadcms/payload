@@ -6,7 +6,10 @@
  */
 
 import { fileURLToPath } from 'node:url'
-import { devServerExternalPackages, serverExternalPackages } from 'payload/build-config'
+import {
+  devServerExternalPackages as devServerExternalPayloadPackages,
+  serverExternalPackages as serverExternalPayloadPackages,
+} from 'payload/build-config'
 
 const poweredByHeader = {
   key: 'X-Powered-By',
@@ -144,12 +147,12 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     },
     serverExternalPackages: [
       ...(nextConfig.serverExternalPackages || []),
-      ...serverExternalPackages,
+      ...serverExternalPayloadPackages,
       // file-type v22 uses `import(specifier)` with a non-literal specifier, which Turbopack rejects
       // with "Cannot find module as expression is too dynamic"
       'file-type',
       ...(process.env.NODE_ENV === 'development' && options.devBundleServerPackages !== true
-        ? devServerExternalPackages
+        ? devServerExternalPayloadPackages
         : []),
     ],
     webpack: (webpackConfig, webpackOptions) => {

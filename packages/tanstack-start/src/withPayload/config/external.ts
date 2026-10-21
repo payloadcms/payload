@@ -1,6 +1,6 @@
 import {
-  devServerExternalPackages,
-  serverExternalPackages as sharedServerExternalPackages,
+  devServerExternalPackages as devServerExternalPayloadPackages,
+  serverExternalPackages as serverExternalPayloadPackages,
 } from 'payload/build-config'
 
 /**
@@ -16,7 +16,7 @@ import {
 export const ssrExternalPackages: string[] = [
   'zod',
   'fast-uri',
-  ...sharedServerExternalPackages,
+  ...serverExternalPayloadPackages,
   'drizzle-orm',
   'pino-pretty',
   'nodemailer',
@@ -74,7 +74,7 @@ export const serverExternalPackages: string[] = [
 /** Additional installed packages that can bypass Vite's development server transforms. */
 export const devExternalPackages: string[] = [
   ...serverExternalPackages,
-  ...devServerExternalPackages.filter((pkg) => !serverExternalPackages.includes(pkg)),
+  ...devServerExternalPayloadPackages.filter((pkg) => !serverExternalPackages.includes(pkg)),
   // Vite otherwise transforms date-fns' full module graph during SSR.
   'date-fns',
 ]
