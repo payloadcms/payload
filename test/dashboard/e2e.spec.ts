@@ -957,7 +957,7 @@ describe('Dashboard', () => {
         page,
         selectLocator: drawer.locator('.list-header__select-collection'),
       })
-      await expect(drawer.getByRole('heading')).toBeVisible()
+      await expect(drawer.getByRole('heading', { level: 1 })).toBeVisible()
       await expect(drawer.getByRole('button', { name: document.title, exact: true })).toHaveCount(0)
       await page.keyboard.press('Escape')
       await expect(drawer).toBeHidden()

@@ -131,6 +131,107 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.3.1 Info and Relationships (A)', () => {
+    for (const { name, path, title } of [
+      { name: 'dashboard', path: '', title: /^Welcome, / },
+      { name: 'collection list', path: '/collections/posts', title: 'Posts' },
+      { name: 'collection creation', path: '/collections/posts/create', title: 'Untitled' },
+      { name: 'global edit', path: '/globals/menu', title: 'Menu' },
+    ]) {
+      test(`should expose the ${name} main page title as a level-one heading`, async () => {
+        // PYLD-3640
+        await page.goto(formatAdminURL({ adminRoute: '/admin', path, serverURL }))
+        if (path.endsWith('/create') || path.startsWith('/globals/')) {
+          await waitForFormReady(page)
+        }
+
+        await expect(
+          page.getByRole('heading', { name: title, exact: true, level: 1 }),
+        ).toBeVisible()
+      })
+    }
+
+    test('should expose the existing document main page title as a level-one heading', async () => {
+      // Additional coverage for PYLD-3640.
+      await gotoFirstPost({ page, postsURL, serverURL })
+
+      await expect(
+        page.getByRole('heading', {
+          name: 'Example post one, third version',
+          exact: true,
+          level: 1,
+        }),
+      ).toBeVisible()
+    })
+
+    test('should expose the empty search result title as a heading in a versioned field collection', async () => {
+      // PYLD-3691, PYLD-3706
+      await gotoPostsList({ page, postsURL })
+      await expect(page.locator('tbody tr').first()).toBeVisible()
+      await page.locator('#search-filter-input').fill('heading-label-no-matching-post')
+      const title = page.locator('.no-results__title')
+
+      await expect(title).toHaveText('No Results.')
+      await expect(page.locator('tbody tr')).toHaveCount(0)
+      await expect(title).toHaveRole('heading')
+      await expect(title).toHaveAccessibleName('No Results.')
+    })
+
+    test('should expose one banner or distinguish repeated banners on the field collection', async () => {
+      // PYLD-3698
+      await gotoPostsList({ page, postsURL })
+      await openNavigation({ page })
+      await expect(page.locator('.app-header')).toBeVisible()
+      const banners = page.getByRole('banner')
+      const count = await banners.count()
+
+      expect(count).toBeGreaterThan(0)
+      if (count > 1) {
+        const names: string[] = []
+
+        for (const banner of await banners.all()) {
+          await expect(banner).toHaveAccessibleName(/\S/)
+          const snapshot = await banner.ariaSnapshot()
+          const name = snapshot.match(/^- banner "(.+?)"(?::|$)/m)?.[1]
+
+          expect(name).toBeTruthy()
+          names.push(name!)
+        }
+        expect(new Set(names).size).toBe(count)
+      }
+    })
+
+    test('should expose SEO preview metadata without actionable links or a page heading', async () => {
+      // PYLD-3832
+      await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/globals/menu', serverURL }))
+      await waitForFormReady(page)
+      await page.locator('#field-meta').scrollIntoViewIfNeeded()
+      await page.locator('#field-meta__title').fill('Accessibility search preview title')
+      await page
+        .locator('#field-meta__description')
+        .fill('Accessibility search preview description')
+      const preview = page
+        .locator('p')
+        .filter({ hasText: /^Accessibility search preview description$/ })
+        .locator('..')
+
+      await expect(preview).toHaveCount(1)
+      await expect(
+        preview.getByText('https://example.com/accessibility-post', { exact: true }),
+      ).toBeVisible()
+      await expect(
+        preview.getByText('Accessibility search preview title', { exact: true }),
+      ).toBeVisible()
+      await expect(
+        preview.getByText('Accessibility search preview description', { exact: true }),
+      ).toBeVisible()
+      await expect.soft(preview.getByRole('link')).toHaveCount(0)
+      await expect
+        .soft(
+          preview.getByRole('heading', { name: 'Accessibility search preview title', exact: true }),
+        )
+        .toHaveCount(0)
+    })
+
     for (const kind of ['Array', 'Blocks'] as const) {
       test(`should identify the ${kind} row on its drag control`, async ({
         browser: _browser,
@@ -483,6 +584,7 @@ test.describe('WCAG 2.2 Level AA', () => {
               .trim(),
           )
 
+          expect.soft(label).toMatch(/\S/)
           await expect.soft(item.getByRole('checkbox')).toHaveAccessibleName(label)
         }
       })
@@ -6057,6 +6159,156 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('3.2.2 On Input (A)', () => {
+    for (const toolbar of ['fixed', 'inline'] as const) {
+      test(`should preserve a partial text selection and ${toolbar} toolbar focus when toggling formatting`, async () => {
+        // Additional coverage for PYLD-3672.
+        await gotoCreatePost({ page, postsURL })
+        await page.locator('.rich-text-lexical').first().scrollIntoViewIfNeeded()
+        const richText = page.locator('.rich-text-lexical[data-field-path="content"]')
+        const editor = richText.locator('[contenteditable="true"]')
+        const toolbarSelector = toolbar === 'fixed' ? '.fixed-toolbar' : '.inline-toolbar-popup'
+        const bold = richText.locator(`${toolbarSelector} .toolbar-popup__button-bold`).first()
+
+        await editor.fill('Partial selection formatting')
+        await editor.press('End')
+        for (let index = 0; index < 11; index++) {
+          await page.keyboard.press('ArrowLeft')
+        }
+        for (let index = 0; index < 9; index++) {
+          await page.keyboard.press('Shift+ArrowLeft')
+        }
+        await expect
+          .poll(() => page.evaluate(() => window.getSelection()?.toString()))
+          .toBe('selection')
+        await expect(bold).toBeVisible()
+        await bold.focus()
+        await bold.press('Enter')
+
+        await expect(editor.locator('strong')).toHaveText('selection')
+        await expect(bold).toHaveAttribute('aria-pressed', 'true')
+        await expect(bold).toBeFocused()
+        await expect
+          .poll(() => page.evaluate(() => window.getSelection()?.toString()))
+          .toBe('selection')
+        await bold.press('Space')
+
+        await expect(editor.locator('strong')).toHaveCount(0)
+        await expect(bold).toHaveAttribute('aria-pressed', 'false')
+        await expect(bold).toBeFocused()
+        await expect
+          .poll(() => page.evaluate(() => window.getSelection()?.toString()))
+          .toBe('selection')
+        await expect(editor).toHaveText('Partial selection formatting')
+      })
+    }
+
+    for (const key of ['Enter', 'Space']) {
+      test(`should return focus to the editor when keyboard outdent disables its control with ${key}`, async () => {
+        await gotoCreatePost({ page, postsURL })
+        const richText = page.locator('.rich-text-lexical[data-field-path="content"]')
+        const editor = richText.locator('[contenteditable="true"]')
+        const increase = richText.locator('.fixed-toolbar .toolbar-popup__button-indentIncrease')
+        const decrease = richText.locator('.fixed-toolbar .toolbar-popup__button-indentDecrease')
+
+        await editor.fill('Keyboard indentation regression')
+        await editor.press('End')
+        await increase.focus()
+        await increase.press(key)
+        await expect(decrease).toBeEnabled()
+        await decrease.focus()
+        await decrease.press(key)
+
+        await expect(decrease).toBeDisabled()
+        await expect(editor).toBeFocused()
+        await page.keyboard.type(' insertion')
+
+        await expect(editor).toHaveText('Keyboard indentation regression insertion')
+      })
+    }
+
+    test('should retain keyboard focus on a rich-text format button when its state changes', async () => {
+      // PYLD-3672
+      await gotoCreatePost({ page, postsURL })
+      await page.locator('.rich-text-lexical').first().scrollIntoViewIfNeeded()
+      const richText = page.locator('.rich-text-lexical[data-field-path="content"]')
+      const editor = richText.locator('[contenteditable="true"]')
+      const bold = richText.locator('.toolbar-popup__button-bold').first()
+
+      await editor.fill('Keyboard formatting regression')
+      await editor.selectText()
+      await expect(bold).toHaveAttribute('aria-pressed', 'false')
+      await bold.focus()
+      await bold.press('Enter')
+
+      await expect(bold).toHaveAttribute('aria-pressed', 'true')
+      await expect(bold).toBeFocused()
+      await expect(editor.locator('strong')).toHaveText('Keyboard formatting regression')
+
+      await bold.press('Space')
+
+      await expect(bold).toHaveAttribute('aria-pressed', 'false')
+      await expect(bold).toBeFocused()
+      await expect(editor.locator('strong')).toHaveCount(0)
+    })
+
+    test('should toggle formatting from the keyboard before entering the rich-text editor', async () => {
+      // Additional coverage for PYLD-3672.
+      await gotoCreatePost({ page, postsURL })
+      await page.locator('.rich-text-lexical').first().scrollIntoViewIfNeeded()
+      const richText = page.locator('.rich-text-lexical[data-field-path="content"]')
+      const bold = richText.locator('.toolbar-popup__button-bold').first()
+
+      await expect(bold).toHaveAttribute('aria-pressed', 'false')
+      await bold.focus()
+      await bold.press('Enter')
+
+      await expect(bold).toHaveAttribute('aria-pressed', 'true')
+      await expect(bold).toBeFocused()
+      await bold.press('Space')
+
+      await expect(bold).toHaveAttribute('aria-pressed', 'false')
+      await expect(bold).toBeFocused()
+    })
+
+    test('should retain insertion formatting after keyboard activation at an existing caret', async () => {
+      // Additional coverage for PYLD-3672.
+      await gotoCreatePost({ page, postsURL })
+      await page.locator('.rich-text-lexical').first().scrollIntoViewIfNeeded()
+      const richText = page.locator('.rich-text-lexical[data-field-path="content"]')
+      const editor = richText.locator('[contenteditable="true"]')
+      const bold = richText.locator('.toolbar-popup__button-bold').first()
+
+      await editor.fill('Existing text ')
+      await editor.press('End')
+      await bold.focus()
+      await bold.press('Enter')
+
+      await expect(bold).toHaveAttribute('aria-pressed', 'true')
+      await expect(bold).toBeFocused()
+      await editor.focus()
+      await page.keyboard.type('Bold insertion')
+
+      await expect(editor.locator('strong')).toHaveText('Bold insertion')
+      await expect(editor).toHaveText('Existing text Bold insertion')
+    })
+
+    test('should return focus to the rich-text editor after pointer formatting', async () => {
+      // Additional coverage for PYLD-3672.
+      await gotoCreatePost({ page, postsURL })
+      await page.locator('.rich-text-lexical').first().scrollIntoViewIfNeeded()
+      const richText = page.locator('.rich-text-lexical[data-field-path="content"]')
+      const editor = richText.locator('[contenteditable="true"]')
+      const bold = richText.locator('.toolbar-popup__button-bold').first()
+
+      await editor.fill('Pointer formatting regression')
+      await editor.selectText()
+      await bold.click()
+
+      await expect(bold).toHaveAttribute('aria-pressed', 'true')
+      await expect(editor).toBeFocused()
+      await expect(editor.locator('strong')).toHaveText('Pointer formatting regression')
+    })
+
     test('should describe automatic search before input in rich text add panels', async () => {
       // PYLD-3663
       for (const openDrawer of [openRichTextUploadDrawer, openRichTextRelationshipDrawer]) {
@@ -6186,6 +6438,98 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should link field tabs to their named panels and expose only the selected content', async ({
+      browser: _browser,
+    }, testInfo) => {
+      // PYLD-3827
+      await gotoCreatePost({ page, postsURL })
+      const field = page.locator('.tabs-field').filter({
+        has: page.getByRole('tab', { name: 'Post details', exact: true }),
+      })
+      const tabs = field.getByRole('tab')
+
+      await expect(field.getByRole('tablist')).toHaveCount(1)
+      await expect(tabs).toHaveCount(2)
+      for (const [index, name] of ['Post details', 'Post summary'].entries()) {
+        const tab = tabs.nth(index)
+        const panel = field.getByRole('tabpanel', { name, exact: true })
+
+        await tab.focus()
+        await tab.press('Enter')
+        await expect(tab).toHaveAttribute('aria-selected', 'true')
+        await expect(panel).toBeVisible()
+        const panelID = (await panel.getAttribute('id')) ?? ''
+        const tabID = (await tab.getAttribute('id')) ?? ''
+
+        expect(panelID).toBeTruthy()
+        expect(tabID).toBeTruthy()
+        await expect(tab).toHaveAttribute('aria-controls', panelID)
+        await expect(panel).toHaveAttribute('aria-labelledby', tabID)
+        await expect(field.getByRole('tabpanel')).toHaveCount(1)
+        await expect(tabs.nth(1 - index)).toHaveAttribute('aria-selected', 'false')
+        await tab.press('Tab')
+        await expect(panel).toBeFocused()
+        await panel.press('Tab')
+        await expect(panel.getByRole('textbox')).toBeFocused()
+        const scan = await runAxeScan({ include: ['.tabs-field'], page, testInfo })
+
+        expect(scan.violations.filter(({ tags }) => tags.includes('wcag412'))).toEqual([])
+      }
+    })
+
+    test('should label navigation tab panels with their selected tabs', async ({
+      browser: _browser,
+    }, testInfo) => {
+      // PYLD-3731
+      await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
+      await openNavigation({ page })
+      const sidebar = page.locator('.nav .sidebar-tabs')
+      const tabs = sidebar.getByRole('tab')
+
+      await expect(tabs).toHaveCount(2)
+      for (const name of ['Collections', 'Folders']) {
+        const tab = sidebar.getByRole('tab', { name, exact: true })
+        const panel = sidebar.getByRole('tabpanel', { name, exact: true })
+
+        if (name === 'Collections') {
+          await tab.focus()
+          await tab.press('Enter')
+        } else {
+          await sidebar.getByRole('tab', { name: 'Collections', exact: true }).focus()
+          await page.keyboard.press('ArrowRight')
+          await expect(tab).toBeFocused()
+        }
+        await expect(tab).toHaveAttribute('aria-selected', 'true')
+        await expect(panel).toBeVisible()
+        const tabID = (await tab.getAttribute('id')) ?? ''
+        const panelID = (await panel.getAttribute('id')) ?? ''
+
+        expect(tabID).toBeTruthy()
+        expect(panelID).toBeTruthy()
+        await expect(panel).toHaveAttribute('aria-labelledby', tabID)
+        await expect(tab).toHaveAttribute('aria-controls', panelID)
+        await expect(sidebar.getByRole('tabpanel')).toHaveCount(1)
+        await tab.press('Tab')
+        await expect(panel).toBeFocused()
+        if (name === 'Folders') {
+          await expect(panel.getByRole('tree')).toBeVisible()
+        }
+        const scan = await runAxeScan({
+          defaultExcludes: false,
+          include: ['.sidebar-tabs'],
+          page,
+          testInfo,
+        })
+
+        expect(scan.violations.filter(({ tags }) => tags.includes('wcag412'))).toEqual([])
+      }
+      await sidebar.getByRole('tab', { name: 'Folders', exact: true }).focus()
+      await page.keyboard.press('ArrowLeft')
+      await expect(
+        sidebar.getByRole('tabpanel', { name: 'Collections', exact: true }),
+      ).toBeVisible()
+    })
+
     for (const { isInDrawer, shouldToggleTwice } of [
       { isInDrawer: false, shouldToggleTwice: false },
       { isInDrawer: true, shouldToggleTwice: false },
