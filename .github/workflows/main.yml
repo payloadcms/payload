@@ -219,10 +219,10 @@ jobs:
           database: ${{ matrix.database }}
 
       - name: Integration Tests
-        run: pnpm test:int:ci --shard=${{ matrix.shard }}/${{ matrix.total-shards }}
+        run: pnpm test:int --shard=${{ matrix.shard }}/${{ matrix.total-shards }}
         env:
           # Private-repo runners have less memory; leave public CI on its existing Node default.
-          NODE_OPTIONS: ${{ github.event.repository.private && '--max-old-space-size=3072 --no-deprecation --no-experimental-strip-types' || '--no-deprecation --no-experimental-strip-types' }}
+          NODE_OPTIONS: ${{ github.event.repository.private && '--max-old-space-size=3072' || '' }}
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
