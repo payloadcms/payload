@@ -5650,6 +5650,27 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
     expect(result.title).toBe('post updated')
   })
 
+  test('should not write localized fields of a missing document with db.updateOne', async ({
+    payload,
+  }) => {
+    const post = await payload.create({
+      collection: postsSlug,
+      data: { localized: 'en', title: 'post' },
+      locale: 'en',
+      overrideAccess: true,
+    })
+
+    await payload.delete({ id: post.id, collection: postsSlug, overrideAccess: true })
+
+    const result = await payload.db.updateOne({
+      id: post.id,
+      collection: postsSlug,
+      data: { localized: { en: 'en updated' }, updatedAt: null },
+    })
+
+    expect(result).toBeNull()
+  })
+
   test('should allow incremental number update', async ({ payload }) => {
     const post = await payload.create({
       collection: 'posts',
