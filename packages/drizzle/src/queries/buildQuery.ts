@@ -4,9 +4,11 @@ import type { FlattenedField, Sort, Where } from 'payload'
 
 import { and } from 'drizzle-orm'
 
+import type { ProjectionQueryAdapter } from '../branching/createProjectionQueries.js'
 import type { DrizzleAdapter, GenericColumn, GenericTable } from '../types.js'
 import type { QueryContext } from './parseParams.js'
 
+import { projectionQueryContext } from '../branching/createProjectionQueries.js'
 import {
   getProjectionCollection,
   guardProjectionJoins,
@@ -61,6 +63,14 @@ export const buildQuery = function buildQuery({
   tableName,
   where: incomingWhere,
 }: BuildQueryArgs): BuildQueryResult {
+  // Nested projection queries use this alias as their driving relation. Field
+  // traversal also reads the table registry when adding localized/array joins.
+  if (aliasTable && (adapter as ProjectionQueryAdapter)[projectionQueryContext]) {
+    adapter = Object.assign(Object.create(adapter), {
+      tables: { ...adapter.tables, [tableName]: aliasTable },
+    }) as DrizzleAdapter
+  }
+
   const selectFields: Record<string, GenericColumn> = {
     id: adapter.tables[tableName].id,
   }

@@ -143,6 +143,7 @@ export const projectionRelationConstraint = ({
   // traverse the same visible branch relation without recursively expanding policies.
   const nestedAdapter = Object.assign(Object.create(adapter), {
     [projectionCompilingAccess]: true,
+    tables: { ...adapter.tables, [tableName]: table },
   }) as DrizzleAdapter
   const joins: BuildQueryJoinAliases = []
   const predicate = parseParams({

@@ -1,6 +1,16 @@
 import type { Find, TypeWithID } from 'payload'
 
-import { asc, count, eq, getTableName, inArray, max, min, sql } from 'drizzle-orm'
+import {
+  aliasedTableColumn,
+  asc,
+  count,
+  eq,
+  getTableName,
+  inArray,
+  max,
+  min,
+  sql,
+} from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../types.js'
@@ -92,7 +102,9 @@ export const findProjection: Find = async function (this: DrizzleAdapter, args) 
   const rank = (db as any)
     .select({ rank: selected.rank })
     .from(selected)
-    .where(eq(selected.id, table.id))
+    // The nested query is compiled before relational alias rewriting. Correlate with
+    // its outer alias explicitly, because a source schema qualifier is invalid there.
+    .where(eq(selected.id, aliasedTableColumn(table.id, tableName)))
 
   relational.where = inArray(table.id, selectedIDs)
   relational.orderBy = sql`(${rank})`
