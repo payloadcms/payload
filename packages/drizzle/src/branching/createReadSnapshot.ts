@@ -9,9 +9,19 @@ import type { DrizzleAdapter, DrizzleTransaction, TransactionPg } from '../types
 import { createPostgresReadTrace } from './createPostgresReadTrace.js'
 import { createProjectionQueries } from './createProjectionQueries.js'
 
+export type WithReadTransaction = <T>(args: {
+  read: (args: { db: DrizzleTransaction }) => Promise<T>
+}) => Promise<T>
+
 /** Native snapshot ownership is deliberately separate from write transaction support. */
 export const createReadSnapshot =
-  ({ adapter }: { adapter: DrizzleAdapter }): NonNullable<BranchingAdapter['withReadSnapshot']> =>
+  ({
+    adapter,
+    withReadTransaction,
+  }: {
+    adapter: DrizzleAdapter
+    withReadTransaction?: WithReadTransaction
+  }): NonNullable<BranchingAdapter['withReadSnapshot']> =>
   async ({ read, req }) => {
     const transactionID = await req.transactionID
 
@@ -57,6 +67,12 @@ export const createReadSnapshot =
       }
 
       return snapshotRead({ adapter, assertReadActive, db: transaction, read, req })
+    }
+
+    if (withReadTransaction) {
+      return withReadTransaction({
+        read: ({ db }) => snapshotRead({ adapter, db, read, req }),
+      })
     }
 
     // Use the primary even when read replicas are configured. All subsequent reads

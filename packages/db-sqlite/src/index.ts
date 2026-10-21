@@ -63,6 +63,7 @@ import type { Args, SQLiteAdapter, WalConfig } from './types.js'
 
 import { connect } from './connect.js'
 import { createTransactionHandlers } from './createTransactionHandlers.js'
+import { withReadTransaction } from './withReadTransaction.js'
 
 const filename = fileURLToPath(import.meta.url)
 
@@ -243,6 +244,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
     adapter.branching = createDrizzleBranchingAdapter({
       adapter: adapter as unknown as DrizzleAdapter,
       isTransactionConfigured: Boolean(args.transactionOptions),
+      withReadTransaction: ({ read }) => withReadTransaction({ adapter, read }),
     })
 
     return adapter

@@ -5,6 +5,7 @@ import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter, TransactionSQLite } from '../types.js'
+import type { WithReadTransaction } from './createReadSnapshot.js'
 
 import { buildFindManyArgs } from '../find/buildFindManyArgs.js'
 import { transform } from '../transform/read/index.js'
@@ -19,10 +20,12 @@ export const createDrizzleBranchingAdapter = ({
   adapter,
   isTransactionConfigured,
   unsupportedReason,
+  withReadTransaction,
 }: {
   adapter: DrizzleAdapter
   isTransactionConfigured: boolean
   unsupportedReason?: string
+  withReadTransaction?: WithReadTransaction
 }): BranchingAdapter => ({
   capabilities: () => {
     const hasInteractiveTransactions =
@@ -190,5 +193,5 @@ export const createDrizzleBranchingAdapter = ({
     return current
   },
   queryProjection: createProjectionQueries({ adapter }),
-  withReadSnapshot: createReadSnapshot({ adapter }),
+  withReadSnapshot: createReadSnapshot({ adapter, withReadTransaction }),
 })
