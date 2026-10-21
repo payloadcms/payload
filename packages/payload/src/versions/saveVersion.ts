@@ -42,7 +42,6 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
   docWithLocales,
   draft,
   global,
-  operation,
   payload,
   req,
   returning,
@@ -102,7 +101,7 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
       const createVersionArgs = {
         autosave: Boolean(autosave),
         collectionSlug: undefined as string | undefined,
-        createdAt: operation === 'restoreVersion' ? versionData.createdAt : now,
+        createdAt: now,
         globalSlug: undefined as string | undefined,
         parent: collection ? id : undefined,
         req,
