@@ -234,7 +234,7 @@ export function DefaultEditView({
           documentLockState.current = {
             hasShownLockedModal: documentLockState.current?.hasShownLockedModal || false,
             isLocked: true,
-            user: lockedState.user as User,
+            user: lockedState.user,
           }
           setCurrentEditor(lockedState.user as User)
         }
@@ -356,7 +356,7 @@ export function DefaultEditView({
           path: `/collections/${collectionSlug}/${document?.id}${locale ? `?locale=${locale}` : ''}`,
         })
 
-        startRouteTransition(() => router.push(redirectRoute))
+        void startRouteTransition(() => router.push(redirectRoute))
       } else {
         resetUploadEdits()
       }
@@ -499,6 +499,7 @@ export function DefaultEditView({
         !hasCheckedForStaleDataRef.current &&
         originalUpdatedAtRef.current &&
         operation === 'update' &&
+        !isTrashed &&
         !autosaveEnabled
 
       if (checkForStaleData) {
@@ -517,6 +518,7 @@ export function DefaultEditView({
         globalSlug,
         operation,
         originalUpdatedAt: checkForStaleData ? originalUpdatedAtRef.current : undefined,
+        readOnly: isTrashed || isReadOnlyForIncomingUser,
         renderAllFields: false,
         returnLockStatus: isLockingEnabled,
         schemaPath: schemaPathSegments.join('.'),
@@ -564,6 +566,8 @@ export function DefaultEditView({
       schemaPathSegments,
       handleDocumentLocking,
       autosaveEnabled,
+      isTrashed,
+      isReadOnlyForIncomingUser,
     ],
   )
 
@@ -609,8 +613,8 @@ export function DefaultEditView({
 
   const isFolderCollection = Boolean(
     collectionConfig?.hierarchy &&
-      typeof collectionConfig.hierarchy === 'object' &&
-      collectionConfig.hierarchy.allowHasMany === false,
+    typeof collectionConfig.hierarchy === 'object' &&
+    collectionConfig.hierarchy.allowHasMany === false,
   )
 
   const documentControlsProps: Omit<React.ComponentProps<typeof DocumentControls>, 'variant'> = {
@@ -690,6 +694,7 @@ export function DefaultEditView({
     <main
       className={[
         baseClass,
+        config.admin.constrainWidth && `${baseClass}--constrain-document-width`,
         (id || globalSlug) && `${baseClass}--is-editing`,
         globalSlug && `global-edit--${globalSlug}`,
         collectionSlug && `collection-edit--${collectionSlug}`,

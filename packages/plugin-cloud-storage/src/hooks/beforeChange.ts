@@ -2,23 +2,57 @@ import type { CollectionConfig, FieldHook, ImageSize } from 'payload'
 
 import type { GeneratedAdapter, GenerateFileURL } from '../types.js'
 
+import { sanitizePrefix } from '../utilities/sanitizePrefix.js'
+
 interface Args {
   adapter: GeneratedAdapter
   collection: CollectionConfig
   disablePayloadAccessControl?: boolean
   generateFileURL?: GenerateFileURL
+  isOriginal?: boolean
   size?: ImageSize
 }
 
+// The object's folder: semantic prefix + `_objectKey` segment.
+const getObjectFolder = (data: unknown, originalDoc: unknown): string => {
+  const source = (data ?? originalDoc ?? {}) as Record<string, unknown>
+  const safePrefix = sanitizePrefix(typeof source.prefix === 'string' ? source.prefix : '')
+  const safeObjectKey = sanitizePrefix(
+    typeof source._objectKey === 'string' ? source._objectKey : '',
+  )
+
+  if (safePrefix && safeObjectKey) {
+    return `${safePrefix}/${safeObjectKey}`
+  }
+
+  return safePrefix || safeObjectKey
+}
+
 export const getBeforeChangeHook =
-  ({ adapter, collection, disablePayloadAccessControl, generateFileURL, size }: Args): FieldHook =>
+  ({
+    adapter,
+    collection,
+    disablePayloadAccessControl,
+    generateFileURL,
+    isOriginal,
+    size,
+  }: Args): FieldHook =>
   async ({ data, originalDoc, value }) => {
-    const newFilename = size ? data?.sizes?.[size.name]?.filename : data?.filename
-    const originalFilename = size
-      ? originalDoc?.sizes?.[size.name]?.filename
-      : originalDoc?.filename
+    const newRepresentation = isOriginal
+      ? data?.original
+      : size
+        ? data?.variants?.[size.name]
+        : data
+    const originalRepresentation = isOriginal
+      ? originalDoc?.original
+      : size
+        ? originalDoc?.variants?.[size.name]
+        : originalDoc
+    const newFilename = newRepresentation?.filename
+    const originalFilename = originalRepresentation?.filename
     const filename = newFilename || originalFilename
-    const prefix = data?.prefix
+    const representation = newRepresentation ?? originalRepresentation
+    const prefix = getObjectFolder(representation, data ?? originalDoc)
     let url = value
 
     if (generateFileURL && filename) {

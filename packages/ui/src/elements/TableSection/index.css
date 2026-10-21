@@ -15,11 +15,10 @@
   .table-section__heading {
     margin: 0;
     flex-grow: 1;
-    font-family: var(--text-body-large-strong-font-family);
-    font-size: var(--text-body-large-strong-font-size);
-    font-weight: var(--text-body-large-strong-font-weight);
-    line-height: var(--text-body-large-strong-line-height);
-    letter-spacing: var(--text-body-large-strong-letter-spacing);
+    font-size: var(--text-body-large-bold-font-size);
+    font-weight: var(--text-body-large-bold-font-weight);
+    line-height: var(--text-body-large-bold-line-height);
+    letter-spacing: var(--text-body-large-bold-letter-spacing);
   }
 
   .table-section__header .list-selection__actions button {
@@ -43,6 +42,7 @@
     display: block;
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .table-section__header {
       padding: 0 calc(var(--spacer-3) - var(--spacer-2));

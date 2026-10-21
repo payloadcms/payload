@@ -1,5 +1,7 @@
 'use client'
 
+import type { AriaAttributes } from 'react'
+
 import React from 'react'
 
 import { FilterIcon } from '../../icons/Filter/index.js'
@@ -10,6 +12,9 @@ import './index.css'
 const baseClass = 'filter-trigger'
 
 type FilterTriggerProps = {
+  'aria-controls'?: AriaAttributes['aria-controls']
+  'aria-expanded'?: AriaAttributes['aria-expanded']
+  'aria-haspopup'?: AriaAttributes['aria-haspopup']
   children: React.ReactNode
   className?: string
   id?: string
@@ -25,6 +30,9 @@ type FilterTriggerProps = {
 
 export function FilterTrigger({
   id,
+  'aria-controls': ariaControls,
+  'aria-expanded': ariaExpanded,
+  'aria-haspopup': ariaHasPopup,
   children,
   className,
   isActive,
@@ -37,6 +45,9 @@ export function FilterTrigger({
   return (
     <div className={`${baseClass}__wrap`}>
       <Button
+        aria-controls={ariaControls}
+        aria-expanded={ariaExpanded}
+        aria-haspopup={ariaHasPopup}
         buttonStyle="secondary"
         className={[baseClass, className].filter(Boolean).join(' ')}
         extraButtonProps={{ onKeyDown }}

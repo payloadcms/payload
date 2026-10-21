@@ -26,11 +26,17 @@ export type SyncConfig = {
   stripeResourceTypeSingular: 'customer' | 'product' // TODO: there must be a better way to do this
 }
 
+export type StripeRESTAccess = (args: { req: PayloadRequest }) => boolean | Promise<boolean>
+
+export type StripeRESTConfig = {
+  access?: StripeRESTAccess
+  allowedMethods: readonly string[]
+}
+
 export type StripePluginConfig = {
   isTestKey?: boolean
   logs?: boolean
-  /** @default false */
-  rest?: boolean
+  rest?: StripeRESTConfig
   stripeSecretKey: string
   stripeWebhooksEndpointSecret?: string
   sync?: SyncConfig[]
@@ -38,8 +44,9 @@ export type StripePluginConfig = {
 }
 
 export type SanitizedStripePluginConfig = {
-  sync: SyncConfig[] // convert to required
-} & StripePluginConfig
+  rest?: StripeRESTConfig
+  sync: SyncConfig[]
+} & Omit<StripePluginConfig, 'rest' | 'sync'>
 
 export type StripeProxy = (args: {
   stripeArgs: any[]

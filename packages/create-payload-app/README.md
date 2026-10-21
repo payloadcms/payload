@@ -2,6 +2,10 @@
 
 CLI for easily starting new Payload project
 
+When run without a project name inside a compatible existing Next.js, TanStack Start, or
+conventional TanStack Router project, the CLI initializes Payload in the current project.
+Router-only projects are converted to TanStack Start after confirmation.
+
 ## Usage
 
 ```text

@@ -1,21 +1,22 @@
 import type { BlobDownloadResponseParsed, ContainerClient } from '@azure/storage-blob'
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { CollectionConfig, FileHandlerOperation, PayloadRequest, TypeWithID } from 'payload'
 import type { Readable } from 'stream'
 
 import { RestError } from '@azure/storage-blob'
 import {
+  buildStoragePathData,
   getFilePrefix as getDocPrefix,
-  getFileKey,
 } from '@payloadcms/plugin-cloud-storage/utilities'
-import { getRangeRequestInfo } from 'payload/internal'
+import { getRangeRequestInfo, isXmlMimeType, uploadContentSecurityPolicy } from 'payload/internal'
 
 interface GetFileArgs {
   client: ContainerClient
   collection: CollectionConfig
   collectionPrefix?: string
+  doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
-  prefixQueryParam?: string
+  operation?: FileHandlerOperation
   req: PayloadRequest
   uploadReference?: unknown
   useCompositePrefixes?: boolean
@@ -55,13 +56,15 @@ export async function getFile({
   client,
   collection,
   collectionPrefix = '',
+  doc,
   filename,
   incomingHeaders,
-  prefixQueryParam,
+  operation = 'read',
   req,
   uploadReference,
   useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
+  const isTransformSource = operation === 'transform'
   let blob: BlobDownloadResponseParsed | undefined = undefined
   let streamed = false
 
@@ -75,22 +78,23 @@ export async function getFile({
   try {
     const docPrefix = await getDocPrefix({
       collection,
+      collectionPrefix,
+      doc,
       filename,
-      prefixQueryParam,
       req,
       uploadReference,
+      useCompositePrefixes,
     })
 
-    const { fileKey } = getFileKey({
+    const { storageFilePath } = buildStoragePathData({
       collectionPrefix,
       docPrefix,
       filename,
       useCompositePrefixes,
     })
 
-    const blockBlobClient = client.getBlockBlobClient(fileKey)
+    const blockBlobClient = client.getBlockBlobClient(storageFilePath)
 
-    // Get file size for range validation
     const properties = await blockBlobClient.getProperties()
     const fileSize = properties.contentLength
 
@@ -98,8 +102,7 @@ export async function getFile({
       return new Response('Internal Server Error', { status: 500 })
     }
 
-    // Handle range request
-    const rangeHeader = req.headers.get('range')
+    const rangeHeader = isTransformSource ? null : req.headers.get('range')
     const rangeResult = getRangeRequestInfo({ fileSize, rangeHeader })
 
     if (rangeResult.type === 'invalid') {
@@ -109,7 +112,6 @@ export async function getFile({
       })
     }
 
-    // Download with range if partial
     blob =
       rangeResult.type === 'partial'
         ? await blockBlobClient.download(
@@ -121,25 +123,24 @@ export async function getFile({
 
     let headers = new Headers(incomingHeaders)
 
-    // Add range-related headers from the result
     for (const [key, value] of Object.entries(rangeResult.headers)) {
       headers.append(key, value)
     }
 
-    // Add Azure-specific headers
     headers.append('Content-Type', String(properties.contentType))
     if (properties.etag) {
       headers.append('ETag', String(properties.etag))
     }
 
-    // Add Content-Security-Policy header for SVG files to prevent executable code
-    if (properties.contentType === 'image/svg+xml') {
-      headers.append('Content-Security-Policy', "script-src 'none'")
+    // Apply a restrictive policy to XML-family responses served through Payload.
+    if (isXmlMimeType(properties.contentType)) {
+      headers.append('Content-Security-Policy', uploadContentSecurityPolicy)
     }
 
     const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
 
     if (
+      !isTransformSource &&
       collection.upload &&
       typeof collection.upload === 'object' &&
       typeof collection.upload.modifyResponseHeaders === 'function'
@@ -147,7 +148,7 @@ export async function getFile({
       headers = collection.upload.modifyResponseHeaders({ headers }) || headers
     }
 
-    if (etagFromHeaders && etagFromHeaders === properties.etag) {
+    if (!isTransformSource && etagFromHeaders && etagFromHeaders === properties.etag) {
       return new Response(null, {
         headers,
         status: 304,

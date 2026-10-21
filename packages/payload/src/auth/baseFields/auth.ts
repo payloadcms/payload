@@ -38,3 +38,13 @@ export const baseAuthFields: Field[] = [
     hidden: true,
   },
 ]
+
+export const resetPasswordRequestedAtField: Field = {
+  name: 'resetPasswordRequestedAt',
+  type: 'date',
+  access: {
+    create: () => false,
+    update: () => false,
+  },
+  hidden: true,
+}

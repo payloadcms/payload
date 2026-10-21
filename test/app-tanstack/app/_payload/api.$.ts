@@ -1,3 +1,4 @@
+/* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. MODIFY AT YOUR OWN RISK. */
 import { payloadApiHandlers } from '@payloadcms/tanstack-start/server'
 import { createFileRoute } from '@tanstack/react-router'
 

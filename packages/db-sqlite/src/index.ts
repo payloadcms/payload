@@ -155,6 +155,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
+      operatorHandlers: [],
       operators,
       prodMigrations: args.prodMigrations,
       wal,
@@ -248,9 +249,6 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
   }
 }
 
-/**
- * @todo deprecate /types subpath export in 4.0
- */
 export type {
   Args as SQLiteAdapterArgs,
   CountDistinct,

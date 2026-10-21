@@ -78,7 +78,7 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
 
   if (!generatedSQL.length) {
     payload.logger.info(`No schema changes needed.`)
-    process.exit(0)
+    return
   }
 
   const sqlUpStatements = groupUpSQLStatements(generatedSQL)

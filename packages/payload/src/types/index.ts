@@ -24,7 +24,7 @@ import type {
   TypedLocale,
 } from '../index.js'
 import type { File } from '../uploads/types.js'
-import type { Operator } from './constants.js'
+import type { HasManyRelationshipOperator, Operator } from './constants.js'
 export type { TypeWithID } from '../collections/config/types.js'
 export type { Payload } from '../index.js'
 
@@ -38,6 +38,12 @@ export type CustomPayloadRequestProperties = {
   context: RequestContext
   /** The locale that should be used for a field when it is not translated to the requested locale */
   fallbackLocale?: TypedFallbackLocale
+  /**
+   * Set by Payload only while running a collection's `read` access function for a
+   * dynamic file transformation request. Restored to its prior value immediately
+   * after that access check completes; never set for ordinary reads.
+   */
+  fileTransform?: true
   i18n: I18n
   /**
    * The requested locale if specified
@@ -126,13 +132,13 @@ type PayloadRequestData = {
   files?: Record<string, File | File[]>
 }
 export interface PayloadRequest
-  extends CustomPayloadRequestProperties,
-    Partial<Request>,
-    PayloadRequestData {
+  extends CustomPayloadRequestProperties, Partial<Request>, PayloadRequestData {
   headers: Request['headers']
+  /** The active Payload operation. */
+  operation?: Operation
 }
 
-export type { Operator }
+export type { HasManyRelationshipOperator, Operator }
 
 // Makes it so things like passing new Date() will error
 export type JsonValue = JsonArray | JsonObject | unknown //Date | JsonArray | JsonObject | boolean | null | number | string // TODO: Evaluate proper, strong type for this
@@ -144,7 +150,7 @@ export interface JsonObject {
 }
 
 export type WhereField = {
-  // any json-serializable value
+  // any json-serializable value, including a nested query for supported relationship operators
   [key in Operator]?: JsonValue
 }
 
@@ -190,7 +196,15 @@ export type JoinQuery<TSlug extends CollectionSlug = string> =
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Document = any
 
-export type Operation = 'create' | 'delete' | 'read' | 'update'
+/**
+ * Operations exposed to access control and request lifecycle functions.
+ *
+ * On-demand validation uses the first-class `validate` value rather than substituting `create`
+ * or `update`.
+ */
+export type Operation = 'create' | 'delete' | 'read' | 'update' | 'validate'
+export type FieldOperation = Exclude<Operation, 'delete'>
+export type BeforeValidateOperation = Extract<FieldOperation, 'create' | 'update' | 'validate'>
 export type VersionOperations = 'readVersions'
 export type AuthOperations = 'unlock'
 export type AllOperations = AuthOperations | Operation | VersionOperations
@@ -290,22 +304,26 @@ export type TransformDataWithSelect<
         // Handle include mode
         Select extends SelectIncludeType
         ? {
-            [K in keyof Data as K extends keyof Select
-              ? Select[K] extends object | true
-                ? K
-                : never
-              : // select 'id' always
-                K extends 'id'
-                ? K
-                : never]: Data[K]
+            [
+              K in keyof Data as K extends keyof Select
+                ? Select[K] extends object | true
+                  ? K
+                  : never
+                : // select 'id' always
+                  K extends 'id'
+                  ? K
+                  : never
+            ]: Data[K]
           }
         : // Handle exclude mode
           {
-            [K in keyof Data as K extends keyof Select
-              ? Select[K] extends object | undefined
-                ? K
-                : never
-              : K]: Data[K]
+            [
+              K in keyof Data as K extends keyof Select
+                ? Select[K] extends object | undefined
+                  ? K
+                  : never
+                : K
+            ]: Data[K]
           }
 
 export type TransformCollectionWithSelect<
@@ -330,6 +348,8 @@ export type TransformGlobalWithSelect<
   : DataFromGlobalSlug<TSlug>
 
 export type PopulateType = Partial<TypedCollectionSelect>
+
+export type { SharedLocalAPIOptions } from './operations.js'
 
 export type ResolvedFilterOptions = { [collection: string]: Where }
 

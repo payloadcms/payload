@@ -1,7 +1,7 @@
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { getConfig } from './getConfig.js'
+import { getConfig, seed } from './getConfig.js'
 
 const idType =
   process.env.PAYLOAD_DATABASE === 'sqlite-uuid'
@@ -11,12 +11,16 @@ const idType =
       : undefined
 
 export default buildConfigWithDefaults({
-  ...getConfig(),
-  db: sqliteAdapter({
-    client: {
-      url: process.env.SQLITE_URL || process.env.DATABASE_URL || 'file:./payload.db',
-    },
-    ...(idType ? { idType } : { autoIncrement: true }),
-    push: false,
-  }),
+  suite: 'queues-crash-worker',
+  config: {
+    ...getConfig(),
+    db: sqliteAdapter({
+      client: {
+        url: process.env.SQLITE_URL || process.env.DATABASE_URL || 'file:./payload.db',
+      },
+      ...(idType ? { idType } : { autoIncrement: true }),
+      push: false,
+    }),
+  },
+  seed,
 })

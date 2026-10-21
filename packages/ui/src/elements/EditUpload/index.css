@@ -10,7 +10,6 @@
     display: flex;
     flex-direction: column;
     overflow: visible;
-    border-bottom: var(--stroke-width-small) solid var(--color-border);
   }
 
   .edit-upload__content {
@@ -80,10 +79,10 @@
   }
 
   .edit-upload__section-title {
-    font-family: var(--text-body-medium-strong-font-family);
-    font-size: var(--text-body-medium-strong-font-size);
-    font-weight: var(--text-body-medium-strong-font-weight);
-    line-height: var(--text-body-medium-strong-line-height);
+    margin: 0;
+    font-size: var(--text-body-medium-bold-font-size);
+    font-weight: var(--text-body-medium-bold-font-weight);
+    line-height: var(--text-body-medium-bold-line-height);
     color: var(--color-text);
   }
 
@@ -150,6 +149,7 @@
     }
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .edit-upload__content {
       flex-direction: column;

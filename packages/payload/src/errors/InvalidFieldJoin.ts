@@ -7,5 +7,6 @@ export class InvalidFieldJoin extends APIError {
     super(
       `Invalid join field ${field.name}. The config does not have a field '${field.on}' in collection '${field.collection}'.`,
     )
+    this.name = 'InvalidFieldJoin'
   }
 }

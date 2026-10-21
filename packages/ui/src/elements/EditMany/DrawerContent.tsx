@@ -169,7 +169,8 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
   } = props
 
   const { permissions, user } = useAuth()
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
 
   const { closeModal } = useModal()
 
@@ -275,7 +276,7 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
   }, [collection, searchParams, selectAll, ids, locale, where])
 
   const onSuccess = () => {
-    router.replace(
+    void router.replace(
       qs.stringify(
         {
           ...parseSearchParams(searchParams),

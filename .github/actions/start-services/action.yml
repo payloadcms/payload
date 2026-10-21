@@ -23,20 +23,24 @@ runs:
     - name: Start storage services
       shell: bash
       run: |
-        for i in 1 2 3; do
+        # Every job pulls at once, so back off with jitter to get out of sync under registry rate limits
+        for i in 1 2 3 4 5; do
           docker compose -f test/docker-compose.yml --profile storage pull && break
-          echo "Pull attempt $i/3 for 'storage' profile failed, retrying in 10s..."
-          sleep 10
+          delay=$((i * 10 + RANDOM % 10))
+          echo "Pull attempt $i/5 for 'storage' profile failed, retrying in ${delay}s..."
+          sleep "$delay"
         done
         docker compose -f test/docker-compose.yml --profile storage up -d --wait
 
     - name: Start Redis
       shell: bash
       run: |
-        for i in 1 2 3; do
+        # Every job pulls at once, so back off with jitter to get out of sync under registry rate limits
+        for i in 1 2 3 4 5; do
           docker compose -f test/docker-compose.yml --profile redis pull && break
-          echo "Pull attempt $i/3 for 'redis' profile failed, retrying in 10s..."
-          sleep 10
+          delay=$((i * 10 + RANDOM % 10))
+          echo "Pull attempt $i/5 for 'redis' profile failed, retrying in ${delay}s..."
+          sleep "$delay"
         done
         docker compose -f test/docker-compose.yml --profile redis up -d --wait
 
@@ -45,10 +49,12 @@ runs:
       if: contains(fromJSON('["mongodb", "cosmosdb", "documentdb", "firestore"]'), inputs.database)
       shell: bash
       run: |
-        for i in 1 2 3; do
+        # Every job pulls at once, so back off with jitter to get out of sync under registry rate limits
+        for i in 1 2 3 4 5; do
           docker compose -f test/docker-compose.yml --profile mongodb pull && break
-          echo "Pull attempt $i/3 for 'mongodb' profile failed, retrying in 10s..."
-          sleep 10
+          delay=$((i * 10 + RANDOM % 10))
+          echo "Pull attempt $i/5 for 'mongodb' profile failed, retrying in ${delay}s..."
+          sleep "$delay"
         done
         docker compose -f test/docker-compose.yml --profile mongodb up -d --wait
         echo "url=mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0" >> $GITHUB_OUTPUT
@@ -58,10 +64,12 @@ runs:
       if: inputs.database == 'mongodb-atlas'
       shell: bash
       run: |
-        for i in 1 2 3; do
+        # Every job pulls at once, so back off with jitter to get out of sync under registry rate limits
+        for i in 1 2 3 4 5; do
           docker compose -f test/docker-compose.yml --profile mongodb-atlas pull && break
-          echo "Pull attempt $i/3 for 'mongodb-atlas' profile failed, retrying in 10s..."
-          sleep 10
+          delay=$((i * 10 + RANDOM % 10))
+          echo "Pull attempt $i/5 for 'mongodb-atlas' profile failed, retrying in ${delay}s..."
+          sleep "$delay"
         done
         docker compose -f test/docker-compose.yml --profile mongodb-atlas up -d --wait
         echo "url=mongodb://localhost:27019/payload?directConnection=true&replicaSet=mongodb-atlas-local" >> $GITHUB_OUTPUT
@@ -71,10 +79,12 @@ runs:
       if: startsWith(inputs.database, 'postgres')
       shell: bash
       run: |
-        for i in 1 2 3; do
+        # Every job pulls at once, so back off with jitter to get out of sync under registry rate limits
+        for i in 1 2 3 4 5; do
           docker compose -f test/docker-compose.yml --profile postgres pull && break
-          echo "Pull attempt $i/3 for 'postgres' profile failed, retrying in 10s..."
-          sleep 10
+          delay=$((i * 10 + RANDOM % 10))
+          echo "Pull attempt $i/5 for 'postgres' profile failed, retrying in ${delay}s..."
+          sleep "$delay"
         done
         docker compose -f test/docker-compose.yml --profile postgres up -d --wait
         echo "url=postgresql://payload:payload@localhost:5433/payload" >> $GITHUB_OUTPUT

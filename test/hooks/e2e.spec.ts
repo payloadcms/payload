@@ -8,13 +8,11 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-} from '../__helpers/e2e/helpers.js'
+import { saveDocAndAssert } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { beforeValidateSlug } from './shared.js'
 
@@ -42,10 +40,7 @@ describe('Hooks', () => {
     beforeDeleteURL = new AdminUrlUtil(serverURL, 'before-delete-hooks')
     beforeDelete2URL = new AdminUrlUtil(serverURL, 'before-delete-2-hooks')
     const context = await browser.newContext()
-    page = await context.newPage()
-
-    initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   beforeEach(async () => {
@@ -87,6 +82,7 @@ describe('Hooks', () => {
         data: {
           title: 'some title',
         },
+        overrideAccess: true,
       })
 
       await page.goto(beforeDeleteURL.list)
@@ -113,6 +109,7 @@ describe('Hooks', () => {
               where: {
                 id: { equals: doc.id },
               },
+              overrideAccess: true,
             })
             return docs.totalDocs
           },
@@ -121,8 +118,9 @@ describe('Hooks', () => {
         .toBe(1)
 
       await payload.delete({
-        collection: 'before-delete-hooks',
         id: doc.id,
+        collection: 'before-delete-hooks',
+        overrideAccess: true,
       })
     })
 
@@ -132,6 +130,7 @@ describe('Hooks', () => {
         data: {
           title: 'some title',
         },
+        overrideAccess: true,
       })
 
       await page.goto(beforeDeleteURL.edit(doc.id))
@@ -154,6 +153,7 @@ describe('Hooks', () => {
               where: {
                 id: { equals: doc.id },
               },
+              overrideAccess: true,
             })
             return docs.totalDocs
           },
@@ -162,8 +162,9 @@ describe('Hooks', () => {
         .toBe(1)
 
       await payload.delete({
-        collection: 'before-delete-hooks',
         id: doc.id,
+        collection: 'before-delete-hooks',
+        overrideAccess: true,
       })
     })
 
@@ -173,6 +174,7 @@ describe('Hooks', () => {
         data: {
           title: 'some title',
         },
+        overrideAccess: true,
       })
 
       await page.goto(beforeDelete2URL.list)
@@ -192,8 +194,9 @@ describe('Hooks', () => {
       )
 
       await payload.delete({
-        collection: 'before-delete-2-hooks',
         id: doc.id,
+        collection: 'before-delete-2-hooks',
+        overrideAccess: true,
       })
     })
 
@@ -203,6 +206,7 @@ describe('Hooks', () => {
         data: {
           title: 'some title',
         },
+        overrideAccess: true,
       })
 
       await page.goto(beforeDelete2URL.edit(doc.id))
@@ -218,8 +222,9 @@ describe('Hooks', () => {
       )
 
       await payload.delete({
-        collection: 'before-delete-2-hooks',
         id: doc.id,
+        collection: 'before-delete-2-hooks',
+        overrideAccess: true,
       })
     })
   })
@@ -235,5 +240,6 @@ async function clearCollectionDocs(collectionSlug: CollectionSlug): Promise<void
     where: {
       id: { exists: true },
     },
+    overrideAccess: true,
   })
 }

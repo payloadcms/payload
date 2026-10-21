@@ -15,7 +15,6 @@
   }
 
   .spinner--md .spinner__text {
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
@@ -23,7 +22,6 @@
   }
 
   .spinner--lg .spinner__text {
-    font-family: var(--text-body-large-font-family);
     font-size: var(--text-body-large-font-size);
     font-weight: var(--text-body-large-font-weight);
     line-height: var(--text-body-large-line-height);

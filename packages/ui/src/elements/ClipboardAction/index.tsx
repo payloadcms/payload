@@ -110,6 +110,7 @@ export const ClipboardAction: FC<Props> = ({
           refresh()
         }
       }}
+      popupType="menu"
       render={({ close }) => (
         <PopupList.MenuItem>
           <PopupList.Button

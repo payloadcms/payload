@@ -10,9 +10,9 @@ import React from 'react'
  * 'use client'
  * import React from 'react'
  * import { TextField, FieldPathContext } from '@payloadcms/ui'
- * import type { TextFieldClientComponent } from 'payload'
+ * import type { TextFieldClientProps } from 'payload'
  *
- * export const MyCustomField: TextFieldClientComponent = (props) => {
+ * export const MyCustomField: React.FC<TextFieldClientProps> = (props) => {
  *   return (
  *     <FieldPathContext value="path.to.some.other.field">
  *       <TextField {...props} />

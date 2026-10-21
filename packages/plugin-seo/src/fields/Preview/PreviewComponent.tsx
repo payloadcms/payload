@@ -1,5 +1,7 @@
 'use client'
 
+import '../colors.css'
+
 import type { FormField, UIField } from 'payload'
 
 import {
@@ -73,7 +75,7 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
           hasSavePermission: docInfo.hasSavePermission,
           initialData: docInfo.initialData,
           initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
-          locale: typeof locale === 'object' ? locale?.code : locale,
+          locale: locale?.code,
           title,
         } satisfies Omit<
           Parameters<GenerateURL>[0],
@@ -105,7 +107,7 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
       <div>{t('plugin-seo:preview')}</div>
       <div
         style={{
-          color: '#9A9A9A',
+          color: 'var(--seo-description-color)',
           marginBottom: '5px',
         }}
       >
@@ -118,34 +120,17 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
           boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)',
           maxWidth: '600px',
           padding: '20px',
-          pointerEvents: 'none',
           width: '100%',
         }}
       >
-        <div>
-          <a
-            href={href}
-            style={{
-              textDecoration: 'none',
-            }}
-          >
-            {href || 'https://...'}
-          </a>
-        </div>
-        <h4
+        <div>{href || 'https://...'}</div>
+        <div
           style={{
             margin: 0,
           }}
         >
-          <a
-            href="/"
-            style={{
-              textDecoration: 'none',
-            }}
-          >
-            {metaTitle as string}
-          </a>
-        </h4>
+          {metaTitle as string}
+        </div>
         <p
           style={{
             margin: 0,

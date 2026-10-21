@@ -1,13 +1,22 @@
 import type {
   Adapter,
   ClientUploadsConfig,
+  DeleteFile,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
-import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
+import {
+  buildUploadStoragePathData,
+  resolveSignedURLKey,
+} from '@payloadcms/plugin-cloud-storage/utilities'
 import { generateClientTokenFromReadWriteToken } from '@vercel/blob/client'
 import { Forbidden } from 'payload'
+import { assertClientUploadAllowed, createClientUploadReceipt } from 'payload/internal'
 
+import type { VercelBlobCollectionSource } from './authorizeFileOverwrite.js'
+
+import { authorizeClientOverwrite } from './authorizeFileOverwrite.js'
+import { copyVercelBlobFile } from './copyFile.js'
 import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
@@ -19,6 +28,7 @@ interface CreateVercelBlobAdapterArgs {
   baseUrl: string
   cacheControlMaxAge: number
   clientUploads?: ClientUploadsConfig
+  collectionSources: VercelBlobCollectionSource[]
   token: string
   useCompositePrefixes?: boolean
 }
@@ -29,13 +39,20 @@ export function createVercelBlobAdapter({
   baseUrl,
   cacheControlMaxAge,
   clientUploads,
+  collectionSources,
   token,
   useCompositePrefixes = false,
 }: CreateVercelBlobAdapterArgs): Adapter {
   const clientUploadsAccess = typeof clientUploads === 'object' ? clientUploads.access : undefined
+  const deleteStoredFile: DeleteFile = ({ storageFilePath }) =>
+    deleteFile({ baseUrl, storageFilePath, token })
 
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'vercel-blob',
+
+    copyFile: ({ from, req, to }) =>
+      copyVercelBlobFile({ access, cacheControlMaxAge, from, req, to, token }),
+    deleteFile: deleteStoredFile,
 
     uploadInstructions: {
       adminHandler: {
@@ -58,27 +75,61 @@ export function createVercelBlobAdapter({
           throw new Forbidden(req.t)
         }
 
-        const resolved = await resolveSignedURLKey({
+        assertClientUploadAllowed({ collection, filename, mimeType })
+
+        const requested = buildUploadStoragePathData({
           collectionPrefix: prefix,
-          collectionSlug,
           docPrefix,
           filename,
-          req,
           useCompositePrefixes,
         })
+        const allowOverwrite = collection.versions
+          ? false
+          : await authorizeClientOverwrite({
+              collectionPrefix: prefix,
+              collectionSources,
+              overrideAccess,
+              req,
+              requestedCollectionSlug: collectionSlug,
+              requestedFilename: requested.sanitizedFilename,
+              requestedStorageFilePath: requested.storageFilePath,
+            })
+        const resolved = allowOverwrite
+          ? {
+              ...requested,
+              uploadReference: {
+                prefix: requested.sanitizedDocPrefix,
+                signedReceipt: createClientUploadReceipt({
+                  allowOverwrite: true,
+                  collectionSlug,
+                  filename: requested.sanitizedFilename,
+                  filePrefix: requested.sanitizedDocPrefix,
+                  req,
+                  storageFilePath: requested.storageFilePath,
+                }),
+              },
+            }
+          : await resolveSignedURLKey({
+              collectionPrefix: prefix,
+              collectionSlug,
+              docPrefix,
+              filename,
+              req,
+              useCompositePrefixes,
+            })
 
         return {
           name: 'uploadToVercelBlob',
           type: 'dispatch',
           data: {
-            pathname: resolved.fileKey,
+            pathname: resolved.storageFilePath,
             token: await generateClientTokenFromReadWriteToken({
-              addRandomSuffix,
+              addRandomSuffix: false,
               allowedContentTypes: mimeType ? [mimeType] : undefined,
-              allowOverwrite: true,
+              ...(allowOverwrite && { allowOverwrite: true }),
               cacheControlMaxAge,
               maximumSizeInBytes: filesize,
-              pathname: resolved.fileKey,
+              pathname: resolved.storageFilePath,
               token,
             }),
           },
@@ -86,10 +137,11 @@ export function createVercelBlobAdapter({
             filename: resolved.sanitizedFilename,
             mimeType,
             size: filesize,
-            uploadReference: { prefix: resolved.sanitizedDocPrefix },
+            uploadReference: resolved.uploadReference,
           },
         }
       },
+      requiresUploadReceipt: true,
       useInAdmin: true,
     },
 
@@ -102,28 +154,17 @@ export function createVercelBlobAdapter({
         useCompositePrefixes,
       }),
 
-    handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
-      deleteFile({
-        baseUrl,
-        collectionPrefix: prefix,
-        docPrefix,
-        filename,
-        token,
-        useCompositePrefixes,
-      }),
+    handleDelete: deleteStoredFile,
 
-    handleUpload: async ({ data, file: { buffer, filename, mimeType } }) => {
+    handleUpload: async ({ data, file: { buffer, mimeType }, storageFilePath }) => {
       const result = await uploadFile({
         access,
         addRandomSuffix,
         buffer,
         cacheControlMaxAge,
-        collectionPrefix: prefix,
-        docPrefix: data.prefix,
-        filename,
         mimeType,
+        storageFilePath,
         token,
-        useCompositePrefixes,
       })
 
       if (result.filename) {
@@ -133,18 +174,16 @@ export function createVercelBlobAdapter({
       return data
     },
 
-    staticHandler: (
-      req,
-      { headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
-    ) =>
+    staticHandler: (req, { doc, headers, params: { filename, operation, uploadReference } }) =>
       getFile({
         baseUrl,
         cacheControlMaxAge,
         collection,
         collectionPrefix: prefix,
+        doc,
         filename,
         incomingHeaders: headers,
-        prefixQueryParam,
+        operation,
         req,
         token,
         uploadReference,

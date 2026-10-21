@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid'
 
 import type { SanitizedStripePluginConfig, StripeWebhookHandler } from '../types.js'
 
-import { deepen } from '../utilities/deepen.js'
+import { deepen, getSyncedFields } from '../utilities/deepen.js'
 
 type HandleCreatedOrUpdated = (
   args: {
@@ -55,6 +55,7 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
     const payloadQuery = await payload.find({
       collection: collectionSlug,
       limit: 1,
+      overrideAccess: true,
       pagination: false,
       where: {
         stripeID: {
@@ -66,15 +67,11 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
     const foundDoc = payloadQuery.docs[0] as any
 
     // combine all properties of the Stripe doc and match their respective fields within the document
-    let syncedData = syncConfig.fields.reduce(
-      (acc, field) => {
-        const { fieldPath, stripeProperty } = field
-
-        acc[fieldPath] = stripeDoc[stripeProperty]
-        return acc
-      },
-      {} as Record<string, any>,
-    )
+    let syncedData = getSyncedFields({
+      data: stripeDoc,
+      fields: syncConfig.fields,
+      source: 'stripe',
+    })
 
     syncedData = deepen({
       ...syncedData,
@@ -98,6 +95,7 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
             const authQuery = await payload.find({
               collection: collectionSlug,
               limit: 1,
+              overrideAccess: true,
               pagination: false,
               where: {
                 email: {
@@ -121,6 +119,7 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
                   id: authDoc.id,
                   collection: collectionSlug,
                   data: syncedData,
+                  overrideAccess: true,
                 })
 
                 if (logs) {
@@ -171,6 +170,7 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
               passwordConfirm: password,
             },
             disableVerificationEmail: isAuthCollection ? true : undefined,
+            overrideAccess: true,
           })
 
           if (logs) {
@@ -197,6 +197,7 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
           id: foundDoc.id,
           collection: collectionSlug,
           data: syncedData,
+          overrideAccess: true,
         })
 
         if (logs) {

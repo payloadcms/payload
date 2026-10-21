@@ -15,7 +15,6 @@
     .timezone-picker__label {
       color: var(--color-text-secondary);
       flex-shrink: 0;
-      font-family: var(--text-body-medium-font-family);
       font-size: var(--text-body-medium-font-size);
       font-weight: var(--text-body-medium-font-weight);
       line-height: var(--text-body-medium-line-height);
@@ -47,6 +46,7 @@
         border: none;
         padding: 0;
         padding-left: var(--spacer-1);
+        /* stylelint-disable-next-line plugin/no-important -- TODO: pre-existing; revisit whether specificity can win instead */
         min-height: auto !important;
         position: relative;
         box-shadow: unset;
@@ -94,7 +94,6 @@
 
       .rs__single-value {
         color: var(--color-text);
-        font-family: var(--text-body-medium-font-family);
         font-size: var(--text-body-medium-font-size);
         font-weight: var(--text-body-medium-font-weight);
         line-height: var(--text-body-medium-line-height);
@@ -105,7 +104,6 @@
 
       .rs__placeholder {
         color: var(--color-text-secondary);
-        font-family: var(--text-body-medium-font-family);
         font-size: var(--text-body-medium-font-size);
         font-weight: var(--text-body-medium-font-weight);
         line-height: var(--text-body-medium-line-height);

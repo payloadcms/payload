@@ -1,16 +1,17 @@
-import { status as httpStatus } from 'http-status'
-
 import type { Collection, DataFromCollectionSlug } from '../../collections/config/types.js'
-import type { AuthCollectionSlug, User } from '../../index.js'
+import type { AuthCollectionSlug, AuthenticatedUser } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
 import { APIError, Forbidden } from '../../errors/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { applyUserReadAccess } from '../applyUserReadAccess.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { jwtSign } from '../jwt.js'
 import { addSessionToUser, revokeSession } from '../sessions.js'
@@ -40,13 +41,15 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     collection: { config: collectionConfig },
     data,
     depth,
-    overrideAccess,
+    overrideAccess = false,
     req: {
       payload: { secret },
       payload,
     },
     req,
   } = args
+
+  assertNoValidationWrite(req)
 
   if (
     !Object.prototype.hasOwnProperty.call(data, 'token') ||
@@ -60,7 +63,7 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
   }
 
   let sid: string | undefined
-  let user: null | User = null
+  let sessionUser: AuthenticatedUser | null = null
 
   try {
     const shouldCommit = await initTransaction(req)
@@ -85,7 +88,7 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
       },
     })
 
-    user = await payload.db.findOne<User>({
+    let user = await payload.db.findOne<AuthenticatedUser>({
       collection: collectionConfig.slug,
       req,
       where,
@@ -106,6 +109,11 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     user.hash = hash
 
     user.resetPasswordExpiration = new Date().toISOString()
+
+    if (collectionConfig.auth.maxLoginAttempts > 0) {
+      user.lockUntil = null
+      user.loginAttempts = 0
+    }
 
     if (collectionConfig.auth.verify) {
       user._verified = Boolean(user._verified)
@@ -134,6 +142,10 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     // Ensure updatedAt date is always updated
     user.updatedAt = new Date().toISOString()
 
+    if (collectionConfig.auth.useSessions) {
+      user.sessions = []
+    }
+
     const doc = await payload.db.updateOne({
       id: user.id,
       collection: collectionConfig.slug,
@@ -142,6 +154,10 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     })
 
     await authenticateLocalStrategy({ doc, password: data.password })
+
+    user = doc as AuthenticatedUser
+    user.collection = collectionConfig.slug
+    user._strategy = 'local-jwt'
 
     const fieldsToSignArgs: Parameters<typeof getFieldsToSign>[0] = {
       collectionConfig,
@@ -155,6 +171,8 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
       req,
       user,
     })
+
+    sessionUser = user
     sid = session.sid
 
     if (sid) {
@@ -167,17 +185,15 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     // beforeLogin - Collection
     // /////////////////////////////////////
 
-    let userBeforeLogin = user
-
     if (collectionConfig.hooks?.beforeLogin?.length) {
       for (const hook of collectionConfig.hooks.beforeLogin) {
-        userBeforeLogin =
+        user =
           (await hook({
             collection: args.collection?.config,
             context: args.req.context,
             req: args.req,
-            user: userBeforeLogin,
-          })) || userBeforeLogin
+            user,
+          })) || user
       }
     }
 
@@ -187,7 +203,7 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
       tokenExpiration: collectionConfig.auth.tokenExpiration,
     })
 
-    req.user = userBeforeLogin
+    req.user = user
 
     // /////////////////////////////////////
     // afterLogin - Collection
@@ -195,38 +211,36 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
 
     if (collectionConfig.hooks?.afterLogin?.length) {
       for (const hook of collectionConfig.hooks.afterLogin) {
-        userBeforeLogin =
+        user =
           (await hook({
             collection: args.collection?.config,
             context: args.req.context,
             req: args.req,
             token,
-            user: userBeforeLogin,
-          })) || userBeforeLogin
+            user,
+          })) || user
       }
     }
 
-    const fullUser = await payload.findByID({
-      id: user.id,
-      collection: collectionConfig.slug,
-      depth,
+    user!.collection = collectionConfig.slug
+    user!._strategy = 'local-jwt'
+
+    const userWithReadAccess = await applyUserReadAccess({
+      collection: collectionConfig,
+      depth: depth!,
       overrideAccess,
       req,
-      trash: false,
+      showHiddenFields: false,
+      user: user!,
     })
 
     if (shouldCommit) {
       await commitTransaction(req)
     }
 
-    if (fullUser) {
-      fullUser.collection = collectionConfig.slug
-      fullUser._strategy = 'local-jwt'
-    }
-
     let result: { user: DataFromCollectionSlug<TSlug> } & Result = {
       token,
-      user: fullUser,
+      user: userWithReadAccess,
     }
 
     // /////////////////////////////////////
@@ -249,7 +263,7 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
         payload,
         req,
         sid,
-        user,
+        user: sessionUser,
       })
     }
     await killTransaction(req)
