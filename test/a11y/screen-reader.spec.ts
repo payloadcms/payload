@@ -286,7 +286,9 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
           await expect(card).toHaveAccessibleName(new RegExp(bullet.trim()))
         }
         await screenReader.navigateToWebContent()
-        await captureScreenReader({ action: () => dragHandle.focus(), screenReader })
+        await card.focus()
+        await captureScreenReader({ action: () => page.keyboard.press('Tab'), screenReader })
+        await expect(dragHandle).toBeFocused()
         const capture = await captureScreenReader({
           action: async () => {
             await page.keyboard.press('Shift+Tab')
