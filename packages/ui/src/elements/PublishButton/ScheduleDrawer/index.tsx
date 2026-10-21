@@ -66,7 +66,8 @@ export const ScheduleDrawer: React.FC<Props> = ({
   const { getUpcomingScheduledPublish, schedulePublish } = useServerFunctions()
   const [type, setType] = React.useState<PublishType>(defaultType || 'publish')
   const [date, setDate] = React.useState<Date>()
-  // Render can't read the current time, so keep it in state and refresh it when the date changes
+  // Render can't read the current time, so keep it in state and refresh it when the date or
+  // timezone changes
   const [now, setNow] = React.useState(() => new Date())
   const [timezone, setTimezone] = React.useState<string>(defaultTimezone)
   const [locale, setLocale] = React.useState<{ label: string; value: string }>(defaultLocaleOption)
@@ -301,7 +302,10 @@ export const ScheduleDrawer: React.FC<Props> = ({
           {supportedTimezones.length > 0 && (
             <TimezonePicker
               id={`timezone-picker`}
-              onChange={setTimezone}
+              onChange={(newTimezone) => {
+                setTimezone(newTimezone)
+                setNow(new Date())
+              }}
               options={supportedTimezones}
               selectedTimezone={timezone}
             />
