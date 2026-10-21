@@ -43,13 +43,10 @@ export const reactA11yRules = {
 
   // Enforce that a label tag has a text label and an associated control.
   // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/b800f40a2a69ad48015ae9226fbe879f946757ed/docs/rules/label-has-associated-control.md
-  // ESLint ran this with jsx-a11y's defaults instead of Airbnb's options. oxlint's defaults match them.
   'jsx-a11y/label-has-associated-control': 'warn',
 
   // Enforce that a control (an interactive element) has a text label.
   // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/control-has-associated-label.md
-  // ESLint ran this with jsx-a11y's defaults instead of Airbnb's options. They check `<input>` and
-  // `<textarea>` too, which oxlint's defaults skip, so they're passed explicitly.
   'jsx-a11y/control-has-associated-label': ['warn', { ignoreElements: [], ignoreRoles: [] }],
 
   // require that mouseover/out come with focus/blur, for keyboard-only users
@@ -208,7 +205,6 @@ export const reactA11yRules = {
 
   // ensure <a> tags are valid
   // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/0745af376cdc8686d85a361ce36952b1fb1ccf6e/docs/rules/anchor-is-valid.md
-  // ESLint ran this with jsx-a11y's defaults instead of Airbnb's options. oxlint's defaults match them.
   'jsx-a11y/anchor-is-valid': 'warn',
   // Enforce that elements with ARIA roles must have all required attributes
   // for that role.
