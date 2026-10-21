@@ -587,6 +587,7 @@ export const roTranslations: DefaultTranslationsObject = {
     yes: 'Da',
   },
   hierarchy: {
+    folderLocation: 'Locația folderului',
     goTo: 'Mergi la "{{name}}"',
     itemsMovedTo: '{{title}} s-a mutat la {{destination}}',
     itemsMovedToRoot: '{{title}} a fost mutat la rădăcină',

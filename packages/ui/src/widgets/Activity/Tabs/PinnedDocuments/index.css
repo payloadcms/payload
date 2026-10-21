@@ -25,7 +25,6 @@
     border: 0;
     border-radius: var(--radius-medium);
     background: var(--color-bg);
-    color: var(--activity-text-secondary);
     cursor: pointer;
     opacity: 0;
   }

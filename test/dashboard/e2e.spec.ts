@@ -894,7 +894,7 @@ describe('Dashboard', () => {
 
     await expect(widget.locator('.activity-widget__item--add-pin')).toHaveCount(1)
     await expect(addPin).toHaveAttribute('aria-haspopup', 'dialog')
-    await expect(widget.locator('.activity-empty-state__icon--pinned')).toBeVisible()
+    await expect(widget.locator('.activity-empty-state__icon .icon--pin')).toBeVisible()
     const [emptyBox, gridBox, buttonBox] = await Promise.all([
       widget.locator('.activity-empty-state').boundingBox(),
       widget.locator('.activity-widget__items').boundingBox(),

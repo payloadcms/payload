@@ -10,6 +10,7 @@ import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useLivePreviewContext } from '../../../providers/LivePreview/context.js'
 import { useLocale } from '../../../providers/Locale/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 import { IframeLoader } from '../../IframeLoader/index.js'
 import { DeviceContainer } from '../Device/index.js'
 import { LivePreviewToolbar } from '../Toolbar/index.js'
@@ -33,6 +34,7 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
     zoom,
   } = useLivePreviewContext()
 
+  const { t } = useTranslation()
   const locale = useLocale()
 
   const { mostRecentUpdate } = useDocumentEvents()
@@ -137,6 +139,7 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
                 style={{
                   transform: typeof zoom === 'number' ? `scale(${zoom}) ` : undefined,
                 }}
+                title={t('general:livePreview')}
               />
             )}
           </DeviceContainer>

@@ -59,6 +59,10 @@ export default buildConfigWithDefaults({
             Component: '/components/BreadcrumbCurrentPage/index.js#BreadcrumbCurrentPage',
             path: '/breadcrumb-current-page',
           },
+          CustomResponseForm: {
+            Component: '/components/CustomResponseForm/index.js#CustomResponseForm',
+            path: '/custom-response-form',
+          },
           CustomIDModals: {
             Component: '/components/CustomIDModals/index.js#CustomIDModals',
             path: '/custom-modal-ids',

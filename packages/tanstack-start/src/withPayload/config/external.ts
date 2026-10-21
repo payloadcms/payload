@@ -1,7 +1,7 @@
-/**
- * SSR/RSC externalization config used by `withPayload`. Kept separate from the
- * client optimizer config (`./optimizeDeps.ts`) so each concern stays small.
- */
+import {
+  devServerExternalPackages as devServerExternalPayloadPackages,
+  serverExternalPackages as serverExternalPayloadPackages,
+} from 'payload/build-config'
 
 /**
  * Packages externalized during dev serve (`ssr.external`). Node's loader resolves
@@ -16,15 +16,9 @@
 export const ssrExternalPackages: string[] = [
   'zod',
   'fast-uri',
-  'drizzle-kit',
-  'drizzle-kit/api',
+  ...serverExternalPayloadPackages,
   'drizzle-orm',
-  'sharp',
-  'require-in-the-middle',
-  'json-schema-to-typescript',
-  'pino',
   'pino-pretty',
-  'graphql',
   'nodemailer',
   'aws4',
   'pluralize',
@@ -40,7 +34,6 @@ export const ssrExternalPackages: string[] = [
   'pg-cloudflare',
   // SQLite (`@payloadcms/db-sqlite`)
   'better-sqlite3',
-  'libsql',
   // Mongo (`@payloadcms/db-mongodb`)
   'mongodb',
   'mongoose',
@@ -80,19 +73,12 @@ export const serverExternalPackages: string[] = [
 
 /** Additional installed packages that can bypass Vite's development server transforms. */
 export const devExternalPackages: string[] = [
-  ...serverExternalPackages,
-  '@payloadcms/email-nodemailer',
-  '@payloadcms/email-resend',
-  '@payloadcms/graphql',
-  '@payloadcms/kv-redis',
-  '@payloadcms/payload-cloud',
-  '@payloadcms/plugin-mcp',
-  '@payloadcms/plugin-nested-docs',
-  '@payloadcms/plugin-redirects',
-  '@payloadcms/transformer-sharp',
-  '@payloadcms/translations',
-  // Vite otherwise transforms date-fns' full module graph during SSR.
-  'date-fns',
+  ...new Set([
+    // Vite otherwise transforms date-fns' full module graph during SSR.
+    'date-fns',
+    ...devServerExternalPayloadPackages,
+    ...serverExternalPackages,
+  ]),
 ]
 
 /**

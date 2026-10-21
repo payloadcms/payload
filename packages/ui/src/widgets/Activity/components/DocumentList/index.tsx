@@ -30,7 +30,7 @@ export function DocumentList({
     <div className="activity-widget__content" id={id}>
       <CardGrid<ActivityDocument | null>
         ariaLabel={label}
-        className="activity-widget__items activity-widget__items--grid"
+        className="activity-widget__items"
         getItemClassName={(item) =>
           item
             ? 'activity-widget__item'

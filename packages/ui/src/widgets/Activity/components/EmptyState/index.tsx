@@ -23,10 +23,7 @@ export function EmptyState({
   return (
     // A live region must not contain controls, so only announce the state when it has none.
     <div aria-live={children ? undefined : 'polite'} className="activity-empty-state">
-      <span
-        aria-hidden="true"
-        className={`activity-empty-state__icon activity-empty-state__icon--${tab}`}
-      >
+      <span aria-hidden="true" className="activity-empty-state__icon">
         {tab === 'pinned' ? <PinIcon /> : <ClockIcon />}
       </span>
       <span className="activity-empty-state__text" id={descriptionID}>

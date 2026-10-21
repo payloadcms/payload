@@ -90,6 +90,12 @@ export const PostsCollection: CollectionConfig = {
       },
     },
     {
+      name: 'relatedPosts',
+      type: 'relationship',
+      hasMany: true,
+      relationTo: postsSlug,
+    },
+    {
       name: 'relatedPost',
       type: 'relationship',
       relationTo: postsSlug,
