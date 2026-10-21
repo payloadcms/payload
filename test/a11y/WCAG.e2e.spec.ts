@@ -4671,8 +4671,9 @@ test.describe('WCAG 2.2 Level AA', () => {
       }
     })
 
-    test('should retain focus during automatic search', async () => {
-      // Additional coverage for PYLD-3773.
+    test('should describe automatic search before input and retain focus', async () => {
+      // PYLD-3773: describe automatic search before input in both the list and Columns.
+      // Actual table-result speech is covered in screen-reader.spec.ts; confirm the Columns hint manually with NVDA.
       for (const isColumnSearch of [false, true]) {
         await page.goto(`${postsURL.list}?search=`)
         if (isColumnSearch) {
@@ -6212,10 +6213,12 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
 
     test('should preserve accessible names and controls in the native toast content', async () => {
+      // Exact spontaneous speech remains a manual AT check; this guards the native content and controls.
       await page.goto(`${postsURL.admin}/status-messages`)
       await page.getByRole('button', { name: 'Show custom toast' }).click()
       const announcement = page.getByRole('region', { name: 'Notifications alt+T' })
 
+      await expect(announcement).toHaveAttribute('aria-live', 'polite')
       await expect(announcement).toContainText('Custom notification')
       await expect(announcement.getByRole('img', { name: 'Upload complete' })).toBeVisible()
       await expect(announcement.getByRole('button', { name: 'Retry upload' })).toBeVisible()

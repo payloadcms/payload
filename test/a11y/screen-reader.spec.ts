@@ -766,62 +766,6 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     })
   })
 
-  test.describe('3.2.2 On Input (A)', () => {
-    test('should announce automatic search and collection results', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3773
-      for (const isColumnSearch of [false, true]) {
-        await gotoPostsList({ page, postsURL })
-        if (isColumnSearch) {
-          await page.locator('.columns-button__button').click()
-        }
-        const search = isColumnSearch
-          ? page
-              .getByRole('dialog', { name: /columns/i })
-              .getByRole('textbox', { name: /search columns/i })
-          : page.locator('#search-filter-input')
-        const focusCapture = await captureScreenReader({
-          action: () => search.focus(),
-          screenReader,
-        })
-        const resultsCapture = await captureScreenReader({
-          action: async () => {
-            await search.fill('no-matching-accessibility-result')
-            if (isColumnSearch) {
-              await expect(
-                page.getByText('No matches found for this search', {
-                  exact: true,
-                }),
-              ).toBeVisible()
-            } else {
-              await expect(page.locator('tbody tr')).toHaveCount(0)
-              await expect(page.locator('.no-results__title')).toHaveText('No Results.')
-            }
-          },
-          screenReader,
-        })
-
-        await expect(search).toBeFocused()
-        expect
-          .soft(
-            (isColumnSearch &&
-              /automatic|as you type|while you type/i.test(focusCapture.spokenPhrase)) ||
-              /results found for.*(?:0|zero)|no (?:matches|results|posts)/i.test(
-                resultsCapture.spokenPhrase,
-              ),
-            JSON.stringify({
-              focus: focusCapture.spokenPhrase,
-              isColumnSearch,
-              results: resultsCapture.spokenPhrase,
-            }),
-          )
-          .toBe(true)
-      }
-    })
-  })
-
   test.describe('4.1.2 Name, Role, Value (A)', () => {
     test('should announce rich-text upload and relationship filter options in NVDA browse mode', async ({
       page,
@@ -960,23 +904,6 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       expect(capture.spokenPhrase).not.toMatch(/close toast/i)
     })
 
-    test('should announce accessible names in custom toast content', async ({
-      page,
-      screenReader,
-    }) => {
-      await page.goto(`${postsURL.admin}/status-messages`)
-      await screenReader.navigateToWebContent()
-      const capture = await captureScreenReader({
-        action: () => page.getByRole('button', { name: 'Show custom toast' }).click(),
-        screenReader,
-      })
-
-      expect(capture.spokenPhrase).toMatch(/Custom notification/i)
-      expect(capture.spokenPhrase).toMatch(/Upload complete/i)
-      expect(capture.spokenPhrase).toMatch(/Retry upload/i)
-      expect(capture.spokenPhrase).toMatch(/View details/i)
-    })
-
     test('should announce the unsaved Copy to locale toast without its close button', async ({
       page,
       screenReader,
@@ -1086,7 +1013,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       page,
       screenReader,
     }) => {
-      // PYLD-3696
+      // PYLD-3696, PYLD-3773: result-announcement coverage complements the browser search-hint checks.
       test.setTimeout(60000)
       await gotoPostsList({ page, postsURL })
       const search = page.getByRole('textbox', { name: /search/i }).first()

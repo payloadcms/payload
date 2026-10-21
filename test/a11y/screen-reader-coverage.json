@@ -14,7 +14,19 @@
     "screenReaderRun": "Not run on this laptop; do not infer AT success from browser assertions.",
     "screenReaderDiscovery": {
       "before": 54,
-      "after": 37
+      "after": 35
+    },
+    "followUpBrowserRun": {
+      "status": "passed",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should describe automatic search before input and retain focus",
+        "WCAG.e2e.spec.ts :: should preserve accessible names and controls in the native toast content"
+      ],
+      "date": "2026-10-21",
+      "browser": "Chromium",
+      "passed": 2,
+      "duration": "7.6 seconds",
+      "command": "PORT=3001 MONGODB_URL=<isolated test database> pnpm test:e2e a11y --grep 'should describe automatic search before input and retain focus|should preserve accessible names and controls in the native toast content' --workers=1"
     }
   },
   "earlierMigrations": [
@@ -700,11 +712,11 @@
       "reportedScreenReaders": ["NVDA"],
       "coverage": "screen-reader-regression-retained",
       "tests": [
-        "WCAG.e2e.spec.ts :: should retain focus during automatic search",
-        "screen-reader.spec.ts :: should announce automatic search and collection results"
+        "WCAG.e2e.spec.ts :: should describe automatic search before input and retain focus",
+        "screen-reader.spec.ts :: should announce table search result changes without moving focus"
       ],
-      "limits": "Automatic-search hint/result speech, overlap with dedicated table live-result test. Keep distinct Columns coverage; reported NVDA.",
-      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+      "limits": "Browser regression checks the advance automatic-search description for both list and Columns inputs, resulting UI, and retained focus. The retained table-result AT regression covers actual table speech. The Columns hint still needs manual NVDA confirmation.",
+      "manualVerification": "Confirm the Columns advance hint with NVDA on the reported platform; a DOM accessible description does not prove its spoken delivery."
     },
     {
       "ticket": "PYLD-3784",
@@ -735,20 +747,18 @@
   ],
   "remainingScreenReaderReview": {
     "date": "2026-10-21",
-    "scope": "Static review of every one of the 37 expanded screen-reader cases at commit 203e115335. No AT tests were executed during this review.",
+    "scope": "Static review covered all 37 expanded cases at commit 203e115335. Two were subsequently retired with explicit browser replacements; the cases array tracks the 35 remaining cases and retiredCases preserves both decisions.",
     "interpretation": "Retain means the observable outcome justifies AT evidence, not that the test has passed or proves conformance. Strengthen means current assertions have a concrete false-pass, false-failure, scope, or cursor-start risk.",
     "counts": {
       "retain-at": 12,
       "scenario-gap": 6,
-      "strengthen-at": 17,
-      "consolidate": 1,
-      "browser-plus-manual-candidate": 1
+      "strengthen-at": 17
     },
     "platformInventory": {
-      "total": 37,
+      "total": 35,
       "nvdaOnly": 5,
       "voiceOverOnly": 1,
-      "both": 31,
+      "both": 29,
       "note": "On macOS the five NVDA-only cases are skipped; they are not passes."
     },
     "sharedRisks": [
@@ -1039,16 +1049,6 @@
         "next": "Require the current cursor item to identify Sort and its role/state. Keep the existing Close-button anchor and small step budget."
       },
       {
-        "test": "should announce automatic search and collection results",
-        "title": "should announce automatic search and collection results",
-        "scenario": null,
-        "screenReaders": "VoiceOver and NVDA",
-        "tickets": ["PYLD-3773"],
-        "decision": "consolidate",
-        "finding": "The browser test already checks the advance automatic-search description for both search inputs. Table result speech is checked more thoroughly by the dedicated PYLD-3696 AT test.",
-        "next": "Promote browser hint coverage for PYLD-3773 and link relevant table speech coverage before removing this overlapping AT case. Preserve a manual check for the Columns hint if needed."
-      },
-      {
         "test": "should announce rich-text upload and relationship filter options in NVDA browse mode",
         "title": "should announce rich-text upload and relationship filter options in NVDA browse mode",
         "scenario": null,
@@ -1087,16 +1087,6 @@
         "decision": "retain-at",
         "finding": "Two rapid spoken notifications are a timing-dependent AT outcome. Browser tests prove both remain in the native live region but not that both are announced.",
         "next": "Retain only if both announcements are the intended product requirement; distinguish screen-reader coalescing/capture loss from product message loss rather than retrying blindly."
-      },
-      {
-        "test": "should announce accessible names in custom toast content",
-        "title": "should announce accessible names in custom toast content",
-        "scenario": null,
-        "screenReaders": "VoiceOver and NVDA",
-        "tickets": [],
-        "decision": "browser-plus-manual-candidate",
-        "finding": "An existing browser regression already checks the custom toast's named image, controls, hidden-label resolution, and keyboard accessibility. This additional unticketed test requires all those names in an automatic announcement.",
-        "next": "Use the existing browser regression plus a recorded manual spontaneous-announcement check; retain a separate AT test only for a concrete speech regression not covered by the real unsaved-toast case."
       },
       {
         "test": "should announce the unsaved Copy to locale toast without its close button",
@@ -1147,6 +1137,37 @@
         "decision": "retain-at",
         "finding": "The real folder-search submission and resulting count are captured while focus and URL remain stable; this addresses an unsolicited result announcement.",
         "next": "Keep; inspect actual speech and live-region update before interpreting a capture failure as a product bug."
+      }
+    ],
+    "retiredCases": [
+      {
+        "test": "should announce automatic search and collection results",
+        "title": "should announce automatic search and collection results",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3773"],
+        "decision": "consolidate",
+        "finding": "The browser test already checks the advance automatic-search description for both search inputs. Table result speech is checked more thoroughly by the dedicated PYLD-3696 AT test.",
+        "next": "Promote browser hint coverage for PYLD-3773 and link relevant table speech coverage before removing this overlapping AT case. Preserve a manual check for the Columns hint if needed.",
+        "replacementTests": [
+          "WCAG.e2e.spec.ts :: should describe automatic search before input and retain focus",
+          "screen-reader.spec.ts :: should announce table search result changes without moving focus"
+        ],
+        "manualLimit": "Exact automatic speech remains a manual reported-platform check; browser assertions do not prove synthesized output."
+      },
+      {
+        "test": "should announce accessible names in custom toast content",
+        "title": "should announce accessible names in custom toast content",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": [],
+        "decision": "browser-plus-manual-candidate",
+        "finding": "An existing browser regression already checks the custom toast's named image, controls, hidden-label resolution, and keyboard accessibility. This additional unticketed test requires all those names in an automatic announcement.",
+        "next": "Use the existing browser regression plus a recorded manual spontaneous-announcement check; retain a separate AT test only for a concrete speech regression not covered by the real unsaved-toast case.",
+        "replacementTests": [
+          "WCAG.e2e.spec.ts :: should preserve accessible names and controls in the native toast content"
+        ],
+        "manualLimit": "Exact automatic speech remains a manual reported-platform check; browser assertions do not prove synthesized output."
       }
     ]
   }
