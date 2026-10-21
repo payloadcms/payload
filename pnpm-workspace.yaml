@@ -83,3 +83,6 @@ minimumReleaseAgeExclude:
   - '@next/swc-win32-x64-msvc@16.4.2'
   - eslint-config-next@16.4.2
   - next@16.4.2
+
+patchedDependencies:
+  sonner@1.7.4: patches/sonner@1.7.4.patch

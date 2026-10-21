@@ -6286,6 +6286,80 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(notification.getByRole('button', { name: /close toast/i })).toBeVisible()
     })
 
+    test('should pause trash-toast dismissal while its close button has keyboard focus', async () => {
+      // PYLD-3580: DOM-focus persistence; virtual-cursor-only persistence needs separate AT verification.
+      const apiURL = formatAdminURL({ apiRoute: '/api', path: '/posts', serverURL })
+      const response = await page.request.post(apiURL, {
+        data: { title: 'Toast keyboard-focus persistence regression' },
+      })
+
+      expect(response.ok()).toBe(true)
+      const { doc } = await response.json()
+
+      try {
+        await gotoPostsList({ page, postsURL })
+        const row = page.locator('tbody tr').filter({ hasText: doc.title })
+
+        await row.locator('.cell-_select input').check()
+        await page.locator('.list-selection__button[aria-label="Delete"]').click()
+        await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
+        const notification = page
+          .locator('[data-sonner-toast]')
+          .filter({ hasText: /moved to trash/i })
+        const close = notification.getByRole('button', { name: 'Close toast', exact: true })
+
+        await expect(notification).toBeVisible()
+        await page.mouse.move(0, 0)
+        await close.focus()
+        await expect(close).toBeFocused()
+        // Real elapsed time must exceed the six-second default while keyboard focus remains inside.
+        await page.waitForTimeout(7000)
+        await expect(notification).toBeVisible()
+        await expect(close).toBeFocused()
+        await page.locator('#search-filter-input').focus()
+        await expect(close).not.toBeFocused()
+        await expect(notification).toBeHidden({ timeout: 7000 })
+      } finally {
+        const cleanup = await page.request.delete(`${apiURL}/${doc.id}?trash=true`)
+
+        expect(cleanup.ok()).toBe(true)
+      }
+    })
+
+    test('should preserve toast focus pausing after hover and reset it after manual dismissal', async () => {
+      test.setTimeout(30000)
+      await page.goto(`${postsURL.admin}/status-messages`)
+      const trigger = page.getByRole('button', { name: 'Show action toast', exact: true })
+
+      await trigger.click()
+      const notification = page
+        .locator('[data-sonner-toast]')
+        .filter({ hasText: 'Action notification' })
+      const close = notification.getByRole('button', { name: 'Close toast', exact: true })
+
+      await expect(notification).toBeVisible()
+      await close.focus()
+      await notification.hover()
+      await page.mouse.move(0, 0)
+      // Leaving hover must not cancel keyboard-focus pausing.
+      await page.waitForTimeout(7000)
+      await expect(notification).toBeVisible()
+      await expect(close).toBeFocused()
+      const action = notification.getByRole('button', { name: 'Undo change', exact: true })
+
+      await action.focus()
+      await expect(action).toBeFocused()
+      await expect(notification).toBeVisible()
+      await close.focus()
+      await close.press('Enter')
+      await expect(notification).toHaveCount(0)
+      await trigger.click()
+      await page.mouse.move(0, 0)
+      await expect(notification).toBeVisible()
+      // Removing the focused toast must not leave later notifications paused.
+      await expect(notification).toBeHidden({ timeout: 8000 })
+    })
+
     test('should give a default toast six seconds before automatic dismissal', async () => {
       // Additional coverage for PYLD-3580; extra reading time does not guarantee virtual cursor persistence.
       await gotoFirstPost({ page, postsURL, serverURL })

@@ -47,7 +47,7 @@
   ],
   "outstanding": [
     "PYLD-3671 and PYLD-3678: current assertions permit a native label stop, unlike the original single-stop requirement. Native WebKit baseline also repeats labels. These remain partial coverage.",
-    "PYLD-3580: six-second dismissal tests do not establish persistence while the screen-reader cursor is on the toast.",
+    "PYLD-3580: DOM keyboard-focus persistence is fixed by a temporary branch-local Sonner patch and four browser checks pass. Virtual-cursor-only persistence remains unverified; replace the root patch with a published-package solution before the final PR.",
     "Reported NVDA/Chrome failures require that platform's evidence; this branch's default Windows Guidepup project uses Firefox.",
     "NVDA browse-mode tests and screen-reader cursor containment must retain AT evidence.",
     "Guidepup queue hazards removed from retained direction/version/widget captures; remote AT verification is still required.",
@@ -101,11 +101,12 @@
       "reportedScreenReaders": ["VoiceOver"],
       "coverage": "partial",
       "tests": [
+        "WCAG.e2e.spec.ts :: should pause trash-toast dismissal while its close button has keyboard focus",
         "WCAG.e2e.spec.ts :: should give a default toast six seconds before automatic dismissal",
         "screen-reader.spec.ts :: should announce the trash toast and dismiss it after the default timeout"
       ],
-      "limits": "Browser investigation confirms the toast dismisses while Close toast holds DOM keyboard focus; hover pauses it. Existing timing tests do not guard focused persistence. The defect is in installed Sonner 1.7.4 focus/pause wiring; no production fix or passing focus-persistence regression exists yet.",
-      "manualVerification": "Original virtual-cursor-only persistence remains unverified. A DOM keyboard-focus failure is independently confirmed and must not be classified as a flaky screen-reader test."
+      "limits": "The temporary Sonner patch fixes and browser-tests DOM keyboard-focus persistence, resumption on blur, hover coexistence, and timer cleanup after manual dismissal. The original virtual-cursor-only requirement remains unverified; this is still partial evidence for that broader report.",
+      "manualVerification": "Repeat the real-trash toast flow in Playwright WebKit after installing the branch patch. Virtual-cursor-only focus is distinct from DOM keyboard focus and remains a separate manual VoiceOver check."
     },
     {
       "ticket": "PYLD-3581",
@@ -1219,15 +1220,40 @@
         "resumeAfterBlur": "Not measurable: focus never paused the timer."
       },
       "rootCause": "In installed Sonner 1.7.4, the dismissal timer pauses for expanded/interacting or optional document-hidden state. Focus handlers update restoration refs but do not update pause state.",
-      "implementationBoundary": "ToastContainer uses Sonner public props, which expose no keyboard-focus pause control. A root pnpm dependency patch would not ship to consumers of the published UI package. Do not treat a checkout-only patch or a global duration change as a complete package fix.",
-      "status": "Confirmed DOM keyboard-focus bug; no production fix applied. A dependency-level candidate has been prepared separately, but needs focus-transfer, focused-toast-removal, hover coexistence, custom-duration, and multiple-toast verification before adoption.",
+      "implementationBoundary": "The branch deliberately registers a pnpm patch for Sonner 1.7.4. This fixes the development/test checkout, but must be replaced with a distributable dependency solution before publishing the Payload UI package.",
+      "status": "Temporary branch-local Sonner patch installed at the user request. Four focused Chromium regressions passed, including the previously failing focus-persistence case. A published-package solution is required before opening the final PR.",
       "manualAT": "Virtual-cursor-only persistence remains unverified; DOM focus is not equivalent to the VoiceOver cursor.",
       "browserRegression": {
         "browser": "Chromium",
         "result": "Reproduced: the focused Close toast button and its toast disappear after the default timeout.",
         "command": "PORT=3001 MONGODB_URL=<isolated test database> pnpm test:e2e a11y --grep 'should pause trash-toast dismissal while its close button has keyboard focus' --workers=1",
         "failure": "The initial toast visibility and Close button focus assertions pass. After seven seconds, the required toast visibility assertion fails because the toast has been removed.",
-        "branchState": "The failing regression was saved as a separate review patch, rather than committed to the passing branch before a shippable dependency fix exists."
+        "branchState": "Included in WCAG.e2e.spec.ts with the temporary dependency fix; previously reproduced the defect and now passes."
+      },
+      "temporaryFix": {
+        "patch": "patches/sonner@1.7.4.patch",
+        "formats": ["ESM", "CommonJS"],
+        "logic": [
+          "Track the focused HTMLElement independently of pointer hover and swipe state.",
+          "Pause timers while pointer expansion or keyboard focus is active.",
+          "Clear keyboard focus state only when focus leaves the toast list.",
+          "Clear stale focus state after a focused element is removed, so subsequent toast timers resume."
+        ],
+        "beforePR": "Abstract/remove the root pnpm patch and establish a fix that ships to published-package consumers."
+      },
+      "browserFixVerification": {
+        "date": "2026-10-21",
+        "browser": "Chromium",
+        "passed": 4,
+        "duration": "44.1 seconds",
+        "scope": "Pause/resume on DOM keyboard focus, hover leaving while focused, focus movement between toast controls, manual dismissal and subsequent timers, close-button keyboard access, default unfocused dismissal.",
+        "command": "PORT=3001 MONGODB_URL=<isolated test database> pnpm test:e2e a11y --grep 'should pause trash-toast dismissal|should preserve toast focus pausing|should give a default toast six seconds|should keep the toast close button accessible' --workers=1",
+        "criteriaAssessed": [
+          "2.1.1 Keyboard (A)",
+          "2.4.3 Focus Order (A)",
+          "2.2.1 Timing Adjustable (A): focused timeout behavior only; no complete criterion claim",
+          "4.1.3 Status Messages (AA): DOM/close-control behavior only; speech not verified"
+        ]
       }
     }
   }
