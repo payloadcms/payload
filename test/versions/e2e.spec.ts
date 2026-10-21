@@ -281,7 +281,7 @@ describe('Versions', () => {
       await expect(page.locator('.app-header .collection-versions-button')).toHaveCount(1)
     })
 
-    test('should restore a historical draft without changing the published document', async () => {
+    test('should restore a draft without changing the published document', async () => {
       const doc = await payload.create({
         collection: restoreAccessCollectionSlug,
         data: { _status: 'draft', title: 'Historical' },
