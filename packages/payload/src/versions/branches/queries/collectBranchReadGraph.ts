@@ -5,6 +5,7 @@ import { withBranchReadSnapshot } from './withBranchReadSnapshot.js'
 
 type RawDocument = Record<string, unknown>
 type Coordinate = { collection: string; id: number | string }
+type RememberArgs = { doc: null | RawDocument } & Coordinate
 
 export type BranchRawReadGraph = {
   /** Unknown keys fail closed. An explicit null is an authorized negative lookup. */
@@ -26,7 +27,9 @@ export const collectBranchReadGraph = async <T>({
   branchID: BranchHeadID
   locale?: string
   read: (args: {
-    remember: (args: { doc: null | RawDocument } & Coordinate) => void
+    remember: (args: RememberArgs) => void
+    /** Transfer a fresh native row which is never exposed outside this collection callback. */
+    rememberOwned: (args: RememberArgs) => void
     req: PayloadRequest
   }) => Promise<T>
   req: PayloadRequest
@@ -37,7 +40,12 @@ export const collectBranchReadGraph = async <T>({
   let isCollecting = true
   const key = ({ id, collection }: Coordinate): string =>
     JSON.stringify([branchID, collection, typeof id, id])
-  const remember = ({ id, collection, doc }: { doc: null | RawDocument } & Coordinate): void => {
+  const store = ({
+    id,
+    collection,
+    doc,
+    shouldClone,
+  }: { shouldClone: boolean } & RememberArgs): void => {
     if (!isCollecting) {
       throw unsupported()
     }
@@ -56,7 +64,7 @@ export const collectBranchReadGraph = async <T>({
     if (rows.size >= 10_000 || bytes + nextBytes > 16 * 1024 * 1024) {
       throw unsupported()
     }
-    const stored = structuredClone(doc)
+    const stored = shouldClone ? structuredClone(doc) : doc
     bytes += nextBytes
     rows.set(coordinate, stored)
   }
@@ -64,7 +72,12 @@ export const collectBranchReadGraph = async <T>({
   try {
     const result = await withBranchReadSnapshot({
       locale,
-      read: ({ req: snapshotReq }) => read({ remember, req: snapshotReq }),
+      read: ({ req: snapshotReq }) =>
+        read({
+          remember: (args) => store({ ...args, shouldClone: true }),
+          rememberOwned: (args) => store({ ...args, shouldClone: false }),
+          req: snapshotReq,
+        }),
       req,
     })
 

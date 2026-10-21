@@ -229,4 +229,39 @@ describe('automatic branch raw graph', () => {
     expect(second.graph.get({ collection: 'targets', id: 1 })).toBeNull()
     expect(first.graph.get({ collection: 'targets', id: 1 })).toEqual({ id: 1, title: 'drafts/en' })
   })
+
+  it.each([undefined, { details: true }])(
+    'should isolate returned root content and graph reads across a related cycle with select %j',
+    async (select) => {
+      const root = { id: 1, related: [2], details: { title: 'root' } }
+      const target = { id: 2, parent: 1, opaque: { title: 'target' } }
+
+      vi.mocked(queryBranchContent)
+        .mockClear()
+        .mockImplementation(async ({ collection }) =>
+          page(collection === 'roots' ? [root] : [target]),
+        )
+      const { graph, result } = await queryBranchContentGraph({
+        branchID: 'drafts',
+        collection: 'roots',
+        depth: 2,
+        req: makeRequest(),
+        select,
+      })
+
+      const details = result.docs[0].details as { title: string }
+
+      details.title = 'changed root result'
+      const related = graph.get({ collection: 'targets', id: 2 })! as typeof target
+
+      related.opaque.title = 'changed population result'
+      expect(graph.get({ collection: 'roots', id: 1 })).toEqual({
+        id: 1,
+        related: [2],
+        details: { title: 'root' },
+      })
+      expect(graph.get({ collection: 'targets', id: 2 })).toEqual(target)
+      expect(queryBranchContent).toHaveBeenCalledTimes(2)
+    },
+  )
 })

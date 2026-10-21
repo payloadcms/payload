@@ -36,7 +36,7 @@ export const queryBranchContentGraph = async ({
   return collectBranchReadGraph({
     branchID: args.branchID,
     locale: args.locale,
-    read: async ({ remember, req }) => {
+    read: async ({ remember, rememberOwned, req }) => {
       // Selecting away a relationship before collection would allow a later
       // population stage to issue an untracked read. Traverse complete raw rows.
       const { select, ...rawArgs } = args
@@ -120,7 +120,10 @@ export const queryBranchContentGraph = async ({
               const coordinate = { id, collection }
               const doc = returned.get(key(coordinate)) as RawDocument | undefined
 
-              remember({ ...coordinate, doc: doc ?? null })
+              // Native related rows belong exclusively to this callback. Unlike root
+              // rows, they never escape in result.docs, and traversal does not mutate
+              // them. Transfer their ownership; graph.get still isolates every read.
+              rememberOwned({ ...coordinate, doc: doc ?? null })
               known.add(key(coordinate))
               if (doc) {
                 frontier.push({ collection, doc })
