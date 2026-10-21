@@ -453,17 +453,11 @@ export async function captureScreenReaderOutput({
 export async function navigateScreenReaderTo({
   matches,
   maxSteps = 150,
-  onVisit,
   screenReader,
   shouldEnterDialogs = false,
 }: {
   matches: RegExp
   maxSteps?: number
-  onVisit?: (args: {
-    index: number
-    itemText: string
-    spokenPhrase: string
-  }) => Promise<void> | void
   screenReader: ScreenReaderPlaywright
   shouldEnterDialogs?: boolean
 }) {
@@ -476,7 +470,6 @@ export async function navigateScreenReaderTo({
     const spokenPhrase = await screenReader.lastSpokenPhrase()
     const output = `${itemText} ${spokenPhrase}`.replace(/\s+/g, ' ').trim()
 
-    await onVisit?.({ index, itemText, spokenPhrase })
     matches.lastIndex = 0
     if (matches.test(output)) {
       return output

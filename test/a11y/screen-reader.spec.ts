@@ -208,6 +208,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       await navigateScreenReaderTo({
         matches: /English.*check\s?box|check\s?box.*English/i,
         screenReader,
+        shouldEnterDialogs: true,
       })
 
       expect(await screenReader.itemText()).toMatch(/English.*check\s?box|check\s?box.*English/i)
@@ -238,21 +239,9 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       await expect(
         dialog.getByRole('checkbox', { name: 'Skip trash and delete permanently', exact: true }),
       ).toBeVisible()
-      console.info('[deletion-cursor] Starting VoiceOver navigation')
       await navigateScreenReaderTo({
         matches: /delete permanently.*check\s?box|check\s?box.*delete permanently/i,
         maxSteps: 12,
-        onVisit: async ({ index, itemText, spokenPhrase }) => {
-          console.info(
-            '[deletion-cursor]',
-            JSON.stringify({
-              index,
-              isDialogVisible: await dialog.isVisible(),
-              itemText,
-              spokenPhrase,
-            }),
-          )
-        },
         screenReader,
         shouldEnterDialogs: true,
       })
@@ -269,10 +258,6 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
         next = await screenReader.itemText()
       }
 
-      console.info(
-        '[deletion-cursor] After checkbox',
-        JSON.stringify({ itemText: next, spokenPhrase: await screenReader.lastSpokenPhrase() }),
-      )
       expect(next).not.toMatch(/delete permanently/i)
       expect(next).toMatch(/Cancel.*button|button.*Cancel/i)
     })
@@ -881,7 +866,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
         await screenReader.next()
         const itemText = await screenReader.itemText()
 
-        if (/overwrite existing data/i.test(itemText)) {
+        if (/overwrite existing field data/i.test(itemText)) {
           hasReachedNextField = true
           break
         }
@@ -959,6 +944,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       const output = await navigateScreenReaderTo({
         matches: /sort/i,
         screenReader,
+        shouldEnterDialogs: true,
       })
 
       expect(output).toMatch(/dimmed|disabled|unavailable/i)
