@@ -266,6 +266,154 @@ describe('planLegacyBranchHeads', () => {
     })
   })
 
+  const attachmentFields = compileBranchScopeFields({
+    fields: [
+      {
+        name: 'rows',
+        type: 'array',
+        fields: [
+          { name: 'title', type: 'text', localized: true },
+          {
+            name: 'blocks',
+            type: 'blocks',
+            blocks: [
+              {
+                slug: 'section',
+                fields: [
+                  { name: 'title', type: 'text', localized: true },
+                  {
+                    name: 'items',
+                    type: 'array',
+                    fields: [{ name: 'title', type: 'text', localized: true }],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            name: 'localizedItems',
+            type: 'array',
+            localized: true,
+            fields: [{ name: 'title', type: 'text' }],
+          },
+        ],
+      },
+    ],
+  })
+  const attachmentRow = ({ id }: { id: number | string }) => ({
+    id,
+    blocks: ['a', 'b'].map((blockID) => ({
+      id: blockID,
+      blockType: 'section',
+      items: ['first', 'second'].map((itemID) => ({
+        id: itemID,
+        title: { en: `${id} ${blockID} ${itemID}`, fr: `French ${id} ${blockID} ${itemID}` },
+      })),
+      title: { en: `${id} ${blockID}`, fr: `French ${id} ${blockID}` },
+    })),
+    localizedItems: {
+      en: [
+        { id: 'a', title: 'First' },
+        { id: 'b', title: 'Second' },
+      ],
+      fr: [
+        { id: 'a', title: 'Premier' },
+        { id: 'b', title: 'Deuxième' },
+      ],
+    },
+    title: { en: String(id), fr: `French ${id}` },
+  })
+  const attachmentData = {
+    _status: { en: 'published', fr: 'published' },
+    rows: [attachmentRow({ id: 1 }), attachmentRow({ id: '1' })],
+  }
+
+  it('should inherit locales after shared arrays, blocks, and nested rows reorder', () => {
+    const workingData = structuredClone(attachmentData)
+
+    workingData.rows.reverse()
+
+    for (const row of workingData.rows) {
+      row.blocks.reverse()
+
+      for (const block of row.blocks) {
+        block.items.reverse()
+      }
+    }
+
+    const result = planLegacyBranchHeads({
+      fields: attachmentFields,
+      locales: ['en', 'fr'],
+      materialized: { data: attachmentData, version: live.version },
+      statusMode: 'localized',
+      working: { data: workingData, version: { generation: 1, id: 'reordered' } },
+    })
+
+    expect(
+      result.heads.filter(({ branchID }) => branchID === 'drafts').map(({ scope }) => scope),
+    ).toStrictEqual([{ type: 'shared' }])
+    expect(workingData.rows[0]!.id).toBe('1')
+    expect(attachmentData.rows[0]!.id).toBe(1)
+  })
+
+  it('should retain a real nested translation change when shared rows reorder', () => {
+    const workingData = structuredClone(attachmentData)
+
+    workingData.rows.reverse()
+    workingData.rows[0]!.blocks.reverse()
+    workingData.rows[0]!.blocks[0]!.items.reverse()
+    workingData.rows[0]!.blocks[0]!.items[0]!.title.en = 'Changed translation'
+
+    const result = planLegacyBranchHeads({
+      fields: attachmentFields,
+      locales: ['en', 'fr'],
+      materialized: { data: attachmentData, version: live.version },
+      statusMode: 'localized',
+      working: { data: workingData, version: { generation: 1, id: 'changed-translation' } },
+    })
+
+    expect(
+      result.heads.filter(({ branchID }) => branchID === 'drafts').map(({ scope }) => scope),
+    ).toStrictEqual([{ type: 'shared' }, { locale: 'en', type: 'locale' }])
+  })
+
+  it('should preserve ordering within localized atomic containers', () => {
+    const workingData = structuredClone(attachmentData)
+
+    workingData.rows[0]!.localizedItems.en.reverse()
+
+    const result = planLegacyBranchHeads({
+      fields: attachmentFields,
+      locales: ['en', 'fr'],
+      materialized: { data: attachmentData, version: live.version },
+      statusMode: 'localized',
+      working: { data: workingData, version: { generation: 1, id: 'localized-order' } },
+    })
+
+    expect(
+      result.heads.filter(({ branchID }) => branchID === 'drafts').map(({ scope }) => scope),
+    ).toStrictEqual([{ locale: 'en', type: 'locale' }])
+  })
+
+  it('should distinguish numeric and string row identities when comparing translations', () => {
+    const workingData = structuredClone(attachmentData)
+
+    workingData.rows.reverse()
+    workingData.rows[0]!.title.en = 'Translation for string identity'
+
+    const result = planLegacyBranchHeads({
+      fields: attachmentFields,
+      locales: ['en', 'fr'],
+      materialized: { data: attachmentData, version: live.version },
+      statusMode: 'localized',
+      working: { data: workingData, version: { generation: 1, id: 'typed-row-change' } },
+    })
+
+    expect(
+      result.heads.filter(({ branchID }) => branchID === 'drafts').map(({ scope }) => scope),
+    ).toStrictEqual([{ type: 'shared' }, { locale: 'en', type: 'locale' }])
+  })
+
   it.each(['bad', [], 'published'])(
     'should reject malformed localized publication state %j',
     (_status) => {

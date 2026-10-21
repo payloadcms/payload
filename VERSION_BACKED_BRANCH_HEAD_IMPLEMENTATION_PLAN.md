@@ -377,14 +377,20 @@ The stack starts at main. Each layer targets the preceding branch so reviewers s
 | 3     | [#18900](https://github.com/payloadcms/payload/pull/18900) | Fix collection Local API restoration dropping its draft flag, with a failing-before/passing-after regression   |
 | 4     | [#18901](https://github.com/payloadcms/payload/pull/18901) | Schema compiled scope projection/composition, typed row matching, and real stored-content integration evidence |
 | 5     | [#18902](https://github.com/payloadcms/payload/pull/18902) | Internal per-entity head schemas, native generation guards, unique first creation, and corruption checks       |
-| 6     | `feat/version-heads-migration-planning`                    | Pure existing-drafts head planning and persistence verification without changing live content/history          |
+| 6     | [#18903](https://github.com/payloadcms/payload/pull/18903) | Pure existing-drafts head planning and persistence verification without changing live content/history          |
 
 Current implementation state as of 2026-10-21:
 
 - M0 has executable live/working, localized publish/withdraw, autosave, restore, and global baselines. Released schema-generation fixtures, API/access coverage, and pending-job characterization remain.
 - M1 includes the scope compiler and content composition as well as the original head domain. Batch selection, full merge-base/receipt planning, and operation integration remain.
-- M2 has native head persistence registered only in the test fixture. Version freezing/pinning and runtime capability/registration contracts remain. SQLite storage races are verified; MongoDB and Postgres are not locally verified because their services are unavailable and Docker is not running.
+- M2 has native head persistence registered only in the test fixture. Version freezing/pinning and runtime capability/registration contracts remain. All 19 initial integration contracts, including storage races, pass locally on SQLite, MongoDB, and PostgreSQL. Isolated temporary MongoDB and PostgreSQL services provide the latter two checks; wrapper capabilities remain unverified.
 - M9 has a per-identity planning primitive that distinguishes actual materialization from resolved working snapshots, handles scalar/localized statuses, retains unpublished working content, and preserves legacy draft metadata references. It does not execute schema migration, freeze versions, resolve historical source generations, migrate jobs, or activate the engine.
 - M3 through M8 and M10 through M11 remain outstanding. In particular, effective indexed branch queries, complete operation/access/hook integration, live materialization, schedules, retention/GC, public APIs, migration cutover, and Admin flows are not implemented.
 
 The collection Local API restore fix passes its new regression and 15 selected existing restore regressions against SQLite. No rendered UI has changed, so this stack supplies no new browser, screen-reader, or accessibility conformance evidence. Review descriptions distinguish each layer's tests from the remaining release gates.
+
+### Independent review gates
+
+The complete six-layer stack received an independent subagent review before further phase implementation. The reviewer found one blocking migration issue: shared row reordering incorrectly created locale overrides for unchanged translations, preventing subsequent main translations from inheriting. A separate implementation agent fixed recursive locale comparison to use typed row identities while preserving localized container order. Independent re-review passed with no remaining blocking findings. All 107 branch unit tests pass; the two migration integration tests pass on SQLite, PostgreSQL, and MongoDB.
+
+Each subsequent milestone has a fresh implementation agent and a separate review agent. Findings are fixed and re-reviewed before advancing. A milestone remains incomplete until its stated evidence gate is satisfied; draft PR creation alone does not satisfy that gate.

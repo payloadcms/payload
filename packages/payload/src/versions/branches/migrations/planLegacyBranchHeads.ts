@@ -188,8 +188,8 @@ const getWorkingHead = ({
     main.state.type === 'version' &&
     materialized &&
     isDeepStrictEqual(
-      projectBranchScopeData({ data: materialized.data, fields, scope: main.scope }),
-      projectBranchScopeData({ data: currentWorking.data, fields, scope: main.scope }),
+      getComparableScopeData({ data: materialized.data, fields, scope: main.scope }),
+      getComparableScopeData({ data: currentWorking.data, fields, scope: main.scope }),
     ) &&
     isDeepStrictEqual(main.state.structure, structure)
   ) {
@@ -208,6 +208,69 @@ const getWorkingHead = ({
     scope: main.scope,
     state: { type: 'version', structure, version: currentWorking.version },
   }
+}
+
+const getComparableScopeData = ({
+  data,
+  fields,
+  scope,
+}: {
+  data: Record<string, unknown>
+  fields: readonly BranchScopeField[]
+  scope: BranchContentScope
+}): Record<string, unknown> => {
+  const projected = projectBranchScopeData({ data, fields, scope })
+
+  return scope.type === 'locale' ? getLocaleAttachments({ data: projected, fields }) : projected
+}
+
+/** Shared row order is not part of a locale attachment; localized containers remain atomic. */
+const getLocaleAttachments = ({
+  data,
+  fields,
+}: {
+  data: Record<string, unknown>
+  fields: readonly BranchScopeField[]
+}): Record<string, unknown> => {
+  const fieldsByName = new Map(fields.map((field) => [field.name, field]))
+
+  return Object.fromEntries(
+    Object.entries(data).map(([name, value]) => {
+      const field = fieldsByName.get(name)
+
+      if (!field || field.type === 'value') {
+        return [name, value]
+      }
+
+      if (field.type === 'group') {
+        return [
+          name,
+          getLocaleAttachments({ data: value as Record<string, unknown>, fields: field.fields }),
+        ]
+      }
+
+      const attachments = new Map<BranchHeadID, Record<string, unknown>>()
+
+      for (const row of value as Record<string, unknown>[]) {
+        const id = row.id
+        const rowFields =
+          field.type === 'blocks' ? field.blocks.get(String(row.blockType)) : field.fields
+
+        if (
+          ((typeof id !== 'number' || !Number.isSafeInteger(id)) &&
+            (typeof id !== 'string' || !id.length)) ||
+          attachments.has(id as BranchHeadID) ||
+          !rowFields
+        ) {
+          throw new Error(`Invalid locale attachment identity in field "${name}".`)
+        }
+
+        attachments.set(id as BranchHeadID, getLocaleAttachments({ data: row, fields: rowFields }))
+      }
+
+      return [name, attachments]
+    }),
+  )
 }
 
 const isPublished = ({
