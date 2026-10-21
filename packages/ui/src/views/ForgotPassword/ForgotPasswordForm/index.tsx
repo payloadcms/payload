@@ -163,20 +163,18 @@ export const ForgotPasswordForm: React.FC = () => {
     })
 
   const validateEmail = (value: null | string | undefined) =>
-    !value
-      ? t('validation:required')
-      : email(value, {
-          name: 'email',
-          type: 'email',
-          blockData: {},
-          data: {},
-          event: 'onChange',
-          path: ['email'],
-          preferences: { fields: {} },
-          req: { payload: { config }, t } as unknown as PayloadRequest,
-          required: true,
-          siblingData: {},
-        })
+    email(value, {
+      name: 'email',
+      type: 'email',
+      blockData: {},
+      data: {},
+      event: 'onChange',
+      path: ['email'],
+      preferences: { fields: {} },
+      req: { payload: { config }, t } as unknown as PayloadRequest,
+      required: true,
+      siblingData: {},
+    })
 
   const initialState: FormState = loginWithUsername
     ? {
