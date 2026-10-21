@@ -861,7 +861,36 @@ describe('Access Control', () => {
 
       await expect(page.locator('.unauthorized__content h1')).toHaveText('Unauthorized')
 
+      const logoutURL = formatAdminURL({
+        apiRoute: '/api',
+        path: `/${publicUsersSlug}/logout`,
+        serverURL,
+      })
+      const logoutResponse = page.waitForResponse(
+        (response) => response.url() === logoutURL && response.request().method() === 'POST',
+      )
+
       await page.goto(url.logout)
+
+      await expect.poll(async () => (await logoutResponse).status()).toBe(200)
+
+      await expect
+        .poll(async () => (await context.cookies()).some(({ name }) => name === 'payload-token'))
+        .toBe(false)
+
+      const currentUserURL = formatAdminURL({
+        apiRoute: '/api',
+        path: `/${publicUsersSlug}/me`,
+        serverURL,
+      })
+
+      await expect
+        .poll(async () => {
+          const response = await context.request.get(currentUserURL)
+
+          return (await response.json()).user
+        })
+        .toBeNull()
 
       await expect(page.locator('.payload-toast-container')).toContainText(
         'You have been logged out successfully.',

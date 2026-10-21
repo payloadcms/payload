@@ -21,7 +21,11 @@ export type AuthContext<T = AuthenticatedUser> = {
   /** Lifecycle state for the current auth session. */
   authSession?: AuthSession
   fetchFullUser: () => Promise<null | T>
-  logOut: () => Promise<boolean>
+  /** Uses the server-resolved collection when the client session has already been cleared. */
+  logOut: {
+    (): Promise<boolean>
+    (args: { fallbackCollection?: string }): Promise<boolean>
+  }
   /**
    * These are the permissions for the current user from a global scope.
    *
