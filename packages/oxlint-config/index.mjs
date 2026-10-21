@@ -4,49 +4,7 @@ import perfectionist from 'eslint-plugin-perfectionist'
 import playwright from 'eslint-plugin-playwright'
 import { configs as regexpConfigs } from 'eslint-plugin-regexp'
 import { createRequire } from 'node:module'
-
-import reactExtends from './configs/react/index.mjs'
-
-const reactA11yRules = {
-  'jsx-a11y/anchor-is-valid': 'warn',
-  // ESLint ran this with jsx-a11y's defaults, which check `<input>` and `<textarea>` too. oxlint's
-  // defaults skip them, so pass jsx-a11y's defaults explicitly.
-  'jsx-a11y/control-has-associated-label': ['warn', { ignoreElements: [], ignoreRoles: [] }],
-  // ESLint ran this with jsx-a11y's default handlers, which include `onMouseEnter` and
-  // `onMouseLeave`. oxlint's defaults skip them, so pass jsx-a11y's defaults explicitly.
-  'jsx-a11y/no-static-element-interactions': [
-    'warn',
-    {
-      handlers: [
-        'onFocus',
-        'onBlur',
-        'onKeyDown',
-        'onKeyPress',
-        'onKeyUp',
-        'onClick',
-        'onContextMenu',
-        'onDblClick',
-        'onDoubleClick',
-        'onDrag',
-        'onDragEnd',
-        'onDragEnter',
-        'onDragExit',
-        'onDragLeave',
-        'onDragOver',
-        'onDragStart',
-        'onDrop',
-        'onMouseDown',
-        'onMouseEnter',
-        'onMouseLeave',
-        'onMouseMove',
-        'onMouseOut',
-        'onMouseOver',
-        'onMouseUp',
-      ],
-    },
-  ],
-  'jsx-a11y/label-has-associated-control': 'warn',
-}
+import { reactA11yRules } from './react-a11y.mjs'
 
 const require = createRequire(import.meta.url)
 const requireFromESLintReact = createRequire(require.resolve('@eslint-react/eslint-plugin'))
@@ -245,16 +203,6 @@ const config = {
       },
     },
     {
-      files: ['**/*.tsx'],
-      ...reactExtends,
-      rules: {
-        ...reactExtends.rules,
-        ...reactA11yRules,
-        // TODO: back to 'error' once fixed. This version flags more than the ESLint one.
-        'jsx-a11y/role-has-required-aria-props': 'warn',
-      },
-    },
-    {
       files: ['**/*.spec.ts'],
       excludeFiles: ['**/*.e2e.spec.ts'],
       // `vitest` is loaded as `@vitest` (see `jsPlugins`), so the preset's rule names need the new prefix
@@ -267,13 +215,31 @@ const config = {
     },
     {
       files: ['**/*.tsx'],
-      // React's recommended React Compiler checks (the `recommended-latest` preset of
-      // `eslint-plugin-react-hooks`), using oxlint's built-in port of the compiler. `hooks`,
-      // `invariant`, `rule-suppression` and `syntax` aren't in the preset, but React Compiler skips
-      // optimizing components they report. Severities are the ones React gives each rule, except
-      // where noted. `todo` is left out: it reports syntax the compiler doesn't support yet, which
-      // React treats as a hint.
       rules: {
+        ...eslintReact.configs['recommended-type-checked'].rules,
+        '@eslint-react/hooks-extra/no-direct-set-state-in-use-effect': 'off',
+        '@eslint-react/naming-convention/use-state': 'off',
+        '@eslint-react/dom/no-dangerously-set-innerhtml': 'off',
+        '@eslint-react/dom/no-dangerously-set-innerhtml-with-children': 'off',
+        '@eslint-react/no-unsafe-component-will-mount': 'off',
+        '@eslint-react/no-unsafe-component-will-receive-props': 'off',
+        '@eslint-react/no-unsafe-component-will-update': 'off',
+        '@eslint-react/no-set-state-in-component-did-mount': 'off',
+        '@eslint-react/no-set-state-in-component-did-update': 'off',
+        '@eslint-react/no-set-state-in-component-will-update': 'off',
+        '@eslint-react/no-missing-component-display-name': 'off',
+        '@eslint-react/no-direct-mutation-state': 'off',
+        '@eslint-react/no-array-index-key': 'off',
+        '@eslint-react/no-unstable-default-props': 'off', // TODO: Evaluate enabling this
+        '@eslint-react/no-unstable-context-value': 'off', // TODO: Evaluate enabling this
+        ...reactA11yRules,
+        // Needs type information, which oxlint doesn't give JS plugins
+        '@eslint-react/no-leaked-conditional-rendering': 'off',
+        // React
+        'react-hooks/exhaustive-deps': 'warn',
+        // TODO: back to 'error' once fixed. This version flags more than the ESLint one.
+        'react-hooks/rules-of-hooks': 'warn',
+        // React Compiler
         'react-hooks/error-boundaries': 'error',
         'react-hooks/globals': 'error',
         'react-hooks/hooks': 'error',
