@@ -160,14 +160,16 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
 
     let result = rawVersion.version
 
-    if (global) {
+    if (global || draft) {
       // Ensure updatedAt date is always updated
       result.updatedAt = new Date().toISOString()
-      result = await payload.db.updateGlobal({
-        slug: globalConfig.slug,
-        data: result,
-        req,
-      })
+      if (!draft) {
+        result = await payload.db.updateGlobal({
+          slug: globalConfig.slug,
+          data: result,
+          req,
+        })
+      }
 
       const now = new Date().toISOString()
 
