@@ -3,6 +3,11 @@ import type { PayloadRequest } from 'payload'
 
 import type { MongooseAdapter } from '../index.js'
 
+import {
+  getBranchReadSnapshotAdapterSession,
+  isBranchReadSnapshotSession,
+} from '../branching/readSnapshotSessions.js'
+
 /**
  * returns the session belonging to the transaction of the req.session if exists
  * @returns ClientSession
@@ -11,14 +16,16 @@ export async function getSession(
   db: MongooseAdapter,
   req?: Partial<PayloadRequest>,
 ): Promise<ClientSession | undefined> {
-  if (!req) {
-    return
-  }
-
-  let transactionID = req.transactionID
+  let transactionID = req?.transactionID
 
   if (transactionID instanceof Promise) {
-    transactionID = await req.transactionID
+    transactionID = await transactionID
+  }
+
+  const scopedSession = getBranchReadSnapshotAdapterSession({ adapter: db, transactionID })
+
+  if (scopedSession) {
+    return scopedSession
   }
 
   if (transactionID) {
@@ -31,7 +38,7 @@ export async function getSession(
     // Note: This shouldn't normally happen as sessions are deleted from db.sessions
     // after commit/rollback, but can occur due to async timing where we hold
     // a reference to a session object that gets ended before we use it.
-    if (session && !session.inTransaction()) {
+    if (session && !session.inTransaction() && !isBranchReadSnapshotSession({ session })) {
       // Clean up the orphaned session reference
       delete db.sessions[transactionID]
       return undefined

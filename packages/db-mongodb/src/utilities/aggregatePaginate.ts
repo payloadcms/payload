@@ -4,6 +4,8 @@ import type { PaginatedDocs } from 'payload'
 
 import type { MongooseAdapter } from '../index.js'
 
+import { buildSnapshotNearStages } from './buildSnapshotNearStages.js'
+
 export const aggregatePaginate = async ({
   adapter,
   collation,
@@ -33,7 +35,8 @@ export const aggregatePaginate = async ({
   sortAggregation?: PipelineStage[]
   useEstimatedCount?: boolean
 }): Promise<PaginatedDocs<any>> => {
-  const aggregation: PipelineStage[] = [{ $match: query }]
+  const near = session ? buildSnapshotNearStages({ Model, query }) : null
+  const aggregation: PipelineStage[] = near ?? [{ $match: query }]
 
   if (sortAggregation && sortAggregation.length > 0) {
     for (const stage of sortAggregation) {
@@ -72,7 +75,12 @@ export const aggregatePaginate = async ({
   let countPromise: Promise<null | number> = Promise.resolve(null)
 
   if (pagination !== false && limit) {
-    if (useEstimatedCount) {
+    if (near) {
+      countPromise = Model.aggregate([...near, { $count: 'totalDocs' }], {
+        collation,
+        session,
+      }).then((rows) => rows[0]?.totalDocs ?? 0)
+    } else if (useEstimatedCount && !session) {
       countPromise = Model.estimatedDocumentCount(query)
     } else {
       // Only hint the _id index for unfiltered counts. With a filter, MongoDB picks the matching index on its own,
@@ -89,10 +97,14 @@ export const aggregatePaginate = async ({
     }
   }
 
-  const [docs, countResult] = await Promise.all([
-    Model.aggregate(aggregation, { collation, session }),
-    countPromise,
-  ])
+  // Resolve the count before starting another operation on a caller transaction.
+  const [docs, countResult] = session
+    ? await (async () => {
+        const count = await countPromise
+        const docs = await Model.aggregate(aggregation, { collation, session })
+        return [docs, count] as const
+      })()
+    : await Promise.all([Model.aggregate(aggregation, { collation, session }), countPromise])
 
   const count = countResult === null ? docs.length : countResult
 

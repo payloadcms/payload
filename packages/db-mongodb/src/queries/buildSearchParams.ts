@@ -5,6 +5,7 @@ import type {
   Operator,
   PathToQuery,
   Payload,
+  PayloadRequest,
 } from 'payload'
 
 import { Types } from 'mongoose'
@@ -19,6 +20,7 @@ import type { MongooseAdapter } from '../index.js'
 import type { OperatorMapKey } from './operatorMap.js'
 
 import { getCollection } from '../utilities/getEntity.js'
+import { getSession } from '../utilities/getSession.js'
 import { isObjectID } from '../utilities/isObjectID.js'
 import { operatorMap } from './operatorMap.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
@@ -37,6 +39,7 @@ const subQueryOptions = {
  * Convert the Payload key / value / operator into a MongoDB query
  */
 export async function buildSearchParam({
+  adapter,
   collectionSlug,
   fields,
   globalSlug,
@@ -45,8 +48,10 @@ export async function buildSearchParam({
   operator,
   parentIsLocalized,
   payload,
+  req,
   val,
 }: {
+  adapter?: MongooseAdapter
   collectionSlug?: string
   fields: FlattenedField[]
   globalSlug?: string
@@ -55,6 +60,7 @@ export async function buildSearchParam({
   operator: Operator
   parentIsLocalized: boolean
   payload: Payload
+  req?: Partial<PayloadRequest>
   val: unknown
 }): Promise<SearchParam | undefined> {
   // Replace GraphQL nested field double underscore formatting
@@ -116,12 +122,14 @@ export async function buildSearchParam({
     isNestedRelationshipQuery(val)
   ) {
     return buildHasManyRelationshipSearchParam({
+      adapter,
       field,
       locale,
       nestedWhere: val,
       operator: operator as HasManyRelationshipOperator,
       path,
       payload,
+      req,
     })
   }
 
@@ -133,10 +141,12 @@ export async function buildSearchParam({
     isNestedRelationshipQuery(val)
   ) {
     return buildJoinContainsSearchParam({
+      adapter,
       field,
       locale,
       nestedWhere: val,
       payload,
+      req,
     })
   }
 
@@ -199,14 +209,16 @@ export async function buildSearchParam({
         }
 
         const { collectionConfig, Model: SubModel } = getCollection({
-          adapter: payload.db as MongooseAdapter,
+          adapter: adapter ?? (payload.db as MongooseAdapter),
           collectionSlug,
         })
 
         if (i === 0) {
           const subQuery = await SubModel.buildQuery({
+            adapter,
             locale,
             payload,
+            req,
             where: {
               [subPath]: {
                 [formattedOperator]: val,
@@ -242,7 +254,11 @@ export async function buildSearchParam({
             select[joinPath] = true
           }
 
-          const result = await SubModel.find(subQuery).lean().select(select)
+          const result = await SubModel.find(subQuery, null, {
+            session: await getSession(adapter ?? (payload.db as MongooseAdapter), req),
+          })
+            .lean()
+            .select(select)
 
           const $in: unknown[] = []
 
@@ -324,7 +340,9 @@ export async function buildSearchParam({
             )
           }
 
-          const $in = await SubModel.distinct(joinPath, subQuery)
+          const $in = await SubModel.distinct(joinPath, subQuery, {
+            session: await getSession(adapter ?? (payload.db as MongooseAdapter), req),
+          })
           if (i + 1 === pathsToQuery.length) {
             return { path: '_id', value: { $in } }
           }
@@ -333,7 +351,10 @@ export async function buildSearchParam({
           continue
         }
 
-        const result = await SubModel.find(subQuery, subQueryOptions)
+        const result = await SubModel.find(subQuery, null, {
+          ...subQueryOptions,
+          session: await getSession(adapter ?? (payload.db as MongooseAdapter), req),
+        })
 
         const $in = result.map((doc) => doc._id)
 
@@ -477,19 +498,23 @@ export async function buildSearchParam({
  * ```
  */
 async function buildHasManyRelationshipSearchParam({
+  adapter,
   field,
   locale,
   nestedWhere,
   operator,
   path,
   payload,
+  req,
 }: {
+  adapter?: MongooseAdapter
   field: FlattenedField
   locale?: string
   nestedWhere: unknown
   operator: HasManyRelationshipOperator
   path: string
   payload: Payload
+  req?: Partial<PayloadRequest>
 }): Promise<SearchParam | undefined> {
   if (
     (field.type !== 'relationship' && field.type !== 'upload') ||
@@ -501,7 +526,7 @@ async function buildHasManyRelationshipSearchParam({
   }
 
   const { Model: RelatedModel } = getCollection({
-    adapter: payload.db as MongooseAdapter,
+    adapter: adapter ?? (payload.db as MongooseAdapter),
     collectionSlug: field.relationTo,
   })
   const pathLocale = payload.config.localization
@@ -510,13 +535,21 @@ async function buildHasManyRelationshipSearchParam({
       )
     : undefined
   const matchingRelatedDocumentsQuery = await RelatedModel.buildQuery({
+    adapter,
     locale: pathLocale ?? locale,
     payload,
+    req,
     where: nestedWhere,
   })
 
   const findRelatedDocumentIDs = async (query: Record<string, unknown>) =>
-    (await RelatedModel.find(query).lean().select({ _id: true })).map((document) => document._id)
+    (
+      await RelatedModel.find(query, null, {
+        session: await getSession(adapter ?? (payload.db as MongooseAdapter), req),
+      })
+        .lean()
+        .select({ _id: true })
+    ).map((document) => document._id)
 
   switch (operator) {
     case 'contains': {
@@ -567,15 +600,19 @@ async function buildHasManyRelationshipSearchParam({
  * constraint must be satisfied by the same document.
  */
 async function buildJoinContainsSearchParam({
+  adapter,
   field,
   locale,
   nestedWhere,
   payload,
+  req,
 }: {
+  adapter?: MongooseAdapter
   field: FlattenedField
   locale?: string
   nestedWhere: unknown
   payload: Payload
+  req?: Partial<PayloadRequest>
 }): Promise<SearchParam | undefined> {
   if (
     field.type !== 'join' ||
@@ -586,7 +623,7 @@ async function buildJoinContainsSearchParam({
   }
 
   const { collectionConfig, Model: JoinedModel } = getCollection({
-    adapter: payload.db as MongooseAdapter,
+    adapter: adapter ?? (payload.db as MongooseAdapter),
     collectionSlug: field.collection,
   })
 
@@ -605,12 +642,16 @@ async function buildJoinContainsSearchParam({
   }
 
   const subQuery = await JoinedModel.buildQuery({
+    adapter,
     locale,
     payload,
+    req,
     where: nestedWhere,
   })
 
-  const parentIDs = await JoinedModel.distinct(joinPath, subQuery)
+  const parentIDs = await JoinedModel.distinct(joinPath, subQuery, {
+    session: await getSession(adapter ?? (payload.db as MongooseAdapter), req),
+  })
 
   return {
     path: '_id',

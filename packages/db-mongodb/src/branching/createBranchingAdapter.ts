@@ -9,6 +9,8 @@ import { buildQuery } from '../queries/buildQuery.js'
 import { getCollection, getGlobal } from '../utilities/getEntity.js'
 import { getSession } from '../utilities/getSession.js'
 import { transform } from '../utilities/transform.js'
+import { createProjectionQueries } from './createProjectionQueries.js'
+import { createReadSnapshot } from './createReadSnapshot.js'
 
 export const createBranchingAdapter = ({
   adapter,
@@ -141,7 +143,7 @@ export const createBranchingAdapter = ({
 
         if (
           typeof parentID !== expectedType ||
-          (typeof parentID === 'number' && !Number.isSafeInteger(parentID)) ||
+          (typeof parentID === 'number' && !Number.isFinite(parentID)) ||
           parentID === ''
         ) {
           throw new Error('The branch version parent has an incompatible ID type.')
@@ -207,6 +209,37 @@ export const createBranchingAdapter = ({
 
       return doc
     },
+    queryProjection: createProjectionQueries({ adapter }),
+    replaceProjection: async ({ collection, replacement, req }) => {
+      const config = adapter.payload.collections[collection]?.config
+      const model = adapter.collections[collection]
+      const session = await getSession(adapter, req)
+      if (
+        !model ||
+        !config?.custom?.branchProjectionStorage ||
+        !session?.inTransaction() ||
+        typeof replacement.id !== 'string'
+      ) {
+        throw new Error('Private projection replacement requires its native caller transaction.')
+      }
+      const data = structuredClone(replacement)
+      const id = data.id
+      const hasUpdatedAt = Object.hasOwn(data, 'updatedAt')
+      const updatedAt = data.updatedAt
+      transform({ adapter, data, fields: config.fields, operation: 'write' })
+      if (hasUpdatedAt) {
+        data.updatedAt = updatedAt
+      } else {
+        delete data.updatedAt
+      }
+      data._id = id
+      delete data.id
+      const result = await model.replaceOne({ _id: id }, data, { session, timestamps: false })
+      if (result.matchedCount !== 1) {
+        throw new Error('The private branch projection row is missing.')
+      }
+    },
+    withReadSnapshot: createReadSnapshot({ adapter, isTransactionsEnabled }),
   }
 }
 

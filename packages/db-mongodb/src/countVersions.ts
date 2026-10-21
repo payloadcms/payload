@@ -6,6 +6,7 @@ import { buildVersionCollectionFields, flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
+import { countSnapshotDocuments } from './utilities/buildSnapshotNearStages.js'
 import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 
@@ -30,6 +31,7 @@ export const countVersions: CountVersions = async function countVersions(
     adapter: this,
     fields: buildVersionCollectionFields(this.payload.config, collectionConfig, true),
     locale,
+    req,
     where,
   })
 
@@ -62,10 +64,10 @@ export const countVersions: CountVersions = async function countVersions(
   }
 
   let result: number
-  if (useEstimatedCount) {
+  if (useEstimatedCount && !options.session) {
     result = await Model.estimatedDocumentCount({ session: options.session })
   } else {
-    result = await Model.countDocuments(query, options)
+    result = await countSnapshotDocuments({ Model, options, query })
   }
 
   return {

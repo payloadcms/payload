@@ -1,15 +1,18 @@
 import type { PipelineStage } from 'mongoose'
+import type {
+  CollectionSlug,
+  FlattenedField,
+  JoinQuery,
+  PayloadRequest,
+  SanitizedCollectionConfig,
+} from 'payload'
 
 import {
   APIError,
   appendVersionToQueryKey,
   buildVersionCollectionFields,
-  type CollectionSlug,
   combineQueries,
-  type FlattenedField,
   getQueryDraftsSort,
-  type JoinQuery,
-  type SanitizedCollectionConfig,
 } from 'payload'
 import { fieldShouldBeLocalized, hasDraftsEnabled } from 'payload/shared'
 
@@ -31,6 +34,7 @@ type BuildJoinAggregationArgs = {
   // the where clause for the top collection
   query?: Record<string, unknown>
   /** whether the query is from drafts */
+  req?: Partial<PayloadRequest>
   versions?: boolean
 }
 
@@ -42,6 +46,7 @@ export const buildJoinAggregation = async ({
   joins,
   locale,
   projection,
+  req,
   versions,
 }: BuildJoinAggregationArgs): Promise<PipelineStage[]> => {
   if (!adapter.useJoinAggregations) {
@@ -109,6 +114,7 @@ export const buildJoinAggregation = async ({
       adapter,
       fields: aggregatedFields,
       locale,
+      req,
       where: whereJoin,
     })
 
@@ -329,8 +335,10 @@ export const buildJoinAggregation = async ({
       const sortDirection = sort[sortProperty] === 'asc' ? 1 : -1
 
       const $match = await JoinModel.buildQuery({
+        adapter,
         locale,
         payload: adapter.payload,
+        req,
         where: useDrafts
           ? combineQueries(appendVersionToQueryKey(whereJoin), {
               latest: {

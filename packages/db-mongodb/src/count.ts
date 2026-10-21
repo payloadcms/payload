@@ -6,6 +6,7 @@ import { flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
+import { buildSnapshotNearStages } from './utilities/buildSnapshotNearStages.js'
 import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 
@@ -27,6 +28,7 @@ export const count: Count = async function count(
     collectionSlug,
     fields: collectionConfig.flattenedFields,
     locale,
+    req,
     where,
   })
 
@@ -59,7 +61,14 @@ export const count: Count = async function count(
   }
 
   let result: number
-  if (useEstimatedCount) {
+  const near = options.session ? buildSnapshotNearStages({ Model, query }) : null
+  if (near) {
+    const rows = await Model.aggregate([...near, { $count: 'totalDocs' }], {
+      collation: options.collation,
+      session: options.session,
+    })
+    result = rows[0]?.totalDocs ?? 0
+  } else if (useEstimatedCount && !options.session) {
     result = await Model.estimatedDocumentCount({ session: options.session })
   } else {
     result = await Model.countDocuments(query, options)

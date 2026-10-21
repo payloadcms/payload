@@ -24,6 +24,7 @@ export const findOne: FindOne = async function findOne(
     collectionSlug,
     fields: collectionConfig.flattenedFields,
     locale,
+    req,
     where,
   })
 
@@ -42,6 +43,7 @@ export const findOne: FindOne = async function findOne(
     locale,
     projection,
     query,
+    req,
   })
 
   const session = await getSession(this, req)
@@ -75,6 +77,7 @@ export const findOne: FindOne = async function findOne(
       docs: [doc] as Record<string, unknown>[],
       joins,
       locale,
+      req,
     })
   }
 

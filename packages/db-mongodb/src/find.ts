@@ -61,6 +61,7 @@ export const find: Find = async function find(
     collectionSlug,
     fields: collectionConfig.flattenedFields,
     locale,
+    req,
     where,
   })
 
@@ -152,9 +153,10 @@ export const find: Find = async function find(
     locale,
     projection: paginationOptions.projection,
     query,
+    req,
   })
 
-  if (aggregate.length > 0 || sortAggregation.length > 0) {
+  if (aggregate.length > 0 || sortAggregation.length > 0 || (session && hasNearConstraint)) {
     result = await aggregatePaginate({
       adapter: this,
       collation: paginationOptions.collation,
@@ -171,6 +173,15 @@ export const find: Find = async function find(
       useEstimatedCount: paginationOptions.useEstimatedCount,
     })
   } else {
+    if (session && paginationOptions.pagination !== false && paginationOptions.limit !== 0) {
+      const totalDocs = await Model.countDocuments(query, {
+        collation: paginationOptions.collation,
+        session,
+      })
+      paginationOptions.useEstimatedCount = false
+      paginationOptions.useCustomCountFn = () => Promise.resolve(totalDocs)
+    }
+
     result = await Model.paginate(query, paginationOptions)
   }
 
@@ -181,6 +192,7 @@ export const find: Find = async function find(
       docs: result.docs as Record<string, unknown>[],
       joins,
       locale,
+      req,
     })
   }
 

@@ -8,6 +8,7 @@ import type { MongooseAdapter } from './index.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { countSnapshotDocuments } from './utilities/buildSnapshotNearStages.js'
 import { getGlobal } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
@@ -53,6 +54,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     adapter: this,
     fields: versionFields,
     locale,
+    req,
     where,
   })
 
@@ -129,6 +131,19 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     if (limit === 0) {
       paginationOptions.pagination = false
     }
+  }
+
+  if (session && paginationOptions.pagination !== false && paginationOptions.limit !== 0) {
+    const totalDocs = await countSnapshotDocuments({
+      Model,
+      options: {
+        collation: paginationOptions.collation,
+        session,
+      },
+      query,
+    })
+    paginationOptions.useEstimatedCount = false
+    paginationOptions.useCustomCountFn = () => Promise.resolve(totalDocs)
   }
 
   const result = await Model.paginate(query, paginationOptions)

@@ -10,6 +10,7 @@ import { buildSortParam } from './queries/buildSortParam.js'
 import { aggregatePaginate } from './utilities/aggregatePaginate.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { countSnapshotDocuments } from './utilities/buildSnapshotNearStages.js'
 import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { resolveJoins } from './utilities/resolveJoins.js'
@@ -66,6 +67,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     adapter: this,
     fields,
     locale,
+    req,
     where: combinedWhere,
   })
 
@@ -142,10 +144,11 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     locale,
     projection,
     query: versionQuery,
+    req,
     versions: true,
   })
 
-  if (aggregate.length > 0 || sortAggregation.length > 0) {
+  if (aggregate.length > 0 || sortAggregation.length > 0 || (session && hasNearConstraint)) {
     result = await aggregatePaginate({
       adapter: this,
       collation: paginationOptions.collation,
@@ -162,6 +165,19 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
       useEstimatedCount: paginationOptions.useEstimatedCount,
     })
   } else {
+    if (session && paginationOptions.pagination !== false && paginationOptions.limit !== 0) {
+      const totalDocs = await countSnapshotDocuments({
+        Model,
+        options: {
+          collation: paginationOptions.collation,
+          session,
+        },
+        query: versionQuery,
+      })
+      paginationOptions.useEstimatedCount = false
+      paginationOptions.useCustomCountFn = () => Promise.resolve(totalDocs)
+    }
+
     result = await Model.paginate(versionQuery, paginationOptions)
   }
 
@@ -172,6 +188,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
       docs: result.docs as Record<string, unknown>[],
       joins,
       locale,
+      req,
       versions: true,
     })
   }

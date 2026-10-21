@@ -6,6 +6,7 @@ import { buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
+import { countSnapshotDocuments } from './utilities/buildSnapshotNearStages.js'
 import { getGlobal } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 
@@ -26,6 +27,7 @@ export const countGlobalVersions: CountGlobalVersions = async function countGlob
     adapter: this,
     fields: buildVersionGlobalFields(this.payload.config, globalConfig, true),
     locale,
+    req,
     where,
   })
 
@@ -58,10 +60,10 @@ export const countGlobalVersions: CountGlobalVersions = async function countGlob
   }
 
   let result: number
-  if (useEstimatedCount) {
+  if (useEstimatedCount && !options.session) {
     result = await Model.estimatedDocumentCount({ session: options.session })
   } else {
-    result = await Model.countDocuments(query, options)
+    result = await countSnapshotDocuments({ Model, options, query })
   }
 
   return {

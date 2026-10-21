@@ -1,6 +1,8 @@
-import type { FlattenedField, Payload, Where } from 'payload'
+import type { FlattenedField, Payload, PayloadRequest, Where } from 'payload'
 
 import { APIError } from 'payload'
+
+import type { MongooseAdapter } from '../index.js'
 
 import { parseParams } from './parseParams.js'
 
@@ -10,9 +12,11 @@ type GetBuildQueryPluginArgs = {
 }
 
 export type BuildQueryArgs = {
+  adapter?: MongooseAdapter
   globalSlug?: string
   locale?: string
   payload: Payload
+  req?: Partial<PayloadRequest>
   where: Where
 }
 
@@ -26,9 +30,11 @@ export const getBuildQueryPlugin = ({
   return function buildQueryPlugin(schema: any) {
     const modifiedSchema = schema
     async function schemaBuildQuery({
+      adapter,
       globalSlug,
       locale,
       payload,
+      req,
       where,
     }: BuildQueryArgs): Promise<Record<string, unknown>> {
       let fields: FlattenedField[] | null = null
@@ -61,12 +67,14 @@ export const getBuildQueryPlugin = ({
       }
 
       const result = await parseParams({
+        adapter,
         collectionSlug,
         fields,
         globalSlug,
         locale,
         parentIsLocalized: false,
         payload,
+        req,
         where,
       })
 

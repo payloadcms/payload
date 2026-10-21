@@ -24,6 +24,7 @@ export const findGlobal: FindGlobal = async function findGlobal(
     fields,
     globalSlug,
     locale,
+    req,
     where: combineQueries({ globalType: { equals: globalSlug } }, where),
   })
 

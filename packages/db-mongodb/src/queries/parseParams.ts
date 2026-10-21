@@ -1,27 +1,33 @@
 import type { QueryFilter } from 'mongoose'
-import type { FlattenedField, Operator, Payload, Where } from 'payload'
+import type { FlattenedField, Operator, Payload, PayloadRequest, Where } from 'payload'
 
 import { deepMergeWithCombinedArrays } from 'payload'
 import { validOperatorSet } from 'payload/shared'
+
+import type { MongooseAdapter } from '../index.js'
 
 import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { buildSearchParam } from './buildSearchParams.js'
 
 export async function parseParams({
+  adapter,
   collectionSlug,
   fields,
   globalSlug,
   locale,
   parentIsLocalized,
   payload,
+  req,
   where,
 }: {
+  adapter?: MongooseAdapter
   collectionSlug?: string
   fields: FlattenedField[]
   globalSlug?: string
   locale?: string
   parentIsLocalized: boolean
   payload: Payload
+  req?: Partial<PayloadRequest>
   where: Where
 }): Promise<Record<string, unknown>> {
   let result = {} as QueryFilter<any>
@@ -38,12 +44,14 @@ export async function parseParams({
       }
       if (Array.isArray(condition)) {
         const builtConditions = await buildAndOrConditions({
+          adapter,
           collectionSlug,
           fields,
           globalSlug,
           locale,
           parentIsLocalized,
           payload,
+          req,
           where: condition,
         })
         if (builtConditions.length > 0 && conditionOperator !== null) {
@@ -61,6 +69,7 @@ export async function parseParams({
 
           for (const operator of validOperators) {
             const searchParam = await buildSearchParam({
+              adapter,
               collectionSlug,
               fields,
               globalSlug,
@@ -69,6 +78,7 @@ export async function parseParams({
               operator,
               parentIsLocalized,
               payload,
+              req,
               val: (pathOperators as Record<string, Where>)[operator],
             })
 

@@ -1,4 +1,4 @@
-import type { JoinQuery, SanitizedJoins, Where } from 'payload'
+import type { JoinQuery, PayloadRequest, SanitizedJoins, Where } from 'payload'
 
 import {
   appendVersionToQueryKey,
@@ -12,6 +12,7 @@ import type { MongooseAdapter } from '../index.js'
 
 import { buildQuery } from '../queries/buildQuery.js'
 import { buildSortParam } from '../queries/buildSortParam.js'
+import { getSession } from './getSession.js'
 import { transform } from './transform.js'
 
 export type ResolveJoinsArgs = {
@@ -28,6 +29,7 @@ export type ResolveJoinsArgs = {
   /** Optional projection for the join query */
   projection?: Record<string, true>
   /** Whether to resolve versions instead of published documents */
+  req?: Partial<PayloadRequest>
   versions?: boolean
 }
 
@@ -43,6 +45,7 @@ export async function resolveJoins({
   joins,
   locale,
   projection,
+  req,
   versions = false,
 }: ResolveJoinsArgs): Promise<void> {
   // Early return if no joins are specified or no documents to process
@@ -73,8 +76,9 @@ export async function resolveJoins({
     joinMap[join.joinPath] = { ...join, targetCollection: join.field.collection as string }
   }
 
-  // Process each requested join concurrently
-  const joinPromises = Object.entries(joins).map(async ([joinPath, joinQuery]) => {
+  const session = await getSession(adapter, req)
+
+  const joinQueries = Object.entries(joins).map(([joinPath, joinQuery]) => async () => {
     if (!joinQuery) {
       return null
     }
@@ -119,8 +123,7 @@ export async function resolveJoins({
     const page = joinQuery.page ?? 1
     const skip = (page - 1) * limit
 
-    // Process collections concurrently
-    const collectionPromises = collections.map(async (joinCollectionSlug) => {
+    const collectionQueries = collections.map((joinCollectionSlug) => async () => {
       const targetConfig = adapter.payload.collections[joinCollectionSlug]?.config
       if (!targetConfig) {
         return null
@@ -157,8 +160,10 @@ export async function resolveJoins({
       }
       whereQuery = useDrafts
         ? await JoinModel.buildQuery({
+            adapter,
             locale,
             payload: adapter.payload,
+            req,
             where: combineQueries(appendVersionToQueryKey(whereQuery as Where), {
               latest: {
                 equals: true,
@@ -170,6 +175,7 @@ export async function resolveJoins({
             collectionSlug: joinCollectionSlug,
             fields: targetConfig.flattenedFields,
             locale,
+            req,
             where: whereQuery as Where,
           })
 
@@ -237,13 +243,17 @@ export async function resolveJoins({
 
       const projection = buildJoinProjection(dbFieldName, useDrafts, sort)
 
-      const [results, dbCount] = await Promise.all([
+      const findResults = () =>
         JoinModel.find(whereQuery, projection, {
+          session,
           sort,
           ...(isPolymorphicJoin ? {} : { limit, skip }),
-        }).lean(),
-        isPolymorphicJoin ? Promise.resolve(0) : JoinModel.countDocuments(whereQuery),
-      ])
+        }).lean()
+      const countResults = () =>
+        isPolymorphicJoin ? Promise.resolve(0) : JoinModel.countDocuments(whereQuery, { session })
+      const [results, dbCount] = session
+        ? [await findResults(), await countResults()]
+        : await Promise.all([findResults(), countResults()])
 
       const count = isPolymorphicJoin ? results.length : dbCount
 
@@ -267,7 +277,10 @@ export async function resolveJoins({
       }
     })
 
-    const collectionResults = await Promise.all(collectionPromises)
+    const collectionResults = await runQueries({
+      isSequential: Boolean(session),
+      queries: collectionQueries,
+    })
 
     // Group the results by parent ID
     const grouped: Record<
@@ -380,8 +393,7 @@ export async function resolveJoins({
     }
   })
 
-  // Wait for all join operations to complete
-  const joinResults = await Promise.all(joinPromises)
+  const joinResults = await runQueries({ isSequential: Boolean(session), queries: joinQueries })
 
   // Process the results and attach them to documents
   for (const joinResult of joinResults) {
@@ -666,4 +678,23 @@ function getByPathWithArrays(doc: unknown, path: string): unknown[] {
   }
 
   return []
+}
+
+async function runQueries<T>({
+  isSequential,
+  queries,
+}: {
+  isSequential: boolean
+  queries: (() => Promise<T>)[]
+}): Promise<T[]> {
+  if (!isSequential) {
+    return Promise.all(queries.map((query) => query()))
+  }
+
+  // MongoDB sessions do not support parallel operations within a transaction.
+  const results: T[] = []
+  for (const query of queries) {
+    results.push(await query())
+  }
+  return results
 }

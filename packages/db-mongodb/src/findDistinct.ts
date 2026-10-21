@@ -69,6 +69,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
     collectionSlug: args.collection,
     fields: collectionConfig.flattenedFields,
     locale: args.locale,
+    req: args.req,
     where,
   })
 
@@ -177,6 +178,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
             collectionSlug: relationTo,
             fields: foreignCollectionConfig.flattenedFields,
             locale: args.locale,
+            req: args.req,
             where: relatedAccess,
           })
         : null

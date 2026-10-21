@@ -6,6 +6,8 @@ import { v4 as uuid } from 'uuid'
 
 import type { MongooseAdapter } from '../index.js'
 
+import { getBranchTransactionOptions } from '../branching/getBranchTransactionOptions.js'
+
 // Needs await to fulfill the interface
 // @ts-expect-error TransactionOptions isn't compatible with BeginTransaction of the DatabaseAdapter interface.
 // eslint-disable-next-line @typescript-eslint/require-await
@@ -26,7 +28,7 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
   if (this.sessions[id]?.inTransaction()) {
     this.payload.logger.warn('beginTransaction called while transaction already exists')
   } else {
-    this.sessions[id]?.startTransaction(options || (this.transactionOptions as TransactionOptions))
+    this.sessions[id]?.startTransaction(getBranchTransactionOptions({ adapter: this, options }))
   }
 
   return id

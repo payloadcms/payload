@@ -349,12 +349,18 @@ export function mongooseAdapter({
     return databaseAdapter
   }
 
-  return {
+  // Config sanitization runs before init and must reject unsupported experimental scope ownership.
+  const definition: DatabaseAdapterObj = {
     name: 'mongoose',
     allowIDOnCreate,
     defaultIDType: 'text',
     init: adapter,
   }
+  Object.defineProperty(definition, 'allowAdditionalKeys', {
+    enumerable: true,
+    value: allowAdditionalKeys,
+  })
+  return definition
 }
 
 export { compatibilityOptions } from './utilities/compatibilityOptions.js'
