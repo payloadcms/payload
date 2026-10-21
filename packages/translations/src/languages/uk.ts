@@ -293,7 +293,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     and: 'і',
     anotherUser: 'Інший користувач',
     anotherUserTakenOver: 'Інший користувач взяв на себе редагування цього документа.',
-    apiResponseReadOnly: 'Відповідь API (лише для читання)',
+    apiResponse: 'Відповідь API',
     applyChanges: 'Застосувати зміни',
     ascending: 'В порядку зростання',
     auto: 'Авто',

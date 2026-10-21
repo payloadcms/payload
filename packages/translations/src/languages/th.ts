@@ -280,7 +280,7 @@ export const thTranslations: DefaultTranslationsObject = {
     and: 'และ',
     anotherUser: 'ผู้ใช้อื่น',
     anotherUserTakenOver: 'ผู้ใช้อื่นเข้าครอบครองการแก้ไขเอกสารนี้แล้ว',
-    apiResponseReadOnly: 'การตอบกลับ API (อ่านอย่างเดียว)',
+    apiResponse: 'การตอบกลับ API',
     applyChanges: 'ใช้การเปลี่ยนแปลง',
     ascending: 'น้อยไปมาก',
     auto: 'อัตโนมัติ',

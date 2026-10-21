@@ -5427,7 +5427,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(editor).toBeAttached()
       await editor.focus()
       await expect(editor).toBeFocused()
-      await expect(editor).toHaveAccessibleName(/read.only/i)
+      await expect(editor).toHaveAccessibleName('API response')
       await expect(editor).toHaveJSProperty('readOnly', true)
       await expect(editor).not.toBeEditable()
     })
@@ -6136,6 +6136,33 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    for (const { field, label } of [
+      { field: 'readOnlySettings', label: 'Read Only Settings' },
+      { field: 'readOnlySource', label: 'Read Only Source' },
+    ]) {
+      test(`should expose the native read-only state of the ${field} editor`, async () => {
+        await gotoCreatePost({ page, postsURL })
+        const wrapper = page.locator(`#field-${field}`)
+        const editor = wrapper.getByRole('textbox', { name: label, exact: true })
+
+        await wrapper.scrollIntoViewIfNeeded()
+        await editor.focus()
+        await expect(editor).toBeFocused()
+        await expect(editor).toHaveJSProperty('readOnly', true)
+        await expect(editor).not.toBeEditable()
+        const content = await wrapper.locator('.view-lines').innerText()
+
+        await editor.press('End')
+        await editor.pressSequentially('changed')
+        await expect(wrapper.locator('.view-lines')).toHaveText(content, { useInnerText: true })
+        for (const key of ['Tab', 'Shift+Tab']) {
+          await editor.focus()
+          await editor.press(key)
+          await expect(wrapper.locator(':focus')).toHaveCount(0)
+        }
+      })
+    }
+
     test('should name the remove-filter button and remove its condition by keyboard', async () => {
       // PYLD-3756
       test.setTimeout(60000)

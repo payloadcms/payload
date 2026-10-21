@@ -300,7 +300,7 @@ export const itTranslations: DefaultTranslationsObject = {
     anotherUser: 'Un altro utente',
     anotherUserTakenOver:
       'Un altro utente ha preso il controllo della modifica di questo documento.',
-    apiResponseReadOnly: 'Risposta API (sola lettura)',
+    apiResponse: 'Risposta API',
     applyChanges: 'Applica modifiche',
     ascending: 'Ascendente',
     auto: 'Automatico',

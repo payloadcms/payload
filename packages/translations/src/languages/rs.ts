@@ -295,7 +295,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     and: 'И',
     anotherUser: 'Други корисник',
     anotherUserTakenOver: 'Други корисник је преузео уређивање овог документа.',
-    apiResponseReadOnly: 'API одговор (само за читање)',
+    apiResponse: 'API одговор',
     applyChanges: 'Примени промене',
     ascending: 'Узлазно',
     auto: 'Automatski',

@@ -276,7 +276,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     and: '與',
     anotherUser: '其他使用者',
     anotherUserTakenOver: '其他使用者已接手編輯此文件。',
-    apiResponseReadOnly: 'API 回應（唯讀）',
+    apiResponse: 'API 回應',
     applyChanges: '套用變更',
     ascending: '遞增',
     auto: '自動',

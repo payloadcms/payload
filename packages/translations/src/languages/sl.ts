@@ -293,7 +293,7 @@ export const slTranslations: DefaultTranslationsObject = {
     and: 'In',
     anotherUser: 'Drug uporabnik',
     anotherUserTakenOver: 'Drug uporabnik je prevzel urejanje tega dokumenta.',
-    apiResponseReadOnly: 'Odgovor API (samo za branje)',
+    apiResponse: 'Odgovor API',
     applyChanges: 'Uporabi spremembe',
     ascending: 'Naraščajoče',
     auto: 'Samodejno',

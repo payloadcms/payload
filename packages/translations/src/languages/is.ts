@@ -293,7 +293,7 @@ export const isTranslations: DefaultTranslationsObject = {
     and: 'Og',
     anotherUser: 'Annar notandi',
     anotherUserTakenOver: 'Annar notandi hefur tekið yfir skráningu þessarar færslu.',
-    apiResponseReadOnly: 'API-svar (skrifvarið)',
+    apiResponse: 'API-svar',
     applyChanges: 'Virkja breytingar',
     ascending: 'Hækkandi',
     auto: 'Sjálfvirkt',

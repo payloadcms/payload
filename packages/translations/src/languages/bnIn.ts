@@ -294,7 +294,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     and: 'এবং',
     anotherUser: 'অন্য ব্যবহারকারী',
     anotherUserTakenOver: 'অন্য একজন ব্যবহারকারী এই ডকুমেন্ট সম্পাদনার দায়িত্ব নিয়েছেন।',
-    apiResponseReadOnly: 'API প্রতিক্রিয়া (শুধুমাত্র পড়ার জন্য)',
+    apiResponse: 'API প্রতিক্রিয়া',
     applyChanges: 'পরিবর্তনগুলি প্রয়োগ করুন',
     ascending: 'আরোহী',
     auto: 'স্বয়ংক্রিয়',

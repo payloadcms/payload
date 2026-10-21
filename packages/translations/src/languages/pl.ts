@@ -294,7 +294,7 @@ export const plTranslations: DefaultTranslationsObject = {
     and: 'i',
     anotherUser: 'Inny użytkownik',
     anotherUserTakenOver: 'Inny użytkownik przejął edycję tego dokumentu.',
-    apiResponseReadOnly: 'Odpowiedź API (tylko do odczytu)',
+    apiResponse: 'Odpowiedź API',
     applyChanges: 'Zastosuj zmiany',
     ascending: 'Rosnąco',
     auto: 'Automatyczny',

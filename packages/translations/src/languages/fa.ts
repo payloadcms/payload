@@ -288,7 +288,7 @@ export const faTranslations: DefaultTranslationsObject = {
     and: 'و',
     anotherUser: 'کاربر دیگر',
     anotherUserTakenOver: 'کاربر دیگری ویرایش این صفحه را در دست گرفته است.',
-    apiResponseReadOnly: 'پاسخ API (فقط خواندنی)',
+    apiResponse: 'پاسخ API',
     applyChanges: 'اعمال تغییرات',
     ascending: 'صعودی',
     auto: 'خودکار',

@@ -283,7 +283,7 @@ export const heTranslations: DefaultTranslationsObject = {
     and: 'וגם',
     anotherUser: 'משתמש אחר',
     anotherUserTakenOver: 'משתמש אחר השתלט על עריכת מסמך זה.',
-    apiResponseReadOnly: 'תגובת API (לקריאה בלבד)',
+    apiResponse: 'תגובת API',
     applyChanges: 'החל שינויים',
     ascending: 'בסדר עולה',
     auto: 'אוטו',

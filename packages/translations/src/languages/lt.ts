@@ -298,7 +298,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     and: 'Ir',
     anotherUser: 'Kitas vartotojas',
     anotherUserTakenOver: 'Kitas naudotojas perėmė šio dokumento redagavimą.',
-    apiResponseReadOnly: 'API atsakymas (tik skaitymui)',
+    apiResponse: 'API atsakymas',
     applyChanges: 'Taikyti pakeitimus',
     ascending: 'Kylantis',
     auto: 'Automatinis',

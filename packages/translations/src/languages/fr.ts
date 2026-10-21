@@ -305,7 +305,7 @@ export const frTranslations: DefaultTranslationsObject = {
     and: 'Et',
     anotherUser: 'Un autre utilisateur',
     anotherUserTakenOver: 'Un autre utilisateur a pris en charge la modification de ce document.',
-    apiResponseReadOnly: 'Réponse de l’API (lecture seule)',
+    apiResponse: 'Réponse de l’API',
     applyChanges: 'Appliquer les modifications',
     ascending: 'Ascendant',
     auto: 'Automatique',

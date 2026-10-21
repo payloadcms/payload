@@ -301,7 +301,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     and: 'En',
     anotherUser: 'Een andere gebruiker',
     anotherUserTakenOver: 'Een andere gebruiker heeft de bewerking van dit document overgenomen.',
-    apiResponseReadOnly: 'API-antwoord (alleen-lezen)',
+    apiResponse: 'API-antwoord',
     applyChanges: 'Breng wijzigingen aan',
     ascending: 'Oplopend',
     auto: 'Automatisch',

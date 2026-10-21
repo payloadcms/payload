@@ -297,7 +297,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     and: 'かつ',
     anotherUser: '別のユーザー',
     anotherUserTakenOver: '別のユーザーがこのドキュメントの編集を引き継ぎました。',
-    apiResponseReadOnly: 'API レスポンス（読み取り専用）',
+    apiResponse: 'API レスポンス',
     applyChanges: '変更を適用する',
     ascending: '昇順',
     auto: '自動',

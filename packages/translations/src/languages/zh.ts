@@ -278,7 +278,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     and: '和',
     anotherUser: '另一位用户',
     anotherUserTakenOver: '另一位用户接管了此文档的编辑。',
-    apiResponseReadOnly: 'API 响应（只读）',
+    apiResponse: 'API 响应',
     applyChanges: '应用更改',
     ascending: '升序',
     auto: '自动',

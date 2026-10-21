@@ -292,7 +292,7 @@ export const csTranslations: DefaultTranslationsObject = {
     and: 'a',
     anotherUser: 'Jiný uživatel',
     anotherUserTakenOver: 'Jiný uživatel převzal úpravy tohoto dokumentu.',
-    apiResponseReadOnly: 'Odpověď API (pouze pro čtení)',
+    apiResponse: 'Odpověď API',
     applyChanges: 'Použít změny',
     ascending: 'Vzestupně',
     auto: 'Automaticky',

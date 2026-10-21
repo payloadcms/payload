@@ -294,7 +294,7 @@ export const enTranslations = {
     and: 'And',
     anotherUser: 'Another user',
     anotherUserTakenOver: 'Another user has taken over editing this document.',
-    apiResponseReadOnly: 'API response (read-only)',
+    apiResponse: 'API response',
     applyChanges: 'Apply Changes',
     ascending: 'Ascending',
     auto: 'Auto',

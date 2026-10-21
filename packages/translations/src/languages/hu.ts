@@ -300,7 +300,7 @@ export const huTranslations: DefaultTranslationsObject = {
     and: 'És',
     anotherUser: 'Egy másik felhasználó',
     anotherUserTakenOver: 'Egy másik felhasználó átvette ennek a dokumentumnak a szerkesztését.',
-    apiResponseReadOnly: 'API-válasz (csak olvasható)',
+    apiResponse: 'API-válasz',
     applyChanges: 'Változtatások alkalmazása',
     ascending: 'Növekvő',
     auto: 'Automatikus',

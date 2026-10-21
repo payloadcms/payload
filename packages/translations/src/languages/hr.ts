@@ -295,7 +295,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     and: 'i',
     anotherUser: 'Drugi korisnik',
     anotherUserTakenOver: 'Drugi korisnik je preuzeo uređivanje ovog dokumenta.',
-    apiResponseReadOnly: 'API odgovor (samo za čitanje)',
+    apiResponse: 'API odgovor',
     applyChanges: 'Primijeni promjene',
     ascending: 'Uzlazno',
     auto: 'Automatski',

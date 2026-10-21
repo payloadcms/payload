@@ -292,7 +292,7 @@ export const koTranslations: DefaultTranslationsObject = {
     and: '및',
     anotherUser: '다른 사용자',
     anotherUserTakenOver: '다른 사용자가 이 문서의 편집을 인수했습니다.',
-    apiResponseReadOnly: 'API 응답 (읽기 전용)',
+    apiResponse: 'API 응답',
     applyChanges: '변경 사항 적용',
     ascending: '오름차순',
     auto: '자동',

@@ -294,7 +294,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     and: 'Եվ',
     anotherUser: 'Այլ օգտատեր',
     anotherUserTakenOver: 'Այլ օգտատեր ստանձել է այս փաստաթղթի խմբագրումը։',
-    apiResponseReadOnly: 'API պատասխան (միայն ընթերցման համար)',
+    apiResponse: 'API պատասխան',
     applyChanges: 'Կիրառել փոփոխությունները',
     ascending: 'Աճող',
     auto: 'Ավտո',

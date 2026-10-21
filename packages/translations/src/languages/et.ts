@@ -293,7 +293,7 @@ export const etTranslations: DefaultTranslationsObject = {
     and: 'Ja',
     anotherUser: 'Teine kasutaja',
     anotherUserTakenOver: 'Teine kasutaja on võtnud selle dokumendi muutmise üle.',
-    apiResponseReadOnly: 'API vastus (kirjutuskaitstud)',
+    apiResponse: 'API vastus',
     applyChanges: 'Rakenda muudatused',
     ascending: 'Kasvav',
     auto: 'Auto',

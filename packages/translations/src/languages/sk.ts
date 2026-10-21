@@ -295,7 +295,7 @@ export const skTranslations: DefaultTranslationsObject = {
     and: 'a',
     anotherUser: 'Iný používateľ',
     anotherUserTakenOver: 'Iný používateľ prevzal úpravy tohto dokumentu.',
-    apiResponseReadOnly: 'Odpoveď API (iba na čítanie)',
+    apiResponse: 'Odpoveď API',
     applyChanges: 'Použiť zmeny',
     ascending: 'Vzostupne',
     auto: 'Automaticky',

@@ -305,7 +305,7 @@ export const deTranslations: DefaultTranslationsObject = {
     and: 'Und',
     anotherUser: 'Ein anderer Benutzer',
     anotherUserTakenOver: 'Ein anderer Benutzer hat die Bearbeitung dieses Dokuments übernommen.',
-    apiResponseReadOnly: 'API-Antwort (schreibgeschützt)',
+    apiResponse: 'API-Antwort',
     applyChanges: 'Änderungen anwenden',
     ascending: 'Aufsteigend',
     auto: 'Automatisch',

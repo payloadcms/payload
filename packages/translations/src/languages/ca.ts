@@ -298,7 +298,7 @@ export const caTranslations: DefaultTranslationsObject = {
     and: 'i',
     anotherUser: 'Altre usuari',
     anotherUserTakenOver: "Un altre usuari ha pres la edició d'aquest document.",
-    apiResponseReadOnly: 'Resposta de l’API (només de lectura)',
+    apiResponse: 'Resposta de l’API',
     applyChanges: 'Apica els canvis',
     ascending: 'Ascendent',
     auto: 'Automàtic',

@@ -287,7 +287,7 @@ export const arTranslations: DefaultTranslationsObject = {
     and: 'و',
     anotherUser: 'مستخدم آخر',
     anotherUserTakenOver: 'قام مستخدم آخر بالاستيلاء على تحرير هذا المستند.',
-    apiResponseReadOnly: 'استجابة API (للقراءة فقط)',
+    apiResponse: 'استجابة API',
     applyChanges: 'طبق التغييرات',
     ascending: 'تصاعدي',
     auto: 'تلقائي',

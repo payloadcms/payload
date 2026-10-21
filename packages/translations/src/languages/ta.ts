@@ -291,7 +291,7 @@ export const taTranslations: DefaultTranslationsObject = {
     and: 'மற்றும்',
     anotherUser: 'மற்றொரு பயனர்',
     anotherUserTakenOver: 'இந்த ஆவணத்தை மற்றொரு பயனர் திருத்திக் கொண்டிருக்கிறார்.',
-    apiResponseReadOnly: 'API பதில் (படிக்க மட்டும்)',
+    apiResponse: 'API பதில்',
     applyChanges: 'மாற்றங்களைப் பயன்படுத்தவும்',
     ascending: 'ஏறுவரிசை',
     auto: 'ஆட்டோ',

@@ -296,7 +296,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     and: 'E',
     anotherUser: 'Outro usuário',
     anotherUserTakenOver: 'Outro usuário assumiu a edição deste documento.',
-    apiResponseReadOnly: 'Resposta da API (somente leitura)',
+    apiResponse: 'Resposta da API',
     applyChanges: 'Aplicar alterações',
     ascending: 'Ascendente',
     auto: 'Automático',

@@ -301,7 +301,7 @@ export const esTranslations: DefaultTranslationsObject = {
     and: 'Y',
     anotherUser: 'Otro usuario',
     anotherUserTakenOver: 'Otro usuario ha tomado el control de la edición de este documento.',
-    apiResponseReadOnly: 'Respuesta de la API (solo lectura)',
+    apiResponse: 'Respuesta de la API',
     applyChanges: 'Aplicar Cambios',
     ascending: 'Ascendente',
     auto: 'Automático',

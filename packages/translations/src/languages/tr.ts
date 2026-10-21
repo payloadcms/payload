@@ -298,7 +298,7 @@ export const trTranslations: DefaultTranslationsObject = {
     and: 've',
     anotherUser: 'Başka bir kullanıcı',
     anotherUserTakenOver: 'Başka bir kullanıcı bu belgenin düzenlemesini devraldı.',
-    apiResponseReadOnly: 'API yanıtı (salt okunur)',
+    apiResponse: 'API yanıtı',
     applyChanges: 'Değişiklikleri Uygula',
     ascending: 'artan',
     auto: 'Otomatik',

@@ -294,7 +294,7 @@ export const svTranslations: DefaultTranslationsObject = {
     and: 'Och',
     anotherUser: 'En annan användare',
     anotherUserTakenOver: 'En annan användare har tagit över redigeringen av detta dokument.',
-    apiResponseReadOnly: 'API-svar (skrivskyddat)',
+    apiResponse: 'API-svar',
     applyChanges: 'Verkställ ändringar',
     ascending: 'Stigande',
     auto: 'Automatiskt',

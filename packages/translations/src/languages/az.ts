@@ -296,7 +296,7 @@ export const azTranslations: DefaultTranslationsObject = {
     and: 'Və',
     anotherUser: 'Başqa bir istifadəçi',
     anotherUserTakenOver: 'Başqa bir istifadəçi bu sənədin redaktəsini ələ keçirdi.',
-    apiResponseReadOnly: 'API cavabı (yalnız oxumaq üçün)',
+    apiResponse: 'API cavabı',
     applyChanges: 'Dəyişiklikləri Tətbiq Edin',
     ascending: 'Artan',
     auto: 'Avtomatik',

@@ -1,5 +1,5 @@
 'use client'
-import type { Monaco } from '@monaco-editor/react'
+import type { Monaco, OnMount } from '@monaco-editor/react'
 
 import EditorImport from '@monaco-editor/react'
 import React, { useState } from 'react'
@@ -69,9 +69,15 @@ const CodeEditor: React.FC<Props> = (props) => {
   const EDITOR_BORDER = 2 // 1px top + 1px bottom border
   const CSS_CONTAINER_PADDING = 16 // 8px top + 8px bottom from CSS
   const prevCalculatedHeightAt = React.useRef<number | undefined>(recalculatedHeightAt)
+  const editorRef = React.useRef<Parameters<OnMount>[0]>(null)
+  const editableOptionsRef = React.useRef<null | Pick<
+    NonNullable<Props['options']>,
+    'domReadOnly' | 'editContext'
+  >>(null)
 
   // Extract per-model settings to avoid global conflicts
   const { insertSpaces, tabSize, trimAutoWhitespace, ...globalEditorOptions } = options || {}
+  const { domReadOnly, editContext } = globalEditorOptions
   const paddingFromProps = options?.padding
     ? (options.padding.top || 0) + (options.padding?.bottom || 0)
     : 0
@@ -104,6 +110,44 @@ const CodeEditor: React.FC<Props> = (props) => {
       prevCalculatedHeightAt.current = recalculatedHeightAt
     }
   }, [value, minHeight, paddingFromProps, recalculatedHeightAt])
+
+  const updateReadOnlyOptions = React.useCallback(() => {
+    const editor = editorRef.current
+
+    if (!editor) {
+      return
+    }
+
+    if (readOnly) {
+      const currentOptions = editor.getRawOptions()
+
+      if (!editableOptionsRef.current) {
+        editableOptionsRef.current = {
+          domReadOnly: currentOptions.domReadOnly,
+          editContext: currentOptions.editContext,
+        }
+      }
+
+      if (currentOptions.domReadOnly !== true || currentOptions.editContext !== false) {
+        editor.updateOptions({ domReadOnly: true, editContext: false })
+      }
+    } else if (editableOptionsRef.current) {
+      editor.updateOptions({
+        domReadOnly: domReadOnly ?? editableOptionsRef.current.domReadOnly,
+        editContext: editContext ?? editableOptionsRef.current.editContext,
+      })
+      editableOptionsRef.current = null
+    }
+
+    return editor
+  }, [domReadOnly, editContext, readOnly])
+  const updateReadOnlyOptionsRef = React.useRef(updateReadOnlyOptions)
+
+  // The Monaco wrapper reapplies caller options on render, so enforce read-only state afterward.
+  React.useEffect(() => {
+    updateReadOnlyOptionsRef.current = updateReadOnlyOptions
+    updateReadOnlyOptions()
+  })
 
   return (
     <Editor
@@ -148,6 +192,7 @@ const CodeEditor: React.FC<Props> = (props) => {
         )
       }}
       onMount={(editor, monaco) => {
+        editorRef.current = editor
         // Set Monaco's shared default once, so its native toggle and announcements stay in sync.
         // Mounting another editor must not reset the user's chosen mode.
         if (!initializedTabFocusModes.has(monaco) && options?.tabFocusMode === undefined) {
@@ -175,6 +220,8 @@ const CodeEditor: React.FC<Props> = (props) => {
             }
           })
         }
+
+        updateReadOnlyOptionsRef.current()
 
         // Set per-model options to avoid global conflicts
         const model = editor.getModel()

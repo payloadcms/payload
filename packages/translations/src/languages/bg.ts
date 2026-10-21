@@ -295,7 +295,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     and: 'И',
     anotherUser: 'Друг потребител',
     anotherUserTakenOver: 'Друг потребител пое редактирането на този документ.',
-    apiResponseReadOnly: 'API отговор (само за четене)',
+    apiResponse: 'API отговор',
     applyChanges: 'Приложи промените',
     ascending: 'Възходящ',
     auto: 'Автоматично',

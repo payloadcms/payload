@@ -293,7 +293,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     and: 'Un',
     anotherUser: 'Cits lietotājs',
     anotherUserTakenOver: 'Cits lietotājs ir pārņēmis šī dokumenta rediģēšanu.',
-    apiResponseReadOnly: 'API atbilde (tikai lasāma)',
+    apiResponse: 'API atbilde',
     applyChanges: 'Pielietot izmaiņas',
     ascending: 'Augošā secībā',
     auto: 'Automātiska',

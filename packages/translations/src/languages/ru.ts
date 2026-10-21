@@ -298,7 +298,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     and: 'А также',
     anotherUser: 'Другой пользователь',
     anotherUserTakenOver: 'Другой пользователь взял на себя редактирование этого документа.',
-    apiResponseReadOnly: 'Ответ API (только для чтения)',
+    apiResponse: 'Ответ API',
     applyChanges: 'Применить изменения',
     ascending: 'Восходящий',
     auto: 'Автоматически',

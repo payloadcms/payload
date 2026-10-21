@@ -233,7 +233,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:anotherUser',
   'general:anotherUserTakenOver',
   'general:applyChanges',
-  'general:apiResponseReadOnly',
+  'general:apiResponse',
   'general:ascending',
   'general:automatic',
   'general:auto',

@@ -300,7 +300,7 @@ export const roTranslations: DefaultTranslationsObject = {
     and: 'Şi',
     anotherUser: 'Un alt utilizator',
     anotherUserTakenOver: 'Un alt utilizator a preluat editarea acestui document.',
-    apiResponseReadOnly: 'Răspuns API (doar citire)',
+    apiResponse: 'Răspuns API',
     applyChanges: 'Aplicați modificările',
     ascending: 'Ascendant',
     auto: 'Automat',

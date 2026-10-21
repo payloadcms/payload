@@ -295,7 +295,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     and: 'Og',
     anotherUser: 'En annen bruker',
     anotherUserTakenOver: 'En annen bruker har tatt over redigeringen av dette dokumentet.',
-    apiResponseReadOnly: 'API-svar (skrivebeskyttet)',
+    apiResponse: 'API-svar',
     applyChanges: 'Bruk endringer',
     ascending: 'Stigende',
     auto: 'Automatisk',

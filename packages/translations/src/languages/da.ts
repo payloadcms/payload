@@ -293,7 +293,7 @@ export const daTranslations: DefaultTranslationsObject = {
     and: 'Og',
     anotherUser: 'En anden bruger',
     anotherUserTakenOver: 'En anden bruger har overtaget denne ressource.',
-    apiResponseReadOnly: 'API-svar (skrivebeskyttet)',
+    apiResponse: 'API-svar',
     applyChanges: 'Tilføj ændringer',
     ascending: 'Stigende',
     auto: 'Automatisk',

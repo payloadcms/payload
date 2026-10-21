@@ -286,7 +286,7 @@ export const myTranslations: DefaultTranslationsObject = {
     and: 'နှင့်',
     anotherUser: 'တစ်ခြားအသုံးပြုသူ',
     anotherUserTakenOver: 'တစ်ခြားအသုံးပြုသူသည်ဤစာရွက်စာတမ်းကိုပြင်ဆင်မှုကိုရယူလိုက်သည်။',
-    apiResponseReadOnly: 'API တုံ့ပြန်ချက် (ဖတ်ရှုရန်သာ)',
+    apiResponse: 'API တုံ့ပြန်ချက်',
     applyChanges: 'ပြောင်းလဲမှုများ အသုံးပြုပါ',
     ascending: 'တက်နေသည်',
     auto: 'အော်တို',

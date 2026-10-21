@@ -296,7 +296,7 @@ export const idTranslations: DefaultTranslationsObject = {
     and: 'Dan',
     anotherUser: 'Pengguna lain',
     anotherUserTakenOver: 'Pengguna lain telah mengambil alih pengeditan dokumen ini.',
-    apiResponseReadOnly: 'Respons API (hanya baca)',
+    apiResponse: 'Respons API',
     applyChanges: 'Terapkan Perubahan',
     ascending: 'Naik',
     auto: 'Otomatis',

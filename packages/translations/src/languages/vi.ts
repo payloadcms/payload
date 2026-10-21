@@ -296,7 +296,7 @@ export const viTranslations: DefaultTranslationsObject = {
     and: 'Và',
     anotherUser: 'Người dùng khác',
     anotherUserTakenOver: 'Người dùng khác đã tiếp quản việc chỉnh sửa tài liệu này.',
-    apiResponseReadOnly: 'Phản hồi API (chỉ đọc)',
+    apiResponse: 'Phản hồi API',
     applyChanges: 'Áp dụng thay đổi',
     ascending: 'Tăng dần',
     auto: 'Tự động',
