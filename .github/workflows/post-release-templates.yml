@@ -130,7 +130,7 @@ jobs:
     needs: [wait_for_release, update_templates]
     if: needs.update_templates.outputs.has_changes == 'true'
     runs-on: ubuntu-24.04
-    environment: templates
+    environment: release
     permissions:
       contents: read
     steps:
