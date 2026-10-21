@@ -322,6 +322,7 @@ export interface Post {
   accessibilitySortableSelect?: ('one' | 'two')[] | null;
   accessibilityDisabledSelect?: ('one' | 'two') | null;
   requiredTags: string[];
+  relatedPosts?: (string | Post)[] | null;
   relatedPost?: (string | null) | Post;
   contrastRelationships?: (string | Post)[] | null;
   contrastDisabledSelect?: ('one' | 'two')[] | null;
@@ -707,6 +708,7 @@ export interface PostsSelect<T extends boolean = true> {
   accessibilitySortableSelect?: T;
   accessibilityDisabledSelect?: T;
   requiredTags?: T;
+  relatedPosts?: T;
   relatedPost?: T;
   contrastRelationships?: T;
   contrastDisabledSelect?: T;

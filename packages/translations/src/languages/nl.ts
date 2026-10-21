@@ -589,6 +589,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     yes: 'Ja',
   },
   hierarchy: {
+    folderLocation: 'Maplocatie',
     goTo: 'Ga naar "{{name}}"',
     itemsMovedTo: '{{title}} verplaatst naar {{destination}}',
     itemsMovedToRoot: '{{title}} verplaatst naar root',

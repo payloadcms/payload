@@ -580,6 +580,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     yes: 'はい',
   },
   hierarchy: {
+    folderLocation: 'フォルダーの場所',
     goTo: '「{{name}}」へ移動してください。',
     itemsMovedTo: '{{title}}は{{destination}}に移動しました',
     itemsMovedToRoot: '{{title}}がルートに移動されました',
