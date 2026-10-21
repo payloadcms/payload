@@ -5,6 +5,8 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
+import { getDefaultCanvas } from './WindowChrome/index.mjs'
+
 import { createAnnotationInteraction } from './annotation-demo.mjs'
 import { createPresentation } from './presentation-demo.mjs'
 import { createScrollInteraction } from './scroll-demo.mjs'
@@ -213,10 +215,18 @@ async function executeDemo({
   const { chromium, expect } = await import('@playwright/test')
   const rawVideoDirectory = await mkdtemp(path.join(tmpdir(), 'payload-pr-demo-'))
   const browser = await chromium.launch({ headless: true })
-  const recordedViewport = scenarioModule.presentation.canvas ?? {
-    width: 1600,
-    height: 1000,
+  const presentationOptions = {
+    ...scenarioModule.presentation,
+    ...(a11y === undefined
+      ? {}
+      : { accessibility: a11y === 'on', showAnnouncements: a11y === 'on' }),
   }
+  const recordedViewport =
+    presentationOptions.canvas ??
+    getDefaultCanvas({
+      viewport,
+      accessibility: presentationOptions.accessibility,
+    })
   const context = await browser.newContext({
     viewport: recordedViewport,
     colorScheme: scenarioModule.presentation.theme ?? 'light',
@@ -372,12 +382,7 @@ async function executeDemo({
   try {
     presentation = await createPresentation({
       page: recordedPage,
-      options: {
-        ...scenarioModule.presentation,
-        ...(a11y === undefined
-          ? {}
-          : { accessibility: a11y === 'on', showAnnouncements: a11y === 'on' }),
-      },
+      options: presentationOptions,
       viewport,
       baseURL,
       pauseScale,

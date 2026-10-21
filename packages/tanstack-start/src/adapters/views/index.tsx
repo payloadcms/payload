@@ -28,7 +28,27 @@ const runLoader = async ({
   signal: AbortSignal
   splat: string
 }) => {
-  const data = await load({ data: { _splat: splat, search: searchToRecord(searchStr) }, signal })
+  const loadController = new AbortController()
+  const abortLoad = () => loadController.abort(signal.reason)
+
+  signal.addEventListener('abort', abortLoad, { once: true })
+
+  if (signal.aborted) {
+    abortLoad()
+  }
+
+  let data: Awaited<ReturnType<AdminLoad>>
+
+  try {
+    data = await load({
+      data: { _splat: splat, search: searchToRecord(searchStr) },
+      signal: loadController.signal,
+    })
+  } finally {
+    // The returned RSC payload can still be streaming after the loader resolves.
+    // Later navigations must not abort a payload that React is already rendering.
+    signal.removeEventListener('abort', abortLoad)
+  }
   if (data?._redirect) {
     // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router requires throwing redirect objects
     throw redirect({ to: data._redirect })

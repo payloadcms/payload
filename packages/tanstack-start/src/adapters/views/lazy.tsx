@@ -4,7 +4,7 @@ import type { NotFoundRouteProps } from '@tanstack/react-router'
 
 import { NotFoundClient, useRouteTransition } from '@payloadcms/ui'
 import { useLoaderData } from '@tanstack/react-router'
-import { Fragment, useDeferredValue, useEffect } from 'react'
+import { Fragment, useDeferredValue, useLayoutEffect } from 'react'
 
 export function AdminPage() {
   // Note: React key intentionally omitted here so the persistent template (nav, header) doesn't remount and flash on navigation.
@@ -18,7 +18,8 @@ export function AdminPage() {
   const { holdRouteTransition } = useRouteTransition()
   const isRscPayloadDeferred = rscPayload !== data?.rscPayload
 
-  useEffect(() => {
+  // Register before the router acknowledges this commit so navigation can await the deferred view.
+  useLayoutEffect(() => {
     if (!isRscPayloadDeferred) {
       return
     }

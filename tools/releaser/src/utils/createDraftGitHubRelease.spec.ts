@@ -52,6 +52,7 @@ describe('createDraftGitHubRelease', () => {
   })
 
   it('should PATCH an existing draft release found by tag_name', async () => {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
     const fetchImpl = vi
       .fn()
       .mockResolvedValueOnce(
@@ -72,6 +73,9 @@ describe('createDraftGitHubRelease', () => {
     const patchCall = fetchImpl.mock.calls.at(-1)!
     expect(patchCall[0]).toContain('/releases/42')
     expect(patchCall[1].method).toBe('PATCH')
+    expect(log).toHaveBeenCalledWith(expect.stringContaining('existing draft release'))
+
+    log.mockRestore()
   })
 
   it('should refuse to overwrite an already-published release', async () => {
@@ -112,13 +116,14 @@ describe('createDraftGitHubRelease', () => {
     ).rejects.toThrow(/html_url/)
   })
 
-  it('should scan only the newest page and treat a not-found tag as new (with a warning)', async () => {
+  it('should scan only the newest page and silently treat a not-found tag as new', async () => {
     const fullPage = Array.from({ length: 100 }, (_, i) => ({
       id: i,
       draft: true,
       tag_name: `v4.0.0-canary.${i}`,
     }))
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
     const fetchImpl = vi
       .fn()
       .mockResolvedValueOnce(jsonResponse(fullPage)) // page 1: 100 items, target absent
@@ -136,8 +141,10 @@ describe('createDraftGitHubRelease', () => {
     expect(fetchImpl).toHaveBeenCalledTimes(2)
     expect(fetchImpl.mock.calls[0]![0]).toContain('page=1')
     expect(fetchImpl.mock.calls.at(-1)![1].method).toBe('POST')
-    expect(warn).toHaveBeenCalled()
+    expect(warn).not.toHaveBeenCalled()
+    expect(log).not.toHaveBeenCalled()
 
     warn.mockRestore()
+    log.mockRestore()
   })
 })

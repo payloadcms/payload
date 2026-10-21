@@ -212,6 +212,9 @@ jobs:
           key: dist-${{ github.sha }}
 
   tests-unit:
+    permissions:
+      actions: read
+      contents: read
     runs-on: ubuntu-26.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true' || needs.changes.outputs.needs_visual == 'true'
@@ -235,6 +238,9 @@ jobs:
         run: pnpm test:components
 
   tests-types:
+    permissions:
+      actions: read
+      contents: read
     runs-on: ubuntu-26.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true'
@@ -275,6 +281,9 @@ jobs:
           echo "matrix=$matrix" >> $GITHUB_OUTPUT
 
   tests-int:
+    permissions:
+      actions: read
+      contents: read
     runs-on: ubuntu-26.04
     needs: [changes, build, int-matrix, probe-next-canary]
     if: needs.changes.outputs.needs_tests == 'true'
@@ -348,6 +357,9 @@ jobs:
 
   # Prepare prod test environment once, shared by all E2E shards
   e2e-prep:
+    permissions:
+      actions: read
+      contents: read
     name: E2E Prep
     runs-on: ubuntu-26.04
     needs: [changes, build]
@@ -376,6 +388,9 @@ jobs:
           if-no-files-found: error
 
   tests-e2e:
+    permissions:
+      actions: read
+      contents: read
     runs-on: ubuntu-26.04
     needs: [e2e-matrix, e2e-prep]
     name: E2E - ${{ matrix.suite || 'all suites' }} [${{ matrix.framework }}]${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}${{ matrix.disableCacheComponents && ' [without cacheComponents]' || '' }}
@@ -571,7 +586,8 @@ jobs:
       - name: Install dependencies
         run: |
           docker exec visual-regression bash -lc "
-            apt-get update -qq && apt-get install -y -qq build-essential python3 > /dev/null &&
+            apt-get update -qq -o Acquire::Retries=5 &&
+            apt-get install -y -qq -o Acquire::Retries=5 build-essential python3 > /dev/null &&
             npm install -g pnpm@\$(grep '^pnpm ' .tool-versions | awk '{print \$2}') &&
             # --location=user avoids writing storeDir into pnpm-workspace.yaml, which pnpm
             # does by default when the cwd is a workspace root.
@@ -602,6 +618,9 @@ jobs:
 
   # Build listed templates with packed local packages and then runs their int and e2e tests
   build-and-test-templates:
+    permissions:
+      actions: read
+      contents: read
     runs-on: ubuntu-26.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_build == 'true'
@@ -695,6 +714,9 @@ jobs:
         run: pnpm --filter scripts check-template-build-approvals
 
   tests-type-generation:
+    permissions:
+      actions: read
+      contents: read
     runs-on: ubuntu-26.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true'
@@ -728,6 +750,7 @@ jobs:
     # with --shard); `test:int:summary` cannot shard.
     continue-on-error: true
     permissions:
+      actions: read
       id-token: write
       contents: read
     services:

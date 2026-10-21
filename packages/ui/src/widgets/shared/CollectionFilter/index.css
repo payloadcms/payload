@@ -1,5 +1,5 @@
 @layer payload-default {
-  .recently-viewed-collections-field__list {
+  .collection-filter__list {
     display: flex;
     flex-direction: column;
     gap: var(--spacer-1);
@@ -8,7 +8,7 @@
     list-style: none;
   }
 
-  .recently-viewed-collections-field__option {
+  .collection-filter__option {
     margin: 0;
   }
 }
