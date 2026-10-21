@@ -42,6 +42,7 @@ import {
   addDefaultsToCollectionConfig,
   createInheritedReadVersionsAccess,
 } from './defaults.js'
+import { validateListSearchableFields } from './listSearchableFields.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
 import { validateUseAsThumbnail } from './useAsThumbnail.js'
 import { validateUseAsTitle } from './useAsTitle.js'
@@ -466,6 +467,7 @@ export const sanitizeCollection = (
   sanitizedConfig.flattenedFields = flattenAllFields({ fields: sanitizedConfig.fields })
 
   validateUseAsTitle(sanitized)
+  validateListSearchableFields(sanitized)
   validateUseAsThumbnail({ config: sanitizedConfig })
 
   if (!sanitizedConfig.admin.useAsThumbnail) {
