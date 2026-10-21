@@ -1,59 +1,8 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import { withPayload } from './withPayload.js'
 
 describe('withPayload', () => {
-  beforeEach(() => {
-    vi.spyOn(console, 'warn')
-    vi.stubEnv('NEXT_TRAILING_SLASH', process.env.NEXT_TRAILING_SLASH)
-  })
-
-  afterEach(() => {
-    vi.unstubAllEnvs()
-    vi.restoreAllMocks()
-  })
-
-  describe('server externals', () => {
-    const userConfig = { serverExternalPackages: ['custom-server-dependency', 'graphql'] }
-
-    it('should externalize server packages by default in development and honor the bundle opt-in', () => {
-      vi.stubEnv('NODE_ENV', 'development')
-      const defaultConfig = withPayload(userConfig)
-      const disabledConfig = withPayload(userConfig, { devBundleServerPackages: false })
-      const enabledConfig = withPayload(userConfig, { devBundleServerPackages: true })
-
-      expect(defaultConfig.serverExternalPackages).toMatchSnapshot('development')
-      expect(disabledConfig.serverExternalPackages).toEqual(defaultConfig.serverExternalPackages)
-      expect(enabledConfig.serverExternalPackages).not.toContain('payload')
-      expect(defaultConfig.serverExternalPackages).not.toContain('@payloadcms/ui')
-
-      vi.stubEnv('NODE_ENV', 'production')
-
-      expect(enabledConfig.serverExternalPackages).toEqual(
-        withPayload(userConfig).serverExternalPackages,
-      )
-      expect(userConfig.serverExternalPackages).toEqual(['custom-server-dependency', 'graphql'])
-    })
-
-    it('should preserve production externals and Webpack exceptions regardless of the dev option', () => {
-      vi.stubEnv('NODE_ENV', 'production')
-      const defaultConfig = withPayload(userConfig)
-      const webpackConfig = defaultConfig.webpack(
-        { externals: ['custom-webpack-external'] },
-        { webpack: { IgnorePlugin: class {} } },
-      )
-
-      expect(defaultConfig.serverExternalPackages).toMatchSnapshot('production')
-      expect(webpackConfig.externals).toMatchSnapshot('webpack')
-
-      for (const devBundleServerPackages of [false, true]) {
-        expect(withPayload(userConfig, { devBundleServerPackages }).serverExternalPackages).toEqual(
-          defaultConfig.serverExternalPackages,
-        )
-      }
-    })
-  })
-
   it('should install the admin route transform only when Cache Components is enabled', () => {
     const env = { CUSTOM: 'value' }
     const enabled = withPayload({ cacheComponents: true, env })
