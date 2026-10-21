@@ -940,12 +940,17 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     }) => {
       // PYLD-3784
       await gotoPostsList({ page, postsURL })
-      await openGroupBy(page)
+      const { groupByContent } = await openGroupBy(page)
+
+      await expect(
+        groupByContent.getByRole('button', { name: 'Sort', exact: true }),
+      ).toHaveAttribute('aria-disabled', 'true')
       const output = await navigateScreenReaderTo({
         matches: /sort.*(?:button|pop.?up)|(?:button|pop.?up).*sort/i,
         maxSteps: 12,
         screenReader,
         shouldEnterDialogs: true,
+        startAt: groupByContent.getByRole('button', { name: 'Close', exact: true }),
       })
 
       expect(output).toMatch(/dimmed|disabled|unavailable/i)
