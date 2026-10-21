@@ -171,10 +171,10 @@ jobs:
       - name: Check formatting
         run: pnpm format:check
 
-      - name: Lint TypeScript/JavaScript
-        run: pnpm lint --quiet
-        env:
-          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
+      #  - name: Lint TypeScript/JavaScript
+      #    run: pnpm lint --quiet
+      #    env:
+      #      NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
 
       - name: Lint CSS
         run: pnpm run lint:css

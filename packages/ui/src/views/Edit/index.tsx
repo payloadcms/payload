@@ -679,7 +679,7 @@ export function DefaultEditView({
       readOnly={!hasSavePermission}
       requirePassword={!id}
       setValidateBeforeSubmit={setValidateBeforeSubmit}
-      // eslint-disable-next-line react-compiler/react-compiler
+      // eslint-disable-next-line react-hooks/hooks
       useAPIKey={auth.useAPIKey}
       username={data?.username}
       verify={auth.verify}
