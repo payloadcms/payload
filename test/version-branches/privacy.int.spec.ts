@@ -9,165 +9,173 @@ import {
   saveBranchAutosave,
 } from '../../packages/payload/src/versions/branches/storage/branchVersionStore.js'
 import { test } from '../__helpers/int/vitest.js'
+import { nativeBranchDatabaseOptions } from './adapterCapabilities.js'
 import { articleHeadsSlug, articlesSlug, settingsHeadsSlug, settingsSlug } from './slugs.js'
 
 const metadata = ['branchFrozen', 'branchGeneration', 'branchOnly', 'branchOwnerKey']
 
 test.suite('Private branch adapter metadata', { config: './config.ts' }, () => {
-  test('should exclude private snapshots when version access inherits the collection read policy', async ({
-    payload,
-  }) => {
-    const article = await payload.create({
-      collection: articlesSlug,
-      data: { title: 'Legacy' },
-      draft: true,
-    })
-    const versions = await payload.db.findVersions({
-      collection: articlesSlug,
-      where: { parent: { equals: article.id } },
-    })
-    const target = { collection: articleHeadsSlug, parentID: article.id }
-    const snapshot = await transaction({
-      payload,
-      run: async ({ req }) => {
-        const reference = await initializeBranchVersion({
-          branchID: 'drafts',
-          isFrozen: true,
-          req,
-          target,
-          versionID: versions.docs[0]!.id,
-        })
-
-        return saveBranchAutosave({
-          branchID: 'staging',
-          data: { title: { en: 'Private staged content' } },
-          expected: reference,
-          req,
-          target,
-        })
-      },
-    })
-
-    await expect(
-      payload.findVersionByID({
+  test.options(
+    'should exclude private snapshots when version access inherits the collection read policy',
+    nativeBranchDatabaseOptions,
+    async ({ payload }) => {
+      const article = await payload.create({
         collection: articlesSlug,
-        id: String(snapshot.id),
-        overrideAccess: false,
-        user: null,
-      }),
-    ).rejects.toMatchObject({ status: 404 })
-    expect(
-      (
-        await payload.findVersionByID({
+        data: { title: 'Legacy' },
+        draft: true,
+      })
+      const versions = await payload.db.findVersions({
+        collection: articlesSlug,
+        where: { parent: { equals: article.id } },
+      })
+      const target = { collection: articleHeadsSlug, parentID: article.id }
+      const snapshot = await transaction({
+        payload,
+        run: async ({ req }) => {
+          const reference = await initializeBranchVersion({
+            branchID: 'drafts',
+            isFrozen: true,
+            req,
+            target,
+            versionID: versions.docs[0]!.id,
+          })
+
+          return saveBranchAutosave({
+            branchID: 'staging',
+            data: { title: { en: 'Private staged content' } },
+            expected: reference,
+            req,
+            target,
+          })
+        },
+      })
+
+      await expect(
+        payload.findVersionByID({
           collection: articlesSlug,
-          id: String(versions.docs[0]!.id),
+          id: String(snapshot.id),
           overrideAccess: false,
           user: null,
-        })
-      ).version.title,
-    ).toBe('Legacy')
-  })
-
-  test('should retain native collection metadata while stripping legacy history and by-ID responses', async ({
-    payload,
-    restClient,
-  }) => {
-    const article = await payload.create({
-      collection: articlesSlug,
-      data: { title: 'Legacy history' },
-      draft: true,
-    })
-    const versions = await payload.db.findVersions({
-      collection: articlesSlug,
-      where: { parent: { equals: article.id } },
-    })
-    const versionID = versions.docs[0]!.id
-
-    await transaction({
-      payload,
-      run: ({ req }) =>
-        initializeBranchVersion({
-          branchID: 'drafts',
-          isFrozen: true,
-          req,
-          target: { collection: articleHeadsSlug, parentID: article.id },
-          versionID,
         }),
-    })
+      ).rejects.toMatchObject({ status: 404 })
+      expect(
+        (
+          await payload.findVersionByID({
+            collection: articlesSlug,
+            id: String(versions.docs[0]!.id),
+            overrideAccess: false,
+            user: null,
+          })
+        ).version.title,
+      ).toBe('Legacy')
+    },
+  )
 
-    const raw = await payload.db.findVersions({
-      collection: articlesSlug,
-      where: { id: { equals: versionID } },
-    })
-    const history = await payload.findVersions({
-      collection: articlesSlug,
-      where: { parent: { equals: article.id } },
-    })
-    const version = await payload.findVersionByID({
-      collection: articlesSlug,
-      id: String(versionID),
-      overrideAccess: false,
-      user: null,
-    })
-    const response = await restClient.GET(`/${articlesSlug}/versions/${versionID}`, { auth: false })
+  test.options(
+    'should retain native collection metadata while stripping legacy history and by-ID responses',
+    nativeBranchDatabaseOptions,
+    async ({ payload, restClient }) => {
+      const article = await payload.create({
+        collection: articlesSlug,
+        data: { title: 'Legacy history' },
+        draft: true,
+      })
+      const versions = await payload.db.findVersions({
+        collection: articlesSlug,
+        where: { parent: { equals: article.id } },
+      })
+      const versionID = versions.docs[0]!.id
 
-    expect(response.status).toBe(200)
-    expect(raw.docs[0]).toMatchObject({
-      branchFrozen: true,
-      branchGeneration: 1,
-      branchOwnerKey: 'string:drafts',
-    })
-    for (const item of [...history.docs, version, await response.json()]) {
-      for (const key of metadata) {
-        expect(item).not.toHaveProperty(key)
+      await transaction({
+        payload,
+        run: ({ req }) =>
+          initializeBranchVersion({
+            branchID: 'drafts',
+            isFrozen: true,
+            req,
+            target: { collection: articleHeadsSlug, parentID: article.id },
+            versionID,
+          }),
+      })
+
+      const raw = await payload.db.findVersions({
+        collection: articlesSlug,
+        where: { id: { equals: versionID } },
+      })
+      const history = await payload.findVersions({
+        collection: articlesSlug,
+        where: { parent: { equals: article.id } },
+      })
+      const version = await payload.findVersionByID({
+        collection: articlesSlug,
+        id: String(versionID),
+        overrideAccess: false,
+        user: null,
+      })
+      const response = await restClient.GET(`/${articlesSlug}/versions/${versionID}`, {
+        auth: false,
+      })
+
+      expect(response.status).toBe(200)
+      expect(raw.docs[0]).toMatchObject({
+        branchFrozen: true,
+        branchGeneration: 1,
+        branchOwnerKey: 'string:drafts',
+      })
+      for (const item of [...history.docs, version, await response.json()]) {
+        for (const key of metadata) {
+          expect(item).not.toHaveProperty(key)
+        }
       }
-    }
-  })
+    },
+  )
 
-  test('should retain native global metadata while stripping legacy history and by-ID responses', async ({
-    payload,
-  }) => {
-    await payload.updateGlobal({
-      slug: settingsSlug,
-      data: { title: 'Global history' },
-      draft: true,
-    })
-    const versions = await payload.db.findGlobalVersions({ global: settingsSlug })
-    const versionID = versions.docs[0]!.id
+  test.options(
+    'should retain native global metadata while stripping legacy history and by-ID responses',
+    nativeBranchDatabaseOptions,
+    async ({ payload }) => {
+      await payload.updateGlobal({
+        slug: settingsSlug,
+        data: { title: 'Global history' },
+        draft: true,
+      })
+      const versions = await payload.db.findGlobalVersions({ global: settingsSlug })
+      const versionID = versions.docs[0]!.id
 
-    await transaction({
-      payload,
-      run: ({ req }) =>
-        initializeBranchVersion({
-          branchID: 'drafts',
-          isFrozen: true,
-          req,
-          target: { collection: settingsHeadsSlug },
-          versionID,
-        }),
-    })
+      await transaction({
+        payload,
+        run: ({ req }) =>
+          initializeBranchVersion({
+            branchID: 'drafts',
+            isFrozen: true,
+            req,
+            target: { collection: settingsHeadsSlug },
+            versionID,
+          }),
+      })
 
-    const raw = await payload.db.findGlobalVersions({
-      global: settingsSlug,
-      where: { id: { equals: versionID } },
-    })
-    const history = await payload.findGlobalVersions({ slug: settingsSlug })
-    const version = await payload.findGlobalVersionByID({
-      slug: settingsSlug,
-      id: String(versionID),
-    })
+      const raw = await payload.db.findGlobalVersions({
+        global: settingsSlug,
+        where: { id: { equals: versionID } },
+      })
+      const history = await payload.findGlobalVersions({ slug: settingsSlug })
+      const version = await payload.findGlobalVersionByID({
+        slug: settingsSlug,
+        id: String(versionID),
+      })
 
-    expect(raw.docs[0]).toMatchObject({
-      branchFrozen: true,
-      branchGeneration: 1,
-      branchOwnerKey: 'string:drafts',
-    })
-    for (const item of [...history.docs, version]) {
-      for (const key of metadata) {
-        expect(item).not.toHaveProperty(key)
+      expect(raw.docs[0]).toMatchObject({
+        branchFrozen: true,
+        branchGeneration: 1,
+        branchOwnerKey: 'string:drafts',
+      })
+      for (const item of [...history.docs, version]) {
+        for (const key of metadata) {
+          expect(item).not.toHaveProperty(key)
+        }
       }
-    }
-  })
+    },
+  )
 
   test('should keep private branch metadata out of collection and global GraphQL schemas', async ({
     restClient,

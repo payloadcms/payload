@@ -28,11 +28,13 @@ import {
 import { getLatestCollectionVersion } from '../../packages/payload/src/versions/getLatestCollectionVersion.js'
 import { getLatestGlobalVersion } from '../../packages/payload/src/versions/getLatestGlobalVersion.js'
 import { test } from '../__helpers/int/vitest.js'
+import { nativeBranchDatabaseOptions } from './adapterCapabilities.js'
 import { articleHeadsSlug, articlesSlug, settingsHeadsSlug, settingsSlug } from './slugs.js'
 
 const scope = { locale: 'en', type: 'locale' as const }
+const suiteOptions = { config: './config.ts', ...nativeBranchDatabaseOptions }
 
-test.suite('Version-backed branch adapter foundation', { config: './config.ts' }, () => {
+test.suite('Version-backed branch adapter foundation', suiteOptions, () => {
   test('should freeze and retain the exact revision selected by a durable pin', async ({
     payload,
   }) => {

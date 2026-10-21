@@ -19,12 +19,14 @@ import {
   saveBranchAutosave,
 } from '../../packages/payload/src/versions/branches/storage/branchVersionStore.js'
 import { test } from '../__helpers/int/vitest.js'
+import { nativeBranchDatabaseOptions } from './adapterCapabilities.js'
 import { articleHeadsSlug, articlesSlug } from './slugs.js'
 
 const scope = { locale: 'en', type: 'locale' as const }
+const suiteOptions = { config: './config.ts', ...nativeBranchDatabaseOptions }
 const pinsSlug = `collection-${articlesSlug}-pins`
 
-test.suite('Independent branch transactions', { config: './config.ts' }, () => {
+test.suite('Independent branch transactions', suiteOptions, () => {
   test('should commit one competing head revision without retaining the losing pin', async ({
     payload,
   }) => {
