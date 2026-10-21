@@ -24,6 +24,7 @@ export const runStoredFileRestore = async <T>({
   collection,
   current,
   req,
+  resolve,
   selected,
   write,
 }: {
@@ -31,6 +32,7 @@ export const runStoredFileRestore = async <T>({
   current: JsonObject
   id: number | string
   req: PayloadRequest
+  resolve?: (restored: JsonObject) => Promise<JsonObject>
   selected: JsonObject
   write: (restored: JsonObject) => Promise<T>
 }): Promise<T> => {
@@ -42,8 +44,10 @@ export const runStoredFileRestore = async <T>({
   const configuredSizeKeys = new Set(collection.upload.variants?.map(({ name }) => name) ?? [])
   const storedFiles: StoredFileList = collectStoredFiles({ collection, doc: stored, req }).flatMap(
     (file) => {
-      const roles = file.roles.filter(
-        (role) => role.type !== 'size' || configuredSizeKeys.has(role.sizeKey),
+      const roles = file.roles.filter((role) =>
+        resolve
+          ? role.type === 'original'
+          : role.type !== 'size' || configuredSizeKeys.has(role.sizeKey),
       )
       return roles.length ? [{ ...file, roles }] : []
     },
@@ -96,7 +100,7 @@ export const runStoredFileRestore = async <T>({
   const currentFiles = collectStoredFiles({ collection, doc: currentStored, req })
 
   if (!storedFiles.length && !currentFiles.length) {
-    return write(selectedForCurrent)
+    return write(resolve ? await resolve(selectedForCurrent) : selectedForCurrent)
   }
 
   const currentIdentities = new Set(currentFiles.map(getStoredFileIdentity))
@@ -142,6 +146,10 @@ export const runStoredFileRestore = async <T>({
         }) ?? selectedForCurrent
     },
     write: async ({ trackStagedObject }) => {
+      if (resolve) {
+        restored = await resolve(restored)
+      }
+
       if (staticDir && !collection.upload.disableLocalStorage) {
         await archiveOutgoingLocalFiles({
           id,

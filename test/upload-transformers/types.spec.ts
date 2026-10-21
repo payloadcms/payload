@@ -1,10 +1,12 @@
 import type { SharpDependency } from '@payloadcms/transformer-sharp'
 import type {
   Config,
+  CropTransform,
   GlobalUploadConfig,
   HandleTransformRequestResult,
   PayloadRequest,
   TransformFileResult,
+  TransformState,
 } from 'payload'
 import type { generatePayloadFileURL as generatePayloadFileURLFromShared } from 'payload/shared'
 
@@ -12,6 +14,16 @@ import { generatePayloadFileURL } from 'payload'
 import { describe, expect, test } from 'tstyche'
 
 describe('upload transformer contracts', () => {
+  test('should allow arbitrary transform keys while retaining built-in shapes', () => {
+    expect<{ custom: { nested: number[] } }>().type.toBeAssignableTo<TransformState>()
+    expect<{ crop: string }>().type.not.toBeAssignableTo<TransformState>()
+  })
+
+  test('should provide conventional shapes for adapters that choose them', () => {
+    expect<{ height: number; width: number; x: number; y: number }>().type.toBe<CropTransform>()
+    expect<{ crop: string }>().type.not.toBeAssignableTo<{ crop: CropTransform }>()
+  })
+
   test('should require a file when a transformFile result is complete', () => {
     expect<{ status: 'complete' }>().type.not.toBeAssignableTo<TransformFileResult>()
   })

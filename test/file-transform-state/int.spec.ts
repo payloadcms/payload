@@ -1,0 +1,1051 @@
+import type { TextField } from 'payload'
+
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options", "test.for"] }] -- Tests use the shared fixture wrapper. */
+import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
+import path from 'node:path'
+import sharp from 'sharp'
+import { expect } from 'vitest'
+
+import { test } from '../__helpers/int/vitest.js'
+import { dynamicMediaSlug, mediaSlug } from './shared.js'
+
+test.suite('File transform state', { config: './config.ts' }, () => {
+  test('should preserve trusted access mode during single and bulk transformer validation', async ({
+    payload,
+  }) => {
+    const data = await createImageBuffer({})
+    const doc = await payload.create({
+      collection: mediaSlug,
+      data: {},
+      file: { name: 'access.png', data, mimetype: 'image/png', size: data.length },
+    })
+    const field = payload.collections[mediaSlug].config.fields.find(
+      (field) => 'name' in field && field.name === 'title',
+    ) as TextField
+    const validate = field.validate
+    const transformer = payload.config.upload.transformers[0]
+    const transformFile = transformer.transformFile!
+    const observed: boolean[] = []
+
+    field.validate = (value, { overrideAccess }) => {
+      if (value === 'transformed') {
+        observed.push(overrideAccess)
+        return overrideAccess ? true : 'Trusted transform expected.'
+      }
+      return true
+    }
+    transformer.transformFile = async (args) => {
+      args.doc.title = 'transformed'
+      return transformFile(args)
+    }
+    try {
+      await payload.update({
+        id: doc.id,
+        collection: mediaSlug,
+        data: { _transforms: { rotate: { angle: 90 } } },
+        overrideAccess: true,
+      })
+      await payload.update({
+        collection: mediaSlug,
+        data: { _transforms: { rotate: { angle: 180 } }, title: 'before' },
+        overrideAccess: true,
+        where: { id: { equals: doc.id } },
+      })
+      expect(observed).toEqual([true, true])
+      await expect(
+        payload.update({
+          id: doc.id,
+          collection: mediaSlug,
+          data: { _transforms: { rotate: { angle: 270 } }, title: 'before' },
+          overrideAccess: false,
+        }),
+      ).rejects.toMatchObject({ data: { errors: [expect.objectContaining({ path: 'title' })] } })
+      expect(observed.at(-1)).toBe(false)
+    } finally {
+      field.validate = validate
+      transformer.transformFile = transformFile
+    }
+  })
+
+  for (const isBulk of [false, true]) {
+    test(`should replay verified legacy local bytes on a ${isBulk ? 'bulk rotation' : 'single crop'} update`, async ({
+      payload,
+    }) => {
+      const data = await sharp(await createImageBuffer({}))
+        .composite([
+          {
+            input: await sharp({
+              create: { background: 'blue', channels: 3, height: 10, width: 10 },
+            })
+              .png()
+              .toBuffer(),
+            left: 10,
+            top: 0,
+          },
+        ])
+        .png()
+        .toBuffer()
+      const upload = payload.collections[mediaSlug].config.upload
+      const directory = upload.staticDir
+      await mkdir(directory, { recursive: true })
+      await writeFile(path.join(directory, 'legacy.png'), data)
+      const doc = await payload.db.create({
+        collection: mediaSlug,
+        data: {
+          filename: 'legacy.png',
+          filesize: data.length,
+          height: 10,
+          mimeType: 'image/png',
+          url: `/api/${mediaSlug}/file/legacy.png`,
+          width: 20,
+        },
+      })
+      const previousTransformer = payload.config.upload.transformers[0]
+      payload.config.upload.transformers[0] = sharpTransformer({
+        collections: { [mediaSlug]: { variants: [{ name: 'small', height: 3, width: 3 }] } },
+      })
+      const state = isBulk
+        ? { rotate: { angle: 90 } }
+        : { crop: { height: 10, width: 10, x: 10, y: 0 } }
+      try {
+        const result = await payload.update({
+          collection: mediaSlug,
+          ...(isBulk ? { where: { id: { equals: doc.id } } } : { id: doc.id }),
+          data: { _transforms: state },
+        })
+        const updated = 'docs' in result ? result.docs[0] : result
+
+        expect(updated).toMatchObject({
+          _transforms: state,
+          height: isBulk ? 20 : 10,
+          original: { filename: 'legacy.png' },
+          width: 10,
+        })
+        expect(await readFile(path.join(directory, updated.original.filename))).toEqual(data)
+        const output = await sharp(path.join(directory, updated.filename))
+          .removeAlpha()
+          .raw()
+          .toBuffer({ resolveWithObject: true })
+        expect(output.info).toMatchObject({ height: isBulk ? 20 : 10, width: 10 })
+        expect([...output.data.subarray(0, 3)]).toEqual(isBulk ? [255, 0, 0] : [0, 0, 255])
+        expect(
+          await sharp(path.join(directory, updated.variants.small.filename)).metadata(),
+        ).toMatchObject({ height: 3, width: 3 })
+      } finally {
+        payload.config.upload.transformers[0] = previousTransformer
+      }
+    })
+  }
+
+  test('should reject canonical replay from a missing legacy source without saving intent', async ({
+    payload,
+  }) => {
+    const doc = await payload.db.create({
+      collection: mediaSlug,
+      data: {
+        filename: 'missing.png',
+        filesize: 100,
+        height: 10,
+        mimeType: 'image/png',
+        url: `/api/${mediaSlug}/file/missing.png`,
+        width: 20,
+      },
+    })
+
+    await expect(
+      payload.update({
+        id: doc.id,
+        collection: mediaSlug,
+        data: { _transforms: { rotate: { angle: 90 } } },
+      }),
+    ).rejects.toThrow()
+    expect(await payload.findByID({ id: doc.id, collection: mediaSlug })).toMatchObject({
+      _transforms: null,
+      height: 10,
+      width: 20,
+    })
+  })
+
+  for (const container of ['details', 'editorial']) {
+    test(`should reject removal of required ${container} descendants by a transformer`, async ({
+      payload,
+    }) => {
+      const data = await createImageBuffer({})
+      const doc = await payload.create({
+        collection: mediaSlug,
+        data: {},
+        file: { name: 'container.png', data, mimetype: 'image/png', size: data.length },
+      })
+      const directory = payload.collections[mediaSlug].config.upload.staticDir
+      const files = await readdir(directory)
+      const transformer = payload.config.upload.transformers[0]
+      const transformFile = transformer.transformFile!
+      transformer.transformFile = async (args) => {
+        delete args.doc[container]
+        return transformFile(args)
+      }
+      try {
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: mediaSlug,
+            data: { _transforms: { rotate: { angle: 90 } } },
+          }),
+        ).rejects.toMatchObject({
+          data: { errors: [expect.objectContaining({ path: `${container}.required` })] },
+        })
+        expect(await readdir(directory)).toEqual(files)
+        expect(await payload.findByID({ id: doc.id, collection: mediaSlug })).toMatchObject({
+          _transforms: null,
+          [container]: { required: 'present' },
+        })
+      } finally {
+        transformer.transformFile = transformFile
+      }
+    })
+  }
+
+  test('should process transform state produced by collection hooks', async ({ payload }) => {
+    const data = await createImageBuffer({})
+    const doc = await payload.create({
+      collection: mediaSlug,
+      context: { applyRotation: true },
+      data: {},
+      file: { name: 'hook.png', data, mimetype: 'image/png', size: data.length },
+    })
+
+    expect(doc).toMatchObject({ _transforms: { rotate: { angle: 90 } }, height: 20, width: 10 })
+  })
+  test('should replay restored intent using the current transformer implementation', async ({
+    payload,
+  }) => {
+    const data = await createImageBuffer({})
+    const doc = await payload.create({
+      collection: mediaSlug,
+      data: { _transforms: { crop: { height: 10, width: 10, x: 0, y: 0 } } },
+      file: { name: 'restore.png', data, mimetype: 'image/png', size: data.length },
+    })
+    const versions = await payload.findVersions({
+      collection: mediaSlug,
+      sort: '-createdAt',
+      where: { parent: { equals: doc.id } },
+    })
+    const selected = versions.docs[0]
+
+    await payload.update({
+      id: doc.id,
+      collection: mediaSlug,
+      data: { _transforms: { crop: { height: 10, width: 5, x: 0, y: 0 } } },
+    })
+    const transformer = payload.config.upload.transformers[0]
+    const transformFile = transformer.transformFile!
+
+    transformer.transformFile = async (args) => {
+      const result = await transformFile(args)
+
+      if (!result.file) {
+        return result
+      }
+      const buffer = await sharp(Buffer.from(await result.file.arrayBuffer()))
+        .resize(2, 2)
+        .png()
+        .toBuffer()
+
+      return { ...result, file: new File([buffer], result.file.name, { type: 'image/png' }) }
+    }
+    try {
+      const restored = await payload.restoreVersion({ id: selected.id, collection: mediaSlug })
+
+      expect(restored).toMatchObject({
+        _transforms: { crop: { height: 10, width: 10, x: 0, y: 0 } },
+        height: 2,
+        width: 2,
+      })
+      expect(
+        await sharp(
+          path.join(payload.collections[mediaSlug].config.upload.staticDir, restored.filename),
+        ).metadata(),
+      ).toMatchObject({ height: 2, width: 2 })
+    } finally {
+      transformer.transformFile = transformFile
+    }
+  })
+  test('should reject invalid transformer mutations without changing the document or files', async ({
+    payload,
+  }) => {
+    const data = await createImageBuffer({})
+    const doc = await payload.create({
+      collection: mediaSlug,
+      data: { title: 'valid' },
+      file: { name: 'validation.png', data, mimetype: 'image/png', size: data.length },
+    })
+    const directory = payload.collections[mediaSlug].config.upload.staticDir
+    const files = await readdir(directory)
+    const transformer = payload.config.upload.transformers[0]
+    const transformFile = transformer.transformFile!
+    const collection = payload.collections[mediaSlug].config
+    const field = collection.fields.find(
+      (field) => 'name' in field && field.name === 'title',
+    ) as TextField
+    const fieldHooks = field.hooks
+    const beforeChange = collection.hooks.beforeChange
+    let fieldHookCalls = 0
+    let collectionHookCalls = 0
+
+    field.hooks = {
+      ...fieldHooks,
+      beforeChange: [
+        ...(fieldHooks?.beforeChange ?? []),
+        ({ value }) => {
+          fieldHookCalls++
+          return value
+        },
+      ],
+    }
+    collection.hooks.beforeChange = [
+      ...beforeChange,
+      ({ data }) => {
+        collectionHookCalls++
+        return data
+      },
+    ]
+
+    transformer.transformFile = async (args) => {
+      args.doc.title = 'invalid'
+
+      return transformFile(args)
+    }
+    try {
+      await expect(
+        payload.update({
+          id: doc.id,
+          collection: mediaSlug,
+          data: { _transforms: { rotate: { angle: 90 } } },
+        }),
+      ).rejects.toMatchObject({ data: { errors: [expect.objectContaining({ path: 'title' })] } })
+      expect(await payload.findByID({ id: doc.id, collection: mediaSlug })).toMatchObject({
+        _transforms: null,
+        height: 10,
+        title: 'valid',
+        width: 20,
+      })
+      expect(await readdir(directory)).toEqual(files)
+      expect(fieldHookCalls).toBe(1)
+      expect(collectionHookCalls).toBe(1)
+    } finally {
+      transformer.transformFile = transformFile
+      field.hooks = fieldHooks
+      collection.hooks.beforeChange = beforeChange
+    }
+  })
+  test('should validate nested transformer mutations against a detached baseline', async ({
+    payload,
+  }) => {
+    const data = await createImageBuffer({})
+    const doc = await payload.create({
+      collection: mediaSlug,
+      data: { appliedState: { title: 'valid' } },
+      file: { name: 'nested.png', data, mimetype: 'image/png', size: data.length },
+    })
+    const transformer = payload.config.upload.transformers[0]
+    const transformFile = transformer.transformFile!
+
+    transformer.transformFile = async (args) => {
+      args.doc.appliedState.title = 'invalid'
+      return transformFile(args)
+    }
+    try {
+      await expect(
+        payload.update({
+          id: doc.id,
+          collection: mediaSlug,
+          data: { _transforms: { rotate: { angle: 90 } } },
+        }),
+      ).rejects.toMatchObject({
+        data: { errors: [expect.objectContaining({ path: 'appliedState' })] },
+      })
+      expect(await payload.findByID({ id: doc.id, collection: mediaSlug })).toMatchObject({
+        appliedState: { title: 'valid' },
+      })
+    } finally {
+      transformer.transformFile = transformFile
+    }
+  })
+
+  test('should let a transformer derive persisted fields from final bytes after source metadata hooks', async ({
+    payload,
+  }) => {
+    const collection = payload.collections[mediaSlug].config
+    const hooks = collection.hooks.beforeChange
+    const transformers = payload.config.upload.transformers
+    collection.hooks.beforeChange = [
+      ...hooks,
+      ({ data }) => {
+        data.appliedState = {
+          filesize: data.filesize,
+          height: data.height,
+          mimeType: data.mimeType,
+          width: data.width,
+        }
+        return data
+      },
+    ]
+    payload.config.upload.transformers = [
+      ...transformers,
+      {
+        slug: 'derived-dimensions',
+        mimeTypes: ['image/*'],
+        transformFile: async ({ doc, source }) => {
+          const metadata = await sharp(
+            Buffer.from(await source.arrayBuffer({ maxBytes: 1024 * 1024 })),
+          ).metadata()
+          doc.title = `${metadata.width} x ${metadata.height}`
+          return { status: 'continue' }
+        },
+      },
+    ]
+    try {
+      const data = await createImageBuffer({})
+      const doc = await payload.create({
+        collection: mediaSlug,
+        data: { _transforms: { crop: { height: 5, width: 10, x: 0, y: 0 } } },
+        file: { name: 'hook-metadata.png', data, mimetype: 'image/png', size: data.length },
+      })
+      expect(doc.appliedState).toEqual({
+        filesize: data.length,
+        height: 10,
+        mimeType: 'image/png',
+        width: 20,
+      })
+      expect(doc).toMatchObject({ height: 5, title: '10 x 5', width: 10 })
+      expect(await payload.findByID({ id: doc.id, collection: mediaSlug })).toMatchObject({
+        title: '10 x 5',
+      })
+    } finally {
+      collection.hooks.beforeChange = hooks
+      payload.config.upload.transformers = transformers
+    }
+  })
+
+  test('should select complete request coverage and keep conversion metadata unknown', async ({
+    payload,
+    restClient,
+  }) => {
+    const previous = payload.config.upload.transformers
+    payload.config.upload.transformers = [
+      ...previous,
+      {
+        slug: 'request-webp',
+        canTransform: ({ doc, operation, purpose }) =>
+          operation === 'request' && purpose === 'persisted-default' && doc._transforms?.customWebp
+            ? { canTransform: true, handledTransformKeys: ['customWebp'] }
+            : false,
+        handleRequest: async ({ getSourceFile }) => ({
+          response: new Response(
+            await sharp(Buffer.from(await (await getSourceFile()).arrayBuffer()))
+              .webp()
+              .toBuffer(),
+            {
+              headers: { 'Content-Type': 'image/webp' },
+            },
+          ),
+          status: 'continue',
+        }),
+        mimeTypes: ['image/*'],
+      },
+    ]
+    try {
+      const data = await createImageBuffer({})
+      const doc = await payload.create({
+        collection: mediaSlug,
+        data: { _transforms: { crop: { height: 10, width: 10, x: 0, y: 0 }, customWebp: true } },
+        file: { name: 'request-conversion.png', data, mimetype: 'image/png', size: data.length },
+      })
+      expect(doc).toMatchObject({ filesize: null, height: null, mimeType: null, width: null })
+      expect(doc.variants.small.mimeType).toBeNull()
+      expect(doc.filename).not.toMatch(/\.png$/)
+      const response = await restClient.GET(`/${mediaSlug}/file/${doc.filename}`)
+      expect(response.status).toBe(200)
+      expect(response.headers.get('content-type')).toContain('image/webp')
+      expect(await sharp(Buffer.from(await response.arrayBuffer())).metadata()).toMatchObject({
+        format: 'webp',
+        height: 10,
+        width: 10,
+      })
+      const variant = await restClient.GET(`/${mediaSlug}/file/${doc.variants.small.filename}`)
+      expect(variant.status).toBe(200)
+      expect(await sharp(Buffer.from(await variant.arrayBuffer())).metadata()).toMatchObject({
+        format: 'webp',
+        height: 3,
+        width: 3,
+      })
+      const updated = await payload.update({
+        id: doc.id,
+        collection: mediaSlug,
+        data: { _transforms: { crop: { height: 5, width: 5, x: 0, y: 0 }, customWebp: true } },
+      })
+      expect(updated.mimeType).toBeNull()
+      const next = await restClient.GET(`/${mediaSlug}/file/${updated.filename}`)
+      expect(next.status).toBe(200)
+      expect(await sharp(Buffer.from(await next.arrayBuffer())).metadata()).toMatchObject({
+        format: 'webp',
+        height: 5,
+        width: 5,
+      })
+    } finally {
+      payload.config.upload.transformers = previous
+    }
+  })
+
+  for (const { encoding, expected, label } of [
+    {
+      encoding: { quality: 75 },
+      expected: { format: 'png', mimeType: 'image/png', originalMimeType: 'video/mp4' },
+      label: 'accept image',
+    },
+    {
+      encoding: { videoBitrate: 1000 },
+      expected: { errors: [{ path: '_transforms.encoding' }] },
+      label: 'reject video',
+    },
+  ]) {
+    test(`should ${label} encoding after a video poster conversion`, async ({ payload }) => {
+      const previous = payload.config.upload.transformers
+      const data = await createImageBuffer({})
+      payload.config.upload.transformers = [
+        {
+          slug: 'poster',
+          canTransform: ({ doc }) =>
+            doc._transforms?.posterFrame
+              ? { canTransform: true, handledTransformKeys: ['posterFrame'] }
+              : false,
+          mimeTypes: ['video/*'],
+          transformFile: () =>
+            Promise.resolve({
+              file: new File([data], 'poster.png', { type: 'image/png' }),
+              status: 'continue',
+            }),
+        },
+        previous[0],
+      ]
+      try {
+        const create = payload.create({
+          collection: mediaSlug,
+          data: {
+            _transforms: {
+              encoding,
+              posterFrame: { timestampMs: 0 },
+            },
+          },
+          file: { name: 'video.mp4', data: Buffer.from('video'), mimetype: 'video/mp4', size: 5 },
+        })
+        await expect(
+          create.then(
+            async (doc) => ({
+              format: (
+                await sharp(
+                  await readFile(
+                    path.join(payload.collections[mediaSlug].config.upload.staticDir, doc.filename),
+                  ),
+                ).metadata()
+              ).format,
+              mimeType: doc.mimeType,
+              originalMimeType: doc.original.mimeType,
+            }),
+            (error) => ({ errors: error.data?.errors }),
+          ),
+        ).resolves.toMatchObject(expected)
+      } finally {
+        payload.config.upload.transformers = previous
+      }
+    })
+  }
+
+  test('should detect source MIME before validating image encoding intent', async ({ payload }) => {
+    const data = await createImageBuffer({ format: 'jpeg' })
+    const doc = await payload.create({
+      collection: mediaSlug,
+      data: { _transforms: { encoding: { quality: 75 } } },
+      file: { name: 'source.bin', data, mimetype: 'application/octet-stream', size: data.length },
+    })
+
+    expect(doc.mimeType).toBe('image/jpeg')
+    expect(doc.original.mimeType).toBe('image/jpeg')
+  })
+
+  test('should preflight saved intent before retrieving a duplicate source', async ({
+    payload,
+  }) => {
+    const data = await createImageBuffer({})
+    const doc = await payload.create({
+      collection: mediaSlug,
+      data: { _transforms: { rotate: { angle: 90 } } },
+      file: { name: 'missing-duplicate.png', data, mimetype: 'image/png', size: data.length },
+    })
+    const transformers = payload.config.upload.transformers
+
+    payload.config.upload.transformers = []
+    await rm(
+      path.join(payload.collections[mediaSlug].config.upload.staticDir, doc.original.filename),
+    )
+    try {
+      await expect(payload.duplicate({ id: doc.id, collection: mediaSlug })).rejects.toThrow(
+        'rotate',
+      )
+    } finally {
+      payload.config.upload.transformers = transformers
+    }
+  })
+
+  test('should create a request-only default without claiming the original as the default', async ({
+    payload,
+    restClient,
+  }) => {
+    const data = await createImageBuffer({})
+    const doc = await payload.create({
+      collection: dynamicMediaSlug,
+      data: { _transforms: { crop: { height: 10, width: 5, x: 0, y: 0 } } },
+      file: { name: 'initial-dynamic.png', data, mimetype: 'image/png', size: data.length },
+    })
+
+    expect(doc.filename).not.toBe(doc.original.filename)
+    const files = await readdir(payload.collections[dynamicMediaSlug].config.upload.staticDir)
+
+    expect(files).toContain(doc.original.filename)
+    expect(files).not.toContain(doc.filename)
+    for (const variant of Object.values(doc.variants)) {
+      expect(files).not.toContain(variant.filename)
+    }
+    const response = await restClient.GET(`/${dynamicMediaSlug}/file/${doc.filename}`)
+
+    expect(await sharp(Buffer.from(await response.arrayBuffer())).metadata()).toMatchObject({
+      height: 10,
+      width: 5,
+    })
+    const original = await restClient.GET(`/${dynamicMediaSlug}/file/${doc.original.filename}`)
+
+    expect(await sharp(Buffer.from(await original.arrayBuffer())).metadata()).toMatchObject({
+      height: 10,
+      width: 20,
+    })
+  })
+
+  test('should render virtual named variants from the saved default', async ({
+    payload,
+    restClient,
+  }) => {
+    const data = await createImageBuffer({})
+    const doc = await payload.create({
+      collection: dynamicMediaSlug,
+      data: { _transforms: { crop: { height: 10, width: 5, x: 0, y: 0 } } },
+      file: { name: 'variant.png', data, mimetype: 'image/png', size: data.length },
+    })
+    const response = await restClient.GET(
+      `/${dynamicMediaSlug}/file/${doc.variants.square.filename}`,
+    )
+
+    expect(response.status).toBe(200)
+    expect(await sharp(Buffer.from(await response.arrayBuffer())).metadata()).toMatchObject({
+      height: 3,
+      width: 3,
+    })
+  })
+
+  test('should round-trip open transform state through REST and validate built-in keys', async ({
+    restClient,
+  }) => {
+    const response = await restClient.POST(`/${mediaSlug}`, {
+      body: JSON.stringify({ _transforms: { vendor: { values: [1, 'a', true, null] } } }),
+    })
+    const { doc } = await response.json()
+
+    expect(response.status).toBe(201)
+    expect(doc._transforms).toEqual({ vendor: { values: [1, 'a', true, null] } })
+    const invalid = await restClient.PATCH(`/${mediaSlug}/${doc.id}`, {
+      body: JSON.stringify({ _transforms: { focalPoint: { x: 101, y: 0 } } }),
+    })
+
+    expect(invalid.status).toBe(400)
+    expect((await invalid.json()).errors[0].data.errors[0]).toMatchObject({
+      path: '_transforms.focalPoint.x',
+    })
+    const read = await restClient.GET(`/${mediaSlug}/${doc.id}`)
+
+    expect((await read.json())._transforms).toEqual(doc._transforms)
+  })
+
+  test('should leave optional custom-definition validation to adapters', async ({ restClient }) => {
+    const response = await restClient.POST(`/${mediaSlug}`, {
+      body: JSON.stringify({ _transforms: { unregistered: { value: true }, watermark: 42 } }),
+    })
+    const { doc } = await response.json()
+
+    expect(response.status).toBe(201)
+    expect(doc._transforms).toEqual({ unregistered: { value: true }, watermark: 42 })
+  })
+
+  test('should expose transform state as writable GraphQL JSON', async ({ restClient }) => {
+    const state = { rotate: { angle: 90 }, vendor: { values: [1, 'a', true, null] } }
+    const response = await restClient.GRAPHQL_POST({
+      body: JSON.stringify({
+        query:
+          'mutation State($state: JSON!) { createTransformStateMedia(data: { _transforms: $state, details: { required: "present" }, editorial: { required: "present" } }) { id _transforms } }',
+        variables: { state },
+      }),
+    })
+    const result = await response.json()
+
+    expect(result.errors).toBeUndefined()
+    expect(result.data.createTransformStateMedia._transforms).toEqual(state)
+  })
+
+  test.for([
+    {
+      filename: 'christmas-mariachi-in-guadalajara.mp4',
+      mimeType: 'video/mp4',
+      state: {
+        clip: { endMs: 1000, startMs: 0 },
+        crop: { height: 10, width: 10, x: 0, y: 0 },
+        encoding: { videoBitrate: 1000000, videoCodec: 'h264' },
+      },
+    },
+    {
+      filename: 'test-pdf.pdf',
+      mimeType: 'application/pdf',
+      state: {
+        encoding: { downsampleImagesToDpi: 72, linearize: true },
+        metadataPolicy: { mode: 'strip' },
+        pageRange: { endPage: 1, startPage: 1 },
+      },
+    },
+  ])(
+    'should pass built-in media intent unchanged to the $mimeType executor',
+    async ({ filename, mimeType, state }, { payload }) => {
+      const data = await readFile(new URL(`../uploads/${filename}`, import.meta.url))
+      const doc = await payload.create({
+        collection: mediaSlug,
+        data: { _transforms: state },
+        file: { name: filename, data, mimetype: mimeType, size: data.length },
+      })
+
+      expect(doc.appliedState).toEqual(state)
+      expect(doc.entryMimeType).toBe(mimeType)
+      expect(doc.original.mimeType).toBe(mimeType)
+      expect(doc.mimeType).toBe(mimeType)
+    },
+  )
+
+  test('should process hook-generated intent on updates and bulk updates', async ({ payload }) => {
+    const data = await createImageBuffer({})
+    const created = await payload.create({
+      collection: mediaSlug,
+      data: {},
+      file: { name: 'update-hook.png', data, mimetype: 'image/png', size: data.length },
+    })
+    const updated = await payload.update({
+      id: created.id,
+      collection: mediaSlug,
+      context: { applyRotation: true },
+      data: { title: 'hook update' },
+    })
+
+    expect(updated).toMatchObject({ _transforms: { rotate: { angle: 90 } }, height: 20, width: 10 })
+    await payload.update({ id: created.id, collection: mediaSlug, data: { _transforms: null } })
+    const bulk = await payload.update({
+      collection: mediaSlug,
+      context: { applyRotation: true },
+      data: { title: 'bulk hook update' },
+      where: { id: { equals: created.id } },
+    })
+
+    expect(bulk.errors).toEqual([])
+    expect(bulk.docs[0]).toMatchObject({
+      _transforms: { rotate: { angle: 90 } },
+      height: 20,
+      width: 10,
+    })
+  })
+
+  test('should clear omitted intent when replacing the original and preserve explicit compatible intent', async ({
+    payload,
+  }) => {
+    const data = await createImageBuffer({})
+    const file = { name: 'replace.png', data, mimetype: 'image/png', size: data.length }
+    const doc = await payload.create({
+      collection: mediaSlug,
+      data: { _transforms: { crop: { height: 5, width: 5, x: 0, y: 0 } } },
+      file,
+    })
+    const replaced = await payload.update({ id: doc.id, collection: mediaSlug, data: {}, file })
+
+    expect(replaced).toMatchObject({ _transforms: null, height: 10, width: 20 })
+    const explicit = await payload.update({
+      id: doc.id,
+      collection: mediaSlug,
+      data: { _transforms: { rotate: { angle: 90 } } },
+      file,
+    })
+
+    expect(explicit).toMatchObject({
+      _transforms: { rotate: { angle: 90 } },
+      height: 20,
+      width: 10,
+    })
+  })
+  test('should preserve stored intent without an executor and fail restore before copying files', async ({
+    payload,
+  }) => {
+    const data = await createImageBuffer({})
+    const doc = await payload.create({
+      collection: mediaSlug,
+      data: { _transforms: { crop: { height: 5, width: 5, x: 0, y: 0 } } },
+      file: { name: 'executor.png', data, mimetype: 'image/png', size: data.length },
+    })
+    const versions = await payload.findVersions({
+      collection: mediaSlug,
+      where: { parent: { equals: doc.id } },
+    })
+    const directory = payload.collections[mediaSlug].config.upload.staticDir
+    const files = await readdir(directory)
+    const transformers = payload.config.upload.transformers
+
+    payload.config.upload.transformers = []
+    try {
+      const updated = await payload.update({
+        id: doc.id,
+        collection: mediaSlug,
+        data: { title: 'metadata edit' },
+      })
+
+      expect(updated._transforms).toEqual(doc._transforms)
+      await expect(
+        payload.restoreVersion({ id: versions.docs[0].id, collection: mediaSlug }),
+      ).rejects.toThrow('No configured transformer handles saved transform crop')
+      expect(await readdir(directory)).toEqual(files)
+      expect((await payload.findByID({ id: doc.id, collection: mediaSlug })).title).toBe(
+        'metadata edit',
+      )
+    } finally {
+      payload.config.upload.transformers = transformers
+    }
+  })
+
+  test('should duplicate intent with independently owned retained files', async ({ payload }) => {
+    const data = await createImageBuffer({})
+    const doc = await payload.create({
+      collection: mediaSlug,
+      data: { _transforms: { crop: { height: 5, width: 5, x: 0, y: 0 } } },
+      file: { name: 'duplicate.png', data, mimetype: 'image/png', size: data.length },
+    })
+    const duplicate = await payload.duplicate({ id: doc.id, collection: mediaSlug })
+
+    expect(duplicate._transforms).toEqual(doc._transforms)
+    expect(duplicate.original.filename).not.toBe(doc.original.filename)
+    const directory = payload.collections[mediaSlug].config.upload.staticDir
+
+    expect(await readFile(path.join(directory, duplicate.original.filename))).toEqual(data)
+  })
+
+  test.options(
+    'should roll back failed transform writes and remove staged files',
+    { db: (adapter) => adapter === 'postgres' || adapter === 'mongodb' },
+    async ({ payload }) => {
+      const data = await createImageBuffer({})
+      const doc = await payload.create({
+        collection: mediaSlug,
+        data: {},
+        file: { name: 'rollback.png', data, mimetype: 'image/png', size: data.length },
+      })
+      const directory = payload.collections[mediaSlug].config.upload.staticDir
+      const files = await readdir(directory)
+
+      await expect(
+        payload.update({
+          id: doc.id,
+          collection: mediaSlug,
+          context: { rejectAfterChange: true },
+          data: { _transforms: { rotate: { angle: 90 } } },
+        }),
+      ).rejects.toThrow('Rejected transform write.')
+      expect(await payload.findByID({ id: doc.id, collection: mediaSlug })).toMatchObject({
+        _transforms: null,
+        filename: doc.filename,
+        height: 10,
+        width: 20,
+      })
+      expect(await readdir(directory)).toEqual(files)
+    },
+  )
+
+  test('should carry intent through draft and publish while sharing the original', async ({
+    payload,
+  }) => {
+    const data = await createImageBuffer({})
+    const doc = await payload.create({
+      collection: mediaSlug,
+      data: { _status: 'published' },
+      file: { name: 'draft.png', data, mimetype: 'image/png', size: data.length },
+    })
+    const draft = await payload.update({
+      id: doc.id,
+      collection: mediaSlug,
+      data: { _transforms: { crop: { height: 5, width: 5, x: 0, y: 0 } } },
+      draft: true,
+    })
+    const published = await payload.findByID({ id: doc.id, collection: mediaSlug, draft: false })
+
+    expect(draft.original.filename).toBe(doc.original.filename)
+    expect(published._transforms).toBeNull()
+    const publish = await payload.update({
+      id: doc.id,
+      collection: mediaSlug,
+      data: { _status: 'published' },
+    })
+
+    expect(publish._transforms).toEqual(draft._transforms)
+    expect(publish.original.filename).toBe(doc.original.filename)
+  })
+  test.afterEach(async ({ payload }) => {
+    await rm(payload.collections[mediaSlug].config.upload.staticDir, {
+      force: true,
+      recursive: true,
+    })
+    await rm(payload.collections[dynamicMediaSlug].config.upload.staticDir, {
+      force: true,
+      recursive: true,
+    })
+  })
+
+  test('should save request-time intent without writing a derived file', async ({
+    payload,
+    restClient,
+  }) => {
+    const data = await createImageBuffer({})
+    const doc = await payload.create({
+      collection: dynamicMediaSlug,
+      data: {},
+      file: { name: 'dynamic.png', data, mimetype: 'image/png', size: data.length },
+    })
+    const directory = payload.collections[dynamicMediaSlug].config.upload.staticDir
+    const filesBefore = await readdir(directory)
+    const updated = await payload.update({
+      id: doc.id,
+      collection: dynamicMediaSlug,
+      data: { _transforms: { crop: { height: 10, width: 5, x: 0, y: 0 } } },
+    })
+
+    expect(await readdir(directory)).toEqual(filesBefore)
+    expect(updated.filename).not.toBe(updated.original.filename)
+    const response = await restClient.GET(`/${dynamicMediaSlug}/file/${updated.filename}`)
+    const metadata = await sharp(Buffer.from(await response.arrayBuffer())).metadata()
+
+    expect(metadata).toMatchObject({ height: 10, width: 5 })
+    const originalResponse = await restClient.GET(
+      `/${dynamicMediaSlug}/file/${updated.original.filename}`,
+    )
+    const originalMetadata = await sharp(
+      Buffer.from(await originalResponse.arrayBuffer()),
+    ).metadata()
+
+    expect(originalMetadata).toMatchObject({ height: 10, width: 20 })
+  })
+
+  test('should replay changed crop state from the retained original and reset reversibly', async ({
+    payload,
+  }) => {
+    const data = await createImageBuffer({})
+    const doc = await payload.create({
+      collection: mediaSlug,
+      data: {},
+      file: { name: 'source.png', data, mimetype: 'image/png', size: data.length },
+    })
+    const cropped = await payload.update({
+      id: doc.id,
+      collection: mediaSlug,
+      data: { _transforms: { crop: { height: 10, width: 10, x: 10, y: 0 } } },
+    })
+
+    expect(cropped).toMatchObject({
+      _transforms: { crop: { height: 10, width: 10, x: 10, y: 0 } },
+      height: 10,
+      width: 10,
+    })
+    const recropped = await payload.update({
+      id: doc.id,
+      collection: mediaSlug,
+      data: { _transforms: { crop: { height: 10, width: 5, x: 0, y: 0 } } },
+    })
+
+    expect(recropped).toMatchObject({ height: 10, width: 5 })
+    expect(recropped.original).toEqual(doc.original)
+    const reset = await payload.update({
+      id: doc.id,
+      collection: mediaSlug,
+      data: { _transforms: null },
+    })
+
+    expect(reset).toMatchObject({
+      _transforms: null,
+      filename: doc.original.filename,
+      height: 10,
+      width: 20,
+    })
+    const metadata = await sharp(
+      path.join(payload.collections[mediaSlug].config.upload.staticDir, reset.filename),
+    ).metadata()
+
+    expect(metadata).toMatchObject({ height: 10, width: 20 })
+  })
+
+  test('should preserve omitted transform state', async ({ payload }) => {
+    const doc = await payload.create({
+      collection: mediaSlug,
+      data: { _transforms: { rotate: { angle: 90 } } },
+    })
+    const updated = await payload.update({
+      id: doc.id,
+      collection: mediaSlug,
+      data: { title: 'updated' },
+    })
+
+    expect(updated._transforms).toEqual({ rotate: { angle: 90 } })
+  })
+
+  test('should replace the complete transform object', async ({ payload }) => {
+    const doc = await payload.create({
+      collection: mediaSlug,
+      data: { _transforms: { custom: 1, rotate: { angle: 90 } } },
+    })
+    const updated = await payload.update({
+      id: doc.id,
+      collection: mediaSlug,
+      data: { _transforms: { custom: 2 } },
+    })
+
+    expect(updated._transforms).toEqual({ custom: 2 })
+  })
+
+  test.for([null, {}])(
+    'should clear transform state with $value',
+    async (_transforms, { payload }) => {
+      const doc = await payload.create({
+        collection: mediaSlug,
+        data: { _transforms: { custom: 1 } },
+      })
+      const updated = await payload.update({
+        id: doc.id,
+        collection: mediaSlug,
+        data: { _transforms },
+      })
+
+      expect(updated._transforms).toBeNull()
+    },
+  )
+})
+
+async function createImageBuffer({ format = 'png' }: { format?: 'jpeg' | 'png' }) {
+  return sharp({ create: { background: 'red', channels: 3, height: 10, width: 20 } })
+    .toFormat(format)
+    .toBuffer()
+}

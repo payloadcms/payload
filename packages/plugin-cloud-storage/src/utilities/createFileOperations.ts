@@ -205,6 +205,37 @@ export const createFileOperations = ({
           destination._objectKey = objectKey
         }
         const docPrefix = buildPrefixWithObjectKey({ objectKey, prefix: uploadPrefix })
+
+        // Generation runs after field hooks and can change filenames. Resolve URLs from
+        // the final representation and storage folder before persisting the staged upload.
+        for (const destination of destinations) {
+          if (generateFileURL) {
+            const sizeName =
+              data.variants && typeof data.variants === 'object'
+                ? Object.entries(data.variants).find(([, variant]) => variant === destination)?.[0]
+                : undefined
+            const size = sizeName
+              ? req.payload.collections[collection.slug]?.config.upload.variants?.find(
+                  (variant) => variant.name === sizeName,
+                )
+              : undefined
+
+            destination.url = await generateFileURL({
+              collection,
+              filename,
+              prefix: docPrefix,
+              size,
+            })
+          } else if (disablePayloadAccessControl && adapter.generateURL) {
+            destination.url = await adapter.generateURL({
+              collection,
+              data: { ...data, prefix: docPrefix },
+              filename,
+              prefix: docPrefix,
+            })
+          }
+        }
+
         const dataForUpload = { ...data, prefix: docPrefix }
         const storageFilePath = buildUploadStoragePathData({
           collectionPrefix,

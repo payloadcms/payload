@@ -28,13 +28,12 @@ describe('transformUploadFile', () => {
     const result = await transformUploadFile({
       collectionSlug: 'media',
       file: new File(['original'], 'logo.png'),
-      options: undefined,
-      pipeline: [first, second],
+      pipeline: [{ transformer: first }, { transformer: second }],
       req: makeReq(),
     })
 
     expect(second.transformFile).toHaveBeenCalledWith(
-      expect.objectContaining({ file: replacement }),
+      expect.objectContaining({ source: expect.objectContaining({ filename: replacement.name }) }),
     )
     expect(result).toBe(replacement)
   })
@@ -50,8 +49,7 @@ describe('transformUploadFile', () => {
     const result = await transformUploadFile({
       collectionSlug: 'media',
       file: new File(['original'], 'logo.png'),
-      options: undefined,
-      pipeline: [first, second],
+      pipeline: [{ transformer: first }, { transformer: second }],
       req: makeReq(),
     })
 
@@ -70,12 +68,88 @@ describe('transformUploadFile', () => {
       transformUploadFile({
         collectionSlug: 'media',
         file: new File(['original'], 'logo.png'),
-        options: undefined,
-        pipeline: [first, second],
+        pipeline: [{ transformer: first }, { transformer: second }],
         req: makeReq(),
       }),
     ).rejects.toThrow('transform failed')
 
     expect(second.transformFile).not.toHaveBeenCalled()
+  })
+})
+
+describe('document-aware stages', () => {
+  it('should route a later stage using the replacement MIME type', async () => {
+    const jpegStage = makeTransformer({
+      slug: 'jpeg',
+      mimeTypes: ['image/jpeg'],
+      canTransform: vi.fn().mockReturnValue({ canTransform: true, options: 'jpeg-options' }),
+      transformFile: vi.fn().mockResolvedValue({ status: 'continue' }),
+    })
+    const convert = makeTransformer({
+      slug: 'convert',
+      transformFile: vi.fn().mockResolvedValue({
+        file: new File(['jpeg'], 'a.jpg', { type: 'image/jpeg' }),
+        status: 'continue',
+      }),
+    })
+    const req = {
+      payload: { config: { upload: { transformers: [convert, jpegStage] } } },
+    } as unknown as PayloadRequest
+
+    await transformUploadFile({
+      collectionSlug: 'media',
+      doc: { mimeType: 'image/png' },
+      file: new File(['png'], 'a.png', { type: 'image/png' }),
+      pipeline: [{ transformer: convert }],
+      req,
+    })
+
+    expect(jpegStage.transformFile).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: 'jpeg-options',
+        source: expect.objectContaining({ mimeType: 'image/jpeg' }),
+        originalSource: expect.objectContaining({ mimeType: 'image/png' }),
+      }),
+    )
+  })
+  it('should preserve the snapshot while passing working document changes and stage-owned options', async () => {
+    const doc = {
+      filename: 'logo.png',
+      mimeType: 'image/png',
+      title: 'initial',
+      nested: { value: 1 },
+    }
+    const seen: unknown[] = []
+    const first = makeTransformer({
+      slug: 'first',
+      transformFile: async ({ doc, originalDoc, options }) => {
+        seen.push(options)
+        doc.title = 'changed'
+        expect(() => {
+          originalDoc.nested.value = 9
+        }).toThrow()
+        return { status: 'continue' }
+      },
+    })
+    const second = makeTransformer({
+      slug: 'second',
+      transformFile: async ({ doc, originalDoc, options }) => {
+        seen.push([doc.title, originalDoc.title, originalDoc.nested.value, options])
+        return { status: 'continue' }
+      },
+    })
+
+    await transformUploadFile({
+      collectionSlug: 'media',
+      doc,
+      file: new File(['original'], 'logo.png', { type: 'image/png' }),
+      pipeline: [
+        { transformer: first, options: 'first-options' },
+        { transformer: second, options: 'second-options' },
+      ],
+      req: makeReq(),
+    })
+
+    expect(seen).toEqual(['first-options', ['changed', 'initial', 1, 'second-options']])
   })
 })

@@ -116,6 +116,7 @@ export const NumberInput: React.FC<NumberInputProps> = (props) => {
           <div className="form-input-group">
             {prefix ? <span className={`${baseClass}__prefix`}>{prefix}</span> : null}
             <input
+              aria-invalid={showError || undefined}
               aria-label={ariaLabel || getTranslation(label, i18n) || path}
               className="form-input"
               disabled={readOnly}

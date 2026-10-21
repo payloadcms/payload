@@ -41,7 +41,7 @@ export const validateHandler: PayloadHandler = async (req) => {
         headers: new Headers(),
         req,
       }),
-      status: httpStatus.OK,
+      status: 200,
     })
   } finally {
     await unlinkTempFiles({
@@ -87,7 +87,7 @@ export const validateByIDHandler: PayloadHandler = async (req) => {
         headers: new Headers(),
         req,
       }),
-      status: httpStatus.OK,
+      status: 200,
     })
   } finally {
     await unlinkTempFiles({

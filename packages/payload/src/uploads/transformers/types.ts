@@ -1,19 +1,54 @@
-import type { Config } from '../../config/types.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { JSONSchema4 } from 'json-schema'
 
-export type CanTransformArgs = {
-  collectionSlug: string
-  documentID?: number | string
+import type { Config } from '../../config/types.js'
+import type { Document, PayloadRequest } from '../../types/index.js'
+
+/** Lazy storage-neutral input. Whole-file consumers must declare a byte limit. */
+export type FileSource = {
+  arrayBuffer: (args: { maxBytes: number }) => Promise<ArrayBuffer>
+  filename: string
   mimeType: string
-  operation: 'request' | 'upload'
+  read: (args: { length: number; offset?: number }) => Promise<ArrayBuffer>
+  size?: number
+  stream: () => Promise<ReadableStream<Uint8Array>>
+}
+
+/** Optional custom-key schema used for generated types and JSDoc, not runtime validation. */
+export type TransformDefinition = JSONSchema4
+
+export type UploadDocument = Document
+
+export type CanTransformResult<TOptions = unknown> =
+  | { canTransform: true; handledTransformKeys?: string[]; options?: TOptions }
+  | boolean
+
+export type PlannedTransformer = {
+  handledTransformKeys?: string[]
+  options?: unknown
+  transformer: UploadTransformer
+}
+
+type BaseCanTransformArgs = {
+  collectionSlug: string
+  doc: UploadDocument
+  originalDoc: Readonly<UploadDocument>
   req: PayloadRequest
 }
 
+export type CanTransformArgs = (
+  | { operation: 'request'; purpose?: 'persisted-default' | 'request-override' }
+  | { operation: 'upload' }
+) &
+  BaseCanTransformArgs
+
 export type TransformFileArgs<TOptions = unknown> = {
   collectionSlug: string
-  file: File
+  doc: UploadDocument
   options: TOptions
+  originalDoc: Readonly<UploadDocument>
+  originalSource: FileSource
   req: PayloadRequest
+  source: FileSource
 }
 
 export type TransformFileResult =
@@ -28,10 +63,12 @@ export type TransformFileResult =
 
 export type HandleTransformRequestArgs = {
   collectionSlug: string
-  documentID: number | string
-  filename: string
+  doc: UploadDocument
+  getOriginalFile: () => Promise<Response>
   getSourceFile: () => Promise<Response>
-  mimeType: string
+  options?: unknown
+  originalDoc: Readonly<UploadDocument>
+  purpose?: 'persisted-default' | 'request-override'
   req: PayloadRequest
 }
 
@@ -54,7 +91,7 @@ export type UploadTransformer = {
    * Inexpensive, side-effect-free routing predicate. Must not fetch the source,
    * call an external service, or perform the transformation.
    */
-  canTransform?: (args: CanTransformArgs) => boolean | Promise<boolean>
+  canTransform?: (args: CanTransformArgs) => CanTransformResult | Promise<CanTransformResult>
   /**
    * Handles one stage of a dynamic transformation request.
    */
@@ -73,6 +110,11 @@ export type UploadTransformer = {
    * Must be unique across `upload.transformers`.
    */
   slug: string
+  /**
+   * Optional custom-key definitions for generated types and JSDoc. Built-in keys
+   * cannot be redefined. These neither claim keys nor replace adapter validation.
+   */
+  transformDefinitions?: Record<string, TransformDefinition>
   /**
    * One-file-in, one-file-out upload processing primitive. Never writes to storage.
    */

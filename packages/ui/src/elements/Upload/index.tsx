@@ -1,5 +1,5 @@
 'use client'
-import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
+import type { FormState, SanitizedCollectionConfig, TransformState, UploadEdits } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { isImage } from 'payload/shared'
@@ -31,6 +31,7 @@ import { useUploadFromUrl } from './useUploadFromUrl.js'
 export { pasteURLDrawerSlug }
 
 const baseClass = 'file-field'
+const transformsFieldOptions = { path: '_transforms' }
 export const editDrawerSlug = 'edit-upload'
 export const sizePreviewSlug = 'preview-sizes'
 
@@ -146,10 +147,8 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
     initialState,
     onChange,
     resetUploadEdits,
-    updateUploadEdits,
     uploadConfig,
     UploadControls,
-    uploadEdits,
   } = props
 
   const {
@@ -168,6 +167,9 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
     path: 'file',
     validate,
   })
+  const { setValue: setTransforms, value: transforms } = useField<null | TransformState>(
+    transformsFieldOptions,
+  )
 
   const [fileSrc, setFileSrc] = useState<null | string>(null)
   const [removedFile, setRemovedFile] = useState(false)
@@ -177,6 +179,10 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
 
   const handleFileChange = useCallback(
     ({ file, isNewFile = true }: { file: File | null; isNewFile?: boolean }) => {
+      if (isNewFile) {
+        setTransforms(null)
+        resetUploadEdits()
+      }
       if (isNewFile && file instanceof File) {
         setFileSrc(URL.createObjectURL(file))
       }
@@ -190,7 +196,15 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
         onChange(file)
       }
     },
-    [onChange, setValue, setUploadControlFile, setUploadControlFileName, setUploadControlFileUrl],
+    [
+      onChange,
+      resetUploadEdits,
+      setTransforms,
+      setValue,
+      setUploadControlFile,
+      setUploadControlFileName,
+      setUploadControlFileUrl,
+    ],
   )
 
   const renameFile = (fileToChange: File, newName: string): File => {
@@ -259,11 +273,12 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
   ])
 
   const onEditsSave = useCallback(
-    (args: UploadEdits) => {
+    (args: null | TransformState) => {
       setModified(true)
-      updateUploadEdits(args)
+      setTransforms(args)
+      resetUploadEdits()
     },
-    [setModified, updateUploadEdits],
+    [resetUploadEdits, setModified, setTransforms],
   )
 
   useEffect(() => {
@@ -331,11 +346,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
             fileName={value?.name || data?.filename}
             fileSrc={getEditorFileSrc({ data, fileSrc, hasSelectedFile: Boolean(value) })}
             imageCacheTag={imageCacheTag}
-            initialCrop={uploadEdits?.crop ?? undefined}
-            initialFocalPoint={{
-              x: uploadEdits?.focalPoint?.x || data?.focalX || 50,
-              y: uploadEdits?.focalPoint?.y || data?.focalY || 50,
-            }}
+            initialTransforms={transforms === undefined ? data?._transforms : transforms}
             onSave={onEditsSave}
             showCrop={showCrop}
             showFocalPoint={showFocalPoint}

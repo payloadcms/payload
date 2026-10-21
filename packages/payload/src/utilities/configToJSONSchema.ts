@@ -652,10 +652,11 @@ export function fieldsToJSONSchema({
           }
 
           case 'json': {
-            fieldSchema = field.jsonSchema?.schema || {
-              ...baseFieldSchema,
-              type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
-            }
+            fieldSchema = (variant === 'input' && field.jsonSchema?.inputSchema) ||
+              field.jsonSchema?.schema || {
+                ...baseFieldSchema,
+                type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
+              }
             break
           }
 
