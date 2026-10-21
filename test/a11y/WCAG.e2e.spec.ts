@@ -114,7 +114,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       test(`should identify the ${kind} row on its drag control`, async ({
         browser: _browser,
       }, testInfo) => {
-        // Additional coverage for PYLD-3628
+        // PYLD-3628: named drag controls; pickup live-region text is covered by keyboard dragging.
         const { firstRowLabel, handle } = await openDragReorderField({ kind, page, postsURL })
 
         await expect(handle).toHaveAccessibleName(new RegExp(firstRowLabel, 'i'))
@@ -132,7 +132,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       })
 
       test(`should describe pickup movement drop and cancellation for ${kind} dragging`, async () => {
-        // Additional coverage for PYLD-3627
+        // PYLD-3627: expose platform-specific pickup, movement, drop, and cancellation instructions.
         const { handle } = await openDragReorderField({ kind, page, postsURL })
 
         await expect.soft(handle).toHaveAccessibleDescription(/space|enter/i)
@@ -864,7 +864,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
 
     test('should expose the active sort direction on relationship table headers and buttons', async () => {
-      // Additional coverage for PYLD-3660.
+      // PYLD-3660: expose the column name, active direction, and pressed state.
       const drawer = await openRichTextRelationshipDrawer({ page, postsURL })
       const header = drawer.locator('th:has(.sort-column)').first()
       const label = (await header.locator('.sort-column__label').innerText()).trim()
@@ -1227,6 +1227,7 @@ test.describe('WCAG 2.2 Level AA', () => {
 
     for (const kind of ['Array', 'Blocks'] as const) {
       test(`should drop a keyboard-dragged ${kind} row at its new position`, async () => {
+        // PYLD-3628: identify the picked-up row in the live region.
         // Additional coverage for PYLD-3625
         const { firstRowLabel, handle, rows, values } = await openDragReorderField({
           kind,
@@ -3275,7 +3276,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
 
     test('should visit every theme option with arrow keys including the middle option', async () => {
-      // PYLD-3636
+      // PYLD-3636, PYLD-3645: keyboard navigation and selected Theme state.
       await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
       await openNavigationForUserMenu({ page })
       await page.locator('.user-menu__trigger').press('Enter')
@@ -3283,6 +3284,11 @@ test.describe('WCAG 2.2 Level AA', () => {
       const options = page.getByRole('menuitemradio')
 
       await expect(options).toHaveCount(3)
+      const selected = page.getByRole('menuitemradio', { checked: true })
+
+      await expect(selected).toHaveCount(1)
+      const originalTheme = (await selected.innerText()).trim()
+
       await page.keyboard.press('Home')
       await expect(options.nth(0)).toBeFocused()
       await page.keyboard.press('ArrowDown')
@@ -3291,7 +3297,14 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(options.nth(2)).toBeFocused()
       await page.keyboard.press('ArrowUp')
       await expect(options.nth(1)).toBeFocused()
-      await page.keyboard.press('Escape')
+      try {
+        await page.keyboard.press('Space')
+        await expect(options.nth(1)).toHaveAttribute('aria-checked', 'true')
+        await expect(selected).toHaveCount(1)
+      } finally {
+        await page.getByRole('menuitemradio', { name: originalTheme, exact: true }).press('Enter')
+        await page.keyboard.press('Escape')
+      }
     })
 
     test('should move focus into the Add Block drawer when opened by keyboard', async () => {
@@ -4106,6 +4119,11 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.6 Headings and Labels (AA)', () => {
+    test('should expose Welcome and the signed-in account as a heading', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await expect(page.getByRole('heading', { name: /^Welcome, /, level: 1 })).toBeVisible()
+    })
+
     test('should describe the dashboard add action as adding a widget', async () => {
       // PYLD-3594
       await openDashboardEditor({ page, serverURL })
@@ -4766,6 +4784,64 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should expose the live-preview zoom name, expansion, and selected option', async () => {
+      // PYLD-3723, PYLD-3725
+      await openLivePreview({ page, postsURL, serverURL })
+      const trigger = page.locator('.live-preview-toolbar-controls__zoom').getByRole('button')
+
+      await expect(trigger).toHaveAccessibleName(/^Zoom \d+%$/)
+      await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+      await trigger.click()
+      await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+      const selected = page.getByRole('menuitemradio', { checked: true })
+
+      await expect(selected).toHaveCount(1)
+      const originalZoom = (await selected.innerText()).trim()
+
+      await expect(trigger).toHaveAccessibleName(`Zoom ${originalZoom}`)
+      const nextZoom = page.getByRole('menuitemradio', { checked: false }).first()
+      const nextValue = (await nextZoom.innerText()).trim()
+
+      try {
+        await nextZoom.click()
+        await expect(trigger).toHaveAccessibleName(`Zoom ${nextValue}`)
+        await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+        await trigger.click()
+        await expect(
+          page.getByRole('menuitemradio', { name: nextValue, exact: true }),
+        ).toHaveAttribute('aria-checked', 'true')
+        await expect(selected).toHaveCount(1)
+      } finally {
+        if ((await trigger.getAttribute('aria-expanded')) !== 'true') {
+          await trigger.click()
+        }
+        await page.getByRole('menuitemradio', { name: originalZoom, exact: true }).click()
+      }
+    })
+
+    test('should expose the selected Add Blocks option by name and pressed state', async () => {
+      // PYLD-3623, PYLD-3735
+      await gotoCreatePost({ page, postsURL })
+      await page.locator('#field-layout > .blocks-field__drawer-toggler').click()
+      const option = page.locator('button.thumbnail-card[title="Text block"]')
+
+      await expect(option).toHaveAccessibleName('Text block')
+      await expect(option).toHaveAttribute('aria-pressed', 'false')
+      await option.click()
+      await expect(option).toHaveAttribute('aria-pressed', 'true')
+      await page.keyboard.press('Escape')
+    })
+
+    test('should expose the disabled Paste or Replace action by name and menu role', async () => {
+      // PYLD-3743: the action has menuitem semantics, rather than a literal button role.
+      const menu = await openFirstBlockActions({ page, postsURL })
+      const action = menu.getByRole('menuitem', { name: /paste|replace/i }).first()
+
+      await expect(action).toHaveAccessibleName(/paste|replace/i)
+      await expect(action).toHaveAttribute('aria-disabled', 'true')
+      await page.keyboard.press('Escape')
+    })
+
     test('should present the embedded dashboard breadcrumb without editing controls', async () => {
       try {
         await page.goto(`${serverURL}/admin?embed=true`)
@@ -5576,7 +5652,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
 
     test('should name version table per-page controls with their value and purpose', async () => {
-      // PYLD-3712
+      // PYLD-3712, PYLD-3713: named control and selected option on both version tables.
       test.setTimeout(60000)
       for (const kind of ['collection', 'global'] as const) {
         const view = await openTableVersionHistory({ kind, page, postsURL, serverURL })
@@ -5584,6 +5660,13 @@ test.describe('WCAG 2.2 Level AA', () => {
         const value = (await button.innerText()).trim()
 
         await expect.soft(button).toHaveAccessibleName(`Per Page: ${value}`)
+        await button.click()
+        await expect(page.getByRole('menuitemradio', { name: value, exact: true })).toHaveAttribute(
+          'aria-checked',
+          'true',
+        )
+        await expect(page.getByRole('menuitemradio', { checked: true })).toHaveCount(1)
+        await page.keyboard.press('Escape')
       }
     })
 
@@ -5783,12 +5866,22 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
 
     test('should expose the current locale and popup state on the locale selector', async () => {
-      // Additional coverage for PYLD-3704.
-      await gotoPostsList({ page, postsURL })
-      const trigger = page.locator('.localizer .popup__trigger-wrap button')
+      // PYLD-3704: cover the reported versions view as well as the collection list.
+      for (const isVersionsView of [false, true]) {
+        if (isVersionsView) {
+          await openVersionsList({ page, postsURL, serverURL })
+        } else {
+          await gotoPostsList({ page, postsURL })
+        }
+        const trigger = page.locator('.localizer .popup__trigger-wrap button')
 
-      await expect(trigger).toHaveAccessibleName('Locale: English (en)')
-      await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+        await expect(trigger).toHaveAccessibleName('Locale: English (en)')
+        await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+        await trigger.click()
+        await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+        await page.keyboard.press('Escape')
+        await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+      }
     })
 
     test('should expose menu semantics and state on the Dashboard menu button', async () => {
@@ -5859,14 +5952,16 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
 
     test('should expose the selected folder as the current creation location', async () => {
-      // Additional coverage for PYLD-3585.
+      // PYLD-3585: expose the selected folder name, checkbox state, and current location.
       const modal = await openFolderCreationLocation({ page, serverURL })
       const folder = modal.locator('.hierarchy-column-item', {
         hasText: 'Accessibility folder',
       })
 
-      await folder.getByRole('checkbox').click()
+      const checkbox = folder.getByRole('checkbox', { name: 'Accessibility folder', exact: true })
 
+      await checkbox.click()
+      await expect(checkbox).toBeChecked()
       await expect(folder).toHaveAttribute('aria-current', 'location')
     })
 

@@ -1,0 +1,735 @@
+{
+  "scope": "The 50 unique Linear tickets audited in screen-reader.spec.ts before this consolidation.",
+  "policy": "Every ticket must resolve to at least one relevant test. Partial mappings are not proof of the original remedy. Removing Guidepup coverage requires replacement browser evidence and explicit AT limitations.",
+  "updated": "2026-10-21",
+  "verification": {
+    "browserRun": {
+      "date": "2026-10-21",
+      "browser": "Chromium",
+      "passed": 19,
+      "duration": "54.8 seconds",
+      "scope": "Only the browser cases replacing the audited candidates. No full suite or Guidepup execution.",
+      "command": "PORT=3001 MONGODB_URL=<isolated test database> pnpm test:e2e a11y --grep 'default login logo|expose required state without naming|identify the .* row on its drag control|describe pickup movement drop|drop a keyboard-dragged|active sort direction on relationship table|selected folder as the current|visit every theme option|current locale and popup state|name version table per-page|live-preview zoom name, expansion|selected Add Blocks option by name|disabled Paste or Replace|Welcome and the signed-in account|navigate LLM instructions tabs|name LLM instructions editors' --workers=1"
+    },
+    "screenReaderRun": "Not run on this laptop; do not infer AT success from browser assertions.",
+    "screenReaderDiscovery": {
+      "before": 54,
+      "after": 37
+    }
+  },
+  "earlierMigrations": [
+    {
+      "ticket": "PYLD-3572",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should preserve dashboard focus and expose widget content and independent actions while editing"
+      ],
+      "manual": "User confirmed error announcement on the focused card and keyboard transition to drag handle in Playwright WebKit with VoiceOver."
+    },
+    {
+      "ticket": "PYLD-3689",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should give the Copy to locale dialog a concise accessible name without repeating its contents"
+      ],
+      "manual": "NVDA opening announcement remains unverified; concise DOM name/description does not prove absence of duplicate speech."
+    }
+  ],
+  "outstanding": [
+    "PYLD-3671 and PYLD-3678: current assertions permit a native label stop, unlike the original single-stop requirement. Native WebKit baseline also repeats labels. These remain partial coverage.",
+    "PYLD-3580: six-second dismissal tests do not establish persistence while the screen-reader cursor is on the toast.",
+    "PYLD-3613: submit-time validation tests do not establish the original error/readout after editing and clearing the password.",
+    "Reported NVDA/Chrome failures require that platform's evidence; this branch's default Windows Guidepup project uses Firefox.",
+    "NVDA browse-mode tests and screen-reader cursor containment must retain AT evidence.",
+    "Guidepup queue hazards removed from retained direction/version/widget captures; remote AT verification is still required."
+  ],
+  "tickets": [
+    {
+      "ticket": "PYLD-3573",
+      "url": "https://linear.app/figma/issue/PYLD-3573/safari-only-payload-admin-widget-buttons-do-not-gain-screen-reader",
+      "report": "[Safari Only] Payload - Admin: Widget buttons do not gain screen reader focus",
+      "expected": "User focus can navigate to all components",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "screen-reader.spec.ts :: should reach widget edit size and remove controls with the VoiceOver cursor"
+      ],
+      "limits": "VoiceOver virtual cursor reachability distinct from existing browser Tab coverage; bound navigation to widget.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3575",
+      "url": "https://linear.app/figma/issue/PYLD-3575/payload-media-and-uploads-screen-reader-focus-can-leave-upload-and",
+      "report": "Payload - Media & Uploads: Screen reader focus can leave Upload and Edit Upload modals",
+      "expected": "Focus is limited to overlay only, not the dimmed content behind it.",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should contain keyboard focus in media and nested folder modals",
+        "WCAG.e2e.spec.ts :: should isolate modal content and restore focus after nested dismissal",
+        "screen-reader.spec.ts :: should contain screen-reader traversal in bulk-upload and image-edit dialogs"
+      ],
+      "limits": "Virtual cursor containment not proved by DOM focus traps; 160 moves per case definition is expensive, needs scope/bounds.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3579",
+      "url": "https://linear.app/figma/issue/PYLD-3579/payload-media-and-uploads-required-entry-indicator-next-to-alt-is",
+      "report": "Payload - Media & Uploads: Required entry indicator next to \"Alt\" is announced as \"Star\"",
+      "expected": "Asterisk for required Alt field announced as 'star' instead of required. WCAG 1.1.1. (Asana section: Untitled section)",
+      "reportedScreenReaders": [],
+      "coverage": "browser-regression",
+      "tests": ["WCAG.e2e.spec.ts :: should expose required state without naming the asterisk"],
+      "limits": "Existing required-state and accessible-name regression; do not require exact word choice such as star.",
+      "manualVerification": "Browser assertions cover semantics or keyboard behavior; exact speech and browse-cursor behavior remain manual checks on the reported platform."
+    },
+    {
+      "ticket": "PYLD-3580",
+      "url": "https://linear.app/figma/issue/PYLD-3580/payload-admin-toast-messages-automatically-dismiss-even-when-focused",
+      "report": "Payload - Admin: Toast messages automatically dismiss even when focused by screen reader",
+      "expected": "Status messages should not disappear while in screen reader focus.",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "partial",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should give a default toast six seconds before automatic dismissal",
+        "screen-reader.spec.ts :: should announce the trash toast and dismiss it after the default timeout"
+      ],
+      "limits": "Test expects automatic toast dismissal without moving cursor to toast; ticket requires persistence while screen-reader cursor is on toast. Existing browser timing check also doesn't prove remedy.",
+      "manualVerification": "Outstanding: reconcile the original requirement and test scenario; a passing partial test does not establish the remedy."
+    },
+    {
+      "ticket": "PYLD-3581",
+      "url": "https://linear.app/figma/issue/PYLD-3581/payload-admin-required-entry-tooltip-gains-focus-at-the-end-of-the",
+      "report": "Payload - Admin: Required entry tooltip gains focus at the end of the page's focus order",
+      "expected": "Related content is adjacent in focus order",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should associate ${form} errors with their fields and focus order",
+        "screen-reader.spec.ts :: should expose validation errors next to their fields"
+      ],
+      "limits": "Two form cases; genuine browse order. Login currently combines edit-clear-blur+submit scenario in browser coverage; ticket3613 specifically asks error after clear, so submission alone insufficient.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3582",
+      "url": "https://linear.app/figma/issue/PYLD-3582/payload-admin-folder-search-resultssuggestions-are-not-announced-to",
+      "report": "Payload - Admin: Folder search results/suggestions are not announced to screen reader users",
+      "expected": "User is informed of the change in the folder list",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "screen-reader.spec.ts :: should announce navigation folder search results without moving focus"
+      ],
+      "limits": "Folder result announcement with stable focus; AT matters.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3585",
+      "url": "https://linear.app/figma/issue/PYLD-3585/payload-admin-selected-state-for-a-folder-in-the-creationlocation",
+      "report": "Payload - Admin: Selected state for a folder in the creation/location modal is not announced",
+      "expected": "Selected state for a folder is announced to screen reader users",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "browser-regression",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should expose the selected folder as the current creation location"
+      ],
+      "limits": "Browser regression checks the folder checkbox's accessible name and checked state, plus aria-current=location on the selected folder.",
+      "manualVerification": "Browser assertions cover semantics or keyboard behavior; exact speech and browse-cursor behavior remain manual checks on the reported platform."
+    },
+    {
+      "ticket": "PYLD-3587",
+      "url": "https://linear.app/figma/issue/PYLD-3587/payload-admin-screen-reader-focus-can-leave-folder-creationlocation",
+      "report": "Payload - Admin: Screen reader focus can leave Folder creation/location modal",
+      "expected": "Screen reader focus cannot leave the Folder create/location modal",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should contain keyboard focus in media and nested folder modals",
+        "WCAG.e2e.spec.ts :: should isolate modal content and restore focus after nested dismissal",
+        "screen-reader.spec.ts :: should contain screen-reader traversal in the nested folder-location modal"
+      ],
+      "limits": "Nested virtual cursor containment; retain actual browse evidence.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3596",
+      "url": "https://linear.app/figma/issue/PYLD-3596/payload-versions-and-publishing-cells-have-both-ascending-and",
+      "report": "Payload: Versions & Publishing - Cells have both ascending and descending in readout",
+      "expected": "Read out should not have confusing or misplaced information",
+      "reportedScreenReaders": ["NVDA"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "screen-reader.spec.ts :: should announce table cell text once without conflicting sort commands"
+      ],
+      "limits": "Actual duplicate/conflicting speech; reported NVDA Chrome platform not proven by Mac pass.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3609",
+      "url": "https://linear.app/figma/issue/PYLD-3609/payload-authentication-site-name-does-not-receive-focus",
+      "report": "Payload: Authentication: Site name does not receive focus",
+      "expected": "Important images receive focus and have adequate alt text",
+      "reportedScreenReaders": ["NVDA"],
+      "coverage": "browser-regression",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should expose the default login logo as an image named Payload"
+      ],
+      "limits": "Existing named-image browser regression; retain separate NVDA browse-cursor confirmation if discovery remains disputed.",
+      "manualVerification": "Browser assertions cover semantics or keyboard behavior; exact speech and browse-cursor behavior remain manual checks on the reported platform."
+    },
+    {
+      "ticket": "PYLD-3613",
+      "url": "https://linear.app/figma/issue/PYLD-3613/payload-authentication-password-error-suggestion-is-not-in-focus-order",
+      "report": "Payload - Authentication: Password error suggestion is not in focus order",
+      "expected": "The error suggestion tooltip is included in focus order.",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "partial",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should associate ${form} errors with their fields and focus order",
+        "screen-reader.spec.ts :: should expose validation errors next to their fields",
+        "screen-reader.spec.ts :: should announce password errors after submission"
+      ],
+      "limits": "Two form cases; genuine browse order. Login currently combines edit-clear-blur+submit scenario in browser coverage; ticket3613 specifically asks error after clear, so submission alone insufficient. Ticket3613 covers error after typing then clearing password, not merely submitting login. Current test does both and only captures submit.",
+      "manualVerification": "Outstanding: reconcile the original requirement and test scenario; a passing partial test does not establish the remedy."
+    },
+    {
+      "ticket": "PYLD-3618",
+      "url": "https://linear.app/figma/issue/PYLD-3618/payload-content-management-globals-depth-value-updates-not-announced",
+      "report": "Payload - Content Management - Globals: Depth value updates not announced on pause",
+      "expected": "The updated depth value is announced by screen reader without interrupting focus.",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should expose global API depth stepper changes as a status",
+        "screen-reader.spec.ts :: should announce global API depth changes while focus stays on the stepper"
+      ],
+      "limits": "Depth value spontaneous speech without moving focus.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3623",
+      "url": "https://linear.app/figma/issue/PYLD-3623/payload-fields-and-richtext-selected-state-for-a-block-is-not",
+      "report": "Payload - Fields and RichText: Selected state for a block is not announced",
+      "expected": "Selected state of a Block option is announced to screen reader users",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "browser-regression",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should expose the selected Add Blocks option by name and pressed state"
+      ],
+      "limits": "Browser Add Blocks regression checks the option name and aria-pressed false-to-true transition; speech remains a reported-platform manual check.",
+      "manualVerification": "Browser assertions cover semantics or keyboard behavior; exact speech and browse-cursor behavior remain manual checks on the reported platform."
+    },
+    {
+      "ticket": "PYLD-3625",
+      "url": "https://linear.app/figma/issue/PYLD-3625/payload-fields-and-richtext-screen-reader-users-do-not-appear-to-be",
+      "report": "Payload - Fields and RichText: Screen reader users do not appear to be able to drop draggable items in new location",
+      "expected": "Users are able to user screen reader controls to drop draggable items into a new location",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should drop a keyboard-dragged ${kind} row at its new position",
+        "WCAG.e2e.spec.ts :: should cancel ${kind} keyboard dragging after moving in both directions",
+        "screen-reader.spec.ts :: should drop the ${kind} row with the screen reader active"
+      ],
+      "limits": "Two cases. Keys with active AT are part of the reported failure; ordinary keyboard drag doesn't replace this.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3626",
+      "url": "https://linear.app/figma/issue/PYLD-3626/payload-fields-and-richtext-draggable-items-do-not-announce-the",
+      "report": "Payload - Fields and RichText: Draggable items do not announce the direction/location it was dragged to in relation with other listed items",
+      "expected": "Direction/location information is communicated to screen reader users while draggable items are moved",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should cancel ${kind} keyboard dragging after moving in both directions",
+        "screen-reader.spec.ts :: should announce relative direction and position while dragging the ${kind} row"
+      ],
+      "limits": "Dynamic direction and relative position speech; nested queued press inside capture must be removed before execution.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3627",
+      "url": "https://linear.app/figma/issue/PYLD-3627/payload-fields-and-richtext-draggable-items-lack-instructions-for",
+      "report": "Payload - Fields and RichText: Draggable items lack instructions for screen reader on how to drag",
+      "expected": "Instructions specific for screen reader users are announced to inform users on how to move/drop draggable elements",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "browser-regression",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should describe pickup movement drop and cancellation for ${kind} dragging"
+      ],
+      "limits": "Two parameterized cases; browser accessible-description checks include platform-specific instructions.",
+      "manualVerification": "Browser assertions cover semantics or keyboard behavior; exact speech and browse-cursor behavior remain manual checks on the reported platform."
+    },
+    {
+      "ticket": "PYLD-3628",
+      "url": "https://linear.app/figma/issue/PYLD-3628/payload-fields-and-richtext-draggable-elements-lack-accurate-and",
+      "report": "Payload - Fields and RichText: Draggable elements lack accurate and descriptive name labels",
+      "expected": "When draggable items are selected, they have accessible name labels announced",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "browser-regression",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should identify the ${kind} row on its drag control",
+        "WCAG.e2e.spec.ts :: should drop a keyboard-dragged ${kind} row at its new position"
+      ],
+      "limits": "Browser regressions check the row's drag-control name and the named pickup message in the live region. Exact AT speech still needs reported-platform confirmation.",
+      "manualVerification": "Browser assertions cover semantics or keyboard behavior; exact speech and browse-cursor behavior remain manual checks on the reported platform."
+    },
+    {
+      "ticket": "PYLD-3642",
+      "url": "https://linear.app/figma/issue/PYLD-3642/payload-dashboard-cannot-place-widgets-in-rearrangement-state-while",
+      "report": "Payload: Dashboard: Cannot place Widgets in rearrangement state while screen reader is active",
+      "expected": "Pressing spacebar on a widget frame places it in its rearrangement state",
+      "reportedScreenReaders": ["NVDA"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should reorder widgets using the dedicated keyboard drag control",
+        "screen-reader.spec.ts :: should lift a dashboard widget with Space while NVDA is active"
+      ],
+      "limits": "NVDA active-keyboard behavior, not ordinary dragging. Nested Guidepup calls need attention; NVDA implementation differs.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3644",
+      "url": "https://linear.app/figma/issue/PYLD-3644/payload-global-modal-overlays-do-not-autofocus-the-screen-reader",
+      "report": "Payload: Global: Modal overlays do not autofocus the screen reader",
+      "expected": "Screen reader immediately enters overlay region when it is opened",
+      "reportedScreenReaders": ["NVDA"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should isolate modal content and restore focus after nested dismissal",
+        "screen-reader.spec.ts :: should move the screen-reader cursor into the add-widget drawer upon opening"
+      ],
+      "limits": "Automatic screen-reader cursor entry, not just DOM focus.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3645",
+      "url": "https://linear.app/figma/issue/PYLD-3645/payload-user-menu-selected-value-does-not-have-an-additional-label",
+      "report": "Payload: User Menu: Selected value does not have an additional label",
+      "expected": "Current selection includes \"Selected\" label",
+      "reportedScreenReaders": ["NVDA"],
+      "coverage": "browser-regression",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should visit every theme option with arrow keys including the middle option",
+        "WCAG.e2e.spec.ts :: should navigate User menu items without entering hidden submenus",
+        "WCAG.e2e.spec.ts :: should close the full User menu chain when tabbing from a nested menu",
+        "WCAG.e2e.spec.ts :: should restore visible focus when shift-tabbing from a nested User menu",
+        "WCAG.e2e.spec.ts :: should move focus into a mobile User menu submenu",
+        "WCAG.e2e.spec.ts :: should expose nested User menu triggers as items in one menu"
+      ],
+      "limits": "Browser Theme regression checks exactly one selected radio option, changes selection, verifies checked state, and restores the prior preference.",
+      "manualVerification": "Browser assertions cover semantics or keyboard behavior; exact speech and browse-cursor behavior remain manual checks on the reported platform."
+    },
+    {
+      "ticket": "PYLD-3650",
+      "url": "https://linear.app/figma/issue/PYLD-3650/payload-relationships-add-new-panel-unknown-loading-object-receives",
+      "report": "Payload: Relationships: Add New Panel: Unknown loading object receives focus",
+      "expected": "Only relevant content receives focus",
+      "reportedScreenReaders": ["NVDA"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "screen-reader.spec.ts :: should not expose an invisible loading object after relationship drawer content"
+      ],
+      "limits": "NVDA-only invisible/unknown browse-cursor object; browser Loading omission isn't sufficient.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3656",
+      "url": "https://linear.app/figma/issue/PYLD-3656/payload-relationships-menu-items-do-not-expose-their-names-in-browse",
+      "report": "Payload: Relationships: Menu items do not expose their names in browse mode",
+      "expected": "List items are announced when navigated through",
+      "reportedScreenReaders": ["NVDA"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "screen-reader.spec.ts :: should expose relationship option names in NVDA browse mode"
+      ],
+      "limits": "NVDA browse behavior, ensure browse mode actually entered; don't assume DOM focus tests equivalent.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3660",
+      "url": "https://linear.app/figma/issue/PYLD-3660/payload-rich-text-field-flyouts-sort-mode-is-not-identified-in-table",
+      "report": "Payload: Rich Text Field: Flyouts: Sort mode is not identified in table headers",
+      "expected": "Table header sort information is adequately announced",
+      "reportedScreenReaders": ["NVDA"],
+      "coverage": "browser-regression",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should expose the active sort direction on relationship table headers and buttons"
+      ],
+      "limits": "Existing browser regression checks header name, aria-sort, both button pressed states.",
+      "manualVerification": "Browser assertions cover semantics or keyboard behavior; exact speech and browse-cursor behavior remain manual checks on the reported platform."
+    },
+    {
+      "ticket": "PYLD-3662",
+      "url": "https://linear.app/figma/issue/PYLD-3662/payload-rich-text-field-add-panels-filter-lists-do-not-expose-their",
+      "report": "Payload: Rich Text Field: Add panels: Filter lists do not expose their names in browse mode",
+      "expected": "List items are announced when navigated through",
+      "reportedScreenReaders": ["NVDA"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should keep drawer filter options inside the active modal accessibility tree",
+        "WCAG.e2e.spec.ts :: should expose named ${control} filter options in the rich-text ${label} drawer",
+        "screen-reader.spec.ts :: should announce rich-text upload and relationship filter options in NVDA browse mode"
+      ],
+      "limits": "NVDA browse-mode option naming; correct explicit mode-switch behavior.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3669",
+      "url": "https://linear.app/figma/issue/PYLD-3669/payload-close-button-announced-in-toast-message",
+      "report": "Payload: Close button announced in toast message",
+      "expected": "The 'Close toast' text is not announced.",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should disable close-control live announcements for the unsaved toast",
+        "screen-reader.spec.ts :: should announce the unsaved Copy to locale toast without its close button"
+      ],
+      "limits": "Close button leaking into spontaneous toast speech; aria-live off alone not speech proof.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3671",
+      "url": "https://linear.app/figma/issue/PYLD-3671/payload-duplicate-locales-text-label-and-checkbox-receives-focus",
+      "report": "Payload: Duplicate locales text label and checkbox receives focus separately",
+      "expected": "The locale checkboxes and their text label receive focus as one element. This way the user does not have to navigate through repeated information.",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "partial",
+      "tests": [
+        "screen-reader.spec.ts :: should announce associated labels for the duplicate locale checkboxes"
+      ],
+      "limits": "Original ticket explicitly demands one checkbox/label cursor stop; current optional label skip permits reported behavior. Native WebKit baseline repeats labels; reconcile remedy/platform requirement rather than count this passing assertion as proof.",
+      "manualVerification": "Outstanding: reconcile the original requirement and test scenario; a passing partial test does not establish the remedy."
+    },
+    {
+      "ticket": "PYLD-3678",
+      "url": "https://linear.app/figma/issue/PYLD-3678/payload-confirm-deletion-checkbox-and-text-label-receive-focus",
+      "report": "Payload: Confirm deletion checkbox and text label receive focus separately",
+      "expected": "The confirm deletion checkbox and its text label receive focus as one element. This way the user does not have to navigate through repeated information.",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "partial",
+      "tests": [
+        "screen-reader.spec.ts :: should announce the associated label for the deletion checkbox"
+      ],
+      "limits": "Same checkbox single-stop gap; associated label assertion proves narrower outcome.",
+      "manualVerification": "Outstanding: reconcile the original requirement and test scenario; a passing partial test does not establish the remedy."
+    },
+    {
+      "ticket": "PYLD-3680",
+      "url": "https://linear.app/figma/issue/PYLD-3680/payload-copy-to-locale-dropdown-elements-receive-focus-twice",
+      "report": "Payload: Copy to locale dropdown elements receive focus twice",
+      "expected": "Dropdown elements receive screen reader focus once.",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "screen-reader.spec.ts :: should expose one screen-reader stop for the Copy to locale select"
+      ],
+      "limits": "Specific duplicate cursor stops, actual AT required.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3682",
+      "url": "https://linear.app/figma/issue/PYLD-3682/payload-focus-resets-when-opening-a-side-panel-from-the-overflow-menu",
+      "report": "Payload: Focus resets when opening a side panel from the overflow menu",
+      "expected": "The side panel opens, and the screen reader focus is moved to the first item in the opened side panel.",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should isolate modal content and restore focus after nested dismissal",
+        "screen-reader.spec.ts :: should move the screen-reader cursor into Copy to locale from the overflow menu"
+      ],
+      "limits": "Overflow-to-drawer virtual cursor location, not just DOM focus.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3696",
+      "url": "https://linear.app/figma/issue/PYLD-3696/payload-fields-and-richtext-table-search-changes-to-the-table-after",
+      "report": "Payload - Fields and RichText: Table search - Changes to the table after typing in the search field are not announced",
+      "expected": "Screen reader users are notified of change to the table after making a search",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "screen-reader.spec.ts :: should announce table search result changes without moving focus"
+      ],
+      "limits": "Live-result updates including same result count but different query; AT matters.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3697",
+      "url": "https://linear.app/figma/issue/PYLD-3697/payload-screen-reader-focus-is-not-moved-to-the-opened-localization",
+      "report": "Payload: Screen reader focus is not moved to the opened localization dropdown",
+      "expected": "Screen reader focus is moved to the opened dropdown. The dropdown options. The dropdown is placed after the localization selection button in the focus order.",
+      "reportedScreenReaders": ["VoiceOver", "NVDA"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should position a popup against its trigger inside a transformed drawer",
+        "WCAG.e2e.spec.ts :: should keep an oversized popup within the viewport",
+        "WCAG.e2e.spec.ts :: should keep a side submenu within the viewport",
+        "WCAG.e2e.spec.ts :: should navigate User menu items without entering hidden submenus",
+        "WCAG.e2e.spec.ts :: should close the full User menu chain when tabbing from a nested menu",
+        "WCAG.e2e.spec.ts :: should restore visible focus when shift-tabbing from a nested User menu",
+        "WCAG.e2e.spec.ts :: should move focus into a mobile User menu submenu",
+        "WCAG.e2e.spec.ts :: should expose nested User menu triggers as items in one menu",
+        "screen-reader.spec.ts :: should move the screen-reader cursor into every shared popup"
+      ],
+      "limits": "Shared popup automatic virtual focus; avoid giant multi-popup debugging, split only if useful.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3699",
+      "url": "https://linear.app/figma/issue/PYLD-3699/payload-fields-and-richtext-related-content-for-a-locale-menu-item",
+      "report": "Payload - Fields and RichText: Related content for a locale menu item becomes ungrouped when selected",
+      "expected": "Related content for selected locale is grouped into one focus",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should expose the active locale as selected rather than disabled",
+        "screen-reader.spec.ts :: should announce a selected locale as one grouped item with its state"
+      ],
+      "limits": "Grouping portion is real browse-cursor concern. Current focus capture/exact English occurrence doesn't itself prove one grouped stop; semantics already browser-covered.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3700",
+      "url": "https://linear.app/figma/issue/PYLD-3700/payload-fields-and-richtext-selected-state-for-locale-menu-item-is-not",
+      "report": "Payload - Fields and RichText: Selected state for locale menu item is not announced",
+      "expected": "Selected state of a chosen locale option is announced to screen reader users",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should expose the active locale as selected rather than disabled",
+        "screen-reader.spec.ts :: should announce a selected locale as one grouped item with its state"
+      ],
+      "limits": "Grouping portion is real browse-cursor concern. Current focus capture/exact English occurrence doesn't itself prove one grouped stop; semantics already browser-covered.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3701",
+      "url": "https://linear.app/figma/issue/PYLD-3701/payload-fields-and-richtext-multiple-instances-drop-down-menus-have",
+      "report": "Payload - Fields and RichText: Multiple instances - Drop down menus have incorrect focus order",
+      "expected": "Focus lands on expanded menu",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should position a popup against its trigger inside a transformed drawer",
+        "WCAG.e2e.spec.ts :: should keep an oversized popup within the viewport",
+        "WCAG.e2e.spec.ts :: should keep a side submenu within the viewport",
+        "WCAG.e2e.spec.ts :: should move keyboard focus into and through the Columns dialog",
+        "screen-reader.spec.ts :: should move the screen-reader cursor into every shared popup"
+      ],
+      "limits": "Shared popup automatic virtual focus; avoid giant multi-popup debugging, split only if useful.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3704",
+      "url": "https://linear.app/figma/issue/PYLD-3704/payload-versions-and-publishing-locale-button-not-announced-with",
+      "report": "Payload: Versions & Publishing - Locale button not announced with visible selection or state",
+      "expected": "Collapsed state and the currently selected option are announced by screen reader",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "browser-regression",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should expose the current locale and popup state on the locale selector"
+      ],
+      "limits": "Browser regression checks the locale name and expanded/collapsed state on both the collection list and the reported versions view.",
+      "manualVerification": "Browser assertions cover semantics or keyboard behavior; exact speech and browse-cursor behavior remain manual checks on the reported platform."
+    },
+    {
+      "ticket": "PYLD-3713",
+      "url": "https://linear.app/figma/issue/PYLD-3713/payload-versions-and-publishing-version-table-count-per-page-lacks",
+      "report": "Payload: Versions & Publishing - Version table, count per page lacks selected state when true",
+      "expected": "The selected state is announced by screen reader",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "browser-regression",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should name version table per-page controls with their value and purpose"
+      ],
+      "limits": "Browser version-table regression checks the selected per-page radio option for both collection and global version tables.",
+      "manualVerification": "Browser assertions cover semantics or keyboard behavior; exact speech and browse-cursor behavior remain manual checks on the reported platform."
+    },
+    {
+      "ticket": "PYLD-3722",
+      "url": "https://linear.app/figma/issue/PYLD-3722/payload-versions-and-publishing-strikethrough-information-is-not",
+      "report": "Payload: Versions & Publishing - Strikethrough information is not communicated",
+      "expected": "Previous updates that have a strikethrough are accurately announced that it is a previous edit.",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "screen-reader.spec.ts :: should communicate removed version text while browsing the comparison"
+      ],
+      "limits": "Removal semantics during browse traversal; nested screen-reader navigation within capture can deadlock.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3723",
+      "url": "https://linear.app/figma/issue/PYLD-3723/payload-live-preview-zoom-options-lack-selected-states-when-true",
+      "report": "Payload: Live Preview - Zoom options lack selected states when true",
+      "expected": "Selected state on the zoom options are communicated by screen reader",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "browser-regression",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should expose the live-preview zoom name, expansion, and selected option"
+      ],
+      "limits": "Browser zoom regression checks exactly one selected radio option before and after changing zoom; restores the prior zoom.",
+      "manualVerification": "Browser assertions cover semantics or keyboard behavior; exact speech and browse-cursor behavior remain manual checks on the reported platform."
+    },
+    {
+      "ticket": "PYLD-3725",
+      "url": "https://linear.app/figma/issue/PYLD-3725/payload-live-preview-the-zoom-options-lack-a-descriptive-name-and",
+      "report": "Payload: Live Preview - The zoom options lack a descriptive name and state",
+      "expected": "The zoom dropdown is described as the zoom level and accurately informs user of the collapsed state.",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "browser-regression",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should expose the live-preview zoom name, expansion, and selected option"
+      ],
+      "limits": "Browser zoom regression checks the trigger's contextual name and expanded/collapsed state before and after selection.",
+      "manualVerification": "Browser assertions cover semantics or keyboard behavior; exact speech and browse-cursor behavior remain manual checks on the reported platform."
+    },
+    {
+      "ticket": "PYLD-3730",
+      "url": "https://linear.app/figma/issue/PYLD-3730/payload-selected-status-not-indicated-to-screen-reader-in-locale",
+      "report": "Payload: Selected status not indicated to screen reader in locale selector",
+      "expected": "The currently selected locale receives focus as one element, and that element has the selected status.",
+      "reportedScreenReaders": ["VoiceOver"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should expose the active locale as selected rather than disabled",
+        "screen-reader.spec.ts :: should announce a selected locale as one grouped item with its state"
+      ],
+      "limits": "Grouping portion is real browse-cursor concern. Current focus capture/exact English occurrence doesn't itself prove one grouped stop; semantics already browser-covered.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3735",
+      "url": "https://linear.app/figma/issue/PYLD-3735/payload-selected-add-blocks-option-is-not-announced-as-selected",
+      "report": "Payload: Selected Add Blocks option is not announced as selected",
+      "expected": "Selected block option is announced with a state as selected by screen reader.",
+      "reportedScreenReaders": ["VoiceOver", "NVDA"],
+      "coverage": "browser-regression",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should expose the selected Add Blocks option by name and pressed state"
+      ],
+      "limits": "Browser Add Blocks regression checks the option name and aria-pressed false-to-true transition; speech remains a reported-platform manual check.",
+      "manualVerification": "Browser assertions cover semantics or keyboard behavior; exact speech and browse-cursor behavior remain manual checks on the reported platform."
+    },
+    {
+      "ticket": "PYLD-3741",
+      "url": "https://linear.app/figma/issue/PYLD-3741/payload-many-locations-not-able-to-navigate-up-or-down-from-field-with",
+      "report": "Payload: Many Locations - Not able to navigate up or down from field with screen reader or keyboard only",
+      "expected": "Focus can be moved up or down the page content after the Body field is focused.",
+      "reportedScreenReaders": ["NVDA"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "screen-reader.spec.ts :: should allow the NVDA browse cursor to exit Lexical editors in both directions"
+      ],
+      "limits": "NVDA browse exit from two editors distinct from DOM tabbing.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3743",
+      "url": "https://linear.app/figma/issue/PYLD-3743/payload-paste-field-button-does-not-have-role-or-state-as-dimmed",
+      "report": "Payload: Paste field button does not have role or state as dimmed",
+      "expected": "Menu item button for Paste field has a button role and state as dimmed announced by screen reader.",
+      "reportedScreenReaders": ["NVDA"],
+      "coverage": "browser-regression",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should not activate or close disabled row-menu actions",
+        "WCAG.e2e.spec.ts :: should expose the disabled Paste or Replace action by name and menu role"
+      ],
+      "limits": "Browser regression checks the action's accessible name, menuitem role, and disabled state. The former speech test incorrectly required the literal word button.",
+      "manualVerification": "Browser assertions cover semantics or keyboard behavior; exact speech and browse-cursor behavior remain manual checks on the reported platform."
+    },
+    {
+      "ticket": "PYLD-3745",
+      "url": "https://linear.app/figma/issue/PYLD-3745/payload-dimmed-more-options-menu-items-do-not-receive-focus-with",
+      "report": "Payload: Dimmed More options menu items do not receive focus with screen reader",
+      "expected": "More options dimmed menu items receive focus with screen reader.",
+      "reportedScreenReaders": ["VoiceOver", "NVDA"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should not activate or close disabled row-menu actions",
+        "WCAG.e2e.spec.ts :: should expose only one menu item at a time in the tab order",
+        "screen-reader.spec.ts :: should expose disabled row-menu actions to screen-reader navigation"
+      ],
+      "limits": "Disabled menu-item browse discoverability can't be replaced by nonactivation checks.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3750",
+      "url": "https://linear.app/figma/issue/PYLD-3750/payload-content-management-table-content-is-announced-twice",
+      "report": "Payload: Content Management - Table content is announced twice",
+      "expected": "Table content is announced one time as visually displayed.",
+      "reportedScreenReaders": ["NVDA"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "screen-reader.spec.ts :: should announce table cell text once without conflicting sort commands"
+      ],
+      "limits": "Actual duplicate/conflicting speech; reported NVDA Chrome platform not proven by Mac pass.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3752",
+      "url": "https://linear.app/figma/issue/PYLD-3752/payload-content-management-many-locations-filter-options-are-announced",
+      "report": "Payload: Content Management - Many Locations - Filter options are announced as \"blank\" when focused",
+      "expected": "Where combo box has an accessible name label announced by screen reader.",
+      "reportedScreenReaders": ["NVDA"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": ["screen-reader.spec.ts :: should announce filter and bulk-edit options by name"],
+      "limits": "Blank option speech, inspect targeted options and reported NVDA browse behavior before simplifying.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3769",
+      "url": "https://linear.app/figma/issue/PYLD-3769/payload-content-management-page-content-is-announced-before-dialog",
+      "report": "Payload: Content Management - Page content is announced before dialog modal",
+      "expected": "Dialog modal with descriptive title / label is announced when displayed.",
+      "reportedScreenReaders": ["NVDA"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "screen-reader.spec.ts :: should announce the deletion dialog before background page content"
+      ],
+      "limits": "Initial dialog speech order needs AT; reported NVDA Chrome platform remains distinct.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3773",
+      "url": "https://linear.app/figma/issue/PYLD-3773/payload-content-management-many-locations-search-results-displayed-are",
+      "report": "Payload: Content Management - Many Locations - Search results displayed are not announced",
+      "expected": "Auto search action is announced before adding text to the search field or search results are not announced by screen reader when displayed.",
+      "reportedScreenReaders": ["NVDA"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "WCAG.e2e.spec.ts :: should retain focus during automatic search",
+        "screen-reader.spec.ts :: should announce automatic search and collection results"
+      ],
+      "limits": "Automatic-search hint/result speech, overlap with dedicated table live-result test. Keep distinct Columns coverage; reported NVDA.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3784",
+      "url": "https://linear.app/figma/issue/PYLD-3784/payload-content-management-dimmed-menu-button-does-not-receive-focus",
+      "report": "Payload: Content Management - Dimmed menu button does not receive focus with screen reader",
+      "expected": "Dimmed Sort menu button receive focus with screen reader and is announced with a state as dimmed.",
+      "reportedScreenReaders": ["NVDA"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "screen-reader.spec.ts :: should keep the disabled Group by sort control in screen-reader navigation"
+      ],
+      "limits": "Disabled Sort browse discoverability; Mac pass not original NVDA proof.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    },
+    {
+      "ticket": "PYLD-3789",
+      "url": "https://linear.app/figma/issue/PYLD-3789/payload-many-locations-hidden-elements-in-the-body-field-receive-focus",
+      "report": "Payload: Many Locations - Hidden elements in the Body field receive focus",
+      "expected": "Hidden elements in the Body field do not receive focus with screen reader.",
+      "reportedScreenReaders": ["VoiceOver", "NVDA"],
+      "coverage": "screen-reader-regression-retained",
+      "tests": [
+        "screen-reader.spec.ts :: should omit hidden Lexical controls from screen-reader navigation"
+      ],
+      "limits": "Hidden controls in virtual navigation distinct from tab order; large scan needs sensible boundaries.",
+      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+    }
+  ]
+}

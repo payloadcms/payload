@@ -36,15 +36,12 @@ import {
   openEditImageDialog,
   openFirstBlockActions,
   openFolderCreationLocation,
-  openLivePreview,
-  openLLMInstructions,
   openLocaleOptions,
   openNavigationFolders,
   openPostsFilter,
   openRichTextRelationshipDrawer,
   openRichTextUploadDrawer,
   openVersionComparison,
-  openVersionsList,
   openWidgetDrawer,
   waitForKeyboardDragActivation,
 } from './helpers.js'
@@ -77,100 +74,9 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
   test.afterEach(async ({ page }) => {
     await cleanupModalMedia({ page })
   })
-  test.describe('1.1.1 Non-text Content (A)', () => {
-    test('should expose the login logo to the screen-reader cursor as Payload', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3609
-      await page.context().clearCookies()
-      await page.setExtraHTTPHeaders({ DisableAutologin: 'true' })
-      await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/login', serverURL }))
-      await expect(page.locator('.login__brand .graphic-logo')).toBeVisible()
-      const output = await navigateScreenReaderTo({
-        matches: /Payload.*(?:image|graphic)|(?:image|graphic).*Payload/i,
-        screenReader,
-      })
-
-      expect(output).toMatch(/Payload/i)
-    })
-  })
-
-  test.describe('1.1.1 Non-text Content (A)', () => {
-    test('should announce required state instead of the asterisk', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3579
-      await page.goto(
-        formatAdminURL({
-          adminRoute: '/admin',
-          path: '/collections/media/create',
-          serverURL,
-        }),
-      )
-      const alt = page.locator('#field-alt')
-
-      await expect(alt).toBeVisible()
-      const capture = await captureScreenReader({
-        action: () => alt.focus(),
-        screenReader,
-      })
-
-      expect(capture.spokenPhrase).toMatch(/alt/i)
-      expect(capture.spokenPhrase).toMatch(/required/i)
-      expect(capture.spokenPhrase).not.toMatch(/star|asterisk/i)
-    })
-  })
 
   test.describe('1.3.1 Info and Relationships (A)', () => {
     for (const kind of ['Array', 'Blocks'] as const) {
-      test(`should announce a meaningful ${kind} row name when picked up`, async ({
-        page,
-        screenReader,
-      }) => {
-        // PYLD-3628
-        const { firstRowLabel, handle } = await openDragReorderField({
-          kind,
-          page,
-          postsURL,
-        })
-
-        await handle.focus()
-        try {
-          const output = await captureScreenReaderOutput({
-            action: () => screenReader.press('Space'),
-            screenReader,
-          })
-
-          await expect(handle).toHaveAttribute('aria-pressed', 'true')
-          expect(output.toLowerCase()).toContain(firstRowLabel.toLowerCase())
-          expect(output).toMatch(/picked up|lifted|dragging/i)
-        } finally {
-          await screenReader.press('Escape')
-        }
-      })
-
-      test(`should announce usable ${kind} pickup movement and drop instructions`, async ({
-        page,
-        screenReader,
-      }) => {
-        // PYLD-3627
-        const { handle } = await openDragReorderField({ kind, page, postsURL })
-        const output = await captureScreenReaderOutput({
-          action: () => handle.focus(),
-          screenReader,
-        })
-
-        expect.soft(output).toMatch(/space|enter/i)
-        expect.soft(output).toMatch(/arrow/i)
-        expect.soft(output).toMatch(/drop/i)
-        expect.soft(output).toMatch(/escape|cancel/i)
-        if (process.platform === 'darwin') {
-          expect(output).toMatch(/command|cmd|quick nav|pass.?through|interact/i)
-        }
-      })
-
       test(`should announce relative direction and position while dragging the ${kind} row`, async ({
         page,
         screenReader,
@@ -185,7 +91,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
         try {
           const output = await captureScreenReaderOutput({
             action: () =>
-              screenReader.press(process.platform === 'darwin' ? 'Meta+ArrowDown' : 'ArrowDown'),
+              page.keyboard.press(process.platform === 'darwin' ? 'Meta+ArrowDown' : 'ArrowDown'),
             screenReader,
           })
 
@@ -198,7 +104,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     }
 
     test('should announce associated labels for the duplicate locale checkboxes', async ({
-      // PYLD-3671
+      // PYLD-3671: partial coverage of label association; the original single-stop report remains unverified.
       page,
       screenReader,
     }) => {
@@ -227,7 +133,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     })
 
     test('should announce the associated label for the deletion checkbox', async ({
-      // PYLD-3678
+      // PYLD-3678: partial coverage of label association; the original single-stop report remains unverified.
       page,
       screenReader,
     }) => {
@@ -307,23 +213,24 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       })
 
       expect(oldGroup).toMatch(/Comparing against/i)
-      const capture = await captureScreenReader({
-        action: async () => {
-          for (let index = 0; index < 30; index++) {
-            await screenReader.next()
-            const item = await screenReader.itemText()
+      await screenReader.clearSpokenPhraseLog()
+      let hasReachedRemovedText = false
 
-            if (item.includes(removedText)) {
-              return
-            }
-          }
-          throw new Error(`Did not reach removed text: ${removedText}`)
-        },
-        screenReader,
-      })
+      for (let index = 0; index < 30; index++) {
+        await screenReader.next()
+        const item = await screenReader.itemText()
 
-      expect(capture.spokenPhrase).toContain(removedText)
-      expect(capture.spokenPhrase).toMatch(/deleted|deletion|removed|strikethrough|strike through/i)
+        if (item.includes(removedText)) {
+          hasReachedRemovedText = true
+          break
+        }
+      }
+
+      expect(hasReachedRemovedText, `Did not reach removed text: ${removedText}`).toBe(true)
+      const spoken = (await screenReader.spokenPhraseLog()).join(' ')
+
+      expect(spoken).toContain(removedText)
+      expect(spoken).toMatch(/deleted|deletion|removed|strikethrough|strike through/i)
       const newGroup = await navigateScreenReaderTo({
         matches: /^(?!.*Previous Version)(?:Version.*group|group.*Version)/i,
         screenReader,
@@ -359,54 +266,6 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       expect(capture.spokenPhrase).not.toMatch(
         /skip to content|navigation landmark|dashboard|subtitle/i,
       )
-    })
-
-    test('should announce the active sort direction on rich-text relationship table headers', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3660
-      const drawer = await openRichTextRelationshipDrawer({ page, postsURL })
-      const sortableHeader = drawer.locator('th:has(.sort-column)').first()
-      const columnName = (await sortableHeader.locator('.sort-column__label').innerText()).trim()
-      const sortButton = sortableHeader.getByRole('button', {
-        name: /ascending/i,
-      })
-
-      await sortButton.click()
-      await sortButton.evaluate((element) => element.blur())
-      const output = await captureScreenReaderOutput({
-        action: () => sortButton.focus(),
-        screenReader,
-      })
-
-      await expect(sortableHeader).toHaveAccessibleName(columnName)
-      await expect(sortableHeader).toHaveAttribute('aria-sort', 'ascending')
-      await expect(sortButton).toHaveAttribute('aria-pressed', 'true')
-      expect(output).toMatch(new RegExp(columnName, 'i'))
-      expect(output).toMatch(/ascending/i)
-      expect(output).toMatch(/pressed|selected/i)
-    })
-
-    test('should announce the selected folder location by name and state', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3585
-      const modal = await openFolderCreationLocation({ page, serverURL })
-      const folder = modal.locator('.hierarchy-column-item', {
-        hasText: 'Accessibility folder',
-      })
-      const selectionControl = folder.getByRole('checkbox')
-      await selectionControl.click()
-      const output = await captureScreenReaderOutput({
-        action: () => folder.focus(),
-        screenReader,
-      })
-
-      await expect(selectionControl).toBeChecked()
-      expect(output).toMatch(/Accessibility folder/i)
-      expect(output).toMatch(/checked|current|selected/i)
     })
 
     test('should announce a selected locale as one grouped item with its state', async ({
@@ -482,7 +341,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
 
         await widget.getByRole('button', { name: 'Drag to reorder', exact: true }).focus()
         const output = await captureScreenReaderOutput({
-          action: () => screenReader.press('Space'),
+          action: () => page.keyboard.press('Space'),
           screenReader,
         })
         await expect(page.locator('.drag-overlay')).toBeVisible()
@@ -701,7 +560,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     }
 
     test('should announce password errors after submission', async ({ page, screenReader }) => {
-      // PYLD-3613
+      // PYLD-3613: partial coverage; submission does not prove the original edit-and-clear error scenario.
       await gotoLabelTestLogin({ page, serverURL })
       await page.locator('input[name="email"]').fill('dev@payloadcms.com')
       const password = page.locator('input[name="password"]')
@@ -907,23 +766,6 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     })
   })
 
-  test.describe('2.4.6 Headings and Labels (AA)', () => {
-    test('should announce Welcome and the signed-in account as a heading', async ({
-      page,
-      screenReader,
-    }) => {
-      await page.goto(`${serverURL}/admin`)
-      await expect(page.getByRole('heading', { name: /^Welcome, /, level: 1 })).toBeVisible()
-
-      const output = await navigateScreenReaderTo({
-        matches: /Welcome, /i,
-        screenReader,
-      })
-
-      expect(output).toMatch(/heading/i)
-    })
-  })
-
   test.describe('3.2.2 On Input (A)', () => {
     test('should announce automatic search and collection results', async ({
       page,
@@ -981,44 +823,6 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
-    test('should announce LLM instruction tabs and the read-only editor', async ({
-      page,
-      screenReader,
-    }) => {
-      const field = await openLLMInstructions({ page, serverURL })
-      const additionalTab = field.getByRole('tab', {
-        name: 'Additional instructions',
-        exact: true,
-      })
-      const systemTab = field.getByRole('tab', {
-        name: 'System instructions (read-only)',
-        exact: true,
-      })
-
-      await field.getByRole('textbox').focus()
-
-      const additionalOutput = await captureScreenReaderOutput({
-        action: () => additionalTab.focus(),
-        screenReader,
-      })
-
-      expect(additionalOutput).toMatch(/Additional instructions/i)
-      expect(additionalOutput).toMatch(/selected/i)
-      expect(additionalOutput).toMatch(/tab/i)
-      await page.keyboard.press('ArrowRight')
-      await expect(systemTab).toBeFocused()
-      await page.keyboard.press('Enter')
-      await expect(systemTab).toHaveAttribute('aria-selected', 'true')
-
-      const output = await captureScreenReaderOutput({
-        action: () => field.getByRole('textbox').focus(),
-        screenReader,
-      })
-
-      expect(output).toMatch(/System instructions/i)
-      expect(output).toMatch(/read.only/i)
-    })
-
     test('should announce rich-text upload and relationship filter options in NVDA browse mode', async ({
       page,
       screenReader,
@@ -1065,24 +869,6 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       }
     })
 
-    test('should announce the selected state of the active Theme option', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3645
-      await page.goto(`${serverURL}/admin`)
-      await openNav(page)
-      await page.locator('.user-menu__trigger').click()
-      await page.getByRole('button', { name: 'Theme' }).click()
-      const selectedTheme = page.locator('.popup-button-list__button--selected').last()
-      const output = await captureScreenReaderOutput({
-        action: () => selectedTheme.focus(),
-        screenReader,
-      })
-
-      expect(output).toMatch(/selected|checked/i)
-    })
-
     test('should expose relationship option names in NVDA browse mode', async ({
       page,
       screenReader,
@@ -1105,34 +891,6 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       })
 
       expect(output).not.toMatch(/blank/i)
-    })
-
-    test('should announce the selected locale and collapsed state on version pages', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3704
-      await openVersionsList({ page, postsURL, serverURL })
-      const localeButton = page.locator('.localizer .popup__trigger-wrap button')
-      const output = await captureScreenReaderOutput({
-        action: () => localeButton.focus(),
-        screenReader,
-      })
-
-      expect(output).toMatch(/locale.+English.+\ben\b/i)
-      expect(output).toMatch(/collapsed/i)
-    })
-
-    test('should announce Paste as a disabled button', async ({ page, screenReader }) => {
-      // PYLD-3743
-      await openFirstBlockActions({ page, postsURL })
-      const output = await navigateScreenReaderTo({
-        matches: /paste|replace/i,
-        screenReader,
-      })
-
-      expect(output).toMatch(/button/i)
-      expect(output).toMatch(/dimmed|disabled|unavailable/i)
     })
 
     test('should announce filter and bulk-edit options by name', async ({ page, screenReader }) => {
@@ -1181,77 +939,6 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       expect(output.toLocaleLowerCase()).toContain(optionName.toLocaleLowerCase())
       expect(output).not.toMatch(/\bblank\b/i)
       expect(output).not.toContain('[object Object]')
-    })
-
-    test('should announce the selected per-page option on the versions table', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3713
-      await openVersionsList({ page, postsURL, serverURL })
-      await page.locator('.per-page .popup__trigger-wrap button').click()
-      const selected = page.locator('.popup-button-list__button--selected').last()
-      const output = await captureScreenReaderOutput({
-        action: () => selected.focus(),
-        screenReader,
-      })
-
-      expect(output).toMatch(/checked|selected/i)
-    })
-
-    test('should announce the selected live-preview zoom option', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3723
-      await openLivePreview({ page, postsURL, serverURL })
-      await page
-        .locator('.live-preview-toolbar-controls__zoom')
-        .getByRole('button', { name: /^Zoom/i })
-        .click()
-      const selected = page.locator('.popup-button-list__button--selected').last()
-      const output = await captureScreenReaderOutput({
-        action: () => selected.focus(),
-        screenReader,
-      })
-
-      expect(output).toMatch(/checked|selected/i)
-    })
-
-    test('should announce the live-preview zoom name and collapsed state', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3725
-      await openLivePreview({ page, postsURL, serverURL })
-      const zoom = page
-        .locator('.live-preview-toolbar-controls__zoom')
-        .getByRole('button', { name: /^Zoom/i })
-      const output = await captureScreenReaderOutput({
-        action: () => zoom.focus(),
-        screenReader,
-      })
-
-      expect(output).toMatch(/zoom/i)
-      expect(output).toMatch(/collapsed/i)
-    })
-
-    test('should announce the selected state of the active Add Blocks option', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3623
-      // PYLD-3735
-      await gotoCreatePost({ page, postsURL })
-      await page.locator('#field-layout > .blocks-field__drawer-toggler').click()
-      const option = page.locator('button.thumbnail-card[title="Text block"]')
-      const output = await captureScreenReaderOutput({
-        action: () => option.click(),
-        screenReader,
-      })
-
-      expect(output).toMatch(/Text block/i)
-      expect(output).toMatch(/checked|selected/i)
     })
   })
   test.describe('4.1.3 Status Messages (AA)', () => {
@@ -1317,7 +1004,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       page,
       screenReader,
     }) => {
-      // PYLD-3580: six seconds is extra reading time, not virtual-cursor persistence.
+      // PYLD-3580: partial coverage only; this does not test persistence under the screen-reader cursor.
       const apiURL = formatAdminURL({
         apiRoute: '/api',
         path: '/posts',
