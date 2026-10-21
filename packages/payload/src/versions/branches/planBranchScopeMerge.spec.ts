@@ -262,6 +262,37 @@ describe('planBranchScopeMerge', () => {
     }
   })
 
+  it('should allow a locale promotion when shared content changed but its structure revision did not', () => {
+    const destination = getScope({ branchID: 'main' })
+    const source = getScope({
+      branchID: 'drafts',
+      state: getVersionState({
+        id: 'translation',
+        structure: { generation: 1, id: 'stable-rows' },
+      }),
+    })
+    const destinationSharedScope = getScope({
+      branchID: 'main',
+      scope: shared,
+      state: getVersionState({
+        id: 'new-shared-label',
+        structure: { generation: 1, id: 'stable-rows' },
+      }),
+    })
+    const result = planBranchScopeMerge({
+      destination,
+      destinationSharedScope,
+      expectedDestination: destination.readSet,
+      source,
+    })
+
+    expect(result.status).toBe('ready')
+
+    if (result.status === 'ready') {
+      expect(result.dependencyReadSet).toStrictEqual(destinationSharedScope.readSet)
+    }
+  })
+
   it('should detect shared structure changing after the locale plan was created', () => {
     const source = getScope({
       branchID: 'drafts',

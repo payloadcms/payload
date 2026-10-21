@@ -365,3 +365,26 @@ M1 is in progress in `packages/payload/src/versions/branches`. Implemented inter
 Initial verification on Node 24.15.0: 47 focused unit tests passed; targeted oxlint, oxfmt, and strict standalone TypeScript checking passed. Two regression cases for matching inherited content failed before the ownership fix and passed afterward. These tests exercise the domain without database IO; they do not establish adapter atomicity, runtime API integration, migration correctness, or rendered accessibility.
 
 Next: complete M0 characterization and upgrade fixtures before modifying existing runtime behavior, finish selection/base receipt planning in M1, then add typed head persistence and freeze/pin adapter contracts in M2. No feature is enabled by the current internal types and pure utilities.
+
+### Draft review stack
+
+The stack starts at main. Each layer targets the preceding branch so reviewers see its incremental diff. This is an initial implementation stack; it does not complete M0 through M11 or enable the feature.
+
+| Layer | Draft                                                      | Delivered scope                                                                                                |
+| ----- | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| 1     | [#18898](https://github.com/payloadcms/payload/pull/18898) | Head domain, generation comparisons, scope merge planning, and implementation specification                    |
+| 2     | [#18899](https://github.com/payloadcms/payload/pull/18899) | Existing drafts compatibility fixture and eight baseline SQLite contracts                                      |
+| 3     | [#18900](https://github.com/payloadcms/payload/pull/18900) | Fix collection Local API restoration dropping its draft flag, with a failing-before/passing-after regression   |
+| 4     | [#18901](https://github.com/payloadcms/payload/pull/18901) | Schema compiled scope projection/composition, typed row matching, and real stored-content integration evidence |
+| 5     | [#18902](https://github.com/payloadcms/payload/pull/18902) | Internal per-entity head schemas, native generation guards, unique first creation, and corruption checks       |
+| 6     | `feat/version-heads-migration-planning`                    | Pure existing-drafts head planning and persistence verification without changing live content/history          |
+
+Current implementation state as of 2026-10-21:
+
+- M0 has executable live/working, localized publish/withdraw, autosave, restore, and global baselines. Released schema-generation fixtures, API/access coverage, and pending-job characterization remain.
+- M1 includes the scope compiler and content composition as well as the original head domain. Batch selection, full merge-base/receipt planning, and operation integration remain.
+- M2 has native head persistence registered only in the test fixture. Version freezing/pinning and runtime capability/registration contracts remain. SQLite storage races are verified; MongoDB and Postgres are not locally verified because their services are unavailable and Docker is not running.
+- M9 has a per-identity planning primitive that distinguishes actual materialization from resolved working snapshots, handles scalar/localized statuses, retains unpublished working content, and preserves legacy draft metadata references. It does not execute schema migration, freeze versions, resolve historical source generations, migrate jobs, or activate the engine.
+- M3 through M8 and M10 through M11 remain outstanding. In particular, effective indexed branch queries, complete operation/access/hook integration, live materialization, schedules, retention/GC, public APIs, migration cutover, and Admin flows are not implemented.
+
+The collection Local API restore fix passes its new regression and 15 selected existing restore regressions against SQLite. No rendered UI has changed, so this stack supplies no new browser, screen-reader, or accessibility conformance evidence. Review descriptions distinguish each layer's tests from the remaining release gates.

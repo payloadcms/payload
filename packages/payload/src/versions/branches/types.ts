@@ -11,7 +11,7 @@ export type BranchVersionReference = Readonly<{
 
 export type BranchHeadState =
   | Readonly<{
-      /** Shared structure required by localized descendants, or null for an independent value. */
+      /** Structure defined by shared content or required by a locale; null for independent values. */
       structure: BranchVersionReference | null
       type: 'version'
       version: BranchVersionReference

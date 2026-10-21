@@ -64,7 +64,7 @@ export const planBranchScopeMerge = ({
       destinationSharedScope?.state?.type !== 'version' ||
       !areBranchVersionsEqual({
         left: source.state.structure,
-        right: destinationSharedScope.state.version,
+        right: destinationSharedScope.state.structure ?? destinationSharedScope.state.version,
       })
     ) {
       return { reason: 'shared-structure-changed', status: 'conflict' }

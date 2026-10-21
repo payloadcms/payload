@@ -384,6 +384,35 @@ describe('branch content scopes', () => {
 
     expect(data.json.nested).toStrictEqual(['original'])
   })
+
+  it('should keep shared block names out of locale change detection', () => {
+    const fields = compileBranchScopeFields({
+      fields: [
+        {
+          name: 'layout',
+          type: 'blocks',
+          blocks: [{ slug: 'text', fields: [{ name: 'title', type: 'text', localized: true }] }],
+        },
+      ],
+    })
+    const live = {
+      layout: [{ id: 'a', blockName: 'Live', blockType: 'text', title: { en: 'unchanged' } }],
+    }
+    const working = {
+      layout: [
+        { id: 'a', blockName: 'Shared draft', blockType: 'text', title: { en: 'unchanged' } },
+      ],
+    }
+
+    expect(
+      projectBranchScopeData({ data: working, fields, scope: { locale: 'en', type: 'locale' } }),
+    ).toStrictEqual(
+      projectBranchScopeData({ data: live, fields, scope: { locale: 'en', type: 'locale' } }),
+    )
+    expect(
+      projectBranchScopeData({ data: working, fields, scope: { type: 'shared' } }),
+    ).not.toStrictEqual(projectBranchScopeData({ data: live, fields, scope: { type: 'shared' } }))
+  })
 })
 
 const arrayField: Field = {

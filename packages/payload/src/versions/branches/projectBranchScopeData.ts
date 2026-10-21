@@ -1,6 +1,8 @@
 import type { BranchScopeField } from './compileBranchScopeFields.js'
 import type { BranchContentScope } from './types.js'
 
+import { hasLocalizedBranchFields } from './hasLocalizedBranchFields.js'
+
 type ScopeData = Record<string, unknown>
 
 /**
@@ -66,8 +68,8 @@ export const projectBranchScopeData = ({
     if (
       scope.type === 'locale' &&
       !(field.type === 'blocks'
-        ? [...field.blocks.values()].some((fields) => hasLocalizedFields({ fields }))
-        : hasLocalizedFields({ fields: field.fields }))
+        ? [...field.blocks.values()].some((fields) => hasLocalizedBranchFields({ fields }))
+        : hasLocalizedBranchFields({ fields: field.fields }))
     ) {
       continue
     }
@@ -96,7 +98,9 @@ export const projectBranchScopeData = ({
 
       const projected = projectBranchScopeData({ data: row, fields: rowFields, scope })
 
-      for (const key of ['id', 'blockType', 'blockName']) {
+      for (const key of scope.type === 'shared'
+        ? ['id', 'blockType', 'blockName']
+        : ['id', 'blockType']) {
         if (Object.hasOwn(row, key)) {
           setValue({ data: projected, key, value: clone({ value: row[key] }) })
         }
@@ -115,32 +119,6 @@ const clone = ({ value }: { value: unknown }): unknown => structuredClone(value)
 
 const getRecord = ({ value }: { value: unknown }): null | ScopeData =>
   value !== null && typeof value === 'object' && !Array.isArray(value) ? (value as ScopeData) : null
-
-const hasLocalizedFields = ({
-  fields,
-  visited = new Set<readonly BranchScopeField[]>(),
-}: {
-  fields: readonly BranchScopeField[]
-  visited?: Set<readonly BranchScopeField[]>
-}): boolean => {
-  if (visited.has(fields)) {
-    return false
-  }
-
-  visited.add(fields)
-
-  return fields.some((field) => {
-    if (field.type === 'value') {
-      return field.isLocalized
-    }
-
-    if (field.type === 'blocks') {
-      return [...field.blocks.values()].some((fields) => hasLocalizedFields({ fields, visited }))
-    }
-
-    return hasLocalizedFields({ fields: field.fields, visited })
-  })
-}
 
 const setValue = ({
   data,
