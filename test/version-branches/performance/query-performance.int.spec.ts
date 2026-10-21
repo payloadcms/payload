@@ -8,7 +8,6 @@ import { createPayloadRequest } from 'payload'
 import { expect } from 'vitest'
 
 import { encodeBranchProjectionBranchKey } from '../../../packages/payload/src/versions/branches/queries/branchProjectionCodec.js'
-import { rebuildBranchProjection } from '../../../packages/payload/src/versions/branches/queries/branchProjectionStore.js'
 import {
   compileBranchProjectionSort,
   compileBranchProjectionWhere,
@@ -29,12 +28,14 @@ import {
   getPerformanceBranches,
   getPerformanceIterations,
   getPerformanceLogicalID,
+  getPerformanceSampleOrdinals,
   getPerformanceScenario,
   performanceSlug,
   summarizePerformanceSamples,
 } from './scenarios.js'
 import { seedBranchPerformance } from './seed.js'
 import { getPerformanceSourceDigest } from './sourceDigest.mjs'
+import { verifyPerformanceSeed } from './verifySeed.js'
 
 const isEnabled = process.env.PAYLOAD_BRANCH_PERF === 'true'
 
@@ -113,39 +114,10 @@ test.suite(
       await writeFile(join(output, `${key}.json`), `${JSON.stringify(report, null, 2)}\n`)
       const native = payload.db.branching!.queryProjection!
       try {
-        // Confirm real native authoritative hydration reproduces representative bulk cache rows.
-        const rebuildTransaction = await payload.db.beginTransaction()
-        if (rebuildTransaction === null) {
-          throw new Error('Native transaction required for authoritative sample rebuild.')
-        }
-        const rebuildReq = await createPayloadRequest({ payload })
-        rebuildReq.transactionID = rebuildTransaction
-        const rebuildStarted = performance.now()
         instrumentation.reset()
-        try {
-          for (const sampledBranch of ['main', ...getPerformanceBranches({ scenario })]) {
-            for (const ordinal of [0, 1, scenario.documents - 1]) {
-              await rebuildBranchProjection({
-                branchID: sampledBranch,
-                req: rebuildReq,
-                target: {
-                  collection: source.custom.branchStorage.heads,
-                  parentID: getPerformanceLogicalID({ ordinal }),
-                },
-              })
-            }
-          }
-          await payload.db.commitTransaction(rebuildTransaction)
-          report.seed.authoritativeSampleRebuild = {
-            milliseconds: performance.now() - rebuildStarted,
-            documents: 3,
-            branches: scenario.branches + 1,
-            calls: instrumentation.statements.length,
-          }
-        } finally {
-          if (payload.db.sessions?.[rebuildTransaction]) {
-            await payload.db.rollbackTransaction(rebuildTransaction)
-          }
+        report.seed.authoritativeSampleRebuild = {
+          ...(await verifyPerformanceSeed({ payload, scenario })),
+          verificationCalls: instrumentation.statements.length,
         }
         const count = await payload.db.count({ collection: performanceSlug })
 
@@ -174,7 +146,7 @@ test.suite(
             })
           ).totalDocs,
         ).toBe(scenario.documents)
-        for (const ordinal of [0, 1, scenario.documents - 1]) {
+        for (const ordinal of getPerformanceSampleOrdinals({ scenario })) {
           const logicalID = getPerformanceLogicalID({ ordinal })
           const target = { collection: source.custom.branchStorage.heads, parentID: logicalID }
           const token = await readBranchHeadToken({

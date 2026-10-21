@@ -375,29 +375,34 @@ M1 implementation in `packages/payload/src/versions/branches` now covers interna
 
 Initial verification on Node 24.15.0: 47 focused unit tests passed; targeted oxlint, oxfmt, and strict standalone TypeScript checking passed. Two regression cases for matching inherited content failed before the ownership fix and passed afterward. These tests exercise the domain without database IO; they do not establish adapter atomicity, runtime API integration, migration correctness, or rendered accessibility.
 
-Current work: publish the independently reviewed M3 query layers for CI and establish the measured performance gate. Native correctness checks are recorded below; the final performance matrix remains outstanding. The internal engine does not enable the feature.
+Current work: resolve findings from M3 draft CI and native performance diagnostics, independently review each correction, and establish the measured performance gate. The final performance matrix remains outstanding. The internal engine does not enable the feature.
 
 ### Draft review stack
 
 The stack starts at main. Each layer targets the preceding branch so reviewers see its incremental diff. This is an initial implementation stack; it does not complete M0 through M11 or enable the feature.
 
-| Layer | Draft                                                      | Delivered scope                                                                                                     |
-| ----- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| 1     | [#18898](https://github.com/payloadcms/payload/pull/18898) | Head domain, generation comparisons, scope merge planning, and implementation specification                         |
-| 2     | [#18899](https://github.com/payloadcms/payload/pull/18899) | Existing drafts compatibility fixture and eight baseline SQLite contracts                                           |
-| 3     | [#18900](https://github.com/payloadcms/payload/pull/18900) | Fix collection Local API restoration dropping its draft flag, with a failing-before/passing-after regression        |
-| 4     | [#18901](https://github.com/payloadcms/payload/pull/18901) | Schema compiled scope projection/composition, typed row matching, and real stored-content integration evidence      |
-| 5     | [#18902](https://github.com/payloadcms/payload/pull/18902) | Internal per-entity head schemas, native generation guards, unique first creation, and corruption checks            |
-| 6     | [#18903](https://github.com/payloadcms/payload/pull/18903) | Pure existing-drafts head planning and persistence verification without changing live content/history               |
-| 7     | [#18909](https://github.com/payloadcms/payload/pull/18909) | Complete legacy contracts and genuine released-package SQLite source fixtures                                       |
-| 8     | [#18910](https://github.com/payloadcms/payload/pull/18910) | Guarded batch head transitions, entity-qualified observations, receipts, dependencies, and reconciliation           |
-| 9     | [#18914](https://github.com/payloadcms/payload/pull/18914) | Native version-backed branch storage, guarded caller transactions, durable pins/visibility and adapter capabilities |
-| 10    | [#18915](https://github.com/payloadcms/payload/pull/18915) | Localized hierarchy join UUID/native-ID ordering regression correction                                              |
-| 11    | [#18916](https://github.com/payloadcms/payload/pull/18916) | Explicit unsupported Cosmos/Firestore transaction contracts and supported-adapter test scoping                      |
-| 12    | [#18929](https://github.com/payloadcms/payload/pull/18929) | Internal effective-query schemas, composition, guards, maintenance and immutable read protocol                      |
-| 13    | [#18930](https://github.com/payloadcms/payload/pull/18930) | Native SQL effective queries, typed joins and PostgreSQL/SQLite/D1 read boundaries                                  |
-| 14    | [#18931](https://github.com/payloadcms/payload/pull/18931) | MongoDB effective queries, pinned sessions and ordinary relationship/geospatial propagation                         |
-| 15    | [#18932](https://github.com/payloadcms/payload/pull/18932) | Effective-query native fixtures, caller snapshot admission, identity compatibility and correctness evidence         |
+| Layer | Draft                                                      | Delivered scope                                                                                                      |
+| ----- | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| 1     | [#18898](https://github.com/payloadcms/payload/pull/18898) | Head domain, generation comparisons, scope merge planning, and implementation specification                          |
+| 2     | [#18899](https://github.com/payloadcms/payload/pull/18899) | Existing drafts compatibility fixture and eight baseline SQLite contracts                                            |
+| 3     | [#18900](https://github.com/payloadcms/payload/pull/18900) | Fix collection Local API restoration dropping its draft flag, with a failing-before/passing-after regression         |
+| 4     | [#18901](https://github.com/payloadcms/payload/pull/18901) | Schema compiled scope projection/composition, typed row matching, and real stored-content integration evidence       |
+| 5     | [#18902](https://github.com/payloadcms/payload/pull/18902) | Internal per-entity head schemas, native generation guards, unique first creation, and corruption checks             |
+| 6     | [#18903](https://github.com/payloadcms/payload/pull/18903) | Pure existing-drafts head planning and persistence verification without changing live content/history                |
+| 7     | [#18909](https://github.com/payloadcms/payload/pull/18909) | Complete legacy contracts and genuine released-package SQLite source fixtures                                        |
+| 8     | [#18910](https://github.com/payloadcms/payload/pull/18910) | Guarded batch head transitions, entity-qualified observations, receipts, dependencies, and reconciliation            |
+| 9     | [#18914](https://github.com/payloadcms/payload/pull/18914) | Native version-backed branch storage, guarded caller transactions, durable pins/visibility and adapter capabilities  |
+| 10    | [#18915](https://github.com/payloadcms/payload/pull/18915) | Localized hierarchy join UUID/native-ID ordering regression correction                                               |
+| 11    | [#18916](https://github.com/payloadcms/payload/pull/18916) | Explicit unsupported Cosmos/Firestore transaction contracts and supported-adapter test scoping                       |
+| 12    | [#18929](https://github.com/payloadcms/payload/pull/18929) | Internal effective-query schemas, composition, guards, maintenance and immutable read protocol                       |
+| 13    | [#18930](https://github.com/payloadcms/payload/pull/18930) | Native SQL effective queries, typed joins and PostgreSQL/SQLite/D1 read boundaries                                   |
+| 14    | [#18931](https://github.com/payloadcms/payload/pull/18931) | MongoDB effective queries, pinned sessions and ordinary relationship/geospatial propagation                          |
+| 15    | [#18932](https://github.com/payloadcms/payload/pull/18932) | Effective-query native fixtures, caller snapshot admission, identity compatibility and correctness evidence          |
+| 16    | [#18933](https://github.com/payloadcms/payload/pull/18933) | Source-pinned native performance harness, historical diagnostic artifacts and explicit outstanding matrix            |
+| 17    | [#18936](https://github.com/payloadcms/payload/pull/18936) | Cached schema traversal with exact presence validation; independent native parity, performance remeasurement pending |
+| 18    | [#18937](https://github.com/payloadcms/payload/pull/18937) | Actual native SQLite read snapshots, coherent scoped reads and primary error preservation during cleanup             |
+| 19    | [#18938](https://github.com/payloadcms/payload/pull/18938) | Custom-schema SQL rank, localized access and sort alias correction with independent native PostgreSQL/D1 evidence    |
+| 20    | [#18939](https://github.com/payloadcms/payload/pull/18939) | Fractional-ID contract admission preserving native DocumentDB and ordinary Cosmos coverage                           |
 
 Current implementation state as of 2026-10-21:
 
@@ -405,7 +410,7 @@ Current implementation state as of 2026-10-21:
 - M1 includes the scope compiler/content composition and guarded batch transition domain described below. Independent final review passed; runtime operation integration retains its M4/M5 gates.
 - M2 now has opt-in schema registration, native version generation/freeze/ownership CAS, durable incarnation tombstones, guarded head batches, pin roots, identity allocation/visibility metadata, honest transaction capabilities, and a dedicated D1 guarded SQL-batch primitive. Independent review, concurrency/matrix checks and full existing versions regressions pass; no engine cutover or public branch operations are enabled.
 - M9 has a per-identity planning primitive that distinguishes actual materialization from resolved working snapshots, handles scalar/localized statuses, retains unpublished working content, and preserves legacy draft metadata references. It does not execute schema migration, freeze versions, resolve historical source generations, migrate jobs, or activate the engine.
-- M3 through M8 and M10 through M11 remain outstanding. The experimental effective indexed query relation has independently approved source/native correctness and draft layers for review. Its performance gate remains open and the engine is inactive. Complete operation/access/hook integration, live materialization, schedules, retention/GC, public APIs, migration cutover and Admin flows remain unimplemented.
+- M3 through M8 and M10 through M11 remain outstanding. Custom-schema SQL, SQLite snapshot, benchmark seed parity and adapter test-scoping corrections have independent approval. The final performance gate and a reproduced existing logout race exposed by CI remain open; the engine is inactive. Complete operation/access/hook integration, live materialization, schedules, retention/GC, public APIs, migration cutover and Admin flows remain unimplemented.
 
 The collection Local API restore fix passes its new regression and 15 selected existing restore regressions against SQLite. No rendered UI has changed, so this stack supplies no new browser, screen-reader, or accessibility conformance evidence. Review descriptions distinguish each layer's tests from the remaining release gates.
 
@@ -463,7 +468,7 @@ Independent final M2 review approved the source and documentation with no remain
 
 ### M3 effective query implementation in progress
 
-M3 remains unchecked pending the measured performance gate and independent final performance review. The complete native correctness matrix and independent production source review pass; draft layers #18929–#18932 are published for CI and review. Separate fresh implementation agents own schema/codec, MongoDB native queries, Drizzle native queries, atomic projection maintenance, existing-ID compatibility, the large-data benchmark and the raw graph snapshot boundary. No legacy operation has been switched to the new relation.
+M3 remains unchecked pending corrective CI review, the measured performance gate and independent final phase review. The native correctness matrix below passed before additional custom-schema and benchmark diagnostic findings; corrective layers #18936–#18938 have independent source and focused native approval. Separate fresh implementation agents own schema/codec, MongoDB native queries, Drizzle native queries, atomic projection maintenance, existing-ID compatibility, the large-data benchmark and the raw graph snapshot boundary. No legacy operation has been switched to the new relation.
 
 The experimental query index uses hidden schema-derived collections with private fixed SHA-256 physical keys. Its actual typed logical document and row identities remain in native queryable columns; declared relationship values have private decoding metadata checked by re-encoding before results escape. Opaque JSON/editor content is unchanged. The index is rebuildable, and selected version revisions plus heads remain authoritative. Original hooks/access are never replaced by the hidden collection's access policy. The ordinary published read path does not consult these schemas.
 

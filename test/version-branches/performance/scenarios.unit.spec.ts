@@ -3,6 +3,7 @@ import { describe, expect, test } from 'vitest'
 import {
   buildPerformanceData,
   getPerformanceIterations,
+  getPerformanceSampleOrdinals,
   hasPerformanceOverride,
   summarizePerformanceSamples,
 } from './scenarios.js'
@@ -10,6 +11,17 @@ import {
 const scenario = { branches: 20, documents: 100_000, locales: 10, overrideDensity: 0.01 }
 
 describe('Branch query benchmark distribution', () => {
+  test('should verify a distinct center-heavy record and retain native block names in common input', () => {
+    expect(getPerformanceSampleOrdinals({ scenario })).toEqual([0, 1, 50_000, 99_999])
+    expect(getPerformanceSampleOrdinals({ scenario: { ...scenario, documents: 10_000 } })).toEqual([
+      0, 1, 5000, 9999,
+    ])
+    const inherited = buildPerformanceData({ ordinal: 5000, scenario })
+    const owned = buildPerformanceData({ hasOverride: true, ordinal: 5000, scenario })
+
+    expect(inherited.content).toMatchObject([{ blockName: null }])
+    expect(owned.content).toMatchObject([{ blockName: null }])
+  })
   test('should reject undersampled or invalid final runs before loading fixtures', () => {
     expect(getPerformanceIterations({ evidence: 'final' })).toBe(40)
     expect(getPerformanceIterations({ evidence: 'final', value: '100' })).toBe(100)

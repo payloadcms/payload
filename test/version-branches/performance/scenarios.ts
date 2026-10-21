@@ -89,6 +89,15 @@ export const getPerformanceBranches = ({
   scenario: BranchQueryPerformanceScenario
 }): string[] => Array.from({ length: scenario.branches }, (_, index) => `review-${index + 1}`)
 
+/** Include an untouched heavy record so rebuilding the first record cannot hide bulk-seed drift. */
+export const getPerformanceSampleOrdinals = ({
+  scenario,
+}: {
+  scenario: BranchQueryPerformanceScenario
+}): number[] => [
+  ...new Set([0, 1, Math.floor(scenario.documents / 200) * 100, scenario.documents - 1]),
+]
+
 export const hasPerformanceOverride = ({
   ordinal,
   scenario,
@@ -131,6 +140,7 @@ export const buildPerformanceData = ({
       ? [
           {
             id: `section-${ordinal}`,
+            blockName: null,
             blockType: 'section',
             heading: localized({ suffix: 'heading' }),
             items: Array.from({ length: 4 }, (_, index) => ({
