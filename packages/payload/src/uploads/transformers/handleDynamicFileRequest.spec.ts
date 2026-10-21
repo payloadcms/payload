@@ -1,3 +1,4 @@
+import { setImmediate } from 'node:timers/promises'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('./resolveUploadDocument.js', async (importOriginal) => ({
@@ -71,6 +72,8 @@ describe('handleDynamicFileRequest', () => {
         handleRequest: vi.fn().mockImplementation(async ({ getSourceFile }) => {
           const sourceResponse: Response = await getSourceFile()
           await sourceResponse.body!.getReader().read()
+          // Drain queued stream work so the abandoned reader leaves a write blocked by backpressure.
+          await setImmediate()
           throw new Error('transform failed')
         }),
         mimeTypes: ['image/*'],
@@ -159,6 +162,7 @@ describe('handleDynamicFileRequest', () => {
         handleRequest: vi.fn().mockImplementation(async ({ getSourceFile }) => {
           const sourceResponse: Response = await getSourceFile()
           await sourceResponse.body!.getReader().read()
+          await setImmediate()
 
           return { response: new Response('replacement'), status: 'complete' }
         }),
@@ -218,6 +222,7 @@ describe('handleDynamicFileRequest', () => {
           handleRequest: vi.fn().mockImplementation(async ({ getSourceFile }) => {
             const sourceResponse: Response = await getSourceFile()
             await sourceResponse.body!.getReader().read()
+            await setImmediate()
 
             return { response: sourceResponse, status: 'continue' }
           }),
@@ -242,6 +247,106 @@ describe('handleDynamicFileRequest', () => {
 
       expect(await result.text()).toBe('replacement')
       await vi.waitFor(() => expect(source.onCancel).toHaveBeenCalled())
+    })
+  })
+
+  describe('streaming responses', () => {
+    const passThrough: UploadTransformer = {
+      slug: 'pass-through',
+      handleRequest: async ({ getSourceFile }) => ({
+        response: await getSourceFile(),
+        status: 'continue',
+      }),
+      mimeTypes: ['image/*'],
+    }
+
+    beforeEach(() => {
+      vi.mocked(planTransformerPipeline).mockResolvedValue([
+        passThrough,
+        { ...passThrough, slug: 'second-pass-through' },
+      ])
+    })
+
+    it('should stream every chunk and preserve response metadata through multiple stages', async () => {
+      const chunks = ['first', '-', 'last']
+      const onCancel = vi.fn()
+      const source = new Response(
+        new ReadableStream({
+          cancel: onCancel,
+          pull(controller) {
+            const chunk = chunks.shift()
+
+            if (chunk === undefined) {
+              controller.close()
+            } else {
+              controller.enqueue(new TextEncoder().encode(chunk))
+            }
+          },
+        }),
+        { headers: { 'Content-Type': 'image/png' }, status: 201, statusText: 'Created' },
+      )
+
+      vi.mocked(getSourceFileResponse).mockResolvedValue(source)
+
+      const result = await handleDynamicFileRequest({
+        collection,
+        filename: 'logo.png',
+        req: makeReq(),
+      })
+
+      expect(await result.text()).toBe('first-last')
+      expect(result.status).toBe(201)
+      expect(result.statusText).toBe('Created')
+      expect(result.headers.get('Content-Type')).toBe('image/png')
+      expect(onCancel).not.toHaveBeenCalled()
+    })
+
+    it('should propagate source read failures through multiple stages', async () => {
+      const error = new Error('source read failed')
+      const source = new Response(
+        new ReadableStream({
+          pull(controller) {
+            controller.error(error)
+          },
+        }),
+      )
+
+      vi.mocked(getSourceFileResponse).mockResolvedValue(source)
+
+      const result = await handleDynamicFileRequest({
+        collection,
+        filename: 'logo.png',
+        req: makeReq(),
+      })
+
+      await expect(result.text()).rejects.toBe(error)
+    })
+
+    it('should propagate consumer cancellation through multiple stages', async () => {
+      const onCancel = vi.fn()
+      const source = new Response(
+        new ReadableStream({
+          cancel: onCancel,
+          pull: (controller) => controller.enqueue(new TextEncoder().encode('source-bytes')),
+        }),
+      )
+
+      vi.mocked(getSourceFileResponse).mockResolvedValue(source)
+
+      const result = await handleDynamicFileRequest({
+        collection,
+        filename: 'logo.png',
+        req: makeReq(),
+      })
+      const reader = result.body!.getReader()
+
+      await reader.read()
+      await setImmediate()
+      await reader.cancel('consumer disconnected')
+
+      await vi.waitFor(() =>
+        expect(onCancel).toHaveBeenCalledExactlyOnceWith('consumer disconnected'),
+      )
     })
   })
 })
