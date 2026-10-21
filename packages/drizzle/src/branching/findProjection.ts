@@ -1,3 +1,4 @@
+import type { SQL } from 'drizzle-orm'
 import type { Find, TypeWithID } from 'payload'
 
 import {
@@ -43,6 +44,17 @@ export const findProjection: Find = async function (this: DrizzleAdapter, args) 
     tableName,
     where: args.where,
   })
+  // Ordinary collections and related tables can legally use the preferred CTE
+  // names. SQLite resolves unqualified sources against CTEs first, including
+  // sources inside nested hydration queries, so reserve the full table namespace.
+  const statementNames = new Set(
+    [
+      ...Object.keys(this.tables),
+      ...Object.values(this.tables).map((table) => getTableName(table)),
+      ...this.tableNameMap.values(),
+      ...joins.map(({ table }) => getTableName(table)),
+    ].map((name) => name.toLowerCase()),
+  )
   const db = await getTransaction(this, args.req)
   const relational = buildFindManyArgs({
     adapter: this,
@@ -55,62 +67,108 @@ export const findProjection: Find = async function (this: DrizzleAdapter, args) 
     select: args.select,
     tableName,
   })
-  const ordering = orderBy.map(({ column, order, projectionAggregate }) =>
-    order(
-      projectionAggregate ??
-        (getTableName(column.table) === tableName
-          ? column
-          : order === asc
-            ? min(column)
-            : max(column)),
-    ),
-  )
-  // A single group per logical entity is selected before the page boundary. Window rank
-  // preserves native one-to-many sort semantics without transporting IDs through JS.
-  let ordered = (db as any)
-    .select({
-      id: table.id,
-      rank: sql`row_number() over (order by ${sql.join(ordering, sql`, `)})`.as('projection_rank'),
-    })
-    .from(table)
-    .where(where)
-    .$dynamic()
+  let statementRelations: SQL[]
+  let fallbackCount: PromiseLike<{ total: number }[]>
+  const canPageRootDirectly =
+    joins.length === 0 &&
+    orderBy.every(
+      ({ column, projectionAggregate }) =>
+        !projectionAggregate && getTableName(column.table) === tableName,
+    )
 
-  if (joins.length) {
-    ordered = ordered.groupBy(table.id)
-  }
+  if (canPageRootDirectly) {
+    // Keep page selection on its native ordered index. Counting the same predicate
+    // separately in this statement avoids ranking every match before applying LIMIT.
+    const countQuery = (db as any)
+      .select({ total: count().as('total') })
+      .from(table)
+      .where(where)
+    const total = (db as any)
+      .$with(allocateStatementName({ preferredName: 'projection_total', statementNames }))
+      .as(countQuery)
+    const totalQuery = (db as any).select({ total: total.total }).from(total)
 
-  for (const join of joins) {
-    ordered = ordered[join.type ?? 'leftJoin'](join.table, join.condition)
-  }
+    relational.where = where
+    relational.orderBy = orderBy.map(({ column, order }) => order(column))
+    if (limit) {
+      relational.limit = limit
+      relational.offset = offset
+    }
+    relational.extras = {
+      ...(relational.extras ?? {}),
+      [totalKey]: sql`(${totalQuery})`.as(totalKey),
+    }
+    statementRelations = [sql`${sql.identifier(total._.alias)} as materialized (${total._.sql})`]
+    fallbackCount = countQuery
+  } else {
+    const ordering = orderBy.map(({ column, order, projectionAggregate }) =>
+      order(
+        projectionAggregate ??
+          (getTableName(column.table) === tableName
+            ? column
+            : order === asc
+              ? min(column)
+              : max(column)),
+      ),
+    )
+    // A single group per logical entity is selected before the page boundary. Window rank
+    // preserves native one-to-many sort semantics without transporting IDs through JS.
+    let ordered = (db as any)
+      .select({
+        id: table.id,
+        rank: sql`row_number() over (order by ${sql.join(ordering, sql`, `)})`.as(
+          'projection_rank',
+        ),
+      })
+      .from(table)
+      .where(where)
+      .$dynamic()
 
-  // Count grouped IDs, rather than joined rows. This is still inside the raw document statement.
-  const allIDs = (db as any).$with('projection_all_ids').as(ordered)
-  const totalQuery = (db as any).select({ total: count() }).from(allIDs)
-  let selectedQuery = (db as any)
-    .select({ id: allIDs.id, rank: allIDs.rank })
-    .from(allIDs)
-    .orderBy(allIDs.rank)
-    .$dynamic()
+    if (joins.length) {
+      ordered = ordered.groupBy(table.id)
+    }
 
-  if (limit) {
-    selectedQuery = selectedQuery.limit(limit).offset(offset)
-  }
+    for (const join of joins) {
+      ordered = ordered[join.type ?? 'leftJoin'](join.table, join.condition)
+    }
 
-  const selected = (db as any).$with('projection_selected_ids').as(selectedQuery)
-  const selectedIDs = (db as any).select({ id: selected.id }).from(selected)
-  const rank = (db as any)
-    .select({ rank: selected.rank })
-    .from(selected)
-    // The nested query is compiled before relational alias rewriting. Correlate with
-    // its outer alias explicitly, because a source schema qualifier is invalid there.
-    .where(eq(selected.id, aliasedTableColumn(table.id, tableName)))
+    // Count grouped IDs, rather than joined rows. This is still inside the raw document statement.
+    const allIDs = (db as any)
+      .$with(allocateStatementName({ preferredName: 'projection_all_ids', statementNames }))
+      .as(ordered)
+    const totalQuery = (db as any).select({ total: count() }).from(allIDs)
+    let selectedQuery = (db as any)
+      .select({ id: allIDs.id, rank: allIDs.rank })
+      .from(allIDs)
+      .orderBy(allIDs.rank)
+      .$dynamic()
 
-  relational.where = inArray(table.id, selectedIDs)
-  relational.orderBy = sql`(${rank})`
-  relational.extras = {
-    ...(relational.extras ?? {}),
-    [totalKey]: sql`(${totalQuery})`.as(totalKey),
+    if (limit) {
+      selectedQuery = selectedQuery.limit(limit).offset(offset)
+    }
+
+    const selected = (db as any)
+      .$with(allocateStatementName({ preferredName: 'projection_selected_ids', statementNames }))
+      .as(selectedQuery)
+    const selectedIDs = (db as any).select({ id: selected.id }).from(selected)
+    const rank = (db as any)
+      .select({ rank: selected.rank })
+      .from(selected)
+      // The nested query is compiled before relational alias rewriting. Correlate with
+      // its outer alias explicitly, because a source schema qualifier is invalid there.
+      .where(eq(selected.id, aliasedTableColumn(table.id, tableName)))
+
+    relational.where = inArray(table.id, selectedIDs)
+    relational.orderBy = sql`(${rank})`
+    relational.extras = {
+      ...(relational.extras ?? {}),
+      [totalKey]: sql`(${totalQuery})`.as(totalKey),
+    }
+    statementRelations = [
+      sql`${sql.identifier(allIDs._.alias)} as materialized (${allIDs._.sql})`,
+      sql`${sql.identifier(selected._.alias)} as materialized (${selected._.sql})`,
+    ]
+    fallbackCount = (db as any).with(allIDs).select({ total: count() }).from(allIDs)
   }
 
   const relationalQuery = db.query[tableName].findMany(relational)
@@ -123,7 +181,7 @@ export const findProjection: Find = async function (this: DrizzleAdapter, args) 
     return {
       ...compiled,
       builtQuery: relationalQuery.dialect.sqlToQuery(
-        sql`with ${sql.identifier(allIDs._.alias)} as materialized (${allIDs._.sql}), ${sql.identifier(selected._.alias)} as materialized (${selected._.sql}) ${compiled.query.sql}`,
+        sql`with ${sql.join(statementRelations, sql`, `)} ${compiled.query.sql}`,
       ),
     }
   }
@@ -133,9 +191,7 @@ export const findProjection: Find = async function (this: DrizzleAdapter, args) 
   if (!rawDocs.length) {
     // An empty page carries no scalar total. It can linearize at this count only if
     // the requested page is also empty there; otherwise the caller must retry.
-    totalDocs = Number(
-      (await (db as any).with(allIDs).select({ total: count() }).from(allIDs))[0]?.total ?? 0,
-    )
+    totalDocs = Number((await fallbackCount)[0]?.total ?? 0)
 
     if (totalDocs > offset) {
       const error = new Error('The selected branch content changed during the read operation.')
@@ -173,4 +229,22 @@ export const findProjection: Find = async function (this: DrizzleAdapter, args) 
     totalDocs: isPaginationEnabled ? totalDocs : docs.length,
     totalPages,
   }
+}
+
+const allocateStatementName = ({
+  preferredName,
+  statementNames,
+}: {
+  preferredName: string
+  statementNames: Set<string>
+}): string => {
+  let name = preferredName
+  let suffix = 0
+
+  while (statementNames.has(name.toLowerCase())) {
+    name = `${preferredName}_${++suffix}`
+  }
+
+  statementNames.add(name.toLowerCase())
+  return name
 }

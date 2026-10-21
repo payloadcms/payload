@@ -100,6 +100,60 @@ test.suite(
       })
     })
 
+    test('should preserve root page totals for bounded, empty and unpaginated reads', async ({
+      payload,
+    }) => {
+      await seeded({
+        payload,
+        run: async ({ req }) => {
+          const cases = [
+            { limit: 1, page: 1, ids: [2], totalDocs: 2, totalPages: 2 },
+            { limit: 1, page: 2, ids: [10], totalDocs: 2, totalPages: 2 },
+            { limit: 1, page: 3, ids: [], totalDocs: 2, totalPages: 2 },
+            { limit: 0, page: 1, ids: [2, 10], totalDocs: 2, totalPages: 1 },
+            {
+              limit: 1,
+              page: 1,
+              pagination: false,
+              ids: [2],
+              totalDocs: 1,
+              totalPages: 1,
+            },
+          ]
+
+          for (const { ids, totalDocs, totalPages, ...paging } of cases) {
+            const result = await queryBranchContent({
+              branchID,
+              collection: queryDocsSlug,
+              req,
+              locale: 'en',
+              joins: false,
+              sort: ['rank', 'id'],
+              where: { rank: { greater_than_equal: 2 } },
+              ...paging,
+            })
+
+            expect(result.docs.map(({ id }) => id)).toEqual(ids)
+            expect(result).toMatchObject({ totalDocs, totalPages })
+            expect(result.docs.every((doc) => !('__payloadBranchReadTotal' in doc))).toBe(true)
+          }
+
+          const absent = await queryBranchContent({
+            branchID,
+            collection: queryDocsSlug,
+            req,
+            locale: 'en',
+            joins: false,
+            sort: ['rank', 'id'],
+            where: { rank: { greater_than: 10 } },
+            limit: 1,
+          })
+
+          expect(absent).toMatchObject({ docs: [], totalDocs: 0, totalPages: 0 })
+        },
+      })
+    })
+
     test('should evaluate original entity and ordinary relationship access on effective content before count and paging', async ({
       payload,
     }) => {

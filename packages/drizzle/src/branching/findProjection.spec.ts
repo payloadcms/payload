@@ -15,20 +15,36 @@ import { findProjection } from './findProjection.js'
 import { projectionRelationConstraint } from './projectionConstraints.js'
 
 describe('effective projection relational aliases', () => {
-  it.each([undefined, 'custom', 'custom"schema'])(
-    'should correlate page ordering with the outer alias for schema %s',
-    async (schemaName) => {
+  it.each(
+    [undefined, 'custom', 'custom"schema'].flatMap((schemaName) =>
+      [false, true].map((hasLocalizedSort) => ({ hasLocalizedSort, schemaName })),
+    ),
+  )(
+    'should compile indexed or ranked paging with correct aliases for $schemaName (localized=$hasLocalizedSort)',
+    async ({ hasLocalizedSort, schemaName }) => {
       const tableName = 'branch_projection'
       const columns = { id: text('source_id').primaryKey(), title: text('title') }
       const table = schemaName
         ? pgSchema(schemaName).table(tableName, columns)
         : pgTable(tableName, columns)
+      const localesName = `${tableName}_locales`
+      const localeColumns = {
+        id: text('id').primaryKey(),
+        _locale: text('_locale'),
+        _parentID: text('_parent_id'),
+        title: text('title'),
+      }
+      const locales = schemaName
+        ? pgSchema(schemaName).table(localesName, localeColumns)
+        : pgTable(localesName, localeColumns)
       let statement = ''
+      let parameters: unknown[] = []
       const captured = new Error('captured native statement')
       const db = drizzle({
         client: {
-          query: ({ text: query }: { text: string }) => {
+          query: ({ text: query }: { text: string }, params: unknown[]) => {
             statement = query
+            parameters = params
             throw captured
           },
         } as any,
@@ -36,16 +52,19 @@ describe('effective projection relational aliases', () => {
       })
       const fields: FlattenedField[] = [
         { name: 'id', type: 'text' },
-        { name: 'title', type: 'text' },
+        { name: 'title', type: 'text', localized: hasLocalizedSort },
       ]
       const adapter = {
         drizzle: db,
         idType: 'uuid',
         name: 'postgres',
+        localesSuffix: '_locales',
         operatorHandlers: [],
         operators: operatorMap,
         payload: {
-          config: {},
+          config: {
+            localization: { locales: ['en', 'fr'], localeCodes: ['en', 'fr'], defaultLocale: 'en' },
+          },
           collections: {
             'branch-projection': {
               customIDType: 'text',
@@ -54,21 +73,34 @@ describe('effective projection relational aliases', () => {
           },
         },
         tableNameMap: new Map([[tableName, tableName]]),
-        tables: { [tableName]: table },
+        tables: { [tableName]: table, [localesName]: locales },
       } as unknown as DrizzleAdapter
 
       await expect(
         findProjection.call(adapter, {
           collection: 'branch-projection',
           limit: 1,
+          locale: 'en',
+          select: { id: true },
           sort: 'title',
           joins: false,
+          where: { title: { equals: 'visible' } },
         }),
       ).rejects.toMatchObject({ cause: captured })
 
-      expect(statement).toContain(
-        'where "projection_selected_ids"."source_id" = "branch_projection"."source_id"',
-      )
+      if (hasLocalizedSort) {
+        expect(statement).toContain('row_number() over')
+        expect(statement).toContain(
+          'where "projection_selected_ids"."source_id" = "branch_projection"."source_id"',
+        )
+      } else {
+        expect(statement).not.toContain('row_number() over')
+        expect(statement).not.toContain('projection_all_ids')
+        expect(statement).toContain('projection_total')
+        expect(statement).toContain('order by "branch_projection"."title" asc')
+        expect(statement).toContain('limit $')
+        expect(parameters.filter((value) => value === 'visible')).toHaveLength(2)
+      }
       expect(statement).toContain(
         schemaName
           ? `from "${schemaName.replaceAll('"', '""')}"."branch_projection"`
