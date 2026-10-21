@@ -95,6 +95,9 @@ test.suite('Localized hierarchy joins', { config: './hierarchy.config.ts', db: '
       data: { title: 'Second child', parent: parent.id, _status: 'published' },
       publishAllLocales: true,
     })
+    const sortedChildIDs = [firstChild.id, secondChild.id].sort((left, right) =>
+      left < right ? -1 : 1,
+    )
 
     await payload.create({
       collection: versionsSlug,
@@ -122,16 +125,13 @@ test.suite('Localized hierarchy joins', { config: './hierarchy.config.ts', db: '
 
     expect(unpaginated.docs[0]).toMatchObject({
       children: {
-        docs: [
-          { relationTo: versionsSlug, value: firstChild.id },
-          { relationTo: versionsSlug, value: secondChild.id },
-        ],
+        docs: sortedChildIDs.map((value) => ({ relationTo: versionsSlug, value })),
         totalDocs: 2,
       },
     })
     expect(paginated.docs[0]).toMatchObject({
       children: {
-        docs: [{ relationTo: versionsSlug, value: secondChild.id }],
+        docs: [{ relationTo: versionsSlug, value: sortedChildIDs[1] }],
         hasNextPage: false,
         totalDocs: 2,
       },
