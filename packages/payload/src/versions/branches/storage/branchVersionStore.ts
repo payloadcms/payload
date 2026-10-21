@@ -3,7 +3,12 @@ import type { JsonObject, PayloadRequest, Where } from '../../../types/index.js'
 import type { BranchHeadID, BranchVersionReference } from '../types.js'
 import type { BranchStorageTarget } from './branchStorage.js'
 
-import { assertBranchTransaction, getBranchKey, getBranchStorage } from './branchStorage.js'
+import {
+  assertBranchTransaction,
+  getBranchKey,
+  getBranchStorage,
+  getBranchStorageKey,
+} from './branchStorage.js'
 
 export const readBranchVersion = async ({
   entity,
@@ -97,8 +102,10 @@ export const pinBranchVersion = async ({
     throw new Error('Cannot pin a missing, wrong-parent, unmanaged, or stale version revision.')
   }
 
+  const referenceKey = getBranchStorageKey({ coordinates: [reference.id, rootKey] })
   const where: Where = {
     and: [
+      { referenceKey: { equals: referenceKey } },
       { versionID: { equals: reference.id } },
       { rootKey: { equals: rootKey } },
       ...(target.parentID !== undefined ? [{ parent: { equals: target.parentID } }] : []),
@@ -119,6 +126,7 @@ export const pinBranchVersion = async ({
       collection: pins,
       data: {
         ...(target.parentID !== undefined ? { parent: target.parentID } : {}),
+        referenceKey,
         rootKey,
         versionGeneration: reference.generation,
         versionID: reference.id,

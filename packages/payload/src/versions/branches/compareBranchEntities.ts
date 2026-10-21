@@ -14,7 +14,7 @@ export const getBranchEntityKey = ({ entity }: { entity: BranchEntityIdentity })
 
   if (
     !entity.collection.length ||
-    (typeof entity.id === 'number' ? !Number.isSafeInteger(entity.id) : !entity.id.length)
+    (typeof entity.id === 'number' ? !Number.isFinite(entity.id) : !entity.id.length)
   ) {
     throw new Error('Invalid branch entity collection or logical ID.')
   }

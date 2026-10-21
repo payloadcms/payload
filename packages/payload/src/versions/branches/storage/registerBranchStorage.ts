@@ -67,15 +67,17 @@ export const registerBranchStorage = ({
           ...(versionIDType === 'number'
             ? [{ name: 'versionID', type: 'number', required: true } satisfies Field]
             : [{ name: 'versionID', type: 'text', required: true } satisfies Field]),
+          { name: 'referenceKey', type: 'text', required: true },
           { name: 'versionGeneration', type: 'number', required: true },
           { name: 'rootKey', type: 'text', required: true },
         ],
         indexes: [
           {
-            fields: [...(parentCollection ? ['parent'] : []), 'versionID', 'rootKey'],
+            fields: ['referenceKey'],
             unique: true,
           },
           { fields: ['versionID'] },
+          ...(parentCollection ? [{ fields: ['parent'] }] : []),
         ],
       },
       {

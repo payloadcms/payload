@@ -90,7 +90,7 @@ const getBase = ({ value }: { value: unknown }): BranchHeadToken => {
   const rawScope = base.scope
 
   if (
-    ((typeof branchID !== 'number' || !Number.isSafeInteger(branchID)) &&
+    ((typeof branchID !== 'number' || !Number.isFinite(branchID)) &&
       (typeof branchID !== 'string' || !branchID.length)) ||
     !rawScope ||
     typeof rawScope !== 'object' ||

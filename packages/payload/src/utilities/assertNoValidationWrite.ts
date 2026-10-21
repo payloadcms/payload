@@ -1,6 +1,7 @@
 import type { PayloadRequest } from '../types/index.js'
 
 import { APIError } from '../errors/index.js'
+import { assertNoBranchReadMutation } from './createBranchReadRequest.js'
 
 /**
  * Prevents guarded document, global, upload, and version mutation entry points from writing
@@ -8,6 +9,7 @@ import { APIError } from '../errors/index.js'
  * intentionally unaffected.
  */
 export function assertNoValidationWrite(req?: Partial<PayloadRequest>): void {
+  assertNoBranchReadMutation({ req })
   if (req?.operation === 'validate') {
     throw new APIError('Payload writes are not allowed during validation.')
   }

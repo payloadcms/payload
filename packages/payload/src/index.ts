@@ -1609,7 +1609,12 @@ export { type OrderableEndpointBody } from './config/orderable/index.js'
 export { sanitizeConfig } from './config/sanitize.js'
 
 export type * from './config/types.js'
-export type { BranchingAdapter, BranchStorageEntity } from './database/branching.js'
+export type {
+  BranchingAdapter,
+  BranchProjectionQueries,
+  BranchProjectionQueryContext,
+  BranchStorageEntity,
+} from './database/branching.js'
 export { combineQueries } from './database/combineQueries.js'
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
 export { defaultBeginTransaction } from './database/defaultBeginTransaction.js'
@@ -1707,8 +1712,8 @@ export type {
   UpsertArgs,
 } from './database/types.js'
 export type { DynamicMigrationTemplate } from './database/types.js'
-
 export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
+
 export {
   APIError,
   APIErrorName,
@@ -1738,14 +1743,15 @@ export {
   ValidationError,
   ValidationErrorName,
 } from './errors/index.js'
-
 export type { ValidationFieldError } from './errors/index.js'
+
 export type { Authorship, SanitizedAuthorship } from './fields/baseFields/authorship/index.js'
 export { createCreatedByField, createUpdatedByField } from './fields/baseFields/authorship/index.js'
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'
-
 export { getSlugFallbackValue } from './fields/baseFields/slug/getSlugFallbackValue.js'
+
+export type { SlugFieldClientProps } from './fields/baseFields/slug/types.js'
 
 export interface FieldCustom extends Record<string, any> {}
 
@@ -1757,7 +1763,6 @@ export interface GlobalCustom extends Record<string, any> {}
 
 export interface GlobalAdminCustom extends Record<string, any> {}
 
-export type { SlugFieldClientProps } from './fields/baseFields/slug/types.js'
 export {
   createClientBlocks,
   createClientField,
@@ -1765,8 +1770,9 @@ export {
   type ServerOnlyFieldAdminProperties,
   type ServerOnlyFieldProperties,
 } from './fields/config/client.js'
-
 export { sanitizeField, sanitizeFields } from './fields/config/sanitize.js'
+
+export type { SanitizeFieldArgs } from './fields/config/sanitize.js'
 
 export interface FieldCustom extends Record<string, any> {}
 
@@ -1778,7 +1784,6 @@ export interface GlobalCustom extends Record<string, any> {}
 
 export interface GlobalAdminCustom extends Record<string, any> {}
 
-export type { SanitizeFieldArgs } from './fields/config/sanitize.js'
 export type {
   AdminClient,
   ArrayField,
@@ -1891,18 +1896,18 @@ export type {
   ValidateOptions,
   ValueWithRelation,
 } from './fields/config/types.js'
-
 export { getDefaultValue } from './fields/getDefaultValue.js'
-export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 
+export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
+
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
-
 export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
 
 export { validateBlocksFilterOptions, validations } from './fields/validations.js'
+
 export type {
   ArrayFieldValidation,
   BlocksFieldValidation,
@@ -1934,7 +1939,6 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
-
 export {
   type ClientGlobalConfig,
   createClientGlobalConfig,
@@ -1942,6 +1946,7 @@ export {
   type ServerOnlyGlobalAdminProperties,
   type ServerOnlyGlobalProperties,
 } from './globals/config/client.js'
+
 export type {
   AfterChangeHook as GlobalAfterChangeHook,
   AfterReadHook as GlobalAfterReadHook,
@@ -2000,8 +2005,8 @@ export type {
 } from './hierarchy/types.js'
 export type { Ancestor } from './hierarchy/utils/getAncestors.js'
 export { getAncestors } from './hierarchy/utils/getAncestors.js'
-
 export * from './kv/adapters/DatabaseKVAdapter.js'
+
 export * from './kv/adapters/InMemoryKVAdapter.js'
 export * from './kv/index.js'
 export type {
@@ -2025,8 +2030,8 @@ export type {
 } from './preferences/types.js'
 export type { QueryPreset } from './query-presets/types.js'
 export { jobAfterRead } from './queues/config/collection.js'
-
 export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
+
 export type {
   RunInlineTaskFunction,
   RunTaskFunction,
@@ -2049,16 +2054,16 @@ export type {
   WorkflowHandler,
   WorkflowSlug,
 } from './queues/config/types/workflowTypes.js'
-
 export { JobCancelledError } from './queues/errors/index.js'
+
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
-
 export {
   _internal_jobSystemGlobals,
   _internal_resetJobSystemGlobals,
   getCurrentDate,
 } from './queues/utilities/getCurrentDate.js'
+
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export type { ValidationResult } from './types/validation.js'
@@ -2087,6 +2092,8 @@ export {
   withNullableJSONSchemaType,
 } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
+export { createBranchReadRequest } from './utilities/createBranchReadRequest.js'
+export { createBranchReadScope } from './utilities/createBranchReadScope.js'
 export {
   createPayloadRequest,
   type CreatePayloadRequestArgs,
@@ -2169,21 +2176,23 @@ export { transformPointDataToPayload } from './utilities/transformPointDataToPay
 export { traverseFields } from './utilities/traverseFields.js'
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { strictObject } from './utilities/zod.js'
+export { BranchProjectionError } from './versions/branches/queries/branchProjectionGuard.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
+
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 export { buildVersionCompoundIndexes } from './versions/buildVersionCompoundIndexes.js'
-
 export { versionDefaults } from './versions/defaults.js'
 export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
 export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryKey.js'
 export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
+
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
 
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
-
 export type { SchedulePublish, TypeWithVersion } from './versions/types.js'
+
 export { deepMergeSimple } from '@payloadcms/translations/utilities'
 export { z } from 'zod/mini'

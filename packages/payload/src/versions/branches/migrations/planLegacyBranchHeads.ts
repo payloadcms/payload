@@ -257,7 +257,7 @@ const getLocaleAttachments = ({
           field.type === 'blocks' ? field.blocks.get(String(row.blockType)) : field.fields
 
         if (
-          ((typeof id !== 'number' || !Number.isSafeInteger(id)) &&
+          ((typeof id !== 'number' || !Number.isFinite(id)) &&
             (typeof id !== 'string' || !id.length)) ||
           attachments.has(id as BranchHeadID) ||
           !rowFields

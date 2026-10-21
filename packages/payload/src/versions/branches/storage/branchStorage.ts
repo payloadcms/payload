@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto'
+
 import type { BranchStorageEntity } from '../../../database/branching.js'
 import type { PayloadRequest } from '../../../types/index.js'
 import type { BranchHeadID } from '../types.js'
@@ -34,6 +36,19 @@ export const getBranchStorage = ({
     entity = { slug: marker.globalSlug, type: 'global' }
   } else {
     throw new Error('Branch head parent identity does not match its storage collection.')
+  }
+
+  if (entity.type === 'collection') {
+    const collection = req.payload.collections[entity.slug]
+    const idType = collection?.customIDType ?? req.payload.db.defaultIDType
+    const isValidID =
+      idType === 'number'
+        ? typeof entity.parentID === 'number' && Number.isFinite(entity.parentID)
+        : typeof entity.parentID === 'string' && entity.parentID.length > 0
+
+    if (!isValidID) {
+      throw new Error('Branch parent identity must retain the source collection ID type.')
+    }
   }
 
   const config =
@@ -79,7 +94,7 @@ export const assertBranchTransaction = async ({ req }: { req: PayloadRequest }):
 
 export const getBranchKey = ({ branchID }: { branchID: BranchHeadID }): string => {
   if (
-    (typeof branchID !== 'number' || !Number.isSafeInteger(branchID)) &&
+    (typeof branchID !== 'number' || !Number.isFinite(branchID)) &&
     (typeof branchID !== 'string' || !branchID.length)
   ) {
     throw new Error('Invalid branch identity.')
@@ -87,3 +102,10 @@ export const getBranchKey = ({ branchID }: { branchID: BranchHeadID }): string =
 
   return `${typeof branchID === 'number' ? 'number' : 'string'}:${branchID}`
 }
+
+/** Fixed-width internal index keys preserve the full, typed coordinates in ordinary fields. */
+export const getBranchStorageKey = ({
+  coordinates,
+}: {
+  coordinates: readonly (null | number | string)[]
+}): string => createHash('sha256').update(JSON.stringify(coordinates)).digest('hex')

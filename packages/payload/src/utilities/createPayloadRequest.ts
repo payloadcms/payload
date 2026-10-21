@@ -4,6 +4,7 @@ import type { PayloadRequest } from '../types/index.js'
 import { getDataLoader } from '../collections/dataloader.js'
 import { getLocalI18n } from '../translations/getLocalI18n.js'
 import { sanitizeFallbackLocale } from '../utilities/sanitizeFallbackLocale.js'
+import { forkBranchReadRequest, resolveBranchReadPayload } from './createBranchReadRequest.js'
 
 function getRequestContext(
   req: Partial<PayloadRequest> = { context: null } as unknown as PayloadRequest,
@@ -108,6 +109,9 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
   urlSuffix,
   user,
 }): Promise<PayloadRequest> => {
+  payload = resolveBranchReadPayload({ payload, req })
+  req = forkBranchReadRequest({ req })
+
   const localization = payload.config?.localization
 
   if (localization) {

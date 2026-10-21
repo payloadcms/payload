@@ -3,6 +3,7 @@ import type { BranchHeadID } from '../types.js'
 import type { BranchStorageTarget } from './branchStorage.js'
 
 import { hasLocalizeStatusEnabled } from '../../../utilities/getVersionsConfig.js'
+import { maintainBranchProjections } from '../queries/branchProjectionStore.js'
 import { assertBranchTransaction, getBranchKey, getBranchStorage } from './branchStorage.js'
 
 export type BranchIdentityVisibility = {
@@ -80,6 +81,7 @@ export const createBranchIdentityVisibility = async ({
   }
 
   await req.payload.db.create({ collection: identities, data, req })
+  await maintainBranchProjections({ branchID, isVisibilityChange: true, req, target })
 
   return data
 }
@@ -147,6 +149,10 @@ export const updateBranchIdentityVisibility = async ({
       ],
     },
   })
+
+  if (row) {
+    await maintainBranchProjections({ branchID: 'main', isVisibilityChange: true, req, target })
+  }
 
   return row
     ? {

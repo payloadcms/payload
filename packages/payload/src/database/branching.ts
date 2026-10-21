@@ -1,5 +1,27 @@
-import type { JsonObject, PayloadRequest } from '../types/index.js'
+import type { JsonObject, PayloadRequest, Where } from '../types/index.js'
 import type { TypeWithVersion } from '../versions/types.js'
+import type { Count, CountArgs, Find, FindArgs, FindDistinct, FindDistinctArgs } from './types.js'
+
+/** Trusted native query context over private, rebuildable effective-content indexes. */
+export type BranchProjectionQueryContext = {
+  /** Encoded query-index branch key, distinct from any public branch name or cache ID. */
+  branchKey: string
+  /** Compiled separately for each original join target; access policies are already in relationAccess. */
+  joins?: Record<
+    string,
+    Record<string, { count?: boolean; limit?: number; page?: number; sort: string[]; where: Where }>
+  >
+  /** Original entity read predicates translated to each private relation; missing means denied. */
+  relationAccess: Record<string, false | Where>
+}
+
+export type BranchProjectionQueries = {
+  count: (args: { context: BranchProjectionQueryContext } & CountArgs) => ReturnType<Count>
+  find: (args: { context: BranchProjectionQueryContext } & FindArgs) => ReturnType<Find>
+  findDistinct: (
+    args: { context: BranchProjectionQueryContext } & FindDistinctArgs,
+  ) => ReturnType<FindDistinct>
+}
 
 export type BranchStorageEntity =
   | { parentID: number | string; slug: string; type: 'collection' }
@@ -35,4 +57,22 @@ export type BranchingAdapter = {
       | { type: 'freeze' }
     req: PayloadRequest
   }) => Promise<null | TypeWithVersion<JsonObject>>
+  /** Every predicate, relationship hop, join and distinct path uses this same effective relation. */
+  queryProjection?: BranchProjectionQueries
+  /** Private derived-index replacement. Native document stores must remove omitted fields before predicates run. */
+  replaceProjection?: (args: {
+    collection: string
+    replacement: Record<string, unknown>
+    req: PayloadRequest
+  }) => Promise<void>
+  /**
+   * Collect raw query results and population before document hooks run. The callback
+   * runs exactly once and must use the supplied request for every database read.
+   * Its returned raw graph is usable only after this boundary resolves. Adapters
+   * either hold a native snapshot or validate every recorded read atomically.
+   */
+  withReadSnapshot?: <T>(args: {
+    read: (args: { req: PayloadRequest }) => Promise<T>
+    req: PayloadRequest
+  }) => Promise<T>
 }

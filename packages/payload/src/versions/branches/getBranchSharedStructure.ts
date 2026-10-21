@@ -62,7 +62,7 @@ export const getBranchSharedStructure = ({
       const id = row.id
 
       if (
-        (typeof id !== 'number' || !Number.isSafeInteger(id)) &&
+        (typeof id !== 'number' || !Number.isFinite(id)) &&
         (typeof id !== 'string' || !id.length)
       ) {
         throw new Error(`A stable row identity is required in field "${field.name}".`)

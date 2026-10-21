@@ -11,7 +11,13 @@ import type {
 import type { BranchStorageTarget } from './branchStorage.js'
 
 import { areBranchHeadTokensEqual } from '../compareBranchHeads.js'
-import { assertBranchTransaction, getBranchKey, getBranchStorage } from './branchStorage.js'
+import { maintainBranchProjections } from '../queries/branchProjectionStore.js'
+import {
+  assertBranchTransaction,
+  getBranchKey,
+  getBranchStorage,
+  getBranchStorageKey,
+} from './branchStorage.js'
 import { pinBranchVersion } from './branchVersionStore.js'
 import { decodeBranchHead } from './decodeBranchHead.js'
 
@@ -164,11 +170,18 @@ export const writeBranchHead = async ({
         ...data,
         base: base ?? null,
         branchKey: getBranchKey({ branchID: expected.branchID }),
+        coordinateKey: getHeadCoordinateKey({
+          branchID: expected.branchID,
+          scope: expected.scope,
+          target,
+        }),
         ...(target.parentID !== undefined ? { parent: target.parentID } : {}),
         scopeKey: getScopeKey({ scope: expected.scope }),
       },
       req,
     })
+
+    await maintainBranchProjections({ branchID: expected.branchID, req, target })
 
     return decodeBranchHead({ branchID: expected.branchID, row, scope: expected.scope })
   }
@@ -188,6 +201,10 @@ export const writeBranchHead = async ({
       ],
     },
   })
+
+  if (row) {
+    await maintainBranchProjections({ branchID: expected.branchID, req, target })
+  }
 
   return row ? decodeBranchHead({ branchID: expected.branchID, row, scope: expected.scope }) : null
 }
@@ -248,6 +265,10 @@ export const discardBranchHead = async ({
       ],
     },
   })
+
+  if (row) {
+    await maintainBranchProjections({ branchID: expected.branchID, req, target })
+  }
 
   return row
     ? {
@@ -371,6 +392,11 @@ export const commitBranchHeads = async ({
         collection: target.collection,
         data: {
           branchKey: getBranchKey({ branchID: token.branchID }),
+          coordinateKey: getHeadCoordinateKey({
+            branchID: token.branchID,
+            scope: token.scope,
+            target,
+          }),
           scopeKey: getScopeKey({ scope: token.scope }),
           ...(target.parentID !== undefined ? { parent: target.parentID } : {}),
           generation: null,
@@ -440,6 +466,7 @@ const getHeadWhere = ({
   target: BranchStorageTarget
 }): Where => ({
   and: [
+    { coordinateKey: { equals: getHeadCoordinateKey({ branchID, scope, target }) } },
     { branchKey: { equals: getBranchKey({ branchID }) } },
     { scopeKey: { equals: getScopeKey({ scope }) } },
     ...(target.parentID !== undefined ? [{ parent: { equals: target.parentID } }] : []),
@@ -465,3 +492,16 @@ const getIncarnation = ({ value }: { value: unknown }): number => {
 
   return value
 }
+
+const getHeadCoordinateKey = ({
+  branchID,
+  scope,
+  target,
+}: {
+  branchID: BranchHeadID
+  scope: BranchContentScope
+  target: BranchStorageTarget
+}): string =>
+  getBranchStorageKey({
+    coordinates: [target.parentID ?? null, getBranchKey({ branchID }), getScopeKey({ scope })],
+  })

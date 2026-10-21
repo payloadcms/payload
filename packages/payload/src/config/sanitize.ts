@@ -42,6 +42,7 @@ import {
 import { flattenAllFields, flattenBlock } from '../utilities/flattenAllFields.js'
 import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
 import { validateTimezones } from '../utilities/validateTimezones.js'
+import { sanitizeBranchQueryStorage } from '../versions/branches/queries/registerBranchQueryStorage.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { addDefaultsToConfig } from './defaults.js'
 import { addOrderableEndpoint, addOrderableFieldsAndHook } from './orderable/index.js'
@@ -706,6 +707,8 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
       ),
     )
   }
+
+  sanitizeBranchQueryStorage({ config: config as SanitizedConfig, richTextSanitizers })
 
   for (const sanitizeRichText of richTextSanitizers) {
     sanitizeRichText(config as SanitizedConfig)

@@ -43,6 +43,7 @@ export const buildBranchHeadCollection = ({
             } satisfies Field,
           ]
         : []),
+      { name: 'coordinateKey', type: 'text', required: true },
       { name: 'branchKey', type: 'text', required: true },
       { name: 'scopeKey', type: 'text', required: true },
       { name: 'generation', type: 'number', min: 1 },
@@ -62,7 +63,8 @@ export const buildBranchHeadCollection = ({
     ],
     graphQL: false,
     indexes: [
-      { fields: [...(parentCollection ? ['parent'] : []), 'branchKey', 'scopeKey'], unique: true },
+      { fields: ['coordinateKey'], unique: true },
+      ...(parentCollection ? [{ fields: ['parent'] }] : []),
       { fields: ['branchKey', 'state'] },
       { fields: ['versionID'] },
       { fields: ['structureVersionID'] },
