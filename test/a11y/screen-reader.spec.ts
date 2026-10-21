@@ -278,10 +278,20 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
           .allTextContents()
 
         expect(bullets.length).toBeGreaterThan(0)
-        await expect(widget.locator('.draggable')).toBeFocused()
-        await widget.getByRole('button', { name: 'Drag to reorder', exact: true }).focus()
+        const card = widget.locator('.draggable')
+        const dragHandle = widget.getByRole('button', { name: 'Drag to reorder', exact: true })
+
+        await expect(card).toBeFocused()
+        for (const bullet of bullets) {
+          await expect(card).toHaveAccessibleName(new RegExp(bullet.trim()))
+        }
+        await screenReader.navigateToWebContent()
+        await captureScreenReader({ action: () => dragHandle.focus(), screenReader })
         const capture = await captureScreenReader({
-          action: () => page.keyboard.press('Shift+Tab'),
+          action: async () => {
+            await screenReader.press('Shift+Tab')
+            await expect(card).toBeFocused()
+          },
           screenReader,
         })
         for (const bullet of bullets) {
@@ -372,9 +382,14 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       const combobox = drawer.locator('#field-toLocale input[role="combobox"]')
 
       // Start within the drawer so this captures field focus, not the dialog opening.
-      await drawer.getByRole('checkbox', { name: 'Overwrite existing field data' }).focus()
+      const overwrite = drawer.getByRole('checkbox', { name: 'Overwrite existing field data' })
+
+      await expect(combobox).toHaveAccessibleName('Copy to')
+      await screenReader.navigateToWebContent()
+      await captureScreenReader({ action: () => overwrite.focus(), screenReader })
+      await expect(overwrite).toBeFocused()
       const capture = await captureScreenReader({
-        action: () => combobox.focus(),
+        action: () => screenReader.press('Shift+Tab'),
         screenReader,
       })
 
