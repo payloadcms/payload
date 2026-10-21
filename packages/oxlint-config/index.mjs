@@ -200,22 +200,10 @@ const config = {
             },
           },
         ],
-      },
-    },
-    {
-      files: ['**/*.spec.ts'],
-      excludeFiles: ['**/*.e2e.spec.ts'],
-      // `vitest` is loaded as `@vitest` (see `jsPlugins`), so the preset's rule names need the new prefix
-      rules: Object.fromEntries(
-        Object.entries(vitest.configs.recommended.rules).map(([rule, value]) => [
-          rule.replace('vitest/', '@vitest/'),
-          value,
-        ]),
-      ),
-    },
-    {
-      files: ['**/*.tsx'],
-      rules: {
+        /**
+         * React's rules check `.ts` files too, not just `.tsx`. Custom hooks often live in `.ts` files,
+         * and the build runs React Compiler on every file with `'use client'`, including `.ts` ones.
+         */
         ...eslintReact.configs['recommended-type-checked'].rules,
         '@eslint-react/hooks-extra/no-direct-set-state-in-use-effect': 'off',
         '@eslint-react/naming-convention/use-state': 'off',
@@ -235,17 +223,6 @@ const config = {
         ...reactA11yRules,
         // Needs type information, which oxlint doesn't give JS plugins
         '@eslint-react/no-leaked-conditional-rendering': 'off',
-      },
-    },
-    /**
-     * Unlike the JSX rules above, React's hook and React Compiler rules also check `.ts` files. Custom
-     * hooks often live in `.ts` files, and the build runs React Compiler on every file with
-     * `'use client'`, including `.ts` ones. These rules only analyze functions named like components
-     * or hooks, so checking every other `.ts` file doesn't measurably slow down linting.
-     */
-    {
-      files: ['**/*.{ts,tsx}'],
-      rules: {
         // React
         'react-hooks/exhaustive-deps': 'warn',
         // TODO: back to 'error' once fixed. This version flags more than the ESLint one.
@@ -273,6 +250,17 @@ const config = {
         'react-hooks/use-memo': 'error',
         'react-hooks/void-use-memo': 'error',
       },
+    },
+    {
+      files: ['**/*.spec.ts'],
+      excludeFiles: ['**/*.e2e.spec.ts'],
+      // `vitest` is loaded as `@vitest` (see `jsPlugins`), so the preset's rule names need the new prefix
+      rules: Object.fromEntries(
+        Object.entries(vitest.configs.recommended.rules).map(([rule, value]) => [
+          rule.replace('vitest/', '@vitest/'),
+          value,
+        ]),
+      ),
     },
     {
       files: ['**/*.config.ts', '**/config.ts'],
