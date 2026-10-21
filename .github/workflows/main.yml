@@ -319,8 +319,7 @@ jobs:
 
       - name: Integration Tests
         env:
-          # Private-repo runners have less memory; leave public CI on its existing Node default.
-          NODE_OPTIONS: ${{ github.event.repository.private && '--max-old-space-size=3072' || '' }}
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
