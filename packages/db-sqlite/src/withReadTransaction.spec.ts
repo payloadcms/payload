@@ -1,9 +1,10 @@
 /* eslint-disable payload/no-relative-monorepo-imports -- Exercise native read sessions without initializing Payload. */
 import type { Client, Transaction } from '@libsql/client'
+import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { Payload, PayloadRequest } from 'payload'
 
 import { createClient } from '@libsql/client'
-import { eq } from 'drizzle-orm'
+import { eq, relations, sql } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/libsql'
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { randomUUID } from 'node:crypto'
@@ -20,6 +21,16 @@ import { getTransaction } from '../../drizzle/src/utilities/getTransaction.js'
 import { withReadTransaction } from './withReadTransaction.js'
 
 const records = sqliteTable('records', { id: integer().primaryKey(), title: text() })
+const notes = sqliteTable('notes', {
+  id: integer().primaryKey(),
+  recordID: integer(),
+  body: text(),
+})
+const recordsRelations = relations(records, ({ many }) => ({ notes: many(notes) }))
+const notesRelations = relations(notes, ({ one }) => ({
+  record: one(records, { fields: [notes.recordID], references: [records.id] }),
+}))
+const schema = { records, notes, recordsRelations, notesRelations }
 
 describe('native SQLite branch read transactions', () => {
   let client: Client
@@ -31,13 +42,13 @@ describe('native SQLite branch read transactions', () => {
     path = join(tmpdir(), `payload-read-snapshot-${randomUUID()}.db`)
     client = createClient({ url: `file:${path}` })
     await client.executeMultiple(
-      "CREATE TABLE records (id INTEGER PRIMARY KEY, title TEXT); INSERT INTO records VALUES (1, 'before')",
+      "CREATE TABLE records (id INTEGER PRIMARY KEY, title TEXT); INSERT INTO records VALUES (1, 'before'); CREATE TABLE notes (id INTEGER PRIMARY KEY, recordID INTEGER, body TEXT); INSERT INTO notes VALUES (1, 1, 'note')",
     )
     adapter = {
       name: 'sqlite',
       client,
-      drizzle: drizzle(client, { schema: { records } }),
-      schema: { records },
+      drizzle: drizzle(client, { schema }),
+      schema,
       sessions: {},
       logger: false,
       find: async function (this: DrizzleAdapter, { req }: { req: PayloadRequest }) {
@@ -55,6 +66,107 @@ describe('native SQLite branch read transactions', () => {
       context: {},
       payload: { db: adapter } as unknown as Payload,
     } as PayloadRequest
+  })
+
+  it('should reuse compiled relations while binding fresh raw, relational and batch queries to each native session', async () => {
+    const connectedDB = adapter.drizzle
+    const databases: LibSQLDatabase<typeof schema>[] = []
+    const parentExecute = vi.spyOn(client, 'execute').mockRejectedValue(new Error('Parent query'))
+
+    for (let round = 0; round < 2; round++) {
+      await withReadTransaction({
+        adapter,
+        read: async ({ db: scopedDB }) => {
+          const db = scopedDB as unknown as LibSQLDatabase<typeof schema>
+
+          databases.push(db)
+          expect(db._.schema).toBe(connectedDB._.schema)
+          expect(db._.fullSchema).toBe(connectedDB._.fullSchema)
+          expect(db._.tableNamesMap).toBe(connectedDB._.tableNamesMap)
+          expect(db.query.records).not.toBe(connectedDB.query.records)
+          expect(await db.query.records.findFirst({ with: { notes: true } })).toEqual({
+            id: 1,
+            title: 'before',
+            notes: [{ id: 1, recordID: 1, body: 'note' }],
+          })
+          expect(await db.get(sql`SELECT title FROM records WHERE id = 1`)).toEqual({
+            title: 'before',
+          })
+          expect(
+            await db.batch([db.select().from(records), db.all(sql`SELECT body FROM notes`)]),
+          ).toEqual([[{ id: 1, title: 'before' }], [{ body: 'note' }]])
+        },
+      })
+    }
+    expect(databases[0]).not.toBe(databases[1])
+    expect(databases[0]!.query.records).not.toBe(databases[1]!.query.records)
+    expect(parentExecute).not.toHaveBeenCalled()
+  })
+
+  it('should isolate overlapping native sessions while reusing their connected schema', async () => {
+    await client.execute('PRAGMA journal_mode = WAL')
+    const writer = createClient({ url: `file:${path}` })
+    let releaseFirst!: () => void
+    let hasReadFirst!: () => void
+    const firstRead = new Promise<void>((resolve) => {
+      hasReadFirst = resolve
+    })
+    const canFinishFirst = new Promise<void>((resolve) => {
+      releaseFirst = resolve
+    })
+    let firstDB: LibSQLDatabase<typeof schema> | undefined
+    const first = withReadTransaction({
+      adapter,
+      read: async ({ db: scopedDB }) => {
+        firstDB = scopedDB as unknown as LibSQLDatabase<typeof schema>
+        expect(await firstDB.query.records.findFirst()).toEqual({ id: 1, title: 'before' })
+        hasReadFirst()
+        await canFinishFirst
+        expect(await firstDB.query.records.findFirst()).toEqual({ id: 1, title: 'before' })
+      },
+    })
+
+    try {
+      await firstRead
+      await writer.execute("UPDATE records SET title = 'after' WHERE id = 1")
+      await withReadTransaction({
+        adapter,
+        read: async ({ db: scopedDB }) => {
+          const secondDB = scopedDB as unknown as LibSQLDatabase<typeof schema>
+
+          expect(secondDB).not.toBe(firstDB)
+          expect(secondDB._.schema).toBe(firstDB!._.schema)
+          expect(await secondDB.query.records.findFirst()).toEqual({ id: 1, title: 'after' })
+          expect(await firstDB!.get(sql`SELECT title FROM records WHERE id = 1`)).toEqual({
+            title: 'before',
+          })
+        },
+      })
+    } finally {
+      releaseFirst()
+      await first
+      writer.close()
+    }
+  })
+
+  it('should use rebuilt connected metadata after the adapter schema changes', async () => {
+    const previousSchema = adapter.drizzle._.schema
+    const rebuiltRecords = sqliteTable('records', { id: integer().primaryKey(), title: text() })
+    const rebuiltSchema = { records: rebuiltRecords }
+
+    adapter.schema = rebuiltSchema
+    adapter.drizzle = drizzle(client, { schema: rebuiltSchema })
+    await withReadTransaction({
+      adapter,
+      read: async ({ db: scopedDB }) => {
+        const db = scopedDB as unknown as LibSQLDatabase<typeof rebuiltSchema>
+
+        expect(db._.schema).not.toBe(previousSchema)
+        expect(db._.schema).toBe(adapter.drizzle._.schema)
+        expect(db._.fullSchema).toBe(rebuiltSchema)
+        expect(await db.query.records.findFirst()).toEqual({ id: 1, title: 'before' })
+      },
+    })
   })
 
   afterEach(async () => {
