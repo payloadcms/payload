@@ -457,7 +457,7 @@ export const Form: React.FC<FormProps> = (props) => {
           setProcessing(false)
 
           if (redirect) {
-            startRouteTransition(() => router.push(redirect))
+            void startRouteTransition(() => router.push(redirect))
           } else if (!disableToast) {
             successToast(json.message || t('general:submissionSuccessful'))
           }

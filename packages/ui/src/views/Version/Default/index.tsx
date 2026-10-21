@@ -114,7 +114,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
       const search = current.toString()
       const query = search ? `?${search}` : ''
 
-      startRouteTransition(() => router.push(`${pathname}${query}`))
+      void startRouteTransition(() => router.push(`${pathname}${query}`))
     },
     [pathname, router, searchParams, startRouteTransition],
   )

@@ -223,6 +223,7 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
   await Promise.all(wherePromises)
 
   populateFieldPermissions({
+    id,
     blockReferencesPermissions,
     collection: entityType === 'collection' ? (entity as SanitizedCollectionConfig) : null,
     data,
