@@ -113,19 +113,12 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         delete row.updatedAt
       }
 
-      const hasDataToUpdate = row && Object.keys(row)?.length
-
-      if (!hasDataToUpdate && hasLocales) {
-        // `updatedAt: null` leaves no main row update, so check the row matches before writing locale rows
-        const [match] = await drizzle
-          .select({ id: adapter.tables[tableName].id })
-          .from(adapter.tables[tableName])
-          .where(updateWhere)
-
-        if (match) {
-          await upsertLocales({ adapter, db, locales, parentID: id, tableName })
-        }
+      if (hasLocales && !Object.keys(row).length) {
+        // No-op update, so locale-only writes also match and lock the row before writing locale rows
+        row.id = adapter.tables[tableName].id
       }
+
+      const hasDataToUpdate = row && Object.keys(row)?.length
 
       // Then, handle regular row update
       if (ignoreResult) {
