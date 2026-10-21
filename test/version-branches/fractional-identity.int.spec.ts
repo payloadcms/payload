@@ -18,12 +18,14 @@ import {
 import { createBranchIdentityVisibility } from '../../packages/payload/src/versions/branches/storage/branchIdentityStore.js'
 import { initializeBranchVersion } from '../../packages/payload/src/versions/branches/storage/branchVersionStore.js'
 import { test } from '../__helpers/int/vitest.js'
+import { mongooseList } from '../__helpers/shared/isMongoose.js'
+import { nativeBranchDatabaseOptions } from './adapterCapabilities.js'
 import { fractionalIDsSlug } from './slugs.js'
 
 test.suite('Existing fractional numeric identities', { config: './config.ts' }, () => {
   test.options(
     'should preserve fractional Mongo custom IDs in ordinary reads and version parents',
-    { db: 'mongo' },
+    { db: (adapter) => mongooseList.includes(adapter) && adapter !== 'firestore' },
     async ({ payload }) => {
       const doc = await payload.create({
         collection: fractionalIDsSlug,
@@ -43,7 +45,9 @@ test.suite('Existing fractional numeric identities', { config: './config.ts' }, 
   )
   test.options(
     'should preserve fractional logical IDs through head adoption and effective projection relationships',
-    { db: 'mongo' },
+    {
+      db: (adapter) => mongooseList.includes(adapter) && nativeBranchDatabaseOptions.db(adapter),
+    },
     async ({ payload }) => {
       await payload.create({ collection: fractionalIDsSlug, data: { id: 2.5, title: 'Related' } })
       const doc = await payload.create({
