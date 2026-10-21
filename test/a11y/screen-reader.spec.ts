@@ -207,8 +207,8 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       await expect(page.locator('.select-locales-drawer')).toBeVisible()
       await navigateScreenReaderTo({
         matches: /English.*check\s?box|check\s?box.*English/i,
+        maxSteps: 12,
         screenReader,
-        shouldEnterDialogs: true,
       })
 
       expect(await screenReader.itemText()).toMatch(/English.*check\s?box|check\s?box.*English/i)
@@ -942,7 +942,8 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       await gotoPostsList({ page, postsURL })
       await openGroupBy(page)
       const output = await navigateScreenReaderTo({
-        matches: /sort/i,
+        matches: /sort.*(?:button|pop.?up)|(?:button|pop.?up).*sort/i,
+        maxSteps: 12,
         screenReader,
         shouldEnterDialogs: true,
       })

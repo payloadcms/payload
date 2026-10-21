@@ -470,6 +470,13 @@ export async function navigateScreenReaderTo({
     const spokenPhrase = await screenReader.lastSpokenPhrase()
     const output = `${itemText} ${spokenPhrase}`.replace(/\s+/g, ' ').trim()
 
+    if (process.env.PAYLOAD_SCREEN_READER_DEBUG === 'true') {
+      console.info(
+        '[screen-reader-navigation]',
+        JSON.stringify({ index, itemText, matches: matches.source, spokenPhrase }),
+      )
+    }
+
     matches.lastIndex = 0
     if (matches.test(output)) {
       return output
