@@ -39,7 +39,8 @@
     "PYLD-3613: submit-time validation tests do not establish the original error/readout after editing and clearing the password.",
     "Reported NVDA/Chrome failures require that platform's evidence; this branch's default Windows Guidepup project uses Firefox.",
     "NVDA browse-mode tests and screen-reader cursor containment must retain AT evidence.",
-    "Guidepup queue hazards removed from retained direction/version/widget captures; remote AT verification is still required."
+    "Guidepup queue hazards removed from retained direction/version/widget captures; remote AT verification is still required.",
+    "Further review found partial original-scenario coverage for PYLD-3699/PYLD-3730 (selected-locale cursor grouping) and PYLD-3642 (widget frame versus drag handle)."
   ],
   "tickets": [
     {
@@ -280,13 +281,13 @@
       "report": "Payload: Dashboard: Cannot place Widgets in rearrangement state while screen reader is active",
       "expected": "Pressing spacebar on a widget frame places it in its rearrangement state",
       "reportedScreenReaders": ["NVDA"],
-      "coverage": "screen-reader-regression-retained",
+      "coverage": "partial",
       "tests": [
         "WCAG.e2e.spec.ts :: should reorder widgets using the dedicated keyboard drag control",
         "screen-reader.spec.ts :: should lift a dashboard widget with Space while NVDA is active"
       ],
-      "limits": "NVDA active-keyboard behavior, not ordinary dragging. Nested Guidepup calls need attention; NVDA implementation differs.",
-      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+      "limits": "The ticket starts with Space on the focused widget frame. The test directly focuses the separate drag handle. The revised keyboard workflow needs explicit verification; a handle-only pass is narrower evidence.",
+      "manualVerification": "Outstanding: reproduce the original cursor grouping or frame-keyboard scenario; the current narrower assertion is not proof of the full remedy."
     },
     {
       "ticket": "PYLD-3644",
@@ -343,7 +344,7 @@
       "tests": [
         "screen-reader.spec.ts :: should expose relationship option names in NVDA browse mode"
       ],
-      "limits": "NVDA browse behavior, ensure browse mode actually entered; don't assume DOM focus tests equivalent.",
+      "limits": "NVDA browse mode is established by the installed adapter, but that adapter also clicks the body and resets to page top after the option list opens. The test must verify that the list remains open and that matching option text belongs to that list.",
       "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
     },
     {
@@ -481,13 +482,13 @@
       "report": "Payload - Fields and RichText: Related content for a locale menu item becomes ungrouped when selected",
       "expected": "Related content for selected locale is grouped into one focus",
       "reportedScreenReaders": ["VoiceOver"],
-      "coverage": "screen-reader-regression-retained",
+      "coverage": "partial",
       "tests": [
         "WCAG.e2e.spec.ts :: should expose the active locale as selected rather than disabled",
         "screen-reader.spec.ts :: should announce a selected locale as one grouped item with its state"
       ],
-      "limits": "Grouping portion is real browse-cursor concern. Current focus capture/exact English occurrence doesn't itself prove one grouped stop; semantics already browser-covered.",
-      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+      "limits": "The test counts English once in a focus capture; it does not verify one virtual-cursor stop or compare the selected and unselected locale grouping.",
+      "manualVerification": "Outstanding: reproduce the original cursor grouping or frame-keyboard scenario; the current narrower assertion is not proof of the full remedy."
     },
     {
       "ticket": "PYLD-3700",
@@ -591,13 +592,13 @@
       "report": "Payload: Selected status not indicated to screen reader in locale selector",
       "expected": "The currently selected locale receives focus as one element, and that element has the selected status.",
       "reportedScreenReaders": ["VoiceOver"],
-      "coverage": "screen-reader-regression-retained",
+      "coverage": "partial",
       "tests": [
         "WCAG.e2e.spec.ts :: should expose the active locale as selected rather than disabled",
         "screen-reader.spec.ts :: should announce a selected locale as one grouped item with its state"
       ],
-      "limits": "Grouping portion is real browse-cursor concern. Current focus capture/exact English occurrence doesn't itself prove one grouped stop; semantics already browser-covered.",
-      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+      "limits": "Selected-state semantics have browser coverage, but the report's one-grouped-item requirement is not verified by counting the locale name in one announcement.",
+      "manualVerification": "Outstanding: reproduce the original cursor grouping or frame-keyboard scenario; the current narrower assertion is not proof of the full remedy."
     },
     {
       "ticket": "PYLD-3735",
@@ -731,5 +732,422 @@
       "limits": "Hidden controls in virtual navigation distinct from tab order; large scan needs sensible boundaries.",
       "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
     }
-  ]
+  ],
+  "remainingScreenReaderReview": {
+    "date": "2026-10-21",
+    "scope": "Static review of every one of the 37 expanded screen-reader cases at commit 203e115335. No AT tests were executed during this review.",
+    "interpretation": "Retain means the observable outcome justifies AT evidence, not that the test has passed or proves conformance. Strengthen means current assertions have a concrete false-pass, false-failure, scope, or cursor-start risk.",
+    "counts": {
+      "retain-at": 12,
+      "scenario-gap": 6,
+      "strengthen-at": 17,
+      "consolidate": 1,
+      "browser-plus-manual-candidate": 1
+    },
+    "platformInventory": {
+      "total": 37,
+      "nvdaOnly": 5,
+      "voiceOverOnly": 1,
+      "both": 31,
+      "note": "On macOS the five NVDA-only cases are skipped; they are not passes."
+    },
+    "sharedRisks": [
+      {
+        "source": "test/a11y/helpers.ts :: navigateScreenReaderTo",
+        "finding": "The helper returns a match from current item text OR last spoken phrase and resets to web-content root first. A matching prior/context phrase does not prove the cursor reached the named control."
+      },
+      {
+        "source": "@guidepup/playwright 0.20.0 :: navigateNVDAtoWebContent",
+        "finding": "The installed adapter exits focus mode, clicks/blurs the body, and navigates to page top. It establishes browse mode, but can change an already-open menu; calling it after opening an options list is not neutral."
+      },
+      {
+        "source": "@guidepup/guidepup 0.36.4 :: NVDA.itemText",
+        "finding": "NVDA itemText returns lastSpokenPhrase; it is not independent accessibility-node identity evidence."
+      },
+      {
+        "source": "test/a11y/helpers.ts :: gotoLabelTestLogin",
+        "finding": "This helper still sets DisableAutologin on all page requests. External font requests can receive that custom header and trigger CORS failures; this is a setup hazard, not proof of a password accessibility failure."
+      },
+      {
+        "source": "test/playwright.screen-reader.config.ts",
+        "finding": "The Windows project uses Firefox, while many source reports specify NVDA with Chrome. Track exact reported-platform verification separately."
+      },
+      {
+        "source": "test/a11y/screen-reader.spec.ts :: collectModalCursorStops",
+        "finding": "Eighty blind steps per modal can be slow and can pass without progress. The media test performs this for two modals; cursor progress and scope must be established."
+      }
+    ],
+    "cases": [
+      {
+        "test": "should announce relative direction and position while dragging the ${kind} row",
+        "title": "should announce relative direction and position while dragging the Array row",
+        "scenario": "Array",
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3626"],
+        "decision": "retain-at",
+        "finding": "The report concerns dynamic direction/position speech, which DOM live-region text cannot prove. The original VoiceOver key sequence is represented; Windows evidence is additional coverage.",
+        "next": "Run the two focused AT cases after setup is stable; browser drag regressions already cover the resulting order."
+      },
+      {
+        "test": "should announce relative direction and position while dragging the ${kind} row",
+        "title": "should announce relative direction and position while dragging the Blocks row",
+        "scenario": "Blocks",
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3626"],
+        "decision": "retain-at",
+        "finding": "The report concerns dynamic direction/position speech, which DOM live-region text cannot prove. The original VoiceOver key sequence is represented; Windows evidence is additional coverage.",
+        "next": "Run the two focused AT cases after setup is stable; browser drag regressions already cover the resulting order."
+      },
+      {
+        "test": "should announce associated labels for the duplicate locale checkboxes",
+        "title": "should announce associated labels for the duplicate locale checkboxes",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3671"],
+        "decision": "scenario-gap",
+        "finding": "The original ticket requires one checkbox/label cursor stop. This test deliberately permits an extra English label stop.",
+        "next": "Reconcile the requirement with the native WebKit baseline; keep this as partial association evidence, not proof of the original single-stop remedy."
+      },
+      {
+        "test": "should announce the associated label for the deletion checkbox",
+        "title": "should announce the associated label for the deletion checkbox",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3678"],
+        "decision": "scenario-gap",
+        "finding": "The test permits the separate deletion-checkbox label stop described by the ticket.",
+        "next": "Reconcile the original single-stop requirement with the platform baseline before treating its existing pass as remediation evidence."
+      },
+      {
+        "test": "should announce table cell text once without conflicting sort commands",
+        "title": "should announce table cell text once without conflicting sort commands",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3750", "PYLD-3596"],
+        "decision": "retain-at",
+        "finding": "Duplicate cell readout and conflicting sort speech are actual AT outcomes. The expected title is checked once in spoken output, but only one fixture cell is sampled.",
+        "next": "Keep focused speech coverage; verify on NVDA/Chrome as reported, rather than inferring it from VoiceOver or NVDA/Firefox."
+      },
+      {
+        "test": "should communicate removed version text while browsing the comparison",
+        "title": "should communicate removed version text while browsing the comparison",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3722"],
+        "decision": "strengthen-at",
+        "finding": "The test aggregates speech from up to 30 stops and separately checks removed text and a deletion word. Those can come from different stops; navigation is not bounded to the older comparison side.",
+        "next": "Require removal meaning associated with the target removed text/current comparison side, without depending on a specific screen-reader pronunciation of strikethrough."
+      },
+      {
+        "test": "should announce the deletion dialog before background page content",
+        "title": "should announce the deletion dialog before background page content",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3769"],
+        "decision": "strengthen-at",
+        "finding": "The report concerns announcement order. The assertion instead rejects a short list of background words anywhere in the captured speech; it does not compare the first dialog announcement with an actual background sentinel.",
+        "next": "Check the initial relevant announcement and dialog arrival on the reported NVDA platform; distinguish background preceding the dialog from legitimate later context."
+      },
+      {
+        "test": "should announce a selected locale as one grouped item with its state",
+        "title": "should announce a selected locale as one grouped item with its state",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3699", "PYLD-3700", "PYLD-3730"],
+        "decision": "scenario-gap",
+        "finding": "Counting English once in one focus capture proves neither one virtual-cursor stop nor grouping relative to the unselected locale. The selected/not-disabled state does have browser and focus-speech evidence.",
+        "next": "Retain browser state coverage for PYLD-3700; verify actual browse stops for PYLD-3699 and the grouping portion of PYLD-3730."
+      },
+      {
+        "test": "should drop the ${kind} row with the screen reader active",
+        "title": "should drop the Array row with the screen reader active",
+        "scenario": "Array",
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3625"],
+        "decision": "retain-at",
+        "finding": "The original failure depends on the screen reader being active when moving/dropping a row. DOM-only keyboard dragging is complementary, not an equivalent replacement.",
+        "next": "Keep both Array and Blocks cases; confirm the intended AT mode and key handling before diagnosing a failure."
+      },
+      {
+        "test": "should drop the ${kind} row with the screen reader active",
+        "title": "should drop the Blocks row with the screen reader active",
+        "scenario": "Blocks",
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3625"],
+        "decision": "retain-at",
+        "finding": "The original failure depends on the screen reader being active when moving/dropping a row. DOM-only keyboard dragging is complementary, not an equivalent replacement.",
+        "next": "Keep both Array and Blocks cases; confirm the intended AT mode and key handling before diagnosing a failure."
+      },
+      {
+        "test": "should lift a dashboard widget with Space while NVDA is active",
+        "title": "should lift a dashboard widget with Space while NVDA is active",
+        "scenario": null,
+        "screenReaders": "NVDA",
+        "tickets": ["PYLD-3642"],
+        "decision": "scenario-gap",
+        "finding": "PYLD-3642 starts with keyboard focus on the widget frame and Space incorrectly opening Edit. This test directly focuses the separate drag handle before Space.",
+        "next": "Test the keyboard path from the frame and document the revised frame/handle interaction contract; a handle-only pass does not prove the literal reported trigger."
+      },
+      {
+        "test": "should reach widget edit size and remove controls with the VoiceOver cursor",
+        "title": "should reach widget edit size and remove controls with the VoiceOver cursor",
+        "scenario": null,
+        "screenReaders": "VoiceOver",
+        "tickets": ["PYLD-3573"],
+        "decision": "strengthen-at",
+        "finding": "Actual VoiceOver cursor access to widget controls is appropriate. The helper resets to the page root for three searches, which loses the widget anchor and can match another widget or exhaust a large traversal.",
+        "next": "Anchor traversal before the target controls, bound it to the added widget, and verify each visited item before activation."
+      },
+      {
+        "test": "should not expose an invisible loading object after relationship drawer content",
+        "title": "should not expose an invisible loading object after relationship drawer content",
+        "scenario": null,
+        "screenReaders": "NVDA",
+        "tickets": ["PYLD-3650"],
+        "decision": "strengthen-at",
+        "finding": "The synthetic end marker is appended inside the drawer. An unknown object immediately after the drawer could be excluded by that boundary. A blacklist of loading/unknown/unlabeled strings also misses an empty stop.",
+        "next": "Confirm the reported last-field-to-next-item transition in NVDA and place the scan boundary after the relevant possible loading object, without repairing the accessibility tree under test."
+      },
+      {
+        "test": "should allow the NVDA browse cursor to exit Lexical editors in both directions",
+        "title": "should allow the NVDA browse cursor to exit Lexical editors in both directions",
+        "scenario": null,
+        "screenReaders": "NVDA",
+        "tickets": ["PYLD-3741"],
+        "decision": "retain-at",
+        "finding": "The report concerns NVDA browse-mode escape from both editors. The test explicitly exits focus mode, navigates both directions, and checks outside boundaries; ordinary Tab tests do not prove this.",
+        "next": "Keep the reported-platform check; verify boundary matches identify outside content, and diagnose cursor state before extending step limits."
+      },
+      {
+        "test": "should omit hidden Lexical controls from screen-reader navigation",
+        "title": "should omit hidden Lexical controls from screen-reader navigation",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3789"],
+        "decision": "strengthen-at",
+        "finding": "The negative scan terminates at broad text/edit or Add item matches. It can finish before all relevant hidden controls are traversed or confuse an editor-local item with outside content.",
+        "next": "Use explicit outside-editor boundaries and demonstrate the relevant region was traversed; keep actual virtual-cursor evidence."
+      },
+      {
+        "test": "should expose validation errors next to their fields",
+        "title": "should expose validation errors next to their fields",
+        "scenario": "document form",
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3581"],
+        "decision": "strengthen-at",
+        "finding": "The original form-error adjacency outcome is virtual reading order. The helper uses DOM blur/focus then a three-step scan, without verifying that the screen-reader cursor actually starts at the intended field.",
+        "next": "Keep the document case and complementary browser associations; verify the AT starting field. The login variant does not replace the separate edit-and-clear requirement in PYLD-3613."
+      },
+      {
+        "test": "should expose validation errors next to their fields",
+        "title": "should expose validation errors next to their fields",
+        "scenario": "login form",
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3581", "PYLD-3613"],
+        "decision": "strengthen-at",
+        "finding": "The original form-error adjacency outcome is virtual reading order. The helper uses DOM blur/focus then a three-step scan, without verifying that the screen-reader cursor actually starts at the intended field.",
+        "next": "Keep the document case and complementary browser associations; verify the AT starting field. The login variant does not replace the separate edit-and-clear requirement in PYLD-3613."
+      },
+      {
+        "test": "should announce password errors after submission",
+        "title": "should announce password errors after submission",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3613"],
+        "decision": "scenario-gap",
+        "finding": "The error is captured only after clicking Login; the original report concerns the password being typed and cleared, prior to submission.",
+        "next": "Claude is investigating the exact browser scenario separately; do not change the scenario to force a pass."
+      },
+      {
+        "test": "should contain screen-reader traversal in bulk-upload and image-edit dialogs",
+        "title": "should contain screen-reader traversal in bulk-upload and image-edit dialogs",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3575"],
+        "decision": "strengthen-at",
+        "finding": "The fixed 40-forward/40-backward scans do not require progress or distinct expected controls. A cursor repeating Add files or Crop can pass the positive/negative word checks. Background-name blacklists can also reject legitimate modal content.",
+        "next": "Require progress through known modal boundaries and controls, then test confinement in both directions. If unreliable, retain browser isolation checks plus explicit manual virtual-cursor verification."
+      },
+      {
+        "test": "should contain screen-reader traversal in the nested folder-location modal",
+        "title": "should contain screen-reader traversal in the nested folder-location modal",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3587"],
+        "decision": "strengthen-at",
+        "finding": "Like the media scan, this can pass while repeating one in-modal item and does not demonstrate traversal through the modal.",
+        "next": "Require distinct expected locations and bounded forward/reverse coverage; retain manual AT containment evidence if automation cannot reliably reproduce it."
+      },
+      {
+        "test": "should move the screen-reader cursor into the add-widget drawer upon opening",
+        "title": "should move the screen-reader cursor into the add-widget drawer upon opening",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3644"],
+        "decision": "retain-at",
+        "finding": "The test captures opening the real drawer and checks the screen-reader item immediately, which addresses automatic AT cursor entry rather than merely DOM focus.",
+        "next": "Keep this representative modal-entry scenario; browser isolation/focus checks remain complementary."
+      },
+      {
+        "test": "should move the screen-reader cursor into Copy to locale from the overflow menu",
+        "title": "should move the screen-reader cursor into Copy to locale from the overflow menu",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3682"],
+        "decision": "retain-at",
+        "finding": "The report concerns opening a drawer from an overflow menu resetting AT focus. The test captures that exact transition and rejects the previous menu/page context.",
+        "next": "Keep; inspect actual current item and target drawer readiness when diagnosing, without resetting the cursor after opening."
+      },
+      {
+        "test": "should expose one screen-reader stop for the Copy to locale select",
+        "title": "should expose one screen-reader stop for the Copy to locale select",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3680"],
+        "decision": "strengthen-at",
+        "finding": "The initial captured item is never required to be the Copy to combobox. One unrelated starting stop followed by the overwrite checkbox could satisfy the count of one.",
+        "next": "First establish that the captured stop has the destination control's name and role, then count stops until the verified next field."
+      },
+      {
+        "test": "should move the screen-reader cursor into every shared popup",
+        "title": "should move the screen-reader cursor into every shared popup",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3697", "PYLD-3701"],
+        "decision": "strengthen-at",
+        "finding": "The helper checks generic captured item words such as Title or Field. Those may appear in background content and do not establish popup-local arrival. Five popup flows also make one failure expensive to diagnose.",
+        "next": "Use popup-specific names/roles/context without moving focus after opening; preserve representative coverage for both localization and the shared popup implementation."
+      },
+      {
+        "test": "should expose disabled row-menu actions to screen-reader navigation",
+        "title": "should expose disabled row-menu actions to screen-reader navigation",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3745"],
+        "decision": "strengthen-at",
+        "finding": "The fixture only opens Blocks, while the ticket describes both Array and Blocks. Matching either paste or replace and a disabled word in merged item/speech output does not verify each disabled action was reached.",
+        "next": "Check the reported variants and named disabled items in the current cursor output; browser nonactivation assertions remain complementary."
+      },
+      {
+        "test": "should keep the disabled Group by sort control in screen-reader navigation",
+        "title": "should keep the disabled Group by sort control in screen-reader navigation",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3784"],
+        "decision": "strengthen-at",
+        "finding": "The reported disabled control is an AT-discoverability issue, but the helper can match the prior spoken phrase as well as current item text. The actual successful run did reach Sort; the assertion can be more precise.",
+        "next": "Require the current cursor item to identify Sort and its role/state. Keep the existing Close-button anchor and small step budget."
+      },
+      {
+        "test": "should announce automatic search and collection results",
+        "title": "should announce automatic search and collection results",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3773"],
+        "decision": "consolidate",
+        "finding": "The browser test already checks the advance automatic-search description for both search inputs. Table result speech is checked more thoroughly by the dedicated PYLD-3696 AT test.",
+        "next": "Promote browser hint coverage for PYLD-3773 and link relevant table speech coverage before removing this overlapping AT case. Preserve a manual check for the Columns hint if needed."
+      },
+      {
+        "test": "should announce rich-text upload and relationship filter options in NVDA browse mode",
+        "title": "should announce rich-text upload and relationship filter options in NVDA browse mode",
+        "scenario": null,
+        "screenReaders": "NVDA",
+        "tickets": ["PYLD-3662"],
+        "decision": "strengthen-at",
+        "finding": "Explicit NVDA browse-mode switching and open-option checks are appropriate. The scan accepts option names anywhere in the next option-count-plus-eight stops, so coincidental background text can satisfy a name.",
+        "next": "Keep both rich-text drawer types and controls; verify bounded option-list traversal and option context for each required name."
+      },
+      {
+        "test": "should expose relationship option names in NVDA browse mode",
+        "title": "should expose relationship option names in NVDA browse mode",
+        "scenario": null,
+        "screenReaders": "NVDA",
+        "tickets": ["PYLD-3656"],
+        "decision": "strengthen-at",
+        "finding": "navigateToWebContent in the installed NVDA adapter clicks the body and resets to page top. Calling it after opening the list can dismiss/change the menu, and Example post can match content outside the intended option list.",
+        "next": "Establish browse mode without losing the open list; assert it stays open and verify the reported option names within that context."
+      },
+      {
+        "test": "should announce filter and bulk-edit options by name",
+        "title": "should announce filter and bulk-edit options by name",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3752"],
+        "decision": "retain-at",
+        "finding": "The test derives an expected active option from the real filter/bulk-edit UI and captures keyboard movement to it. Blank spoken option names are not established solely by DOM names.",
+        "next": "Keep focused NVDA evidence for all reported control types; confirm whether the failing report is browse- or focus-mode specific before adapting it."
+      },
+      {
+        "test": "should announce both rapid toast messages",
+        "title": "should announce both rapid toast messages",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": [],
+        "decision": "retain-at",
+        "finding": "Two rapid spoken notifications are a timing-dependent AT outcome. Browser tests prove both remain in the native live region but not that both are announced.",
+        "next": "Retain only if both announcements are the intended product requirement; distinguish screen-reader coalescing/capture loss from product message loss rather than retrying blindly."
+      },
+      {
+        "test": "should announce accessible names in custom toast content",
+        "title": "should announce accessible names in custom toast content",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": [],
+        "decision": "browser-plus-manual-candidate",
+        "finding": "An existing browser regression already checks the custom toast's named image, controls, hidden-label resolution, and keyboard accessibility. This additional unticketed test requires all those names in an automatic announcement.",
+        "next": "Use the existing browser regression plus a recorded manual spontaneous-announcement check; retain a separate AT test only for a concrete speech regression not covered by the real unsaved-toast case."
+      },
+      {
+        "test": "should announce the unsaved Copy to locale toast without its close button",
+        "title": "should announce the unsaved Copy to locale toast without its close button",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3669"],
+        "decision": "retain-at",
+        "finding": "This reproduces the actual unsaved-change toast from the ticket and tests Close toast leaking into spontaneous speech. aria-live=off on a button alone does not prove the announcement.",
+        "next": "Keep the real-product-flow speech test; do not require the close button to be hidden or inaccessible."
+      },
+      {
+        "test": "should announce the trash toast and dismiss it after the default timeout",
+        "title": "should announce the trash toast and dismiss it after the default timeout",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3580"],
+        "decision": "scenario-gap",
+        "finding": "The test intentionally asserts timed dismissal without putting the virtual cursor on the toast, whereas PYLD-3580 requires persistence while the reader is focused on it.",
+        "next": "Keep timing/announcement evidence clearly separate; reproduce the cursor-persistence requirement before claiming a remedy or changing production behavior."
+      },
+      {
+        "test": "should announce global API depth changes while focus stays on the stepper",
+        "title": "should announce global API depth changes while focus stays on the stepper",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3618"],
+        "decision": "strengthen-at",
+        "finding": "The spoken assertion accepts any occurrence of the updated number, which can also occur in positional/context speech. Browser checks already prove the numeric value and stable keyboard focus.",
+        "next": "Require the depth-update message/value context in the spontaneous announcement, while retaining focus on the increment/decrement control."
+      },
+      {
+        "test": "should announce table search result changes without moving focus",
+        "title": "should announce table search result changes without moving focus",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3696"],
+        "decision": "strengthen-at",
+        "finding": "Successive queries can produce the same count. The DOM checks include each query, but the speech regex only requires a generic result count and can accept stale or unrelated count speech.",
+        "next": "Require result speech tied to the current query as well as count, particularly the two different one-result searches."
+      },
+      {
+        "test": "should announce navigation folder search results without moving focus",
+        "title": "should announce navigation folder search results without moving focus",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3582"],
+        "decision": "retain-at",
+        "finding": "The real folder-search submission and resulting count are captured while focus and URL remain stable; this addresses an unsolicited result announcement.",
+        "next": "Keep; inspect actual speech and live-region update before interpreting a capture failure as a product bug."
+      }
+    ]
+  }
 }
