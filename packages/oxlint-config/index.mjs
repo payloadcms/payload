@@ -235,6 +235,17 @@ const config = {
         ...reactA11yRules,
         // Needs type information, which oxlint doesn't give JS plugins
         '@eslint-react/no-leaked-conditional-rendering': 'off',
+      },
+    },
+    /**
+     * Unlike the JSX rules above, React's hook and React Compiler rules also check `.ts` files. Custom
+     * hooks often live in `.ts` files, and the build runs React Compiler on every file with
+     * `'use client'`, including `.ts` ones. These rules only analyze functions named like components
+     * or hooks, so checking every other `.ts` file doesn't measurably slow down linting.
+     */
+    {
+      files: ['**/*.{ts,tsx}'],
+      rules: {
         // React
         'react-hooks/exhaustive-deps': 'warn',
         // TODO: back to 'error' once fixed. This version flags more than the ESLint one.
