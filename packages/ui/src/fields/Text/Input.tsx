@@ -53,7 +53,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
   const editDepth = useEditDepth()
   const { i18n, t } = useTranslation()
 
-  const inputID = idFromProps ?? generateFieldID(path, editDepth, uuid, hasMany ? 'input' : 'field')
+  const inputID = idFromProps ?? generateFieldID(path, editDepth, uuid)
   const errorID = showError ? generateFieldID(path, editDepth, uuid, 'field-error') : undefined
 
   const editableProps: ReactSelectAdapterProps['customProps']['editableProps'] = (

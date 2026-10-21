@@ -136,6 +136,7 @@ export function UploadInput(props: UploadInputProps) {
   const code = locale?.code
   const { i18n, t } = useTranslation()
   const labelID = React.useId()
+  const a11yID = label ? labelID : undefined
 
   // This will be used by the bulk upload to allow you to select only collections you have create permissions for
   const collectionSlugsWithCreatePermission = useMemo(() => {
@@ -697,7 +698,7 @@ export function UploadInput(props: UploadInputProps) {
 
   return (
     <div
-      aria-labelledby={label ? labelID : undefined}
+      aria-labelledby={a11yID}
       className={[
         fieldBaseClass,
         baseClass,
@@ -708,10 +709,10 @@ export function UploadInput(props: UploadInputProps) {
         .filter(Boolean)
         .join(' ')}
       id={`field-${path?.replace(/\./g, '__')}`}
-      role={label ? 'group' : undefined}
+      role={a11yID ? 'group' : undefined}
       style={style}
     >
-      <div className={`${baseClass}__label`} id={labelID}>
+      <div className={`${baseClass}__label`} id={a11yID}>
         <RenderCustomComponent
           CustomComponent={Label}
           Fallback={
