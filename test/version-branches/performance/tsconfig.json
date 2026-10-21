@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": false,
+    "incremental": false,
+    "noEmit": true,
+    "emitDeclarationOnly": false
+  },
+  "include": [
+    "./*.ts"
+  ]
+}
