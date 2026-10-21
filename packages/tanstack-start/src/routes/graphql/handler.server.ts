@@ -9,6 +9,8 @@ import {
   mergeHeaders,
 } from 'payload'
 
+import { importConfigToSchema, importCreateHandler } from './importGraphQL.js'
+
 const handleError = async ({
   err,
   payload,
@@ -69,12 +71,11 @@ const getGraphql = async (config: Promise<SanitizedConfig> | SanitizedConfig) =>
 
   if (!cached.promise) {
     const resolvedConfig = await config
-    const graphqlPackage = '@payloadcms/graphql'
-    const { configToSchema } = await import(/* @vite-ignore */ graphqlPackage)
-    cached.promise = new Promise((resolve) => {
-      const schema = configToSchema(resolvedConfig)
-      resolve(cached.graphql || schema)
-    })
+    cached.promise = (async () => {
+      const configToSchema = await importConfigToSchema()
+
+      return cached.graphql || configToSchema(resolvedConfig)
+    })()
   }
 
   try {
@@ -119,30 +120,21 @@ export const handleGraphQL = async ({
 
   const { schema, validationRules } = await getGraphql(config)
 
-  const graphqlHttpHandlerPath = 'graphql-http/lib/use/fetch'
-  const { createHandler } = await import(/* @vite-ignore */ graphqlHttpHandlerPath)
+  const createHandler = await importCreateHandler()
 
   const headers: Record<string, string> = {}
   const apiResponse = await createHandler({
     context: { headers, req },
-    onOperation: async (_request: any, args: any, result: any) => {
-      const response =
-        typeof payload.extensions === 'function'
-          ? await payload.extensions({
-              args,
-              req: _request,
-              result,
-            })
-          : result
-      if (response.errors) {
+    onOperation: async (_request: any, _args: any, result: any) => {
+      if (result.errors) {
         const errors = await Promise.all(
-          response.errors.map((error: any) => {
+          result.errors.map((error: any) => {
             return handleError({ err: error, payload, req })
           }),
         )
-        return { ...response, errors }
+        return { ...result, errors }
       }
-      return response
+      return result
     },
     schema,
     validationRules: (_: any, args: any, defaultRules: any) =>

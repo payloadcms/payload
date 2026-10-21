@@ -103,40 +103,51 @@
     "test:types": "tsc --project test/tsconfig.json"
   },
   "dependencies": {
-    "@payloadcms/graphql": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
-    "graphql-http": "1.22.4",
     "qs-esm": "^7.0.2"
   },
   "devDependencies": {
+    "@payloadcms/graphql": "workspace:*",
     "@tanstack/react-router": "^1.170.44",
     "@tanstack/react-start": "^1.169.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^6.0.0",
     "@vitejs/plugin-rsc": "^0.5.21",
+    "graphql-http": "1.22.4",
     "payload": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:",
     "vite": ">=8.0.0"
   },
   "peerDependencies": {
+    "@payloadcms/graphql": "workspace:*",
     "@tanstack/react-router": "^1.170.44",
     "@tanstack/react-start": "^1.169.1",
     "@vitejs/plugin-react": "^6.0.0",
     "@vitejs/plugin-rsc": "^0.5.21",
     "graphql": "^16.8.1",
+    "graphql-http": "^1.22.4",
     "payload": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "vite": ">=8.0.0"
   },
   "peerDependenciesMeta": {
+    "@payloadcms/graphql": {
+      "optional": true
+    },
     "@vitejs/plugin-react": {
       "optional": true
     },
     "@vitejs/plugin-rsc": {
+      "optional": true
+    },
+    "graphql": {
+      "optional": true
+    },
+    "graphql-http": {
       "optional": true
     },
     "vite": {

@@ -16,7 +16,7 @@ import { runUpgrade } from './upgrade/index.js'
 import { renderUpgradePrompt } from './upgrade/prompt.js'
 import { resolveSelfCommand } from './upgrade/selfCommand.js'
 import { loadPackageJsons, serializePackageJson } from './utils/packageJson.js'
-import { loadProject } from './utils/project.js'
+import { deleteFiles, getDeletedFilePaths, loadProject } from './utils/project.js'
 
 export async function main(argv: string[] = process.argv.slice(2)): Promise<void> {
   const flags = parseFlags(argv)
@@ -83,13 +83,14 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
   const changed = project
     .getSourceFiles()
     .filter((file) => snapshot.get(file.getFilePath()) !== file.getFullText())
+  const deleted = getDeletedFilePaths({ project, snapshot })
 
   const changedPackageJsons = packageJsons.filter(
     (pkg) => serializePackageJson(pkg.data, pkg.originalText) !== pkg.originalText,
   )
 
   if (flags.print) {
-    if (changed.length === 0 && changedPackageJsons.length === 0) {
+    if (changed.length === 0 && changedPackageJsons.length === 0 && deleted.length === 0) {
       console.log('(no files changed)')
     } else {
       for (const file of changed) {
@@ -100,12 +101,16 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
         console.log(`// ${pkg.path}`)
         console.log(serializePackageJson(pkg.data, pkg.originalText))
       }
+      for (const path of deleted) {
+        console.log(`// deleted ${path}`)
+      }
     }
   } else if (!flags.dry) {
     await Promise.all(changed.map((file) => file.save()))
     for (const pkg of changedPackageJsons) {
       writeFileSync(pkg.path, serializePackageJson(pkg.data, pkg.originalText))
     }
+    deleteFiles({ paths: deleted })
   }
 
   printSummary(results)

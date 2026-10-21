@@ -24,6 +24,8 @@
     "cross-env": "^7.0.3",
     "dotenv": "^8.2.0",
     "graphql": "^16.9.0",
+    "graphql-http": "1.22.4",
+    "graphql-playground-html": "1.6.30",
     "install": "^0.13.0",
     "next": "^15.4.10",
     "payload": "latest",

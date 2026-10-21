@@ -21,6 +21,8 @@
     "@payloadcms/richtext-slate": "latest",
     "@payloadcms/ui": "latest",
     "cross-env": "^7.0.3",
+    "graphql-http": "1.22.4",
+    "graphql-playground-html": "1.6.30",
     "next": "^15.4.10",
     "payload": "latest",
     "react": "19.2.1",

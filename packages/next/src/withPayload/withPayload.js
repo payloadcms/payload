@@ -146,6 +146,12 @@ export const withPayload = (nextConfig = {}, options = {}) => {
       // WHY: without externalizing graphql, a graphql version error will be thrown
       // during runtime ("Ensure that there is only one instance of \"graphql\" in the node_modules\ndirectory.")
       'graphql',
+      // GraphQL is opt-in, so these optional peers may not be installed. Keeping them external leaves
+      // resolution to runtime, where importGraphQL.ts turns a missing package into an install hint,
+      // instead of failing the build on its literal dynamic imports.
+      '@payloadcms/graphql',
+      'graphql-http',
+      'graphql-playground-html',
       'drizzle-kit',
       'drizzle-kit/api',
       'sharp',
@@ -189,7 +195,6 @@ export const withPayload = (nextConfig = {}, options = {}) => {
             '@payloadcms/drizzle',
             '@payloadcms/email-nodemailer',
             '@payloadcms/email-resend',
-            '@payloadcms/graphql',
             '@payloadcms/kv-redis',
             '@payloadcms/payload-cloud',
             // Its `/client` entry has no exports, so the import map never loads anything from it

@@ -11,7 +11,7 @@ import type { RegistryPackument, ResolvedVersions, UpgradeDeps } from './types.j
 import { transforms as registry } from '../registry.js'
 import { runTransforms as defaultRunTransforms } from '../runner.js'
 import { loadPackageJsons, serializePackageJson } from '../utils/packageJson.js'
-import { loadProject } from '../utils/project.js'
+import { deleteFiles, getDeletedFilePaths, loadProject } from '../utils/project.js'
 import { resolveDefaultTag } from './defaultTag.js'
 import { detectPackageManager } from './detectPackageManager.js'
 import { renderReport } from './report.js'
@@ -133,6 +133,7 @@ export async function runUpgrade(
       .filter((f) => snapshot.get(f.getFilePath()) !== f.getFullText())
       .map((f) => f.save()),
   )
+  deleteFiles({ paths: getDeletedFilePaths({ project, snapshot }) })
   for (const pkg of packageJsons) {
     const text = serializePackageJson(pkg.data, pkg.originalText)
     if (text !== pkg.originalText) {
