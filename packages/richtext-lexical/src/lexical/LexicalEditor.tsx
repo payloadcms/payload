@@ -5,10 +5,10 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin.js'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin.js'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin.js'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
-import { useTranslation } from '@payloadcms/ui'
+import { useDocumentInfo, useLocale, useTranslation } from '@payloadcms/ui'
 import { BLUR_COMMAND, COMMAND_PRIORITY_LOW, FOCUS_COMMAND } from 'lexical'
 import * as React from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import type { LexicalProviderProps } from './LexicalProvider.js'
 
@@ -27,6 +27,7 @@ import { SelectAllPlugin } from './plugins/SelectAllPlugin/index.js'
 import { SlashMenuPlugin } from './plugins/SlashMenu/index.js'
 import { TextPlugin } from './plugins/TextPlugin/index.js'
 import { LexicalContentEditable } from './ui/ContentEditable.js'
+import { useEditorHistory } from './useEditorHistory.js'
 
 export const LexicalEditor: React.FC<
   {
@@ -38,6 +39,13 @@ export const LexicalEditor: React.FC<
   const editorConfigContext = useEditorConfigContext()
   const [editor] = useLexicalComposerContext()
   const isEditable = useLexicalEditable()
+  const { id, collectionSlug, globalSlug } = useDocumentInfo()
+  const locale = useLocale()
+  const historyScope = useMemo(
+    () => ({ id, collectionSlug, globalSlug, locale: locale?.code }),
+    [collectionSlug, globalSlug, id, locale?.code],
+  )
+  const historyState = useEditorHistory(historyScope)
   const { t } = useTranslation<Record<string, never>, string>()
   const instructionsID = React.useId()
   const hasTabIndentation = isEditable && editorConfig.features.enabledFeatures.includes('indent')
@@ -178,7 +186,7 @@ export const LexicalEditor: React.FC<
         )}
         {isEditable && (
           <React.Fragment>
-            <HistoryPlugin />
+            <HistoryPlugin externalHistoryState={historyState} />
             {editorConfig?.features?.markdownTransformers?.length > 0 && <MarkdownShortcutPlugin />}
           </React.Fragment>
         )}

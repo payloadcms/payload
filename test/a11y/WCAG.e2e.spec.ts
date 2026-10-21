@@ -72,6 +72,56 @@ const openNavigationForUserMenu = async ({ page }: { page: Page }): Promise<void
   await expect(page.locator('.user-menu__trigger')).toBeVisible()
 }
 
+async function holdPostSave({ page }: { page: Page }) {
+  let releaseSave = () => {}
+  const saveGate = new Promise<void>((resolve) => {
+    releaseSave = resolve
+  })
+  let hasInterceptedSave = false
+  let finishSave = () => {}
+  const saveFinished = new Promise<void>((resolve) => {
+    finishSave = resolve
+  })
+  const saveRoute = '**/api/posts**'
+  const holdSave = async (route: Route) => {
+    if (
+      route.request().method() !== 'POST' ||
+      new URL(route.request().url()).pathname !== '/api/posts'
+    ) {
+      await route.continue()
+      return
+    }
+
+    hasInterceptedSave = true
+    try {
+      await saveGate
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({ errors: [{ message: 'Controlled save failure' }] }),
+        status: 400,
+      })
+    } finally {
+      finishSave()
+    }
+  }
+
+  await page.route(saveRoute, holdSave)
+
+  return {
+    cleanup: async () => {
+      releaseSave()
+      if (hasInterceptedSave) {
+        await saveFinished
+      }
+      if (!page.isClosed()) {
+        await page.unroute(saveRoute, holdSave)
+      }
+    },
+    hasInterceptedSave: () => hasInterceptedSave,
+    release: releaseSave,
+  }
+}
+
 test.describe('WCAG 2.2 Level AA', () => {
   let page: Page
   let postsURL: AdminUrlUtil
@@ -2482,6 +2532,59 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.1.1 Keyboard (A)', () => {
+    test('should restore rich-text keyboard editing after form processing without losing content', async () => {
+      await gotoCreatePost({ page, postsURL })
+      const editor = page.getByRole('textbox', { name: 'Content', exact: true }).first()
+      const content = 'Unsaved keyboard content'
+      const heldSave = await holdPostSave({ page })
+
+      try {
+        await page
+          .getByRole('textbox', { name: 'Title — English', exact: true })
+          .fill('Editability regression')
+        await expect(editor).toHaveAttribute('contenteditable', 'true')
+        await expect(editor).not.toHaveAttribute('aria-readonly', 'true')
+        await editor.fill(content)
+        await editor.press('End')
+        await editor.press('Enter')
+        await page.keyboard.type('Second keyboard paragraph')
+        await expect(editor).toContainText('Second keyboard paragraph')
+        const expectedContent = await editor.textContent()
+        const originalEditor = await editor.elementHandle()
+
+        await page.getByRole('button', { name: 'Save Draft', exact: true }).click()
+        await expect.poll(heldSave.hasInterceptedSave).toBe(true)
+        await expect(editor).toHaveAttribute('contenteditable', 'false')
+        await expect(editor).toHaveAttribute('aria-readonly', 'true')
+        await expect(editor).toHaveText(expectedContent!)
+        await editor.focus()
+        await page.keyboard.type('x')
+        await expect(editor).toHaveText(expectedContent!)
+        heldSave.release()
+        await expect(editor).toHaveAttribute('contenteditable', 'true')
+        await expect(editor).not.toHaveAttribute('aria-readonly', 'true')
+        await expect(editor).toHaveText(expectedContent!)
+        await expect
+          .poll(() => originalEditor!.evaluate((element) => element.isConnected))
+          .toBe(true)
+        await editor.focus()
+        await page.keyboard.press('ControlOrMeta+z')
+        await expect(editor).not.toContainText('Second keyboard paragraph')
+        await expect(editor).toContainText(content)
+        await page.keyboard.press('ControlOrMeta+Shift+z')
+        await expect(editor).toHaveText(expectedContent!)
+        await page.keyboard.press('ControlOrMeta+End')
+        await page.keyboard.type(' continued')
+        await expect(editor).toHaveText(`${expectedContent} continued`)
+        await expect(editor).toBeFocused()
+        await page.keyboard.press('Escape')
+        await page.keyboard.press('Tab')
+        await expect(editor).not.toBeFocused()
+      } finally {
+        await heldSave.cleanup()
+      }
+    })
+
     test('should isolate nested rich-text move menu keys and mouse dragging from the enclosing editor', async () => {
       await gotoCreatePost({ page, postsURL })
       const richText = page.locator('.rich-text-lexical[data-field-path="content"]')

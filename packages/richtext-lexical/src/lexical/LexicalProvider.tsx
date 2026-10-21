@@ -17,6 +17,7 @@ import {
 } from './config/client/EditorConfigProvider.js'
 import { LexicalEditor as LexicalEditorComponent } from './LexicalEditor.js'
 import { getEnabledNodes } from './nodes/index.js'
+import { EditabilityPlugin } from './plugins/Editability/index.js'
 
 export type LexicalProviderProps = {
   composerKey: string
@@ -116,14 +117,13 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
     return <p>Loading...</p>
   }
 
-  // We need to add initialConfig.editable to the key to force a re-render when the readOnly prop changes.
-  // Without it, there were cases where lexical editors inside drawers turn readOnly initially - a few miliseconds later they turn editable, but the editor does not re-render and stays readOnly.
-  // We also add currentView to force re-render when the view changes.
+  // Synchronize read-only changes without recreating the editor and discarding its current state.
   return (
     <LexicalComposer
       initialConfig={initialConfig}
       key={composerKey + initialConfig.editable + currentView}
     >
+      <EditabilityPlugin isReadOnly={readOnly === true} />
       <EditorConfigProvider
         editorConfig={editorConfig}
         editorContainerRef={editorContainerRef}

@@ -414,6 +414,8 @@ The stack starts at main. Each layer targets the preceding branch so reviewers s
 | 29    | [#18955](https://github.com/payloadcms/payload/pull/18955) | Exclusively leased local SQLite read clients with native capability checks, scope expiry and generation retirement    |
 | 30    | [#18958](https://github.com/payloadcms/payload/pull/18958) | Test-only private SQLite client observation, native cold/warm wiring proof and explicit attribution boundaries        |
 
+| 31 | [#18961](https://github.com/payloadcms/payload/pull/18961) | Branch-scoped PostgreSQL private locale index and localized ranking root fence; independent native review |
+
 Current implementation state as of 2026-10-21:
 
 - M0 now has executable live/working, localized publish/withdraw, autosave, restore, validation, global, Local/REST/GraphQL/SDK read parity, access, and pending-job baselines. Genuine published-package SQLite exports cover stable 3.91.0 scalar statuses and current 4.0.0-beta.3 localized statuses. Independent phase review and full existing-suite evidence are recorded below before signoff; adapter-specific source upgrade rehearsals remain M9.
