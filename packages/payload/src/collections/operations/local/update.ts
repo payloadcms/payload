@@ -249,7 +249,14 @@ async function updateLocal<
     ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
     payload,
   })
-  req.file = file ?? (await getFileByPath(filePath!))
+
+  // Only assign `req.file` when a file or filePath was explicitly passed to this operation.
+  // Otherwise, this would overwrite (and drop) a file reference that was already set on `req`
+  // by an earlier upload operation, e.g. when a hook passes the original `req` through to a
+  // nested Local API call. See https://github.com/payloadcms/payload/issues/15975
+  if (file || filePath) {
+    req.file = file ?? (await getFileByPath(filePath!))
+  }
 
   const args = {
     id,
