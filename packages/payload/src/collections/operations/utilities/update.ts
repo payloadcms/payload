@@ -39,6 +39,7 @@ import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
 import { getTopLevelFieldNames } from '../../../utilities/getTopLevelFieldNames.js'
 import {
+  hasAutosaveEnabled,
   hasDraftsEnabled,
   hasDraftValidationEnabled,
   hasLocalizeStatusEnabled,
@@ -156,6 +157,8 @@ export const updateDocument = async <
     collectionSlug: collectionConfig.slug,
     lockErrorMessage: `Document with ID ${id} is currently locked by another user and cannot be updated.`,
     overrideLock,
+    // Draft saves keep the lock. Publish, trash, and collections without autosave release it.
+    preserveLock: hasAutosaveEnabled(collectionConfig) && !data?.deletedAt && isSavingDraft,
     req,
   })
 

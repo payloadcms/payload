@@ -153,6 +153,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
               },
               action: url,
               context: {
+                autosave: true,
                 getDocPermissions: false,
                 incrementVersionCount: !mostRecentVersionIsAutosaved,
               },
