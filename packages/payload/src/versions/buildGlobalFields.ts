@@ -3,6 +3,7 @@ import type { Field, FlattenedField } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 
 import { hasAutosaveEnabled, hasDraftsEnabled } from '../utilities/getVersionsConfig.js'
+import { buildBranchVersionFields } from './branches/storage/registerBranchStorage.js'
 
 export const buildVersionGlobalFields = <T extends boolean = false>(
   config: SanitizedConfig,
@@ -10,6 +11,7 @@ export const buildVersionGlobalFields = <T extends boolean = false>(
   flatten?: T,
 ): true extends T ? FlattenedField[] : Field[] => {
   const fields: FlattenedField[] = [
+    ...(global.custom?.branchStorage ? buildBranchVersionFields() : []),
     {
       name: 'version',
       type: 'group',

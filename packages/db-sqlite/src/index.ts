@@ -10,6 +10,7 @@ import {
   countVersions,
   create,
   createBlocksToJsonMigrator,
+  createDrizzleBranchingAdapter,
   createGlobal,
   createGlobalVersion,
   createSchemaGenerator,
@@ -61,6 +62,7 @@ import { fileURLToPath } from 'url'
 import type { Args, SQLiteAdapter, WalConfig } from './types.js'
 
 import { connect } from './connect.js'
+import { createTransactionHandlers } from './createTransactionHandlers.js'
 
 const filename = fileURLToPath(import.meta.url)
 
@@ -228,10 +230,19 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       upsert,
     })
 
+    if (args.transactionOptions) {
+      Object.assign(adapter, createTransactionHandlers({ adapter }))
+    }
+
     adapter.blocksToJsonMigrator = createBlocksToJsonMigrator({
       adapter: adapter as unknown as DrizzleAdapter,
       executeMethod,
       sanitizeStatements,
+    })
+
+    adapter.branching = createDrizzleBranchingAdapter({
+      adapter: adapter as unknown as DrizzleAdapter,
+      isTransactionConfigured: Boolean(args.transactionOptions),
     })
 
     return adapter

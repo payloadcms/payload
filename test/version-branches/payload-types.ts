@@ -81,8 +81,15 @@ export interface Config {
   collections: {
     'branch-head-articles': BranchHeadArticle;
     'branch-head-protected-articles': BranchHeadProtectedArticle;
-    'branch-head-article-heads': BranchHeadArticleHead;
-    'branch-head-settings-heads': BranchHeadSettingsHead;
+    'collection-branch-head-articles-heads': CollectionBranchHeadArticlesHead;
+    'collection-branch-head-articles-pins': CollectionBranchHeadArticlesPin;
+    'collection-branch-head-articles-identities': CollectionBranchHeadArticlesIdentity;
+    'collection-branch-head-protected-articles-heads': CollectionBranchHeadProtectedArticlesHead;
+    'collection-branch-head-protected-articles-pins': CollectionBranchHeadProtectedArticlesPin;
+    'collection-branch-head-protected-articles-identities': CollectionBranchHeadProtectedArticlesIdentity;
+    'global-branch-head-settings-heads': GlobalBranchHeadSettingsHead;
+    'global-branch-head-settings-pins': GlobalBranchHeadSettingsPin;
+    'global-branch-head-settings-identities': GlobalBranchHeadSettingsIdentity;
     'payload-kv': PayloadKv;
     users: User;
     'payload-jobs': PayloadJob;
@@ -95,8 +102,15 @@ export interface Config {
   collectionsSelect: {
     'branch-head-articles': BranchHeadArticlesSelect<false> | BranchHeadArticlesSelect<true>;
     'branch-head-protected-articles': BranchHeadProtectedArticlesSelect<false> | BranchHeadProtectedArticlesSelect<true>;
-    'branch-head-article-heads': BranchHeadArticleHeadsSelect<false> | BranchHeadArticleHeadsSelect<true>;
-    'branch-head-settings-heads': BranchHeadSettingsHeadsSelect<false> | BranchHeadSettingsHeadsSelect<true>;
+    'collection-branch-head-articles-heads': CollectionBranchHeadArticlesHeadsSelect<false> | CollectionBranchHeadArticlesHeadsSelect<true>;
+    'collection-branch-head-articles-pins': CollectionBranchHeadArticlesPinsSelect<false> | CollectionBranchHeadArticlesPinsSelect<true>;
+    'collection-branch-head-articles-identities': CollectionBranchHeadArticlesIdentitiesSelect<false> | CollectionBranchHeadArticlesIdentitiesSelect<true>;
+    'collection-branch-head-protected-articles-heads': CollectionBranchHeadProtectedArticlesHeadsSelect<false> | CollectionBranchHeadProtectedArticlesHeadsSelect<true>;
+    'collection-branch-head-protected-articles-pins': CollectionBranchHeadProtectedArticlesPinsSelect<false> | CollectionBranchHeadProtectedArticlesPinsSelect<true>;
+    'collection-branch-head-protected-articles-identities': CollectionBranchHeadProtectedArticlesIdentitiesSelect<false> | CollectionBranchHeadProtectedArticlesIdentitiesSelect<true>;
+    'global-branch-head-settings-heads': GlobalBranchHeadSettingsHeadsSelect<false> | GlobalBranchHeadSettingsHeadsSelect<true>;
+    'global-branch-head-settings-pins': GlobalBranchHeadSettingsPinsSelect<false> | GlobalBranchHeadSettingsPinsSelect<true>;
+    'global-branch-head-settings-identities': GlobalBranchHeadSettingsIdentitiesSelect<false> | GlobalBranchHeadSettingsIdentitiesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
@@ -244,15 +258,17 @@ export interface BranchHeadProtectedArticle {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "branch-head-article-heads".
+ * via the `definition` "collection-branch-head-articles-heads".
  */
-export interface BranchHeadArticleHead {
+export interface CollectionBranchHeadArticlesHead {
   id: number;
   parent: number | BranchHeadArticle;
   branchKey: string;
   scopeKey: string;
-  generation: number;
-  state: 'version' | 'withdrawn';
+  generation?: number | null;
+  incarnation: number;
+  lockNonce?: string | null;
+  state: 'absent' | 'version' | 'withdrawn';
   versionID?: number | null;
   versionGeneration?: number | null;
   structureVersionID?: number | null;
@@ -277,14 +293,57 @@ export interface BranchHeadArticleHead {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "branch-head-settings-heads".
+ * via the `definition` "collection-branch-head-articles-pins".
  */
-export interface BranchHeadSettingsHead {
+export interface CollectionBranchHeadArticlesPin {
   id: number;
+  parent: number | BranchHeadArticle;
+  versionID: number;
+  versionGeneration: number;
+  rootKey: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-head-articles-identities".
+ */
+export interface CollectionBranchHeadArticlesIdentity {
+  id: number;
+  parent: number | BranchHeadArticle;
+  singleton: string;
+  generation: number;
+  ownerKey: string;
+  isPublished: boolean;
+  isLegacyDraftVisible: boolean;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-head-protected-articles-heads".
+ */
+export interface CollectionBranchHeadProtectedArticlesHead {
+  id: number;
+  parent: number | BranchHeadProtectedArticle;
   branchKey: string;
   scopeKey: string;
-  generation: number;
-  state: 'version' | 'withdrawn';
+  generation?: number | null;
+  incarnation: number;
+  lockNonce?: string | null;
+  state: 'absent' | 'version' | 'withdrawn';
   versionID?: number | null;
   versionGeneration?: number | null;
   structureVersionID?: number | null;
@@ -298,6 +357,118 @@ export interface BranchHeadSettingsHead {
     | number
     | boolean
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-head-protected-articles-pins".
+ */
+export interface CollectionBranchHeadProtectedArticlesPin {
+  id: number;
+  parent: number | BranchHeadProtectedArticle;
+  versionID: number;
+  versionGeneration: number;
+  rootKey: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-head-protected-articles-identities".
+ */
+export interface CollectionBranchHeadProtectedArticlesIdentity {
+  id: number;
+  parent: number | BranchHeadProtectedArticle;
+  singleton: string;
+  generation: number;
+  ownerKey: string;
+  isPublished: boolean;
+  isLegacyDraftVisible: boolean;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-branch-head-settings-heads".
+ */
+export interface GlobalBranchHeadSettingsHead {
+  id: number;
+  branchKey: string;
+  scopeKey: string;
+  generation?: number | null;
+  incarnation: number;
+  lockNonce?: string | null;
+  state: 'absent' | 'version' | 'withdrawn';
+  versionID?: number | null;
+  versionGeneration?: number | null;
+  structureVersionID?: number | null;
+  structureVersionGeneration?: number | null;
+  base?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-branch-head-settings-pins".
+ */
+export interface GlobalBranchHeadSettingsPin {
+  id: number;
+  versionID: number;
+  versionGeneration: number;
+  rootKey: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-branch-head-settings-identities".
+ */
+export interface GlobalBranchHeadSettingsIdentity {
+  id: number;
+  singleton: string;
+  generation: number;
+  ownerKey: string;
+  isPublished: boolean;
+  isLegacyDraftVisible: boolean;
   createdBy?: {
     relationTo: 'users';
     value: number | User;
@@ -559,13 +730,15 @@ export interface BranchHeadProtectedArticlesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "branch-head-article-heads_select".
+ * via the `definition` "collection-branch-head-articles-heads_select".
  */
-export interface BranchHeadArticleHeadsSelect<T extends boolean = true> {
+export interface CollectionBranchHeadArticlesHeadsSelect<T extends boolean = true> {
   parent?: T;
   branchKey?: T;
   scopeKey?: T;
   generation?: T;
+  incarnation?: T;
+  lockNonce?: T;
   state?: T;
   versionID?: T;
   versionGeneration?: T;
@@ -577,18 +750,116 @@ export interface BranchHeadArticleHeadsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "branch-head-settings-heads_select".
+ * via the `definition` "collection-branch-head-articles-pins_select".
  */
-export interface BranchHeadSettingsHeadsSelect<T extends boolean = true> {
+export interface CollectionBranchHeadArticlesPinsSelect<T extends boolean = true> {
+  parent?: T;
+  versionID?: T;
+  versionGeneration?: T;
+  rootKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-head-articles-identities_select".
+ */
+export interface CollectionBranchHeadArticlesIdentitiesSelect<T extends boolean = true> {
+  parent?: T;
+  singleton?: T;
+  generation?: T;
+  ownerKey?: T;
+  isPublished?: T;
+  isLegacyDraftVisible?: T;
+  createdBy?: T;
+  updatedBy?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-head-protected-articles-heads_select".
+ */
+export interface CollectionBranchHeadProtectedArticlesHeadsSelect<T extends boolean = true> {
+  parent?: T;
   branchKey?: T;
   scopeKey?: T;
   generation?: T;
+  incarnation?: T;
+  lockNonce?: T;
   state?: T;
   versionID?: T;
   versionGeneration?: T;
   structureVersionID?: T;
   structureVersionGeneration?: T;
   base?: T;
+  createdBy?: T;
+  updatedBy?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-head-protected-articles-pins_select".
+ */
+export interface CollectionBranchHeadProtectedArticlesPinsSelect<T extends boolean = true> {
+  parent?: T;
+  versionID?: T;
+  versionGeneration?: T;
+  rootKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-head-protected-articles-identities_select".
+ */
+export interface CollectionBranchHeadProtectedArticlesIdentitiesSelect<T extends boolean = true> {
+  parent?: T;
+  singleton?: T;
+  generation?: T;
+  ownerKey?: T;
+  isPublished?: T;
+  isLegacyDraftVisible?: T;
+  createdBy?: T;
+  updatedBy?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-branch-head-settings-heads_select".
+ */
+export interface GlobalBranchHeadSettingsHeadsSelect<T extends boolean = true> {
+  branchKey?: T;
+  scopeKey?: T;
+  generation?: T;
+  incarnation?: T;
+  lockNonce?: T;
+  state?: T;
+  versionID?: T;
+  versionGeneration?: T;
+  structureVersionID?: T;
+  structureVersionGeneration?: T;
+  base?: T;
+  createdBy?: T;
+  updatedBy?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-branch-head-settings-pins_select".
+ */
+export interface GlobalBranchHeadSettingsPinsSelect<T extends boolean = true> {
+  versionID?: T;
+  versionGeneration?: T;
+  rootKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-branch-head-settings-identities_select".
+ */
+export interface GlobalBranchHeadSettingsIdentitiesSelect<T extends boolean = true> {
+  singleton?: T;
+  generation?: T;
+  ownerKey?: T;
+  isPublished?: T;
+  isLegacyDraftVisible?: T;
   createdBy?: T;
   updatedBy?: T;
 }

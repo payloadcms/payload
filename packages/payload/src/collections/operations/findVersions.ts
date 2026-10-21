@@ -19,6 +19,8 @@ import { hasVersionsEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { legacyVersionWhere } from '../../versions/branches/storage/legacyVersionWhere.js'
+import { serializeLegacyVersion } from '../../versions/branches/storage/serializeLegacyVersion.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
@@ -105,7 +107,10 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     versionFields,
   })
 
-  let fullWhere = combineQueries(where!, accessResults)
+  let fullWhere = legacyVersionWhere({
+    entity: collectionConfig,
+    where: combineQueries(where!, accessResults),
+  })
 
   // Exclude trashed documents when trash: false
   fullWhere = appendNonTrashedFilter({
@@ -273,5 +278,10 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     result,
   })
 
-  return result
+  return {
+    ...result,
+    docs: result.docs.map((version) =>
+      serializeLegacyVersion({ entity: collectionConfig, version }),
+    ),
+  }
 }

@@ -8,7 +8,6 @@ export const Articles: CollectionConfig = {
     create: () => true,
     delete: () => true,
     read: () => true,
-    readVersions: () => true,
     update: () => true,
   },
   fields: [

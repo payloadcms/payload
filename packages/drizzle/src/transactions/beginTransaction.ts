@@ -8,27 +8,24 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
   this: DrizzleAdapter,
   options: DrizzleAdapter['transactionOptions'],
 ) {
-  let id
   try {
-    id = uuid()
-
-    let reject: () => Promise<void>
-    let resolve: () => Promise<void>
-    let transaction: DrizzleTransaction
-
-    let transactionReady: () => void
-    let transactionFailed: (err: unknown) => void
-
-    // Await initialization here
-    // Prevent race conditions where the adapter may be
-    // re-initializing, and `this.drizzle` is potentially undefined
     await this.initializing
 
-    // Drizzle only exposes a transactions API that is sufficient if you
-    // can directly pass around the `tx` argument. But our operations are spread
-    // over many files and we don't want to pass the `tx` around like that,
-    // so instead, we "lift" up the `resolve` and `reject` methods
-    // and will call them in our respective transaction methods
+    const id = uuid()
+    const rollbackSignal = new Error('Payload caller requested transaction rollback.')
+    let transaction!: DrizzleTransaction
+    let resolve!: () => Promise<void>
+    let reject!: () => Promise<void>
+    let isReady = false
+    let shouldRollback = false
+    let transactionReady!: () => void
+    let transactionFailed!: (error: unknown) => void
+    const ready = new Promise<void>((res, rej) => {
+      transactionReady = res
+      transactionFailed = rej
+    })
+
+    // Lift the callback boundary into the existing request-owned session without committing it.
     const done = this.drizzle
       .transaction(async (tx) => {
         transaction = tx
@@ -38,34 +35,36 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
             return done
           }
           reject = () => {
-            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
-            rej()
+            shouldRollback = true
+            rej(rollbackSignal)
             return done
           }
+          isReady = true
           transactionReady()
         })
       }, options || this.transactionOptions)
-      .catch((err) => {
-        // Connection failed before callback ran - reject instead of hanging forever
-        transactionFailed(err)
+      .catch((error: unknown) => {
+        if (!isReady) {
+          transactionFailed(error)
+          return
+        }
+
+        // A native rollback failure is a different error and must still reach the owner.
+        if (shouldRollback && error === rollbackSignal) {
+          return
+        }
+
+        throw error
       })
 
-    // Need to wait until the transaction is ready
-    // before binding its `resolve` and `reject` methods below
-    await new Promise<void>((res, rej) => {
-      transactionReady = res
-      transactionFailed = rej
-    })
+    await ready
+    this.sessions[id] = { db: transaction, reject, resolve }
 
-    this.sessions[id] = {
-      db: transaction,
-      reject,
-      resolve,
-    }
+    return id
   } catch (err) {
-    this.payload.logger.error({ err, msg: `Error: cannot begin transaction: ${err.message}` })
-    throw new Error(`Error: cannot begin transaction: ${err.message}`)
-  }
+    const message = err instanceof Error ? err.message : String(err)
 
-  return id
+    this.payload.logger.error({ err, msg: `Error: cannot begin transaction: ${message}` })
+    throw new Error(`Error: cannot begin transaction: ${message}`)
+  }
 }

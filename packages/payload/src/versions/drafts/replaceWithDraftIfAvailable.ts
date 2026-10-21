@@ -11,6 +11,7 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { docHasTimestamps } from '../../types/index.js'
 import { hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
+import { legacyVersionWhere } from '../branches/storage/legacyVersionWhere.js'
 import { appendVersionToQueryKey } from './appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from './getQueryDraftsSelect.js'
 
@@ -148,7 +149,10 @@ export const findDraftVersion = async <T extends TypeWithID>({
     req,
     select: getQueryDraftsSelect({ select }),
     sort: '-updatedAt',
-    where: combineQueries(queryToBuild, versionAccessResult!),
+    where: legacyVersionWhere({
+      entity,
+      where: combineQueries(queryToBuild, versionAccessResult!),
+    }),
   }
 
   let versionDocs

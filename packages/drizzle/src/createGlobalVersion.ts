@@ -15,6 +15,7 @@ export async function createGlobalVersion<T extends JsonObject = JsonObject>(
   this: DrizzleAdapter,
   {
     autosave,
+    branchMode,
     createdAt,
     globalSlug,
     publishedLocale,
@@ -37,7 +38,8 @@ export async function createGlobalVersion<T extends JsonObject = JsonObject>(
     data: {
       autosave,
       createdAt,
-      latest: true,
+      latest: !branchMode,
+      ...(branchMode ? { branchOnly: true } : {}),
       publishedLocale,
       snapshot,
       updatedAt,
@@ -54,7 +56,7 @@ export async function createGlobalVersion<T extends JsonObject = JsonObject>(
   })
 
   const table = this.tables[tableName]
-  if (hasDraftsEnabled(global)) {
+  if (!branchMode && hasDraftsEnabled(global)) {
     await this.execute({
       db,
       sql: sql`

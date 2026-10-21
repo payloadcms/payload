@@ -5,6 +5,7 @@ import { buildVersionGlobalFields } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { guardLegacyVersionUpdate } from './branching/guardLegacyVersionUpdate.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getGlobal } from './utilities/getEntity.js'
@@ -31,12 +32,19 @@ export async function updateGlobalVersion<T extends JsonObject = JsonObject>(
   const fields = buildVersionGlobalFields(this.payload.config, globalConfig)
   const flattenedFields = buildVersionGlobalFields(this.payload.config, globalConfig, true)
 
-  const query = await buildQuery({
+  let query = await buildQuery({
     adapter: this,
     fields: flattenedFields,
     locale,
     where: whereToUse,
   })
+
+  if (globalConfig.custom?.branchStorage) {
+    query = guardLegacyVersionUpdate({ data: versionData, query })
+    if (optionsArgs.upsert) {
+      throw new Error('Legacy branch version updates cannot upsert versions.')
+    }
+  }
 
   transform({ adapter: this, data: versionData, fields, operation: 'write' })
 

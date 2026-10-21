@@ -139,7 +139,9 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
       const idType = config.db.defaultIDType === 'number' ? GraphQLInt : GraphQLString
 
       const versionGlobalFields: Field[] = [
-        ...buildVersionGlobalFields(config, global),
+        ...buildVersionGlobalFields(config, global).filter(
+          (field) => !('hidden' in field && field.hidden),
+        ),
         {
           name: 'id',
           type: config.db.defaultIDType as 'text',

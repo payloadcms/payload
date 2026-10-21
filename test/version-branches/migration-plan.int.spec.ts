@@ -1,4 +1,6 @@
 /* eslint-disable payload/no-relative-monorepo-imports -- Validate offline migration planning and head persistence before adding a runtime cutover path. */
+import type { PayloadRequest } from 'payload'
+
 import { createPayloadRequest } from 'payload'
 import { expect } from 'vitest'
 
@@ -10,10 +12,19 @@ import {
   readBranchHead,
   writeBranchHead,
 } from '../../packages/payload/src/versions/branches/storage/branchHeadStore.js'
+import { initializeBranchVersion } from '../../packages/payload/src/versions/branches/storage/branchVersionStore.js'
 import { test } from '../__helpers/int/vitest.js'
 import { articleHeadsSlug, articlesSlug } from './slugs.js'
 
 test.suite('Existing drafts migration head planning', { config: './config.ts' }, () => {
+  let transactionRequest: PayloadRequest | undefined
+
+  test.afterEach(async () => {
+    if (transactionRequest) {
+      await transactionRequest.payload.db.rollbackTransaction(transactionRequest.transactionID!)
+      transactionRequest = undefined
+    }
+  })
   test('should keep reordered working rows attached to inheriting main translations', async ({
     payload,
   }) => {
@@ -190,7 +201,20 @@ test.suite('Existing drafts migration head planning', { config: './config.ts' },
       },
     })
     const req = await createPayloadRequest({ payload })
+    req.transactionID = (await payload.db.beginTransaction())!
+    transactionRequest = req
+
     const target = { collection: articleHeadsSlug, parentID: article.id }
+
+    for (const versionID of new Set([liveVersions.docs[0]!.id, workingVersions.docs[0]!.id])) {
+      await initializeBranchVersion({
+        branchID: 'migration',
+        isFrozen: true,
+        req,
+        target,
+        versionID,
+      })
+    }
 
     for (const head of plan.heads) {
       await writeBranchHead({
@@ -226,6 +250,7 @@ test.suite('Existing drafts migration head planning', { config: './config.ts' },
       where: { id: { equals: article.id } },
     })
     const afterHistory = await payload.db.findVersions({
+      req,
       collection: articlesSlug,
       locale: 'all',
       sort: 'id',
@@ -242,7 +267,25 @@ test.suite('Existing drafts migration head planning', { config: './config.ts' },
     })
     expect(draftFrench).toBeNull()
     expect(after).toStrictEqual(materialized)
-    expect(afterHistory).toStrictEqual(beforeHistory)
+    expect(
+      afterHistory.docs.map(
+        ({
+          branchFrozen: _branchFrozen,
+          branchGeneration: _branchGeneration,
+          branchOwnerKey: _branchOwnerKey,
+          ...version
+        }) => version,
+      ),
+    ).toStrictEqual(
+      beforeHistory.docs.map(
+        ({
+          branchFrozen: _branchFrozen,
+          branchGeneration: _branchGeneration,
+          branchOwnerKey: _branchOwnerKey,
+          ...version
+        }) => version,
+      ),
+    )
     expect(plan.legacyWorkingVersion?.id).toBe(workingVersions.docs[0]!.id)
   })
 })

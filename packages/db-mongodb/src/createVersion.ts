@@ -10,6 +10,7 @@ export const createVersion: CreateVersion = async function createVersion(
   this: MongooseAdapter,
   {
     autosave,
+    branchMode,
     collectionSlug,
     createdAt,
     parent,
@@ -30,7 +31,8 @@ export const createVersion: CreateVersion = async function createVersion(
   const data = {
     autosave,
     createdAt,
-    latest: true,
+    latest: !branchMode,
+    ...(branchMode ? { branchOnly: true } : {}),
     parent,
     publishedLocale,
     snapshot,
@@ -68,30 +70,32 @@ export const createVersion: CreateVersion = async function createVersion(
     ],
   }
 
-  await Model.updateMany(
-    {
-      $and: [
-        {
-          _id: {
-            $ne: doc._id,
+  if (!branchMode) {
+    await Model.updateMany(
+      {
+        $and: [
+          {
+            _id: {
+              $ne: doc._id,
+            },
           },
-        },
-        parentQuery,
-        {
-          latest: {
-            $eq: true,
+          parentQuery,
+          {
+            latest: {
+              $eq: true,
+            },
           },
-        },
-        {
-          updatedAt: {
-            $lt: new Date(doc.updatedAt),
+          {
+            updatedAt: {
+              $lt: new Date(doc.updatedAt),
+            },
           },
-        },
-      ],
-    },
-    { $unset: { latest: 1 } },
-    options,
-  )
+        ],
+      },
+      { $unset: { latest: 1 } },
+      options,
+    )
+  }
 
   if (returning === false) {
     return null

@@ -15,6 +15,8 @@ import { hasVersionsEnabled } from '../../utilities/getVersionsConfig.js'
 import { httpStatus } from '../../utilities/httpStatus.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { legacyVersionWhere } from '../../versions/branches/storage/legacyVersionWhere.js'
+import { serializeLegacyVersion } from '../../versions/branches/storage/serializeLegacyVersion.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import {
   isInheritedReadVersionsAccess,
@@ -132,7 +134,10 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
 
   const hasWhereAccess = typeof accessResults === 'object'
 
-  let fullWhere = combineQueries(where, accessResults)
+  let fullWhere = legacyVersionWhere({
+    entity: collectionConfig,
+    where: combineQueries(where, accessResults),
+  })
 
   fullWhere = appendNonTrashedFilter({
     deletedAtPath: 'version.deletedAt',
@@ -275,5 +280,5 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
   // Return results
   // /////////////////////////////////////
 
-  return result
+  return serializeLegacyVersion({ entity: collectionConfig, version: result })
 }

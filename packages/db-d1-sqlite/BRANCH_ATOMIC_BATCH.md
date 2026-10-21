@@ -1,0 +1,13 @@
+Written with AI
+
+D1 branch storage has an internal `branching.executeAtomicBatch` adapter boundary. It accepts trusted, compiled SQL statements and optional expected direct row counts. It is not a public content API and does not supply branch authorization, version freezing, locale composition, publication hooks or merge compilation. Those callers must compile their complete mutation, including all dependent guards, into one batch.
+
+D1 supports atomic batches and does not support Payload's interactive caller transactions. A request carrying a transaction ID is rejected. The connected D1 session is reused when present to preserve its read-after-write consistency bookmark. Capability reporting requires a binding with native `prepare` and `batch` methods.
+
+For each guarded mutation the adapter inserts a following `SELECT CASE WHEN changes() = ? THEN 1 ELSE json_extract('{}', 'payload_branch_atomic_conflict') END` assertion. SQLite evaluates CASE branches lazily. A stale row count therefore raises a uniquely identifiable invalid JSON path error inside the transaction, causing D1 to roll back the entire batch. Checking returned metadata after a batch commits would not provide this guarantee. Only the exact named assertion error is translated to a sanitized conflict; other native errors return a sanitized batch failure.
+
+The current trusted compiler contract accepts direct SELECT, INSERT, UPDATE, DELETE and REPLACE statements, with no semicolons. SELECT cannot carry a row-count assertion because SQLite's `changes()` describes the preceding mutation. Transaction control and schema operations belong outside this boundary. Bounds are 100 submitted statements including assertions, 100 parameters per user statement, 1,000 total parameters including assertions, 100,000 UTF-8 bytes per SQL statement, and 1,000,000 total SQL/string/binary bytes. Bound values are finite numbers, strings, nulls or ArrayBuffers.
+
+The native tests use Wrangler's local D1 binding backed by Miniflare/workerd. They verify successful assertions, lazy assertion evaluation, an expected zero-row result, a stale first guard, rollback of earlier writes when a later guard fails, rollback when a later SQL statement fails, unguarded native statements, rejection of caller transactions, request limits and sanitized failures. No post-commit compensation is used.
+
+References: [Cloudflare D1 batch transaction guarantee](https://developers.cloudflare.com/d1/worker-api/d1-database/#batch), [SQLite CASE evaluation](https://www.sqlite.org/lang_expr.html#the_case_expression), [SQLite changes semantics](https://www.sqlite.org/lang_corefunc.html#changes).

@@ -15,6 +15,7 @@ export async function createVersion<T extends JsonObject = JsonObject>(
   this: DrizzleAdapter,
   {
     autosave,
+    branchMode,
     collectionSlug,
     createdAt,
     parent,
@@ -45,7 +46,8 @@ export async function createVersion<T extends JsonObject = JsonObject>(
   const data: Record<string, unknown> = {
     autosave,
     createdAt,
-    latest: true,
+    latest: !branchMode,
+    ...(branchMode ? { branchOnly: true } : {}),
     parent,
     publishedLocale,
     snapshot,
@@ -70,7 +72,7 @@ export async function createVersion<T extends JsonObject = JsonObject>(
 
   const table = this.tables[tableName]
 
-  if (hasDraftsEnabled(collection)) {
+  if (!branchMode && hasDraftsEnabled(collection)) {
     await this.execute({
       db,
       sql: sql`

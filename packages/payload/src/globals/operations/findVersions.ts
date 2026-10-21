@@ -15,6 +15,8 @@ import { hasVersionsEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { legacyVersionWhere } from '../../versions/branches/storage/legacyVersionWhere.js'
+import { serializeLegacyVersion } from '../../versions/branches/storage/serializeLegacyVersion.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
 
 export type Arguments = {
@@ -80,7 +82,10 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     versionFields,
   })
 
-  const fullWhere = combineQueries(where!, accessResults)
+  const fullWhere = legacyVersionWhere({
+    entity: globalConfig,
+    where: combineQueries(where!, accessResults),
+  })
 
   sanitizeWhereQuery({ fields: versionFields, payload, where: fullWhere })
 
@@ -190,5 +195,8 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     docs: result.docs.map((doc) => sanitizeInternalFields<T>(doc)),
   }
 
-  return result
+  return {
+    ...result,
+    docs: result.docs.map((version) => serializeLegacyVersion({ entity: globalConfig, version })),
+  }
 }

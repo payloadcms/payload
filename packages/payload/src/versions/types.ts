@@ -125,6 +125,10 @@ export type SanitizedGlobalVersions = {
 }
 
 export type TypeWithVersion<T> = {
+  branchFrozen?: boolean
+  branchGeneration?: number
+  branchOnly?: boolean
+  branchOwnerKey?: string
   createdAt: string
   id: string
   latest?: boolean

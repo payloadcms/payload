@@ -13,6 +13,8 @@ import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { hasVersionsEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { legacyVersionWhere } from '../../versions/branches/storage/legacyVersionWhere.js'
+import { serializeLegacyVersion } from '../../versions/branches/storage/serializeLegacyVersion.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
 
 export type Arguments = {
@@ -89,7 +91,10 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     versions: true,
   })
 
-  const where = combineQueries({ id: { equals: id } }, accessResults)
+  const where = legacyVersionWhere({
+    entity: globalConfig,
+    where: combineQueries({ id: { equals: id } }, accessResults),
+  })
 
   sanitizeWhereQuery({ fields: versionFields, payload, where })
 
@@ -186,5 +191,5 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     }
   }
 
-  return result
+  return serializeLegacyVersion({ entity: globalConfig, version: result })
 }

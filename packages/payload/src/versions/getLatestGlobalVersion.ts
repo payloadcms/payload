@@ -5,6 +5,7 @@ import type { TypeWithVersion } from './types.js'
 import { hasWhereAccessResult } from '../auth/types.js'
 import { combineQueries } from '../database/combineQueries.js'
 import { hasDraftsEnabled } from '../utilities/getVersionsConfig.js'
+import { legacyVersionWhere } from './branches/storage/legacyVersionWhere.js'
 import { appendVersionToQueryKey } from './drafts/appendVersionToQueryKey.js'
 
 type Args = {
@@ -40,7 +41,10 @@ export const getLatestGlobalVersion = async ({
         locale: locale || req?.locale || undefined,
         pagination: false,
         req,
-        where: combineQueries(appendVersionToQueryKey(where), whereQuery as unknown as Where),
+        where: legacyVersionWhere({
+          entity: config,
+          where: combineQueries(appendVersionToQueryKey(where), whereQuery as unknown as Where),
+        }),
       })
     ).docs[0]
   }

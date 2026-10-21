@@ -4,21 +4,23 @@ export const commitTransaction: CommitTransaction = async function commitTransac
   incomingID = '',
 ) {
   const transactionID = incomingID instanceof Promise ? await incomingID : incomingID
+  const session = this.sessions[transactionID]
 
-  // if the session was deleted it has already been aborted
-  if (!this.sessions[transactionID]) {
+  if (!session) {
     return
   }
 
-  const session = this.sessions[transactionID]
-
-  // Delete from registry FIRST to prevent race conditions
-  // This ensures other operations can't retrieve this session while we're ending it
   delete this.sessions[transactionID]
 
   try {
     await session.resolve()
-  } catch (_) {
-    await session.reject()
+  } catch (error) {
+    try {
+      await session.reject()
+    } catch {
+      // The commit error describes the failed outcome even when cleanup also fails.
+    }
+
+    throw error
   }
 }

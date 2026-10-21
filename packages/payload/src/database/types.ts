@@ -11,6 +11,7 @@ import type {
   Where,
 } from '../types/index.js'
 import type { TypeWithVersion } from '../versions/types.js'
+import type { BranchingAdapter } from './branching.js'
 
 export type { TypeWithVersion }
 
@@ -25,6 +26,8 @@ export interface BaseDatabaseAdapter {
    * @returns an identifier for the transaction or null if one cannot be established
    */
   beginTransaction: BeginTransaction
+  /** Native primitives for the opt-in internal branch engine. Legacy adapters may omit this. */
+  branching?: BranchingAdapter
   /**
    * When true, bulk operations will process documents one at a time
    * in separate transactions instead of all at once in a single transaction.
@@ -504,6 +507,8 @@ export type DeleteVersionsArgs = {
 
 export type CreateVersionArgs<T extends JsonObject = JsonObject> = {
   autosave: boolean
+  /** Internal branch snapshots do not change the legacy drafts latest marker. */
+  branchMode?: true
   collectionSlug: CollectionSlug
   createdAt: string
   /** ID of the parent document for which the version should be created for */
@@ -532,6 +537,8 @@ export type CreateVersion = <T extends JsonObject = JsonObject>(
 
 export type CreateGlobalVersionArgs<T extends JsonObject = JsonObject> = {
   autosave: boolean
+  /** Internal branch snapshots do not change the legacy drafts latest marker. */
+  branchMode?: true
   createdAt: string
   globalSlug: GlobalSlug
   publishedLocale?: string

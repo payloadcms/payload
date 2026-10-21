@@ -1,5 +1,5 @@
 export const articlesSlug = 'branch-head-articles'
-export const articleHeadsSlug = 'branch-head-article-heads'
+export const articleHeadsSlug = 'collection-branch-head-articles-heads'
 export const settingsSlug = 'branch-head-settings'
-export const settingsHeadsSlug = 'branch-head-settings-heads'
+export const settingsHeadsSlug = 'global-branch-head-settings-heads'
 export const protectedArticlesSlug = 'branch-head-protected-articles'

@@ -5,6 +5,7 @@ import type { TypeWithVersion } from './types.js'
 
 import { combineQueries } from '../database/combineQueries.js'
 import { hasDraftsEnabled } from '../utilities/getVersionsConfig.js'
+import { legacyVersionWhere } from './branches/storage/legacyVersionWhere.js'
 import { appendVersionToQueryKey } from './drafts/appendVersionToQueryKey.js'
 
 type Args = {
@@ -38,7 +39,10 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
       pagination: false,
       req,
       sort: '-updatedAt',
-      where: combineQueries(appendVersionToQueryKey(query.where), whereQuery as unknown as Where),
+      where: legacyVersionWhere({
+        entity: config,
+        where: combineQueries(appendVersionToQueryKey(query.where), whereQuery as unknown as Where),
+      }),
     })
     latestVersion = docs[0]!
   }

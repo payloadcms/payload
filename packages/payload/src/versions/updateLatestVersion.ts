@@ -58,7 +58,11 @@ export async function updateLatestVersion<TData extends JsonObject>({
 
   const [latestVersion] = docs
 
-  if (!latestVersion || !shouldUpdate(latestVersion)) {
+  if (
+    !latestVersion ||
+    typeof latestVersion.branchGeneration === 'number' ||
+    !shouldUpdate(latestVersion)
+  ) {
     return undefined
   }
 

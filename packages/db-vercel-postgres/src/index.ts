@@ -11,6 +11,7 @@ import {
   countVersions,
   create,
   createBlocksToJsonMigrator,
+  createDrizzleBranchingAdapter,
   createGlobal,
   createGlobalVersion,
   createSchemaGenerator,
@@ -227,6 +228,11 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       adapter: adapter as unknown as DrizzleAdapter,
       executeMethod,
       sanitizeStatements,
+    })
+
+    adapter.branching = createDrizzleBranchingAdapter({
+      adapter: adapter as unknown as DrizzleAdapter,
+      isTransactionConfigured: args.transactionOptions !== false,
     })
 
     return adapter

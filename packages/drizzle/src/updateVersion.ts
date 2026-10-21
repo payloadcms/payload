@@ -10,6 +10,7 @@ import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
+import { guardLegacyVersionUpdate } from './branching/guardLegacyVersionUpdate.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { upsertRow } from './upsertRow/index.js'
 import { getPrimaryDb } from './utilities/getPrimaryDb.js'
@@ -36,12 +37,18 @@ export async function updateVersion<T extends JsonObject = JsonObject>(
 
   const fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
 
+  const guarded = guardLegacyVersionUpdate({
+    isBranchStorage: Boolean(collectionConfig.custom?.branchStorage),
+    versionData,
+    where: whereToUse,
+  })
+
   const { where } = buildQuery({
     adapter: this,
     fields,
     locale,
     tableName,
-    where: whereToUse,
+    where: guarded.where,
   })
 
   const db = getPrimaryDb(this, await getTransaction(this, req))
@@ -50,7 +57,7 @@ export async function updateVersion<T extends JsonObject = JsonObject>(
     id,
     adapter: this,
     collectionSlug: collection,
-    data: versionData,
+    data: guarded.versionData,
     db,
     fields,
     ignoreResult: returning === false,

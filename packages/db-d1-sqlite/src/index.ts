@@ -10,6 +10,7 @@ import {
   countVersions,
   create,
   createBlocksToJsonMigrator,
+  createDrizzleBranchingAdapter,
   createGlobal,
   createGlobalVersion,
   createSchemaGenerator,
@@ -58,6 +59,7 @@ import { fileURLToPath } from 'url'
 import type { Args, SQLiteD1Adapter } from './types.js'
 
 import { connect } from './connect.js'
+import { createD1BranchingAdapter } from './createBranchingAdapter.js'
 import { execute } from './execute.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -209,6 +211,15 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
       adapter: adapter as unknown as DrizzleAdapter,
       executeMethod,
       sanitizeStatements,
+    })
+
+    adapter.branching = createD1BranchingAdapter({
+      adapter,
+      interactiveAdapter: createDrizzleBranchingAdapter({
+        adapter: adapter as unknown as DrizzleAdapter,
+        isTransactionConfigured: false,
+        unsupportedReason: 'D1 branch mutations require the atomic batch protocol.',
+      }),
     })
 
     return adapter

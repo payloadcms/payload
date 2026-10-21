@@ -47,6 +47,9 @@ export const decodeBranchHead = ({
     base: row.base == null ? null : getBase({ value: row.base }),
     branchID,
     generation,
+    ...(row.incarnation === undefined
+      ? {}
+      : { incarnation: getIncarnation({ value: row.incarnation }) }),
     scope,
     state,
   }
@@ -111,8 +114,13 @@ const getBase = ({ value }: { value: unknown }): BranchHeadToken => {
     throw new Error('Invalid branch base scope.')
   }
 
+  const incarnation =
+    base.incarnation === undefined
+      ? {}
+      : { incarnation: getIncarnation({ value: base.incarnation }) }
+
   if (base.generation === null && base.state === null) {
-    return { branchID, generation: null, scope, state: null }
+    return { branchID, generation: null, ...incarnation, scope, state: null }
   }
 
   const rawState = base.state
@@ -145,7 +153,16 @@ const getBase = ({ value }: { value: unknown }): BranchHeadToken => {
   return {
     branchID,
     generation: getGeneration({ value: base.generation }),
+    ...incarnation,
     scope,
     state: decodedState,
   }
+}
+
+const getIncarnation = ({ value }: { value: unknown }): number => {
+  if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 0) {
+    throw new Error('Branch incarnation must be a nonnegative safe integer.')
+  }
+
+  return value
 }

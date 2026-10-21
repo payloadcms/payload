@@ -10,6 +10,7 @@ import {
   countVersions,
   create,
   createBlocksToJsonMigrator,
+  createDrizzleBranchingAdapter,
   createGlobal,
   createGlobalVersion,
   createSchemaGenerator,
@@ -235,6 +236,11 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       adapter: adapter as unknown as DrizzleAdapter,
       executeMethod,
       sanitizeStatements,
+    })
+
+    adapter.branching = createDrizzleBranchingAdapter({
+      adapter: adapter as unknown as DrizzleAdapter,
+      isTransactionConfigured: args.transactionOptions !== false,
     })
 
     return adapter

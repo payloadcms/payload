@@ -1,12 +1,14 @@
 import type { CollectionConfig } from '../../../collections/config/types.js'
 import type { Field } from '../../../fields/config/types.js'
 
-/** Internal storage only. Runtime registration is deferred until engine cutover is implemented. */
+/** Internal schema only. Registration does not activate branch reads, writes, or engine cutover. */
 export const buildBranchHeadCollection = ({
   slug,
+  globalSlug,
   parentCollection,
   versionIDType,
 }: {
+  globalSlug?: string
   parentCollection?: string
   slug: string
   versionIDType: 'number' | 'text'
@@ -23,7 +25,12 @@ export const buildBranchHeadCollection = ({
       update: () => false,
     },
     admin: { hidden: true },
-    custom: { branchHeadStorage: { parentCollection: parentCollection ?? null } },
+    custom: {
+      branchHeadStorage: {
+        globalSlug: globalSlug ?? null,
+        parentCollection: parentCollection ?? null,
+      },
+    },
     disableDuplicate: true,
     fields: [
       ...(parentCollection
@@ -38,8 +45,15 @@ export const buildBranchHeadCollection = ({
         : []),
       { name: 'branchKey', type: 'text', required: true },
       { name: 'scopeKey', type: 'text', required: true },
-      { name: 'generation', type: 'number', min: 1, required: true },
-      { name: 'state', type: 'select', options: ['version', 'withdrawn'], required: true },
+      { name: 'generation', type: 'number', min: 1 },
+      { name: 'incarnation', type: 'number', defaultValue: 0, min: 0, required: true },
+      { name: 'lockNonce', type: 'text' },
+      {
+        name: 'state',
+        type: 'select',
+        options: ['absent', 'version', 'withdrawn'],
+        required: true,
+      },
       versionIDField({ name: 'versionID' }),
       { name: 'versionGeneration', type: 'number', min: 1 },
       versionIDField({ name: 'structureVersionID' }),
@@ -49,6 +63,9 @@ export const buildBranchHeadCollection = ({
     graphQL: false,
     indexes: [
       { fields: [...(parentCollection ? ['parent'] : []), 'branchKey', 'scopeKey'], unique: true },
+      { fields: ['branchKey', 'state'] },
+      { fields: ['versionID'] },
+      { fields: ['structureVersionID'] },
     ],
     lockDocuments: false,
     timestamps: false,

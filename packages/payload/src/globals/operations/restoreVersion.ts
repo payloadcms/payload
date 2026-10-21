@@ -13,6 +13,7 @@ import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { legacyVersionWhere } from '../../versions/branches/storage/legacyVersionWhere.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
 import { getRestoredStatusesToAuthorize } from '../../versions/getRestoredStatusesToAuthorize.js'
 
@@ -67,7 +68,10 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
       : await executeAccess({ slug: globalConfig.slug, req }, globalConfig.access.readVersions)
 
     const versionFields = buildVersionGlobalFields(payload.config, globalConfig, true)
-    const where = combineQueries({ id: { equals: id } }, readVersionsAccessResult)
+    const where = legacyVersionWhere({
+      entity: globalConfig,
+      where: combineQueries({ id: { equals: id } }, readVersionsAccessResult),
+    })
 
     sanitizeWhereQuery({ fields: versionFields, payload, where })
 

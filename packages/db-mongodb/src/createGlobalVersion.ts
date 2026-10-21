@@ -10,6 +10,7 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
   this: MongooseAdapter,
   {
     autosave,
+    branchMode,
     createdAt,
     globalSlug,
     publishedLocale,
@@ -25,7 +26,8 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
   const data = {
     autosave,
     createdAt,
-    latest: true,
+    latest: !branchMode,
+    ...(branchMode ? { branchOnly: true } : {}),
     publishedLocale,
     snapshot,
     updatedAt,
@@ -52,24 +54,26 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
 
   let [doc] = await Model.create([data], options)
 
-  await Model.updateMany(
-    {
-      $and: [
-        {
-          _id: {
-            $ne: doc._id,
+  if (!branchMode) {
+    await Model.updateMany(
+      {
+        $and: [
+          {
+            _id: {
+              $ne: doc._id,
+            },
           },
-        },
-        {
-          latest: {
-            $eq: true,
+          {
+            latest: {
+              $eq: true,
+            },
           },
-        },
-      ],
-    },
-    { $unset: { latest: 1 } },
-    options,
-  )
+        ],
+      },
+      { $unset: { latest: 1 } },
+      options,
+    )
+  }
 
   if (returning === false) {
     return null

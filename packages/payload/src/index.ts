@@ -1609,6 +1609,7 @@ export { type OrderableEndpointBody } from './config/orderable/index.js'
 export { sanitizeConfig } from './config/sanitize.js'
 
 export type * from './config/types.js'
+export type { BranchingAdapter, BranchStorageEntity } from './database/branching.js'
 export { combineQueries } from './database/combineQueries.js'
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
 export { defaultBeginTransaction } from './database/defaultBeginTransaction.js'

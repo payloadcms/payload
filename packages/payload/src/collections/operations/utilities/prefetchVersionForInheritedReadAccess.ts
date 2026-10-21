@@ -4,6 +4,7 @@ import type { Collection, TypeWithID } from '../../config/types.js'
 
 import { appendNonTrashedFilter } from '../../../utilities/appendNonTrashedFilter.js'
 import { getSelectMode } from '../../../utilities/getSelectMode.js'
+import { legacyVersionWhere } from '../../../versions/branches/storage/legacyVersionWhere.js'
 
 export const prefetchVersionForInheritedReadAccess = async <TData extends TypeWithID>({
   id,
@@ -47,7 +48,7 @@ export const prefetchVersionForInheritedReadAccess = async <TData extends TypeWi
       deletedAtPath: 'version.deletedAt',
       enableTrash: collectionConfig.trash,
       trash,
-      where: { id: { equals: id } },
+      where: legacyVersionWhere({ entity: collectionConfig, where: { id: { equals: id } } }),
     }),
   })
   const version = docs[0]

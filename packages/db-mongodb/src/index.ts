@@ -31,6 +31,7 @@ import type {
   MongooseMigration,
 } from './types.js'
 
+import { createBranchingAdapter } from './branching/createBranchingAdapter.js'
 import { connect } from './connect.js'
 import { count } from './count.js'
 import { countGlobalVersions } from './countGlobalVersions.js'
@@ -269,7 +270,7 @@ export function mongooseAdapter({
     const migrationDir = findMigrationDir(migrationDirArg)
     mongoose.set('strictQuery', false)
 
-    return createDatabaseAdapter<MongooseAdapter>({
+    const databaseAdapter = createDatabaseAdapter<MongooseAdapter>({
       name: 'mongoose',
 
       // Mongoose-specific
@@ -339,6 +340,13 @@ export function mongooseAdapter({
       useJoinAggregations,
       usePipelineInSortLookup,
     })
+
+    databaseAdapter.branching = createBranchingAdapter({
+      adapter: databaseAdapter,
+      isTransactionsEnabled: transactionOptions !== false,
+    })
+
+    return databaseAdapter
   }
 
   return {

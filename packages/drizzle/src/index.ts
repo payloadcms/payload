@@ -1,3 +1,4 @@
+export { createDrizzleBranchingAdapter } from './branching/createDrizzleBranchingAdapter.js'
 export { count } from './count.js'
 export { countGlobalVersions } from './countGlobalVersions.js'
 export { countVersions } from './countVersions.js'
