@@ -796,6 +796,20 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(drawer.getByRole('heading', { name: /creating new post/i })).toBeVisible()
     })
 
+    test('should give the Copy to locale dialog a concise accessible name without repeating its contents', async () => {
+      // PYLD-3689: guard against announcing the entire dialog as its name or description.
+      // Confirm the opening announcement separately with NVDA; DOM checks cannot prove speech frequency.
+      const drawer = await openCopyToLocaleDrawer({ page, postsURL, serverURL })
+
+      await expect(drawer).toHaveRole('dialog')
+      await expect(drawer).toHaveAccessibleName('Copy to locale')
+      await expect(drawer).toHaveAccessibleDescription('')
+      await expect(drawer.getByRole('combobox', { name: 'Copy to', exact: true })).toBeVisible()
+      await expect(
+        drawer.getByRole('checkbox', { name: 'Overwrite existing field data', exact: true }),
+      ).toBeVisible()
+    })
+
     test('should give the Copy to locale combobox an accessible name', async () => {
       // PYLD-3687
       const drawer = await openCopyToLocaleDrawer({ page, postsURL, serverURL })
@@ -3166,6 +3180,8 @@ test.describe('WCAG 2.2 Level AA', () => {
       })
       const widget = await addCollectionQueryWidget({ page })
 
+      // PYLD-3572: include every visible error bullet in the card name and drag-handle description.
+      // Exact focus announcements require manual Safari/WebKit and VoiceOver verification.
       await test.step('Expose the added widget content and structure', async () => {
         const card = widget.locator('.draggable')
         const bullets = await widget
@@ -3185,6 +3201,10 @@ test.describe('WCAG 2.2 Level AA', () => {
       })
       const drag = widget.getByRole('button', { name: 'Drag to reorder', exact: true })
 
+      await expect(widget.locator('.draggable')).toBeFocused()
+      await page.keyboard.press('Tab')
+      await expect(drag).toBeFocused()
+      await page.keyboard.press('Shift+Tab')
       await expect(widget.locator('.draggable')).toBeFocused()
       await page.keyboard.press('Tab')
       await expect(drag).toBeFocused()

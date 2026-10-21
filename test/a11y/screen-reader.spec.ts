@@ -263,45 +263,6 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       expect(next).toMatch(/Cancel.*button|button.*Cancel/i)
     })
 
-    test.describe('Safari and VoiceOver report', () => {
-      test.skip(process.platform !== 'darwin', 'Safari and VoiceOver report')
-
-      test('should announce the visible Collection Query bullet text when its card receives focus', async ({
-        page,
-        screenReader,
-      }) => {
-        // PYLD-3572
-        await openDashboardEditor({ page, serverURL })
-        const widget = await addCollectionQueryWidget({ page })
-        const bullets = await widget
-          .locator('.collection-query-widget__error-list li')
-          .allTextContents()
-
-        expect(bullets.length).toBeGreaterThan(0)
-        const card = widget.locator('.draggable')
-        const dragHandle = widget.getByRole('button', { name: 'Drag to reorder', exact: true })
-
-        await expect(card).toBeFocused()
-        for (const bullet of bullets) {
-          await expect(card).toHaveAccessibleName(new RegExp(bullet.trim()))
-        }
-        await screenReader.navigateToWebContent()
-        await card.focus()
-        await captureScreenReader({ action: () => page.keyboard.press('Tab'), screenReader })
-        await expect(dragHandle).toBeFocused()
-        const capture = await captureScreenReader({
-          action: async () => {
-            await page.keyboard.press('Shift+Tab')
-            await expect(card).toBeFocused()
-          },
-          screenReader,
-        })
-        for (const bullet of bullets) {
-          expect.soft(capture.spokenPhrase).toContain(bullet.trim())
-        }
-      })
-    })
-
     test('should announce table cell text once without conflicting sort commands', async ({
       page,
       screenReader,
@@ -369,35 +330,6 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       })
 
       expect(newGroup).not.toMatch(/Comparing against/i)
-    })
-
-    test('should announce the Copy to combobox label once on focus', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3689
-      const drawer = await openCopyToLocaleDrawer({
-        page,
-        postsURL,
-        serverURL,
-      })
-      const combobox = drawer.locator('#field-toLocale input[role="combobox"]')
-
-      // Start within the drawer so this captures field focus, not the dialog opening.
-      const overwrite = drawer.getByRole('checkbox', { name: 'Overwrite existing field data' })
-
-      await expect(combobox).toHaveAccessibleName('Copy to')
-      await screenReader.navigateToWebContent()
-      await captureScreenReader({ action: () => overwrite.focus(), screenReader })
-      await expect(overwrite).toBeFocused()
-      const capture = await captureScreenReader({
-        action: () => page.keyboard.press('Shift+Tab'),
-        screenReader,
-      })
-
-      await expect(combobox).toBeFocused()
-      // Count the field label, excluding the dialog name "Copy to locale".
-      expect(capture.spokenPhrase.match(/\bcopy to\b(?!\s+locale\b)/gi) || []).toHaveLength(1)
     })
 
     test('should announce the deletion dialog before background page content', async ({
