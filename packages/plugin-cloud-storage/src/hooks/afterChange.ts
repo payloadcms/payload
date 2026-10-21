@@ -93,6 +93,9 @@ export const getAfterChangeHook =
           // Clear to prevent re-processing
           req.file = undefined
           req.payloadUploadSizes = undefined
+          const originalQuery = req.query
+          req.query = { ...req.query }
+          delete req.query.uploadEdits
 
           try {
             await req.payload.update({
@@ -104,6 +107,7 @@ export const getAfterChangeHook =
               req,
             })
           } finally {
+            req.query = originalQuery
             delete req.context.skipCloudStorage
           }
 
