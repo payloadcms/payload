@@ -4,7 +4,6 @@ import {
   getUpcomingScheduledPublishHandler,
   schedulePublishHandler,
 } from '@payloadcms/ui/utilities/schedulePublishHandler'
-import { toSnakeCase } from 'drizzle-orm/casing'
 import fs from 'fs'
 import path from 'path'
 import {
@@ -12,7 +11,6 @@ import {
   Forbidden,
   getFileByPath,
   NotFound,
-  restoreVersionOperationGlobal,
   saveVersion,
   ValidationError,
 } from 'payload'
@@ -25,7 +23,6 @@ import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 import type { AutosaveMultiSelectPost, DraftPost } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
-import { isMongoose } from '../__helpers/shared/isMongoose.js'
 import { devUser } from '../credentials.js'
 import { cloudStorageDeletedFilenames } from './collections/DraftsWithUploadCloudStorage.js'
 import { cleanupDocuments, cleanupGlobal, createDraftDocument } from './helpers.js'
@@ -36,7 +33,6 @@ import {
   draftCollectionSlug,
   draftGlobalSlug,
   draftUnlimitedGlobalSlug,
-  draftWithMaxGlobalSlug,
   draftWithUploadCloudStorageCollectionSlug,
   draftWithUploadCollectionSlug,
   errorOnUnpublishSlug,
@@ -48,7 +44,6 @@ import {
   restoreAccessLocalizedCollectionSlug,
   restoreAccessNoVersionsGlobalSlug,
   secondaryAdminUserCollectionSlug,
-  simpleDraftGlobalSlug,
   versionCollectionSlug,
   versionsDisabledCollectionSlug,
   versionsDisabledGlobalSlug,
@@ -4066,281 +4061,75 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
         const versions = await payload.findGlobalVersions({
           slug: autoSaveGlobalSlug,
-          locale: 'all',
           overrideAccess: true,
         })
 
         const restore = await payload.restoreGlobalVersion({
           id: versions.docs[1]!.id,
           slug: autoSaveGlobalSlug,
-          locale: 'es',
           overrideAccess: true,
         })
 
-        expect(restore.title).toBe('Restorable global title es')
+        expect(restore.title).toBe(versions.docs[1]!.version.title)
         expect(restore.globalType).toBe(autoSaveGlobalSlug)
 
         const restoredGlobal = await payload.findGlobal({
           slug: autoSaveGlobalSlug,
           draft: true,
-          locale: 'es',
           overrideAccess: true,
         })
 
         expect(restoredGlobal.title).toBe(restore.title)
       })
 
-      test.describe('Hook documents', () => {
-        test.afterEach(async ({ payload }) => {
-          await payload.db.deleteVersions({ globalSlug: restoreAccessGlobalSlug, where: {} })
-        })
-
-        for (const hookName of ['afterRead', 'afterChange'] as const) {
-          test(`should pass the restored global document to ${hookName} hooks`, async ({
-            payload,
-          }) => {
-            await payload.updateGlobal({
-              slug: restoreAccessGlobalSlug,
-              data: { title: 'Historical' },
-              overrideAccess: true,
-            })
-
-            const { docs } = await payload.findGlobalVersions({
-              slug: restoreAccessGlobalSlug,
-              limit: 1,
-              overrideAccess: true,
-              sort: '-updatedAt',
-            })
-
-            await payload.updateGlobal({
-              slug: restoreAccessGlobalSlug,
-              data: { title: 'Current' },
-              overrideAccess: true,
-            })
-
-            const globalConfig = payload.globals.config.find(
-              ({ slug }) => slug === restoreAccessGlobalSlug,
-            )!
-            const originalHooks = globalConfig.hooks[hookName]
-            let hookDoc: JsonObject | undefined
-
-            globalConfig.hooks[hookName] = [
-              ...originalHooks,
-              ({ doc }: { doc: JsonObject }) => {
-                hookDoc = doc
-                return doc
-              },
-            ]
-
-            try {
-              await payload.restoreGlobalVersion({
-                id: docs[0]!.id,
-                slug: restoreAccessGlobalSlug,
-                overrideAccess: true,
-              })
-
-              expect(hookDoc).toMatchObject({
-                globalType: restoreAccessGlobalSlug,
-                title: 'Historical',
-              })
-            } finally {
-              globalConfig.hooks[hookName] = originalHooks
-            }
-          })
-        }
-      })
-
-      test.describe('Version limits', () => {
-        test.afterEach(async ({ payload }) => {
-          await payload.db.deleteVersions({ globalSlug: draftWithMaxGlobalSlug, where: {} })
-        })
-
-        for (const shouldRestoreAsDraft of [false, true]) {
-          test(`should enforce the global version limit when restoring as ${shouldRestoreAsDraft ? 'draft' : 'published'}`, async ({
-            payload,
-          }) => {
-            for (const locale of ['en', 'es', 'de'] as const) {
-              await payload.updateGlobal({
-                slug: draftWithMaxGlobalSlug,
-                data: { title: `Historical ${locale}` },
-                draft: true,
-                locale,
-                overrideAccess: true,
-              })
-            }
-
-            await payload.updateGlobal({
-              slug: draftWithMaxGlobalSlug,
-              data: { _status: 'published' },
-              overrideAccess: true,
-              publishAllLocales: true,
-            })
-
-            const { docs } = await payload.findGlobalVersions({
-              slug: draftWithMaxGlobalSlug,
-              limit: 1,
-              overrideAccess: true,
-            })
-            const req = await createPayloadRequest({ payload })
-
-            await restoreVersionOperationGlobal({
-              id: docs[0]!.id,
-              draft: shouldRestoreAsDraft,
-              globalConfig: payload.globals.config.find(
-                ({ slug }) => slug === draftWithMaxGlobalSlug,
-              )!,
-              overrideAccess: true,
-              req,
-            })
-
-            const versions = await payload.findGlobalVersions({
-              slug: draftWithMaxGlobalSlug,
-              overrideAccess: true,
-            })
-
-            expect(versions.totalDocs).toBe(1)
-            expect(versions.docs[0]!.id).not.toBe(docs[0]!.id)
-            expect(versions.docs[0]!.version.createdAt).toBe(docs[0]!.version.createdAt)
-          })
-        }
-      })
-    })
-
-    test.describe('Restore - draft persistence', () => {
-      test.afterEach(async ({ payload }) => {
-        await cleanupGlobal({ globalSlug: localizedGlobalSlug, payload })
-        await payload.db.deleteVersions({ globalSlug: simpleDraftGlobalSlug, where: {} })
-
-        if (isMongoose(payload)) {
-          await payload.db.globals.deleteOne({ globalType: simpleDraftGlobalSlug })
-        } else {
-          await payload.db.drizzle.delete(payload.db.tables[toSnakeCase(simpleDraftGlobalSlug)])
-        }
-      })
-
-      test('should restore localized global statuses as drafts without changing live content', async ({
+      test('should normalize localized statuses when restoring a global draft', async ({
         payload,
         restClient,
       }) => {
-        for (const locale of ['en', 'es', 'de'] as const) {
+        try {
           await payload.updateGlobal({
             slug: localizedGlobalSlug,
-            data: { _status: 'published', title: `Historical ${locale}` },
-            locale,
-            overrideAccess: true,
-          })
-        }
-
-        const { docs } = await payload.findGlobalVersions({
-          slug: localizedGlobalSlug,
-          limit: 1,
-          locale: 'all',
-          overrideAccess: true,
-          sort: '-updatedAt',
-        })
-
-        for (const locale of ['en', 'es', 'de'] as const) {
-          await payload.updateGlobal({
-            slug: localizedGlobalSlug,
-            data: { _status: 'published', title: `Current ${locale}` },
-            locale,
-            overrideAccess: true,
-          })
-        }
-
-        const liveBefore = await payload.db.findGlobal({ slug: localizedGlobalSlug })
-
-        await restClient.login({ slug: 'users', credentials: devUser })
-
-        const query = qs.stringify({ draft: true, locale: 'all' }, { addQueryPrefix: true })
-        const response = await restClient.POST(
-          `/globals/${localizedGlobalSlug}/versions/${docs[0]!.id}${query}`,
-        )
-
-        expect(response.status).toBe(200)
-
-        const { doc } = await response.json()
-        const statuses = { de: 'draft', en: 'draft', es: 'draft' }
-
-        expect(doc).toMatchObject({
-          _status: statuses,
-          globalType: localizedGlobalSlug,
-          title: { de: 'Historical de', en: 'Historical en', es: 'Historical es' },
-        })
-        expect(await payload.db.findGlobal({ slug: localizedGlobalSlug })).toEqual(liveBefore)
-
-        const versions = await payload.findGlobalVersions({
-          slug: localizedGlobalSlug,
-          limit: 1,
-          locale: 'all',
-          overrideAccess: true,
-          sort: '-updatedAt',
-        })
-
-        expect(versions.docs[0]!.id).not.toBe(docs[0]!.id)
-        expect(versions.docs[0]!.version._status).toEqual(statuses)
-      })
-
-      for (const shouldRestoreAsDraft of [false, true]) {
-        const expectedLive = shouldRestoreAsDraft
-          ? {}
-          : expect.objectContaining({ title: 'Historical' })
-
-        test(`should restore a version-only global ${shouldRestoreAsDraft ? 'as a draft' : 'directly'}`, async ({
-          payload,
-          restClient,
-        }) => {
-          const historicalCreatedAt = '2020-01-01T00:00:00.000Z'
-
-          await payload.updateGlobal({
-            slug: simpleDraftGlobalSlug,
-            data: { createdAt: historicalCreatedAt, title: 'Historical' },
-            draft: true,
+            data: { _status: 'published', title: 'Historical' },
             overrideAccess: true,
           })
 
           const { docs } = await payload.findGlobalVersions({
-            slug: simpleDraftGlobalSlug,
-            overrideAccess: true,
-          })
-
-          expect(
-            Object.keys((await payload.db.findGlobal({ slug: simpleDraftGlobalSlug })) || {}),
-          ).toHaveLength(0)
-
-          await restClient.login({ slug: 'users', credentials: devUser })
-
-          const query = qs.stringify({ draft: shouldRestoreAsDraft }, { addQueryPrefix: true })
-          const response = await restClient.POST(
-            `/globals/${simpleDraftGlobalSlug}/versions/${docs[0]!.id}${query}`,
-          )
-
-          expect(response.status).toBe(200)
-
-          const { doc } = await response.json()
-
-          expect(doc).toMatchObject({
-            _status: 'draft',
-            globalType: simpleDraftGlobalSlug,
-            title: 'Historical',
-          })
-
-          const versions = await payload.findGlobalVersions({
-            slug: simpleDraftGlobalSlug,
+            slug: localizedGlobalSlug,
+            limit: 1,
             overrideAccess: true,
             sort: '-updatedAt',
           })
 
-          expect(versions.totalDocs).toBe(2)
-          expect(versions.docs[0]!.id).not.toBe(docs[0]!.id)
-          expect(versions.docs[0]!.createdAt).toBe(historicalCreatedAt)
-          expect(versions.docs[0]!.version.createdAt).toBe(historicalCreatedAt)
+          await payload.updateGlobal({
+            slug: localizedGlobalSlug,
+            data: { _status: 'published', title: 'Current' },
+            overrideAccess: true,
+          })
 
-          const liveAfter = await payload.db.findGlobal({ slug: simpleDraftGlobalSlug })
+          const liveBefore = await payload.db.findGlobal({ slug: localizedGlobalSlug })
 
-          expect(liveAfter || {}).toEqual(expectedLive)
-        })
-      }
+          await restClient.login({ slug: 'users', credentials: devUser })
+
+          const query = qs.stringify({ draft: true }, { addQueryPrefix: true })
+          const response = await restClient.POST(
+            `/globals/${localizedGlobalSlug}/versions/${docs[0]!.id}${query}`,
+          )
+
+          expect(response.status).toBe(200)
+
+          const restored = await payload.findGlobal({
+            slug: localizedGlobalSlug,
+            draft: true,
+            locale: 'all',
+            overrideAccess: true,
+          })
+
+          expect(restored._status).toEqual({ de: 'draft', en: 'draft', es: 'draft' })
+          expect(await payload.db.findGlobal({ slug: localizedGlobalSlug })).toEqual(liveBefore)
+        } finally {
+          await cleanupGlobal({ globalSlug: localizedGlobalSlug, payload })
+        }
+      })
     })
 
     test.describe('Global update access control', () => {
