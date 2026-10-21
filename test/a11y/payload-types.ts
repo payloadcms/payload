@@ -392,6 +392,10 @@ export interface Post {
     | boolean
     | null;
   unlabelledSource?: string | null;
+  tabDetails?: {
+    note?: string | null;
+  };
+  tabSummary?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -761,6 +765,12 @@ export interface PostsSelect<T extends boolean = true> {
   source?: T;
   unlabelledSettings?: T;
   unlabelledSource?: T;
+  tabDetails?:
+    | T
+    | {
+        note?: T;
+      };
+  tabSummary?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;

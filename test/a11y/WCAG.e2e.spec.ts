@@ -692,6 +692,7 @@ test.describe('WCAG 2.2 Level AA', () => {
               .trim(),
           )
 
+          expect.soft(label).toMatch(/\S/)
           await expect.soft(item.getByRole('checkbox')).toHaveAccessibleName(label)
         }
       })
@@ -6790,6 +6791,98 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(page.getByRole('option').first()).toBeVisible()
       await collection.press('Escape')
     })
+    test('should link field tabs to their named panels and expose only the selected content', async ({
+      browser: _browser,
+    }, testInfo) => {
+      // PYLD-3827
+      await gotoCreatePost({ page, postsURL })
+      const field = page.locator('.tabs-field').filter({
+        has: page.getByRole('tab', { name: 'Post details', exact: true }),
+      })
+      const tabs = field.getByRole('tab')
+
+      await expect(field.getByRole('tablist')).toHaveCount(1)
+      await expect(tabs).toHaveCount(2)
+      for (const [index, name] of ['Post details', 'Post summary'].entries()) {
+        const tab = tabs.nth(index)
+        const panel = field.getByRole('tabpanel', { name, exact: true })
+
+        await tab.focus()
+        await tab.press('Enter')
+        await expect(tab).toHaveAttribute('aria-selected', 'true')
+        await expect(panel).toBeVisible()
+        const panelID = (await panel.getAttribute('id')) ?? ''
+        const tabID = (await tab.getAttribute('id')) ?? ''
+
+        expect(panelID).toBeTruthy()
+        expect(tabID).toBeTruthy()
+        await expect(tab).toHaveAttribute('aria-controls', panelID)
+        await expect(panel).toHaveAttribute('aria-labelledby', tabID)
+        await expect(field.getByRole('tabpanel')).toHaveCount(1)
+        await expect(tabs.nth(1 - index)).toHaveAttribute('aria-selected', 'false')
+        await tab.press('Tab')
+        await expect(panel).toBeFocused()
+        await panel.press('Tab')
+        await expect(panel.getByRole('textbox')).toBeFocused()
+        const scan = await runAxeScan({ include: ['.tabs-field'], page, testInfo })
+
+        expect(scan.violations.filter(({ tags }) => tags.includes('wcag412'))).toEqual([])
+      }
+    })
+
+    test('should label navigation tab panels with their selected tabs', async ({
+      browser: _browser,
+    }, testInfo) => {
+      // PYLD-3731
+      await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
+      await openNavigation({ page })
+      const sidebar = page.locator('.nav .sidebar-tabs')
+      const tabs = sidebar.getByRole('tab')
+
+      await expect(tabs).toHaveCount(2)
+      for (const name of ['Collections', 'Folders']) {
+        const tab = sidebar.getByRole('tab', { name, exact: true })
+        const panel = sidebar.getByRole('tabpanel', { name, exact: true })
+
+        if (name === 'Collections') {
+          await tab.focus()
+          await tab.press('Enter')
+        } else {
+          await sidebar.getByRole('tab', { name: 'Collections', exact: true }).focus()
+          await page.keyboard.press('ArrowRight')
+          await expect(tab).toBeFocused()
+        }
+        await expect(tab).toHaveAttribute('aria-selected', 'true')
+        await expect(panel).toBeVisible()
+        const tabID = (await tab.getAttribute('id')) ?? ''
+        const panelID = (await panel.getAttribute('id')) ?? ''
+
+        expect(tabID).toBeTruthy()
+        expect(panelID).toBeTruthy()
+        await expect(panel).toHaveAttribute('aria-labelledby', tabID)
+        await expect(tab).toHaveAttribute('aria-controls', panelID)
+        await expect(sidebar.getByRole('tabpanel')).toHaveCount(1)
+        await tab.press('Tab')
+        await expect(panel).toBeFocused()
+        if (name === 'Folders') {
+          await expect(panel.getByRole('tree')).toBeVisible()
+        }
+        const scan = await runAxeScan({
+          defaultExcludes: false,
+          include: ['.sidebar-tabs'],
+          page,
+          testInfo,
+        })
+
+        expect(scan.violations.filter(({ tags }) => tags.includes('wcag412'))).toEqual([])
+      }
+      await sidebar.getByRole('tab', { name: 'Folders', exact: true }).focus()
+      await page.keyboard.press('ArrowLeft')
+      await expect(
+        sidebar.getByRole('tabpanel', { name: 'Collections', exact: true }),
+      ).toBeVisible()
+    })
+
     for (const { isInDrawer, shouldToggleTwice } of [
       { isInDrawer: false, shouldToggleTwice: false },
       { isInDrawer: true, shouldToggleTwice: false },
