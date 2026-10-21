@@ -216,8 +216,8 @@ export async function publishSinglePackage(
       const { exitCode, output } = await runPnpm(cmdArgs)
       lastExitCode = exitCode
 
+      // pnpm's streamed output already reports the successful publish
       if (exitCode === 0) {
-        console.log(`✅ ${pkg.name} published${attempt > 1 ? ' (on retry)' : ''}`)
         return { name: pkg.name, success: true }
       }
 

@@ -147,7 +147,7 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
 
   const replace = useCallback(
     (path: string, options?: { scroll?: boolean }) => {
-      void router.navigate({ ...toNavOptions(path), replace: true, resetScroll: options?.scroll })
+      return router.navigate({ ...toNavOptions(path), replace: true, resetScroll: options?.scroll })
     },
     [router, toNavOptions],
   )
