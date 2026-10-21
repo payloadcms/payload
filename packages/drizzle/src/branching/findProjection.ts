@@ -5,6 +5,7 @@ import {
   aliasedTableColumn,
   asc,
   count,
+  countDistinct,
   eq,
   getTableName,
   inArray,
@@ -69,12 +70,11 @@ export const findProjection: Find = async function (this: DrizzleAdapter, args) 
   })
   let statementRelations: SQL[]
   let fallbackCount: PromiseLike<{ total: number }[]>
-  const canPageRootDirectly =
-    joins.length === 0 &&
-    orderBy.every(
-      ({ column, projectionAggregate }) =>
-        !projectionAggregate && getTableName(column.table) === tableName,
-    )
+  const hasRootOrdering = orderBy.every(
+    ({ column, projectionAggregate }) =>
+      !projectionAggregate && getTableName(column.table) === tableName,
+  )
+  const canPageRootDirectly = joins.length === 0 && hasRootOrdering
 
   if (canPageRootDirectly) {
     // Keep page selection on its native ordered index. Counting the same predicate
@@ -100,6 +100,36 @@ export const findProjection: Find = async function (this: DrizzleAdapter, args) 
     }
     statementRelations = [sql`${sql.identifier(total._.alias)} as materialized (${total._.sql})`]
     fallbackCount = countQuery
+  } else if (hasRootOrdering) {
+    // Filter joins can multiply a root without changing its ordering. IN deduplicates
+    // membership; defer distinctness to the count so matching can use filtering indexes.
+    let matching = (db as any).select({ id: table.id }).from(table).where(where).$dynamic()
+
+    for (const join of joins) {
+      matching = matching[join.type ?? 'leftJoin'](join.table, join.condition)
+    }
+
+    const allIDs = (db as any)
+      .$with(allocateStatementName({ preferredName: 'projection_all_ids', statementNames }))
+      .as(matching)
+    const matchingIDs = (db as any).select({ id: allIDs.id }).from(allIDs)
+    const totalQuery = (db as any).select({ total: countDistinct(allIDs.id) }).from(allIDs)
+
+    relational.where = inArray(table.id, matchingIDs)
+    relational.orderBy = orderBy.map(({ column, order }) => order(column))
+    if (limit) {
+      relational.limit = limit
+      relational.offset = offset
+    }
+    relational.extras = {
+      ...(relational.extras ?? {}),
+      [totalKey]: sql`(${totalQuery})`.as(totalKey),
+    }
+    statementRelations = [sql`${sql.identifier(allIDs._.alias)} as materialized (${allIDs._.sql})`]
+    fallbackCount = (db as any)
+      .with(allIDs)
+      .select({ total: countDistinct(allIDs.id) })
+      .from(allIDs)
   } else {
     const ordering = orderBy.map(({ column, order, projectionAggregate }) =>
       order(
