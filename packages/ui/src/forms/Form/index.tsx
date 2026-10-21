@@ -447,7 +447,8 @@ export const Form: React.FC<FormProps> = (props) => {
         setDisabled(false)
 
         if (typeof handleResponse === 'function') {
-          handleResponse(res, successToast, errorToast)
+          await handleResponse(res, successToast, errorToast)
+          setProcessing(false)
           return
         }
 

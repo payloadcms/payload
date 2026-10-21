@@ -4393,6 +4393,34 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.3 Focus Order (A)', () => {
+    test('should restore submit focus after an asynchronous custom response handler completes', async () => {
+      const responseURL = '**/api/a11y-custom-response'
+
+      await page.route(responseURL, (route) => route.fulfill({ json: {} }))
+      try {
+        await page.goto(
+          formatAdminURL({ adminRoute: '/admin', path: '/custom-response-form', serverURL }),
+        )
+        const form = page.locator('.custom-response-form')
+        const submit = page.getByRole('button', { name: 'Submit custom response', exact: true })
+        const finish = page.getByRole('button', { name: 'Finish response handler', exact: true })
+
+        await expect(form).toHaveAttribute('data-form-ready', 'true')
+        await submit.press('Enter')
+        await expect(finish).toBeEnabled()
+        await expect(submit).toBeDisabled()
+        await expect(form).toHaveAttribute('data-form-ready', 'false')
+        // Finish the handler without moving focus away from the disabled submitter.
+        await finish.evaluate((button: HTMLButtonElement) => button.click())
+        await expect(finish).toBeDisabled()
+        await expect(form).toHaveAttribute('data-form-ready', 'true')
+        await expect(submit).toBeEnabled()
+        await expect(submit).toBeFocused()
+      } finally {
+        await page.unroute(responseURL)
+      }
+    })
+
     for (const removal of ['none', 'after opening', 'while opening']) {
       test(`should return focus to the root popup after a nested confirmation with opener removal ${removal}`, async () => {
         await page.goto(

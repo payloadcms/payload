@@ -112,7 +112,7 @@ export const ForgotPasswordForm: React.FC = () => {
   }, [resendDelay])
 
   const handleResponse: FormProps['handleResponse'] = (res, successToast, errorToast) => {
-    res
+    return res
       .json()
       .then(() => {
         const nextResendAvailableAt = Date.now() + minRequestInterval
