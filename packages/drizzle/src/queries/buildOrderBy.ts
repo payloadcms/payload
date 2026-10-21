@@ -1,11 +1,13 @@
 import type { SQL, Table } from 'drizzle-orm'
 import type { FlattenedField, Sort } from 'payload'
 
-import { asc, desc } from 'drizzle-orm'
+import { asc, desc, max, min, sql } from 'drizzle-orm'
 
+import type { ProjectionQueryAdapter } from '../branching/createProjectionQueries.js'
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases, BuildQueryResult } from './buildQuery.js'
 
+import { projectionQueryContext } from '../branching/createProjectionQueries.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
 
@@ -76,7 +78,13 @@ export const buildOrderBy = ({
       sortDirection = 'asc'
     }
     try {
-      const { columnName: sortTableColumnName, table: sortTable } = getTableColumnFromPath({
+      const isProjectionQuery = Boolean((adapter as ProjectionQueryAdapter)[projectionQueryContext])
+      const {
+        columnName: sortTableColumnName,
+        columns,
+        rawColumn,
+        table: sortTable,
+      } = getTableColumnFromPath({
         adapter,
         collectionPath: sortProperty,
         fields,
@@ -86,8 +94,56 @@ export const buildOrderBy = ({
         pathSegments: sortProperty.replace(/__/g, '.').split('.'),
         selectFields,
         tableName,
-        value: sortProperty,
+        value: isProjectionQuery ? undefined : sortProperty,
       })
+      const order = sortDirection === 'asc' ? asc : desc
+
+      if (isProjectionQuery && columns?.length) {
+        const aggregate = sortDirection === 'asc' ? min : max
+        const numberColumns = columns
+          .filter(({ idType }) => idType === 'number')
+          .map(({ rawColumn }) => rawColumn)
+        const textColumns = columns
+          .filter(({ idType }) => idType !== 'number')
+          .map(({ rawColumn }) => sql`cast(${rawColumn} as text)`)
+        const coalesce = ({ isNumber = false, values }: { isNumber?: boolean; values: SQL[] }) =>
+          values.length === 0
+            ? isNumber
+              ? sql`cast(null as numeric)`
+              : sql`cast(null as text)`
+            : values.length === 1
+              ? values[0]
+              : sql`coalesce(${sql.join(values, sql`, `)})`
+        const numberValue = coalesce({ isNumber: true, values: numberColumns })
+        const textValue = coalesce({ values: textColumns })
+        const rank = sql`case when ${numberValue} is not null then 0 when ${textValue} is not null then 1 else null end`
+        const rankAggregate = aggregate(rank)
+
+        orderBy.push(
+          { column: rank as any, order, projectionAggregate: rankAggregate },
+          {
+            column: numberValue as any,
+            order,
+            projectionAggregate: sql`case when ${rankAggregate} = 0 then ${aggregate(numberValue)} else null end`,
+          },
+          {
+            column: textValue as any,
+            order,
+            projectionAggregate: sql`case when ${rankAggregate} = 1 then ${aggregate(textValue)} else null end`,
+          },
+        )
+        continue
+      }
+
+      if (isProjectionQuery && rawColumn) {
+        orderBy.push({
+          column: rawColumn as any,
+          order,
+          projectionAggregate: (sortDirection === 'asc' ? min : max)(rawColumn),
+        })
+        continue
+      }
+
       if (sortTable?.[sortTableColumnName]) {
         let order = sortDirection === 'asc' ? asc : desc
 

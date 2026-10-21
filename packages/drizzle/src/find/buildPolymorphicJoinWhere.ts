@@ -12,6 +12,10 @@ import type {
   WherePathPlan,
 } from './createPolymorphicJoinWherePlan.js'
 
+import {
+  getProjectionTarget,
+  projectionRelationConstraint,
+} from '../branching/projectionConstraints.js'
 import { buildOperatorConstraint } from '../queries/buildOperatorConstraint.js'
 import { sanitizeQueryValue } from '../queries/sanitizeQueryValue.js'
 
@@ -89,6 +93,7 @@ export const buildPolymorphicJoinWhere = ({
     const resolvedPath = resolveWherePath({
       adapter,
       collection,
+      locale,
       schemaPath: key,
       table,
       wherePlan,
@@ -260,12 +265,13 @@ export const buildPolymorphicJoinWhere = ({
 const resolveWherePath = ({
   adapter,
   collection,
+  locale,
   schemaPath,
   table,
   wherePlan,
 }: {
   schemaPath: string
-} & Omit<BuildPolymorphicJoinWhereArgs, 'locale' | 'where'>): ResolvedWherePath => {
+} & Omit<BuildPolymorphicJoinWhereArgs, 'where'>): ResolvedWherePath => {
   const pathPlan = wherePlan.get(schemaPath)
 
   if (!pathPlan) {
@@ -279,7 +285,7 @@ const resolveWherePath = ({
   if (schemaPath === 'relationTo') {
     return {
       type: 'scalar',
-      column: sql`${collection}`,
+      column: sql`${getProjectionTarget({ adapter, collection }).config?.custom?.branchProjectionStorage?.collection ?? collection}`,
       pathPlan,
       queryValueContext: {
         type: 'scalar',
@@ -323,13 +329,30 @@ const resolveWherePath = ({
     return { type: 'invalid', pathPlan }
   }
 
+  const column = fieldContext
+    ? fieldContext.isLocalized
+      ? adapter.tables[
+          `${getProjectionTarget({ adapter, collection }).tableName}${adapter.localesSuffix}`
+        ][pathPlan.columnPath]
+      : table[fieldContext.columnPath ?? pathPlan.columnPath]
+    : sql`null`
+  const relationVisibility =
+    fieldContext &&
+    (fieldContext.field.type === 'relationship' || fieldContext.field.type === 'upload') &&
+    typeof fieldContext.field.relationTo === 'string'
+      ? projectionRelationConstraint({
+          adapter,
+          collection: fieldContext.field.relationTo,
+          idColumn: column,
+          locale,
+        })
+      : undefined
+
   return {
     type: 'scalar',
-    column: fieldContext
-      ? fieldContext.isLocalized
-        ? adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`][pathPlan.columnPath]
-        : table[pathPlan.columnPath]
-      : sql`null`,
+    column: relationVisibility
+      ? sql`CASE WHEN ${relationVisibility} THEN ${column} ELSE NULL END`
+      : column,
     fieldContext,
     pathPlan,
     queryValueContext,
@@ -355,7 +378,10 @@ const getHasManySelectExpression = ({
     .split('.')
     .map((pathSegment) => toSnakeCase(pathSegment))
     .join('_')
-  const valuesTableName = adapter.tableNameMap.get(`${toSnakeCase(collection)}_${selectTablePath}`)
+  const target = getProjectionTarget({ adapter, collection })
+  const valuesTableName = adapter.tableNameMap.get(
+    `${toSnakeCase(target.collection)}_${selectTablePath}`,
+  )
 
   if (!valuesTableName) {
     throw new Error(

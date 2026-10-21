@@ -2,6 +2,8 @@ import type { BranchingAdapter } from 'payload'
 
 import type { SQLiteD1Adapter } from './types.js'
 
+import { createReadSnapshot } from './createReadSnapshot.js'
+
 const assertionMarker = 'payload_branch_atomic_conflict'
 const assertionSQL = `SELECT CASE WHEN changes() = ? THEN 1 ELSE json_extract('{}', '${assertionMarker}') END`
 const conflictMessages = new Set([
@@ -66,6 +68,7 @@ export const createD1BranchingAdapter = ({
       throw new Error('D1 branch atomic batch failed.')
     }
   },
+  withReadSnapshot: createReadSnapshot({ adapter }),
 })
 
 const hasAtomicBatch = ({ adapter }: { adapter: SQLiteD1Adapter }): boolean =>

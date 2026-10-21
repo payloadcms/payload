@@ -18,6 +18,13 @@ import { validate as uuidValidate } from 'uuid'
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
+import {
+  getProjectionTarget,
+  projectionLogicalIDColumn,
+  projectionPolymorphicValue,
+  projectionRelationConstraint,
+  projectionTypedValue,
+} from '../branching/projectionConstraints.js'
 import { isPolymorphicRelationship } from '../utilities/isPolymorphicRelationship.js'
 import { isUUIDType } from '../utilities/isUUIDType.js'
 import { jsonBuildObject } from '../utilities/json.js'
@@ -379,12 +386,13 @@ export const getTableColumnFromPath = ({
           throw new APIError('Not supported')
         }
 
+        const target = getProjectionTarget({ adapter, collection: field.collection })
         const newCollectionPath = pathSegments.slice(1).join('.')
 
         // Filtering through a polymorphic `on` relationship is not supported: it is stored in the
         // `_rels` table with no direct column to correlate on, which would otherwise build invalid SQL.
         const onRelationshipField = getFieldByPath({
-          fields: adapter.payload.collections[field.collection].config.flattenedFields,
+          fields: target.config.flattenedFields,
           path: field.on,
         })?.field
 
@@ -397,7 +405,7 @@ export const getTableColumnFromPath = ({
         }
 
         if (field.hasMany) {
-          const relationTableName = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${adapter.relationshipsSuffix}`
+          const relationTableName = `${target.tableName}${adapter.relationshipsSuffix}`
 
           const existingTable = joins.find(
             (e) => e.queryPath === `${constraintPath}${field.name}._rels`,
@@ -410,7 +418,7 @@ export const getTableColumnFromPath = ({
             }).newAliasTable) as PgTableWithColumns<any>
 
           const relationshipField = getFieldByPath({
-            fields: adapter.payload.collections[field.collection].config.flattenedFields,
+            fields: target.config.flattenedFields,
             path: field.on,
           })
           if (!relationshipField) {
@@ -434,7 +442,7 @@ export const getTableColumnFromPath = ({
             })
           }
 
-          if (newCollectionPath === 'id') {
+          if (newCollectionPath === 'id' && target.idField === 'id') {
             return {
               columnName: 'parent',
               constraints,
@@ -446,7 +454,7 @@ export const getTableColumnFromPath = ({
             }
           }
 
-          const relationshipConfig = adapter.payload.collections[field.collection].config
+          const relationshipConfig = target.config
           const relationshipTableName = adapter.tableNameMap.get(
             toSnakeCase(relationshipConfig.slug),
           )
@@ -491,9 +499,7 @@ export const getTableColumnFromPath = ({
           })
         }
 
-        const newTableName = adapter.tableNameMap.get(
-          toSnakeCase(adapter.payload.collections[field.collection].config.slug),
-        )
+        const newTableName = target.tableName
 
         const existingTable = joins.find(
           (e) => e.queryPath === `${constraintPath}${field.name}`,
@@ -503,8 +509,7 @@ export const getTableColumnFromPath = ({
 
         if (!existingTable) {
           const onSegments = field.on.split('.')
-          const collectionFlattenedFields =
-            adapter.payload.collections[field.collection].config.flattenedFields
+          const collectionFlattenedFields = target.config.flattenedFields
           const firstSegField =
             onSegments.length > 1
               ? collectionFlattenedFields.find((f) => f.name === onSegments[0])
@@ -551,7 +556,7 @@ export const getTableColumnFromPath = ({
           }
         }
 
-        if (newCollectionPath === 'id') {
+        if (newCollectionPath === 'id' && target.idField === 'id') {
           return {
             columnName: 'id',
             constraints,
@@ -569,7 +574,7 @@ export const getTableColumnFromPath = ({
           collectionPath: newCollectionPath,
           constraintPath: '',
           constraints,
-          fields: adapter.payload.collections[field.collection].config.flattenedFields,
+          fields: target.config.flattenedFields,
           joins,
           locale,
           // A join reads from a different collection, so localization does not carry over
@@ -715,16 +720,20 @@ export const getTableColumnFromPath = ({
           let newAliasTable
 
           if (typeof field.relationTo === 'string') {
-            const relationshipConfig = adapter.payload.collections[field.relationTo].config
+            const target = getProjectionTarget({ adapter, collection: field.relationTo })
+            const relationshipConfig = target.config
 
-            newTableName = adapter.tableNameMap.get(toSnakeCase(relationshipConfig.slug))
+            newTableName = target.tableName
 
             // parent to relationship join table
             relationshipFields = relationshipConfig.flattenedFields
             ;({ newAliasTable } = getTableAlias({ adapter, tableName: newTableName }))
 
             joins.push({
-              condition: eq(newAliasTable.id, aliasRelationshipTable[`${field.relationTo}ID`]),
+              condition: eq(
+                newAliasTable[target.idField],
+                aliasRelationshipTable[`${field.relationTo}ID`],
+              ),
               table: newAliasTable,
             })
 
@@ -753,6 +762,17 @@ export const getTableColumnFromPath = ({
                   idType = customIDType
                 }
 
+                const logicalIDColumn = projectionLogicalIDColumn({
+                  adapter,
+                  collection: relationTo,
+                  idColumn: aliasRelationshipTable[`${relationTo}ID`],
+                  locale,
+                })
+
+                if (logicalIDColumn) {
+                  idType = logicalIDColumn.idType
+                }
+
                 const idTypeTextOrUuid = idType === 'text' || idType === 'uuid'
 
                 // Do not add the column to OR if we know that it can't match by the type
@@ -773,8 +793,7 @@ export const getTableColumnFromPath = ({
                 // a custom ID type, we skip this check
                 // We need this because Postgres throws an error if querying by UUID column with a value that isn't a valid UUID.
                 if (
-                  value &&
-                  !Array.isArray(value) &&
+                  typeof value === 'string' &&
                   idType === 'uuid' &&
                   hasCustomCollectionWithCustomID
                 ) {
@@ -798,7 +817,9 @@ export const getTableColumnFromPath = ({
 
                 return {
                   idType,
-                  rawColumn: sql.raw(`"${aliasRelationshipTableName}"."${relationTableName}_id"`),
+                  rawColumn:
+                    logicalIDColumn?.rawColumn ??
+                    sql.raw(`"${aliasRelationshipTableName}"."${relationTableName}_id"`),
                 }
               })
               .filter(Boolean)
@@ -807,6 +828,9 @@ export const getTableColumnFromPath = ({
               columns,
               constraints,
               field,
+              ...(value === DistinctSymbol && {
+                rawColumn: projectionTypedValue({ adapter, columns }),
+              }),
               table: aliasRelationshipTable,
             }
           } else if (newCollectionPath === 'relationTo') {
@@ -847,10 +871,18 @@ export const getTableColumnFromPath = ({
                 toSnakeCase(adapter.payload.collections[relationTo].config.slug),
               )
 
-              obj[relationTo] = sql.raw(`"${aliasRelationshipTableName}"."${relationTableName}_id"`)
+              obj[relationTo] =
+                projectionLogicalIDColumn({
+                  adapter,
+                  collection: relationTo,
+                  idColumn: aliasRelationshipTable[`${relationTo}ID`],
+                  locale,
+                })?.rawColumn ??
+                sql.raw(`"${aliasRelationshipTableName}"."${relationTableName}_id"`)
             })
 
-            let rawColumn = jsonBuildObject(adapter, obj)
+            let rawColumn =
+              projectionPolymorphicValue({ adapter, values: obj }) ?? jsonBuildObject(adapter, obj)
             if (adapter.name === 'postgres') {
               rawColumn = sql`${rawColumn}::text`
             }
@@ -888,9 +920,8 @@ export const getTableColumnFromPath = ({
         ) {
           // simple relationships
           const columnName = `${columnPrefix}${field.name}`
-          const newTableName = adapter.tableNameMap.get(
-            toSnakeCase(adapter.payload.collections[field.relationTo].config.slug),
-          )
+          const target = getProjectionTarget({ adapter, collection: field.relationTo })
+          const newTableName = target.tableName
           const { newAliasTable } = getTableAlias({ adapter, tableName: newTableName })
 
           if (isFieldLocalized && adapter.payload.config.localization) {
@@ -918,13 +949,13 @@ export const getTableColumnFromPath = ({
             })
 
             joins.push({
-              condition: eq(localesTable[columnName], newAliasTable.id),
+              condition: eq(localesTable[columnName], newAliasTable[target.idField]),
               table: newAliasTable,
             })
           } else {
             joins.push({
               condition: eq(
-                newAliasTable.id,
+                newAliasTable[target.idField],
                 aliasTable ? aliasTable[columnName] : adapter.tables[tableName][columnName],
               ),
               table: newAliasTable,
@@ -937,7 +968,7 @@ export const getTableColumnFromPath = ({
             collectionPath: newCollectionPath,
             constraintPath: '',
             constraints,
-            fields: adapter.payload.collections[field.relationTo].config.flattenedFields,
+            fields: target.config.flattenedFields,
             joins,
             locale,
             // A relationship jumps to a different collection, so localization does not carry over
@@ -1080,6 +1111,42 @@ export const getTableColumnFromPath = ({
 
     selectFields[`${newTableName}.${columnPrefix}${field.name}`] =
       targetTable[`${columnPrefix}${field.name}`]
+
+    if (
+      (field.type === 'relationship' || field.type === 'upload') &&
+      typeof field.relationTo === 'string'
+    ) {
+      const targetCollection = adapter.payload.collections[field.relationTo]?.config
+      const relationshipColumn = targetTable[`${columnPrefix}${field.name}`]
+      const visibility = projectionRelationConstraint({
+        adapter,
+        collection: field.relationTo,
+        idColumn: relationshipColumn,
+        locale,
+      })
+
+      if (visibility) {
+        const target = getProjectionTarget({ adapter, collection: targetCollection.slug })
+        const targetTableName = target.tableName
+        const { newAliasTable: relationshipTarget } = getTableAlias({
+          adapter,
+          tableName: targetTableName,
+        })
+
+        joins.push({
+          condition: and(eq(relationshipColumn, relationshipTarget[target.idField]), visibility),
+          table: relationshipTarget,
+        })
+
+        return {
+          columnName: target.idField,
+          constraints,
+          field,
+          pathSegments,
+          table: relationshipTarget,
+        }
+      }
+    }
 
     return {
       columnName: `${columnPrefix}${field.name}`,

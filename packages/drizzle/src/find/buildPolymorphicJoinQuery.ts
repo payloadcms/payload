@@ -2,13 +2,24 @@ import type { SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
 
-import { and, asc, count, desc, eq, getTableName, sql } from 'drizzle-orm'
-import { type FlattenedJoinField, type Where } from 'payload'
-import toSnakeCase from 'to-snake-case'
+import { and, asc, count, desc, eq, max, min, sql } from 'drizzle-orm'
+import {
+  type BranchProjectionQueryContext,
+  type FlattenedJoinField,
+  getFieldByPath,
+  type Where,
+} from 'payload'
 
 import type { DrizzleAdapter, GenericTable } from '../types.js'
 import type { PolymorphicJoinWherePlan } from './createPolymorphicJoinWherePlan.js'
 
+import {
+  getProjectionCollection,
+  getProjectionTarget,
+  projectionRelationConstraint,
+} from '../branching/projectionConstraints.js'
+import { buildQuery } from '../queries/buildQuery.js'
+import { getTableAlias } from '../queries/getTableAlias.js'
 import { jsonAggBuildObject } from '../utilities/json.js'
 import { buildPolymorphicJoinWhere } from './buildPolymorphicJoinWhere.js'
 import { createPolymorphicJoinWherePlan } from './createPolymorphicJoinWherePlan.js'
@@ -22,6 +33,7 @@ type BuildPolymorphicJoinQueryArgs = {
   page?: number
   pageSize?: number
   path: string
+  preparedOptions?: NonNullable<BranchProjectionQueryContext['joins']>[string]
   shouldCount: boolean
   sort?: string | string[]
   where?: Where
@@ -57,6 +69,7 @@ export const buildPolymorphicJoinQuery = ({
   page,
   pageSize = limit,
   path,
+  preparedOptions,
   shouldCount,
   sort,
   where,
@@ -76,13 +89,22 @@ export const buildPolymorphicJoinQuery = ({
   const collections = field.collection
   const columnName = `${path.replaceAll('.', '_')}${field.name}`
   const db = adapter.drizzle as LibSQLDatabase
+  const rootSlug = getProjectionCollection({ adapter, table: adapter.tables[currentTableName] })
+  const rootCollection = rootSlug ? adapter.payload.collections[rootSlug]?.config : undefined
+  const rootID = sql.raw(`"${currentTableName}"."id"`)
+  const rootLogicalID = rootCollection?.custom?.branchProjectionStorage
+    ? sql.raw(
+        `"${currentTableName}"."${adapter.tables[currentTableName]['_branchProjection_logicalID'].name}"`,
+      )
+    : rootID
   const onPath = field.on.split('.').join('_')
   const collectionTables = collections.map((collection) => {
     if (!adapter.payload.collections[collection]) {
       throw new Error(`Unknown polymorphic join collection "${collection}"`)
     }
 
-    const tableName = adapter.tableNameMap.get(toSnakeCase(collection))
+    const target = getProjectionTarget({ adapter, collection })
+    const tableName = target.tableName
     const table = tableName ? (adapter.tables[tableName] as GenericTable | undefined) : undefined
 
     if (!table) {
@@ -97,36 +119,134 @@ export const buildPolymorphicJoinQuery = ({
       throw new Error(`Polymorphic join collection "${collection}" has no "${onPath}" column`)
     }
 
-    return { collection, table }
+    return {
+      collection,
+      table: preparedOptions ? getTableAlias({ adapter, tableName }).newAliasTable : table,
+      target,
+    }
   })
-  const sortField = getSortField({ adapter, collections, sort })
+  const sortField =
+    preparedOptions?.[collections[0]]?.sort[0] ?? getSortField({ adapter, collections, sort })
   const sortOrder = sortField.startsWith('-') ? desc : asc
-  const sortPath = sortField.replace('-', '').split('.').join('_')
+  const preparedSort = preparedOptions?.[collections[0]]?.sort
+  const sortTerms = preparedSort?.map((sort, index) => ({
+    index,
+    isLogicalID: collectionTables.every(({ collection }) =>
+      ['_branchProjection.logicalID', 'id'].includes(
+        preparedOptions[collection]?.sort[index]?.replace(/^-/, ''),
+      ),
+    ),
+    order: sort.startsWith('-') ? desc : asc,
+  }))
+  const preparedSortColumns = new Map(
+    collectionTables.map(({ collection, table, target }) => [
+      collection,
+      (sortTerms ?? []).map(({ index, isLogicalID }) =>
+        isLogicalID
+          ? []
+          : buildProjectionJoinSortColumns({
+              adapter,
+              collection: target.collection,
+              locale,
+              sort: preparedOptions[collection].sort[index],
+              table,
+              tableName: target.tableName,
+            }),
+      ),
+    ]),
+  )
+  const sortWidths = (sortTerms ?? []).map(({ index }) =>
+    Math.max(
+      1,
+      ...collectionTables.map(
+        ({ collection }) => preparedSortColumns.get(collection)[index].length,
+      ),
+    ),
+  )
   const wherePlan: PolymorphicJoinWherePlan = where
     ? createPolymorphicJoinWherePlan({ adapter, collections, where })
     : new Map()
   let unionQuery: null | SQLiteSelect = null
 
-  for (const { collection, table } of collectionTables) {
-    const sortColumn = table[sortPath]
+  for (const { collection, table, target } of collectionTables) {
+    const targetOptions = preparedOptions?.[collection]
+    const targetWhere = targetOptions?.where ?? where
+    const targetWherePlan =
+      targetWhere && targetOptions
+        ? createPolymorphicJoinWherePlan({ adapter, collections, where: targetWhere })
+        : wherePlan
+    const targetSort = targetOptions?.sort[0] ?? sortField
+    const targetSortPath = targetSort.replace(/^-/, '').split('.').join('_')
+    const logicalIDColumn =
+      table[target.config.custom?.branchProjectionStorage ? '_branchProjection_logicalID' : 'id']
+    const idField = getFieldByPath({
+      fields: target.config.flattenedFields,
+      path: target.config.custom?.branchProjectionStorage ? '_branchProjection.logicalID' : 'id',
+    })?.field
+    const isNumericID = idField?.type === 'number' || (!idField && adapter.idType === 'serial')
+    const sortColumn =
+      targetSortPath === 'id' && target.config.custom?.branchProjectionStorage
+        ? table['_branchProjection_logicalID']
+        : table[targetSortPath]
     const selectFields = {
-      id: table['id'],
-      parent: sql`${table[onPath]}`.as(onPath),
+      id:
+        getProjectionCollection({ adapter, table }) && target.config.custom?.branchProjectionStorage
+          ? (adapter.name === 'postgres'
+              ? sql`to_jsonb(${logicalIDColumn})`
+              : sql`${logicalIDColumn}`
+            ).as('id')
+          : preparedOptions && adapter.name === 'postgres'
+            ? sql`to_jsonb(${logicalIDColumn})`.as('id')
+            : table['id'],
+      parent: preparedOptions ? sql`${rootID}`.as(onPath) : sql`${table[onPath]}`.as(onPath),
       relationTo: sql`${collection}`.as('relationTo'),
-      sortPath: sql`${sortColumn ?? null}`.as('sortPath'),
+      sortPath: sql`${preparedOptions ? null : (sortColumn ?? null)}`.as('sortPath'),
+      ...Object.fromEntries(
+        (sortTerms ?? []).flatMap(({ index }) =>
+          Array.from({ length: sortWidths[index] }, (_, component) => [
+            `sortPath${index}_${component}`,
+            sql`${preparedSortColumns.get(collection)[index][component] ?? null}`.as(
+              `sortPath${index}_${component}`,
+            ),
+          ]),
+        ),
+      ),
+      ...(preparedOptions
+        ? {
+            collectionTie:
+              sql`${target.config.custom?.branchProjectionStorage?.collection ?? collection}`.as(
+                'collectionTie',
+              ),
+            idDomain: sql`${isNumericID ? 0 : 1}`.as('idDomain'),
+            idNumber: sql`${isNumericID ? logicalIDColumn : null}`.as('idNumber'),
+            idText: sql`${isNumericID ? null : logicalIDColumn}`.as('idText'),
+          }
+        : {}),
     }
-    const collectionWhere =
-      where && Object.keys(where).length > 0
+    const incomingCollectionWhere =
+      targetWhere && Object.keys(targetWhere).length > 0
         ? buildPolymorphicJoinWhere({
             adapter,
             collection,
             locale,
             table,
-            where,
-            wherePlan,
+            where: targetWhere,
+            wherePlan: targetWherePlan,
           })
         : undefined
-    const hasLocalizedWhere = [...wherePlan.values()].some((pathPlan) => {
+    const collectionWhere = and(
+      incomingCollectionWhere,
+      preparedOptions
+        ? eq(table[onPath], target.config.custom?.branchProjectionStorage ? rootID : rootLogicalID)
+        : undefined,
+      projectionRelationConstraint({
+        adapter,
+        collection: target.collection,
+        idColumn: table['id'],
+        locale,
+      }),
+    )
+    const hasLocalizedWhere = [...targetWherePlan.values()].some((pathPlan) => {
       const collectionField = pathPlan.fieldsByCollection.get(collection)
 
       return collectionField?.type === 'scalar' && collectionField.isLocalized
@@ -139,7 +259,7 @@ export const buildPolymorphicJoinQuery = ({
       .$dynamic()
 
     if (hasLocalizedWhere) {
-      const localesTable = adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`]
+      const localesTable = adapter.tables[`${target.tableName}${adapter.localesSuffix}`]
 
       collectionQuery = collectionQuery.leftJoin(
         localesTable,
@@ -173,7 +293,23 @@ export const buildPolymorphicJoinQuery = ({
         .where(parentConstraint)}`.as(`${columnName}_count`)
     : undefined
 
-  unionQuery = unionQuery.orderBy(sortOrder(sql`"sortPath"`))
+  unionQuery = unionQuery.orderBy(
+    ...(sortTerms
+      ? [
+          ...sortTerms.flatMap(({ index, isLogicalID, order }) =>
+            isLogicalID
+              ? [order(sql`"idDomain"`), order(sql`"idNumber"`), order(sql`"idText"`)]
+              : Array.from({ length: sortWidths[index] }, (_, component) =>
+                  order(sql.identifier(`sortPath${index}_${component}`)),
+                ),
+          ),
+          asc(sql`"idDomain"`),
+          asc(sql`"idNumber"`),
+          asc(sql`"idText"`),
+          asc(sql`"collectionTie"`),
+        ]
+      : [sortOrder(sql`"sortPath"`)]),
+  )
 
   const sortedUnionAlias = `${columnName}_sorted`
   let limitOffsetSQL = sql.empty()
@@ -229,4 +365,58 @@ const getSortField = ({
   )
 
   return hasCreatedAt ? '-createdAt' : 'id'
+}
+
+/** Keep every prepared union sort term inside the same correlated native statement. */
+const buildProjectionJoinSortColumns = ({
+  adapter,
+  collection,
+  locale,
+  sort,
+  table,
+  tableName,
+}: {
+  adapter: DrizzleAdapter
+  collection: string
+  locale?: string
+  sort: string
+  table: GenericTable
+  tableName: string
+}): SQL[] => {
+  const path = sort.replace(/^-/, '')
+  const config = adapter.payload.collections[collection].config
+  if (!config.flattenedFields.some(({ name }) => name === path.split('.')[0])) {
+    return []
+  }
+  const directColumn = table[path.replaceAll('.', '_')]
+  if (directColumn) {
+    return [sql`${directColumn}`]
+  }
+  const { newAliasTable } = getTableAlias({ adapter, tableName })
+  const sortAdapter = Object.assign(Object.create(adapter), {
+    tables: { ...adapter.tables, [tableName]: newAliasTable },
+  }) as DrizzleAdapter
+  const { joins, orderBy, where } = buildQuery({
+    adapter: sortAdapter,
+    aliasTable: newAliasTable,
+    fields: config.flattenedFields,
+    locale,
+    sort: [sort, adapter.tables[tableName].createdAt ? '-createdAt' : '-id'],
+    tableName,
+    where: {},
+  })
+  // buildOrderBy appends the ordinary fallback. The union supplies its own logical ties.
+  return orderBy.slice(0, -1).map((component) => {
+    const value =
+      component.projectionAggregate ?? (sort.startsWith('-') ? max : min)(component.column)
+    let query = (adapter.drizzle as LibSQLDatabase)
+      .select({ value })
+      .from(newAliasTable)
+      .where(and(eq(newAliasTable['id'], table['id']), where))
+      .$dynamic()
+    for (const join of joins) {
+      query = query[join.type ?? 'leftJoin'](join.table, join.condition)
+    }
+    return sql`(${query})`
+  })
 }

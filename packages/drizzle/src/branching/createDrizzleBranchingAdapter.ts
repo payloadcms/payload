@@ -11,6 +11,8 @@ import { transform } from '../transform/read/index.js'
 import { upsertRow } from '../upsertRow/index.js'
 import { markWrite } from '../utilities/readAfterWrite.js'
 import { completeBranchVersionData } from './completeBranchVersionData.js'
+import { createProjectionQueries } from './createProjectionQueries.js'
+import { createReadSnapshot } from './createReadSnapshot.js'
 
 /** The wrapper supplies configuration support; the connected driver must also support transactions. */
 export const createDrizzleBranchingAdapter = ({
@@ -145,7 +147,7 @@ export const createDrizzleBranchingAdapter = ({
 
     markWrite(adapter)
 
-    const query = buildFindManyArgs({ adapter, depth: 0, fields, tableName })
+    const query = buildFindManyArgs({ adapter, depth: 0, fields, joinQuery: false, tableName })
     const data = await db.query[tableName].findFirst({ ...query, where: eq(table.id, expected.id) })
     const current = transform<TypeWithVersion<JsonObject>>({
       adapter,
@@ -187,4 +189,6 @@ export const createDrizzleBranchingAdapter = ({
 
     return current
   },
+  queryProjection: createProjectionQueries({ adapter }),
+  withReadSnapshot: createReadSnapshot({ adapter }),
 })

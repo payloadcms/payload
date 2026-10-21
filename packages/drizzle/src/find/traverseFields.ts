@@ -16,9 +16,12 @@ import {
 import { fieldIsVirtual, fieldShouldBeLocalized, hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
+import type { ProjectionQueryAdapter } from '../branching/createProjectionQueries.js'
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
+import { projectionQueryContext } from '../branching/createProjectionQueries.js'
+import { getProjectionCollection, getProjectionTarget } from '../branching/projectionConstraints.js'
 import { buildQuery } from '../queries/buildQuery.js'
 import { getTableAlias } from '../queries/getTableAlias.js'
 import { getArrayRelationName } from '../utilities/getArrayRelationName.js'
@@ -393,6 +396,8 @@ export const traverseFields = ({
           break
         }
 
+        const preparedOptions = (adapter as ProjectionQueryAdapter)[projectionQueryContext]
+          ?.joins?.[joinSchemaPath]
         const {
           count: shouldCount = false,
           limit: limitArg = field.defaultLimit ?? 10,
@@ -417,6 +422,7 @@ export const traverseFields = ({
             page,
             pageSize: limitArg,
             path,
+            preparedOptions,
             shouldCount,
             sort,
             where,
@@ -430,7 +436,9 @@ export const traverseFields = ({
           }
         } else {
           const db = adapter.drizzle as LibSQLDatabase
+          const target = getProjectionTarget({ adapter, collection: field.collection })
           const useDrafts =
+            target.collection === field.collection &&
             (versions || draftsEnabled) &&
             hasDraftsEnabled(adapter.payload.collections[field.collection].config)
 
@@ -440,19 +448,26 @@ export const traverseFields = ({
                 adapter.payload.collections[field.collection].config,
                 true,
               )
-            : adapter.payload.collections[field.collection].config.flattenedFields
+            : target.config.flattenedFields
 
           const joinCollectionTableName = adapter.tableNameMap.get(
             useDrafts
               ? `_${toSnakeCase(field.collection)}${adapter.versionsSuffix}`
-              : toSnakeCase(field.collection),
+              : toSnakeCase(target.collection),
           )
 
           const joins: BuildQueryJoinAliases = []
 
+          const rootTable = adapter.tables[currentTableName]
+          const rootCollection = getProjectionCollection({ adapter, table: rootTable })
+          const hasProjectedRoot =
+            rootCollection &&
+            adapter.payload.collections[rootCollection].config.custom?.branchProjectionStorage
           const currentIDColumn = versions
-            ? adapter.tables[currentTableName].parent
-            : adapter.tables[currentTableName].id
+            ? rootTable.parent
+            : preparedOptions && hasProjectedRoot && !target.config.custom?.branchProjectionStorage
+              ? rootTable._branchProjection_logicalID
+              : rootTable.id
 
           let joinQueryWhere: Where
 
@@ -464,7 +479,12 @@ export const traverseFields = ({
             joinQueryWhere = {
               [field.on]: {
                 equals: {
-                  relationTo: collectionSlug,
+                  relationTo:
+                    preparedOptions &&
+                    hasProjectedRoot &&
+                    !target.config.custom?.branchProjectionStorage
+                      ? hasProjectedRoot.collection
+                      : collectionSlug,
                   value: rawConstraint(currentIDRaw),
                 },
               },
@@ -477,9 +497,11 @@ export const traverseFields = ({
             }
           }
 
-          if (where && Object.keys(where).length) {
+          const targetWhere = preparedOptions?.[field.collection]?.where ?? where
+          const targetSort = preparedOptions?.[field.collection]?.sort ?? sort
+          if (targetWhere && Object.keys(targetWhere).length) {
             joinQueryWhere = {
-              and: [joinQueryWhere, where],
+              and: [joinQueryWhere, targetWhere],
             }
           }
 
@@ -515,7 +537,7 @@ export const traverseFields = ({
                   collectionConfig: adapter.payload.collections[field.collection].config,
                   sort,
                 })
-              : sort,
+              : targetSort,
             tableName: joinCollectionTableName,
             where: joinQueryWhere,
           })
@@ -534,6 +556,14 @@ export const traverseFields = ({
             selectFields.parent = newAliasTable.parent
           }
 
+          const projectionTarget = getProjectionCollection({ adapter, table: newAliasTable })
+          if (
+            projectionTarget &&
+            adapter.payload.collections[projectionTarget].config.custom?.branchProjectionStorage
+          ) {
+            selectFields.id = sql`${newAliasTable['_branchProjection_logicalID']}`.as('id') as any
+          }
+
           let query: SQLiteSelect = db
             .select(selectFields as any)
             .from(newAliasTable)
@@ -546,7 +576,7 @@ export const traverseFields = ({
           })
 
           if (page && limit !== 0) {
-            const offset = (page - 1) * limit - 1
+            const offset = preparedOptions ? (page - 1) * limitArg : (page - 1) * limit - 1
             if (offset > 0) {
               query = query.offset(offset)
             }

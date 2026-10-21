@@ -22,12 +22,18 @@ import {
   isNestedRelationshipQuery,
   validOperatorSet,
 } from 'payload/shared'
-import toSnakeCase from 'to-snake-case'
 
+import type { ProjectionQueryAdapter } from '../branching/createProjectionQueries.js'
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 import type { DrizzleResolvedOperator } from './operatorMap.js'
 
+import { projectionQueryContext } from '../branching/createProjectionQueries.js'
+import {
+  getProjectionTarget,
+  guardProjectionJoins,
+  projectionRelationConstraint,
+} from '../branching/projectionConstraints.js'
 import { escapeSQLValue } from '../utilities/escapeSQLValue.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { isValidStringID } from '../utilities/isValidStringID.js'
@@ -205,6 +211,21 @@ export function parseParams({
                   (aliasTable && tableName === getNameFromDrizzleTable(table)
                     ? aliasTable[columnName]
                     : table[columnName])
+
+                if (
+                  (adapter as ProjectionQueryAdapter)[projectionQueryContext] &&
+                  columns?.length &&
+                  operator === 'exists'
+                ) {
+                  constraints.push(
+                    (val === true ? or : and)(
+                      ...columns.map(({ rawColumn }) =>
+                        val === true ? isNotNull(rawColumn) : isNull(rawColumn),
+                      ),
+                    ),
+                  )
+                  break
+                }
 
                 if (val === DistinctSymbol) {
                   selectFields['_selected'] = resolvedColumn
@@ -728,8 +749,9 @@ function buildHasManyRelationshipCondition({
   }
 
   const relationshipTableName = `${tableName}${adapter.relationshipsSuffix}`
-  const relatedCollection = adapter.payload.collections[relationshipField.relationTo]
-  const relatedTableName = adapter.tableNameMap.get(toSnakeCase(relatedCollection.config.slug))
+  const relatedTarget = getProjectionTarget({ adapter, collection: relationshipField.relationTo })
+  const relatedCollection = adapter.payload.collections[relatedTarget.collection]
+  const relatedTableName = relatedTarget.tableName
   const relationshipLocale = relationshipPath.locale
   const { newAliasTable: relationshipTable } = getTableAlias({
     adapter,
@@ -773,8 +795,21 @@ function buildHasManyRelationshipCondition({
     relationshipRowConstraints.push(eq(relationshipTable.locale, relationshipLocale))
   }
 
+  const visibleRelatedDocument = projectionRelationConstraint({
+    adapter,
+    collection: relationshipField.relationTo,
+    idColumn: relationshipTable[`${relationshipField.relationTo}ID`],
+    locale: relationshipLocale,
+  })
+
+  if (visibleRelatedDocument) {
+    relationshipRowConstraints.push(visibleRelatedDocument)
+  }
+
+  guardProjectionJoins({ adapter, joins: nestedJoins, locale: relationshipLocale })
+
   const relatedDocumentConstraints = [
-    eq(relatedTable.id, relationshipTable[`${relationshipField.relationTo}ID`]),
+    eq(relatedTable[relatedTarget.idField], relationshipTable[`${relationshipField.relationTo}ID`]),
   ]
 
   if (relatedDocumentWhere) {

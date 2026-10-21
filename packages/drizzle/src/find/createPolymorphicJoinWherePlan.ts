@@ -1,14 +1,17 @@
 import type { Column } from 'drizzle-orm'
 
 import { type FlattenedField, getFieldByPath, type Where } from 'payload'
-import toSnakeCase from 'to-snake-case'
 
+import type { ProjectionQueryAdapter } from '../branching/createProjectionQueries.js'
 import type { DrizzleAdapter, GenericTable } from '../types.js'
 
+import { projectionQueryContext } from '../branching/createProjectionQueries.js'
+import { getProjectionTarget } from '../branching/projectionConstraints.js'
 import { isUUIDType } from '../utilities/isUUIDType.js'
 import { sanitizePathSegment } from '../utilities/sanitizePathSegment.js'
 
 export type ScalarWhereField = {
+  columnPath?: string
   field: FlattenedField
   isLocalized?: boolean
   isUUID: boolean
@@ -48,13 +51,14 @@ export const createPolymorphicJoinWherePlan = ({
   where: Where
 }): PolymorphicJoinWherePlan => {
   const collectionContexts = collections.map((collection) => {
-    const collectionConfig = adapter.payload.collections[collection]?.config
+    const target = getProjectionTarget({ adapter, collection })
+    const collectionConfig = target.config
 
     if (!collectionConfig) {
       throw new Error(`Unknown polymorphic join collection "${collection}"`)
     }
 
-    const tableName = adapter.tableNameMap.get(toSnakeCase(collection))
+    const tableName = target.tableName
     const table = tableName ? (adapter.tables[tableName] as GenericTable | undefined) : undefined
 
     if (!table) {
@@ -91,19 +95,27 @@ export const createPolymorphicJoinWherePlan = ({
       })
 
       if (schemaPath === 'id') {
-        const idColumn = table['id'] as Column | undefined
+        const columnPath = collectionConfig.custom?.branchProjectionStorage
+          ? '_branchProjection_logicalID'
+          : 'id'
+        const idColumn = table[columnPath] as Column | undefined
 
         if (!idColumn) {
           hasUnsupportedFieldShape = true
         } else {
-          scalarQueryValueSignatures.add(`id:${idColumn.getSQLType()}`)
+          scalarQueryValueSignatures.add(
+            (adapter as ProjectionQueryAdapter)[projectionQueryContext]
+              ? 'logical-id'
+              : `id:${idColumn.getSQLType()}`,
+          )
           fieldsByCollection.set(collection, {
             type: 'scalar',
+            columnPath,
             field:
-              fieldAtPath?.field ??
+              (columnPath === 'id' ? fieldAtPath?.field : undefined) ??
               ({
                 name: 'id',
-                type: isUUIDType(adapter.idType) ? 'text' : 'number',
+                type: idColumn.dataType === 'number' ? 'number' : 'text',
               } as FlattenedField),
             isUUID: !fieldAtPath && isUUIDType(adapter.idType),
           })

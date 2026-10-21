@@ -2,9 +2,16 @@ import type { asc, desc, SQL, Table } from 'drizzle-orm'
 import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
 import type { FlattenedField, Sort, Where } from 'payload'
 
+import { and } from 'drizzle-orm'
+
 import type { DrizzleAdapter, GenericColumn, GenericTable } from '../types.js'
 import type { QueryContext } from './parseParams.js'
 
+import {
+  getProjectionCollection,
+  guardProjectionJoins,
+  projectionRootConstraint,
+} from '../branching/projectionConstraints.js'
 import { buildOrderBy } from './buildOrderBy.js'
 import { parseParams } from './parseParams.js'
 
@@ -35,6 +42,8 @@ export type BuildQueryResult = {
   orderBy: {
     column: GenericColumn
     order: typeof asc | typeof desc
+    /** Aggregate over one-to-many rows without mixing polymorphic ID type domains. */
+    projectionAggregate?: SQL
   }[]
   selectFields: Record<string, GenericColumn>
   where: SQL
@@ -87,6 +96,26 @@ export const buildQuery = function buildQuery({
     sort: context.sort,
     tableName,
   })
+
+  guardProjectionJoins({ adapter, joins, locale })
+
+  const projectionCollection = getProjectionCollection({
+    adapter,
+    table: aliasTable ?? adapter.tables[tableName],
+  })
+
+  if (projectionCollection) {
+    where = and(
+      where,
+      projectionRootConstraint({
+        adapter,
+        collection: projectionCollection,
+        joins,
+        locale,
+        table: aliasTable ?? adapter.tables[tableName],
+      }),
+    )
+  }
 
   return {
     joins,
