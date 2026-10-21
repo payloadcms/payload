@@ -233,6 +233,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
       - name: Node setup
         uses: ./.github/actions/setup
