@@ -299,9 +299,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // If there are locale rows with data, add the parent and locale to each
     if (Object.keys(rowToInsert.locales).length > 0) {
       Object.entries(rowToInsert.locales).forEach(([locale, localeRow]) => {
-        localeRow._parentID = insertedRow.id
-        localeRow._locale = locale
-        localesToInsert.push(localeRow)
+        localesToInsert.push({ ...localeRow, _locale: locale, _parentID: insertedRow.id })
       })
     }
 
@@ -365,22 +363,21 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // //////////////////////////////////
 
     if (localesToInsert.length > 0) {
-      const localeTableName = `${tableName}${adapter.localesSuffix}`
-      const localeTable = adapter.tables[`${tableName}${adapter.localesSuffix}`]
-
       if (operation === 'update') {
-        await adapter.deleteWhere({
+        await upsertLocales({
+          adapter,
           db,
-          tableName: localeTableName,
-          where: eq(localeTable._parentID, insertedRow.id),
+          locales: rowToInsert.locales,
+          parentID: insertedRow.id as number | string,
+          tableName,
+        })
+      } else {
+        await adapter.insert({
+          db,
+          tableName: `${tableName}${adapter.localesSuffix}`,
+          values: localesToInsert,
         })
       }
-
-      await adapter.insert({
-        db,
-        tableName: localeTableName,
-        values: localesToInsert,
-      })
     }
 
     // //////////////////////////////////

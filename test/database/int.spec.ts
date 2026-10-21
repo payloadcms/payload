@@ -5633,6 +5633,31 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
     expect(result.localized.en).toBe('en updated')
   })
 
+  test('should keep the other localized fields when the update also has complex fields', async ({
+    payload,
+  }) => {
+    const post = await payload.create({
+      collection: postsSlug,
+      data: {
+        localized: 'en',
+        testNestedGroup: { nestedLocalizedText: 'nested en' },
+        title: 'post',
+      },
+      locale: 'en',
+      overrideAccess: true,
+    })
+
+    const result = (await payload.db.updateOne({
+      id: post.id,
+      collection: postsSlug,
+      data: { localized: { en: 'en updated' }, numbersHasMany: [1], title: 'post' },
+    })) as any
+
+    expect(result.localized.en).toBe('en updated')
+    expect(result.numbersHasMany).toEqual([1])
+    expect(result.testNestedGroup.nestedLocalizedText.en).toBe('nested en')
+  })
+
   test('should ignore undefined localized values with db.updateOne', async ({ payload }) => {
     const post = await payload.create({
       collection: postsSlug,
