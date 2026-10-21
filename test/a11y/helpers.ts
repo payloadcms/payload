@@ -436,7 +436,16 @@ export async function captureScreenReader({
 }) {
   await screenReader.clearItemTextLog()
   await screenReader.clearSpokenPhraseLog()
-  return screenReader.capture(action)
+  const capture = await screenReader.capture(action)
+
+  if (process.env.PAYLOAD_SCREEN_READER_DEBUG === 'true') {
+    console.info(
+      '[screen-reader-capture]',
+      JSON.stringify({ itemText: capture.itemText, spokenPhrase: capture.spokenPhrase }),
+    )
+  }
+
+  return capture
 }
 
 export async function captureScreenReaderOutput({

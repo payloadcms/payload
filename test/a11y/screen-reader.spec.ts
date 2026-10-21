@@ -62,7 +62,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     postsURL = new AdminUrlUtil(serverURL, 'posts')
   })
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, screenReader }) => {
     const loginResponse = await page.request.post(
       formatAdminURL({ apiRoute: '/api', path: '/users/login', serverURL }),
       { data: devUser },
@@ -71,6 +71,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     expect(loginResponse.ok()).toBe(true)
     await initPage({ page, serverURL })
     page.removeAllListeners('console')
+    await screenReader.navigateToWebContent()
   })
 
   test.afterEach(async ({ page }) => {
