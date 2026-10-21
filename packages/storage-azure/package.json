@@ -58,7 +58,7 @@
     "payload": "workspace:*"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": "^22.23.4 || >=24.22.1"
   },
   "publishConfig": {
     "exports": {
