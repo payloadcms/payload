@@ -191,26 +191,11 @@ export function DefaultEditView({
   const isSavingRef = useRef(false)
 
   const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
-  // Render can't read the current time, so a timer records when the lock expires
-  const [expiredLockTime, setExpiredLockTime] = useState(() =>
-    Date.now() > lockExpiryTime ? lockExpiryTime : undefined,
-  )
-  const isLockExpired = expiredLockTime === lockExpiryTime
+  // Render can't read the current time, so check for expiry when the lock changes
+  const [isLockExpired, setIsLockExpired] = useState(() => Date.now() > lockExpiryTime)
 
   useEffect(() => {
-    const msUntilExpiry = lockExpiryTime - Date.now()
-
-    // `setTimeout` runs right away for NaN and for delays longer than about 24.8 days
-    if (Number.isNaN(msUntilExpiry) || msUntilExpiry > 2_147_483_647) {
-      return
-    }
-
-    const timeout = setTimeout(
-      () => setExpiredLockTime(lockExpiryTime),
-      Math.max(0, msUntilExpiry + 1),
-    )
-
-    return () => clearTimeout(timeout)
+    setIsLockExpired(Date.now() > lockExpiryTime)
   }, [lockExpiryTime])
 
   const preventLeaveWithoutSaving =
