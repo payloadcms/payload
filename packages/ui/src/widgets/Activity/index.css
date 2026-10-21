@@ -13,7 +13,6 @@
     gap: var(--spacer-3);
     height: auto;
     max-height: none;
-    /* The tabs sit on the top-left edge, so clipping would cut off their focus outline. */
     overflow: visible;
     padding: 0;
     border: 0;
