@@ -388,7 +388,9 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
         name: `${singularName}Version`,
         collectionSlug: collectionConfig.slug,
         config,
-        fields: versionCollectionFields,
+        fields: versionCollectionFields.filter(
+          (field) => !('name' in field) || field.name !== '_branchParent',
+        ),
         forceNullable: forceNullableObjectType,
         graphqlResult,
         parentName: `${singularName}Version`,

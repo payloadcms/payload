@@ -183,6 +183,8 @@ query FallCampaignPages {
 
 Branch selection is request-scoped. Nested relationship and join reads keep the same branch, and concurrent GraphQL root fields do not share branch state.
 
+When you read a version, `_branch` tells you which branch it belongs to. For collection versions, `parent` is the document's ID, even when the version was saved on a branch.
+
 ## Merge and discard
 
 The Local API exposes `payload.branches.merge` and `payload.branches.discard`:
