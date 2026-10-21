@@ -289,7 +289,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
         await captureScreenReader({ action: () => dragHandle.focus(), screenReader })
         const capture = await captureScreenReader({
           action: async () => {
-            await screenReader.press('Shift+Tab')
+            await page.keyboard.press('Shift+Tab')
             await expect(card).toBeFocused()
           },
           screenReader,
@@ -389,7 +389,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       await captureScreenReader({ action: () => overwrite.focus(), screenReader })
       await expect(overwrite).toBeFocused()
       const capture = await captureScreenReader({
-        action: () => screenReader.press('Shift+Tab'),
+        action: () => page.keyboard.press('Shift+Tab'),
         screenReader,
       })
 
