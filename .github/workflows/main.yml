@@ -114,6 +114,8 @@ jobs:
               - 'tools/releaser/src/lib/sbom/**'
               - 'tools/releaser/src/lib/publishList.ts'
               - 'tools/releaser/src/lib/getPackageDetails.ts'
+              - 'tools/releaser/package.json'
+              - 'tools/constants/**'
               - 'package.json'
               - '.github/actions/setup/**'
       - name: Log filter results
