@@ -104,7 +104,7 @@ jobs:
               # the root lockfile; that, plus the allowlist itself, is what can introduce drift.
               - 'pnpm-lock.yaml'
               - 'packages/create-payload-app/src/lib/configure-pnpm-builds.ts'
-            # Inputs of the release SBOMs: the dependency graph, the pnpm version, and the generator.
+            # Inputs of the release SBOMs (the dependency graph, the pnpm version, the generator) and this job.
             needs_sbom:
               - 'pnpm-lock.yaml'
               - 'pnpm-workspace.yaml'
@@ -118,6 +118,7 @@ jobs:
               - 'tools/constants/**'
               - 'package.json'
               - '.github/actions/setup/**'
+              - '.github/workflows/main.yml'
       - name: Log filter results
         run: |
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
