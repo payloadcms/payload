@@ -1,9 +1,10 @@
 'use client'
 import { formatAdminURL } from 'payload/shared'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { useIntersect } from '../../../../hooks/useIntersect.js'
 import { useConfig } from '../../../../providers/Config/index.js'
+import { useLocale } from '../../../../providers/Locale/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { canUseDOM } from '../../../../utilities/canUseDOM.js'
 import { formatDocTitle } from '../../../../utilities/formatDocTitle/index.js'
@@ -19,20 +20,23 @@ export function UpdatedByCell({ updatedBy }: { updatedBy: UpdatedByValue }) {
     },
   } = useConfig()
   const { i18n, t } = useTranslation()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const [intersectionRef, entry] = useIntersect()
   const [label, setLabel] = useState<false | null | string>(null)
-  const requestedRef = useRef(false)
 
+  const relationTo = updatedBy?.relationTo
+  const value = updatedBy?.value
   const isVisible = canUseDOM ? entry?.boundingClientRect?.top < window.innerHeight : false
 
   useEffect(() => {
-    if (!updatedBy || requestedRef.current || !isVisible) {
+    if (!relationTo || value === undefined || value === null || !isVisible) {
       return
     }
 
-    requestedRef.current = true
+    setLabel(null)
+    let cancelled = false
 
-    const { relationTo, value } = updatedBy
     const collection = collections.find((c) => c.slug === relationTo)
 
     if (!collection) {
@@ -46,12 +50,19 @@ export function UpdatedByCell({ updatedBy }: { updatedBy: UpdatedByValue }) {
     params.append('depth', '0')
     params.append('select[' + fieldToSelect + ']', 'true')
 
+    if (locale) {
+      params.append('locale', locale)
+    }
+
     fetch(`${url}?${params.toString()}`, {
       credentials: 'include',
       headers: { 'Accept-Language': i18n.language },
     })
       .then((res) => (res.ok ? res.json() : null))
       .then((doc) => {
+        if (cancelled) {
+          return
+        }
         if (doc) {
           const title = formatDocTitle({
             collectionConfig: collection,
@@ -65,8 +76,16 @@ export function UpdatedByCell({ updatedBy }: { updatedBy: UpdatedByValue }) {
           setLabel(false)
         }
       })
-      .catch(() => setLabel(false))
-  }, [updatedBy, isVisible, api, collections, dateFormat, i18n, t])
+      .catch(() => {
+        if (!cancelled) {
+          setLabel(false)
+        }
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [relationTo, value, locale, isVisible, api, collections, dateFormat, i18n])
 
   if (!updatedBy) {
     return <span ref={intersectionRef}>—</span>

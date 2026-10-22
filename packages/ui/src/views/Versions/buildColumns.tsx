@@ -83,7 +83,7 @@ export const buildVersionColumns = ({
         name: '',
         type: 'relationship',
       },
-      Heading: <SortColumn Label={t('general:updatedBy')} name="version.updatedBy" />,
+      Heading: t('general:updatedBy'),
       renderedCells: docs.map((doc, i) => {
         const updatedBy = (doc as any).version?.updatedBy ?? null
         return <UpdatedByCell key={i} updatedBy={updatedBy} />
