@@ -121,9 +121,9 @@ describe('AST Integration Tests', () => {
         expect(configContent).not.toContain('mongooseAdapter')
       }
 
-      // Check that plugins array exists if storage adapter was added
+      // Check that storage array exists if storage adapter was added
       if (storageAdapter !== 'localDisk') {
-        expect(configContent).toContain('plugins:')
+        expect(configContent).toContain('storage:')
       }
 
       // Verify package.json transformations
