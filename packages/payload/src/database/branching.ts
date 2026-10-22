@@ -6,6 +6,8 @@ import type { Count, CountArgs, Find, FindArgs, FindDistinct, FindDistinctArgs }
 export type BranchProjectionQueryContext = {
   /** Encoded query-index branch key, distinct from any public branch name or cache ID. */
   branchKey: string
+  /** Optional bounded graph batch targeting; predicates and access remain authoritative. */
+  graphTarget?: { collection: string; ids: readonly string[] }
   /** Compiled separately for each original join target; access policies are already in relationAccess. */
   joins?: Record<
     string,

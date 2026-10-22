@@ -117,6 +117,24 @@ export const buildProjectionQuery = async ({
     stages.push({ $match: visibility({ collection, state }) })
   }
 
+  const graphTarget = context.graphTarget
+  const root = adapter.payload.collections[collection]?.config
+  const source = root?.custom?.branchProjectionStorage?.collection
+  if (
+    !adapter.collation &&
+    graphTarget?.collection === collection &&
+    Array.isArray(graphTarget.ids) &&
+    graphTarget.ids.length > 0 &&
+    graphTarget.ids.length <= 50 &&
+    graphTarget.ids.every((id) => typeof id === 'string' && /^bp2:[\w-]{43}$/.test(id)) &&
+    typeof source === 'string' &&
+    adapter.payload.collections[source]?.config.custom?.branchQueryStorage?.projection ===
+      collection &&
+    !root?.custom?.branchProjectionStorage?.global
+  ) {
+    stages.push({ $match: { _id: { $in: graphTarget.ids } } })
+  }
+
   if (!access) {
     stages.push({ $match: { $expr: false } })
   } else {

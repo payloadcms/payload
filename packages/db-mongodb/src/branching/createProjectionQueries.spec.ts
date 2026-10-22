@@ -369,3 +369,109 @@ describe('Mongo native effective branch query compiler', () => {
     expect(JSON.stringify(query.stages)).toContain('fr')
   })
 })
+
+describe('Mongo bounded raw graph primary-key targeting', () => {
+  const setupTarget = () => {
+    const fixture = setup()
+    const { adapter } = fixture
+    adapter.payload.collections.articles!.config.custom.branchProjectionStorage = {
+      collection: 'source',
+    }
+    adapter.payload.collections.source = {
+      config: {
+        slug: 'source',
+        flattenedFields: [],
+        custom: { branchQueryStorage: { projection: 'articles' } },
+      },
+    } as any
+
+    return {
+      ...fixture,
+      context: {
+        ...fixture.context,
+        graphTarget: { collection: 'articles', ids: [`bp2:${'a'.repeat(43)}`] },
+      },
+    }
+  }
+
+  it('should retain predicates and access while targeting only the registered root', async () => {
+    const { adapter, context } = setupTarget()
+    const query = await buildProjectionQuery({
+      adapter,
+      collection: 'articles',
+      context,
+      where: { id: { in: ['logical'] } },
+    })
+
+    expect(query.stages[1]).toEqual({ $match: { _id: { $in: context.graphTarget.ids } } })
+    expect(query.stages[0]).toMatchObject({ $match: { '_branchProjection.branchKey': 'staging' } })
+    expect(JSON.stringify(query.stages.at(-1))).toContain('logical')
+    expect(query.stages[2]).toEqual({ $match: {} })
+  })
+
+  it('should keep geoNear first and insert targeting only after the root geo stage', async () => {
+    const { adapter, context } = setupTarget()
+    const query = await buildProjectionQuery({
+      adapter,
+      collection: 'articles',
+      context,
+      where: { position: { near: [0, 0, 1000] } },
+    })
+
+    expect(query.stages[0]).toHaveProperty('$geoNear')
+    expect(query.stages[1]).toEqual({ $match: { _id: { $in: context.graphTarget.ids } } })
+  })
+
+  it('should target the restored root after an inverse relationship semijoin', async () => {
+    const { adapter, context } = setupTarget()
+    const query = await buildProjectionQuery({
+      adapter,
+      collection: 'articles',
+      context,
+      where: { 'author.title': { equals: 'Ada' } },
+    })
+    const restoration = query.stages.findIndex(
+      (stage) => '$replaceWith' in stage && stage.$replaceWith === '$__branchRoot',
+    )
+    const target = query.stages.findIndex((stage: any) => stage.$match?._id?.$in)
+
+    expect(restoration).toBeGreaterThan(0)
+    expect(target).toBeGreaterThan(restoration)
+    expect(query.sourceCollection).toBe('authors')
+    expect(JSON.stringify(query.stages)).toContain('enabled')
+  })
+
+  it.each([
+    'collation',
+    'mismatched-collection',
+    'ordinary',
+    'global',
+    'unregistered',
+    'empty',
+    'oversized',
+    'malformed',
+  ])('should skip %s hints without changing the logical query', async (mode) => {
+    const { adapter, context } = setupTarget()
+    if (mode === 'collation') adapter.collation = { strength: 1 }
+    if (mode === 'mismatched-collection') context.graphTarget.collection = 'authors'
+    if (mode === 'ordinary')
+      delete adapter.payload.collections.articles!.config.custom.branchProjectionStorage
+    if (mode === 'global')
+      adapter.payload.collections.articles!.config.custom.branchProjectionStorage.global =
+        'settings'
+    if (mode === 'unregistered')
+      adapter.payload.collections.source!.config.custom.branchQueryStorage.projection = 'other'
+    if (mode === 'empty') context.graphTarget.ids = []
+    if (mode === 'oversized') context.graphTarget.ids = Array(51).fill(`bp2:${'a'.repeat(43)}`)
+    if (mode === 'malformed') context.graphTarget.ids = ['not-a-private-id']
+    const query = await buildProjectionQuery({
+      adapter,
+      collection: 'articles',
+      context,
+      where: { title: { equals: 'root' } },
+    })
+
+    expect(query.stages.some((stage: any) => stage.$match?._id?.$in)).toBe(false)
+    expect(JSON.stringify(query.stages.at(-1))).toContain('root')
+  })
+})

@@ -264,4 +264,30 @@ describe('automatic branch raw graph', () => {
       expect(queryBranchContent).toHaveBeenCalledTimes(2)
     },
   )
+
+  it('should target only each known fifty-reference population batch and retain its logical predicate', async () => {
+    const ids = Array.from({ length: 120 }, (_, index) => index)
+    const req = makeRequest()
+    vi.mocked(queryBranchContent)
+      .mockReset()
+      .mockImplementation(async (args) =>
+        args.collection === 'roots' ? page([{ id: 'root', related: { en: ids } }]) : page([]),
+      )
+
+    const { graph } = await queryBranchContentGraph({
+      branchID: 'drafts',
+      collection: 'roots',
+      depth: 1,
+      req,
+    })
+    const calls = vi.mocked(queryBranchContent).mock.calls.map(([args]) => args)
+
+    expect(calls[0]).not.toHaveProperty('graphTargetIDs')
+    expect(calls.slice(1).map((args) => args.graphTargetIDs!.length)).toEqual([50, 50, 20])
+    for (const args of calls.slice(1)) {
+      expect(args.where).toEqual({ id: { in: args.graphTargetIDs } })
+    }
+    expect(graph.get({ collection: 'targets', id: 0 })).toBeNull()
+    expect(graph.get({ collection: 'targets', id: 119 })).toBeNull()
+  })
 })

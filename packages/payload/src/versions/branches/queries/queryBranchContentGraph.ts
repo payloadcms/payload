@@ -105,6 +105,7 @@ export const queryBranchContentGraph = async ({
             const related = await queryBranchContent({
               branchID: args.branchID,
               collection,
+              graphTargetIDs: requested,
               limit: 0,
               locale: args.locale,
               overrideAccess: args.overrideAccess,

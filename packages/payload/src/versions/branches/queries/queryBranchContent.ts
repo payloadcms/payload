@@ -9,6 +9,7 @@ import { executeAccess } from '../../../auth/executeAccess.js'
 import {
   decodeBranchProjectionDocument,
   encodeBranchProjectionBranchKey,
+  encodeBranchProjectionID,
 } from './branchProjectionCodec.js'
 import {
   collectBranchQueryLocales,
@@ -32,6 +33,8 @@ export const queryBranchContent = async (
   args: {
     branchID: BranchHeadID
     collection: string
+    /** Known bounded references from the raw graph collector, never a public query option. */
+    graphTargetIDs?: readonly BranchHeadID[]
     overrideAccess?: boolean
     req: PayloadRequest
   } & Omit<FindArgs, 'collection' | 'req'>,
@@ -46,12 +49,14 @@ export const queryBranchContent = async (
 const queryRawBranchContent = async ({
   branchID,
   collection,
+  graphTargetIDs,
   overrideAccess = false,
   req,
   ...args
 }: {
   branchID: BranchHeadID
   collection: string
+  graphTargetIDs?: readonly BranchHeadID[]
   overrideAccess?: boolean
   req: PayloadRequest
 } & Omit<FindArgs, 'collection' | 'req'>) => {
@@ -72,7 +77,10 @@ const queryRawBranchContent = async ({
   const result = await query.find({
     ...nativeArgs,
     collection: storage?.projection ?? collection,
-    context,
+    context: {
+      ...context,
+      graphTarget: getGraphTarget({ branchID, collection, graphTargetIDs, req }),
+    },
     locale,
     req,
     sort: compileBranchProjectionSort({ collection, req, sort: args.sort }),
@@ -273,4 +281,64 @@ const getReachableCollections = ({
 
   visit({ slug: collection })
   return [...visited]
+}
+
+/** Target only the collector's bounded, typed references in their registered private root. */
+const getGraphTarget = ({
+  branchID,
+  collection,
+  graphTargetIDs,
+  req,
+}: {
+  branchID: BranchHeadID
+  collection: string
+  graphTargetIDs?: readonly BranchHeadID[]
+  req: PayloadRequest
+}): { collection: string; ids: string[] } | undefined => {
+  if (
+    req.payload.db.name !== 'mongoose' ||
+    !Array.isArray(graphTargetIDs) ||
+    !graphTargetIDs.length ||
+    graphTargetIDs.length > 50
+  ) {
+    return undefined
+  }
+  const source = req.payload.collections[collection]?.config
+  const projection = source?.custom?.branchQueryStorage?.projection
+  const target =
+    typeof projection === 'string' ? req.payload.collections[projection]?.config : undefined
+  if (
+    !source ||
+    !target ||
+    source.custom?.branchQueryGlobalSource ||
+    target.custom?.branchProjectionStorage?.global ||
+    target.custom?.branchProjectionStorage?.collection !== collection
+  ) {
+    return undefined
+  }
+  const sourceID = source.fields.find((field) => 'name' in field && field.name === 'id')
+  const kind =
+    sourceID?.type === 'number' ? 'number' : sourceID ? 'text' : req.payload.db.defaultIDType
+  const metadata = target.fields.find(
+    (field) => 'name' in field && field.name === '_branchProjection',
+  )
+  const logicalID =
+    metadata?.type === 'group'
+      ? metadata.fields.find((field) => 'name' in field && field.name === 'logicalID')
+      : undefined
+  if (
+    (kind !== 'number' && kind !== 'text') ||
+    logicalID?.type !== kind ||
+    graphTargetIDs.some((id) =>
+      kind === 'number'
+        ? typeof id !== 'number' || !Number.isFinite(id)
+        : typeof id !== 'string' || id.length === 0,
+    )
+  ) {
+    return undefined
+  }
+  return {
+    collection: projection,
+    ids: graphTargetIDs.map((logicalID) => encodeBranchProjectionID({ branchID, logicalID })),
+  }
 }
