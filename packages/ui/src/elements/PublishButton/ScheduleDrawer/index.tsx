@@ -5,7 +5,7 @@ import type { Column, SchedulePublish } from 'payload'
 
 import { TZDateMini as TZDate } from '@date-fns/tz/date/mini'
 import { getTranslation } from '@payloadcms/translations'
-import { endOfToday, isToday, startOfDay } from 'date-fns'
+import { endOfDay, isSameDay, startOfDay } from 'date-fns'
 import { transpose } from 'date-fns/transpose'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
@@ -66,6 +66,9 @@ export const ScheduleDrawer: React.FC<Props> = ({
   const { getUpcomingScheduledPublish, schedulePublish } = useServerFunctions()
   const [type, setType] = React.useState<PublishType>(defaultType || 'publish')
   const [date, setDate] = React.useState<Date>()
+  // Render can't read the current time, so keep it in state and refresh it when the date or
+  // timezone changes
+  const [now, setNow] = React.useState(() => new Date())
   const [timezone, setTimezone] = React.useState<string>(defaultTimezone)
   const [locale, setLocale] = React.useState<{ label: string; value: string }>(defaultLocaleOption)
   const [processing, setProcessing] = React.useState(false)
@@ -171,6 +174,7 @@ export const ScheduleDrawer: React.FC<Props> = ({
       })
 
       setDate(undefined)
+      setNow(new Date())
       toast.success(t('version:scheduledSuccessfully'))
       void fetchUpcoming()
     } catch (err) {
@@ -215,6 +219,8 @@ export const ScheduleDrawer: React.FC<Props> = ({
 
   const onChangeDate = useCallback(
     (incomingDate: Date) => {
+      setNow(new Date())
+
       if (timezone && incomingDate) {
         // Create TZDate instances for the selected timezone
         const tzDateWithUTC = TZDate.tz(timezone)
@@ -244,12 +250,12 @@ export const ScheduleDrawer: React.FC<Props> = ({
   }, [upcoming, fetchUpcoming])
 
   const minTime = useMemo(() => {
-    if (!date || isToday(date)) {
-      return new Date()
+    if (!date || isSameDay(date, now)) {
+      return now
     }
 
-    return startOfDay(new Date())
-  }, [date])
+    return startOfDay(now)
+  }, [date, now])
 
   return (
     <Drawer className={baseClass} slug={slug} title={modalTitle}>
@@ -283,8 +289,8 @@ export const ScheduleDrawer: React.FC<Props> = ({
           <FieldLabel label={t('general:time')} path={'time'} required />
           <DatePickerField
             id="time"
-            maxTime={endOfToday()}
-            minDate={new Date()}
+            maxTime={endOfDay(now)}
+            minDate={now}
             minTime={minTime}
             onChange={(e) => onChangeDate(e)}
             pickerAppearance="dayAndTime"
@@ -296,7 +302,10 @@ export const ScheduleDrawer: React.FC<Props> = ({
           {supportedTimezones.length > 0 && (
             <TimezonePicker
               id={`timezone-picker`}
-              onChange={setTimezone}
+              onChange={(newTimezone) => {
+                setTimezone(newTimezone)
+                setNow(new Date())
+              }}
               options={supportedTimezones}
               selectedTimezone={timezone}
             />

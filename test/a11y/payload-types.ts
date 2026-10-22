@@ -324,6 +324,7 @@ export interface Post {
   accessibilitySortableSelect?: ('one' | 'two')[] | null;
   accessibilityDisabledSelect?: ('one' | 'two') | null;
   requiredTags: string[];
+  relatedPosts?: (string | Post)[] | null;
   relatedPost?: (string | null) | Post;
   contrastRelationships?: (string | Post)[] | null;
   contrastDisabledSelect?: ('one' | 'two')[] | null;
@@ -383,6 +384,16 @@ export interface Post {
     | boolean
     | null;
   source?: string | null;
+  readOnlySettings?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  readOnlySource?: string | null;
   unlabelledSettings?:
     | {
         [k: string]: unknown;
@@ -699,6 +710,7 @@ export interface PostsSelect<T extends boolean = true> {
   accessibilitySortableSelect?: T;
   accessibilityDisabledSelect?: T;
   requiredTags?: T;
+  relatedPosts?: T;
   relatedPost?: T;
   contrastRelationships?: T;
   contrastDisabledSelect?: T;
@@ -763,6 +775,8 @@ export interface PostsSelect<T extends boolean = true> {
   location?: T;
   settings?: T;
   source?: T;
+  readOnlySettings?: T;
+  readOnlySource?: T;
   unlabelledSettings?: T;
   unlabelledSource?: T;
   tabDetails?:

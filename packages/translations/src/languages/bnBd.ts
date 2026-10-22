@@ -294,6 +294,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     and: 'এবং',
     anotherUser: 'অন্য ব্যবহারকারী',
     anotherUserTakenOver: 'অন্য একজন ব্যবহারকারী এই ডকুমেন্ট সম্পাদনার দায়িত্ব নিয়েছেন।',
+    apiResponse: 'API প্রতিক্রিয়া',
     applyChanges: 'পরিবর্তনগুলি প্রয়োগ করুন',
     ascending: 'আরোহী',
     auto: 'স্বয়ংক্রিয়',
@@ -487,6 +488,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     reindexingAll: 'সমস্ত {{collections}} পুনরায় সূচিবদ্ধ করা হচ্ছে।',
     reloadDocument: 'নথি পুনরায় লোড করুন',
     remove: 'অপসারণ করুন',
+    removeFilter: 'ফিল্টার সরান',
     rename: 'নাম পরিবর্তন করুন',
     replaceRow: 'সারি প্রতিস্থাপন করুন',
     requiredFields: '* চিহ্নিত ঘরগুলো পূরণ করা আবশ্যক।',
@@ -580,6 +582,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     yes: 'হ্যাঁ',
   },
   hierarchy: {
+    folderLocation: 'ফোল্ডারের অবস্থান',
     goTo: '"{{name}}" এ যান',
     itemsMovedTo: '{{title}} এখন {{destination}} এ স্থানান্তরিত হয়েছে',
     itemsMovedToRoot: '{{title}} মূলে সরানো হয়েছে',

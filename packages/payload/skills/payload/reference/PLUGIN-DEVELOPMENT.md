@@ -161,7 +161,7 @@ plugin-<name>/
     "payload": "^3.82.1"
   },
   "engines": {
-    "node": ">=24.15.0"
+    "node": ">=24.22.1"
   }
 }
 ```

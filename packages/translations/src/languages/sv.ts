@@ -294,6 +294,7 @@ export const svTranslations: DefaultTranslationsObject = {
     and: 'Och',
     anotherUser: 'En annan användare',
     anotherUserTakenOver: 'En annan användare har tagit över redigeringen av detta dokument.',
+    apiResponse: 'API-svar',
     applyChanges: 'Verkställ ändringar',
     ascending: 'Stigande',
     auto: 'Automatiskt',
@@ -487,6 +488,7 @@ export const svTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Omindexerar alla {{collections}}...',
     reloadDocument: 'Ladda om dokumentet',
     remove: 'Ta bort',
+    removeFilter: 'Ta bort filter',
     rename: 'Byt namn',
     replaceRow: 'Ersätt rad',
     requiredFields: 'Fält markerade med * är obligatoriska.',
@@ -580,6 +582,7 @@ export const svTranslations: DefaultTranslationsObject = {
     yes: 'Ja',
   },
   hierarchy: {
+    folderLocation: 'Mappens plats',
     goTo: 'Gå till "{{name}}"',
     itemsMovedTo: '{{title}} flyttades till {{destination}}',
     itemsMovedToRoot: '{{title}} flyttad till rot',

@@ -292,6 +292,7 @@ export const csTranslations: DefaultTranslationsObject = {
     and: 'a',
     anotherUser: 'Jiný uživatel',
     anotherUserTakenOver: 'Jiný uživatel převzal úpravy tohoto dokumentu.',
+    apiResponse: 'Odpověď API',
     applyChanges: 'Použít změny',
     ascending: 'Vzestupně',
     auto: 'Automaticky',
@@ -483,6 +484,7 @@ export const csTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Přeindexování všech {{collections}}.',
     reloadDocument: 'Obnovit dokument',
     remove: 'Odstranit',
+    removeFilter: 'Odstranit filtr',
     rename: 'Přejmenovat',
     replaceRow: 'Nahradit řádek',
     requiredFields: 'Pole označená * jsou povinná.',
@@ -575,6 +577,7 @@ export const csTranslations: DefaultTranslationsObject = {
     yes: 'Ano',
   },
   hierarchy: {
+    folderLocation: 'Umístění složky',
     goTo: 'Přejděte na "{{name}}"',
     itemsMovedTo: '{{title}} byl přesunut do {{destination}}',
     itemsMovedToRoot: '{{title}} přesunuto do kořenové složky',

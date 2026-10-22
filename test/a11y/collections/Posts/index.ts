@@ -90,6 +90,12 @@ export const PostsCollection: CollectionConfig = {
       },
     },
     {
+      name: 'relatedPosts',
+      type: 'relationship',
+      hasMany: true,
+      relationTo: postsSlug,
+    },
+    {
       name: 'relatedPost',
       type: 'relationship',
       relationTo: postsSlug,
@@ -341,6 +347,18 @@ export const PostsCollection: CollectionConfig = {
     {
       name: 'source',
       type: 'code',
+    },
+    {
+      name: 'readOnlySettings',
+      type: 'json',
+      admin: { readOnly: true },
+      defaultValue: { enabled: true },
+    },
+    {
+      name: 'readOnlySource',
+      type: 'code',
+      admin: { readOnly: true },
+      defaultValue: 'const enabled = true;',
     },
     {
       name: 'unlabelledSettings',

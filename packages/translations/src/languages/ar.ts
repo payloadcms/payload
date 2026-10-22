@@ -287,6 +287,7 @@ export const arTranslations: DefaultTranslationsObject = {
     and: 'و',
     anotherUser: 'مستخدم آخر',
     anotherUserTakenOver: 'قام مستخدم آخر بالاستيلاء على تحرير هذا المستند.',
+    apiResponse: 'استجابة API',
     applyChanges: 'طبق التغييرات',
     ascending: 'تصاعدي',
     auto: 'تلقائي',
@@ -475,6 +476,7 @@ export const arTranslations: DefaultTranslationsObject = {
     reindexingAll: 'جاري إعادة فهرسة جميع {{collections}}.',
     reloadDocument: 'أعد تحميل الوثيقة',
     remove: 'إزالة',
+    removeFilter: 'إزالة عامل التصفية',
     rename: 'إعادة تسمية',
     replaceRow: 'استبدال الصف',
     requiredFields: 'الحقول المميزة بعلامة * مطلوبة.',
@@ -566,6 +568,7 @@ export const arTranslations: DefaultTranslationsObject = {
     yes: 'نعم',
   },
   hierarchy: {
+    folderLocation: 'موقع المجلد',
     goTo: 'اذهب إلى "{{name}}"',
     itemsMovedTo: '{{title}} تم نقله إلى {{destination}}',
     itemsMovedToRoot: '{{title}} تم نقله إلى الجذر',

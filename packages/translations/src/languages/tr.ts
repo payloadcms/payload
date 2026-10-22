@@ -298,6 +298,7 @@ export const trTranslations: DefaultTranslationsObject = {
     and: 've',
     anotherUser: 'Başka bir kullanıcı',
     anotherUserTakenOver: 'Başka bir kullanıcı bu belgenin düzenlemesini devraldı.',
+    apiResponse: 'API yanıtı',
     applyChanges: 'Değişiklikleri Uygula',
     ascending: 'artan',
     auto: 'Otomatik',
@@ -491,6 +492,7 @@ export const trTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Tüm {{collections}} yeniden dizine alınıyor.',
     reloadDocument: 'Dokümanı yeniden yükle',
     remove: 'Kaldır',
+    removeFilter: 'Filtreyi kaldır',
     rename: 'Yeniden adlandır',
     replaceRow: 'Satırı Değiştir',
     requiredFields: '* ile işaretlenmiş alanlar zorunludur.',
@@ -585,6 +587,7 @@ export const trTranslations: DefaultTranslationsObject = {
     yes: 'Evet',
   },
   hierarchy: {
+    folderLocation: 'Klasör konumu',
     goTo: '"{{name}}" öğesine gidin',
     itemsMovedTo: "{{title}} {{destination}}'ye taşındı",
     itemsMovedToRoot: '{{title}} kök bölüme taşındı.',

@@ -6,6 +6,10 @@
  */
 
 import { fileURLToPath } from 'node:url'
+import {
+  devServerExternalPackages as devServerExternalPayloadPackages,
+  serverExternalPackages as serverExternalPayloadPackages,
+} from 'payload/build-config'
 
 const poweredByHeader = {
   key: 'X-Powered-By',
@@ -142,74 +146,16 @@ export const withPayload = (nextConfig = {}, options = {}) => {
       ]
     },
     serverExternalPackages: [
-      ...(nextConfig.serverExternalPackages || []),
-      // WHY: without externalizing graphql, a graphql version error will be thrown
-      // during runtime ("Ensure that there is only one instance of \"graphql\" in the node_modules\ndirectory.")
-      'graphql',
-      'drizzle-kit',
-      'drizzle-kit/api',
-      'sharp',
-      'libsql',
-      'require-in-the-middle',
-      'json-schema-to-typescript',
-      // Prevents turbopack build errors by the thread-stream package which is installed by pino
-      'pino',
-      // file-type v22 uses `import(specifier)` with a non-literal specifier, which Turbopack rejects
-      // with "Cannot find module as expression is too dynamic"
-      'file-type',
-      ...(process.env.NODE_ENV === 'development' && options.devBundleServerPackages !== true
-        ? /**
-           * Unless explicitly disabled by the user, by passing `devBundleServerPackages: true` to withPayload, we
-           * do not bundle server-only packages during dev. Node.js loads them directly instead, so there are fewer
-           * files to compile, which means faster compilation speeds.
-           *
-           * A package can only be listed here if the import map never loads a client component from it. Node.js
-           * loads external packages as they are, so a `'use client'` file inside one would not become a client
-           * component. That is why packages with client components are not listed (see the TODO below).
-           *
-           * We should only do this during development, not build, because externalizing these packages can hurt
-           * the bundle size. Not only does it disable tree-shaking, it also risks installing duplicate copies of the
-           * same package.
-           *
-           * Example:
-           * - @payloadcms/richtext-lexical (in bundle) -> installs qs-esm (bundled because of importer)
-           * - payload (not in bundle, external) -> installs qs-esm (external because of importer)
-           * Result: we have two copies of qs-esm installed - one in the bundle, and one in node_modules.
-           *
-           * During development, these bundle size differences do not matter much, and development speed is more
-           * important.
-           */
-          [
-            'payload',
-            '@payloadcms/db-mongodb',
-            '@payloadcms/db-postgres',
-            '@payloadcms/db-sqlite',
-            '@payloadcms/db-vercel-postgres',
-            '@payloadcms/db-d1-sqlite',
-            '@payloadcms/drizzle',
-            '@payloadcms/email-nodemailer',
-            '@payloadcms/email-resend',
-            '@payloadcms/graphql',
-            '@payloadcms/kv-redis',
-            '@payloadcms/payload-cloud',
-            // Its `/client` entry has no exports, so the import map never loads anything from it
-            '@payloadcms/plugin-mcp',
-            '@payloadcms/plugin-nested-docs',
-            '@payloadcms/plugin-redirects',
-            '@payloadcms/transformer-sharp',
-            '@payloadcms/translations',
-            // TODO: Add the following packages, excluding their /client subpath exports, once Next.js supports it
-            // see: https://github.com/vercel/next.js/discussions/76991
-            //'@payloadcms/plugin-cloud-storage',
-            //'@payloadcms/plugin-sentry',
-            //'@payloadcms/plugin-stripe',
-            // @payloadcms/richtext-lexical
-            //'@payloadcms/storage-azure',
-            //'@payloadcms/storage-gcs',
-            //'@payloadcms/storage-s3',
-            //'@payloadcms/storage-vercel-blob',
-          ]
-        : []),
+      ...new Set([
+        ...(nextConfig.serverExternalPackages || []),
+        ...serverExternalPayloadPackages,
+        // file-type v22 uses `import(specifier)` with a non-literal specifier, which Turbopack rejects
+        // with "Cannot find module as expression is too dynamic"
+        'file-type',
+        ...(process.env.NODE_ENV === 'development' && options.devBundleServerPackages !== true
+          ? devServerExternalPayloadPackages
+          : []),
+      ]),
     ],
     webpack: (webpackConfig, webpackOptions) => {
       const incomingWebpackConfig =

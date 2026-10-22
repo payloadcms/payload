@@ -8,6 +8,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { formatAdminURL, instructionsCollectionSlug } from 'payload/shared'
 
+import { toggleColumn } from '../__helpers/e2e/columns/toggleColumn.js'
 import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
 import {
@@ -23,6 +24,8 @@ import { initPage } from '../__setup/e2e/initPage.js'
 import { devUser } from '../credentials.js'
 import { DashboardHelper } from '../dashboard/utils.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
+
+const workflowUsers = new Map<Page, number | string>()
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -236,7 +239,14 @@ export async function gotoFirstPost({
   serverURL: string
 }) {
   await gotoPostsList({ page, postsURL })
+  await toggleColumn(page, {
+    columnLabel: 'Title',
+    columnName: 'title',
+    shouldCloseListColumns: true,
+    targetState: 'on',
+  })
   const postLink = page.locator('tbody tr .cell-title a', { hasText: 'Example post one' })
+
   await expect(postLink).toHaveAttribute('href')
   const href = await postLink.getAttribute('href')
 
@@ -775,7 +785,7 @@ export async function openRelationshipCreationDrawer({
 
   await expect(drawer).toBeVisible()
   await expect(drawer.locator('[data-form-ready="true"]').first()).toBeVisible()
-  await expect(drawer.locator('#field-title')).toBeVisible()
+  await expect(drawer.getByRole('textbox', { name: /^Title/ })).toBeVisible()
   await waitForLexicalReady(drawer.locator('[data-field-path="content"]'))
   return drawer
 }
@@ -1175,6 +1185,75 @@ export async function disableWorkflowAutoLogin({
   })
 }
 
+export async function prepareSignInPage({ page, serverURL }: { page: Page; serverURL: string }) {
+  await page.context().clearCookies()
+  const serverOrigin = new URL(serverURL).origin
+
+  await page.route(
+    (url) => url.origin === serverOrigin,
+    async (route) => {
+      await route.continue({
+        headers: { ...route.request().headers(), DisableAutologin: 'true' },
+      })
+    },
+  )
+  await initPage({ noAutoLogin: true, page, serverURL })
+  const loginURL = formatAdminURL({ adminRoute: '/admin', path: '/login', serverURL })
+
+  // Normal patched navigation waits for hydration after compilation polling has finished.
+  await page.goto(loginURL)
+  await expect(page).toHaveURL(loginURL)
+}
+
+export async function tabToWorkflowControl({
+  control,
+  direction = 'Tab',
+  page,
+}: {
+  control: Locator
+  direction?: 'Shift+Tab' | 'Tab'
+  page: Page
+}) {
+  // Traverse the real tab order, including document controls before the form.
+  for (let tabCount = 0; tabCount < 80; tabCount++) {
+    if (await control.evaluate((element) => element === element.ownerDocument.activeElement)) {
+      return
+    }
+    await page.keyboard.press(workflowTabKey({ direction, page }))
+  }
+  await expect(control).toBeFocused()
+}
+
+export async function prepareWorkflowPage({ page, serverURL }: { page: Page; serverURL: string }) {
+  await expect(await page.request.post(`${serverURL}/api/users/login`, { data: devUser })).toBeOK()
+  const credentials = { email: `workflow-${randomUUID()}@example.com`, password: devUser.password }
+  const created = await page.request.post(`${serverURL}/api/users`, { data: credentials })
+
+  await expect(created).toBeOK()
+  const { doc } = (await created.json()) as { doc: { id: number | string } }
+
+  workflowUsers.set(page, doc.id)
+  await expect(
+    await page.request.post(`${serverURL}/api/users/login`, { data: credentials }),
+  ).toBeOK()
+  await initPage({ page, serverURL })
+  page.removeAllListeners('console')
+}
+
+export async function cleanupWorkflowUsers({ serverURL }: { serverURL: string }) {
+  for (const [page, id] of workflowUsers) {
+    try {
+      // Logout journeys end anonymously; authenticate as the seeded admin to delete the fixture user.
+      await expect(
+        await page.request.post(`${serverURL}/api/users/login`, { data: devUser }),
+      ).toBeOK()
+      await expect(await page.request.delete(`${serverURL}/api/users/${id}`)).toBeOK()
+    } finally {
+      workflowUsers.delete(page)
+    }
+  }
+}
+
 export async function withWorkflowPost({
   action,
   initialStatus = 'published',
@@ -1280,6 +1359,14 @@ export async function withWorkflowPosts({
       expect(response.ok() || response.status() === 404).toBe(true)
     }
   }
+}
+
+function workflowTabKey({ direction, page }: { direction: 'Shift+Tab' | 'Tab'; page: Page }) {
+  // With default macOS settings, Safari uses Option-Tab to include buttons and links.
+  return process.platform === 'darwin' &&
+    page.context().browser()?.browserType().name() === 'webkit'
+    ? `Alt+${direction}`
+    : direction
 }
 
 export async function openDragReorderField({

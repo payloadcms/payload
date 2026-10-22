@@ -296,6 +296,7 @@ export const idTranslations: DefaultTranslationsObject = {
     and: 'Dan',
     anotherUser: 'Pengguna lain',
     anotherUserTakenOver: 'Pengguna lain telah mengambil alih pengeditan dokumen ini.',
+    apiResponse: 'Respons API',
     applyChanges: 'Terapkan Perubahan',
     ascending: 'Naik',
     auto: 'Otomatis',
@@ -489,6 +490,7 @@ export const idTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Mengindeks ulang semua {{collections}}.',
     reloadDocument: 'Muat ulang dokumen',
     remove: 'Hapus',
+    removeFilter: 'Hapus filter',
     rename: 'Ganti Nama',
     replaceRow: 'Ganti Baris',
     requiredFields: 'Kolom yang ditandai dengan * wajib diisi.',
@@ -583,6 +585,7 @@ export const idTranslations: DefaultTranslationsObject = {
     yes: 'Ya',
   },
   hierarchy: {
+    folderLocation: 'Lokasi folder',
     goTo: 'Buka "{{name}}"',
     itemsMovedTo: '{{title}} dipindahkan ke {{destination}}',
     itemsMovedToRoot: '{{title}} dipindahkan ke akar',

@@ -2552,7 +2552,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             slug: inheritedReadVersionsVirtualGlobalSlug,
             overrideAccess: false,
           }),
-        ).resolves.toMatchObject({ version: { related: allowedID } })
+        ).resolves.toMatchObject({ related: { id: allowedID } })
       } finally {
         await payload.db.deleteVersions({
           globalSlug: inheritedReadVersionsVirtualGlobalSlug,

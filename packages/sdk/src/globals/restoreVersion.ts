@@ -1,4 +1,4 @@
-import type { GlobalSlug, PayloadTypesShape, TypedLocale, TypeWithVersion } from 'payload'
+import type { GlobalSlug, PayloadTypesShape, TypedLocale } from 'payload'
 
 import type { PayloadSDK } from '../index.js'
 import type { DataFromGlobalSlug, PopulateType } from '../types.js'
@@ -41,7 +41,7 @@ export async function restoreGlobalVersion<
   sdk: PayloadSDK<T>,
   options: RestoreGlobalVersionByIDOptions<T, TSlug>,
   init?: RequestInit,
-): Promise<TypeWithVersion<DataFromGlobalSlug<T, TSlug>>> {
+): Promise<DataFromGlobalSlug<T, TSlug>> {
   const response = await sdk.request({
     args: options,
     init,

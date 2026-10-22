@@ -295,6 +295,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     and: 'И',
     anotherUser: 'Други корисник',
     anotherUserTakenOver: 'Други корисник је преузео уређивање овог документа.',
+    apiResponse: 'API одговор',
     applyChanges: 'Примени промене',
     ascending: 'Узлазно',
     auto: 'Automatski',
@@ -486,6 +487,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Ponovno indeksiranje svih {{collections}}.',
     reloadDocument: 'Ponovo učitaj dokument',
     remove: 'Уклони',
+    removeFilter: 'Уклони филтер',
     rename: 'Preimenujte',
     replaceRow: 'Zameni red',
     requiredFields: 'Поља означена са * су обавезна.',
@@ -577,6 +579,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     yes: 'Да',
   },
   hierarchy: {
+    folderLocation: 'Локација фасцикле',
     goTo: 'Idite na "{{name}}"',
     itemsMovedTo: '{{title}} je premešten u {{destination}}',
     itemsMovedToRoot: '{{title}} premestio se u koren',

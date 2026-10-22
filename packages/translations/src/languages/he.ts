@@ -283,6 +283,7 @@ export const heTranslations: DefaultTranslationsObject = {
     and: 'וגם',
     anotherUser: 'משתמש אחר',
     anotherUserTakenOver: 'משתמש אחר השתלט על עריכת מסמך זה.',
+    apiResponse: 'תגובת API',
     applyChanges: 'החל שינויים',
     ascending: 'בסדר עולה',
     auto: 'אוטו',
@@ -471,6 +472,7 @@ export const heTranslations: DefaultTranslationsObject = {
     reindexingAll: 'החזרת אינדקס לכל {{collections}}.',
     reloadDocument: 'טען מחדש את המסמך',
     remove: 'הסר',
+    removeFilter: 'הסרת מסנן',
     rename: 'שנה שם',
     replaceRow: 'החלף שורה',
     requiredFields: 'שדות המסומנים ב-* הם שדות חובה.',
@@ -562,6 +564,7 @@ export const heTranslations: DefaultTranslationsObject = {
     yes: 'כן',
   },
   hierarchy: {
+    folderLocation: 'מיקום התיקייה',
     goTo: 'עבור אל "{{name}}"',
     itemsMovedTo: '{{title}} הועבר ל-{{destination}}',
     itemsMovedToRoot: '{{title}} הועבר לשורש',
