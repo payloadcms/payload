@@ -11,6 +11,11 @@ import { formatDocTitle } from '../../../../utilities/formatDocTitle/index.js'
 
 type UpdatedByValue = { relationTo: string; value: number | string } | null | undefined
 
+/**
+ * Renders the author of a version by lazy-loading the related user document
+ * when the cell scrolls into view. Reacts to prop and locale changes.
+ * @param props.updatedBy - polymorphic relationship reference from `version.updatedBy`
+ */
 export function UpdatedByCell({ updatedBy }: { updatedBy: UpdatedByValue }) {
   const {
     config: {
