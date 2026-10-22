@@ -4,6 +4,7 @@ import { runReleaseBump } from './release-bump.js'
 
 const baseDeps = () => ({
   env: { GITHUB_TOKEN: 'token' } as NodeJS.ProcessEnv,
+  getCommitBump: vi.fn(async (): Promise<null | string> => 'patch'),
   isPublished: vi.fn(async () => false),
   log: vi.fn(),
   readBranch: () => '3.x',
@@ -22,7 +23,7 @@ describe('runReleaseBump', () => {
   it('should bump, configure identity, commit, tag, then push in order', async () => {
     const deps = makeDeps()
 
-    const next = await runReleaseBump({ bump: 'patch', deps, dryRun: false })
+    const next = await runReleaseBump({ bump: 'auto', deps, dryRun: false })
 
     expect(next).toBe('3.90.3')
     expect(deps.workspace.bumpVersion).toHaveBeenCalledWith('patch')
@@ -40,7 +41,7 @@ describe('runReleaseBump', () => {
   it('should abort before any git write or bump when not on 3.x', async () => {
     const deps = makeDeps({ readBranch: () => 'main' })
 
-    await expect(runReleaseBump({ bump: 'patch', deps, dryRun: false })).rejects.toThrow(/3\.x/)
+    await expect(runReleaseBump({ bump: 'auto', deps, dryRun: false })).rejects.toThrow(/3\.x/)
 
     expect(deps.run).not.toHaveBeenCalled()
     expect(deps.workspace.bumpVersion).not.toHaveBeenCalled()
@@ -48,13 +49,14 @@ describe('runReleaseBump', () => {
 
   it('should bump a minor version', async () => {
     const deps = makeDeps({
+      getCommitBump: vi.fn(async (): Promise<null | string> => 'minor'),
       workspace: {
         bumpVersion: vi.fn(async () => '3.91.0'),
         version: vi.fn(async () => '3.90.2'),
       },
     })
 
-    const next = await runReleaseBump({ bump: 'minor', deps, dryRun: false })
+    const next = await runReleaseBump({ bump: 'auto', deps, dryRun: false })
 
     expect(next).toBe('3.91.0')
     expect(deps.workspace.bumpVersion).toHaveBeenCalledWith('minor')
@@ -63,7 +65,7 @@ describe('runReleaseBump', () => {
   it('should abort before any git write when the computed version is already published', async () => {
     const deps = makeDeps({ isPublished: vi.fn(async () => true) })
 
-    await expect(runReleaseBump({ bump: 'patch', deps, dryRun: false })).rejects.toThrow(
+    await expect(runReleaseBump({ bump: 'auto', deps, dryRun: false })).rejects.toThrow(
       /already published/,
     )
 
@@ -81,7 +83,7 @@ describe('runReleaseBump', () => {
       }),
     })
 
-    await expect(runReleaseBump({ bump: 'patch', deps, dryRun: false })).rejects.toThrow(/503/)
+    await expect(runReleaseBump({ bump: 'auto', deps, dryRun: false })).rejects.toThrow(/503/)
 
     expect(deps.run).not.toHaveBeenCalled()
   })
@@ -89,7 +91,7 @@ describe('runReleaseBump', () => {
   it('should run the already-published guard in dry-run too', async () => {
     const deps = makeDeps({ isPublished: vi.fn(async () => true) })
 
-    await expect(runReleaseBump({ bump: 'patch', deps, dryRun: true })).rejects.toThrow(
+    await expect(runReleaseBump({ bump: 'auto', deps, dryRun: true })).rejects.toThrow(
       /already published/,
     )
   })
@@ -97,7 +99,7 @@ describe('runReleaseBump', () => {
   it('should log the push and never execute it in dry-run', async () => {
     const deps = makeDeps()
 
-    await runReleaseBump({ bump: 'patch', deps, dryRun: true })
+    await runReleaseBump({ bump: 'auto', deps, dryRun: true })
 
     const runCmds = deps.run.mock.calls.map((call) => call[0] as string)
     expect(runCmds.some((cmd) => cmd.startsWith('git push'))).toBe(false)
