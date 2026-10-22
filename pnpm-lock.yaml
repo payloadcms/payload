@@ -433,7 +433,7 @@ importers:
         specifier: workspace:*
         version: link:../drizzle
       '@types/pg':
-        specifier: 8.20.0
+        specifier: ^8.20.0
         version: 8.20.0
       console-table-printer:
         specifier: 2.15.0
