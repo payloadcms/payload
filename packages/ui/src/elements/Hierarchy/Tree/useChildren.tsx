@@ -68,16 +68,26 @@ export const useChildren = ({
   // Extract docs for this parent from initialData if available
   // Apply same superset filter as fetchPage for consistency
   const initialDocsForParent = hasInitialData
-    ? initialData.docs.filter((doc) => {
-        const docParent = doc[parentFieldName] || 'null'
-        if (String(docParent) !== parentKey) {
-          return false
-        }
-        if (filterByCollections?.length && typeFieldName) {
-          return isSuperset(doc[typeFieldName] as string[] | undefined, filterByCollections)
-        }
-        return true
-      })
+    ? (() => {
+        const seenDocIds = new Set<string>()
+        return initialData.docs.filter((doc) => {
+          const docParent = doc[parentFieldName] || 'null'
+          if (String(docParent) !== parentKey) {
+            return false
+          }
+          if (filterByCollections?.length && typeFieldName) {
+            if (!isSuperset(doc[typeFieldName] as string[] | undefined, filterByCollections)) {
+              return false
+            }
+          }
+          const docIdStr = String(doc.id)
+          if (seenDocIds.has(docIdStr)) {
+            return false
+          }
+          seenDocIds.add(docIdStr)
+          return true
+        })
+      })()
     : null
 
   const [children, setChildren] = useState<null | TreeDocument[]>(

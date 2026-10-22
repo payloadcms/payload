@@ -176,13 +176,20 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
 
   if (haveInitialDataInputsChanged && initialData && initialData.docs.length > 0) {
     const docsByParent = new Map<string, TreeDocument[]>()
+    const seenByParent = new Map<string, Set<string>>()
     for (const doc of initialData.docs) {
       const parentId = doc[parentFieldName] || 'null'
       const parentKey = String(parentId)
       if (!docsByParent.has(parentKey)) {
         docsByParent.set(parentKey, [])
+        seenByParent.set(parentKey, new Set())
       }
-      docsByParent.get(parentKey).push(doc)
+      const seenSet = seenByParent.get(parentKey)!
+      const docIdStr = String(doc.id)
+      if (!seenSet.has(docIdStr)) {
+        seenSet.add(docIdStr)
+        docsByParent.get(parentKey)!.push(doc)
+      }
     }
 
     const filterKey = filterByCollections?.length
