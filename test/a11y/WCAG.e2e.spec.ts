@@ -6609,22 +6609,51 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(remove).toHaveAccessibleName(/remove/i)
     })
 
-    test('should use a native checkbox label without inferring an ARIA reference from its name', async () => {
-      // PYLD-3817
-      await gotoFirstPost({ page, postsURL, serverURL })
-      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
-      await page.getByRole('menuitem', { name: 'Delete', exact: true }).click()
-      const dialog = page.getByRole('dialog', { name: /confirm deletion/i })
-      const checkbox = dialog.getByRole('checkbox')
+    for (const isTitleVisible of [true, false]) {
+      test(`should use a native checkbox label without inferring an ARIA reference from its name with the title column ${isTitleVisible ? 'visible' : 'hidden'}`, async () => {
+        // PYLD-3817
+        const columns = await openTableColumns({ page, postsURL })
+        const titleToggle = columns.getByRole('checkbox', { name: 'Title', exact: true })
+        const isTitleInitiallyVisible = await titleToggle.isChecked()
+        const originalHeadings = await page.locator('thead th').allTextContents()
 
-      await expect(checkbox).toBeVisible()
-      await expect(checkbox).toHaveAccessibleName('Skip trash and delete permanently')
-      await checkbox.focus()
-      await checkbox.press('Space')
-      await expect(checkbox).toBeChecked()
-      await checkbox.press('Space')
-      await expect(checkbox).not.toBeChecked()
-    })
+        try {
+          await titleToggle.setChecked(isTitleVisible)
+          await expect(page.locator('#heading-title')).toHaveCount(isTitleVisible ? 1 : 0)
+          await page.keyboard.press('Escape')
+          await page.reload()
+          await expect(page.locator('#heading-title')).toHaveCount(isTitleVisible ? 1 : 0)
+          await gotoFirstPost({ page, postsURL, serverURL })
+          await expect(page.locator('#field-title')).toHaveValue(/^Example post one(?:,|$)/)
+          await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+          await page.getByRole('menuitem', { name: 'Delete', exact: true }).click()
+          const dialog = page.getByRole('dialog', { name: /confirm deletion/i })
+          const checkbox = dialog.getByRole('checkbox')
+
+          await expect(checkbox).toBeVisible()
+          await expect(checkbox).toHaveAccessibleName('Skip trash and delete permanently')
+          await checkbox.focus()
+          await expect(checkbox).toBeFocused()
+          await checkbox.press('Space')
+          await expect(checkbox).toBeChecked()
+          await checkbox.press('Space')
+          await expect(checkbox).not.toBeChecked()
+        } finally {
+          const restoredColumns = await openTableColumns({ page, postsURL })
+          const restoredTitleToggle = restoredColumns.getByRole('checkbox', {
+            name: 'Title',
+            exact: true,
+          })
+
+          await restoredTitleToggle.setChecked(isTitleInitiallyVisible)
+          await expect(restoredTitleToggle).toBeChecked({ checked: isTitleInitiallyVisible })
+          await expect(page.locator('#heading-title')).toHaveCount(isTitleInitiallyVisible ? 1 : 0)
+          await page.keyboard.press('Escape')
+          await page.reload()
+          await expect(page.locator('thead th')).toHaveText(originalHeadings)
+        }
+      })
+    }
 
     test('should expose read-only hierarchy controls as disabled', async () => {
       await gotoCreatePost({ page, postsURL })

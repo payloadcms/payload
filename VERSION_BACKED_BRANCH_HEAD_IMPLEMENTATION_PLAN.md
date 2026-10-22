@@ -375,7 +375,7 @@ M1 implementation in `packages/payload/src/versions/branches` now covers interna
 
 Initial verification on Node 24.15.0: 47 focused unit tests passed; targeted oxlint, oxfmt, and strict standalone TypeScript checking passed. Two regression cases for matching inherited content failed before the ownership fix and passed afterward. These tests exercise the domain without database IO; they do not establish adapter atomicity, runtime API integration, migration correctness, or rendered accessibility.
 
-Current work: M3 independent correctness and native index/query-plan review passed under the reduced gate below. The first M4 persistence slice is published; authoritative operation originals and selected working writes are undergoing independent review. Public reads, autosave ownership and the remaining M4 requirements follow as separately reviewed slices. The internal engine does not enable the feature. Further timing optimization is deferred in favor of functional delivery.
+Current work: M3 independent correctness and native index/query-plan review passed under the reduced gate below. M4 persistence and selected-original slices are independently approved and published; public collection read routing is in progress. Public reads, autosave ownership and the remaining M4 requirements follow as separately reviewed slices. The internal engine does not enable the feature. Further timing optimization is deferred in favor of functional delivery.
 
 ### Draft review stack
 
@@ -427,6 +427,7 @@ The stack starts at main. Each layer targets the preceding branch so reviewers s
 | 37 | [#18970](https://github.com/payloadcms/payload/pull/18970) | Restrict native Mongo graph/zero integration cases to supported transaction adapters |
 | 38 | [#18972](https://github.com/payloadcms/payload/pull/18972) | Ignore stale Lexical link-drawer initialization; production race and keyboard/state regressions |
 | 39 | [#18973](https://github.com/payloadcms/payload/pull/18973) | First M4 slice: migration-gated working-save persistence, native snapshots, guarded hooks and retention roots |
+| 40 | [#18974](https://github.com/payloadcms/payload/pull/18974) | Selected update/restore/bulk/global originals and named working writes, independently verified on three databases |
 
 Historical implementation state as of 2026-10-21 (superseded by the revised M3 signoff below):
 
@@ -557,3 +558,9 @@ This is not M4 completion. Authoritative original/read routing and named context
 The next slice uses privately selected working branches for collection update/restore originals, bulk membership and global update candidates. Root operation authorization remains separate from relationship read policies. Selected working writes cannot publish main or replace managed drafts latest. Native status-key presence, global ID shape, timestamps and caller transactions retain their existing operation contracts.
 
 The implementation owner and independent reviewer each pass the 43-case selected-original/working-write suite on SQLite, PostgreSQL and MongoDB, 38 focused units and the actual native Mongo root-policy geospatial case. Core/Mongo/Drizzle TypeScript, targeted formatting/lint and whitespace checks pass; existing lint warnings remain. Independent review approves all 30 frozen source files, verified before and after execution. Review identified and corrected late authority adoption after an explicitly observed legacy original or bulk candidate selection. Actual callback activation regressions cover both cases. This slice does not complete public selected reads, nested loaders or named-anchor suppression on ordinary reads; activation remains gated by the remaining M4 and M9 work.
+
+### Accessibility CI navigation correction
+
+The preceding stack's accessibility job reported ten terminal failures because its post-navigation helper required the Title column, while the configured list still exposed the seeded post through another column. Actual production UI configuration and reload reproduced the failure. The helper now identifies the seeded row by its accessible selection checkbox and follows its own collection edit link. The canonical native-checkbox test covers visible and hidden Title, retaining name, focus, Space/state assertions and restoring the original columns.
+
+Owner and independent reviewer each pass all 80 affected production criterion tests, including the ten terminal cases, and both configured-column variants. Final source hashes are independently verified. Assessment covers WCAG 2.2 4.1.2 and 2.1.1 with focus checks; no product markup/style, full manual assistive-technology or AA conformance claim is made. The cause of the persisted CI preferences and the separate column-toggle retry remain unproven. This is a test helper correction, not completion of any branch-head milestone.

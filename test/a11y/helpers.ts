@@ -235,7 +235,10 @@ export async function gotoFirstPost({
   serverURL: string
 }) {
   await gotoPostsList({ page, postsURL })
-  const postLink = page.locator('tbody tr .cell-title a', { hasText: 'Example post one' })
+  const postRow = page.locator('tbody tr').filter({
+    has: page.getByRole('checkbox', { name: /^Select Example post one(?:,|$)/ }),
+  })
+  const postLink = postRow.locator(`.cell--linked a[href^="${new URL(postsURL.list).pathname}/"]`)
   await expect(postLink).toHaveAttribute('href')
   const href = await postLink.getAttribute('href')
 
