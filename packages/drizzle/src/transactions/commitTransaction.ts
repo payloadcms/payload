@@ -18,7 +18,13 @@ export const commitTransaction: CommitTransaction = async function commitTransac
 
   try {
     await session.resolve()
-  } catch (_) {
-    await session.reject()
+  } catch (error) {
+    try {
+      await session.reject()
+    } catch (_) {
+      // rollback is best effort once the commit has failed — the commit
+      // error is the one the caller must see
+    }
+    throw error
   }
 }
