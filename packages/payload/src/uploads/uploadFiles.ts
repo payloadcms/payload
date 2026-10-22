@@ -1,25 +1,27 @@
-import fs from 'fs/promises'
-
 import type { Payload } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { FileToSave } from './types.js'
+import type { FileContentToSave } from './fileContent.js'
 
 import { FileUploadError } from '../errors/index.js'
-import { saveBufferToFile } from './saveBufferToFile.js'
+import { saveFileContent } from './fileContent.js'
 
 export const uploadFiles = async (
   payload: Payload,
-  files: FileToSave[],
+  files: (FileContentToSave | FileToSave)[],
   req: PayloadRequest,
 ): Promise<void> => {
   try {
     await Promise.all(
       files.map(async (file) => {
-        if ('sourcePath' in file) {
-          await fs.copyFile(file.sourcePath, file.path)
-        } else {
-          await saveBufferToFile(file.buffer, file.path)
-        }
+        const content =
+          'content' in file
+            ? file.content
+            : 'sourcePath' in file
+              ? ({ ownership: 'external', path: file.sourcePath, type: 'file' } as const)
+              : ({ buffer: file.buffer, type: 'buffer' } as const)
+
+        await saveFileContent(content, file.path)
       }),
     )
   } catch (err) {

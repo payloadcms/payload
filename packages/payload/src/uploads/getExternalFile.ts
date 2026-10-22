@@ -5,6 +5,7 @@ import { APIError } from '../errors/index.js'
 import { getRequestOrigin } from '../utilities/getRequestOrigin.js'
 import { isURLAllowed } from '../utilities/isURLAllowed.js'
 import { safeFetch } from './safeFetch.js'
+import { toLegacyUploadFile } from './uploadFile.js'
 
 type Args = {
   data: Pick<FileData, 'filename' | 'url'>
@@ -149,14 +150,14 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
       throw new APIError(`Failed to fetch file from ${fileURL}`, res?.status)
     }
 
-    const data = await res.arrayBuffer()
+    const data = Buffer.from(await res.arrayBuffer())
 
-    return {
+    return toLegacyUploadFile({
       name: filename,
-      data: Buffer.from(data),
+      content: { buffer: data, type: 'buffer' },
       mimetype: res.headers.get('content-type') || undefined!,
-      size: Number(res.headers.get('content-length')) || 0,
-    }
+      size: data.length,
+    })
   }
 
   throw new APIError('Invalid file url', 400)

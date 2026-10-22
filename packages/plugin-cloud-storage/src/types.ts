@@ -7,11 +7,13 @@ import type {
   TypeWithID,
   UploadCollectionSlug,
 } from 'payload'
-import type { SignedClientUploadReceipt } from 'payload/internal'
+import type { FileContent, SignedClientUploadReceipt } from 'payload/internal'
 
 export interface File {
   buffer: Buffer
   clientUploadContext?: unknown
+  /** Authoritative content for adapters that support the shared file readers. */
+  content?: FileContent
   filename: string
   filesize: number
   /** Configured image-size name. Undefined for the original file. */

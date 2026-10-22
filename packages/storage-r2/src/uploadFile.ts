@@ -1,30 +1,23 @@
-import type { R2Bucket } from './types.js'
+import type { FileContent } from 'payload/internal'
 
-const isMiniflare = process.env.NODE_ENV === 'development'
+import { getFileBlob } from 'payload/internal'
+
+import type { R2Bucket } from './types.js'
 
 interface UploadFileArgs {
   bucket: R2Bucket
-  buffer: Buffer
+  content: FileContent
   mimeType: string
   storageFilePath: string
-  tempFilePath?: string
 }
 
 export async function uploadFile({
   bucket,
-  buffer,
+  content,
   mimeType,
   storageFilePath,
-  tempFilePath,
 }: UploadFileArgs): Promise<void> {
-  // Read more: https://github.com/cloudflare/workers-sdk/issues/6047#issuecomment-2691217843
-  let body = isMiniflare ? new Blob([buffer]) : buffer
-
-  if (tempFilePath) {
-    // Workers require filesystem compatibility to use temp files, so keep this import conditional.
-    const { openAsBlob } = await import('fs')
-    body = await openAsBlob(tempFilePath)
-  }
+  const body = await getFileBlob(content, mimeType)
 
   await bucket.put(storageFilePath, body, {
     httpMetadata: { contentType: mimeType },

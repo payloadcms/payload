@@ -83,7 +83,10 @@ describe('generateFileData - non-image temp file buffering', () => {
     expect(readFileMock).not.toHaveBeenCalled()
     expect(writeFileMock).not.toHaveBeenCalled()
     expect(result.files).toEqual([
-      { path: '/tmp/media/big-video.mp4', sourcePath: '/tmp/payload-upload-def' },
+      {
+        content: { ownership: 'external', path: '/tmp/payload-upload-def', type: 'file' },
+        path: '/tmp/media/big-video.mp4',
+      },
     ])
   })
 })

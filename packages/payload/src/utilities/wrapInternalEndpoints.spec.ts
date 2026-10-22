@@ -125,16 +125,13 @@ describe('wrapInternalEndpoints', () => {
     expect(await fileExists(tempFilePath)).toBe(false)
   })
 
-  it('returns the handler response when the temp file can no longer be removed', async () => {
+  it('returns the handler response when the temp file was already removed', async () => {
     const req = createReq(path.join(os.tmpdir(), `wrap-internal-endpoints-spec-missing-file`))
     const handler = vi.fn(() => Promise.resolve(Response.json({})))
 
     await expect(wrapEndpoint(handler)(req)).resolves.toBeInstanceOf(Response)
 
-    expect(req.payload.logger.error).toHaveBeenCalledWith({
-      err: expect.objectContaining({ code: 'ENOENT' }),
-      msg: 'Failed to remove client upload temp file',
-    })
+    expect(req.payload.logger.error).not.toHaveBeenCalled()
   })
 
   it('throws the handler error rather than a cleanup error', async () => {

@@ -190,7 +190,7 @@ describe('unlinkTempFiles', () => {
     expect(req.context[CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY]).toBeUndefined()
   })
 
-  it('logs instead of throwing when a client-upload temp file can no longer be removed', async () => {
+  it('does not throw or log when a client-upload temp file was already removed', async () => {
     const req = {
       context: {
         [CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY]: path.join(
@@ -209,9 +209,6 @@ describe('unlinkTempFiles', () => {
       }),
     ).resolves.toBeUndefined()
 
-    expect(req.payload.logger.error).toHaveBeenCalledWith({
-      err: expect.objectContaining({ code: 'ENOENT' }),
-      msg: 'Failed to remove client upload temp file',
-    })
+    expect(req.payload.logger.error).not.toHaveBeenCalled()
   })
 })

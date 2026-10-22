@@ -5,6 +5,8 @@ import type {
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
+import { getFileContent } from 'payload/internal'
+
 import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
@@ -53,11 +55,10 @@ export function createAzureAdapter({
 
     handleUpload: async ({ data, file, storageFilePath }) => {
       await uploadFile({
-        buffer: file.buffer,
+        content: getFileContent(file),
         client: getStorageClient(),
         mimeType: file.mimeType,
         storageFilePath,
-        tempFilePath: file.tempFilePath,
       })
 
       return data

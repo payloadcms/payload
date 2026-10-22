@@ -7,7 +7,8 @@ import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Document, PayloadRequest } from '../types/index.js'
 import type { ExternalUploadSource } from './sanitizeUploadData.js'
-import type { FileData, FileToSave, ProbedImageSize, UploadEdits } from './types.js'
+import type { FileData, ProbedImageSize, UploadEdits } from './types.js'
+import type { FileContentToSave } from './fileContent.js'
 
 import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
 import { isNumber } from '../utilities/isNumber.js'
@@ -17,6 +18,10 @@ import { cropImage } from './cropImage.js'
 import { getExternalFile } from './getExternalFile.js'
 import { getFileByPath } from './getFileByPath.js'
 import { getFileExtension, getSanitizedUploadFilename } from './getFileTypeIdentity.js'
+import { getFileBuffer, getFileContent, getFileInput, replaceFileContent } from './fileContent.js'
+import { normalizeUploadFile, toLegacyUploadFile } from './uploadFile.js'
+import { getFileFromClientUpload } from './getFileFromClientUpload.js'
+import { getFileContentRequirement } from './getFileContentRequirement.js'
 import { getImageSize } from './getImageSize.js'
 import { getSafeFileName } from './getSafeFilename.js'
 import { createImageSizes } from './image-resizing/createImageSizes.js'
@@ -40,7 +45,7 @@ type Args<T> = {
 
 type Result<T> = Promise<{
   data: T
-  files: FileToSave[]
+  files: FileContentToSave[]
 }>
 
 const shouldReupload = (
@@ -99,7 +104,13 @@ export const generateFileData = async <T>({
 
   const { serverURL, sharp } = req.payload.config
 
-  let file = isDuplicating ? undefined : req.file
+  let file =
+    !isDuplicating && req.file
+      ? normalizeUploadFile(
+          req.file,
+          req.payload.config.upload?.useTempFiles ? 'temporary' : 'external',
+        )
+      : undefined
 
   const uploadEdits = parseUploadEditsFromReqOrIncomingData({
     data,
@@ -151,15 +162,17 @@ export const generateFileData = async <T>({
         // File is stored locally
         const filePath = `${staticPath}/${filename}`
         const response = await getFileByPath(filePath)
-        file = response
+        file = response ? normalizeUploadFile(response) : undefined
         overwriteExistingFiles = true
       } else if (filename && url) {
         // File is remote
-        file = await getExternalFile({
-          data: fileSourceData as unknown as FileData,
-          req,
-          uploadConfig: collectionConfig.upload,
-        })
+        file = normalizeUploadFile(
+          await getExternalFile({
+            data: fileSourceData as unknown as FileData,
+            req,
+            uploadConfig: collectionConfig.upload,
+          }),
+        )
         overwriteExistingFiles = !externalUploadSource
       }
     } catch (err: unknown) {
@@ -193,12 +206,43 @@ export const generateFileData = async <T>({
     (isProcessableImage(file.mimetype) || isProcessableImage(detectedFileType.mime))
 
   if (shouldUseDetectedFileType && detectedFileType.mime !== file.mimetype) {
-    const isRequestFile = file === req.file
     file = { ...file, mimetype: detectedFileType.mime }
+  }
 
-    // Later steps change `file` in place, and storage adapters read `req.file`.
-    if (isRequestFile) {
-      req.file = file
+  // A probe may reveal a MIME type that needs more processing than the declared type did.
+  if (
+    file.content.type === 'clientUpload' &&
+    getFileContentRequirement({
+      hasSizeEdits: Boolean(
+        uploadEdits?.crop || uploadEdits?.heightInPixels || uploadEdits?.widthInPixels,
+      ),
+      mimeType: file.mimetype,
+      uploadConfig: collectionConfig.upload,
+    }) === 'full'
+  ) {
+    file = normalizeUploadFile(
+      await getFileFromClientUpload({
+        file: {
+          clientUploadContext: file.clientUploadContext,
+          collectionSlug: collectionConfig.slug,
+          filename: file.name,
+          mimeType: file.mimetype,
+          size: file.size,
+        },
+        forceFullContent: true,
+        req,
+      }),
+    )
+    const materializedType = await checkFileRestrictions({
+      collection: collectionConfig,
+      file,
+      req,
+    })
+    if (
+      materializedType &&
+      (isProcessableImage(file.mimetype) || isProcessableImage(materializedType.mime))
+    ) {
+      file = { ...file, mimetype: materializedType.mime }
     }
   }
 
@@ -207,7 +251,7 @@ export const generateFileData = async <T>({
   }
 
   let newData = incomingFileData as T
-  const filesToSave: FileToSave[] = []
+  const filesToSave: FileContentToSave[] = []
   const fileData: Partial<FileData> = {}
   const fileIsAnimatedType = isAnimatedImage(file.mimetype)
   const cropData =
@@ -234,11 +278,7 @@ export const generateFileData = async <T>({
     }
 
     if (sharp && (fileIsAnimatedType || fileHasAdjustments)) {
-      if (file.tempFilePath) {
-        sharpFile = sharp(file.tempFilePath, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
-      } else {
-        sharpFile = sharp(file.data, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
-      }
+      sharpFile = sharp(getFileInput(file), sharpOptions).rotate() // Auto-rotate based on EXIF data.
 
       if (fileHasAdjustments) {
         if (resizeOptions) {
@@ -337,13 +377,13 @@ export const generateFileData = async <T>({
           .toBuffer({ resolveWithObject: true })
 
         filesToSave.push({
-          buffer: resizedAfterCrop.data,
+          content: { buffer: resizedAfterCrop.data, type: 'buffer' },
           path: `${staticPath}/${fsSafeName}`,
         })
 
         fileForResize = {
           ...fileForResize,
-          data: resizedAfterCrop.data,
+          content: { buffer: resizedAfterCrop.data, type: 'buffer' },
           size: resizedAfterCrop.info.size,
         }
 
@@ -359,13 +399,13 @@ export const generateFileData = async <T>({
       } else {
         // If resizeOptions is not present, just save the cropped image
         filesToSave.push({
-          buffer: croppedImage,
+          content: { buffer: croppedImage, type: 'buffer' },
           path: `${staticPath}/${fsSafeName}`,
         })
 
         fileForResize = {
           ...file,
-          data: croppedImage,
+          content: { buffer: croppedImage, type: 'buffer' },
           size: info.size,
         }
 
@@ -378,68 +418,22 @@ export const generateFileData = async <T>({
         fileData.filesize = info.size
       }
 
-      delete file.clientUploadContext
+      file = await replaceFileContent(file, await getFileBuffer(fileForResize))
+      fileForResize = file
       delete fileForResize.clientUploadContext
-      if (file.tempFilePath) {
-        await fs.writeFile(file.tempFilePath, fileForResize.data) // write the edited bytes to the temp path
-      } else {
-        req.file = fileForResize
-      }
-    } else {
-      // For non-image files with useTempFiles, read the buffer from the temp file
-      // since file.data is empty when using temp files.
-      //
-      // When local storage is disabled, filesToSave is never written to disk (create/update
-      // skip uploadFiles for it), and an unmodified temp file's bytes on disk are already
-      // correct, so there's nothing to read into memory or write back out. Skipping this avoids
-      // buffering the entire file just to discard or rewrite it unchanged - a tempFilePath can
-      // point at a file far larger than server memory allows.
-      const skipTempFileBuffer =
-        disableLocalStorage && Boolean(file.tempFilePath) && !fileBuffer?.data
-
-      // When local storage is enabled and the temp file itself is unmodified, copy it straight
-      // to its destination instead of reading it into memory first - a tempFilePath can point at
-      // a file far larger than server memory allows.
-      const shouldCopyFromTempFile =
-        !fileBuffer?.data && Boolean(file.tempFilePath) && !disableLocalStorage
-
-      if (shouldCopyFromTempFile) {
-        filesToSave.push({
-          path: `${staticPath}/${fsSafeName}`,
-          sourcePath: file.tempFilePath!,
-        })
-      } else {
-        let bufferToSave: Buffer
-        if (fileBuffer?.data) {
-          bufferToSave = fileBuffer.data
-        } else if (file.tempFilePath) {
-          bufferToSave = skipTempFileBuffer ? Buffer.alloc(0) : await fs.readFile(file.tempFilePath)
-        } else {
-          bufferToSave = file.data
-        }
-
-        if (!skipTempFileBuffer) {
-          filesToSave.push({
-            buffer: bufferToSave,
-            path: `${staticPath}/${fsSafeName}`,
-          })
-
-          // If using temp files and the image is being resized, write the file to the temp path
-          if (fileBuffer?.data || bufferToSave.length > 0) {
-            if (file.tempFilePath) {
-              await fs.writeFile(file.tempFilePath, fileBuffer?.data || bufferToSave) // write fileBuffer to the temp path
-            } else {
-              // Assign the _possibly modified_ file to the request object
-              req.file = {
-                ...file,
-                data: fileBuffer?.data || bufferToSave,
-                size: fileBuffer?.info.size,
-              }
-            }
-          }
-        }
-      }
+    } else if (fileBuffer?.data) {
+      file = await replaceFileContent(file, fileBuffer.data)
+      fileForResize = file
+      filesToSave.push({
+        content: getFileContent(file),
+        path: `${staticPath}/${fsSafeName}`,
+      })
+    } else if (!disableLocalStorage) {
+      // Unmodified temp files can be copied without materializing all their bytes.
+      filesToSave.push({ content: getFileContent(file), path: `${staticPath}/${fsSafeName}` })
     }
+
+    req.file = toLegacyUploadFile(file, req.file)
 
     if (fileSupportsResize && (Array.isArray(imageSizes) || focalPointEnabled !== false)) {
       req.payloadUploadSizes = {}

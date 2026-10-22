@@ -1,6 +1,8 @@
 import type { FetchAPIFileUploadOptions } from '../../config/types.js'
 import type { FileShape } from './index.js'
 
+import { bindLegacyFileContent } from '../fileContent.js'
+
 import {
   checkAndMakeDir,
   debugLog,
@@ -56,25 +58,30 @@ export const fileFactory: FileFactory = (options, fileUploadOptions) => {
   // if (!fileUploadOptions.useTempFiles && !options.buffer.length) return;
 
   // Create and return file object.
-  return {
-    name: options.name,
-    data: options.buffer,
-    encoding: options.encoding,
-    md5: options.hash,
-    mimetype: options.mimetype,
-    mv: (filePath: string, callback) => {
-      // Define a proper move function.
-      const moveFunc = fileUploadOptions.useTempFiles
-        ? moveFromTemp(filePath, options, fileUploadOptions)
-        : moveFromBuffer(filePath, options, fileUploadOptions)
-      // Create a folder for a file.
-      checkAndMakeDir(fileUploadOptions, filePath)
-      // If callback is passed in, use the callback API, otherwise return a promise.
-      const defaultReject = () => undefined
-      return isFunc(callback) ? moveFunc(callback, defaultReject) : new Promise(moveFunc)
+  return bindLegacyFileContent(
+    {
+      name: options.name,
+      data: options.buffer,
+      encoding: options.encoding,
+      md5: options.hash,
+      mimetype: options.mimetype,
+      mv: (filePath: string, callback) => {
+        // Define a proper move function.
+        const moveFunc = fileUploadOptions.useTempFiles
+          ? moveFromTemp(filePath, options, fileUploadOptions)
+          : moveFromBuffer(filePath, options, fileUploadOptions)
+        // Create a folder for a file.
+        checkAndMakeDir(fileUploadOptions, filePath)
+        // If callback is passed in, use the callback API, otherwise return a promise.
+        const defaultReject = () => undefined
+        return isFunc(callback) ? moveFunc(callback, defaultReject) : new Promise(moveFunc)
+      },
+      size: options.size,
+      tempFilePath: options.tempFilePath,
+      truncated: options.truncated,
     },
-    size: options.size,
-    tempFilePath: options.tempFilePath,
-    truncated: options.truncated,
-  }
+    options.tempFilePath
+      ? { ownership: 'temporary', path: options.tempFilePath, type: 'file' }
+      : { buffer: options.buffer, type: 'buffer' },
+  )
 }

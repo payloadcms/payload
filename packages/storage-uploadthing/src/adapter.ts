@@ -8,6 +8,8 @@ import type { UTApi } from 'uploadthing/server'
 
 import type { ACL } from './index.js'
 
+import { getFileContent } from 'payload/internal'
+
 import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
@@ -51,7 +53,7 @@ export function createUploadthingAdapter({
     handleUpload: async ({ clientUploadContext, data, file }) => {
       const result = await uploadFile({
         acl,
-        buffer: file.buffer,
+        content: getFileContent(file),
         clientUploadContext,
         data,
         filename: file.filename,

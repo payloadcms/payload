@@ -7,6 +7,8 @@ import type {
 
 import type { SignedDownloadsConfig } from './getFile.js'
 
+import { getFileContent } from 'payload/internal'
+
 import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
@@ -57,11 +59,10 @@ export function createS3Adapter({
       await uploadFile({
         acl,
         bucket,
-        buffer: file.buffer,
+        content: getFileContent(file),
         client: getStorageClient(),
         mimeType: file.mimeType,
         storageFilePath,
-        tempFilePath: file.tempFilePath,
       })
 
       return data

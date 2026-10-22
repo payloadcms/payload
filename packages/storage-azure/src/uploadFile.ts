@@ -1,41 +1,36 @@
 import type { ContainerClient } from '@azure/storage-blob'
+import type { FileContent } from 'payload/internal'
 
 import { AbortController } from '@azure/abort-controller'
-import fs from 'fs'
-import { Readable } from 'stream'
+import { getFileBuffer, getFileStream } from 'payload/internal'
 
 interface UploadArgs {
-  buffer: Buffer
+  content: FileContent
   client: ContainerClient
   mimeType: string
   storageFilePath: string
-  tempFilePath?: string
 }
 
 const multipartThreshold = 1024 * 1024 * 50 // 50MB
 
 export async function uploadFile({
-  buffer,
+  content,
   client,
   mimeType,
   storageFilePath,
-  tempFilePath,
 }: UploadArgs): Promise<void> {
   const blockBlobClient = client.getBlockBlobClient(storageFilePath)
 
-  // when there are no temp files, or the upload is less than the threshold size, do not stream files
-  if (!tempFilePath && buffer.length > 0 && buffer.length < multipartThreshold) {
+  if (content.type === 'buffer' && content.buffer.length < multipartThreshold) {
+    const buffer = await getFileBuffer(content)
+
     await blockBlobClient.upload(buffer, buffer.byteLength, {
       blobHTTPHeaders: { blobContentType: mimeType },
     })
     return
   }
 
-  const fileBufferOrStream: Readable = tempFilePath
-    ? fs.createReadStream(tempFilePath)
-    : Readable.from(buffer)
-
-  await blockBlobClient.uploadStream(fileBufferOrStream, 4 * 1024 * 1024, 4, {
+  await blockBlobClient.uploadStream(await getFileStream(content), 4 * 1024 * 1024, 4, {
     abortSignal: AbortController.timeout(30 * 60 * 1000),
     blobHTTPHeaders: { blobContentType: mimeType },
   })

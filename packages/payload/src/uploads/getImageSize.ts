@@ -1,11 +1,13 @@
 import type { SharpDependency } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { ProbedImageSize } from './types.js'
+import type { UploadFile } from './uploadFile.js'
 
 import { probeImageSize, probeImageSizeFromPath } from './probeImageSize.js'
+import { getFileContent, getFileInput } from './fileContent.js'
 
 type Args = {
-  file: PayloadRequest['file']
+  file: PayloadRequest['file'] | UploadFile
   /**
    * The configured `sharp` instance, when available. Preferred for reading
    * dimensions because it covers every format sharp can process. Falls back to
@@ -15,12 +17,18 @@ type Args = {
 }
 
 export async function getImageSize({ file, sharp }: Args): Promise<ProbedImageSize> {
-  // `tempFilePath` may be an empty string when the file is held in memory
-  const tempFilePath = file?.tempFilePath || undefined
+  const content = getFileContent(file!)
+
+  if (content.type === 'clientUpload') {
+    if (!content.probe) {
+      throw new Error('Image dimensions require a probe or materialized client upload.')
+    }
+    return probeImageSize(content.probe)
+  }
 
   if (sharp) {
     try {
-      const { height, width } = await sharp(tempFilePath ?? file!.data).metadata()
+      const { height, width } = await sharp(getFileInput(content)).metadata()
       if (width && height) {
         return { height, width }
       }
@@ -30,9 +38,9 @@ export async function getImageSize({ file, sharp }: Args): Promise<ProbedImageSi
     }
   }
 
-  if (tempFilePath) {
-    return probeImageSizeFromPath(tempFilePath)
+  if (content.type === 'file') {
+    return probeImageSizeFromPath(content.path)
   }
 
-  return probeImageSize(file!.data)
+  return probeImageSize(content.buffer)
 }

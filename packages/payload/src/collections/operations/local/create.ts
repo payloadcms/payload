@@ -26,6 +26,8 @@ import {
   type TypedLocale,
 } from '../../../index.js'
 import { getFileByPath } from '../../../uploads/getFileByPath.js'
+import { withUploadFileScope } from '../../../uploads/uploadFileLifecycle.js'
+import { normalizeUploadFile, toLegacyUploadFile } from '../../../uploads/uploadFile.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { createOperation } from '../create.js'
 
@@ -219,21 +221,26 @@ export async function createLocal<
   const req = await createLocalReq(options as CreateLocalReqOptions, payload)
 
   req.file = file ?? (await getFileByPath(filePath!))
+  if (req.file) {
+    req.file = toLegacyUploadFile(normalizeUploadFile(req.file), req.file)
+  }
 
-  return createOperation<TSlug, TSelect>({
-    collection,
-    data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
-    depth,
-    disableTransaction,
-    disableVerificationEmail,
-    draft,
-    duplicateFromID,
-    overrideAccess,
-    overwriteExistingFiles,
-    populate,
-    publishAllLocales,
-    req,
-    select,
-    showHiddenFields,
-  })
+  return withUploadFileScope(req, () =>
+    createOperation<TSlug, TSelect>({
+      collection,
+      data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
+      depth,
+      disableTransaction,
+      disableVerificationEmail,
+      draft,
+      duplicateFromID,
+      overrideAccess,
+      overwriteExistingFiles,
+      populate,
+      publishAllLocales,
+      req,
+      select,
+      showHiddenFields,
+    }),
+  )
 }

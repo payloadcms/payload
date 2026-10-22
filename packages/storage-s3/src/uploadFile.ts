@@ -1,16 +1,16 @@
 import type * as AWS from '@aws-sdk/client-s3'
+import type { FileContent } from 'payload/internal'
 
 import { Upload } from '@aws-sdk/lib-storage'
-import fs from 'fs'
+import { getFileBuffer, getFileStream } from 'payload/internal'
 
 interface UploadArgs {
   acl?: 'private' | 'public-read'
   bucket: string
-  buffer: Buffer
+  content: FileContent
   client: AWS.S3
   mimeType: string
   storageFilePath: string
-  tempFilePath?: string
 }
 
 const multipartThreshold = 1024 * 1024 * 50 // 50MB
@@ -18,18 +18,15 @@ const multipartThreshold = 1024 * 1024 * 50 // 50MB
 export async function uploadFile({
   acl,
   bucket,
-  buffer,
+  content,
   client,
   mimeType,
   storageFilePath,
-  tempFilePath,
 }: UploadArgs): Promise<void> {
-  const fileBufferOrStream = tempFilePath ? fs.createReadStream(tempFilePath) : buffer
-
-  if (buffer.length > 0 && buffer.length < multipartThreshold) {
+  if (content.type === 'buffer' && content.buffer.length < multipartThreshold) {
     await client.putObject({
       ACL: acl,
-      Body: fileBufferOrStream,
+      Body: await getFileBuffer(content),
       Bucket: bucket,
       ContentType: mimeType,
       Key: storageFilePath,
@@ -42,7 +39,7 @@ export async function uploadFile({
     client,
     params: {
       ACL: acl,
-      Body: fileBufferOrStream,
+      Body: await getFileStream(content),
       Bucket: bucket,
       ContentType: mimeType,
       Key: storageFilePath,

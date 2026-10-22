@@ -6,6 +6,8 @@ import type {
 
 import type { R2Bucket } from './types.js'
 
+import { getFileContent } from 'payload/internal'
+
 import { deleteFile } from './deleteFile.js'
 import { getFile } from './getFile.js'
 import { uploadFile } from './uploadFile.js'
@@ -35,10 +37,9 @@ export function createR2Adapter({
     handleUpload: ({ file, storageFilePath }) =>
       uploadFile({
         bucket,
-        buffer: file.buffer,
+        content: getFileContent(file),
         mimeType: file.mimeType,
         storageFilePath,
-        tempFilePath: file.tempFilePath,
       }),
 
     staticHandler: (req, { doc, headers, params: { clientUploadContext, filename } }) =>

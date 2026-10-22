@@ -7,9 +7,12 @@ import type { SanitizedCollectionConfig } from '../../collections/config/types.j
 import type { SharpDependency } from '../../config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { WithMetadata } from '../optionallyAppendMetadata.js'
-import type { FileSize, FileSizes, FileToSave, FocalPoint, ProbedImageSize } from '../types.js'
+import type { FileSize, FileSizes, FocalPoint, ProbedImageSize } from '../types.js'
+import type { FileContentToSave } from '../fileContent.js'
+import type { UploadFile } from '../uploadFile.js'
 
 import { fileExists } from '../fileExists.js'
+import { getFileInput } from '../fileContent.js'
 import { isAnimatedImage } from '../isAnimatedImage.js'
 import { optionallyAppendMetadata } from '../optionallyAppendMetadata.js'
 import { createImageSize } from './createImageSize.js'
@@ -37,7 +40,7 @@ import { sanitizeResizeConfig } from './sanitizeResizeConfig.js'
 type ResizeArgs = {
   config: SanitizedCollectionConfig
   dimensions: ProbedImageSize
-  file: PayloadRequest['file']
+  file: PayloadRequest['file'] | UploadFile
   focalPoint?: FocalPoint
   mimeType: string
   req: PayloadRequest
@@ -50,7 +53,7 @@ type ResizeArgs = {
 /** Result from resizing and transforming the requested image sizes */
 type ImageSizesResult = {
   sizeData: FileSizes
-  sizesToSave: FileToSave[]
+  sizesToSave: FileContentToSave[]
 }
 
 export async function createImageSizes({
@@ -82,10 +85,7 @@ export async function createImageSizes({
     sharpOptions.animated = true
   }
 
-  const sharpBase: Sharp | undefined = sharp(
-    file!.tempFilePath || file!.data,
-    sharpOptions,
-  ).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
+  const sharpBase: Sharp | undefined = sharp(getFileInput(file!), sharpOptions).rotate() // Auto-rotate based on EXIF data.
   const originalImageMeta = await sharpBase.metadata()
 
   let adjustedDimensions = { ...dimensions }
@@ -106,7 +106,7 @@ export async function createImageSizes({
   }
 
   const sizes = {} as Record<string, FileSize>
-  const imageSizeFiles: FileToSave[] = []
+  const imageSizeFiles: FileContentToSave[] = []
 
   await Promise.all(
     imageSizes.map(async (imageResizeConfig): Promise<void> => {
@@ -287,7 +287,7 @@ export async function createImageSizes({
       })
 
       imageSizeFiles.push({
-        buffer: bufferData,
+        content: { buffer: bufferData, type: 'buffer' },
         path: imagePath,
       })
     }),
