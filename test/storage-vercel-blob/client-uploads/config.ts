@@ -12,6 +12,7 @@ import { MediaWithPrefix } from '../collections/MediaWithPrefix.js'
 import { Users } from '../collections/Users.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix, resizedMediaSlug } from '../shared.js'
 import { MediaContainer } from './collections/MediaContainer.js'
+import { ResizedMedia } from './collections/ResizedMedia.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -20,11 +21,6 @@ const LegacyMedia: CollectionConfig = {
   slug: legacyMediaSlug,
   fields: [],
   upload: { allowRestrictedFileTypes: true },
-}
-const ResizedMedia: CollectionConfig = {
-  slug: resizedMediaSlug,
-  fields: [],
-  upload: { resizeOptions: { height: 10, width: 10 } },
 }
 
 dotenv.config({

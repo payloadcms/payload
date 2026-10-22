@@ -26,6 +26,8 @@ let restClient: NextRESTClient
 let httpServer: Server
 let handleUploadUrl: string
 
+const createdResizedMediaIDs: (number | string)[] = []
+
 const serverHandlerPath = '/vercel-blob-client-upload-route'
 
 const issueClientUpload = async ({
@@ -91,6 +93,11 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
   })
 
   afterEach(async () => {
+    for (const id of createdResizedMediaIDs) {
+      await payload.delete({ id, collection: resizedMediaSlug, overrideAccess: true })
+    }
+    createdResizedMediaIDs.length = 0
+
     const { blobs } = await list()
     if (blobs.length > 0) {
       await del(blobs.map((b) => b.url))
@@ -161,13 +168,14 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
     expect(response.status).toBe(201)
 
     const { doc } = await response.json()
+
+    createdResizedMediaIDs.push(doc.id)
+
     const { blobs } = await list()
     const storedMain = blobs.find(({ pathname }) => pathname.endsWith(`/${doc.filename}`))
 
     expect(doc.width).toBe(10)
     expect(storedMain?.size).toBe(doc.filesize)
-
-    await payload.delete({ id: doc.id, collection: resizedMediaSlug, overrideAccess: true })
   })
 
   it("should reject upload when 'x-disallow-access' header is set", async () => {
