@@ -428,6 +428,7 @@ The stack starts at main. Each layer targets the preceding branch so reviewers s
 | 38 | [#18972](https://github.com/payloadcms/payload/pull/18972) | Ignore stale Lexical link-drawer initialization; production race and keyboard/state regressions |
 | 39 | [#18973](https://github.com/payloadcms/payload/pull/18973) | First M4 slice: migration-gated working-save persistence, native snapshots, guarded hooks and retention roots |
 | 40 | [#18974](https://github.com/payloadcms/payload/pull/18974) | Selected update/restore/bulk/global originals and named working writes, independently verified on three databases |
+| 41 | [#18975](https://github.com/payloadcms/payload/pull/18975) | Navigate accessibility tests through configured list columns; real production regression and independent criterion checks |
 
 Historical implementation state as of 2026-10-21 (superseded by the revised M3 signoff below):
 
@@ -564,3 +565,9 @@ The implementation owner and independent reviewer each pass the 43-case selected
 The preceding stack's accessibility job reported ten terminal failures because its post-navigation helper required the Title column, while the configured list still exposed the seeded post through another column. Actual production UI configuration and reload reproduced the failure. The helper now identifies the seeded row by its accessible selection checkbox and follows its own collection edit link. The canonical native-checkbox test covers visible and hidden Title, retaining name, focus, Space/state assertions and restoring the original columns.
 
 Owner and independent reviewer each pass all 80 affected production criterion tests, including the ten terminal cases, and both configured-column variants. Final source hashes are independently verified. Assessment covers WCAG 2.2 4.1.2 and 2.1.1 with focus checks; no product markup/style, full manual assistive-technology or AA conformance claim is made. The cause of the persisted CI preferences and the separate column-toggle retry remain unproven. This is a test helper correction, not completion of any branch-head milestone.
+
+### Numeric-zero update prerequisite
+
+Public update dispatch and by-ID validation treated numeric ID zero as missing. Native SQL ID resolution/upsert and Mongo filtering also lost zero, allowing a nominal update response without updating the intended row. A dedicated regression creates neighbor 1 before record 0, performs the genuine by-ID update, verifies permission arguments and both persisted records, and checks ordinary bulk/missing-selector behavior. A Drizzle relationship-filter case resolves row zero.
+
+Owner and independent reviewer each pass four SQLite and four PostgreSQL cases, plus three MongoDB cases with one intentional Drizzle-only skip. Six frozen files pass package reference typechecks, targeted formatting/lint and whitespace checks; existing lint warnings remain. Verification reads disable unrelated fixture virtual response joins; the actual public update stays genuine. This prerequisite permits direct ID-zero updates in the pending M4 caller-transaction proof; it does not complete public branch read routing.

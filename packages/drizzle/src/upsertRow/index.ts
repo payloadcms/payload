@@ -237,7 +237,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         (hasLocalizedData || !rowKeys.every((key) => key === 'updatedAt' || key === 'createdAt'))
 
       if (hasMainRowData) {
-        if (id) {
+        if (id || id === 0) {
           rowToInsert.row.id = id
           ;[insertedRow] = await adapter.insert({
             db,

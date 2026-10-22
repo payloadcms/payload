@@ -210,7 +210,7 @@ export const updateByIDOperation = async <
       unpublishAllLocales: unpublishAllLocalesArg,
     } = args
 
-    if (!id) {
+    if (!id && id !== 0) {
       throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST)
     }
 

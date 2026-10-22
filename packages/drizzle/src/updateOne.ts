@@ -38,7 +38,7 @@ export const updateOne: UpdateOne = async function updateOne(
 
   const db = getPrimaryDb(this, await getTransaction(this, req))
 
-  if (!idToUpdate) {
+  if (!idToUpdate && idToUpdate !== 0) {
     const { joins, selectFields, where } = buildQuery({
       adapter: this,
       fields: collection.flattenedFields,
@@ -100,7 +100,7 @@ export const updateOne: UpdateOne = async function updateOne(
       where,
     })
 
-    if (selectDistinctResult?.[0]?.id) {
+    if (selectDistinctResult?.[0]?.id || selectDistinctResult?.[0]?.id === 0) {
       idToUpdate = selectDistinctResult?.[0]?.id
       // If id wasn't passed but `where` without any joins, retrieve it with findFirst
     } else if (whereArg && !joins.length) {
@@ -117,7 +117,7 @@ export const updateOne: UpdateOne = async function updateOne(
     }
   }
 
-  if (!idToUpdate && !options.upsert) {
+  if (!idToUpdate && idToUpdate !== 0 && !options.upsert) {
     // TODO: In 4.0, if returning === false, we should differentiate between:
     // - No document found to update
     // - Document found, but returning === false

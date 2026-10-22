@@ -25,7 +25,7 @@ export const updateOne: UpdateOne = async function updateOne(
   },
 ) {
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
-  const where = id ? { id: { equals: id } } : whereArg
+  const where = id || id === 0 ? { id: { equals: id } } : whereArg
   const fields = collectionConfig.fields
 
   const query = await buildQuery({

@@ -275,7 +275,7 @@ async function updateLocal<
     where,
   }
 
-  if (options.id) {
+  if (options.id || options.id === 0) {
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     return updateByIDOperation<TSlug, TSelect>(args)
   }
