@@ -8,6 +8,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { formatAdminURL, instructionsCollectionSlug } from 'payload/shared'
 
+import { toggleColumn } from '../__helpers/e2e/columns/toggleColumn.js'
 import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
 import {
@@ -238,7 +239,14 @@ export async function gotoFirstPost({
   serverURL: string
 }) {
   await gotoPostsList({ page, postsURL })
+  await toggleColumn(page, {
+    columnLabel: 'Title',
+    columnName: 'title',
+    shouldCloseListColumns: true,
+    targetState: 'on',
+  })
   const postLink = page.locator('tbody tr .cell-title a', { hasText: 'Example post one' })
+
   await expect(postLink).toHaveAttribute('href')
   const href = await postLink.getAttribute('href')
 
