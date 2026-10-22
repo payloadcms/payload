@@ -1,0 +1,4 @@
+interface:
+  display_name: "Payload Dev Isolated"
+  short_description: "Create, list, and clean up isolated dev environments"
+  default_prompt: "Use $payload-dev-isolated to configure this worktree with its own database and port, seed the hierarchy suite, and start its server."
