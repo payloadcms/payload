@@ -299,6 +299,42 @@ const relsData = {
 }
 
 describe('transform', () => {
+  it.each([
+    { nativeID: 0, expectedID: 0 },
+    { nativeID: 12, expectedID: 12 },
+    { nativeID: 1.5, expectedID: 1.5 },
+    { nativeID: '0', expectedID: '0' },
+    { nativeID: 'custom-text', expectedID: 'custom-text' },
+    {
+      nativeID: new Types.ObjectId('507f1f77bcf86cd799439011'),
+      expectedID: '507f1f77bcf86cd799439011',
+    },
+    { nativeID: 0n, expectedID: 0 },
+    { nativeID: 12n, expectedID: 12 },
+    { nativeID: null, expectedID: 'fallback' },
+    { nativeID: undefined, expectedID: 'fallback' },
+  ])('should preserve native identity $nativeID on read', ({ nativeID, expectedID }) => {
+    const data = { _id: nativeID, id: 'fallback' }
+    const adapter = {
+      payload: { config },
+      useBigIntForNumberIDs: true,
+    } as MongooseAdapter
+
+    transform({ adapter, data, fields: [], operation: 'read' })
+
+    expect(data.id).toBe(expectedID)
+    expect(data).not.toHaveProperty('_id')
+  })
+
+  it('should retain an existing zero identity when the native key is absent', () => {
+    const data = { id: 0 }
+    const adapter = { payload: { config } } as MongooseAdapter
+
+    transform({ adapter, data, fields: [], operation: 'read' })
+
+    expect(data.id).toBe(0)
+  })
+
   it('should sanitize relationships', () => {
     const data = {
       ...relsData,
