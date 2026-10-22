@@ -464,6 +464,25 @@ test('should arm from the point where the pointer turned towards the submenu', a
   expect(menu.toggleLog()).toEqual(['Theme open'])
 })
 
+test('should keep the submenu when the pointer rests near the trigger edge, then heads into it', async () => {
+  const menu = await renderUserMenu()
+
+  await hoverSubmenu({ menu, name: 'Theme' })
+
+  const themeRect = menu.rectOf('Theme')
+  const rest = { x: themeRect.right - 10, y: themeRect.bottom - 2 }
+  const target = { x: menu.menuRectOf('Theme').left + 24, y: menu.centerOf('Theme Three').y }
+
+  await movePointer({ points: [rest] })
+  await settle()
+  await settle()
+  await movePointer({ points: pointsBetween({ from: rest, step: 4, to: target }) })
+  await settle()
+
+  expect(menu.changes).toEqual(['Theme true'])
+  expect(menu.toggleLog()).toEqual(['Theme open'])
+})
+
 test('should hand over while the pointer turns back over a sibling', async () => {
   const menu = await renderUserMenu()
   const start = await hoverSubmenu({ menu, name: 'Theme' })
@@ -755,6 +774,26 @@ test('should keep a keyboard-opened submenu and its keys working when the mouse 
   await userEvent.keyboard('{Escape}')
   await expect.element(menu.item('Theme')).toHaveFocus()
   expect(menu.toggleLog()).toEqual(['Theme open', 'Theme close'])
+})
+
+test('should keep a keyboard-opened submenu when the mouse leaves the menu', async () => {
+  const menu = await renderUserMenu()
+
+  await openThemeWithKeyboard({ menu })
+
+  const logOut = menu.centerOf('Log out')
+
+  await movePointer({
+    points: pointsBetween({
+      from: logOut,
+      step: 4,
+      to: { x: logOut.x, y: menu.menuRectOf('Account').bottom + 40 },
+    }),
+  })
+  await settle()
+
+  await expect.element(menu.item('Theme One')).toHaveFocus()
+  expect(menu.toggleLog()).toEqual(['Theme open'])
 })
 
 test('should move focus into the root menu when the mouse takes over a focused submenu', async () => {

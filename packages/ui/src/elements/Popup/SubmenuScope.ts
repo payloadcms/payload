@@ -152,7 +152,7 @@ export const createSubmenuScope = (): SubmenuScope => {
   }
 
   const handlePointerMove = (event: PointerEvent) => {
-    if (event.pointerType === 'touch' || !tracking) {
+    if (event.pointerType === 'touch' || !tracking || event.timeStamp === lastPointerTime) {
       return
     }
 
@@ -207,8 +207,11 @@ export const createSubmenuScope = (): SubmenuScope => {
 
     const target = isHeadingBack ? triggerRect : submenuRect
 
+    const recent = current.samples.filter(({ time }) => pointer.time - time <= SAMPLE_WINDOW_MS)
+    const rest = recent.length === 0 ? current.samples.at(-1) : undefined
+
     current.samples = [
-      ...current.samples.filter(({ time }) => pointer.time - time <= SAMPLE_WINDOW_MS),
+      ...(rest ? [{ ...rest, time: pointer.time - getStopDelay({ gaps: pointerGaps }) }] : recent),
       pointer,
     ]
     setArmed({
@@ -230,7 +233,7 @@ export const createSubmenuScope = (): SubmenuScope => {
   }
 
   const handlePointerLeave = (event: PointerEvent) => {
-    if (event.pointerType !== 'touch' && !tracking?.isArmed) {
+    if (event.pointerType !== 'touch' && tracking && !tracking.isArmed) {
       closeActiveHoverBranch()
     }
   }
@@ -239,6 +242,9 @@ export const createSubmenuScope = (): SubmenuScope => {
     if (event.pointerType === 'touch' || !(event.target instanceof Element)) {
       return
     }
+
+    // pointerover fires before its own pointermove, which is then skipped by timeStamp
+    handlePointerMove(event)
 
     const armedNode = tracking?.isArmed ? nodes.get(tracking.id) : null
 
