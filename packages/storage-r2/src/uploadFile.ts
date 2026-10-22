@@ -18,9 +18,13 @@ export async function uploadFile({
   tempFilePath,
 }: UploadFileArgs): Promise<void> {
   // Read more: https://github.com/cloudflare/workers-sdk/issues/6047#issuecomment-2691217843
-  const bufferBody = isMiniflare ? new Blob([buffer]) : buffer
-  // Imported only when needed, since `fs` is not always available in Workers.
-  const body = tempFilePath ? await (await import('fs')).openAsBlob(tempFilePath) : bufferBody
+  let body = isMiniflare ? new Blob([buffer]) : buffer
+
+  if (tempFilePath) {
+    // Workers require filesystem compatibility to use temp files, so keep this import conditional.
+    const { openAsBlob } = await import('fs')
+    body = await openAsBlob(tempFilePath)
+  }
 
   await bucket.put(storageFilePath, body, {
     httpMetadata: { contentType: mimeType },
