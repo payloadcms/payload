@@ -510,10 +510,15 @@ export const hrTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Dodaj datoteku',
     addFiles: 'Dodaj datoteke',
+    aspectRatio: 'Omjer stranica',
+    aspectRatioCustom: 'Prilagođeno',
+    aspectRatioFreeform: 'Slobodno',
+    aspectRatioOriginal: 'Izvorna slika',
     bulkUpload: 'Masovno dodavanje',
     crop: 'Izreži',
     cropToolDescription:
       'Povucite kutove odabranog područja, nacrtajte novo područje ili prilagodite vrijednosti ispod.',
+    customAspectRatio: 'Prilagođeni omjer',
     download: 'Preuzmi',
     dragAndDrop: 'Povucite i ispustite datoteku',
     dragAndDropHere: 'ili povucite i ispustite datoteku ovdje',
@@ -526,6 +531,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Povucite središnju točku izravno na pregledu ili prilagodite vrijednosti ispod.',
     height: 'Visina',
+    invalidAspectRatio: 'Unesite omjer kao širina:visina, na primjer 16:9.',
     lessInfo: 'Manje informacija',
     moreInfo: 'Više informacija',
     noFile: 'Nema datoteke',

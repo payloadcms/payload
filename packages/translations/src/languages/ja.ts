@@ -511,10 +511,15 @@ export const jaTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'ファイルを追加',
     addFiles: 'ファイルを追加する',
+    aspectRatio: 'アスペクト比',
+    aspectRatioCustom: 'カスタム',
+    aspectRatioFreeform: 'フリー',
+    aspectRatioOriginal: '元の画像',
     bulkUpload: '一括アップロード',
     crop: 'クロップ',
     cropToolDescription:
       '選択したエリアのコーナーをドラッグしたり、新たなエリアを描画したり、下記の値を調整してください。',
+    customAspectRatio: 'カスタム比率',
     download: 'ダウンロード',
     dragAndDrop: 'ファイルをドラッグ & ドロップする',
     dragAndDropHere: 'または、このエリアにファイルをドラッグ & ドロップ',
@@ -526,6 +531,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     focalPoint: '焦点',
     focalPointDescription: 'プレビュー上で焦点を直接ドラッグするか、下の値を調整してください。',
     height: '高さ',
+    invalidAspectRatio: '幅:高さの形式で比率を入力してください（例: 16:9）。',
     lessInfo: '詳細を隠す',
     moreInfo: '詳細を表示',
     noFile: 'ファイルなし',
