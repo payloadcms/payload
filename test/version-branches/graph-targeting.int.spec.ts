@@ -14,6 +14,8 @@ import {
 } from '../../packages/payload/src/versions/branches/storage/branchHeadStore.js'
 import { initializeBranchVersion } from '../../packages/payload/src/versions/branches/storage/branchVersionStore.js'
 import { test } from '../__helpers/int/vitest.js'
+import { mongooseList } from '../__helpers/shared/isMongoose.js'
+import { nativeBranchDatabaseOptions } from './adapterCapabilities.js'
 import { fractionalIDsSlug, wideIDsSlug } from './slugs.js'
 
 const branchID = 'targeted-graph'
@@ -21,7 +23,9 @@ const branchID = 'targeted-graph'
 test.suite('Native Mongo bounded graph targeting', { config: './config.ts' }, () => {
   test.options(
     'should preserve zero and fractional targets through the existing primary key index',
-    { db: 'mongo' },
+    {
+      db: (adapter) => mongooseList.includes(adapter) && nativeBranchDatabaseOptions.db(adapter),
+    },
     async ({ payload }) => {
       await seed({ payload, collection: fractionalIDsSlug, ids: [0, 1.5, 2.5] })
       const req = await createPayloadRequest({ payload })
@@ -67,7 +71,9 @@ test.suite('Native Mongo bounded graph targeting', { config: './config.ts' }, ()
 
   test.options(
     'should preserve numeric text and wide Unicode targets and disable exact hashing under collation',
-    { db: 'mongo' },
+    {
+      db: (adapter) => mongooseList.includes(adapter) && nativeBranchDatabaseOptions.db(adapter),
+    },
     async ({ payload }) => {
       const wideID = '界💡'.repeat(440)
       await seed({ payload, collection: wideIDsSlug, ids: ['root', '1', wideID] })

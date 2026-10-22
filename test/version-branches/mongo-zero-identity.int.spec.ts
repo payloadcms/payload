@@ -10,12 +10,16 @@ import {
 } from '../../packages/payload/src/versions/branches/storage/branchHeadStore.js'
 import { initializeBranchVersion } from '../../packages/payload/src/versions/branches/storage/branchVersionStore.js'
 import { test } from '../__helpers/int/vitest.js'
+import { mongooseList } from '../__helpers/shared/isMongoose.js'
+import { nativeBranchDatabaseOptions } from './adapterCapabilities.js'
 import { fractionalIDsSlug } from './slugs.js'
 
 test.suite('Mongo numeric zero identity', { config: './config.ts' }, () => {
   test.options(
     'should preserve zero through public create, reads, version parents and branch bootstrap',
-    { db: 'mongo' },
+    {
+      db: (adapter) => mongooseList.includes(adapter) && nativeBranchDatabaseOptions.db(adapter),
+    },
     async ({ payload }) => {
       const created = await payload.create({
         collection: fractionalIDsSlug,

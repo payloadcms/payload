@@ -131,7 +131,7 @@ For Drizzle, prototype effective row relations using typed head joins and schema
 
 Joins and relationship traversal must use the same effective relation, selected branch, locale, access context, and transaction snapshot. Cache keys include branch identity, locale/fallback, generation, and authorization context. Batched population cannot mix branches merely because logical IDs match.
 
-Derived query projections are permitted only as rebuildable caches; heads and versions remain authoritative. Their updates must be transactionally consistent or guarded by generation so stale cache data never determines permission or publication. If effective queries do not meet the performance gate, optimize this relation or add validated projections before building the full Admin. Do not claim the existing `queryDrafts` implementation already solves sparse locale overlays.
+Derived query projections are permitted only as rebuildable caches; heads and versions remain authoritative. Their updates must be transactionally consistent or guarded by generation so stale cache data never determines permission or publication. Verify that effective queries retain suitable native indexes and plans before building the full Admin; defer broader timing optimization while functionality is implemented. Do not claim the existing `queryDrafts` implementation already solves sparse locale overlays.
 
 Required adapters: MongoDB, Postgres, SQLite, Vercel Postgres, and D1 SQLite. Verify wrapper capabilities and runtime limits separately. Third party adapters get an explicit capability contract and a clear unsupported error for named branches; never silently select main. Preserve their legacy drafts path during the compatibility period if the old adapter contract is available.
 
@@ -423,8 +423,9 @@ The stack starts at main. Each layer targets the preceding branch so reviewers s
 | 34 | [#18965](https://github.com/payloadcms/payload/pull/18965) | Mongo-only bounded graph native-PK targeting with typed identity, collation, snapshot and zero-ID proofs |
 
 | 35 | [#18966](https://github.com/payloadcms/payload/pull/18966) | Honor local example scaffolding and isolate unit tests from live npm metadata without changing timeouts |
+| 36 | [#18969](https://github.com/payloadcms/payload/pull/18969) | Independent M3 correctness/index signoff and functionality-first sequencing; timing work deferred |
 
-Current implementation state as of 2026-10-21:
+Historical implementation state as of 2026-10-21 (superseded by the revised M3 signoff below):
 
 - M0 now has executable live/working, localized publish/withdraw, autosave, restore, validation, global, Local/REST/GraphQL/SDK read parity, access, and pending-job baselines. Genuine published-package SQLite exports cover stable 3.91.0 scalar statuses and current 4.0.0-beta.3 localized statuses. Independent phase review and full existing-suite evidence are recorded below before signoff; adapter-specific source upgrade rehearsals remain M9.
 - M1 includes the scope compiler/content composition and guarded batch transition domain described below. Independent final review passed; runtime operation integration retains its M4/M5 gates.
