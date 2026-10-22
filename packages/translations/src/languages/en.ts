@@ -206,6 +206,7 @@ export const enTranslations = {
     browseByFolder: 'Browse by Folder',
     byFolder: 'By Folder',
     deleteFolder: 'Delete Folder',
+    folder: 'Folder',
     folderName: 'Folder Name',
     folders: 'Folders',
     folderTypeDescription:
@@ -265,7 +266,6 @@ export const enTranslations = {
     changesNotSaved:
       'Your changes have not been saved. If you leave now, you will lose your changes.',
     clear: 'Clear',
-    clearAll: 'Clear All',
     close: 'Close',
     collapse: 'Collapse',
     collections: 'Collections',
@@ -312,6 +312,7 @@ export const enTranslations = {
     deleting: 'Deleting...',
     depth: 'Depth',
     descending: 'Descending',
+    deselectAll: 'Deselect all',
     deselectAllRows: 'Deselect all rows',
     document: 'Document',
     documentIsTrashed: 'This {{label}} is trashed and is read-only.',
@@ -437,6 +438,7 @@ export const enTranslations = {
     showAllLabel: 'Show all {{label}}',
     sorryNotFound: 'Sorry—there is nothing to correspond with your request.',
     sort: 'Sort',
+    sortBy: 'Sort by',
     sortByLabelDirection: 'Sort by {{label}} {{direction}}',
     stayOnThisPage: 'Stay on this page',
     submissionSuccessful: 'Submission Successful.',
