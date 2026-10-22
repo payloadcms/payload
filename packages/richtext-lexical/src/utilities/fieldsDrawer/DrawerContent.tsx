@@ -75,7 +75,9 @@ export const DrawerContent: React.FC<
         signal: controller.signal,
       })
 
-      setInitialState(state)
+      if (!controller.signal.aborted) {
+        setInitialState(state)
+      }
     }
 
     void awaitInitialState()

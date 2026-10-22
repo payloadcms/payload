@@ -424,6 +424,7 @@ The stack starts at main. Each layer targets the preceding branch so reviewers s
 
 | 35 | [#18966](https://github.com/payloadcms/payload/pull/18966) | Honor local example scaffolding and isolate unit tests from live npm metadata without changing timeouts |
 | 36 | [#18969](https://github.com/payloadcms/payload/pull/18969) | Independent M3 correctness/index signoff and functionality-first sequencing; timing work deferred |
+| 37 | [#18970](https://github.com/payloadcms/payload/pull/18970) | Restrict native Mongo graph/zero integration cases to supported transaction adapters |
 
 Historical implementation state as of 2026-10-21 (superseded by the revised M3 signoff below):
 

@@ -6249,6 +6249,34 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should expose the initialized link checkbox and allow keyboard state changes', async () => {
+      await gotoCreatePost({ page, postsURL })
+      const editor = page
+        .locator('[data-field-path="content"] [data-lexical-editor="true"]')
+        .first()
+
+      await editor.fill('Link text')
+      await editor.press('ControlOrMeta+a')
+      await page.getByRole('button', { exact: true, name: 'Link' }).first().click()
+      const drawer = page.getByRole('dialog', { name: 'Edit Link' })
+      const checkbox = drawer.getByRole('checkbox', { name: 'Open in new tab' })
+
+      await expect(checkbox).toBeVisible()
+      await expect(checkbox).not.toBeChecked()
+      await checkbox.focus()
+      await expect(checkbox).toBeFocused()
+      await test.info().attach('initialized-link-drawer', {
+        body: await page.screenshot(),
+        contentType: 'image/png',
+      })
+      await checkbox.press('Space')
+      await expect(checkbox).toBeChecked()
+      await checkbox.press('Space')
+      await expect(checkbox).not.toBeChecked()
+      await drawer.getByRole('button', { exact: true, name: 'Close' }).click()
+      await expect(drawer).toBeHidden()
+    })
+
     for (const { isInDrawer, shouldToggleTwice } of [
       { isInDrawer: false, shouldToggleTwice: false },
       { isInDrawer: true, shouldToggleTwice: false },
