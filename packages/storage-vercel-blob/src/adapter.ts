@@ -54,9 +54,6 @@ export function createVercelBlobAdapter({
       file: { buffer, filename, mimeType, tempFilePath },
       storageFilePath,
     }) => {
-      // Image sizes share `data` with the main file, so each upload renames only its own entry.
-      const sizes = data.sizes as Record<string, { filename?: string }> | undefined
-      const imageSize = Object.values(sizes || {}).find((size) => size?.filename === filename)
       const result = await uploadFile({
         access,
         addRandomSuffix,
@@ -67,6 +64,11 @@ export function createVercelBlobAdapter({
         tempFilePath,
         token,
       })
+
+      // Image sizes share `data` with the main file, so each upload renames only its own entry.
+      // Find the entry after the upload, so that sizes with the same filename get different entries.
+      const sizes = data.sizes as Record<string, { filename?: string }> | undefined
+      const imageSize = Object.values(sizes || {}).find((size) => size?.filename === filename)
 
       if (result.filename && imageSize) {
         imageSize.filename = result.filename

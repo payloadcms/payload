@@ -1,3 +1,4 @@
+import { put } from '@vercel/blob'
 import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('@vercel/blob', async (importOriginal) => ({
@@ -33,5 +34,34 @@ describe('handleUpload with addRandomSuffix', () => {
     } as never)
 
     expect({ filename: data.filename, square: data.sizes.square.filename }).toEqual(expected)
+  })
+
+  it('should give image sizes with the same dimensions their own suffixed filenames', async () => {
+    vi.mocked(put)
+      .mockResolvedValueOnce({ pathname: 'image-400x400-a.png' } as never)
+      .mockResolvedValueOnce({ pathname: 'image-400x400-b.png' } as never)
+
+    const data = {
+      filename: 'image.png',
+      sizes: { card: { filename: 'image-400x400.png' }, square: { filename: 'image-400x400.png' } },
+    }
+    const uploadImageSize = () =>
+      adapter.handleUpload({
+        data,
+        file: {
+          buffer: Buffer.from('file'),
+          filename: 'image-400x400.png',
+          filesize: 4,
+          mimeType: 'image/png',
+        },
+        storageFilePath: 'image-400x400.png',
+      } as never)
+
+    await Promise.all([uploadImageSize(), uploadImageSize()])
+
+    expect(data.sizes).toEqual({
+      card: { filename: 'image-400x400-a.png' },
+      square: { filename: 'image-400x400-b.png' },
+    })
   })
 })
