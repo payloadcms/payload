@@ -43,6 +43,10 @@ export const createDraftGitHubRelease = async ({
     )
   }
 
+  if (existing) {
+    console.log(`📝 Found existing draft release for ${tag}; updating it.`)
+  }
+
   // https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28
   const url = existing
     ? `https://api.github.com/repos/${REPO}/releases/${existing.id}`
@@ -87,8 +91,7 @@ export const createDraftGitHubRelease = async ({
 // instead. The list is newest-first by created_at and a draft we would update was
 // created recently, so it sits on the first page — we scan only the newest page to
 // stay O(1) as the release history grows. A match buried deeper would require ~100
-// releases created after the draft (implausible for a re-run); we warn if that
-// near-impossible case is even reachable.
+// releases created after the draft, which is implausible for a re-run.
 const findReleaseByTag = async ({
   fetchImpl,
   tag,
@@ -112,13 +115,5 @@ const findReleaseByTag = async ({
   }
 
   const releases = (await res.json()) as GitHubRelease[]
-  const match = releases.find((release) => release.tag_name === tag)
-
-  if (!match && releases.length === PER_PAGE) {
-    console.warn(
-      `⚠️  ${tag} not found in the ${PER_PAGE} most recent releases; treating it as new. A draft buried deeper in the history would not be updated.`,
-    )
-  }
-
-  return match
+  return releases.find((release) => release.tag_name === tag)
 }
