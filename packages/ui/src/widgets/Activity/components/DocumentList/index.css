@@ -7,15 +7,8 @@
   }
 
   .card-grid.activity-widget__items {
-    display: grid;
-    gap: var(--spacer-3);
     min-height: 0;
     padding: 0;
-    margin: 0;
-    list-style: none;
-  }
-
-  .card-grid.activity-widget__items--grid {
     grid-column: 1 / -1;
     grid-template-columns: subgrid;
   }

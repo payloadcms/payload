@@ -726,7 +726,7 @@ describe('Relationship Field', () => {
     await openCreateDocDrawer({ fieldSelector: '#field-relationshipHasMany', page })
     const documentDrawer = page.locator('[id^=doc-drawer_relation-one_1_]')
     await expect(documentDrawer).toBeVisible()
-    const drawerField = documentDrawer.locator('#field-name')
+    const drawerField = documentDrawer.locator('input[name="name"]')
     await drawerField.fill('Newly created document')
     const saveButton = documentDrawer.locator('#action-save')
     await saveButton.click()
@@ -756,7 +756,7 @@ describe('Relationship Field', () => {
       selector: '#field-relationship button.relationship--single-value__drawer-toggler',
     })
 
-    const field = page.locator('#field-name')
+    const field = page.locator('.doc-drawer').getByRole('textbox', { name: 'Name', exact: true })
     await field.fill('Updated')
 
     await saveButton.nth(1).click()

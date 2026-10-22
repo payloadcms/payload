@@ -297,6 +297,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     and: 'かつ',
     anotherUser: '別のユーザー',
     anotherUserTakenOver: '別のユーザーがこのドキュメントの編集を引き継ぎました。',
+    apiResponse: 'API レスポンス',
     applyChanges: '変更を適用する',
     ascending: '昇順',
     auto: '自動',
@@ -488,6 +489,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     reindexingAll: 'すべての{{collections}}を再インデックスしています。',
     reloadDocument: 'ドキュメントを再読み込みする',
     remove: '削除',
+    removeFilter: 'フィルターを削除',
     rename: '名前を変更する',
     replaceRow: '行を置換',
     requiredFields: '* が付いた項目は必須です。',
@@ -578,6 +580,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     yes: 'はい',
   },
   hierarchy: {
+    folderLocation: 'フォルダーの場所',
     goTo: '「{{name}}」へ移動してください。',
     itemsMovedTo: '{{title}}は{{destination}}に移動しました',
     itemsMovedToRoot: '{{title}}がルートに移動されました',

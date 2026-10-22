@@ -293,6 +293,7 @@ export const slTranslations: DefaultTranslationsObject = {
     and: 'In',
     anotherUser: 'Drug uporabnik',
     anotherUserTakenOver: 'Drug uporabnik je prevzel urejanje tega dokumenta.',
+    apiResponse: 'Odgovor API',
     applyChanges: 'Uporabi spremembe',
     ascending: 'Naraščajoče',
     auto: 'Samodejno',
@@ -485,6 +486,7 @@ export const slTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Ponovno indeksiranje vseh {{collections}}.',
     reloadDocument: 'Osveži dokument',
     remove: 'Odstrani',
+    removeFilter: 'Odstrani filter',
     rename: 'Preimenuj',
     replaceRow: 'Zamenjaj vrstico',
     requiredFields: 'Polja, označena z *, so obvezna.',
@@ -577,6 +579,7 @@ export const slTranslations: DefaultTranslationsObject = {
     yes: 'Da',
   },
   hierarchy: {
+    folderLocation: 'Lokacija mape',
     goTo: 'Pojdite na "{{name}}"',
     itemsMovedTo: '{{title}} preseljeno v {{destination}}',
     itemsMovedToRoot: '{{title}} premaknjeno v koren',

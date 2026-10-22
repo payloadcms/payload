@@ -294,6 +294,7 @@ export const enTranslations = {
     and: 'And',
     anotherUser: 'Another user',
     anotherUserTakenOver: 'Another user has taken over editing this document.',
+    apiResponse: 'API response',
     applyChanges: 'Apply Changes',
     ascending: 'Ascending',
     auto: 'Auto',
@@ -487,6 +488,7 @@ export const enTranslations = {
     reindexingAll: 'Reindexing all {{collections}}.',
     reloadDocument: 'Reload document',
     remove: 'Remove',
+    removeFilter: 'Remove filter',
     rename: 'Rename',
     replaceRow: 'Replace Row',
     requiredFields: 'Fields marked with * are required.',
@@ -578,6 +580,7 @@ export const enTranslations = {
     yes: 'Yes',
   },
   hierarchy: {
+    folderLocation: 'Folder location',
     goTo: 'Go to "{{name}}"',
     itemsMovedTo: '{{title}} moved to {{destination}}',
     itemsMovedToRoot: '{{title}} moved to root',

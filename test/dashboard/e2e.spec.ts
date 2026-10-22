@@ -926,7 +926,7 @@ describe('Dashboard', () => {
     await widget.getByRole('button', { name: 'Pinned', exact: true }).click()
     await expect(widget.locator('.activity-widget__item--add-pin')).toHaveCount(1)
     await expect(addPin).toHaveAttribute('aria-haspopup', 'dialog')
-    await expect(widget.locator('.activity-empty-state__icon--pinned')).toBeVisible()
+    await expect(widget.locator('.activity-empty-state__icon .icon--pin')).toBeVisible()
     const [emptyBox, gridBox, buttonBox] = await Promise.all([
       widget.locator('.activity-empty-state').boundingBox(),
       widget.locator('.activity-widget__items').boundingBox(),
@@ -989,7 +989,7 @@ describe('Dashboard', () => {
         page,
         selectLocator: drawer.locator('.list-header__select-collection'),
       })
-      await expect(drawer.getByRole('heading')).toBeVisible()
+      await expect(drawer.getByRole('heading', { level: 1 })).toBeVisible()
       await expect(drawer.getByRole('button', { name: document.title, exact: true })).toHaveCount(0)
       await page.keyboard.press('Escape')
       await expect(drawer).toBeHidden()

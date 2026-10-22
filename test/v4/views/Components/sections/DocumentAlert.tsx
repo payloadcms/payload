@@ -18,6 +18,7 @@ export const DocumentAlertSection: React.FC<{ selectedComponent: string }> = ({
   const [lockedActive, setLockedActive] = useState(false)
   const [takeOverActive, setTakeOverActive] = useState(false)
   const [staleActive, setStaleActive] = useState(false)
+  const [lockedAt] = useState(() => Date.now() - 60000)
   const { closeModal, toggleModal } = useModal()
 
   return (
@@ -36,7 +37,7 @@ export const DocumentAlertSection: React.FC<{ selectedComponent: string }> = ({
           isActive={lockedActive}
           onReadOnly={() => setLockedActive(false)}
           onTakeOver={() => setLockedActive(false)}
-          updatedAt={Date.now() - 60000}
+          updatedAt={lockedAt}
           user={{
             id: '123',
             collection: 'users',
