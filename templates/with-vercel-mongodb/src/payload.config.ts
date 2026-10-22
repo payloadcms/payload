@@ -3,6 +3,7 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
+
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
@@ -26,6 +27,7 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.MONGODB_URL || '',
   }),
+  plugins: [],
   storage: [
     vercelBlobStorage({
       collections: {

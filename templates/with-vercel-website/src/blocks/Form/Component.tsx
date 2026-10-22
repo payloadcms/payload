@@ -6,7 +6,7 @@ import React, { useCallback, useState } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import RichText from '@/components/RichText'
 import { Button } from '@/components/ui/button'
-import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
 import { fields } from './fields'
 import { getClientSideURL } from '@/utilities/getURL'
@@ -16,7 +16,7 @@ export type FormBlockType = {
   blockType?: 'formBlock'
   enableIntro: boolean
   form: FormType
-  introContent?: DefaultTypedEditorState
+  introContent?: SerializedEditorState
 }
 
 export const FormBlock: React.FC<
