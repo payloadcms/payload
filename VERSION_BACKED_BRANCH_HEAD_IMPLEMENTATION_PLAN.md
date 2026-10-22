@@ -4,7 +4,7 @@ Written with AI
 
 Implement named content branches by extending Payload's versions and drafts engine. Versions store content; branch heads select versions; the ordinary collection and global tables remain the materialized representation used by existing live reads. Publishing is promotion into the published branch, initially `main`. A working branch does not contain a second independently publishable draft state.
 
-This is an implementation specification with ordered delivery milestones. Complete the correctness and performance gates before enabling the new engine. Migration covers existing versions and `versions.drafts` data, including pending publish jobs. Migration from PR #17878 is explicitly excluded because that implementation was never released.
+This is an implementation specification with ordered delivery milestones. Complete the correctness and index/query-plan gates before enabling the new engine. Migration covers existing versions and `versions.drafts` data, including pending publish jobs. Migration from PR #17878 is explicitly excluded because that implementation was never released.
 
 ## Scope and compatibility
 
@@ -310,7 +310,7 @@ Put criterion evidence in `test/a11y/WCAG.e2e.spec.ts`; use the existing axe hel
 | M0 Contract baseline        | Characterize existing create/update/read/restore/status/locale/autosave/schedule semantics and add upgrade fixtures    | Existing behavior recorded in executable tests; intentional changes named                              |
 | M1 Head domain              | Internal typed head states, immutable tokens, resolution, selection, base conflict rules, and pure transition planning | Focused tests for inheritance, withdrawal, locale isolation, stale tokens, and no mutation             |
 | M2 Adapter foundation       | Typed schema, head CAS, freeze/pin, identity visibility, and transaction capabilities in MongoDB and Drizzle           | Same adapter contract passes MongoDB/Postgres/SQLite; wrappers exercised separately                    |
-| M3 Effective queries        | Native effective content relations, access predicates, joins, count/sort/pagination/distinct and scope compilation     | Full query parity plus performance gate; no core unbounded shadow ID lists                             |
+| M3 Effective queries        | Native effective content relations, access predicates, joins, count/sort/pagination/distinct and scope compilation     | Full query parity plus native index/query-plan review; no core unbounded shadow ID lists               |
 | M4 Working writes           | Legacy normalization, create/update/autosave/restore, nested transaction composition, status projection                | Existing versions suites pass through head engine; draft writes leave main unchanged                   |
 | M5 Promotion and withdrawal | Arbitrary destination merge, scoped conflict checks, candidate validation, live materialization, source reconciliation | Drafts to staging to main plus locale subset and mixed shared structure integration tests              |
 | M6 Lifecycle and assets     | Branch catalog permissions, visibility, discard, Trash/delete, retention roots, uploads, repair                        | Cross branch isolation and no retained file/version loss under GC races                                |
@@ -318,7 +318,7 @@ Put criterion evidence in `test/a11y/WCAG.e2e.spec.ts`; use the existing axe hel
 | M8 Public API parity        | REST/GraphQL/SDK/CLI, types, validation errors, schema support boundaries                                              | Equivalent operation outcomes and negative access tests across interfaces                              |
 | M9 Migration                | Adapter migrations, source fixtures, resumability, verification report, cutover/rollback tooling                       | Supported released data upgrades without read/content/schedule loss                                    |
 | M10 Admin                   | Existing drafts flows plus named branch review, locale actions, scheduling and results                                 | Browser flow tests, accessibility evidence, translations, production bundling, Docker visual baselines |
-| M11 Release                 | Full adapter/plugin matrix, load tests, documentation, examples, upgrade rehearsal                                     | All release gates below met; operational limits documented                                             |
+| M11 Release                 | Full adapter/plugin matrix, index checks, documentation, examples, upgrade rehearsal                                   | All release gates below met; operational limits documented                                             |
 
 M0 and M1 start implementation. M2 and M3 establish whether the chosen representation can serve real queries. Do not build an Admin over a head engine with unproven database semantics. Develop migration fixtures early in M0 and migration logic alongside M2/M4; M9 is the complete cutover rehearsal, not the first migration work.
 
@@ -332,7 +332,7 @@ Add a dedicated head-engine integration suite plus regressions in existing versi
 
 Required concurrency/failure cases: first inherited write in caller transaction; two autosaves; autosave racing pin; source edited during merge; destination edited after preflight; shared structure changed under a locale; overlapping schedules; cancellation racing execution; commit acknowledgement lost; cleanup failed after commit; GC racing a new pin; duplicate worker execution; failed uniqueness reservation; and hooks altering candidate data.
 
-Performance fixtures include 10k and 100k logical documents, sparse and dense overrides, 2 and 10 locales, deeply nested blocks, high relationship fanout, 1 and 20 branches, and long version histories. Compare p50/p95, database calls, rows examined, memory, and write amplification against current published/draft reads. Published queries must retain their normal indexed path. Set a working-query p95 budget before M3 signoff; a suggested initial ceiling is 2x the equivalent current draft query on the same dataset. Any exception needs an explicit supported limit and benchmark, not silent fallback.
+Per the user’s 2026-10-22 direction, prioritize functionality and narrow performance review to proper indexes and native query plans. Verify identity/head/projection access paths, locale and relationship predicates, branch restrictions, and preservation of the ordinary published indexed path. Retain existing large-fixture plans and correctness evidence. The former 2x timing ceiling and complete 48-case benchmark matrix are superseded as milestone/release blockers; further timing, profiling, memory and load tuning are deferred until functionality is implemented. Historical timing failures remain failures and are not converted into passes by this scope change.
 
 Representative validation commands, narrowed by changed suites as work lands:
 
@@ -352,7 +352,7 @@ pnpm format:check
 
 Create the planned `test/version-branches` suite before using its commands. Run server/client boundary changes with `pnpm prepare-run-test-against-prod` followed by `pnpm dev:prod <suite>`. Generate/update visual baselines only with `pnpm test:visual:update` in the pinned Docker workflow. Run screen-reader verification on a configured supported machine.
 
-Release requires data migration comparison and interrupted retry tests; a working drafts/staging/main flow; per locale and all locale publish/withdraw/schedules; API access parity; upload retention; honest adapter transaction capabilities; query performance results; existing drafts regressions passing; and documented upgrade/rollback instructions. Every remaining limitation has an explicit behavior and test rather than an unspecified fallback.
+Release requires data migration comparison and interrupted retry tests; a working drafts/staging/main flow; per locale and all locale publish/withdraw/schedules; API access parity; upload retention; honest adapter transaction capabilities; native index/query-plan evidence; existing drafts regressions passing; and documented upgrade/rollback instructions. Every remaining limitation has an explicit behavior and test rather than an unspecified fallback.
 
 ## Implementation progress
 
@@ -361,7 +361,7 @@ Release requires data migration comparison and interrupted retry tests; a workin
 - [x] M0 Characterize the legacy contracts and create migration fixtures.
 - [x] M1 Implement and test the internal head domain and resolution rules.
 - [x] M2 Adapter foundation and native concurrency contracts.
-- [ ] M3 Effective queries and performance gate.
+- [x] M3 Effective queries and native index/query-plan review.
 - [ ] M4 Working writes and legacy operation integration.
 - [ ] M5 Promotion and withdrawal.
 - [ ] M6 Lifecycle, retention and assets.
@@ -375,7 +375,7 @@ M1 implementation in `packages/payload/src/versions/branches` now covers interna
 
 Initial verification on Node 24.15.0: 47 focused unit tests passed; targeted oxlint, oxfmt, and strict standalone TypeScript checking passed. Two regression cases for matching inherited content failed before the ownership fix and passed afterward. These tests exercise the domain without database IO; they do not establish adapter atomicity, runtime API integration, migration correctness, or rendered accessibility.
 
-Current work: resolve findings from M3 draft CI and native performance diagnostics, independently review each correction, and establish the measured performance gate. The final performance matrix remains outstanding. The internal engine does not enable the feature.
+Current work: M3 independent correctness and native index/query-plan review passed under the reduced gate below; implement M4 working writes. The internal engine does not enable the feature. Further timing optimization is deferred in favor of functional delivery.
 
 ### Draft review stack
 
@@ -421,6 +421,8 @@ The stack starts at main. Each layer targets the preceding branch so reviewers s
 | 33 | [#18964](https://github.com/payloadcms/payload/pull/18964) | Preserve genuine Mongo numeric-zero identities through serialization, version parent creation and branch bootstrap |
 
 | 34 | [#18965](https://github.com/payloadcms/payload/pull/18965) | Mongo-only bounded graph native-PK targeting with typed identity, collation, snapshot and zero-ID proofs |
+
+| 35 | [#18966](https://github.com/payloadcms/payload/pull/18966) | Honor local example scaffolding and isolate unit tests from live npm metadata without changing timeouts |
 
 Current implementation state as of 2026-10-21:
 
@@ -486,6 +488,8 @@ Independent final M2 review approved the source and documentation with no remain
 
 ### M3 effective query implementation in progress
 
+**Current gate — user direction, 2026-10-22:** prioritize functionality. M3 requires query correctness, access/locale/snapshot safety and proper native indexes/query plans. It no longer requires a 2x timing ceiling, fresh timed reruns or the 48-case matrix. Broader performance optimization is deferred until functionality is implemented, including in M4/M11. Independent final review of this revised gate passed; see M3_INDEX_FUNCTIONALITY_REVIEW.md. The following implementation/evidence narrative is historical where it calls for timed gates; those prerequisites are superseded, while failed measurements and functional follow-ups remain accurately retained.
+
 M3 remains unchecked pending corrective CI review, the measured performance gate and independent final phase review. The native correctness matrix below passed before additional custom-schema and benchmark diagnostic findings; corrective layers #18936–#18938 have independent source and focused native approval. Separate fresh implementation agents own schema/codec, MongoDB native queries, Drizzle native queries, atomic projection maintenance, existing-ID compatibility, the large-data benchmark and the raw graph snapshot boundary. No legacy operation has been switched to the new relation.
 
 The experimental query index uses hidden schema-derived collections with private fixed SHA-256 physical keys. Its actual typed logical document and row identities remain in native queryable columns; declared relationship values have private decoding metadata checked by re-encoding before results escape. Opaque JSON/editor content is unchanged. The index is rebuildable, and selected version revisions plus heads remain authoritative. Original hooks/access are never replaced by the hidden collection's access policy. The ordinary published read path does not consult these schemas.
@@ -527,3 +531,9 @@ A separate Mongo zero-identity prerequisite is independently approved. The nativ
 The Mongo graph-targeting correction is independently approved against eight frozen files. Only the graph collector's already-known, typed, bounded requested IDs produce native primary-key targets; Mongo revalidates registered ownership and preserves the original logical predicate, visibility, access, sorting and snapshot. Globals, ordinary collections, incompatible IDs and configured collation retain existing paths. Core preparation now checks the verified Mongo runtime name before any target validation or encoding, so SQL adapters do no unused target-ID hashing. Owner and independent reviewer each pass 58 focused/private-boundary cases and two genuine native graph cases, including physically targeted related ID0/fractional cycles, wide text and numeric-string IDs, and case-equivalent collation fallback. Five targeted native Mongo snapshot/caller/revocation cases also pass; the 31 earlier native query/guard passes remain retained. Core/Mongo typechecks, targeted lint, formatting and whitespace checks pass. Read-only candidate plans preserve complete ordered results while reducing 50/20/20-ID batches from 1,050/420/420 examined documents to 50/20/20. These are correctness/design proofs, not accepted performance results. Fresh committed-source three-adapter small diagnostics, the affected Mongo twenty-branch gate and all 48 final scenarios remain required; M3 remains unchecked.
 
 The new stack's remote unit job exposed two unrelated CLI scaffold issues, now independently resolved in a separate two-file part. Six project-creation cases timed out at five seconds and one example case at ninety seconds; the unchanged plugin test reproduced its timeout, with a sanitized observer showing a pending live npm metadata request. A strict deterministic npm fixture preserves the real resolver and filesystem work and exposed an unintended GitHub download after a successful local-example copy. The production change makes local-example/local-template/remote selection mutually exclusive. Owner and independent reviewer pass all eight creation and nine resolver tests with retries disabled and the original timeouts. CLI TypeScript, production-file lint, two-file formatting and whitespace checks pass. No timeout, dependency or production version-fetch behavior was changed. M3 performance coverage remains pending on the new committed head; all prior failed and passing reports remain preserved.
+
+### 2026-10-22 functionality-first sequencing
+
+The user reduced M3 benchmarking effort to checking proper indexes. Stop profiling and timing optimization; preserve existing benchmark reports unchanged. Review the existing PostgreSQL branch/locale root fence and native index probes, MongoDB encoded-primary-key targeting and SQLite query plans alongside the retained functional/access/snapshot proofs. Only concrete functional or index defects block M4. M4–M11 retain all original functional, migration, API, scheduling, asset, accessibility and review requirements. The old 2x and 48-case timing prerequisites in historical evidence above do not gate those phases.
+
+Independent revised M3 phase review approved the current query foundation at `eb8b6464087957fe472a0b460530ed1ef3dd48b9`, with no concrete functional or missing-index blocker. The reviewer verified twelve PostgreSQL and eight MongoDB source hashes, actual retained PostgreSQL/MongoDB/SQLite native plans, and real D1 compatibility evidence. See [M3_INDEX_FUNCTIONALITY_REVIEW.md](./M3_INDEX_FUNCTIONALITY_REVIEW.md) for the assessed boundaries. M3 is complete under the revised scope; public writes, merges, scheduling, migration and Admin remain later work. Current top-stack CI passes unit and PostgreSQL/SQLite/MongoDB/DocumentDB suites; CosmosDB/Firestore failures remain under separate investigation, so full CI is not claimed green.
