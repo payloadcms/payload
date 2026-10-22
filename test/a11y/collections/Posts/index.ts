@@ -39,6 +39,15 @@ export const PostsCollection: CollectionConfig = {
       },
     },
     {
+      name: 'showConditionalNote',
+      type: 'checkbox',
+    },
+    {
+      name: 'conditionalNote',
+      type: 'text',
+      admin: { condition: (_, siblingData) => Boolean(siblingData.showConditionalNote) },
+    },
+    {
       name: 'accessibilitySelect',
       type: 'select',
       defaultValue: 'one',
