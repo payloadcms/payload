@@ -117,7 +117,10 @@ const renderUserMenu = async ({
               popupType="menu"
               renderButton={({ active: _active, ...buttonProps }) =>
                 customTriggers.includes(label) ? (
-                  <div {...buttonProps}>{label}</div>
+                  <div {...buttonProps}>
+                    {label}
+                    <Icon />
+                  </div>
                 ) : (
                   <SubmenuTrigger buttonProps={{ active: _active, ...buttonProps }} label={label} />
                 )
@@ -861,6 +864,25 @@ test('should open a custom non-button trigger on hover and keep it on the way in
 
   expect(menu.item('Theme').element().tagName).toBe('DIV')
   expect(menu.toggleLog()).toEqual(['Theme open'])
+})
+
+test('should keep a clicked-closed custom trigger closed while the pointer crosses its children', async () => {
+  const menu = await renderUserMenu({ customTriggers: ['Theme'] })
+  const start = await hoverSubmenu({ menu, name: 'Theme' })
+  const icon = menu.item('Theme').element().querySelector('svg')!.getBoundingClientRect()
+  const iconCenter = { x: icon.left + icon.width / 2, y: icon.top + icon.height / 2 }
+
+  await movePointer({ points: [start], shouldClickAtEnd: true })
+  await settle()
+  await movePointer({
+    points: [
+      ...pointsBetween({ from: start, step: 2, to: iconCenter }),
+      ...pointsBetween({ from: iconCenter, step: 2, to: start }),
+    ],
+  })
+  await settle()
+
+  expect(menu.toggleLog()).toEqual(['Theme open', 'Theme close'])
 })
 
 test('should keep tracking the open submenu when the menus re-render', async () => {

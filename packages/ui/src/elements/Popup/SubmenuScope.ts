@@ -246,6 +246,12 @@ export const createSubmenuScope = (): SubmenuScope => {
     // pointerover fires before its own pointermove, which is then skipped by timeStamp
     handlePointerMove(event)
 
+    const item = event.target.closest(MENU_ITEM_SELECTOR)
+
+    if (item && event.relatedTarget instanceof Node && item.contains(event.relatedTarget)) {
+      return
+    }
+
     const armedNode = tracking?.isArmed ? nodes.get(tracking.id) : null
 
     if (
