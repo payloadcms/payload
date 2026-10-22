@@ -19,9 +19,9 @@ import { getReachableCollections, queryBranchContent } from '../queries/queryBra
 import { selectBranchQueryData } from '../queries/selectBranchQueryData.js'
 import { withBranchReadSnapshot } from '../queries/withBranchReadSnapshot.js'
 import { readBranchHeads } from '../storage/branchHeadStore.js'
+import { assertBranchReadBinding } from './assertBranchReadBinding.js'
 import { createBranchOriginalPolicy } from './branchOriginalPolicy.js'
 import {
-  assertBranchReadBinding,
   getBranchReadContext,
   getBranchReadIntent,
   registerBranchReadContext,

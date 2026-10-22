@@ -88,6 +88,58 @@ test.suite(
         ).docs,
       ).toEqual([])
     })
+    for (const collection of [scalarArticlesSlug, localizedStatusArticlesSlug]) {
+      test(`should correlate root policies through the native schema for ${collection}`, async ({
+        payload,
+      }) => {
+        await activateEmpty({ collection, payload })
+        const allowed = await payload.create({
+          collection,
+          data: { title: 'Allowed main', _status: 'published' },
+        })
+        const denied = await payload.create({
+          collection,
+          data: { title: 'Denied main', _status: 'published' },
+        })
+        const req = createSelectedBranchRequest({
+          branchID: 'staging',
+          req: await createPayloadRequest({ payload }),
+        })
+
+        await payload.update({
+          collection,
+          id: allowed.id,
+          data: { title: 'Allowed staging' },
+          req,
+        })
+        await payload.update({ collection, id: denied.id, data: { title: 'Denied staging' }, req })
+
+        const config = payload.collections[collection]!.config
+        const previous = config.access.read
+        let accessCalls = 0
+
+        config.access.read = () => {
+          accessCalls++
+          return { id: { equals: allowed.id } }
+        }
+        cleanups.push(() => {
+          config.access.read = previous
+        })
+
+        const selected = await payload.find({ collection, depth: 0, overrideAccess: false, req })
+        const ordinary = await payload.find({ collection, depth: 0, overrideAccess: false })
+
+        expect(selected.docs.map(({ id, title }) => ({ id, title }))).toEqual([
+          { id: allowed.id, title: 'Allowed staging' },
+        ])
+        expect(selected.totalDocs).toBe(1)
+        expect(ordinary.docs.map(({ id, title }) => ({ id, title }))).toEqual([
+          { id: allowed.id, title: 'Allowed main' },
+        ])
+        expect(ordinary.totalDocs).toBe(1)
+        expect(accessCalls).toBe(2)
+      })
+    }
     test('should hide actual named-only native anchors from ordinary reads and aggregates', async ({
       payload,
     }) => {

@@ -6,11 +6,12 @@ import type { BranchProjectionGuard } from './branchProjectionGuard.js'
 import type { BranchQueryStorage } from './registerBranchQueryStorage.js'
 
 import { executeAccess } from '../../../auth/executeAccess.js'
+import { assertBranchReadBinding } from '../operations/assertBranchReadBinding.js'
 import {
   consumeBranchOriginalPolicy,
   readBranchOriginalGrant,
 } from '../operations/branchOriginalPolicy.js'
-import { assertBranchReadBinding, getBranchReadContext } from '../operations/branchReadContext.js'
+import { getBranchReadContext } from '../operations/branchReadContext.js'
 import { collectOriginalReadTargets } from '../operations/collectOriginalReadTargets.js'
 import {
   decodeBranchProjectionDocument,

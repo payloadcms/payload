@@ -86,7 +86,8 @@ test.suite(
       ).rejects.toThrow('observations captured before document hooks')
       expect(calls).toBe(1)
       expect(
-        (await payload.findByID({ collection: scalarArticlesSlug, id: created.id })).title,
+        (await payload.findByID({ depth: 0, collection: scalarArticlesSlug, id: created.id }))
+          .title,
       ).toBe('Legacy original')
       expect(
         await payload.db.findOne({ collection: config.custom.branchStorage.cutover }),
@@ -164,7 +165,7 @@ test.suite(
         }
       }
       expect(
-        (await payload.findByID({ collection: scalarArticlesSlug, id: second.id })).title,
+        (await payload.findByID({ depth: 0, collection: scalarArticlesSlug, id: second.id })).title,
       ).toBe('Second original')
       expect(
         (await payload.db.find({ collection: config.custom.branchStorage.heads })).docs,
@@ -229,9 +230,11 @@ test.suite(
       })
       expect(resaved).toMatchObject({ shared: 'Main shared', title: 'Stage second' })
       expect(
-        await payload.findByID({ collection: articlesSlug, id: created.id, draft: true }),
+        await payload.findByID({ depth: 0, collection: articlesSlug, id: created.id, draft: true }),
       ).toMatchObject({ shared: 'Draft shared', title: 'Draft English' })
-      expect(await payload.findByID({ collection: articlesSlug, id: created.id })).toMatchObject({
+      expect(
+        await payload.findByID({ depth: 0, collection: articlesSlug, id: created.id }),
+      ).toMatchObject({
         shared: 'Main shared',
         title: 'Main English',
       })
@@ -473,7 +476,12 @@ test.suite(
 
       expect(result.title).toBe('Nouveau')
       expect(
-        await payload.findByID({ collection: articlesSlug, id: created.id, locale: 'en' }),
+        await payload.findByID({
+          depth: 0,
+          collection: articlesSlug,
+          id: created.id,
+          locale: 'en',
+        }),
       ).toMatchObject({ title: 'English' })
     })
 
@@ -537,10 +545,15 @@ test.suite(
       })
 
       expect(
-        await payload.findByID({ collection: scalarArticlesSlug, id: created.id }),
+        await payload.findByID({ depth: 0, collection: scalarArticlesSlug, id: created.id }),
       ).toMatchObject({ title: 'Main' })
       expect(
-        await payload.findByID({ collection: scalarArticlesSlug, id: created.id, draft: true }),
+        await payload.findByID({
+          depth: 0,
+          collection: scalarArticlesSlug,
+          id: created.id,
+          draft: true,
+        }),
       ).toMatchObject({ title: 'Working', _status: 'draft' })
     })
 
@@ -595,6 +608,7 @@ test.suite(
           collection: localizedStatusArticlesSlug,
           id: created.id,
           locale: 'en',
+          depth: 0,
         }),
       ).toMatchObject({ title: 'English only', _status: 'published' })
     })

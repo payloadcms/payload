@@ -1,5 +1,3 @@
-import { isDeepStrictEqual } from 'node:util'
-
 import type { Payload } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 import type { BranchHeadID } from '../types.js'
@@ -107,17 +105,5 @@ export const assertBranchReadOperationRequest = ({
     throw new Error(
       'A branch read operation cannot detach its registered request or entity binding.',
     )
-  }
-}
-
-export const assertBranchReadBinding = ({ req }: { req: PayloadRequest }): void => {
-  const binding = contexts.get(req)?.binding
-  if (
-    binding &&
-    (!isDeepStrictEqual(binding.user, req.user) ||
-      binding.locale !== req.locale ||
-      !isDeepStrictEqual(binding.fallbackLocale, req.fallbackLocale))
-  ) {
-    throw new Error('The branch read authorization or locale binding changed during the operation.')
   }
 }

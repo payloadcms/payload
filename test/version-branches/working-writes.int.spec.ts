@@ -63,7 +63,7 @@ test.suite(
       await expect(
         payload.create({ collection: scalarArticlesSlug, data: { title: 'Refused' }, draft: true }),
       ).rejects.toThrow('inactive or unsupported')
-      expect((await payload.find({ collection: scalarArticlesSlug })).docs).toHaveLength(0)
+      expect((await payload.db.find({ collection: scalarArticlesSlug })).docs).toHaveLength(0)
     })
 
     test('should refuse a cutover revoked by an application hook and roll back the write', async ({
@@ -161,7 +161,9 @@ test.suite(
         { ...created.sections![0], translation: { en: 'Translation' } },
       ])
       expect(main.docs).toHaveLength(0)
-      expect(await payload.findByID({ collection: articlesSlug, id: created.id })).toMatchObject({
+      expect(
+        await payload.findByID({ depth: 0, collection: articlesSlug, id: created.id }),
+      ).toMatchObject({
         id: created.id,
       })
     })
@@ -224,7 +226,7 @@ test.suite(
       expect(main.docs[0]).toMatchObject({ id: created.id, title: 'Live' })
       expect(working.docs[0]).toMatchObject({ id: created.id, title: 'Working' })
       expect(
-        await payload.findByID({ collection: scalarArticlesSlug, id: created.id }),
+        await payload.findByID({ depth: 0, collection: scalarArticlesSlug, id: created.id }),
       ).toMatchObject({ title: 'Live' })
       expect({ afterCount, beforeCount }).toEqual({ afterCount: 1, beforeCount: 1 })
     })

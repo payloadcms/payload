@@ -35,7 +35,8 @@ export const findProjection: Find = async function (this: DrizzleAdapter, args) 
   const context = (this as ProjectionQueryAdapter)[projectionQueryContext]
   const hasScopedLocales =
     this.name === 'postgres' && !!context && !!nativeLocales?.[branchProjectionLocaleKey]
-  const table = hasScopedLocales ? aliasedTable(nativeTable, tableName) : nativeTable
+  const hasAliasedRoot = this.name === 'postgres' && !!context
+  const table = hasAliasedRoot ? aliasedTable(nativeTable, tableName) : nativeTable
   let totalKey = '__payloadBranchReadTotal'
 
   while (config.flattenedFields.some((field) => field.name === totalKey)) {
@@ -48,7 +49,7 @@ export const findProjection: Find = async function (this: DrizzleAdapter, args) 
   const isPaginationEnabled = args.pagination !== false && limit !== 0
   const { joins, orderBy, where } = buildQuery({
     adapter: this,
-    aliasTable: hasScopedLocales ? table : undefined,
+    aliasTable: hasAliasedRoot ? table : undefined,
     fields: config.flattenedFields,
     locale: args.locale,
     sort: args.sort ?? config.defaultSort,

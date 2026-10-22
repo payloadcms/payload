@@ -430,6 +430,7 @@ The stack starts at main. Each layer targets the preceding branch so reviewers s
 | 40 | [#18974](https://github.com/payloadcms/payload/pull/18974) | Selected update/restore/bulk/global originals and named working writes, independently verified on three databases |
 | 41 | [#18975](https://github.com/payloadcms/payload/pull/18975) | Navigate accessibility tests through configured list columns; real production regression and independent criterion checks |
 | 42 | [#18978](https://github.com/payloadcms/payload/pull/18978) | Preserve numeric ID zero through genuine public updates and native SQL/Mongo row selection |
+| 43 | [#18979](https://github.com/payloadcms/payload/pull/18979) | Public collection reads, indexed native identity visibility, scoped access and cutover fences; independently verified |
 
 Historical implementation state as of 2026-10-21 (superseded by the revised M3 signoff below):
 
@@ -582,3 +583,11 @@ Drizzle compiles generated reverse linkage independently from user target WHERE/
 Owner and independent reviewer verification against 29 frozen files each passes 25 applicable SQLite and 25 PostgreSQL cases, each with one Mongo-only skip, all 26 Mongo cases under configured collation, 13 context units and core/Drizzle/Mongo typechecks, formatting/lint and whitespace checks. Independent review approves this bounded slice, with all 29 source hashes verified before and after execution. This is not activation or M4 completion: public globals, full population/loaders and the other M4 requirements remain gated.
 
 M9 must verify complete identity backfill and all encoded forward dependencies before activation. Activated receipts cannot revert to absence: retain durable authority/tombstones so absence fences cannot miss an activated-to-absent transition. Initial activation is an offline verified cutover with compatible processes, not rolling per-entity activation. Effective reads reject incomplete registered encoding dependencies before decoding; there is no silent native fallback or migration from unreleased PR17878 data.
+
+### Public-read CI compatibility correction
+
+The published collection-read layer exposed a browser import regression: shared request context pulled in Node's strict equality helper. Keep the same equality check in a server-only module and leave shared context free of that import. Custom-schema PostgreSQL also exposed schema-qualified outer columns reused inside aliased relational hydration; driving, count and hydration queries now share a canonical root alias while retaining genuine schemas, root access correlation and locale ordering fences.
+
+Earlier working-write/original tests now explicitly request depth zero when checking bodies, retaining the deliberate automatic-population refusal until B3. The unsupported-cutover test verifies the unchanged native row directly because public reads correctly reject that invalid receipt too. No access, population or cutover guard is relaxed.
+
+Owner and independent reviewer each pass 70 applicable cases on SQLite, PostgreSQL and custom-schema PostgreSQL (one Mongo-only skip each), all 71 Mongo cases, 13 unchanged browser component tests, 13 context units and actual packed production Admin/browser checks. Independent repaired-source SQLite, PostgreSQL, custom-schema and Mongo runs, component/context tests, typechecks and packed production checks pass. Review caught an import-order lint error that the owner had incorrectly reported as passing; the import-only correction now passes direct lint, formatting and whitespace checks, with all eight final hashes independently verified. Production preparation initially mixed packed and source request registries in independent native tests; restoring the documented generated workspace files and relinking source modules resolved all 18 affected SQLite failures without a source change. Failed logs are retained. No benchmark gate applies.
