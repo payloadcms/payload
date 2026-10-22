@@ -1,10 +1,10 @@
 'use client'
-import { Product, Variant } from '@/payload-types'
+import type { Product, Variant } from '@/payload-types'
 import { useSearchParams } from 'next/navigation'
 import { useMemo } from 'react'
 
 type Props = {
-  product: Product
+  product: Partial<Product> & Pick<Product, 'id'>
 }
 
 export const StockIndicator: React.FC<Props> = ({ product }) => {

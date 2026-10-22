@@ -1800,7 +1800,7 @@ describe('List View', () => {
     test('should sort with existing filters', async () => {
       await page.goto(postsUrl.list)
 
-      await toggleColumn(page, {
+      const { columnContainer } = await toggleColumn(page, {
         columnLabel: 'ID',
         columnName: 'id',
         shouldCloseListColumns: true,
@@ -1811,8 +1811,10 @@ describe('List View', () => {
       await page.locator('#heading-title button.sort-column__asc').click()
       await page.waitForURL(/sort=title/)
 
+      await openListColumns(page)
+
       const columnAfterSort = getColumnSelectorItem({
-        container: page.locator('.column-selector'),
+        container: columnContainer,
         label: 'ID',
       })
 
