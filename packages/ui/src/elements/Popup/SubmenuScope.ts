@@ -1,98 +1,291 @@
+import type { RefObject } from 'react'
+
+import type { Point, PointerSample } from './safetyTriangle.js'
+
+import {
+  followTurn,
+  getStopDelay,
+  isApproaching,
+  SAMPLE_WINDOW_MS,
+  STOP_DELAY_GAP_COUNT,
+} from './safetyTriangle.js'
+
 export type SubmenuNode = {
   closeBranch: () => void
+  contentRef: RefObject<HTMLElement | null>
+  getTrigger: () => HTMLElement | null
   id: string
+  isHoverSubmenu: boolean
   open: (viaKeyboard: boolean) => void
 }
 
 export type SubmenuScope = {
-  activeChildId: null | string
-  cancelPending: (id?: string) => void
+  attach: (args: { menu: HTMLElement }) => () => void
   closeActiveBranch: () => void
   register: (node: SubmenuNode) => () => void
   release: (id: string) => void
-  requestOpen: (args: { delay: boolean; id: string; viaKeyboard?: boolean }) => void
+  requestOpen: (args: { id: string; viaKeyboard?: boolean }) => void
 }
 
-const DEFAULT_HOVER_DELAY = 150
+export const MENU_ITEM_SELECTOR =
+  '[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]'
 
-export const createSubmenuScope = ({
-  hoverDelay = DEFAULT_HOVER_DELAY,
-}: { hoverDelay?: number } = {}): SubmenuScope => {
+type Tracking = {
+  id: string
+  isArmed: boolean
+  isHeadingBack: boolean
+  samples: PointerSample[]
+  stopTimer?: ReturnType<typeof setTimeout>
+  turn: null | PointerSample
+}
+
+export const createSubmenuScope = (): SubmenuScope => {
   const nodes = new Map<string, SubmenuNode>()
+  const pointerGaps: number[] = []
+  let menu: HTMLElement | null = null
   let activeChildId: null | string = null
-  let pendingChildId: null | string = null
-  let pendingTimer: ReturnType<typeof setTimeout> | undefined
+  let tracking: null | Tracking = null
+  let lastPointer: null | Point = null
+  let lastPointerTime: null | number = null
 
-  const cancelPending = (id?: string) => {
-    if (id && pendingChildId !== id) {
+  const stopTracking = () => {
+    if (!tracking) {
       return
     }
 
-    if (pendingTimer) {
-      clearTimeout(pendingTimer)
-    }
-    pendingTimer = undefined
-    pendingChildId = null
+    clearTimeout(tracking.stopTimer)
+    tracking = null
+    document.removeEventListener('pointermove', handlePointerMove, { capture: true })
+  }
+
+  const startTracking = ({ id }: { id: string }) => {
+    tracking = { id, isArmed: false, isHeadingBack: false, samples: [], turn: null }
+    document.addEventListener('pointermove', handlePointerMove, { capture: true, passive: true })
   }
 
   const activate = ({ id, viaKeyboard = false }: { id: string; viaKeyboard?: boolean }) => {
-    cancelPending()
     const node = nodes.get(id)
     if (!node) {
       return
     }
 
     if (activeChildId !== id) {
-      nodes.get(activeChildId ?? '')?.closeBranch()
+      closeActiveBranch()
       activeChildId = id
     }
     node.open(viaKeyboard)
+
+    if (node.isHoverSubmenu && !viaKeyboard && tracking?.id !== id) {
+      startTracking({ id })
+    }
+  }
+
+  const closeActiveBranch = () => {
+    const node = nodes.get(activeChildId ?? '')
+    const hasFocus = Boolean(node?.contentRef.current?.contains(document.activeElement))
+
+    node?.closeBranch()
+    activeChildId = null
+    stopTracking()
+
+    if (hasFocus) {
+      node?.getTrigger()?.focus()
+    }
+  }
+
+  const closeActiveHoverBranch = () => {
+    if (nodes.get(activeChildId ?? '')?.isHoverSubmenu) {
+      closeActiveBranch()
+    }
+  }
+
+  const handOver = ({ element }: { element: Element | null }) => {
+    if (!menu) {
+      return
+    }
+
+    if (!element || !menu.contains(element)) {
+      closeActiveHoverBranch()
+      return
+    }
+
+    if (nodes.get(activeChildId ?? '')?.contentRef.current?.contains(element)) {
+      return
+    }
+
+    const item = element.closest(MENU_ITEM_SELECTOR)
+    if (!item) {
+      return
+    }
+
+    const node = Array.from(nodes.values()).find(
+      ({ getTrigger, isHoverSubmenu }) => isHoverSubmenu && getTrigger()?.contains(item),
+    )
+
+    if (!node) {
+      closeActiveHoverBranch()
+    } else if (node.id !== activeChildId) {
+      activate({ id: node.id })
+    } else if (!tracking) {
+      startTracking({ id: node.id })
+    }
+  }
+
+  const setArmed = ({ isArmed }: { isArmed: boolean }) => {
+    if (!tracking || tracking.isArmed === isArmed) {
+      return
+    }
+
+    tracking.isArmed = isArmed
+
+    if (!isArmed && lastPointer) {
+      handOver({ element: document.elementFromPoint(lastPointer.x, lastPointer.y) })
+    }
+  }
+
+  const recordPointerGap = ({ time }: { time: number }) => {
+    if (lastPointerTime !== null) {
+      pointerGaps.push(time - lastPointerTime)
+      pointerGaps.splice(0, pointerGaps.length - STOP_DELAY_GAP_COUNT)
+    }
+    lastPointerTime = time
+  }
+
+  const handlePointerMove = (event: PointerEvent) => {
+    if (event.pointerType === 'touch' || !tracking) {
+      return
+    }
+
+    const current = tracking
+    const node = nodes.get(current.id)
+    const trigger = node?.getTrigger()
+    const submenu = node?.contentRef.current
+
+    if (!trigger || !submenu) {
+      stopTracking()
+      return
+    }
+
+    const pointer = { time: event.timeStamp, x: event.clientX, y: event.clientY }
+    const triggerRect = trigger.getBoundingClientRect()
+    const submenuRect = submenu.getBoundingClientRect()
+    const isInsideSubmenu = event.target instanceof Node && submenu.contains(event.target)
+    const isInsideTrigger = event.target instanceof Node && trigger.contains(event.target)
+    const { isUndecided, shouldSwitchTarget, turn } =
+      isInsideSubmenu || isInsideTrigger
+        ? { isUndecided: false, shouldSwitchTarget: false, turn: null }
+        : followTurn({
+            currentTarget: current.isHeadingBack ? triggerRect : submenuRect,
+            otherTarget: current.isHeadingBack ? submenuRect : triggerRect,
+            pointer,
+            previous: current.samples.at(-1),
+            turn: current.turn,
+          })
+    let isHeadingBack = current.isHeadingBack
+
+    if (isInsideSubmenu) {
+      isHeadingBack = true
+    } else if (isInsideTrigger) {
+      isHeadingBack = false
+    } else if (shouldSwitchTarget) {
+      isHeadingBack = !current.isHeadingBack
+    }
+
+    recordPointerGap({ time: pointer.time })
+    lastPointer = pointer
+    current.turn = turn
+
+    if (isHeadingBack !== current.isHeadingBack) {
+      current.isHeadingBack = isHeadingBack
+      current.samples = []
+      current.turn = null
+
+      if (shouldSwitchTarget) {
+        setArmed({ isArmed: true })
+      }
+    }
+
+    const target = isHeadingBack ? triggerRect : submenuRect
+
+    current.samples = [
+      ...current.samples.filter(({ time }) => pointer.time - time <= SAMPLE_WINDOW_MS),
+      pointer,
+    ]
+    setArmed({
+      isArmed:
+        isUndecided || current.samples.length < 2
+          ? current.isArmed
+          : isApproaching({ samples: current.samples, target }),
+    })
+
+    if (tracking !== current) {
+      return
+    }
+
+    clearTimeout(current.stopTimer)
+    current.stopTimer = setTimeout(
+      () => setArmed({ isArmed: false }),
+      getStopDelay({ gaps: pointerGaps }),
+    )
+  }
+
+  const handlePointerLeave = (event: PointerEvent) => {
+    if (event.pointerType !== 'touch' && !tracking?.isArmed) {
+      closeActiveHoverBranch()
+    }
+  }
+
+  const handlePointerOver = (event: PointerEvent) => {
+    if (event.pointerType === 'touch' || !(event.target instanceof Element)) {
+      return
+    }
+
+    const armedNode = tracking?.isArmed ? nodes.get(tracking.id) : null
+
+    if (
+      armedNode &&
+      !armedNode.getTrigger()?.contains(event.target) &&
+      !armedNode.contentRef.current?.contains(event.target)
+    ) {
+      return
+    }
+
+    handOver({ element: event.target })
   }
 
   return {
-    get activeChildId() {
-      return activeChildId
+    attach: ({ menu: element }) => {
+      menu = element
+      element.addEventListener('pointerover', handlePointerOver, { capture: true })
+      element.addEventListener('pointerleave', handlePointerLeave)
+
+      return () => {
+        element.removeEventListener('pointerover', handlePointerOver, { capture: true })
+        element.removeEventListener('pointerleave', handlePointerLeave)
+        menu = null
+      }
     },
-    cancelPending,
-    closeActiveBranch: () => {
-      cancelPending()
-      nodes.get(activeChildId ?? '')?.closeBranch()
-      activeChildId = null
-    },
+    closeActiveBranch,
     register: (node) => {
       nodes.set(node.id, node)
+
       return () => {
-        cancelPending(node.id)
+        nodes.delete(node.id)
+
         if (activeChildId === node.id) {
           activeChildId = null
+          stopTracking()
         }
-        nodes.delete(node.id)
       }
     },
     release: (id) => {
-      cancelPending(id)
       if (activeChildId === id) {
         activeChildId = null
       }
-    },
-    requestOpen: ({ id, delay, viaKeyboard = false }) => {
-      if (!delay) {
-        activate({ id, viaKeyboard })
-        return
+      if (tracking?.id === id) {
+        stopTracking()
       }
-
-      if (activeChildId === id) {
-        cancelPending()
-        return
-      }
-
-      cancelPending()
-      pendingChildId = id
-      pendingTimer = setTimeout(() => {
-        pendingTimer = undefined
-        pendingChildId = null
-        activate({ id, viaKeyboard })
-      }, hoverDelay)
     },
+    requestOpen: activate,
   }
 }

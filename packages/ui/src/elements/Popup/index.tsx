@@ -19,8 +19,7 @@ import { useModalFocus } from '../../providers/ModalFocus/index.js'
 import { ThemeProvider } from '../../providers/Theme/index.js'
 import './index.css'
 import { type PopupButtonRenderProps, PopupTrigger } from './PopupTrigger/index.js'
-import { createSubmenuScope, type SubmenuScope } from './SubmenuScope.js'
-import { useSubmenuPointerIntent } from './useSubmenuPointerIntent.js'
+import { createSubmenuScope, MENU_ITEM_SELECTOR, type SubmenuScope } from './SubmenuScope.js'
 
 const baseClass = 'popup'
 
@@ -51,7 +50,6 @@ const TABBABLE_SELECTOR = [
   .map((s) => `${s}:not([tabindex="-1"])`)
   .join(', ')
 
-const MENU_ITEM_SELECTOR = '[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]'
 const POPUP_CONTENT_SELECTOR = `.${baseClass}__content, .${baseClass}__hidden-content`
 
 const getMenuItems = (popup: HTMLElement): HTMLElement[] =>
@@ -204,17 +202,14 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
   const [active, setActiveInternal] = useState(initActive)
   const [isOnTop, setIsOnTop] = useState(verticalAlign === 'top')
+  const [gapSide, setGapSide] = useState<'inline-end' | 'inline-start' | null>(null)
 
   const setActive = useCallback(
     (isActive: boolean, viaKeyboard = false, coordinateParent = true) => {
       if (isActive) {
         openedViaKeyboardRef.current = viaKeyboard
         if (coordinateParent && isSubmenu) {
-          parentPopup.submenuScope.requestOpen({
-            id: contentId,
-            delay: false,
-            viaKeyboard,
-          })
+          parentPopup.submenuScope.requestOpen({ id: contentId, viaKeyboard })
           return
         }
         onToggleOpen?.(true)
@@ -253,33 +248,29 @@ export const Popup: React.FC<PopupProps> = (props) => {
     [closePopup, parentPopup],
   )
 
-  const openFromParent = useCallback(
-    (viaKeyboard: boolean) => setActive(true, viaKeyboard, false),
-    [setActive],
+  const closeBranch = useEffectEvent(() => closePopup({ restoreFocus: false }))
+  const openFromParent = useEffectEvent((viaKeyboard: boolean) =>
+    setActive(true, viaKeyboard, false),
   )
+  const parentScope = parentPopup?.submenuScope
 
   useEffect(() => {
-    if (!isSubmenu) {
+    if (!isSubmenu || !parentScope) {
       return
     }
 
-    return parentPopup.submenuScope.register({
+    return parentScope.register({
       id: contentId,
-      closeBranch: () => closePopup({ restoreFocus: false }),
+      closeBranch,
+      contentRef: popupRef,
+      getTrigger: () =>
+        triggerRef.current?.querySelector<HTMLElement>(
+          `[aria-controls="${CSS.escape(contentId)}"]`,
+        ) ?? null,
+      isHoverSubmenu: hoverSubmenu,
       open: openFromParent,
     })
-  }, [closePopup, contentId, isSubmenu, openFromParent, parentPopup])
-
-  const pointerIntent = useSubmenuPointerIntent({
-    contentRef: popupRef,
-    enabled: isSubmenu && hoverSubmenu,
-    onClose: () => setActive(false),
-    onOpen: () =>
-      parentPopup?.submenuScope.requestOpen({
-        id: contentId,
-        delay: Boolean(parentPopup.submenuScope.activeChildId),
-      }),
-  })
+  }, [contentId, hoverSubmenu, isSubmenu, parentScope])
 
   // /////////////////////////////////////
   // Position Calculation
@@ -356,7 +347,11 @@ export const Popup: React.FC<PopupProps> = (props) => {
       // Caret not used in side mode; set a neutral value
       caretLeft = popupRect.width / 2
 
+      const isRightOfAnchor = left + popupRect.width / 2 > anchorRect.left + anchorRect.width / 2
+      const isRtl = window.getComputedStyle(popup).direction === 'rtl'
+
       setIsOnTop(false)
+      setGapSide(isRightOfAnchor === isRtl ? 'inline-end' : 'inline-start')
     } else {
       // /////////////////////////////////////
       // Vertical Positioning
@@ -392,6 +387,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
       top = Math.max(offset, Math.min(top, maxTop))
 
       setIsOnTop(onTop)
+      setGapSide(null)
 
       // /////////////////////////////////////
       // Horizontal Positioning
@@ -687,6 +683,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     document.addEventListener('mousedown', handleClickOutside)
     popup.addEventListener('keydown', handleKeyDown)
     popup.addEventListener('click', handleActionableClick)
+    const detachSubmenuScope = submenuScope.attach({ menu: popup })
 
     return () => {
       cancelAnimationFrame(rafId)
@@ -695,11 +692,12 @@ export const Popup: React.FC<PopupProps> = (props) => {
       document.removeEventListener('mousedown', handleClickOutside)
       popup.removeEventListener('keydown', handleKeyDown)
       popup.removeEventListener('click', handleActionableClick)
+      detachSubmenuScope()
       if (popup.matches(':popover-open')) {
         popup.hidePopover()
       }
     }
-  }, [active])
+  }, [active, submenuScope])
 
   useEffect(() => {
     if (forceOpen !== undefined) {
@@ -738,18 +736,12 @@ export const Popup: React.FC<PopupProps> = (props) => {
           >
             {Trigger}
           </div>
-        ) : hoverSubmenu && isSubmenu ? (
-          <div {...pointerIntent} className={`${baseClass}__submenu-hover-watch`}>
-            {Trigger}
-          </div>
         ) : (
           Trigger
         )}
       </div>
 
       <PopupContext value={{ closePopupChain, popupRef, popupRole, submenuScope }}>
-        {/* The menu surface tracks pointer intent while preserving its menu semantics. */}
-        {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
         <div
           aria-label={popupAriaLabel}
           className={
@@ -762,6 +754,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
                     : isOnTop
                       ? `${baseClass}--v-top`
                       : `${baseClass}--v-bottom`,
+                  gapSide && `${baseClass}--gap-${gapSide}`,
                   portalClassName,
                 ]
                   .filter(Boolean)
@@ -773,8 +766,6 @@ export const Popup: React.FC<PopupProps> = (props) => {
           data-popup-id={id || undefined}
           data-theme={theme === 'auto' ? undefined : theme}
           id={contentId}
-          onMouseEnter={pointerIntent.onMouseEnter}
-          onMouseLeave={pointerIntent.onMouseLeave}
           popover="manual"
           ref={popupRef}
           role={popupRole}

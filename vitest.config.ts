@@ -4,6 +4,8 @@ import fs from 'fs'
 import { playwright } from '@vitest/browser-playwright'
 import { defaultExclude, defineConfig } from 'vitest/config'
 
+import { movePointer } from './test/__helpers/components/movePointer.js'
+
 // Use process.cwd() to be safe in both CJS and ESM contexts within Vitest
 const ROOT_DIR = process.cwd()
 const figmaPath =
@@ -91,6 +93,7 @@ export default defineConfig({
           include: ['packages/**/*.spec.tsx'],
           name: 'components',
           browser: {
+            commands: { movePointer },
             enabled: true,
             headless: true,
             provider: playwright({ launchOptions: { channel: 'chromium' } }),
