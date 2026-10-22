@@ -65,14 +65,7 @@ export const usePointerSafeArea = ({
       }
       const points = getSafeAreaPoints({ rect, start })
 
-      if (
-        pointer &&
-        !points.every(
-          (point, index) =>
-            getCrossProduct({ a: point, b: points[(index + 1) % points.length], point: pointer }) >=
-            0,
-        )
-      ) {
+      if (pointer && !isInsideSafeArea({ pointer, points })) {
         return false
       }
 
@@ -169,6 +162,18 @@ export const usePointerSafeArea = ({
     trackTarget,
   }
 }
+
+const isInsideSafeArea = ({
+  pointer,
+  points,
+}: {
+  pointer: PointerPosition
+  points: PointerPosition[]
+}) =>
+  points.every(
+    (point, index) =>
+      getCrossProduct({ a: point, b: points[(index + 1) % points.length], point: pointer }) >= 0,
+  )
 
 // The convex hull covers the whole destination, allowing return paths to enter
 // through its top or bottom as well as its nearest edge.
