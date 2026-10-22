@@ -21,6 +21,7 @@ import { defaultUserCollection } from '../auth/defaultUser.js'
 import { authRootEndpoints } from '../auth/endpoints/index.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
+import { migrationsLockGlobal } from '../database/migrations/migrationsLockGlobal.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
 import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
@@ -39,6 +40,7 @@ import {
   stagedUploadEndpoints,
   uploadInstructionsEndpoint,
 } from '../uploads/endpoints/uploadInstructions.js'
+import { deepCopyObject } from '../utilities/deepCopyObject.js'
 import { flattenAllFields, flattenBlock } from '../utilities/flattenAllFields.js'
 import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
 import { validateTimezones } from '../utilities/validateTimezones.js'
@@ -302,6 +304,8 @@ const addDefaultDashboardWidgets = ({
 
 export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   const configWithDefaults = addDefaultsToConfig(incomingConfig)
+  configWithDefaults.globals!.push(deepCopyObject(migrationsLockGlobal))
+
   const { duration, safetyBuffer } = configWithDefaults.jobs!.processingLease!
   if (!(safetyBuffer! >= 0 && safetyBuffer! < duration!)) {
     throw new InvalidConfiguration(
