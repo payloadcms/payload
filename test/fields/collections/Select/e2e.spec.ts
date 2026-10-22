@@ -59,6 +59,32 @@ describe('Select', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
+  test('should find list rows by their select option label', async () => {
+    const selected = await payload.create({
+      collection: selectFieldsSlug,
+      data: { select: 'two' },
+      overrideAccess: true,
+    })
+
+    await page.goto(url.list)
+
+    const searchInput = page.locator('#search-filter-input')
+    const rows = page.locator('tbody tr')
+
+    await searchInput.focus()
+    await searchInput.pressSequentially('Value Two')
+    await expect(rows).toHaveCount(1)
+    await expect(rows.first()).toContainText(String(selected.id))
+    await expect(searchInput).toBeFocused()
+
+    await searchInput.fill('does not match any option')
+    await expect(rows).toHaveCount(0)
+
+    await searchInput.fill('two')
+    await expect(rows).toHaveCount(1)
+    await expect(rows.first()).toContainText(String(selected.id))
+  })
+
   test('should use i18n option labels', async () => {
     await page.goto(url.create)
     await waitForFormReady(page)
