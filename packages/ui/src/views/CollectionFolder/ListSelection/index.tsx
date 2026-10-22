@@ -146,26 +146,30 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               fromFolderName={currentFolder?.value?._folderOrDocumentTitle}
               itemsToMove={getSelectedItems()}
               onConfirm={async ({ id, name }) => {
-                await moveToFolder({
+                const { movedCount } = await moveToFolder({
                   itemsToMove: getSelectedItems(),
                   toFolderID: id,
                 })
 
-                if (id) {
-                  // moved to folder
-                  toast.success(
-                    t('folder:itemsMovedToFolder', {
-                      folderName: `"${name}"`,
-                      title: `${count} ${count > 1 ? t('general:items') : t('general:item')}`,
-                    }),
-                  )
-                } else {
-                  // moved to root
-                  toast.success(
-                    t('folder:itemsMovedToRoot', {
-                      title: `${count} ${count > 1 ? t('general:items') : t('general:item')}`,
-                    }),
-                  )
+                // Only report what the server actually confirmed moved — the
+                // selection count is what was requested, not what succeeded.
+                if (movedCount > 0) {
+                  if (id) {
+                    // moved to folder
+                    toast.success(
+                      t('folder:itemsMovedToFolder', {
+                        folderName: `"${name}"`,
+                        title: `${movedCount} ${movedCount > 1 ? t('general:items') : t('general:item')}`,
+                      }),
+                    )
+                  } else {
+                    // moved to root
+                    toast.success(
+                      t('folder:itemsMovedToRoot', {
+                        title: `${movedCount} ${movedCount > 1 ? t('general:items') : t('general:item')}`,
+                      }),
+                    )
+                  }
                 }
 
                 clearRouteCache()
