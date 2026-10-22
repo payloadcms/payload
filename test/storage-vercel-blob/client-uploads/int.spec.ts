@@ -181,9 +181,13 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
 
     const { blobs } = await list()
     const storedMain = blobs.find(({ pathname }) => pathname.endsWith(`/${doc.filename}`))
+    const storedThumbnail = blobs.find(({ pathname }) =>
+      pathname.endsWith(`/${doc.sizes.thumbnail.filename}`),
+    )
 
     expect(doc.width).toBe(10)
     expect(storedMain?.size).toBe(doc.filesize)
+    expect(storedThumbnail?.size).toBe(doc.sizes.thumbnail.filesize)
   })
 
   it("should reject upload when 'x-disallow-access' header is set", async () => {
