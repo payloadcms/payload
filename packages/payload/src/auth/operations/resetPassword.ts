@@ -280,9 +280,7 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
 }
 
 /**
- * Reset password writes with `payload.db.updateOne`, so the collection's field validation never
- * runs. Run the `password` field's own `validate` here so a `password` field override (e.g.
- * `minLength` or a custom `validate`) applies to resets the same way it does to create and update.
+ * Runs the `password` field override's validation, which `payload.db.updateOne` skips.
  */
 async function validatePasswordField({
   collectionConfig,
