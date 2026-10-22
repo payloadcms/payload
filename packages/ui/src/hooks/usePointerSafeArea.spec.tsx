@@ -3,14 +3,14 @@ import { expect, test } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 import { render } from 'vitest-browser-react'
 
-import { usePointerCorridor } from './usePointerCorridor.js'
+import { usePointerSafeArea } from './usePointerSafeArea.js'
 
-const CorridorExample = () => {
+const SafeAreaExample = () => {
   const from = useRef<HTMLButtonElement>(null)
   const to = useRef<HTMLDivElement>(null)
   const [polygon, setPolygon] = useState<null | string>(null)
   const [isIdle, setIsIdle] = useState(false)
-  const corridor = usePointerCorridor({
+  const safeArea = usePointerSafeArea({
     enabled: true,
     from,
     idleTimeout: 100,
@@ -22,9 +22,9 @@ const CorridorExample = () => {
   return (
     <div data-testid="surface" style={{ inset: 0, position: 'fixed' }}>
       <button
-        onPointerEnter={(event) => corridor.trackSource({ x: event.clientX, y: event.clientY })}
+        onPointerEnter={(event) => safeArea.trackSource({ x: event.clientX, y: event.clientY })}
         onPointerLeave={(event) =>
-          corridor.protect({ pointer: { x: event.clientX, y: event.clientY } })
+          safeArea.protect({ pointer: { x: event.clientX, y: event.clientY } })
         }
         ref={from}
         style={{ height: 30, left: 100, position: 'fixed', top: 100, width: 100 }}
@@ -41,9 +41,9 @@ const CorridorExample = () => {
   )
 }
 
-test('should report corridor geometry and inactivity without Popup markup or a popover', async () => {
+test('should track a safe area and pauses without Popup markup or a popover', async () => {
   await page.viewport(800, 600)
-  const screen = await render(<CorridorExample />)
+  const screen = await render(<SafeAreaExample />)
 
   await screen.getByRole('button', { name: 'Source' }).hover()
   await userEvent.hover(screen.getByTestId('surface'), {

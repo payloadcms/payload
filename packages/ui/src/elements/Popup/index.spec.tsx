@@ -78,8 +78,8 @@ test.each([
     const startY = triggerBox.top + triggerBox.height / 2
     const steps = Math.ceil(Math.abs(diagonalPoint.x - startX))
 
-    // Keep moving by at most one horizontal pixel per event, even when crossing
-    // the corridor takes longer than its 300 ms inactivity timeout.
+    // Keep moving by at most one horizontal pixel per event. Crossing the safe
+    // area can take longer than the 300 ms pause timeout.
     for (let step = 1; step <= steps; step++) {
       await userEvent.hover(screen.getByTestId('pointer-surface'), {
         force: true,
@@ -110,7 +110,7 @@ test.each([
     expect(onOpenLanguage).not.toHaveBeenCalled()
     await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
 
-    // A deliberate click still reaches the row beneath the protected corridor.
+    // A deliberate click still reaches the row inside the safe area.
     await userEvent.hover(screen.getByTestId('pointer-surface'), {
       force: true,
       position: diagonalPoint,
@@ -219,7 +219,7 @@ test('should keep a reusable submenu trigger full width and highlighted over its
   expect(getComputedStyle(theme.element()).backgroundColor).toBe('rgb(1, 2, 3)')
 })
 
-test('should immediately switch to a sibling submenu outside the corridor', async () => {
+test('should immediately switch to a sibling submenu outside the safe area', async () => {
   const screen = await render(
     <div style={{ '--color-bg-selected-strong': 'rgb(1, 2, 3)' } as CSSProperties}>
       <Popup button="Root" popupType="menu" theme="auto">

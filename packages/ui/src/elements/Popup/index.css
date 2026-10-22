@@ -54,7 +54,7 @@
   }
 
   .popup__content[data-submenu-safe-area]::before {
-    /* Debug corridor: uncomment to visualize the hit area.
+    /* Debug safe area: uncomment to show the protected path.
     background-color: color-mix(in srgb, var(--color-bg-assistive) 35%, transparent);
     */
     content: '';

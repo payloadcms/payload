@@ -2,9 +2,9 @@ import type { PointerEvent, RefObject } from 'react'
 
 import { useCallback } from 'react'
 
-import type { PointerPosition } from '../../hooks/usePointerCorridor.js'
+import type { PointerPosition } from '../../hooks/usePointerSafeArea.js'
 
-import { usePointerCorridor } from '../../hooks/usePointerCorridor.js'
+import { usePointerSafeArea } from '../../hooks/usePointerSafeArea.js'
 
 type UseSubmenuPointerIntentArgs = {
   active: boolean
@@ -25,7 +25,7 @@ export const useSubmenuPointerIntent = ({
   onSafeAreaExpire,
   triggerRef,
 }: UseSubmenuPointerIntentArgs) => {
-  const renderCorridor = useCallback(
+  const renderSafeArea = useCallback(
     ({ polygon }: { polygon: null | string }) => {
       const content = contentRef.current
 
@@ -40,14 +40,14 @@ export const useSubmenuPointerIntent = ({
     [contentRef],
   )
 
-  const corridor = usePointerCorridor({
+  const safeArea = usePointerSafeArea({
     enabled: enabled && active,
     from: triggerRef,
-    onChange: renderCorridor,
+    onChange: renderSafeArea,
     onRelease: onSafeAreaExpire,
     to: contentRef,
   })
-  const { clear, protect, trackSource, trackTarget } = corridor
+  const { clear, protect, trackSource, trackTarget } = safeArea
 
   const handleEnter = (event: PointerEvent) => {
     if (event.pointerType !== 'mouse') {
@@ -64,7 +64,7 @@ export const useSubmenuPointerIntent = ({
   }
 
   const handleLeave = (event: PointerEvent) => {
-    if (event.pointerType !== 'mouse' || !active || !corridor.isTracking()) {
+    if (event.pointerType !== 'mouse' || !active || !safeArea.isTracking()) {
       return
     }
     const target = event.relatedTarget as Node | null
@@ -83,11 +83,11 @@ export const useSubmenuPointerIntent = ({
       onPointerEnter: enabled ? handleEnter : undefined,
       onPointerLeave: enabled ? handleLeave : undefined,
     },
-    isProtected: corridor.isProtected,
+    isProtected: safeArea.isProtected,
     triggerProps: {
       onPointerEnter: enabled ? handleEnter : undefined,
       onPointerLeave: enabled ? handleLeave : undefined,
     },
-    updateSafeArea: corridor.refresh,
+    updateSafeArea: safeArea.refresh,
   }
 }

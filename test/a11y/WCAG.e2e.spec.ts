@@ -2451,7 +2451,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(theme).toHaveAttribute('aria-expanded', 'false')
     })
 
-    test('should release a User submenu corridor when pausing over another item', async () => {
+    test('should switch User submenus after pausing over another item', async () => {
       await page.goto(`${serverURL}/admin`)
       await openNavigationForUserMenu({ page })
       await page.locator('.user-menu__trigger').click()

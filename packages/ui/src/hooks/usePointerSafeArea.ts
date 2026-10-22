@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef } from 'react'
 
 export type PointerPosition = { x: number; y: number }
 
-type UsePointerCorridorArgs = {
+type UsePointerSafeAreaArgs = {
   enabled: boolean
   from: RefObject<HTMLElement | null>
   idleTimeout?: number
@@ -13,15 +13,15 @@ type UsePointerCorridorArgs = {
   to: RefObject<HTMLElement | null>
 }
 
-/** Tracks a bidirectional horizontal hover corridor independently of its renderer and behavior. */
-export const usePointerCorridor = ({
+/** Tracks a safe area for pointer travel between two elements in either direction. */
+export const usePointerSafeArea = ({
   enabled,
   from,
   idleTimeout = 300,
   onChange,
   onRelease,
   to,
-}: UsePointerCorridorArgs) => {
+}: UsePointerSafeAreaArgs) => {
   const origin = useRef<PointerPosition | undefined>(undefined)
   const isReturning = useRef(false)
   const isProtected = useRef(false)
@@ -63,13 +63,14 @@ export const usePointerCorridor = ({
       if (rect.left <= start.x && rect.right >= start.x) {
         return false
       }
-      const points = getCorridorPoints({ rect, start })
+      const points = getSafeAreaPoints({ rect, start })
 
       if (
         pointer &&
         !points.every(
           (point, index) =>
-            cross({ a: point, b: points[(index + 1) % points.length], point: pointer }) >= 0,
+            getCrossProduct({ a: point, b: points[(index + 1) % points.length], point: pointer }) >=
+            0,
         )
       ) {
         return false
@@ -134,7 +135,7 @@ export const usePointerCorridor = ({
     const handlePress = (event: PointerEvent) => {
       if (event.pointerType === 'mouse') {
         // Preserve tracking after clicks that keep either endpoint open, while
-        // letting clicks elsewhere bypass hover protection without redispatching.
+        // letting clicks elsewhere reach their target without sending a replacement event.
         const pointer = { x: event.clientX, y: event.clientY }
         const target = event.target as Node | null
 
@@ -169,9 +170,9 @@ export const usePointerCorridor = ({
   }
 }
 
-// The convex hull includes the whole destination, so a return path can enter a wide
-// source through its top or bottom rather than having to reach its nearest edge.
-const getCorridorPoints = ({ rect, start }: { rect: DOMRect; start: PointerPosition }) => {
+// The convex hull covers the whole destination, allowing return paths to enter
+// through its top or bottom as well as its nearest edge.
+const getSafeAreaPoints = ({ rect, start }: { rect: DOMRect; start: PointerPosition }) => {
   const points = [
     { x: start.x, y: start.y - 4 },
     { x: start.x, y: start.y + 4 },
@@ -180,25 +181,28 @@ const getCorridorPoints = ({ rect, start }: { rect: DOMRect; start: PointerPosit
     { x: rect.right, y: rect.bottom },
     { x: rect.left, y: rect.bottom },
   ].sort((a, b) => a.x - b.x || a.y - b.y)
-  const half = ({ vertices }: { vertices: PointerPosition[] }) => {
-    const hull: PointerPosition[] = []
+  const getOuterEdge = ({ orderedPoints }: { orderedPoints: PointerPosition[] }) => {
+    const edge: PointerPosition[] = []
 
-    for (const point of vertices) {
+    for (const point of orderedPoints) {
       while (
-        hull.length > 1 &&
-        cross({ a: hull[hull.length - 2], b: hull[hull.length - 1], point }) <= 0
+        edge.length > 1 &&
+        getCrossProduct({ a: edge[edge.length - 2], b: edge[edge.length - 1], point }) <= 0
       ) {
-        hull.pop()
+        edge.pop()
       }
-      hull.push(point)
+      edge.push(point)
     }
-    return hull.slice(0, -1)
+    return edge.slice(0, -1)
   }
 
-  return [...half({ vertices: points }), ...half({ vertices: [...points].reverse() })]
+  return [
+    ...getOuterEdge({ orderedPoints: points }),
+    ...getOuterEdge({ orderedPoints: [...points].reverse() }),
+  ]
 }
 
-const cross = ({
+const getCrossProduct = ({
   a,
   b,
   point,
