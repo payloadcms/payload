@@ -320,6 +320,8 @@ export interface Post {
    * A subtitle field to test focus indicators in the admin UI, helps us detect exiting out of rich text editor properly.
    */
   subtitle?: string | null;
+  showConditionalNote?: boolean | null;
+  conditionalNote?: string | null;
   accessibilitySelect: 'one' | 'two';
   accessibilitySortableSelect?: ('one' | 'two')[] | null;
   accessibilityDisabledSelect?: ('one' | 'two') | null;
@@ -706,6 +708,8 @@ export interface PayloadFoldersSelect<T extends boolean = true> {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   subtitle?: T;
+  showConditionalNote?: T;
+  conditionalNote?: T;
   accessibilitySelect?: T;
   accessibilitySortableSelect?: T;
   accessibilityDisabledSelect?: T;
