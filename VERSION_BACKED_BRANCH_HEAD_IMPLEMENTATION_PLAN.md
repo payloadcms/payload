@@ -425,6 +425,7 @@ The stack starts at main. Each layer targets the preceding branch so reviewers s
 | 35 | [#18966](https://github.com/payloadcms/payload/pull/18966) | Honor local example scaffolding and isolate unit tests from live npm metadata without changing timeouts |
 | 36 | [#18969](https://github.com/payloadcms/payload/pull/18969) | Independent M3 correctness/index signoff and functionality-first sequencing; timing work deferred |
 | 37 | [#18970](https://github.com/payloadcms/payload/pull/18970) | Restrict native Mongo graph/zero integration cases to supported transaction adapters |
+| 38 | [#18972](https://github.com/payloadcms/payload/pull/18972) | Ignore stale Lexical link-drawer initialization; production race and keyboard/state regressions |
 
 Historical implementation state as of 2026-10-21 (superseded by the revised M3 signoff below):
 
@@ -539,3 +540,13 @@ The new stack's remote unit job exposed two unrelated CLI scaffold issues, now i
 The user reduced M3 benchmarking effort to checking proper indexes. Stop profiling and timing optimization; preserve existing benchmark reports unchanged. Review the existing PostgreSQL branch/locale root fence and native index probes, MongoDB encoded-primary-key targeting and SQLite query plans alongside the retained functional/access/snapshot proofs. Only concrete functional or index defects block M4. M4–M11 retain all original functional, migration, API, scheduling, asset, accessibility and review requirements. The old 2x and 48-case timing prerequisites in historical evidence above do not gate those phases.
 
 Independent revised M3 phase review approved the current query foundation at `eb8b6464087957fe472a0b460530ed1ef3dd48b9`, with no concrete functional or missing-index blocker. The reviewer verified twelve PostgreSQL and eight MongoDB source hashes, actual retained PostgreSQL/MongoDB/SQLite native plans, and real D1 compatibility evidence. See [M3_INDEX_FUNCTIONALITY_REVIEW.md](./M3_INDEX_FUNCTIONALITY_REVIEW.md) for the assessed boundaries. M3 is complete under the revised scope; public writes, merges, scheduling, migration and Admin remain later work. Current top-stack CI passes unit and PostgreSQL/SQLite/MongoDB/DocumentDB suites; CosmosDB/Firestore failures remain under separate investigation, so full CI is not claimed green.
+
+### M4 first functional slice — managed working-save persistence
+
+The first slice integrates normal public collection create/update/working restore and global-update version persistence with the internal head engine after verified authoritative cutover. It captures and guards main/drafts observations before candidate callbacks, preserves original merge bases, retains original request/hook semantics and caller rollback, and builds heads/projections from canonical persisted native bodies. Live head snapshots use actual native materialization so sibling draft locales cannot become published through a single-locale history snapshot. Retention prunes genuine unprotected history while preserving durable version roots and matching upload cleanup candidates.
+
+Private cutover storage is authoritative and separate from rebuildable projections. An absent receipt preserves legacy drafts; an existing invalid/inactive receipt refuses writes. Atomic receipt dependency/revalidation and head CAS reject mid-hook revocation and stale nested writes without replaying hooks. Arbitrary application custom keys do not activate the engine. Migration and supported activation remain M9 work.
+
+Owner and independent reviewer each pass all thirteen focused tests on SQLite, PostgreSQL and MongoDB. The reviewer also passes four registration units and verifies all thirteen frozen source hashes before and after testing; core TypeScript, targeted formatting/lint and whitespace checks pass. All native/generator workers have stopped; only proven task-generated unrelated community types were restored. No benchmark was run.
+
+This is not M4 completion. Authoritative original/read routing and named context are next, followed by nested/public read routing, exclusive autosave coalescing, global restore parity, schema/editor reference discovery, full upload/GC boundaries, real D1 atomic write compilation and existing-suite engine regressions. M4 remains unchecked until those functional requirements and independent phase review pass.

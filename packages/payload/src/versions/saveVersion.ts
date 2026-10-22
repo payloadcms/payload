@@ -2,17 +2,24 @@ import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { CreateGlobalVersionArgs, CreateVersionArgs, Payload } from '../index.js'
 import type { JsonObject, PayloadRequest, SelectType } from '../types/index.js'
+import type { BranchWriteObservation } from './branches/writes/prepareBranchWrite.js'
 
 import { deepCopyObjectSimple } from '../index.js'
 import { assertNoValidationWrite } from '../utilities/assertNoValidationWrite.js'
 import { getVersionsMax, hasLocalizeStatusEnabled } from '../utilities/getVersionsConfig.js'
 import { sanitizeInternalFields } from '../utilities/sanitizeInternalFields.js'
+import { persistBranchWrite } from './branches/writes/persistBranchWrite.js'
+import {
+  assertBranchWriteCutover,
+  isBranchWriteEngineActive,
+} from './branches/writes/prepareBranchWrite.js'
 import { getQueryDraftsSelect } from './drafts/getQueryDraftsSelect.js'
 import { enforceMaxVersions } from './enforceMaxVersions.js'
 import { updateLatestVersion } from './updateLatestVersion.js'
 
 type Args<T extends JsonObject = JsonObject> = {
   autosave?: boolean
+  branchWrite?: BranchWriteObservation | null
   collection?: SanitizedCollectionConfig
   docWithLocales: T
   draft?: boolean
@@ -38,6 +45,7 @@ export async function saveVersion<TData extends JsonObject = JsonObject>(
 export async function saveVersion<TData extends JsonObject = JsonObject>({
   id,
   autosave,
+  branchWrite,
   collection,
   docWithLocales,
   draft,
@@ -50,6 +58,20 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
   unpublish,
 }: Args<TData>): Promise<JsonObject | null> {
   assertNoValidationWrite(req)
+
+  if (
+    !branchWrite &&
+    (collection ?? global) &&
+    (await isBranchWriteEngineActive({ entity: (collection ?? global)!, req }))
+  ) {
+    throw new Error(
+      'An activated branch write requires observations captured before document hooks.',
+    )
+  }
+
+  if (branchWrite) {
+    await assertBranchWriteCutover({ cutover: branchWrite.cutover, req: req! })
+  }
 
   let result: JsonObject | undefined
   let createdNewVersion = false
@@ -83,7 +105,7 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
   }
 
   try {
-    if (unpublish || autosave) {
+    if (!branchWrite && (unpublish || autosave)) {
       result = await updateLatestVersion({
         id,
         collection,
@@ -106,8 +128,8 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
         globalSlug: undefined as string | undefined,
         parent: collection ? id : undefined,
         req,
-        returning,
-        select: getQueryDraftsSelect({ select }),
+        returning: branchWrite ? true : returning,
+        select: branchWrite ? undefined : getQueryDraftsSelect({ select }),
         updatedAt: now,
         versionData,
       }
@@ -135,6 +157,18 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
     throw err
   }
 
+  if (branchWrite) {
+    await persistBranchWrite({
+      id,
+      collection,
+      draft: Boolean(draft),
+      global,
+      observation: branchWrite,
+      req: req!,
+      versionID: result!.id as number | string,
+    })
+  }
+
   const max = getVersionsMax(collection || global!)
 
   if (createdNewVersion && max > 0) {
@@ -142,6 +176,7 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
       id,
       collection,
       global,
+      isBranchWrite: Boolean(branchWrite),
       max,
       payload,
       req,

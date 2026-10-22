@@ -26,8 +26,13 @@ export const registerBranchStorage = ({
       return entity
     }
 
+    if (entity.custom?.branchStorage !== undefined) {
+      throw new Error('Internal branch storage cannot overwrite configured custom branchStorage.')
+    }
+
     const prefix = `${isGlobal ? 'global' : 'collection'}-${entity.slug}`
     const storage = {
+      cutover: `${prefix}-cutover`,
       heads: `${prefix}-heads`,
       identities: `${prefix}-identities`,
       pins: `${prefix}-pins`,
@@ -47,6 +52,20 @@ export const registerBranchStorage = ({
     } as const
 
     storageCollections.push(
+      {
+        ...internal,
+        slug: storage.cutover,
+        custom: { branchCutoverStorage: { globalSlug, parentCollection } },
+        fields: [
+          { name: 'singleton', type: 'text', required: true },
+          { name: 'schemaGeneration', type: 'number', required: true },
+          { name: 'generation', type: 'number', required: true },
+          { name: 'lockNonce', type: 'text' },
+          { name: 'migrationID', type: 'text', required: true },
+          { name: 'isActivated', type: 'checkbox', required: true },
+        ],
+        indexes: [{ fields: ['singleton'], unique: true }],
+      },
       buildBranchHeadCollection({
         slug: storage.heads,
         globalSlug,

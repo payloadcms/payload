@@ -50,6 +50,7 @@ import {
   hasAuthorizedAllLocalesPublicationStatus,
   validateAllLocalesPublicationFlags,
 } from '../../../versions/allLocalesPublicationStatus.js'
+import { prepareBranchWrite } from '../../../versions/branches/writes/prepareBranchWrite.js'
 import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
 import { validateLocalWithLocaleKeyedData } from '../local/validate.js'
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
@@ -158,6 +159,8 @@ export const updateDocument = async <
     overrideLock,
     req,
   })
+
+  const branchWrite = await prepareBranchWrite({ id, collection: collectionConfig, req })
 
   const originalDoc = await afterRead({
     collection: collectionConfig,
@@ -541,6 +544,7 @@ export const updateDocument = async <
       resultWithLocales = await saveVersion({
         id,
         autosave,
+        branchWrite,
         collection: collectionConfig,
         docWithLocales: resultWithLocales,
         draft: isSavingDraft,

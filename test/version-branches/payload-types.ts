@@ -89,24 +89,31 @@ export interface Config {
     'branch-query-text-tags': BranchQueryTextTag;
     'branch-query-states': BranchQueryState;
     'branch-query-invalidations': BranchQueryInvalidation;
+    'collection-branch-head-articles-cutover': CollectionBranchHeadArticlesCutover;
     'collection-branch-head-articles-heads': CollectionBranchHeadArticlesHead;
     'collection-branch-head-articles-pins': CollectionBranchHeadArticlesPin;
     'collection-branch-head-articles-identities': CollectionBranchHeadArticlesIdentity;
+    'collection-branch-scalar-articles-cutover': CollectionBranchScalarArticlesCutover;
     'collection-branch-scalar-articles-heads': CollectionBranchScalarArticlesHead;
     'collection-branch-scalar-articles-pins': CollectionBranchScalarArticlesPin;
     'collection-branch-scalar-articles-identities': CollectionBranchScalarArticlesIdentity;
+    'collection-branch-head-protected-articles-cutover': CollectionBranchHeadProtectedArticlesCutover;
     'collection-branch-head-protected-articles-heads': CollectionBranchHeadProtectedArticlesHead;
     'collection-branch-head-protected-articles-pins': CollectionBranchHeadProtectedArticlesPin;
     'collection-branch-head-protected-articles-identities': CollectionBranchHeadProtectedArticlesIdentity;
+    'collection-branch-wide-ids-cutover': CollectionBranchWideIdsCutover;
     'collection-branch-wide-ids-heads': CollectionBranchWideIdsHead;
     'collection-branch-wide-ids-pins': CollectionBranchWideIdsPin;
     'collection-branch-wide-ids-identities': CollectionBranchWideIdsIdentity;
+    'collection-branch-fractional-ids-cutover': CollectionBranchFractionalIdsCutover;
     'collection-branch-fractional-ids-heads': CollectionBranchFractionalIdsHead;
     'collection-branch-fractional-ids-pins': CollectionBranchFractionalIdsPin;
     'collection-branch-fractional-ids-identities': CollectionBranchFractionalIdsIdentity;
+    'collection-branch-query-docs-cutover': CollectionBranchQueryDocsCutover;
     'collection-branch-query-docs-heads': CollectionBranchQueryDocsHead;
     'collection-branch-query-docs-pins': CollectionBranchQueryDocsPin;
     'collection-branch-query-docs-identities': CollectionBranchQueryDocsIdentity;
+    'global-branch-head-settings-cutover': GlobalBranchHeadSettingsCutover;
     'global-branch-head-settings-heads': GlobalBranchHeadSettingsHead;
     'global-branch-head-settings-pins': GlobalBranchHeadSettingsPin;
     'global-branch-head-settings-identities': GlobalBranchHeadSettingsIdentity;
@@ -164,24 +171,31 @@ export interface Config {
     'branch-query-text-tags': BranchQueryTextTagsSelect<false> | BranchQueryTextTagsSelect<true>;
     'branch-query-states': BranchQueryStatesSelect<false> | BranchQueryStatesSelect<true>;
     'branch-query-invalidations': BranchQueryInvalidationsSelect<false> | BranchQueryInvalidationsSelect<true>;
+    'collection-branch-head-articles-cutover': CollectionBranchHeadArticlesCutoverSelect<false> | CollectionBranchHeadArticlesCutoverSelect<true>;
     'collection-branch-head-articles-heads': CollectionBranchHeadArticlesHeadsSelect<false> | CollectionBranchHeadArticlesHeadsSelect<true>;
     'collection-branch-head-articles-pins': CollectionBranchHeadArticlesPinsSelect<false> | CollectionBranchHeadArticlesPinsSelect<true>;
     'collection-branch-head-articles-identities': CollectionBranchHeadArticlesIdentitiesSelect<false> | CollectionBranchHeadArticlesIdentitiesSelect<true>;
+    'collection-branch-scalar-articles-cutover': CollectionBranchScalarArticlesCutoverSelect<false> | CollectionBranchScalarArticlesCutoverSelect<true>;
     'collection-branch-scalar-articles-heads': CollectionBranchScalarArticlesHeadsSelect<false> | CollectionBranchScalarArticlesHeadsSelect<true>;
     'collection-branch-scalar-articles-pins': CollectionBranchScalarArticlesPinsSelect<false> | CollectionBranchScalarArticlesPinsSelect<true>;
     'collection-branch-scalar-articles-identities': CollectionBranchScalarArticlesIdentitiesSelect<false> | CollectionBranchScalarArticlesIdentitiesSelect<true>;
+    'collection-branch-head-protected-articles-cutover': CollectionBranchHeadProtectedArticlesCutoverSelect<false> | CollectionBranchHeadProtectedArticlesCutoverSelect<true>;
     'collection-branch-head-protected-articles-heads': CollectionBranchHeadProtectedArticlesHeadsSelect<false> | CollectionBranchHeadProtectedArticlesHeadsSelect<true>;
     'collection-branch-head-protected-articles-pins': CollectionBranchHeadProtectedArticlesPinsSelect<false> | CollectionBranchHeadProtectedArticlesPinsSelect<true>;
     'collection-branch-head-protected-articles-identities': CollectionBranchHeadProtectedArticlesIdentitiesSelect<false> | CollectionBranchHeadProtectedArticlesIdentitiesSelect<true>;
+    'collection-branch-wide-ids-cutover': CollectionBranchWideIdsCutoverSelect<false> | CollectionBranchWideIdsCutoverSelect<true>;
     'collection-branch-wide-ids-heads': CollectionBranchWideIdsHeadsSelect<false> | CollectionBranchWideIdsHeadsSelect<true>;
     'collection-branch-wide-ids-pins': CollectionBranchWideIdsPinsSelect<false> | CollectionBranchWideIdsPinsSelect<true>;
     'collection-branch-wide-ids-identities': CollectionBranchWideIdsIdentitiesSelect<false> | CollectionBranchWideIdsIdentitiesSelect<true>;
+    'collection-branch-fractional-ids-cutover': CollectionBranchFractionalIdsCutoverSelect<false> | CollectionBranchFractionalIdsCutoverSelect<true>;
     'collection-branch-fractional-ids-heads': CollectionBranchFractionalIdsHeadsSelect<false> | CollectionBranchFractionalIdsHeadsSelect<true>;
     'collection-branch-fractional-ids-pins': CollectionBranchFractionalIdsPinsSelect<false> | CollectionBranchFractionalIdsPinsSelect<true>;
     'collection-branch-fractional-ids-identities': CollectionBranchFractionalIdsIdentitiesSelect<false> | CollectionBranchFractionalIdsIdentitiesSelect<true>;
+    'collection-branch-query-docs-cutover': CollectionBranchQueryDocsCutoverSelect<false> | CollectionBranchQueryDocsCutoverSelect<true>;
     'collection-branch-query-docs-heads': CollectionBranchQueryDocsHeadsSelect<false> | CollectionBranchQueryDocsHeadsSelect<true>;
     'collection-branch-query-docs-pins': CollectionBranchQueryDocsPinsSelect<false> | CollectionBranchQueryDocsPinsSelect<true>;
     'collection-branch-query-docs-identities': CollectionBranchQueryDocsIdentitiesSelect<false> | CollectionBranchQueryDocsIdentitiesSelect<true>;
+    'global-branch-head-settings-cutover': GlobalBranchHeadSettingsCutoverSelect<false> | GlobalBranchHeadSettingsCutoverSelect<true>;
     'global-branch-head-settings-heads': GlobalBranchHeadSettingsHeadsSelect<false> | GlobalBranchHeadSettingsHeadsSelect<true>;
     'global-branch-head-settings-pins': GlobalBranchHeadSettingsPinsSelect<false> | GlobalBranchHeadSettingsPinsSelect<true>;
     'global-branch-head-settings-identities': GlobalBranchHeadSettingsIdentitiesSelect<false> | GlobalBranchHeadSettingsIdentitiesSelect<true>;
@@ -646,6 +660,27 @@ export interface BranchQueryInvalidation {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-head-articles-cutover".
+ */
+export interface CollectionBranchHeadArticlesCutover {
+  id: number;
+  singleton: string;
+  schemaGeneration: number;
+  generation: number;
+  lockNonce?: string | null;
+  migrationID: string;
+  isActivated: boolean;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-head-articles-heads".
  */
 export interface CollectionBranchHeadArticlesHead {
@@ -712,6 +747,27 @@ export interface CollectionBranchHeadArticlesIdentity {
   ownerKey: string;
   isPublished: boolean;
   isLegacyDraftVisible: boolean;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-scalar-articles-cutover".
+ */
+export interface CollectionBranchScalarArticlesCutover {
+  id: number;
+  singleton: string;
+  schemaGeneration: number;
+  generation: number;
+  lockNonce?: string | null;
+  migrationID: string;
+  isActivated: boolean;
   createdBy?: {
     relationTo: 'users';
     value: number | User;
@@ -800,6 +856,27 @@ export interface CollectionBranchScalarArticlesIdentity {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-head-protected-articles-cutover".
+ */
+export interface CollectionBranchHeadProtectedArticlesCutover {
+  id: number;
+  singleton: string;
+  schemaGeneration: number;
+  generation: number;
+  lockNonce?: string | null;
+  migrationID: string;
+  isActivated: boolean;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-head-protected-articles-heads".
  */
 export interface CollectionBranchHeadProtectedArticlesHead {
@@ -866,6 +943,27 @@ export interface CollectionBranchHeadProtectedArticlesIdentity {
   ownerKey: string;
   isPublished: boolean;
   isLegacyDraftVisible: boolean;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-wide-ids-cutover".
+ */
+export interface CollectionBranchWideIdsCutover {
+  id: number;
+  singleton: string;
+  schemaGeneration: number;
+  generation: number;
+  lockNonce?: string | null;
+  migrationID: string;
+  isActivated: boolean;
   createdBy?: {
     relationTo: 'users';
     value: number | User;
@@ -954,6 +1052,27 @@ export interface CollectionBranchWideIdsIdentity {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-fractional-ids-cutover".
+ */
+export interface CollectionBranchFractionalIdsCutover {
+  id: number;
+  singleton: string;
+  schemaGeneration: number;
+  generation: number;
+  lockNonce?: string | null;
+  migrationID: string;
+  isActivated: boolean;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-fractional-ids-heads".
  */
 export interface CollectionBranchFractionalIdsHead {
@@ -1031,6 +1150,27 @@ export interface CollectionBranchFractionalIdsIdentity {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-query-docs-cutover".
+ */
+export interface CollectionBranchQueryDocsCutover {
+  id: number;
+  singleton: string;
+  schemaGeneration: number;
+  generation: number;
+  lockNonce?: string | null;
+  migrationID: string;
+  isActivated: boolean;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-query-docs-heads".
  */
 export interface CollectionBranchQueryDocsHead {
@@ -1097,6 +1237,27 @@ export interface CollectionBranchQueryDocsIdentity {
   ownerKey: string;
   isPublished: boolean;
   isLegacyDraftVisible: boolean;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-branch-head-settings-cutover".
+ */
+export interface GlobalBranchHeadSettingsCutover {
+  id: number;
+  singleton: string;
+  schemaGeneration: number;
+  generation: number;
+  lockNonce?: string | null;
+  migrationID: string;
+  isActivated: boolean;
   createdBy?: {
     relationTo: 'users';
     value: number | User;
@@ -2497,6 +2658,20 @@ export interface BranchQueryInvalidationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-head-articles-cutover_select".
+ */
+export interface CollectionBranchHeadArticlesCutoverSelect<T extends boolean = true> {
+  singleton?: T;
+  schemaGeneration?: T;
+  generation?: T;
+  lockNonce?: T;
+  migrationID?: T;
+  isActivated?: T;
+  createdBy?: T;
+  updatedBy?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-head-articles-heads_select".
  */
 export interface CollectionBranchHeadArticlesHeadsSelect<T extends boolean = true> {
@@ -2540,6 +2715,20 @@ export interface CollectionBranchHeadArticlesIdentitiesSelect<T extends boolean 
   ownerKey?: T;
   isPublished?: T;
   isLegacyDraftVisible?: T;
+  createdBy?: T;
+  updatedBy?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-scalar-articles-cutover_select".
+ */
+export interface CollectionBranchScalarArticlesCutoverSelect<T extends boolean = true> {
+  singleton?: T;
+  schemaGeneration?: T;
+  generation?: T;
+  lockNonce?: T;
+  migrationID?: T;
+  isActivated?: T;
   createdBy?: T;
   updatedBy?: T;
 }
@@ -2593,6 +2782,20 @@ export interface CollectionBranchScalarArticlesIdentitiesSelect<T extends boolea
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-head-protected-articles-cutover_select".
+ */
+export interface CollectionBranchHeadProtectedArticlesCutoverSelect<T extends boolean = true> {
+  singleton?: T;
+  schemaGeneration?: T;
+  generation?: T;
+  lockNonce?: T;
+  migrationID?: T;
+  isActivated?: T;
+  createdBy?: T;
+  updatedBy?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-head-protected-articles-heads_select".
  */
 export interface CollectionBranchHeadProtectedArticlesHeadsSelect<T extends boolean = true> {
@@ -2636,6 +2839,20 @@ export interface CollectionBranchHeadProtectedArticlesIdentitiesSelect<T extends
   ownerKey?: T;
   isPublished?: T;
   isLegacyDraftVisible?: T;
+  createdBy?: T;
+  updatedBy?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-wide-ids-cutover_select".
+ */
+export interface CollectionBranchWideIdsCutoverSelect<T extends boolean = true> {
+  singleton?: T;
+  schemaGeneration?: T;
+  generation?: T;
+  lockNonce?: T;
+  migrationID?: T;
+  isActivated?: T;
   createdBy?: T;
   updatedBy?: T;
 }
@@ -2689,6 +2906,20 @@ export interface CollectionBranchWideIdsIdentitiesSelect<T extends boolean = tru
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-fractional-ids-cutover_select".
+ */
+export interface CollectionBranchFractionalIdsCutoverSelect<T extends boolean = true> {
+  singleton?: T;
+  schemaGeneration?: T;
+  generation?: T;
+  lockNonce?: T;
+  migrationID?: T;
+  isActivated?: T;
+  createdBy?: T;
+  updatedBy?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-fractional-ids-heads_select".
  */
 export interface CollectionBranchFractionalIdsHeadsSelect<T extends boolean = true> {
@@ -2737,6 +2968,20 @@ export interface CollectionBranchFractionalIdsIdentitiesSelect<T extends boolean
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-query-docs-cutover_select".
+ */
+export interface CollectionBranchQueryDocsCutoverSelect<T extends boolean = true> {
+  singleton?: T;
+  schemaGeneration?: T;
+  generation?: T;
+  lockNonce?: T;
+  migrationID?: T;
+  isActivated?: T;
+  createdBy?: T;
+  updatedBy?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-query-docs-heads_select".
  */
 export interface CollectionBranchQueryDocsHeadsSelect<T extends boolean = true> {
@@ -2780,6 +3025,20 @@ export interface CollectionBranchQueryDocsIdentitiesSelect<T extends boolean = t
   ownerKey?: T;
   isPublished?: T;
   isLegacyDraftVisible?: T;
+  createdBy?: T;
+  updatedBy?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-branch-head-settings-cutover_select".
+ */
+export interface GlobalBranchHeadSettingsCutoverSelect<T extends boolean = true> {
+  singleton?: T;
+  schemaGeneration?: T;
+  generation?: T;
+  lockNonce?: T;
+  migrationID?: T;
+  isActivated?: T;
   createdBy?: T;
   updatedBy?: T;
 }

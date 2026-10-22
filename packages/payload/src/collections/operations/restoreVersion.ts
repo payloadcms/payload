@@ -36,6 +36,7 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { legacyVersionWhere } from '../../versions/branches/storage/legacyVersionWhere.js'
+import { prepareBranchWrite } from '../../versions/branches/writes/prepareBranchWrite.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { getRestoredStatusesToAuthorize } from '../../versions/getRestoredStatusesToAuthorize.js'
 import { saveVersion } from '../../versions/saveVersion.js'
@@ -119,6 +120,12 @@ export const restoreVersionOperation = async <
 
     const { parent: parentDocID } = rawVersionToRestore
     const versionToRestoreWithLocales = rawVersionToRestore.version
+
+    const branchWrite = await prepareBranchWrite({
+      id: parentDocID,
+      collection: collectionConfig,
+      req,
+    })
 
     // /////////////////////////////////////
     // Access
@@ -352,6 +359,7 @@ export const restoreVersionOperation = async <
       const savedVersion = await saveVersion({
         id: parentDocID,
         autosave: false,
+        branchWrite,
         collection: collectionConfig,
         docWithLocales: result,
         draft: draftArg,

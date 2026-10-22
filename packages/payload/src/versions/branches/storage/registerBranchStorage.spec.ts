@@ -33,7 +33,7 @@ describe('Internal branch storage registration', () => {
     const heads = registered.collections.find(({ slug }) => slug === 'collection-articles-heads')!
     const globalHeads = registered.collections.find(({ slug }) => slug === 'global-settings-heads')!
 
-    expect(registered.collections).toHaveLength(7)
+    expect(registered.collections).toHaveLength(9)
     expect(articles.custom).toBeUndefined()
     expect(settings.custom).toBeUndefined()
     expect(heads.fields).toContainEqual({
@@ -50,6 +50,23 @@ describe('Internal branch storage registration', () => {
       globalSlug: null,
       parentCollection: 'articles',
     })
+  })
+
+  it('should refuse overwriting an existing custom storage marker', () => {
+    expect(() =>
+      registerBranchStorage({
+        collections: [
+          {
+            slug: 'articles',
+            fields: [],
+            versions: { drafts: true },
+            custom: { branchStorage: { userData: true } },
+          },
+        ],
+        globals: [],
+        versionIDType: 'text',
+      }),
+    ).toThrow('cannot overwrite')
   })
 
   it('should refuse internal storage slug collisions before schema creation', () => {

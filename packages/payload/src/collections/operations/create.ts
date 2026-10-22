@@ -67,6 +67,7 @@ import {
   normalizeAllLocalesPublicationStatus,
   reconcileAllLocalesPublicationStatus,
 } from '../../versions/allLocalesPublicationStatus.js'
+import { prepareBranchWrite } from '../../versions/branches/writes/prepareBranchWrite.js'
 import { validateLocalWithLocaleKeyedData } from './local/validate.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
@@ -289,6 +290,12 @@ export const createOperation = async <
       docWithLocales: duplicatedFromDocWithLocales,
       status:
         data._status === allLocalesPublicationStatus ? allLocalesPublicationStatus : undefined,
+    })
+
+    const branchWrite = await prepareBranchWrite({
+      collection: collectionConfig,
+      isCreate: true,
+      req,
     })
 
     data = await beforeValidate({
@@ -590,8 +597,10 @@ export const createOperation = async <
       await saveVersion({
         id: resultWithLocales.id,
         autosave,
+        branchWrite,
         collection: collectionConfig,
         docWithLocales: resultWithLocales,
+        draft: branchWrite ? isSavingDraft : undefined,
         operation: 'create',
         payload,
         req,

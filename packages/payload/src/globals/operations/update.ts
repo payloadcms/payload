@@ -47,6 +47,7 @@ import {
   reconcileAllLocalesPublicationStatus,
   validateAllLocalesPublicationFlags,
 } from '../../versions/allLocalesPublicationStatus.js'
+import { prepareBranchWrite } from '../../versions/branches/writes/prepareBranchWrite.js'
 import { buildLocalizedPublishData } from '../../versions/buildSingleLocalePublishData.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
@@ -239,6 +240,8 @@ export const updateOperation = async <
         delete globalJSON._id
       }
     }
+
+    const branchWrite = await prepareBranchWrite({ global: globalConfig, req })
 
     const originalDoc = await afterRead({
       collection: null,
@@ -562,6 +565,7 @@ export const updateOperation = async <
       const { globalType } = resultWithLocales
       resultWithLocales = await saveVersion({
         autosave,
+        branchWrite,
         docWithLocales: resultWithLocales,
         draft: isSavingDraft,
         global: globalConfig,

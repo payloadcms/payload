@@ -7,11 +7,13 @@ import {
   collectVersionFiles,
   scheduleUnreferencedFileCleanup,
 } from '../uploads/fileVersioning/cleanup.js'
+import { enforceBranchMaxVersions } from './branches/writes/enforceBranchMaxVersions.js'
 
 type Args = {
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
   id?: number | string
+  isBranchWrite?: boolean
   max: number
   payload: Payload
   req?: PayloadRequest
@@ -21,6 +23,7 @@ export const enforceMaxVersions = async ({
   id,
   collection,
   global: globalConfig,
+  isBranchWrite,
   max,
   payload,
   req,
@@ -29,6 +32,11 @@ export const enforceMaxVersions = async ({
   const slug = collection ? collection.slug : globalConfig?.slug
 
   try {
+    if (isBranchWrite && req) {
+      await enforceBranchMaxVersions({ id, collection, global: globalConfig, max, req })
+      return
+    }
+
     const where: Where = {}
     let oldestAllowedDoc
 
