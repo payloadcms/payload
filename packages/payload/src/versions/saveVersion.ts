@@ -123,6 +123,9 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
 
       const createVersionArgs = {
         autosave: Boolean(autosave),
+        ...(branchWrite && branchWrite.workingBranchID !== 'drafts' && draft
+          ? { branchMode: true as const }
+          : {}),
         collectionSlug: undefined as string | undefined,
         createdAt: operation === 'restoreVersion' ? versionData.createdAt : now,
         globalSlug: undefined as string | undefined,

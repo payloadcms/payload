@@ -271,6 +271,22 @@ describe('Mongo native effective branch query compiler', () => {
     expect(lookups(query.stages)).toHaveLength(1)
   })
 
+  it('should keep an authorized operation near policy before inverse relationship stages', async () => {
+    const { adapter, context } = setup()
+    const query = await buildProjectionQuery({
+      adapter,
+      collection: 'articles',
+      context: {
+        ...context,
+        rootAccess: { collection: 'articles', where: { position: { near: [0, 0, 1000] } } },
+      },
+      where: { 'author.title': { equals: 'visible' } },
+    })
+
+    expect(query.stages[0]).toHaveProperty('$geoNear')
+    expect(query.stages.filter((stage) => '$geoNear' in stage)).toHaveLength(1)
+  })
+
   it('should reject an optional near predicate instead of changing OR semantics', async () => {
     const { adapter, context } = setup()
 

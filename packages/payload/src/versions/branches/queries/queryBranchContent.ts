@@ -7,6 +7,11 @@ import type { BranchQueryStorage } from './registerBranchQueryStorage.js'
 
 import { executeAccess } from '../../../auth/executeAccess.js'
 import {
+  consumeBranchOriginalPolicy,
+  readBranchOriginalGrant,
+} from '../operations/branchOriginalPolicy.js'
+import { collectOriginalReadTargets } from '../operations/collectOriginalReadTargets.js'
+import {
   decodeBranchProjectionDocument,
   encodeBranchProjectionBranchKey,
   encodeBranchProjectionID,
@@ -33,15 +38,23 @@ export const queryBranchContent = async (
   args: {
     branchID: BranchHeadID
     collection: string
-    /** Known bounded references from the raw graph collector, never a public query option. */
     graphTargetIDs?: readonly BranchHeadID[]
+    /** Known bounded references from the raw graph collector, never a public query option. */
+    originalPolicy?: object
     overrideAccess?: boolean
     req: PayloadRequest
   } & Omit<FindArgs, 'collection' | 'req'>,
 ) => {
+  const { originalPolicy, ...queryArgs } = args
+  const originalAccess = consumeBranchOriginalPolicy({
+    branchID: args.branchID,
+    collection: args.collection,
+    policy: originalPolicy,
+    req: args.req,
+  })
   return withBranchReadSnapshot({
     locale: args.locale,
-    read: ({ req }) => queryRawBranchContent({ ...args, req }),
+    read: ({ req }) => queryRawBranchContent({ ...queryArgs, originalAccess, req }),
     req: args.req,
   })
 }
@@ -50,6 +63,7 @@ const queryRawBranchContent = async ({
   branchID,
   collection,
   graphTargetIDs,
+  originalAccess,
   overrideAccess = false,
   req,
   ...args
@@ -57,6 +71,7 @@ const queryRawBranchContent = async ({
   branchID: BranchHeadID
   collection: string
   graphTargetIDs?: readonly BranchHeadID[]
+  originalAccess?: object
   overrideAccess?: boolean
   req: PayloadRequest
 } & Omit<FindArgs, 'collection' | 'req'>) => {
@@ -64,6 +79,7 @@ const queryRawBranchContent = async ({
     await prepareBranchContentQuery({
       branchID,
       collection,
+      originalAccess,
       overrideAccess,
       req,
       ...args,
@@ -114,6 +130,7 @@ const queryRawBranchContent = async ({
 export const prepareBranchContentQuery = async ({
   branchID,
   collection,
+  originalAccess,
   overrideAccess = false,
   req,
   ...args
@@ -123,9 +140,13 @@ export const prepareBranchContentQuery = async ({
   observedField?: string
   observedJoins?: FindArgs['joins']
   observedSort?: FindArgs['sort']
+  originalAccess?: object
   overrideAccess?: boolean
   req: PayloadRequest
 } & Omit<FindArgs, 'collection' | 'req'>) => {
+  const originalGrant = readBranchOriginalGrant({ grant: originalAccess })
+  const rootOperationWhere = originalGrant?.where
+  overrideAccess = originalGrant?.overrideAccess ?? overrideAccess
   assertBranchQuerySchemaOwnership({ adapter: req.payload.db })
   const query = req.payload.db.branching?.queryProjection
   const root = req.payload.collections[collection]?.config
@@ -158,6 +179,11 @@ export const prepareBranchContentQuery = async ({
   })) {
     requestedLocales.add(code)
   }
+  if (rootOperationWhere !== undefined) {
+    for (const code of collectBranchQueryLocales({ collection, req, where: rootOperationWhere })) {
+      requestedLocales.add(code)
+    }
+  }
   if (args.observedField) {
     for (const code of collectBranchQueryLocales({ collection, req, sort: args.observedField })) {
       requestedLocales.add(code)
@@ -182,12 +208,24 @@ export const prepareBranchContentQuery = async ({
       }
     }
   }
+  const originalReadTargets =
+    rootOperationWhere !== undefined && !overrideAccess
+      ? collectOriginalReadTargets({
+          collection,
+          req,
+          sort: args.observedSort ?? args.sort,
+          where: args.where,
+        })
+      : undefined
   for (const slug of reachable) {
     const config = req.payload.collections[slug]!.config
     const control = config.custom?.branchQueryStorage as BranchQueryStorage | undefined
-    const access = overrideAccess
-      ? true
-      : await executeAccess({ slug, disableErrors: true, req }, config.access.read)
+    const access =
+      originalReadTargets && !originalReadTargets.has(slug)
+        ? false
+        : overrideAccess
+          ? true
+          : await executeAccess({ slug, disableErrors: true, req }, config.access.read)
 
     if (access && typeof access === 'object') {
       for (const code of collectBranchQueryLocales({ collection: slug, req, where: access })) {
@@ -224,6 +262,19 @@ export const prepareBranchContentQuery = async ({
   return {
     context: {
       branchKey: encodeBranchProjectionBranchKey({ branchID }),
+      ...(rootOperationWhere !== undefined
+        ? {
+            rootAccess: {
+              collection: storage?.projection ?? collection,
+              where: compileBranchProjectionWhere({
+                branchID,
+                collection,
+                req,
+                where: rootOperationWhere,
+              }),
+            },
+          }
+        : {}),
       joins: preparedJoins?.joins,
       relationAccess,
     },

@@ -375,7 +375,7 @@ M1 implementation in `packages/payload/src/versions/branches` now covers interna
 
 Initial verification on Node 24.15.0: 47 focused unit tests passed; targeted oxlint, oxfmt, and strict standalone TypeScript checking passed. Two regression cases for matching inherited content failed before the ownership fix and passed afterward. These tests exercise the domain without database IO; they do not establish adapter atomicity, runtime API integration, migration correctness, or rendered accessibility.
 
-Current work: M3 independent correctness and native index/query-plan review passed under the reduced gate below; implement M4 working writes. The internal engine does not enable the feature. Further timing optimization is deferred in favor of functional delivery.
+Current work: M3 independent correctness and native index/query-plan review passed under the reduced gate below. The first M4 persistence slice is published; authoritative operation originals and selected working writes are undergoing independent review. Public reads, autosave ownership and the remaining M4 requirements follow as separately reviewed slices. The internal engine does not enable the feature. Further timing optimization is deferred in favor of functional delivery.
 
 ### Draft review stack
 
@@ -426,6 +426,7 @@ The stack starts at main. Each layer targets the preceding branch so reviewers s
 | 36 | [#18969](https://github.com/payloadcms/payload/pull/18969) | Independent M3 correctness/index signoff and functionality-first sequencing; timing work deferred |
 | 37 | [#18970](https://github.com/payloadcms/payload/pull/18970) | Restrict native Mongo graph/zero integration cases to supported transaction adapters |
 | 38 | [#18972](https://github.com/payloadcms/payload/pull/18972) | Ignore stale Lexical link-drawer initialization; production race and keyboard/state regressions |
+| 39 | [#18973](https://github.com/payloadcms/payload/pull/18973) | First M4 slice: migration-gated working-save persistence, native snapshots, guarded hooks and retention roots |
 
 Historical implementation state as of 2026-10-21 (superseded by the revised M3 signoff below):
 
@@ -550,3 +551,9 @@ Private cutover storage is authoritative and separate from rebuildable projectio
 Owner and independent reviewer each pass all thirteen focused tests on SQLite, PostgreSQL and MongoDB. The reviewer also passes four registration units and verifies all thirteen frozen source hashes before and after testing; core TypeScript, targeted formatting/lint and whitespace checks pass. All native/generator workers have stopped; only proven task-generated unrelated community types were restored. No benchmark was run.
 
 This is not M4 completion. Authoritative original/read routing and named context are next, followed by nested/public read routing, exclusive autosave coalescing, global restore parity, schema/editor reference discovery, full upload/GC boundaries, real D1 atomic write compilation and existing-suite engine regressions. M4 remains unchecked until those functional requirements and independent phase review pass.
+
+### M4 part 2A — selected operation originals
+
+The next slice uses privately selected working branches for collection update/restore originals, bulk membership and global update candidates. Root operation authorization remains separate from relationship read policies. Selected working writes cannot publish main or replace managed drafts latest. Native status-key presence, global ID shape, timestamps and caller transactions retain their existing operation contracts.
+
+The implementation owner and independent reviewer each pass the 43-case selected-original/working-write suite on SQLite, PostgreSQL and MongoDB, 38 focused units and the actual native Mongo root-policy geospatial case. Core/Mongo/Drizzle TypeScript, targeted formatting/lint and whitespace checks pass; existing lint warnings remain. Independent review approves all 30 frozen source files, verified before and after execution. Review identified and corrected late authority adoption after an explicitly observed legacy original or bulk candidate selection. Actual callback activation regressions cover both cases. This slice does not complete public selected reads, nested loaders or named-anchor suppression on ordinary reads; activation remains gated by the remaining M4 and M9 work.

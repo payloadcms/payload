@@ -35,6 +35,7 @@ import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { isWorkingBranchSelected } from '../../versions/branches/operations/selectedBranchContext.js'
 import { legacyVersionWhere } from '../../versions/branches/storage/legacyVersionWhere.js'
 import { prepareBranchWrite } from '../../versions/branches/writes/prepareBranchWrite.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
@@ -63,6 +64,9 @@ export const restoreVersionOperation = async <
 ): Promise<TData> => {
   assertNoValidationWrite(args.req)
 
+  if (isWorkingBranchSelected({ req: args.req })) {
+    args = { ...args, draft: true }
+  }
   const {
     id,
     collection: { config: collectionConfig },
@@ -176,7 +180,17 @@ export const restoreVersionOperation = async <
     }
 
     // Get the document from the non versioned collection
-    const doc = await req.payload.db.findOne<TData>(findOneArgs)
+    const doc = branchWrite
+      ? await getLatestCollectionVersion<TData>({
+          id: parentDocID,
+          branchWrite,
+          config: collectionConfig,
+          overrideAccess,
+          payload,
+          query: findOneArgs,
+          req,
+        })
+      : await req.payload.db.findOne<TData>(findOneArgs)
 
     if (!doc && !hasWherePolicy) {
       throw new NotFound(req.t)
@@ -205,13 +219,15 @@ export const restoreVersionOperation = async <
     // /////////////////////////////////////
     // fetch previousDoc
     // /////////////////////////////////////
-    const prevDocWithLocales = await getLatestCollectionVersion({
-      id: parentDocID,
-      config: collectionConfig,
-      payload,
-      query: findOneArgs,
-      req,
-    })
+    const prevDocWithLocales = branchWrite
+      ? doc
+      : await getLatestCollectionVersion({
+          id: parentDocID,
+          config: collectionConfig,
+          payload,
+          query: findOneArgs,
+          req,
+        })
 
     // originalDoc with hoisted localized data
     const validationLocale = payload.config.localization

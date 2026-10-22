@@ -6,6 +6,7 @@ import path from 'node:path'
 
 import type { AccessResult } from '../../config/types.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
+import type { BranchHeadToken } from '../../versions/branches/types.js'
 import type {
   BulkOperationResult,
   Collection,
@@ -54,6 +55,16 @@ import {
   reconcileAllLocalesPublicationStatus,
   validateAllLocalesPublicationFlags,
 } from '../../versions/allLocalesPublicationStatus.js'
+import { areBranchHeadTokensEqual } from '../../versions/branches/compareBranchHeads.js'
+import { queryBranchOriginalCandidates } from '../../versions/branches/operations/resolveBranchOriginal.js'
+import {
+  getSelectedBranch,
+  isWorkingBranchSelected,
+} from '../../versions/branches/operations/selectedBranchContext.js'
+import {
+  isBranchWriteEngineActive,
+  prepareBranchWrite,
+} from '../../versions/branches/writes/prepareBranchWrite.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
@@ -97,6 +108,15 @@ export const updateOperation = async <
   incomingArgs: Arguments<TSlug>,
 ): Promise<BulkOperationResult<TSlug, TSelect>> => {
   let args = incomingArgs
+  if (isWorkingBranchSelected({ req: args.req })) {
+    args = {
+      ...args,
+      data: { ...args.data, _status: 'draft' },
+      draft: true,
+      publishAllLocales: false,
+      unpublishAllLocales: false,
+    }
+  }
   const hasFileOperationScope = Boolean(args.collection.config.upload)
 
   assertNoValidationWrite(args.req)
@@ -160,6 +180,16 @@ export const updateOperation = async <
       operation: 'update',
       overrideAccess: args.overrideAccess!,
     })
+
+    if (isWorkingBranchSelected({ req: args.req })) {
+      args = {
+        ...args,
+        data: { ...args.data, _status: 'draft' },
+        draft: true,
+        publishAllLocales: false,
+        unpublishAllLocales: false,
+      }
+    }
 
     const {
       autosave = false,
@@ -247,6 +277,7 @@ export const updateOperation = async <
     // Retrieve documents
     // /////////////////////////////////////
 
+    let operationAccess = typeof accessResult! === 'object' ? accessResult! : {}
     let fullWhere = combineQueries(where, accessResult!)
 
     const isTrashAttempt =
@@ -264,6 +295,7 @@ export const updateOperation = async <
         collectionConfig.access.delete,
       )
       fullWhere = combineQueries(fullWhere, deleteAccessResult)
+      operationAccess = combineQueries(operationAccess, deleteAccessResult)
     }
 
     // Exclude trashed documents when trash: false
@@ -288,8 +320,26 @@ export const updateOperation = async <
     })
 
     let docs
+    let candidateObservations: Map<number | string, BranchHeadToken[]> | undefined
+    const isAuthoritative = await isBranchWriteEngineActive({ entity: collectionConfig, req })
+    if (isWorkingBranchSelected({ req }) && !isAuthoritative) {
+      throw new Error('Named branch writes require an authoritative cutover and supported entity.')
+    }
 
-    if (hasDraftsEnabled(collectionConfig) && (shouldSaveDraft || isTrashAttempt)) {
+    if (isAuthoritative) {
+      const selected = await queryBranchOriginalCandidates({
+        access: operationAccess,
+        collection: collectionConfig.slug,
+        limit,
+        overrideAccess,
+        readBranchID: getSelectedBranch({ req }) ?? (shouldSaveDraft ? 'drafts' : 'main'),
+        req,
+        sort,
+        where: appendNonTrashedFilter({ enableTrash: collectionConfig.trash, trash, where }),
+      })
+      docs = selected.docs
+      candidateObservations = selected.observations
+    } else if (hasDraftsEnabled(collectionConfig) && (shouldSaveDraft || isTrashAttempt)) {
       const versionsWhere = appendVersionToQueryKey(fullWhere)
 
       await validateQueryPaths({
@@ -350,6 +400,29 @@ export const updateOperation = async <
         let docShouldCommit = false
         if (req.payload.db.bulkOperationsSingleTransaction) {
           docShouldCommit = await initTransaction(req)
+        }
+
+        if (
+          (await isBranchWriteEngineActive({ entity: collectionConfig, req })) !== isAuthoritative
+        ) {
+          throw new Error('Branch write authority changed after candidate selection.')
+        }
+        const branchWrite = isAuthoritative
+          ? await prepareBranchWrite({ id, collection: collectionConfig, req })
+          : null
+        if (isAuthoritative && !branchWrite) {
+          throw new Error('Branch write authority changed after candidate selection.')
+        }
+        const captured = candidateObservations?.get(id)
+        if (
+          branchWrite &&
+          captured &&
+          captured.some(
+            (token, index) =>
+              !areBranchHeadTokensEqual({ left: token, right: branchWrite.readSet[index]! }),
+          )
+        ) {
+          throw new Error('Bulk branch candidates changed before the operation write.')
         }
 
         const documentFile = req.file ? { ...req.file } : undefined
@@ -423,6 +496,7 @@ export const updateOperation = async <
         const updateArgs = {
           id,
           autosave,
+          branchWrite,
           collectionConfig,
           config,
           data: documentData,

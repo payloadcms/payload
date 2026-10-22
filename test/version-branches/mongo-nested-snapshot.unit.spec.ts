@@ -512,10 +512,12 @@ describe.skipIf(!isNativeEnabled)('native nested MongoDB snapshot queries', () =
           )
         const run = async ({
           access = {},
+          rootAccess,
           targetAccess = {},
           where = {},
         }: {
           access?: false | Where
+          rootAccess?: false | Where
           targetAccess?: false | Where
           where?: Where
         }) => {
@@ -523,6 +525,9 @@ describe.skipIf(!isNativeEnabled)('native nested MongoDB snapshot queries', () =
             collection: 'parents',
             context: {
               branchKey: 'staging',
+              ...(rootAccess === undefined
+                ? {}
+                : { rootAccess: { collection: 'parents', where: rootAccess } }),
               relationAccess: { parents: access, targets: targetAccess, children: {} },
             } as never,
             where,
@@ -535,6 +540,17 @@ describe.skipIf(!isNativeEnabled)('native nested MongoDB snapshot queries', () =
         expect(
           (await run({ access: { position: { near: [0, 0, 1000] } } })).map(({ id }) => String(id)),
         ).toEqual([String(parentID)])
+        const rootOperation = await run({
+          access: false,
+          rootAccess: { position: { near: [0, 0, 1000] } },
+          where: { 'target.title': { equals: 'old' } },
+        })
+        const rootRead = await run({
+          access: { position: { near: [0, 0, 1000] } },
+          where: { 'target.title': { equals: 'old' } },
+        })
+        expect(rootOperation).toEqual(rootRead)
+        expect(rootOperation.map(({ id }) => String(id))).toEqual([String(parentID)])
         expect(
           (
             await run({

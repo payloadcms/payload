@@ -24,6 +24,35 @@ export const queryBranchGlobalGraph = async ({
   req: PayloadRequest
   where?: Where
 }) => {
+  const { scopedReq, sourceSlug } = createBranchGlobalSourceRequest({ global, req })
+  const result = await queryBranchContentGraph({
+    branchID,
+    collection: sourceSlug,
+    depth,
+    joins: false,
+    limit: 1,
+    locale,
+    overrideAccess,
+    req: scopedReq,
+    sort: 'id',
+    where,
+  })
+  return { graph: result.graph, result: result.result.docs[0] ?? null }
+}
+
+/** A raw singleton read; population callers use the same-snapshot global graph entrypoint. */
+export const queryBranchGlobal = async (
+  args: Parameters<typeof queryBranchGlobalGraph>[0],
+): Promise<null | Record<string, unknown>> => (await queryBranchGlobalGraph(args)).result
+
+/** Shared singleton alias for trusted original-operation reads and ordinary raw graphs. */
+export const createBranchGlobalSourceRequest = ({
+  global,
+  req,
+}: {
+  global: string
+  req: PayloadRequest
+}) => {
   const config = req.payload.globals.config.find(({ slug }) => slug === global)
   const storage = config?.custom?.branchQueryStorage as BranchQueryStorage | undefined
 
@@ -58,22 +87,5 @@ export const queryBranchGlobalGraph = async ({
     }),
     req,
   })
-  const result = await queryBranchContentGraph({
-    branchID,
-    collection: sourceSlug,
-    depth,
-    joins: false,
-    limit: 1,
-    locale,
-    overrideAccess,
-    req: scopedReq,
-    sort: 'id',
-    where,
-  })
-  return { graph: result.graph, result: result.result.docs[0] ?? null }
+  return { scopedReq, sourceSlug }
 }
-
-/** A raw singleton read; population callers use the same-snapshot global graph entrypoint. */
-export const queryBranchGlobal = async (
-  args: Parameters<typeof queryBranchGlobalGraph>[0],
-): Promise<null | Record<string, unknown>> => (await queryBranchGlobalGraph(args)).result

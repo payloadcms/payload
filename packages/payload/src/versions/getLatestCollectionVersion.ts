@@ -1,16 +1,20 @@
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { FindOneArgs } from '../database/types.js'
 import type { Payload, PayloadRequest, Where } from '../types/index.js'
+import type { BranchWriteObservation } from './branches/writes/prepareBranchWrite.js'
 import type { TypeWithVersion } from './types.js'
 
 import { combineQueries } from '../database/combineQueries.js'
 import { hasDraftsEnabled } from '../utilities/getVersionsConfig.js'
+import { resolveBranchOriginal } from './branches/operations/resolveBranchOriginal.js'
 import { legacyVersionWhere } from './branches/storage/legacyVersionWhere.js'
 import { appendVersionToQueryKey } from './drafts/appendVersionToQueryKey.js'
 
 type Args = {
+  branchWrite?: BranchWriteObservation | null
   config: SanitizedCollectionConfig
   id: number | string
+  overrideAccess?: boolean
   payload: Payload
   published?: boolean
   query: FindOneArgs
@@ -19,12 +23,24 @@ type Args = {
 
 export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
   id,
+  branchWrite,
   config,
+  overrideAccess,
   payload,
   published,
   query,
   req,
 }: Args): Promise<T | undefined> => {
+  if (branchWrite) {
+    return (await resolveBranchOriginal({
+      collection: config.slug,
+      observation: branchWrite,
+      overrideAccess,
+      req: req!,
+      where: query.where,
+    })) as T | undefined
+  }
+
   let latestVersion!: TypeWithVersion<T>
 
   const whereQuery = published

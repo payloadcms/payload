@@ -12,6 +12,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { databaseAdapter } from '../databaseAdapter.js'
 import { Articles } from './collections/Articles/index.js'
 import { FractionalIDs } from './collections/FractionalIDs/index.js'
+import { LocalizedStatusArticles } from './collections/LocalizedStatusArticles/index.js'
 import { ProtectedArticles } from './collections/ProtectedArticles/index.js'
 import { QueryDocs } from './collections/QueryDocs/index.js'
 import { QueryTags } from './collections/QueryTags/index.js'
@@ -48,6 +49,7 @@ export default buildConfigWithDefaults({
       registerBranchStorage({
         collections: [
           Articles,
+          LocalizedStatusArticles,
           ScalarArticles,
           ProtectedArticles,
           WideIDs,

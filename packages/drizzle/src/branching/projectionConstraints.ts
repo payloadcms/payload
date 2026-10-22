@@ -75,6 +75,49 @@ export const projectionRootConstraint = ({
   if (!context || !config) {
     return undefined
   }
+  const hasOperationPolicy =
+    context.rootAccess?.collection === collection &&
+    getTableName(table) === adapter.tableNameMap.get(toSnakeCase(collection)) &&
+    !(adapter as ProjectionQueryAdapter)[projectionCompilingAccess]
+  if (hasOperationPolicy) {
+    const access = context.rootAccess!.where
+    if (!access) {
+      return sql`false`
+    }
+    const tableName = adapter.tableNameMap.get(toSnakeCase(collection))
+    const { newAliasTable: policyTable } = getTableAlias({ adapter, tableName })
+    const nestedAdapter = Object.assign(Object.create(adapter), {
+      [projectionCompilingAccess]: true,
+      tables: { ...adapter.tables, [tableName]: policyTable },
+    }) as DrizzleAdapter
+    const policyJoins: BuildQueryJoinAliases = []
+    const predicate = parseParams({
+      adapter: nestedAdapter,
+      aliasTable: policyTable,
+      context: { sort: undefined },
+      fields: config.flattenedFields,
+      joins: policyJoins,
+      locale,
+      parentIsLocalized: false,
+      selectFields: {},
+      tableName,
+      where: access,
+    })
+    guardProjectionJoins({ adapter: nestedAdapter, joins: policyJoins, locale })
+    let query = (adapter.drizzle as any).select({ id: policyTable.id }).from(policyTable).$dynamic()
+    for (const join of policyJoins) {
+      query = query[join.type ?? 'leftJoin'](join.table, join.condition)
+    }
+    return and(
+      exists(query.where(and(eq(policyTable.id, table['id']), predicate))),
+      ...(config.custom?.branchProjectionStorage
+        ? [
+            eq(table['_branchProjection_branchKey'], context.branchKey),
+            eq(table['_branchProjection_isVisible'], true),
+          ]
+        : []),
+    )
+  }
   const access = (adapter as ProjectionQueryAdapter)[projectionCompilingAccess]
     ? {}
     : context.relationAccess[collection]

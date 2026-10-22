@@ -47,6 +47,7 @@ import {
   reconcileAllLocalesPublicationStatus,
   validateAllLocalesPublicationFlags,
 } from '../../versions/allLocalesPublicationStatus.js'
+import { isWorkingBranchSelected } from '../../versions/branches/operations/selectedBranchContext.js'
 import { prepareBranchWrite } from '../../versions/branches/writes/prepareBranchWrite.js'
 import { buildLocalizedPublishData } from '../../versions/buildSingleLocalePublishData.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
@@ -75,6 +76,15 @@ export const updateOperation = async <
 >(
   args: Args<TSlug>,
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
+  if (isWorkingBranchSelected({ req: args.req })) {
+    args = {
+      ...args,
+      data: { ...args.data, _status: 'draft' },
+      draft: true,
+      publishAllLocales: false,
+      unpublishAllLocales: false,
+    }
+  }
   assertNoValidationWrite(args.req)
 
   const req = args.req
@@ -108,6 +118,8 @@ export const updateOperation = async <
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(req))
+    const observedTransactionID = req.transactionID
+    const branchWrite = await prepareBranchWrite({ global: initialGlobalConfig, req })
 
     // /////////////////////////////////////
     // beforeOperation - Global
@@ -125,6 +137,25 @@ export const updateOperation = async <
             req: args.req,
           })) || args
       }
+    }
+
+    if (isWorkingBranchSelected({ req: args.req })) {
+      args = {
+        ...args,
+        data: { ...args.data, _status: 'draft' },
+        draft: true,
+        publishAllLocales: false,
+        unpublishAllLocales: false,
+      }
+    }
+
+    if (
+      branchWrite &&
+      (args.globalConfig !== initialGlobalConfig ||
+        args.req !== req ||
+        !Object.is(req.transactionID, observedTransactionID))
+    ) {
+      throw new Error('An authoritative operation cannot rebind its observed destination.')
     }
 
     const {
@@ -177,9 +208,10 @@ export const updateOperation = async <
     }
 
     const isSavingDraft =
-      Boolean(draftArg && hasDraftsEnabled(globalConfig)) &&
-      data._status !== 'published' &&
-      !publishAllLocales
+      isWorkingBranchSelected({ req }) ||
+      (Boolean(draftArg && hasDraftsEnabled(globalConfig)) &&
+        data._status !== 'published' &&
+        !publishAllLocales)
 
     if (isSavingDraft) {
       data._status = 'draft'
@@ -215,8 +247,10 @@ export const updateOperation = async <
     // /////////////////////////////////////
     const globalVersionResult = await getLatestGlobalVersion({
       slug,
+      branchWrite,
       config: globalConfig,
       locale: publishAllLocales || unpublishAllLocales ? 'all' : locale!,
+      overrideAccess,
       payload,
       req,
       where: query,
@@ -225,7 +259,7 @@ export const updateOperation = async <
 
     if (
       hasWhereAccessResult(accessResults) &&
-      globalExists &&
+      (globalExists || branchWrite?.readSet.some(({ state }) => state?.type === 'version')) &&
       (!global || Object.keys(global).length === 0)
     ) {
       throw new Forbidden(req.t)
@@ -240,8 +274,6 @@ export const updateOperation = async <
         delete globalJSON._id
       }
     }
-
-    const branchWrite = await prepareBranchWrite({ global: globalConfig, req })
 
     const originalDoc = await afterRead({
       collection: null,

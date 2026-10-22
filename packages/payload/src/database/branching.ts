@@ -15,6 +15,8 @@ export type BranchProjectionQueryContext = {
   >
   /** Original entity read predicates translated to each private relation; missing means denied. */
   relationAccess: Record<string, false | Where>
+  /** Already-authorized original operation root; never used for relationship hops. */
+  rootAccess?: { collection: string; where: false | Where }
 }
 
 export type BranchProjectionQueries = {

@@ -17,6 +17,7 @@ import type {
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
+import type { BranchWriteObservation } from '../../../versions/branches/writes/prepareBranchWrite.js'
 import type {
   DataFromCollectionSlug,
   SanitizedCollectionConfig,
@@ -50,11 +51,13 @@ import {
   hasAuthorizedAllLocalesPublicationStatus,
   validateAllLocalesPublicationFlags,
 } from '../../../versions/allLocalesPublicationStatus.js'
+import { isWorkingBranchSelected } from '../../../versions/branches/operations/selectedBranchContext.js'
 import { prepareBranchWrite } from '../../../versions/branches/writes/prepareBranchWrite.js'
 import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
 import { validateLocalWithLocaleKeyedData } from '../local/validate.js'
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
+  branchWrite?: BranchWriteObservation | null
   collectionConfig: SanitizedCollectionConfig
   config: SanitizedConfig
   data: DeepPartial<DataFromCollectionSlug<TSlug>>
@@ -95,6 +98,7 @@ export const updateDocument = async <
 >({
   id,
   autosave,
+  branchWrite: capturedBranchWrite,
   collectionConfig,
   config,
   data,
@@ -141,9 +145,10 @@ export const updateDocument = async <
     unpublishAllLocales,
   })
   const isSavingDraft =
-    Boolean(draftArg && hasDraftsEnabled(collectionConfig)) &&
-    data._status !== 'published' &&
-    !publishAllLocales
+    isWorkingBranchSelected({ req }) ||
+    (Boolean(draftArg && hasDraftsEnabled(collectionConfig)) &&
+      data._status !== 'published' &&
+      !publishAllLocales)
   if (allLocalesPublicationStatus || isSavingDraft) {
     data._status = allLocalesPublicationStatus ?? 'draft'
   }
@@ -160,7 +165,10 @@ export const updateDocument = async <
     req,
   })
 
-  const branchWrite = await prepareBranchWrite({ id, collection: collectionConfig, req })
+  const branchWrite =
+    capturedBranchWrite !== undefined
+      ? capturedBranchWrite
+      : await prepareBranchWrite({ id, collection: collectionConfig, req })
 
   const originalDoc = await afterRead({
     collection: collectionConfig,

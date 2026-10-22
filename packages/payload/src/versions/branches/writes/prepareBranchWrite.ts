@@ -7,6 +7,7 @@ import type { BranchStorageTarget } from '../storage/branchStorage.js'
 import type { BranchContentScope, BranchHeadID, BranchHeadToken } from '../types.js'
 
 import { areBranchHeadTokensEqual } from '../compareBranchHeads.js'
+import { getSelectedBranch, isWorkingBranchSelected } from '../operations/selectedBranchContext.js'
 import { readBranchHead, readBranchHeads } from '../storage/branchHeadStore.js'
 import { assertBranchTransaction } from '../storage/branchStorage.js'
 
@@ -24,6 +25,7 @@ export type BranchWriteObservation = {
   readSet: readonly BranchHeadToken[]
   scopes: readonly BranchContentScope[]
   target: BranchStorageTarget
+  workingBranchID: BranchHeadID
 }
 
 /** Read a durable cutover receipt, not cache readiness. No public input activates this path. */
@@ -45,6 +47,9 @@ export const prepareBranchWrite = async ({
   const cutover = entity && req ? await readBranchWriteCutover({ entity, req }) : null
 
   if (!req || !entity || !cutover) {
+    if (isWorkingBranchSelected({ req })) {
+      throw new Error('Named branch writes require an authoritative cutover and supported entity.')
+    }
     return null
   }
   await assertBranchTransaction({ req })
@@ -65,9 +70,10 @@ export const prepareBranchWrite = async ({
         }))
       : []),
   ]
+  const workingBranchID = getSelectedBranch({ req }) ?? 'drafts'
   const selections = scopes.flatMap((scope) => [
     { branchID: 'main', scope },
-    { branchID: 'drafts', scope },
+    { branchID: workingBranchID, scope },
   ])
 
   const readSet = isCreate
@@ -83,7 +89,7 @@ export const prepareBranchWrite = async ({
 
   if (!isCreate) {
     for (const scope of scopes) {
-      const head = await readBranchHead({ branchID: 'drafts', req, scope, target })
+      const head = await readBranchHead({ branchID: workingBranchID, req, scope, target })
 
       if (head) {
         bases.push({ base: head.base ?? null, scope })
@@ -110,6 +116,7 @@ export const prepareBranchWrite = async ({
     readSet,
     scopes,
     target,
+    workingBranchID,
   }
 }
 

@@ -42,7 +42,7 @@ export const persistBranchWrite = async ({
     ...(collection ? { parentID: id } : {}),
   }
   const { entity } = getBranchStorage({ req, target })
-  const branchID = draft ? 'drafts' : 'main'
+  const branchID = draft ? observation.workingBranchID : 'main'
   let reference = await initializeBranchVersion({
     branchID,
     isFrozen: true,
@@ -57,6 +57,7 @@ export const persistBranchWrite = async ({
     const materialized = collection
       ? await req.payload.db.findOne<{ id: number | string } & JsonObject>({
           collection: collection.slug,
+          joins: false,
           locale: 'all',
           req,
           where: { id: { equals: id } },
@@ -163,8 +164,8 @@ export const persistBranchWrite = async ({
 
   if (!visibility) {
     visibility = await createBranchIdentityVisibility({
-      branchID: 'drafts',
-      isLegacyDraftVisible: true,
+      branchID: draft ? branchID : 'drafts',
+      isLegacyDraftVisible: !draft || branchID === 'drafts',
       req,
       target,
     })

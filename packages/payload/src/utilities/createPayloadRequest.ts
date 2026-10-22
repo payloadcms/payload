@@ -4,6 +4,10 @@ import type { PayloadRequest } from '../types/index.js'
 import { getDataLoader } from '../collections/dataloader.js'
 import { getLocalI18n } from '../translations/getLocalI18n.js'
 import { sanitizeFallbackLocale } from '../utilities/sanitizeFallbackLocale.js'
+import {
+  forkSelectedBranchRequest,
+  getSelectedBranch,
+} from '../versions/branches/operations/selectedBranchContext.js'
 import { forkBranchReadRequest, resolveBranchReadPayload } from './createBranchReadRequest.js'
 
 function getRequestContext(
@@ -109,6 +113,7 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
   urlSuffix,
   user,
 }): Promise<PayloadRequest> => {
+  req = forkSelectedBranchRequest({ req })
   payload = resolveBranchReadPayload({ payload, req })
   req = forkBranchReadRequest({ req })
 
@@ -123,7 +128,9 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
       localeCandidate && typeof localeCandidate === 'string' ? localeCandidate : defaultLocale
 
     const sanitizedFallback = sanitizeFallbackLocale({
-      fallbackLocale: fallbackLocale!,
+      fallbackLocale: (fallbackLocale === undefined && getSelectedBranch({ req }) !== undefined
+        ? req.fallbackLocale
+        : fallbackLocale)!,
       locale: req.locale,
       localization,
     })

@@ -49,6 +49,8 @@ import {
   reconcileAllLocalesPublicationStatus,
   validateAllLocalesPublicationFlags,
 } from '../../versions/allLocalesPublicationStatus.js'
+import { isWorkingBranchSelected } from '../../versions/branches/operations/selectedBranchContext.js'
+import { prepareBranchWrite } from '../../versions/branches/writes/prepareBranchWrite.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
@@ -81,6 +83,15 @@ export const updateByIDOperation = async <
   incomingArgs: Arguments<TSlug>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
+  if (isWorkingBranchSelected({ req: args.req })) {
+    args = {
+      ...args,
+      data: { ...args.data, _status: 'draft' },
+      draft: true,
+      publishAllLocales: false,
+      unpublishAllLocales: false,
+    }
+  }
   const hasFileOperationScope = Boolean(args.collection.config.upload)
 
   if (hasFileOperationScope) {
@@ -91,6 +102,17 @@ export const updateByIDOperation = async <
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    const observedDestination = {
+      id: args.id,
+      config: args.collection.config,
+      req: args.req,
+      transactionID: args.req.transactionID,
+    }
+    const branchWrite = await prepareBranchWrite({
+      id: args.id,
+      collection: args.collection.config,
+      req: args.req,
+    })
 
     if (args.collection.config.upload && !args.overrideAccess) {
       const { objectKey, prefix } = getUploadDestination({ data: args.data, file: args.req.file })
@@ -142,6 +164,26 @@ export const updateByIDOperation = async <
       operation: 'update',
       overrideAccess: args.overrideAccess!,
     })
+
+    if (isWorkingBranchSelected({ req: args.req })) {
+      args = {
+        ...args,
+        data: { ...args.data, _status: 'draft' },
+        draft: true,
+        publishAllLocales: false,
+        unpublishAllLocales: false,
+      }
+    }
+
+    if (
+      branchWrite &&
+      (args.id !== observedDestination.id ||
+        args.collection.config !== observedDestination.config ||
+        args.req !== observedDestination.req ||
+        !Object.is(args.req.transactionID, observedDestination.transactionID))
+    ) {
+      throw new Error('An authoritative operation cannot rebind its observed destination.')
+    }
 
     const {
       id,
@@ -256,7 +298,9 @@ export const updateByIDOperation = async <
       RequiredDataFromCollectionSlug<TSlug> & TypeWithID
     >({
       id,
+      branchWrite,
       config: collectionConfig,
+      overrideAccess,
       payload,
       query: findOneArgs,
       req,
@@ -325,6 +369,7 @@ export const updateByIDOperation = async <
     const updateArgs = {
       id,
       autosave,
+      branchWrite,
       collectionConfig,
       config,
       data: deepCopyObjectSimple(newFileData),

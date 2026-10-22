@@ -57,13 +57,21 @@ export const buildProjectionQuery = async ({
   const stages: Stage[] = []
   const hasGeospatialPredicate =
     hasNearPredicate({ where }) ||
+    (context.rootAccess?.collection === collection &&
+      !!context.rootAccess.where &&
+      hasNearPredicate({ where: context.rootAccess.where })) ||
     Object.values(context.relationAccess).some(
       (access) => access && hasNearPredicate({ where: access }),
     )
   const inverse = hasGeospatialPredicate
     ? undefined
     : findInversePredicate({ collection, state, where })
-  if (inverse && context.relationAccess[collection]) {
+  if (
+    inverse &&
+    (context.rootAccess?.collection === collection
+      ? context.rootAccess.where
+      : context.relationAccess[collection])
+  ) {
     stages.push({ $match: visibility({ collection: inverse.target, state }) })
     const foreignAccess = context.relationAccess[inverse.target]
     stages.push({
@@ -102,7 +110,10 @@ export const buildProjectionQuery = async ({
       { $replaceWith: '$__branchRoot' },
     )
   }
-  const access = context.relationAccess[collection]
+  const access =
+    context.rootAccess?.collection === collection
+      ? context.rootAccess.where
+      : context.relationAccess[collection]
   const geo = await extractNear({
     collection,
     state,
@@ -161,7 +172,13 @@ export const buildProjectionQuery = async ({
 
       return { path: resolved, stages: sortStages as PipelineStage[] }
     },
-    sourceCollection: inverse && context.relationAccess[collection] ? inverse.target : collection,
+    sourceCollection:
+      inverse &&
+      (context.rootAccess?.collection === collection
+        ? context.rootAccess.where
+        : context.relationAccess[collection])
+        ? inverse.target
+        : collection,
     stages: stages as PipelineStage[],
   }
 }

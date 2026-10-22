@@ -67,6 +67,7 @@ import {
   normalizeAllLocalesPublicationStatus,
   reconcileAllLocalesPublicationStatus,
 } from '../../versions/allLocalesPublicationStatus.js'
+import { isWorkingBranchSelected } from '../../versions/branches/operations/selectedBranchContext.js'
 import { prepareBranchWrite } from '../../versions/branches/writes/prepareBranchWrite.js'
 import { validateLocalWithLocaleKeyedData } from './local/validate.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
@@ -97,6 +98,14 @@ export const createOperation = async <
   incomingArgs: Arguments<TSlug>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
+  if (isWorkingBranchSelected({ req: args.req })) {
+    args = {
+      ...args,
+      data: { ...args.data, _status: 'draft' },
+      draft: true,
+      publishAllLocales: false,
+    }
+  }
   let externalUploadSource: ReturnType<typeof getExternalUploadSource>
   let restoreCloudHookState: (() => void) | undefined
   const hasFileOperationScope = Boolean(args.collection.config.upload)
@@ -167,6 +176,15 @@ export const createOperation = async <
       operation: 'create',
       overrideAccess: args.overrideAccess!,
     })
+
+    if (isWorkingBranchSelected({ req: args.req })) {
+      args = {
+        ...args,
+        data: { ...args.data, _status: 'draft' },
+        draft: true,
+        publishAllLocales: false,
+      }
+    }
 
     const {
       autosave = false,

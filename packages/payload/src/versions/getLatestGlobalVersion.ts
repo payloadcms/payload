@@ -1,16 +1,20 @@
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Document, Payload, PayloadRequest, Where } from '../types/index.js'
+import type { BranchWriteObservation } from './branches/writes/prepareBranchWrite.js'
 import type { TypeWithVersion } from './types.js'
 
 import { hasWhereAccessResult } from '../auth/types.js'
 import { combineQueries } from '../database/combineQueries.js'
 import { hasDraftsEnabled } from '../utilities/getVersionsConfig.js'
+import { resolveBranchOriginal } from './branches/operations/resolveBranchOriginal.js'
 import { legacyVersionWhere } from './branches/storage/legacyVersionWhere.js'
 import { appendVersionToQueryKey } from './drafts/appendVersionToQueryKey.js'
 
 type Args = {
+  branchWrite?: BranchWriteObservation | null
   config: SanitizedGlobalConfig
   locale?: string
+  overrideAccess?: boolean
   payload: Payload
   published?: boolean
   req?: PayloadRequest
@@ -20,13 +24,30 @@ type Args = {
 
 export const getLatestGlobalVersion = async ({
   slug,
+  branchWrite,
   config,
   locale,
+  overrideAccess,
   payload,
   published,
   req,
   where,
 }: Args): Promise<{ global: Document; globalExists: boolean }> => {
+  if (branchWrite) {
+    const effective = await resolveBranchOriginal({
+      global: slug,
+      observation: branchWrite,
+      overrideAccess,
+      req: req!,
+      where,
+    })
+    const existing = await payload.db.findGlobal({ slug, locale, req })
+    return {
+      global: effective as Document,
+      globalExists: Boolean(existing && Object.keys(existing).length > 0),
+    }
+  }
+
   let latestVersion: TypeWithVersion<Document> | undefined
 
   const whereQuery = published

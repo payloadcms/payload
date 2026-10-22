@@ -80,6 +80,7 @@ export interface Config {
   blocks: {};
   collections: {
     'branch-head-articles': BranchHeadArticle;
+    'branch-localized-status-articles': BranchLocalizedStatusArticle;
     'branch-scalar-articles': BranchScalarArticle;
     'branch-head-protected-articles': BranchHeadProtectedArticle;
     'branch-wide-ids': BranchWideId;
@@ -93,6 +94,10 @@ export interface Config {
     'collection-branch-head-articles-heads': CollectionBranchHeadArticlesHead;
     'collection-branch-head-articles-pins': CollectionBranchHeadArticlesPin;
     'collection-branch-head-articles-identities': CollectionBranchHeadArticlesIdentity;
+    'collection-branch-localized-status-articles-cutover': CollectionBranchLocalizedStatusArticlesCutover;
+    'collection-branch-localized-status-articles-heads': CollectionBranchLocalizedStatusArticlesHead;
+    'collection-branch-localized-status-articles-pins': CollectionBranchLocalizedStatusArticlesPin;
+    'collection-branch-localized-status-articles-identities': CollectionBranchLocalizedStatusArticlesIdentity;
     'collection-branch-scalar-articles-cutover': CollectionBranchScalarArticlesCutover;
     'collection-branch-scalar-articles-heads': CollectionBranchScalarArticlesHead;
     'collection-branch-scalar-articles-pins': CollectionBranchScalarArticlesPin;
@@ -119,6 +124,8 @@ export interface Config {
     'global-branch-head-settings-identities': GlobalBranchHeadSettingsIdentity;
     'collection-branch-head-articles-query-states': CollectionBranchHeadArticlesQueryState;
     'collection-branch-head-articles-query-invalidations': CollectionBranchHeadArticlesQueryInvalidation;
+    'collection-branch-localized-status-articles-query-states': CollectionBranchLocalizedStatusArticlesQueryState;
+    'collection-branch-localized-status-articles-query-invalidations': CollectionBranchLocalizedStatusArticlesQueryInvalidation;
     'collection-branch-scalar-articles-query-states': CollectionBranchScalarArticlesQueryState;
     'collection-branch-scalar-articles-query-invalidations': CollectionBranchScalarArticlesQueryInvalidation;
     'collection-branch-head-protected-articles-query-states': CollectionBranchHeadProtectedArticlesQueryState;
@@ -139,6 +146,7 @@ export interface Config {
     'payload-migrations': PayloadMigration;
     'payload-llm-instructions': PayloadLlmInstruction;
     'collection-branch-head-articles-projection': CollectionBranchHeadArticlesProjection;
+    'collection-branch-localized-status-articles-projection': CollectionBranchLocalizedStatusArticlesProjection;
     'collection-branch-scalar-articles-projection': CollectionBranchScalarArticlesProjection;
     'collection-branch-head-protected-articles-projection': CollectionBranchHeadProtectedArticlesProjection;
     'collection-branch-wide-ids-projection': CollectionBranchWideIdsProjection;
@@ -162,6 +170,7 @@ export interface Config {
   };
   collectionsSelect: {
     'branch-head-articles': BranchHeadArticlesSelect<false> | BranchHeadArticlesSelect<true>;
+    'branch-localized-status-articles': BranchLocalizedStatusArticlesSelect<false> | BranchLocalizedStatusArticlesSelect<true>;
     'branch-scalar-articles': BranchScalarArticlesSelect<false> | BranchScalarArticlesSelect<true>;
     'branch-head-protected-articles': BranchHeadProtectedArticlesSelect<false> | BranchHeadProtectedArticlesSelect<true>;
     'branch-wide-ids': BranchWideIdsSelect<false> | BranchWideIdsSelect<true>;
@@ -175,6 +184,10 @@ export interface Config {
     'collection-branch-head-articles-heads': CollectionBranchHeadArticlesHeadsSelect<false> | CollectionBranchHeadArticlesHeadsSelect<true>;
     'collection-branch-head-articles-pins': CollectionBranchHeadArticlesPinsSelect<false> | CollectionBranchHeadArticlesPinsSelect<true>;
     'collection-branch-head-articles-identities': CollectionBranchHeadArticlesIdentitiesSelect<false> | CollectionBranchHeadArticlesIdentitiesSelect<true>;
+    'collection-branch-localized-status-articles-cutover': CollectionBranchLocalizedStatusArticlesCutoverSelect<false> | CollectionBranchLocalizedStatusArticlesCutoverSelect<true>;
+    'collection-branch-localized-status-articles-heads': CollectionBranchLocalizedStatusArticlesHeadsSelect<false> | CollectionBranchLocalizedStatusArticlesHeadsSelect<true>;
+    'collection-branch-localized-status-articles-pins': CollectionBranchLocalizedStatusArticlesPinsSelect<false> | CollectionBranchLocalizedStatusArticlesPinsSelect<true>;
+    'collection-branch-localized-status-articles-identities': CollectionBranchLocalizedStatusArticlesIdentitiesSelect<false> | CollectionBranchLocalizedStatusArticlesIdentitiesSelect<true>;
     'collection-branch-scalar-articles-cutover': CollectionBranchScalarArticlesCutoverSelect<false> | CollectionBranchScalarArticlesCutoverSelect<true>;
     'collection-branch-scalar-articles-heads': CollectionBranchScalarArticlesHeadsSelect<false> | CollectionBranchScalarArticlesHeadsSelect<true>;
     'collection-branch-scalar-articles-pins': CollectionBranchScalarArticlesPinsSelect<false> | CollectionBranchScalarArticlesPinsSelect<true>;
@@ -201,6 +214,8 @@ export interface Config {
     'global-branch-head-settings-identities': GlobalBranchHeadSettingsIdentitiesSelect<false> | GlobalBranchHeadSettingsIdentitiesSelect<true>;
     'collection-branch-head-articles-query-states': CollectionBranchHeadArticlesQueryStatesSelect<false> | CollectionBranchHeadArticlesQueryStatesSelect<true>;
     'collection-branch-head-articles-query-invalidations': CollectionBranchHeadArticlesQueryInvalidationsSelect<false> | CollectionBranchHeadArticlesQueryInvalidationsSelect<true>;
+    'collection-branch-localized-status-articles-query-states': CollectionBranchLocalizedStatusArticlesQueryStatesSelect<false> | CollectionBranchLocalizedStatusArticlesQueryStatesSelect<true>;
+    'collection-branch-localized-status-articles-query-invalidations': CollectionBranchLocalizedStatusArticlesQueryInvalidationsSelect<false> | CollectionBranchLocalizedStatusArticlesQueryInvalidationsSelect<true>;
     'collection-branch-scalar-articles-query-states': CollectionBranchScalarArticlesQueryStatesSelect<false> | CollectionBranchScalarArticlesQueryStatesSelect<true>;
     'collection-branch-scalar-articles-query-invalidations': CollectionBranchScalarArticlesQueryInvalidationsSelect<false> | CollectionBranchScalarArticlesQueryInvalidationsSelect<true>;
     'collection-branch-head-protected-articles-query-states': CollectionBranchHeadProtectedArticlesQueryStatesSelect<false> | CollectionBranchHeadProtectedArticlesQueryStatesSelect<true>;
@@ -221,6 +236,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
     'payload-llm-instructions': PayloadLlmInstructionsSelect<false> | PayloadLlmInstructionsSelect<true>;
     'collection-branch-head-articles-projection': CollectionBranchHeadArticlesProjectionSelect<false> | CollectionBranchHeadArticlesProjectionSelect<true>;
+    'collection-branch-localized-status-articles-projection': CollectionBranchLocalizedStatusArticlesProjectionSelect<false> | CollectionBranchLocalizedStatusArticlesProjectionSelect<true>;
     'collection-branch-scalar-articles-projection': CollectionBranchScalarArticlesProjectionSelect<false> | CollectionBranchScalarArticlesProjectionSelect<true>;
     'collection-branch-head-protected-articles-projection': CollectionBranchHeadProtectedArticlesProjectionSelect<false> | CollectionBranchHeadProtectedArticlesProjectionSelect<true>;
     'collection-branch-wide-ids-projection': CollectionBranchWideIdsProjectionSelect<false> | CollectionBranchWideIdsProjectionSelect<true>;
@@ -337,6 +353,26 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "branch-localized-status-articles".
+ */
+export interface BranchLocalizedStatusArticle {
+  id: number;
+  shared?: string | null;
+  title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -742,6 +778,104 @@ export interface CollectionBranchHeadArticlesPin {
 export interface CollectionBranchHeadArticlesIdentity {
   id: number;
   parent: number | BranchHeadArticle;
+  singleton: string;
+  generation: number;
+  ownerKey: string;
+  isPublished: boolean;
+  isLegacyDraftVisible: boolean;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-localized-status-articles-cutover".
+ */
+export interface CollectionBranchLocalizedStatusArticlesCutover {
+  id: number;
+  singleton: string;
+  schemaGeneration: number;
+  generation: number;
+  lockNonce?: string | null;
+  migrationID: string;
+  isActivated: boolean;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-localized-status-articles-heads".
+ */
+export interface CollectionBranchLocalizedStatusArticlesHead {
+  id: number;
+  parent: number | BranchLocalizedStatusArticle;
+  coordinateKey: string;
+  branchKey: string;
+  scopeKey: string;
+  generation?: number | null;
+  incarnation: number;
+  lockNonce?: string | null;
+  state: 'absent' | 'version' | 'withdrawn';
+  versionID?: number | null;
+  versionGeneration?: number | null;
+  structureVersionID?: number | null;
+  structureVersionGeneration?: number | null;
+  base?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-localized-status-articles-pins".
+ */
+export interface CollectionBranchLocalizedStatusArticlesPin {
+  id: number;
+  parent: number | BranchLocalizedStatusArticle;
+  versionID: number;
+  referenceKey: string;
+  versionGeneration: number;
+  rootKey: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-localized-status-articles-identities".
+ */
+export interface CollectionBranchLocalizedStatusArticlesIdentity {
+  id: number;
+  parent: number | BranchLocalizedStatusArticle;
   singleton: string;
   generation: number;
   ownerKey: string;
@@ -1404,6 +1538,67 @@ export interface CollectionBranchHeadArticlesQueryInvalidation {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-localized-status-articles-query-states".
+ */
+export interface CollectionBranchLocalizedStatusArticlesQueryState {
+  id: number;
+  rowKey: string;
+  branchKey: string;
+  scopeKey: string;
+  generation: number;
+  pendingCount: number;
+  isInitialized: boolean;
+  bootstrapCursor?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-localized-status-articles-query-invalidations".
+ */
+export interface CollectionBranchLocalizedStatusArticlesQueryInvalidation {
+  id: number;
+  branchKey: string;
+  scopeKey: string;
+  rowKey: string;
+  logicalID:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  identityKey: string;
+  lifetime: string;
+  revision: number;
+  state: 'pending' | 'structural-conflict';
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-scalar-articles-query-states".
  */
 export interface CollectionBranchScalarArticlesQueryState {
@@ -1907,6 +2102,10 @@ export interface PayloadLockedDocument {
         value: number | BranchHeadArticle;
       } | null)
     | ({
+        relationTo: 'branch-localized-status-articles';
+        value: number | BranchLocalizedStatusArticle;
+      } | null)
+    | ({
         relationTo: 'branch-scalar-articles';
         value: number | BranchScalarArticle;
       } | null)
@@ -2020,6 +2219,50 @@ export interface CollectionBranchHeadArticlesProjection {
         };
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+  _branchProjection: {
+    branchKey: string;
+    logicalID: number;
+    isVisible: boolean;
+    relationships?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    shape?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    nativeGlobalID?: number | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-localized-status-articles-projection".
+ */
+export interface CollectionBranchLocalizedStatusArticlesProjection {
+  id: string;
+  shared?: string | null;
+  title?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: number | User;
@@ -2468,6 +2711,19 @@ export interface BranchHeadArticlesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "branch-localized-status-articles_select".
+ */
+export interface BranchLocalizedStatusArticlesSelect<T extends boolean = true> {
+  shared?: T;
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "branch-scalar-articles_select".
  */
 export interface BranchScalarArticlesSelect<T extends boolean = true> {
@@ -2709,6 +2965,68 @@ export interface CollectionBranchHeadArticlesPinsSelect<T extends boolean = true
  * via the `definition` "collection-branch-head-articles-identities_select".
  */
 export interface CollectionBranchHeadArticlesIdentitiesSelect<T extends boolean = true> {
+  parent?: T;
+  singleton?: T;
+  generation?: T;
+  ownerKey?: T;
+  isPublished?: T;
+  isLegacyDraftVisible?: T;
+  createdBy?: T;
+  updatedBy?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-localized-status-articles-cutover_select".
+ */
+export interface CollectionBranchLocalizedStatusArticlesCutoverSelect<T extends boolean = true> {
+  singleton?: T;
+  schemaGeneration?: T;
+  generation?: T;
+  lockNonce?: T;
+  migrationID?: T;
+  isActivated?: T;
+  createdBy?: T;
+  updatedBy?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-localized-status-articles-heads_select".
+ */
+export interface CollectionBranchLocalizedStatusArticlesHeadsSelect<T extends boolean = true> {
+  parent?: T;
+  coordinateKey?: T;
+  branchKey?: T;
+  scopeKey?: T;
+  generation?: T;
+  incarnation?: T;
+  lockNonce?: T;
+  state?: T;
+  versionID?: T;
+  versionGeneration?: T;
+  structureVersionID?: T;
+  structureVersionGeneration?: T;
+  base?: T;
+  createdBy?: T;
+  updatedBy?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-localized-status-articles-pins_select".
+ */
+export interface CollectionBranchLocalizedStatusArticlesPinsSelect<T extends boolean = true> {
+  parent?: T;
+  versionID?: T;
+  referenceKey?: T;
+  versionGeneration?: T;
+  rootKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-localized-status-articles-identities_select".
+ */
+export interface CollectionBranchLocalizedStatusArticlesIdentitiesSelect<T extends boolean = true> {
   parent?: T;
   singleton?: T;
   generation?: T;
@@ -3120,6 +3438,37 @@ export interface CollectionBranchHeadArticlesQueryInvalidationsSelect<T extends 
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-localized-status-articles-query-states_select".
+ */
+export interface CollectionBranchLocalizedStatusArticlesQueryStatesSelect<T extends boolean = true> {
+  rowKey?: T;
+  branchKey?: T;
+  scopeKey?: T;
+  generation?: T;
+  pendingCount?: T;
+  isInitialized?: T;
+  bootstrapCursor?: T;
+  createdBy?: T;
+  updatedBy?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-localized-status-articles-query-invalidations_select".
+ */
+export interface CollectionBranchLocalizedStatusArticlesQueryInvalidationsSelect<T extends boolean = true> {
+  branchKey?: T;
+  scopeKey?: T;
+  rowKey?: T;
+  logicalID?: T;
+  identityKey?: T;
+  lifetime?: T;
+  revision?: T;
+  state?: T;
+  createdBy?: T;
+  updatedBy?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-scalar-articles-query-states_select".
  */
 export interface CollectionBranchScalarArticlesQueryStatesSelect<T extends boolean = true> {
@@ -3445,6 +3794,30 @@ export interface CollectionBranchHeadArticlesProjectionSelect<T extends boolean 
               logicalID?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+  _branchProjection?:
+    | T
+    | {
+        branchKey?: T;
+        logicalID?: T;
+        isVisible?: T;
+        relationships?: T;
+        shape?: T;
+        nativeGlobalID?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-branch-localized-status-articles-projection_select".
+ */
+export interface CollectionBranchLocalizedStatusArticlesProjectionSelect<T extends boolean = true> {
+  id?: T;
+  shared?: T;
+  title?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -3789,6 +4162,7 @@ export interface CollectionQueryWidget {
     title?: string | null;
     relatedCollection:
       | 'branch-head-articles'
+      | 'branch-localized-status-articles'
       | 'branch-scalar-articles'
       | 'branch-head-protected-articles'
       | 'branch-wide-ids'
@@ -3821,6 +4195,7 @@ export interface ActivityWidget {
     excludedCollections?:
       | (
           | 'branch-head-articles'
+          | 'branch-localized-status-articles'
           | 'branch-scalar-articles'
           | 'branch-head-protected-articles'
           | 'branch-wide-ids'
