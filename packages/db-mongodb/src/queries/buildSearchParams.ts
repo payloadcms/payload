@@ -3,7 +3,7 @@ import type { FlattenedField, Operator, PathToQuery, Payload } from 'payload'
 
 import { Types } from 'mongoose'
 import { APIError, escapeRegExp, getFieldByPath, getLocalizedPaths } from 'payload'
-import { isNestedRelationshipQuery, validOperatorSet } from 'payload/shared'
+import { getDateOnlyBounds, isNestedRelationshipQuery, validOperatorSet } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 import type { OperatorMapKey } from './operatorMap.js'
@@ -513,6 +513,28 @@ export async function buildSearchParam({
         }
 
         return result
+      }
+
+      if (
+        field.type === 'date' &&
+        formattedOperator === 'equals' &&
+        formattedValue instanceof Date &&
+        (!field.admin?.date?.pickerAppearance ||
+          ['dayOnly', 'default'].includes(field.admin.date.pickerAppearance))
+      ) {
+        const timezone =
+          (typeof field.timezone === 'object'
+            ? field.timezone.defaultTimezone
+            : field.timezone && payload.config.admin?.timezones?.defaultTimezone) || 'UTC'
+        const { startOfDay, startOfNextDay } = getDateOnlyBounds({
+          date: typeof val === 'string' ? val : formattedValue,
+          timezone,
+        })
+
+        return {
+          path,
+          value: { $gte: startOfDay, $lt: startOfNextDay },
+        }
       }
 
       // Some operators like 'near' need to define a full query
