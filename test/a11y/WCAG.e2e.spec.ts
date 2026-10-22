@@ -3115,6 +3115,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         })
       })
 
+      await widget.getByRole('button', { name: 'Pinned', exact: true }).click()
       await widget.locator('.activity-empty-state__icon').click()
       await expect(drawer).toHaveCount(0)
       await expect(opener).toHaveAttribute('aria-expanded', 'false')
