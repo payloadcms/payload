@@ -29,7 +29,13 @@ describe('handleUpload with addRandomSuffix', () => {
 
     await adapter.handleUpload({
       data,
-      file: { buffer: Buffer.from('file'), filename, filesize: 4, mimeType: 'image/png' },
+      file: {
+        buffer: Buffer.from('file'),
+        filename,
+        filesize: 4,
+        imageSizeName: filename === 'image.png' ? undefined : 'square',
+        mimeType: 'image/png',
+      },
       storageFilePath: filename,
     } as never)
 
@@ -45,19 +51,20 @@ describe('handleUpload with addRandomSuffix', () => {
       filename: 'image.png',
       sizes: { card: { filename: 'image-400x400.png' }, square: { filename: 'image-400x400.png' } },
     }
-    const uploadImageSize = () =>
+    const uploadImageSize = (imageSizeName: string) =>
       adapter.handleUpload({
         data,
         file: {
           buffer: Buffer.from('file'),
           filename: 'image-400x400.png',
           filesize: 4,
+          imageSizeName,
           mimeType: 'image/png',
         },
         storageFilePath: 'image-400x400.png',
       } as never)
 
-    await Promise.all([uploadImageSize(), uploadImageSize()])
+    await Promise.all([uploadImageSize('card'), uploadImageSize('square')])
 
     expect(data.sizes).toEqual({
       card: { filename: 'image-400x400-a.png' },
