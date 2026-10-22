@@ -381,7 +381,7 @@ export const generateFileData = async <T>({
       delete file.clientUploadContext
       delete fileForResize.clientUploadContext
       if (file.tempFilePath) {
-        await fs.writeFile(file.tempFilePath, fileForResize.data) // write fileBuffer to the temp path
+        await fs.writeFile(file.tempFilePath, fileForResize.data) // write the edited bytes to the temp path
       } else {
         req.file = fileForResize
       }
