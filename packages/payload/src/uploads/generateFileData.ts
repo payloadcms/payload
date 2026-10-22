@@ -4,7 +4,7 @@ import { fileTypeFromBuffer } from 'file-type'
 import fs from 'fs/promises'
 
 import type { Collection } from '../collections/config/types.js'
-import type { SanitizedConfig } from '../config/types.js'
+import type { SanitizedConfig, SharpDependency } from '../config/types.js'
 import type { Document, PayloadRequest } from '../types/index.js'
 import type { ExternalUploadSource } from './sanitizeUploadData.js'
 import type { FileData, FileToSave, ProbedImageSize, UploadEdits } from './types.js'
@@ -203,7 +203,11 @@ export const generateFileData = async <T>({
   let newData = incomingFileData as T
   const filesToSave: FileToSave[] = []
   const fileData: Partial<FileData> = {}
-  const fileIsAnimatedType = isAnimatedImage(file.mimetype)
+  // `isAnimatedImage` only looks at the mime type. Checking the frame count keeps a single-frame
+  // WebP/GIF/TIFF out of the animated path below, so its original is stored untouched like any
+  // other image instead of being re-encoded by sharp.
+  const fileIsAnimatedType =
+    isAnimatedImage(file.mimetype) && (await hasMultipleFrames({ file, sharp }))
   const cropData =
     typeof uploadEdits === 'object' && 'crop' in uploadEdits ? uploadEdits.crop : undefined
 
@@ -545,4 +549,28 @@ function parseUploadEditsFromReqOrIncomingData(args: {
   }
 
   return uploadEdits
+}
+
+/**
+ * Whether the file really has more than one frame/page. Falls back to `true` (the mime-type answer)
+ * when sharp is not configured or cannot read the file, so those cases keep the existing behavior.
+ */
+async function hasMultipleFrames({
+  file,
+  sharp,
+}: {
+  file: NonNullable<PayloadRequest['file']>
+  sharp?: SharpDependency
+}): Promise<boolean> {
+  if (!sharp) {
+    return true
+  }
+
+  try {
+    // `tempFilePath` may be an empty string when the file is held in memory
+    const { pages } = await sharp(file.tempFilePath || file.data).metadata()
+    return (pages ?? 1) > 1
+  } catch {
+    return true
+  }
 }
