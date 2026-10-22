@@ -50,7 +50,7 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     timestamps: false,
   }
 
-  let [doc] = await Model.create([data], options, req)
+  let [doc] = await Model.create([data], options)
 
   await Model.updateMany(
     {

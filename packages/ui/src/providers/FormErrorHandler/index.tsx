@@ -17,8 +17,12 @@ export type NonFieldError = {
  *
  * Multiple handlers can be chained by composing providers; the first one to
  * return `true` wins.
+ *
+ * `retry` re-submits the form that produced the error, allowing the user to
+ * retry after resolving the underlying issue (e.g. deleting documents to free
+ * up quota).
  */
-export type FormErrorHandler = (err: NonFieldError) => boolean
+export type FormErrorHandler = (err: NonFieldError, retry: () => void) => boolean
 
 export const FormErrorHandlerContext = createContext<FormErrorHandler | undefined>(undefined)
 

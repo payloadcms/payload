@@ -1,9 +1,8 @@
-import { status as httpStatus } from 'http-status'
-
 import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { generatePayloadCookie } from '../cookies.js'
 import { refreshOperation } from '../operations/refresh.js'
 
@@ -21,25 +20,26 @@ export const refreshHandler: PayloadHandler = async (req) => {
     req,
   })
 
+  const { refreshedToken, ...resultWithoutToken } = result
+
   if (result.setCookie) {
     const cookie = generatePayloadCookie({
       collectionAuthConfig: collection.config.auth,
       cookiePrefix: req.payload.config.cookiePrefix,
-      token: result.refreshedToken,
+      token: refreshedToken,
     })
-
-    if (collection.config.auth.removeTokenFromResponses) {
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-      delete result.refreshedToken
-    }
 
     headers.set('Set-Cookie', cookie)
   }
 
+  const responseResult = collection.config.auth.removeTokenFromResponses
+    ? resultWithoutToken
+    : result
+
   return Response.json(
     {
       message: t('authentication:tokenRefreshSuccessful'),
-      ...result,
+      ...responseResult,
     },
     {
       headers,

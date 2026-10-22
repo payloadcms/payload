@@ -13,8 +13,9 @@ import { tenantField } from './fields/tenantField/index.js'
 import { tenantsArrayField } from './fields/tenantsArrayField/index.js'
 import { filterDocumentsByTenants } from './filters/filterDocumentsByTenants.js'
 import { addTenantCleanup } from './hooks/afterTenantDelete.js'
+import { enforceTenantMembership } from './hooks/enforceTenantMembership.js'
 import { translations } from './translations/index.js'
-import { addCollectionAccess } from './utilities/addCollectionAccess.js'
+import { addCollectionAccess, type TenantAccessConfig } from './utilities/addCollectionAccess.js'
 import { addFilterOptionsToFields } from './utilities/addFilterOptionsToFields.js'
 import { combineFilters } from './utilities/combineFilters.js'
 import { miniChalk } from './utilities/miniChalk.js'
@@ -40,6 +41,7 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
       pluginConfig?.tenantsArrayField?.arrayFieldName || defaults.tenantsArrayFieldName
     const tenantsArrayTenantFieldName =
       pluginConfig?.tenantsArrayField?.arrayTenantFieldName || defaults.tenantsArrayTenantFieldName
+    const tenantAccessScopes: TenantAccessConfig[] = []
 
     /**
      * Add defaults for admin properties
@@ -89,6 +91,11 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
       adminUsersCollection.fields.push(
         tenantsArrayField({
           ...(pluginConfig?.tenantsArrayField || {}),
+          arrayFieldAccess: {
+            create: ({ req }) => Boolean(req.user && userHasAccessToAllTenants(req.user)),
+            update: ({ req }) => Boolean(req.user && userHasAccessToAllTenants(req.user)),
+            ...(pluginConfig?.tenantsArrayField?.arrayFieldAccess || {}),
+          },
           tenantsArrayFieldName,
           tenantsArrayTenantFieldName,
           tenantsCollectionSlug,
@@ -96,7 +103,7 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
       )
     }
 
-    addCollectionAccess({
+    tenantAccessScopes.push({
       accessResultCallback: pluginConfig.usersAccessResultOverride,
       adminUsersSlug: adminUsersCollection.slug,
       collection: adminUsersCollection,
@@ -168,7 +175,7 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
            * Add access control constraint to tenants collection
            * - constrains access a users assigned tenants
            */
-          addCollectionAccess({
+          tenantAccessScopes.push({
             adminUsersSlug: adminUsersCollection.slug,
             collection,
             fieldName: 'id',
@@ -293,6 +300,7 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
           collection.fields.unshift(
             tenantField({
               name: tenantFieldName,
+              adminUsersSlug: adminUsersCollection.slug,
               debug: pluginConfig.debug,
               isAutosaveEnabled: hasAutosaveEnabled(collection),
               overrides: pluginConfig.collections[collection.slug]?.tenantFieldOverrides
@@ -302,9 +310,22 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
               tenantsArrayTenantFieldName,
               tenantsCollectionSlug,
               unique: isGlobal,
+              userHasAccessToAllTenants,
             }),
           )
         }
+
+        collection.hooks ??= {}
+        collection.hooks.beforeValidate ??= []
+        collection.hooks.beforeValidate.push(
+          enforceTenantMembership({
+            collectionSlug: collection.slug,
+            tenantFieldName,
+            tenantsArrayFieldName,
+            tenantsArrayTenantFieldName,
+            userHasAccessToAllTenants,
+          }),
+        )
 
         const { useBaseFilter, useBaseListFilter } = pluginConfig.collections[collection.slug] || {}
         if (useBaseFilter ?? useBaseListFilter ?? true) {
@@ -331,7 +352,7 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
           /**
            * Add access control constraint to tenant enabled collection
            */
-          addCollectionAccess({
+          tenantAccessScopes.push({
             accessResultCallback: pluginConfig.collections[collection.slug]?.accessResultOverride,
             adminUsersSlug: adminUsersCollection.slug,
             collection,
@@ -363,6 +384,8 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
         'try placing the multi-tenant plugin after other plugins.',
       )
     }
+
+    addCollectionAccess({ config: incomingConfig, scopes: tenantAccessScopes })
 
     /**
      * Add TenantSelectionProvider to admin providers

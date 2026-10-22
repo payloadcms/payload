@@ -12,6 +12,51 @@ interface RevenueData {
   period: string
 }
 
+const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat('en-US', {
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    style: 'currency',
+  }).format(value)
+}
+
+function CustomTooltip(props: {
+  active?: boolean
+  label?: number | string
+  payload?: { value: number }[]
+}) {
+  const { active, label, payload } = props
+  if (active && payload && payload.length) {
+    return (
+      <div
+        style={{
+          background: 'var(--color-bg-elevated)',
+          border: '1px solid var(--color-border)',
+          borderRadius: '4px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          color: 'var(--color-text)',
+          padding: '8px 12px',
+        }}
+      >
+        <p
+          style={{
+            color: 'var(--color-text)',
+            fontSize: '12px',
+            margin: '0 0 4px 0',
+            opacity: 0.7,
+          }}
+        >
+          {label}
+        </p>
+        <p style={{ color: 'var(--color-text)', fontSize: '14px', fontWeight: 600, margin: 0 }}>
+          {formatCurrency(payload[0]?.value ?? 0)}
+        </p>
+      </div>
+    )
+  }
+  return null
+}
+
 export default function Revenue({ widgetData }: WidgetServerProps<RevenueWidget>) {
   const timeframe = typeof widgetData?.timeframe === 'string' ? widgetData.timeframe : 'monthly'
   const title = typeof widgetData?.title === 'string' ? widgetData.title : 'Revenue Statistics'
@@ -30,51 +75,6 @@ export default function Revenue({ widgetData }: WidgetServerProps<RevenueWidget>
     { amount: 48000, date: '2024-11', period: 'Nov' },
     { amount: 52000, date: '2024-12', period: 'Dec' },
   ]
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      style: 'currency',
-    }).format(value)
-  }
-
-  function CustomTooltip(props: {
-    active?: boolean
-    label?: number | string
-    payload?: { value: number }[]
-  }) {
-    const { active, label, payload } = props
-    if (active && payload && payload.length) {
-      return (
-        <div
-          style={{
-            background: 'var(--theme-elevation-0)',
-            border: '1px solid var(--theme-elevation-200)',
-            borderRadius: '4px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-            color: 'var(--theme-text)',
-            padding: '8px 12px',
-          }}
-        >
-          <p
-            style={{
-              color: 'var(--theme-text)',
-              fontSize: '12px',
-              margin: '0 0 4px 0',
-              opacity: 0.7,
-            }}
-          >
-            {label}
-          </p>
-          <p style={{ color: 'var(--theme-text)', fontSize: '14px', fontWeight: 600, margin: 0 }}>
-            {formatCurrency(payload[0]?.value ?? 0)}
-          </p>
-        </div>
-      )
-    }
-    return null
-  }
 
   return (
     <div
@@ -99,10 +99,10 @@ export default function Revenue({ widgetData }: WidgetServerProps<RevenueWidget>
           <select
             defaultValue={timeframe}
             style={{
-              background: 'var(--theme-elevation-50)',
-              border: '1px solid var(--theme-elevation-200)',
+              background: 'var(--color-bg-secondary)',
+              border: '1px solid var(--color-border)',
               borderRadius: '4px',
-              color: 'var(--theme-text)',
+              color: 'var(--color-text)',
               fontSize: '12px',
               outline: 'none',
               padding: '4px 8px',
@@ -132,12 +132,12 @@ export default function Revenue({ widgetData }: WidgetServerProps<RevenueWidget>
             <XAxis
               axisLine={false}
               dataKey="period"
-              tick={{ fill: 'var(--theme-elevation-500)', fontSize: 12 }}
+              tick={{ fill: 'var(--color-text)', fontSize: 12 }}
               tickLine={false}
             />
             <YAxis
               axisLine={false}
-              tick={{ fill: 'var(--theme-elevation-500)', fontSize: 12 }}
+              tick={{ fill: 'var(--color-text)', fontSize: 12 }}
               tickFormatter={(value) => `$${value / 1000}k`}
               tickLine={false}
             />

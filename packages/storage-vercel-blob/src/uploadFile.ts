@@ -1,4 +1,3 @@
-import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { put } from '@vercel/blob'
 import path from 'path'
 
@@ -7,12 +6,9 @@ interface UploadFileArgs {
   addRandomSuffix?: boolean
   buffer: Buffer
   cacheControlMaxAge?: number
-  collectionPrefix?: string
-  docPrefix?: string
-  filename: string
   mimeType: string
+  storageFilePath: string
   token: string
-  useCompositePrefixes?: boolean
 }
 
 interface UploadFileResult {
@@ -24,21 +20,11 @@ export async function uploadFile({
   addRandomSuffix,
   buffer,
   cacheControlMaxAge,
-  collectionPrefix = '',
-  docPrefix,
-  filename,
   mimeType,
+  storageFilePath,
   token,
-  useCompositePrefixes = false,
 }: UploadFileArgs): Promise<UploadFileResult> {
-  const { fileKey } = getFileKey({
-    collectionPrefix,
-    docPrefix,
-    filename,
-    useCompositePrefixes,
-  })
-
-  const result = await put(fileKey, buffer, {
+  const result = await put(storageFilePath, buffer, {
     access,
     addRandomSuffix,
     allowOverwrite: true,

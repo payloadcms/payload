@@ -38,7 +38,8 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   versionToStatus,
 }) => {
   const { config, getEntityConfig } = useConfig()
-  const { code } = useLocale()
+  const locale = useLocale()
+  const code = locale?.code
   const { i18n, t } = useTranslation()
 
   const [locales, setLocales] = useState<SelectablePill[]>([])
@@ -113,7 +114,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
       const search = current.toString()
       const query = search ? `?${search}` : ''
 
-      startRouteTransition(() => router.push(`${pathname}${query}`))
+      void startRouteTransition(() => router.push(`${pathname}${query}`))
     },
     [pathname, router, searchParams, startRouteTransition],
   )

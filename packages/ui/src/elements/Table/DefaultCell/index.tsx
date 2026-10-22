@@ -9,8 +9,8 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { getDisplayedFieldValue } from '../../../utilities/getDisplayedFieldValue.js'
 import { isValidReactElement } from '../../../utilities/isValidReactElement.js'
+import { IDLabel } from '../../IDLabel/index.js'
 import { Link } from '../../Link/index.js'
-import { CodeCell } from './fields/Code/index.js'
 import { HierarchyCell } from './fields/Hierarchy/index.js'
 import { cellComponents } from './fields/index.js'
 import { StatusCell } from './fields/Status/index.js'
@@ -93,22 +93,17 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
   if (fieldIsID(field)) {
     return (
       <WrapElement {...wrapElementProps}>
-        <CodeCell
-          cellData={`ID: ${cellData}`}
-          collectionConfig={collectionConfig}
-          collectionSlug={collectionSlug}
-          field={{
-            ...field,
-            type: 'code',
-          }}
-          nowrap
-          rowData={rowData}
-        />
+        <IDLabel id={cellData} />
       </WrapElement>
     )
   }
 
-  const displayedValue = getDisplayedFieldValue(cellData, field, i18n)
+  const displayedValue = getDisplayedFieldValue({
+    cellData,
+    collectionConfig,
+    field,
+    i18n,
+  })
 
   // Check if this is a hierarchy relationship field by checking if the related collection has hierarchy config
   const isHierarchyField =

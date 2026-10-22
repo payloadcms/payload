@@ -37,7 +37,10 @@ export const FieldError: React.FC<GenericErrorProps> = (props) => {
         className={baseClass}
         delay={0}
         id={generateFieldID(path, editDepth, uuid, 'field-error')}
-        staticPositioning
+        portal={false}
+        position="top"
+        role="alert"
+        tabIndex={0}
       >
         {message}
       </Tooltip>

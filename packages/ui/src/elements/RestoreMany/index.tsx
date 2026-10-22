@@ -35,7 +35,8 @@ export const RestoreMany: React.FC<Props> = (props) => {
   const {
     config: { collections, routes, serverURL },
   } = useConfig()
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const router = useRouter()
   const { clearRouteCache } = useRouteCache()
   const searchParams = useSearchParams()
@@ -143,7 +144,7 @@ export const RestoreMany: React.FC<Props> = (props) => {
 
     toggleAll()
 
-    router.replace(
+    void router.replace(
       qs.stringify(
         {
           ...parseSearchParams(searchParams),

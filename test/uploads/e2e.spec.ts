@@ -13,15 +13,13 @@ import type { Config } from './payload-types.js'
 import {
   getColumnSelectorItem,
   openListColumns,
-  toggleColumn,
+  toggleColumns,
 } from '../__helpers/e2e/columns/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
 import {
   closeAllToasts,
-  ensureCompilationIsDone,
   exactText,
   gotoAndWaitForForm,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
   waitForFormReady,
 } from '../__helpers/e2e/helpers.js'
@@ -33,6 +31,8 @@ import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
 import { startTestFileServer } from '../__helpers/shared/startTestFileServer.js'
+import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   adminThumbnailFunctionSlug,
@@ -60,9 +60,11 @@ import {
   mediaWithoutCacheTagsSlug,
   mediaWithoutDeleteAccessSlug,
   noFilesRequiredSlug,
+  pdfOnlySlug,
   relationPreviewSlug,
   relationSlug,
   relationToNoFilesRequiredSlug,
+  restrictedMimeTypesSlug,
   svgOnlySlug,
   threeDimensionalSlug,
   withMetadataSlug,
@@ -87,7 +89,7 @@ const adminThumbnailFunctionSrcPattern = new RegExp(
     '$',
 )
 
-const { afterAll, beforeAll, beforeEach, describe } = test
+const { afterAll, afterEach, beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
 let client: RESTClient
@@ -132,6 +134,8 @@ let adminUploadFilePreviewSingleURL: AdminUrlUtil
 let adminUploadFilePreviewMapURL: AdminUrlUtil
 let filePreviewURL: AdminUrlUtil
 let mediaWithFieldsURL: AdminUrlUtil
+let pdfOnlyURL: AdminUrlUtil
+let restrictedMimeTypesURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
@@ -180,54 +184,22 @@ describe('Uploads', () => {
     adminUploadFilePreviewMapURL = new AdminUrlUtil(serverURL, adminUploadFilePreviewMapSlug)
     filePreviewURL = new AdminUrlUtil(serverURL, filePreviewSlug)
     mediaWithFieldsURL = new AdminUrlUtil(serverURL, mediaWithFieldsSlug)
+    pdfOnlyURL = new AdminUrlUtil(serverURL, pdfOnlySlug)
+    restrictedMimeTypesURL = new AdminUrlUtil(serverURL, restrictedMimeTypesSlug)
 
     const context = await browser.newContext()
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
-    page = await context.newPage()
+    const initialized = await initPage({ context, ignoreCORS: true, serverURL })
 
-    const { collectErrors, consoleErrors, stopCollectingErrors } = initPageConsoleErrorCatch(page, {
-      ignoreCORS: true,
-    })
-
-    consoleErrorsFromPage = consoleErrors
-    collectErrorsFromPage = collectErrors
-    stopCollectingErrorsFromPage = stopCollectingErrors
-
-    await ensureCompilationIsDone({ page, serverURL })
+    page = initialized.page
+    consoleErrorsFromPage = initialized.consoleErrors
+    collectErrorsFromPage = initialized.collectErrors
+    stopCollectingErrorsFromPage = initialized.stopCollectingErrors
   })
 
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'uploadsTest',
-      uploadsDir: [
-        path.resolve(dirname, './uploads'),
-        path.resolve(dirname, './media'),
-        path.resolve(dirname, './media-gif'),
-        path.resolve(dirname, './no-image-sizes'),
-        path.resolve(dirname, './object-fit'),
-        path.resolve(dirname, './custom-file-name-media'),
-        path.resolve(dirname, './focal-only'),
-        path.resolve(dirname, './crop-only'),
-        path.resolve(dirname, './optional'),
-        path.resolve(dirname, './required'),
-        path.resolve(dirname, './focal-no-sizes'),
-        path.resolve(dirname, './svg-only'),
-        path.resolve(dirname, './media-trim'),
-        path.resolve(dirname, './image-sizes-only'),
-        path.resolve(dirname, './versions'),
-        path.resolve(dirname, './media-with-relation-preview'),
-        path.resolve(dirname, './with-meta-data'),
-        path.resolve(dirname, './with-any-image-type'),
-        path.resolve(dirname, './with-only-jpeg-meta-data'),
-        path.resolve(dirname, './without-meta-data'),
-        path.resolve(dirname, './collections/Upload1/uploads'),
-        path.resolve(dirname, './collections/Upload2/uploads'),
-        path.resolve(dirname, './collections/AdminThumbnailFunction/test/uploads'),
-        path.resolve(dirname, './collections/AdminThumbnailSize/test/uploads'),
-        path.resolve(dirname, './collections/AdminThumbnailWithSearchQueries/test/uploads'),
-        path.resolve(dirname, './collections/AdminUploadControl/test/uploads'),
-      ],
     })
 
     if (client) {
@@ -241,11 +213,38 @@ describe('Uploads', () => {
 
   test('should show upload filename in upload collection list', async () => {
     await page.goto(mediaURL.list)
-    const audioUpload = page.locator('tbody .cell-filename', { hasText: exactText('audio.mp3') })
+    const audioUpload = page.locator('tbody .cell-filename', {
+      hasText: exactText('audio-original.mp3'),
+    })
     await expect(audioUpload).toBeVisible()
 
     const imageUpload = page.locator('tbody .cell-filename', { hasText: exactText('image.png') })
     await expect(imageUpload).toBeVisible()
+  })
+
+  test('should show a readable file size in the upload collection list', async () => {
+    await payload.create({
+      collection: mediaSlug,
+      data: {},
+      file: {
+        data: Buffer.alloc(1536, 'a'),
+        name: 'size-test.txt',
+        mimetype: 'text/plain',
+        size: 1536,
+      },
+      overrideAccess: true,
+    })
+
+    await page.goto(mediaURL.list)
+    await toggleColumns({
+      columns: [{ columnLabel: 'File Size', targetState: 'on' }],
+      page,
+      shouldCloseListColumns: true,
+    })
+
+    const row = page.locator('tbody tr', { hasText: 'size-test-original.txt' })
+
+    await expect(row.locator('.cell-filesize')).toHaveText('1.5KB')
   })
 
   test('should see upload filename in relation list', async () => {
@@ -269,6 +268,7 @@ describe('Uploads', () => {
         depth: 0,
         limit: 1,
         pagination: false,
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -305,6 +305,7 @@ describe('Uploads', () => {
     const relationDoc = await payload.create({
       collection: relationSlug,
       data: {},
+      overrideAccess: true,
     })
 
     await page.goto(relationURL.edit(relationDoc.id))
@@ -323,7 +324,7 @@ describe('Uploads', () => {
       .locator('tr', { hasText: 'Polymorphic upload two' })
       .locator('.select-row__checkbox')
       .click()
-    await listDrawer.getByRole('button', { name: 'Select 1' }).click()
+    await listDrawer.getByRole('button', { name: 'Confirm' }).click()
 
     await saveDocAndAssert(page)
 
@@ -336,6 +337,7 @@ describe('Uploads', () => {
             equals: relationDoc.id,
           },
         },
+        overrideAccess: true,
       })
     ).docs[0] as any
 
@@ -360,6 +362,7 @@ describe('Uploads', () => {
         depth: 0,
         limit: 1,
         pagination: false,
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -376,6 +379,7 @@ describe('Uploads', () => {
         depth: 0,
         limit: 1,
         pagination: false,
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -401,6 +405,7 @@ describe('Uploads', () => {
             equals: 'image/png',
           },
         },
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -420,6 +425,7 @@ describe('Uploads', () => {
         depth: 0,
         limit: 1,
         pagination: false,
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -453,6 +459,7 @@ describe('Uploads', () => {
         where: {
           mimeType: { contains: 'image/' },
         },
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -484,6 +491,7 @@ describe('Uploads', () => {
         where: {
           mimeType: { contains: 'image/' },
         },
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -516,6 +524,7 @@ describe('Uploads', () => {
         where: {
           mimeType: { contains: 'image/' },
         },
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -551,14 +560,192 @@ describe('Uploads', () => {
     await expect(page.locator('.tooltip--show', { hasText: exactText('Cancel') })).toBeVisible()
   })
 
-  test('should remove remote URL button if pasteURL is false', async () => {
+  test('should not fetch a URL found on the clipboard if pasteURL is false', async () => {
     // pasteURL option is set to false in the media collection
-    await page.goto(mediaURL.create)
+    await gotoAndWaitForForm(page, mediaURL.create)
 
-    const pasteURLButton = page.locator('.file-manager__upload button', {
-      hasText: 'Paste URL',
+    await page.evaluate(async () => {
+      await navigator.clipboard.writeText('https://example.com/image.png')
     })
-    await expect(pasteURLButton).toBeHidden()
+
+    await page.locator('.file-manager__pasteFromClipboard').click()
+
+    await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+      'No file found in clipboard.',
+    )
+    await expect(page.locator('#upload-paste-url')).toBeHidden()
+    await closeAllToasts(page)
+  })
+
+  describe('paste from clipboard', () => {
+    afterEach(async () => {
+      // Restore clipboard permissions in case a test revoked them, since later tests in this
+      // file share the same browser context and assume clipboard-read/write is granted.
+      await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+    })
+
+    test('should paste an image file from the clipboard', async () => {
+      await gotoAndWaitForForm(page, mediaURL.create)
+
+      const imageBytes = Array.from(readFileSync(path.resolve(dirname, './image.png')))
+
+      await page.evaluate(async (bytes) => {
+        const blob = new Blob([new Uint8Array(bytes)], { type: 'image/png' })
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+      }, imageBytes)
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('#field-filemanager-filename')).toHaveValue('clipboard-1.png')
+
+      await saveDocAndAssert(page)
+    })
+
+    test('should show an error when the clipboard has no file', async () => {
+      await gotoAndWaitForForm(page, mediaURL.create)
+
+      await page.evaluate(async () => {
+        await navigator.clipboard.writeText('no files here')
+      })
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+        'No file found in clipboard.',
+      )
+      await expect(page.locator('#upload-paste-url')).toBeHidden()
+      await closeAllToasts(page)
+    })
+
+    test('should show an error when clipboard access is blocked', async () => {
+      await gotoAndWaitForForm(page, mediaURL.create)
+
+      await page.context().clearPermissions()
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+        'Unable to read from clipboard.',
+      )
+      await closeAllToasts(page)
+    })
+
+    test('should open the paste-from-URL modal when clipboard access is blocked and pasteURL is enabled', async () => {
+      // pdfOnlyURL has no pasteURL config, matching the common case of pasteURL left enabled
+      await gotoAndWaitForForm(page, pdfOnlyURL.create)
+
+      await page.context().clearPermissions()
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('#upload-paste-url')).toBeVisible()
+    })
+
+    test('should show an error rather than open the paste-from-URL modal for an unexpected clipboard error', async () => {
+      // pdfOnlyURL has no pasteURL config, matching the common case of pasteURL left enabled.
+      // Only a permission-denied clipboard error should fall back to the paste-URL modal -
+      // any other failure (e.g. a browser quirk unrelated to permissions) should surface the
+      // same error it always has and must not open the modal.
+      await gotoAndWaitForForm(page, pdfOnlyURL.create)
+
+      await page.evaluate(() => {
+        navigator.clipboard.read = () => Promise.reject(new Error('Unexpected clipboard failure'))
+      })
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+        'Unable to read from clipboard.',
+      )
+      await expect(page.locator('#upload-paste-url')).toBeHidden()
+      await closeAllToasts(page)
+    })
+
+    test('should show an invalid file type error when the clipboard file does not match the accepted mime types', async () => {
+      await gotoAndWaitForForm(page, pdfOnlyURL.create)
+
+      const imageBytes = Array.from(readFileSync(path.resolve(dirname, './image.png')))
+
+      await page.evaluate(async (bytes) => {
+        const blob = new Blob([new Uint8Array(bytes)], { type: 'image/png' })
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+      }, imageBytes)
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+        'Invalid file type',
+      )
+      await expect(page.locator('#field-filemanager-filename')).toBeHidden()
+      await closeAllToasts(page)
+    })
+
+    test('should open the paste-from-URL modal when the clipboard text is not a valid link', async () => {
+      // pdfOnlyURL has no pasteURL config, matching the common case of pasteURL left enabled
+      await gotoAndWaitForForm(page, pdfOnlyURL.create)
+
+      await page.evaluate(async () => {
+        await navigator.clipboard.writeText('this is not a valid link')
+      })
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('#upload-paste-url')).toBeVisible()
+    })
+
+    test('should open the paste-from-URL modal with the URL prefilled when a valid link cannot be fetched directly', async () => {
+      // A page URL (not a direct file link) is a valid URL that will fail to fetch as a file
+      await gotoAndWaitForForm(page, pdfOnlyURL.create)
+
+      const pageURL =
+        'https://unsplash.com/photos/upside-down-illuminated-chicago-sign-with-blurry-golden-reflections-rKlC6BNaJsY'
+      await page.evaluate(async (url) => {
+        await navigator.clipboard.writeText(url)
+      }, pageURL)
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('#upload-paste-url')).toBeVisible({ timeout: POLL_TOPASS_TIMEOUT })
+      await expect(page.locator('#upload-paste-url #field-url')).toHaveValue(pageURL)
+    })
+
+    test('should reject a fetched URL whose content does not match the accepted mime types', async () => {
+      // restrictedMimeTypesURL only accepts image/png and has no pasteURL config (client-side
+      // fetch only). A same-origin URL like the current admin page fetches successfully but
+      // returns HTML, which must be rejected rather than silently accepted as the uploaded file.
+      await gotoAndWaitForForm(page, restrictedMimeTypesURL.create)
+
+      const sameOriginPageUrl = page.url()
+      await page.evaluate(async (url) => {
+        await navigator.clipboard.writeText(url)
+      }, sameOriginPageUrl)
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+        'Invalid file type',
+      )
+      await expect(page.locator('#field-filemanager-filename')).toBeHidden()
+      await closeAllToasts(page)
+    })
+
+    test('should auto-fetch a real external image URL on a collection without mime type restrictions', async () => {
+      await gotoAndWaitForForm(page, animatedTypeMediaURL.create)
+
+      const imageURL =
+        'https://images.unsplash.com/photo-1785462099343-c854ad06f84c?q=80&w=798&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+      await page.evaluate(async (url) => {
+        await navigator.clipboard.writeText(url)
+      }, imageURL)
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('#field-filemanager-filename')).toHaveValue(
+        'photo-1785462099343-c854ad06f84c',
+        { timeout: POLL_TOPASS_TIMEOUT },
+      )
+      await expect(page.locator('#upload-paste-url')).toBeHidden()
+    })
   })
 
   test('should properly create IOS file upload', async () => {
@@ -654,7 +841,7 @@ describe('Uploads', () => {
       slug: animatedTypeMedia,
       auth: true,
     })
-    expect(doc.sizes.squareSmall.filename).toMatch(/480x480\.webp$/)
+    expect(doc.variants.squareSmall.filename).toMatch(/480x480\.webp$/)
   })
 
   test('should show resized images', async () => {
@@ -668,25 +855,26 @@ describe('Uploads', () => {
             equals: 'image/png',
           },
         },
+        overrideAccess: true,
       })
     ).docs[0]
 
     // The per-size detail drawer was replaced by the inline carousel, which no longer surfaces
     // per-size dimensions/formats; verify the generated sizes via the API instead.
-    const { sizes } = pngDoc!
+    const { variants } = pngDoc!
 
-    expect(sizes!.maintainedAspectRatio).toMatchObject({ height: 1024, width: 1024 })
-    expect(sizes!.differentFormatFromMainImage!.mimeType).toBe('image/jpeg')
-    expect(sizes!.maintainedImageSize).toMatchObject({ height: 1600, width: 1600 })
-    expect(sizes!.maintainedImageSizeWithNewFormat).toMatchObject({
+    expect(variants!.maintainedAspectRatio).toMatchObject({ height: 1024, width: 1024 })
+    expect(variants!.differentFormatFromMainImage!.mimeType).toBe('image/jpeg')
+    expect(variants!.maintainedImageSize).toMatchObject({ height: 1600, width: 1600 })
+    expect(variants!.maintainedImageSizeWithNewFormat).toMatchObject({
       height: 1600,
       mimeType: 'image/jpeg',
       width: 1600,
     })
-    expect(sizes!.accidentalSameSize).toMatchObject({ height: 80, width: 320 })
-    expect(sizes!.tablet).toMatchObject({ height: 480, width: 640 })
-    expect(sizes!.mobile).toMatchObject({ height: 240, width: 320 })
-    expect(sizes!.icon).toMatchObject({ height: 16, width: 16 })
+    expect(variants!.accidentalSameSize).toMatchObject({ height: 80, width: 320 })
+    expect(variants!.tablet).toMatchObject({ height: 480, width: 640 })
+    expect(variants!.mobile).toMatchObject({ height: 240, width: 320 })
+    expect(variants!.icon).toMatchObject({ height: 16, width: 16 })
   })
 
   test('should resize and show tiff images', async () => {
@@ -737,7 +925,7 @@ describe('Uploads', () => {
       slug: customFileNameMediaSlug,
       auth: true,
     })
-    expect(doc.sizes.custom.filename).toBe('custom-500x500.png')
+    expect(doc.variants.custom.filename).toBe('custom-500x500.png')
   })
 
   test('should show draft uploads in the relation list', async () => {
@@ -751,7 +939,10 @@ describe('Uploads', () => {
     await page.locator('.field-type:nth-of-type(2) .icon--write').click()
 
     // fill the title with 'draft'
-    await page.locator('#field-title').fill('draft')
+    await page
+      .locator('.doc-drawer')
+      .getByRole('textbox', { name: /^Title\b/ })
+      .fill('draft')
 
     await saveDocAndAssert(
       page,
@@ -791,6 +982,7 @@ describe('Uploads', () => {
           collection: audioSlug,
           depth: 0,
           pagination: false,
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -836,6 +1028,7 @@ describe('Uploads', () => {
           collection: audioSlug,
           depth: 0,
           pagination: false,
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -961,6 +1154,7 @@ describe('Uploads', () => {
             equals: 'image/png',
           },
         },
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -988,6 +1182,7 @@ describe('Uploads', () => {
             equals: 'image/png',
           },
         },
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -1018,6 +1213,7 @@ describe('Uploads', () => {
         depth: 0,
         limit: 1,
         pagination: false,
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -1069,10 +1265,11 @@ describe('Uploads', () => {
       auth: true,
     })
 
-    const acceptableFileSizes = [9431, 9435]
+    // EXIF plus the compact sRGB ICC profile embedded by sharp >= 0.33 (libvips 8.15+)
+    const acceptableFileSizes = [2989]
 
     await expect
-      .poll(() => acceptableFileSizes.includes(mediaDoc.sizes.sizeOne.filesize))
+      .poll(() => acceptableFileSizes.includes(mediaDoc.variants.sizeOne.filesize))
       .toBe(true)
   })
 
@@ -1093,7 +1290,7 @@ describe('Uploads', () => {
     const acceptableFileSizes = [2424, 2445]
 
     await expect
-      .poll(() => acceptableFileSizes.includes(mediaDoc.sizes.sizeTwo.filesize))
+      .poll(() => acceptableFileSizes.includes(mediaDoc.variants.sizeTwo.filesize))
       .toBe(true)
   })
 
@@ -1111,11 +1308,11 @@ describe('Uploads', () => {
       auth: true,
     })
 
-    const acceptableFileSizesForJPEG = [9554, 9575]
+    const acceptableFileSizesForJPEG = [3112]
 
     // without metadata appended, the jpeg image filesize would be 2424
     await expect
-      .poll(() => acceptableFileSizesForJPEG.includes(jpegMediaDoc.sizes.sizeThree.filesize))
+      .poll(() => acceptableFileSizesForJPEG.includes(jpegMediaDoc.variants.sizeThree.filesize))
       .toBe(true)
 
     await gotoAndWaitForForm(page, withOnlyJPEGMetadataURL.create)
@@ -1132,7 +1329,7 @@ describe('Uploads', () => {
     })
 
     // With metadata, the animated image filesize would be 218762
-    await expect.poll(() => webpMediaDoc.sizes.sizeThree.filesize).toBe(211638)
+    await expect.poll(() => webpMediaDoc.variants.sizeThree.filesize).toBe(211638)
   })
 
   test('should show custom upload component', async () => {
@@ -1181,7 +1378,7 @@ describe('Uploads', () => {
     // Ensure the URL ends correctly
     await expect
       .poll(() => href)
-      .toMatch(/\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
+      .toMatch(/\/api\/admin-thumbnail-size\/file\/test-image-original(-\d+)?\.png$/i)
 
     // Ensure no "-100x100" or any similar suffix
     await expect.poll(() => !/-\d+x\d+\.png$/.test(href!)).toBe(true)
@@ -1223,8 +1420,34 @@ describe('Uploads', () => {
       .locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem a')
       .getAttribute('href')
 
-    expect(href).toMatch(/\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
+    expect(href).toMatch(/\/api\/admin-thumbnail-size\/file\/test-image-original(-\d+)?\.png$/i)
     expect(href).not.toMatch(/-\d+x\d+\.png$/)
+  })
+
+  test('should add uploads to a hasMany field after the bulk upload drawer was closed without uploading', async () => {
+    await gotoAndWaitForForm(page, uploadsOne.create)
+
+    const createNewButton = page.locator('#field-hasManyThumbnailUpload button', {
+      hasText: exactText('Create New'),
+    })
+    const bulkUploadModal = page.locator('#hasManyThumbnailUpload-bulk-upload-modal-slug-1')
+
+    await createNewButton.click()
+    await expect(bulkUploadModal).toBeVisible()
+    await bulkUploadModal.getByRole('button', { name: 'Close' }).click()
+    await expect(bulkUploadModal).toBeHidden()
+
+    await createNewButton.click()
+    await expect(bulkUploadModal).toBeVisible()
+    await bulkUploadModal
+      .locator('.dropzone input[type="file"]')
+      .setInputFiles([path.resolve(dirname, './test-image.png')])
+    await bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button').click()
+    await closeAllToasts(page)
+
+    await expect(
+      page.locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem'),
+    ).toHaveCount(1)
   })
 
   test('should show preview button if image sizes are defined but crop and focal point are not', async () => {
@@ -1277,7 +1500,7 @@ describe('Uploads', () => {
         ])
 
       await bulkUploadModal
-        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .locator('.bulk-upload--file-manager .render-fields input[name="prefix"]')
         .fill('prefix-one')
 
       const nextImageChevronButton = bulkUploadModal.locator(
@@ -1286,7 +1509,7 @@ describe('Uploads', () => {
       await nextImageChevronButton.click()
 
       await bulkUploadModal
-        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .locator('.bulk-upload--file-manager .render-fields input[name="prefix"]')
         .fill('prefix-two')
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
@@ -1402,7 +1625,7 @@ describe('Uploads', () => {
         .setInputFiles([path.resolve(dirname, './test-pdf.pdf')])
 
       await bulkUploadModal
-        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .locator('.bulk-upload--file-manager .render-fields input[name="prefix"]')
         .fill('prefix-one')
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
@@ -1463,7 +1686,7 @@ describe('Uploads', () => {
 
       await options.locator('text=Prefix').click()
 
-      await editManyBulkUploadModal.locator('#field-prefix').fill('some prefix')
+      await editManyBulkUploadModal.locator('input[name="prefix"]').fill('some prefix')
 
       await editManyBulkUploadModal
         .locator('.edit-many-bulk-uploads__header__actions button')
@@ -1529,7 +1752,7 @@ describe('Uploads', () => {
       // Select an option
       await options.locator('text=Prefix').click()
 
-      await editManyBulkUploadModal.locator('#field-prefix').fill('some prefix')
+      await editManyBulkUploadModal.locator('input[name="prefix"]').fill('some prefix')
 
       await editManyBulkUploadModal
         .locator('.edit-many-bulk-uploads__header__actions button')
@@ -1585,7 +1808,7 @@ describe('Uploads', () => {
       // Select an option
       await options.locator('text=Prefix').click()
 
-      await editManyBulkUploadModal.locator('#field-prefix').fill('some prefix')
+      await editManyBulkUploadModal.locator('input[name="prefix"]').fill('some prefix')
 
       await editManyBulkUploadModal
         .locator('.edit-many-bulk-uploads__header__actions button')
@@ -1633,7 +1856,7 @@ describe('Uploads', () => {
 
       await page.setInputFiles('.dropzone input[type="file"]', path.resolve(dirname, './image.png'))
 
-      await page.locator('#field-prefix').fill('should-preserve')
+      await page.locator('input[name="prefix"]').fill('should-preserve')
 
       // add another file
       const addFileButton = page.locator(
@@ -1661,7 +1884,7 @@ describe('Uploads', () => {
       await originalFileRow.locator('button.file-selections__fileRow').click()
 
       // ensure the prefix field is still filled with the original value
-      await expect(page.locator('#field-prefix')).toHaveValue('should-preserve')
+      await expect(page.locator('input[name="prefix"]')).toHaveValue('should-preserve')
     })
 
     test('should not redirect to created relationship document inside the bulk upload drawer', async () => {
@@ -1690,7 +1913,7 @@ describe('Uploads', () => {
       await relationshipField.locator('.relationship-add-new__add-button').click()
 
       const collectionForm = page.locator('.collection-edit')
-      await collectionForm.locator('#field-title').fill('Related Document Title')
+      await collectionForm.locator('input[name="title"]').fill('Related Document Title')
       await saveDocAndAssert(page)
       await collectionForm.locator('.doc-drawer__header-close').click()
 
@@ -1747,7 +1970,7 @@ describe('Uploads', () => {
         ])
 
       await bulkUploadModal
-        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .locator('.bulk-upload--file-manager .render-fields input[name="prefix"]')
         .fill('prefix-one')
 
       // Clear the filename from the first file
@@ -1759,7 +1982,7 @@ describe('Uploads', () => {
       await nextImageChevronButton.click()
 
       await bulkUploadModal
-        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .locator('.bulk-upload--file-manager .render-fields input[name="prefix"]')
         .fill('prefix-two')
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
@@ -1878,7 +2101,7 @@ describe('Uploads', () => {
         ])
 
       // Form 1: Fill prefix but remove file (should have 1 error: missing file)
-      await bulkUploadModal.locator('#field-prefix').fill('prefix-one')
+      await bulkUploadModal.locator('input[name="prefix"]').fill('prefix-one')
       await bulkUploadModal.locator('.file-manager__remove').click()
 
       // Form 2: Omit prefix and remove file (should have 2 errors: missing file + missing prefix)
@@ -1890,7 +2113,7 @@ describe('Uploads', () => {
 
       // Form 3: Fill prefix and keep file (should have 0 errors - will succeed)
       await nextButton.click()
-      await bulkUploadModal.locator('#field-prefix').fill('prefix-three')
+      await bulkUploadModal.locator('input[name="prefix"]').fill('prefix-three')
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
@@ -1964,18 +2187,18 @@ describe('Uploads', () => {
       ])
 
       // Fill in the required prefix field for all uploads
-      await bulkUploadModal.locator('#field-prefix').fill('test-prefix')
+      await bulkUploadModal.locator('input[name="prefix"]').fill('test-prefix')
 
       // Navigate to second file
       const nextButton = bulkUploadModal.locator(
         '.bulk-upload--actions-bar__controls button:nth-of-type(2)',
       )
       await nextButton.click()
-      await bulkUploadModal.locator('#field-prefix').fill('test-prefix')
+      await bulkUploadModal.locator('input[name="prefix"]').fill('test-prefix')
 
       // Navigate to third file
       await nextButton.click()
-      await bulkUploadModal.locator('#field-prefix').fill('test-prefix')
+      await bulkUploadModal.locator('input[name="prefix"]').fill('test-prefix')
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
@@ -2068,18 +2291,15 @@ describe('Uploads', () => {
       }
     })
 
-    test('should fetch remote URL server-side if pasteURL.allowList is defined', async () => {
+    test('should auto-fetch a URL detected on the clipboard server-side if pasteURL.allowList is defined', async () => {
       // Navigate to the upload creation page
       await gotoAndWaitForForm(page, uploadsOne.create)
 
-      // Open the paste-from-URL modal
-      const pasteURLButton = page.locator('.file-manager__upload button', { hasText: 'Paste URL' })
-      await pasteURLButton.click()
-
-      // Input the remote URL
+      // Put the remote URL on the clipboard instead of opening the paste-from-URL modal
       const remoteImage = 'http://localhost:4000/mock-cors-image'
-      const inputField = page.locator('#upload-paste-url #field-url')
-      await inputField.fill(remoteImage)
+      await page.evaluate(async (url) => {
+        await navigator.clipboard.writeText(url)
+      }, remoteImage)
 
       // Intercept the server-side fetch to the paste-url endpoint
       const encodedImageURL = encodeURIComponent(remoteImage)
@@ -2089,14 +2309,15 @@ describe('Uploads', () => {
         { timeout: POLL_TOPASS_TIMEOUT },
       )
 
-      // Click the "Add file" button
-      const addFileButton = page.locator('#upload-paste-url button', { hasText: 'Add file' })
-      await addFileButton.click()
+      // The clipboard-paste button detects the URL and fetches it directly, without opening the modal
+      await page.locator('.file-manager__pasteFromClipboard').click()
 
       // Wait for the server-side fetch to complete
       const serverSideFetch = await serverSideFetchPromise
       // Assert that the server-side fetch completed successfully
       await serverSideFetch.text()
+
+      await expect(page.locator('#upload-paste-url')).toBeHidden()
 
       // Wait for the filename field to be updated
       const filenameInput = page.locator('#field-filemanager-filename')
@@ -2110,13 +2331,18 @@ describe('Uploads', () => {
       await expect(imageDetails).toHaveAttribute('src', /mock-cors-image/, { timeout: 500 })
     })
 
-    test('should fail to fetch remote URL server-side if the pasteURL.allowList domains do not match', async () => {
+    test('should open the paste-from-URL modal when the clipboard has no file or URL, then fail server-side if the pasteURL.allowList domains do not match', async () => {
       // Navigate to the upload creation page
       await gotoAndWaitForForm(page, uploadsTwo.create)
 
-      // Open the paste-from-URL modal
-      const pasteURLButton = page.locator('.file-manager__upload button', { hasText: 'Paste URL' })
-      await pasteURLButton.click()
+      // Clear the clipboard so the paste button has nothing to auto-detect
+      await page.evaluate(async () => {
+        await navigator.clipboard.writeText('')
+      })
+
+      // The clipboard-paste button falls back to opening the paste-from-URL modal
+      await page.locator('.file-manager__pasteFromClipboard').click()
+      await expect(page.locator('#upload-paste-url')).toBeVisible()
 
       // Input the remote URL
       const remoteImage = 'http://localhost:4000/mock-cors-image'
@@ -2131,6 +2357,30 @@ describe('Uploads', () => {
       await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
         'The provided URL is not allowed.',
       )
+    })
+
+    test('should open the paste-from-URL modal with the URL prefilled when the auto-fetch fails', async () => {
+      // pdfOnlyURL has no pasteURL.allowList configured, so only a client-side fetch is attempted
+      await gotoAndWaitForForm(page, pdfOnlyURL.create)
+
+      // The mock CORS server responds without an Access-Control-Allow-Origin header, so the
+      // client-side fetch is blocked and there is no server-side fallback to try.
+      const remoteImage = 'http://localhost:4000/mock-cors-image'
+      await page.evaluate(async (url) => {
+        await navigator.clipboard.writeText(url)
+      }, remoteImage)
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+        'Failed to fetch the file.',
+      )
+
+      // The failed auto-fetch falls back to the modal so the user can retry or correct the URL
+      await expect(page.locator('#upload-paste-url')).toBeVisible()
+      await expect(page.locator('#upload-paste-url #field-url')).toHaveValue(remoteImage)
+
+      await closeAllToasts(page)
     })
   })
 
@@ -2231,7 +2481,7 @@ describe('Uploads', () => {
       })
 
       // without focal point update this generated size was equal to 1736
-      await expect.poll(() => redDoc.sizes.focalTest.filesize).toBe(1586)
+      await expect.poll(() => redDoc.variants.focalTest.filesize).toBe(1586)
     })
 
     test('should resize image after crop if resizeOptions defined', async () => {
@@ -2292,9 +2542,15 @@ describe('Uploads', () => {
     await page.goto(relationPreviewURL.list)
 
     // Show all columns with relations
-    await toggleColumn(page, { columnLabel: 'Image Without Preview2', targetState: 'on' })
-    await toggleColumn(page, { columnLabel: 'Image With Preview3', targetState: 'on' })
-    await toggleColumn(page, { columnLabel: 'Image Without Preview3', targetState: 'on' })
+    await toggleColumns({
+      columns: [
+        { columnLabel: 'Image Without Preview2', targetState: 'on' },
+        { columnLabel: 'Image With Preview3', targetState: 'on' },
+        { columnLabel: 'Image Without Preview3', targetState: 'on' },
+      ],
+      page,
+      shouldCloseListColumns: true,
+    })
 
     // Wait for the columns to be displayed
     await expect(page.locator('.cell-imageWithoutPreview3')).toBeVisible()
@@ -2335,6 +2591,7 @@ describe('Uploads', () => {
       data: {
         title: 'test',
       },
+      overrideAccess: true,
     })
     await page.goto(hideFileInputOnCreateURL.edit(doc.id))
 
@@ -2376,7 +2633,7 @@ describe('Uploads', () => {
       const thumbnail = page.locator('#field-withinRange div.thumbnail > img')
       await expect(thumbnail).toHaveAttribute(
         'src',
-        /\/api\/enlarge\/file\/test-image-180x50\.jpg(\?.*)?$/,
+        /\/api\/enlarge\/file\/test-image-original-180x50\.jpg(\?.*)?$/,
       )
     })
 
@@ -2388,7 +2645,7 @@ describe('Uploads', () => {
       const thumbnail = page.locator('#field-nextSmallestOutOfRange div.thumbnail > img')
       await expect(thumbnail).toHaveAttribute(
         'src',
-        /\/api\/focal-only\/file\/test-image-400x300\.jpg(\?.*)?$/,
+        /\/api\/focal-only\/file\/test-image-original-400x300\.jpg(\?.*)?$/,
       )
     })
 
@@ -2398,7 +2655,10 @@ describe('Uploads', () => {
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'small.png'))
       await page.locator('dialog button#action-save').click()
       const thumbnail = page.locator('#field-original div.thumbnail > img')
-      await expect(thumbnail).toHaveAttribute('src', /\/api\/focal-only\/file\/small\.png(\?.*)?$/)
+      await expect(thumbnail).toHaveAttribute(
+        'src',
+        /\/api\/focal-only\/file\/small-original\.png(\?.*)?$/,
+      )
     })
   })
 
@@ -2419,7 +2679,7 @@ describe('Uploads', () => {
 
     const imageUploadImg = imageUploadCell.locator('.thumbnail')
     await expect(imageUploadImg).toBeVisible()
-    await expect(imageRelationshipCell).toHaveText('image.png')
+    await expect(imageRelationshipCell).toHaveText('image-original.png')
 
     // Navigate back to page 1 using the left arrow
     const prevPageButton = page.locator('.clickable-arrow--left')
@@ -2470,8 +2730,13 @@ describe('Uploads', () => {
   })
 
   test('should be able to replace the file even if the user doesnt have delete access', async () => {
-    const docID = (await payload.find({ collection: mediaWithoutDeleteAccessSlug, limit: 1 }))
-      .docs[0]?.id as string
+    const docID = (
+      await payload.find({
+        collection: mediaWithoutDeleteAccessSlug,
+        limit: 1,
+        overrideAccess: true,
+      })
+    ).docs[0]?.id as string
     await gotoAndWaitForForm(page, mediaWithoutDeleteAccessURL.edit(docID))
     // Replacing the file is available even without delete access
     await page.locator('.file-toolbar__filename-btn').click()
@@ -2487,9 +2752,13 @@ describe('Uploads', () => {
     await expect(filename).toHaveValue('test-image.jpg')
     await saveDocAndAssert(page)
     const filenameFromAPI = (
-      await payload.find({ collection: mediaWithoutDeleteAccessSlug, limit: 1 })
+      await payload.find({
+        collection: mediaWithoutDeleteAccessSlug,
+        limit: 1,
+        overrideAccess: true,
+      })
     ).docs[0]?.filename
-    expect(filenameFromAPI).toBe('test-image.jpg')
+    expect(filenameFromAPI).toBe('test-image-original.jpg')
   })
 
   test('should not show image sizes in column selector in list view if imageSize has admin.disableListColumn true', async () => {
@@ -2777,6 +3046,7 @@ describe('Uploads', () => {
       data: {
         title: 'Upload without file',
       },
+      overrideAccess: true,
     })
 
     const relationDoc = await payload.create({
@@ -2785,6 +3055,7 @@ describe('Uploads', () => {
         title: 'Relation document',
         uploadField: uploadDoc.id,
       },
+      overrideAccess: true,
     })
 
     await page.goto(relationToNoFilesRequiredURL.edit(relationDoc.id))
@@ -2796,7 +3067,7 @@ describe('Uploads', () => {
     const drawer = page.locator('[id^=doc-drawer_no-files-required_]')
     await expect(drawer).toBeVisible()
 
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
 
     await expect(titleField).toHaveValue('Upload without file')
   })
@@ -2839,6 +3110,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'image/png' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -2856,6 +3128,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'audio/mpeg' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -2875,6 +3148,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'application/pdf' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -2894,6 +3168,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'audio/mpeg' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -2913,6 +3188,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'video/mp4' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -2932,6 +3208,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'image/png' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -2952,6 +3229,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'image/png' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -2969,6 +3247,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'audio/mpeg' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -2988,6 +3267,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'audio/mpeg' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3005,6 +3285,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'application/pdf' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3021,6 +3302,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'image/png' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3039,6 +3321,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'video/mp4' } },
+          overrideAccess: true,
         })
       ).docs[0]
 

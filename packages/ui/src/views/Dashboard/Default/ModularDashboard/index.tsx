@@ -43,6 +43,7 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
           locale,
           permissions,
           req,
+          user,
           widgetData,
           widgetSlug,
         } satisfies WidgetServerProps,

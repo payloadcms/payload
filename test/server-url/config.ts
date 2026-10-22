@@ -9,24 +9,28 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  serverURL: `http://localhost:${process.env.PORT || 3000}`,
-  admin: {
-    autoLogin: false,
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'server-url',
+  config: {
+    admin: {
+      autoLogin: false,
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    editor: lexicalEditor({}),
+    serverURL: `http://localhost:${process.env.PORT || 3000}`,
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  editor: lexicalEditor({}),
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

@@ -6,14 +6,17 @@ import type { FeatureProviderServer, ResolvedServerFeatureMap } from './features
 import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
 import type {
   AdapterProps,
-  LexicalEditorProps,
+  LexicalEditorArgs,
   LexicalRichTextAdapterProvider,
 } from './types/index.js'
 
+import { convertLexicalToMarkdown } from './features/converters/lexicalToMarkdown/index.js'
+import { convertMarkdownToLexical } from './features/converters/markdownToLexical/index.js'
 import { getLexicalHooks } from './hooks.js'
 import { i18n } from './i18n.js'
 import { defaultEditorFeatures } from './lexical/config/server/default.js'
 import { populateLexicalPopulationPromises } from './populateGraphQL/populateLexicalPopulationPromises.js'
+import { getLLMInstructionsFeatures } from './presets/llmInstructions.js'
 import { getFieldToJSONSchema } from './types/schema.js'
 import { featuresInputToEditorConfig } from './utilities/editorConfigFactory.js'
 import { getGenerateImportMap } from './utilities/generateImportMap.js'
@@ -23,9 +26,9 @@ import { richTextValidateHOC } from './validate/index.js'
 
 let checkedDependencies = false
 
-export const lexicalTargetVersion = '0.48.0'
+export const lexicalTargetVersion = '0.52.0'
 
-export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapterProvider {
+export function lexicalEditor(args?: LexicalEditorArgs): LexicalRichTextAdapterProvider {
   if (
     process.env.NODE_ENV !== 'production' &&
     process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true' &&
@@ -103,6 +106,12 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
 
     return {
       CellComponent: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell',
+      converters: {
+        fromMarkdown: ({ markdown }) =>
+          convertMarkdownToLexical({ editorConfig: finalSanitizedEditorConfig, markdown }),
+        toMarkdown: ({ data }) =>
+          convertLexicalToMarkdown({ data, editorConfig: finalSanitizedEditorConfig }),
+      },
       DiffComponent: '@payloadcms/richtext-lexical/rsc#LexicalDiffComponent',
       editorConfig: finalSanitizedEditorConfig,
       features,
@@ -161,6 +170,10 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
         editorConfig: finalSanitizedEditorConfig,
       }),
       jsonSchema: getFieldToJSONSchema({ editorConfig: finalSanitizedEditorConfig }),
+      presets: {
+        llmInstructions: (presetArgs) =>
+          lexicalEditor({ features: getLLMInstructionsFeatures })(presetArgs),
+      },
       validate: richTextValidateHOC({
         editorConfig: finalSanitizedEditorConfig,
       }),
@@ -346,8 +359,8 @@ export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 export { populate } from './populateGraphQL/populate.js'
 export type {
   ClientFeaturesMap,
+  LexicalEditorArgs,
   LexicalEditorNodeMap,
-  LexicalEditorProps,
   LexicalEditorViewMap,
   LexicalFieldAdminProps,
   LexicalRichTextAdapter,

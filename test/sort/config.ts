@@ -15,45 +15,44 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  collections: [
-    PostsCollection,
-    DraftsCollection,
-    DefaultSortCollection,
-    NonUniqueSortCollection,
-    LocalizedCollection,
-    OrderableCollection,
-    OrderableJoinCollection,
-  ],
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-  },
-  endpoints: [
-    {
-      path: '/seed',
-      method: 'post',
-      handler: async (req) => {
-        await seedSortable(req.payload)
-
-        return new Response(JSON.stringify({ success: true }), {
-          headers: { 'Content-Type': 'application/json' },
-          status: 200,
-        })
+  suite: 'sort',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
       },
     },
-  ],
-  cors: [`http://localhost:${process.env.PORT || 3000}`, 'http://localhost:3001'],
-  localization: {
-    locales: ['en', 'nb'],
-    defaultLocale: 'en',
+    collections: [
+      PostsCollection,
+      DraftsCollection,
+      DefaultSortCollection,
+      NonUniqueSortCollection,
+      LocalizedCollection,
+      OrderableCollection,
+      OrderableJoinCollection,
+    ],
+    cors: [`http://localhost:${process.env.PORT || 3000}`, 'http://localhost:3001'],
+    endpoints: [
+      {
+        handler: async (req) => {
+          await seedSortable(req.payload)
+
+          return new Response(JSON.stringify({ success: true }), {
+            headers: { 'Content-Type': 'application/json' },
+            status: 200,
+          })
+        },
+        method: 'post',
+        path: '/seed',
+      },
+    ],
+    localization: {
+      defaultLocale: 'en',
+      locales: ['en', 'nb'],
+    },
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
   },
-  onInit: async (payload) => {
-    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await seed(payload)
-    }
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
+  seed,
 })

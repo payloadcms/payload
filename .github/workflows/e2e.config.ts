@@ -13,7 +13,7 @@ import { createE2EConfig } from './utilities/e2e-matrix.ts'
 
 const nextSuites: TestConfig[] = [
   { file: '_community', shards: 1 },
-  { file: 'a11y', shards: 1 },
+  { file: 'a11y', shards: 3 },
   { file: 'access-control', shards: 2 },
   { file: 'admin__e2e__general', shards: 3 },
   { file: 'admin__e2e__list-view', shards: 4 },
@@ -85,6 +85,7 @@ const nextSuites: TestConfig[] = [
   { file: 'query-presets', shards: 1 },
   { file: 'form-state', shards: 1 },
   { file: 'live-preview', shards: 2 },
+  { file: 'llm-instructions', shards: 1 },
   { file: 'localization', shards: 2 },
   { file: 'locked-documents', shards: 1 },
   { file: 'i18n', shards: 1 },
@@ -106,20 +107,19 @@ const nextSuites: TestConfig[] = [
   { file: 'trash', shards: 2 },
   { file: 'versions', shards: 3 },
   { file: 'uploads', shards: 3 },
+  { file: 'upload-transformers', shards: 1 },
 ]
 
-/**
- * tanstack-start coverage is being rolled out one suite at a time.
- * Only the `_community` suite runs for now, and it is required so its failures block the `all-green` gate.
- *
- * @todo as the tanstack-start adapter becomes stable, turn on the full suite matrix, one-by-one.
- * To enable all
- *  - Use `nextSuites.map((suite) => ({ ...suite, framework: 'tanstack-start' }))` —
- *  - Drop the per-suite `optional` overrides and remove the `optional` default for tanstack-start in e2e matrix.
- */
-const tanstackSuites: TestConfig[] = [
-  { file: '_community', framework: 'tanstack-start', optional: false, shards: 1 },
-  { file: 'admin-routing', framework: 'tanstack-start', optional: false, shards: 1 },
-]
+const tanstackSuites: TestConfig[] = nextSuites.map((suite) => ({
+  ...suite,
+  framework: 'tanstack-start',
+  optional: false,
+}))
 
-export default createE2EConfig([...nextSuites, ...tanstackSuites])
+export default createE2EConfig([
+  ...nextSuites,
+  ...tanstackSuites,
+  // Next.js suites run with `cacheComponents` enabled. This runs the tests tagged
+  // `@also-without-cache-components` from every suite once more, with it disabled.
+  { file: '', shards: 1, disableCacheComponents: true, grep: '@also-without-cache-components' },
+])

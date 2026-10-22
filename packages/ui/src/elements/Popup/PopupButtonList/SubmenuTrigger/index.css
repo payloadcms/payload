@@ -1,0 +1,53 @@
+@layer payload-default {
+  .popup-button-list__submenu-trigger {
+    --color-bg-selected: var(--color-bg-selected-strong);
+    --color-text-selected: var(--color-text-onselected-strong);
+
+    width: 100%;
+    text-align: start;
+  }
+
+  .popup-button-list__submenu-trigger.btn--style-ghost:hover {
+    background-color: var(--color-bg-selected-strong);
+    color: var(--color-text-onselected-strong);
+  }
+
+  .popup__content[role='menu']:has(
+      > .popup__scroll-container
+        > .popup-button-list
+        > .popup
+        > .popup__trigger-wrap
+        [aria-expanded='true']
+    )
+    > .popup__scroll-container
+    > .popup-button-list
+    > .popup
+    > .popup__trigger-wrap
+    .popup-button-list__submenu-trigger[aria-expanded='false']:hover {
+    background-color: transparent;
+    color: var(--color-text);
+  }
+
+  .popup-button-list__submenu-trigger .btn__content,
+  .popup-button-list__submenu-trigger .btn__label,
+  .popup-button-list__submenu-trigger__content {
+    width: 100%;
+  }
+
+  .popup-button-list__submenu-trigger__content {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+  }
+
+  .popup-button-list__submenu-trigger__icon,
+  .popup-button-list__submenu-trigger__trailing-icon {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .popup-button-list__submenu-trigger__trailing-icon {
+    margin-inline-start: auto;
+  }
+}

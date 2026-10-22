@@ -9,7 +9,7 @@
     "lib": ["ES2022"],
     "rootDir": "./src" /* Specify the root folder within your source files. */,
   },
-  "exclude": ["dist", "node_modules"],
+  "exclude": ["dist", "node_modules", "**/*.spec.*"],
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
   "references": [{ "path": "../payload" }, { "path": "../plugin-cloud-storage" }],
 }

@@ -61,20 +61,15 @@ export const DefaultNavClient: React.FC<{
                 <span className={`${baseClass}__link-label`}>{getTranslation(label, i18n)}</span>
               )
 
-              // If the URL matches the link exactly
-              if (pathname === href) {
-                return (
-                  <div className={`${baseClass}__link-wrapper`} key={i}>
-                    <div className={linkClass} id={id}>
-                      {Label}
-                    </div>
-                  </div>
-                )
-              }
-
               return (
                 <div className={`${baseClass}__link-wrapper`} key={i}>
-                  <Link className={linkClass} href={href} id={id} prefetch={false}>
+                  <Link
+                    aria-current={isActive ? (pathname === href ? 'page' : 'location') : undefined}
+                    className={linkClass}
+                    href={href}
+                    id={id}
+                    prefetch={false}
+                  >
                     {Label}
                   </Link>
                 </div>

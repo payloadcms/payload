@@ -155,6 +155,8 @@ export type JobsConfig = {
   /**
    * Override any settings on the default Jobs collection. Accepts the default collection and allows you to return
    * a new collection.
+   *
+   * @experimental
    */
   jobsCollectionOverrides?: (args: { defaultJobsCollection: CollectionConfig }) => CollectionConfig
   processingLease?: ProcessingLeaseConfig
@@ -176,7 +178,8 @@ export type JobsConfig = {
     | Sort
   /**
    * A function that will be executed before Payload picks up jobs which are configured by the `jobs.autorun` function.
-   * If this function returns true, jobs will be queried and picked up. If it returns false, jobs will not be run.
+   * If this function returns true, jobs will be queried and picked up. If it returns false, jobs will not be run
+   * for that tick. The cron will check again on its next scheduled run.
    * @default undefined - if this function is not defined, jobs will be run - as if () => true was passed.
    * @param payload
    * @returns boolean

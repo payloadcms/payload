@@ -38,7 +38,7 @@ describe('plugin', () => {
   })
 
   beforeEach(() => {
-    createTransportSpy = vitest.spyOn(nodemailer, 'createTransport').mockImplementationOnce(() => {
+    createTransportSpy = vitest.spyOn(nodemailer, 'createTransport').mockImplementation(() => {
       return {
         transporter: {
           name: 'Nodemailer - SMTP',
@@ -149,28 +149,21 @@ describe('plugin', () => {
       it('should allow setting fromName and fromAddress', async () => {
         const defaultFromName = 'Test'
         const defaultFromAddress = 'test@test.com'
-        const configWithPartialEmail = createConfig({
-          email: await nodemailerAdapter({
+        const plugin = payloadCloudPlugin({
+          email: {
             defaultFromAddress,
             defaultFromName,
             skipVerify,
-          }),
+          },
         })
 
-        const plugin = payloadCloudPlugin()
-        const config = await plugin(configWithPartialEmail)
+        const config = await plugin(createConfig())
         const emailConfig = config.email as Awaited<ReturnType<typeof nodemailerAdapter>>
 
         const initializedEmail = emailConfig({ payload: mockedPayload })
 
         expect(initializedEmail.defaultFromName).toStrictEqual(defaultFromName)
         expect(initializedEmail.defaultFromAddress).toStrictEqual(defaultFromAddress)
-
-        expect(createTransportSpy).toHaveBeenCalledWith(
-          expect.objectContaining({
-            host: 'smtp.resend.com',
-          }),
-        )
       })
     })
   })
@@ -191,14 +184,15 @@ describe('plugin', () => {
       )
 
       expect(globalInstance).toBeDefined()
+      expect(globalInstance?.authorship).toBe(false)
       expect(globalInstance?.fields).toStrictEqual([
         {
           name: 'instance',
           type: 'text',
           required: true,
         },
-      ]),
-        expect(globalInstance?.admin?.hidden).toStrictEqual(true)
+      ])
+      expect(globalInstance?.admin?.hidden).toStrictEqual(true)
     })
     // TO-DO: I managed to mock findGlobal, but not generateRandomString
     test.skip('if autoRun is not set, should return default cron job', async () => {

@@ -148,7 +148,7 @@ export type TransformOptions = {
 }
 
 export type WriteOptions = {
-  formatWithPrettier?: boolean
+  formatWithOxfmt?: boolean
   validateStructure?: boolean
 }
 

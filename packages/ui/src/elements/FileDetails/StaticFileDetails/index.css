@@ -101,6 +101,7 @@
     background-color: var(--color-bg-secondary);
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1440px) {
     .file-details__main-detail {
       padding: var(--spacer-4);
@@ -117,6 +118,7 @@
     }
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1024px) {
     .file-details header {
       flex-wrap: wrap;

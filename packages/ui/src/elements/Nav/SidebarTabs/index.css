@@ -4,7 +4,6 @@
     flex-direction: column;
     width: 100%;
     flex-grow: 1;
-    gap: var(--spacer-2-5);
   }
 
   .sidebar-tabs__tabs {
@@ -12,7 +11,9 @@
     gap: 0;
     background-color: var(--color-bg-secondary);
     border-radius: var(--button-radius);
-    width: 100%;
+    margin: var(--spacer-2-5) var(--spacer-2-5) 0;
+    overflow-x: auto;
+    overflow-y: hidden;
   }
 
   .sidebar-tabs__tab {
@@ -23,7 +24,6 @@
     align-items: center;
     justify-content: center;
     height: var(--button-height);
-    padding: 0 var(--spacer-1);
     cursor: pointer;
     border-radius: var(--button-radius);
     border: var(--stroke-width-small) solid transparent;

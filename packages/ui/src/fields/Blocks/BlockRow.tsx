@@ -37,6 +37,7 @@ type BlocksFieldProps = {
   moveRow: (fromIndex: number, toIndex: number) => void
   parentPath: string
   pasteRow: (rowIndex: number) => void
+  pasteRowBelow: (rowIndex: number) => void
   path: string
   permissions: SanitizedFieldPermissions
   readOnly: boolean
@@ -67,6 +68,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   moveRow,
   parentPath,
   pasteRow,
+  pasteRowBelow,
   path,
   permissions,
   readOnly,
@@ -75,6 +77,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   rowCount,
   rowIndex,
   schemaPath,
+  setActivatorNodeRef,
   setCollapse,
   setNodeRef,
   transform,
@@ -165,6 +168,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
               moveRow={moveRow}
               pasteData={pasteData}
               pasteRow={pasteRow}
+              pasteRowBelow={pasteRowBelow}
               removeRow={removeRow}
               rowCount={rowCount}
               rowIndex={rowIndex}
@@ -179,6 +183,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
                 id: row.id,
                 attributes,
                 listeners,
+                setActivatorNodeRef,
               }
             : undefined
         }

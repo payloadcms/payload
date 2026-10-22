@@ -467,6 +467,7 @@ input versionsPage_where_or {
 
 type User {
   id: String!
+  _strategy: String
   name: String
   roles: [User_roles!]
   updatedAt: DateTime
@@ -769,7 +770,6 @@ type UsersUnlockDocAccess {
 type usersMe {
   collection: String
   exp: Int
-  strategy: String
   token: String
   user: User
 }
@@ -2552,13 +2552,13 @@ enum UserUpdate_roles_MutationInput {
 type usersRefreshedUser {
   exp: Int
   refreshedToken: String
-  strategy: String
   user: usersJWT
 }
 
 type usersJWT {
   email: EmailAddress!
   collection: String!
+  _strategy: String
 }
 
 type usersLoginResult {

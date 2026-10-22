@@ -110,6 +110,8 @@ export const generateSearchCollection = (
         singular: 'Search Result',
       }),
     },
+    // Internal search index; opt out of authorship (a searchOverride can re-enable it).
+    authorship: pluginConfig?.searchOverrides?.authorship ?? false,
     versions: pluginConfig?.searchOverrides?.versions ?? false,
   }
 

@@ -1,9 +1,9 @@
 'use client'
-import type { BlocksFieldClientComponent } from 'payload'
+import type { BlocksFieldClientProps } from 'payload'
 
 import { BlocksField } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomBlocksFieldClient: BlocksFieldClientComponent = (props) => {
+export const CustomBlocksFieldClient: React.FC<BlocksFieldClientProps> = (props) => {
   return <BlocksField {...props} />
 }

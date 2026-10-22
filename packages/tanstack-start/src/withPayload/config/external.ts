@@ -1,7 +1,7 @@
-/**
- * SSR/RSC externalization config used by `withPayload`. Kept separate from the
- * client optimizer config (`./optimizeDeps.ts`) so each concern stays small.
- */
+import {
+  devServerExternalPackages as devServerExternalPayloadPackages,
+  serverExternalPackages as serverExternalPayloadPackages,
+} from 'payload/build-config'
 
 /**
  * Packages externalized during dev serve (`ssr.external`). Node's loader resolves
@@ -9,21 +9,16 @@
  * fragile UMD wrappers (e.g. `pluralize`, whose `this`-based global assignment
  * throws when transformed rather than required).
  *
- * Note `pluralize` is deliberately excluded from {@link buildExternalPackages}:
- * for the production build it must bundle (see there).
+ * Safe here whoever declared the entry: Node resolves from the importing package,
+ * so pnpm's isolated layout never applies. The build is stricter — see
+ * {@link buildBundledPackages}.
  */
 export const ssrExternalPackages: string[] = [
-  'ajv',
+  'zod',
   'fast-uri',
-  'drizzle-kit',
-  'drizzle-kit/api',
+  ...serverExternalPayloadPackages,
   'drizzle-orm',
-  'sharp',
-  'require-in-the-middle',
-  'json-schema-to-typescript',
-  'pino',
   'pino-pretty',
-  'graphql',
   'nodemailer',
   'aws4',
   'pluralize',
@@ -39,32 +34,33 @@ export const ssrExternalPackages: string[] = [
   'pg-cloudflare',
   // SQLite (`@payloadcms/db-sqlite`)
   'better-sqlite3',
-  'libsql',
   // Mongo (`@payloadcms/db-mongodb`)
   'mongodb',
   'mongoose',
 ]
 
 /**
- * External packages for the production `vite build` only (not dev serve).
+ * Entries of {@link ssrExternalPackages} that must bundle in the production build.
  *
- * Externalizes the `@payloadcms/*` package boundaries — plus `payload` — so each
- * resolves its own transitive Node deps (`pino`, `drizzle-orm`, `libsql`, …) from
- * its own `node_modules` at runtime. Externalizing only the leaf deps breaks under
- * pnpm: a leaf imported by bundled code becomes an unresolvable bare specifier from
- * `dist/`, since pnpm does not hoist it.
+ * Externalizing only works for specifiers resolvable from the project root. These
+ * are leaf deps of Payload packages, so under pnpm they live in `.pnpm/…` and a bare
+ * specifier in a root-resolved chunk is invisible — `ERR_MODULE_NOT_FOUND` at
+ * runtime, or a build-time resolve failure under Nitro's re-bundle pass.
  *
- * Kept out of dev's `ssr.external` on purpose: the monorepo resolves these to
- * TypeScript source (`.ts` imported via `.js` specifiers), which only Vite's
- * transform can resolve — an externalized copy would hit Node's raw resolver and
- * fail on the `.js`→`.ts` mismatch.
- *
- * `pluralize` is excluded: it is reached from client-safe code (`payload`'s
- * `formatLabels`, shipped in the `/shared` export), so externalizing it would
- * leave a bare specifier in a bundled client chunk that pnpm can't resolve from
- * `dist/` at runtime. It must bundle for the build.
+ * `pluralize` also needs forcing back via `noExternal` (see `withPayload`); the
+ * storage leaves don't, since their adapters are already `noExternal`.
  */
-export const buildExternalPackages: string[] = [
+export const buildBundledPackages: string[] = [
+  'pluralize',
+  // Leaf deps of the `@payloadcms/storage-*` adapters.
+  '@aws-sdk/client-s3',
+  '@aws-sdk/s3-request-presigner',
+  '@azure/storage-blob',
+  '@google-cloud/storage',
+]
+
+/** Server-only package boundaries loaded directly by Node in development and production. */
+export const serverExternalPackages: string[] = [
   'payload',
   'payload/node',
   '@payloadcms/drizzle',
@@ -73,7 +69,25 @@ export const buildExternalPackages: string[] = [
   '@payloadcms/db-vercel-postgres',
   '@payloadcms/db-sqlite',
   '@payloadcms/db-d1-sqlite',
-  ...ssrExternalPackages.filter((pkg) => pkg !== 'pluralize'),
+]
+
+/** Additional installed packages that can bypass Vite's development server transforms. */
+export const devExternalPackages: string[] = [
+  ...new Set([
+    // Vite otherwise transforms date-fns' full module graph during SSR.
+    'date-fns',
+    ...devServerExternalPayloadPackages,
+    ...serverExternalPackages,
+  ]),
+]
+
+/**
+ * Externalizes package boundaries so packages resolve their own transitive dependencies under pnpm.
+ * Leaves that must bundle in production are excluded; see {@link buildBundledPackages}.
+ */
+export const buildExternalPackages: string[] = [
+  ...serverExternalPackages,
+  ...ssrExternalPackages.filter((pkg) => !buildBundledPackages.includes(pkg)),
 ]
 
 export const payloadNoExternalPatterns: Array<RegExp | string> = [

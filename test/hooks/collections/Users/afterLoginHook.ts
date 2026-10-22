@@ -8,5 +8,6 @@ export const afterLoginHook: CollectionAfterLoginHook = async ({ req, user }) =>
       afterLoginHook: true,
     },
     req,
+    overrideAccess: true,
   })
 }
