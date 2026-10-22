@@ -1,8 +1,11 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+// eslint-disable-next-line payload/no-relative-monorepo-imports -- Preserve the default auth collection while testing a second namespace.
+import { defaultUserCollection } from '../../packages/payload/src/auth/defaultUser.js'
 import { readVirtualTagsSlug } from './slugs.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercise fail-closed derived projection state in the experimental fixture.
@@ -22,7 +25,10 @@ import { QueryDocs } from './collections/QueryDocs/index.js'
 import { QueryTags } from './collections/QueryTags/index.js'
 import { QueryTextTags } from './collections/QueryTextTags/index.js'
 import { ScalarArticles } from './collections/ScalarArticles/index.js'
+import { buildSecondaryUsers } from './collections/SecondaryUsers/index.js'
 import { WideIDs } from './collections/WideIDs/index.js'
+import { CaseVariantSettings } from './globals/CaseVariantSettings/index.js'
+import { buildOrdinarySettings } from './globals/OrdinarySettings/index.js'
 import { Settings } from './globals/Settings/index.js'
 
 const projectionControlCollections = buildBranchProjectionControlCollections({
@@ -56,10 +62,13 @@ const selectedDatabaseAdapter = process.env.PAYLOAD_DATABASE?.startsWith('sqlite
 export default buildConfigWithDefaults({
   config: {
     db: selectedDatabaseAdapter,
+    admin: { user: 'users' },
     ...registerBranchQueryStorage(
       registerBranchStorage({
         collections: [
+          defaultUserCollection,
           Articles,
+          buildSecondaryUsers({ idType: selectedDatabaseAdapter.defaultIDType }),
           NestedReadArticles,
           LocalizedStatusArticles,
           ScalarArticles,
@@ -80,13 +89,21 @@ export default buildConfigWithDefaults({
           QueryTextTags,
           ...projectionControlCollections,
         ],
-        globals: [Settings],
+        globals: [
+          ...(selectedDatabaseAdapter.name === 'mongoose' ? [CaseVariantSettings] : []),
+          Settings,
+          buildOrdinarySettings({
+            hasPoint: ['mongoose', 'postgres'].includes(selectedDatabaseAdapter.name),
+          }),
+        ],
         versionIDType: selectedDatabaseAdapter.defaultIDType,
       }),
     ),
     jobs: { deleteJobOnComplete: false },
     localization: { defaultLocale: 'en', fallback: false, locales: ['en', 'fr'] },
-    typescript: { outputFile: fileURLToPath(new URL('./payload-types.ts', import.meta.url)) },
+    typescript: {
+      outputFile: path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'payload-types.ts'),
+    },
   },
   disableMCP: true,
   suite: 'version-branches',

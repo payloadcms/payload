@@ -940,16 +940,14 @@ export const getTableColumnFromPath = ({
               condtions.push(eq(aliasLocaleTable._locale, locale))
             }
 
-            const localesTable = adapter.tables[`${rootTableName}${adapter.localesSuffix}`]
-
             addJoinTable({
               condition: and(...condtions),
               joins,
-              table: localesTable,
+              table: aliasLocaleTable,
             })
 
             joins.push({
-              condition: eq(localesTable[columnName], newAliasTable[target.idField]),
+              condition: eq(aliasLocaleTable[columnName], newAliasTable[target.idField]),
               table: newAliasTable,
             })
           } else {

@@ -4,6 +4,11 @@ import type { PayloadRequest } from '../types/index.js'
 import { getDataLoader } from '../collections/dataloader.js'
 import { getLocalI18n } from '../translations/getLocalI18n.js'
 import { sanitizeFallbackLocale } from '../utilities/sanitizeFallbackLocale.js'
+import { assertBranchReadBinding } from '../versions/branches/operations/assertBranchReadBinding.js'
+import {
+  getBranchReadContext,
+  registerBranchReadContext,
+} from '../versions/branches/operations/branchReadContext.js'
 import { forkSelectedBranchRequest } from '../versions/branches/operations/selectedBranchContext.js'
 import { forkBranchReadRequest, resolveBranchReadPayload } from './createBranchReadRequest.js'
 
@@ -110,6 +115,7 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
   urlSuffix,
   user,
 }): Promise<PayloadRequest> => {
+  assertBranchReadBinding({ req: req as PayloadRequest })
   req = forkSelectedBranchRequest({ req })
   req = forkBranchReadRequest({ req })
   payload = resolveBranchReadPayload({ payload, req })
@@ -165,6 +171,21 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
   }
 
   attachFakeURLProperties(req, urlSuffix)
+
+  const inherited = getBranchReadContext({ req })
+  if (inherited) {
+    registerBranchReadContext({
+      context: {
+        ...inherited,
+        binding: structuredClone({
+          fallbackLocale: req.fallbackLocale,
+          locale: req.locale,
+          user: req.user,
+        }),
+      },
+      req: req as PayloadRequest,
+    })
+  }
 
   return req as PayloadRequest
 }

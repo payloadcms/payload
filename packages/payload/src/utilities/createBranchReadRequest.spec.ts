@@ -14,6 +14,21 @@ const makePayload = () =>
 const makeI18n = () => ({ t: vi.fn(), language: 'en' })
 
 describe('trusted branch request views', () => {
+  it('should isolate mutable authorization data and fallback arrays from its caller', () => {
+    const payload = makePayload()
+    const source = {
+      payload,
+      context: {},
+      user: { id: 'native-user', collection: 'users', roles: ['editor'] },
+      fallbackLocale: ['en'],
+    } as unknown as PayloadRequest
+    const req = createBranchReadRequest({ payload, req: source })
+    ;(req.user as unknown as { roles: string[] }).roles.push('admin')
+    ;(req.fallbackLocale as string[]).push('fr')
+    expect((source.user as unknown as { roles: string[] }).roles).toEqual(['editor'])
+    expect(source.fallbackLocale).toEqual(['en'])
+  })
+
   it('should forward real Request brands without consuming or cloning its body', async () => {
     const original = Object.assign(
       new Request('https://payload.test/api/posts?locale=en', {

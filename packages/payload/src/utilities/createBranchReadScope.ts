@@ -116,7 +116,7 @@ export const createBranchReadScope = <T extends object>({
         }
         if (
           isQuery &&
-          !['count', 'find', 'findDistinct', 'readStates'].includes(String(property))
+          !['count', 'find', 'findDistinct', 'findGlobal', 'readStates'].includes(String(property))
         ) {
           throw unsupported()
         }

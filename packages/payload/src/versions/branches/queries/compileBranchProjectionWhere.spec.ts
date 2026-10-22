@@ -44,6 +44,23 @@ const setup = () => {
 }
 
 describe('Logical branch predicate compilation', () => {
+  it('should reject an ordinary collection globalType path even with a stray global source marker', () => {
+    const args = setup()
+    args.req.payload.db = { name: 'mongoose' } as PayloadRequest['payload']['db']
+    args.req.payload.globals = {
+      config: [{ slug: 'settings', fields: [], flattenedFields: [] }],
+    } as unknown as PayloadRequest['payload']['globals']
+    const config = args.req.payload.collections.ordinary!.config
+    config.custom = { branchQueryGlobalSource: 'settings' }
+    expect(() =>
+      compileBranchProjectionWhere({
+        ...args,
+        collection: 'ordinary',
+        where: { globalType: { equals: 'settings' } },
+      }),
+    ).toThrow('Unknown branch query field')
+  })
+
   it('should preserve has-many exact array equality while encoding only declared cache references', () => {
     const args = setup()
     const values = [1, 1.5, 2].map((logicalID) =>

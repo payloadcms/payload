@@ -1,6 +1,15 @@
 import type { JsonObject, PayloadRequest, Where } from '../types/index.js'
 import type { TypeWithVersion } from '../versions/types.js'
-import type { Count, CountArgs, Find, FindArgs, FindDistinct, FindDistinctArgs } from './types.js'
+import type {
+  Count,
+  CountArgs,
+  Find,
+  FindArgs,
+  FindDistinct,
+  FindDistinctArgs,
+  FindGlobal,
+  FindGlobalArgs,
+} from './types.js'
 
 /** Trusted native query context over private, rebuildable effective-content indexes. */
 export type BranchProjectionQueryContext = {
@@ -29,6 +38,9 @@ export type BranchProjectionQueries = {
   findDistinct: (
     args: { context: BranchProjectionQueryContext } & FindDistinctArgs,
   ) => ReturnType<FindDistinct>
+  findGlobal?: (
+    args: { context: BranchProjectionQueryContext } & FindGlobalArgs,
+  ) => ReturnType<FindGlobal>
   /** Optional fixed-snapshot batching of registered private readiness coordinates, never content IDs. */
   readStates?: (args: {
     reads: {

@@ -76,10 +76,13 @@ export type LexicalNodes_3DE324E4 =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'branch-read-secondary-users': BranchReadSecondaryUserAuthOperations;
   };
   blocks: {};
   collections: {
+    users: User;
     'branch-head-articles': BranchHeadArticle;
+    'branch-read-secondary-users': BranchReadSecondaryUser;
     'branch-nested-read-articles': BranchNestedReadArticle;
     'branch-localized-status-articles': BranchLocalizedStatusArticle;
     'branch-scalar-articles': BranchScalarArticle;
@@ -147,7 +150,6 @@ export interface Config {
     'global-branch-head-settings-query-states': GlobalBranchHeadSettingsQueryState;
     'global-branch-head-settings-query-invalidations': GlobalBranchHeadSettingsQueryInvalidation;
     'payload-kv': PayloadKv;
-    users: User;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -178,7 +180,9 @@ export interface Config {
     };
   };
   collectionsSelect: {
+    users: UsersSelect<false> | UsersSelect<true>;
     'branch-head-articles': BranchHeadArticlesSelect<false> | BranchHeadArticlesSelect<true>;
+    'branch-read-secondary-users': BranchReadSecondaryUsersSelect<false> | BranchReadSecondaryUsersSelect<true>;
     'branch-nested-read-articles': BranchNestedReadArticlesSelect<false> | BranchNestedReadArticlesSelect<true>;
     'branch-localized-status-articles': BranchLocalizedStatusArticlesSelect<false> | BranchLocalizedStatusArticlesSelect<true>;
     'branch-scalar-articles': BranchScalarArticlesSelect<false> | BranchScalarArticlesSelect<true>;
@@ -246,7 +250,6 @@ export interface Config {
     'global-branch-head-settings-query-states': GlobalBranchHeadSettingsQueryStatesSelect<false> | GlobalBranchHeadSettingsQueryStatesSelect<true>;
     'global-branch-head-settings-query-invalidations': GlobalBranchHeadSettingsQueryInvalidationsSelect<false> | GlobalBranchHeadSettingsQueryInvalidationsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
-    users: UsersSelect<false> | UsersSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -263,15 +266,19 @@ export interface Config {
     'global-branch-head-settings-projection': GlobalBranchHeadSettingsProjectionSelect<false> | GlobalBranchHeadSettingsProjectionSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'fr') | ('en' | 'fr')[];
   globals: {
+    'BRANCH-HEAD-SETTINGS': BRANCHHEADSETTING;
     'branch-head-settings': BranchHeadSetting;
+    'branch-read-ordinary-settings': BranchReadOrdinarySetting;
     'payload-jobs-stats': PayloadJobsStat;
   };
   globalsSelect: {
+    'BRANCH-HEAD-SETTINGS': BRANCHHEADSETTINGSSelect<false> | BRANCHHEADSETTINGSSelect<true>;
     'branch-head-settings': BranchHeadSettingsSelect<false> | BranchHeadSettingsSelect<true>;
+    'branch-read-ordinary-settings': BranchReadOrdinarySettingsSelect<false> | BranchReadOrdinarySettingsSelect<true>;
     'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
   locale: 'en' | 'fr';
@@ -281,7 +288,7 @@ export interface Config {
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
   };
-  user: User;
+  user: User | BranchReadSecondaryUser;
   jobs: {
     tasks: {
       schedulePublish: TaskSchedulePublish;
@@ -311,47 +318,48 @@ export interface UserAuthOperations {
     password: string;
   };
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "branch-head-articles".
- */
-export interface BranchHeadArticle {
-  id: number;
-  shared?: string | null;
-  title: string;
-  sections?:
-    | {
-        label?: string | null;
-        translation?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
+export interface BranchReadSecondaryUserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  id: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -374,22 +382,113 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "branch-read-secondary-users".
+ */
+export interface BranchReadSecondaryUser {
+  id: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'branch-read-secondary-users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "branch-head-articles".
+ */
+export interface BranchHeadArticle {
+  id: string;
+  shared?: string | null;
+  title: string;
+  sections?:
+    | {
+        label?: string | null;
+        translation?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "branch-nested-read-articles".
  */
 export interface BranchNestedReadArticle {
-  id: number;
+  id: string;
   title?: string | null;
   references?: {
     target?: (number | null) | BranchQueryDoc;
   };
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -474,14 +573,24 @@ export interface BranchQueryDoc {
       }[]
     | null;
   content?: QueryNote[] | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -508,14 +617,24 @@ export interface BranchQueryTag {
           }
       )[]
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
 }
@@ -527,14 +646,24 @@ export interface BranchQueryTextTag {
   id: string;
   title?: string | null;
   one?: (number | null) | BranchQueryDoc;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
 }
@@ -554,17 +683,27 @@ export interface QueryNote {
  * via the `definition` "branch-localized-status-articles".
  */
 export interface BranchLocalizedStatusArticle {
-  id: number;
+  id: string;
   shared?: string | null;
   title?: string | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -574,16 +713,26 @@ export interface BranchLocalizedStatusArticle {
  * via the `definition` "branch-scalar-articles".
  */
 export interface BranchScalarArticle {
-  id: number;
+  id: string;
   title?: string | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -593,7 +742,7 @@ export interface BranchScalarArticle {
  * via the `definition` "branch-head-protected-articles".
  */
 export interface BranchHeadProtectedArticle {
-  id: number;
+  id: string;
   shared?: string | null;
   title: string;
   sections?:
@@ -603,14 +752,24 @@ export interface BranchHeadProtectedArticle {
         id?: string | null;
       }[]
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -634,14 +793,24 @@ export interface BranchWideId {
       }[]
     | null;
   related?: (string | null) | BranchWideId;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -661,14 +830,24 @@ export interface BranchFractionalId {
       }[]
     | null;
   related?: (number | null) | BranchFractionalId;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -696,14 +875,24 @@ export interface ReadVirtualTag {
       )[]
     | null;
   ownerTitle?: string | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
 }
@@ -712,7 +901,7 @@ export interface ReadVirtualTag {
  * via the `definition` "branch-query-states".
  */
 export interface BranchQueryState {
-  id: number;
+  id: string;
   rowKey: string;
   branchKey: string;
   scopeKey: string;
@@ -728,21 +917,31 @@ export interface BranchQueryState {
     | number
     | boolean
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "branch-query-invalidations".
  */
 export interface BranchQueryInvalidation {
-  id: number;
+  id: string;
   branchKey: string;
   scopeKey: string;
   rowKey: string;
@@ -759,43 +958,63 @@ export interface BranchQueryInvalidation {
   lifetime: string;
   revision: number;
   state: 'pending' | 'structural-conflict';
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-head-articles-cutover".
  */
 export interface CollectionBranchHeadArticlesCutover {
-  id: number;
+  id: string;
   singleton: string;
   schemaGeneration: number;
   generation: number;
   lockNonce?: string | null;
   migrationID: string;
   isActivated: boolean;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-head-articles-heads".
  */
 export interface CollectionBranchHeadArticlesHead {
-  id: number;
-  parent: number | BranchHeadArticle;
+  id: string;
+  parent: string | BranchHeadArticle;
   coordinateKey: string;
   branchKey: string;
   scopeKey: string;
@@ -803,9 +1022,9 @@ export interface CollectionBranchHeadArticlesHead {
   incarnation: number;
   lockNonce?: string | null;
   state: 'absent' | 'version' | 'withdrawn';
-  versionID?: number | null;
+  versionID?: string | null;
   versionGeneration?: number | null;
-  structureVersionID?: number | null;
+  structureVersionID?: string | null;
   structureVersionGeneration?: number | null;
   base?:
     | {
@@ -816,84 +1035,124 @@ export interface CollectionBranchHeadArticlesHead {
     | number
     | boolean
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-head-articles-pins".
  */
 export interface CollectionBranchHeadArticlesPin {
-  id: number;
-  parent: number | BranchHeadArticle;
-  versionID: number;
+  id: string;
+  parent: string | BranchHeadArticle;
+  versionID: string;
   referenceKey: string;
   versionGeneration: number;
   rootKey: string;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-head-articles-identities".
  */
 export interface CollectionBranchHeadArticlesIdentity {
-  id: number;
-  parent: number | BranchHeadArticle;
+  id: string;
+  parent: string | BranchHeadArticle;
   singleton: string;
   generation: number;
   ownerKey: string;
   isPublished: boolean;
   isLegacyDraftVisible: boolean;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-nested-read-articles-cutover".
  */
 export interface CollectionBranchNestedReadArticlesCutover {
-  id: number;
+  id: string;
   singleton: string;
   schemaGeneration: number;
   generation: number;
   lockNonce?: string | null;
   migrationID: string;
   isActivated: boolean;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-nested-read-articles-heads".
  */
 export interface CollectionBranchNestedReadArticlesHead {
-  id: number;
-  parent: number | BranchNestedReadArticle;
+  id: string;
+  parent: string | BranchNestedReadArticle;
   coordinateKey: string;
   branchKey: string;
   scopeKey: string;
@@ -901,9 +1160,9 @@ export interface CollectionBranchNestedReadArticlesHead {
   incarnation: number;
   lockNonce?: string | null;
   state: 'absent' | 'version' | 'withdrawn';
-  versionID?: number | null;
+  versionID?: string | null;
   versionGeneration?: number | null;
-  structureVersionID?: number | null;
+  structureVersionID?: string | null;
   structureVersionGeneration?: number | null;
   base?:
     | {
@@ -914,84 +1173,124 @@ export interface CollectionBranchNestedReadArticlesHead {
     | number
     | boolean
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-nested-read-articles-pins".
  */
 export interface CollectionBranchNestedReadArticlesPin {
-  id: number;
-  parent: number | BranchNestedReadArticle;
-  versionID: number;
+  id: string;
+  parent: string | BranchNestedReadArticle;
+  versionID: string;
   referenceKey: string;
   versionGeneration: number;
   rootKey: string;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-nested-read-articles-identities".
  */
 export interface CollectionBranchNestedReadArticlesIdentity {
-  id: number;
-  parent: number | BranchNestedReadArticle;
+  id: string;
+  parent: string | BranchNestedReadArticle;
   singleton: string;
   generation: number;
   ownerKey: string;
   isPublished: boolean;
   isLegacyDraftVisible: boolean;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-localized-status-articles-cutover".
  */
 export interface CollectionBranchLocalizedStatusArticlesCutover {
-  id: number;
+  id: string;
   singleton: string;
   schemaGeneration: number;
   generation: number;
   lockNonce?: string | null;
   migrationID: string;
   isActivated: boolean;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-localized-status-articles-heads".
  */
 export interface CollectionBranchLocalizedStatusArticlesHead {
-  id: number;
-  parent: number | BranchLocalizedStatusArticle;
+  id: string;
+  parent: string | BranchLocalizedStatusArticle;
   coordinateKey: string;
   branchKey: string;
   scopeKey: string;
@@ -999,9 +1298,9 @@ export interface CollectionBranchLocalizedStatusArticlesHead {
   incarnation: number;
   lockNonce?: string | null;
   state: 'absent' | 'version' | 'withdrawn';
-  versionID?: number | null;
+  versionID?: string | null;
   versionGeneration?: number | null;
-  structureVersionID?: number | null;
+  structureVersionID?: string | null;
   structureVersionGeneration?: number | null;
   base?:
     | {
@@ -1012,84 +1311,124 @@ export interface CollectionBranchLocalizedStatusArticlesHead {
     | number
     | boolean
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-localized-status-articles-pins".
  */
 export interface CollectionBranchLocalizedStatusArticlesPin {
-  id: number;
-  parent: number | BranchLocalizedStatusArticle;
-  versionID: number;
+  id: string;
+  parent: string | BranchLocalizedStatusArticle;
+  versionID: string;
   referenceKey: string;
   versionGeneration: number;
   rootKey: string;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-localized-status-articles-identities".
  */
 export interface CollectionBranchLocalizedStatusArticlesIdentity {
-  id: number;
-  parent: number | BranchLocalizedStatusArticle;
+  id: string;
+  parent: string | BranchLocalizedStatusArticle;
   singleton: string;
   generation: number;
   ownerKey: string;
   isPublished: boolean;
   isLegacyDraftVisible: boolean;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-scalar-articles-cutover".
  */
 export interface CollectionBranchScalarArticlesCutover {
-  id: number;
+  id: string;
   singleton: string;
   schemaGeneration: number;
   generation: number;
   lockNonce?: string | null;
   migrationID: string;
   isActivated: boolean;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-scalar-articles-heads".
  */
 export interface CollectionBranchScalarArticlesHead {
-  id: number;
-  parent: number | BranchScalarArticle;
+  id: string;
+  parent: string | BranchScalarArticle;
   coordinateKey: string;
   branchKey: string;
   scopeKey: string;
@@ -1097,9 +1436,9 @@ export interface CollectionBranchScalarArticlesHead {
   incarnation: number;
   lockNonce?: string | null;
   state: 'absent' | 'version' | 'withdrawn';
-  versionID?: number | null;
+  versionID?: string | null;
   versionGeneration?: number | null;
-  structureVersionID?: number | null;
+  structureVersionID?: string | null;
   structureVersionGeneration?: number | null;
   base?:
     | {
@@ -1110,84 +1449,124 @@ export interface CollectionBranchScalarArticlesHead {
     | number
     | boolean
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-scalar-articles-pins".
  */
 export interface CollectionBranchScalarArticlesPin {
-  id: number;
-  parent: number | BranchScalarArticle;
-  versionID: number;
+  id: string;
+  parent: string | BranchScalarArticle;
+  versionID: string;
   referenceKey: string;
   versionGeneration: number;
   rootKey: string;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-scalar-articles-identities".
  */
 export interface CollectionBranchScalarArticlesIdentity {
-  id: number;
-  parent: number | BranchScalarArticle;
+  id: string;
+  parent: string | BranchScalarArticle;
   singleton: string;
   generation: number;
   ownerKey: string;
   isPublished: boolean;
   isLegacyDraftVisible: boolean;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-head-protected-articles-cutover".
  */
 export interface CollectionBranchHeadProtectedArticlesCutover {
-  id: number;
+  id: string;
   singleton: string;
   schemaGeneration: number;
   generation: number;
   lockNonce?: string | null;
   migrationID: string;
   isActivated: boolean;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-head-protected-articles-heads".
  */
 export interface CollectionBranchHeadProtectedArticlesHead {
-  id: number;
-  parent: number | BranchHeadProtectedArticle;
+  id: string;
+  parent: string | BranchHeadProtectedArticle;
   coordinateKey: string;
   branchKey: string;
   scopeKey: string;
@@ -1195,9 +1574,9 @@ export interface CollectionBranchHeadProtectedArticlesHead {
   incarnation: number;
   lockNonce?: string | null;
   state: 'absent' | 'version' | 'withdrawn';
-  versionID?: number | null;
+  versionID?: string | null;
   versionGeneration?: number | null;
-  structureVersionID?: number | null;
+  structureVersionID?: string | null;
   structureVersionGeneration?: number | null;
   base?:
     | {
@@ -1208,83 +1587,123 @@ export interface CollectionBranchHeadProtectedArticlesHead {
     | number
     | boolean
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-head-protected-articles-pins".
  */
 export interface CollectionBranchHeadProtectedArticlesPin {
-  id: number;
-  parent: number | BranchHeadProtectedArticle;
-  versionID: number;
+  id: string;
+  parent: string | BranchHeadProtectedArticle;
+  versionID: string;
   referenceKey: string;
   versionGeneration: number;
   rootKey: string;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-head-protected-articles-identities".
  */
 export interface CollectionBranchHeadProtectedArticlesIdentity {
-  id: number;
-  parent: number | BranchHeadProtectedArticle;
+  id: string;
+  parent: string | BranchHeadProtectedArticle;
   singleton: string;
   generation: number;
   ownerKey: string;
   isPublished: boolean;
   isLegacyDraftVisible: boolean;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-wide-ids-cutover".
  */
 export interface CollectionBranchWideIdsCutover {
-  id: number;
+  id: string;
   singleton: string;
   schemaGeneration: number;
   generation: number;
   lockNonce?: string | null;
   migrationID: string;
   isActivated: boolean;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-wide-ids-heads".
  */
 export interface CollectionBranchWideIdsHead {
-  id: number;
+  id: string;
   parent: string | BranchWideId;
   coordinateKey: string;
   branchKey: string;
@@ -1293,9 +1712,9 @@ export interface CollectionBranchWideIdsHead {
   incarnation: number;
   lockNonce?: string | null;
   state: 'absent' | 'version' | 'withdrawn';
-  versionID?: number | null;
+  versionID?: string | null;
   versionGeneration?: number | null;
-  structureVersionID?: number | null;
+  structureVersionID?: string | null;
   structureVersionGeneration?: number | null;
   base?:
     | {
@@ -1306,83 +1725,123 @@ export interface CollectionBranchWideIdsHead {
     | number
     | boolean
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-wide-ids-pins".
  */
 export interface CollectionBranchWideIdsPin {
-  id: number;
+  id: string;
   parent: string | BranchWideId;
-  versionID: number;
+  versionID: string;
   referenceKey: string;
   versionGeneration: number;
   rootKey: string;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-wide-ids-identities".
  */
 export interface CollectionBranchWideIdsIdentity {
-  id: number;
+  id: string;
   parent: string | BranchWideId;
   singleton: string;
   generation: number;
   ownerKey: string;
   isPublished: boolean;
   isLegacyDraftVisible: boolean;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-fractional-ids-cutover".
  */
 export interface CollectionBranchFractionalIdsCutover {
-  id: number;
+  id: string;
   singleton: string;
   schemaGeneration: number;
   generation: number;
   lockNonce?: string | null;
   migrationID: string;
   isActivated: boolean;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-fractional-ids-heads".
  */
 export interface CollectionBranchFractionalIdsHead {
-  id: number;
+  id: string;
   parent: number | BranchFractionalId;
   coordinateKey: string;
   branchKey: string;
@@ -1391,9 +1850,9 @@ export interface CollectionBranchFractionalIdsHead {
   incarnation: number;
   lockNonce?: string | null;
   state: 'absent' | 'version' | 'withdrawn';
-  versionID?: number | null;
+  versionID?: string | null;
   versionGeneration?: number | null;
-  structureVersionID?: number | null;
+  structureVersionID?: string | null;
   structureVersionGeneration?: number | null;
   base?:
     | {
@@ -1404,83 +1863,123 @@ export interface CollectionBranchFractionalIdsHead {
     | number
     | boolean
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-fractional-ids-pins".
  */
 export interface CollectionBranchFractionalIdsPin {
-  id: number;
+  id: string;
   parent: number | BranchFractionalId;
-  versionID: number;
+  versionID: string;
   referenceKey: string;
   versionGeneration: number;
   rootKey: string;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-fractional-ids-identities".
  */
 export interface CollectionBranchFractionalIdsIdentity {
-  id: number;
+  id: string;
   parent: number | BranchFractionalId;
   singleton: string;
   generation: number;
   ownerKey: string;
   isPublished: boolean;
   isLegacyDraftVisible: boolean;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-query-docs-cutover".
  */
 export interface CollectionBranchQueryDocsCutover {
-  id: number;
+  id: string;
   singleton: string;
   schemaGeneration: number;
   generation: number;
   lockNonce?: string | null;
   migrationID: string;
   isActivated: boolean;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-query-docs-heads".
  */
 export interface CollectionBranchQueryDocsHead {
-  id: number;
+  id: string;
   parent: number | BranchQueryDoc;
   coordinateKey: string;
   branchKey: string;
@@ -1489,9 +1988,9 @@ export interface CollectionBranchQueryDocsHead {
   incarnation: number;
   lockNonce?: string | null;
   state: 'absent' | 'version' | 'withdrawn';
-  versionID?: number | null;
+  versionID?: string | null;
   versionGeneration?: number | null;
-  structureVersionID?: number | null;
+  structureVersionID?: string | null;
   structureVersionGeneration?: number | null;
   base?:
     | {
@@ -1502,83 +2001,123 @@ export interface CollectionBranchQueryDocsHead {
     | number
     | boolean
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-query-docs-pins".
  */
 export interface CollectionBranchQueryDocsPin {
-  id: number;
+  id: string;
   parent: number | BranchQueryDoc;
-  versionID: number;
+  versionID: string;
   referenceKey: string;
   versionGeneration: number;
   rootKey: string;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-query-docs-identities".
  */
 export interface CollectionBranchQueryDocsIdentity {
-  id: number;
+  id: string;
   parent: number | BranchQueryDoc;
   singleton: string;
   generation: number;
   ownerKey: string;
   isPublished: boolean;
   isLegacyDraftVisible: boolean;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-branch-head-settings-cutover".
  */
 export interface GlobalBranchHeadSettingsCutover {
-  id: number;
+  id: string;
   singleton: string;
   schemaGeneration: number;
   generation: number;
   lockNonce?: string | null;
   migrationID: string;
   isActivated: boolean;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-branch-head-settings-heads".
  */
 export interface GlobalBranchHeadSettingsHead {
-  id: number;
+  id: string;
   coordinateKey: string;
   branchKey: string;
   scopeKey: string;
@@ -1586,9 +2125,9 @@ export interface GlobalBranchHeadSettingsHead {
   incarnation: number;
   lockNonce?: string | null;
   state: 'absent' | 'version' | 'withdrawn';
-  versionID?: number | null;
+  versionID?: string | null;
   versionGeneration?: number | null;
-  structureVersionID?: number | null;
+  structureVersionID?: string | null;
   structureVersionGeneration?: number | null;
   base?:
     | {
@@ -1599,60 +2138,90 @@ export interface GlobalBranchHeadSettingsHead {
     | number
     | boolean
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-branch-head-settings-pins".
  */
 export interface GlobalBranchHeadSettingsPin {
-  id: number;
-  versionID: number;
+  id: string;
+  versionID: string;
   referenceKey: string;
   versionGeneration: number;
   rootKey: string;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-branch-head-settings-identities".
  */
 export interface GlobalBranchHeadSettingsIdentity {
-  id: number;
+  id: string;
   singleton: string;
   generation: number;
   ownerKey: string;
   isPublished: boolean;
   isLegacyDraftVisible: boolean;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-head-articles-query-states".
  */
 export interface CollectionBranchHeadArticlesQueryState {
-  id: number;
+  id: string;
   rowKey: string;
   branchKey: string;
   scopeKey: string;
@@ -1668,21 +2237,31 @@ export interface CollectionBranchHeadArticlesQueryState {
     | number
     | boolean
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-head-articles-query-invalidations".
  */
 export interface CollectionBranchHeadArticlesQueryInvalidation {
-  id: number;
+  id: string;
   branchKey: string;
   scopeKey: string;
   rowKey: string;
@@ -1699,21 +2278,31 @@ export interface CollectionBranchHeadArticlesQueryInvalidation {
   lifetime: string;
   revision: number;
   state: 'pending' | 'structural-conflict';
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-nested-read-articles-query-states".
  */
 export interface CollectionBranchNestedReadArticlesQueryState {
-  id: number;
+  id: string;
   rowKey: string;
   branchKey: string;
   scopeKey: string;
@@ -1729,21 +2318,31 @@ export interface CollectionBranchNestedReadArticlesQueryState {
     | number
     | boolean
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-nested-read-articles-query-invalidations".
  */
 export interface CollectionBranchNestedReadArticlesQueryInvalidation {
-  id: number;
+  id: string;
   branchKey: string;
   scopeKey: string;
   rowKey: string;
@@ -1760,21 +2359,31 @@ export interface CollectionBranchNestedReadArticlesQueryInvalidation {
   lifetime: string;
   revision: number;
   state: 'pending' | 'structural-conflict';
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-localized-status-articles-query-states".
  */
 export interface CollectionBranchLocalizedStatusArticlesQueryState {
-  id: number;
+  id: string;
   rowKey: string;
   branchKey: string;
   scopeKey: string;
@@ -1790,21 +2399,31 @@ export interface CollectionBranchLocalizedStatusArticlesQueryState {
     | number
     | boolean
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-localized-status-articles-query-invalidations".
  */
 export interface CollectionBranchLocalizedStatusArticlesQueryInvalidation {
-  id: number;
+  id: string;
   branchKey: string;
   scopeKey: string;
   rowKey: string;
@@ -1821,21 +2440,31 @@ export interface CollectionBranchLocalizedStatusArticlesQueryInvalidation {
   lifetime: string;
   revision: number;
   state: 'pending' | 'structural-conflict';
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-scalar-articles-query-states".
  */
 export interface CollectionBranchScalarArticlesQueryState {
-  id: number;
+  id: string;
   rowKey: string;
   branchKey: string;
   scopeKey: string;
@@ -1851,21 +2480,31 @@ export interface CollectionBranchScalarArticlesQueryState {
     | number
     | boolean
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-scalar-articles-query-invalidations".
  */
 export interface CollectionBranchScalarArticlesQueryInvalidation {
-  id: number;
+  id: string;
   branchKey: string;
   scopeKey: string;
   rowKey: string;
@@ -1882,21 +2521,31 @@ export interface CollectionBranchScalarArticlesQueryInvalidation {
   lifetime: string;
   revision: number;
   state: 'pending' | 'structural-conflict';
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-head-protected-articles-query-states".
  */
 export interface CollectionBranchHeadProtectedArticlesQueryState {
-  id: number;
+  id: string;
   rowKey: string;
   branchKey: string;
   scopeKey: string;
@@ -1912,21 +2561,31 @@ export interface CollectionBranchHeadProtectedArticlesQueryState {
     | number
     | boolean
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-head-protected-articles-query-invalidations".
  */
 export interface CollectionBranchHeadProtectedArticlesQueryInvalidation {
-  id: number;
+  id: string;
   branchKey: string;
   scopeKey: string;
   rowKey: string;
@@ -1943,21 +2602,31 @@ export interface CollectionBranchHeadProtectedArticlesQueryInvalidation {
   lifetime: string;
   revision: number;
   state: 'pending' | 'structural-conflict';
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-wide-ids-query-states".
  */
 export interface CollectionBranchWideIdsQueryState {
-  id: number;
+  id: string;
   rowKey: string;
   branchKey: string;
   scopeKey: string;
@@ -1973,21 +2642,31 @@ export interface CollectionBranchWideIdsQueryState {
     | number
     | boolean
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-wide-ids-query-invalidations".
  */
 export interface CollectionBranchWideIdsQueryInvalidation {
-  id: number;
+  id: string;
   branchKey: string;
   scopeKey: string;
   rowKey: string;
@@ -2004,21 +2683,31 @@ export interface CollectionBranchWideIdsQueryInvalidation {
   lifetime: string;
   revision: number;
   state: 'pending' | 'structural-conflict';
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-fractional-ids-query-states".
  */
 export interface CollectionBranchFractionalIdsQueryState {
-  id: number;
+  id: string;
   rowKey: string;
   branchKey: string;
   scopeKey: string;
@@ -2034,21 +2723,31 @@ export interface CollectionBranchFractionalIdsQueryState {
     | number
     | boolean
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-fractional-ids-query-invalidations".
  */
 export interface CollectionBranchFractionalIdsQueryInvalidation {
-  id: number;
+  id: string;
   branchKey: string;
   scopeKey: string;
   rowKey: string;
@@ -2065,21 +2764,31 @@ export interface CollectionBranchFractionalIdsQueryInvalidation {
   lifetime: string;
   revision: number;
   state: 'pending' | 'structural-conflict';
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-query-docs-query-states".
  */
 export interface CollectionBranchQueryDocsQueryState {
-  id: number;
+  id: string;
   rowKey: string;
   branchKey: string;
   scopeKey: string;
@@ -2095,21 +2804,31 @@ export interface CollectionBranchQueryDocsQueryState {
     | number
     | boolean
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-branch-query-docs-query-invalidations".
  */
 export interface CollectionBranchQueryDocsQueryInvalidation {
-  id: number;
+  id: string;
   branchKey: string;
   scopeKey: string;
   rowKey: string;
@@ -2126,21 +2845,31 @@ export interface CollectionBranchQueryDocsQueryInvalidation {
   lifetime: string;
   revision: number;
   state: 'pending' | 'structural-conflict';
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-branch-head-settings-query-states".
  */
 export interface GlobalBranchHeadSettingsQueryState {
-  id: number;
+  id: string;
   rowKey: string;
   branchKey: string;
   scopeKey: string;
@@ -2156,21 +2885,31 @@ export interface GlobalBranchHeadSettingsQueryState {
     | number
     | boolean
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-branch-head-settings-query-invalidations".
  */
 export interface GlobalBranchHeadSettingsQueryInvalidation {
-  id: number;
+  id: string;
   branchKey: string;
   scopeKey: string;
   rowKey: string;
@@ -2187,21 +2926,31 @@ export interface GlobalBranchHeadSettingsQueryInvalidation {
   lifetime: string;
   revision: number;
   state: 'pending' | 'structural-conflict';
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
+  id: string;
   key: string;
   data:
     | {
@@ -2218,7 +2967,7 @@ export interface PayloadKv {
  * via the `definition` "payload-jobs".
  */
 export interface PayloadJob {
-  id: number;
+  id: string;
   /**
    * Input data provided to the job
    */
@@ -2328,27 +3077,35 @@ export interface PayloadJob {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
         relationTo: 'branch-head-articles';
-        value: number | BranchHeadArticle;
+        value: string | BranchHeadArticle;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
       } | null)
     | ({
         relationTo: 'branch-nested-read-articles';
-        value: number | BranchNestedReadArticle;
+        value: string | BranchNestedReadArticle;
       } | null)
     | ({
         relationTo: 'branch-localized-status-articles';
-        value: number | BranchLocalizedStatusArticle;
+        value: string | BranchLocalizedStatusArticle;
       } | null)
     | ({
         relationTo: 'branch-scalar-articles';
-        value: number | BranchScalarArticle;
+        value: string | BranchScalarArticle;
       } | null)
     | ({
         relationTo: 'branch-head-protected-articles';
-        value: number | BranchHeadProtectedArticle;
+        value: string | BranchHeadProtectedArticle;
       } | null)
     | ({
         relationTo: 'branch-wide-ids';
@@ -2373,16 +3130,17 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'branch-query-text-tags';
         value: string | BranchQueryTextTag;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: number | User;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -2391,11 +3149,16 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  id: string;
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      };
   key?: string | null;
   value?:
     | {
@@ -2414,7 +3177,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -2431,14 +3194,24 @@ export interface PayloadLlmInstruction {
   entityType: 'collection' | 'global';
   additionalInstructions?: LexicalRichText<LexicalNodes_3DE324E4> | null;
   systemInstructions?: LexicalRichText<LexicalNodes_3DE324E4> | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
 }
@@ -2460,20 +3233,30 @@ export interface CollectionBranchHeadArticlesProjection {
         };
       }[]
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   updatedAt?: string | null;
   createdAt?: string | null;
   _status?: ('draft' | 'published') | null;
   _branchProjection: {
     branchKey: string;
-    logicalID: number;
+    logicalID: string;
     isVisible: boolean;
     relationships?:
       | {
@@ -2493,7 +3276,7 @@ export interface CollectionBranchHeadArticlesProjection {
       | number
       | boolean
       | null;
-    nativeGlobalID?: number | null;
+    nativeGlobalID?: string | null;
   };
 }
 /**
@@ -2506,20 +3289,30 @@ export interface CollectionBranchNestedReadArticlesProjection {
   references?: {
     target?: (string | null) | CollectionBranchQueryDocsProjection;
   };
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   updatedAt?: string | null;
   createdAt?: string | null;
   _status?: ('draft' | 'published') | null;
   _branchProjection: {
     branchKey: string;
-    logicalID: number;
+    logicalID: string;
     isVisible: boolean;
     relationships?:
       | {
@@ -2539,7 +3332,7 @@ export interface CollectionBranchNestedReadArticlesProjection {
       | number
       | boolean
       | null;
-    nativeGlobalID?: number | null;
+    nativeGlobalID?: string | null;
   };
 }
 /**
@@ -2625,14 +3418,24 @@ export interface CollectionBranchQueryDocsProjection {
       }[]
     | null;
   content?: QueryNote_203903EB[] | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   updatedAt?: string | null;
   createdAt?: string | null;
   _status?: ('draft' | 'published') | null;
@@ -2658,7 +3461,7 @@ export interface CollectionBranchQueryDocsProjection {
       | number
       | boolean
       | null;
-    nativeGlobalID?: number | null;
+    nativeGlobalID?: string | null;
   };
 }
 /**
@@ -2685,20 +3488,30 @@ export interface CollectionBranchLocalizedStatusArticlesProjection {
   id: string;
   shared?: string | null;
   title?: string | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   updatedAt?: string | null;
   createdAt?: string | null;
   _status?: ('draft' | 'published') | null;
   _branchProjection: {
     branchKey: string;
-    logicalID: number;
+    logicalID: string;
     isVisible: boolean;
     relationships?:
       | {
@@ -2718,7 +3531,7 @@ export interface CollectionBranchLocalizedStatusArticlesProjection {
       | number
       | boolean
       | null;
-    nativeGlobalID?: number | null;
+    nativeGlobalID?: string | null;
   };
 }
 /**
@@ -2728,20 +3541,30 @@ export interface CollectionBranchLocalizedStatusArticlesProjection {
 export interface CollectionBranchScalarArticlesProjection {
   id: string;
   title?: string | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   updatedAt?: string | null;
   createdAt?: string | null;
   _status?: ('draft' | 'published') | null;
   _branchProjection: {
     branchKey: string;
-    logicalID: number;
+    logicalID: string;
     isVisible: boolean;
     relationships?:
       | {
@@ -2761,7 +3584,7 @@ export interface CollectionBranchScalarArticlesProjection {
       | number
       | boolean
       | null;
-    nativeGlobalID?: number | null;
+    nativeGlobalID?: string | null;
   };
 }
 /**
@@ -2782,20 +3605,30 @@ export interface CollectionBranchHeadProtectedArticlesProjection {
         };
       }[]
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   updatedAt?: string | null;
   createdAt?: string | null;
   _status?: ('draft' | 'published') | null;
   _branchProjection: {
     branchKey: string;
-    logicalID: number;
+    logicalID: string;
     isVisible: boolean;
     relationships?:
       | {
@@ -2815,7 +3648,7 @@ export interface CollectionBranchHeadProtectedArticlesProjection {
       | number
       | boolean
       | null;
-    nativeGlobalID?: number | null;
+    nativeGlobalID?: string | null;
   };
 }
 /**
@@ -2840,14 +3673,24 @@ export interface CollectionBranchWideIdsProjection {
       }[]
     | null;
   related?: (string | null) | CollectionBranchWideIdsProjection;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   updatedAt?: string | null;
   createdAt?: string | null;
   _status?: ('draft' | 'published') | null;
@@ -2873,7 +3716,7 @@ export interface CollectionBranchWideIdsProjection {
       | number
       | boolean
       | null;
-    nativeGlobalID?: number | null;
+    nativeGlobalID?: string | null;
   };
 }
 /**
@@ -2894,14 +3737,24 @@ export interface CollectionBranchFractionalIdsProjection {
       }[]
     | null;
   related?: (string | null) | CollectionBranchFractionalIdsProjection;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   updatedAt?: string | null;
   createdAt?: string | null;
   _status?: ('draft' | 'published') | null;
@@ -2927,7 +3780,7 @@ export interface CollectionBranchFractionalIdsProjection {
       | number
       | boolean
       | null;
-    nativeGlobalID?: number | null;
+    nativeGlobalID?: string | null;
   };
 }
 /**
@@ -2940,14 +3793,24 @@ export interface GlobalBranchHeadSettingsProjection {
   related?: (string | null) | CollectionBranchHeadArticlesProjection;
   tag?: (number | null) | BranchQueryTag;
   title?: string | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -2973,8 +3836,33 @@ export interface GlobalBranchHeadSettingsProjection {
       | number
       | boolean
       | null;
-    nativeGlobalID?: number | null;
+    nativeGlobalID?: string | null;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  resetPasswordRequestedAt?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2995,6 +3883,32 @@ export interface BranchHeadArticlesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "branch-read-secondary-users_select".
+ */
+export interface BranchReadSecondaryUsersSelect<T extends boolean = true> {
+  id?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  resetPasswordRequestedAt?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -4077,31 +4991,6 @@ export interface PayloadKvSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
- */
-export interface UsersSelect<T extends boolean = true> {
-  createdBy?: T;
-  updatedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  resetPasswordRequestedAt?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs_select".
  */
 export interface PayloadJobsSelect<T extends boolean = true> {
@@ -4511,23 +5400,100 @@ export interface GlobalBranchHeadSettingsProjectionSelect<T extends boolean = tr
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BRANCH-HEAD-SETTINGS".
+ */
+export interface BRANCHHEADSETTING {
+  id: string;
+  title?: string | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  caseLocation?: [number, number] | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "branch-head-settings".
  */
 export interface BranchHeadSetting {
-  id: number;
+  id: string;
   shared?: string | null;
-  related?: (number | null) | BranchHeadArticle;
+  related?: (string | null) | BranchHeadArticle;
   tag?: (number | null) | BranchQueryTag;
   title: string;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "branch-read-ordinary-settings".
+ */
+export interface BranchReadOrdinarySetting {
+  id: string;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  location?: [number, number] | null;
+  title?: string | null;
+  related?: (string | null) | BranchHeadArticle;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'branch-read-secondary-users';
+        value: string | BranchReadSecondaryUser;
+      } | null);
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -4536,7 +5502,7 @@ export interface BranchHeadSetting {
  * via the `definition` "payload-jobs-stats".
  */
 export interface PayloadJobsStat {
-  id: number;
+  id: string;
   stats?:
     | {
         [k: string]: unknown;
@@ -4551,6 +5517,19 @@ export interface PayloadJobsStat {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BRANCH-HEAD-SETTINGS_select".
+ */
+export interface BRANCHHEADSETTINGSSelect<T extends boolean = true> {
+  title?: T;
+  caseLocation?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "branch-head-settings_select".
  */
 export interface BranchHeadSettingsSelect<T extends boolean = true> {
@@ -4561,6 +5540,20 @@ export interface BranchHeadSettingsSelect<T extends boolean = true> {
   createdBy?: T;
   updatedBy?: T;
   _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "branch-read-ordinary-settings_select".
+ */
+export interface BranchReadOrdinarySettingsSelect<T extends boolean = true> {
+  location?: T;
+  title?: T;
+  related?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -4603,7 +5596,9 @@ export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
     relatedCollection:
+      | 'users'
       | 'branch-head-articles'
+      | 'branch-read-secondary-users'
       | 'branch-nested-read-articles'
       | 'branch-localized-status-articles'
       | 'branch-scalar-articles'
@@ -4613,8 +5608,7 @@ export interface CollectionQueryWidget {
       | 'branch-query-docs'
       | 'branch-query-tags'
       | 'read-virtual-tags'
-      | 'branch-query-text-tags'
-      | 'users';
+      | 'branch-query-text-tags';
     where?:
       | {
           [k: string]: unknown;
@@ -4638,7 +5632,9 @@ export interface ActivityWidget {
   data?: {
     excludedCollections?:
       | (
+          | 'users'
           | 'branch-head-articles'
+          | 'branch-read-secondary-users'
           | 'branch-nested-read-articles'
           | 'branch-localized-status-articles'
           | 'branch-scalar-articles'
@@ -4649,7 +5645,6 @@ export interface ActivityWidget {
           | 'branch-query-tags'
           | 'read-virtual-tags'
           | 'branch-query-text-tags'
-          | 'users'
         )[]
       | null;
   };
@@ -4666,17 +5661,22 @@ export interface TaskSchedulePublish {
     doc?:
       | ({
           relationTo: 'branch-head-articles';
-          value: number | BranchHeadArticle;
+          value: string | BranchHeadArticle;
         } | null)
       | ({
           relationTo: 'branch-head-protected-articles';
-          value: number | BranchHeadProtectedArticle;
+          value: string | BranchHeadProtectedArticle;
         } | null);
     global?: 'branch-head-settings' | null;
-    user?: {
-      relationTo: 'users';
-      value: number | User;
-    } | null;
+    user?:
+      | ({
+          relationTo: 'users';
+          value: string | User;
+        } | null)
+      | ({
+          relationTo: 'branch-read-secondary-users';
+          value: string | BranchReadSecondaryUser;
+        } | null);
   };
   output?: unknown;
 }

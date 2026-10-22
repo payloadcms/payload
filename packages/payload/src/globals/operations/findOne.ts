@@ -1,5 +1,3 @@
-import { ar } from '@payloadcms/translations/languages/ar'
-
 import type { FindOptions } from '../../collections/operations/local/find.js'
 import type { AccessResult } from '../../config/types.js'
 import type {
@@ -19,6 +17,9 @@ import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { assertBranchReadOperationRequest } from '../../versions/branches/operations/branchReadContext.js'
+import { resolveBranchGlobalRead } from '../../versions/branches/operations/resolveBranchReadContext.js'
+import { selectBranchQueryData } from '../../versions/branches/queries/selectBranchQueryData.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 
 export type GlobalFindOneArgs = {
@@ -43,6 +44,38 @@ export type GlobalFindOneArgs = {
 export const findOneOperation = async <T extends Record<string, unknown>>(
   args: GlobalFindOneArgs,
 ): Promise<T> => {
+  const sourceReq = args.req
+  const sourceConfig = args.globalConfig
+  // /////////////////////////////////////
+  // beforeOperation - Global
+  // /////////////////////////////////////
+
+  if (sourceConfig.hooks?.beforeOperation?.length) {
+    for (const hook of sourceConfig.hooks.beforeOperation) {
+      args =
+        (await hook({
+          args,
+          context: args.req.context,
+          global: sourceConfig,
+          operation: 'read',
+          overrideAccess: args.overrideAccess ?? false,
+          req: args.req,
+        })) || args
+    }
+  }
+
+  if (
+    args.slug !== args.globalConfig.slug ||
+    args.req.payload.globals.config.find(({ slug }) => slug === args.slug) !== args.globalConfig
+  ) {
+    throw new Error('A global read cannot detach its slug from its genuine config.')
+  }
+  assertBranchReadOperationRequest({
+    source: sourceReq,
+    sourceCollection: sourceConfig.slug,
+    target: args.req,
+    targetCollection: args.globalConfig.slug,
+  })
   const {
     slug,
     depth,
@@ -63,30 +96,21 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     includeLockStatusFromArgs && req.payload.collections?.[lockedDocumentsCollectionSlug]
 
   // /////////////////////////////////////
-  // beforeOperation - Global
-  // /////////////////////////////////////
-
-  if (globalConfig.hooks?.beforeOperation?.length) {
-    for (const hook of globalConfig.hooks.beforeOperation) {
-      args =
-        (await hook({
-          args,
-          context: args.req.context,
-          global: globalConfig,
-          operation: 'read',
-          overrideAccess,
-          req: args.req,
-        })) || args
-    }
-  }
-
-  // /////////////////////////////////////
   // Retrieve and execute access
   // /////////////////////////////////////
 
-  let accessResult!: AccessResult
+  const branchRead = await resolveBranchGlobalRead({
+    depth,
+    disableErrors,
+    draft: replaceWithVersion,
+    global: slug,
+    native: { joins: false, locale: locale!, pagination: false },
+    overrideAccess,
+    req,
+  })
+  let accessResult: AccessResult = branchRead?.accessResult ?? true
 
-  if (!overrideAccess) {
+  if ((!branchRead || branchRead.legacy) && !overrideAccess) {
     accessResult = await executeAccess(
       { slug: globalConfig.slug, disableErrors, req },
       globalConfig.access.read,
@@ -124,25 +148,64 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
   ) {
     dbSelect = { ...select, createdAt: true, updatedAt: true }
   }
-  const docFromDB = await req.payload.db.findGlobal({
-    slug,
-    locale: locale!,
-    req,
-    select: dbSelect,
-    where: overrideAccess ? undefined : (accessResult as Where),
-  })
+  const docFromDB =
+    branchRead && !branchRead.legacy
+      ? branchRead.result?.docs[0]
+        ? selectBranchQueryData({
+            blocks: req.payload.config.blocks,
+            data: branchRead.result.docs[0],
+            fields: globalConfig.fields,
+            select,
+          })
+        : null
+      : await req.payload.db.findGlobal({
+          slug,
+          locale: locale!,
+          req,
+          select: dbSelect,
+          where: overrideAccess ? undefined : (accessResult as Where),
+        })
 
   // Check if no document was returned (Postgres returns {} instead of null)
   const hasDoc = docFromDB && Object.keys(docFromDB).length > 0
 
-  if (!hasDoc && !args.data && !overrideAccess && accessResult !== true) {
+  if (
+    !hasDoc &&
+    (!args.data || (branchRead && !branchRead.legacy)) &&
+    !overrideAccess &&
+    accessResult !== true
+  ) {
+    await branchRead?.assertLegacy?.()
     if (!disableErrors) {
       return {} as any
     }
     return null!
   }
 
-  let doc = (args.data as any) ?? (hasDoc ? docFromDB : null) ?? {}
+  let doc =
+    (branchRead && !branchRead.legacy
+      ? hasDoc
+        ? docFromDB
+        : null
+      : ((args.data as any) ?? (hasDoc ? docFromDB : null))) ?? {}
+
+  // /////////////////////////////////////
+  // Replace document with draft if available
+  // /////////////////////////////////////
+
+  if ((!branchRead || branchRead.legacy) && replaceWithVersion && hasDraftsEnabled(globalConfig)) {
+    doc = await replaceWithDraftIfAvailable({
+      accessResult,
+      doc,
+      entity: globalConfig,
+      entityType: 'global',
+      overrideAccess,
+      req,
+      select,
+    })
+  }
+
+  await branchRead?.assertLegacy?.()
 
   // /////////////////////////////////////
   // Include Lock Status if required
@@ -190,22 +253,6 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
 
     doc._isLocked = !!lockStatus
     doc._userEditing = lockStatus?.user?.value ?? null
-  }
-
-  // /////////////////////////////////////
-  // Replace document with draft if available
-  // /////////////////////////////////////
-
-  if (replaceWithVersion && hasDraftsEnabled(globalConfig)) {
-    doc = await replaceWithDraftIfAvailable({
-      accessResult,
-      doc,
-      entity: globalConfig,
-      entityType: 'global',
-      overrideAccess,
-      req,
-      select,
-    })
   }
 
   // /////////////////////////////////////

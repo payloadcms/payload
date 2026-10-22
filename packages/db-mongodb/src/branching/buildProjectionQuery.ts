@@ -13,13 +13,14 @@ import { isNestedRelationshipQuery, validOperatorSet } from 'payload/shared'
 import type { MongooseAdapter } from '../index.js'
 
 import { buildSearchParam } from '../queries/buildSearchParams.js'
-import { getCollection } from '../utilities/getEntity.js'
+import { getCollection, getGlobal } from '../utilities/getEntity.js'
 import { compileProjectionScalarMatch } from './compileProjectionScalarMatch.js'
 
 type Stage = Record<string, any>
 type State = {
   adapter: MongooseAdapter
   context: BranchProjectionQueryContext
+  globalRoot?: { collection: string; slug: string }
   isCompilingAccess: boolean
   locale?: string
   nextAlias: number
@@ -37,18 +38,21 @@ export const buildProjectionQuery = async ({
   adapter,
   collection,
   context,
+  global,
   locale,
   where = {},
 }: {
   adapter: MongooseAdapter
   collection: string
   context: BranchProjectionQueryContext
+  global?: string
   locale?: string
   where?: Where
 }) => {
   const state: State = {
     adapter,
     context,
+    ...(global ? { globalRoot: { slug: global, collection } } : {}),
     isCompilingAccess: false,
     locale,
     nextAlias: 0,
@@ -124,15 +128,65 @@ export const buildProjectionQuery = async ({
 
   if (near) {
     stages.push(
-      { $geoNear: { ...near, query: visibility({ collection, state }) } },
+      {
+        $geoNear: {
+          ...near,
+          query: {
+            ...visibility({ collection, state }),
+            ...(global ? { globalType: global } : {}),
+          },
+        },
+      },
       ...materializedVisibilityStages({ collection, state }),
     )
   } else {
     stages.push(...visibilityStages({ collection, state }))
   }
 
+  if (global) {
+    stages.push({
+      $match: {
+        globalType: global,
+        // Collation may widen the index candidate; singleton ownership remains byte-exact.
+        $expr: {
+          $and: [
+            { $eq: [{ $type: '$globalType' }, 'string'] },
+            {
+              $eq: [
+                {
+                  $strLenBytes: {
+                    $convert: { input: '$globalType', onError: '', onNull: '', to: 'string' },
+                  },
+                },
+                { $strLenBytes: { $literal: global } },
+              ],
+            },
+            {
+              $eq: [
+                {
+                  $indexOfBytes: [
+                    { $convert: { input: '$globalType', onError: '', onNull: '', to: 'string' } },
+                    { $literal: global },
+                  ],
+                },
+                0,
+              ],
+            },
+          ],
+        },
+      },
+    })
+  } else {
+    const projectedGlobal =
+      adapter.payload.collections[collection]?.config.custom?.branchProjectionStorage?.global
+    if (typeof projectedGlobal === 'string') {
+      stages.push({ $set: { globalType: { $literal: projectedGlobal } } })
+    }
+  }
   const graphTarget = context.graphTarget
-  const root = adapter.payload.collections[collection]?.config
+  const root = global
+    ? getGlobal({ adapter, globalSlug: global }).globalConfig
+    : adapter.payload.collections[collection]?.config
   const source = root?.custom?.branchProjectionStorage?.collection
   if (
     !adapter.collation &&
@@ -186,6 +240,33 @@ export const buildProjectionQuery = async ({
   }
 }
 
+const queryGlobalSlug = ({
+  collection,
+  state,
+}: {
+  collection: string
+  state: State
+}): string | undefined => {
+  if (state.globalRoot?.collection === collection) {
+    return state.globalRoot.slug
+  }
+  const global =
+    state.adapter.payload.collections[collection]?.config.custom?.branchProjectionStorage?.global
+  return typeof global === 'string' ? global : undefined
+}
+
+/** Only the explicitly typed root is a global; every relation hop remains a collection. */
+const getQueryEntity = ({ collection, state }: { collection: string; state: State }) => {
+  if (state.globalRoot?.collection === collection) {
+    const { globalConfig, Model } = getGlobal({
+      adapter: state.adapter,
+      globalSlug: state.globalRoot.slug,
+    })
+    return { collectionConfig: globalConfig, Model }
+  }
+  return getCollection({ adapter: state.adapter, collectionSlug: collection })
+}
+
 const hasNearPredicate = ({ where }: { where: Where }): boolean =>
   Object.entries(where).some(([path, value]) =>
     ['and', 'or'].includes(path.toLowerCase()) && Array.isArray(value)
@@ -231,6 +312,7 @@ const findInversePredicate = ({
       const paths = localizedPaths({
         collectionSlug: collection,
         fields: config.flattenedFields,
+        globalSlug: queryGlobalSlug({ collection, state }),
         incomingPath: path,
         locale: state.locale,
         overrideAccess: true,
@@ -393,6 +475,7 @@ const compileWhere = async ({
         const param = await buildSearchParam({
           collectionSlug: collection,
           fields: [{ name: 'relationTo', type: 'text' }],
+          globalSlug: queryGlobalSlug({ collection, state }),
           incomingPath: 'relationTo',
           locale: state.locale,
           operator: operator as Operator,
@@ -408,10 +491,7 @@ const compileWhere = async ({
         conditions.push({ [discriminator]: param.value })
         continue
       }
-      const { collectionConfig } = getCollection({
-        adapter: state.adapter,
-        collectionSlug: collection,
-      })
+      const { collectionConfig } = getQueryEntity({ collection, state })
       const fields = fallbackFields
         ? [
             ...collectionConfig.flattenedFields,
@@ -423,6 +503,7 @@ const compileWhere = async ({
       const paths = localizedPaths({
         collectionSlug: collection,
         fields,
+        globalSlug: queryGlobalSlug({ collection, state }),
         incomingPath: incomingPath.replace(/__/g, '.'),
         locale: state.locale,
         overrideAccess: true,
@@ -503,6 +584,7 @@ const compileWhere = async ({
             isPolymorphicOperand && incomingPath.endsWith('.value')
               ? [{ name: 'logicalValue', type: 'json' }]
               : fields,
+          globalSlug: queryGlobalSlug({ collection, state }),
           incomingPath:
             isPolymorphicOperand && incomingPath.endsWith('.value') ? 'logicalValue' : incomingPath,
           locale: state.locale,
@@ -957,10 +1039,11 @@ const resolveValue = async ({
     throw new APIError('Branch relationship value path exceeds the supported nesting depth.', 400)
   }
 
-  const target = getCollection({ adapter: state.adapter, collectionSlug: collection })
+  const target = getQueryEntity({ collection, state })
   const paths = localizedPaths({
     collectionSlug: collection,
     fields: target.collectionConfig.flattenedFields,
+    globalSlug: queryGlobalSlug({ collection, state }),
     incomingPath: path,
     locale: state.locale,
     overrideAccess: true,
@@ -1044,6 +1127,12 @@ const buildJoins = async ({
     return []
   }
 
+  if (state.globalRoot?.collection === collection) {
+    throw new APIError(
+      'Native singleton acquisition does not support automatic join population.',
+      400,
+    )
+  }
   const { collectionConfig } = getCollection({ adapter: state.adapter, collectionSlug: collection })
   const definitions = [
     ...Object.values(collectionConfig.joins).flat(),
@@ -1271,13 +1360,11 @@ const extractNear = async ({
       }
       output[path] = children
     } else if (operators && typeof operators === 'object' && 'near' in operators) {
-      const { collectionConfig } = getCollection({
-        adapter: state.adapter,
-        collectionSlug: collection,
-      })
+      const { collectionConfig } = getQueryEntity({ collection, state })
       const paths = localizedPaths({
         collectionSlug: collection,
         fields: collectionConfig.flattenedFields,
+        globalSlug: queryGlobalSlug({ collection, state }),
         incomingPath: path,
         locale: state.locale,
         payload: state.adapter.payload,
@@ -1300,6 +1387,7 @@ const extractNear = async ({
       const param = await buildSearchParam({
         collectionSlug: collection,
         fields: collectionConfig.flattenedFields,
+        globalSlug: queryGlobalSlug({ collection, state }),
         incomingPath: path,
         locale: state.locale,
         operator: 'near',
@@ -1367,6 +1455,7 @@ const localizedPaths = (
           ...args,
           collectionSlug: relatedTarget,
           fields: related.flattenedFields,
+          globalSlug: undefined,
           incomingPath: remaining,
         }),
       ]

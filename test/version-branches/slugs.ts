@@ -13,3 +13,9 @@ export const localizedStatusArticlesSlug = 'branch-localized-status-articles'
 
 export const readVirtualTagsSlug = 'read-virtual-tags'
 export const nestedReadArticlesSlug = 'branch-nested-read-articles'
+
+export const ordinarySettingsSlug = 'branch-read-ordinary-settings'
+
+export const secondaryUsersSlug = 'branch-read-secondary-users'
+
+export const caseVariantSettingsSlug = 'BRANCH-HEAD-SETTINGS'

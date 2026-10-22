@@ -223,7 +223,7 @@ export const prepareBranchContentQuery = async ({
             ...(args.observedField ? [args.observedField] : []),
             ...Object.keys(args.observedJoins || {}),
           ] as string[],
-          where: args.where,
+          where: { and: [args.where ?? {}, rootOperationWhere ?? {}] },
         })
       : undefined
   if (originalReadTargets && args.observedJoins !== false) {

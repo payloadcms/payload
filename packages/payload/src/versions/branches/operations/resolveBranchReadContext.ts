@@ -1,6 +1,7 @@
 import type { CollectionPermission } from '../../../auth/types.js'
 import type { AccessResult } from '../../../config/types.js'
 import type { FindArgs, FindDistinctArgs } from '../../../database/types.js'
+import type { Field } from '../../../fields/config/types.js'
 import type { PayloadRequest, Where } from '../../../types/index.js'
 
 import { executeAccess } from '../../../auth/executeAccess.js'
@@ -15,12 +16,18 @@ import { createBranchReadRequest } from '../../../utilities/createBranchReadRequ
 import { populateFieldPermissions } from '../../../utilities/getEntityPermissions/populateFieldPermissions.js'
 import { getFieldByPath } from '../../../utilities/getFieldByPath.js'
 import { countBranchContent, findDistinctBranchContent } from '../queries/queryBranchAggregates.js'
-import { getReachableCollections, queryBranchContent } from '../queries/queryBranchContent.js'
+import {
+  getReachableCollections,
+  prepareBranchContentQuery,
+  queryBranchContent,
+} from '../queries/queryBranchContent.js'
+import { createBranchGlobalSourceRequest } from '../queries/queryBranchGlobal.js'
 import { selectBranchQueryData } from '../queries/selectBranchQueryData.js'
 import { withBranchReadSnapshot } from '../queries/withBranchReadSnapshot.js'
 import { readBranchHeads } from '../storage/branchHeadStore.js'
+import { readBranchIdentityVisibility } from '../storage/branchIdentityStore.js'
 import { assertBranchReadBinding } from './assertBranchReadBinding.js'
-import { createBranchOriginalPolicy } from './branchOriginalPolicy.js'
+import { consumeBranchOriginalPolicy, createBranchOriginalPolicy } from './branchOriginalPolicy.js'
 import {
   getBranchReadContext,
   getBranchReadIntent,
@@ -34,17 +41,20 @@ import { getSelectedBranch } from './selectedBranchContext.js'
 export const hasBranchReadCandidates = ({ req }: { req: PayloadRequest }): boolean =>
   !!req.payload.db.branching?.withReadSnapshot &&
   (!!getBranchReadContext({ req }) ||
-    Object.values(req.payload.collections).some(
-      ({ config }) => config.custom?.branchQueryStorage && config.custom?.branchStorage,
-    ))
+    [
+      ...Object.values(req.payload.collections).map(({ config }) => config),
+      ...(req.payload.globals?.config ?? []),
+    ].some((config) => config.custom?.branchQueryStorage && config.custom?.branchStorage))
 
 type Args = {
   collection: string
   depth?: number
   disableErrors?: boolean
   draft?: boolean
+  global?: string
   id?: number | string
   kind: 'count' | 'distinct' | 'find'
+  legacyReq?: PayloadRequest
   native: Omit<FindArgs, 'collection' | 'req'> & Partial<Pick<FindDistinctArgs, 'field'>>
   originalField?: string
   overrideAccess?: boolean
@@ -58,13 +68,16 @@ export const resolveBranchCollectionRead = async ({
   depth,
   disableErrors,
   draft,
+  global,
   kind,
+  legacyReq,
   native,
   originalField,
   overrideAccess = false,
   req,
   showHiddenFields = false,
 }: Args): Promise<{
+  accessResult?: AccessResult
   assertLegacy?: () => Promise<void>
   denied?: boolean
   legacy?: boolean
@@ -111,9 +124,14 @@ export const resolveBranchCollectionRead = async ({
         const entity = sources[slug]!
         const config = entity.config
         if (!config.custom?.branchQueryStorage || !config.custom?.branchStorage) {
+          materializedCollections.add(slug)
           continue
         }
-        const receipt = await readBranchCutover({ entity: config, req: metadataReq })
+        const authority =
+          slug === collection && global
+            ? metadataReq.payload.globals.config.find(({ slug }) => slug === global)!
+            : config
+        const receipt = await readBranchCutover({ entity: authority, req: metadataReq })
         if (receipt) {
           hasAuthority = true
           admitted.add(slug)
@@ -124,7 +142,7 @@ export const resolveBranchCollectionRead = async ({
         const isEffective = !!receipt && (selection !== undefined || draft === true)
         if (!isEffective) {
           materializedCollections.add(slug)
-          if (receipt) {
+          if (receipt && !(global && slug === collection)) {
             materializedVisibility[slug] = config.custom.branchStorage.identities
           }
         } else {
@@ -163,7 +181,9 @@ export const resolveBranchCollectionRead = async ({
       }
       if (
         selection !== undefined &&
-        sources[collection]?.config.versions?.drafts &&
+        (global
+          ? metadataReq.payload.globals.config.find(({ slug }) => slug === global)?.versions?.drafts
+          : sources[collection]?.config.versions?.drafts) &&
         !hasRootAuthority
       ) {
         throw new Error(
@@ -174,14 +194,15 @@ export const resolveBranchCollectionRead = async ({
         if (selection !== undefined) {
           throw new Error('Selected branch reads require authoritative cutover.')
         }
-        const payload = req.payload
+        const legacySource = legacyReq ?? req
+        const payload = legacySource.payload
         const absentReceipts = reachable.flatMap((slug) => {
           const cutover = sources[slug]?.config.custom?.branchStorage?.cutover
           return typeof cutover === 'string' ? [cutover] : []
         })
         return {
           assertLegacy: async () => {
-            if (req.payload !== payload) {
+            if (legacySource.payload !== payload) {
               throw new Error(
                 'A legacy branch read cannot rebind its Payload before authority validation.',
               )
@@ -191,7 +212,7 @@ export const resolveBranchCollectionRead = async ({
             for (const cutover of absentReceipts) {
               const receipt = await payload.db.findOne({
                 collection: cutover,
-                req,
+                req: legacySource,
                 where: { singleton: { equals: 'authoritative' } },
               })
               if (receipt) {
@@ -280,7 +301,7 @@ export const resolveBranchCollectionRead = async ({
       isRootPolicy = false
       assertBranchReadBinding({ req: scopedReq })
       if (access === false) {
-        return { denied: true, result: null }
+        return { accessResult: false, denied: true, result: null }
       }
       const rootPermissions: CollectionPermission = {
         fields: {},
@@ -402,11 +423,13 @@ export const resolveBranchCollectionRead = async ({
         req: scopedReq,
       }
       const result =
-        kind === 'count'
-          ? await countBranchContent(args)
-          : kind === 'distinct'
-            ? await findDistinctBranchContent({ ...args, field: native.field! })
-            : await queryBranchContent(args)
+        global && materializedCollections.has(collection)
+          ? await acquireMaterializedGlobal({ args, global, hasRootAuthority })
+          : kind === 'count'
+            ? await countBranchContent(args)
+            : kind === 'distinct'
+              ? await findDistinctBranchContent({ ...args, field: native.field! })
+              : await queryBranchContent(args)
       if (
         kind === 'find' &&
         'docs' in result &&
@@ -417,7 +440,7 @@ export const resolveBranchCollectionRead = async ({
         for (const doc of result.docs) {
           const target = {
             collection: sources[collection]!.config.custom.branchStorage.heads,
-            parentID: doc.id,
+            ...(global ? {} : { parentID: doc.id as number | string }),
           }
           const scopes = [
             { type: 'shared' as const },
@@ -437,6 +460,20 @@ export const resolveBranchCollectionRead = async ({
             target,
           })
           await normalizeBranchOriginal({ branchID, doc, readSet, req: scopedReq, target })
+          if (global) {
+            const singleton = await scopedReq.payload.db.findGlobal({
+              slug: global,
+              locale: 'all',
+              req: scopedReq,
+              select: { id: true, globalType: true },
+            })
+            doc.id = singleton?.id
+            if (singleton?.globalType) {
+              doc.globalType = singleton.globalType
+            } else {
+              delete doc.globalType
+            }
+          }
         }
       }
       if (kind === 'find' && 'docs' in result && Array.isArray(result.docs) && native.select) {
@@ -449,9 +486,100 @@ export const resolveBranchCollectionRead = async ({
           }),
         )
       }
-      return { denied: false, result }
+      return { accessResult: access, denied: false, result }
     },
     req,
+  })
+}
+
+const acquireMaterializedGlobal = async ({
+  args,
+  global,
+  hasRootAuthority,
+}: {
+  args: Parameters<typeof queryBranchContent>[0]
+  global: string
+  hasRootAuthority: boolean
+}) => {
+  const req = args.req
+  const config = req.payload.globals.config.find(({ slug }) => slug === global)!
+  const visibility = hasRootAuthority
+    ? await readBranchIdentityVisibility({
+        req,
+        target: { collection: config.custom.branchStorage.heads },
+      })
+    : null
+  if (
+    hasRootAuthority &&
+    (!visibility || !(visibility.isPublished || visibility.isLegacyDraftVisible))
+  ) {
+    return { docs: [] }
+  }
+  const originalAccess = consumeBranchOriginalPolicy({
+    branchID: args.branchID,
+    collection: args.collection,
+    policy: args.originalPolicy,
+    req,
+  })
+  const prepared = await prepareBranchContentQuery({ ...args, originalAccess })
+  if (!prepared.query.findGlobal) {
+    throw new Error('Authoritative global reads require the native singleton query compiler.')
+  }
+  const doc = await prepared.query.findGlobal({
+    slug: global,
+    context: prepared.context,
+    locale: args.locale,
+    req,
+  })
+  return { docs: doc && Object.keys(doc).length ? [doc] : [] }
+}
+
+/** Global authority is validated using its genuine config before the private query alias is used. */
+export const resolveBranchGlobalRead = async ({
+  global,
+  ...args
+}: { global: string } & Omit<Args, 'collection' | 'kind'>) => {
+  if (!hasBranchReadCandidates({ req: args.req })) {
+    if (
+      getBranchReadIntent({ req: args.req }) !== undefined ||
+      getSelectedBranch({ req: args.req }) !== undefined
+    ) {
+      throw new Error(
+        'Selected branch reads require authoritative cutover and native snapshot support.',
+      )
+    }
+    return null
+  }
+  return withBranchReadSnapshot({
+    locale: args.native.locale,
+    read: async ({ req }) => {
+      const config = req.payload.globals.config.find(({ slug }) => slug === global)!
+      if (
+        config.versions?.drafts &&
+        !config.custom?.branchQueryStorage &&
+        (getBranchReadIntent({ req }) !== undefined || getSelectedBranch({ req }) !== undefined)
+      ) {
+        if (
+          getBranchReadIntent({ req }) !== undefined ||
+          getSelectedBranch({ req }) !== undefined
+        ) {
+          throw new Error(
+            'Selected branch reads require authoritative cutover for the requested global.',
+          )
+        }
+      }
+      await readBranchCutover({ entity: config, req })
+      const source = createBranchGlobalSourceRequest({ global, req })
+      return resolveBranchCollectionRead({
+        ...args,
+        collection: source.sourceSlug,
+        global,
+        kind: 'find',
+        legacyReq: args.req,
+        req: source.scopedReq,
+      })
+    },
+    req: args.req,
   })
 }
 
@@ -461,7 +589,7 @@ const hasPopulationFields = ({
   req,
   seenBlocks = new Set<string>(),
 }: {
-  fields: import('../../../fields/config/types.js').Field[]
+  fields: Field[]
   req: PayloadRequest
   seenBlocks?: Set<string>
 }): boolean =>
@@ -500,7 +628,7 @@ const collectEncodedDependencies = ({
   req,
   seenBlocks = new Set<string>(),
 }: {
-  fields: import('../../../fields/config/types.js').Field[]
+  fields: Field[]
   req: PayloadRequest
   seenBlocks?: Set<string>
 }): string[] =>

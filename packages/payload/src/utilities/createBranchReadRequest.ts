@@ -134,6 +134,8 @@ export const createBranchReadRequest = ({
   })
   const overrides = Object.assign(Object.create(Object.getPrototypeOf(req)), {
     context: { ...req.context },
+    fallbackLocale: structuredClone(req.fallbackLocale),
+    user: structuredClone(req.user),
     ...(locale === undefined ? {} : { locale }),
     payload: scopedPayload,
     payloadDataLoader: undefined,

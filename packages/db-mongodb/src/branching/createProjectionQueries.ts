@@ -4,7 +4,7 @@ import type { BranchProjectionQueries, BranchProjectionQueryContext, FindArgs } 
 import type { MongooseAdapter } from '../index.js'
 
 import { buildProjectionFromSelect } from '../utilities/buildProjectionFromSelect.js'
-import { getCollection } from '../utilities/getEntity.js'
+import { getCollection, getGlobal } from '../utilities/getEntity.js'
 import { getSession } from '../utilities/getSession.js'
 import { transform } from '../utilities/transform.js'
 import { buildProjectionQuery, projectionPathValues } from './buildProjectionQuery.js'
@@ -178,6 +178,43 @@ export const createProjectionQueries = ({
         [args.field]: JSON.parse(JSON.stringify(item._id)),
       })),
     }
+  },
+  findGlobal: async (args) => {
+    const { globalConfig, Model } = getGlobal({ adapter, globalSlug: args.slug })
+    const collection = args.context.rootAccess?.collection
+    if (!collection) {
+      throw new Error('A native branch global query requires its bound root policy.')
+    }
+    const query = await buildProjectionQuery({
+      adapter,
+      collection,
+      context: args.context,
+      global: args.slug,
+      locale: args.locale,
+      where: args.where,
+    })
+    const projection = args.select
+      ? buildProjectionFromSelect({
+          adapter,
+          fields: globalConfig.flattenedFields,
+          select: args.select,
+        })
+      : undefined
+    // Native global predicates retain the genuine model's comparison rules.
+    const [doc] = await Model.aggregate(
+      [...query.stages, { $limit: 1 }, ...(projection ? [{ $project: projection }] : [])],
+      {
+        session: await getSession(adapter, args.req),
+      },
+    )
+    if (!doc) {
+      return null
+    }
+    for (const field of query.privateFields) {
+      delete doc[field]
+    }
+    transform({ adapter, data: doc, fields: globalConfig.fields, operation: 'read' })
+    return doc
   },
 })
 

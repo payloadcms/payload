@@ -4,6 +4,7 @@ import type { BranchHeadID } from '../types.js'
 import type { BranchQueryStorage } from './registerBranchQueryStorage.js'
 
 import { createBranchReadRequest } from '../../../utilities/createBranchReadRequest.js'
+import { getBranchReadContext, registerBranchReadContext } from '../operations/branchReadContext.js'
 import { queryBranchContentGraph } from './queryBranchContentGraph.js'
 
 /** A global uses its native singleton content; no public document identity is invented. */
@@ -56,7 +57,7 @@ export const createBranchGlobalSourceRequest = ({
   const config = req.payload.globals.config.find(({ slug }) => slug === global)
   const storage = config?.custom?.branchQueryStorage as BranchQueryStorage | undefined
 
-  if (!config || !storage) {
+  if (!config) {
     throw new Error('The requested global has no branch query relation.')
   }
   let sourceSlug = `__branch_global_source_${global}`
@@ -64,10 +65,12 @@ export const createBranchGlobalSourceRequest = ({
     sourceSlug += '_'
   }
   const source = {
-    ...req.payload.collections[storage.projection]!.config,
+    ...(storage
+      ? req.payload.collections[storage.projection]!.config
+      : { defaultSort: 'id', joins: {}, polymorphicJoins: [], timestamps: true }),
     slug: sourceSlug,
     access: {
-      ...req.payload.collections[storage.projection]!.config.access,
+      ...(storage ? req.payload.collections[storage.projection]!.config.access : {}),
       ...config.access,
       read: (args) =>
         config.access.read ? config.access.read({ ...args, slug: global }) : Boolean(args.req.user),
@@ -75,6 +78,7 @@ export const createBranchGlobalSourceRequest = ({
     custom: { ...config.custom, branchQueryGlobalSource: global },
     fields: config.fields,
     flattenedFields: config.flattenedFields,
+    versions: config.versions,
   } as SanitizedCollectionConfig
   const scopedReq = createBranchReadRequest({
     payload: Object.create(req.payload, {
@@ -87,5 +91,15 @@ export const createBranchGlobalSourceRequest = ({
     }),
     req,
   })
+  const inherited = getBranchReadContext({ req })
+  if (inherited) {
+    registerBranchReadContext({
+      context: {
+        ...inherited,
+        sources: { ...inherited.sources, [sourceSlug]: { config: source } },
+      },
+      req: scopedReq,
+    })
+  }
   return { scopedReq, sourceSlug }
 }

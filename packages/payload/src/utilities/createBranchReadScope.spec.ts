@@ -8,7 +8,10 @@ import { createBranchReadScope } from './createBranchReadScope.js'
 
 const setup = ({ shouldSerializeReads = false } = {}) => {
   const readStates = vi.fn(async (_args: { reads: unknown[]; req?: unknown }) => [])
-  const nativeAdapter = { branching: { queryProjection: { readStates } } }
+  const findGlobal = vi.fn(async (_args: { slug: string; req?: unknown }) => ({
+    title: 'Native global',
+  }))
+  const nativeAdapter = { branching: { queryProjection: { readStates, findGlobal } } }
   const scope = createBranchReadScope({ adapter: nativeAdapter, shouldSerializeReads })
   const req = createBranchReadRequest({
     assertActive: scope.assertActive,
@@ -18,7 +21,7 @@ const setup = ({ shouldSerializeReads = false } = {}) => {
   })
 
   scope.setRequest({ req })
-  return { readStates, req, scope }
+  return { readStates, findGlobal, req, scope }
 }
 
 describe('batched branch readiness read admission', () => {
@@ -40,6 +43,21 @@ describe('batched branch readiness read admission', () => {
       expect.objectContaining({ code: 'branch-read-snapshot-unsupported' }),
     )
     expect(readStates).toHaveBeenCalledTimes(1)
+  })
+
+  it('should bind native global singleton queries to the registered request and revoke captured methods', async () => {
+    const { findGlobal, req, scope } = setup()
+    const read = scope.adapter.branching.queryProjection.findGlobal
+    await expect(read({ slug: 'settings', req })).resolves.toEqual({ title: 'Native global' })
+    await expect(read({ slug: 'settings', req: { ...req } })).rejects.toMatchObject({
+      code: 'branch-read-snapshot-unsupported',
+    })
+    expect(findGlobal).toHaveBeenCalledTimes(1)
+    scope.revoke()
+    expect(() => read({ slug: 'settings', req })).toThrowError(
+      expect.objectContaining({ code: 'branch-read-snapshot-unsupported' }),
+    )
+    expect(findGlobal).toHaveBeenCalledTimes(1)
   })
 
   it('should recheck queued batch admission after revocation before any second native read', async () => {

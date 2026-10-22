@@ -1,8 +1,11 @@
 import type { BranchProjectionQueries, BranchProjectionQueryContext } from 'payload'
 
+import { combineQueries } from 'payload'
+
 import type { DrizzleAdapter } from '../types.js'
 
 import { count } from '../count.js'
+import { findGlobal } from '../findGlobal.js'
 import { findProjection } from './findProjection.js'
 import { findProjectionDistinct } from './findProjectionDistinct.js'
 
@@ -34,5 +37,12 @@ export const createProjectionQueries = ({
     find: ({ context, ...args }) => findProjection.call(scopedAdapter({ context }), args),
     findDistinct: ({ context, ...args }) =>
       findProjectionDistinct.call(scopedAdapter({ context }), args),
+    findGlobal: ({ context, ...args }) =>
+      context.rootAccess?.where === false
+        ? Promise.resolve({})
+        : findGlobal.call(scopedAdapter({ context }), {
+            ...args,
+            where: combineQueries(context.rootAccess?.where, args.where),
+          }),
   }
 }

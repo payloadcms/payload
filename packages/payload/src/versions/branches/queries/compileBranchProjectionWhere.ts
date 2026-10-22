@@ -226,6 +226,32 @@ export const compileBranchProjectionPath = ({
     throw new Error('Invalid or private branch query path.')
   }
 
+  const globalSlug =
+    source.custom?.branchQueryGlobalSource ?? source.custom?.branchProjectionStorage?.global
+  const genuineGlobal =
+    typeof globalSlug === 'string'
+      ? req.payload.globals.config.find(({ slug }) => slug === globalSlug)
+      : undefined
+  const isGlobalAlias =
+    !!genuineGlobal &&
+    source.custom?.branchQueryGlobalSource === genuineGlobal.slug &&
+    source.fields === genuineGlobal.fields &&
+    source.flattenedFields === genuineGlobal.flattenedFields &&
+    source.custom?.branchStorage === genuineGlobal.custom?.branchStorage &&
+    (source.custom?.branchQueryStorage === undefined ||
+      source.custom.branchQueryStorage === genuineGlobal.custom?.branchQueryStorage)
+  const isGlobalProjection =
+    !!genuineGlobal &&
+    source.slug === genuineGlobal.custom?.branchQueryStorage?.projection &&
+    source.custom?.branchProjectionStorage?.global === genuineGlobal.slug
+  if (
+    path === 'globalType' &&
+    req.payload.db.name === 'mongoose' &&
+    (isGlobalAlias || isGlobalProjection)
+  ) {
+    return { hasEncodedReferences: false, kind: 'ordinary', locales: [], path, targets: [] }
+  }
+
   for (let index = 0; index < segments.length; index++) {
     const segment = segments[index]!
 

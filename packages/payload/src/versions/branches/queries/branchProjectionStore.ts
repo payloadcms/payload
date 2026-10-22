@@ -307,18 +307,13 @@ const rebuildBranchProjectionWithMainLock = async ({
   })
   const visibility = await readBranchIdentityVisibility({ req, target })
   const hasMainShared = resolved[0]!.main?.type === 'version'
-  const hasOwnedGlobalShared =
+  const hasOwnedGlobalVersion =
     entity.type === 'global' &&
     branchID !== 'main' &&
-    tokens.some(
-      (token) =>
-        token.branchID === branchID &&
-        token.scope.type === 'shared' &&
-        token.state?.type === 'version',
-    )
+    tokens.some((token) => token.branchID === branchID && token.state?.type === 'version')
   const isVisible =
     composed.hasSharedContent &&
-    (hasOwnedGlobalShared ||
+    (hasOwnedGlobalVersion ||
       (visibility ? isBranchIdentityVisible({ branchID, visibility }) : hasMainShared))
   const projectionSlugs = getProjectionSlugs({ req })
 
