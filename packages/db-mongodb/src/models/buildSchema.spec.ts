@@ -485,6 +485,8 @@ describe('buildSchema unique + localized defaultValue', () => {
 
     expect(schema.path('uniqueLocalizedPoint.en.coordinates').options.default).toBeUndefined()
     expect(schema.path('uniqueLocalizedPoint.es.coordinates').options.default).toBeUndefined()
+    // A leftover `type: 'Point'` without coordinates is invalid GeoJSON for the 2dsphere index
+    expect(schema.path('uniqueLocalizedPoint.es.type').options.default).toBeUndefined()
   })
 
   it('still applies the static defaultValue on a non-unique localized point field', () => {

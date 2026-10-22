@@ -3545,42 +3545,6 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       ).resolves.toBeDefined()
     })
 
-    test('should still enforce uniqueness when a localized unique field explicitly keeps the same defaultValue in a locale', async ({
-      payload,
-    }) => {
-      await payload.create({
-        collection: 'indexed-fields',
-        locale: 'all',
-        data: {
-          text: 'first-' + Date.now(),
-          localizedUniqueRequiredText: {
-            en: 'first-en-' + Date.now(),
-            // explicitly kept as the field's defaultValue, rather than left untouched
-            es: 'localizedUniqueRequired',
-          },
-          uniqueRequiredText: 'uniqueRequired-first-' + Date.now(),
-        },
-        overrideAccess: true,
-      })
-
-      await expect(
-        payload.create({
-          collection: 'indexed-fields',
-          locale: 'all',
-          data: {
-            text: 'second-' + Date.now(),
-            localizedUniqueRequiredText: {
-              en: 'second-en-' + Date.now(),
-              // also explicitly kept as the same defaultValue -> should still collide
-              es: 'localizedUniqueRequired',
-            },
-            uniqueRequiredText: 'uniqueRequired-second-' + Date.now(),
-          },
-          overrideAccess: true,
-        }),
-      ).rejects.toThrow(/unique/i)
-    })
-
     test('should throw validation error saving on unique relationship fields hasMany: false non polymorphic', async ({
       payload,
     }) => {

@@ -570,9 +570,8 @@ const point: FieldSchemaGenerator<PointField> = (
   buildSchemaOptions,
   parentIsLocalized,
 ): void => {
-  // Point fields build their per-locale schema by hand instead of going through
-  // `formatBaseSchema`/`localizeSchema`'s shared suppression, so `unique` localized
-  // fields need the same default suppression applied here directly.
+  // Point schemas don't use `formatBaseSchema`, so `localizeSchema` can't detect `unique`.
+  // Suppress both sub-path defaults: `type` alone is invalid GeoJSON for the 2dsphere index.
   const suppressDefault =
     !buildSchemaOptions.disableUnique &&
     field.unique &&
@@ -582,9 +581,10 @@ const point: FieldSchemaGenerator<PointField> = (
     type: {
       type: String,
       enum: ['Point'],
-      ...(typeof field.defaultValue !== 'undefined' && {
-        default: 'Point',
-      }),
+      ...(typeof field.defaultValue !== 'undefined' &&
+        !suppressDefault && {
+          default: 'Point',
+        }),
     },
     coordinates: {
       type: [Number],
