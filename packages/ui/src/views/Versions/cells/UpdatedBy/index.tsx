@@ -45,7 +45,10 @@ export function UpdatedByCell({ updatedBy }: { updatedBy: UpdatedByValue }) {
     }
 
     const fieldToSelect = collection.admin.useAsTitle ?? 'id'
-    const url = formatAdminURL({ apiRoute: api, path: `/${relationTo}/${value}` })
+    const url = formatAdminURL({
+      apiRoute: api,
+      path: `/${relationTo}/${encodeURIComponent(String(value))}`,
+    })
     const params = new URLSearchParams()
     params.append('depth', '0')
     params.append('select[' + fieldToSelect + ']', 'true')
