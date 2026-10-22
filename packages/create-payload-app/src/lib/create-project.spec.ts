@@ -3,26 +3,39 @@ import fse from 'fs-extra'
 import globby from 'globby'
 import * as os from 'node:os'
 import path from 'path'
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest'
 import type { CliArgs, DbType, ProjectExample, ProjectTemplate } from '../types.js'
 
+import { DEFAULT_PAYLOAD_VERSION_TAG } from '../utils/resolvePackageVersion.js'
 import { createProject, updatePackageJSONDependencies } from './create-project.js'
 import { getValidTemplates } from './templates.js'
 
 describe('createProject', () => {
   let projectDir: string
-
-  beforeAll(() => {
-    // eslint-disable-next-line no-console
-    console.log = vitest.fn()
-  })
+  const payloadVersion = '4.0.0-beta.1'
+  const registryURL = 'https://registry.npmjs.org/-/package/payload/dist-tags'
 
   beforeEach(() => {
+    vitest.spyOn(console, 'log').mockImplementation(() => {})
+    vitest.stubGlobal(
+      'fetch',
+      vitest.fn((url: string) => {
+        if (url !== registryURL) {
+          throw new Error(`Unexpected request: ${url}`)
+        }
+
+        return Promise.resolve(Response.json({ [DEFAULT_PAYLOAD_VERSION_TAG]: payloadVersion }))
+      }),
+    )
+
     const tempDirectory = fs.realpathSync(os.tmpdir())
     projectDir = `${tempDirectory}/${Math.random().toString(36).substring(7)}`
   })
 
   afterEach(() => {
+    vitest.unstubAllGlobals()
+    vitest.restoreAllMocks()
+
     if (fse.existsSync(projectDir)) {
       fse.rmSync(projectDir, { recursive: true })
     }
@@ -59,6 +72,7 @@ describe('createProject', () => {
 
       // Check package name and description
       expect(packageJson.name).toStrictEqual(projectName)
+      expect(fetch).toHaveBeenCalledExactlyOnceWith(registryURL)
     })
 
     it('updates project name in plugin template importMap file', async () => {
@@ -109,6 +123,9 @@ describe('createProject', () => {
 
       // Check package name and description
       expect(packageJson.name).toStrictEqual(projectName)
+      expect(packageJson.dependencies.payload).toBe(payloadVersion)
+      expect(fetch).toHaveBeenCalledExactlyOnceWith(registryURL)
+      expect(fse.existsSync(path.resolve(projectDir, 'src/server.ts'))).toBe(true)
     }, 90_000)
 
     describe('creates project from template', () => {
@@ -152,6 +169,9 @@ describe('createProject', () => {
 
         const packageJsonPath = path.resolve(projectDir, 'package.json')
         const packageJson = fse.readJsonSync(packageJsonPath)
+
+        expect(packageJson.dependencies.payload).toBe(payloadVersion)
+        expect(fetch).toHaveBeenCalledExactlyOnceWith(registryURL)
 
         // Verify git was initialized
         expect(fse.existsSync(path.resolve(projectDir, '.git'))).toBe(true)

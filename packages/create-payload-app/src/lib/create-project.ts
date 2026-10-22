@@ -152,9 +152,7 @@ export async function createProject(
     // Copy example from local path. For development purposes.
     const localExample = path.resolve(dirname, '../../../../examples/', cliArgs['--local-example'])
     await fse.copy(localExample, projectDir)
-  }
-
-  if (cliArgs['--local-template']) {
+  } else if (cliArgs['--local-template']) {
     // Copy template from local path. For development purposes.
     const localTemplate = path.resolve(
       dirname,
