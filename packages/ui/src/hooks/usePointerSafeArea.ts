@@ -170,16 +170,13 @@ const isInsideSafeArea = ({
   pointer: PointerPosition
   points: PointerPosition[]
 }) =>
-  points.every((edgeStart, index) => {
-    const edgeEnd = points[(index + 1) % points.length]
-    const edgeX = edgeEnd.x - edgeStart.x
-    const edgeY = edgeEnd.y - edgeStart.y
-    const pointerX = pointer.x - edgeStart.x
-    const pointerY = pointer.y - edgeStart.y
-
-    // An inside point lies on the inner side of every boundary edge.
-    return edgeX * pointerY - edgeY * pointerX >= 0
-  })
+  points.every((edgeStart, index) =>
+    isPointerInsideEdge({
+      edgeEnd: points[(index + 1) % points.length],
+      edgeStart,
+      pointer,
+    }),
+  )
 
 // The convex hull covers the whole destination, allowing return paths to enter
 // through its top or bottom as well as its nearest edge.
@@ -221,3 +218,17 @@ const getSafeAreaPoints = ({ rect, start }: { rect: DOMRect; start: PointerPosit
     ...getOuterEdge({ orderedPoints: [...points].reverse() }),
   ]
 }
+
+// Edges follow the safe area's point order. Points on the boundary count as inside.
+const isPointerInsideEdge = ({
+  edgeEnd,
+  edgeStart,
+  pointer,
+}: {
+  edgeEnd: PointerPosition
+  edgeStart: PointerPosition
+  pointer: PointerPosition
+}): boolean =>
+  (edgeEnd.x - edgeStart.x) * (pointer.y - edgeStart.y) -
+    (edgeEnd.y - edgeStart.y) * (pointer.x - edgeStart.x) >=
+  0
