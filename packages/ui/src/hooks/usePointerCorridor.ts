@@ -9,160 +9,201 @@ type UsePointerCorridorArgs = {
   from: RefObject<HTMLElement | null>
   idleTimeout?: number
   onChange: (args: { polygon: null | string }) => void
-  onIdle: (pointer: PointerPosition) => void
+  onRelease: (pointer: PointerPosition) => void
   to: RefObject<HTMLElement | null>
 }
 
-/**
- * Tracks a horizontal hover corridor independently of its renderer and hover behavior.
- * Reports a clip-path polygon in viewport coordinates; the caller renders and clears it.
- */
+/** Tracks a bidirectional horizontal hover corridor independently of its renderer and behavior. */
 export const usePointerCorridor = ({
   enabled,
   from,
   idleTimeout = 300,
   onChange,
-  onIdle,
+  onRelease,
   to,
 }: UsePointerCorridorArgs) => {
   const origin = useRef<PointerPosition | undefined>(undefined)
-  const latestPointer = useRef<PointerPosition | undefined>(undefined)
-  const sourceBounds = useRef<DOMRect | undefined>(undefined)
+  const isReturning = useRef(false)
   const isProtected = useRef(false)
   const idleTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  const callbacks = useRef({ onChange, onIdle })
+  const callbacks = useRef({ onChange, onRelease })
 
   useEffect(() => {
-    callbacks.current = { onChange, onIdle }
-  }, [onChange, onIdle])
-
-  const cancelIdle = useCallback(() => {
-    if (idleTimer.current) {
-      clearTimeout(idleTimer.current)
-      idleTimer.current = undefined
-    }
-  }, [])
+    callbacks.current = { onChange, onRelease }
+  }, [onChange, onRelease])
 
   const clear = useCallback(() => {
-    cancelIdle()
+    clearTimeout(idleTimer.current)
+    idleTimer.current = undefined
     if (isProtected.current) {
       isProtected.current = false
       callbacks.current.onChange({ polygon: null })
     }
     origin.current = undefined
-    latestPointer.current = undefined
-    sourceBounds.current = undefined
-  }, [cancelIdle])
+  }, [])
 
-  const updateIdle = useCallback(
+  const release = useCallback(
     (pointer: PointerPosition) => {
-      latestPointer.current = pointer
-      const bounds = sourceBounds.current
-
-      cancelIdle()
-      if (!bounds || (pointer.y >= bounds.top && pointer.y <= bounds.bottom)) {
-        return
-      }
-
-      idleTimer.current = setTimeout(() => {
-        const pointer = latestPointer.current
-
-        clear()
-        if (pointer) {
-          callbacks.current.onIdle(pointer)
-        }
-      }, idleTimeout)
+      clear()
+      callbacks.current.onRelease(pointer)
     },
-    [cancelIdle, clear, idleTimeout],
+    [clear],
   )
 
   const update = useCallback(
     ({ pointer }: { pointer?: PointerPosition } = {}) => {
-      const target = to.current
+      const target = isReturning.current ? from.current : to.current
       const start = origin.current
 
-      if (!enabled || !from.current || !target || !start || (!pointer && !isProtected.current)) {
+      if (!enabled || !target || !start || (!pointer && !isProtected.current)) {
         return false
       }
 
       const rect = target.getBoundingClientRect()
-      const isOnRight = rect.left > start.x
-      const isOnLeft = rect.right < start.x
-
-      if (!isOnRight && !isOnLeft) {
-        clear()
+      if (rect.left <= start.x && rect.right >= start.x) {
         return false
       }
+      const points = getCorridorPoints({ rect, start })
 
-      const edgeX = isOnRight ? rect.left : rect.right
-
-      if (pointer) {
-        const progress = (pointer.x - start.x) / (edgeX - start.x)
-        const top = start.y - 4 + (rect.top - start.y + 4) * progress
-        const bottom = start.y + 4 + (rect.bottom - start.y - 4) * progress
-
-        // Only protect travel toward the target; vertical departures remain unobstructed.
-        if (progress <= 0 || progress >= 1 || pointer.y < top || pointer.y > bottom) {
-          return false
-        }
+      if (
+        pointer &&
+        !points.every(
+          (point, index) =>
+            cross({ a: point, b: points[(index + 1) % points.length], point: pointer }) >= 0,
+        )
+      ) {
+        return false
       }
 
       isProtected.current = true
       callbacks.current.onChange({
-        polygon: `polygon(${start.x}px ${start.y - 4}px, ${edgeX}px ${rect.top}px, ${edgeX}px ${rect.bottom}px, ${start.x}px ${start.y + 4}px)`,
+        polygon: `polygon(${points.map(({ x, y }) => `${x}px ${y}px`).join(', ')})`,
       })
       if (pointer) {
-        updateIdle(pointer)
+        clearTimeout(idleTimer.current)
+        idleTimer.current = setTimeout(() => release(pointer), idleTimeout)
       }
       return true
     },
-    [clear, enabled, from, to, updateIdle],
+    [enabled, from, idleTimeout, release, to],
   )
 
-  // Tracking can precede enabling protection, e.g. when entering the source opens the target.
   const trackSource = useCallback(
     (pointer: PointerPosition) => {
+      clear()
       origin.current = pointer
-      sourceBounds.current ??= from.current?.getBoundingClientRect()
+      isReturning.current = false
     },
-    [from],
+    [clear],
   )
 
   const trackTarget = useCallback(
     (pointer: PointerPosition) => {
-      if (!isProtected.current || !to.current) {
+      // A keyboard-opened target does not start pointer tracking on its own.
+      if (!origin.current) {
         return
       }
-
-      const rect = to.current.getBoundingClientRect()
-
-      if (
-        pointer.x >= rect.left &&
-        pointer.x <= rect.right &&
-        pointer.y >= rect.top &&
-        pointer.y <= rect.bottom
-      ) {
-        clear()
-      } else {
-        updateIdle(pointer)
-      }
+      clear()
+      origin.current = pointer
+      isReturning.current = true
     },
-    [clear, to, updateIdle],
+    [clear],
   )
 
   useEffect(() => {
     if (!enabled) {
       clear()
+      return
     }
-  }, [clear, enabled])
 
-  useEffect(() => clear, [clear, from, to])
+    const handleMove = (event: PointerEvent) => {
+      if (event.pointerType !== 'mouse' || !origin.current) {
+        return
+      }
+      const pointer = { x: event.clientX, y: event.clientY }
+      const target = event.target as Node | null
+
+      if (target && from.current?.contains(target)) {
+        trackSource(pointer)
+      } else if (target && to.current?.contains(target)) {
+        trackTarget(pointer)
+      } else if (isProtected.current && !update({ pointer })) {
+        release(pointer)
+      }
+    }
+    const handlePress = (event: PointerEvent) => {
+      if (event.pointerType === 'mouse') {
+        // Preserve tracking after clicks that keep either endpoint open, while
+        // letting clicks elsewhere bypass hover protection without redispatching.
+        const pointer = { x: event.clientX, y: event.clientY }
+        const target = event.target as Node | null
+
+        if (target && from.current?.contains(target)) {
+          trackSource(pointer)
+        } else if (target && to.current?.contains(target)) {
+          trackTarget(pointer)
+        } else {
+          clear()
+        }
+      }
+    }
+    const document = from.current?.ownerDocument
+
+    document?.addEventListener('pointermove', handleMove, { capture: true, passive: true })
+    document?.addEventListener('pointerdown', handlePress, { capture: true, passive: true })
+    return () => {
+      document?.removeEventListener('pointermove', handleMove, { capture: true })
+      document?.removeEventListener('pointerdown', handlePress, { capture: true })
+      clear()
+    }
+  }, [clear, enabled, from, release, to, trackSource, trackTarget, update])
 
   return {
     clear,
+    isProtected: useCallback(() => isProtected.current, []),
+    isTracking: useCallback(() => origin.current !== undefined, []),
     protect: ({ pointer }: { pointer: PointerPosition }) => update({ pointer }),
     refresh: () => update(),
     trackSource,
     trackTarget,
   }
 }
+
+// The convex hull includes the whole destination, so a return path can enter a wide
+// source through its top or bottom rather than having to reach its nearest edge.
+const getCorridorPoints = ({ rect, start }: { rect: DOMRect; start: PointerPosition }) => {
+  const points = [
+    { x: start.x, y: start.y - 4 },
+    { x: start.x, y: start.y + 4 },
+    { x: rect.left, y: rect.top },
+    { x: rect.right, y: rect.top },
+    { x: rect.right, y: rect.bottom },
+    { x: rect.left, y: rect.bottom },
+  ].sort((a, b) => a.x - b.x || a.y - b.y)
+  const half = ({ vertices }: { vertices: PointerPosition[] }) => {
+    const hull: PointerPosition[] = []
+
+    for (const point of vertices) {
+      while (
+        hull.length > 1 &&
+        cross({ a: hull[hull.length - 2], b: hull[hull.length - 1], point }) <= 0
+      ) {
+        hull.pop()
+      }
+      hull.push(point)
+    }
+    return hull.slice(0, -1)
+  }
+
+  return [...half({ vertices: points }), ...half({ vertices: [...points].reverse() })]
+}
+
+const cross = ({
+  a,
+  b,
+  point,
+}: {
+  a: PointerPosition
+  b: PointerPosition
+  point: PointerPosition
+}) => (b.x - a.x) * (point.y - a.y) - (b.y - a.y) * (point.x - a.x)

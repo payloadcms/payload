@@ -1,6 +1,6 @@
 import type { PointerEvent, RefObject } from 'react'
 
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback } from 'react'
 
 import type { PointerPosition } from '../../hooks/usePointerCorridor.js'
 
@@ -25,7 +25,6 @@ export const useSubmenuPointerIntent = ({
   onSafeAreaExpire,
   triggerRef,
 }: UseSubmenuPointerIntentArgs) => {
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const renderCorridor = useCallback(
     ({ polygon }: { polygon: null | string }) => {
       const content = contentRef.current
@@ -45,90 +44,50 @@ export const useSubmenuPointerIntent = ({
     enabled: enabled && active,
     from: triggerRef,
     onChange: renderCorridor,
-    onIdle: onSafeAreaExpire,
+    onRelease: onSafeAreaExpire,
     to: contentRef,
   })
-  const { clear, protect, refresh, trackSource, trackTarget } = corridor
+  const { clear, protect, trackSource, trackTarget } = corridor
 
-  const handleContentMove = useCallback(
-    (event: PointerEvent) => {
-      if (event.pointerType === 'mouse') {
-        trackTarget({ x: event.clientX, y: event.clientY })
-      }
-    },
-    [trackTarget],
-  )
-
-  const cancelClose = useCallback(() => {
-    if (closeTimer.current) {
-      clearTimeout(closeTimer.current)
-      closeTimer.current = undefined
+  const handleEnter = (event: PointerEvent) => {
+    if (event.pointerType !== 'mouse') {
+      return
     }
-  }, [])
+    const pointer = { x: event.clientX, y: event.clientY }
 
-  const handleEnter = useCallback(
-    (event: PointerEvent) => {
-      if (event.pointerType !== 'mouse') {
-        return
-      }
-
-      cancelClose()
-      if (event.currentTarget !== contentRef.current) {
-        trackSource({ x: event.clientX, y: event.clientY })
-      }
+    if (event.currentTarget === contentRef.current) {
+      trackTarget(pointer)
+    } else {
+      trackSource(pointer)
       onOpen()
-    },
-    [cancelClose, contentRef, onOpen, trackSource],
-  )
-
-  const handleLeave = useCallback(
-    (event: PointerEvent) => {
-      if (event.pointerType !== 'mouse') {
-        return
-      }
-
-      const target = event.relatedTarget as Node | null
-      if (target && contentRef.current?.contains(target)) {
-        cancelClose()
-        return
-      }
-
-      if (
-        event.currentTarget !== contentRef.current &&
-        protect({ pointer: { x: event.clientX, y: event.clientY } })
-      ) {
-        cancelClose()
-        return
-      }
-
-      clear()
-      cancelClose()
-      closeTimer.current = setTimeout(() => {
-        closeTimer.current = undefined
-        onClose()
-      }, 250)
-    },
-    [cancelClose, clear, contentRef, onClose, protect],
-  )
-
-  useEffect(() => {
-    if (!enabled || !active) {
-      cancelClose()
     }
-    return cancelClose
-  }, [active, cancelClose, enabled])
+  }
+
+  const handleLeave = (event: PointerEvent) => {
+    if (event.pointerType !== 'mouse' || !active || !corridor.isTracking()) {
+      return
+    }
+    const target = event.relatedTarget as Node | null
+
+    if (target && (contentRef.current?.contains(target) || triggerRef.current?.contains(target))) {
+      return
+    }
+    if (!protect({ pointer: { x: event.clientX, y: event.clientY } })) {
+      clear()
+      onClose()
+    }
+  }
 
   return {
     contentProps: {
       onPointerEnter: enabled ? handleEnter : undefined,
       onPointerLeave: enabled ? handleLeave : undefined,
-      onPointerMove: enabled ? handleContentMove : undefined,
     },
+    isProtected: corridor.isProtected,
     triggerProps: {
       onPointerEnter: enabled ? handleEnter : undefined,
       onPointerLeave: enabled ? handleLeave : undefined,
-      onPointerMove: enabled ? handleEnter : undefined,
     },
-    updateSafeArea: refresh,
+    updateSafeArea: corridor.refresh,
   }
 }

@@ -1,27 +1,21 @@
-import { expect, test, vi } from 'vitest'
+import { expect, test } from 'vitest'
 
 import { createSubmenuScope } from './SubmenuScope.js'
 
-test('should open a pending sibling without restarting its delay on pointer movement', () => {
-  vi.useFakeTimers()
+test('should protect pointer handoff while allowing an explicit selection', () => {
   const scope = createSubmenuScope()
 
-  try {
-    for (const id of ['theme', 'language']) {
-      scope.register({ id, closeBranch: () => {}, open: () => {} })
-    }
+  scope.register({
+    id: 'theme',
+    closeBranch: () => {},
+    isPointerProtected: () => true,
+    open: () => {},
+  })
+  scope.register({ id: 'language', closeBranch: () => {}, open: () => {} })
+  scope.requestOpen({ id: 'theme' })
+  scope.requestOpen({ id: 'language', viaPointer: true })
+  expect(scope.activeChildId).toBe('theme')
 
-    scope.requestOpen({ id: 'theme', delay: false })
-    scope.requestOpen({ id: 'language', delay: true })
-    vi.advanceTimersByTime(50)
-    scope.requestOpen({ id: 'language', delay: true })
-    vi.advanceTimersByTime(50)
-    scope.requestOpen({ id: 'language', delay: true })
-    vi.advanceTimersByTime(50)
-
-    expect(scope.activeChildId).toBe('language')
-  } finally {
-    scope.closeActiveBranch()
-    vi.useRealTimers()
-  }
+  scope.requestOpen({ id: 'language' })
+  expect(scope.activeChildId).toBe('language')
 })

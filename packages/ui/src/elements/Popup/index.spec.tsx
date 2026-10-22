@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
 
-import { expect, test } from 'vitest'
+import { expect, test, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 import { render } from 'vitest-browser-react'
 
@@ -15,6 +15,7 @@ test.each([
   async ({ direction, side, width }) => {
     await page.viewport(width, 720)
 
+    const onOpenLanguage = vi.fn()
     const screen = await render(
       <div
         data-testid="pointer-surface"
@@ -26,6 +27,7 @@ test.each([
               <Popup
                 hoverSubmenu
                 key={label}
+                onToggleOpen={label === 'Language' ? onOpenLanguage : undefined}
                 popupAriaLabel={`${label} menu`}
                 popupType="menu"
                 renderButton={(buttonProps) => (
@@ -36,11 +38,13 @@ test.each([
                 side={side}
                 theme="auto"
               >
-                {Array.from({ length: 3 }, (_, index) => (
-                  <PopupList.Button key={index} onClick={() => {}}>
-                    {`${label} option ${index}`}
-                  </PopupList.Button>
-                ))}
+                <div data-popup-prevent-close>
+                  {Array.from({ length: 3 }, (_, index) => (
+                    <PopupList.Button key={index} onClick={() => {}}>
+                      {`${label} option ${index}`}
+                    </PopupList.Button>
+                  ))}
+                </div>
               </Popup>
             ))}
           </PopupList.MenuItem>
@@ -85,11 +89,39 @@ test.each([
         },
       })
     }
-    expect(document.elementFromPoint(diagonalPoint.x, diagonalPoint.y)).toBe(
-      screen.getByRole('menu', { name: 'Theme menu' }).element(),
-    )
+    expect(document.elementFromPoint(diagonalPoint.x, diagonalPoint.y)).toBe(language.element())
     await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
     await expect.element(language).toHaveAttribute('aria-expanded', 'false')
+
+    const option = screen.getByRole('menuitem', { name: 'Theme option 2' })
+    await option.click()
+    const optionBox = option.element().getBoundingClientRect()
+    const returnX = optionBox.left + optionBox.width / 2
+    const returnY = optionBox.top + optionBox.height / 2
+    for (let step = 1; step <= steps; step++) {
+      await userEvent.hover(screen.getByTestId('pointer-surface'), {
+        force: true,
+        position: {
+          x: returnX + ((startX - returnX) * step) / steps,
+          y: returnY + ((startY - returnY) * step) / steps,
+        },
+      })
+    }
+    expect(onOpenLanguage).not.toHaveBeenCalled()
+    await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
+
+    // A deliberate click still reaches the row beneath the protected corridor.
+    await userEvent.hover(screen.getByTestId('pointer-surface'), {
+      force: true,
+      position: diagonalPoint,
+    })
+    await language.click({
+      position: {
+        x: diagonalPoint.x - siblingBox.left,
+        y: diagonalPoint.y - siblingBox.top,
+      },
+    })
+    await expect.element(language).toHaveAttribute('aria-expanded', 'true')
   },
 )
 
@@ -187,7 +219,7 @@ test('should keep a reusable submenu trigger full width and highlighted over its
   expect(getComputedStyle(theme.element()).backgroundColor).toBe('rgb(1, 2, 3)')
 })
 
-test('should defer hover styling on a submenu trigger in a separate group', async () => {
+test('should immediately switch to a sibling submenu outside the corridor', async () => {
   const screen = await render(
     <div style={{ '--color-bg-selected-strong': 'rgb(1, 2, 3)' } as CSSProperties}>
       <Popup button="Root" popupType="menu" theme="auto">
@@ -235,14 +267,14 @@ test('should defer hover styling on a submenu trigger in a separate group', asyn
   await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
   await language.hover()
 
-  expect(theme.element().getAttribute('aria-expanded')).toBe('true')
-  expect(getComputedStyle(language.element()).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+  expect(theme.element().getAttribute('aria-expanded')).toBe('false')
+  expect(language.element().getAttribute('aria-expanded')).toBe('true')
 
   await expect.element(language).toHaveAttribute('aria-expanded', 'true')
   expect(getComputedStyle(language.element()).backgroundColor).toBe('rgb(1, 2, 3)')
 })
 
-test('should defer hover styling on an action in a separate group', async () => {
+test('should immediately close a hover submenu over a sibling action', async () => {
   const screen = await render(
     <div style={{ '--popup-item-bg-hover': 'rgb(1, 2, 3)' } as CSSProperties}>
       <Popup button="Root" popupType="menu" theme="auto">
@@ -279,11 +311,11 @@ test('should defer hover styling on an action in a separate group', async () => 
   await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
   await account.hover()
 
-  expect(theme.element().getAttribute('aria-expanded')).toBe('true')
-  expect(getComputedStyle(account.element()).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+  expect(theme.element().getAttribute('aria-expanded')).toBe('false')
+  expect(getComputedStyle(account.element()).backgroundColor).toBe('rgb(1, 2, 3)')
 })
 
-test('should defer a sibling leaf hover state while a submenu is active', async () => {
+test('should immediately hand hover back to a sibling leaf', async () => {
   const screen = await render(
     <div style={{ '--popup-item-bg-hover': 'rgb(1, 2, 3)' } as CSSProperties}>
       <Popup button="Root" popupType="menu" theme="auto">
@@ -336,8 +368,7 @@ test('should defer a sibling leaf hover state while a submenu is active', async 
     document.querySelectorAll<HTMLElement>('[role="menuitem"]'),
   ).find((element) => element.textContent === 'Typography')
 
-  expect(colorElement?.getAttribute('aria-expanded')).toBe('true')
-  expect(getComputedStyle(typographyElement!).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+  expect(colorElement?.getAttribute('aria-expanded')).toBe('false')
 
   await expect.element(color).toHaveAttribute('aria-expanded', 'false')
   expect(getComputedStyle(typographyElement!).backgroundColor).toBe('rgb(1, 2, 3)')

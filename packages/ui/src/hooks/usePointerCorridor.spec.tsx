@@ -15,7 +15,7 @@ const CorridorExample = () => {
     from,
     idleTimeout: 100,
     onChange: ({ polygon }) => setPolygon(polygon),
-    onIdle: () => setIsIdle(true),
+    onRelease: () => setIsIdle(true),
     to,
   })
 
@@ -52,7 +52,7 @@ test('should report corridor geometry and inactivity without Popup markup or a p
   })
 
   expect(screen.getByTestId('polygon').element().textContent).toBe(
-    'polygon(150px 111px, 300px 100px, 300px 300px, 150px 119px)',
+    'polygon(150px 111px, 300px 100px, 400px 100px, 400px 300px, 300px 300px, 150px 119px)',
   )
   await expect.element(screen.getByTestId('idle')).toHaveTextContent('idle')
   await expect.element(screen.getByTestId('polygon')).toHaveTextContent('inactive')

@@ -61,7 +61,7 @@
     position: fixed;
     inset: 0;
     clip-path: var(--popup-safe-area);
-    pointer-events: auto;
+    pointer-events: none;
   }
 
   .popup__content.popup--size-small {

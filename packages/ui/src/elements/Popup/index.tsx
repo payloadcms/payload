@@ -188,7 +188,6 @@ export const Popup: React.FC<PopupProps> = (props) => {
         if (coordinateParent && isSubmenu) {
           parentPopup.submenuScope.requestOpen({
             id: contentId,
-            delay: false,
             viaKeyboard,
           })
           return
@@ -234,27 +233,25 @@ export const Popup: React.FC<PopupProps> = (props) => {
     [setActive],
   )
 
-  useEffect(() => {
-    if (!isSubmenu) {
-      return
-    }
+  const closeFromPointer = useCallback(() => {
+    const hasFocus = popupRef.current?.contains(document.activeElement)
+    const trigger = triggerRef.current?.querySelector<HTMLElement>('[aria-haspopup="menu"]')
 
-    return parentPopup.submenuScope.register({
-      id: contentId,
-      closeBranch: () => closePopup({ restoreFocus: false }),
-      open: openFromParent,
-    })
-  }, [closePopup, contentId, isSubmenu, openFromParent, parentPopup])
+    closePopup({ restoreFocus: false })
+    if (hasFocus) {
+      trigger?.focus()
+    }
+  }, [closePopup])
 
   const pointerIntent = useSubmenuPointerIntent({
     active,
     contentRef: popupRef,
     enabled: isSubmenu && hoverSubmenu,
-    onClose: () => setActive(false),
+    onClose: closeFromPointer,
     onOpen: () =>
       parentPopup?.submenuScope.requestOpen({
         id: contentId,
-        delay: Boolean(parentPopup.submenuScope.activeChildId),
+        viaPointer: true,
       }),
     onSafeAreaExpire: ({ x, y }) => {
       const target = document.elementFromPoint(x, y)
@@ -267,15 +264,35 @@ export const Popup: React.FC<PopupProps> = (props) => {
         const siblingId = trigger?.getAttribute('aria-controls')
 
         if (siblingId && trigger?.getAttribute('aria-disabled') !== 'true') {
-          parentPopup?.submenuScope.requestOpen({ id: siblingId, delay: false })
+          parentPopup?.submenuScope.requestOpen({ id: siblingId })
           return
         }
       }
 
-      setActive(false)
+      closeFromPointer()
     },
     triggerRef,
   })
+
+  useEffect(() => {
+    if (!isSubmenu) {
+      return
+    }
+
+    return parentPopup.submenuScope.register({
+      id: contentId,
+      closeBranch: closeFromPointer,
+      isPointerProtected: pointerIntent.isProtected,
+      open: openFromParent,
+    })
+  }, [
+    closeFromPointer,
+    contentId,
+    isSubmenu,
+    openFromParent,
+    parentPopup,
+    pointerIntent.isProtected,
+  ])
 
   // /////////////////////////////////////
   // Position Calculation

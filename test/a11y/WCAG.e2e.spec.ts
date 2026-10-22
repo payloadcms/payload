@@ -2434,6 +2434,18 @@ test.describe('WCAG 2.2 Level AA', () => {
       await page.waitForTimeout(400)
       await expect(submenu).toBeVisible()
 
+      const optionBox = (await submenu.getByRole('menuitemradio').last().boundingBox())!
+      const returnX = optionBox.x + optionBox.width / 2
+      const returnY = optionBox.y + optionBox.height / 2
+
+      for (let step = 1; step <= 40; step++) {
+        await page.mouse.move(
+          returnX + ((startX - returnX) * step) / 40,
+          returnY + ((startY - returnY) * step) / 40,
+        )
+        await page.waitForTimeout(20)
+        await expect(theme).toHaveAttribute('aria-expanded', 'true')
+      }
       await language.hover()
       await expect(language).toHaveAttribute('aria-expanded', 'true')
       await expect(theme).toHaveAttribute('aria-expanded', 'false')
@@ -5060,7 +5072,18 @@ test.describe('WCAG 2.2 Level AA', () => {
       await language.press('Enter')
       const languageOption = page.getByRole('menuitemradio').first()
       await expect(languageOption).toBeFocused()
+      const optionBox = (await languageOption.boundingBox())!
+
+      await page.mouse.move(optionBox.x + optionBox.width / 2, optionBox.y + optionBox.height / 2)
+      await page.mouse.move(0, 0)
+      await expect(language).toHaveAttribute('aria-expanded', 'true')
       await languageOption.press('Escape')
+      await expect(language).toBeFocused()
+
+      await language.press('Enter')
+      await expect(languageOption).toBeFocused()
+      await theme.hover()
+      await expect(theme).toHaveAttribute('aria-expanded', 'true')
       await expect(language).toBeFocused()
     })
 
