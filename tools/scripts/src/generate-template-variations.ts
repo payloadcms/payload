@@ -15,6 +15,7 @@ import { PROJECT_ROOT, TEMPLATES_DIR } from '@tools/constants'
 import chalk from 'chalk'
 import { execSync } from 'child_process'
 import { configurePayloadConfig } from 'create-payload-app/lib/configure-payload-config.js'
+import { ensurePnpmBuildApprovals } from 'create-payload-app/lib/configure-pnpm-builds.js'
 import { copyRecursiveSync } from 'create-payload-app/utils/copy-recursive-sync.js'
 import minimist from 'minimist'
 import * as fs from 'node:fs/promises'
@@ -329,10 +330,9 @@ async function main() {
      * workspace root; it's removed before commit so the generated template ships unchanged.
      * dangerouslyAllowAllBuilds runs every dependency's build script: this is throwaway generation
      * tooling, not a shipped config, so there's no allowlist to drift out of sync with the templates'
-     * deps (e.g. the d1 variant's `workerd`). The install always runs under v11 here — the vercel
-     * variants' pnpm@10 packageManager pin is added after install — so package.json#pnpm is ignored
-     * and dangerouslyAllowAllBuilds can't conflict with its onlyBuiltDependencies. verifyDepsBeforeRun
-     * stops v11 re-installing before the later `pnpm generate:*`/`build` runs.
+     * deps (e.g. the d1 variant's `workerd`). The vercel variants' packageManager pin and shipped
+     * build approvals are only written after install, so they can't conflict with this config.
+     * verifyDepsBeforeRun stops v11 re-installing before the later `pnpm generate:*`/`build` runs.
      */
     if (!workspace) {
       await fs.writeFile(
@@ -411,6 +411,13 @@ async function main() {
       await fs.rm(path.join(destDir, 'pnpm-workspace.yaml'), { force: true })
     }
 
+    // Vercel deploys clone the template as-is instead of scaffolding it through create-payload-app,
+    // so ship the pnpm v11 build approvals create-payload-app would otherwise write. Without them,
+    // the install fails with ERR_PNPM_IGNORED_BUILDS.
+    if (targetDeployment === 'vercel') {
+      await ensurePnpmBuildApprovals({ packageManager: 'pnpm', projectDir: destDir })
+    }
+
     // TODO: Email?
 
     // TODO: Sharp?
@@ -476,9 +483,12 @@ async function handleDeploymentTarget({
       delete packageJson.engines.pnpm
     }
 
-    const pnpmVersion = await getLatestPackageVersion({ packageName: 'pnpm' })
+    // Pin the pnpm version the monorepo uses, which the templates are generated and tested with
+    const rootPackageJson = JSON.parse(
+      await fs.readFile(path.resolve(PROJECT_ROOT, 'package.json'), 'utf8'),
+    )
 
-    packageJson.packageManager = `pnpm@${pnpmVersion}`
+    packageJson.packageManager = rootPackageJson.packageManager
 
     await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2))
   }
@@ -624,44 +634,4 @@ async function bumpPluginTemplate(payloadVersion: string) {
     templateDir: pluginDir,
     latestVersion: payloadVersion,
   })
-}
-
-/**
- * Fetches the latest version of a package from the NPM registry.
- *
- * Used in determining the latest version of Payload to use in the generated templates.
- */
-async function getLatestPackageVersion({
-  packageName = 'payload',
-}: {
-  /**
-   * Package name to fetch the latest version for based on the NPM registry URL
-   *
-   * Eg. for `'payload'`, it will fetch the version from `https://registry.npmjs.org/payload`
-   *
-   * @default 'payload'
-   */
-  packageName?: string
-}) {
-  try {
-    const response = await fetch(`https://registry.npmjs.org/-/package/${packageName}/dist-tags`)
-    const data = await response.json()
-
-    // Monster chaining for type safety just checking for data.latest
-    const latestVersion =
-      data &&
-      typeof data === 'object' &&
-      'latest' in data &&
-      data.latest &&
-      typeof data.latest === 'string'
-        ? data.latest
-        : null
-
-    log(`Found latest version of ${packageName}: ${latestVersion}`)
-
-    return latestVersion
-  } catch (error) {
-    console.error('Error fetching Payload version:', error)
-    throw error
-  }
 }

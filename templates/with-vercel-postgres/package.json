@@ -57,5 +57,5 @@
       "unrs-resolver"
     ]
   },
-  "packageManager": "pnpm@12.15.0"
+  "packageManager": "pnpm@11.28.6"
 }
