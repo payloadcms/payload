@@ -170,10 +170,16 @@ const isInsideSafeArea = ({
   pointer: PointerPosition
   points: PointerPosition[]
 }) =>
-  points.every(
-    (point, index) =>
-      getCrossProduct({ a: point, b: points[(index + 1) % points.length], point: pointer }) >= 0,
-  )
+  points.every((edgeStart, index) => {
+    const edgeEnd = points[(index + 1) % points.length]
+    const edgeX = edgeEnd.x - edgeStart.x
+    const edgeY = edgeEnd.y - edgeStart.y
+    const pointerX = pointer.x - edgeStart.x
+    const pointerY = pointer.y - edgeStart.y
+
+    // An inside point lies on the inner side of every boundary edge.
+    return edgeX * pointerY - edgeY * pointerX >= 0
+  })
 
 // The convex hull covers the whole destination, allowing return paths to enter
 // through its top or bottom as well as its nearest edge.
@@ -190,10 +196,19 @@ const getSafeAreaPoints = ({ rect, start }: { rect: DOMRect; start: PointerPosit
     const edge: PointerPosition[] = []
 
     for (const point of orderedPoints) {
-      while (
-        edge.length > 1 &&
-        getCrossProduct({ a: edge[edge.length - 2], b: edge[edge.length - 1], point }) <= 0
-      ) {
+      while (edge.length > 1) {
+        const previous = edge[edge.length - 2]
+        const corner = edge[edge.length - 1]
+        const edgeX = corner.x - previous.x
+        const edgeY = corner.y - previous.y
+        const pointX = point.x - previous.x
+        const pointY = point.y - previous.y
+        const shouldRemoveCorner = edgeX * pointY - edgeY * pointX <= 0
+
+        // Remove corners that bend into the area or lie on a straight edge.
+        if (!shouldRemoveCorner) {
+          break
+        }
         edge.pop()
       }
       edge.push(point)
@@ -206,13 +221,3 @@ const getSafeAreaPoints = ({ rect, start }: { rect: DOMRect; start: PointerPosit
     ...getOuterEdge({ orderedPoints: [...points].reverse() }),
   ]
 }
-
-const getCrossProduct = ({
-  a,
-  b,
-  point,
-}: {
-  a: PointerPosition
-  b: PointerPosition
-  point: PointerPosition
-}) => (b.x - a.x) * (point.y - a.y) - (b.y - a.y) * (point.x - a.x)
