@@ -14,6 +14,8 @@ export interface File {
   clientUploadContext?: unknown
   filename: string
   filesize: number
+  /** Configured image-size name. Undefined for the original file. */
+  imageSizeName?: string
   mimeType: string
   tempFilePath?: string
 }
