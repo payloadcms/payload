@@ -185,6 +185,8 @@ export const generateFileData = async <T>({
   const staticPath = staticDir
 
   const incomingFileData: Document = isDuplicating ? originalDoc : data
+  // When duplicating, the source document is the base and the caller's `data` overrides it
+  const resultData = isDuplicating ? { ...originalDoc, ...data } : data
   const currentFileData = (operation === 'update' ? originalDoc : incomingFileData) as
     | FileData
     | undefined
@@ -270,7 +272,7 @@ export const generateFileData = async <T>({
     }
 
     return {
-      data: incomingFileData!,
+      data: resultData,
       files: [],
     }
   }
@@ -293,7 +295,7 @@ export const generateFileData = async <T>({
     await fs.mkdir(staticPath!, { recursive: true })
   }
 
-  let newData = incomingFileData as T
+  let newData = resultData
   const filesToSave: FileToSave[] = []
   const fileData: Partial<FileData> = {}
   const crop = uploadEdits?.crop
@@ -806,8 +808,8 @@ function parseUploadEditsFromReqOrIncomingData(args: {
 
     if (isDuplicating) {
       uploadEdits.focalPoint = {
-        x: incomingData?.focalX || origDoc.focalX!,
-        y: incomingData?.focalY || origDoc.focalY!,
+        x: incomingData?.focalX ?? origDoc.focalX!,
+        y: incomingData?.focalY ?? origDoc.focalY!,
       }
       return uploadEdits
     }
