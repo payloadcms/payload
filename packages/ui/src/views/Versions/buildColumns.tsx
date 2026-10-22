@@ -17,6 +17,7 @@ import {
   VersionsAutosaveCell as AutosaveCell,
   VersionsCreatedAtCell as CreatedAtCell,
   VersionsIDCell as IDCell,
+  VersionsUpdatedByCell as UpdatedByCell,
   SortColumn,
 } from '../../exports/client/index.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
@@ -73,6 +74,22 @@ export const buildVersionColumns = ({
       }),
     },
   ]
+
+  if (entityConfig?.authorship?.updatedBy) {
+    columns.push({
+      accessor: 'version.updatedBy',
+      active: true,
+      field: {
+        name: '',
+        type: 'relationship',
+      },
+      Heading: <SortColumn Label={t('general:updatedBy')} name="version.updatedBy" />,
+      renderedCells: docs.map((doc, i) => {
+        const updatedBy = (doc as any).version?.updatedBy ?? null
+        return <UpdatedByCell key={i} updatedBy={updatedBy} />
+      }),
+    })
+  }
 
   if (hasDraftsEnabled(entityConfig)) {
     columns.push({
