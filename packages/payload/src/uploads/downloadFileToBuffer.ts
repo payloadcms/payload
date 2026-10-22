@@ -91,7 +91,7 @@ export const downloadFileToBuffer = async ({ data, req, uploadConfig }: Args): P
       name: filename,
       data: Buffer.from(data),
       mimetype: response.headers.get('content-type') || undefined!,
-      size: Number(response.headers.get('content-length')) || 0,
+      size: data.byteLength,
     }
   }
 
