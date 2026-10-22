@@ -1,6 +1,9 @@
 import type { PayloadRequest } from '../../../types/index.js'
 import type { BranchHeadID } from '../types.js'
 
+import { forkBranchReadRequest } from '../../../utilities/createBranchReadRequest.js'
+import { inheritBranchReadContext } from './branchReadContext.js'
+
 const selections = new WeakMap<object, BranchHeadID>()
 
 /** Trusted internal selection; deliberately absent from public options and request.context. */
@@ -19,6 +22,17 @@ export const createSelectedBranchRequest = ({
   }
   if (branchID === 'main') {
     throw new Error('A working selection cannot target main; use the publication intent.')
+  }
+  const view = createBranchOperationRequest({ req })
+  selections.set(view, branchID)
+  return view
+}
+
+/** Registered operation fork shared by distinct read and working-write intents. */
+export const createBranchOperationRequest = ({ req }: { req: PayloadRequest }): PayloadRequest => {
+  const rawFork = forkBranchReadRequest({ req })
+  if (rawFork !== req) {
+    return rawFork as PayloadRequest
   }
   const overrides = Object.assign(Object.create(Object.getPrototypeOf(req)), {
     context: { ...req.context },
@@ -73,7 +87,8 @@ export const createSelectedBranchRequest = ({
       return Reflect.set(target, property, value)
     },
   })
-  selections.set(view, branchID)
+  inheritSelectedBranch({ source: req, target: view })
+  inheritBranchReadContext({ source: req, target: view })
   return view
 }
 
@@ -101,3 +116,16 @@ export const forkSelectedBranchRequest = ({
 
 export const isWorkingBranchSelected = ({ req }: { req?: Partial<PayloadRequest> }): boolean =>
   getSelectedBranch({ req }) !== undefined
+
+export const inheritSelectedBranch = ({
+  source,
+  target,
+}: {
+  source: Partial<PayloadRequest>
+  target: PayloadRequest
+}): void => {
+  const branchID = selections.get(source)
+  if (branchID !== undefined) {
+    selections.set(target, branchID)
+  }
+}

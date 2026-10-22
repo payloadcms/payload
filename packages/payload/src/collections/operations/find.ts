@@ -27,6 +27,8 @@ import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.j
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { assertBranchReadOperationRequest } from '../../versions/branches/operations/branchReadContext.js'
+import { resolveBranchCollectionRead } from '../../versions/branches/operations/resolveBranchReadContext.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
@@ -63,6 +65,10 @@ export const findOperation = async <
 >(
   incomingArgs: Arguments,
 ): Promise<PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>> => {
+  const branchReadSource = {
+    collection: incomingArgs.collection.config.slug,
+    req: incomingArgs.req,
+  }
   let args = incomingArgs
 
   // /////////////////////////////////////
@@ -74,6 +80,13 @@ export const findOperation = async <
     collection: args.collection.config,
     operation: 'read',
     overrideAccess: args.overrideAccess!,
+  })
+
+  assertBranchReadOperationRequest({
+    source: branchReadSource.req,
+    sourceCollection: branchReadSource.collection,
+    target: args.req,
+    targetCollection: args.collection.config.slug,
   })
 
   const {
@@ -118,9 +131,48 @@ export const findOperation = async <
   // Access
   // /////////////////////////////////////
 
+  const branchReadAdmission = await resolveBranchCollectionRead({
+    collection: collectionConfig.slug,
+    depth,
+    disableErrors,
+    draft: draftsEnabled,
+    kind: 'find',
+    native: {
+      joins: req.payloadAPI === 'GraphQL' ? false : joins,
+      limit: limit ?? (pagination ? 10 : 0),
+      locale: locale!,
+      page: page || 1,
+      pagination: pagination && limit !== 0,
+      select,
+      sort: incomingSort || collectionConfig.defaultSort,
+      where: appendNonTrashedFilter({
+        enableTrash: collectionConfig.trash,
+        trash,
+        where: where ?? {},
+      }),
+    },
+    overrideAccess,
+    req,
+    showHiddenFields,
+  })
+  const branchRead = branchReadAdmission?.legacy ? null : branchReadAdmission
+  if (branchRead?.denied) {
+    return {
+      docs: [],
+      hasNextPage: false,
+      hasPrevPage: false,
+      limit: limit!,
+      nextPage: null,
+      page: 1,
+      pagingCounter: 1,
+      prevPage: null,
+      totalDocs: 0,
+      totalPages: 1,
+    }
+  }
   let accessResult: AccessResult
 
-  if (!overrideAccess) {
+  if (!overrideAccess && !branchRead) {
     accessResult = await executeAccess(
       { slug: collectionConfig.slug, disableErrors, req },
       collectionConfig.access.read,
@@ -168,21 +220,27 @@ export const findOperation = async <
     sort: incomingSort || collectionConfig.defaultSort,
   })
 
-  await validateSortQuery({
-    collectionConfig,
-    overrideAccess: overrideAccess!,
-    req,
-    sort,
-  })
+  if (!branchRead) {
+    await validateSortQuery({
+      collectionConfig,
+      overrideAccess: overrideAccess!,
+      req,
+      sort,
+    })
+  }
 
-  const sanitizedJoins = await sanitizeJoinQuery({
-    collectionConfig,
-    joins,
-    overrideAccess: overrideAccess!,
-    req,
-  })
+  const sanitizedJoins = branchRead
+    ? false
+    : await sanitizeJoinQuery({
+        collectionConfig,
+        joins,
+        overrideAccess: overrideAccess!,
+        req,
+      })
 
-  if (hasDraftsEnabled(collectionConfig) && draftsEnabled) {
+  if (branchRead) {
+    result = branchRead.result
+  } else if (hasDraftsEnabled(collectionConfig) && draftsEnabled) {
     fullWhere = appendVersionToQueryKey(fullWhere)
 
     await validateQueryPaths({
@@ -230,6 +288,8 @@ export const findOperation = async <
       where: fullWhere,
     })
   }
+
+  await branchReadAdmission?.assertLegacy?.()
 
   // /////////////////////////////////////
   // Add collection property for auth collections

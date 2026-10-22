@@ -18,6 +18,8 @@ import { relationshipPopulationPromise } from '../../fields/hooks/afterRead/rela
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { getFieldByPath } from '../../utilities/getFieldByPath.js'
 import { httpStatus } from '../../utilities/httpStatus.js'
+import { assertBranchReadOperationRequest } from '../../versions/branches/operations/branchReadContext.js'
+import { resolveBranchCollectionRead } from '../../versions/branches/operations/resolveBranchReadContext.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
@@ -58,6 +60,10 @@ const getEmptyResult = ({
 export const findDistinctOperation = async (
   incomingArgs: Arguments,
 ): Promise<PaginatedDistinctDocs<Record<string, unknown>>> => {
+  const branchReadSource = {
+    collection: incomingArgs.collection.config.slug,
+    req: incomingArgs.req,
+  }
   let args = incomingArgs
 
   // /////////////////////////////////////
@@ -69,6 +75,13 @@ export const findDistinctOperation = async (
     collection: args.collection.config,
     operation: 'readDistinct',
     overrideAccess: args.overrideAccess!,
+  })
+
+  assertBranchReadOperationRequest({
+    source: branchReadSource.req,
+    sourceCollection: branchReadSource.collection,
+    target: args.req,
+    targetCollection: args.collection.config.slug,
   })
 
   const {
@@ -88,9 +101,45 @@ export const findDistinctOperation = async (
   // Access
   // /////////////////////////////////////
 
+  const branchField = getFieldByPath({
+    config: payload.config,
+    fields: collectionConfig.flattenedFields,
+    includeRelationships: true,
+    path: args.field,
+  })?.field
+  const branchFieldPath =
+    branchField && 'virtual' in branchField && typeof branchField.virtual === 'string'
+      ? branchField.virtual
+      : args.field
+  const branchReadAdmission = await resolveBranchCollectionRead({
+    collection: collectionConfig.slug,
+    depth: args.depth,
+    disableErrors,
+    kind: 'distinct',
+    native: {
+      field: branchFieldPath,
+      limit: args.limit,
+      locale: locale!,
+      page: args.page,
+      sort: args.sort,
+      where: appendNonTrashedFilter({
+        enableTrash: collectionConfig.trash,
+        trash,
+        where: where ?? {},
+      }),
+    },
+    originalField: args.field,
+    overrideAccess,
+    req,
+    showHiddenFields,
+  })
+  const branchRead = branchReadAdmission?.legacy ? null : branchReadAdmission
+  if (branchRead?.denied) {
+    return getEmptyResult({ limit: args.limit })
+  }
   let accessResult: AccessResult
 
-  if (!overrideAccess) {
+  if (!overrideAccess && !branchRead) {
     accessResult = await executeAccess(
       { slug: collectionConfig.slug, disableErrors, req },
       collectionConfig.access.read,
@@ -143,7 +192,7 @@ export const findDistinctOperation = async (
     throw new Forbidden(req.t)
   }
 
-  if (fieldResult.field.access?.read) {
+  if (!branchRead && fieldResult.field.access?.read) {
     const hasAccess = await fieldResult.field.access.read({
       collection: collectionConfig,
       req,
@@ -153,7 +202,7 @@ export const findDistinctOperation = async (
     }
   }
 
-  if (!overrideAccess) {
+  if (!overrideAccess && !branchRead) {
     const paths = getLocalizedPaths({
       collectionSlug: collectionConfig.slug,
       fields: collectionConfig.flattenedFields,
@@ -245,7 +294,7 @@ export const findDistinctOperation = async (
     })
   }
 
-  if ('virtual' in fieldResult.field && fieldResult.field.virtual) {
+  if (!branchRead && 'virtual' in fieldResult.field && fieldResult.field.virtual) {
     if (typeof fieldResult.field.virtual !== 'string') {
       throw new APIError(
         `Cannot findDistinct by a virtual field that isn't linked to a relationship field.`,
@@ -289,6 +338,8 @@ export const findDistinctOperation = async (
       where,
     })
 
+    await branchReadAdmission?.assertLegacy?.()
+
     for (const val of result.values) {
       val[args.field] = val[path]
       delete val[path]
@@ -297,18 +348,27 @@ export const findDistinctOperation = async (
     return result
   }
 
-  let result = await payload.db.findDistinct({
-    collection: collectionConfig.slug,
-    field: args.field,
-    limit: args.limit,
-    locale: locale!,
-    page: args.page,
-    relatedAccess: relatedAccessByPath,
-    req,
-    sort: args.sort,
-    where: fullWhere,
-  })
+  let result = branchRead
+    ? branchRead.result
+    : await payload.db.findDistinct({
+        collection: collectionConfig.slug,
+        field: args.field,
+        limit: args.limit,
+        locale: locale!,
+        page: args.page,
+        relatedAccess: relatedAccessByPath,
+        req,
+        sort: args.sort,
+        where: fullWhere,
+      })
 
+  await branchReadAdmission?.assertLegacy?.()
+
+  if (branchRead && branchFieldPath !== args.field) {
+    result.values = result.values.map((value: Record<string, unknown>) => ({
+      [args.field]: value[branchFieldPath],
+    }))
+  }
   if (
     (fieldResult.field.type === 'relationship' || fieldResult.field.type === 'upload') &&
     args.depth

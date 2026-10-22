@@ -3,20 +3,15 @@ import { randomUUID } from 'node:crypto'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { PayloadRequest } from '../../../types/index.js'
+import type { BranchWriteCutover } from '../operations/readBranchCutover.js'
 import type { BranchStorageTarget } from '../storage/branchStorage.js'
 import type { BranchContentScope, BranchHeadID, BranchHeadToken } from '../types.js'
 
 import { areBranchHeadTokensEqual } from '../compareBranchHeads.js'
+import { readBranchCutover } from '../operations/readBranchCutover.js'
 import { getSelectedBranch, isWorkingBranchSelected } from '../operations/selectedBranchContext.js'
 import { readBranchHead, readBranchHeads } from '../storage/branchHeadStore.js'
 import { assertBranchTransaction } from '../storage/branchStorage.js'
-
-type BranchWriteCutover = {
-  collection: string
-  generation: number
-  id: number | string
-  migrationID: string
-}
 
 export type BranchWriteObservation = {
   bases: readonly { base: BranchHeadToken | null; scope: BranchContentScope }[]
@@ -44,7 +39,7 @@ export const prepareBranchWrite = async ({
 }): Promise<BranchWriteObservation | null> => {
   const entity = collection ?? global
 
-  const cutover = entity && req ? await readBranchWriteCutover({ entity, req }) : null
+  const cutover = entity && req ? await readBranchCutover({ entity, req }) : null
 
   if (!req || !entity || !cutover) {
     if (isWorkingBranchSelected({ req })) {
@@ -124,7 +119,7 @@ export const prepareBranchWrite = async ({
 export const isBranchWriteEngineActive = async (args: {
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   req?: PayloadRequest
-}): Promise<boolean> => Boolean(await readBranchWriteCutover(args))
+}): Promise<boolean> => Boolean(await readBranchCutover(args))
 
 /** Native row dependency fences cutover/rollback against all writes in this caller transaction. */
 export const assertBranchWriteCutover = async ({
@@ -153,62 +148,5 @@ export const assertBranchWriteCutover = async ({
 
   if (!locked) {
     throw new Error('Authoritative branch cutover changed during the operation.')
-  }
-}
-
-const readBranchWriteCutover = async ({
-  entity,
-  req,
-}: {
-  entity: SanitizedCollectionConfig | SanitizedGlobalConfig
-  req?: PayloadRequest
-}): Promise<BranchWriteCutover | null> => {
-  const storage = entity.custom?.branchStorage
-  const cutoverSlug = storage?.cutover
-
-  if (!req || typeof cutoverSlug !== 'string' || !entity.custom?.branchQueryStorage) {
-    return null
-  }
-  const marker = req.payload.collections[cutoverSlug]?.config.custom?.branchCutoverStorage
-  const headMarker = req.payload.collections[storage.heads]?.config.custom?.branchHeadStorage
-  const isCollection = req.payload.collections[entity.slug]?.config === entity
-
-  if (
-    !marker ||
-    !headMarker ||
-    marker.parentCollection !== (isCollection ? entity.slug : undefined) ||
-    marker.globalSlug !== (isCollection ? undefined : entity.slug) ||
-    headMarker.parentCollection !== (isCollection ? entity.slug : null) ||
-    headMarker.globalSlug !== (isCollection ? null : entity.slug)
-  ) {
-    return null
-  }
-  const cutover = await req.payload.db.findOne<{
-    generation: number
-    id: number | string
-    isActivated: boolean
-    migrationID: string
-    schemaGeneration: number
-  }>({
-    collection: cutoverSlug,
-    req,
-    where: { singleton: { equals: 'authoritative' } },
-  })
-
-  if (!cutover) {
-    return null
-  }
-  if (cutover.schemaGeneration !== 1 || cutover.isActivated !== true) {
-    throw new Error('The authoritative branch cutover is inactive or unsupported.')
-  }
-  if (!Number.isSafeInteger(cutover.generation) || cutover.generation < 1 || !cutover.migrationID) {
-    throw new Error('The authoritative branch cutover receipt is invalid.')
-  }
-
-  return {
-    id: cutover.id,
-    collection: cutoverSlug,
-    generation: cutover.generation,
-    migrationID: cutover.migrationID,
   }
 }

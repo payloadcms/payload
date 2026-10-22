@@ -2,6 +2,7 @@ import type { CountArgs, FindDistinctArgs } from '../../../database/types.js'
 import type { PayloadRequest } from '../../../types/index.js'
 import type { BranchHeadID } from '../types.js'
 
+import { consumeBranchOriginalPolicy } from '../operations/branchOriginalPolicy.js'
 import {
   compileBranchProjectionPath,
   compileBranchProjectionSort,
@@ -10,13 +11,25 @@ import {
 import { prepareBranchContentQuery } from './queryBranchContent.js'
 import { withBranchReadSnapshot } from './withBranchReadSnapshot.js'
 
-type BranchArgs = { branchID: BranchHeadID; overrideAccess?: boolean; req: PayloadRequest }
+type BranchArgs = {
+  branchID: BranchHeadID
+  originalAccess?: object
+  originalPolicy?: object
+  overrideAccess?: boolean
+  req: PayloadRequest
+}
 
 /** Count the native effective relation; never fetch content IDs to count in core. */
 export const countBranchContent = async (args: BranchArgs & Omit<CountArgs, 'req'>) => {
+  const originalAccess = consumeBranchOriginalPolicy({
+    branchID: args.branchID,
+    collection: args.collection,
+    policy: args.originalPolicy,
+    req: args.req,
+  })
   return withBranchReadSnapshot({
     locale: args.locale,
-    read: ({ req }) => countRawBranchContent({ ...args, req }),
+    read: ({ req }) => countRawBranchContent({ ...args, originalAccess, req }),
     req: args.req,
   })
 }
@@ -38,9 +51,15 @@ const countRawBranchContent = async (args: BranchArgs & Omit<CountArgs, 'req'>) 
 export const findDistinctBranchContent = async (
   args: BranchArgs & Omit<FindDistinctArgs, 'req'>,
 ) => {
+  const originalAccess = consumeBranchOriginalPolicy({
+    branchID: args.branchID,
+    collection: args.collection,
+    policy: args.originalPolicy,
+    req: args.req,
+  })
   return withBranchReadSnapshot({
     locale: args.locale,
-    read: ({ req }) => findRawDistinctBranchContent({ ...args, req }),
+    read: ({ req }) => findRawDistinctBranchContent({ ...args, originalAccess, req }),
     req: args.req,
   })
 }

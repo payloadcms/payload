@@ -2,12 +2,14 @@ import type { SanitizedCollectionConfig } from '../../collections/config/types.j
 import type { FlattenedField } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
+import type { EntityPolicies } from './types.js'
 
 import { getLocalizedPaths } from '../getLocalizedPaths.js'
 import { validateQueryPaths } from './validateQueryPaths.js'
 
 type Args = {
   overrideAccess: boolean
+  policies?: EntityPolicies
   req: PayloadRequest
   sort?: Sort
   versionFields?: FlattenedField[]
@@ -30,6 +32,7 @@ export const validateSortQuery = async ({
   collectionConfig,
   globalConfig,
   overrideAccess,
+  policies,
   req,
   sort,
   versionFields,
@@ -67,6 +70,7 @@ export const validateSortQuery = async ({
     await validateQueryPaths({
       collectionConfig,
       overrideAccess,
+      policies,
       req,
       versionFields,
       where,
@@ -75,6 +79,7 @@ export const validateSortQuery = async ({
     await validateQueryPaths({
       globalConfig,
       overrideAccess,
+      policies,
       req,
       versionFields,
       where,

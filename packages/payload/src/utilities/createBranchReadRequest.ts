@@ -1,6 +1,9 @@
 import type { Payload } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
+import { inheritBranchReadContext } from '../versions/branches/operations/branchReadContext.js'
+import { inheritSelectedBranch } from '../versions/branches/operations/selectedBranchContext.js'
+
 const reads = new Set([
   'auth',
   'count',
@@ -144,17 +147,23 @@ export const createBranchReadRequest = ({
     value: overrides.transactionID,
     writable: false,
   })
+  Object.defineProperty(overrides, 'payload', {
+    configurable: false,
+    enumerable: true,
+    value: scopedPayload,
+    writable: false,
+  })
   const deleted = new Set<PropertyKey>()
   const view = new Proxy(overrides as unknown as PayloadRequest, {
     defineProperty: (_target, property, descriptor) => {
-      if (property === 'transactionID') {
+      if (property === 'transactionID' || property === 'payload') {
         throw unsupportedPayloadProperty()
       }
       deleted.delete(property)
       return Reflect.defineProperty(overrides, property, descriptor)
     },
     deleteProperty: (_target, property) => {
-      if (property === 'transactionID') {
+      if (property === 'transactionID' || property === 'payload') {
         throw unsupportedPayloadProperty()
       }
       const isDeleted = Reflect.deleteProperty(overrides, property)
@@ -196,8 +205,8 @@ export const createBranchReadRequest = ({
         (property) => !deleted.has(property),
       ),
     set: (_target, property, value) => {
-      if (property === 'transactionID') {
-        if (!Object.is(value, overrides.transactionID)) {
+      if (property === 'transactionID' || property === 'payload') {
+        if (!Object.is(value, overrides[property])) {
           throw unsupportedPayloadProperty()
         }
         return true
@@ -208,6 +217,8 @@ export const createBranchReadRequest = ({
   })
 
   payloadViews.add(scopedPayload)
+  inheritSelectedBranch({ source: req, target: view })
+  inheritBranchReadContext({ source: req, target: view })
   requests.set(view, {
     assertActive,
     origin: requests.get(req)?.origin ?? req.payload,

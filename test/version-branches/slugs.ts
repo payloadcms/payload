@@ -10,3 +10,6 @@ export const queryTagsSlug = 'branch-query-tags'
 export const queryTextTagsSlug = 'branch-query-text-tags'
 export const scalarArticlesSlug = 'branch-scalar-articles'
 export const localizedStatusArticlesSlug = 'branch-localized-status-articles'
+
+export const readVirtualTagsSlug = 'read-virtual-tags'
+export const nestedReadArticlesSlug = 'branch-nested-read-articles'

@@ -39,6 +39,30 @@ export const buildCollectionSchema = ({
     schemaPath: `collection:${collection.slug}`,
   })
 
+  const identity = collection.custom?.branchIdentityStorage
+  const parent = identity?.parentCollection
+  if (
+    parent &&
+    payload.collections[parent]?.config.custom?.branchStorage?.identities === collection.slug
+  ) {
+    // Identity coordinates stay binary even when document queries use linguistic collation.
+    schema.removeIndex({ parent: 1 })
+    schema.index({ parent: 1 }, { collation: { locale: 'simple' }, unique: true })
+    const collation = payload.db.collation
+    if (collation) {
+      const locales = payload.config.localization ? payload.config.localization.localeCodes : ['en']
+      for (const locale of locales) {
+        schema.index(
+          { parent: 1 },
+          {
+            name: `branch_identity_parent_${locale}`,
+            collation: { locale, ...collation },
+          },
+        )
+      }
+    }
+  }
+
   if (Array.isArray(collection.upload.filenameCompoundIndex)) {
     const indexDefinition = collection.upload.filenameCompoundIndex.reduce<Record<string, 1>>(
       (acc, index) => {

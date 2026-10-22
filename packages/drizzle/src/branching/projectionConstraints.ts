@@ -21,9 +21,11 @@ export const getProjectionTarget = ({
   collection: string
 }) => {
   const original = adapter.payload.collections[collection]?.config
-  const projection = (adapter as ProjectionQueryAdapter)[projectionQueryContext]
-    ? original?.custom?.branchQueryStorage?.projection
-    : undefined
+  const context = (adapter as ProjectionQueryAdapter)[projectionQueryContext]
+  const projection =
+    context && !context.materializedCollections?.includes(collection)
+      ? original?.custom?.branchQueryStorage?.projection
+      : undefined
   const targetCollection = typeof projection === 'string' ? projection : collection
   const config = adapter.payload.collections[targetCollection]?.config
 
@@ -109,6 +111,7 @@ export const projectionRootConstraint = ({
       query = query[join.type ?? 'leftJoin'](join.table, join.condition)
     }
     return and(
+      materializedVisibilityConstraint({ adapter, collection, table }),
       exists(query.where(and(eq(policyTable.id, table['id']), predicate))),
       ...(config.custom?.branchProjectionStorage
         ? [
@@ -143,6 +146,7 @@ export const projectionRootConstraint = ({
   guardProjectionJoins({ adapter: nestedAdapter, joins: policyJoins, locale })
   joins.push(...policyJoins)
   return and(
+    materializedVisibilityConstraint({ adapter, collection, table }),
     predicate,
     ...(config.custom?.branchProjectionStorage
       ? [
@@ -215,6 +219,7 @@ export const projectionRelationConstraint = ({
     query.where(
       and(
         eq(table[target.idField], idColumn),
+        materializedVisibilityConstraint({ adapter, collection: target.collection, table }),
         ...(config.custom?.branchProjectionStorage
           ? [
               eq(table._branchProjection_branchKey, context.branchKey),
@@ -391,4 +396,33 @@ export const guardProjectionJoins = ({
   }
 
   return joins
+}
+
+/** Equality-correlated membership uses the registered unique identity-parent index. */
+const materializedVisibilityConstraint = ({
+  adapter,
+  collection,
+  table,
+}: {
+  adapter: DrizzleAdapter
+  collection: string
+  table: GenericTable
+}): SQL | undefined => {
+  const identityCollection = (adapter as ProjectionQueryAdapter)[projectionQueryContext]
+    ?.materializedVisibility?.[collection]
+  if (!identityCollection) {
+    return undefined
+  }
+  const tableName = adapter.tableNameMap.get(toSnakeCase(identityCollection))
+  const { newAliasTable: identity } = getTableAlias({ adapter, tableName })
+  const query = (adapter.drizzle as any)
+    .select({ id: identity.id })
+    .from(identity)
+    .where(
+      and(
+        eq(identity.parent, table['id']),
+        or(eq(identity.isPublished, true), eq(identity.isLegacyDraftVisible, true)),
+      ),
+    )
+  return exists(query)
 }

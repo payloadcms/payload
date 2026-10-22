@@ -1,5 +1,7 @@
 import type { Operation, PayloadRequest } from '../types/index.js'
 
+import { forkSelectedBranchRequest } from '../versions/branches/operations/selectedBranchContext.js'
+import { forkBranchReadRequest } from './createBranchReadRequest.js'
 import { isolateObjectProperty } from './isolateObjectProperty.js'
 
 /**
@@ -13,7 +15,10 @@ export function getAccessOperationRequest({
   operation: Operation
   req: PayloadRequest
 }): PayloadRequest {
-  const operationRequest = isolateObjectProperty(req, 'operation')
+  const scoped = forkBranchReadRequest({ req })
+  const selected = scoped === req ? forkSelectedBranchRequest({ req }) : scoped
+  const operationRequest =
+    selected === req ? isolateObjectProperty(req, 'operation') : (selected as PayloadRequest)
 
   operationRequest.operation = operation
 

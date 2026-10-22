@@ -67,8 +67,13 @@ export const findProjection: Find = async function (this: DrizzleAdapter, args) 
     ].map((name) => name.toLowerCase()),
   )
   const db = await getTransaction(this, args.req)
+  const hydrationAdapter = context?.rootAccess
+    ? (Object.assign(Object.create(this), {
+        [projectionQueryContext]: { ...context, rootAccess: undefined },
+      }) as DrizzleAdapter)
+    : this
   const relational = buildFindManyArgs({
-    adapter: this,
+    adapter: hydrationAdapter,
     collectionSlug: config.slug,
     depth: 0,
     draftsEnabled: false,

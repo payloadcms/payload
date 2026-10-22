@@ -6,6 +6,7 @@ import type { EntityPolicies, PathToQuery } from './types.js'
 
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { hasManyRelationshipOperatorSet, SAFE_FIELD_PATH_REGEX } from '../../types/constants.js'
+import { forkBranchReadRequest } from '../../utilities/createBranchReadRequest.js'
 import { getEntityPermissions } from '../../utilities/getEntityPermissions/getEntityPermissions.js'
 import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { getLocalizedPaths } from '../getLocalizedPaths.js'
@@ -183,7 +184,12 @@ export async function validateSearchParam({
               entityType: 'collection',
               fetchData: false,
               operations: ['read'],
-              req: isolateObjectProperty(req, 'transactionID'),
+              req: (() => {
+                const scoped = forkBranchReadRequest({ req })
+                return scoped === req
+                  ? isolateObjectProperty(req, 'transactionID')
+                  : (scoped as PayloadRequest)
+              })(),
             })
           }
 

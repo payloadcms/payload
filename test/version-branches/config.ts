@@ -1,6 +1,9 @@
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
 import { fileURLToPath } from 'node:url'
+
+import { readVirtualTagsSlug } from './slugs.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercise fail-closed derived projection state in the experimental fixture.
 import { buildBranchProjectionControlCollections } from '../../packages/payload/src/versions/branches/queries/buildBranchProjectionControlCollections.js'
@@ -13,6 +16,7 @@ import { databaseAdapter } from '../databaseAdapter.js'
 import { Articles } from './collections/Articles/index.js'
 import { FractionalIDs } from './collections/FractionalIDs/index.js'
 import { LocalizedStatusArticles } from './collections/LocalizedStatusArticles/index.js'
+import { NestedReadArticles } from './collections/NestedReadArticles/index.js'
 import { ProtectedArticles } from './collections/ProtectedArticles/index.js'
 import { QueryDocs } from './collections/QueryDocs/index.js'
 import { QueryTags } from './collections/QueryTags/index.js'
@@ -40,7 +44,14 @@ const selectedDatabaseAdapter = process.env.PAYLOAD_DATABASE?.startsWith('sqlite
     })
   : process.env.PAYLOAD_BRANCH_HEAD_WRAPPER === 'vercel-postgres'
     ? vercelPostgresAdapter({ pool: { connectionString: process.env.POSTGRES_URL } })
-    : databaseAdapter
+    : process.env.PAYLOAD_BRANCH_READ_COLLATION === 'true'
+      ? mongooseAdapter({
+          url: process.env.DATABASE_URL!,
+          allowIDOnCreate: true,
+          collation: { strength: 2 },
+          ensureIndexes: true,
+        })
+      : databaseAdapter
 
 export default buildConfigWithDefaults({
   config: {
@@ -49,6 +60,7 @@ export default buildConfigWithDefaults({
       registerBranchStorage({
         collections: [
           Articles,
+          NestedReadArticles,
           LocalizedStatusArticles,
           ScalarArticles,
           ProtectedArticles,
@@ -56,6 +68,15 @@ export default buildConfigWithDefaults({
           FractionalIDs,
           QueryDocs,
           QueryTags,
+          {
+            ...QueryTags,
+            access: { ...QueryTags.access },
+            slug: readVirtualTagsSlug,
+            fields: [
+              ...QueryTags.fields,
+              { name: 'ownerTitle', type: 'text', virtual: 'owner.title' },
+            ],
+          },
           QueryTextTags,
           ...projectionControlCollections,
         ],

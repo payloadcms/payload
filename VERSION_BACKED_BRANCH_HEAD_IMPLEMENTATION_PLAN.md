@@ -375,7 +375,7 @@ M1 implementation in `packages/payload/src/versions/branches` now covers interna
 
 Initial verification on Node 24.15.0: 47 focused unit tests passed; targeted oxlint, oxfmt, and strict standalone TypeScript checking passed. Two regression cases for matching inherited content failed before the ownership fix and passed afterward. These tests exercise the domain without database IO; they do not establish adapter atomicity, runtime API integration, migration correctness, or rendered accessibility.
 
-Current work: M3 independent correctness and native index/query-plan review passed under the reduced gate below. M4 persistence and selected-original slices are independently approved and published; public collection read routing is in progress. Public reads, autosave ownership and the remaining M4 requirements follow as separately reviewed slices. The internal engine does not enable the feature. Further timing optimization is deferred in favor of functional delivery.
+Current work: M3 independent correctness and native index/query-plan review passed under the reduced gate below. M4 persistence and selected-original slices are independently approved and published; public collection read routing has independent approval; public globals and explicit nested reads are next. Public reads, autosave ownership and the remaining M4 requirements follow as separately reviewed slices. The internal engine does not enable the feature. Further timing optimization is deferred in favor of functional delivery.
 
 ### Draft review stack
 
@@ -429,6 +429,7 @@ The stack starts at main. Each layer targets the preceding branch so reviewers s
 | 39 | [#18973](https://github.com/payloadcms/payload/pull/18973) | First M4 slice: migration-gated working-save persistence, native snapshots, guarded hooks and retention roots |
 | 40 | [#18974](https://github.com/payloadcms/payload/pull/18974) | Selected update/restore/bulk/global originals and named working writes, independently verified on three databases |
 | 41 | [#18975](https://github.com/payloadcms/payload/pull/18975) | Navigate accessibility tests through configured list columns; real production regression and independent criterion checks |
+| 42 | [#18978](https://github.com/payloadcms/payload/pull/18978) | Preserve numeric ID zero through genuine public updates and native SQL/Mongo row selection |
 
 Historical implementation state as of 2026-10-21 (superseded by the revised M3 signoff below):
 
@@ -571,3 +572,13 @@ Owner and independent reviewer each pass all 80 affected production criterion te
 Public update dispatch and by-ID validation treated numeric ID zero as missing. Native SQL ID resolution/upsert and Mongo filtering also lost zero, allowing a nominal update response without updating the intended row. A dedicated regression creates neighbor 1 before record 0, performs the genuine by-ID update, verifies permission arguments and both persisted records, and checks ordinary bulk/missing-selector behavior. A Drizzle relationship-filter case resolves row zero.
 
 Owner and independent reviewer each pass four SQLite and four PostgreSQL cases, plus three MongoDB cases with one intentional Drizzle-only skip. Six frozen files pass package reference typechecks, targeted formatting/lint and whitespace checks; existing lint warnings remain. Verification reads disable unrelated fixture virtual response joins; the actual public update stays genuine. This prerequisite permits direct ID-zero updates in the pending M4 caller-transaction proof; it does not complete public branch read routing.
+
+### M4 part 2B1 — public collection read acquisition
+
+The collection read slice distinguishes ordinary materialized bodies, managed drafts and explicit effective branch intent. A real first draft A followed by draft save B retains ordinary body A while draft reads return B. Named-only native anchors and missing identity metadata are excluded with indexed native identity membership, including through ordinary unversioned roots, joins, predicates, counts and distinct queries. Root authorization runs inside the pinned frame; target authorization remains separate. Query and field validators run before acquisition, trusted derivations preserve locale/fallback and caller transaction ownership, and final legacy acquisition receives a cutover-absence fence before outer hooks/output.
+
+Drizzle compiles generated reverse linkage independently from user target WHERE/sort while preserving visibility. Mongo retains binary unique identity coordinates and bounded configured-locale nonunique candidate indexes; exact byte membership prevents collated case-equivalent IDs from sharing visibility. The actual public aggregate explain selects the identity-parent candidate index. No timing benchmark was run.
+
+Owner and independent reviewer verification against 29 frozen files each passes 25 applicable SQLite and 25 PostgreSQL cases, each with one Mongo-only skip, all 26 Mongo cases under configured collation, 13 context units and core/Drizzle/Mongo typechecks, formatting/lint and whitespace checks. Independent review approves this bounded slice, with all 29 source hashes verified before and after execution. This is not activation or M4 completion: public globals, full population/loaders and the other M4 requirements remain gated.
+
+M9 must verify complete identity backfill and all encoded forward dependencies before activation. Activated receipts cannot revert to absence: retain durable authority/tombstones so absence fences cannot miss an activated-to-absent transition. Initial activation is an offline verified cutover with compatible processes, not rolling per-entity activation. Effective reads reject incomplete registered encoding dependencies before decoding; there is no silent native fallback or migration from unreleased PR17878 data.

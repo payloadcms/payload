@@ -10,6 +10,7 @@ import {
   consumeBranchOriginalPolicy,
   readBranchOriginalGrant,
 } from '../operations/branchOriginalPolicy.js'
+import { assertBranchReadBinding, getBranchReadContext } from '../operations/branchReadContext.js'
 import { collectOriginalReadTargets } from '../operations/collectOriginalReadTargets.js'
 import {
   decodeBranchProjectionDocument,
@@ -144,6 +145,7 @@ export const prepareBranchContentQuery = async ({
   overrideAccess?: boolean
   req: PayloadRequest
 } & Omit<FindArgs, 'collection' | 'req'>) => {
+  assertBranchReadBinding({ req })
   const originalGrant = readBranchOriginalGrant({ grant: originalAccess })
   const rootOperationWhere = originalGrant?.where
   overrideAccess = originalGrant?.overrideAccess ?? overrideAccess
@@ -213,10 +215,46 @@ export const prepareBranchContentQuery = async ({
       ? collectOriginalReadTargets({
           collection,
           req,
-          sort: args.observedSort ?? args.sort,
+          sort: [
+            ...(typeof (args.observedSort ?? args.sort) === 'string'
+              ? [args.observedSort ?? (args.sort as string)]
+              : (args.observedSort ?? args.sort ?? [])),
+            ...(args.observedField ? [args.observedField] : []),
+            ...Object.keys(args.observedJoins || {}),
+          ] as string[],
           where: args.where,
         })
       : undefined
+  if (originalReadTargets && args.observedJoins !== false) {
+    const config = req.payload.collections[collection]!.config
+    for (const definition of [
+      ...Object.values(config.joins ?? {}).flat(),
+      ...(config.polymorphicJoins ?? []),
+    ]) {
+      const options = args.observedJoins?.[definition.joinPath]
+      if (options === false) {
+        continue
+      }
+      const targets =
+        typeof definition.field.collection === 'string'
+          ? [definition.field.collection]
+          : definition.field.collection
+      for (const target of targets) {
+        originalReadTargets.add(target)
+        for (const observed of collectOriginalReadTargets({
+          collection: target,
+          req,
+          sort:
+            options?.sort ??
+            definition.field.defaultSort ??
+            req.payload.collections[target]!.config.defaultSort,
+          where: options?.where ?? definition.field.where,
+        })) {
+          originalReadTargets.add(observed)
+        }
+      }
+    }
+  }
   for (const slug of reachable) {
     const config = req.payload.collections[slug]!.config
     const control = config.custom?.branchQueryStorage as BranchQueryStorage | undefined
@@ -239,6 +277,7 @@ export const prepareBranchContentQuery = async ({
           ? {}
           : compileBranchProjectionWhere({ branchID, collection: slug, req, where: access })
   }
+  assertBranchReadBinding({ req })
   const scopes: BranchContentScope[] = [
     { type: 'shared' },
     ...[...requestedLocales].map((locale): BranchContentScope => ({ type: 'locale', locale })),
@@ -262,6 +301,8 @@ export const prepareBranchContentQuery = async ({
   return {
     context: {
       branchKey: encodeBranchProjectionBranchKey({ branchID }),
+      materializedCollections: getBranchReadContext({ req })?.materializedCollections,
+      materializedVisibility: getBranchReadContext({ req })?.materializedVisibility,
       ...(rootOperationWhere !== undefined
         ? {
             rootAccess: {
@@ -288,7 +329,7 @@ export const prepareBranchContentQuery = async ({
 }
 
 /** Finite schema graph; never inventories content IDs in application memory. */
-const getReachableCollections = ({
+export const getReachableCollections = ({
   collection,
   req,
 }: {

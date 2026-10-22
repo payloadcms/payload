@@ -185,7 +185,7 @@ export const queryBranchOriginalCandidates = async ({
   })
 
 /** Restore native presence and latest effective timestamps without changing content selection. */
-const normalizeBranchOriginal = async ({
+export const normalizeBranchOriginal = async ({
   branchID,
   doc,
   readSet,

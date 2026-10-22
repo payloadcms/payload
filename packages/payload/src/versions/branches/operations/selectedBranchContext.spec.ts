@@ -1,3 +1,14 @@
+import {
+  createBranchReadRequest,
+  isBranchReadRequest,
+  forkBranchReadRequest,
+  resolveBranchReadPayload,
+} from '../../../utilities/createBranchReadRequest.js'
+import {
+  createBranchReadIntent,
+  getBranchReadIntent,
+  assertBranchReadOperationRequest,
+} from './branchReadContext.js'
 import type { PayloadRequest } from '../../../types/index.js'
 
 import { describe, expect, it } from 'vitest'
@@ -52,6 +63,71 @@ describe('trusted working selections', () => {
     expect(() => createSelectedBranchRequest({ branchID: 'main', req: request() })).toThrow(
       'publication intent',
     )
+  })
+})
+
+describe('composite selected read request capabilities', () => {
+  it('should preserve both trusted registrations and revoke every derived native view', async () => {
+    const source = request()
+    const payload = { collections: {}, config: {}, db: {} } as PayloadRequest['payload']
+    source.payload = payload
+    let isActive = true
+    const scoped = createBranchReadRequest({
+      payload,
+      req: source,
+      assertActive: () => {
+        if (!isActive) throw new Error('expired read frame')
+      },
+    })
+    const selected = createSelectedBranchRequest({ branchID: 'staging', req: scoped })
+    const read = createBranchReadIntent({
+      branchID: 'main',
+      req: forkSelectedBranchRequest({ req: selected }) as PayloadRequest,
+    })
+    expect(isBranchReadRequest({ req: read })).toBe(true)
+    expect(getSelectedBranch({ req: read })).toBe('staging')
+    expect(getBranchReadIntent({ req: read })).toBe('main')
+    expect(read.url).toBe(source.url)
+    expect(await read.text()).toBe('')
+    expect(resolveBranchReadPayload({ payload, req: read })).toBe(read.payload)
+    expect(() => {
+      read.payload = payload
+    }).toThrow('read-only scoped Payload')
+    isActive = false
+    expect(() => forkBranchReadRequest({ req: read })).toThrow('expired read frame')
+    expect(source.transactionID).toBe('caller')
+  })
+
+  it('should leave ordinary outer operation requests writable while selecting main reads', () => {
+    const source = request()
+    const payload = { config: {}, collections: {}, db: {} } as PayloadRequest['payload']
+    source.payload = payload
+    const read = createBranchReadIntent({ branchID: 'main', req: source })
+    expect(read.payload).toBe(payload)
+    expect(getSelectedBranch({ req: read })).toBeUndefined()
+    read.locale = 'en'
+    expect(source.locale).toBe('fr')
+  })
+
+  it('should reject request copies and entity changes that drop the incoming read intent', () => {
+    const source = request()
+    const read = createBranchReadIntent({ branchID: 'main', req: source })
+    expect(() =>
+      assertBranchReadOperationRequest({
+        source: read,
+        target: { ...read },
+        sourceCollection: 'posts',
+        targetCollection: 'posts',
+      }),
+    ).toThrow('registered request')
+    expect(() =>
+      assertBranchReadOperationRequest({
+        source: read,
+        target: read,
+        sourceCollection: 'posts',
+        targetCollection: 'pages',
+      }),
+    ).toThrow('entity binding')
   })
 })
 

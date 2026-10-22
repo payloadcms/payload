@@ -1,7 +1,7 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
 
-import { count, sql } from 'drizzle-orm'
+import { and, count, sql } from 'drizzle-orm'
 import {
   appendVersionToQueryKey,
   buildVersionCollectionFields,
@@ -20,7 +20,10 @@ import type { ProjectionQueryAdapter } from '../branching/createProjectionQuerie
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
-import { projectionQueryContext } from '../branching/createProjectionQueries.js'
+import {
+  projectionCompilingAccess,
+  projectionQueryContext,
+} from '../branching/createProjectionQueries.js'
 import { getProjectionCollection, getProjectionTarget } from '../branching/projectionConstraints.js'
 import { buildQuery } from '../queries/buildQuery.js'
 import { getTableAlias } from '../queries/getTableAlias.js'
@@ -497,9 +500,11 @@ export const traverseFields = ({
             }
           }
 
+          const linkageWhere = joinQueryWhere
+          const hasProjectionContext = !!(adapter as ProjectionQueryAdapter)[projectionQueryContext]
           const targetWhere = preparedOptions?.[field.collection]?.where ?? where
           const targetSort = preparedOptions?.[field.collection]?.sort ?? sort
-          if (targetWhere && Object.keys(targetWhere).length) {
+          if (!hasProjectionContext && targetWhere && Object.keys(targetWhere).length) {
             joinQueryWhere = {
               and: [joinQueryWhere, targetWhere],
             }
@@ -523,7 +528,7 @@ export const traverseFields = ({
           const {
             orderBy,
             selectFields,
-            where: subQueryWhere,
+            where: targetQueryWhere,
           } = buildQuery({
             adapter,
             aliasTable: newAliasTable,
@@ -539,8 +544,30 @@ export const traverseFields = ({
                 })
               : targetSort,
             tableName: joinCollectionTableName,
-            where: joinQueryWhere,
+            where: hasProjectionContext ? targetWhere : joinQueryWhere,
           })
+
+          // Generated reverse linkage is structural, while caller predicates retain target access.
+          // Each compilation owns its joins so trusted linkage is never guarded a second time.
+          let subQueryWhere = targetQueryWhere
+          if (hasProjectionContext) {
+            const linkageJoins: BuildQueryJoinAliases = []
+            const linkageAdapter = Object.assign(Object.create(adapter), {
+              [projectionCompilingAccess]: true,
+            }) as DrizzleAdapter
+            const linkage = buildQuery({
+              adapter: linkageAdapter,
+              aliasTable: newAliasTable,
+              fields,
+              joins: linkageJoins,
+              locale,
+              parentIsLocalized,
+              tableName: joinCollectionTableName,
+              where: linkageWhere,
+            })
+            subQueryWhere = and(targetQueryWhere, linkage.where)
+            joins.push(...linkageJoins)
+          }
 
           for (let key in selectFields) {
             const val = selectFields[key]
@@ -550,6 +577,17 @@ export const traverseFields = ({
               key = key.split('.').pop()
               selectFields[key] = newAliasTable[key]
             }
+          }
+
+          if (hasProjectionContext) {
+            // Join output carries only identity and locale; sort traversal may select the same
+            // physical column under several paths, which is ambiguous in a PostgreSQL subquery.
+            for (const key of Object.keys(selectFields)) {
+              if (key !== '_locale') {
+                delete selectFields[key]
+              }
+            }
+            selectFields.id = newAliasTable.id
           }
 
           if (useDrafts) {

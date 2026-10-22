@@ -28,6 +28,8 @@ import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { assertBranchReadOperationRequest } from '../../versions/branches/operations/branchReadContext.js'
+import { resolveBranchCollectionRead } from '../../versions/branches/operations/resolveBranchReadContext.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
@@ -64,6 +66,10 @@ export const findByIDOperation = async <
 >(
   incomingArgs: FindByIDArgs,
 ): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> => {
+  const branchReadSource = {
+    collection: incomingArgs.collection.config.slug,
+    req: incomingArgs.req,
+  }
   let args = incomingArgs
 
   // /////////////////////////////////////
@@ -75,6 +81,13 @@ export const findByIDOperation = async <
     collection: args.collection.config,
     operation: 'read',
     overrideAccess: args.overrideAccess!,
+  })
+
+  assertBranchReadOperationRequest({
+    source: branchReadSource.req,
+    sourceCollection: branchReadSource.collection,
+    target: args.req,
+    targetCollection: args.collection.config.slug,
   })
 
   const {
@@ -113,15 +126,40 @@ export const findByIDOperation = async <
   // Access
   // /////////////////////////////////////
 
-  const accessResult = !overrideAccess
-    ? await executeAccess(
-        { id, slug: collectionConfig.slug, disableErrors, req },
-        collectionConfig.access.read,
-      )
-    : true
+  const branchReadAdmission = await resolveBranchCollectionRead({
+    id,
+    collection: collectionConfig.slug,
+    depth,
+    disableErrors,
+    draft: replaceWithVersion,
+    kind: 'find',
+    native: {
+      joins: req.payloadAPI === 'GraphQL' ? false : joins,
+      limit: 1,
+      locale: locale!,
+      pagination: false,
+      select,
+      where: appendNonTrashedFilter({
+        enableTrash: collectionConfig.trash,
+        trash,
+        where: { id: { equals: id } },
+      }),
+    },
+    overrideAccess,
+    req,
+    showHiddenFields,
+  })
+  const branchRead = branchReadAdmission?.legacy ? null : branchReadAdmission
+  const accessResult =
+    !overrideAccess && !branchRead
+      ? await executeAccess(
+          { id, slug: collectionConfig.slug, disableErrors, req },
+          collectionConfig.access.read,
+        )
+      : true
 
   // If errors are disabled, and access returns false, return null
-  if (accessResult === false) {
+  if (accessResult === false || branchRead?.denied) {
     return null!
   }
 
@@ -149,15 +187,17 @@ export const findByIDOperation = async <
     where: fullWhere,
   })
 
-  const sanitizedJoins = await sanitizeJoinQuery({
-    collectionConfig,
-    joins,
-    overrideAccess,
-    req,
-  })
+  const sanitizedJoins = branchRead
+    ? false
+    : await sanitizeJoinQuery({
+        collectionConfig,
+        joins,
+        overrideAccess,
+        req,
+      })
 
   // execute only if there's a custom ID and potentially overwriten access on id
-  if (req.payload.collections[collectionConfig.slug]!.customIDType) {
+  if (!branchRead && req.payload.collections[collectionConfig.slug]!.customIDType) {
     await validateQueryPaths({
       collectionConfig,
       overrideAccess,
@@ -197,7 +237,9 @@ export const findByIDOperation = async <
     where: fullWhere,
   }
 
-  if (shouldQueryDrafts) {
+  if (branchRead) {
+    docWithLocales = branchRead.result.docs[0]
+  } else if (shouldQueryDrafts) {
     query = appendVersionToQueryKey(fullWhere)
 
     await validateQueryPaths({
@@ -224,6 +266,7 @@ export const findByIDOperation = async <
     if (!docWithLocales) {
       const { docs: existingVersions } = await req.payload.db.queryDrafts({
         collection: collectionConfig.slug,
+        joins: false,
         limit: 1,
         locale: locale!,
         pagination: false,
@@ -241,15 +284,18 @@ export const findByIDOperation = async <
     docWithLocales = await req.payload.db.findOne(findOneArgs)
   }
 
-  if (!docWithLocales && !args.data) {
+  await branchReadAdmission?.assertLegacy?.()
+
+  if (!docWithLocales && (!args.data || branchRead)) {
     if (!disableErrors) {
       throw new NotFound(req.t)
     }
     return null!
   }
 
-  let result: DataFromCollectionSlug<TSlug> =
-    (args.data as DataFromCollectionSlug<TSlug>) ?? docWithLocales!
+  let result: DataFromCollectionSlug<TSlug> = branchRead
+    ? docWithLocales!
+    : ((args.data as DataFromCollectionSlug<TSlug>) ?? docWithLocales!)
 
   // /////////////////////////////////////
   // Add collection property for auth collections

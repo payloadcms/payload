@@ -72,7 +72,7 @@ export const buildProjectionQuery = async ({
       ? context.rootAccess.where
       : context.relationAccess[collection])
   ) {
-    stages.push({ $match: visibility({ collection: inverse.target, state }) })
+    stages.push(...visibilityStages({ collection: inverse.target, state }))
     const foreignAccess = context.relationAccess[inverse.target]
     stages.push({
       $match: !foreignAccess
@@ -123,9 +123,12 @@ export const buildProjectionQuery = async ({
   const near = combineNear({ near: geo.near, policyNear: policyGeo.near })
 
   if (near) {
-    stages.push({ $geoNear: { ...near, query: visibility({ collection, state }) } })
+    stages.push(
+      { $geoNear: { ...near, query: visibility({ collection, state }) } },
+      ...materializedVisibilityStages({ collection, state }),
+    )
   } else {
-    stages.push({ $match: visibility({ collection, state }) })
+    stages.push(...visibilityStages({ collection, state }))
   }
 
   const graphTarget = context.graphTarget
@@ -314,8 +317,9 @@ const effectiveCollection = ({
   collection: string
   state: State
 }): string => {
-  const projection =
-    state.adapter.payload.collections[collection]?.config.custom?.branchQueryStorage?.projection
+  const projection = state.context.materializedCollections?.includes(collection)
+    ? undefined
+    : state.adapter.payload.collections[collection]?.config.custom?.branchQueryStorage?.projection
   return typeof projection === 'string' ? projection : collection
 }
 
@@ -584,8 +588,11 @@ const lookup = async ({
   })
   const near = combineNear({ near: geo.near, policyNear: policyGeo.near })
   const pipeline: Stage[] = near
-    ? [{ $geoNear: { ...near, query: visibility({ collection: effectiveTarget, state }) } }]
-    : [{ $match: visibility({ collection: effectiveTarget, state }) }]
+    ? [
+        { $geoNear: { ...near, query: visibility({ collection: effectiveTarget, state }) } },
+        ...materializedVisibilityStages({ collection: effectiveTarget, state }),
+      ]
+    : visibilityStages({ collection: effectiveTarget, state })
   const isJoin = relation.field.type === 'join'
   let linkage: Stage
   let rootID: any = '$_id'
@@ -1388,3 +1395,111 @@ const nextAlias = ({ state }: { state: State }): string => {
 const logicalMongoID = ({ value }: { value: unknown }): unknown => ({
   $cond: [{ $eq: [{ $type: value }, 'objectId'] }, { $toString: value }, value],
 })
+
+const visibilityStages = ({ collection, state }: { collection: string; state: State }): Stage[] => [
+  { $match: visibility({ collection, state }) },
+  ...materializedVisibilityStages({ collection, state }),
+]
+
+/** A missing identity is deliberately absent after complete authoritative cutover. */
+const materializedVisibilityStages = ({
+  collection,
+  state,
+}: {
+  collection: string
+  state: State
+}): Stage[] => {
+  const identities = state.context.materializedVisibility?.[collection]
+  if (!identities) {
+    return []
+  }
+  const alias = nextAlias({ state })
+  return [
+    {
+      $lookup: {
+        as: alias,
+        foreignField: 'parent',
+        from: getCollection({ adapter: state.adapter, collectionSlug: identities }).Model.collection
+          .name,
+        let: { identityParent: '$_id' },
+        localField: '_id',
+        pipeline: [
+          // Collation may widen the indexed candidate equality; identity ownership is exact.
+          {
+            $match: {
+              $expr: {
+                $cond: [
+                  { $eq: [{ $type: '$parent' }, 'string'] },
+                  {
+                    $cond: [
+                      { $eq: [{ $type: '$$identityParent' }, 'string'] },
+                      {
+                        $and: [
+                          {
+                            $eq: [
+                              {
+                                $strLenBytes: {
+                                  $convert: {
+                                    input: '$parent',
+                                    onError: '',
+                                    onNull: '',
+                                    to: 'string',
+                                  },
+                                },
+                              },
+                              {
+                                $strLenBytes: {
+                                  $convert: {
+                                    input: '$$identityParent',
+                                    onError: '',
+                                    onNull: '',
+                                    to: 'string',
+                                  },
+                                },
+                              },
+                            ],
+                          },
+                          {
+                            $eq: [
+                              {
+                                $indexOfBytes: [
+                                  {
+                                    $convert: {
+                                      input: '$parent',
+                                      onError: '',
+                                      onNull: '',
+                                      to: 'string',
+                                    },
+                                  },
+                                  {
+                                    $convert: {
+                                      input: '$$identityParent',
+                                      onError: '',
+                                      onNull: '',
+                                      to: 'string',
+                                    },
+                                  },
+                                ],
+                              },
+                              0,
+                            ],
+                          },
+                        ],
+                      },
+                      false,
+                    ],
+                  },
+                  { $eq: ['$parent', '$$identityParent'] },
+                ],
+              },
+            },
+          },
+          { $match: { $or: [{ isPublished: true }, { isLegacyDraftVisible: true }] } },
+          { $limit: 1 },
+        ],
+      },
+    },
+    { $match: { [`${alias}.0`]: { $exists: true } } },
+    { $unset: alias },
+  ]
+}

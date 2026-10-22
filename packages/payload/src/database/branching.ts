@@ -13,6 +13,10 @@ export type BranchProjectionQueryContext = {
     string,
     Record<string, { count?: boolean; limit?: number; page?: number; sort: string[]; where: Where }>
   >
+  /** Per-entity native source resolution, including unactivated relationship targets. */
+  materializedCollections?: string[]
+  /** Registered ordinary collections whose native anchors require indexed visibility membership. */
+  materializedVisibility?: Record<string, string>
   /** Original entity read predicates translated to each private relation; missing means denied. */
   relationAccess: Record<string, false | Where>
   /** Already-authorized original operation root; never used for relationship hops. */
