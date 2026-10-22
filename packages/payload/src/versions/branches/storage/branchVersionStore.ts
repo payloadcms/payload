@@ -153,7 +153,7 @@ export const saveBranchAutosave = async ({
   target: BranchStorageTarget
 }): Promise<BranchVersionReference> => {
   await assertBranchTransaction({ req })
-  const { entity } = getBranchStorage({ req, target })
+  const { entity, heads } = getBranchStorage({ req, target })
   const row = await readBranchVersion({ entity, req, versionID: expected.id })
 
   if (!row || row.branchGeneration !== expected.generation) {
@@ -163,10 +163,39 @@ export const saveBranchAutosave = async ({
   const ownerKey = getBranchKey({ branchID })
 
   if (row.branchFrozen !== true && row.branchOwnerKey === ownerKey) {
+    // Existing reference writers freeze this same native row before attaching. The owner
+    // path only discovers already-attached candidates or creates a fresh row transactionally.
+    // Therefore the subsequent generation CAS serializes this standalone update with attach.
+    const attached = await req.payload.db.findOne({
+      collection: heads,
+      req,
+      where: {
+        and: [
+          ...(entity.type === 'collection' ? [{ parent: { equals: entity.parentID } }] : []),
+          {
+            or: [
+              { versionID: { equals: expected.id } },
+              { structureVersionID: { equals: expected.id } },
+            ],
+          },
+        ],
+      },
+    })
+
+    if (attached) {
+      throw new Error(
+        'An attached autosave requires the complete guarded head ownership transition.',
+      )
+    }
     const updated = await req.payload.db.branching!.mutateVersion({
       entity,
       expected,
-      mutation: { type: 'replace', data, ownerKey },
+      mutation: {
+        type: 'replace',
+        data,
+        envelope: { updatedAt: new Date().toISOString() },
+        ownerKey,
+      },
       req,
     })
 

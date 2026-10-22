@@ -64,7 +64,26 @@ export const enforceBranchMaxVersions = async ({
         },
       })
 
-      if (root || ++unprotectedCount <= max) {
+      const headRoot = root
+        ? null
+        : await req.payload.db.findOne({
+            collection: config.custom.branchStorage.heads as string,
+            req,
+            where: {
+              and: [
+                ...(collection ? [{ parent: { equals: id } }] : []),
+                { state: { equals: 'version' } },
+                {
+                  or: [
+                    { versionID: { equals: row.id } },
+                    { structureVersionID: { equals: row.id } },
+                  ],
+                },
+              ],
+            },
+          })
+
+      if (root || headRoot || ++unprotectedCount <= max) {
         continue
       }
       const deleteWhere: Where = {

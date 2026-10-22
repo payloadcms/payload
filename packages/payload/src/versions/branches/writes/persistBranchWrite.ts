@@ -9,7 +9,7 @@ import type { BranchWriteObservation } from './prepareBranchWrite.js'
 import { hasLocalizeStatusEnabled } from '../../../utilities/getVersionsConfig.js'
 import { compileBranchScopeFields } from '../compileBranchScopeFields.js'
 import { projectBranchScopeData } from '../projectBranchScopeData.js'
-import { commitBranchHeads } from '../storage/branchHeadStore.js'
+import { commitBranchAutosaveHeads, commitBranchHeads } from '../storage/branchHeadStore.js'
 import {
   createBranchIdentityVisibility,
   readBranchIdentityVisibility,
@@ -17,6 +17,11 @@ import {
 } from '../storage/branchIdentityStore.js'
 import { getBranchStorage } from '../storage/branchStorage.js'
 import { initializeBranchVersion, readBranchVersion } from '../storage/branchVersionStore.js'
+import {
+  areBranchAutosaveScopesEqual,
+  planBranchAutosaveOwnership,
+  prepareBranchAutosave,
+} from './prepareBranchAutosave.js'
 
 /** Install references to canonical native bodies inside the original operation transaction. */
 export const persistBranchWrite = async ({
@@ -190,4 +195,208 @@ export const persistBranchWrite = async ({
       }
     }
   }
+}
+
+/** Autosave candidates are composed once by the operation, then persisted under the full head guard. */
+export const persistBranchAutosave = async ({
+  id,
+  collection,
+  global,
+  now,
+  observation,
+  req,
+  versionData,
+}: {
+  collection?: SanitizedCollectionConfig
+  global?: SanitizedGlobalConfig
+  id?: number | string
+  now: string
+  observation: BranchWriteObservation
+  req: PayloadRequest
+  versionData: JsonObject
+}): Promise<JsonObject> => {
+  const config = (collection ?? global)!
+  const target = { ...observation.target, ...(collection ? { parentID: id } : {}) }
+  const { entity } = getBranchStorage({ req, target })
+  const branchID = observation.workingBranchID
+  const fields = compileBranchScopeFields({
+    blocks: req.payload.config.blocks,
+    fields: config.fields,
+  })
+  const local = observation.readSet.filter((token) => token.branchID === branchID)
+  const shared = local.find(({ scope }) => scope.type === 'shared')!
+  const mainShared = observation.readSet.find(
+    ({ branchID, scope }) => branchID === 'main' && scope.type === 'shared',
+  )!
+  const previousShared = shared.state ?? mainShared.state
+  const hasLocales = local.some(({ scope }) => scope.type === 'locale')
+  let hasSharedChange = true
+
+  if (previousShared?.type === 'version') {
+    const previous = await readBranchVersion({ entity, req, versionID: previousShared.version.id })
+
+    if (!previous || previous.branchGeneration !== previousShared.version.generation) {
+      throw new Error('The observed shared branch revision is missing or stale.')
+    }
+    hasSharedChange = !areBranchAutosaveScopesEqual({
+      left: projectBranchScopeData({
+        data: previous.version as JsonObject,
+        fields,
+        scope: shared.scope,
+      }),
+      right: projectBranchScopeData({ data: versionData, fields, scope: shared.scope }),
+    })
+  }
+  const selected = local.filter(({ scope }) =>
+    scope.type === 'shared'
+      ? !hasLocales || hasSharedChange
+      : req.locale === 'all' || scope.locale === req.locale,
+  )
+  const visibility = await readBranchIdentityVisibility({ req, target })
+
+  if (!visibility) {
+    await createBranchIdentityVisibility({
+      branchID,
+      isLegacyDraftVisible: branchID === 'drafts',
+      req,
+      target,
+    })
+  }
+
+  return commitBranchAutosaveHeads({
+    branchID,
+    prepare: async ({ initialize, replace }) => {
+      const ownership = await prepareBranchAutosave({
+        branchID,
+        data: versionData,
+        fields,
+        hasSharedChange,
+        readSet: observation.readSet,
+        req,
+        selected,
+        target,
+      })
+      let reference
+
+      if (ownership) {
+        reference = await replace({
+          data: versionData,
+          expected: ownership.reference,
+          updatedAt: now,
+          ...(branchID === 'drafts' ? { latest: true } : {}),
+        })
+      } else {
+        const args = {
+          autosave: true,
+          ...(branchID !== 'drafts' ? { branchMode: true as const } : {}),
+          createdAt: now,
+          req,
+          updatedAt: now,
+          versionData,
+        }
+        const created = collection
+          ? await req.payload.db.createVersion({
+              ...args,
+              collectionSlug: collection.slug,
+              parent: id!,
+            })
+          : await req.payload.db.createGlobalVersion({ ...args, globalSlug: global!.slug })
+
+        reference = await initialize({ versionID: created.id })
+      }
+      const stored = await readBranchVersion({ entity, req, versionID: reference.id })
+
+      if (!stored || stored.branchGeneration !== reference.generation || !stored.version) {
+        throw new Error('The canonical autosave revision is missing.')
+      }
+      const data = stored.version as JsonObject
+
+      if (
+        ownership &&
+        !planBranchAutosaveOwnership({
+          branchID,
+          data,
+          fields,
+          hasSharedChange,
+          observed: observation.readSet,
+          reference: ownership.reference,
+          references: ownership.closure,
+          selected,
+          stored: ownership.previous,
+        })
+      ) {
+        throw new Error(
+          'Native autosave canonicalization changed an unselected scope; roll back the caller transaction.',
+        )
+      }
+      let structure = previousShared?.type === 'version' ? previousShared.version : reference
+
+      if (hasLocales && hasSharedChange) {
+        const args = {
+          autosave: false,
+          branchMode: true as const,
+          createdAt: now,
+          req,
+          updatedAt: now,
+          versionData: data,
+        }
+        const checkpoint = collection
+          ? await req.payload.db.createVersion({
+              ...args,
+              collectionSlug: collection.slug,
+              parent: id!,
+            })
+          : await req.payload.db.createGlobalVersion({ ...args, globalSlug: global!.slug })
+
+        structure = await initializeBranchVersion({
+          branchID,
+          isFrozen: true,
+          req,
+          target,
+          versionID: checkpoint.id,
+        })
+      }
+      const advancing = [...selected]
+
+      for (const expected of ownership?.closure ?? []) {
+        if (!advancing.includes(expected)) {
+          advancing.push(expected)
+        }
+      }
+      const changes = advancing.map((expected) => {
+        const isSelected = selected.includes(expected)
+        const nextState: BranchHeadState =
+          !isSelected && expected.state?.type === 'version'
+            ? { ...expected.state, version: reference }
+            : {
+                type: 'version',
+                structure: expected.scope.type === 'locale' ? structure : null,
+                version: hasLocales && expected.scope.type === 'shared' ? structure : reference,
+              }
+        const original = observation.bases.find(
+          ({ scope }) =>
+            scope.type === expected.scope.type &&
+            (scope.type === 'shared' ||
+              (expected.scope.type === 'locale' && scope.locale === expected.scope.locale)),
+        )
+        const base = original
+          ? original.base
+          : observation.readSet.find(
+              (token) =>
+                token.branchID === 'main' &&
+                token.scope.type === expected.scope.type &&
+                (token.scope.type === 'shared' ||
+                  (expected.scope.type === 'locale' &&
+                    token.scope.locale === expected.scope.locale)),
+            )!
+
+        return { base, expected, nextState }
+      })
+
+      return { changes, reference, version: stored as JsonObject }
+    },
+    readSet: observation.readSet,
+    req,
+    target,
+  })
 }

@@ -102,6 +102,16 @@ export const createBranchingAdapter = ({
         throw new Error('Branch version ownership must be non-empty.')
       }
 
+      if (
+        mutation.type === 'replace' &&
+        mutation.envelope &&
+        (typeof mutation.envelope.updatedAt !== 'string' ||
+          !Number.isFinite(Date.parse(mutation.envelope.updatedAt)) ||
+          (mutation.envelope.latest !== undefined && typeof mutation.envelope.latest !== 'boolean'))
+      ) {
+        throw new Error('Branch replacement requires a valid history envelope.')
+      }
+
       if (mutation.type === 'initialize' && typeof mutation.isFrozen !== 'boolean') {
         throw new Error('Branch version frozen state must be boolean.')
       }
@@ -190,6 +200,14 @@ export const createBranchingAdapter = ({
         conditions.branchOwnerKey = mutation.ownerKey
         data = {
           branchGeneration: expected.generation + 1,
+          ...(mutation.envelope
+            ? {
+                updatedAt: mutation.envelope.updatedAt,
+                ...(mutation.envelope.latest !== undefined
+                  ? { latest: mutation.envelope.latest }
+                  : {}),
+              }
+            : {}),
           version: structuredClone(mutation.data),
         }
         transform({ adapter, data, fields, operation: 'write' })

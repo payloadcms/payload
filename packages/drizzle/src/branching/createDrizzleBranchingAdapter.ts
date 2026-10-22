@@ -53,6 +53,16 @@ export const createDrizzleBranchingAdapter = ({
       throw new Error('Branch version mutation requires an active caller transaction.')
     }
 
+    if (
+      mutation.type === 'replace' &&
+      mutation.envelope &&
+      (typeof mutation.envelope.updatedAt !== 'string' ||
+        !Number.isFinite(Date.parse(mutation.envelope.updatedAt)) ||
+        (mutation.envelope.latest !== undefined && typeof mutation.envelope.latest !== 'boolean'))
+    ) {
+      throw new Error('Branch replacement requires a valid history envelope.')
+    }
+
     if (!Number.isSafeInteger(expected.generation) || expected.generation < 0) {
       throw new Error('Invalid expected branch version generation.')
     }
@@ -175,6 +185,14 @@ export const createDrizzleBranchingAdapter = ({
           : { globalSlug: entity.slug }),
         data: {
           branchGeneration: expected.generation + 1,
+          ...(mutation.envelope
+            ? {
+                updatedAt: mutation.envelope.updatedAt,
+                ...(mutation.envelope.latest !== undefined
+                  ? { latest: mutation.envelope.latest }
+                  : {}),
+              }
+            : {}),
           version: completeBranchVersionData({
             fields: versionField.flattenedFields,
             previous: current.version,

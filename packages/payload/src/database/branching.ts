@@ -81,7 +81,12 @@ export type BranchingAdapter = {
     entity: BranchStorageEntity
     expected: { generation: number; id: number | string }
     mutation:
-      | { data: JsonObject; ownerKey: string; type: 'replace' }
+      | {
+          data: JsonObject
+          envelope?: { latest?: boolean; updatedAt: string }
+          ownerKey: string
+          type: 'replace'
+        }
       | { isFrozen: boolean; ownerKey: string; type: 'initialize' }
       | { type: 'freeze' }
     req: PayloadRequest

@@ -28,6 +28,8 @@ import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js
 import { updateOperation } from '../update.js'
 
 type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
+  /** Save a coalescible draft autosave rather than an immutable manual version. */
+  autosave?: boolean
   /**
    * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
    * which can be read by hooks. Useful if you want to pass additional information to the hooks which
@@ -109,6 +111,7 @@ export async function updateGlobalLocal<
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> {
   const {
     slug: globalSlug,
+    autosave,
     data,
     depth,
     draft,
@@ -129,6 +132,7 @@ export async function updateGlobalLocal<
 
   return updateOperation<TSlug, TSelect>({
     slug: globalSlug,
+    autosave,
     data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
     depth,
     draft,

@@ -6,9 +6,13 @@ import type { BranchWriteObservation } from './branches/writes/prepareBranchWrit
 
 import { deepCopyObjectSimple } from '../index.js'
 import { assertNoValidationWrite } from '../utilities/assertNoValidationWrite.js'
-import { getVersionsMax, hasLocalizeStatusEnabled } from '../utilities/getVersionsConfig.js'
+import {
+  getVersionsMax,
+  hasAutosaveEnabled,
+  hasLocalizeStatusEnabled,
+} from '../utilities/getVersionsConfig.js'
 import { sanitizeInternalFields } from '../utilities/sanitizeInternalFields.js'
-import { persistBranchWrite } from './branches/writes/persistBranchWrite.js'
+import { persistBranchAutosave, persistBranchWrite } from './branches/writes/persistBranchWrite.js'
 import {
   assertBranchWriteCutover,
   isBranchWriteEngineActive,
@@ -104,7 +108,27 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
     )
   }
 
+  const isBranchAutosave = Boolean(
+    branchWrite &&
+    draft &&
+    autosave &&
+    hasAutosaveEnabled((collection ?? global)!) &&
+    operation !== 'restoreVersion',
+  )
+
   try {
+    if (isBranchAutosave) {
+      result = await persistBranchAutosave({
+        id,
+        collection,
+        global,
+        now,
+        observation: branchWrite!,
+        req: req!,
+        versionData,
+      })
+      createdNewVersion = true
+    }
     if (!branchWrite && (unpublish || autosave)) {
       result = await updateLatestVersion({
         id,
@@ -160,7 +184,7 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
     throw err
   }
 
-  if (branchWrite) {
+  if (branchWrite && !isBranchAutosave) {
     await persistBranchWrite({
       id,
       collection,

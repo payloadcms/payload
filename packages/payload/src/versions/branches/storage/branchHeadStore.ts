@@ -1,12 +1,13 @@
 import { randomUUID } from 'node:crypto'
 
-import type { PayloadRequest, Where } from '../../../types/index.js'
+import type { JsonObject, PayloadRequest, Where } from '../../../types/index.js'
 import type {
   BranchContentScope,
   BranchHead,
   BranchHeadID,
   BranchHeadState,
   BranchHeadToken,
+  BranchVersionReference,
 } from '../types.js'
 import type { BranchStorageTarget } from './branchStorage.js'
 
@@ -18,7 +19,11 @@ import {
   getBranchStorage,
   getBranchStorageKey,
 } from './branchStorage.js'
-import { pinBranchVersion } from './branchVersionStore.js'
+import {
+  initializeBranchVersion,
+  pinBranchVersion,
+  readBranchVersion,
+} from './branchVersionStore.js'
 import { decodeBranchHead } from './decodeBranchHead.js'
 
 export const readBranchHead = async (args: {
@@ -76,17 +81,29 @@ export const readBranchHeadToken = async ({
 }
 
 /** Trusted primitive: freezes content and guards the complete expected state in a caller transaction. */
-export const writeBranchHead = async ({
-  base,
-  expected,
-  nextState,
-  req,
-  target,
-}: {
+export const writeBranchHead = async (args: {
   base?: BranchHeadToken | null
   expected: BranchHeadToken
   nextState: BranchHeadState
   req: PayloadRequest
+  target: BranchStorageTarget
+}): Promise<BranchHead | null> => writeBranchHeadRecord(args)
+
+const writeBranchHeadRecord = async ({
+  base,
+  expected,
+  mutableReference,
+  nextState,
+  req,
+  shouldMaintainProjection = true,
+  target,
+}: {
+  base?: BranchHeadToken | null
+  expected: BranchHeadToken
+  mutableReference?: BranchVersionReference
+  nextState: BranchHeadState
+  req: PayloadRequest
+  shouldMaintainProjection?: boolean
   target: BranchStorageTarget
 }): Promise<BranchHead | null> => {
   await assertBranchTransaction({ req })
@@ -128,10 +145,23 @@ export const writeBranchHead = async ({
     return null
   }
 
+  if (
+    expected.state?.type === 'version' &&
+    (!mutableReference || expected.state.version.id !== mutableReference.id)
+  ) {
+    await freezeRetiredBranchVersion({ reference: expected.state.version, req, target })
+  }
+
   if (version) {
     const rootKey = `head:${getBranchKey({ branchID: expected.branchID })}:${getScopeKey({ scope: expected.scope })}:${incarnation}:${generation}`
 
-    await pinBranchVersion({ reference: version, req, rootKey, target })
+    if (
+      !mutableReference ||
+      version.id !== mutableReference.id ||
+      version.generation !== mutableReference.generation
+    ) {
+      await pinBranchVersion({ reference: version, req, rootKey, target })
+    }
     if (structure) {
       await pinBranchVersion({ reference: structure, req, rootKey: `${rootKey}:structure`, target })
     }
@@ -181,7 +211,9 @@ export const writeBranchHead = async ({
       req,
     })
 
-    await maintainBranchProjections({ branchID: expected.branchID, req, target })
+    if (shouldMaintainProjection) {
+      await maintainBranchProjections({ branchID: expected.branchID, req, target })
+    }
 
     return decodeBranchHead({ branchID: expected.branchID, row, scope: expected.scope })
   }
@@ -202,7 +234,7 @@ export const writeBranchHead = async ({
     },
   })
 
-  if (row) {
+  if (row && shouldMaintainProjection) {
     await maintainBranchProjections({ branchID: expected.branchID, req, target })
   }
 
@@ -242,6 +274,9 @@ export const discardBranchHead = async ({
     return current
   }
 
+  if (expected.state?.type === 'version') {
+    await freezeRetiredBranchVersion({ reference: expected.state.version, req, target })
+  }
   const row = await req.payload.db.updateOne({
     collection: target.collection,
     data: {
@@ -354,11 +389,220 @@ export const commitBranchHeads = async ({
   req: PayloadRequest
   target: BranchStorageTarget
 }): Promise<readonly BranchHeadToken[]> => {
+  await lockBranchHeadReadSet({
+    readSet: [...readSet, ...changes.map(({ expected }) => expected)],
+    req,
+    target,
+  })
+
+  const results: BranchHeadToken[] = []
+
+  for (const change of changes) {
+    const result =
+      change.nextState === null
+        ? await discardBranchHead({ expected: change.expected, req, target })
+        : await writeBranchHead({ ...change, nextState: change.nextState, req, target })
+
+    if (!result) {
+      throw new Error('Branch batch observation changed; roll back the caller transaction.')
+    }
+
+    results.push({
+      branchID: result.branchID,
+      generation: result.generation,
+      incarnation: result.incarnation ?? 0,
+      scope: result.scope,
+      state: result.state,
+    } as BranchHeadToken)
+  }
+
+  return results
+}
+
+/** Owner-only path: guard the complete read set before native replacement and rebuild once. */
+export const commitBranchAutosaveHeads = async ({
+  branchID,
+  prepare,
+  readSet,
+  req,
+  target,
+}: {
+  branchID: BranchHeadID
+  prepare: (args: {
+    initialize: (args: { versionID: BranchHeadID }) => Promise<BranchVersionReference>
+    replace: (args: {
+      data: JsonObject
+      expected: BranchVersionReference
+      latest?: boolean
+      updatedAt: string
+    }) => Promise<BranchVersionReference>
+  }) => Promise<{
+    changes: readonly {
+      base?: BranchHeadToken | null
+      expected: BranchHeadToken
+      nextState: BranchHeadState
+    }[]
+    reference: BranchVersionReference
+    version: JsonObject
+  }>
+  readSet: readonly BranchHeadToken[]
+  req: PayloadRequest
+  target: BranchStorageTarget
+}): Promise<JsonObject> => {
+  await lockBranchHeadReadSet({ readSet, req, target })
+  const { entity } = getBranchStorage({ req, target })
+  let mutableReference: BranchVersionReference | undefined
+  let isPreparing = true
+  let hasMutationStarted = false
+  const assertMutationAvailable = () => {
+    if (!isPreparing || hasMutationStarted) {
+      throw new Error(
+        'An autosave transition requires exactly one operation-scoped native mutation.',
+      )
+    }
+    hasMutationStarted = true
+  }
+  let prepared: Awaited<ReturnType<typeof prepare>>
+
+  try {
+    prepared = await prepare({
+      initialize: async ({ versionID }) => {
+        assertMutationAvailable()
+        mutableReference = Object.freeze(
+          await initializeBranchVersion({ branchID, isFrozen: false, req, target, versionID }),
+        )
+
+        return mutableReference
+      },
+      replace: async ({ data, expected, latest, updatedAt }) => {
+        assertMutationAvailable()
+        if (
+          !readSet.some(
+            (token) =>
+              token.branchID === branchID &&
+              token.state?.type === 'version' &&
+              token.state.version.id === expected.id &&
+              token.state.version.generation === expected.generation,
+          )
+        ) {
+          throw new Error('Only an observed attached owner autosave can be replaced.')
+        }
+        const updated = await req.payload.db.branching!.mutateVersion({
+          entity,
+          expected,
+          mutation: {
+            type: 'replace',
+            data,
+            envelope: { updatedAt, ...(latest !== undefined ? { latest } : {}) },
+            ownerKey: getBranchKey({ branchID }),
+          },
+          req,
+        })
+
+        if (!updated) {
+          throw new Error('Autosave version revision changed or was pinned concurrently.')
+        }
+        mutableReference = Object.freeze({ id: expected.id, generation: expected.generation + 1 })
+
+        return mutableReference
+      },
+    })
+  } finally {
+    isPreparing = false
+  }
+  if (!mutableReference || prepared.reference !== mutableReference) {
+    throw new Error('Mutable head attachment requires this operation’s native generation CAS.')
+  }
+  const stored = await readBranchVersion({ entity, req, versionID: prepared.reference.id })
+
+  if (
+    !stored ||
+    stored.autosave !== true ||
+    stored.branchFrozen !== false ||
+    stored.branchOwnerKey !== getBranchKey({ branchID }) ||
+    stored.branchGeneration !== prepared.reference.generation
+  ) {
+    throw new Error('Mutable branch heads require an exact owned autosave revision.')
+  }
+
+  for (const change of prepared.changes) {
+    if (
+      change.expected.branchID !== branchID ||
+      !readSet.some((token) => areBranchHeadTokensEqual({ left: token, right: change.expected }))
+    ) {
+      throw new Error('An autosave cannot advance an unobserved or differently owned head.')
+    }
+    const result = await writeBranchHeadRecord({
+      ...change,
+      mutableReference: prepared.reference,
+      req,
+      shouldMaintainProjection: false,
+      target,
+    })
+
+    if (!result) {
+      throw new Error('Autosave head observation changed; roll back the caller transaction.')
+    }
+  }
+  const committedReference = mutableReference
+  const references = await req.payload.db.find<Record<string, unknown>>({
+    collection: target.collection,
+    limit: 0,
+    pagination: false,
+    req,
+    where: {
+      and: [
+        ...(target.parentID !== undefined ? [{ parent: { equals: target.parentID } }] : []),
+        {
+          or: [
+            { versionID: { equals: committedReference.id } },
+            { structureVersionID: { equals: committedReference.id } },
+          ],
+        },
+      ],
+    },
+  })
+
+  if (
+    !references.docs.length ||
+    references.docs.some(
+      (row) =>
+        row.state !== 'version' ||
+        row.branchKey !== getBranchKey({ branchID }) ||
+        row.versionID !== committedReference.id ||
+        row.versionGeneration !== committedReference.generation ||
+        row.structureVersionID === committedReference.id,
+    )
+  ) {
+    throw new Error('An autosave transition must advance its complete content ownership closure.')
+  }
+  const finalVersion = await readBranchVersion({ entity, req, versionID: committedReference.id })
+
+  if (
+    finalVersion?.branchFrozen !== false ||
+    finalVersion.branchGeneration !== committedReference.generation
+  ) {
+    throw new Error('An autosave reference cannot also be an immutable structural or base root.')
+  }
+  await maintainBranchProjections({ branchID, req, target })
+
+  return prepared.version
+}
+
+const lockBranchHeadReadSet = async ({
+  readSet,
+  req,
+  target,
+}: {
+  readSet: readonly BranchHeadToken[]
+  req: PayloadRequest
+  target: BranchStorageTarget
+}): Promise<void> => {
   await assertBranchTransaction({ req })
   getBranchStorage({ req, target })
   const observations = new Map<string, BranchHeadToken>()
 
-  for (const token of [...readSet, ...changes.map(({ expected }) => expected)]) {
+  for (const token of readSet) {
     const key = JSON.stringify([
       getBranchKey({ branchID: token.branchID }),
       getScopeKey({ scope: token.scope }),
@@ -431,29 +675,6 @@ export const commitBranchHeads = async ({
       }
     }
   }
-
-  const results: BranchHeadToken[] = []
-
-  for (const change of changes) {
-    const result =
-      change.nextState === null
-        ? await discardBranchHead({ expected: change.expected, req, target })
-        : await writeBranchHead({ ...change, nextState: change.nextState, req, target })
-
-    if (!result) {
-      throw new Error('Branch batch observation changed; roll back the caller transaction.')
-    }
-
-    results.push({
-      branchID: result.branchID,
-      generation: result.generation,
-      incarnation: result.incarnation ?? 0,
-      scope: result.scope,
-      state: result.state,
-    } as BranchHeadToken)
-  }
-
-  return results
 }
 
 const getHeadWhere = ({
@@ -505,3 +726,26 @@ const getHeadCoordinateKey = ({
   getBranchStorageKey({
     coordinates: [target.parentID ?? null, getBranchKey({ branchID }), getScopeKey({ scope })],
   })
+
+/** Detaching a mutable owner makes its historical body immutable without keeping it forever. */
+const freezeRetiredBranchVersion = async ({
+  reference,
+  req,
+  target,
+}: {
+  reference: BranchVersionReference
+  req: PayloadRequest
+  target: BranchStorageTarget
+}): Promise<void> => {
+  const { entity } = getBranchStorage({ req, target })
+  const frozen = await req.payload.db.branching!.mutateVersion({
+    entity,
+    expected: reference,
+    mutation: { type: 'freeze' },
+    req,
+  })
+
+  if (!frozen) {
+    throw new Error('The retired branch revision changed; roll back the caller transaction.')
+  }
+}
