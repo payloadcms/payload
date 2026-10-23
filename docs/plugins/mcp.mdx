@@ -163,7 +163,7 @@ authenticated user, provide an override object with `access: () => true`.
 | `disabled`                             | `boolean`    | Skip MCP endpoint registration.                                                                                                               |
 | `hooks.afterToolCall`                  | `function[]` | Run cross-cutting hooks after tool handlers return. See [MCP plugin hooks](#mcp-plugin-hooks).                                                |
 | `overrideGetAuthorizedMCP`             | `function`   | Replace the default MCP authorization resolver. See [Custom auth](#custom-auth).                                                              |
-| `oauth`                                | `object`     | Let MCP clients sign in through an OAuth authorization server. See [OAuth](#oauth).                                                           |
+| `oauth`                                | `object`     | How MCP clients sign in with OAuth: through Payload by default, or another authorization server. `false` turns it off. See [OAuth](#oauth).   |
 | `mcp.maxRequestBodySize`               | `number`     | Largest HTTP request body in bytes. Larger requests get a `413` response. Base64 file uploads count toward it. Default `4194304` (4 MiB).     |
 | `mcp.serverOptions.serverInfo.name`    | `string`     | The MCP server name advertised to clients. Default `'Payload MCP Server'`.                                                                    |
 | `mcp.serverOptions.serverInfo.version` | `string`     | The MCP server version. Default `'1.0.0'`.                                                                                                    |
@@ -229,7 +229,7 @@ These instructions come from your collection or global config and can include ad
 
 HTTP is the recommended transport for both local development and deployed apps. During development, config changes follow Payload's normal dev-server reload lifecycle.
 
-Once `mcpPlugin` is in your `plugins` array, `POST /api/mcp` accepts JSON-RPC 2.0 MCP requests. Send Payload authorization when you want MCP to run as a user (see [Authorization](#authorization)); without it, MCP runs access control with no user.
+Once `mcpPlugin` is in your `plugins` array, `POST /api/mcp` accepts JSON-RPC 2.0 MCP requests. Send Payload authorization when you want MCP to run as a user (see [Authorization](#authorization)); without it, MCP asks the client to [sign in with OAuth](#oauth).
 
 Quick test:
 
@@ -255,7 +255,7 @@ Send this value in the `Authorization` header.
 When authorization is sent, MCP authenticates with Payload's normal auth system.
 The authenticated user is used for Payload access control, and MCP only
 advertises tools, prompts, and resources allowed for that request.
-If no authorization is sent, MCP runs access control with no user.
+If no authorization is sent, MCP asks the client to [sign in with OAuth](#oauth).
 
 ### Creating an API key
 
@@ -283,15 +283,65 @@ HTTP rejects the `overrideAccess` URL argument outside development.
 
 ### OAuth
 
-Set `oauth` to let MCP clients sign in through an OAuth authorization server. MCP
-requests without an authenticated user then get a `401` whose `WWW-Authenticate`
-header links to the [protected resource metadata](https://www.rfc-editor.org/rfc/rfc9728)
-at `/api/mcp/oauth-protected-resource`, and the client starts its OAuth flow from
-there. No other setup is needed.
+MCP clients can sign in with OAuth. MCP requests without an authenticated user
+get a `401` whose `WWW-Authenticate` header links to the
+[protected resource metadata](https://www.rfc-editor.org/rfc/rfc9728) at
+`/api/mcp/oauth-protected-resource`, and the client starts its OAuth flow from
+there. No other setup is needed, and API keys keep working as before.
+
+Set `oauth: false` to turn this off. MCP requests without authorization then run
+access control with no user.
+
+#### Sign in with Payload
+
+By default, Payload is the authorization server. The client opens a page in the
+browser, the user logs in to the admin panel if needed and allows the client,
+and the client receives a Payload login token. MCP then runs as that user with
+access control.
+
+This works for auth collections that use Payload's own login. Login tokens
+expire after the collection's `tokenExpiration`, and the client then gets new
+ones with its [refresh token](../authentication/overview#refresh-tokens),
+without the user. A refresh token stays valid for 30 days without use, or the
+collection's `auth.refreshTokens.expiration`. Each one works once: if a used
+refresh token comes back later, someone copied it, and the client is signed out.
+Clients are signed out too when the user logs out of all sessions. Collections
+with `useSessions: false` get no refresh tokens, so their clients sign in again
+when the login token expires.
+
+To give clients different tokens, pass `issueToken`. It runs when the user
+clicks Allow, on the user's own browser request, so `req.user` is the user who
+allowed the client. Payload's auth strategies, or `oauth.authenticate`, must
+accept the access token. To let clients refresh it, also return a refresh token
+and pass `refreshToken`, which trades it for new tokens, or returns `null` when
+it's no longer valid:
 
 ```ts
 mcpPlugin({
   oauth: {
+    type: 'builtin',
+    issueToken: async ({ req }) => ({
+      accessToken: await createAccessToken(req.user), // your own tokens
+      // Optional, in seconds
+      expiresIn: 60 * 60,
+      refreshToken: await createRefreshToken(req.user),
+    }),
+    refreshToken: async ({ refreshToken }) => await refreshTokens(refreshToken),
+  },
+})
+```
+
+Your `refreshToken` must notice copied refresh tokens, as OAuth requires:
+return a new refresh token each time, and revoke the tokens when an already used
+one comes back. Payload only makes sure a refresh token is used by the client it
+was issued to.
+
+#### Use another authorization server
+
+```ts
+mcpPlugin({
+  oauth: {
+    type: 'external',
     authorizationServers: ['https://auth.example.com'],
     // Optional. Defaults to the absolute URL of /api/mcp.
     resource: 'https://example.com/api/mcp',
@@ -322,6 +372,7 @@ strategy, it only applies to MCP. Return the Payload user, including its
 ```ts
 mcpPlugin({
   oauth: {
+    type: 'external',
     authenticate: async ({ req, token }) => {
       const email = await getEmailFromAccessToken(token) // ask your authorization server
       const { docs } = await req.payload.find({
@@ -336,6 +387,8 @@ mcpPlugin({
   },
 })
 ```
+
+#### Clients that skip the link
 
 Some clients ignore that link and only look for the metadata at
 `/.well-known/oauth-protected-resource`, outside `/api`. To support them, serve
