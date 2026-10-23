@@ -722,7 +722,13 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
           const currentIndex = formsRef.current.findIndex((item) => item.formID === form.formID)
           const currentForm = formsRef.current[currentIndex]
-          if (!currentForm || currentForm.formState !== formStateAtStart) {
+          if (
+            !currentForm ||
+            Object.keys(currentForm.formState).length !== Object.keys(formStateAtStart).length ||
+            Object.keys(formStateAtStart).some(
+              (path) => currentForm.formState[path] !== formStateAtStart[path],
+            )
+          ) {
             return
           }
 
@@ -741,7 +747,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           })
         }),
       )
-    }
     },
     [collectionSlug, docPermissions, forms, getFormState, hasSubmitted],
   )
