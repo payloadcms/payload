@@ -701,6 +701,48 @@ describe('Versions', () => {
       )
     })
 
+    test('collection - autosave - should save edits to writable virtual fields', async () => {
+      const { id: docID } = await payload.create({
+        collection: autosaveWithVirtualSlug,
+        data: {
+          title: 'original title',
+        },
+      })
+
+      await page.goto(autosaveWithVirtualURL.edit(docID))
+
+      await expect(page.locator('#field-titleDerived')).toHaveValue('derived:original title')
+
+      const autosaveRequestURL = formatAdminURL({
+        apiRoute: '/api',
+        path: `/${autosaveWithVirtualSlug}/${docID}?autosave=true&depth=0&draft=true&fallback-locale=null&locale=en`,
+        serverURL,
+      })
+
+      await assertNetworkRequests(
+        page,
+        autosaveRequestURL,
+        async () => {
+          await page.locator('#field-editableTitle').fill('title from virtual input')
+        },
+        {
+          allowedNumberOfRequests: 1,
+        },
+      )
+
+      await expect(page.locator('#field-title')).toHaveValue('title from virtual input')
+
+      const { docs } = await payload.find({
+        collection: autosaveWithVirtualSlug,
+        draft: true,
+        where: {
+          id: { equals: docID },
+        },
+      })
+
+      expect(docs[0]?.title).toBe('title from virtual input')
+    })
+
     test('collection - should show "save as draft" button when showSaveDraftButton is true', async () => {
       await page.goto(autosaveWithDraftButtonURL.create)
       await expect(page.locator('#action-save-draft')).toBeVisible()

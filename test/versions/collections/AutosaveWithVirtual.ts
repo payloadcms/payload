@@ -33,6 +33,14 @@ const AutosaveWithVirtual: CollectionConfig = {
     },
     virtualDerivedTitle,
     {
+      name: 'editableTitle',
+      type: 'text',
+      admin: {
+        readOnly: false,
+      },
+      virtual: true,
+    },
+    {
       name: 'array',
       type: 'array',
       fields: [
@@ -44,6 +52,18 @@ const AutosaveWithVirtual: CollectionConfig = {
       ],
     },
   ],
+  hooks: {
+    beforeValidate: [
+      ({ data }) => {
+        if (data?.editableTitle) {
+          data.title = data.editableTitle
+          delete data.editableTitle
+        }
+
+        return data
+      },
+    ],
+  },
   versions: {
     drafts: {
       autosave: {

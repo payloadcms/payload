@@ -646,6 +646,7 @@ export interface AutosaveWithVirtualPost {
   id: string;
   title: string;
   titleDerived?: string | null;
+  editableTitle?: string | null;
   array?:
     | {
         title?: string | null;
@@ -1936,6 +1937,7 @@ export interface AutosaveWithDraftButtonPostsSelect<T extends boolean = true> {
 export interface AutosaveWithVirtualPostsSelect<T extends boolean = true> {
   title?: T;
   titleDerived?: T;
+  editableTitle?: T;
   array?:
     | T
     | {
