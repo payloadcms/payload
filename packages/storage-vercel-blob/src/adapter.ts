@@ -5,7 +5,7 @@ import type {
 } from '@payloadcms/plugin-cloud-storage/types'
 
 import { CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY } from 'payload'
-import { getFileContent } from 'payload/internal'
+import { getFileSource } from 'payload/internal'
 
 import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
@@ -62,8 +62,8 @@ export function createVercelBlobAdapter({
         access,
         addRandomSuffix: addRandomSuffix && !isClientUpload,
         cacheControlMaxAge,
-        content: getFileContent(file),
         mimeType,
+        source: getFileSource(file),
         storageFilePath,
         token,
       })

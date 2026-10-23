@@ -6,7 +6,7 @@ import type {
 import type { Field } from 'payload'
 import type { UTApi } from 'uploadthing/server'
 
-import { getFileContent } from 'payload/internal'
+import { getFileSource } from 'payload/internal'
 
 import type { ACL } from './index.js'
 
@@ -54,10 +54,10 @@ export function createUploadthingAdapter({
       const result = await uploadFile({
         acl,
         clientUploadContext,
-        content: getFileContent(file),
         data,
         filename: file.filename,
         mimeType: file.mimeType,
+        source: getFileSource(file),
         utApi,
       })
 

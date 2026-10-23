@@ -1,5 +1,5 @@
 import type { Storage } from '@google-cloud/storage'
-import type { FileContent } from 'payload/internal'
+import type { FileSource } from 'payload/internal'
 
 import { getFileStream } from 'payload/internal'
 import { pipeline } from 'stream/promises'
@@ -8,8 +8,8 @@ interface UploadFileArgs {
   acl?: 'Private' | 'Public'
   bucket: string
   client: Storage
-  content: FileContent
   mimeType: string
+  source: FileSource
   storageFilePath: string
 }
 
@@ -17,14 +17,14 @@ export async function uploadFile({
   acl,
   bucket,
   client,
-  content,
   mimeType,
+  source,
   storageFilePath,
 }: UploadFileArgs): Promise<void> {
   const gcsFile = client.bucket(bucket).file(storageFilePath)
   const metadata = { contentType: mimeType }
 
-  await pipeline(await getFileStream(content), gcsFile.createWriteStream({ metadata }))
+  await pipeline(await getFileStream(source), gcsFile.createWriteStream({ metadata }))
 
   if (acl) {
     await gcsFile[`make${acl}`]()

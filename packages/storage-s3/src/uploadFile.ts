@@ -1,5 +1,5 @@
 import type * as AWS from '@aws-sdk/client-s3'
-import type { FileContent } from 'payload/internal'
+import type { FileSource } from 'payload/internal'
 
 import { Upload } from '@aws-sdk/lib-storage'
 import { getFileBuffer, getFileStream } from 'payload/internal'
@@ -8,8 +8,8 @@ interface UploadArgs {
   acl?: 'private' | 'public-read'
   bucket: string
   client: AWS.S3
-  content: FileContent
   mimeType: string
+  source: FileSource
   storageFilePath: string
 }
 
@@ -19,14 +19,14 @@ export async function uploadFile({
   acl,
   bucket,
   client,
-  content,
   mimeType,
+  source,
   storageFilePath,
 }: UploadArgs): Promise<void> {
-  if (content.type === 'buffer' && content.buffer.length < multipartThreshold) {
+  if (source.type === 'buffer' && source.buffer.length < multipartThreshold) {
     await client.putObject({
       ACL: acl,
-      Body: await getFileBuffer(content),
+      Body: await getFileBuffer(source),
       Bucket: bucket,
       ContentType: mimeType,
       Key: storageFilePath,
@@ -39,7 +39,7 @@ export async function uploadFile({
     client,
     params: {
       ACL: acl,
-      Body: await getFileStream(content),
+      Body: await getFileStream(source),
       Bucket: bucket,
       ContentType: mimeType,
       Key: storageFilePath,
