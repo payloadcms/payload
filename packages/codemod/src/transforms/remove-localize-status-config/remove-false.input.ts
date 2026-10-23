@@ -1,7 +1,10 @@
 import { buildConfig } from 'payload'
 
-// localizeStatus: false should be preserved (explicit opt-out)
+// localizeStatus: false is no longer a supported opt-out
 export default buildConfig({
+  experimental: {
+    localizeStatus: false,
+  },
   collections: [
     {
       slug: 'posts',
