@@ -532,7 +532,10 @@ describe('Versions', () => {
 
       const drawer = page.locator('[id^=doc-drawer_autosave-posts_1_]')
       await expect(drawer).toBeVisible()
-      await expect(drawer.locator('.id-label')).toBeVisible()
+      await expect(drawer.getByRole('heading', { level: 3 }).getByRole('link')).toHaveAttribute(
+        'href',
+        new RegExp(`/${autosaveCollectionSlug}/[^/]+$`),
+      )
     })
 
     test('collection - autosave - should redirect from create to edit URL after first save', async () => {

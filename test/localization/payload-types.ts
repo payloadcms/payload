@@ -208,6 +208,7 @@ export interface Config {
     | ('xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu')
     | ('xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu')[];
   globals: {
+    'localized-status-shared-global': LocalizedStatusSharedGlobal;
     'locale-validation-global': LocaleValidationGlobal;
     'global-array': GlobalArray;
     'global-text': GlobalText;
@@ -219,6 +220,7 @@ export interface Config {
     'publication-hook-global': PublicationHookGlobal;
   };
   globalsSelect: {
+    'localized-status-shared-global': LocalizedStatusSharedGlobalSelect<false> | LocalizedStatusSharedGlobalSelect<true>;
     'locale-validation-global': LocaleValidationGlobalSelect<false> | LocaleValidationGlobalSelect<true>;
     'global-array': GlobalArraySelect<false> | GlobalArraySelect<true>;
     'global-text': GlobalTextSelect<false> | GlobalTextSelect<true>;
@@ -2372,6 +2374,45 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-status-shared-global".
+ */
+export interface LocalizedStatusSharedGlobal {
+  id: string;
+  localizedText?: string | null;
+  sharedText?: string | null;
+  sharedRows?:
+    | {
+        localizedText?: string | null;
+        sharedText?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  sharedBlocks?: SharedTextBlock[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SharedTextBlock".
+ */
+export interface SharedTextBlock {
+  localizedText?: string | null;
+  sharedText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'sharedTextBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "locale-validation-global".
  */
 export interface LocaleValidationGlobal {
@@ -2573,6 +2614,39 @@ export interface PublicationHookGlobal {
   updatedAt?: string | null;
   createdAt?: string | null;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-status-shared-global_select".
+ */
+export interface LocalizedStatusSharedGlobalSelect<T extends boolean = true> {
+  localizedText?: T;
+  sharedText?: T;
+  sharedRows?:
+    | T
+    | {
+        localizedText?: T;
+        sharedText?: T;
+        id?: T;
+      };
+  sharedBlocks?:
+    | T
+    | {
+        sharedTextBlock?:
+          | T
+          | {
+              localizedText?: T;
+              sharedText?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

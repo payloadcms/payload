@@ -43,6 +43,7 @@ import {
   hasDraftValidationEnabled,
   hasLocalizeStatusEnabled,
 } from '../../../utilities/getVersionsConfig.js'
+import { mergeLocalizedData } from '../../../utilities/mergeLocalizedData.js'
 import { resolvePublishAllLocales } from '../../../utilities/resolvePublishAllLocales.js'
 import {
   buildAllLocalesPublicationHookDoc,
@@ -51,7 +52,10 @@ import {
   validateAllLocalesPublicationFlags,
 } from '../../../versions/allLocalesPublicationStatus.js'
 import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
+import { getLocalizedDraftStatus } from '../../../versions/drafts/getLocalizedDraftStatus.js'
+import { hasNonLocalizedDataChanged } from '../../../versions/drafts/hasNonLocalizedDataChanged.js'
 import { validateLocalWithLocaleKeyedData } from '../local/validate.js'
+
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
   collectionConfig: SanitizedCollectionConfig
@@ -347,9 +351,9 @@ export const updateDocument = async <
     const statusStr = result._status
 
     if (
-      hasAuthorizedPublicationStatus &&
       typeof docWithLocales._status === 'object' &&
-      docWithLocales._status !== null
+      docWithLocales._status !== null &&
+      !Array.isArray(docWithLocales._status)
     ) {
       result._status = { ...docWithLocales._status }
     } else {
@@ -357,7 +361,9 @@ export const updateDocument = async <
     }
 
     if (!hasAuthorizedPublicationStatus) {
-      for (const localeCode of config.localization.localeCodes) {
+      const localesToUpdate = locale === 'all' ? config.localization.localeCodes : [locale]
+
+      for (const localeCode of localesToUpdate) {
         ;(result._status as Record<string, unknown>)[localeCode] = statusStr
       }
     }
@@ -387,13 +393,26 @@ export const updateDocument = async <
         for (const localeCode of accessibleLocaleCodes) {
           result._status[localeCode] = unpublishAllLocales ? 'draft' : 'published'
         }
-      } else if (
-        !isSavingDraft &&
-        result._status &&
-        typeof result._status === 'object' &&
-        !Array.isArray(result._status) &&
-        (result._status as Record<string, unknown>)[locale] === 'published'
-      ) {
+      } else if (isSavingDraft && statusFieldAccess) {
+        const shouldDraftAllLocales = hasNonLocalizedDataChanged({
+          after: mergeLocalizedData({
+            configBlockReferences: config.blocks,
+            dataWithLocales: result,
+            docWithLocales,
+            fields: collectionConfig.fields,
+            localesToUpdate: config.localization.localeCodes,
+          }),
+          before: docWithLocales,
+          configBlockReferences: config.blocks,
+          fields: collectionConfig.fields,
+        })
+
+        result._status = getLocalizedDraftStatus({
+          existingStatus: shouldDraftAllLocales ? result._status : docWithLocales._status,
+          locale: shouldDraftAllLocales ? 'all' : locale,
+          localeCodes: config.localization.localeCodes,
+        })
+      } else if (!isSavingDraft && locale !== 'all') {
         const currentDoc = await payload.db.findOne<DataFromCollectionSlug<TSlug>>({
           collection: collectionConfig.slug,
           locale: 'all',
