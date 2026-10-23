@@ -71,6 +71,135 @@ const fields: Field[] = [
 ]
 
 describe('hasNonLocalizedDataChanged', () => {
+  it.each([
+    { after: { b: 2, a: 1 }, before: { a: 1, b: 2 }, hasChanged: false },
+    { after: { a: 1 }, before: { a: 1, b: undefined }, hasChanged: false },
+    { after: [1, 2], before: [1, undefined, 2], hasChanged: false },
+    { after: [2, 1], before: [1, 2], hasChanged: true },
+    { after: null, before: undefined, hasChanged: true },
+    { after: '', before: null, hasChanged: true },
+    { after: false, before: null, hasChanged: true },
+    { after: 0, before: null, hasChanged: true },
+  ])('should compare shared JSON values $before and $after', ({ after, before, hasChanged }) => {
+    expect(
+      hasNonLocalizedDataChanged({
+        after: { value: after },
+        before: { value: before },
+        configBlockReferences: [],
+        fields: [{ name: 'value', type: 'json' }],
+      }),
+    ).toBe(hasChanged)
+  })
+
+  it.each(['rows', 'blocks'] as const)('should detect reordering shared %s', (field) => {
+    const rows = ['one', 'two'].map((id) => ({
+      id,
+      ...(field === 'blocks' ? { blockType: 'textBlock' } : {}),
+    }))
+
+    expect(
+      hasNonLocalizedDataChanged({
+        after: { [field]: [...rows].reverse() },
+        before: { [field]: rows },
+        configBlockReferences: [],
+        fields,
+      }),
+    ).toBe(true)
+  })
+
+  it('should treat missing and null row metadata equally with sanitized fields', () => {
+    expect(
+      hasNonLocalizedDataChanged({
+        after: { rows: [{ id: null, text: 'Shared' }] },
+        before: { rows: [{ text: 'Shared' }] },
+        configBlockReferences: [],
+        fields: [
+          {
+            name: 'rows',
+            type: 'array',
+            fields: [
+              { name: 'id', type: 'text' },
+              { name: 'text', type: 'text' },
+            ],
+          },
+        ],
+      }),
+    ).toBe(false)
+  })
+
+  it.each([
+    { hasChanged: false, localizedText: 'Draft', sharedText: 'Shared' },
+    { hasChanged: true, localizedText: 'Published', sharedText: 'Changed' },
+  ])(
+    'should compare shared children of referenced blocks ($hasChanged)',
+    ({ hasChanged, ...after }) => {
+      const block = {
+        slug: 'reference',
+        fields: [
+          { name: 'localizedText', type: 'text', localized: true },
+          { name: 'sharedText', type: 'text' },
+        ],
+      } as const
+
+      expect(
+        hasNonLocalizedDataChanged({
+          after: { blocks: [{ id: 'one', blockType: block.slug, ...after }] },
+          before: {
+            blocks: [
+              {
+                id: 'one',
+                blockType: block.slug,
+                localizedText: 'Published',
+                sharedText: 'Shared',
+              },
+            ],
+          },
+          configBlockReferences: [{ ...block, fields: [...block.fields], flattenedFields: [] }],
+          fields: [{ name: 'blocks', type: 'blocks', blocks: [block.slug] }],
+        }),
+      ).toBe(hasChanged)
+    },
+  )
+
+  it.each([false, true])('should compare shared children of named tabs (%s)', (hasChanged) => {
+    expect(
+      hasNonLocalizedDataChanged({
+        after: { tab: { sharedText: hasChanged ? 'Changed' : 'Shared', localizedText: 'Draft' } },
+        before: { tab: { sharedText: 'Shared', localizedText: 'Published' } },
+        configBlockReferences: [],
+        fields: [
+          {
+            type: 'tabs',
+            tabs: [
+              {
+                name: 'tab',
+                fields: [
+                  { name: 'sharedText', type: 'text' },
+                  { name: 'localizedText', type: 'text', localized: true },
+                ],
+              },
+            ],
+          },
+        ],
+      }),
+    ).toBe(hasChanged)
+  })
+
+  it.each(['group', 'array'] as const)('should ignore children of a localized %s', (type) => {
+    expect(
+      hasNonLocalizedDataChanged({
+        after: { container: { en: type === 'group' ? { text: 'Draft' } : [{ text: 'Draft' }] } },
+        before: {
+          container: { en: type === 'group' ? { text: 'Published' } : [{ text: 'Published' }] },
+        },
+        configBlockReferences: [],
+        fields: [
+          { name: 'container', type, localized: true, fields: [{ name: 'text', type: 'text' }] },
+        ],
+      }),
+    ).toBe(false)
+  })
+
   it('should ignore localized field changes', () => {
     expect(
       hasNonLocalizedDataChanged({

@@ -1,21 +1,8 @@
-import type { Block, Field, FlattenedBlock } from '../../fields/config/types.js'
+import type { Field } from '../../fields/config/types.js'
 import type { SanitizedConfig } from '../../index.js'
 import type { JsonObject } from '../../types/index.js'
 
-import {
-  fieldAffectsData,
-  fieldIsVirtual,
-  fieldShouldBeLocalized,
-  tabHasName,
-} from '../../fields/config/types.js'
-
-type ComparableValue =
-  | { [key: string]: ComparableValue }
-  | boolean
-  | ComparableValue[]
-  | null
-  | number
-  | string
+import { fieldAffectsData, fieldIsVirtual, tabHasName } from '../../fields/config/types.js'
 
 type HasNonLocalizedDataChangedArgs = {
   after: JsonObject
@@ -24,276 +11,191 @@ type HasNonLocalizedDataChangedArgs = {
   fields: Field[]
 }
 
-type NormalizeArgs = {
-  configBlockReferences: SanitizedConfig['blocks']
-  data: JsonObject
-  fields: Field[]
-  parentIsLocalized?: boolean
-}
-
 export const hasNonLocalizedDataChanged = ({
   after,
   before,
   configBlockReferences,
   fields,
 }: HasNonLocalizedDataChangedArgs): boolean => {
-  const beforeSharedData = normalizeNonLocalizedData({
-    configBlockReferences,
-    data: removeUndefinedValues(before),
-    fields,
-  })
-  const afterSharedData = normalizeNonLocalizedData({
-    configBlockReferences,
-    data: removeUndefinedValues(after),
-    fields,
-  })
-
-  return stableStringify(beforeSharedData) !== stableStringify(afterSharedData)
-}
-
-const removeUndefinedValues = <T>(value: T): T => {
-  if (Array.isArray(value)) {
-    return value
-      .map((item) => removeUndefinedValues(item))
-      .filter((item) => typeof item !== 'undefined') as T
-  }
-
-  if (value && typeof value === 'object') {
-    const cleanedValue: Record<string, unknown> = {}
-
-    for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
-      const cleanedItem = removeUndefinedValues(item)
-
-      if (typeof cleanedItem !== 'undefined') {
-        cleanedValue[key] = cleanedItem
-      }
-    }
-
-    return cleanedValue as T
-  }
-
-  return value
-}
-
-const normalizeNonLocalizedData = ({
-  configBlockReferences,
-  data,
-  fields,
-  parentIsLocalized = false,
-}: NormalizeArgs): Record<string, ComparableValue> => {
-  const result: Record<string, ComparableValue> = {}
-
   for (const field of fields) {
-    if (fieldIsVirtual(field)) {
+    // Skipping localized containers also skips their implicitly localized children.
+    if (fieldIsVirtual(field) || ('localized' in field && field.localized)) {
       continue
     }
 
     if (fieldAffectsData(field)) {
-      if (!(field.name in data)) {
-        continue
-      }
-
-      const fieldIsLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
-
-      if (fieldIsLocalized) {
-        continue
-      }
-
-      const value = data[field.name]
+      const beforeValue = before[field.name]
+      const afterValue = after[field.name]
 
       switch (field.type) {
-        case 'array': {
-          const normalizedRows = normalizeArrayRows({
-            configBlockReferences,
-            fields: field.fields,
-            rows: Array.isArray(value) ? value : [],
-          })
-
-          if (normalizedRows.length > 0) {
-            result[field.name] = normalizedRows
-          }
-          break
-        }
-
+        case 'array':
         case 'blocks': {
-          const normalizedBlocks = normalizeBlocks({
-            blocks: Array.isArray(value) ? value : [],
-            configBlockReferences,
-            fieldBlocks: field.blocks,
-          })
-
-          if (normalizedBlocks.length > 0) {
-            result[field.name] = normalizedBlocks
+          if (
+            hasRowDataChanged({
+              after: afterValue,
+              before: beforeValue,
+              configBlockReferences,
+              field,
+            })
+          ) {
+            return true
           }
           break
         }
 
         case 'group': {
-          const normalizedGroup = normalizeNonLocalizedData({
-            configBlockReferences,
-            data: isJsonObject(value) ? value : {},
-            fields: field.fields,
-            parentIsLocalized,
-          })
-
-          if (Object.keys(normalizedGroup).length > 0) {
-            result[field.name] = normalizedGroup
+          if (
+            hasNonLocalizedDataChanged({
+              after: asObject({ value: afterValue }),
+              before: asObject({ value: beforeValue }),
+              configBlockReferences,
+              fields: field.fields,
+            })
+          ) {
+            return true
           }
           break
         }
 
         default: {
-          result[field.name] = normalizeComparableValue(value)
-          break
+          if (!areValuesEqual({ after: afterValue, before: beforeValue })) {
+            return true
+          }
         }
       }
-    } else if ('fields' in field && Array.isArray(field.fields)) {
-      Object.assign(
-        result,
-        normalizeNonLocalizedData({
-          configBlockReferences,
-          data,
-          fields: field.fields,
-          parentIsLocalized,
-        }),
-      )
+    } else if ('fields' in field) {
+      if (
+        hasNonLocalizedDataChanged({ after, before, configBlockReferences, fields: field.fields })
+      ) {
+        return true
+      }
     } else if (field.type === 'tabs') {
       for (const tab of field.tabs) {
-        if (fieldIsVirtual(tab)) {
+        if (fieldIsVirtual(tab) || ('localized' in tab && tab.localized)) {
           continue
         }
 
-        const tabIsLocalized = fieldShouldBeLocalized({ field: tab, parentIsLocalized })
-
-        if (tabHasName(tab)) {
-          if (tabIsLocalized || !(tab.name in data)) {
-            continue
-          }
-
-          const tabValue = data[tab.name]
-          const normalizedTab = normalizeNonLocalizedData({
+        if (
+          hasNonLocalizedDataChanged({
+            after: tabHasName(tab) ? asObject({ value: after[tab.name] }) : after,
+            before: tabHasName(tab) ? asObject({ value: before[tab.name] }) : before,
             configBlockReferences,
-            data: isJsonObject(tabValue) ? tabValue : {},
             fields: tab.fields,
-            parentIsLocalized,
           })
-
-          if (Object.keys(normalizedTab).length > 0) {
-            result[tab.name] = normalizedTab
-          }
-        } else {
-          Object.assign(
-            result,
-            normalizeNonLocalizedData({
-              configBlockReferences,
-              data,
-              fields: tab.fields,
-              parentIsLocalized,
-            }),
-          )
+        ) {
+          return true
         }
       }
     }
   }
 
-  return result
+  return false
 }
 
-const normalizeArrayRows = ({
+const hasRowDataChanged = ({
+  after,
+  before,
   configBlockReferences,
-  fields,
-  rows,
+  field,
 }: {
+  after: unknown
+  before: unknown
   configBlockReferences: SanitizedConfig['blocks']
-  fields: Field[]
-  rows: unknown[]
-}): ComparableValue[] => {
-  return rows.map((row) => {
-    const rowData = isJsonObject(row) ? row : {}
+  field: Extract<Field, { type: 'array' | 'blocks' }>
+}): boolean => {
+  const beforeRows = definedItems({ value: before })
+  const afterRows = definedItems({ value: after })
 
-    return {
-      id: normalizeComparableValue(rowData.id),
-      ...normalizeNonLocalizedData({
-        configBlockReferences,
-        data: rowData,
-        fields,
-      }),
-    }
-  })
-}
-
-const normalizeBlocks = ({
-  blocks,
-  configBlockReferences,
-  fieldBlocks,
-}: {
-  blocks: unknown[]
-  configBlockReferences: SanitizedConfig['blocks']
-  fieldBlocks: (Block | string)[]
-}): ComparableValue[] => {
-  return blocks.map((blockData) => {
-    const blockObject = isJsonObject(blockData) ? blockData : {}
-    const blockType = typeof blockObject.blockType === 'string' ? blockObject.blockType : undefined
-    const blockOrSlug = fieldBlocks.find((block) => {
-      const slug = typeof block === 'string' ? block : block.slug
-      return slug === blockType
-    })
-    const block: Block | FlattenedBlock | undefined =
-      typeof blockOrSlug === 'string'
-        ? configBlockReferences?.find((blockRef) => blockRef.slug === blockOrSlug)
-        : blockOrSlug
-
-    return {
-      id: normalizeComparableValue(blockObject.id),
-      blockName: normalizeComparableValue(blockObject.blockName),
-      blockType: normalizeComparableValue(blockObject.blockType),
-      ...(block
-        ? normalizeNonLocalizedData({
-            configBlockReferences,
-            data: blockObject,
-            fields: block.fields,
-          })
-        : {}),
-    }
-  })
-}
-
-const isJsonObject = (value: unknown): value is JsonObject => {
-  return Boolean(value && typeof value === 'object' && !Array.isArray(value))
-}
-
-const normalizeComparableValue = (value: unknown): ComparableValue => {
-  if (Array.isArray(value)) {
-    return value.map((item) => normalizeComparableValue(item))
+  if (beforeRows.length !== afterRows.length) {
+    return true
   }
 
-  if (value && typeof value === 'object') {
-    const objectValue = value as Record<string, unknown>
-    const result: Record<string, ComparableValue> = {}
+  return beforeRows.some((row, index) => {
+    const beforeRow = asObject({ value: row })
+    const afterRow = asObject({ value: afterRows[index] })
 
-    for (const key of Object.keys(objectValue).sort()) {
-      const normalizedValue = normalizeComparableValue(objectValue[key])
+    if (!areValuesEqual({ after: afterRow.id ?? null, before: beforeRow.id ?? null })) {
+      return true
+    }
 
-      if (typeof normalizedValue !== 'undefined') {
-        result[key] = normalizedValue
+    let fields: Field[]
+
+    if (field.type === 'blocks') {
+      if (
+        !areValuesEqual({
+          after: afterRow.blockType ?? null,
+          before: beforeRow.blockType ?? null,
+        }) ||
+        !areValuesEqual({ after: afterRow.blockName ?? null, before: beforeRow.blockName ?? null })
+      ) {
+        return true
       }
+
+      const blockOrSlug = field.blocks.find(
+        (block) => (typeof block === 'string' ? block : block.slug) === afterRow.blockType,
+      )
+      const block =
+        typeof blockOrSlug === 'string'
+          ? configBlockReferences?.find((block) => block.slug === blockOrSlug)
+          : blockOrSlug
+
+      fields = block?.fields ?? []
+    } else {
+      fields = field.fields
     }
 
-    return result
-  }
-
-  if (
-    typeof value === 'boolean' ||
-    typeof value === 'number' ||
-    typeof value === 'string' ||
-    value === null
-  ) {
-    return value
-  }
-
-  return null
+    return hasNonLocalizedDataChanged({
+      after: afterRow,
+      before: beforeRow,
+      configBlockReferences,
+      // Metadata was compared above, including its missing/null equivalence.
+      fields: fields.filter(
+        (child) =>
+          !fieldAffectsData(child) ||
+          (child.name !== 'id' && (field.type !== 'blocks' || child.name !== 'blockName')),
+      ),
+    })
+  })
 }
 
-const stableStringify = (value: ComparableValue | Record<string, ComparableValue>): string => {
-  return JSON.stringify(value)
+const asObject = ({ value }: { value: unknown }): JsonObject =>
+  value && typeof value === 'object' && !Array.isArray(value) ? (value as JsonObject) : {}
+
+const definedItems = ({ value }: { value: unknown }): unknown[] =>
+  Array.isArray(value) ? value.filter((item) => typeof item !== 'undefined') : []
+
+const areValuesEqual = ({ after, before }: { after: unknown; before: unknown }): boolean => {
+  if (before === after) {
+    return true
+  }
+
+  if (Array.isArray(before) && Array.isArray(after)) {
+    const beforeItems = definedItems({ value: before })
+    const afterItems = definedItems({ value: after })
+
+    return (
+      beforeItems.length === afterItems.length &&
+      beforeItems.every((item, index) => areValuesEqual({ after: afterItems[index], before: item }))
+    )
+  }
+
+  if (before && after && typeof before === 'object' && typeof after === 'object') {
+    if (Array.isArray(before) || Array.isArray(after)) {
+      return false
+    }
+
+    const beforeObject = before as JsonObject
+    const afterObject = after as JsonObject
+    const beforeKeys = Object.keys(beforeObject).filter((key) => beforeObject[key] !== undefined)
+    const afterKeys = Object.keys(afterObject).filter((key) => afterObject[key] !== undefined)
+
+    return (
+      beforeKeys.length === afterKeys.length &&
+      beforeKeys.every((key) =>
+        areValuesEqual({ after: afterObject[key], before: beforeObject[key] }),
+      )
+    )
+  }
+
+  return false
 }
