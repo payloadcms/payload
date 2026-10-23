@@ -157,7 +157,8 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
     localReq.user = { ...localReq.user, collection: payload.config.admin.user }
   }
 
-  localReq.payloadDataLoader = localReq?.payloadDataLoader || getDataLoader(localReq as PayloadRequest)
+  localReq.payloadDataLoader =
+    localReq?.payloadDataLoader || getDataLoader(localReq as PayloadRequest)
   localReq.routeParams = localReq?.routeParams || {}
   localReq.query = localReq?.query || {}
 
