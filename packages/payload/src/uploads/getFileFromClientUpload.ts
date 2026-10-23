@@ -11,8 +11,10 @@ import type { SanitizedUploadConfig, UploadEdits } from './types.js'
 
 import { APIError } from '../errors/APIError.js'
 import { isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
+import { getFileSize } from './fileContent.js'
 import { getFileContentRequirement, HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
 import { getImageSize } from './getImageSize.js'
+import { toLegacyUploadFile } from './uploadFile.js'
 
 export type ClientUploadData = {
   clientUploadContext?: unknown
@@ -32,9 +34,11 @@ export const CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY = 'payloadClientUploadTemp
 
 export async function getFileFromClientUpload({
   file,
+  forceFullContent = false,
   req,
 }: {
   file: ClientUploadData
+  forceFullContent?: boolean
   req: PayloadRequest
 }): Promise<NonNullable<PayloadRequest['file']>> {
   const uploadConfig = req.payload.collections[file.collectionSlug]?.config.upload
@@ -43,22 +47,23 @@ export async function getFileFromClientUpload({
     throw new APIError(`uploadConfig.handlers is not present for ${file.collectionSlug}`)
   }
 
-  const contentRequirement = file.clientUploadContext
-    ? getFileContentRequirement({
-        hasSizeEdits: requestHasSizeEdits(req),
-        mimeType: file.mimeType,
-        uploadConfig,
-      })
-    : 'full'
+  const contentRequirement =
+    file.clientUploadContext && !forceFullContent
+      ? getFileContentRequirement({
+          hasSizeEdits: requestHasSizeEdits(req),
+          mimeType: file.mimeType,
+          uploadConfig,
+        })
+      : 'full'
 
   if (contentRequirement === 'none') {
-    return {
+    return toLegacyUploadFile({
       name: file.filename,
       clientUploadContext: file.clientUploadContext,
-      data: Buffer.alloc(0),
+      content: { type: 'clientUpload', size: file.size },
       mimetype: file.mimeType,
       size: file.size,
-    }
+    })
   }
 
   if (contentRequirement === 'header') {
@@ -76,14 +81,15 @@ export async function getFileFromClientUpload({
   }
   req.context[CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY] = tempFilePath
 
-  return {
+  const content = { type: 'file', ownership: 'temporary', path: tempFilePath } as const
+
+  return toLegacyUploadFile({
     name: file.filename,
     clientUploadContext: file.clientUploadContext,
-    data: Buffer.alloc(0),
+    content,
     mimetype: response.headers.get('Content-Type') || file.mimeType,
-    size: file.size,
-    tempFilePath,
-  }
+    size: await getFileSize(content),
+  })
 }
 
 /**
@@ -206,13 +212,13 @@ async function fetchHeaderOnly({
     await reader.cancel().catch(() => undefined)
   }
 
-  const probedFile = {
+  const probedFile = toLegacyUploadFile({
     name: file.filename,
     clientUploadContext: file.clientUploadContext,
-    data: Buffer.concat(chunks),
+    content: { type: 'clientUpload', probe: Buffer.concat(chunks), size: file.size },
     mimetype: response.headers.get('Content-Type') || file.mimeType,
     size: file.size,
-  }
+  })
 
   try {
     await getImageSize({ file: probedFile, sharp: req.payload.config.sharp })

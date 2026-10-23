@@ -2,12 +2,7 @@ import type { DeepPartial } from 'ts-essentials'
 
 import type { UserSession } from '../../../auth/types.js'
 import type { Args } from '../../../fields/hooks/beforeChange/index.js'
-import type {
-  CollectionSlug,
-  FileToSave,
-  SanitizedConfig,
-  TypedFallbackLocale,
-} from '../../../index.js'
+import type { CollectionSlug, SanitizedConfig, TypedFallbackLocale } from '../../../index.js'
 import type {
   JsonObject,
   Payload,
@@ -16,6 +11,7 @@ import type {
   SelectType,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
+import type { FileContentToSave } from '../../../uploads/fileContent.js'
 import type {
   DataFromCollectionSlug,
   SanitizedCollectionConfig,
@@ -56,7 +52,7 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   docWithLocales: JsonObject & TypeWithID
   draftArg: boolean
   fallbackLocale: TypedFallbackLocale
-  filesToUpload: FileToSave[]
+  filesToUpload: FileContentToSave[]
   id: number | string
   locale: string
   overrideAccess: boolean

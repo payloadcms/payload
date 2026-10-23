@@ -1,10 +1,8 @@
-import fs from 'fs/promises'
-
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
-import { mapAsync } from '../utilities/mapAsync.js'
+import { disposeFileContent, getFileContent } from './fileContent.js'
 import { unlinkClientUploadTempFile } from './unlinkClientUploadTempFile.js'
 
 type Args = {
@@ -24,17 +22,18 @@ export const unlinkTempFiles: (args: Args) => Promise<void> = async ({
   const isClientUploadTempFile = Boolean(
     file?.tempFilePath && Object.prototype.hasOwnProperty.call(file, 'clientUploadContext'),
   )
+
   let unlinkedTempFilePath: string | undefined
 
-  if (collectionConfig.upload && (config.upload?.useTempFiles || isClientUploadTempFile)) {
-    const fileArray = [{ file }]
-    await mapAsync(fileArray, async ({ file }) => {
-      // Still need this check because this will not be populated if using local API
-      if (file?.tempFilePath) {
-        await fs.unlink(file.tempFilePath)
-        unlinkedTempFilePath = file.tempFilePath
-      }
-    })
+  if (collectionConfig.upload && file) {
+    const ownership =
+      config.upload?.useTempFiles || isClientUploadTempFile ? 'temporary' : 'external'
+    const content = getFileContent(file, ownership)
+
+    if (content.type === 'file' && content.ownership === 'temporary') {
+      await disposeFileContent(content)
+      unlinkedTempFilePath = content.path
+    }
   }
 
   await unlinkClientUploadTempFile({ alreadyUnlinkedPath: unlinkedTempFilePath, req })

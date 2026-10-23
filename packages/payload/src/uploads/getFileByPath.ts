@@ -4,6 +4,8 @@ import path from 'path'
 
 import type { PayloadRequest } from '../types/index.js'
 
+import { toLegacyUploadFile } from './uploadFile.js'
+
 const mimeTypeEstimate: Record<string, string> = {
   svg: 'image/svg+xml',
 }
@@ -22,10 +24,10 @@ export const getFileByPath = async (filePath: string): Promise<PayloadRequest['f
     fileTypeFromFile(filePath),
   ])
 
-  return {
+  return toLegacyUploadFile({
     name,
-    data,
+    content: { type: 'buffer', buffer: data },
     mimetype: type?.mime || mimeTypeEstimate[ext]!,
     size: stat.size,
-  }
+  })
 }

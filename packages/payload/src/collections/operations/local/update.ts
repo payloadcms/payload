@@ -27,6 +27,7 @@ import type {
 
 import { APIError } from '../../../errors/index.js'
 import { getFileByPath } from '../../../uploads/getFileByPath.js'
+import { normalizeUploadFile, toLegacyUploadFile } from '../../../uploads/uploadFile.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { updateOperation } from '../update.js'
 import { updateByIDOperation } from '../updateByID.js'
@@ -257,6 +258,9 @@ async function updateLocal<
 
   const req = await createLocalReq(options as CreateLocalReqOptions, payload)
   req.file = file ?? (await getFileByPath(filePath!))
+  if (req.file) {
+    req.file = toLegacyUploadFile(normalizeUploadFile(req.file), req.file)
+  }
 
   const args = {
     id,

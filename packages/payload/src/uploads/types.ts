@@ -4,6 +4,7 @@ import type { CollectionConfig, TypeWithID } from '../collections/config/types.j
 import type { PayloadComponent } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { WithMetadata } from './optionallyAppendMetadata.js'
+import type { UploadFile } from './uploadFile.js'
 
 export type FileSize = {
   filename: null | string
@@ -328,7 +329,7 @@ export type UploadConfig = {
 }
 export type checkFileRestrictionsParams = {
   collection: CollectionConfig
-  file: File
+  file: File | UploadFile
   req: PayloadRequest
 }
 

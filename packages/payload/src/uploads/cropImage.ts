@@ -1,12 +1,12 @@
 import type { SharpOptions } from 'sharp'
 
-import fs from 'fs/promises'
-
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { WithMetadata } from './optionallyAppendMetadata.js'
 import type { UploadEdits } from './types.js'
+import type { UploadFile } from './uploadFile.js'
 
+import { getFileBuffer, getFileInput } from './fileContent.js'
 import { isAnimatedImage } from './isAnimatedImage.js'
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
 
@@ -17,7 +17,7 @@ const percentToPixel = (value: number, dimension: number) => {
 type CropImageArgs = {
   cropData: UploadEdits['crop']
   dimensions: { height: number; width: number }
-  file: PayloadRequest['file']
+  file: PayloadRequest['file'] | UploadFile
   heightInPixels: number
   req?: PayloadRequest
   sharp: SanitizedConfig['sharp']
@@ -56,14 +56,11 @@ export async function cropImage({
       let adjustedHeight = originalHeight
 
       if (fileIsAnimatedType) {
-        const animatedMetadata = await sharp(
-          file.tempFilePath || file.data,
-          sharpOptions,
-        ).metadata()
+        const animatedMetadata = await sharp(getFileInput(file), sharpOptions).metadata()
         adjustedHeight = animatedMetadata.pages ? animatedMetadata.height! : originalHeight
       }
 
-      const data = file.tempFilePath ? await fs.readFile(file.tempFilePath) : file.data
+      const data = await getFileBuffer(file)
 
       return {
         data,
@@ -82,7 +79,7 @@ export async function cropImage({
       width: Number(widthInPixels),
     }
 
-    let cropped = sharp(file.tempFilePath || file.data, sharpOptions).extract(formattedCropData)
+    let cropped = sharp(getFileInput(file), sharpOptions).extract(formattedCropData)
 
     cropped = await optionallyAppendMetadata({
       req: req!,

@@ -1,11 +1,15 @@
 import { fileTypeFromBuffer, fileTypeFromFile } from 'file-type'
-import fs from 'fs/promises'
 
 import type { checkFileRestrictionsParams, FileAllowList } from './types.js'
 
 import { ValidationError } from '../errors/index.js'
 import { validateMimeType } from '../utilities/validateMimeType.js'
 import { validatePDF } from '../utilities/validatePDF.js'
+import {
+  getFileContent,
+  getFileInspectionInput,
+  getFileBuffer as readFileBuffer,
+} from './fileContent.js'
 import { getFileTypeFallback } from './getFileTypeFallback.js'
 import {
   getFileExtension,
@@ -98,8 +102,8 @@ export const checkFileRestrictions = async ({
   // For temp files, use fileTypeFromFile so large files (e.g. video) are never loaded into memory
   // just for detection. Content validation streams SVG/XML temp files and only loads a full
   // temp-file buffer for PDF integrity checks.
-  const { tempFilePath } = file
-  const isTempFile = !!tempFilePath && (!file.data || file.data.length === 0)
+  const content = getFileContent(file)
+  const inspectionInput = getFileInspectionInput(content)
 
   // Lazily reads the full file — only reached for PDF validation.
   let _fileBuffer: Buffer | undefined
@@ -107,11 +111,8 @@ export const checkFileRestrictions = async ({
     if (_fileBuffer) {
       return _fileBuffer
     }
-    if (!isTempFile || !tempFilePath) {
-      return (_fileBuffer = file.data)
-    }
     try {
-      _fileBuffer = await fs.readFile(tempFilePath)
+      _fileBuffer = await readFileBuffer(content)
       return _fileBuffer
     } catch {
       throw new ValidationError({
@@ -126,16 +127,18 @@ export const checkFileRestrictions = async ({
 
   const getSvgInspection = async () => {
     svgInspection ??=
-      isTempFile && tempFilePath ? await inspectSvgFile(tempFilePath) : inspectSvg(file.data)
+      typeof inspectionInput === 'string'
+        ? await inspectSvgFile(inspectionInput)
+        : inspectSvg(inspectionInput)
     return svgInspection
   }
 
   let detected
   try {
     detected =
-      isTempFile && tempFilePath
-        ? await fileTypeFromFile(tempFilePath)
-        : await fileTypeFromBuffer(file.data)
+      typeof inspectionInput === 'string'
+        ? await fileTypeFromFile(inspectionInput)
+        : await fileTypeFromBuffer(inspectionInput)
   } catch {
     if (configMimeTypes.length > 0) {
       throw new ValidationError({
@@ -161,9 +164,9 @@ export const checkFileRestrictions = async ({
 
   if (detected && isISOBaseMediaMimeType(detected.mime)) {
     const isValidISOBaseMedia =
-      isTempFile && tempFilePath
-        ? await validateISOBaseMediaFile(tempFilePath)
-        : await validateISOBaseMediaBuffer(file.data)
+      typeof inspectionInput === 'string'
+        ? await validateISOBaseMediaFile(inspectionInput)
+        : await validateISOBaseMediaBuffer(inspectionInput)
 
     if (!isValidISOBaseMedia) {
       errors.push('Invalid or corrupted ISO base media file.')

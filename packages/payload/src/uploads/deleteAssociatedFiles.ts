@@ -13,7 +13,7 @@ type Args = {
   collectionConfig: SanitizedCollectionConfig
   config: SanitizedConfig
   doc: Record<string, unknown>
-  files?: FileToSave[]
+  files?: Pick<FileToSave, 'path'>[]
   overrideDelete: boolean
   req: PayloadRequest
 }
