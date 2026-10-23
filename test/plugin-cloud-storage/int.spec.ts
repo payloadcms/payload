@@ -30,9 +30,11 @@ import {
   mediaWithThrowingHookSlug,
   prefix,
   restrictedMediaSlug,
+  staticFileMediaSlug,
   testMetadataSlug,
   versionedS3MediaSlug,
 } from './shared.js'
+import { staticFileBytes } from './staticFileMedia.js'
 import { clearTestBucket, createTestBucket } from './utils.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -141,6 +143,11 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
 
     const mockCollection = {
       slug: 'media',
+      access: {
+        // The fallback lookup evaluates read access before querying. These cases
+        // cover prefix resolution, not a denial.
+        read: () => true,
+      },
       upload: {},
     } as any
 
@@ -253,6 +260,56 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         })
         expect(result).toBe('db-prefix')
       })
+    })
+  })
+
+  test.describe('static file reads without a prefix query', () => {
+    const createdIDs: Array<number | string> = []
+
+    test.afterEach(async ({ payload }) => {
+      for (const id of createdIDs) {
+        await payload.delete({
+          id,
+          collection: staticFileMediaSlug,
+          overrideAccess: true,
+        } as never)
+      }
+
+      createdIDs.length = 0
+      staticFileBytes.clear()
+    })
+
+    test('should serve an anonymous file request when read access allows only static files', async ({
+      payload,
+      restClient,
+    }) => {
+      const filePath = path.resolve(dirname, '../uploads/image.png')
+      const upload = (await payload.create({
+        collection: staticFileMediaSlug,
+        data: {},
+        filePath,
+        overrideAccess: true,
+      } as never)) as { filename: string; id: number | string; url: string }
+
+      createdIDs.push(upload.id)
+
+      const fileResponse = await restClient.GET(`/${staticFileMediaSlug}/file/${upload.filename}`, {
+        auth: false,
+      })
+
+      expect(fileResponse.status).toBe(200)
+      expect(Buffer.from(await fileResponse.arrayBuffer())).toEqual(fs.readFileSync(filePath))
+      expect(upload.url).not.toContain('prefix=')
+
+      const listResponse = await restClient.GET(`/${staticFileMediaSlug}`, { auth: false })
+
+      expect(listResponse.status).toBe(403)
+
+      await restClient.login({ slug: 'users' })
+
+      const authedListResponse = await restClient.GET(`/${staticFileMediaSlug}`)
+
+      expect(authedListResponse.status).toBe(200)
     })
   })
 
