@@ -1,7 +1,7 @@
 {
   "scope": "The 50 unique Linear tickets audited in screen-reader.spec.ts before this consolidation.",
   "policy": "Every ticket must resolve to at least one relevant test. Partial mappings are not proof of the original remedy. Removing Guidepup coverage requires replacement browser evidence and explicit AT limitations.",
-  "updated": "2026-10-21",
+  "updated": "2026-10-23",
   "verification": {
     "browserRun": {
       "date": "2026-10-21",
@@ -14,7 +14,7 @@
     "screenReaderRun": "Not run on this laptop; do not infer AT success from browser assertions.",
     "screenReaderDiscovery": {
       "before": 54,
-      "after": 33
+      "after": 31
     },
     "followUpBrowserRun": {
       "status": "passed",
@@ -102,8 +102,7 @@
       "coverage": "partial",
       "tests": [
         "WCAG.e2e.spec.ts :: should pause trash-toast dismissal while its close button has keyboard focus",
-        "WCAG.e2e.spec.ts :: should give a default toast six seconds before automatic dismissal",
-        "screen-reader.spec.ts :: should announce the trash toast and dismiss it after the default timeout"
+        "WCAG.e2e.spec.ts :: should give a default toast six seconds before automatic dismissal"
       ],
       "limits": "Temporary Sonner patch fixes DOM keyboard-focus persistence, resumption on blur, hover coexistence, and timer cleanup after manual dismissal. Four local Chromium regressions pass; the four requested WebKit browser scenarios also pass in Claude's report. Actual VoiceOver toast navigation and virtual-cursor-only persistence have not yet been verified.",
       "manualVerification": "With VoiceOver, navigate normally to a real trash toast, then verify it remains while being read after mouse hover is removed. Record whether DOM focus follows the VoiceOver cursor; do not assume a purely virtual or keyboard-focused path."
@@ -745,18 +744,18 @@
   ],
   "remainingScreenReaderReview": {
     "date": "2026-10-21",
-    "scope": "Static review covered all 37 expanded cases at commit 203e115335. Four were subsequently retired with explicit browser replacements and recorded manual limits; cases tracks the 33 remaining cases and retiredCases preserves all four decisions.",
+    "scope": "Static review initially covered 37 expanded cases at commit 203e115335. Six were subsequently retired with explicit browser replacements and recorded manual limits; cases tracks the 31 remaining cases and retiredCases preserves all six decisions.",
     "interpretation": "Retain means the observable outcome justifies AT evidence, not that the test has passed or proves conformance. Strengthen means current assertions have a concrete false-pass, false-failure, scope, or cursor-start risk.",
     "counts": {
-      "retain-at": 12,
-      "scenario-gap": 5,
+      "retain-at": 11,
+      "scenario-gap": 4,
       "strengthen-at": 16
     },
     "platformInventory": {
-      "total": 33,
+      "total": 31,
       "nvdaOnly": 5,
       "voiceOverOnly": 1,
-      "both": 27,
+      "both": 25,
       "note": "On macOS the five NVDA-only cases are skipped; they are not passes."
     },
     "sharedRisks": [
@@ -1057,16 +1056,6 @@
         "next": "Keep focused NVDA evidence for all reported control types; confirm whether the failing report is browse- or focus-mode specific before adapting it."
       },
       {
-        "test": "should announce both rapid toast messages",
-        "title": "should announce both rapid toast messages",
-        "scenario": null,
-        "screenReaders": "VoiceOver and NVDA",
-        "tickets": [],
-        "decision": "retain-at",
-        "finding": "Two rapid spoken notifications are a timing-dependent AT outcome. Browser tests prove both remain in the native live region but not that both are announced.",
-        "next": "Retain only if both announcements are the intended product requirement; distinguish screen-reader coalescing/capture loss from product message loss rather than retrying blindly."
-      },
-      {
         "test": "should announce the unsaved Copy to locale toast without its close button",
         "title": "should announce the unsaved Copy to locale toast without its close button",
         "scenario": null,
@@ -1075,16 +1064,6 @@
         "decision": "retain-at",
         "finding": "This reproduces the actual unsaved-change toast from the ticket and tests Close toast leaking into spontaneous speech. aria-live=off on a button alone does not prove the announcement.",
         "next": "Keep the real-product-flow speech test; do not require the close button to be hidden or inaccessible."
-      },
-      {
-        "test": "should announce the trash toast and dismiss it after the default timeout",
-        "title": "should announce the trash toast and dismiss it after the default timeout",
-        "scenario": null,
-        "screenReaders": "VoiceOver and NVDA",
-        "tickets": ["PYLD-3580"],
-        "decision": "scenario-gap",
-        "finding": "The test intentionally asserts timed dismissal without putting the virtual cursor on the toast, whereas PYLD-3580 requires persistence while the reader is focused on it.",
-        "next": "Keep timing/announcement evidence clearly separate; reproduce the cursor-persistence requirement before claiming a remedy or changing production behavior."
       },
       {
         "test": "should announce global API depth changes while focus stays on the stepper",
@@ -1174,8 +1153,108 @@
           "WCAG.e2e.spec.ts :: should associate ${form} errors with their fields and focus order"
         ],
         "manualLimit": "User confirmed the returning error auto-announces and is reachable in forward/backward keyboard order in Playwright WebKit with VoiceOver after one failed submission. A fresh-form pre-submit error was not reproduced."
+      },
+      {
+        "test": "should announce both rapid toast messages",
+        "title": "should announce both rapid toast messages",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": [],
+        "decision": "browser-plus-manual",
+        "finding": "Unticketed synthetic speech assertion; no established requirement to announce every rapid notification. Browser coverage preserves both messages in the live region; real unsaved-toast speech coverage remains.",
+        "next": "Browser checks do not prove both rapid notifications are spoken. No manual speech result is claimed.",
+        "replacementTests": [
+          "WCAG.e2e.spec.ts :: should retain both rapid toast messages in the native live region"
+        ],
+        "manualLimit": "Browser checks do not prove both rapid notifications are spoken. No manual speech result is claimed.",
+        "retiredDate": "2026-10-23"
+      },
+      {
+        "test": "should announce the trash toast and dismiss it after the default timeout",
+        "title": "should announce the trash toast and dismiss it after the default timeout",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3580"],
+        "decision": "browser-plus-manual",
+        "finding": "This test never places the screen-reader cursor on the toast, so its dismissal assertion does not reproduce PYLD-3580. Browser regressions cover DOM-focus persistence and default dismissal.",
+        "next": "VoiceOver cursor persistence and the real trash announcement remain unverified. The ticket remains partial; the branch-local dependency patch must be replaced before the final PR.",
+        "replacementTests": [
+          "WCAG.e2e.spec.ts :: should pause trash-toast dismissal while its close button has keyboard focus",
+          "WCAG.e2e.spec.ts :: should give a default toast six seconds before automatic dismissal"
+        ],
+        "manualLimit": "VoiceOver cursor persistence and the real trash announcement remain unverified. The ticket remains partial; the branch-local dependency patch must be replaced before the final PR.",
+        "retiredDate": "2026-10-23"
       }
-    ]
+    ],
+    "retirementShortlist": {
+      "date": "2026-10-23",
+      "assessed": 7,
+      "retired": 2,
+      "pending": 5,
+      "policy": "Retire only after checking replacement evidence against the original report; a browser regression does not establish virtual-cursor or speech behavior.",
+      "candidates": [
+        {
+          "test": "should announce both rapid toast messages",
+          "status": "retired",
+          "reason": "Unticketed synthetic speech assertion; no established requirement to announce every rapid notification. Browser coverage preserves both messages in the live region; real unsaved-toast speech coverage remains.",
+          "manualLimit": "Browser checks do not prove both rapid notifications are spoken. No manual speech result is claimed."
+        },
+        {
+          "test": "should announce the trash toast and dismiss it after the default timeout",
+          "status": "retired",
+          "reason": "This test never places the screen-reader cursor on the toast, so its dismissal assertion does not reproduce PYLD-3580. Browser regressions cover DOM-focus persistence and default dismissal.",
+          "manualLimit": "VoiceOver cursor persistence and the real trash announcement remain unverified. The ticket remains partial; the branch-local dependency patch must be replaced before the final PR."
+        },
+        {
+          "test": "should expose validation errors next to their fields",
+          "scenario": "document form",
+          "tickets": ["PYLD-3581"],
+          "status": "pending-manual-evidence",
+          "replacementTests": [
+            "WCAG.e2e.spec.ts :: should associate ${form} errors with their fields and focus order"
+          ],
+          "required": "On the real document create form, submit empty and verify the required title error is reachable adjacent to its field in normal forward/reverse reading order. The recorded login check is not document-form evidence."
+        },
+        {
+          "test": "should contain screen-reader traversal in bulk-upload and image-edit dialogs",
+          "tickets": ["PYLD-3575"],
+          "status": "pending-manual-evidence",
+          "replacementTests": [
+            "WCAG.e2e.spec.ts :: should contain keyboard focus in media and nested folder modals",
+            "WCAG.e2e.spec.ts :: should isolate modal content and restore focus after nested dismissal"
+          ],
+          "required": "Verify forward/reverse virtual-cursor progress through distinct controls in both real dialogs and no access to the background. The isolation browser test does not itself exercise the media dialogs."
+        },
+        {
+          "test": "should contain screen-reader traversal in the nested folder-location modal",
+          "tickets": ["PYLD-3587"],
+          "status": "pending-manual-evidence",
+          "replacementTests": [
+            "WCAG.e2e.spec.ts :: should contain keyboard focus in media and nested folder modals",
+            "WCAG.e2e.spec.ts :: should isolate modal content and restore focus after nested dismissal"
+          ],
+          "required": "Verify forward/reverse virtual-cursor progress through the nested location modal without entering the parent drawer or page."
+        },
+        {
+          "test": "should announce a selected locale as one grouped item with its state",
+          "tickets": ["PYLD-3699", "PYLD-3700", "PYLD-3730"],
+          "status": "pending-manual-evidence",
+          "replacementTests": [
+            "WCAG.e2e.spec.ts :: should expose the active locale as selected rather than disabled"
+          ],
+          "required": "Verify actual selected/unselected locale browse stops and selected-state announcement on the reported platforms. Counting a word once in focus speech is not grouping evidence."
+        },
+        {
+          "test": "should move the screen-reader cursor into every shared popup",
+          "tickets": ["PYLD-3697", "PYLD-3701"],
+          "status": "pending-replacement",
+          "replacementTests": [
+            "WCAG.e2e.spec.ts :: should move keyboard focus into and through the Columns dialog"
+          ],
+          "required": "Replace the five-flow sweep with representative popup-local AT arrival coverage and record localization cursor entry manually. Existing drawer-entry AT checks do not prove popup/localization behavior."
+        }
+      ]
+    }
   },
   "investigations": {
     "PYLD-3613": {
