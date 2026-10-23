@@ -59,6 +59,25 @@ You can access Mongoose models as follows:
 - Globals model - `payload.db.globals`
 - Versions model (both collections and globals) - `payload.db.versions[myEntitySlug]`
 
+## Global indexes
+
+Current global documents share one physical `globals` collection. MongoDB limits a collection to
+[64 indexes](https://www.mongodb.com/docs/manual/reference/limits/#indexes), including `_id`, so this
+budget is shared by all globals rather than available separately to each global. The number of
+globals that fits within the budget depends on their indexed fields and locales, not only their count.
+Global version-history collections are separate and have their own index budgets.
+
+Draft-enabled globals use shared nonunique compound indexes beginning with `globalType`, followed by
+`_status` or a localized status path such as `_status.en`. Globals using the same status path share
+that index. Localized status therefore adds one index per locale, not one per global and locale.
+Other global field indexes still count toward the shared limit and retain their configured semantics.
+
+Existing status indexes are not automatically removed when upgrading. The new compound indexes can
+coexist with the old definitions without rewriting global documents, but retained indexes still
+consume capacity. If the collection is already near its index limit, review the existing index
+inventory before upgrading. Remove obsolete indexes only through an explicitly reviewed migration;
+do not indiscriminately synchronize or drop indexes on the shared collection.
+
 ## Using other MongoDB implementations
 
 You can import the `compatibilityOptions` object to get the recommended settings for other MongoDB implementations. Since these databases aren't officially supported by payload, you may still encounter issues even with these settings (please create an issue or PR if you believe these options should be updated):
