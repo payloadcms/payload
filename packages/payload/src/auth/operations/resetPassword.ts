@@ -1,12 +1,17 @@
 import { status as httpStatus } from 'http-status'
 
-import type { Collection, DataFromCollectionSlug } from '../../collections/config/types.js'
+import type {
+  Collection,
+  DataFromCollectionSlug,
+  SanitizedCollectionConfig,
+} from '../../collections/config/types.js'
+import type { Validate } from '../../fields/config/types.js'
 import type { AuthCollectionSlug, TypedUser } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
-import { APIError, Forbidden } from '../../errors/index.js'
+import { APIError, Forbidden, ValidationError } from '../../errors/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
@@ -95,6 +100,14 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     if (!user) {
       throw new APIError('Token is either invalid or has expired.', httpStatus.FORBIDDEN)
     }
+
+    await validatePasswordField({
+      collectionConfig,
+      overrideAccess,
+      password: data.password,
+      req,
+      user,
+    })
 
     // TODO: replace this method
     const { hash, salt } = await generatePasswordSaltHash({
@@ -264,5 +277,53 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     }
     await killTransaction(req)
     throw error
+  }
+}
+
+/**
+ * Runs the `password` field override's validation, which `payload.db.updateOne` skips.
+ */
+async function validatePasswordField({
+  collectionConfig,
+  overrideAccess,
+  password,
+  req,
+  user,
+}: {
+  collectionConfig: SanitizedCollectionConfig
+  overrideAccess: boolean
+  password: string
+  req: PayloadRequest
+  user: TypedUser
+}): Promise<void> {
+  const passwordField = collectionConfig.flattenedFields.find((field) => field.name === 'password')
+
+  if (!passwordField || !('validate' in passwordField) || !passwordField.validate) {
+    return
+  }
+
+  const validate = passwordField.validate as Validate<string>
+  const dataToValidate = { ...user, password }
+
+  const validationResult = await validate(password, {
+    ...passwordField,
+    id: user.id,
+    blockData: {},
+    collectionSlug: collectionConfig.slug,
+    data: dataToValidate,
+    event: 'submit',
+    operation: 'update',
+    overrideAccess,
+    path: ['password'],
+    preferences: { fields: {} },
+    req,
+    siblingData: dataToValidate,
+  })
+
+  if (typeof validationResult === 'string') {
+    throw new ValidationError({
+      collection: collectionConfig.slug,
+      errors: [{ message: validationResult, path: 'password' }],
+    })
   }
 }
