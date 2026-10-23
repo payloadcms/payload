@@ -1,9 +1,13 @@
 import type { PayloadRequest } from '../types/index.js'
 
 import crypto from 'node:crypto'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { createClientUploadReceipt, verifyClientUploadReceipt } from './clientUploadReceipt.js'
+import {
+  createClientUploadReceipt,
+  resignClientUploadReceipt,
+  verifyClientUploadReceipt,
+} from './clientUploadReceipt.js'
 
 const secret = 'test-secret'
 
@@ -60,5 +64,61 @@ describe('clientUploadReceipt', () => {
     expect(() => verifyClientUploadReceipt({ req, signedReceipt })).toThrow(
       'Invalid upload reference.',
     )
+  })
+
+  describe('resignClientUploadReceipt', () => {
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('should add adapterData and keep the other receipt fields', () => {
+      const signedReceipt = createClientUploadReceipt({
+        ...receiptArgs,
+        adapterData: { providerUploadID: 'provider-1' },
+      })
+      const original = verifyClientUploadReceipt({ req, signedReceipt })
+
+      const resigned = resignClientUploadReceipt({
+        adapterData: { providerObjectID: 'object-1' },
+        req,
+        signedReceipt,
+      })
+
+      expect(verifyClientUploadReceipt({ req, signedReceipt: resigned })).toEqual({
+        ...original,
+        adapterData: { providerObjectID: 'object-1', providerUploadID: 'provider-1' },
+      })
+    })
+
+    it('should reject a receipt issued to another user', () => {
+      const otherUserReq = {
+        ...req,
+        user: { id: 'user-2', collection: 'users' },
+      } as unknown as PayloadRequest
+      const signedReceipt = createClientUploadReceipt({ ...receiptArgs, req: otherUserReq })
+
+      expect(() =>
+        resignClientUploadReceipt({
+          adapterData: { providerObjectID: 'object-1' },
+          req,
+          signedReceipt,
+        }),
+      ).toThrow('Invalid upload reference.')
+    })
+
+    it('should keep the original expiry', () => {
+      vi.useFakeTimers()
+      const signedReceipt = createClientUploadReceipt(receiptArgs)
+      const { expiresAt } = verifyClientUploadReceipt({ req, signedReceipt })
+      vi.advanceTimersByTime(60_000)
+
+      const resigned = resignClientUploadReceipt({
+        adapterData: { providerObjectID: 'object-1' },
+        req,
+        signedReceipt,
+      })
+
+      expect(verifyClientUploadReceipt({ req, signedReceipt: resigned }).expiresAt).toBe(expiresAt)
+    })
   })
 })

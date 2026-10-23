@@ -581,6 +581,19 @@ Payload rebuilds `uploadReference` from the verified receipt before calling your
 
 - `adapterData` is optional data your adapter needs back after the upload, such as a provider upload ID. Payload signs it into the receipt, so the browser cannot change it. It is not stored on the document.
 
+Some providers return an ID only after the upload finishes. To sign it, call `resignClientUploadReceipt` from an endpoint your adapter's client handler calls after the upload, and send the new receipt with the document. It adds to `adapterData` and keeps every other field, including the user and expiry, so it only works in a request from the user who started the upload, before the receipt expires.
+
+```ts
+import { resignClientUploadReceipt } from '@payloadcms/plugin-cloud-storage/utilities'
+
+// In your upload-complete endpoint, after confirming the object with the provider:
+const signedReceipt = resignClientUploadReceipt({
+  adapterData: { providerObjectID },
+  req,
+  signedReceipt: uploadReference.signedReceipt,
+})
+```
+
 Client uploads keep an [original and file history](./overview#file-versioning) only when a receipt is verified. Without `requiresUploadReceipt`, Payload passes `uploadReference` to your handlers as the browser sent it, and the upload has no original or file history.
 
 ## Plugin options

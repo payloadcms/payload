@@ -53,9 +53,29 @@ export const createClientUploadReceipt = ({
     storageFilePath,
     ...getUser(req),
   }
-  const encodedReceipt = Buffer.from(JSON.stringify(data)).toString('base64url')
 
-  return `${encodedReceipt}.${sign({ encodedReceipt, secret: req.payload.secret })}`
+  return encodeReceipt({ data, secret: req.payload.secret })
+}
+
+/**
+ * Signs a copy of a receipt with more `adapterData`, such as a provider ID that exists only after
+ * the upload. Every other field, including the user and expiry, is kept from the original receipt.
+ */
+export const resignClientUploadReceipt = ({
+  adapterData,
+  req,
+  signedReceipt,
+}: {
+  adapterData: Record<string, unknown>
+  req: PayloadRequest
+  signedReceipt: unknown
+}): `${string}.${string}` => {
+  const receipt = verifyClientUploadReceipt({ req, signedReceipt })
+
+  return encodeReceipt({
+    data: { ...receipt, adapterData: { ...receipt.adapterData, ...adapterData } },
+    secret: req.payload.secret,
+  })
 }
 
 export const verifyClientUploadReceipt = ({
@@ -109,6 +129,18 @@ const getUser = (req: PayloadRequest) => ({
   userCollection: req.user?.collection ?? null,
   userID: req.user?.id ?? null,
 })
+
+const encodeReceipt = ({
+  data,
+  secret,
+}: {
+  data: ClientUploadReceipt
+  secret: string
+}): `${string}.${string}` => {
+  const encodedReceipt = Buffer.from(JSON.stringify(data)).toString('base64url')
+
+  return `${encodedReceipt}.${sign({ encodedReceipt, secret })}`
+}
 
 const sign = ({ encodedReceipt, secret }: { encodedReceipt: string; secret: string }) =>
   crypto.createHmac('sha256', `${DOMAIN}:${secret}`).update(encodedReceipt).digest('base64url')
