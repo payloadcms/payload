@@ -1906,7 +1906,7 @@ describe('Uploads', () => {
       await expect(bulkUploadForm.locator('#field-alt')).toBeVisible()
 
       await page.getByRole('button', { name: /edit all/i }).click()
-      const editAllDrawer = page.locator('.edit-many-bulk-uploads')
+      const editAllDrawer = page.locator('.edit-many-bulk-uploads__form')
       const fieldSelect = editAllDrawer.getByRole('combobox', { name: /select fields to edit/i })
       await fieldSelect.fill('isDecorative')
       await editAllDrawer.getByRole('option', { name: 'isDecorative' }).click()
@@ -1915,9 +1915,7 @@ describe('Uploads', () => {
 
       await expect(bulkUploadForm.locator('#field-alt')).toBeHidden()
 
-      await bulkUploadForm
-        .locator('.bulk-upload--actions-bar__controls button:nth-of-type(2)')
-        .click()
+      await page.locator('.bulk-upload--actions-bar__controls button:nth-of-type(2)').click()
       await expect(bulkUploadForm.locator('#field-alt')).toBeHidden()
     })
 
