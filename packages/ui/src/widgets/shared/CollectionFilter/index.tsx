@@ -1,0 +1,100 @@
+'use client'
+import type { Option, OptionObject, SelectFieldClientProps } from 'payload'
+
+import { getTranslation } from '@payloadcms/translations'
+import React, { useCallback, useId, useMemo } from 'react'
+
+import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
+import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
+import { FieldDescription } from '../../../fields/FieldDescription/index.js'
+import { FieldLabel } from '../../../fields/FieldLabel/index.js'
+import { useField } from '../../../forms/useField/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
+import './index.css'
+
+const baseClass = 'collection-filter'
+
+const normalizeOption = (option: Option): OptionObject =>
+  typeof option === 'string' ? { label: option, value: option } : option
+
+/**
+ * Widget config field shared by collection checklists. The value is stored as an exclusion list
+ * (`excludedCollections`), but the user sees an inclusion filter: every collection is checked by
+ * default and unchecking one adds it to the stored exclusions. Storing exclusions means collections
+ * added later are visible by default.
+ *
+ * @internal - may change or be removed without a major version bump
+ */
+export const CollectionFilter: React.FC<SelectFieldClientProps> = ({
+  field,
+  path: pathFromProps,
+  readOnly,
+}) => {
+  const { admin: { description } = {}, label } = field
+  const {
+    customComponents: { Description } = {},
+    path,
+    setValue,
+    value,
+  } = useField<string[]>({ potentiallyStalePath: pathFromProps })
+  const hasDescription = Boolean(Description || description)
+  const { i18n } = useTranslation()
+  const labelID = useId()
+  const descriptionID = useId()
+
+  const excludedSlugs = useMemo(() => new Set<string>(Array.isArray(value) ? value : []), [value])
+
+  const options = useMemo(() => (field.options ?? []).map(normalizeOption), [field.options])
+
+  const toggleCollection = useCallback(
+    (slug: string, isIncluded: boolean) => {
+      const nextExcluded = new Set(excludedSlugs)
+
+      if (isIncluded) {
+        nextExcluded.delete(slug)
+      } else {
+        nextExcluded.add(slug)
+      }
+
+      setValue(Array.from(nextExcluded))
+    },
+    [excludedSlugs, setValue],
+  )
+
+  return (
+    <div
+      aria-describedby={hasDescription ? descriptionID : undefined}
+      aria-labelledby={labelID}
+      className={baseClass}
+      role="group"
+    >
+      <span id={labelID}>
+        <FieldLabel as="span" label={label} path={path} />
+      </span>
+      <ul className={`${baseClass}__list`}>
+        {options.map((option) => {
+          const isIncluded = !excludedSlugs.has(option.value)
+          const resolvedLabel = getTranslation(option.label, i18n)
+
+          return (
+            <li className={`${baseClass}__option`} key={option.value}>
+              <CheckboxInput
+                checked={isIncluded}
+                label={typeof resolvedLabel === 'string' ? resolvedLabel : option.value}
+                name={`${path}__${option.value}`}
+                onToggle={(event) => toggleCollection(option.value, event.target.checked)}
+                readOnly={readOnly}
+              />
+            </li>
+          )
+        })}
+      </ul>
+      <div id={descriptionID}>
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
+        />
+      </div>
+    </div>
+  )
+}

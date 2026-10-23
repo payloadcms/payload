@@ -85,6 +85,7 @@ export const Button: React.FC<Props> = (props) => {
     onClick,
     onKeyDown,
     onMouseDown,
+    popupAriaLabel,
     popupIconSize,
     ref,
     round,
@@ -222,7 +223,7 @@ export const Button: React.FC<Props> = (props) => {
         {buttonElement}
         <Popup
           button={<ChevronIcon size={popupIconSize} />}
-          buttonAriaLabel={t('general:moreOptions')}
+          buttonAriaLabel={popupAriaLabel || t('general:moreOptions')}
           buttonSize={size}
           className={disabled && !enableSubMenu ? `${baseClass}--popup-disabled` : ''}
           disabled={disabled && !enableSubMenu}

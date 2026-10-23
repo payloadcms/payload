@@ -566,11 +566,10 @@ export interface FieldBase {
   virtual?: boolean | string
 }
 
-export interface FieldBaseClient
-  extends Pick<
-    FieldBase,
-    'hidden' | 'index' | 'jsonSchema' | 'localized' | 'name' | 'required' | 'saveToJWT' | 'unique'
-  > {
+export interface FieldBaseClient extends Pick<
+  FieldBase,
+  'hidden' | 'index' | 'jsonSchema' | 'localized' | 'name' | 'required' | 'saveToJWT' | 'unique'
+> {
   admin?: AdminClient
   label?: StaticLabel
 }

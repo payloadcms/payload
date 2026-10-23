@@ -137,4 +137,9 @@
       --nav-padding-inline-end: var(--gutter-h);
     }
   }
+
+  html[data-enhanced-contrast] .nav__link--selected::before {
+    background: var(--color-bg-secondary);
+    border: var(--stroke-width-small) solid var(--color-border-selected);
+  }
 }

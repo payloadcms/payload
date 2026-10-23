@@ -290,7 +290,8 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
 >
 
 export interface SanitizedGlobalConfig
-  extends Omit<
+  extends
+    Omit<
       GlobalConfig,
       | '_sanitized'
       | 'access'

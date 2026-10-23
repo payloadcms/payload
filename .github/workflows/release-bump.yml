@@ -10,13 +10,18 @@ on:
           - beta
         default: beta
       bump:
-        description: Semver bump
+        description: "Semver bump ('auto' picks it from the commits)"
         type: choice
         options:
+          - auto
           - prerelease
           - prepatch
           - preminor
-        default: prerelease
+        default: auto
+      override_reason:
+        description: "Override reason (required if bump is not 'auto')"
+        type: string
+        default: ''
       dry_run:
         description: 'Dry run: log git commands, push nothing'
         type: boolean
@@ -69,9 +74,10 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
       - name: Bump
-        run: pnpm release-bump --preid "$PREID" --bump "$BUMP" ${DRY_RUN_FLAG:-}
+        run: pnpm release-bump --preid "$PREID" --bump "$BUMP" --override-reason "$OVERRIDE_REASON" ${DRY_RUN_FLAG:-}
         env:
           PREID: ${{ inputs.preid }}
           BUMP: ${{ inputs.bump }}
+          OVERRIDE_REASON: ${{ inputs.override_reason }}
           DRY_RUN_FLAG: ${{ inputs.dry_run && '--dry-run' || '' }}
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}

@@ -40,8 +40,7 @@ export const myTranslations: DefaultTranslationsObject = {
     lockUntil: 'Lock Until',
     logBackIn: 'အကောင့်ထဲ ပြန်ဝင်မည်။',
     loggedIn: 'အခြားအကောင့်နှင့် လော့ဂ်အင်ဝင်လိုပါက <0>လော့ဂ်အောက်</0> ပြုလုပ်ပါ။',
-    loggedInChangePassword:
-      'စကားဝှက် ပြောင်းလဲရန်အတွက်  သင့် <0>အကောင့်</0> သို့ဝင်ရောက်ပြီး ပြင်ဆင် သတ်မှတ်ပါ။',
+    loggedInChangePassword: 'စကားဝှက် ပြောင်းလဲရန်အတွက်  သင့် <0>အကောင့်</0> သို့ဝင်ရောက်ပြီး ပြင်ဆင် သတ်မှတ်ပါ။',
     loggedOutInactivity: 'လုပ်ဆောင်ချက်မရှိခြင်းကြောင့် သင်သည် ထွက်လိုက်ပါသည်။',
     loggedOutSuccessfully: 'သင်သည် အောင်မြင်စွာ ထွက်ပြီးပါပြီ။',
     loggingOut: 'ထွက်မယ်...',
@@ -72,8 +71,7 @@ export const myTranslations: DefaultTranslationsObject = {
     unableToVerify: 'စိစစ်၍မရပါ။',
     username: 'အသုံးပြုသူအမည်',
     usernameNotValid: 'ပေးထားသော အသုံးပြုသူအမည်မှာ တရားဝင်မှု မရှိပါ။',
-    verificationFailedRequestNew:
-      'သင့်အကောင့်ကိုအတည်ပြု၍မရပါ။ အတည်ပြုရန်အီးမေးလ်အသစ်တောင်းဆိုပြီး ထပ်မံကြိုးစားပါ။',
+    verificationFailedRequestNew: 'သင့်အကောင့်ကိုအတည်ပြု၍မရပါ။ အတည်ပြုရန်အီးမေးလ်အသစ်တောင်းဆိုပြီး ထပ်မံကြိုးစားပါ။',
     verified: 'စိစစ်ပြီး',
     verifiedSuccessfully: 'အတည်ပြုပြီးပါပြီ။',
     verify: 'စိစစ်ခြင်း',
@@ -112,8 +110,7 @@ export const myTranslations: DefaultTranslationsObject = {
     discardTitle: 'ပြောင်းလဲမှုများကို ဖယ်ရှားမလား။',
     editDashboard: 'ဒက်ရှ်ဘုတ် တည်းဖြတ်ပါ',
     editingDashboard: 'ဒက်ရှ်ဘုတ် တည်းဖြတ်နေသည်',
-    noItems:
-      'သင့်ဒက်ရှ်ဘုတ်တွင် ဝစ်ဂျက်များ မရှိပါ။ အပေါ်ဘားရှိ "Dashboard" မီနူးမှ ထည့်သွင်းနိုင်ပါသည်။',
+    noItems: 'သင့်ဒက်ရှ်ဘုတ်တွင် ဝစ်ဂျက်များ မရှိပါ။ အပေါ်ဘားရှိ "Dashboard" မီနူးမှ ထည့်သွင်းနိုင်ပါသည်။',
     resetLayout: 'စီစဉ်မှုကို ပြန်လည်သတ်မှတ်ပါ',
     resizeWidget: '{{label}} ၏ အရွယ်အစားကို ပြောင်းရန်၊ လက်ရှိအရွယ်အစား: {{size}}',
     searchWidgets: 'ဝစ်ဂျက်များ ရှာဖွေပါ...',
@@ -122,13 +119,11 @@ export const myTranslations: DefaultTranslationsObject = {
     widgetConfigurationError: 'Widget အတည်ပြုခြင်းအမှား',
     widgetDropFilesToUpload: 'ဖိုင်တစ်ဖိုင်ကို ဆွဲချလိုက်ပါ။',
     widgetInvalidCollection: 'Collection "{{collection}}" မရှိပါ။',
-    widgetInvalidFilterField:
-      'Filter field "{{field}}" သည် collection "{{collection}}" တွင် မရှိပါ။',
+    widgetInvalidFilterField: 'Filter field "{{field}}" သည် collection "{{collection}}" တွင် မရှိပါ။',
     widgetInvalidSortField:
       'မည်သည့် Sort field "{{field}}" မဟုတ်ပါ collection "{{collection}}" တွင် မတည်ရှိပါ။',
     widgetLimitLabel: 'ကန့်သတ်ချက်',
-    widgetNonSortableSortField:
-      'အမျိုးအစား "{{collection}}" တွင် Sort field "{{field}}" ကို စီခန့်နိုင်မှုမရှိပါ။',
+    widgetNonSortableSortField: 'အမျိုးအစား "{{collection}}" တွင် Sort field "{{field}}" ကို စီခန့်နိုင်မှုမရှိပါ။',
     widgetPageCount: '{{totalPages}} အနက် {{currentPage}}',
     widgetPagination: 'စာရွက်စာတမ်း စာမျက်နှာများ',
     widgetPinned: 'ပင်ထည့်ပြီး',
@@ -137,8 +132,7 @@ export const myTranslations: DefaultTranslationsObject = {
     widgetPinnedSaveError: 'ပင်ထည့်ထားသော စာရွက်စာတမ်းများကို သိမ်းဆည်း၍ မရနိုင်ပါ။',
     widgetQueryError: 'ဤ widget အတွက် Document များကို မဖော်ပြနိုင်ခဲ့ပါ။',
     widgetRecentlyViewedEmpty: 'မကြာသေးမီ စာရွက်စာတမ်း မရှိပါ',
-    widgetRecentlyViewedEmptyDescription:
-      'သင် ယင်းခေတ်အနီးက ကြည့်ရှုခဲ့သော Document များသည် ဤနေရာတွင် ပြသပါမည်',
+    widgetRecentlyViewedEmptyDescription: 'သင် ယင်းခေတ်အနီးက ကြည့်ရှုခဲ့သော Document များသည် ဤနေရာတွင် ပြသပါမည်',
     widgetRecentlyViewedFilterDescription: 'လတ်တလောကြည့်ရှုခဲ့သောအရာများကိုသာ စစ်ထုတ်ပါ။',
     widgetRecentlyViewedTitle: 'မကြာသေးမီ တွေ့မြင်ခဲ့သည်များ',
     widgetRecentsAndPinned: 'မကြာသေးမီနှင့် ပင်ထည့်ထားသော',
@@ -158,8 +152,7 @@ export const myTranslations: DefaultTranslationsObject = {
     autosaving: 'ဖိုင်ကို အလိုအလျောက်သိမ်းဆည်းရာတွင် ပြဿနာတစ်ခုရှိနေသည်။',
     correctInvalidFields: 'ကျေးဇူးပြု၍ အချက်အလက်များကို ပြန်လည် စစ်ဆေးပါ။',
     deletingFile: 'ဖိုင်ကိုဖျက်ရာတွင် အမှားအယွင်းရှိနေသည်။',
-    deletingTitle:
-      '{{title}} ကို ဖျက်ရာတွင် အမှားအယွင်းရှိခဲ့သည်။ သင့် အင်တာနက်လိုင်းအား စစ်ဆေးပြီး ထပ်မံကြို့စားကြည့်ပါ။',
+    deletingTitle: '{{title}} ကို ဖျက်ရာတွင် အမှားအယွင်းရှိခဲ့သည်။ သင့် အင်တာနက်လိုင်းအား စစ်ဆေးပြီး ထပ်မံကြို့စားကြည့်ပါ။',
     documentNotFound:
       'ID {{id}} ဖြင့် စာရွက်စာတမ်းကို ရှာမတွေ့ပါ။ ၎င်းကို ဖျက်လိုက်ပြီးဖြစ်နိုင်သည် သို့မဟုတ် မရှိခဲ့သည့်ဖြစ်နိုင်သည် သို့မဟုတ် သင်သည် ၎င်းကို ဝင်ရောက်ခွင့်မရှိနိုင်ပါ။',
     emailOrPasswordIncorrect: 'ထည့်သွင်းထားသော အီးမေးလ် သို့မဟုတ် စကားဝှက်သည် မမှန်ပါ။',
@@ -169,8 +162,7 @@ export const myTranslations: DefaultTranslationsObject = {
     followingFieldsInvalid_one: 'ထည့်သွင်းထားသော အချက်အလက်သည် မမှန်ကန်ပါ။',
     followingFieldsInvalid_other: 'ထည့်သွင်းထားသော အချက်အလက်များသည် မမှန်ကန်ပါ။',
     incorrectCollection: 'မှားယွင်းသော စုစည်းမှု',
-    insufficientClipboardPermissions:
-      'ကလစ်ဘုတ်ဝင်ရောက်ခွင့်ပြုချက်မရှိပါ။ ကလစ်ဘုတ်ပြုချက်များကိုစစ်ဆေးပါ။',
+    insufficientClipboardPermissions: 'ကလစ်ဘုတ်ဝင်ရောက်ခွင့်ပြုချက်မရှိပါ။ ကလစ်ဘုတ်ပြုချက်များကိုစစ်ဆေးပါ။',
     invalidClipboardData: 'မမှန်ကန်သောကလစ်ဘုတ်ဒေတာ။',
     invalidFileType: 'မမှန်ကန်သော ဖိုင်အမျိုးအစား',
     invalidFileTypeValue: 'မမှန်ကန်သော ဖိုင်အမျိုးအစား: {{value}}',
@@ -192,8 +184,7 @@ export const myTranslations: DefaultTranslationsObject = {
     noUser: 'အသုံးပြုသူ မရှိပါ။',
     previewing: 'ဖိုင်ကို အစမ်းကြည့်ရန် ပြဿနာရှိနေသည်။',
     problemUploadingFile: 'ဖိုင်ကို အပ်လုဒ်တင်ရာတွင် ပြဿနာရှိနေသည်။',
-    restoringTitle:
-      '{{title}} ကို ပြန်လည်ရယူရာတွင် အမှားအယွင်းရှိခဲ့သည်။ သင့် အင်တာနက်လိုင်းအား စစ်ဆေးပြီး ထပ်မံကြို့စားကြည့်ပါ။',
+    restoringTitle: '{{title}} ကို ပြန်လည်ရယူရာတွင် အမှားအယွင်းရှိခဲ့သည်။ သင့် အင်တာနက်လိုင်းအား စစ်ဆေးပြီး ထပ်မံကြို့စားကြည့်ပါ။',
     revertingDocument: 'ဤစာရွက်စာတမ်းကို ပြန်လည်ပြောင်းရာတွင် ပြဿနာတစ်ခု ရှိနေသည်။',
     tokenInvalidOrExpired: 'တိုကင်သည် မမှန်ကန်ပါ သို့မဟုတ် သက်တမ်းကုန်သွားပါပြီ။',
     tokenNotProvided: 'Token မပေးထားပါ။',
@@ -211,8 +202,7 @@ export const myTranslations: DefaultTranslationsObject = {
     unverifiedEmail: 'ထည့်သွင်းမည်မဆိုမီ သင့်အီးမေးလ်ကို အတည်ပြုပါ။',
     urlNotAllowed: 'ပေးထားသော URL သည် ခွင့်ပြုထားခြင်း မရှိပါ။',
     userEmailAlreadyRegistered: 'ပေးထားသော အီးမေးလ်ဖြင့် အသုံးပြုသူ တစ်ဦး ရှိပြီးဖြစ်သည်။',
-    userLocked:
-      'အကောင့်ထဲကို ဝင်ရန် အရမ်းအရမ်းကို ကြိုးပမ်းနေသောကြောင့် အကောင့်အား လော့ခ်ချလိုက်ပါသည်။',
+    userLocked: 'အကောင့်ထဲကို ဝင်ရန် အရမ်းအရမ်းကို ကြိုးပမ်းနေသောကြောင့် အကောင့်အား လော့ခ်ချလိုက်ပါသည်။',
     usernameAlreadyRegistered: 'ပေးထားသော အသုံးပြုသူအမည်ဖြင့် အသုံးပြုသူ တစ်ဦး ရှိပြီးဖြစ်သည်။',
     usernameOrPasswordIncorrect: 'ပေးထားသော အသုံးပြုသူအမည် သို့မဟုတ် စကားဝှက်သည် မမှန်ပါ။',
     valueMustBeUnique: 'value သည် အဓိပ္ပာယ်ရှိရပါမည်။',
@@ -270,13 +260,11 @@ export const myTranslations: DefaultTranslationsObject = {
   },
   general: {
     name: 'နာမည်',
-    aboutToDelete:
-      '{{label}} <1>{{title}}</1> ကို ဖျက်ပါတော့မည်။ သေချာပြီလား။ ဖျက်ပြီးရင် ပြန်မရဘူးနော်။',
+    aboutToDelete: '{{label}} <1>{{title}}</1> ကို ဖျက်ပါတော့မည်။ သေချာပြီလား။ ဖျက်ပြီးရင် ပြန်မရဘူးနော်။',
     aboutToDeleteCount_many: 'သင်သည် {{count}} {{label}} ကို ဖျက်ပါတော့မည်။',
     aboutToDeleteCount_one: 'သင်သည် {{count}} {{label}} ကို ဖျက်ပါတော့မည်။',
     aboutToDeleteCount_other: 'သင်သည် {{count}} {{label}} ကို ဖျက်ပါတော့မည်။',
-    aboutToPermanentlyDelete:
-      'သင်သည် {{label}} <1>{{title}}</1> ကို အပြီးအပိုင် ဖျက်ပါတော့မည်။ သေချာပါသလား။',
+    aboutToPermanentlyDelete: 'သင်သည် {{label}} <1>{{title}}</1> ကို အပြီးအပိုင် ဖျက်ပါတော့မည်။ သေချာပါသလား။',
     aboutToPermanentlyDeleteTrash:
       'သင်သည် အမှိုက်ပုံးမှ <0>{{count}}</0> <1>{{label}}</1> ကို အပြီးအပိုင် ဖျက်ပါတော့မည်။ သေချာပါသလား။',
     aboutToRestore: 'သင်သည် {{label}} <1>{{title}}</1> ကို ပြန်လည်ရယူပါတော့မည်။ သေချာပါသလား။',
@@ -284,8 +272,7 @@ export const myTranslations: DefaultTranslationsObject = {
       'သင်သည် {{label}} <1>{{title}}</1> ကို မူကြမ်းအဖြစ် ပြန်လည်ရယူပါတော့မည်။ သေချာပါသလား။',
     aboutToRestoreAsDraftCount: 'သင်သည် {{count}} {{label}} ကို မူကြမ်းအဖြစ် ပြန်လည်ရယူပါတော့မည်',
     aboutToRestoreCount: 'သင်သည် {{count}} {{label}} ကို ပြန်လည်ရယူပါတော့မည်',
-    aboutToTrash:
-      'သင်သည် {{label}} <1>{{title}}</1> ကို အမှိုက်ပုံးသို့ ရွှေ့ပါတော့မည်။ သေချာပါသလား။',
+    aboutToTrash: 'သင်သည် {{label}} <1>{{title}}</1> ကို အမှိုက်ပုံးသို့ ရွှေ့ပါတော့မည်။ သေချာပါသလား။',
     aboutToTrashCount: 'သင်သည် {{count}} {{label}} ကို အမှိုက်ပုံးသို့ ရွှေ့ပါတော့မည်',
     accepts: 'လက်ခံသည်',
     access: 'ဝင်ရောက်ခွင့်',
@@ -299,6 +286,7 @@ export const myTranslations: DefaultTranslationsObject = {
     and: 'နှင့်',
     anotherUser: 'တစ်ခြားအသုံးပြုသူ',
     anotherUserTakenOver: 'တစ်ခြားအသုံးပြုသူသည်ဤစာရွက်စာတမ်းကိုပြင်ဆင်မှုကိုရယူလိုက်သည်။',
+    apiResponse: 'API တုံ့ပြန်ချက်',
     applyChanges: 'ပြောင်းလဲမှုများ အသုံးပြုပါ',
     ascending: 'တက်နေသည်',
     auto: 'အော်တို',
@@ -336,8 +324,7 @@ export const myTranslations: DefaultTranslationsObject = {
     copyField: 'ကွက်လပ်ကိုကူးပါ',
     copying: 'ကူးယူခြင်း',
     copyRow: 'တန်းကိုကူးပါ',
-    copyWarning:
-      'သင်သည် {{label}} {{title}} အတွက် {{to}} ကို {{from}} ဖြင့် အစားထိုးပါတော့မည်။ သေချာပါသလား။',
+    copyWarning: 'သင်သည် {{label}} {{title}} အတွက် {{to}} ကို {{from}} ဖြင့် အစားထိုးပါတော့မည်။ သေချာပါသလား။',
     create: 'ဖန်တီးမည်။',
     created: 'ဖန်တီးခဲ့သည်။',
     createdAt: 'ဖန်တီးခဲ့သည့်အချိန်',
@@ -371,6 +358,13 @@ export const myTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'ဤစာရွက်စာတမ်းကို အခြားအသုံးပြုသူတစ်ဦးက မကြာသေးမီက အပ်ဒိတ်လုပ်ထားသည်။ သင့်ကြည့်ရှုမှုသည် နောက်ကျနေပါသည်။',
     documents: 'စာရွက်စာတမ်းများ',
+    dragCancelled: '{{label}} ကို ဆွဲရွှေ့ခြင်း ပယ်ဖျက်ထားသည်။',
+    dragDropped: '{{label}} ကို ချထားသည်။ {{count}} ခုအနက် နေရာ {{position}}။',
+    dragInstructions:
+      'အတန်းတစ်ခုကို ကောက်ယူရန် Space သို့မဟုတ် Enter ကို နှိပ်ပါ။ ရွှေ့ရန် မြားခလုတ်များကို အသုံးပြုပါ။ VoiceOver ဖြင့် Quick Nav ကို ပိတ်ပြီး Command + မြားခလုတ်များကို အသုံးပြုပါ။ ချရန် Space သို့မဟုတ် Enter၊ ပယ်ဖျက်ရန် Escape ကို နှိပ်ပါ။',
+    dragMoved: '{{label}}: {{direction}}. {{count}} ခုအနက် နေရာ {{position}}။',
+    dragPickedUp: '{{label}} ကို ကောက်ယူထားသည်။ {{count}} ခုအနက် နေရာ {{position}}။',
+    dragToMove: 'ရွှေ့ရန် ဆွဲပါ',
     dragToReorder: 'ဆွဲ၍ အမျိုးအစား ပြန်စဉ်ပါ',
     duplicate: 'ပုံတူပွားမည်။',
     duplicateWithoutSaving: 'သေချာပါပြီ။',
@@ -447,16 +441,14 @@ export const myTranslations: DefaultTranslationsObject = {
     noMatchesFound: 'ရှာဖွေမှုအတွက် သင့်တော်သောစာရင်းမှမတွေ့ရှိပါ။',
     none: 'တစ်ခုမှ',
     noOptions: 'ရွေးချယ်မှုမရှိပါ',
-    noResults:
-      '{{label}} မတွေ့ပါ။ {{label}} မရှိသေးသည်ဖြစ်စေ အထက်တွင်ဖော်ပြထားသော စစ်ထုတ်မှုများနှင့် ကိုက်ညီမှုမရှိပါ။',
+    noResults: '{{label}} မတွေ့ပါ။ {{label}} မရှိသေးသည်ဖြစ်စေ အထက်တွင်ဖော်ပြထားသော စစ်ထုတ်မှုများနှင့် ကိုက်ညီမှုမရှိပါ။',
     noResultsDescription:
       'ရလဒ်မရှိပါ။ ဒေတာမရှိသေးသည်ဖြစ်စေ အထက်တွင် သတ်မှတ်ထားသော စစ်ထုတ်မှုများနှင့် ကိုက်ညီမှုမရှိသည်ဖြစ်စေ ဖြစ်နိုင်ပါသည်။',
     noResultsFound: 'ရလဒ်မရှိပါ။',
     notFound: 'ဘာမှ မရှိတော့ဘူး။',
     nothingFound: 'ဘာမှလည်း မတွေ့ဘူး။',
     noTrashResults: 'အမှိုက်ပုံးတွင် {{label}} မရှိပါ။',
-    notSelectedDocument:
-      'ရွေးချယ်ထားခြင်းမရှိပါ။ ရွေးချယ်မှုကို ပြောင်းရန် Enter သို့မဟုတ် Space ကို နှိပ်ပါ။',
+    notSelectedDocument: 'ရွေးချယ်ထားခြင်းမရှိပါ။ ရွေးချယ်မှုကို ပြောင်းရန် Enter သို့မဟုတ် Space ကို နှိပ်ပါ။',
     notShownInTable: 'ဇယားတွင် ပြသထားခြင်း မရှိပါ',
     noUpcomingEventsScheduled: 'လာမည့် အစီအစဉ်များ မရှိပါ။',
     noValue: 'တန်ဖိုး မရှိပါ။',
@@ -476,8 +468,7 @@ export const myTranslations: DefaultTranslationsObject = {
     pasteRow: 'တန်းကိုတင်ပါ',
     payloadSettings: 'ရွေးချယ်စရာများ',
     permanentlyDelete: 'အပြီးအပိုင် ဖျက်ပါ',
-    permanentlyDeletedCountSuccessfully:
-      '{{count}} {{label}} ကို အပြီးအပိုင် အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။',
+    permanentlyDeletedCountSuccessfully: '{{count}} {{label}} ကို အပြီးအပိုင် အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။',
     perPage: 'စာမျက်နှာ အလိုက်: {{limit}}',
     perPageLabel: 'တစ်အုပ်စာမျက်နှာ။',
     presets: 'ကြိုတင်သတ်မှတ်ချက်များ',
@@ -487,13 +478,13 @@ export const myTranslations: DefaultTranslationsObject = {
     reindexingAll: 'အပေါ် {{collections}} အားလုံးကို ထပ်လိပ်နေပါသည်။',
     reloadDocument: 'စာရွက်စာတမ်း ပြန်လည်ဖွင့်ပါ',
     remove: 'ဖယ်ရှားမည်။',
+    removeFilter: 'စစ်ထုတ်မှုကို ဖယ်ရှားရန်',
     rename: 'အမည်ပြောင်း',
     replaceRow: 'တန်းစီအစားထိုးရန်',
     requiredFields: '* ဖြင့် အမှတ်အသားပြုထားသော အကွက်များကို မဖြစ်မနေ ဖြည့်ရပါမည်။',
     reset: 'ပြန်လည်သတ်မှတ်ပါ',
     resetPreferences: 'ကြိုတင်သတ်မှတ်ချက်များ ပြန်လည်တပ်ဆင်မည်',
-    resetPreferencesDescription:
-      'ဤသည်သည် သင့်၏အကြိုက်များအားလုံးကို အခြားတပ်ဆင်မှုများမှ ပြန်လည်သတ်မှတ်ပေးပါလိမ့်မည်။',
+    resetPreferencesDescription: 'ဤသည်သည် သင့်၏အကြိုက်များအားလုံးကို အခြားတပ်ဆင်မှုများမှ ပြန်လည်သတ်မှတ်ပေးပါလိမ့်မည်။',
     resettingPreferences: 'ကြိုတင်သတ်မှတ်ချက်များ ပြန်လည်တပ်ဆင်နေပါသည်။',
     restore: 'ပြန်လည်ရယူပါ',
     restoreAsPublished: 'ထုတ်ဝေထားသော ဗားရှင်းအဖြစ် ပြန်လည်ရယူပါ',
@@ -516,8 +507,7 @@ export const myTranslations: DefaultTranslationsObject = {
     selectAll: '{{count}} {{label}} အားလုံးကို ရွေးပါ',
     selectAllRows: 'အားလုံးကိုရွေးချယ်ပါ',
     selectedCount: '{{count}} {{label}} ကို ရွေးထားသည်။',
-    selectedDocument:
-      'ရွေးချယ်ထားသည်။ ရွေးချယ်မှုကို ပြောင်းရန် Enter သို့မဟုတ် Space ကို နှိပ်ပါ။',
+    selectedDocument: 'ရွေးချယ်ထားသည်။ ရွေးချယ်မှုကို ပြောင်းရန် Enter သို့မဟုတ် Space ကို နှိပ်ပါ။',
     selectLabel: '{{label}} ရွေးချယ်ပါ',
     selectValue: 'တစ်ခုခုကို ရွေးချယ်ပါ။',
     settings: 'ဆက်တင်များ',
@@ -528,8 +518,7 @@ export const myTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'ဝမ်းနည်းပါသည်။ သင်ရှာနေတဲ့ဟာ ဒီမှာမရှိပါ။',
     sort: 'အစဉ်လိုက်',
     sortByLabelDirection: 'အစဉ်အလိုက် စီမံခန့်ခွဲထားသည် {{label}} {{direction}}',
-    sortByOrderToReorder:
-      'အတန်းတန်းများကို ပြန်စီရန်အတွက် မူရင်းအားဖြင့် "Order" column ကို အရင်ဆုံး စီတန်းရပါမည်။',
+    sortByOrderToReorder: 'အတန်းတန်းများကို ပြန်စီရန်အတွက် မူရင်းအားဖြင့် "Order" column ကို အရင်ဆုံး စီတန်းရပါမည်။',
     stayOnThisPage: 'ဒီမှာပဲ ဆက်နေမည်။',
     submissionSuccessful: 'သိမ်းဆည်းမှု အောင်မြင်ပါသည်။',
     submit: 'သိမ်းဆည်းမည်။',
@@ -555,10 +544,8 @@ export const myTranslations: DefaultTranslationsObject = {
     unauthorized: 'အခွင့်မရှိပါ။',
     unchecked: 'မစစ်ဆေးရသေးပါ',
     unlock: 'ဖွင့်',
-    unsavedChanges:
-      'သင့်တွင် မသိမ်းဆည်းရသေးသော ပြောင်းလဲမှုများ ရှိနေပါသည်။ ဆက်လုပ်မီ သိမ်းဆည်းပါ သို့မဟုတ် ဖယ်ရှားပါ။',
-    unsavedChangesDuplicate:
-      'သင့်တွင် မသိမ်းဆည်းရသေးသော ပြောင်းလဲမှုများ ရှိနေပါသည်။ ပုံတူပွားမှာ သေချာပြီလား။',
+    unsavedChanges: 'သင့်တွင် မသိမ်းဆည်းရသေးသော ပြောင်းလဲမှုများ ရှိနေပါသည်။ ဆက်လုပ်မီ သိမ်းဆည်းပါ သို့မဟုတ် ဖယ်ရှားပါ။',
+    unsavedChangesDuplicate: 'သင့်တွင် မသိမ်းဆည်းရသေးသော ပြောင်းလဲမှုများ ရှိနေပါသည်။ ပုံတူပွားမှာ သေချာပြီလား။',
     untitled: 'ခေါင်းစဥ်မဲ့',
     upcomingEvents: 'လာမည့် အစီအစဉ်များ',
     updatedAgo: 'နောက်ဆုံး အပ်ဒိတ်လုပ်ခဲ့သည် {{distance}} ကလောက် ဖြစ်ပါသည်။',
@@ -582,6 +569,7 @@ export const myTranslations: DefaultTranslationsObject = {
     yes: 'ဟုတ်ကဲ့',
   },
   hierarchy: {
+    folderLocation: 'ဖိုင်တွဲတည်နေရာ',
     goTo: '"{{name}}" သို့သွားပါ',
     itemsMovedTo: '{{title}} ကို {{destination}} သို့ ရွှေ့လိုက်ပါပြီ',
     itemsMovedToRoot: '"{{title}}" ကို အမြစ်သို့ ရွှေ့လိုက်ပါပြီ။',
@@ -597,14 +585,12 @@ export const myTranslations: DefaultTranslationsObject = {
     additionalInstructions: 'ထပ်ဆောင်းညွှန်ကြားချက်များ',
     collectionDescription:
       'LLM များက မေးခွန်းများနှင့် ပိုမိုသင့်လျော်သော တုံ့ပြန်ချက်များ ပေးနိုင်ရန် {{label}} စုစည်းမှုအတွက် စိတ်ကြိုက်ညွှန်ကြားချက်များ ထည့်ပါ။',
-    collectionSystemDescription:
-      'ဤစနစ်ညွှန်ကြားချက်များကို စုစည်းမှု၏ ဖွဲ့စည်းမှုဖိုင်မှ ပံ့ပိုးထားပြီး အမြဲထည့်သွင်းထားပါသည်။',
+    collectionSystemDescription: 'ဤစနစ်ညွှန်ကြားချက်များကို စုစည်းမှု၏ ဖွဲ့စည်းမှုဖိုင်မှ ပံ့ပိုးထားပြီး အမြဲထည့်သွင်းထားပါသည်။',
     editInstructions: 'LLM ညွှန်ကြားချက်များကို ပြင်ဆင်ရန်',
     global: 'ဂလိုဘယ်စာတမ်း',
     globalDescription:
       'LLM များက မေးခွန်းများနှင့် ပိုမိုသင့်လျော်သော တုံ့ပြန်ချက်များ ပေးနိုင်ရန် {{label}} ဂလိုဘယ်စာတမ်းအတွက် စိတ်ကြိုက်ညွှန်ကြားချက်များ ထည့်ပါ။',
-    globalSystemDescription:
-      'ဤစနစ်ညွှန်ကြားချက်များကို ဂလိုဘယ်စာတမ်း၏ ဖွဲ့စည်းမှုဖိုင်မှ ပံ့ပိုးထားပြီး အမြဲထည့်သွင်းထားပါသည်။',
+    globalSystemDescription: 'ဤစနစ်ညွှန်ကြားချက်များကို ဂလိုဘယ်စာတမ်း၏ ဖွဲ့စည်းမှုဖိုင်မှ ပံ့ပိုးထားပြီး အမြဲထည့်သွင်းထားပါသည်။',
     instructions: 'LLM ညွှန်ကြားချက်များ',
     systemInstructions: 'စနစ်ညွှန်ကြားချက်များ (ဖတ်ရန်သာ)',
     targetCannotBeChanged: 'ညွှန်ကြားချက်များ၏ ပစ်မှတ်ကို ပြောင်းလဲ၍မရပါ။',
@@ -650,8 +636,7 @@ export const myTranslations: DefaultTranslationsObject = {
     cropBottomRight: 'ဖြတ်တောက်မှု အောက်ညာလက်ကိုင်',
     cropLeft: 'ဖြတ်တောက်မှု ဘယ်လက်ကိုင်',
     cropRight: 'ဖြတ်တောက်မှု ညာလက်ကိုင်',
-    cropToolDescription:
-      'ရွေးထားသည့်ဧရိယာတွင်မွေးလျှက်မှုများကိုဆွဲပြီး, အသစ်တည်ပြီးသို့မဟုတ်အောက်ပါတ',
+    cropToolDescription: 'ရွေးထားသည့်ဧရိယာတွင်မွေးလျှက်မှုများကိုဆွဲပြီး, အသစ်တည်ပြီးသို့မဟုတ်အောက်ပါတ',
     cropTop: 'ဖြတ်တောက်မှု အပေါ်လက်ကိုင်',
     cropTopLeft: 'ဖြတ်တောက်မှု အပေါ်ဘယ်လက်ကိုင်',
     cropTopRight: 'ဖြတ်တောက်မှု အပေါ်ညာလက်ကိုင်',
@@ -664,8 +649,7 @@ export const myTranslations: DefaultTranslationsObject = {
     filesToUpload: 'အပ်လုဒ်တင်ရန် ဖိုင်များ',
     fileToUpload: 'ဖိုင်တင်ရန်',
     focalPoint: 'အကန့်အသတ်ချုပ်',
-    focalPointDescription:
-      'ပြသနားရထားသည့်ပုံအားထိန်းသိမ်းရန် ဖိုကယ်ပိုင်းကို တိုက်ရိုက်ပွဲ့နိုင်သည် သို',
+    focalPointDescription: 'ပြသနားရထားသည့်ပုံအားထိန်းသိမ်းရန် ဖိုကယ်ပိုင်းကို တိုက်ရိုက်ပွဲ့နိုင်သည် သို',
     fromURL: 'URL မှတဆင့်ဖိုင် တင်သွင်းပါ',
     height: 'Height',
     lessInfo: 'အချက်အလက်နည်းတယ်။',
@@ -697,10 +681,8 @@ export const myTranslations: DefaultTranslationsObject = {
     invalidSelection: 'ဤအကွက်တွင် မမှန်ကန်သော ရွေးချယ်မှုတစ်ခုရှိသည်။',
     invalidSelections: 'ဤအကွက်တွင် အောက်ပါ မမှန်ကန်သော ရွေးချယ်မှုများ ရှိသည်',
     latitudeOutOfBounds: 'လတ္တီတွဒ်သည် -90 နှင့် 90 ကြားတွင် ရှိရမည်။',
-    lessThanMin:
-      '{{value}} သည် {{min}} ထက် ပိုမိုနိမ့်သည်။ ဤသည်ဖြင့် {{label}} အနည်းဆုံးခွင့်ပြုထားသော တန်ဖိုးထက် နိမ့်သည်။',
-    limitReached:
-      'ခွင့်ပြုထားသော ကန့်သတ်ချက်သို့ ရောက်ရှိပြီ။ {{max}} ခုသာ ထပ်မံ ထည့်သွင်းနိုင်ပါသည်။',
+    lessThanMin: '{{value}} သည် {{min}} ထက် ပိုမိုနိမ့်သည်။ ဤသည်ဖြင့် {{label}} အနည်းဆုံးခွင့်ပြုထားသော တန်ဖိုးထက် နိမ့်သည်။',
+    limitReached: 'ခွင့်ပြုထားသော ကန့်သတ်ချက်သို့ ရောက်ရှိပြီ။ {{max}} ခုသာ ထပ်မံ ထည့်သွင်းနိုင်ပါသည်။',
     longerThanMin: 'ဤတန်ဖိုးသည် အနိမ့်ဆုံးအရှည် {{minLength}} စာလုံးထက် ပိုရှည်ရမည်။',
     longitudeOutOfBounds: 'လောင်ဂျီကျူဒ်သည် -180 နှင့် 180 ကြားတွင် ရှိရမည်။',
     notValidDate: '"{{value}}" သည် တရားဝင်ရက်စွဲမဟုတ်ပါ။',
@@ -711,25 +693,19 @@ export const myTranslations: DefaultTranslationsObject = {
     shorterThanMax: 'ဤတန်ဖိုးသည် စာလုံး {{maxLength}} လုံး၏ အမြင့်ဆုံးအရှည်ထက် ပိုတိုရပါမည်။',
     timezoneRequired: 'အချိန်ဇုန်တစ်ခုလိုအပ်သည်။',
     trueOrFalse: 'ဤအကွက်သည် တစ်ခုခုဖြစ်ရပါမည်။',
-    username:
-      'မှန်ကန်သော အသုံးပြုသူအမည် ထည့်သွင်းပါ။ အက္ခရာ၊ နံပါတ်၊ ဟိုင်ဖန်၊ အစက် နှင့် အောက်မျဉ်းတို့ ပါဝင်နိုင်ပါသည်။',
+    username: 'မှန်ကန်သော အသုံးပြုသူအမည် ထည့်သွင်းပါ။ အက္ခရာ၊ နံပါတ်၊ ဟိုင်ဖန်၊ အစက် နှင့် အောက်မျဉ်းတို့ ပါဝင်နိုင်ပါသည်။',
     validUploadID: "'ဤအကွက်သည် မှန်ကန်သော အပ်လုဒ် ID မဟုတ်ပါ။'",
   },
   version: {
     type: 'အမျိုးအစား',
-    aboutToPublishSelection:
-      'သင်သည် ရွေးချယ်မှုတွင် {{label}} အားလုံးကို ထုတ်ဝေပါတော့မည်။ သေချာလား?',
-    aboutToRestore:
-      'သင်သည် ဤ {{label}} စာရွက်စာတမ်းကို {{versionDate}} တွင် ပါရှိသည့် အခြေအနေသို့ ပြန်ယူတော့မည်။',
+    aboutToPublishSelection: 'သင်သည် ရွေးချယ်မှုတွင် {{label}} အားလုံးကို ထုတ်ဝေပါတော့မည်။ သေချာလား?',
+    aboutToRestore: 'သင်သည် ဤ {{label}} စာရွက်စာတမ်းကို {{versionDate}} တွင် ပါရှိသည့် အခြေအနေသို့ ပြန်ယူတော့မည်။',
     aboutToRestoreGlobal:
       'သင်သည် ဂလိုဘယ် {{label}} ကို {{versionDate}} တွင် ပါရှိသည့် အခြေအနေသို့ ပြန်လည်ရောက်ရှိတော့မည်ဖြစ်သည်။',
-    aboutToRevertToPublished:
-      'သင်သည် အပြောင်းအလဲများကို အများဆိုင် အခြေအနေသို့ ပြန်ပြောင်းပါတော့မည်။ သေချာလား?',
+    aboutToRevertToPublished: 'သင်သည် အပြောင်းအလဲများကို အများဆိုင် အခြေအနေသို့ ပြန်ပြောင်းပါတော့မည်။ သေချာလား?',
     aboutToUnpublish: 'အများဆိုင်မှ ပြန်ဖြုတ်တော့မည်။ သေချာလား',
-    aboutToUnpublishIn:
-      'သင်သည် ဤစာရွက်စာတမ်းကို {{locale}} တွင် ထုတ်ဝေမှုမှ ရုပ်သိမ်းပါတော့မည်။ သေချာပါသလား။',
-    aboutToUnpublishSelection:
-      'သင်သည် ရွေးချယ်မှုတွင် {{label}} အားလုံးကို ထုတ်ဝေတော့မည် ဖြစ်သည်။ သေချာလား?',
+    aboutToUnpublishIn: 'သင်သည် ဤစာရွက်စာတမ်းကို {{locale}} တွင် ထုတ်ဝေမှုမှ ရုပ်သိမ်းပါတော့မည်။ သေချာပါသလား။',
+    aboutToUnpublishSelection: 'သင်သည် ရွေးချယ်မှုတွင် {{label}} အားလုံးကို ထုတ်ဝေတော့မည် ဖြစ်သည်။ သေချာလား?',
     autosave: 'အလိုအလျောက်သိမ်းဆည်းပါ။',
     autosavedSuccessfully: 'အလိုအလျောက် သိမ်းဆည်းပြီးပါပြီ။',
     autosavedVersion: 'အော်တို ဗားရှင်း',

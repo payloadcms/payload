@@ -650,7 +650,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
             blocks,
             config,
             currentTableName,
-            dataRef: groupData as Record<string, unknown>,
+            dataRef: groupData,
             deletions,
             fieldPrefix: groupFieldPrefix,
             fields: field.flattenedFields,
