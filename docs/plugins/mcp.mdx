@@ -296,19 +296,19 @@ access control with no user.
 
 By default, Payload is the authorization server. The client opens a page in the
 browser, the user logs in to the admin panel if needed and allows the client,
-and the client receives a Payload login token. MCP then runs as that user with
-access control.
+and the client receives an access token. MCP then runs as that user with access
+control. The access token is a Payload login token that only works for MCP, not
+for the rest of Payload's APIs.
 
-This works for auth collections that use Payload's own login. Login tokens
+This works for auth collections that use Payload's own login. Access tokens
 expire after the collection's `tokenExpiration`, and the client then gets new
 ones with its [refresh token](../authentication/overview#refresh-tokens),
 without the user. The refresh token works as long as its session, which lasts
 30 days without a refresh, or the collection's `auth.refreshTokens.expiration`.
-Each one works once: if a used
-refresh token comes back later, someone copied it, and the client is signed out.
-Clients are signed out too when the user logs out of all sessions. Collections
-with `useSessions: false` get no refresh tokens, so their clients sign in again
-when the login token expires.
+Each one works once: if a used refresh token comes back later, someone copied
+it, and the client is signed out. Clients are signed out too when the user logs
+out of all sessions. Collections with `useSessions: false` get no refresh
+tokens, so their clients sign in again when the access token expires.
 
 To give clients different tokens, pass `issueToken`. It runs when the user
 clicks Allow, on the user's own browser request, so `req.user` is the user who
