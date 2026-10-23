@@ -19,12 +19,10 @@ export const getGlobalSchemaTool = defineGlobalTool({
   },
   description: 'Get the input schema and LLM instructions before updating a global.',
   input: getGlobalSchemaInputSchema,
-}).handler(async ({ slug, authorizedMCP, req }) => {
-  const permissions = authorizedMCP.overrideAccess
-    ? null
-    : (await getAccessResults({ req })).globals?.[slug]
+}).handler(async ({ slug, req }) => {
+  const permissions = (await getAccessResults({ req })).globals?.[slug]
 
-  if (!authorizedMCP.overrideAccess && !permissions?.update) {
+  if (!permissions?.update) {
     return {
       content: [
         {
@@ -38,8 +36,8 @@ export const getGlobalSchemaTool = defineGlobalTool({
 
   const inputSchema = getGlobalInputSchema({
     globalSlug: slug,
+    permissions,
     req,
-    ...(permissions ? { permissions } : {}),
   })
 
   if (!inputSchema) {
@@ -52,7 +50,7 @@ export const getGlobalSchemaTool = defineGlobalTool({
   const instructions = await getLLMInstructions({
     slug,
     type: 'global',
-    overrideAccess: authorizedMCP.overrideAccess,
+    overrideAccess: false,
     req,
   })
 

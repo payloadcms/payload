@@ -26,12 +26,12 @@ export const getUploadInstructionsTool = defineCollectionTool({
     filesize: z.int().check(z.nonnegative(), z.describe('The file size in bytes.')),
     mimeType: z.string().check(z.describe('The file MIME type.')),
   }),
-}).handler(async ({ slug, authorizedMCP, input, req }) => {
+}).handler(async ({ slug, input, req }) => {
   try {
     const instructions = await getPayloadUploadInstructions({
       ...input,
       collectionSlug: slug,
-      overrideAccess: authorizedMCP.overrideAccess,
+      overrideAccess: false,
       req,
     })
 

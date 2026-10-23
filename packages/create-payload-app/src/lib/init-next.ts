@@ -206,9 +206,12 @@ async function installDeps(args: {
 
   const version = await resolvePackageVersion({ packageName: 'payload', versionOrTag })
 
-  const packagesToInstall = ['payload', '@payloadcms/next', '@payloadcms/richtext-lexical'].map(
-    (pkg) => `${pkg}@${version}`,
-  )
+  const packagesToInstall = [
+    'payload',
+    '@payloadcms/next',
+    '@payloadcms/plugin-mcp',
+    '@payloadcms/richtext-lexical',
+  ].map((pkg) => `${pkg}@${version}`)
 
   packagesToInstall.push(`${getDbPackageName(dbType)}@${version}`)
 

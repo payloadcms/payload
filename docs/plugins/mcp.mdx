@@ -22,7 +22,7 @@ This plugin adds [Model Context Protocol](https://modelcontextprotocol.io/docs/g
 
 ## Core features
 
-- Streamable HTTP transport at `/api/mcp` for local and remote clients, using Payload auth when provided
+- Streamable HTTP transport at `/api/mcp`, with Payload authentication and access control in every environment
 - Stable discovery and CRUD tools for configured collections and globals (`getConfigInfo`, `getCollectionSchema`, `findDocuments`, `createDocuments`, `updateDocument`, `deleteDocuments`, `getUploadInstructions`, `getGlobalSchema`, `findGlobal`, `updateGlobal`) - filtered by Payload access and configurable with simple keys like `tools: { delete: false }`
 - Auth-enabled collections expose opt-in `login`, `auth`, `forgotPassword`, `resetPassword`, `unlock`, `verify` tools
 - Define your own `tools`, `prompts`, and `resources` with full TypeScript inference via `defineTool` / `defineCollectionTool` / `defineGlobalTool` / `definePrompt`
@@ -38,6 +38,14 @@ pnpm add @payloadcms/plugin-mcp
 
 ## Quick Start
 
+Use the [Payload CLI](../configuration/cli) for local development and coding-agent
+work. Use MCP to connect clients to a stable running server,
+such as your production deployment, with credentials and permissions for that
+server. MCP follows the same access rules when used against a development server.
+
+The blank Next.js and TanStack templates include this plugin. They do not configure
+a local MCP client connection or generate `.mcp.json`.
+
 **1.** Add `mcpPlugin` to your Payload config:
 
 ```ts
@@ -50,24 +58,30 @@ export default buildConfig({
 })
 ```
 
-**2.** Start Payload and point your MCP client at the HTTP endpoint:
+**2.** [Enable API keys and create a key](#creating-an-api-key) for a Payload user
+with the permissions your MCP client needs.
+
+**3.** Point your MCP client at your running server and supply the authorization header:
 
 ```json
 {
   "mcpServers": {
     "Payload": {
       "type": "http",
-      "url": "http://127.0.0.1:3000/api/mcp?overrideAccess=true"
+      "url": "https://cms.example.com/api/mcp",
+      "headers": {
+        "Authorization": "users API-Key YOUR_API_KEY"
+      }
     }
   }
 }
 ```
 
-This development URL skips access control. Outside development, remove
-`overrideAccess=true` and [send Payload authorization](#authorization). If your
-client does not support HTTP natively, see [Connecting MCP clients](#connecting-mcp-clients).
+Replace the URL and authorization value with your server's details. Keep credentials
+in your client's secret storage or local configuration, outside source control.
+If your client does not support HTTP natively, see [Connecting MCP clients](#connecting-mcp-clients).
 
-That's it - every collection and global is now available through the generic MCP tools. For example, call `getConfigInfo` to see available slugs, inspect a collection with `getCollectionSchema`, then create one or more documents with `createDocuments`.
+The client can now use the tools and data allowed by its user's permissions. For example, call `getConfigInfo` to see available slugs, inspect a collection with `getCollectionSchema`, then create one or more documents with `createDocuments`.
 
 ### Uploading files
 
@@ -222,18 +236,18 @@ The agent reads the collection's upload settings before acting. MIME type and fi
 
 The `getCollectionSchema` and `getGlobalSchema` tools return [LLM instructions](../configuration/llm-instructions) in `structuredContent.instructions` alongside `schema`, and in a text content block. Read them before creating or updating content.
 
-These instructions come from your collection or global config and can include additional instructions saved in the Admin Panel. To read them, the caller needs permission to create or update documents in that collection, or to update that global. Saved instructions also require the caller to be logged in and have read permission for the collection or global. These permission checks are skipped when `overrideAccess` is enabled.
+These instructions come from your collection or global config and can include additional instructions saved in the Admin Panel. To read them, the caller needs permission to create or update documents in that collection, or to update that global. Saved instructions also require the caller to be logged in and have read permission for the collection or global.
 
 ## HTTP transport
 
-HTTP is the recommended transport for both local development and deployed apps. During development, config changes follow Payload's normal dev-server reload lifecycle.
+Use the CLI for local development. HTTP is the recommended MCP transport for a stable running server because it authenticates and evaluates access on every request.
 
 Once `mcpPlugin` is in your `plugins` array, `POST /api/mcp` accepts JSON-RPC 2.0 MCP requests. Send Payload authorization when you want MCP to run as a user (see [Authorization](#authorization)); without it, MCP runs access control with no user.
 
 Quick test:
 
 ```bash
-curl -i 'http://localhost:3000/api/mcp' \
+curl -i 'https://cms.example.com/api/mcp' \
   -X POST \
   -H 'Authorization: users API-Key MCP-USER-API-KEY' \
   -H 'Content-Type: application/json' \
@@ -264,22 +278,6 @@ If no authorization is sent, MCP runs access control with no user.
 4. Use that key as `Authorization: users API-Key <key>`. Replace `users` with
    that auth collection's slug.
 
-### `overrideAccess`
-
-By default, MCP runs access control. Set `overrideAccess` explicitly when you
-want MCP to behave like a Payload local API call with `overrideAccess: true`.
-When true, MCP skips item access callbacks, built-in permission checks, and
-Payload access control inside built-in handlers.
-
-For HTTP in development, add `overrideAccess=true` or `overrideAccess=false` to
-the MCP URL:
-
-```txt
-POST /api/mcp?overrideAccess=true
-```
-
-HTTP rejects the `overrideAccess` URL argument outside development.
-
 ### Custom auth
 
 Use `overrideGetAuthorizedMCP` to replace the default Payload authentication and
@@ -288,8 +286,6 @@ MCP authorization flow. The custom resolver must:
 1. Authenticate the caller and assign the matching Payload user to `req.user`.
    Assign `null` when the caller is anonymous.
 2. Return only the MCP `items` that caller may use.
-3. Return the `overrideAccess` value that handlers should pass to Payload's local
-   API.
 
 `req.user` is the single source of truth for the caller's identity. Payload
 access control, MCP access callbacks, and local API calls that receive `req` all
@@ -305,7 +301,7 @@ use it.
 import { mcpPlugin } from '@payloadcms/plugin-mcp'
 
 mcpPlugin({
-  overrideGetAuthorizedMCP: async ({ overrideAccess, pluginConfig, req }) => {
+  overrideGetAuthorizedMCP: async ({ pluginConfig, req }) => {
     // Your application verifies the external credentials and returns the
     // matching Payload user, or null when the caller is anonymous.
     const user = await authenticateAndResolvePayloadUser(req)
@@ -313,7 +309,6 @@ mcpPlugin({
 
     return {
       items: req.user ? pluginConfig.items : [],
-      overrideAccess,
     }
   },
 })
@@ -327,7 +322,6 @@ The handler receives:
 
 - `req` - the incoming `PayloadRequest`
 - `pluginConfig` - the fully sanitized plugin config, including the registered `items`
-- `overrideAccess` - the requested Payload-style access override
 
 ## Connecting MCP clients
 
@@ -351,7 +345,7 @@ Most clients support the streamable-HTTP transport directly. If yours doesn't, t
       "args": [
         "-y",
         "mcp-remote",
-        "http://127.0.0.1:3000/api/mcp",
+        "https://cms.example.com/api/mcp",
         "--header",
         "Authorization: users API-Key MCP-USER-API-KEY"
       ]
@@ -370,7 +364,7 @@ Most clients support the streamable-HTTP transport directly. If yours doesn't, t
       "args": [
         "-y",
         "mcp-remote",
-        "http://localhost:3000/api/mcp",
+        "https://cms.example.com/api/mcp",
         "--header",
         "Authorization: users API-Key MCP-USER-API-KEY"
       ]
@@ -382,7 +376,7 @@ Most clients support the streamable-HTTP transport directly. If yours doesn't, t
 #### [Claude Code](https://code.claude.com/docs/en/mcp)
 
 ```bash
-claude mcp add --transport http Payload http://127.0.0.1:3000/api/mcp \
+claude mcp add --transport http Payload https://cms.example.com/api/mcp \
   --header "Authorization: users API-Key MCP-USER-API-KEY"
 ```
 
@@ -393,7 +387,7 @@ claude mcp add --transport http Payload http://127.0.0.1:3000/api/mcp \
   "mcpServers": {
     "Payload": {
       "type": "http",
-      "url": "http://localhost:3000/api/mcp",
+      "url": "https://cms.example.com/api/mcp",
       "headers": {
         "Authorization": "users API-Key MCP-USER-API-KEY"
       }
@@ -410,7 +404,7 @@ The [MCP Inspector](https://github.com/modelcontextprotocol/inspector) is the fa
 npx @modelcontextprotocol/inspector
 ```
 
-Set the URL to `http://127.0.0.1:3000/api/mcp` and add
+Set the URL to `https://cms.example.com/api/mcp` and add
 `Authorization: users API-Key MCP-USER-API-KEY` as a header.
 
 ## Defining custom tools, prompts, and resources
@@ -435,13 +429,13 @@ mcpPlugin({
       input: z.object({
         sides: z.number().int().min(2).max(1000).default(6),
       }),
-    }).handler(async ({ authorizedMCP, input, req }) => {
+    }).handler(async ({ input, req }) => {
       const result = Math.floor(Math.random() * input.sides) + 1
 
       await req.payload.create({
         collection: 'rolls',
         data: { sides: input.sides, result, user: req.user?.id },
-        overrideAccess: authorizedMCP.overrideAccess,
+        overrideAccess: false,
         req,
       })
 
@@ -470,12 +464,12 @@ mcpPlugin({
           input: z.object({
             id: z.string(),
           }),
-        }).handler(async ({ slug, input, authorizedMCP, req }) => {
+        }).handler(async ({ slug, input, req }) => {
           const result = await req.payload.update({
             id: input.id,
             collection: slug,
             data: { _status: 'published' },
-            overrideAccess: authorizedMCP.overrideAccess,
+            overrideAccess: false,
             req,
           })
           return {
@@ -510,11 +504,11 @@ mcpPlugin({
           input: z.object({
             enabled: z.boolean(),
           }),
-        }).handler(async ({ slug, input, authorizedMCP, req }) => {
+        }).handler(async ({ slug, input, req }) => {
           const result = await req.payload.updateGlobal({
             slug,
             data: { maintenanceMode: input.enabled },
-            overrideAccess: authorizedMCP.overrideAccess,
+            overrideAccess: false,
             req,
           })
 
@@ -648,24 +642,23 @@ an `authorizedMCP` object describing the MCP authorization result:
 ```ts
 type AuthorizedMCP = {
   items: MCPItem[] // the items this caller may use
-  overrideAccess: boolean // whether handlers should bypass Payload access control
 }
 ```
 
-When calling Payload's local API from a tool handler, pass `req` and
-`authorizedMCP.overrideAccess`. The local API reads the user from `req.user`:
+When calling Payload's local API from a tool handler, pass `req` and keep
+`overrideAccess: false`. The local API reads the user from `req.user`:
 
 ```ts
 await req.payload.create({
   collection: 'posts',
   data,
-  overrideAccess: authorizedMCP.overrideAccess,
+  overrideAccess: false,
   req,
 })
 ```
 
-Built-in CRUD tools already use this pattern. They run as `req.user` unless
-`overrideAccess` is true.
+Built-in CRUD tools already use this pattern. They always enforce Payload access
+control for `req.user`, including when using a custom authorization resolver.
 
 Prompt and resource handlers receive `req`, but not `authorizedMCP`.
 
@@ -681,7 +674,7 @@ accept `select` directly.
 `select` follows [Payload's Select API](https://payloadcms.com/docs/queries/select) syntax - set a field to `true` to include it:
 
 ```bash
-curl -i 'http://localhost:3000/api/mcp' \
+curl -i 'https://cms.example.com/api/mcp' \
   -X POST \
   -H 'Authorization: users API-Key MCP-USER-API-KEY' \
   -H 'Content-Type: application/json' \
@@ -816,7 +809,7 @@ When your Payload config has localization enabled, built-in collection/global re
 Example - find posts in Spanish with English as fallback:
 
 ```bash
-curl -i 'http://localhost:3000/api/mcp' \
+curl -i 'https://cms.example.com/api/mcp' \
   -X POST \
   -H 'Authorization: users API-Key MCP-USER-API-KEY' \
   -H 'Content-Type: application/json' \
@@ -896,11 +889,11 @@ mcpPlugin({
 ## stdio transport (with limitations)
 
 <Banner type="warning">
-  HTTP is the recommended transport for both local development and production.
-  The stdio server does not hot reload Payload configuration or refresh its MCP
-  registrations and authorization state. Restart the server and reconnect your
-  MCP client after changing your Payload config, collections, globals, tools,
-  prompts, resources, hooks, or access rules.
+  Use the CLI for local development and authenticated HTTP MCP for a stable
+  running server. The stdio server does not hot reload Payload configuration or
+  refresh its MCP registrations and authorization state. Restart the server and
+  reconnect your MCP client after changing your Payload config, collections,
+  globals, tools, prompts, resources, hooks, or access rules.
 </Banner>
 
 For clients that can only spawn local processes, the package also ships a
@@ -922,9 +915,9 @@ instance, and serves MCP over stdin/stdout.
 ```
 
 `PAYLOAD_MCP_AUTHORIZATION` is the same value used for the HTTP `Authorization`
-header. If you omit it, MCP runs access control without a user. During
-development, you can instead set `NODE_ENV=development` and
-`PAYLOAD_MCP_OVERRIDE_ACCESS=true` to skip access control.
+header. If you omit it, MCP runs access control without a user, so only items
+explicitly configured to allow anonymous callers are available. Development mode
+does not bypass authentication or access control.
 
 You do not need to add `mcpPlugin` to your Payload config to use the bin. Add it
 when you want to configure tools, descriptions, prompts, or resources. The bin
