@@ -278,7 +278,20 @@ test.suite('ecommerce', { config: './config.ts', resetBetweenTests: false }, () 
           data: { product: product.id, options: [regular!.id], inventory: 1, _status: 'published' },
           overrideAccess: true,
         }),
-      ).rejects.toThrow()
+      ).rejects.toThrow(/Variant options/)
+
+      await payload.delete({
+        collection: 'variants',
+        overrideAccess: true,
+        where: { product: { equals: product.id } },
+      })
+      await payload.delete({ id: product.id, collection: 'products', overrideAccess: true })
+      await payload.delete({
+        collection: 'variantOptions',
+        overrideAccess: true,
+        where: { variantType: { equals: variantType.id } },
+      })
+      await payload.delete({ id: variantType.id, collection: 'variantTypes', overrideAccess: true })
     })
   })
 
