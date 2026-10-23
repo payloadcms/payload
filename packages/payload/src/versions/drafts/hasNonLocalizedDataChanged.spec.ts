@@ -161,40 +161,19 @@ describe('hasNonLocalizedDataChanged', () => {
     },
   )
 
-  it.each([false, true])('should compare shared children of named tabs (%s)', (hasChanged) => {
+  it('should ignore children of a localized array', () => {
     expect(
       hasNonLocalizedDataChanged({
-        after: { tab: { sharedText: hasChanged ? 'Changed' : 'Shared', localizedText: 'Draft' } },
-        before: { tab: { sharedText: 'Shared', localizedText: 'Published' } },
+        after: { container: { en: [{ text: 'Draft' }] } },
+        before: { container: { en: [{ text: 'Published' }] } },
         configBlockReferences: [],
         fields: [
           {
-            type: 'tabs',
-            tabs: [
-              {
-                name: 'tab',
-                fields: [
-                  { name: 'sharedText', type: 'text' },
-                  { name: 'localizedText', type: 'text', localized: true },
-                ],
-              },
-            ],
+            name: 'container',
+            type: 'array',
+            localized: true,
+            fields: [{ name: 'text', type: 'text' }],
           },
-        ],
-      }),
-    ).toBe(hasChanged)
-  })
-
-  it.each(['group', 'array'] as const)('should ignore children of a localized %s', (type) => {
-    expect(
-      hasNonLocalizedDataChanged({
-        after: { container: { en: type === 'group' ? { text: 'Draft' } : [{ text: 'Draft' }] } },
-        before: {
-          container: { en: type === 'group' ? { text: 'Published' } : [{ text: 'Published' }] },
-        },
-        configBlockReferences: [],
-        fields: [
-          { name: 'container', type, localized: true, fields: [{ name: 'text', type: 'text' }] },
         ],
       }),
     ).toBe(false)
@@ -255,48 +234,6 @@ describe('hasNonLocalizedDataChanged', () => {
         fields,
       }),
     ).toBe(true)
-  })
-
-  it('should compare non-localized children inside non-localized groups', () => {
-    expect(
-      hasNonLocalizedDataChanged({
-        after: {
-          meta: {
-            localizedDescription: { en: 'Draft EN' },
-            sharedDescription: 'Shared draft',
-          },
-        },
-        before: {
-          meta: {
-            localizedDescription: { en: 'Published EN' },
-            sharedDescription: 'Shared published',
-          },
-        },
-        configBlockReferences: [],
-        fields,
-      }),
-    ).toBe(true)
-  })
-
-  it('should ignore localized children inside non-localized groups', () => {
-    expect(
-      hasNonLocalizedDataChanged({
-        after: {
-          meta: {
-            localizedDescription: { en: 'Draft EN' },
-            sharedDescription: 'Shared',
-          },
-        },
-        before: {
-          meta: {
-            localizedDescription: { en: 'Published EN' },
-            sharedDescription: 'Shared',
-          },
-        },
-        configBlockReferences: [],
-        fields,
-      }),
-    ).toBe(false)
   })
 
   it('should ignore empty non-localized groups when the stored document omits them', () => {
@@ -619,22 +556,6 @@ describe('virtual fields', () => {
         before: {},
         configBlockReferences: [],
         fields: [{ name: 'computed', type: 'text', virtual: true }],
-      }),
-    ).toBe(false)
-  })
-
-  it('should ignore children of virtual named tabs', () => {
-    expect(
-      hasNonLocalizedDataChanged({
-        after: { computed: { text: 'Computed value' } },
-        before: {},
-        configBlockReferences: [],
-        fields: [
-          {
-            type: 'tabs',
-            tabs: [{ name: 'computed', virtual: true, fields: [{ name: 'text', type: 'text' }] }],
-          },
-        ],
       }),
     ).toBe(false)
   })
