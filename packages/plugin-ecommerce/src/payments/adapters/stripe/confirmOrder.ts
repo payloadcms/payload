@@ -53,8 +53,9 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
       })
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentID)
       // PaymentIntents created by older versions also carry a `cartItemsSnapshot`.
-      // Newer ones don't, because Stripe caps metadata values at 500 characters.
-      // The order items always come from the transaction.
+      // Newer ones carry a `cartItemsHash` instead, because Stripe caps metadata values
+      // at 500 characters. The order items always come from the transaction, and
+      // `validateSettlement` checks them against the snapshot or the hash.
       const cartItemsSnapshot =
         paymentIntent.metadata.cartItemsSnapshot === undefined
           ? undefined

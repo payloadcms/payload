@@ -21,6 +21,7 @@ vi.mock('stripe', () => {
 })
 
 import { initiatePayment } from './initiatePayment.js'
+import { hashCartItems } from './validateSettlement.js'
 
 type InitiatePaymentArgs = Parameters<ReturnType<typeof initiatePayment>>[0]
 
@@ -96,12 +97,13 @@ describe('initiatePayment', () => {
 
     const [{ metadata }] = mockPaymentIntentsCreate.mock.calls[0]
 
+    const [{ data: transactionData }] = create.mock.calls[0]
+
     expect(metadata).toEqual({
       cartID: 'cart-123',
+      cartItemsHash: hashCartItems(transactionData.items),
       shippingAddress: JSON.stringify({ city: 'Test City' }),
     })
-
-    const [{ data: transactionData }] = create.mock.calls[0]
 
     expect(transactionData.items).toHaveLength(12)
     expect(transactionData.items[0]).toEqual({

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   getRelationshipID,
+  hashCartItems,
   normalizeCartItems,
   normalizeEmail,
   validateSettlement,
@@ -242,10 +243,57 @@ describe('validateSettlement', () => {
     ).not.toThrow()
   })
 
-  it('should accept a PaymentIntent without an item snapshot', () => {
+  it('should accept a PaymentIntent whose item hash matches the transaction items', () => {
+    expect(() =>
+      validateSettlement(
+        createAuthenticatedValidation({
+          cartItemsSnapshot: undefined,
+          paymentIntent: createPaymentIntent({
+            metadata: {
+              cartID: 'cart-123',
+              cartItemsHash: hashCartItems([{ id: 'item-1', product: 'product-123', quantity: 1 }]),
+            },
+          }),
+          transaction: createTransaction({
+            items: [{ id: 'item-1', product: { id: 'product-123' }, quantity: 1, variant: null }],
+          }),
+        }),
+      ),
+    ).not.toThrow()
+  })
+
+  it('should reject transaction items edited after payment initiation', () => {
+    expect(() =>
+      validateSettlement(
+        createAuthenticatedValidation({
+          cartItemsSnapshot: undefined,
+          paymentIntent: createPaymentIntent({
+            metadata: {
+              cartID: 'cart-123',
+              cartItemsHash: hashCartItems([{ id: 'item-1', product: 'product-123', quantity: 1 }]),
+            },
+          }),
+          transaction: createTransaction({
+            items: [{ id: 'item-1', product: 'product-123', quantity: 5 }],
+          }),
+        }),
+      ),
+    ).toThrow('Stripe cart items do not match the transaction items')
+  })
+
+  it('should reject a PaymentIntent with neither an item snapshot nor an item hash', () => {
     expect(() =>
       validateSettlement(createAuthenticatedValidation({ cartItemsSnapshot: undefined })),
-    ).not.toThrow()
+    ).toThrow('Stripe cart items metadata is missing')
+  })
+
+  it('should ignore custom item properties when hashing', () => {
+    expect(
+      hashCartItems([{ deliveryOption: 'express', id: 'item-1', product: 'p-1', quantity: 1 }]),
+    ).toBe(hashCartItems([{ id: 'item-2', product: { id: 'p-1' }, quantity: 1 }]))
+    expect(hashCartItems([{ product: 'p-1', quantity: 1 }])).not.toBe(
+      hashCartItems([{ product: 'p-1', quantity: 2 }]),
+    )
   })
 
   it('should still validate the transaction items without an item snapshot', () => {

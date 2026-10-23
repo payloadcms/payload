@@ -15,6 +15,7 @@ vi.mock('stripe', () => {
 })
 
 import { confirmOrder } from './confirmOrder.js'
+import { hashCartItems } from './validateSettlement.js'
 
 type ConfirmOrderArgs = Parameters<ReturnType<typeof confirmOrder>>[0]
 
@@ -230,6 +231,7 @@ describe('confirmOrder', () => {
       createPaymentIntent({
         metadata: {
           cartID: 'cart-123',
+          cartItemsHash: hashCartItems(items),
           shippingAddress: JSON.stringify({ city: 'Test City' }),
         },
       }),
