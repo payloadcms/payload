@@ -521,6 +521,7 @@ export const slTranslations: DefaultTranslationsObject = {
     selectValue: 'Izberi vrednost',
     settings: 'Nastavitve',
     showAllLabel: 'Pokaži vse {{label}}',
+    showingCurrentOfTotal: 'Prikazano {{current}} od {{total}}',
     shownInTable: 'Prikazano v tabeli',
     showSidebar: 'Prikaži stransko vrstico',
     skipToContent: 'Preskoči na vsebino',

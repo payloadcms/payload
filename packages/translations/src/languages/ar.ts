@@ -511,6 +511,7 @@ export const arTranslations: DefaultTranslationsObject = {
     selectValue: 'اختيار قيمة',
     settings: 'الإعدادات',
     showAllLabel: 'عرض كل {{label}}',
+    showingCurrentOfTotal: 'عرض {{current}} من {{total}}',
     shownInTable: 'معروض في جدول',
     showSidebar: 'إظهار الشريط الجانبي',
     skipToContent: 'تخطي إلى المحتوى',

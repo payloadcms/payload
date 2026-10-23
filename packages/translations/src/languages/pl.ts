@@ -522,6 +522,7 @@ export const plTranslations: DefaultTranslationsObject = {
     selectValue: 'Wybierz wartość',
     settings: 'Ustawienia',
     showAllLabel: 'Pokaż wszystkie {{label}}',
+    showingCurrentOfTotal: 'Wyświetlono {{current}} z {{total}}',
     shownInTable: 'Wyświetlane w tabeli',
     showSidebar: 'Pokaż pasek boczny',
     skipToContent: 'Przejdź do treści',

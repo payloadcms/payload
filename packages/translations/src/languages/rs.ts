@@ -521,6 +521,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     selectValue: 'Одабери вредност',
     settings: 'Podešavanja',
     showAllLabel: 'Прикажи све {{label}}',
+    showingCurrentOfTotal: 'Приказано {{current}} од {{total}}',
     shownInTable: 'Prikazano u tabeli',
     showSidebar: 'Prikaži bočnu traku',
     skipToContent: 'Пређи на садржај',

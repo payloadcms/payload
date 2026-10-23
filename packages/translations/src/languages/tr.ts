@@ -528,6 +528,7 @@ export const trTranslations: DefaultTranslationsObject = {
     selectValue: 'Bir değer seçin',
     settings: 'Ayarlar',
     showAllLabel: 'Tüm {{label}} göster',
+    showingCurrentOfTotal: '{{total}} sonuçtan {{current}} tanesi gösteriliyor',
     shownInTable: 'Tablo olarak gösterildi',
     showSidebar: 'Kenar çubuğunu göster',
     skipToContent: 'İçeriğe geç',
