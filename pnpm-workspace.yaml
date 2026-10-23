@@ -4,7 +4,6 @@ packages:
   - 'test'
   - 'templates/blank'
   - 'templates/blank-tanstack'
-  - 'templates/with-cloudflare-d1-tanstack'
   - 'templates/website'
   - 'templates/ecommerce'
 

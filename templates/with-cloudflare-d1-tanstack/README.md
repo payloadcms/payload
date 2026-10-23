@@ -1,5 +1,7 @@
 # Payload + TanStack Start on Cloudflare
 
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/payloadcms/payload/tree/main/templates/with-cloudflare-d1-tanstack)
+
 A minimal full-stack example that runs the Payload admin, Payload REST API, and a TanStack Start frontend in one Cloudflare Worker.
 
 - **TanStack Start** handles SSR, routing, and server functions.
@@ -11,6 +13,10 @@ The implementation combines Payload's official `blank-tanstack` template with th
 
 > [!IMPORTANT]
 > Payload's TanStack Start adapter is currently available in Payload 4 beta. Payload's Worker bundle also generally requires a paid Workers plan because it exceeds the free plan's compressed script-size limit.
+
+## Deploy to Cloudflare
+
+Click the button above to create a copy of this template in your Git provider and deploy it to Cloudflare Workers. Cloudflare provisions the D1 database and R2 bucket from `wrangler.jsonc` and prompts you to configure `PAYLOAD_SECRET` during setup.
 
 ## Requirements
 
