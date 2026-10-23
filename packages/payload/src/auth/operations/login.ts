@@ -21,11 +21,10 @@ import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { applyUserReadAccess } from '../applyUserReadAccess.js'
-import { getFieldsToSign } from '../getFieldsToSign.js'
+import { createAuthToken } from '../createAuthToken.js'
 import { getLoginOptions } from '../getLoginOptions.js'
 import { isUserLocked } from '../isUserLocked.js'
-import { jwtSign } from '../jwt.js'
-import { addSessionToUser, revokeSession } from '../sessions.js'
+import { revokeSession } from '../sessions.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash.js'
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js'
@@ -99,10 +98,7 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
     depth,
     overrideAccess = false,
     req,
-    req: {
-      payload,
-      payload: { secret },
-    },
+    req: { payload },
     showHiddenFields,
   } = args
 
@@ -280,23 +276,13 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
       })
     }
 
-    const fieldsToSignArgs: Parameters<typeof getFieldsToSign>[0] = {
+    const { exp, token, ...session } = await createAuthToken({
       collectionConfig,
       email: sanitizedEmail!,
-      user,
-    }
-
-    const session = await addSessionToUser({
-      collectionConfig,
-      payload,
       req,
       user,
     })
     sid = session.sid
-
-    if (sid) {
-      fieldsToSignArgs.sid = sid
-    }
 
     if (
       authResult.shouldUpdatePasswordHash &&
@@ -329,8 +315,6 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
       }
     }
 
-    const fieldsToSign = getFieldsToSign(fieldsToSignArgs)
-
     if (maxLoginAttemptsEnabled) {
       await resetLoginAttempts({
         collection: collectionConfig,
@@ -355,12 +339,6 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
           })) || user
       }
     }
-
-    const { exp, token } = await jwtSign({
-      fieldsToSign,
-      secret,
-      tokenExpiration: collectionConfig.auth.tokenExpiration,
-    })
 
     req.user = user
 
