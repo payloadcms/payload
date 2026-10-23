@@ -2692,6 +2692,86 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
 
+  test.describe('1.4.13 Content on Hover or Focus (AA)', () => {
+    test('should keep a User submenu open during slow diagonal pointer movement', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
+      await page.locator('.user-menu__trigger').click()
+
+      const theme = page.getByRole('menuitem', { name: /theme/i })
+      const language = page.getByRole('menuitem', { name: /language/i })
+
+      await theme.hover()
+      await expect(theme).toHaveAttribute('aria-expanded', 'true')
+
+      const submenu = page.locator(`[id="${await theme.getAttribute('aria-controls')}"]`)
+      const triggerBox = (await theme.boundingBox())!
+      const siblingBox = (await language.boundingBox())!
+      const submenuBox = (await submenu.boundingBox())!
+      const startX = triggerBox.x + triggerBox.width / 2
+      const edgeX = submenuBox.x > startX ? submenuBox.x : submenuBox.x + submenuBox.width
+
+      const startY = triggerBox.y + triggerBox.height / 2
+      const targetX = startX + (edgeX - startX) * 0.85
+      const targetY = siblingBox.y + siblingBox.height / 2
+
+      for (let step = 1; step <= 40; step++) {
+        await page.mouse.move(
+          startX + ((targetX - startX) * step) / 40,
+          startY + ((targetY - startY) * step) / 40,
+        )
+        await page.waitForTimeout(20)
+      }
+      await expect(theme).toHaveAttribute('aria-expanded', 'true')
+      await expect(language).toHaveAttribute('aria-expanded', 'false')
+
+      await submenu.getByRole('menuitemradio').last().hover()
+      await page.waitForTimeout(400)
+      await expect(submenu).toBeVisible()
+
+      const optionBox = (await submenu.getByRole('menuitemradio').last().boundingBox())!
+      const returnX = optionBox.x + optionBox.width / 2
+      const returnY = optionBox.y + optionBox.height / 2
+
+      for (let step = 1; step <= 40; step++) {
+        await page.mouse.move(
+          returnX + ((startX - returnX) * step) / 40,
+          returnY + ((startY - returnY) * step) / 40,
+        )
+        await page.waitForTimeout(20)
+        await expect(theme).toHaveAttribute('aria-expanded', 'true')
+      }
+      await language.hover()
+      await expect(language).toHaveAttribute('aria-expanded', 'true')
+      await expect(theme).toHaveAttribute('aria-expanded', 'false')
+    })
+
+    test('should switch User submenus after pausing over another item', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
+      await page.locator('.user-menu__trigger').click()
+
+      const theme = page.getByRole('menuitem', { name: /theme/i })
+      const language = page.getByRole('menuitem', { name: /language/i })
+
+      await theme.hover()
+      await expect(theme).toHaveAttribute('aria-expanded', 'true')
+
+      const submenu = page.locator(`[id="${await theme.getAttribute('aria-controls')}"]`)
+      const triggerBox = (await theme.boundingBox())!
+      const siblingBox = (await language.boundingBox())!
+      const submenuBox = (await submenu.boundingBox())!
+      const startX = triggerBox.x + triggerBox.width / 2
+      const edgeX = submenuBox.x > startX ? submenuBox.x : submenuBox.x + submenuBox.width
+
+      const point = { x: startX + (edgeX - startX) * 0.85, y: siblingBox.y + siblingBox.height / 2 }
+
+      await page.mouse.move(point.x, point.y)
+      await expect(language).toHaveAttribute('aria-expanded', 'true')
+      await expect(theme).toHaveAttribute('aria-expanded', 'false')
+    })
+  })
+
   test.describe('2.1.1 Keyboard (A)', () => {
     test(
       'should apply and remove a collection filter using the keyboard',
@@ -5485,7 +5565,18 @@ test.describe('WCAG 2.2 Level AA', () => {
       await language.press('Enter')
       const languageOption = page.getByRole('menuitemradio').first()
       await expect(languageOption).toBeFocused()
+      const optionBox = (await languageOption.boundingBox())!
+
+      await page.mouse.move(optionBox.x + optionBox.width / 2, optionBox.y + optionBox.height / 2)
+      await page.mouse.move(0, 0)
+      await expect(language).toHaveAttribute('aria-expanded', 'true')
       await languageOption.press('Escape')
+      await expect(language).toBeFocused()
+
+      await language.press('Enter')
+      await expect(languageOption).toBeFocused()
+      await theme.hover()
+      await expect(theme).toHaveAttribute('aria-expanded', 'true')
       await expect(language).toBeFocused()
     })
 
