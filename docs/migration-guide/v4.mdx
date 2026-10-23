@@ -1874,6 +1874,15 @@ File versioning adds a required `GeneratedAdapter.copyFile` method. Copy `from` 
 
 Replace `clientUploadContext` with `uploadReference` in generated file metadata and static handler parameters. `handleUpload` no longer receives it because Payload skips uploading files that are already stored.
 
+Payload keeps only `_objectKey`, `prefix`, and `signedReceipt` at the top level of `uploadReference`. Read any other field your adapter or client added from `uploadReference.clientData`:
+
+```diff
+- const objectID = uploadReference.providerObjectID
++ const objectID = uploadReference.clientData?.providerObjectID
+```
+
+`clientData` is not verified. To trust a value, sign it into the upload receipt as `adapterData` instead. See [Upload receipts](../upload/storage-adapters#custom-upload-receipts).
+
 Set `uploadInstructions.enabled`. When false, Payload adds `adminHandler` to the import map without rendering it. When true, Payload also renders it and exposes the instructions and supporting endpoint.
 
 Move access checks into the generator or supporting endpoint that authorizes the upload:
