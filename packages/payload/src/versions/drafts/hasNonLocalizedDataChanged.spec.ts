@@ -472,6 +472,145 @@ describe('hasNonLocalizedDataChanged', () => {
   })
 })
 
+describe('layout fields', () => {
+  const childFields: Field[] = [
+    { name: 'sharedText', type: 'text' },
+    { name: 'localizedText', type: 'text', localized: true },
+  ]
+  const layouts: { dataKey?: string; fields: Field[]; name: string }[] = [
+    {
+      name: 'collapsible',
+      fields: [{ type: 'collapsible', label: 'Details', fields: childFields }],
+    },
+    {
+      name: 'unnamed group',
+      fields: [{ type: 'group', fields: childFields }],
+    },
+    {
+      name: 'named group',
+      dataKey: 'details',
+      fields: [{ name: 'details', type: 'group', fields: childFields }],
+    },
+    {
+      name: 'unnamed tab',
+      fields: [{ type: 'tabs', tabs: [{ label: 'Details', fields: childFields }] }],
+    },
+    {
+      name: 'named tab',
+      dataKey: 'details',
+      fields: [{ type: 'tabs', tabs: [{ name: 'details', fields: childFields }] }],
+    },
+  ]
+
+  describe.each(layouts)('$name', ({ dataKey, fields }) => {
+    it.each([
+      { hasChanged: true, localizedText: 'Published', sharedText: 'Draft' },
+      { hasChanged: false, localizedText: 'Draft', sharedText: 'Published' },
+    ])('should detect only shared child changes ($hasChanged)', ({ hasChanged, ...after }) => {
+      const before = { localizedText: { en: 'Published' }, sharedText: 'Published' }
+      const afterData = { localizedText: { en: after.localizedText }, sharedText: after.sharedText }
+
+      expect(
+        hasNonLocalizedDataChanged({
+          after: dataKey ? { [dataKey]: afterData } : afterData,
+          before: dataKey ? { [dataKey]: before } : before,
+          configBlockReferences: [],
+          fields,
+        }),
+      ).toBe(hasChanged)
+    })
+  })
+
+  it.each(['group', 'tab'] as const)(
+    'should ignore localized child changes throughout a localized named %s',
+    (type) => {
+      const container = { name: 'details', localized: true, fields: childFields }
+      const fields: Field[] =
+        type === 'group' ? [{ ...container, type: 'group' }] : [{ type: 'tabs', tabs: [container] }]
+
+      expect(
+        hasNonLocalizedDataChanged({
+          after: { details: { en: { sharedText: 'Draft' } } },
+          before: { details: { en: { sharedText: 'Published' } } },
+          configBlockReferences: [],
+          fields,
+        }),
+      ).toBe(false)
+    },
+  )
+
+  it.each(['group', 'tab'] as const)('should ignore virtual named %s containers', (type) => {
+    const container = { name: 'details', virtual: true, fields: childFields }
+    const fields: Field[] =
+      type === 'group' ? [{ ...container, type: 'group' }] : [{ type: 'tabs', tabs: [container] }]
+
+    expect(
+      hasNonLocalizedDataChanged({
+        after: { details: { sharedText: 'Computed' } },
+        before: {},
+        configBlockReferences: [],
+        fields,
+      }),
+    ).toBe(false)
+  })
+
+  it.each([
+    { hasChanged: false, localizedText: 'Draft', sharedText: 'Published' },
+    { hasChanged: true, localizedText: 'Published', sharedText: 'Draft' },
+  ])(
+    'should preserve scope through mixed nested layouts ($hasChanged)',
+    ({ hasChanged, ...after }) => {
+      const fields: Field[] = [
+        {
+          name: 'details',
+          type: 'group',
+          fields: [
+            {
+              type: 'collapsible',
+              label: 'Settings',
+              fields: [
+                {
+                  type: 'tabs',
+                  tabs: [
+                    {
+                      label: 'Content',
+                      fields: [
+                        {
+                          type: 'group',
+                          fields: [
+                            { type: 'tabs', tabs: [{ name: 'content', fields: childFields }] },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ]
+
+      expect(
+        hasNonLocalizedDataChanged({
+          after: {
+            details: {
+              content: { localizedText: { en: after.localizedText }, sharedText: after.sharedText },
+            },
+          },
+          before: {
+            details: {
+              content: { localizedText: { en: 'Published' }, sharedText: 'Published' },
+            },
+          },
+          configBlockReferences: [],
+          fields,
+        }),
+      ).toBe(hasChanged)
+    },
+  )
+})
+
 describe('virtual fields', () => {
   it('should ignore computed virtual values absent from stored data', () => {
     expect(
