@@ -71,6 +71,7 @@ export interface Config {
     'media-with-prefix': MediaWithPrefix;
     'media-container': MediaContainer;
     'legacy-media': LegacyMedia;
+    'resized-media': ResizedMedia;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -83,6 +84,7 @@ export interface Config {
     'media-with-prefix': MediaWithPrefixSelect<false> | MediaWithPrefixSelect<true>;
     'media-container': MediaContainerSelect<false> | MediaContainerSelect<true>;
     'legacy-media': LegacyMediaSelect<false> | LegacyMediaSelect<true>;
+    'resized-media': ResizedMediaSelect<false> | ResizedMediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -212,6 +214,25 @@ export interface LegacyMedia {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "resized-media".
+ */
+export interface ResizedMedia {
+  id: string;
+  _objectKey?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -275,6 +296,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'legacy-media';
         value: string | LegacyMedia;
+      } | null)
+    | ({
+        relationTo: 'resized-media';
+        value: string | ResizedMedia;
       } | null)
     | ({
         relationTo: 'users';
@@ -398,6 +423,24 @@ export interface MediaContainerSelect<T extends boolean = true> {
  * via the `definition` "legacy-media_select".
  */
 export interface LegacyMediaSelect<T extends boolean = true> {
+  _objectKey?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "resized-media_select".
+ */
+export interface ResizedMediaSelect<T extends boolean = true> {
   _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
