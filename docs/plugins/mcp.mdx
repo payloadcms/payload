@@ -346,6 +346,9 @@ export const Route = createFileRoute('/.well-known/oauth-protected-resource/$')(
 )
 ```
 
+Set `serverURL` in your [Payload config](../configuration/overview), so the
+URLs in the OAuth metadata don't come from each request's address.
+
 ### Custom auth
 
 Use `overrideGetAuthorizedMCP` to replace the default Payload authentication and

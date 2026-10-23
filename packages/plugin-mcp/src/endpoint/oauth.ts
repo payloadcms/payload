@@ -84,7 +84,8 @@ const getMetadataResponse = async ({ req }: { req: PayloadRequest }): Promise<Re
       resource: getMCPResource({ config, url: req.url! }),
       scopes_supported: scopes,
     } satisfies OAuthProtectedResourceMetadata,
-    // Public document, readable by browser-based MCP clients on any origin
-    { headers: { 'Access-Control-Allow-Origin': '*' } },
+    // Public document, readable by browser-based MCP clients on any origin. Not cached, since
+    // without `serverURL` its URLs come from the request.
+    { headers: { 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-store' } },
   )
 }
