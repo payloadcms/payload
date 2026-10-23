@@ -244,10 +244,7 @@ export const deleteUserLocks = async ({
     // Not passing req fails on postgres
     req: payload.db.name === 'mongoose' ? undefined : req,
     where: {
-      and: [
-        { 'user.relationTo': { equals: collectionSlug } },
-        { 'user.value': { in: ids } },
-      ],
+      and: [{ 'user.relationTo': { equals: collectionSlug } }, { 'user.value': { in: ids } }],
     },
   })
 }
