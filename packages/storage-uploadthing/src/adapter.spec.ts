@@ -2,15 +2,20 @@ import { randomUUID } from 'crypto'
 import { rm, writeFile } from 'fs/promises'
 import { tmpdir } from 'os'
 import path from 'path'
-import { expect, it } from 'vitest'
+import {
+  CLIENT_UPLOAD_CONTEXT_CONTEXT_KEY,
+  CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY,
+} from 'payload'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createUploadthingAdapter } from './adapter.js'
 
-it('should upload the temporary file contents', async () => {
+describe('handleUpload', () => {
   const bytes = Buffer.from('processed image contents')
-  const tempFilePath = path.join(tmpdir(), `uploadthing-upload-${randomUUID()}`)
+  let tempFilePath: string
   let storedFile: File | undefined
   const utApi = {
+    deleteFiles: vi.fn(),
     uploadFiles: (file: File) => {
       storedFile = file
       return { data: { name: file.name, key: 'stored-key' } }
@@ -20,9 +25,18 @@ it('should upload the temporary file contents', async () => {
     collection: { slug: 'media' },
   } as never)
 
-  await writeFile(tempFilePath, bytes)
+  beforeEach(async () => {
+    tempFilePath = path.join(tmpdir(), `uploadthing-upload-${randomUUID()}`)
+    await writeFile(tempFilePath, bytes)
+  })
 
-  try {
+  afterEach(async () => {
+    await rm(tempFilePath, { force: true })
+    storedFile = undefined
+    utApi.deleteFiles.mockClear()
+  })
+
+  it('should upload the temporary file contents', async () => {
     await adapter.handleUpload({
       data: {},
       file: {
@@ -31,11 +45,52 @@ it('should upload the temporary file contents', async () => {
         mimeType: 'image/png',
         tempFilePath,
       },
+      req: { context: {} },
       storageFilePath: 'processed.png',
     } as never)
 
     expect(Buffer.from(await storedFile!.arrayBuffer())).toEqual(bytes)
-  } finally {
-    await rm(tempFilePath, { force: true })
-  }
+  })
+
+  it('should delete the browser upload when a processed client upload replaces it', async () => {
+    await adapter.handleUpload({
+      data: {},
+      file: {
+        buffer: Buffer.alloc(0),
+        filename: 'processed.png',
+        mimeType: 'image/png',
+        tempFilePath,
+      },
+      req: {
+        context: {
+          [CLIENT_UPLOAD_CONTEXT_CONTEXT_KEY]: { key: 'browser-key' },
+          [CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY]: tempFilePath,
+        },
+      },
+      storageFilePath: 'processed.png',
+    } as never)
+
+    expect(utApi.deleteFiles).toHaveBeenCalledWith('browser-key')
+  })
+
+  it('should not delete the browser upload when uploading an image size', async () => {
+    await adapter.handleUpload({
+      data: { sizes: { square: { filename: 'processed-400x400.png' } } },
+      file: {
+        buffer: Buffer.from('image size contents'),
+        filename: 'processed-400x400.png',
+        imageSizeName: 'square',
+        mimeType: 'image/png',
+      },
+      req: {
+        context: {
+          [CLIENT_UPLOAD_CONTEXT_CONTEXT_KEY]: { key: 'browser-key' },
+          [CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY]: tempFilePath,
+        },
+      },
+      storageFilePath: 'processed-400x400.png',
+    } as never)
+
+    expect(utApi.deleteFiles).not.toHaveBeenCalled()
+  })
 })
