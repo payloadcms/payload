@@ -635,6 +635,11 @@ export type ProductsValidation = (args: {
    */
   currency?: string
   /**
+   * The name of the field used to track inventory levels, or `false` when inventory
+   * tracking is disabled for the store. Defaults to 'inventory'.
+   */
+  inventoryFieldName?: false | string
+  /**
    * The full product data.
    */
   product: TypedCollection['products']
@@ -815,7 +820,7 @@ export type SanitizedEcommercePluginConfig = {
   access: SanitizedAccessConfig
   addresses: { addressFields: Field[] } & Omit<AddressesConfig, 'addressFields'>
   currencies: Required<CurrenciesConfig>
-  inventory?: InventoryConfig
+  inventory?: false | InventoryConfig
   payments: {
     paymentMethods: [] | PaymentAdapter[]
   }
