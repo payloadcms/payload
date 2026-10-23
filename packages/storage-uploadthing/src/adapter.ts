@@ -56,6 +56,7 @@ export function createUploadthingAdapter({
         data,
         filename: file.filename,
         mimeType: file.mimeType,
+        tempFilePath: file.tempFilePath,
         utApi,
       })
 
