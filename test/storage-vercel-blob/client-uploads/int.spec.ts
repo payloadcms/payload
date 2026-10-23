@@ -131,22 +131,30 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
     expect(uploaded).toBeDefined()
   })
 
-  it('should store processed bytes for a resized client upload', async () => {
+  it.each([
+    ['resized', 'image/png', ''],
+    [
+      'cropped',
+      'image/png',
+      '?uploadEdits[crop][unit]=%25&uploadEdits[crop][x]=0&uploadEdits[crop][y]=0&uploadEdits[crop][width]=50&uploadEdits[crop][height]=50&uploadEdits[heightInPixels]=800&uploadEdits[widthInPixels]=800',
+    ],
+    ['mislabeled', 'image/jpeg', ''],
+  ])('should store processed bytes for a %s client upload', async (_, mimeType, query) => {
     const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
     const issued = await issueClientUpload({
       collectionSlug: resizedMediaSlug,
       filename: 'image.png',
-      mimeType: 'image/png',
+      mimeType,
     })
 
-    await upload(issued.pathname, new Blob([file], { type: 'image/png' }), {
+    await upload(issued.pathname, new Blob([file], { type: mimeType }), {
       access: 'public',
       clientPayload: JSON.stringify({
         collectionSlug: resizedMediaSlug,
-        mimeType: 'image/png',
+        mimeType,
         signedReceipt: issued.clientUploadContext.signedReceipt,
       }),
-      contentType: 'image/png',
+      contentType: mimeType,
       handleUploadUrl,
     })
 
@@ -158,12 +166,12 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
         clientUploadContext: issued.clientUploadContext,
         collectionSlug: resizedMediaSlug,
         filename: issued.filename,
-        mimeType: 'image/png',
+        mimeType,
         size: file.length,
       }),
     )
 
-    const response = await restClient.POST(`/${resizedMediaSlug}`, { body: formData })
+    const response = await restClient.POST(`/${resizedMediaSlug}${query}`, { body: formData })
 
     expect(response.status).toBe(201)
 
@@ -173,9 +181,13 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
 
     const { blobs } = await list()
     const storedMain = blobs.find(({ pathname }) => pathname.endsWith(`/${doc.filename}`))
+    const storedThumbnail = blobs.find(({ pathname }) =>
+      pathname.endsWith(`/${doc.sizes.thumbnail.filename}`),
+    )
 
     expect(doc.width).toBe(10)
     expect(storedMain?.size).toBe(doc.filesize)
+    expect(storedThumbnail?.size).toBe(doc.sizes.thumbnail.filesize)
   })
 
   it("should reject upload when 'x-disallow-access' header is set", async () => {
