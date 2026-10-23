@@ -14,17 +14,26 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { applyUserReadAccess } from '../applyUserReadAccess.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { jwtSign } from '../jwt.js'
+import { refreshAuthToken } from '../refreshAuthToken.js'
 import { removeExpiredSessions } from '../sessions.js'
 
 export type Result = {
   exp: number
   refreshedToken: string
+  /** The next refresh token, when refreshing with a refresh token. */
+  refreshToken?: string
   setCookie?: boolean
   user: Document
 }
 
 export type Arguments = {
   collection: Collection
+  /**
+   * A refresh token from login to refresh with, instead of the request's token. Unlike the
+   * request's token, it still works after the token expired. Collection `refresh` hooks don't run
+   * for it, since they replace refreshing with the request's token.
+   */
+  refreshToken?: string
   req: PayloadRequest
 }
 
@@ -59,11 +68,29 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       },
     } = args
 
-    if (!args.req.user) {
+    const refreshed = args.refreshToken
+      ? await refreshAuthToken({
+          collection: collectionConfig.slug,
+          refreshToken: args.refreshToken,
+          req,
+        })
+      : undefined
+
+    if (args.refreshToken && !refreshed) {
+      // Commit, so a reused refresh token's session stays logged out
+      if (shouldCommit) {
+        await commitTransaction(req)
+      }
+
       throw new Forbidden(args.req.t)
     }
-    if (args.req.user.collection !== collectionConfig.slug) {
-      throw new APIError('Incorrect collection', httpStatus.FORBIDDEN)
+    if (!refreshed) {
+      if (!args.req.user) {
+        throw new Forbidden(args.req.t)
+      }
+      if (args.req.user.collection !== collectionConfig.slug) {
+        throw new APIError('Incorrect collection', httpStatus.FORBIDDEN)
+      }
     }
 
     const pathname = new URL(args.req.url!).pathname
@@ -73,16 +100,21 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
     let user = await req.payload.db.findOne<AuthenticatedUser>({
       collection: collectionConfig.slug,
       req,
-      where: { id: { equals: args.req.user.id } },
+      where: { id: { equals: refreshed?.user.id ?? args.req.user!.id } },
     })
 
     if (!user) {
       throw new Forbidden(args.req.t)
     }
 
-    const sid = args.req.user._sid
+    const sid = args.req.user?._sid
 
-    if (collectionConfig.auth.useSessions && !collectionConfig.auth.disableLocalStrategy) {
+    // refreshAuthToken already refreshed the refresh token's session
+    if (
+      !refreshed &&
+      collectionConfig.auth.useSessions &&
+      !collectionConfig.auth.disableLocalStrategy
+    ) {
       if (!Array.isArray(user.sessions) || !sid) {
         throw new Forbidden(args.req.t)
       }
@@ -95,7 +127,13 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
 
       const now = new Date()
       const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
-      existingSession.expiresAt = new Date(now.getTime() + tokenExpInMs)
+      const tokenExpiresAt = new Date(now.getTime() + tokenExpInMs)
+
+      // Don't shorten sessions that outlast their tokens. Moving the expiry of a session with a
+      // refresh token would also make its refresh token look reused.
+      if (new Date(existingSession.expiresAt) < tokenExpiresAt) {
+        existingSession.expiresAt = tokenExpiresAt
+      }
 
       await req.payload.db.updateOne({
         id: user.id,
@@ -126,21 +164,31 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       throw new NotFound(req.t)
     }
 
-    user.collection = args.req.user.collection
-    user._strategy = args.req.user._strategy
+    user.collection = collectionConfig.slug
+    user._strategy = refreshed ? 'local-jwt' : args.req.user!._strategy
 
     let result!: Result
 
-    // /////////////////////////////////////
-    // refresh hook - Collection
-    // /////////////////////////////////////
+    if (refreshed) {
+      result = {
+        exp: refreshed.exp,
+        refreshedToken: refreshed.token,
+        refreshToken: refreshed.refreshToken,
+        setCookie: true,
+        user,
+      }
+    } else {
+      // /////////////////////////////////////
+      // refresh hook - Collection
+      // /////////////////////////////////////
 
-    for (const refreshHook of args.collection.config.hooks.refresh) {
-      const hookResult = await refreshHook({ args, user })
+      for (const refreshHook of args.collection.config.hooks.refresh) {
+        const hookResult = await refreshHook({ args, user })
 
-      if (hookResult) {
-        result = hookResult
-        break
+        if (hookResult) {
+          result = hookResult
+          break
+        }
       }
     }
 
