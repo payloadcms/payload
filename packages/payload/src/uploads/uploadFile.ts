@@ -1,15 +1,15 @@
-import type { FileContent } from './fileContent.js'
+import type { FileSource } from './fileSource.js'
 import type { File } from './types.js'
 
-import { bindLegacyFileContent, getFileContent } from './fileContent.js'
+import { bindLegacyFileSource, getFileSource } from './fileSource.js'
 
-/** Internal state; public request files remain legacy views of this content. */
+/** Internal state; public request files remain legacy views of this source. */
 export type UploadFile = {
   clientUploadContext?: unknown
-  content: FileContent
   mimetype: string
   name: string
   size: number
+  source: FileSource
 }
 
 type LegacyUploadFile = { clientUploadContext?: unknown } & File
@@ -26,9 +26,9 @@ export function normalizeUploadFile(
   return {
     name: file.name,
     clientUploadContext: file.clientUploadContext,
-    content: getFileContent(file, ownership),
     mimetype: file.mimetype,
     size: file.size,
+    source: getFileSource(file, ownership),
   }
 }
 
@@ -37,21 +37,21 @@ export function toLegacyUploadFile(
   file: UploadFile,
   original?: LegacyUploadFile,
 ): LegacyUploadFile {
-  const { content } = file
+  const { source } = file
   const legacy: LegacyUploadFile = {
     ...original,
     name: file.name,
     data:
-      content.type === 'buffer'
-        ? content.buffer
-        : content.type === 'clientUpload'
-          ? (content.probe ?? Buffer.alloc(0))
+      source.type === 'buffer'
+        ? source.buffer
+        : source.type === 'clientUpload'
+          ? (source.probe ?? Buffer.alloc(0))
           : Buffer.alloc(0),
     mimetype: file.mimetype,
     size: file.size,
   }
-  if (content.type === 'file') {
-    legacy.tempFilePath = content.path
+  if (source.type === 'file') {
+    legacy.tempFilePath = source.path
   } else {
     delete legacy.tempFilePath
   }
@@ -60,5 +60,5 @@ export function toLegacyUploadFile(
   } else {
     delete legacy.clientUploadContext
   }
-  return bindLegacyFileContent(legacy, content)
+  return bindLegacyFileSource(legacy, source)
 }

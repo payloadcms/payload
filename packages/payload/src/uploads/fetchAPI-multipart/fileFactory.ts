@@ -1,7 +1,7 @@
 import type { FetchAPIFileUploadOptions } from '../../config/types.js'
 import type { FileShape } from './index.js'
 
-import { bindLegacyFileContent } from '../fileContent.js'
+import { bindLegacyFileSource } from '../fileSource.js'
 import {
   checkAndMakeDir,
   debugLog,
@@ -57,7 +57,7 @@ export const fileFactory: FileFactory = (options, fileUploadOptions) => {
   // if (!fileUploadOptions.useTempFiles && !options.buffer.length) return;
 
   // Create and return file object.
-  return bindLegacyFileContent(
+  return bindLegacyFileSource(
     {
       name: options.name,
       data: options.buffer,

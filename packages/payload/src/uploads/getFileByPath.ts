@@ -26,8 +26,8 @@ export const getFileByPath = async (filePath: string): Promise<PayloadRequest['f
 
   return toLegacyUploadFile({
     name,
-    content: { type: 'buffer', buffer: data },
     mimetype: type?.mime || mimeTypeEstimate[ext]!,
     size: stat.size,
+    source: { type: 'buffer', buffer: data },
   })
 }

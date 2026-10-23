@@ -140,7 +140,7 @@ describe('generateFileData', () => {
       expect(toBufferMock).not.toHaveBeenCalled()
       expect(files).toEqual([
         {
-          content: { ownership: 'external', path: tempFilePath, type: 'file' },
+          source: { ownership: 'external', path: tempFilePath, type: 'file' },
           path: `${os.tmpdir()}/photo.png`,
         },
       ])

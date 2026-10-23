@@ -6,7 +6,7 @@ import type { WithMetadata } from './optionallyAppendMetadata.js'
 import type { UploadEdits } from './types.js'
 import type { UploadFile } from './uploadFile.js'
 
-import { getFileBuffer, getFileInput } from './fileContent.js'
+import { getFileBuffer, getFileInput } from './fileSource.js'
 import { isAnimatedImage } from './isAnimatedImage.js'
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
 

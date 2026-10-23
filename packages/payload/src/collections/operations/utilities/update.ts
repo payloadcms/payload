@@ -11,7 +11,7 @@ import type {
   SelectType,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
-import type { FileContentToSave } from '../../../uploads/fileContent.js'
+import type { FileSourceToSave } from '../../../uploads/fileSource.js'
 import type {
   DataFromCollectionSlug,
   SanitizedCollectionConfig,
@@ -52,7 +52,7 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   docWithLocales: JsonObject & TypeWithID
   draftArg: boolean
   fallbackLocale: TypedFallbackLocale
-  filesToUpload: FileContentToSave[]
+  filesToUpload: FileSourceToSave[]
   id: number | string
   locale: string
   overrideAccess: boolean

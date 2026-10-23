@@ -6,13 +6,13 @@ import fs from 'fs/promises'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { SharpDependency } from '../../config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
-import type { FileContentToSave } from '../fileContent.js'
+import type { FileSourceToSave } from '../fileSource.js'
 import type { WithMetadata } from '../optionallyAppendMetadata.js'
 import type { FileSize, FileSizes, FocalPoint, ProbedImageSize } from '../types.js'
 import type { UploadFile } from '../uploadFile.js'
 
-import { getFileInput } from '../fileContent.js'
 import { fileExists } from '../fileExists.js'
+import { getFileInput } from '../fileSource.js'
 import { isAnimatedImage } from '../isAnimatedImage.js'
 import { optionallyAppendMetadata } from '../optionallyAppendMetadata.js'
 import { createImageSize } from './createImageSize.js'
@@ -53,7 +53,7 @@ type ResizeArgs = {
 /** Result from resizing and transforming the requested image sizes */
 type ImageSizesResult = {
   sizeData: FileSizes
-  sizesToSave: FileContentToSave[]
+  sizesToSave: FileSourceToSave[]
 }
 
 export async function createImageSizes({
@@ -106,7 +106,7 @@ export async function createImageSizes({
   }
 
   const sizes = {} as Record<string, FileSize>
-  const imageSizeFiles: FileContentToSave[] = []
+  const imageSizeFiles: FileSourceToSave[] = []
 
   await Promise.all(
     imageSizes.map(async (imageResizeConfig): Promise<void> => {
@@ -287,8 +287,8 @@ export async function createImageSizes({
       })
 
       imageSizeFiles.push({
-        content: { type: 'buffer', buffer: bufferData },
         path: imagePath,
+        source: { type: 'buffer', buffer: bufferData },
       })
     }),
   )

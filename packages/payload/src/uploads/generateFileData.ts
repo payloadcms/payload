@@ -6,7 +6,7 @@ import fs from 'fs/promises'
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Document, PayloadRequest } from '../types/index.js'
-import type { FileContentToSave } from './fileContent.js'
+import type { FileSourceToSave } from './fileSource.js'
 import type { ExternalUploadSource } from './sanitizeUploadData.js'
 import type { FileData, ProbedImageSize, UploadEdits } from './types.js'
 
@@ -15,7 +15,7 @@ import { isNumber } from '../utilities/isNumber.js'
 import { canResizeImage } from './canResizeImage.js'
 import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { cropImage } from './cropImage.js'
-import { getFileBuffer, getFileContent, getFileInput, replaceFileContent } from './fileContent.js'
+import { getFileBuffer, getFileInput, getFileSource, replaceFileSource } from './fileSource.js'
 import { getExternalFile } from './getExternalFile.js'
 import { getFileByPath } from './getFileByPath.js'
 import { getFileContentRequirement } from './getFileContentRequirement.js'
@@ -45,7 +45,7 @@ type Args<T> = {
 
 type Result<T> = Promise<{
   data: T
-  files: FileContentToSave[]
+  files: FileSourceToSave[]
 }>
 
 const shouldReupload = (
@@ -211,7 +211,7 @@ export const generateFileData = async <T>({
 
   // A probe may reveal a MIME type that needs more processing than the declared type did.
   if (
-    file.content.type === 'clientUpload' &&
+    file.source.type === 'clientUpload' &&
     getFileContentRequirement({
       hasSizeEdits: Boolean(
         uploadEdits?.crop || uploadEdits?.heightInPixels || uploadEdits?.widthInPixels,
@@ -251,7 +251,7 @@ export const generateFileData = async <T>({
   }
 
   let newData = incomingFileData as T
-  const filesToSave: FileContentToSave[] = []
+  const filesToSave: FileSourceToSave[] = []
   const fileData: Partial<FileData> = {}
   const fileIsAnimatedType = isAnimatedImage(file.mimetype)
   const cropData =
@@ -377,14 +377,14 @@ export const generateFileData = async <T>({
           .toBuffer({ resolveWithObject: true })
 
         filesToSave.push({
-          content: { type: 'buffer', buffer: resizedAfterCrop.data },
           path: `${staticPath}/${fsSafeName}`,
+          source: { type: 'buffer', buffer: resizedAfterCrop.data },
         })
 
         fileForResize = {
           ...fileForResize,
-          content: { type: 'buffer', buffer: resizedAfterCrop.data },
           size: resizedAfterCrop.info.size,
+          source: { type: 'buffer', buffer: resizedAfterCrop.data },
         }
 
         fileData.width = resizedAfterCrop.info.width
@@ -399,14 +399,14 @@ export const generateFileData = async <T>({
       } else {
         // If resizeOptions is not present, just save the cropped image
         filesToSave.push({
-          content: { type: 'buffer', buffer: croppedImage },
           path: `${staticPath}/${fsSafeName}`,
+          source: { type: 'buffer', buffer: croppedImage },
         })
 
         fileForResize = {
           ...file,
-          content: { type: 'buffer', buffer: croppedImage },
           size: info.size,
+          source: { type: 'buffer', buffer: croppedImage },
         }
 
         fileData.width = info.width
@@ -418,19 +418,19 @@ export const generateFileData = async <T>({
         fileData.filesize = info.size
       }
 
-      file = await replaceFileContent(file, await getFileBuffer(fileForResize))
+      file = await replaceFileSource(file, await getFileBuffer(fileForResize))
       fileForResize = file
       delete fileForResize.clientUploadContext
     } else if (fileBuffer?.data) {
-      file = await replaceFileContent(file, fileBuffer.data)
+      file = await replaceFileSource(file, fileBuffer.data)
       fileForResize = file
       filesToSave.push({
-        content: getFileContent(file),
         path: `${staticPath}/${fsSafeName}`,
+        source: getFileSource(file),
       })
     } else if (!disableLocalStorage) {
       // Unmodified temp files can be copied without materializing all their bytes.
-      filesToSave.push({ content: getFileContent(file), path: `${staticPath}/${fsSafeName}` })
+      filesToSave.push({ path: `${staticPath}/${fsSafeName}`, source: getFileSource(file) })
     }
 
     req.file = toLegacyUploadFile(file, req.file)

@@ -2,7 +2,7 @@ import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
-import { disposeFileContent, getFileContent } from './fileContent.js'
+import { disposeFileSource, getFileSource } from './fileSource.js'
 import { unlinkClientUploadTempFile } from './unlinkClientUploadTempFile.js'
 
 type Args = {
@@ -28,11 +28,11 @@ export const unlinkTempFiles: (args: Args) => Promise<void> = async ({
   if (collectionConfig.upload && file) {
     const ownership =
       config.upload?.useTempFiles || isClientUploadTempFile ? 'temporary' : 'external'
-    const content = getFileContent(file, ownership)
+    const source = getFileSource(file, ownership)
 
-    if (content.type === 'file' && content.ownership === 'temporary') {
-      await disposeFileContent(content)
-      unlinkedTempFilePath = content.path
+    if (source.type === 'file' && source.ownership === 'temporary') {
+      await disposeFileSource(source)
+      unlinkedTempFilePath = source.path
     }
   }
 

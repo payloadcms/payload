@@ -3,7 +3,7 @@ import type { PayloadRequest } from '../types/index.js'
 import type { ProbedImageSize } from './types.js'
 import type { UploadFile } from './uploadFile.js'
 
-import { getFileContent, getFileInput } from './fileContent.js'
+import { getFileInput, getFileSource } from './fileSource.js'
 import { probeImageSize, probeImageSizeFromPath } from './probeImageSize.js'
 
 type Args = {
@@ -17,18 +17,18 @@ type Args = {
 }
 
 export async function getImageSize({ file, sharp }: Args): Promise<ProbedImageSize> {
-  const content = getFileContent(file!)
+  const source = getFileSource(file!)
 
-  if (content.type === 'clientUpload') {
-    if (!content.probe) {
+  if (source.type === 'clientUpload') {
+    if (!source.probe) {
       throw new Error('Image dimensions require a probe or materialized client upload.')
     }
-    return probeImageSize(content.probe)
+    return probeImageSize(source.probe)
   }
 
   if (sharp) {
     try {
-      const { height, width } = await sharp(getFileInput(content)).metadata()
+      const { height, width } = await sharp(getFileInput(source)).metadata()
       if (width && height) {
         return { height, width }
       }
@@ -38,9 +38,9 @@ export async function getImageSize({ file, sharp }: Args): Promise<ProbedImageSi
     }
   }
 
-  if (content.type === 'file') {
-    return probeImageSizeFromPath(content.path)
+  if (source.type === 'file') {
+    return probeImageSizeFromPath(source.path)
   }
 
-  return probeImageSize(content.buffer)
+  return probeImageSize(source.buffer)
 }

@@ -6,10 +6,10 @@ import { ValidationError } from '../errors/index.js'
 import { validateMimeType } from '../utilities/validateMimeType.js'
 import { validatePDF } from '../utilities/validatePDF.js'
 import {
-  getFileContent,
   getFileInspectionInput,
+  getFileSource,
   getFileBuffer as readFileBuffer,
-} from './fileContent.js'
+} from './fileSource.js'
 import { getFileTypeFallback } from './getFileTypeFallback.js'
 import {
   getFileExtension,
@@ -102,8 +102,8 @@ export const checkFileRestrictions = async ({
   // For temp files, use fileTypeFromFile so large files (e.g. video) are never loaded into memory
   // just for detection. Content validation streams SVG/XML temp files and only loads a full
   // temp-file buffer for PDF integrity checks.
-  const content = getFileContent(file)
-  const inspectionInput = getFileInspectionInput(content)
+  const source = getFileSource(file)
+  const inspectionInput = getFileInspectionInput(source)
 
   // Lazily reads the full file — only reached for PDF validation.
   let _fileBuffer: Buffer | undefined
@@ -112,7 +112,7 @@ export const checkFileRestrictions = async ({
       return _fileBuffer
     }
     try {
-      _fileBuffer = await readFileBuffer(content)
+      _fileBuffer = await readFileBuffer(source)
       return _fileBuffer
     } catch {
       throw new ValidationError({
@@ -245,7 +245,7 @@ export const checkFileRestrictions = async ({
   if (isSvg) {
     const isSafeSvg = (await getSvgInspection()).isSafe
     if (!isSafeSvg) {
-      errors.push('SVG file contains potentially harmful content.')
+      errors.push('SVG file contains potentially harmful source.')
     }
   }
 

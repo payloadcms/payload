@@ -154,9 +154,9 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
 
     return toLegacyUploadFile({
       name: filename,
-      content: { type: 'buffer', buffer: data },
-      mimetype: res.headers.get('content-type') || undefined!,
+      mimetype: res.headers.get('source-type') || undefined!,
       size: data.length,
+      source: { type: 'buffer', buffer: data },
     })
   }
 

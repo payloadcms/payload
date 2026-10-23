@@ -19,19 +19,19 @@ export type {
   SignedClientUploadReceipt,
 } from '../uploads/clientUploadReceipt.js'
 export {
-  bindLegacyFileContent,
-  disposeFileContent,
+  bindLegacyFileSource,
+  disposeFileSource,
   getFileBlob,
   getFileBuffer,
-  getFileContent,
   getFileInput,
   getFileInspectionInput,
   getFileSize,
+  getFileSource,
   getFileStream,
-  replaceFileContent,
-  saveFileContent,
-} from '../uploads/fileContent.js'
-export type { FileContent, FileContentToSave } from '../uploads/fileContent.js'
+  replaceFileSource,
+  saveFileSource,
+} from '../uploads/fileSource.js'
+export type { FileSource, FileSourceToSave } from '../uploads/fileSource.js'
 export { getExternalFile } from '../uploads/getExternalFile.js'
 export { isSvgMimeType, isXmlMimeType } from '../uploads/getFileTypeIdentity.js'
 export { getRangeRequestInfo } from '../uploads/getRangeRequestInfo.js'
