@@ -223,7 +223,10 @@ export const writerPlugin = definePlugin({
     if (reader) {
       reader.options = {
         ...reader.options,
-        items: [...(reader.options?.items ?? []), { name: 'injected-by-writer' }],
+        items: [
+          ...(reader.options?.items ?? []),
+          { name: 'injected-by-writer' },
+        ],
       }
     }
     return config
