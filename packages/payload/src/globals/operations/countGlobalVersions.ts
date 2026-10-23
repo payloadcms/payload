@@ -4,6 +4,7 @@ import type { PayloadRequest, Where } from '../../types/index.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import {
   buildVersionGlobalFields,
   type GlobalSlug,
@@ -67,6 +68,8 @@ export const countGlobalVersionsOperation = async <TSlug extends GlobalSlug>(
   const fullWhere = combineQueries(where!, accessResult!)
 
   const versionFields = buildVersionGlobalFields(payload.config, global, true)
+
+  sanitizeWhereQuery({ fields: versionFields, payload, where: fullWhere })
 
   await validateQueryPaths({
     globalConfig: global,

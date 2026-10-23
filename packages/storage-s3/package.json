@@ -1,13 +1,8 @@
 {
   "name": "@payloadcms/storage-s3",
-  "version": "4.0.0-canary.14",
+  "version": "4.0.0-beta.4",
   "description": "Payload storage adapter for Amazon S3",
   "homepage": "https://payloadcms.com",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/storage-s3"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -17,29 +12,53 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/storage-s3"
+  },
+  "files": [
+    "dist"
+  ],
   "type": "module",
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts",
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./copy-file": {
+      "import": "./src/copyFile.ts",
+      "types": "./src/copyFile.ts",
+      "default": "./src/copyFile.ts"
     }
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "files": [
-    "dist"
-  ],
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./copy-file": {
+        "import": "./dist/copyFile.js",
+        "types": "./dist/copyFile.d.ts",
+        "default": "./dist/copyFile.js"
+      }
+    }
+  },
   "scripts": {
     "build": "pnpm build:types && pnpm build:swc",
     "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
     "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "clean": "rimraf -g {dist,*.tsbuildinfo}"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.614.0",
@@ -55,17 +74,6 @@
     "payload": "workspace:*"
   },
   "engines": {
-    "node": ">=24.15.0"
-  },
-  "publishConfig": {
-    "exports": {
-      ".": {
-        "import": "./dist/index.js",
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      }
-    },
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts"
+    "node": ">=24.22.1"
   }
 }

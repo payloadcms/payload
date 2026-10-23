@@ -17,6 +17,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
       email: 'demo@payloadcms.com',
       password: 'demo',
     },
+    overrideAccess: true,
   })
 
   const basicFormJSON = JSON.parse(JSON.stringify(basicForm))
@@ -24,6 +25,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
   const { id: basicFormID } = await payload.create({
     collection: 'forms',
     data: basicFormJSON,
+    overrideAccess: true,
   })
 
   const contactFormJSON = JSON.parse(JSON.stringify(contactForm))
@@ -31,6 +33,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
   const { id: contactFormID } = await payload.create({
     collection: 'forms',
     data: contactFormJSON,
+    overrideAccess: true,
   })
 
   const advancedFormJSON = JSON.parse(JSON.stringify(advancedForm))
@@ -38,6 +41,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
   const { id: advancedFormID } = await payload.create({
     collection: 'forms',
     data: advancedFormJSON,
+    overrideAccess: true,
   })
 
   const signUpFormJSON = JSON.parse(JSON.stringify(signUpForm))
@@ -45,6 +49,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
   const { id: signUpFormID } = await payload.create({
     collection: 'forms',
     data: signUpFormJSON,
+    overrideAccess: true,
   })
 
   const homePageJSON = JSON.parse(
@@ -66,21 +71,25 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
   await payload.create({
     collection: 'pages',
     data: homePageJSON,
+    overrideAccess: true,
   })
 
   const { id: contactPageID } = await payload.create({
     collection: 'pages',
     data: contactPageJSON,
+    overrideAccess: true,
   })
 
   const { id: advancedPageID } = await payload.create({
     collection: 'pages',
     data: advancedPageJSON,
+    overrideAccess: true,
   })
 
   const { id: signupPageID } = await payload.create({
     collection: 'pages',
     data: signupPageJSON,
+    overrideAccess: true,
   })
 
   await payload.updateGlobal({
@@ -119,5 +128,6 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
         },
       ],
     },
+    overrideAccess: true,
   })
 }

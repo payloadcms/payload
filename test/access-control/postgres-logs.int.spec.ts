@@ -1,6 +1,6 @@
 import type { CollectionPermission, PayloadRequest } from 'payload'
 
-import { createLocalReq } from 'payload'
+import { createPayloadRequest } from 'payload'
 import { getEntityPermissions } from 'payload/internal'
 import { expect, vitest } from 'vitest'
 
@@ -9,23 +9,22 @@ import { whereCacheSameSlug, whereCacheUniqueSlug } from './shared.js'
 
 let req: PayloadRequest
 
-test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.startsWith('postgres') })(
+test.suite(
   'Access Control - postgres logs',
+  { config: './config.postgreslogs.ts', db: (adapter) => adapter.startsWith('postgres') },
   () => {
     test.beforeEach(async ({ payload }) => {
-      req = await createLocalReq(
-        {
-          user: {
-            id: 123 as any,
-            collection: 'users',
-            roles: ['admin'],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            email: 'test@test.com',
-          },
-        },
+      req = await createPayloadRequest({
         payload,
-      )
+        user: {
+          id: 123 as any,
+          collection: 'users',
+          roles: ['admin'],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          email: 'test@test.com',
+        },
+      })
     })
 
     test.describe('Tests', () => {
@@ -39,6 +38,7 @@ test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.starts
               title: 'Test Document',
               userRole: 'admin',
             },
+            overrideAccess: true,
           })
 
           const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
@@ -65,6 +65,8 @@ test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.starts
               userRole: { read: { permission: true }, update: { permission: true } },
               updatedAt: { read: { permission: true }, update: { permission: true } },
               createdAt: { read: { permission: true }, update: { permission: true } },
+              createdBy: { read: { permission: true }, update: { permission: false } },
+              updatedBy: { read: { permission: true }, update: { permission: false } },
             },
             read: { permission: true, where: { userRole: { equals: 'admin' } } },
             update: { permission: true, where: { userRole: { equals: 'admin' } } },
@@ -81,6 +83,7 @@ test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.starts
               title: 'Test Document',
               userRole: 'noAccess',
             },
+            overrideAccess: true,
           })
 
           const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
@@ -108,6 +111,8 @@ test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.starts
               userRole: { read: { permission: false }, update: { permission: false } },
               updatedAt: { read: { permission: false }, update: { permission: false } },
               createdAt: { read: { permission: false }, update: { permission: false } },
+              createdBy: { read: { permission: false }, update: { permission: false } },
+              updatedBy: { read: { permission: false }, update: { permission: false } },
             },
             read: { permission: false, where: { userRole: { equals: 'admin' } } },
             update: { permission: false, where: { userRole: { equals: 'admin' } } },
@@ -128,6 +133,7 @@ test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.starts
               updateRole: 'noAccess',
               deleteRole: 'admin',
             },
+            overrideAccess: true,
           })
 
           const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
@@ -155,6 +161,8 @@ test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.starts
               deleteRole: { read: { permission: true }, update: { permission: false } },
               updatedAt: { read: { permission: true }, update: { permission: false } },
               createdAt: { read: { permission: true }, update: { permission: false } },
+              createdBy: { read: { permission: true }, update: { permission: false } },
+              updatedBy: { read: { permission: true }, update: { permission: false } },
             },
             read: { permission: true, where: { readRole: { equals: 'admin' } } },
             update: { permission: false, where: { updateRole: { equals: 'admin' } } },
@@ -173,6 +181,7 @@ test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.starts
               updateRole: 'noAccess',
               deleteRole: 'admin',
             },
+            overrideAccess: true,
           })
 
           const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
@@ -201,6 +210,8 @@ test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.starts
               deleteRole: { read: { permission: true }, update: { permission: false } },
               updatedAt: { read: { permission: true }, update: { permission: false } },
               createdAt: { read: { permission: true }, update: { permission: false } },
+              createdBy: { read: { permission: true }, update: { permission: false } },
+              updatedBy: { read: { permission: true }, update: { permission: false } },
             },
             read: { permission: true, where: { readRole: { equals: 'admin' } } },
             update: { permission: false, where: { updateRole: { equals: 'admin' } } },
@@ -217,6 +228,7 @@ test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.starts
               updateRole: 'admin',
               deleteRole: 'noAccess',
             },
+            overrideAccess: true,
           })
 
           const permissions = await getEntityPermissions({
@@ -237,6 +249,8 @@ test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.starts
               deleteRole: { read: { permission: false }, update: { permission: true } },
               updatedAt: { read: { permission: false }, update: { permission: true } },
               createdAt: { read: { permission: false }, update: { permission: true } },
+              createdBy: { read: { permission: false }, update: { permission: false } },
+              updatedBy: { read: { permission: false }, update: { permission: false } },
             },
             read: { permission: false, where: { readRole: { equals: 'admin' } } },
             delete: { permission: false, where: { deleteRole: { equals: 'admin' } } },
@@ -253,6 +267,7 @@ test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.starts
               updateRole: 'noAccess',
               deleteRole: 'admin',
             },
+            overrideAccess: true,
           })
 
           const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
@@ -279,6 +294,8 @@ test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.starts
               deleteRole: { read: { permission: true }, update: { permission: true } },
               updatedAt: { read: { permission: true }, update: { permission: true } },
               createdAt: { read: { permission: true }, update: { permission: true } },
+              createdBy: { read: { permission: true }, update: { permission: false } },
+              updatedBy: { read: { permission: true }, update: { permission: false } },
             },
             read: { permission: true, where: { readRole: { equals: 'admin' } } },
             update: { permission: true, where: { updateRole: { equals: 'admin' } } },

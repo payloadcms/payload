@@ -7,6 +7,7 @@ import { pointSlug, relationSlug, slug } from './shared.js'
 export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: 'users',
+    overrideAccess: true,
     data: {
       email: devUser.email,
       password: devUser.password,
@@ -15,6 +16,7 @@ export const seed = async (_payload: Payload) => {
 
   await _payload.create({
     collection: 'custom-ids',
+    overrideAccess: true,
     data: {
       id: 1,
       title: 'hello',
@@ -23,6 +25,7 @@ export const seed = async (_payload: Payload) => {
 
   await _payload.create({
     collection: slug,
+    overrideAccess: true,
     data: {
       relationToCustomID: 1,
       title: 'has custom ID relation',
@@ -31,6 +34,7 @@ export const seed = async (_payload: Payload) => {
 
   await _payload.create({
     collection: slug,
+    overrideAccess: true,
     data: {
       title: 'post1',
     },
@@ -38,6 +42,7 @@ export const seed = async (_payload: Payload) => {
 
   await _payload.create({
     collection: slug,
+    overrideAccess: true,
     data: {
       title: 'post2',
     },
@@ -45,6 +50,7 @@ export const seed = async (_payload: Payload) => {
 
   await _payload.create({
     collection: slug,
+    overrideAccess: true,
     data: {
       description: 'description',
       title: 'with-description',
@@ -53,6 +59,7 @@ export const seed = async (_payload: Payload) => {
 
   await _payload.create({
     collection: slug,
+    overrideAccess: true,
     data: {
       number: 1,
       title: 'numPost1',
@@ -61,6 +68,7 @@ export const seed = async (_payload: Payload) => {
 
   await _payload.create({
     collection: slug,
+    overrideAccess: true,
     data: {
       number: 2,
       title: 'numPost2',
@@ -69,6 +77,7 @@ export const seed = async (_payload: Payload) => {
 
   const rel1 = await _payload.create({
     collection: relationSlug,
+    overrideAccess: true,
     data: {
       name: 'name',
     },
@@ -76,6 +85,7 @@ export const seed = async (_payload: Payload) => {
 
   const rel2 = await _payload.create({
     collection: relationSlug,
+    overrideAccess: true,
     data: {
       name: 'name2',
     },
@@ -83,6 +93,7 @@ export const seed = async (_payload: Payload) => {
 
   await _payload.create({
     collection: slug,
+    overrideAccess: true,
     data: {
       relationHasManyField: rel1.id,
       title: 'rel to hasMany',
@@ -91,6 +102,7 @@ export const seed = async (_payload: Payload) => {
 
   await _payload.create({
     collection: slug,
+    overrideAccess: true,
     data: {
       relationHasManyField: rel2.id,
       title: 'rel to hasMany 2',
@@ -99,6 +111,7 @@ export const seed = async (_payload: Payload) => {
 
   await _payload.create({
     collection: slug,
+    overrideAccess: true,
     data: {
       relationMultiRelationTo: {
         relationTo: relationSlug,
@@ -110,6 +123,7 @@ export const seed = async (_payload: Payload) => {
 
   await _payload.create({
     collection: slug,
+    overrideAccess: true,
     data: {
       relationMultiRelationToHasMany: [
         {
@@ -127,11 +141,13 @@ export const seed = async (_payload: Payload) => {
 
   const payloadAPITest1 = await _payload.create({
     collection: 'payload-api-test-ones',
+    overrideAccess: true,
     data: {},
   })
 
   await _payload.create({
     collection: 'payload-api-test-twos',
+    overrideAccess: true,
     data: {
       relation: payloadAPITest1.id,
     },
@@ -139,6 +155,7 @@ export const seed = async (_payload: Payload) => {
 
   await _payload.create({
     collection: pointSlug,
+    overrideAccess: true,
     data: {
       point: [10, 20],
     },
@@ -146,6 +163,7 @@ export const seed = async (_payload: Payload) => {
 
   await _payload.create({
     collection: 'content-type',
+    overrideAccess: true,
     data: {},
   })
 }

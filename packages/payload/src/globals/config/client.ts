@@ -13,7 +13,15 @@ import { type ClientField, createClientFields } from '../../fields/config/client
 
 export type ServerOnlyGlobalProperties = keyof Pick<
   SanitizedGlobalConfig,
-  'access' | 'admin' | 'custom' | 'endpoints' | 'fields' | 'flattenedFields' | 'hooks' | 'select'
+  | 'access'
+  | 'admin'
+  | 'custom'
+  | 'endpoints'
+  | 'fields'
+  | 'flattenedFields'
+  | 'hooks'
+  | 'llmInstructions'
+  | 'select'
 >
 
 export type ServerOnlyGlobalAdminProperties = keyof Pick<
@@ -35,6 +43,7 @@ export type ClientGlobalConfig = {
 
 const serverOnlyProperties: Partial<ServerOnlyGlobalProperties>[] = [
   'hooks',
+  'llmInstructions',
   'access',
   'endpoints',
   'custom',

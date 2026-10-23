@@ -1,5 +1,7 @@
 export const slug = 'users'
 
+export const preferencesSlug = 'payload-preferences'
+
 export const publicUsersSlug = 'public-users'
 
 export const apiKeysSlug = 'api-keys'
@@ -16,6 +18,10 @@ export const rotateSecretSecondarySlug = 'rotate-secret-secondary'
 // A previous PAYLOAD_SECRET kept in the keyring (config.previousSecrets) so
 // rotation tests can seed and read data encrypted under it.
 export const rotateSecretOldSecret = 'old-payload-secret-for-rotation-tests'
+
+export const jwtUsersSlug = 'jwt-users'
+
+export const restrictedRelationshipsSlug = 'restricted-relationships'
 
 export const partialDisableLocalStrategiesSlug = 'partial-disable-local-strategies'
 

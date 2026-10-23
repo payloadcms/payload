@@ -2,13 +2,16 @@ import type { ContainerClient } from '@azure/storage-blob'
 import type {
   Adapter,
   ClientUploadsConfig,
+  DeleteFile,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
+import { copyAzureFile } from './copyFile.js'
 import { deleteFile } from './deleteFile.js'
 import { generateUploadInstructions } from './generateUploadInstructions.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
+import { isClientUploadAllowed } from './isClientUploadAllowed.js'
 import { uploadFile } from './uploadFile.js'
 
 interface CreateAzureAdapterArgs {
@@ -16,7 +19,7 @@ interface CreateAzureAdapterArgs {
   baseURL: string
   clientUploads?: ClientUploadsConfig
   containerName: string
-  createContainerIfNotExists: () => void
+  createContainerIfNotExists: () => Promise<void> | void
   getStorageClient: () => ContainerClient
   useCompositePrefixes?: boolean
 }
@@ -30,8 +33,15 @@ export function createAzureAdapter({
   getStorageClient,
   useCompositePrefixes = false,
 }: CreateAzureAdapterArgs): Adapter {
+  const deleteStoredFile: DeleteFile = ({ storageFilePath }) =>
+    deleteFile({ client: getStorageClient(), storageFilePath })
+
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'azure',
+    supportsTempFiles: true,
+
+    copyFile: ({ from, req, to }) => copyAzureFile({ client: getStorageClient(), from, req, to }),
+    deleteFile: deleteStoredFile,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({
@@ -47,7 +57,7 @@ export function createAzureAdapter({
       adminHandler: {
         path: '@payloadcms/storage-azure/client#AzureClientUploadHandler',
       },
-      enabled: Boolean(clientUploads),
+      enabled: Boolean(clientUploads) && isClientUploadAllowed(collection),
       generate: generateUploadInstructions({
         access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
         collectionPrefix: prefix,
@@ -55,44 +65,33 @@ export function createAzureAdapter({
         getStorageClient,
         useCompositePrefixes,
       }),
+      requiresUploadReceipt: true,
       useInAdmin: true,
     },
 
-    handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
-      deleteFile({
-        client: getStorageClient(),
-        collectionPrefix: prefix,
-        docPrefix,
-        filename,
-        useCompositePrefixes,
-      }),
+    handleDelete: deleteStoredFile,
 
-    handleUpload: async ({ data, file }) => {
+    handleUpload: async ({ data, file, storageFilePath }) => {
       await uploadFile({
         buffer: file.buffer,
         client: getStorageClient(),
-        collectionPrefix: prefix,
-        docPrefix: data.prefix,
-        filename: file.filename,
         mimeType: file.mimeType,
+        storageFilePath,
         tempFilePath: file.tempFilePath,
-        useCompositePrefixes,
       })
 
       return data
     },
 
-    staticHandler: (
-      req,
-      { headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
-    ) =>
+    staticHandler: (req, { doc, headers, params: { filename, operation, uploadReference } }) =>
       getFile({
         client: getStorageClient(),
         collection,
         collectionPrefix: prefix,
+        doc,
         filename,
         incomingHeaders: headers,
-        prefixQueryParam,
+        operation,
         req,
         uploadReference,
         useCompositePrefixes,

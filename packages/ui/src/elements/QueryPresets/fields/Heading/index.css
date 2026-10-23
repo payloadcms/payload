@@ -2,7 +2,6 @@
   .query-preset-heading {
     margin: var(--spacer-4) 0 var(--spacer-2-5);
     color: var(--color-text);
-    font-family: var(--text-heading-medium-font-family);
     font-size: var(--text-heading-medium-font-size);
     font-weight: var(--text-heading-medium-font-weight);
     line-height: var(--text-heading-medium-line-height);
@@ -32,6 +31,7 @@
       }
 
       /* Stay in a row on mobile, where Row otherwise stacks into a column. */
+      /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
       @media (max-width: 1024px) {
         flex-direction: row;
       }

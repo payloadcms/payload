@@ -12,7 +12,7 @@
 
     /* Layout spacing */
     --gutter-h: var(--spacer-5);
-    --spacing-field: var(--spacer-3);
+    --spacing-field: var(--spacer-4);
     --spacing-view-bottom: var(--gutter-h);
 
     /* Breakpoints */
@@ -22,18 +22,21 @@
     --breakpoint-l-width: 1440px;
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1440px) {
     :root {
       --gutter-h: var(--spacer-4);
     }
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1024px) {
     :root {
       --gutter-h: var(--spacer-3);
     }
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     :root {
       --spacing-field: var(--spacer-2-5);

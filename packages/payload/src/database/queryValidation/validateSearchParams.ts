@@ -10,6 +10,7 @@ import { getEntityPermissions } from '../../utilities/getEntityPermissions/getEn
 import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { getLocalizedPaths } from '../getLocalizedPaths.js'
 import { isNestedRelationshipQuery } from '../isNestedRelationshipQuery.js'
+import { prefixWherePaths } from '../prefixWherePaths.js'
 import { validateQueryPaths } from './validateQueryPaths.js'
 
 type Args = {
@@ -26,6 +27,7 @@ type Args = {
   policies: EntityPolicies
   polymorphicJoin?: boolean
   req: PayloadRequest
+  showHiddenFields?: boolean
   val: unknown
   versionFields?: FlattenedField[]
 }
@@ -46,6 +48,7 @@ export async function validateSearchParam({
   policies,
   polymorphicJoin,
   req,
+  showHiddenFields,
   val,
   versionFields,
 }: Args): Promise<void> {
@@ -82,6 +85,7 @@ export async function validateSearchParam({
       overrideAccess,
       parentIsLocalized,
       payload: req.payload,
+      showHiddenFields,
     })
   }
   const promises: Promise<void>[] = []
@@ -100,6 +104,18 @@ export async function validateSearchParam({
     hasNestedWhere &&
     Boolean(relatedCollectionSlug)
 
+  if (operator === 'like' || operator === 'not_like' || operator === 'contains') {
+    const isLegitimateNestedContains = operator === 'contains' && isNestedHasManyQuery
+    const containsPlainObject =
+      hasNestedWhere ||
+      (Array.isArray(val) && val.some((entry) => isNestedRelationshipQuery(entry)))
+
+    if (containsPlainObject && !isLegitimateNestedContains) {
+      errors.push({ path: incomingPath })
+      return
+    }
+  }
+
   if (isNestedHasManyQuery && relatedCollectionSlug) {
     // Validate the nested query against the related collection.
     promises.push(
@@ -109,6 +125,7 @@ export async function validateSearchParam({
         overrideAccess,
         policies,
         req,
+        showHiddenFields,
         where: val,
       }),
     )
@@ -129,7 +146,10 @@ export async function validateSearchParam({
   promises.push(
     ...paths.map(async ({ collectionSlug, field, invalid, path }, i) => {
       if (invalid) {
-        if (!polymorphicJoin || !SAFE_FIELD_PATH_REGEX.test(incomingPath)) {
+        const isUnknownPolymorphicJoinField =
+          polymorphicJoin && !field && SAFE_FIELD_PATH_REGEX.test(incomingPath)
+
+        if (!isUnknownPolymorphicJoinField) {
           errors.push({ path })
         }
 
@@ -173,6 +193,74 @@ export async function validateSearchParam({
             !collectionConfig!.auth?.disableLocalStrategy
           ) {
             errors.push({ path: incomingPath })
+          }
+
+          const relatedCollectionReadPermission = policies.collections![collectionSlug].read
+          const previousSegment = paths[i - 1]
+          const traversedField = previousSegment?.field
+          const isRelationshipHop =
+            Boolean(traversedField) &&
+            (traversedField!.type === 'relationship' ||
+              traversedField!.type === 'upload' ||
+              traversedField!.type === 'join')
+
+          if (
+            isRelationshipHop &&
+            relatedCollectionReadPermission &&
+            typeof relatedCollectionReadPermission === 'object' &&
+            relatedCollectionReadPermission.where
+          ) {
+            const relationshipPath = paths
+              .slice(0, i)
+              .map(({ path: pathToRelationship }) => pathToRelationship)
+              .join('.')
+
+            const mutableWhere = constraint as Record<string, unknown>
+            const existingAnd = Array.isArray(mutableWhere.and) ? mutableWhere.and : []
+
+            // Has-many relationships and joins can point to many related documents, so the user's
+            // filter and the access constraint must be satisfied by the SAME related document.
+            // Scoping both into a single `contains` prevents a different, readable document from
+            // masking one the user cannot read (a related-document oracle).
+            const isHasManyRelationship =
+              (traversedField!.type === 'relationship' || traversedField!.type === 'upload') &&
+              traversedField!.hasMany
+            const isJoin = traversedField!.type === 'join'
+
+            if (isHasManyRelationship || isJoin) {
+              const relatedFieldPath = paths.at(-1)?.path
+
+              if (relatedFieldPath) {
+                mutableWhere.and = [
+                  ...existingAnd,
+                  {
+                    [relationshipPath]: {
+                      contains: {
+                        and: [
+                          {
+                            [relatedFieldPath]: {
+                              [operator]: val,
+                            },
+                          },
+                          relatedCollectionReadPermission.where,
+                        ],
+                      },
+                    },
+                  },
+                ]
+
+                // The scoped `contains` above fully replaces the user's original filter;
+                // so we can remove it from the top-level where clause
+                delete mutableWhere[incomingPath]
+              }
+            } else {
+              const accessWhere = prefixWherePaths({
+                prefix: relationshipPath,
+                where: relatedCollectionReadPermission.where,
+              })
+
+              mutableWhere.and = [...existingAnd, accessWhere]
+            }
           }
         }
         let fieldPath = path
@@ -244,6 +332,7 @@ export async function validateSearchParam({
                   overrideAccess,
                   policies,
                   req,
+                  showHiddenFields,
                   where: {
                     [subPath]: {
                       [operator]: val,

@@ -1,64 +1,136 @@
-import type { CollectionConfig, PayloadRequest, UploadConfig } from 'payload'
+import type {
+  CollectionConfig,
+  FileData,
+  PayloadRequest,
+  SanitizedUploadConfig,
+  TypeWithID,
+} from 'payload'
 
+import { buildPrefixWithObjectKey } from './buildPrefixWithObjectKey.js'
+import { buildUploadStoragePathData } from './buildStoragePathData.js'
 import { sanitizePrefix } from './sanitizePrefix.js'
 
 /**
- * Resolves the file prefix from the highest-priority available source and
- * always returns a sanitized value.
+ * Resolves the folder a stored object lives under (semantic `prefix` plus `_objectKey`).
  *
- * Resolution order:
- * 1. `prefixQueryParam`
- * 2. `uploadReference.prefix`
- * 3. Stored document `prefix` from the database
- *
- * Resolved values are passed through `sanitizePrefix`.
+ * An already-authorized `doc` wins outright. Otherwise an `uploadReference` is used (its
+ * `prefix` re-contained with {@link buildUploadStoragePathData}, since it hasn't been verified against
+ * a signed receipt by every adapter). Otherwise the document is resolved with
+ * `overrideAccess: false`, any query-param prefix only narrows that lookup, and `_objectKey`
+ * is read from the resolved document via `showHiddenFields`.
  */
 export async function getFilePrefix({
   collection,
+  collectionPrefix,
+  doc,
   filename,
   prefixQueryParam,
   req,
   uploadReference,
+  useCompositePrefixes = false,
 }: {
   collection: CollectionConfig
+  collectionPrefix?: string
+  doc?: Partial<FileData> & TypeWithID
   filename: string
+  /**
+   * Only narrows the access-controlled fallback lookup below; never trusted or
+   * returned directly. Prefer passing the access-checked document as `doc` instead.
+   */
   prefixQueryParam?: string
   req: PayloadRequest
   uploadReference?: unknown
+  useCompositePrefixes?: boolean
 }): Promise<string> {
-  if (typeof prefixQueryParam === 'string') {
-    return sanitizePrefix(prefixQueryParam)
+  // The serve path already loaded and authorized this document — trust it over any
+  // client-supplied upload reference or query prefix.
+  if (doc) {
+    return getRepresentationPrefix({ doc, filename })
   }
 
-  // Prioritize the upload reference prefix if there is one.
+  // Upload instructions call handlers without a document yet. Re-contain the claimed
+  // prefix — it hasn't been verified against a signed receipt by every adapter.
   if (
     uploadReference &&
     typeof uploadReference === 'object' &&
     'prefix' in uploadReference &&
     typeof uploadReference.prefix === 'string'
   ) {
-    return sanitizePrefix(uploadReference.prefix)
+    const referenceObjectKey =
+      '_objectKey' in uploadReference
+        ? (uploadReference as { _objectKey?: string })._objectKey
+        : undefined
+    const containedPrefix = buildUploadStoragePathData({
+      collectionPrefix,
+      docPrefix: uploadReference.prefix,
+      filename,
+      useCompositePrefixes,
+    }).sanitizedDocPrefix
+    return buildPrefixWithObjectKey({ objectKey: referenceObjectKey, prefix: containedPrefix })
   }
 
-  const imageSizes = (collection?.upload as UploadConfig)?.imageSizes || []
+  // Reads without a query prefix or read-access constraints skip the endpoint's document lookup.
+  const variants = (collection?.upload as SanitizedUploadConfig)?.variants || []
+
+  const filenameClause = {
+    or: [
+      {
+        filename: { equals: filename },
+      },
+      { 'original.filename': { equals: filename } },
+      ...variants.map((imageSize) => ({
+        [`variants.${imageSize.name}.filename`]: { equals: filename },
+      })),
+    ],
+  }
+
+  // Only filter by prefix when the collection persists a `prefix` field (querying a missing field throws).
+  const hasPrefixField = collection.fields?.some(
+    (field) => 'name' in field && field.name === 'prefix',
+  )
+  const where =
+    typeof prefixQueryParam === 'string' && hasPrefixField
+      ? { and: [filenameClause, { prefix: { equals: sanitizePrefix(prefixQueryParam) } }] }
+      : filenameClause
 
   const files = await req.payload.find({
     collection: collection.slug,
     depth: 0,
     draft: true,
     limit: 1,
+    overrideAccess: false,
     pagination: false,
-    where: {
-      or: [
-        {
-          filename: { equals: filename },
-        },
-        ...imageSizes.map((imageSize) => ({
-          [`sizes.${imageSize.name}.filename`]: { equals: filename },
-        })),
-      ],
+    req,
+    select: {
+      _objectKey: true,
+      filename: true,
+      original: true,
+      prefix: true,
+      variants: true,
     },
+    showHiddenFields: true,
+    where,
   })
-  const prefix = files?.docs?.[0]?.prefix
-  return prefix ? sanitizePrefix(prefix as string) : ''
+
+  const found = files?.docs?.[0] as
+    | ({ _objectKey?: string; prefix?: string } & Partial<FileData>)
+    | undefined
+  return found ? getRepresentationPrefix({ doc: found, filename }) : ''
+}
+
+const getRepresentationPrefix = ({
+  doc,
+  filename,
+}: {
+  doc: Partial<FileData>
+  filename: string
+}): string => {
+  const representation =
+    doc.original?.filename === filename
+      ? doc.original
+      : (Object.values(doc.variants ?? {}).find((variant) => variant?.filename === filename) ?? doc)
+  return buildPrefixWithObjectKey({
+    objectKey: representation._objectKey ?? (!doc.original?.filename ? doc._objectKey : undefined),
+    prefix: representation.prefix ?? (!doc.original?.filename ? doc.prefix : undefined),
+  })
 }

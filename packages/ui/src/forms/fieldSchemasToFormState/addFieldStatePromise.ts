@@ -4,6 +4,7 @@ import type {
   Data,
   DocumentPreferences,
   Field,
+  FieldOperation,
   FieldSchemaMap,
   FieldState,
   FlattenedBlock,
@@ -76,7 +77,7 @@ export type AddFieldStatePromiseArgs = {
    * Whether to omit parent fields in the state. @default false
    */
   omitParents?: boolean
-  operation: 'create' | 'update'
+  operation: FieldOperation
   parentIndexPath: string
   parentPath: string
   parentPermissions: SanitizedFieldsPermissions
@@ -490,6 +491,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             if (block) {
               row.id = row?.id || new ObjectId().toHexString()
 
+              const previousRow: Row = (previousFormState?.[path]?.rows || []).find(
+                (prevRow) => prevRow.id === row.id,
+              )
+
               if (!omitParents && (!filter || filter(args))) {
                 // Handle block `id` field
                 const idKey = rowPath + '.id'
@@ -497,6 +502,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 state[idKey] = {
                   initialValue: row.id,
                   value: row.id,
+                }
+
+                if (!previousRow) {
+                  state[idKey].addedByServer = true
                 }
 
                 // If the blocks field fails filterOptions validation, add error paths to the individual blocks that are no longer allowed
@@ -533,8 +542,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   value: row.blockType,
                 }
 
-                if (addedByServer) {
-                  state[fieldKey].addedByServer = addedByServer
+                if (!previousRow) {
+                  state[fieldKey].addedByServer = true
                 }
 
                 if (includeSchema) {
@@ -547,6 +556,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 const blockNameKey = rowPath + '.blockName'
 
                 state[blockNameKey] = {}
+
+                if (!previousRow) {
+                  state[blockNameKey].addedByServer = true
+                }
 
                 if (row.blockName) {
                   state[blockNameKey].initialValue = row.blockName
@@ -602,11 +615,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 }),
               )
 
-              // First, check if `previousFormState` has a matching row
-              const previousRow: Row = (previousFormState?.[path]?.rows || []).find(
-                (prevRow) => prevRow.id === row.id,
-              )
-
               const newRow: Row = {
                 id: row.id,
                 blockType: row.blockType,
@@ -615,6 +623,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
               if (previousRow?.lastRenderedPath) {
                 newRow.lastRenderedPath = previousRow.lastRenderedPath
+              }
+
+              if (!previousRow) {
+                newRow.addedByServer = true
               }
 
               acc.rowMetadata.push(newRow)

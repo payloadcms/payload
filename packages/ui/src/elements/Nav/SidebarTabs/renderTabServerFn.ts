@@ -15,7 +15,7 @@ export type RenderTabServerFnReturnType = {
 export const renderTabHandler: ServerFunction<
   RenderTabServerFnArgs,
   RenderTabServerFnReturnType
-> = ({ req, searchParams, tabSlug }) => {
+> = ({ req, searchParams, tabSlug, user }) => {
   if (!req.user) {
     throw new Error('Unauthorized')
   }
@@ -44,7 +44,7 @@ export const renderTabHandler: ServerFunction<
         payload: req.payload,
         req,
         searchParams: searchParams ?? req.query,
-        user: req.user,
+        user,
       },
     })
 

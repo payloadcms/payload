@@ -1,4 +1,4 @@
-import { jwtVerify } from 'jose'
+import { jwtVerify } from 'jose/jwt/verify'
 import { randomUUID } from 'node:crypto'
 import fs from 'node:fs/promises'
 import os from 'node:os'
@@ -264,7 +264,7 @@ const verifyUploadID = async (
       throw new Error()
     }
 
-    return payload as StagedUploadToken
+    return payload
   } catch {
     throw new APIError('Invalid or expired staged upload.', 400)
   }

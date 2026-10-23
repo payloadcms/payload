@@ -48,17 +48,17 @@ This project includes configuration files for AI-assisted development.
 | Cursor            | ✅      | ✅     | ✅    | ✅  |
 | VS Code + Copilot | ⚠️      | ✅     | ❌    | ✅  |
 
-We don't use `AGENTS.md` because Cursor loads both `CLAUDE.md` and `AGENTS.md`, which would result in duplicated context. Instead, the AGENTS.md just contains a link to the CLAUDE.md file.
+Guidance lives in a single `AGENTS.md` at the repo root, read by Claude Code, Cursor, and Copilot. A single source avoids the duplicated context that arises when both `AGENTS.md` and `CLAUDE.md` hold content.
 
 ### Context
 
-Project purpose, architecture, and coding guidelines. Located in `CLAUDE.md`.
+Project purpose, architecture, and coding guidelines. Located in `AGENTS.md`.
 
 Without this, the AI won't know project conventions and may generate code that doesn't match the codebase conventions.
 
 ### Skills
 
-Task-specific guidance (e.g., how to generate translations). Located in `.claude/skills/<name>/SKILL.md`.
+Task-specific guidance (e.g., how to generate translations). Located in `.agents/skills/<name>/SKILL.md`.
 
 Without this, you'll need to manually explain covered testing patterns and other workflows in each conversation.
 

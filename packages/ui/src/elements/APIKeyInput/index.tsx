@@ -12,6 +12,8 @@ export type APIKeyInputProps = {
   readonly 'aria-label'?: string
   readonly highlighted?: boolean
   readonly id?: string
+  readonly masked?: boolean
+  readonly revealOnMount?: boolean
   readonly value: null | string | undefined
 }
 
@@ -23,9 +25,11 @@ export const APIKeyInput: React.FC<APIKeyInputProps> = ({
   id,
   'aria-label': ariaLabel = 'API Key',
   highlighted,
+  masked = false,
+  revealOnMount = false,
   value,
 }) => {
-  const [showKey, setShowKey] = useState(false)
+  const [showKey, setShowKey] = useState(revealOnMount)
   const keyValue = value ?? ''
 
   return (
@@ -39,19 +43,21 @@ export const APIKeyInput: React.FC<APIKeyInputProps> = ({
           className={`${baseClass}__field`}
           id={id}
           readOnly
-          type={showKey ? 'text' : 'password'}
+          type={masked || showKey ? 'text' : 'password'}
           value={keyValue}
         />
-        <button
-          aria-label={showKey ? 'Hide API key' : 'Show API key'}
-          className={`${baseClass}__toggle`}
-          onClick={() => setShowKey((prev) => !prev)}
-          type="button"
-        >
-          <EyeIcon active={showKey} size={24} />
-        </button>
+        {!masked && (
+          <button
+            aria-label={showKey ? 'Hide API key' : 'Show API key'}
+            className={`${baseClass}__toggle`}
+            onClick={() => setShowKey((prev) => !prev)}
+            type="button"
+          >
+            <EyeIcon active={showKey} size={24} />
+          </button>
+        )}
       </div>
-      <CopyToClipboard value={keyValue} />
+      {!masked && <CopyToClipboard value={keyValue} />}
     </div>
   )
 }

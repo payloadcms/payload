@@ -38,6 +38,7 @@ export const validateOptions: (props?: Props) => Validate =
           },
         },
       },
+      overrideAccess: true,
       select: {
         variants: true,
         variantTypes: true,

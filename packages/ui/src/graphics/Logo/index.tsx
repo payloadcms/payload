@@ -8,9 +8,11 @@ const css = `
 
 export const PayloadLogo: React.FC = () => (
   <svg
+    aria-label="Payload"
     className="graphic-logo"
     fill="none"
     height="32"
+    role="img"
     viewBox="0 0 143 32"
     width="143"
     xmlns="http://www.w3.org/2000/svg"

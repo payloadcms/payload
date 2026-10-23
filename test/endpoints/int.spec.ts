@@ -13,7 +13,7 @@ import {
   rootEndpoint,
 } from './shared.js'
 
-test.suite({ config: './config.ts' })('Endpoints', () => {
+test.suite('Endpoints', { config: './config.ts' }, () => {
   test.describe('Collections', () => {
     test('should GET a static endpoint', async ({ restClient }) => {
       const response = await restClient.GET(`/${collectionSlug}/say-hello/joe-bloggs`)

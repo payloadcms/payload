@@ -26,6 +26,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { reduceFieldsToValuesWithValidation } from '../../utilities/reduceFieldsToValuesWithValidation.js'
 import { LeaveWithoutSaving } from '../LeaveWithoutSaving/index.js'
 import './index.css'
@@ -98,6 +99,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const currentLocale = useLocale()
   const locale = currentLocale?.code
   const { t } = useTranslation()
+  const { uploadEdits } = useUploadEdits()
 
   const interval = getAutosaveInterval(docConfig)
   const validateOnDraft = hasDraftValidationEnabled(docConfig)
@@ -111,6 +113,14 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const { queueTask } = useQueue()
 
   const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const stopAutoSaveIndicator = useEffectEvent(() => {
+    if (autosaveTimeoutRef.current) {
+      clearTimeout(autosaveTimeoutRef.current)
+    }
+
+    setSaving(false)
+  })
 
   const handleAutosave = useEffectEvent(() => {
     autosaveTimeoutRef.current = undefined
@@ -149,6 +159,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
               draft: true,
               'fallback-locale': 'null',
               locale,
+              uploadEdits: uploadEdits || undefined,
             },
             {
               addQueryPrefix: true,
@@ -223,6 +234,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const didMount = useRef(false)
   const previousDebouncedData = useRef(reduceFieldsToComparableValues(debouncedFormState))
+  const previousUploadEdits = useRef(uploadEdits)
 
   // When debounced fields change, autosave
   useEffect(() => {
@@ -239,14 +251,18 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
      */
     const formData = reduceFieldsToComparableValues(debouncedFormState)
 
-    if (dequal(formData, previousDebouncedData.current)) {
+    if (
+      dequal(formData, previousDebouncedData.current) &&
+      dequal(uploadEdits, previousUploadEdits.current)
+    ) {
       return
     }
 
     previousDebouncedData.current = formData
+    previousUploadEdits.current = uploadEdits
 
     handleAutosave()
-  }, [debouncedFormState])
+  }, [debouncedFormState, uploadEdits])
 
   /**
    * If component unmounts, clear the autosave timeout
@@ -256,14 +272,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
       stopAutoSaveIndicator()
     }
   }, [])
-
-  const stopAutoSaveIndicator = useEffectEvent(() => {
-    if (autosaveTimeoutRef.current) {
-      clearTimeout(autosaveTimeoutRef.current)
-    }
-
-    setSaving(false)
-  })
 
   return (
     <React.Fragment>

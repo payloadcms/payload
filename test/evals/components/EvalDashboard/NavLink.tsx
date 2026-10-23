@@ -97,7 +97,7 @@ export const EvalDashboardNavLink: PayloadClientReactComponent<
       <InternalNavItem adminRoute={adminRoute} href="/eval-dashboard" icon={<ListIcon size={20} />}>
         Eval Results
       </InternalNavItem>
-      <ExternalNavItem href="/api/eval-report/report.html" icon={<FlaskIcon size={20} />}>
+      <ExternalNavItem href="/api/eval-report/index.html" icon={<FlaskIcon size={20} />}>
         Vitest Report
       </ExternalNavItem>
     </div>

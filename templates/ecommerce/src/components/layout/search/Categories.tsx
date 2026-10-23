@@ -12,6 +12,7 @@ async function CategoryList() {
   const categories = await payload.find({
     collection: 'categories',
     sort: 'title',
+    overrideAccess: true,
   })
 
   return (

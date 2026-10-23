@@ -1,19 +1,19 @@
 'use server'
 
 import type {
+  AdminContext,
   AdminViewAdapter,
   AdminViewClientProps,
   AdminViewServerPropsOnly,
   CollectionPreferences,
-  createLocalReq,
+  createPayloadRequest,
   ImportMap,
-  InitReqResult,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
 } from 'payload'
 
-import { applyLocaleFiltering, formatAdminURL } from 'payload/shared'
+import { applyLocaleFiltering, formatAdminURL, stripTrailingSlash } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
@@ -31,19 +31,19 @@ import { isPublicAdminRoute } from '../../utilities/isPublicAdminRoute.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 import { getRouteData } from './getRouteData.js'
 
-type InitReqFn = (args: {
+export type InitAdminContextFn = (args: {
   canSetHeaders?: boolean
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
   key: string
-  overrides?: Parameters<typeof createLocalReq>[0]
-}) => Promise<InitReqResult>
+  overrides?: Omit<Parameters<typeof createPayloadRequest>[0], 'payload'>
+}) => Promise<AdminContext>
 
 export type RenderRootArgs = {
   adminViews: AdminViewAdapter
   config: Promise<SanitizedConfig>
   importMap: ImportMap
-  initReq: InitReqFn
+  initAdminContext: InitAdminContextFn
   /**
    * Optional React `key` applied to the rendered view (not the surrounding admin
    * template/nav). Adapters whose router reconciles a single RSC payload in place
@@ -67,7 +67,7 @@ export const renderRoot = async ({
   adminViews,
   config: configPromise,
   importMap,
-  initReq,
+  initAdminContext,
   key,
   notFound,
   params: paramsPromise,
@@ -83,13 +83,17 @@ export const renderRoot = async ({
     },
     routes: { admin: adminRoute },
   } = config
+  const adminRouteURL = formatAdminURL({ adminRoute })
 
   const params = await paramsPromise
 
-  const currentRoute = formatAdminURL({
+  // route with possible trailing slash
+  const currentRouteURL = formatAdminURL({
     adminRoute,
     path: Array.isArray(params.segments) ? `/${params.segments.join('/')}` : null,
   })
+  // route without possible trailing slash
+  const currentRouteToCompare = stripTrailingSlash(currentRouteURL)
 
   const segments = Array.isArray(params.segments) ? params.segments : []
   const isCollectionRoute = segments[0] === 'collections'
@@ -109,7 +113,7 @@ export const renderRoot = async ({
 
       // Only redirect if there's NO custom view configured for /collections
       if (!viewKey) {
-        redirect(adminRoute)
+        redirect(adminRouteURL)
       }
     }
 
@@ -128,7 +132,7 @@ export const renderRoot = async ({
 
       // Only redirect if there's NO custom view configured for /globals
       if (!viewKey) {
-        redirect(adminRoute)
+        redirect(adminRouteURL)
       }
     }
 
@@ -149,7 +153,8 @@ export const renderRoot = async ({
     permissions,
     req,
     req: { payload },
-  } = await initReq({
+    user,
+  } = await initAdminContext({
     configPromise: config,
     importMap,
     key: 'initPage',
@@ -162,19 +167,19 @@ export const renderRoot = async ({
         }),
       },
       // intentionally omit `serverURL` to keep URL relative
-      urlSuffix: `${currentRoute}${searchParams ? queryString : ''}`,
+      urlSuffix: `${currentRouteURL}${searchParams ? queryString : ''}`,
     },
   })
 
   if (
     !permissions.canAccessAdmin &&
-    !isPublicAdminRoute({ adminRoute, config: payload.config, route: currentRoute }) &&
-    !isCustomAdminView({ adminRoute, config: payload.config, route: currentRoute })
+    !isPublicAdminRoute({ adminRoute, config: payload.config, route: currentRouteToCompare }) &&
+    !isCustomAdminView({ adminRoute, config: payload.config, route: currentRouteToCompare })
   ) {
     req.server.redirect(
       handleAuthRedirect({
         config: payload.config,
-        route: currentRoute,
+        route: currentRouteToCompare,
         searchParams,
         user: req.user,
       }),
@@ -209,7 +214,7 @@ export const renderRoot = async ({
     adminViews,
     collectionConfig,
     collectionPreferences,
-    currentRoute,
+    currentRoute: currentRouteToCompare,
     globalConfig,
     payload,
     searchParams,
@@ -237,39 +242,44 @@ export const renderRoot = async ({
     }
 
     if (dbHasUser) {
-      req.server.redirect(adminRoute)
+      req.server.redirect(adminRouteURL)
     }
   }
 
   const usersCollection = config.collections.find(({ slug }) => slug === userSlug)
   const disableLocalStrategy = usersCollection?.auth?.disableLocalStrategy
 
-  const createFirstUserRoute = formatAdminURL({
+  const createFirstUserURL = formatAdminURL({
     adminRoute,
     path: _createFirstUserRoute,
   })
+  const createFirstUserRouteToCompare = stripTrailingSlash(createFirstUserURL)
 
-  if (disableLocalStrategy && currentRoute === createFirstUserRoute) {
-    req.server.redirect(adminRoute)
+  if (disableLocalStrategy && currentRouteToCompare === createFirstUserRouteToCompare) {
+    req.server.redirect(adminRouteURL)
   }
 
-  if (!dbHasUser && currentRoute !== createFirstUserRoute && !disableLocalStrategy) {
-    req.server.redirect(createFirstUserRoute)
+  if (
+    !dbHasUser &&
+    currentRouteToCompare !== createFirstUserRouteToCompare &&
+    !disableLocalStrategy
+  ) {
+    req.server.redirect(createFirstUserURL)
   }
 
-  if (dbHasUser && currentRoute === createFirstUserRoute) {
-    req.server.redirect(adminRoute)
+  if (dbHasUser && currentRouteToCompare === createFirstUserRouteToCompare) {
+    req.server.redirect(adminRouteURL)
   }
 
   if (!DefaultView?.Component && !DefaultView?.payloadComponent && !dbHasUser) {
-    req.server.redirect(adminRoute)
+    req.server.redirect(adminRouteURL)
   }
 
   const clientConfig = getClientConfig({
     config,
     i18n: req.i18n,
     importMap,
-    user: viewType === 'createFirstUser' ? true : req.user,
+    user: viewType === 'createFirstUser' ? true : user,
   })
 
   await applyLocaleFiltering({ clientConfig, config, req })
@@ -281,7 +291,7 @@ export const renderRoot = async ({
     !clientConfig.localization.localeCodes.includes(req.locale)
   ) {
     req.server.redirect(
-      `${currentRoute}${qs.stringify(
+      `${currentRouteURL}${qs.stringify(
         {
           ...searchParams,
           locale: clientConfig.localization.localeCodes.includes(
@@ -344,6 +354,7 @@ export const renderRoot = async ({
       payload: req.payload,
       searchParams,
       server: req.server,
+      user,
       viewActions,
     } satisfies AdminViewServerPropsOnly,
   })
@@ -372,7 +383,7 @@ export const renderRoot = async ({
           permissions={permissions}
           req={req}
           searchParams={searchParams}
-          user={req.user}
+          user={user}
           viewActions={viewActions}
           viewKey={key}
           viewType={viewType}

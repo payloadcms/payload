@@ -8,7 +8,7 @@
     "rootDir": "./src" /* Specify the root folder within your source files. */,
     "strict": true
   },
-  "exclude": ["dist", "node_modules"],
+  "exclude": ["dist", "node_modules", "**/*.spec.*"],
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
   "references": [{ "path": "../payload" }]
 }
