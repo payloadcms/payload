@@ -14,7 +14,7 @@ import { isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
 import { getFileSize } from './fileSource.js'
 import { getFileContentRequirement, HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
 import { getImageSize } from './getImageSize.js'
-import { toLegacyUploadFile } from './uploadFile.js'
+import { toRequestFile } from './uploadFile.js'
 
 export type ClientUploadData = {
   clientUploadContext?: unknown
@@ -57,7 +57,7 @@ export async function getFileFromClientUpload({
       : 'full'
 
   if (contentRequirement === 'none') {
-    return toLegacyUploadFile({
+    return toRequestFile({
       name: file.filename,
       clientUploadContext: file.clientUploadContext,
       mimetype: file.mimeType,
@@ -83,7 +83,7 @@ export async function getFileFromClientUpload({
 
   const source = { type: 'file', isTemporary: true, path: tempFilePath } as const
 
-  return toLegacyUploadFile({
+  return toRequestFile({
     name: file.filename,
     clientUploadContext: file.clientUploadContext,
     mimetype: response.headers.get('Content-Type') || file.mimeType,
@@ -212,7 +212,7 @@ async function fetchHeaderOnly({
     await reader.cancel().catch(() => undefined)
   }
 
-  const probedFile = toLegacyUploadFile({
+  const probedFile = toRequestFile({
     name: file.filename,
     clientUploadContext: file.clientUploadContext,
     mimetype: response.headers.get('Content-Type') || file.mimeType,

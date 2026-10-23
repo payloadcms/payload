@@ -16,13 +16,10 @@ type LegacyUploadFile = { clientUploadContext?: unknown } & File
 
 /** Prepare a caller-supplied file without transferring ownership to Payload. */
 export function prepareLocalUploadFile(file: LegacyUploadFile): LegacyUploadFile {
-  return toLegacyUploadFile(normalizeUploadFile(file), file)
+  return toRequestFile(toUploadFile(file), file)
 }
 
-export function normalizeUploadFile(
-  file: LegacyUploadFile | UploadFile,
-  isTemporary = false,
-): UploadFile {
+export function toUploadFile(file: LegacyUploadFile | UploadFile, isTemporary = false): UploadFile {
   return {
     name: file.name,
     clientUploadContext: file.clientUploadContext,
@@ -33,10 +30,7 @@ export function normalizeUploadFile(
 }
 
 /** Preserve the public shape, including custom properties attached by user hooks. */
-export function toLegacyUploadFile(
-  file: UploadFile,
-  original?: LegacyUploadFile,
-): LegacyUploadFile {
+export function toRequestFile(file: UploadFile, original?: LegacyUploadFile): LegacyUploadFile {
   const { source } = file
   const legacy: LegacyUploadFile = {
     ...original,

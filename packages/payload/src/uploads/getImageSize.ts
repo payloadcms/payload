@@ -3,7 +3,7 @@ import type { PayloadRequest } from '../types/index.js'
 import type { ProbedImageSize } from './types.js'
 import type { UploadFile } from './uploadFile.js'
 
-import { getFileInput, getFileSource } from './fileSource.js'
+import { getFileBufferOrPath, getFileSource } from './fileSource.js'
 import { probeImageSize, probeImageSizeFromPath } from './probeImageSize.js'
 
 type Args = {
@@ -28,7 +28,7 @@ export async function getImageSize({ file, sharp }: Args): Promise<ProbedImageSi
 
   if (sharp) {
     try {
-      const { height, width } = await sharp(getFileInput(source)).metadata()
+      const { height, width } = await sharp(getFileBufferOrPath(source)).metadata()
       if (width && height) {
         return { height, width }
       }

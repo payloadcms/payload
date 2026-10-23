@@ -1,6 +1,6 @@
 import type { PayloadRequest } from '../types/index.js'
 
-import { disposeFileSource } from './fileSource.js'
+import { deleteTempFile } from './fileSource.js'
 import { CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY } from './getFileFromClientUpload.js'
 
 type Args = {
@@ -37,7 +37,7 @@ export const unlinkClientUploadTempFile: (args: Args) => Promise<void> = async (
   }
 
   try {
-    await disposeFileSource({ type: 'file', isTemporary: true, path: tempFilePath })
+    await deleteTempFile({ type: 'file', isTemporary: true, path: tempFilePath })
   } catch (error) {
     req.payload.logger.error({ err: error, msg: 'Failed to remove client upload temp file' })
   }

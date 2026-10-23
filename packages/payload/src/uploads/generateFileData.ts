@@ -15,7 +15,12 @@ import { isNumber } from '../utilities/isNumber.js'
 import { canResizeImage } from './canResizeImage.js'
 import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { cropImage } from './cropImage.js'
-import { getFileBuffer, getFileInput, getFileSource, replaceFileSource } from './fileSource.js'
+import {
+  getFileBuffer,
+  getFileBufferOrPath,
+  getFileSource,
+  replaceFileSource,
+} from './fileSource.js'
 import { getExternalFile } from './getExternalFile.js'
 import { getFileByPath } from './getFileByPath.js'
 import { getFileContentRequirement } from './getFileContentRequirement.js'
@@ -28,7 +33,7 @@ import { isAnimatedImage } from './isAnimatedImage.js'
 import { isImage } from './isImage.js'
 import { isProcessableImage } from './isProcessableImage.js'
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
-import { normalizeUploadFile, toLegacyUploadFile } from './uploadFile.js'
+import { toRequestFile, toUploadFile } from './uploadFile.js'
 type Args<T> = {
   collection: Collection
   config: SanitizedConfig
@@ -106,7 +111,7 @@ export const generateFileData = async <T>({
 
   let file =
     !isDuplicating && req.file
-      ? normalizeUploadFile(req.file, Boolean(req.payload.config.upload?.useTempFiles))
+      ? toUploadFile(req.file, Boolean(req.payload.config.upload?.useTempFiles))
       : undefined
 
   const uploadEdits = parseUploadEditsFromReqOrIncomingData({
@@ -159,11 +164,11 @@ export const generateFileData = async <T>({
         // File is stored locally
         const filePath = `${staticPath}/${filename}`
         const response = await getFileByPath(filePath)
-        file = response ? normalizeUploadFile(response) : undefined
+        file = response ? toUploadFile(response) : undefined
         overwriteExistingFiles = true
       } else if (filename && url) {
         // File is remote
-        file = normalizeUploadFile(
+        file = toUploadFile(
           await getExternalFile({
             data: fileSourceData as unknown as FileData,
             req,
@@ -217,7 +222,7 @@ export const generateFileData = async <T>({
       uploadConfig: collectionConfig.upload,
     }) === 'full'
   ) {
-    file = normalizeUploadFile(
+    file = toUploadFile(
       await getFileFromClientUpload({
         file: {
           clientUploadContext: file.clientUploadContext,
@@ -275,7 +280,7 @@ export const generateFileData = async <T>({
     }
 
     if (sharp && (fileIsAnimatedType || fileHasAdjustments)) {
-      sharpFile = sharp(getFileInput(file), sharpOptions).rotate() // Auto-rotate based on EXIF data.
+      sharpFile = sharp(getFileBufferOrPath(file), sharpOptions).rotate() // Auto-rotate based on EXIF data.
 
       if (fileHasAdjustments) {
         if (resizeOptions) {
@@ -430,7 +435,7 @@ export const generateFileData = async <T>({
       filesToSave.push({ path: `${staticPath}/${fsSafeName}`, source: getFileSource(file) })
     }
 
-    req.file = toLegacyUploadFile(file, req.file)
+    req.file = toRequestFile(file, req.file)
 
     if (fileSupportsResize && (Array.isArray(imageSizes) || focalPointEnabled !== false)) {
       req.payloadUploadSizes = {}

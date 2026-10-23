@@ -2,7 +2,7 @@ import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
-import { disposeFileSource, getFileSource } from './fileSource.js'
+import { deleteTempFile, getFileSource } from './fileSource.js'
 import { unlinkClientUploadTempFile } from './unlinkClientUploadTempFile.js'
 
 type Args = {
@@ -30,7 +30,7 @@ export const unlinkTempFiles: (args: Args) => Promise<void> = async ({
     const source = getFileSource(file, isTemporary)
 
     if (source.type === 'file' && source.isTemporary) {
-      await disposeFileSource(source)
+      await deleteTempFile(source)
       unlinkedTempFilePath = source.path
     }
   }

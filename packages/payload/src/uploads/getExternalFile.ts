@@ -5,7 +5,7 @@ import { APIError } from '../errors/index.js'
 import { getRequestOrigin } from '../utilities/getRequestOrigin.js'
 import { isURLAllowed } from '../utilities/isURLAllowed.js'
 import { safeFetch } from './safeFetch.js'
-import { toLegacyUploadFile } from './uploadFile.js'
+import { toRequestFile } from './uploadFile.js'
 
 type Args = {
   data: Pick<FileData, 'filename' | 'url'>
@@ -152,7 +152,7 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
 
     const data = Buffer.from(await res.arrayBuffer())
 
-    return toLegacyUploadFile({
+    return toRequestFile({
       name: filename,
       mimetype: res.headers.get('source-type') || undefined!,
       size: data.length,

@@ -6,7 +6,7 @@ import type { WithMetadata } from './optionallyAppendMetadata.js'
 import type { UploadEdits } from './types.js'
 import type { UploadFile } from './uploadFile.js'
 
-import { getFileBuffer, getFileInput } from './fileSource.js'
+import { getFileBuffer, getFileBufferOrPath } from './fileSource.js'
 import { isAnimatedImage } from './isAnimatedImage.js'
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
 
@@ -56,7 +56,7 @@ export async function cropImage({
       let adjustedHeight = originalHeight
 
       if (fileIsAnimatedType) {
-        const animatedMetadata = await sharp(getFileInput(file), sharpOptions).metadata()
+        const animatedMetadata = await sharp(getFileBufferOrPath(file), sharpOptions).metadata()
         adjustedHeight = animatedMetadata.pages ? animatedMetadata.height! : originalHeight
       }
 
@@ -79,7 +79,7 @@ export async function cropImage({
       width: Number(widthInPixels),
     }
 
-    let cropped = sharp(getFileInput(file), sharpOptions).extract(formattedCropData)
+    let cropped = sharp(getFileBufferOrPath(file), sharpOptions).extract(formattedCropData)
 
     cropped = await optionallyAppendMetadata({
       req: req!,

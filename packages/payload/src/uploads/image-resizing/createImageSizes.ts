@@ -12,7 +12,7 @@ import type { FileSize, FileSizes, FocalPoint, ProbedImageSize } from '../types.
 import type { UploadFile } from '../uploadFile.js'
 
 import { fileExists } from '../fileExists.js'
-import { getFileInput } from '../fileSource.js'
+import { getFileBufferOrPath } from '../fileSource.js'
 import { isAnimatedImage } from '../isAnimatedImage.js'
 import { optionallyAppendMetadata } from '../optionallyAppendMetadata.js'
 import { createImageSize } from './createImageSize.js'
@@ -85,7 +85,7 @@ export async function createImageSizes({
     sharpOptions.animated = true
   }
 
-  const sharpBase: Sharp | undefined = sharp(getFileInput(file!), sharpOptions).rotate() // Auto-rotate based on EXIF data.
+  const sharpBase: Sharp | undefined = sharp(getFileBufferOrPath(file!), sharpOptions).rotate() // Auto-rotate based on EXIF data.
   const originalImageMeta = await sharpBase.metadata()
 
   let adjustedDimensions = { ...dimensions }

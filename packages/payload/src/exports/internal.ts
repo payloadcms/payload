@@ -20,16 +20,16 @@ export type {
 } from '../uploads/clientUploadReceipt.js'
 export {
   bindLegacyFileSource,
-  disposeFileSource,
+  deleteTempFile,
   getFileBlob,
   getFileBuffer,
-  getFileInput,
+  getFileBufferOrPath,
   getFileInspectionInput,
   getFileSize,
   getFileSource,
   getFileStream,
   replaceFileSource,
-  saveFileSource,
+  writeFileToDisk,
 } from '../uploads/fileSource.js'
 export type { FileSource, FileSourceToSave } from '../uploads/fileSource.js'
 export { getExternalFile } from '../uploads/getExternalFile.js'
@@ -38,7 +38,7 @@ export { getRangeRequestInfo } from '../uploads/getRangeRequestInfo.js'
 export { getSafeFileName } from '../uploads/getSafeFilename.js'
 export { parseRangeHeader } from '../uploads/parseRangeHeader.js'
 export { UPLOAD_CONTENT_SECURITY_POLICY } from '../uploads/uploadContentSecurityPolicy.js'
-export { normalizeUploadFile, toLegacyUploadFile } from '../uploads/uploadFile.js'
+export { toRequestFile, toUploadFile } from '../uploads/uploadFile.js'
 export type { UploadFile } from '../uploads/uploadFile.js'
 export { getEntityPermissions } from '../utilities/getEntityPermissions/getEntityPermissions.js'
 

@@ -4,7 +4,7 @@ import type { FileSourceToSave } from './fileSource.js'
 import type { FileToSave } from './types.js'
 
 import { FileUploadError } from '../errors/index.js'
-import { saveFileSource } from './fileSource.js'
+import { writeFileToDisk } from './fileSource.js'
 
 export const uploadFiles = async (
   payload: Payload,
@@ -21,7 +21,7 @@ export const uploadFiles = async (
               ? ({ type: 'file', isTemporary: false, path: file.sourcePath } as const)
               : ({ type: 'buffer', buffer: file.buffer } as const)
 
-        await saveFileSource(source, file.path)
+        await writeFileToDisk(source, file.path)
       }),
     )
   } catch (err) {

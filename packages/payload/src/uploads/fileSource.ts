@@ -73,7 +73,7 @@ export function bindLegacyFileSource<T extends LegacyFileSource>(file: T, source
 }
 
 /** Processors receive complete bytes, never a header probe. */
-export function getFileInput(file: FileSourceInput): Buffer | string {
+export function getFileBufferOrPath(file: FileSourceInput): Buffer | string {
   const source = requireCompleteSource(file)
   return source.type === 'file' ? source.path : source.buffer
 }
@@ -142,7 +142,7 @@ export async function replaceFileSource<T extends { size: number; source: FileSo
   return { ...file, size: data.length, source }
 }
 
-export async function saveFileSource(file: FileSourceInput, destination: string): Promise<void> {
+export async function writeFileToDisk(file: FileSourceInput, destination: string): Promise<void> {
   const source = requireCompleteSource(file)
   const fs = await import('fs/promises')
   if (source.type === 'buffer') {
@@ -156,7 +156,7 @@ export async function saveFileSource(file: FileSourceInput, destination: string)
 }
 
 /** Cleanup is idempotent and never removes borrowed files. */
-export async function disposeFileSource(file: FileSourceInput): Promise<void> {
+export async function deleteTempFile(file: FileSourceInput): Promise<void> {
   const source = getFileSource(file)
   if (source.type !== 'file' || !source.isTemporary) {
     return
