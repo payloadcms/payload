@@ -302,8 +302,9 @@ access control.
 This works for auth collections that use Payload's own login. Login tokens
 expire after the collection's `tokenExpiration`, and the client then gets new
 ones with its [refresh token](../authentication/overview#refresh-tokens),
-without the user. A refresh token stays valid for 30 days without use, or the
-collection's `auth.refreshTokens.expiration`. Each one works once: if a used
+without the user. The refresh token works as long as its session, which lasts
+30 days without a refresh, or the collection's `auth.refreshTokens.expiration`.
+Each one works once: if a used
 refresh token comes back later, someone copied it, and the client is signed out.
 Clients are signed out too when the user logs out of all sessions. Collections
 with `useSessions: false` get no refresh tokens, so their clients sign in again
