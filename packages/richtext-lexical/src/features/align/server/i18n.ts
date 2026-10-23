@@ -61,6 +61,12 @@ export const i18n: Partial<GenericLanguages> = {
     alignLeftLabel: 'چپ تراز',
     alignRightLabel: 'راست چین',
   },
+  fi: {
+    alignCenterLabel: 'Keskitä',
+    alignJustifyLabel: 'Tasaa',
+    alignLeftLabel: 'Tasaa vasemmalle',
+    alignRightLabel: 'Tasaa oikealle',
+  },
   fr: {
     alignCenterLabel: 'Aligner au centre',
     alignJustifyLabel: 'Aligner Justifier',
