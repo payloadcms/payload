@@ -1138,6 +1138,7 @@ export interface CollapsibleField {
         id?: string | null;
       }[]
     | null;
+  forceRenderedText?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -3373,6 +3374,7 @@ export interface CollapsibleFieldsSelect<T extends boolean = true> {
         innerCollapsible?: T;
         id?: T;
       };
+  forceRenderedText?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
