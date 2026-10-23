@@ -12,6 +12,7 @@ import { formatAdminURL } from 'payload/shared'
 import type { MCPBuiltinOAuthConfig, MCPOAuthTokens } from '../types.js'
 
 import { getPluginConfig } from '../utils/getPluginConfig.js'
+import { seal, unseal } from '../utils/seal.js'
 import { getMCPURL } from './oauth.js'
 import { issueLoginToken, refreshLoginToken } from './oauthLoginToken.js'
 
@@ -338,51 +339,6 @@ const getTokenHooks = (req: PayloadRequest) => {
   return oauth.issueToken
     ? { issueToken: oauth.issueToken, refreshToken: oauth.refreshToken }
     : { issueToken: issueLoginToken, refreshToken: refreshLoginToken }
-}
-
-/**
- * Encrypts data for the client to hold, so it doesn't need to be stored. `type` keeps one kind
- * from being used as another, e.g. a client ID as an authorization code.
- */
-const seal = ({
-  type,
-  data,
-  expiresIn,
-  req,
-}: {
-  data: object
-  /** Seconds */
-  expiresIn?: number
-  req: PayloadRequest
-  type: string
-}): string =>
-  req.payload.encrypt(
-    JSON.stringify({ ...data, type, exp: expiresIn && Date.now() + expiresIn * 1000 }),
-  )
-
-const unseal = <T>({
-  type,
-  req,
-  value,
-}: {
-  req: PayloadRequest
-  type: string
-  value: null | string
-}): T | undefined => {
-  // Only the v1 format is authenticated. Older formats decrypt anything without an error.
-  if (!value?.startsWith('v1:')) {
-    return undefined
-  }
-
-  try {
-    // Previous secrets can be public, like a default secret from source code, so only client IDs
-    // accept them. Client IDs grant nothing, and this keeps clients registered when the secret changes.
-    const secret = type === 'client' ? undefined : req.payload.config.secret
-    const data = JSON.parse(req.payload.decrypt(value, { secret }))
-    return data.type === type && (!data.exp || data.exp > Date.now()) ? data : undefined
-  } catch {
-    return undefined
-  }
 }
 
 const redirect = ({
