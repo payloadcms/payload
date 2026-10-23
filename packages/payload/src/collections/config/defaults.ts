@@ -139,7 +139,7 @@ export const addDefaultsToCollectionConfig = (collection: CollectionConfig): Col
   return collection
 }
 
-/** How many seconds a refresh token stays valid without being used, by default: 30 days. */
+/** How many seconds a session with a refresh token lasts without a refresh, by default: 30 days. */
 export const defaultRefreshTokenExpiration = 30 * 24 * 60 * 60
 
 export const addDefaultsToAuthConfig = (auth: IncomingAuthType): Auth => {
