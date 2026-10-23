@@ -25,6 +25,8 @@ Router-only projects are converted to TanStack Start after confirmation.
 
         blank                       Blank Template
         blank-tanstack              Blank TanStack Start Template
+        with-cloudflare-d1          Cloudflare D1 and Workers Template
+        with-cloudflare-d1-tanstack TanStack Start Cloudflare D1 and Workers Template
         website                     Website Template
         ecommerce                   E-commerce Template
         plugin                      Template for creating a Payload plugin

@@ -47,6 +47,13 @@ export function getValidTemplates(): ProjectTemplate[] {
       url: 'https://github.com/payloadcms/payload/templates/with-cloudflare-d1#main',
     },
     {
+      name: 'with-cloudflare-d1-tanstack',
+      type: 'starter',
+      dbType: 'd1-sqlite',
+      description: 'TanStack Start template with Cloudflare D1 and Workers integration',
+      url: 'https://github.com/payloadcms/payload/templates/with-cloudflare-d1-tanstack#main',
+    },
+    {
       name: 'plugin',
       type: 'plugin',
       description: 'Template for creating a Payload plugin',

@@ -6,7 +6,7 @@ import type { PackageManager } from '../types.js'
 /*
  * Build scripts pnpm v11 must be allowed to run for the projects create-payload-app scaffolds;
  * otherwise the install fails with ERR_PNPM_IGNORED_BUILDS. esbuild/sharp/unrs-resolver cover the
- * default templates; workerd is required by with-cloudflare-d1.
+ * default templates; workerd is required by the Cloudflare templates.
  * TODO(follow-up): the CI drift guard only verifies the blank template — extend it across every
  * getValidTemplates() entry so this single list can't drift per-template.
  */

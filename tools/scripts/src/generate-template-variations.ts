@@ -228,6 +228,20 @@ async function main() {
       workspace: false,
       targetDeployment: 'cloudflare',
     },
+    {
+      name: 'with-cloudflare-d1-tanstack',
+      db: 'd1-sqlite',
+      dirname: 'with-cloudflare-d1-tanstack',
+      sharp: false,
+      skipConfig: true,
+      skipDockerCompose: true,
+      skipReadme: true,
+      storage: 'r2Storage',
+      configureConfig: false,
+      workspace: true,
+      base: 'none',
+      targetDeployment: 'cloudflare',
+    },
   ]
 
   // If template is set, only generate that template. The plugin template is not a

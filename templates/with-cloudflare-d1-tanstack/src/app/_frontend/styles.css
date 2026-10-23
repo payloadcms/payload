@@ -1,0 +1,256 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700&display=swap');
+
+:root {
+  color: #effff9;
+  background: #07110e;
+  font-family: 'Manrope', sans-serif;
+  font-synthesis: none;
+  --ink: #effff9;
+  --muted: #9bb9af;
+  --line: #26433a;
+  --mint: #6cffc2;
+  --panel: #0d1c17;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: #07110e;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background:
+    radial-gradient(circle at 85% 4%, rgb(44 172 125 / 20%), transparent 32rem),
+    linear-gradient(#07110e 0, #0a1512 100%);
+}
+
+a {
+  color: inherit;
+}
+
+main {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 24px 0 96px;
+}
+
+.hero {
+  min-height: 72vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 96px 0 80px;
+  border-bottom: 1px solid var(--line);
+}
+
+.eyebrow,
+.sectionLabel,
+code,
+.flow span,
+.postCard time,
+.postCard > span {
+  font-family: 'DM Mono', monospace;
+}
+
+.eyebrow,
+.sectionLabel {
+  color: var(--mint);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  max-width: 950px;
+  margin: 28px 0;
+  font-size: clamp(54px, 8vw, 112px);
+  line-height: 0.92;
+  letter-spacing: -0.07em;
+}
+
+.lede {
+  max-width: 720px;
+  color: var(--muted);
+  font-size: clamp(18px, 2vw, 24px);
+  line-height: 1.55;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.button {
+  padding: 13px 18px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  text-decoration: none;
+  transition: 160ms ease;
+}
+
+.button:hover {
+  border-color: var(--mint);
+  transform: translateY(-2px);
+}
+
+.buttonPrimary {
+  color: #07110e;
+  background: var(--mint);
+  border-color: var(--mint);
+  font-weight: 700;
+}
+
+.stack,
+.posts {
+  padding: 88px 0;
+}
+
+.stack {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 64px;
+  border-bottom: 1px solid var(--line);
+}
+
+h2 {
+  max-width: 520px;
+  font-size: clamp(34px, 5vw, 62px);
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+}
+
+.flow {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.flow li {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 4px 18px;
+  padding: 22px 0;
+  border-top: 1px solid var(--line);
+}
+
+.flow span {
+  grid-row: 1 / 3;
+  color: var(--mint);
+}
+
+.flow strong {
+  font-size: 22px;
+}
+
+.flow small {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.postsHeader {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+code {
+  padding: 8px 12px;
+  color: var(--muted);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.postGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.postCard,
+.emptyState {
+  padding: 24px;
+  background: rgb(13 28 23 / 72%);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.postCard time,
+.postCard > span {
+  color: var(--mint);
+  font-size: 12px;
+}
+
+.postCard h3 {
+  margin: 42px 0 12px;
+  font-size: 26px;
+  letter-spacing: -0.035em;
+}
+
+.postCard p,
+.emptyState span {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.postCard > span {
+  display: block;
+  margin-top: 28px;
+}
+
+.emptyState {
+  min-height: 190px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.emptyState p {
+  margin-bottom: 8px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+@media (max-width: 800px) {
+  main {
+    width: min(100% - 28px, 1180px);
+  }
+
+  .hero {
+    min-height: auto;
+    padding: 90px 0 64px;
+  }
+
+  .stack {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .postsHeader {
+    display: block;
+  }
+
+  .postsHeader code {
+    display: inline-block;
+    margin-bottom: 28px;
+  }
+
+  .postGrid {
+    grid-template-columns: 1fr;
+  }
+}
