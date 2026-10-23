@@ -40,10 +40,11 @@ export const oauthProtectedResourceHandler =
  * metadata, which starts the client's OAuth flow.
  */
 export const oauthChallenge = ({ req }: { req: PayloadRequest }): Response => {
+  const { oauth } = getPluginConfig({ config: req.payload.config })
   const response = bearerAuthChallengeResponse(
     new OAuthError(OAuthErrorCode.InvalidToken, req.t('error:unauthorized')),
     {
-      requiredScopes: getPluginConfig({ config: req.payload.config }).oauth?.scopes,
+      requiredScopes: oauth?.type === 'external' ? oauth.scopes : undefined,
       resourceMetadataUrl: `${getMCPResource({ req })}/oauth-protected-resource`,
     },
   )
@@ -70,25 +71,28 @@ export const getMCPResource = ({ req }: { req: PayloadRequest }): string => {
   return resource ?? new URL(`${config.routes.api}/mcp`, config.serverURL || req.url).href
 }
 
+export const getMCPURL = ({ config, url }: { config: SanitizedConfig; url: string }): string =>
+  new URL(`${config.routes.api}/mcp`, config.serverURL || url).href
+
 const getMetadataResponse = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
   const { config } = req.payload
-  const pluginConfig = getPluginConfig({ config })
+  const { oauth } = getPluginConfig({ config })
 
-  if (!pluginConfig.oauth) {
+  if (!oauth) {
     return new Response(null, { status: 404 })
   }
-
-  const { authorizationServers, scopes } = pluginConfig.oauth
 
   return Response.json(
     {
       authorization_servers:
-        typeof authorizationServers === 'function'
-          ? await authorizationServers({ req })
-          : authorizationServers,
+        oauth.type === 'builtin'
+          ? [`${getMCPURL({ config, url: req.url! })}/oauth`]
+          : typeof oauth.authorizationServers === 'function'
+            ? await oauth.authorizationServers({ req })
+            : oauth.authorizationServers,
       bearer_methods_supported: ['header'],
       resource: getMCPResource({ req }),
-      scopes_supported: scopes,
+      scopes_supported: oauth.type === 'external' ? oauth.scopes : undefined,
     } satisfies OAuthProtectedResourceMetadata,
     // Public document, readable by browser-based MCP clients on any origin. Not cached, since its
     // URLs can depend on the request.
