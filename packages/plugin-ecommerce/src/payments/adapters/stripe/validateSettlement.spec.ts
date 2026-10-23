@@ -242,6 +242,23 @@ describe('validateSettlement', () => {
     ).not.toThrow()
   })
 
+  it('should accept a PaymentIntent without an item snapshot', () => {
+    expect(() =>
+      validateSettlement(createAuthenticatedValidation({ cartItemsSnapshot: undefined })),
+    ).not.toThrow()
+  })
+
+  it('should still validate the transaction items without an item snapshot', () => {
+    expect(() =>
+      validateSettlement(
+        createAuthenticatedValidation({
+          cartItemsSnapshot: undefined,
+          transaction: createTransaction({ items: [] }),
+        }),
+      ),
+    ).toThrow('Cart items are missing or invalid')
+  })
+
   it('should reject an item quantity mismatch', () => {
     expect(() =>
       validateSettlement(

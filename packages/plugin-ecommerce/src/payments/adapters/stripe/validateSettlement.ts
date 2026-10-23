@@ -24,7 +24,7 @@ type SettlementTransaction = {
 
 type SettlementValidationArgs = {
   canonicalCartID: unknown
-  cartItemsSnapshot: unknown
+  cartItemsSnapshot?: unknown
   customerEmail: unknown
   paymentIntent: SettlementPaymentIntent
   paymentIntentID: string
@@ -173,11 +173,14 @@ export const validateSettlement = ({
     throw new Error('Stripe currency does not match the transaction currency')
   }
 
-  const normalizedSnapshot = normalizeCartItems(cartItemsSnapshot)
   const normalizedTransactionItems = normalizeCartItems(transaction.items)
 
-  if (stableSerialize(normalizedSnapshot) !== stableSerialize(normalizedTransactionItems)) {
-    throw new Error('Stripe cart items do not match the transaction items')
+  if (cartItemsSnapshot !== undefined) {
+    const normalizedSnapshot = normalizeCartItems(cartItemsSnapshot)
+
+    if (stableSerialize(normalizedSnapshot) !== stableSerialize(normalizedTransactionItems)) {
+      throw new Error('Stripe cart items do not match the transaction items')
+    }
   }
 
   if (paymentIntent.status !== 'succeeded') {

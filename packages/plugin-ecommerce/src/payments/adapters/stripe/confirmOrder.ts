@@ -52,10 +52,16 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
         value: transaction.id,
       })
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentID)
-      const cartItemsSnapshot = parseRequiredMetadata({
-        fieldName: 'cartItemsSnapshot',
-        value: paymentIntent.metadata.cartItemsSnapshot,
-      })
+      // PaymentIntents created by older versions also carry a `cartItemsSnapshot`.
+      // Newer ones don't, because Stripe caps metadata values at 500 characters.
+      // The order items always come from the transaction.
+      const cartItemsSnapshot =
+        paymentIntent.metadata.cartItemsSnapshot === undefined
+          ? undefined
+          : parseRequiredMetadata({
+              fieldName: 'cartItemsSnapshot',
+              value: paymentIntent.metadata.cartItemsSnapshot,
+            })
       const shippingAddress = parseOptionalMetadata({
         fieldName: 'shippingAddress',
         value: paymentIntent.metadata.shippingAddress,
@@ -85,7 +91,7 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
           amount: transaction.amount,
           currency: transaction.currency,
           ...purchaser,
-          items: cartItemsSnapshot,
+          items: transaction.items,
           shippingAddress,
           status: 'processing',
         },
