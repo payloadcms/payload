@@ -327,7 +327,8 @@ export type MCPBuiltinOAuthConfig = {
    * browser request, so `req.user` is the user who allowed it. Pass `authenticate` too if
    * Payload's auth strategies don't accept the access token.
    *
-   * @default a Payload login token for that user, with a refresh token when the collection uses sessions
+   * @default a Payload login token for that user that only works for MCP, with a refresh token when
+   * the collection uses sessions
    */
   issueToken?: (args: { req: PayloadRequest }) => MaybePromise<MCPOAuthTokens>
   /**
