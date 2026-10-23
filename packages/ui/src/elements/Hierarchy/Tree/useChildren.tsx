@@ -98,6 +98,7 @@ export const useChildren = ({
       routes: { api },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
 
   const fetchPage = useCallback(
@@ -143,7 +144,7 @@ export const useChildren = ({
         const queryParams: Record<string, unknown> = {
           limit,
           page: pageToFetch,
-          sort: useAsTitle ?? 'id',
+          sort: getEntityConfig({ collectionSlug })?.defaultSort ?? useAsTitle ?? 'id',
           where,
         }
 
@@ -221,6 +222,7 @@ export const useChildren = ({
       limit,
       useAsTitle,
       api,
+      getEntityConfig,
       collectionSlug,
       serverURL,
       cache,

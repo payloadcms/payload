@@ -125,7 +125,7 @@ export const getInitialTreeData = async ({
         limit: effectiveLimit,
         overrideAccess: false,
         page: currentPage,
-        sort: useAsTitle,
+        sort: collectionConfig.defaultSort ?? useAsTitle,
         user,
         where: whereClause,
       })
