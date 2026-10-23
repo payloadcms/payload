@@ -57,7 +57,7 @@ jobs:
     name: generate-sboms
     needs: publish
     if: github.repository == 'payloadcms/payload'
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     steps:
@@ -84,7 +84,7 @@ jobs:
     name: attach-sboms
     needs: generate-sboms
     if: github.repository == 'payloadcms/payload'
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:

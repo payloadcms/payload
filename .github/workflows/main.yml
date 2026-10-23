@@ -129,11 +129,11 @@ jobs:
           path: ./*
           key: ${{ github.sha }}
 
-  # Catches SBOM generation regressions before a release. Push to main only, not part of all-green.
+  # Catches SBOM generation regressions before a release. Push to 3.x only, not part of all-green.
   sbom:
     needs: changes
     if: github.event_name == 'push' && needs.changes.outputs.needs_sbom == 'true'
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v5
