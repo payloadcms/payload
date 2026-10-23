@@ -3562,7 +3562,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
 
     test('should contain keyboard focus in media and nested folder modals', async () => {
-      // Additional coverage for PYLD-3575 and PYLD-3587; browse-cursor coverage is in screen-reader.spec.ts.
+      // PYLD-3575 and PYLD-3587: keyboard containment; virtual-cursor containment requires manual AT verification.
       test.setTimeout(60000)
       for (const open of [openBulkUploadDialog, openEditImageDialog, openFolderCreationLocation]) {
         const modal = await open({ page, serverURL })

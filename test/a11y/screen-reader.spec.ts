@@ -1,6 +1,3 @@
-import type { ScreenReaderPlaywright } from '@guidepup/playwright'
-import type { Locator } from '@playwright/test'
-
 import { NVDAKeyCodeCommands } from '@guidepup/guidepup'
 import { screenReaderTest as test } from '@guidepup/playwright'
 import { expect } from '@playwright/test'
@@ -9,33 +6,25 @@ import { fileURLToPath } from 'node:url'
 import { formatAdminURL } from 'payload/shared'
 
 import { openGroupBy } from '../__helpers/e2e/groupBy/index.js'
-import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
 import { devUser } from '../credentials.js'
 import {
   addCollectionQueryWidget,
-  addTextBlock,
   captureScreenReader,
   captureScreenReaderOutput,
-  cleanupModalMedia,
-  expectPopupCursorToMove,
   gotoCreatePost,
   gotoFirstPost,
   gotoPostsList,
   insertTextBlockWithKeyboard,
   navigateScreenReaderTo,
   openBulkEditFieldSelect,
-  openBulkUploadDialog,
   openCopyToLocaleDrawer,
   openDashboardEditor,
   openDragReorderField,
   openDrawerFilters,
-  openEditImageDialog,
   openFirstBlockActions,
-  openFolderCreationLocation,
-  openLocaleOptions,
   openNavigationFolders,
   openPostsFilter,
   openRichTextRelationshipDrawer,
@@ -68,10 +57,6 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     await initPage({ page, serverURL })
     page.removeAllListeners('console')
     await screenReader.navigateToWebContent()
-  })
-
-  test.afterEach(async ({ page }) => {
-    await cleanupModalMedia({ page })
   })
 
   test.describe('1.3.1 Info and Relationships (A)', () => {
@@ -265,31 +250,6 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       expect(capture.spokenPhrase).not.toMatch(
         /skip to content|navigation landmark|dashboard|subtitle/i,
       )
-    })
-
-    test('should announce a selected locale as one grouped item with its state', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3699
-      // PYLD-3700
-      // PYLD-3730
-      const options = await openLocaleOptions({ page, postsURL })
-      const selectedOption = options.filter({ hasText: 'English' })
-
-      await expect(selectedOption).toHaveRole('menuitemradio')
-      await expect(selectedOption).toHaveAttribute('aria-checked', 'true')
-      await expect(selectedOption).not.toHaveAttribute('aria-disabled', 'true')
-
-      const capture = await captureScreenReader({
-        action: () => selectedOption.focus(),
-        screenReader,
-      })
-
-      expect(capture.spokenPhrase).toMatch(/English/i)
-      expect(capture.spokenPhrase).toMatch(/checked|selected/i)
-      expect(capture.spokenPhrase).not.toMatch(/dimmed|disabled|unavailable/i)
-      expect(capture.spokenPhrase.match(/English/gi)).toHaveLength(1)
     })
   })
   test.describe('2.1.1 Keyboard (A)', () => {
@@ -530,56 +490,6 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
         expect(outputs.join(' ')).not.toMatch(/drag to move|add block|edit link|remove link/i)
       }
     })
-    test.describe('document form', () => {
-      test('should expose validation errors next to their fields', async ({
-        page,
-        screenReader,
-      }) => {
-        // PYLD-3581
-        await gotoCreatePost({ page, postsURL })
-        await page.getByRole('button', { name: /^Publish(?: in English)?$/ }).click()
-        const field = page.locator('#field-title')
-        const error = page
-          .locator('.field-error')
-          .filter({ hasText: /required/i })
-          .first()
-
-        await expect(error).toBeVisible()
-        await expectAdjacentValidationError({ error, field, screenReader })
-      })
-    })
-
-    test('should contain screen-reader traversal in bulk-upload and image-edit dialogs', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3575
-      for (const open of [openBulkUploadDialog, openEditImageDialog]) {
-        const dialog = await open({ page, serverURL })
-
-        await dialog.getByRole('button', { name: 'Close', exact: true }).focus()
-        const stops = await collectModalCursorStops({ screenReader })
-        expect(stops.join('\n')).not.toMatch(
-          /dashboard|navigation|collections|create new|\bmedia\b|\bposts\b|\busers\b|file name|save draft/i,
-        )
-        expect(stops.join('\n')).toMatch(/add files|crop|focal point|choose files|browse files/i)
-      }
-    })
-
-    test('should contain screen-reader traversal in the nested folder-location modal', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3587
-      const modal = await openFolderCreationLocation({ page, serverURL })
-
-      await modal.getByRole('button', { name: 'Cancel', exact: true }).focus()
-      const stops = await collectModalCursorStops({ screenReader })
-      expect(stops.join('\n')).not.toMatch(
-        /dashboard|navigation|collections|creating new folder|untitled|save draft/i,
-      )
-      expect(stops.join('\n')).toMatch(/accessibility folder/i)
-    })
 
     test('should move the screen-reader cursor into the add-widget drawer upon opening', async ({
       page,
@@ -653,49 +563,6 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
 
       expect(hasReachedNextField, `Screen-reader stops: ${JSON.stringify(selectStops)}`).toBe(true)
       expect(selectStops, `Screen-reader stops: ${JSON.stringify(selectStops)}`).toHaveLength(1)
-    })
-
-    test('should move the screen-reader cursor into every shared popup', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3697
-      // PYLD-3701
-      await page.goto(`${serverURL}/admin`)
-      await openNav(page)
-      await expectPopupCursorToMove({
-        expectedItem: /account|preferences|logout/i,
-        screenReader,
-        trigger: page.locator('.user-menu__trigger'),
-      })
-
-      await gotoCreatePost({ page, postsURL })
-      await expectPopupCursorToMove({
-        expectedItem: /English|Spanish/i,
-        screenReader,
-        trigger: page.locator('.localizer .popup__trigger-wrap button'),
-      })
-
-      await gotoPostsList({ page, postsURL })
-      await expectPopupCursorToMove({
-        expectedItem: /field|sort/i,
-        screenReader,
-        trigger: page.locator('#toggle-group-by'),
-      })
-
-      await gotoPostsList({ page, postsURL })
-      await expectPopupCursorToMove({
-        expectedItem: /title|updated|created/i,
-        screenReader,
-        trigger: page.locator('.columns-button__button'),
-      })
-
-      await addTextBlock({ page, postsURL })
-      await expectPopupCursorToMove({
-        expectedItem: /duplicate|remove|paste/i,
-        screenReader,
-        trigger: page.locator('#field-layout .array-actions__button').first(),
-      })
     })
 
     test('should expose disabled row-menu actions to screen-reader navigation', async ({
@@ -988,52 +855,3 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     })
   })
 })
-
-async function collectModalCursorStops({ screenReader }: { screenReader: ScreenReaderPlaywright }) {
-  const stops: string[] = []
-
-  for (const direction of ['next', 'previous'] as const) {
-    for (let step = 0; step < 40; step++) {
-      await screenReader[direction]()
-      stops.push(await screenReader.itemText())
-    }
-  }
-  return stops
-}
-
-async function expectAdjacentValidationError({
-  error,
-  field,
-  screenReader,
-}: {
-  error: Locator
-  field: Locator
-  screenReader: ScreenReaderPlaywright
-}) {
-  const message = (await error.innerText()).replace(/\s+/g, ' ').trim()
-  const stops: string[] = []
-  let hasAdjacentError = false
-
-  // Permit the label and field wrapper between the input and its error, in either direction.
-  for (const direction of ['previous', 'next'] as const) {
-    await field.blur()
-    await field.focus()
-    for (let index = 0; index < 3; index++) {
-      await screenReader[direction]()
-      const text = (await screenReader.itemText()).replace(/\s+/g, ' ').trim()
-
-      stops.push(text)
-      if (text.includes(message)) {
-        hasAdjacentError = true
-        break
-      }
-      if (/dashboard|navigation|publish|save draft/i.test(text)) {
-        break
-      }
-    }
-    if (hasAdjacentError) {
-      break
-    }
-  }
-  expect(hasAdjacentError, JSON.stringify({ message, stops })).toBe(true)
-}

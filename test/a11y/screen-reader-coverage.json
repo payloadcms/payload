@@ -14,7 +14,7 @@
     "screenReaderRun": "Not run on this laptop; do not infer AT success from browser assertions.",
     "screenReaderDiscovery": {
       "before": 54,
-      "after": 31
+      "after": 26
     },
     "followUpBrowserRun": {
       "status": "passed",
@@ -51,7 +51,14 @@
     "Reported NVDA/Chrome failures require that platform's evidence; this branch's default Windows Guidepup project uses Firefox.",
     "NVDA browse-mode tests and screen-reader cursor containment must retain AT evidence.",
     "Guidepup queue hazards removed from retained direction/version/widget captures; remote AT verification is still required.",
-    "Further review found partial original-scenario coverage for PYLD-3699/PYLD-3730 (selected-locale cursor grouping) and PYLD-3642 (widget frame versus drag handle)."
+    "Further review found partial original-scenario coverage for PYLD-3699/PYLD-3730 (selected-locale cursor grouping) and PYLD-3642 (widget frame versus drag handle).",
+    "PYLD-3581: Guidepup retired in favor of browser regressions; original reported AT behavior still requires the manual verification recorded on the ticket.",
+    "PYLD-3575: Guidepup retired in favor of browser regressions; original reported AT behavior still requires the manual verification recorded on the ticket.",
+    "PYLD-3587: Guidepup retired in favor of browser regressions; original reported AT behavior still requires the manual verification recorded on the ticket.",
+    "PYLD-3699: Guidepup retired in favor of browser regressions; original reported AT behavior still requires the manual verification recorded on the ticket.",
+    "PYLD-3730: Guidepup retired in favor of browser regressions; original reported AT behavior still requires the manual verification recorded on the ticket.",
+    "PYLD-3697: Guidepup retired in favor of browser regressions; original reported AT behavior still requires the manual verification recorded on the ticket.",
+    "PYLD-3701: Guidepup retired in favor of browser regressions; original reported AT behavior still requires the manual verification recorded on the ticket."
   ],
   "tickets": [
     {
@@ -73,14 +80,13 @@
       "report": "Payload - Media & Uploads: Screen reader focus can leave Upload and Edit Upload modals",
       "expected": "Focus is limited to overlay only, not the dimmed content behind it.",
       "reportedScreenReaders": ["VoiceOver"],
-      "coverage": "screen-reader-regression-retained",
+      "coverage": "browser-regression-with-manual-at-pending",
       "tests": [
         "WCAG.e2e.spec.ts :: should contain keyboard focus in media and nested folder modals",
-        "WCAG.e2e.spec.ts :: should isolate modal content and restore focus after nested dismissal",
-        "screen-reader.spec.ts :: should contain screen-reader traversal in bulk-upload and image-edit dialogs"
+        "WCAG.e2e.spec.ts :: should isolate modal content and restore focus after nested dismissal"
       ],
-      "limits": "Virtual cursor containment not proved by DOM focus traps; 160 moves per case definition is expensive, needs scope/bounds.",
-      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+      "limits": "Virtual cursor containment not proved by DOM focus traps; 160 moves per case definition is expensive, needs scope/bounds. Guidepup case retired by user decision; browser assertions do not prove the original virtual-cursor/speech outcome. Required manual verification is pending.",
+      "manualVerification": "Verify forward/reverse virtual-cursor progress through distinct controls in both real dialogs and no access to the background. The isolation browser test does not itself exercise the media dialogs."
     },
     {
       "ticket": "PYLD-3579",
@@ -113,13 +119,12 @@
       "report": "Payload - Admin: Required entry tooltip gains focus at the end of the page's focus order",
       "expected": "Related content is adjacent in focus order",
       "reportedScreenReaders": ["VoiceOver"],
-      "coverage": "screen-reader-regression-retained",
+      "coverage": "browser-regression-with-manual-at-pending",
       "tests": [
-        "WCAG.e2e.spec.ts :: should associate ${form} errors with their fields and focus order",
-        "screen-reader.spec.ts :: should expose validation errors next to their fields"
+        "WCAG.e2e.spec.ts :: should associate ${form} errors with their fields and focus order"
       ],
-      "limits": "Document error reading order retains its AT regression. Login error associations and keyboard order remain in the browser regression; post-submission edit-and-clear was manually verified with VoiceOver for PYLD-3613.",
-      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+      "limits": "Document error reading order retains its AT regression. Login error associations and keyboard order remain in the browser regression; post-submission edit-and-clear was manually verified with VoiceOver for PYLD-3613. Guidepup case retired by user decision; browser assertions do not prove the original virtual-cursor/speech outcome. Required manual verification is pending.",
+      "manualVerification": "On the real document create form, submit empty and verify the required title error is reachable adjacent to its field in normal forward/reverse reading order. The recorded login check is not document-form evidence."
     },
     {
       "ticket": "PYLD-3582",
@@ -153,14 +158,13 @@
       "report": "Payload - Admin: Screen reader focus can leave Folder creation/location modal",
       "expected": "Screen reader focus cannot leave the Folder create/location modal",
       "reportedScreenReaders": ["VoiceOver"],
-      "coverage": "screen-reader-regression-retained",
+      "coverage": "browser-regression-with-manual-at-pending",
       "tests": [
         "WCAG.e2e.spec.ts :: should contain keyboard focus in media and nested folder modals",
-        "WCAG.e2e.spec.ts :: should isolate modal content and restore focus after nested dismissal",
-        "screen-reader.spec.ts :: should contain screen-reader traversal in the nested folder-location modal"
+        "WCAG.e2e.spec.ts :: should isolate modal content and restore focus after nested dismissal"
       ],
-      "limits": "Nested virtual cursor containment; retain actual browse evidence.",
-      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+      "limits": "Nested virtual cursor containment; retain actual browse evidence. Guidepup case retired by user decision; browser assertions do not prove the original virtual-cursor/speech outcome. Required manual verification is pending.",
+      "manualVerification": "Verify forward/reverse virtual-cursor progress through the nested location modal without entering the parent drawer or page."
     },
     {
       "ticket": "PYLD-3596",
@@ -470,7 +474,7 @@
       "report": "Payload: Screen reader focus is not moved to the opened localization dropdown",
       "expected": "Screen reader focus is moved to the opened dropdown. The dropdown options. The dropdown is placed after the localization selection button in the focus order.",
       "reportedScreenReaders": ["VoiceOver", "NVDA"],
-      "coverage": "screen-reader-regression-retained",
+      "coverage": "browser-regression-with-manual-at-pending",
       "tests": [
         "WCAG.e2e.spec.ts :: should position a popup against its trigger inside a transformed drawer",
         "WCAG.e2e.spec.ts :: should keep an oversized popup within the viewport",
@@ -479,11 +483,10 @@
         "WCAG.e2e.spec.ts :: should close the full User menu chain when tabbing from a nested menu",
         "WCAG.e2e.spec.ts :: should restore visible focus when shift-tabbing from a nested User menu",
         "WCAG.e2e.spec.ts :: should move focus into a mobile User menu submenu",
-        "WCAG.e2e.spec.ts :: should expose nested User menu triggers as items in one menu",
-        "screen-reader.spec.ts :: should move the screen-reader cursor into every shared popup"
+        "WCAG.e2e.spec.ts :: should expose nested User menu triggers as items in one menu"
       ],
-      "limits": "Shared popup automatic virtual focus; avoid giant multi-popup debugging, split only if useful.",
-      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+      "limits": "Shared popup automatic virtual focus; avoid giant multi-popup debugging, split only if useful. Guidepup case retired by user decision; browser assertions do not prove the original virtual-cursor/speech outcome. Required manual verification is pending.",
+      "manualVerification": "Replace the five-flow sweep with representative popup-local AT arrival coverage and record localization cursor entry manually. Existing drawer-entry AT checks do not prove popup/localization behavior."
     },
     {
       "ticket": "PYLD-3699",
@@ -491,13 +494,12 @@
       "report": "Payload - Fields and RichText: Related content for a locale menu item becomes ungrouped when selected",
       "expected": "Related content for selected locale is grouped into one focus",
       "reportedScreenReaders": ["VoiceOver"],
-      "coverage": "partial",
+      "coverage": "browser-regression-with-manual-at-pending",
       "tests": [
-        "WCAG.e2e.spec.ts :: should expose the active locale as selected rather than disabled",
-        "screen-reader.spec.ts :: should announce a selected locale as one grouped item with its state"
+        "WCAG.e2e.spec.ts :: should expose the active locale as selected rather than disabled"
       ],
-      "limits": "The test counts English once in a focus capture; it does not verify one virtual-cursor stop or compare the selected and unselected locale grouping.",
-      "manualVerification": "Outstanding: reproduce the original cursor grouping or frame-keyboard scenario; the current narrower assertion is not proof of the full remedy."
+      "limits": "The test counts English once in a focus capture; it does not verify one virtual-cursor stop or compare the selected and unselected locale grouping. Guidepup case retired by user decision; browser assertions do not prove the original virtual-cursor/speech outcome. Required manual verification is pending.",
+      "manualVerification": "Verify actual selected/unselected locale browse stops and selected-state announcement on the reported platforms. Counting a word once in focus speech is not grouping evidence."
     },
     {
       "ticket": "PYLD-3700",
@@ -505,13 +507,12 @@
       "report": "Payload - Fields and RichText: Selected state for locale menu item is not announced",
       "expected": "Selected state of a chosen locale option is announced to screen reader users",
       "reportedScreenReaders": ["VoiceOver"],
-      "coverage": "screen-reader-regression-retained",
+      "coverage": "browser-regression-with-manual-at-pending",
       "tests": [
-        "WCAG.e2e.spec.ts :: should expose the active locale as selected rather than disabled",
-        "screen-reader.spec.ts :: should announce a selected locale as one grouped item with its state"
+        "WCAG.e2e.spec.ts :: should expose the active locale as selected rather than disabled"
       ],
-      "limits": "Grouping portion is real browse-cursor concern. Current focus capture/exact English occurrence doesn't itself prove one grouped stop; semantics already browser-covered.",
-      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+      "limits": "Grouping portion is real browse-cursor concern. Current focus capture/exact English occurrence doesn't itself prove one grouped stop; semantics already browser-covered. Guidepup case retired by user decision; browser assertions do not prove the original virtual-cursor/speech outcome. Required manual verification is pending.",
+      "manualVerification": "Verify actual selected/unselected locale browse stops and selected-state announcement on the reported platforms. Counting a word once in focus speech is not grouping evidence."
     },
     {
       "ticket": "PYLD-3701",
@@ -519,16 +520,15 @@
       "report": "Payload - Fields and RichText: Multiple instances - Drop down menus have incorrect focus order",
       "expected": "Focus lands on expanded menu",
       "reportedScreenReaders": ["VoiceOver"],
-      "coverage": "screen-reader-regression-retained",
+      "coverage": "browser-regression-with-manual-at-pending",
       "tests": [
         "WCAG.e2e.spec.ts :: should position a popup against its trigger inside a transformed drawer",
         "WCAG.e2e.spec.ts :: should keep an oversized popup within the viewport",
         "WCAG.e2e.spec.ts :: should keep a side submenu within the viewport",
-        "WCAG.e2e.spec.ts :: should move keyboard focus into and through the Columns dialog",
-        "screen-reader.spec.ts :: should move the screen-reader cursor into every shared popup"
+        "WCAG.e2e.spec.ts :: should move keyboard focus into and through the Columns dialog"
       ],
-      "limits": "Shared popup automatic virtual focus; avoid giant multi-popup debugging, split only if useful.",
-      "manualVerification": "Run the retained AT regression on the reported screen reader/browser; a VoiceOver pass is not NVDA evidence."
+      "limits": "Shared popup automatic virtual focus; avoid giant multi-popup debugging, split only if useful. Guidepup case retired by user decision; browser assertions do not prove the original virtual-cursor/speech outcome. Required manual verification is pending.",
+      "manualVerification": "Replace the five-flow sweep with representative popup-local AT arrival coverage and record localization cursor entry manually. Existing drawer-entry AT checks do not prove popup/localization behavior."
     },
     {
       "ticket": "PYLD-3704",
@@ -601,13 +601,12 @@
       "report": "Payload: Selected status not indicated to screen reader in locale selector",
       "expected": "The currently selected locale receives focus as one element, and that element has the selected status.",
       "reportedScreenReaders": ["VoiceOver"],
-      "coverage": "partial",
+      "coverage": "browser-regression-with-manual-at-pending",
       "tests": [
-        "WCAG.e2e.spec.ts :: should expose the active locale as selected rather than disabled",
-        "screen-reader.spec.ts :: should announce a selected locale as one grouped item with its state"
+        "WCAG.e2e.spec.ts :: should expose the active locale as selected rather than disabled"
       ],
-      "limits": "Selected-state semantics have browser coverage, but the report's one-grouped-item requirement is not verified by counting the locale name in one announcement.",
-      "manualVerification": "Outstanding: reproduce the original cursor grouping or frame-keyboard scenario; the current narrower assertion is not proof of the full remedy."
+      "limits": "Selected-state semantics have browser coverage, but the report's one-grouped-item requirement is not verified by counting the locale name in one announcement. Guidepup case retired by user decision; browser assertions do not prove the original virtual-cursor/speech outcome. Required manual verification is pending.",
+      "manualVerification": "Verify actual selected/unselected locale browse stops and selected-state announcement on the reported platforms. Counting a word once in focus speech is not grouping evidence."
     },
     {
       "ticket": "PYLD-3735",
@@ -744,18 +743,18 @@
   ],
   "remainingScreenReaderReview": {
     "date": "2026-10-21",
-    "scope": "Static review initially covered 37 expanded cases at commit 203e115335. Six were subsequently retired with explicit browser replacements and recorded manual limits; cases tracks the 31 remaining cases and retiredCases preserves all six decisions.",
+    "scope": "Static review initially covered 37 expanded cases at commit 203e115335. Eleven were subsequently retired with explicit browser replacements and recorded manual limits; cases tracks the 26 remaining cases and retiredCases preserves all eleven decisions.",
     "interpretation": "Retain means the observable outcome justifies AT evidence, not that the test has passed or proves conformance. Strengthen means current assertions have a concrete false-pass, false-failure, scope, or cursor-start risk.",
     "counts": {
       "retain-at": 11,
-      "scenario-gap": 4,
-      "strengthen-at": 16
+      "scenario-gap": 3,
+      "strengthen-at": 12
     },
     "platformInventory": {
-      "total": 31,
+      "total": 26,
       "nvdaOnly": 5,
       "voiceOverOnly": 1,
-      "both": 25,
+      "both": 20,
       "note": "On macOS the five NVDA-only cases are skipped; they are not passes."
     },
     "sharedRisks": [
@@ -778,10 +777,6 @@
       {
         "source": "test/playwright.screen-reader.config.ts",
         "finding": "The Windows project uses Firefox, while many source reports specify NVDA with Chrome. Track exact reported-platform verification separately."
-      },
-      {
-        "source": "test/a11y/screen-reader.spec.ts :: collectModalCursorStops",
-        "finding": "Eighty blind steps per modal can be slow and can pass without progress. The media test performs this for two modals; cursor progress and scope must be established."
       }
     ],
     "cases": [
@@ -856,16 +851,6 @@
         "next": "Check the initial relevant announcement and dialog arrival on the reported NVDA platform; distinguish background preceding the dialog from legitimate later context."
       },
       {
-        "test": "should announce a selected locale as one grouped item with its state",
-        "title": "should announce a selected locale as one grouped item with its state",
-        "scenario": null,
-        "screenReaders": "VoiceOver and NVDA",
-        "tickets": ["PYLD-3699", "PYLD-3700", "PYLD-3730"],
-        "decision": "scenario-gap",
-        "finding": "Counting English once in one focus capture proves neither one virtual-cursor stop nor grouping relative to the unselected locale. The selected/not-disabled state does have browser and focus-speech evidence.",
-        "next": "Retain browser state coverage for PYLD-3700; verify actual browse stops for PYLD-3699 and the grouping portion of PYLD-3730."
-      },
-      {
         "test": "should drop the ${kind} row with the screen reader active",
         "title": "should drop the Array row with the screen reader active",
         "scenario": "Array",
@@ -936,36 +921,6 @@
         "next": "Use explicit outside-editor boundaries and demonstrate the relevant region was traversed; keep actual virtual-cursor evidence."
       },
       {
-        "test": "should expose validation errors next to their fields",
-        "title": "should expose validation errors next to their fields",
-        "scenario": "document form",
-        "screenReaders": "VoiceOver and NVDA",
-        "tickets": ["PYLD-3581"],
-        "decision": "strengthen-at",
-        "finding": "The retained document case checks the original document-submission reading-order report. The helper still starts from DOM focus without first verifying the AT cursor position.",
-        "next": "Verify the AT starting field before the adjacency scan; login coverage is now browser plus recorded manual VoiceOver evidence."
-      },
-      {
-        "test": "should contain screen-reader traversal in bulk-upload and image-edit dialogs",
-        "title": "should contain screen-reader traversal in bulk-upload and image-edit dialogs",
-        "scenario": null,
-        "screenReaders": "VoiceOver and NVDA",
-        "tickets": ["PYLD-3575"],
-        "decision": "strengthen-at",
-        "finding": "The fixed 40-forward/40-backward scans do not require progress or distinct expected controls. A cursor repeating Add files or Crop can pass the positive/negative word checks. Background-name blacklists can also reject legitimate modal content.",
-        "next": "Require progress through known modal boundaries and controls, then test confinement in both directions. If unreliable, retain browser isolation checks plus explicit manual virtual-cursor verification."
-      },
-      {
-        "test": "should contain screen-reader traversal in the nested folder-location modal",
-        "title": "should contain screen-reader traversal in the nested folder-location modal",
-        "scenario": null,
-        "screenReaders": "VoiceOver and NVDA",
-        "tickets": ["PYLD-3587"],
-        "decision": "strengthen-at",
-        "finding": "Like the media scan, this can pass while repeating one in-modal item and does not demonstrate traversal through the modal.",
-        "next": "Require distinct expected locations and bounded forward/reverse coverage; retain manual AT containment evidence if automation cannot reliably reproduce it."
-      },
-      {
         "test": "should move the screen-reader cursor into the add-widget drawer upon opening",
         "title": "should move the screen-reader cursor into the add-widget drawer upon opening",
         "scenario": null,
@@ -994,16 +949,6 @@
         "decision": "strengthen-at",
         "finding": "The initial captured item is never required to be the Copy to combobox. One unrelated starting stop followed by the overwrite checkbox could satisfy the count of one.",
         "next": "First establish that the captured stop has the destination control's name and role, then count stops until the verified next field."
-      },
-      {
-        "test": "should move the screen-reader cursor into every shared popup",
-        "title": "should move the screen-reader cursor into every shared popup",
-        "scenario": null,
-        "screenReaders": "VoiceOver and NVDA",
-        "tickets": ["PYLD-3697", "PYLD-3701"],
-        "decision": "strengthen-at",
-        "finding": "The helper checks generic captured item words such as Title or Field. Those may appear in background content and do not establish popup-local arrival. Five popup flows also make one failure expensive to diagnose.",
-        "next": "Use popup-specific names/roles/context without moving focus after opening; preserve representative coverage for both localization and the shared popup implementation."
       },
       {
         "test": "should expose disabled row-menu actions to screen-reader navigation",
@@ -1184,14 +1129,91 @@
         ],
         "manualLimit": "VoiceOver cursor persistence and the real trash announcement remain unverified. The ticket remains partial; the branch-local dependency patch must be replaced before the final PR.",
         "retiredDate": "2026-10-23"
+      },
+      {
+        "test": "should announce a selected locale as one grouped item with its state",
+        "title": "should announce a selected locale as one grouped item with its state",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3699", "PYLD-3700", "PYLD-3730"],
+        "decision": "browser-plus-manual",
+        "finding": "Counting English once in one focus capture proves neither one virtual-cursor stop nor grouping relative to the unselected locale. The selected/not-disabled state does have browser and focus-speech evidence.",
+        "next": "Verify actual selected/unselected locale browse stops and selected-state announcement on the reported platforms. Counting a word once in focus speech is not grouping evidence.",
+        "replacementTests": [
+          "WCAG.e2e.spec.ts :: should expose the active locale as selected rather than disabled"
+        ],
+        "manualLimit": "Not yet verified manually: Verify actual selected/unselected locale browse stops and selected-state announcement on the reported platforms. Counting a word once in focus speech is not grouping evidence.",
+        "retiredDate": "2026-10-23"
+      },
+      {
+        "test": "should expose validation errors next to their fields",
+        "title": "should expose validation errors next to their fields",
+        "scenario": "document form",
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3581"],
+        "decision": "browser-plus-manual",
+        "finding": "The retained document case checks the original document-submission reading-order report. The helper still starts from DOM focus without first verifying the AT cursor position.",
+        "next": "On the real document create form, submit empty and verify the required title error is reachable adjacent to its field in normal forward/reverse reading order. The recorded login check is not document-form evidence.",
+        "replacementTests": [
+          "WCAG.e2e.spec.ts :: should associate ${form} errors with their fields and focus order"
+        ],
+        "manualLimit": "Not yet verified manually: On the real document create form, submit empty and verify the required title error is reachable adjacent to its field in normal forward/reverse reading order. The recorded login check is not document-form evidence.",
+        "retiredDate": "2026-10-23"
+      },
+      {
+        "test": "should contain screen-reader traversal in bulk-upload and image-edit dialogs",
+        "title": "should contain screen-reader traversal in bulk-upload and image-edit dialogs",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3575"],
+        "decision": "browser-plus-manual",
+        "finding": "The fixed 40-forward/40-backward scans do not require progress or distinct expected controls. A cursor repeating Add files or Crop can pass the positive/negative word checks. Background-name blacklists can also reject legitimate modal content.",
+        "next": "Verify forward/reverse virtual-cursor progress through distinct controls in both real dialogs and no access to the background. The isolation browser test does not itself exercise the media dialogs.",
+        "replacementTests": [
+          "WCAG.e2e.spec.ts :: should contain keyboard focus in media and nested folder modals",
+          "WCAG.e2e.spec.ts :: should isolate modal content and restore focus after nested dismissal"
+        ],
+        "manualLimit": "Not yet verified manually: Verify forward/reverse virtual-cursor progress through distinct controls in both real dialogs and no access to the background. The isolation browser test does not itself exercise the media dialogs.",
+        "retiredDate": "2026-10-23"
+      },
+      {
+        "test": "should contain screen-reader traversal in the nested folder-location modal",
+        "title": "should contain screen-reader traversal in the nested folder-location modal",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3587"],
+        "decision": "browser-plus-manual",
+        "finding": "Like the media scan, this can pass while repeating one in-modal item and does not demonstrate traversal through the modal.",
+        "next": "Verify forward/reverse virtual-cursor progress through the nested location modal without entering the parent drawer or page.",
+        "replacementTests": [
+          "WCAG.e2e.spec.ts :: should contain keyboard focus in media and nested folder modals",
+          "WCAG.e2e.spec.ts :: should isolate modal content and restore focus after nested dismissal"
+        ],
+        "manualLimit": "Not yet verified manually: Verify forward/reverse virtual-cursor progress through the nested location modal without entering the parent drawer or page.",
+        "retiredDate": "2026-10-23"
+      },
+      {
+        "test": "should move the screen-reader cursor into every shared popup",
+        "title": "should move the screen-reader cursor into every shared popup",
+        "scenario": null,
+        "screenReaders": "VoiceOver and NVDA",
+        "tickets": ["PYLD-3697", "PYLD-3701"],
+        "decision": "browser-plus-manual",
+        "finding": "The helper checks generic captured item words such as Title or Field. Those may appear in background content and do not establish popup-local arrival. Five popup flows also make one failure expensive to diagnose.",
+        "next": "Replace the five-flow sweep with representative popup-local AT arrival coverage and record localization cursor entry manually. Existing drawer-entry AT checks do not prove popup/localization behavior.",
+        "replacementTests": [
+          "WCAG.e2e.spec.ts :: should move keyboard focus into and through the Columns dialog"
+        ],
+        "manualLimit": "Not yet verified manually: Replace the five-flow sweep with representative popup-local AT arrival coverage and record localization cursor entry manually. Existing drawer-entry AT checks do not prove popup/localization behavior.",
+        "retiredDate": "2026-10-23"
       }
     ],
     "retirementShortlist": {
       "date": "2026-10-23",
       "assessed": 7,
-      "retired": 2,
-      "pending": 5,
-      "policy": "Retire only after checking replacement evidence against the original report; a browser regression does not establish virtual-cursor or speech behavior.",
+      "retired": 7,
+      "pending": 0,
+      "policy": "User authorized retirement with existing browser regressions and explicit pending manual AT verification. A browser regression does not establish virtual-cursor or speech behavior. The six ticket-linked retired cases have outstanding manual checks; the unticketed synthetic rapid-toast requirement was not retained.",
       "candidates": [
         {
           "test": "should announce both rapid toast messages",
@@ -1209,7 +1231,7 @@
           "test": "should expose validation errors next to their fields",
           "scenario": "document form",
           "tickets": ["PYLD-3581"],
-          "status": "pending-manual-evidence",
+          "status": "retired-manual-verification-pending",
           "replacementTests": [
             "WCAG.e2e.spec.ts :: should associate ${form} errors with their fields and focus order"
           ],
@@ -1218,7 +1240,7 @@
         {
           "test": "should contain screen-reader traversal in bulk-upload and image-edit dialogs",
           "tickets": ["PYLD-3575"],
-          "status": "pending-manual-evidence",
+          "status": "retired-manual-verification-pending",
           "replacementTests": [
             "WCAG.e2e.spec.ts :: should contain keyboard focus in media and nested folder modals",
             "WCAG.e2e.spec.ts :: should isolate modal content and restore focus after nested dismissal"
@@ -1228,7 +1250,7 @@
         {
           "test": "should contain screen-reader traversal in the nested folder-location modal",
           "tickets": ["PYLD-3587"],
-          "status": "pending-manual-evidence",
+          "status": "retired-manual-verification-pending",
           "replacementTests": [
             "WCAG.e2e.spec.ts :: should contain keyboard focus in media and nested folder modals",
             "WCAG.e2e.spec.ts :: should isolate modal content and restore focus after nested dismissal"
@@ -1238,7 +1260,7 @@
         {
           "test": "should announce a selected locale as one grouped item with its state",
           "tickets": ["PYLD-3699", "PYLD-3700", "PYLD-3730"],
-          "status": "pending-manual-evidence",
+          "status": "retired-manual-verification-pending",
           "replacementTests": [
             "WCAG.e2e.spec.ts :: should expose the active locale as selected rather than disabled"
           ],
@@ -1247,13 +1269,14 @@
         {
           "test": "should move the screen-reader cursor into every shared popup",
           "tickets": ["PYLD-3697", "PYLD-3701"],
-          "status": "pending-replacement",
+          "status": "retired-manual-verification-pending",
           "replacementTests": [
             "WCAG.e2e.spec.ts :: should move keyboard focus into and through the Columns dialog"
           ],
           "required": "Replace the five-flow sweep with representative popup-local AT arrival coverage and record localization cursor entry manually. Existing drawer-entry AT checks do not prove popup/localization behavior."
         }
-      ]
+      ],
+      "manualVerificationPending": 6
     }
   },
   "investigations": {

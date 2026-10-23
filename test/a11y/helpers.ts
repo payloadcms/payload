@@ -512,25 +512,6 @@ export async function navigateScreenReaderTo({
   )
 }
 
-export async function expectPopupCursorToMove({
-  expectedItem,
-  screenReader,
-  trigger,
-}: {
-  expectedItem: RegExp
-  screenReader: ScreenReaderPlaywright
-  trigger: Locator
-}) {
-  await trigger.focus()
-  const capture = await captureScreenReader({
-    action: () => trigger.press('Enter'),
-    screenReader,
-  })
-
-  expect.soft(capture.itemText).toMatch(expectedItem)
-  await trigger.page().keyboard.press('Escape')
-}
-
 export async function openWidgetDrawer({ page, serverURL }: { page: Page; serverURL: string }) {
   await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
   await new DashboardHelper(page).setEditing()
