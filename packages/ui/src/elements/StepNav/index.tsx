@@ -106,6 +106,8 @@ const StepNav: React.FC<{
   ) => {
     const StepLabel = getTranslation(item.label, i18n)
     const isCurrent = item.isCurrent ?? isLast
+    // Long labels are cut off with an ellipsis, so expose the full text on hover
+    const title = typeof StepLabel === 'string' ? StepLabel : undefined
     const itemClassName = [
       `${baseClass}__item`,
       isLast ? `${baseClass}__last` : undefined,
@@ -120,7 +122,7 @@ const StepNav: React.FC<{
           buttonStyle="ghost"
           className={itemClassName}
           el="link"
-          extraButtonProps={{ 'aria-current': isCurrent ? 'page' : false }}
+          extraButtonProps={{ 'aria-current': isCurrent ? 'page' : false, title }}
           url={item.url}
         >
           {StepLabel}
@@ -129,7 +131,7 @@ const StepNav: React.FC<{
     }
 
     return (
-      <span aria-current={isCurrent ? 'page' : undefined} className={itemClassName}>
+      <span aria-current={isCurrent ? 'page' : undefined} className={itemClassName} title={title}>
         {StepLabel}
       </span>
     )
