@@ -21,7 +21,14 @@ export function isolateObjectProperty<T extends object>(object: T, key: (keyof T
         return Reflect.get(delegate, p, receiver)
       }
       // Use target as receiver to preserve private field access (e.g., Request#headers in Node 24+)
-      return Reflect.get(target, p, target)
+      const value = Reflect.get(target, p, target)
+      // Methods must run against the target: invoked as proxy.method(), `this`
+      // would be the proxy and private field access (e.g., Request#text reading
+      // #state in undici) throws "Cannot read private member".
+      if (typeof value === 'function') {
+        return value.bind(target)
+      }
+      return value
     },
     getOwnPropertyDescriptor(target, p) {
       if (keys.includes(p as keyof T)) {
