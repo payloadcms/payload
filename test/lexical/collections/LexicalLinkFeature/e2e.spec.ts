@@ -377,6 +377,8 @@ describe('Lexical Link Feature', () => {
     await createdLink.dispatchEvent('mouseover')
     await page.getByRole('button', { name: 'Edit link', exact: true }).click()
     await expect(assetLabelField).toHaveValue('Client asset')
-    await expect(linkDrawer.locator('#field-url')).toHaveValue(finalizedURL)
+    await expect(linkDrawer.getByRole('textbox', { name: 'Enter a URL', exact: true })).toHaveValue(
+      finalizedURL,
+    )
   })
 })
