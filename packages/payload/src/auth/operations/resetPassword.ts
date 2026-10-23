@@ -103,6 +103,7 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
 
     await validatePasswordField({
       collectionConfig,
+      overrideAccess,
       password: data.password,
       req,
       user,
@@ -284,11 +285,13 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
  */
 async function validatePasswordField({
   collectionConfig,
+  overrideAccess,
   password,
   req,
   user,
 }: {
   collectionConfig: SanitizedCollectionConfig
+  overrideAccess: boolean
   password: string
   req: PayloadRequest
   user: TypedUser
@@ -310,6 +313,7 @@ async function validatePasswordField({
     data: dataToValidate,
     event: 'submit',
     operation: 'update',
+    overrideAccess,
     path: ['password'],
     preferences: { fields: {} },
     req,
