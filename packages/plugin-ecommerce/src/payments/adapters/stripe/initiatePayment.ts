@@ -97,7 +97,6 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
         customer: customer.id,
         metadata: {
           cartID: cart.id,
-          cartItemsSnapshot: JSON.stringify(flattenedCart),
           shippingAddress: shippingAddressAsString,
         },
       })

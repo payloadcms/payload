@@ -41,7 +41,6 @@ const createPaymentIntent = (overrides: Record<string, unknown> = {}) => ({
   id: 'pi_123',
   metadata: {
     cartID: 'cart-123',
-    cartItemsSnapshot: JSON.stringify([{ id: 'item-1', product: 'product-123', quantity: 1 }]),
     shippingAddress: JSON.stringify({ city: 'Test City' }),
   },
   status: 'succeeded',
@@ -201,22 +200,19 @@ describe('confirmOrder', () => {
     expect(harness.finalizeOrder).not.toHaveBeenCalled()
   })
 
-  it('should reject provider item drift before finalization', async () => {
-    const harness = createHarness()
-    mockPaymentIntentsRetrieve.mockResolvedValue(
-      createPaymentIntent({
-        metadata: {
-          ...createPaymentIntent().metadata,
-          cartItemsSnapshot: JSON.stringify([
-            { id: 'item-1', product: 'product-123', quantity: 2 },
-          ]),
-        },
-      }),
-    )
+  it('should build order items from the transaction without cart items in the metadata', async () => {
+    const items = [
+      { id: 'item-1', product: 'product-123', quantity: 1 },
+      { id: 'item-2', product: 'product-456', quantity: 3, variant: 'variant-789' },
+    ]
+    const harness = createHarness({ transaction: createTransaction({ items }) })
 
-    await expect(runConfirmation({ harness })).rejects.toThrow('items')
+    await runConfirmation({ harness })
 
-    expect(harness.finalizeOrder).not.toHaveBeenCalled()
+    expect(harness.finalizeOrder).toHaveBeenCalledWith({
+      orderData: expect.objectContaining({ items }),
+      transactionID: 'txn-123',
+    })
   })
 
   it('should log and propagate finalization failures', async () => {
