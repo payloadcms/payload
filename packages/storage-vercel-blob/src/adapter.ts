@@ -5,6 +5,7 @@ import type {
 } from '@payloadcms/plugin-cloud-storage/types'
 
 import { CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY } from 'payload'
+import { getFileContent } from 'payload/internal'
 
 import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
@@ -51,24 +52,19 @@ export function createVercelBlobAdapter({
         token,
       }),
 
-    handleUpload: async ({
-      data,
-      file: { buffer, imageSizeName, mimeType, tempFilePath },
-      req,
-      storageFilePath,
-    }) => {
-      // A processed client upload keeps the storage key from its receipt.
+    handleUpload: async ({ data, file, req, storageFilePath }) => {
+      const { imageSizeName, mimeType, tempFilePath } = file
+      // A processed client upload should not receive another random suffix.
       const isClientUpload =
         Boolean(tempFilePath) &&
         tempFilePath === req.context?.[CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY]
       const result = await uploadFile({
         access,
         addRandomSuffix: addRandomSuffix && !isClientUpload,
-        buffer,
         cacheControlMaxAge,
+        content: getFileContent(file),
         mimeType,
         storageFilePath,
-        tempFilePath,
         token,
       })
 

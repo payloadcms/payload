@@ -1,14 +1,16 @@
+import type { FileContent } from 'payload/internal'
 import type { UTApi } from 'uploadthing/server'
 
 import { APIError } from 'payload'
+import { getFileBlob } from 'payload/internal'
 import { UTFile } from 'uploadthing/server'
 
 import type { ACL } from './index.js'
 
 interface UploadFileArgs {
   acl: ACL
-  buffer: Buffer
   clientUploadContext?: unknown
+  content: FileContent
   data: Record<string, unknown>
   filename: string
   mimeType: string
@@ -17,8 +19,8 @@ interface UploadFileArgs {
 
 export async function uploadFile({
   acl,
-  buffer,
   clientUploadContext,
+  content,
   data,
   filename,
   mimeType,
@@ -34,7 +36,7 @@ export async function uploadFile({
       await utApi.deleteFiles(clientUploadContext.key)
     }
 
-    const blob = new Blob([buffer], { type: mimeType })
+    const blob = await getFileBlob(content, mimeType)
     const res = await utApi.uploadFiles(new UTFile([blob], filename), { acl })
 
     if (res.error) {

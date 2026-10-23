@@ -4,6 +4,8 @@ import type {
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
+import { getFileContent } from 'payload/internal'
+
 import type { R2Bucket } from './types.js'
 
 import { deleteFile } from './deleteFile.js'
@@ -35,10 +37,9 @@ export function createR2Adapter({
     handleUpload: ({ file, storageFilePath }) =>
       uploadFile({
         bucket,
-        buffer: file.buffer,
+        content: getFileContent(file),
         mimeType: file.mimeType,
         storageFilePath,
-        tempFilePath: file.tempFilePath,
       }),
 
     staticHandler: (req, { doc, headers, params: { clientUploadContext, filename } }) =>

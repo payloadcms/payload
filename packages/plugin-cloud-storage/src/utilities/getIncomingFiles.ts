@@ -1,5 +1,7 @@
 import type { FileData, PayloadRequest } from 'payload'
 
+import { getFileContent } from 'payload/internal'
+
 import type { File } from '../types.js'
 
 interface CloudStorageContext {
@@ -25,6 +27,7 @@ export function getIncomingFiles({
     const mainFile: File = {
       buffer: file.data,
       clientUploadContext: file.clientUploadContext,
+      content: getFileContent(file),
       filename: data.filename,
       filesize: file.size,
       mimeType: data.mimeType,
@@ -39,6 +42,7 @@ export function getIncomingFiles({
           files = files.concat([
             {
               buffer: payloadUploadSizes[imageSizeName],
+              content: getFileContent({ buffer: payloadUploadSizes[imageSizeName] }),
               filename: `${resizedFileData.filename}`,
               filesize: payloadUploadSizes[imageSizeName].length,
               imageSizeName,

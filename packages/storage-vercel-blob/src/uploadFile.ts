@@ -1,15 +1,16 @@
+import type { FileContent } from 'payload/internal'
+
 import { put } from '@vercel/blob'
-import { openAsBlob } from 'fs'
 import path from 'path'
+import { getFileBlob } from 'payload/internal'
 
 interface UploadFileArgs {
   access: 'public'
   addRandomSuffix?: boolean
-  buffer: Buffer
   cacheControlMaxAge?: number
+  content: FileContent
   mimeType: string
   storageFilePath: string
-  tempFilePath?: string
   token: string
 }
 
@@ -20,14 +21,13 @@ interface UploadFileResult {
 export async function uploadFile({
   access,
   addRandomSuffix,
-  buffer,
   cacheControlMaxAge,
+  content,
   mimeType,
   storageFilePath,
-  tempFilePath,
   token,
 }: UploadFileArgs): Promise<UploadFileResult> {
-  const body = tempFilePath ? await openAsBlob(tempFilePath) : buffer
+  const body = await getFileBlob(content, mimeType)
   const result = await put(storageFilePath, body, {
     access,
     addRandomSuffix,
