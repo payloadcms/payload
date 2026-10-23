@@ -59,6 +59,52 @@ describe('isolateObjectProperty', () => {
     })
   })
 
+  describe('spread and enumeration', () => {
+    it('should include an isolated property set on the proxy in a spread', () => {
+      const original: Record<string, any> = { b: 2 }
+      const proxy = isolateObjectProperty(original, 'a')
+
+      proxy.a = 100
+
+      expect({ ...proxy }).toEqual({ a: 100, b: 2 })
+      expect(original).toEqual({ b: 2 })
+    })
+
+    it('should include isolated properties in Object.keys and entries', () => {
+      const original = { a: 1, b: 2 }
+      const proxy = isolateObjectProperty(original, 'a')
+
+      proxy.a = 100
+
+      expect(Object.keys(proxy).sort()).toEqual(['a', 'b'])
+      expect(Object.fromEntries(Object.entries(proxy))).toEqual({ a: 100, b: 2 })
+    })
+
+    it('should report an enumerable, configurable descriptor for an isolated property not on the original', () => {
+      const original: Record<string, any> = { b: 2 }
+      const proxy = isolateObjectProperty(original, 'a')
+
+      proxy.a = 100
+
+      expect(Object.getOwnPropertyDescriptor(proxy, 'a')).toEqual({
+        configurable: true,
+        enumerable: true,
+        value: 100,
+        writable: true,
+      })
+    })
+
+    it('should not include a deleted isolated property in a spread', () => {
+      const original: Record<string, any> = { a: 1, b: 2 }
+      const proxy = isolateObjectProperty(original, 'a')
+
+      delete proxy.a
+
+      expect({ ...proxy }).toEqual({ b: 2 })
+      expect(Object.keys(proxy)).toEqual(['b'])
+    })
+  })
+
   describe('private field access (Node 24+ compatibility)', () => {
     /**
      * Class with private fields to test that the proxy correctly handles
