@@ -36,7 +36,6 @@ const createPaymentIntent = (overrides: Record<string, unknown> = {}) => ({
 
 const createAuthenticatedValidation = (overrides: Record<string, unknown> = {}) => ({
   canonicalCartID: 'cart-123',
-  cartItemsSnapshot: [{ id: 'item-1', product: 'product-123', quantity: 1 }],
   customerEmail: 'buyer@example.com',
   paymentIntent: createPaymentIntent(),
   paymentIntentID: 'pi_123',
@@ -227,44 +226,15 @@ describe('validateSettlement', () => {
     ).toThrow('currency')
   })
 
-  it('should accept relationship objects and scalar IDs as equivalent item data', () => {
+  it('should accept relationship objects as item data', () => {
     const transaction = createTransaction({
       items: [{ id: 'item-1', product: { id: 123 }, quantity: 1, variant: { id: 456 } }],
     })
 
-    expect(() =>
-      validateSettlement(
-        createAuthenticatedValidation({
-          cartItemsSnapshot: [{ id: 'item-1', product: '123', quantity: 1, variant: '456' }],
-          transaction,
-        }),
-      ),
-    ).not.toThrow()
+    expect(() => validateSettlement(createAuthenticatedValidation({ transaction }))).not.toThrow()
   })
 
-  it('should reject an item quantity mismatch', () => {
-    expect(() =>
-      validateSettlement(
-        createAuthenticatedValidation({
-          cartItemsSnapshot: [{ id: 'item-1', product: 'product-123', quantity: 2 }],
-        }),
-      ),
-    ).toThrow('items')
-  })
-
-  it('should reject an item custom-property mismatch', () => {
-    expect(() =>
-      validateSettlement(
-        createAuthenticatedValidation({
-          cartItemsSnapshot: [
-            { giftMessage: 'surprise', id: 'item-1', product: 'product-123', quantity: 1 },
-          ],
-        }),
-      ),
-    ).toThrow('items')
-  })
-
-  it('should treat a persisted null root variant as equivalent to an omitted snapshot variant', () => {
+  it('should accept a persisted null root variant', () => {
     expect(() =>
       validateSettlement(
         createAuthenticatedValidation({
@@ -280,7 +250,9 @@ describe('validateSettlement', () => {
     expect(() =>
       validateSettlement(
         createAuthenticatedValidation({
-          cartItemsSnapshot: [{ id: 'item-1', product: null, quantity: 1 }],
+          transaction: createTransaction({
+            items: [{ id: 'item-1', product: null, quantity: 1 }],
+          }),
         }),
       ),
     ).toThrow()
@@ -295,75 +267,21 @@ describe('validateSettlement', () => {
     expect(() =>
       validateSettlement(
         createAuthenticatedValidation({
-          cartItemsSnapshot: [{ id: 'item-1', product: 'product-123', quantity: 1, variant }],
-        }),
-      ),
-    ).toThrow()
-  })
-
-  it('should reject equivalent empty scalar and object relationship IDs', () => {
-    expect(() =>
-      validateSettlement(
-        createAuthenticatedValidation({
-          cartItemsSnapshot: [{ id: 'item-1', product: 'product-123', quantity: 1, variant: '' }],
           transaction: createTransaction({
-            items: [{ id: 'item-1', product: 'product-123', quantity: 1, variant: { id: '' } }],
+            items: [{ id: 'item-1', product: 'product-123', quantity: 1, variant }],
           }),
         }),
       ),
     ).toThrow()
   })
 
-  it('should preserve nested custom variant null when comparing against a missing nested key', () => {
+  it('should reject malformed transaction items', () => {
     expect(() =>
       validateSettlement(
         createAuthenticatedValidation({
-          cartItemsSnapshot: [
-            {
-              id: 'item-1',
-              product: 'product-123',
-              quantity: 1,
-              selection: { variant: null },
-            },
-          ],
-          transaction: createTransaction({
-            items: [{ id: 'item-1', product: 'product-123', quantity: 1, selection: {} }],
-          }),
+          transaction: createTransaction({ items: { quantity: 1 } }),
         }),
       ),
-    ).toThrow('items')
-  })
-
-  it('should preserve nested custom values while ignoring object key order', () => {
-    expect(() =>
-      validateSettlement(
-        createAuthenticatedValidation({
-          cartItemsSnapshot: [
-            {
-              id: 'item-1',
-              product: 'product-123',
-              quantity: 1,
-              selection: { color: 'blue', variant: null },
-            },
-          ],
-          transaction: createTransaction({
-            items: [
-              {
-                id: 'item-1',
-                product: 'product-123',
-                quantity: 1,
-                selection: { variant: null, color: 'blue' },
-              },
-            ],
-          }),
-        }),
-      ),
-    ).not.toThrow()
-  })
-
-  it('should reject malformed item metadata', () => {
-    expect(() =>
-      validateSettlement(createAuthenticatedValidation({ cartItemsSnapshot: { quantity: 1 } })),
     ).toThrow('items')
   })
 

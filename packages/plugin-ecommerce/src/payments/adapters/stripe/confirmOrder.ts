@@ -68,7 +68,6 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
 
       validateSettlement({
         canonicalCartID: data.cartID,
-        cartItemsSnapshot: transaction.items,
         customerEmail: data.customerEmail,
         paymentIntent,
         paymentIntentID,

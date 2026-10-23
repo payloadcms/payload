@@ -35,10 +35,10 @@ describe('initiatePayment', () => {
     vi.clearAllMocks()
     mockCustomersList.mockResolvedValue({ data: [{ id: 'cus-123' }] })
     mockPaymentIntentsCreate.mockResolvedValue({
-      id: 'pi_123',
       amount: 1000,
       client_secret: 'secret-123',
       currency: 'usd',
+      id: 'pi_123',
     })
   })
 

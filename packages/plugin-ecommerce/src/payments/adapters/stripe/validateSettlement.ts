@@ -24,7 +24,6 @@ type SettlementTransaction = {
 
 type SettlementValidationArgs = {
   canonicalCartID: unknown
-  cartItemsSnapshot: unknown
   customerEmail: unknown
   paymentIntent: SettlementPaymentIntent
   paymentIntentID: string
@@ -102,7 +101,6 @@ export const normalizeCartItems = (items: unknown): unknown[] => {
 
 export const validateSettlement = ({
   canonicalCartID,
-  cartItemsSnapshot,
   customerEmail,
   paymentIntent,
   paymentIntentID,
@@ -173,12 +171,7 @@ export const validateSettlement = ({
     throw new Error('Stripe currency does not match the transaction currency')
   }
 
-  const normalizedSnapshot = normalizeCartItems(cartItemsSnapshot)
-  const normalizedTransactionItems = normalizeCartItems(transaction.items)
-
-  if (stableSerialize(normalizedSnapshot) !== stableSerialize(normalizedTransactionItems)) {
-    throw new Error('Stripe cart items do not match the transaction items')
-  }
+  normalizeCartItems(transaction.items)
 
   if (paymentIntent.status !== 'succeeded') {
     throw new Error('Payment not completed.')
@@ -235,19 +228,4 @@ const normalizeValue = (value: unknown): unknown => {
   }
 
   throw new Error('Cart items contain unsupported data')
-}
-
-const stableSerialize = (value: unknown): string => {
-  if (Array.isArray(value)) {
-    return `[${value.map((entry) => stableSerialize(entry)).join(',')}]`
-  }
-
-  if (isRecord(value)) {
-    return `{${Object.keys(value)
-      .sort()
-      .map((key) => `${JSON.stringify(key)}:${stableSerialize(value[key])}`)
-      .join(',')}}`
-  }
-
-  return JSON.stringify(value)
 }
