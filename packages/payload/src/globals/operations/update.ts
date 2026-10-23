@@ -396,9 +396,9 @@ export const updateOperation = async <
       const statusStr = result._status
 
       if (
-        hasAuthorizedPublicationStatus &&
         typeof globalJSON._status === 'object' &&
-        globalJSON._status !== null
+        globalJSON._status !== null &&
+        !Array.isArray(globalJSON._status)
       ) {
         result._status = { ...globalJSON._status }
       } else {
@@ -406,7 +406,9 @@ export const updateOperation = async <
       }
 
       if (!hasAuthorizedPublicationStatus) {
-        for (const localeCode of config.localization.localeCodes) {
+        const localesToUpdate = locale === 'all' ? config.localization.localeCodes : [locale!]
+
+        for (const localeCode of localesToUpdate) {
           ;(result._status as Record<string, unknown>)[localeCode] = statusStr
         }
       }
@@ -453,13 +455,7 @@ export const updateOperation = async <
             locale: shouldDraftAllLocales ? 'all' : locale!,
             localeCodes: config.localization.localeCodes,
           })
-        } else if (
-          !isSavingDraft &&
-          result._status &&
-          typeof result._status === 'object' &&
-          !Array.isArray(result._status) &&
-          (result._status as Record<string, unknown>)[locale!] === 'published'
-        ) {
+        } else if (!isSavingDraft && locale !== 'all') {
           const currentGlobal = await payload.db.findGlobal({
             slug: globalConfig.slug,
             locale: 'all',

@@ -2,7 +2,10 @@
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import { publishSharedCollectionLocales } from './helpers/publishLocales.js'
+import {
+  publishSharedCollectionLocales,
+  publishSharedGlobalLocales,
+} from './helpers/publishLocales.js'
 import {
   allFieldsLocalizedSlug,
   defaultLocale,
@@ -10,9 +13,71 @@ import {
   publicationFieldAccessGlobalSlug,
   publicationFieldAccessSlug,
   spanishLocale,
+  spanishTitle,
 } from './shared.js'
 
 test.suite('Localized draft preservation', { config: './config.ts' }, () => {
+  test('should preserve other published collection locales when unpublishing with a pending draft', async ({
+    payload,
+  }) => {
+    const doc = await publishSharedCollectionLocales({ payload })
+
+    await payload.update({
+      overrideAccess: true,
+      collection: allFieldsLocalizedSlug,
+      id: doc.id,
+      locale: spanishLocale,
+      draft: true,
+      data: { _status: 'draft', text: 'Spanish draft' },
+    })
+
+    await payload.update({
+      overrideAccess: true,
+      collection: allFieldsLocalizedSlug,
+      id: doc.id,
+      locale: defaultLocale,
+      data: { _status: 'draft', text: 'English unpublished' },
+    })
+
+    const stored = await payload.db.findOne({
+      collection: allFieldsLocalizedSlug,
+      locale: 'all',
+      where: { id: { equals: doc.id } },
+    })
+
+    expect(stored.text.es).toBe('spanish published')
+    expect(stored._status.es).toBe('published')
+  })
+
+  test('should preserve other published global locales when unpublishing with a pending draft', async ({
+    payload,
+  }) => {
+    await publishSharedGlobalLocales({ payload })
+
+    await payload.updateGlobal({
+      overrideAccess: true,
+      slug: localizedStatusSharedGlobalSlug,
+      locale: spanishLocale,
+      draft: true,
+      data: { _status: 'draft', localizedText: 'Spanish draft' },
+    })
+
+    await payload.updateGlobal({
+      overrideAccess: true,
+      slug: localizedStatusSharedGlobalSlug,
+      locale: defaultLocale,
+      data: { _status: 'draft', localizedText: 'English unpublished' },
+    })
+
+    const stored = await payload.db.findGlobal({
+      slug: localizedStatusSharedGlobalSlug,
+      locale: 'all',
+    })
+
+    expect(stored.localizedText.es).toBe(spanishTitle)
+    expect(stored._status.es).toBe('published')
+  })
+
   test('should preserve collection status when field access denies draft status changes', async ({
     payload,
   }) => {

@@ -351,9 +351,9 @@ export const updateDocument = async <
     const statusStr = result._status
 
     if (
-      hasAuthorizedPublicationStatus &&
       typeof docWithLocales._status === 'object' &&
-      docWithLocales._status !== null
+      docWithLocales._status !== null &&
+      !Array.isArray(docWithLocales._status)
     ) {
       result._status = { ...docWithLocales._status }
     } else {
@@ -361,7 +361,9 @@ export const updateDocument = async <
     }
 
     if (!hasAuthorizedPublicationStatus) {
-      for (const localeCode of config.localization.localeCodes) {
+      const localesToUpdate = locale === 'all' ? config.localization.localeCodes : [locale]
+
+      for (const localeCode of localesToUpdate) {
         ;(result._status as Record<string, unknown>)[localeCode] = statusStr
       }
     }
@@ -410,13 +412,7 @@ export const updateDocument = async <
           locale: shouldDraftAllLocales ? 'all' : locale,
           localeCodes: config.localization.localeCodes,
         })
-      } else if (
-        !isSavingDraft &&
-        result._status &&
-        typeof result._status === 'object' &&
-        !Array.isArray(result._status) &&
-        (result._status as Record<string, unknown>)[locale] === 'published'
-      ) {
+      } else if (!isSavingDraft && locale !== 'all') {
         const currentDoc = await payload.db.findOne<DataFromCollectionSlug<TSlug>>({
           collection: collectionConfig.slug,
           locale: 'all',
