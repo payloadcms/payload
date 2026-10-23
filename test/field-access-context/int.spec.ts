@@ -3,7 +3,14 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import { childrenSlug, globalSlug, parentsSlug, readAccessLog, resetAccessLog } from './shared.js'
+import {
+  childrenSlug,
+  globalSlug,
+  ownerScopedBlockSlug,
+  parentsSlug,
+  readAccessLog,
+  resetAccessLog,
+} from './shared.js'
 
 const childIDs: (number | string)[] = []
 const parentIDs: (number | string)[] = []
@@ -285,6 +292,35 @@ test.suite('field access collection context', { config: './config.ts' }, () => {
     ).toHaveLength(0)
   })
 
+  test('should run field access of a shared block with the context of each entity that uses it', async ({
+    payload,
+  }) => {
+    const req = await createPayloadRequest({ payload })
+
+    const { permissions } = await payload.auth({
+      headers: new Headers(),
+      req,
+    })
+
+    const probePath = [
+      'fields',
+      'ownerScopedBlocks',
+      'blocks',
+      ownerScopedBlockSlug,
+      'fields',
+      'globalOnlyProbe',
+      'read',
+    ]
+
+    expect({
+      collection: canAccessPath({
+        path: probePath,
+        permissions: permissions.collections?.[parentsSlug],
+      }),
+      global: canAccessPath({ path: probePath, permissions: permissions.globals?.[globalSlug] }),
+    }).toEqual({ collection: false, global: true })
+  })
+
   test('should leave collectionSlug undefined and set globalSlug for global field access callbacks', async ({
     payload,
   }) => {
@@ -365,3 +401,25 @@ test.suite('field access collection context', { config: './config.ts' }, () => {
     ).toHaveLength(0)
   })
 })
+
+/**
+ * Reads a permission from a sanitized permissions tree, where a fully allowed branch is collapsed to `true`
+ * and a denied permission is removed
+ */
+function canAccessPath({ path, permissions }: { path: string[]; permissions: unknown }): boolean {
+  let current = permissions
+
+  for (const segment of path) {
+    if (current === true) {
+      return true
+    }
+
+    if (!current || typeof current !== 'object') {
+      return false
+    }
+
+    current = (current as Record<string, unknown>)[segment]
+  }
+
+  return current === true || (current as { permission?: boolean } | undefined)?.permission === true
+}

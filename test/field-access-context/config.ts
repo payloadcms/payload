@@ -3,6 +3,7 @@ import { fileURLToPath } from 'url'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { OwnerScopedBlock } from './blocks/OwnerScopedBlock.js'
 import { Children } from './collections/Children/index.js'
 import { Parents } from './collections/Parents/index.js'
 import { AccessContextGlobal } from './globals/AccessContextGlobal.js'
@@ -18,6 +19,7 @@ export default buildConfigWithDefaults({
         baseDir: path.resolve(dirname),
       },
     },
+    blocks: [OwnerScopedBlock],
     collections: [Parents, Children],
     globals: [AccessContextGlobal],
     typescript: {
