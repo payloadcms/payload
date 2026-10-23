@@ -48,6 +48,7 @@ export default defineConfig({
             'packages/**/*.spec.ts',
             'test/benchmark-blocks/**/*.unit.spec.ts',
             'tools/**/*.spec.ts',
+            '.github/scripts/**/*.spec.mjs',
           ],
           name: 'unit',
           environment: 'node',
