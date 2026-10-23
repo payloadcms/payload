@@ -144,8 +144,11 @@ export const FileManager: React.FC<FileManagerProps> = ({
         toast.error(t('error:invalidFileType'))
         return
       }
-      if (isNewFile && file instanceof File) {
-        setFileSrc(URL.createObjectURL(file))
+      if (isNewFile) {
+        setFilename(file?.name ?? '')
+        if (file instanceof File) {
+          setFileSrc(URL.createObjectURL(file))
+        }
       }
       setValue(file)
       setUploadControlFileUrl('')

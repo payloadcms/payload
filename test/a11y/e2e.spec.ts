@@ -527,6 +527,36 @@ test.describe('Admin accessibility', () => {
     })
   })
 
+  test.describe('Document editing with touch input', () => {
+    test.use({ hasTouch: true })
+
+    test('should clear a selected timezone with touch and keyboard and retain input focus', async ({
+      page,
+    }) => {
+      await gotoCreatePost({ page, postsURL })
+      const timezone = page.getByRole('combobox', { name: 'Timezone', exact: true }).first()
+
+      await timezone.press('ArrowDown')
+      await expect(page.getByRole('option').first()).toBeVisible()
+      await timezone.press('Enter')
+      const clear = page.getByRole('button', { name: 'Clear Timezone', exact: true })
+
+      await expect(clear).toBeVisible()
+      await clear.tap()
+      await expect(clear).toBeHidden()
+      await expect(timezone).toBeFocused()
+      await expect(page.locator('.timezone-picker .rs__single-value')).toHaveCount(0)
+
+      await timezone.press('ArrowDown')
+      await expect(page.getByRole('option').first()).toBeVisible()
+      await timezone.press('Enter')
+      await clear.focus()
+      await clear.press('Space')
+      await expect(clear).toBeHidden()
+      await expect(timezone).toBeFocused()
+    })
+  })
+
   test.describe('Complex fields', () => {
     test('should navigate tabs and reveal conditional content without losing focus', async ({
       page,
@@ -803,6 +833,25 @@ test.describe('Admin accessibility', () => {
   })
 
   test.describe('Media management', () => {
+    test('should replace a renamed local image without retaining its previous name', async ({
+      page,
+    }) => {
+      await page.goto(`${serverURL}/admin/collections/media/create`)
+      await chooseWorkflowUpload({ page })
+      const filename = page.getByLabel('File Name', { exact: true })
+      const preview = page.locator('.file-manager__selected-preview').getByRole('img')
+
+      await filename.fill('renamed-image.png')
+      await expect(preview).toHaveAccessibleName('renamed-image.png')
+      const remove = page.locator('.file-manager__remove')
+
+      await tabToWorkflowControl({ control: remove, direction: 'Shift+Tab', page })
+      await page.keyboard.press('Enter')
+      await chooseWorkflowUpload({ page })
+      await expect(filename).toHaveValue('image.png')
+      await expect(preview).toHaveAccessibleName('image.png')
+    })
+
     test('should recover from required alternative text and save an image using the keyboard', async ({
       page: workflowPage,
     }) => {
