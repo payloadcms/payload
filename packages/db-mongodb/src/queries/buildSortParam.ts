@@ -166,10 +166,12 @@ export const buildSortParam = ({
   }
 
   // We use this flag to determine if the sort is unique or not to decide whether to add a fallback sort.
-  const isUniqueSort = sort.some((item) => {
-    const field = getFieldByPath({ fields, path: item })
-    return field?.field?.unique
-  })
+  const isUniqueSort =
+    !versions &&
+    sort.some((item) => {
+      const field = getFieldByPath({ fields, path: item })
+      return field?.field?.unique
+    })
 
   // In the case of Mongo, when sorting by a field that is not unique, the results are not guaranteed to be in the same order each time.
   // So we add a fallback sort to ensure that the results are always in the same order.
