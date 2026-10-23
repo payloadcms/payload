@@ -248,6 +248,8 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
 
     return result
   } catch (error: unknown) {
+    // Logging in with the new password failed, e.g. in a `beforeLogin` hook, so remove the session
+    // it started
     if (sid) {
       await revokeSession({
         collectionConfig,
