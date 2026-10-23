@@ -82,6 +82,9 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       resolveInitializing = res
       rejectInitializing = rej
     })
+    // `connect` throws its own error when it fails, and only `beginTransaction` awaits this promise:
+    // without a handler, a failed connect on a path that opens no transaction is an unhandled rejection.
+    void initializing.catch(() => {})
 
     if (args.schemaName) {
       adapterSchema = pgSchema(args.schemaName)

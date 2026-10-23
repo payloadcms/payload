@@ -170,7 +170,7 @@ export type BaseSQLiteAdapter = {
     up: (args: MigrateUpArgs) => Promise<void>
   }[]
   push: boolean
-  rejectInitializing: () => void
+  rejectInitializing: (err?: unknown) => void
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
   resolveInitializing: () => void
