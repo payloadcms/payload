@@ -23,6 +23,7 @@ import {
   getFocusIndicatorStyle,
   gotoCreatePost,
   hasRenderedFocusIndicator,
+  isPaintedColor,
   openWorkflowDeleteDialog,
   prepareSignInPage,
   prepareWorkflowPage,
@@ -33,11 +34,6 @@ import {
   withWorkflowPosts,
   workflowTabKey,
 } from './helpers.js'
-
-// Product failures retained for the stacked remediation PR.
-const documentFormIssues =
-  'timezone picker has a hidden focusable button and unlabeled input; upload paste buttons lack names; select/block targets are too small'
-const editedDocumentIssues = `${documentFormIssues}; document navigation list contains links without list items`
 
 let postsURL: AdminUrlUtil
 let serverURL: string
@@ -153,18 +149,15 @@ test.describe('Admin accessibility', () => {
       }
       await tabToWorkflowControl({ control: posts, page })
       await expect
-        .poll(() =>
-          posts.evaluate((element) => {
-            const style = getComputedStyle(element, '::before')
+        .poll(async () => {
+          const style = await getFocusIndicatorStyle(posts, { pseudoElement: '::before' })
 
-            return (
-              style.outlineStyle !== 'none' &&
-              Number.parseFloat(style.outlineWidth) > 0 &&
-              style.outlineColor !== 'transparent' &&
-              !/rgba\([^)]*,\s*0\)$/.test(style.outlineColor)
-            )
-          }),
-        )
+          return (
+            style.outlineStyle !== 'none' &&
+            Number.parseFloat(style.outlineWidth) > 0 &&
+            isPaintedColor(style.outlineColor)
+          )
+        })
         .toBe(true)
       await page.keyboard.press('Enter')
       await expect(page).toHaveURL((url) => url.pathname === '/admin/collections/posts')
@@ -174,7 +167,6 @@ test.describe('Admin accessibility', () => {
   })
 
   test.describe('Finding content', () => {
-    // Axe checkpoint skipped: clear-search target is too small and lacks sufficient spacing.
     test('should recover from empty search results and open the matching document', async ({
       page,
     }) => {
@@ -192,7 +184,6 @@ test.describe('Admin accessibility', () => {
           await scanA11y({
             name: 'empty collection search',
             page,
-            deferred: 'clear-search button target is smaller than 24px without sufficient spacing',
           })
           await page.keyboard.press('ControlOrMeta+A')
           await page.keyboard.type(title)
@@ -215,8 +206,6 @@ test.describe('Admin accessibility', () => {
         serverURL,
       })
     })
-
-    // Axe checkpoint skipped: missing filter-panel ID and undersized column-sort targets.
     test('should sort and paginate collection results using the keyboard', async ({
       page: workflowPage,
     }) => {
@@ -240,8 +229,6 @@ test.describe('Admin accessibility', () => {
           await expect(grid.locator('tbody .cell-title')).toHaveText(posts[0].title)
           await scanA11y({
             name: 'sorted collection list',
-            deferred:
-              'filter aria-controls references a missing panel; column-sort targets are too small',
             page: workflowPage,
           })
           const next = workflowPage.getByRole('button', { name: 'Next table page', exact: true })
@@ -265,8 +252,6 @@ test.describe('Admin accessibility', () => {
         serverURL,
       })
     })
-
-    // Axe checkpoint skipped: the filter button references a missing panel ID.
     test('should apply and dismiss collection filters using the keyboard', async ({ page }) => {
       await withWorkflowPosts({
         action: async ([match]) => {
@@ -277,6 +262,18 @@ test.describe('Admin accessibility', () => {
           await expect(trigger).toHaveAttribute('aria-expanded', 'false')
           await page.keyboard.press('Enter')
           await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+          await expect(trigger).toHaveAttribute('aria-controls', /.+/)
+          const panelID = (await trigger.getAttribute('aria-controls'))!
+
+          expect(
+            await page
+              .locator('[id]')
+              .evaluateAll(
+                (elements, id) => elements.filter((element) => element.id === id).length,
+                panelID,
+              ),
+          ).toBe(1)
+          await expect(page.locator('.where-builder').locator('..')).toHaveAttribute('id', panelID)
           const add = page.getByRole('button', { name: /add filter/i }).first()
 
           await tabToWorkflowControl({ control: add, page })
@@ -286,14 +283,21 @@ test.describe('Admin accessibility', () => {
 
           await tabToWorkflowControl({ control: field, page })
           await page.keyboard.type('Title')
-          await page.keyboard.press('ArrowDown')
+          await expect(page.getByRole('option', { name: 'Title', exact: true })).toBeVisible()
+          await page.keyboard.press('Home')
           await page.keyboard.press('Enter')
           const operator = builder.getByRole('combobox', { name: 'Filter', exact: true }).first()
 
           await tabToWorkflowControl({ control: operator, page })
           await page.keyboard.type('equals')
-          await page.keyboard.press('ArrowDown')
+          const equals = page.getByRole('option', { name: 'equals', exact: true })
+
+          await expect(equals).toBeVisible()
+          await page.keyboard.press('Home')
           await page.keyboard.press('Enter')
+          await expect(
+            operator.locator('..').locator('..').locator('.rs__single-value'),
+          ).toHaveText('equals')
           const value = builder.getByRole('textbox', { name: 'Title', exact: true }).first()
 
           await tabToWorkflowControl({ control: value, page })
@@ -302,16 +306,12 @@ test.describe('Admin accessibility', () => {
 
           await expect(grid.locator('tbody tr')).toHaveCount(1)
           await expect(grid.locator('tbody .cell-title')).toHaveText(match.title)
-          await test.step.skip(
-            'focus retention: applying a collection filter should keep focus in its value input — filter refresh loses keyboard focus',
-            async () => {
-              await expect(value).toBeFocused()
-            },
-          )
+          await test.step('focus retention: applying a collection filter should keep focus in its value input', async () => {
+            await expect(value).toBeFocused()
+          })
           await scanA11y({
             name: 'collection filter builder',
             page,
-            deferred: 'filter aria-controls references the missing list-controls-where panel',
           })
           await tabToWorkflowControl({ control: trigger, direction: 'Shift+Tab', page })
           await page.keyboard.press('Enter')
@@ -327,7 +327,6 @@ test.describe('Admin accessibility', () => {
   })
 
   test.describe('Document editing', () => {
-    // Axe checkpoint skipped: timezone/upload semantics and select/block target-size findings.
     test('should create a draft through the keyboard and retain it after reload', async ({
       page: workflowPage,
     }) => {
@@ -344,7 +343,6 @@ test.describe('Admin accessibility', () => {
         await waitForFormReady(workflowPage)
         await scanA11y({
           name: 'document creation',
-          deferred: documentFormIssues,
           page: workflowPage,
         })
         const input = workflowPage
@@ -568,7 +566,6 @@ test.describe('Admin accessibility', () => {
     })
 
     for (const kind of ['Array', 'Blocks'] as const) {
-      // Axe checkpoint skipped: shared form findings and invalid document-navigation list markup.
       test(`should add, reorder and remove ${kind.toLowerCase()} rows using the keyboard`, async ({
         page,
       }) => {
@@ -648,7 +645,6 @@ test.describe('Admin accessibility', () => {
             ).toHaveValue('Second row')
             await scanA11y({
               name: `${kind} rows after keyboard changes`,
-              deferred: editedDocumentIssues,
               page,
             })
             const publish = page.getByRole('button', { name: /^Publish(?: in English)?$/ })
@@ -683,7 +679,6 @@ test.describe('Admin accessibility', () => {
   })
 
   test.describe('Relationships and drawers', () => {
-    // Axe checkpoint skipped: shared form findings and invalid document-navigation list markup.
     test('should select and remove a related post using the keyboard', async ({
       page: workflowPage,
     }) => {
@@ -705,7 +700,6 @@ test.describe('Admin accessibility', () => {
           await expect(option).toBeVisible()
           await scanA11y({
             name: 'relationship options',
-            deferred: editedDocumentIssues,
             page: workflowPage,
           })
           await workflowPage.keyboard.press('ArrowDown')
@@ -760,8 +754,6 @@ test.describe('Admin accessibility', () => {
         serverURL,
       })
     })
-
-    // Axe checkpoint skipped: unnamed upload buttons and an unlabeled timezone input.
     test('should isolate nested relationship drawers and restore focus on dismissal', async ({
       page,
     }) => {
@@ -787,10 +779,16 @@ test.describe('Admin accessibility', () => {
       await expect(page.locator('dialog[id^="doc-drawer_posts_"][open]')).toHaveCount(2)
       await expectFocusInside({ container: child, page })
       await expect(child).toHaveAccessibleName(/post/i)
+      await expect(child.locator('[data-form-ready="true"]').first()).toBeVisible()
+      const timezoneIDs = await page
+        .locator('.timezone-picker input[role="combobox"]')
+        .evaluateAll((inputs) => inputs.map((input) => input.id))
+
+      expect(timezoneIDs.length).toBeGreaterThanOrEqual(3)
+      expect(new Set(timezoneIDs).size).toBe(timezoneIDs.length)
       await expect(parent.getByRole('textbox')).toHaveCount(0)
       await scanA11y({
         name: 'nested relationship creation drawer',
-        deferred: 'upload paste buttons lack names and timezone picker input lacks a label',
         page,
       })
       await page.keyboard.press('Escape')
@@ -805,7 +803,6 @@ test.describe('Admin accessibility', () => {
   })
 
   test.describe('Media management', () => {
-    // Axe checkpoint skipped: the selected upload preview image has no alt attribute.
     test('should recover from required alternative text and save an image using the keyboard', async ({
       page: workflowPage,
     }) => {
@@ -836,7 +833,6 @@ test.describe('Admin accessibility', () => {
         )
         await scanA11y({
           name: 'invalid media upload form',
-          deferred: 'selected upload preview image has no alt attribute',
           page: workflowPage,
         })
         await tabToWorkflowControl({ control: input, page: workflowPage })
@@ -975,8 +971,6 @@ test.describe('Admin accessibility', () => {
         await cleanupModalMedia({ page: workflowPage })
       }
     })
-
-    // Bulk-upload axe checkpoint skipped: the paste button has no accessible name; the list scan runs.
     test('should open bulk upload and restore focus after cancelling', async ({ page }) => {
       await page.goto(
         formatAdminURL({ adminRoute: '/admin', path: '/collections/media', serverURL }),
@@ -991,7 +985,6 @@ test.describe('Admin accessibility', () => {
       await expectFocusInside({ container: dialog, page })
       await scanA11y({
         name: 'bulk upload dialog',
-        deferred: 'paste-from-clipboard icon button has no accessible name',
         page,
       })
       await page.keyboard.press('Escape')
@@ -1001,7 +994,6 @@ test.describe('Admin accessibility', () => {
   })
 
   test.describe('Rich-text editing', () => {
-    // Axe checkpoint skipped: shared form findings and invalid document-navigation list markup.
     test('should persist keyboard changes to a select and rich-text field', async ({
       page: workflowPage,
     }) => {
@@ -1030,7 +1022,6 @@ test.describe('Admin accessibility', () => {
           await expect(editor).toHaveAccessibleDescription(/Press Escape, then Tab or Shift\+Tab/)
           await scanA11y({
             name: 'edited rich-text form',
-            deferred: editedDocumentIssues,
             page: workflowPage,
           })
           await workflowPage.keyboard.press('Escape')
@@ -1156,7 +1147,6 @@ test.describe('Admin accessibility', () => {
   })
 
   test.describe('Publishing, versions and deletion', () => {
-    // Axe checkpoint skipped: document-navigation links lack enclosing list items.
     test('should publish a draft and inspect its version history using the keyboard', async ({
       page: workflowPage,
     }) => {
@@ -1181,7 +1171,6 @@ test.describe('Admin accessibility', () => {
           await expect(history.locator('tbody tr').first()).toBeVisible()
           await scanA11y({
             name: 'document version history',
-            deferred: 'document navigation list contains links without list items',
             page: workflowPage,
           })
           await workflowPage.goto(postsURL.edit(id))
@@ -1354,17 +1343,13 @@ test.describe('Admin accessibility', () => {
         expect((await savedNavigation).ok()).toBe(true)
         await expect(menu).toHaveAttribute('aria-expanded', 'false')
         await expect(page.locator('aside.nav')).not.toHaveClass(/nav--nav-open/)
-        await test.step.skip(
-          'focus restoration: closing the mobile sidebar should return focus to its opener — sidebar close does not restore focus to its opener',
-          async () => {
-            await expect(menu).toBeFocused()
-          },
-        )
+        await test.step('focus restoration: closing the mobile sidebar should return focus to its opener', async () => {
+          await expect(menu).toBeFocused()
+        })
       })
     }
 
-    test.skip('should keep collection list controls within a 320px viewport', async ({ page }) => {
-      // Existing list controls extend the page to approximately 399px at 320px.
+    test('should keep collection list controls within a 320px viewport', async ({ page }) => {
       await page.setViewportSize({ height: 720, width: 320 })
       await page.goto(postsURL.list)
       await expect(page.locator('.list-controls')).toBeVisible()
