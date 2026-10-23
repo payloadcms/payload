@@ -55,6 +55,7 @@ const SmallClearIndicator: React.FC<ClearIndicatorProps<OptionType, true>> = (pr
         }
       }}
       onMouseDown={(event) => event.stopPropagation()}
+      onTouchEnd={(event) => event.stopPropagation()}
       type="button"
     >
       <CircledXIcon size={24} />
