@@ -26,7 +26,10 @@ import {
 } from '../../uploads/fileVersioning/fileOperationManager.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
-import { checkDocumentLockStatus, deleteUserLocks } from '../../utilities/checkDocumentLockStatus.js'
+import {
+  checkDocumentLockStatus,
+  deleteUserLocks,
+} from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
