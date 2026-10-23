@@ -24,6 +24,7 @@ import { jsonBuildObject } from '../utilities/json.js'
 import { DistinctSymbol } from '../utilities/rawConstraint.js'
 import { resolveBlockTableName } from '../utilities/validateExistingBlockIsIdentical.js'
 import { addJoinTable } from './addJoinTable.js'
+import { blockRowPathPattern, blockTableKey } from './blockRowPath.js'
 import { getTableAlias } from './getTableAlias.js'
 import { appendFieldToStoragePath, resolveRelationshipPath } from './resolveRelationshipPath.js'
 
@@ -208,6 +209,10 @@ export const getTableColumnFromPath = ({
         }
         let blockTableColumn: TableColumn
         let newTableName: string
+        // Block tables hang off the collection, and _parent_id references that
+        // row. After an array, `tableName` is the array table.
+        const blockParentTable = parentAliasTable ?? aliasTable ?? adapter.tables[rootTableName]
+        const blockPath = blockRowPathPattern(fieldStoragePath)
 
         // handle blockType queries
         if (pathSegments[1] === 'blockType') {
@@ -222,19 +227,19 @@ export const getTableColumnFromPath = ({
 
             newTableName = resolveBlockTableName(
               block,
-              adapter.tableNameMap.get(`${tableName}_blocks_${toSnakeCase(block.slug)}`),
+              adapter.tableNameMap.get(blockTableKey(rootTableName, toSnakeCase(block.slug))),
             )
 
             const { newAliasTable } = getTableAlias({ adapter, tableName: newTableName })
 
             joins.push({
-              condition: eq(adapter.tables[tableName].id, newAliasTable._parentID),
+              condition: eq(blockParentTable.id, newAliasTable._parentID),
               table: newAliasTable,
             })
             constraints.push({
               columnName: '_path',
               table: newAliasTable,
-              value: `${constraintPath}${pathSegments[0]}`,
+              value: blockPath,
             })
           })
           return {
@@ -250,7 +255,7 @@ export const getTableColumnFromPath = ({
 
           newTableName = resolveBlockTableName(
             block,
-            adapter.tableNameMap.get(`${tableName}_blocks_${toSnakeCase(block.slug)}`),
+            adapter.tableNameMap.get(blockTableKey(rootTableName, toSnakeCase(block.slug))),
           )
 
           let result: TableColumn
@@ -258,13 +263,12 @@ export const getTableColumnFromPath = ({
           const blockSelectFields = {}
 
           let blockJoin: BuildQueryJoinAliases[0]
+          const blockJoinConditions = [
+            eq(blockParentTable.id, adapter.tables[newTableName]._parentID),
+            like(adapter.tables[newTableName]._path, blockPath),
+          ]
           if (isFieldLocalized && adapter.payload.config.localization) {
-            const conditions = [
-              eq(
-                (aliasTable || adapter.tables[tableName]).id,
-                adapter.tables[newTableName]._parentID,
-              ),
-            ]
+            const conditions = [...blockJoinConditions]
 
             if (locale !== 'all') {
               conditions.push(eq(adapter.tables[newTableName]._locale, locale))
@@ -276,10 +280,7 @@ export const getTableColumnFromPath = ({
             }
           } else {
             blockJoin = {
-              condition: eq(
-                (aliasTable || adapter.tables[tableName]).id,
-                adapter.tables[newTableName]._parentID,
-              ),
+              condition: and(...blockJoinConditions),
               table: adapter.tables[newTableName],
             }
           }
