@@ -1887,6 +1887,40 @@ describe('Uploads', () => {
       await expect(page.locator('input[name="prefix"]')).toHaveValue('should-preserve')
     })
 
+    test('should refresh conditional fields after a bulk edit before the first submit', async () => {
+      await page.goto(bulkUploadsURL.list)
+
+      const bulkUploadButton = page.locator('.list-header__title-actions button', {
+        hasText: 'Bulk Upload',
+      })
+      await bulkUploadButton.click()
+      const dropzoneInput = page.locator('.dropzone input[type="file"]')
+      await expect(dropzoneInput).toBeAttached()
+
+      await dropzoneInput.setInputFiles([
+        path.resolve(dirname, './image.png'),
+        path.resolve(dirname, './test-image.png'),
+      ])
+
+      const bulkUploadForm = page.locator('.bulk-upload--file-manager')
+      await expect(bulkUploadForm.locator('#field-alt')).toBeVisible()
+
+      await page.getByRole('button', { name: /edit all/i }).click()
+      const editAllDrawer = page.locator('.edit-many-bulk-uploads')
+      const fieldSelect = editAllDrawer.getByRole('combobox', { name: /select fields to edit/i })
+      await fieldSelect.fill('isDecorative')
+      await editAllDrawer.getByRole('option', { name: 'isDecorative' }).click()
+      await editAllDrawer.getByRole('checkbox', { name: 'isDecorative' }).check()
+      await editAllDrawer.getByRole('button', { name: /apply changes/i }).click()
+
+      await expect(bulkUploadForm.locator('#field-alt')).toBeHidden()
+
+      await bulkUploadForm
+        .locator('.bulk-upload--actions-bar__controls button:nth-of-type(2)')
+        .click()
+      await expect(bulkUploadForm.locator('#field-alt')).toBeHidden()
+    })
+
     test('should not redirect to created relationship document inside the bulk upload drawer', async () => {
       await page.goto(bulkUploadsURL.list)
 
