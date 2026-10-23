@@ -26,6 +26,7 @@ export const validateOptions: (props?: Props) => Validate =
       id: productID,
       collection: productsCollectionSlug,
       depth: 1,
+      draft: true,
       joins: {
         variants: {
           where: {
@@ -47,7 +48,8 @@ export const validateOptions: (props?: Props) => Validate =
     })
 
     // @ts-expect-error - TODO: Fix types
-    const variants = product.variants?.docs ?? []
+    const allVariants = product.variants?.docs ?? []
+    const variants = allVariants.filter((variant: any) => String(variant.id) !== String(data.id))
 
     // @ts-expect-error - TODO: Fix types
     if (values.length < product?.variantTypes?.length) {

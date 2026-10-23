@@ -216,6 +216,72 @@ test.suite('ecommerce', { config: './config.ts', resetBetweenTests: false }, () 
     expect(arTranslations?.['plugin-ecommerce']).toBeUndefined()
   })
 
+  test.describe('variant options validation', () => {
+    test('should compare against the latest draft options of other variants', async ({
+      payload,
+    }) => {
+      const variantType = await payload.create({
+        collection: 'variantTypes',
+        data: { name: 'fit', label: 'Fit' },
+        overrideAccess: true,
+      })
+
+      const [slim, regular] = await Promise.all(
+        ['slim', 'regular'].map((value) =>
+          payload.create({
+            collection: 'variantOptions',
+            data: { label: value, value, variantType: variantType.id },
+            overrideAccess: true,
+          }),
+        ),
+      )
+
+      const product = await payload.create({
+        collection: 'products',
+        data: { name: 'Jacket', enableVariants: true, variantTypes: [variantType.id] },
+        overrideAccess: true,
+      })
+
+      const variantA = await payload.create({
+        collection: 'variants',
+        data: { product: product.id, options: [slim!.id], inventory: 1, _status: 'published' },
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        id: variantA.id,
+        collection: 'variants',
+        data: { options: [regular!.id] },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      const variantB = await payload.create({
+        collection: 'variants',
+        data: { product: product.id, options: [slim!.id], inventory: 1 },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      await expect(
+        payload.update({
+          id: variantB.id,
+          collection: 'variants',
+          data: { _status: 'published' },
+          overrideAccess: true,
+        }),
+      ).resolves.toBeTruthy()
+
+      await expect(
+        payload.create({
+          collection: 'variants',
+          data: { product: product.id, options: [regular!.id], inventory: 1, _status: 'published' },
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow()
+    })
+  })
+
   test.describe('guest cart access', () => {
     test('should allow guest users to create carts', async ({ restClient }) => {
       // Create a cart without authentication
