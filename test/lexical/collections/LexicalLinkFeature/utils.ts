@@ -19,9 +19,9 @@ export async function openNestedUploadDrawer({
   await lexical.inlineToolbar.getByRole('button', { name: 'Link', exact: true }).click()
 
   const linkDrawer = page.locator('.lexical-link-edit-drawer')
-  const assetLabelField = linkDrawer.locator('#field-hyperlink__0__label')
+  const assetLabelField = linkDrawer.getByRole('textbox', { name: 'Label', exact: true })
 
-  await linkDrawer.locator('#field-url').fill(finalizedURL)
+  await linkDrawer.getByRole('textbox', { name: 'Enter a URL', exact: true }).fill(finalizedURL)
   await linkDrawer.getByRole('button', { name: 'Add Hyperlink' }).click()
   const blockDrawer = page
     .getByRole('dialog')
