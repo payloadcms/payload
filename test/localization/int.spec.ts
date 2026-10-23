@@ -96,6 +96,61 @@ describe('Localization', () => {
       createdDocuments.length = 0
     })
 
+    it('should preserve other published collection locales when unpublishing with a pending draft', async () => {
+      const doc = await publishSharedCollectionLocales({ payload })
+
+      createdDocuments.push({ id: doc.id, collection: allFieldsLocalizedSlug })
+
+      await payload.update({
+        collection: allFieldsLocalizedSlug,
+        id: doc.id,
+        locale: spanishLocale,
+        draft: true,
+        data: { _status: 'draft', text: 'Spanish draft' },
+      })
+
+      await payload.update({
+        collection: allFieldsLocalizedSlug,
+        id: doc.id,
+        locale: defaultLocale,
+        data: { _status: 'draft', text: 'English unpublished' },
+      })
+
+      const stored = await payload.db.findOne({
+        collection: allFieldsLocalizedSlug,
+        locale: 'all',
+        where: { id: { equals: doc.id } },
+      })
+
+      expect(stored.text.es).toBe('spanish published')
+      expect(stored._status.es).toBe('published')
+    })
+
+    it('should preserve other published global locales when unpublishing with a pending draft', async () => {
+      await publishSharedGlobalLocales({ payload })
+
+      await payload.updateGlobal({
+        slug: localizedStatusSharedGlobalSlug,
+        locale: spanishLocale,
+        draft: true,
+        data: { _status: 'draft', localizedText: 'Spanish draft' },
+      })
+
+      await payload.updateGlobal({
+        slug: localizedStatusSharedGlobalSlug,
+        locale: defaultLocale,
+        data: { _status: 'draft', localizedText: 'English unpublished' },
+      })
+
+      const stored = await payload.db.findGlobal({
+        slug: localizedStatusSharedGlobalSlug,
+        locale: 'all',
+      })
+
+      expect(stored.localizedText.es).toBe(spanishTitle)
+      expect(stored._status.es).toBe('published')
+    })
+
     it.each(['localized', 'shared'] as const)(
       'should preserve collection status when field access denies draft status changes during a %s edit',
       async (editType) => {

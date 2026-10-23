@@ -45,6 +45,7 @@ import {
   reconcileAllLocalesPublicationStatus,
   validateAllLocalesPublicationFlags,
 } from '../../versions/allLocalesPublicationStatus.js'
+import { getLocalizedDraftStatus } from '../../versions/drafts/getLocalizedDraftStatus.js'
 import { hasNonLocalizedDataChanged } from '../../versions/drafts/hasNonLocalizedDataChanged.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
@@ -379,8 +380,16 @@ export const updateOperation = async <
       typeof result._status === 'string'
     ) {
       const statusStr = result._status
-      result._status = {}
-      for (const localeCode of config.localization.localeCodes) {
+      result._status =
+        globalJSON._status &&
+        typeof globalJSON._status === 'object' &&
+        !Array.isArray(globalJSON._status)
+          ? { ...globalJSON._status }
+          : {}
+
+      const localesToUpdate = locale === 'all' ? config.localization.localeCodes : [locale!]
+
+      for (const localeCode of localesToUpdate) {
         ;(result._status as Record<string, unknown>)[localeCode] = statusStr
       }
     }
@@ -398,41 +407,17 @@ export const updateOperation = async <
         fields: globalConfig.fields,
       })
 
-    if (shouldDraftAllLocales && localization) {
-      if (!result._status || typeof result._status !== 'object' || Array.isArray(result._status)) {
-        result._status = {}
-      }
-
-      for (const localeCode of localization.localeCodes) {
-        ;(result._status as Record<string, unknown>)[localeCode] = 'draft'
-      }
-    } else if (
+    if (
       isSavingDraft &&
       statusFieldAccess &&
       localization &&
       hasLocalizeStatusEnabled(globalConfig)
     ) {
-      const existingStatus =
-        globalJSON._status &&
-        typeof globalJSON._status === 'object' &&
-        !Array.isArray(globalJSON._status)
-          ? globalJSON._status
-          : {}
-
-      if (locale === 'all') {
-        const statusByLocale = { ...existingStatus }
-
-        for (const localeCode of localization.localeCodes) {
-          statusByLocale[localeCode] = 'draft'
-        }
-
-        result._status = statusByLocale
-      } else {
-        result._status = {
-          ...existingStatus,
-          [locale!]: 'draft',
-        }
-      }
+      result._status = getLocalizedDraftStatus({
+        existingStatus: shouldDraftAllLocales ? result._status : globalJSON._status,
+        locale: shouldDraftAllLocales ? 'all' : locale!,
+        localeCodes: localization.localeCodes,
+      })
     }
 
     // /////////////////////////////////////
@@ -464,13 +449,7 @@ export const updateOperation = async <
           for (const localeCode of accessibleLocaleCodes) {
             result._status[localeCode] = unpublishAllLocales ? 'draft' : 'published'
           }
-        } else if (
-          !isSavingDraft &&
-          result._status &&
-          typeof result._status === 'object' &&
-          !Array.isArray(result._status) &&
-          (result._status as Record<string, unknown>)[locale!] === 'published'
-        ) {
+        } else if (!isSavingDraft && locale !== 'all') {
           currentGlobal = await payload.db.findGlobal({
             slug: globalConfig.slug,
             req,

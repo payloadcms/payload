@@ -47,6 +47,7 @@ import {
   hasAuthorizedAllLocalesPublicationStatus,
   validateAllLocalesPublicationFlags,
 } from '../../../versions/allLocalesPublicationStatus.js'
+import { getLocalizedDraftStatus } from '../../../versions/drafts/getLocalizedDraftStatus.js'
 import { hasNonLocalizedDataChanged } from '../../../versions/drafts/hasNonLocalizedDataChanged.js'
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
@@ -353,8 +354,16 @@ export const updateDocument = async <
     typeof result._status === 'string'
   ) {
     const statusStr = result._status
-    result._status = {}
-    for (const localeCode of config.localization.localeCodes) {
+    result._status =
+      docWithLocales._status &&
+      typeof docWithLocales._status === 'object' &&
+      !Array.isArray(docWithLocales._status)
+        ? { ...docWithLocales._status }
+        : {}
+
+    const localesToUpdate = locale === 'all' ? config.localization.localeCodes : [locale]
+
+    for (const localeCode of localesToUpdate) {
       ;(result._status as Record<string, unknown>)[localeCode] = statusStr
     }
   }
@@ -377,41 +386,17 @@ export const updateDocument = async <
       fields: collectionConfig.fields,
     })
 
-  if (shouldDraftAllLocales && config.localization) {
-    if (!result._status || typeof result._status !== 'object' || Array.isArray(result._status)) {
-      result._status = {}
-    }
-
-    for (const localeCode of config.localization.localeCodes) {
-      ;(result._status as Record<string, unknown>)[localeCode] = 'draft'
-    }
-  } else if (
+  if (
     isSavingDraft &&
     statusFieldAccess &&
     config.localization &&
     hasLocalizeStatusEnabled(collectionConfig)
   ) {
-    const existingStatus =
-      docWithLocales._status &&
-      typeof docWithLocales._status === 'object' &&
-      !Array.isArray(docWithLocales._status)
-        ? docWithLocales._status
-        : {}
-
-    if (locale === 'all') {
-      const statusByLocale = { ...existingStatus }
-
-      for (const localeCode of config.localization.localeCodes) {
-        statusByLocale[localeCode] = 'draft'
-      }
-
-      result._status = statusByLocale
-    } else {
-      result._status = {
-        ...existingStatus,
-        [locale]: 'draft',
-      }
-    }
+    result._status = getLocalizedDraftStatus({
+      existingStatus: shouldDraftAllLocales ? result._status : docWithLocales._status,
+      locale: shouldDraftAllLocales ? 'all' : locale,
+      localeCodes: config.localization.localeCodes,
+    })
   }
 
   if (config.localization && collectionConfig.versions) {
@@ -439,13 +424,7 @@ export const updateDocument = async <
         for (const localeCode of accessibleLocaleCodes) {
           result._status[localeCode] = unpublishAllLocales ? 'draft' : 'published'
         }
-      } else if (
-        !isSavingDraft &&
-        result._status &&
-        typeof result._status === 'object' &&
-        !Array.isArray(result._status) &&
-        (result._status as Record<string, unknown>)[locale] === 'published'
-      ) {
+      } else if (!isSavingDraft && locale !== 'all') {
         currentDoc = await payload.db.findOne<DataFromCollectionSlug<TSlug>>({
           collection: collectionConfig.slug,
           locale: 'all',
