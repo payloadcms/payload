@@ -311,6 +311,50 @@ describe('getFileFromUploadInstructions', () => {
     expect(handler).not.toHaveBeenCalled()
   })
 
+  it('should pass signed adapterData to the handler', async () => {
+    const handler = vi.fn(async () => new Response(Buffer.alloc(18), { status: 200 }))
+    const req = createReq([handler])
+    const file = createUploadReferenceFile()
+    file.uploadReference.signedReceipt = JSON.stringify({
+      ...JSON.parse(file.uploadReference.signedReceipt as string),
+      adapterData: { providerUploadID: 'provider-1' },
+    })
+
+    const result = await getFileFromUploadInstructions({ collectionSlug: 'media', file, req })
+
+    tempFilesToClean.push(result.tempFilePath!)
+    expect(handler).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        params: expect.objectContaining({
+          uploadReference: expect.objectContaining({
+            adapterData: { providerUploadID: 'provider-1' },
+          }),
+        }),
+      }),
+    )
+  })
+
+  it('should keep prefix and _objectKey from the receipt when adapterData contains them', async () => {
+    const handler = vi.fn(async () => new Response(Buffer.alloc(18), { status: 200 }))
+    const req = createReq([handler])
+    const file = createUploadReferenceFile()
+    file.uploadReference.signedReceipt = JSON.stringify({
+      ...JSON.parse(file.uploadReference.signedReceipt as string),
+      adapterData: { _objectKey: 'other-upload', prefix: 'private' },
+    })
+
+    const result = await getFileFromUploadInstructions({ collectionSlug: 'media', file, req })
+
+    tempFilesToClean.push(result.tempFilePath!)
+    expect(result.uploadReference).toEqual({
+      _objectKey: 'upload-1',
+      adapterData: { _objectKey: 'other-upload', prefix: 'private' },
+      prefix: '',
+      signedReceipt: expect.any(String),
+    })
+  })
+
   it('fetches only a bounded header for an image with no configured adjustments', async () => {
     const handler = vi.fn(async (handlerReq: PayloadRequest) => {
       expect(handlerReq.headers.get('range')).toBe(`bytes=0-${HEADER_PROBE_BYTE_LENGTH - 1}`)
