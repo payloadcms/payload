@@ -19,9 +19,10 @@ export async function openNestedUploadDrawer({
   await lexical.inlineToolbar.getByRole('button', { name: 'Link', exact: true }).click()
 
   const linkDrawer = page.locator('.lexical-link-edit-drawer')
-  const assetLabelField = linkDrawer.locator('#field-hyperlink__0__label')
+  // The nested drawer makes this parent inert; label queries still allow checking its stored value.
+  const assetLabelField = linkDrawer.getByLabel('Label', { exact: true })
 
-  await linkDrawer.locator('#field-url').fill(finalizedURL)
+  await linkDrawer.getByRole('textbox', { name: 'Enter a URL', exact: true }).fill(finalizedURL)
   await linkDrawer.getByRole('button', { name: 'Add Hyperlink' }).click()
   const blockDrawer = page
     .getByRole('dialog')

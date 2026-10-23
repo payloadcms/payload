@@ -105,6 +105,7 @@
     "reinstall": "pnpm clean:all && pnpm install",
     "release-bump": "pnpm --filter releaser release-bump",
     "release-ci": "pnpm --filter releaser release-ci",
+    "release-sbom": "pnpm --filter releaser release-sbom",
     "runts": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" node --no-deprecation --no-experimental-strip-types --import @swc-node/register/esm-register",
     "script:audit": "pnpm audit -P",
     "script:audit:critical": "pnpm audit -P --audit-level critical",
