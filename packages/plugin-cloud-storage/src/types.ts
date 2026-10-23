@@ -35,6 +35,8 @@ export type UploadReference = {
   _objectKey?: string
   /** Data the adapter signed into the receipt with `resolveSignedURLKey`. Not stored on the document. */
   adapterData?: Record<string, unknown>
+  /** Fields the client added to `uploadReference`. Not verified; check them before use. */
+  clientData?: Record<string, unknown>
   prefix: string
   signedReceipt: `${string}.${string}`
 }

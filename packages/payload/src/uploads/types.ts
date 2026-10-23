@@ -408,7 +408,8 @@ export type UploadInstructionsCapability = {
    * after six hours. Sign it with `resolveSignedURLKey` from
    * `@payloadcms/plugin-cloud-storage/utilities` and return its `uploadReference` from `generate`.
    * Payload rebuilds `uploadReference` from the verified receipt, so handlers receive only
-   * `_objectKey`, `prefix`, `signedReceipt`, and any signed `adapterData`.
+   * `_objectKey`, `prefix`, `signedReceipt`, any signed `adapterData`, and any unverified
+   * `clientData` the client added.
    *
    * Client uploads keep an `original` and file history only when a receipt is verified.
    */
