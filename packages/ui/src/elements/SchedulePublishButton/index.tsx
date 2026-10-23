@@ -46,13 +46,13 @@ export const SchedulePublishButton: React.FC<{ disabled?: boolean }> = ({ disabl
 
   const canSchedulePublish = Boolean(
     scheduledPublishEnabled &&
-      hasPublishPermission &&
-      (globalSlug || (collectionSlug && id)) &&
-      (hasAutosave || !modified) &&
-      // The job runs with no branch on its request, so it would publish main's copy
-      // of the document rather than the branch's (§18). Not offered on a branch at
-      // all; `schedulePublishHandler` refuses it server-side too.
-      !branch,
+    hasPublishPermission &&
+    (globalSlug || (collectionSlug && id)) &&
+    (hasAutosave || !modified) &&
+    // The job runs with no branch on its request, so it would publish main's copy
+    // of the document rather than the branch's (§18). Not offered on a branch at
+    // all; `schedulePublishHandler` refuses it server-side too.
+    !branch,
   )
 
   const drawerSlug = `schedule-publish-${id}`

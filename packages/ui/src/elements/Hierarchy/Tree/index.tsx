@@ -174,6 +174,7 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
   // Fill the cache during render, so children find initialData on their first render. Compares the
   // inputs like useMemo would, since a useMemo used only for its side effect isn't guaranteed to run.
   const initialDataInputs = [
+    branch,
     initialData,
     filterByCollections,
     parentFieldName,
