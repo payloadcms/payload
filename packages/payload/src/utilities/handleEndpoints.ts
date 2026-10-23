@@ -1,4 +1,3 @@
-import { status as httpStatus } from 'http-status'
 import { match } from 'path-to-regexp'
 
 import type { Collection } from '../collections/config/types.js'
@@ -10,6 +9,7 @@ import type { PayloadRequest } from '../types/index.js'
 import { createPayloadRequestFromWebRequest } from './createPayloadRequestFromWebRequest.js'
 import { formatAdminURL, stripTrailingSlash } from './formatAdminURL.js'
 import { headersWithCors } from './headersWithCors.js'
+import { httpStatus } from './httpStatus.js'
 import { mergeHeaders } from './mergeHeaders.js'
 import { routeError } from './routeError.js'
 

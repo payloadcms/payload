@@ -94,7 +94,7 @@ export type CreatePayloadRequestArgs = {
   payload: Payload
   req?: Partial<PayloadRequest>
   urlSuffix?: string
-  user?: User
+  user?: null | User
 }
 
 type CreatePayloadRequest = (args: CreatePayloadRequestArgs) => Promise<PayloadRequest>
@@ -105,7 +105,7 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
   fallbackLocale,
   locale: localeArg,
   payload,
-  req = {} as PayloadRequest,
+  req = {},
   urlSuffix,
   user,
 }): Promise<PayloadRequest> => {
@@ -149,7 +149,7 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
   localReq.payload = payload
   localReq.i18n = i18n
   localReq.t = i18n.t
-  localReq.user = user || localReq?.user || null
+  localReq.user = user === undefined ? (localReq?.user ?? null) : user
 
   // Ensure user.collection is set for auth-related access control
   // TODO (4.0): Instead of silently falling back, throw an error if user.collection is missing

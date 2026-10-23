@@ -1,10 +1,10 @@
 'use client'
-import type { CheckboxFieldLabelClientComponent } from 'payload'
+import type { CheckboxFieldLabelClientProps } from 'payload'
 
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomCheckboxFieldLabelClient: CheckboxFieldLabelClientComponent = ({
+export const CustomCheckboxFieldLabelClient: React.FC<CheckboxFieldLabelClientProps> = ({
   field,
   path,
 }) => {

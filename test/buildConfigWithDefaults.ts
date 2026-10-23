@@ -25,6 +25,7 @@ import {
   UnorderedListFeature,
   UploadFeature,
 } from '@payloadcms/richtext-lexical'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import { buildConfig } from 'payload'
 import { de } from 'payload/i18n/de'
 import { en } from 'payload/i18n/en'
@@ -48,6 +49,7 @@ import { testEmailAdapter } from './testEmailAdapter.js'
 type BuildConfigWithDefaultsArgs = {
   config: Partial<Config>
   disableAutoLogin?: boolean
+  disableMCP?: boolean
   seed?: SeedFunction
   suite: string
 }
@@ -55,6 +57,7 @@ type BuildConfigWithDefaultsArgs = {
 export async function buildConfigWithDefaults({
   config: testConfig,
   disableAutoLogin,
+  disableMCP,
   seed,
   suite,
 }: BuildConfigWithDefaultsArgs): Promise<SanitizedConfig> {
@@ -145,7 +148,6 @@ export async function buildConfigWithDefaults({
     }),
     email: testEmailAdapter,
     secret: 'TEST_SECRET',
-    sharp,
     telemetry: false,
     ...testConfig,
     endpoints: [
@@ -194,8 +196,19 @@ export async function buildConfigWithDefaults({
   // Auto-add the MCP plugin so every test suite exercises it. Suites that need
   // to configure it explicitly add their own `mcpPlugin({...})` call.
   const hasMcpPlugin = (config.plugins ?? []).some((p) => p.slug === '@payloadcms/plugin-mcp')
-  if (!hasMcpPlugin) {
+  if (!disableMCP && !hasMcpPlugin) {
     config.plugins = [...(config.plugins ?? []), mcpPlugin({})]
+  }
+
+  // Auto-register the Sharp transformer so every test suite keeps its existing
+  // upload-time image processing (variants/resizeOptions/crop/focalPoint).
+  // Suites that need to configure `upload.transformers` themselves (e.g. to add
+  // a custom slug or fixture transformers) set their own array, which wins here.
+  if (!config.upload) {
+    config.upload = {}
+  }
+  if (!config.upload.transformers) {
+    config.upload.transformers = [sharpTransformer({ sharp })]
   }
 
   if (config.cli !== false) {

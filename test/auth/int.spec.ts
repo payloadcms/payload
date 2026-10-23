@@ -22,7 +22,7 @@ import { email as emailValidation } from 'payload/shared'
 import { v4 as uuid } from 'uuid'
 import { expect, vitest } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { transformForWrite } from '../../packages/drizzle/src/transform/write/index.js'
@@ -628,7 +628,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       try {
         traverseFields({ fields: [], fillEmpty: false, ref: sharedData })
         transformForWrite({
-          adapter: payload.db as DrizzleAdapter,
+          adapter: payload.db,
           data: drizzleData,
           fields: [],
           tableName: 'session_users',
@@ -1505,8 +1505,8 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         const userEmail = 'lock@me.com'
 
         const tryLogin = async (
-          success?: boolean,
-          { restClient }: { restClient: NextRESTClient },
+          success: boolean | undefined,
+          { restClient }: { restClient: RESTClient },
         ) => {
           const res = await restClient.POST(`/${slug}/login`, {
             body: JSON.stringify(
@@ -2156,6 +2156,8 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         .map((field) => (field as FieldAffectingData).name)
 
       expect(authFields).toMatchObject([
+        'createdBy',
+        'updatedBy',
         'updatedAt',
         'createdAt',
         'email',
@@ -3072,7 +3074,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       expect(decodedRefreshed.sid).toStrictEqual(decoded.sid)
 
       expect(new Date(matchedSession?.expiresAt as unknown as string).getTime()).toBeLessThan(
-        new Date(matchedRefreshedSession?.expiresAt as unknown as string).getTime(),
+        new Date(matchedRefreshedSession?.expiresAt).getTime(),
       )
     })
 

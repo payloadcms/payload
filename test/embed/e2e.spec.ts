@@ -18,7 +18,7 @@ test.describe('embed mode', () => {
   let context: BrowserContext
   let url: AdminUrlUtil
 
-  const userMenu = () => page.locator('button[aria-label="Account"]')
+  const userMenu = () => page.getByRole('button', { name: /^Account(?::|$)/ })
 
   const getEmbedCookie = async () =>
     (await context.cookies()).find((cookie) => cookie.name === embedCookieName)

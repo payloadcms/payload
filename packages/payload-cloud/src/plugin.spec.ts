@@ -184,14 +184,15 @@ describe('plugin', () => {
       )
 
       expect(globalInstance).toBeDefined()
+      expect(globalInstance?.authorship).toBe(false)
       expect(globalInstance?.fields).toStrictEqual([
         {
           name: 'instance',
           type: 'text',
           required: true,
         },
-      ]),
-        expect(globalInstance?.admin?.hidden).toStrictEqual(true)
+      ])
+      expect(globalInstance?.admin?.hidden).toStrictEqual(true)
     })
     // TO-DO: I managed to mock findGlobal, but not generateRandomString
     test.skip('if autoRun is not set, should return default cron job', async () => {

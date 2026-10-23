@@ -1,5 +1,6 @@
 'use client'
-import type { GroupFieldClientComponent } from 'payload'
+import type { GroupFieldClientProps } from 'payload'
+import type React from 'react'
 
 import { RichTextViewProvider } from '@payloadcms/richtext-lexical/client'
 import { GroupField } from '@payloadcms/ui'
@@ -19,7 +20,7 @@ import { GroupField } from '@payloadcms/ui'
  * - The field reads views["frontend"] directly, gets undefined, and falls back to base
  *   _admin config instead of views.default.admin — so hideGutter from the default view is lost.
  */
-export const ViewProviderFallbackWrapper: GroupFieldClientComponent = (props) => {
+export const ViewProviderFallbackWrapper: React.FC<GroupFieldClientProps> = (props) => {
   return (
     <RichTextViewProvider currentView="frontend" inheritable={true}>
       <GroupField {...props} />

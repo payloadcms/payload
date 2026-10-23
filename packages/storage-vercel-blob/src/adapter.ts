@@ -1,6 +1,7 @@
 import type {
   Adapter,
   ClientUploadsConfig,
+  DeleteFile,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
@@ -15,6 +16,7 @@ import { assertClientUploadAllowed, createClientUploadReceipt } from 'payload/in
 import type { VercelBlobCollectionSource } from './authorizeFileOverwrite.js'
 
 import { authorizeClientOverwrite } from './authorizeFileOverwrite.js'
+import { copyVercelBlobFile } from './copyFile.js'
 import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
@@ -42,9 +44,15 @@ export function createVercelBlobAdapter({
   useCompositePrefixes = false,
 }: CreateVercelBlobAdapterArgs): Adapter {
   const clientUploadsAccess = typeof clientUploads === 'object' ? clientUploads.access : undefined
+  const deleteStoredFile: DeleteFile = ({ storageFilePath }) =>
+    deleteFile({ baseUrl, storageFilePath, token })
 
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'vercel-blob',
+
+    copyFile: ({ from, req, to }) =>
+      copyVercelBlobFile({ access, cacheControlMaxAge, from, req, to, token }),
+    deleteFile: deleteStoredFile,
 
     uploadInstructions: {
       adminHandler: {
@@ -75,15 +83,17 @@ export function createVercelBlobAdapter({
           filename,
           useCompositePrefixes,
         })
-        const allowOverwrite = await authorizeClientOverwrite({
-          collectionPrefix: prefix,
-          collectionSources,
-          overrideAccess,
-          req,
-          requestedCollectionSlug: collectionSlug,
-          requestedFilename: requested.sanitizedFilename,
-          requestedStorageFilePath: requested.storageFilePath,
-        })
+        const allowOverwrite = collection.versions
+          ? false
+          : await authorizeClientOverwrite({
+              collectionPrefix: prefix,
+              collectionSources,
+              overrideAccess,
+              req,
+              requestedCollectionSlug: collectionSlug,
+              requestedFilename: requested.sanitizedFilename,
+              requestedStorageFilePath: requested.storageFilePath,
+            })
         const resolved = allowOverwrite
           ? {
               ...requested,
@@ -144,12 +154,7 @@ export function createVercelBlobAdapter({
         useCompositePrefixes,
       }),
 
-    handleDelete: ({ storageFilePath }) =>
-      deleteFile({
-        baseUrl,
-        storageFilePath,
-        token,
-      }),
+    handleDelete: deleteStoredFile,
 
     handleUpload: async ({ data, file: { buffer, mimeType }, storageFilePath }) => {
       const result = await uploadFile({
@@ -169,7 +174,7 @@ export function createVercelBlobAdapter({
       return data
     },
 
-    staticHandler: (req, { doc, headers, params: { filename, uploadReference } }) =>
+    staticHandler: (req, { doc, headers, params: { filename, operation, uploadReference } }) =>
       getFile({
         baseUrl,
         cacheControlMaxAge,
@@ -178,6 +183,7 @@ export function createVercelBlobAdapter({
         doc,
         filename,
         incomingHeaders: headers,
+        operation,
         req,
         token,
         uploadReference,

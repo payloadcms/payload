@@ -16,6 +16,8 @@ export const appendUploadSelectFields = ({
     return
   }
 
+  /** `filename` identifies a populated upload and supplies useful thumbnail alt text. */
+  select.filename = true
   select.mimeType = true
   select.thumbnailURL = true
 
@@ -23,20 +25,20 @@ export const appendUploadSelectFields = ({
     select.updatedAt = true
   }
 
-  if (collectionConfig.upload.imageSizes && collectionConfig.upload.imageSizes.length > 0) {
+  if (collectionConfig.upload.variants && collectionConfig.upload.variants.length > 0) {
     if (
       collectionConfig.upload.adminThumbnail &&
       typeof collectionConfig.upload.adminThumbnail === 'string'
     ) {
       /** Only return image size properties that are required to generate the adminThumbnailURL */
-      select.sizes = {
+      select.variants = {
         [collectionConfig.upload.adminThumbnail]: {
           filename: true,
         },
       }
     } else {
       /** Only return image size properties that are required for thumbnails */
-      select.sizes = collectionConfig.upload.imageSizes.reduce((acc, imageSizeConfig) => {
+      select.variants = collectionConfig.upload.variants.reduce((acc, imageSizeConfig) => {
         return {
           ...acc,
           [imageSizeConfig.name]: {

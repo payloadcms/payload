@@ -20,21 +20,18 @@ fi
 
 # Format based on file type
 case "$FILE" in
-  */package.json)
-    pnpm sort-package-json "$FILE" >/dev/null 2>&1
-    ;;
-  *.yml|*.json)
-    pnpm prettier --write "$FILE" >/dev/null 2>&1
+  *.cjs|*.css|*.cts|*.graphql|*.html|*.json|*.jsonc|*.mjs|*.mts|*.scss|*.toml|*.yaml|*.yml|*/.swcrc)
+    pnpm oxfmt "$FILE" >/dev/null 2>&1
     ;;
   *.md|*.mdx)
-    pnpm prettier --write "$FILE" >/dev/null 2>&1
+    pnpm oxfmt "$FILE" >/dev/null 2>&1
     if command -v markdownlint >/dev/null 2>&1; then
       markdownlint -i node_modules "$FILE" >/dev/null 2>&1
     fi
     ;;
   *.js|*.jsx|*.ts|*.tsx)
-    pnpm eslint --flag v10_config_lookup_from_file --cache --fix "$FILE" >/dev/null 2>&1
-    pnpm prettier --write "$FILE" >/dev/null 2>&1
+    pnpm oxlint --fix --no-error-on-unmatched-pattern "$FILE" >/dev/null 2>&1
+    pnpm oxfmt "$FILE" >/dev/null 2>&1
     ;;
 esac
 

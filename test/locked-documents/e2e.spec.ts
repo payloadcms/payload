@@ -211,9 +211,21 @@ describe('Locked Documents', () => {
 
     test('should only allow bulk delete on unlocked documents on current page', async () => {
       await page.goto(postsUrl.list)
+      const grid = page.getByRole('grid')
+      const lockedRow = grid.getByRole('row').filter({ has: page.locator('.locked') })
+      const selectableRows = grid.getByRole('row').filter({
+        has: page.locator('.select-row__checkbox'),
+      })
+
+      await expect(lockedRow).toHaveCount(1)
+      await expect(lockedRow).not.toHaveAttribute('aria-selected')
+      await expect(selectableRows).toHaveCount(2)
+      await expect(selectableRows.nth(0)).toHaveAttribute('aria-selected', 'false')
       await page.locator('input#select-all').click()
+      await expect(lockedRow).not.toHaveAttribute('aria-selected')
+      await expect(selectableRows.nth(0)).toHaveAttribute('aria-selected', 'true')
       // Should be partial since one doc is locked and cannot be selected
-      await expect(page.locator('.select-all .checkbox-input__icon.partial')).toBeVisible()
+      await expect(page.locator('input#select-all')).toHaveJSProperty('indeterminate', true)
       await page.locator('.delete-documents__toggle').click()
       await expect(page.locator('#confirm-delete-many-docs .dialog__body p')).toHaveText(
         'You are about to delete 2 Posts',
@@ -290,7 +302,7 @@ describe('Locked Documents', () => {
       const bulkText = 'Bulk update title'
       await page.locator('input#select-all').click()
       // Should be partial since one doc is locked and cannot be selected
-      await expect(page.locator('.select-all .checkbox-input__icon.partial')).toBeVisible()
+      await expect(page.locator('input#select-all')).toHaveJSProperty('indeterminate', true)
       await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
       await page.locator('.edit-many__toggle').click()
 
@@ -512,7 +524,7 @@ describe('Locked Documents', () => {
 
       expect(lockedDocs.docs.length).toBe(1)
 
-      await page.locator('a[aria-label="API"]').click()
+      await page.getByRole('link', { name: 'API', exact: true }).click()
 
       // Locate the modal container
       const modalContainer = page.locator('.payload__modal-container')
@@ -1443,23 +1455,23 @@ describe('Locked Documents', () => {
     beforeEach(async ({ browser }, testInfo) => {
       testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
-      simpleDoc = (await payload.create({
+      simpleDoc = await payload.create({
         collection: 'simple',
         data: {
           fieldA: 'Original A',
           fieldB: 'Original B',
         },
         overrideAccess: true,
-      })) as unknown as Simple
+      })
 
-      simpleWithVersionsDoc = (await payload.create({
+      simpleWithVersionsDoc = await payload.create({
         collection: 'simple-with-versions',
         data: {
           fieldA: 'Original A',
           fieldB: 'Original B',
         },
         overrideAccess: true,
-      })) as unknown as SimpleWithVersion
+      })
 
       // Create a second browser context for user 2 (user 1 uses the parent test's page)
       user2Context = await browser.newContext()
@@ -1742,14 +1754,14 @@ describe('Locked Documents', () => {
         const createdAutosaveIDs: string[] = []
 
         // Create an autosave document
-        const autosaveDoc = (await payload.create({
+        const autosaveDoc = await payload.create({
           collection: 'autosave',
           data: {
             fieldA: 'Initial Value',
             fieldB: 'Initial Value B',
           },
           overrideAccess: true,
-        })) as unknown as Autosave
+        })
 
         createdAutosaveIDs.push(autosaveDoc.id)
 
@@ -2198,7 +2210,7 @@ async function createPageDoc(data: Partial<PageType>): Promise<PageType> {
     collection: 'pages',
     data,
     overrideAccess: true,
-  }) as unknown as Promise<PageType>
+  })
 }
 
 async function createPostDoc(data: Partial<Post>): Promise<Post> {
@@ -2206,7 +2218,7 @@ async function createPostDoc(data: Partial<Post>): Promise<Post> {
     collection: 'posts',
     data,
     overrideAccess: true,
-  }) as unknown as Promise<Post>
+  })
 }
 
 async function createTestDoc(data: Partial<Test>): Promise<Test> {
@@ -2214,5 +2226,5 @@ async function createTestDoc(data: Partial<Test>): Promise<Test> {
     collection: 'tests',
     data,
     overrideAccess: true,
-  }) as unknown as Promise<Test>
+  })
 }

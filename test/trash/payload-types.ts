@@ -172,6 +172,14 @@ export interface Page {
   title?: string | null;
   relatedPosts?: (string | Post)[] | null;
   featuredPost?: (string | null) | Post;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -186,41 +194,14 @@ export interface Post {
   localizedField?: string | null;
   richText?: LexicalRichText<LexicalNodes_03D967D2> | null;
   richTextInTab?: LexicalRichText<LexicalNodes_03D967D2> | null;
-  updatedAt: string;
-  createdAt: string;
-  deletedAt?: string | null;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "registrations".
- */
-export interface Registration {
-  id: string;
-  title?: string | null;
-  post: string | Post;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "restricted-collection".
- */
-export interface RestrictedCollection {
-  id: string;
-  title?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  deletedAt?: string | null;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "differentiated-trash-collection".
- */
-export interface DifferentiatedTrashCollection {
-  id: string;
-  title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -234,6 +215,14 @@ export interface User {
   id: string;
   name?: string | null;
   roles?: ('is_user' | 'is_admin')[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -242,6 +231,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -253,6 +243,65 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "registrations".
+ */
+export interface Registration {
+  id: string;
+  title?: string | null;
+  post: string | Post;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-collection".
+ */
+export interface RestrictedCollection {
+  id: string;
+  title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "differentiated-trash-collection".
+ */
+export interface DifferentiatedTrashCollection {
+  id: string;
+  title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -352,6 +401,8 @@ export interface PagesSelect<T extends boolean = true> {
   title?: T;
   relatedPosts?: T;
   featuredPost?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -365,6 +416,8 @@ export interface PostsSelect<T extends boolean = true> {
   localizedField?: T;
   richText?: T;
   richTextInTab?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -377,6 +430,8 @@ export interface PostsSelect<T extends boolean = true> {
 export interface RegistrationsSelect<T extends boolean = true> {
   title?: T;
   post?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -386,6 +441,8 @@ export interface RegistrationsSelect<T extends boolean = true> {
  */
 export interface RestrictedCollectionSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -397,6 +454,8 @@ export interface RestrictedCollectionSelect<T extends boolean = true> {
  */
 export interface DifferentiatedTrashCollectionSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -409,6 +468,8 @@ export interface DifferentiatedTrashCollectionSelect<T extends boolean = true> {
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
   roles?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -417,6 +478,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:

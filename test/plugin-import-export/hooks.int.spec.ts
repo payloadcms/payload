@@ -5,7 +5,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
@@ -923,7 +923,7 @@ test.suite('@payloadcms/plugin-import-export — hooks', { config: './config.ts'
       formFields?: Record<string, unknown>
       id?: string
       postID: number | string
-      restClient: NextRESTClient
+      restClient: RESTClient
     }) => {
       const response = await restClient.POST(`/${postsWithHooksExportSlug}/download`, {
         body: JSON.stringify({

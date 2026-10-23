@@ -65,7 +65,6 @@ export const DefaultDocumentTab: React.FC<{
   return (
     <DocumentTabLink
       adminRoute={req.payload.config.routes.admin}
-      ariaLabel={labelToRender}
       baseClass={baseClass}
       href={href}
       isActive={isActive}

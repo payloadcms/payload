@@ -10,6 +10,7 @@ import { sanitizePathSegment } from '../utilities/sanitizePathSegment.js'
 
 export type ScalarWhereField = {
   field: FlattenedField
+  isLocalized?: boolean
   isUUID: boolean
   type: 'scalar'
 }
@@ -31,7 +32,7 @@ export type PolymorphicJoinWherePlan = Map<string, WherePathPlan>
  * whether the path uses a scalar column or a has-many select value table. A field may be absent
  * from some target collections; those branches compare against SQL NULL or an empty JSON array.
  *
- * Paths are marked as invalid when their storage shapes conflict, require localized or separate-row
+ * Paths are marked as invalid when their storage shapes conflict, require separate-row
  * traversal, have no matching field, lack a required column, or collide after path flattening.
  *
  * @returns A plan keyed by each unique schema path in `where`.
@@ -60,7 +61,7 @@ export const createPolymorphicJoinWherePlan = ({
       throw new Error(`Polymorphic join collection "${collection}" has no database table`)
     }
 
-    return { collection, collectionConfig, table }
+    return { collection, collectionConfig, table, tableName }
   })
   const schemaPathsByColumnPath = new Map<string, Set<string>>()
   const schemaPaths = new Set(getWhereSchemaPaths(where))
@@ -83,7 +84,7 @@ export const createPolymorphicJoinWherePlan = ({
     let hasUnsupportedFieldShape = false
     const scalarQueryValueSignatures = new Set<string>()
 
-    for (const { collection, collectionConfig, table } of collectionContexts) {
+    for (const { collection, collectionConfig, table, tableName } of collectionContexts) {
       const fieldAtPath = getFieldByPath({
         fields: collectionConfig.flattenedFields,
         path: schemaPath,
@@ -126,15 +127,17 @@ export const createPolymorphicJoinWherePlan = ({
 
       isFieldPresent = true
 
-      if (
-        fieldAtPath.pathHasLocalized ||
-        pathHasSeparateRows({ fields: collectionConfig.flattenedFields, path: schemaPath })
-      ) {
+      if (pathHasSeparateRows({ fields: collectionConfig.flattenedFields, path: schemaPath })) {
         hasUnsupportedFieldShape = true
         continue
       }
 
       if (fieldAtPath.field.type === 'select' && fieldAtPath.field.hasMany) {
+        if (fieldAtPath.pathHasLocalized) {
+          hasUnsupportedFieldShape = true
+          continue
+        }
+
         hasManySelect = true
         fieldsByCollection.set(collection, {
           type: 'hasManySelect',
@@ -143,7 +146,10 @@ export const createPolymorphicJoinWherePlan = ({
         continue
       }
 
-      const fieldColumn = table[columnPath] as Column | undefined
+      const fieldTable = fieldAtPath.pathHasLocalized
+        ? adapter.tables[`${tableName}${adapter.localesSuffix}`]
+        : table
+      const fieldColumn = fieldTable?.[columnPath] as Column | undefined
 
       if (!fieldColumn) {
         hasUnsupportedFieldShape = true
@@ -153,6 +159,7 @@ export const createPolymorphicJoinWherePlan = ({
       fieldsByCollection.set(collection, {
         type: 'scalar',
         field: fieldAtPath.field,
+        ...(fieldAtPath.pathHasLocalized && { isLocalized: true }),
         isUUID: fieldColumn.columnType === 'PgUUID',
       })
       scalarQueryValueSignatures.add(

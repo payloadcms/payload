@@ -108,6 +108,7 @@ export const databaseKVAdapter = (options: DatabaseKVAdapterOptions = {}): KVAda
       admin: {
         hidden: true,
       },
+      authorship: false,
       fields: [
         {
           name: 'key',

@@ -13,7 +13,7 @@ import type { Config } from './payload-types.js'
 import {
   getColumnSelectorItem,
   openListColumns,
-  toggleColumn,
+  toggleColumns,
 } from '../__helpers/e2e/columns/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
 import {
@@ -213,11 +213,38 @@ describe('Uploads', () => {
 
   test('should show upload filename in upload collection list', async () => {
     await page.goto(mediaURL.list)
-    const audioUpload = page.locator('tbody .cell-filename', { hasText: exactText('audio.mp3') })
+    const audioUpload = page.locator('tbody .cell-filename', {
+      hasText: exactText('audio-original.mp3'),
+    })
     await expect(audioUpload).toBeVisible()
 
     const imageUpload = page.locator('tbody .cell-filename', { hasText: exactText('image.png') })
     await expect(imageUpload).toBeVisible()
+  })
+
+  test('should show a readable file size in the upload collection list', async () => {
+    await payload.create({
+      collection: mediaSlug,
+      data: {},
+      file: {
+        data: Buffer.alloc(1536, 'a'),
+        name: 'size-test.txt',
+        mimetype: 'text/plain',
+        size: 1536,
+      },
+      overrideAccess: true,
+    })
+
+    await page.goto(mediaURL.list)
+    await toggleColumns({
+      columns: [{ columnLabel: 'File Size', targetState: 'on' }],
+      page,
+      shouldCloseListColumns: true,
+    })
+
+    const row = page.locator('tbody tr', { hasText: 'size-test-original.txt' })
+
+    await expect(row.locator('.cell-filesize')).toHaveText('1.5KB')
   })
 
   test('should see upload filename in relation list', async () => {
@@ -297,7 +324,7 @@ describe('Uploads', () => {
       .locator('tr', { hasText: 'Polymorphic upload two' })
       .locator('.select-row__checkbox')
       .click()
-    await listDrawer.getByRole('button', { name: 'Select 1' }).click()
+    await listDrawer.getByRole('button', { name: 'Confirm' }).click()
 
     await saveDocAndAssert(page)
 
@@ -814,7 +841,7 @@ describe('Uploads', () => {
       slug: animatedTypeMedia,
       auth: true,
     })
-    expect(doc.sizes.squareSmall.filename).toMatch(/480x480\.webp$/)
+    expect(doc.variants.squareSmall.filename).toMatch(/480x480\.webp$/)
   })
 
   test('should show resized images', async () => {
@@ -834,20 +861,20 @@ describe('Uploads', () => {
 
     // The per-size detail drawer was replaced by the inline carousel, which no longer surfaces
     // per-size dimensions/formats; verify the generated sizes via the API instead.
-    const { sizes } = pngDoc!
+    const { variants } = pngDoc!
 
-    expect(sizes!.maintainedAspectRatio).toMatchObject({ height: 1024, width: 1024 })
-    expect(sizes!.differentFormatFromMainImage!.mimeType).toBe('image/jpeg')
-    expect(sizes!.maintainedImageSize).toMatchObject({ height: 1600, width: 1600 })
-    expect(sizes!.maintainedImageSizeWithNewFormat).toMatchObject({
+    expect(variants!.maintainedAspectRatio).toMatchObject({ height: 1024, width: 1024 })
+    expect(variants!.differentFormatFromMainImage!.mimeType).toBe('image/jpeg')
+    expect(variants!.maintainedImageSize).toMatchObject({ height: 1600, width: 1600 })
+    expect(variants!.maintainedImageSizeWithNewFormat).toMatchObject({
       height: 1600,
       mimeType: 'image/jpeg',
       width: 1600,
     })
-    expect(sizes!.accidentalSameSize).toMatchObject({ height: 80, width: 320 })
-    expect(sizes!.tablet).toMatchObject({ height: 480, width: 640 })
-    expect(sizes!.mobile).toMatchObject({ height: 240, width: 320 })
-    expect(sizes!.icon).toMatchObject({ height: 16, width: 16 })
+    expect(variants!.accidentalSameSize).toMatchObject({ height: 80, width: 320 })
+    expect(variants!.tablet).toMatchObject({ height: 480, width: 640 })
+    expect(variants!.mobile).toMatchObject({ height: 240, width: 320 })
+    expect(variants!.icon).toMatchObject({ height: 16, width: 16 })
   })
 
   test('should resize and show tiff images', async () => {
@@ -898,7 +925,7 @@ describe('Uploads', () => {
       slug: customFileNameMediaSlug,
       auth: true,
     })
-    expect(doc.sizes.custom.filename).toBe('custom-500x500.png')
+    expect(doc.variants.custom.filename).toBe('custom-500x500.png')
   })
 
   test('should show draft uploads in the relation list', async () => {
@@ -912,7 +939,10 @@ describe('Uploads', () => {
     await page.locator('.field-type:nth-of-type(2) .icon--write').click()
 
     // fill the title with 'draft'
-    await page.locator('#field-title').fill('draft')
+    await page
+      .locator('.doc-drawer')
+      .getByRole('textbox', { name: /^Title\b/ })
+      .fill('draft')
 
     await saveDocAndAssert(
       page,
@@ -1235,10 +1265,11 @@ describe('Uploads', () => {
       auth: true,
     })
 
-    const acceptableFileSizes = [9431, 9435]
+    // EXIF plus the compact sRGB ICC profile embedded by sharp >= 0.33 (libvips 8.15+)
+    const acceptableFileSizes = [2989]
 
     await expect
-      .poll(() => acceptableFileSizes.includes(mediaDoc.sizes.sizeOne.filesize))
+      .poll(() => acceptableFileSizes.includes(mediaDoc.variants.sizeOne.filesize))
       .toBe(true)
   })
 
@@ -1259,7 +1290,7 @@ describe('Uploads', () => {
     const acceptableFileSizes = [2424, 2445]
 
     await expect
-      .poll(() => acceptableFileSizes.includes(mediaDoc.sizes.sizeTwo.filesize))
+      .poll(() => acceptableFileSizes.includes(mediaDoc.variants.sizeTwo.filesize))
       .toBe(true)
   })
 
@@ -1277,11 +1308,11 @@ describe('Uploads', () => {
       auth: true,
     })
 
-    const acceptableFileSizesForJPEG = [9554, 9575]
+    const acceptableFileSizesForJPEG = [3112]
 
     // without metadata appended, the jpeg image filesize would be 2424
     await expect
-      .poll(() => acceptableFileSizesForJPEG.includes(jpegMediaDoc.sizes.sizeThree.filesize))
+      .poll(() => acceptableFileSizesForJPEG.includes(jpegMediaDoc.variants.sizeThree.filesize))
       .toBe(true)
 
     await gotoAndWaitForForm(page, withOnlyJPEGMetadataURL.create)
@@ -1298,7 +1329,7 @@ describe('Uploads', () => {
     })
 
     // With metadata, the animated image filesize would be 218762
-    await expect.poll(() => webpMediaDoc.sizes.sizeThree.filesize).toBe(211638)
+    await expect.poll(() => webpMediaDoc.variants.sizeThree.filesize).toBe(211638)
   })
 
   test('should show custom upload component', async () => {
@@ -1347,7 +1378,7 @@ describe('Uploads', () => {
     // Ensure the URL ends correctly
     await expect
       .poll(() => href)
-      .toMatch(/\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
+      .toMatch(/\/api\/admin-thumbnail-size\/file\/test-image-original(-\d+)?\.png$/i)
 
     // Ensure no "-100x100" or any similar suffix
     await expect.poll(() => !/-\d+x\d+\.png$/.test(href!)).toBe(true)
@@ -1389,8 +1420,34 @@ describe('Uploads', () => {
       .locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem a')
       .getAttribute('href')
 
-    expect(href).toMatch(/\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
+    expect(href).toMatch(/\/api\/admin-thumbnail-size\/file\/test-image-original(-\d+)?\.png$/i)
     expect(href).not.toMatch(/-\d+x\d+\.png$/)
+  })
+
+  test('should add uploads to a hasMany field after the bulk upload drawer was closed without uploading', async () => {
+    await gotoAndWaitForForm(page, uploadsOne.create)
+
+    const createNewButton = page.locator('#field-hasManyThumbnailUpload button', {
+      hasText: exactText('Create New'),
+    })
+    const bulkUploadModal = page.locator('#hasManyThumbnailUpload-bulk-upload-modal-slug-1')
+
+    await createNewButton.click()
+    await expect(bulkUploadModal).toBeVisible()
+    await bulkUploadModal.getByRole('button', { name: 'Close' }).click()
+    await expect(bulkUploadModal).toBeHidden()
+
+    await createNewButton.click()
+    await expect(bulkUploadModal).toBeVisible()
+    await bulkUploadModal
+      .locator('.dropzone input[type="file"]')
+      .setInputFiles([path.resolve(dirname, './test-image.png')])
+    await bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button').click()
+    await closeAllToasts(page)
+
+    await expect(
+      page.locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem'),
+    ).toHaveCount(1)
   })
 
   test('should show preview button if image sizes are defined but crop and focal point are not', async () => {
@@ -1443,7 +1500,7 @@ describe('Uploads', () => {
         ])
 
       await bulkUploadModal
-        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .locator('.bulk-upload--file-manager .render-fields input[name="prefix"]')
         .fill('prefix-one')
 
       const nextImageChevronButton = bulkUploadModal.locator(
@@ -1452,7 +1509,7 @@ describe('Uploads', () => {
       await nextImageChevronButton.click()
 
       await bulkUploadModal
-        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .locator('.bulk-upload--file-manager .render-fields input[name="prefix"]')
         .fill('prefix-two')
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
@@ -1568,7 +1625,7 @@ describe('Uploads', () => {
         .setInputFiles([path.resolve(dirname, './test-pdf.pdf')])
 
       await bulkUploadModal
-        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .locator('.bulk-upload--file-manager .render-fields input[name="prefix"]')
         .fill('prefix-one')
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
@@ -1629,7 +1686,7 @@ describe('Uploads', () => {
 
       await options.locator('text=Prefix').click()
 
-      await editManyBulkUploadModal.locator('#field-prefix').fill('some prefix')
+      await editManyBulkUploadModal.locator('input[name="prefix"]').fill('some prefix')
 
       await editManyBulkUploadModal
         .locator('.edit-many-bulk-uploads__header__actions button')
@@ -1695,7 +1752,7 @@ describe('Uploads', () => {
       // Select an option
       await options.locator('text=Prefix').click()
 
-      await editManyBulkUploadModal.locator('#field-prefix').fill('some prefix')
+      await editManyBulkUploadModal.locator('input[name="prefix"]').fill('some prefix')
 
       await editManyBulkUploadModal
         .locator('.edit-many-bulk-uploads__header__actions button')
@@ -1751,7 +1808,7 @@ describe('Uploads', () => {
       // Select an option
       await options.locator('text=Prefix').click()
 
-      await editManyBulkUploadModal.locator('#field-prefix').fill('some prefix')
+      await editManyBulkUploadModal.locator('input[name="prefix"]').fill('some prefix')
 
       await editManyBulkUploadModal
         .locator('.edit-many-bulk-uploads__header__actions button')
@@ -1799,7 +1856,7 @@ describe('Uploads', () => {
 
       await page.setInputFiles('.dropzone input[type="file"]', path.resolve(dirname, './image.png'))
 
-      await page.locator('#field-prefix').fill('should-preserve')
+      await page.locator('input[name="prefix"]').fill('should-preserve')
 
       // add another file
       const addFileButton = page.locator(
@@ -1827,7 +1884,7 @@ describe('Uploads', () => {
       await originalFileRow.locator('button.file-selections__fileRow').click()
 
       // ensure the prefix field is still filled with the original value
-      await expect(page.locator('#field-prefix')).toHaveValue('should-preserve')
+      await expect(page.locator('input[name="prefix"]')).toHaveValue('should-preserve')
     })
 
     test('should not redirect to created relationship document inside the bulk upload drawer', async () => {
@@ -1856,7 +1913,7 @@ describe('Uploads', () => {
       await relationshipField.locator('.relationship-add-new__add-button').click()
 
       const collectionForm = page.locator('.collection-edit')
-      await collectionForm.locator('#field-title').fill('Related Document Title')
+      await collectionForm.locator('input[name="title"]').fill('Related Document Title')
       await saveDocAndAssert(page)
       await collectionForm.locator('.doc-drawer__header-close').click()
 
@@ -1913,7 +1970,7 @@ describe('Uploads', () => {
         ])
 
       await bulkUploadModal
-        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .locator('.bulk-upload--file-manager .render-fields input[name="prefix"]')
         .fill('prefix-one')
 
       // Clear the filename from the first file
@@ -1925,7 +1982,7 @@ describe('Uploads', () => {
       await nextImageChevronButton.click()
 
       await bulkUploadModal
-        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .locator('.bulk-upload--file-manager .render-fields input[name="prefix"]')
         .fill('prefix-two')
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
@@ -2044,7 +2101,7 @@ describe('Uploads', () => {
         ])
 
       // Form 1: Fill prefix but remove file (should have 1 error: missing file)
-      await bulkUploadModal.locator('#field-prefix').fill('prefix-one')
+      await bulkUploadModal.locator('input[name="prefix"]').fill('prefix-one')
       await bulkUploadModal.locator('.file-manager__remove').click()
 
       // Form 2: Omit prefix and remove file (should have 2 errors: missing file + missing prefix)
@@ -2056,7 +2113,7 @@ describe('Uploads', () => {
 
       // Form 3: Fill prefix and keep file (should have 0 errors - will succeed)
       await nextButton.click()
-      await bulkUploadModal.locator('#field-prefix').fill('prefix-three')
+      await bulkUploadModal.locator('input[name="prefix"]').fill('prefix-three')
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
@@ -2130,18 +2187,18 @@ describe('Uploads', () => {
       ])
 
       // Fill in the required prefix field for all uploads
-      await bulkUploadModal.locator('#field-prefix').fill('test-prefix')
+      await bulkUploadModal.locator('input[name="prefix"]').fill('test-prefix')
 
       // Navigate to second file
       const nextButton = bulkUploadModal.locator(
         '.bulk-upload--actions-bar__controls button:nth-of-type(2)',
       )
       await nextButton.click()
-      await bulkUploadModal.locator('#field-prefix').fill('test-prefix')
+      await bulkUploadModal.locator('input[name="prefix"]').fill('test-prefix')
 
       // Navigate to third file
       await nextButton.click()
-      await bulkUploadModal.locator('#field-prefix').fill('test-prefix')
+      await bulkUploadModal.locator('input[name="prefix"]').fill('test-prefix')
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
@@ -2424,7 +2481,7 @@ describe('Uploads', () => {
       })
 
       // without focal point update this generated size was equal to 1736
-      await expect.poll(() => redDoc.sizes.focalTest.filesize).toBe(1586)
+      await expect.poll(() => redDoc.variants.focalTest.filesize).toBe(1586)
     })
 
     test('should resize image after crop if resizeOptions defined', async () => {
@@ -2485,9 +2542,15 @@ describe('Uploads', () => {
     await page.goto(relationPreviewURL.list)
 
     // Show all columns with relations
-    await toggleColumn(page, { columnLabel: 'Image Without Preview2', targetState: 'on' })
-    await toggleColumn(page, { columnLabel: 'Image With Preview3', targetState: 'on' })
-    await toggleColumn(page, { columnLabel: 'Image Without Preview3', targetState: 'on' })
+    await toggleColumns({
+      columns: [
+        { columnLabel: 'Image Without Preview2', targetState: 'on' },
+        { columnLabel: 'Image With Preview3', targetState: 'on' },
+        { columnLabel: 'Image Without Preview3', targetState: 'on' },
+      ],
+      page,
+      shouldCloseListColumns: true,
+    })
 
     // Wait for the columns to be displayed
     await expect(page.locator('.cell-imageWithoutPreview3')).toBeVisible()
@@ -2570,7 +2633,7 @@ describe('Uploads', () => {
       const thumbnail = page.locator('#field-withinRange div.thumbnail > img')
       await expect(thumbnail).toHaveAttribute(
         'src',
-        /\/api\/enlarge\/file\/test-image-180x50\.jpg(\?.*)?$/,
+        /\/api\/enlarge\/file\/test-image-original-180x50\.jpg(\?.*)?$/,
       )
     })
 
@@ -2582,7 +2645,7 @@ describe('Uploads', () => {
       const thumbnail = page.locator('#field-nextSmallestOutOfRange div.thumbnail > img')
       await expect(thumbnail).toHaveAttribute(
         'src',
-        /\/api\/focal-only\/file\/test-image-400x300\.jpg(\?.*)?$/,
+        /\/api\/focal-only\/file\/test-image-original-400x300\.jpg(\?.*)?$/,
       )
     })
 
@@ -2592,7 +2655,10 @@ describe('Uploads', () => {
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'small.png'))
       await page.locator('dialog button#action-save').click()
       const thumbnail = page.locator('#field-original div.thumbnail > img')
-      await expect(thumbnail).toHaveAttribute('src', /\/api\/focal-only\/file\/small\.png(\?.*)?$/)
+      await expect(thumbnail).toHaveAttribute(
+        'src',
+        /\/api\/focal-only\/file\/small-original\.png(\?.*)?$/,
+      )
     })
   })
 
@@ -2613,7 +2679,7 @@ describe('Uploads', () => {
 
     const imageUploadImg = imageUploadCell.locator('.thumbnail')
     await expect(imageUploadImg).toBeVisible()
-    await expect(imageRelationshipCell).toHaveText('image.png')
+    await expect(imageRelationshipCell).toHaveText('image-original.png')
 
     // Navigate back to page 1 using the left arrow
     const prevPageButton = page.locator('.clickable-arrow--left')
@@ -2692,7 +2758,7 @@ describe('Uploads', () => {
         overrideAccess: true,
       })
     ).docs[0]?.filename
-    expect(filenameFromAPI).toBe('test-image.jpg')
+    expect(filenameFromAPI).toBe('test-image-original.jpg')
   })
 
   test('should not show image sizes in column selector in list view if imageSize has admin.disableListColumn true', async () => {
@@ -3001,7 +3067,7 @@ describe('Uploads', () => {
     const drawer = page.locator('[id^=doc-drawer_no-files-required_]')
     await expect(drawer).toBeVisible()
 
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
 
     await expect(titleField).toHaveValue('Upload without file')
   })

@@ -4,7 +4,7 @@
 
 @layer payload-default {
   :root {
-    --font-body: var(--font-family-sans), sans-serif;
+    --font-body: var(--font-family-sans, var(--text-body-family)), sans-serif;
     --font-mono: var(--font-family-mono), 'SF Mono', Menlo, Consolas, Monaco, monospace;
 
     --app-header-height: 0px;
@@ -49,8 +49,8 @@
     letter-spacing: var(--text-letter-spacing);
     color: var(--color-text);
     margin: 0;
-    /* this is for the nav to be able to push the document over */
-    overflow-x: hidden;
+    /* Clip the shifted navigation without making body a vertical scroll container. */
+    overflow-x: clip;
   }
 
   /* Lock background scroll while a drawer is open. Backs up faceless-ui's JS

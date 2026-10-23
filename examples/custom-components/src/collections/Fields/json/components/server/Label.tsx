@@ -1,9 +1,9 @@
-import type { JSONFieldLabelServerComponent } from 'payload'
+import type { JSONFieldLabelServerProps } from 'payload'
 
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomJSONFieldLabelServer: JSONFieldLabelServerComponent = ({
+export const CustomJSONFieldLabelServer: React.FC<JSONFieldLabelServerProps> = ({
   clientField,
   path,
 }) => {
