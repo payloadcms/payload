@@ -22,7 +22,7 @@
     "@payloadcms/db-postgres": "3.82.1",
     "@payloadcms/next": "3.82.1",
     "@payloadcms/richtext-lexical": "3.82.1",
-    "@payloadcms/transformer-sharp": "3.82.1",
+    "@payloadcms/transformer-sharp": "4.0.0-beta.4",
     "@payloadcms/ui": "3.82.1",
     "cross-env": "10.1.0",
     "graphql": "^16.8.1",

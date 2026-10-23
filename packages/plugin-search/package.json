@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-search",
-  "version": "4.0.0-beta.3",
+  "version": "4.0.0-beta.4",
   "description": "Search plugin for Payload",
   "keywords": [
     "algolia",
