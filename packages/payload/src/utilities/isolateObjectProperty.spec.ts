@@ -172,5 +172,33 @@ describe('isolateObjectProperty', () => {
       expect(proxy.headers).toBeInstanceOf(Headers)
       expect(proxy.headers.get('content-type')).toBe('application/json')
     })
+
+    it('should allow calling methods that access private fields', () => {
+      class ObjectWithPrivateMethod {
+        #privateValue: string
+
+        constructor(value: string) {
+          this.#privateValue = value
+        }
+
+        getValue(): string {
+          return this.#privateValue
+        }
+      }
+
+      const original = new ObjectWithPrivateMethod('secret')
+      const proxy = isolateObjectProperty(original, 'nonExistentKey' as keyof typeof original)
+
+      // This would throw "Cannot read private member" if the method ran with the proxy as receiver
+      expect(proxy.getValue()).toBe('secret')
+    })
+
+    it('should allow calling Request.text() on a proxied request', async () => {
+      const request = new Request('https://example.com', { method: 'POST', body: 'hello' })
+      const proxy = isolateObjectProperty(request, 'nonExistentKey' as keyof typeof request)
+
+      // Undici reads the private #state field; with the proxy as receiver this throws
+      await expect(proxy.text()).resolves.toBe('hello')
+    })
   })
 })
