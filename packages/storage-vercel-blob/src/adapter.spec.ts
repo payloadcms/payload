@@ -6,6 +6,11 @@ vi.mock('@vercel/blob', async (importOriginal) => ({
   put: vi.fn(async (pathname: string) => ({ pathname: pathname.replace('.png', '-suffix.png') })),
 }))
 
+vi.mock('fs', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('fs')>()),
+  openAsBlob: vi.fn(async () => new Blob(['file'])),
+}))
+
 import { createVercelBlobAdapter } from './adapter.js'
 
 const adapter = createVercelBlobAdapter({
@@ -36,6 +41,7 @@ describe('handleUpload with addRandomSuffix', () => {
         imageSizeName: filename === 'image.png' ? undefined : 'square',
         mimeType: 'image/png',
       },
+      req: { context: {} },
       storageFilePath: filename,
     } as never)
 
@@ -61,6 +67,7 @@ describe('handleUpload with addRandomSuffix', () => {
           imageSizeName,
           mimeType: 'image/png',
         },
+        req: { context: {} },
         storageFilePath: 'image-400x400.png',
       } as never)
 
@@ -70,5 +77,29 @@ describe('handleUpload with addRandomSuffix', () => {
       card: { filename: 'image-400x400-a.png' },
       square: { filename: 'image-400x400-b.png' },
     })
+  })
+
+  it.each([
+    ['a processed client upload', '/tmp/client-upload', false],
+    ['another temp file', '/tmp/other-upload', true],
+  ])('should set addRandomSuffix for %s', async (_, tempFilePath, expected) => {
+    await adapter.handleUpload({
+      data: { filename: 'image.png' },
+      file: {
+        buffer: Buffer.alloc(0),
+        filename: 'image.png',
+        filesize: 4,
+        mimeType: 'image/png',
+        tempFilePath,
+      },
+      req: { context: { payloadClientUploadTempFilePath: '/tmp/client-upload' } },
+      storageFilePath: 'issued/image.png',
+    } as never)
+
+    expect(vi.mocked(put)).toHaveBeenLastCalledWith(
+      'issued/image.png',
+      expect.anything(),
+      expect.objectContaining({ addRandomSuffix: expected }),
+    )
   })
 })
