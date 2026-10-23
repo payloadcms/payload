@@ -15,6 +15,18 @@ export async function createPresentation({
       contentType: 'text/html',
       body: '<!doctype html><html data-pr-demo-stage><head><meta charset="utf-8"><title>Demo recording</title><style>body{margin:0}</style></head><body><div id="demo-stage"></div></body></html>',
     })
+  if (options.accessibility) {
+    const observerSource = await readFile(
+      new URL('./accessibility-demo.mjs', import.meta.url),
+      'utf8',
+    )
+    await stage.context().addInitScript({
+      content: `${observerSource.replace('export function', 'function')}
+      if (window.name === 'pr-demo-app' && window.parent !== window) {
+        window.__stopDemoAccessibility = observeAccessibility({ report: state => window.parent.postMessage({ type: 'payload-demo-accessibility', state }, '*') })
+      }`,
+    })
+  }
   await stage.route(wrapperURL, wrapper)
   try {
     await stage.goto(wrapperURL)
@@ -34,6 +46,17 @@ export async function createPresentation({
         app.name = 'pr-demo-app'
         app.title = 'Payload application'
         app.slot = 'content'
+        if (options.accessibility) {
+          window.demoAccessibilityListener = (event) => {
+            if (
+              event.source === app.contentWindow &&
+              event.data?.type === 'payload-demo-accessibility'
+            ) {
+              window.demoChrome.setAccessibilityState(event.data.state)
+            }
+          }
+          window.addEventListener('message', window.demoAccessibilityListener)
+        }
         root.append(app)
       },
       {
@@ -132,7 +155,16 @@ export async function createPresentation({
           () =>
             new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
         ),
-      stop: () => stage.unroute(wrapperURL, wrapper),
+      stop: async () => {
+        if (options.accessibility) {
+          await frame.evaluate(() => window.__stopDemoAccessibility?.()).catch(() => {})
+          await stage.evaluate(() => {
+            window.removeEventListener('message', window.demoAccessibilityListener)
+            delete window.demoAccessibilityListener
+          })
+        }
+        await stage.unroute(wrapperURL, wrapper)
+      },
     }
   } catch (error) {
     await stage.unroute(wrapperURL, wrapper)
