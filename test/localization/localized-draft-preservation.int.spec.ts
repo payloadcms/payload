@@ -2,6 +2,7 @@
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
+import { publishSharedCollectionLocales } from './helpers/publishLocales.js'
 import {
   allFieldsLocalizedSlug,
   defaultLocale,
@@ -79,23 +80,9 @@ test.suite('Localized draft preservation', { config: './config.ts' }, () => {
       drafts: { localizeStatus: true },
     })
 
-    const doc = await payload.create({
-      collection: allFieldsLocalizedSlug,
-      data: {
-        _status: 'published',
-        nonLocalizedArray: [{ localizedItem: 'Published row' }],
-        text: 'English',
-      },
-      locale: defaultLocale,
-      overrideAccess: true,
-    })
-
-    await payload.update({
-      id: doc.id,
-      collection: allFieldsLocalizedSlug,
-      data: { _status: 'published', text: 'Spanish' },
-      locale: spanishLocale,
-      overrideAccess: true,
+    const doc = await publishSharedCollectionLocales({
+      payload,
+      data: { nonLocalizedArray: [{ localizedItem: 'Published row' }] },
     })
 
     await payload.update({
