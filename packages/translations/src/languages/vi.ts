@@ -296,6 +296,7 @@ export const viTranslations: DefaultTranslationsObject = {
     and: 'Và',
     anotherUser: 'Người dùng khác',
     anotherUserTakenOver: 'Người dùng khác đã tiếp quản việc chỉnh sửa tài liệu này.',
+    apiResponse: 'Phản hồi API',
     applyChanges: 'Áp dụng thay đổi',
     ascending: 'Tăng dần',
     auto: 'Tự động',
@@ -488,6 +489,7 @@ export const viTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Đang tái lập chỉ mục tất cả {{collections}}.',
     reloadDocument: 'Tải lại tài liệu',
     remove: 'Xóa',
+    removeFilter: 'Xóa bộ lọc',
     rename: 'Đổi tên',
     replaceRow: 'Thay thế hàng',
     requiredFields: 'Các trường được đánh dấu * là bắt buộc.',
@@ -579,6 +581,7 @@ export const viTranslations: DefaultTranslationsObject = {
     yes: 'Có',
   },
   hierarchy: {
+    folderLocation: 'Vị trí thư mục',
     goTo: 'Đi đến "{{name}}"',
     itemsMovedTo: '{{title}} đã di chuyển đến {{destination}}',
     itemsMovedToRoot: '{{title}} đã được chuyển đến gốc',

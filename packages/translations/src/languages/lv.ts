@@ -293,6 +293,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     and: 'Un',
     anotherUser: 'Cits lietotājs',
     anotherUserTakenOver: 'Cits lietotājs ir pārņēmis šī dokumenta rediģēšanu.',
+    apiResponse: 'API atbilde',
     applyChanges: 'Pielietot izmaiņas',
     ascending: 'Augošā secībā',
     auto: 'Automātiska',
@@ -487,6 +488,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Pārindeksē visus {{collections}}.',
     reloadDocument: 'Pārlādēt dokumentu',
     remove: 'Noņemt',
+    removeFilter: 'Noņemt filtru',
     rename: 'Pārdēvēt',
     replaceRow: 'Aizstāt rindu',
     requiredFields: 'Lauki, kas atzīmēti ar *, ir obligāti.',
@@ -577,6 +579,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     yes: 'Jā',
   },
   hierarchy: {
+    folderLocation: 'Mapes atrašanās vieta',
     goTo: 'Dodieties uz "{{name}}"',
     itemsMovedTo: '{{title}} tika pārvietots uz {{destination}}',
     itemsMovedToRoot: '{{title}} pārvietots uz sakni',

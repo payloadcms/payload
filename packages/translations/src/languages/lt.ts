@@ -298,6 +298,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     and: 'Ir',
     anotherUser: 'Kitas vartotojas',
     anotherUserTakenOver: 'Kitas naudotojas perėmė šio dokumento redagavimą.',
+    apiResponse: 'API atsakymas',
     applyChanges: 'Taikyti pakeitimus',
     ascending: 'Kylantis',
     auto: 'Automatinis',
@@ -491,6 +492,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Perindeksuojamos visos {{collections}}.',
     reloadDocument: 'Perkrauti dokumentą',
     remove: 'Pašalinti',
+    removeFilter: 'Pašalinti filtrą',
     rename: 'Pervadinti',
     replaceRow: 'Pakeisti eilutę',
     requiredFields: '* pažymėti laukai yra privalomi.',
@@ -583,6 +585,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     yes: 'Taip',
   },
   hierarchy: {
+    folderLocation: 'Aplanko vieta',
     goTo: 'Eikite į "{{name}}"',
     itemsMovedTo: '{{title}} perkeltas į {{destination}}',
     itemsMovedToRoot: '{{title}} perkeltas į šaknį',

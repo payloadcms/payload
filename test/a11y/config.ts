@@ -12,7 +12,7 @@ import { MediaCollection, mediaSlug } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { UsersCollection, usersSlug } from './collections/Users/index.js'
 import { seededAPIKey } from './constants.js'
-import { MenuGlobal } from './globals/Menu/index.js'
+import { MenuGlobal, menuSlug } from './globals/Menu/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -59,6 +59,10 @@ export default buildConfigWithDefaults({
             Component: '/components/BreadcrumbCurrentPage/index.js#BreadcrumbCurrentPage',
             path: '/breadcrumb-current-page',
           },
+          CustomResponseForm: {
+            Component: '/components/CustomResponseForm/index.js#CustomResponseForm',
+            path: '/custom-response-form',
+          },
           CustomIDModals: {
             Component: '/components/CustomIDModals/index.js#CustomIDModals',
             path: '/custom-modal-ids',
@@ -75,6 +79,7 @@ export default buildConfigWithDefaults({
       },
       dashboard: {
         defaultLayout: [
+          { widgetSlug: 'welcome', width: 'full' },
           { widgetSlug: 'collections', width: 'full' },
           {
             data: {
@@ -120,7 +125,12 @@ export default buildConfigWithDefaults({
         },
       ],
     },
-    plugins: [seoPlugin({ collections: [] })],
+    plugins: [
+      seoPlugin({
+        generateURL: () => 'https://example.com/accessibility-post',
+        globals: [menuSlug],
+      }),
+    ],
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },

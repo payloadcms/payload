@@ -293,6 +293,7 @@ export const isTranslations: DefaultTranslationsObject = {
     and: 'Og',
     anotherUser: 'Annar notandi',
     anotherUserTakenOver: 'Annar notandi hefur tekið yfir skráningu þessarar færslu.',
+    apiResponse: 'API-svar',
     applyChanges: 'Virkja breytingar',
     ascending: 'Hækkandi',
     auto: 'Sjálfvirkt',
@@ -483,6 +484,7 @@ export const isTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Endursetja leitargrunn fyrir allar {{collections}}.',
     reloadDocument: 'Endurhlaða skjal',
     remove: 'Fjarlægja',
+    removeFilter: 'Fjarlægja síu',
     rename: 'Endurnefna',
     replaceRow: 'Raðir skipt út',
     requiredFields: 'Reitir merktir með * eru skyldureitir.',
@@ -576,6 +578,7 @@ export const isTranslations: DefaultTranslationsObject = {
     yes: 'Já',
   },
   hierarchy: {
+    folderLocation: 'Staðsetning möppu',
     goTo: 'Farðu á "{{name}}"',
     itemsMovedTo: '{{title}} flutt til {{destination}}',
     itemsMovedToRoot: '{{title}} flutt til rót',

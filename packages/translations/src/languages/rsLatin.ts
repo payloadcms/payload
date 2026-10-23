@@ -295,6 +295,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     and: 'I',
     anotherUser: 'Drugi korisnik',
     anotherUserTakenOver: 'Drugi korisnik je preuzeo uređivanje ovog dokumenta.',
+    apiResponse: 'API odgovor',
     applyChanges: 'Primeni promene',
     ascending: 'Uzlazno',
     auto: 'Automatski',
@@ -486,6 +487,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Ponovno indeksiranje svih {{collections}}.',
     reloadDocument: 'Ponovo učitaj dokument',
     remove: 'Ukloni',
+    removeFilter: 'Ukloni filter',
     rename: 'Preimenuj',
     replaceRow: 'Zameni red',
     requiredFields: 'Polja označena sa * su obavezna.',
@@ -578,6 +580,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     yes: 'Da',
   },
   hierarchy: {
+    folderLocation: 'Lokacija fascikle',
     goTo: 'Idite na "{{name}}"',
     itemsMovedTo: '{{title}} premešten u {{destination}}',
     itemsMovedToRoot: '{{title}} premešteno u koren',

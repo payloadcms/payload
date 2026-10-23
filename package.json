@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "4.0.0-beta.3",
+  "version": "4.0.0-beta.4",
   "private": true,
   "workspaces": [
     "packages/*",
@@ -136,10 +136,10 @@
     "test:e2e:tanstack:headed": "cross-env PAYLOAD_FRAMEWORK=tanstack-start NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true playwright test --headed",
     "test:eval": "tsx ./test/evals/cli.ts",
     "test:eval:report": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 VITEST_EVAL_REPORT=true vitest --run --project eval",
-    "test:int": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true vitest --project int --no-cache",
-    "test:int:firestore": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=firestore DISABLE_LOGGING=true vitest --project int",
-    "test:int:postgres": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true vitest --project int",
-    "test:int:sqlite": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=sqlite DISABLE_LOGGING=true vitest --project int",
+    "test:int": "cross-env NODE_OPTIONS=\"$NODE_OPTIONS --no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true vitest --project int --no-cache",
+    "test:int:firestore": "cross-env NODE_OPTIONS=\"$NODE_OPTIONS --no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=firestore DISABLE_LOGGING=true vitest --project int",
+    "test:int:postgres": "cross-env NODE_OPTIONS=\"$NODE_OPTIONS --no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true vitest --project int",
+    "test:int:sqlite": "cross-env NODE_OPTIONS=\"$NODE_OPTIONS --no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=sqlite DISABLE_LOGGING=true vitest --project int",
     "test:int:summary": "pnpm runts ./test/runTestsWithSummary.ts",
     "test:rsc": "cross-env NODE_OPTIONS=\"--conditions=react-server\" vitest run --project rsc",
     "test:types": "tstyche",
@@ -195,6 +195,7 @@
     "husky": "9.0.11",
     "lint-staged": "15.2.7",
     "minimist": "1.2.8",
+    "monaco-editor": "0.57.0",
     "mongoose": "9.9.2",
     "next": "16.4.2",
     "node-gyp": "12.3.0",
@@ -225,5 +226,5 @@
     "wrangler": "~4.61.1",
     "zod": "catalog:"
   },
-  "packageManager": "pnpm@11.9.0"
+  "packageManager": "pnpm@11.28.6"
 }

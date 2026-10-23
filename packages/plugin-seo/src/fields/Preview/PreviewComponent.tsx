@@ -2,7 +2,7 @@
 
 import '../colors.css'
 
-import type { FormField, UIField } from 'payload'
+import type { UIField } from 'payload'
 
 import {
   useAllFormFields,
@@ -50,10 +50,8 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
   const descriptionPath = descriptionPathFromContext || 'meta.description'
   const titlePath = titlePathFromContext || 'meta.title'
 
-  const {
-    [descriptionPath]: { value: metaDescription } = {} as FormField,
-    [titlePath]: { value: metaTitle } = {} as FormField,
-  } = fields
+  const metaDescription = fields[descriptionPath]?.value
+  const metaTitle = fields[titlePath]?.value
 
   const [href, setHref] = useState<string>()
 
@@ -120,34 +118,17 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
           boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)',
           maxWidth: '600px',
           padding: '20px',
-          pointerEvents: 'none',
           width: '100%',
         }}
       >
-        <div>
-          <a
-            href={href}
-            style={{
-              textDecoration: 'none',
-            }}
-          >
-            {href || 'https://...'}
-          </a>
-        </div>
-        <h4
+        <div>{href || 'https://...'}</div>
+        <div
           style={{
             margin: 0,
           }}
         >
-          <a
-            href="/"
-            style={{
-              textDecoration: 'none',
-            }}
-          >
-            {metaTitle as string}
-          </a>
-        </h4>
+          {metaTitle as string}
+        </div>
         <p
           style={{
             margin: 0,

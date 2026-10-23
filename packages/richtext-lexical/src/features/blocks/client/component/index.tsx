@@ -219,7 +219,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           isEditor={true}
           isJSXConverter={false}
           nodeKey={nodeKey}
-          // eslint-disable-next-line react-compiler/react-compiler -- intentionally passed as a prop for custom block components to call
+          // eslint-disable-next-line react-hooks/hooks -- intentionally passed as a prop for custom block components to call
           useBlockComponentContext={useBlockComponentContext}
         />
       )
@@ -236,7 +236,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           isEditor={true}
           isJSXConverter={false}
           nodeKey={nodeKey}
-          // eslint-disable-next-line react-compiler/react-compiler -- intentionally passed as a prop for custom block components to call
+          // eslint-disable-next-line react-hooks/hooks -- intentionally passed as a prop for custom block components to call
           useBlockComponentContext={useBlockComponentContext}
         />
       )

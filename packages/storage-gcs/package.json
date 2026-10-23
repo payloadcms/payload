@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/storage-gcs",
-  "version": "4.0.0-beta.3",
+  "version": "4.0.0-beta.4",
   "description": "Payload storage adapter for Google Cloud Storage",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
@@ -61,6 +61,6 @@
     "payload": "workspace:*"
   },
   "engines": {
-    "node": ">=24.15.0"
+    "node": ">=24.22.1"
   }
 }

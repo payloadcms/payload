@@ -296,6 +296,7 @@ export const azTranslations: DefaultTranslationsObject = {
     and: 'Və',
     anotherUser: 'Başqa bir istifadəçi',
     anotherUserTakenOver: 'Başqa bir istifadəçi bu sənədin redaktəsini ələ keçirdi.',
+    apiResponse: 'API cavabı',
     applyChanges: 'Dəyişiklikləri Tətbiq Edin',
     ascending: 'Artan',
     auto: 'Avtomatik',
@@ -490,6 +491,7 @@ export const azTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Bütün {{collections}} yenidən indekslənir.',
     reloadDocument: 'Sənədə yenidən yükləyin',
     remove: 'Sil',
+    removeFilter: 'Filtri sil',
     rename: 'Yenidən adlandırın',
     replaceRow: 'Sətiri əvəz et',
     requiredFields: '* ilə işarələnmiş sahələr məcburidir.',
@@ -584,6 +586,7 @@ export const azTranslations: DefaultTranslationsObject = {
     yes: 'Bəli',
   },
   hierarchy: {
+    folderLocation: 'Qovluğun yeri',
     goTo: '"{{name}}" -a keçin',
     itemsMovedTo: '{{title}} {{destination}}-ə köçürüldü',
     itemsMovedToRoot: '{{title}} kökə köçürüldü',

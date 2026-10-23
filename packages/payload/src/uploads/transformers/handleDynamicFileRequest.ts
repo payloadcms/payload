@@ -124,7 +124,7 @@ export async function handleDynamicFileRequest({
       if (result.response) {
         if (handedOutResponse && result.response !== handedOutResponse) {
           await discardResponse(handedOutResponse)
-        } else if (previousResponse && result.response !== previousResponse) {
+        } else if (!handedOutResponse && previousResponse && result.response !== previousResponse) {
           await discardResponse(previousResponse)
         }
 
@@ -172,7 +172,15 @@ function withAbortableBody({
     return response
   }
 
-  return new Response(response.body.pipeThrough(new TransformStream(), { signal }), {
+  const stream = new TransformStream({
+    start(controller) {
+      // Pipe abort waits for pending writes, which can stall on an abandoned reader.
+      // Error the transform to unblock those writes before the pipe cancels its source.
+      signal.addEventListener('abort', () => controller.error(signal.reason), { once: true })
+    },
+  })
+
+  return new Response(response.body.pipeThrough(stream, { signal }), {
     headers: response.headers,
     status: response.status,
     statusText: response.statusText,

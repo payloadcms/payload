@@ -2,52 +2,9 @@ import eslintReact from '@eslint-react/eslint-plugin'
 import vitest from '@vitest/eslint-plugin'
 import perfectionist from 'eslint-plugin-perfectionist'
 import playwright from 'eslint-plugin-playwright'
-import reactCompiler from 'eslint-plugin-react-compiler'
 import { configs as regexpConfigs } from 'eslint-plugin-regexp'
 import { createRequire } from 'node:module'
-
-import reactExtends from './configs/react/index.mjs'
-
-const reactA11yRules = {
-  'jsx-a11y/anchor-is-valid': 'warn',
-  // ESLint ran this with jsx-a11y's defaults, which check `<input>` and `<textarea>` too. oxlint's
-  // defaults skip them, so pass jsx-a11y's defaults explicitly.
-  'jsx-a11y/control-has-associated-label': ['warn', { ignoreElements: [], ignoreRoles: [] }],
-  // ESLint ran this with jsx-a11y's default handlers, which include `onMouseEnter` and
-  // `onMouseLeave`. oxlint's defaults skip them, so pass jsx-a11y's defaults explicitly.
-  'jsx-a11y/no-static-element-interactions': [
-    'warn',
-    {
-      handlers: [
-        'onFocus',
-        'onBlur',
-        'onKeyDown',
-        'onKeyPress',
-        'onKeyUp',
-        'onClick',
-        'onContextMenu',
-        'onDblClick',
-        'onDoubleClick',
-        'onDrag',
-        'onDragEnd',
-        'onDragEnter',
-        'onDragExit',
-        'onDragLeave',
-        'onDragOver',
-        'onDragStart',
-        'onDrop',
-        'onMouseDown',
-        'onMouseEnter',
-        'onMouseLeave',
-        'onMouseMove',
-        'onMouseOut',
-        'onMouseOver',
-        'onMouseUp',
-      ],
-    },
-  ],
-  'jsx-a11y/label-has-associated-control': 'warn',
-}
+import { reactA11yRules } from './react-a11y.mjs'
 
 const require = createRequire(import.meta.url)
 const requireFromESLintReact = createRequire(require.resolve('@eslint-react/eslint-plugin'))
@@ -75,7 +32,6 @@ const config = {
     { name: 'payload', specifier: require.resolve('@payloadcms/oxlint-plugin') },
     { name: 'perfectionist', specifier: require.resolve('eslint-plugin-perfectionist') },
     { name: 'playwright', specifier: require.resolve('eslint-plugin-playwright') },
-    { name: 'react-compiler', specifier: require.resolve('eslint-plugin-react-compiler') },
     { name: 'regexp', specifier: require.resolve('eslint-plugin-regexp') },
     // `vitest` is reserved for oxlint's native plugin, which can't recognize custom `test` imports
     { name: '@vitest', specifier: require.resolve('@vitest/eslint-plugin') },
@@ -244,16 +200,55 @@ const config = {
             },
           },
         ],
-      },
-    },
-    {
-      files: ['**/*.tsx'],
-      ...reactExtends,
-      rules: {
-        ...reactExtends.rules,
+        /**
+         * React's rules check `.ts` files too, not just `.tsx`. Custom hooks often live in `.ts` files,
+         * and the build runs React Compiler on every file with `'use client'`, including `.ts` ones.
+         */
+        ...eslintReact.configs['recommended-type-checked'].rules,
+        '@eslint-react/hooks-extra/no-direct-set-state-in-use-effect': 'off',
+        '@eslint-react/naming-convention/use-state': 'off',
+        '@eslint-react/dom/no-dangerously-set-innerhtml': 'off',
+        '@eslint-react/dom/no-dangerously-set-innerhtml-with-children': 'off',
+        '@eslint-react/no-unsafe-component-will-mount': 'off',
+        '@eslint-react/no-unsafe-component-will-receive-props': 'off',
+        '@eslint-react/no-unsafe-component-will-update': 'off',
+        '@eslint-react/no-set-state-in-component-did-mount': 'off',
+        '@eslint-react/no-set-state-in-component-did-update': 'off',
+        '@eslint-react/no-set-state-in-component-will-update': 'off',
+        '@eslint-react/no-missing-component-display-name': 'off',
+        '@eslint-react/no-direct-mutation-state': 'off',
+        '@eslint-react/no-array-index-key': 'off',
+        '@eslint-react/no-unstable-default-props': 'off', // TODO: Evaluate enabling this
+        '@eslint-react/no-unstable-context-value': 'off', // TODO: Evaluate enabling this
         ...reactA11yRules,
+        // Needs type information, which oxlint doesn't give JS plugins
+        '@eslint-react/no-leaked-conditional-rendering': 'off',
+        // React
+        'react-hooks/exhaustive-deps': 'warn',
         // TODO: back to 'error' once fixed. This version flags more than the ESLint one.
-        'jsx-a11y/role-has-required-aria-props': 'warn',
+        'react-hooks/rules-of-hooks': 'warn',
+        // React Compiler
+        'react-hooks/error-boundaries': 'error',
+        'react-hooks/globals': 'error',
+        'react-hooks/hooks': 'error',
+        'react-hooks/immutability': 'error',
+        'react-hooks/incompatible-library': 'warn',
+        'react-hooks/invariant': 'error',
+        // TODO: 'error' once all its findings are fixed
+        'react-hooks/preserve-manual-memoization': 'warn',
+        'react-hooks/purity': 'error',
+        // TODO: 'error' once all its findings are fixed
+        'react-hooks/refs': 'warn',
+        'react-hooks/rule-suppression': 'error',
+        // TODO: 'error' once all its findings are fixed
+        'react-hooks/set-state-in-effect': 'warn',
+        'react-hooks/set-state-in-render': 'error',
+        // TODO: 'error' once all its findings are fixed
+        'react-hooks/static-components': 'warn',
+        'react-hooks/syntax': 'error',
+        'react-hooks/unsupported-syntax': 'warn',
+        'react-hooks/use-memo': 'error',
+        'react-hooks/void-use-memo': 'error',
       },
     },
     {
@@ -267,7 +262,6 @@ const config = {
         ]),
       ),
     },
-    { files: ['**/*.tsx'], rules: reactCompiler.configs.recommended.rules },
     {
       files: ['**/*.config.ts', '**/config.ts'],
       rules: {

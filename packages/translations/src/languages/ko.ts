@@ -292,6 +292,7 @@ export const koTranslations: DefaultTranslationsObject = {
     and: '및',
     anotherUser: '다른 사용자',
     anotherUserTakenOver: '다른 사용자가 이 문서의 편집을 인수했습니다.',
+    apiResponse: 'API 응답',
     applyChanges: '변경 사항 적용',
     ascending: '오름차순',
     auto: '자동',
@@ -484,6 +485,7 @@ export const koTranslations: DefaultTranslationsObject = {
     reindexingAll: '모든 {{collections}}를 다시 인덱싱하는 중입니다.',
     reloadDocument: '문서 다시 불러오기',
     remove: '제거',
+    removeFilter: '필터 제거',
     rename: '이름 변경',
     replaceRow: '행 교체',
     requiredFields: '*로 표시된 필드는 필수입니다.',
@@ -575,6 +577,7 @@ export const koTranslations: DefaultTranslationsObject = {
     yes: '네',
   },
   hierarchy: {
+    folderLocation: '폴더 위치',
     goTo: '"{{name}}"로 이동하십시오.',
     itemsMovedTo: '{{title}}은 {{destination}}으로 이동되었습니다.',
     itemsMovedToRoot: '{{title}}가 루트로 이동되었습니다.',
