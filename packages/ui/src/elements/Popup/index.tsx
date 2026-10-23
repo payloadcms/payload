@@ -274,25 +274,25 @@ export const Popup: React.FC<PopupProps> = (props) => {
     triggerRef,
   })
 
+  const submenuCallbacks = useRef({ closeFromPointer, openFromParent })
+  const parentSubmenuScope = parentPopup?.submenuScope
+
   useEffect(() => {
-    if (!isSubmenu) {
+    submenuCallbacks.current = { closeFromPointer, openFromParent }
+  }, [closeFromPointer, openFromParent])
+
+  useEffect(() => {
+    if (!isSubmenu || !parentSubmenuScope) {
       return
     }
 
-    return parentPopup.submenuScope.register({
+    return parentSubmenuScope.register({
       id: contentId,
-      closeBranch: closeFromPointer,
+      closeBranch: () => submenuCallbacks.current.closeFromPointer(),
       isPointerProtected: pointerIntent.isProtected,
-      open: openFromParent,
+      open: (viaKeyboard) => submenuCallbacks.current.openFromParent(viaKeyboard),
     })
-  }, [
-    closeFromPointer,
-    contentId,
-    isSubmenu,
-    openFromParent,
-    parentPopup,
-    pointerIntent.isProtected,
-  ])
+  }, [contentId, isSubmenu, parentSubmenuScope, pointerIntent.isProtected])
 
   // /////////////////////////////////////
   // Position Calculation

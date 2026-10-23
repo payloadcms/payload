@@ -219,13 +219,15 @@ test('should keep a reusable submenu trigger full width and highlighted over its
   expect(getComputedStyle(theme.element()).backgroundColor).toBe('rgb(1, 2, 3)')
 })
 
-test('should immediately switch to a sibling submenu outside the safe area', async () => {
-  const screen = await render(
+test('should switch siblings with the latest callbacks after a rerender', async () => {
+  const renderMenu = ({ onClose }: { onClose: () => void }) => (
     <div style={{ '--color-bg-selected-strong': 'rgb(1, 2, 3)' } as CSSProperties}>
       <Popup button="Root" popupType="menu" theme="auto">
         <PopupList.MenuItem>
           <Popup
             hoverSubmenu
+            onToggleClose={() => onClose()}
+            onToggleOpen={() => {}}
             popupType="menu"
             renderButton={(buttonProps) => (
               <PopupList.SubmenuTrigger buttonProps={buttonProps}>Theme</PopupList.SubmenuTrigger>
@@ -256,8 +258,11 @@ test('should immediately switch to a sibling submenu outside the safe area', asy
           </Popup>
         </PopupList.MenuItem>
       </Popup>
-    </div>,
+    </div>
   )
+  const initialClose = vi.fn()
+  const latestClose = vi.fn()
+  const screen = await render(renderMenu({ onClose: initialClose }))
 
   await screen.getByRole('button', { name: 'Root' }).click()
   const theme = screen.getByRole('menuitem', { name: 'Theme' })
@@ -265,10 +270,14 @@ test('should immediately switch to a sibling submenu outside the safe area', asy
 
   await theme.hover()
   await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
-  await language.hover()
+  await screen.rerender(renderMenu({ onClose: latestClose }))
+  language.element().focus()
+  await userEvent.keyboard('{Enter}')
 
   expect(theme.element().getAttribute('aria-expanded')).toBe('false')
   expect(language.element().getAttribute('aria-expanded')).toBe('true')
+  expect(initialClose).not.toHaveBeenCalled()
+  expect(latestClose).toHaveBeenCalledOnce()
 
   await expect.element(language).toHaveAttribute('aria-expanded', 'true')
   expect(getComputedStyle(language.element()).backgroundColor).toBe('rgb(1, 2, 3)')
