@@ -53,8 +53,8 @@ export function createGcsAdapter({
       await uploadFile({
         acl,
         bucket,
-        content: getFileContent(file),
         client: getStorageClient(),
+        content: getFileContent(file),
         mimeType: file.mimeType,
         storageFilePath,
       })

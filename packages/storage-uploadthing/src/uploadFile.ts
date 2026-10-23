@@ -1,5 +1,5 @@
-import type { UTApi } from 'uploadthing/server'
 import type { FileContent } from 'payload/internal'
+import type { UTApi } from 'uploadthing/server'
 
 import { APIError } from 'payload'
 import { getFileBlob } from 'payload/internal'
@@ -9,8 +9,8 @@ import type { ACL } from './index.js'
 
 interface UploadFileArgs {
   acl: ACL
-  content: FileContent
   clientUploadContext?: unknown
+  content: FileContent
   data: Record<string, unknown>
   filename: string
   mimeType: string
@@ -19,8 +19,8 @@ interface UploadFileArgs {
 
 export async function uploadFile({
   acl,
-  content,
   clientUploadContext,
+  content,
   data,
   filename,
   mimeType,

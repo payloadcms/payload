@@ -5,9 +5,9 @@ import type {
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
-import type { SignedDownloadsConfig } from './getFile.js'
-
 import { getFileContent } from 'payload/internal'
+
+import type { SignedDownloadsConfig } from './getFile.js'
 
 import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
@@ -59,8 +59,8 @@ export function createS3Adapter({
       await uploadFile({
         acl,
         bucket,
-        content: getFileContent(file),
         client: getStorageClient(),
+        content: getFileContent(file),
         mimeType: file.mimeType,
         storageFilePath,
       })

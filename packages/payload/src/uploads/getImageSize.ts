@@ -3,8 +3,8 @@ import type { PayloadRequest } from '../types/index.js'
 import type { ProbedImageSize } from './types.js'
 import type { UploadFile } from './uploadFile.js'
 
-import { probeImageSize, probeImageSizeFromPath } from './probeImageSize.js'
 import { getFileContent, getFileInput } from './fileContent.js'
+import { probeImageSize, probeImageSizeFromPath } from './probeImageSize.js'
 
 type Args = {
   file: PayloadRequest['file'] | UploadFile

@@ -5,12 +5,12 @@ import type { checkFileRestrictionsParams, FileAllowList } from './types.js'
 import { ValidationError } from '../errors/index.js'
 import { validateMimeType } from '../utilities/validateMimeType.js'
 import { validatePDF } from '../utilities/validatePDF.js'
-import { getFileTypeFallback } from './getFileTypeFallback.js'
 import {
-  getFileBuffer as readFileBuffer,
   getFileContent,
   getFileInspectionInput,
+  getFileBuffer as readFileBuffer,
 } from './fileContent.js'
+import { getFileTypeFallback } from './getFileTypeFallback.js'
 import {
   getFileExtension,
   getMimeTypeEssence,

@@ -61,8 +61,8 @@ export function createVercelBlobAdapter({
       const result = await uploadFile({
         access,
         addRandomSuffix: addRandomSuffix && !isClientUpload,
-        content: getFileContent(file),
         cacheControlMaxAge,
+        content: getFileContent(file),
         mimeType,
         storageFilePath,
         token,

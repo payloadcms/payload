@@ -6,13 +6,13 @@ import fs from 'fs/promises'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { SharpDependency } from '../../config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
+import type { FileContentToSave } from '../fileContent.js'
 import type { WithMetadata } from '../optionallyAppendMetadata.js'
 import type { FileSize, FileSizes, FocalPoint, ProbedImageSize } from '../types.js'
-import type { FileContentToSave } from '../fileContent.js'
 import type { UploadFile } from '../uploadFile.js'
 
-import { fileExists } from '../fileExists.js'
 import { getFileInput } from '../fileContent.js'
+import { fileExists } from '../fileExists.js'
 import { isAnimatedImage } from '../isAnimatedImage.js'
 import { optionallyAppendMetadata } from '../optionallyAppendMetadata.js'
 import { createImageSize } from './createImageSize.js'
@@ -287,7 +287,7 @@ export async function createImageSizes({
       })
 
       imageSizeFiles.push({
-        content: { buffer: bufferData, type: 'buffer' },
+        content: { type: 'buffer', buffer: bufferData },
         path: imagePath,
       })
     }),

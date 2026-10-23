@@ -1,12 +1,12 @@
 import type { PayloadRequest } from '../types/index.js'
 import type { ClientUploadData } from '../uploads/getFileFromClientUpload.js'
 
-import { getFileContent } from '../uploads/fileContent.js'
-import { registerUploadFile } from '../uploads/uploadFileLifecycle.js'
 import { APIError } from '../errors/APIError.js'
 import { verifyClientUploadReceipt } from '../uploads/clientUploadReceipt.js'
 import { processMultipartFormdata } from '../uploads/fetchAPI-multipart/index.js'
+import { getFileContent } from '../uploads/fileContent.js'
 import { getFileFromClientUpload } from '../uploads/getFileFromClientUpload.js'
+import { registerUploadFile } from '../uploads/uploadFileLifecycle.js'
 
 type AddDataAndFileToRequest = (req: PayloadRequest) => Promise<void>
 

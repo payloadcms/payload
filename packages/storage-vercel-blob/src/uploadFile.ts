@@ -7,8 +7,8 @@ import { getFileBlob } from 'payload/internal'
 interface UploadFileArgs {
   access: 'public'
   addRandomSuffix?: boolean
-  content: FileContent
   cacheControlMaxAge?: number
+  content: FileContent
   mimeType: string
   storageFilePath: string
   token: string
@@ -21,8 +21,8 @@ interface UploadFileResult {
 export async function uploadFile({
   access,
   addRandomSuffix,
-  content,
   cacheControlMaxAge,
+  content,
   mimeType,
   storageFilePath,
   token,

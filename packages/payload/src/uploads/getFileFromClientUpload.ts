@@ -11,11 +11,11 @@ import type { SanitizedUploadConfig, UploadEdits } from './types.js'
 
 import { APIError } from '../errors/APIError.js'
 import { isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
+import { getFileSize } from './fileContent.js'
 import { getFileContentRequirement, HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
 import { getImageSize } from './getImageSize.js'
-import { getFileSize } from './fileContent.js'
-import { registerUploadFile } from './uploadFileLifecycle.js'
 import { toLegacyUploadFile } from './uploadFile.js'
+import { registerUploadFile } from './uploadFileLifecycle.js'
 
 export type ClientUploadData = {
   clientUploadContext?: unknown
@@ -61,7 +61,7 @@ export async function getFileFromClientUpload({
     return toLegacyUploadFile({
       name: file.filename,
       clientUploadContext: file.clientUploadContext,
-      content: { size: file.size, type: 'clientUpload' },
+      content: { type: 'clientUpload', size: file.size },
       mimetype: file.mimeType,
       size: file.size,
     })
@@ -82,7 +82,7 @@ export async function getFileFromClientUpload({
   }
   req.context[CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY] = tempFilePath
 
-  const content = { ownership: 'temporary', path: tempFilePath, type: 'file' } as const
+  const content = { type: 'file', ownership: 'temporary', path: tempFilePath } as const
 
   registerUploadFile({ content, contextKey: CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY, req })
 
@@ -218,7 +218,7 @@ async function fetchHeaderOnly({
   const probedFile = toLegacyUploadFile({
     name: file.filename,
     clientUploadContext: file.clientUploadContext,
-    content: { probe: Buffer.concat(chunks), size: file.size, type: 'clientUpload' },
+    content: { type: 'clientUpload', probe: Buffer.concat(chunks), size: file.size },
     mimetype: response.headers.get('Content-Type') || file.mimeType,
     size: file.size,
   })

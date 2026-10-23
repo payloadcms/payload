@@ -4,9 +4,9 @@ import type {
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
-import type { R2Bucket } from './types.js'
-
 import { getFileContent } from 'payload/internal'
+
+import type { R2Bucket } from './types.js'
 
 import { deleteFile } from './deleteFile.js'
 import { getFile } from './getFile.js'

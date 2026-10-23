@@ -28,8 +28,12 @@ export function getFileContent(
   file: FileContentSource,
   ownership: 'external' | 'temporary' = 'external',
 ): FileContent {
-  if ('type' in file) return file
-  if (file.content) return file.content
+  if ('type' in file) {
+    return file
+  }
+  if (file.content) {
+    return file.content
+  }
 
   const tracked = legacyContent.get(file)
   if (
@@ -37,18 +41,23 @@ export function getFileContent(
     tracked.data === file.data &&
     tracked.buffer === file.buffer &&
     tracked.tempFilePath === file.tempFilePath
-  )
+  ) {
     return tracked.content
-  if (file.tempFilePath) return { ownership, path: file.tempFilePath, type: 'file' }
+  }
+  if (file.tempFilePath) {
+    return { type: 'file', ownership, path: file.tempFilePath }
+  }
 
   const buffer = file.data ?? file.buffer
-  if (!buffer) throw new Error('Expected file content, a buffer, or a file path.')
+  if (!buffer) {
+    throw new Error('Expected file content, a buffer, or a file path.')
+  }
   // A hook may clone a public file and lose its WeakMap association. Stay conservative:
   // a client reference without a local path does not establish that its bytes are complete.
   if (file.clientUploadContext) {
-    return { probe: buffer.length ? buffer : undefined, size: file.size ?? 0, type: 'clientUpload' }
+    return { type: 'clientUpload', probe: buffer.length ? buffer : undefined, size: file.size ?? 0 }
   }
-  return { buffer, type: 'buffer' }
+  return { type: 'buffer', buffer }
 }
 
 export function bindLegacyFileContent<T extends LegacyContent>(file: T, content: FileContent): T {
@@ -70,13 +79,17 @@ export function getFileInput(file: FileContentSource): Buffer | string {
 /** A bounded probe is sufficient for inspection, but is not a complete file. */
 export function getFileInspectionInput(file: FileContentSource): Buffer | string {
   const content = getFileContent(file)
-  if (content.type === 'clientUpload') return content.probe ?? Buffer.alloc(0)
+  if (content.type === 'clientUpload') {
+    return content.probe ?? Buffer.alloc(0)
+  }
   return content.type === 'file' ? content.path : content.buffer
 }
 
 export async function getFileBuffer(file: FileContentSource): Promise<Buffer> {
   const content = requireCompleteContent(file)
-  if (content.type === 'buffer') return content.buffer
+  if (content.type === 'buffer') {
+    return content.buffer
+  }
   const fs = await import('fs/promises')
   return fs.default.readFile(content.path)
 }
@@ -93,7 +106,9 @@ export async function getFileStream(file: FileContentSource): Promise<Readable> 
 
 export async function getFileBlob(file: FileContentSource, type?: string): Promise<Blob> {
   const content = requireCompleteContent(file)
-  if (content.type === 'buffer') return new Blob([content.buffer], { type })
+  if (content.type === 'buffer') {
+    return new Blob([content.buffer], { type })
+  }
   // Workers require filesystem compatibility to use temp files, so keep this import conditional.
   const { openAsBlob } = await import('fs')
   return openAsBlob(content.path, { type })
@@ -101,8 +116,12 @@ export async function getFileBlob(file: FileContentSource, type?: string): Promi
 
 export async function getFileSize(file: FileContentSource): Promise<number> {
   const content = getFileContent(file)
-  if (content.type === 'clientUpload') return content.size
-  if (content.type === 'buffer') return content.buffer.length
+  if (content.type === 'clientUpload') {
+    return content.size
+  }
+  if (content.type === 'buffer') {
+    return content.buffer.length
+  }
   const fs = await import('fs/promises')
   return (await fs.default.stat(content.path)).size
 }
@@ -112,7 +131,7 @@ export async function replaceFileContent<T extends { content: FileContent; size:
   file: T,
   data: Buffer,
 ): Promise<T> {
-  let content: FileContent = { buffer: data, type: 'buffer' }
+  let content: FileContent = { type: 'buffer', buffer: data }
   if (file.content.type === 'file' && file.content.ownership === 'temporary') {
     const fs = await import('fs/promises')
     await fs.default.writeFile(file.content.path, data)
@@ -128,28 +147,34 @@ export async function saveFileContent(file: FileContentSource, destination: stri
     await fs.default.writeFile(destination, content.buffer)
   } else {
     const path = await import('path')
-    if (path.default.resolve(content.path) !== path.default.resolve(destination))
+    if (path.default.resolve(content.path) !== path.default.resolve(destination)) {
       await fs.default.copyFile(content.path, destination)
+    }
   }
 }
 
 /** Cleanup is idempotent and never removes borrowed files. */
 export async function disposeFileContent(file: FileContentSource): Promise<void> {
   const content = getFileContent(file)
-  if (content.type !== 'file' || content.ownership !== 'temporary') return
+  if (content.type !== 'file' || content.ownership !== 'temporary') {
+    return
+  }
   const fs = await import('fs/promises')
   try {
     await fs.default.unlink(content.path)
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      throw error
+    }
   }
 }
 
 function requireCompleteContent(file: FileContentSource) {
   const content = getFileContent(file)
-  if (content.type === 'clientUpload')
+  if (content.type === 'clientUpload') {
     throw new Error(
       'Client upload must be materialized before reading or processing its full content.',
     )
+  }
   return content
 }

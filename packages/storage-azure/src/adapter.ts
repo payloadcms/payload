@@ -55,8 +55,8 @@ export function createAzureAdapter({
 
     handleUpload: async ({ data, file, storageFilePath }) => {
       await uploadFile({
-        content: getFileContent(file),
         client: getStorageClient(),
+        content: getFileContent(file),
         mimeType: file.mimeType,
         storageFilePath,
       })

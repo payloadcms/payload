@@ -5,8 +5,8 @@ import { AbortController } from '@azure/abort-controller'
 import { getFileBuffer, getFileStream } from 'payload/internal'
 
 interface UploadArgs {
-  content: FileContent
   client: ContainerClient
+  content: FileContent
   mimeType: string
   storageFilePath: string
 }
@@ -14,8 +14,8 @@ interface UploadArgs {
 const multipartThreshold = 1024 * 1024 * 50 // 50MB
 
 export async function uploadFile({
-  content,
   client,
+  content,
   mimeType,
   storageFilePath,
 }: UploadArgs): Promise<void> {

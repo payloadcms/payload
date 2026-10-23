@@ -26,8 +26,8 @@ import {
   type TypedLocale,
 } from '../../../index.js'
 import { getFileByPath } from '../../../uploads/getFileByPath.js'
-import { withUploadFileScope } from '../../../uploads/uploadFileLifecycle.js'
 import { normalizeUploadFile, toLegacyUploadFile } from '../../../uploads/uploadFile.js'
+import { withUploadFileScope } from '../../../uploads/uploadFileLifecycle.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { createOperation } from '../create.js'
 

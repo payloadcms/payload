@@ -3,6 +3,7 @@ import fs from 'fs/promises'
 import path from 'path'
 
 import type { PayloadRequest } from '../types/index.js'
+
 import { toLegacyUploadFile } from './uploadFile.js'
 
 const mimeTypeEstimate: Record<string, string> = {
@@ -25,7 +26,7 @@ export const getFileByPath = async (filePath: string): Promise<PayloadRequest['f
 
   return toLegacyUploadFile({
     name,
-    content: { buffer: data, type: 'buffer' },
+    content: { type: 'buffer', buffer: data },
     mimetype: type?.mime || mimeTypeEstimate[ext]!,
     size: stat.size,
   })

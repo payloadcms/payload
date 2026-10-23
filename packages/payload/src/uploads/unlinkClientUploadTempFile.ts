@@ -32,7 +32,7 @@ export const unlinkClientUploadTempFile: (args: Args) => Promise<void> = async (
 
   if (tempFilePath !== alreadyUnlinkedPath) {
     registerUploadFile({
-      content: { ownership: 'temporary', path: tempFilePath, type: 'file' },
+      content: { type: 'file', ownership: 'temporary', path: tempFilePath },
       contextKey: CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY,
       req,
     })

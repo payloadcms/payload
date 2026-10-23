@@ -1,7 +1,7 @@
 import type { Endpoint } from '../config/types.js'
 
-import { withUploadFileScope } from '../uploads/uploadFileLifecycle.js'
 import { unlinkClientUploadTempFile } from '../uploads/unlinkClientUploadTempFile.js'
+import { withUploadFileScope } from '../uploads/uploadFileLifecycle.js'
 import { addDataAndFileToRequest } from './addDataAndFileToRequest.js'
 import { addLocalesToRequestFromData } from './addLocalesToRequest.js'
 

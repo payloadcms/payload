@@ -45,9 +45,15 @@ export function toLegacyUploadFile(
     mimetype: file.mimetype,
     size: file.size,
   }
-  if (content.type === 'file') legacy.tempFilePath = content.path
-  else delete legacy.tempFilePath
-  if (file.clientUploadContext !== undefined) legacy.clientUploadContext = file.clientUploadContext
-  else delete legacy.clientUploadContext
+  if (content.type === 'file') {
+    legacy.tempFilePath = content.path
+  } else {
+    delete legacy.tempFilePath
+  }
+  if (file.clientUploadContext !== undefined) {
+    legacy.clientUploadContext = file.clientUploadContext
+  } else {
+    delete legacy.clientUploadContext
+  }
   return bindLegacyFileContent(legacy, content)
 }

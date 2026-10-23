@@ -7,8 +7,8 @@ import { getFileBuffer, getFileStream } from 'payload/internal'
 interface UploadArgs {
   acl?: 'private' | 'public-read'
   bucket: string
-  content: FileContent
   client: AWS.S3
+  content: FileContent
   mimeType: string
   storageFilePath: string
 }
@@ -18,8 +18,8 @@ const multipartThreshold = 1024 * 1024 * 50 // 50MB
 export async function uploadFile({
   acl,
   bucket,
-  content,
   client,
+  content,
   mimeType,
   storageFilePath,
 }: UploadArgs): Promise<void> {

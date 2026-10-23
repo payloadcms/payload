@@ -13,7 +13,6 @@ import {
   mergeHeaders,
   unlinkClientUploadTempFile,
 } from 'payload'
-
 import { withUploadFileScope } from 'payload/internal'
 const handleError = async ({
   err,

@@ -7,8 +7,8 @@ import { pipeline } from 'stream/promises'
 interface UploadFileArgs {
   acl?: 'Private' | 'Public'
   bucket: string
-  content: FileContent
   client: Storage
+  content: FileContent
   mimeType: string
   storageFilePath: string
 }
@@ -16,8 +16,8 @@ interface UploadFileArgs {
 export async function uploadFile({
   acl,
   bucket,
-  content,
   client,
+  content,
   mimeType,
   storageFilePath,
 }: UploadFileArgs): Promise<void> {

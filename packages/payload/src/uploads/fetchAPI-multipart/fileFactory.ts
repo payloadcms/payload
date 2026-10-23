@@ -2,7 +2,6 @@ import type { FetchAPIFileUploadOptions } from '../../config/types.js'
 import type { FileShape } from './index.js'
 
 import { bindLegacyFileContent } from '../fileContent.js'
-
 import {
   checkAndMakeDir,
   debugLog,
@@ -81,7 +80,7 @@ export const fileFactory: FileFactory = (options, fileUploadOptions) => {
       truncated: options.truncated,
     },
     options.tempFilePath
-      ? { ownership: 'temporary', path: options.tempFilePath, type: 'file' }
-      : { buffer: options.buffer, type: 'buffer' },
+      ? { type: 'file', ownership: 'temporary', path: options.tempFilePath }
+      : { type: 'buffer', buffer: options.buffer },
   )
 }

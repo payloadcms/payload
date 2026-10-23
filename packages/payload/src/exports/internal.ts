@@ -18,7 +18,6 @@ export type {
   ClientUploadReceipt,
   SignedClientUploadReceipt,
 } from '../uploads/clientUploadReceipt.js'
-export { getExternalFile } from '../uploads/getExternalFile.js'
 export {
   bindLegacyFileContent,
   disposeFileContent,
@@ -33,14 +32,15 @@ export {
   saveFileContent,
 } from '../uploads/fileContent.js'
 export type { FileContent, FileContentToSave } from '../uploads/fileContent.js'
-export { normalizeUploadFile, toLegacyUploadFile } from '../uploads/uploadFile.js'
-export type { UploadFile } from '../uploads/uploadFile.js'
+export { getExternalFile } from '../uploads/getExternalFile.js'
 export { isSvgMimeType, isXmlMimeType } from '../uploads/getFileTypeIdentity.js'
 export { getRangeRequestInfo } from '../uploads/getRangeRequestInfo.js'
 export { getSafeFileName } from '../uploads/getSafeFilename.js'
 export { parseRangeHeader } from '../uploads/parseRangeHeader.js'
 export { UPLOAD_CONTENT_SECURITY_POLICY } from '../uploads/uploadContentSecurityPolicy.js'
-export { getEntityPermissions } from '../utilities/getEntityPermissions/getEntityPermissions.js'
-export { sanitizePermissions } from '../utilities/sanitizePermissions.js'
-
+export { normalizeUploadFile, toLegacyUploadFile } from '../uploads/uploadFile.js'
+export type { UploadFile } from '../uploads/uploadFile.js'
 export { withUploadFileScope } from '../uploads/uploadFileLifecycle.js'
+export { getEntityPermissions } from '../utilities/getEntityPermissions/getEntityPermissions.js'
+
+export { sanitizePermissions } from '../utilities/sanitizePermissions.js'

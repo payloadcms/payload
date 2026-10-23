@@ -6,22 +6,21 @@ import fs from 'fs/promises'
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Document, PayloadRequest } from '../types/index.js'
+import type { FileContentToSave } from './fileContent.js'
 import type { ExternalUploadSource } from './sanitizeUploadData.js'
 import type { FileData, ProbedImageSize, UploadEdits } from './types.js'
-import type { FileContentToSave } from './fileContent.js'
 
 import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
 import { isNumber } from '../utilities/isNumber.js'
 import { canResizeImage } from './canResizeImage.js'
 import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { cropImage } from './cropImage.js'
+import { getFileBuffer, getFileContent, getFileInput, replaceFileContent } from './fileContent.js'
 import { getExternalFile } from './getExternalFile.js'
 import { getFileByPath } from './getFileByPath.js'
-import { getFileExtension, getSanitizedUploadFilename } from './getFileTypeIdentity.js'
-import { getFileBuffer, getFileContent, getFileInput, replaceFileContent } from './fileContent.js'
-import { normalizeUploadFile, toLegacyUploadFile } from './uploadFile.js'
-import { getFileFromClientUpload } from './getFileFromClientUpload.js'
 import { getFileContentRequirement } from './getFileContentRequirement.js'
+import { getFileFromClientUpload } from './getFileFromClientUpload.js'
+import { getFileExtension, getSanitizedUploadFilename } from './getFileTypeIdentity.js'
 import { getImageSize } from './getImageSize.js'
 import { getSafeFileName } from './getSafeFilename.js'
 import { createImageSizes } from './image-resizing/createImageSizes.js'
@@ -29,6 +28,7 @@ import { isAnimatedImage } from './isAnimatedImage.js'
 import { isImage } from './isImage.js'
 import { isProcessableImage } from './isProcessableImage.js'
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
+import { normalizeUploadFile, toLegacyUploadFile } from './uploadFile.js'
 type Args<T> = {
   collection: Collection
   config: SanitizedConfig
@@ -377,13 +377,13 @@ export const generateFileData = async <T>({
           .toBuffer({ resolveWithObject: true })
 
         filesToSave.push({
-          content: { buffer: resizedAfterCrop.data, type: 'buffer' },
+          content: { type: 'buffer', buffer: resizedAfterCrop.data },
           path: `${staticPath}/${fsSafeName}`,
         })
 
         fileForResize = {
           ...fileForResize,
-          content: { buffer: resizedAfterCrop.data, type: 'buffer' },
+          content: { type: 'buffer', buffer: resizedAfterCrop.data },
           size: resizedAfterCrop.info.size,
         }
 
@@ -399,13 +399,13 @@ export const generateFileData = async <T>({
       } else {
         // If resizeOptions is not present, just save the cropped image
         filesToSave.push({
-          content: { buffer: croppedImage, type: 'buffer' },
+          content: { type: 'buffer', buffer: croppedImage },
           path: `${staticPath}/${fsSafeName}`,
         })
 
         fileForResize = {
           ...file,
-          content: { buffer: croppedImage, type: 'buffer' },
+          content: { type: 'buffer', buffer: croppedImage },
           size: info.size,
         }
 

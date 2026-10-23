@@ -3,8 +3,8 @@ import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { getFileContent } from './fileContent.js'
-import { cleanupUploadFiles, registerUploadFile } from './uploadFileLifecycle.js'
 import { unlinkClientUploadTempFile } from './unlinkClientUploadTempFile.js'
+import { cleanupUploadFiles, registerUploadFile } from './uploadFileLifecycle.js'
 
 type Args = {
   collectionConfig: SanitizedCollectionConfig
