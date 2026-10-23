@@ -100,6 +100,14 @@ const withIssuer = (
   return issuer ? handler(issuer) : new Response(null, { status: 404 })
 }
 
+/**
+ * The user logged in to this browser, who can allow MCP clients. Tokens and API keys in the
+ * `Authorization` header can't, or an MCP client could use its access token to approve itself a
+ * new, separate login.
+ */
+const getBrowserUser = (req: PayloadRequest): PayloadRequest['user'] =>
+  req.headers.has('Authorization') ? null : req.user
+
 const metadataResponse = (issuer: string): Response =>
   Response.json(
     {
@@ -116,7 +124,8 @@ const metadataResponse = (issuer: string): Response =>
       token_endpoint: `${issuer}/token`,
       token_endpoint_auth_methods_supported: ['none'],
     } satisfies OpenIdProviderDiscoveryMetadata,
-    { headers: { 'Access-Control-Allow-Origin': '*' } },
+    // Not cached, since without `serverURL` its URLs come from the request
+    { headers: { 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-store' } },
   )
 
 const register: PayloadHandler = async (req) => {
@@ -177,7 +186,9 @@ const authorize: PayloadHandler = (req) => {
     return redirect({ params: { error: OAuthErrorCode.InvalidRequest, state }, redirectURI })
   }
 
-  if (!req.user) {
+  const user = getBrowserUser(req)
+
+  if (!user) {
     const loginURL = formatAdminURL({ adminRoute: req.payload.config.routes.admin, path: '/login' })
 
     return new Response(null, {
@@ -191,14 +202,14 @@ const authorize: PayloadHandler = (req) => {
   const consent: Consent = {
     clientID: clientID!,
     codeChallenge,
-    collection: req.user.collection,
+    collection: user.collection,
     redirectURI,
     state,
-    userID: req.user.id,
+    userID: user.id,
   }
 
   return page({
-    content: `<p>It will be able to use this app's MCP tools as ${escapeHTML(String(req.user.email ?? req.user.id))}, and you will return to ${escapeHTML(new URL(redirectURI).host || redirectURI)}.</p>
+    content: `<p>It will be able to use this app's MCP tools as ${escapeHTML(String(user.email ?? user.id))}, and you will return to ${escapeHTML(new URL(redirectURI).host || redirectURI)}.</p>
 <form method="post">
 <input name="consent" type="hidden" value="${seal({ type: 'consent', data: consent, expiresIn: 20 * 60 * 60, req })}">
 <button name="decision" type="submit" value="allow">Allow</button>
@@ -212,9 +223,10 @@ const authorize: PayloadHandler = (req) => {
 const approve: PayloadHandler = async (req) => {
   const form = new URLSearchParams(await req.text!())
   const consent = unseal<Consent>({ type: 'consent', req, value: form.get('consent') })
+  const user = getBrowserUser(req)
 
   // The form is only valid for the user it was shown to
-  if (!consent || req.user?.id !== consent.userID || req.user.collection !== consent.collection) {
+  if (!consent || user?.id !== consent.userID || user.collection !== consent.collection) {
     return page({
       content: '<p>Start the sign-in again from your MCP client.</p>',
       status: 400,
