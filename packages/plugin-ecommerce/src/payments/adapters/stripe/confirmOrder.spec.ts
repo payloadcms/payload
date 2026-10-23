@@ -15,6 +15,7 @@ vi.mock('stripe', () => {
 })
 
 import { confirmOrder } from './confirmOrder.js'
+import { hashCartItems } from './validateSettlement.js'
 
 type ConfirmOrderArgs = Parameters<ReturnType<typeof confirmOrder>>[0]
 
@@ -217,6 +218,31 @@ describe('confirmOrder', () => {
     await expect(runConfirmation({ harness })).rejects.toThrow('items')
 
     expect(harness.finalizeOrder).not.toHaveBeenCalled()
+  })
+
+  it('should take order items from the transaction when the PaymentIntent has no item snapshot', async () => {
+    const items = Array.from({ length: 12 }, (_, index) => ({
+      id: `item-${index}`,
+      product: `product-${index}`,
+      quantity: 1,
+    }))
+    const harness = createHarness({ transaction: createTransaction({ items }) })
+    mockPaymentIntentsRetrieve.mockResolvedValue(
+      createPaymentIntent({
+        metadata: {
+          cartID: 'cart-123',
+          cartItemsHash: hashCartItems(items),
+          shippingAddress: JSON.stringify({ city: 'Test City' }),
+        },
+      }),
+    )
+
+    await runConfirmation({ harness })
+
+    expect(harness.finalizeOrder).toHaveBeenCalledWith({
+      orderData: expect.objectContaining({ items }),
+      transactionID: 'txn-123',
+    })
   })
 
   it('should log and propagate finalization failures', async () => {
