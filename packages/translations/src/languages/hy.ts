@@ -294,6 +294,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     and: 'Եվ',
     anotherUser: 'Այլ օգտատեր',
     anotherUserTakenOver: 'Այլ օգտատեր ստանձել է այս փաստաթղթի խմբագրումը։',
+    apiResponse: 'API պատասխան',
     applyChanges: 'Կիրառել փոփոխությունները',
     ascending: 'Աճող',
     auto: 'Ավտո',
@@ -488,6 +489,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Վերաինդեքսավորվում են բոլոր {{collections}}-ները։',
     reloadDocument: 'Թարմացնել փաստաթուղթը',
     remove: 'Հեռացնել',
+    removeFilter: 'Հեռացնել զտիչը',
     rename: 'Վերանվանել',
     replaceRow: 'Տողը փոխարինել',
     requiredFields: '* նշանով դաշտերը պարտադիր են։',
@@ -583,6 +585,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     yes: 'Այո',
   },
   hierarchy: {
+    folderLocation: 'Պանակի տեղադրություն',
     goTo: 'Անցեք "{{name}}"',
     itemsMovedTo: '{{title}} տեղափոխվեց {{destination}}։',
     itemsMovedToRoot: '"{{title}}" տեղափոխվել է արմատը',

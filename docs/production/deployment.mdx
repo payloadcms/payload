@@ -211,7 +211,7 @@ Dockerfile
 # Dockerfile
 # From https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile
 
-FROM node:24-alpine AS base
+FROM node:24.22.1-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -288,7 +288,7 @@ TanStack Start builds with Vite, so there's no `next.config` or `standalone` out
 # Dockerfile
 # From https://github.com/payloadcms/payload/blob/main/templates/blank-tanstack/Dockerfile
 
-FROM node:24-alpine AS base
+FROM node:24.22.1-alpine AS base
 
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
@@ -345,7 +345,7 @@ version: '3'
 
 services:
   payload:
-    image: node:24-alpine
+    image: node:24.22.1-alpine
     ports:
       - '3000:3000'
     volumes:

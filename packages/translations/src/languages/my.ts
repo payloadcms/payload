@@ -286,6 +286,7 @@ export const myTranslations: DefaultTranslationsObject = {
     and: 'နှင့်',
     anotherUser: 'တစ်ခြားအသုံးပြုသူ',
     anotherUserTakenOver: 'တစ်ခြားအသုံးပြုသူသည်ဤစာရွက်စာတမ်းကိုပြင်ဆင်မှုကိုရယူလိုက်သည်။',
+    apiResponse: 'API တုံ့ပြန်ချက်',
     applyChanges: 'ပြောင်းလဲမှုများ အသုံးပြုပါ',
     ascending: 'တက်နေသည်',
     auto: 'အော်တို',
@@ -477,6 +478,7 @@ export const myTranslations: DefaultTranslationsObject = {
     reindexingAll: 'အပေါ် {{collections}} အားလုံးကို ထပ်လိပ်နေပါသည်။',
     reloadDocument: 'စာရွက်စာတမ်း ပြန်လည်ဖွင့်ပါ',
     remove: 'ဖယ်ရှားမည်။',
+    removeFilter: 'စစ်ထုတ်မှုကို ဖယ်ရှားရန်',
     rename: 'အမည်ပြောင်း',
     replaceRow: 'တန်းစီအစားထိုးရန်',
     requiredFields: '* ဖြင့် အမှတ်အသားပြုထားသော အကွက်များကို မဖြစ်မနေ ဖြည့်ရပါမည်။',
@@ -567,6 +569,7 @@ export const myTranslations: DefaultTranslationsObject = {
     yes: 'ဟုတ်ကဲ့',
   },
   hierarchy: {
+    folderLocation: 'ဖိုင်တွဲတည်နေရာ',
     goTo: '"{{name}}" သို့သွားပါ',
     itemsMovedTo: '{{title}} ကို {{destination}} သို့ ရွှေ့လိုက်ပါပြီ',
     itemsMovedToRoot: '"{{title}}" ကို အမြစ်သို့ ရွှေ့လိုက်ပါပြီ။',

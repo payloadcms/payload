@@ -305,6 +305,7 @@ export const deTranslations: DefaultTranslationsObject = {
     and: 'Und',
     anotherUser: 'Ein anderer Benutzer',
     anotherUserTakenOver: 'Ein anderer Benutzer hat die Bearbeitung dieses Dokuments übernommen.',
+    apiResponse: 'API-Antwort',
     applyChanges: 'Änderungen anwenden',
     ascending: 'Aufsteigend',
     auto: 'Automatisch',
@@ -499,6 +500,7 @@ export const deTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Alle {{collections}} werden neu indiziert.',
     reloadDocument: 'Dokument neu laden',
     remove: 'Entfernen',
+    removeFilter: 'Filter entfernen',
     rename: 'Umbenennen',
     replaceRow: 'Zeile ersetzen',
     requiredFields: 'Mit * gekennzeichnete Felder sind Pflichtfelder.',
@@ -594,6 +596,7 @@ export const deTranslations: DefaultTranslationsObject = {
     yes: 'Ja',
   },
   hierarchy: {
+    folderLocation: 'Ordnerpfad',
     goTo: 'Gehen Sie zu "{{name}}"',
     itemsMovedTo: '{{title}} wurde nach {{destination}} verschoben.',
     itemsMovedToRoot: '{{title}} wurde zur Wurzel verschoben',

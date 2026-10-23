@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/tanstack-start",
-  "version": "4.0.0-beta.3",
+  "version": "4.0.0-beta.4",
   "description": "TanStack Start framework adapter for Payload",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
@@ -39,6 +39,11 @@
       "types": "./src/exports/server.ts",
       "default": "./src/exports/server.ts"
     },
+    "./routes": {
+      "import": "./src/exports/routes.ts",
+      "types": "./src/exports/routes.ts",
+      "default": "./src/exports/routes.ts"
+    },
     "./shared": {
       "import": "./src/exports/shared.ts",
       "types": "./src/exports/shared.ts",
@@ -74,6 +79,11 @@
         "import": "./dist/exports/server.js",
         "types": "./dist/exports/server.d.ts",
         "default": "./dist/exports/server.js"
+      },
+      "./routes": {
+        "import": "./dist/exports/routes.js",
+        "types": "./dist/exports/routes.d.ts",
+        "default": "./dist/exports/routes.js"
       },
       "./shared": {
         "import": "./dist/exports/shared.js",
@@ -144,6 +154,6 @@
     }
   },
   "engines": {
-    "node": "^18.20.2 || >=20.9.0"
+    "node": ">=24.22.1"
   }
 }

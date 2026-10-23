@@ -293,6 +293,7 @@ export const etTranslations: DefaultTranslationsObject = {
     and: 'Ja',
     anotherUser: 'Teine kasutaja',
     anotherUserTakenOver: 'Teine kasutaja on võtnud selle dokumendi muutmise üle.',
+    apiResponse: 'API vastus',
     applyChanges: 'Rakenda muudatused',
     ascending: 'Kasvav',
     auto: 'Auto',
@@ -483,6 +484,7 @@ export const etTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Indekseerin uuesti kõik {{collections}}.',
     reloadDocument: 'Laadige dokument uuesti',
     remove: 'Eemalda',
+    removeFilter: 'Eemalda filter',
     rename: 'Nimeta ümber',
     replaceRow: 'Asenda rida',
     requiredFields: 'Tärniga * tähistatud väljad on kohustuslikud.',
@@ -574,6 +576,7 @@ export const etTranslations: DefaultTranslationsObject = {
     yes: 'Jah',
   },
   hierarchy: {
+    folderLocation: 'Kausta asukoht',
     goTo: 'Mine "{{name}}" juurde',
     itemsMovedTo: '{{title}} viidi üle {{destination}}',
     itemsMovedToRoot: '{{title}} liigutatud juurikasse',

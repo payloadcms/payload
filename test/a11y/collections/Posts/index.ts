@@ -90,6 +90,12 @@ export const PostsCollection: CollectionConfig = {
       },
     },
     {
+      name: 'relatedPosts',
+      type: 'relationship',
+      hasMany: true,
+      relationTo: postsSlug,
+    },
+    {
       name: 'relatedPost',
       type: 'relationship',
       relationTo: postsSlug,
@@ -343,6 +349,18 @@ export const PostsCollection: CollectionConfig = {
       type: 'code',
     },
     {
+      name: 'readOnlySettings',
+      type: 'json',
+      admin: { readOnly: true },
+      defaultValue: { enabled: true },
+    },
+    {
+      name: 'readOnlySource',
+      type: 'code',
+      admin: { readOnly: true },
+      defaultValue: 'const enabled = true;',
+    },
+    {
       name: 'unlabelledSettings',
       type: 'json',
       admin: {
@@ -357,6 +375,20 @@ export const PostsCollection: CollectionConfig = {
         disabled: { bulkEdit: true, column: true, filter: true, groupBy: true },
       },
       label: false,
+    },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          name: 'tabDetails',
+          fields: [{ name: 'note', type: 'text' }],
+          label: { en: 'Post details' },
+        },
+        {
+          fields: [{ name: 'tabSummary', type: 'text' }],
+          label: 'Post summary',
+        },
+      ],
     },
   ],
   llmInstructions: 'Use descriptive post titles.',

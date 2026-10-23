@@ -295,6 +295,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     and: 'Og',
     anotherUser: 'En annen bruker',
     anotherUserTakenOver: 'En annen bruker har tatt over redigeringen av dette dokumentet.',
+    apiResponse: 'API-svar',
     applyChanges: 'Bruk endringer',
     ascending: 'Stigende',
     auto: 'Automatisk',
@@ -488,6 +489,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Reindekserer alle {{collections}}.',
     reloadDocument: 'Last inn dokument',
     remove: 'Fjern',
+    removeFilter: 'Fjern filter',
     rename: 'Endre navn',
     replaceRow: 'Erstatt rad',
     requiredFields: 'Felter merket med * er obligatoriske.',
@@ -581,6 +583,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     yes: 'Ja',
   },
   hierarchy: {
+    folderLocation: 'Mappeplassering',
     goTo: 'Gå til "{{name}}"',
     itemsMovedTo: '{{title}} flyttet til {{destination}}',
     itemsMovedToRoot: '{{title}} flyttet til roten',

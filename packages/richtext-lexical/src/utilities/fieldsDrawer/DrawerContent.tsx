@@ -7,6 +7,7 @@ import {
   RenderFields,
   useDocumentForm,
   useDocumentInfo,
+  useEffectEvent,
   useServerFunctions,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
@@ -53,6 +54,9 @@ export const DrawerContent: React.FC<
 
   const fields: any = fieldMapOverride ?? featureClientSchemaMap[featureKey]?.[schemaFieldsPath] // Field Schema
 
+  // Parent autosave updates this context without starting a new drawer editing session.
+  const getParentDocumentFields = useEffectEvent(() => parentDocumentFields)
+
   useEffect(() => {
     const controller = new AbortController()
 
@@ -65,7 +69,7 @@ export const DrawerContent: React.FC<
           fields: true,
         },
         docPreferences: await getDocPreferences(),
-        documentFormState: parentDocumentFields,
+        documentFormState: getParentDocumentFields(),
         globalSlug,
         initialBlockData: data,
         operation: 'update',
@@ -92,7 +96,6 @@ export const DrawerContent: React.FC<
     isEditable,
     globalSlug,
     getDocPreferences,
-    parentDocumentFields,
   ])
 
   const onChange = useCallback(

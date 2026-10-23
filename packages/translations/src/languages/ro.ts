@@ -300,6 +300,7 @@ export const roTranslations: DefaultTranslationsObject = {
     and: 'Şi',
     anotherUser: 'Un alt utilizator',
     anotherUserTakenOver: 'Un alt utilizator a preluat editarea acestui document.',
+    apiResponse: 'Răspuns API',
     applyChanges: 'Aplicați modificările',
     ascending: 'Ascendant',
     auto: 'Automat',
@@ -493,6 +494,7 @@ export const roTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Reindexarea tuturor {{collections}}.',
     reloadDocument: 'Reîncarcă documentul',
     remove: 'Eliminați',
+    removeFilter: 'Elimină filtrul',
     rename: 'Redenumire',
     replaceRow: 'Înlocuire rând',
     requiredFields: 'Câmpurile marcate cu * sunt obligatorii.',
@@ -585,6 +587,7 @@ export const roTranslations: DefaultTranslationsObject = {
     yes: 'Da',
   },
   hierarchy: {
+    folderLocation: 'Locația folderului',
     goTo: 'Mergi la "{{name}}"',
     itemsMovedTo: '{{title}} s-a mutat la {{destination}}',
     itemsMovedToRoot: '{{title}} a fost mutat la rădăcină',

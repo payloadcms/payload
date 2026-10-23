@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "4.0.0-beta.3",
+  "version": "4.0.0-beta.4",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
@@ -705,7 +705,7 @@
     "@hyrious/esbuild-plugin-commonjs": "0.2.6",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "babel-plugin-react-compiler": "19.1.0-rc.3",
+    "babel-plugin-react-compiler": "1.0.0",
     "esbuild": "0.27.1",
     "esbuild-sass-plugin": "3.3.1",
     "payload": "workspace:*"
@@ -716,6 +716,6 @@
     "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },
   "engines": {
-    "node": ">=24.15.0"
+    "node": ">=24.22.1"
   }
 }

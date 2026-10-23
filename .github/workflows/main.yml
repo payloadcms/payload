@@ -33,6 +33,7 @@ jobs:
       needs_visual: ${{ steps.filter.outputs.needs_visual }}
       templates: ${{ steps.filter.outputs.templates }}
       build_approvals: ${{ steps.filter.outputs.build_approvals }}
+      needs_sbom: ${{ steps.filter.outputs.needs_sbom }}
     steps:
       # https://github.com/actions/virtual-environments/issues/1187
       - name: tune linux network
@@ -103,6 +104,21 @@ jobs:
               # the root lockfile; that, plus the allowlist itself, is what can introduce drift.
               - 'pnpm-lock.yaml'
               - 'packages/create-payload-app/src/lib/configure-pnpm-builds.ts'
+            # Inputs of the release SBOMs (the dependency graph, the pnpm version, the generator) and this job.
+            needs_sbom:
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'packages/*/package.json'
+              - '.tool-versions'
+              - 'tools/releaser/src/release-sbom.ts'
+              - 'tools/releaser/src/lib/sbom/**'
+              - 'tools/releaser/src/lib/publishList.ts'
+              - 'tools/releaser/src/lib/getPackageDetails.ts'
+              - 'tools/releaser/package.json'
+              - 'tools/constants/**'
+              - 'package.json'
+              - '.github/actions/setup/**'
+              - '.github/workflows/main.yml'
       - name: Log filter results
         run: |
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
@@ -110,6 +126,7 @@ jobs:
           echo "needs_visual: ${{ steps.filter.outputs.needs_visual }}"
           echo "templates: ${{ steps.filter.outputs.templates }}"
           echo "build_approvals: ${{ steps.filter.outputs.build_approvals }}"
+          echo "needs_sbom: ${{ steps.filter.outputs.needs_sbom }}"
 
   # Detects upstream Next.js canary publishes that are missing `@next/env` or
   # `@next/eslint-plugin-next` for the same version (would break
@@ -211,7 +228,27 @@ jobs:
           path: packages/*/dist
           key: dist-${{ github.sha }}
 
+  # Catches SBOM generation regressions before a release. Push to main only, not part of all-green.
+  sbom:
+    needs: changes
+    if: github.event_name == 'push' && needs.changes.outputs.needs_sbom == 'true'
+    runs-on: ubuntu-26.04
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+
+      - name: Generate SBOMs
+        run: pnpm release-sbom --out-dir "$RUNNER_TEMP/sboms"
+
   tests-unit:
+    permissions:
+      actions: read
+      contents: read
     runs-on: ubuntu-26.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true' || needs.changes.outputs.needs_visual == 'true'
@@ -235,6 +272,9 @@ jobs:
         run: pnpm test:components
 
   tests-types:
+    permissions:
+      actions: read
+      contents: read
     runs-on: ubuntu-26.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true'
@@ -275,6 +315,9 @@ jobs:
           echo "matrix=$matrix" >> $GITHUB_OUTPUT
 
   tests-int:
+    permissions:
+      actions: read
+      contents: read
     runs-on: ubuntu-26.04
     needs: [changes, build, int-matrix, probe-next-canary]
     if: needs.changes.outputs.needs_tests == 'true'
@@ -348,6 +391,9 @@ jobs:
 
   # Prepare prod test environment once, shared by all E2E shards
   e2e-prep:
+    permissions:
+      actions: read
+      contents: read
     name: E2E Prep
     runs-on: ubuntu-26.04
     needs: [changes, build]
@@ -376,6 +422,9 @@ jobs:
           if-no-files-found: error
 
   tests-e2e:
+    permissions:
+      actions: read
+      contents: read
     runs-on: ubuntu-26.04
     needs: [e2e-matrix, e2e-prep]
     name: E2E - ${{ matrix.suite || 'all suites' }} [${{ matrix.framework }}]${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}${{ matrix.disableCacheComponents && ' [without cacheComponents]' || '' }}
@@ -571,7 +620,8 @@ jobs:
       - name: Install dependencies
         run: |
           docker exec visual-regression bash -lc "
-            apt-get update -qq && apt-get install -y -qq build-essential python3 > /dev/null &&
+            apt-get update -qq -o Acquire::Retries=5 &&
+            apt-get install -y -qq -o Acquire::Retries=5 build-essential python3 > /dev/null &&
             npm install -g pnpm@\$(grep '^pnpm ' .tool-versions | awk '{print \$2}') &&
             # --location=user avoids writing storeDir into pnpm-workspace.yaml, which pnpm
             # does by default when the cwd is a workspace root.
@@ -602,6 +652,9 @@ jobs:
 
   # Build listed templates with packed local packages and then runs their int and e2e tests
   build-and-test-templates:
+    permissions:
+      actions: read
+      contents: read
     runs-on: ubuntu-26.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_build == 'true'
@@ -695,6 +748,9 @@ jobs:
         run: pnpm --filter scripts check-template-build-approvals
 
   tests-type-generation:
+    permissions:
+      actions: read
+      contents: read
     runs-on: ubuntu-26.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true'
@@ -728,6 +784,7 @@ jobs:
     # with --shard); `test:int:summary` cannot shard.
     continue-on-error: true
     permissions:
+      actions: read
       id-token: write
       contents: read
     services:
