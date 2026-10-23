@@ -46,26 +46,28 @@ import { formatName } from '../utilities/formatName.js'
 import { groupOrTabHasRequiredSubfield } from '../utilities/groupOrTabHasRequiredSubfield.js'
 import { withNullableType } from './withNullableType.js'
 
-function reduceFieldsToSchema({
+function buildMutationInputFields({
   fields,
   fieldToSchemaMap,
-  inputObjectTypeConfig = {},
+  initialInputFields = {},
 }: {
   fields: Field[]
   fieldToSchemaMap: Partial<
-    Record<Field['type'], (schema: InputObjectTypeConfig, field: Field) => object>
+    Record<Field['type'], (inputFields: InputObjectTypeConfig, field: Field) => object>
   >
-  inputObjectTypeConfig?: InputObjectTypeConfig
+  initialInputFields?: InputObjectTypeConfig
 }): InputObjectTypeConfig {
-  return fields.reduce((schema, field) => {
+  return fields.reduce((inputFields, field) => {
     if ('hidden' in field && field.hidden) {
-      return schema
+      return inputFields
     }
 
-    const fieldSchema = fieldToSchemaMap[field.type]
+    const buildFieldSchema = fieldToSchemaMap[field.type]
 
-    return typeof fieldSchema === 'function' ? { ...schema, ...fieldSchema(schema, field) } : schema
-  }, inputObjectTypeConfig)
+    return typeof buildFieldSchema === 'function'
+      ? { ...inputFields, ...buildFieldSchema(inputFields, field) }
+      : inputFields
+  }, initialInputFields)
 }
 
 const idFieldTypes = {
@@ -155,7 +157,11 @@ export function buildMutationInputType({
       },
     }),
     collapsible: (inputObjectTypeConfig: InputObjectTypeConfig, field: CollapsibleField) =>
-      reduceFieldsToSchema({ fields: field.fields, fieldToSchemaMap, inputObjectTypeConfig }),
+      buildMutationInputFields({
+        fields: field.fields,
+        fieldToSchemaMap,
+        initialInputFields: inputObjectTypeConfig,
+      }),
     date: (inputObjectTypeConfig: InputObjectTypeConfig, field: DateField) => ({
       ...inputObjectTypeConfig,
       [formatName(field.name)]: {
@@ -194,10 +200,10 @@ export function buildMutationInputType({
           [formatName(field.name)]: { type },
         }
       } else {
-        return reduceFieldsToSchema({
+        return buildMutationInputFields({
           fields: field.fields,
           fieldToSchemaMap,
-          inputObjectTypeConfig,
+          initialInputFields: inputObjectTypeConfig,
         })
       }
     },
@@ -290,7 +296,11 @@ export function buildMutationInputType({
       },
     }),
     row: (inputObjectTypeConfig: InputObjectTypeConfig, field: RowField) =>
-      reduceFieldsToSchema({ fields: field.fields, fieldToSchemaMap, inputObjectTypeConfig }),
+      buildMutationInputFields({
+        fields: field.fields,
+        fieldToSchemaMap,
+        initialInputFields: inputObjectTypeConfig,
+      }),
     select: (inputObjectTypeConfig: InputObjectTypeConfig, field: SelectField) => {
       const formattedName = `${combineParentName(parentName, field.name)}_MutationInput`
       let type: GraphQLType = new GraphQLEnumType({
@@ -350,10 +360,10 @@ export function buildMutationInputType({
           }
         }
 
-        return reduceFieldsToSchema({
+        return buildMutationInputFields({
           fields: tab.fields,
           fieldToSchemaMap,
-          inputObjectTypeConfig: acc,
+          initialInputFields: acc,
         })
       }, inputObjectTypeConfig)
     },
@@ -422,7 +432,7 @@ export function buildMutationInputType({
   }
 
   const fieldName = formatName(name)
-  const fieldSchemas = reduceFieldsToSchema({ fields, fieldToSchemaMap })
+  const fieldSchemas = buildMutationInputFields({ fields, fieldToSchemaMap })
 
   if (Object.keys(fieldSchemas).length === 0) {
     return null
