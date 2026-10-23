@@ -9,7 +9,7 @@ import { addSessionToUser } from './sessions.js'
 
 /**
  * Starts a login session for the user and signs the JWT for it, the same token a password login
- * returns. Payload's JWT strategy accepts it. Revoke `sid` if the login fails after this.
+ * returns. Payload's JWT strategy accepts it. The session is saved on the user right away.
  */
 export const createAuthToken = async ({
   collectionConfig,
@@ -29,7 +29,16 @@ export const createAuthToken = async ({
    */
   shouldCreateRefreshToken?: boolean
   user: AuthenticatedUser
-}): Promise<{ exp: number; refreshToken?: string; sid?: string; token: string }> => {
+}): Promise<{
+  exp: number
+  refreshToken?: string
+  /**
+   * The ID of the session the token belongs to. Removing that session from the user, like logout
+   * does, makes the token stop working.
+   */
+  sid?: string
+  token: string
+}> => {
   const { session, sid } = await addSessionToUser({
     collectionConfig,
     payload: req.payload,

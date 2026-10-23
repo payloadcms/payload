@@ -404,6 +404,8 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
 
     return result
   } catch (error: unknown) {
+    // The password was right, but the login failed afterwards, e.g. in a `beforeLogin` hook, so
+    // remove the session it started
     if (sid) {
       await revokeSession({
         collectionConfig,
