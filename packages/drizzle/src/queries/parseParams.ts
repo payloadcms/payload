@@ -28,6 +28,7 @@ import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 import type { DrizzleResolvedOperator } from './operatorMap.js'
 
+import { escapeLikeValue } from '../utilities/escapeLikeValue.js'
 import { escapeSQLValue } from '../utilities/escapeSQLValue.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { isValidStringID } from '../utilities/isValidStringID.js'
@@ -339,7 +340,7 @@ export function parseParams({
                           originalOperator,
                           path: relationOrPath,
                           resolvedOperator: 'like',
-                          value: `%${word}%`,
+                          value: `%${escapeLikeValue(word)}%`,
                         }),
                       ),
                     ),
