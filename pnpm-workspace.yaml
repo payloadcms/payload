@@ -109,3 +109,6 @@ minimumReleaseAgeExclude:
   - '@lexical/utils@0.53.0'
   - '@lexical/yjs@0.53.0'
   - lexical@0.53.0
+  - '@modelcontextprotocol/client@2.4.0'
+  - '@modelcontextprotocol/core@2.4.0'
+  - '@modelcontextprotocol/server@2.4.0'
