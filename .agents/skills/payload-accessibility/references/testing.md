@@ -15,14 +15,14 @@ The tool used by an original auditor does not determine the test layer. If Playw
 
 ## Canonical suites
 
-- `test/a11y/WCAG.e2e.spec.ts` contains browser-observable criterion evidence.
+- `test/a11y/WCAG.audit.spec.ts` preserves the original audit evidence and runs only with the explicit audit command.
 - `test/a11y/screen-reader.spec.ts` contains Guidepup VoiceOver and NVDA evidence.
-- `test/a11y/helpers.ts` contains setup reused by both suites.
-- `test/a11y/e2e.spec.ts` remains the existing broad accessibility-scan and page-level suite.
+- `test/a11y/helpers.ts` contains setup reused across the suites.
+- `test/a11y/e2e.spec.ts` contains general workflow regressions, combining keyboard/focus assertions and axe checkpoints.
 
-Use ordered `test.describe` groups named with the WCAG criterion and level. A test belongs under its primary criterion; note secondary affected criteria in the handoff rather than duplicating the scenario. Consolidate tests only when one arrangement, interaction, and assertion genuinely exercises every covered case.
+In the audit, use ordered `test.describe` groups named with the WCAG criterion and level. A test belongs under its primary criterion; note secondary affected criteria in the handoff rather than duplicating the scenario. Consolidate tests only when one arrangement, interaction, and assertion genuinely exercises every covered case.
 
-Use the existing a11y Payload config and real UI components. Keep scenario-specific setup in its WCAG spec. Extract a helper only when both canonical specs use it.
+Use the existing a11y Payload config and real UI components. Keep scenario-specific setup in its spec; reusable helpers live in `test/a11y/helpers.ts`.
 
 ## Regression quality
 
@@ -54,11 +54,11 @@ The operating-system setup changes accessibility and automation permissions, so 
 ## Commands
 
 ```bash
-# Targeted browser evidence
-pnpm test:e2e a11y --grep "<test name or WCAG criterion>" --workers=1
+# Targeted general browser evidence
+pnpm test:a11y --grep "<test name>" --workers=1
 
 # Complete browser WCAG evidence suite
-pnpm test:e2e a11y --grep "WCAG" --workers=1
+pnpm test:a11y:audit --workers=1
 
 # Screen-reader evidence on a configured macOS or Windows machine
 pnpm test:a11y:screen-reader
