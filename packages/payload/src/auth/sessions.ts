@@ -20,30 +20,37 @@ export const removeExpiredSessions = (sessions: UserSession[]): UserSession[] =>
 
 /**
  * Adds a session to the user and removes expired sessions
- * @returns The session ID (sid) if sessions are used
+ * @returns The session and its ID (sid) if sessions are used
  */
 export const addSessionToUser = async ({
   collectionConfig,
   payload,
   req,
+  sessionExpiration = collectionConfig.auth.tokenExpiration,
   user,
 }: {
   collectionConfig: SanitizedCollectionConfig
   payload: Payload
   req: PayloadRequest
+  /**
+   * Seconds until the session expires.
+   *
+   * @default collectionConfig.auth.tokenExpiration
+   */
+  sessionExpiration?: number
   user: AuthenticatedUser
-}): Promise<{ sid?: string }> => {
+}): Promise<{ session?: UserSession; sid?: string }> => {
   assertNoValidationWrite(req)
 
+  let session: undefined | UserSession
   let sid: string | undefined
   if (collectionConfig.auth.useSessions) {
     // Add session to user
     sid = uuid()
     const now = new Date()
-    const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
-    const expiresAt = new Date(now.getTime() + tokenExpInMs)
+    const expiresAt = new Date(now.getTime() + sessionExpiration * 1000)
 
-    const session = { id: sid, createdAt: now, expiresAt }
+    session = { id: sid, createdAt: now, expiresAt }
 
     if (!user.sessions?.length) {
       user.sessions = [session]
@@ -69,6 +76,7 @@ export const addSessionToUser = async ({
   }
 
   return {
+    session,
     sid,
   }
 }
