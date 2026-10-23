@@ -72,6 +72,7 @@ export interface Config {
     posts: Post;
     'autosave-posts': AutosavePost;
     'autosave-with-draft-button-posts': AutosaveWithDraftButtonPost;
+    'autosave-with-virtual-posts': AutosaveWithVirtualPost;
     'autosave-multi-select-posts': AutosaveMultiSelectPost;
     'autosave-with-validate-posts': AutosaveWithValidatePost;
     'draft-posts': DraftPost;
@@ -106,6 +107,7 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
     'autosave-with-draft-button-posts': AutosaveWithDraftButtonPostsSelect<false> | AutosaveWithDraftButtonPostsSelect<true>;
+    'autosave-with-virtual-posts': AutosaveWithVirtualPostsSelect<false> | AutosaveWithVirtualPostsSelect<true>;
     'autosave-multi-select-posts': AutosaveMultiSelectPostsSelect<false> | AutosaveMultiSelectPostsSelect<true>;
     'autosave-with-validate-posts': AutosaveWithValidatePostsSelect<false> | AutosaveWithValidatePostsSelect<true>;
     'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
@@ -327,6 +329,25 @@ export interface DraftPost {
 export interface AutosaveWithDraftButtonPost {
   id: string;
   title: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-with-virtual-posts".
+ */
+export interface AutosaveWithVirtualPost {
+  id: string;
+  title: string;
+  titleDerived?: string | null;
+  array?:
+    | {
+        title?: string | null;
+        titleDerived?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -970,6 +991,10 @@ export interface PayloadLockedDocument {
         value: string | AutosaveWithDraftButtonPost;
       } | null)
     | ({
+        relationTo: 'autosave-with-virtual-posts';
+        value: string | AutosaveWithVirtualPost;
+      } | null)
+    | ({
         relationTo: 'autosave-multi-select-posts';
         value: string | AutosaveMultiSelectPost;
       } | null)
@@ -1157,6 +1182,24 @@ export interface AutosavePostsSelect<T extends boolean = true> {
  */
 export interface AutosaveWithDraftButtonPostsSelect<T extends boolean = true> {
   title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-with-virtual-posts_select".
+ */
+export interface AutosaveWithVirtualPostsSelect<T extends boolean = true> {
+  title?: T;
+  titleDerived?: T;
+  array?:
+    | T
+    | {
+        title?: T;
+        titleDerived?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
