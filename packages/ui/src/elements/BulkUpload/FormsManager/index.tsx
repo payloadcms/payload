@@ -698,28 +698,29 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           afterStateUpdate()
         }
 
-        if (hasSubmitted) {
-          const { state } = await getFormState({
-            collectionSlug,
-            docPermissions,
-            docPreferences: null,
-            formState: forms[i].formState,
-            operation: 'create',
-            schemaPath: collectionSlug,
-          })
+        const { state } = await getFormState({
+          collectionSlug,
+          docPermissions,
+          docPreferences: null,
+          formState: forms[i].formState,
+          operation: 'create',
+          schemaPath: collectionSlug,
+          skipValidation: !hasSubmitted,
+        })
 
-          const newFormErrorCount = Object.values(state).reduce(
-            (acc, value) => (value?.valid === false ? acc + 1 : acc),
-            0,
-          )
+        const errorCount = hasSubmitted
+          ? Object.values(state).reduce(
+              (acc, value) => (value?.valid === false ? acc + 1 : acc),
+              0,
+            )
+          : forms[i].errorCount
 
-          dispatch({
-            type: 'UPDATE_FORM',
-            errorCount: newFormErrorCount,
-            formState: state,
-            index: i,
-          })
-        }
+        dispatch({
+          type: 'UPDATE_FORM',
+          errorCount,
+          formState: state,
+          index: i,
+        })
       }
     },
     [collectionSlug, docPermissions, forms, getFormState, hasSubmitted],
