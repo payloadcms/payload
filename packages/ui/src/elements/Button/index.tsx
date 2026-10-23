@@ -100,6 +100,10 @@ export const Button: React.FC<Props> = (props) => {
   const [showTooltip, setShowTooltip] = React.useState(false)
   const { t } = useTranslation()
 
+  // An icon-only button has no text of its own, so its tooltip is the only label
+  // sighted users get. Screen readers need that label too, even while the tooltip is hidden.
+  const accessibleLabel = ariaLabel ?? (icon && !children && tooltip ? tooltip : undefined)
+
   // Explicit `=== true` check preserves `false` for aria-disabled attribute.
   // Using `disabled || loading` would treat `false` as falsy, omitting the attribute entirely.
   const isDisabled = disabled === true || loading === true
@@ -147,7 +151,7 @@ export const Button: React.FC<Props> = (props) => {
     'aria-disabled': isDisabled,
     'aria-expanded': ariaExpanded,
     'aria-haspopup': ariaHasPopup,
-    'aria-label': ariaLabel,
+    'aria-label': accessibleLabel,
     'aria-pressed': ariaPressed,
     className: !SubMenuPopupContent ? [classes, styleClasses].join(' ') : classes,
     disabled: isDisabled,
