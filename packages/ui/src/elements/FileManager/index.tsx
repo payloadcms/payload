@@ -294,6 +294,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
       <div className={`${baseClass}__selected-preview`}>
         <Thumbnail
           collectionSlug={collectionSlug}
+          doc={{ filename: filename || value?.name }}
           fileSrc={isImage(fileType) ? src : null}
           size="expand"
         />

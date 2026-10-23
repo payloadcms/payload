@@ -126,9 +126,12 @@ export async function expectOptionsToHaveAccessibleNames(
   return accessibleNames
 }
 
-export async function getFocusIndicatorStyle(element: Locator) {
-  return element.evaluate((node) => {
-    const style = getComputedStyle(node)
+export async function getFocusIndicatorStyle(
+  element: Locator,
+  { pseudoElement }: { pseudoElement?: '::after' | '::before' } = {},
+) {
+  return element.evaluate((node, pseudoElement) => {
+    const style = getComputedStyle(node, pseudoElement)
 
     return {
       backgroundColor: style.backgroundColor,
@@ -145,7 +148,7 @@ export async function getFocusIndicatorStyle(element: Locator) {
       outlineStyle: style.outlineStyle,
       outlineWidth: style.outlineWidth,
     }
-  })
+  }, pseudoElement)
 }
 
 type FocusIndicatorStyle = Awaited<ReturnType<typeof getFocusIndicatorStyle>>
@@ -210,7 +213,7 @@ function hasPaintedBoxShadow({ shadow }: { shadow: string }) {
   })
 }
 
-function isPaintedColor(color: string) {
+export function isPaintedColor(color: string) {
   return (
     color !== 'transparent' &&
     !/(?:rgba|hsla)\([^)]*,\s*0(?:\.0+)?%?\s*\)$/i.test(color) &&
@@ -1222,10 +1225,8 @@ export async function scanA11y({
   name,
   page,
   include,
-  deferred,
   testInfo = test.info(),
 }: {
-  deferred?: string
   include?: string[]
   name: string
   page: Page
@@ -1252,11 +1253,7 @@ export async function scanA11y({
     expect.soft(results.violations, `Axe checkpoint: ${name}`).toEqual([])
   }
 
-  if (deferred) {
-    await test.step.skip(`axe: ${name} — ${deferred}`, run)
-  } else {
-    await test.step(`axe: ${name}`, run)
-  }
+  await test.step(`axe: ${name}`, run)
 }
 
 export async function expectNoPageOverflow({ page }: { page: Page }) {

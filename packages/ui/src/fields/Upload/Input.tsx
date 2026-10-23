@@ -824,6 +824,7 @@ export function UploadInput(props: UploadInputProps) {
                         {t('general:or')}
                       </span>
                       <Button
+                        aria-label={t('upload:pasteFromClipboard')}
                         buttonStyle="secondary"
                         className={`${baseClass}__pasteFromClipboard`}
                         icon="clipboard"
