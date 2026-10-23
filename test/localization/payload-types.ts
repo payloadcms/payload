@@ -152,6 +152,7 @@ export interface Config {
     'locale-validation-global': LocaleValidationGlobal;
     'global-array': GlobalArray;
     'global-text': GlobalText;
+    'localized-status-shared-global': LocalizedStatusSharedGlobal;
     'global-drafts': GlobalDraft;
     'publication-access-global': PublicationAccessGlobal;
     'publication-before-operation-global': PublicationBeforeOperationGlobal;
@@ -163,6 +164,7 @@ export interface Config {
     'locale-validation-global': LocaleValidationGlobalSelect<false> | LocaleValidationGlobalSelect<true>;
     'global-array': GlobalArraySelect<false> | GlobalArraySelect<true>;
     'global-text': GlobalTextSelect<false> | GlobalTextSelect<true>;
+    'localized-status-shared-global': LocalizedStatusSharedGlobalSelect<false> | LocalizedStatusSharedGlobalSelect<true>;
     'global-drafts': GlobalDraftsSelect<false> | GlobalDraftsSelect<true>;
     'publication-access-global': PublicationAccessGlobalSelect<false> | PublicationAccessGlobalSelect<true>;
     'publication-before-operation-global': PublicationBeforeOperationGlobalSelect<false> | PublicationBeforeOperationGlobalSelect<true>;
@@ -978,6 +980,7 @@ export interface PublicationAccess {
 export interface PublicationFieldAccess {
   id: string;
   title?: string | null;
+  sharedText?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1931,6 +1934,7 @@ export interface PublicationAccessSelect<T extends boolean = true> {
  */
 export interface PublicationFieldAccessSelect<T extends boolean = true> {
   title?: T;
+  sharedText?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -2073,6 +2077,34 @@ export interface GlobalText {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-status-shared-global".
+ */
+export interface LocalizedStatusSharedGlobal {
+  id: string;
+  localizedText?: string | null;
+  sharedText?: string | null;
+  sharedArray?:
+    | {
+        sharedText?: string | null;
+        localizedText?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  sharedBlocks?:
+    | {
+        sharedText?: string | null;
+        localizedText?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'shared-content';
+      }[]
+    | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-drafts".
  */
 export interface GlobalDraft {
@@ -2122,6 +2154,7 @@ export interface PublicationSanitizeGlobal {
 export interface PublicationFieldAccessGlobal {
   id: string;
   title?: string | null;
+  sharedText?: string | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -2191,6 +2224,37 @@ export interface GlobalTextSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-status-shared-global_select".
+ */
+export interface LocalizedStatusSharedGlobalSelect<T extends boolean = true> {
+  localizedText?: T;
+  sharedText?: T;
+  sharedArray?:
+    | T
+    | {
+        sharedText?: T;
+        localizedText?: T;
+        id?: T;
+      };
+  sharedBlocks?:
+    | T
+    | {
+        'shared-content'?:
+          | T
+          | {
+              sharedText?: T;
+              localizedText?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-drafts_select".
  */
 export interface GlobalDraftsSelect<T extends boolean = true> {
@@ -2239,6 +2303,7 @@ export interface PublicationSanitizeGlobalSelect<T extends boolean = true> {
  */
 export interface PublicationFieldAccessGlobalSelect<T extends boolean = true> {
   title?: T;
+  sharedText?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
