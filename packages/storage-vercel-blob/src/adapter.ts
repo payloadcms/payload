@@ -49,7 +49,11 @@ export function createVercelBlobAdapter({
         token,
       }),
 
-    handleUpload: async ({ data, file: { buffer, mimeType, tempFilePath }, storageFilePath }) => {
+    handleUpload: async ({
+      data,
+      file: { buffer, imageSizeName, mimeType, tempFilePath },
+      storageFilePath,
+    }) => {
       const result = await uploadFile({
         access,
         addRandomSuffix,
@@ -62,7 +66,11 @@ export function createVercelBlobAdapter({
       })
 
       if (result.filename) {
-        data.filename = result.filename
+        if (imageSizeName !== undefined) {
+          data.sizes[imageSizeName].filename = result.filename
+        } else {
+          data.filename = result.filename
+        }
       }
 
       return data
