@@ -135,6 +135,33 @@ describe('createTransformFile', () => {
         expect(metadata.height).toBe(expectedSize)
       },
     )
+
+    it('should strip EXIF metadata when withMetadata is false without image adjustments', async () => {
+      const buffer = await sharp({
+        create: { background: { b: 100, g: 150, r: 200 }, channels: 3, height: 50, width: 50 },
+      })
+        .jpeg()
+        .toBuffer()
+
+      const file = new File([buffer], 'photo.jpg', { type: 'image/jpeg' })
+      const transformFile = createTransformFile({ sharpDependency: sharp })
+
+      const result = await transformFile({
+        file,
+        options: {
+          collectionUpload: { withMetadata: false },
+          kind: 'main',
+        } satisfies SharpUploadTaskOptions,
+        req: makeReq(),
+      })
+
+      expect(result.file).toBeDefined()
+      const processedBuffer = await toBuffer(result.file!)
+      const metadata = await sharp(processedBuffer).metadata()
+      expect(metadata.width).toBe(50)
+      expect(metadata.height).toBe(50)
+      expect(metadata.exif).toBeUndefined()
+    })
   })
 
   describe('size (transformSize)', () => {
