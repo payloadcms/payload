@@ -14,7 +14,7 @@ import type { Data, FileSizes, SanitizedCollectionConfig } from 'payload'
 export type StaticFileDetailsProps = {
   customUploadActions?: React.ReactNode[]
   doc: {
-    sizes?: FileSizes
+    variants?: FileSizes
   } & Data
   enableAdjustments?: boolean
   handleRemove?: () => void

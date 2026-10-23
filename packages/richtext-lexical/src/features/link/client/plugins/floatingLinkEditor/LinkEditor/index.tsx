@@ -12,6 +12,7 @@ import {
   useConfig,
   useEditDepth,
   useLocale,
+  useModal,
   useTranslation,
   WriteIcon,
 } from '@payloadcms/ui'
@@ -20,6 +21,7 @@ import {
   $getSelection,
   $isLineBreakNode,
   $isRangeSelection,
+  $onUpdate,
   COMMAND_PRIORITY_HIGH,
   COMMAND_PRIORITY_LOW,
   getDOMSelection,
@@ -89,6 +91,8 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
   })
 
   const { toggleDrawer } = useLexicalDrawer(drawerSlug)
+  const { modalState } = useModal()
+  const isDrawerOpen = Boolean(modalState[drawerSlug]?.isOpen)
 
   const setNotLink = useCallback(() => {
     setIsLink(false)
@@ -104,6 +108,11 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
   }, [setIsLink, setLinkUrl, setLinkLabel, setSelectedNodes])
 
   const $updateLinkEditor = useCallback(() => {
+    // The drawer owns the in-progress edit until it closes, including its selected nodes.
+    if (isDrawerOpen) {
+      return
+    }
+
     const selection = $getSelection()
     let selectedNodeDomRect: DOMRect | undefined
 
@@ -261,6 +270,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     return true
   }, [
     editor,
+    isDrawerOpen,
     setNotLink,
     config.routes.admin,
     config.routes.api,
@@ -325,15 +335,17 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       editor.registerCommand(
         SELECTION_CHANGE_COMMAND,
         () => {
-          void $updateLinkEditor()
+          $onUpdate(() => editor.read('latest', $updateLinkEditor))
           return true
         },
         COMMAND_PRIORITY_LOW,
       ),
       editor.registerCommand(
         KEY_ESCAPE_COMMAND,
-        () => {
+        (event) => {
           if (isLink) {
+            event.preventDefault()
+            event.stopImmediatePropagation()
             setNotLink()
 
             return true
@@ -364,7 +376,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
   return (
     <React.Fragment>
-      <div className="link-editor" data-theme="dark" ref={editorRef}>
+      <div className="link-editor" data-theme="dark" hidden={!isLink} ref={editorRef}>
         <div className="link-input">
           {linkNode?.__fields?.linkType === 'custom' ? <LinkIcon /> : <PageIcon />}
           {linkUrl && linkUrl.length > 0 ? (

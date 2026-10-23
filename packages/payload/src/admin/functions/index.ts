@@ -1,5 +1,3 @@
-import type { AcceptedLanguages } from '@payloadcms/translations'
-
 import type { ImportMap } from '../../cli/commands/generateImportMap/generateImportMap.js'
 import type { Locale, SanitizedConfig } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
@@ -16,12 +14,8 @@ import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 import type { ColumnsFromURL } from '../../utilities/transformColumnPreferences.js'
 import type { ComponentRenderer } from '../adapters/render.js'
 
-export type InitReqResult = {
+export type AdminContext = {
   cookies: Map<string, string>
-  // TODO: Remove in 4.0. Duplicative, already available in req.headers
-  headers: Headers
-  // TODO: Remove in 4.0. Duplicative, already available in req.i18n.language
-  languageCode: AcceptedLanguages
   locale?: Locale
   permissions: SanitizedPermissions
   req: PayloadRequest
@@ -32,7 +26,7 @@ export type InitReqResult = {
 export type DefaultServerFunctionArgs = {
   importMap: ImportMap
   renderComponent?: ComponentRenderer
-} & Pick<InitReqResult, 'cookies' | 'locale' | 'permissions' | 'req' | 'user'>
+} & Pick<AdminContext, 'cookies' | 'locale' | 'permissions' | 'req' | 'user'>
 
 export type ServerFunctionArgs = {
   args: Record<string, unknown>

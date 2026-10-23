@@ -10,6 +10,7 @@ import { createLogger, mergeConfig } from 'vite'
 
 import {
   buildExternalPackages,
+  devExternalPackages,
   payloadNoExternalPatterns,
   ssrExternalPackages,
 } from './config/external.js'
@@ -80,10 +81,10 @@ function applyDependencyWarningSuppression(config: UserConfig, enabled: boolean)
 export type WithPayloadOptions = {
   /** Extra import-protection `ignoreImporters` patterns for the TanStack Start plugin. */
   additionalIgnoreImporters?: RegExp[]
-  /** Route id of Payload's admin layout, eager-loaded instead of code-split. Defaults to `'/_payload'`. */
-  adminRouteId?: string
   /** Extra globs exempted from the `.client.*` SSR denial (beyond the default node_modules exemption). */
   clientDenialExcludeFiles?: string[]
+  /** Transform server packages in development. Enable when linking Payload source. Defaults to `false`. */
+  devBundleServerPackages?: boolean
   /**
    * Packages added to `ssr.external` on dev serve only (the build bundles them).
    * List CommonJS deps that 500 with `__cjs_module_runner_transform` — the RSC
@@ -163,8 +164,8 @@ export function withPayload(
 ): UserConfigFnObject {
   const {
     additionalIgnoreImporters = [],
-    adminRouteId,
     clientDenialExcludeFiles = [],
+    devBundleServerPackages = false,
     devServerExternalPackages = [],
     payloadConfigPath,
     routesDirectory = 'app',
@@ -196,7 +197,13 @@ export function withPayload(
     // needs none of it, since Rollup bundles CJS correctly.
     const ssrExternal = isBuild
       ? buildExternalPackages
-      : [...ssrExternalPackages, ...devServerExternalPackages]
+      : [
+          ...new Set([
+            ...(devBundleServerPackages ? [] : devExternalPackages),
+            ...devServerExternalPackages,
+            ...ssrExternalPackages,
+          ]),
+        ]
 
     const base: UserConfig = {
       build: {
@@ -207,7 +214,7 @@ export function withPayload(
           scss: {
             importers: payloadScssImporters,
             silenceDeprecations: ['import', 'global-builtin'],
-          } as any,
+          },
         },
       },
       define: {
@@ -216,13 +223,19 @@ export function withPayload(
       environments: {
         rsc: {
           build: { rollupOptions: { external: buildExternalPackages } },
-          resolve: { noExternal: noExternalPatterns },
+          resolve: {
+            external: isBuild ? undefined : ssrExternal,
+            noExternal: noExternalPatterns,
+          },
         },
         ssr: {
           build: { rollupOptions: { external: buildExternalPackages } },
-          resolve: { noExternal: noExternalPatterns },
+          resolve: {
+            external: isBuild ? undefined : ssrExternal,
+            noExternal: noExternalPatterns,
+          },
         },
-      } as any,
+      },
       optimizeDeps: {
         exclude: optimizeDepsExcludeDefaults,
         include: optimizeDepsIncludeDefaults,
@@ -250,7 +263,7 @@ export function withPayload(
         ],
         extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
         tsconfigPaths: true,
-      } as any,
+      },
       ssr: {
         external: ssrExternal,
         noExternal: noExternalPatterns,
@@ -263,7 +276,6 @@ export function withPayload(
       rsc: payloadRscOptions(),
       tanstackStart: payloadTanstackStartOptions({
         additionalIgnoreImporters,
-        adminRouteId,
         clientDenialExcludeFiles,
         routesDirectory,
         srcDirectory,
@@ -305,20 +317,14 @@ export function payloadNitroOptions(): PayloadNitroOptions {
   return { traceDeps: ['tslib*'] }
 }
 
-/** `@vitejs/plugin-react` options for Payload: transform every `.[jt]sx?` file. */
+/** Transforms application and workspace source without refreshing installed dependencies. */
 export function payloadReactOptions(): NonNullable<Parameters<typeof viteReact>[0]> {
-  return { exclude: [], include: /\.[jt]sx?$/ }
+  return { exclude: /node_modules/, include: /\.[jt]sx?$/ }
 }
 
 export type PayloadTanstackStartOptionsArgs = {
   /** Additional import-protection `ignoreImporters` patterns. */
   additionalIgnoreImporters?: RegExp[]
-  /**
-   * Route id of Payload's admin layout route, eager-loaded (not code-split) so it
-   * hydrates on first paint. It and its children skip splitting; host routes keep
-   * TanStack's default. Defaults to `'/_payload'` (the `_payload.tsx` convention).
-   */
-  adminRouteId?: string
   /**
    * Extra globs exempted from TanStack's `.client.*` SSR denial, on top of the
    * default node_modules exemption. Needed only when Payload's own `.client.*`
@@ -332,8 +338,8 @@ export type PayloadTanstackStartOptionsArgs = {
 }
 
 /**
- * The `tanstackStart` options Payload's admin requires (import-protection and
- * code-splitting). TanStack Start is one-per-app, so a host that already runs it
+ * The `tanstackStart` options Payload's admin requires (import protection and
+ * route discovery). TanStack Start is one-per-app, so a host that already runs it
  * should merge these into its single `tanstackStart` call.
  */
 export function payloadTanstackStartOptions(
@@ -341,7 +347,6 @@ export function payloadTanstackStartOptions(
 ): NonNullable<Parameters<typeof tanstackStart>[0]> {
   const {
     additionalIgnoreImporters = [],
-    adminRouteId = '/_payload',
     clientDenialExcludeFiles = [],
     routesDirectory = 'app',
     srcDirectory = 'src',
@@ -350,6 +355,7 @@ export function payloadTanstackStartOptions(
   return {
     importProtection: {
       client: { excludeFiles: [], specifiers: serverOnlyClientSpecifiers },
+      exclude: ['**/node_modules/**'],
       ignoreImporters: [...defaultImportProtectionIgnoreImporters, ...additionalIgnoreImporters],
       include: ['**/*'],
       mockAccess: 'warn',
@@ -362,19 +368,11 @@ export function payloadTanstackStartOptions(
       server: { excludeFiles: ['**/node_modules/**', ...clientDenialExcludeFiles] },
     },
     router: {
-      codeSplittingOptions: {
-        // Eager-load only Payload's admin routes so they hydrate on first paint —
-        // a split admin renders but isn't interactive until its lazy `?tsr-split=`
-        // chunk lands. Returning `[]` disables splitting for a route; `undefined`
-        // lets host routes keep TanStack's default per-route splitting.
-        splitBehavior: ({ routeId }: { routeId: string }) =>
-          routeId === adminRouteId || routeId.startsWith(`${adminRouteId}/`) ? [] : undefined,
-      },
       // Ignore generated importMap files and colocated `*.functions.ts` modules
       // (they define `createServerFn`s, not routes).
       routeFileIgnorePattern: 'importMap\\.(?:d\\.ts|js|server\\.ts)$|\\.functions\\.',
       routesDirectory,
-    } as any,
+    },
     rsc: { enabled: true },
     srcDirectory,
   }

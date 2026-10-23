@@ -130,9 +130,9 @@ export const POST = async (req: PayloadRequest) => {
 }
 ```
 
-#### From Server Actions
+#### From Server Actions / Server Functions
 
-Queue jobs from Next.js server actions:
+Queue jobs from server actions or server functions:
 
 ```ts
 'use server'
@@ -289,7 +289,7 @@ These functions receive the current `req` and return a boolean. By default, they
 Omit `overrideAccess` or pass `overrideAccess: false` to run them from the Local API:
 
 ```ts
-const req = await createLocalReq({ user }, payload)
+const req = await createPayloadRequest({ payload, user })
 
 await payload.jobs.queue({
   workflow: 'createPost',

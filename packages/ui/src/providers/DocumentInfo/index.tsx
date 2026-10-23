@@ -385,7 +385,6 @@ const DocumentInfo: React.FC<
     lastUpdateTime,
     mostRecentVersionIsAutosaved,
     preferencesKey,
-    savedDocumentData: data,
     setCurrentEditor,
     setData,
     setDocFieldPreferences,
@@ -399,7 +398,6 @@ const DocumentInfo: React.FC<
     unlockDocument,
     unpublishedVersionCount,
     updateDocumentEditor,
-    updateSavedDocumentData: setData,
     uploadStatus,
     versionCount,
   }

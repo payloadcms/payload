@@ -1,9 +1,9 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { FindOptions } from '../../collections/operations/local/find.js'
+import type { Args as BeforeChangeArgs } from '../../fields/hooks/beforeChange/index.js'
 import type { GlobalSlug, JsonObject } from '../../index.js'
 import type {
-  Operation,
   PayloadRequest,
   PopulateType,
   SelectType,
@@ -18,12 +18,13 @@ import type {
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
-import { Forbidden } from '../../errors/index.js'
+import { Forbidden, ValidationError } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple } from '../../index.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
@@ -35,6 +36,7 @@ import {
 } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolvePublishAllLocales } from '../../utilities/resolvePublishAllLocales.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import {
@@ -48,6 +50,7 @@ import {
 import { buildLocalizedPublishData } from '../../versions/buildSingleLocalePublishData.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
+import { validateGlobalLocalWithLocaleKeyedData } from './local/validate.js'
 type Args<TSlug extends GlobalSlug> = {
   autosave?: boolean
   data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
@@ -71,22 +74,29 @@ export const updateOperation = async <
 >(
   args: Args<TSlug>,
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
+  assertNoValidationWrite(args.req)
+
   const req = args.req
   const initialGlobalConfig = args.globalConfig
+
+  assertNoValidationWrite(req)
 
   validateAllLocalesPublicationFlags({
     publishAllLocales: args.publishAllLocales,
     unpublishAllLocales: args.unpublishAllLocales,
   })
 
+  const initialPublishAllLocales = resolvePublishAllLocales({
+    draft: args.draft,
+    hasLocalizeStatusEnabled: hasLocalizeStatusEnabled(initialGlobalConfig),
+    locale: req.locale,
+    publishAllLocalesArg: args.publishAllLocales,
+  })
   const initialAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
     hasLocalizedStatus: Boolean(
       req.payload.config.localization && hasLocalizeStatusEnabled(initialGlobalConfig),
     ),
-    publishAllLocales:
-      !args.draft &&
-      (args.publishAllLocales ??
-        !(hasLocalizeStatusEnabled(initialGlobalConfig) && req.locale !== 'all')),
+    publishAllLocales: initialPublishAllLocales,
     unpublishAllLocales: Boolean(args.unpublishAllLocales),
   })
 
@@ -139,9 +149,12 @@ export const updateOperation = async <
       unpublishAllLocales: unpublishAllLocalesArg,
     })
 
-    let publishAllLocales =
-      !draftArg &&
-      (publishAllLocalesArg ?? !(hasLocalizeStatusEnabled(globalConfig) && locale !== 'all'))
+    let publishAllLocales = resolvePublishAllLocales({
+      draft: draftArg,
+      hasLocalizeStatusEnabled: hasLocalizeStatusEnabled(globalConfig),
+      locale,
+      publishAllLocalesArg,
+    })
     let unpublishAllLocales =
       typeof unpublishAllLocalesArg === 'string'
         ? unpublishAllLocalesArg === 'true'
@@ -301,6 +314,7 @@ export const updateOperation = async <
             context: req.context,
             data,
             global: globalConfig,
+            operation: 'update',
             originalDoc: publicationHookDoc,
             overrideAccess,
             req,
@@ -319,6 +333,7 @@ export const updateOperation = async <
             context: req.context,
             data,
             global: globalConfig,
+            operation: 'update',
             originalDoc: publicationHookDoc,
             overrideAccess,
             req,
@@ -340,10 +355,10 @@ export const updateOperation = async <
       docWithLocales: globalJSON,
       fieldsToValidate: submittedTopLevelFieldNames,
       global: globalConfig,
-      operation: 'update' as Operation,
+      operation: 'update',
       req,
       skipValidation: isSavingDraft && !hasDraftValidationEnabled(globalConfig),
-    }
+    } satisfies BeforeChangeArgs<JsonObject>
 
     let statusFieldValue: unknown
 
@@ -445,6 +460,43 @@ export const updateOperation = async <
             result,
           })
         }
+      }
+    }
+
+    if (
+      config?.localization &&
+      hasDraftsEnabled(globalConfig) &&
+      publishAllLocales &&
+      !unpublishAllLocales &&
+      (!hasLocalizeStatusEnabled(globalConfig) || hasAuthorizedPublicationStatus)
+    ) {
+      const validationResult = await validateGlobalLocalWithLocaleKeyedData({
+        operation: 'update',
+        options: {
+          slug: globalConfig.slug,
+          data: result,
+          draft: true,
+          locale: 'all',
+          overrideAccess,
+          req,
+        },
+        payload,
+        sourceData: {
+          docWithLocales: globalJSON,
+          originalDoc: publicationHookDoc,
+          originalLocale: locale!,
+        },
+      })
+
+      if (!validationResult.valid) {
+        throw new ValidationError(
+          {
+            errors: validationResult.errors,
+            global: globalConfig.slug,
+            req,
+          },
+          req.t,
+        )
       }
     }
 
@@ -603,6 +655,7 @@ export const updateOperation = async <
             data,
             doc: result,
             global: globalConfig,
+            operation: 'update',
             overrideAccess,
             previousDoc: originalDoc,
             req,

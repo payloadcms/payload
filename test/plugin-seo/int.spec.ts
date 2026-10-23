@@ -6,7 +6,7 @@ import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { removeFiles } from '../__helpers/shared/removeFiles.js'
-import { mediaSlug, pagesSlug, siteSettingsSlug } from './shared.js'
+import { mediaSlug, pagesSlug, pagesWithImportedFieldsSlug, siteSettingsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -168,6 +168,45 @@ test.suite('@payloadcms/plugin-seo', { config: './config.ts' }, () => {
     expect(results).toEqual(
       generationEndpoints.map(({ expectedResult }) => ({ result: expectedResult })),
     )
+  })
+
+  test('should generate metadata for collections with manually configured SEO fields', async ({
+    restClient,
+  }) => {
+    await restClient.login({ slug: 'users' })
+
+    const results: unknown[] = []
+
+    for (const { body, endpoint } of generationEndpoints) {
+      const response = await restClient.POST(endpoint, {
+        body: JSON.stringify({
+          collectionSlug: pagesWithImportedFieldsSlug,
+          doc: body,
+        }),
+      })
+
+      expect(response.status).toBe(200)
+      results.push(await response.json())
+    }
+
+    expect(results).toEqual(
+      generationEndpoints.map(({ expectedResult }) => ({ result: expectedResult })),
+    )
+  })
+
+  test('should reject collections without SEO generation fields', async ({ restClient }) => {
+    await restClient.login({ slug: 'users' })
+
+    const response = await restClient.POST('/plugin-seo/generate-title', {
+      body: JSON.stringify({
+        collectionSlug: mediaSlug,
+        doc: {
+          title: 'Media title',
+        },
+      }),
+    })
+
+    expect(response.status).toBe(403)
   })
 
   test('should respect collection read access for generation endpoints', async ({ restClient }) => {

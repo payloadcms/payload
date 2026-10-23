@@ -16,6 +16,7 @@ export type CliFlags = {
   command?: CliCommand
   dry: boolean
   force: boolean
+  help: boolean
   list: boolean
   path: string
   print: boolean
@@ -33,6 +34,7 @@ export function parseFlags(argv: string[]): CliFlags {
       dry: { type: 'boolean', default: false },
       'dry-run': { type: 'boolean', default: false },
       force: { type: 'boolean', default: false },
+      help: { type: 'boolean', default: false, short: 'h' },
       list: { type: 'boolean', default: false },
       print: { type: 'boolean', default: false },
       tag: { type: 'string' },
@@ -52,6 +54,7 @@ export function parseFlags(argv: string[]): CliFlags {
     command,
     dry: Boolean(values.dry) || Boolean(values['dry-run']),
     force: Boolean(values.force),
+    help: Boolean(values.help),
     list: Boolean(values.list),
     path,
     print: Boolean(values.print),

@@ -149,10 +149,10 @@ plugin-<name>/
     "copyfiles": "^2.4.1",
     "cross-env": "10.1.0",
     "eslint": "^9.39.2",
-    "next": "^16.3.3",
+    "next": "^16.4.2",
     "payload": "^3.82.1",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "rimraf": "^6.0.1",
     "typescript": "^6.0.3",
     "vitest": "5.0.1"
@@ -161,7 +161,7 @@ plugin-<name>/
     "payload": "^3.82.1"
   },
   "engines": {
-    "node": ">=24.15.0"
+    "node": ">=24.22.1"
   }
 }
 ```
@@ -668,10 +668,11 @@ import type { MyPluginConfig } from '@payloadcms/plugin-example/types'
 ```tsx
 // src/fields/CustomField/Component.tsx
 'use client'
+import type React from 'react'
 import { useField } from '@payloadcms/ui'
-import type { TextFieldClientComponent } from 'payload'
+import type { TextFieldClientProps } from 'payload'
 
-export const CustomFieldComponent: TextFieldClientComponent = ({ field, path }) => {
+export const CustomFieldComponent: React.FC<TextFieldClientProps> = ({ field, path }) => {
   const { value, setValue } = useField<string>({ path })
 
   return (
@@ -1350,7 +1351,7 @@ Create `dev/int.spec.ts`:
 ```ts
 import type { Payload } from 'payload'
 import config from '@payload-config'
-import { createPayloadRequest, getPayload } from 'payload'
+import { createPayloadRequestFromWebRequest, getPayload } from 'payload'
 import { afterAll, beforeAll, describe, expect, test } from 'vitest'
 import { customEndpointHandler } from '../src/endpoints/handler.js'
 
@@ -1385,7 +1386,7 @@ describe('Plugin integration tests', () => {
 
   test('should query custom endpoint', async () => {
     const request = new Request('http://localhost:3000/api/my-endpoint')
-    const payloadRequest = await createPayloadRequest({ config, request })
+    const payloadRequest = await createPayloadRequestFromWebRequest({ config, request })
     const response = await customEndpointHandler(payloadRequest)
     const data = await response.json()
     expect(data).toMatchObject({ message: 'Hello' })

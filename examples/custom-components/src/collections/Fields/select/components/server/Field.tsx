@@ -1,9 +1,9 @@
-import type { SelectFieldServerComponent } from 'payload'
+import type { SelectFieldServerProps } from 'payload'
 import type React from 'react'
 
 import { SelectField } from '@payloadcms/ui'
 
-export const CustomSelectFieldServer: SelectFieldServerComponent = ({
+export const CustomSelectFieldServer: React.FC<SelectFieldServerProps> = ({
   clientField,
   path,
   schemaPath,

@@ -87,6 +87,20 @@ describe('publishSinglePackage idempotency + retry', () => {
     expect(spawn).toHaveBeenCalledTimes(1)
   })
 
+  it('should treat an "already published" conflict on the retry as success', async () => {
+    vi.mocked(isVersionPublished).mockResolvedValue(false)
+    vi.mocked(spawn)
+      .mockImplementationOnce(() => spawnExiting(1) as never)
+      .mockImplementationOnce(
+        () => spawnExiting(1, 'npm error code EPUBLISHCONFLICT\ncannot publish over') as never,
+      )
+
+    const result = await publishSinglePackage(pkg, { tag: 'canary' })
+
+    expect(result).toEqual({ name: 'payload', success: true })
+    expect(spawn).toHaveBeenCalledTimes(2)
+  })
+
   it('should treat a landed-despite-error version as success after a failed retry', async () => {
     vi.mocked(isVersionPublished).mockResolvedValueOnce(false).mockResolvedValueOnce(true)
     vi.mocked(spawn)

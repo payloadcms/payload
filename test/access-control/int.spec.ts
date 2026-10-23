@@ -7,7 +7,7 @@ import type {
   RequiredDataFromCollectionSlug,
 } from 'payload'
 
-import { AuthenticationError, createLocalReq, Forbidden } from 'payload'
+import { AuthenticationError, createPayloadRequest, docAccessOperation, Forbidden } from 'payload'
 import { getEntityPermissions } from 'payload/internal'
 import { expect, vitest } from 'vitest'
 
@@ -281,6 +281,83 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         }
         createdAdminUserIDs.length = 0
         createdAuthIDs.length = 0
+      })
+
+      test('should allow a user to update their own password based on the document id', async ({
+        payload,
+      }) => {
+        const originalPassword = 'OriginalPassword123!'
+        const replacementPassword = 'ReplacementPassword123!'
+
+        const account = await payload.create({
+          collection: authSlug,
+          data: {
+            _verified: true,
+            email: 'password-owner@example.com',
+            password: originalPassword,
+            roles: ['user'],
+          },
+          overrideAccess: true,
+        })
+
+        createdAuthIDs.push(account.id)
+
+        await payload.update({
+          id: account.id,
+          collection: authSlug,
+          data: {
+            password: replacementPassword,
+          },
+          overrideAccess: false,
+          user: { ...account, collection: authSlug },
+        })
+
+        await expect(
+          payload.login({
+            collection: authSlug,
+            data: {
+              email: account.email,
+              password: replacementPassword,
+            },
+          }),
+        ).resolves.toMatchObject({ user: { id: account.id } })
+
+        await expect(
+          payload.login({
+            collection: authSlug,
+            data: {
+              email: account.email,
+              password: originalPassword,
+            },
+          }),
+        ).rejects.toThrow(AuthenticationError)
+      })
+
+      test('should pass the document id to password field update access', async ({ payload }) => {
+        const account = await payload.create({
+          collection: authSlug,
+          data: {
+            _verified: true,
+            email: 'password-permissions@example.com',
+            password: 'OriginalPassword123!',
+            roles: ['user'],
+          },
+          overrideAccess: true,
+        })
+
+        createdAuthIDs.push(account.id)
+
+        const req = await createPayloadRequest({
+          payload,
+          user: { ...account, collection: authSlug },
+        })
+        const permissions = await docAccessOperation({
+          id: account.id,
+          collection: payload.collections[authSlug],
+          req,
+        })
+
+        expect(permissions.fields?.password).toBe(true)
       })
 
       test('should preserve credentials when password update access is denied', async ({
@@ -2017,7 +2094,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         entityType: 'collection',
         fetchData: true,
         operations: ['read', 'readVersions'],
-        req: await createLocalReq({}, payload),
+        req: await createPayloadRequest({ payload }),
       })
 
       expect(permissions.read?.permission).toBe(false)
@@ -2306,7 +2383,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
     })
 
     test('should evaluate inherited global read version permissions against versions', async () => {
-      const req = await createLocalReq({}, payload)
+      const req = await createPayloadRequest({ payload })
 
       await payload.db.deleteVersions({
         globalSlug: inheritedReadVersionsGlobalSlug,
@@ -2398,7 +2475,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
     })
 
     test('should sanitize virtual-field constraints from inherited global read access', async () => {
-      const req = await createLocalReq({}, payload)
+      const req = await createPayloadRequest({ payload })
 
       await payload.db.deleteVersions({
         globalSlug: inheritedReadVersionsVirtualGlobalSlug,
@@ -2475,7 +2552,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             slug: inheritedReadVersionsVirtualGlobalSlug,
             overrideAccess: false,
           }),
-        ).resolves.toMatchObject({ version: { related: allowedID } })
+        ).resolves.toMatchObject({ related: { id: allowedID } })
       } finally {
         await payload.db.deleteVersions({
           globalSlug: inheritedReadVersionsVirtualGlobalSlug,
@@ -2543,19 +2620,17 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         overrideAccess: true,
       })
 
-      const req = await createLocalReq(
-        {
-          user: {
-            id: 123 as any,
-            collection: 'users',
-            createdAt: new Date().toISOString(),
-            email: 'test@test.com',
-            roles: ['admin'],
-            updatedAt: new Date().toISOString(),
-          },
-        },
+      const req = await createPayloadRequest({
         payload,
-      )
+        user: {
+          id: 123 as any,
+          collection: 'users',
+          createdAt: new Date().toISOString(),
+          email: 'test@test.com',
+          roles: ['admin'],
+          updatedAt: new Date().toISOString(),
+        },
+      })
 
       // Get permissions with admin user (should have access)
       const permissions = await getEntityPermissions({
@@ -2594,6 +2669,8 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             update: { permission: true },
           },
           title: { read: { permission: true }, update: { permission: true } },
+          createdBy: { read: { permission: true }, update: { permission: false } },
+          updatedBy: { read: { permission: true }, update: { permission: false } },
           updatedAt: { read: { permission: true }, update: { permission: true } },
         },
         read: { permission: true },
@@ -2613,19 +2690,17 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
       })
 
       // Create non-admin user request
-      const nonAdminReq = await createLocalReq(
-        {
-          user: {
-            id: 456 as any,
-            collection: 'users',
-            createdAt: new Date().toISOString(),
-            email: 'user@test.com',
-            roles: ['user'], // Not admin
-            updatedAt: new Date().toISOString(),
-          },
-        },
+      const nonAdminReq = await createPayloadRequest({
         payload,
-      )
+        user: {
+          id: 456 as any,
+          collection: 'users',
+          createdAt: new Date().toISOString(),
+          email: 'user@test.com',
+          roles: ['user'], // Not admin
+          updatedAt: new Date().toISOString(),
+        },
+      })
 
       const permissions = await getEntityPermissions({
         id: doc.id,
@@ -2663,6 +2738,8 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             update: { permission: false },
           },
           title: { read: { permission: true }, update: { permission: true } },
+          createdBy: { read: { permission: true }, update: { permission: false } },
+          updatedBy: { read: { permission: true }, update: { permission: false } },
           updatedAt: { read: { permission: true }, update: { permission: true } },
         },
         read: { permission: true },

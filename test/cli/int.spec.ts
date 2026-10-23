@@ -621,7 +621,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
       success: true,
     })
     expect(createdMedia).toMatchObject({
-      filename: 'image.png',
+      filename: 'image-original.png',
       filesize: image.length,
       mimeType: 'image/png',
       title: 'External URL upload',
@@ -967,7 +967,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     })
 
     expect(output.stdout).toContain('"title": "Updated media"')
-    expect(updatedMedia).toMatchObject({ filename: 'image.png', title: 'Updated media' })
+    expect(updatedMedia).toMatchObject({ filename: 'image-original.png', title: 'Updated media' })
   })
 
   test(`updateDocument --slug media --id <seeded-media-id> --data '{"title":"External media"}' --file <external-url-json>`, async ({
@@ -1001,7 +1001,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     })
 
     expect(updatedMedia).toMatchObject({
-      filename: 'external-update.png',
+      filename: 'external-update-original.png',
       filesize: image.length,
       mimeType: 'image/png',
       title: 'External media',

@@ -3,7 +3,7 @@ import path from 'path'
 import {
   _internal_jobSystemGlobals,
   _internal_resetJobSystemGlobals,
-  createLocalReq,
+  createPayloadRequest,
   Forbidden,
   type JobTaskStatus,
   type Payload,
@@ -32,7 +32,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
   let token: string
   let user: User
 
-  test.beforeEach(async ({ payload }) => {
+  test.beforeEach(({ payload }) => {
     processingLeaseDefaults = { ...payload.config.jobs.processingLease }
   })
 
@@ -84,11 +84,29 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       expect(jobsStatsGlobal).toBeDefined()
       expect(metaField).toBeDefined()
     })
+
+    test('should not inject authorship fields into the internal jobs global or collection', ({
+      payload,
+    }) => {
+      const jobsCollection = payload.config.collections.find(({ slug }) => slug === 'payload-jobs')
+      const jobsStatsGlobal = payload.config.globals.find(
+        ({ slug }) => slug === 'payload-jobs-stats',
+      )
+
+      expect(jobsCollection).toBeDefined()
+      expect(jobsStatsGlobal).toBeDefined()
+
+      for (const fields of [jobsCollection!.fields, jobsStatsGlobal!.fields]) {
+        const names = fields.filter((f) => 'name' in f).map((f) => (f as { name: string }).name)
+        expect(names).not.toContain('createdBy')
+        expect(names).not.toContain('updatedBy')
+      }
+    })
   })
 
   test.describe('access control', () => {
     test('should deny raw job creation when access control is enabled', async ({ payload }) => {
-      const req = await createLocalReq({ user }, payload)
+      const req = await createPayloadRequest({ payload, user })
 
       await expect(
         payload.create({
@@ -106,7 +124,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     })
 
     test('should deny raw job reads when access control is enabled', async ({ payload }) => {
-      const req = await createLocalReq({ user }, payload)
+      const req = await createPayloadRequest({ payload, user })
       const job = await payload.jobs.queue({
         task: 'CreateSimple',
         input: {
@@ -126,7 +144,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     })
 
     test('should deny raw job updates when access control is enabled', async ({ payload }) => {
-      const req = await createLocalReq({ user }, payload)
+      const req = await createPayloadRequest({ payload, user })
       const job = await payload.jobs.queue({
         task: 'CreateSimple',
         input: {
@@ -159,7 +177,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     })
 
     test('should deny raw job deletion when access control is enabled', async ({ payload }) => {
-      const req = await createLocalReq({ user }, payload)
+      const req = await createPayloadRequest({ payload, user })
       const job = await payload.jobs.queue({
         task: 'CreateSimple',
         input: {
@@ -218,7 +236,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     test('will pass access control on local api .queue when passing overrideAccess: false', async ({
       payload,
     }) => {
-      const req = await createLocalReq({ user }, payload)
+      const req = await createPayloadRequest({ payload, user })
       const result = await payload.jobs.queue({
         task: 'CreateSimple',
         input: {
@@ -239,7 +257,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     test('will pass access control on local api .run when passing overrideAccess: false', async ({
       payload,
     }) => {
-      const req = await createLocalReq({ user }, payload)
+      const req = await createPayloadRequest({ payload, user })
       const result = await payload.jobs.run({
         overrideAccess: false,
         req,
@@ -259,7 +277,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     test('will pass access control on local api .runByID when passing overrideAccess: false', async ({
       payload,
     }) => {
-      const req = await createLocalReq({ user }, payload)
+      const req = await createPayloadRequest({ payload, user })
 
       // Queue a job first so we have a valid ID
       const job = await payload.jobs.queue({
@@ -319,7 +337,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     }) => {
       payload.config.jobs.deleteJobOnComplete = false
 
-      const req = await createLocalReq({ user }, payload)
+      const req = await createPayloadRequest({ payload, user })
 
       // Queue a job without running it
       const job = await payload.jobs.queue({
@@ -387,7 +405,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     }) => {
       payload.config.jobs.deleteJobOnComplete = false
 
-      const req = await createLocalReq({ user }, payload)
+      const req = await createPayloadRequest({ payload, user })
 
       // Queue a job without running it
       const job = await payload.jobs.queue({
@@ -1758,7 +1776,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
         overrideAccess: true,
       })
 
-      const _req = await createLocalReq({}, payload)
+      const _req = await createPayloadRequest({ payload })
       const t1Req = isolateObjectProperty(_req, 'transactionID')
       delete t1Req.transactionID
 

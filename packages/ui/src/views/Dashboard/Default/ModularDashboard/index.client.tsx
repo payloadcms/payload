@@ -1,10 +1,12 @@
 'use client'
 
-import type { Modifier } from '@dnd-kit/core'
+import type { Announcements, Modifier, UniqueIdentifier } from '@dnd-kit/core'
 import type { ClientWidget, WidgetWidth } from 'payload'
 
 import { DndContext, DragOverlay, useDraggable, useDroppable } from '@dnd-kit/core'
 import { snapCenterToCursor } from '@dnd-kit/modifiers'
+import { getTranslation } from '@payloadcms/translations'
+import { toWords } from 'payload/shared'
 import React, { useEffect, useMemo, useState } from 'react'
 
 import { Button } from '../../../../elements/Button/index.js'
@@ -16,6 +18,7 @@ import { DashboardStepNav } from './DashboardStepNav.js'
 import { useDashboardLayout } from './useDashboardLayout.js'
 import { closestInXAxis } from './utils/collisionDetection.js'
 import { useDashboardSensors } from './utils/sensors.js'
+import { WidgetContent } from './WidgetContent/index.js'
 import { WidgetEditControl } from './WidgetEditControl.js'
 
 /**
@@ -69,7 +72,7 @@ export function ModularDashboardClient({
   clientLayout: WidgetInstanceClient[]
   widgets: ClientWidget[]
 }) {
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const {
     addWidget,
     cancel,
@@ -88,6 +91,62 @@ export function ModularDashboardClient({
   const [activeDragId, setActiveDragId] = useState<null | string>(null)
   const [activeControlsWidgetID, setActiveControlsWidgetID] = useState<null | string>(null)
   const sensors = useDashboardSensors()
+  const announcements = useMemo<Announcements>(() => {
+    const describeWidget = ({ id, index }: { id: UniqueIdentifier; index?: number }) => {
+      const widgetID = String(id).replace(/-(?:before|after)$/, '')
+      const slug = widgetID.slice(0, widgetID.lastIndexOf('-'))
+      const label = getTranslation(
+        widgets.find((widget) => widget.slug === slug)?.label ?? toWords(slug),
+        i18n,
+      )
+      const position = index ?? currentLayout.findIndex((widget) => widget.item.id === widgetID)
+
+      return `${label}, ${t('general:order')}: ${position + 1}`
+    }
+    const announceCancel: Announcements['onDragCancel'] = ({ active }) =>
+      `${t('general:cancel')}: ${describeWidget({ id: active.id })}`
+    const announceMove: NonNullable<Announcements['onDragOver']> = ({ active, over }) => {
+      if (!over) {
+        return undefined
+      }
+      const { moveToIndex } = getWidgetMoveIndexes({
+        activeID: active.id,
+        layout: currentLayout,
+        overID: over.id,
+      })
+
+      return t('hierarchy:itemsMovedTo', {
+        title: describeWidget({ id: active.id }),
+        destination: describeWidget({ id: over.id, index: moveToIndex }),
+      })
+    }
+
+    return {
+      onDragCancel: announceCancel,
+      onDragEnd: (event) => {
+        if (event.over) {
+          const { moveFromIndex, moveToIndex } = getWidgetMoveIndexes({
+            activeID: event.active.id,
+            layout: currentLayout,
+            overID: event.over.id,
+          })
+
+          if (moveFromIndex !== moveToIndex) {
+            return announceMove(event)
+          }
+        }
+
+        return announceCancel(event)
+      },
+      onDragOver: (event) => {
+        const message = announceMove(event)
+
+        return message ? `${t('general:move')}: ${message}` : undefined
+      },
+      onDragStart: ({ active }) =>
+        `${t('general:dragToReorder')}: ${describeWidget({ id: active.id })}`,
+    }
+  }, [currentLayout, i18n, t, widgets])
 
   useEffect(() => {
     if (!isEditing) {
@@ -98,6 +157,7 @@ export function ModularDashboardClient({
   return (
     <div>
       <DndContext
+        accessibility={{ announcements }}
         autoScroll={{
           enabled: true,
           threshold: {
@@ -112,31 +172,20 @@ export function ModularDashboardClient({
           setActiveDragId(null)
         }}
         onDragEnd={(event) => {
-          if (!event.over) {
-            setActiveDragId(null)
-            return
-          }
-          const droppableId = event.over.id as string
-          const i = droppableId.lastIndexOf('-')
-          const slug = droppableId.slice(0, i)
-          const position = droppableId.slice(i + 1)
-
-          if (slug === event.active.id) {
-            return
-          }
-
-          const moveFromIndex = currentLayout?.findIndex(
-            (widget) => widget.item.id === event.active.id,
-          )
-          let moveToIndex = currentLayout?.findIndex((widget) => widget.item.id === slug)
-          if (moveFromIndex < moveToIndex) {
-            moveToIndex--
-          }
-          if (position === 'after') {
-            moveToIndex++
-          }
-          moveWidget({ moveFromIndex, moveToIndex })
           setActiveDragId(null)
+
+          if (!event.over) {
+            return
+          }
+          const indexes = getWidgetMoveIndexes({
+            activeID: event.active.id,
+            layout: currentLayout,
+            overID: event.over.id,
+          })
+
+          if (indexes.moveFromIndex !== indexes.moveToIndex) {
+            moveWidget(indexes)
+          }
         }}
         onDragStart={(event) => {
           setActiveDragId(event.active.id as string)
@@ -157,67 +206,77 @@ export function ModularDashboardClient({
               <p>{t('dashboard:noItems')}</p>
             </div>
           )}
-          {currentLayout?.map((widget, _index) => (
-            <React.Fragment key={widget.item.id}>
+          {currentLayout?.map((widget) => {
+            const slug = widget.item.id.slice(0, widget.item.id.lastIndexOf('-'))
+            const label = getTranslation(
+              widgets.find((widgetConfig) => widgetConfig.slug === slug)?.label ?? toWords(slug),
+              i18n,
+            )
+
+            return (
               <DraggableItem
                 disabled={!isEditing}
                 id={widget.item.id}
+                key={widget.item.id}
+                label={label}
                 style={{
                   width: `${WIDTH_TO_PERCENTAGE[widget.item.width]}%`,
                 }}
                 width={widget.item.width}
               >
-                <div
-                  className={[
-                    'widget-wrapper',
-                    isEditing ? 'widget-wrapper--editing' : '',
-                    activeControlsWidgetID === widget.item.id
-                      ? 'widget-wrapper--controls-active'
-                      : '',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                >
-                  <div aria-hidden={isEditing} className="widget-content" inert={isEditing}>
-                    {widget.component}
+                {({ dragHandle }) => (
+                  <div
+                    className={[
+                      'widget-wrapper',
+                      isEditing ? 'widget-wrapper--editing' : '',
+                      activeControlsWidgetID === widget.item.id
+                        ? 'widget-wrapper--controls-active'
+                        : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                  >
+                    <WidgetContent id={`${widget.item.id}-content`} isEditing={isEditing}>
+                      {widget.component}
+                    </WidgetContent>
+                    {dragHandle}
+                    {isEditing && (
+                      <div className="widget-wrapper__controls">
+                        <WidgetEditControl
+                          onSave={(data) => {
+                            updateWidgetData(widget.item.id, data)
+                          }}
+                          widgetData={widget.item.data}
+                          widgetID={widget.item.id}
+                          widgetLabel={label}
+                        />
+                        <WidgetWidthDropdown
+                          currentWidth={widget.item.width}
+                          maxWidth={widget.item.maxWidth}
+                          minWidth={widget.item.minWidth}
+                          onOpenChange={(isOpen) => {
+                            setActiveControlsWidgetID(isOpen ? widget.item.id : null)
+                          }}
+                          onResize={(width) => resizeWidget(widget.item.id, width)}
+                          widgetLabel={label}
+                        />
+                        <Button
+                          aria-label={t('general:deleteLabel', { label })}
+                          buttonStyle="destructive"
+                          className="widget-wrapper__delete-btn"
+                          extraButtonProps={{ tabIndex: 0 }}
+                          icon="x"
+                          margin={false}
+                          onClick={() => deleteWidget(widget.item.id)}
+                          round
+                        />
+                      </div>
+                    )}
                   </div>
-                  {isEditing && <div aria-hidden className="widget-wrapper__edit-overlay" />}
-                  {isEditing && (
-                    <div
-                      className="widget-wrapper__controls"
-                      onPointerDown={(e) => e.stopPropagation()}
-                    >
-                      <WidgetEditControl
-                        onSave={(data) => {
-                          updateWidgetData(widget.item.id, data)
-                        }}
-                        widgetData={widget.item.data}
-                        widgetID={widget.item.id}
-                      />
-                      <WidgetWidthDropdown
-                        currentWidth={widget.item.width}
-                        maxWidth={widget.item.maxWidth}
-                        minWidth={widget.item.minWidth}
-                        onOpenChange={(isOpen) => {
-                          setActiveControlsWidgetID(isOpen ? widget.item.id : null)
-                        }}
-                        onResize={(width) => resizeWidget(widget.item.id, width)}
-                      />
-                      <Button
-                        aria-label={t('dashboard:deleteWidget', { id: widget.item.id })}
-                        buttonStyle="destructive"
-                        className="widget-wrapper__delete-btn"
-                        icon="x"
-                        margin={false}
-                        onClick={() => deleteWidget(widget.item.id)}
-                        round
-                      />
-                    </div>
-                  )}
-                </div>
+                )}
               </DraggableItem>
-            </React.Fragment>
-          ))}
+            )
+          })}
           <DragOverlay
             className="drag-overlay"
             dropAnimation={{
@@ -233,6 +292,8 @@ export function ModularDashboardClient({
                   )
                   return draggedWidget ? (
                     <div
+                      aria-hidden="true"
+                      inert
                       style={{
                         transform: 'scale(0.25)',
                       }}
@@ -269,13 +330,17 @@ function WidgetWidthDropdown({
   minWidth,
   onOpenChange,
   onResize,
+  widgetLabel,
 }: {
   currentWidth: WidgetWidth
   maxWidth: WidgetWidth
   minWidth: WidgetWidth
   onOpenChange: (isOpen: boolean) => void
   onResize: (width: WidgetWidth) => void
+  widgetLabel: string
 }) {
+  const { t } = useTranslation()
+
   // Filter options based on minWidth and maxWidth
   const validOptions = useMemo(() => {
     const minPercentage = WIDTH_TO_PERCENTAGE[minWidth]
@@ -299,6 +364,7 @@ function WidgetWidthDropdown({
     <Popup
       onToggleClose={() => onOpenChange(false)}
       onToggleOpen={onOpenChange}
+      popupType="menu"
       render={({ close }) => (
         <PopupList.ButtonGroup>
           {validOptions.map((option) => {
@@ -323,12 +389,13 @@ function WidgetWidthDropdown({
       )}
       renderButton={({ active: _active, onClick, onKeyDown, ...ariaProps }) => (
         <Button
+          aria-label={t('dashboard:resizeWidget', { label: widgetLabel, size: currentWidth })}
           buttonStyle="secondary"
           className="widget-wrapper__size-btn"
           extraButtonProps={{
             onKeyDown,
-            onPointerDown: (e) => e.stopPropagation(),
             ...ariaProps,
+            tabIndex: 0,
           }}
           icon={<ChevronIcon className="widget-wrapper__size-btn-icon" size={16} />}
           margin={false}
@@ -345,13 +412,15 @@ function WidgetWidthDropdown({
 }
 
 function DraggableItem(props: {
-  children: React.ReactNode
+  children: (args: { dragHandle: React.ReactNode }) => React.ReactNode
   disabled?: boolean
   id: string
+  label: string
   style?: React.CSSProperties
   width: WidgetWidth
 }) {
-  const { attributes, isDragging, listeners, setNodeRef } = useDraggable({
+  const { t } = useTranslation()
+  const { attributes, isDragging, listeners, setActivatorNodeRef, setNodeRef } = useDraggable({
     id: props.id,
     disabled: props.disabled,
   })
@@ -362,24 +431,38 @@ function DraggableItem(props: {
     position: 'relative',
   }
 
-  // Only apply draggable attributes and listeners when not disabled
-  // to prevent disabling interactive elements inside the widget
-  const draggableProps = props.disabled ? {} : { ...listeners, ...attributes }
-
   return (
     <div className="widget" data-slug={props.id} data-width={props.width} style={mergedStyles}>
       <DroppableItem id={props.id} position="before" />
       <div
+        aria-label={props.label}
+        aria-labelledby={props.disabled ? undefined : `${props.id}-content`}
         className="draggable"
         id={props.id}
         ref={setNodeRef}
-        {...draggableProps}
+        role="group"
         style={{
           width: '100%',
           height: '100%',
+          position: 'relative',
         }}
+        tabIndex={props.disabled ? undefined : 0}
       >
-        {props.children}
+        {props.children({
+          dragHandle: !props.disabled && (
+            <button
+              {...attributes}
+              {...listeners}
+              aria-describedby={[attributes['aria-describedby'], `${props.id}-content`]
+                .filter(Boolean)
+                .join(' ')}
+              aria-label={t('general:dragToReorder')}
+              className="widget-wrapper__edit-overlay widget-wrapper__drag-btn"
+              ref={setActivatorNodeRef}
+              type="button"
+            />
+          ),
+        })}
       </div>
       <DroppableItem id={props.id} position="after" />
     </div>
@@ -410,4 +493,29 @@ function DroppableItem({ id, position }: { id: string; position: 'after' | 'befo
       }}
     />
   )
+}
+
+function getWidgetMoveIndexes({
+  activeID,
+  layout,
+  overID,
+}: {
+  activeID: UniqueIdentifier
+  layout: WidgetInstanceClient[]
+  overID: UniqueIdentifier
+}) {
+  const widgetID = String(overID).replace(/-(?:before|after)$/, '')
+  const moveFromIndex = layout.findIndex((widget) => widget.item.id === activeID)
+  let moveToIndex = layout.findIndex((widget) => widget.item.id === widgetID)
+
+  if (widgetID !== activeID) {
+    if (moveFromIndex < moveToIndex) {
+      moveToIndex--
+    }
+    if (String(overID).endsWith('-after')) {
+      moveToIndex++
+    }
+  }
+
+  return { moveFromIndex, moveToIndex }
 }

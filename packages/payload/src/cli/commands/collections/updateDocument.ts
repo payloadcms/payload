@@ -1,5 +1,5 @@
 import { updateDocumentLocalInputSchema } from '../../../collections/operations/inputSchemas.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { parseDocumentID } from '../../../utilities/parseDocumentID.js'
 import { defineCLICommand } from '../../defineCLICommand.js'
 import {
@@ -37,7 +37,7 @@ export const createUpdateDocumentCommand = defineCLICommand({
     const payload = await getPayload()
     const collection = args.slug
     const inputData = stripCollectionVirtualFields({ collection, data: args.data, payload })
-    const req = await createLocalReq({}, payload)
+    const req = await createPayloadRequest({ payload })
     try {
       validateCollectionData({
         slug: collection,

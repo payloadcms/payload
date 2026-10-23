@@ -3,7 +3,7 @@ import type { IndexDirection, IndexOptions } from 'mongoose'
 import type { ValidationError } from 'payload'
 
 import { slugifyHandler } from '@payloadcms/ui/utilities/slugify'
-import { createLocalReq, reload } from 'payload'
+import { createPayloadRequest, reload } from 'payload'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
@@ -520,7 +520,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       const takenSlug = taken.localizedSlug as string
       expect(takenSlug).toMatch(/^slug-field-\d+$/)
 
-      const req = await createLocalReq({ user: user.user }, payload)
+      const req = await createPayloadRequest({ payload, user: user.user })
 
       const regenerated = await slugifyHandler({
         collectionSlug: 'slug-fields',
@@ -546,7 +546,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       created.push(first.id)
       expect(first.slug).toBe('shared-regen')
 
-      const req = await createLocalReq({ user: user.user }, payload)
+      const req = await createPayloadRequest({ payload, user: user.user })
 
       // Regenerating from a source that slugifies to a taken slug must bump it, not hand back the
       // duplicate — otherwise the next save throws a uniqueness error.
@@ -572,7 +572,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       created.push(doc.id)
       expect(doc.slug).toBe('own-slug')
 
-      const req = await createLocalReq({ user: user.user }, payload)
+      const req = await createPayloadRequest({ payload, user: user.user })
 
       // Excluding the current doc means regenerating its own unchanged source reuses the value rather
       // than bumping past test.
@@ -1004,7 +1004,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       })
       created.push(hidden.id)
 
-      const req = await createLocalReq({ user: user.user }, payload)
+      const req = await createPayloadRequest({ payload, user: user.user })
       const createdWithAccess = await payload.create({
         collection,
         data: { title: 'Shared title' },
@@ -1031,7 +1031,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       })
       created.push(hidden.id, editable.id)
 
-      const req = await createLocalReq({ user: user.user }, payload)
+      const req = await createPayloadRequest({ payload, user: user.user })
       const updated = await payload.update({
         collection,
         id: editable.id,
@@ -1052,7 +1052,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       })
       created.push(hidden.id)
 
-      const req = await createLocalReq({ user: user.user }, payload)
+      const req = await createPayloadRequest({ payload, user: user.user })
       const createdWithAccess = await payload.create({
         collection,
         data: { localizedTitle: 'Localized title', title: 'Visible' },
@@ -1089,7 +1089,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       })
       created.push(hidden.id)
 
-      const req = await createLocalReq({ user: user.user }, payload)
+      const req = await createPayloadRequest({ payload, user: user.user })
       const createdWithAccess = await payload.create({
         collection,
         data: { title: 'Visible' },
@@ -1440,6 +1440,256 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       expect(allLocales.localizedRequiredText.en).toEqual('English text')
       // @ts-expect-error
       expect(allLocales.localizedRequiredText.es).toEqual('Spanish text')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id, overrideAccess: true })
+    })
+
+    test('should enforce localized text length validation with locale all', async ({ payload }) => {
+      await expect(
+        payload.create({
+          collection: 'text-fields',
+          data: {
+            text: 'required',
+            // @ts-expect-error locale 'all' accepts object values for localized fields
+            localizedRequiredText: {
+              en: 'English text',
+              es: 'no',
+            },
+          },
+          locale: 'all',
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('The following field is invalid: Localized Required Text')
+    })
+
+    test('should skip validation for locales omitted from a locale all write', async ({
+      payload,
+    }) => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale 'all' accepts object values for localized fields
+          localizedRequiredText: {
+            en: 'English text',
+          },
+        },
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      const allLocales = await payload.findByID({
+        id: doc.id,
+        collection: 'text-fields',
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      // @ts-expect-error locale 'all' returns locale-keyed object for localized fields
+      expect(allLocales.localizedRequiredText.en).toEqual('English text')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id, overrideAccess: true })
+    })
+
+    test('should enforce maxLength per locale and name the failing locale with locale all', async ({
+      payload,
+    }) => {
+      await expect(
+        payload.create({
+          collection: 'text-fields',
+          data: {
+            text: 'required',
+            // @ts-expect-error locale 'all' accepts object values for localized fields
+            localizedRequiredText: {
+              en: 'English text',
+              es: 'this value is definitely longer than twenty characters',
+            },
+          },
+          locale: 'all',
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('Localized Required Text (es)')
+    })
+
+    test('should treat an empty locale map as missing for a required field with locale all', async ({
+      payload,
+    }) => {
+      await expect(
+        payload.create({
+          collection: 'text-fields',
+          data: {
+            text: 'required',
+            // @ts-expect-error locale 'all' accepts object values for localized fields
+            localizedRequiredText: {},
+          },
+          locale: 'all',
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('The following field is invalid: Localized Required Text')
+    })
+
+    test('should enforce localized length validation on update with locale all', async ({
+      payload,
+    }) => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale 'all' accepts object values for localized fields
+          localizedRequiredText: {
+            en: 'English text',
+            es: 'Spanish text',
+          },
+        },
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      await expect(
+        // @ts-expect-error locale 'all' accepts object values for localized fields
+        payload.update({
+          id: doc.id,
+          collection: 'text-fields',
+          data: {
+            localizedRequiredText: {
+              en: 'English text',
+              es: 'no',
+            },
+          },
+          locale: 'all',
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('The following field is invalid: Localized Required Text')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id, overrideAccess: true })
+    })
+
+    test('should persist updated values on a locale all update', async ({ payload }) => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale 'all' accepts object values for localized fields
+          localizedRequiredText: { en: 'English one', es: 'Spanish one' },
+        },
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      // @ts-expect-error locale 'all' accepts object values for localized fields
+      await payload.update({
+        id: doc.id,
+        collection: 'text-fields',
+        data: {
+          localizedRequiredText: { en: 'English two', es: 'Spanish two' },
+        },
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      const refetched: any = await payload.findByID({
+        id: doc.id,
+        collection: 'text-fields',
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      expect(refetched.localizedRequiredText.en).toStrictEqual('English two')
+      expect(refetched.localizedRequiredText.es).toStrictEqual('Spanish two')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id, overrideAccess: true })
+    })
+
+    test('should only update submitted locales on a partial locale all update', async ({
+      payload,
+    }) => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale 'all' accepts object values for localized fields
+          localizedRequiredText: { en: 'English one', es: 'Spanish one' },
+        },
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      // @ts-expect-error locale 'all' accepts object values for localized fields
+      await payload.update({
+        id: doc.id,
+        collection: 'text-fields',
+        data: {
+          localizedRequiredText: { en: 'English two' },
+        },
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      const refetched: any = await payload.findByID({
+        id: doc.id,
+        collection: 'text-fields',
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      expect(refetched.localizedRequiredText.en).toStrictEqual('English two')
+      expect(refetched.localizedRequiredText.es).toStrictEqual('Spanish one')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id, overrideAccess: true })
+    })
+
+    test('should scope req.locale per locale for a custom validator with locale all', async ({
+      payload,
+    }) => {
+      // Same sentinel in both locales; the validator only rejects it for `es`. If `req.locale` leaked as
+      // `'all'` (or `'en'`), neither would reject - so a rejection attributed to `(es)` proves the scoping.
+      await expect(
+        payload.create({
+          collection: 'text-fields',
+          data: {
+            text: 'required',
+            // @ts-expect-error locale all
+            localizedRequiredText: { en: 'English text', es: 'Spanish text' },
+            // @ts-expect-error locale all
+            localizedCustomValidate: { en: 'reject-es', es: 'reject-es' },
+          },
+          locale: 'all',
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('Localized Custom Validate (es)')
+    })
+
+    test('should pass the locale previousValue to a custom validator on a locale all update', async ({
+      payload,
+    }) => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale all
+          localizedRequiredText: { en: 'English text', es: 'Spanish text' },
+          // @ts-expect-error locale all
+          localizedCustomValidate: { en: 'prev-en', es: 'prev-es' },
+        },
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      // The validator asserts the en previousValue is 'prev-en' (the locale's own prior value, not the
+      // whole `{ en, es }` object). A wrong previousValue returns an error naming the received value.
+      // @ts-expect-error locale all
+      const updated: any = await payload.update({
+        id: doc.id,
+        collection: 'text-fields',
+        data: {
+          localizedCustomValidate: { en: 'assert-previous', es: 'prev-es' },
+        },
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      expect(updated.localizedCustomValidate.en).toStrictEqual('assert-previous')
+      expect(updated.localizedCustomValidate.es).toStrictEqual('prev-es')
 
       await payload.delete({ collection: 'text-fields', id: doc.id, overrideAccess: true })
     })

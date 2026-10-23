@@ -358,7 +358,7 @@ export class PayloadSDK<T extends PayloadTypesShape = PayloadTypes> {
   restoreGlobalVersion<TSlug extends GlobalSlug<T>>(
     options: RestoreGlobalVersionByIDOptions<T, TSlug>,
     init?: RequestInit,
-  ): Promise<TypeWithVersion<DataFromGlobalSlug<T, TSlug>>> {
+  ): Promise<DataFromGlobalSlug<T, TSlug>> {
     return restoreGlobalVersion(this, options, init)
   }
 

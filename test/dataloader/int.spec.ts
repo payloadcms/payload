@@ -1,7 +1,7 @@
 import type { CollectionSlug } from 'payload'
 
 import { buildDefaultEditorState } from '@payloadcms/richtext-lexical'
-import { createLocalReq } from 'payload'
+import { createPayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 import { expect, vitest } from 'vitest'
 
@@ -161,7 +161,7 @@ test.suite('dataloader', { config: './config.ts' }, () => {
 
   test.describe('find', () => {
     test('should call the same query only once in a request', async ({ payload }) => {
-      const req = await createLocalReq({}, payload)
+      const req = await createPayloadRequest({ payload })
       const spy = vitest.spyOn(payload, 'find')
 
       const findArgs = {

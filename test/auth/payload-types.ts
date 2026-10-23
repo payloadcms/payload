@@ -371,10 +371,84 @@ export interface User {
   unnamedTabSaveToJWTFalse?: string | null;
   custom?: string | null;
   shouldNotShowInClientConfigUnlessAuthenticated?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
   updatedAt: string;
   createdAt: string;
   apiKey?: string | null;
-  apiKeyPreview?: string | null;
+  apiKeyLast4?: string | null;
   apiKeyIndex?: string | null;
   email: string;
   resetPasswordToken?: string | null;
@@ -400,6 +474,80 @@ export interface User {
  */
 export interface PartialDisableLocalStrategy {
   id: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -427,6 +575,80 @@ export interface PartialDisableLocalStrategy {
 export interface DisableLocalStrategyPassword {
   id: string;
   password: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
   updatedAt: string;
   createdAt: string;
   collection: 'disable-local-strategy-password';
@@ -437,10 +659,84 @@ export interface DisableLocalStrategyPassword {
  */
 export interface ApiKey {
   id: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
   updatedAt: string;
   createdAt: string;
   apiKey?: string | null;
-  apiKeyPreview?: string | null;
+  apiKeyLast4?: string | null;
   apiKeyIndex?: string | null;
   collection: 'api-keys';
 }
@@ -450,6 +746,80 @@ export interface ApiKey {
  */
 export interface PublicUser {
   id: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -471,10 +841,84 @@ export interface PublicUser {
  */
 export interface RotateSecret {
   id: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
   updatedAt: string;
   createdAt: string;
   apiKey?: string | null;
-  apiKeyPreview?: string | null;
+  apiKeyLast4?: string | null;
   apiKeyIndex?: string | null;
   collection: 'rotate-secret';
 }
@@ -484,10 +928,84 @@ export interface RotateSecret {
  */
 export interface RotateSecretSecondary {
   id: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
   updatedAt: string;
   createdAt: string;
   apiKey?: string | null;
-  apiKeyPreview?: string | null;
+  apiKeyLast4?: string | null;
   apiKeyIndex?: string | null;
   collection: 'rotate-secret-secondary';
 }
@@ -497,10 +1015,84 @@ export interface RotateSecretSecondary {
  */
 export interface RotateSecretLogin {
   id: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
   updatedAt: string;
   createdAt: string;
   apiKey?: string | null;
-  apiKeyPreview?: string | null;
+  apiKeyLast4?: string | null;
   apiKeyIndex?: string | null;
   email: string;
   resetPasswordToken?: string | null;
@@ -522,27 +1114,175 @@ export interface RotateSecretLogin {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-keys-with-field-read-access".
+ */
+export interface ApiKeysWithFieldReadAccess {
+  id: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+  apiKey?: string | null;
+  apiKeyLast4?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'api-keys-with-field-read-access';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relationsCollection".
  */
 export interface RelationsCollection {
   id: string;
   rel?: (string | null) | User;
   text?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "api-keys-with-field-read-access".
- */
-export interface ApiKeysWithFieldReadAccess {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  apiKey?: string | null;
-  apiKeyPreview?: string | null;
-  apiKeyIndex?: string | null;
-  collection: 'api-keys-with-field-read-access';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -758,10 +1498,12 @@ export interface UsersSelect<T extends boolean = true> {
   unnamedTabSaveToJWTFalse?: T;
   custom?: T;
   shouldNotShowInClientConfigUnlessAuthenticated?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   apiKey?: T;
-  apiKeyPreview?: T;
+  apiKeyLast4?: T;
   apiKeyIndex?: T;
   email?: T;
   resetPasswordToken?: T;
@@ -784,6 +1526,8 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "partial-disable-local-strategies_select".
  */
 export interface PartialDisableLocalStrategiesSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -808,6 +1552,8 @@ export interface PartialDisableLocalStrategiesSelect<T extends boolean = true> {
  */
 export interface DisableLocalStrategyPasswordSelect<T extends boolean = true> {
   password?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -816,10 +1562,12 @@ export interface DisableLocalStrategyPasswordSelect<T extends boolean = true> {
  * via the `definition` "api-keys_select".
  */
 export interface ApiKeysSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   apiKey?: T;
-  apiKeyPreview?: T;
+  apiKeyLast4?: T;
   apiKeyIndex?: T;
 }
 /**
@@ -827,6 +1575,8 @@ export interface ApiKeysSelect<T extends boolean = true> {
  * via the `definition` "public-users_select".
  */
 export interface PublicUsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -845,10 +1595,12 @@ export interface PublicUsersSelect<T extends boolean = true> {
  * via the `definition` "rotate-secret_select".
  */
 export interface RotateSecretSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   apiKey?: T;
-  apiKeyPreview?: T;
+  apiKeyLast4?: T;
   apiKeyIndex?: T;
 }
 /**
@@ -856,10 +1608,12 @@ export interface RotateSecretSelect<T extends boolean = true> {
  * via the `definition` "rotate-secret-secondary_select".
  */
 export interface RotateSecretSecondarySelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   apiKey?: T;
-  apiKeyPreview?: T;
+  apiKeyLast4?: T;
   apiKeyIndex?: T;
 }
 /**
@@ -867,10 +1621,12 @@ export interface RotateSecretSecondarySelect<T extends boolean = true> {
  * via the `definition` "rotate-secret-login_select".
  */
 export interface RotateSecretLoginSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   apiKey?: T;
-  apiKeyPreview?: T;
+  apiKeyLast4?: T;
   apiKeyIndex?: T;
   email?: T;
   resetPasswordToken?: T;
@@ -895,6 +1651,8 @@ export interface RotateSecretLoginSelect<T extends boolean = true> {
 export interface RelationsCollectionSelect<T extends boolean = true> {
   rel?: T;
   text?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -903,10 +1661,12 @@ export interface RelationsCollectionSelect<T extends boolean = true> {
  * via the `definition` "api-keys-with-field-read-access_select".
  */
 export interface ApiKeysWithFieldReadAccessSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   apiKey?: T;
-  apiKeyPreview?: T;
+  apiKeyLast4?: T;
   apiKeyIndex?: T;
 }
 /**

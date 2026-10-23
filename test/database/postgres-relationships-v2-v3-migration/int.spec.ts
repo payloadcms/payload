@@ -31,6 +31,8 @@ test.suite(
         collections: [
           {
             slug: 'users',
+            // Disable authorship so the runtime schema matches the pre-authorship committed migrations.
+            authorship: false,
             auth: true,
             fields: [],
             versions: false,
@@ -48,7 +50,7 @@ test.suite(
 
       expect(hasErr).toBeFalsy()
 
-      await payload.db.dropDatabase({ adapter: payload.db as any })
+      await payload.db.dropDatabase({ adapter: payload.db })
       await payload.destroy()
     })
   },

@@ -1,4 +1,4 @@
-import { createPayloadRequest } from 'payload'
+import { createPayloadRequestFromWebRequest } from 'payload'
 import { v4 as uuid } from 'uuid'
 import { expect } from 'vitest'
 
@@ -89,7 +89,7 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
       overrideAccess: true,
     })
 
-    const req = await createPayloadRequest({
+    const req = await createPayloadRequestFromWebRequest({
       config: payload.config,
       request: new Request(
         'http://localhost/api/auth-read-hook?locale=fr&fallbackLocale=none&depth=2',
@@ -100,7 +100,7 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
         },
       ),
     })
-    const graphQLReq = await createPayloadRequest({
+    const graphQLReq = await createPayloadRequestFromWebRequest({
       config: payload.config,
       request: new Request('http://localhost/api/graphql', {
         headers: {
@@ -158,7 +158,7 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
     expect(collection.fields).not.toContainEqual(expect.objectContaining({ name: 'enableAPIKey' }))
     expect(collection.fields).not.toContainEqual(expect.objectContaining({ name: 'hasAPIKey' }))
     expect('access' in apiKeyField && apiKeyField.access?.read).toBeTypeOf('function')
-    expect(await apiKeyField.access!.read!({} as never)).toBe(false)
+    expect(await apiKeyField.access!.read!({})).toBe(false)
   })
 
   test('should omit secrets before hooks and return only the final four characters', async ({
@@ -270,7 +270,7 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
         overrideAccess: true,
       })
     ).token!
-    const req = await createPayloadRequest({
+    const req = await createPayloadRequestFromWebRequest({
       config: payload.config,
       request: new Request('http://localhost/api', {
         headers: { Authorization: `JWT ${token}` },
@@ -282,15 +282,15 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
     )!
 
     expect('access' in apiKeyField && apiKeyField.access?.update).toBeTypeOf('function')
-    expect(await apiKeyField.access!.update!({ id: target.id, req } as never)).toBe(true)
+    expect(await apiKeyField.access!.update!({ id: target.id, req })).toBe(true)
 
-    const unauthenticatedReq = await createPayloadRequest({
+    const unauthenticatedReq = await createPayloadRequestFromWebRequest({
       config: payload.config,
       request: new Request('http://localhost/api'),
     })
-    expect(
-      await apiKeyField.access!.update!({ id: target.id, req: unauthenticatedReq } as never),
-    ).toBe(false)
+    expect(await apiKeyField.access!.update!({ id: target.id, req: unauthenticatedReq })).toBe(
+      false,
+    )
   })
 
   test('should allow applications to further restrict API key management', async ({

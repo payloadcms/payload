@@ -7,7 +7,7 @@ import type {
   TransformGlobalWithSelect,
 } from '../../../types/index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 import type {
   DataFromGlobalSlug,
   DraftFlagFromGlobalSlug,
@@ -24,7 +24,7 @@ import {
   type TypedLocale,
   type User,
 } from '../../../index.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { updateOperation } from '../update.js'
 
 type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
@@ -128,7 +128,7 @@ export async function updateGlobalLocal<
   }
 
   return updateOperation<TSlug, TSelect>({
-    slug: globalSlug as string,
+    slug: globalSlug,
     data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
     depth,
     draft,
@@ -137,7 +137,10 @@ export async function updateGlobalLocal<
     overrideLock,
     populate,
     publishAllLocales,
-    req: await createLocalReq(options as CreateLocalReqOptions, payload),
+    req: await createPayloadRequest({
+      ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
+      payload,
+    }),
     select,
     showHiddenFields,
     unpublishAllLocales,

@@ -7,6 +7,13 @@ import { versionDefaults } from '../versions/defaults.js'
 type EntityConfig = Pick<CollectionConfig | GlobalConfig, 'versions'>
 
 /**
+ * Check if an entity has versions enabled at all
+ */
+export const hasVersionsEnabled = (config: EntityConfig): boolean => {
+  return Boolean(config?.versions)
+}
+
+/**
  * Check if an entity has drafts enabled
  */
 export const hasDraftsEnabled = (config: EntityConfig): boolean => {
@@ -19,10 +26,10 @@ export const hasDraftsEnabled = (config: EntityConfig): boolean => {
 export const hasLocalizeStatusEnabled = (config: EntityConfig): boolean => {
   return Boolean(
     config?.versions &&
-      typeof config.versions === 'object' &&
-      config.versions.drafts &&
-      typeof config.versions.drafts === 'object' &&
-      (config.versions.drafts as SanitizedDrafts).localizeStatus,
+    typeof config.versions === 'object' &&
+    config.versions.drafts &&
+    typeof config.versions.drafts === 'object' &&
+    (config.versions.drafts as SanitizedDrafts).localizeStatus,
   )
 }
 
@@ -38,10 +45,10 @@ export const hasAutosaveEnabled = (
 } & EntityConfig => {
   return Boolean(
     config?.versions &&
-      typeof config.versions === 'object' &&
-      config.versions.drafts &&
-      typeof config.versions.drafts === 'object' &&
-      config.versions.drafts.autosave,
+    typeof config.versions === 'object' &&
+    config.versions.drafts &&
+    typeof config.versions.drafts === 'object' &&
+    config.versions.drafts.autosave,
   )
 }
 
@@ -51,10 +58,10 @@ export const hasAutosaveEnabled = (
 export const hasDraftValidationEnabled = (config: EntityConfig): boolean => {
   return Boolean(
     config?.versions &&
-      typeof config.versions === 'object' &&
-      config.versions.drafts &&
-      typeof config.versions.drafts === 'object' &&
-      config.versions.drafts.validate,
+    typeof config.versions === 'object' &&
+    config.versions.drafts &&
+    typeof config.versions.drafts === 'object' &&
+    config.versions.drafts.validate,
   )
 }
 
@@ -67,10 +74,10 @@ export const hasScheduledPublishEnabled = (
 } & EntityConfig => {
   return Boolean(
     config?.versions &&
-      typeof config.versions === 'object' &&
-      config.versions.drafts &&
-      typeof config.versions.drafts === 'object' &&
-      config.versions.drafts.schedulePublish,
+    typeof config.versions === 'object' &&
+    config.versions.drafts &&
+    typeof config.versions.drafts === 'object' &&
+    config.versions.drafts.schedulePublish,
   )
 }
 

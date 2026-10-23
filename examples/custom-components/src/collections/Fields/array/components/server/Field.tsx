@@ -1,9 +1,9 @@
-import type { ArrayFieldServerComponent } from 'payload'
+import type { ArrayFieldServerProps } from 'payload'
 import type React from 'react'
 
 import { ArrayField } from '@payloadcms/ui'
 
-export const CustomArrayFieldServer: ArrayFieldServerComponent = ({
+export const CustomArrayFieldServer: React.FC<ArrayFieldServerProps> = ({
   clientField,
   path,
   schemaPath,

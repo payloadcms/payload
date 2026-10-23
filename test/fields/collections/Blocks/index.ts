@@ -440,6 +440,61 @@ export const BlockFields: CollectionConfig = {
       blocks: ['ConfigBlockTest'],
     },
     {
+      name: 'configuration',
+      type: 'blocks',
+      blocks: ['conditionalReference'],
+      defaultValue: [{ blockType: 'conditionalReference' }],
+    },
+    {
+      name: 'showConditionalFields',
+      type: 'checkbox',
+    },
+    {
+      name: 'conditionalGroup',
+      type: 'group',
+      fields: [
+        {
+          name: 'conditionalConfiguration',
+          type: 'blocks',
+          admin: {
+            condition: (data) => Boolean(data.showConditionalFields),
+          },
+          blocks: ['conditionalReference'],
+          defaultValue: [{ blockType: 'conditionalReference' }],
+        },
+      ],
+    },
+    {
+      name: 'showInlineBlocks',
+      type: 'checkbox',
+    },
+    {
+      name: 'testBlocks',
+      type: 'blocks',
+      admin: {
+        condition: (data) => Boolean(data.showInlineBlocks),
+      },
+      blocks: [
+        {
+          slug: 'testBlock',
+          fields: [
+            {
+              name: 'testField',
+              type: 'text',
+            },
+          ],
+          labels: {
+            plural: 'Test Blocks',
+            singular: 'Test Block',
+          },
+        },
+      ],
+      defaultValue: [{ blockType: 'testBlock' }],
+      maxRows: 1,
+      minRows: 1,
+      required: true,
+    },
+    {
       name: 'localizedReferencesLocalizedBlock',
       type: 'blocks',
       blocks: ['localizedTextReference'],

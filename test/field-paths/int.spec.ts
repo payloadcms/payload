@@ -193,6 +193,8 @@ test.suite('Field Paths', { config: './config.ts' }, () => {
         'blocks.CollapsibleBlock._index-0-0.textInCollapsibleInCollapsibleBlock',
         'blocks.CollapsibleBlock.id',
         'blocks.CollapsibleBlock.blockName',
+        'createdBy',
+        'updatedBy',
         'updatedAt',
         'createdAt',
         '_status',

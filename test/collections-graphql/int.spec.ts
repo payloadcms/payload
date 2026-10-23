@@ -101,10 +101,26 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
     })
 
     test('should sort by multiple fields', async ({ payload, restClient }) => {
-      const doc1 = await payload.create({ collection: 'sort', data: { title: 'a', number: 1 }, overrideAccess: true })
-      const doc2 = await payload.create({ collection: 'sort', data: { title: 'b', number: 1 }, overrideAccess: true })
-      const doc3 = await payload.create({ collection: 'sort', data: { title: 'a', number: 2 }, overrideAccess: true })
-      const doc4 = await payload.create({ collection: 'sort', data: { title: 'b', number: 3 }, overrideAccess: true })
+      const doc1 = await payload.create({
+        collection: 'sort',
+        data: { title: 'a', number: 1 },
+        overrideAccess: true,
+      })
+      const doc2 = await payload.create({
+        collection: 'sort',
+        data: { title: 'b', number: 1 },
+        overrideAccess: true,
+      })
+      const doc3 = await payload.create({
+        collection: 'sort',
+        data: { title: 'a', number: 2 },
+        overrideAccess: true,
+      })
+      const doc4 = await payload.create({
+        collection: 'sort',
+        data: { title: 'b', number: 3 },
+        overrideAccess: true,
+      })
 
       const query = `query {
         Sorts(sort: "title, number") {
@@ -1177,7 +1193,11 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
           overrideAccess: true,
         })
 
-        await payload.delete({ collection: 'relation', id: relation_1_draft.id, overrideAccess: true })
+        await payload.delete({
+          collection: 'relation',
+          id: relation_1_draft.id,
+          overrideAccess: true,
+        })
 
         const query = `query {
           Posts(draft:true,where: { title: { equals: "post with relations in draft" }}) {
@@ -1462,9 +1482,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
       expect(errors[2].message).toEqual('The following field is invalid: Email')
       expect(errors[2].path[0]).toEqual('test4')
       expect(errors[2].extensions.name).toEqual('ValidationError')
-      expect(errors[2].extensions.data.errors[0].message).toEqual(
-        'Please enter a valid email address.',
-      )
+      expect(errors[2].extensions.data.errors[0].message).toEqual('This field is required.')
       expect(errors[2].extensions.data.errors[0].path).toEqual('email')
     })
 
@@ -1491,6 +1509,70 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
       expect(errors[0].path[0]).toEqual('QueryWithInternalError')
       expect(errors[0].extensions.statusCode).toEqual(500)
       expect(errors[0].extensions.name).toEqual('Error')
+    })
+  })
+
+  test.describe('select projection', () => {
+    test('should keep the sub-selection for an aliased relationship', async ({
+      payload,
+      restClient,
+    }) => {
+      const relation = await payload.create({
+        collection: relationSlug,
+        data: { name: 'aliased' },
+        overrideAccess: true,
+      })
+      const post = await payload.create({
+        collection: slug,
+        data: { relationField: relation.id, title: 'post' },
+        overrideAccess: true,
+      })
+
+      const query = `query {
+        Post(id: ${formatID(post.id)}, select: true) {
+          aliased: relationField { id name }
+        }
+      }`
+
+      const { data, errors } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((response) => response.json())
+
+      expect(errors).toBeUndefined()
+      expect(data.Post.aliased).toMatchObject({ id: relation.id, name: 'aliased' })
+    })
+
+    test('should keep concurrent root field selections separate', async ({
+      payload,
+      restClient,
+    }) => {
+      const relation = await payload.create({
+        collection: relationSlug,
+        data: { name: 'concurrent' },
+        overrideAccess: true,
+      })
+      const post = await payload.create({
+        collection: slug,
+        data: { relationField: relation.id, title: 'post' },
+        overrideAccess: true,
+      })
+
+      const query = `query {
+        first: Post(id: ${formatID(post.id)}, select: true) {
+          relationField { name }
+        }
+        second: Post(id: ${formatID(post.id)}, select: true) {
+          relationField { id }
+        }
+      }`
+
+      const { data, errors } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((response) => response.json())
+
+      expect(errors).toBeUndefined()
+      expect(data.first.relationField.name).toBe('concurrent')
+      expect(data.second.relationField.id).toBe(relation.id)
     })
   })
 })

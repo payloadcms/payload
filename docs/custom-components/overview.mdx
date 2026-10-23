@@ -260,7 +260,7 @@ Each Custom Component receives the following props by default:
 <Banner type="warning">
   **Reminder:** All Custom Components also receive various other props that are
   specific to the component being rendered. See [Root
-  Components](#root-components), [Collection
+  Components](./root-components), [Collection
   Components](../configuration/collections#custom-components), [Global
   Components](../configuration/globals#custom-components), or [Field
   Components](../fields/overview#custom-components) for a complete list of all
@@ -388,9 +388,9 @@ Within Server Components, this prop is named `field`:
 
 ```tsx
 import React from 'react'
-import type { TextFieldServerComponent } from 'payload'
+import type { TextFieldServerProps } from 'payload'
 
-export const MyClientFieldComponent: TextFieldServerComponent = ({
+export const MyClientFieldComponent: React.FC<TextFieldServerProps> = ({
   field: { name },
 }) => {
   return <p>{`This field's name is ${name}`}</p>
@@ -402,9 +402,9 @@ Within Client Components, this prop is named `clientField` because its non-seria
 ```tsx
 'use client'
 import React from 'react'
-import type { TextFieldClientComponent } from 'payload'
+import type { TextFieldClientProps } from 'payload'
 
-export const MyClientFieldComponent: TextFieldClientComponent = ({
+export const MyClientFieldComponent: React.FC<TextFieldClientProps> = ({
   clientField: { name },
 }) => {
   return <p>{`This field's name is ${name}`}</p>
@@ -574,15 +574,15 @@ This is different from front-end performance of your public-facing site.
   documentation](../performance/overview).
 </Banner>
 
-### Follow React and Next.js best practices
+### Follow React and your host framework's best practices
 
 All Custom Components are built using [React](https://react.dev). For this reason, it is important to follow React best practices. This includes using memoization, streaming, caching, optimizing renders, using hooks appropriately, and more.
 
 To learn more, see the [React documentation](https://react.dev/learn).
 
-The Admin Panel itself is a [Next.js](https://nextjs.org) application. For this reason, it is _also_ important to follow Next.js best practices. This includes bundling, when to use layouts vs pages, where to place the server/client boundary, and more.
+The Admin Panel itself is a [Next.js](https://nextjs.org) or [TanStack Start](https://tanstack.com/start/latest) application, depending on how you installed Payload. For this reason, it is _also_ important to follow your host framework's best practices. This includes bundling, when to use layouts vs pages, where to place the server/client boundary, and more.
 
-To learn more, see the [Next.js documentation](https://nextjs.org/docs).
+To learn more, see the [Next.js documentation](https://nextjs.org/docs) or the [TanStack Start documentation](https://tanstack.com/start/latest/docs).
 
 ### Reducing initial HTML size
 
@@ -603,9 +603,11 @@ To do this, use the [`useFormFields`](../admin/react-hooks) hook instead of `use
 
 ```ts
 'use client'
+import type React from 'react'
 import { useFormFields } from '@payloadcms/ui'
+import type { TextFieldClientProps } from 'payload'
 
-const MyComponent: TextFieldClientComponent = ({ path }) => {
+const MyComponent: React.FC<TextFieldClientProps> = ({ path }) => {
   const value = useFormFields(([fields, dispatch]) => fields[path])
   // ...
 }

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { expect, vitest } from 'vitest'
+import { afterEach, expect, vitest } from 'vitest'
 
 import type { Post } from './payload-types.js'
 
@@ -9,6 +9,12 @@ test.suite(
   'database - postgres logs',
   { config: './config.postgreslogs.ts', db: (adapter) => adapter.startsWith('postgres') },
   () => {
+    // Restore spies after every test so a failed assertion can't leak the `console.log`
+    // spy into later tests and inflate their counts.
+    afterEach(() => {
+      vitest.restoreAllMocks()
+    })
+
     test('ensure simple update uses optimized upsertRow with returning()', async ({ payload }) => {
       const doc = await payload.create({
         collection: 'simple',

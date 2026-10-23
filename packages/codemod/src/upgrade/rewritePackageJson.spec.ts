@@ -5,7 +5,7 @@ import type { ResolvedVersions } from './types.js'
 import { rewritePackageJson } from './rewritePackageJson.js'
 
 const resolved: ResolvedVersions = {
-  enginesNode: '>=24.15.0',
+  enginesNode: '>=24.22.1',
   nextTarget: '16.9.3',
   payloadVersion: '4.0.0-canary.20',
   typesNode: '24.12.3',
@@ -51,7 +51,7 @@ describe('rewritePackageJson', () => {
         '@types/node': '24.12.3',
         typescript: '6.0.3',
       },
-      engines: { node: '>=24.15.0' },
+      engines: { node: '>=24.22.1' },
       pnpm: { overrides: { 'some-other': '1.0.0' } }, // payload override removed, unrelated kept
       // resolutions removed entirely (only key was a payload package)
     })
@@ -108,7 +108,39 @@ describe('rewritePackageJson', () => {
       '@types/node': '24.12.3',
       typescript: '6.0.3',
     })
-    expect(data.engines).toEqual({ node: '>=24.15.0' })
+    expect(data.engines).toEqual({ node: '>=24.22.1' })
+  })
+
+  it('keeps toolchain versions already at or above the floor', () => {
+    const data: Record<string, unknown> = {
+      devDependencies: { '@types/node': '^24.12.3', typescript: '^6.2.0' },
+      engines: { node: '>=26.12.1' },
+    }
+
+    const summary = rewritePackageJson({ data, resolved })
+
+    expect(data.devDependencies).toEqual({ '@types/node': '^24.12.3', typescript: '^6.2.0' })
+    expect(data.engines).toEqual({ node: '>=26.12.1' })
+    expect(summary.floorsWritten).toEqual([])
+  })
+
+  it('leaves placeholder and non-semver toolchain specs untouched', () => {
+    const data: Record<string, unknown> = {
+      devDependencies: { '@types/node': 'latest', typescript: 'catalog:' },
+    }
+
+    const summary = rewritePackageJson({ data, resolved })
+
+    expect(data.devDependencies).toEqual({ '@types/node': 'latest', typescript: 'catalog:' })
+    expect(summary.floorsWritten).toEqual(['engines.node'])
+  })
+
+  it('reports only the floors it wrote', () => {
+    const data = baseInput() as Record<string, unknown>
+
+    const summary = rewritePackageJson({ data, resolved })
+
+    expect(summary.floorsWritten).toEqual(['typescript', '@types/node', 'engines.node'])
   })
 
   it('is idempotent', () => {

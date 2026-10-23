@@ -102,6 +102,7 @@ export {
 } from '../hierarchy/constants.js'
 
 export type { ClientHierarchyConfig, FolderBreadcrumb } from '../hierarchy/types.js'
+export { instructionsCollectionSlug } from '../llm-instructions/shared.js'
 export { PREFERENCE_KEYS } from '../preferences/keys.js'
 
 export {
@@ -112,6 +113,7 @@ export {
 } from '../types/constants.js'
 export type { HasManyRelationshipOperator } from '../types/constants.js'
 export { formatFilesize } from '../uploads/formatFilesize.js'
+export { generatePayloadFileURL } from '../uploads/generatePayloadFileURL.js'
 export {
   getSanitizedUploadFilename,
   uploadRequiresServerValidation,
