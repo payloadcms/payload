@@ -165,6 +165,7 @@ if (!suiteName) {
   // Run all spec files in the folder with a single dev server and playwright invocation
   // This avoids port conflicts when multiple spec files exist in the same folder
   await executePlaywright({
+    bail,
     baseTestFolder,
     fullyParallelArg: fullyParallel,
     grepArg: grep,
