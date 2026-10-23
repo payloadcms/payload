@@ -232,7 +232,8 @@ export const Users: CollectionConfig = {
   auth: {
     // highlight-start
     refreshTokens: {
-      // Optional. How many seconds a refresh token lasts without being used. Defaults to 30 days.
+      // Optional. How many seconds the session lasts without a refresh, which is how long its
+      // refresh token can be used. Defaults to 30 days.
       expiration: 60 * 60 * 24 * 7,
     },
     // highlight-end
@@ -250,6 +251,8 @@ const res = await fetch('http://localhost:3000/api/users/refresh-token', {
 // Store the new refresh token for next time
 const { refreshedToken, refreshToken: nextRefreshToken } = await res.json()
 ```
+
+Refresh tokens don't expire on their own. They work as long as their session, which lasts `expiration` from the last refresh instead of `tokenExpiration`. The token itself still expires after `tokenExpiration`.
 
 Each refresh token works once, so store the new one after every refresh. If a used refresh token comes back later, Payload treats it as copied and logs out its session. Logging out ends refresh tokens too. They require `useSessions`, and aren't returned with `removeTokenFromResponses`.
 

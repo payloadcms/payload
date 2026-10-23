@@ -301,13 +301,18 @@ export interface IncomingAuthType {
    * which the refresh operation trades for a new token and a new refresh token. Each refresh token
    * works once: when a used one comes back, its session is logged out. Requires `useSessions`.
    *
+   * Refresh tokens don't expire on their own. They work as long as their login session, which lasts
+   * `expiration` from the last refresh instead of `tokenExpiration`.
+   *
    * @default false
    * @link https://payloadcms.com/docs/authentication/overview#refresh-tokens
    */
   refreshTokens?:
     | {
         /**
-         * How many seconds a refresh token stays valid without being used.
+         * How many seconds a login session with a refresh token lasts without a refresh, which is
+         * how long its refresh token can be used. Every refresh starts this time again. The token
+         * itself still expires after `tokenExpiration`.
          *
          * @default 2592000 (30 days)
          */
