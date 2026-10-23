@@ -14,6 +14,11 @@ export type UploadFile = {
 
 type LegacyUploadFile = { clientUploadContext?: unknown } & File
 
+/** Prepare a caller-supplied file without transferring ownership to Payload. */
+export function prepareLocalUploadFile(file: LegacyUploadFile): LegacyUploadFile {
+  return toLegacyUploadFile(normalizeUploadFile(file), file)
+}
+
 export function normalizeUploadFile(
   file: LegacyUploadFile | UploadFile,
   ownership: 'external' | 'temporary' = 'external',

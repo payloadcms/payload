@@ -26,7 +26,7 @@ import {
   type TypedLocale,
 } from '../../../index.js'
 import { getFileByPath } from '../../../uploads/getFileByPath.js'
-import { normalizeUploadFile, toLegacyUploadFile } from '../../../uploads/uploadFile.js'
+import { prepareLocalUploadFile } from '../../../uploads/uploadFile.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { createOperation } from '../create.js'
 
@@ -221,7 +221,7 @@ export async function createLocal<
 
   req.file = file ?? (await getFileByPath(filePath!))
   if (req.file) {
-    req.file = toLegacyUploadFile(normalizeUploadFile(req.file), req.file)
+    req.file = prepareLocalUploadFile(req.file)
   }
 
   return createOperation<TSlug, TSelect>({
