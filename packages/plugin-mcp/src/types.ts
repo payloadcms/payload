@@ -291,40 +291,13 @@ export type MCPPluginConfig = {
     verboseLogs?: boolean
   }
   /**
-   * Lets MCP clients sign in through an OAuth authorization server. MCP requests without an
-   * authenticated user get a `401` that points to the protected resource metadata (RFC 9728),
-   * served by `oauthProtectedResourceHandler`. Payload's auth strategies must accept the
-   * issued access tokens.
+   * How MCP clients sign in. MCP requests without an authenticated user get a `401` that points
+   * to the protected resource metadata (RFC 9728). Set to `false` to only accept API keys and
+   * anonymous requests.
+   *
+   * @default { type: 'builtin' }
    */
-  oauth?: {
-    /**
-     * Called on MCP requests with a bearer token that Payload's auth strategies didn't accept.
-     *  Return the Payload user, including its `collection`, or `null` to answer with the OAuth challenge.
-     */
-    authenticate?: (args: {
-      req: PayloadRequest
-      token: string
-    }) => MaybePromise<PayloadRequest['user']>
-    /**
-     * The authorization servers that issue access tokens for MCP clients. Clients require each one
-     * to exactly match the `issuer` in that server's metadata, so pass a function when the exact
-     * value is only known at runtime, e.g. from the server's OpenID configuration or per host.
-     */
-    authorizationServers: ((args: { req: PayloadRequest }) => MaybePromise<string[]>) | string[]
-    /**
-     * The URL clients call to reach the MCP endpoint. The metadata link is based on it. Pass a
-     * function when it depends on the request, e.g. on a host header your proxy sets.
-     *
-     * @default the absolute URL of `/api/mcp`, based on `serverURL` or the request URL
-     */
-    resource?: ((args: { req: PayloadRequest }) => string) | string
-    /**
-     * Scopes MCP clients should request, e.g. `['openid', 'email', 'profile']`. Without them,
-     * clients request none, which some authorization servers reject or answer with a token that
-     * doesn't identify the user.
-     */
-    scopes?: string[]
-  }
+  oauth?: false | MCPOAuthConfig
   /**
    * Replace the default MCP authorization resolver.
    *
@@ -342,9 +315,84 @@ export type MCPPluginConfig = {
   tools?: MCPTopLevelToolsMap
 }
 
+export type MCPOAuthConfig = MCPBuiltinOAuthConfig | MCPExternalOAuthConfig
+
+/**
+ * This Payload app is the authorization server. Users sign in to the admin panel and allow the
+ * MCP client, which then gets an access token for them.
+ */
+export type MCPBuiltinOAuthConfig = {
+  /**
+   * Creates the tokens the MCP client gets when the user clicks Allow. `req` is the user's own
+   * browser request, so `req.user` is the user who allowed it. Pass `authenticate` too if
+   * Payload's auth strategies don't accept the access token.
+   *
+   * @default a Payload login token for that user, with a refresh token when the collection uses sessions
+   */
+  issueToken?: (args: { req: PayloadRequest }) => MaybePromise<MCPOAuthTokens>
+  /**
+   * Trades a refresh token from `issueToken`, or from an earlier refresh, for new tokens. Return
+   * `null` when it's no longer valid, and the client sends the user through sign-in again. `req`
+   * is the MCP client's request, without a user. Only used together with `issueToken`.
+   *
+   * OAuth requires noticing copied refresh tokens: return a new refresh token every time, and
+   * revoke the tokens when an already used refresh token comes back.
+   */
+  refreshToken?: (args: {
+    refreshToken: string
+    req: PayloadRequest
+  }) => MaybePromise<MCPOAuthTokens | null>
+  type: 'builtin'
+} & MCPOAuthSharedConfig
+
+export type MCPOAuthTokens = {
+  accessToken: string
+  /** Seconds until the access token expires. */
+  expiresIn?: number
+  /** Lets the client get new tokens without the user, through `refreshToken`. */
+  refreshToken?: string
+}
+
+/** Another service, e.g. your identity provider, is the authorization server. */
+export type MCPExternalOAuthConfig = {
+  /**
+   * The authorization servers that issue access tokens for MCP clients. Clients require each one
+   * to exactly match the `issuer` in that server's metadata, so pass a function when the exact
+   * value is only known at runtime, e.g. from the server's OpenID configuration or per host.
+   */
+  authorizationServers: ((args: { req: PayloadRequest }) => MaybePromise<string[]>) | string[]
+  /**
+   * Scopes MCP clients should request, e.g. `['openid', 'email', 'profile']`. Without them,
+   * clients request none, which some authorization servers reject or answer with a token that
+   * doesn't identify the user.
+   */
+  scopes?: string[]
+  type: 'external'
+} & MCPOAuthSharedConfig
+
+type MCPOAuthSharedConfig = {
+  /**
+   * Called on MCP requests with a bearer token that Payload's auth strategies didn't accept.
+   * Return the Payload user, including its `collection`, or `null` to answer with the OAuth challenge.
+   */
+  authenticate?: (args: {
+    req: PayloadRequest
+    token: string
+  }) => MaybePromise<PayloadRequest['user']>
+  /**
+   * The URL clients call to reach the MCP endpoint. The metadata link is based on it. Pass a
+   * function when it depends on the request, e.g. on a host header your proxy sets.
+   *
+   * @default the absolute URL of `/api/mcp`, based on `serverURL` or the request URL
+   */
+  resource?: ((args: { req: PayloadRequest }) => string) | string
+}
+
 export type SanitizedMCPPluginConfig = {
   items: MCPItem[]
-} & Pick<MCPPluginConfig, 'disabled' | 'hooks' | 'mcp' | 'oauth' | 'overrideGetAuthorizedMCP'>
+  /** `undefined` when OAuth is turned off. */
+  oauth?: MCPOAuthConfig
+} & Pick<MCPPluginConfig, 'disabled' | 'hooks' | 'mcp' | 'overrideGetAuthorizedMCP'>
 
 export type MCPServerOptions = {
   options?: McpServerOptions
