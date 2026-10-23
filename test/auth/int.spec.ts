@@ -32,6 +32,8 @@ import {
   apiKeysSlug,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
+  passwordCustomValidateSlug,
+  passwordMinLengthSlug,
   preferencesSlug,
   publicUsersSlug,
   rotateSecretLoginSlug,
@@ -2537,6 +2539,91 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           overrideAccess: true,
         }),
       ).rejects.toThrow('Token is either invalid or has expired.')
+    })
+
+    test.describe('reset password with a password field override', () => {
+      const userEmail = 'password-override@payloadcms.com'
+
+      test.afterEach(async ({ payload }) => {
+        for (const collection of [passwordMinLengthSlug, passwordCustomValidateSlug] as const) {
+          await payload.delete({
+            collection,
+            overrideAccess: true,
+            where: { email: { equals: userEmail } },
+          })
+        }
+      })
+
+      test('should reject a new password shorter than the field minLength', async ({ payload }) => {
+        await payload.create({
+          collection: passwordMinLengthSlug,
+          data: { email: userEmail, password: 'longenough1' },
+          overrideAccess: true,
+        })
+
+        const token = await payload.forgotPassword({
+          collection: passwordMinLengthSlug,
+          data: { email: userEmail },
+          disableEmail: true,
+          overrideAccess: true,
+        })
+
+        await expect(
+          payload.resetPassword({
+            collection: passwordMinLengthSlug,
+            data: { password: 'abc', token },
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow('The following field is invalid: password')
+      })
+
+      test('should reject a new password that fails the field custom validate', async ({
+        payload,
+      }) => {
+        await payload.create({
+          collection: passwordCustomValidateSlug,
+          data: { email: userEmail, password: 'hasnumber1' },
+          overrideAccess: true,
+        })
+
+        const token = await payload.forgotPassword({
+          collection: passwordCustomValidateSlug,
+          data: { email: userEmail },
+          disableEmail: true,
+          overrideAccess: true,
+        })
+
+        await expect(
+          payload.resetPassword({
+            collection: passwordCustomValidateSlug,
+            data: { password: 'nonumber', token },
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow('The following field is invalid: password')
+      })
+
+      test('should accept a new password that meets the field minLength', async ({ payload }) => {
+        await payload.create({
+          collection: passwordMinLengthSlug,
+          data: { email: userEmail, password: 'longenough1' },
+          overrideAccess: true,
+        })
+
+        const token = await payload.forgotPassword({
+          collection: passwordMinLengthSlug,
+          data: { email: userEmail },
+          disableEmail: true,
+          overrideAccess: true,
+        })
+
+        const reset = await payload.resetPassword({
+          collection: passwordMinLengthSlug,
+          data: { password: 'longenough2', token },
+          overrideAccess: true,
+        })
+
+        expect(reset.user.email).toBe(userEmail)
+      })
     })
 
     test.describe('Login Attempts', () => {
