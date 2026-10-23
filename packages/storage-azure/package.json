@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/storage-azure",
-  "version": "3.91.0",
+  "version": "3.92.0",
   "description": "Payload storage adapter for Azure Blob Storage",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -58,7 +58,7 @@
     "payload": "workspace:*"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": "^22.23.4 || >=24.22.1"
   },
   "publishConfig": {
     "exports": {

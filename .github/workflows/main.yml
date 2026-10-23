@@ -44,6 +44,8 @@ jobs:
           filters: |
             needs_build:
               - '.github/workflows/main.yml'
+              - '.github/actions/start-services/**'
+              - '.github/actions/setup/**'
               - 'packages/**'
               - 'test/**'
               - 'pnpm-lock.yaml'
@@ -111,6 +113,9 @@ jobs:
           key: ${{ github.sha }}
 
   tests-unit:
+    permissions:
+      actions: read
+      contents: read
     runs-on: ubuntu-24.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true'
@@ -128,6 +133,9 @@ jobs:
           NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
 
   tests-types:
+    permissions:
+      actions: read
+      contents: read
     runs-on: ubuntu-24.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true'
@@ -168,6 +176,9 @@ jobs:
           echo "matrix=$matrix" >> $GITHUB_OUTPUT
 
   tests-int:
+    permissions:
+      actions: read
+      contents: read
     runs-on: ubuntu-24.04
     needs: [changes, build, int-matrix]
     if: needs.changes.outputs.needs_tests == 'true'
@@ -243,6 +254,9 @@ jobs:
 
   # Prepare prod test environment once, shared by all E2E shards
   e2e-prep:
+    permissions:
+      actions: read
+      contents: read
     name: E2E Prep
     runs-on: ubuntu-24.04
     needs: [changes, build]
@@ -271,6 +285,9 @@ jobs:
           if-no-files-found: error
 
   tests-e2e:
+    permissions:
+      actions: read
+      contents: read
     runs-on: ubuntu-24.04
     needs: [e2e-matrix, e2e-prep]
     name: E2E - ${{ matrix.suite }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}${{ matrix.cacheComponents && ' [cacheComponents]' || '' }}
@@ -390,6 +407,9 @@ jobs:
 
   # Build listed templates with packed local packages and then runs their int and e2e tests
   build-and-test-templates:
+    permissions:
+      actions: read
+      contents: read
     runs-on: ubuntu-24.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_build == 'true'
@@ -499,6 +519,9 @@ jobs:
         run: pnpm --filter scripts check-template-build-approvals
 
   tests-type-generation:
+    permissions:
+      actions: read
+      contents: read
     runs-on: ubuntu-24.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true'
@@ -532,6 +555,7 @@ jobs:
     # with --shard); `test:int:summary` cannot shard.
     continue-on-error: true
     permissions:
+      actions: read
       id-token: write
       contents: read
     services:

@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.91.0",
+  "version": "3.92.0",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -96,7 +96,9 @@
     "prepare-run-test-against-prod:ci": "rm -rf test/packed && rm -rf test/node_modules && rm -rf app && rm -f test/pnpm-lock.yaml && pnpm run script:pack --all --no-build --dest test/packed && pnpm runts test/setupProd.ts && cd test && pnpm i && cd ..",
     "publish-prerelease": "pnpm --filter releaser publish-prerelease",
     "reinstall": "pnpm clean:all && pnpm install",
-    "release": "pnpm --filter releaser release --tag latest",
+    "release": "pnpm --filter releaser release",
+    "release-bump": "pnpm --filter releaser release-bump",
+    "release-ci": "pnpm --filter releaser release-ci",
     "runts": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" node --no-deprecation --no-experimental-strip-types --import @swc-node/register/esm-register",
     "script:audit": "pnpm audit -P",
     "script:audit:critical": "pnpm audit -P --audit-level critical",
@@ -155,10 +157,10 @@
     "test:eval:rest-api:low-power": "cross-env EVAL_VARIANT=low-power NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 pnpm exec vitest --run --project eval eval.rest-api.spec",
     "test:eval:rest-api:skill": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 pnpm exec vitest --run --project eval eval.rest-api.spec",
     "test:eval:skill": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 vitest --run --project eval",
-    "test:int": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true vitest --project int --no-cache",
-    "test:int:firestore": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=firestore DISABLE_LOGGING=true vitest --project int",
-    "test:int:postgres": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true vitest --project int",
-    "test:int:sqlite": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=sqlite DISABLE_LOGGING=true vitest --project int",
+    "test:int": "cross-env NODE_OPTIONS=\"$NODE_OPTIONS --no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true vitest --project int --no-cache",
+    "test:int:firestore": "cross-env NODE_OPTIONS=\"$NODE_OPTIONS --no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=firestore DISABLE_LOGGING=true vitest --project int",
+    "test:int:postgres": "cross-env NODE_OPTIONS=\"$NODE_OPTIONS --no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true vitest --project int",
+    "test:int:sqlite": "cross-env NODE_OPTIONS=\"$NODE_OPTIONS --no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=sqlite DISABLE_LOGGING=true vitest --project int",
     "test:int:summary": "pnpm runts ./test/runTestsWithSummary.ts",
     "test:types": "tstyche",
     "test:unit": "vitest run --project unit",
@@ -244,5 +246,5 @@
     "wrangler": "~4.61.1",
     "zod": "4.3.6"
   },
-  "packageManager": "pnpm@11.9.0"
+  "packageManager": "pnpm@11.28.6"
 }

@@ -18,17 +18,17 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
-    "@payloadcms/db-mongodb": "3.90.0",
-    "@payloadcms/next": "3.90.0",
-    "@payloadcms/richtext-lexical": "3.90.0",
-    "@payloadcms/storage-vercel-blob": "3.90.0",
-    "@payloadcms/ui": "3.90.0",
+    "@payloadcms/next": "3.92.0",
+    "@payloadcms/richtext-lexical": "3.92.0",
+    "@payloadcms/ui": "3.92.0",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
     "next": "16.3.3",
-    "payload": "3.90.0",
+    "payload": "3.92.0",
     "react": "19.2.6",
-    "react-dom": "19.2.6"
+    "react-dom": "19.2.6",
+    "@payloadcms/db-mongodb": "3.92.0",
+    "@payloadcms/storage-vercel-blob": "3.92.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -47,16 +47,15 @@
     "vite-tsconfig-paths": "6.0.5",
     "vitest": "4.0.18"
   },
-  "packageManager": "pnpm@11.0.8",
   "engines": {
-    "node": ">=20.18.1"
+    "node": "^22.23.4 || >=24.22.1"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "bufferutil",
-      "esbuild",
       "sharp",
+      "esbuild",
       "unrs-resolver"
     ]
-  }
+  },
+  "packageManager": "pnpm@12.15.0"
 }
