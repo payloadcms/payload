@@ -4231,17 +4231,46 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         .then((res) => res.json())
         .then(({ user }) => user)
 
-    // What the user's browser does: open the sign-in link while logged in, then click Allow
-    const approve = async ({ query, restClient }: { query: string; restClient: RESTClient }) => {
-      const headers = { Authorization: `JWT ${await getLoginToken(restClient)}` }
-      const page = await restClient
-        .GET(`/mcp/oauth/authorize${query}`, { headers })
+    // The browser of a logged-in user sends its login cookie
+    const getBrowserHeaders = async (restClient: RESTClient) => ({
+      Cookie: `payload-token=${await getLoginToken(restClient)}`,
+      'Sec-Fetch-Site': 'same-origin',
+    })
+
+    const getConsent = ({
+      headers,
+      query,
+      restClient,
+    }: {
+      headers: HeadersInit
+      query: string
+      restClient: RESTClient
+    }) =>
+      restClient
+        .GET(`/mcp/oauth/authorize${query}`, { auth: false, headers })
         .then((res) => res.text())
-      const consent = /name="consent" type="hidden" value="([^"]+)"/.exec(page)![1]!
-      const response = await restClient.POST('/mcp/oauth/authorize', {
+        .then((page) => /name="consent" type="hidden" value="([^"]+)"/.exec(page)![1]!)
+
+    const allow = ({
+      consent,
+      headers,
+      restClient,
+    }: {
+      consent: string
+      headers: Record<string, string>
+      restClient: RESTClient
+    }) =>
+      restClient.POST('/mcp/oauth/authorize', {
+        auth: false,
         body: new URLSearchParams({ consent, decision: 'allow' }).toString(),
         headers: { ...headers, 'Content-Type': 'application/x-www-form-urlencoded' },
       })
+
+    // What the user's browser does: open the sign-in link while logged in, then click Allow
+    const approve = async ({ query, restClient }: { query: string; restClient: RESTClient }) => {
+      const headers = await getBrowserHeaders(restClient)
+      const consent = await getConsent({ headers, query, restClient })
+      const response = await allow({ consent, headers, restClient })
 
       return new URL(response.headers.get('Location')!).searchParams.get('code')!
     }
@@ -4427,6 +4456,37 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
       expect((await refresh(tokens.refresh_token)).status).toBe(400)
       expect((await refresh(refreshed.refresh_token)).status).toBe(400)
       expect(await getUser({ accessToken: refreshed.access_token, restClient })).toBeNull()
+    })
+
+    test("should only let the browser's login allow MCP clients", async ({
+      payload,
+      restClient,
+    }) => {
+      enableOAuth(payload, { type: 'builtin' })
+      const { tokens } = await signIn(restClient)
+      const { client_id } = await register(restClient)
+      const query = `?${new URLSearchParams({
+        client_id,
+        code_challenge: 'challenge',
+        code_challenge_method: 'S256',
+        redirect_uri: redirectURI,
+        response_type: 'code',
+      })}`
+      // An MCP client's own access token
+      const tokenHeaders = { Authorization: `Bearer ${tokens.access_token}` }
+
+      const signInPage = await restClient.GET(`/mcp/oauth/authorize${query}`, {
+        auth: false,
+        headers: tokenHeaders,
+      })
+      const consent = await getConsent({
+        headers: await getBrowserHeaders(restClient),
+        query,
+        restClient,
+      })
+
+      expect(signInPage.headers.get('Location')).toContain('/admin/login')
+      expect((await allow({ consent, headers: tokenHeaders, restClient })).status).toBe(400)
     })
 
     test('should send users who are not logged in to the admin login', async ({
