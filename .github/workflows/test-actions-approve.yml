@@ -1,0 +1,22 @@
+name: test-actions-approve
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  approve:
+    # Limits the approval to this throwaway test PR, even if the file reaches main.
+    if: github.head_ref == 'test/actions-approve'
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Approve as github-actions[bot]
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr review "$PR_NUMBER" --approve --body "Test: GITHUB_TOKEN approval" --repo "$GITHUB_REPOSITORY"
