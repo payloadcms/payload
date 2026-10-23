@@ -76,7 +76,13 @@ test.describe('Admin accessibility', () => {
     test('should recover from rejected credentials and sign in using the keyboard', async ({
       page,
     }) => {
+      const currentUser = await page.request.get(`${serverURL}/api/users/me`)
+
+      await expect(currentUser).toBeOK()
+      const { user } = await currentUser.json()
+
       await prepareSignInPage({ page, serverURL })
+      await expect(page.locator('html')).toHaveAttribute('data-enhanced-contrast', '')
       const email = page.getByRole('textbox', { name: 'Email', exact: true })
       const password = page.getByLabel('Password', { exact: true })
       const submit = page.getByRole('button', { name: 'Login', exact: true })
@@ -85,7 +91,7 @@ test.describe('Admin accessibility', () => {
       await expect(password).toHaveAttribute('aria-required', 'true')
       await scanA11y({ name: 'login', page })
       await tabToSignInControl({ control: email, page })
-      await page.keyboard.type(devUser.email)
+      await page.keyboard.type(user.email)
       await page.keyboard.press('Tab')
       await expect(password).toBeFocused()
       await page.keyboard.type('incorrect-password')
@@ -94,8 +100,17 @@ test.describe('Admin accessibility', () => {
       const error = page.getByText('The email or password provided is incorrect.')
 
       await expect(error).toBeVisible()
+      const notification = page.locator('[data-sonner-toast]').filter({ has: error })
+
+      // Axe must measure the rendered toast, not its fade-in transition.
+      await expect(notification).toHaveCSS('opacity', '1')
+      await expect(notification.locator('.toast-content')).toHaveCSS('opacity', '1')
       await scanA11y({ name: 'login with rejected credentials', page })
-      await tabToSignInControl({ control: password, page })
+      // Stay within the form: Sonner restores prior focus when tabbing out of its toast.
+      await page.keyboard.press('Shift+Tab')
+      await expect(page.getByRole('button', { name: 'Show password', exact: true })).toBeFocused()
+      await page.keyboard.press('Shift+Tab')
+      await expect(password).toBeFocused()
       await page.keyboard.press('ControlOrMeta+A')
       await page.keyboard.type(devUser.password)
       await tabToSignInControl({ control: submit, page })
