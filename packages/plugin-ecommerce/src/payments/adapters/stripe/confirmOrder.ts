@@ -52,10 +52,6 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
         value: transaction.id,
       })
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentID)
-      const cartItemsSnapshot = parseRequiredMetadata({
-        fieldName: 'cartItemsSnapshot',
-        value: paymentIntent.metadata.cartItemsSnapshot,
-      })
       const shippingAddress = parseOptionalMetadata({
         fieldName: 'shippingAddress',
         value: paymentIntent.metadata.shippingAddress,
@@ -72,7 +68,7 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
 
       validateSettlement({
         canonicalCartID: data.cartID,
-        cartItemsSnapshot,
+        cartItemsSnapshot: transaction.items,
         customerEmail: data.customerEmail,
         paymentIntent,
         paymentIntentID,
@@ -85,7 +81,7 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
           amount: transaction.amount,
           currency: transaction.currency,
           ...purchaser,
-          items: cartItemsSnapshot,
+          items: transaction.items,
           shippingAddress,
           status: 'processing',
         },
