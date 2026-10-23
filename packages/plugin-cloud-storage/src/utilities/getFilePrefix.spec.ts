@@ -1,5 +1,6 @@
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { Access, CollectionConfig, PayloadRequest } from 'payload'
 
+import { Forbidden } from 'payload'
 import { describe, expect, it, vi } from 'vitest'
 
 import { getFilePrefix } from './getFilePrefix.js'
@@ -7,15 +8,23 @@ import { getFilePrefix } from './getFilePrefix.js'
 const makeReq = (docs: unknown[] = []) =>
   ({
     payload: {
+      collections: {},
       find: vi.fn().mockResolvedValue({ docs }),
     },
   }) as unknown as PayloadRequest
 
+const allowStaticFileReads: Access = ({ isReadingStaticFile }) => Boolean(isReadingStaticFile)
+
 const makeCollection = ({
   hasPrefixField = false,
-}: { hasPrefixField?: boolean } = {}): CollectionConfig =>
+  read = allowStaticFileReads,
+}: {
+  hasPrefixField?: boolean
+  read?: Access
+} = {}): CollectionConfig =>
   ({
     slug: 'media',
+    access: { read },
     fields: hasPrefixField ? [{ name: 'prefix', type: 'text' }] : [],
     upload: {},
   }) as unknown as CollectionConfig
@@ -160,18 +169,125 @@ describe('getFilePrefix', () => {
       expect(req.payload.find).toHaveBeenCalledOnce()
     })
 
-    it('queries with access control enabled and hidden fields', async () => {
+    it('evaluates static-file read access and then loads hidden storage fields', async () => {
+      const read = vi.fn<Access>(() => true)
       const req = makeReq([{ prefix: 'db-prefix' }])
 
       await getFilePrefix({
-        collection: makeCollection(),
+        collection: makeCollection({ read }),
         filename: 'logo.png',
         req,
       })
 
-      expect(req.payload.find).toHaveBeenCalledWith(
-        expect.objectContaining({ overrideAccess: false, req, showHiddenFields: true }),
+      expect(read).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: { filename: 'logo.png' },
+          isReadingStaticFile: true,
+          slug: 'media',
+        }),
       )
+      expect(req.payload.find).toHaveBeenCalledWith(
+        expect.objectContaining({ overrideAccess: true, req, showHiddenFields: true }),
+      )
+    })
+
+    it('loads the prefix when read access allows only static-file reads', async () => {
+      const read = vi.fn<Access>(({ isReadingStaticFile }) => Boolean(isReadingStaticFile))
+      const req = makeReq([{ _objectKey: 'abc123', prefix: 'invoices' }])
+
+      const result = await getFilePrefix({
+        collection: makeCollection({ read }),
+        filename: 'logo.png',
+        req,
+      })
+
+      expect(result).toBe('invoices/abc123')
+      expect(req.payload.find).toHaveBeenCalledWith(
+        expect.objectContaining({ overrideAccess: true }),
+      )
+    })
+
+    it('throws Forbidden when static-file read access is denied', async () => {
+      const read = vi.fn<Access>(() => false)
+      const req = makeReq([{ prefix: 'secret' }])
+
+      await expect(
+        getFilePrefix({
+          collection: makeCollection({ read }),
+          filename: 'logo.png',
+          req,
+        }),
+      ).rejects.toBeInstanceOf(Forbidden)
+
+      expect(req.payload.find).not.toHaveBeenCalled()
+    })
+
+    it('constrains the lookup with a Where returned for a static-file read', async () => {
+      const read = vi.fn<Access>(() => ({ visibility: { equals: 'public' } }))
+      const req = makeReq([{ prefix: 'public-files' }])
+
+      const result = await getFilePrefix({
+        collection: makeCollection({ read }),
+        filename: 'logo.png',
+        req,
+      })
+
+      expect(result).toBe('public-files')
+      expect(req.payload.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          overrideAccess: true,
+          where: {
+            and: [
+              {
+                or: [
+                  { filename: { equals: 'logo.png' } },
+                  { 'original.filename': { equals: 'logo.png' } },
+                ],
+              },
+              { visibility: { equals: 'public' } },
+            ],
+          },
+        }),
+      )
+    })
+
+    it('throws Forbidden when a static-file Where matches no document', async () => {
+      const read = vi.fn<Access>(() => ({ id: { exists: false } }))
+      const req = makeReq([])
+
+      await expect(
+        getFilePrefix({
+          collection: makeCollection({ read }),
+          filename: 'logo.png',
+          req,
+        }),
+      ).rejects.toBeInstanceOf(Forbidden)
+    })
+
+    it('uses sanitized collection read access when Payload has initialized the collection', async () => {
+      const incomingRead = vi.fn<Access>(() => false)
+      const sanitizedRead = vi.fn<Access>(() => true)
+      const req = makeReq([{ prefix: 'from-db' }])
+      req.payload.collections = {
+        media: {
+          config: {
+            access: { read: sanitizedRead },
+            slug: 'media',
+          },
+        },
+      } as unknown as PayloadRequest['payload']['collections']
+
+      const result = await getFilePrefix({
+        collection: makeCollection({ read: incomingRead }),
+        filename: 'logo.png',
+        req,
+      })
+
+      expect(result).toBe('from-db')
+      expect(sanitizedRead).toHaveBeenCalledWith(
+        expect.objectContaining({ isReadingStaticFile: true }),
+      )
+      expect(incomingRead).not.toHaveBeenCalled()
     })
 
     it('folds the stored object key into the resolved prefix', async () => {
