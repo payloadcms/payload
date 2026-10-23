@@ -180,4 +180,43 @@ describe('downloadFileToBuffer', () => {
       ).rejects.toMatchObject({ status: 400 })
     },
   )
+
+  test('should use the body byte length as the file size when content-length is absent', async () => {
+    const body = 'uncompressed-svg-content'
+    vitest.spyOn(global, 'fetch').mockResolvedValue(
+      new Response(body, {
+        headers: { 'content-type': 'text/plain' },
+        status: 200,
+      }),
+    )
+    const req = createRequest({ serverURL: 'https://configured.example.com' })
+
+    const file = await downloadFileToBuffer({
+      data: { url: '/asset.txt' },
+      req,
+      uploadConfig: { skipSafeFetch: true },
+    })
+
+    expect(file.size).toBe(Buffer.byteLength(body))
+  })
+
+  test('should use the body byte length as the file size when content-length is wrong', async () => {
+    // A compressed response whose content-length describes the encoded body, not the decoded one.
+    const body = 'uncompressed-svg-content'
+    vitest.spyOn(global, 'fetch').mockResolvedValue(
+      new Response(body, {
+        headers: { 'content-length': '5', 'content-type': 'text/plain' },
+        status: 200,
+      }),
+    )
+    const req = createRequest({ serverURL: 'https://configured.example.com' })
+
+    const file = await downloadFileToBuffer({
+      data: { url: '/asset.txt' },
+      req,
+      uploadConfig: { skipSafeFetch: true },
+    })
+
+    expect(file.size).toBe(Buffer.byteLength(body))
+  })
 })
