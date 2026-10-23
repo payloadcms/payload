@@ -162,6 +162,12 @@ export interface Post {
       | null;
   };
   selectWithAsyncFilterOptions?: ('allowed' | 'excluded') | null;
+  validatePathArray?:
+    | {
+        validatePathText?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -402,6 +408,12 @@ export interface PostsSelect<T extends boolean = true> {
             };
       };
   selectWithAsyncFilterOptions?: T;
+  validatePathArray?:
+    | T
+    | {
+        validatePathText?: T;
+        id?: T;
+      };
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
