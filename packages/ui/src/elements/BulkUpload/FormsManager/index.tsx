@@ -680,48 +680,68 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
   const bulkUpdateForm = React.useCallback(
     async (updatedFields: Record<string, unknown>, afterStateUpdate?: () => void) => {
-      for (let i = 0; i < forms.length; i++) {
-        Object.entries(updatedFields).forEach(([path, value]) => {
-          if (forms[i].formState[path]) {
-            forms[i].formState[path].value = value
+      const updatedForms = forms.map((form, index) => {
+        const formState = Object.fromEntries(
+          Object.entries(form.formState).map(([path, value]) => [
+            path,
+            value && typeof value === 'object' ? { ...value } : value,
+          ]),
+        ) as FormState
 
-            dispatch({
-              type: 'UPDATE_FORM',
-              errorCount: forms[i].errorCount,
-              formState: forms[i].formState,
-              index: i,
-            })
+        for (const [path, value] of Object.entries(updatedFields)) {
+          if (formState[path] && typeof formState[path] === 'object') {
+            formState[path] = { ...formState[path], value }
           }
-        })
-
-        if (typeof afterStateUpdate === 'function') {
-          afterStateUpdate()
         }
-
-        const { state } = await getFormState({
-          collectionSlug,
-          docPermissions,
-          docPreferences: null,
-          formState: forms[i].formState,
-          operation: 'create',
-          schemaPath: collectionSlug,
-          skipValidation: !hasSubmitted,
-        })
-
-        const errorCount = hasSubmitted
-          ? Object.values(state).reduce(
-              (acc, value) => (value?.valid === false ? acc + 1 : acc),
-              0,
-            )
-          : forms[i].errorCount
 
         dispatch({
           type: 'UPDATE_FORM',
-          errorCount,
-          formState: state,
-          index: i,
+          errorCount: form.errorCount,
+          formState,
+          index,
         })
+        return { ...form, formState }
+      })
+
+      if (typeof afterStateUpdate === 'function') {
+        afterStateUpdate()
       }
+
+      await Promise.all(
+        updatedForms.map(async (form, index) => {
+          const formStateAtStart = form.formState
+          const { state: refreshedState } = await getFormState({
+            collectionSlug,
+            docPermissions,
+            docPreferences: null,
+            formState: formStateAtStart,
+            operation: 'create',
+            schemaPath: collectionSlug,
+            skipValidation: !hasSubmitted,
+          })
+
+          const currentIndex = formsRef.current.findIndex((item) => item.formID === form.formID)
+          const currentForm = formsRef.current[currentIndex]
+          if (!currentForm || currentForm.formState !== formStateAtStart) {
+            return
+          }
+
+          const errorCount = hasSubmitted
+            ? Object.values(refreshedState).reduce(
+                (acc, value) => (value?.valid === false ? acc + 1 : acc),
+                0,
+              )
+            : currentForm.errorCount
+
+          dispatch({
+            type: 'UPDATE_FORM',
+            errorCount,
+            formState: refreshedState,
+            index: currentIndex,
+          })
+        }),
+      )
+    }
     },
     [collectionSlug, docPermissions, forms, getFormState, hasSubmitted],
   )
