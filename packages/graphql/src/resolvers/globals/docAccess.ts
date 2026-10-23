@@ -1,26 +1,37 @@
+import type { GraphQLResolveInfo } from 'graphql'
 import type {
-  PayloadRequest,
   SanitizedCollectionPermission,
   SanitizedGlobalConfig,
   SanitizedGlobalPermission,
 } from 'payload'
 
-import { docAccessOperationGlobal, isolateObjectProperty } from 'payload'
+import { docAccessOperationGlobal } from 'payload'
 
 import type { Context } from '../types.js'
 
+import { getGraphQLRequest } from '../getGraphQLRequest.js'
+
 export type Resolver = (
   _: unknown,
-  context: {
-    req: PayloadRequest
+  args: {
+    branch?: string
   },
+  context: Context,
+  info: GraphQLResolveInfo,
 ) => Promise<SanitizedCollectionPermission | SanitizedGlobalPermission>
 
 export function docAccessResolver(global: SanitizedGlobalConfig): Resolver {
-  async function resolver(_, context: Context) {
+  async function resolver(_, args, context, info) {
+    const req = await getGraphQLRequest({
+      branch: args.branch,
+      context,
+      globalSlug: global.slug,
+      info,
+    })
+
     return docAccessOperationGlobal({
       globalConfig: global,
-      req: isolateObjectProperty(context.req, 'transactionID'),
+      req,
     })
   }
 

@@ -6,7 +6,10 @@ import type {
   PopulateType,
   SelectType,
   TransformCollectionWithSelect,
+  Where,
 } from '../../types/index.js'
+import type { UploadFileRollbacks } from '../../uploads/uploadFileRollback.js'
+import type { DeferredCleanupScope } from '../../utilities/transactionCallbacks.js'
 import type {
   Collection,
   RequiredDataFromCollectionSlug,
@@ -16,6 +19,15 @@ import type {
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
+import { retryConcurrentShadowOperation } from '../../branching/createShadowRow.js'
+import { forkDocument } from '../../branching/forkDocument.js'
+import { assertBranchMergeValidationWriteAllowed } from '../../branching/mergeWriteGuard.js'
+import {
+  refreshRequestDataLoader,
+  resetBranchState,
+  resolveBranch,
+} from '../../branching/resolveBranch.js'
+import { branchField, MAIN_BRANCH } from '../../branching/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { type CollectionSlug, deepCopyObjectSimple, type FindOptions } from '../../index.js'
@@ -34,15 +46,28 @@ import {
   sanitizeUploadData,
 } from '../../uploads/sanitizeUploadData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
+import {
+  cleanupUploadFileRollbacks,
+  rollbackUploadFiles,
+} from '../../uploads/uploadFileRollback.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
-import { commitTransaction } from '../../utilities/commitTransaction.js'
+import {
+  commitTransaction,
+  shouldRollbackTransactionArtifacts,
+} from '../../utilities/commitTransaction.js'
 import { hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { httpStatus } from '../../utilities/httpStatus.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import {
+  beginDeferredCleanupScope,
+  clearDeferredCleanupScope,
+  flushDeferredCleanupScopeAfterOperation,
+  hasActiveDeferredCleanupScope,
+} from '../../utilities/transactionCallbacks.js'
 import {
   getAllLocalesPublicationStatus,
   normalizeAllLocalesPublicationStatus,
@@ -52,10 +77,25 @@ import {
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
+import {
+  commitOperationRetryRequestContext,
+  createOperationRetryRequest,
+  shouldRetryOperationRequest,
+} from './utilities/createOperationRetryRequest.js'
 import { updateDocument } from './utilities/update.js'
+
+export const branchMergeUploadDataContextKey = Symbol('branchMergeUploadData')
+
+export type BranchMergeUploadDataContext = {
+  collectionSlug: string
+  data: unknown
+  id: number | string
+}
 
 export type Arguments<TSlug extends CollectionSlug> = {
   autosave?: boolean
+  /** @internal Storage request for an in-place branch-created row promotion. */
+  branchMergeStorageReq?: PayloadRequest
   collection: Collection
   data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
   depth?: number
@@ -74,23 +114,189 @@ export type Arguments<TSlug extends CollectionSlug> = {
   unpublishAllLocales?: boolean
 } & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
-export const updateByIDOperation = async <
+export const updateByIDOperation = <
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug> = SelectType,
 >(
   incomingArgs: Arguments<TSlug>,
-): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
+): Promise<TransformCollectionWithSelect<TSlug, TSelect>> =>
+  updateByIDOperationWithLifecycle<TSlug, TSelect>({
+    incomingArgs,
+    lifecycleOperation: 'update',
+  })
+
+/**
+ * Promotes a branch-created row while applying create access and lifecycle hooks.
+ * This module is not a package export; external callers use `updateByIDOperation`.
+ *
+ * @internal
+ */
+export const updateByIDOperationForBranchMerge = <
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug> = SelectType,
+>(
+  incomingArgs: Arguments<TSlug>,
+): Promise<TransformCollectionWithSelect<TSlug, TSelect>> =>
+  updateByIDOperationWithLifecycle<TSlug, TSelect>({
+    incomingArgs,
+    lifecycleOperation: 'create',
+    trustedUploadData: incomingArgs.data,
+  })
+
+const updateByIDOperationWithLifecycle = async <
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug> = SelectType,
+>({
+  incomingArgs,
+  lifecycleOperation,
+  trustedUploadData,
+}: {
+  incomingArgs: Arguments<TSlug>
+  lifecycleOperation: 'create' | 'update'
+  trustedUploadData?: unknown
+}): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
+  assertNoValidationWrite(incomingArgs.req)
+
+  const reqContext = incomingArgs.req.context as Record<PropertyKey, unknown> | undefined
+  const pendingBranchMergeUploadData = reqContext?.[branchMergeUploadDataContextKey] as
+    | BranchMergeUploadDataContext
+    | undefined
+  let branchMergeUploadDataToTrust: BranchMergeUploadDataContext | undefined =
+    trustedUploadData === undefined
+      ? undefined
+      : {
+          id: incomingArgs.id,
+          collectionSlug: incomingArgs.collection.config.slug,
+          data: trustedUploadData,
+        }
+
+  if (
+    pendingBranchMergeUploadData?.collectionSlug === incomingArgs.collection.config.slug &&
+    pendingBranchMergeUploadData.id === incomingArgs.id
+  ) {
+    branchMergeUploadDataToTrust ??= pendingBranchMergeUploadData
+    delete reqContext![branchMergeUploadDataContextKey]
+  }
+
+  const hasCallerTransaction = Boolean(await incomingArgs.req.transactionID)
+  const pristineData = deepCopyObjectSimple(incomingArgs.data)
+  const shouldIsolateTempFile = Boolean(
+    !hasCallerTransaction &&
+      incomingArgs.req.file?.tempFilePath &&
+      (incomingArgs.req.payload.config.upload?.useTempFiles ||
+        incomingArgs.req.file.uploadReference ||
+        incomingArgs.req.context?._payloadClientUploadTempFile),
+  )
+  let didOwnAttemptTransaction = false
+  let didReachFinalCommit = false
+  let isRetrySafe = false
+
+  try {
+    return await retryConcurrentShadowOperation({
+      operation: async () => {
+        didOwnAttemptTransaction = false
+        didReachFinalCommit = false
+        isRetrySafe = false
+
+        const shouldReuseParentRequest =
+          incomingArgs.disableTransaction &&
+          hasActiveDeferredCleanupScope({ req: incomingArgs.req })
+        const retryRequest =
+          hasCallerTransaction || shouldReuseParentRequest
+            ? undefined
+            : await createOperationRetryRequest({
+                copyFileTempPath: shouldIsolateTempFile,
+                req: incomingArgs.req,
+              })
+
+        isRetrySafe = retryRequest?.isRetrySafe ?? false
+        const attemptArgs = retryRequest
+          ? {
+              ...incomingArgs,
+              data: deepCopyObjectSimple(pristineData),
+              req: retryRequest.req,
+            }
+          : incomingArgs
+
+        const result = await updateByIDOperationWithLifecycleAttempt<TSlug, TSelect>({
+          branchMergeUploadDataToTrust,
+          hasCallerTransaction,
+          incomingArgs: attemptArgs,
+          lifecycleOperation,
+          reportFinalCommit: () => {
+            didReachFinalCommit = true
+          },
+          reportTransactionOwnership: ({ isOperationTransaction }) => {
+            didOwnAttemptTransaction = isOperationTransaction
+          },
+        })
+
+        if (retryRequest?.isRetrySafe) {
+          commitOperationRetryRequestContext({ req: attemptArgs.req })
+        }
+
+        return result
+      },
+      shouldRetry: ({ error }) =>
+        shouldRetryOperationRequest({
+          didOwnAttemptTransaction,
+          didReachFinalCommit,
+          error,
+          hasCallerTransaction,
+          isRetrySafe,
+        }),
+    })
+  } finally {
+    if (shouldIsolateTempFile) {
+      await unlinkTempFiles({
+        collectionConfig: incomingArgs.collection.config,
+        config: incomingArgs.req.payload.config,
+        req: incomingArgs.req,
+      }).catch((unlinkError) => {
+        incomingArgs.req.payload.logger.error({
+          err: unlinkError,
+          msg: 'Failed to remove temp file',
+        })
+      })
+    }
+  }
+}
+
+const updateByIDOperationWithLifecycleAttempt = async <
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug> = SelectType,
+>({
+  branchMergeUploadDataToTrust,
+  hasCallerTransaction,
+  incomingArgs,
+  lifecycleOperation,
+  reportFinalCommit,
+  reportTransactionOwnership,
+}: {
+  branchMergeUploadDataToTrust?: BranchMergeUploadDataContext
+  hasCallerTransaction: boolean
+  incomingArgs: Arguments<TSlug>
+  lifecycleOperation: 'create' | 'update'
+  reportFinalCommit: () => void
+  reportTransactionOwnership: (args: { isOperationTransaction: boolean }) => void
+}): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
+  let cleanupScope: DeferredCleanupScope | null = null
+  let didResolveBranchFork = false
+  let shouldCommit = false
+  const uploadFileRollbacks: UploadFileRollbacks = new Map()
   const hasFileOperationScope = Boolean(args.collection.config.upload)
+
+  assertBranchMergeValidationWriteAllowed({ req: args.req })
 
   if (hasFileOperationScope) {
     beginFileOperationScope({ req: args.req })
   }
 
-  assertNoValidationWrite(args.req)
-
   try {
-    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    reportTransactionOwnership({ isOperationTransaction: shouldCommit })
+    cleanupScope = await beginDeferredCleanupScope({ req: args.req })
 
     if (args.collection.config.upload && !args.overrideAccess) {
       const { objectKey, prefix } = getUploadDestination({ data: args.data, file: args.req.file })
@@ -146,6 +352,7 @@ export const updateByIDOperation = async <
     const {
       id,
       autosave = false,
+      branchMergeStorageReq,
       collection: { config: collectionConfig },
       collection,
       depth,
@@ -202,74 +409,53 @@ export const updateByIDOperation = async <
       ? unpublishAllLocalesArg
       : false
 
-    // /////////////////////////////////////
-    // Access
-    // /////////////////////////////////////
-
-    const accessResults = !overrideAccess
-      ? await executeAccess(
-          { id, slug: collectionConfig.slug, data, req },
-          collectionConfig.access.update,
-        )
-      : true
-    const hasWherePolicy = hasWhereAccessResult(accessResults)
-
-    // /////////////////////////////////////
-    // Retrieve document
-    // /////////////////////////////////////
-
-    const where = { id: { equals: id } }
-
-    let fullWhere = combineQueries(where, accessResults)
-
-    const isTrashAttempt =
-      collectionConfig.trash &&
-      typeof data === 'object' &&
-      data !== null &&
-      'deletedAt' in data &&
-      data.deletedAt != null
-
-    if (isTrashAttempt && !overrideAccess) {
-      // Pass data so access function can check data.deletedAt to know it's a trash attempt
-      const deleteAccessResult = await executeAccess(
-        { id, slug: collectionConfig.slug, data, req },
-        collectionConfig.access.delete,
-      )
-      fullWhere = combineQueries(fullWhere, deleteAccessResult)
-    }
-
-    // Exclude trashed documents when trash: false
-    fullWhere = appendNonTrashedFilter({
-      enableTrash: collectionConfig.trash,
-      trash,
-      where: fullWhere,
-    })
-
-    const findOneArgs: FindOneArgs = {
-      collection: collectionConfig.slug,
-      locale: locale!,
-      req,
-      where: fullWhere,
-    }
-
-    let docWithLocales = await getLatestCollectionVersion<
-      RequiredDataFromCollectionSlug<TSlug> & TypeWithID
-    >({
+    const authorizedDocument = await readAuthorizedUpdateDocument<TSlug>({
       id,
-      config: collectionConfig,
-      payload,
-      query: findOneArgs,
+      collectionConfig,
+      data,
+      lifecycleOperation,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
       req,
+      storageReq: branchMergeStorageReq,
+      trash,
     })
+    let { docWithLocales } = authorizedDocument
+    const branch = resolveBranch(req)
+    const isBranchingDocument =
+      branch !== MAIN_BRANCH &&
+      req.payload.config.branching?.branchableCollections.has(collectionConfig.slug)
 
-    if (!docWithLocales && !hasWherePolicy) {
-      throw new NotFound(req.t)
-    }
-    if (!docWithLocales && hasWherePolicy) {
-      throw new Forbidden(req.t)
-    }
-    if (!docWithLocales) {
-      throw new NotFound(req.t)
+    if (isBranchingDocument) {
+      const isExistingBranchDocument = docWithLocales[branchField] === branch
+
+      if (hasCallerTransaction && !isExistingBranchDocument) {
+        throw new APIError(
+          'Cannot update an untouched branch document within an existing transaction.',
+          httpStatus.CONFLICT,
+        )
+      }
+
+      await forkDocument({
+        id,
+        collectionSlug: collectionConfig.slug,
+        req,
+        // Without an operation-owned transaction, retain the isolated race-recovery path. An
+        // adapter with transactions disabled or unavailable cannot roll back a later hook failure.
+        useAmbientTransaction: shouldCommit,
+      })
+      didResolveBranchFork = true
+
+      if (!isExistingBranchDocument) {
+        docWithLocales = await readUpdateDocument<TSlug>({
+          id,
+          collectionConfig,
+          hasWherePolicy: authorizedDocument.hasWherePolicy,
+          locale: locale!,
+          req,
+          where: authorizedDocument.where,
+        })
+      }
     }
 
     const storedDocWithLocales = docWithLocales
@@ -282,7 +468,13 @@ export const updateByIDOperation = async <
     }
 
     if (collectionConfig.upload && !overrideAccess) {
-      data = mergeUploadDataWithDocument(data, docWithLocales, {
+      const trustedUploadDataForDocument =
+        branchMergeUploadDataToTrust?.collectionSlug === collectionConfig.slug &&
+        branchMergeUploadDataToTrust.id === id
+          ? branchMergeUploadDataToTrust.data
+          : docWithLocales
+
+      data = mergeUploadDataWithDocument(data, trustedUploadDataForDocument, {
         locale:
           locale === 'all' || !locale
             ? config.localization
@@ -328,12 +520,14 @@ export const updateByIDOperation = async <
       collectionConfig,
       config,
       data: deepCopyObjectSimple(newFileData),
+      databaseReq: branchMergeStorageReq,
       depth: depth!,
       docWithLocales,
       draftArg,
       fallbackLocale: fallbackLocale!,
       filesToUpload,
       locale: locale!,
+      operation: lifecycleOperation,
       overrideAccess: overrideAccess!,
       overrideLock: overrideLock!,
       payload,
@@ -344,6 +538,10 @@ export const updateByIDOperation = async <
       shouldManageLocalFiles: true,
       showHiddenFields: showHiddenFields!,
       unpublishAllLocales,
+      uploadFileRollbacks:
+        shouldCommit && collectionConfig.upload && !collectionConfig.upload.disableLocalStorage
+          ? uploadFileRollbacks
+          : undefined,
     } as const
 
     const write = () => updateDocument<TSlug, TSelect>(updateArgs)
@@ -391,8 +589,23 @@ export const updateByIDOperation = async <
     // Return results
     // /////////////////////////////////////
 
+    if (cleanupScope) {
+      await flushDeferredCleanupScopeAfterOperation({ req, scope: cleanupScope })
+    }
     if (shouldCommit) {
+      reportFinalCommit()
       await commitTransaction(req)
+
+      await cleanupUploadFileRollbacks({ rollbacks: uploadFileRollbacks }).catch((error) => {
+        args.req.payload.logger.error({
+          err: error,
+          msg: 'Failed to remove an upload rollback backup after committing its database write.',
+        })
+      })
+    }
+
+    if (isBranchingDocument) {
+      refreshRequestDataLoader(req)
     }
 
     if (hasFileOperationScope) {
@@ -401,6 +614,12 @@ export const updateByIDOperation = async <
 
     return result
   } catch (error: unknown) {
+    const shouldRollbackArtifacts = shouldRollbackTransactionArtifacts({ error })
+
+    if (cleanupScope) {
+      clearDeferredCleanupScope({ req: args.req, scope: cleanupScope })
+    }
+
     await unlinkTempFiles({
       collectionConfig: args.collection.config,
       config: args.req.payload.config,
@@ -408,10 +627,139 @@ export const updateByIDOperation = async <
     }).catch((unlinkError) => {
       args.req.payload.logger.error({ err: unlinkError, msg: 'Failed to remove temp file' })
     })
-    await killTransaction(args.req)
+    if (shouldCommit) {
+      await killTransaction(args.req)
+      if (didResolveBranchFork) {
+        resetBranchState(args.req)
+      }
+
+      if (shouldRollbackArtifacts) {
+        await rollbackUploadFiles({ rollbacks: uploadFileRollbacks })
+      }
+    }
+
     if (hasFileOperationScope) {
       await abortFileOperationScope({ req: args.req })
     }
     throw error
   }
+}
+
+const readAuthorizedUpdateDocument = async <TSlug extends CollectionSlug>({
+  id,
+  collectionConfig,
+  data,
+  lifecycleOperation,
+  locale,
+  overrideAccess,
+  req,
+  storageReq,
+  trash,
+}: {
+  collectionConfig: Collection['config']
+  data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
+  id: number | string
+  lifecycleOperation: 'create' | 'update'
+  locale: string
+  overrideAccess: boolean
+  req: PayloadRequest
+  storageReq?: PayloadRequest
+  trash: boolean
+}): Promise<{
+  docWithLocales: RequiredDataFromCollectionSlug<TSlug> & TypeWithID
+  hasWherePolicy: boolean
+  where: Where
+}> => {
+  if (!id) {
+    throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST)
+  }
+
+  const accessResults = !overrideAccess
+    ? await executeAccess(
+        {
+          id: lifecycleOperation === 'create' ? undefined : id,
+          slug: collectionConfig.slug,
+          data,
+          req,
+        },
+        collectionConfig.access[lifecycleOperation],
+      )
+    : true
+  const hasWherePolicy = lifecycleOperation !== 'create' && hasWhereAccessResult(accessResults)
+  const where = { id: { equals: id } }
+  let fullWhere = hasWherePolicy ? combineQueries(where, accessResults) : where
+  const isTrashAttempt =
+    collectionConfig.trash &&
+    typeof data === 'object' &&
+    data !== null &&
+    'deletedAt' in data &&
+    data.deletedAt != null
+
+  if (isTrashAttempt && !overrideAccess) {
+    const deleteAccessResult = await executeAccess(
+      { id, slug: collectionConfig.slug, data, req },
+      collectionConfig.access.delete,
+    )
+
+    fullWhere = combineQueries(fullWhere, deleteAccessResult)
+  }
+
+  fullWhere = appendNonTrashedFilter({
+    enableTrash: collectionConfig.trash,
+    trash,
+    where: fullWhere,
+  })
+
+  const docWithLocales = await readUpdateDocument<TSlug>({
+    id,
+    collectionConfig,
+    hasWherePolicy,
+    locale,
+    req: storageReq ?? req,
+    where: fullWhere,
+  })
+
+  return { docWithLocales, hasWherePolicy, where: fullWhere }
+}
+
+const readUpdateDocument = async <TSlug extends CollectionSlug>({
+  id,
+  collectionConfig,
+  hasWherePolicy,
+  locale,
+  req,
+  where,
+}: {
+  collectionConfig: Collection['config']
+  hasWherePolicy: boolean
+  id: number | string
+  locale: string
+  req: PayloadRequest
+  where: Where
+}): Promise<RequiredDataFromCollectionSlug<TSlug> & TypeWithID> => {
+  const findOneArgs: FindOneArgs = {
+    collection: collectionConfig.slug,
+    locale,
+    req,
+    where,
+  }
+  const docWithLocales = await getLatestCollectionVersion<
+    RequiredDataFromCollectionSlug<TSlug> & TypeWithID
+  >({
+    id,
+    config: collectionConfig,
+    payload: req.payload,
+    query: findOneArgs,
+    req,
+  })
+
+  if (!docWithLocales) {
+    if (hasWherePolicy) {
+      throw new Forbidden(req.t)
+    }
+
+    throw new NotFound(req.t)
+  }
+
+  return docWithLocales
 }

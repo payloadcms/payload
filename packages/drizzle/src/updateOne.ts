@@ -2,6 +2,8 @@ import type { SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { UpdateOne } from 'payload'
 
+import { and, eq } from 'drizzle-orm'
+import { applyBranchIDProjection, resolveBranchRowID, withBranchIDSelect } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -20,6 +22,7 @@ export const updateOne: UpdateOne = async function updateOne(
   this: DrizzleAdapter,
   {
     id,
+    branch,
     collection: collectionSlug,
     data,
     joins: joinQuery,
@@ -33,7 +36,10 @@ export const updateOne: UpdateOne = async function updateOne(
 ) {
   const collection = this.payload.collections[collectionSlug].config
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
-  let idToUpdate = id
+  let idToUpdate =
+    id === undefined || id === null
+      ? id
+      : await resolveBranchRowID({ id, branch, collectionSlug, req })
   let whereToUpdate: SQL<unknown> | undefined
 
   const db = getPrimaryDb(this, await getTransaction(this, req))
@@ -51,6 +57,10 @@ export const updateOne: UpdateOne = async function updateOne(
     whereToUpdate = joins.length === 0 ? where : undefined
 
     if (options.atomic === true) {
+      if (joins.length > 0) {
+        throw new Error('Atomic where updates do not support predicates that require joins')
+      }
+
       if (!shouldUseOptimizedUpsertRow({ data, fields: collection.flattenedFields })) {
         throw new Error('Atomic where updates only support fields stored on the main table')
       }
@@ -67,19 +77,31 @@ export const updateOne: UpdateOne = async function updateOne(
         throw new Error('Atomic where updates do not support array operations')
       }
 
+      const table = this.tables[tableName]
+      const matchingRows = await (db as LibSQLDatabase)
+        .select({ id: table.id })
+        .from(table)
+        .where(where)
+        .limit(1)
+      const matchingRowID = matchingRows[0]?.id
+
+      if (matchingRowID === undefined || matchingRowID === null) {
+        return null
+      }
+
       markWrite(this)
 
       const docs = await (db as LibSQLDatabase)
-        .update(this.tables[tableName])
+        .update(table)
         .set(row)
-        .where(where)
+        .where(and(eq(table.id, matchingRowID), where))
         .returning()
 
       if (!docs[0]) {
         return null
       }
 
-      return transform({
+      const result = transform({
         adapter: this,
         config: this.payload.config,
         data: docs[0],
@@ -87,6 +109,15 @@ export const updateOne: UpdateOne = async function updateOne(
         joinQuery: false,
         tableName,
       })
+
+      applyBranchIDProjection({
+        branch,
+        collectionSlug,
+        docs: [result as Record<string, unknown>],
+        req,
+      })
+
+      return result
     }
 
     // selectDistinct will only return if there are joins
@@ -135,7 +166,7 @@ export const updateOne: UpdateOne = async function updateOne(
     joinQuery,
     operation: 'update',
     req,
-    select,
+    select: withBranchIDSelect({ branch, collectionSlug, req, select }),
     tableName,
     where: whereToUpdate,
   })
@@ -143,6 +174,15 @@ export const updateOne: UpdateOne = async function updateOne(
   if (returning === false) {
     return null
   }
+
+  // The row written on a branch is the shadow row, so the document it returns
+  // carries that row's primary key rather than the document's canonical ID.
+  applyBranchIDProjection({
+    branch,
+    collectionSlug,
+    docs: [result as Record<string, unknown>],
+    req,
+  })
 
   return result
 }

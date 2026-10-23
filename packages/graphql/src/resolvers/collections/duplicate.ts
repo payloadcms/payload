@@ -1,12 +1,16 @@
+import type { GraphQLResolveInfo } from 'graphql'
 import type { Collection, CollectionSlug, DataFromCollectionSlug, PayloadRequest } from 'payload'
 
-import { duplicateOperation, isolateObjectProperty } from 'payload'
+import { duplicateOperation } from 'payload'
 
 import type { Context } from '../types.js'
+
+import { getGraphQLRequest } from '../getGraphQLRequest.js'
 
 export type Resolver<TData> = (
   _: unknown,
   args: {
+    branch?: string
     data: TData
     draft: boolean
     fallbackLocale?: string
@@ -16,18 +20,21 @@ export type Resolver<TData> = (
   context: {
     req: PayloadRequest
   },
+  info: GraphQLResolveInfo,
 ) => Promise<TData>
 
 export function duplicateResolver<TSlug extends CollectionSlug>(
   collection: Collection,
 ): Resolver<DataFromCollectionSlug<TSlug>> {
-  return async function resolver(_, args, context: Context) {
-    const { req } = context
-    const locale = req.locale
-    const fallbackLocale = req.fallbackLocale
-    req.locale = args.locale || locale
-    req.fallbackLocale = args.fallbackLocale || fallbackLocale
-    context.req = req
+  return async function resolver(_, args, context: Context, info) {
+    const req = await getGraphQLRequest({
+      branch: args.branch,
+      collectionSlug: collection.config.slug,
+      context,
+      fallbackLocale: args.fallbackLocale,
+      info,
+      locale: args.locale,
+    })
 
     const result = await duplicateOperation({
       id: args.id,
@@ -35,7 +42,7 @@ export function duplicateResolver<TSlug extends CollectionSlug>(
       data: args.data,
       depth: 0,
       draft: args.draft,
-      req: isolateObjectProperty(req, 'transactionID'),
+      req,
     })
 
     return result

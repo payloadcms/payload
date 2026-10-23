@@ -14,6 +14,7 @@ import {
   createGlobalVersion,
   createSchemaGenerator,
   createVersion,
+  deleteBranchGlobal,
   deleteMany,
   deleteOne,
   deleteVersions,
@@ -40,6 +41,7 @@ import {
   updateOne,
   updateVersion,
   upsert,
+  upsertBranchGlobalChange,
   validateOperatorHandlers,
 } from '@payloadcms/drizzle'
 import {
@@ -188,6 +190,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       createJSONQuery,
       createVersion,
       defaultIDType: payloadIDType,
+      deleteBranchGlobal,
       deleteMany,
       deleteOne,
       deleteVersions,
@@ -229,6 +232,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       updateOne,
       updateVersion,
       upsert,
+      upsertBranchGlobalChange,
     })
 
     adapter.blocksToJsonMigrator = createBlocksToJsonMigrator({

@@ -21,6 +21,8 @@ import {
   BulkUploadProvider,
   CommandPalette,
   EntityVisibilityProvider,
+  HierarchyProvider,
+  MergeBranchProvider,
   DefaultTemplateWrapper as Wrapper,
 } from '../../exports/client/index.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
@@ -28,6 +30,7 @@ import type { UserMenuSettingsGroup } from '../../elements/UserMenu/SettingsMenu
 
 import { DefaultNav } from '../../elements/Nav/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
+import { RenderBranchProvider } from '../../providers/Branch/index.server.js'
 
 const baseClass = 'template-default'
 
@@ -203,28 +206,36 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   })
 
   return (
-    <EntityVisibilityProvider visibleEntities={visibleEntities}>
-      <CommandPalette />
-      <BulkUploadProvider modalSlugPrefix={collectionSlug}>
-        <ActionsProvider Actions={Actions} viewKey={viewKey}>
-          {RenderServerComponent({
-            clientProps,
-            Component: CustomHeader,
-            importMap: payload.importMap,
-            serverProps,
-          })}
-          <div style={{ position: 'relative' }}>
-            <Wrapper baseClass={baseClass} className={className}>
-              {NavComponent}
-              <div className={`${baseClass}__wrap`}>
-                <AppHeader />
-                <span className="sr-only" id="payload-main-content" tabIndex={-1} />
-                {children}
-              </div>
-            </Wrapper>
-          </div>
-        </ActionsProvider>
-      </BulkUploadProvider>
-    </EntityVisibilityProvider>
+    <RenderBranchProvider req={req}>
+      <HierarchyProvider>
+        {/* Above both the app header and the page, because the merge modal is mounted
+            exactly once and either can raise it. */}
+        <MergeBranchProvider>
+          <EntityVisibilityProvider visibleEntities={visibleEntities}>
+            <CommandPalette />
+            <BulkUploadProvider modalSlugPrefix={collectionSlug}>
+              <ActionsProvider Actions={Actions} viewKey={viewKey}>
+                {RenderServerComponent({
+                  clientProps,
+                  Component: CustomHeader,
+                  importMap: payload.importMap,
+                  serverProps,
+                })}
+                <div style={{ position: 'relative' }}>
+                  <Wrapper baseClass={baseClass} className={className}>
+                    {NavComponent}
+                    <div className={`${baseClass}__wrap`}>
+                      <AppHeader />
+                      <span className="sr-only" id="payload-main-content" tabIndex={-1} />
+                      {children}
+                    </div>
+                  </Wrapper>
+                </div>
+              </ActionsProvider>
+            </BulkUploadProvider>
+          </EntityVisibilityProvider>
+        </MergeBranchProvider>
+      </HierarchyProvider>
+    </RenderBranchProvider>
   )
 }

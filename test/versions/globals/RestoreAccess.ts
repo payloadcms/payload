@@ -32,6 +32,10 @@ const buildRestoreAccessGlobal = (slug: string): GlobalConfig => ({
         return data?._status !== 'draft'
       }
 
+      if (context?.restoreAccessMode === 'idConstraint') {
+        return { id: { equals: context.restoreAccessGlobalID } }
+      }
+
       // Constrained: only allow when the current global is unlocked.
       // Uses `equals` because it filters consistently across all database
       // adapters (relational `not_equals` has NULL/text semantics that differ

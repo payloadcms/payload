@@ -1,5 +1,6 @@
 import type { PayloadRequest } from '../types/index.js'
 
+import { assertBranchMergeValidationWriteAllowed } from '../branching/mergeWriteGuard.js'
 import { APIError } from '../errors/index.js'
 
 /**
@@ -9,6 +10,8 @@ import { APIError } from '../errors/index.js'
  */
 export function assertNoValidationWrite(req?: Partial<PayloadRequest>): void {
   if (req?.operation === 'validate') {
+    assertBranchMergeValidationWriteAllowed({ req })
+
     throw new APIError('Payload writes are not allowed during validation.')
   }
 }

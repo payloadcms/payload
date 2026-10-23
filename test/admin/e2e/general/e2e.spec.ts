@@ -883,7 +883,7 @@ describe('General', () => {
       const waitForNavPreferenceUpdate = () =>
         page.waitForResponse(
           (response) =>
-            new URL(response.url()).pathname.endsWith('/payload-preferences/nav') &&
+            new URL(response.url()).pathname.endsWith('/payload-preferences/admin') &&
             response.request().method() === 'POST',
         )
 

@@ -14,7 +14,11 @@ export const sanitizeCompoundIndexes = ({
   const sanitizedCompoundIndexes: SanitizedCompoundIndex[] = []
 
   for (const index of indexes) {
-    const sanitized: SanitizedCompoundIndex = { fields: [], unique: index.unique ?? false }
+    const sanitized: SanitizedCompoundIndex = {
+      fields: [],
+      requireExists: index.requireExists,
+      unique: index.unique ?? false,
+    }
     for (const path of index.fields) {
       const result = getFieldByPath({ fields, path })
 
@@ -31,6 +35,12 @@ export const sanitizeCompoundIndexes = ({
       }
 
       sanitized.fields.push({ field, localizedPath, path, pathHasLocalized })
+    }
+
+    for (const path of index.requireExists ?? []) {
+      if (!getFieldByPath({ fields, path })) {
+        throw new InvalidConfiguration(`Field ${path} in requireExists was not found`)
+      }
     }
 
     sanitizedCompoundIndexes.push(sanitized)
