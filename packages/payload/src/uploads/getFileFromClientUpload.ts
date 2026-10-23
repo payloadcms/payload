@@ -81,7 +81,7 @@ export async function getFileFromClientUpload({
   }
   req.context[CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY] = tempFilePath
 
-  const source = { type: 'file', ownership: 'temporary', path: tempFilePath } as const
+  const source = { type: 'file', isTemporary: true, path: tempFilePath } as const
 
   return toLegacyUploadFile({
     name: file.filename,

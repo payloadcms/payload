@@ -106,10 +106,7 @@ export const generateFileData = async <T>({
 
   let file =
     !isDuplicating && req.file
-      ? normalizeUploadFile(
-          req.file,
-          req.payload.config.upload?.useTempFiles ? 'temporary' : 'external',
-        )
+      ? normalizeUploadFile(req.file, Boolean(req.payload.config.upload?.useTempFiles))
       : undefined
 
   const uploadEdits = parseUploadEditsFromReqOrIncomingData({

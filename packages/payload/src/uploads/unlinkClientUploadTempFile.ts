@@ -37,7 +37,7 @@ export const unlinkClientUploadTempFile: (args: Args) => Promise<void> = async (
   }
 
   try {
-    await disposeFileSource({ type: 'file', ownership: 'temporary', path: tempFilePath })
+    await disposeFileSource({ type: 'file', isTemporary: true, path: tempFilePath })
   } catch (error) {
     req.payload.logger.error({ err: error, msg: 'Failed to remove client upload temp file' })
   }

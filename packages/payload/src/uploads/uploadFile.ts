@@ -21,14 +21,14 @@ export function prepareLocalUploadFile(file: LegacyUploadFile): LegacyUploadFile
 
 export function normalizeUploadFile(
   file: LegacyUploadFile | UploadFile,
-  ownership: 'external' | 'temporary' = 'external',
+  isTemporary = false,
 ): UploadFile {
   return {
     name: file.name,
     clientUploadContext: file.clientUploadContext,
     mimetype: file.mimetype,
     size: file.size,
-    source: getFileSource(file, ownership),
+    source: getFileSource(file, isTemporary),
   }
 }
 

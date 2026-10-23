@@ -80,7 +80,7 @@ export const fileFactory: FileFactory = (options, fileUploadOptions) => {
       truncated: options.truncated,
     },
     options.tempFilePath
-      ? { type: 'file', ownership: 'temporary', path: options.tempFilePath }
+      ? { type: 'file', isTemporary: true, path: options.tempFilePath }
       : { type: 'buffer', buffer: options.buffer },
   )
 }

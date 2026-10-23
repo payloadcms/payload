@@ -26,11 +26,10 @@ export const unlinkTempFiles: (args: Args) => Promise<void> = async ({
   let unlinkedTempFilePath: string | undefined
 
   if (collectionConfig.upload && file) {
-    const ownership =
-      config.upload?.useTempFiles || isClientUploadTempFile ? 'temporary' : 'external'
-    const source = getFileSource(file, ownership)
+    const isTemporary = Boolean(config.upload?.useTempFiles || isClientUploadTempFile)
+    const source = getFileSource(file, isTemporary)
 
-    if (source.type === 'file' && source.ownership === 'temporary') {
+    if (source.type === 'file' && source.isTemporary) {
       await disposeFileSource(source)
       unlinkedTempFilePath = source.path
     }

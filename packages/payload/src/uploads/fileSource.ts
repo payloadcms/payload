@@ -2,8 +2,13 @@ import type { Readable } from 'stream'
 
 /** Full local source, or an original still held by a client-upload provider. */
 export type FileSource =
+  | {
+      /** Payload may overwrite and delete this temporary working file; false preserves the original. */
+      isTemporary: boolean
+      path: string
+      type: 'file'
+    }
   | { buffer: Buffer; type: 'buffer' }
-  | { ownership: 'external' | 'temporary'; path: string; type: 'file' }
   | { probe?: Buffer; size: number; type: 'clientUpload' }
 
 export type FileSourceToSave = { path: string; source: FileSource }
@@ -24,10 +29,7 @@ const legacySources = new WeakMap<
   { buffer?: Buffer; data?: Buffer; source: FileSource; tempFilePath?: string }
 >()
 
-export function getFileSource(
-  file: FileSourceInput,
-  ownership: 'external' | 'temporary' = 'external',
-): FileSource {
+export function getFileSource(file: FileSourceInput, isTemporary = false): FileSource {
   if ('type' in file) {
     return file
   }
@@ -45,7 +47,7 @@ export function getFileSource(
     return tracked.source
   }
   if (file.tempFilePath) {
-    return { type: 'file', ownership, path: file.tempFilePath }
+    return { type: 'file', isTemporary, path: file.tempFilePath }
   }
 
   const buffer = file.data ?? file.buffer
@@ -132,7 +134,7 @@ export async function replaceFileSource<T extends { size: number; source: FileSo
   data: Buffer,
 ): Promise<T> {
   let source: FileSource = { type: 'buffer', buffer: data }
-  if (file.source.type === 'file' && file.source.ownership === 'temporary') {
+  if (file.source.type === 'file' && file.source.isTemporary) {
     const fs = await import('fs/promises')
     await fs.default.writeFile(file.source.path, data)
     source = file.source
@@ -156,7 +158,7 @@ export async function saveFileSource(file: FileSourceInput, destination: string)
 /** Cleanup is idempotent and never removes borrowed files. */
 export async function disposeFileSource(file: FileSourceInput): Promise<void> {
   const source = getFileSource(file)
-  if (source.type !== 'file' || source.ownership !== 'temporary') {
+  if (source.type !== 'file' || !source.isTemporary) {
     return
   }
   const fs = await import('fs/promises')

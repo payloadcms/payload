@@ -18,7 +18,7 @@ export const uploadFiles = async (
           'source' in file
             ? file.source
             : 'sourcePath' in file
-              ? ({ type: 'file', ownership: 'external', path: file.sourcePath } as const)
+              ? ({ type: 'file', isTemporary: false, path: file.sourcePath } as const)
               : ({ type: 'buffer', buffer: file.buffer } as const)
 
         await saveFileSource(source, file.path)
