@@ -39,6 +39,7 @@ import {
   localizedDateFieldsSlug,
   localizedPostsSlug,
   localizedSortSlug,
+  localizedStatusSharedGlobalSlug,
   portugueseLocale,
   publicationAccessGlobalSlug,
   publicationAccessSlug,
@@ -479,6 +480,7 @@ export default buildConfigWithDefaults({
       access: openAccess,
       fields: [
         ...localizedPublicationFields,
+        { name: 'sharedText', type: 'text' },
         {
           name: '_status',
           access: {
@@ -631,6 +633,46 @@ export default buildConfigWithDefaults({
     {
       fields: [
         {
+          name: 'localizedText',
+          localized: true,
+          type: 'text',
+        },
+        {
+          name: 'sharedText',
+          type: 'text',
+        },
+        {
+          name: 'sharedArray',
+          type: 'array',
+          fields: [
+            { name: 'sharedText', type: 'text' },
+            { name: 'localizedText', type: 'text', localized: true },
+          ],
+        },
+        {
+          name: 'sharedBlocks',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'shared-content',
+              fields: [
+                { name: 'sharedText', type: 'text' },
+                { name: 'localizedText', type: 'text', localized: true },
+              ],
+            },
+          ],
+        },
+      ],
+      slug: localizedStatusSharedGlobalSlug,
+      versions: {
+        drafts: {
+          localizeStatus: true,
+        },
+      },
+    },
+    {
+      fields: [
+        {
           name: 'text',
           localized: true,
           type: 'text',
@@ -709,6 +751,7 @@ export default buildConfigWithDefaults({
       },
       fields: [
         ...localizedPublicationFields,
+        { name: 'sharedText', type: 'text' },
         {
           name: '_status',
           access: {

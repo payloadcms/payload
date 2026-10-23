@@ -47,6 +47,8 @@ import {
   hasAuthorizedAllLocalesPublicationStatus,
   validateAllLocalesPublicationFlags,
 } from '../../../versions/allLocalesPublicationStatus.js'
+import { getLocalizedDraftStatus } from '../../../versions/drafts/getLocalizedDraftStatus.js'
+import { hasNonLocalizedDataChanged } from '../../../versions/drafts/hasNonLocalizedDataChanged.js'
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
   collectionConfig: SanitizedCollectionConfig
@@ -346,6 +348,57 @@ export const updateDocument = async <
 
   let snapshotToSave: JsonObject | undefined
 
+  if (
+    config.localization &&
+    hasLocalizeStatusEnabled(collectionConfig) &&
+    typeof result._status === 'string'
+  ) {
+    const statusStr = result._status
+    result._status =
+      docWithLocales._status &&
+      typeof docWithLocales._status === 'object' &&
+      !Array.isArray(docWithLocales._status)
+        ? { ...docWithLocales._status }
+        : {}
+
+    const localesToUpdate = locale === 'all' ? config.localization.localeCodes : [locale]
+
+    for (const localeCode of localesToUpdate) {
+      ;(result._status as Record<string, unknown>)[localeCode] = statusStr
+    }
+  }
+
+  const shouldDraftAllLocales =
+    isSavingDraft &&
+    statusFieldAccess &&
+    config.localization &&
+    hasLocalizeStatusEnabled(collectionConfig) &&
+    hasNonLocalizedDataChanged({
+      after: mergeLocalizedData({
+        configBlockReferences: config.blocks,
+        dataWithLocales: result,
+        docWithLocales,
+        fields: collectionConfig.fields,
+        selectedLocales: config.localization.localeCodes,
+      }),
+      before: docWithLocales,
+      configBlockReferences: config.blocks,
+      fields: collectionConfig.fields,
+    })
+
+  if (
+    isSavingDraft &&
+    statusFieldAccess &&
+    config.localization &&
+    hasLocalizeStatusEnabled(collectionConfig)
+  ) {
+    result._status = getLocalizedDraftStatus({
+      existingStatus: shouldDraftAllLocales ? result._status : docWithLocales._status,
+      locale: shouldDraftAllLocales ? 'all' : locale,
+      localeCodes: config.localization.localeCodes,
+    })
+  }
+
   if (config.localization && collectionConfig.versions) {
     let snapshotData: JsonObject | undefined
     let currentDoc
@@ -371,10 +424,10 @@ export const updateDocument = async <
         for (const localeCode of accessibleLocaleCodes) {
           result._status[localeCode] = unpublishAllLocales ? 'draft' : 'published'
         }
-      } else if (!isSavingDraft) {
-        // publishing a single locale
+      } else if (!isSavingDraft && locale !== 'all') {
         currentDoc = await payload.db.findOne<DataFromCollectionSlug<TSlug>>({
           collection: collectionConfig.slug,
+          locale: 'all',
           req,
           where: { id: { equals: id } },
         })
