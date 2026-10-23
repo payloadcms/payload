@@ -28,6 +28,7 @@ import type {
 import { APIError } from '../../../errors/index.js'
 import { getFileByPath } from '../../../uploads/getFileByPath.js'
 import { prepareLocalUploadFile } from '../../../uploads/uploadFile.js'
+import { withUploadFileScope } from '../../../uploads/uploadFileLifecycle.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { updateOperation } from '../update.js'
 import { updateByIDOperation } from '../updateByID.js'
@@ -287,12 +288,14 @@ async function updateLocal<
     where,
   }
 
-  if (options.id) {
+  return withUploadFileScope(req, async () => {
+    if (options.id) {
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+      return updateByIDOperation<TSlug, TSelect>(args)
+    }
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    return updateByIDOperation<TSlug, TSelect>(args)
-  }
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  return updateOperation<TSlug, TSelect>(args)
+    return updateOperation<TSlug, TSelect>(args)
+  })
 }
 
 export { updateLocal }

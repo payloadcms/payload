@@ -4,7 +4,9 @@ import type { ClientUploadData } from '../uploads/getFileFromClientUpload.js'
 import { APIError } from '../errors/APIError.js'
 import { verifyClientUploadReceipt } from '../uploads/clientUploadReceipt.js'
 import { processMultipartFormdata } from '../uploads/fetchAPI-multipart/index.js'
+import { getFileSource } from '../uploads/fileSource.js'
 import { getFileFromClientUpload } from '../uploads/getFileFromClientUpload.js'
+import { registerTempFile } from '../uploads/uploadFileLifecycle.js'
 
 type AddDataAndFileToRequest = (req: PayloadRequest) => Promise<void>
 
@@ -49,6 +51,11 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
       // Set all files on req.files for access by hooks
       if (files) {
         req.files = files
+        for (const entry of Object.values(files)) {
+          for (const file of Array.isArray(entry) ? entry : [entry]) {
+            registerTempFile({ req, source: getFileSource(file) })
+          }
+        }
         // Backwards compatibility: set req.file for standard upload collections
         // Guard: if multiple files share the field name "file", files.file is an array — skip
         if (files.file && !Array.isArray(files.file)) {

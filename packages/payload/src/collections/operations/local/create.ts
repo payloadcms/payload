@@ -27,6 +27,7 @@ import {
 } from '../../../index.js'
 import { getFileByPath } from '../../../uploads/getFileByPath.js'
 import { prepareLocalUploadFile } from '../../../uploads/uploadFile.js'
+import { withUploadFileScope } from '../../../uploads/uploadFileLifecycle.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { createOperation } from '../create.js'
 
@@ -224,20 +225,22 @@ export async function createLocal<
     req.file = prepareLocalUploadFile(req.file)
   }
 
-  return createOperation<TSlug, TSelect>({
-    collection,
-    data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
-    depth,
-    disableTransaction,
-    disableVerificationEmail,
-    draft,
-    duplicateFromID,
-    overrideAccess,
-    overwriteExistingFiles,
-    populate,
-    publishAllLocales,
-    req,
-    select,
-    showHiddenFields,
-  })
+  return withUploadFileScope(req, () =>
+    createOperation<TSlug, TSelect>({
+      collection,
+      data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
+      depth,
+      disableTransaction,
+      disableVerificationEmail,
+      draft,
+      duplicateFromID,
+      overrideAccess,
+      overwriteExistingFiles,
+      populate,
+      publishAllLocales,
+      req,
+      select,
+      showHiddenFields,
+    }),
+  )
 }

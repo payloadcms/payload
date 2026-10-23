@@ -40,6 +40,7 @@ export { parseRangeHeader } from '../uploads/parseRangeHeader.js'
 export { UPLOAD_CONTENT_SECURITY_POLICY } from '../uploads/uploadContentSecurityPolicy.js'
 export { toRequestFile, toUploadFile } from '../uploads/uploadFile.js'
 export type { UploadFile } from '../uploads/uploadFile.js'
+export { withUploadFileScope } from '../uploads/uploadFileLifecycle.js'
 export { getEntityPermissions } from '../utilities/getEntityPermissions/getEntityPermissions.js'
 
 export { sanitizePermissions } from '../utilities/sanitizePermissions.js'

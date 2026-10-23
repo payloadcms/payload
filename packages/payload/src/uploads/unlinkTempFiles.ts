@@ -2,8 +2,9 @@ import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
-import { deleteTempFile, getFileSource } from './fileSource.js'
+import { getFileSource } from './fileSource.js'
 import { unlinkClientUploadTempFile } from './unlinkClientUploadTempFile.js'
+import { cleanupUploadFiles, registerTempFile } from './uploadFileLifecycle.js'
 
 type Args = {
   collectionConfig: SanitizedCollectionConfig
@@ -23,17 +24,15 @@ export const unlinkTempFiles: (args: Args) => Promise<void> = async ({
     file?.tempFilePath && Object.prototype.hasOwnProperty.call(file, 'clientUploadContext'),
   )
 
-  let unlinkedTempFilePath: string | undefined
-
   if (collectionConfig.upload && file) {
     const isTemporary = Boolean(config.upload?.useTempFiles || isClientUploadTempFile)
     const source = getFileSource(file, isTemporary)
 
     if (source.type === 'file' && source.isTemporary) {
-      await deleteTempFile(source)
-      unlinkedTempFilePath = source.path
+      registerTempFile({ req, source })
     }
   }
 
-  await unlinkClientUploadTempFile({ alreadyUnlinkedPath: unlinkedTempFilePath, req })
+  await unlinkClientUploadTempFile({ req })
+  await cleanupUploadFiles(req)
 }

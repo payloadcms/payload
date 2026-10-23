@@ -1,7 +1,7 @@
 import type { PayloadRequest } from '../types/index.js'
 
-import { deleteTempFile } from './fileSource.js'
 import { CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY } from './getFileFromClientUpload.js'
+import { cleanupUploadFiles, registerTempFile } from './uploadFileLifecycle.js'
 
 type Args = {
   /**
@@ -30,15 +30,15 @@ export const unlinkClientUploadTempFile: (args: Args) => Promise<void> = async (
     return
   }
 
-  delete req.context[CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY]
-
-  if (tempFilePath === alreadyUnlinkedPath) {
-    return
+  if (tempFilePath !== alreadyUnlinkedPath) {
+    registerTempFile({
+      contextKey: CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY,
+      req,
+      source: { type: 'file', isTemporary: true, path: tempFilePath },
+    })
+  } else {
+    delete req.context[CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY]
   }
 
-  try {
-    await deleteTempFile({ type: 'file', isTemporary: true, path: tempFilePath })
-  } catch (error) {
-    req.payload.logger.error({ err: error, msg: 'Failed to remove client upload temp file' })
-  }
+  await cleanupUploadFiles(req)
 }

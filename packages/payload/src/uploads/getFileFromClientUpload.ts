@@ -15,6 +15,7 @@ import { getFileSize } from './fileSource.js'
 import { getFileContentRequirement, HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
 import { getImageSize } from './getImageSize.js'
 import { toRequestFile } from './uploadFile.js'
+import { registerTempFile } from './uploadFileLifecycle.js'
 
 export type ClientUploadData = {
   clientUploadContext?: unknown
@@ -82,6 +83,8 @@ export async function getFileFromClientUpload({
   req.context[CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY] = tempFilePath
 
   const source = { type: 'file', isTemporary: true, path: tempFilePath } as const
+
+  registerTempFile({ contextKey: CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY, req, source })
 
   return toRequestFile({
     name: file.filename,
