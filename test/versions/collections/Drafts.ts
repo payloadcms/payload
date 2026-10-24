@@ -86,6 +86,10 @@ const DraftPosts: CollectionConfig = {
       required: true,
     },
     {
+      name: 'revertTestField',
+      type: 'textarea',
+    },
+    {
       name: 'radio',
       type: 'radio',
       options: [
