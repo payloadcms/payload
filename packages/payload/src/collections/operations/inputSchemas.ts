@@ -122,6 +122,7 @@ const deleteDocumentsInputShape = {
   depth: depthSchema,
   fallbackLocale: fallbackLocaleSchema,
   locale: localeSchema,
+  trash: trashSchema,
   where: whereSchema,
 }
 

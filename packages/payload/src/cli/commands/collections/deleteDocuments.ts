@@ -24,6 +24,7 @@ export const createDeleteDocumentsCommand = defineCLICommand({
         fallbackLocale: args.fallbackLocale,
         locale: args.locale,
         overrideAccess: args.overrideAccess,
+        trash: args.trash,
       })
     } else if (args.where !== undefined) {
       result = await payload.delete({
@@ -32,6 +33,7 @@ export const createDeleteDocumentsCommand = defineCLICommand({
         fallbackLocale: args.fallbackLocale,
         locale: args.locale,
         overrideAccess: args.overrideAccess,
+        trash: args.trash,
         where: args.where,
       })
     } else {
