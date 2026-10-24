@@ -46,14 +46,14 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
-    "@payloadcms/db-mongodb": "3.82.1",
-    "@payloadcms/db-postgres": "3.82.1",
-    "@payloadcms/db-sqlite": "3.82.1",
+    "@payloadcms/db-mongodb": "4.0.0-beta.4",
+    "@payloadcms/db-postgres": "4.0.0-beta.4",
+    "@payloadcms/db-sqlite": "4.0.0-beta.4",
     "@payloadcms/eslint-config": "3.28.0",
-    "@payloadcms/next": "3.82.1",
-    "@payloadcms/richtext-lexical": "3.82.1",
+    "@payloadcms/next": "4.0.0-beta.4",
+    "@payloadcms/richtext-lexical": "4.0.0-beta.4",
     "@payloadcms/transformer-sharp": "4.0.0-beta.4",
-    "@payloadcms/ui": "3.82.1",
+    "@payloadcms/ui": "4.0.0-beta.4",
     "@playwright/test": "1.63.0",
     "@swc-node/register": "1.10.9",
     "@swc/cli": "0.6.0",
@@ -69,7 +69,7 @@
     "next": "16.4.2",
     "open": "^10.1.0",
     "oxfmt": "^0.73.0",
-    "payload": "3.82.1",
+    "payload": "4.0.0-beta.4",
     "qs-esm": "8.0.1",
     "react": "19.3.1",
     "react-dom": "19.3.1",
@@ -80,7 +80,7 @@
     "vitest": "5.0.1"
   },
   "peerDependencies": {
-    "payload": "^3.82.1"
+    "payload": "^4.0.0-beta.4"
   },
   "engines": {
     "node": ">=24.22.1",

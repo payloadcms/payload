@@ -40,7 +40,8 @@ describe('updatePackageJson', () => {
     const originalPkg = {
       name: 'test-app',
       dependencies: {
-        payload: '^3.0.0',
+        '@payloadcms/transformer-sharp': '^4.0.0',
+        payload: '^4.0.0',
         sharp: '^0.33.0',
       },
     }
@@ -52,6 +53,8 @@ describe('updatePackageJson', () => {
 
     const updated = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
     expect(updated.dependencies.sharp).toBeUndefined()
+    expect(updated.dependencies['@payloadcms/transformer-sharp']).toBeUndefined()
+    expect(updated.dependencies.payload).toBe('^4.0.0')
   })
 
   it('should remove selected packages from dependencies and devDependencies', () => {

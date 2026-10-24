@@ -86,8 +86,8 @@ export default buildConfig({
     Users,
   ],
   cors: [getServerSideURL()].filter(Boolean),
-  plugins: [...plugins],
   globals: [Header, Footer],
+  plugins,
   secret: process.env.PAYLOAD_SECRET,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

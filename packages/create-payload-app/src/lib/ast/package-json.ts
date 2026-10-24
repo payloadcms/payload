@@ -134,6 +134,10 @@ function transformPackageJson(
     } else {
       debug('[AST] Sharp dependency not found (already absent)')
     }
+    if (transformed.dependencies['@payloadcms/transformer-sharp']) {
+      delete transformed.dependencies['@payloadcms/transformer-sharp']
+      debug('[AST] Removed @payloadcms/transformer-sharp dependency')
+    }
   }
 
   if (options.addDependencies) {
