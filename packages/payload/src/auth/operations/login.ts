@@ -32,6 +32,8 @@ import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
 
 export type LoginResult<TSlug extends AuthCollectionSlug> = {
   exp?: number
+  /** With `auth.refreshTokens`, trades for a new token after this one expires. */
+  refreshToken?: string
   token?: string
   user?: AuthRuntimeFields & DataFromCollectionSlug<TSlug>
 }
@@ -276,10 +278,11 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
       })
     }
 
-    const { exp, token, ...session } = await createAuthToken({
+    const { exp, refreshToken, token, ...session } = await createAuthToken({
       collectionConfig,
       email: sanitizedEmail!,
       req,
+      shouldCreateRefreshToken: Boolean(collectionConfig.auth.refreshTokens),
       user,
     })
     sid = session.sid
@@ -374,6 +377,7 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
 
     let result: LoginResult<TSlug> = {
       exp,
+      refreshToken,
       token,
       user: userWithReadAccess,
     }
