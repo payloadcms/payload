@@ -293,6 +293,7 @@ export const etTranslations: DefaultTranslationsObject = {
     and: 'Ja',
     anotherUser: 'Teine kasutaja',
     anotherUserTakenOver: 'Teine kasutaja on võtnud selle dokumendi muutmise üle.',
+    apiResponse: 'API vastus',
     applyChanges: 'Rakenda muudatused',
     ascending: 'Kasvav',
     auto: 'Auto',
@@ -363,6 +364,13 @@ export const etTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Seda dokumenti on hiljuti värskendanud teine kasutaja. Teie vaade on aegunud.',
     documents: 'Dokumendid',
+    dragCancelled: '{{label}} lohistamine tühistati.',
+    dragDropped: '{{label}} on maha pandud. Asukoht {{position}} / {{count}}.',
+    dragInstructions:
+      'Rea ülesvõtmiseks vajutage Space või Enter. Liigutamiseks kasutage nooleklahve. VoiceOveriga lülitage Quick Nav välja ning kasutage Command + nooleklahve. Mahapanekuks vajutage Space või Enter, tühistamiseks Escape.',
+    dragMoved: '{{label}}: {{direction}}. Asukoht {{position}} / {{count}}.',
+    dragPickedUp: '{{label}} on üles võetud. Asukoht {{position}} / {{count}}.',
+    dragToMove: 'Lohista liigutamiseks',
     dragToReorder: 'Lohistage, et ümber järjestada',
     duplicate: 'Dubleeri',
     duplicateWithoutSaving: 'Dubleeri ilma muudatusi salvestamata',
@@ -476,6 +484,7 @@ export const etTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Indekseerin uuesti kõik {{collections}}.',
     reloadDocument: 'Laadige dokument uuesti',
     remove: 'Eemalda',
+    removeFilter: 'Eemalda filter',
     rename: 'Nimeta ümber',
     replaceRow: 'Asenda rida',
     requiredFields: 'Tärniga * tähistatud väljad on kohustuslikud.',
@@ -567,6 +576,7 @@ export const etTranslations: DefaultTranslationsObject = {
     yes: 'Jah',
   },
   hierarchy: {
+    folderLocation: 'Kausta asukoht',
     goTo: 'Mine "{{name}}" juurde',
     itemsMovedTo: '{{title}} viidi üle {{destination}}',
     itemsMovedToRoot: '{{title}} liigutatud juurikasse',

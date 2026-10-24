@@ -1158,9 +1158,8 @@ test.suite('Lexical', { config: './config.ts' }, () => {
     test('should populate previousValue in afterChange hooks for fields inside lexical', async ({
       payload,
     }) => {
-      const { autosaveHookLog, clearAutosaveHookLog } = await import(
-        './collections/LexicalAutosave/index.js'
-      )
+      const { autosaveHookLog, clearAutosaveHookLog } =
+        await import('./collections/LexicalAutosave/index.js')
 
       clearAutosaveHookLog()
 

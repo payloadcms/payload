@@ -4,6 +4,7 @@ import type { FormState } from 'payload'
 import { expect } from '@playwright/test'
 import * as path from 'path'
 import { formatAdminURL, wait } from 'payload/shared'
+import { fromJSON } from 'seroval'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
@@ -11,7 +12,6 @@ import type { Config, Post } from './payload-types.js'
 
 import { assertElementStaysVisible } from '../__helpers/e2e/assertElementStaysVisible.js'
 import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
-import { assertRequestBody } from '../__helpers/e2e/assertRequestBody.js'
 import {
   addArrayRow,
   addArrayRowAsync,
@@ -183,74 +183,78 @@ test.describe('Form State', () => {
     )
   })
 
-  // Asserts the `lastRenderedPath` form-state optimization by inspecting the form
-  // state embedded in Next.js's RSC form-state request body. TanStack Start
-  // dispatches form state through the `createServerFn` RPC with a seroval-encoded
-  // body, so this Next-transport-specific assertion does not apply. The underlying
-  // optimization is framework-agnostic shared form logic exercised by the other
-  // form-state tests on both adapters.
-  test('should send `lastRenderedPath` only when necessary', { framework: 'next' }, async () => {
+  // Asserts the lastRenderedPath optimization by inspecting outgoing form-state requests on both frameworks.
+  // Previously rendered fields should retain their rendering paths as new array rows are added.
+  test('should send `lastRenderedPath` only when necessary', async () => {
     await page.goto(postsUrl.create)
     await waitForFormReady(page)
+    await page.locator('#field-title').fill('Test')
 
-    const field = page.locator('#field-title')
-    await field.fill('Test')
+    // Both frameworks send the same form state, but TanStack wraps it in a Seroval-encoded RPC payload.
+    const readFormState = ({ request }: { request: Request }): FormState | undefined => {
+      if (currentFramework === 'tanstack-start') {
+        const { data }: { data: { args: { formState?: FormState }; name: string } } = fromJSON(
+          request.postDataJSON(),
+        )
 
-    // The `array` itself SHOULD have a `lastRenderedPath` because it was rendered on initial load
-    await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-      action: async () => await addArrayRowAsync(page, 'array'),
-      expect: (body) =>
-        Boolean(
-          body?.[0]?.args?.formState?.['array'] &&
-            body[0].args.formState['array'].lastRenderedPath === 'array',
-        ),
-      url: postsUrl.create,
-    })
+        return data.name === 'form-state' ? data.args.formState : undefined
+      }
 
-    await page.waitForResponse(
-      (response) =>
-        response.url() === postsUrl.create &&
-        response.status() === 200 &&
-        response.headers()['content-type'] === 'text/x-component',
-    )
+      const body = request.postDataJSON() as { args: { formState?: FormState } }[]
 
-    // The `array` itself SHOULD still have a `lastRenderedPath`
-    // The custom text field in the first row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the first request
-    await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-      action: async () => await addArrayRowAsync(page, 'array'),
-      expect: (body) =>
-        Boolean(
-          body?.[0]?.args?.formState?.['array'] &&
-            body[0].args.formState['array'].lastRenderedPath === 'array' &&
-            body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
-              'array.0.customTextField',
-        ),
-      url: postsUrl.create,
-    })
+      return body[0]?.args?.formState
+    }
 
-    await page.waitForResponse(
-      (response) =>
-        response.url() === postsUrl.create &&
-        response.status() === 200 &&
-        response.headers()['content-type'] === 'text/x-component',
-    )
+    // Add three rows to check that each request remembers fields rendered by earlier requests.
+    for (let rowIndex = 0; rowIndex < 3; rowIndex++) {
+      const requestPromise = page.waitForRequest((request) => {
+        const isFormStateURL =
+          currentFramework === 'tanstack-start'
+            ? request.url().startsWith(`${serverURL}/_serverFn/`)
+            : request.url() === postsUrl.create
 
-    // The `array` itself SHOULD still have a `lastRenderedPath`
-    // The custom text field in the first row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the first request
-    // The custom text field in the second row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the second request
-    await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-      action: async () => await addArrayRowAsync(page, 'array'),
-      expect: (body) =>
-        Boolean(
-          body?.[0]?.args?.formState?.['array'] &&
-            body[0].args.formState['array'].lastRenderedPath &&
-            body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
-              'array.0.customTextField' &&
-            body[0].args.formState['array.1.customTextField']?.lastRenderedPath ===
-              'array.1.customTextField',
-        ),
-      url: postsUrl.create,
-    })
+        return (
+          request.method() === 'POST' &&
+          isFormStateURL &&
+          Boolean(readFormState({ request })?.array)
+        )
+      })
+
+      await addArrayRowAsync(page, 'array')
+
+      const request = await requestPromise
+      const formState = readFormState({ request })
+      const response = await request.response()
+
+      // The `array` itself SHOULD have a `lastRenderedPath` because it was rendered on initial load.
+      expect(formState?.array.lastRenderedPath).toBe('array')
+      expect(formState?.array.customComponents).toBeUndefined()
+      expect(formState?.array.rows).toHaveLength(rowIndex + 1)
+      expect(formState?.title.value).toBe('Test')
+
+      for (const [index, row] of (formState?.array.rows ?? []).entries()) {
+        expect(row.id).toBe(formState?.[`array.${index}.id`]?.value)
+        expect(row.customComponents).toBeUndefined()
+      }
+
+      // Each earlier row's custom text field SHOULD ALSO have a `lastRenderedPath` because it was rendered in a previous request.
+      // The second request checks the first row; the third request checks both earlier rows.
+      for (let renderedRowIndex = 0; renderedRowIndex < rowIndex; renderedRowIndex++) {
+        const fieldPath = `array.${renderedRowIndex}.customTextField`
+
+        expect(formState?.[fieldPath]?.lastRenderedPath).toBe(fieldPath)
+        expect(formState?.array.rows?.[renderedRowIndex]?.lastRenderedPath).toBe(
+          `array.${renderedRowIndex}`,
+        )
+        expect(formState?.[fieldPath]?.initialValue).toBe('This is a default value')
+        expect(formState?.[fieldPath]?.customComponents).toBeUndefined()
+      }
+
+      expect(response?.status()).toBe(200)
+      expect(response?.headers()['content-type']?.split(';')[0].trim()).toBe('text/x-component')
+      await expect(page.locator(`#field-array__${rowIndex}__customTextField`)).toBeVisible()
+      await expect(page.locator('#field-array .array-field__row')).toHaveCount(rowIndex + 1)
+    }
   })
 
   test('should not render stale values for server components while form state is in flight', async () => {
@@ -780,52 +784,43 @@ test.describe('Form State', () => {
       )
     })
 
-    test.fixme(
-      'should not cause nested custom components to disappear when adding rows back-to-back',
-      async () => {
-        // TODO: This test is too flaky
-        // Add two rows quickly
-        // Test that the custom text field within the rows do not disappear
-        await assertNetworkRequests(
-          page,
-          postsUrl.create,
-          async () => {
-            await addArrayRowAsync(page, 'array')
-            await addArrayRowAsync(page, 'array')
+    test.fixme('should not cause nested custom components to disappear when adding rows back-to-back', async () => {
+      // TODO: This test is too flaky
+      // Add two rows quickly
+      // Test that the custom text field within the rows do not disappear
+      await assertNetworkRequests(
+        page,
+        postsUrl.create,
+        async () => {
+          await addArrayRowAsync(page, 'array')
+          await addArrayRowAsync(page, 'array')
 
-            // use `waitForSelector` to ensure the element doesn't appear and then disappear
-            // eslint-disable-next-line playwright/no-wait-for-selector
-            await page.waitForSelector(
-              '#field-array #array-row-0 #field-array__0__customTextField',
-              {
-                timeout: TEST_TIMEOUT,
-              },
-            )
+          // use `waitForSelector` to ensure the element doesn't appear and then disappear
+          // eslint-disable-next-line playwright/no-wait-for-selector
+          await page.waitForSelector('#field-array #array-row-0 #field-array__0__customTextField', {
+            timeout: TEST_TIMEOUT,
+          })
 
-            // use `waitForSelector` to ensure the element doesn't appear and then disappear
-            // eslint-disable-next-line playwright/no-wait-for-selector
-            await page.waitForSelector(
-              '#field-array #array-row-1 #field-array__1__customTextField',
-              {
-                timeout: TEST_TIMEOUT,
-              },
-            )
+          // use `waitForSelector` to ensure the element doesn't appear and then disappear
+          // eslint-disable-next-line playwright/no-wait-for-selector
+          await page.waitForSelector('#field-array #array-row-1 #field-array__1__customTextField', {
+            timeout: TEST_TIMEOUT,
+          })
 
-            await expect(
-              page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
-            ).toBeVisible()
+          await expect(
+            page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
+          ).toBeVisible()
 
-            await expect(
-              page.locator('#field-array #array-row-1 #field-array__1__customTextField'),
-            ).toBeVisible()
-          },
-          {
-            allowedNumberOfRequests: 2,
-            timeout: 10000,
-          },
-        )
-      },
-    )
+          await expect(
+            page.locator('#field-array #array-row-1 #field-array__1__customTextField'),
+          ).toBeVisible()
+        },
+        {
+          allowedNumberOfRequests: 2,
+          timeout: 10000,
+        },
+      )
+    })
   })
 })
 
@@ -837,5 +832,5 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
       ...overrides,
     },
     overrideAccess: true,
-  }) as unknown as Promise<Post>
+  })
 }
