@@ -129,7 +129,16 @@ export function mergeLocalizedData({
             } else if (Array.isArray(newValue)) {
               // Non-localized array - still process children for any localized fields
               result[field.name] = newValue.map((newItem: JsonObject, index: number) => {
-                const existingItem = existingValue?.[index] || {}
+                const existingItem =
+                  (newItem?.id && Array.isArray(existingValue)
+                    ? existingValue.find(
+                        (row) =>
+                          row &&
+                          typeof row === 'object' &&
+                          'id' in row &&
+                          row.id === newItem.id,
+                      )
+                    : existingValue?.[index]) || {}
 
                 return mergeLocalizedData({
                   configBlockReferences,
@@ -181,9 +190,21 @@ export function mergeLocalizedData({
 
                 if (block) {
                   const blockData =
-                    Array.isArray(existingValue) && existingValue[index]
-                      ? (existingValue[index] as JsonObject)
-                      : {}
+                    (newBlockData?.id && Array.isArray(existingValue)
+                      ? existingValue.find(
+                          (row) =>
+                            row &&
+                            typeof row === 'object' &&
+                            'id' in row &&
+                            row.id === newBlockData.id &&
+                            'blockType' in row &&
+                            row.blockType === newBlockData.blockType,
+                        )
+                      : Array.isArray(existingValue) &&
+                        existingValue[index] &&
+                        (existingValue[index] as JsonObject).blockType === newBlockData.blockType
+                        ? existingValue[index]
+                        : undefined) || {}
 
                   const merged = mergeLocalizedData({
                     configBlockReferences,
