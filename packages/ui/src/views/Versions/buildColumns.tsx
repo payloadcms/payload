@@ -17,8 +17,8 @@ import {
   VersionsAutosaveCell as AutosaveCell,
   VersionsCreatedAtCell as CreatedAtCell,
   VersionsIDCell as IDCell,
-  VersionsUpdatedByCell as UpdatedByCell,
   SortColumn,
+  VersionsUpdatedByCell as UpdatedByCell,
 } from '../../exports/client/index.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
 
@@ -81,7 +81,7 @@ export const buildVersionColumns = ({
       active: true,
       field: {
         name: '',
-        type: 'relationship',
+        type: 'text',
       },
       Heading: t('general:updatedBy'),
       renderedCells: docs.map((doc, i) => {

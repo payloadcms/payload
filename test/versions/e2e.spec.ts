@@ -56,6 +56,7 @@ import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConf
 import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
 import { initPage } from '../__setup/e2e/initPage.js'
 import { postsCollectionSlug } from '../admin/slugs.js'
+import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { draftWithCustomUnpublishSlug } from './collections/DraftsWithCustomUnpublish.js'
 import { BASE_PATH } from './shared.js'
@@ -1077,6 +1078,50 @@ describe('Versions', () => {
       await versionsTabUpdated.waitFor({ state: 'visible' })
 
       expect(versionsTabUpdated).toBeTruthy()
+    })
+
+    test('collection — versions list shows updatedBy column', async () => {
+      const doc = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          description: 'some description',
+          title: 'updated by title',
+        },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      await page.goto(url.edit(doc.id))
+
+      const titleField = page.locator('#field-title')
+      await titleField.fill('updated by title - edited')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await page.goto(`${url.edit(doc.id)}/versions`)
+
+      await expect(page.locator('thead th', { hasText: exactText('Updated By') })).toBeVisible()
+
+      const updatedByCells = page.locator('tbody .cell-version__updatedBy')
+      await expect(updatedByCells).toHaveCount(2)
+      await expect(updatedByCells.nth(0)).toHaveText(devUser.email)
+      await expect(updatedByCells.nth(1)).toHaveText(devUser.email)
+    })
+
+    test('collection — versions list hides updatedBy column when authorship is disabled', async () => {
+      const doc = await payload.create({
+        collection: versionCollectionSlug,
+        data: {
+          description: 'some description',
+          title: 'no authorship',
+        },
+        overrideAccess: true,
+      })
+
+      await page.goto(`${versionURL.edit(doc.id)}/versions`)
+
+      await expect(page.locator('tbody .cell-updatedAt').first()).toBeVisible()
+      await expect(page.locator('thead th', { hasText: exactText('Updated By') })).toHaveCount(0)
+      await expect(page.locator('tbody .cell-version__updatedBy')).toHaveCount(0)
     })
 
     describe.skip('A11y', () => {
