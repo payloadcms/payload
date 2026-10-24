@@ -82,7 +82,7 @@ export const addSessionToUser = async ({
 }
 
 /**
- * Extends the session `sid` so it lasts at least another `tokenExpiration`. Sessions that already
+ * Extends the session `sid` so it lasts at least another `sessionExpiration`. Sessions that already
  * last longer, like ones with a refresh token, keep their expiry, since their refresh token relies
  * on it.
  *
@@ -91,11 +91,18 @@ export const addSessionToUser = async ({
 export const extendSession = async ({
   collectionConfig,
   req,
+  sessionExpiration = collectionConfig.auth.tokenExpiration,
   sid,
   user,
 }: {
   collectionConfig: SanitizedCollectionConfig
   req: PayloadRequest
+  /**
+   * Seconds the session lasts at least, from now.
+   *
+   * @default collectionConfig.auth.tokenExpiration
+   */
+  sessionExpiration?: number
   sid: string
   user: AuthenticatedUser
 }): Promise<undefined | UserSession> => {
@@ -107,10 +114,10 @@ export const extendSession = async ({
     return undefined
   }
 
-  const tokenExpiresAt = new Date(Date.now() + collectionConfig.auth.tokenExpiration * 1000)
+  const expiresAt = new Date(Date.now() + sessionExpiration * 1000)
 
-  if (new Date(session.expiresAt) < tokenExpiresAt) {
-    session.expiresAt = tokenExpiresAt
+  if (new Date(session.expiresAt) < expiresAt) {
+    session.expiresAt = expiresAt
   }
 
   await req.payload.db.updateOne({

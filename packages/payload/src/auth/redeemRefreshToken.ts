@@ -6,7 +6,7 @@ import { defaultRefreshTokenExpiration } from '../collections/config/defaults.js
 import { assertNoValidationWrite } from '../utilities/assertNoValidationWrite.js'
 import { getFieldsToSign } from './getFieldsToSign.js'
 import { jwtSign } from './jwt.js'
-import { removeExpiredSessions, revokeSession } from './sessions.js'
+import { extendSession, removeExpiredSessions, revokeSession } from './sessions.js'
 
 /**
  * How long an already used refresh token still works, in milliseconds. Clients that send requests
@@ -75,19 +75,12 @@ export const redeemRefreshToken = async ({
   const refreshedAt = sessionExpiresAt - expiration * 1000
 
   if (sessionExpiresAt === contents.expiresAt) {
-    session.expiresAt = new Date(Date.now() + expiration * 1000)
-
-    await req.payload.db.updateOne({
-      id: user.id,
-      collection: collectionConfig.slug,
-      data: {
-        ...user,
-        // Prevent updatedAt from being updated when only refreshing a session
-        sessions: removeExpiredSessions(user.sessions!),
-        updatedAt: null,
-      },
+    await extendSession({
+      collectionConfig,
       req,
-      returning: false,
+      sessionExpiration: expiration,
+      sid: session.id,
+      user,
     })
   } else if (Date.now() - refreshedAt >= reuseInterval) {
     await revokeSession({ collectionConfig, payload: req.payload, req, sid: session.id, user })
