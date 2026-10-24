@@ -14,8 +14,8 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { applyUserReadAccess } from '../applyUserReadAccess.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { jwtSign } from '../jwt.js'
-import { refreshAuthToken } from '../refreshAuthToken.js'
-import { removeExpiredSessions } from '../sessions.js'
+import { redeemRefreshToken } from '../redeemRefreshToken.js'
+import { extendSession } from '../sessions.js'
 
 export type Result = {
   exp: number
@@ -69,7 +69,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
     } = args
 
     const refreshed = args.refreshToken
-      ? await refreshAuthToken({
+      ? await redeemRefreshToken({
           collection: collectionConfig.slug,
           refreshToken: args.refreshToken,
           req,
@@ -109,44 +109,18 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
 
     const sid = args.req.user?._sid
 
-    // refreshAuthToken already refreshed the refresh token's session
+    // redeemRefreshToken already refreshed the refresh token's session
     if (
       !refreshed &&
       collectionConfig.auth.useSessions &&
       !collectionConfig.auth.disableLocalStrategy
     ) {
-      if (!Array.isArray(user.sessions) || !sid) {
+      const session =
+        sid && (await extendSession({ collectionConfig, payload: req.payload, req, sid, user }))
+
+      if (!session) {
         throw new Forbidden(args.req.t)
       }
-
-      const existingSession = user.sessions.find(({ id }) => id === sid)
-
-      if (!existingSession) {
-        throw new Forbidden(args.req.t)
-      }
-
-      const now = new Date()
-      const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
-      const tokenExpiresAt = new Date(now.getTime() + tokenExpInMs)
-
-      // Don't shorten sessions that outlast their tokens. Moving the expiry of a session with a
-      // refresh token would also make its refresh token look reused.
-      if (new Date(existingSession.expiresAt) < tokenExpiresAt) {
-        existingSession.expiresAt = tokenExpiresAt
-      }
-
-      await req.payload.db.updateOne({
-        id: user.id,
-        collection: collectionConfig.slug,
-        data: {
-          ...user,
-          // Prevent updatedAt from being updated when only refreshing a session
-          sessions: removeExpiredSessions(user.sessions),
-          updatedAt: null,
-        },
-        req,
-        returning: false,
-      })
     }
 
     user = await req.payload.db.findOne({

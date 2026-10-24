@@ -1472,7 +1472,7 @@ export { registerFirstUserOperation } from './auth/operations/registerFirstUser.
 export { resetPasswordOperation } from './auth/operations/resetPassword.js'
 export { unlockOperation } from './auth/operations/unlock.js'
 export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
-export { refreshAuthToken } from './auth/refreshAuthToken.js'
+export { redeemRefreshToken } from './auth/redeemRefreshToken.js'
 export { rotateSecret } from './auth/rotateSecret.js'
 export type { RotateSecretArgs, RotateSecretResult } from './auth/rotateSecret.js'
 export { JWTAuthentication } from './auth/strategies/jwt.js'

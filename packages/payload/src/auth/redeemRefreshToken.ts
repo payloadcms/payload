@@ -29,9 +29,12 @@ type RefreshTokenContents = {
  * so a refresh token with an outdated one was already used. That means it was copied, and its
  * session is logged out.
  *
+ * The refresh operation uses it when it gets a refresh token. Plugins can also call it directly,
+ * since it needs nothing but the refresh token.
+ *
  * @returns `null` when the refresh token is invalid, its session ended, or it was reused
  */
-export const refreshAuthToken = async ({
+export const redeemRefreshToken = async ({
   collection,
   refreshToken,
   req,

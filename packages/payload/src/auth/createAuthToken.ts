@@ -4,7 +4,7 @@ import type { PayloadRequest } from '../types/index.js'
 
 import { getFieldsToSign } from './getFieldsToSign.js'
 import { jwtSign } from './jwt.js'
-import { createRefreshToken, getRefreshTokenExpiration } from './refreshAuthToken.js'
+import { createRefreshToken, getRefreshTokenExpiration } from './redeemRefreshToken.js'
 import { addSessionToUser } from './sessions.js'
 
 /**
@@ -23,7 +23,7 @@ export const createAuthToken = async ({
   email: string
   req: PayloadRequest
   /**
-   * Also return a refresh token for the session, which `refreshAuthToken` trades for a new token.
+   * Also return a refresh token for the session, which `redeemRefreshToken` trades for a new token.
    * The session then lasts `auth.refreshTokens.expiration` from each refresh, or 30 days when the
    * collection doesn't enable refresh tokens. Requires `auth.useSessions`.
    */
