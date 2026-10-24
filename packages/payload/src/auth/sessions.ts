@@ -80,13 +80,11 @@ export const addSessionToUser = async ({
  */
 export const extendSession = async ({
   collectionConfig,
-  payload,
   req,
   sid,
   user,
 }: {
   collectionConfig: SanitizedCollectionConfig
-  payload: Payload
   req: PayloadRequest
   sid: string
   user: AuthenticatedUser
@@ -101,7 +99,7 @@ export const extendSession = async ({
 
   session.expiresAt = new Date(Date.now() + collectionConfig.auth.tokenExpiration * 1000)
 
-  await payload.db.updateOne({
+  await req.payload.db.updateOne({
     id: user.id,
     collection: collectionConfig.slug,
     data: {
