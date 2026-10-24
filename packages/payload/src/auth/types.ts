@@ -296,6 +296,29 @@ export interface IncomingAuthType {
    * Only allow a user to attempt logging in X amount of times. Automatically locks out a user from authenticating if this limit is passed. Set to 0 to disable.
    */
   maxLoginAttempts?: number
+  /**
+   * Lets clients stay logged in after their token expires. Logins also return a refresh token,
+   * which the refresh operation trades for a new token and a new refresh token. Each refresh token
+   * works once: when a used one comes back, its session is logged out. Requires `useSessions`.
+   *
+   * Refresh tokens don't expire on their own. They work as long as their login session, which lasts
+   * `expiration` from the last refresh instead of `tokenExpiration`.
+   *
+   * @default false
+   * @link https://payloadcms.com/docs/authentication/overview#refresh-tokens
+   */
+  refreshTokens?:
+    | {
+        /**
+         * How many seconds a login session with a refresh token lasts without a refresh, which is
+         * how long its refresh token can be used. Every refresh starts this time again. The token
+         * itself still expires after `tokenExpiration`.
+         *
+         * @default 2592000 (30 days)
+         */
+        expiration?: number
+      }
+    | boolean
   /***
    * Set to true if you want to remove the token from the returned authentication API responses such as login or refresh.
    */
@@ -358,6 +381,7 @@ export interface Auth
       | 'lockTime'
       | 'loginWithUsername'
       | 'maxLoginAttempts'
+      | 'refreshTokens'
       | 'strategies'
       | 'tokenExpiration'
       | 'useSessions'
@@ -377,6 +401,7 @@ export interface Auth
     > {
   cookies: Pick<AuthCookies, 'domain'> & Required<Pick<AuthCookies, 'sameSite' | 'secure'>>
   loginWithUsername: false | Required<LoginWithUsernameOptions>
+  refreshTokens: { expiration: number } | false
 }
 
 export function hasWhereAccessResult(result: boolean | Where): result is Where {
