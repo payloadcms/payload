@@ -194,10 +194,22 @@ export const sanitizeQueryValue = ({
     }
   }
 
-  if (field.type === 'date' && typeof val === 'string' && operator !== 'exists') {
-    formattedValue = new Date(val)
-    if (Number.isNaN(Date.parse(formattedValue))) {
-      return undefined
+  if (field.type === 'date' && operator !== 'exists') {
+    if (Array.isArray(formattedValue)) {
+      formattedValue = formattedValue.reduce<Date[]>((dates, item) => {
+        const date = item instanceof Date ? item : new Date(item as number | string)
+
+        if (!Number.isNaN(date.getTime())) {
+          dates.push(date)
+        }
+
+        return dates
+      }, [])
+    } else if (typeof val === 'string') {
+      formattedValue = new Date(val)
+      if (Number.isNaN(Date.parse(formattedValue))) {
+        return undefined
+      }
     }
   }
 
