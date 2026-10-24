@@ -81,6 +81,56 @@ export const addSessionToUser = async ({
   }
 }
 
+/**
+ * Extends the session `sid` so it lasts at least another `tokenExpiration`. Sessions that already
+ * last longer, like ones with a refresh token, keep their expiry, since their refresh token relies
+ * on it.
+ *
+ * @returns The session, or `undefined` when the user has no session with this ID
+ */
+export const extendSession = async ({
+  collectionConfig,
+  payload,
+  req,
+  sid,
+  user,
+}: {
+  collectionConfig: SanitizedCollectionConfig
+  payload: Payload
+  req: PayloadRequest
+  sid: string
+  user: AuthenticatedUser
+}): Promise<undefined | UserSession> => {
+  assertNoValidationWrite(req)
+
+  const session = user.sessions?.find(({ id }) => id === sid)
+
+  if (!session) {
+    return undefined
+  }
+
+  const tokenExpiresAt = new Date(Date.now() + collectionConfig.auth.tokenExpiration * 1000)
+
+  if (new Date(session.expiresAt) < tokenExpiresAt) {
+    session.expiresAt = tokenExpiresAt
+  }
+
+  await payload.db.updateOne({
+    id: user.id,
+    collection: collectionConfig.slug,
+    data: {
+      ...user,
+      // Prevent updatedAt from being updated when only extending a session
+      sessions: removeExpiredSessions(user.sessions!),
+      updatedAt: null,
+    },
+    req,
+    returning: false,
+  })
+
+  return session
+}
+
 export const revokeSession = async ({
   collectionConfig,
   payload,
