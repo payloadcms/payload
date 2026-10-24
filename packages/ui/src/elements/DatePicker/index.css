@@ -954,4 +954,9 @@
       transform: translateY(-50%);
     }
   }
+
+  html[data-enhanced-contrast]
+    .react-datepicker__day--today:not(.react-datepicker__day--selected)::after {
+    background-color: var(--color-icon-brand);
+  }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "4.0.0-beta.3",
+  "version": "4.0.0-beta.4",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
@@ -854,7 +854,7 @@
     "@types/node": "24.12.3",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "babel-plugin-react-compiler": "19.1.0-rc.3",
+    "babel-plugin-react-compiler": "1.0.0",
     "babel-plugin-transform-remove-imports": "^1.8.0",
     "esbuild": "0.27.1",
     "esbuild-sass-plugin": "3.3.1",
@@ -877,6 +877,6 @@
     ]
   },
   "engines": {
-    "node": ">=24.15.0"
+    "node": ">=24.22.1"
   }
 }

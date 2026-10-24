@@ -12,6 +12,7 @@ import {
   useConfig,
   useEditDepth,
   useLocale,
+  useModal,
   useTranslation,
   WriteIcon,
 } from '@payloadcms/ui'
@@ -90,6 +91,8 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
   })
 
   const { toggleDrawer } = useLexicalDrawer(drawerSlug)
+  const { modalState } = useModal()
+  const isDrawerOpen = Boolean(modalState[drawerSlug]?.isOpen)
 
   const setNotLink = useCallback(() => {
     setIsLink(false)
@@ -105,6 +108,11 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
   }, [setIsLink, setLinkUrl, setLinkLabel, setSelectedNodes])
 
   const $updateLinkEditor = useCallback(() => {
+    // The drawer owns the in-progress edit until it closes, including its selected nodes.
+    if (isDrawerOpen) {
+      return
+    }
+
     const selection = $getSelection()
     let selectedNodeDomRect: DOMRect | undefined
 
@@ -262,6 +270,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     return true
   }, [
     editor,
+    isDrawerOpen,
     setNotLink,
     config.routes.admin,
     config.routes.api,

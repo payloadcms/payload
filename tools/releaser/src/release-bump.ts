@@ -7,7 +7,8 @@
  *
  * Usage:
  *   GITHUB_TOKEN=... pnpm release-bump --preid <canary|beta> \
- *     --bump <prerelease|prepatch|preminor|premajor> [--dry-run]
+ *     [--bump <auto|prerelease|prepatch|preminor|premajor>] \
+ *     [--override-reason "<why>"] [--dry-run]
  *
  * In --dry-run, git commands are logged (not executed) and nothing is pushed, but
  * the version bump is still written to local package.json (bumpVersion has no
@@ -28,9 +29,11 @@ import { isVersionPublished } from './lib/getPackageRegistryVersions.js'
 import { getWorkspace } from './lib/getWorkspace.js'
 import { listReleaseTags } from './lib/listReleaseTags.js'
 import { pushWithRebaseRetry } from './lib/pushWithRebaseRetry.js'
+import { AUTO_BUMP, recommendBump, resolveBump } from './lib/resolveBump.js'
 import { runCommand } from './lib/runCommand.js'
 import { writeStepSummary } from './lib/writeStepSummary.js'
 import { generateReleaseNotes } from './utils/generateReleaseNotes.js'
+import { getRecommendedBump } from './utils/getRecommendedBump.js'
 
 type ReleaseBumpDeps = {
   env: NodeJS.ProcessEnv
@@ -40,6 +43,7 @@ type ReleaseBumpDeps = {
     releaseTag: string
     toVersion: string
   }) => Promise<{ releaseNotes: string }>
+  getCommitBump: (fromTag: string) => Promise<null | string>
   isPublished: (args: { name: string; version: string }) => Promise<boolean>
   log: (message: string) => void
   readBranch: () => string
@@ -53,20 +57,23 @@ type ReleaseBumpDeps = {
 const GUARD_PACKAGE = 'payload'
 
 export const runReleaseBump = async ({
-  bump,
+  bump: requestedBump,
   deps,
   dryRun,
+  overrideReason,
   preid,
 }: {
   bump: string
   deps: ReleaseBumpDeps
   dryRun: boolean
+  overrideReason?: string
   preid: string
 }): Promise<string> => {
   const {
     env,
     findChangelogBaseTag,
     generateReleaseNotes,
+    getCommitBump,
     isPublished,
     log,
     readBranch,
@@ -75,12 +82,33 @@ export const runReleaseBump = async ({
     writeSummary,
   } = deps
 
+  const version = await workspace.version()
+  const recommended = await recommendBump({
+    getCommitBump: () => getCommitBump(`v${version}`),
+    version,
+  })
+  const { bump, isOverride } = resolveBump({
+    overrideReason,
+    recommended,
+    requested: requestedBump,
+  })
+
+  if (isOverride) {
+    const reason = (overrideReason ?? '')
+      .replace(/%/g, '%25')
+      .replace(/\r/g, '%0D')
+      .replace(/\n/g, '%0A')
+    log(
+      `::notice title=Bump override::Releasing as '${bump}' (the commits call for '${recommended}'). Reason: ${reason}`,
+    )
+  }
+
   const validated = {
     branch: readBranch(),
     bump,
     hasGithubToken: Boolean(env.GITHUB_TOKEN),
     preid,
-    version: await workspace.version(),
+    version,
   }
 
   assertBumpPreconditions(validated)
@@ -125,9 +153,10 @@ export const runReleaseBump = async ({
 }
 
 async function main(): Promise<void> {
-  const argv = minimist(process.argv.slice(2))
-  const bump = typeof argv.bump === 'string' ? argv.bump : 'prerelease'
-  const preid = typeof argv.preid === 'string' ? argv.preid : 'beta'
+  const argv = minimist(process.argv.slice(2), { string: ['bump', 'override-reason', 'preid'] })
+  const bump = argv.bump || AUTO_BUMP
+  const preid = argv.preid || 'beta'
+  const overrideReason = argv['override-reason'] || undefined
   const dryRun = Boolean(argv['dry-run'])
 
   const run = (cmd: string): void => {
@@ -149,6 +178,7 @@ async function main(): Promise<void> {
           version,
         }),
       generateReleaseNotes,
+      getCommitBump: (fromTag) => getRecommendedBump(fromTag, 'HEAD'),
       isPublished: isVersionPublished,
       log: console.log,
       readBranch: () => execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim(),
@@ -158,6 +188,7 @@ async function main(): Promise<void> {
         writeStepSummary({ markdown, summaryPath: process.env.GITHUB_STEP_SUMMARY }),
     },
     dryRun,
+    overrideReason,
     preid,
   })
 }

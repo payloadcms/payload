@@ -52,7 +52,7 @@
     "@payloadcms/eslint-config": "3.28.0",
     "@payloadcms/next": "3.82.1",
     "@payloadcms/richtext-lexical": "3.82.1",
-    "@payloadcms/transformer-sharp": "3.82.1",
+    "@payloadcms/transformer-sharp": "4.0.0-beta.4",
     "@payloadcms/ui": "3.82.1",
     "@playwright/test": "1.63.0",
     "@swc-node/register": "1.10.9",
@@ -83,7 +83,7 @@
     "payload": "^3.82.1"
   },
   "engines": {
-    "node": ">=24.15.0",
+    "node": ">=24.22.1",
     "pnpm": "^9 || ^10 || ^11"
   },
   "publishConfig": {
