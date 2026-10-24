@@ -5,6 +5,9 @@ import { CustomJSXLabel } from './CustomJSXLabel.js'
 
 const SelectFields: CollectionConfig = {
   slug: selectFieldsSlug,
+  admin: {
+    listSearchableFields: ['select'],
+  },
   fields: [
     {
       name: 'select',
