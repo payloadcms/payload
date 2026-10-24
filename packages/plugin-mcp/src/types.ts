@@ -291,6 +291,32 @@ export type MCPPluginConfig = {
     verboseLogs?: boolean
   }
   /**
+   * Lets MCP clients sign in through an OAuth authorization server. MCP requests without an
+   * authenticated user get a `401` that points to the protected resource metadata (RFC 9728),
+   * served by `oauthProtectedResourceHandler`. Payload's auth strategies must accept the
+   * issued access tokens.
+   */
+  oauth?: {
+    /**
+     * The authorization servers that issue access tokens for MCP clients. Clients require each one
+     * to exactly match the `issuer` in that server's metadata, so pass a function when the exact
+     * value is only known at runtime, e.g. from the server's OpenID configuration or per host.
+     */
+    authorizationServers: ((args: { req: PayloadRequest }) => MaybePromise<string[]>) | string[]
+    /**
+     * The URL clients call to reach the MCP endpoint.
+     *
+     * @default the absolute URL of `/api/mcp`, based on `serverURL` or the request URL
+     */
+    resource?: string
+    /**
+     * Scopes MCP clients should request, e.g. `['openid', 'email', 'profile']`. Without them,
+     * clients request none, which some authorization servers reject or answer with a token that
+     * doesn't identify the user.
+     */
+    scopes?: string[]
+  }
+  /**
    * Replace the default MCP authorization resolver.
    *
    * This hook replaces the default authentication flow. It must set `req.user` to the
@@ -309,7 +335,7 @@ export type MCPPluginConfig = {
 
 export type SanitizedMCPPluginConfig = {
   items: MCPItem[]
-} & Pick<MCPPluginConfig, 'disabled' | 'hooks' | 'mcp' | 'overrideGetAuthorizedMCP'>
+} & Pick<MCPPluginConfig, 'disabled' | 'hooks' | 'mcp' | 'oauth' | 'overrideGetAuthorizedMCP'>
 
 export type MCPServerOptions = {
   options?: McpServerOptions
