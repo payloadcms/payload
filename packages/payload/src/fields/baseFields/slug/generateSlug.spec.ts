@@ -23,4 +23,24 @@ describe('generateSlug', () => {
 
     expect(data.slug).toBe('async-slug')
   })
+
+  it('should synchronously assign default slugify during create to prevent required validation race (#18334)', () => {
+    const data: Record<string, unknown> = {
+      title: 'Hello Slug',
+    }
+    const hook = generateSlug({
+      slugFieldName: 'slug',
+      useAsSlug: 'title',
+    })
+
+    // Invoke without awaiting immediately to verify synchronous property assignment
+    const hookPromise = hook({
+      data,
+      operation: 'create',
+      req: {} as PayloadRequest,
+    } as Parameters<typeof hook>[0])
+
+    // Must be set synchronously on data before microtask resolution
+    expect(data.slug).toBe('hello-slug')
+  })
 })
