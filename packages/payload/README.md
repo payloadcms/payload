@@ -110,11 +110,11 @@ Migrating from v2 to v3? Check out the [3.0 Migration Guide](https://github.com/
 
 ## 🙋 Contributing
 
-If you want to add contributions to this repository, please follow the instructions in [contributing.md](./CONTRIBUTING.md).
+If you want to add contributions to this repository, please follow the instructions in [contributing.md](https://github.com/payloadcms/payload/blob/main/CONTRIBUTING.md).
 
 ## 📚 Examples
 
-The [Examples Directory](./examples) is a great resource for learning how to setup Payload in a variety of different ways, but you can also find great examples in our blog and throughout our social media.
+The [Examples Directory](https://github.com/payloadcms/payload/tree/main/examples) is a great resource for learning how to setup Payload in a variety of different ways, but you can also find great examples in our blog and throughout our social media.
 
 If you'd like to run the examples, you can use `create-payload-app` to create a project from one:
 
@@ -124,7 +124,7 @@ npx create-payload-app --example example_name
 
 You can see more examples at:
 
-- [Examples Directory](./examples)
+- [Examples Directory](https://github.com/payloadcms/payload/tree/main/examples)
 - [Payload Blog](https://payloadcms.com/blog)
 - [Payload YouTube](https://www.youtube.com/@payloadcms)
 
