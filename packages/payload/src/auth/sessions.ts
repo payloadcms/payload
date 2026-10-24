@@ -20,30 +20,37 @@ export const removeExpiredSessions = (sessions: UserSession[]): UserSession[] =>
 
 /**
  * Adds a session to the user and removes expired sessions
- * @returns The session ID (sid) if sessions are used
+ * @returns The session and its ID (sid) if sessions are used
  */
 export const addSessionToUser = async ({
   collectionConfig,
   payload,
   req,
+  sessionExpiration = collectionConfig.auth.tokenExpiration,
   user,
 }: {
   collectionConfig: SanitizedCollectionConfig
   payload: Payload
   req: PayloadRequest
+  /**
+   * Seconds until the session expires.
+   *
+   * @default collectionConfig.auth.tokenExpiration
+   */
+  sessionExpiration?: number
   user: AuthenticatedUser
-}): Promise<{ sid?: string }> => {
+}): Promise<{ session?: UserSession; sid?: string }> => {
   assertNoValidationWrite(req)
 
+  let session: undefined | UserSession
   let sid: string | undefined
   if (collectionConfig.auth.useSessions) {
     // Add session to user
     sid = uuid()
     const now = new Date()
-    const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
-    const expiresAt = new Date(now.getTime() + tokenExpInMs)
+    const expiresAt = new Date(now.getTime() + sessionExpiration * 1000)
 
-    const session = { id: sid, createdAt: now, expiresAt }
+    session = { id: sid, createdAt: now, expiresAt }
 
     if (!user.sessions?.length) {
       user.sessions = [session]
@@ -69,12 +76,15 @@ export const addSessionToUser = async ({
   }
 
   return {
+    session,
     sid,
   }
 }
 
 /**
- * Extends the session `sid` so it lasts another `tokenExpiration` from now.
+ * Extends the session `sid` so it lasts at least another `tokenExpiration`. Sessions that already
+ * last longer, like ones with a refresh token, keep their expiry, since their refresh token relies
+ * on it.
  *
  * @returns The session, or `undefined` when the user has no session with this ID
  */
@@ -97,7 +107,11 @@ export const extendSession = async ({
     return undefined
   }
 
-  session.expiresAt = new Date(Date.now() + collectionConfig.auth.tokenExpiration * 1000)
+  const tokenExpiresAt = new Date(Date.now() + collectionConfig.auth.tokenExpiration * 1000)
+
+  if (new Date(session.expiresAt) < tokenExpiresAt) {
+    session.expiresAt = tokenExpiresAt
+  }
 
   await req.payload.db.updateOne({
     id: user.id,
