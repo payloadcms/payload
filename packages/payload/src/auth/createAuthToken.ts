@@ -4,6 +4,7 @@ import type { PayloadRequest } from '../types/index.js'
 
 import { getFieldsToSign } from './getFieldsToSign.js'
 import { jwtSign } from './jwt.js'
+import { createRefreshToken, getRefreshTokenExpiration } from './redeemRefreshToken.js'
 import { addSessionToUser } from './sessions.js'
 
 /**
@@ -14,15 +15,23 @@ export const createAuthToken = async ({
   collectionConfig,
   email,
   req,
+  shouldCreateRefreshToken = false,
   user,
 }: {
   collectionConfig: SanitizedCollectionConfig
   /** The `email` claim of the token. */
   email: string
   req: PayloadRequest
+  /**
+   * Also return a refresh token for the session, which `redeemRefreshToken` trades for a new token.
+   * The session then lasts `auth.refreshTokens.expiration` from each refresh, or 30 days when the
+   * collection doesn't enable refresh tokens. Requires `auth.useSessions`.
+   */
+  shouldCreateRefreshToken?: boolean
   user: AuthenticatedUser
 }): Promise<{
   exp: number
+  refreshToken?: string
   /**
    * The ID of the session the token belongs to. Removing that session from the user, like logout
    * does, makes the token stop working.
@@ -30,7 +39,15 @@ export const createAuthToken = async ({
   sid?: string
   token: string
 }> => {
-  const { sid } = await addSessionToUser({ collectionConfig, payload: req.payload, req, user })
+  const { session, sid } = await addSessionToUser({
+    collectionConfig,
+    payload: req.payload,
+    req,
+    sessionExpiration: shouldCreateRefreshToken
+      ? getRefreshTokenExpiration(collectionConfig)
+      : undefined,
+    user,
+  })
 
   const { exp, token } = await jwtSign({
     fieldsToSign: getFieldsToSign({ collectionConfig, email, sid, user }),
@@ -38,5 +55,13 @@ export const createAuthToken = async ({
     tokenExpiration: collectionConfig.auth.tokenExpiration,
   })
 
-  return { exp, sid, token }
+  return {
+    exp,
+    refreshToken:
+      shouldCreateRefreshToken && session
+        ? createRefreshToken({ collectionConfig, req, session, userID: user.id })
+        : undefined,
+    sid,
+    token,
+  }
 }

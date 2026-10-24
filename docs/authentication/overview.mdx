@@ -93,6 +93,7 @@ The following options are available:
 | **`lockTime`**                 | Set the time (in milliseconds) that a user should be locked out if they fail authentication more times than `maxLoginAttempts` allows for.                                                                                  |
 | **`loginWithUsername`**        | Ability to allow users to login with username/password. [More](/docs/authentication/overview#login-with-username)                                                                                                           |
 | **`maxLoginAttempts`**         | Only allow a user to attempt logging in X amount of times. Automatically locks out a user from authenticating if this limit is passed. Set to `0` to disable.                                                               |
+| **`refreshTokens`**            | Set to `true` to also return a refresh token from login, which keeps clients logged in after their token expires. [More details](#refresh-tokens).                                                                          |
 | **`removeTokenFromResponses`** | Set to true if you want to remove the token from the returned authentication API responses such as login or refresh.                                                                                                        |
 | **`strategies`**               | Advanced - an array of custom authentication strategies to extend this collection's authentication with. [More details](./custom-strategies).                                                                               |
 | **`tokenExpiration`**          | How long (in seconds) to keep the user logged in. JWTs and HTTP-only cookies will both expire at the same time.                                                                                                             |
@@ -218,6 +219,42 @@ export default buildConfig({
   // highlight-end
 })
 ```
+
+## Refresh Tokens
+
+Apps that aren't always running, like mobile apps or CLIs, can't refresh their token before it expires. With `refreshTokens`, login also returns a refresh token, which the [refresh operation](./operations#refresh) trades for a new token and a new refresh token, even after the token expired:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Users: CollectionConfig = {
+  slug: 'users',
+  auth: {
+    // highlight-start
+    refreshTokens: {
+      // Optional. How many seconds the session lasts without a refresh, which is how long its
+      // refresh token can be used. Defaults to 30 days.
+      expiration: 60 * 60 * 24 * 7,
+    },
+    // highlight-end
+  },
+}
+```
+
+```ts
+const res = await fetch('http://localhost:3000/api/users/refresh-token', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ refreshToken }),
+})
+
+// Store the new refresh token for next time
+const { refreshedToken, refreshToken: nextRefreshToken } = await res.json()
+```
+
+Refresh tokens don't expire on their own. They work as long as their session, which lasts `expiration` from the last refresh instead of `tokenExpiration`. The token itself still expires after `tokenExpiration`.
+
+Each refresh token works once, so store the new one after every refresh. If a used refresh token comes back later, Payload treats it as copied and logs out its session. Logging out ends refresh tokens too. They require `useSessions`, and aren't returned with `removeTokenFromResponses`.
 
 ## Operations
 
