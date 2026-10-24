@@ -1,10 +1,12 @@
 import type { PayloadHandler } from '../../config/types.js'
+import type { Result } from '../operations/refresh.js'
 
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { httpStatus } from '../../utilities/httpStatus.js'
 import { generatePayloadCookie } from '../cookies.js'
 import { refreshOperation } from '../operations/refresh.js'
+import { refreshWithRefreshTokenOperation } from '../operations/refreshWithRefreshToken.js'
 
 export const refreshHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
@@ -15,11 +17,12 @@ export const refreshHandler: PayloadHandler = async (req) => {
     req,
   })
 
-  const result = await refreshOperation({
-    collection,
-    refreshToken: typeof req.data?.refreshToken === 'string' ? req.data.refreshToken : undefined,
-    req,
-  })
+  const refreshToken =
+    typeof req.data?.refreshToken === 'string' ? req.data.refreshToken : undefined
+
+  const result: { refreshToken?: string } & Result = refreshToken
+    ? await refreshWithRefreshTokenOperation({ collection, refreshToken, req })
+    : await refreshOperation({ collection, req })
 
   const { refreshedToken, refreshToken: _refreshToken, ...resultWithoutToken } = result
 
