@@ -11,7 +11,7 @@ type HookArgs = {
 } & Pick<SlugFieldArgs, 'slugify'> &
   Required<Pick<SlugFieldArgs, 'useAsSlug'>>
 
-const slugify = ({
+const slugify = async ({
   customSlugify,
   data,
   req,
@@ -21,7 +21,7 @@ const slugify = ({
   data: Record<string, unknown>
   req: PayloadRequest
   valueToSlugify?: string
-}) => {
+}): Promise<string | undefined> => {
   if (customSlugify) {
     return customSlugify({ data, req, valueToSlugify })
   }
