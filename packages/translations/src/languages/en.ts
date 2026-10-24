@@ -294,6 +294,7 @@ export const enTranslations = {
     and: 'And',
     anotherUser: 'Another user',
     anotherUserTakenOver: 'Another user has taken over editing this document.',
+    apiResponse: 'API response',
     applyChanges: 'Apply Changes',
     ascending: 'Ascending',
     auto: 'Auto',
@@ -366,7 +367,15 @@ export const enTranslations = {
     documentOutOfDate:
       'This document was recently updated by another user. Your view is out of date.',
     documents: 'Documents',
+    dragCancelled: '{{label}} drag cancelled.',
+    dragDropped: '{{label}} dropped. Position {{position}} of {{count}}.',
+    dragInstructions:
+      'Press Space or Enter to pick up a row. Use the arrow keys to move it. With VoiceOver, turn Quick Nav off and use Command + arrow keys. Press Space or Enter to drop, or Escape to cancel.',
+    dragMoved: '{{label}}: {{direction}}. Position {{position}} of {{count}}.',
+    dragPickedUp: '{{label}} picked up. Position {{position}} of {{count}}.',
+    dragToMove: 'Drag to move',
     dragToReorder: 'Drag to reorder',
+
     duplicate: 'Duplicate',
     duplicateWithoutSaving: 'Duplicate without saving changes',
     edit: 'Edit',
@@ -479,6 +488,7 @@ export const enTranslations = {
     reindexingAll: 'Reindexing all {{collections}}.',
     reloadDocument: 'Reload document',
     remove: 'Remove',
+    removeFilter: 'Remove filter',
     rename: 'Rename',
     replaceRow: 'Replace Row',
     requiredFields: 'Fields marked with * are required.',
@@ -570,6 +580,7 @@ export const enTranslations = {
     yes: 'Yes',
   },
   hierarchy: {
+    folderLocation: 'Folder location',
     goTo: 'Go to "{{name}}"',
     itemsMovedTo: '{{title}} moved to {{destination}}',
     itemsMovedToRoot: '{{title}} moved to root',
@@ -587,7 +598,7 @@ export const enTranslations = {
       'Add custom instructions for the {{label}} collection to help LLMs tailor better prompt responses.',
     collectionSystemDescription:
       'These system instructions are provided by the collection’s config file and are always included.',
-    editInstructions: 'Edit LLM instructions',
+    editInstructions: 'Edit agent instructions',
     global: 'Global',
     globalDescription:
       'Add custom instructions for the {{label}} global to help LLMs tailor better prompt responses.',

@@ -81,7 +81,7 @@ export const CopyLocaleData: React.FC = () => {
 
         setCopying(false)
 
-        startRouteTransition(() =>
+        void startRouteTransition(() =>
           router.push(
             formatAdminURL({
               adminRoute: admin,

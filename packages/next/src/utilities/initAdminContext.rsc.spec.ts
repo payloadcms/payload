@@ -18,6 +18,10 @@ const { counters, initPayloadAdminContext } = vi.hoisted(() => ({
 
 vi.mock('react', () => createRequire(import.meta.url)('react'))
 
+vi.mock('next/server.js', () => ({
+  connection: vi.fn(() => Promise.resolve()),
+}))
+
 vi.mock('payload/internal', () => ({
   initAdminContext: initPayloadAdminContext,
 }))

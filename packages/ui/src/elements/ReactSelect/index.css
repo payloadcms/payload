@@ -158,4 +158,8 @@
       border-color: var(--field-color-border-focus);
     }
   }
+
+  html[data-enhanced-contrast] :is(.rs__option--is-focused, .rs__option--is-selected) {
+    --color-text-secondary: var(--color-text);
+  }
 }

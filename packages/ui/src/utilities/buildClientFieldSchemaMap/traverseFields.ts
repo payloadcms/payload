@@ -136,12 +136,8 @@ export const traverseFields = ({
         // 3. add them to the client schema map
 
         // So these would basically be all fields that are not part of the client config already
-        const richTextFieldSchemaMap: FieldSchemaMap = new Map()
-        for (const [path, subField] of schemaMap.entries()) {
-          if (path.startsWith(`${schemaPath}.`)) {
-            richTextFieldSchemaMap.set(path, subField)
-          }
-        }
+        const richTextFieldSchemaMap: FieldSchemaMap =
+          getRichTextSubFieldsByPath({ schemaMap }).get(schemaPath) ?? new Map()
 
         // Now loop through them, convert each entry to a client field and add it to the client schema map.
         // Schema map values are a union: Block | Field | Tab | { fields: Field[] }.
@@ -223,4 +219,44 @@ export const traverseFields = ({
       }
     }
   }
+}
+
+const richTextSubFieldsCache = new WeakMap<FieldSchemaMap, Map<string, FieldSchemaMap>>()
+
+/**
+ * Groups the schema map entries by the rich text field they belong to,
+ * so each rich text field does not have to scan the whole schema map.
+ */
+function getRichTextSubFieldsByPath({
+  schemaMap,
+}: {
+  schemaMap: FieldSchemaMap
+}): Map<string, FieldSchemaMap> {
+  const cachedSubFieldsByPath = richTextSubFieldsCache.get(schemaMap)
+
+  if (cachedSubFieldsByPath) {
+    return cachedSubFieldsByPath
+  }
+
+  const subFieldsByPath = new Map<string, FieldSchemaMap>()
+
+  for (const [path, field] of schemaMap) {
+    if ('type' in field && field.type === 'richText') {
+      subFieldsByPath.set(path, new Map())
+    }
+  }
+
+  for (const [path, field] of schemaMap) {
+    let separatorIndex = path.indexOf('.')
+
+    // A sub-field of a nested rich text field belongs to each of its rich text ancestors
+    while (separatorIndex !== -1) {
+      subFieldsByPath.get(path.slice(0, separatorIndex))?.set(path, field)
+      separatorIndex = path.indexOf('.', separatorIndex + 1)
+    }
+  }
+
+  richTextSubFieldsCache.set(schemaMap, subFieldsByPath)
+
+  return subFieldsByPath
 }
