@@ -928,6 +928,17 @@ export interface Event {
     address?: string | null;
     city: string;
     country: string;
+    /**
+     * Filled in from Apple Maps when the venue, address, city or country changes. Correct them if the pin is in the wrong place; clear them to look the place up again.
+     *
+     * @minItems 2
+     * @maxItems 2
+     */
+    coordinates?: [number, number] | null;
+    /**
+     * How precise the coordinates are
+     */
+    coordinatesSource?: ('venue' | 'address' | 'city' | 'country' | 'manual') | null;
   };
   organizer?: string | null;
   website?: string | null;
@@ -1667,6 +1678,8 @@ export interface EventsSelect<T extends boolean = true> {
         address?: T;
         city?: T;
         country?: T;
+        coordinates?: T;
+        coordinatesSource?: T;
       };
   organizer?: T;
   website?: T;
