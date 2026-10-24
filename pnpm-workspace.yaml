@@ -83,3 +83,6 @@ minimumReleaseAgeExclude:
   - '@next/swc-win32-x64-msvc@16.4.2'
   - eslint-config-next@16.4.2
   - next@16.4.2
+  - '@modelcontextprotocol/client@2.4.0'
+  - '@modelcontextprotocol/core@2.4.0'
+  - '@modelcontextprotocol/server@2.4.0'
