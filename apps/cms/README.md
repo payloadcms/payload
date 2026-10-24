@@ -732,7 +732,8 @@ country) from a precise one.
   marked **Set by hand** and kept, until the venue, address, city or country changes; to move the event and
   keep your own pin, change both in the same save.
 - **Not found**, or Apple Maps can't be reached: the event is saved anyway, without coordinates, and the app
-  then looks the place up on the phone. Saving it again tries again.
+  then looks the place up on the phone. **Why there are no coordinates** under them says what went wrong, e.g.
+  that Apple Maps isn't set up, or the error Apple Maps answered with. Saving it again tries again.
 
 **Set up (once):**
 
@@ -758,6 +759,11 @@ country) from a precise one.
    ```
 
    `--all` looks up every event again, except coordinates set by hand.
+
+**Still no coordinates?** On the server, `docker compose exec cms printenv | grep -c '^APPLE_MAPS_'` must print
+`3`; otherwise the CMS doesn't see the settings (`docker compose restart` doesn't reload `.env`; run
+`./deploy/deploy.sh`). `./deploy/locate-events.sh --dry-run` prints the exact error, and
+`docker compose logs cms | grep -i 'apple maps'` shows past ones.
 
 Apple allows 25,000 lookups a day per developer team (shared with MapKit JS); each saved event takes two or
 three. Use a separate key for each server (e.g. UAT and production), so one can be revoked without the other.

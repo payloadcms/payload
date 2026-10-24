@@ -166,6 +166,16 @@ export const Events: CollectionConfig = {
             },
           ],
         },
+        {
+          name: 'coordinatesProblem',
+          type: 'text',
+          admin: {
+            // Only while there is one
+            condition: (_data, siblingData) => Boolean(siblingData?.coordinatesProblem),
+            readOnly: true,
+          },
+          label: 'Why there are no coordinates',
+        },
       ],
     },
     {

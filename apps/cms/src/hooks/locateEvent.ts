@@ -19,6 +19,7 @@ type Point = [number, number]
  *   change in the same save.
  * - When a changed place isn't found, or Apple Maps isn't set up or can't be reached, the old
  *   coordinates are removed instead of pointing at the old place.
+ * - `location.coordinatesProblem` tells the editor why an event has no coordinates.
  * - Nothing here stops a save.
  *
  * Skipped with `context: { skipLocateEvent: true }`: scripts/locate-events.ts saves what it found
@@ -39,6 +40,9 @@ export const locateEvent: CollectionBeforeChangeHook = async ({
   }
 
   if (context.skipLocateEvent) {
+    if (input && toPoint(input.coordinates)) {
+      input.coordinatesProblem = null
+    }
     return data
   }
 
@@ -50,7 +54,12 @@ export const locateEvent: CollectionBeforeChangeHook = async ({
     input?.coordinates !== undefined && !isSamePoint(coordinates, toPoint(before?.coordinates))
 
   if (editedByHand && coordinates) {
-    data.location = { ...location, coordinates, coordinatesSource: 'manual' }
+    data.location = {
+      ...location,
+      coordinates,
+      coordinatesProblem: null,
+      coordinatesSource: 'manual',
+    }
     return data
   }
 
@@ -60,18 +69,43 @@ export const locateEvent: CollectionBeforeChangeHook = async ({
     return data
   }
 
-  const found = await findEventLocation(location).catch((error: unknown) => {
+  let found: Awaited<ReturnType<typeof findEventLocation>>
+  let problem: null | string = null
+
+  try {
+    found = await findEventLocation(location)
+  } catch (error) {
     req.payload.logger.warn({
       err: error,
       msg: `Could not look up the place of the event "${data.name ?? originalDoc?.name}" in Apple Maps; saving it without new coordinates`,
     })
-    return undefined
-  })
+    problem = `Apple Maps failed: ${(error as Error).message} Save again to retry.`
+  }
+
+  if (found === undefined && !problem) {
+    problem =
+      "Apple Maps isn't set up on this server: set APPLE_MAPS_TEAM_ID, APPLE_MAPS_KEY_ID and APPLE_MAPS_PRIVATE_KEY in .env and redeploy."
+  } else if (found === null) {
+    problem =
+      'Apple Maps found neither the venue, the street address nor the city. Enter the coordinates by hand.'
+  }
 
   if (found) {
-    data.location = { ...location, coordinates: found.coordinates, coordinatesSource: found.source }
+    data.location = {
+      ...location,
+      coordinates: found.coordinates,
+      coordinatesProblem: null,
+      coordinatesSource: found.source,
+    }
   } else if (placeChanged || editedByHand) {
-    data.location = { ...location, coordinates: null, coordinatesSource: null }
+    data.location = {
+      ...location,
+      coordinates: null,
+      coordinatesProblem: problem,
+      coordinatesSource: null,
+    }
+  } else {
+    data.location = { ...location, coordinatesProblem: problem }
   }
 
   return data
