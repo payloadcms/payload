@@ -17,6 +17,7 @@ import {
 } from './config/client/EditorConfigProvider.js'
 import { LexicalEditor as LexicalEditorComponent } from './LexicalEditor.js'
 import { getEnabledNodes } from './nodes/index.js'
+import { hasEmptyRoot } from './utils/hasEmptyRoot.js'
 
 export type LexicalProviderProps = {
   composerKey: string
@@ -97,7 +98,11 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
 
     return {
       editable: readOnly !== true,
-      editorState: value != null ? JSON.stringify(value) : undefined,
+      // A root without children is a state Lexical can save but refuses to load
+      // (`setEditorState` throws "the editor state is empty"). Treat it like no
+      // value, so Lexical seeds its default empty paragraph instead of crashing
+      // the field. See EnsureRootNotEmptyPlugin for how new ones are prevented.
+      editorState: value != null && !hasEmptyRoot(value) ? JSON.stringify(value) : undefined,
       namespace: editorConfig.lexical.namespace,
       nodes: getEnabledNodes({
         editorConfig,
