@@ -1080,3 +1080,94 @@ describe('mergeLocalizedData', () => {
     })
   })
 })
+
+describe('shared row identity during single-locale publish', () => {
+  describe.each(['array', 'blocks'] as const)('%s', (type) => {
+    const rowFields: Field[] = [
+      { name: 'id', type: 'text' },
+      { name: 'label', type: 'text', localized: true },
+    ]
+    const fields: Field[] = [
+      type === 'array'
+        ? { name: 'items', type, fields: rowFields }
+        : { name: 'items', type, blocks: [{ slug: 'copy', fields: rowFields }] },
+    ]
+    const row = (id: string) => ({
+      id,
+      ...(type === 'blocks' ? { blockType: 'copy' } : {}),
+      label: { en: `${id} English`, de: `${id} Deutsch`, ja: `${id} 日本語` },
+    })
+
+    it.each([
+      ['reorder', ['b', 'a']],
+      ['insert', ['new', 'a', 'b']],
+      ['delete', ['b']],
+    ])('should preserve untouched translations on %s', (_, ids) => {
+      const docWithLocales = { items: [row('a'), row('b')] }
+      const original = structuredClone(docWithLocales)
+      const dataWithLocales = {
+        items: (ids as string[]).map((id) => ({
+          ...row(id),
+          label: { en: `${id} updated` },
+        })),
+      }
+      const result = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales,
+        docWithLocales,
+        fields,
+        selectedLocales: ['en'],
+      })
+
+      expect(result.items).toEqual(
+        (ids as string[]).map((id) => ({
+          ...row(id),
+          ...(type === 'blocks' ? { blockName: undefined } : {}),
+          label: id === 'new' ? { en: `${id} updated` } : { ...row(id).label, en: `${id} updated` },
+        })),
+      )
+      expect(docWithLocales).toEqual(original)
+    })
+  })
+})
+
+describe('block identity compatibility', () => {
+  const fields: Field[] = [
+    {
+      name: 'items',
+      type: 'blocks',
+      blocks: ['old', 'new'].map((slug) => ({
+        slug,
+        fields: [{ name: 'label', type: 'text', localized: true }],
+      })),
+    },
+  ]
+
+  it.each(['same', undefined])('should not inherit another block type with id %s', (id) => {
+    const result = mergeLocalizedData({
+      configBlockReferences: [],
+      fields,
+      selectedLocales: ['en'],
+      docWithLocales: {
+        items: [{ id, blockType: 'old', label: { de: 'Alt' }, retired: 'old field' }],
+      },
+      dataWithLocales: { items: [{ id, blockType: 'new', label: { en: 'New' } }] },
+    })
+
+    expect(result.items).toEqual([
+      { id, blockType: 'new', blockName: undefined, label: { en: 'New' } },
+    ])
+  })
+
+  it('should retain index matching for matching blocks without IDs', () => {
+    const result = mergeLocalizedData({
+      configBlockReferences: [],
+      fields,
+      selectedLocales: ['en'],
+      docWithLocales: { items: [{ blockType: 'old', label: { de: 'Alt' } }] },
+      dataWithLocales: { items: [{ blockType: 'old', label: { en: 'Updated' } }] },
+    })
+
+    expect(result.items[0].label).toEqual({ en: 'Updated', de: 'Alt' })
+  })
+})
