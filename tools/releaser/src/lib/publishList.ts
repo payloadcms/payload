@@ -10,6 +10,7 @@ export const packagePublishList = [
   'translations',
   'payload',
   'transformer-sharp',
+  'transformer-cloudflare',
 
   // Core UI/API
   'ui',
