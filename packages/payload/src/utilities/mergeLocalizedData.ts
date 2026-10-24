@@ -138,7 +138,7 @@ export function mergeLocalizedData({
               }
             } else if (Array.isArray(newValue)) {
               // Non-localized blocks - still process children for any localized fields
-              const getExistingRow = existingRowsByIdentity(existingValue)
+              const getExistingRow = existingRowsByIdentity(existingValue, true)
 
               result[field.name] = newValue.map((newBlockData: JsonObject, index: number) => {
                 let block: Block | FlattenedBlock | undefined
@@ -348,7 +348,7 @@ export function mergeLocalizedData({
 }
 
 /** Shared rows can move; other locales must follow the row, not its former position. */
-function existingRowsByIdentity(existingRows: unknown) {
+function existingRowsByIdentity(existingRows: unknown, isBlock = false) {
   const rows: JsonObject[] = Array.isArray(existingRows) ? existingRows : []
   const byID = new Map(rows.filter((row) => row?.id != null).map((row) => [String(row.id), row]))
 
@@ -356,6 +356,6 @@ function existingRowsByIdentity(existingRows: unknown) {
     const existing =
       row.id != null ? byID.get(String(row.id)) : rows[index]?.id == null ? rows[index] : undefined
 
-    return existing && existing.blockType === row.blockType ? existing : {}
+    return existing && (!isBlock || existing.blockType === row.blockType) ? existing : {}
   }
 }

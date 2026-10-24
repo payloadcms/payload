@@ -1171,3 +1171,30 @@ describe('block identity compatibility', () => {
     expect(result.items[0].label).toEqual({ en: 'Updated', de: 'Alt' })
   })
 })
+
+it('should preserve array translations when a user-defined blockType field changes', () => {
+  const fields: Field[] = [
+    {
+      name: 'items',
+      type: 'array',
+      fields: [
+        { name: 'id', type: 'text' },
+        { name: 'blockType', type: 'text' },
+        { name: 'label', type: 'text', localized: true },
+      ],
+    },
+  ]
+  const result = mergeLocalizedData({
+    configBlockReferences: [],
+    fields,
+    selectedLocales: ['en'],
+    docWithLocales: {
+      items: [{ id: 'one', blockType: 'old', label: { en: 'Old', de: 'Deutsch', ja: '日本語' } }],
+    },
+    dataWithLocales: { items: [{ id: 'one', blockType: 'new', label: { en: 'Updated' } }] },
+  })
+
+  expect(result.items).toEqual([
+    { id: 'one', blockType: 'new', label: { en: 'Updated', de: 'Deutsch', ja: '日本語' } },
+  ])
+})
