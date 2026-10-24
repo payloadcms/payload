@@ -1,0 +1,2 @@
+# Generate with: openssl rand -hex 32
+PAYLOAD_SECRET=replace-me-with-a-long-random-value
