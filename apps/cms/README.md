@@ -742,14 +742,20 @@ country) from a precise one.
 2. Under _Keys_, add a key with **MapKit JS** checked, press _Configure_ and choose that Maps ID, then register
    it and **download the .p8 file** (Apple offers it only once). Note the **Key ID**.
 3. Find your **Team ID** under _Membership_.
-4. Add them to `.env`, the key as one line: the lines between `BEGIN PRIVATE KEY` and `END PRIVATE KEY` joined
-   together, e.g. `grep -v PRIVATE AuthKey_ABC123DEFG.p8 | tr -d '\n'`
+4. Add them to `.env`. The key must be **one line**: the lines between `BEGIN PRIVATE KEY` and `END PRIVATE KEY`
+   joined together. On your Mac, this copies it that way:
+
+   ```bash
+   grep -v PRIVATE ~/Downloads/AuthKey_ABC123DEFG.p8 | tr -d '\r\n' | pbcopy
+   ```
 
    ```bash
    APPLE_MAPS_TEAM_ID=DEF123GHIJ
    APPLE_MAPS_KEY_ID=ABC123DEFG
    APPLE_MAPS_PRIVATE_KEY=MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQg...
    ```
+
+   Check it on the server: `grep '^APPLE_MAPS_PRIVATE_KEY=' .env | cut -d= -f2- | wc -c` prints about `200`.
 
 5. `./deploy/deploy.sh`, then look up the events saved before, previewing first:
 

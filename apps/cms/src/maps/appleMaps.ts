@@ -149,19 +149,46 @@ function authToken() {
 }
 
 /**
- * The contents of the .p8 file from Apple: as is, with `\n` instead of line breaks (a .env value
- * is one line), or only the lines between BEGIN and END joined together.
+ * The contents of the .p8 file from Apple: only the lines between BEGIN and END joined together
+ * (a .env value is one line), or the whole file, with or without `\n` instead of line breaks.
+ * Quotes, spaces and stray backslashes around it are ignored.
  */
 function signingKey() {
-  const text = privateKey.replace(/\\n/g, '\n').trim()
-  const body = text.replace(/-----(BEGIN|END) PRIVATE KEY-----/g, '').replace(/\s+/g, '')
-  const pem = `-----BEGIN PRIVATE KEY-----\n${body.match(/.{1,64}/g)?.join('\n')}\n-----END PRIVATE KEY-----\n`
+  const body = privateKey
+    .replace(/\\[nr]/g, '')
+    .replace(/-----(BEGIN|END) PRIVATE KEY-----/g, '')
+    // Everything that can't be part of the key's base64 text
+    .replace(/[^A-Za-z0-9+/=]/g, '')
 
   try {
-    return crypto.createPrivateKey(pem)
+    if (body) {
+      return crypto.createPrivateKey(
+        `-----BEGIN PRIVATE KEY-----\n${body.match(/.{1,64}/g)?.join('\n')}\n-----END PRIVATE KEY-----\n`,
+      )
+    }
   } catch {
-    throw new Error('APPLE_MAPS_PRIVATE_KEY is not a valid private key (the .p8 file from Apple).')
+    // Explained below
   }
+
+  throw new Error(
+    `APPLE_MAPS_PRIVATE_KEY is not a valid private key: ${whatIsWrongWithTheKey(body)}`,
+  )
+}
+
+/** Without showing the key itself, which ends up in logs and the admin panel */
+function whatIsWrongWithTheKey(body: string) {
+  const howTo =
+    'In .env it must be one line: the lines between BEGIN and END of the .p8 file from Apple, joined together.'
+
+  if (!body) {
+    return `it has no key text, e.g. only its BEGIN line made it into .env. ${howTo}`
+  }
+
+  if (/AuthKey_|\.p8/i.test(privateKey)) {
+    return `it looks like the file's name or path instead of its contents. ${howTo}`
+  }
+
+  return `it has ${body.length} characters (Apple's key has about 200, starting with "MIG"). ${howTo}`
 }
 
 async function errorMessage(res: Response) {
