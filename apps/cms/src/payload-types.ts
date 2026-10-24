@@ -939,6 +939,7 @@ export interface Event {
      * How precise the coordinates are
      */
     coordinatesSource?: ('venue' | 'address' | 'city' | 'country' | 'manual') | null;
+    coordinatesProblem?: string | null;
   };
   organizer?: string | null;
   website?: string | null;
@@ -1680,6 +1681,7 @@ export interface EventsSelect<T extends boolean = true> {
         country?: T;
         coordinates?: T;
         coordinatesSource?: T;
+        coordinatesProblem?: T;
       };
   organizer?: T;
   website?: T;
