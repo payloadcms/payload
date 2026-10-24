@@ -83,8 +83,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
     const sid = args.req.user._sid
 
     if (collectionConfig.auth.useSessions && !collectionConfig.auth.disableLocalStrategy) {
-      const session =
-        sid && (await extendSession({ collectionConfig, payload: req.payload, req, sid, user }))
+      const session = sid && (await extendSession({ collectionConfig, req, sid, user }))
 
       if (!session) {
         throw new Forbidden(args.req.t)
