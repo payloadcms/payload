@@ -73,6 +73,18 @@ validate_env() {
     fi
   done
 
+  local apple_maps_key apple_maps_set=0
+  for apple_maps_key in APPLE_MAPS_TEAM_ID APPLE_MAPS_KEY_ID APPLE_MAPS_PRIVATE_KEY; do
+    if [[ -n "$(env_value "$apple_maps_key")" ]]; then
+      apple_maps_set=$((apple_maps_set + 1))
+    fi
+  done
+
+  if [[ "$apple_maps_set" -gt 0 && "$apple_maps_set" -lt 3 ]]; then
+    echo "Set all of APPLE_MAPS_TEAM_ID, APPLE_MAPS_KEY_ID and APPLE_MAPS_PRIVATE_KEY, or none." >&2
+    has_error=true
+  fi
+
   local sendgrid_api_key email_from_address
   sendgrid_api_key="$(env_value SENDGRID_API_KEY)"
   email_from_address="$(env_value EMAIL_FROM_ADDRESS)"

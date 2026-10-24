@@ -34,5 +34,8 @@ docker run --rm --network host \
   --env DATABASE_URL="$(env_value DATABASE_URL)" \
   --env PAYLOAD_SECRET="$(env_value PAYLOAD_SECRET)" \
   --env SERVER_URL="$(env_value SERVER_URL)" \
+  --env APPLE_MAPS_TEAM_ID="$(env_value APPLE_MAPS_TEAM_ID)" \
+  --env APPLE_MAPS_KEY_ID="$(env_value APPLE_MAPS_KEY_ID)" \
+  --env APPLE_MAPS_PRIVATE_KEY="$(env_value APPLE_MAPS_PRIVATE_KEY)" \
   --volume "$file:/import/events.json:ro" \
   "$image" pnpm --silent payload run scripts/import-events.ts /import/events.json "$@"

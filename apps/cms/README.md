@@ -34,6 +34,8 @@ uses to test templates.
 | `src/collections/Clients.ts`               | Private client records: contacts, business type, importance (see "Clients and events") |
 | `src/collections/Events.ts`                | Private records of sales events and exhibitions worldwide                              |
 | `scripts/import-events.ts`                 | Imports events from a JSON file (see "Importing events")                               |
+| `src/maps/`, `src/hooks/locateEvent.ts`    | Finds each event's coordinates in Apple Maps (see "Event locations")                   |
+| `scripts/locate-events.ts`                 | Looks up the coordinates of events saved earlier (see "Event locations")               |
 | `src/endpoints/appEvents.ts`               | Upcoming events for the VgemsAI app (see "Events in the VgemsAI app")                  |
 | `src/vigor/`, `src/locales.ts`             | Content of the Vigor website in four languages (see "Vigor website")                   |
 | `scripts/import-vigor.ts`                  | Copies the Vigor website's current content into the CMS (see "Vigor website")          |
@@ -48,6 +50,7 @@ uses to test templates.
 | `deploy/check-db.sh`                       | Checks that the app EC2 can reach and write to MongoDB                                 |
 | `deploy/deploy.sh`                         | Build + (re)start + wait until healthy                                                 |
 | `deploy/import-events.sh`                  | Runs the events import on the server                                                   |
+| `deploy/locate-events.sh`                  | Looks up the coordinates of events on the server                                       |
 | `deploy/import-personal-website.sh`        | Runs the personal website import on the server                                         |
 | `deploy/import-vigor.sh`                   | Runs the Vigor website import on the server                                            |
 | `deploy/mongodb/create-payload-user.js`    | Creates the MongoDB user for Payload (run on the DB EC2)                               |
@@ -141,6 +144,7 @@ nano .env
 | `WEBSITE_URL`, `WEBSITE_REVALIDATE_SECRET`                  | optional, refresh the personal website as soon as its content changes (see "Personal website")                 |
 | `VIGOR_WEBSITE_URL`, `VIGOR_WEBSITE_REVALIDATE_SECRET`      | optional, refresh the Vigor website as soon as its content changes (see "Vigor website")                       |
 | `OPENAI_API_KEY`, `OPENAI_MODEL`                            | optional, write the title, alt text, description and tags of photos with AI (see "Photos")                     |
+| `APPLE_MAPS_*`                                              | optional, team ID, key ID and private key to put events on the map with Apple Maps (see "Event locations")     |
 | `SENDGRID_API_KEY`, `EMAIL_FROM_ADDRESS`, `EMAIL_FROM_NAME` | optional, send "forgot password" emails (see "Email (SendGrid)")                                               |
 
 URL-encode special characters in the MongoDB password: `@` → `%40`, `:` → `%3A`, `/` → `%2F`,
@@ -633,9 +637,10 @@ needs a logged-in user, so `GET /api/clients` and `GET /api/events` return `403`
   industry, notes, **importance** (1–5 stars), status (lead, active, inactive) and source. Each client also
   lists the events it is linked to.
 - **Events**: name, type (exhibition, trade show, sales event, conference, meeting, other), description, start and end
-  date and time with the **time zone** of the event, venue, booth, address, city, country, organizer,
-  website, linked clients, notes, status (planned, confirmed, completed, cancelled) and attachments. The
-  list is sorted with the latest event first, and an end date before the start date is rejected.
+  date and time with the **time zone** of the event, venue, booth, address, city, country, **coordinates**
+  (see "Event locations"), organizer, website, linked clients, notes, status (planned, confirmed, completed,
+  cancelled) and attachments. The list is sorted with the latest event first, and an end date before the start
+  date is rejected.
 
 Attachments are stored in Media, whose files are publicly readable by URL. Don't attach confidential
 documents to events.
@@ -705,6 +710,59 @@ How the file becomes events:
 
 Locally, run `pnpm payload run scripts/import-events.ts <file.json> [--dry-run]` in this folder instead.
 
+With Apple Maps set up (next section), every imported event gets its coordinates, which adds a second or two
+per event.
+
+### Event locations
+
+Each event's **Coordinates** (longitude and latitude, under Location) are filled in from the
+[Apple Maps Server API](https://developer.apple.com/documentation/applemapsserverapi) when the event is saved,
+so the VgemsAI app can pin it on its map. Apple Maps is looked up, most precise first, for:
+
+1. the **venue** in its city, e.g. `Palexpo, Geneva, Switzerland`
+2. the **street address** in its city
+3. only the **city**, or only the **country** while the city is `TBC`
+
+A venue or address that Apple Maps finds more than 100 km from the city is taken for a namesake elsewhere and
+skipped. **Coordinates of** next to them says which one was found, so you can tell a rough pin (only the city or
+country) from a precise one.
+
+- **Looked up again** when the venue, address, city or country changes, or when you clear the coordinates.
+- **Wrong pin?** Type the right longitude and latitude (e.g. from Apple Maps or Google Maps) and save. They're
+  marked **Set by hand** and kept, until the venue, address, city or country changes; to move the event and
+  keep your own pin, change both in the same save.
+- **Not found**, or Apple Maps can't be reached: the event is saved anyway, without coordinates, and the app
+  then looks the place up on the phone. Saving it again tries again.
+
+**Set up (once):**
+
+1. In your [Apple Developer account](https://developer.apple.com/account), under _Certificates, Identifiers &
+   Profiles_ → _Identifiers_, add a **Maps ID**, e.g. `maps.co.vgems.cms`.
+2. Under _Keys_, add a key with **MapKit JS** checked, press _Configure_ and choose that Maps ID, then register
+   it and **download the .p8 file** (Apple offers it only once). Note the **Key ID**.
+3. Find your **Team ID** under _Membership_.
+4. Add them to `.env`, the key as one line: the lines between `BEGIN PRIVATE KEY` and `END PRIVATE KEY` joined
+   together, e.g. `grep -v PRIVATE AuthKey_ABC123DEFG.p8 | tr -d '\n'`
+
+   ```bash
+   APPLE_MAPS_TEAM_ID=DEF123GHIJ
+   APPLE_MAPS_KEY_ID=ABC123DEFG
+   APPLE_MAPS_PRIVATE_KEY=MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQg...
+   ```
+
+5. `./deploy/deploy.sh`, then look up the events saved before, previewing first:
+
+   ```bash
+   ./deploy/locate-events.sh --dry-run   # lists what Apple Maps finds for each event; nothing is saved
+   ./deploy/locate-events.sh             # saves it for every event without coordinates
+   ```
+
+   `--all` looks up every event again, except coordinates set by hand.
+
+Apple allows 25,000 lookups a day per developer team (shared with MapKit JS); each saved event takes two or
+three. Use a separate key for each server (e.g. UAT and production), so one can be revoked without the other.
+Locally, run `pnpm payload run scripts/locate-events.ts [--dry-run] [--all]` in this folder.
+
 ### Events in the VgemsAI app
 
 The VgemsAI app shows upcoming events through its own backend, awoz-api, which reads them from
@@ -719,8 +777,10 @@ curl -H "X-API-Key: $APP_API_KEY" https://cms.example.com/api/app/events
 
 The endpoint returns events that aren't over yet and start within the next 12 months, soonest first, without
 cancelled ones. Each event has its name, type, description, start and end date with time zone, location
-(venue, booth, address, city, country), organizer, website and status. **Clients, notes and attachments are
-never included.** A wrong or missing key gets `401`; while `APP_API_KEY` is empty the endpoint returns `404`.
+(venue, booth, address, city, country and coordinates), organizer, website and status. **Clients, notes and
+attachments are never included.** The coordinates are `{ "latitude": 22.2829, "longitude": 114.1736,
+"precision": "venue" }`, where `precision` is `exact` (set by hand), `venue`, `address`, `city` or `country`,
+or `null` while the event has none (see "Event locations"). A wrong or missing key gets `401`; while `APP_API_KEY` is empty the endpoint returns `404`.
 
 ## Two-factor authentication
 

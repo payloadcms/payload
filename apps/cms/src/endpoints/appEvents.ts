@@ -15,6 +15,9 @@ const DAY_MS = 24 * 60 * 60 * 1000
  * login must pass two-factor (src/proxy.ts), which a server can't do.
  *
  * Only fields that are safe to show app users leave the CMS: never clients, notes or attachments.
+ * `location.coordinates` is `{ latitude, longitude, precision }` once the event's place was found
+ * (see src/hooks/locateEvent.ts), otherwise null. `precision` is `exact` (set by hand), `venue`,
+ * `address`, `city` or `country`.
  * "Upcoming" means not over yet (still running, or starting later) and starting within the next 12
  * months. Cancelled events are left out. Soonest first, in the same `{ docs: [...] }` shape as
  * Payload's REST API.
@@ -93,6 +96,7 @@ const toAppEvent = (event: Partial<Event>) => ({
     address: event.location?.address ?? null,
     booth: event.location?.booth ?? null,
     city: event.location?.city,
+    coordinates: appCoordinates(event.location),
     country: event.location?.country,
     venue: event.location?.venue ?? null,
   },
@@ -102,6 +106,19 @@ const toAppEvent = (event: Partial<Event>) => ({
   status: event.status,
   website: event.website ?? null,
 })
+
+/** Where the app puts the event's pin, and how precise it is */
+const appCoordinates = (location: Partial<Event['location']> | undefined) => {
+  const [longitude, latitude] = location?.coordinates ?? []
+
+  if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+    return null
+  }
+
+  const source = location?.coordinatesSource
+
+  return { latitude, longitude, precision: !source || source === 'manual' ? 'exact' : source }
+}
 
 /** An event without an end date lasts one day */
 const isOver = ({ event, now }: { event: Partial<Event>; now: Date }) => {
