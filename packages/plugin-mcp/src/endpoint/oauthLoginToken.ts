@@ -1,6 +1,6 @@
 import type { PayloadRequest } from 'payload'
 
-import { APIError, createAuthToken, executeAuthStrategies, refreshAuthToken } from 'payload'
+import { APIError, createAuthToken, executeAuthStrategies, redeemRefreshToken } from 'payload'
 
 import type { MCPOAuthTokens } from '../types.js'
 
@@ -54,7 +54,7 @@ export const refreshLoginToken = async ({
   refreshToken: string
   req: PayloadRequest
 }): Promise<MCPOAuthTokens | null> => {
-  const refreshed = await refreshAuthToken({ refreshToken, req })
+  const refreshed = await redeemRefreshToken({ refreshToken, req })
 
   return (
     refreshed && {
