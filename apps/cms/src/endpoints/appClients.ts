@@ -8,7 +8,13 @@ import { refuseWithoutAppApiKey } from './appApiKey'
 
 /** What awoz-api sends: the signup's name and email, and the company details it asked for */
 type AppClient = {
-  address?: { city?: unknown; country?: unknown; street?: unknown }
+  address?: {
+    city?: unknown
+    country?: unknown
+    postalCode?: unknown
+    state?: unknown
+    street?: unknown
+  }
   appUserId?: unknown
   businessType?: unknown
   company?: unknown
@@ -28,9 +34,9 @@ type AppClient = {
  * APP_API_KEY is empty the endpoint answers 404, as if it didn't exist.
  *
  * Body: `{ appUserId, company, contactName, jobTitle, email, phone, website,
- * address: { street, city, country }, businessType, industry }`, where `appUserId` is the account's ID
- * in awoz-api. Only these fields are copied. The client starts as a lead with the source "VgemsAI app";
- * importance, notes and status are left to the team.
+ * address: { street, city, state, postalCode, country }, businessType, industry }`, where `appUserId`
+ * is the account's ID in awoz-api. Only these fields are copied. The client starts as a lead with the
+ * source "VgemsAI app"; importance, notes and status are left to the team.
  *
  * Answers `201 { id }`. If a client already exists for the `appUserId`, answers `200` with its `id` instead
  * of making a second one, so awoz-api can safely try again after a lost answer. It sends one signup at a
@@ -48,7 +54,12 @@ export const appClientsEndpoint: Endpoint = {
     const body = (await req.json?.().catch(() => null)) as AppClient | null
     const appUserId = body?.appUserId
 
-    if (!body || typeof appUserId !== 'number' || !Number.isSafeInteger(appUserId) || appUserId <= 0) {
+    if (
+      !body ||
+      typeof appUserId !== 'number' ||
+      !Number.isSafeInteger(appUserId) ||
+      appUserId <= 0
+    ) {
       return Response.json(
         { errors: [{ message: 'appUserId must be a positive whole number.', path: 'appUserId' }] },
         { status: 400 },
@@ -77,6 +88,8 @@ export const appClientsEndpoint: Endpoint = {
           address: {
             city: text(body.address?.city),
             country: text(body.address?.country),
+            postalCode: text(body.address?.postalCode),
+            state: text(body.address?.state),
             street: text(body.address?.street),
           },
           appUserId,

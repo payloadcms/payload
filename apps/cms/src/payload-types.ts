@@ -860,6 +860,8 @@ export interface Client {
   address?: {
     street?: string | null;
     city?: string | null;
+    state?: string | null;
+    postalCode?: string | null;
     country?: string | null;
   };
   businessType?:
@@ -1649,6 +1651,8 @@ export interface ClientsSelect<T extends boolean = true> {
     | {
         street?: T;
         city?: T;
+        state?: T;
+        postalCode?: T;
         country?: T;
       };
   businessType?: T;

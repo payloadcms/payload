@@ -634,7 +634,8 @@ Locally, run `pnpm payload run scripts/import-vigor.ts <website-url> [--dry-run]
 Both appear under **Business** in the admin panel and are private: every request, including reading,
 needs a logged-in user, so `GET /api/clients` and `GET /api/events` return `403` to everyone else.
 
-- **Clients**: company, contact person, job title, email, phone, website, address, business type,
+- **Clients**: company, contact person, job title, email, phone, website, address (street, city, state or
+  province, ZIP or postal code, country), business type,
   industry, notes, **importance** (1–5 stars), status (lead, active, inactive) and source. Each client also
   lists the events it is linked to. People who sign up in the VgemsAI app are added as leads (see
   "The VgemsAI app").
@@ -821,8 +822,10 @@ curl -X POST -H "X-API-Key: $APP_API_KEY" -H 'Content-Type: application/json' \
 # 201 {"id": "…"}, or 200 with the same id when that account already has a client
 ```
 
-Only `company`, `contactName`, `jobTitle`, `email`, `phone`, `website`, `address` (`street`, `city`,
-`country`), `businessType` and `industry` are copied. Invalid values, such as an unknown business type, get
+Only `company`, `contactName`, `jobTitle`, `email`, `phone`, `website`, `address` (`street`, `city`, `state`,
+`postalCode`, `country`), `businessType` and `industry` are copied. The app picks the country from a list, so
+`country` is always its English name ("United States"); in the US and Canada `state` (the full name, e.g. "New
+York") and `postalCode` are always set, and the phone number starts with the country's calling code. Invalid values, such as an unknown business type, get
 `400` with `{"errors": [{"message": "…", "path": "businessType"}]}`.
 
 ## Two-factor authentication
