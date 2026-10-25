@@ -13,6 +13,7 @@ import { Posts } from './collections/Posts'
 import { Profiles } from './collections/Profiles'
 import { Users } from './collections/Users'
 import { sendgridAdapter } from './email/sendgrid'
+import { appClientsEndpoint } from './endpoints/appClients'
 import { appEventsEndpoint } from './endpoints/appEvents'
 import { healthEndpoint } from './endpoints/health'
 import { locales } from './locales'
@@ -87,7 +88,7 @@ export default buildConfig({
   editor: lexicalEditor(),
   // Sends emails such as "forgot password" through SendGrid when SENDGRID_API_KEY is set
   email: sendgridAdapter(),
-  endpoints: [appEventsEndpoint, healthEndpoint],
+  endpoints: [appClientsEndpoint, appEventsEndpoint, healthEndpoint],
   globals: [...personalGlobals, ...vigorGlobals],
   // Only fields marked `localized: true` have a version per language; see src/locales.ts
   localization: {

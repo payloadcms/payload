@@ -36,7 +36,8 @@ uses to test templates.
 | `scripts/import-events.ts`                 | Imports events from a JSON file (see "Importing events")                               |
 | `src/maps/`, `src/hooks/locateEvent.ts`    | Finds each event's coordinates in Apple Maps (see "Event locations")                   |
 | `scripts/locate-events.ts`                 | Looks up the coordinates of events saved earlier (see "Event locations")               |
-| `src/endpoints/appEvents.ts`               | Upcoming events for the VgemsAI app (see "Events in the VgemsAI app")                  |
+| `src/endpoints/appEvents.ts`               | Upcoming events for the VgemsAI app (see "The VgemsAI app")                            |
+| `src/endpoints/appClients.ts`              | Saves VgemsAI app signups as clients (see "The VgemsAI app")                           |
 | `src/vigor/`, `src/locales.ts`             | Content of the Vigor website in four languages (see "Vigor website")                   |
 | `scripts/import-vigor.ts`                  | Copies the Vigor website's current content into the CMS (see "Vigor website")          |
 | `src/timezones.ts`                         | Time zones offered for event dates                                                     |
@@ -635,7 +636,8 @@ needs a logged-in user, so `GET /api/clients` and `GET /api/events` return `403`
 
 - **Clients**: company, contact person, job title, email, phone, website, address, business type,
   industry, notes, **importance** (1–5 stars), status (lead, active, inactive) and source. Each client also
-  lists the events it is linked to.
+  lists the events it is linked to. People who sign up in the VgemsAI app are added as leads (see
+  "The VgemsAI app").
 - **Events**: name, type (exhibition, trade show, sales event, conference, meeting, other), description, start and end
   date and time with the **time zone** of the event, venue, booth, address, city, country, **coordinates**
   (see "Event locations"), organizer, website, linked clients, notes, status (planned, confirmed, completed,
@@ -775,10 +777,11 @@ Apple allows 25,000 lookups a day per developer team (shared with MapKit JS); ea
 three. Use a separate key for each server (e.g. UAT and production), so one can be revoked without the other.
 Locally, run `pnpm payload run scripts/locate-events.ts [--dry-run] [--all]` in this folder.
 
-### Events in the VgemsAI app
+### The VgemsAI app
 
-The VgemsAI app shows upcoming events through its own backend, awoz-api, which reads them from
-`GET /api/app/events`. A server can't pass two-factor, so instead of logging in it sends a shared key:
+The VgemsAI app talks to the CMS through its own backend, awoz-api, which reads upcoming events from
+`GET /api/app/events` and saves every signup as a client with `POST /api/app/clients`. A server can't pass
+two-factor, so instead of logging in it sends a shared key:
 
 ```bash
 curl -H "X-API-Key: $APP_API_KEY" https://cms.example.com/api/app/events
@@ -787,12 +790,40 @@ curl -H "X-API-Key: $APP_API_KEY" https://cms.example.com/api/app/events
 1. Generate a key with `openssl rand -hex 32`.
 2. Set it as `APP_API_KEY` in this server's `.env` and as `PAYLOAD_API_KEY` on awoz-api, then redeploy both.
 
-The endpoint returns events that aren't over yet and start within the next 12 months, soonest first, without
+A wrong or missing key gets `401`; while `APP_API_KEY` is empty both endpoints return `404`.
+
+#### Events
+
+`GET /api/app/events` returns events that aren't over yet and start within the next 12 months, soonest first, without
 cancelled ones. Each event has its name, type, description, start and end date with time zone, location
 (venue, booth, address, city, country and coordinates), organizer, website and status. **Clients, notes and
 attachments are never included.** The coordinates are `{ "latitude": 22.2829, "longitude": 114.1736,
 "precision": "venue" }`, where `precision` is `exact` (set by hand), `venue`, `address`, `city` or `country`,
-or `null` while the event has none (see "Event locations"). A wrong or missing key gets `401`; while `APP_API_KEY` is empty the endpoint returns `404`.
+or `null` while the event has none (see "Event locations").
+
+#### Signups
+
+When someone signs up in the app, awoz-api keeps the account (email, password, login) in its own MySQL
+database and sends their name, email and company details here within 30 seconds. Each signup becomes a
+client under **Business → Clients** with status **Lead**, source "VgemsAI app", and their app account's ID in
+**VgemsAI App Account** (sidebar, read-only). From there it is an ordinary client: set the importance, add
+notes, link events. The password never reaches the CMS.
+
+While the CMS is down or `APP_API_KEY` is missing, signups in the app keep working; awoz-api sends them once
+the CMS answers again. Sending the same signup twice doesn't make a second client: for an account that
+already has one, the endpoint returns the existing client.
+
+```bash
+curl -X POST -H "X-API-Key: $APP_API_KEY" -H 'Content-Type: application/json' \
+  -d '{"appUserId": 1, "company": "Oskar Gems", "contactName": "Oskar", "email": "oskar@example.com",
+       "address": {"city": "Hong Kong", "country": "Hong Kong"}, "businessType": "retailer"}' \
+  https://cms.example.com/api/app/clients
+# 201 {"id": "…"}, or 200 with the same id when that account already has a client
+```
+
+Only `company`, `contactName`, `jobTitle`, `email`, `phone`, `website`, `address` (`street`, `city`,
+`country`), `businessType` and `industry` are copied. Invalid values, such as an unknown business type, get
+`400` with `{"errors": [{"message": "…", "path": "businessType"}]}`.
 
 ## Two-factor authentication
 
