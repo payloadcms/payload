@@ -5,6 +5,9 @@ import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 
+import { ChatMessages } from './collections/ChatMessages'
+import { ensureChatRetentionIndexes } from './collections/chatRetention'
+import { ChatSessions } from './collections/ChatSessions'
 import { Clients } from './collections/Clients'
 import { Events } from './collections/Events'
 import { Media, mediaVariants } from './collections/Media'
@@ -13,6 +16,12 @@ import { Posts } from './collections/Posts'
 import { Profiles } from './collections/Profiles'
 import { Users } from './collections/Users'
 import { sendgridAdapter } from './email/sendgrid'
+import {
+  appAccountDeleteEndpoint,
+  appChatMessagesEndpoint,
+  appChatSessionSummaryEndpoint,
+  appChatSessionsToSummarizeEndpoint,
+} from './endpoints/appChat'
 import { appClientsEndpoint } from './endpoints/appClients'
 import { appEventsEndpoint } from './endpoints/appEvents'
 import { healthEndpoint } from './endpoints/health'
@@ -74,6 +83,8 @@ export default buildConfig({
     Profiles,
     Clients,
     Events,
+    ChatSessions,
+    ChatMessages,
     ...vigorCollections,
   ],
   cors: allowedOrigins,
@@ -88,9 +99,19 @@ export default buildConfig({
   editor: lexicalEditor(),
   // Sends emails such as "forgot password" through SendGrid when SENDGRID_API_KEY is set
   email: sendgridAdapter(),
-  endpoints: [appClientsEndpoint, appEventsEndpoint, healthEndpoint],
+  endpoints: [
+    appAccountDeleteEndpoint,
+    appChatMessagesEndpoint,
+    appChatSessionSummaryEndpoint,
+    appChatSessionsToSummarizeEndpoint,
+    appClientsEndpoint,
+    appEventsEndpoint,
+    healthEndpoint,
+  ],
   globals: [...personalGlobals, ...vigorGlobals],
   // Only fields marked `localized: true` have a version per language; see src/locales.ts
+  // Lets MongoDB delete VgemsAI app chats after 90 days
+  onInit: ensureChatRetentionIndexes,
   localization: {
     defaultLocale: 'en',
     fallback: true,

@@ -151,6 +151,18 @@ export const Clients: CollectionConfig = {
       on: 'clients',
     },
     {
+      name: 'chatSessions',
+      type: 'join',
+      admin: {
+        defaultColumns: ['title', 'summary', 'messageCount', 'lastMessageAt'],
+        description: 'Their conversations in the VgemsAI app, newest first (kept 90 days).',
+      },
+      collection: 'chat-sessions',
+      defaultSort: '-lastMessageAt',
+      label: 'VgemsAI App Chats',
+      on: 'client',
+    },
+    {
       name: 'importance',
       type: 'select',
       admin: {

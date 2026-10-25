@@ -112,17 +112,17 @@ export type LexicalNodes_8909F562 =
   | SerializedListItemNode<LexicalNodes_8909F562>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_AC9F4BB7".
+ * via the `definition` "LexicalNodes_74DAFDD6".
  */
-export type LexicalNodes_AC9F4BB7 =
+export type LexicalNodes_74DAFDD6 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_AC9F4BB7>
+  | SerializedParagraphNode<LexicalNodes_74DAFDD6>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
   | SerializedUploadNode<'personal-photos'>
-  | SerializedQuoteNode<LexicalNodes_AC9F4BB7>
+  | SerializedQuoteNode<LexicalNodes_74DAFDD6>
   | SerializedRelationshipNode<
       | 'users'
       | 'posts'
@@ -132,6 +132,8 @@ export type LexicalNodes_AC9F4BB7 =
       | 'profiles'
       | 'clients'
       | 'events'
+      | 'chat-sessions'
+      | 'chat-messages'
       | 'vigor-products'
       | 'vigor-services'
       | 'vigor-news'
@@ -141,11 +143,11 @@ export type LexicalNodes_AC9F4BB7 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_AC9F4BB7, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_AC9F4BB7, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_AC9F4BB7>
-  | SerializedListItemNode<LexicalNodes_AC9F4BB7>
-  | SerializedHeadingNode<LexicalNodes_AC9F4BB7>;
+  | SerializedAutoLinkNode<LexicalNodes_74DAFDD6, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_74DAFDD6, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_74DAFDD6>
+  | SerializedListItemNode<LexicalNodes_74DAFDD6>
+  | SerializedHeadingNode<LexicalNodes_74DAFDD6>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_3DE324E4".
@@ -175,6 +177,8 @@ export interface Config {
     profiles: Profile;
     clients: Client;
     events: Event;
+    'chat-sessions': ChatSession;
+    'chat-messages': ChatMessage;
     'vigor-products': VigorProduct;
     'vigor-services': VigorService;
     'vigor-news': VigorNewsArticle;
@@ -191,6 +195,10 @@ export interface Config {
     };
     clients: {
       events: 'events';
+      chatSessions: 'chat-sessions';
+    };
+    'chat-sessions': {
+      messages: 'chat-messages';
     };
   };
   collectionsSelect: {
@@ -204,6 +212,8 @@ export interface Config {
     profiles: ProfilesSelect<false> | ProfilesSelect<true>;
     clients: ClientsSelect<false> | ClientsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
+    'chat-sessions': ChatSessionsSelect<false> | ChatSessionsSelect<true>;
+    'chat-messages': ChatMessagesSelect<false> | ChatMessagesSelect<true>;
     'vigor-products': VigorProductsSelect<false> | VigorProductsSelect<true>;
     'vigor-services': VigorServicesSelect<false> | VigorServicesSelect<true>;
     'vigor-news': VigorNewsSelect<false> | VigorNewsSelect<true>;
@@ -771,7 +781,7 @@ export interface Profile {
    */
   headline?: string | null;
   photo?: (string | null) | Media;
-  bio?: LexicalRichText<LexicalNodes_AC9F4BB7> | null;
+  bio?: LexicalRichText<LexicalNodes_74DAFDD6> | null;
   links?:
     | {
         platform: 'github' | 'linkedin' | 'youtube' | 'x' | 'website' | 'other';
@@ -880,6 +890,14 @@ export interface Client {
     totalDocs?: number;
   };
   /**
+   * Their conversations in the VgemsAI app, newest first (kept 90 days).
+   */
+  chatSessions?: {
+    docs?: (string | ChatSession)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
    * How important this client is to the business
    */
   importance?: ('5' | '4' | '3' | '2' | '1') | null;
@@ -962,6 +980,91 @@ export interface Event {
    * Brochures, floor plans, photos
    */
   attachments?: (string | Media)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Conversations in the VgemsAI app. Each is deleted 90 days after its last message.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chat-sessions".
+ */
+export interface ChatSession {
+  id: string;
+  /**
+   * The first question
+   */
+  title: string;
+  /**
+   * Written by the AI once the conversation has been quiet for 30 minutes
+   */
+  summary?: string | null;
+  topics?: string[] | null;
+  messages?: {
+    docs?: (string | ChatMessage)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Who asked: the client made from their app signup
+   */
+  client?: (string | null) | Client;
+  /**
+   * Their account ID in the app
+   */
+  appUserId: number;
+  messageCount?: number | null;
+  lastMessageAt?: string | null;
+  /**
+   * The AI model of the last answer
+   */
+  model?: string | null;
+  expiresAt?: string | null;
+  needsSummary?: boolean | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Every question and answer in the VgemsAI app, kept 90 days.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chat-messages".
+ */
+export interface ChatMessage {
+  id: string;
+  session: string | ChatSession;
+  role: 'user' | 'assistant';
+  text: string;
+  /**
+   * The AI declined to answer
+   */
+  refused?: boolean | null;
+  appUserId: number;
+  /**
+   * claude or openai
+   */
+  provider?: string | null;
+  model?: string | null;
+  inputTokens?: number | null;
+  outputTokens?: number | null;
+  durationMs?: number | null;
+  expiresAt?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -1184,6 +1287,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'events';
         value: string | Event;
+      } | null)
+    | ({
+        relationTo: 'chat-sessions';
+        value: string | ChatSession;
+      } | null)
+    | ({
+        relationTo: 'chat-messages';
+        value: string | ChatMessage;
       } | null)
     | ({
         relationTo: 'vigor-products';
@@ -1659,6 +1770,7 @@ export interface ClientsSelect<T extends boolean = true> {
   industry?: T;
   notes?: T;
   events?: T;
+  chatSessions?: T;
   importance?: T;
   status?: T;
   source?: T;
@@ -1698,6 +1810,48 @@ export interface EventsSelect<T extends boolean = true> {
   notes?: T;
   status?: T;
   attachments?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chat-sessions_select".
+ */
+export interface ChatSessionsSelect<T extends boolean = true> {
+  title?: T;
+  summary?: T;
+  topics?: T;
+  messages?: T;
+  client?: T;
+  appUserId?: T;
+  messageCount?: T;
+  lastMessageAt?: T;
+  model?: T;
+  expiresAt?: T;
+  needsSummary?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chat-messages_select".
+ */
+export interface ChatMessagesSelect<T extends boolean = true> {
+  session?: T;
+  role?: T;
+  text?: T;
+  refused?: T;
+  appUserId?: T;
+  provider?: T;
+  model?: T;
+  inputTokens?: T;
+  outputTokens?: T;
+  durationMs?: T;
+  expiresAt?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -3086,6 +3240,8 @@ export interface CollectionQueryWidget {
       | 'profiles'
       | 'clients'
       | 'events'
+      | 'chat-sessions'
+      | 'chat-messages'
       | 'vigor-products'
       | 'vigor-services'
       | 'vigor-news'
@@ -3123,6 +3279,8 @@ export interface ActivityWidget {
           | 'profiles'
           | 'clients'
           | 'events'
+          | 'chat-sessions'
+          | 'chat-messages'
           | 'vigor-products'
           | 'vigor-services'
           | 'vigor-news'
