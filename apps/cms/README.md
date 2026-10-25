@@ -37,7 +37,7 @@ uses to test templates.
 | `src/maps/`, `src/hooks/locateEvent.ts`    | Finds each event's coordinates in Apple Maps (see "Event locations")                   |
 | `scripts/locate-events.ts`                 | Looks up the coordinates of events saved earlier (see "Event locations")               |
 | `src/endpoints/appEvents.ts`               | Upcoming events for the VgemsAI app (see "The VgemsAI app")                            |
-| `src/endpoints/appClients.ts`              | Saves VgemsAI app signups as clients (see "The VgemsAI app")                           |
+| `src/endpoints/appClients.ts`              | VgemsAI app signups as clients, and their Account screen (see "The VgemsAI app")       |
 | `src/endpoints/appChat.ts`                 | Saves VgemsAI app chats, deletes app accounts' data (see "The VgemsAI app")            |
 | `src/collections/ChatSessions.ts`, `…/ChatMessages.ts` | VgemsAI app conversations, deleted after 90 days (see "Chats")             |
 | `src/vigor/`, `src/locales.ts`             | Content of the Vigor website in four languages (see "Vigor website")                   |
@@ -825,7 +825,12 @@ curl -X POST -H "X-API-Key: $APP_API_KEY" -H 'Content-Type: application/json' \
 ```
 
 Only `company`, `contactName`, `jobTitle`, `email`, `phone`, `website`, `address` (`street`, `city`, `state`,
-`postalCode`, `country`), `businessType` and `industry` are copied. The app picks the country from a list, so
+`postalCode`, `country`), `businessType` and `industry` are copied.
+
+People can see and change these details later in the app's Account screen, except the email. awoz-api reads them
+with `GET /api/app/clients/by-account/:appUserId` and saves changes with `PATCH` to the same path, which sets all
+of those fields at once (an empty one is cleared). Importance, notes, status, source and linked events are never
+sent to the app and never changed by it. The app picks the country from a list, so
 `country` is always its English name ("United States"); in the US and Canada `state` (the full name, e.g. "New
 York") and `postalCode` are always set, and the phone number starts with the country's calling code. Invalid values, such as an unknown business type, get
 `400` with `{"errors": [{"message": "…", "path": "businessType"}]}`.
