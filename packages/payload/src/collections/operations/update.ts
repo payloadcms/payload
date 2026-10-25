@@ -352,6 +352,33 @@ export const updateOperation = async <
           docShouldCommit = await initTransaction(req)
         }
 
+        if (config.localization && locale !== 'all') {
+          const allLocalesDoc = await getLatestCollectionVersion<
+            RequiredDataFromCollectionSlug<TSlug> & TypeWithID
+          >({
+            id,
+            config: collectionConfig,
+            payload,
+            query: {
+              collection: collectionConfig.slug,
+              locale: 'all',
+              req: documentReq,
+              where: appendNonTrashedFilter({
+                enableTrash: collectionConfig.trash,
+                trash,
+                where: { id: { equals: id } },
+              }),
+            },
+            req: documentReq,
+          })
+
+          if (!allLocalesDoc) {
+            throw new NotFound(req.t)
+          }
+
+          docWithLocales = allLocalesDoc
+        }
+
         const documentFile = req.file ? { ...req.file } : undefined
         if (collectionConfig.upload && documentFile?.tempFilePath) {
           const extension = path.extname(documentFile.tempFilePath)

@@ -1,6 +1,5 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { FindOneArgs } from '../../database/types.js'
 import type {
   PayloadRequest,
   PopulateType,
@@ -212,7 +211,7 @@ export const updateByIDOperation = async <
           collectionConfig.access.update,
         )
       : true
-    const hasWherePolicy = hasWhereAccessResult(accessResults)
+    let hasWherePolicy = hasWhereAccessResult(accessResults)
 
     // /////////////////////////////////////
     // Retrieve document
@@ -235,6 +234,9 @@ export const updateByIDOperation = async <
         { id, slug: collectionConfig.slug, data, req },
         collectionConfig.access.delete,
       )
+      if (hasWhereAccessResult(deleteAccessResult)) {
+        hasWherePolicy = true
+      }
       fullWhere = combineQueries(fullWhere, deleteAccessResult)
     }
 
@@ -245,31 +247,76 @@ export const updateByIDOperation = async <
       where: fullWhere,
     })
 
-    const findOneArgs: FindOneArgs = {
-      collection: collectionConfig.slug,
-      locale: locale!,
-      req,
-      where: fullWhere,
-    }
+    let docWithLocales: (RequiredDataFromCollectionSlug<TSlug> & TypeWithID) | undefined
 
-    let docWithLocales = await getLatestCollectionVersion<
-      RequiredDataFromCollectionSlug<TSlug> & TypeWithID
-    >({
-      id,
-      config: collectionConfig,
-      payload,
-      query: findOneArgs,
-      req,
-    })
+    if (hasWherePolicy) {
+      // Evaluate access using the request locale so localized predicates match accurately
+      const doc = await getLatestCollectionVersion<
+        RequiredDataFromCollectionSlug<TSlug> & TypeWithID
+      >({
+        id,
+        config: collectionConfig,
+        payload,
+        query: {
+          collection: collectionConfig.slug,
+          locale: locale!,
+          req,
+          where: fullWhere,
+        },
+        req,
+      })
 
-    if (!docWithLocales && !hasWherePolicy) {
-      throw new NotFound(req.t)
-    }
-    if (!docWithLocales && hasWherePolicy) {
-      throw new Forbidden(req.t)
-    }
-    if (!docWithLocales) {
-      throw new NotFound(req.t)
+      if (!doc) {
+        throw new Forbidden(req.t)
+      }
+
+      // Fetch all locales using non-localized ID & trash filters so unflattenLocales preserves other translations
+      if (config.localization && locale !== 'all') {
+        docWithLocales = await getLatestCollectionVersion<
+          RequiredDataFromCollectionSlug<TSlug> & TypeWithID
+        >({
+          id,
+          config: collectionConfig,
+          payload,
+          query: {
+            collection: collectionConfig.slug,
+            locale: 'all',
+            req,
+            where: appendNonTrashedFilter({
+              enableTrash: collectionConfig.trash,
+              trash,
+              where: { id: { equals: id } },
+            }),
+          },
+          req,
+        })
+
+        if (!docWithLocales) {
+          throw new NotFound(req.t)
+        }
+      } else {
+        docWithLocales = doc
+      }
+    } else {
+      // Direct single query when no where access policy exists
+      docWithLocales = await getLatestCollectionVersion<
+        RequiredDataFromCollectionSlug<TSlug> & TypeWithID
+      >({
+        id,
+        config: collectionConfig,
+        payload,
+        query: {
+          collection: collectionConfig.slug,
+          locale: config.localization ? 'all' : locale!,
+          req,
+          where: fullWhere,
+        },
+        req,
+      })
+
+      if (!docWithLocales) {
+        throw new NotFound(req.t)
+      }
     }
 
     const storedDocWithLocales = docWithLocales

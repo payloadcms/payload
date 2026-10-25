@@ -196,7 +196,11 @@ export const updateDocument = async <
   // Deleting it during the update would break the published document's file even though no publish
   // is happening. Only skip deletion in this case; when the latest version is already a
   // draft, it is safe to delete the old draft file as it is being replaced.
-  const isDraftOverPublished = isSavingDraft && docWithLocales._status === 'published'
+  const docStatus =
+    typeof docWithLocales._status === 'object' && docWithLocales._status !== null
+      ? (docWithLocales._status as Record<string, unknown>)?.[locale]
+      : docWithLocales._status
+  const isDraftOverPublished = isSavingDraft && docStatus === 'published'
 
   const hasManagedLocalUpload =
     filesToUpload.length > 0 &&
