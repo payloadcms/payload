@@ -5,6 +5,7 @@ import { loggedIn } from '../access/loggedIn'
 /**
  * Client records: contact details, type of business and how important the client is.
  * Internal only: every operation, including reading, requires a logged-in user.
+ * People who sign up in the VgemsAI app are added as leads by POST /api/app/clients (src/endpoints/appClients.ts).
  */
 export const Clients: CollectionConfig = {
   slug: 'clients',
@@ -170,6 +171,17 @@ export const Clients: CollectionConfig = {
         description: 'How you found them, e.g. a referral or an event',
         position: 'sidebar',
       },
+    },
+    {
+      name: 'appUserId',
+      type: 'number',
+      admin: {
+        description: 'Signed up in the VgemsAI app: the ID of their account there. Set by the app.',
+        position: 'sidebar',
+        readOnly: true,
+      },
+      index: true,
+      label: 'VgemsAI App Account',
     },
   ],
 }

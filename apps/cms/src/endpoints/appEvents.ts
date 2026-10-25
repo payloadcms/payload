@@ -1,8 +1,8 @@
 import type { Endpoint, Where } from 'payload'
 
-import crypto from 'node:crypto'
-
 import type { Event } from '../payload-types'
+
+import { refuseWithoutAppApiKey } from './appApiKey'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -10,9 +10,8 @@ const DAY_MS = 24 * 60 * 60 * 1000
  * `GET /api/app/events` - upcoming events from the private Events collection (under "Business") for
  * the VgemsAI app's backend (awoz-api), which passes them on to the app.
  *
- * Server to server only: the caller sends `X-API-Key: <APP_API_KEY>`. While APP_API_KEY is empty the
- * endpoint answers 404, as if it didn't exist. It uses an API key instead of a login because every
- * login must pass two-factor (src/proxy.ts), which a server can't do.
+ * Server to server only: the caller sends `X-API-Key: <APP_API_KEY>` (see ./appApiKey.ts). While
+ * APP_API_KEY is empty the endpoint answers 404, as if it didn't exist.
  *
  * Only fields that are safe to show app users leave the CMS: never clients, notes or attachments.
  * `location.coordinates` is `{ latitude, longitude, precision }` once the event's place was found
@@ -24,14 +23,10 @@ const DAY_MS = 24 * 60 * 60 * 1000
  */
 export const appEventsEndpoint: Endpoint = {
   handler: async (req) => {
-    const apiKey = process.env.APP_API_KEY
+    const refused = refuseWithoutAppApiKey(req)
 
-    if (!apiKey) {
-      return Response.json({ errors: [{ message: 'Not Found' }] }, { status: 404 })
-    }
-
-    if (!isSameSecret(req.headers.get('x-api-key') ?? '', apiKey)) {
-      return Response.json({ errors: [{ message: 'Invalid API key.' }] }, { status: 401 })
+    if (refused) {
+      return refused
     }
 
     const now = new Date()
@@ -128,10 +123,3 @@ const isOver = ({ event, now }: { event: Partial<Event>; now: Date }) => {
 
   return end < now
 }
-
-/** Constant-time comparison; hashing first makes both sides the same length */
-const isSameSecret = (given: string, expected: string) =>
-  crypto.timingSafeEqual(
-    crypto.createHash('sha256').update(given).digest(),
-    crypto.createHash('sha256').update(expected).digest(),
-  )

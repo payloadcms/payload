@@ -886,6 +886,10 @@ export interface Client {
    * How you found them, e.g. a referral or an event
    */
   source?: string | null;
+  /**
+   * Signed up in the VgemsAI app: the ID of their account there. Set by the app.
+   */
+  appUserId?: number | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -1654,6 +1658,7 @@ export interface ClientsSelect<T extends boolean = true> {
   importance?: T;
   status?: T;
   source?: T;
+  appUserId?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
