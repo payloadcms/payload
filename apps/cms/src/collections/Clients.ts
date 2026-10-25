@@ -89,6 +89,21 @@ export const Clients: CollectionConfig = {
               type: 'text',
             },
             {
+              name: 'state',
+              type: 'text',
+              label: 'State / Province',
+            },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'postalCode',
+              type: 'text',
+              label: 'ZIP / Postal Code',
+            },
+            {
               name: 'country',
               type: 'text',
             },
