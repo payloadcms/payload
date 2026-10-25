@@ -171,6 +171,7 @@ export const validateSettlement = ({
     throw new Error('Stripe currency does not match the transaction currency')
   }
 
+  // Called only to throw on missing or malformed transaction items, the result is not needed.
   normalizeCartItems(transaction.items)
 
   if (paymentIntent.status !== 'succeeded') {
