@@ -38,6 +38,8 @@ uses to test templates.
 | `scripts/locate-events.ts`                 | Looks up the coordinates of events saved earlier (see "Event locations")               |
 | `src/endpoints/appEvents.ts`               | Upcoming events for the VgemsAI app (see "The VgemsAI app")                            |
 | `src/endpoints/appClients.ts`              | Saves VgemsAI app signups as clients (see "The VgemsAI app")                           |
+| `src/endpoints/appChat.ts`                 | Saves VgemsAI app chats, deletes app accounts' data (see "The VgemsAI app")            |
+| `src/collections/ChatSessions.ts`, `…/ChatMessages.ts` | VgemsAI app conversations, deleted after 90 days (see "Chats")             |
 | `src/vigor/`, `src/locales.ts`             | Content of the Vigor website in four languages (see "Vigor website")                   |
 | `scripts/import-vigor.ts`                  | Copies the Vigor website's current content into the CMS (see "Vigor website")          |
 | `src/timezones.ts`                         | Time zones offered for event dates                                                     |
@@ -781,8 +783,8 @@ Locally, run `pnpm payload run scripts/locate-events.ts [--dry-run] [--all]` in 
 ### The VgemsAI app
 
 The VgemsAI app talks to the CMS through its own backend, awoz-api, which reads upcoming events from
-`GET /api/app/events` and saves every signup as a client with `POST /api/app/clients`. A server can't pass
-two-factor, so instead of logging in it sends a shared key:
+`GET /api/app/events`, saves every signup as a client with `POST /api/app/clients`, and keeps the app's chats
+(see "Chats" below). A server can't pass two-factor, so instead of logging in it sends a shared key:
 
 ```bash
 curl -H "X-API-Key: $APP_API_KEY" https://cms.example.com/api/app/events
@@ -791,7 +793,7 @@ curl -H "X-API-Key: $APP_API_KEY" https://cms.example.com/api/app/events
 1. Generate a key with `openssl rand -hex 32`.
 2. Set it as `APP_API_KEY` in this server's `.env` and as `PAYLOAD_API_KEY` on awoz-api, then redeploy both.
 
-A wrong or missing key gets `401`; while `APP_API_KEY` is empty both endpoints return `404`.
+A wrong or missing key gets `401`; while `APP_API_KEY` is empty every `/api/app/...` endpoint returns `404`.
 
 #### Events
 
@@ -827,6 +829,31 @@ Only `company`, `contactName`, `jobTitle`, `email`, `phone`, `website`, `address
 `country` is always its English name ("United States"); in the US and Canada `state` (the full name, e.g. "New
 York") and `postalCode` are always set, and the phone number starts with the country's calling code. Invalid values, such as an unknown business type, get
 `400` with `{"errors": [{"message": "…", "path": "businessType"}]}`.
+
+#### Chats
+
+Every question asked in the app's chat, and every answer, is kept under **VgemsAI App**:
+
+- **Chat Sessions**: one per conversation, titled with its first question, with the client who asked, the number of
+  messages, the time of the last one and the AI model. Once a conversation has been quiet for 30 minutes,
+  awoz-api has the AI write a **summary and topics** for the sales team. Each client's page lists their sessions
+  under **VgemsAI App Chats**, newest first: together they show what the person asks about over time.
+- **Chat Messages**: every question and answer, with the model, tokens and answer time, and whether the AI declined.
+
+Both are read-only in the admin panel (the app writes them), and can be deleted. **MongoDB deletes each message 90
+days after it was sent, and each session 90 days after its last message** (a TTL index on `expiresAt`, created when
+the CMS starts; MongoDB checks about once a minute). To keep chats longer or shorter, change
+`CHAT_RETENTION_DAYS` in `src/collections/chatRetention.ts`; it applies to messages saved from then on.
+
+awoz-api uses these endpoints (`src/endpoints/appChat.ts`); it decides who is asking from the app login, and a
+session only ever answers to the account that started it:
+
+| Endpoint | What it does |
+| --- | --- |
+| `POST /api/app/chat-messages` | Saves a question (starting a session when there's none) or an answer; a question returns the session's last 50 messages |
+| `GET /api/app/chat-sessions/to-summarize` | Sessions quiet for 30 minutes whose summary is missing or older than their last message |
+| `POST /api/app/chat-sessions/:id/summary` | Saves the AI's summary and topics |
+| `POST /api/app/accounts/delete` | When someone deletes their app account: deletes their chats, and their client while it's still an untouched app lead (status Lead, source "VgemsAI app"); otherwise the client stays, unlinked, with a note |
 
 ## Two-factor authentication
 
