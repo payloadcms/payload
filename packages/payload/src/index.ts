@@ -1250,6 +1250,11 @@ type CachedPayload = {
   payload: null | Payload
   promise: null | Promise<Payload>
   reload: boolean | Promise<void>
+  /**
+   * Set when a change is reported while a reload is in progress. That reload may already
+   * have read the previous config, so another reload runs on the next `getPayload` call.
+   */
+  reloadQueued: boolean
 }
 
 let _cached: Map<string, CachedPayload> = (global as any)._payload
@@ -1313,6 +1318,7 @@ function connectDevReload({
   try {
     cached.devReloadCleanup = strategy.connect(() => {
       if (cached.reload instanceof Promise) {
+        cached.reloadQueued = true
         return
       }
       cached.reload = true
@@ -1366,6 +1372,7 @@ export const getPayload = async (
       payload: null,
       promise: null,
       reload: false,
+      reloadQueued: false,
     }
     _cached.set(options.key ?? 'default', cached)
   } else {
@@ -1394,6 +1401,7 @@ export const getPayload = async (
       // we can ensure that all subsequent calls will wait for the first reload to finish. So if we set it here, the 2nd call of getPayload
       // will reach `if (cached.reload instanceof Promise) {` which then waits for the first reload to finish.
       cached.reload = new Promise((res) => (resolve = res))
+      cached.reloadQueued = false
       const config = await options.config
 
       // Reload the payload instance after a config change (triggered by HMR in development).
@@ -1408,8 +1416,9 @@ export const getPayload = async (
       // By always regenerating on reload, we ensure the import map stays in sync with the updated config.
       await reload(config, cached.payload, false, options)
 
+      cached.reload = cached.reloadQueued
+      cached.reloadQueued = false
       resolve()
-      cached.reload = false
     }
 
     if (cached.reload instanceof Promise) {
