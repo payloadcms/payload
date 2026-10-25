@@ -304,11 +304,12 @@ export type MCPPluginConfig = {
      */
     authorizationServers: ((args: { req: PayloadRequest }) => MaybePromise<string[]>) | string[]
     /**
-     * The URL clients call to reach the MCP endpoint.
+     * The URL clients call to reach the MCP endpoint. The metadata link is based on it. Pass a
+     * function when it depends on the request, e.g. on a host header your proxy sets.
      *
      * @default the absolute URL of `/api/mcp`, based on `serverURL` or the request URL
      */
-    resource?: string
+    resource?: ((args: { req: PayloadRequest }) => string) | string
     /**
      * Scopes MCP clients should request, e.g. `['openid', 'email', 'profile']`. Without them,
      * clients request none, which some authorization servers reject or answer with a token that
