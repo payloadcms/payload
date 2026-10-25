@@ -13,7 +13,7 @@ import type { MCPBuiltinOAuthConfig, MCPOAuthTokens } from '../types.js'
 
 import { getPluginConfig } from '../utils/getPluginConfig.js'
 import { seal, unseal } from '../utils/seal.js'
-import { getMCPURL } from './oauth.js'
+import { getMCPResource } from './oauth.js'
 import { issueLoginToken, refreshLoginToken } from './oauthLoginToken.js'
 
 type Client = { name: string; redirectURIs: string[] }
@@ -90,7 +90,7 @@ export const oauthServerEndpoints: Endpoint[] = [
 /** The authorization server URL, or `undefined` when Payload isn't the authorization server. */
 const getIssuer = (req: PayloadRequest): string | undefined =>
   getPluginConfig({ config: req.payload.config }).oauth?.type === 'builtin'
-    ? `${getMCPURL({ config: req.payload.config, url: req.url! })}/oauth`
+    ? `${getMCPResource({ req })}/oauth`
     : undefined
 
 const withIssuer = (

@@ -381,8 +381,8 @@ type MCPOAuthSharedConfig = {
     token: string
   }) => MaybePromise<PayloadRequest['user']>
   /**
-   * The URL clients call to reach the MCP endpoint. The metadata link is based on it. Pass a
-   * function when it depends on the request, e.g. on a host header your proxy sets.
+   * The URL clients call to reach the MCP endpoint. The metadata link and the built-in
+   * authorization server's issuer are based on it.
    *
    * @default the absolute URL of `/api/mcp`, based on `serverURL` or the request URL
    */

@@ -4507,6 +4507,27 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
       }
     })
 
+    test("should base the login server's issuer on oauth.resource", async ({
+      payload,
+      restClient,
+    }) => {
+      enableOAuth(payload, {
+        type: 'builtin',
+        resource: ({ req }) => `https://${req.headers.get('x-forwarded-host')}/api/mcp`,
+      })
+      const headers = { 'X-Forwarded-Host': 'mcp.example.com' }
+
+      const metadata = await restClient
+        .GET('/mcp/oauth-protected-resource', { auth: false, headers })
+        .then((res) => res.json())
+      const discovery = await restClient
+        .GET('/mcp/oauth/.well-known/openid-configuration', { auth: false, headers })
+        .then((res) => res.json())
+
+      expect(metadata.authorization_servers).toEqual(['https://mcp.example.com/api/mcp/oauth'])
+      expect(discovery.issuer).toBe('https://mcp.example.com/api/mcp/oauth')
+    })
+
     test('should send users who are not logged in to the admin login', async ({
       payload,
       restClient,
