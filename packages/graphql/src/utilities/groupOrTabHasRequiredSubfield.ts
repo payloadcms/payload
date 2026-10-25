@@ -20,7 +20,15 @@ export const groupOrTabHasRequiredSubfield = (entity: Field | Tab): boolean => {
   }
 
   if ('fields' in entity && 'name' in entity) {
-    return (entity as Tab).fields.some((subField) => groupOrTabHasRequiredSubfield(subField))
+    return (entity as Tab).fields.some((subField) => {
+      return (
+        (fieldAffectsData(subField) &&
+          !subField.hidden &&
+          'required' in subField &&
+          subField.required) ||
+        groupOrTabHasRequiredSubfield(subField)
+      )
+    })
   }
 
   return false

@@ -336,7 +336,7 @@ export function buildMutationInputType({
       return field.tabs.reduce((acc, tab) => {
         if (tabHasName(tab)) {
           const fullName = combineParentName(parentName, toWords(tab.name, true))
-          const requiresAtLeastOneField = groupOrTabHasRequiredSubfield(field)
+          const requiresAtLeastOneField = groupOrTabHasRequiredSubfield(tab)
           let type: GraphQLType = buildMutationInputType({
             name: fullName,
             config,
