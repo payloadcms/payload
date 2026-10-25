@@ -347,7 +347,20 @@ export const Route = createFileRoute('/.well-known/oauth-protected-resource/$')(
 ```
 
 Set `serverURL` in your [Payload config](../configuration/overview), so the
-URLs in the OAuth metadata don't come from each request's address.
+URLs in the OAuth metadata don't come from each request's address. If the address
+depends on the request, for example behind a proxy that sets the public host in a
+header, pass `oauth.resource` a function instead. The metadata link is based on it:
+
+```ts
+mcpPlugin({
+  oauth: {
+    authorizationServers: ['https://auth.example.com'],
+    // Only trust a header your proxy always sets, since clients can send their own
+    resource: ({ req }) =>
+      `https://${req.headers.get('x-forwarded-host')}/api/mcp`,
+  },
+})
+```
 
 ### Custom auth
 

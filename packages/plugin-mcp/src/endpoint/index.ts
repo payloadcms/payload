@@ -20,7 +20,7 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
 
   req.payloadAPI = 'MCP' as const
   // Lets auth strategies check that an OAuth access token was issued for this MCP server
-  req.context.mcp = { resource: getMCPResource({ config: req.payload.config, url: req.url }) }
+  req.context.mcp = { resource: getMCPResource({ req }) }
 
   const pluginConfig = getPluginConfig({ config: req.payload.config })
   const overrideAccessParam = new URL(req.url).searchParams.get('overrideAccess')

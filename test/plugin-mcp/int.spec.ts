@@ -433,6 +433,30 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         expect(challenge.headers.get('WWW-Authenticate')).toContain('scope="openid email"')
         expect(metadata.scopes_supported).toEqual(['openid', 'email'])
       })
+      it('should base the metadata on oauth.resource when it is a function', async ({
+        payload,
+        restClient,
+      }) => {
+        enableOAuth(payload, {
+          resource: ({ req }: { req: PayloadRequest }) =>
+            `https://${req.headers.get('x-forwarded-host')}/api/mcp`,
+        })
+        const headers = { 'X-Forwarded-Host': 'mcp.example.com' }
+
+        const challenge = await restClient.POST('/mcp', {
+          auth: false,
+          body: JSON.stringify({ id: 1, jsonrpc: '2.0', method: 'tools/list', params: {} }),
+          headers: { ...headers, Accept: 'application/json, text/event-stream' },
+        })
+        const metadata = await restClient
+          .GET('/mcp/oauth-protected-resource', { auth: false, headers })
+          .then((res) => res.json())
+
+        expect(challenge.headers.get('WWW-Authenticate')).toContain(
+          'resource_metadata="https://mcp.example.com/api/mcp/oauth-protected-resource"',
+        )
+        expect(metadata.resource).toBe('https://mcp.example.com/api/mcp')
+      })
       it('should tell auth strategies which address MCP access tokens are for', async ({
         getApiKey,
         mcp,
