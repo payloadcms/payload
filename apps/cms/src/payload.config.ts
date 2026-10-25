@@ -22,7 +22,11 @@ import {
   appChatSessionSummaryEndpoint,
   appChatSessionsToSummarizeEndpoint,
 } from './endpoints/appChat'
-import { appClientsEndpoint } from './endpoints/appClients'
+import {
+  appClientByAccountEndpoint,
+  appClientsEndpoint,
+  appClientUpdateEndpoint,
+} from './endpoints/appClients'
 import { appEventsEndpoint } from './endpoints/appEvents'
 import { healthEndpoint } from './endpoints/health'
 import { locales } from './locales'
@@ -104,7 +108,9 @@ export default buildConfig({
     appChatMessagesEndpoint,
     appChatSessionSummaryEndpoint,
     appChatSessionsToSummarizeEndpoint,
+    appClientByAccountEndpoint,
     appClientsEndpoint,
+    appClientUpdateEndpoint,
     appEventsEndpoint,
     healthEndpoint,
   ],
