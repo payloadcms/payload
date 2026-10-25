@@ -32,6 +32,7 @@ import {
   apiKeysSlug,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
+  passwordBooleanValidateSlug,
   passwordCustomValidateSlug,
   passwordMinLengthSlug,
   preferencesSlug,
@@ -2545,7 +2546,11 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const userEmail = 'password-override@payloadcms.com'
 
       test.afterEach(async ({ payload }) => {
-        for (const collection of [passwordMinLengthSlug, passwordCustomValidateSlug] as const) {
+        for (const collection of [
+          passwordMinLengthSlug,
+          passwordCustomValidateSlug,
+          passwordBooleanValidateSlug,
+        ] as const) {
           await payload.delete({
             collection,
             overrideAccess: true,
@@ -2597,6 +2602,31 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           payload.resetPassword({
             collection: passwordCustomValidateSlug,
             data: { password: 'nonumber', token },
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow('The following field is invalid: password')
+      })
+
+      test('should reject a new password when the field custom validate returns false', async ({
+        payload,
+      }) => {
+        await payload.create({
+          collection: passwordBooleanValidateSlug,
+          data: { email: userEmail, password: 'initial-password-1' },
+          overrideAccess: true,
+        })
+
+        const token = await payload.forgotPassword({
+          collection: passwordBooleanValidateSlug,
+          data: { email: userEmail },
+          disableEmail: true,
+          overrideAccess: true,
+        })
+
+        await expect(
+          payload.resetPassword({
+            collection: passwordBooleanValidateSlug,
+            data: { password: 'rejected-password', token },
             overrideAccess: true,
           }),
         ).rejects.toThrow('The following field is invalid: password')

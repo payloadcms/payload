@@ -324,10 +324,15 @@ async function validatePasswordField({
     siblingData: dataToValidate,
   })
 
-  if (typeof validationResult === 'string') {
+  if (typeof validationResult === 'string' || validationResult === false) {
     throw new ValidationError({
       collection: collectionConfig.slug,
-      errors: [{ message: validationResult, path: 'password' }],
+      errors: [
+        {
+          message: typeof validationResult === 'string' ? validationResult : 'Password is invalid',
+          path: 'password',
+        },
+      ],
     })
   }
 }

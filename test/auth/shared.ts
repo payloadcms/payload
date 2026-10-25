@@ -10,6 +10,8 @@ export const passwordMinLengthSlug = 'password-min-length'
 
 export const passwordCustomValidateSlug = 'password-custom-validate'
 
+export const passwordBooleanValidateSlug = 'password-boolean-validate'
+
 export const rotateSecretSlug = 'rotate-secret'
 
 export const rotateSecretLoginSlug = 'rotate-secret-login'

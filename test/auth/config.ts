@@ -12,6 +12,7 @@ import {
   BASE_PATH,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
+  passwordBooleanValidateSlug,
   passwordCustomValidateSlug,
   passwordMinLengthSlug,
   publicUsersSlug,
@@ -327,6 +328,19 @@ export default buildConfigWithDefaults({
             hidden: true,
             validate: (value: null | string | undefined) =>
               !value || /\d/.test(value) || 'Password must contain a number',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: passwordBooleanValidateSlug,
+        auth: true,
+        fields: [
+          {
+            name: 'password',
+            type: 'text',
+            hidden: true,
+            validate: (value: null | string | undefined) => value === 'initial-password-1',
           },
         ],
         versions: false,
