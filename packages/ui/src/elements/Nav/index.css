@@ -26,7 +26,13 @@
     align-items: center;
     background: none;
     border: 0;
+    border-radius: var(--button-radius);
     outline: 0;
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+    }
   }
 
   .nav__scroll {

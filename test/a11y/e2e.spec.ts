@@ -1,3 +1,5 @@
+import type { Locator } from '@playwright/test'
+
 import { expect, test } from '@playwright/test'
 import { randomUUID } from 'node:crypto'
 import { fileURLToPath } from 'node:url'
@@ -134,9 +136,11 @@ test.describe('Admin accessibility', () => {
 
       await tabToWorkflowControl({ control: navigation.getByRole('tab', { selected: true }), page })
       await arrowToWorkflowItem({ item: folders, key: 'ArrowRight', page })
+      await expectSidebarTabFocus({ tab: folders })
       await page.keyboard.press('Enter')
       await expect(folders).toHaveAttribute('aria-selected', 'true')
       await arrowToWorkflowItem({ item: collections, key: 'ArrowLeft', page })
+      await expectSidebarTabFocus({ tab: collections })
       await page.keyboard.press('Enter')
       await expect(collections).toHaveAttribute('aria-selected', 'true')
       const posts = page.locator('#nav-posts')
@@ -1380,6 +1384,19 @@ test.describe('Admin accessibility', () => {
         const close = page.getByRole('button', { name: 'Hide sidebar', exact: true })
 
         await tabToWorkflowControl({ control: close, page })
+        await page.keyboard.press('Tab')
+        const unfocusedStyle = await getFocusIndicatorStyle(close)
+
+        await page.keyboard.press('Shift+Tab')
+        await expect(close).toBeFocused()
+        await expect
+          .poll(async () =>
+            hasRenderedFocusIndicator({
+              focusedStyle: await getFocusIndicatorStyle(close),
+              unfocusedStyle,
+            }),
+          )
+          .toBe(true)
         // Let the final preference write commit before teardown deletes its owner.
         const savedNavigation = page.waitForResponse(
           (response) =>
@@ -1465,3 +1482,31 @@ test.describe('Admin accessibility', () => {
     })
   })
 })
+
+async function expectSidebarTabFocus({ tab }: { tab: Locator }) {
+  await expect(tab).toBeFocused()
+  await expect
+    .poll(async () => {
+      const style = await getFocusIndicatorStyle(tab)
+
+      if (style.outlineStyle === 'none' || !isPaintedColor(style.outlineColor)) {
+        return false
+      }
+      return tab.evaluate((element) => {
+        const style = getComputedStyle(element)
+        const width = Number.parseFloat(style.outlineWidth)
+        const extent = Math.max(0, width + Number.parseFloat(style.outlineOffset))
+        const bounds = element.getBoundingClientRect()
+        const strip = element.closest('.sidebar-tabs__tabs')!.getBoundingClientRect()
+
+        return (
+          width > 0 &&
+          bounds.left - extent >= strip.left &&
+          bounds.right + extent <= strip.right &&
+          bounds.top - extent >= strip.top &&
+          bounds.bottom + extent <= strip.bottom
+        )
+      })
+    })
+    .toBe(true)
+}
