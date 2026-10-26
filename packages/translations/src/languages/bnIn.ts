@@ -100,13 +100,11 @@ export const bnInTranslations: DefaultTranslationsObject = {
     changedDocuments: 'পরিবর্তিত ডকুমেন্ট',
     changesTo: '{{summary}}-এ পরিবর্তন',
     closeBranchAfterMerge: 'মার্জ করার পর এই ব্রাঞ্চটি বন্ধ করুন',
-    closeBranchHelpOff:
-      'ব্রাঞ্চটি খোলা থাকবে, তাই আপনি এতে কাজ চালিয়ে যেতে এবং পরে আবার মার্জ করতে পারবেন।',
+    closeBranchHelpOff: 'ব্রাঞ্চটি খোলা থাকবে, তাই আপনি এতে কাজ চালিয়ে যেতে এবং পরে আবার মার্জ করতে পারবেন।',
     closeBranchHelpOn: 'ব্রাঞ্চটি শুধু-পঠনযোগ্য হয়ে যাবে এবং আর মার্জ করা যাবে না।',
     confirmDiscardAll:
       'এই ব্রাঞ্চের সব {{count}}টি পরিবর্তিত ডকুমেন্ট main-এর অবস্থায় ফিরে যাবে। এটি ফেরানো যাবে না।',
-    confirmDiscardSelected:
-      '{{count}}টি পরিবর্তিত ডকুমেন্ট main-এর অবস্থায় ফিরে যাবে। এটি ফেরানো যাবে না।',
+    confirmDiscardSelected: '{{count}}টি পরিবর্তিত ডকুমেন্ট main-এর অবস্থায় ফিরে যাবে। এটি ফেরানো যাবে না।',
     createAndSwitch: 'তৈরি করে স্যুইচ করুন',
     createNewBranch: 'নতুন ব্রাঞ্চ তৈরি করুন',
     currentChanges: 'বর্তমান পরিবর্তন',
@@ -152,11 +150,9 @@ export const bnInTranslations: DefaultTranslationsObject = {
     scheduledMerges: 'সময়সূচি করা মার্জ',
     scheduledToMerge: 'মার্জের সময়সূচি করা',
     scheduledToMergeOn: 'এই ব্রাঞ্চটি {{date}}-এ মার্জ করার সময়সূচি করা হয়েছে।',
-    scheduleHasNothingLeft:
-      'প্রয়োগ করার কিছু বাকি নেই — এই পরিবর্তনগুলি বাতিল বা ইতিমধ্যে মার্জ করা হয়েছে।',
+    scheduleHasNothingLeft: 'প্রয়োগ করার কিছু বাকি নেই — এই পরিবর্তনগুলি বাতিল বা ইতিমধ্যে মার্জ করা হয়েছে।',
     scheduleMerge: 'মার্জ সময়সূচি করুন',
-    scheduleMergeHelp:
-      'আপনি যে সময় বেছে নেবেন তখনই মার্জ চলবে, এবং তখন আপনার অনুমতি আবার যাচাই করা হবে।',
+    scheduleMergeHelp: 'আপনি যে সময় বেছে নেবেন তখনই মার্জ চলবে, এবং তখন আপনার অনুমতি আবার যাচাই করা হবে।',
     scheduleWillApplyAll: 'অপেক্ষমাণ সবকিছু প্রয়োগ করবে ({{count}})',
     scheduleWillApplySelected: 'নির্বাচিত {{count}}টি পরিবর্তন প্রয়োগ করবে',
     scheduling: 'সময়সূচি করা হচ্ছে…',

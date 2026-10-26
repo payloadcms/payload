@@ -11803,7 +11803,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           const conditions = (args.where as { and?: Record<string, unknown>[] } | undefined)?.and
           const isRetryRevalidation = Boolean(
             conditions?.some((condition) => '_branchDocID' in condition) &&
-              conditions.some((condition) => 'id' in condition),
+            conditions.some((condition) => 'id' in condition),
           )
 
           if (isRetryRevalidation && !didReachRetryRevalidation) {

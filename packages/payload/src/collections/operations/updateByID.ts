@@ -182,10 +182,10 @@ const updateByIDOperationWithLifecycle = async <
   const pristineData = deepCopyObjectSimple(incomingArgs.data)
   const shouldIsolateTempFile = Boolean(
     !hasCallerTransaction &&
-      incomingArgs.req.file?.tempFilePath &&
-      (incomingArgs.req.payload.config.upload?.useTempFiles ||
-        incomingArgs.req.file.uploadReference ||
-        incomingArgs.req.context?._payloadClientUploadTempFile),
+    incomingArgs.req.file?.tempFilePath &&
+    (incomingArgs.req.payload.config.upload?.useTempFiles ||
+      incomingArgs.req.file.uploadReference ||
+      incomingArgs.req.context?._payloadClientUploadTempFile),
   )
   let didOwnAttemptTransaction = false
   let didReachFinalCommit = false

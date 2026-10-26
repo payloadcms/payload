@@ -98,16 +98,16 @@ const findRetryableCleanupCandidates = async ({
     for (const change of event.changes ?? []) {
       const canRetryCollection = Boolean(
         change.collectionSlug &&
-          change.sourceID &&
-          change.sourceUpdatedAt &&
-          change.operation !== 'create',
+        change.sourceID &&
+        change.sourceUpdatedAt &&
+        change.operation !== 'create',
       )
       const canRetryGlobal = Boolean(change.globalSlug && change.sourceRevision)
       const canRetryCreatedCollection = Boolean(
         change.collectionSlug &&
-          change.operation === 'create' &&
-          change.sourceID &&
-          change.sourceVersionIDs,
+        change.operation === 'create' &&
+        change.sourceID &&
+        change.sourceVersionIDs,
       )
 
       if (
@@ -214,9 +214,9 @@ export const retryFailedCleanups = async ({
     const canRetryGlobal = Boolean(change.globalSlug && change.sourceRevision)
     const canRetryCreatedCollection = Boolean(
       change.collectionSlug &&
-        change.operation === 'create' &&
-        change.sourceID &&
-        change.sourceVersionIDs,
+      change.operation === 'create' &&
+      change.sourceID &&
+      change.sourceVersionIDs,
     )
 
     event.changes = updateMergeEventChange({
@@ -302,9 +302,9 @@ export const retryFailedCleanups = async ({
 
         isSuperseded = Boolean(
           source &&
-            currentSourceUpdatedAt !== undefined &&
-            mergedSourceUpdatedAt !== undefined &&
-            currentSourceUpdatedAt !== mergedSourceUpdatedAt,
+          currentSourceUpdatedAt !== undefined &&
+          mergedSourceUpdatedAt !== undefined &&
+          currentSourceUpdatedAt !== mergedSourceUpdatedAt,
         )
 
         if (!isSuperseded && source) {

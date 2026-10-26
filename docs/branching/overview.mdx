@@ -127,12 +127,12 @@ If a branch has no replacement for a document, reads inherit the current documen
 
 A branch can have one of four statuses:
 
-| Status | Meaning |
-| --- | --- |
-| `open` | Accepts content changes and merges. |
-| `merging` | A merge is in progress; content writes are temporarily blocked. |
-| `merged` | All pending changes have been merged. New content changes reopen the branch. |
-| `closed` | Terminal: further content changes and merges are blocked. |
+| Status    | Meaning                                                                      |
+| --------- | ---------------------------------------------------------------------------- |
+| `open`    | Accepts content changes and merges.                                          |
+| `merging` | A merge is in progress; content writes are temporarily blocked.              |
+| `merged`  | All pending changes have been merged. New content changes reopen the branch. |
+| `closed`  | Terminal: further content changes and merges are blocked.                    |
 
 Merging keeps the branch available by default. Pass `closeBranch: true` to close it once all pending work has been merged. If changes remain, the branch stays open. Branch records remain available after merging or closing; they are not automatically deleted.
 
@@ -230,10 +230,10 @@ For collections and globals with drafts enabled, merging preserves whether the l
 
 For example, if a document on `main` has the published title “Original”:
 
-| Latest branch state | Result on `main` after merge |
-| --- | --- |
-| Draft title: “Campaign” | Published title remains “Original”; draft title becomes “Campaign”. |
-| Published title: “Campaign” | Published title becomes “Campaign”. |
+| Latest branch state         | Result on `main` after merge                                        |
+| --------------------------- | ------------------------------------------------------------------- |
+| Draft title: “Campaign”     | Published title remains “Original”; draft title becomes “Campaign”. |
+| Published title: “Campaign” | Published title becomes “Campaign”.                                 |
 
 <Banner type="warning">
   A successful dry run is not an authorization token or a guarantee that the
@@ -287,11 +287,11 @@ Scheduling does not freeze the branch or capture a content snapshot. Editors can
 
 The scheduled job resolves its selection at execution time:
 
-| Job input | Content selected when the job runs |
-| --- | --- |
-| `changes` omitted | All pending changes, including changes added after scheduling. |
-| Nonempty `changes` array | The latest content for matching pending change IDs, including edits made after scheduling. |
-| `changes: []` | Currently treated as all pending changes, unlike an immediate merge, where an empty array selects nothing. |
+| Job input                | Content selected when the job runs                                                                         |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `changes` omitted        | All pending changes, including changes added after scheduling.                                             |
+| Nonempty `changes` array | The latest content for matching pending change IDs, including edits made after scheduling.                 |
+| `changes: []`            | Currently treated as all pending changes, unlike an immediate merge, where an empty array selects nothing. |
 
 Selected change IDs that have already been merged or discarded are skipped. If no selected changes remain, no content is merged. A scheduled merge is therefore not a guarantee that the exact content reviewed when scheduling will be applied.
 

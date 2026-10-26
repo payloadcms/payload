@@ -532,8 +532,8 @@ export const updateOperation = async <
 
             const shouldTrackUploadFileRollback = Boolean(
               (shouldCommit || docShouldCommit) &&
-                collectionConfig.upload &&
-                !collectionConfig.upload.disableLocalStorage,
+              collectionConfig.upload &&
+              !collectionConfig.upload.disableLocalStorage,
             )
 
             const select = sanitizeSelect({

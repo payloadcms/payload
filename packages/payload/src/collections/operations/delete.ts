@@ -233,7 +233,7 @@ export const deleteOperation = async <
     const isDeletingFromBranch =
       Boolean(
         config.branching?.enabled &&
-          config.branching.branchableCollections.has(collectionConfig.slug),
+        config.branching.branchableCollections.has(collectionConfig.slug),
       ) && branch !== MAIN_BRANCH
     const hasBranchSharedTransaction = isDeletingFromBranch && hasSharedTransaction
 

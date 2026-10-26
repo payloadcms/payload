@@ -101,7 +101,7 @@ const getRelationshipJoinCondition = ({
     : getBranchPredicateSync({ collectionSlug, req })
   const shouldMatchCanonicalID = Boolean(
     table._branchDocID &&
-      (branchReadState.useBranching || branchPredicate || value === DistinctSymbol),
+    (branchReadState.useBranching || branchPredicate || value === DistinctSymbol),
   )
   const identityCondition = shouldMatchCanonicalID
     ? or(eq(table.id, relationshipID), eq(table._branchDocID, relationshipID))

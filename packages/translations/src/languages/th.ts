@@ -148,8 +148,7 @@ export const thTranslations: DefaultTranslationsObject = {
     scheduledMerges: 'การผสานตามกำหนดเวลา',
     scheduledToMerge: 'ตั้งเวลาผสานไว้',
     scheduledToMergeOn: 'สาขานี้ถูกตั้งเวลาให้ผสานในวันที่ {{date}}',
-    scheduleHasNothingLeft:
-      'ไม่มีอะไรเหลือให้นำไปใช้ — การเปลี่ยนแปลงเหล่านี้ถูกละทิ้งหรือผสานแล้ว',
+    scheduleHasNothingLeft: 'ไม่มีอะไรเหลือให้นำไปใช้ — การเปลี่ยนแปลงเหล่านี้ถูกละทิ้งหรือผสานแล้ว',
     scheduleMerge: 'ตั้งเวลาผสาน',
     scheduleMergeHelp: 'การผสานจะทำงานตามเวลาที่คุณเลือก และจะตรวจสอบสิทธิ์ของคุณอีกครั้งในตอนนั้น',
     scheduleWillApplyAll: 'จะนำทุกอย่างที่รออยู่ไปใช้ ({{count}})',

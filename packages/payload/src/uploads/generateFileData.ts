@@ -422,9 +422,9 @@ export const generateFileData = async <T>({
     )
     const hasReusableCurrentMain = Boolean(
       !hasReusableOriginalMain &&
-        !fileWasTransformed &&
-        retainedOriginal &&
-        currentFileData?.filename,
+      !fileWasTransformed &&
+      retainedOriginal &&
+      currentFileData?.filename,
     )
     if (hasReusableOriginalMain && !hasFocalPointChange && retainedOriginal) {
       return {
@@ -495,10 +495,10 @@ export const generateFileData = async <T>({
     const branch = resolveBranch(req)
     const isIsolatedProviderUpload = Boolean(
       file.uploadReference &&
-        typeof file.uploadReference === 'object' &&
-        !Array.isArray(file.uploadReference) &&
-        '_objectKey' in file.uploadReference &&
-        typeof file.uploadReference._objectKey === 'string',
+      typeof file.uploadReference === 'object' &&
+      !Array.isArray(file.uploadReference) &&
+      '_objectKey' in file.uploadReference &&
+      typeof file.uploadReference._objectKey === 'string',
     )
     const shouldIsolateBranchFile = branch !== MAIN_BRANCH && !isIsolatedProviderUpload
 

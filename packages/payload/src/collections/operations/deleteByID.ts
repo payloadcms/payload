@@ -239,7 +239,7 @@ const deleteByIDOperationAttempt = async <
     const isDeletingFromBranch =
       Boolean(
         config.branching?.enabled &&
-          config.branching.branchableCollections.has(collectionConfig.slug),
+        config.branching.branchableCollections.has(collectionConfig.slug),
       ) && resolveBranch(req) !== MAIN_BRANCH
 
     // /////////////////////////////////////

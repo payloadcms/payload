@@ -87,8 +87,7 @@ export const taTranslations: DefaultTranslationsObject = {
   branching: {
     andMoreChanges: 'மேலும் {{count}} மாற்றங்கள்',
     branch: 'கிளை',
-    branchClosed:
-      'இந்தக் கிளை மூடப்பட்டுள்ளது. என்ன ஒன்றிணைக்கப்பட்டது என்பதற்கான பதிவாக இது வைக்கப்படுகிறது.',
+    branchClosed: 'இந்தக் கிளை மூடப்பட்டுள்ளது. என்ன ஒன்றிணைக்கப்பட்டது என்பதற்கான பதிவாக இது வைக்கப்படுகிறது.',
     branchDescription: 'கிளையின் விளக்கம்',
     branchedFrom: 'கிளைக்கப்பட்ட மூலம்',
     branches: 'கிளைகள்',
@@ -100,8 +99,7 @@ export const taTranslations: DefaultTranslationsObject = {
     changedDocuments: 'மாற்றப்பட்ட ஆவணங்கள்',
     changesTo: '{{summary}} இல் மாற்றங்கள்',
     closeBranchAfterMerge: 'ஒன்றிணைத்த பிறகு இந்தக் கிளையை மூடு',
-    closeBranchHelpOff:
-      'கிளை திறந்திருக்கும், எனவே நீங்கள் அதில் தொடர்ந்து பணியாற்றி பின்னர் மீண்டும் ஒன்றிணைக்கலாம்.',
+    closeBranchHelpOff: 'கிளை திறந்திருக்கும், எனவே நீங்கள் அதில் தொடர்ந்து பணியாற்றி பின்னர் மீண்டும் ஒன்றிணைக்கலாம்.',
     closeBranchHelpOn: 'கிளை படிக்க மட்டுமே ஆகிவிடும், மீண்டும் ஒன்றிணைக்க முடியாது.',
     confirmDiscardAll:
       'இந்தக் கிளையில் மாற்றப்பட்ட {{count}} ஆவணங்களும் main-ல் இருந்த நிலைக்குத் திரும்பும். இதைச் செயல்தவிர்க்க முடியாது.',
@@ -132,8 +130,7 @@ export const taTranslations: DefaultTranslationsObject = {
     mergedOfTotal: '{{total}}-ல் {{current}} ஒன்றிணைக்கப்பட்டது',
     mergedOn: '{{date}}-ல் ஒன்றிணைக்கப்பட்டது',
     mergeHistory: 'ஒன்றிணைப்பு வரலாறு',
-    mergeInterrupted:
-      'ஒன்றிணைப்பு தடைபட்டது, எதுவும் பயன்படுத்தப்படவில்லை. மீண்டும் முயற்சிக்கவும்.',
+    mergeInterrupted: 'ஒன்றிணைப்பு தடைபட்டது, எதுவும் பயன்படுத்தப்படவில்லை. மீண்டும் முயற்சிக்கவும்.',
     mergeNow: 'இப்போது ஒன்றிணை',
     mergeOnlySelected: 'எந்த மாற்றங்களை ஒன்றிணைக்க வேண்டும் என்பதைத் தேர்ந்தெடுக்கவும்',
     mergePartial: 'பகுதியாக முடிக்கப்பட்டதை இணைக்கவும்',
