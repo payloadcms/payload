@@ -106,6 +106,19 @@ describe('clientUploadReceipt', () => {
       ).toThrow('Invalid upload reference.')
     })
 
+    it('should reject a receipt for another collection when collectionSlug is passed', () => {
+      const signedReceipt = createClientUploadReceipt(receiptArgs)
+
+      expect(() =>
+        resignClientUploadReceipt({
+          adapterData: { providerObjectID: 'object-1' },
+          collectionSlug: 'documents',
+          req,
+          signedReceipt,
+        }),
+      ).toThrow('Invalid upload reference.')
+    })
+
     it('should keep the original expiry', () => {
       vi.useFakeTimers()
       const signedReceipt = createClientUploadReceipt(receiptArgs)

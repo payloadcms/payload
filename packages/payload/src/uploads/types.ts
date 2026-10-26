@@ -402,15 +402,9 @@ export type UploadInstructionsCapability = {
   /** Generates upload instructions. The generator or supporting endpoint must check access. */
   generate: GenerateUploadInstructions
   /**
-   * Require a signed receipt before invoking upload handlers.
-   *
-   * The receipt binds the upload to the user, collection, filename, and storage key, and expires
-   * after six hours. Sign it with `resolveSignedURLKey` from
-   * `@payloadcms/plugin-cloud-storage/utilities` and return its `uploadReference` from `generate`.
-   * Payload rebuilds `uploadReference` from the verified receipt, so handlers receive only
-   * `_objectKey`, `prefix`, `signedReceipt`, and any signed `adapterData`.
-   *
-   * Client uploads keep an `original` and file history only when a receipt is verified.
+   * Require a receipt signed by `resolveSignedURLKey` before invoking upload handlers. Client
+   * uploads keep an `original` and file history only when a receipt is verified.
+   * @see https://payloadcms.com/docs/upload/storage-adapters#custom-upload-receipts
    */
   requiresUploadReceipt?: boolean
   /**

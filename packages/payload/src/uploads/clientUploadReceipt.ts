@@ -63,14 +63,17 @@ export const createClientUploadReceipt = ({
  */
 export const resignClientUploadReceipt = ({
   adapterData,
+  collectionSlug,
   req,
   signedReceipt,
 }: {
   adapterData: Record<string, unknown>
+  /** Rejects a receipt issued for another collection. */
+  collectionSlug?: string
   req: PayloadRequest
   signedReceipt: unknown
 }): `${string}.${string}` => {
-  const receipt = verifyClientUploadReceipt({ req, signedReceipt })
+  const receipt = verifyClientUploadReceipt({ collectionSlug, req, signedReceipt })
 
   return encodeReceipt({
     data: { ...receipt, adapterData: { ...receipt.adapterData, ...adapterData } },
