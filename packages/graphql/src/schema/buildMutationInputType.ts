@@ -176,7 +176,10 @@ export function buildMutationInputType({
     }),
     group: (inputObjectTypeConfig: InputObjectTypeConfig, field: GroupField) => {
       if (fieldAffectsData(field)) {
-        const requiresAtLeastOneField = groupOrTabHasRequiredSubfield(field)
+        const requiresAtLeastOneField = groupOrTabHasRequiredSubfield(
+          field,
+          parentIsLocalized || field.localized,
+        )
         const fullName = combineParentName(parentName, toWords(field.name, true))
         let type: GraphQLType = buildMutationInputType({
           name: fullName,
@@ -336,7 +339,10 @@ export function buildMutationInputType({
       return field.tabs.reduce((acc, tab) => {
         if (tabHasName(tab)) {
           const fullName = combineParentName(parentName, toWords(tab.name, true))
-          const requiresAtLeastOneField = groupOrTabHasRequiredSubfield(tab)
+          const requiresAtLeastOneField = groupOrTabHasRequiredSubfield(
+            tab,
+            parentIsLocalized || tab.localized,
+          )
           let type: GraphQLType = buildMutationInputType({
             name: fullName,
             config,

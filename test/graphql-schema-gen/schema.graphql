@@ -1,26 +1,38 @@
 type Query {
-  Collection1(id: String!, draft: Boolean, trash: Boolean): Collection1
-  Collection1s(draft: Boolean, where: Collection1_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): Collection1s
+  Collection1(id: String!, draft: Boolean, select: Boolean, trash: Boolean): Collection1
+  Collection1s(draft: Boolean, where: Collection1_where, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): Collection1s
   countCollection1s(draft: Boolean, trash: Boolean, where: Collection1_where): countCollection1s
   docAccessCollection1(id: String!): collection1DocAccess
-  Collection2(id: String!, draft: Boolean, trash: Boolean): Collection2
-  Collection2s(draft: Boolean, where: Collection2_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): Collection2s
+  Collection2(id: String!, draft: Boolean, select: Boolean, trash: Boolean): Collection2
+  Collection2s(draft: Boolean, where: Collection2_where, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): Collection2s
   countCollection2s(draft: Boolean, trash: Boolean, where: Collection2_where): countCollection2s
   docAccessCollection2(id: String!): collection2DocAccess
-  User(id: String!, draft: Boolean, trash: Boolean): User
-  Users(draft: Boolean, where: User_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): Users
+  NamedTabCase(id: String!, draft: Boolean, select: Boolean, trash: Boolean): NamedTabCase
+  NamedTabCases(draft: Boolean, where: NamedTabCase_where, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): NamedTabCases
+  countNamedTabCases(draft: Boolean, trash: Boolean, where: NamedTabCase_where): countNamedTabCases
+  docAccessNamedTabCase(id: String!): named_tab_casesDocAccess
+  PayloadKv(id: String!, draft: Boolean, select: Boolean, trash: Boolean): PayloadKv
+  PayloadKvs(draft: Boolean, where: PayloadKv_where, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): PayloadKvs
+  countPayloadKvs(draft: Boolean, trash: Boolean, where: PayloadKv_where): countPayloadKvs
+  docAccessPayloadKv(id: String!): payload_kvDocAccess
+  User(id: String!, draft: Boolean, select: Boolean, trash: Boolean): User
+  Users(draft: Boolean, where: User_where, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): Users
   countUsers(draft: Boolean, trash: Boolean, where: User_where): countUsers
   docAccessUser(id: String!): usersDocAccess
   meUser: usersMe
   initializedUser: Boolean
-  PayloadLockedDocument(id: String!, draft: Boolean, trash: Boolean): PayloadLockedDocument
-  PayloadLockedDocuments(draft: Boolean, where: PayloadLockedDocument_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): PayloadLockedDocuments
+  PayloadLockedDocument(id: String!, draft: Boolean, select: Boolean, trash: Boolean): PayloadLockedDocument
+  PayloadLockedDocuments(draft: Boolean, where: PayloadLockedDocument_where, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): PayloadLockedDocuments
   countPayloadLockedDocuments(draft: Boolean, trash: Boolean, where: PayloadLockedDocument_where): countPayloadLockedDocuments
   docAccessPayloadLockedDocument(id: String!): payload_locked_documentsDocAccess
-  PayloadPreference(id: String!, draft: Boolean, trash: Boolean): PayloadPreference
-  PayloadPreferences(draft: Boolean, where: PayloadPreference_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): PayloadPreferences
+  PayloadPreference(id: String!, draft: Boolean, select: Boolean, trash: Boolean): PayloadPreference
+  PayloadPreferences(draft: Boolean, where: PayloadPreference_where, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): PayloadPreferences
   countPayloadPreferences(draft: Boolean, trash: Boolean, where: PayloadPreference_where): countPayloadPreferences
   docAccessPayloadPreference(id: String!): payload_preferencesDocAccess
+  PayloadLlmInstruction(id: String!, draft: Boolean, select: Boolean, trash: Boolean): PayloadLlmInstruction
+  PayloadLlmInstructions(draft: Boolean, where: PayloadLlmInstruction_where, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): PayloadLlmInstructions
+  countPayloadLlmInstructions(draft: Boolean, trash: Boolean, where: PayloadLlmInstruction_where): countPayloadLlmInstructions
+  docAccessPayloadLlmInstruction(id: String!): payload_llm_instructionsDocAccess
   Access: Access
 }
 
@@ -30,6 +42,8 @@ type Collection1 {
   title: String!
   meta: [SharedMetaArray!]
   blocks: [Collection1_Blocks!]!
+  createdBy: Collection1_CreatedBy_Relationship
+  updatedBy: Collection1_UpdatedBy_Relationship
   updatedAt: DateTime
   createdAt: DateTime
 }
@@ -58,10 +72,83 @@ type AnotherSharedBlock {
   blockType: String
 }
 
+type Collection1_CreatedBy_Relationship {
+  relationTo: Collection1_CreatedBy_RelationTo
+  value: Collection1_CreatedBy
+}
+
+enum Collection1_CreatedBy_RelationTo {
+  users
+}
+
+union Collection1_CreatedBy = User
+
+type User {
+  id: String!
+  _strategy: String
+  createdBy: User_CreatedBy_Relationship
+  updatedBy: User_UpdatedBy_Relationship
+  updatedAt: DateTime
+  createdAt: DateTime
+  email: EmailAddress!
+  resetPasswordToken: String
+  resetPasswordExpiration: DateTime
+  salt: String
+  hash: String
+  resetPasswordRequestedAt: DateTime
+  loginAttempts: Float
+  lockUntil: DateTime
+  sessions: [User_Sessions!]
+}
+
+type User_CreatedBy_Relationship {
+  relationTo: User_CreatedBy_RelationTo
+  value: User_CreatedBy
+}
+
+enum User_CreatedBy_RelationTo {
+  users
+}
+
+union User_CreatedBy = User
+
+type User_UpdatedBy_Relationship {
+  relationTo: User_UpdatedBy_RelationTo
+  value: User_UpdatedBy
+}
+
+enum User_UpdatedBy_RelationTo {
+  users
+}
+
+union User_UpdatedBy = User
+
 """
 A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
 """
 scalar DateTime
+
+"""
+A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
+"""
+scalar EmailAddress @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
+
+type User_Sessions {
+  id: String
+  createdAt: DateTime
+  expiresAt: DateTime
+}
+
+type Collection1_UpdatedBy_Relationship {
+  relationTo: Collection1_UpdatedBy_RelationTo
+  value: Collection1_UpdatedBy
+}
+
+enum Collection1_UpdatedBy_RelationTo {
+  users
+}
+
+union Collection1_UpdatedBy = User
 
 type Collection1s {
   docs: [Collection1!]!
@@ -83,6 +170,8 @@ input Collection1_where {
   meta__title: Collection1_meta__title_operator
   meta__description: Collection1_meta__description_operator
   meta__id: Collection1_meta__id_operator
+  createdBy: Collection1_createdBy_Relation
+  updatedBy: Collection1_updatedBy_Relation
   updatedAt: Collection1_updatedAt_operator
   createdAt: Collection1_createdAt_operator
   id: Collection1_id_operator
@@ -143,6 +232,29 @@ input Collection1_meta__id_operator {
   exists: Boolean
 }
 
+input Collection1_createdBy_Relation {
+  relationTo: Collection1_createdBy_Relation_RelationTo
+  value: JSON
+}
+
+enum Collection1_createdBy_Relation_RelationTo {
+  users
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
+
+input Collection1_updatedBy_Relation {
+  relationTo: Collection1_updatedBy_Relation_RelationTo
+  value: JSON
+}
+
+enum Collection1_updatedBy_Relation_RelationTo {
+  users
+}
+
 input Collection1_updatedAt_operator {
   equals: DateTime
   not_equals: DateTime
@@ -182,6 +294,8 @@ input Collection1_where_and {
   meta__title: Collection1_meta__title_operator
   meta__description: Collection1_meta__description_operator
   meta__id: Collection1_meta__id_operator
+  createdBy: Collection1_createdBy_Relation
+  updatedBy: Collection1_updatedBy_Relation
   updatedAt: Collection1_updatedAt_operator
   createdAt: Collection1_createdAt_operator
   id: Collection1_id_operator
@@ -195,6 +309,8 @@ input Collection1_where_or {
   meta__title: Collection1_meta__title_operator
   meta__description: Collection1_meta__description_operator
   meta__id: Collection1_meta__id_operator
+  createdBy: Collection1_createdBy_Relation
+  updatedBy: Collection1_updatedBy_Relation
   updatedAt: Collection1_updatedAt_operator
   createdAt: Collection1_createdAt_operator
   id: Collection1_id_operator
@@ -212,6 +328,7 @@ type collection1DocAccess {
   read: Collection1ReadDocAccess
   update: Collection1UpdateDocAccess
   delete: Collection1DeleteDocAccess
+  validate: Collection1ValidateDocAccess
 }
 
 type Collection1DocAccessFields {
@@ -219,6 +336,8 @@ type Collection1DocAccessFields {
   title: Collection1DocAccessFields_title
   meta: Collection1DocAccessFields_meta
   blocks: Collection1DocAccessFields_blocks
+  createdBy: Collection1DocAccessFields_createdBy
+  updatedBy: Collection1DocAccessFields_updatedBy
   updatedAt: Collection1DocAccessFields_updatedAt
   createdAt: Collection1DocAccessFields_createdAt
 }
@@ -228,6 +347,7 @@ type Collection1DocAccessFields_testing {
   read: Collection1DocAccessFields_testing_Read
   update: Collection1DocAccessFields_testing_Update
   delete: Collection1DocAccessFields_testing_Delete
+  validate: Collection1DocAccessFields_testing_Validate
 }
 
 type Collection1DocAccessFields_testing_Create {
@@ -246,11 +366,16 @@ type Collection1DocAccessFields_testing_Delete {
   permission: Boolean!
 }
 
+type Collection1DocAccessFields_testing_Validate {
+  permission: Boolean!
+}
+
 type Collection1DocAccessFields_title {
   create: Collection1DocAccessFields_title_Create
   read: Collection1DocAccessFields_title_Read
   update: Collection1DocAccessFields_title_Update
   delete: Collection1DocAccessFields_title_Delete
+  validate: Collection1DocAccessFields_title_Validate
 }
 
 type Collection1DocAccessFields_title_Create {
@@ -269,11 +394,16 @@ type Collection1DocAccessFields_title_Delete {
   permission: Boolean!
 }
 
+type Collection1DocAccessFields_title_Validate {
+  permission: Boolean!
+}
+
 type Collection1DocAccessFields_meta {
   create: Collection1DocAccessFields_meta_Create
   read: Collection1DocAccessFields_meta_Read
   update: Collection1DocAccessFields_meta_Update
   delete: Collection1DocAccessFields_meta_Delete
+  validate: Collection1DocAccessFields_meta_Validate
   fields: Collection1DocAccessFields_meta_Fields
 }
 
@@ -293,6 +423,10 @@ type Collection1DocAccessFields_meta_Delete {
   permission: Boolean!
 }
 
+type Collection1DocAccessFields_meta_Validate {
+  permission: Boolean!
+}
+
 type Collection1DocAccessFields_meta_Fields {
   title: Collection1DocAccessFields_meta_title
   description: Collection1DocAccessFields_meta_description
@@ -304,6 +438,7 @@ type Collection1DocAccessFields_meta_title {
   read: Collection1DocAccessFields_meta_title_Read
   update: Collection1DocAccessFields_meta_title_Update
   delete: Collection1DocAccessFields_meta_title_Delete
+  validate: Collection1DocAccessFields_meta_title_Validate
 }
 
 type Collection1DocAccessFields_meta_title_Create {
@@ -322,11 +457,16 @@ type Collection1DocAccessFields_meta_title_Delete {
   permission: Boolean!
 }
 
+type Collection1DocAccessFields_meta_title_Validate {
+  permission: Boolean!
+}
+
 type Collection1DocAccessFields_meta_description {
   create: Collection1DocAccessFields_meta_description_Create
   read: Collection1DocAccessFields_meta_description_Read
   update: Collection1DocAccessFields_meta_description_Update
   delete: Collection1DocAccessFields_meta_description_Delete
+  validate: Collection1DocAccessFields_meta_description_Validate
 }
 
 type Collection1DocAccessFields_meta_description_Create {
@@ -345,11 +485,16 @@ type Collection1DocAccessFields_meta_description_Delete {
   permission: Boolean!
 }
 
+type Collection1DocAccessFields_meta_description_Validate {
+  permission: Boolean!
+}
+
 type Collection1DocAccessFields_meta_id {
   create: Collection1DocAccessFields_meta_id_Create
   read: Collection1DocAccessFields_meta_id_Read
   update: Collection1DocAccessFields_meta_id_Update
   delete: Collection1DocAccessFields_meta_id_Delete
+  validate: Collection1DocAccessFields_meta_id_Validate
 }
 
 type Collection1DocAccessFields_meta_id_Create {
@@ -368,11 +513,16 @@ type Collection1DocAccessFields_meta_id_Delete {
   permission: Boolean!
 }
 
+type Collection1DocAccessFields_meta_id_Validate {
+  permission: Boolean!
+}
+
 type Collection1DocAccessFields_blocks {
   create: Collection1DocAccessFields_blocks_Create
   read: Collection1DocAccessFields_blocks_Read
   update: Collection1DocAccessFields_blocks_Update
   delete: Collection1DocAccessFields_blocks_Delete
+  validate: Collection1DocAccessFields_blocks_Validate
 }
 
 type Collection1DocAccessFields_blocks_Create {
@@ -391,11 +541,72 @@ type Collection1DocAccessFields_blocks_Delete {
   permission: Boolean!
 }
 
+type Collection1DocAccessFields_blocks_Validate {
+  permission: Boolean!
+}
+
+type Collection1DocAccessFields_createdBy {
+  create: Collection1DocAccessFields_createdBy_Create
+  read: Collection1DocAccessFields_createdBy_Read
+  update: Collection1DocAccessFields_createdBy_Update
+  delete: Collection1DocAccessFields_createdBy_Delete
+  validate: Collection1DocAccessFields_createdBy_Validate
+}
+
+type Collection1DocAccessFields_createdBy_Create {
+  permission: Boolean!
+}
+
+type Collection1DocAccessFields_createdBy_Read {
+  permission: Boolean!
+}
+
+type Collection1DocAccessFields_createdBy_Update {
+  permission: Boolean!
+}
+
+type Collection1DocAccessFields_createdBy_Delete {
+  permission: Boolean!
+}
+
+type Collection1DocAccessFields_createdBy_Validate {
+  permission: Boolean!
+}
+
+type Collection1DocAccessFields_updatedBy {
+  create: Collection1DocAccessFields_updatedBy_Create
+  read: Collection1DocAccessFields_updatedBy_Read
+  update: Collection1DocAccessFields_updatedBy_Update
+  delete: Collection1DocAccessFields_updatedBy_Delete
+  validate: Collection1DocAccessFields_updatedBy_Validate
+}
+
+type Collection1DocAccessFields_updatedBy_Create {
+  permission: Boolean!
+}
+
+type Collection1DocAccessFields_updatedBy_Read {
+  permission: Boolean!
+}
+
+type Collection1DocAccessFields_updatedBy_Update {
+  permission: Boolean!
+}
+
+type Collection1DocAccessFields_updatedBy_Delete {
+  permission: Boolean!
+}
+
+type Collection1DocAccessFields_updatedBy_Validate {
+  permission: Boolean!
+}
+
 type Collection1DocAccessFields_updatedAt {
   create: Collection1DocAccessFields_updatedAt_Create
   read: Collection1DocAccessFields_updatedAt_Read
   update: Collection1DocAccessFields_updatedAt_Update
   delete: Collection1DocAccessFields_updatedAt_Delete
+  validate: Collection1DocAccessFields_updatedAt_Validate
 }
 
 type Collection1DocAccessFields_updatedAt_Create {
@@ -414,11 +625,16 @@ type Collection1DocAccessFields_updatedAt_Delete {
   permission: Boolean!
 }
 
+type Collection1DocAccessFields_updatedAt_Validate {
+  permission: Boolean!
+}
+
 type Collection1DocAccessFields_createdAt {
   create: Collection1DocAccessFields_createdAt_Create
   read: Collection1DocAccessFields_createdAt_Read
   update: Collection1DocAccessFields_createdAt_Update
   delete: Collection1DocAccessFields_createdAt_Delete
+  validate: Collection1DocAccessFields_createdAt_Validate
 }
 
 type Collection1DocAccessFields_createdAt_Create {
@@ -434,6 +650,10 @@ type Collection1DocAccessFields_createdAt_Update {
 }
 
 type Collection1DocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type Collection1DocAccessFields_createdAt_Validate {
   permission: Boolean!
 }
 
@@ -462,6 +682,11 @@ type Collection1DeleteDocAccess {
   where: JSONObject
 }
 
+type Collection1ValidateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
 type Collection2 {
   id: String!
   metaArray: [SharedMetaArray!]
@@ -469,6 +694,8 @@ type Collection2 {
   nestedGroup: Collection2_NestedGroup
   some_text_: String
   spaceBottom: Collection2_spaceBottom
+  createdBy: Collection2_CreatedBy_Relationship
+  updatedBy: Collection2_UpdatedBy_Relationship
   updatedAt: DateTime
   createdAt: DateTime
 }
@@ -489,6 +716,28 @@ enum Collection2_spaceBottom {
   mb_24
   mb__150px_
 }
+
+type Collection2_CreatedBy_Relationship {
+  relationTo: Collection2_CreatedBy_RelationTo
+  value: Collection2_CreatedBy
+}
+
+enum Collection2_CreatedBy_RelationTo {
+  users
+}
+
+union Collection2_CreatedBy = User
+
+type Collection2_UpdatedBy_Relationship {
+  relationTo: Collection2_UpdatedBy_RelationTo
+  value: Collection2_UpdatedBy
+}
+
+enum Collection2_UpdatedBy_RelationTo {
+  users
+}
+
+union Collection2_UpdatedBy = User
 
 type Collection2s {
   docs: [Collection2!]!
@@ -514,6 +763,8 @@ input Collection2_where {
   nestedGroup__meta__description: Collection2_nestedGroup__meta__description_operator
   some_text_: Collection2_some_text__operator
   spaceBottom: Collection2_spaceBottom_operator
+  createdBy: Collection2_createdBy_Relation
+  updatedBy: Collection2_updatedBy_Relation
   updatedAt: Collection2_updatedAt_operator
   createdAt: Collection2_createdAt_operator
   id: Collection2_id_operator
@@ -626,6 +877,24 @@ enum Collection2_spaceBottom_Input {
   mb__150px_
 }
 
+input Collection2_createdBy_Relation {
+  relationTo: Collection2_createdBy_Relation_RelationTo
+  value: JSON
+}
+
+enum Collection2_createdBy_Relation_RelationTo {
+  users
+}
+
+input Collection2_updatedBy_Relation {
+  relationTo: Collection2_updatedBy_Relation_RelationTo
+  value: JSON
+}
+
+enum Collection2_updatedBy_Relation_RelationTo {
+  users
+}
+
 input Collection2_updatedAt_operator {
   equals: DateTime
   not_equals: DateTime
@@ -669,6 +938,8 @@ input Collection2_where_and {
   nestedGroup__meta__description: Collection2_nestedGroup__meta__description_operator
   some_text_: Collection2_some_text__operator
   spaceBottom: Collection2_spaceBottom_operator
+  createdBy: Collection2_createdBy_Relation
+  updatedBy: Collection2_updatedBy_Relation
   updatedAt: Collection2_updatedAt_operator
   createdAt: Collection2_createdAt_operator
   id: Collection2_id_operator
@@ -686,6 +957,8 @@ input Collection2_where_or {
   nestedGroup__meta__description: Collection2_nestedGroup__meta__description_operator
   some_text_: Collection2_some_text__operator
   spaceBottom: Collection2_spaceBottom_operator
+  createdBy: Collection2_createdBy_Relation
+  updatedBy: Collection2_updatedBy_Relation
   updatedAt: Collection2_updatedAt_operator
   createdAt: Collection2_createdAt_operator
   id: Collection2_id_operator
@@ -703,6 +976,7 @@ type collection2DocAccess {
   read: Collection2ReadDocAccess
   update: Collection2UpdateDocAccess
   delete: Collection2DeleteDocAccess
+  validate: Collection2ValidateDocAccess
 }
 
 type Collection2DocAccessFields {
@@ -711,6 +985,8 @@ type Collection2DocAccessFields {
   nestedGroup: Collection2DocAccessFields_nestedGroup
   some_text_: Collection2DocAccessFields_some_text_
   spaceBottom: Collection2DocAccessFields_spaceBottom
+  createdBy: Collection2DocAccessFields_createdBy
+  updatedBy: Collection2DocAccessFields_updatedBy
   updatedAt: Collection2DocAccessFields_updatedAt
   createdAt: Collection2DocAccessFields_createdAt
 }
@@ -720,6 +996,7 @@ type Collection2DocAccessFields_metaArray {
   read: Collection2DocAccessFields_metaArray_Read
   update: Collection2DocAccessFields_metaArray_Update
   delete: Collection2DocAccessFields_metaArray_Delete
+  validate: Collection2DocAccessFields_metaArray_Validate
   fields: Collection2DocAccessFields_metaArray_Fields
 }
 
@@ -739,6 +1016,10 @@ type Collection2DocAccessFields_metaArray_Delete {
   permission: Boolean!
 }
 
+type Collection2DocAccessFields_metaArray_Validate {
+  permission: Boolean!
+}
+
 type Collection2DocAccessFields_metaArray_Fields {
   title: Collection2DocAccessFields_metaArray_title
   description: Collection2DocAccessFields_metaArray_description
@@ -750,6 +1031,7 @@ type Collection2DocAccessFields_metaArray_title {
   read: Collection2DocAccessFields_metaArray_title_Read
   update: Collection2DocAccessFields_metaArray_title_Update
   delete: Collection2DocAccessFields_metaArray_title_Delete
+  validate: Collection2DocAccessFields_metaArray_title_Validate
 }
 
 type Collection2DocAccessFields_metaArray_title_Create {
@@ -768,11 +1050,16 @@ type Collection2DocAccessFields_metaArray_title_Delete {
   permission: Boolean!
 }
 
+type Collection2DocAccessFields_metaArray_title_Validate {
+  permission: Boolean!
+}
+
 type Collection2DocAccessFields_metaArray_description {
   create: Collection2DocAccessFields_metaArray_description_Create
   read: Collection2DocAccessFields_metaArray_description_Read
   update: Collection2DocAccessFields_metaArray_description_Update
   delete: Collection2DocAccessFields_metaArray_description_Delete
+  validate: Collection2DocAccessFields_metaArray_description_Validate
 }
 
 type Collection2DocAccessFields_metaArray_description_Create {
@@ -791,11 +1078,16 @@ type Collection2DocAccessFields_metaArray_description_Delete {
   permission: Boolean!
 }
 
+type Collection2DocAccessFields_metaArray_description_Validate {
+  permission: Boolean!
+}
+
 type Collection2DocAccessFields_metaArray_id {
   create: Collection2DocAccessFields_metaArray_id_Create
   read: Collection2DocAccessFields_metaArray_id_Read
   update: Collection2DocAccessFields_metaArray_id_Update
   delete: Collection2DocAccessFields_metaArray_id_Delete
+  validate: Collection2DocAccessFields_metaArray_id_Validate
 }
 
 type Collection2DocAccessFields_metaArray_id_Create {
@@ -814,11 +1106,16 @@ type Collection2DocAccessFields_metaArray_id_Delete {
   permission: Boolean!
 }
 
+type Collection2DocAccessFields_metaArray_id_Validate {
+  permission: Boolean!
+}
+
 type Collection2DocAccessFields_metaGroup {
   create: Collection2DocAccessFields_metaGroup_Create
   read: Collection2DocAccessFields_metaGroup_Read
   update: Collection2DocAccessFields_metaGroup_Update
   delete: Collection2DocAccessFields_metaGroup_Delete
+  validate: Collection2DocAccessFields_metaGroup_Validate
   fields: Collection2DocAccessFields_metaGroup_Fields
 }
 
@@ -838,6 +1135,10 @@ type Collection2DocAccessFields_metaGroup_Delete {
   permission: Boolean!
 }
 
+type Collection2DocAccessFields_metaGroup_Validate {
+  permission: Boolean!
+}
+
 type Collection2DocAccessFields_metaGroup_Fields {
   title: Collection2DocAccessFields_metaGroup_title
   description: Collection2DocAccessFields_metaGroup_description
@@ -848,6 +1149,7 @@ type Collection2DocAccessFields_metaGroup_title {
   read: Collection2DocAccessFields_metaGroup_title_Read
   update: Collection2DocAccessFields_metaGroup_title_Update
   delete: Collection2DocAccessFields_metaGroup_title_Delete
+  validate: Collection2DocAccessFields_metaGroup_title_Validate
 }
 
 type Collection2DocAccessFields_metaGroup_title_Create {
@@ -866,11 +1168,16 @@ type Collection2DocAccessFields_metaGroup_title_Delete {
   permission: Boolean!
 }
 
+type Collection2DocAccessFields_metaGroup_title_Validate {
+  permission: Boolean!
+}
+
 type Collection2DocAccessFields_metaGroup_description {
   create: Collection2DocAccessFields_metaGroup_description_Create
   read: Collection2DocAccessFields_metaGroup_description_Read
   update: Collection2DocAccessFields_metaGroup_description_Update
   delete: Collection2DocAccessFields_metaGroup_description_Delete
+  validate: Collection2DocAccessFields_metaGroup_description_Validate
 }
 
 type Collection2DocAccessFields_metaGroup_description_Create {
@@ -889,11 +1196,16 @@ type Collection2DocAccessFields_metaGroup_description_Delete {
   permission: Boolean!
 }
 
+type Collection2DocAccessFields_metaGroup_description_Validate {
+  permission: Boolean!
+}
+
 type Collection2DocAccessFields_nestedGroup {
   create: Collection2DocAccessFields_nestedGroup_Create
   read: Collection2DocAccessFields_nestedGroup_Read
   update: Collection2DocAccessFields_nestedGroup_Update
   delete: Collection2DocAccessFields_nestedGroup_Delete
+  validate: Collection2DocAccessFields_nestedGroup_Validate
   fields: Collection2DocAccessFields_nestedGroup_Fields
 }
 
@@ -913,6 +1225,10 @@ type Collection2DocAccessFields_nestedGroup_Delete {
   permission: Boolean!
 }
 
+type Collection2DocAccessFields_nestedGroup_Validate {
+  permission: Boolean!
+}
+
 type Collection2DocAccessFields_nestedGroup_Fields {
   meta: Collection2DocAccessFields_nestedGroup_meta
 }
@@ -922,6 +1238,7 @@ type Collection2DocAccessFields_nestedGroup_meta {
   read: Collection2DocAccessFields_nestedGroup_meta_Read
   update: Collection2DocAccessFields_nestedGroup_meta_Update
   delete: Collection2DocAccessFields_nestedGroup_meta_Delete
+  validate: Collection2DocAccessFields_nestedGroup_meta_Validate
   fields: Collection2DocAccessFields_nestedGroup_meta_Fields
 }
 
@@ -941,6 +1258,10 @@ type Collection2DocAccessFields_nestedGroup_meta_Delete {
   permission: Boolean!
 }
 
+type Collection2DocAccessFields_nestedGroup_meta_Validate {
+  permission: Boolean!
+}
+
 type Collection2DocAccessFields_nestedGroup_meta_Fields {
   title: Collection2DocAccessFields_nestedGroup_meta_title
   description: Collection2DocAccessFields_nestedGroup_meta_description
@@ -951,6 +1272,7 @@ type Collection2DocAccessFields_nestedGroup_meta_title {
   read: Collection2DocAccessFields_nestedGroup_meta_title_Read
   update: Collection2DocAccessFields_nestedGroup_meta_title_Update
   delete: Collection2DocAccessFields_nestedGroup_meta_title_Delete
+  validate: Collection2DocAccessFields_nestedGroup_meta_title_Validate
 }
 
 type Collection2DocAccessFields_nestedGroup_meta_title_Create {
@@ -969,11 +1291,16 @@ type Collection2DocAccessFields_nestedGroup_meta_title_Delete {
   permission: Boolean!
 }
 
+type Collection2DocAccessFields_nestedGroup_meta_title_Validate {
+  permission: Boolean!
+}
+
 type Collection2DocAccessFields_nestedGroup_meta_description {
   create: Collection2DocAccessFields_nestedGroup_meta_description_Create
   read: Collection2DocAccessFields_nestedGroup_meta_description_Read
   update: Collection2DocAccessFields_nestedGroup_meta_description_Update
   delete: Collection2DocAccessFields_nestedGroup_meta_description_Delete
+  validate: Collection2DocAccessFields_nestedGroup_meta_description_Validate
 }
 
 type Collection2DocAccessFields_nestedGroup_meta_description_Create {
@@ -992,11 +1319,16 @@ type Collection2DocAccessFields_nestedGroup_meta_description_Delete {
   permission: Boolean!
 }
 
+type Collection2DocAccessFields_nestedGroup_meta_description_Validate {
+  permission: Boolean!
+}
+
 type Collection2DocAccessFields_some_text_ {
   create: Collection2DocAccessFields_some_text__Create
   read: Collection2DocAccessFields_some_text__Read
   update: Collection2DocAccessFields_some_text__Update
   delete: Collection2DocAccessFields_some_text__Delete
+  validate: Collection2DocAccessFields_some_text__Validate
 }
 
 type Collection2DocAccessFields_some_text__Create {
@@ -1015,11 +1347,16 @@ type Collection2DocAccessFields_some_text__Delete {
   permission: Boolean!
 }
 
+type Collection2DocAccessFields_some_text__Validate {
+  permission: Boolean!
+}
+
 type Collection2DocAccessFields_spaceBottom {
   create: Collection2DocAccessFields_spaceBottom_Create
   read: Collection2DocAccessFields_spaceBottom_Read
   update: Collection2DocAccessFields_spaceBottom_Update
   delete: Collection2DocAccessFields_spaceBottom_Delete
+  validate: Collection2DocAccessFields_spaceBottom_Validate
 }
 
 type Collection2DocAccessFields_spaceBottom_Create {
@@ -1038,11 +1375,72 @@ type Collection2DocAccessFields_spaceBottom_Delete {
   permission: Boolean!
 }
 
+type Collection2DocAccessFields_spaceBottom_Validate {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_createdBy {
+  create: Collection2DocAccessFields_createdBy_Create
+  read: Collection2DocAccessFields_createdBy_Read
+  update: Collection2DocAccessFields_createdBy_Update
+  delete: Collection2DocAccessFields_createdBy_Delete
+  validate: Collection2DocAccessFields_createdBy_Validate
+}
+
+type Collection2DocAccessFields_createdBy_Create {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_createdBy_Read {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_createdBy_Update {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_createdBy_Delete {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_createdBy_Validate {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_updatedBy {
+  create: Collection2DocAccessFields_updatedBy_Create
+  read: Collection2DocAccessFields_updatedBy_Read
+  update: Collection2DocAccessFields_updatedBy_Update
+  delete: Collection2DocAccessFields_updatedBy_Delete
+  validate: Collection2DocAccessFields_updatedBy_Validate
+}
+
+type Collection2DocAccessFields_updatedBy_Create {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_updatedBy_Read {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_updatedBy_Update {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_updatedBy_Delete {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_updatedBy_Validate {
+  permission: Boolean!
+}
+
 type Collection2DocAccessFields_updatedAt {
   create: Collection2DocAccessFields_updatedAt_Create
   read: Collection2DocAccessFields_updatedAt_Read
   update: Collection2DocAccessFields_updatedAt_Update
   delete: Collection2DocAccessFields_updatedAt_Delete
+  validate: Collection2DocAccessFields_updatedAt_Validate
 }
 
 type Collection2DocAccessFields_updatedAt_Create {
@@ -1061,11 +1459,16 @@ type Collection2DocAccessFields_updatedAt_Delete {
   permission: Boolean!
 }
 
+type Collection2DocAccessFields_updatedAt_Validate {
+  permission: Boolean!
+}
+
 type Collection2DocAccessFields_createdAt {
   create: Collection2DocAccessFields_createdAt_Create
   read: Collection2DocAccessFields_createdAt_Read
   update: Collection2DocAccessFields_createdAt_Update
   delete: Collection2DocAccessFields_createdAt_Delete
+  validate: Collection2DocAccessFields_createdAt_Validate
 }
 
 type Collection2DocAccessFields_createdAt_Create {
@@ -1081,6 +1484,10 @@ type Collection2DocAccessFields_createdAt_Update {
 }
 
 type Collection2DocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_createdAt_Validate {
   permission: Boolean!
 }
 
@@ -1104,30 +1511,818 @@ type Collection2DeleteDocAccess {
   where: JSONObject
 }
 
-type User {
-  id: String!
-  _strategy: String
-  updatedAt: DateTime
-  createdAt: DateTime
-  email: EmailAddress!
-  resetPasswordToken: String
-  resetPasswordExpiration: DateTime
-  salt: String
-  hash: String
-  loginAttempts: Float
-  lockUntil: DateTime
-  sessions: [User_Sessions!]
+type Collection2ValidateDocAccess {
+  permission: Boolean!
+  where: JSONObject
 }
 
-"""
-A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
-"""
-scalar EmailAddress @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
-
-type User_Sessions {
-  id: String
+type NamedTabCase {
+  id: String!
+  tabWithRequiredField: NamedTabCase_TabWithRequiredField
+  tabWithHiddenRequiredField: NamedTabCase_TabWithHiddenRequiredField
+  tabWithVirtualRequiredField: NamedTabCase_TabWithVirtualRequiredField
+  tabWithConditionalRequiredField: NamedTabCase_TabWithConditionalRequiredField
+  tabWithReadAccessRequiredField: NamedTabCase_TabWithReadAccessRequiredField
+  tabWithOptionalArray: NamedTabCase_TabWithOptionalArray
+  createdBy: NamedTabCase_CreatedBy_Relationship
+  updatedBy: NamedTabCase_UpdatedBy_Relationship
+  updatedAt: DateTime
   createdAt: DateTime
-  expiresAt: DateTime
+}
+
+type NamedTabCase_TabWithRequiredField {
+  title: String!
+}
+
+type NamedTabCase_TabWithHiddenRequiredField {
+  hiddenTitle: String!
+}
+
+type NamedTabCase_TabWithVirtualRequiredField {
+  virtualTitle: String
+}
+
+type NamedTabCase_TabWithConditionalRequiredField {
+  conditionalTitle: String
+}
+
+type NamedTabCase_TabWithReadAccessRequiredField {
+  readAccessTitle: String
+}
+
+type NamedTabCase_TabWithOptionalArray {
+  items: [NamedTabCase_TabWithOptionalArray_Items!]
+}
+
+type NamedTabCase_TabWithOptionalArray_Items {
+  itemTitle: String
+  id: String
+}
+
+type NamedTabCase_CreatedBy_Relationship {
+  relationTo: NamedTabCase_CreatedBy_RelationTo
+  value: NamedTabCase_CreatedBy
+}
+
+enum NamedTabCase_CreatedBy_RelationTo {
+  users
+}
+
+union NamedTabCase_CreatedBy = User
+
+type NamedTabCase_UpdatedBy_Relationship {
+  relationTo: NamedTabCase_UpdatedBy_RelationTo
+  value: NamedTabCase_UpdatedBy
+}
+
+enum NamedTabCase_UpdatedBy_RelationTo {
+  users
+}
+
+union NamedTabCase_UpdatedBy = User
+
+type NamedTabCases {
+  docs: [NamedTabCase!]!
+  hasNextPage: Boolean!
+  hasPrevPage: Boolean!
+  limit: Int!
+  nextPage: Int
+  offset: Int
+  page: Int!
+  pagingCounter: Int!
+  prevPage: Int
+  totalDocs: Int!
+  totalPages: Int!
+}
+
+input NamedTabCase_where {
+  tabWithRequiredField__title: NamedTabCase_tabWithRequiredField__title_operator
+  tabWithHiddenRequiredField__hiddenTitle: NamedTabCase_tabWithHiddenRequiredField__hiddenTitle_operator
+  tabWithVirtualRequiredField__virtualTitle: NamedTabCase_tabWithVirtualRequiredField__virtualTitle_operator
+  tabWithConditionalRequiredField__conditionalTitle: NamedTabCase_tabWithConditionalRequiredField__conditionalTitle_operator
+  tabWithReadAccessRequiredField__readAccessTitle: NamedTabCase_tabWithReadAccessRequiredField__readAccessTitle_operator
+  tabWithOptionalArray__items__itemTitle: NamedTabCase_tabWithOptionalArray__items__itemTitle_operator
+  tabWithOptionalArray__items__id: NamedTabCase_tabWithOptionalArray__items__id_operator
+  createdBy: NamedTabCase_createdBy_Relation
+  updatedBy: NamedTabCase_updatedBy_Relation
+  updatedAt: NamedTabCase_updatedAt_operator
+  createdAt: NamedTabCase_createdAt_operator
+  id: NamedTabCase_id_operator
+  AND: [NamedTabCase_where_and]
+  OR: [NamedTabCase_where_or]
+}
+
+input NamedTabCase_tabWithRequiredField__title_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+}
+
+input NamedTabCase_tabWithHiddenRequiredField__hiddenTitle_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+}
+
+input NamedTabCase_tabWithVirtualRequiredField__virtualTitle_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+}
+
+input NamedTabCase_tabWithConditionalRequiredField__conditionalTitle_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+}
+
+input NamedTabCase_tabWithReadAccessRequiredField__readAccessTitle_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+}
+
+input NamedTabCase_tabWithOptionalArray__items__itemTitle_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+}
+
+input NamedTabCase_tabWithOptionalArray__items__id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input NamedTabCase_createdBy_Relation {
+  relationTo: NamedTabCase_createdBy_Relation_RelationTo
+  value: JSON
+}
+
+enum NamedTabCase_createdBy_Relation_RelationTo {
+  users
+}
+
+input NamedTabCase_updatedBy_Relation {
+  relationTo: NamedTabCase_updatedBy_Relation_RelationTo
+  value: JSON
+}
+
+enum NamedTabCase_updatedBy_Relation_RelationTo {
+  users
+}
+
+input NamedTabCase_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input NamedTabCase_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input NamedTabCase_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input NamedTabCase_where_and {
+  tabWithRequiredField__title: NamedTabCase_tabWithRequiredField__title_operator
+  tabWithHiddenRequiredField__hiddenTitle: NamedTabCase_tabWithHiddenRequiredField__hiddenTitle_operator
+  tabWithVirtualRequiredField__virtualTitle: NamedTabCase_tabWithVirtualRequiredField__virtualTitle_operator
+  tabWithConditionalRequiredField__conditionalTitle: NamedTabCase_tabWithConditionalRequiredField__conditionalTitle_operator
+  tabWithReadAccessRequiredField__readAccessTitle: NamedTabCase_tabWithReadAccessRequiredField__readAccessTitle_operator
+  tabWithOptionalArray__items__itemTitle: NamedTabCase_tabWithOptionalArray__items__itemTitle_operator
+  tabWithOptionalArray__items__id: NamedTabCase_tabWithOptionalArray__items__id_operator
+  createdBy: NamedTabCase_createdBy_Relation
+  updatedBy: NamedTabCase_updatedBy_Relation
+  updatedAt: NamedTabCase_updatedAt_operator
+  createdAt: NamedTabCase_createdAt_operator
+  id: NamedTabCase_id_operator
+  AND: [NamedTabCase_where_and]
+  OR: [NamedTabCase_where_or]
+}
+
+input NamedTabCase_where_or {
+  tabWithRequiredField__title: NamedTabCase_tabWithRequiredField__title_operator
+  tabWithHiddenRequiredField__hiddenTitle: NamedTabCase_tabWithHiddenRequiredField__hiddenTitle_operator
+  tabWithVirtualRequiredField__virtualTitle: NamedTabCase_tabWithVirtualRequiredField__virtualTitle_operator
+  tabWithConditionalRequiredField__conditionalTitle: NamedTabCase_tabWithConditionalRequiredField__conditionalTitle_operator
+  tabWithReadAccessRequiredField__readAccessTitle: NamedTabCase_tabWithReadAccessRequiredField__readAccessTitle_operator
+  tabWithOptionalArray__items__itemTitle: NamedTabCase_tabWithOptionalArray__items__itemTitle_operator
+  tabWithOptionalArray__items__id: NamedTabCase_tabWithOptionalArray__items__id_operator
+  createdBy: NamedTabCase_createdBy_Relation
+  updatedBy: NamedTabCase_updatedBy_Relation
+  updatedAt: NamedTabCase_updatedAt_operator
+  createdAt: NamedTabCase_createdAt_operator
+  id: NamedTabCase_id_operator
+  AND: [NamedTabCase_where_and]
+  OR: [NamedTabCase_where_or]
+}
+
+type countNamedTabCases {
+  totalDocs: Int
+}
+
+type named_tab_casesDocAccess {
+  fields: NamedTabCasesDocAccessFields
+  create: NamedTabCasesCreateDocAccess
+  read: NamedTabCasesReadDocAccess
+  update: NamedTabCasesUpdateDocAccess
+  delete: NamedTabCasesDeleteDocAccess
+  validate: NamedTabCasesValidateDocAccess
+}
+
+type NamedTabCasesDocAccessFields {
+  tabWithRequiredField: NamedTabCasesDocAccessFields_tabWithRequiredField
+  tabWithVirtualRequiredField: NamedTabCasesDocAccessFields_tabWithVirtualRequiredField
+  tabWithConditionalRequiredField: NamedTabCasesDocAccessFields_tabWithConditionalRequiredField
+  tabWithReadAccessRequiredField: NamedTabCasesDocAccessFields_tabWithReadAccessRequiredField
+  tabWithOptionalArray: NamedTabCasesDocAccessFields_tabWithOptionalArray
+  createdBy: NamedTabCasesDocAccessFields_createdBy
+  updatedBy: NamedTabCasesDocAccessFields_updatedBy
+  updatedAt: NamedTabCasesDocAccessFields_updatedAt
+  createdAt: NamedTabCasesDocAccessFields_createdAt
+}
+
+type NamedTabCasesDocAccessFields_tabWithRequiredField {
+  title: NamedTabCasesDocAccessFields_tabWithRequiredField_title
+}
+
+type NamedTabCasesDocAccessFields_tabWithRequiredField_title {
+  create: NamedTabCasesDocAccessFields_tabWithRequiredField_title_Create
+  read: NamedTabCasesDocAccessFields_tabWithRequiredField_title_Read
+  update: NamedTabCasesDocAccessFields_tabWithRequiredField_title_Update
+  delete: NamedTabCasesDocAccessFields_tabWithRequiredField_title_Delete
+  validate: NamedTabCasesDocAccessFields_tabWithRequiredField_title_Validate
+}
+
+type NamedTabCasesDocAccessFields_tabWithRequiredField_title_Create {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithRequiredField_title_Read {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithRequiredField_title_Update {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithRequiredField_title_Delete {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithRequiredField_title_Validate {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithVirtualRequiredField {
+  virtualTitle: NamedTabCasesDocAccessFields_tabWithVirtualRequiredField_virtualTitle
+}
+
+type NamedTabCasesDocAccessFields_tabWithVirtualRequiredField_virtualTitle {
+  create: NamedTabCasesDocAccessFields_tabWithVirtualRequiredField_virtualTitle_Create
+  read: NamedTabCasesDocAccessFields_tabWithVirtualRequiredField_virtualTitle_Read
+  update: NamedTabCasesDocAccessFields_tabWithVirtualRequiredField_virtualTitle_Update
+  delete: NamedTabCasesDocAccessFields_tabWithVirtualRequiredField_virtualTitle_Delete
+  validate: NamedTabCasesDocAccessFields_tabWithVirtualRequiredField_virtualTitle_Validate
+}
+
+type NamedTabCasesDocAccessFields_tabWithVirtualRequiredField_virtualTitle_Create {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithVirtualRequiredField_virtualTitle_Read {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithVirtualRequiredField_virtualTitle_Update {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithVirtualRequiredField_virtualTitle_Delete {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithVirtualRequiredField_virtualTitle_Validate {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithConditionalRequiredField {
+  conditionalTitle: NamedTabCasesDocAccessFields_tabWithConditionalRequiredField_conditionalTitle
+}
+
+type NamedTabCasesDocAccessFields_tabWithConditionalRequiredField_conditionalTitle {
+  create: NamedTabCasesDocAccessFields_tabWithConditionalRequiredField_conditionalTitle_Create
+  read: NamedTabCasesDocAccessFields_tabWithConditionalRequiredField_conditionalTitle_Read
+  update: NamedTabCasesDocAccessFields_tabWithConditionalRequiredField_conditionalTitle_Update
+  delete: NamedTabCasesDocAccessFields_tabWithConditionalRequiredField_conditionalTitle_Delete
+  validate: NamedTabCasesDocAccessFields_tabWithConditionalRequiredField_conditionalTitle_Validate
+}
+
+type NamedTabCasesDocAccessFields_tabWithConditionalRequiredField_conditionalTitle_Create {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithConditionalRequiredField_conditionalTitle_Read {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithConditionalRequiredField_conditionalTitle_Update {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithConditionalRequiredField_conditionalTitle_Delete {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithConditionalRequiredField_conditionalTitle_Validate {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithReadAccessRequiredField {
+  readAccessTitle: NamedTabCasesDocAccessFields_tabWithReadAccessRequiredField_readAccessTitle
+}
+
+type NamedTabCasesDocAccessFields_tabWithReadAccessRequiredField_readAccessTitle {
+  create: NamedTabCasesDocAccessFields_tabWithReadAccessRequiredField_readAccessTitle_Create
+  read: NamedTabCasesDocAccessFields_tabWithReadAccessRequiredField_readAccessTitle_Read
+  update: NamedTabCasesDocAccessFields_tabWithReadAccessRequiredField_readAccessTitle_Update
+  delete: NamedTabCasesDocAccessFields_tabWithReadAccessRequiredField_readAccessTitle_Delete
+  validate: NamedTabCasesDocAccessFields_tabWithReadAccessRequiredField_readAccessTitle_Validate
+}
+
+type NamedTabCasesDocAccessFields_tabWithReadAccessRequiredField_readAccessTitle_Create {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithReadAccessRequiredField_readAccessTitle_Read {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithReadAccessRequiredField_readAccessTitle_Update {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithReadAccessRequiredField_readAccessTitle_Delete {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithReadAccessRequiredField_readAccessTitle_Validate {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithOptionalArray {
+  items: NamedTabCasesDocAccessFields_tabWithOptionalArray_items
+}
+
+type NamedTabCasesDocAccessFields_tabWithOptionalArray_items {
+  create: NamedTabCasesDocAccessFields_tabWithOptionalArray_items_Create
+  read: NamedTabCasesDocAccessFields_tabWithOptionalArray_items_Read
+  update: NamedTabCasesDocAccessFields_tabWithOptionalArray_items_Update
+  delete: NamedTabCasesDocAccessFields_tabWithOptionalArray_items_Delete
+  validate: NamedTabCasesDocAccessFields_tabWithOptionalArray_items_Validate
+  fields: NamedTabCasesDocAccessFields_tabWithOptionalArray_items_Fields
+}
+
+type NamedTabCasesDocAccessFields_tabWithOptionalArray_items_Create {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithOptionalArray_items_Read {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithOptionalArray_items_Update {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithOptionalArray_items_Delete {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithOptionalArray_items_Validate {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithOptionalArray_items_Fields {
+  itemTitle: NamedTabCasesDocAccessFields_tabWithOptionalArray_items_itemTitle
+  id: NamedTabCasesDocAccessFields_tabWithOptionalArray_items_id
+}
+
+type NamedTabCasesDocAccessFields_tabWithOptionalArray_items_itemTitle {
+  create: NamedTabCasesDocAccessFields_tabWithOptionalArray_items_itemTitle_Create
+  read: NamedTabCasesDocAccessFields_tabWithOptionalArray_items_itemTitle_Read
+  update: NamedTabCasesDocAccessFields_tabWithOptionalArray_items_itemTitle_Update
+  delete: NamedTabCasesDocAccessFields_tabWithOptionalArray_items_itemTitle_Delete
+  validate: NamedTabCasesDocAccessFields_tabWithOptionalArray_items_itemTitle_Validate
+}
+
+type NamedTabCasesDocAccessFields_tabWithOptionalArray_items_itemTitle_Create {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithOptionalArray_items_itemTitle_Read {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithOptionalArray_items_itemTitle_Update {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithOptionalArray_items_itemTitle_Delete {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithOptionalArray_items_itemTitle_Validate {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithOptionalArray_items_id {
+  create: NamedTabCasesDocAccessFields_tabWithOptionalArray_items_id_Create
+  read: NamedTabCasesDocAccessFields_tabWithOptionalArray_items_id_Read
+  update: NamedTabCasesDocAccessFields_tabWithOptionalArray_items_id_Update
+  delete: NamedTabCasesDocAccessFields_tabWithOptionalArray_items_id_Delete
+  validate: NamedTabCasesDocAccessFields_tabWithOptionalArray_items_id_Validate
+}
+
+type NamedTabCasesDocAccessFields_tabWithOptionalArray_items_id_Create {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithOptionalArray_items_id_Read {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithOptionalArray_items_id_Update {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithOptionalArray_items_id_Delete {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_tabWithOptionalArray_items_id_Validate {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_createdBy {
+  create: NamedTabCasesDocAccessFields_createdBy_Create
+  read: NamedTabCasesDocAccessFields_createdBy_Read
+  update: NamedTabCasesDocAccessFields_createdBy_Update
+  delete: NamedTabCasesDocAccessFields_createdBy_Delete
+  validate: NamedTabCasesDocAccessFields_createdBy_Validate
+}
+
+type NamedTabCasesDocAccessFields_createdBy_Create {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_createdBy_Read {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_createdBy_Update {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_createdBy_Delete {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_createdBy_Validate {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_updatedBy {
+  create: NamedTabCasesDocAccessFields_updatedBy_Create
+  read: NamedTabCasesDocAccessFields_updatedBy_Read
+  update: NamedTabCasesDocAccessFields_updatedBy_Update
+  delete: NamedTabCasesDocAccessFields_updatedBy_Delete
+  validate: NamedTabCasesDocAccessFields_updatedBy_Validate
+}
+
+type NamedTabCasesDocAccessFields_updatedBy_Create {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_updatedBy_Read {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_updatedBy_Update {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_updatedBy_Delete {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_updatedBy_Validate {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_updatedAt {
+  create: NamedTabCasesDocAccessFields_updatedAt_Create
+  read: NamedTabCasesDocAccessFields_updatedAt_Read
+  update: NamedTabCasesDocAccessFields_updatedAt_Update
+  delete: NamedTabCasesDocAccessFields_updatedAt_Delete
+  validate: NamedTabCasesDocAccessFields_updatedAt_Validate
+}
+
+type NamedTabCasesDocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_updatedAt_Validate {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_createdAt {
+  create: NamedTabCasesDocAccessFields_createdAt_Create
+  read: NamedTabCasesDocAccessFields_createdAt_Read
+  update: NamedTabCasesDocAccessFields_createdAt_Update
+  delete: NamedTabCasesDocAccessFields_createdAt_Delete
+  validate: NamedTabCasesDocAccessFields_createdAt_Validate
+}
+
+type NamedTabCasesDocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type NamedTabCasesDocAccessFields_createdAt_Validate {
+  permission: Boolean!
+}
+
+type NamedTabCasesCreateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type NamedTabCasesReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type NamedTabCasesUpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type NamedTabCasesDeleteDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type NamedTabCasesValidateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadKv {
+  id: String!
+  key: String!
+  data: JSON!
+}
+
+type PayloadKvs {
+  docs: [PayloadKv!]!
+  hasNextPage: Boolean!
+  hasPrevPage: Boolean!
+  limit: Int!
+  nextPage: Int
+  offset: Int
+  page: Int!
+  pagingCounter: Int!
+  prevPage: Int
+  totalDocs: Int!
+  totalPages: Int!
+}
+
+input PayloadKv_where {
+  key: PayloadKv_key_operator
+  data: PayloadKv_data_operator
+  id: PayloadKv_id_operator
+  AND: [PayloadKv_where_and]
+  OR: [PayloadKv_where_or]
+}
+
+input PayloadKv_key_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+}
+
+input PayloadKv_data_operator {
+  equals: JSON
+  not_equals: JSON
+  like: JSON
+  contains: JSON
+  within: JSON
+  intersects: JSON
+}
+
+input PayloadKv_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input PayloadKv_where_and {
+  key: PayloadKv_key_operator
+  data: PayloadKv_data_operator
+  id: PayloadKv_id_operator
+  AND: [PayloadKv_where_and]
+  OR: [PayloadKv_where_or]
+}
+
+input PayloadKv_where_or {
+  key: PayloadKv_key_operator
+  data: PayloadKv_data_operator
+  id: PayloadKv_id_operator
+  AND: [PayloadKv_where_and]
+  OR: [PayloadKv_where_or]
+}
+
+type countPayloadKvs {
+  totalDocs: Int
+}
+
+type payload_kvDocAccess {
+  fields: PayloadKvDocAccessFields
+  create: PayloadKvCreateDocAccess
+  read: PayloadKvReadDocAccess
+  update: PayloadKvUpdateDocAccess
+  delete: PayloadKvDeleteDocAccess
+  validate: PayloadKvValidateDocAccess
+}
+
+type PayloadKvDocAccessFields {
+  key: PayloadKvDocAccessFields_key
+  data: PayloadKvDocAccessFields_data
+}
+
+type PayloadKvDocAccessFields_key {
+  create: PayloadKvDocAccessFields_key_Create
+  read: PayloadKvDocAccessFields_key_Read
+  update: PayloadKvDocAccessFields_key_Update
+  delete: PayloadKvDocAccessFields_key_Delete
+  validate: PayloadKvDocAccessFields_key_Validate
+}
+
+type PayloadKvDocAccessFields_key_Create {
+  permission: Boolean!
+}
+
+type PayloadKvDocAccessFields_key_Read {
+  permission: Boolean!
+}
+
+type PayloadKvDocAccessFields_key_Update {
+  permission: Boolean!
+}
+
+type PayloadKvDocAccessFields_key_Delete {
+  permission: Boolean!
+}
+
+type PayloadKvDocAccessFields_key_Validate {
+  permission: Boolean!
+}
+
+type PayloadKvDocAccessFields_data {
+  create: PayloadKvDocAccessFields_data_Create
+  read: PayloadKvDocAccessFields_data_Read
+  update: PayloadKvDocAccessFields_data_Update
+  delete: PayloadKvDocAccessFields_data_Delete
+  validate: PayloadKvDocAccessFields_data_Validate
+}
+
+type PayloadKvDocAccessFields_data_Create {
+  permission: Boolean!
+}
+
+type PayloadKvDocAccessFields_data_Read {
+  permission: Boolean!
+}
+
+type PayloadKvDocAccessFields_data_Update {
+  permission: Boolean!
+}
+
+type PayloadKvDocAccessFields_data_Delete {
+  permission: Boolean!
+}
+
+type PayloadKvDocAccessFields_data_Validate {
+  permission: Boolean!
+}
+
+type PayloadKvCreateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadKvReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadKvUpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadKvDeleteDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadKvValidateDocAccess {
+  permission: Boolean!
+  where: JSONObject
 }
 
 type Users {
@@ -1145,6 +2340,8 @@ type Users {
 }
 
 input User_where {
+  createdBy: User_createdBy_Relation
+  updatedBy: User_updatedBy_Relation
   updatedAt: User_updatedAt_operator
   createdAt: User_createdAt_operator
   email: User_email_operator
@@ -1154,6 +2351,24 @@ input User_where {
   id: User_id_operator
   AND: [User_where_and]
   OR: [User_where_or]
+}
+
+input User_createdBy_Relation {
+  relationTo: User_createdBy_Relation_RelationTo
+  value: JSON
+}
+
+enum User_createdBy_Relation_RelationTo {
+  users
+}
+
+input User_updatedBy_Relation {
+  relationTo: User_updatedBy_Relation_RelationTo
+  value: JSON
+}
+
+enum User_updatedBy_Relation_RelationTo {
+  users
 }
 
 input User_updatedAt_operator {
@@ -1231,6 +2446,8 @@ input User_id_operator {
 }
 
 input User_where_and {
+  createdBy: User_createdBy_Relation
+  updatedBy: User_updatedBy_Relation
   updatedAt: User_updatedAt_operator
   createdAt: User_createdAt_operator
   email: User_email_operator
@@ -1243,6 +2460,8 @@ input User_where_and {
 }
 
 input User_where_or {
+  createdBy: User_createdBy_Relation
+  updatedBy: User_updatedBy_Relation
   updatedAt: User_updatedAt_operator
   createdAt: User_createdAt_operator
   email: User_email_operator
@@ -1264,14 +2483,73 @@ type usersDocAccess {
   read: UsersReadDocAccess
   update: UsersUpdateDocAccess
   delete: UsersDeleteDocAccess
+  validate: UsersValidateDocAccess
   unlock: UsersUnlockDocAccess
 }
 
 type UsersDocAccessFields {
+  createdBy: UsersDocAccessFields_createdBy
+  updatedBy: UsersDocAccessFields_updatedBy
   updatedAt: UsersDocAccessFields_updatedAt
   createdAt: UsersDocAccessFields_createdAt
   email: UsersDocAccessFields_email
   sessions: UsersDocAccessFields_sessions
+}
+
+type UsersDocAccessFields_createdBy {
+  create: UsersDocAccessFields_createdBy_Create
+  read: UsersDocAccessFields_createdBy_Read
+  update: UsersDocAccessFields_createdBy_Update
+  delete: UsersDocAccessFields_createdBy_Delete
+  validate: UsersDocAccessFields_createdBy_Validate
+}
+
+type UsersDocAccessFields_createdBy_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_createdBy_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_createdBy_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_createdBy_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_createdBy_Validate {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_updatedBy {
+  create: UsersDocAccessFields_updatedBy_Create
+  read: UsersDocAccessFields_updatedBy_Read
+  update: UsersDocAccessFields_updatedBy_Update
+  delete: UsersDocAccessFields_updatedBy_Delete
+  validate: UsersDocAccessFields_updatedBy_Validate
+}
+
+type UsersDocAccessFields_updatedBy_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_updatedBy_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_updatedBy_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_updatedBy_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_updatedBy_Validate {
+  permission: Boolean!
 }
 
 type UsersDocAccessFields_updatedAt {
@@ -1279,6 +2557,7 @@ type UsersDocAccessFields_updatedAt {
   read: UsersDocAccessFields_updatedAt_Read
   update: UsersDocAccessFields_updatedAt_Update
   delete: UsersDocAccessFields_updatedAt_Delete
+  validate: UsersDocAccessFields_updatedAt_Validate
 }
 
 type UsersDocAccessFields_updatedAt_Create {
@@ -1297,11 +2576,16 @@ type UsersDocAccessFields_updatedAt_Delete {
   permission: Boolean!
 }
 
+type UsersDocAccessFields_updatedAt_Validate {
+  permission: Boolean!
+}
+
 type UsersDocAccessFields_createdAt {
   create: UsersDocAccessFields_createdAt_Create
   read: UsersDocAccessFields_createdAt_Read
   update: UsersDocAccessFields_createdAt_Update
   delete: UsersDocAccessFields_createdAt_Delete
+  validate: UsersDocAccessFields_createdAt_Validate
 }
 
 type UsersDocAccessFields_createdAt_Create {
@@ -1320,11 +2604,16 @@ type UsersDocAccessFields_createdAt_Delete {
   permission: Boolean!
 }
 
+type UsersDocAccessFields_createdAt_Validate {
+  permission: Boolean!
+}
+
 type UsersDocAccessFields_email {
   create: UsersDocAccessFields_email_Create
   read: UsersDocAccessFields_email_Read
   update: UsersDocAccessFields_email_Update
   delete: UsersDocAccessFields_email_Delete
+  validate: UsersDocAccessFields_email_Validate
 }
 
 type UsersDocAccessFields_email_Create {
@@ -1343,11 +2632,16 @@ type UsersDocAccessFields_email_Delete {
   permission: Boolean!
 }
 
+type UsersDocAccessFields_email_Validate {
+  permission: Boolean!
+}
+
 type UsersDocAccessFields_sessions {
   create: UsersDocAccessFields_sessions_Create
   read: UsersDocAccessFields_sessions_Read
   update: UsersDocAccessFields_sessions_Update
   delete: UsersDocAccessFields_sessions_Delete
+  validate: UsersDocAccessFields_sessions_Validate
   fields: UsersDocAccessFields_sessions_Fields
 }
 
@@ -1367,6 +2661,10 @@ type UsersDocAccessFields_sessions_Delete {
   permission: Boolean!
 }
 
+type UsersDocAccessFields_sessions_Validate {
+  permission: Boolean!
+}
+
 type UsersDocAccessFields_sessions_Fields {
   id: UsersDocAccessFields_sessions_id
   createdAt: UsersDocAccessFields_sessions_createdAt
@@ -1378,6 +2676,7 @@ type UsersDocAccessFields_sessions_id {
   read: UsersDocAccessFields_sessions_id_Read
   update: UsersDocAccessFields_sessions_id_Update
   delete: UsersDocAccessFields_sessions_id_Delete
+  validate: UsersDocAccessFields_sessions_id_Validate
 }
 
 type UsersDocAccessFields_sessions_id_Create {
@@ -1396,11 +2695,16 @@ type UsersDocAccessFields_sessions_id_Delete {
   permission: Boolean!
 }
 
+type UsersDocAccessFields_sessions_id_Validate {
+  permission: Boolean!
+}
+
 type UsersDocAccessFields_sessions_createdAt {
   create: UsersDocAccessFields_sessions_createdAt_Create
   read: UsersDocAccessFields_sessions_createdAt_Read
   update: UsersDocAccessFields_sessions_createdAt_Update
   delete: UsersDocAccessFields_sessions_createdAt_Delete
+  validate: UsersDocAccessFields_sessions_createdAt_Validate
 }
 
 type UsersDocAccessFields_sessions_createdAt_Create {
@@ -1419,11 +2723,16 @@ type UsersDocAccessFields_sessions_createdAt_Delete {
   permission: Boolean!
 }
 
+type UsersDocAccessFields_sessions_createdAt_Validate {
+  permission: Boolean!
+}
+
 type UsersDocAccessFields_sessions_expiresAt {
   create: UsersDocAccessFields_sessions_expiresAt_Create
   read: UsersDocAccessFields_sessions_expiresAt_Read
   update: UsersDocAccessFields_sessions_expiresAt_Update
   delete: UsersDocAccessFields_sessions_expiresAt_Delete
+  validate: UsersDocAccessFields_sessions_expiresAt_Validate
 }
 
 type UsersDocAccessFields_sessions_expiresAt_Create {
@@ -1439,6 +2748,10 @@ type UsersDocAccessFields_sessions_expiresAt_Update {
 }
 
 type UsersDocAccessFields_sessions_expiresAt_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_expiresAt_Validate {
   permission: Boolean!
 }
 
@@ -1462,6 +2775,11 @@ type UsersDeleteDocAccess {
   where: JSONObject
 }
 
+type UsersValidateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
 type UsersUnlockDocAccess {
   permission: Boolean!
   where: JSONObject
@@ -1478,7 +2796,7 @@ type PayloadLockedDocument {
   id: String!
   document: PayloadLockedDocument_Document_Relationship
   globalSlug: String
-  user: PayloadLockedDocument_User_Relationship!
+  user: PayloadLockedDocument_User_Relationship
   updatedAt: DateTime
   createdAt: DateTime
 }
@@ -1491,10 +2809,11 @@ type PayloadLockedDocument_Document_Relationship {
 enum PayloadLockedDocument_Document_RelationTo {
   collection1
   collection2
+  named_tab_cases
   users
 }
 
-union PayloadLockedDocument_Document = Collection1 | Collection2 | User
+union PayloadLockedDocument_Document = Collection1 | Collection2 | NamedTabCase | User
 
 type PayloadLockedDocument_User_Relationship {
   relationTo: PayloadLockedDocument_User_RelationTo
@@ -1540,14 +2859,10 @@ input PayloadLockedDocument_document_Relation {
 enum PayloadLockedDocument_document_Relation_RelationTo {
   collection1
   collection2
+  named_tab_cases
   no_graphql
   users
 }
-
-"""
-The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
-"""
-scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
 input PayloadLockedDocument_globalSlug_operator {
   equals: String
@@ -1634,6 +2949,7 @@ type payload_locked_documentsDocAccess {
   read: PayloadLockedDocumentsReadDocAccess
   update: PayloadLockedDocumentsUpdateDocAccess
   delete: PayloadLockedDocumentsDeleteDocAccess
+  validate: PayloadLockedDocumentsValidateDocAccess
 }
 
 type PayloadLockedDocumentsDocAccessFields {
@@ -1649,6 +2965,7 @@ type PayloadLockedDocumentsDocAccessFields_document {
   read: PayloadLockedDocumentsDocAccessFields_document_Read
   update: PayloadLockedDocumentsDocAccessFields_document_Update
   delete: PayloadLockedDocumentsDocAccessFields_document_Delete
+  validate: PayloadLockedDocumentsDocAccessFields_document_Validate
 }
 
 type PayloadLockedDocumentsDocAccessFields_document_Create {
@@ -1667,11 +2984,16 @@ type PayloadLockedDocumentsDocAccessFields_document_Delete {
   permission: Boolean!
 }
 
+type PayloadLockedDocumentsDocAccessFields_document_Validate {
+  permission: Boolean!
+}
+
 type PayloadLockedDocumentsDocAccessFields_globalSlug {
   create: PayloadLockedDocumentsDocAccessFields_globalSlug_Create
   read: PayloadLockedDocumentsDocAccessFields_globalSlug_Read
   update: PayloadLockedDocumentsDocAccessFields_globalSlug_Update
   delete: PayloadLockedDocumentsDocAccessFields_globalSlug_Delete
+  validate: PayloadLockedDocumentsDocAccessFields_globalSlug_Validate
 }
 
 type PayloadLockedDocumentsDocAccessFields_globalSlug_Create {
@@ -1690,11 +3012,16 @@ type PayloadLockedDocumentsDocAccessFields_globalSlug_Delete {
   permission: Boolean!
 }
 
+type PayloadLockedDocumentsDocAccessFields_globalSlug_Validate {
+  permission: Boolean!
+}
+
 type PayloadLockedDocumentsDocAccessFields_user {
   create: PayloadLockedDocumentsDocAccessFields_user_Create
   read: PayloadLockedDocumentsDocAccessFields_user_Read
   update: PayloadLockedDocumentsDocAccessFields_user_Update
   delete: PayloadLockedDocumentsDocAccessFields_user_Delete
+  validate: PayloadLockedDocumentsDocAccessFields_user_Validate
 }
 
 type PayloadLockedDocumentsDocAccessFields_user_Create {
@@ -1713,11 +3040,16 @@ type PayloadLockedDocumentsDocAccessFields_user_Delete {
   permission: Boolean!
 }
 
+type PayloadLockedDocumentsDocAccessFields_user_Validate {
+  permission: Boolean!
+}
+
 type PayloadLockedDocumentsDocAccessFields_updatedAt {
   create: PayloadLockedDocumentsDocAccessFields_updatedAt_Create
   read: PayloadLockedDocumentsDocAccessFields_updatedAt_Read
   update: PayloadLockedDocumentsDocAccessFields_updatedAt_Update
   delete: PayloadLockedDocumentsDocAccessFields_updatedAt_Delete
+  validate: PayloadLockedDocumentsDocAccessFields_updatedAt_Validate
 }
 
 type PayloadLockedDocumentsDocAccessFields_updatedAt_Create {
@@ -1736,11 +3068,16 @@ type PayloadLockedDocumentsDocAccessFields_updatedAt_Delete {
   permission: Boolean!
 }
 
+type PayloadLockedDocumentsDocAccessFields_updatedAt_Validate {
+  permission: Boolean!
+}
+
 type PayloadLockedDocumentsDocAccessFields_createdAt {
   create: PayloadLockedDocumentsDocAccessFields_createdAt_Create
   read: PayloadLockedDocumentsDocAccessFields_createdAt_Read
   update: PayloadLockedDocumentsDocAccessFields_createdAt_Update
   delete: PayloadLockedDocumentsDocAccessFields_createdAt_Delete
+  validate: PayloadLockedDocumentsDocAccessFields_createdAt_Validate
 }
 
 type PayloadLockedDocumentsDocAccessFields_createdAt_Create {
@@ -1756,6 +3093,10 @@ type PayloadLockedDocumentsDocAccessFields_createdAt_Update {
 }
 
 type PayloadLockedDocumentsDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsDocAccessFields_createdAt_Validate {
   permission: Boolean!
 }
 
@@ -1779,9 +3120,14 @@ type PayloadLockedDocumentsDeleteDocAccess {
   where: JSONObject
 }
 
+type PayloadLockedDocumentsValidateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
 type PayloadPreference {
   id: String!
-  user: PayloadPreference_User_Relationship!
+  user: PayloadPreference_User_Relationship
   key: String
   value: JSON
   updatedAt: DateTime
@@ -1919,6 +3265,7 @@ type payload_preferencesDocAccess {
   read: PayloadPreferencesReadDocAccess
   update: PayloadPreferencesUpdateDocAccess
   delete: PayloadPreferencesDeleteDocAccess
+  validate: PayloadPreferencesValidateDocAccess
 }
 
 type PayloadPreferencesDocAccessFields {
@@ -1934,6 +3281,7 @@ type PayloadPreferencesDocAccessFields_user {
   read: PayloadPreferencesDocAccessFields_user_Read
   update: PayloadPreferencesDocAccessFields_user_Update
   delete: PayloadPreferencesDocAccessFields_user_Delete
+  validate: PayloadPreferencesDocAccessFields_user_Validate
 }
 
 type PayloadPreferencesDocAccessFields_user_Create {
@@ -1952,11 +3300,16 @@ type PayloadPreferencesDocAccessFields_user_Delete {
   permission: Boolean!
 }
 
+type PayloadPreferencesDocAccessFields_user_Validate {
+  permission: Boolean!
+}
+
 type PayloadPreferencesDocAccessFields_key {
   create: PayloadPreferencesDocAccessFields_key_Create
   read: PayloadPreferencesDocAccessFields_key_Read
   update: PayloadPreferencesDocAccessFields_key_Update
   delete: PayloadPreferencesDocAccessFields_key_Delete
+  validate: PayloadPreferencesDocAccessFields_key_Validate
 }
 
 type PayloadPreferencesDocAccessFields_key_Create {
@@ -1975,11 +3328,16 @@ type PayloadPreferencesDocAccessFields_key_Delete {
   permission: Boolean!
 }
 
+type PayloadPreferencesDocAccessFields_key_Validate {
+  permission: Boolean!
+}
+
 type PayloadPreferencesDocAccessFields_value {
   create: PayloadPreferencesDocAccessFields_value_Create
   read: PayloadPreferencesDocAccessFields_value_Read
   update: PayloadPreferencesDocAccessFields_value_Update
   delete: PayloadPreferencesDocAccessFields_value_Delete
+  validate: PayloadPreferencesDocAccessFields_value_Validate
 }
 
 type PayloadPreferencesDocAccessFields_value_Create {
@@ -1998,11 +3356,16 @@ type PayloadPreferencesDocAccessFields_value_Delete {
   permission: Boolean!
 }
 
+type PayloadPreferencesDocAccessFields_value_Validate {
+  permission: Boolean!
+}
+
 type PayloadPreferencesDocAccessFields_updatedAt {
   create: PayloadPreferencesDocAccessFields_updatedAt_Create
   read: PayloadPreferencesDocAccessFields_updatedAt_Read
   update: PayloadPreferencesDocAccessFields_updatedAt_Update
   delete: PayloadPreferencesDocAccessFields_updatedAt_Delete
+  validate: PayloadPreferencesDocAccessFields_updatedAt_Validate
 }
 
 type PayloadPreferencesDocAccessFields_updatedAt_Create {
@@ -2021,11 +3384,16 @@ type PayloadPreferencesDocAccessFields_updatedAt_Delete {
   permission: Boolean!
 }
 
+type PayloadPreferencesDocAccessFields_updatedAt_Validate {
+  permission: Boolean!
+}
+
 type PayloadPreferencesDocAccessFields_createdAt {
   create: PayloadPreferencesDocAccessFields_createdAt_Create
   read: PayloadPreferencesDocAccessFields_createdAt_Read
   update: PayloadPreferencesDocAccessFields_createdAt_Update
   delete: PayloadPreferencesDocAccessFields_createdAt_Delete
+  validate: PayloadPreferencesDocAccessFields_createdAt_Validate
 }
 
 type PayloadPreferencesDocAccessFields_createdAt_Create {
@@ -2041,6 +3409,10 @@ type PayloadPreferencesDocAccessFields_createdAt_Update {
 }
 
 type PayloadPreferencesDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_createdAt_Validate {
   permission: Boolean!
 }
 
@@ -2064,13 +3436,552 @@ type PayloadPreferencesDeleteDocAccess {
   where: JSONObject
 }
 
+type PayloadPreferencesValidateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadLlmInstruction {
+  id: String
+  entitySlug: String!
+  title: String
+  entityType: PayloadLlmInstruction_entityType!
+  additionalInstructions(depth: Int): JSON
+  systemInstructions(depth: Int): JSON
+  createdBy: PayloadLlmInstruction_CreatedBy_Relationship
+  updatedBy: PayloadLlmInstruction_UpdatedBy_Relationship
+  updatedAt: DateTime
+  createdAt: DateTime
+}
+
+enum PayloadLlmInstruction_entityType {
+  collection
+  global
+}
+
+type PayloadLlmInstruction_CreatedBy_Relationship {
+  relationTo: PayloadLlmInstruction_CreatedBy_RelationTo
+  value: PayloadLlmInstruction_CreatedBy
+}
+
+enum PayloadLlmInstruction_CreatedBy_RelationTo {
+  users
+}
+
+union PayloadLlmInstruction_CreatedBy = User
+
+type PayloadLlmInstruction_UpdatedBy_Relationship {
+  relationTo: PayloadLlmInstruction_UpdatedBy_RelationTo
+  value: PayloadLlmInstruction_UpdatedBy
+}
+
+enum PayloadLlmInstruction_UpdatedBy_RelationTo {
+  users
+}
+
+union PayloadLlmInstruction_UpdatedBy = User
+
+type PayloadLlmInstructions {
+  docs: [PayloadLlmInstruction!]!
+  hasNextPage: Boolean!
+  hasPrevPage: Boolean!
+  limit: Int!
+  nextPage: Int
+  offset: Int
+  page: Int!
+  pagingCounter: Int!
+  prevPage: Int
+  totalDocs: Int!
+  totalPages: Int!
+}
+
+input PayloadLlmInstruction_where {
+  id: PayloadLlmInstruction_id_operator
+  entitySlug: PayloadLlmInstruction_entitySlug_operator
+  title: PayloadLlmInstruction_title_operator
+  entityType: PayloadLlmInstruction_entityType_operator
+  additionalInstructions: PayloadLlmInstruction_additionalInstructions_operator
+  systemInstructions: PayloadLlmInstruction_systemInstructions_operator
+  createdBy: PayloadLlmInstruction_createdBy_Relation
+  updatedBy: PayloadLlmInstruction_updatedBy_Relation
+  updatedAt: PayloadLlmInstruction_updatedAt_operator
+  createdAt: PayloadLlmInstruction_createdAt_operator
+  AND: [PayloadLlmInstruction_where_and]
+  OR: [PayloadLlmInstruction_where_or]
+}
+
+input PayloadLlmInstruction_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input PayloadLlmInstruction_entitySlug_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+}
+
+input PayloadLlmInstruction_title_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input PayloadLlmInstruction_entityType_operator {
+  equals: PayloadLlmInstruction_entityType_Input
+  not_equals: PayloadLlmInstruction_entityType_Input
+  in: [PayloadLlmInstruction_entityType_Input]
+  not_in: [PayloadLlmInstruction_entityType_Input]
+  all: [PayloadLlmInstruction_entityType_Input]
+}
+
+enum PayloadLlmInstruction_entityType_Input {
+  collection
+  global
+}
+
+input PayloadLlmInstruction_additionalInstructions_operator {
+  equals: JSON
+  not_equals: JSON
+  like: JSON
+  contains: JSON
+  exists: Boolean
+}
+
+input PayloadLlmInstruction_systemInstructions_operator {
+  equals: JSON
+  not_equals: JSON
+  like: JSON
+  contains: JSON
+  exists: Boolean
+}
+
+input PayloadLlmInstruction_createdBy_Relation {
+  relationTo: PayloadLlmInstruction_createdBy_Relation_RelationTo
+  value: JSON
+}
+
+enum PayloadLlmInstruction_createdBy_Relation_RelationTo {
+  users
+}
+
+input PayloadLlmInstruction_updatedBy_Relation {
+  relationTo: PayloadLlmInstruction_updatedBy_Relation_RelationTo
+  value: JSON
+}
+
+enum PayloadLlmInstruction_updatedBy_Relation_RelationTo {
+  users
+}
+
+input PayloadLlmInstruction_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input PayloadLlmInstruction_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input PayloadLlmInstruction_where_and {
+  id: PayloadLlmInstruction_id_operator
+  entitySlug: PayloadLlmInstruction_entitySlug_operator
+  title: PayloadLlmInstruction_title_operator
+  entityType: PayloadLlmInstruction_entityType_operator
+  additionalInstructions: PayloadLlmInstruction_additionalInstructions_operator
+  systemInstructions: PayloadLlmInstruction_systemInstructions_operator
+  createdBy: PayloadLlmInstruction_createdBy_Relation
+  updatedBy: PayloadLlmInstruction_updatedBy_Relation
+  updatedAt: PayloadLlmInstruction_updatedAt_operator
+  createdAt: PayloadLlmInstruction_createdAt_operator
+  AND: [PayloadLlmInstruction_where_and]
+  OR: [PayloadLlmInstruction_where_or]
+}
+
+input PayloadLlmInstruction_where_or {
+  id: PayloadLlmInstruction_id_operator
+  entitySlug: PayloadLlmInstruction_entitySlug_operator
+  title: PayloadLlmInstruction_title_operator
+  entityType: PayloadLlmInstruction_entityType_operator
+  additionalInstructions: PayloadLlmInstruction_additionalInstructions_operator
+  systemInstructions: PayloadLlmInstruction_systemInstructions_operator
+  createdBy: PayloadLlmInstruction_createdBy_Relation
+  updatedBy: PayloadLlmInstruction_updatedBy_Relation
+  updatedAt: PayloadLlmInstruction_updatedAt_operator
+  createdAt: PayloadLlmInstruction_createdAt_operator
+  AND: [PayloadLlmInstruction_where_and]
+  OR: [PayloadLlmInstruction_where_or]
+}
+
+type countPayloadLlmInstructions {
+  totalDocs: Int
+}
+
+type payload_llm_instructionsDocAccess {
+  fields: PayloadLlmInstructionsDocAccessFields
+  create: PayloadLlmInstructionsCreateDocAccess
+  read: PayloadLlmInstructionsReadDocAccess
+  update: PayloadLlmInstructionsUpdateDocAccess
+  delete: PayloadLlmInstructionsDeleteDocAccess
+  validate: PayloadLlmInstructionsValidateDocAccess
+}
+
+type PayloadLlmInstructionsDocAccessFields {
+  id: PayloadLlmInstructionsDocAccessFields_id
+  entitySlug: PayloadLlmInstructionsDocAccessFields_entitySlug
+  title: PayloadLlmInstructionsDocAccessFields_title
+  entityType: PayloadLlmInstructionsDocAccessFields_entityType
+  additionalInstructions: PayloadLlmInstructionsDocAccessFields_additionalInstructions
+  systemInstructions: PayloadLlmInstructionsDocAccessFields_systemInstructions
+  createdBy: PayloadLlmInstructionsDocAccessFields_createdBy
+  updatedBy: PayloadLlmInstructionsDocAccessFields_updatedBy
+  updatedAt: PayloadLlmInstructionsDocAccessFields_updatedAt
+  createdAt: PayloadLlmInstructionsDocAccessFields_createdAt
+}
+
+type PayloadLlmInstructionsDocAccessFields_id {
+  create: PayloadLlmInstructionsDocAccessFields_id_Create
+  read: PayloadLlmInstructionsDocAccessFields_id_Read
+  update: PayloadLlmInstructionsDocAccessFields_id_Update
+  delete: PayloadLlmInstructionsDocAccessFields_id_Delete
+  validate: PayloadLlmInstructionsDocAccessFields_id_Validate
+}
+
+type PayloadLlmInstructionsDocAccessFields_id_Create {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_id_Read {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_id_Update {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_id_Delete {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_id_Validate {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_entitySlug {
+  create: PayloadLlmInstructionsDocAccessFields_entitySlug_Create
+  read: PayloadLlmInstructionsDocAccessFields_entitySlug_Read
+  update: PayloadLlmInstructionsDocAccessFields_entitySlug_Update
+  delete: PayloadLlmInstructionsDocAccessFields_entitySlug_Delete
+  validate: PayloadLlmInstructionsDocAccessFields_entitySlug_Validate
+}
+
+type PayloadLlmInstructionsDocAccessFields_entitySlug_Create {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_entitySlug_Read {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_entitySlug_Update {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_entitySlug_Delete {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_entitySlug_Validate {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_title {
+  create: PayloadLlmInstructionsDocAccessFields_title_Create
+  read: PayloadLlmInstructionsDocAccessFields_title_Read
+  update: PayloadLlmInstructionsDocAccessFields_title_Update
+  delete: PayloadLlmInstructionsDocAccessFields_title_Delete
+  validate: PayloadLlmInstructionsDocAccessFields_title_Validate
+}
+
+type PayloadLlmInstructionsDocAccessFields_title_Create {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_title_Read {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_title_Update {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_title_Delete {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_title_Validate {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_entityType {
+  create: PayloadLlmInstructionsDocAccessFields_entityType_Create
+  read: PayloadLlmInstructionsDocAccessFields_entityType_Read
+  update: PayloadLlmInstructionsDocAccessFields_entityType_Update
+  delete: PayloadLlmInstructionsDocAccessFields_entityType_Delete
+  validate: PayloadLlmInstructionsDocAccessFields_entityType_Validate
+}
+
+type PayloadLlmInstructionsDocAccessFields_entityType_Create {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_entityType_Read {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_entityType_Update {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_entityType_Delete {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_entityType_Validate {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_additionalInstructions {
+  create: PayloadLlmInstructionsDocAccessFields_additionalInstructions_Create
+  read: PayloadLlmInstructionsDocAccessFields_additionalInstructions_Read
+  update: PayloadLlmInstructionsDocAccessFields_additionalInstructions_Update
+  delete: PayloadLlmInstructionsDocAccessFields_additionalInstructions_Delete
+  validate: PayloadLlmInstructionsDocAccessFields_additionalInstructions_Validate
+}
+
+type PayloadLlmInstructionsDocAccessFields_additionalInstructions_Create {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_additionalInstructions_Read {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_additionalInstructions_Update {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_additionalInstructions_Delete {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_additionalInstructions_Validate {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_systemInstructions {
+  create: PayloadLlmInstructionsDocAccessFields_systemInstructions_Create
+  read: PayloadLlmInstructionsDocAccessFields_systemInstructions_Read
+  update: PayloadLlmInstructionsDocAccessFields_systemInstructions_Update
+  delete: PayloadLlmInstructionsDocAccessFields_systemInstructions_Delete
+  validate: PayloadLlmInstructionsDocAccessFields_systemInstructions_Validate
+}
+
+type PayloadLlmInstructionsDocAccessFields_systemInstructions_Create {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_systemInstructions_Read {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_systemInstructions_Update {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_systemInstructions_Delete {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_systemInstructions_Validate {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_createdBy {
+  create: PayloadLlmInstructionsDocAccessFields_createdBy_Create
+  read: PayloadLlmInstructionsDocAccessFields_createdBy_Read
+  update: PayloadLlmInstructionsDocAccessFields_createdBy_Update
+  delete: PayloadLlmInstructionsDocAccessFields_createdBy_Delete
+  validate: PayloadLlmInstructionsDocAccessFields_createdBy_Validate
+}
+
+type PayloadLlmInstructionsDocAccessFields_createdBy_Create {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_createdBy_Read {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_createdBy_Update {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_createdBy_Delete {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_createdBy_Validate {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_updatedBy {
+  create: PayloadLlmInstructionsDocAccessFields_updatedBy_Create
+  read: PayloadLlmInstructionsDocAccessFields_updatedBy_Read
+  update: PayloadLlmInstructionsDocAccessFields_updatedBy_Update
+  delete: PayloadLlmInstructionsDocAccessFields_updatedBy_Delete
+  validate: PayloadLlmInstructionsDocAccessFields_updatedBy_Validate
+}
+
+type PayloadLlmInstructionsDocAccessFields_updatedBy_Create {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_updatedBy_Read {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_updatedBy_Update {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_updatedBy_Delete {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_updatedBy_Validate {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_updatedAt {
+  create: PayloadLlmInstructionsDocAccessFields_updatedAt_Create
+  read: PayloadLlmInstructionsDocAccessFields_updatedAt_Read
+  update: PayloadLlmInstructionsDocAccessFields_updatedAt_Update
+  delete: PayloadLlmInstructionsDocAccessFields_updatedAt_Delete
+  validate: PayloadLlmInstructionsDocAccessFields_updatedAt_Validate
+}
+
+type PayloadLlmInstructionsDocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_updatedAt_Validate {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_createdAt {
+  create: PayloadLlmInstructionsDocAccessFields_createdAt_Create
+  read: PayloadLlmInstructionsDocAccessFields_createdAt_Read
+  update: PayloadLlmInstructionsDocAccessFields_createdAt_Update
+  delete: PayloadLlmInstructionsDocAccessFields_createdAt_Delete
+  validate: PayloadLlmInstructionsDocAccessFields_createdAt_Validate
+}
+
+type PayloadLlmInstructionsDocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsDocAccessFields_createdAt_Validate {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsCreateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadLlmInstructionsReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadLlmInstructionsUpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadLlmInstructionsDeleteDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadLlmInstructionsValidateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
 type Access {
   canAccessAdmin: Boolean!
   collection1: collection1Access
   collection2: collection2Access
+  named_tab_cases: named_tab_casesAccess
+  payload_kv: payload_kvAccess
   users: usersAccess
   payload_locked_documents: payload_locked_documentsAccess
   payload_preferences: payload_preferencesAccess
+  payload_llm_instructions: payload_llm_instructionsAccess
 }
 
 type collection1Access {
@@ -2079,6 +3990,7 @@ type collection1Access {
   read: Collection1ReadAccess
   update: Collection1UpdateAccess
   delete: Collection1DeleteAccess
+  validate: Collection1ValidateAccess
 }
 
 type Collection1Fields {
@@ -2086,6 +3998,8 @@ type Collection1Fields {
   title: Collection1Fields_title
   meta: Collection1Fields_meta
   blocks: Collection1Fields_blocks
+  createdBy: Collection1Fields_createdBy
+  updatedBy: Collection1Fields_updatedBy
   updatedAt: Collection1Fields_updatedAt
   createdAt: Collection1Fields_createdAt
 }
@@ -2095,6 +4009,7 @@ type Collection1Fields_testing {
   read: Collection1Fields_testing_Read
   update: Collection1Fields_testing_Update
   delete: Collection1Fields_testing_Delete
+  validate: Collection1Fields_testing_Validate
 }
 
 type Collection1Fields_testing_Create {
@@ -2113,11 +4028,16 @@ type Collection1Fields_testing_Delete {
   permission: Boolean!
 }
 
+type Collection1Fields_testing_Validate {
+  permission: Boolean!
+}
+
 type Collection1Fields_title {
   create: Collection1Fields_title_Create
   read: Collection1Fields_title_Read
   update: Collection1Fields_title_Update
   delete: Collection1Fields_title_Delete
+  validate: Collection1Fields_title_Validate
 }
 
 type Collection1Fields_title_Create {
@@ -2136,11 +4056,16 @@ type Collection1Fields_title_Delete {
   permission: Boolean!
 }
 
+type Collection1Fields_title_Validate {
+  permission: Boolean!
+}
+
 type Collection1Fields_meta {
   create: Collection1Fields_meta_Create
   read: Collection1Fields_meta_Read
   update: Collection1Fields_meta_Update
   delete: Collection1Fields_meta_Delete
+  validate: Collection1Fields_meta_Validate
   fields: Collection1Fields_meta_Fields
 }
 
@@ -2160,6 +4085,10 @@ type Collection1Fields_meta_Delete {
   permission: Boolean!
 }
 
+type Collection1Fields_meta_Validate {
+  permission: Boolean!
+}
+
 type Collection1Fields_meta_Fields {
   title: Collection1Fields_meta_title
   description: Collection1Fields_meta_description
@@ -2171,6 +4100,7 @@ type Collection1Fields_meta_title {
   read: Collection1Fields_meta_title_Read
   update: Collection1Fields_meta_title_Update
   delete: Collection1Fields_meta_title_Delete
+  validate: Collection1Fields_meta_title_Validate
 }
 
 type Collection1Fields_meta_title_Create {
@@ -2189,11 +4119,16 @@ type Collection1Fields_meta_title_Delete {
   permission: Boolean!
 }
 
+type Collection1Fields_meta_title_Validate {
+  permission: Boolean!
+}
+
 type Collection1Fields_meta_description {
   create: Collection1Fields_meta_description_Create
   read: Collection1Fields_meta_description_Read
   update: Collection1Fields_meta_description_Update
   delete: Collection1Fields_meta_description_Delete
+  validate: Collection1Fields_meta_description_Validate
 }
 
 type Collection1Fields_meta_description_Create {
@@ -2212,11 +4147,16 @@ type Collection1Fields_meta_description_Delete {
   permission: Boolean!
 }
 
+type Collection1Fields_meta_description_Validate {
+  permission: Boolean!
+}
+
 type Collection1Fields_meta_id {
   create: Collection1Fields_meta_id_Create
   read: Collection1Fields_meta_id_Read
   update: Collection1Fields_meta_id_Update
   delete: Collection1Fields_meta_id_Delete
+  validate: Collection1Fields_meta_id_Validate
 }
 
 type Collection1Fields_meta_id_Create {
@@ -2235,11 +4175,16 @@ type Collection1Fields_meta_id_Delete {
   permission: Boolean!
 }
 
+type Collection1Fields_meta_id_Validate {
+  permission: Boolean!
+}
+
 type Collection1Fields_blocks {
   create: Collection1Fields_blocks_Create
   read: Collection1Fields_blocks_Read
   update: Collection1Fields_blocks_Update
   delete: Collection1Fields_blocks_Delete
+  validate: Collection1Fields_blocks_Validate
 }
 
 type Collection1Fields_blocks_Create {
@@ -2258,11 +4203,72 @@ type Collection1Fields_blocks_Delete {
   permission: Boolean!
 }
 
+type Collection1Fields_blocks_Validate {
+  permission: Boolean!
+}
+
+type Collection1Fields_createdBy {
+  create: Collection1Fields_createdBy_Create
+  read: Collection1Fields_createdBy_Read
+  update: Collection1Fields_createdBy_Update
+  delete: Collection1Fields_createdBy_Delete
+  validate: Collection1Fields_createdBy_Validate
+}
+
+type Collection1Fields_createdBy_Create {
+  permission: Boolean!
+}
+
+type Collection1Fields_createdBy_Read {
+  permission: Boolean!
+}
+
+type Collection1Fields_createdBy_Update {
+  permission: Boolean!
+}
+
+type Collection1Fields_createdBy_Delete {
+  permission: Boolean!
+}
+
+type Collection1Fields_createdBy_Validate {
+  permission: Boolean!
+}
+
+type Collection1Fields_updatedBy {
+  create: Collection1Fields_updatedBy_Create
+  read: Collection1Fields_updatedBy_Read
+  update: Collection1Fields_updatedBy_Update
+  delete: Collection1Fields_updatedBy_Delete
+  validate: Collection1Fields_updatedBy_Validate
+}
+
+type Collection1Fields_updatedBy_Create {
+  permission: Boolean!
+}
+
+type Collection1Fields_updatedBy_Read {
+  permission: Boolean!
+}
+
+type Collection1Fields_updatedBy_Update {
+  permission: Boolean!
+}
+
+type Collection1Fields_updatedBy_Delete {
+  permission: Boolean!
+}
+
+type Collection1Fields_updatedBy_Validate {
+  permission: Boolean!
+}
+
 type Collection1Fields_updatedAt {
   create: Collection1Fields_updatedAt_Create
   read: Collection1Fields_updatedAt_Read
   update: Collection1Fields_updatedAt_Update
   delete: Collection1Fields_updatedAt_Delete
+  validate: Collection1Fields_updatedAt_Validate
 }
 
 type Collection1Fields_updatedAt_Create {
@@ -2281,11 +4287,16 @@ type Collection1Fields_updatedAt_Delete {
   permission: Boolean!
 }
 
+type Collection1Fields_updatedAt_Validate {
+  permission: Boolean!
+}
+
 type Collection1Fields_createdAt {
   create: Collection1Fields_createdAt_Create
   read: Collection1Fields_createdAt_Read
   update: Collection1Fields_createdAt_Update
   delete: Collection1Fields_createdAt_Delete
+  validate: Collection1Fields_createdAt_Validate
 }
 
 type Collection1Fields_createdAt_Create {
@@ -2301,6 +4312,10 @@ type Collection1Fields_createdAt_Update {
 }
 
 type Collection1Fields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type Collection1Fields_createdAt_Validate {
   permission: Boolean!
 }
 
@@ -2324,12 +4339,18 @@ type Collection1DeleteAccess {
   where: JSONObject
 }
 
+type Collection1ValidateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
 type collection2Access {
   fields: Collection2Fields
   create: Collection2CreateAccess
   read: Collection2ReadAccess
   update: Collection2UpdateAccess
   delete: Collection2DeleteAccess
+  validate: Collection2ValidateAccess
 }
 
 type Collection2Fields {
@@ -2338,6 +4359,8 @@ type Collection2Fields {
   nestedGroup: Collection2Fields_nestedGroup
   some_text_: Collection2Fields_some_text_
   spaceBottom: Collection2Fields_spaceBottom
+  createdBy: Collection2Fields_createdBy
+  updatedBy: Collection2Fields_updatedBy
   updatedAt: Collection2Fields_updatedAt
   createdAt: Collection2Fields_createdAt
 }
@@ -2347,6 +4370,7 @@ type Collection2Fields_metaArray {
   read: Collection2Fields_metaArray_Read
   update: Collection2Fields_metaArray_Update
   delete: Collection2Fields_metaArray_Delete
+  validate: Collection2Fields_metaArray_Validate
   fields: Collection2Fields_metaArray_Fields
 }
 
@@ -2366,6 +4390,10 @@ type Collection2Fields_metaArray_Delete {
   permission: Boolean!
 }
 
+type Collection2Fields_metaArray_Validate {
+  permission: Boolean!
+}
+
 type Collection2Fields_metaArray_Fields {
   title: Collection2Fields_metaArray_title
   description: Collection2Fields_metaArray_description
@@ -2377,6 +4405,7 @@ type Collection2Fields_metaArray_title {
   read: Collection2Fields_metaArray_title_Read
   update: Collection2Fields_metaArray_title_Update
   delete: Collection2Fields_metaArray_title_Delete
+  validate: Collection2Fields_metaArray_title_Validate
 }
 
 type Collection2Fields_metaArray_title_Create {
@@ -2395,11 +4424,16 @@ type Collection2Fields_metaArray_title_Delete {
   permission: Boolean!
 }
 
+type Collection2Fields_metaArray_title_Validate {
+  permission: Boolean!
+}
+
 type Collection2Fields_metaArray_description {
   create: Collection2Fields_metaArray_description_Create
   read: Collection2Fields_metaArray_description_Read
   update: Collection2Fields_metaArray_description_Update
   delete: Collection2Fields_metaArray_description_Delete
+  validate: Collection2Fields_metaArray_description_Validate
 }
 
 type Collection2Fields_metaArray_description_Create {
@@ -2418,11 +4452,16 @@ type Collection2Fields_metaArray_description_Delete {
   permission: Boolean!
 }
 
+type Collection2Fields_metaArray_description_Validate {
+  permission: Boolean!
+}
+
 type Collection2Fields_metaArray_id {
   create: Collection2Fields_metaArray_id_Create
   read: Collection2Fields_metaArray_id_Read
   update: Collection2Fields_metaArray_id_Update
   delete: Collection2Fields_metaArray_id_Delete
+  validate: Collection2Fields_metaArray_id_Validate
 }
 
 type Collection2Fields_metaArray_id_Create {
@@ -2441,11 +4480,16 @@ type Collection2Fields_metaArray_id_Delete {
   permission: Boolean!
 }
 
+type Collection2Fields_metaArray_id_Validate {
+  permission: Boolean!
+}
+
 type Collection2Fields_metaGroup {
   create: Collection2Fields_metaGroup_Create
   read: Collection2Fields_metaGroup_Read
   update: Collection2Fields_metaGroup_Update
   delete: Collection2Fields_metaGroup_Delete
+  validate: Collection2Fields_metaGroup_Validate
   fields: Collection2Fields_metaGroup_Fields
 }
 
@@ -2465,6 +4509,10 @@ type Collection2Fields_metaGroup_Delete {
   permission: Boolean!
 }
 
+type Collection2Fields_metaGroup_Validate {
+  permission: Boolean!
+}
+
 type Collection2Fields_metaGroup_Fields {
   title: Collection2Fields_metaGroup_title
   description: Collection2Fields_metaGroup_description
@@ -2475,6 +4523,7 @@ type Collection2Fields_metaGroup_title {
   read: Collection2Fields_metaGroup_title_Read
   update: Collection2Fields_metaGroup_title_Update
   delete: Collection2Fields_metaGroup_title_Delete
+  validate: Collection2Fields_metaGroup_title_Validate
 }
 
 type Collection2Fields_metaGroup_title_Create {
@@ -2493,11 +4542,16 @@ type Collection2Fields_metaGroup_title_Delete {
   permission: Boolean!
 }
 
+type Collection2Fields_metaGroup_title_Validate {
+  permission: Boolean!
+}
+
 type Collection2Fields_metaGroup_description {
   create: Collection2Fields_metaGroup_description_Create
   read: Collection2Fields_metaGroup_description_Read
   update: Collection2Fields_metaGroup_description_Update
   delete: Collection2Fields_metaGroup_description_Delete
+  validate: Collection2Fields_metaGroup_description_Validate
 }
 
 type Collection2Fields_metaGroup_description_Create {
@@ -2516,11 +4570,16 @@ type Collection2Fields_metaGroup_description_Delete {
   permission: Boolean!
 }
 
+type Collection2Fields_metaGroup_description_Validate {
+  permission: Boolean!
+}
+
 type Collection2Fields_nestedGroup {
   create: Collection2Fields_nestedGroup_Create
   read: Collection2Fields_nestedGroup_Read
   update: Collection2Fields_nestedGroup_Update
   delete: Collection2Fields_nestedGroup_Delete
+  validate: Collection2Fields_nestedGroup_Validate
   fields: Collection2Fields_nestedGroup_Fields
 }
 
@@ -2540,6 +4599,10 @@ type Collection2Fields_nestedGroup_Delete {
   permission: Boolean!
 }
 
+type Collection2Fields_nestedGroup_Validate {
+  permission: Boolean!
+}
+
 type Collection2Fields_nestedGroup_Fields {
   meta: Collection2Fields_nestedGroup_meta
 }
@@ -2549,6 +4612,7 @@ type Collection2Fields_nestedGroup_meta {
   read: Collection2Fields_nestedGroup_meta_Read
   update: Collection2Fields_nestedGroup_meta_Update
   delete: Collection2Fields_nestedGroup_meta_Delete
+  validate: Collection2Fields_nestedGroup_meta_Validate
   fields: Collection2Fields_nestedGroup_meta_Fields
 }
 
@@ -2568,6 +4632,10 @@ type Collection2Fields_nestedGroup_meta_Delete {
   permission: Boolean!
 }
 
+type Collection2Fields_nestedGroup_meta_Validate {
+  permission: Boolean!
+}
+
 type Collection2Fields_nestedGroup_meta_Fields {
   title: Collection2Fields_nestedGroup_meta_title
   description: Collection2Fields_nestedGroup_meta_description
@@ -2578,6 +4646,7 @@ type Collection2Fields_nestedGroup_meta_title {
   read: Collection2Fields_nestedGroup_meta_title_Read
   update: Collection2Fields_nestedGroup_meta_title_Update
   delete: Collection2Fields_nestedGroup_meta_title_Delete
+  validate: Collection2Fields_nestedGroup_meta_title_Validate
 }
 
 type Collection2Fields_nestedGroup_meta_title_Create {
@@ -2596,11 +4665,16 @@ type Collection2Fields_nestedGroup_meta_title_Delete {
   permission: Boolean!
 }
 
+type Collection2Fields_nestedGroup_meta_title_Validate {
+  permission: Boolean!
+}
+
 type Collection2Fields_nestedGroup_meta_description {
   create: Collection2Fields_nestedGroup_meta_description_Create
   read: Collection2Fields_nestedGroup_meta_description_Read
   update: Collection2Fields_nestedGroup_meta_description_Update
   delete: Collection2Fields_nestedGroup_meta_description_Delete
+  validate: Collection2Fields_nestedGroup_meta_description_Validate
 }
 
 type Collection2Fields_nestedGroup_meta_description_Create {
@@ -2619,11 +4693,16 @@ type Collection2Fields_nestedGroup_meta_description_Delete {
   permission: Boolean!
 }
 
+type Collection2Fields_nestedGroup_meta_description_Validate {
+  permission: Boolean!
+}
+
 type Collection2Fields_some_text_ {
   create: Collection2Fields_some_text__Create
   read: Collection2Fields_some_text__Read
   update: Collection2Fields_some_text__Update
   delete: Collection2Fields_some_text__Delete
+  validate: Collection2Fields_some_text__Validate
 }
 
 type Collection2Fields_some_text__Create {
@@ -2642,11 +4721,16 @@ type Collection2Fields_some_text__Delete {
   permission: Boolean!
 }
 
+type Collection2Fields_some_text__Validate {
+  permission: Boolean!
+}
+
 type Collection2Fields_spaceBottom {
   create: Collection2Fields_spaceBottom_Create
   read: Collection2Fields_spaceBottom_Read
   update: Collection2Fields_spaceBottom_Update
   delete: Collection2Fields_spaceBottom_Delete
+  validate: Collection2Fields_spaceBottom_Validate
 }
 
 type Collection2Fields_spaceBottom_Create {
@@ -2665,11 +4749,72 @@ type Collection2Fields_spaceBottom_Delete {
   permission: Boolean!
 }
 
+type Collection2Fields_spaceBottom_Validate {
+  permission: Boolean!
+}
+
+type Collection2Fields_createdBy {
+  create: Collection2Fields_createdBy_Create
+  read: Collection2Fields_createdBy_Read
+  update: Collection2Fields_createdBy_Update
+  delete: Collection2Fields_createdBy_Delete
+  validate: Collection2Fields_createdBy_Validate
+}
+
+type Collection2Fields_createdBy_Create {
+  permission: Boolean!
+}
+
+type Collection2Fields_createdBy_Read {
+  permission: Boolean!
+}
+
+type Collection2Fields_createdBy_Update {
+  permission: Boolean!
+}
+
+type Collection2Fields_createdBy_Delete {
+  permission: Boolean!
+}
+
+type Collection2Fields_createdBy_Validate {
+  permission: Boolean!
+}
+
+type Collection2Fields_updatedBy {
+  create: Collection2Fields_updatedBy_Create
+  read: Collection2Fields_updatedBy_Read
+  update: Collection2Fields_updatedBy_Update
+  delete: Collection2Fields_updatedBy_Delete
+  validate: Collection2Fields_updatedBy_Validate
+}
+
+type Collection2Fields_updatedBy_Create {
+  permission: Boolean!
+}
+
+type Collection2Fields_updatedBy_Read {
+  permission: Boolean!
+}
+
+type Collection2Fields_updatedBy_Update {
+  permission: Boolean!
+}
+
+type Collection2Fields_updatedBy_Delete {
+  permission: Boolean!
+}
+
+type Collection2Fields_updatedBy_Validate {
+  permission: Boolean!
+}
+
 type Collection2Fields_updatedAt {
   create: Collection2Fields_updatedAt_Create
   read: Collection2Fields_updatedAt_Read
   update: Collection2Fields_updatedAt_Update
   delete: Collection2Fields_updatedAt_Delete
+  validate: Collection2Fields_updatedAt_Validate
 }
 
 type Collection2Fields_updatedAt_Create {
@@ -2688,11 +4833,16 @@ type Collection2Fields_updatedAt_Delete {
   permission: Boolean!
 }
 
+type Collection2Fields_updatedAt_Validate {
+  permission: Boolean!
+}
+
 type Collection2Fields_createdAt {
   create: Collection2Fields_createdAt_Create
   read: Collection2Fields_createdAt_Read
   update: Collection2Fields_createdAt_Update
   delete: Collection2Fields_createdAt_Delete
+  validate: Collection2Fields_createdAt_Validate
 }
 
 type Collection2Fields_createdAt_Create {
@@ -2708,6 +4858,10 @@ type Collection2Fields_createdAt_Update {
 }
 
 type Collection2Fields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type Collection2Fields_createdAt_Validate {
   permission: Boolean!
 }
 
@@ -2731,20 +4885,559 @@ type Collection2DeleteAccess {
   where: JSONObject
 }
 
+type Collection2ValidateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type named_tab_casesAccess {
+  fields: NamedTabCasesFields
+  create: NamedTabCasesCreateAccess
+  read: NamedTabCasesReadAccess
+  update: NamedTabCasesUpdateAccess
+  delete: NamedTabCasesDeleteAccess
+  validate: NamedTabCasesValidateAccess
+}
+
+type NamedTabCasesFields {
+  tabWithRequiredField: NamedTabCasesFields_tabWithRequiredField
+  tabWithVirtualRequiredField: NamedTabCasesFields_tabWithVirtualRequiredField
+  tabWithConditionalRequiredField: NamedTabCasesFields_tabWithConditionalRequiredField
+  tabWithReadAccessRequiredField: NamedTabCasesFields_tabWithReadAccessRequiredField
+  tabWithOptionalArray: NamedTabCasesFields_tabWithOptionalArray
+  createdBy: NamedTabCasesFields_createdBy
+  updatedBy: NamedTabCasesFields_updatedBy
+  updatedAt: NamedTabCasesFields_updatedAt
+  createdAt: NamedTabCasesFields_createdAt
+}
+
+type NamedTabCasesFields_tabWithRequiredField {
+  title: NamedTabCasesFields_tabWithRequiredField_title
+}
+
+type NamedTabCasesFields_tabWithRequiredField_title {
+  create: NamedTabCasesFields_tabWithRequiredField_title_Create
+  read: NamedTabCasesFields_tabWithRequiredField_title_Read
+  update: NamedTabCasesFields_tabWithRequiredField_title_Update
+  delete: NamedTabCasesFields_tabWithRequiredField_title_Delete
+  validate: NamedTabCasesFields_tabWithRequiredField_title_Validate
+}
+
+type NamedTabCasesFields_tabWithRequiredField_title_Create {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithRequiredField_title_Read {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithRequiredField_title_Update {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithRequiredField_title_Delete {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithRequiredField_title_Validate {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithVirtualRequiredField {
+  virtualTitle: NamedTabCasesFields_tabWithVirtualRequiredField_virtualTitle
+}
+
+type NamedTabCasesFields_tabWithVirtualRequiredField_virtualTitle {
+  create: NamedTabCasesFields_tabWithVirtualRequiredField_virtualTitle_Create
+  read: NamedTabCasesFields_tabWithVirtualRequiredField_virtualTitle_Read
+  update: NamedTabCasesFields_tabWithVirtualRequiredField_virtualTitle_Update
+  delete: NamedTabCasesFields_tabWithVirtualRequiredField_virtualTitle_Delete
+  validate: NamedTabCasesFields_tabWithVirtualRequiredField_virtualTitle_Validate
+}
+
+type NamedTabCasesFields_tabWithVirtualRequiredField_virtualTitle_Create {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithVirtualRequiredField_virtualTitle_Read {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithVirtualRequiredField_virtualTitle_Update {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithVirtualRequiredField_virtualTitle_Delete {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithVirtualRequiredField_virtualTitle_Validate {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithConditionalRequiredField {
+  conditionalTitle: NamedTabCasesFields_tabWithConditionalRequiredField_conditionalTitle
+}
+
+type NamedTabCasesFields_tabWithConditionalRequiredField_conditionalTitle {
+  create: NamedTabCasesFields_tabWithConditionalRequiredField_conditionalTitle_Create
+  read: NamedTabCasesFields_tabWithConditionalRequiredField_conditionalTitle_Read
+  update: NamedTabCasesFields_tabWithConditionalRequiredField_conditionalTitle_Update
+  delete: NamedTabCasesFields_tabWithConditionalRequiredField_conditionalTitle_Delete
+  validate: NamedTabCasesFields_tabWithConditionalRequiredField_conditionalTitle_Validate
+}
+
+type NamedTabCasesFields_tabWithConditionalRequiredField_conditionalTitle_Create {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithConditionalRequiredField_conditionalTitle_Read {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithConditionalRequiredField_conditionalTitle_Update {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithConditionalRequiredField_conditionalTitle_Delete {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithConditionalRequiredField_conditionalTitle_Validate {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithReadAccessRequiredField {
+  readAccessTitle: NamedTabCasesFields_tabWithReadAccessRequiredField_readAccessTitle
+}
+
+type NamedTabCasesFields_tabWithReadAccessRequiredField_readAccessTitle {
+  create: NamedTabCasesFields_tabWithReadAccessRequiredField_readAccessTitle_Create
+  read: NamedTabCasesFields_tabWithReadAccessRequiredField_readAccessTitle_Read
+  update: NamedTabCasesFields_tabWithReadAccessRequiredField_readAccessTitle_Update
+  delete: NamedTabCasesFields_tabWithReadAccessRequiredField_readAccessTitle_Delete
+  validate: NamedTabCasesFields_tabWithReadAccessRequiredField_readAccessTitle_Validate
+}
+
+type NamedTabCasesFields_tabWithReadAccessRequiredField_readAccessTitle_Create {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithReadAccessRequiredField_readAccessTitle_Read {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithReadAccessRequiredField_readAccessTitle_Update {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithReadAccessRequiredField_readAccessTitle_Delete {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithReadAccessRequiredField_readAccessTitle_Validate {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithOptionalArray {
+  items: NamedTabCasesFields_tabWithOptionalArray_items
+}
+
+type NamedTabCasesFields_tabWithOptionalArray_items {
+  create: NamedTabCasesFields_tabWithOptionalArray_items_Create
+  read: NamedTabCasesFields_tabWithOptionalArray_items_Read
+  update: NamedTabCasesFields_tabWithOptionalArray_items_Update
+  delete: NamedTabCasesFields_tabWithOptionalArray_items_Delete
+  validate: NamedTabCasesFields_tabWithOptionalArray_items_Validate
+  fields: NamedTabCasesFields_tabWithOptionalArray_items_Fields
+}
+
+type NamedTabCasesFields_tabWithOptionalArray_items_Create {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithOptionalArray_items_Read {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithOptionalArray_items_Update {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithOptionalArray_items_Delete {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithOptionalArray_items_Validate {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithOptionalArray_items_Fields {
+  itemTitle: NamedTabCasesFields_tabWithOptionalArray_items_itemTitle
+  id: NamedTabCasesFields_tabWithOptionalArray_items_id
+}
+
+type NamedTabCasesFields_tabWithOptionalArray_items_itemTitle {
+  create: NamedTabCasesFields_tabWithOptionalArray_items_itemTitle_Create
+  read: NamedTabCasesFields_tabWithOptionalArray_items_itemTitle_Read
+  update: NamedTabCasesFields_tabWithOptionalArray_items_itemTitle_Update
+  delete: NamedTabCasesFields_tabWithOptionalArray_items_itemTitle_Delete
+  validate: NamedTabCasesFields_tabWithOptionalArray_items_itemTitle_Validate
+}
+
+type NamedTabCasesFields_tabWithOptionalArray_items_itemTitle_Create {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithOptionalArray_items_itemTitle_Read {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithOptionalArray_items_itemTitle_Update {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithOptionalArray_items_itemTitle_Delete {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithOptionalArray_items_itemTitle_Validate {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithOptionalArray_items_id {
+  create: NamedTabCasesFields_tabWithOptionalArray_items_id_Create
+  read: NamedTabCasesFields_tabWithOptionalArray_items_id_Read
+  update: NamedTabCasesFields_tabWithOptionalArray_items_id_Update
+  delete: NamedTabCasesFields_tabWithOptionalArray_items_id_Delete
+  validate: NamedTabCasesFields_tabWithOptionalArray_items_id_Validate
+}
+
+type NamedTabCasesFields_tabWithOptionalArray_items_id_Create {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithOptionalArray_items_id_Read {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithOptionalArray_items_id_Update {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithOptionalArray_items_id_Delete {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_tabWithOptionalArray_items_id_Validate {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_createdBy {
+  create: NamedTabCasesFields_createdBy_Create
+  read: NamedTabCasesFields_createdBy_Read
+  update: NamedTabCasesFields_createdBy_Update
+  delete: NamedTabCasesFields_createdBy_Delete
+  validate: NamedTabCasesFields_createdBy_Validate
+}
+
+type NamedTabCasesFields_createdBy_Create {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_createdBy_Read {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_createdBy_Update {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_createdBy_Delete {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_createdBy_Validate {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_updatedBy {
+  create: NamedTabCasesFields_updatedBy_Create
+  read: NamedTabCasesFields_updatedBy_Read
+  update: NamedTabCasesFields_updatedBy_Update
+  delete: NamedTabCasesFields_updatedBy_Delete
+  validate: NamedTabCasesFields_updatedBy_Validate
+}
+
+type NamedTabCasesFields_updatedBy_Create {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_updatedBy_Read {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_updatedBy_Update {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_updatedBy_Delete {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_updatedBy_Validate {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_updatedAt {
+  create: NamedTabCasesFields_updatedAt_Create
+  read: NamedTabCasesFields_updatedAt_Read
+  update: NamedTabCasesFields_updatedAt_Update
+  delete: NamedTabCasesFields_updatedAt_Delete
+  validate: NamedTabCasesFields_updatedAt_Validate
+}
+
+type NamedTabCasesFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_updatedAt_Validate {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_createdAt {
+  create: NamedTabCasesFields_createdAt_Create
+  read: NamedTabCasesFields_createdAt_Read
+  update: NamedTabCasesFields_createdAt_Update
+  delete: NamedTabCasesFields_createdAt_Delete
+  validate: NamedTabCasesFields_createdAt_Validate
+}
+
+type NamedTabCasesFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type NamedTabCasesFields_createdAt_Validate {
+  permission: Boolean!
+}
+
+type NamedTabCasesCreateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type NamedTabCasesReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type NamedTabCasesUpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type NamedTabCasesDeleteAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type NamedTabCasesValidateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type payload_kvAccess {
+  fields: PayloadKvFields
+  create: PayloadKvCreateAccess
+  read: PayloadKvReadAccess
+  update: PayloadKvUpdateAccess
+  delete: PayloadKvDeleteAccess
+  validate: PayloadKvValidateAccess
+}
+
+type PayloadKvFields {
+  key: PayloadKvFields_key
+  data: PayloadKvFields_data
+}
+
+type PayloadKvFields_key {
+  create: PayloadKvFields_key_Create
+  read: PayloadKvFields_key_Read
+  update: PayloadKvFields_key_Update
+  delete: PayloadKvFields_key_Delete
+  validate: PayloadKvFields_key_Validate
+}
+
+type PayloadKvFields_key_Create {
+  permission: Boolean!
+}
+
+type PayloadKvFields_key_Read {
+  permission: Boolean!
+}
+
+type PayloadKvFields_key_Update {
+  permission: Boolean!
+}
+
+type PayloadKvFields_key_Delete {
+  permission: Boolean!
+}
+
+type PayloadKvFields_key_Validate {
+  permission: Boolean!
+}
+
+type PayloadKvFields_data {
+  create: PayloadKvFields_data_Create
+  read: PayloadKvFields_data_Read
+  update: PayloadKvFields_data_Update
+  delete: PayloadKvFields_data_Delete
+  validate: PayloadKvFields_data_Validate
+}
+
+type PayloadKvFields_data_Create {
+  permission: Boolean!
+}
+
+type PayloadKvFields_data_Read {
+  permission: Boolean!
+}
+
+type PayloadKvFields_data_Update {
+  permission: Boolean!
+}
+
+type PayloadKvFields_data_Delete {
+  permission: Boolean!
+}
+
+type PayloadKvFields_data_Validate {
+  permission: Boolean!
+}
+
+type PayloadKvCreateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadKvReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadKvUpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadKvDeleteAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadKvValidateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
 type usersAccess {
   fields: UsersFields
   create: UsersCreateAccess
   read: UsersReadAccess
   update: UsersUpdateAccess
   delete: UsersDeleteAccess
+  validate: UsersValidateAccess
   unlock: UsersUnlockAccess
 }
 
 type UsersFields {
+  createdBy: UsersFields_createdBy
+  updatedBy: UsersFields_updatedBy
   updatedAt: UsersFields_updatedAt
   createdAt: UsersFields_createdAt
   email: UsersFields_email
   sessions: UsersFields_sessions
+}
+
+type UsersFields_createdBy {
+  create: UsersFields_createdBy_Create
+  read: UsersFields_createdBy_Read
+  update: UsersFields_createdBy_Update
+  delete: UsersFields_createdBy_Delete
+  validate: UsersFields_createdBy_Validate
+}
+
+type UsersFields_createdBy_Create {
+  permission: Boolean!
+}
+
+type UsersFields_createdBy_Read {
+  permission: Boolean!
+}
+
+type UsersFields_createdBy_Update {
+  permission: Boolean!
+}
+
+type UsersFields_createdBy_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_createdBy_Validate {
+  permission: Boolean!
+}
+
+type UsersFields_updatedBy {
+  create: UsersFields_updatedBy_Create
+  read: UsersFields_updatedBy_Read
+  update: UsersFields_updatedBy_Update
+  delete: UsersFields_updatedBy_Delete
+  validate: UsersFields_updatedBy_Validate
+}
+
+type UsersFields_updatedBy_Create {
+  permission: Boolean!
+}
+
+type UsersFields_updatedBy_Read {
+  permission: Boolean!
+}
+
+type UsersFields_updatedBy_Update {
+  permission: Boolean!
+}
+
+type UsersFields_updatedBy_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_updatedBy_Validate {
+  permission: Boolean!
 }
 
 type UsersFields_updatedAt {
@@ -2752,6 +5445,7 @@ type UsersFields_updatedAt {
   read: UsersFields_updatedAt_Read
   update: UsersFields_updatedAt_Update
   delete: UsersFields_updatedAt_Delete
+  validate: UsersFields_updatedAt_Validate
 }
 
 type UsersFields_updatedAt_Create {
@@ -2770,11 +5464,16 @@ type UsersFields_updatedAt_Delete {
   permission: Boolean!
 }
 
+type UsersFields_updatedAt_Validate {
+  permission: Boolean!
+}
+
 type UsersFields_createdAt {
   create: UsersFields_createdAt_Create
   read: UsersFields_createdAt_Read
   update: UsersFields_createdAt_Update
   delete: UsersFields_createdAt_Delete
+  validate: UsersFields_createdAt_Validate
 }
 
 type UsersFields_createdAt_Create {
@@ -2793,11 +5492,16 @@ type UsersFields_createdAt_Delete {
   permission: Boolean!
 }
 
+type UsersFields_createdAt_Validate {
+  permission: Boolean!
+}
+
 type UsersFields_email {
   create: UsersFields_email_Create
   read: UsersFields_email_Read
   update: UsersFields_email_Update
   delete: UsersFields_email_Delete
+  validate: UsersFields_email_Validate
 }
 
 type UsersFields_email_Create {
@@ -2816,11 +5520,16 @@ type UsersFields_email_Delete {
   permission: Boolean!
 }
 
+type UsersFields_email_Validate {
+  permission: Boolean!
+}
+
 type UsersFields_sessions {
   create: UsersFields_sessions_Create
   read: UsersFields_sessions_Read
   update: UsersFields_sessions_Update
   delete: UsersFields_sessions_Delete
+  validate: UsersFields_sessions_Validate
   fields: UsersFields_sessions_Fields
 }
 
@@ -2840,6 +5549,10 @@ type UsersFields_sessions_Delete {
   permission: Boolean!
 }
 
+type UsersFields_sessions_Validate {
+  permission: Boolean!
+}
+
 type UsersFields_sessions_Fields {
   id: UsersFields_sessions_id
   createdAt: UsersFields_sessions_createdAt
@@ -2851,6 +5564,7 @@ type UsersFields_sessions_id {
   read: UsersFields_sessions_id_Read
   update: UsersFields_sessions_id_Update
   delete: UsersFields_sessions_id_Delete
+  validate: UsersFields_sessions_id_Validate
 }
 
 type UsersFields_sessions_id_Create {
@@ -2869,11 +5583,16 @@ type UsersFields_sessions_id_Delete {
   permission: Boolean!
 }
 
+type UsersFields_sessions_id_Validate {
+  permission: Boolean!
+}
+
 type UsersFields_sessions_createdAt {
   create: UsersFields_sessions_createdAt_Create
   read: UsersFields_sessions_createdAt_Read
   update: UsersFields_sessions_createdAt_Update
   delete: UsersFields_sessions_createdAt_Delete
+  validate: UsersFields_sessions_createdAt_Validate
 }
 
 type UsersFields_sessions_createdAt_Create {
@@ -2892,11 +5611,16 @@ type UsersFields_sessions_createdAt_Delete {
   permission: Boolean!
 }
 
+type UsersFields_sessions_createdAt_Validate {
+  permission: Boolean!
+}
+
 type UsersFields_sessions_expiresAt {
   create: UsersFields_sessions_expiresAt_Create
   read: UsersFields_sessions_expiresAt_Read
   update: UsersFields_sessions_expiresAt_Update
   delete: UsersFields_sessions_expiresAt_Delete
+  validate: UsersFields_sessions_expiresAt_Validate
 }
 
 type UsersFields_sessions_expiresAt_Create {
@@ -2912,6 +5636,10 @@ type UsersFields_sessions_expiresAt_Update {
 }
 
 type UsersFields_sessions_expiresAt_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_expiresAt_Validate {
   permission: Boolean!
 }
 
@@ -2935,6 +5663,11 @@ type UsersDeleteAccess {
   where: JSONObject
 }
 
+type UsersValidateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
 type UsersUnlockAccess {
   permission: Boolean!
   where: JSONObject
@@ -2946,6 +5679,7 @@ type payload_locked_documentsAccess {
   read: PayloadLockedDocumentsReadAccess
   update: PayloadLockedDocumentsUpdateAccess
   delete: PayloadLockedDocumentsDeleteAccess
+  validate: PayloadLockedDocumentsValidateAccess
 }
 
 type PayloadLockedDocumentsFields {
@@ -2961,6 +5695,7 @@ type PayloadLockedDocumentsFields_document {
   read: PayloadLockedDocumentsFields_document_Read
   update: PayloadLockedDocumentsFields_document_Update
   delete: PayloadLockedDocumentsFields_document_Delete
+  validate: PayloadLockedDocumentsFields_document_Validate
 }
 
 type PayloadLockedDocumentsFields_document_Create {
@@ -2979,11 +5714,16 @@ type PayloadLockedDocumentsFields_document_Delete {
   permission: Boolean!
 }
 
+type PayloadLockedDocumentsFields_document_Validate {
+  permission: Boolean!
+}
+
 type PayloadLockedDocumentsFields_globalSlug {
   create: PayloadLockedDocumentsFields_globalSlug_Create
   read: PayloadLockedDocumentsFields_globalSlug_Read
   update: PayloadLockedDocumentsFields_globalSlug_Update
   delete: PayloadLockedDocumentsFields_globalSlug_Delete
+  validate: PayloadLockedDocumentsFields_globalSlug_Validate
 }
 
 type PayloadLockedDocumentsFields_globalSlug_Create {
@@ -3002,11 +5742,16 @@ type PayloadLockedDocumentsFields_globalSlug_Delete {
   permission: Boolean!
 }
 
+type PayloadLockedDocumentsFields_globalSlug_Validate {
+  permission: Boolean!
+}
+
 type PayloadLockedDocumentsFields_user {
   create: PayloadLockedDocumentsFields_user_Create
   read: PayloadLockedDocumentsFields_user_Read
   update: PayloadLockedDocumentsFields_user_Update
   delete: PayloadLockedDocumentsFields_user_Delete
+  validate: PayloadLockedDocumentsFields_user_Validate
 }
 
 type PayloadLockedDocumentsFields_user_Create {
@@ -3025,11 +5770,16 @@ type PayloadLockedDocumentsFields_user_Delete {
   permission: Boolean!
 }
 
+type PayloadLockedDocumentsFields_user_Validate {
+  permission: Boolean!
+}
+
 type PayloadLockedDocumentsFields_updatedAt {
   create: PayloadLockedDocumentsFields_updatedAt_Create
   read: PayloadLockedDocumentsFields_updatedAt_Read
   update: PayloadLockedDocumentsFields_updatedAt_Update
   delete: PayloadLockedDocumentsFields_updatedAt_Delete
+  validate: PayloadLockedDocumentsFields_updatedAt_Validate
 }
 
 type PayloadLockedDocumentsFields_updatedAt_Create {
@@ -3048,11 +5798,16 @@ type PayloadLockedDocumentsFields_updatedAt_Delete {
   permission: Boolean!
 }
 
+type PayloadLockedDocumentsFields_updatedAt_Validate {
+  permission: Boolean!
+}
+
 type PayloadLockedDocumentsFields_createdAt {
   create: PayloadLockedDocumentsFields_createdAt_Create
   read: PayloadLockedDocumentsFields_createdAt_Read
   update: PayloadLockedDocumentsFields_createdAt_Update
   delete: PayloadLockedDocumentsFields_createdAt_Delete
+  validate: PayloadLockedDocumentsFields_createdAt_Validate
 }
 
 type PayloadLockedDocumentsFields_createdAt_Create {
@@ -3068,6 +5823,10 @@ type PayloadLockedDocumentsFields_createdAt_Update {
 }
 
 type PayloadLockedDocumentsFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadLockedDocumentsFields_createdAt_Validate {
   permission: Boolean!
 }
 
@@ -3091,12 +5850,18 @@ type PayloadLockedDocumentsDeleteAccess {
   where: JSONObject
 }
 
+type PayloadLockedDocumentsValidateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
 type payload_preferencesAccess {
   fields: PayloadPreferencesFields
   create: PayloadPreferencesCreateAccess
   read: PayloadPreferencesReadAccess
   update: PayloadPreferencesUpdateAccess
   delete: PayloadPreferencesDeleteAccess
+  validate: PayloadPreferencesValidateAccess
 }
 
 type PayloadPreferencesFields {
@@ -3112,6 +5877,7 @@ type PayloadPreferencesFields_user {
   read: PayloadPreferencesFields_user_Read
   update: PayloadPreferencesFields_user_Update
   delete: PayloadPreferencesFields_user_Delete
+  validate: PayloadPreferencesFields_user_Validate
 }
 
 type PayloadPreferencesFields_user_Create {
@@ -3130,11 +5896,16 @@ type PayloadPreferencesFields_user_Delete {
   permission: Boolean!
 }
 
+type PayloadPreferencesFields_user_Validate {
+  permission: Boolean!
+}
+
 type PayloadPreferencesFields_key {
   create: PayloadPreferencesFields_key_Create
   read: PayloadPreferencesFields_key_Read
   update: PayloadPreferencesFields_key_Update
   delete: PayloadPreferencesFields_key_Delete
+  validate: PayloadPreferencesFields_key_Validate
 }
 
 type PayloadPreferencesFields_key_Create {
@@ -3153,11 +5924,16 @@ type PayloadPreferencesFields_key_Delete {
   permission: Boolean!
 }
 
+type PayloadPreferencesFields_key_Validate {
+  permission: Boolean!
+}
+
 type PayloadPreferencesFields_value {
   create: PayloadPreferencesFields_value_Create
   read: PayloadPreferencesFields_value_Read
   update: PayloadPreferencesFields_value_Update
   delete: PayloadPreferencesFields_value_Delete
+  validate: PayloadPreferencesFields_value_Validate
 }
 
 type PayloadPreferencesFields_value_Create {
@@ -3176,11 +5952,16 @@ type PayloadPreferencesFields_value_Delete {
   permission: Boolean!
 }
 
+type PayloadPreferencesFields_value_Validate {
+  permission: Boolean!
+}
+
 type PayloadPreferencesFields_updatedAt {
   create: PayloadPreferencesFields_updatedAt_Create
   read: PayloadPreferencesFields_updatedAt_Read
   update: PayloadPreferencesFields_updatedAt_Update
   delete: PayloadPreferencesFields_updatedAt_Delete
+  validate: PayloadPreferencesFields_updatedAt_Validate
 }
 
 type PayloadPreferencesFields_updatedAt_Create {
@@ -3199,11 +5980,16 @@ type PayloadPreferencesFields_updatedAt_Delete {
   permission: Boolean!
 }
 
+type PayloadPreferencesFields_updatedAt_Validate {
+  permission: Boolean!
+}
+
 type PayloadPreferencesFields_createdAt {
   create: PayloadPreferencesFields_createdAt_Create
   read: PayloadPreferencesFields_createdAt_Read
   update: PayloadPreferencesFields_createdAt_Update
   delete: PayloadPreferencesFields_createdAt_Delete
+  validate: PayloadPreferencesFields_createdAt_Validate
 }
 
 type PayloadPreferencesFields_createdAt_Create {
@@ -3219,6 +6005,10 @@ type PayloadPreferencesFields_createdAt_Update {
 }
 
 type PayloadPreferencesFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_createdAt_Validate {
   permission: Boolean!
 }
 
@@ -3242,33 +6032,384 @@ type PayloadPreferencesDeleteAccess {
   where: JSONObject
 }
 
+type PayloadPreferencesValidateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type payload_llm_instructionsAccess {
+  fields: PayloadLlmInstructionsFields
+  create: PayloadLlmInstructionsCreateAccess
+  read: PayloadLlmInstructionsReadAccess
+  update: PayloadLlmInstructionsUpdateAccess
+  delete: PayloadLlmInstructionsDeleteAccess
+  validate: PayloadLlmInstructionsValidateAccess
+}
+
+type PayloadLlmInstructionsFields {
+  id: PayloadLlmInstructionsFields_id
+  entitySlug: PayloadLlmInstructionsFields_entitySlug
+  title: PayloadLlmInstructionsFields_title
+  entityType: PayloadLlmInstructionsFields_entityType
+  additionalInstructions: PayloadLlmInstructionsFields_additionalInstructions
+  systemInstructions: PayloadLlmInstructionsFields_systemInstructions
+  createdBy: PayloadLlmInstructionsFields_createdBy
+  updatedBy: PayloadLlmInstructionsFields_updatedBy
+  updatedAt: PayloadLlmInstructionsFields_updatedAt
+  createdAt: PayloadLlmInstructionsFields_createdAt
+}
+
+type PayloadLlmInstructionsFields_id {
+  create: PayloadLlmInstructionsFields_id_Create
+  read: PayloadLlmInstructionsFields_id_Read
+  update: PayloadLlmInstructionsFields_id_Update
+  delete: PayloadLlmInstructionsFields_id_Delete
+  validate: PayloadLlmInstructionsFields_id_Validate
+}
+
+type PayloadLlmInstructionsFields_id_Create {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_id_Read {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_id_Update {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_id_Delete {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_id_Validate {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_entitySlug {
+  create: PayloadLlmInstructionsFields_entitySlug_Create
+  read: PayloadLlmInstructionsFields_entitySlug_Read
+  update: PayloadLlmInstructionsFields_entitySlug_Update
+  delete: PayloadLlmInstructionsFields_entitySlug_Delete
+  validate: PayloadLlmInstructionsFields_entitySlug_Validate
+}
+
+type PayloadLlmInstructionsFields_entitySlug_Create {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_entitySlug_Read {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_entitySlug_Update {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_entitySlug_Delete {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_entitySlug_Validate {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_title {
+  create: PayloadLlmInstructionsFields_title_Create
+  read: PayloadLlmInstructionsFields_title_Read
+  update: PayloadLlmInstructionsFields_title_Update
+  delete: PayloadLlmInstructionsFields_title_Delete
+  validate: PayloadLlmInstructionsFields_title_Validate
+}
+
+type PayloadLlmInstructionsFields_title_Create {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_title_Read {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_title_Update {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_title_Delete {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_title_Validate {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_entityType {
+  create: PayloadLlmInstructionsFields_entityType_Create
+  read: PayloadLlmInstructionsFields_entityType_Read
+  update: PayloadLlmInstructionsFields_entityType_Update
+  delete: PayloadLlmInstructionsFields_entityType_Delete
+  validate: PayloadLlmInstructionsFields_entityType_Validate
+}
+
+type PayloadLlmInstructionsFields_entityType_Create {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_entityType_Read {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_entityType_Update {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_entityType_Delete {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_entityType_Validate {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_additionalInstructions {
+  create: PayloadLlmInstructionsFields_additionalInstructions_Create
+  read: PayloadLlmInstructionsFields_additionalInstructions_Read
+  update: PayloadLlmInstructionsFields_additionalInstructions_Update
+  delete: PayloadLlmInstructionsFields_additionalInstructions_Delete
+  validate: PayloadLlmInstructionsFields_additionalInstructions_Validate
+}
+
+type PayloadLlmInstructionsFields_additionalInstructions_Create {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_additionalInstructions_Read {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_additionalInstructions_Update {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_additionalInstructions_Delete {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_additionalInstructions_Validate {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_systemInstructions {
+  create: PayloadLlmInstructionsFields_systemInstructions_Create
+  read: PayloadLlmInstructionsFields_systemInstructions_Read
+  update: PayloadLlmInstructionsFields_systemInstructions_Update
+  delete: PayloadLlmInstructionsFields_systemInstructions_Delete
+  validate: PayloadLlmInstructionsFields_systemInstructions_Validate
+}
+
+type PayloadLlmInstructionsFields_systemInstructions_Create {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_systemInstructions_Read {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_systemInstructions_Update {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_systemInstructions_Delete {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_systemInstructions_Validate {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_createdBy {
+  create: PayloadLlmInstructionsFields_createdBy_Create
+  read: PayloadLlmInstructionsFields_createdBy_Read
+  update: PayloadLlmInstructionsFields_createdBy_Update
+  delete: PayloadLlmInstructionsFields_createdBy_Delete
+  validate: PayloadLlmInstructionsFields_createdBy_Validate
+}
+
+type PayloadLlmInstructionsFields_createdBy_Create {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_createdBy_Read {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_createdBy_Update {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_createdBy_Delete {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_createdBy_Validate {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_updatedBy {
+  create: PayloadLlmInstructionsFields_updatedBy_Create
+  read: PayloadLlmInstructionsFields_updatedBy_Read
+  update: PayloadLlmInstructionsFields_updatedBy_Update
+  delete: PayloadLlmInstructionsFields_updatedBy_Delete
+  validate: PayloadLlmInstructionsFields_updatedBy_Validate
+}
+
+type PayloadLlmInstructionsFields_updatedBy_Create {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_updatedBy_Read {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_updatedBy_Update {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_updatedBy_Delete {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_updatedBy_Validate {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_updatedAt {
+  create: PayloadLlmInstructionsFields_updatedAt_Create
+  read: PayloadLlmInstructionsFields_updatedAt_Read
+  update: PayloadLlmInstructionsFields_updatedAt_Update
+  delete: PayloadLlmInstructionsFields_updatedAt_Delete
+  validate: PayloadLlmInstructionsFields_updatedAt_Validate
+}
+
+type PayloadLlmInstructionsFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_updatedAt_Validate {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_createdAt {
+  create: PayloadLlmInstructionsFields_createdAt_Create
+  read: PayloadLlmInstructionsFields_createdAt_Read
+  update: PayloadLlmInstructionsFields_createdAt_Update
+  delete: PayloadLlmInstructionsFields_createdAt_Delete
+  validate: PayloadLlmInstructionsFields_createdAt_Validate
+}
+
+type PayloadLlmInstructionsFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsFields_createdAt_Validate {
+  permission: Boolean!
+}
+
+type PayloadLlmInstructionsCreateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadLlmInstructionsReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadLlmInstructionsUpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadLlmInstructionsDeleteAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadLlmInstructionsValidateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
 type Mutation {
   createCollection1(data: mutationCollection1Input!, draft: Boolean): Collection1
   updateCollection1(id: String!, autosave: Boolean, data: mutationCollection1UpdateInput!, draft: Boolean, trash: Boolean): Collection1
+  validateCollection1(id: String, data: mutationCollection1ValidationInput, draft: Boolean): PayloadValidationResult
   deleteCollection1(id: String!, trash: Boolean): Collection1
   duplicateCollection1(id: String!, data: mutationCollection1Input!): Collection1
   createCollection2(data: mutationCollection2Input!, draft: Boolean): Collection2
   updateCollection2(id: String!, autosave: Boolean, data: mutationCollection2UpdateInput!, draft: Boolean, trash: Boolean): Collection2
+  validateCollection2(id: String, data: mutationCollection2ValidationInput, draft: Boolean): PayloadValidationResult
   deleteCollection2(id: String!, trash: Boolean): Collection2
   duplicateCollection2(id: String!, data: mutationCollection2Input!): Collection2
+  createNamedTabCase(data: mutationNamedTabCaseInput!, draft: Boolean): NamedTabCase
+  updateNamedTabCase(id: String!, autosave: Boolean, data: mutationNamedTabCaseUpdateInput!, draft: Boolean, trash: Boolean): NamedTabCase
+  validateNamedTabCase(id: String, data: mutationNamedTabCaseValidationInput, draft: Boolean): PayloadValidationResult
+  deleteNamedTabCase(id: String!, trash: Boolean): NamedTabCase
+  duplicateNamedTabCase(id: String!, data: mutationNamedTabCaseInput!): NamedTabCase
+  createPayloadKv(data: mutationPayloadKvInput!, draft: Boolean): PayloadKv
+  updatePayloadKv(id: String!, autosave: Boolean, data: mutationPayloadKvUpdateInput!, draft: Boolean, trash: Boolean): PayloadKv
+  validatePayloadKv(id: String, data: mutationPayloadKvValidationInput, draft: Boolean): PayloadValidationResult
+  deletePayloadKv(id: String!, trash: Boolean): PayloadKv
+  duplicatePayloadKv(id: String!, data: mutationPayloadKvInput!): PayloadKv
   createUser(data: mutationUserInput!, draft: Boolean): User
   updateUser(id: String!, autosave: Boolean, data: mutationUserUpdateInput!, draft: Boolean, trash: Boolean): User
+  validateUser(id: String, data: mutationUserValidationInput, draft: Boolean): PayloadValidationResult
   deleteUser(id: String!, trash: Boolean): User
   refreshTokenUser: usersRefreshedUser
   logoutUser(allSessions: Boolean): String
   unlockUser(email: String!): Boolean!
   loginUser(email: String!, password: String): usersLoginResult
-  forgotPasswordUser(disableEmail: Boolean, expiration: Int, email: String!): Boolean!
+  forgotPasswordUser(email: String!): Boolean!
   resetPasswordUser(password: String, token: String): usersResetPassword
   verifyEmailUser(token: String): Boolean
   createPayloadLockedDocument(data: mutationPayloadLockedDocumentInput!, draft: Boolean): PayloadLockedDocument
   updatePayloadLockedDocument(id: String!, autosave: Boolean, data: mutationPayloadLockedDocumentUpdateInput!, draft: Boolean, trash: Boolean): PayloadLockedDocument
+  validatePayloadLockedDocument(id: String, data: mutationPayloadLockedDocumentValidationInput, draft: Boolean): PayloadValidationResult
   deletePayloadLockedDocument(id: String!, trash: Boolean): PayloadLockedDocument
   duplicatePayloadLockedDocument(id: String!, data: mutationPayloadLockedDocumentInput!): PayloadLockedDocument
   createPayloadPreference(data: mutationPayloadPreferenceInput!, draft: Boolean): PayloadPreference
   updatePayloadPreference(id: String!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!, draft: Boolean, trash: Boolean): PayloadPreference
+  validatePayloadPreference(id: String, data: mutationPayloadPreferenceValidationInput, draft: Boolean): PayloadValidationResult
   deletePayloadPreference(id: String!, trash: Boolean): PayloadPreference
   duplicatePayloadPreference(id: String!, data: mutationPayloadPreferenceInput!): PayloadPreference
+  createPayloadLlmInstruction(data: mutationPayloadLlmInstructionInput!, draft: Boolean): PayloadLlmInstruction
+  updatePayloadLlmInstruction(id: String!, autosave: Boolean, data: mutationPayloadLlmInstructionUpdateInput!, draft: Boolean, trash: Boolean): PayloadLlmInstruction
+  validatePayloadLlmInstruction(id: String, data: mutationPayloadLlmInstructionValidationInput, draft: Boolean): PayloadValidationResult
+  deletePayloadLlmInstruction(id: String!, trash: Boolean): PayloadLlmInstruction
 }
 
 input mutationCollection1Input {
@@ -3276,6 +6417,8 @@ input mutationCollection1Input {
   title: String!
   meta: [mutationCollection1_MetaInput]
   blocks: JSON
+  createdBy: Collection1_CreatedByRelationshipInput
+  updatedBy: Collection1_UpdatedByRelationshipInput
   updatedAt: String
   createdAt: String
 }
@@ -3286,11 +6429,31 @@ input mutationCollection1_MetaInput {
   id: String
 }
 
+input Collection1_CreatedByRelationshipInput {
+  relationTo: Collection1_CreatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum Collection1_CreatedByRelationshipInputRelationTo {
+  users
+}
+
+input Collection1_UpdatedByRelationshipInput {
+  relationTo: Collection1_UpdatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum Collection1_UpdatedByRelationshipInputRelationTo {
+  users
+}
+
 input mutationCollection1UpdateInput {
   testing: String
   title: String
   meta: [mutationCollection1Update_MetaInput]
   blocks: JSON
+  createdBy: Collection1Update_CreatedByRelationshipInput
+  updatedBy: Collection1Update_UpdatedByRelationshipInput
   updatedAt: String
   createdAt: String
 }
@@ -3301,12 +6464,78 @@ input mutationCollection1Update_MetaInput {
   id: String
 }
 
+input Collection1Update_CreatedByRelationshipInput {
+  relationTo: Collection1Update_CreatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum Collection1Update_CreatedByRelationshipInputRelationTo {
+  users
+}
+
+input Collection1Update_UpdatedByRelationshipInput {
+  relationTo: Collection1Update_UpdatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum Collection1Update_UpdatedByRelationshipInputRelationTo {
+  users
+}
+
+type PayloadValidationResult {
+  errors: [PayloadValidationFieldError!]!
+  valid: Boolean!
+}
+
+type PayloadValidationFieldError {
+  locale: String
+  message: String!
+  path: String!
+}
+
+input mutationCollection1ValidationInput {
+  testing: String
+  title: String
+  meta: [mutationCollection1Validation_MetaInput]
+  blocks: JSON
+  createdBy: Collection1Validation_CreatedByRelationshipInput
+  updatedBy: Collection1Validation_UpdatedByRelationshipInput
+  updatedAt: String
+  createdAt: String
+}
+
+input mutationCollection1Validation_MetaInput {
+  title: String
+  description: String
+  id: String
+}
+
+input Collection1Validation_CreatedByRelationshipInput {
+  relationTo: Collection1Validation_CreatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum Collection1Validation_CreatedByRelationshipInputRelationTo {
+  users
+}
+
+input Collection1Validation_UpdatedByRelationshipInput {
+  relationTo: Collection1Validation_UpdatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum Collection1Validation_UpdatedByRelationshipInputRelationTo {
+  users
+}
+
 input mutationCollection2Input {
   metaArray: [mutationCollection2_MetaArrayInput]
   metaGroup: mutationCollection2_MetaGroupInput
   nestedGroup: mutationCollection2_NestedGroupInput
   some_text_: String
   spaceBottom: Collection2_spaceBottom_MutationInput
+  createdBy: Collection2_CreatedByRelationshipInput
+  updatedBy: Collection2_UpdatedByRelationshipInput
   updatedAt: String
   createdAt: String
 }
@@ -3339,12 +6568,32 @@ enum Collection2_spaceBottom_MutationInput {
   mb__150px_
 }
 
+input Collection2_CreatedByRelationshipInput {
+  relationTo: Collection2_CreatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum Collection2_CreatedByRelationshipInputRelationTo {
+  users
+}
+
+input Collection2_UpdatedByRelationshipInput {
+  relationTo: Collection2_UpdatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum Collection2_UpdatedByRelationshipInputRelationTo {
+  users
+}
+
 input mutationCollection2UpdateInput {
   metaArray: [mutationCollection2Update_MetaArrayInput]
   metaGroup: mutationCollection2Update_MetaGroupInput
   nestedGroup: mutationCollection2Update_NestedGroupInput
   some_text_: String
   spaceBottom: Collection2Update_spaceBottom_MutationInput
+  createdBy: Collection2Update_CreatedByRelationshipInput
+  updatedBy: Collection2Update_UpdatedByRelationshipInput
   updatedAt: String
   createdAt: String
 }
@@ -3377,18 +6626,288 @@ enum Collection2Update_spaceBottom_MutationInput {
   mb__150px_
 }
 
+input Collection2Update_CreatedByRelationshipInput {
+  relationTo: Collection2Update_CreatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum Collection2Update_CreatedByRelationshipInputRelationTo {
+  users
+}
+
+input Collection2Update_UpdatedByRelationshipInput {
+  relationTo: Collection2Update_UpdatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum Collection2Update_UpdatedByRelationshipInputRelationTo {
+  users
+}
+
+input mutationCollection2ValidationInput {
+  metaArray: [mutationCollection2Validation_MetaArrayInput]
+  metaGroup: mutationCollection2Validation_MetaGroupInput
+  nestedGroup: mutationCollection2Validation_NestedGroupInput
+  some_text_: String
+  spaceBottom: Collection2Validation_spaceBottom_MutationInput
+  createdBy: Collection2Validation_CreatedByRelationshipInput
+  updatedBy: Collection2Validation_UpdatedByRelationshipInput
+  updatedAt: String
+  createdAt: String
+}
+
+input mutationCollection2Validation_MetaArrayInput {
+  title: String
+  description: String
+  id: String
+}
+
+input mutationCollection2Validation_MetaGroupInput {
+  title: String
+  description: String
+}
+
+input mutationCollection2Validation_NestedGroupInput {
+  meta: mutationCollection2Validation_NestedGroup_MetaInput
+}
+
+input mutationCollection2Validation_NestedGroup_MetaInput {
+  title: String
+  description: String
+}
+
+enum Collection2Validation_spaceBottom_MutationInput {
+  mb_0
+  mb_8
+  mb_16
+  mb_24
+  mb__150px_
+}
+
+input Collection2Validation_CreatedByRelationshipInput {
+  relationTo: Collection2Validation_CreatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum Collection2Validation_CreatedByRelationshipInputRelationTo {
+  users
+}
+
+input Collection2Validation_UpdatedByRelationshipInput {
+  relationTo: Collection2Validation_UpdatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum Collection2Validation_UpdatedByRelationshipInputRelationTo {
+  users
+}
+
+input mutationNamedTabCaseInput {
+  tabWithRequiredField: mutationNamedTabCase_TabWithRequiredFieldInput!
+  tabWithVirtualRequiredField: mutationNamedTabCase_TabWithVirtualRequiredFieldInput
+  tabWithConditionalRequiredField: mutationNamedTabCase_TabWithConditionalRequiredFieldInput
+  tabWithReadAccessRequiredField: mutationNamedTabCase_TabWithReadAccessRequiredFieldInput
+  tabWithOptionalArray: mutationNamedTabCase_TabWithOptionalArrayInput
+  createdBy: NamedTabCase_CreatedByRelationshipInput
+  updatedBy: NamedTabCase_UpdatedByRelationshipInput
+  updatedAt: String
+  createdAt: String
+}
+
+input mutationNamedTabCase_TabWithRequiredFieldInput {
+  title: String!
+}
+
+input mutationNamedTabCase_TabWithVirtualRequiredFieldInput {
+  virtualTitle: String
+}
+
+input mutationNamedTabCase_TabWithConditionalRequiredFieldInput {
+  conditionalTitle: String
+}
+
+input mutationNamedTabCase_TabWithReadAccessRequiredFieldInput {
+  readAccessTitle: String
+}
+
+input mutationNamedTabCase_TabWithOptionalArrayInput {
+  items: [mutationNamedTabCase_TabWithOptionalArray_ItemsInput]
+}
+
+input mutationNamedTabCase_TabWithOptionalArray_ItemsInput {
+  itemTitle: String!
+  id: String
+}
+
+input NamedTabCase_CreatedByRelationshipInput {
+  relationTo: NamedTabCase_CreatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum NamedTabCase_CreatedByRelationshipInputRelationTo {
+  users
+}
+
+input NamedTabCase_UpdatedByRelationshipInput {
+  relationTo: NamedTabCase_UpdatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum NamedTabCase_UpdatedByRelationshipInputRelationTo {
+  users
+}
+
+input mutationNamedTabCaseUpdateInput {
+  tabWithRequiredField: mutationNamedTabCaseUpdate_TabWithRequiredFieldInput
+  tabWithVirtualRequiredField: mutationNamedTabCaseUpdate_TabWithVirtualRequiredFieldInput
+  tabWithConditionalRequiredField: mutationNamedTabCaseUpdate_TabWithConditionalRequiredFieldInput
+  tabWithReadAccessRequiredField: mutationNamedTabCaseUpdate_TabWithReadAccessRequiredFieldInput
+  tabWithOptionalArray: mutationNamedTabCaseUpdate_TabWithOptionalArrayInput
+  createdBy: NamedTabCaseUpdate_CreatedByRelationshipInput
+  updatedBy: NamedTabCaseUpdate_UpdatedByRelationshipInput
+  updatedAt: String
+  createdAt: String
+}
+
+input mutationNamedTabCaseUpdate_TabWithRequiredFieldInput {
+  title: String
+}
+
+input mutationNamedTabCaseUpdate_TabWithVirtualRequiredFieldInput {
+  virtualTitle: String
+}
+
+input mutationNamedTabCaseUpdate_TabWithConditionalRequiredFieldInput {
+  conditionalTitle: String
+}
+
+input mutationNamedTabCaseUpdate_TabWithReadAccessRequiredFieldInput {
+  readAccessTitle: String
+}
+
+input mutationNamedTabCaseUpdate_TabWithOptionalArrayInput {
+  items: [mutationNamedTabCaseUpdate_TabWithOptionalArray_ItemsInput]
+}
+
+input mutationNamedTabCaseUpdate_TabWithOptionalArray_ItemsInput {
+  itemTitle: String
+  id: String
+}
+
+input NamedTabCaseUpdate_CreatedByRelationshipInput {
+  relationTo: NamedTabCaseUpdate_CreatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum NamedTabCaseUpdate_CreatedByRelationshipInputRelationTo {
+  users
+}
+
+input NamedTabCaseUpdate_UpdatedByRelationshipInput {
+  relationTo: NamedTabCaseUpdate_UpdatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum NamedTabCaseUpdate_UpdatedByRelationshipInputRelationTo {
+  users
+}
+
+input mutationNamedTabCaseValidationInput {
+  tabWithRequiredField: mutationNamedTabCaseValidation_TabWithRequiredFieldInput
+  tabWithVirtualRequiredField: mutationNamedTabCaseValidation_TabWithVirtualRequiredFieldInput
+  tabWithConditionalRequiredField: mutationNamedTabCaseValidation_TabWithConditionalRequiredFieldInput
+  tabWithReadAccessRequiredField: mutationNamedTabCaseValidation_TabWithReadAccessRequiredFieldInput
+  tabWithOptionalArray: mutationNamedTabCaseValidation_TabWithOptionalArrayInput
+  createdBy: NamedTabCaseValidation_CreatedByRelationshipInput
+  updatedBy: NamedTabCaseValidation_UpdatedByRelationshipInput
+  updatedAt: String
+  createdAt: String
+}
+
+input mutationNamedTabCaseValidation_TabWithRequiredFieldInput {
+  title: String
+}
+
+input mutationNamedTabCaseValidation_TabWithVirtualRequiredFieldInput {
+  virtualTitle: String
+}
+
+input mutationNamedTabCaseValidation_TabWithConditionalRequiredFieldInput {
+  conditionalTitle: String
+}
+
+input mutationNamedTabCaseValidation_TabWithReadAccessRequiredFieldInput {
+  readAccessTitle: String
+}
+
+input mutationNamedTabCaseValidation_TabWithOptionalArrayInput {
+  items: [mutationNamedTabCaseValidation_TabWithOptionalArray_ItemsInput]
+}
+
+input mutationNamedTabCaseValidation_TabWithOptionalArray_ItemsInput {
+  itemTitle: String
+  id: String
+}
+
+input NamedTabCaseValidation_CreatedByRelationshipInput {
+  relationTo: NamedTabCaseValidation_CreatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum NamedTabCaseValidation_CreatedByRelationshipInputRelationTo {
+  users
+}
+
+input NamedTabCaseValidation_UpdatedByRelationshipInput {
+  relationTo: NamedTabCaseValidation_UpdatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum NamedTabCaseValidation_UpdatedByRelationshipInputRelationTo {
+  users
+}
+
+input mutationPayloadKvInput {
+  key: String!
+  data: JSON!
+}
+
+input mutationPayloadKvUpdateInput {
+  key: String
+  data: JSON
+}
+
+input mutationPayloadKvValidationInput {
+  key: String
+  data: JSON
+}
+
 input mutationUserInput {
+  createdBy: User_CreatedByRelationshipInput
+  updatedBy: User_UpdatedByRelationshipInput
   updatedAt: String
   createdAt: String
   email: String!
-  resetPasswordToken: String
-  resetPasswordExpiration: String
-  salt: String
-  hash: String
-  loginAttempts: Float
-  lockUntil: String
   sessions: [mutationUser_SessionsInput]
   password: String!
+}
+
+input User_CreatedByRelationshipInput {
+  relationTo: User_CreatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum User_CreatedByRelationshipInputRelationTo {
+  users
+}
+
+input User_UpdatedByRelationshipInput {
+  relationTo: User_UpdatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum User_UpdatedByRelationshipInputRelationTo {
+  users
 }
 
 input mutationUser_SessionsInput {
@@ -3398,23 +6917,71 @@ input mutationUser_SessionsInput {
 }
 
 input mutationUserUpdateInput {
+  createdBy: UserUpdate_CreatedByRelationshipInput
+  updatedBy: UserUpdate_UpdatedByRelationshipInput
   updatedAt: String
   createdAt: String
   email: String
-  resetPasswordToken: String
-  resetPasswordExpiration: String
-  salt: String
-  hash: String
-  loginAttempts: Float
-  lockUntil: String
   sessions: [mutationUserUpdate_SessionsInput]
   password: String
 }
 
+input UserUpdate_CreatedByRelationshipInput {
+  relationTo: UserUpdate_CreatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum UserUpdate_CreatedByRelationshipInputRelationTo {
+  users
+}
+
+input UserUpdate_UpdatedByRelationshipInput {
+  relationTo: UserUpdate_UpdatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum UserUpdate_UpdatedByRelationshipInputRelationTo {
+  users
+}
+
 input mutationUserUpdate_SessionsInput {
-  id: String!
+  id: String
   createdAt: String
-  expiresAt: String!
+  expiresAt: String
+}
+
+input mutationUserValidationInput {
+  createdBy: UserValidation_CreatedByRelationshipInput
+  updatedBy: UserValidation_UpdatedByRelationshipInput
+  updatedAt: String
+  createdAt: String
+  email: String
+  sessions: [mutationUserValidation_SessionsInput]
+  password: String
+}
+
+input UserValidation_CreatedByRelationshipInput {
+  relationTo: UserValidation_CreatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum UserValidation_CreatedByRelationshipInputRelationTo {
+  users
+}
+
+input UserValidation_UpdatedByRelationshipInput {
+  relationTo: UserValidation_UpdatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum UserValidation_UpdatedByRelationshipInputRelationTo {
+  users
+}
+
+input mutationUserValidation_SessionsInput {
+  id: String
+  createdAt: String
+  expiresAt: String
 }
 
 type usersRefreshedUser {
@@ -3456,6 +7023,7 @@ input PayloadLockedDocument_DocumentRelationshipInput {
 enum PayloadLockedDocument_DocumentRelationshipInputRelationTo {
   collection1
   collection2
+  named_tab_cases
   no_graphql
   users
 }
@@ -3485,6 +7053,7 @@ input PayloadLockedDocumentUpdate_DocumentRelationshipInput {
 enum PayloadLockedDocumentUpdate_DocumentRelationshipInputRelationTo {
   collection1
   collection2
+  named_tab_cases
   no_graphql
   users
 }
@@ -3495,6 +7064,36 @@ input PayloadLockedDocumentUpdate_UserRelationshipInput {
 }
 
 enum PayloadLockedDocumentUpdate_UserRelationshipInputRelationTo {
+  users
+}
+
+input mutationPayloadLockedDocumentValidationInput {
+  document: PayloadLockedDocumentValidation_DocumentRelationshipInput
+  globalSlug: String
+  user: PayloadLockedDocumentValidation_UserRelationshipInput
+  updatedAt: String
+  createdAt: String
+}
+
+input PayloadLockedDocumentValidation_DocumentRelationshipInput {
+  relationTo: PayloadLockedDocumentValidation_DocumentRelationshipInputRelationTo
+  value: JSON
+}
+
+enum PayloadLockedDocumentValidation_DocumentRelationshipInputRelationTo {
+  collection1
+  collection2
+  named_tab_cases
+  no_graphql
+  users
+}
+
+input PayloadLockedDocumentValidation_UserRelationshipInput {
+  relationTo: PayloadLockedDocumentValidation_UserRelationshipInputRelationTo
+  value: JSON
+}
+
+enum PayloadLockedDocumentValidation_UserRelationshipInputRelationTo {
   users
 }
 
@@ -3529,5 +7128,129 @@ input PayloadPreferenceUpdate_UserRelationshipInput {
 }
 
 enum PayloadPreferenceUpdate_UserRelationshipInputRelationTo {
+  users
+}
+
+input mutationPayloadPreferenceValidationInput {
+  user: PayloadPreferenceValidation_UserRelationshipInput
+  key: String
+  value: JSON
+  updatedAt: String
+  createdAt: String
+}
+
+input PayloadPreferenceValidation_UserRelationshipInput {
+  relationTo: PayloadPreferenceValidation_UserRelationshipInputRelationTo
+  value: JSON
+}
+
+enum PayloadPreferenceValidation_UserRelationshipInputRelationTo {
+  users
+}
+
+input mutationPayloadLlmInstructionInput {
+  id: String
+  entitySlug: String!
+  title: String
+  entityType: PayloadLlmInstruction_entityType_MutationInput!
+  additionalInstructions: JSON
+  systemInstructions: JSON
+  createdBy: PayloadLlmInstruction_CreatedByRelationshipInput
+  updatedBy: PayloadLlmInstruction_UpdatedByRelationshipInput
+  updatedAt: String
+  createdAt: String
+}
+
+enum PayloadLlmInstruction_entityType_MutationInput {
+  collection
+  global
+}
+
+input PayloadLlmInstruction_CreatedByRelationshipInput {
+  relationTo: PayloadLlmInstruction_CreatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum PayloadLlmInstruction_CreatedByRelationshipInputRelationTo {
+  users
+}
+
+input PayloadLlmInstruction_UpdatedByRelationshipInput {
+  relationTo: PayloadLlmInstruction_UpdatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum PayloadLlmInstruction_UpdatedByRelationshipInputRelationTo {
+  users
+}
+
+input mutationPayloadLlmInstructionUpdateInput {
+  entitySlug: String
+  title: String
+  entityType: PayloadLlmInstructionUpdate_entityType_MutationInput
+  additionalInstructions: JSON
+  systemInstructions: JSON
+  createdBy: PayloadLlmInstructionUpdate_CreatedByRelationshipInput
+  updatedBy: PayloadLlmInstructionUpdate_UpdatedByRelationshipInput
+  updatedAt: String
+  createdAt: String
+}
+
+enum PayloadLlmInstructionUpdate_entityType_MutationInput {
+  collection
+  global
+}
+
+input PayloadLlmInstructionUpdate_CreatedByRelationshipInput {
+  relationTo: PayloadLlmInstructionUpdate_CreatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum PayloadLlmInstructionUpdate_CreatedByRelationshipInputRelationTo {
+  users
+}
+
+input PayloadLlmInstructionUpdate_UpdatedByRelationshipInput {
+  relationTo: PayloadLlmInstructionUpdate_UpdatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum PayloadLlmInstructionUpdate_UpdatedByRelationshipInputRelationTo {
+  users
+}
+
+input mutationPayloadLlmInstructionValidationInput {
+  id: String
+  entitySlug: String
+  title: String
+  entityType: PayloadLlmInstructionValidation_entityType_MutationInput
+  additionalInstructions: JSON
+  systemInstructions: JSON
+  createdBy: PayloadLlmInstructionValidation_CreatedByRelationshipInput
+  updatedBy: PayloadLlmInstructionValidation_UpdatedByRelationshipInput
+  updatedAt: String
+  createdAt: String
+}
+
+enum PayloadLlmInstructionValidation_entityType_MutationInput {
+  collection
+  global
+}
+
+input PayloadLlmInstructionValidation_CreatedByRelationshipInput {
+  relationTo: PayloadLlmInstructionValidation_CreatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum PayloadLlmInstructionValidation_CreatedByRelationshipInputRelationTo {
+  users
+}
+
+input PayloadLlmInstructionValidation_UpdatedByRelationshipInput {
+  relationTo: PayloadLlmInstructionValidation_UpdatedByRelationshipInputRelationTo
+  value: JSON
+}
+
+enum PayloadLlmInstructionValidation_UpdatedByRelationshipInputRelationTo {
   users
 }
