@@ -50,6 +50,34 @@ describe('authenticateLocalStrategy', () => {
     expect(result).toEqual({ doc, shouldUpdatePasswordHash: false })
   })
 
+  it('should flag a 600k password hash for rehash when configured for 100000 iterations', async () => {
+    const password = 'test-password'
+    const { hash, salt } = generateCurrentHashAndSalt(password)
+    const doc = { id: 1, hash, salt }
+
+    const result = await authenticateLocalStrategy({
+      doc,
+      password,
+      passwordHashIterations: 100000,
+    })
+
+    expect(result).toEqual({ doc, shouldUpdatePasswordHash: true })
+  })
+
+  it('should flag a legacy password hash for rehash when configured for 100000 iterations', async () => {
+    const password = 'test-password'
+    const { hash, salt } = generateExistingHashAndSalt(password)
+    const doc = { id: 1, hash, salt }
+
+    const result = await authenticateLocalStrategy({
+      doc,
+      password,
+      passwordHashIterations: 100000,
+    })
+
+    expect(result).toEqual({ doc, shouldUpdatePasswordHash: true })
+  })
+
   it('should return null when hashing fails', async () => {
     // Calls back on a later tick like the real crypto.pbkdf2, so an error thrown
     // inside the callback is not caught by authenticateLocalStrategy
