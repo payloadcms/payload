@@ -33,3 +33,8 @@ export const trashMediaDir = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   'trash-media',
 )
+export const legacyMediaSlug = 'file-versioned-legacy-media'
+export const legacyMediaDir = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  'legacy-media',
+)

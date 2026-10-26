@@ -21,6 +21,7 @@ import {
   convertedMediaSlug,
   draftMediaDir,
   draftMediaSlug,
+  legacyMediaDir,
   mediaDir,
   mediaSlug,
   plainMediaDir,
@@ -63,6 +64,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     await rm(mediaDir, { force: true, recursive: true })
     await rm(draftMediaDir, { force: true, recursive: true })
     await rm(transformedMediaDir, { force: true, recursive: true })
+    await rm(legacyMediaDir, { force: true, recursive: true })
     await rm(convertedMediaDir, { force: true, recursive: true })
     await rm(trashMediaDir, { force: true, recursive: true })
   })

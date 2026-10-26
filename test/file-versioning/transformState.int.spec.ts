@@ -11,7 +11,13 @@ import { expect } from 'vitest'
 import type { UploadTransforms } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
-import { transformedMediaDir, transformedMediaSlug } from './shared.js'
+import { legacyFocalPoints } from './seedLegacyMedia.js'
+import {
+  legacyMediaDir,
+  legacyMediaSlug,
+  transformedMediaDir,
+  transformedMediaSlug,
+} from './shared.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 // 1600 x 1600 PNG
@@ -24,6 +30,7 @@ const transformStateError = {
 test.suite('File transform state', { config: './config.ts' }, () => {
   test.afterEach(async () => {
     await rm(transformedMediaDir, { force: true, recursive: true })
+    await rm(legacyMediaDir, { force: true, recursive: true })
   })
 
   const createImage = async ({
@@ -224,40 +231,43 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     expect(await readFile(path.join(transformedMediaDir, updated.filename!))).toEqual(bytes)
   })
 
-  const createLegacyImage = async ({
-    focalPoint,
+  const findLegacyImage = async ({
+    alt,
     payload,
   }: {
-    focalPoint: { x: number; y: number }
+    alt: keyof typeof legacyFocalPoints
     payload: Payload
   }) => {
-    const created = await createImage({ payload })
-
-    // A document saved before `_transforms` existed keeps its focal point only in focalX/focalY.
-    await payload.db.updateOne({
-      id: created.id,
-      collection: transformedMediaSlug,
-      data: { _transforms: null, focalX: focalPoint.x, focalY: focalPoint.y },
+    const { docs } = await payload.find({
+      collection: legacyMediaSlug,
+      where: { alt: { equals: alt } },
     })
 
-    return created
+    return docs[0]!
   }
+
+  test('should seed legacy documents without transform state', async ({ payload }) => {
+    const legacy = await findLegacyImage({ alt: 'legacy off-center', payload })
+
+    expect(legacy._transforms).toBeNull()
+    expect(legacy).toMatchObject({ focalX: 30, focalY: 70 })
+  })
 
   test('should move a legacy focal point into transform state on the first write', async ({
     payload,
   }) => {
-    const created = await createLegacyImage({ focalPoint: { x: 30, y: 70 }, payload })
+    const legacy = await findLegacyImage({ alt: 'legacy off-center', payload })
 
     const updated = await payload.update({
-      id: created.id,
-      collection: transformedMediaSlug,
+      id: legacy.id,
+      collection: legacyMediaSlug,
       data: { _transforms: { crop: { height: 600, width: 800, x: 0, y: 0 } } },
     })
 
     expect(updated).toMatchObject({ focalX: 30, focalY: 70 })
     expect(updated._transforms).toEqual({
       crop: { height: 600, width: 800, x: 0, y: 0 },
-      focalPoint: { x: 30, y: 70 },
+      focalPoint: legacyFocalPoints['legacy off-center'],
     })
   })
 
@@ -265,9 +275,9 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     payload,
     restClient,
   }) => {
-    const created = await createLegacyImage({ focalPoint: { x: 30, y: 70 }, payload })
+    const legacy = await findLegacyImage({ alt: 'legacy off-center', payload })
 
-    const response = await restClient.PATCH(`/${transformedMediaSlug}/${created.id}`, {
+    const response = await restClient.PATCH(`/${legacyMediaSlug}/${legacy.id}`, {
       body: JSON.stringify({ alt: 'cropped' }),
       query: {
         uploadEdits: {
@@ -281,16 +291,16 @@ test.suite('File transform state', { config: './config.ts' }, () => {
 
     expect(doc._transforms).toEqual({
       crop: { height: 800, width: 800, x: 0, y: 0 },
-      focalPoint: { x: 30, y: 70 },
+      focalPoint: legacyFocalPoints['legacy off-center'],
     })
   })
 
   test('should not add a center focal point on the first write', async ({ payload }) => {
-    const created = await createLegacyImage({ focalPoint: { x: 50, y: 50 }, payload })
+    const legacy = await findLegacyImage({ alt: 'legacy center', payload })
 
     const updated = await payload.update({
-      id: created.id,
-      collection: transformedMediaSlug,
+      id: legacy.id,
+      collection: legacyMediaSlug,
       data: { _transforms: { crop: { height: 600, width: 800, x: 0, y: 0 } } },
     })
 
