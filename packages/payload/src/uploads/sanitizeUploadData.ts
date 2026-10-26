@@ -182,6 +182,7 @@ export const mergeUploadDataWithDocument = <T>(
 }
 
 const uploadDerivedProperties = [
+  '_transforms',
   '_objectKey',
   'filename',
   'filesize',
