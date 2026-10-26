@@ -24,7 +24,7 @@
 
     &:focus-visible {
       outline: var(--accessibility-outline);
-      --accessibility-outline-offset: var(--accessibility-outline-inset);
+      outline-offset: var(--accessibility-outline-inset);
     }
   }
 }

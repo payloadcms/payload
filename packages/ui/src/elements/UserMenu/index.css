@@ -94,7 +94,7 @@
 
 .user-menu__submenu-header-row:focus-visible {
   outline: var(--accessibility-outline);
-  --accessibility-outline-offset: var(--accessibility-outline-inset);
+  outline-offset: var(--accessibility-outline-inset);
 }
 
 .user-menu__submenu-header-row:hover {

@@ -151,7 +151,7 @@
 
     &:focus-visible {
       outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
-      --accessibility-outline-offset: var(--accessibility-outline-inset);
+      outline-offset: var(--accessibility-outline-inset);
     }
   }
 
@@ -189,7 +189,7 @@
     &:focus-visible {
       opacity: 1;
       outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
-      --accessibility-outline-offset: var(--accessibility-outline-inset);
+      outline-offset: var(--accessibility-outline-inset);
     }
 
     &:active {

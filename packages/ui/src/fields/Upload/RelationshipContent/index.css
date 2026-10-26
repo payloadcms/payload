@@ -47,7 +47,7 @@
       color: inherit;
 
       &:focus-visible {
-        --accessibility-outline-offset: var(--accessibility-outline-inset);
+        outline-offset: var(--accessibility-outline-inset);
       }
     }
   }

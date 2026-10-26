@@ -63,7 +63,7 @@
 
   .popup-button-list__button:focus-visible {
     outline: var(--accessibility-outline);
-    --accessibility-outline-offset: var(--accessibility-outline-inset);
+    outline-offset: var(--accessibility-outline-inset);
     border-radius: var(--popup-item-radius);
   }
   .popup-button-list__button:hover {
