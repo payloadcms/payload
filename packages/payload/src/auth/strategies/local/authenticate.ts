@@ -2,6 +2,7 @@
 import crypto from 'crypto'
 
 import type { TypeWithID } from '../../../collections/config/types.js'
+import type { SanitizedConfig } from '../../../config/types.js'
 
 import { getPasswordHashParameters, isCurrentPasswordHash } from './generatePasswordSaltHash.js'
 
@@ -15,11 +16,13 @@ type AuthenticationResult = {
 type Args = {
   doc: Doc
   password: string
+  passwordHashIterations: SanitizedConfig['auth']['passwordHashIterations']
 }
 
 export const authenticateLocalStrategy = async ({
   doc,
   password,
+  passwordHashIterations,
 }: Args): Promise<AuthenticationResult | null> => {
   try {
     const { hash, salt } = doc
@@ -29,7 +32,7 @@ export const authenticateLocalStrategy = async ({
       const res = await new Promise<AuthenticationResult | null>((resolve, reject) => {
         crypto.pbkdf2(password, salt, iterations, keyLength, 'sha256', (e, hashBuffer) => {
           if (e) {
-            reject(e)
+            return reject(e)
           }
 
           const storedHashBuffer = Buffer.from(storedHash, 'hex')
@@ -40,7 +43,7 @@ export const authenticateLocalStrategy = async ({
           ) {
             resolve({
               doc,
-              shouldUpdatePasswordHash: !isCurrentPasswordHash(hash),
+              shouldUpdatePasswordHash: !isCurrentPasswordHash({ hash, passwordHashIterations }),
             })
           } else {
             reject(new Error('Invalid password'))
