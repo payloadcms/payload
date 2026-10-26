@@ -122,11 +122,13 @@
 
         &:focus-visible {
           outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
-          outline-offset: calc(-1 * var(--stroke-width-small));
+          --accessibility-outline-offset: var(--accessibility-outline-inset);
         }
       }
 
       .timezone-picker__clear-indicator {
+        --accessibility-outline-offset: var(--accessibility-outline-inset);
+
         display: flex;
         align-items: center;
         justify-content: center;
@@ -137,10 +139,6 @@
         height: var(--spacer-4);
         overflow: visible;
         border-radius: var(--button-radius);
-
-        &:focus-visible {
-          outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
-        }
       }
     }
   }

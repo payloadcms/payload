@@ -36,8 +36,10 @@
     }
 
     &:focus-visible {
+      --accessibility-outline-offset: var(--accessibility-outline-inset);
+
       outline: var(--accessibility-outline);
-      outline-offset: calc(-1 * var(--stroke-width-small));
+      outline-offset: var(--accessibility-outline-offset);
       border-radius: var(--button-radius);
     }
   }
