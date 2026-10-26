@@ -1874,7 +1874,7 @@ File versioning adds a required `GeneratedAdapter.copyFile` method. Copy `from` 
 
 Replace `clientUploadContext` with `uploadReference` in generated file metadata and static handler parameters. `handleUpload` no longer receives it because Payload skips uploading files that are already stored.
 
-Payload keeps only `_objectKey`, `prefix`, and `signedReceipt` at the top level of `uploadReference`. Read any other field your adapter or client added from `uploadReference.clientData`:
+Payload keeps only `_objectKey`, `prefix`, and `signedReceipt` at the top level of `uploadReference`, plus signed `adapterData` when `requiresUploadReceipt` is set. Read any other field your adapter or client added from `uploadReference.clientData`:
 
 ```diff
 - const objectID = uploadReference.providerObjectID
