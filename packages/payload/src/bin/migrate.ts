@@ -4,6 +4,7 @@ import type { SanitizedConfig } from '../config/types.js'
 
 import payload from '../index.js'
 import { prettySyncLoggerDestination } from '../utilities/logger.js'
+import { formatArgKey, getForceAcceptWarning } from './parseMigrateArgs.js'
 
 /**
  * The default logger's options did not allow for forcing sync logging
@@ -37,25 +38,11 @@ type Args = {
 }
 
 export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promise<void> => {
-  const { _: args, file, forceAcceptWarning: forceAcceptFromProps, help } = parsedArgs
+  const { _: args, file, help } = parsedArgs
 
-  const formattedArgs = Object.keys(parsedArgs)
-    .map((key) => {
-      const formattedKey = key.replace(/^[-_]+/, '')
-      if (!formattedKey) {
-        return null
-      }
+  const formattedArgs = Object.keys(parsedArgs).map(formatArgKey).filter(Boolean)
 
-      return formattedKey
-        .split('-')
-        .map((word, index) =>
-          index === 0 ? word.toLowerCase() : word.charAt(0).toUpperCase() + word.slice(1),
-        )
-        .join('')
-    })
-    .filter(Boolean)
-
-  const forceAcceptWarning = forceAcceptFromProps || formattedArgs.includes('forceAcceptWarning')
+  const forceAcceptWarning = getForceAcceptWarning(parsedArgs)
   const skipEmpty = formattedArgs.includes('skipEmpty')
 
   if (help) {
