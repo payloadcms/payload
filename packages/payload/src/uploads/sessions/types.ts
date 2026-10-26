@@ -154,6 +154,8 @@ export type UploadSessionDoc = {
   operation: UploadSessionOperation
   ownerCollection: string
   ownerID: string
+  /** Unique; see `getReservationKey`. */
+  reservationKey: string
   /** The `-original` filename this session's object key uses, held until the session ends. */
   reservedFilename?: null | string
   status: UploadSessionStatus

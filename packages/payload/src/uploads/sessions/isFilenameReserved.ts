@@ -18,8 +18,8 @@ export const isFilenameReservedByUploadSession = async ({
   filename: string
   req: PayloadRequest
 }): Promise<boolean> => {
-  // Only projects with a segmented storage adapter register the sessions collection.
-  if (!req.payload?.collections?.[uploadSessionsCollectionSlug]) {
+  // Only collections with a segmented storage adapter can have sessions.
+  if (!req.payload?.collections?.[collectionSlug]?.config.upload?.uploadInstructions?.segmented) {
     return false
   }
 
@@ -38,8 +38,8 @@ export const isFilenameReservedByUploadSession = async ({
       and: [
         { collectionSlug: { equals: collectionSlug } },
         { reservedFilename: { in: [...candidates] } },
+        // Overdue sessions keep their name until the sweep ends them, matching the reservation key.
         { status: { in: ['pending', 'active'] } },
-        { expiresAt: { greater_than: new Date().toISOString() } },
       ],
     },
   })

@@ -15,6 +15,8 @@ type UploadHandler = (args: {
   file: File
   /** The document data being saved, kept with a running upload so the save survives navigation. */
   intent?: UploadSessionIntentData
+  /** The document whose file is replaced. Omitted when creating a document. */
+  targetID?: number | string
 }) => Promise<UploadInstructions['file']>
 
 export type UploadHandlersContext = {
@@ -38,7 +40,7 @@ export const UploadHandlersProvider = ({ children }) => {
       return null
     }
 
-    return async ({ docPrefix, file, intent }) => {
+    return async ({ docPrefix, file, intent, targetID }) => {
       // The upload may already be running since the file was picked; the save waits for it.
       const runningUpload = uploadSessions.getUploadedFile({ file, intent })
 
@@ -53,6 +55,7 @@ export const UploadHandlersProvider = ({ children }) => {
           docPrefix,
           file,
           serverURL: config.serverURL,
+          targetID,
         })
       }
 

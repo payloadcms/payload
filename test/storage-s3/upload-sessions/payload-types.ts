@@ -80,6 +80,7 @@ export interface Config {
   blocks: {};
   collections: {
     videos: Video;
+    'videos-with-drafts': VideosWithDraft;
     'videos-missing-bucket': VideosMissingBucket;
     users: User;
     'payload-kv': PayloadKv;
@@ -92,6 +93,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     videos: VideosSelect<false> | VideosSelect<true>;
+    'videos-with-drafts': VideosWithDraftsSelect<false> | VideosWithDraftsSelect<true>;
     'videos-missing-bucket': VideosMissingBucketSelect<false> | VideosMissingBucketSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -214,6 +216,46 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "videos-with-drafts".
+ */
+export interface VideosWithDraft {
+  id: string;
+  title: string;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "videos-missing-bucket".
  */
 export interface VideosMissingBucket {
@@ -280,6 +322,10 @@ export interface PayloadLockedDocument {
         value: string | Video;
       } | null)
     | ({
+        relationTo: 'videos-with-drafts';
+        value: string | VideosWithDraft;
+      } | null)
+    | ({
         relationTo: 'videos-missing-bucket';
         value: string | VideosMissingBucket;
       } | null)
@@ -308,6 +354,7 @@ export interface PayloadUploadSession {
   operation: 'create' | 'update';
   targetID?: string | null;
   reservedFilename?: string | null;
+  reservationKey: string;
   file:
     | {
         [k: string]: unknown;
@@ -457,6 +504,41 @@ export interface VideosSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "videos-with-drafts_select".
+ */
+export interface VideosWithDraftsSelect<T extends boolean = true> {
+  title?: T;
+  prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "videos-missing-bucket_select".
  */
 export interface VideosMissingBucketSelect<T extends boolean = true> {
@@ -545,6 +627,7 @@ export interface PayloadUploadSessionsSelect<T extends boolean = true> {
   operation?: T;
   targetID?: T;
   reservedFilename?: T;
+  reservationKey?: T;
   file?: T;
   storage?: T;
   transfer?: T;
@@ -626,7 +709,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'videos' | 'videos-missing-bucket' | 'users';
+    relatedCollection: 'videos' | 'videos-with-drafts' | 'videos-missing-bucket' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -648,7 +731,7 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('videos' | 'videos-missing-bucket' | 'users')[] | null;
+    excludedCollections?: ('videos' | 'videos-with-drafts' | 'videos-missing-bucket' | 'users')[] | null;
   };
   width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
@@ -658,7 +741,7 @@ export interface ActivityWidget {
  */
 export interface UploadDropzoneWidget {
   data?: {
-    excludedCollections?: ('videos' | 'videos-missing-bucket')[] | null;
+    excludedCollections?: ('videos' | 'videos-with-drafts' | 'videos-missing-bucket')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

@@ -1,3 +1,4 @@
+import crypto from 'node:crypto'
 import path from 'node:path'
 
 import type { CollectionSlug } from '../../index.js'
@@ -17,7 +18,7 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { createOperation } from '../../collections/operations/create.js'
 import { updateByIDOperation } from '../../collections/operations/updateByID.js'
 import { combineQueries } from '../../database/combineQueries.js'
-import { APIError, Forbidden, NotFound } from '../../errors/index.js'
+import { APIError, Forbidden, NotFound, ValidationError } from '../../errors/index.js'
 import { assertClientUploadAllowed } from '../assertClientUploadAllowed.js'
 import { checkFileMetadataRestrictions } from '../checkFileRestrictions.js'
 import { createClientUploadReceipt } from '../clientUploadReceipt.js'
@@ -28,8 +29,9 @@ import { uploadSessionsCollectionSlug } from './slug.js'
 
 const DEFAULT_EXPIRES_IN = 7 * 24 * 60 * 60 * 1000
 const DEFAULT_MAX_ACTIVE = 10
-const FINALIZE_LEASE_MS = 10 * 60 * 1000
+const LEASE_MS = 10 * 60 * 1000
 const INSTRUCTION_EXPIRES_IN_SECONDS = 15 * 60
+const MAX_FILENAME_RESERVATION_ATTEMPTS = 3
 const MAX_INTENT_BYTES = 256 * 1024
 const SWEEP_BATCH_SIZE = 10
 
@@ -148,6 +150,7 @@ export const createUploadSession = async ({
       operation,
       ownerCollection: owner.ownerCollection,
       ownerID: owner.ownerID,
+      reservationKey: getReservationKey(),
       status: 'pending',
       storage: { docPrefix, object: null, providerState: null },
       targetID: targetID ?? null,
@@ -158,7 +161,7 @@ export const createUploadSession = async ({
   })) as UploadSessionDoc
 
   try {
-    session = await ensureInitiated({ req, segmented, session })
+    session = await ensureInitiated({ isLeaseHeld: true, req, segmented, session })
   } catch (err) {
     const isPermanent = isPermanentError(err)
 
@@ -299,7 +302,7 @@ export const completeUploadSessionStorage = async ({
 
   // Once storage is committed this only mints a fresh receipt, so concurrent calls are safe.
   if (!session.storageCompletedAt) {
-    session = await claimFinalization({ req, session })
+    session = await claimLease({ req, session })
 
     try {
       session = await commitStorage({ req, session })
@@ -379,7 +382,7 @@ export const completeUploadSession = async ({
     throw new APIError('Document data is required to finish this upload.', 400)
   }
 
-  session = await claimFinalization({ req, session })
+  session = await claimLease({ req, session })
 
   try {
     session = await commitStorage({ req, session })
@@ -460,6 +463,7 @@ export const cancelUploadSession = async ({
       cancelledAt: new Date().toISOString(),
       cancelReason: 'user',
       intent: null,
+      reservationKey: getReservationKey(),
       status: 'cancelled',
     },
     req,
@@ -515,7 +519,13 @@ export const sweepUploadSessions = async ({
 
       if (session.status === 'pending' || session.status === 'active') {
         session = await updateSession({
-          data: { cancelledAt: now, cancelReason: 'expired', intent: null, status: 'cancelled' },
+          data: {
+            cancelledAt: now,
+            cancelReason: 'expired',
+            intent: null,
+            reservationKey: getReservationKey(),
+            status: 'cancelled',
+          },
           req,
           session,
         })
@@ -676,11 +686,18 @@ const getInitiatedStorage = ({ session }: { session: UploadSessionDoc }) => {
   return { object, providerState }
 }
 
+/**
+ * Starts the provider upload once. Unless the caller already holds the session lease, it is taken
+ * here so concurrent instruction requests cannot each start a provider upload.
+ */
 const ensureInitiated = async ({
+  isLeaseHeld = false,
   req,
   segmented,
   session,
 }: {
+  /** The caller holds the lease, or the session is new and its ID has not been returned yet. */
+  isLeaseHeld?: boolean
   req: PayloadRequest
   segmented: SegmentedUploadCapability
   session: UploadSessionDoc
@@ -689,30 +706,104 @@ const ensureInitiated = async ({
     return session
   }
 
-  const { object, providerState } = await segmented.initiate({
-    collectionSlug: session.collectionSlug,
-    docPrefix: session.storage.docPrefix,
-    filename: session.file.filename,
-    mimeType: session.file.mimeType,
-    req,
-  })
+  if (isLeaseHeld) {
+    return initiateWithUniqueFilename({ req, segmented, session })
+  }
 
-  return updateSession({
-    data: {
-      error: null,
-      reservedFilename: path.posix.basename(object.storageFilePath),
-      storage: { object, providerState },
-    },
-    req,
-    session,
-  })
+  let leasedSession: UploadSessionDoc
+
+  try {
+    leasedSession = await claimLease({ req, session })
+  } catch (err) {
+    // Another request may have just finished initiating.
+    const latestSession = await findOwnedSession({ id: String(session.id), req })
+
+    if (latestSession.storage.object) {
+      return latestSession
+    }
+
+    throw err
+  }
+
+  try {
+    leasedSession = await initiateWithUniqueFilename({ req, segmented, session: leasedSession })
+  } finally {
+    leasedSession = await updateSession({
+      data: { finalizingUntil: null },
+      req,
+      session: leasedSession,
+    })
+  }
+
+  return leasedSession
 }
 
 /**
- * Takes an exclusive, time-limited claim on finalization so concurrent or retried completions
- * cannot both commit. An expired claim from a crashed request can be taken over.
+ * Filenames are checked before they are reserved, so two sessions starting at the same moment can
+ * pick the same one. The unique reservation key rejects the second, which gives its provider
+ * upload up and picks again; the first session's name is now visible to the filename check.
  */
-const claimFinalization = async ({
+const initiateWithUniqueFilename = async ({
+  req,
+  segmented,
+  session,
+}: {
+  req: PayloadRequest
+  segmented: SegmentedUploadCapability
+  session: UploadSessionDoc
+}): Promise<UploadSessionDoc> => {
+  for (let attempt = 1; ; attempt++) {
+    const { object, providerState } = await segmented.initiate({
+      collectionSlug: session.collectionSlug,
+      docPrefix: session.storage.docPrefix,
+      filename: session.file.filename,
+      mimeType: session.file.mimeType,
+      req,
+    })
+
+    const reservedFilename = path.posix.basename(object.storageFilePath)
+
+    try {
+      return await updateSession({
+        data: {
+          error: null,
+          reservationKey: getReservationKey({
+            collectionSlug: session.collectionSlug,
+            reservedFilename,
+          }),
+          reservedFilename,
+          storage: { ...session.storage, object, providerState },
+        },
+        req,
+        session,
+      })
+    } catch (err) {
+      await segmented.abort({ object, providerState, req })
+
+      if (!(err instanceof ValidationError) || attempt >= MAX_FILENAME_RESERVATION_ATTEMPTS) {
+        throw err
+      }
+    }
+  }
+}
+
+/** Without a filename, returns a unique placeholder for a session that holds no name. */
+const getReservationKey = ({
+  collectionSlug,
+  reservedFilename,
+}: {
+  collectionSlug?: string
+  reservedFilename?: string
+} = {}): string =>
+  collectionSlug && reservedFilename
+    ? `${collectionSlug}/${reservedFilename}`
+    : `unreserved/${crypto.randomUUID()}`
+
+/**
+ * Takes an exclusive, time-limited lease on the session so concurrent or retried initiations
+ * and completions cannot both run. An expired lease from a crashed request can be taken over.
+ */
+const claimLease = async ({
   req,
   session,
 }: {
@@ -724,7 +815,7 @@ const claimFinalization = async ({
   const claimedSession = await req.payload.db.updateOne({
     collection: slug,
     data: {
-      finalizingUntil: new Date(now.getTime() + FINALIZE_LEASE_MS).toISOString(),
+      finalizingUntil: new Date(now.getTime() + LEASE_MS).toISOString(),
       lastActivityAt: now.toISOString(),
       status: 'active',
       updatedAt: now.toISOString(),
@@ -747,7 +838,7 @@ const claimFinalization = async ({
   })
 
   if (!claimedSession) {
-    throw new APIError('This upload is already being completed.', 409)
+    throw new APIError('Another request is already working on this upload. Try again shortly.', 409)
   }
 
   return claimedSession as UploadSessionDoc
@@ -766,7 +857,7 @@ const commitStorage = async ({
   }
 
   const { segmented } = getSegmentedCollection({ collectionSlug: session.collectionSlug, req })
-  const initiatedSession = await ensureInitiated({ req, segmented, session })
+  const initiatedSession = await ensureInitiated({ isLeaseHeld: true, req, segmented, session })
   const { object, providerState } = getInitiatedStorage({ session: initiatedSession })
 
   const reconciled = await segmented.reconcile({ object, providerState, req })
@@ -797,6 +888,7 @@ const commitStorage = async ({
           retryable: false,
           source: 'provider',
         }),
+        reservationKey: getReservationKey(),
         status: 'failed',
       },
       req,
@@ -844,7 +936,11 @@ const createFileReference = ({
   }
 }
 
-/** `_objectKey` is unique per session and persisted on the document, so it identifies the claim. */
+/**
+ * `_objectKey` is unique per session and persisted on the document, so it identifies the claim.
+ * A draft save writes only a version, so versions are checked too before the object is treated
+ * as unclaimed and deleted.
+ */
 const findDocumentByObjectKey = async ({
   req,
   session,
@@ -856,11 +952,29 @@ const findDocumentByObjectKey = async ({
     return null
   }
 
-  return req.payload.db.findOne({
+  const { _objectKey } = session.storage.object
+
+  const document = await req.payload.db.findOne<{ id: number | string }>({
     collection: session.collectionSlug,
     req,
-    where: { _objectKey: { equals: session.storage.object._objectKey } },
+    where: { _objectKey: { equals: _objectKey } },
   })
+
+  if (document || !req.payload.collections[session.collectionSlug]?.config.versions) {
+    return document
+  }
+
+  const {
+    docs: [version],
+  } = await req.payload.db.findVersions<{ id: number | string }>({
+    collection: session.collectionSlug,
+    limit: 1,
+    pagination: false,
+    req,
+    where: { 'version._objectKey': { equals: _objectKey } },
+  })
+
+  return version ? { id: version.parent } : null
 }
 
 /**
@@ -922,6 +1036,7 @@ const markCompleted = ({
       error: null,
       finalizingUntil: null,
       intent: null,
+      reservationKey: getReservationKey(),
       status: 'completed',
     },
     req,

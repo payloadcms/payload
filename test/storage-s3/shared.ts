@@ -11,3 +11,4 @@ export const mediaHeaderOnlyWithSizesSlug = 'media-header-only-with-sizes'
 
 export const videosSlug = 'videos'
 export const videosMissingBucketSlug = 'videos-missing-bucket'
+export const videosWithDraftsSlug = 'videos-with-drafts'

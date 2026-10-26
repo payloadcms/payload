@@ -22,9 +22,9 @@ import {
 export const uploadSessionEndpoints: Endpoint[] = [
   {
     handler: async (req) => {
-      const body = await readJSONBody(req)
+      const body = parseCreateUploadSessionBody({ body: await readJSONBody({ req }) })
 
-      if (!isCreateUploadSessionBody(body)) {
+      if (!body) {
         throw new APIError('Invalid upload session request.', 400)
       }
 
@@ -54,25 +54,29 @@ export const uploadSessionEndpoints: Endpoint[] = [
     path: '/',
   },
   {
-    handler: async (req) => Response.json(await getUploadSession({ id: getSessionID(req), req })),
+    handler: async (req) =>
+      Response.json(await getUploadSession({ id: getSessionID({ req }), req })),
     method: 'get',
     path: '/:id',
   },
   {
     handler: async (req) =>
-      Response.json(await getUploadSessionInstructions({ id: getSessionID(req), req })),
+      Response.json(await getUploadSessionInstructions({ id: getSessionID({ req }), req })),
     method: 'post',
     path: '/:id/instructions',
   },
   {
     handler: async (req) =>
-      Response.json(await completeUploadSessionStorage({ id: getSessionID(req), req })),
+      Response.json(await completeUploadSessionStorage({ id: getSessionID({ req }), req })),
     method: 'post',
     path: '/:id/storage',
   },
   {
     handler: async (req) => {
-      const body = parseDocumentDataBody({ body: await readJSONBody(req), isDataRequired: true })
+      const body = parseDocumentDataBody({
+        body: await readJSONBody({ req }),
+        isDataRequired: true,
+      })
 
       if (!body?.data) {
         throw new APIError('Invalid upload session intent request.', 400)
@@ -80,7 +84,7 @@ export const uploadSessionEndpoints: Endpoint[] = [
 
       return Response.json(
         await setUploadSessionIntent({
-          id: getSessionID(req),
+          id: getSessionID({ req }),
           data: body.data,
           draft: body.draft,
           req,
@@ -95,7 +99,7 @@ export const uploadSessionEndpoints: Endpoint[] = [
     handler: async (req) => {
       // The body is optional: without `data` the stored intent is used.
       const body = parseDocumentDataBody({
-        body: await readJSONBody(req, { isOptional: true }),
+        body: await readJSONBody({ isOptional: true, req }),
         isDataRequired: false,
       })
 
@@ -105,7 +109,7 @@ export const uploadSessionEndpoints: Endpoint[] = [
 
       return Response.json(
         await completeUploadSession({
-          id: getSessionID(req),
+          id: getSessionID({ req }),
           data: body.data,
           draft: body.draft,
           req,
@@ -117,13 +121,13 @@ export const uploadSessionEndpoints: Endpoint[] = [
   },
   {
     handler: async (req) =>
-      Response.json(await cancelUploadSession({ id: getSessionID(req), req })),
+      Response.json(await cancelUploadSession({ id: getSessionID({ req }), req })),
     method: 'delete',
     path: '/:id',
   },
 ]
 
-const getSessionID = (req: PayloadRequest): string => {
+const getSessionID = ({ req }: { req: PayloadRequest }): string => {
   const id = req.routeParams?.id
 
   if (typeof id !== 'string' && typeof id !== 'number') {
@@ -133,10 +137,13 @@ const getSessionID = (req: PayloadRequest): string => {
   return String(id)
 }
 
-const readJSONBody = async (
-  req: PayloadRequest,
-  { isOptional = false }: { isOptional?: boolean } = {},
-): Promise<unknown> => {
+const readJSONBody = async ({
+  isOptional = false,
+  req,
+}: {
+  isOptional?: boolean
+  req: PayloadRequest
+}): Promise<unknown> => {
   const text = req.text ? await req.text() : ''
 
   if (!text) {
@@ -156,9 +163,14 @@ const readJSONBody = async (
 
 type CreateUploadSessionBody = Omit<CreateUploadSessionArgs, 'req'>
 
-const isCreateUploadSessionBody = (body: unknown): body is CreateUploadSessionBody => {
+/** Returns the validated create request body, or null when the shape is invalid. */
+const parseCreateUploadSessionBody = ({
+  body,
+}: {
+  body: unknown
+}): CreateUploadSessionBody | null => {
   if (typeof body !== 'object' || body === null) {
-    return false
+    return null
   }
 
   const { collectionSlug, docPrefix, file, operation, targetID } = body as Record<string, unknown>
@@ -171,18 +183,30 @@ const isCreateUploadSessionBody = (body: unknown): body is CreateUploadSessionBo
     typeof file !== 'object' ||
     file === null
   ) {
-    return false
+    return null
   }
 
   const { filename, lastModified, mimeType, size } = file as Record<string, unknown>
 
-  return (
-    typeof filename === 'string' &&
-    typeof mimeType === 'string' &&
-    Number.isSafeInteger(size) &&
-    (size as number) > 0 &&
-    (lastModified === undefined || Number.isSafeInteger(lastModified))
-  )
+  if (
+    typeof filename !== 'string' ||
+    typeof mimeType !== 'string' ||
+    typeof size !== 'number' ||
+    !Number.isSafeInteger(size) ||
+    size <= 0 ||
+    (lastModified !== undefined &&
+      (typeof lastModified !== 'number' || !Number.isSafeInteger(lastModified)))
+  ) {
+    return null
+  }
+
+  return {
+    collectionSlug,
+    docPrefix,
+    file: { filename, lastModified, mimeType, size },
+    operation,
+    targetID,
+  }
 }
 
 /** Returns the validated document data body, or null when the shape is invalid. */

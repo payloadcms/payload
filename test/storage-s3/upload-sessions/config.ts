@@ -9,9 +9,10 @@ import { APIError } from 'payload'
 import { buildConfigWithDefaults } from '../../buildConfigWithDefaults.js'
 import { devUser, regularUser } from '../../credentials.js'
 import { Users } from '../collections/Users.js'
-import { videosMissingBucketSlug, videosSlug } from '../shared.js'
+import { videosMissingBucketSlug, videosSlug, videosWithDraftsSlug } from '../shared.js'
 import { Videos } from './collections/Videos.js'
 import { VideosMissingBucket } from './collections/VideosMissingBucket.js'
+import { VideosWithDrafts } from './collections/VideosWithDrafts.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -63,7 +64,7 @@ export default buildConfigWithDefaults({
         baseDir: path.resolve(dirname, '..'),
       },
     },
-    collections: [Videos, VideosMissingBucket, Users],
+    collections: [Videos, VideosWithDrafts, VideosMissingBucket, Users],
     storage: [
       s3Storage({
         bucket: process.env.S3_BUCKET!,
@@ -72,6 +73,7 @@ export default buildConfigWithDefaults({
         },
         collections: {
           [videosSlug]: true,
+          [videosWithDraftsSlug]: true,
         },
         config: {
           credentials: {

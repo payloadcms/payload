@@ -325,33 +325,37 @@ const sendSegment = async ({
   signal?: AbortSignal
 }): Promise<'expired' | 'sent' | 'throttled'> => {
   for (let attempt = 0; ; attempt++) {
+    let response: Response | undefined
+
     try {
-      const response = await fetch(request.url, {
+      response = await fetch(request.url, {
         body,
         headers: request.headers,
         method: request.method,
         signal,
       })
-
-      if (response.ok) {
-        return 'sent'
-      }
-
-      if (response.status === 403) {
-        return 'expired'
-      }
-
-      if (response.status === 429 || response.status === 503) {
-        return 'throttled'
-      }
-
-      if (response.status < 500) {
-        throw new Error(`Upload failed with status ${response.status}`)
-      }
     } catch (err) {
+      // Network failure: retried below.
       if (signal?.aborted || attempt >= retries) {
         throw err
       }
+    }
+
+    if (response?.ok) {
+      return 'sent'
+    }
+
+    if (response?.status === 403) {
+      return 'expired'
+    }
+
+    if (response?.status === 429 || response?.status === 503) {
+      return 'throttled'
+    }
+
+    // Any other 4xx means the request itself is wrong, so sending it again cannot help.
+    if (response && response.status < 500) {
+      throw new Error(`Upload failed with status ${response.status}`)
     }
 
     if (attempt >= retries) {

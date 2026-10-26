@@ -1,7 +1,11 @@
 /* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options", "test.for", "test.each"] }] -- Tests use the shared fixture wrapper. */
 import type { ClientUploadSession, UploadInstructions, UploadSegmentRequest } from 'payload'
 
-import { AbortMultipartUploadCommand, ListMultipartUploadsCommand } from '@aws-sdk/client-s3'
+import {
+  AbortMultipartUploadCommand,
+  ListMultipartUploadsCommand,
+  ListObjectsV2Command,
+} from '@aws-sdk/client-s3'
 import { randomBytes } from 'node:crypto'
 import { uploadSessionsCollectionSlug } from 'payload/internal'
 import { expect } from 'vitest'
@@ -17,7 +21,7 @@ import {
 import { test } from '../../__helpers/int/vitest.js'
 import { RESTClient as RESTClientClass } from '../../__helpers/shared/RESTClient.js'
 import { regularUser } from '../../credentials.js'
-import { videosMissingBucketSlug, videosSlug } from '../shared.js'
+import { videosMissingBucketSlug, videosSlug, videosWithDraftsSlug } from '../shared.js'
 import {
   clearTestBucket,
   createTestBucket,
@@ -366,6 +370,99 @@ test.suite('@payloadcms/storage-s3 upload sessions', { config: './config.ts' }, 
     expect(doc.filename).toBe('video-original.mp4')
   })
 
+  test('should give two sessions started at the same moment different filenames', async ({
+    restClient,
+  }) => {
+    const sessions = await Promise.all([
+      createSession({ restClient }),
+      createSession({ restClient }),
+    ])
+    const filenames = sessions.map(({ file }) => file.filename)
+
+    expect(new Set(filenames).size).toBe(2)
+    expect(filenames).toContain('video.mp4')
+  })
+
+  test('should start one provider upload when instructions are requested concurrently', async ({
+    payload,
+    restClient,
+  }) => {
+    const session = await createSession({ restClient })
+
+    // Return the session to its state after a temporary initiation failure.
+    await abortMultipartUploads()
+    await payload.db.updateOne({
+      id: session.id,
+      collection: uploadSessionsCollectionSlug,
+      data: { reservedFilename: null, storage: { object: null, providerState: null } },
+    })
+
+    const responses = await Promise.all(
+      [1, 2, 3].map(() => restClient.POST(`${sessionsPath}/${session.id}/instructions`)),
+    )
+    const statuses = responses.map(({ status }) => status)
+
+    expect(statuses).toContain(200)
+    expect(statuses.every((status) => status === 200 || status === 409)).toBe(true)
+
+    const { Uploads } = await getAWSClient().send(
+      new ListMultipartUploadsCommand({ Bucket: getTestBucketName() }),
+    )
+
+    expect(Uploads ?? []).toHaveLength(1)
+  })
+
+  test('should keep a file saved into a draft when its session is cancelled', async ({
+    restClient,
+  }) => {
+    const original = await createSession({ collectionSlug: videosWithDraftsSlug, restClient })
+
+    await uploadAllSegments({ restClient, session: original })
+
+    const { doc: published } = await complete({
+      data: { _status: 'published', title: 'Published' },
+      restClient,
+      session: original,
+    })
+
+    const replacement = await createSession({
+      collectionSlug: videosWithDraftsSlug,
+      operation: 'update',
+      restClient,
+      targetID: String(published.id),
+    })
+
+    await uploadAllSegments({ restClient, session: replacement })
+
+    const { file } = await completeStorage({ restClient, session: replacement })
+    const formData = new FormData()
+
+    formData.append('_payload', JSON.stringify({ _status: 'draft' }))
+    formData.append('file', JSON.stringify(file))
+
+    const draftSave = await restClient.PATCH(
+      `/${videosWithDraftsSlug}/${published.id}?draft=true`,
+      { body: formData },
+    )
+
+    expect(draftSave.status).toBe(200)
+
+    // The draft lives only in the versions table; the session must still count as claimed.
+    const cancel = await restClient.DELETE(`${sessionsPath}/${replacement.id}`)
+
+    expect(cancel.status).toBe(409)
+    expect((await getSession({ restClient, session: replacement })).documentID).toBe(
+      String(published.id),
+    )
+
+    // Both the published file and the draft's replacement are still stored.
+    const { Contents = [] } = await getAWSClient().send(
+      new ListObjectsV2Command({ Bucket: getTestBucketName() }),
+    )
+
+    expect(Contents.filter(({ Size }) => Size === fileBytes.length)).toHaveLength(2)
+  })
+
   test('should release the filename when the session is cancelled', async ({ restClient }) => {
     const first = await createSession({ restClient })
 
@@ -661,33 +758,37 @@ const abortMultipartUploads = async () => {
 }
 
 const createBody = ({
+  collectionSlug = videosSlug,
   filename = 'video.mp4',
   mimeType = 'video/mp4',
   operation = 'create',
   targetID,
 }: {
+  collectionSlug?: string
   filename?: string
   mimeType?: string
   operation?: 'create' | 'update'
   targetID?: string
 }) => ({
-  collectionSlug: videosSlug,
+  collectionSlug,
   file: { filename, lastModified: 1_700_000_000_000, mimeType, size: fileBytes.length },
   operation,
   targetID,
 })
 
 const createSession = async ({
+  collectionSlug,
   operation,
   restClient,
   targetID,
 }: {
+  collectionSlug?: string
   operation?: 'create' | 'update'
   restClient: RESTClient
   targetID?: string
 }): Promise<ClientUploadSession> => {
   const response = await restClient.POST(sessionsPath, {
-    body: JSON.stringify(createBody({ operation, targetID })),
+    body: JSON.stringify(createBody({ collectionSlug, operation, targetID })),
   })
 
   expect(response.status).toBe(201)

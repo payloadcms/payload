@@ -117,7 +117,9 @@ test.describe('storage-s3 upload sessions E2E', () => {
       `${serverURL}/api/${videosSlug}?where[title][equals]=${encodeURIComponent(title)}`,
     )
 
-    return ((await response.json()) as { docs: { filesize: number; id: string }[] }).docs[0]
+    return (
+      (await response.json()) as { docs: { filename: string; filesize: number; id: string }[] }
+    ).docs[0]
   }
 
   const expectVideo = async (title: string) => {
@@ -257,6 +259,70 @@ test.describe('storage-s3 upload sessions E2E', () => {
     await chooser.setFiles(filePath)
 
     await expectVideo(title)
+
+    await context.close()
+  })
+
+  test('should save a file renamed after its upload started under the new name', async ({
+    browser,
+  }) => {
+    const { context, log, page } = await openCreateForm({ browser })
+    const title = `Renamed ${Date.now()}`
+
+    await pickFile(page)
+    await expect.poll(() => log.partPuts).toBe(3)
+    await page.locator('#field-filemanager-filename').fill('renamed.mp4')
+    await page.getByLabel('Title').fill(title)
+    await page.locator('#action-save').click()
+
+    const doc = await expectVideo(title)
+
+    expect(doc.filename).toMatch(/^renamed/)
+    expect(doc.filesize).toBe(FILE_SIZE)
+
+    await context.close()
+  })
+
+  test('should still warn about unsaved changes elsewhere while a save continues in the background', async ({
+    browser,
+  }) => {
+    const { context, log, page } = await openCreateForm({ browser, partDelay: 4000 })
+
+    await pickFile(page)
+    await page.getByLabel('Title').fill(`Background ${Date.now()}`)
+    await expect.poll(() => log.partPuts).toBeGreaterThan(0)
+    await page.locator('#action-save').click()
+    await expect.poll(() => log.sessionCalls.some((call) => call.endsWith('/intent'))).toBe(true)
+
+    // Leaving the saving form needs no prompt; the coordinator finishes its save.
+    await page.getByRole('link', { name: 'Users' }).first().click()
+    await expect(page.getByRole('button', { name: 'Leave anyway' })).toBeHidden()
+    // Client-side navigation keeps the background save running.
+    await page.locator('a[href$="/collections/users/create"]').first().click()
+    await page.locator('#field-email').fill(`unsaved-${Date.now()}@payloadcms.com`)
+
+    // Another form with unsaved changes must still prompt while that save runs.
+    await page.getByRole('link', { name: 'Videos' }).first().click()
+    await expect(page.getByRole('button', { name: 'Leave anyway' })).toBeVisible()
+
+    await context.close()
+  })
+
+  test('should not offer to recover an upload another tab is still sending', async ({
+    browser,
+  }) => {
+    const { context, log, page } = await openCreateForm({ browser, partDelay: 3000 })
+
+    await pickFile(page)
+    await expect.poll(() => log.partPuts).toBeGreaterThan(0)
+
+    const otherTab = await context.newPage()
+
+    await otherTab.goto(videosURL.list)
+    // Recovery waits briefly for other tabs to answer before showing anything.
+    await otherTab.waitForTimeout(2000)
+
+    await expect(otherTab.getByText(/was interrupted/)).toHaveCount(0)
 
     await context.close()
   })

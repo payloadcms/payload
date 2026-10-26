@@ -3,7 +3,7 @@ import React, { useCallback } from 'react'
 
 import type { OnCancel } from '../ConfirmationModal/index.js'
 
-import { useForm, useFormModified } from '../../forms/Form/index.js'
+import { useForm, useFormFields, useFormModified } from '../../forms/Form/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useOptionalUploadSessions } from '../../providers/UploadSessions/index.js'
@@ -33,10 +33,12 @@ export const LeaveWithoutSaving: React.FC<LeaveWithoutSavingProps> = ({
   const { user } = useAuth()
   const [hasAccepted, setHasAccepted] = React.useState(false)
 
-  // A submitted save waiting on a large upload is finished by the upload coordinator.
-  const isSaveContinuingInBackground = Boolean(
-    useOptionalUploadSessions()?.isSaveContinuingInBackground,
-  )
+  const uploadSessions = useOptionalUploadSessions()
+  const file = useFormFields(([fields]) => fields?.file?.value)
+
+  // This form's save is waiting on a large upload, and the upload coordinator will finish it.
+  const isSaveContinuingInBackground =
+    file instanceof File && Boolean(uploadSessions?.isSaveWaitingOnUpload({ file }))
 
   const prevent =
     !disablePreventLeave && !isSaveContinuingInBackground && Boolean((modified || !isValid) && user)

@@ -43,6 +43,11 @@ export const getUploadSessionsCollection = (): CollectionConfig => ({
     { name: 'targetID', type: 'text' },
     /** The `-original` filename this session's object key uses, held until the session ends. */
     { name: 'reservedFilename', type: 'text', index: true },
+    /**
+     * `<collection>/<reservedFilename>` while the session holds the name, otherwise a random
+     * placeholder. The unique index stops two sessions from reserving the same name at once.
+     */
+    { name: 'reservationKey', type: 'text', required: true, unique: true },
     { name: 'file', type: 'json', required: true },
     { name: 'storage', type: 'json', required: true },
     { name: 'transfer', type: 'json', required: true },

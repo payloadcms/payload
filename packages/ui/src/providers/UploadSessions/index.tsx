@@ -45,13 +45,19 @@ type UploadEntry = {
   hasIntent: boolean
   /** Pending request that stores the intent; background completion waits for it. */
   intentRequest?: Promise<unknown>
+  /** Adopted from a link: the bytes are already in storage and not in this browser. */
+  isAdopted?: boolean
   isAttached: boolean
-  /** Counted in `isSaveContinuingInBackground` until the upload settles. */
+  /** Counted in `isSaveWaitingOnUpload` until the upload settles. */
   isCountedAsWaitingSave?: boolean
   isSettled: boolean
   /** Whether a save has consumed or is waiting on this upload. */
   isWaitedOn: boolean
   session: Promise<ClientUploadSession>
+  /** Set once the session is created, so other tabs can be told this tab holds it. */
+  sessionID?: string
+  /** The name the session was started with. Storage keeps the object under this name. */
+  startedName: string
   targetID?: number | string
   toastID: string
 }
@@ -72,10 +78,10 @@ export type UploadSessionsContext = {
     intent?: UploadSessionIntentData
   }) => null | Promise<UploadInstructions['file']>
   /**
-   * Whether a submitted save is waiting on an upload. Leaving the form is safe then, because the
-   * coordinator finishes the save, so the leave-without-saving prompt is skipped.
+   * Whether a submitted save is waiting on the upload of this file. Leaving that form is safe,
+   * because the coordinator finishes the save, so its leave-without-saving prompt is skipped.
    */
-  isSaveContinuingInBackground: boolean
+  isSaveWaitingOnUpload: (args: { file: File }) => boolean
   /** Whether a session upload for this file is still transferring. */
   isUploading: (args: { file: File }) => boolean
   /** The form renamed the file; keep the same upload. */
@@ -89,6 +95,13 @@ export type UploadSessionsContext = {
 }
 
 const Context = React.createContext<null | UploadSessionsContext>(null)
+
+const TABS_CHANNEL_NAME = 'payload-upload-sessions'
+const TABS_REPLY_TIMEOUT_MS = 300
+
+type TabsMessage =
+  | { sessionIDs: string[]; type: 'held' }
+  | { sessionIDs: string[]; type: 'whoHolds' }
 
 /**
  * Coordinates durable uploads for the whole Admin so they survive client-side navigation. Large
@@ -261,11 +274,18 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
         isSettled: false,
         isWaitedOn: false,
         session,
+        startedName: file.name,
         targetID,
         toastID,
       }
 
       entriesRef.current.set(file, entry)
+      void session.then(
+        ({ id }) => {
+          entry.sessionID = String(id)
+        },
+        () => {},
+      )
       progress.show(t('upload:uploadingFile', { filename: file.name }))
 
       uploadedFile.then(
@@ -301,7 +321,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
 
       return true
     },
-    [finishInBackground, getEntityConfig, releaseWaitingSave, requestArgs],
+    [finishInBackground, getEntityConfig, getErrorMessage, releaseWaitingSave, requestArgs, t],
   )
 
   const cancel = useCallback<UploadSessionsContext['cancel']>(
@@ -364,15 +384,34 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
 
   const getUploadedFile = useCallback<UploadSessionsContext['getUploadedFile']>(
     ({ file, intent }) => {
-      const entry = entriesRef.current.get(file)
+      let entry = entriesRef.current.get(file)
 
       if (!entry) {
         return null
       }
 
+      // Storage holds the object under the name picked at start, so a file renamed since then
+      // is uploaded again under its new name. Adopted uploads have no bytes here to send again.
+      if (file.name !== entry.startedName && !entry.isAdopted) {
+        const { collectionSlug, targetID } = entry
+
+        cancel({ file })
+
+        if (!start({ collectionSlug, file, targetID })) {
+          return null
+        }
+
+        entry = entriesRef.current.get(file)!
+      }
+
       entry.isWaitedOn = true
 
-      if (intent && !entry.isSettled) {
+      // A finished upload's reference may be older than its receipt allows, so mint a new one.
+      if (entry.isSettled) {
+        return entry.session.then(({ id }) => getUploadSessionFile({ id, ...requestArgs }))
+      }
+
+      if (intent) {
         if (!entry.isCountedAsWaitingSave) {
           entry.isCountedAsWaitingSave = true
           setWaitingSaveCount((count) => count + 1)
@@ -388,7 +427,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
 
       return Promise.race([entry.file, entry.detached])
     },
-    [requestArgs],
+    [cancel, requestArgs, start],
   )
 
   const adoptionsRef = useRef(new Map<string, Promise<File | null>>())
@@ -403,22 +442,23 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
 
       // The bytes are already in storage, so the form only needs a stand-in with the right name.
       const placeholder = new File([], session.file.filename, { type: session.file.mimeType })
-      const uploadedFile = getUploadSessionFile({ id: session.id, ...requestArgs })
-
-      uploadedFile.catch(() => {})
 
       entriesRef.current.set(placeholder, {
         collectionSlug: session.collectionSlug as UploadCollectionSlug,
         controller: new AbortController(),
         detach: () => {},
         detached: new Promise<never>(() => {}),
-        file: uploadedFile,
+        // Settled entries always mint a fresh reference when a save asks for one.
+        file: new Promise<never>(() => {}),
         formFile: placeholder,
         hasIntent: session.hasIntent,
+        isAdopted: true,
         isAttached: true,
         isSettled: true,
         isWaitedOn: false,
         session: Promise.resolve(session),
+        sessionID: String(session.id),
+        startedName: placeholder.name,
         targetID: session.targetID ?? undefined,
         toastID: `upload-session-${session.id}`,
       })
@@ -462,9 +502,52 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
     t('upload:uploadInProgressLeaveWarning'),
   )
 
-  useRecoverUploadSessions({ finishInBackground, getErrorMessage, requestArgs })
+  const recoveringSessionIDsRef = useRef(new Set<string>())
 
-  const isSaveContinuingInBackground = waitingSaveCount > 0
+  // Answers other tabs, so they do not offer to recover an upload this tab is still running.
+  useEffect(() => {
+    if (typeof BroadcastChannel === 'undefined') {
+      return
+    }
+
+    const channel = new BroadcastChannel(TABS_CHANNEL_NAME)
+
+    channel.onmessage = ({ data }: MessageEvent<TabsMessage>) => {
+      if (data?.type !== 'whoHolds') {
+        return
+      }
+
+      const heldSessionIDs = new Set(recoveringSessionIDsRef.current)
+
+      for (const { sessionID } of entriesRef.current.values()) {
+        if (sessionID) {
+          heldSessionIDs.add(sessionID)
+        }
+      }
+
+      const sessionIDs = data.sessionIDs.filter((id) => heldSessionIDs.has(id))
+
+      if (sessionIDs.length) {
+        channel.postMessage({ type: 'held', sessionIDs } satisfies TabsMessage)
+      }
+    }
+
+    return () => channel.close()
+  }, [])
+
+  useRecoverUploadSessions({
+    finishInBackground,
+    getErrorMessage,
+    recoveringSessionIDsRef,
+    requestArgs,
+  })
+
+  // Changes identity whenever the count changes, so forms re-check their own file.
+  const isSaveWaitingOnUpload = useCallback<UploadSessionsContext['isSaveWaitingOnUpload']>(
+    ({ file }) =>
+      waitingSaveCount > 0 && Boolean(entriesRef.current.get(file)?.isCountedAsWaitingSave),
+    [waitingSaveCount],
+  )
 
   const value = useMemo(
     () => ({
@@ -472,21 +555,12 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
       cancel,
       detach,
       getUploadedFile,
-      isSaveContinuingInBackground,
+      isSaveWaitingOnUpload,
       isUploading,
       rekey,
       start,
     }),
-    [
-      adopt,
-      cancel,
-      detach,
-      getUploadedFile,
-      isSaveContinuingInBackground,
-      isUploading,
-      rekey,
-      start,
-    ],
+    [adopt, cancel, detach, getUploadedFile, isSaveWaitingOnUpload, isUploading, rekey, start],
   )
 
   return <Context value={value}>{children}</Context>
@@ -512,10 +586,13 @@ export const useUploadSessions = (): UploadSessionsContext => {
 const useRecoverUploadSessions = ({
   finishInBackground,
   getErrorMessage,
+  recoveringSessionIDsRef,
   requestArgs,
 }: {
   finishInBackground: (args: { session: ClientUploadSession }) => Promise<void>
   getErrorMessage: (err: unknown) => string
+  /** Sessions this tab is resuming, reported to other tabs as held. */
+  recoveringSessionIDsRef: React.RefObject<Set<string>>
   requestArgs: { apiRoute: string; serverURL: string }
 }) => {
   const { config } = useConfig()
@@ -534,8 +611,16 @@ const useRecoverUploadSessions = ({
     hasCheckedRef.current = true
 
     void listUploadSessions(requestArgs)
-      .then((sessions) => {
+      .then(async (sessions) => {
+        const heldByOtherTabs = await findSessionsHeldByOtherTabs({
+          sessionIDs: sessions.map(({ id }) => String(id)),
+        })
+
         for (const session of sessions) {
+          if (heldByOtherTabs.has(String(session.id))) {
+            continue
+          }
+
           if (session.isStorageComplete) {
             void finishInBackground({ session })
             continue
@@ -556,6 +641,9 @@ const useRecoverUploadSessions = ({
                     accept: session.file.mimeType,
                     onPick: (file) => {
                       const progress = createProgressToast({ id: toastID })
+                      const sessionID = String(session.id)
+
+                      recoveringSessionIDsRef.current.add(sessionID)
 
                       progress.show(t('upload:resumingFile', { filename: file.name }))
 
@@ -576,6 +664,7 @@ const useRecoverUploadSessions = ({
                           return finishInBackground({ session })
                         })
                         .catch((err: unknown) => toast.error(getErrorMessage(err), { id: toastID }))
+                        .finally(() => recoveringSessionIDsRef.current.delete(sessionID))
                     },
                   }),
               },
@@ -590,7 +679,41 @@ const useRecoverUploadSessions = ({
         }
       })
       .catch(() => {})
-  }, [finishInBackground, getErrorMessage, hasSegmentedCollections, requestArgs, t])
+  }, [
+    finishInBackground,
+    getErrorMessage,
+    hasSegmentedCollections,
+    recoveringSessionIDsRef,
+    requestArgs,
+    t,
+  ])
+}
+
+/** Asks the other open Admin tabs which of these sessions they are still uploading or holding. */
+const findSessionsHeldByOtherTabs = async ({
+  sessionIDs,
+}: {
+  sessionIDs: string[]
+}): Promise<Set<string>> => {
+  const heldSessionIDs = new Set<string>()
+
+  if (!sessionIDs.length || typeof BroadcastChannel === 'undefined') {
+    return heldSessionIDs
+  }
+
+  const channel = new BroadcastChannel(TABS_CHANNEL_NAME)
+
+  channel.onmessage = ({ data }: MessageEvent<TabsMessage>) => {
+    if (data?.type === 'held') {
+      data.sessionIDs.forEach((id) => heldSessionIDs.add(id))
+    }
+  }
+
+  channel.postMessage({ type: 'whoHolds', sessionIDs } satisfies TabsMessage)
+  await new Promise((resolve) => setTimeout(resolve, TABS_REPLY_TIMEOUT_MS))
+  channel.close()
+
+  return heldSessionIDs
 }
 
 /**

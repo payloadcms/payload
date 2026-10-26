@@ -676,6 +676,7 @@ export const Form: React.FC<FormProps> = (props) => {
               docPrefix: typeof data?.prefix === 'string' ? data.prefix : undefined,
               file,
               intent: { data: intentData, draft: intentData?._status === 'draft' },
+              targetID: id,
             }),
           )
         }
@@ -706,7 +707,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       return formData
     },
-    [collectionSlug, docConfig, getUploadHandler],
+    [collectionSlug, docConfig, getUploadHandler, id],
   )
 
   const reset = useCallback(

@@ -50,20 +50,22 @@ export const createSegmentedUpload = ({
       const client = getStorageClient()
       const { uploadId } = providerState as S3ProviderState
 
-      await ignoreNotFound(
-        client.send(
+      await ignoreNotFound({
+        promise: client.send(
           new AbortMultipartUploadCommand({
             Bucket: bucket,
             Key: object.storageFilePath,
             UploadId: uploadId,
           }),
         ),
-      )
+      })
 
       // Core only aborts unclaimed sessions, so a committed object here is an orphan.
-      await ignoreNotFound(
-        client.send(new DeleteObjectCommand({ Bucket: bucket, Key: object.storageFilePath })),
-      )
+      await ignoreNotFound({
+        promise: client.send(
+          new DeleteObjectCommand({ Bucket: bucket, Key: object.storageFilePath }),
+        ),
+      })
     },
 
     authorize: async ({ collectionSlug, req }) => {
@@ -91,7 +93,7 @@ export const createSegmentedUpload = ({
         )
       } catch (err) {
         // A retry after a lost response: the multipart upload is gone but the object exists.
-        if (!isNotFound(err)) {
+        if (!isNotFound({ err })) {
           throw err
         }
       }
@@ -136,16 +138,17 @@ export const createSegmentedUpload = ({
         useCompositePrefixes,
       })
 
-      const { UploadId } = await withPermanentErrors(() =>
-        getStorageClient().send(
-          new CreateMultipartUploadCommand({
-            ACL: acl,
-            Bucket: bucket,
-            ContentType: mimeType,
-            Key: storageFilePath,
-          }),
-        ),
-      )
+      const { UploadId } = await withPermanentErrors({
+        operation: () =>
+          getStorageClient().send(
+            new CreateMultipartUploadCommand({
+              ACL: acl,
+              Bucket: bucket,
+              ContentType: mimeType,
+              Key: storageFilePath,
+            }),
+          ),
+      })
 
       if (!UploadId || !uploadReference._objectKey) {
         throw new Error('S3 multipart upload could not be initiated.')
@@ -219,7 +222,11 @@ const listParts = async ({
  * `APIError`, so core marks the session failed instead of retrying it until it expires.
  * Timeouts and throttling stay retryable.
  */
-const withPermanentErrors = async <T>(operation: () => Promise<T>): Promise<T> => {
+const withPermanentErrors = async <T>({
+  operation,
+}: {
+  operation: () => Promise<T>
+}): Promise<T> => {
   try {
     return await operation()
   } catch (err) {
@@ -250,17 +257,17 @@ const getClientFaultStatus = (err: unknown): null | number => {
   return status && status >= 400 && status < 500 ? status : 400
 }
 
-const isNotFound = (err: unknown): boolean =>
+const isNotFound = ({ err }: { err: unknown }): boolean =>
   typeof err === 'object' &&
   err !== null &&
   'name' in err &&
   (err.name === 'NoSuchUpload' || err.name === 'NoSuchKey' || err.name === 'NotFound')
 
-const ignoreNotFound = async (promise: Promise<unknown>): Promise<void> => {
+const ignoreNotFound = async ({ promise }: { promise: Promise<unknown> }): Promise<void> => {
   try {
     await promise
   } catch (err) {
-    if (!isNotFound(err)) {
+    if (!isNotFound({ err })) {
       throw err
     }
   }

@@ -431,6 +431,7 @@ export interface PayloadUploadSession {
   operation: 'create' | 'update';
   targetID?: string | null;
   reservedFilename?: string | null;
+  reservationKey: string;
   file:
     | {
         [k: string]: unknown;
@@ -760,6 +761,7 @@ export interface PayloadUploadSessionsSelect<T extends boolean = true> {
   operation?: T;
   targetID?: T;
   reservedFilename?: T;
+  reservationKey?: T;
   file?: T;
   storage?: T;
   transfer?: T;
