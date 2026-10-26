@@ -28,15 +28,6 @@ export async function uploadFile({
   utApi,
 }: UploadFileArgs): Promise<Record<string, unknown>> {
   try {
-    if (
-      clientUploadContext &&
-      typeof clientUploadContext === 'object' &&
-      'key' in clientUploadContext &&
-      typeof clientUploadContext.key === 'string'
-    ) {
-      await utApi.deleteFiles(clientUploadContext.key)
-    }
-
     const blob = tempFilePath
       ? await openAsBlob(tempFilePath, { type: mimeType })
       : new Blob([buffer], { type: mimeType })
@@ -44,6 +35,16 @@ export async function uploadFile({
 
     if (res.error) {
       throw new APIError(`Error uploading file: ${res.error.code} - ${res.error.message}`)
+    }
+
+    // Delete the replaced upload only once its replacement is stored.
+    if (
+      clientUploadContext &&
+      typeof clientUploadContext === 'object' &&
+      'key' in clientUploadContext &&
+      typeof clientUploadContext.key === 'string'
+    ) {
+      await utApi.deleteFiles(clientUploadContext.key)
     }
 
     const sizes = data.sizes as Record<string, { _key?: string; filename?: string }> | undefined

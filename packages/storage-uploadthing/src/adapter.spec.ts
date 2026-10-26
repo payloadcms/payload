@@ -16,10 +16,10 @@ describe('handleUpload', () => {
   let storedFile: File | undefined
   const utApi = {
     deleteFiles: vi.fn(),
-    uploadFiles: (file: File) => {
+    uploadFiles: vi.fn((file: File) => {
       storedFile = file
-      return { data: { name: file.name, key: 'stored-key' } }
-    },
+      return { data: { name: file.name, key: 'stored-key' } } as object
+    }),
   }
   const adapter = createUploadthingAdapter({ acl: 'public-read', utApi: utApi as never })({
     collection: { slug: 'media' },
@@ -90,6 +90,31 @@ describe('handleUpload', () => {
       },
       storageFilePath: 'processed-400x400.png',
     } as never)
+
+    expect(utApi.deleteFiles).not.toHaveBeenCalled()
+  })
+
+  it('should keep the browser upload when the processed file fails to upload', async () => {
+    utApi.uploadFiles.mockReturnValueOnce({ error: { code: 'UPLOAD_FAILED', message: 'failed' } })
+
+    await expect(
+      adapter.handleUpload({
+        data: {},
+        file: {
+          buffer: Buffer.alloc(0),
+          filename: 'processed.png',
+          mimeType: 'image/png',
+          tempFilePath,
+        },
+        req: {
+          context: {
+            [CLIENT_UPLOAD_CONTEXT_CONTEXT_KEY]: { key: 'browser-key' },
+            [CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY]: tempFilePath,
+          },
+        },
+        storageFilePath: 'processed.png',
+      } as never),
+    ).rejects.toThrow('Error uploading file')
 
     expect(utApi.deleteFiles).not.toHaveBeenCalled()
   })
