@@ -150,6 +150,7 @@ export interface Config {
     'file-versioned-converted-media': FileVersionedConvertedMedia;
     'file-versioned-trash-media': FileVersionedTrashMedia;
     'file-versioned-plain-media': FileVersionedPlainMedia;
+    'file-versioned-legacy-media': FileVersionedLegacyMedia;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -164,6 +165,7 @@ export interface Config {
     'file-versioned-converted-media': FileVersionedConvertedMediaSelect<false> | FileVersionedConvertedMediaSelect<true>;
     'file-versioned-trash-media': FileVersionedTrashMediaSelect<false> | FileVersionedTrashMediaSelect<true>;
     'file-versioned-plain-media': FileVersionedPlainMediaSelect<false> | FileVersionedPlainMediaSelect<true>;
+    'file-versioned-legacy-media': FileVersionedLegacyMediaSelect<false> | FileVersionedLegacyMediaSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -486,6 +488,56 @@ export interface FileVersionedPlainMedia {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "file-versioned-legacy-media".
+ */
+export interface FileVersionedLegacyMedia {
+  id: string;
+  alt?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  _transforms?: UploadTransforms;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+  variants?: {
+    small?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -531,6 +583,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'file-versioned-plain-media';
         value: string | FileVersionedPlainMedia;
+      } | null)
+    | ({
+        relationTo: 'file-versioned-legacy-media';
+        value: string | FileVersionedLegacyMedia;
       } | null)
     | ({
         relationTo: 'users';
@@ -796,6 +852,55 @@ export interface FileVersionedPlainMediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "file-versioned-legacy-media_select".
+ */
+export interface FileVersionedLegacyMediaSelect<T extends boolean = true> {
+  alt?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  _transforms?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
+  focalX?: T;
+  focalY?: T;
+  variants?:
+    | T
+    | {
+        small?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -893,6 +998,7 @@ export interface CollectionQueryWidget {
       | 'file-versioned-converted-media'
       | 'file-versioned-trash-media'
       | 'file-versioned-plain-media'
+      | 'file-versioned-legacy-media'
       | 'users';
     where?:
       | {
@@ -923,6 +1029,7 @@ export interface ActivityWidget {
           | 'file-versioned-converted-media'
           | 'file-versioned-trash-media'
           | 'file-versioned-plain-media'
+          | 'file-versioned-legacy-media'
           | 'users'
         )[]
       | null;
@@ -943,6 +1050,7 @@ export interface UploadDropzoneWidget {
           | 'file-versioned-converted-media'
           | 'file-versioned-trash-media'
           | 'file-versioned-plain-media'
+          | 'file-versioned-legacy-media'
         )[]
       | null;
   };

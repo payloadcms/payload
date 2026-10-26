@@ -1,5 +1,6 @@
 /* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test"] }] -- Tests use the shared fixture wrapper. */
 /* eslint-disable @typescript-eslint/require-await -- Storage callbacks are asynchronous in production; these fakes record synchronous effects. */
+import { rm } from 'node:fs/promises'
 import { expect } from 'vitest'
 
 /* eslint-disable payload/no-relative-monorepo-imports -- The file operation manager is internal until upload writers use it. */
@@ -9,9 +10,13 @@ import {
 } from '../../packages/payload/src/uploads/fileVersioning/fileOperationManager.js'
 /* eslint-enable payload/no-relative-monorepo-imports */
 import { test } from '../__helpers/int/vitest.js'
-import { mediaSlug } from './shared.js'
+import { legacyMediaDir, mediaSlug } from './shared.js'
 
 test.suite('File operation manager', { config: './config.ts' }, () => {
+  test.afterEach(async () => {
+    await rm(legacyMediaDir, { force: true, recursive: true })
+  })
+
   test('should wait for a no-transaction outer update and its hooks', async ({ payload }) => {
     const doc = await payload.db.create({ collection: mediaSlug, data: { alt: 'before' } })
     const hooks = payload.collections[mediaSlug].config.hooks
