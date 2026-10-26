@@ -2577,6 +2577,31 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         ).rejects.toThrow('The following field is invalid: password')
       })
 
+      test('should reject an empty new password when password field override omits required: true', async ({
+        payload,
+      }) => {
+        await payload.create({
+          collection: passwordMinLengthSlug,
+          data: { email: userEmail, password: 'longenough1' },
+          overrideAccess: true,
+        })
+
+        const token = await payload.forgotPassword({
+          collection: passwordMinLengthSlug,
+          data: { email: userEmail },
+          disableEmail: true,
+          overrideAccess: true,
+        })
+
+        await expect(
+          payload.resetPassword({
+            collection: passwordMinLengthSlug,
+            data: { password: '', token },
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow('The following field is invalid: password')
+      })
+
       test('should reject a new password that fails the field custom validate', async ({
         payload,
       }) => {

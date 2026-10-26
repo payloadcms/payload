@@ -321,6 +321,7 @@ async function validatePasswordField({
     path: ['password'],
     preferences: { fields: {} },
     req,
+    required: true,
     siblingData: dataToValidate,
   })
 
