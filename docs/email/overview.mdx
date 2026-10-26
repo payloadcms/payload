@@ -122,7 +122,8 @@ import { groundmailAdapter } from 'groundmail-payload'
 
 export default buildConfig({
   email: groundmailAdapter({
-    defaultFromAddress: 'info@payloadcms.com',
+    // Must be on a domain you have verified in Groundmail
+    defaultFromAddress: 'noreply@yourdomain.com',
     defaultFromName: 'Payload',
     // apiKey: process.env.GROUNDMAIL_API_KEY,
   }),
