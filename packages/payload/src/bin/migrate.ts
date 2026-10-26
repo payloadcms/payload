@@ -94,7 +94,7 @@ export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promi
 
   switch (args[0]) {
     case 'migrate':
-      await adapter.migrate()
+      await adapter.migrate({ forceAcceptWarning })
       break
     case 'migrate:create':
       try {
