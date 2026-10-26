@@ -63,7 +63,7 @@ export const Code: React.FC<CodeFieldClientProps> = ({
             }
             void run()
           },
-        } as any,
+        },
         label,
         language: languageKeyToMonacoLanguageMap[language] || language,
       },

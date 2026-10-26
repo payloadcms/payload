@@ -81,7 +81,7 @@ export const Link: React.FC<Props> = ({
           }
         }
 
-        startRouteTransition(navigate)
+        void startRouteTransition(navigate)
       }}
       ref={ref}
       {...rest}

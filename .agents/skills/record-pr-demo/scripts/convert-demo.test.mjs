@@ -31,6 +31,7 @@ test('convertDemo uses the opening ready time for H.264 conversion', async () =>
   const ffmpegArgs = await readFile(path.join(directory, 'ffmpeg-args.txt'), 'utf8')
   assert.match(ffmpegArgs, /-ss 1\.25/)
   assert.match(ffmpegArgs, /-c:v libx264/)
+  assert.match(ffmpegArgs, /-crf 18/)
   assert.match(ffmpegArgs, /-pix_fmt yuv420p/)
   assert.match(ffmpegArgs, /-movflags \+faststart/)
 })

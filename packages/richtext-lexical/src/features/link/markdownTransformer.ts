@@ -28,7 +28,7 @@ export type CreatePayloadLinkTransformerArgs = {
   internalDocToHref?: (args: { linkNode: SerializedLinkNode }) => string
 }
 
-const replaceTransformer: TextMatchTransformer['replace'] = (textNode, match) => {
+const $replaceTransformer: TextMatchTransformer['replace'] = (textNode, match) => {
   const [, linkText, linkUrl] = match
   const linkNode = $createLinkNode({
     fields: {
@@ -79,7 +79,7 @@ export const createPayloadLinkTransformer = (
   },
   importRegExp: /(?<!!)\[([^[]+)\]\(([^()\s]+)(?:\s"((?:[^"]*\\")*[^"]*)"\s*)?\)/,
   regExp: /(?<!!)\[([^[]+)\]\(([^()\s]+)(?:\s"((?:[^"]*\\")*[^"]*)"\s*)?\)$/,
-  replace: replaceTransformer,
+  replace: $replaceTransformer,
   trigger: ')',
 })
 

@@ -10,6 +10,11 @@ export async function startChromePreview({ port = 4400 } = {}) {
     ['/', ['preview/index.html', 'text/html']],
     ['/preview/index.mjs', ['preview/index.mjs', 'text/javascript']],
     ['/preview/application.html', ['preview/application.html', 'text/html']],
+    ['/accessibility-demo.mjs', ['accessibility-demo.mjs', 'text/javascript']],
+    [
+      '/preview/accessibility-application.html',
+      ['preview/accessibility-application.html', 'text/html'],
+    ],
     ['/WindowChrome/index.mjs', ['WindowChrome/index.mjs', 'text/javascript']],
   ])
   const server = createServer(async (request, response) => {

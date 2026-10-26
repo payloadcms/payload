@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/live-preview",
-  "version": "4.0.0-beta.2",
+  "version": "4.0.0-beta.4",
   "description": "The official live preview JavaScript SDK for Payload",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
@@ -49,12 +49,9 @@
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
     "payload": "workspace:*"
   }
 }

@@ -403,7 +403,7 @@ export const updateDocument = async <
 
         localizedPublishData = buildLocalizedPublishData({
           config,
-          currentDoc: currentDoc as JsonObject,
+          currentDoc,
           fields: collectionConfig.fields,
           locale,
           result,
@@ -636,7 +636,7 @@ export const updateDocument = async <
     collection: collectionConfig,
     current: docWithLocales,
     files: hasManagedLocalUpload ? filesToUpload : [],
-    next: nextFileData as JsonObject,
+    next: nextFileData,
     req,
     write: writeDocument,
   })
