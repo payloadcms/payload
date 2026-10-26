@@ -52,4 +52,23 @@ describe('generatePasswordSaltHash', () => {
       }),
     ).rejects.toThrow(InvalidConfiguration)
   })
+
+  it('should not suggest 100000 iterations when already configured for 100000', async () => {
+    vi.spyOn(crypto, 'pbkdf2').mockImplementation(((...args: unknown[]) => {
+      const callback = args.at(-1) as (err: Error) => void
+
+      callback(new DOMException('Pbkdf2 failed', 'NotSupportedError'))
+    }) as typeof crypto.pbkdf2)
+
+    await expect(
+      generatePasswordSaltHash({
+        collection: { slug: 'users' } as SanitizedCollectionConfig,
+        isPasswordAuthenticated: true,
+        password: 'test-password',
+        req: {
+          payload: { config: { auth: { passwordHashIterations: 100000 } } },
+        } as PayloadRequest,
+      }),
+    ).rejects.not.toThrow('Set `auth.passwordHashIterations` to 100000')
+  })
 })
