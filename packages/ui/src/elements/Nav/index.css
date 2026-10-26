@@ -22,6 +22,7 @@
   }
 
   .nav__close {
+    position: relative;
     display: flex;
     align-items: center;
     background: none;
@@ -29,9 +30,13 @@
     border-radius: var(--button-radius);
     outline: 0;
 
-    &:focus-visible {
-      outline: var(--accessibility-outline);
-      outline-offset: var(--accessibility-outline-offset);
+    &:focus-visible::after {
+      content: '';
+      position: absolute;
+      inset: var(--spacer-1);
+      border: var(--stroke-width-small) solid var(--color-border-selected);
+      border-radius: var(--button-radius);
+      pointer-events: none;
     }
   }
 

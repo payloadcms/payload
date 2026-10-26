@@ -431,6 +431,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
           {value && fileSrc && (
             <React.Fragment>
               <Button
+                aria-label={t('general:cancel')}
                 buttonStyle="ghost"
                 className={`${baseClass}__remove`}
                 icon="x"

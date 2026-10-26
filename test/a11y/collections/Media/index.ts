@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { createFolderField } from 'payload'
+
 export const mediaSlug = 'media'
 
 export const MediaCollection: CollectionConfig = {
@@ -9,6 +11,7 @@ export const MediaCollection: CollectionConfig = {
     read: () => true,
   },
   fields: [
+    createFolderField({ relationTo: 'payload-folders' }),
     {
       name: 'alt',
       type: 'text',

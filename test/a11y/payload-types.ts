@@ -182,7 +182,7 @@ export interface Config {
   };
   collectionsJoins: {
     'payload-folders': {
-      documentsAndFolders: 'payload-folders' | 'posts';
+      documentsAndFolders: 'payload-folders' | 'posts' | 'media';
     };
   };
   collectionsSelect: {
@@ -317,6 +317,10 @@ export interface PayloadFolder {
           relationTo?: 'posts';
           value: string | Post;
         }
+      | {
+          relationTo?: 'media';
+          value: string | Media;
+        }
     )[];
     hasNextPage?: boolean;
     totalDocs?: number;
@@ -340,6 +344,15 @@ export interface Post {
   accessibilityDisabledSelect?: ('one' | 'two') | null;
   requiredTags: string[];
   relatedPosts?: (string | Post)[] | null;
+  relatedContent?:
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: string | Media;
+      } | null);
   relatedPost?: (string | null) | Post;
   contrastRelationships?: (string | Post)[] | null;
   contrastDisabledSelect?: ('one' | 'two')[] | null;
@@ -442,6 +455,7 @@ export interface Post {
  */
 export interface Media {
   id: string;
+  '_h_payload-folders'?: (string | null) | PayloadFolder;
   alt: string;
   createdBy?: {
     relationTo: 'users';
@@ -838,6 +852,7 @@ export interface PostsSelect<T extends boolean = true> {
   accessibilityDisabledSelect?: T;
   requiredTags?: T;
   relatedPosts?: T;
+  relatedContent?: T;
   relatedPost?: T;
   contrastRelationships?: T;
   contrastDisabledSelect?: T;
@@ -924,6 +939,7 @@ export interface PostsSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  '_h_payload-folders'?: T;
   alt?: T;
   createdBy?: T;
   updatedBy?: T;

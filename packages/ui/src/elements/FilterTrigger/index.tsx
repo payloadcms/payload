@@ -6,6 +6,7 @@ import React from 'react'
 
 import { FilterIcon } from '../../icons/Filter/index.js'
 import { XIcon } from '../../icons/X/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import './index.css'
 
@@ -42,6 +43,8 @@ export function FilterTrigger({
   popupActive,
   showBadge,
 }: FilterTriggerProps) {
+  const { t } = useTranslation()
+
   return (
     <div className={`${baseClass}__wrap`}>
       <Button
@@ -61,7 +64,12 @@ export function FilterTrigger({
         {children}
       </Button>
       {isActive && onClear && (
-        <button className={`${baseClass}__clear`} onClick={onClear} type="button">
+        <button
+          aria-label={t('general:clear')}
+          className={`${baseClass}__clear`}
+          onClick={onClear}
+          type="button"
+        >
           <XIcon size={16} />
         </button>
       )}

@@ -106,6 +106,11 @@ export const PostsCollection: CollectionConfig = {
       relationTo: postsSlug,
     },
     {
+      name: 'relatedContent',
+      type: 'relationship',
+      relationTo: [postsSlug, mediaSlug],
+    },
+    {
       name: 'relatedPost',
       type: 'relationship',
       relationTo: postsSlug,

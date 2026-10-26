@@ -6,6 +6,9 @@ import { fileURLToPath } from 'node:url'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
+import type { Config } from './payload-types.js'
+
 import { waitForFormReady } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -37,12 +40,13 @@ import {
   workflowTabKey,
 } from './helpers.js'
 
+let payload: PayloadTestSDK<Config>
 let postsURL: AdminUrlUtil
 let serverURL: string
 
 test.describe('Admin accessibility', () => {
   test.beforeAll(async () => {
-    ;({ serverURL } = await initPayloadE2ENoConfig({
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname: fileURLToPath(new URL('.', import.meta.url)),
     }))
     postsURL = new AdminUrlUtil(serverURL, 'posts')
@@ -197,6 +201,186 @@ test.describe('Admin accessibility', () => {
         'Current breadcrumb example',
       )
       await scanA11y({ name: 'breadcrumb labels', page, include: ['nav.step-nav'] })
+    })
+  })
+
+  test.describe('Icon-only controls', () => {
+    test('should give icon-only admin controls accessible names before interaction', async ({
+      page,
+    }) => {
+      const expectNamedIcons = async ({ scope }: { scope: Locator }) => {
+        const buttons = scope
+          .getByRole('button')
+          .filter({ has: page.locator('svg') })
+          .and(page.locator(':not(.rich-text-lexical *)'))
+
+        await expect(buttons.first()).toBeVisible()
+        for (const button of await buttons.all()) {
+          await expect.soft(button).toHaveAccessibleName(/\S/)
+        }
+      }
+
+      await test.step('Navigation and collection controls', async () => {
+        await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
+        await expect(page.locator('.collections')).toBeVisible()
+        await expectNamedIcons({ scope: page.locator('body') })
+        await page.goto(postsURL.list)
+        await expect(page.getByRole('grid', { name: 'Posts', exact: true })).toBeVisible()
+        await expectNamedIcons({ scope: page.locator('body') })
+      })
+
+      await test.step('Active filter clear action', async () => {
+        await page.goto(
+          formatAdminURL({
+            adminRoute: '/admin',
+            path: '/collections/payload-folders?view=hierarchy',
+            serverURL,
+          }),
+        )
+        await page.getByRole('button', { name: 'Type', exact: true }).click()
+        await page.getByRole('menuitemcheckbox', { name: 'Posts', exact: true }).click()
+        await page.keyboard.press('Escape')
+        const clear = page.locator('.type-filter .filter-trigger__clear')
+
+        await expect.soft(clear).toHaveAccessibleName('Clear')
+      })
+
+      await withWorkflowPost({
+        action: async ({ id }) => {
+          await test.step('Document, relationship and clipboard controls', async () => {
+            await page.mouse.move(0, 0)
+            const preview = page.locator('#preview-button')
+            const schedule = page.locator('#schedule-publish-button')
+            const add = page.locator('#field-relatedContent .relationship-add-new__add-button')
+
+            await expect.soft(preview).toHaveAccessibleName('Copy')
+            await expect.soft(schedule).toHaveAccessibleName('Schedule Publish')
+            await expect.soft(add).toHaveAccessibleName('Add new')
+            await expect
+              .soft(page.locator('#field-featuredImage .upload__pasteFromClipboard'))
+              .toHaveAccessibleName('Paste from clipboard')
+            await expectNamedIcons({ scope: page.locator('body') })
+            await preview.hover()
+            await expect(page.getByRole('tooltip', { name: 'Copy', exact: true })).toBeVisible()
+            await expect(preview).not.toHaveAttribute('title')
+            await schedule.hover()
+            await expect(
+              page.getByRole('tooltip', { name: 'Schedule Publish', exact: true }),
+            ).toBeVisible()
+            await expect(schedule).not.toHaveAttribute('title')
+            await tabToWorkflowControl({ control: add, page })
+            await page.keyboard.press('Enter')
+            await expect(add).not.toHaveAttribute('title')
+            await expect(page.getByRole('menuitem', { name: 'Post', exact: true })).toBeVisible()
+            await expect(page.getByRole('menuitem', { name: 'Media', exact: true })).toBeVisible()
+            await page.keyboard.press('Escape')
+            await expect(add).toBeFocused()
+          })
+
+          await test.step('Scheduled event delete action', async () => {
+            const job = await payload.create({
+              collection: 'payload-jobs',
+              data: {
+                input: { type: 'publish', doc: { relationTo: 'posts', value: String(id) } },
+                taskSlug: 'schedulePublish',
+                waitUntil: '2049-01-01T18:00:00.000Z',
+              },
+              overrideAccess: true,
+            })
+
+            expect(job.id).toBeTruthy()
+            try {
+              await page.locator('#schedule-publish-button').click()
+              const drawer = page.locator('.schedule-publish:visible')
+              const remove = drawer.locator('.schedule-publish__delete')
+
+              await expect(remove).toBeVisible()
+              await expect.soft(remove).toHaveAccessibleName('Delete')
+              await expectNamedIcons({ scope: drawer })
+              await page.keyboard.press('Escape')
+            } finally {
+              const cleanup = await payload.delete({
+                collection: 'payload-jobs',
+                overrideAccess: true,
+                where: { id: { equals: job.id } },
+              })
+
+              expect(cleanup.docs).toHaveLength(1)
+            }
+          })
+        },
+        initialStatus: 'draft',
+        page,
+        postsURL,
+        serverURL,
+      })
+
+      await test.step('Bulk upload clipboard action', async () => {
+        await page.goto(
+          formatAdminURL({ adminRoute: '/admin', path: '/collections/media', serverURL }),
+        )
+        await expect(
+          page.getByRole('heading', { level: 1, name: 'Media', exact: true }),
+        ).toBeVisible()
+        await page.getByRole('button', { name: /bulk upload/i }).click()
+        const dialog = page.getByRole('dialog', { name: 'Add files', exact: true })
+
+        await expect
+          .soft(dialog.locator('button[class*="pasteFromClipboard"]'))
+          .toHaveAccessibleName('Paste from clipboard')
+        await expectNamedIcons({ scope: dialog })
+        await page.keyboard.press('Escape')
+      })
+
+      await test.step('Exported upload, file, reorder and preview controls', async () => {
+        await page.goto(
+          formatAdminURL({ adminRoute: '/admin', path: '/icon-only-controls', serverURL }),
+        )
+        const fixture = page.locator('.icon-only-controls')
+
+        await expect(
+          fixture.getByRole('heading', { name: 'Icon-only controls', exact: true }),
+        ).toBeVisible()
+        await expect(fixture.locator('.live-preview-toolbar__drag-handle')).toBeVisible()
+        await expect(fixture.locator('.file-field__pasteFromClipboard')).toBeVisible()
+        await expectNamedIcons({ scope: fixture })
+        const staticFile = fixture.getByRole('region', { name: 'Static file', exact: true })
+        const sortableFile = fixture.getByRole('region', { name: 'Sortable file', exact: true })
+        const row = fixture.getByRole('region', { name: 'Collection reorder handle', exact: true })
+        const preview = fixture.getByRole('region', {
+          name: 'Draggable preview toolbar',
+          exact: true,
+        })
+
+        await expect
+          .soft(staticFile.locator('.file-details__remove'))
+          .toHaveAccessibleName('Remove: icon-only.png')
+        await expect
+          .soft(sortableFile.locator('.file-details-draggable__remove'))
+          .toHaveAccessibleName('Remove: icon-only.png')
+        await expect
+          .soft(sortableFile.locator('.file-details-draggable__drag'))
+          .toHaveAccessibleName('Drag to move: icon-only.png')
+        await expect
+          .soft(preview.locator('.live-preview-toolbar__drag-handle'))
+          .toHaveAccessibleName('Drag to move')
+        const handle = row.getByRole('button', { name: 'Drag to move', exact: true })
+
+        await expect(row.getByRole('button')).toHaveCount(1)
+        await tabToWorkflowControl({ control: handle, page })
+        await expect(handle).toHaveCSS('outline-style', 'solid')
+        const upload = fixture.getByRole('region', { name: 'Local file upload', exact: true })
+
+        await expect
+          .soft(upload.locator('.file-field__pasteFromClipboard'))
+          .toHaveAccessibleName('Paste URL')
+        await upload
+          .locator('input[type="file"]')
+          .setInputFiles(fileURLToPath(new URL('../uploads/image.png', import.meta.url)))
+        const cancel = upload.locator('.file-field__remove')
+
+        await expect.soft(cancel).toHaveAccessibleName('Cancel')
+      })
     })
   })
 
@@ -1230,39 +1414,6 @@ test.describe('Admin accessibility', () => {
   })
 
   test.describe('Publishing, versions and deletion', () => {
-    test('should name preview and schedule controls before hover or keyboard interaction', async ({
-      page,
-    }) => {
-      await withWorkflowPost({
-        action: async () => {
-          await page.mouse.move(0, 0)
-          const preview = page.locator('#preview-button')
-          const schedule = page.locator('#schedule-publish-button')
-
-          await expect(preview).toBeVisible()
-          await expect(schedule).toBeVisible()
-          await expect.soft(preview).toHaveAccessibleName('Copy')
-          await expect.soft(schedule).toHaveAccessibleName('Schedule Publish')
-          await preview.hover()
-          await expect(page.getByRole('tooltip', { name: 'Copy', exact: true })).toBeVisible()
-          await expect(preview).not.toHaveAttribute('title')
-          await schedule.hover()
-          await expect(
-            page.getByRole('tooltip', { name: 'Schedule Publish', exact: true }),
-          ).toBeVisible()
-          await expect(schedule).not.toHaveAttribute('title')
-          await scanA11y({
-            name: 'preview and schedule controls',
-            page,
-            include: ['#preview-button', '#schedule-publish-button'],
-          })
-        },
-        page,
-        postsURL,
-        serverURL,
-      })
-    })
-
     test('should publish a draft and inspect its version history using the keyboard', async ({
       page: workflowPage,
     }) => {
@@ -1442,24 +1593,38 @@ test.describe('Admin accessibility', () => {
         const menu = page.getByRole('button', { name: 'Open Menu', exact: true })
 
         await tabToWorkflowControl({ control: menu, page })
+        const menuBounds = await menu.boundingBox()
+
         await page.keyboard.press('Enter')
         await expect(page.locator('aside.nav')).toHaveClass(/nav--nav-open/)
         const close = page.getByRole('button', { name: 'Hide sidebar', exact: true })
 
         await tabToWorkflowControl({ control: close, page })
         await page.keyboard.press('Tab')
-        const unfocusedStyle = await getFocusIndicatorStyle(close)
+        const unfocusedStyle = await getFocusIndicatorStyle(close, { pseudoElement: '::after' })
 
         await page.keyboard.press('Shift+Tab')
         await expect(close).toBeFocused()
         await expect
           .poll(async () =>
             hasRenderedFocusIndicator({
-              focusedStyle: await getFocusIndicatorStyle(close),
+              focusedStyle: await getFocusIndicatorStyle(close, { pseudoElement: '::after' }),
               unfocusedStyle,
             }),
           )
           .toBe(true)
+        await expect
+          .poll(() =>
+            close.evaluate((element) => {
+              const style = getComputedStyle(element, '::after')
+
+              return {
+                height: Number.parseFloat(style.height),
+                width: Number.parseFloat(style.width),
+              }
+            }),
+          )
+          .toEqual({ height: menuBounds!.height, width: menuBounds!.width })
         // Let the final preference write commit before teardown deletes its owner.
         const savedNavigation = page.waitForResponse(
           (response) =>
