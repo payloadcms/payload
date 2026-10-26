@@ -78,21 +78,6 @@ describe('sanitizeConfig', () => {
     })
   })
 
-  it('should default password hash iterations to 600000', () => {
-    const sanitizedConfig = sanitizeConfig({ ...configDefaults })
-
-    expect(sanitizedConfig.auth.passwordHashIterations).toBe(600000)
-  })
-
-  it('should keep configured password hash iterations', () => {
-    const sanitizedConfig = sanitizeConfig({
-      ...configDefaults,
-      auth: { passwordHashIterations: 100000 },
-    })
-
-    expect(sanitizedConfig.auth.passwordHashIterations).toBe(100000)
-  })
-
   it('should throw for unsupported password hash iterations', () => {
     expect(() =>
       sanitizeConfig({

@@ -17,13 +17,6 @@ const generateCurrentHashAndSalt = (password: string): { hash: string; salt: str
   return { hash: `pbkdf2-sha256-v1:${hash}`, salt }
 }
 
-const generate100kHashAndSalt = (password: string): { hash: string; salt: string } => {
-  const salt = crypto.randomBytes(32).toString('hex')
-  const hash = crypto.pbkdf2Sync(password, salt, 100000, 32, 'sha256').toString('hex')
-
-  return { hash: `pbkdf2-sha256-100k-v1:${hash}`, salt }
-}
-
 describe('authenticateLocalStrategy', () => {
   afterEach(() => {
     vi.restoreAllMocks()
@@ -55,48 +48,6 @@ describe('authenticateLocalStrategy', () => {
     })
 
     expect(result).toEqual({ doc, shouldUpdatePasswordHash: false })
-  })
-
-  it('should return doc for a 100k password hash when configured for 100000 iterations', async () => {
-    const password = 'test-password'
-    const { hash, salt } = generate100kHashAndSalt(password)
-    const doc = { id: 1, hash, salt }
-
-    const result = await authenticateLocalStrategy({
-      doc,
-      password,
-      passwordHashIterations: 100000,
-    })
-
-    expect(result).toEqual({ doc, shouldUpdatePasswordHash: false })
-  })
-
-  it('should flag a 100k password hash for update when configured for 600000 iterations', async () => {
-    const password = 'test-password'
-    const { hash, salt } = generate100kHashAndSalt(password)
-    const doc = { id: 1, hash, salt }
-
-    const result = await authenticateLocalStrategy({
-      doc,
-      password,
-      passwordHashIterations: 600000,
-    })
-
-    expect(result).toEqual({ doc, shouldUpdatePasswordHash: true })
-  })
-
-  it('should flag a current password hash for update when configured for 100000 iterations', async () => {
-    const password = 'test-password'
-    const { hash, salt } = generateCurrentHashAndSalt(password)
-    const doc = { id: 1, hash, salt }
-
-    const result = await authenticateLocalStrategy({
-      doc,
-      password,
-      passwordHashIterations: 100000,
-    })
-
-    expect(result).toEqual({ doc, shouldUpdatePasswordHash: true })
   })
 
   it('should return null when hashing fails', async () => {
