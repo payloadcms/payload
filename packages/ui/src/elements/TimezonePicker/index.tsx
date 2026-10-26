@@ -50,7 +50,7 @@ const SmallClearIndicator: React.FC<ClearIndicatorProps<OptionType, true>> = (pr
         input?.focus()
       }}
       onKeyDown={(event) => {
-        if (event.key === ' ') {
+        if (event.key === ' ' || event.key === 'Enter') {
           event.stopPropagation()
         }
       }}
