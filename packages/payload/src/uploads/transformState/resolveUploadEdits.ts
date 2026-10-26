@@ -152,6 +152,19 @@ export async function resolveUploadEdits({
           : state
     }
 
+    // The first write on a document saved before `_transforms` existed keeps its focal point.
+    // The center means the same as no focal point, so it is not copied.
+    if (
+      state &&
+      !state.focalPoint &&
+      !previous &&
+      !hasNewFile &&
+      currentFocalPoint &&
+      !isDeepStrictEqual(currentFocalPoint, centerFocalPoint)
+    ) {
+      state = { ...state, focalPoint: currentFocalPoint }
+    }
+
     const savedFocalPoint = state?.focalPoint ?? focalPoint
 
     return {
