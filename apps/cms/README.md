@@ -556,7 +556,7 @@ Traditional Chinese. The code is in `src/vigor/`, the languages in `src/locales.
 | Service pages      | `/topics/<slug>`, shown as tiles on the home page                                       |
 | News               | `/news` and a page per article                                                          |
 | Events             | Upcoming events on the home page (separate from the private events under Business)      |
-| Site settings      | Company name, contact details, opening hours, social links, main menu, key figures      |
+| Site settings      | Company name, contact details (see below), social links, main menu, key figures         |
 | Home page          | The hero slides at the top of the home page                                             |
 | About page         | `/about`                                                                                |
 
@@ -577,6 +577,12 @@ and the website then shows the English text, also after it's edited.
 Site settings, Home page and About page have no drafts: **Save** puts the change live in the language you're
 editing. (With MongoDB, Payload gives every global with drafts an index with the same name, so all but one
 of them fail to build.)
+
+**Contact details** (Site settings → Company: email, phone, WhatsApp, WeChat ID, showroom address, opening hours)
+appear in the website's top bar, footer and Contact page, where the showroom address also gets a map, and the
+website's AI assistant knows them. Each field says where it's shown. WhatsApp becomes a link that opens a chat.
+Optional fields left empty, such as WeChat or a social link, are left out on the website. Address, opening hours,
+tagline and portal name are per language; the others are the same in every language.
 
 **Images** go to Media like any upload (to S3 when it's on). A product without a photo gets a drawn
 illustration on the website.

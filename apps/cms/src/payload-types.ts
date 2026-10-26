@@ -2659,14 +2659,38 @@ export interface VigorSettings {
      * Shown in the top bar and the footer.
      */
     tagline?: string | null;
+    /**
+     * Shown in the footer and on the Contact page. The contact form's messages go here too, unless the website's CONTACT_EMAIL_TO says otherwise.
+     */
     email: string;
+    /**
+     * With the country code, e.g. +852 2123 4567. Shown in the top bar, the footer and on the Contact page.
+     */
     phone: string;
+    /**
+     * The WhatsApp number with the country code, e.g. +852 9123 4567. Buyers get a "WhatsApp" link that opens a chat with it.
+     */
+    whatsapp?: string | null;
+    /**
+     * The WeChat ID buyers search for to add you. Shown in the footer and on the Contact page.
+     */
+    wechat?: string | null;
+    /**
+     * The showroom. Shown in the footer and on the Contact page, with a map.
+     */
     address?: string | null;
+    /**
+     * e.g. Monday to Friday, 9:00 am to 6:00 pm
+     */
     hours?: string | null;
+    /**
+     * Links in the footer. Leave a field empty to leave its link out.
+     */
     social?: {
       linkedin?: string | null;
       instagram?: string | null;
       facebook?: string | null;
+      youtube?: string | null;
     };
   };
   /**
@@ -3114,6 +3138,8 @@ export interface VigorSettingsSelect<T extends boolean = true> {
         tagline?: T;
         email?: T;
         phone?: T;
+        whatsapp?: T;
+        wechat?: T;
         address?: T;
         hours?: T;
         social?:
@@ -3122,6 +3148,7 @@ export interface VigorSettingsSelect<T extends boolean = true> {
               linkedin?: T;
               instagram?: T;
               facebook?: T;
+              youtube?: T;
             };
       };
   nav?:
