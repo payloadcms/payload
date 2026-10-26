@@ -160,7 +160,7 @@ export const Form: React.FC<FormProps> = (props) => {
    * See the `modifiedWhileProcessingRef` ref for more details.
    */
   const setModified = useCallback((modified: boolean) => {
-    if (modified && backgroundProcessingRef.current) {
+    if (backgroundProcessingRef.current) {
       modifiedWhileProcessingRef.current = true
     }
 
