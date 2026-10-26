@@ -656,6 +656,13 @@ export function fieldsToJSONSchema({
               ...baseFieldSchema,
               type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
             }
+
+            if (field.interfaceName && field.jsonSchema?.schema) {
+              fieldSchema = {
+                $ref: `#/$defs/${registerNamedInterface(field.interfaceName, fieldSchema)}`,
+              }
+            }
+
             break
           }
 

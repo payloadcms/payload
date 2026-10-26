@@ -473,7 +473,7 @@ export type FileToSave =
       sourcePath: string
     }
 
-type Crop = {
+export type Crop = {
   height: number
   unit: '%' | 'px'
   width: number

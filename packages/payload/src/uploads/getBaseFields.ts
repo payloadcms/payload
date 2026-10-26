@@ -5,6 +5,8 @@ import type { SanitizedUploadConfig } from './types.js'
 
 import { generateFilePathOrURL } from './generateFilePathOrURL.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
+import { transformStateSchema } from './transformState/transformStateSchema.js'
+import { validateTransformState } from './transformState/validateTransformState.js'
 import { validateUploadFilename } from './validateUploadFilename.js'
 
 const disabledFromImageSize = (
@@ -171,6 +173,32 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     filesize,
     width,
     height,
+    {
+      name: '_transforms',
+      type: 'json',
+      admin: { disabled: true },
+      hooks: {
+        beforeChange: [
+          ({ operation, value }) => {
+            const isEmptyObject =
+              value &&
+              typeof value === 'object' &&
+              !Array.isArray(value) &&
+              !Object.keys(value).length
+
+            return isEmptyObject || (operation === 'create' && value === undefined) ? null : value
+          },
+        ],
+      },
+      interfaceName: 'UploadTransforms',
+      jsonSchema: {
+        fileMatch: ['payload://upload-transforms'],
+        schema: transformStateSchema,
+        uri: 'payload://upload-transforms',
+      },
+      label: 'Transforms',
+      validate: validateTransformState,
+    },
     {
       name: 'original',
       type: 'group',

@@ -7,6 +7,29 @@
  */
 
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "UploadTransforms".
+ */
+export type UploadTransforms = {
+  /**
+   * Rectangle in original-file pixels, applied before resize and encoding.
+   */
+  crop?: {
+    height: number;
+    width: number;
+    x: number;
+    y: number;
+  };
+  /**
+   * Preferred point as percentages of the original, from 0 to 100.
+   */
+  focalPoint?: {
+    x: number;
+    y: number;
+  };
+  [k: string]: unknown;
+} | null;
+/**
  * Supported timezones in IANA format.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -155,6 +178,7 @@ export interface FileVersionedMedia {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
     url?: string | null;
@@ -227,6 +251,7 @@ export interface FileVersionedDraftMedia {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
     url?: string | null;
@@ -264,6 +289,7 @@ export interface FileVersionedTransformedMedia {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
     url?: string | null;
@@ -313,6 +339,7 @@ export interface FileVersionedConvertedMedia {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
     url?: string | null;
@@ -351,6 +378,7 @@ export interface FileVersionedTrashMedia {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
     url?: string | null;
@@ -388,6 +416,7 @@ export interface FileVersionedPlainMedia {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
     url?: string | null;
@@ -512,6 +541,7 @@ export interface FileVersionedMediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _transforms?: T;
   original?:
     | T
     | {
@@ -545,6 +575,7 @@ export interface FileVersionedDraftMediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _transforms?: T;
   original?:
     | T
     | {
@@ -577,6 +608,7 @@ export interface FileVersionedTransformedMediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _transforms?: T;
   original?:
     | T
     | {
@@ -625,6 +657,7 @@ export interface FileVersionedConvertedMediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _transforms?: T;
   original?:
     | T
     | {
@@ -658,6 +691,7 @@ export interface FileVersionedTrashMediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _transforms?: T;
   original?:
     | T
     | {
@@ -690,6 +724,7 @@ export interface FileVersionedPlainMediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _transforms?: T;
   original?:
     | T
     | {
