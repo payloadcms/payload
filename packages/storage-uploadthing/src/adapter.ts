@@ -66,6 +66,7 @@ export function createUploadthingAdapter({
           : clientUploadContext,
         data,
         filename: file.filename,
+        logger: req.payload.logger,
         mimeType: file.mimeType,
         tempFilePath: file.tempFilePath,
         utApi,

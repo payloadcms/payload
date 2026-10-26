@@ -21,6 +21,7 @@ describe('handleUpload', () => {
       return { data: { name: file.name, key: 'stored-key' } } as object
     }),
   }
+  const payload = { logger: { error: vi.fn() } }
   const adapter = createUploadthingAdapter({ acl: 'public-read', utApi: utApi as never })({
     collection: { slug: 'media' },
   } as never)
@@ -45,7 +46,7 @@ describe('handleUpload', () => {
         mimeType: 'image/png',
         tempFilePath,
       },
-      req: { context: {} },
+      req: { context: {}, payload },
       storageFilePath: 'processed.png',
     } as never)
 
@@ -62,6 +63,7 @@ describe('handleUpload', () => {
         tempFilePath,
       },
       req: {
+        payload,
         context: {
           [CLIENT_UPLOAD_CONTEXT_CONTEXT_KEY]: { key: 'browser-key' },
           [CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY]: tempFilePath,
@@ -83,6 +85,7 @@ describe('handleUpload', () => {
         mimeType: 'image/png',
       },
       req: {
+        payload,
         context: {
           [CLIENT_UPLOAD_CONTEXT_CONTEXT_KEY]: { key: 'browser-key' },
           [CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY]: tempFilePath,
@@ -107,6 +110,7 @@ describe('handleUpload', () => {
           tempFilePath,
         },
         req: {
+          payload,
           context: {
             [CLIENT_UPLOAD_CONTEXT_CONTEXT_KEY]: { key: 'browser-key' },
             [CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY]: tempFilePath,

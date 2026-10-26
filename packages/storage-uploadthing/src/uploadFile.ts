@@ -1,3 +1,4 @@
+import type { Payload } from 'payload'
 import type { UTApi } from 'uploadthing/server'
 
 import { openAsBlob } from 'fs'
@@ -12,6 +13,7 @@ interface UploadFileArgs {
   clientUploadContext?: unknown
   data: Record<string, unknown>
   filename: string
+  logger: Payload['logger']
   mimeType: string
   tempFilePath?: string
   utApi: UTApi
@@ -23,6 +25,7 @@ export async function uploadFile({
   clientUploadContext,
   data,
   filename,
+  logger,
   mimeType,
   tempFilePath,
   utApi,
@@ -44,7 +47,12 @@ export async function uploadFile({
       'key' in clientUploadContext &&
       typeof clientUploadContext.key === 'string'
     ) {
-      await utApi.deleteFiles(clientUploadContext.key)
+      // The replacement is already stored, so a failed delete must not fail the save.
+      try {
+        await utApi.deleteFiles(clientUploadContext.key)
+      } catch (err) {
+        logger.error({ err, msg: 'Failed to delete the replaced uploadthing file' })
+      }
     }
 
     const sizes = data.sizes as Record<string, { _key?: string; filename?: string }> | undefined
