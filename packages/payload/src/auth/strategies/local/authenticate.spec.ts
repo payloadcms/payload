@@ -2,6 +2,7 @@ import crypto from 'crypto'
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { InvalidConfiguration } from '../../../errors/InvalidConfiguration.js'
 import { authenticateLocalStrategy } from './authenticate.js'
 
 const generateExistingHashAndSalt = (password: string): { hash: string; salt: string } => {
@@ -96,6 +97,32 @@ describe('authenticateLocalStrategy', () => {
     })
 
     expect(result).toBeNull()
+  })
+
+  it('should throw an InvalidConfiguration error when the environment does not support the stored hash iterations', async () => {
+    // Matches the error Cloudflare Workers throws for more than 100,000 iterations
+    vi.spyOn(crypto, 'pbkdf2').mockImplementation(((...args: unknown[]) => {
+      const callback = args.at(-1) as (err: Error) => void
+
+      process.nextTick(() =>
+        callback(
+          new DOMException(
+            'Pbkdf2 failed: iteration counts above 100000 are not supported (requested 600000).',
+            'NotSupportedError',
+          ),
+        ),
+      )
+    }) as typeof crypto.pbkdf2)
+    const { hash, salt } = generateCurrentHashAndSalt('test-password')
+    const doc = { id: 1, hash, salt }
+
+    await expect(
+      authenticateLocalStrategy({
+        doc,
+        password: 'test-password',
+        passwordHashIterations: 100000,
+      }),
+    ).rejects.toThrow(InvalidConfiguration)
   })
 
   it('should return null when password is invalid', async () => {

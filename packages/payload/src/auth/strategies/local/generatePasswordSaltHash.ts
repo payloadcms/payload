@@ -71,10 +71,14 @@ export const generatePasswordSaltHash = async ({
     password: passwordToSet,
     salt,
   }).catch((err: unknown) => {
-    // Environments such as Cloudflare Workers reject iteration counts above their limit
-    if (err instanceof Error && err.name === 'NotSupportedError') {
+    if (isUnsupportedIterationsError(err)) {
+      const configHint =
+        passwordHashIterations === 100000
+          ? ''
+          : ' Set `auth.passwordHashIterations` to 100000 in your Payload Config.'
+
       throw new InvalidConfiguration(
-        `This environment does not support ${passwordHashIterations} PBKDF2 iterations for password hashing. Set \`auth.passwordHashIterations\` to 100000 in your Payload Config.`,
+        `This environment does not support ${passwordHashIterations} PBKDF2 iterations for password hashing.${configHint}`,
       )
     }
 
@@ -117,7 +121,11 @@ function randomBytes(): Promise<Buffer> {
   )
 }
 
-function pbkdf2Promisified({
+// Environments such as Cloudflare Workers reject iteration counts above their limit
+export const isUnsupportedIterationsError = (err: unknown): boolean =>
+  err instanceof Error && err.name === 'NotSupportedError'
+
+export function pbkdf2Promisified({
   iterations,
   keyLength,
   password,
