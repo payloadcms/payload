@@ -2,6 +2,7 @@ import type { Config } from './types.js'
 
 import { describe, expect, it } from 'vitest'
 
+import { InvalidConfiguration } from '../errors/InvalidConfiguration.js'
 import { sanitizeConfig } from './sanitize.js'
 
 const configDefaults: Config = {
@@ -75,6 +76,31 @@ describe('sanitizeConfig', () => {
       graphQL: '/graphql',
       graphQLPlayground: '/graphql-playground',
     })
+  })
+
+  it('should default password hash iterations to 600000', () => {
+    const sanitizedConfig = sanitizeConfig({ ...configDefaults })
+
+    expect(sanitizedConfig.auth.passwordHashIterations).toBe(600000)
+  })
+
+  it('should keep configured password hash iterations', () => {
+    const sanitizedConfig = sanitizeConfig({
+      ...configDefaults,
+      auth: { passwordHashIterations: 100000 },
+    })
+
+    expect(sanitizedConfig.auth.passwordHashIterations).toBe(100000)
+  })
+
+  it('should throw for unsupported password hash iterations', () => {
+    expect(() =>
+      sanitizeConfig({
+        ...configDefaults,
+        // @ts-expect-error unsupported value from an untyped config
+        auth: { passwordHashIterations: 200000 },
+      }),
+    ).toThrow(InvalidConfiguration)
   })
 
   it('should populate a nested default when the property is explicitly undefined', () => {

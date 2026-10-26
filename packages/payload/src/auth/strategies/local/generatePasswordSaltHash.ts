@@ -1,9 +1,10 @@
 import crypto from 'crypto'
 
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+import type { SanitizedConfig } from '../../../config/types.js'
 import type { PayloadRequest } from '../../../types/index.js'
 
-import { ValidationError } from '../../../errors/index.js'
+import { InvalidConfiguration, ValidationError } from '../../../errors/index.js'
 import { password } from '../../../fields/validations.js'
 
 type PasswordHashParameters = {
@@ -19,9 +20,16 @@ type Args = {
   req: PayloadRequest
 }
 
-const currentPasswordHashPrefix = 'pbkdf2-sha256-v1:'
-const currentPasswordHashIterations = 600000
-const currentPasswordHashKeyLength = 32
+type PasswordHashIterations = SanitizedConfig['auth']['passwordHashIterations']
+
+// Each supported iteration count has its own fixed prefix, so a stored hash
+// can be verified whichever count is configured
+const passwordHashPrefixes: Record<PasswordHashIterations, string> = {
+  100000: 'pbkdf2-sha256-100k-v1:',
+  600000: 'pbkdf2-sha256-v1:',
+}
+export const supportedPasswordHashIterations = Object.keys(passwordHashPrefixes).map(Number)
+const passwordHashKeyLength = 32
 const legacyPasswordHashIterations = 25000
 const legacyPasswordHashKeyLength = 512
 
@@ -53,26 +61,38 @@ export const generatePasswordSaltHash = async ({
     }
   }
 
+  const { passwordHashIterations } = req.payload.config.auth
   const saltBuffer = await randomBytes()
   const salt = saltBuffer.toString('hex')
 
   const hashRaw = await pbkdf2Promisified({
-    iterations: currentPasswordHashIterations,
-    keyLength: currentPasswordHashKeyLength,
+    iterations: passwordHashIterations,
+    keyLength: passwordHashKeyLength,
     password: passwordToSet,
     salt,
+  }).catch((err: unknown) => {
+    // Environments such as Cloudflare Workers reject iteration counts above their limit
+    if (err instanceof Error && err.name === 'NotSupportedError') {
+      throw new InvalidConfiguration(
+        `This environment does not support ${passwordHashIterations} PBKDF2 iterations for password hashing. Set \`auth.passwordHashIterations\` to 100000 in your Payload Config.`,
+      )
+    }
+
+    throw err
   })
-  const hash = `${currentPasswordHashPrefix}${hashRaw.toString('hex')}`
+  const hash = `${passwordHashPrefixes[passwordHashIterations]}${hashRaw.toString('hex')}`
 
   return { hash, salt }
 }
 
 export const getPasswordHashParameters = (hash: string): PasswordHashParameters => {
-  if (isCurrentPasswordHash(hash)) {
-    return {
-      hash: hash.slice(currentPasswordHashPrefix.length),
-      iterations: currentPasswordHashIterations,
-      keyLength: currentPasswordHashKeyLength,
+  for (const [iterations, prefix] of Object.entries(passwordHashPrefixes)) {
+    if (hash.startsWith(prefix)) {
+      return {
+        hash: hash.slice(prefix.length),
+        iterations: Number(iterations),
+        keyLength: passwordHashKeyLength,
+      }
     }
   }
 
@@ -83,8 +103,13 @@ export const getPasswordHashParameters = (hash: string): PasswordHashParameters 
   }
 }
 
-export const isCurrentPasswordHash = (hash: unknown): hash is string =>
-  typeof hash === 'string' && hash.startsWith(currentPasswordHashPrefix)
+export const isCurrentPasswordHash = ({
+  hash,
+  passwordHashIterations,
+}: {
+  hash: string
+  passwordHashIterations: PasswordHashIterations
+}): boolean => hash.startsWith(passwordHashPrefixes[passwordHashIterations])
 
 function randomBytes(): Promise<Buffer> {
   return new Promise((resolve, reject) =>
