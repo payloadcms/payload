@@ -20,6 +20,7 @@ export const PostsCollection: CollectionConfig = {
     livePreview: {
       url: ({ data }) => `http://localhost:${process.env.PORT || 3000}/preview/${data?.id || ''}`,
     },
+    preview: ({ id }) => `http://localhost:${process.env.PORT || 3000}/preview/${id || ''}`,
     useAsTitle: 'title',
   },
   fields: [
@@ -403,7 +404,7 @@ export const PostsCollection: CollectionConfig = {
   llmInstructions: 'Use descriptive post titles.',
   trash: true,
   versions: {
-    drafts: true,
+    drafts: { schedulePublish: true },
     maxPerDoc: 10,
   },
 }

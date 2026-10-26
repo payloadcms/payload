@@ -168,6 +168,36 @@ test.describe('Admin accessibility', () => {
       await expect(posts).toHaveAttribute('aria-current', 'page')
       await expect(page.getByRole('grid', { name: 'Posts', exact: true })).toBeVisible()
     })
+    test('should expose full truncated breadcrumb labels without changing their accessible names', async ({
+      page,
+    }) => {
+      await page.goto(
+        formatAdminURL({ adminRoute: '/admin', path: '/breadcrumb-current-page', serverURL }),
+      )
+      const breadcrumb = page.getByRole('navigation', { name: 'Breadcrumb', exact: true })
+      const label = 'Parent section of breadcrumb example'
+      const parent = breadcrumb.getByRole('link', { name: label, exact: true })
+
+      await expect(parent).toBeVisible()
+      await expect
+        .poll(() =>
+          parent
+            .locator('.btn__label')
+            .evaluate((element) => element.scrollWidth > element.clientWidth),
+        )
+        .toBe(true)
+      await expect(parent).toHaveAttribute('title', label)
+      await tabToWorkflowControl({ control: parent, page })
+      await expect(parent).toHaveAccessibleName(label)
+      await expect(breadcrumb.locator('span.step-nav__item')).toHaveAttribute(
+        'title',
+        'Additional breadcrumb context',
+      )
+      await expect(breadcrumb.locator('[aria-current="page"]')).toHaveAccessibleName(
+        'Current breadcrumb example',
+      )
+      await scanA11y({ name: 'breadcrumb labels', page, include: ['nav.step-nav'] })
+    })
   })
 
   test.describe('Finding content', () => {
@@ -1200,6 +1230,39 @@ test.describe('Admin accessibility', () => {
   })
 
   test.describe('Publishing, versions and deletion', () => {
+    test('should name preview and schedule controls before hover or keyboard interaction', async ({
+      page,
+    }) => {
+      await withWorkflowPost({
+        action: async () => {
+          await page.mouse.move(0, 0)
+          const preview = page.locator('#preview-button')
+          const schedule = page.locator('#schedule-publish-button')
+
+          await expect(preview).toBeVisible()
+          await expect(schedule).toBeVisible()
+          await expect.soft(preview).toHaveAccessibleName('Copy')
+          await expect.soft(schedule).toHaveAccessibleName('Schedule Publish')
+          await preview.hover()
+          await expect(page.getByRole('tooltip', { name: 'Copy', exact: true })).toBeVisible()
+          await expect(preview).not.toHaveAttribute('title')
+          await schedule.hover()
+          await expect(
+            page.getByRole('tooltip', { name: 'Schedule Publish', exact: true }),
+          ).toBeVisible()
+          await expect(schedule).not.toHaveAttribute('title')
+          await scanA11y({
+            name: 'preview and schedule controls',
+            page,
+            include: ['#preview-button', '#schedule-publish-button'],
+          })
+        },
+        page,
+        postsURL,
+        serverURL,
+      })
+    })
+
     test('should publish a draft and inspect its version history using the keyboard', async ({
       page: workflowPage,
     }) => {
