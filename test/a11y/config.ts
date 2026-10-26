@@ -67,10 +67,6 @@ export default buildConfigWithDefaults({
             Component: '/components/CustomIDModals/index.js#CustomIDModals',
             path: '/custom-modal-ids',
           },
-          IconOnlyControls: {
-            Component: '/components/IconOnlyControls/index.js#IconOnlyControls',
-            path: '/icon-only-controls',
-          },
           FocusIndicatorsView: {
             Component: '/components/FocusIndicatorsView.js#FocusIndicatorsView',
             path: '/focus-indicators',

@@ -20,7 +20,6 @@ export const PostsCollection: CollectionConfig = {
     livePreview: {
       url: ({ data }) => `http://localhost:${process.env.PORT || 3000}/preview/${data?.id || ''}`,
     },
-    preview: ({ id }) => `http://localhost:${process.env.PORT || 3000}/preview/${id || ''}`,
     useAsTitle: 'title',
   },
   fields: [
@@ -104,11 +103,6 @@ export const PostsCollection: CollectionConfig = {
       type: 'relationship',
       hasMany: true,
       relationTo: postsSlug,
-    },
-    {
-      name: 'relatedContent',
-      type: 'relationship',
-      relationTo: [postsSlug, mediaSlug],
     },
     {
       name: 'relatedPost',
@@ -409,7 +403,7 @@ export const PostsCollection: CollectionConfig = {
   llmInstructions: 'Use descriptive post titles.',
   trash: true,
   versions: {
-    drafts: { schedulePublish: true },
+    drafts: true,
     maxPerDoc: 10,
   },
 }

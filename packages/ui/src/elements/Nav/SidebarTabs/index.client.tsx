@@ -234,7 +234,13 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
                   isLoading={isActive && loadingTab === tab.slug}
                 />
                 <div style={loadingTab === tab.slug ? { display: 'none' } : undefined}>
-                  {content}
+                  <React.Suspense
+                    fallback={
+                      <DelayedSpinner baseClass={baseClass} delay={loadingDelay} isLoading />
+                    }
+                  >
+                    {content}
+                  </React.Suspense>
                 </div>
               </div>
             )

@@ -62,93 +62,90 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_B4576AFD".
+ * via the `definition` "LexicalNodes_CBA0F1D6".
  */
-export type LexicalNodes_B4576AFD =
+export type LexicalNodes_CBA0F1D6 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_B4576AFD>
+  | SerializedParagraphNode<LexicalNodes_CBA0F1D6>
   | SerializedBlockNode<Callout>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
   | SerializedUploadNode<'media-alt'>
-  | SerializedQuoteNode<LexicalNodes_B4576AFD>
+  | SerializedQuoteNode<LexicalNodes_CBA0F1D6>
   | SerializedRelationshipNode<
       | 'users'
       | 'payload-folders'
       | 'posts'
       | 'payload-kv'
-      | 'payload-jobs'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_B4576AFD, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_B4576AFD, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_B4576AFD>
-  | SerializedListItemNode<LexicalNodes_B4576AFD>
-  | SerializedHeadingNode<LexicalNodes_B4576AFD>;
+  | SerializedAutoLinkNode<LexicalNodes_CBA0F1D6, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_CBA0F1D6, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_CBA0F1D6>
+  | SerializedListItemNode<LexicalNodes_CBA0F1D6>
+  | SerializedHeadingNode<LexicalNodes_CBA0F1D6>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_753D764A".
+ * via the `definition` "LexicalNodes_2AE36179".
  */
-export type LexicalNodes_753D764A =
+export type LexicalNodes_2AE36179 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_753D764A>
+  | SerializedParagraphNode<LexicalNodes_2AE36179>
   | SerializedBlockNode<Callout | NestedRichText | NoHandle>
-  | SerializedTableNode<LexicalNodes_753D764A>
-  | SerializedTableCellNode<LexicalNodes_753D764A>
-  | SerializedTableRowNode<LexicalNodes_753D764A>
+  | SerializedTableNode<LexicalNodes_2AE36179>
+  | SerializedTableCellNode<LexicalNodes_2AE36179>
+  | SerializedTableRowNode<LexicalNodes_2AE36179>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
   | SerializedUploadNode<'media-alt'>
-  | SerializedQuoteNode<LexicalNodes_753D764A>
+  | SerializedQuoteNode<LexicalNodes_2AE36179>
   | SerializedRelationshipNode<
       | 'users'
       | 'payload-folders'
       | 'posts'
       | 'payload-kv'
-      | 'payload-jobs'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_753D764A, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_753D764A, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_753D764A>
-  | SerializedListItemNode<LexicalNodes_753D764A>
-  | SerializedHeadingNode<LexicalNodes_753D764A>;
+  | SerializedAutoLinkNode<LexicalNodes_2AE36179, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_2AE36179, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_2AE36179>
+  | SerializedListItemNode<LexicalNodes_2AE36179>
+  | SerializedHeadingNode<LexicalNodes_2AE36179>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_30FBFD32".
+ * via the `definition` "LexicalNodes_9A5B20AD".
  */
-export type LexicalNodes_30FBFD32 =
+export type LexicalNodes_9A5B20AD =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_30FBFD32>
+  | SerializedParagraphNode<LexicalNodes_9A5B20AD>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
   | SerializedUploadNode<'media-alt'>
-  | SerializedQuoteNode<LexicalNodes_30FBFD32>
+  | SerializedQuoteNode<LexicalNodes_9A5B20AD>
   | SerializedRelationshipNode<
       | 'users'
       | 'payload-folders'
       | 'posts'
       | 'payload-kv'
-      | 'payload-jobs'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_30FBFD32, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_30FBFD32, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_30FBFD32>
-  | SerializedListItemNode<LexicalNodes_30FBFD32>
-  | SerializedHeadingNode<LexicalNodes_30FBFD32>;
+  | SerializedAutoLinkNode<LexicalNodes_9A5B20AD, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_9A5B20AD, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_9A5B20AD>
+  | SerializedListItemNode<LexicalNodes_9A5B20AD>
+  | SerializedHeadingNode<LexicalNodes_9A5B20AD>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_3DE324E4".
@@ -174,7 +171,6 @@ export interface Config {
     media: Media;
     'media-alt': MediaAlt;
     'payload-kv': PayloadKv;
-    'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -182,7 +178,7 @@ export interface Config {
   };
   collectionsJoins: {
     'payload-folders': {
-      documentsAndFolders: 'payload-folders' | 'posts' | 'media';
+      documentsAndFolders: 'payload-folders' | 'posts';
     };
   };
   collectionsSelect: {
@@ -192,7 +188,6 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     'media-alt': MediaAltSelect<false> | MediaAltSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
-    'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -205,12 +200,10 @@ export interface Config {
   globals: {
     menu: Menu;
     'workflow-menu': WorkflowMenu;
-    'payload-jobs-stats': PayloadJobsStat;
   };
   globalsSelect: {
     menu: MenuSelect<false> | MenuSelect<true>;
     'workflow-menu': WorkflowMenuSelect<false> | WorkflowMenuSelect<true>;
-    'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
   locale: 'en' | 'es';
   widgets: {
@@ -222,13 +215,7 @@ export interface Config {
   };
   user: User;
   jobs: {
-    tasks: {
-      schedulePublish: TaskSchedulePublish;
-      inline: {
-        input: unknown;
-        output: unknown;
-      };
-    };
+    tasks: unknown;
     workflows: unknown;
   };
 }
@@ -317,10 +304,6 @@ export interface PayloadFolder {
           relationTo?: 'posts';
           value: string | Post;
         }
-      | {
-          relationTo?: 'media';
-          value: string | Media;
-        }
     )[];
     hasNextPage?: boolean;
     totalDocs?: number;
@@ -344,15 +327,6 @@ export interface Post {
   accessibilityDisabledSelect?: ('one' | 'two') | null;
   requiredTags: string[];
   relatedPosts?: (string | Post)[] | null;
-  relatedContent?:
-    | ({
-        relationTo: 'posts';
-        value: string | Post;
-      } | null)
-    | ({
-        relationTo: 'media';
-        value: string | Media;
-      } | null);
   relatedPost?: (string | null) | Post;
   contrastRelationships?: (string | Post)[] | null;
   contrastDisabledSelect?: ('one' | 'two')[] | null;
@@ -376,7 +350,7 @@ export interface Post {
   };
   status?: ('draft' | 'published') | null;
   publishedOn?: string | null;
-  content?: LexicalRichText<LexicalNodes_753D764A> | null;
+  content?: LexicalRichText<LexicalNodes_2AE36179> | null;
   items?:
     | {
         label?: string | null;
@@ -455,7 +429,6 @@ export interface Post {
  */
 export interface Media {
   id: string;
-  '_h_payload-folders'?: (string | null) | PayloadFolder;
   alt: string;
   createdBy?: {
     relationTo: 'users';
@@ -524,7 +497,7 @@ export interface Media {
  * via the `definition` "TextBlock".
  */
 export interface TextBlock {
-  body?: LexicalRichText<LexicalNodes_30FBFD32> | null;
+  body?: LexicalRichText<LexicalNodes_9A5B20AD> | null;
   text?: string | null;
   date?: string | null;
   id?: string | null;
@@ -593,116 +566,6 @@ export interface PayloadKv {
     | number
     | boolean
     | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-jobs".
- */
-export interface PayloadJob {
-  id: string;
-  /**
-   * Input data provided to the job
-   */
-  input?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  taskStatus?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  meta?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  completedAt?: string | null;
-  totalTried?: number | null;
-  /**
-   * If hasError is true this job will not be retried
-   */
-  hasError?: boolean | null;
-  /**
-   * If hasError is true, this is the error that caused it
-   */
-  error?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  /**
-   * Task execution log
-   */
-  log?:
-    | {
-        executedAt: string;
-        completedAt: string;
-        taskSlug: 'inline' | 'schedulePublish';
-        taskID: string;
-        input:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
-        output?:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
-        state: 'failed' | 'succeeded';
-        error?:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
-        parent?: {
-          taskSlug?: ('inline' | 'schedulePublish') | null;
-          taskID?: string | null;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  taskSlug?: ('inline' | 'schedulePublish') | null;
-  queue?: string | null;
-  waitUntil?: string | null;
-  processingUntil?: string | null;
-  processingToken?: string | null;
-  /**
-   * Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.
-   */
-  concurrencyKey?: string | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -852,7 +715,6 @@ export interface PostsSelect<T extends boolean = true> {
   accessibilityDisabledSelect?: T;
   requiredTags?: T;
   relatedPosts?: T;
-  relatedContent?: T;
   relatedPost?: T;
   contrastRelationships?: T;
   contrastDisabledSelect?: T;
@@ -939,7 +801,6 @@ export interface PostsSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
-  '_h_payload-folders'?: T;
   alt?: T;
   createdBy?: T;
   updatedBy?: T;
@@ -1048,46 +909,6 @@ export interface PayloadKvSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-jobs_select".
- */
-export interface PayloadJobsSelect<T extends boolean = true> {
-  input?: T;
-  taskStatus?: T;
-  meta?: T;
-  completedAt?: T;
-  totalTried?: T;
-  hasError?: T;
-  error?: T;
-  log?:
-    | T
-    | {
-        executedAt?: T;
-        completedAt?: T;
-        taskSlug?: T;
-        taskID?: T;
-        input?: T;
-        output?: T;
-        state?: T;
-        error?: T;
-        parent?:
-          | T
-          | {
-              taskSlug?: T;
-              taskID?: T;
-            };
-        id?: T;
-      };
-  taskSlug?: T;
-  queue?: T;
-  waitUntil?: T;
-  processingUntil?: T;
-  processingToken?: T;
-  concurrencyKey?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -1176,24 +997,6 @@ export interface WorkflowMenu {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-jobs-stats".
- */
-export interface PayloadJobsStat {
-  id: string;
-  stats?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "menu_select".
  */
 export interface MenuSelect<T extends boolean = true> {
@@ -1218,16 +1021,6 @@ export interface WorkflowMenuSelect<T extends boolean = true> {
   globalText?: T;
   createdBy?: T;
   updatedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-jobs-stats_select".
- */
-export interface PayloadJobsStatsSelect<T extends boolean = true> {
-  stats?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1297,26 +1090,6 @@ export interface UploadDropzoneWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TaskSchedulePublish".
- */
-export interface TaskSchedulePublish {
-  input: {
-    type?: ('publish' | 'unpublish') | null;
-    locale?: string | null;
-    doc?: {
-      relationTo: 'posts';
-      value: string | Post;
-    } | null;
-    global?: string | null;
-    user?: {
-      relationTo: 'users';
-      value: string | User;
-    } | null;
-  };
-  output?: unknown;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "Callout".
  */
 export interface Callout {
@@ -1332,7 +1105,7 @@ export interface Callout {
 export interface NestedRichText {
   id: string;
   blockType: 'nestedRichText';
-  body?: LexicalRichText<LexicalNodes_B4576AFD> | null;
+  body?: LexicalRichText<LexicalNodes_CBA0F1D6> | null;
   blockName?: string | null;
 }
 /**

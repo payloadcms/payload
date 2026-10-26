@@ -16,7 +16,7 @@ Commands start the a11y app and reset/seed its fixtures. Set `PORT` if needed.
 
 ## Suites
 
-- **`e2e.spec.ts`**: 32 workflow cases with enhanced contrast enabled, combining keyboard/focus assertions and axe checkpoints on real admin components.
+- **`e2e.spec.ts`**: 31 workflow cases with enhanced contrast enabled, combining keyboard/focus assertions and axe checkpoints on real admin components.
 - **`WCAG.audit.spec.ts`**: tests for validation of audit findings, grouped by WCAG criterion and ticket. Explicit command only; excluded from normal CI.
 - **`focus-indicators.e2e.spec.ts`**: browser tests validating the shared `checkFocusIndicators` scanner against deliberate good/bad fixtures; runs alongside the workflows.
 - **`screen-reader.spec.ts`**: separate VoiceOver/NVDA verification; excluded from normal CI.
