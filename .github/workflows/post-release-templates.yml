@@ -133,6 +133,7 @@ jobs:
     environment: release
     permissions:
       contents: read
+      pull-requests: write
     steps:
       - name: Mint App token
         id: app-token
@@ -185,6 +186,13 @@ jobs:
             🤖 Automated bump of templates for ${{ needs.wait_for_release.outputs.release_tag }}
 
             Triggered by user: @${{ github.actor }}
+
+      - name: Approve pull request
+        if: steps.cpr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
+        run: gh pr review "$PR_NUMBER" --approve --repo "$GITHUB_REPOSITORY"
 
       - name: Enable auto-merge
         if: steps.cpr.outputs.pull-request-number != ''

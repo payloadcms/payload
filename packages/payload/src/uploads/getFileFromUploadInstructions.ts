@@ -122,6 +122,7 @@ export const getFileFromUploadInstructions = async ({
       ...file,
       uploadReference: {
         _objectKey: receipt._objectKey,
+        ...(receipt.adapterData && { adapterData: receipt.adapterData }),
         prefix: receipt.filePrefix,
         signedReceipt,
       },
