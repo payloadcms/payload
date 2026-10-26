@@ -155,7 +155,7 @@ export const Form: React.FC<FormProps> = (props) => {
    * See the `modifiedWhileProcessingRef` ref for more details.
    */
   const setModified = useCallback((modified: boolean) => {
-    if (modified && backgroundProcessingRef.current) {
+    if (backgroundProcessingRef.current) {
       modifiedWhileProcessingRef.current = true
     }
 
@@ -267,6 +267,8 @@ export const Form: React.FC<FormProps> = (props) => {
         }
         return
       }
+
+      modifiedWhileProcessingRef.current = false
 
       // create new toast promise which will resolve manually later
       let errorToast, successToast
@@ -408,9 +410,8 @@ export const Form: React.FC<FormProps> = (props) => {
 
         if (!modifiedWhileProcessingRef.current) {
           setModified(false)
-        } else {
-          modifiedWhileProcessingRef.current = false
         }
+        modifiedWhileProcessingRef.current = false
 
         setDisabled(false)
 
