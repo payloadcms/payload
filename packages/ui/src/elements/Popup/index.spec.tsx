@@ -383,6 +383,99 @@ test('should immediately hand hover back to a sibling leaf', async () => {
   expect(getComputedStyle(typographyElement!).backgroundColor).toBe('rgb(1, 2, 3)')
 })
 
+test('should not open a disabled hover submenu on pointer hover', async () => {
+  const screen = await render(
+    <Popup button="Root" popupType="menu" theme="auto">
+      <PopupList.MenuItem>
+        <Popup button="Theme" disabled hoverSubmenu popupType="menu" side="right" theme="auto">
+          <PopupList.MenuItem>
+            <PopupList.Button onClick={() => {}}>Light</PopupList.Button>
+          </PopupList.MenuItem>
+        </Popup>
+      </PopupList.MenuItem>
+    </Popup>,
+  )
+
+  await screen.getByRole('button', { name: 'Root' }).click()
+  const theme = screen.getByRole('menuitem', { name: 'Theme' })
+  await theme.hover()
+
+  expect(theme.element().getAttribute('aria-expanded')).toBe('false')
+})
+
+test('should not open a disabled sibling submenu when the safe area expires over it', async () => {
+  await page.viewport(1000, 720)
+
+  const screen = await render(
+    <div
+      data-testid="pointer-surface"
+      style={{ inset: 0, padding: '64px 300px', position: 'fixed' }}
+    >
+      <Popup button="Root" popupType="menu" size="large" theme="auto">
+        <PopupList.MenuItem>
+          {['Theme', 'Language'].map((label) => (
+            <Popup
+              button={
+                <button disabled={label === 'Language'} style={{ width: '100%' }} type="button">
+                  {label}
+                </button>
+              }
+              buttonType="custom"
+              disabled={label === 'Language'}
+              hoverSubmenu
+              key={label}
+              popupAriaLabel={`${label} menu`}
+              popupType="menu"
+              side="right"
+              theme="auto"
+            >
+              <div data-popup-prevent-close>
+                {Array.from({ length: 3 }, (_, index) => (
+                  <PopupList.Button key={index} onClick={() => {}}>
+                    {`${label} option ${index}`}
+                  </PopupList.Button>
+                ))}
+              </div>
+            </Popup>
+          ))}
+        </PopupList.MenuItem>
+      </Popup>
+    </div>,
+  )
+
+  await screen.getByRole('button', { name: 'Root' }).click()
+  const theme = screen.getByRole('menuitem', { name: 'Theme', exact: true })
+  const language = screen.getByRole('menuitem', { name: 'Language', exact: true })
+
+  await theme.hover()
+  await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
+
+  const triggerBox = theme.element().getBoundingClientRect()
+  const siblingBox = language.element().getBoundingClientRect()
+  const menuBox = screen.getByRole('menu', { name: 'Theme menu' }).element().getBoundingClientRect()
+  const startX = triggerBox.left + triggerBox.width / 2
+  const startY = triggerBox.top + triggerBox.height / 2
+  const diagonalPoint = {
+    x: startX + (menuBox.left - startX) * 0.85,
+    y: siblingBox.top + siblingBox.height / 2,
+  }
+  const steps = Math.ceil(Math.abs(diagonalPoint.x - startX))
+
+  for (let step = 1; step <= steps; step++) {
+    await userEvent.hover(screen.getByTestId('pointer-surface'), {
+      force: true,
+      position: {
+        x: startX + ((diagonalPoint.x - startX) * step) / steps,
+        y: startY + ((diagonalPoint.y - startY) * step) / steps,
+      },
+    })
+  }
+  expect(document.elementFromPoint(diagonalPoint.x, diagonalPoint.y)).toBe(language.element())
+
+  await expect.element(theme).toHaveAttribute('aria-expanded', 'false')
+  expect(language.element().getAttribute('aria-expanded')).toBe('false')
+})
+
 test('should open and close nested menus with keyboard focus restoration', async () => {
   const screen = await render(
     <Popup button="Root" popupType="menu" theme="auto">

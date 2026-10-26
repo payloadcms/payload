@@ -270,7 +270,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
   const pointerIntent = useSubmenuPointerIntent({
     active,
     contentRef: popupRef,
-    enabled: isSubmenu && hoverSubmenu,
+    enabled: isSubmenu && hoverSubmenu && !disabled,
     onClose: closeFromPointer,
     onOpen: () =>
       parentPopup?.submenuScope.requestOpen({
@@ -287,7 +287,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
           ?.querySelector<HTMLElement>('[aria-haspopup="menu"][aria-controls]')
         const siblingId = trigger?.getAttribute('aria-controls')
 
-        if (siblingId && trigger?.getAttribute('aria-disabled') !== 'true') {
+        if (siblingId && !trigger?.matches(':disabled, [aria-disabled="true"]')) {
           parentPopup?.submenuScope.requestOpen({ id: siblingId })
           return
         }
