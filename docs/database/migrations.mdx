@@ -120,6 +120,12 @@ The `migrate` command will run any migrations that have not yet been run.
 npm run payload migrate
 ```
 
+If Payload has pushed schema changes to the database in development mode (Postgres and SQLite), it records a `dev` migration with a batch of `-1` in the `payload_migrations` table. When that row exists, `migrate` warns that data loss may occur and asks for confirmation before running any migrations. This prompt needs an interactive terminal, so in CI or other non-interactive environments it will wait indefinitely unless you pass the flag below.
+
+Flags:
+
+- `--force-accept-warning`: accepts the dev mode warning and runs the migrations without prompting. Only use this when you are sure the pushed schema is compatible with your migrations.
+
 ### Create
 
 Create a new migration file in the migrations directory. You can optionally name the migration that will be created. By
