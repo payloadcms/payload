@@ -1,0 +1,23 @@
+@layer payload-default {
+  .spinner {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--base) * 0.5);
+    color: var(--theme-elevation-500);
+  }
+
+  .spinner--sm {
+    gap: calc(var(--base) * 0.25);
+  }
+
+  .spinner--sm .spinner__text {
+    font-size: calc(var(--base-body-size) * 1px);
+  }
+
+  .spinner--md .spinner__text,
+  .spinner--lg .spinner__text {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+}

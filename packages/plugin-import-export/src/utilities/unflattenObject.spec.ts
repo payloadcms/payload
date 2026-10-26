@@ -1,5 +1,6 @@
 import { FlattenedField, PayloadRequest } from 'payload'
 
+import { getImportFieldFunctions } from './getImportFieldFunctions.js'
 import { unflattenObject } from './unflattenObject.js'
 
 import { describe, it, expect, vi } from 'vitest'
@@ -561,6 +562,95 @@ describe('unflattenObject', () => {
 
       const archives = result.archives as Array<Record<string, unknown>>
       expect(archives[0]!['2024']).toBe('transformed-raw')
+    })
+  })
+
+  describe('blocks with nested arrays', () => {
+    const faqFields: FlattenedField[] = [
+      {
+        name: 'faqContent',
+        type: 'blocks',
+        blocks: [
+          {
+            slug: 'faqSection',
+            flattenedFields: [
+              {
+                name: 'faqs',
+                type: 'array',
+                flattenedFields: [
+                  { name: 'id', type: 'text' },
+                  { name: 'question', type: 'text' },
+                  { name: 'answer', type: 'richText' },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ] as unknown as FlattenedField[]
+
+    it('should unflatten a nested array inside a block as an array, not an object with numeric keys', () => {
+      const data = {
+        faqContent_0_faqSection_id: '6a1714b81e5f4cdbb51f18b1',
+        faqContent_0_faqSection_faqs_0_id: '6a1714c01e5f4cdbb51f18b2',
+        faqContent_0_faqSection_faqs_0_question: 'ipsum',
+        faqContent_0_faqSection_blockType: 'faqSection',
+      }
+
+      const result = unflattenObject({ data, fields: faqFields, req: mockReq })
+
+      const faqContent = result.faqContent as Array<Record<string, unknown>>
+      expect(Array.isArray(faqContent)).toBe(true)
+      expect(faqContent).toHaveLength(1)
+      expect(faqContent[0]!.blockType).toBe('faqSection')
+
+      const faqs = faqContent[0]!.faqs
+      expect(Array.isArray(faqs)).toBe(true)
+
+      const faqItems = faqs as Array<Record<string, unknown>>
+      expect(faqItems[0]!.question).toBe('ipsum')
+      expect(faqItems[0]!.id).toBe('6a1714c01e5f4cdbb51f18b2')
+    })
+
+    it('should parse a richText JSON string inside a nested array within a block', () => {
+      const richTextValue = {
+        root: {
+          children: [
+            {
+              children: [
+                { detail: 0, format: 0, mode: 'normal', text: 'porksum', type: 'text', version: 1 },
+              ],
+              direction: null,
+              format: '',
+              indent: 0,
+              type: 'paragraph',
+              version: 1,
+            },
+          ],
+          direction: null,
+          format: '',
+          indent: 0,
+          type: 'root',
+          version: 1,
+        },
+      }
+
+      const data = {
+        faqContent_0_faqSection_id: '6a1714b81e5f4cdbb51f18b1',
+        faqContent_0_faqSection_faqs_0_id: '6a1714c01e5f4cdbb51f18b2',
+        faqContent_0_faqSection_faqs_0_question: 'ipsum',
+        faqContent_0_faqSection_faqs_0_answer: JSON.stringify(richTextValue),
+        faqContent_0_faqSection_blockType: 'faqSection',
+      }
+
+      const importFieldHooks = getImportFieldFunctions({ fields: faqFields })
+      const result = unflattenObject({ data, fields: faqFields, importFieldHooks, req: mockReq })
+
+      const faqContent = result.faqContent as Array<Record<string, unknown>>
+      const faqs = faqContent[0]!.faqs as Array<Record<string, unknown>>
+
+      expect(typeof faqs[0]!.answer).not.toBe('string')
+      expect(faqs[0]!.answer).toEqual(richTextValue)
     })
   })
 

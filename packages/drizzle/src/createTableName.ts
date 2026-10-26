@@ -1,9 +1,10 @@
 import type { DBIdentifierName } from 'payload'
 
-import { APIError } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
+
+import { validateIdentifierLength } from './utilities/validateIdentifierLength.js'
 
 type Args = {
   adapter: Pick<DrizzleAdapter, 'tableNameMap' | 'versionsSuffix'>
@@ -76,13 +77,5 @@ export const createTableName = ({
     return result
   }
 
-  if (result.length > 63) {
-    throw new APIError(
-      `Exceeded max identifier length for table or enum name of 63 characters. Invalid name: ${result}.
-Tip: You can use the dbName property to reduce the table name length.
-      `,
-    )
-  }
-
-  return result
+  return validateIdentifierLength(result)
 }

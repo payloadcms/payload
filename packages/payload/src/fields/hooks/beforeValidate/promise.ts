@@ -10,6 +10,7 @@ import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../co
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc.js'
 import { getFallbackValue } from './getFallbackValue.js'
+import { stripNullRows } from './stripNullRows.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T> = {
@@ -24,10 +25,12 @@ type Args<T> = {
    * The original data (not modified by any hooks)
    */
   doc: T
+  docForHooks?: T
   field: Field | TabAsField
   fieldIndex: number
   global: null | SanitizedGlobalConfig
   id?: number | string
+  onFieldAccess?: (args: { accessResult: boolean; path: string }) => void
   operation: 'create' | 'update'
   overrideAccess: boolean
   parentIndexPath: string
@@ -57,9 +60,11 @@ export const promise = async <T>({
   context,
   data,
   doc,
+  docForHooks,
   field,
   fieldIndex,
   global,
+  onFieldAccess,
   operation,
   overrideAccess,
   parentIndexPath,
@@ -82,6 +87,9 @@ export const promise = async <T>({
   const pathSegments = path ? path.split('.') : []
   const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
   const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
+  const policyDoc = path === '_status' && docForHooks ? docForHooks : doc
+  const policySiblingDoc =
+    path === '_status' && docForHooks ? (docForHooks as JsonObject) : siblingDoc
 
   if (fieldAffectsData(field)) {
     if (field.name === 'id') {
@@ -295,11 +303,11 @@ export const promise = async <T>({
           global,
           indexPath: indexPathSegments,
           operation,
-          originalDoc: doc,
+          originalDoc: policyDoc,
           overrideAccess,
           path: pathSegments,
-          previousSiblingDoc: siblingDoc,
-          previousValue: siblingDoc[field.name],
+          previousSiblingDoc: policySiblingDoc,
+          previousValue: policySiblingDoc[field.name],
           req,
           schemaPath: schemaPathSegments,
           siblingData,
@@ -316,28 +324,35 @@ export const promise = async <T>({
       }
     }
 
+    let accessResult = true
+
     // Execute access control
     if (field.access && field.access[operation]) {
-      const result = overrideAccess
+      accessResult = overrideAccess
         ? true
         : await field.access[operation]({
             id,
             blockData,
             data: data as Partial<T>,
-            doc,
+            doc: policyDoc,
             req,
             siblingData,
           })
 
-      if (!result) {
+      if (!accessResult) {
         delete siblingData[field.name!]
       }
     }
 
+    onFieldAccess?.({ accessResult, path })
+
     if (typeof siblingData[field.name!] === 'undefined' && !req.context?.isRestoringVersion) {
-      siblingData[field.name!] = !fallbackResult.executed
-        ? await getFallbackValue({ field, req, siblingDoc })
-        : fallbackResult.value
+      const isDocumentValueAllowed = operation === 'update' || accessResult
+
+      siblingData[field.name!] =
+        !fallbackResult.executed || !isDocumentValueAllowed
+          ? await getFallbackValue({ field, isDocumentValueAllowed, req, siblingDoc })
+          : fallbackResult.value
     }
   }
 
@@ -347,9 +362,16 @@ export const promise = async <T>({
       const rows = siblingData[field.name]
 
       if (Array.isArray(rows)) {
+        const filteredRows = stripNullRows(
+          rows,
+          'array',
+          field.name,
+          req.payload.logger,
+          siblingData,
+        )
         const promises: Promise<void>[] = []
 
-        rows.forEach((row, rowIndex) => {
+        filteredRows.forEach((row, rowIndex) => {
           promises.push(
             traverseFields({
               id,
@@ -360,6 +382,7 @@ export const promise = async <T>({
               doc,
               fields: field.fields,
               global,
+              onFieldAccess,
               operation,
               overrideAccess,
               parentIndexPath: '',
@@ -367,8 +390,8 @@ export const promise = async <T>({
               parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath,
               req,
-              siblingData: row as JsonObject,
-              siblingDoc: getExistingRowDoc(row as JsonObject, siblingDoc[field.name]),
+              siblingData: row,
+              siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
             }),
           )
         })
@@ -382,11 +405,18 @@ export const promise = async <T>({
       const rows = siblingData[field.name]
 
       if (Array.isArray(rows)) {
+        const filteredRows = stripNullRows(
+          rows,
+          'blocks',
+          field.name,
+          req.payload.logger,
+          siblingData,
+        )
         const promises: Promise<void>[] = []
 
-        rows.forEach((row, rowIndex) => {
-          const rowSiblingDoc = getExistingRowDoc(row as JsonObject, siblingDoc[field.name])
-          const blockTypeToMatch = (row as JsonObject).blockType || rowSiblingDoc.blockType
+        filteredRows.forEach((row, rowIndex) => {
+          const rowSiblingDoc = getExistingRowDoc(row, siblingDoc[field.name])
+          const blockTypeToMatch = row.blockType || rowSiblingDoc.blockType
 
           const block: Block | undefined =
             req.payload.blocks[blockTypeToMatch] ??
@@ -395,7 +425,7 @@ export const promise = async <T>({
             ) as Block | undefined)
 
           if (block) {
-            ;(row as JsonObject).blockType = blockTypeToMatch
+            row.blockType = blockTypeToMatch
 
             promises.push(
               traverseFields({
@@ -407,6 +437,7 @@ export const promise = async <T>({
                 doc,
                 fields: block.fields,
                 global,
+                onFieldAccess,
                 operation,
                 overrideAccess,
                 parentIndexPath: '',
@@ -414,7 +445,7 @@ export const promise = async <T>({
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 req,
-                siblingData: row as JsonObject,
+                siblingData: row,
                 siblingDoc: rowSiblingDoc,
               }),
             )
@@ -438,6 +469,7 @@ export const promise = async <T>({
         doc,
         fields: field.fields,
         global,
+        onFieldAccess,
         operation,
         overrideAccess,
         parentIndexPath: indexPath,
@@ -480,6 +512,7 @@ export const promise = async <T>({
         doc,
         fields: field.fields,
         global,
+        onFieldAccess,
         operation,
         overrideAccess,
         parentIndexPath: isNamedGroup ? '' : indexPath,
@@ -566,6 +599,7 @@ export const promise = async <T>({
         doc,
         fields: field.fields,
         global,
+        onFieldAccess,
         operation,
         overrideAccess,
         parentIndexPath: isNamedTab ? '' : indexPath,
@@ -590,6 +624,7 @@ export const promise = async <T>({
         doc,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         global,
+        onFieldAccess,
         operation,
         overrideAccess,
         parentIndexPath: indexPath,

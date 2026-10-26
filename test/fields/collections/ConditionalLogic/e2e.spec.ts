@@ -289,6 +289,15 @@ describe('Conditional Logic', () => {
     await expect(fieldWithOperationCondition).toBeHidden()
   })
 
+  test('should hide row field UI when admin.condition is false', async () => {
+    await page.goto(url.create)
+
+    await toggleConditionAndCheckField(
+      'label[for=field-toggleField]',
+      'label[for=field-rowFieldWithCondition]',
+    )
+  })
+
   test('should hide entire tabs field UI when admin.condition is false', async () => {
     await page.goto(url.create)
 

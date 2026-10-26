@@ -4,6 +4,7 @@ import type { PayloadHandler } from 'payload'
 
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { APIError, Forbidden } from 'payload'
+import { assertClientUploadAccess, assertClientUploadAllowed } from 'payload/internal'
 
 import type { GcsStorageOptions } from './index.js'
 
@@ -37,6 +38,8 @@ export const getGenerateSignedURLHandler = ({
       mimeType: string
     }
 
+    await assertClientUploadAccess({ collectionSlug, req })
+
     const collectionStorageConfig = collections[collectionSlug]
     if (!collectionStorageConfig) {
       throw new APIError(`Collection ${collectionSlug} was not found in GCS storage options`)
@@ -49,14 +52,21 @@ export const getGenerateSignedURLHandler = ({
       throw new Forbidden()
     }
 
-    const { fileKey, sanitizedDocPrefix, sanitizedFilename } = await resolveSignedURLKey({
-      collectionPrefix,
-      collectionSlug,
-      docPrefix,
+    assertClientUploadAllowed({
+      collection: req.payload.collections[collectionSlug]?.config,
       filename,
-      req,
-      useCompositePrefixes,
+      mimeType,
     })
+
+    const { clientUploadContext, fileKey, sanitizedDocPrefix, sanitizedFilename } =
+      await resolveSignedURLKey({
+        collectionPrefix,
+        collectionSlug,
+        docPrefix,
+        filename,
+        req,
+        useCompositePrefixes,
+      })
 
     const [url] = await getStorageClient()
       .bucket(bucket)
@@ -65,12 +75,15 @@ export const getGenerateSignedURLHandler = ({
         action: 'write',
         contentType: mimeType,
         expires: Date.now() + 60 * 60 * 5,
+        extensionHeaders: { 'x-goog-if-generation-match': '0' },
         version: 'v4',
       })
 
     return Response.json({
+      clientUploadContext,
       docPrefix: sanitizedDocPrefix,
       filename: sanitizedFilename,
+      headers: { 'x-goog-if-generation-match': '0' },
       url,
     })
   }

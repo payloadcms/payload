@@ -13,6 +13,7 @@ export default createE2EConfig([
   { file: '_community', shards: 1 },
   { file: 'a11y', shards: 1 },
   { file: 'access-control', shards: 2 },
+  { file: 'admin__e2e__banner', shards: 1 },
   { file: 'admin__e2e__general', shards: 3 },
   { file: 'admin__e2e__list-view', shards: 4 },
   { file: 'admin__e2e__document-view', shards: 3 },

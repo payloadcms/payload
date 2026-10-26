@@ -48,6 +48,14 @@ export const testEslintConfig = [
     },
   },
   {
+    files: ['**/*.unit.spec.ts'],
+    settings: {
+      vitest: {
+        vitestImports: [/memory\/vitest/],
+      },
+    },
+  },
+  {
     ...playwright.configs['flat/recommended'],
     files: ['**/*.e2e.spec.ts', '**/e2e.spec.ts', 'helpers.ts'],
   },

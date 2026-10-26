@@ -63,10 +63,8 @@ export type FieldPaths = {
    * Nested fields will have a path that includes the parent field names
    * if they are nested within a group, array, block or named tab.
    *
-   * Collapsibles and unnamed tabs will have arbitrary paths
+   * Collapsibles, rows and unnamed tabs will have arbitrary paths
    * that look like _index-0, _index-1, etc.
-   *
-   * Row fields will not have a path.
    *
    * @example 'parentGroupField.childTextField'
    *
@@ -99,8 +97,10 @@ export type ServerComponentProps = {
   payload: Payload
   permissions: SanitizedFieldPermissions
   preferences: DocumentPreferences
+  /** Request object. Use `req.user` (full principal) for access-control checks. */
   req: PayloadRequest
   siblingData: Data
+  /** Authenticated user with field read access applied. Use for values sent to the client; use `req.user` for access checks. */
   user: TypedUser
   value?: unknown
 }

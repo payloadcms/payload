@@ -12,6 +12,8 @@ export const publicCustomViewPath = '/public-custom-view'
 
 export const protectedCustomNestedViewPath = `${publicCustomViewPath}/protected-nested-view`
 
+export const bannerStylesViewPath = '/banner-styles'
+
 export const customParamViewPathBase = '/custom-param'
 
 export const customParamViewPath = `${customParamViewPathBase}/:id`

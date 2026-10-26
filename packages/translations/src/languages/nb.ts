@@ -56,6 +56,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     newPassword: 'Nytt passord',
     passed: 'Autentisering bestått',
     passwordResetSuccessfully: 'Passordet er tilbakestilt.',
+    resend: 'Send på nytt',
     resetPassword: 'Tilbakestill passord',
     resetPasswordExpiration: 'Tilbakestill passordets utløpsdato',
     resetPasswordToken: 'Tilbakestill passordet-token',

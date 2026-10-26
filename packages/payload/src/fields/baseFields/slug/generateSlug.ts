@@ -38,7 +38,7 @@ export const generateSlug =
   async ({ collection, data, global, operation, originalDoc, req, value: isChecked }) => {
     if (operation === 'create') {
       if (data) {
-        data[slugFieldName] = slugify({
+        data[slugFieldName] = await slugify({
           customSlugify,
           data,
           req,
@@ -60,7 +60,7 @@ export const generateSlug =
       if (!hasAutosaveEnabled(collection || global!)) {
         // We can generate the slug at this point
         if (data) {
-          data[slugFieldName] = slugify({
+          data[slugFieldName] = await slugify({
             customSlugify,
             data,
             req,
@@ -81,7 +81,7 @@ export const generateSlug =
             // If the fallback is an empty string, we want the slug to return to `null`
             // This will ensure that live preview conditions continue to run as expected
             data[slugFieldName] = data?.[useAsSlug]
-              ? slugify({
+              ? await slugify({
                   customSlugify,
                   data,
                   req,

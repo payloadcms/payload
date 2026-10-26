@@ -34,3 +34,59 @@ Payload exports a number of types that you may find useful while writing your ow
 - [Collection hooks](/docs/hooks/collections#typescript)
 - [Global hooks](/docs/hooks/globals#typescript)
 - [Field hooks](/docs/hooks/fields#typescript)
+
+## Type Helpers
+
+Beyond the concrete interfaces in your generated `payload-types.ts` (`Post`, `User`, etc.), Payload exports a set of **generic type helpers** from the `payload` package. Instead of referencing a single collection by name, these resolve dynamically against _all_ of your collections and globals — which makes them especially useful in [Plugins](../plugins/build-your-own#consuming-generated-types), reusable [Hooks](../hooks/overview), and [Access Control](../access-control/overview) functions, where the exact collection may not be known ahead of time.
+
+### How they resolve
+
+When you run [`payload generate:types`](./generating-types), the generated file augments a global `GeneratedTypes` interface inside the `payload` module:
+
+```ts
+// payload-types.ts (generated)
+declare module 'payload' {
+  export interface GeneratedTypes extends Config {}
+}
+```
+
+Every helper below is generic over this augmented interface. Because the augmentation lives in _your_ project, the helpers resolve to _your_ actual collections wherever your code is type-checked — including inside a third-party plugin's source once it is installed in your project. If `GeneratedTypes` has not been augmented (for example, in a plugin's own repository before it is consumed), the helpers gracefully fall back to loose types (`string`, index signatures) rather than erroring.
+
+### Available helpers
+
+| Helper                                  | Resolves to                                                                                |
+| --------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `CollectionSlug`                        | A union of all your collection slugs, e.g. `'posts' \| 'users' \| 'media'`.                |
+| `DataFromCollectionSlug<TSlug>`         | The full document type for a collection (the shape returned after read).                   |
+| `RequiredDataFromCollectionSlug<TSlug>` | The data shape accepted by `create` (system fields like `id`/`createdAt` become optional). |
+| `SelectFromCollectionSlug<TSlug>`       | The `select` type for a collection.                                                        |
+| `TypedCollection`                       | A map of every collection slug to its document type.                                       |
+| `GlobalSlug`                            | A union of all your global slugs.                                                          |
+| `TypedGlobal`                           | A map of every global slug to its data type.                                               |
+| `TypedUser`                             | The user type — a union across all auth-enabled collections.                               |
+| `TypedLocale`                           | A union of your configured locale codes (or `string` if localization is disabled).         |
+| `DefaultDocumentIDType`                 | Your database's default ID type (`string` or `number`).                                    |
+
+### Example
+
+```ts
+import type {
+  CollectionSlug,
+  DataFromCollectionSlug,
+  CollectionAfterChangeHook,
+} from 'payload'
+
+// Constrain a value to any valid collection slug
+const collections: CollectionSlug[] = ['posts', 'users']
+
+// Write a hook that stays generic over whichever slug it is attached to
+function createAuditHook<TSlug extends CollectionSlug>(slug: TSlug) {
+  const hook: CollectionAfterChangeHook<DataFromCollectionSlug<TSlug>> = ({
+    doc,
+  }) => {
+    // `doc` is fully typed to the collection at `slug`
+    return doc
+  }
+  return hook
+}
+```

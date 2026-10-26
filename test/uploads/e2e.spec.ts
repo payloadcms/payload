@@ -276,6 +276,65 @@ describe('Uploads', () => {
     await expect(filename).toContainText('test-image.png')
   })
 
+  test('should preserve collection when bulk selecting polymorphic uploads', async () => {
+    await page.goto(uploadsTwo.create)
+    await page.locator('#field-prefix').fill('video')
+    await page.locator('#field-title').fill('Polymorphic upload two')
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+    await saveDocAndAssert(page)
+
+    const uploadTwoID = page.url().split('/').pop()
+    const relationDoc = await payload.create({
+      collection: relationSlug,
+      data: {},
+    })
+
+    await page.goto(relationURL.edit(relationDoc.id))
+    await openDocDrawer({ page, selector: '#field-polymorphicUploads .upload__listToggler' })
+
+    const listDrawer = page.locator('[id^=list-drawer_1_]')
+    await expect(listDrawer).toBeVisible()
+
+    await listDrawer.locator('.list-header__select-collection').click()
+    await page.getByText('Uploads 2', { exact: true }).click()
+    await expect(
+      listDrawer.locator('.cell-title', { hasText: 'Polymorphic upload two' }),
+    ).toBeVisible()
+
+    await listDrawer
+      .locator('tr', { hasText: 'Polymorphic upload two' })
+      .locator('.select-row__checkbox')
+      .click()
+    await listDrawer.getByRole('button', { name: 'Select 1' }).click()
+
+    await saveDocAndAssert(page)
+
+    const updatedRelationDoc = (
+      await payload.find({
+        collection: relationSlug,
+        depth: 0,
+        where: {
+          id: {
+            equals: relationDoc.id,
+          },
+        },
+      })
+    ).docs[0] as any
+
+    expect(updatedRelationDoc.polymorphicUploads).toEqual([
+      {
+        relationTo: 'uploads-2',
+        value: uploadTwoID,
+      },
+    ])
+    expect(updatedRelationDoc.polymorphicUploads).not.toEqual([
+      {
+        relationTo: 'uploads-1',
+        value: uploadTwoID,
+      },
+    ])
+  })
+
   test('should copy the file url field to the clipboard', async () => {
     const mediaDoc = (
       await payload.find({
@@ -322,7 +381,13 @@ describe('Uploads', () => {
 
     await expect(filename).toHaveValue('ios-image.jpeg')
 
-    await saveDocAndAssert(page)
+    await saveDocAndAssert(page, '#action-save', 'success', {
+      waitForAfterSave: async () => {
+        const progressBar = page.locator('.progress-bar')
+        await expect(progressBar).toBeVisible()
+        await expect(progressBar).toBeHidden()
+      },
+    })
   })
 
   test('should properly convert avif image to png', async () => {
@@ -979,6 +1044,32 @@ describe('Uploads', () => {
 
     expect(href).toMatch(/\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
     expect(href).not.toMatch(/-\d+x\d+\.png$/)
+  })
+
+  test('should add uploads to a hasMany field after the bulk upload drawer was closed without uploading', async () => {
+    await page.goto(uploadsOne.create)
+
+    const createNewButton = page.locator('#field-hasManyThumbnailUpload button', {
+      hasText: exactText('Create New'),
+    })
+    const bulkUploadModal = page.locator('#hasManyThumbnailUpload-bulk-upload-drawer-slug-1')
+
+    await createNewButton.click()
+    await expect(bulkUploadModal).toBeVisible()
+    await bulkUploadModal.locator('.drawer-close-button').click()
+    await expect(bulkUploadModal).toBeHidden()
+
+    await createNewButton.click()
+    await expect(bulkUploadModal).toBeVisible()
+    await bulkUploadModal
+      .locator('.dropzone input[type="file"]')
+      .setInputFiles([path.resolve(dirname, './test-image.png')])
+    await bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button').click()
+    await closeAllToasts(page)
+
+    await expect(
+      page.locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem'),
+    ).toHaveCount(1)
   })
 
   test('should show preview button if image sizes are defined but crop and focal point are not', async () => {

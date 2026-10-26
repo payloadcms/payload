@@ -1,5 +1,3 @@
-import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
-
 import type { R2Bucket } from './types.js'
 
 const isMiniflare = process.env.NODE_ENV === 'development'
@@ -7,33 +5,28 @@ const isMiniflare = process.env.NODE_ENV === 'development'
 interface UploadFileArgs {
   bucket: R2Bucket
   buffer: Buffer
-  collectionPrefix?: string
-  docPrefix?: string
-  filename: string
   mimeType: string
-  useCompositePrefixes?: boolean
+  storageFilePath: string
+  tempFilePath?: string
 }
 
 export async function uploadFile({
   bucket,
   buffer,
-  collectionPrefix = '',
-  docPrefix,
-  filename,
   mimeType,
-  useCompositePrefixes = false,
+  storageFilePath,
+  tempFilePath,
 }: UploadFileArgs): Promise<void> {
   // Read more: https://github.com/cloudflare/workers-sdk/issues/6047#issuecomment-2691217843
-  const body = isMiniflare ? new Blob([buffer]) : buffer
+  let body = isMiniflare ? new Blob([buffer]) : buffer
 
-  const { fileKey } = getFileKey({
-    collectionPrefix,
-    docPrefix,
-    filename,
-    useCompositePrefixes,
-  })
+  if (tempFilePath) {
+    // Workers require filesystem compatibility to use temp files, so keep this import conditional.
+    const { openAsBlob } = await import('fs')
+    body = await openAsBlob(tempFilePath)
+  }
 
-  await bucket.put(fileKey, body, {
+  await bucket.put(storageFilePath, body, {
     httpMetadata: { contentType: mimeType },
   })
 }

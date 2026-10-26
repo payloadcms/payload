@@ -6,9 +6,16 @@
  *
  */
 
-import type { ElementNode, LexicalNode, TextFormatType, TextNode } from 'lexical'
+import type { ElementNode, LexicalNode, LineBreakNode, TextFormatType, TextNode } from 'lexical'
 
-import { $getRoot, $isDecoratorNode, $isElementNode, $isLineBreakNode, $isTextNode } from 'lexical'
+import {
+  $getRoot,
+  $getState,
+  $isDecoratorNode,
+  $isElementNode,
+  $isLineBreakNode,
+  $isTextNode,
+} from 'lexical'
 
 import type {
   ElementTransformer,
@@ -18,6 +25,7 @@ import type {
   Transformer,
 } from './MarkdownTransformers.js'
 
+import { hardLineBreakState } from './MarkdownTransformers.js'
 import { isEmptyParagraph, transformersByType } from './utils.js'
 
 /**
@@ -161,7 +169,7 @@ function exportChildren(
     }
 
     if ($isLineBreakNode(child)) {
-      output.push('\n')
+      output.push($exportLineBreak(child))
     } else if ($isTextNode(child)) {
       output.push(
         exportTextFormat(
@@ -189,6 +197,13 @@ function exportChildren(
   }
 
   return output.join('')
+}
+
+// Prefixes the newline with the original CommonMark hard line break marker
+// (`\` or trailing spaces) when one was preserved on import, otherwise exports a
+// plain soft line break.
+function $exportLineBreak(node: LineBreakNode): string {
+  return $getState(node, hardLineBreakState) + '\n'
 }
 
 function exportTextFormat(

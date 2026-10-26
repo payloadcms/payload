@@ -1,5 +1,5 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import type { PayloadRequest, SelectType, TypedUser } from 'payload'
+import type { JoinQuery, PayloadRequest, PopulateType, SelectType, TypedUser } from 'payload'
 
 import type { MCPPluginConfig } from '../../../types.js'
 
@@ -20,11 +20,15 @@ export const findResourceTool = (
     page: number = 1,
     sort?: string,
     where?: string,
-    select?: string,
+    select?: Record<string, unknown>,
     depth: number = 0,
     locale?: string,
     fallbackLocale?: string,
     draft?: boolean,
+    populate?: Record<string, unknown>,
+    joins?: false | Record<string, unknown>,
+    trash?: boolean,
+    pagination?: boolean,
   ): Promise<{
     content: Array<{
       text: string
@@ -63,26 +67,6 @@ export const findResourceTool = (
         }
       }
 
-      // Parse select clause if provided
-      let selectClause: SelectType | undefined
-      if (select) {
-        try {
-          selectClause = JSON.parse(select) as SelectType
-        } catch (_parseError) {
-          payload.logger.warn(`[payload-mcp] Invalid select clause JSON: ${select}`)
-          const response = {
-            content: [{ type: 'text' as const, text: 'Error: Invalid JSON in select clause' }],
-          }
-          return (collections?.[collectionSlug]?.overrideResponse?.(response, {}, req) ||
-            response) as {
-            content: Array<{
-              text: string
-              type: 'text'
-            }>
-          }
-        }
-      }
-
       // If ID is provided, use findByID
       if (id) {
         try {
@@ -90,13 +74,16 @@ export const findResourceTool = (
             id,
             collection: collectionSlug,
             depth,
-            ...(selectClause && { select: selectClause }),
+            ...(select && { select: select as SelectType }),
+            ...(populate && { populate: populate as PopulateType }),
+            ...(joins !== undefined && { joins: joins as JoinQuery }),
             overrideAccess: false,
             req,
             user,
             ...(locale && { locale }),
             ...(fallbackLocale && { fallbackLocale }),
             ...(draft !== undefined && { draft }),
+            ...(trash !== undefined && { trash }),
           })
 
           if (verboseLogs) {
@@ -151,10 +138,14 @@ ${JSON.stringify(doc)}`,
         page,
         req,
         user,
-        ...(selectClause && { select: selectClause }),
+        ...(select && { select: select as SelectType }),
+        ...(populate && { populate: populate as PopulateType }),
+        ...(joins !== undefined && { joins: joins as JoinQuery }),
         ...(locale && { locale }),
         ...(fallbackLocale && { fallbackLocale }),
         ...(draft !== undefined && { draft }),
+        ...(pagination !== undefined && { pagination }),
+        ...(trash !== undefined && { trash }),
       }
 
       if (sort) {
@@ -227,7 +218,22 @@ Page: ${result.page} of ${result.totalPages}
         description: `${collections?.[collectionSlug]?.description || toolSchemas.findResources.description.trim()}`,
         inputSchema: toolSchemas.findResources.parameters.shape,
       },
-      async ({ id, depth, draft, fallbackLocale, limit, locale, page, select, sort, where }) => {
+      async ({
+        id,
+        depth,
+        draft,
+        fallbackLocale,
+        joins,
+        limit,
+        locale,
+        page,
+        pagination,
+        populate,
+        select,
+        sort,
+        trash,
+        where,
+      }) => {
         return await tool(
           id,
           limit,
@@ -239,6 +245,10 @@ Page: ${result.page} of ${result.totalPages}
           locale,
           fallbackLocale,
           draft,
+          populate,
+          joins,
+          trash,
+          pagination,
         )
       },
     )

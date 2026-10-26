@@ -41,6 +41,7 @@ export function createUploadthingAdapter({
     name: 'uploadthing',
     clientUploads,
     fields,
+    requiresClientUploadReceipt: true,
 
     generateURL,
 
@@ -55,6 +56,7 @@ export function createUploadthingAdapter({
         data,
         filename: file.filename,
         mimeType: file.mimeType,
+        tempFilePath: file.tempFilePath,
         utApi,
       })
 

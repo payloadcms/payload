@@ -3,7 +3,7 @@
  *
  * How to use:
  *
- * pnpm run script:gen-templates
+ * pnpm run script:gen-templates [--payload-version 3.91.0]
  *
  * NOTE: You will likely have to commit by using the `--no-verify` flag to avoid the repo linting
  *       There is no way currently to have lint-staged ignore the templates directory.
@@ -64,10 +64,17 @@ main().catch((error) => {
 })
 
 async function main() {
-  const args = minimist(process.argv.slice(2))
+  const args = minimist(process.argv.slice(2), { string: ['payload-version'] })
   const template = args['template'] // template directory name
 
   const shouldBuild = args['build']
+
+  const payloadVersion: string =
+    args['payload-version'] ||
+    JSON.parse(
+      await fs.readFile(path.resolve(PROJECT_ROOT, 'packages/payload/package.json'), 'utf8'),
+    ).version
+  log(`Using payload version ${payloadVersion}`)
 
   const templateRepoUrlBase = `https://github.com/payloadcms/payload/tree/3.x/templates`
 
@@ -294,9 +301,6 @@ async function main() {
       })
     }
 
-    // Fetch latest npm version of payload package:
-    const payloadVersion = await getLatestPackageVersion({ packageName: 'payload' })
-
     // Bump package.json versions only in non-workspace templates such as Vercel variants
     // Workspace templates should always continue to point to `workspace:*` version of payload packages
     if (!workspace) {
@@ -306,11 +310,30 @@ async function main() {
       })
     }
 
+    /*
+     * Non-workspace variants must install in isolation from the monorepo. `--ignore-workspace`
+     * can't do this under pnpm v11 (it reads the flag as "skip pnpm-workspace.yaml entirely",
+     * dropping build approvals -> ERR_PNPM_IGNORED_BUILDS). Instead drop a transient standalone
+     * workspace root; it's removed before commit so the generated template ships unchanged.
+     * dangerouslyAllowAllBuilds runs every dependency's build script: this is throwaway generation
+     * tooling, not a shipped config, so there's no allowlist to drift out of sync with the templates'
+     * deps (e.g. the d1 variant's `workerd`). The install always runs under v11 here — the vercel
+     * variants' pnpm@10 packageManager pin is added after install — so package.json#pnpm is ignored
+     * and dangerouslyAllowAllBuilds can't conflict with its onlyBuiltDependencies. verifyDepsBeforeRun
+     * stops v11 re-installing before the later `pnpm generate:*`/`build` runs.
+     */
+    if (!workspace) {
+      await fs.writeFile(
+        path.join(destDir, 'pnpm-workspace.yaml'),
+        `verifyDepsBeforeRun: false\ndangerouslyAllowAllBuilds: true\n`,
+      )
+    }
+
     // Install packages BEFORE running any commands that load the config
     // This ensures all imports in payload.config.ts can be resolved
     log('Installing dependencies...')
 
-    execSyncSafe(`pnpm install ${workspace ? '' : '--ignore-workspace'} --no-frozen-lockfile`, {
+    execSyncSafe(`pnpm install --no-frozen-lockfile`, {
       cwd: destDir,
     })
 
@@ -356,19 +379,24 @@ async function main() {
 
     // Generate importmap
     log('Generating import map')
-    execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace '}generate:importmap`, {
+    execSyncSafe(`pnpm generate:importmap`, {
       cwd: destDir,
     })
 
     // Generate types
     log('Generating types')
-    execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace '}generate:types`, {
+    execSyncSafe(`pnpm generate:types`, {
       cwd: destDir,
     })
 
     if (shouldBuild) {
       log('Building...')
-      execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace '}build`, { cwd: destDir })
+      execSyncSafe(`pnpm build`, { cwd: destDir })
+    }
+
+    // Remove the transient workspace root so it isn't committed into the generated template.
+    if (!workspace) {
+      await fs.rm(path.join(destDir, 'pnpm-workspace.yaml'), { force: true })
     }
 
     // TODO: Email?
@@ -379,7 +407,7 @@ async function main() {
   }
 
   if (!template || template === 'plugin') {
-    await bumpPluginTemplate()
+    await bumpPluginTemplate(payloadVersion)
   }
 
   log('Running prettier on generated files...')
@@ -577,13 +605,9 @@ async function bumpPackageJson({
  * on each release. Unlike `blank`/`website`/`ecommerce`, it is not part of the pnpm
  * workspace, so its versions drift unless we bump them explicitly.
  */
-async function bumpPluginTemplate() {
+async function bumpPluginTemplate(payloadVersion: string) {
   header('Bumping plugin template...')
   const pluginDir = path.join(TEMPLATES_DIR, 'plugin')
-  const payloadVersion = await getLatestPackageVersion({ packageName: 'payload' })
-  if (!payloadVersion) {
-    throw new Error('Could not resolve latest payload version')
-  }
   await bumpPackageJson({
     templateDir: pluginDir,
     latestVersion: payloadVersion,

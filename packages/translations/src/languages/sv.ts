@@ -56,6 +56,7 @@ export const svTranslations: DefaultTranslationsObject = {
     newPassword: 'Nytt lösenord',
     passed: 'Autentisering godkänd',
     passwordResetSuccessfully: 'Lösenordet har återställts',
+    resend: 'Skicka igen',
     resetPassword: 'Återställ lösenord',
     resetPasswordExpiration: 'Utgångstid för återställning av lösenord',
     resetPasswordToken: 'Återställningstoken för lösenord',

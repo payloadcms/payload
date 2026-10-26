@@ -70,6 +70,9 @@ export interface Config {
     media: Media;
     'media-with-prefix': MediaWithPrefix;
     'media-with-doc-prefix': MediaWithDocPrefix;
+    'media-no-content': MediaNoContent;
+    'media-header-only': MediaHeaderOnly;
+    'media-header-only-with-sizes': MediaHeaderOnlyWithSize;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -81,6 +84,9 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     'media-with-prefix': MediaWithPrefixSelect<false> | MediaWithPrefixSelect<true>;
     'media-with-doc-prefix': MediaWithDocPrefixSelect<false> | MediaWithDocPrefixSelect<true>;
+    'media-no-content': MediaNoContentSelect<false> | MediaNoContentSelect<true>;
+    'media-header-only': MediaHeaderOnlySelect<false> | MediaHeaderOnlySelect<true>;
+    'media-header-only-with-sizes': MediaHeaderOnlyWithSizesSelect<false> | MediaHeaderOnlyWithSizesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -128,6 +134,7 @@ export interface UserAuthOperations {
 export interface Media {
   id: string;
   alt?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -165,6 +172,7 @@ export interface Media {
 export interface MediaWithPrefix {
   id: string;
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -184,6 +192,35 @@ export interface MediaWithPrefix {
 export interface MediaWithDocPrefix {
   id: string;
   prefix?: string | null;
+  _objectKey?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-no-content".
+ */
+export interface MediaNoContent {
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -198,6 +235,52 @@ export interface MediaWithDocPrefix {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-header-only".
+ */
+export interface MediaHeaderOnly {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-header-only-with-sizes".
+ */
+export interface MediaHeaderOnlyWithSize {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -209,6 +292,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -256,6 +340,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media-with-doc-prefix';
         value: string | MediaWithDocPrefix;
+      } | null)
+    | ({
+        relationTo: 'media-no-content';
+        value: string | MediaNoContent;
+      } | null)
+    | ({
+        relationTo: 'media-header-only';
+        value: string | MediaHeaderOnly;
+      } | null)
+    | ({
+        relationTo: 'media-header-only-with-sizes';
+        value: string | MediaHeaderOnlyWithSize;
       } | null)
     | ({
         relationTo: 'users';
@@ -309,6 +405,7 @@ export interface PayloadMigration {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -351,6 +448,7 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface MediaWithPrefixSelect<T extends boolean = true> {
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -369,6 +467,38 @@ export interface MediaWithPrefixSelect<T extends boolean = true> {
  */
 export interface MediaWithDocPrefixSelect<T extends boolean = true> {
   prefix?: T;
+  _objectKey?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-no-content_select".
+ */
+export interface MediaNoContentSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -383,6 +513,54 @@ export interface MediaWithDocPrefixSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-header-only_select".
+ */
+export interface MediaHeaderOnlySelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-header-only-with-sizes_select".
+ */
+export interface MediaHeaderOnlyWithSizesSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -393,6 +571,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:

@@ -6,6 +6,13 @@ export const orderableSlug = 'orderable'
 
 export const OrderableCollection: CollectionConfig = {
   slug: orderableSlug,
+  access: {
+    update: () => ({
+      title: {
+        not_equals: 'Fixed position',
+      },
+    }),
+  },
   orderable: true,
   admin: {
     useAsTitle: 'title',

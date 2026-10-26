@@ -37,6 +37,7 @@ import {
   collapsibleFieldsSlug,
   customIDNestedSlug,
   dateFieldsSlug,
+  duplicateFieldsSlug,
   groupFieldsSlug,
   numberFieldsSlug,
   relationshipFieldsSlug,
@@ -76,13 +77,215 @@ describe('Fields', () => {
   })
 
   describe('text', () => {
+    const createdDuplicateIDs: (number | string)[] = []
+    const createdTextIDs: (number | string)[] = []
     let doc
     const text = 'text field'
+
     beforeEach(async () => {
       doc = await payload.create({
         collection: 'text-fields',
         data: { text },
       })
+    })
+
+    afterEach(async () => {
+      for (const id of createdDuplicateIDs) {
+        await payload.delete({ collection: duplicateFieldsSlug, id })
+      }
+      createdDuplicateIDs.length = 0
+
+      for (const id of createdTextIDs) {
+        await payload.delete({ collection: textFieldsSlug, id })
+      }
+      createdTextIDs.length = 0
+    })
+
+    it('should use the default for a field disabled during duplication', async () => {
+      const source = await payload.create({
+        collection: duplicateFieldsSlug,
+        data: {
+          disabledText: 'source-value',
+          text,
+        },
+      })
+      createdDuplicateIDs.push(source.id)
+
+      const duplicate = await payload.duplicate({
+        collection: duplicateFieldsSlug,
+        id: source.id,
+      })
+      createdDuplicateIDs.push(duplicate.id)
+
+      expect(duplicate.disabledText).toBe('duplicate-disabled-default')
+    })
+
+    it('should apply nested defaults when a group is disabled during duplication', async () => {
+      const source = await payload.create({
+        collection: duplicateFieldsSlug,
+        data: {
+          disabledGroup: {
+            value: 'source-value',
+          },
+          text,
+        },
+      })
+      createdDuplicateIDs.push(source.id)
+
+      const duplicate = await payload.duplicate({
+        collection: duplicateFieldsSlug,
+        id: source.id,
+      })
+      createdDuplicateIDs.push(duplicate.id)
+
+      expect(duplicate.disabledGroup).toEqual({
+        value: 'duplicate-disabled-group-default',
+      })
+    })
+
+    it('should apply nested defaults when an array is disabled during duplication', async () => {
+      const source = await payload.create({
+        collection: duplicateFieldsSlug,
+        data: {
+          disabledArray: [
+            {
+              value: 'source-value',
+            },
+          ],
+          text,
+        },
+      })
+      createdDuplicateIDs.push(source.id)
+
+      const duplicate = await payload.duplicate({
+        collection: duplicateFieldsSlug,
+        id: source.id,
+      })
+      createdDuplicateIDs.push(duplicate.id)
+
+      expect(duplicate.disabledArray).toHaveLength(1)
+      expect(duplicate.disabledArray?.[0]?.value).toBe('duplicate-disabled-array-default')
+    })
+
+    it('should apply nested defaults when blocks are disabled during duplication', async () => {
+      const source = await payload.create({
+        collection: duplicateFieldsSlug,
+        data: {
+          disabledBlocks: [
+            {
+              blockType: 'disabledBlock',
+              value: 'source-value',
+            },
+          ],
+          text,
+        },
+      })
+      createdDuplicateIDs.push(source.id)
+
+      const duplicate = await payload.duplicate({
+        collection: duplicateFieldsSlug,
+        id: source.id,
+      })
+      createdDuplicateIDs.push(duplicate.id)
+
+      expect(duplicate.disabledBlocks).toHaveLength(1)
+      expect(duplicate.disabledBlocks?.[0]?.value).toBe('duplicate-disabled-block-default')
+    })
+
+    it('should apply a nested field default without discarding its array row', async () => {
+      const source = await payload.create({
+        collection: duplicateFieldsSlug,
+        data: {
+          childDisabledArray: [
+            {
+              preserved: 'preserved-source-value',
+              reset: 'reset-source-value',
+            },
+          ],
+          text,
+        },
+      })
+      createdDuplicateIDs.push(source.id)
+
+      const duplicate = await payload.duplicate({
+        collection: duplicateFieldsSlug,
+        context: {
+          shouldThrowDisabledDuplicateDescendantHook: true,
+        },
+        id: source.id,
+      })
+      createdDuplicateIDs.push(duplicate.id)
+
+      expect(duplicate.childDisabledArray).toHaveLength(1)
+      expect(duplicate.childDisabledArray?.[0]).toMatchObject({
+        preserved: 'preserved-source-value',
+        reset: 'duplicate-disabled-child-default',
+      })
+    })
+
+    it('should accept request data for a field disabled during duplication', async () => {
+      const source = await payload.create({
+        collection: duplicateFieldsSlug,
+        data: {
+          disabledText: 'source-value',
+          text,
+        },
+      })
+      createdDuplicateIDs.push(source.id)
+
+      const duplicate = await payload.duplicate({
+        collection: duplicateFieldsSlug,
+        data: {
+          disabledText: 'request-value',
+        },
+        id: source.id,
+      })
+      createdDuplicateIDs.push(duplicate.id)
+
+      expect(duplicate.disabledText).toBe('request-value')
+    })
+
+    it('should skip beforeDuplicate hooks for a field disabled during duplication', async () => {
+      const source = await payload.create({
+        collection: duplicateFieldsSlug,
+        data: {
+          disabledHookText: 'source-value',
+          text,
+        },
+      })
+      createdDuplicateIDs.push(source.id)
+
+      const duplicate = await payload.duplicate({
+        collection: duplicateFieldsSlug,
+        context: {
+          shouldThrowDisabledDuplicateHook: true,
+        },
+        id: source.id,
+      })
+      createdDuplicateIDs.push(duplicate.id)
+
+      expect(duplicate.disabledHookText).toBe('duplicate-disabled-hook-default')
+    })
+
+    it('should use the localized default for a localized field disabled during duplication', async () => {
+      const source = await payload.create({
+        collection: duplicateFieldsSlug,
+        data: {
+          disabledLocalizedText: 'localized-source-value',
+          text,
+        },
+        locale: 'en',
+      })
+      createdDuplicateIDs.push(source.id)
+
+      const duplicate = await payload.duplicate({
+        collection: duplicateFieldsSlug,
+        id: source.id,
+        locale: 'en',
+      })
+      createdDuplicateIDs.push(duplicate.id)
+
+      expect(duplicate.disabledLocalizedText).toBe('duplicate-disabled-localized-default')
     })
 
     it('creates with default values', () => {
@@ -160,6 +363,226 @@ describe('Fields', () => {
       expect(allLocales.localizedRequiredText.en).toEqual('English text')
       // @ts-expect-error
       expect(allLocales.localizedRequiredText.es).toEqual('Spanish text')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id })
+    })
+
+    it('should enforce localized text length validation with locale all', async () => {
+      await expect(
+        payload.create({
+          collection: 'text-fields',
+          data: {
+            text: 'required',
+            // @ts-expect-error locale 'all' accepts object values for localized fields
+            localizedRequiredText: {
+              en: 'English text',
+              es: 'no',
+            },
+          },
+          locale: 'all',
+        }),
+      ).rejects.toThrow('The following field is invalid: Localized Required Text')
+    })
+
+    it('should skip validation for locales omitted from a locale all write', async () => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale 'all' accepts object values for localized fields
+          localizedRequiredText: {
+            en: 'English text',
+          },
+        },
+        locale: 'all',
+      })
+
+      const allLocales = await payload.findByID({
+        id: doc.id,
+        collection: 'text-fields',
+        locale: 'all',
+      })
+
+      // @ts-expect-error
+      expect(allLocales.localizedRequiredText.en).toEqual('English text')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id })
+    })
+
+    it('should enforce maxLength per locale and name the failing locale with locale all', async () => {
+      await expect(
+        payload.create({
+          collection: 'text-fields',
+          data: {
+            text: 'required',
+            // @ts-expect-error locale 'all' accepts object values for localized fields
+            localizedRequiredText: {
+              en: 'English text',
+              es: 'this value is definitely longer than twenty characters',
+            },
+          },
+          locale: 'all',
+        }),
+      ).rejects.toThrow('Localized Required Text (es)')
+    })
+
+    it('should treat an empty locale map as missing for a required field with locale all', async () => {
+      await expect(
+        payload.create({
+          collection: 'text-fields',
+          data: {
+            text: 'required',
+            // @ts-expect-error locale 'all' accepts object values for localized fields
+            localizedRequiredText: {},
+          },
+          locale: 'all',
+        }),
+      ).rejects.toThrow('The following field is invalid: Localized Required Text')
+    })
+
+    it('should enforce localized length validation on update with locale all', async () => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale 'all' accepts object values for localized fields
+          localizedRequiredText: {
+            en: 'English text',
+            es: 'Spanish text',
+          },
+        },
+        locale: 'all',
+      })
+
+      await expect(
+        // @ts-expect-error locale 'all' accepts object values for localized fields
+        payload.update({
+          id: doc.id,
+          collection: 'text-fields',
+          data: {
+            localizedRequiredText: {
+              en: 'English text',
+              es: 'no',
+            },
+          },
+          locale: 'all',
+        }),
+      ).rejects.toThrow('The following field is invalid: Localized Required Text')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id })
+    })
+
+    it('should persist updated values on a locale all update', async () => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale all
+          localizedRequiredText: { en: 'English one', es: 'Spanish one' },
+        },
+        locale: 'all',
+      })
+
+      // @ts-expect-error locale all
+      await payload.update({
+        id: doc.id,
+        collection: 'text-fields',
+        data: {
+          localizedRequiredText: { en: 'English two', es: 'Spanish two' },
+        },
+        locale: 'all',
+      })
+
+      const refetched: any = await payload.findByID({
+        id: doc.id,
+        collection: 'text-fields',
+        locale: 'all',
+      })
+
+      expect(refetched.localizedRequiredText.en).toStrictEqual('English two')
+      expect(refetched.localizedRequiredText.es).toStrictEqual('Spanish two')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id })
+    })
+
+    it('should only update submitted locales on a partial locale all update', async () => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale all
+          localizedRequiredText: { en: 'English one', es: 'Spanish one' },
+        },
+        locale: 'all',
+      })
+
+      // @ts-expect-error locale all
+      await payload.update({
+        id: doc.id,
+        collection: 'text-fields',
+        data: {
+          localizedRequiredText: { en: 'English two' },
+        },
+        locale: 'all',
+      })
+
+      const refetched: any = await payload.findByID({
+        id: doc.id,
+        collection: 'text-fields',
+        locale: 'all',
+      })
+
+      expect(refetched.localizedRequiredText.en).toStrictEqual('English two')
+      expect(refetched.localizedRequiredText.es).toStrictEqual('Spanish one')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id })
+    })
+
+    it('should scope req.locale per locale for a custom validator with locale all', async () => {
+      // Same sentinel in both locales; the validator only rejects it for `es`. If `req.locale` leaked as
+      // `'all'` (or `'en'`), neither would reject - so a rejection attributed to `(es)` proves the scoping.
+      await expect(
+        payload.create({
+          collection: 'text-fields',
+          data: {
+            text: 'required',
+            // @ts-expect-error locale all
+            localizedRequiredText: { en: 'English text', es: 'Spanish text' },
+            // @ts-expect-error locale all
+            localizedCustomValidate: { en: 'reject-es', es: 'reject-es' },
+          },
+          locale: 'all',
+        }),
+      ).rejects.toThrow('Localized Custom Validate (es)')
+    })
+
+    it('should pass the locale previousValue to a custom validator on a locale all update', async () => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale all
+          localizedRequiredText: { en: 'English text', es: 'Spanish text' },
+          // @ts-expect-error locale all
+          localizedCustomValidate: { en: 'prev-en', es: 'prev-es' },
+        },
+        locale: 'all',
+      })
+
+      // The validator asserts the en previousValue is 'prev-en' (the locale's own prior value, not the
+      // whole `{ en, es }` object). A wrong previousValue returns an error naming the received value.
+      // @ts-expect-error locale all
+      const updated: any = await payload.update({
+        id: doc.id,
+        collection: 'text-fields',
+        data: {
+          localizedCustomValidate: { en: 'assert-previous', es: 'prev-es' },
+        },
+        locale: 'all',
+      })
+
+      expect(updated.localizedCustomValidate.en).toStrictEqual('assert-previous')
+      expect(updated.localizedCustomValidate.es).toStrictEqual('prev-es')
 
       await payload.delete({ collection: 'text-fields', id: doc.id })
     })
@@ -2528,6 +2951,20 @@ describe('Fields', () => {
       expect(typeof found.items[0].richTextField).toBe('object')
       expect(found.items[0].richTextField).toEqual(richTextValue)
     })
+
+    it('should not crash when array contains a null element', async () => {
+      const doc = await payload.create({
+        collection,
+        data: {
+          // @ts-expect-error testing null in array
+          items: [null, { text: 'required', localizedText: 'valid' }],
+        },
+      })
+
+      // The null should be stripped; the valid row should survive intact.
+      expect(doc.items).toHaveLength(1)
+      expect(doc.items[0].text).toBe('required')
+    })
   })
 
   describe('group', () => {
@@ -3398,6 +3835,27 @@ describe('Fields', () => {
       )
       expect(doc?.localizedReferencesLocalizedBlock?.en?.[0]?.text).toEqual('localized text')
     })
+
+    it('should not crash when blocks array contains a null element', async () => {
+      const doc = await payload.create({
+        collection: blockFieldsSlug,
+        data: {
+          // @ts-expect-error — intentionally injecting null to simulate the broken client state
+          blocks: [
+            null,
+            {
+              blockType: 'content',
+              text: 'valid block',
+            },
+          ],
+        },
+      })
+
+      // The null should be stripped; the valid block should survive intact.
+      expect(doc.blocks).toHaveLength(1)
+      expect(doc.blocks[0].blockType).toBe('content')
+      expect(doc.blocks[0].text).toBe('valid block')
+    })
   })
 
   describe('collapsible', () => {
@@ -3722,6 +4180,64 @@ describe('Fields', () => {
         expect(docIDs).not.toContain(1)
         expect(docIDs).not.toContain(3)
         expect(docIDs).toContain(2)
+      })
+
+      it('should query nested strings as literals - in', async () => {
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.foo': { in: ['foobar'] },
+          },
+        })
+
+        const docIDs = docs.map(({ id }) => id)
+
+        expect(docIDs).toContain(fooBar.id)
+        expect(docIDs).not.toContain(bazBar.id)
+      })
+
+      it('should query nested strings as literals - not_in', async () => {
+        const otherFoo = await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { foo: 'bar', number: 10 },
+          },
+        })
+
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.foo': { not_in: ['foobar'] },
+          },
+        })
+
+        const docIDs = docs.map(({ id }) => id)
+
+        expect(docIDs).not.toContain(fooBar.id)
+        expect(docIDs).toContain(otherFoo.id)
+      })
+
+      it('should query nested mixed arrays with null literals - in', async () => {
+        const stringValue = await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { value: 'literal-value' },
+          },
+        })
+
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.value': { in: [null, 1, 'literal-value'] },
+          },
+        })
+
+        const docValues = docs.map(({ json }) => json.value)
+        const docIDs = docs.map(({ id }) => id)
+
+        expect(docValues).toContain(1)
+        expect(docIDs).toContain(stringValue.id)
+        expect(docValues).not.toContain(2)
       })
 
       it('should query nested numbers with multiple clauses - equals_and_in', async () => {

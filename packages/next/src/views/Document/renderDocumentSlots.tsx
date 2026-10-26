@@ -33,8 +33,10 @@ export const renderDocumentSlots: (args: {
   locale: Locale
   permissions: SanitizedPermissions
   req: PayloadRequest
+  user?: PayloadRequest['user']
 }) => DocumentSlots = (args) => {
-  const { id, collectionConfig, globalConfig, hasSavePermission, locale, permissions, req } = args
+  const { id, collectionConfig, globalConfig, hasSavePermission, locale, permissions, req, user } =
+    args
 
   const components: DocumentSlots = {} as DocumentSlots
 
@@ -48,7 +50,7 @@ export const renderDocumentSlots: (args: {
     locale,
     payload: req.payload,
     permissions,
-    user: req.user,
+    user,
     // TODO: Add remaining serverProps
   }
 
@@ -216,7 +218,7 @@ export const renderDocumentSlotsHandler: ServerFunction<{
   collectionSlug: string
   id?: number | string
 }> = async (args) => {
-  const { id, collectionSlug, locale, permissions, req } = args
+  const { id, collectionSlug, locale, permissions, req, user } = args
 
   const collectionConfig = req.payload.collections[collectionSlug]?.config
 
@@ -238,5 +240,6 @@ export const renderDocumentSlotsHandler: ServerFunction<{
     locale,
     permissions,
     req,
+    user,
   })
 }

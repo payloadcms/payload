@@ -1,0 +1,88 @@
+---
+title: Motion and Loading
+label: Motion and Loading
+order: 170
+desc: Communicate loading and layout changes with Payload's motion and loading components.
+keywords: ui, components, loading, overlay, shimmer, progress, animation
+---
+
+Payload's loading components communicate that work is in progress, while its motion helpers make layout changes easier to follow.
+
+## Import
+
+```tsx
+import {
+  AnimateHeight,
+  FormLoadingOverlayToggle,
+  LoadingOverlay,
+  LoadingOverlayToggle,
+  ProgressBar,
+  ShimmerEffect,
+  StaggeredShimmers,
+} from '@payloadcms/ui'
+```
+
+## Loading overlay
+
+<ComponentPreview component="MotionAndLoading" example="overlay" />
+
+`LoadingOverlay` renders the visual loading surface directly. Use `LoadingOverlayToggle` inside the Admin Panel to update Payload's shared loading overlay instead.
+
+`FormLoadingOverlayToggle` connects that shared overlay to a Payload form's loading and processing states. It must be rendered inside the Admin Panel's form and loading providers.
+
+## Staggered shimmers
+
+<ComponentPreview component="MotionAndLoading" example="staggered" />
+
+Use `ShimmerEffect` for one placeholder or `StaggeredShimmers` for a repeated set. Match their dimensions to the content they temporarily replace to reduce layout movement.
+
+## Route progress
+
+<ComponentPreview component="MotionAndLoading" example="progress" />
+
+`ProgressBar` displays progress for transitions started within `RouteTransitionProvider`. Payload's `Link` component starts this transition automatically. Use `startRouteTransition` from `useRouteTransition` when navigation begins from another control.
+
+The preview simulates a slower route so the delayed progress indicator remains visible long enough to inspect.
+
+## Other helpers
+
+- [`AnimateHeight`](/docs/ui-components/animate-height) animates a container when its content changes height.
+- [`ShimmerEffect`](/docs/ui-components/shimmer-effect) documents the single-placeholder API in more detail.
+
+## Common props
+
+These are the props most commonly used. See the exported types in `@payloadcms/ui` for the complete list.
+
+### LoadingOverlay
+
+| Prop                | Type      | Default   | Description                                      |
+| ------------------- | --------- | --------- | ------------------------------------------------ |
+| `show`              | `boolean` | `true`    | Selects the entering or exiting animation state. |
+| `loadingText`       | `string`  | —         | Replaces the translated loading label.           |
+| `animationDuration` | `string`  | `'500ms'` | Sets the CSS animation duration.                 |
+| `overlayType`       | `string`  | —         | Adds a type modifier to the overlay.             |
+
+### LoadingOverlayToggle
+
+| Prop          | Type                           | Default        | Description                                   |
+| ------------- | ------------------------------ | -------------- | --------------------------------------------- |
+| `name` \*     | `string`                       | —              | Identifies this source in the shared overlay. |
+| `show` \*     | `boolean`                      | —              | Adds or removes this source's loading state.  |
+| `type`        | `'fullscreen' \| 'withoutNav'` | `'fullscreen'` | Selects the shared overlay layout.            |
+| `loadingText` | `string`                       | —              | Replaces the translated loading label.        |
+
+### StaggeredShimmers
+
+| Prop           | Type               | Default | Description                                      |
+| -------------- | ------------------ | ------- | ------------------------------------------------ |
+| `count` \*     | `number`           | —       | Sets the number of shimmer placeholders.         |
+| `height`       | `number \| string` | —       | Sets each placeholder's height.                  |
+| `width`        | `number \| string` | —       | Sets each placeholder's width.                   |
+| `renderDelay`  | `number`           | `500`   | Delays rendering to avoid flashing on fast work. |
+| `shimmerDelay` | `number \| string` | `25`    | Staggers the animation between placeholders.     |
+
+_\* An asterisk denotes that a prop is required._
+
+## Accessibility
+
+Loading visuals should accompany, not replace, meaningful status text. Prevent interaction when an action cannot safely continue, and keep the loading state visible only while work is actually pending.

@@ -78,9 +78,11 @@ export interface Config {
     categories: Category;
     media: Media;
     'collection-level-config': CollectionLevelConfig;
+    'open-by-default': OpenByDefault;
     'static-url': StaticUrl;
     'custom-live-preview': CustomLivePreview;
     'conditional-url': ConditionalUrl;
+    'forbidden-url': ForbiddenUrl;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -97,9 +99,11 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'collection-level-config': CollectionLevelConfigSelect<false> | CollectionLevelConfigSelect<true>;
+    'open-by-default': OpenByDefaultSelect<false> | OpenByDefaultSelect<true>;
     'static-url': StaticUrlSelect<false> | StaticUrlSelect<true>;
     'custom-live-preview': CustomLivePreviewSelect<false> | CustomLivePreviewSelect<true>;
     'conditional-url': ConditionalUrlSelect<false> | ConditionalUrlSelect<true>;
+    'forbidden-url': ForbiddenUrlSelect<false> | ForbiddenUrlSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -900,6 +904,18 @@ export interface CollectionLevelConfig {
   createdAt: string;
 }
 /**
+ * Live Preview opens automatically on first visit via `openByDefault`.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "open-by-default".
+ */
+export interface OpenByDefault {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "static-url".
  */
@@ -1065,6 +1081,15 @@ export interface ConditionalUrl {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forbidden-url".
+ */
+export interface ForbiddenUrl {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1124,6 +1149,10 @@ export interface PayloadLockedDocument {
         value: string | CollectionLevelConfig;
       } | null)
     | ({
+        relationTo: 'open-by-default';
+        value: string | OpenByDefault;
+      } | null)
+    | ({
         relationTo: 'static-url';
         value: string | StaticUrl;
       } | null)
@@ -1134,6 +1163,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'conditional-url';
         value: string | ConditionalUrl;
+      } | null)
+    | ({
+        relationTo: 'forbidden-url';
+        value: string | ForbiddenUrl;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1677,6 +1710,15 @@ export interface CollectionLevelConfigSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "open-by-default_select".
+ */
+export interface OpenByDefaultSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "static-url_select".
  */
 export interface StaticUrlSelect<T extends boolean = true> {
@@ -1791,6 +1833,14 @@ export interface CustomLivePreviewSelect<T extends boolean = true> {
 export interface ConditionalUrlSelect<T extends boolean = true> {
   title?: T;
   enabled?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forbidden-url_select".
+ */
+export interface ForbiddenUrlSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
 }

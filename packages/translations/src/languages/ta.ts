@@ -55,6 +55,7 @@ export const taTranslations: DefaultTranslationsObject = {
     newPassword: 'புதிய கடவுச்சொல்',
     passed: 'அங்கீகாரம் நிறைவேற்றப்பட்டது',
     passwordResetSuccessfully: 'கடவுச்சொல் வெற்றிகரமாக மீட்டமைக்கப்பட்டது.',
+    resend: 'மீண்டும் அனுப்பு',
     resetPassword: 'கடவுச்சொல்லை மீட்டமை',
     resetPasswordExpiration: 'கடவுச்சொல் மீட்டமைக்க வேண்டிய காலம்',
     resetPasswordToken: 'கடவுச்சொல் மீட்டமைப்பு டோக்கன்',

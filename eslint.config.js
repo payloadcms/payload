@@ -17,6 +17,7 @@ export const defaultESLintIgnores = [
   '**/eslint.config.js',
   '**/payload-types.ts',
   '**/dist/',
+  '**/dist_optimized/',
   '**/.yarn/',
   '**/build/',
   '**/node_modules/',
@@ -25,6 +26,7 @@ export const defaultESLintIgnores = [
   'next-env.d.ts',
   '**/app',
   'src/**/*.spec.ts',
+  'tools/**/*.spec.ts',
   'packages/payload/rollup.dts.config.mjs',
   'scripts/**/*.js',
 ]
