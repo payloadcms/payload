@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
+import { PREFERENCE_KEYS } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
@@ -54,7 +55,7 @@ async function switchBranch({ name, page }: { name: string; page: Page }): Promi
 
   const preferenceUpdate = page.waitForResponse(
     (response) =>
-      response.url().includes('/api/payload-preferences/admin') &&
+      new URL(response.url()).pathname.endsWith(`/payload-preferences/${PREFERENCE_KEYS.NAV}`) &&
       response.request().method() === 'POST' &&
       response.ok(),
   )
@@ -168,7 +169,7 @@ test.describe('Branching', () => {
       collection: 'payload-preferences',
       overrideAccess: true,
       pagination: false,
-      where: { key: { equals: 'admin' } },
+      where: { key: { equals: PREFERENCE_KEYS.NAV } },
     })
 
     for (const preference of preferences.docs) {
