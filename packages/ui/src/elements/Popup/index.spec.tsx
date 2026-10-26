@@ -415,17 +415,16 @@ test('should not open a disabled sibling submenu when the safe area expires over
         <PopupList.MenuItem>
           {['Theme', 'Language'].map((label) => (
             <Popup
-              button={
-                <button disabled={label === 'Language'} style={{ width: '100%' }} type="button">
-                  {label}
-                </button>
-              }
-              buttonType="custom"
               disabled={label === 'Language'}
               hoverSubmenu
               key={label}
               popupAriaLabel={`${label} menu`}
               popupType="menu"
+              renderButton={(buttonProps) => (
+                <PopupList.SubmenuTrigger buttonProps={buttonProps}>
+                  {label}
+                </PopupList.SubmenuTrigger>
+              )}
               side="right"
               theme="auto"
             >
@@ -454,26 +453,20 @@ test('should not open a disabled sibling submenu when the safe area expires over
   const siblingBox = language.element().getBoundingClientRect()
   const menuBox = screen.getByRole('menu', { name: 'Theme menu' }).element().getBoundingClientRect()
   const startX = triggerBox.left + triggerBox.width / 2
-  const startY = triggerBox.top + triggerBox.height / 2
   const diagonalPoint = {
     x: startX + (menuBox.left - startX) * 0.85,
     y: siblingBox.top + siblingBox.height / 2,
   }
-  const steps = Math.ceil(Math.abs(diagonalPoint.x - startX))
 
-  for (let step = 1; step <= steps; step++) {
-    await userEvent.hover(screen.getByTestId('pointer-surface'), {
-      force: true,
-      position: {
-        x: startX + ((diagonalPoint.x - startX) * step) / steps,
-        y: startY + ((diagonalPoint.y - startY) * step) / steps,
-      },
-    })
-  }
+  await userEvent.hover(screen.getByTestId('pointer-surface'), {
+    force: true,
+    position: diagonalPoint,
+  })
   expect(document.elementFromPoint(diagonalPoint.x, diagonalPoint.y)).toBe(language.element())
+  await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
 
   await expect.element(theme).toHaveAttribute('aria-expanded', 'false')
-  expect(language.element().getAttribute('aria-expanded')).toBe('false')
+  await expect.element(language).toHaveAttribute('aria-expanded', 'false')
 })
 
 test('should open and close nested menus with keyboard focus restoration', async () => {
