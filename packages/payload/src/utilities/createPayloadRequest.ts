@@ -109,15 +109,21 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
   urlSuffix,
   user,
 }): Promise<PayloadRequest> => {
+  const localization = payload.config?.localization
+
   // A nested Local API call with an explicit `locale` must not rewrite the
   // caller's req: `beforeChange` merges submitted data into per-locale fields
   // based on `req.locale` after hooks/validation have awaited, so a mutated
   // `req.locale` corrupts the parent operation's data (see #18246). Isolate
   // both locale properties; the nested operation still sees its own locale
   // through the returned request.
-  const localReq = isolateObjectProperty(req, ['locale', 'fallbackLocale'])
-
-  const localization = payload.config?.localization
+  // Only isolate when an explicit locale override was passed. Wrapping every
+  // req in a proxy breaks referential identity between nested operations and
+  // the caller's req, which hooks and callers rely on.
+  const localReq =
+    localization && (localeArg !== undefined || fallbackLocale !== undefined)
+      ? isolateObjectProperty(req, ['locale', 'fallbackLocale'])
+      : req
 
   if (localization) {
     const locale = localeArg === '*' ? 'all' : localeArg
