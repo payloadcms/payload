@@ -1,4 +1,5 @@
 /* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options"] }] -- Tests use the shared fixture wrapper. */
+import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { CollectionBeforeChangeHook, Payload } from 'payload'
 
 import { readFile, rm } from 'node:fs/promises'
@@ -366,4 +367,72 @@ test.suite('File transform state', { config: './config.ts' }, () => {
       },
     })
   })
+
+  const findVersionByAlt = async ({
+    alt,
+    id,
+    payload,
+  }: {
+    alt: string
+    id: number | string
+    payload: Payload
+  }) => {
+    const { docs } = await payload.findVersions({
+      collection: transformedMediaSlug,
+      where: { parent: { equals: id } },
+    })
+
+    return docs.find(({ version }) => version.alt === alt)!
+  }
+
+  test('should restore the crop that belongs to the restored version', async ({ payload }) => {
+    const created = await createImage({
+      payload,
+      _transforms: { crop: { height: 600, width: 800, x: 0, y: 0 } },
+    })
+
+    await payload.update({
+      id: created.id,
+      collection: transformedMediaSlug,
+      data: { _transforms: { crop: { height: 400, width: 400, x: 0, y: 0 } }, alt: 'second crop' },
+    })
+
+    const restored = await payload.restoreVersion({
+      id: (await findVersionByAlt({ id: created.id, alt: 'source', payload })).id,
+      collection: transformedMediaSlug,
+    })
+
+    expect(restored).toMatchObject({ height: 600, width: 800 })
+    expect(restored._transforms).toEqual({ crop: { height: 600, width: 800, x: 0, y: 0 } })
+  })
+
+  test.options(
+    'should clear transform state when restoring a version saved before it existed',
+    { db: 'mongo' },
+    async ({ payload }) => {
+      const created = await createImage({ payload })
+
+      await payload.update({
+        id: created.id,
+        collection: transformedMediaSlug,
+        data: { _transforms: { crop: { height: 400, width: 400, x: 0, y: 0 } }, alt: 'cropped' },
+      })
+
+      const legacyVersion = await findVersionByAlt({ id: created.id, alt: 'source', payload })
+
+      // Versions saved before `_transforms` existed have no key at all.
+      await (payload.db as unknown as MongooseAdapter).versions[transformedMediaSlug]!.updateOne(
+        { _id: legacyVersion.id },
+        { $unset: { 'version._transforms': 1 } },
+      )
+
+      const restored = await payload.restoreVersion({
+        id: legacyVersion.id,
+        collection: transformedMediaSlug,
+      })
+
+      expect(restored).toMatchObject({ height: 1600, width: 1600 })
+      expect(restored._transforms).toBeNull()
+    },
+  )
 })
