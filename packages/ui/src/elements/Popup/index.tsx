@@ -321,6 +321,12 @@ export const Popup: React.FC<PopupProps> = (props) => {
     })
   }, [contentId, disabled, isSubmenu, parentSubmenuScope, pointerIntent.isProtected])
 
+  useEffect(() => {
+    if (isSubmenu && disabled && active) {
+      submenuCallbacks.current.closeFromPointer()
+    }
+  }, [active, disabled, isSubmenu])
+
   // /////////////////////////////////////
   // Position Calculation
   //

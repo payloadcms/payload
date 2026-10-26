@@ -469,6 +469,45 @@ test('should not open a disabled sibling submenu when the safe area expires over
   await expect.element(language).toHaveAttribute('aria-expanded', 'false')
 })
 
+test('should close an open hover submenu when it becomes disabled', async () => {
+  const renderMenu = ({ themeDisabled }: { themeDisabled: boolean }) => (
+    <Popup button="Root" popupType="menu" theme="auto">
+      <PopupList.MenuItem>
+        {['Theme', 'Language'].map((label) => (
+          <Popup
+            disabled={label === 'Theme' && themeDisabled}
+            hoverSubmenu
+            key={label}
+            popupType="menu"
+            renderButton={(buttonProps) => (
+              <PopupList.SubmenuTrigger buttonProps={buttonProps}>{label}</PopupList.SubmenuTrigger>
+            )}
+            side="right"
+            theme="auto"
+          >
+            <PopupList.MenuItem>
+              <PopupList.Button onClick={() => {}}>{`${label} option`}</PopupList.Button>
+            </PopupList.MenuItem>
+          </Popup>
+        ))}
+      </PopupList.MenuItem>
+    </Popup>
+  )
+  const screen = await render(renderMenu({ themeDisabled: false }))
+
+  await screen.getByRole('button', { name: 'Root' }).click()
+  const theme = screen.getByRole('menuitem', { name: 'Theme', exact: true })
+  const language = screen.getByRole('menuitem', { name: 'Language', exact: true })
+
+  await theme.hover()
+  await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
+  await screen.rerender(renderMenu({ themeDisabled: true }))
+  await language.hover()
+
+  await expect.element(language).toHaveAttribute('aria-expanded', 'true')
+  expect(theme.element().getAttribute('aria-expanded')).toBe('false')
+})
+
 test('should open and close nested menus with keyboard focus restoration', async () => {
   const screen = await render(
     <Popup button="Root" popupType="menu" theme="auto">
