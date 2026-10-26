@@ -1,0 +1,27 @@
+@layer payload-default {
+  :root,
+  [data-theme] {
+    --seo-description-color: #9a9a9a;
+    --seo-danger-bg: red;
+    --seo-short-bg: orangered;
+    --seo-danger-text: white;
+    --seo-warning-bg: orange;
+    --seo-warning-text: white;
+    --seo-success-bg: green;
+    --seo-success-text: white;
+    --seo-track-bg: #f3f3f3;
+  }
+
+  html[data-enhanced-contrast],
+  html[data-enhanced-contrast] [data-theme] {
+    --seo-description-color: var(--color-text-secondary);
+    --seo-danger-bg: var(--color-bg-danger);
+    --seo-short-bg: var(--color-bg-danger);
+    --seo-danger-text: var(--color-text-ondanger);
+    --seo-warning-bg: var(--color-bg-warning);
+    --seo-warning-text: var(--color-text-onwarning);
+    --seo-success-bg: var(--color-bg-success-tertiary);
+    --seo-success-text: var(--color-text);
+    --seo-track-bg: var(--color-bg-tertiary);
+  }
+}

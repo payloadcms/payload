@@ -110,7 +110,7 @@ export const MultiValue: React.FC<MultiValueProps<Option>> = (props) => {
         ...props.components,
         Container: SortableMultiValueContainer,
       }}
-      innerProps={sortableInnerProps as MultiValueProps<Option>['innerProps']}
+      innerProps={sortableInnerProps}
     />
   )
 }

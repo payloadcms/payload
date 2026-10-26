@@ -1,6 +1,6 @@
 {
   "name": "create-payload-app",
-  "version": "4.0.0-beta.2",
+  "version": "4.0.0-beta.4",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
@@ -52,8 +52,6 @@
     "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "pack-template-files": "node --no-deprecation --import @swc-node/register/esm-register src/scripts/pack-template-files.ts",
     "test": "vitest --run",
     "typecheck": "tsc"
@@ -81,6 +79,6 @@
     "@types/node": "24.12.3"
   },
   "engines": {
-    "node": ">=24.15.0"
+    "node": ">=24.22.1"
   }
 }

@@ -5,6 +5,8 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
+import { getDefaultCanvas } from './WindowChrome/index.mjs'
+
 import { createAnnotationInteraction } from './annotation-demo.mjs'
 import { createPresentation } from './presentation-demo.mjs'
 import { createScrollInteraction } from './scroll-demo.mjs'
@@ -12,12 +14,13 @@ import { createScrollInteraction } from './scroll-demo.mjs'
 const DEFAULT_BASE_URL = 'http://localhost:3000'
 const DEFAULT_INTERACTION_PAUSE_MS = 300
 const DEFAULT_LABEL = 'feature-demo'
-const DEFAULT_MOUSE_MOVE_MS = 400
+const DEFAULT_MOUSE_MOVE_MS = 300
 const DEFAULT_VIEWPORT = { height: 900, width: 1440 }
 
 export function parseArgs(argv) {
   const values = new Map()
   const supportedOptions = new Set([
+    '--a11y',
     '--base-url',
     '--interaction-pause-ms',
     '--label',
@@ -46,9 +49,15 @@ export function parseArgs(argv) {
     throw new Error('--scenario is required')
   }
 
+  const a11y = values.get('--a11y')
+  if (a11y !== undefined && !['on', 'off'].includes(a11y)) {
+    throw new Error('--a11y must be on or off')
+  }
+
   const label = sanitizeLabel(values.get('--label') ?? DEFAULT_LABEL)
 
   return {
+    ...(a11y === undefined ? {} : { a11y }),
     baseURL: values.get('--base-url') ?? DEFAULT_BASE_URL,
     interactionPauseMs: parseTiming({
       name: '--interaction-pause-ms',
@@ -105,6 +114,7 @@ export function sanitizeLabel(value) {
 }
 
 export async function recordDemo({
+  a11y,
   baseURL,
   fixture,
   interactionPauseMs = DEFAULT_INTERACTION_PAUSE_MS,
@@ -116,6 +126,7 @@ export async function recordDemo({
   viewport,
 }) {
   return executeDemo({
+    a11y,
     baseURL,
     fixture,
     interactionPauseMs,
@@ -130,8 +141,9 @@ export async function recordDemo({
   })
 }
 
-export async function validateDemo({ baseURL, fixture, label, scenario, viewport }) {
+export async function validateDemo({ a11y, baseURL, fixture, label, scenario, viewport }) {
   await executeDemo({
+    a11y,
     baseURL,
     fixture,
     interactionPauseMs: 0,
@@ -144,8 +156,9 @@ export async function validateDemo({ baseURL, fixture, label, scenario, viewport
   })
 }
 
-export async function previewDemo({ baseURL, fixture, label, output, scenario, viewport }) {
+export async function previewDemo({ a11y, baseURL, fixture, label, output, scenario, viewport }) {
   return executeDemo({
+    a11y,
     baseURL,
     fixture,
     interactionPauseMs: 0,
@@ -160,6 +173,7 @@ export async function previewDemo({ baseURL, fixture, label, output, scenario, v
 }
 
 async function executeDemo({
+  a11y,
   baseURL,
   fixture,
   interactionPauseMs,
@@ -173,6 +187,9 @@ async function executeDemo({
   trailingPauseMs,
   viewport,
 }) {
+  if (a11y !== undefined && !['on', 'off'].includes(a11y)) {
+    throw new Error('--a11y must be on or off')
+  }
   const parsedBaseURL = new URL(baseURL)
   const scenarioURL = pathToFileURL(path.resolve(scenario)).href
   const scenarioModule = await import(scenarioURL)
@@ -198,7 +215,18 @@ async function executeDemo({
   const { chromium, expect } = await import('@playwright/test')
   const rawVideoDirectory = await mkdtemp(path.join(tmpdir(), 'payload-pr-demo-'))
   const browser = await chromium.launch({ headless: true })
-  const recordedViewport = scenarioModule.presentation.canvas ?? { width: 1600, height: 1000 }
+  const presentationOptions = {
+    ...scenarioModule.presentation,
+    ...(a11y === undefined
+      ? {}
+      : { accessibility: a11y === 'on', showAnnouncements: a11y === 'on' }),
+  }
+  const recordedViewport =
+    presentationOptions.canvas ??
+    getDefaultCanvas({
+      viewport,
+      accessibility: presentationOptions.accessibility,
+    })
   const context = await browser.newContext({
     viewport: recordedViewport,
     colorScheme: scenarioModule.presentation.theme ?? 'light',
@@ -311,7 +339,10 @@ async function executeDemo({
             isReducedMotion
               ? [{ opacity: 0.9 }, { opacity: 0.9, offset: 0.7 }, { opacity: 0 }]
               : [
-                  { opacity: 0.9, transform: 'translate(-50%, -50%) scale(0.55)' },
+                  {
+                    opacity: 0.9,
+                    transform: 'translate(-50%, -50%) scale(0.55)',
+                  },
                   { opacity: 0.55, offset: 0.5 },
                   { opacity: 0, transform: 'translate(-50%, -50%) scale(1.4)' },
                 ],
@@ -338,8 +369,9 @@ async function executeDemo({
     })
   })
 
-  const recordedPage = await context.newPage()
+  // Video capture can start before newPage() resolves. Include page creation in the trim clock.
   const recordingStartedAt = performance.now()
+  const recordedPage = await context.newPage()
   const video = output ? recordedPage.video() : undefined
   let presentation
   const resolvedOutput = output ? path.resolve(output) : undefined
@@ -350,7 +382,7 @@ async function executeDemo({
   try {
     presentation = await createPresentation({
       page: recordedPage,
-      options: scenarioModule.presentation,
+      options: presentationOptions,
       viewport,
       baseURL,
       pauseScale,
@@ -362,7 +394,9 @@ async function executeDemo({
       mouseMoveMs,
       page,
     })
-    const annotationInteractions = createAnnotationInteraction({ presentation })
+    const annotationInteractions = createAnnotationInteraction({
+      presentation,
+    })
     await scenarioModule.default({
       clearAnnotation: annotationInteractions.hideAnnotation,
       resizeWindow: presentation.resizeWindow,
@@ -372,6 +406,11 @@ async function executeDemo({
           : annotationInteractions.showAnnotation(annotation),
       baseURL: parsedBaseURL.toString().replace(/\/$/, ''),
       click: pointerInteractions.click,
+      typeText: async ({ locator, text, clear = false, delay = 80 }) => {
+        await pointerInteractions.click(locator)
+        if (clear) await page.keyboard.press('ControlOrMeta+A')
+        await page.keyboard.type(text, { delay })
+      },
       expect,
       fixture,
       hideAnnotation: annotationInteractions.hideAnnotation,
@@ -381,6 +420,7 @@ async function executeDemo({
       pause: (milliseconds = 700) => page.waitForTimeout(milliseconds * pauseScale),
       ready: async () => {
         if (isOpeningReady) throw new Error('Scenario may call ready() only once')
+        annotationInteractions.markReady()
         isOpeningReady = true
         await presentation.flush()
         onOpeningReady?.((performance.now() - presentation.startedAt) / 1000)
@@ -433,37 +473,99 @@ async function executeDemo({
 function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
   let pointerPosition = { x: 0, y: 0 }
 
+  const getTargetPoint = async ({ locator, position, pagePoint }) => {
+    await locator.waitFor({ state: 'visible' })
+    const box = await locator.boundingBox()
+    if (!box) throw new Error('Cannot move the demo cursor to an element without a bounding box')
+    const local = await locator.evaluate(
+      (element, { position, pagePoint, box }) => {
+        const rect = element.getBoundingClientRect()
+        // The document remains the wheel surface after its border box scrolls away.
+        const isDocumentScroller = element === document.scrollingElement
+        let left = isDocumentScroller ? 0 : Math.max(0, rect.left)
+        let top = isDocumentScroller ? 0 : Math.max(0, rect.top)
+        let right = isDocumentScroller ? innerWidth : Math.min(innerWidth, rect.right)
+        let bottom = isDocumentScroller ? innerHeight : Math.min(innerHeight, rect.bottom)
+        const rootStyle = getComputedStyle(document.documentElement)
+        for (
+          let parent = isDocumentScroller ? null : element.parentElement;
+          parent;
+          parent = parent.parentElement
+        ) {
+          // Root overflow, and body overflow propagated from a visible root, clip at the viewport.
+          const isViewportOverflow =
+            parent === document.documentElement ||
+            (parent === document.body &&
+              document.scrollingElement === document.documentElement &&
+              rootStyle.overflowX === 'visible' &&
+              rootStyle.overflowY === 'visible')
+          if (isViewportOverflow) continue
+          const style = getComputedStyle(parent)
+          const clip = parent.getBoundingClientRect()
+          if (/(auto|scroll|hidden|clip)/.test(style.overflowX)) {
+            left = Math.max(left, clip.left)
+            right = Math.min(right, clip.right)
+          }
+          if (/(auto|scroll|hidden|clip)/.test(style.overflowY)) {
+            top = Math.max(top, clip.top)
+            bottom = Math.min(bottom, clip.bottom)
+          }
+        }
+        const points = pagePoint
+          ? [
+              {
+                x: rect.left + ((pagePoint.x - box.x) * rect.width) / box.width,
+                y: rect.top + ((pagePoint.y - box.y) * rect.height) / box.height,
+              },
+            ]
+          : position
+            ? [
+                {
+                  x: rect.left + element.clientLeft + position.x,
+                  y: rect.top + element.clientTop + position.y,
+                },
+              ]
+            : [
+                { x: (left + right) / 2, y: (top + bottom) / 2 },
+                ...[0.1, 0.5, 0.9].flatMap((x) =>
+                  [0.1, 0.5, 0.9].map((y) => ({
+                    x: left + (right - left) * x,
+                    y: top + (bottom - top) * y,
+                  })),
+                ),
+              ]
+        const point = points.find(({ x, y }) => {
+          if (right <= left || bottom <= top || x < left || x >= right || y < top || y >= bottom)
+            return false
+          const hit = document.elementFromPoint(x, y)
+          return hit && element.contains(hit)
+        })
+        if (!point) {
+          throw new Error(
+            'Demo target must be visible and unobstructed; reveal it with wheel scrolling before clicking',
+          )
+        }
+        const { x, y } = point
+        return {
+          x: x - rect.left,
+          y: y - rect.top,
+          width: rect.width,
+          height: rect.height,
+        }
+      },
+      { position, pagePoint, box },
+    )
+    return {
+      x: box.x + local.x * (box.width / local.width),
+      y: box.y + local.y * (box.height / local.height),
+    }
+  }
+
   const moveCursor = async (
     locator,
     { duration = mouseMoveMs, pauseAfter = interactionPauseMs, position } = {},
   ) => {
-    await locator.scrollIntoViewIfNeeded()
-
-    const box = await locator.boundingBox()
-    if (!box) {
-      throw new Error('Cannot move the demo cursor to an element without a bounding box')
-    }
-
-    let relativePosition = { x: box.width / 2, y: box.height / 2 }
-    if (position) {
-      const localBox = await locator.evaluate((element) => {
-        const rect = element.getBoundingClientRect()
-        return {
-          width: rect.width,
-          height: rect.height,
-          borderX: element.clientLeft,
-          borderY: element.clientTop,
-        }
-      })
-      relativePosition = {
-        x: (position.x + localBox.borderX) * (box.width / localBox.width),
-        y: (position.y + localBox.borderY) * (box.height / localBox.height),
-      }
-    }
-    const targetPosition = {
-      x: box.x + relativePosition.x,
-      y: box.y + relativePosition.y,
-    }
+    const targetPosition = await getTargetPoint({ locator, position })
     const steps = duration === 0 ? 1 : Math.max(2, Math.round(duration / 16))
     const stepDelay = steps === 1 ? 0 : duration / steps
 
@@ -498,12 +600,20 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
       position,
     } = {},
   ) => {
-    await moveCursor(locator, { duration, pauseAfter: before, position })
-    if (position) {
-      // Click at the same outer-page point as the cursor, including iframe scaling.
+    const target = await locator.elementHandle()
+    if (!target) throw new Error('Demo click target is unavailable')
+
+    try {
+      await target.waitForElementState('enabled', { timeout: 10_000 })
+      await target.waitForElementState('stable', { timeout: 10_000 })
+      await moveCursor(locator, { duration, pauseAfter: before, position })
+      await target.waitForElementState('enabled', { timeout: 10_000 })
+      await target.waitForElementState('stable', { timeout: 10_000 })
+      await getTargetPoint({ locator, pagePoint: pointerPosition })
+      // Use the same outer-page point for the visible cursor and the actual click.
       await page.mouse.click(pointerPosition.x, pointerPosition.y)
-    } else {
-      await locator.click()
+    } finally {
+      await target.dispose()
     }
 
     if (after > 0) {
@@ -518,6 +628,7 @@ function printHelp() {
   console.log(`Usage: record-demo.mjs --scenario PATH [options]
 
 Options:
+  --a11y on|off        Override a11y feedback; omit to use the scenario setting
   --base-url URL       Running Payload URL (default: ${DEFAULT_BASE_URL})
   --interaction-pause-ms MS
                        Dwell before and after clicks (default: ${DEFAULT_INTERACTION_PAUSE_MS})

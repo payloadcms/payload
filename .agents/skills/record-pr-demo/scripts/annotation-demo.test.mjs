@@ -40,3 +40,38 @@ test('should reject floating and placement options before changing annotations',
 test('should require chrome for annotations', () => {
   assert.throws(() => createAnnotationInteraction({}), /require recording chrome/)
 })
+
+test('should require a visible opening note once annotations have been used', async () => {
+  const annotations = createAnnotationInteraction({
+    presentation: { setAnnotation: async () => {}, clearAnnotation: async () => {} },
+  })
+  await annotations.showAnnotation({ title: 'Opening', body: 'First note.' })
+  await annotations.hideAnnotation()
+  assert.throws(() => annotations.markReady(), /annotation.*before.*ready\(\)/i)
+  await annotations.showAnnotation({ title: 'Opening', body: 'First note.' })
+  annotations.markReady()
+  await annotations.hideAnnotation()
+  await annotations.showAnnotation({
+    title: 'Next',
+    body: 'Later notes may follow a hidden interval.',
+  })
+})
+
+test('should allow an unannotated opening but reject introducing notes afterward', async () => {
+  let renders = 0
+  const annotations = createAnnotationInteraction({
+    presentation: {
+      setAnnotation: async () => {
+        renders++
+      },
+      clearAnnotation: async () => {},
+    },
+  })
+  annotations.markReady()
+  await annotations.hideAnnotation()
+  await assert.rejects(
+    () => annotations.showAnnotation({ title: 'Late start', body: 'Missing opening note.' }),
+    /annotation.*before.*ready\(\)/i,
+  )
+  assert.equal(renders, 0)
+})

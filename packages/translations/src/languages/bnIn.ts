@@ -294,6 +294,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     and: 'এবং',
     anotherUser: 'অন্য ব্যবহারকারী',
     anotherUserTakenOver: 'অন্য একজন ব্যবহারকারী এই ডকুমেন্ট সম্পাদনার দায়িত্ব নিয়েছেন।',
+    apiResponse: 'API প্রতিক্রিয়া',
     applyChanges: 'পরিবর্তনগুলি প্রয়োগ করুন',
     ascending: 'আরোহী',
     auto: 'স্বয়ংক্রিয়',
@@ -366,6 +367,13 @@ export const bnInTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'এই নথিটি সম্প্রতি অন্য ব্যবহারকারীর দ্বারা আপডেট করা হয়েছে। আপনার দেখানো ভার্সন আপ টু ডেট নয়।',
     documents: 'ডকুমেন্টগুলি',
+    dragCancelled: '{{label}} টেনে সরানো বাতিল হয়েছে।',
+    dragDropped: '{{label}} ছেড়ে দেওয়া হয়েছে। {{count}}টির মধ্যে অবস্থান {{position}}।',
+    dragInstructions:
+      'একটি সারি তুলতে Space বা Enter চাপুন। সরাতে তীর চিহ্নের কী ব্যবহার করুন। VoiceOver ব্যবহার করলে Quick Nav বন্ধ করে Command + তীর চিহ্নের কী ব্যবহার করুন। ছেড়ে দিতে Space বা Enter, অথবা বাতিল করতে Escape চাপুন।',
+    dragMoved: '{{label}}: {{direction}}. {{count}}টির মধ্যে অবস্থান {{position}}।',
+    dragPickedUp: '{{label}} তুলে নেওয়া হয়েছে। {{count}}টির মধ্যে অবস্থান {{position}}।',
+    dragToMove: 'সরাতে টেনে আনুন',
     dragToReorder: 'টেনে অর্ডার পরিবর্তন করুন',
     duplicate: 'ডুপ্লিকেট করুন',
     duplicateWithoutSaving: 'পরিবর্তনগুলি সংরক্ষণ না করে ডুপ্লিকেট করুন',
@@ -480,6 +488,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     reindexingAll: 'সমস্ত {{collections}} পুনরায় সূচিবদ্ধ করা হচ্ছে।',
     reloadDocument: 'নথি পুনরায় লোড করুন',
     remove: 'অপসারণ করুন',
+    removeFilter: 'ফিল্টার সরান',
     rename: 'নাম পরিবর্তন করুন',
     replaceRow: 'সারি প্রতিস্থাপন করুন',
     requiredFields: '* চিহ্নিত ঘরগুলি পূরণ করা আবশ্যক।',
@@ -572,6 +581,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     yes: 'হ্যাঁ',
   },
   hierarchy: {
+    folderLocation: 'ফোল্ডারের অবস্থান',
     goTo: '"{{name}}" তে যান',
     itemsMovedTo: '{{title}} টি {{destination}} এ সরিয়ে নেওয়া হলো।',
     itemsMovedToRoot: '{{title}} মূলে সরিয়ে নেওয়া হয়েছে',
