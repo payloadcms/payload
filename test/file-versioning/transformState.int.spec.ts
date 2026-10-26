@@ -224,6 +224,79 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     expect(await readFile(path.join(transformedMediaDir, updated.filename!))).toEqual(bytes)
   })
 
+  const createLegacyImage = async ({
+    focalPoint,
+    payload,
+  }: {
+    focalPoint: { x: number; y: number }
+    payload: Payload
+  }) => {
+    const created = await createImage({ payload })
+
+    // A document saved before `_transforms` existed keeps its focal point only in focalX/focalY.
+    await payload.db.updateOne({
+      id: created.id,
+      collection: transformedMediaSlug,
+      data: { _transforms: null, focalX: focalPoint.x, focalY: focalPoint.y },
+    })
+
+    return created
+  }
+
+  test('should move a legacy focal point into transform state on the first write', async ({
+    payload,
+  }) => {
+    const created = await createLegacyImage({ focalPoint: { x: 30, y: 70 }, payload })
+
+    const updated = await payload.update({
+      id: created.id,
+      collection: transformedMediaSlug,
+      data: { _transforms: { crop: { height: 600, width: 800, x: 0, y: 0 } } },
+    })
+
+    expect(updated).toMatchObject({ focalX: 30, focalY: 70 })
+    expect(updated._transforms).toEqual({
+      crop: { height: 600, width: 800, x: 0, y: 0 },
+      focalPoint: { x: 30, y: 70 },
+    })
+  })
+
+  test('should move a legacy focal point into transform state on the first admin crop', async ({
+    payload,
+    restClient,
+  }) => {
+    const created = await createLegacyImage({ focalPoint: { x: 30, y: 70 }, payload })
+
+    const response = await restClient.PATCH(`/${transformedMediaSlug}/${created.id}`, {
+      body: JSON.stringify({ alt: 'cropped' }),
+      query: {
+        uploadEdits: {
+          crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
+          heightInPixels: 800,
+          widthInPixels: 800,
+        },
+      },
+    })
+    const { doc } = await response.json()
+
+    expect(doc._transforms).toEqual({
+      crop: { height: 800, width: 800, x: 0, y: 0 },
+      focalPoint: { x: 30, y: 70 },
+    })
+  })
+
+  test('should not add a center focal point on the first write', async ({ payload }) => {
+    const created = await createLegacyImage({ focalPoint: { x: 50, y: 50 }, payload })
+
+    const updated = await payload.update({
+      id: created.id,
+      collection: transformedMediaSlug,
+      data: { _transforms: { crop: { height: 600, width: 800, x: 0, y: 0 } } },
+    })
+
+    expect(updated._transforms).toEqual({ crop: { height: 600, width: 800, x: 0, y: 0 } })
+  })
+
   test('should keep the saved crop when only the focal point changes', async ({ payload }) => {
     const created = await createImage({
       payload,

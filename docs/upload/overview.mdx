@@ -324,7 +324,7 @@ await payload.update({
 
 - Omit `_transforms` to keep the saved value. Send `null` to remove all edits. An object replaces the whole value, so a key that you leave out is removed.
 - Uploading a new file clears `_transforms`, unless the same request sends a new value.
-- `focalX` and `focalY` stay available and always match `_transforms.focalPoint`. Writing either one updates both. When the two disagree in one request, `_transforms` is used.
+- `focalX` and `focalY` stay available and always match `_transforms.focalPoint`. Writing either one updates both. When the two disagree in one request, `_transforms` is used. For a document saved before `_transforms` existed, the first write copies its focal point into `_transforms.focalPoint`, unless it is the center.
 - The crop must fit inside the original. Invalid values return a validation error for `_transforms`.
 - Keys other than the built-in ones are saved as they are, for use by your own transformers. These built-in names are reserved for future use and are rejected for now: `clip`, `encoding`, `flip`, `metadataPolicy`, `pageRange`, `posterFrame`, `resize` and `rotate`.
 
