@@ -2206,6 +2206,34 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
         payload.findByID({ id, collection: 'posts', disableErrors: true, overrideAccess: true }),
       ).resolves.toBeNull()
     })
+
+    test('findByID should return null when id is invalid and disableErrors: true', async ({
+      payload,
+    }) => {
+      await expect(
+        payload.findByID({
+          id: null as unknown as string,
+          collection: 'posts',
+          disableErrors: true,
+          overrideAccess: true,
+        }),
+      ).resolves.toBeNull()
+      await expect(
+        payload.findByID({
+          id: '' as unknown as string,
+          collection: 'posts',
+          disableErrors: true,
+          overrideAccess: true,
+        }),
+      ).resolves.toBeNull()
+      await expect(
+        payload.findByID({
+          id: null as unknown as string,
+          collection: 'posts',
+          overrideAccess: true,
+        }),
+      ).rejects.toBeInstanceOf(NotFound)
+    })
   })
 
   test.describe('Custom endpoints', () => {
