@@ -120,6 +120,7 @@ export {
 } from '../uploads/getFileTypeIdentity.js'
 export { isImage } from '../uploads/isImage.js'
 export { matchMimeType } from '../uploads/matchMimeType.js'
+export { cropToPercent } from '../uploads/transformState/cropUnits.js'
 export { appendDateTimezoneSelectFields } from '../utilities/appendDateTimezoneSelectFields.js'
 export { appendUploadSelectFields } from '../utilities/appendUploadSelectFields.js'
 
