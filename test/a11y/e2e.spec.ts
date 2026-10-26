@@ -143,6 +143,11 @@ test.describe('Admin accessibility', () => {
       await expectSidebarTabFocus({ tab: collections })
       await page.keyboard.press('Enter')
       await expect(collections).toHaveAttribute('aria-selected', 'true')
+      const panel = navigation.getByRole('tabpanel', { name: 'Collections', exact: true })
+
+      await page.keyboard.press('Tab')
+      await expectFocusInside({ container: panel, page })
+      await expect(panel).not.toBeFocused()
       const posts = page.locator('#nav-posts')
 
       if (!(await posts.isVisible())) {

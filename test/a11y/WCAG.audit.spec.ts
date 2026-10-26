@@ -9306,7 +9306,10 @@ test.describe('WCAG 2.2 Level AA', () => {
         await expect(tab).toHaveAttribute('aria-controls', panelID)
         await expect(sidebar.getByRole('tabpanel')).toHaveCount(1)
         await tab.press('Tab')
-        await expect(panel).toBeFocused()
+        await expect(panel).not.toBeFocused()
+        await expect
+          .poll(() => panel.evaluate((element) => element.contains(document.activeElement)))
+          .toBe(true)
         if (name === 'Folders') {
           await expect(panel.getByRole('tree')).toBeVisible()
         }

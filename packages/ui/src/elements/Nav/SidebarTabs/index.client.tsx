@@ -226,7 +226,7 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
                 id={`${tabsID}-panel-${tab.slug}`}
                 key={tab.slug}
                 role="tabpanel"
-                tabIndex={0}
+                tabIndex={-1}
               >
                 <DelayedSpinner
                   baseClass={baseClass}
