@@ -264,6 +264,52 @@ describe('Auth', () => {
         expect(updatedUser?.salt).not.toBe(existingSalt)
       })
 
+      it('should rehash a 100k password hash to 600k after login', async () => {
+        const testEmail = '100k-password-hash@example.com'
+        const testPassword = 'test-password'
+        const existingSalt = crypto.randomBytes(32).toString('hex')
+        const existingHash = `pbkdf2-sha256-100k-v1:${crypto
+          .pbkdf2Sync(testPassword, existingSalt, 100000, 32, 'sha256')
+          .toString('hex')}`
+        const user = await payload.create({
+          collection: slug,
+          data: {
+            email: testEmail,
+            password: testPassword,
+          },
+        })
+        createdUserIDs.push(user.id)
+
+        await payload.db.updateOne({
+          collection: slug,
+          data: {
+            hash: existingHash,
+            salt: existingSalt,
+          },
+          id: user.id,
+        })
+
+        await payload.login({
+          collection: slug,
+          data: {
+            email: testEmail,
+            password: testPassword,
+          },
+        })
+
+        const updatedUser = await payload.db.findOne({
+          collection: slug,
+          select: {
+            hash: true,
+          },
+          where: {
+            id: { equals: user.id },
+          },
+        })
+
+        expect(updatedUser?.hash).toMatch(/^pbkdf2-sha256-v1:[a-f0-9]{64}$/)
+      })
+
       it('should preserve a password changed during login', async () => {
         const testEmail = 'password-change-during-login@example.com'
         const testPassword = 'test-password'
