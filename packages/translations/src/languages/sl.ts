@@ -630,6 +630,7 @@ export const slTranslations: DefaultTranslationsObject = {
     addFile: 'Dodaj datoteko',
     addFiles: 'Dodaj datoteke',
     bulkUpload: 'Množično nalaganje',
+    cancelUpload: 'Prekliči nalaganje',
     copyLinkToFile: 'Kopiraj povezavo do datoteke',
     copyURL: 'Kopiraj URL',
     crop: 'Obreži',
@@ -651,6 +652,7 @@ export const slTranslations: DefaultTranslationsObject = {
     fileSize: 'Velikost datoteke',
     filesToUpload: 'Datoteke za nalaganje',
     fileToUpload: 'Datoteka za nalaganje',
+    finishSaving: 'Dokončaj shranjevanje',
     focalPoint: 'Žarišče',
     focalPointDescription:
       'Povlecite žarišče neposredno na predogledu ali prilagodite vrednosti spodaj.',
@@ -665,12 +667,26 @@ export const slTranslations: DefaultTranslationsObject = {
     previewSizes: 'Velikosti predogleda',
     renameFile: 'Preimenuj datoteko',
     replaceFile: 'Zamenjaj datoteko',
+    resumingFile: 'Nadaljevanje {{filename}}',
+    savingInBackground: 'Nalaganje se bo končalo v ozadju in dokument bo takrat shranjen.',
     selectCollectionToBrowse: 'Izberite zbirko za brskanje',
     selectFile: 'Izberite datoteko',
     setCropArea: 'Nastavi območje obrezovanja',
     setFocalPoint: 'Nastavi žarišče',
     sizes: 'Velikosti',
     sizesFor: 'Velikosti za {{label}}',
+    uploadFileMismatch: 'Izbrana datoteka se ne ujema s prekinjenim nalaganjem.',
+    uploadingFile: 'Nalaganje datoteke {{filename}}',
+    uploadingFileProgress: 'Nalaganje datoteke {{filename}}: {{percent}} %',
+    uploadInProgressLeaveWarning: 'Nalaganje še poteka. Če zdaj zapustite stran, bo prekinjeno.',
+    uploadInterrupted: 'Nalaganje datoteke {{filename}} je bilo prekinjeno.',
+    uploadInterruptedWillSave:
+      'Nalaganje datoteke {{filename}} je bilo prekinjeno. Dokument bo shranjen, ko se konča.',
+    uploadReadyToFinishSaving:
+      'Datoteka {{filename}} je naložena. Odprite obrazec, da dokončate shranjevanje.',
+    uploadSavedInBackground: 'Nalaganje je končano in dokument je shranjen.',
+    uploadStorageRejectedSegments:
+      'Shramba ni sprejela nobenega dela nalaganja. Preverite pravilnik CORS za bucket.',
     width: 'Širina',
   },
   validation: {

@@ -640,6 +640,7 @@ export const huTranslations: DefaultTranslationsObject = {
     addFile: 'Fájl hozzáadása',
     addFiles: 'Fájlok hozzáadása',
     bulkUpload: 'Tömeges feltöltés',
+    cancelUpload: 'Feltöltés megszakítása',
     copyLinkToFile: 'Hivatkozás másolása a fájlhoz',
     copyURL: 'URL másolása',
     crop: 'Termés',
@@ -661,6 +662,7 @@ export const huTranslations: DefaultTranslationsObject = {
     fileSize: 'Fájl mérete',
     filesToUpload: 'Feltöltendő fájlok',
     fileToUpload: 'Feltöltendő fájl',
+    finishSaving: 'Mentés befejezése',
     focalPoint: 'Fókuszpont',
     focalPointDescription:
       'Húzza az érdekes pontot közvetlenül az előnézetre, vagy állítsa be az alábbi értékeket.',
@@ -675,12 +677,27 @@ export const huTranslations: DefaultTranslationsObject = {
     previewSizes: 'Előnézeti méretek',
     renameFile: 'Fájl átnevezése',
     replaceFile: 'Fájl cseréje',
+    resumingFile: '{{filename}} folytatása',
+    savingInBackground:
+      'A feltöltés a háttérben fejeződik be, és a dokumentum akkor kerül mentésre.',
     selectCollectionToBrowse: 'Válassza ki a böngészni kívánt gyűjteményt',
     selectFile: 'Válasszon ki egy fájlt',
     setCropArea: 'Állítsa be a vágási területet',
     setFocalPoint: 'Állítsa be a fókuszpontot',
     sizes: 'Méretek',
     sizesFor: 'Méretek a {{címke}} számára',
+    uploadFileMismatch: 'A kiválasztott fájl nem egyezik a megszakított feltöltéssel.',
+    uploadingFile: '{{filename}} feltöltése',
+    uploadingFileProgress: '{{filename}} feltöltése: {{percent}}%',
+    uploadInProgressLeaveWarning: 'Egy feltöltés még folyamatban van. Ha most kilép, megszakad.',
+    uploadInterrupted: 'A(z) {{filename}} feltöltése megszakadt.',
+    uploadInterruptedWillSave:
+      'A(z) {{filename}} feltöltése megszakadt. A dokumentum a feltöltés befejezésekor kerül mentésre.',
+    uploadReadyToFinishSaving:
+      'A(z) {{filename}} feltöltése befejeződött. Nyissa meg az űrlapot a mentés befejezéséhez.',
+    uploadSavedInBackground: 'A feltöltés befejeződött, és a dokumentum mentésre került.',
+    uploadStorageRejectedSegments:
+      'A tárhely egyetlen feltöltési részt sem fogadott el. Ellenőrizze a bucket CORS-szabályzatát.',
     width: 'Szélesség',
   },
   validation: {

@@ -633,6 +633,7 @@ export const svTranslations: DefaultTranslationsObject = {
     addFile: 'Lägg till fil',
     addFiles: 'Lägg till filer',
     bulkUpload: 'Massuppladdning',
+    cancelUpload: 'Avbryt uppladdning',
     copyLinkToFile: 'Kopiera länk till fil',
     copyURL: 'Kopiera URL',
     crop: 'Beskär',
@@ -654,6 +655,7 @@ export const svTranslations: DefaultTranslationsObject = {
     fileSize: 'Filstorlek',
     filesToUpload: 'Filer att ladda upp',
     fileToUpload: 'Fil att ladda upp',
+    finishSaving: 'Slutför sparande',
     focalPoint: 'Fokuspunkt',
     focalPointDescription:
       'Dra fokuspunkten direkt på förhandsgranskningen eller justera värdena nedan.',
@@ -668,12 +670,27 @@ export const svTranslations: DefaultTranslationsObject = {
     previewSizes: 'Förhandsgranska storlekar',
     renameFile: 'Byt namn på fil',
     replaceFile: 'Ersätt fil',
+    resumingFile: 'Återupptar {{filename}}',
+    savingInBackground: 'Uppladdningen slutförs i bakgrunden och dokumentet sparas då.',
     selectCollectionToBrowse: 'Välj en samling att bläddra i',
     selectFile: 'Välj en fil',
     setCropArea: 'Ange beskärning',
     setFocalPoint: 'Ställ in fokuspunkt',
     sizes: 'Storlekar',
     sizesFor: 'Storlekar för {{label}}',
+    uploadFileMismatch: 'Den valda filen matchar inte den avbrutna uppladdningen.',
+    uploadingFile: 'Laddar upp {{filename}}',
+    uploadingFileProgress: 'Laddar upp {{filename}}: {{percent}} %',
+    uploadInProgressLeaveWarning:
+      'En uppladdning pågår fortfarande. Om du lämnar sidan nu avbryts den.',
+    uploadInterrupted: 'Uppladdningen av {{filename}} avbröts.',
+    uploadInterruptedWillSave:
+      'Uppladdningen av {{filename}} avbröts. Dokumentet sparas när den är klar.',
+    uploadReadyToFinishSaving:
+      '{{filename}} har laddats upp. Öppna formuläret för att slutföra sparandet.',
+    uploadSavedInBackground: 'Uppladdningen är klar och dokumentet har sparats.',
+    uploadStorageRejectedSegments:
+      'Lagringen tog inte emot några delar av uppladdningen. Kontrollera bucketens CORS-policy.',
     width: 'Bredd',
   },
   validation: {

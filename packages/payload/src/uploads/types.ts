@@ -3,6 +3,7 @@ import type { PayloadComponent } from '../config/types.js'
 import type { UploadCollectionSlug } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { StagedObject } from './fileVersioning/fileOperationManager.js'
+import type { SegmentedUploadCapability, UploadSessionTransferConfig } from './sessions/types.js'
 
 export type OriginalFileData = {
   _objectKey?: string
@@ -352,6 +353,11 @@ export type UploadConfig = {
    */
   staticDir?: string
   /**
+   * Per-collection transfer preferences for segmented browser uploads.
+   * @experimental
+   */
+  transfer?: UploadSessionTransferConfig
+  /**
    * Adapter-provided upload instructions.
    * @internal
    */
@@ -403,6 +409,11 @@ export type UploadInstructionsCapability = {
   generate: GenerateUploadInstructions
   /** Require a signed server-issued reference before invoking upload handlers. @internal */
   requiresUploadReceipt?: boolean
+  /**
+   * Native multipart or resumable transfer used by durable upload sessions.
+   * @experimental
+   */
+  segmented?: SegmentedUploadCapability
   /**
    * Whether the Admin panel should use these instructions before saving a document.
    * This can still be useful when upload chunks pass through Payload.

@@ -627,6 +627,7 @@ export const etTranslations: DefaultTranslationsObject = {
     addFile: 'Lisa fail',
     addFiles: 'Lisa failid',
     bulkUpload: 'Massiüleslaadimine',
+    cancelUpload: 'Tühista üleslaadimine',
     copyLinkToFile: 'Kopeeri faili link',
     copyURL: 'Kopeeri URL',
     crop: 'Kärbi',
@@ -648,6 +649,7 @@ export const etTranslations: DefaultTranslationsObject = {
     fileSize: 'Failisuurus',
     filesToUpload: 'Üleslaetavad failid',
     fileToUpload: 'Üleslaetav fail',
+    finishSaving: 'Lõpeta salvestamine',
     focalPoint: 'Fookuspunkt',
     focalPointDescription: 'Lohista fookuspunkti otse eelvaatel või kohanda väärtusi allpool.',
     fromURL: 'Laadi fail üles URL-i kaudu',
@@ -661,12 +663,27 @@ export const etTranslations: DefaultTranslationsObject = {
     previewSizes: 'Eelvaate suurused',
     renameFile: 'Faili ümbernimetamine',
     replaceFile: 'Asendage fail',
+    resumingFile: 'Jätkatakse faili {{filename}}',
+    savingInBackground: 'Üleslaadimine lõpeb taustal ja dokument salvestatakse siis.',
     selectCollectionToBrowse: 'Vali kollektsioon sirvimiseks',
     selectFile: 'Vali fail',
     setCropArea: 'Määra kärpeala',
     setFocalPoint: 'Määra fookuspunkt',
     sizes: 'Suurused',
     sizesFor: 'Suurused {{label}} jaoks',
+    uploadFileMismatch: 'Valitud fail ei vasta katkestatud üleslaadimisele.',
+    uploadingFile: 'Laaditakse üles {{filename}}',
+    uploadingFileProgress: 'Laaditakse üles {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning:
+      'Üleslaadimine on veel pooleli. Kui lahkute praegu, see katkestatakse.',
+    uploadInterrupted: 'Faili {{filename}} üleslaadimine katkestati.',
+    uploadInterruptedWillSave:
+      'Faili {{filename}} üleslaadimine katkestati. Dokument salvestatakse, kui see lõpeb.',
+    uploadReadyToFinishSaving:
+      '{{filename}} on üles laaditud. Salvestamise lõpetamiseks avage vorm.',
+    uploadSavedInBackground: 'Üleslaadimine lõppes ja dokument salvestati.',
+    uploadStorageRejectedSegments:
+      'Salvestusruum ei võtnud vastu ühtegi üleslaadimise osa. Kontrollige bucketi CORS-poliitikat.',
     width: 'Laius',
   },
   validation: {

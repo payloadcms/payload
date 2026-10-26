@@ -39,6 +39,10 @@ import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadHandlers } from '../../providers/UploadHandlers/index.js'
+import {
+  UploadContinuesInBackgroundError,
+  useOptionalUploadSessions,
+} from '../../providers/UploadSessions/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { requests } from '../../utilities/api.js'
 import {
@@ -106,6 +110,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const { getFormState } = useServerFunctions()
   const { startRouteTransition } = useRouteTransition()
   const { getUploadHandler } = useUploadHandlers()
+  const uploadSessions = useOptionalUploadSessions()
 
   const { config } = useConfig()
 
@@ -251,6 +256,46 @@ export const Form: React.FC<FormProps> = (props) => {
     return isValid
   }, [collectionSlug, config, dispatchFields, id, operation, t, user, documentForm])
 
+  /**
+   * Validates the document on the server without saving it. The `file` field is skipped because
+   * its bytes are being uploaded separately and are never part of the form state sent here.
+   */
+  const getServerValidationErrors = useCallback(
+    async ({
+      formState,
+    }: {
+      formState: FormState
+    }): Promise<{ message: string; path: string }[]> => {
+      const result = await getFormState({
+        id,
+        collectionSlug,
+        docPermissions,
+        docPreferences: await getDocPreferences(),
+        formState,
+        globalSlug,
+        locale,
+        operation,
+        schemaPath: collectionSlug ? collectionSlug : globalSlug,
+        skipValidation: false,
+      })
+
+      return Object.entries(result?.state ?? {})
+        .filter(([path, field]) => path !== 'file' && field.valid === false)
+        .map(([path, field]) => ({ message: field.errorMessage ?? t('error:unknown'), path }))
+    },
+    [
+      collectionSlug,
+      docPermissions,
+      getDocPreferences,
+      getFormState,
+      globalSlug,
+      id,
+      locale,
+      operation,
+      t,
+    ],
+  )
+
   const submit = useCallback<Submit>(
     async (options, e) => {
       const {
@@ -352,8 +397,22 @@ export const Form: React.FC<FormProps> = (props) => {
         }
       }
 
-      const isValid =
+      let isValid =
         skipValidation || disableValidationOnSubmit ? true : await contextRef.current.validateForm()
+
+      // Document forms leave validation to the server, which would only answer after a large
+      // upload finishes. Ask it now so field errors show immediately while the upload continues.
+      const isWaitingOnUpload =
+        data?.file instanceof File && Boolean(uploadSessions?.isUploading({ file: data.file }))
+
+      if (isValid && isWaitingOnUpload && !skipValidation) {
+        const serverErrors = await getServerValidationErrors({ formState: serializableFormState })
+
+        if (serverErrors.length) {
+          dispatchFields({ type: 'ADD_SERVER_ERRORS', errors: serverErrors })
+          isValid = false
+        }
+      }
 
       setIsValid(isValid)
 
@@ -536,6 +595,12 @@ export const Form: React.FC<FormProps> = (props) => {
 
         return { formState: contextRef.current.fields, res }
       } catch (err) {
+        // The form unmounted during a large upload; the upload coordinator finishes the save.
+        if (err instanceof UploadContinuesInBackgroundError) {
+          successToast(t('upload:savingInBackground'))
+          return
+        }
+
         console.error('Error submitting form', err) // eslint-disable-line no-console
         setProcessing(false)
         setSubmitted(true)
@@ -559,6 +624,8 @@ export const Form: React.FC<FormProps> = (props) => {
       router,
       t,
       i18n,
+      getServerValidationErrors,
+      uploadSessions,
       validateDrafts,
       waitForAutocomplete,
       setModified,
@@ -602,10 +669,13 @@ export const Form: React.FC<FormProps> = (props) => {
             mimeType: file.type,
           })
         ) {
+          const intentData = mergeOverrideData ? { ...data, ...overrides } : overrides
+
           file = JSON.stringify(
             await handler({
               docPrefix: typeof data?.prefix === 'string' ? data.prefix : undefined,
               file,
+              intent: { data: intentData, draft: intentData?._status === 'draft' },
             }),
           )
         }

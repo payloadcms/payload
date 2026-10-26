@@ -636,6 +636,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     addFile: 'Adicionar arquivo',
     addFiles: 'Adicionar Arquivos',
     bulkUpload: 'Upload em Massa',
+    cancelUpload: 'Cancelar envio',
     copyLinkToFile: 'Copiar link para o arquivo',
     copyURL: 'Copiar URL',
     crop: 'Cultura',
@@ -657,6 +658,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     fileSize: 'Tamanho do Arquivo',
     filesToUpload: 'Arquivos para Carregar',
     fileToUpload: 'Arquivo para upload',
+    finishSaving: 'Concluir salvamento',
     focalPoint: 'Ponto Focal',
     focalPointDescription:
       'Arraste o ponto focal diretamente na pré-visualização ou ajuste os valores abaixo.',
@@ -671,12 +673,27 @@ export const ptTranslations: DefaultTranslationsObject = {
     previewSizes: 'Tamanhos de Pré-visualização',
     renameFile: 'Renomear arquivo',
     replaceFile: 'Substituir arquivo',
+    resumingFile: 'Retomando {{filename}}',
+    savingInBackground:
+      'O envio será concluído em segundo plano e o documento será salvo nesse momento.',
     selectCollectionToBrowse: 'Selecione uma Coleção para Navegar',
     selectFile: 'Selecione um arquivo',
     setCropArea: 'Definir área de corte',
     setFocalPoint: 'Definir ponto focal',
     sizes: 'Tamanhos',
     sizesFor: 'Tamanhos para {{label}}',
+    uploadFileMismatch: 'O arquivo selecionado não corresponde ao envio interrompido.',
+    uploadingFile: 'Enviando {{filename}}',
+    uploadingFileProgress: 'Enviando {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning: 'Um envio ainda está em andamento. Sair agora irá interrompê-lo.',
+    uploadInterrupted: 'O envio de {{filename}} foi interrompido.',
+    uploadInterruptedWillSave:
+      'O envio de {{filename}} foi interrompido. O documento será salvo quando ele terminar.',
+    uploadReadyToFinishSaving:
+      '{{filename}} terminou de ser enviado. Abra o formulário para concluir o salvamento.',
+    uploadSavedInBackground: 'O envio foi concluído e o documento foi salvo.',
+    uploadStorageRejectedSegments:
+      'O armazenamento não aceitou nenhuma parte do envio. Verifique a política CORS do bucket.',
     width: 'Largura',
   },
   validation: {

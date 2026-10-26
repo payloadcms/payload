@@ -2031,6 +2031,37 @@ azureStorage({
 
 Run `npx @payloadcms/codemod --transform migrate-azure-chunk-large-files` to remove the flag automatically (it collapses `clientUploads: { chunkLargeFiles: true }` to `clientUploads: true` and keeps any other `clientUploads` options).
 
+### S3 client uploads are enabled by default
+
+`@payloadcms/storage-s3` now uploads files directly from the browser to S3 unless you opt out. Files of 64MB or more use resumable multipart upload sessions, so an interrupted upload continues where it stopped instead of starting over.
+
+**This needs bucket configuration, not just a code change.** If your bucket has no CORS rule for your Admin origin, browser uploads will fail. Either add a CORS rule that allows:
+
+| Field           | Value                                             |
+| --------------- | ------------------------------------------------- |
+| Allowed origins | Your Admin origin (e.g. `https://example.com`)    |
+| Allowed methods | `PUT`                                             |
+| Allowed headers | `content-type`, `content-length`, `if-none-match` |
+
+or keep uploading through Payload:
+
+```diff
+s3Storage({
++ clientUploads: false,
+  // ...
+})
+```
+
+Also make sure the credentials Payload uses can create, list, complete and abort multipart uploads (`s3:PutObject`, `s3:ListMultipartUploadParts`, `s3:AbortMultipartUpload`), and consider a bucket lifecycle rule that aborts incomplete multipart uploads after a few days.
+
+Hooks that read file bytes from `req.file` during a client upload receive the file Payload downloads back from S3 only when a transformer or image size needs it. Hooks that must always have the full file in memory should set `clientUploads: false`.
+
+### Upload instructions require client uploads or local storage
+
+`POST /api/upload-instructions` now returns `400` for a collection that has neither client uploads nor local storage, for example `s3Storage({ clientUploads: false })`. Previously it returned a URL on Payload itself and kept the file in the server's temporary directory, which failed whenever the following document request reached a different server.
+
+The Admin Panel is not affected. If a custom client uses upload instructions for such a collection, send the file with the document request instead (multipart `file` field), or enable client uploads on the storage adapter. Collections with local storage keep working as before.
+
 ### Sharp is now an optional file transformer #sharp-moved-out-of-core-into-payloadcmstransformer-sharp
 
 Image resizing is no longer built into `payload` itself. It now ships as an official [file transformer](../upload/transformers), `@payloadcms/transformer-sharp`, that you register under `upload.transformers`.

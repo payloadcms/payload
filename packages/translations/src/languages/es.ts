@@ -640,6 +640,7 @@ export const esTranslations: DefaultTranslationsObject = {
     addFile: 'Añadir archivo',
     addFiles: 'Añadir archivos',
     bulkUpload: 'Subida en lotes',
+    cancelUpload: 'Cancelar carga',
     copyLinkToFile: 'Copiar enlace al archivo',
     copyURL: 'Copiar URL',
     crop: 'Recortar',
@@ -661,6 +662,7 @@ export const esTranslations: DefaultTranslationsObject = {
     fileSize: 'Tamaño del archivo',
     filesToUpload: 'Archivos para subir',
     fileToUpload: 'Archivo para subir',
+    finishSaving: 'Terminar de guardar',
     focalPoint: 'Punto Focal',
     focalPointDescription:
       'Arrastra el punto focal directamente en la vista previa o ajusta los valores a continuación.',
@@ -675,12 +677,27 @@ export const esTranslations: DefaultTranslationsObject = {
     previewSizes: 'Tamaños de Vista Previa',
     renameFile: 'Renombrar archivo',
     replaceFile: 'Reemplazar archivo',
+    resumingFile: 'Reanudando {{filename}}',
+    savingInBackground: 'La carga terminará en segundo plano y el documento se guardará entonces.',
     selectCollectionToBrowse: 'Selecciona una Colección para navegar',
     selectFile: 'Selecciona un archivo',
     setCropArea: 'Establecer área de recorte',
     setFocalPoint: 'Establecer punto focal',
     sizes: 'Tamaños',
     sizesFor: 'Tamaños para {{label}}',
+    uploadFileMismatch: 'El archivo seleccionado no coincide con la carga interrumpida.',
+    uploadingFile: 'Cargando {{filename}}',
+    uploadingFileProgress: 'Cargando {{filename}}: {{percent}} %',
+    uploadInProgressLeaveWarning:
+      'Todavía hay una carga en curso. Si sales ahora, se interrumpirá.',
+    uploadInterrupted: 'Se interrumpió la carga de {{filename}}.',
+    uploadInterruptedWillSave:
+      'Se interrumpió la carga de {{filename}}. El documento se guardará cuando termine.',
+    uploadReadyToFinishSaving:
+      '{{filename}} terminó de cargarse. Abre el formulario para terminar de guardar.',
+    uploadSavedInBackground: 'La carga terminó y el documento se guardó.',
+    uploadStorageRejectedSegments:
+      'El almacenamiento no aceptó ningún segmento de la carga. Revisa la política CORS del bucket.',
     width: 'Ancho',
   },
   validation: {

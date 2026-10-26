@@ -646,6 +646,7 @@ export const frTranslations: DefaultTranslationsObject = {
     addFile: 'Ajouter un fichier',
     addFiles: 'Ajouter des fichiers',
     bulkUpload: 'Téléchargement en masse',
+    cancelUpload: 'Annuler le téléversement',
     copyLinkToFile: 'Copier le lien vers le fichier',
     copyURL: 'Copier l’URL',
     crop: 'Recadrer',
@@ -667,6 +668,7 @@ export const frTranslations: DefaultTranslationsObject = {
     fileSize: 'Taille du fichier',
     filesToUpload: 'Fichiers à télécharger',
     fileToUpload: 'Fichier à télécharger',
+    finishSaving: "Terminer l'enregistrement",
     focalPoint: 'Point focal',
     focalPointDescription:
       'Faites glisser le point focal directement sur l’aperçu ou ajustez les valeurs ci-dessous.',
@@ -681,12 +683,28 @@ export const frTranslations: DefaultTranslationsObject = {
     previewSizes: 'Tailles d’aperçu',
     renameFile: 'Renommer le fichier',
     replaceFile: 'Remplacer le fichier',
+    resumingFile: 'Reprise de {{filename}}',
+    savingInBackground:
+      'Le téléversement se terminera en arrière-plan et le document sera alors enregistré.',
     selectCollectionToBrowse: 'Sélectionnez une collection à parcourir',
     selectFile: 'Sélectionnez un fichier',
     setCropArea: 'Définir la zone de recadrage',
     setFocalPoint: 'Définir le point focal',
     sizes: 'Tailles',
     sizesFor: 'Tailles pour {{label}}',
+    uploadFileMismatch: 'Le fichier sélectionné ne correspond pas au téléversement interrompu.',
+    uploadingFile: 'Téléversement de {{filename}}',
+    uploadingFileProgress: 'Téléversement de {{filename}} : {{percent}} %',
+    uploadInProgressLeaveWarning:
+      "Un téléversement est toujours en cours. Quitter maintenant l'interrompra.",
+    uploadInterrupted: 'Le téléversement de {{filename}} a été interrompu.',
+    uploadInterruptedWillSave:
+      'Le téléversement de {{filename}} a été interrompu. Le document sera enregistré une fois terminé.',
+    uploadReadyToFinishSaving:
+      "{{filename}} a été téléversé. Ouvrez le formulaire pour terminer l'enregistrement.",
+    uploadSavedInBackground: 'Le téléversement est terminé et le document a été enregistré.',
+    uploadStorageRejectedSegments:
+      "Le stockage n'a accepté aucun segment du téléversement. Vérifiez la politique CORS du bucket.",
     width: 'Largeur',
   },
   validation: {

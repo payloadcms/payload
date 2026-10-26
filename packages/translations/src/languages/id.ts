@@ -636,6 +636,7 @@ export const idTranslations: DefaultTranslationsObject = {
     addFile: 'Tambah file',
     addFiles: 'Tambah file',
     bulkUpload: 'Unggah Massal',
+    cancelUpload: 'Batalkan unggahan',
     copyLinkToFile: 'Salin tautan ke file',
     copyURL: 'Salin URL',
     crop: 'Pangkas',
@@ -657,6 +658,7 @@ export const idTranslations: DefaultTranslationsObject = {
     fileSize: 'Ukuran File',
     filesToUpload: 'File untuk Diunggah',
     fileToUpload: 'File untuk Diunggah',
+    finishSaving: 'Selesaikan penyimpanan',
     focalPoint: 'Titik Fokus',
     focalPointDescription:
       'Seret titik fokus langsung pada pratinjau atau sesuaikan nilai di bawah ini.',
@@ -671,12 +673,28 @@ export const idTranslations: DefaultTranslationsObject = {
     previewSizes: 'Ukuran Pratinjau',
     renameFile: 'Ganti nama file',
     replaceFile: 'Ganti berkas',
+    resumingFile: 'Melanjutkan {{filename}}',
+    savingInBackground:
+      'Unggahan akan selesai di latar belakang dan dokumen akan disimpan setelahnya.',
     selectCollectionToBrowse: 'Pilih Koleksi untuk Dijelajahi',
     selectFile: 'Pilih file',
     setCropArea: 'Atur area pangkas',
     setFocalPoint: 'Atur titik fokus',
     sizes: 'Ukuran',
     sizesFor: 'Ukuran untuk {{label}}',
+    uploadFileMismatch: 'File yang dipilih tidak cocok dengan unggahan yang terputus.',
+    uploadingFile: 'Mengunggah {{filename}}',
+    uploadingFileProgress: 'Mengunggah {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning:
+      'Unggahan masih berlangsung. Keluar sekarang akan menghentikannya.',
+    uploadInterrupted: 'Unggahan {{filename}} terputus.',
+    uploadInterruptedWillSave:
+      'Unggahan {{filename}} terputus. Dokumen akan disimpan setelah unggahan selesai.',
+    uploadReadyToFinishSaving:
+      '{{filename}} selesai diunggah. Buka formulir untuk menyelesaikan penyimpanan.',
+    uploadSavedInBackground: 'Unggahan selesai dan dokumen telah disimpan.',
+    uploadStorageRejectedSegments:
+      'Penyimpanan tidak menerima bagian unggahan apa pun. Periksa kebijakan CORS bucket.',
     width: 'Lebar',
   },
   validation: {

@@ -638,6 +638,7 @@ export const roTranslations: DefaultTranslationsObject = {
     addFile: 'Adaugă fișier',
     addFiles: 'Adăugați fișiere',
     bulkUpload: 'Încărcare în masă',
+    cancelUpload: 'Anulează încărcarea',
     copyLinkToFile: 'Copiați linkul către fișier',
     copyURL: 'Copiați URL-ul',
     crop: 'Cultură',
@@ -659,6 +660,7 @@ export const roTranslations: DefaultTranslationsObject = {
     fileSize: 'Dimensiunea fișierului',
     filesToUpload: 'Fișiere de încărcat',
     fileToUpload: 'Fișier de încărcat',
+    finishSaving: 'Finalizează salvarea',
     focalPoint: 'Punct central',
     focalPointDescription:
       'Trageți punctul focal direct pe previzualizare sau ajustați valorile de mai jos.',
@@ -673,12 +675,27 @@ export const roTranslations: DefaultTranslationsObject = {
     previewSizes: 'Dimensiuni Previzualizare',
     renameFile: 'Redenumiți fișierul',
     replaceFile: 'Înlocuiți fișierul',
+    resumingFile: 'Se reia {{filename}}',
+    savingInBackground: 'Încărcarea se va finaliza în fundal, iar documentul va fi salvat atunci.',
     selectCollectionToBrowse: 'Selectați o colecție pentru navigare',
     selectFile: 'Selectați un fișier',
     setCropArea: 'Setați zona de decupare',
     setFocalPoint: 'Setează punctul focal',
     sizes: 'Dimensiuni',
     sizesFor: 'Mărimi pentru {{label}}',
+    uploadFileMismatch: 'Fișierul selectat nu corespunde încărcării întrerupte.',
+    uploadingFile: 'Se încarcă {{filename}}',
+    uploadingFileProgress: 'Se încarcă {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning:
+      'O încărcare este încă în desfășurare. Dacă pleci acum, va fi întreruptă.',
+    uploadInterrupted: 'Încărcarea fișierului {{filename}} a fost întreruptă.',
+    uploadInterruptedWillSave:
+      'Încărcarea fișierului {{filename}} a fost întreruptă. Documentul va fi salvat când se termină.',
+    uploadReadyToFinishSaving:
+      '{{filename}} a fost încărcat. Deschide formularul pentru a finaliza salvarea.',
+    uploadSavedInBackground: 'Încărcarea s-a terminat și documentul a fost salvat.',
+    uploadStorageRejectedSegments:
+      'Spațiul de stocare nu a acceptat nicio parte a încărcării. Verifică politica CORS a bucket-ului.',
     width: 'Lățime',
   },
   validation: {

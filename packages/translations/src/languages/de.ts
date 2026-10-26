@@ -647,6 +647,7 @@ export const deTranslations: DefaultTranslationsObject = {
     addFile: 'Datei hinzufügen',
     addFiles: 'Dateien hinzufügen',
     bulkUpload: 'Mehrere Dateien hochladen',
+    cancelUpload: 'Upload abbrechen',
     copyLinkToFile: 'Link zum Datei kopieren',
     copyURL: 'URL kopieren',
     crop: 'Zuschneiden',
@@ -668,6 +669,7 @@ export const deTranslations: DefaultTranslationsObject = {
     fileSize: 'Dateigröße',
     filesToUpload: 'Dateien zum Hochladen',
     fileToUpload: 'Datei zum Hochladen',
+    finishSaving: 'Speichern abschließen',
     focalPoint: 'Fokuspunkt',
     focalPointDescription:
       'Setze den Fokuspunkt direkt auf der Vorschau oder passe die Werte unten an.',
@@ -682,12 +684,28 @@ export const deTranslations: DefaultTranslationsObject = {
     previewSizes: 'Bildgrößen anzeigen',
     renameFile: 'Datei umbenennen',
     replaceFile: 'Datei ersetzen',
+    resumingFile: '{{filename}} wird fortgesetzt',
+    savingInBackground:
+      'Der Upload wird im Hintergrund abgeschlossen und das Dokument dann gespeichert.',
     selectCollectionToBrowse: 'Eine Sammlung zum Durchsuchen auswählen',
     selectFile: 'Datei auswählen',
     setCropArea: 'Zuschneide-Bereich festlegen',
     setFocalPoint: 'Fokuspunkt setzen',
     sizes: 'Bildgrößen',
     sizesFor: 'Bildgrößen für {{label}}',
+    uploadFileMismatch: 'Die ausgewählte Datei stimmt nicht mit dem unterbrochenen Upload überein.',
+    uploadingFile: '{{filename}} wird hochgeladen',
+    uploadingFileProgress: '{{filename}} wird hochgeladen: {{percent}} %',
+    uploadInProgressLeaveWarning:
+      'Ein Upload läuft noch. Wenn du die Seite jetzt verlässt, wird er unterbrochen.',
+    uploadInterrupted: 'Der Upload von {{filename}} wurde unterbrochen.',
+    uploadInterruptedWillSave:
+      'Der Upload von {{filename}} wurde unterbrochen. Das Dokument wird gespeichert, sobald er abgeschlossen ist.',
+    uploadReadyToFinishSaving:
+      '{{filename}} wurde hochgeladen. Öffne das Formular, um das Speichern abzuschließen.',
+    uploadSavedInBackground: 'Der Upload ist abgeschlossen und das Dokument wurde gespeichert.',
+    uploadStorageRejectedSegments:
+      'Der Speicher hat keine Upload-Teile angenommen. Überprüfe die CORS-Richtlinie des Buckets.',
     width: 'Breite',
   },
   validation: {

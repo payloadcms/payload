@@ -638,6 +638,7 @@ export const trTranslations: DefaultTranslationsObject = {
     addFile: 'Dosya ekle',
     addFiles: 'Dosya Ekle',
     bulkUpload: 'Toplu Yükleme',
+    cancelUpload: 'Yüklemeyi iptal et',
     copyLinkToFile: 'Dosyanın bağlantısını kopyala',
     copyURL: 'URL’yi kopyala',
     crop: 'Mahsulat',
@@ -659,6 +660,7 @@ export const trTranslations: DefaultTranslationsObject = {
     fileSize: 'Dosya boyutu',
     filesToUpload: 'Yüklemek için Dosyalar',
     fileToUpload: 'Yüklenecek Dosya',
+    finishSaving: 'Kaydetmeyi tamamla',
     focalPoint: 'Odak Noktası',
     focalPointDescription:
       'Önizlemeye odak noktasını doğrudan sürükleyin veya aşağıdaki değerleri ayarlayın.',
@@ -673,12 +675,26 @@ export const trTranslations: DefaultTranslationsObject = {
     previewSizes: 'Önizleme Boyutları',
     renameFile: 'Dosyayı yeniden adlandır',
     replaceFile: 'Dosyayı değiştir',
+    resumingFile: '{{filename}} sürdürülüyor',
+    savingInBackground: 'Yükleme arka planda tamamlanacak ve belge o zaman kaydedilecek.',
     selectCollectionToBrowse: 'Görüntülenecek bir koleksiyon seçin',
     selectFile: 'Dosya seç',
     setCropArea: 'Mahsul alanını ayarla',
     setFocalPoint: 'Odak noktasını ayarla',
     sizes: 'Boyutlar',
     sizesFor: '{{label}} için boyutlar',
+    uploadFileMismatch: 'Seçilen dosya kesintiye uğrayan yüklemeyle eşleşmiyor.',
+    uploadingFile: '{{filename}} yükleniyor',
+    uploadingFileProgress: '{{filename}} yükleniyor: %{{percent}}',
+    uploadInProgressLeaveWarning:
+      'Bir yükleme hâlâ devam ediyor. Şimdi ayrılırsanız kesintiye uğrayacak.',
+    uploadInterrupted: '{{filename}} yüklemesi kesintiye uğradı.',
+    uploadInterruptedWillSave:
+      '{{filename}} yüklemesi kesintiye uğradı. Yükleme bittiğinde belge kaydedilecek.',
+    uploadReadyToFinishSaving: '{{filename}} yüklendi. Kaydetmeyi tamamlamak için formu açın.',
+    uploadSavedInBackground: 'Yükleme tamamlandı ve belge kaydedildi.',
+    uploadStorageRejectedSegments:
+      'Depolama hiçbir yükleme parçasını kabul etmedi. Bucket CORS politikasını kontrol edin.',
     width: 'Genişlik',
   },
   validation: {

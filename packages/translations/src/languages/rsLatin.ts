@@ -631,6 +631,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     addFile: 'Dodaj datoteku',
     addFiles: 'Dodaj Datoteke',
     bulkUpload: 'Masovno otpremanje',
+    cancelUpload: 'Otkaži otpremanje',
     copyLinkToFile: 'Kopiraj link ka fajlu',
     copyURL: 'Kopiraj URL',
     crop: 'Isecite sliku',
@@ -652,6 +653,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     fileSize: 'Veličina datoteke',
     filesToUpload: 'Fajlovi za Slanje',
     fileToUpload: 'Datoteka za otpremanje',
+    finishSaving: 'Završi čuvanje',
     focalPoint: 'Centralna tačka',
     focalPointDescription:
       'Prevucite središnju tačku direktno na pregled ili prilagodite vrednosti ispod.',
@@ -666,12 +668,27 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     previewSizes: 'Veličine pregleda',
     renameFile: 'Preimenujte fajl',
     replaceFile: 'Zamenite fajl',
+    resumingFile: 'Nastavlja se {{filename}}',
+    savingInBackground: 'Otpremanje će se završiti u pozadini i dokument će tada biti sačuvan.',
     selectCollectionToBrowse: 'Odaberite kolekciju za pregled',
     selectFile: 'Odaberite datoteku',
     setCropArea: 'Postavite područje za isečenu sliku',
     setFocalPoint: 'Postavite centralnu tačku',
     sizes: 'Veličine',
     sizesFor: 'Veličine za {{label}}',
+    uploadFileMismatch: 'Izabrana datoteka ne odgovara prekinutom otpremanju.',
+    uploadingFile: 'Otpremanje datoteke {{filename}}',
+    uploadingFileProgress: 'Otpremanje datoteke {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning:
+      'Otpremanje je još u toku. Ako sada napustite stranicu, biće prekinuto.',
+    uploadInterrupted: 'Otpremanje datoteke {{filename}} je prekinuto.',
+    uploadInterruptedWillSave:
+      'Otpremanje datoteke {{filename}} je prekinuto. Dokument će biti sačuvan kada se završi.',
+    uploadReadyToFinishSaving:
+      'Datoteka {{filename}} je otpremljena. Otvorite obrazac da završite čuvanje.',
+    uploadSavedInBackground: 'Otpremanje je završeno i dokument je sačuvan.',
+    uploadStorageRejectedSegments:
+      'Skladište nije prihvatilo nijedan deo otpremanja. Proverite CORS smernice bucket-a.',
     width: 'Širina',
   },
   validation: {

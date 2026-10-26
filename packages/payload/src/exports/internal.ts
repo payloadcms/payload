@@ -31,6 +31,18 @@ export { parseRangeHeader } from '../uploads/parseRangeHeader.js'
 export { externalURLInputSchema, resolveURLUploadInput } from '../uploads/resolveURLUploadInput.js'
 export type { ExternalURLInput } from '../uploads/resolveURLUploadInput.js'
 export {
+  cancelUploadSession,
+  completeUploadSession,
+  completeUploadSessionStorage,
+  createUploadSession,
+  getUploadSession,
+  getUploadSessionInstructions,
+  listUploadSessions,
+  sweepUploadSessions,
+} from '../uploads/sessions/operations.js'
+export { planSegments, shouldUseSegmentedUpload } from '../uploads/sessions/planSegments.js'
+export { uploadSessionsCollectionSlug } from '../uploads/sessions/slug.js'
+export {
   getUploadFilePath,
   getUploadTransformerInternal,
   setUploadFilePath,

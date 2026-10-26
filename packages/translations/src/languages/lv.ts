@@ -630,6 +630,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     addFile: 'Pievienot failu',
     addFiles: 'Pievienot failus',
     bulkUpload: 'Masveida augšupielāde',
+    cancelUpload: 'Atcelt augšupielādi',
     copyLinkToFile: 'Kopēt saiti uz failu',
     copyURL: 'Kopēt URL',
     crop: 'Apgriezt',
@@ -651,6 +652,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     fileSize: 'Faila izmērs',
     filesToUpload: 'Faili augšupielādei',
     fileToUpload: 'Fails augšupielādei',
+    finishSaving: 'Pabeigt saglabāšanu',
     focalPoint: 'Fokusa punkts',
     focalPointDescription:
       'Velciet fokusa punktu tieši priekšskatījumā vai pielāgojiet vērtības zemāk.',
@@ -665,12 +667,27 @@ export const lvTranslations: DefaultTranslationsObject = {
     previewSizes: 'Priekšskatījuma izmēri',
     renameFile: 'Pārsaukt failu',
     replaceFile: 'Aizstāt failu',
+    resumingFile: 'Atsāk {{filename}}',
+    savingInBackground: 'Augšupielāde tiks pabeigta fonā, un tad dokuments tiks saglabāts.',
     selectCollectionToBrowse: 'Izvēlieties kolekciju, ko pārlūkot',
     selectFile: 'Izvēlieties failu',
     setCropArea: 'Iestatīt apgriešanas apgabalu',
     setFocalPoint: 'Iestatīt fokusa punktu',
     sizes: 'Izmēri',
     sizesFor: 'Izmēri priekš {{label}}',
+    uploadFileMismatch: 'Atlasītais fails neatbilst pārtrauktajai augšupielādei.',
+    uploadingFile: 'Augšupielādē {{filename}}',
+    uploadingFileProgress: 'Augšupielādē {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning:
+      'Augšupielāde joprojām notiek. Ja aiziesiet tagad, tā tiks pārtraukta.',
+    uploadInterrupted: 'Faila {{filename}} augšupielāde tika pārtraukta.',
+    uploadInterruptedWillSave:
+      'Faila {{filename}} augšupielāde tika pārtraukta. Dokuments tiks saglabāts, kad tā būs pabeigta.',
+    uploadReadyToFinishSaving:
+      '{{filename}} ir augšupielādēts. Atveriet veidlapu, lai pabeigtu saglabāšanu.',
+    uploadSavedInBackground: 'Augšupielāde pabeigta, un dokuments tika saglabāts.',
+    uploadStorageRejectedSegments:
+      'Krātuve nepieņēma nevienu augšupielādes daļu. Pārbaudiet bucket CORS politiku.',
     width: 'Platums',
   },
   validation: {

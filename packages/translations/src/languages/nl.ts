@@ -640,6 +640,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     addFile: 'Bestand toevoegen',
     addFiles: 'Bestanden toevoegen',
     bulkUpload: 'Bulk Upload',
+    cancelUpload: 'Upload annuleren',
     copyLinkToFile: 'Kopieer link naar bestand',
     copyURL: 'Kopieer URL',
     crop: 'Bijsnijden',
@@ -661,6 +662,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     fileSize: 'Bestandsgrootte',
     filesToUpload: 'Bestanden om te uploaden',
     fileToUpload: 'Bestand om te uploaden',
+    finishSaving: 'Opslaan voltooien',
     focalPoint: 'Focuspunt',
     focalPointDescription:
       'Sleep het focuspunt rechtstreeks op de voorvertoning of pas de waarden hieronder aan.',
@@ -675,12 +677,28 @@ export const nlTranslations: DefaultTranslationsObject = {
     previewSizes: 'Voorbeeldgroottes',
     renameFile: 'Bestand hernoemen',
     replaceFile: 'Bestand vervangen',
+    resumingFile: '{{filename}} hervatten',
+    savingInBackground:
+      'De upload wordt op de achtergrond voltooid en het document wordt dan opgeslagen.',
     selectCollectionToBrowse: 'Selecteer een collectie om door te bladeren',
     selectFile: 'Selecteer een bestand',
     setCropArea: 'Stel bijsnijdgebied in',
     setFocalPoint: 'Stel het brandpunt in',
     sizes: 'Groottes',
     sizesFor: 'Maten voor {{label}}',
+    uploadFileMismatch: 'Het geselecteerde bestand komt niet overeen met de onderbroken upload.',
+    uploadingFile: '{{filename}} uploaden',
+    uploadingFileProgress: '{{filename}} uploaden: {{percent}}%',
+    uploadInProgressLeaveWarning:
+      'Er is nog een upload bezig. Als je nu weggaat, wordt deze onderbroken.',
+    uploadInterrupted: 'De upload van {{filename}} is onderbroken.',
+    uploadInterruptedWillSave:
+      'De upload van {{filename}} is onderbroken. Het document wordt opgeslagen zodra deze klaar is.',
+    uploadReadyToFinishSaving:
+      '{{filename}} is geüpload. Open het formulier om het opslaan te voltooien.',
+    uploadSavedInBackground: 'De upload is voltooid en het document is opgeslagen.',
+    uploadStorageRejectedSegments:
+      'De opslag heeft geen enkel uploaddeel geaccepteerd. Controleer het CORS-beleid van de bucket.',
     width: 'Breedte',
   },
   validation: {

@@ -15,6 +15,7 @@ import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { UploadControlsProvider, useUploadControls } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
+import { useFileFieldUploadSession } from '../../providers/UploadSessions/useFileFieldUploadSession.js'
 import { Button } from '../Button/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
@@ -175,12 +176,26 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
 
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const handleAdoptedFile = useCallback(
+    (file: File) => {
+      setValue(file)
+      setFilename(file.name)
+    },
+    [setValue],
+  )
+
+  const { onFileChange: onSessionFileChange } = useFileFieldUploadSession({
+    collectionSlug,
+    onAdopt: handleAdoptedFile,
+  })
+
   const handleFileChange = useCallback(
     ({ file, isNewFile = true }: { file: File | null; isNewFile?: boolean }) => {
       if (isNewFile && file instanceof File) {
         setFileSrc(URL.createObjectURL(file))
       }
 
+      onSessionFileChange({ file, isNewFile })
       setValue(file)
       setUploadControlFileUrl('')
       setUploadControlFileName(null)
@@ -190,7 +205,14 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
         onChange(file)
       }
     },
-    [onChange, setValue, setUploadControlFile, setUploadControlFileName, setUploadControlFileUrl],
+    [
+      onChange,
+      onSessionFileChange,
+      setValue,
+      setUploadControlFile,
+      setUploadControlFileName,
+      setUploadControlFileUrl,
+    ],
   )
 
   const renameFile = (fileToChange: File, newName: string): File => {

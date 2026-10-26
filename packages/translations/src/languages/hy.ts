@@ -636,6 +636,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     addFile: 'Ավելացնել ֆայլ',
     addFiles: 'Ավելացնել ֆայլեր',
     bulkUpload: 'Զանգվածային վերբեռնում',
+    cancelUpload: 'Չեղարկել վերբեռնումը',
     copyLinkToFile: 'Պատճենել հղումը ֆայլին',
     copyURL: 'Պատճենել URL-ը',
     crop: 'Կտրել',
@@ -657,6 +658,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     fileSize: 'Ֆայլի չափ',
     filesToUpload: 'Վերբեռնման ֆայլեր',
     fileToUpload: 'Վերբեռնման ֆայլ',
+    finishSaving: 'Ավարտել պահպանումը',
     focalPoint: 'Կիզակետ',
     focalPointDescription:
       'Քաշեք կիզակետը անմիջապես նախադիտման վրա կամ կարգավորեք ստորև նշված արժեքները։',
@@ -671,12 +673,27 @@ export const hyTranslations: DefaultTranslationsObject = {
     previewSizes: 'Նախադիտման չափեր',
     renameFile: 'Վերանվանել ֆայլը',
     replaceFile: 'Փոխարինել ֆայլը',
+    resumingFile: '{{filename}}-ի վերսկսում',
+    savingInBackground:
+      'Վերբեռնումը կավարտվի ֆոնային ռեժիմում, և փաստաթուղթը կպահպանվի այդ ժամանակ։',
     selectCollectionToBrowse: 'Ընտրեք հավաքածու՝ դիտելու համար',
     selectFile: 'Ընտրեք ֆայլ',
     setCropArea: 'Սահմանել կտրվող տարածքի չափը',
     setFocalPoint: 'Սահմանել կիզակետ',
     sizes: 'Չափեր',
     sizesFor: 'Չափեր {{label}}-ի համար',
+    uploadFileMismatch: 'Ընտրված ֆայլը չի համապատասխանում ընդհատված վերբեռնմանը։',
+    uploadingFile: '{{filename}}-ի վերբեռնում',
+    uploadingFileProgress: '{{filename}}-ի վերբեռնում՝ {{percent}}%',
+    uploadInProgressLeaveWarning: 'Վերբեռնումը դեռ ընթացքում է։ Եթե հիմա հեռանաք, այն կընդհատվի։',
+    uploadInterrupted: '{{filename}}-ի վերբեռնումն ընդհատվեց։',
+    uploadInterruptedWillSave:
+      '{{filename}}-ի վերբեռնումն ընդհատվեց։ Փաստաթուղթը կպահպանվի, երբ այն ավարտվի։',
+    uploadReadyToFinishSaving:
+      '{{filename}}-ի վերբեռնումն ավարտվեց։ Բացեք ձևը՝ պահպանումն ավարտելու համար։',
+    uploadSavedInBackground: 'Վերբեռնումն ավարտվեց, և փաստաթուղթը պահպանվեց։',
+    uploadStorageRejectedSegments:
+      'Պահոցը չընդունեց վերբեռնման ոչ մի հատված։ Ստուգեք bucket-ի CORS քաղաքականությունը։',
     width: 'Լայնություն',
   },
   validation: {

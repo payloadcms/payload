@@ -631,6 +631,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     addFile: 'ファイルを追加',
     addFiles: 'ファイルを追加する',
     bulkUpload: '一括アップロード',
+    cancelUpload: 'アップロードをキャンセル',
     copyLinkToFile: 'ファイルへのリンクをコピー',
     copyURL: 'URLをコピー',
     crop: 'クロップ',
@@ -652,6 +653,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     fileSize: 'ファイル容量',
     filesToUpload: 'アップロードするファイル',
     fileToUpload: 'アップロードするファイル',
+    finishSaving: '保存を完了',
     focalPoint: '焦点',
     focalPointDescription: 'プレビュー上で焦点を直接ドラッグするか、下の値を調整してください。',
     fromURL: 'URLからファイルをアップロード',
@@ -665,12 +667,27 @@ export const jaTranslations: DefaultTranslationsObject = {
     previewSizes: 'プレビューサイズ',
     renameFile: 'ファイル名を変更',
     replaceFile: 'ファイルを差し替える',
+    resumingFile: '{{filename}} を再開しています',
+    savingInBackground:
+      'アップロードはバックグラウンドで完了し、その時点でドキュメントが保存されます。',
     selectCollectionToBrowse: '閲覧するコレクションを選択',
     selectFile: 'ファイルを選択',
     setCropArea: 'クロップエリアを設定する',
     setFocalPoint: '焦点を設定する',
     sizes: '容量',
     sizesFor: '{{label}}のサイズ',
+    uploadFileMismatch: '選択したファイルは中断されたアップロードと一致しません。',
+    uploadingFile: '{{filename}} をアップロード中',
+    uploadingFileProgress: '{{filename}} をアップロード中: {{percent}}%',
+    uploadInProgressLeaveWarning: 'アップロードはまだ進行中です。今ページを離れると中断されます。',
+    uploadInterrupted: '{{filename}} のアップロードが中断されました。',
+    uploadInterruptedWillSave:
+      '{{filename}} のアップロードが中断されました。完了するとドキュメントが保存されます。',
+    uploadReadyToFinishSaving:
+      '{{filename}} のアップロードが完了しました。フォームを開いて保存を完了してください。',
+    uploadSavedInBackground: 'アップロードが完了し、ドキュメントが保存されました。',
+    uploadStorageRejectedSegments:
+      'ストレージがアップロードのパートを受け付けませんでした。バケットの CORS ポリシーを確認してください。',
     width: '横幅',
   },
   validation: {
