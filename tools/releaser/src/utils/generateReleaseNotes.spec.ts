@@ -129,4 +129,39 @@ describe('generateReleaseNotes', () => {
     expect(releaseNotes).not.toContain('###')
     expect(releaseNotes).not.toContain('v4.0.0-canary.8')
   })
+
+  it('should label notes with releaseTag for a HEAD range', async () => {
+    vi.stubGlobal('fetch', vi.fn())
+
+    const { changelog, releaseTag, releaseUrl } = await generateReleaseNotes({
+      fromVersion: 'v3.91.0',
+      releaseTag: 'v3.92.0',
+      toVersion: 'HEAD',
+    })
+
+    expect(releaseTag).toBe('v3.92.0')
+    expect(changelog).toContain('compare/v3.91.0...v3.92.0')
+    expect(releaseUrl).toContain('tag=v3.92.0')
+    expect(releaseUrl).not.toContain('prerelease=1')
+  })
+
+  it('should drop release bump commits from a HEAD range', async () => {
+    vi.mocked(getLatestCommits).mockResolvedValueOnce([releaseBumpCommit, featureCommit])
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({
+        ok: true,
+        json: async () => ({ author: { email: 'dev@example.com', login: 'dev' } }),
+      })),
+    )
+
+    const { changelog } = await generateReleaseNotes({
+      fromVersion: 'v4.0.0-canary.9',
+      releaseTag: 'v4.0.0-canary.11',
+      toVersion: 'HEAD',
+    })
+
+    expect(changelog).toContain('add a new field')
+    expect(changelog).not.toContain('v4.0.0-canary.10')
+  })
 })

@@ -18,11 +18,7 @@ concurrency:
 jobs:
   publish:
     name: publish-release-${{ github.ref_name }}
-    # A local `pnpm release` commits with [skip ci] and publishes itself, so its tag push
-    # must not start a second publish. The CI bump commit never carries [skip ci].
-    if: >-
-      github.repository == 'payloadcms/payload' &&
-      !contains(github.event.head_commit.message, '[skip ci]')
+    if: github.repository == 'payloadcms/payload'
     runs-on: ubuntu-26.04
     environment: release
     permissions:

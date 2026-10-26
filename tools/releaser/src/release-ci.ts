@@ -10,7 +10,6 @@
  * In --dry-run, build/publish/draft are skipped (logged); the dist-tag resolution
  * and read-only notes preview still run.
  */
-import { execSync } from 'child_process'
 import minimist from 'minimist'
 import semver from 'semver'
 import { pathToFileURL } from 'url'
@@ -22,7 +21,8 @@ import { findChangelogBaseTag } from './lib/findChangelogBaseTag.js'
 import { getPackageDetails } from './lib/getPackageDetails.js'
 import { getDistTagVersion, isVersionPublished } from './lib/getPackageRegistryVersions.js'
 import { getWorkspace } from './lib/getWorkspace.js'
-import { PINNED_MAJOR, pinnedMajorTagGlob, RELEASE_BRANCH } from './lib/pinnedMajor.js'
+import { listReleaseTags } from './lib/listReleaseTags.js'
+import { PINNED_MAJOR, RELEASE_BRANCH } from './lib/pinnedMajor.js'
 import { packagePublishList } from './lib/publishList.js'
 import { resolveStableDistTags } from './lib/stableDistTag.js'
 import {
@@ -156,17 +156,15 @@ async function main(): Promise<void> {
   const argv = minimist(process.argv.slice(2))
   const dryRun = Boolean(argv['dry-run'])
 
-  const listTags = (): string[] =>
-    execSync(`git tag --list '${pinnedMajorTagGlob}'`, { encoding: 'utf8' })
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean)
-
   await runReleaseCi({
     deps: {
       createDraftGitHubRelease,
       findChangelogBaseTag: ({ version }) =>
-        findChangelogBaseTag({ isPublished: isVersionPublished, listTags, version }),
+        findChangelogBaseTag({
+          isPublished: isVersionPublished,
+          listTags: listReleaseTags,
+          version,
+        }),
       generateReleaseNotes,
       hasGithubToken: Boolean(process.env.GITHUB_TOKEN),
       listPackageNames: async () =>
