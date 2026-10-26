@@ -217,7 +217,7 @@ export function buildPolicyType(args: BuildPolicyType): GraphQLObjectType {
     operations.push('readVersions')
   }
 
-  const globalTypeName = formatName(`${global?.graphQL?.name || slug}${typeSuffix || ''}`)
+  const globalTypeName = formatName(`${entity?.graphQL?.name || slug}${typeSuffix || ''}`)
 
   return new GraphQLObjectType({
     name: globalTypeName,
