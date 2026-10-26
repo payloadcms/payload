@@ -63,6 +63,10 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
+  auth: {
+    // Cloudflare Workers does not support more than 100,000 PBKDF2 iterations
+    passwordHashIterations: 100000,
+  },
   collections: [Users, Media],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
