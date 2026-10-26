@@ -39,20 +39,41 @@ describe('CLI error exit code handlers', () => {
     expect(console.error).toHaveBeenCalledWith(error)
   })
 
-  it('should preserve the JSON diagnostic when classifying an error', () => {
-    const output = vi.fn()
-    const cli = new Command().option('--json').configureOutput({ writeOut: output })
+  it.each([
+    { error: new EnvironmentError('Missing platform environment'), exitCode: 42 },
+    { error: new Error('Invalid user config'), exitCode: 1 },
+  ])(
+    'should preserve the JSON diagnostic and exit code $exitCode if a handler throws',
+    ({ error, exitCode }) => {
+      unregister?.()
+      const removeThrowingHandler = registerCLIExitCodeHandler({
+        handler: () => {
+          throw new Error('Classifier failed')
+        },
+      })
 
-    cli.setOptionValueWithSource('json', true, 'cli')
-    handleCLIError({ cli, error: new EnvironmentError('Missing platform environment') })
+      unregister = registerCLIExitCodeHandler({
+        handler: (error) => (error instanceof EnvironmentError ? 42 : undefined),
+      })
 
-    expect(process.exitCode).toBe(42)
-    expect(JSON.parse(output.mock.calls[0][0])).toMatchObject({
-      error: { code: 'COMMAND_FAILED', message: 'Missing platform environment' },
-      success: false,
-    })
-    expect(console.error).not.toHaveBeenCalled()
-  })
+      try {
+        const output = vi.fn()
+        const cli = new Command().option('--json').configureOutput({ writeOut: output })
+
+        cli.setOptionValueWithSource('json', true, 'cli')
+        handleCLIError({ cli, error })
+
+        expect(process.exitCode).toBe(exitCode)
+        expect(JSON.parse(output.mock.calls[0][0])).toMatchObject({
+          error: { code: 'COMMAND_FAILED', message: error.message },
+          success: false,
+        })
+        expect(console.error).not.toHaveBeenCalled()
+      } finally {
+        removeThrowingHandler()
+      }
+    },
+  )
 
   it('should leave ordinary errors and arbitrary causes unclassified', () => {
     const error = new Error('Invalid user config', {
@@ -73,9 +94,22 @@ describe('CLI error exit code handlers', () => {
     expect(console.error).not.toHaveBeenCalled()
   })
 
-  it('should stop classifying errors after the handler is removed', () => {
+  it('should remove repeated registrations independently', () => {
     unregister?.()
-    handleCLIError({ error: new EnvironmentError('Missing platform environment') })
+    const handler = () => 42
+    const removeFirst = registerCLIExitCodeHandler({ handler })
+
+    unregister = registerCLIExitCodeHandler({ handler })
+    removeFirst()
+    removeFirst()
+
+    const error = new EnvironmentError('Missing platform environment')
+
+    handleCLIError({ error })
+    expect(process.exitCode).toBe(42)
+
+    unregister()
+    handleCLIError({ error })
 
     expect(process.exitCode).toBe(1)
   })
