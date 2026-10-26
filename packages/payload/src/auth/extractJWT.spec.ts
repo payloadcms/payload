@@ -96,6 +96,28 @@ describe('extractJWT', () => {
       expect(extractJWT({ headers, payload: payload as BasePayload })).toBeNull()
     })
 
+    it('should reject a disallowed Origin even with a trusted Referer', () => {
+      const headers = makeHeaders({
+        Cookie: 'payload-token=abc',
+        Origin: 'https://attacker.com',
+        Referer: 'https://myapp.com/admin',
+      })
+      const payload = makePayload(['https://myapp.com'])
+
+      expect(extractJWT({ headers, payload: payload as BasePayload })).toBeNull()
+    })
+
+    it('should reject cross-site requests even with a trusted Referer', () => {
+      const headers = makeHeaders({
+        Cookie: 'payload-token=abc',
+        'Sec-Fetch-Site': 'cross-site',
+        Referer: 'https://myapp.com/admin',
+      })
+      const payload = makePayload(['https://myapp.com'])
+
+      expect(extractJWT({ headers, payload: payload as BasePayload })).toBeNull()
+    })
+
     it('rejects when Origin, Sec-Fetch-Site, and Referer are all absent and csrf is configured', () => {
       const headers = makeHeaders({
         Cookie: 'payload-token=abc',
