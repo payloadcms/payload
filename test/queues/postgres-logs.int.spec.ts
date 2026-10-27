@@ -18,9 +18,13 @@ test.suite(
     db: (adapter) => adapter.startsWith('postgres'),
   },
   () => {
+    test.afterEach(() => {
+      vitest.restoreAllMocks()
+    })
+
     test('ensure running jobs uses minimal db calls', async ({ payload }) => {
       await withoutAutoRun(async () => {
-        await payload.jobs.queue({
+        const job = await payload.jobs.queue({
           input: {
             message: 'test',
           },
@@ -34,7 +38,7 @@ test.suite(
         const res = await payload.jobs.run({ overrideAccess: true })
 
         expect(res).toEqual({
-          jobStatus: { '1': { status: 'success' } },
+          jobStatus: { [job.id]: { status: 'success' } },
           remainingJobsFromQueried: 0,
         })
         expect(consoleCount).toHaveBeenCalledTimes(16)
