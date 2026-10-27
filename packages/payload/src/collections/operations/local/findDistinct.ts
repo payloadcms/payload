@@ -22,6 +22,11 @@ export type Options<
   TField extends keyof DataFromCollectionSlug<TSlug>,
 > = {
   /**
+   * Read against a specific content branch instead of resolving one from the
+   * request. `false` bypasses branching entirely.
+   */
+  branch?: false | string
+  /**
    * the Collection slug to operate against.
    */
   collection: TSlug

@@ -4,6 +4,7 @@ import type { JsonObject, PayloadRequest, Where } from '../types/index.js'
 
 import { Locked } from '../errors/index.js'
 import { lockedDocumentsCollectionSlug } from '../locked-documents/config.js'
+import { markTransactionWrite } from './transactionMutationTracker.js'
 
 type CheckDocumentLockStatusArgs = {
   collectionSlug?: string
@@ -13,6 +14,7 @@ type CheckDocumentLockStatusArgs = {
   lockErrorMessage?: string
   overrideLock?: boolean
   req: PayloadRequest
+  shouldDeleteLock?: boolean
 }
 
 export const checkDocumentLockStatus = async ({
@@ -23,6 +25,7 @@ export const checkDocumentLockStatus = async ({
   lockErrorMessage,
   overrideLock = true,
   req,
+  shouldDeleteLock = true,
 }: CheckDocumentLockStatusArgs): Promise<void> => {
   const { payload } = req
 
@@ -70,6 +73,7 @@ export const checkDocumentLockStatus = async ({
       collection: lockedDocumentsCollectionSlug,
       limit: 1,
       pagination: false,
+      req: payload.db.name === 'mongoose' ? undefined : req,
       sort: '-updatedAt',
       where: lockedDocumentQuery,
     })
@@ -96,6 +100,10 @@ export const checkDocumentLockStatus = async ({
     }
   }
 
+  if (!shouldDeleteLock) {
+    return
+  }
+
   // Perform the delete operation regardless of overrideLock status
   await payload.db.deleteMany({
     collection: lockedDocumentsCollectionSlug,
@@ -103,6 +111,7 @@ export const checkDocumentLockStatus = async ({
     req: payload.db.name === 'mongoose' ? undefined : req,
     where: lockedDocumentQuery,
   })
+  markTransactionWrite({ req: payload.db.name === 'mongoose' ? undefined : req })
 }
 
 type BulkLockArgs = {
@@ -110,6 +119,16 @@ type BulkLockArgs = {
   ids: (number | string)[]
   req: PayloadRequest
 }
+
+type DocumentLockState = {
+  lockDocumentIDsByDocumentID: Map<string, (number | string)[]>
+  lockedDocumentIDs: Set<string>
+}
+
+type GetDocumentLockStateArgs = {
+  lockDurationDefault?: number
+  overrideLock?: boolean
+} & BulkLockArgs
 
 const buildBulkLockedDocumentQuery = (collectionSlug: string, ids: (number | string)[]): Where => ({
   and: [{ 'document.relationTo': { equals: collectionSlug } }, { 'document.value': { in: ids } }],
@@ -130,20 +149,20 @@ const isLockingAvailable = (collectionSlug: string, req: PayloadRequest): boolea
  * single query instead of one per document, and returns the ids that are locked by another user.
  * Callers are expected to report those ids as errors and leave them alone.
  */
-export const getLockedDocumentIds = async ({
+export const getDocumentLockState = async ({
   collectionSlug,
   ids,
   lockDurationDefault = 300, // Default 5 minutes in seconds
   overrideLock = true,
   req,
-}: {
-  lockDurationDefault?: number
-  overrideLock?: boolean
-} & BulkLockArgs): Promise<Set<string>> => {
-  const lockedIds = new Set<string>()
+}: GetDocumentLockStateArgs): Promise<DocumentLockState> => {
+  const lockState: DocumentLockState = {
+    lockDocumentIDsByDocumentID: new Map<string, (number | string)[]>(),
+    lockedDocumentIDs: new Set<string>(),
+  }
 
-  if (overrideLock || !ids.length || !isLockingAvailable(collectionSlug, req)) {
-    return lockedIds
+  if (!ids.length || !isLockingAvailable(collectionSlug, req)) {
+    return lockState
   }
 
   const { payload } = req
@@ -153,6 +172,7 @@ export const getLockedDocumentIds = async ({
     collection: lockedDocumentsCollectionSlug,
     limit: 0,
     pagination: false,
+    req: payload.db.name === 'mongoose' ? undefined : req,
     sort: '-updatedAt',
     where: buildBulkLockedDocumentQuery(collectionSlug, ids),
   })
@@ -167,6 +187,13 @@ export const getLockedDocumentIds = async ({
 
   for (const lockedDoc of lockedDocumentResult?.docs ?? []) {
     const documentId = String(lockedDoc.document?.value)
+    const lockDocumentIDs = lockState.lockDocumentIDsByDocumentID.get(documentId)
+
+    if (lockDocumentIDs) {
+      lockDocumentIDs.push(lockedDoc.id)
+    } else {
+      lockState.lockDocumentIDsByDocumentID.set(documentId, [lockedDoc.id])
+    }
 
     // Sorted by -updatedAt, so the first row seen for an id is its most recent lock
     if (resolved.has(documentId)) {
@@ -178,14 +205,25 @@ export const getLockedDocumentIds = async ({
 
     // document is locked by another user and the lock hasn't expired
     if (
+      !overrideLock &&
       lockedDoc.user?.value !== currentUserId &&
       now - lastEditedAt <= lockDurationInMilliseconds
     ) {
-      lockedIds.add(documentId)
+      lockState.lockedDocumentIDs.add(documentId)
     }
   }
 
-  return lockedIds
+  return lockState
+}
+
+export const getLockedDocumentIds = async (
+  args: GetDocumentLockStateArgs,
+): Promise<Set<string>> => {
+  if (args.overrideLock ?? true) {
+    return new Set<string>()
+  }
+
+  return (await getDocumentLockState(args)).lockedDocumentIDs
 }
 
 /**
@@ -195,11 +233,16 @@ export const getLockedDocumentIds = async ({
 export const deleteDocumentLocks = async ({
   collectionSlug,
   ids,
+  lockDocumentIDs,
   req,
-}: BulkLockArgs): Promise<void> => {
+}: { lockDocumentIDs?: (number | string)[] } & BulkLockArgs): Promise<void> => {
   const { payload } = req
 
-  if (!ids.length || !isLockingAvailable(collectionSlug, req)) {
+  if (
+    !ids.length ||
+    (lockDocumentIDs && !lockDocumentIDs.length) ||
+    !isLockingAvailable(collectionSlug, req)
+  ) {
     return
   }
 
@@ -207,6 +250,9 @@ export const deleteDocumentLocks = async ({
     collection: lockedDocumentsCollectionSlug,
     // Not passing req fails on postgres
     req: payload.db.name === 'mongoose' ? undefined : req,
-    where: buildBulkLockedDocumentQuery(collectionSlug, ids),
+    where: lockDocumentIDs
+      ? { id: { in: lockDocumentIDs } }
+      : buildBulkLockedDocumentQuery(collectionSlug, ids),
   })
+  markTransactionWrite({ req: payload.db.name === 'mongoose' ? undefined : req })
 }

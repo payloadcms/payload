@@ -1,6 +1,7 @@
 import type { PayloadRequest } from '../types/index.js'
 import type { BranchOperation, SanitizedBranchingConfig } from './types.js'
 
+import { getDataLoader } from '../collections/dataloader.js'
 import { branchesCollectionSlug, MAIN_BRANCH } from './types.js'
 
 /**
@@ -242,6 +243,29 @@ export const loadBranchOperation = async ({
 }
 
 /**
+ * A copy of the request that can resolve a branch of its own.
+ *
+ * The resolved branch and its manifest are memoized on `req.context`, so one
+ * request reads one branch — an explicit `branch` argument passed alongside a
+ * request that has already resolved a different one is otherwise accepted and
+ * ignored. Reading the same document on two branches, as a diff does, therefore
+ * needs a request per branch.
+ *
+ * The copy carries the transaction, the user and the locale, so it is the same
+ * request in every respect but the branch. Its dataloader is its own, because
+ * the dataloader's cache key does not include the branch and would otherwise
+ * serve one branch's document to the other.
+ */
+export const isolateBranchState = (req: PayloadRequest): PayloadRequest => {
+  const isolated = { ...req, context: { ...req.context }, headers: req.headers } as PayloadRequest
+
+  resetBranchState(isolated)
+  isolated.payloadDataLoader = getDataLoader(isolated)
+
+  return isolated
+}
+
+/**
  * The branch's own row, read once per request.
  *
  * Three separate checks want it — whether the branch is closed, whether a merged branch
@@ -284,6 +308,65 @@ export const loadBranchRow = async ({
   return row
 }
 
+/** Replaces the memoized branch row after something changed it. */
+export const setBranchRow = ({
+  branch,
+  req,
+  row,
+}: {
+  branch: string
+  req: PayloadRequest
+  row: null | Record<string, unknown>
+}): void => {
+  const context = req.context as Record<string, unknown> | undefined
+  const state = context?.[stateKey] as BranchState | undefined
+
+  if (state && state.branch === branch) {
+    state.branchRow = row
+  }
+}
+
+/**
+ * Records a newly forked document in the memoized manifest.
+ *
+ * Cheaper than dropping the manifest and reloading it, which is what a fork used to do:
+ * the manifest needs to know the branch now shadows this document, and that is one ID —
+ * not a reason to re-read every change row on the branch. Reads later in the same request
+ * then exclude main's copy without a second query.
+ */
+export const addToBranchManifest = ({
+  collectionSlug,
+  docID,
+  operation,
+  req,
+}: {
+  collectionSlug: string
+  docID: number | string
+  operation: BranchOperation
+  req: PayloadRequest
+}): void => {
+  const context = req.context as Record<string, unknown> | undefined
+  const state = context?.[stateKey] as BranchState | undefined
+
+  // Not loaded yet is the common case on a write-only request: the next read loads it
+  // fresh, and it will include this document.
+  if (!state?.manifestLoaded) {
+    return
+  }
+
+  const existing = state.manifest.get(collectionSlug)
+
+  if (existing) {
+    if (!existing.some((id) => String(id) === String(docID))) {
+      existing.push(docID)
+    }
+  } else {
+    state.manifest.set(collectionSlug, [docID])
+  }
+
+  state.operations.set(`${collectionSlug}:${String(docID)}`, operation)
+}
+
 /** The shadow row ID this request has already resolved for a canonical ID, if any. */
 export const peekBranchRowID = ({
   collectionSlug,
@@ -318,6 +401,44 @@ export const rememberBranchRowID = ({
   state?.rowIDs.set(`${collectionSlug}:${docID}`, rowID)
 }
 
+/**
+ * The same request with branch resolution switched off.
+ *
+ * For the engines that write to `main` on a branch's behalf — merge and discard. They
+ * address shadow rows by their real primary keys and write production, so every write
+ * they make must bypass branch resolution. Passing `branch: false` per call is one
+ * omission away from a silent no-op: the merge-create promotion goes through
+ * `updateByIDOperation`, which takes no `branch` argument at all and reads the request,
+ * so a merge triggered over HTTP with `?branch=` resolved that write against the branch
+ * it was merging.
+ *
+ * Isolated rather than mutated, because the caller's request keeps its own branch — the
+ * HTTP handler still has a response to render on it.
+ */
+export const withoutBranch = (req: PayloadRequest): PayloadRequest => {
+  const isolated = isolateBranchState(req)
+
+  // The same sentinel `createPayloadRequest({ branch: false })` sets, rather than a `branch`
+  // of our own: `req.branch` alone is not enough, because resolution falls back to the
+  // query string behind it.
+  isolated.branch = undefined
+  ;(isolated.context as Record<string, unknown>)._branchBypass = true
+
+  return isolated
+}
+
+/**
+ * The branch this request has already resolved, or `undefined` if it has not.
+ *
+ * Deliberately does not resolve: callers use this to find out whether they are about to
+ * *change* the branch, and resolving here would create the state they are checking for.
+ */
+export const peekResolvedBranch = (req?: Partial<PayloadRequest>): string | undefined => {
+  const context = req?.context as Record<string, unknown> | undefined
+
+  return (context?.[stateKey] as BranchState | undefined)?.branch
+}
+
 /** Clears memoized branch state, for tests and for cross-branch reads. */
 export const resetBranchState = (req: PayloadRequest): void => {
   const context = req.context as Record<string, unknown> | undefined
@@ -325,6 +446,17 @@ export const resetBranchState = (req: PayloadRequest): void => {
   if (context) {
     delete context[stateKey]
   }
+}
+
+/** Clears memoized branch and document state after a write changes what this request can read. */
+export const refreshBranchState = (req: PayloadRequest): void => {
+  resetBranchState(req)
+  refreshRequestDataLoader(req)
+}
+
+/** Clears documents cached while populating relationships on this request. */
+export const refreshRequestDataLoader = (req: PayloadRequest): void => {
+  req.payloadDataLoader = getDataLoader(req)
 }
 
 /**

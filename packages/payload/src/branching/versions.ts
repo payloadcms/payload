@@ -416,3 +416,59 @@ export const projectBranchVersionParent = (row: Record<string, unknown>): number
   (extractRelationshipID({ relationship: row?.[branchParentField] }) ?? row?.parent) as
     | number
     | string
+
+/**
+ * The version rows this branch owns for one document.
+ *
+ * Every operation that reaches into an existing version chain needs this, not just
+ * deletes: a cascade after a delete, pruning to `maxPerDoc`, and rewriting the latest
+ * row on unpublish are all the same question — which rows belong to the branch doing
+ * the writing.
+ *
+ * Deleting a document cascades to its versions by `parent`. On a branch that is
+ * destructive: the delete becomes a tombstone rather than a real delete, but the
+ * cascade still names the canonical ID — which is main's `parent` — so main loses
+ * its version chain while its row survives. A published document then vanishes
+ * from main's own drafts list, and nothing about the branch says why.
+ *
+ * Adding `_branch` makes the cascade hit only the rows belonging to the branch in
+ * play. It also protects a branch's chain from a delete performed on main, whose
+ * versions share no `parent` with it but are cheap to exclude explicitly.
+ */
+export const resolveBranchOwnVersions = async ({
+  id,
+  branch: branchOverride,
+  collectionSlug,
+  req,
+}: {
+  branch?: false | string
+  collectionSlug: string
+  id: number | string
+  req?: Partial<PayloadRequest>
+}): Promise<Where> => {
+  const unscoped: Where = { parent: { equals: id } }
+
+  if (bypassed(branchOverride, req)) {
+    return unscoped
+  }
+
+  const branching = req!.payload!.config?.branching
+
+  if (!branching?.enabled || !branching.branchableCollections.has(collectionSlug)) {
+    return unscoped
+  }
+
+  const branch = branchOverride ?? resolveBranch(req as PayloadRequest)
+
+  if (branch === MAIN_BRANCH) {
+    return { and: [unscoped, { [branchField]: { equals: MAIN_BRANCH } }] }
+  }
+
+  // The branch's own versions hang off its shadow row, so the cascade has to
+  // address that row rather than the canonical ID. When the branch has no copy
+  // yet, `resolveBranchRowID` returns the canonical ID — and the `_branch`
+  // constraint is what then keeps the cascade off main's rows.
+  const rowID = await resolveBranchRowID({ id, collectionSlug, req })
+
+  return { and: [{ parent: { equals: rowID } }, { [branchField]: { equals: branch } }] }
+}
