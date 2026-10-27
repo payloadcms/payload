@@ -92,6 +92,11 @@
   line-height: var(--text-body-medium-bold-line-height);
 }
 
+/* Bulk actions join distinct reasons with newlines. Keep each one on its own line. */
+.payload-toast-container [data-description] {
+  white-space: pre-line;
+}
+
 /* Sonner forces [data-icon] to 16px; use a --spacer-4 (24px) box so our icons fit. */
 .payload-toast-container .payload-toast-item .toast-icon {
   position: relative;

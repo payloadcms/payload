@@ -14,6 +14,7 @@ import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
+import { formatBulkErrorDescription } from '../../utilities/bulkErrorMessages.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 
@@ -138,7 +139,7 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
 
             if (json?.errors.length > 0) {
               toast.error(json.message, {
-                description: json.errors.map((error) => error.message).join('\n'),
+                description: formatBulkErrorDescription({ errors: json.errors }),
               })
             }
 
@@ -161,8 +162,10 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
             return null
           }
 
-          if (json.errors) {
-            json.errors.forEach((error) => toast.error(error.message))
+          if (Array.isArray(json.errors) && json.errors.length > 0) {
+            toast.error(json.message || t('error:unknown'), {
+              description: formatBulkErrorDescription({ errors: json.errors }),
+            })
           } else {
             addDefaultError()
           }
