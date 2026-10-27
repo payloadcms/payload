@@ -87,6 +87,17 @@ export default buildConfig({
   bundled JavaScript is kept to a minimum for your project.
 </Banner>
 
+### Text direction
+
+Payload sets the Admin Panel's text direction for you based on the user's selected language:
+
+- **Right-to-left (RTL):** Arabic (`ar`), Persian (`fa`), and Hebrew (`he`).
+- **Left-to-right (LTR):** All other supported languages.
+
+To enable an RTL language, add it to `i18n.supportedLanguages`. There's no extra configuration needed.
+
+Text direction follows the language used for the admin interface, independently of the locale used to edit your content.
+
 ### Custom Translations
 
 You can customize Payload's built-in translations either by extending existing languages or by adding new languages entirely. This can be done by injecting new translation strings into existing languages, or by providing an entirely new language keys altogether.

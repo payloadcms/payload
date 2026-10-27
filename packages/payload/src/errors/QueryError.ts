@@ -11,5 +11,6 @@ export class QueryError extends APIError<{ path: string }[]> {
       httpStatus.BAD_REQUEST,
       results,
     )
+    this.name = 'QueryError'
   }
 }

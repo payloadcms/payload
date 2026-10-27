@@ -230,6 +230,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "_objectkey": {
+          "name": "_objectkey",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
         "updated_at": {
           "name": "updated_at",
           "type": "timestamp(3) with time zone",
@@ -940,6 +946,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "8995ec1a-0b47-4963-9a5d-88dfc3f953e3",
+  "id": "64ab32ec-2006-48b1-b800-19ac4a13c242",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

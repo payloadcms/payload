@@ -8,7 +8,7 @@ import { drizzle } from 'drizzle-orm/libsql'
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { flattenAllFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
-import { afterAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { DrizzleAdapter, GenericTable } from '../types.js'
 
@@ -27,6 +27,12 @@ const articlesTable = sqliteTable('join_articles', {
   parent: integer('parent_id'),
   score: integer('score'),
   title: text('title'),
+})
+
+const articlesLocalesTable = sqliteTable('join_articles_locales', {
+  _parentID: integer('_parent_id'),
+  _locale: text('_locale'),
+  _status: text('_status'),
 })
 
 const notesTable = sqliteTable('join_notes', {
@@ -127,7 +133,9 @@ const buildQuery = ({
   adapter: adapterArg = adapter,
   field = joinField,
   limit = 0,
+  locale,
   page,
+  pageSize,
   path = '',
   shouldCount = false,
   sort,
@@ -136,7 +144,9 @@ const buildQuery = ({
   adapter?: DrizzleAdapter
   field?: FlattenedJoinField
   limit?: number
+  locale?: string
   page?: number
+  pageSize?: number
   path?: string
   shouldCount?: boolean
   sort?: string | string[]
@@ -147,7 +157,9 @@ const buildQuery = ({
     currentTableName: getTableName(parentsTable),
     field,
     limit,
+    locale,
     page,
+    pageSize,
     path,
     shouldCount,
     sort,
@@ -167,6 +179,110 @@ const renderQuery = (query: ReturnType<typeof buildPolymorphicJoinQuery>) => {
 afterAll(() => client.close())
 
 describe('buildPolymorphicJoinQuery', () => {
+  describe('localized filters', () => {
+    const localizedAdapter = createAdapter({
+      articles: {
+        fields: [
+          { name: 'parent', relationTo: 'join-parents', type: 'relationship' },
+          { name: '_status', type: 'select', localized: true, options: ['draft', 'published'] },
+        ],
+        table: articlesTable,
+      },
+      notes: {
+        fields: [{ name: 'parent', relationTo: 'join-parents', type: 'relationship' }],
+        table: notesTable,
+      },
+    })
+
+    localizedAdapter.localesSuffix = '_locales'
+    localizedAdapter.tables.join_articles_locales = articlesLocalesTable
+
+    beforeAll(async () => {
+      await client.executeMultiple(`
+        CREATE TABLE join_parents (id INTEGER PRIMARY KEY);
+        CREATE TABLE join_articles (
+          id INTEGER PRIMARY KEY, parent_id INTEGER, created_at TEXT,
+          details_rank INTEGER, score INTEGER, title TEXT
+        );
+        CREATE TABLE join_notes (id INTEGER PRIMARY KEY, parent_id INTEGER, title TEXT);
+        CREATE TABLE join_articles_locales (_parent_id INTEGER, _locale TEXT, _status TEXT);
+        INSERT INTO join_parents VALUES (1);
+        INSERT INTO join_articles (id, parent_id) VALUES (1, 1), (2, 1), (3, 1);
+        INSERT INTO join_notes (id, parent_id) VALUES (4, 1);
+        INSERT INTO join_articles_locales VALUES
+          (1, 'en', 'published'), (1, 'fr', 'draft'),
+          (2, 'en', 'draft'), (2, 'fr', 'published'),
+          (3, 'en', 'published'), (3, 'fr', 'published');
+      `)
+    })
+
+    it.each([
+      { locale: 'en', ids: [1, 3] },
+      { locale: 'fr', ids: [2, 3] },
+    ])('should filter published documents in locale $locale', async ({ locale, ids }) => {
+      const query = buildQuery({
+        adapter: localizedAdapter,
+        locale,
+        shouldCount: true,
+        sort: 'id',
+        where: { _status: { equals: 'published' } },
+      })
+      const [result] = await db
+        .select({ documents: query.documents, count: query.count! })
+        .from(parentsTable)
+
+      expect(JSON.parse(result.documents as string)).toEqual(
+        ids.map((id) => ({ id, relationTo: 'articles' })),
+      )
+      expect(result.count).toBe(2)
+    })
+
+    it.each(['all', undefined])(
+      'should count matching documents once across locales with locale %s',
+      async (locale) => {
+        const query = buildQuery({
+          adapter: localizedAdapter,
+          locale,
+          shouldCount: true,
+          sort: 'id',
+          where: { _status: { equals: 'published' } },
+        })
+        const [result] = await db
+          .select({ documents: query.documents, count: query.count! })
+          .from(parentsTable)
+
+        expect(JSON.parse(result.documents as string)).toEqual([
+          { id: 1, relationTo: 'articles' },
+          { id: 2, relationTo: 'articles' },
+          { id: 3, relationTo: 'articles' },
+        ])
+        expect(result.count).toBe(3)
+      },
+    )
+
+    it('should paginate distinct documents using the page size before the look-ahead row', async () => {
+      const query = buildQuery({
+        adapter: localizedAdapter,
+        limit: 2,
+        locale: 'all',
+        page: 2,
+        pageSize: 1,
+        shouldCount: true,
+        sort: 'id',
+        where: { _status: { equals: 'published' } },
+      })
+      const [result] = await db
+        .select({ documents: query.documents, count: query.count! })
+        .from(parentsTable)
+
+      expect(JSON.parse(result.documents as string)).toEqual([
+        { id: 2, relationTo: 'articles' },
+        { id: 3, relationTo: 'articles' },
+      ])
+      expect(result.count).toBe(3)
+    })
+  })
+
   it('combines every target into one fixed polymorphic document projection', () => {
     const result = buildQuery({ path: 'content.' })
     const query = renderQuery(result)

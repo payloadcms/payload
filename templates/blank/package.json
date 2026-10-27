@@ -32,7 +32,7 @@
     "sharp": "0.35.4"
   },
   "devDependencies": {
-    "@playwright/test": "1.58.2",
+    "@playwright/test": "1.63.0",
     "@testing-library/react": "16.3.0",
     "@types/node": "22.19.9",
     "@types/react": "19.2.14",
@@ -48,7 +48,7 @@
     "vitest": "4.0.18"
   },
   "engines": {
-    "node": ">=20.18.1",
+    "node": "^22.23.4 || >=24.22.1",
     "pnpm": "^9 || ^10 || ^11"
   },
   "pnpm": {

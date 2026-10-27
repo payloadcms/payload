@@ -1797,6 +1797,7 @@ export {
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
+export { CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY } from './uploads/getFileFromClientUpload.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
 
 export type * from './uploads/types.js'
