@@ -20,7 +20,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
   const branchDelete = await resolveBranchDelete({ branch, collectionSlug, req, where })
 
   if (branchDelete.tombstoned) {
-    return returning === false ? null : (branchDelete.doc as any)
+    return returning === false ? null : (branchDelete.doc as Awaited<ReturnType<DeleteOne>>)
   }
 
   if (branchDelete.deleteRowID !== undefined) {

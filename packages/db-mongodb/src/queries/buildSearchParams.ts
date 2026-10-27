@@ -420,7 +420,7 @@ export async function buildSearchParam({
           payload,
           req,
           where: relatedWhere ?? {},
-        })) as QueryFilter<any>
+        })) as QueryFilter<Record<string, unknown>>
 
         /**
          * Follow this join back to its parent IDs.
