@@ -21,7 +21,7 @@ import { getFileContentRequirement, HEADER_PROBE_BYTE_LENGTH } from './getFileCo
 import { getImageSize } from './getImageSize.js'
 import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
 import { getStagedFile } from './stagedUpload.js'
-import { planTransformerPipeline } from './transformers/planTransformerPipeline.js'
+import { getCandidateTransformers } from './transformers/planTransformerPipeline.js'
 import { getUploadTransformerInternal } from './transformers/uploadTransformerBridge.js'
 
 export const getFileFromUploadInstructions = async ({
@@ -171,11 +171,7 @@ export const getFileFromUploadInstructions = async ({
 
   const contentRequirement = getFileContentRequirement({
     hasSizeEdits: requestHasSizeEdits(req),
-    hasTransformFileStages: await hasTransformFileStages({
-      collectionSlug,
-      mimeType: file.mimeType,
-      req,
-    }),
+    hasTransformFileStages: hasTransformFileStages({ mimeType: file.mimeType, req }),
     mimeType: file.mimeType,
     uploadConfig,
   })
@@ -275,33 +271,25 @@ const requestHasSizeEdits = (req: PayloadRequest): boolean => {
 }
 
 /**
- * Whether a transformer that reads the whole file will run `transformFile` on this upload. A
+ * Whether a transformer that reads the whole file could run `transformFile` on this upload. A
  * bridge transformer (e.g. `sharpTransformer`) is excluded: it projects what it needs onto the
  * sanitized upload config (`hasImageAdjustments`, `variants`) at startup instead.
+ *
+ * Matches by MIME type only. `canTransform` needs the document, which does not exist yet at
+ * this point, so a transformer that would decline the upload still causes a full fetch.
  */
-const hasTransformFileStages = async ({
-  collectionSlug,
+const hasTransformFileStages = ({
   mimeType,
   req,
 }: {
-  collectionSlug: string
   mimeType: string
   req: PayloadRequest
-}): Promise<boolean> => {
-  const transformers = req.payload.config.upload?.transformers ?? []
-
-  if (transformers.length === 0) {
-    return false
-  }
-
-  const pipeline = await planTransformerPipeline({
-    args: { collectionSlug, mimeType, operation: 'upload', req },
+}): boolean =>
+  getCandidateTransformers({
     capability: 'transformFile',
-    transformers,
-  })
-
-  return pipeline.some((transformer) => !getUploadTransformerInternal(transformer)?.prepareUpload)
-}
+    mimeType,
+    transformers: req.payload.config.upload?.transformers ?? [],
+  }).some((transformer) => !getUploadTransformerInternal(transformer)?.prepareUpload)
 
 /**
  * Fetches only the first `HEADER_PROBE_BYTE_LENGTH` bytes of the upload (via a best-effort byte

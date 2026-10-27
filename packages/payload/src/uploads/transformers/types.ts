@@ -1,19 +1,62 @@
 import type { Config } from '../../config/types.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { Document, PayloadRequest } from '../../types/index.js'
+
+/**
+ * A lazy, storage-neutral, read-only view of a file. No bytes are read until a method is
+ * called, and each call reads the file again. A byte range is `numberOfBytes` bytes starting
+ * at `startByte`, and must be inside `sizeInBytes`.
+ */
+export type FileSource = {
+  filename: string
+  mimeType: string
+  /** Loads one small byte range into memory. */
+  readFileBytes: (args: {
+    numberOfBytes: number
+    signal?: AbortSignal
+    startByte: number
+  }) => Promise<Uint8Array>
+  sizeInBytes: number
+  /**
+   * Streams the byte range, or the whole file when called with no range. A transformer that
+   * needs the whole file in memory must enforce its own byte limit while it reads the stream.
+   */
+  streamFile: (args?: {
+    numberOfBytes?: number
+    signal?: AbortSignal
+    startByte?: number
+  }) => Promise<ReadableStream<Uint8Array>>
+}
 
 export type CanTransformArgs = {
   collectionSlug: string
+  /** The current document. Read-only: routing must not change it. */
+  doc: Readonly<Document>
   documentID?: number | string
   mimeType: string
   operation: 'request' | 'upload'
+  /** A frozen snapshot of the document, taken before the pipeline runs. */
+  originalDoc: Readonly<Document>
   req: PayloadRequest
 }
 
 export type TransformFileArgs<TOptions = unknown> = {
   collectionSlug: string
+  /**
+   * The working copy of the document, passed in order through the stages. A stage may change
+   * `doc._transforms`, and later stages see the change. Payload saves the final value, after the
+   * normal hooks and validation. A change to any other field fails the upload.
+   */
+  doc: Document
+  /** The current pipeline file. The same file as `source`. */
   file: File
   options: TOptions
+  /** A frozen snapshot of the document, taken before the pipeline runs. */
+  originalDoc: Readonly<Document>
+  /** The retained original file, before any transformer changed it. */
+  originalSource: FileSource
   req: PayloadRequest
+  /** The current pipeline file: the upload, or the file that the previous stage returned. */
+  source: FileSource
 }
 
 export type TransformFileResult =
@@ -28,10 +71,14 @@ export type TransformFileResult =
 
 export type HandleTransformRequestArgs = {
   collectionSlug: string
+  /** The requested document. Read-only: a request does not save changes. */
+  doc: Readonly<Document>
   documentID: number | string
   filename: string
   getSourceFile: () => Promise<Response>
   mimeType: string
+  /** A frozen snapshot of the requested document. */
+  originalDoc: Readonly<Document>
   req: PayloadRequest
 }
 

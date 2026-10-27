@@ -161,6 +161,37 @@ describe('getFileFromUploadInstructions', () => {
     fs.rmSync(customTempDir, { force: true, recursive: true })
   })
 
+  // No document exists yet at this point, so `canTransform` cannot be given a `doc`.
+  it('should fetch the whole file for a MIME-matching transformer without calling canTransform', async () => {
+    const handler = vi.fn(
+      async () =>
+        new Response('some file contents', { headers: { 'Content-Length': '18' }, status: 200 }),
+    )
+    const req = createReq([handler], { mimeTypes: undefined })
+    const canTransform = vi.fn(() => false)
+    req.payload.config.upload = {
+      transformers: [
+        {
+          slug: 'video-transformer',
+          canTransform,
+          mimeTypes: ['video/*'],
+          transformFile: vi.fn(),
+        },
+      ],
+    } as unknown as PayloadRequest['payload']['config']['upload']
+
+    const file = await getFileFromUploadInstructions({
+      collectionSlug: 'media',
+      file: createUploadReferenceFile(),
+      req,
+    })
+
+    tempFilesToClean.push(file.tempFilePath!)
+
+    expect(canTransform).not.toHaveBeenCalled()
+    expect(fs.readFileSync(file.tempFilePath!, 'utf8')).toBe('some file contents')
+  })
+
   it('throws when no handler returns a response with a body', async () => {
     const handler = vi.fn(async () => new Response(null, { status: 204 }))
     const req = createReq([handler])
