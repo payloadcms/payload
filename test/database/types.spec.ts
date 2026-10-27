@@ -5,7 +5,10 @@ import type {
   DrizzleOperatorHandler,
   DrizzleOperatorHandlerContext,
   DrizzleResolvedOperator,
+  RequireDrizzleKit,
 } from '@payloadcms/drizzle'
+import type { up as upgradePostgresSnapshot } from 'drizzle-kit/payload/postgres'
+import type { up as upgradeSQLiteSnapshot } from 'drizzle-kit/payload/sqlite'
 
 import {
   postgresAdapter,
@@ -115,5 +118,38 @@ describe('postgres operator handlers - type tests', () => {
     }
 
     expect<DrizzleOperatorHandler>().type.toBeAssignableFrom<FullySupportedHandler>()
+  })
+})
+
+describe('Drizzle snapshot contracts', () => {
+  type Snapshot = Awaited<ReturnType<ReturnType<RequireDrizzleKit>['generateDrizzleJson']>>
+
+  test('should expose snapshot metadata and keep unmodelled fields unknown', () => {
+    expect<Snapshot['version']>().type.toBe<string>()
+    expect<Snapshot['id']>().type.toBe<string>()
+    expect<Snapshot['dialect']>().type.toBe<'postgres' | 'postgresql' | 'sqlite'>()
+    expect<Snapshot['unmodelledField']>().type.toBe<unknown>()
+    expect<Snapshot>().type.not.toBeAssignableFrom<{ version: string }>()
+  })
+
+  test('should accept legacy PostgreSQL table-map snapshots', () => {
+    const legacy = {
+      id: '00000000-0000-0000-0000-000000000001',
+      dialect: 'postgresql' as const,
+      prevId: '00000000-0000-0000-0000-000000000000',
+      tables: {},
+      version: '7',
+    }
+
+    expect(legacy).type.toBeAssignableTo<Snapshot>()
+  })
+
+  test('should accept SQLite upgrade results and reject PostgreSQL result envelopes as snapshots', () => {
+    type SQLiteUpgradeResult = ReturnType<typeof upgradeSQLiteSnapshot>
+    type PostgresUpgradeResult = ReturnType<typeof upgradePostgresSnapshot>
+
+    expect<SQLiteUpgradeResult>().type.toBeAssignableTo<Snapshot>()
+    expect<PostgresUpgradeResult['snapshot']>().type.toBeAssignableTo<Snapshot>()
+    expect<PostgresUpgradeResult>().type.not.toBeAssignableTo<Snapshot>()
   })
 })

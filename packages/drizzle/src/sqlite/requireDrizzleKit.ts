@@ -1,3 +1,4 @@
+import type { up as upgradeSnapshot } from 'drizzle-kit/payload/sqlite'
 import type { SQL } from 'drizzle-orm'
 
 import { sql } from 'drizzle-orm'
@@ -8,12 +9,9 @@ import type { RequireDrizzleKit } from '../types.js'
 const require = createRequire(import.meta.url)
 
 export const requireDrizzleKit: RequireDrizzleKit = () => {
-  const {
-    generateDrizzleJson,
-    generateMigration,
-    pushSchema,
-    up,
-  } = require('drizzle-kit/payload/sqlite')
+  const kit = require('drizzle-kit/payload/sqlite')
+  const { generateDrizzleJson, generateMigration, pushSchema } = kit
+  const up: typeof upgradeSnapshot = kit.up
 
   return {
     generateDrizzleJson,
@@ -41,6 +39,6 @@ export const requireDrizzleKit: RequireDrizzleKit = () => {
 
       return pushSchema(schema, client, migrationsConfig)
     },
-    upSnapshot: (snapshot) => up(snapshot),
+    upSnapshot: (snapshot) => up(snapshot as Parameters<typeof up>[0]),
   }
 }
