@@ -33,12 +33,23 @@ import type { QueryResult } from 'pg'
 
 import type { DrizzleResolvedOperator, Operators } from './queries/operatorMap.js'
 
-/**
- * In drizzle-kit v1 the snapshot shape is dialect-specific and no longer exported
- * from a shared `drizzle-kit/api` entry. Payload only passes snapshots through the
- * drizzle-kit programmatic API, so a structural passthrough type is sufficient.
- */
-export type DrizzleSnapshotJSON = Record<string, any>
+/** Snapshot fields shared by legacy table-map and current DDL formats. */
+export type DrizzleSnapshotJSON = {
+  [key: string]: unknown
+  ddl?: {
+    [key: string]: unknown
+    entityType: string
+    name?: string
+    schema?: string
+    table?: string
+  }[]
+  dialect: 'postgres' | 'postgresql' | 'sqlite'
+  id: string
+  prevId?: string
+  prevIds?: string[]
+  tables?: Record<string, unknown>
+  version: string
+}
 
 export type PostgresDB = NodePgDatabase<AnyRelations>
 
