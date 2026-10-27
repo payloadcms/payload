@@ -18,6 +18,8 @@ type ReduceFieldOptionsArgs = {
   fieldPermissions?: SanitizedFieldPermissions | SanitizedFieldsPermissions
   fields: ClientField[]
   i18n: I18nClient
+  /** Set while reducing the fields of an array: a document holds many values for each of them. */
+  insideArray?: boolean
   labelPrefix?: string
   pathPrefix?: string
 }
@@ -30,6 +32,7 @@ export const reduceFieldsToOptions = ({
   fieldPermissions,
   fields,
   i18n,
+  insideArray,
   labelPrefix,
   pathPrefix: pathPrefixFromArgs,
 }: ReduceFieldOptionsArgs): ReducedField[] => {
@@ -91,6 +94,7 @@ export const reduceFieldsToOptions = ({
                       : fieldPermissions,
                 fields: tab.fields,
                 i18n,
+                insideArray,
                 labelPrefix: labelWithPrefix,
                 pathPrefix: tabPathPrefix,
               }),
@@ -108,6 +112,7 @@ export const reduceFieldsToOptions = ({
           fieldPermissions,
           fields: field.fields,
           i18n,
+          insideArray,
           labelPrefix,
           pathPrefix,
         }),
@@ -127,6 +132,7 @@ export const reduceFieldsToOptions = ({
           fieldPermissions,
           fields: field.fields,
           i18n,
+          insideArray,
           labelPrefix: labelWithPrefix,
           pathPrefix,
         }),
@@ -159,6 +165,7 @@ export const reduceFieldsToOptions = ({
                 : fieldPermissions?.[field.name]?.fields || fieldPermissions?.[field.name],
             fields: field.fields,
             i18n,
+            insideArray,
             labelPrefix: labelWithPrefix,
             pathPrefix: pathWithPrefix,
           }),
@@ -169,6 +176,7 @@ export const reduceFieldsToOptions = ({
             fieldPermissions,
             fields: field.fields,
             i18n,
+            insideArray,
             labelPrefix: labelWithPrefix,
             pathPrefix,
           }),
@@ -202,6 +210,7 @@ export const reduceFieldsToOptions = ({
               : fieldPermissions?.[field.name]?.fields || fieldPermissions?.[field.name],
           fields: field.fields,
           i18n,
+          insideArray: true,
           labelPrefix: labelWithPrefix,
           pathPrefix: pathWithPrefix,
         }),
@@ -262,6 +271,7 @@ export const reduceFieldsToOptions = ({
           plainTextLabel: `${labelPrefix ? labelPrefix + ' > ' : ''}${localizedLabel}`,
           ...fieldTypeConditions[field.type],
           field,
+          ...(insideArray ? { insideArray } : {}),
           operators,
         }
 
