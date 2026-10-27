@@ -11,6 +11,14 @@ import type { FindOptions } from './local/find.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
+import { forkDocument } from '../../branching/forkDocument.js'
+import { assertBranchMergeValidationWriteAllowed } from '../../branching/mergeWriteGuard.js'
+import {
+  refreshRequestDataLoader,
+  resetBranchState,
+  resolveBranch,
+} from '../../branching/resolveBranch.js'
+import { branchDocIDField, branchField, MAIN_BRANCH } from '../../branching/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
@@ -35,6 +43,7 @@ import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { markTransactionWrite } from '../../utilities/transactionMutationTracker.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { getRestoredStatusesToAuthorize } from '../../versions/getRestoredStatusesToAuthorize.js'
 import { saveVersion } from '../../versions/saveVersion.js'
@@ -59,6 +68,7 @@ export const restoreVersionOperation = async <
 >(
   args: Arguments,
 ): Promise<TData> => {
+  assertBranchMergeValidationWriteAllowed({ req: args.req })
   assertNoValidationWrite(args.req)
 
   const {
@@ -73,6 +83,11 @@ export const restoreVersionOperation = async <
     select: incomingSelect,
     showHiddenFields,
   } = args
+  let shouldCommit = false
+  const branch = resolveBranch(req)
+  const isBranchableCollection =
+    payload.config.branching?.branchableCollections.has(collectionConfig.slug) ?? false
+  const isBranchingDocument = branch !== MAIN_BRANCH && isBranchableCollection
   const hasFileOperationScope = Boolean(collectionConfig.upload)
 
   if (hasFileOperationScope) {
@@ -80,7 +95,7 @@ export const restoreVersionOperation = async <
   }
 
   try {
-    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -93,95 +108,35 @@ export const restoreVersionOperation = async <
       overrideAccess,
     })
 
-    if (!id) {
-      throw new APIError('Missing ID of version to restore.', httpStatus.BAD_REQUEST)
-    }
-
-    // /////////////////////////////////////
-    // Retrieve original raw version
-    // /////////////////////////////////////
-
-    const { docs: versionDocs } = await req.payload.db.findVersions({
-      collection: collectionConfig.slug,
-      limit: 1,
-      locale: 'all',
-      pagination: false,
+    const restoreTarget = await readAuthorizedRestoreTarget<TData>({
+      id,
+      collectionConfig,
+      draft: draftArg,
+      overrideAccess,
       req,
-      where: { id: { equals: id } },
+    })
+    const { findOneArgs, parentDocID } = restoreTarget
+    const versionToRestoreWithLocales = stripBranchOwnershipFromVersion({
+      version: restoreTarget.versionToRestoreWithLocales,
     })
 
-    const [rawVersionToRestore] = versionDocs
+    if (isBranchingDocument) {
+      const hasCallerTransaction = !shouldCommit && Boolean(await req.transactionID)
+      const isUntouchedBranch = restoreTarget.document[branchField] !== branch
 
-    if (!rawVersionToRestore) {
-      throw new NotFound(req.t)
-    }
-
-    const { parent: parentDocID } = rawVersionToRestore
-    const versionToRestoreWithLocales = rawVersionToRestore.version
-
-    // /////////////////////////////////////
-    // Access
-    // /////////////////////////////////////
-
-    const restoredStatuses = draftArg
-      ? ['draft']
-      : getRestoredStatusesToAuthorize(versionToRestoreWithLocales?._status)
-
-    // A localized `_status` can publish and unpublish locales in one restore, so authorize every
-    // status it writes. executeAccess throws Forbidden on the first denial; Where constraints are
-    // AND-combined into the lookup below.
-    const accessResultsList: Array<boolean | Where> = []
-
-    if (overrideAccess) {
-      accessResultsList.push(true)
-    } else {
-      const statusesToAuthorize = restoredStatuses.length > 0 ? restoredStatuses : [undefined]
-
-      for (const status of statusesToAuthorize) {
-        accessResultsList.push(
-          await executeAccess(
-            {
-              id: parentDocID,
-              slug: collectionConfig.slug,
-              data: { _status: status },
-              req,
-            },
-            collectionConfig.access.update,
-          ),
+      if (hasCallerTransaction && isUntouchedBranch) {
+        throw new APIError(
+          'Cannot restore an untouched branch document within an existing transaction.',
+          httpStatus.CONFLICT,
         )
       }
-    }
 
-    const hasWherePolicy = accessResultsList.some((result) => hasWhereAccessResult(result))
-
-    // /////////////////////////////////////
-    // Retrieve document
-    // /////////////////////////////////////
-
-    const findOneArgs: FindOneArgs = {
-      collection: collectionConfig.slug,
-      locale: 'all',
-      req,
-      where: accessResultsList.reduce<Where>((where, result) => combineQueries(where, result), {
-        id: { equals: parentDocID },
-      }),
-    }
-
-    // Get the document from the non versioned collection
-    const doc = await req.payload.db.findOne<TData>(findOneArgs)
-
-    if (!doc && !hasWherePolicy) {
-      throw new NotFound(req.t)
-    }
-    if (!doc && hasWherePolicy) {
-      throw new Forbidden(req.t)
-    }
-
-    if (collectionConfig.trash && doc?.deletedAt) {
-      throw new APIError(
-        `Cannot restore a version of a trashed document (ID: ${parentDocID}). Restore the document first.`,
-        httpStatus.FORBIDDEN,
-      )
+      await forkDocument({
+        id: parentDocID,
+        collectionSlug: collectionConfig.slug,
+        req,
+        useAmbientTransaction: shouldCommit,
+      })
     }
 
     if (collectionConfig.upload && !overrideAccess) {
@@ -229,7 +184,7 @@ export const restoreVersionOperation = async <
       collection: collectionConfig,
       context: req.context,
       depth: 0,
-      doc: deepCopyObjectSimple(rawVersionToRestore.version),
+      doc: deepCopyObjectSimple(versionToRestoreWithLocales),
       draft: draftArg,
       fallbackLocale: null,
       global: null,
@@ -298,6 +253,14 @@ export const restoreVersionOperation = async <
       }
     }
 
+    const branchOwnership = isBranchableCollection
+      ? getBranchOwnership({ branch, currentDocument: prevDocWithLocales })
+      : undefined
+
+    if (branchOwnership) {
+      data = applyBranchOwnership({ data, ownership: branchOwnership })
+    }
+
     // /////////////////////////////////////
     // beforeChange - Fields
     // /////////////////////////////////////
@@ -315,6 +278,10 @@ export const restoreVersionOperation = async <
       req: reqWithValidationLocale,
       skipValidation: draftArg && !hasDraftValidationEnabled(collectionConfig),
     })
+
+    if (branchOwnership) {
+      result = applyBranchOwnership({ data: result, ownership: branchOwnership })
+    }
 
     // /////////////////////////////////////
     // Update
@@ -346,6 +313,7 @@ export const restoreVersionOperation = async <
           req: reqWithValidationLocale,
           select,
         })
+        markTransactionWrite({ req: reqWithValidationLocale })
       }
 
       const savedVersion = await saveVersion({
@@ -359,6 +327,7 @@ export const restoreVersionOperation = async <
         req: reqWithValidationLocale,
         select,
       })
+      markTransactionWrite({ req: reqWithValidationLocale })
       return savedVersion
     }
 
@@ -466,12 +435,170 @@ export const restoreVersionOperation = async <
       await completeFileOperationScope({ req })
     }
 
+    if (isBranchingDocument) {
+      refreshRequestDataLoader(req)
+    }
+
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    if (shouldCommit) {
+      await killTransaction(req)
+      resetBranchState(req)
+    }
+
     if (hasFileOperationScope) {
       await abortFileOperationScope({ req })
     }
     throw error
+  }
+}
+
+const readAuthorizedRestoreTarget = async <
+  TData extends JsonObject & TypeWithID = JsonObject & TypeWithID,
+>({
+  id,
+  collectionConfig,
+  draft,
+  overrideAccess,
+  req,
+}: {
+  collectionConfig: Collection['config']
+  draft: boolean
+  id: number | string
+  overrideAccess: boolean
+  req: PayloadRequest
+}) => {
+  if (!id) {
+    throw new APIError('Missing ID of version to restore.', httpStatus.BAD_REQUEST)
+  }
+
+  const { docs: versionDocs } = await req.payload.db.findVersions({
+    collection: collectionConfig.slug,
+    limit: 1,
+    locale: 'all',
+    pagination: false,
+    req,
+    where: { id: { equals: id } },
+  })
+
+  const [rawVersionToRestore] = versionDocs
+
+  if (!rawVersionToRestore) {
+    throw new NotFound(req.t)
+  }
+
+  const { parent: parentDocID } = rawVersionToRestore
+  const versionToRestoreWithLocales = rawVersionToRestore.version
+  const restoredStatuses = draft
+    ? ['draft']
+    : getRestoredStatusesToAuthorize(versionToRestoreWithLocales?._status)
+
+  // A localized `_status` can publish and unpublish locales in one restore, so authorize every
+  // status it writes. executeAccess throws Forbidden on the first denial; Where constraints are
+  // AND-combined into the lookup below.
+  const accessResultsList: Array<boolean | Where> = []
+
+  if (overrideAccess) {
+    accessResultsList.push(true)
+  } else {
+    const statusesToAuthorize = restoredStatuses.length > 0 ? restoredStatuses : [undefined]
+
+    for (const status of statusesToAuthorize) {
+      accessResultsList.push(
+        await executeAccess(
+          {
+            id: parentDocID,
+            slug: collectionConfig.slug,
+            data: { _status: status },
+            req,
+          },
+          collectionConfig.access.update,
+        ),
+      )
+    }
+  }
+
+  const hasWherePolicy = accessResultsList.some((result) => hasWhereAccessResult(result))
+  const findOneArgs: FindOneArgs = {
+    collection: collectionConfig.slug,
+    locale: 'all',
+    req,
+    where: accessResultsList.reduce<Where>((where, result) => combineQueries(where, result), {
+      id: { equals: parentDocID },
+    }),
+  }
+  const document = await req.payload.db.findOne<TData>(findOneArgs)
+
+  if (!document) {
+    if (hasWherePolicy) {
+      throw new Forbidden(req.t)
+    }
+
+    throw new NotFound(req.t)
+  }
+
+  if (collectionConfig.trash && document.deletedAt) {
+    throw new APIError(
+      `Cannot restore a version of a trashed document (ID: ${parentDocID}). Restore the document first.`,
+      httpStatus.FORBIDDEN,
+    )
+  }
+
+  return {
+    document,
+    findOneArgs,
+    parentDocID,
+    rawVersionToRestore,
+    versionToRestoreWithLocales,
+  }
+}
+
+/** Removes historical branch ownership before caller-controlled hooks and access checks run. */
+const stripBranchOwnershipFromVersion = <TVersion extends JsonObject>({
+  version,
+}: {
+  version: TVersion
+}): TVersion => {
+  const {
+    [branchDocIDField]: _historicalBranchDocumentID,
+    [branchField]: _historicalBranch,
+    ...versionContent
+  } = version
+
+  return versionContent as TVersion
+}
+
+type BranchOwnership = {
+  branch: string
+  documentID: unknown
+}
+
+const getBranchOwnership = ({
+  branch,
+  currentDocument,
+}: {
+  branch: string
+  currentDocument: JsonObject
+}): BranchOwnership => {
+  const currentBranch =
+    typeof currentDocument[branchField] === 'string' ? currentDocument[branchField] : branch
+
+  return {
+    branch: currentBranch,
+    documentID: currentBranch === MAIN_BRANCH ? null : (currentDocument[branchDocIDField] ?? null),
+  }
+}
+
+const applyBranchOwnership = <TData extends JsonObject>({
+  data,
+  ownership,
+}: {
+  data: TData
+  ownership: BranchOwnership
+}): TData => {
+  return {
+    ...data,
+    [branchDocIDField]: ownership.documentID,
+    [branchField]: ownership.branch,
   }
 }

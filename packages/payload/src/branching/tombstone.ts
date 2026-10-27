@@ -49,7 +49,6 @@ type BranchDeleteOperation = {
 }
 
 const concurrentBranchDeleteContextKey = Symbol.for('payload.branching.concurrentBranchDelete')
-
 const branchDeleteOperationContextKey = Symbol.for('payload.branching.branchDeleteOperation')
 
 type Result = {
@@ -106,6 +105,49 @@ const createBranchDeleteChangedError = (): APIError =>
     'The branch document changed while it was being deleted. Retry the operation.',
     httpStatus.CONFLICT,
   )
+
+export const requireBranchDeleteOutcome = ({
+  outcome,
+}: {
+  outcome: BranchDeleteOutcome | undefined
+}): BranchDeleteOutcome => {
+  if (!outcome) {
+    throw createBranchDeleteChangedError()
+  }
+
+  return outcome
+}
+
+export const assertBranchDeleteCanUseCallerTransaction = async ({
+  branch,
+  collectionSlug,
+  docID,
+  req,
+}: {
+  branch: string
+  collectionSlug: string
+  docID: number | string
+  req: PayloadRequest
+}): Promise<void> => {
+  const branchDocument = await req.payload.db.findOne({
+    branch: false,
+    collection: collectionSlug,
+    req,
+    where: {
+      and: [
+        { [branchField]: { equals: branch } },
+        { or: [{ id: { equals: docID } }, { [branchDocIDField]: { equals: docID } }] },
+      ],
+    },
+  })
+
+  if (!branchDocument) {
+    throw new APIError(
+      'Cannot delete an untouched branch document within an existing transaction.',
+      httpStatus.CONFLICT,
+    )
+  }
+}
 
 /**
  * Checks a branch-created document before delete hooks and cascades can cause
@@ -175,6 +217,61 @@ export const assertBranchCreatedDeleteUnreferenced = async ({
   })
 
   return branchDocument
+}
+
+/**
+ * Whether a delete will be absorbed into a tombstone rather than removing a row.
+ *
+ * `deleteByID` runs its cascades — associated files, scheduled publish jobs —
+ * before `db.deleteOne` decides this, and each of them addresses the canonical
+ * document. On a branch that means reaching into main: deleting an upload on a
+ * branch unlinks main's file while main keeps the row that points at it.
+ *
+ * Answered from the document already fetched for the delete, so it costs no extra
+ * read. A document created on the branch is exempt — nothing of main's stands
+ * behind it, so its side effects are its own to clean up.
+ */
+export const willBranchAbsorbDelete = async ({
+  collectionSlug,
+  doc,
+  req,
+}: {
+  branch?: false | string
+  collectionSlug: string
+  doc: null | Record<string, unknown> | undefined
+  req?: Partial<PayloadRequest>
+}): Promise<boolean> => {
+  if (!doc || !req?.payload) {
+    return false
+  }
+
+  if ((req.context as Record<string, unknown> | undefined)?._branchBypass) {
+    return false
+  }
+
+  const branching = req.payload.config?.branching
+
+  if (!branching?.enabled || !branching.branchableCollections.has(collectionSlug)) {
+    return false
+  }
+
+  const branch = resolveBranch(req as PayloadRequest)
+
+  if (branch === MAIN_BRANCH) {
+    return false
+  }
+
+  if (doc[branchField] !== branch) {
+    return true
+  }
+
+  const operation = await loadBranchOperation({
+    collectionSlug,
+    docID: doc.id as number | string,
+    req: req as PayloadRequest,
+  })
+
+  return operation !== 'create'
 }
 
 /**

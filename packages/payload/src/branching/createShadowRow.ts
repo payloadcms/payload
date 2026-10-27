@@ -85,6 +85,9 @@ const markConcurrentShadowOperationError = (error: unknown): void => {
   }
 }
 
+export const isConcurrentShadowOperationError = (error: unknown): boolean =>
+  Boolean(error && typeof error === 'object' && concurrentShadowOperationErrors.has(error))
+
 const maximumConcurrentShadowAttempts = 8
 
 export const waitForConcurrentShadowRetry = async ({
@@ -95,6 +98,37 @@ export const waitForConcurrentShadowRetry = async ({
   const delayMilliseconds = Math.min(25 * 2 ** retryIndex, 100)
 
   await new Promise((resolve) => setTimeout(resolve, delayMilliseconds))
+}
+
+export const retryConcurrentShadowOperation = async <Result>({
+  onRetry,
+  operation,
+  shouldRetry,
+  waitForRetry = waitForConcurrentShadowRetry,
+}: {
+  onRetry?: (args: { error: unknown; retryIndex: number }) => Promise<void> | void
+  operation: () => Promise<Result>
+  shouldRetry: ((args: { error: unknown }) => boolean) | boolean
+  waitForRetry?: (args: { retryIndex: number }) => Promise<void>
+}): Promise<Result> => {
+  for (let attemptIndex = 0; attemptIndex < maximumConcurrentShadowAttempts; attemptIndex++) {
+    try {
+      return await operation()
+    } catch (error) {
+      const hasAnotherAttempt = attemptIndex < maximumConcurrentShadowAttempts - 1
+      const isRetryAllowed =
+        typeof shouldRetry === 'function' ? shouldRetry({ error }) : shouldRetry
+
+      if (!isRetryAllowed || !hasAnotherAttempt || !isRecoverableConcurrentShadowError(error)) {
+        throw error
+      }
+
+      await onRetry?.({ error, retryIndex: attemptIndex })
+      await waitForRetry({ retryIndex: attemptIndex })
+    }
+  }
+
+  throw new Error('Concurrent shadow retry attempts were exhausted.')
 }
 
 export const findCompetingShadow = async ({
