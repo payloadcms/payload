@@ -2,6 +2,7 @@ import type { PayloadRequest } from '../types/index.js'
 import type { BranchOperation, SanitizedBranchingConfig } from './types.js'
 
 import { getDataLoader } from '../collections/dataloader.js'
+import { extractRelationshipID } from '../utilities/extractRelationshipID.js'
 import { branchesCollectionSlug, MAIN_BRANCH } from './types.js'
 
 /**
