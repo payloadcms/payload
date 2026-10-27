@@ -21,8 +21,6 @@ import { getFileContentRequirement, HEADER_PROBE_BYTE_LENGTH } from './getFileCo
 import { getImageSize } from './getImageSize.js'
 import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
 import { getStagedFile } from './stagedUpload.js'
-import { getCandidateTransformers } from './transformers/planTransformerPipeline.js'
-import { getUploadTransformerInternal } from './transformers/uploadTransformerBridge.js'
 
 export const getFileFromUploadInstructions = async ({
   collectionSlug,
@@ -171,7 +169,6 @@ export const getFileFromUploadInstructions = async ({
 
   const contentRequirement = getFileContentRequirement({
     hasSizeEdits: requestHasSizeEdits(req),
-    hasTransformFileStages: hasTransformFileStages({ mimeType: file.mimeType, req }),
     mimeType: file.mimeType,
     uploadConfig,
   })
@@ -224,11 +221,74 @@ export const getFileFromUploadInstructions = async ({
     // The header wasn't enough to determine the image's dimensions - fall through to a full fetch.
   }
 
-  const response = await fetchUploadResponse({
+  const { contentType, tempFilePath } = await downloadToTempFile({
     collectionSlug,
     file: providerFile,
     req,
-    uploadConfig,
+  })
+  rememberVerifiedOriginal()
+
+  return {
+    name: file.filename,
+    data: Buffer.alloc(0),
+    mimetype: contentType || file.mimeType,
+    size: file.size,
+    tempFilePath,
+    uploadReference: file.uploadReference,
+  }
+}
+
+/**
+ * Downloads the whole file of a client upload that `getFileFromUploadInstructions` returned
+ * without its full contents. `generateFileData` calls this when a transformer accepts the upload,
+ * because only then is the document available to `canTransform`.
+ */
+export const fetchFullClientUpload = async ({
+  collectionSlug,
+  file,
+  req,
+}: {
+  collectionSlug: string
+  file: NonNullable<PayloadRequest['file']>
+  req: PayloadRequest
+}): Promise<NonNullable<PayloadRequest['file']>> => {
+  if (!file.uploadReference) {
+    throw new APIError('Upload has no complete file or upload reference.', 400)
+  }
+
+  // A verified receipt stores the file under its original filename, not the submitted one.
+  const verifiedOriginal = req.context?._payloadVerifiedProviderOriginal as
+    | { filename?: string }
+    | undefined
+
+  const { tempFilePath } = await downloadToTempFile({
+    collectionSlug,
+    file: {
+      filename: verifiedOriginal?.filename ?? file.name,
+      mimeType: file.mimetype,
+      size: file.size,
+      uploadReference: file.uploadReference as UploadInstructions['file']['uploadReference'],
+    },
+    req,
+  })
+
+  return { ...file, data: Buffer.alloc(0), tempFilePath }
+}
+
+const downloadToTempFile = async ({
+  collectionSlug,
+  file,
+  req,
+}: {
+  collectionSlug: string
+  file: UploadInstructions['file']
+  req: PayloadRequest
+}): Promise<{ contentType: null | string; tempFilePath: string }> => {
+  const response = await fetchUploadResponse({
+    collectionSlug,
+    file,
+    req,
+    uploadConfig: req.payload.collections[collectionSlug]!.config.upload,
   })
 
   const tempFilePath = await streamResponseToTempFile({ req, response })
@@ -238,16 +298,8 @@ export const getFileFromUploadInstructions = async ({
   }
   req.context ??= {}
   req.context._payloadClientUploadTempFile = true
-  rememberVerifiedOriginal()
 
-  return {
-    name: file.filename,
-    data: Buffer.alloc(0),
-    mimetype: response.headers.get('Content-Type') || file.mimeType,
-    size: file.size,
-    tempFilePath,
-    uploadReference: file.uploadReference,
-  }
+  return { contentType: response.headers.get('Content-Type'), tempFilePath }
 }
 
 /**
@@ -269,27 +321,6 @@ const requestHasSizeEdits = (req: PayloadRequest): boolean => {
 
   return hasCropOrResizeEdit(uploadEdits)
 }
-
-/**
- * Whether a transformer that reads the whole file could run `transformFile` on this upload. A
- * bridge transformer (e.g. `sharpTransformer`) is excluded: it projects what it needs onto the
- * sanitized upload config (`hasImageAdjustments`, `variants`) at startup instead.
- *
- * Matches by MIME type only. `canTransform` needs the document, which does not exist yet at
- * this point, so a transformer that would decline the upload still causes a full fetch.
- */
-const hasTransformFileStages = ({
-  mimeType,
-  req,
-}: {
-  mimeType: string
-  req: PayloadRequest
-}): boolean =>
-  getCandidateTransformers({
-    capability: 'transformFile',
-    mimeType,
-    transformers: req.payload.config.upload?.transformers ?? [],
-  }).some((transformer) => !getUploadTransformerInternal(transformer)?.prepareUpload)
 
 /**
  * Fetches only the first `HEADER_PROBE_BYTE_LENGTH` bytes of the upload (via a best-effort byte
