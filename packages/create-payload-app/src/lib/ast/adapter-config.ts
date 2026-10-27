@@ -131,6 +131,10 @@ export const STORAGE_ADAPTER_CONFIG: Record<StorageAdapter, StorageAdapterConfig
   },
 } as const
 
+export const SHARP_TRANSFORMER_PACKAGE = '@payloadcms/transformer-sharp'
+
+export const SHARP_TRANSFORMER_NAME = 'sharpTransformer'
+
 /**
  * Helper to get database adapter package name
  */
