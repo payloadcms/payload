@@ -427,6 +427,14 @@ export async function VersionView(props: DocumentViewServerProps) {
 
   return (
     <DefaultVersionView
+      branch={
+        req.payload.config.branching?.enabled
+          ? {
+              from: (versionFrom as { _branch?: string } | undefined)?._branch,
+              to: (versionTo as { _branch?: string })._branch,
+            }
+          : undefined
+      }
       canUpdate={docPermissions?.update}
       modifiedOnly={modifiedOnly}
       RenderedDiff={RenderedDiff}

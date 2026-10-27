@@ -1,7 +1,10 @@
 import type { DocumentTabConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
+import { branchesCollectionSlug } from 'payload/shared'
+
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
-import { VersionsPill } from '../../../../exports/client/index.js'
+import { BranchChangesPill, VersionsPill } from '../../../../exports/client/index.js'
+import { BranchSettingsTab } from './BranchSettingsTab/index.js'
 
 export const documentViewKeys = ['api', 'default', 'livePreview', 'versions']
 
@@ -18,6 +21,37 @@ export const getTabs = ({
     collectionConfig?.admin?.components?.views?.edit ||
     globalConfig?.admin?.components?.views?.edit ||
     {}
+
+  // A branch gets its own two: what it changed, and its own fields behind a gear.
+  // No API tab and no versions — a branch record is bookkeeping, and its history
+  // is noise (the collection sets `versions: false`).
+  if (collectionConfig?.slug === branchesCollectionSlug) {
+    return [
+      {
+        // `Pill_Component` is read by `DefaultDocumentTab` but absent from
+        // `DocumentTabConfig`; the versions tab relies on the same thing, and only
+        // gets away with it because `.concat` below erases the excess-property check.
+        tab: {
+          href: '',
+          label: ({ t }) => t('branching:changedDocuments'),
+          order: 100,
+          Pill_Component: BranchChangesPill,
+        } as DocumentTabConfig,
+        viewPath: '/',
+      },
+      {
+        tab: {
+          // Typed as a component *path* because config-supplied tabs are resolved
+          // through the import map. `RenderServerComponent` takes a real component
+          // just as happily, which is what keeps this out of the import map.
+          Component: BranchSettingsTab as unknown as DocumentTabConfig['Component'],
+          href: '/manage',
+          order: 200,
+        },
+        viewPath: '/manage',
+      },
+    ]
+  }
 
   return [
     {

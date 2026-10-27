@@ -13,7 +13,6 @@ import { useTranslation } from '../../providers/Translation/index.js'
 export const VersionsViewClient: React.FC<{
   readonly baseClass: string
   readonly columns: Column[]
-  readonly fetchURL: string
   readonly paginationLimits?: SanitizedCollectionConfig['admin']['pagination']['limits']
 }> = (props) => {
   const { baseClass, columns, paginationLimits } = props

@@ -9,6 +9,15 @@ export type VersionPill = {
 }
 
 export type DefaultVersionsViewProps = {
+  /**
+   * Branch each side of the comparison belongs to, when branching is enabled.
+   * Shown alongside the selectors rather than as a field diff: which branch a
+   * version came from is metadata about the version, not content of the document.
+   */
+  branch?: {
+    from?: null | string
+    to?: null | string
+  }
   canUpdate: boolean
   modifiedOnly: boolean
   RenderedDiff: React.ReactNode

@@ -1,0 +1,136 @@
+@layer payload-default {
+  /* Wraps the summary and its optional link so the gap to the mode options is the
+     wrapper's, and does not depend on which of the two is last. */
+  .merge-branch-modal__intro {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacer-1);
+    margin-block-end: var(--spacer-3);
+  }
+
+  .merge-branch-modal__summary {
+    margin-block: 0;
+    color: var(--color-text-secondary);
+  }
+
+  /* The way out of "all of it" — sits directly under the sentence it qualifies. */
+  .merge-branch-modal__review {
+    color: var(--color-text-brand);
+  }
+
+  .merge-branch-modal__modes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+
+  /* Separated from the mode radios by a rule: this is a second, independent
+     decision, not a third option in the first one. */
+  .merge-branch-modal__close-branch {
+    margin-block-start: var(--spacer-3);
+    padding-block-start: var(--spacer-3);
+    border-block-start: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .merge-branch-modal__close-branch-help {
+    margin-block: var(--spacer-1) 0;
+    padding-inline-start: var(--spacer-4);
+    color: var(--color-text-secondary);
+  }
+
+  /* Indented to the radio label above it, so the date reads as part of choosing
+     "schedule" rather than as the next question down the modal. */
+  .merge-branch-modal__schedule {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+    margin-block-start: var(--spacer-2);
+    padding-inline-start: var(--spacer-4);
+  }
+
+  .merge-branch-modal__schedule-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-1);
+  }
+
+  /* The picker sizes itself to its container, which in a modal is the full width —
+     a date needs nothing like that much room. */
+  .merge-branch-modal__schedule-field .date-time-picker {
+    max-width: calc(var(--spacer-6) * 6);
+  }
+
+  .merge-branch-modal__schedule-help {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+
+  .merge-branch-modal__upcoming {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-1);
+  }
+
+  .merge-branch-modal__upcoming-title {
+    margin: 0;
+    font-family: var(--text-body-small-font-family);
+    font-size: var(--text-body-small-font-size);
+    color: var(--color-text-secondary);
+  }
+
+  .merge-branch-modal__upcoming-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .merge-branch-modal__upcoming-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacer-3);
+  }
+
+  .merge-branch-modal__unavailable {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+
+  .merge-branch-modal__progress {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+    margin-block-start: var(--spacer-4);
+  }
+
+  .merge-branch-modal__progress-bar {
+    height: var(--spacer-1);
+    border-radius: var(--radius-full);
+    background: var(--color-bg-secondary);
+    overflow: hidden;
+  }
+
+  .merge-branch-modal__progress-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--color-text-brand);
+    /* Each document lands as a discrete step, so ease between them rather than
+       letting the bar snap on every event. */
+    transition: width 200ms ease-out;
+  }
+
+  .merge-branch-modal__progress-fill--complete {
+    background: var(--color-bg-success);
+  }
+
+  .merge-branch-modal__blocked {
+    margin-block: var(--spacer-3) 0;
+    padding-inline-start: var(--spacer-3);
+    color: var(--color-text-danger);
+  }
+
+  .merge-branch-modal__progress-label {
+    color: var(--color-text-secondary);
+  }
+}
