@@ -1494,21 +1494,48 @@ export type {
   SanitizedPermissions,
   VerifyConfig,
 } from './auth/types.js'
+export { appendBranchFilter } from './branching/appendBranchFilter.js'
 export { assertBranchActionAccess } from './branching/assertBranchActionAccess.js'
+
 export { assertBranchReadable } from './branching/assertBranchReadable.js'
-
 export { assertBranchUpdateAccess } from './branching/assertBranchUpdateAccess.js'
+
+export { rewriteBranchIDs } from './branching/branchIDs.js'
+
+export { rewriteBranchVersionParents } from './branching/branchIDs.js'
+
+export { applyBranchIDProjection } from './branching/branchIDs.js'
+
+export { projectBranchIDs } from './branching/branchIDs.js'
+export { withBranchIDSelect } from './branching/branchSelect.js'
+
+export { withBranchGlobalSelect } from './branching/branchSelect.js'
+export { withBranchVersionSelect } from './branching/branchSelect.js'
+export { isBranchProjectionActive } from './branching/branchSelect.js'
 export type { EffectiveOperation } from './branching/effectiveOperations.js'
-
 export type { MergeStreamEvent } from './branching/endpoints/merge.js'
-
+export { resolveBranchGlobalQuery } from './branching/globals.js'
+export { branchGlobalNeedsBothRows } from './branching/globals.js'
+export { pickBranchGlobal } from './branching/globals.js'
+export { resolveBranchGlobalVersionQuery } from './branching/globals.js'
+export { resolveBranchGlobalWrite } from './branching/globals.js'
 export type { MergeResult } from './branching/merge.js'
-
 export type { BlockedChange } from './branching/preflight.js'
-
-export { resetBranchState } from './branching/resolveBranch.js'
 export { resolveBranch } from './branching/resolveBranch.js'
+export { loadBranchDeletions } from './branching/resolveBranch.js'
+export { loadBranchManifest } from './branching/resolveBranch.js'
+export { resetBranchState } from './branching/resolveBranch.js'
+export { resolveBranchReadState } from './branching/resolveBranchQuery.js'
+export { resolveBranchQuery } from './branching/resolveBranchQuery.js'
 
+export { getBranchPredicateSync } from './branching/resolveBranchQuery.js'
+export type { BranchReadState } from './branching/resolveBranchQuery.js'
+export { resolveBranchRowID } from './branching/resolveBranchRowID.js'
+
+export { resolveBranchDelete } from './branching/tombstone.js'
+export { MAIN_BRANCH } from './branching/types.js'
+export { branchField } from './branching/types.js'
+export { branchChangesCollectionSlug } from './branching/types.js'
 export type { BranchingConfig } from './branching/types.js'
 export type { MergeableChange } from './branching/types.js'
 export type { MergeWarning } from './branching/types.js'
@@ -1520,24 +1547,38 @@ export type { MergeCleanupOutcome } from './branching/types.js'
 export type { MergeEventChange } from './branching/types.js'
 export type { MergeRecoveryOutcome } from './branching/types.js'
 export type { SanitizedBranchingConfig } from './branching/types.js'
-export { branchChangesCollectionSlug } from './branching/types.js'
 export { branchDocIDField } from './branching/types.js'
 export { branchesCollectionSlug } from './branching/types.js'
-export { branchField } from './branching/types.js'
 export { branchParentField } from './branching/types.js'
-export { MAIN_BRANCH } from './branching/types.js'
 export { mergeApplicationOutcomes } from './branching/types.js'
-
 export { mergeCleanupOutcomes } from './branching/types.js'
 export { mergeRecoveryOutcomes } from './branching/types.js'
 export type { BranchMergeValidate } from './branching/validation.js'
-
 export type { BranchMergeValidationCandidate } from './branching/validation.js'
 export type { BranchMergeValidationError } from './branching/validation.js'
 export type { BranchMergeValidationResult } from './branching/validation.js'
+
+export { resolveBranchVersionHistoryQuery } from './branching/versions.js'
+export { resolveBranchVersionParent } from './branching/versions.js'
+
+export { projectBranchVersionParents } from './branching/versions.js'
+export { resolveBranchVersionQuery } from './branching/versions.js'
+export { projectBranchVersionParent } from './branching/versions.js'
 export { generateImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
 export type { ImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
+
 export { genImportMapIterateFields } from './cli/commands/generateImportMap/iterateFields.js'
+
+export interface FieldCustom extends Record<string, any> {}
+
+export interface CollectionCustom extends Record<string, any> {}
+
+export interface CollectionAdminCustom extends Record<string, any> {}
+
+export interface GlobalCustom extends Record<string, any> {}
+
+export interface GlobalAdminCustom extends Record<string, any> {}
+
 export {
   type ClientCollectionConfig,
   createClientCollectionConfig,
@@ -1584,18 +1625,35 @@ export type {
   TypeWithID,
   TypeWithTimestamps,
 } from './collections/config/types.js'
+
 export type { CompoundIndex, FoldersConfig, TagsConfig } from './collections/config/types.js'
+
+export interface FieldCustom extends Record<string, any> {}
+
+export interface CollectionCustom extends Record<string, any> {}
+
+export interface CollectionAdminCustom extends Record<string, any> {}
+
+export interface GlobalCustom extends Record<string, any> {}
+
+export interface GlobalAdminCustom extends Record<string, any> {}
+
 export type { SanitizedCompoundIndex } from './collections/config/types.js'
 export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
+
 export { countOperation } from './collections/operations/count.js'
 export { createOperation } from './collections/operations/create.js'
+
 export { deleteOperation } from './collections/operations/delete.js'
 export { deleteByIDOperation } from './collections/operations/deleteByID.js'
 export { docAccessOperation } from './collections/operations/docAccess.js'
 export { duplicateOperation } from './collections/operations/duplicate.js'
+
 export { findOperation } from './collections/operations/find.js'
+
 export { findByIDOperation } from './collections/operations/findByID.js'
 export { findVersionByIDOperation } from './collections/operations/findVersionByID.js'
+
 export { findVersionsOperation } from './collections/operations/findVersions.js'
 export {
   countDocumentsInputSchema,
@@ -1625,10 +1683,8 @@ export {
 export type { ValidateCollectionOptions } from './collections/operations/local/validate.js'
 export { renameFileOperation } from './collections/operations/renameFile.js'
 export { restoreVersionOperation } from './collections/operations/restoreVersion.js'
-
 export { updateOperation } from './collections/operations/update.js'
 export { updateByIDOperation } from './collections/operations/updateByID.js'
-
 export { buildConfig } from './config/build.js'
 export {
   type ClientConfig,
@@ -1642,57 +1698,32 @@ export {
 export { addDefaultsToConfig } from './config/defaults.js'
 export { definePlugin } from './config/definePlugin.js'
 export { type OrderableEndpointBody } from './config/orderable/index.js'
-
 export { sanitizeConfig } from './config/sanitize.js'
-
-export interface FieldCustom extends Record<string, any> {}
-
-export interface CollectionCustom extends Record<string, any> {}
-
-export interface CollectionAdminCustom extends Record<string, any> {}
-
-export interface GlobalCustom extends Record<string, any> {}
-
-export interface GlobalAdminCustom extends Record<string, any> {}
-
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
-
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
-
-export interface FieldCustom extends Record<string, any> {}
-
-export interface CollectionCustom extends Record<string, any> {}
-
-export interface CollectionAdminCustom extends Record<string, any> {}
-
-export interface GlobalCustom extends Record<string, any> {}
-
-export interface GlobalAdminCustom extends Record<string, any> {}
-
 export { defaultBeginTransaction } from './database/defaultBeginTransaction.js'
 export { flattenWhereToOperators } from './database/flattenWhereToOperators.js'
-
 export { getLocalizedPaths } from './database/getLocalizedPaths.js'
 export { createMigration } from './database/migrations/createMigration.js'
-
 export { findMigrationDir } from './database/migrations/findMigrationDir.js'
 export { getMigrations } from './database/migrations/getMigrations.js'
+
 export { getPredefinedMigration } from './database/migrations/getPredefinedMigration.js'
 export { migrate } from './database/migrations/migrate.js'
-
 export { migrateDown } from './database/migrations/migrateDown.js'
-
 export { migrateRefresh } from './database/migrations/migrateRefresh.js'
 export { migrateReset } from './database/migrations/migrateReset.js'
-
 export { migrateStatus } from './database/migrations/migrateStatus.js'
+
 export { migrationsCollection } from './database/migrations/migrationsCollection.js'
 export { migrationTemplate } from './database/migrations/migrationTemplate.js'
 export { readMigrationFiles } from './database/migrations/readMigrationFiles.js'
+
 export { writeMigrationIndex } from './database/migrations/writeMigrationIndex.js'
 export type * from './database/queryValidation/types.js'
 export type { EntityPolicies, PathToQuery } from './database/queryValidation/types.js'
+
 export { validateQueryPaths } from './database/queryValidation/validateQueryPaths.js'
 export { validateSearchParam } from './database/queryValidation/validateSearchParams.js'
 export type {
@@ -1771,8 +1802,8 @@ export type {
 } from './database/types.js'
 export type { DynamicMigrationTemplate } from './database/types.js'
 export type { DeleteBranchGlobal } from './database/types.js'
-export type { DeleteBranchGlobalArgs } from './database/types.js'
 export type { UpsertBranchGlobalChange } from './database/types.js'
+export type { DeleteBranchGlobalArgs } from './database/types.js'
 export type { UpsertBranchGlobalChangeArgs } from './database/types.js'
 export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
 export {
@@ -1809,7 +1840,6 @@ export type { Authorship, SanitizedAuthorship } from './fields/baseFields/author
 export { createCreatedByField, createUpdatedByField } from './fields/baseFields/authorship/index.js'
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'
-
 export { getSlugFallbackValue } from './fields/baseFields/slug/getSlugFallbackValue.js'
 export type { SlugFieldClientProps } from './fields/baseFields/slug/types.js'
 export {
@@ -1933,15 +1963,12 @@ export type {
   ValidateOptions,
   ValueWithRelation,
 } from './fields/config/types.js'
-
 export { getDefaultValue } from './fields/getDefaultValue.js'
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
-
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
-
 export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
 export { validateBlocksFilterOptions, validations } from './fields/validations.js'
 export type {
@@ -2101,6 +2128,7 @@ export type { ValidationResult } from './types/validation.js'
 export { generatePayloadFileURL } from './uploads/generatePayloadFileURL.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
+
 export type * from './uploads/transformers/types.js'
 export type * from './uploads/types.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
@@ -2112,6 +2140,7 @@ export {
 } from './utilities/batchProcessing.js'
 export { canAccessAdmin } from './utilities/canAccessAdmin.js'
 export { commitTransaction } from './utilities/commitTransaction.js'
+
 export {
   configToJSONSchema,
   entityToJSONSchema,
@@ -2123,6 +2152,7 @@ export {
   withNullableJSONSchemaType,
 } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
+
 export {
   createPayloadRequest,
   type CreatePayloadRequestArgs,
@@ -2133,6 +2163,7 @@ export {
   deepCopyObjectComplex,
   deepCopyObjectSimple,
 } from './utilities/deepCopyObject.js'
+
 export {
   deepMerge,
   deepMergeWithCombinedArrays,
@@ -2167,7 +2198,6 @@ export { formatErrors } from './utilities/formatErrors.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
 export { getBlockSelect } from './utilities/getBlockSelect.js'
 export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes.js'
-
 export { getFieldByPath } from './utilities/getFieldByPath.js'
 export { getObjectDotNotation } from './utilities/getObjectDotNotation.js'
 export { getRequestLanguage } from './utilities/getRequestLanguage.js'
@@ -2179,14 +2209,11 @@ export {
   stripVirtualFields,
 } from './utilities/getVirtualFieldNames.js'
 export { handleEndpoints } from './utilities/handleEndpoints.js'
-
 export { headersWithCors } from './utilities/headersWithCors.js'
 export { initTransaction } from './utilities/initTransaction.js'
-
 export { isEntityHidden } from './utilities/isEntityHidden.js'
 export { isolateObjectProperty } from './utilities/isolateObjectProperty.js'
 export { isPlainObject } from './utilities/isPlainObject.js'
-
 export { isValidID } from './utilities/isValidID.js'
 export { killTransaction } from './utilities/killTransaction.js'
 export { logError } from './utilities/logError.js'

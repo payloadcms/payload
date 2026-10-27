@@ -1,6 +1,8 @@
 import type { QueryOptions, UpdateQuery } from 'mongoose'
 import type { UpdateOne } from 'payload'
 
+import { applyBranchIDProjection, resolveBranchRowID, withBranchIDSelect } from 'payload'
+
 import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
@@ -14,6 +16,7 @@ export const updateOne: UpdateOne = async function updateOne(
   this: MongooseAdapter,
   {
     id,
+    branch,
     collection: collectionSlug,
     data,
     locale,
@@ -25,14 +28,21 @@ export const updateOne: UpdateOne = async function updateOne(
   },
 ) {
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
+
+  if (id !== undefined && id !== null) {
+    id = await resolveBranchRowID({ id, branch, collectionSlug, req })
+  }
+
   const where = id ? { id: { equals: id } } : whereArg
   const fields = collectionConfig.fields
 
   const query = await buildQuery({
     adapter: this,
+    branch,
     collectionSlug,
     fields: collectionConfig.flattenedFields,
     locale,
+    req,
     where,
   })
 
@@ -88,7 +98,7 @@ export const updateOne: UpdateOne = async function updateOne(
     projection: buildProjectionFromSelect({
       adapter: this,
       fields: collectionConfig.flattenedFields,
-      select,
+      select: withBranchIDSelect({ branch, collectionSlug, req, select }),
     }),
     returnDocument: 'after',
   }
@@ -110,6 +120,15 @@ export const updateOne: UpdateOne = async function updateOne(
   }
 
   transform({ adapter: this, data: result, fields, operation: 'read' })
+
+  // The row written on a branch is the shadow row, so the document it returns
+  // carries that row's primary key rather than the document's canonical ID.
+  applyBranchIDProjection({
+    branch,
+    collectionSlug,
+    docs: [result as Record<string, unknown>],
+    req,
+  })
 
   return result
 }
