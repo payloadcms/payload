@@ -35,6 +35,7 @@ export async function updateGlobalVersion<T extends JsonObject = JsonObject>(
     adapter: this,
     fields: flattenedFields,
     locale,
+    req,
     where: whereToUse,
   })
 
