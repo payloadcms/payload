@@ -106,10 +106,48 @@ describe('generateFileData', () => {
         },
         payload: {
           config: {},
-          logger: { error: vi.fn() },
+          logger: { error: vi.fn(), warn: vi.fn() },
         },
         query,
       }) as unknown as PayloadRequest
+
+    it('should warn when no configured transformer applies a crop', async () => {
+      const req = createPngReq({
+        query: {
+          uploadEdits: {
+            crop: { height: 100, unit: '%', width: 50, x: 0, y: 0 },
+            heightInPixels: 1,
+            widthInPixels: 1,
+          },
+        },
+      })
+
+      await generateFileData({
+        collection: createCollection({ focalPoint: true }),
+        config: {} as SanitizedConfig,
+        data: {},
+        operation: 'create',
+        overwriteExistingFiles: true,
+        req,
+      })
+
+      expect(req.payload.logger.warn).toHaveBeenCalledWith(expect.stringContaining('crop'))
+    })
+
+    it('should not warn when only the default focal point is set', async () => {
+      const req = createPngReq()
+
+      await generateFileData({
+        collection: createCollection({ focalPoint: true }),
+        config: {} as SanitizedConfig,
+        data: {},
+        operation: 'create',
+        overwriteExistingFiles: true,
+        req,
+      })
+
+      expect(req.payload.logger.warn).not.toHaveBeenCalled()
+    })
 
     it('should default the focal point to the center on create', async () => {
       const result = await generateFileData({
@@ -196,7 +234,7 @@ describe('generateFileData', () => {
       },
       payload: {
         config: { sharp },
-        logger: { error: vi.fn() },
+        logger: { error: vi.fn(), warn: vi.fn() },
       },
       query: {
         uploadEdits: {

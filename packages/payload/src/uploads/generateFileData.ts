@@ -359,6 +359,13 @@ const processUpload = async <T>({
         }),
       ) ?? bridgeTransformers[0]
 
+    // Only the Sharp transformer applies crops for now; others receive `_transforms` later.
+    if (!bridgeTransformer && editsForTransformer?.crop) {
+      req.payload.logger.warn(
+        `No configured transformer applies crops for "${collectionConfig.slug}". The crop is saved in _transforms but not applied to the file.`,
+      )
+    }
+
     // The chosen bridge's task options are private to it, so other bridges must not see them.
     const bridgeTaskPipeline = pipeline.filter(
       (transformer) =>
