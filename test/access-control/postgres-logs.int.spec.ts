@@ -13,6 +13,10 @@ test.suite(
   'Access Control - postgres logs',
   { config: './config.postgreslogs.ts', db: (adapter) => adapter.startsWith('postgres') },
   () => {
+    test.afterEach(() => {
+      vitest.restoreAllMocks()
+    })
+
     test.beforeEach(async ({ payload }) => {
       req = await createPayloadRequest({
         payload,
