@@ -4,7 +4,7 @@ import type { MergeEventChange as PersistedMergeEventChange } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { RenderMergeDiffResult } from '../renderMergeDiff.js'
 
@@ -62,7 +62,9 @@ export const MergeLedger: React.FC<{ events: MergeEvent[] }> = ({ events }) => {
   const [loaded, setLoaded] = useState<Record<string, LoadState>>({})
 
   const loadedRef = useRef(loaded)
-  loadedRef.current = loaded
+  useEffect(() => {
+    loadedRef.current = loaded
+  }, [loaded])
 
   const load = useCallback(
     async ({

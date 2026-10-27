@@ -23,21 +23,23 @@ export const useUpcomingBranchMerges = ({
   const { serverFunction } = useServerFunctions()
   const [upcoming, setUpcoming] = useState<UpcomingBranchMerge[]>([])
 
-  const loadUpcoming = useCallback(async () => {
+  const loadUpcoming = useCallback((): Promise<void> => {
     if (branchID === undefined || branchID === null) {
-      return
+      return Promise.resolve()
     }
 
-    try {
-      const upcomingMerges = (await serverFunction({
+    return Promise.resolve(
+      serverFunction({
         name: 'get-upcoming-branch-merges',
         args: { branchID },
-      })) as UpcomingBranchMerge[]
-
-      setUpcoming(upcomingMerges)
-    } catch (_err) {
-      // A missing list costs context, not the scheduling action.
-    }
+      }),
+    )
+      .then((upcomingMerges) => {
+        setUpcoming(upcomingMerges as UpcomingBranchMerge[])
+      })
+      .catch(() => {
+        // A missing list costs context, not the scheduling action.
+      })
   }, [branchID, serverFunction])
 
   useEffect(() => {
