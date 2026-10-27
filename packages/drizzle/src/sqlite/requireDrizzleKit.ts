@@ -41,6 +41,6 @@ export const requireDrizzleKit: RequireDrizzleKit = () => {
 
       return pushSchema(schema, client, migrationsConfig)
     },
-    upSnapshot: (snapshot) => up(snapshot).snapshot,
+    upSnapshot: (snapshot) => up(snapshot),
   }
 }
