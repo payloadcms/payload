@@ -301,6 +301,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     and: 'En',
     anotherUser: 'Een andere gebruiker',
     anotherUserTakenOver: 'Een andere gebruiker heeft de bewerking van dit document overgenomen.',
+    apiResponse: 'API-antwoord',
     applyChanges: 'Breng wijzigingen aan',
     ascending: 'Oplopend',
     auto: 'Automatisch',
@@ -373,6 +374,13 @@ export const nlTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Dit document is onlangs bijgewerkt door een andere gebruiker. Uw weergave is verouderd.',
     documents: 'Documenten',
+    dragCancelled: 'Slepen van {{label}} geannuleerd.',
+    dragDropped: '{{label}} neergezet. Positie {{position}} van {{count}}.',
+    dragInstructions:
+      'Druk op Space of Enter om een rij op te pakken. Gebruik de pijltjestoetsen om deze te verplaatsen. Schakel met VoiceOver Quick Nav uit en gebruik Command + pijltjestoetsen. Druk op Space of Enter om neer te zetten, of Escape om te annuleren.',
+    dragMoved: '{{label}}: {{direction}}. Positie {{position}} van {{count}}.',
+    dragPickedUp: '{{label}} opgepakt. Positie {{position}} van {{count}}.',
+    dragToMove: 'Sleep om te verplaatsen',
     dragToReorder: 'Sleep om opnieuw te rangschikken',
     duplicate: 'Dupliceren',
     duplicateWithoutSaving: 'Dupliceren zonder wijzigingen te bewaren',
@@ -487,6 +495,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Bezig met het opnieuw indexeren van alle {{collections}}.',
     reloadDocument: 'Document opnieuw laden',
     remove: 'Verwijderen',
+    removeFilter: 'Filter verwijderen',
     rename: 'Hernoemen',
     replaceRow: 'Rij vervangen',
     requiredFields: 'Velden gemarkeerd met * zijn verplicht.',
@@ -580,6 +589,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     yes: 'Ja',
   },
   hierarchy: {
+    folderLocation: 'Maplocatie',
     goTo: 'Ga naar "{{name}}"',
     itemsMovedTo: '{{title}} verplaatst naar {{destination}}',
     itemsMovedToRoot: '{{title}} verplaatst naar root',

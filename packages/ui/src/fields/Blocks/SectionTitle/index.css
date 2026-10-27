@@ -69,4 +69,8 @@
   .collapsible--collapsed .section-title--empty {
     display: none;
   }
+
+  html[data-enhanced-contrast] .section-title__input:not([readonly]):not(:focus) {
+    border-color: var(--color-border-control);
+  }
 }

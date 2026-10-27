@@ -295,6 +295,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     and: 'Og',
     anotherUser: 'En annen bruker',
     anotherUserTakenOver: 'En annen bruker har tatt over redigeringen av dette dokumentet.',
+    apiResponse: 'API-svar',
     applyChanges: 'Bruk endringer',
     ascending: 'Stigende',
     auto: 'Automatisk',
@@ -367,6 +368,13 @@ export const nbTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Dette dokumentet ble nylig oppdatert av en annen bruker. Visningen din er utdatert.',
     documents: 'Dokumenter',
+    dragCancelled: 'Draingen av {{label}} er avbrutt.',
+    dragDropped: '{{label}} er sluppet. Posisjon {{position}} av {{count}}.',
+    dragInstructions:
+      'Trykk Space eller Enter for å plukke opp en rad. Bruk piltastene for å flytte den. Med VoiceOver slår du av Quick Nav og bruker Command + piltastene. Trykk Space eller Enter for å slippe, eller Escape for å avbryte.',
+    dragMoved: '{{label}}: {{direction}}. Posisjon {{position}} av {{count}}.',
+    dragPickedUp: '{{label}} er plukket opp. Posisjon {{position}} av {{count}}.',
+    dragToMove: 'Dra for å flytte',
     dragToReorder: 'Dra for å endre rekkefølge',
     duplicate: 'Dupliser',
     duplicateWithoutSaving: 'Dupliser uten å lagre endringer',
@@ -481,6 +489,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Reindekserer alle {{collections}}.',
     reloadDocument: 'Last inn dokument',
     remove: 'Fjern',
+    removeFilter: 'Fjern filter',
     rename: 'Endre navn',
     replaceRow: 'Erstatt rad',
     requiredFields: 'Felter merket med * er obligatoriske.',
@@ -574,6 +583,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     yes: 'Ja',
   },
   hierarchy: {
+    folderLocation: 'Mappeplassering',
     goTo: 'Gå til "{{name}}"',
     itemsMovedTo: '{{title}} flyttet til {{destination}}',
     itemsMovedToRoot: '{{title}} flyttet til roten',

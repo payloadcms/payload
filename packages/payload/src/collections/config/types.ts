@@ -504,7 +504,10 @@ export type CollectionAdminOptions = {
    * Specify a navigational group for collections in the admin sidebar.
    * - Provide a string to place the entity in a custom group.
    * - Provide a record to define localized group names.
-   * - Set to `false` to exclude the entity from the sidebar / dashboard without disabling its routes.
+   * - Set to `false` to exclude the collection from the sidebar, command palette, dashboard collection cards,
+   *   and pin picker, and its documents from both the Pinned and Recently viewed dashboard tabs, including existing pins.
+   * This does not disable routes or change access control or rich text link and relationship eligibility.
+   * Use `enableRichTextLink` and `enableRichTextRelationship` to configure rich text eligibility separately.
    */
   group?: false | Record<string, string> | string
   /**
@@ -824,7 +827,8 @@ export type SanitizedJoins = {
  * preserve their incoming optionality.
  */
 export interface SanitizedCollectionConfig
-  extends Omit<
+  extends
+    Omit<
       CollectionConfig,
       | '_sanitized'
       | 'access'

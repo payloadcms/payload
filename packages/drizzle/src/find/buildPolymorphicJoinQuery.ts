@@ -2,7 +2,7 @@ import type { SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
 
-import { asc, count, desc, eq, sql } from 'drizzle-orm'
+import { and, asc, count, desc, eq, getTableName, sql } from 'drizzle-orm'
 import { type FlattenedJoinField, type Where } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
@@ -20,6 +20,7 @@ type BuildPolymorphicJoinQueryArgs = {
   limit: number
   locale?: string
   page?: number
+  pageSize?: number
   path: string
   shouldCount: boolean
   sort?: string | string[]
@@ -40,7 +41,7 @@ type PolymorphicJoinQuery = {
  *
  * `field.collection` must contain at least one configured collection. Each mapped table must have
  * an `id` column and the column named by `field.on`. The supplied `limit` is used as-is; callers can
- * include an extra look-ahead row when they calculate pagination.
+ * include an extra look-ahead row and supply the original `pageSize` for offset calculation.
  *
  * @returns The stable projection name, the document projection, and the count projection when
  * `shouldCount` is true.
@@ -54,6 +55,7 @@ export const buildPolymorphicJoinQuery = ({
   limit,
   locale,
   page,
+  pageSize = limit,
   path,
   shouldCount,
   sort,
@@ -124,14 +126,36 @@ export const buildPolymorphicJoinQuery = ({
             wherePlan,
           })
         : undefined
-    let collectionQuery = db.select(selectFields).from(table).$dynamic()
+    const hasLocalizedWhere = [...wherePlan.values()].some((pathPlan) => {
+      const collectionField = pathPlan.fieldsByCollection.get(collection)
+
+      return collectionField?.type === 'scalar' && collectionField.isLocalized
+    })
+    const shouldDeduplicate = hasLocalizedWhere && (!locale || locale === 'all')
+    let collectionQuery = (
+      shouldDeduplicate ? db.selectDistinct(selectFields) : db.select(selectFields)
+    )
+      .from(table)
+      .$dynamic()
+
+    if (hasLocalizedWhere) {
+      const localesTable = adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`]
+
+      collectionQuery = collectionQuery.leftJoin(
+        localesTable,
+        and(
+          eq(table['id'], localesTable._parentID),
+          locale && locale !== 'all' ? eq(localesTable._locale, locale) : undefined,
+        ),
+      )
+    }
 
     if (collectionWhere) {
       collectionQuery = collectionQuery.where(collectionWhere)
     }
 
     if (unionQuery === null) {
-      unionQuery = collectionQuery as unknown as SQLiteSelect
+      unionQuery = collectionQuery
     } else {
       unionQuery = unionQuery.unionAll(collectionQuery)
     }
@@ -159,7 +183,7 @@ export const buildPolymorphicJoinQuery = ({
   }
 
   if (page && limit !== 0) {
-    const offset = (page - 1) * limit
+    const offset = (page - 1) * pageSize
 
     if (offset > 0) {
       limitOffsetSQL = sql`${limitOffsetSQL} OFFSET ${offset}`

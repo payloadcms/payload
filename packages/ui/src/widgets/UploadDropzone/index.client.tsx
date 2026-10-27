@@ -15,6 +15,9 @@ type Props = {
   collections: Array<{ mimeTypes?: string[]; slug: string }>
 }
 
+/**
+ * @internal - may change or be removed without a major version bump
+ */
 export function UploadDropzoneWidgetClient({ collections }: Props) {
   const { modalSlug, setCollectionSlug, setInitialFiles, setSelectableCollections } =
     useBulkUpload()

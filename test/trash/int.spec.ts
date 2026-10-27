@@ -85,7 +85,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
     }) => {
       await expect(
         payload.update({
-          collection: restrictedCollectionSlug as CollectionSlug,
+          collection: restrictedCollectionSlug,
           data: {
             deletedAt: new Date().toISOString(),
           },
@@ -111,7 +111,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
       await expect(
         payload.update({
           id: restrictedCollectionDoc.id, // Using ID to target specific document
-          collection: restrictedCollectionSlug as CollectionSlug,
+          collection: restrictedCollectionSlug,
           data: {
             deletedAt: new Date().toISOString(),
           },
@@ -155,7 +155,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
         try {
           await payload.delete({
             id,
-            collection: differentiatedTrashCollectionSlug as CollectionSlug,
+            collection: differentiatedTrashCollectionSlug,
             overrideAccess: true,
             trash: true,
           })
@@ -180,7 +180,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
         // Regular user should be able to trash the document
         const trashedDoc = await payload.update({
           id: doc.id,
-          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          collection: differentiatedTrashCollectionSlug,
           data: {
             deletedAt: new Date().toISOString(),
           },
@@ -204,7 +204,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
         // Admin should be able to trash the document
         const trashedDoc = await payload.update({
           id: doc.id,
-          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          collection: differentiatedTrashCollectionSlug,
           data: {
             deletedAt: new Date().toISOString(),
           },
@@ -236,7 +236,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
         await expect(
           payload.delete({
             id: doc.id,
-            collection: differentiatedTrashCollectionSlug as CollectionSlug,
+            collection: differentiatedTrashCollectionSlug,
             overrideAccess: false,
             trash: true,
             user, // Regular user from outer scope
@@ -262,7 +262,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
         // Admin should be able to permanently delete
         const deletedDoc = await payload.delete({
           id: doc.id,
-          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          collection: differentiatedTrashCollectionSlug,
           overrideAccess: false,
           trash: true,
           user: adminUser.user,
@@ -274,7 +274,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
         await expect(
           payload.findByID({
             id: doc.id,
-            collection: differentiatedTrashCollectionSlug as CollectionSlug,
+            collection: differentiatedTrashCollectionSlug,
             overrideAccess: true,
             trash: true,
           }),
@@ -301,7 +301,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
 
         // Regular user should be able to bulk trash
         const result = await payload.update({
-          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          collection: differentiatedTrashCollectionSlug,
           data: {
             deletedAt: new Date().toISOString(),
           },
@@ -345,7 +345,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
         // Regular user should NOT be able to bulk permanently delete
         await expect(
           payload.delete({
-            collection: differentiatedTrashCollectionSlug as CollectionSlug,
+            collection: differentiatedTrashCollectionSlug,
             overrideAccess: false,
             trash: true,
             user, // Regular user from outer scope
@@ -363,7 +363,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
 
         // Verify documents still exist
         const remaining = await payload.find({
-          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          collection: differentiatedTrashCollectionSlug,
           overrideAccess: true,
           trash: true,
           where: {
@@ -400,7 +400,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
 
         // Admin should be able to bulk permanently delete
         const result = await payload.delete({
-          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          collection: differentiatedTrashCollectionSlug,
           overrideAccess: false,
           trash: true,
           user: adminUser.user,
@@ -418,7 +418,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
 
         // Verify documents are gone
         const remaining = await payload.find({
-          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          collection: differentiatedTrashCollectionSlug,
           overrideAccess: true,
           trash: true,
           where: {
