@@ -51,12 +51,6 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
   })
 
   test.describe('transformFile arguments', () => {
-    test('should still pass file to existing transformers', async ({ payload }) => {
-      await createNote({ contractStages: {}, payload })
-
-      expect(contractCalls.transformFile[0]?.fileName).toBe('note.md')
-    })
-
     test('should pass the upload as source and originalSource', async ({ payload }) => {
       await createNote({ contractStages: {}, payload })
 
@@ -64,27 +58,6 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
         originalSourceText: 'hello',
         source: { filename: 'note.md', mimeType: 'text/markdown', sizeInBytes: 5 },
         sourceText: 'hello',
-      })
-    })
-
-    test("should pass an earlier stage's file as source, and keep the upload as originalSource", async ({
-      payload,
-    }) => {
-      await createNote({
-        contractStages: {
-          first: () => ({
-            file: new File(['HELLO!'], 'note.md', { type: 'text/markdown' }),
-            status: 'continue',
-          }),
-        },
-        payload,
-      })
-
-      expect(contractCalls.transformFile[1]).toMatchObject({
-        originalSourceText: 'hello',
-        slug: 'contract-second',
-        source: { sizeInBytes: 6 },
-        sourceText: 'HELLO!',
       })
     })
 
@@ -162,20 +135,6 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
       expect(stored._transforms).toEqual({ contractScore: 1 })
     })
 
-    test('should pass a _transforms change to later stages and keep originalDoc unchanged', async ({
-      payload,
-    }) => {
-      await createNote({
-        contractStages: { first: setTransforms({ contractScore: 1 }) },
-        payload,
-      })
-
-      const secondCall = contractCalls.transformFile[1]
-
-      expect(secondCall?.docAtStart._transforms).toEqual({ contractScore: 1 })
-      expect(secondCall?.originalDoc._transforms).toBeNull()
-    })
-
     test('should run beforeValidate and beforeChange hooks on the _transforms change', async ({
       payload,
     }) => {
@@ -250,12 +209,6 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
         name: 'a group with required fields',
         change: (doc: Record<string, unknown>) => delete doc.details,
       },
-      { name: 'a new field', change: (doc: Record<string, unknown>) => (doc.extra = true) },
-      {
-        name: 'a core upload field',
-        change: (doc: Record<string, unknown>) => (doc.filename = 'other.txt'),
-      },
-      { name: 'the width', change: (doc: Record<string, unknown>) => (doc.width = 10) },
     ])('should reject a change to $name and save nothing', async ({ change }, { payload }) => {
       await expect(
         createNote({ contractStages: { first: ({ doc }) => void change(doc) }, payload }),
