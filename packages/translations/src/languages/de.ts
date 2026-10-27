@@ -143,7 +143,7 @@ export const deTranslations: DefaultTranslationsObject = {
       'Die Zusammenführung wurde unterbrochen und nichts wurde übernommen. Bitte erneut versuchen.',
     mergeNow: 'Jetzt zusammenführen',
     mergeOnlySelected: 'Auswählen, welche Änderungen zusammengeführt werden',
-    mergePartial: 'Teilweise abgeschlossen zusammenführen',
+    mergePartial: 'Zusammenführung teilweise abgeschlossen',
     mergeScheduledFor: 'Zusammenführung geplant für {{date}}.',
     mergeSelectedOfTotal: '{{selected}} von {{total}} geänderten Dokumenten werden übernommen.',
     mergeStarting: 'Zusammenführung wird gestartet…',

@@ -137,7 +137,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     mergeInterrupted: 'マージが中断され、何も適用されませんでした。もう一度お試しください。',
     mergeNow: '今すぐマージ',
     mergeOnlySelected: 'マージする変更を選択',
-    mergePartial: '部分的に完了したものを統合',
+    mergePartial: '統合が部分的に完了しました',
     mergeScheduledFor: '{{date}} にマージを予約しました。',
     mergeSelectedOfTotal:
       '変更されたドキュメント {{total}} 件のうち {{selected}} 件が適用されます。',

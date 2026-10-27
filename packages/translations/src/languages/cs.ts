@@ -137,7 +137,7 @@ export const csTranslations: DefaultTranslationsObject = {
     mergeInterrupted: 'Sloučení bylo přerušeno a nic se nepoužilo. Zkuste to znovu.',
     mergeNow: 'Sloučit nyní',
     mergeOnlySelected: 'Vyberte, které změny sloučit',
-    mergePartial: 'Sloučit částečně dokončené',
+    mergePartial: 'Sloučení částečně dokončeno',
     mergeScheduledFor: 'Sloučení naplánováno na {{date}}.',
     mergeSelectedOfTotal: 'Použije se {{selected}} z {{total}} změněných dokumentů.',
     mergeStarting: 'Sloučení se spouští…',

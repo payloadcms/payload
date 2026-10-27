@@ -139,7 +139,7 @@ export const trTranslations: DefaultTranslationsObject = {
     mergeInterrupted: 'Birleştirme kesintiye uğradı ve hiçbir şey uygulanmadı. Yeniden deneyin.',
     mergeNow: 'Şimdi birleştir',
     mergeOnlySelected: 'Hangi değişikliklerin birleştirileceğini seçin',
-    mergePartial: 'Kısmen tamamlanmış birleştir',
+    mergePartial: 'Birleştirme kısmen tamamlandı',
     mergeScheduledFor: 'Birleştirme {{date}} için zamanlandı.',
     mergeSelectedOfTotal: '{{total}} değişen belgeden {{selected}} tanesi uygulanacak.',
     mergeStarting: 'Birleştirme başlatılıyor…',

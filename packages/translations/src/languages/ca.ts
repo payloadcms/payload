@@ -138,7 +138,7 @@ export const caTranslations: DefaultTranslationsObject = {
     mergeInterrupted: 'La fusió s’ha interromput i no s’ha aplicat res. Torna-ho a provar.',
     mergeNow: 'Fusiona ara',
     mergeOnlySelected: 'Tria quins canvis vols fusionar',
-    mergePartial: 'Combina parcialment complet',
+    mergePartial: 'Fusió parcialment completada',
     mergeScheduledFor: 'Fusió programada per al {{date}}.',
     mergeSelectedOfTotal: 'S’aplicaran {{selected}} de {{total}} documents modificats.',
     mergeStarting: 'S’està iniciant la fusió…',
