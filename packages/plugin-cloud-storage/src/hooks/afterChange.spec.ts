@@ -1,3 +1,4 @@
+import { beginDeferredCleanupScope, commitTransaction, flushDeferredCleanupScope } from 'payload'
 import { describe, expect, it, vi } from 'vitest'
 
 import { getAfterChangeHook } from './afterChange.js'
@@ -25,6 +26,12 @@ describe('upload replacement cleanup', () => {
         variants: { thumbnail: { filename: 'thumb.png' } },
         prefix: newPrefix,
       }
+      const req = {
+        context: {},
+        file: { data: Buffer.from('file'), size: 4 },
+        payload: { db: {}, logger: { error: vi.fn() } },
+      }
+      const cleanupScope = await beginDeferredCleanupScope({ req: req as never })
 
       await hook({
         data: uploadData,
@@ -38,12 +45,9 @@ describe('upload replacement cleanup', () => {
           prefix: oldPrefix,
         },
         operation: 'update',
-        req: {
-          context: {},
-          file: { data: Buffer.from('file'), size: 4 },
-          payload: { logger: { error: vi.fn() } },
-        },
+        req,
       } as never)
+      await flushDeferredCleanupScope({ req: req as never, scope: cleanupScope! })
 
       expect(handleDelete).toHaveBeenCalledTimes(shouldDelete ? 2 : 0)
       if (shouldDelete) {
@@ -56,4 +60,119 @@ describe('upload replacement cleanup', () => {
       }
     },
   )
+
+  it('should retain a cloud file that the main document still uses during a branch replacement', async () => {
+    const handleDelete = vi.fn()
+    const hook = getAfterChangeHook({
+      adapter: { handleDelete, handleUpload: vi.fn() } as never,
+      collection: { slug: 'media' } as never,
+      collectionPrefix: 'media',
+    })
+    const req = {
+      context: {},
+      file: { data: Buffer.from('file'), size: 4 },
+      payload: {
+        db: {
+          findOne: vi.fn().mockResolvedValue({
+            _branch: 'main',
+            filename: 'main.png',
+            id: 1,
+            prefix: 'media',
+            variants: { thumbnail: { filename: 'main-thumbnail.png' } },
+          }),
+        },
+        logger: { error: vi.fn() },
+      },
+    }
+    const cleanupScope = await beginDeferredCleanupScope({ req: req as never })
+
+    await hook({
+      data: {
+        _branch: 'campaign',
+        _branchDocID: 1,
+        filename: 'replacement.png',
+        id: 2,
+        mimeType: 'image/png',
+        prefix: 'media',
+        variants: { thumbnail: { filename: 'replacement-thumbnail.png' } },
+      },
+      doc: {
+        _branch: 'campaign',
+        _branchDocID: 1,
+        filename: 'replacement.png',
+        id: 2,
+        mimeType: 'image/png',
+        prefix: 'media',
+        variants: { thumbnail: { filename: 'replacement-thumbnail.png' } },
+      },
+      operation: 'update',
+      previousDoc: {
+        _branch: 'campaign',
+        _branchDocID: 1,
+        filename: 'main.png',
+        id: 2,
+        mimeType: 'image/png',
+        prefix: 'media',
+        variants: { thumbnail: { filename: 'main-thumbnail.png' } },
+      },
+      req,
+    } as never)
+    await flushDeferredCleanupScope({ req: req as never, scope: cleanupScope! })
+
+    expect(handleDelete).not.toHaveBeenCalled()
+  })
+
+  it('should defer replacement cleanup until the active transaction commits', async () => {
+    const handleDelete = vi.fn()
+    const databaseCommit = vi.fn().mockResolvedValue(undefined)
+    const hook = getAfterChangeHook({
+      adapter: { handleDelete, handleUpload: vi.fn() } as never,
+      collection: { slug: 'media' } as never,
+      collectionPrefix: 'media',
+    })
+    const req = {
+      context: {},
+      file: { data: Buffer.from('new file'), size: 8 },
+      payload: {
+        db: { commitTransaction: databaseCommit },
+        logger: { error: vi.fn() },
+      },
+      transactionID: 'transaction-id',
+    }
+
+    await hook({
+      data: {
+        filename: 'new.png',
+        id: 1,
+        mimeType: 'image/png',
+        prefix: 'media',
+        variants: {},
+      },
+      doc: {
+        filename: 'new.png',
+        id: 1,
+        mimeType: 'image/png',
+        prefix: 'media',
+        variants: {},
+      },
+      operation: 'update',
+      previousDoc: {
+        filename: 'old.png',
+        id: 1,
+        mimeType: 'image/png',
+        prefix: 'media',
+        variants: {},
+      },
+      req,
+    } as never)
+
+    expect(handleDelete).not.toHaveBeenCalled()
+
+    await commitTransaction(req as never)
+
+    expect(databaseCommit).toHaveBeenCalledWith('transaction-id')
+    expect(handleDelete).toHaveBeenCalledWith(
+      expect.objectContaining({ filename: 'old.png', storageFilePath: 'media/old.png' }),
+    )
+  })
 })
