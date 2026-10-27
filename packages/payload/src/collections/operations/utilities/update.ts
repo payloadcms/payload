@@ -17,6 +17,7 @@ import type {
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
+import type { UploadFileRollbacks } from '../../../uploads/uploadFileRollback.js'
 import type {
   DataFromCollectionSlug,
   SanitizedCollectionConfig,
@@ -27,6 +28,8 @@ import type {
 import { ensureUsernameOrEmail } from '../../../auth/ensureUsernameOrEmail.js'
 import { removeExpiredSessions } from '../../../auth/sessions.js'
 import { generatePasswordSaltHash } from '../../../auth/strategies/local/generatePasswordSaltHash.js'
+import { runBranchMergeWriteGuard } from '../../../branching/mergeWriteGuard.js'
+import { branchDocIDField, branchField, MAIN_BRANCH } from '../../../branching/types.js'
 import { ValidationError } from '../../../errors/index.js'
 import { afterChange } from '../../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../../fields/hooks/afterRead/index.js'
@@ -34,6 +37,7 @@ import { beforeChange } from '../../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple, saveVersion } from '../../../index.js'
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
+import { deleteUploadFilesExclusiveToDocument } from '../../../uploads/deleteUploadFilesExclusiveToDocument.js'
 import { runLocalFileUpdate } from '../../../uploads/fileVersioning/archive.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
@@ -44,6 +48,7 @@ import {
   hasLocalizeStatusEnabled,
 } from '../../../utilities/getVersionsConfig.js'
 import { resolvePublishAllLocales } from '../../../utilities/resolvePublishAllLocales.js'
+import { markTransactionWrite } from '../../../utilities/transactionMutationTracker.js'
 import {
   buildAllLocalesPublicationHookDoc,
   getAllLocalesPublicationStatus,
@@ -57,6 +62,8 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   collectionConfig: SanitizedCollectionConfig
   config: SanitizedConfig
   data: DeepPartial<DataFromCollectionSlug<TSlug>>
+  /** @internal Request used only for database reads and writes during branch promotion. */
+  databaseReq?: PayloadRequest
   depth: number
   docWithLocales: JsonObject & TypeWithID
   draftArg: boolean
@@ -64,6 +71,15 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   filesToUpload: FileToSave[]
   id: number | string
   locale: string
+  onBeforeDocumentWrite?: () => void
+  /**
+   * Hook `operation` label. Merge reports a branch-created document as a
+   * `create` on main even though the row is updated in place, since deleting
+   * and recreating it would cascade away every inbound relationship.
+   *
+   * @default 'update'
+   */
+  operation?: 'create' | 'update'
   overrideLock: boolean
   payload: Payload
   populate?: PopulateType
@@ -73,6 +89,7 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   shouldManageLocalFiles: boolean
   showHiddenFields: boolean
   unpublishAllLocales?: boolean
+  uploadFileRollbacks?: UploadFileRollbacks
 } & Pick<Required<SharedLocalAPIOptions>, 'overrideAccess'>
 
 /**
@@ -97,12 +114,15 @@ export const updateDocument = async <
   collectionConfig,
   config,
   data,
+  databaseReq,
   depth,
   docWithLocales,
   draftArg,
   fallbackLocale,
   filesToUpload,
   locale,
+  onBeforeDocumentWrite,
+  operation = 'update',
   overrideAccess,
   overrideLock,
   payload,
@@ -113,7 +133,9 @@ export const updateDocument = async <
   shouldManageLocalFiles,
   showHiddenFields,
   unpublishAllLocales: unpublishAllLocalesArg,
+  uploadFileRollbacks,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
+  const databaseRequest = databaseReq ?? req
   const nextFileData =
     collectionConfig.upload && shouldManageLocalFiles && !collectionConfig.upload.fileOperations
       ? deepCopyObjectSimple(data)
@@ -157,6 +179,7 @@ export const updateDocument = async <
     lockErrorMessage: `Document with ID ${id} is currently locked by another user and cannot be updated.`,
     overrideLock,
     req,
+    shouldDeleteLock: false,
   })
 
   const originalDoc = await afterRead({
@@ -227,7 +250,7 @@ export const updateDocument = async <
         statusFieldAccess = accessResult
       }
     },
-    operation: 'update',
+    operation,
     overrideAccess,
     req,
   })
@@ -262,7 +285,7 @@ export const updateDocument = async <
           collection: collectionConfig,
           context: req.context,
           data,
-          operation: 'update',
+          operation,
           originalDoc: publicationHookDoc,
           req,
         })) || data
@@ -280,7 +303,7 @@ export const updateDocument = async <
           collection: collectionConfig,
           context: req.context,
           data,
-          operation: 'update',
+          operation,
           originalDoc: publicationHookDoc,
           req,
         })) || data
@@ -302,7 +325,7 @@ export const updateDocument = async <
     docWithLocales,
     fieldsToValidate: submittedTopLevelFieldNames,
     global: null,
-    operation: 'update',
+    operation,
     overrideAccess,
     req,
     // only skip validation for drafts when draft validation is false
@@ -397,7 +420,7 @@ export const updateDocument = async <
         const currentDoc = await payload.db.findOne<DataFromCollectionSlug<TSlug>>({
           collection: collectionConfig.slug,
           locale: 'all',
-          req,
+          req: databaseRequest,
           where: { id: { equals: id } },
         })
 
@@ -455,18 +478,55 @@ export const updateDocument = async <
   // File deletion and writes must occur after the final publish validation. Validation failures
   // leave both the persisted upload and local files untouched.
   if (!isDraftOverPublished && !hasManagedLocalUpload) {
-    await deleteAssociatedFiles({
-      collectionConfig,
-      config,
-      doc: docWithLocales,
-      files: filesToUpload,
-      overrideDelete: false,
-      req,
-    })
+    const documentBranch = docWithLocales[branchField]
+    const isBranchUploadReplacement =
+      filesToUpload.length > 0 &&
+      typeof documentBranch === 'string' &&
+      documentBranch !== MAIN_BRANCH
+
+    if (isBranchUploadReplacement) {
+      const canonicalDocument = docWithLocales[branchDocIDField]
+      const canonicalDocumentID =
+        canonicalDocument && typeof canonicalDocument === 'object' && 'value' in canonicalDocument
+          ? canonicalDocument.value
+          : canonicalDocument
+      const retainedDoc =
+        typeof canonicalDocumentID === 'number' || typeof canonicalDocumentID === 'string'
+          ? ((await payload.db.findOne({
+              branch: false,
+              collection: collectionConfig.slug,
+              req,
+              where: {
+                and: [
+                  { [branchField]: { equals: MAIN_BRANCH } },
+                  { id: { equals: canonicalDocumentID } },
+                ],
+              },
+            })) as null | Record<string, unknown>)
+          : null
+
+      await deleteUploadFilesExclusiveToDocument({
+        collectionConfig,
+        config,
+        deleteFromAdapter: false,
+        req,
+        retainedDoc,
+        sourceDoc: docWithLocales,
+      })
+    } else {
+      await deleteAssociatedFiles({
+        collectionConfig,
+        config,
+        doc: docWithLocales,
+        files: filesToUpload,
+        overrideDelete: false,
+        req,
+      })
+    }
   }
 
   if (!collectionConfig.upload.disableLocalStorage && !hasManagedLocalUpload) {
-    await uploadFiles(payload, filesToUpload, req)
+    await uploadFiles(payload, filesToUpload, req, { uploadFileRollbacks })
   }
 
   const writeDocument = async (): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
@@ -502,6 +562,28 @@ export const updateDocument = async <
       }
     }
 
+    await runBranchMergeWriteGuard({
+      collectionSlug: collectionConfig.slug,
+      data: dataToUpdate,
+      req,
+    })
+
+    if (localizedPublishData) {
+      await runBranchMergeWriteGuard({
+        collectionSlug: collectionConfig.slug,
+        data: result,
+        req,
+      })
+    }
+
+    await checkDocumentLockStatus({
+      id,
+      collectionSlug: collectionConfig.slug,
+      lockErrorMessage: `Document with ID ${id} is currently locked by another user and cannot be updated.`,
+      overrideLock,
+      req,
+    })
+
     // /////////////////////////////////////
     // Update
     // /////////////////////////////////////
@@ -511,6 +593,7 @@ export const updateDocument = async <
     if (!isSavingDraft) {
       // Ensure updatedAt date is always updated
       dataToUpdate.updatedAt = new Date().toISOString()
+      onBeforeDocumentWrite?.()
       if (localizedPublishData) {
         // Single-locale publish: save filtered data to main doc but keep full locale data for
         // the version so draft fetches (replaceWithDraftIfAvailable) return complete data.
@@ -519,8 +602,9 @@ export const updateDocument = async <
           collection: collectionConfig.slug,
           data: dataToUpdate,
           locale,
-          req,
+          req: databaseRequest,
         })
+        markTransactionWrite({ req })
         resultWithLocales = { ...result, updatedAt: dataToUpdate.updatedAt }
       } else {
         resultWithLocales = await req.payload.db.updateOne({
@@ -528,8 +612,9 @@ export const updateDocument = async <
           collection: collectionConfig.slug,
           data: dataToUpdate,
           locale,
-          req,
+          req: databaseRequest,
         })
+        markTransactionWrite({ req })
       }
     }
 
@@ -538,6 +623,7 @@ export const updateDocument = async <
     // /////////////////////////////////////
 
     if (collectionConfig.versions) {
+      onBeforeDocumentWrite?.()
       resultWithLocales = await saveVersion({
         id,
         autosave,
@@ -546,9 +632,10 @@ export const updateDocument = async <
         draft: isSavingDraft,
         operation: 'update',
         payload,
-        req,
+        req: databaseRequest,
         unpublish: unpublishAllLocales,
       })
+      markTransactionWrite({ req })
     }
 
     // /////////////////////////////////////
@@ -598,7 +685,7 @@ export const updateDocument = async <
       data,
       doc: result,
       global: null,
-      operation: 'update',
+      operation,
       previousDoc: originalDoc,
       req,
     })
@@ -615,7 +702,7 @@ export const updateDocument = async <
             context: req.context,
             data,
             doc: result,
-            operation: 'update',
+            operation,
             overrideAccess,
             previousDoc: originalDoc,
             req,
