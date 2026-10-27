@@ -1,3 +1,5 @@
+import type { Locator } from '@playwright/test'
+
 import { expect, test } from '@playwright/test'
 import { randomUUID } from 'node:crypto'
 import { fileURLToPath } from 'node:url'
@@ -23,6 +25,7 @@ import {
   getFocusIndicatorStyle,
   gotoCreatePost,
   hasRenderedFocusIndicator,
+  isPaintedColor,
   openWorkflowDeleteDialog,
   prepareSignInPage,
   prepareWorkflowPage,
@@ -33,11 +36,6 @@ import {
   withWorkflowPosts,
   workflowTabKey,
 } from './helpers.js'
-
-// Product failures retained for the stacked remediation PR.
-const documentFormIssues =
-  'timezone picker has a hidden focusable button and unlabeled input; upload paste buttons lack names; select/block targets are too small'
-const editedDocumentIssues = `${documentFormIssues}; document navigation list contains links without list items`
 
 let postsURL: AdminUrlUtil
 let serverURL: string
@@ -138,11 +136,18 @@ test.describe('Admin accessibility', () => {
 
       await tabToWorkflowControl({ control: navigation.getByRole('tab', { selected: true }), page })
       await arrowToWorkflowItem({ item: folders, key: 'ArrowRight', page })
+      await expectSidebarTabFocus({ tab: folders })
       await page.keyboard.press('Enter')
       await expect(folders).toHaveAttribute('aria-selected', 'true')
       await arrowToWorkflowItem({ item: collections, key: 'ArrowLeft', page })
+      await expectSidebarTabFocus({ tab: collections })
       await page.keyboard.press('Enter')
       await expect(collections).toHaveAttribute('aria-selected', 'true')
+      const panel = navigation.getByRole('tabpanel', { name: 'Collections', exact: true })
+
+      await page.keyboard.press('Tab')
+      await expectFocusInside({ container: panel, page })
+      await expect(panel).not.toBeFocused()
       const posts = page.locator('#nav-posts')
 
       if (!(await posts.isVisible())) {
@@ -153,28 +158,54 @@ test.describe('Admin accessibility', () => {
       }
       await tabToWorkflowControl({ control: posts, page })
       await expect
-        .poll(() =>
-          posts.evaluate((element) => {
-            const style = getComputedStyle(element, '::before')
+        .poll(async () => {
+          const style = await getFocusIndicatorStyle(posts, { pseudoElement: '::before' })
 
-            return (
-              style.outlineStyle !== 'none' &&
-              Number.parseFloat(style.outlineWidth) > 0 &&
-              style.outlineColor !== 'transparent' &&
-              !/rgba\([^)]*,\s*0\)$/.test(style.outlineColor)
-            )
-          }),
-        )
+          return (
+            style.outlineStyle !== 'none' &&
+            Number.parseFloat(style.outlineWidth) > 0 &&
+            isPaintedColor(style.outlineColor)
+          )
+        })
         .toBe(true)
       await page.keyboard.press('Enter')
       await expect(page).toHaveURL((url) => url.pathname === '/admin/collections/posts')
       await expect(posts).toHaveAttribute('aria-current', 'page')
       await expect(page.getByRole('grid', { name: 'Posts', exact: true })).toBeVisible()
     })
+    test('should expose full truncated breadcrumb labels without changing their accessible names', async ({
+      page,
+    }) => {
+      await page.goto(
+        formatAdminURL({ adminRoute: '/admin', path: '/breadcrumb-current-page', serverURL }),
+      )
+      const breadcrumb = page.getByRole('navigation', { name: 'Breadcrumb', exact: true })
+      const label = 'Parent section of breadcrumb example'
+      const parent = breadcrumb.getByRole('link', { name: label, exact: true })
+
+      await expect(parent).toBeVisible()
+      await expect
+        .poll(() =>
+          parent
+            .locator('.btn__label')
+            .evaluate((element) => element.scrollWidth > element.clientWidth),
+        )
+        .toBe(true)
+      await expect(parent).toHaveAttribute('title', label)
+      await tabToWorkflowControl({ control: parent, page })
+      await expect(parent).toHaveAccessibleName(label)
+      await expect(breadcrumb.locator('span.step-nav__item')).toHaveAttribute(
+        'title',
+        'Additional breadcrumb context',
+      )
+      await expect(breadcrumb.locator('[aria-current="page"]')).toHaveAccessibleName(
+        'Current breadcrumb example',
+      )
+      await scanA11y({ name: 'breadcrumb labels', page, include: ['nav.step-nav'] })
+    })
   })
 
   test.describe('Finding content', () => {
-    // Axe checkpoint skipped: clear-search target is too small and lacks sufficient spacing.
     test('should recover from empty search results and open the matching document', async ({
       page,
     }) => {
@@ -192,7 +223,6 @@ test.describe('Admin accessibility', () => {
           await scanA11y({
             name: 'empty collection search',
             page,
-            deferred: 'clear-search button target is smaller than 24px without sufficient spacing',
           })
           await page.keyboard.press('ControlOrMeta+A')
           await page.keyboard.type(title)
@@ -215,8 +245,6 @@ test.describe('Admin accessibility', () => {
         serverURL,
       })
     })
-
-    // Axe checkpoint skipped: missing filter-panel ID and undersized column-sort targets.
     test('should sort and paginate collection results using the keyboard', async ({
       page: workflowPage,
     }) => {
@@ -240,8 +268,6 @@ test.describe('Admin accessibility', () => {
           await expect(grid.locator('tbody .cell-title')).toHaveText(posts[0].title)
           await scanA11y({
             name: 'sorted collection list',
-            deferred:
-              'filter aria-controls references a missing panel; column-sort targets are too small',
             page: workflowPage,
           })
           const next = workflowPage.getByRole('button', { name: 'Next table page', exact: true })
@@ -265,8 +291,6 @@ test.describe('Admin accessibility', () => {
         serverURL,
       })
     })
-
-    // Axe checkpoint skipped: the filter button references a missing panel ID.
     test('should apply and dismiss collection filters using the keyboard', async ({ page }) => {
       await withWorkflowPosts({
         action: async ([match]) => {
@@ -277,6 +301,18 @@ test.describe('Admin accessibility', () => {
           await expect(trigger).toHaveAttribute('aria-expanded', 'false')
           await page.keyboard.press('Enter')
           await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+          await expect(trigger).toHaveAttribute('aria-controls', /.+/)
+          const panelID = (await trigger.getAttribute('aria-controls'))!
+
+          expect(
+            await page
+              .locator('[id]')
+              .evaluateAll(
+                (elements, id) => elements.filter((element) => element.id === id).length,
+                panelID,
+              ),
+          ).toBe(1)
+          await expect(page.locator('.where-builder').locator('..')).toHaveAttribute('id', panelID)
           const add = page.getByRole('button', { name: /add filter/i }).first()
 
           await tabToWorkflowControl({ control: add, page })
@@ -286,14 +322,21 @@ test.describe('Admin accessibility', () => {
 
           await tabToWorkflowControl({ control: field, page })
           await page.keyboard.type('Title')
-          await page.keyboard.press('ArrowDown')
+          await expect(page.getByRole('option', { name: 'Title', exact: true })).toBeVisible()
+          await page.keyboard.press('Home')
           await page.keyboard.press('Enter')
           const operator = builder.getByRole('combobox', { name: 'Filter', exact: true }).first()
 
           await tabToWorkflowControl({ control: operator, page })
           await page.keyboard.type('equals')
-          await page.keyboard.press('ArrowDown')
+          const equals = page.getByRole('option', { name: 'equals', exact: true })
+
+          await expect(equals).toBeVisible()
+          await page.keyboard.press('Home')
           await page.keyboard.press('Enter')
+          await expect(
+            operator.locator('..').locator('..').locator('.rs__single-value'),
+          ).toHaveText('equals')
           const value = builder.getByRole('textbox', { name: 'Title', exact: true }).first()
 
           await tabToWorkflowControl({ control: value, page })
@@ -302,16 +345,12 @@ test.describe('Admin accessibility', () => {
 
           await expect(grid.locator('tbody tr')).toHaveCount(1)
           await expect(grid.locator('tbody .cell-title')).toHaveText(match.title)
-          await test.step.skip(
-            'focus retention: applying a collection filter should keep focus in its value input — filter refresh loses keyboard focus',
-            async () => {
-              await expect(value).toBeFocused()
-            },
-          )
+          await test.step('focus retention: applying a collection filter should keep focus in its value input', async () => {
+            await expect(value).toBeFocused()
+          })
           await scanA11y({
             name: 'collection filter builder',
             page,
-            deferred: 'filter aria-controls references the missing list-controls-where panel',
           })
           await tabToWorkflowControl({ control: trigger, direction: 'Shift+Tab', page })
           await page.keyboard.press('Enter')
@@ -327,7 +366,6 @@ test.describe('Admin accessibility', () => {
   })
 
   test.describe('Document editing', () => {
-    // Axe checkpoint skipped: timezone/upload semantics and select/block target-size findings.
     test('should create a draft through the keyboard and retain it after reload', async ({
       page: workflowPage,
     }) => {
@@ -344,7 +382,6 @@ test.describe('Admin accessibility', () => {
         await waitForFormReady(workflowPage)
         await scanA11y({
           name: 'document creation',
-          deferred: documentFormIssues,
           page: workflowPage,
         })
         const input = workflowPage
@@ -529,6 +566,36 @@ test.describe('Admin accessibility', () => {
     })
   })
 
+  test.describe('Document editing with touch input', () => {
+    test.use({ hasTouch: true })
+
+    test('should clear a selected timezone with touch and keyboard and retain input focus', async ({
+      page,
+    }) => {
+      await gotoCreatePost({ page, postsURL })
+      const timezone = page.getByRole('combobox', { name: 'Timezone', exact: true }).first()
+
+      await timezone.press('ArrowDown')
+      await expect(page.getByRole('option').first()).toBeVisible()
+      await timezone.press('Enter')
+      const clear = page.getByRole('button', { name: 'Clear Timezone', exact: true })
+
+      await expect(clear).toBeVisible()
+      await clear.tap()
+      await expect(clear).toBeHidden()
+      await expect(timezone).toBeFocused()
+      await expect(page.locator('.timezone-picker .rs__single-value')).toHaveCount(0)
+
+      await timezone.press('ArrowDown')
+      await expect(page.getByRole('option').first()).toBeVisible()
+      await timezone.press('Enter')
+      await clear.focus()
+      await clear.press('Space')
+      await expect(clear).toBeHidden()
+      await expect(timezone).toBeFocused()
+    })
+  })
+
   test.describe('Complex fields', () => {
     test('should navigate tabs and reveal conditional content without losing focus', async ({
       page,
@@ -568,7 +635,6 @@ test.describe('Admin accessibility', () => {
     })
 
     for (const kind of ['Array', 'Blocks'] as const) {
-      // Axe checkpoint skipped: shared form findings and invalid document-navigation list markup.
       test(`should add, reorder and remove ${kind.toLowerCase()} rows using the keyboard`, async ({
         page,
       }) => {
@@ -648,7 +714,6 @@ test.describe('Admin accessibility', () => {
             ).toHaveValue('Second row')
             await scanA11y({
               name: `${kind} rows after keyboard changes`,
-              deferred: editedDocumentIssues,
               page,
             })
             const publish = page.getByRole('button', { name: /^Publish(?: in English)?$/ })
@@ -683,7 +748,6 @@ test.describe('Admin accessibility', () => {
   })
 
   test.describe('Relationships and drawers', () => {
-    // Axe checkpoint skipped: shared form findings and invalid document-navigation list markup.
     test('should select and remove a related post using the keyboard', async ({
       page: workflowPage,
     }) => {
@@ -705,7 +769,6 @@ test.describe('Admin accessibility', () => {
           await expect(option).toBeVisible()
           await scanA11y({
             name: 'relationship options',
-            deferred: editedDocumentIssues,
             page: workflowPage,
           })
           await workflowPage.keyboard.press('ArrowDown')
@@ -760,8 +823,6 @@ test.describe('Admin accessibility', () => {
         serverURL,
       })
     })
-
-    // Axe checkpoint skipped: unnamed upload buttons and an unlabeled timezone input.
     test('should isolate nested relationship drawers and restore focus on dismissal', async ({
       page,
     }) => {
@@ -787,10 +848,16 @@ test.describe('Admin accessibility', () => {
       await expect(page.locator('dialog[id^="doc-drawer_posts_"][open]')).toHaveCount(2)
       await expectFocusInside({ container: child, page })
       await expect(child).toHaveAccessibleName(/post/i)
+      await expect(child.locator('[data-form-ready="true"]').first()).toBeVisible()
+      const timezoneIDs = await page
+        .locator('.timezone-picker input[role="combobox"]')
+        .evaluateAll((inputs) => inputs.map((input) => input.id))
+
+      expect(timezoneIDs.length).toBeGreaterThanOrEqual(3)
+      expect(new Set(timezoneIDs).size).toBe(timezoneIDs.length)
       await expect(parent.getByRole('textbox')).toHaveCount(0)
       await scanA11y({
         name: 'nested relationship creation drawer',
-        deferred: 'upload paste buttons lack names and timezone picker input lacks a label',
         page,
       })
       await page.keyboard.press('Escape')
@@ -805,7 +872,25 @@ test.describe('Admin accessibility', () => {
   })
 
   test.describe('Media management', () => {
-    // Axe checkpoint skipped: the selected upload preview image has no alt attribute.
+    test('should replace a renamed local image without retaining its previous name', async ({
+      page,
+    }) => {
+      await page.goto(`${serverURL}/admin/collections/media/create`)
+      await chooseWorkflowUpload({ page })
+      const filename = page.getByLabel('File Name', { exact: true })
+      const preview = page.locator('.file-manager__selected-preview').getByRole('img')
+
+      await filename.fill('renamed-image.png')
+      await expect(preview).toHaveAccessibleName('renamed-image.png')
+      const remove = page.locator('.file-manager__remove')
+
+      await tabToWorkflowControl({ control: remove, direction: 'Shift+Tab', page })
+      await page.keyboard.press('Enter')
+      await chooseWorkflowUpload({ page })
+      await expect(filename).toHaveValue('image.png')
+      await expect(preview).toHaveAccessibleName('image.png')
+    })
+
     test('should recover from required alternative text and save an image using the keyboard', async ({
       page: workflowPage,
     }) => {
@@ -836,7 +921,6 @@ test.describe('Admin accessibility', () => {
         )
         await scanA11y({
           name: 'invalid media upload form',
-          deferred: 'selected upload preview image has no alt attribute',
           page: workflowPage,
         })
         await tabToWorkflowControl({ control: input, page: workflowPage })
@@ -975,8 +1059,6 @@ test.describe('Admin accessibility', () => {
         await cleanupModalMedia({ page: workflowPage })
       }
     })
-
-    // Bulk-upload axe checkpoint skipped: the paste button has no accessible name; the list scan runs.
     test('should open bulk upload and restore focus after cancelling', async ({ page }) => {
       await page.goto(
         formatAdminURL({ adminRoute: '/admin', path: '/collections/media', serverURL }),
@@ -991,7 +1073,6 @@ test.describe('Admin accessibility', () => {
       await expectFocusInside({ container: dialog, page })
       await scanA11y({
         name: 'bulk upload dialog',
-        deferred: 'paste-from-clipboard icon button has no accessible name',
         page,
       })
       await page.keyboard.press('Escape')
@@ -1001,7 +1082,6 @@ test.describe('Admin accessibility', () => {
   })
 
   test.describe('Rich-text editing', () => {
-    // Axe checkpoint skipped: shared form findings and invalid document-navigation list markup.
     test('should persist keyboard changes to a select and rich-text field', async ({
       page: workflowPage,
     }) => {
@@ -1030,7 +1110,6 @@ test.describe('Admin accessibility', () => {
           await expect(editor).toHaveAccessibleDescription(/Press Escape, then Tab or Shift\+Tab/)
           await scanA11y({
             name: 'edited rich-text form',
-            deferred: editedDocumentIssues,
             page: workflowPage,
           })
           await workflowPage.keyboard.press('Escape')
@@ -1156,7 +1235,6 @@ test.describe('Admin accessibility', () => {
   })
 
   test.describe('Publishing, versions and deletion', () => {
-    // Axe checkpoint skipped: document-navigation links lack enclosing list items.
     test('should publish a draft and inspect its version history using the keyboard', async ({
       page: workflowPage,
     }) => {
@@ -1181,7 +1259,6 @@ test.describe('Admin accessibility', () => {
           await expect(history.locator('tbody tr').first()).toBeVisible()
           await scanA11y({
             name: 'document version history',
-            deferred: 'document navigation list contains links without list items',
             page: workflowPage,
           })
           await workflowPage.goto(postsURL.edit(id))
@@ -1337,11 +1414,38 @@ test.describe('Admin accessibility', () => {
         const menu = page.getByRole('button', { name: 'Open Menu', exact: true })
 
         await tabToWorkflowControl({ control: menu, page })
+        const menuBounds = await menu.boundingBox()
+
         await page.keyboard.press('Enter')
         await expect(page.locator('aside.nav')).toHaveClass(/nav--nav-open/)
         const close = page.getByRole('button', { name: 'Hide sidebar', exact: true })
 
         await tabToWorkflowControl({ control: close, page })
+        await page.keyboard.press('Tab')
+        const unfocusedStyle = await getFocusIndicatorStyle(close, { pseudoElement: '::after' })
+
+        await page.keyboard.press('Shift+Tab')
+        await expect(close).toBeFocused()
+        await expect
+          .poll(async () =>
+            hasRenderedFocusIndicator({
+              focusedStyle: await getFocusIndicatorStyle(close, { pseudoElement: '::after' }),
+              unfocusedStyle,
+            }),
+          )
+          .toBe(true)
+        await expect
+          .poll(() =>
+            close.evaluate((element) => {
+              const style = getComputedStyle(element, '::after')
+
+              return {
+                height: Number.parseFloat(style.height),
+                width: Number.parseFloat(style.width),
+              }
+            }),
+          )
+          .toEqual({ height: menuBounds!.height, width: menuBounds!.width })
         // Let the final preference write commit before teardown deletes its owner.
         const savedNavigation = page.waitForResponse(
           (response) =>
@@ -1354,17 +1458,13 @@ test.describe('Admin accessibility', () => {
         expect((await savedNavigation).ok()).toBe(true)
         await expect(menu).toHaveAttribute('aria-expanded', 'false')
         await expect(page.locator('aside.nav')).not.toHaveClass(/nav--nav-open/)
-        await test.step.skip(
-          'focus restoration: closing the mobile sidebar should return focus to its opener — sidebar close does not restore focus to its opener',
-          async () => {
-            await expect(menu).toBeFocused()
-          },
-        )
+        await test.step('focus restoration: closing the mobile sidebar should return focus to its opener', async () => {
+          await expect(menu).toBeFocused()
+        })
       })
     }
 
-    test.skip('should keep collection list controls within a 320px viewport', async ({ page }) => {
-      // Existing list controls extend the page to approximately 399px at 320px.
+    test('should keep collection list controls within a 320px viewport', async ({ page }) => {
       await page.setViewportSize({ height: 720, width: 320 })
       await page.goto(postsURL.list)
       await expect(page.locator('.list-controls')).toBeVisible()
@@ -1431,3 +1531,31 @@ test.describe('Admin accessibility', () => {
     })
   })
 })
+
+async function expectSidebarTabFocus({ tab }: { tab: Locator }) {
+  await expect(tab).toBeFocused()
+  await expect
+    .poll(async () => {
+      const style = await getFocusIndicatorStyle(tab)
+
+      if (style.outlineStyle === 'none' || !isPaintedColor(style.outlineColor)) {
+        return false
+      }
+      return tab.evaluate((element) => {
+        const style = getComputedStyle(element)
+        const width = Number.parseFloat(style.outlineWidth)
+        const extent = Math.max(0, width + Number.parseFloat(style.outlineOffset))
+        const bounds = element.getBoundingClientRect()
+        const strip = element.closest('.sidebar-tabs__tabs')!.getBoundingClientRect()
+
+        return (
+          width > 0 &&
+          bounds.left - extent >= strip.left &&
+          bounds.right + extent <= strip.right &&
+          bounds.top - extent >= strip.top &&
+          bounds.bottom + extent <= strip.bottom
+        )
+      })
+    })
+    .toBe(true)
+}
