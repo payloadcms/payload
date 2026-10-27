@@ -1,3 +1,5 @@
+import type { DrizzleSnapshotJSON } from '../types.js'
+
 import { integer as pgInteger, pgTable } from 'drizzle-orm/pg-core'
 import { integer as sqliteInteger, sqliteTable } from 'drizzle-orm/sqlite-core'
 import { describe, expect, it, vi } from 'vitest'
@@ -5,6 +7,14 @@ import { describe, expect, it, vi } from 'vitest'
 import { requireDrizzleKit as requirePostgresKit } from '../postgres/requireDrizzleKit.js'
 import { requireDrizzleKit as requireSQLiteKit } from '../sqlite/requireDrizzleKit.js'
 import { generateMigrationWithCreateHints } from './generateMigrationWithCreateHints.js'
+
+const emptySnapshot: DrizzleSnapshotJSON = {
+  id: '00000000-0000-0000-0000-000000000000',
+  ddl: [],
+  dialect: 'sqlite',
+  prevIds: [],
+  version: '7',
+}
 
 describe('generateMigrationWithCreateHints', () => {
   it.each([
@@ -51,7 +61,11 @@ describe('generateMigrationWithCreateHints', () => {
     const generateMigration = vi.fn().mockRejectedValue(error)
 
     await expect(
-      generateMigrationWithCreateHints({ after: {}, before: {}, generateMigration }),
+      generateMigrationWithCreateHints({
+        after: emptySnapshot,
+        before: emptySnapshot,
+        generateMigration,
+      }),
     ).rejects.toBe(error)
     expect(generateMigration).toHaveBeenCalledTimes(1)
   })
@@ -64,13 +78,15 @@ describe('generateMigrationWithCreateHints', () => {
     const generateMigration = vi.fn().mockRejectedValue(error)
 
     await expect(
-      generateMigrationWithCreateHints({ after: {}, before: {}, generateMigration }),
+      generateMigrationWithCreateHints({
+        after: emptySnapshot,
+        before: emptySnapshot,
+        generateMigration,
+      }),
     ).rejects.toBe(error)
     expect(generateMigration).toHaveBeenCalledTimes(2)
-    expect(generateMigration).toHaveBeenLastCalledWith(
-      {},
-      {},
-      { hints: [{ type: 'create', kind: 'table', entity: ['public', 'new'] }] },
-    )
+    expect(generateMigration).toHaveBeenLastCalledWith(emptySnapshot, emptySnapshot, {
+      hints: [{ type: 'create', kind: 'table', entity: ['public', 'new'] }],
+    })
   })
 })

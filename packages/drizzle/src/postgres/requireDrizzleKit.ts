@@ -1,3 +1,5 @@
+import type { up as upgradeSnapshot } from 'drizzle-kit/payload/postgres'
+
 import { createRequire } from 'module'
 
 import type { RequireDrizzleKit } from '../types.js'
@@ -5,12 +7,9 @@ import type { RequireDrizzleKit } from '../types.js'
 const require = createRequire(import.meta.url)
 
 export const requireDrizzleKit: RequireDrizzleKit = () => {
-  const {
-    generateDrizzleJson,
-    generateMigration,
-    pushSchema,
-    up,
-  } = require('drizzle-kit/payload/postgres')
+  const kit = require('drizzle-kit/payload/postgres')
+  const { generateDrizzleJson, generateMigration, pushSchema } = kit
+  const up: typeof upgradeSnapshot = kit.up
 
   return {
     generateDrizzleJson,
