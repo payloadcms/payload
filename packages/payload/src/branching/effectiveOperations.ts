@@ -33,7 +33,7 @@ export type EffectiveWrite = {
 }
 
 export type ResolvedChange = {
-  change: Record<string, any>
+  change: { id: number | string } & Record<string, unknown>
   collectionSlug: string
   docID: number | string
   shadow: null | Record<string, unknown>
@@ -63,7 +63,7 @@ export const resolveEffectiveOperations = async ({
   req,
 }: {
   branch: string
-  changes: Record<string, any>[]
+  changes: Record<string, unknown>[]
   payload: Payload
   req: PayloadRequest
 }): Promise<ResolvedChange[]> => {
@@ -83,7 +83,7 @@ export const resolveEffectiveOperations = async ({
     }
 
     resolved.push({
-      change,
+      change: change as ResolvedChange['change'],
       collectionSlug,
       docID,
       shadow,
@@ -109,11 +109,11 @@ const readChangeShadows = async ({
   req,
 }: {
   branch: string
-  changes: Record<string, any>[]
+  changes: Record<string, unknown>[]
   payload: Payload
   req: PayloadRequest
 }): Promise<Map<string, Record<string, unknown>>> => {
-  const changesByCollection = new Map<string, Record<string, any>[]>()
+  const changesByCollection = new Map<string, Record<string, unknown>[]>()
   const shadowsByChange = new Map<string, Record<string, unknown>>()
 
   for (const change of changes) {
@@ -180,7 +180,7 @@ const getBranchChangeDocumentID = ({
   change,
   collectionSlug,
 }: {
-  change: Record<string, any>
+  change: Record<string, unknown>
   collectionSlug: string
 }): number | string => {
   const docID = extractRelationshipID({ relationship: change.doc })
@@ -202,7 +202,7 @@ const resolveWrites = async ({
   shadow,
 }: {
   branch: string
-  change: Record<string, any>
+  change: Record<string, unknown>
   collectionSlug: string
   docID: number | string
   payload: Payload
