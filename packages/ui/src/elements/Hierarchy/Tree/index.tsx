@@ -157,19 +157,10 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
   )
 
   // Pre-populate cache with initialData synchronously before first render
-  const childrenCache = useRef<Map<string, CachedChildren>>(new Map())
-
-  const previousBranchRef = useRef(branch)
-  if (previousBranchRef.current !== branch) {
-    previousBranchRef.current = branch
-    childrenCache.current.clear()
-  }
-
-  const prevBaseFilterKeyRef = useRef(baseFilterKey)
-  if (prevBaseFilterKeyRef.current !== baseFilterKey) {
-    prevBaseFilterKeyRef.current = baseFilterKey
-    childrenCache.current.clear()
-  }
+  const childrenCache = useMemo(
+    () => ({ baseFilterKey, branch, current: new Map<string, CachedChildren>() }),
+    [branch, baseFilterKey],
+  )
 
   // Fill the cache during render, so children find initialData on their first render. Compares the
   // inputs like useMemo would, since a useMemo used only for its side effect isn't guaranteed to run.

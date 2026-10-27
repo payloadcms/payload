@@ -246,7 +246,7 @@ export function PublishButton({
     api,
     blocksMap,
     collectionSlug,
-    entityConfig?.fields,
+    entityConfig,
     getData,
     globalSlug,
     hasLocalizedFields,

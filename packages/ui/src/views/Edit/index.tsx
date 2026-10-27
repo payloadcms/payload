@@ -571,7 +571,7 @@ export function DefaultEditView({
       return state
     },
     [
-      data?.updatedAt,
+      data,
       branch,
       editSessionStartTime,
       isLockingEnabled,

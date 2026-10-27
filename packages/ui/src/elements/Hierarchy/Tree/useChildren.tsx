@@ -100,14 +100,20 @@ export const useChildren = ({
   const [hasMore, setHasMore] = useState(parentMeta?.hasMore || cachedData?.hasMore || false)
   const initializedRef = useRef(!!hasInitialData)
   const activeCacheKeyRef = useRef(cacheKey)
-  activeCacheKeyRef.current = cacheKey
-  const stateCacheKeyRef = useRef(cacheKey)
+  useEffect(() => {
+    activeCacheKeyRef.current = cacheKey
+  }, [cacheKey])
+  const [stateCacheKey, setStateCacheKey] = useState(cacheKey)
   const stateFilterKeyRef = useRef(filterKey)
   // Refs for stable access inside load() without adding state to its dep array
   const childrenRef = useRef(children)
-  childrenRef.current = stateCacheKeyRef.current === cacheKey ? children : null
+  useEffect(() => {
+    childrenRef.current = stateCacheKey === cacheKey ? children : null
+  }, [cacheKey, children, stateCacheKey])
   const isLoadingRef = useRef(isLoading)
-  isLoadingRef.current = isLoading
+  useEffect(() => {
+    isLoadingRef.current = isLoading
+  }, [isLoading])
   const {
     config: {
       routes: { api },
@@ -257,8 +263,8 @@ export const useChildren = ({
   useEffect(() => {
     const hasFilterChanged = stateFilterKeyRef.current !== filterKey
 
-    if (stateCacheKeyRef.current !== cacheKey || hasFilterChanged) {
-      stateCacheKeyRef.current = cacheKey
+    if (stateCacheKey !== cacheKey || hasFilterChanged) {
+      setStateCacheKey(cacheKey)
       stateFilterKeyRef.current = filterKey
       initializedRef.current = false
 
@@ -281,7 +287,7 @@ export const useChildren = ({
         void fetchPage(1, null)
       }
     }
-  }, [cache, cacheKey, enabled, fetchPage, filterKey])
+  }, [cache, cacheKey, enabled, fetchPage, filterKey, stateCacheKey])
 
   // Load children explicitly. Safe to call multiple times — no-ops if already loaded or loading.
   const load = useCallback(async (): Promise<TreeDocument[]> => {
@@ -338,9 +344,7 @@ export const useChildren = ({
   // Tree's useMemo pre-populates the cache before child TreeNodes render, so this eliminates
   // the brief null-children flash that occurs when a node becomes expanded after context updates.
   const effectiveChildren =
-    stateCacheKeyRef.current === cacheKey
-      ? (children ?? cache?.current.get(cacheKey)?.children ?? null)
-      : null
+    stateCacheKey === cacheKey ? (children ?? cache?.current.get(cacheKey)?.children ?? null) : null
 
   return { children: effectiveChildren, hasMore, isLoading, load, loadMore, refresh, totalDocs }
 }
