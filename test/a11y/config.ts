@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
+import { seoPlugin } from '@payloadcms/plugin-seo'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
@@ -11,7 +12,7 @@ import { MediaCollection, mediaSlug } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { UsersCollection, usersSlug } from './collections/Users/index.js'
 import { seededAPIKey } from './constants.js'
-import { MenuGlobal } from './globals/Menu/index.js'
+import { MenuGlobal, menuSlug } from './globals/Menu/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -49,10 +50,18 @@ export default buildConfigWithDefaults({
     // ...extend config here
     admin: {
       components: {
+        providers: [
+          '../admin/components/CustomProviderServer/index.js#CustomProviderServer',
+          '../admin/components/CustomProvider/index.js#CustomProvider',
+        ],
         views: {
           BreadcrumbCurrentPage: {
             Component: '/components/BreadcrumbCurrentPage/index.js#BreadcrumbCurrentPage',
             path: '/breadcrumb-current-page',
+          },
+          CustomResponseForm: {
+            Component: '/components/CustomResponseForm/index.js#CustomResponseForm',
+            path: '/custom-response-form',
           },
           CustomIDModals: {
             Component: '/components/CustomIDModals/index.js#CustomIDModals',
@@ -70,7 +79,17 @@ export default buildConfigWithDefaults({
       },
       dashboard: {
         defaultLayout: [
+          { widgetSlug: 'welcome', width: 'full' },
           { widgetSlug: 'collections', width: 'full' },
+          {
+            data: {
+              relatedCollection: postsSlug,
+              sortField: 'removedField',
+              title: 'Contrast query error',
+            },
+            widgetSlug: 'collection-query',
+            width: 'medium',
+          },
           { widgetSlug: 'upload-dropzone', width: 'small' },
           { widgetSlug: 'activity', width: 'full' },
         ],
@@ -106,6 +125,12 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    plugins: [
+      seoPlugin({
+        generateURL: () => 'https://example.com/accessibility-post',
+        globals: [menuSlug],
+      }),
+    ],
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
@@ -138,6 +163,15 @@ export default buildConfigWithDefaults({
       overrideAccess: true,
     })
 
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        deletedAt: '2026-01-01T00:00:00.000Z',
+        title: 'Contrast trashed post',
+      },
+      overrideAccess: true,
+    })
+
     for (const globalText of ['Original menu text', 'Updated menu text', 'Current menu text']) {
       await payload.updateGlobal({
         slug: 'menu',
@@ -159,6 +193,7 @@ export default buildConfigWithDefaults({
       collection: postsSlug,
       data: {
         accessibilitySelect: 'one',
+        subtitle: 'Original subtitle',
         title: 'Example post one',
       },
       draft: true,
@@ -169,6 +204,7 @@ export default buildConfigWithDefaults({
       id: firstPost.id,
       collection: postsSlug,
       data: {
+        subtitle: 'Replacement subtitle',
         title: 'Example post one, second version',
       },
       draft: true,

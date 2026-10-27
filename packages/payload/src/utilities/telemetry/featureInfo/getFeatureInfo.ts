@@ -228,7 +228,7 @@ const collectRichTextFeatures = (config: SanitizedConfig): FeatureInfo => {
   return {
     richTextFeatures: (['blocks', 'table', 'upload', 'relationship'] as const).filter((f) =>
       featureSet.has(f),
-    ) as RichTextFeature[],
+    ),
   }
 }
 

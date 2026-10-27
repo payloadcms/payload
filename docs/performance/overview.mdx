@@ -204,7 +204,7 @@ import { Button } from '@payloadcms/ui'
 
 Everything mentioned above applies to local development as well, but there are a few additional steps you can take to optimize your local development experience.
 
-### Enable Turbopack
+### Enable Turbopack (Next.js)
 
 In Next.js 16, turbopack is enabled by default, unless you explicitly disabled it using the `--webpack` flag.
 
@@ -218,25 +218,36 @@ In Next.js 15, add `--turbo` to your dev script to significantly speed up your l
 }
 ```
 
-### Only bundle server packages in production
+On TanStack Start there is no equivalent flag — it builds with [Vite](https://vite.dev), which already uses fast, esbuild-based dev transforms by default.
 
-<Banner type="warning">
-  **Note:** This is enabled by default in `create-payload-app` since v3.28.0. If
-  you created your app after this version, you don't need to do anything.
-</Banner>
+### Externalize server packages during development
 
-By default, Next.js bundles both server and client code. However, during development, bundling certain server packages isn't necessary.
+Both Next.js and TanStack Start support the `devBundleServerPackages` option in `withPayload`. It defaults to `false`, allowing Node.js to load installed server-only packages directly instead of passing them through the framework's development transforms.
 
-Payload has thousands of modules, slowing down compilation.
+Payload has thousands of modules. Skipping unnecessary bundling and transforms reduces the number of files the dev server needs to process, improving initial load times.
 
-Setting this option skips bundling Payload server modules during development. Fewer files to compile means faster compilation speeds.
-
-To do this, add the `devBundleServerPackages` option to `withPayload` in your `next.config.js` file:
+For Next.js, configure the option in your `next.config.js` file:
 
 ```ts
+import { withPayload } from '@payloadcms/next/withPayload'
+
 const nextConfig = {
   // your existing next config
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })
 ```
+
+For TanStack Start, configure it in your `vite.config.ts` file:
+
+```ts
+import { withPayload } from '@payloadcms/tanstack-start'
+import path from 'node:path'
+
+export default withPayload(undefined, {
+  devBundleServerPackages: false,
+  payloadConfigPath: path.resolve('src/payload.config.ts'),
+})
+```
+
+When linking Payload source in a TanStack Start app, set `devBundleServerPackages: true` so Vite can transform the source files. This option does not change production build behavior.

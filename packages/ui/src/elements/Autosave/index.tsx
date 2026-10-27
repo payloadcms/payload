@@ -80,6 +80,14 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
+  const stopAutoSaveIndicator = useEffectEvent(() => {
+    if (autosaveTimeoutRef.current) {
+      clearTimeout(autosaveTimeoutRef.current)
+    }
+
+    setSaving(false)
+  })
+
   const handleAutosave = useEffectEvent(() => {
     autosaveTimeoutRef.current = undefined
     // We need to log the time in order to figure out if we need to trigger the state off later
@@ -229,14 +237,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
       stopAutoSaveIndicator()
     }
   }, [])
-
-  const stopAutoSaveIndicator = useEffectEvent(() => {
-    if (autosaveTimeoutRef.current) {
-      clearTimeout(autosaveTimeoutRef.current)
-    }
-
-    setSaving(false)
-  })
 
   return (
     <React.Fragment>

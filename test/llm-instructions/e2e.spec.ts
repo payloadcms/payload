@@ -17,12 +17,12 @@ test.beforeEach(async ({ page }) => {
 test('should manage LLM instructions from the collection menu', async ({ page }) => {
   await page.goto(`${serverURL}/admin/collections/pages`)
   await page.getByRole('button', { name: 'More options' }).click()
-  await expect(page.getByRole('menuitem', { name: 'Edit LLM instructions' })).toHaveCount(1)
-  await expect(page.getByRole('menuitem', { name: 'Edit LLM instructions' })).toHaveAttribute(
+  await expect(page.getByRole('menuitem', { name: 'Edit agent instructions' })).toHaveCount(1)
+  await expect(page.getByRole('menuitem', { name: 'Edit agent instructions' })).toHaveAttribute(
     'href',
     new URL(`${instructionsURL}/collection-pages`).pathname,
   )
-  await page.getByRole('menuitem', { name: 'Edit LLM instructions' }).click()
+  await page.getByRole('menuitem', { name: 'Edit agent instructions' }).click()
 
   await expect(page).toHaveURL(`${instructionsURL}/collection-pages`)
   await expect(page.getByRole('heading', { name: 'pages', exact: true })).toBeVisible()
@@ -86,12 +86,12 @@ test('should open the correct instructions document from the global menu', async
   await page.goto(
     formatAdminURL({ adminRoute: '/admin', path: '/globals/site-settings', serverURL }),
   )
-  await page.getByRole('button', { name: 'More options', exact: true }).click()
-  await expect(page.getByRole('menuitem', { name: 'Edit LLM instructions' })).toHaveAttribute(
+  await page.getByRole('button', { name: 'More options: Document', exact: true }).click()
+  await expect(page.getByRole('menuitem', { name: 'Edit agent instructions' })).toHaveAttribute(
     'href',
     new URL(`${instructionsURL}/global-site-settings`).pathname,
   )
-  await page.getByRole('menuitem', { name: 'Edit LLM instructions' }).click()
+  await page.getByRole('menuitem', { name: 'Edit agent instructions' }).click()
 
   await expect(page).toHaveURL(`${instructionsURL}/global-site-settings`)
   await expect(page.getByRole('heading', { name: 'site-settings', exact: true })).toBeVisible()

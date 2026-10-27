@@ -294,6 +294,7 @@ export const svTranslations: DefaultTranslationsObject = {
     and: 'Och',
     anotherUser: 'En annan användare',
     anotherUserTakenOver: 'En annan användare har tagit över redigeringen av detta dokument.',
+    apiResponse: 'API-svar',
     applyChanges: 'Verkställ ändringar',
     ascending: 'Stigande',
     auto: 'Automatiskt',
@@ -366,6 +367,13 @@ export const svTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Detta dokument har nyligen uppdaterats av en annan användare. Din vy är föråldrad.',
     documents: 'Dokument',
+    dragCancelled: 'Dragning av {{label}} har avbrutits.',
+    dragDropped: '{{label}} har släppts. Position {{position}} av {{count}}.',
+    dragInstructions:
+      'Tryck på Space eller Enter för att lyfta en rad. Använd piltangenterna för att flytta den. Med VoiceOver stänger du av Quick Nav och använder Command + piltangenterna. Tryck på Space eller Enter för att släppa, eller Escape för att avbryta.',
+    dragMoved: '{{label}}: {{direction}}. Position {{position}} av {{count}}.',
+    dragPickedUp: '{{label}} har lyfts. Position {{position}} av {{count}}.',
+    dragToMove: 'Dra för att flytta',
     dragToReorder: 'Dra för att ändra ordningen',
     duplicate: 'Duplicera',
     duplicateWithoutSaving: 'Duplicera utan att spara ändringar',
@@ -480,6 +488,7 @@ export const svTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Omindexerar alla {{collections}}...',
     reloadDocument: 'Ladda om dokumentet',
     remove: 'Ta bort',
+    removeFilter: 'Ta bort filter',
     rename: 'Byt namn',
     replaceRow: 'Ersätt rad',
     requiredFields: 'Fält markerade med * är obligatoriska.',
@@ -573,6 +582,7 @@ export const svTranslations: DefaultTranslationsObject = {
     yes: 'Ja',
   },
   hierarchy: {
+    folderLocation: 'Mappens plats',
     goTo: 'Gå till "{{name}}"',
     itemsMovedTo: '{{title}} flyttades till {{destination}}',
     itemsMovedToRoot: '{{title}} flyttad till rot',

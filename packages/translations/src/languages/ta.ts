@@ -22,8 +22,7 @@ export const taTranslations: DefaultTranslationsObject = {
     emailOrUsername: 'மின்னஞ்சல் அல்லது பயனர் பெயர்',
     emailSent: 'மின்னஞ்சல் அனுப்பப்பட்டது',
     emailVerified: 'மின்னஞ்சல் வெற்றிகரமாக சரிபார்க்கப்பட்டது.',
-    emailVerifiedRedirecting:
-      'மின்னஞ்சல் வெற்றிகரமாக சரிபார்க்கப்பட்டது. உங்களை உள்நுழைவதற்கு மாற்றிவிடுகிறோம்...',
+    emailVerifiedRedirecting: 'மின்னஞ்சல் வெற்றிகரமாக சரிபார்க்கப்பட்டது. உங்களை உள்நுழைவதற்கு மாற்றிவிடுகிறோம்...',
     enableAPIKey: 'API விசையை இயக்கவும்',
     failedToUnlock: 'திறக்க முடியவில்லை',
     forceUnlock: 'கட்டாயமாக திற',
@@ -141,8 +140,7 @@ export const taTranslations: DefaultTranslationsObject = {
     widgetRecentlyViewedTitle: 'சமீபத்தில் பார்க்கப்பட்டது',
     widgetRecentsAndPinned: 'சமீபத்தியவை மற்றும் பின் செய்யப்பட்டவை',
     widgetRemovePin: 'ஆவணத்தை பின் நீக்கவும்',
-    widgetSelectCollectionFirst:
-      'வரிசை தேர்வு செய்வதற்கு முன்பு ஒரு Collection-ஐ தேர்ந்தெடுக்கவும்.',
+    widgetSelectCollectionFirst: 'வரிசை தேர்வு செய்வதற்கு முன்பு ஒரு Collection-ஐ தேர்ந்தெடுக்கவும்.',
     widgetSelectSortField: 'வரிசைப்படுத்தத் தலைப்பைத் தேர்ந்தெடுக்கவும்',
     widgetSortDirectionLabel: 'வரிசை திசை',
     widgetSortFieldLabel: 'Field ஐ வரிசைப்படுத்து',
@@ -157,8 +155,7 @@ export const taTranslations: DefaultTranslationsObject = {
     autosaving: 'இந்த ஆவணத்தை தானாகச் சேமிக்கும் போது ஒரு பிரச்சனை ஏற்பட்டது.',
     correctInvalidFields: 'தயவுசெய்து தவறான புலங்களைச் சரிசெய்யவும்.',
     deletingFile: 'கோப்பை நீக்கும் போது பிழை ஏற்பட்டது.',
-    deletingTitle:
-      '{{title}}-ஐ நீக்கும் போது பிழை ஏற்பட்டது. உங்கள் இணைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.',
+    deletingTitle: '{{title}}-ஐ நீக்கும் போது பிழை ஏற்பட்டது. உங்கள் இணைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.',
     documentNotFound:
       'ID {{id}} கொண்ட ஆவணம் காணப்படவில்லை. அது நீக்கப்பட்டிருக்கலாம் அல்லது இல்லாமல் இருக்கலாம், அல்லது உங்களுக்கு அதற்கான அணுகல் அனுமதி இல்லாமல் இருக்கலாம்.',
     emailOrPasswordIncorrect: 'கொடுக்கப்பட்ட மின்னஞ்சல் அல்லது கடவுச்சொல் தவறானது.',
@@ -272,8 +269,7 @@ export const taTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: '{{count}} {{label}}-ஐ நீக்கவிருக்கிறீர்கள்',
     aboutToDeleteCount_one: '{{count}} {{label}}-ஐ நீக்கவிருக்கிறீர்கள்',
     aboutToDeleteCount_other: '{{count}} {{label}}-ஐ நீக்கவிருக்கிறீர்கள்',
-    aboutToPermanentlyDelete:
-      '{{label}} <1>{{title}}</1>-ஐ நிரந்தரமாக நீக்கவிருக்கிறீர்கள். உறுதியாகவா?',
+    aboutToPermanentlyDelete: '{{label}} <1>{{title}}</1>-ஐ நிரந்தரமாக நீக்கவிருக்கிறீர்கள். உறுதியாகவா?',
     aboutToPermanentlyDeleteTrash:
       'குப்பையில் உள்ள <0>{{count}}</0> <1>{{label}}</1>-ஐ நிரந்தரமாக நீக்கவிருக்கிறீர்கள். உறுதியாகவா?',
     aboutToRestore: '{{label}} <1>{{title}}</1>-ஐ மீட்டெடுக்கவிருக்கிறீர்கள். உறுதியாகவா?',
@@ -295,6 +291,7 @@ export const taTranslations: DefaultTranslationsObject = {
     and: 'மற்றும்',
     anotherUser: 'மற்றொரு பயனர்',
     anotherUserTakenOver: 'இந்த ஆவணத்தை மற்றொரு பயனர் திருத்திக் கொண்டிருக்கிறார்.',
+    apiResponse: 'API பதில்',
     applyChanges: 'மாற்றங்களைப் பயன்படுத்தவும்',
     ascending: 'ஏறுவரிசை',
     auto: 'ஆட்டோ',
@@ -331,8 +328,7 @@ export const taTranslations: DefaultTranslationsObject = {
     copyField: 'புலத்தை நகலெடுக்கவும்',
     copying: 'நகலெடுக்கிறது...',
     copyRow: 'வரிசையை நகலெடுக்கவும்',
-    copyWarning:
-      '{{label}} {{title}}-க்கு {{to}}-ஐ {{from}}-ஆல் மீளெழுதவிருக்கிறீர்கள். உறுதியாகவா?',
+    copyWarning: '{{label}} {{title}}-க்கு {{to}}-ஐ {{from}}-ஆல் மீளெழுதவிருக்கிறீர்கள். உறுதியாகவா?',
     create: 'உருவாக்கு',
     created: 'உருவாக்கப்பட்டது',
     createdAt: 'உருவாக்கப்பட்ட நாள்',
@@ -363,9 +359,15 @@ export const taTranslations: DefaultTranslationsObject = {
     documentIsTrashed: 'இந்த {{label}} குப்பையில் உள்ளது மற்றும் வாசிப்பதற்கு மட்டும்.',
     documentLocked: 'ஆவணம் பூட்டப்பட்டுள்ளது',
     documentModified: 'ஆவணம் மாற்றப்பட்டது',
-    documentOutOfDate:
-      'இந்த ஆவணம் விரைவில் மற்றொரு பயனரால் மேம்படுத்தப்பட்டது. உங்கள் காட்சி காலாவதியானது.',
+    documentOutOfDate: 'இந்த ஆவணம் விரைவில் மற்றொரு பயனரால் மேம்படுத்தப்பட்டது. உங்கள் காட்சி காலாவதியானது.',
     documents: 'ஆவணங்கள்',
+    dragCancelled: '{{label}} இழுத்தல் ரத்துசெய்யப்பட்டது.',
+    dragDropped: '{{label}} வைக்கப்பட்டது. {{count}} இல் நிலை {{position}}.',
+    dragInstructions:
+      'ஒரு வரியை எடுக்க Space அல்லது Enter ஐ அழுத்தவும். நகர்த்த அம்புக்குறி விசைகளைப் பயன்படுத்தவும். VoiceOver உடன் Quick Nav ஐ முடக்கி Command + அம்புக்குறி விசைகளைப் பயன்படுத்தவும். வைக்க Space அல்லது Enter, அல்லது ரத்துசெய்ய Escape ஐ அழுத்தவும்.',
+    dragMoved: '{{label}}: {{direction}}. {{count}} இல் நிலை {{position}}.',
+    dragPickedUp: '{{label}} எடுக்கப்பட்டது. {{count}} இல் நிலை {{position}}.',
+    dragToMove: 'நகர்த்த இழுக்கவும்',
     dragToReorder: 'இழுத்து மறுவரிசைப்படுத்தவும்',
     duplicate: 'நகலெடு',
     duplicateWithoutSaving: 'மாற்றங்களைச் சேமிக்காமல் நகலெடு',
@@ -424,8 +426,7 @@ export const taTranslations: DefaultTranslationsObject = {
     menu: 'மெனு',
     moreOptions: 'மேலும் விருப்பங்கள்',
     move: 'நகர்த்து',
-    moveConfirm:
-      '{{count}} {{label}}-ஐ <1>{{destination}}</1>-க்கு நகர்த்த உள்ளீர்கள். உறுதியாக உள்ளீர்களா?',
+    moveConfirm: '{{count}} {{label}}-ஐ <1>{{destination}}</1>-க்கு நகர்த்த உள்ளீர்கள். உறுதியாக உள்ளீர்களா?',
     moveCount: '{{count}} {{label}} நகர்த்துக',
     moveDown: 'கீழே நகர்த்து',
     moveUp: 'மேலே நகர்த்து',
@@ -480,13 +481,13 @@ export const taTranslations: DefaultTranslationsObject = {
     reindexingAll: 'அனைத்து {{collections}} மறுஅட்டவணை செய்யப்படுகிறது.',
     reloadDocument: 'ஆவணத்தை மீளாக்கு',
     remove: 'நீக்கு',
+    removeFilter: 'வடிகட்டியை அகற்று',
     rename: 'பெயர் மாற்று',
     replaceRow: 'வரிசையை மாற்றவும்',
     requiredFields: '* குறியிடப்பட்ட புலங்கள் கட்டாயமானவை.',
     reset: 'மீட்டமை',
     resetPreferences: 'அமைப்புகளை மீட்டமை',
-    resetPreferencesDescription:
-      'இது உங்கள் அனைத்து விருப்பங்களையும் இயல்புநிலை அமைப்புகளுக்கு மாற்றும்.',
+    resetPreferencesDescription: 'இது உங்கள் அனைத்து விருப்பங்களையும் இயல்புநிலை அமைப்புகளுக்கு மாற்றும்.',
     resettingPreferences: 'அமைப்புகள் மீட்டமைக்கப்படுகிறது.',
     restore: 'மீட்டமை',
     restoreAsPublished: 'வெளியிடப்பட்ட பதிப்பாக மீட்டமை',
@@ -547,8 +548,7 @@ export const taTranslations: DefaultTranslationsObject = {
     unauthorized: 'அனுமதி இல்லை',
     unchecked: 'தேர்வு செய்யப்படாத',
     unlock: 'திறக்க',
-    unsavedChanges:
-      'சேமிக்கப்படாத மாற்றங்கள் உள்ளன. தொடருவதற்கு முன் சேமிக்கவும் அல்லது நிராகரிக்கவும்.',
+    unsavedChanges: 'சேமிக்கப்படாத மாற்றங்கள் உள்ளன. தொடருவதற்கு முன் சேமிக்கவும் அல்லது நிராகரிக்கவும்.',
     unsavedChangesDuplicate: 'சேமிக்கப்படாத மாற்றங்கள் உள்ளன. நகலெடுக்கத் தொடர விரும்புகிறீர்களா?',
     untitled: 'தலைப்பிடப்படாதது',
     upcomingEvents: 'வரவிருக்கும் நிகழ்ச்சிகள்',
@@ -573,6 +573,7 @@ export const taTranslations: DefaultTranslationsObject = {
     yes: 'ஆம்',
   },
   hierarchy: {
+    folderLocation: 'கோப்புறையின் இருப்பிடம்',
     goTo: '"{{name}}"க்கு செல்லுங்கள்',
     itemsMovedTo: '{{title}} ஐ {{destination}} க்கு நகர்த்தினோம்',
     itemsMovedToRoot: '{{title}} மூலத்திற்கு நகர்த்தப்பட்டது',
@@ -689,16 +690,14 @@ export const taTranslations: DefaultTranslationsObject = {
     latitudeOutOfBounds: 'அகலாங்கம் -90 மற்றும் 90 இடையே இருக்க வேண்டும்.',
     lessThanMin: '{{value}} குறைந்தபட்சமாக அனுமதிக்கப்பட்ட {{label}} {{min}}-ஐ விட குறைவாக உள்ளது.',
     limitReached: 'வரம்பு எட்டப்பட்டுள்ளது, {{max}} உருப்படிகள் மட்டுமே சேர்க்கப்படலாம்.',
-    longerThanMin:
-      'இந்த மதிப்பு குறைந்தபட்ச நீளமான {{minLength}} எழுத்துக்களை விட நீளமாக இருக்க வேண்டும்.',
+    longerThanMin: 'இந்த மதிப்பு குறைந்தபட்ச நீளமான {{minLength}} எழுத்துக்களை விட நீளமாக இருக்க வேண்டும்.',
     longitudeOutOfBounds: 'தீர்க்கக் கூறு -180 மற்றும் 180 இடையே இருக்க வேண்டும்.',
     notValidDate: '"{{value}}" ஒரு சரியான தேதி அல்ல.',
     required: 'இந்த புலம் அவசியம்.',
     requiresAtLeast: 'இந்த புலம் குறைந்தது {{count}} {{label}} தேவைப்படுகிறது.',
     requiresNoMoreThan: 'இந்த புலம் அதிகபட்சம் {{count}} {{label}} மட்டுமே அனுமதிக்கிறது.',
     requiresTwoNumbers: 'இந்த புலத்தில் இரண்டு எண்கள் தேவை.',
-    shorterThanMax:
-      'இந்த மதிப்பு அதிகபட்ச நீளமான {{maxLength}} எழுத்துக்களை விட குறைவாக இருக்க வேண்டும்.',
+    shorterThanMax: 'இந்த மதிப்பு அதிகபட்ச நீளமான {{maxLength}} எழுத்துக்களை விட குறைவாக இருக்க வேண்டும்.',
     timezoneRequired: 'ஒரு நேர மண்டலம் தேவைப்படுகிறது.',
     trueOrFalse: 'இந்த புலம் true அல்லது false ஆக மட்டுமே இருக்க வேண்டும்.',
     username:
@@ -707,14 +706,12 @@ export const taTranslations: DefaultTranslationsObject = {
   },
   version: {
     type: 'வகை',
-    aboutToPublishSelection:
-      'நீங்கள் தேர்வில் உள்ள அனைத்து {{label}}-ஐ வெளியிடப் போகிறீர்கள். உறுதியா?',
+    aboutToPublishSelection: 'நீங்கள் தேர்வில் உள்ள அனைத்து {{label}}-ஐ வெளியிடப் போகிறீர்கள். உறுதியா?',
     aboutToRestore:
       'நீங்கள் இந்த {{label}} ஆவணத்தை {{versionDate}} அன்று இருந்த நிலைக்கு மீட்டமைக்கப் போகிறீர்கள்.',
     aboutToRestoreGlobal:
       'நீங்கள் உலகளாவிய {{label}}-ஐ {{versionDate}} அன்று இருந்த நிலைக்கு மீட்டமைக்கப் போகிறீர்கள்.',
-    aboutToRevertToPublished:
-      'இந்த ஆவணத்தின் மாற்றங்களை வெளியிடப்பட்ட நிலைக்கு மாற்றப்போகிறீர்கள். உறுதியா?',
+    aboutToRevertToPublished: 'இந்த ஆவணத்தின் மாற்றங்களை வெளியிடப்பட்ட நிலைக்கு மாற்றப்போகிறீர்கள். உறுதியா?',
     aboutToUnpublish: 'இந்த ஆவணத்தை வெளியிடாமல் செய்யப் போகிறீர்கள். உறுதியா?',
     aboutToUnpublishIn:
       'நீங்கள் இந்த ஆவணத்தை {{locale}} இல் வெளியீட்டில் இருந்து அகற்ற உள்ளீர்கள். நீங்கள் நிச்சயமாக உள்ளீர்களா?',

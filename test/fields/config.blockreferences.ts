@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-exports */
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { autoDedupeBlocksPlugin } from '../__helpers/shared/autoDedupeBlocksPlugin/index.js'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { baseConfig, seed } from './baseConfig.js'
 
 export default buildConfigWithDefaults({
