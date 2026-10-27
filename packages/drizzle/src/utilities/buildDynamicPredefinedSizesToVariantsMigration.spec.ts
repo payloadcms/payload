@@ -72,7 +72,8 @@ const makePayload = ({ migrationDir }: { migrationDir: string }) =>
           },
         },
       },
-      requireDrizzleKit: () => ({ generateDrizzleJson: () => Promise.resolve({ version: '7' }) }),
+      requireDrizzleKit: () =>
+        Promise.resolve({ generateDrizzleJson: () => Promise.resolve({ version: '7' }) }),
       schema: {},
       tableNameMap: new Map([['media', 'media']]),
       versionsSuffix: '_v',
