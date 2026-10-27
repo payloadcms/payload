@@ -13,6 +13,7 @@ const decode = (bytes: Uint8Array): string => new TextDecoder().decode(bytes)
 const makeDocs = (doc: Record<string, unknown> = { alt: 'logo', _transforms: null }) => ({
   doc: structuredClone(doc),
   originalDoc: Object.freeze(structuredClone(doc)),
+  unchangedDoc: Object.freeze(structuredClone(doc)),
 })
 
 const makeTransformer = (overrides: Partial<UploadTransformer> = {}): UploadTransformer => ({
@@ -204,4 +205,26 @@ describe('transformUploadFile', () => {
       expect(second.transformFile).not.toHaveBeenCalled()
     },
   )
+
+  it('should allow originalDoc to differ from doc, because it is the stored document', async () => {
+    const first = makeTransformer({
+      slug: 'first',
+      transformFile: vi.fn().mockResolvedValue({ status: 'continue' }),
+    })
+    const doc = { alt: 'new', _transforms: null }
+
+    await expect(
+      transformUploadFile({
+        collectionSlug: 'media',
+        doc: structuredClone(doc),
+        file: new File(['original'], 'logo.png'),
+        options: undefined,
+        originalDoc: Object.freeze({ alt: 'old', _transforms: { crop: 'stored' } }),
+        originalFile: new File(['original'], 'logo.png'),
+        pipeline: [first],
+        req: makeReq(),
+        unchangedDoc: Object.freeze(structuredClone(doc)),
+      }),
+    ).resolves.toMatchObject({ doc })
+  })
 })

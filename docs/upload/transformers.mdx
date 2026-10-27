@@ -89,7 +89,7 @@ canTransform: (args: {
 
 `canTransform` must be inexpensive and side-effect-free — it must not fetch the file's source, call an external service, or perform the transformation itself. It only decides eligibility. If you omit it, the transformer is eligible for every request/upload that already passed the MIME filter.
 
-`doc` is the current document and `originalDoc` is a snapshot of it taken before the pipeline runs. Both are frozen, so `canTransform` cannot change them. For an upload, `doc` is the document as the operation would save it: the incoming data, merged with the stored document on an update. For a dynamic request, it is the stored document.
+`doc` is the current document. For an upload, it is the document as the operation would save it: the incoming data, merged with the stored document on an update. `originalDoc` is the stored document before the operation, as in hooks, or the incoming data on a create. Both are frozen, so `canTransform` cannot change them. For a dynamic request, both are the stored document.
 
 ## The `transformFile` capability (uploads)
 
@@ -117,7 +117,7 @@ transformFile: (args: {
 | `file`           | The same file as `source`, as a `File`.                                                                                         |
 | `originalSource` | The retained original file, before any transformer changed it. On a re-crop, this is the stored original, not the cropped file. |
 | `doc`            | The working copy of the document. See [Changing the document](#changing-the-document).                                          |
-| `originalDoc`    | A frozen snapshot of the document, taken before the pipeline runs. It never changes.                                            |
+| `originalDoc`    | The stored document before the operation, as in hooks, or the incoming data on a create. It is frozen and never changes.        |
 
 ### Changing the document
 

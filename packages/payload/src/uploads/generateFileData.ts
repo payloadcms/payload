@@ -367,7 +367,12 @@ const processUpload = async <T>({
     ;({ pipelineDoc, uploadEdits } = await resolveEditsForFile(file))
   }
 
-  const pipelineOriginalDoc = deepFreeze(deepCopyObject(pipelineDoc))
+  // Like `originalDoc` in hooks: the stored document, or the incoming data on a create.
+  const pipelineOriginalDoc = deepFreeze(
+    deepCopyObject((operation === 'update' || isDuplicating ? originalDoc : data) ?? {}),
+  )
+  /** A frozen copy of `pipelineDoc` before any stage ran. Core checks stage changes against it. */
+  const pipelineUnchangedDoc = deepFreeze(deepCopyObject(pipelineDoc))
 
   if (!disableLocalStorage) {
     await fs.mkdir(staticPath!, { recursive: true })
@@ -397,7 +402,7 @@ const processUpload = async <T>({
     const pipeline = await planTransformerPipeline({
       args: {
         collectionSlug: collectionConfig.slug,
-        doc: pipelineOriginalDoc,
+        doc: pipelineUnchangedDoc,
         mimeType: file.mimetype,
         operation: 'upload',
         originalDoc: pipelineOriginalDoc,
@@ -474,6 +479,7 @@ const processUpload = async <T>({
               originalFile: originalWebFile!,
               pipeline: bridgeTaskPipeline,
               req,
+              unchangedDoc: pipelineUnchangedDoc,
             })
 
             return taskFile
@@ -498,6 +504,7 @@ const processUpload = async <T>({
           originalFile: originalWebFile,
           pipeline,
           req,
+          unchangedDoc: pipelineUnchangedDoc,
         })
 
         mainWebFile = transformedFile
