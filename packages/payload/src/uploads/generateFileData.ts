@@ -230,15 +230,17 @@ const processUpload = async <T>({
   const currentFileData = (operation === 'update' ? originalDoc : incomingFileData) as
     | FileData
     | undefined
-  const retainedOriginal =
-    operation === 'update' &&
+  const sourceOriginal =
+    (operation === 'update' || isDuplicating) &&
     !file &&
     !externalUploadSource &&
     typeof currentFileData?.original?.filename === 'string' &&
     typeof currentFileData.original.url === 'string'
       ? currentFileData.original
       : undefined
-  const fileSourceData = externalUploadSource ?? retainedOriginal ?? currentFileData
+  // A duplicate reads the source's original but stores its own copy of it.
+  const retainedOriginal = isDuplicating ? undefined : sourceOriginal
+  const fileSourceData = externalUploadSource ?? sourceOriginal ?? currentFileData
   let isLocalFile = false
 
   if (
@@ -264,7 +266,7 @@ const processUpload = async <T>({
         const response = await getFileByPath(filePath)
         file = response
         overwriteExistingFiles = true
-      } else if (filename && retainedOriginal && hasManagedCloudStorage) {
+      } else if (filename && sourceOriginal && hasManagedCloudStorage) {
         const { retrieveFileResponse } = await import('./endpoints/getFile.js')
         const response = await retrieveFileResponse({
           collection: { config: collectionConfig },
@@ -280,7 +282,7 @@ const processUpload = async <T>({
         file = {
           name: filename,
           data: buffer,
-          mimetype: retainedOriginal.mimeType,
+          mimetype: sourceOriginal.mimeType,
           size: buffer.length,
         }
         overwriteExistingFiles = true
@@ -297,8 +299,18 @@ const processUpload = async <T>({
       throw new FileRetrievalError(req.t, err instanceof Error ? err.message : undefined)
     }
 
-    if (file && retainedOriginal && currentFileData?.filename) {
-      file = { ...file, name: currentFileData.filename }
+    if (file && sourceOriginal && currentFileData?.filename) {
+      // The duplicate's new original is named from this file, so it keeps the original's
+      // extension when a transformer converted the main file to another format.
+      const originalExtension = getFileExtension(sourceOriginal.filename)
+      const name =
+        isDuplicating &&
+        originalExtension &&
+        originalExtension !== getFileExtension(currentFileData.filename)
+          ? `${parseFilename(currentFileData.filename).name}.${originalExtension}`
+          : currentFileData.filename
+
+      file = { ...file, name }
     }
   }
 

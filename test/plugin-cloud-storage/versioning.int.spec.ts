@@ -4,6 +4,7 @@ import type { Payload } from 'payload'
 import { readFile, rm } from 'node:fs/promises'
 import path from 'node:path'
 import { createPayloadRequest } from 'payload'
+import sharp from 'sharp'
 import { expect, vi } from 'vitest'
 
 /* eslint-disable payload/no-relative-monorepo-imports -- Exercise the internal cleanup lifecycle against saved documents and versions. */
@@ -438,6 +439,40 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       where: { parent: { equals: created.id } },
     })
     expect(versions.some(({ version }) => version.filename === cropped.filename)).toBe(true)
+  })
+
+  test('should duplicate a cropped cloud upload from a copy of its retained original', async ({
+    payload,
+  }) => {
+    const sourceBytes = await readFile(firstFile)
+    const crop = { height: 600, width: 800, x: 100, y: 200 }
+    const created = await payload.create({
+      collection: versionedCloudMediaSlug,
+      data: { _transforms: { crop } },
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+
+    const copy = await payload.duplicate({
+      id: created.id,
+      collection: versionedCloudMediaSlug,
+      overrideAccess: true,
+    })
+    const sourceKeys = (await getStoredFiles({ id: created.id, payload })).map((file) => file.key)
+    const copyFiles = await getStoredFiles({ id: copy.id, payload })
+    const copyOriginal = copyFiles.find((file) =>
+      file.roles.some((role) => role.type === 'original'),
+    )
+    const copyMain = copyFiles.find((file) => file.roles.some((role) => role.type === 'default'))
+
+    expect(copy._transforms).toEqual({ crop })
+    expect(copy).toMatchObject({ height: 600, width: 800 })
+    expect(copyFiles.some((file) => sourceKeys.includes(file.key))).toBe(false)
+    expect(versionedCloudFiles.get(copyOriginal!.key)).toEqual(sourceBytes)
+    await expect(sharp(versionedCloudFiles.get(copyMain!.key)).metadata()).resolves.toMatchObject({
+      height: 600,
+      width: 800,
+    })
   })
 
   test('should retain the original cloud object when resetting a crop and moving the focal point', async ({

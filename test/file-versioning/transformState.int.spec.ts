@@ -13,6 +13,8 @@ import type { UploadTransforms } from './payload-types.js'
 import { test } from '../__helpers/int/vitest.js'
 import { legacyFocalPoints } from './seedLegacyMedia.js'
 import {
+  convertedMediaDir,
+  convertedMediaSlug,
   draftMediaDir,
   draftMediaSlug,
   legacyMediaDir,
@@ -32,6 +34,7 @@ const transformStateError = {
 test.suite('File transform state', { config: './config.ts' }, () => {
   test.afterEach(async () => {
     await rm(transformedMediaDir, { force: true, recursive: true })
+    await rm(convertedMediaDir, { force: true, recursive: true })
     await rm(legacyMediaDir, { force: true, recursive: true })
     await rm(draftMediaDir, { force: true, recursive: true })
   })
@@ -522,20 +525,142 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     },
   )
 
-  test('should keep the cropped file and drop the crop when duplicating', async ({ payload }) => {
-    const created = await createImage({
-      payload,
-      _transforms: {
-        crop: { height: 600, width: 800, x: 100, y: 200 },
-        focalPoint: { x: 20, y: 30 },
+  const duplicateCropState: UploadTransforms = {
+    crop: { height: 600, width: 800, x: 100, y: 200 },
+    focalPoint: { x: 20, y: 30 },
+  }
+
+  test('should copy the retained original when duplicating', async ({ payload }) => {
+    const bytes = await readFile(imageFixture)
+    const created = await createImage({ payload, _transforms: duplicateCropState })
+
+    const copy = await payload.duplicate({ id: created.id, collection: transformedMediaSlug })
+
+    expect(copy.original).toMatchObject({ height: 1600, width: 1600 })
+    expect(copy.original?.filename).not.toBe(created.original?.filename)
+    expect(await readFile(path.join(transformedMediaDir, copy.original!.filename!))).toEqual(bytes)
+  })
+
+  test('should keep the crop and crop once when duplicating', async ({ payload }) => {
+    const created = await createImage({ payload, _transforms: duplicateCropState })
+
+    const copy = await payload.duplicate({ id: created.id, collection: transformedMediaSlug })
+
+    expect(copy._transforms).toEqual(duplicateCropState)
+    expect(copy).toMatchObject({ height: 600, width: 800 })
+    expect(copy.filename).not.toBe(created.filename)
+    // A second crop of the already cropped file would give different pixels.
+    expect(await readFile(path.join(transformedMediaDir, copy.filename!))).toEqual(
+      await readFile(path.join(transformedMediaDir, created.filename!)),
+    )
+  })
+
+  test('should serve the full image when the crop is removed on a duplicate', async ({
+    payload,
+  }) => {
+    const bytes = await readFile(imageFixture)
+    const created = await createImage({ payload, _transforms: duplicateCropState })
+    const copy = await payload.duplicate({ id: created.id, collection: transformedMediaSlug })
+
+    const updated = await payload.update({
+      id: copy.id,
+      collection: transformedMediaSlug,
+      data: { _transforms: null },
+    })
+
+    expect(updated).toMatchObject({ height: 1600, width: 1600 })
+    expect(await readFile(path.join(transformedMediaDir, updated.filename!))).toEqual(bytes)
+  })
+
+  test('should keep the files of a duplicate when the source is deleted', async ({ payload }) => {
+    const created = await createImage({ payload, _transforms: duplicateCropState })
+    const copy = await payload.duplicate({ id: created.id, collection: transformedMediaSlug })
+
+    await payload.delete({ id: created.id, collection: transformedMediaSlug, overrideAccess: true })
+
+    const copyFilenames = [
+      copy.filename,
+      copy.original?.filename,
+      copy.variants?.small?.filename,
+    ] as string[]
+
+    await expect(
+      readFile(path.join(transformedMediaDir, created.original!.filename!)),
+    ).rejects.toThrow()
+    for (const filename of copyFilenames) {
+      await expect(readFile(path.join(transformedMediaDir, filename))).resolves.toBeInstanceOf(
+        Buffer,
+      )
+    }
+  })
+
+  test('should duplicate from the main file and drop the crop when there is no original', async ({
+    payload,
+  }) => {
+    const legacy = await findLegacyImage({ alt: 'legacy center', payload })
+    const cropped = await payload.update({
+      id: legacy.id,
+      collection: legacyMediaSlug,
+      data: { _transforms: duplicateCropState },
+    })
+    // Uploads saved before File Versioning have no retained original.
+    await payload.db.updateOne({
+      id: legacy.id,
+      collection: legacyMediaSlug,
+      data: {
+        original: {
+          _objectKey: null,
+          filename: null,
+          filesize: null,
+          height: null,
+          mimeType: null,
+          prefix: null,
+          url: null,
+          width: null,
+        },
       },
     })
 
-    // The copy is made from the cropped file, so the crop is already part of its files.
-    const copy = await payload.duplicate({ id: created.id, collection: transformedMediaSlug })
+    const copy = await payload.duplicate({ id: legacy.id, collection: legacyMediaSlug })
 
     expect(copy).toMatchObject({ height: 600, width: 800 })
-    expect(copy._transforms).toEqual({ focalPoint: { x: 20, y: 30 } })
+    expect(copy.original).toMatchObject({ height: 600, width: 800 })
+    expect(copy._transforms).toEqual({ focalPoint: duplicateCropState.focalPoint })
+    expect(await readFile(path.join(legacyMediaDir, copy.filename!))).toEqual(
+      await readFile(path.join(legacyMediaDir, cropped.filename!)),
+    )
+  })
+
+  test('should keep the original format when duplicating a converted upload', async ({
+    payload,
+  }) => {
+    const bytes = await readFile(imageFixture)
+    const created = await payload.create({
+      collection: convertedMediaSlug,
+      data: { alt: 'source' },
+      file: { name: 'square.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+    })
+
+    const copy = await payload.duplicate({ id: created.id, collection: convertedMediaSlug })
+
+    expect(copy).toMatchObject({ mimeType: 'image/jpeg' })
+    expect(copy.filename).toMatch(/\.jpg$/)
+    expect(copy.original).toMatchObject({ mimeType: 'image/png' })
+    expect(copy.original?.filename).toMatch(/\.png$/)
+    expect(await readFile(path.join(convertedMediaDir, copy.original!.filename!))).toEqual(bytes)
+  })
+
+  test('should duplicate an upload without transform state unchanged', async ({ payload }) => {
+    const bytes = await readFile(imageFixture)
+    const created = await createImage({ payload })
+
+    const copy = await payload.duplicate({ id: created.id, collection: transformedMediaSlug })
+
+    expect(copy._transforms).toBeNull()
+    expect(copy).toMatchObject({ height: 1600, width: 1600 })
+    expect(copy.filename).toBe(copy.original?.filename)
+    expect(copy.filename).not.toBe(created.filename)
+    expect(await readFile(path.join(transformedMediaDir, copy.filename!))).toEqual(bytes)
   })
 
   test('should apply transform state to every document in a bulk update', async ({ payload }) => {

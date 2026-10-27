@@ -52,9 +52,35 @@ export async function resolveUploadEdits({
     req,
   })
 
-  // A duplicate is made from the source's cropped main file, which becomes the copy's original.
-  // The crop is already part of those files, so the copy keeps every other key but not `crop`.
   if (isDuplicating) {
+    const sourceOriginal = (originalDoc as FileData | undefined)?.original
+    const sourceCrop = ((originalDoc as Document)?._transforms as TransformState)?.crop
+
+    // A duplicate is made from a copy of the source's retained original, so it keeps the whole
+    // state and the pipeline crops the copy again from that original.
+    if (
+      typeof sourceOriginal?.filename === 'string' &&
+      typeof sourceOriginal.url === 'string' &&
+      sourceOriginal.width &&
+      sourceOriginal.height
+    ) {
+      const original = { height: sourceOriginal.height, width: sourceOriginal.width }
+
+      return {
+        applyTransformState: (fileData) => fileData,
+        uploadEdits: sourceCrop
+          ? {
+              ...parsedEdits,
+              crop: cropToPercent({ crop: sourceCrop, original }),
+              heightInPixels: sourceCrop.height,
+              widthInPixels: sourceCrop.width,
+            }
+          : parsedEdits,
+      }
+    }
+
+    // An older upload without a retained original is duplicated from its cropped main file.
+    // The crop is already part of that file, so the copy keeps every other key but not `crop`.
     const applyTransformState = <T>(fileData: T): T => {
       const { crop: _crop, ...rest } = ((fileData as Document)._transforms ?? {}) as Document
 
