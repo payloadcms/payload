@@ -1,3 +1,4 @@
+import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
 export const ukTranslations: DefaultTranslationsObject = {
@@ -86,6 +87,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Якщо ви не сторювали цей запит, будь ласка, проігноруйте це повідомлення',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Дії',
     createNew: 'Створити новий',
@@ -308,6 +310,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     clearAll: 'Очистити все',
     clearSearch: 'Очистити пошук',
     close: 'Закрити',
+    closed: 'Закрита',
     collapse: 'Згорнути',
     collection: 'Колекція',
     collections: 'Колекції',

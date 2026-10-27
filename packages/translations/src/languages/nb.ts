@@ -1,3 +1,4 @@
+import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
 export const nbTranslations: DefaultTranslationsObject = {
@@ -85,6 +86,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Hvis du ikke har bedt om dette, kan du ignorere denne e-posten, og passordet ditt vil forbli uendret.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Handlinger',
     createNew: 'Opprett ny',
@@ -311,6 +313,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     clearAll: 'Tøm alt',
     clearSearch: 'Tøm søk',
     close: 'Lukk',
+    closed: 'Lukket',
     collapse: 'Skjul',
     collection: 'Samling',
     collections: 'Samlinger',

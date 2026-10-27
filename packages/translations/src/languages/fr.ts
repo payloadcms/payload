@@ -1,3 +1,4 @@
+import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
 export const frTranslations: DefaultTranslationsObject = {
@@ -87,6 +88,7 @@ export const frTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Si vous ne l’avez pas demandé, veuillez ignorer cet e-mail et votre mot de passe restera inchangé.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Actions',
     createNew: 'Créer un nouveau',
@@ -321,6 +323,7 @@ export const frTranslations: DefaultTranslationsObject = {
     clearAll: 'Tout effacer',
     clearSearch: 'Effacer la recherche',
     close: 'Fermer',
+    closed: 'Fermée',
     collapse: 'Réduire',
     collection: 'Collection',
     collections: 'Collections',

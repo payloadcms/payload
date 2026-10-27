@@ -1,3 +1,4 @@
+import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
 export const etTranslations: DefaultTranslationsObject = {
@@ -84,6 +85,7 @@ export const etTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Kui te seda ei taotlenud, ignoreerige seda e-kirja ja teie parool jääb muutmata.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Tegevused',
     createNew: 'Loo uus',
@@ -308,6 +310,7 @@ export const etTranslations: DefaultTranslationsObject = {
     clearAll: 'Tühjenda kõik',
     clearSearch: 'Tühjenda otsing',
     close: 'Sulge',
+    closed: 'Suletud',
     collapse: 'Ahenda',
     collection: 'Kogumik',
     collections: 'Kollektsioonid',

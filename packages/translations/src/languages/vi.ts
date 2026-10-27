@@ -1,3 +1,4 @@
+import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
 export const viTranslations: DefaultTranslationsObject = {
@@ -86,6 +87,7 @@ export const viTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Nếu bạn không phải là người yêu cầu thay đổi mật khẩu, xin hãy bỏ qua tin nhắn này và mật khẩu của bạn sẽ được giữ nguyên.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Hành động',
     createNew: 'Tạo Mới',
@@ -311,6 +313,7 @@ export const viTranslations: DefaultTranslationsObject = {
     clearAll: 'Xóa tất cả',
     clearSearch: 'Xóa tìm kiếm',
     close: 'Đóng',
+    closed: 'Đã đóng',
     collapse: 'Thu gọn',
     collection: 'Bộ sưu tập',
     collections: 'Collections',

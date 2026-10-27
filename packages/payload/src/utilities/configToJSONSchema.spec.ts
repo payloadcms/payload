@@ -563,7 +563,9 @@ describe('configToJSONSchema', () => {
         id: {
           type: 'string',
         },
-        jsonWithSchema: customSchema,
+        jsonWithSchema: {
+          anyOf: [customSchema, { type: 'null' }],
+        },
         withCustom: customSchema,
       },
       required: ['id'],

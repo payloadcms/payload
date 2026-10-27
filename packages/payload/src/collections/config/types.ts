@@ -624,6 +624,17 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   authorship?: Authorship | boolean
   /**
+   * Opt this collection into or out of content branching.
+   *
+   * Defaults to the root `branching` setting, except for built-in Payload
+   * collections, which default to `false` and must opt in explicitly.
+   *
+   * Auth-enabled collections cannot use branching. A branch merge must not
+   * replace authentication credentials or sessions with data from a shadow
+   * row.
+   */
+  branching?: boolean
+  /**
    * Configuration for bulk operations
    */
   /** Extension point to add your custom data. Server only. */
@@ -941,22 +952,3 @@ export type CompoundIndex = {
   /**
    * MongoDB only: include documents in this index only when every listed field exists.
    * Explicit null values count as existing. SQL adapters ignore this option.
-   */
-  requireExists?: string[]
-  unique?: boolean
-}
-
-export type SanitizedCompoundIndex = {
-  fields: {
-    field: FlattenedField
-    localizedPath: string
-    path: string
-    pathHasLocalized: boolean
-  }[]
-  requireExists?: {
-    localizedPath: string
-    path: string
-    pathHasLocalized: boolean
-  }[]
-  unique: boolean
-}

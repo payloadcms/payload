@@ -1,3 +1,4 @@
+import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
 export const roTranslations: DefaultTranslationsObject = {
@@ -88,6 +89,7 @@ export const roTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Dacă nu ați solicitat acest lucru, vă rugăm să ignorați acest email și parola dvs. va rămâne neschimbată.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Acțiuni',
     createNew: 'Creează nou',
@@ -316,6 +318,7 @@ export const roTranslations: DefaultTranslationsObject = {
     clearAll: 'Șterge tot',
     clearSearch: 'Șterge căutarea',
     close: 'Închide',
+    closed: 'Închisă',
     collapse: 'Colaps',
     collection: 'Colectie',
     collections: 'Colecții',

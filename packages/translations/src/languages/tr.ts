@@ -1,3 +1,4 @@
+import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
 export const trTranslations: DefaultTranslationsObject = {
@@ -87,6 +88,7 @@ export const trTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Eğer bu işlemi siz gerçekleştirmediyseniz bu e-postayı görmezden gelebilirsiniz.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Eylemler',
     createNew: 'Yeni Oluştur',
@@ -314,6 +316,7 @@ export const trTranslations: DefaultTranslationsObject = {
     clearAll: 'Hepsini Temizle',
     clearSearch: 'Aramayı temizle',
     close: 'Kapat',
+    closed: 'Kapalı',
     collapse: 'Daralt',
     collection: 'Koleksiyon',
     collections: 'Koleksiyonlar',

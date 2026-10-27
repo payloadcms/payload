@@ -1,3 +1,4 @@
+import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
 export const bnBdTranslations: DefaultTranslationsObject = {
@@ -86,6 +87,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'আপনি যদি এটি অনুরোধ না করে থাকেন, তাহলে এই ইমেইলটি উপেক্ষা করুন এবং আপনার পাসওয়ার্ড অপরিবর্তিত থাকবে।',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'কার্যক্রমসমূহ',
     createNew: 'নতুন তৈরি করুন',
@@ -311,6 +313,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     clearAll: 'সমস্ত সাফ করুন',
     clearSearch: 'অনুসন্ধান মুছুন',
     close: 'বন্ধ করুন',
+    closed: 'বন্ধ',
     collapse: 'সংকুচিত করুন',
     collection: 'সংগ্রহ',
     collections: 'সংগ্রহগুলি',

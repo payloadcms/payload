@@ -1,3 +1,4 @@
+import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
 export const isTranslations: DefaultTranslationsObject = {
@@ -87,6 +88,7 @@ export const isTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ef þú baðst ekki um þetta, vinsamlegast hunsaðu þennan tölvupóst og lykilorðið þitt verður óbreytt.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Aðgerðir',
     createNew: 'Búa til nýtt',
@@ -309,6 +311,7 @@ export const isTranslations: DefaultTranslationsObject = {
     clearAll: 'Hreinsa allt',
     clearSearch: 'Hreinsa leit',
     close: 'Loka',
+    closed: 'Lokuð',
     collapse: 'Fella saman',
     collection: 'Safn',
     collections: 'Söfn',

@@ -1,3 +1,4 @@
+import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
 export const koTranslations: DefaultTranslationsObject = {
@@ -85,6 +86,7 @@ export const koTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       '비밀번호 초기화를 요청하지 않았다면 이 이메일을 무시하시고 비밀번호를 변경하지 마세요.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: '작업',
     createNew: '새로 만들기',
@@ -308,6 +310,7 @@ export const koTranslations: DefaultTranslationsObject = {
     clearAll: '모두 지우기',
     clearSearch: '검색 지우기',
     close: '닫기',
+    closed: '닫힘',
     collapse: '접기',
     collection: '콜렉션',
     collections: '컬렉션',

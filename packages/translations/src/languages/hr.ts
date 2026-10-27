@@ -1,3 +1,4 @@
+import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
 export const hrTranslations: DefaultTranslationsObject = {
@@ -86,6 +87,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ako niste zatražili ovo, molimo ignorirajte ovaj e-mail i Vaša će lozinka ostati nepromijenjena.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Radnje',
     createNew: 'Kreiraj novo',
@@ -310,6 +312,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     clearAll: 'Očisti sve',
     clearSearch: 'Očisti pretragu',
     close: 'Zatvori',
+    closed: 'Zatvorena',
     collapse: 'Sažmi',
     collection: 'Kolekcija',
     collections: 'Kolekcije',

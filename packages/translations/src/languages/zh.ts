@@ -1,3 +1,4 @@
+import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
 export const zhTranslations: DefaultTranslationsObject = {
@@ -82,6 +83,7 @@ export const zhTranslations: DefaultTranslationsObject = {
       '您收到此邮件是因为您（或其他人）已请求重置您账号的密码。请点击以下链接，或将其粘贴到您的浏览器中以完成该过程：',
     youDidNotRequestPassword: '如果您没有要求这样做，请忽略这封邮件，您的密码将保持不变。',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: '操作',
     createNew: '新建',
@@ -293,6 +295,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     clearAll: '清除全部',
     clearSearch: '清除搜索',
     close: '关闭',
+    closed: '已关闭',
     collapse: '折叠',
     collection: '收集',
     collections: '集合',
