@@ -4267,7 +4267,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           overrideAccess: true,
         })
 
-        expect(await payload.db.findGlobal({ slug: simpleDraftGlobalSlug })).toBeFalsy()
+        const liveGlobalBeforeRestore = await payload.db.findGlobal({ slug: simpleDraftGlobalSlug })
+
+        expect(Object.keys(liveGlobalBeforeRestore ?? {})).toHaveLength(0)
 
         await restClient.login({ slug: 'users', credentials: devUser })
 
@@ -4285,7 +4287,10 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
         expect(restoredDraft.title).toBe('Historical')
         expect(restoredDraft._status).toBe('draft')
-        expect(await payload.db.findGlobal({ slug: simpleDraftGlobalSlug })).toBeFalsy()
+
+        const liveGlobalAfterRestore = await payload.db.findGlobal({ slug: simpleDraftGlobalSlug })
+
+        expect(Object.keys(liveGlobalAfterRestore ?? {})).toHaveLength(0)
       })
     })
 
