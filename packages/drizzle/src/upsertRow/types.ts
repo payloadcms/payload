@@ -33,6 +33,7 @@ type CreateArgs = {
   joinQuery?: never
   operation: 'create'
   select?: SelectType
+  upsertConflictData?: never
   upsertTarget?: never
   where?: never
 } & BaseArgs
@@ -43,6 +44,8 @@ type UpdateArgs = {
   joinQuery?: JoinQuery
   operation: 'update'
   select?: SelectType
+  /** Data applied only when an insert conflicts with an existing upsert target. */
+  upsertConflictData?: Record<string, unknown>
   upsertTarget?: GenericColumn
   where?: SQL<unknown>
 } & BaseArgs
