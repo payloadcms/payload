@@ -89,7 +89,7 @@ canTransform: (args: {
 
 `canTransform` must be inexpensive and side-effect-free — it must not fetch the file's source, call an external service, or perform the transformation itself. It only decides eligibility. If you omit it, the transformer is eligible for every request/upload that already passed the MIME filter.
 
-`doc` is the current document. For an upload, it is the document as the operation would save it: the incoming data, merged with the stored document on an update. `originalDoc` is the stored document before the operation, as in hooks, or the incoming data on a create. Both are frozen, so `canTransform` cannot change them. For a dynamic request, both are the stored document.
+`doc` is the current document. For an upload, it is the document as the operation would save it: the incoming data, merged with the stored document on an update. `originalDoc` is a snapshot of that document, taken before the pipeline runs. This is not the `originalDoc` that hooks receive: on an update, it already includes the incoming data. Both are frozen, so `canTransform` cannot change them. For a dynamic request, both are the stored document.
 
 ## The `transformFile` capability (uploads)
 
@@ -111,13 +111,13 @@ transformFile: (args: {
 
 `transformFile` is a one-file-in, one-file-out primitive — it never writes to storage itself. Payload's upload pipeline calls every eligible transformer's `transformFile` in declaration order, threading the result of one into the next, then persists whatever the pipeline produces. `options` is `undefined` for an ordinary upload.
 
-| Argument         | Description                                                                                                                     |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `source`         | The current pipeline file as a [`FileSource`](#the-filesource-type): the upload, or the file the previous stage returned.       |
-| `file`           | The same file as `source`, as a `File`.                                                                                         |
-| `originalSource` | The retained original file, before any transformer changed it. On a re-crop, this is the stored original, not the cropped file. |
-| `doc`            | The working copy of the document. See [Changing the document](#changing-the-document).                                          |
-| `originalDoc`    | The stored document before the operation, as in hooks, or the incoming data on a create. It is frozen and never changes.        |
+| Argument         | Description                                                                                                                                                                    |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `source`         | The current pipeline file as a [`FileSource`](#the-filesource-type): the upload, or the file the previous stage returned.                                                      |
+| `file`           | The same file as `source`, as a `File`.                                                                                                                                        |
+| `originalSource` | The retained original file, before any transformer changed it. On a re-crop, this is the stored original, not the cropped file.                                                |
+| `doc`            | The working copy of the document. See [Changing the document](#changing-the-document).                                                                                         |
+| `originalDoc`    | A frozen snapshot of the document, taken before the pipeline runs. It never changes. This is not the hooks `originalDoc`: on an update, it already includes the incoming data. |
 
 ### Changing the document
 

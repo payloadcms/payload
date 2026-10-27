@@ -92,13 +92,10 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
       })
     })
 
-    test('should pass the stored document before the update as originalDoc', async ({
+    test('should pass doc at pipeline start as a frozen originalDoc on an update', async ({
       payload,
     }) => {
-      const created = await createNote({
-        contractStages: { first: setTransforms({ contractScore: 1 }) },
-        payload,
-      })
+      const created = await createNote({ payload })
       resetContractCalls()
 
       await payload.update({
@@ -109,16 +106,19 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
         file: textFile('replacement'),
       })
 
-      expect(contractCalls.transformFile[0]?.originalDoc).toMatchObject({
+      const call = contractCalls.transformFile[0]
+
+      expect(call?.originalDoc).toEqual(call?.docAtStart)
+      expect(call?.originalDoc).toMatchObject({
         id: created.id,
-        _transforms: { contractScore: 1 },
-        alt: 'note',
-        filename: created.filename,
+        alt: 'changed',
+        details: { caption: 'A note' },
       })
+      expect(call?.isOriginalDocFrozen).toBe(true)
     })
   })
 
-  test('should pass the stored document before the update to canTransform as originalDoc', async ({
+  test('should pass doc at pipeline start to canTransform as a frozen originalDoc on an update', async ({
     payload,
   }) => {
     const created = await createNote({ payload })
@@ -137,8 +137,9 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
         collectionSlug === contractMediaSlug && operation === 'upload',
     )
 
-    expect(call?.doc).toMatchObject({ alt: 'changed' })
-    expect(call?.originalDoc).toMatchObject({ alt: 'note' })
+    expect(call?.originalDoc).toEqual(call?.doc)
+    expect(call?.originalDoc).toMatchObject({ alt: 'changed', details: { caption: 'A note' } })
+    expect(Object.isFrozen(call?.originalDoc)).toBe(true)
   })
 
   test('should pass doc and a frozen originalDoc to canTransform', async ({ payload }) => {
