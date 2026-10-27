@@ -3,6 +3,11 @@ import { describe, expect, it, vi } from 'vitest'
 import type { Payload } from '../index.js'
 
 import { createPayloadRequest } from './createPayloadRequest.js'
+import {
+  beginDeferredCleanupScope,
+  clearDeferredCleanupScope,
+  deferredCleanupScopeContextKey,
+} from './transactionCallbacks.js'
 
 describe('createPayloadRequest - URL construction', () => {
   const mockPayload = {
@@ -18,6 +23,7 @@ describe('createPayloadRequest - URL construction', () => {
     logger: {
       error: vi.fn(),
     },
+    db: {},
   } as unknown as Payload
 
   it('should use req.url when provided and serverURL is undefined', async () => {
@@ -129,5 +135,86 @@ describe('createPayloadRequest - URL construction', () => {
 
     expect(result.url).toBe('http://localhost/api/test')
     expect(mockPayload.logger.error).not.toHaveBeenCalled()
+  })
+
+  it('should isolate the dataloader when changing branches', async () => {
+    const firstBranchRequest = await createPayloadRequest({
+      branch: 'first',
+      payload: mockPayload,
+    })
+
+    const secondBranchRequest = await createPayloadRequest({
+      branch: 'second',
+      payload: mockPayload,
+      req: firstBranchRequest,
+    })
+
+    expect(secondBranchRequest).not.toBe(firstBranchRequest)
+    expect(secondBranchRequest.payloadDataLoader).not.toBe(firstBranchRequest.payloadDataLoader)
+    expect(firstBranchRequest.branch).toBe('first')
+    expect(secondBranchRequest.branch).toBe('second')
+  })
+
+  it('should not add a bypass marker for a named branch', async () => {
+    const request = await createPayloadRequest({
+      branch: 'preview',
+      context: { caller: 'test' },
+      payload: mockPayload,
+    })
+
+    expect(request.context).toEqual({ caller: 'test' })
+  })
+
+  it('should isolate branch overrides from a request whose branch comes from the query', async () => {
+    const queryBranchRequest = await createPayloadRequest({
+      payload: mockPayload,
+      req: { query: { branch: 'from-query' } },
+    })
+
+    const mainRequest = await createPayloadRequest({
+      branch: false,
+      payload: mockPayload,
+      req: queryBranchRequest,
+    })
+
+    expect(mainRequest).not.toBe(queryBranchRequest)
+    expect(mainRequest.payloadDataLoader).not.toBe(queryBranchRequest.payloadDataLoader)
+    expect(queryBranchRequest.query.branch).toBe('from-query')
+    expect(queryBranchRequest.context).not.toHaveProperty('_branchBypass')
+    expect(mainRequest.context).toMatchObject({ _branchBypass: true })
+  })
+
+  it('should isolate nested local operations while retaining their parent cleanup scope', async () => {
+    const parentRequest = await createPayloadRequest({ payload: mockPayload })
+    const parentScope = await beginDeferredCleanupScope({ req: parentRequest })
+
+    const firstNestedRequest = await createPayloadRequest({
+      payload: mockPayload,
+      req: parentRequest,
+    })
+    const secondNestedRequest = await createPayloadRequest({
+      payload: mockPayload,
+      req: parentRequest,
+    })
+
+    expect(firstNestedRequest).not.toBe(parentRequest)
+    expect(secondNestedRequest).not.toBe(parentRequest)
+    expect(secondNestedRequest).not.toBe(firstNestedRequest)
+    expect(firstNestedRequest.context[deferredCleanupScopeContextKey]).toBe(parentScope)
+    expect(secondNestedRequest.context[deferredCleanupScopeContextKey]).toBe(parentScope)
+
+    const firstNestedScope = await beginDeferredCleanupScope({ req: firstNestedRequest })
+    const secondNestedScope = await beginDeferredCleanupScope({ req: secondNestedRequest })
+
+    expect(firstNestedScope.parent).toBe(parentScope)
+    expect(secondNestedScope.parent).toBe(parentScope)
+
+    expect(() =>
+      clearDeferredCleanupScope({ req: firstNestedRequest, scope: firstNestedScope }),
+    ).not.toThrow()
+    expect(() =>
+      clearDeferredCleanupScope({ req: secondNestedRequest, scope: secondNestedScope }),
+    ).not.toThrow()
+    clearDeferredCleanupScope({ req: parentRequest, scope: parentScope })
   })
 })

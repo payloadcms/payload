@@ -61,6 +61,46 @@ type Result = {
   tombstoned: boolean
 }
 
+export const setConcurrentBranchDelete = ({
+  branch,
+  collectionSlug,
+  doc,
+  docID,
+  req,
+  retryError,
+  winnerID,
+}: { req: PayloadRequest } & ConcurrentBranchDelete): void => {
+  req.context ??= {}
+  ;(req.context as Record<PropertyKey, unknown>)[concurrentBranchDeleteContextKey] = {
+    branch,
+    collectionSlug,
+    doc,
+    docID,
+    retryError,
+    winnerID,
+  }
+}
+
+export const setBranchDeleteOperation = ({
+  branch,
+  collectionSlug,
+  docID,
+  isTombstoneExpected,
+  onResolved,
+  req,
+  useAmbientTransaction,
+}: { req: PayloadRequest } & BranchDeleteOperation): void => {
+  req.context ??= {}
+  ;(req.context as Record<PropertyKey, unknown>)[branchDeleteOperationContextKey] = {
+    branch,
+    collectionSlug,
+    docID,
+    isTombstoneExpected,
+    onResolved,
+    useAmbientTransaction,
+  }
+}
+
 const createBranchDeleteChangedError = (): APIError =>
   new APIError(
     'The branch document changed while it was being deleted. Retry the operation.',
