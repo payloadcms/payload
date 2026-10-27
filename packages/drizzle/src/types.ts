@@ -129,13 +129,21 @@ export type EntitiesFilterConfig = {
   tables?: string | string[]
 }
 
+export type DrizzleMigrationHint =
+  | { entity: readonly string[]; kind: string; type: 'confirm_data_loss' | 'create' }
+  | { from: readonly string[]; kind: string; to: readonly string[]; type: 'rename' }
+
 export type RequireDrizzleKit = () => {
   generateDrizzleJson: (
     args: Record<string, unknown>,
     prevId?: string,
     schemaFilters?: string[],
   ) => DrizzleSnapshotJSON | Promise<DrizzleSnapshotJSON>
-  generateMigration: (prev: DrizzleSnapshotJSON, cur: DrizzleSnapshotJSON) => Promise<string[]>
+  generateMigration: (
+    prev: DrizzleSnapshotJSON,
+    cur: DrizzleSnapshotJSON,
+    options?: { hints?: DrizzleMigrationHint[] },
+  ) => Promise<string[]>
   pushSchema: (
     schema: Record<string, unknown>,
     drizzle: DrizzleAdapter['drizzle'],

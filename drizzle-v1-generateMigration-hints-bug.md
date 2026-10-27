@@ -1,5 +1,7 @@
 Written with AI
 
+> Historical rc.4 report. In rc.5, `generateMigration` accepts `{ hints }` and reports unresolved decisions with `MissingHintsError`. The CI failure on #19083 was Payload's missing integration with that API. The blocks-to-JSON migrator now supplies explicit create hints rather than synthesizing terminal keypresses; it does not auto-confirm data-loss requests. See `generateMigrationWithCreateHints.ts` and its PostgreSQL/SQLite tests.
+
 # Bug report: drizzle-kit v1 `generateMigration` cannot resolve create/delete ambiguity programmatically (no `HintsHandler`)
 
 ## Summary

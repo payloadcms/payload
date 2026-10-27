@@ -14,7 +14,14 @@ export const requireDrizzleKit: RequireDrizzleKit = () => {
 
   return {
     generateDrizzleJson,
-    generateMigration,
+    generateMigration: async (before, after, options) => {
+      const statements: string[] = await generateMigration(before, after, options)
+
+      // Payload can connect to a pre-created schema, including after dropDatabase recreates it.
+      return statements.map((statement) =>
+        statement.replace(/^CREATE SCHEMA (?!IF NOT EXISTS )/, 'CREATE SCHEMA IF NOT EXISTS '),
+      )
+    },
     pushSchema,
     upSnapshot: (snapshot) => up(snapshot).snapshot,
   }
