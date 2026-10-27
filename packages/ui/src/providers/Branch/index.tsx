@@ -84,9 +84,12 @@ export const BranchProvider: React.FC<BranchProviderProps> = ({
   // components finish re-rendering.
   const [activeBranch, setActiveBranchState] = useState(activeBranchFromServer)
 
-  useEffect(() => {
+  const [previousServerBranch, setPreviousServerBranch] = useState(activeBranchFromServer)
+
+  if (previousServerBranch !== activeBranchFromServer) {
+    setPreviousServerBranch(activeBranchFromServer)
     setActiveBranchState(activeBranchFromServer)
-  }, [activeBranchFromServer])
+  }
 
   const setBranch = useCallback(
     (slug: string, { refresh = true }: { refresh?: boolean } = {}) => {
@@ -119,22 +122,26 @@ export const BranchProvider: React.FC<BranchProviderProps> = ({
   // from — the full create page, and any drawer that ever opens onto it.
   const { mostRecentUpdate } = useDocumentEvents()
 
-  useEffect(() => {
-    if (
-      mostRecentUpdate?.entitySlug !== branchesCollectionSlug ||
-      mostRecentUpdate.operation !== 'create'
-    ) {
-      return
-    }
+  const createdSlug =
+    mostRecentUpdate?.entitySlug === branchesCollectionSlug &&
+    mostRecentUpdate.operation === 'create'
+      ? (mostRecentUpdate.doc as { slug?: string } | undefined)?.slug
+      : undefined
+  const [previousUpdate, setPreviousUpdate] = useState(mostRecentUpdate)
 
-    const createdSlug = (mostRecentUpdate.doc as { slug?: string } | undefined)?.slug
-
+  if (previousUpdate !== mostRecentUpdate) {
+    setPreviousUpdate(mostRecentUpdate)
     if (createdSlug) {
-      // No refresh: the create view redirects to the new document immediately
-      // after this fires, and that navigation re-resolves the branch.
-      setBranch(createdSlug, { refresh: false })
+      setActiveBranchState(createdSlug)
     }
-  }, [mostRecentUpdate, setBranch])
+  }
+
+  useEffect(() => {
+    if (createdSlug) {
+      // The create view redirects immediately, so persist the selection without refreshing.
+      void setPreference(PREFERENCE_KEYS.NAV, { branch: createdSlug }, true)
+    }
+  }, [createdSlug, setPreference])
 
   // Drops a stored selection pointing at a branch that no longer resolves, so
   // the next request starts clean on main instead of resurrecting it.

@@ -840,6 +840,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     hasInitializedDocPermissions,
     initialForms,
     applyFolderToState,
+    folderFieldName,
+    parentID,
   ])
 
   return (
