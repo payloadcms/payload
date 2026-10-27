@@ -188,4 +188,46 @@ describe('annotateFindings', () => {
 
     expect(reported.bumps[0].fix).toEqual({ reason: 'no-current-version', status: 'unknown' })
   })
+
+  it('treats a spec that is not a semver range as an unknown current version', async () => {
+    const aliasIndex: DeclaredIndex = new Map([
+      ['eslint-config', new Map([['@typescript-eslint/parser', 'npm:other-parser@^8.20.0']])],
+    ])
+    const client = fakeClient({
+      '@typescript-eslint/parser': packument({ '8.20.0': { minimatch: '9.0.5' } }),
+    })
+
+    const [reported] = await annotateFindings({ client, findings: [finding()], index: aliasIndex })
+
+    expect(reported.bumps[0].fix).toEqual({ reason: 'no-current-version', status: 'unknown' })
+  })
+
+  it('checks the version itself when the direct dependency is the vulnerable module', async () => {
+    const directIndex: DeclaredIndex = new Map([['plugin-mcp', new Map([['zod', '^3.25.50']])]])
+    const client = fakeClient({
+      zod: packument({ '3.25.50': {}, '3.25.76': {}, '4.6.6': {} }),
+    })
+    const directFinding = finding({
+      chainPackages: ['zod'],
+      directDeps: [{ dependency: 'zod', workspacePackage: 'plugin-mcp' }],
+      fixed_in: '>=4.6.6',
+      package: 'zod',
+      paths: ['plugin-mcp > zod'],
+      vulnerable: '<4.6.6',
+    })
+
+    const [reported] = await annotateFindings({
+      client,
+      findings: [directFinding],
+      index: directIndex,
+    })
+
+    expect(reported.bumps[0].fix).toEqual({
+      crossesMajor: true,
+      fromMajor: 3,
+      status: 'fix',
+      toMajor: 4,
+      version: '4.6.6',
+    })
+  })
 })
