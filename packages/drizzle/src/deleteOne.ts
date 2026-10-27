@@ -1,6 +1,6 @@
 import type { DeleteOne } from 'payload'
 
-import { eq } from 'drizzle-orm'
+import { eq, getColumnTable } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -21,8 +21,6 @@ export const deleteOne: DeleteOne = async function deleteOne(
 
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
 
-  let docToDelete: Record<string, unknown>
-
   const { joins, selectFields, where } = buildQuery({
     adapter: this,
     fields: collection.flattenedFields,
@@ -36,9 +34,6 @@ export const deleteOne: DeleteOne = async function deleteOne(
   const selectDistinctResult = await selectDistinct({
     adapter: this,
     db,
-    // Resolve the target id via a manual select so the relational fetch only filters by primary
-    // key (RQB v2 aliases the base table, breaking raw SQL that references real table names).
-    forceRun: true,
     joins,
     query: ({ query }) => query.limit(1),
     selectFields,
@@ -46,36 +41,36 @@ export const deleteOne: DeleteOne = async function deleteOne(
     where,
   })
 
-  if (selectDistinctResult?.[0]?.id) {
-    // Build the full relational query (with sub-table `with` clauses for localized fields,
-    // relationships, etc.) and filter by the resolved primary key. A bare `findFirst({ where })`
-    // would omit those sub-tables, dropping localized/related field data from the deleted doc.
-    const findManyArgs = buildFindManyArgs({
-      adapter: this,
-      depth: 0,
-      fields: collection.flattenedFields,
-      joinQuery: false,
-      select,
-      tableName,
-    })
-
-    findManyArgs.where = { RAW: (table) => eq(table.id, selectDistinctResult[0].id) }
-
-    docToDelete = await db.query[tableName].findFirst(findManyArgs)
-  } else if (!selectDistinctResult) {
-    const findManyArgs = buildFindManyArgs({
-      adapter: this,
-      depth: 0,
-      fields: collection.flattenedFields,
-      joinQuery: false,
-      select,
-      tableName,
-    })
-
-    findManyArgs.where = { RAW: where }
-
-    docToDelete = await db.query[tableName].findFirst(findManyArgs)
+  if (selectDistinctResult && selectDistinctResult.length === 0) {
+    return null
   }
+
+  const findManyArgs = buildFindManyArgs({
+    adapter: this,
+    depth: 0,
+    fields: collection.flattenedFields,
+    joinQuery: false,
+    select,
+    tableName,
+  })
+
+  if (selectDistinctResult) {
+    findManyArgs.where = { RAW: (table) => eq(table.id, selectDistinctResult[0].id) }
+  } else if (where) {
+    findManyArgs.where = {
+      RAW: (table) =>
+        buildQuery({
+          adapter: this,
+          aliasTable: getColumnTable(table.id),
+          fields: collection.flattenedFields,
+          locale: req?.locale,
+          tableName,
+          where: whereArg,
+        }).where,
+    }
+  }
+
+  const docToDelete: Record<string, unknown> = await db.query[tableName].findFirst(findManyArgs)
 
   if (!docToDelete) {
     return null
