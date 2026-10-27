@@ -1,6 +1,3 @@
-import type { DiscardOptions } from './branching/discard.js'
-
-import { discardBranchChanges } from './branching/discard.js'
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { Request as graphQLRequest, OperationArgs } from 'graphql-http'
@@ -40,10 +37,18 @@ import {
   verifyEmailLocal,
   type Options as VerifyEmailOptions,
 } from './auth/operations/local/verifyEmail.js'
+
 export {
   getRegisteredDevReloadStrategy,
   registerDevReloadStrategy,
 } from './admin/adapters/devReload.js'
+
+export type * from './admin/adapters/index.js'
+export type { FieldState } from './admin/forms/Form.js'
+
+export type * from './admin/types.js'
+
+export { EntityType } from './admin/views/dashboard.js'
 import type { InitOptions, SanitizedConfig } from './config/types.js'
 import type { BaseDatabaseAdapter, PaginatedDistinctDocs, PaginatedDocs } from './database/types.js'
 import type { InitializedEmailAdapter } from './email/types.js'
@@ -75,7 +80,32 @@ import {
   type Options as DuplicateOptions,
 } from './collections/operations/local/duplicate.js'
 import { findLocal, type FindOptions } from './collections/operations/local/find.js'
+
 export type { FindOptions }
+import type { SupportedLanguages } from '@payloadcms/translations'
+
+import { Cron } from 'croner'
+
+import type { EncryptionKeyring } from './auth/crypto.js'
+import type { ClientConfig } from './config/client.js'
+import type { KVAdapter } from './kv/index.js'
+import type { JobLog, JobTaskStatus } from './queues/config/types/workflowTypes.js'
+import type { TypeWithVersion } from './versions/types.js'
+
+import { buildEncryptionKeyring, decrypt, encrypt, reencrypt } from './auth/crypto.js'
+import { authLocal } from './auth/operations/local/auth.js'
+import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
+import { JWTAuthentication } from './auth/strategies/jwt.js'
+import { getBranchesLocalAPI } from './branching/merge.js'
+import { checkPayloadDependencies } from './checkPayloadDependencies.js'
+import {
+  generateImportMap,
+  type ImportMap,
+} from './cli/commands/generateImportMap/generateImportMap.js'
+import {
+  countVersionsLocal,
+  type CountVersionsOptions,
+} from './collections/operations/local/countVersions.js'
 import {
   findByIDLocal,
   type Options as FindByIDOptions,
@@ -110,6 +140,8 @@ import {
   type ValidateCollectionOptions,
   validateLocal,
 } from './collections/operations/local/validate.js'
+import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
+import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import {
   countGlobalVersionsLocal,
   type CountGlobalVersionsOptions,
@@ -138,35 +170,6 @@ import {
   validateGlobalLocal,
   type ValidateGlobalOptions,
 } from './globals/operations/local/validate.js'
-export type * from './admin/adapters/index.js'
-export type { FieldState } from './admin/forms/Form.js'
-export type * from './admin/types.js'
-export { EntityType } from './admin/views/dashboard.js'
-import type { SupportedLanguages } from '@payloadcms/translations'
-
-import { Cron } from 'croner'
-
-import type { EncryptionKeyring } from './auth/crypto.js'
-import type { ClientConfig } from './config/client.js'
-import type { KVAdapter } from './kv/index.js'
-import type { JobLog, JobTaskStatus } from './queues/config/types/workflowTypes.js'
-import type { TypeWithVersion } from './versions/types.js'
-
-import { buildEncryptionKeyring, decrypt, encrypt, reencrypt } from './auth/crypto.js'
-import { authLocal } from './auth/operations/local/auth.js'
-import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
-import { JWTAuthentication } from './auth/strategies/jwt.js'
-import { checkPayloadDependencies } from './checkPayloadDependencies.js'
-import {
-  generateImportMap,
-  type ImportMap,
-} from './cli/commands/generateImportMap/generateImportMap.js'
-import {
-  countVersionsLocal,
-  type CountVersionsOptions,
-} from './collections/operations/local/countVersions.js'
-import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
-import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
 import { _internal_jobSystemGlobals } from './queues/utilities/getCurrentDate.js'
 import { formatAdminURL } from './utilities/formatAdminURL.js'
@@ -181,19 +184,31 @@ import { traverseFields } from './utilities/traverseFields.js'
  * useful as users wish to extend built-in fields with custom logic
  */
 export { accountLockFields as baseAccountLockFields } from './auth/baseFields/accountLock.js'
+
 export { createAPIKeyFields } from './auth/baseFields/apiKey.js'
+
 export { baseAuthFields } from './auth/baseFields/auth.js'
+
 export { emailFieldConfig as baseEmailField } from './auth/baseFields/email.js'
+
 export { sessionsFieldConfig as baseSessionsField } from './auth/baseFields/sessions.js'
+
 export { usernameFieldConfig as baseUsernameField } from './auth/baseFields/username.js'
+
 export { verificationFields as baseVerificationFields } from './auth/baseFields/verification.js'
 
 export { defaultUserCollection } from './auth/defaultUser.js'
+
 export { executeAccess } from './auth/executeAccess.js'
+
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
+
 export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'
+
 export { getAccessResults } from './auth/getAccessResults.js'
+
 export { getFieldsToSign } from './auth/getFieldsToSign.js'
+
 export { getLoginOptions } from './auth/getLoginOptions.js'
 
 /**
@@ -495,6 +510,7 @@ export type Job<TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | obje
 } & Omit<JobDocument, 'input' | 'taskStatus'>
 
 const filename = fileURLToPath(import.meta.url)
+
 const dirname = path.dirname(filename)
 
 let checkedDependencies = false
@@ -516,11 +532,14 @@ export class BasePayload {
 
   blocks: Record<BlockSlug, FlattenedBlock> = {}
 
-  branches = { discard: (options: DiscardOptions) => discardBranchChanges(this, options) }
+  /**
+   * Content branching operations
+   */
+  branches = getBranchesLocalAPI(this)
 
   collections: Record<CollectionSlug, Collection> = {}
-
   config!: SanitizedConfig
+
   /**
    * @description Performs count operation
    * @param options
@@ -564,8 +583,8 @@ export class BasePayload {
   ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
     return createLocal<TSlug, TSelect>(this, options)
   }
-
   crons: Cron[] = []
+
   db!: DatabaseAdapter
 
   decrypt = decrypt
@@ -588,10 +607,10 @@ export class BasePayload {
     return duplicateLocal<TSlug, TSelect>(this, options)
   }
 
-  email!: InitializedEmailAdapter
-
   // TODO: re-implement or remove?
   // errorHandler: ErrorHandler
+
+  email!: InitializedEmailAdapter
 
   encrypt = encrypt
 
@@ -1457,30 +1476,55 @@ interface RequestContext {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
+
 export type { Payload, RequestContext }
+
 export * from './auth/index.js'
+
 export { jwtSign } from './auth/jwt.js'
+
 export { JWT_AUTH_VERSION } from './auth/jwtAuth.js'
+
 export type { JWTAuthVersion } from './auth/jwtAuth.js'
+
 export { accessOperation } from './auth/operations/access.js'
+
 export { forgotPasswordOperation } from './auth/operations/forgotPassword.js'
+
 export { initOperation } from './auth/operations/init.js'
+
 export type { LoginResult } from './auth/operations/login.js'
+
 export { checkLoginPermission } from './auth/operations/login.js'
+
 export { loginOperation } from './auth/operations/login.js'
+
 export { logoutOperation } from './auth/operations/logout.js'
+
 export type { MeOperationResult } from './auth/operations/me.js'
+
 export { meOperation } from './auth/operations/me.js'
+
 export { refreshOperation } from './auth/operations/refresh.js'
+
 export { registerFirstUserOperation } from './auth/operations/registerFirstUser.js'
+
 export { resetPasswordOperation } from './auth/operations/resetPassword.js'
+
 export { unlockOperation } from './auth/operations/unlock.js'
+
 export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
+
 export { rotateSecret } from './auth/rotateSecret.js'
+
 export type { RotateSecretArgs, RotateSecretResult } from './auth/rotateSecret.js'
+
 export { JWTAuthentication } from './auth/strategies/jwt.js'
+
 export { incrementLoginAttempts } from './auth/strategies/local/incrementLoginAttempts.js'
+
 export { resetLoginAttempts } from './auth/strategies/local/resetLoginAttempts.js'
+
 export type {
   AuthStrategyFunction,
   AuthStrategyFunctionArgs,
@@ -1500,119 +1544,125 @@ export type {
   VerifyConfig,
 } from './auth/types.js'
 export { appendBranchFilter } from './branching/appendBranchFilter.js'
+
 export { assertBranchActionAccess } from './branching/assertBranchActionAccess.js'
 
 export { assertBranchReadable } from './branching/assertBranchReadable.js'
+
 export { assertBranchUpdateAccess } from './branching/assertBranchUpdateAccess.js'
 
-export { rewriteBranchIDs } from './branching/branchIDs.js'
+export {
+  applyBranchIDProjection,
+  projectBranchIDs,
+  rewriteBranchIDs,
+  rewriteBranchVersionParents,
+} from './branching/branchIDs.js'
 
-export { rewriteBranchVersionParents } from './branching/branchIDs.js'
+export {
+  isBranchProjectionActive,
+  withBranchGlobalSelect,
+  withBranchIDSelect,
+  withBranchVersionSelect,
+} from './branching/branchSelect.js'
 
-export { applyBranchIDProjection } from './branching/branchIDs.js'
+export type { DiscardedChange, DiscardOptions, DiscardResult } from './branching/discard.js'
 
-export { projectBranchIDs } from './branching/branchIDs.js'
-export { withBranchIDSelect } from './branching/branchSelect.js'
-
-export { withBranchGlobalSelect } from './branching/branchSelect.js'
-export { withBranchVersionSelect } from './branching/branchSelect.js'
-export { isBranchProjectionActive } from './branching/branchSelect.js'
-export type { DiscardedChange } from './branching/discard.js'
-export type { DiscardOptions } from './branching/discard.js'
-export type { DiscardResult } from './branching/discard.js'
 export { discardBranchChanges } from './branching/discard.js'
-export type { EffectiveOperation } from './branching/effectiveOperations.js'
-export type { EffectiveWrite } from './branching/effectiveOperations.js'
-export type { ResolvedChange } from './branching/effectiveOperations.js'
-export { operationsForChange } from './branching/effectiveOperations.js'
-export { resolveEffectiveOperations } from './branching/effectiveOperations.js'
-export type { MergeStreamEvent } from './branching/endpoints/merge.js'
-export { resolveBranchGlobalQuery } from './branching/globals.js'
-export { branchGlobalNeedsBothRows } from './branching/globals.js'
-export { pickBranchGlobal } from './branching/globals.js'
-export { resolveBranchGlobalVersionQuery } from './branching/globals.js'
-export { resolveBranchGlobalWrite } from './branching/globals.js'
 
-export { recordBranchGlobalChange } from './branching/globals.js'
-export type { MergeResult } from './branching/merge.js'
+export type {
+  EffectiveOperation,
+  EffectiveWrite,
+  ResolvedChange,
+} from './branching/effectiveOperations.js'
+
+export { operationsForChange, resolveEffectiveOperations } from './branching/effectiveOperations.js'
+
+export type { MergeStreamEvent } from './branching/endpoints/merge.js'
+
+export {
+  branchGlobalNeedsBothRows,
+  pickBranchGlobal,
+  recordBranchGlobalChange,
+  resolveBranchGlobalQuery,
+  resolveBranchGlobalVersionQuery,
+  resolveBranchGlobalWrite,
+} from './branching/globals.js'
+
+export { getBranchesLocalAPI, mergeBranch } from './branching/merge.js'
+
+export type { MergeOptions, MergeResult } from './branching/merge.js'
+
 export type { BlockedChange } from './branching/preflight.js'
 
 export { runMergePreflight } from './branching/preflight.js'
-export { resolveBranch } from './branching/resolveBranch.js'
-export { isolateBranchState } from './branching/resolveBranch.js'
-export { loadBranchDeletions } from './branching/resolveBranch.js'
-export { loadBranchManifest } from './branching/resolveBranch.js'
-export { resetBranchState } from './branching/resolveBranch.js'
-export { resolveBranchReadState } from './branching/resolveBranchQuery.js'
-export { resolveBranchQuery } from './branching/resolveBranchQuery.js'
-export { getBranchPredicateSync } from './branching/resolveBranchQuery.js'
+
+export {
+  isolateBranchState,
+  loadBranchDeletions,
+  loadBranchManifest,
+  resetBranchState,
+  resolveBranch,
+} from './branching/resolveBranch.js'
+
+export {
+  getBranchPredicateSync,
+  resolveBranchQuery,
+  resolveBranchReadState,
+} from './branching/resolveBranchQuery.js'
+
 export type { BranchReadState } from './branching/resolveBranchQuery.js'
+
 export { resolveBranchRowID } from './branching/resolveBranchRowID.js'
-export { resolveBranchDelete } from './branching/tombstone.js'
-export { willBranchAbsorbDelete } from './branching/tombstone.js'
-export { MAIN_BRANCH } from './branching/types.js'
-export { branchField } from './branching/types.js'
-export { branchChangesCollectionSlug } from './branching/types.js'
-export type { BranchingConfig } from './branching/types.js'
-export type { MergeableChange } from './branching/types.js'
-export type { MergeWarning } from './branching/types.js'
-export { branchOperations } from './branching/types.js'
-export type { BranchOperation } from './branching/types.js'
-export type { MergeProgress } from './branching/types.js'
-export type { MergeApplicationOutcome } from './branching/types.js'
-export type { MergeCleanupOutcome } from './branching/types.js'
-export type { MergeEventChange } from './branching/types.js'
 
-export type { MergeRecoveryOutcome } from './branching/types.js'
-export type { SanitizedBranchingConfig } from './branching/types.js'
+export { resolveBranchDelete, willBranchAbsorbDelete } from './branching/tombstone.js'
 
-export { branchDocIDField } from './branching/types.js'
-export { branchesCollectionSlug } from './branching/types.js'
-export { branchParentField } from './branching/types.js'
-export { mergeApplicationOutcomes } from './branching/types.js'
-export { mergeCleanupOutcomes } from './branching/types.js'
+export type {
+  BranchingConfig,
+  BranchOperation,
+  MergeableChange,
+  MergeApplicationOutcome,
+  MergeCleanupOutcome,
+  MergeEventChange,
+  MergeProgress,
+  MergeRecoveryOutcome,
+  MergeWarning,
+  SanitizedBranchingConfig,
+} from './branching/types.js'
 
-export { mergeRecoveryOutcomes } from './branching/types.js'
-
-export interface FieldCustom extends Record<string, any> {}
-
-export interface CollectionCustom extends Record<string, any> {}
-
-export interface CollectionAdminCustom extends Record<string, any> {}
-
-export interface GlobalCustom extends Record<string, any> {}
-
-export interface GlobalAdminCustom extends Record<string, any> {}
+export {
+  branchChangesCollectionSlug,
+  branchDocIDField,
+  branchesCollectionSlug,
+  branchField,
+  branchOperations,
+  branchParentField,
+  MAIN_BRANCH,
+  mergeApplicationOutcomes,
+  mergeCleanupOutcomes,
+  mergeRecoveryOutcomes,
+} from './branching/types.js'
 
 export { defaultBranchMergeValidation } from './branching/validation.js'
-export type { BranchMergeValidate } from './branching/validation.js'
 
-export type { BranchMergeValidationCandidate } from './branching/validation.js'
+export type {
+  BranchMergeValidate,
+  BranchMergeValidationCandidate,
+  BranchMergeValidationError,
+  BranchMergeValidationResult,
+} from './branching/validation.js'
 
-export interface FieldCustom extends Record<string, any> {}
-
-export interface CollectionCustom extends Record<string, any> {}
-
-export interface CollectionAdminCustom extends Record<string, any> {}
-
-export interface GlobalCustom extends Record<string, any> {}
-
-export interface GlobalAdminCustom extends Record<string, any> {}
-
-export type { BranchMergeValidationError } from './branching/validation.js'
-export type { BranchMergeValidationResult } from './branching/validation.js'
-
-export { resolveBranchVersionHistoryQuery } from './branching/versions.js'
-export { resolveBranchVersionParent } from './branching/versions.js'
-
-export { projectBranchVersionParents } from './branching/versions.js'
-export { resolveBranchVersionQuery } from './branching/versions.js'
-export { projectBranchVersionParent } from './branching/versions.js'
-export { resolveBranchVersionQuerySync } from './branching/versions.js'
-
-export { resolveBranchOwnVersions } from './branching/versions.js'
+export {
+  projectBranchVersionParent,
+  projectBranchVersionParents,
+  resolveBranchOwnVersions,
+  resolveBranchVersionHistoryQuery,
+  resolveBranchVersionParent,
+  resolveBranchVersionQuery,
+  resolveBranchVersionQuerySync,
+} from './branching/versions.js'
 
 export { generateImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
+
 export type { ImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
 
 export { genImportMapIterateFields } from './cli/commands/generateImportMap/iterateFields.js'
@@ -1624,6 +1674,7 @@ export {
   type ServerOnlyCollectionProperties,
   type ServerOnlyUploadProperties,
 } from './collections/config/client.js'
+
 export type {
   AfterChangeHook as CollectionAfterChangeHook,
   AfterDeleteHook as CollectionAfterDeleteHook,
@@ -1662,19 +1713,31 @@ export type {
   TypeWithID,
   TypeWithTimestamps,
 } from './collections/config/types.js'
+
 export type { CompoundIndex, FoldersConfig, TagsConfig } from './collections/config/types.js'
+
 export type { SanitizedCompoundIndex } from './collections/config/types.js'
+
 export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
+
 export { countOperation } from './collections/operations/count.js'
 export { createOperation } from './collections/operations/create.js'
+
 export { deleteOperation } from './collections/operations/delete.js'
+
 export { deleteByIDOperation } from './collections/operations/deleteByID.js'
+
 export { docAccessOperation } from './collections/operations/docAccess.js'
+
 export { duplicateOperation } from './collections/operations/duplicate.js'
+
 export { findOperation } from './collections/operations/find.js'
 export { findByIDOperation } from './collections/operations/findByID.js'
+
 export { findVersionByIDOperation } from './collections/operations/findVersionByID.js'
+
 export { findVersionsOperation } from './collections/operations/findVersions.js'
+
 export {
   countDocumentsInputSchema,
   countDocumentsLocalInputSchema,
@@ -1700,10 +1763,14 @@ export {
   updateDocumentInputSchema,
   updateDocumentLocalInputSchema,
 } from './collections/operations/inputSchemas.js'
+
 export type { ValidateCollectionOptions } from './collections/operations/local/validate.js'
+
 export { renameFileOperation } from './collections/operations/renameFile.js'
 export { restoreVersionOperation } from './collections/operations/restoreVersion.js'
+
 export { updateOperation } from './collections/operations/update.js'
+
 export { updateByIDOperation } from './collections/operations/updateByID.js'
 
 export { buildConfig } from './config/build.js'
@@ -1716,35 +1783,58 @@ export {
   serverOnlyConfigProperties,
   type UnauthenticatedClientConfig,
 } from './config/client.js'
+
 export { addDefaultsToConfig } from './config/defaults.js'
+
 export { definePlugin } from './config/definePlugin.js'
+
 export { type OrderableEndpointBody } from './config/orderable/index.js'
 export { sanitizeConfig } from './config/sanitize.js'
 
 export type * from './config/types.js'
+
 export { combineQueries } from './database/combineQueries.js'
+
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
 
 export { defaultBeginTransaction } from './database/defaultBeginTransaction.js'
+
 export { flattenWhereToOperators } from './database/flattenWhereToOperators.js'
+
 export { getLocalizedPaths } from './database/getLocalizedPaths.js'
 
 export { createMigration } from './database/migrations/createMigration.js'
+
 export { findMigrationDir } from './database/migrations/findMigrationDir.js'
+
 export { getMigrations } from './database/migrations/getMigrations.js'
+
 export { getPredefinedMigration } from './database/migrations/getPredefinedMigration.js'
+
 export { migrate } from './database/migrations/migrate.js'
+
 export { migrateDown } from './database/migrations/migrateDown.js'
+
 export { migrateRefresh } from './database/migrations/migrateRefresh.js'
+
 export { migrateReset } from './database/migrations/migrateReset.js'
+
 export { migrateStatus } from './database/migrations/migrateStatus.js'
+
 export { migrationsCollection } from './database/migrations/migrationsCollection.js'
+
 export { migrationTemplate } from './database/migrations/migrationTemplate.js'
+
 export { readMigrationFiles } from './database/migrations/readMigrationFiles.js'
+
 export { writeMigrationIndex } from './database/migrations/writeMigrationIndex.js'
+
 export type * from './database/queryValidation/types.js'
+
 export type { EntityPolicies, PathToQuery } from './database/queryValidation/types.js'
+
 export { validateQueryPaths } from './database/queryValidation/validateQueryPaths.js'
+
 export { validateSearchParam } from './database/queryValidation/validateSearchParams.js'
 export type {
   BaseDatabaseAdapter,
@@ -1774,6 +1864,8 @@ export type {
   CreateVersionArgs,
   DatabaseAdapterResult as DatabaseAdapterObj,
   DBIdentifierName,
+  DeleteBranchGlobal,
+  DeleteBranchGlobalArgs,
   DeleteMany,
   DeleteManyArgs,
   DeleteOne,
@@ -1819,13 +1911,14 @@ export type {
   UpdateVersionArgs,
   Upsert,
   UpsertArgs,
+  UpsertBranchGlobalChange,
+  UpsertBranchGlobalChangeArgs,
 } from './database/types.js'
+
 export type { DynamicMigrationTemplate } from './database/types.js'
-export type { DeleteBranchGlobal } from './database/types.js'
-export type { UpsertBranchGlobalChange } from './database/types.js'
-export type { DeleteBranchGlobalArgs } from './database/types.js'
-export type { UpsertBranchGlobalChangeArgs } from './database/types.js'
+
 export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
+
 export {
   APIError,
   APIErrorName,
@@ -1855,13 +1948,28 @@ export {
   ValidationError,
   ValidationErrorName,
 } from './errors/index.js'
+
 export type { ValidationFieldError } from './errors/index.js'
-export type { Authorship, SanitizedAuthorship } from './fields/baseFields/authorship/index.js'
 export { createCreatedByField, createUpdatedByField } from './fields/baseFields/authorship/index.js'
+
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
+
 export { baseIDField } from './fields/baseFields/baseIDField.js'
+
 export { getSlugFallbackValue } from './fields/baseFields/slug/getSlugFallbackValue.js'
+
+export interface FieldCustom extends Record<string, any> {}
+
+export interface CollectionCustom extends Record<string, any> {}
+
+export interface CollectionAdminCustom extends Record<string, any> {}
+
+export interface GlobalCustom extends Record<string, any> {}
+
+export interface GlobalAdminCustom extends Record<string, any> {}
+
 export type { SlugFieldClientProps } from './fields/baseFields/slug/types.js'
+
 export {
   createClientBlocks,
   createClientField,
@@ -1869,8 +1977,11 @@ export {
   type ServerOnlyFieldAdminProperties,
   type ServerOnlyFieldProperties,
 } from './fields/config/client.js'
+
 export { sanitizeField, sanitizeFields } from './fields/config/sanitize.js'
+
 export type { SanitizeFieldArgs } from './fields/config/sanitize.js'
+
 export type {
   AdminClient,
   ArrayField,
@@ -1983,14 +2094,22 @@ export type {
   ValidateOptions,
   ValueWithRelation,
 } from './fields/config/types.js'
+
 export { getDefaultValue } from './fields/getDefaultValue.js'
+
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
+
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
+
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
+
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
+
 export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
+
 export { validateBlocksFilterOptions, validations } from './fields/validations.js'
+
 export type {
   ArrayFieldValidation,
   BlocksFieldValidation,
@@ -2022,6 +2141,7 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
+
 export {
   type ClientGlobalConfig,
   createClientGlobalConfig,
@@ -2042,10 +2162,14 @@ export type {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './globals/config/types.js'
+
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 export { findOneOperation } from './globals/operations/findOne.js'
+
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
+
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
+
 export {
   countGlobalVersionsInputSchema,
   countGlobalVersionsLocalInputSchema,
@@ -2061,9 +2185,12 @@ export {
   updateGlobalInputSchema,
   updateGlobalLocalInputSchema,
 } from './globals/operations/inputSchemas.js'
+
 export type { ValidateGlobalOptions } from './globals/operations/local/validate.js'
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
+
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
+
 export {
   DEFAULT_ALLOW_HAS_MANY,
   DEFAULT_HIERARCHY_TREE_LIMIT,
@@ -2072,30 +2199,40 @@ export {
   HIERARCHY_SLUG_PATH_FIELD,
   HIERARCHY_TITLE_PATH_FIELD,
 } from './hierarchy/constants.js'
+
 export { createFolderField } from './hierarchy/createFolderField.js'
+
 export type { CreateFolderFieldOptions } from './hierarchy/createFolderField.js'
+
 export { createTagField } from './hierarchy/createTagField.js'
+
 export type { CreateTagFieldOptions } from './hierarchy/createTagField.js'
 export { getInitialTreeData } from './hierarchy/getInitialTreeData.js'
+
 export type { GetInitialTreeDataArgs, InitialTreeData } from './hierarchy/getInitialTreeData.js'
+
 export { injectHierarchyButton } from './hierarchy/injectHierarchyButton.js'
+
 export { resolveHierarchyCollections } from './hierarchy/resolveHierarchyCollections.js'
+
 export type {
   HierarchyConfig,
   SanitizedHierarchyConfig,
   SanitizedHierarchyRelatedCollection,
 } from './hierarchy/types.js'
+
 export type { Ancestor } from './hierarchy/utils/getAncestors.js'
+
 export { getAncestors } from './hierarchy/utils/getAncestors.js'
+
 export * from './kv/adapters/DatabaseKVAdapter.js'
+
 export * from './kv/adapters/InMemoryKVAdapter.js'
+
 export * from './kv/index.js'
 export type {
   CollapsedPreferences,
   CollectionPreferences,
-  /**
-   * @deprecated Use `CollectionPreferences` instead.
-   */
   CollectionPreferences as ListPreferences,
   ColumnPreference,
   DocumentPreferences,
@@ -2111,8 +2248,11 @@ export type {
 } from './preferences/types.js'
 
 export type { QueryPreset } from './query-presets/types.js'
+
 export { jobAfterRead } from './queues/config/collection.js'
+
 export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
+
 export type {
   RunInlineTaskFunction,
   RunTaskFunction,
@@ -2126,6 +2266,7 @@ export type {
   TaskOutput,
   TaskSlug,
 } from './queues/config/types/taskTypes.js'
+
 export type {
   ConcurrencyConfig,
   JobLog,
@@ -2135,10 +2276,13 @@ export type {
   WorkflowHandler,
   WorkflowSlug,
 } from './queues/config/types/workflowTypes.js'
+
 export { JobCancelledError } from './queues/errors/index.js'
+
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
 
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
+
 export {
   _internal_jobSystemGlobals,
   _internal_resetJobSystemGlobals,
@@ -2146,23 +2290,34 @@ export {
 } from './queues/utilities/getCurrentDate.js'
 
 export { getLocalI18n } from './translations/getLocalI18n.js'
+
 export * from './types/index.js'
+
 export type { ValidationResult } from './types/validation.js'
 
 export { generatePayloadFileURL } from './uploads/generatePayloadFileURL.js'
+
 export { getFileByPath } from './uploads/getFileByPath.js'
+
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
+
 export type * from './uploads/transformers/types.js'
+
 export type * from './uploads/types.js'
+
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
+
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
+
 export {
   batchProcessing,
   type BatchProcessingOptions,
   type BatchProcessorResult,
 } from './utilities/batchProcessing.js'
+
 export { canAccessAdmin } from './utilities/canAccessAdmin.js'
 export { commitTransaction } from './utilities/commitTransaction.js'
+
 export {
   configToJSONSchema,
   entityToJSONSchema,
@@ -2173,106 +2328,168 @@ export {
   type SchemaVariant,
   withNullableJSONSchemaType,
 } from './utilities/configToJSONSchema.js'
+
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
 export {
   createPayloadRequest,
   type CreatePayloadRequestArgs,
 } from './utilities/createPayloadRequest.js'
+
 export { createPayloadRequestFromWebRequest } from './utilities/createPayloadRequestFromWebRequest.js'
+
 export {
   deepCopyObject,
   deepCopyObjectComplex,
   deepCopyObjectSimple,
 } from './utilities/deepCopyObject.js'
+
 export {
   deepMerge,
   deepMergeWithCombinedArrays,
   deepMergeWithReactComponents,
   deepMergeWithSourceArrays,
 } from './utilities/deepMerge.js'
+
 export {
   checkDependencies,
   type CustomVersionParser,
 } from './utilities/dependencies/dependencyChecker.js'
+
 export { getDependencies } from './utilities/dependencies/getDependencies.js'
+
 export { dynamicImport } from './utilities/dynamicImport.js'
+
 export {
   getCollectionInputSchema,
   getGlobalInputSchema,
 } from './utilities/entityInputSchema/getEntityInputSchema.js'
+
 export type { EntityInputSchema } from './utilities/entityInputSchema/types.js'
+
 export {
   validateCollectionData,
   validateGlobalData,
 } from './utilities/entityInputSchema/validateEntityData.js'
+
 export { escapeRegExp } from './utilities/escapeRegExp.js'
+
 export {
   findUp,
   findUpSync,
   pathExistsAndIsAccessible,
   pathExistsAndIsAccessibleSync,
 } from './utilities/findUp.js'
+
 export { flattenAllFields } from './utilities/flattenAllFields.js'
+
 export { flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
+
 export { formatErrors } from './utilities/formatErrors.js'
+
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
+
 export { getBlockSelect } from './utilities/getBlockSelect.js'
+
 export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes.js'
+
 export { getFieldByPath } from './utilities/getFieldByPath.js'
+
 export { getObjectDotNotation } from './utilities/getObjectDotNotation.js'
+
 export { getRequestLanguage } from './utilities/getRequestLanguage.js'
+
 export { getUniqueFieldValue } from './utilities/getUniqueFieldValue.js'
+
 export { hasDraftsEnabled, hasDraftValidationEnabled } from './utilities/getVersionsConfig.js'
+
 export {
   getCollectionVirtualFieldNames,
   getGlobalVirtualFieldNames,
   stripVirtualFields,
 } from './utilities/getVirtualFieldNames.js'
 export { handleEndpoints } from './utilities/handleEndpoints.js'
+
 export { headersWithCors } from './utilities/headersWithCors.js'
 export { initTransaction } from './utilities/initTransaction.js'
+
 export { isEntityHidden } from './utilities/isEntityHidden.js'
+
 export { isolateObjectProperty } from './utilities/isolateObjectProperty.js'
+
 export { isPlainObject } from './utilities/isPlainObject.js'
+
 export { isValidID } from './utilities/isValidID.js'
 export { killTransaction } from './utilities/killTransaction.js'
+
 export { logError } from './utilities/logError.js'
+
 export { defaultLoggerOptions } from './utilities/logger.js'
+
 export type { PayloadLogger } from './utilities/logger.js'
+
 export { mapAsync } from './utilities/mapAsync.js'
+
 export { mergeHeaders } from './utilities/mergeHeaders.js'
+
 export { parseDocumentID } from './utilities/parseDocumentID.js'
+
 export { parseParams } from './utilities/parseParams/index.js'
+
 export type { ParsedParams, RawParams } from './utilities/parseParams/index.js'
+
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
+
 export { sanitizeJoinParams } from './utilities/sanitizeJoinParams.js'
+
 export type { JoinParams } from './utilities/sanitizeJoinParams.js'
+
 export { sanitizePopulateParam } from './utilities/sanitizePopulateParam.js'
+
 export { sanitizeSelectParam } from './utilities/sanitizeSelectParam.js'
+
 export { sanitizeSortParams } from './utilities/sanitizeSortParams.js'
+
 export { getConfigInfoInputSchema } from './utilities/sharedInputSchemas.js'
+
 export { stripUnselectedFields } from './utilities/stripUnselectedFields.js'
-export { beginDeferredCleanupScope } from './utilities/transactionCallbacks.js'
-export { flushDeferredCleanupScope } from './utilities/transactionCallbacks.js'
-export { scheduleAfterTransactionCommit } from './utilities/transactionCallbacks.js'
-export { beginDeferredCleanupScopeIfNeeded } from './utilities/transactionCallbacks.js'
-export { clearDeferredCleanupScope } from './utilities/transactionCallbacks.js'
+export {
+  beginDeferredCleanupScope,
+  beginDeferredCleanupScopeIfNeeded,
+  clearDeferredCleanupScope,
+  flushDeferredCleanupScope,
+  scheduleAfterTransactionCommit,
+} from './utilities/transactionCallbacks.js'
+
 export { transformPointDataToPayload } from './utilities/transformPointDataToPayload.js'
+
 export { traverseFields } from './utilities/traverseFields.js'
+
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
+
 export { strictObject } from './utilities/zod.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
+
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
+
 export { buildVersionCompoundIndexes } from './versions/buildVersionCompoundIndexes.js'
+
 export { versionDefaults } from './versions/defaults.js'
 export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
+
 export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryKey.js'
+
 export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
+
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
+
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
+
 export { saveVersion } from './versions/saveVersion.js'
+
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 export type { SchedulePublish, TypeWithVersion } from './versions/types.js'
+
 export { deepMergeSimple } from '@payloadcms/translations/utilities'
+
 export { z } from 'zod/mini'
