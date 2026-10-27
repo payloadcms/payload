@@ -724,6 +724,10 @@ export const ltTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'Jūs ketinate išleisti visus {{label}} išrinktame. Ar esate tikri?',
     aboutToRestore:
       'Jūs ketinate atkurti šį {{label}} dokumentą į būklę, kurioje jis buvo {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Atkurkite {{versionDate}} turinį kaip juodraštį. Paskelbtas turinys liks nepakitęs, kol jo nepaskelbsite iš redaktoriaus.',
+    aboutToRestoreAsDraftAllLocales:
+      'Atkurkite {{versionDate}} turinį kaip juodraštį visomis kalbomis. Paskelbtas turinys liks nepakitęs, kol jo nepaskelbsite iš redaktoriaus.',
     aboutToRestoreGlobal:
       'Jūs ketinate atkurti visuotinę {{label}} būklę, kokia ji buvo {{versionDate}}.',
     aboutToRevertToPublished:

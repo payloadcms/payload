@@ -726,6 +726,10 @@ export const itTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'Stai per pubblicare tutte le {{label}} nella selezione. Sei sicuro?',
     aboutToRestore:
       'Stai per ripristinare questo documento {{label}} allo stato in cui si trovava il {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Ripristina il contenuto del {{versionDate}} come bozza. Il contenuto pubblicato rimarrà invariato finché non lo pubblicherai dall’editor.',
+    aboutToRestoreAsDraftAllLocales:
+      'Ripristina il contenuto del {{versionDate}} come bozza in tutte le lingue. Il contenuto pubblicato rimarrà invariato finché non lo pubblicherai dall’editor.',
     aboutToRestoreGlobal:
       'Stai per ripristinare {{label}} allo stato in cui si trovava il {{versionDate}}.',
     aboutToRevertToPublished:

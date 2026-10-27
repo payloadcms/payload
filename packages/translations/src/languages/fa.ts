@@ -708,6 +708,10 @@ export const faTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'آیا از انتشار تمام {{label}} انتخاب شده مطمئن هستید؟',
     aboutToRestore:
       'شما در حال بازگردانی این {{label}} به نسخه‌ای هستید که در تاریخ {{versionDate}} ذخیره شده است. آیا ادامه می‌دهید؟',
+    aboutToRestoreAsDraft:
+      'محتوای {{versionDate}} را به‌صورت پیش‌نویس بازیابی کنید. محتوای منتشرشده تا زمانی که از ویرایشگر منتشر نکنید، بدون تغییر باقی می‌ماند.',
+    aboutToRestoreAsDraftAllLocales:
+      'محتوای {{versionDate}} را در همه زبان‌ها به‌صورت پیش‌نویس بازیابی کنید. محتوای منتشرشده تا زمانی که از ویرایشگر منتشر نکنید، بدون تغییر باقی می‌ماند.',
     aboutToRestoreGlobal:
       'شما در حال بازگردانی {{label}} به نسخه مربوط به تاریخ {{versionDate}} هستید. آیا ادامه می‌دهید؟',
     aboutToRevertToPublished:
