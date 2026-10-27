@@ -131,7 +131,7 @@ export const getDeleteFiles =
         callback: async () => {
           try {
             await Promise.all(
-              filesToDelete.map(({ filename, storageFilePath }) =>
+              filesToDelete.map(async ({ filename, storageFilePath }) =>
                 adapter.handleDelete({
                   collection,
                   doc: sourceUploadDocument,

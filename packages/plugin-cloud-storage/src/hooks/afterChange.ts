@@ -273,7 +273,7 @@ export const getAfterChangeHook =
           await scheduleAfterTransactionCommit({
             callback: async () => {
               await Promise.all(
-                deletionTargets.map(({ filename, storageFilePath }) =>
+                deletionTargets.map(async ({ filename, storageFilePath }) =>
                   adapter.handleDelete({
                     collection,
                     doc: previousDoc,
