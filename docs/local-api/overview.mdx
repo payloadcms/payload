@@ -208,7 +208,7 @@ const result = await payload.count({
 ```js
 // Result will be an object with:
 // {
-//   values: ['value-1', 'value-2'], // array of distinct values,
+//   values: [{title: 'value-1'}, {title: 'value-2'}], // array of distinct values,
 //   field: 'title', // the field
 //   totalDocs: 10, // count of the distinct values satisfies query,
 //   perPage: 10, // count of distinct values per page (based on provided limit)
