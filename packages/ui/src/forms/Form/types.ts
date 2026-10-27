@@ -55,7 +55,7 @@ export type FormProps = {
     res: Response,
     successToast: (value: string) => void,
     errorToast: (value: string) => void,
-  ) => void
+  ) => unknown
   initialState?: FormState
   /**
    * Determines if this Form is the main, top-level Form of a document. If set to true, the

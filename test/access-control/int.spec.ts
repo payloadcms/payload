@@ -7,7 +7,7 @@ import type {
   RequiredDataFromCollectionSlug,
 } from 'payload'
 
-import { AuthenticationError, createPayloadRequest, Forbidden } from 'payload'
+import { AuthenticationError, createPayloadRequest, docAccessOperation, Forbidden } from 'payload'
 import { getEntityPermissions } from 'payload/internal'
 import { expect, vitest } from 'vitest'
 
@@ -281,6 +281,83 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         }
         createdAdminUserIDs.length = 0
         createdAuthIDs.length = 0
+      })
+
+      test('should allow a user to update their own password based on the document id', async ({
+        payload,
+      }) => {
+        const originalPassword = 'OriginalPassword123!'
+        const replacementPassword = 'ReplacementPassword123!'
+
+        const account = await payload.create({
+          collection: authSlug,
+          data: {
+            _verified: true,
+            email: 'password-owner@example.com',
+            password: originalPassword,
+            roles: ['user'],
+          },
+          overrideAccess: true,
+        })
+
+        createdAuthIDs.push(account.id)
+
+        await payload.update({
+          id: account.id,
+          collection: authSlug,
+          data: {
+            password: replacementPassword,
+          },
+          overrideAccess: false,
+          user: { ...account, collection: authSlug },
+        })
+
+        await expect(
+          payload.login({
+            collection: authSlug,
+            data: {
+              email: account.email,
+              password: replacementPassword,
+            },
+          }),
+        ).resolves.toMatchObject({ user: { id: account.id } })
+
+        await expect(
+          payload.login({
+            collection: authSlug,
+            data: {
+              email: account.email,
+              password: originalPassword,
+            },
+          }),
+        ).rejects.toThrow(AuthenticationError)
+      })
+
+      test('should pass the document id to password field update access', async ({ payload }) => {
+        const account = await payload.create({
+          collection: authSlug,
+          data: {
+            _verified: true,
+            email: 'password-permissions@example.com',
+            password: 'OriginalPassword123!',
+            roles: ['user'],
+          },
+          overrideAccess: true,
+        })
+
+        createdAuthIDs.push(account.id)
+
+        const req = await createPayloadRequest({
+          payload,
+          user: { ...account, collection: authSlug },
+        })
+        const permissions = await docAccessOperation({
+          id: account.id,
+          collection: payload.collections[authSlug],
+          req,
+        })
+
+        expect(permissions.fields?.password).toBe(true)
       })
 
       test('should preserve credentials when password update access is denied', async ({
@@ -2475,7 +2552,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             slug: inheritedReadVersionsVirtualGlobalSlug,
             overrideAccess: false,
           }),
-        ).resolves.toMatchObject({ version: { related: allowedID } })
+        ).resolves.toMatchObject({ related: { id: allowedID } })
       } finally {
         await payload.db.deleteVersions({
           globalSlug: inheritedReadVersionsVirtualGlobalSlug,

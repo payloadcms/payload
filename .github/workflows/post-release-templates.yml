@@ -1,11 +1,9 @@
 name: post-release-templates
 
 on:
-  # Release trigger disabled: the wait step and template generator both read the npm
-  # `latest` dist-tag, so v4 prerelease tags never resolve and the job times out.
-  # release:
-  #   types:
-  #     - published
+  release:
+    types:
+      - published
   workflow_dispatch:
 
 env:
@@ -56,7 +54,7 @@ jobs:
             echo "target_branch=main" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Wait until latest versions resolve on npm registry
+      - name: Wait until the release versions resolve on npm registry
         env:
           RELEASE_TAG: ${{ steps.determine_tag.outputs.release_tag }}
         run: |
@@ -68,8 +66,9 @@ jobs:
     needs: wait_for_release
     runs-on: ubuntu-26.04
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read
+    outputs:
+      has_changes: ${{ steps.patch.outputs.has_changes }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -99,35 +98,87 @@ jobs:
           DATABASE_URL: ${{ steps.postgres.outputs.POSTGRES_URL }}
 
       - name: Update template lockfiles and migrations
-        run: pnpm script:gen-templates
+        run: pnpm script:gen-templates --payload-version "${RELEASE_TAG#v}"
         env:
+          RELEASE_TAG: ${{ needs.wait_for_release.outputs.release_tag }}
           POSTGRES_URL: ${{ steps.postgres.outputs.POSTGRES_URL }}
           DATABASE_URL: ${{ steps.postgres.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.mongodb.outputs.MONGODB_URL }}
 
-      - name: Commit and push changes
-        id: commit
+      - name: Save template changes as a patch
+        id: patch
+        run: |
+          set -euo pipefail
+          git add -A
+          git diff --cached --name-only
+          if git diff --cached --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            git diff --cached --binary > "$RUNNER_TEMP/templates.patch"
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload patch
+        if: steps.patch.outputs.has_changes == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: templates-patch
+          path: ${{ runner.temp }}/templates.patch
+          retention-days: 1
+
+  open_pr:
+    needs: [wait_for_release, update_templates]
+    if: needs.update_templates.outputs.has_changes == 'true'
+    runs-on: ubuntu-26.04
+    environment: release
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Mint App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ secrets.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.wait_for_release.outputs.target_branch }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Download patch
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: templates-patch
+          path: ${{ runner.temp }}
+
+      - name: Apply patch
+        id: apply
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ needs.wait_for_release.outputs.release_tag }}
         run: |
-          set -ex
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-          git diff --name-only
-
-          BRANCH_NAME="templates/bump-${RELEASE_TAG}-$(date +%s)"
-          echo "branch=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
+          set -euo pipefail
+          PATCH="$RUNNER_TEMP/templates.patch"
+          git apply --binary "$PATCH"
+          OUTSIDE=$(git status --porcelain --untracked-files=all | cut -c4- | grep -v '^templates/' || true)
+          if [[ -n "$OUTSIDE" ]]; then
+            echo "::error::The templates patch changes files outside templates/:"
+            echo "$OUTSIDE"
+            exit 1
+          fi
+          echo "branch=templates/bump-${RELEASE_TAG}-$(date +%s)" >> "$GITHUB_OUTPUT"
 
       - name: Create pull request
+        id: cpr
         uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
         with:
-          token: ${{ secrets.GH_TOKEN_POST_RELEASE_TEMPLATES }}
+          token: ${{ steps.app-token.outputs.token }}
           labels: 'area: templates'
           author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
           commit-message: 'templates: bump templates for ${{ needs.wait_for_release.outputs.release_tag }}'
-          branch: ${{ steps.commit.outputs.branch }}
+          branch: ${{ steps.apply.outputs.branch }}
           base: ${{ needs.wait_for_release.outputs.target_branch }}
           assignees: ${{ github.actor }}
           title: 'templates: bump for ${{ needs.wait_for_release.outputs.release_tag }}'
@@ -135,3 +186,17 @@ jobs:
             🤖 Automated bump of templates for ${{ needs.wait_for_release.outputs.release_tag }}
 
             Triggered by user: @${{ github.actor }}
+
+      - name: Approve pull request
+        if: steps.cpr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
+        run: gh pr review "$PR_NUMBER" --approve --repo "$GITHUB_REPOSITORY"
+
+      - name: Enable auto-merge
+        if: steps.cpr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
+        run: gh pr merge "$PR_NUMBER" --auto --squash --repo "$GITHUB_REPOSITORY"

@@ -939,7 +939,10 @@ describe('Uploads', () => {
     await page.locator('.field-type:nth-of-type(2) .icon--write').click()
 
     // fill the title with 'draft'
-    await page.locator('#field-title').fill('draft')
+    await page
+      .locator('.doc-drawer')
+      .getByRole('textbox', { name: /^Title\b/ })
+      .fill('draft')
 
     await saveDocAndAssert(
       page,
@@ -1421,6 +1424,32 @@ describe('Uploads', () => {
     expect(href).not.toMatch(/-\d+x\d+\.png$/)
   })
 
+  test('should add uploads to a hasMany field after the bulk upload drawer was closed without uploading', async () => {
+    await gotoAndWaitForForm(page, uploadsOne.create)
+
+    const createNewButton = page.locator('#field-hasManyThumbnailUpload button', {
+      hasText: exactText('Create New'),
+    })
+    const bulkUploadModal = page.locator('#hasManyThumbnailUpload-bulk-upload-modal-slug-1')
+
+    await createNewButton.click()
+    await expect(bulkUploadModal).toBeVisible()
+    await bulkUploadModal.getByRole('button', { name: 'Close' }).click()
+    await expect(bulkUploadModal).toBeHidden()
+
+    await createNewButton.click()
+    await expect(bulkUploadModal).toBeVisible()
+    await bulkUploadModal
+      .locator('.dropzone input[type="file"]')
+      .setInputFiles([path.resolve(dirname, './test-image.png')])
+    await bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button').click()
+    await closeAllToasts(page)
+
+    await expect(
+      page.locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem'),
+    ).toHaveCount(1)
+  })
+
   test('should show preview button if image sizes are defined but crop and focal point are not', async () => {
     await gotoAndWaitForForm(page, imageSizesOnlyURL.create)
 
@@ -1471,7 +1500,7 @@ describe('Uploads', () => {
         ])
 
       await bulkUploadModal
-        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .locator('.bulk-upload--file-manager .render-fields input[name="prefix"]')
         .fill('prefix-one')
 
       const nextImageChevronButton = bulkUploadModal.locator(
@@ -1480,7 +1509,7 @@ describe('Uploads', () => {
       await nextImageChevronButton.click()
 
       await bulkUploadModal
-        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .locator('.bulk-upload--file-manager .render-fields input[name="prefix"]')
         .fill('prefix-two')
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
@@ -1596,7 +1625,7 @@ describe('Uploads', () => {
         .setInputFiles([path.resolve(dirname, './test-pdf.pdf')])
 
       await bulkUploadModal
-        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .locator('.bulk-upload--file-manager .render-fields input[name="prefix"]')
         .fill('prefix-one')
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
@@ -1657,7 +1686,7 @@ describe('Uploads', () => {
 
       await options.locator('text=Prefix').click()
 
-      await editManyBulkUploadModal.locator('#field-prefix').fill('some prefix')
+      await editManyBulkUploadModal.locator('input[name="prefix"]').fill('some prefix')
 
       await editManyBulkUploadModal
         .locator('.edit-many-bulk-uploads__header__actions button')
@@ -1723,7 +1752,7 @@ describe('Uploads', () => {
       // Select an option
       await options.locator('text=Prefix').click()
 
-      await editManyBulkUploadModal.locator('#field-prefix').fill('some prefix')
+      await editManyBulkUploadModal.locator('input[name="prefix"]').fill('some prefix')
 
       await editManyBulkUploadModal
         .locator('.edit-many-bulk-uploads__header__actions button')
@@ -1779,7 +1808,7 @@ describe('Uploads', () => {
       // Select an option
       await options.locator('text=Prefix').click()
 
-      await editManyBulkUploadModal.locator('#field-prefix').fill('some prefix')
+      await editManyBulkUploadModal.locator('input[name="prefix"]').fill('some prefix')
 
       await editManyBulkUploadModal
         .locator('.edit-many-bulk-uploads__header__actions button')
@@ -1827,7 +1856,7 @@ describe('Uploads', () => {
 
       await page.setInputFiles('.dropzone input[type="file"]', path.resolve(dirname, './image.png'))
 
-      await page.locator('#field-prefix').fill('should-preserve')
+      await page.locator('input[name="prefix"]').fill('should-preserve')
 
       // add another file
       const addFileButton = page.locator(
@@ -1855,7 +1884,7 @@ describe('Uploads', () => {
       await originalFileRow.locator('button.file-selections__fileRow').click()
 
       // ensure the prefix field is still filled with the original value
-      await expect(page.locator('#field-prefix')).toHaveValue('should-preserve')
+      await expect(page.locator('input[name="prefix"]')).toHaveValue('should-preserve')
     })
 
     test('should not redirect to created relationship document inside the bulk upload drawer', async () => {
@@ -1884,7 +1913,7 @@ describe('Uploads', () => {
       await relationshipField.locator('.relationship-add-new__add-button').click()
 
       const collectionForm = page.locator('.collection-edit')
-      await collectionForm.locator('#field-title').fill('Related Document Title')
+      await collectionForm.locator('input[name="title"]').fill('Related Document Title')
       await saveDocAndAssert(page)
       await collectionForm.locator('.doc-drawer__header-close').click()
 
@@ -1941,7 +1970,7 @@ describe('Uploads', () => {
         ])
 
       await bulkUploadModal
-        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .locator('.bulk-upload--file-manager .render-fields input[name="prefix"]')
         .fill('prefix-one')
 
       // Clear the filename from the first file
@@ -1953,7 +1982,7 @@ describe('Uploads', () => {
       await nextImageChevronButton.click()
 
       await bulkUploadModal
-        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .locator('.bulk-upload--file-manager .render-fields input[name="prefix"]')
         .fill('prefix-two')
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
@@ -2072,7 +2101,7 @@ describe('Uploads', () => {
         ])
 
       // Form 1: Fill prefix but remove file (should have 1 error: missing file)
-      await bulkUploadModal.locator('#field-prefix').fill('prefix-one')
+      await bulkUploadModal.locator('input[name="prefix"]').fill('prefix-one')
       await bulkUploadModal.locator('.file-manager__remove').click()
 
       // Form 2: Omit prefix and remove file (should have 2 errors: missing file + missing prefix)
@@ -2084,7 +2113,7 @@ describe('Uploads', () => {
 
       // Form 3: Fill prefix and keep file (should have 0 errors - will succeed)
       await nextButton.click()
-      await bulkUploadModal.locator('#field-prefix').fill('prefix-three')
+      await bulkUploadModal.locator('input[name="prefix"]').fill('prefix-three')
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
@@ -2158,18 +2187,18 @@ describe('Uploads', () => {
       ])
 
       // Fill in the required prefix field for all uploads
-      await bulkUploadModal.locator('#field-prefix').fill('test-prefix')
+      await bulkUploadModal.locator('input[name="prefix"]').fill('test-prefix')
 
       // Navigate to second file
       const nextButton = bulkUploadModal.locator(
         '.bulk-upload--actions-bar__controls button:nth-of-type(2)',
       )
       await nextButton.click()
-      await bulkUploadModal.locator('#field-prefix').fill('test-prefix')
+      await bulkUploadModal.locator('input[name="prefix"]').fill('test-prefix')
 
       // Navigate to third file
       await nextButton.click()
-      await bulkUploadModal.locator('#field-prefix').fill('test-prefix')
+      await bulkUploadModal.locator('input[name="prefix"]').fill('test-prefix')
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
@@ -3038,7 +3067,7 @@ describe('Uploads', () => {
     const drawer = page.locator('[id^=doc-drawer_no-files-required_]')
     await expect(drawer).toBeVisible()
 
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
 
     await expect(titleField).toHaveValue('Upload without file')
   })

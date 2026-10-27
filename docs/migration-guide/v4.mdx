@@ -1180,9 +1180,9 @@ The deprecated `findMigrationDir` re-export has been removed from `@payloadcms/d
 + import { findMigrationDir } from 'payload'
 ```
 
-### Minimum supported Node.js version is now 24.15.0 ([#16540](https://github.com/payloadcms/payload/pull/16540))
+### Minimum supported Node.js version is now 24.22.1 ([#16540](https://github.com/payloadcms/payload/pull/16540))
 
-The minimum supported Node.js version is now **24.15.0** (previously 18.20.2). Upgrade your runtime — along with any CI, Docker images, and deployment targets — to the latest node LTS version or newer before upgrading to 4.0.
+The minimum supported Node.js version is now **24.22.1** (previously 18.20.2). Upgrade your runtime — along with any CI, Docker images, and deployment targets — to the latest node LTS version or newer before upgrading to 4.0.
 
 ### Minimum supported Next.js version is now 16.4.0 ([#16537](https://github.com/payloadcms/payload/pull/16537))
 
@@ -1873,6 +1873,15 @@ If you typed `clientUploads.access`, replace `ClientUploadsAccess` with `UploadI
 File versioning adds a required `GeneratedAdapter.copyFile` method. Copy `from` to `to` (complete storage keys) without changing the source, reject an existing destination, and return only once the destination is readable. `moveFile` stays optional. See [Custom Storage Adapters](../upload/storage-adapters) for the full contract.
 
 Replace `clientUploadContext` with `uploadReference` in generated file metadata and static handler parameters. `handleUpload` no longer receives it because Payload skips uploading files that are already stored.
+
+Payload keeps only `_objectKey`, `prefix`, and `signedReceipt` at the top level of `uploadReference`, plus signed `adapterData` when `requiresUploadReceipt` is set. Read any other field your adapter or client added from `uploadReference.clientData`:
+
+```diff
+- const objectID = uploadReference.providerObjectID
++ const objectID = uploadReference.clientData?.providerObjectID
+```
+
+`clientData` is not verified. To trust a value, sign it into the upload receipt as `adapterData` instead. See [Upload receipts](../upload/storage-adapters#custom-upload-receipts).
 
 Set `uploadInstructions.enabled`. When false, Payload adds `adminHandler` to the import map without rendering it. When true, Payload also renders it and exposes the instructions and supporting endpoint.
 

@@ -20,7 +20,7 @@ test('parseArgs applies recording defaults and derives a safe output path', () =
     baseURL: 'http://localhost:3000',
     interactionPauseMs: 300,
     label: 'feature-demo',
-    mouseMoveMs: 400,
+    mouseMoveMs: 300,
     output: '/tmp/payload-pr-demo-feature-demo.webm',
     scenario: '/tmp/demo-scenario.mjs',
     viewport: { height: 900, width: 1440 },
@@ -272,19 +272,38 @@ test('recordDemo renders a Mac-style arrow cursor', async () => {
   }
 })
 
-test('should trim startup frames to the ready opening state', async () => {
+test('should trim startup frames to the ready opening state', async ({ mock }) => {
   const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-opening-test-'))
   const scenario = path.join(directory, 'scenario.mjs')
   const rawVideo = path.join(directory, 'demo.webm')
   const convertedVideo = path.join(directory, 'demo.mp4')
   let trimStart
+  const { chromium } = await import('@playwright/test')
+  const launch = chromium.launch.bind(chromium)
+  mock.method(chromium, 'launch', async (options) => {
+    const browser = await launch(options)
+    const newContext = browser.newContext.bind(browser)
+    mock.method(browser, 'newContext', async (options) => {
+      const context = await newContext(options)
+      const newPage = context.newPage.bind(context)
+      mock.method(context, 'newPage', async () => {
+        const page = await newPage()
+        // Capture starts before page creation resolves to the caller.
+        await new Promise((resolve) => setTimeout(resolve, 350))
+        return page
+      })
+      return context
+    })
+    return browser
+  })
 
   try {
     await writeFile(
       scenario,
-      `${presentationExport}export default async function scenario({ page, ready }) {
+      `${presentationExport}export default async function scenario({ page, ready, showAnnotation }) {
         await page.goto('data:text/html,<body style="margin:0;background:white"><script>setTimeout(() => { document.body.style.background = "rgb(0, 200, 0)"; document.body.id = "ready" }, 1400)</script></body>')
         await page.locator('#ready').waitFor()
+        await showAnnotation({title:'Opening annotation', body:'Visible from the first frame.'})
         await ready()
       }`,
     )
@@ -331,6 +350,32 @@ test('should trim startup frames to the ready opening state', async () => {
       firstFrame.stdout[0] < 80 && firstFrame.stdout[1] > 150 && firstFrame.stdout[2] < 80,
       'Opening frame does not show the ready green page',
     )
+    const annotationFrame = spawnSync('ffmpeg', [
+      '-v',
+      'error',
+      '-i',
+      convertedVideo,
+      '-vf',
+      'crop=900:44:174:80',
+      '-frames:v',
+      '1',
+      '-f',
+      'rawvideo',
+      '-pix_fmt',
+      'rgb24',
+      '-',
+    ])
+    assert.equal(annotationFrame.status, 0, annotationFrame.stderr.toString())
+    let darkPixels = 0
+    for (let index = 0; index < annotationFrame.stdout.length; index += 3) {
+      if (
+        annotationFrame.stdout[index] < 180 &&
+        annotationFrame.stdout[index + 1] < 180 &&
+        annotationFrame.stdout[index + 2] < 180
+      )
+        darkPixels++
+    }
+    assert.ok(darkPixels > 100, 'Opening frame has an empty annotation section')
   } finally {
     await rm(directory, { force: true, recursive: true })
   }
@@ -595,6 +640,278 @@ test('should show a temporary click ring at the click point above popups', async
       scenario,
       viewport: { width: 640, height: 480 },
     })
+  } finally {
+    await rm(directory, { force: true, recursive: true })
+  }
+})
+
+test('should click scaled targets, type with keys, and require wheel input to reveal targets', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'demo-gestures-'))
+  const scenario = path.join(directory, 'scenario.mjs')
+  try {
+    await writeFile(
+      scenario,
+      `${presentationExport}
+      export default async function({page,click,typeText,expect,scroll}) {
+        await page.goto('data:text/html,'+encodeURIComponent('<style>body{margin:0}button,input{display:block;margin:30px}#scroller{height:180px;overflow:auto}#spacer{height:800px}</style><input aria-label="Title" value="Old title" onkeydown="this.dataset.key=event.key" oninput="this.dataset.trusted=event.isTrusted"><button onclick="this.textContent=String.fromCharCode(67,108,105,99,107,101,100)">Click target</button><div id="scroller"><div id="spacer"></div><button>Offscreen</button></div>'))
+        await click(page.getByRole('button',{name:'Click target',exact:true}))
+        await expect(page.getByRole('button',{name:'Clicked',exact:true})).toBeVisible()
+        await typeText({locator:page.getByRole('textbox',{name:'Title'}),text:'New title',clear:true,delay:1})
+        await expect(page.getByRole('textbox',{name:'Title'})).toHaveValue('New title')
+        await expect(page.getByRole('textbox',{name:'Title'})).toHaveAttribute('data-key','e')
+        await expect(page.getByRole('textbox',{name:'Title'})).toHaveAttribute('data-trusted','true')
+        let rejected=false
+        try { await click(page.getByRole('button',{name:'Offscreen',exact:true})) } catch(error) { rejected=/wheel|visible/.test(error.message) }
+        if(!rejected)throw new Error('Offscreen click silently scrolled')
+        await expect(page.locator('#scroller')).toHaveJSProperty('scrollTop',0)
+        await scroll(page.locator('#scroller'),{duration:100,settle:0})
+        await click(page.getByRole('button',{name:'Offscreen',exact:true}))
+      }
+    `,
+    )
+    await recorder.validateDemo({
+      baseURL: 'http://localhost:3000',
+      label: 'gestures',
+      scenario,
+      viewport: { width: 1800, height: 1100 },
+    })
+  } finally {
+    await rm(directory, { force: true, recursive: true })
+  }
+})
+
+for (const mode of ['disabled', 'moving', 'covered', 'partial', 'explicit']) {
+  test(`should handle ${mode} click targets safely`, async () => {
+    const directory = await mkdtemp(path.join(tmpdir(), 'demo-click-safety-'))
+    const scenario = path.join(directory, 'scenario.mjs')
+    try {
+      await writeFile(
+        scenario,
+        `${presentationExport}
+        export default async function({page,click,expect}) {
+          const mode = ${JSON.stringify(mode)}
+          await page.goto('data:text/html,' + encodeURIComponent(
+            '<style>body{margin:0}button{position:absolute;left:60px;top:60px;width:240px;height:80px}#cover{position:absolute;left:140px;top:60px;width:80px;height:80px}</style>' +
+            '<button '+(mode==='disabled'?'disabled':'')+' onclick="this.dataset.clicked=String(event.isTrusted)">Target</button>' +
+            (mode==='partial'||mode==='explicit'?'<div id="cover"></div>':'')
+          ))
+          const target=page.getByRole('button',{name:'Target'})
+          if(mode==='disabled') await target.evaluate(el=>setTimeout(()=>{el.disabled=false},200))
+          if(mode==='moving'||mode==='covered') await target.evaluate((el,mode)=>{
+            el.addEventListener('pointerenter',()=>setTimeout(()=>{
+              if(mode==='moving') el.style.left='400px'
+              else { const cover=document.createElement('div');cover.style='position:absolute;inset:0;background:white';document.body.append(cover) }
+            },30),{once:true})
+          },mode)
+          if(mode==='moving'||mode==='covered'||mode==='explicit') {
+            let rejected=false
+            try { await click(target,{duration:0,before:250,after:0,...(mode==='explicit'?{position:{x:120,y:40}}:{})}) }
+            catch(error) { rejected=/visible|unobstructed/.test(error.message) }
+            if(!rejected)throw new Error('Unsafe click returned success')
+            await expect(target).not.toHaveAttribute('data-clicked','true')
+          } else {
+            await click(target,{duration:0,before:0,after:0})
+            await expect(target).toHaveAttribute('data-clicked','true')
+          }
+        }
+      `,
+      )
+      await recorder.validateDemo({
+        baseURL: 'http://localhost:3000',
+        label: 'click-safety',
+        scenario,
+        viewport: { width: 1800, height: 1100 },
+      })
+    } finally {
+      await rm(directory, { force: true, recursive: true })
+    }
+  })
+}
+
+test('should keep wheel scrolling the document after its root border box leaves the viewport', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'demo-document-wheel-'))
+  const scenario = path.join(directory, 'scenario.mjs')
+  try {
+    await writeFile(
+      scenario,
+      `${presentationExport}
+      export default async function({page,scroll,expect}) {
+        await page.goto('data:text/html,'+encodeURIComponent('<!doctype html><style>html{height:100%}body{margin:0;min-height:3000px}</style><button>Page content</button>'))
+        const document=page.locator('html')
+        await scroll(document,{to:800,duration:120,settle:0})
+        await scroll(document,{to:120,duration:120,settle:0})
+        await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBe(120)
+      }
+    `,
+    )
+    await recorder.validateDemo({
+      baseURL: 'http://localhost:3000',
+      label: 'document-wheel',
+      scenario,
+      viewport: { width: 1280, height: 720 },
+    })
+  } finally {
+    await rm(directory, { force: true, recursive: true })
+  }
+})
+
+test('should accept a11y overrides and reject invalid modes', () => {
+  for (const a11y of ['on', 'off']) {
+    assert.equal(parseArgs(['--scenario', './demo.mjs', '--a11y', a11y]).a11y, a11y)
+  }
+  assert.throws(
+    () => parseArgs(['--scenario', './demo.mjs', '--a11y', 'maybe']),
+    /--a11y must be on or off/,
+  )
+})
+
+test('should toggle a11y feedback for the same scenario without changing its exported defaults', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-a11y-override-'))
+  try {
+    for (const isEnabled of [false, true]) {
+      const scenario = path.join(directory, `scenario-${isEnabled}.mjs`)
+      await writeFile(
+        scenario,
+        `${presentationExport.replace('change:', `accessibility: ${isEnabled}, showAnnouncements: ${isEnabled}, change:`)}
+        Object.freeze(presentation)
+        export default async function ({ page, ready, fixture, expect }) {
+          await page.route('**/fixture', route => route.fulfill({contentType:'text/html',body:'<button>First control</button><div role="status">Ready</div>'}))
+          await page.goto('http://localhost:3000/fixture')
+          const feedback = await page.evaluate(() => {
+            const chrome = window.parent.document.querySelector('#demo-stage').shadowRoot
+            return {
+              panel: Boolean(chrome.querySelector('[data-accessibility]')),
+              captions: Boolean(chrome.querySelector('[data-announcement]')),
+              observer: typeof window.__stopDemoAccessibility === 'function',
+            }
+          })
+          expect(feedback).toEqual({panel: fixture.isEnabled, captions: fixture.isEnabled, observer: fixture.isEnabled})
+          expect(presentation.accessibility).toBe(${isEnabled})
+          await ready()
+        }`,
+      )
+      for (const a11y of [undefined, 'on', 'off']) {
+        await recorder.validateDemo({
+          a11y,
+          baseURL: 'http://localhost:3000',
+          fixture: { isEnabled: a11y === undefined ? isEnabled : a11y === 'on' },
+          label: 'a11y-override',
+          scenario,
+          viewport: { width: 1280, height: 720 },
+        })
+      }
+    }
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+test('should capture native canvas dimensions without changing application layout or clicks', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-density-'))
+  const scenario = path.join(directory, 'scenario.mjs')
+  const output = path.join(directory, 'native.webm')
+  try {
+    await writeFile(
+      scenario,
+      `${presentationExport.replace('change:', 'canvas: {width:800,height:600}, change:')}
+      export default async function({page, click, ready, expect}) {
+        await page.goto('data:text/html,' + encodeURIComponent('<button style="margin:30px" data-result="Clicked" onclick="this.textContent=this.dataset.result">Activate</button>'))
+        expect(page.viewportSize()).toEqual({width:640,height:480})
+        const stage = page.context().pages()[0]
+        expect(stage.viewportSize()).toEqual({width:800,height:600})
+        const scale = await stage.locator('[data-canvas]').evaluate(el => getComputedStyle(el).transform)
+        expect(scale).toBe('matrix(1, 0, 0, 1, 0, 0)')
+        await ready()
+        await click(page.getByRole('button', {name:'Activate'}))
+        await expect(page.getByRole('button', {name:'Clicked'})).toBeVisible()
+      }`,
+    )
+    await recorder.recordDemo({
+      baseURL: 'http://localhost:3000',
+      label: 'density',
+      output,
+      scenario,
+      viewport: { width: 640, height: 480 },
+      interactionPauseMs: 0,
+      mouseMoveMs: 0,
+    })
+    const probe = spawnSync(
+      'ffprobe',
+      [
+        '-v',
+        'error',
+        '-select_streams',
+        'v:0',
+        '-show_entries',
+        'stream=width,height',
+        '-of',
+        'json',
+        output,
+      ],
+      { encoding: 'utf8' },
+    )
+    assert.equal(probe.status, 0, probe.stderr)
+    const stream = JSON.parse(probe.stdout).streams[0]
+    assert.equal(stream.width, 800)
+    assert.equal(stream.height, 600)
+  } finally {
+    await rm(directory, { force: true, recursive: true })
+  }
+})
+
+test('should click visible controls after scrolling when body overflow propagates to the viewport', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-body-overflow-'))
+  const scenario = path.join(directory, 'scenario.mjs')
+  try {
+    await writeFile(
+      scenario,
+      `${presentationExport}
+      export default async function ({page, click, scroll, ready, expect}) {
+        await page.goto('data:text/html,' + encodeURIComponent('<!doctype html><style>html,body{margin:0;height:100%}body{overflow-x:hidden}</style><div style="height:900px"></div><button data-result="Clicked" onclick="this.textContent=this.dataset.result">Activate</button><div style="height:40px"></div>'))
+        await ready()
+        await scroll(page.locator('html'), {to:'end', duration:100, settle:0})
+        await click(page.getByRole('button',{name:'Activate'}))
+        await expect(page.getByRole('button',{name:'Clicked'})).toBeVisible()
+      }
+    `,
+    )
+    await recorder.validateDemo({
+      baseURL: 'http://localhost:3000',
+      label: 'body-overflow',
+      scenario,
+      viewport: { width: 1280, height: 720 },
+    })
+  } finally {
+    await rm(directory, { force: true, recursive: true })
+  }
+})
+
+test('should reject notes introduced after an unannotated ready marker through either API', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-opening-note-'))
+  try {
+    for (const method of ['showAnnotation', 'setAnnotation']) {
+      const scenario = path.join(directory, `${method}.mjs`)
+      await writeFile(
+        scenario,
+        `${presentationExport}
+        export default async function ({page, ready, ${method}}) {
+          await page.goto('data:text/html,<main>Loaded app</main>')
+          await ready()
+          await ${method}({title:'Too late',body:'No annotation was visible at ready.'})
+        }
+      `,
+      )
+      await assert.rejects(
+        () =>
+          recorder.validateDemo({
+            baseURL: 'http://localhost:3000',
+            label: 'opening-note',
+            scenario,
+            viewport: { width: 1280, height: 720 },
+          }),
+        /annotation.*before.*ready\(\)/i,
+      )
+    }
   } finally {
     await rm(directory, { force: true, recursive: true })
   }

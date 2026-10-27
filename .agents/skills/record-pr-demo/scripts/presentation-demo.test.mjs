@@ -377,3 +377,56 @@ test('should indicate real reloads through completion and failure while viewport
     await browser.close()
   }
 })
+
+for (const accessibility of [false, true]) {
+  test(`should preserve one CSS pixel per captured pixel with accessibility ${accessibility}`, async () => {
+    await withScenario({
+      run: async ({ directory, scenario }) => {
+        await writeFile(
+          scenario,
+          `
+          export const presentation = {
+            accessibility: ${accessibility},
+            change: {kind:'Feature', title:'Native detail', description:'Preserve thin borders.'},
+          }
+          export default async function ({page, expect, ready, showAnnotation, resizeWindow}) {
+            await page.goto('data:text/html,<button>Native app</button>')
+            await showAnnotation({index:1,total:1,title:'Inspect controls',body:'Keep their original dimensions.'})
+            await ready()
+            const stage = page.context().pages()[0]
+            const geometry = await stage.evaluate(() => {
+              const bounds = document.querySelector('iframe').getBoundingClientRect()
+              return {width:bounds.width,height:bounds.height,canvasHeight:innerHeight}
+            })
+            expect(geometry).toEqual({width:1440,height:900,canvasHeight:${accessibility ? 1188 : 1148}})
+            await resizeWindow({width:390,height:720,duration:0})
+            expect(await stage.evaluate(() => innerHeight)).toBe(${accessibility ? 1188 : 1148})
+          }
+        `,
+        )
+        const output = path.join(directory, 'native.png')
+        await previewDemo({
+          baseURL: 'http://localhost:3000',
+          label: 'native-detail',
+          output,
+          scenario,
+          viewport: { width: 1440, height: 900 },
+        })
+        const probe = spawnSync('ffprobe', [
+          '-v',
+          'error',
+          '-show_entries',
+          'stream=width,height',
+          '-of',
+          'json',
+          output,
+        ])
+        assert.equal(probe.status, 0, probe.stderr.toString())
+        assert.deepEqual(JSON.parse(probe.stdout).streams[0], {
+          width: 1600,
+          height: accessibility ? 1188 : 1148,
+        })
+      },
+    })
+  })
+}

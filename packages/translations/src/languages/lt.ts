@@ -298,6 +298,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     and: 'Ir',
     anotherUser: 'Kitas vartotojas',
     anotherUserTakenOver: 'Kitas naudotojas perėmė šio dokumento redagavimą.',
+    apiResponse: 'API atsakymas',
     applyChanges: 'Taikyti pakeitimus',
     ascending: 'Kylantis',
     auto: 'Automatinis',
@@ -370,6 +371,13 @@ export const ltTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Šis dokumentas neseniai buvo atnaujintas kitos naudotojo. Jūsų vaizdas yra pasenusi.',
     documents: 'Dokumentai',
+    dragCancelled: '{{label}} vilkimas atšauktas.',
+    dragDropped: '{{label}} padėta. Pozicija {{position}} iš {{count}}.',
+    dragInstructions:
+      'Paspauskite Space arba Enter, kad paimtumėte eilutę. Perkelkite ją rodyklių klavišais. Naudodami VoiceOver išjunkite Quick Nav ir naudokite Command + rodyklių klavišus. Paspauskite Space arba Enter, kad padėtumėte, arba Escape, kad atšauktumėte.',
+    dragMoved: '{{label}}: {{direction}}. Pozicija {{position}} iš {{count}}.',
+    dragPickedUp: '{{label}} paimta. Pozicija {{position}} iš {{count}}.',
+    dragToMove: 'Vilkite norėdami perkelti',
     dragToReorder: 'Vilkite, kad pakeistumėte eilės tvarką',
     duplicate: 'Dublikatas',
     duplicateWithoutSaving: 'Dubliuoti be įrašytų pakeitimų',
@@ -484,6 +492,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Perindeksuojamos visos {{collections}}.',
     reloadDocument: 'Perkrauti dokumentą',
     remove: 'Pašalinti',
+    removeFilter: 'Pašalinti filtrą',
     rename: 'Pervadinti',
     replaceRow: 'Pakeisti eilutę',
     requiredFields: '* pažymėti laukai yra privalomi.',
@@ -576,6 +585,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     yes: 'Taip',
   },
   hierarchy: {
+    folderLocation: 'Aplanko vieta',
     goTo: 'Eikite į "{{name}}"',
     itemsMovedTo: '{{title}} perkeltas į {{destination}}',
     itemsMovedToRoot: '{{title}} perkeltas į šaknį',

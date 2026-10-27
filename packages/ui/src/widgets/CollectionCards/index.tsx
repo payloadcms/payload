@@ -14,6 +14,9 @@ import './index.css'
 
 const baseClass = 'collections'
 
+/**
+ * @internal - may change or be removed without a major version bump
+ */
 export async function CollectionCards(props: WidgetServerProps) {
   const { i18n, payload, user } = props.req
   const { admin: adminRoute } = payload.config.routes

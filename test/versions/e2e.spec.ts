@@ -81,6 +81,7 @@ import {
   localizedCollectionSlug,
   localizedGlobalSlug,
   postCollectionSlug,
+  restoreAccessCollectionSlug,
   simpleDraftGlobalSlug,
   textCollectionSlug,
   versionCollectionSlug,
@@ -251,8 +252,9 @@ describe('Versions', () => {
         '.relationship-add-new__add-button.doc-drawer__toggler',
       )
       await addNewButton.click()
-      const titleField = page.locator('#field-title')
-      const descriptionField = page.locator('#field-description')
+      const drawer = page.locator('.doc-drawer')
+      const titleField = drawer.getByRole('textbox', { name: /^Title\b/ })
+      const descriptionField = drawer.getByRole('textbox', { name: /^Description\b/ })
       await titleField.fill('test')
       await descriptionField.fill('test')
 
@@ -278,6 +280,53 @@ describe('Versions', () => {
 
       await page.goto(`${page.url()}/versions`)
       await expect(page.locator('.app-header .collection-versions-button')).toHaveCount(1)
+    })
+
+    test('should restore a draft without changing the published document', async () => {
+      const doc = await payload.create({
+        collection: restoreAccessCollectionSlug,
+        data: { _status: 'draft', title: 'Historical' },
+        draft: true,
+        overrideAccess: true,
+      })
+      const { docs } = await payload.findVersions({
+        collection: restoreAccessCollectionSlug,
+        limit: 1,
+        overrideAccess: true,
+        sort: '-updatedAt',
+        where: { parent: { equals: doc.id } },
+      })
+
+      await payload.update({
+        id: doc.id,
+        collection: restoreAccessCollectionSlug,
+        data: { _status: 'published', title: 'Current' },
+        overrideAccess: true,
+      })
+
+      const restoreURL = new AdminUrlUtil(serverURL, restoreAccessCollectionSlug)
+      const editorURL = restoreURL.edit(doc.id)
+      const apiURL = formatAdminURL({
+        apiRoute: '/api',
+        path: `/${restoreAccessCollectionSlug}/${doc.id}`,
+        serverURL,
+      })
+
+      await page.goto(restoreURL.version(doc.id, docs[0]!.id))
+      await page.getByRole('button', { name: 'Restore as draft', exact: true }).click()
+      await page.getByRole('dialog').getByRole('button', { name: 'Confirm', exact: true }).click()
+      await page.waitForURL(editorURL)
+      await expect(page.locator('#field-title')).toHaveValue('Historical')
+
+      const draftResponse = await page.request.get(apiURL, { params: { draft: true } })
+
+      await expect(draftResponse).toBeOK()
+      expect(await draftResponse.json()).toMatchObject({ _status: 'draft', title: 'Historical' })
+
+      const liveResponse = await page.request.get(apiURL, { params: { draft: false } })
+
+      await expect(liveResponse).toBeOK()
+      expect(await liveResponse.json()).toMatchObject({ _status: 'published', title: 'Current' })
     })
 
     test('should restore version with correct data', async () => {
@@ -2287,7 +2336,7 @@ describe('Versions', () => {
         '#field-relationToAutosaves .relationship--single-value__drawer-toggler',
       )
 
-      const titleField = page.locator('#field-title')
+      const titleField = page.locator('[id^=doc-drawer_autosave-posts_1_] input[name="title"]')
 
       await titleField.fill('')
 

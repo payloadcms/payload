@@ -106,7 +106,12 @@ export const UserMenu: React.FC<UserMenuProps> = ({
       renderButton={({ active, ...ariaProps }) => (
         <Button
           {...ariaProps}
-          aria-label={t('authentication:account')}
+          aria-label={[
+            t('authentication:account'),
+            showTitle ? titleString || identifier : undefined,
+          ]
+            .filter(Boolean)
+            .join(': ')}
           buttonStyle="ghost"
           className={`${baseClass}__trigger${showTitle ? ` ${baseClass}__trigger--with-title` : ''}`}
           icon={<ChevronIcon direction="down" size={16} />}
@@ -156,7 +161,15 @@ export const UserMenu: React.FC<UserMenuProps> = ({
         // Normal menu content (desktop always; mobile when no active submenu)
         <>
           {/* Profile header */}
-          <a className={`${baseClass}__profile`} href={accountHref} role="menuitem" tabIndex={-1}>
+          <a
+            aria-label={[t('authentication:account'), titleString, identifier]
+              .filter(Boolean)
+              .join(': ')}
+            className={`${baseClass}__profile`}
+            href={accountHref}
+            role="menuitem"
+            tabIndex={-1}
+          >
             <div className={`${baseClass}__avatar`}>
               <RenderCustomComponent CustomComponent={CustomAvatar} Fallback={<Account />} />
             </div>

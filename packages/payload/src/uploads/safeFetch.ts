@@ -95,11 +95,11 @@ export const safeFetch = async (...args: Parameters<typeof undiciFetch>): Promis
         throw buildBlockedFetchError(hostname)
       }
     }
-    return (await undiciFetch(url, {
+    return await undiciFetch(url, {
       ...options,
       dispatcher: getSafeDispatcher(),
       redirect: 'manual', // Prevent automatic redirects
-    })) as unknown as Response
+    })
   } catch (error) {
     if (error instanceof Error) {
       if (error.cause instanceof Error && error.cause.message.includes('unsafe')) {

@@ -1,0 +1,42 @@
+@layer payload-default {
+  .activity-widget__pagination {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+  }
+
+  .activity-widget__pagination button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--spacer-4);
+    height: var(--spacer-4);
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-medium);
+    background: transparent;
+    color: var(--color-text);
+    cursor: pointer;
+  }
+
+  .activity-widget__pagination button:hover:not(:disabled) {
+    background: var(--color-bg-secondary);
+  }
+
+  .activity-widget__pagination button:focus-visible {
+    outline: var(--accessibility-outline);
+    outline-offset: var(--accessibility-outline-offset);
+  }
+
+  [dir='rtl'] .activity-widget__pagination button > span {
+    transform: scaleX(-1);
+  }
+
+  .activity-widget__pagination button:disabled {
+    color: var(--color-text-disabled);
+    cursor: default;
+  }
+}
