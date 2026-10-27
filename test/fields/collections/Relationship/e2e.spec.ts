@@ -721,7 +721,7 @@ describe('relationship', () => {
     await expect(page.locator(tableRowLocator)).toHaveCount(1)
   })
 
-  test('should allow filtering by non-polymorphic hasMany relationship field / equals', async () => {
+  test('should allow filtering by non-polymorphic hasMany relationship field / is in', async () => {
     const textDoc1 = await createTextFieldDoc({ text: 'Text 1' })
     const textDoc2 = await createTextFieldDoc({ text: 'Text 2' })
     const textDoc3 = await createTextFieldDoc({ text: 'Text 3' })
@@ -746,7 +746,7 @@ describe('relationship', () => {
     await addListFilter({
       fieldLabel: 'Relationship Has Many',
       multiSelect: true,
-      operatorLabel: 'equals',
+      operatorLabel: 'is in',
       page,
       value: 'Text 1',
     })

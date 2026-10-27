@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { postsSlug } from '../../slugs.js'
+import { pagesSlug, postsSlug } from '../../slugs.js'
 
 export const Posts: CollectionConfig = {
   slug: postsSlug,
@@ -11,6 +11,12 @@ export const Posts: CollectionConfig = {
   enableQueryPresets: true,
   lockDocuments: false,
   fields: [
+    {
+      name: 'relatedPages',
+      type: 'relationship',
+      hasMany: true,
+      relationTo: pagesSlug,
+    },
     {
       name: 'text',
       type: 'text',

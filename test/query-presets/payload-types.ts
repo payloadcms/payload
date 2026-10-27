@@ -149,6 +149,7 @@ export interface Page {
  * via the `definition` "posts".
  */
 export interface Post {
+  relatedPages?: (string | Page)[] | null;
   id: string;
   text?: string | null;
   createdBy?: {
@@ -365,6 +366,7 @@ export interface PagesSelect<T extends boolean = true> {
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
+  relatedPages?: T;
   text?: T;
   createdBy?: T;
   updatedBy?: T;

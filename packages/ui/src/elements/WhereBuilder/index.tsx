@@ -25,7 +25,7 @@ import {
   isNoOpConditionValueUpdate,
 } from './conditionValue.js'
 import './index.css'
-import { fieldTypeConditions, getValidFieldOperators } from './field-types.js'
+import { getValidFieldOperators } from './field-types.js'
 
 const baseClass = 'where-builder'
 
@@ -86,7 +86,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     ({ andIndex, field, orIndex, relation }) => {
       const newConditions = structuredClone(conditions)
 
-      const defaultOperator = fieldTypeConditions[field.field.type].operators[0].value
+      const { validOperator: defaultOperator } = getValidFieldOperators({ field: field.field })
 
       if (relation === 'and') {
         newConditions[orIndex].and.splice(andIndex, 0, {

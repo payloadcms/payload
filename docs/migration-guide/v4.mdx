@@ -20,6 +20,57 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
 
+### List filters for hasMany relationships use membership operators
+
+The Admin list filter no longer offers `equals` or `not_equals` for relationship and upload fields with `hasMany: true` and a single target collection (`relationTo` is a string). Use `in` ("is in") or `not_in` ("is not in") instead. Single-value fields and polymorphic fields are unchanged. The Local, REST, and GraphQL APIs continue to accept equality operators.
+
+Saved query presets and any legacy collection preferences containing these filters must be migrated before users reopen or edit them in Payload 4. The migration changes only matching fields in saved `where` queries, including nested `and` / `or` conditions:
+
+```diff
+-{ relatedPages: { equals: ['first-id', 'second-id'] } }
++{ relatedPages: { in: ['first-id', 'second-id'] } }
+
+-{ relatedPages: { not_equals: ['first-id', 'second-id'] } }
++{ relatedPages: { not_in: ['first-id', 'second-id'] } }
+```
+
+<Banner type="warning">
+  On MongoDB, array-valued equality filters previously compared the entire
+  array. Membership filters match any selected ID (`in`) or exclude all selected
+  IDs (`not_in`). Review saved filters that relied on exact array equality:
+  their results can change after this migration.
+</Banner>
+
+Create a migration using your configured database adapter:
+
+```bash
+pnpm payload migrate:create migrate-hasmany-relationship-filters
+```
+
+Keep any generated schema changes and add the following call to the migration's `up` function. This helper uses your configured database adapter. Use the `MigrateUpArgs` import from your configured adapter; the example below uses MongoDB:
+
+```ts
+import type { MigrateUpArgs } from '@payloadcms/db-mongodb'
+
+import { migrateHasManyRelationshipFilters } from 'payload/migrations'
+
+export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
+  await migrateHasManyRelationshipFilters({ payload, req })
+}
+
+export async function down(): Promise<void> {
+  throw new Error(
+    'Restore saved filters from a backup to reverse this data migration.',
+  )
+}
+```
+
+Then run `pnpm payload migrate`. Pass the migration's `req` so all reads and writes use its transaction. The helper preserves selected IDs, preset access settings, ownership, and other preference values. It processes records in batches and is safe to run again. Fields are resolved against the current collection configuration; filters for removed collections or fields are left unchanged.
+
+If a condition already contains both `equals` and `in`, or both `not_equals` and `not_in`, the helper throws rather than discarding a constraint. Split the constraints into separate `and` conditions and rerun the migration.
+
+Back up saved filters before migrating. An automatic reverse migration cannot distinguish migrated filters from filters that already used membership operators. Application queries, custom base filters, and bookmarked URLs are outside this data migration; update any Admin filter URLs that still use the removed operators.
+
 ### Payload request creation is consolidated
 
 Payload request creation now uses `createPayloadRequest` for local contexts and `createPayloadRequestFromWebRequest` to convert a Web `Request`. Admin context setup is exposed as `initAdminContext`.

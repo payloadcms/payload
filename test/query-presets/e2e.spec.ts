@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
 import { wait } from 'payload/shared'
+import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
@@ -11,6 +12,7 @@ import { addListFilter, openListFilters } from '../__helpers/e2e/filters/index.j
 import { addGroupBy, clearGroupBy } from '../__helpers/e2e/groupBy/index.js'
 import { exactText, saveDocAndAssert } from '../__helpers/e2e/helpers.js'
 import { navigateToListView } from '../__helpers/e2e/navigateToListView.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -31,7 +33,8 @@ import {
   savePresetChanges,
   selectPreset,
 } from './helpers/togglePreset.js'
-import { defaultColumnsSlug, pagesSlug } from './slugs.js'
+import { seedData } from './seed.js'
+import { defaultColumnsSlug, pagesSlug, postsSlug } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -84,6 +87,95 @@ describe('Query Presets', () => {
       specificUsers: allDocs.find((doc) => doc.title === 'Specific Users')!,
     }
   })
+
+  for (const [previous, next, label] of [
+    ['equals', 'in', 'is in'],
+    ['not_equals', 'not_in', 'is not in'],
+  ] as const) {
+    test(`should reopen, edit and save a migrated hasMany ${previous} filter`, async ({ page }) => {
+      const first = await payload.create({
+        collection: pagesSlug,
+        data: { text: 'First migration page' },
+        overrideAccess: true,
+      })
+      const second = await payload.create({
+        collection: pagesSlug,
+        data: { text: 'Second migration page' },
+        overrideAccess: true,
+      })
+      const legacy = await payload.create({
+        collection: 'payload-query-presets',
+        data: {
+          ...seedData.everyone(),
+          relatedCollection: postsSlug,
+          title: `Migrated ${previous}`,
+          where: { relatedPages: { [previous]: [first.id, second.id] } },
+        },
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        collection: 'payload-query-presets',
+        id: legacy.id,
+        data: {
+          ...legacy,
+          where: { relatedPages: { [next]: [first.id, second.id] } },
+        },
+        overrideAccess: true,
+      })
+
+      const postsURL = new AdminUrlUtil(serverURL, postsSlug)
+
+      await navigateToListView({ page, url: postsURL.list })
+      await selectPreset({ page, presetTitle: legacy.title })
+      await openListFilters(page, {})
+
+      const condition = page.locator('.where-builder .condition').first()
+      const operator = condition.getByRole('combobox', { name: 'Filter', exact: true })
+
+      await expect(condition.locator('.condition__operator')).toContainText(label)
+      await expect(condition.locator('.condition__value')).toContainText(first.text!)
+      await expect(condition.locator('.condition__value')).toContainText(second.text!)
+      await operator.focus()
+      await operator.press('ArrowDown')
+      await expect(getSelectMenu({ page }).getByRole('option')).toHaveText([
+        'is in',
+        'is not in',
+        'exists',
+      ])
+      await operator.press('Escape')
+      await expect(operator).toBeFocused()
+
+      const expectedWhere = { or: [{ and: [{ relatedPages: { [next]: [second.id] } }] }] }
+      const expectedURLWhere = {
+        or: [{ and: [{ relatedPages: { [next]: [String(second.id)] } }] }],
+      }
+
+      await condition.getByRole('button', { name: `Remove ${first.text}`, exact: true }).click()
+      await expect
+        .poll(
+          () => qs.parse(new URL(page.url()).search, { depth: 20, ignoreQueryPrefix: true }).where,
+        )
+        .toEqual(expectedURLWhere)
+      await savePresetChanges({ page })
+      await expect
+        .poll(async () => {
+          const saved = await payload.find({
+            collection: 'payload-query-presets',
+            where: { id: { equals: legacy.id } },
+            overrideAccess: true,
+          })
+
+          return saved.docs[0]?.where
+        })
+        .toEqual(expectedWhere)
+      await page.reload()
+      await openListFilters(page, {})
+      await expect(condition.locator('.condition__operator')).toContainText(label)
+      await expect(condition.locator('.condition__value')).toContainText(second.text!)
+      await expect(condition.locator('.condition__value')).not.toContainText(first.text!)
+    })
+  }
 
   test('can create and view preset with no filters or columns', async ({ page }) => {
     await navigateToListView({ page, url: pagesUrl.list })

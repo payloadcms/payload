@@ -6958,6 +6958,32 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should expose and operate hasMany relationship membership filter choices', async () => {
+      await gotoPostsList({ page, postsURL })
+      const { condition } = await addListFilter({
+        page,
+        fieldLabel: 'Related Posts',
+        operatorLabel: 'is in',
+      })
+      const operator = condition.getByRole('combobox', { name: 'Filter', exact: true })
+
+      await expect(operator).toHaveAccessibleName('Filter')
+      await expect(condition.locator('.condition__operator')).toContainText('is in')
+      await operator.focus()
+      await operator.press('ArrowDown')
+      await expect(getSelectMenu({ page }).getByRole('option')).toHaveText([
+        'is in',
+        'is not in',
+        'exists',
+      ])
+      await operator.press('ArrowDown')
+      await operator.press('Enter')
+      await expect(condition.locator('.condition__operator')).toContainText('is not in')
+      await operator.press('ArrowDown')
+      await operator.press('Escape')
+      await expect(operator).toBeFocused()
+    })
+
     test('should distinguish document and publishing option menus in live preview', async () => {
       // pyld-3726
       await openLivePreview({ page, postsURL, serverURL })
