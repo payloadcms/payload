@@ -26,6 +26,7 @@ import type {
 } from '../types.js'
 
 import { formatGeneratedFile } from './formatGeneratedFile.js'
+import { generateMigrationWithCreateHints } from './generateMigrationWithCreateHints.js'
 import { getTransaction } from './getTransaction.js'
 
 const DEFAULT_BATCH_SIZE = 100
@@ -38,43 +39,6 @@ const writeEntitiesToTempFile = (
 ): void => {
   const filePath = path.join(tempFolderPath, `entities-batch-${batchIndex}.json`)
   writeFileSync(filePath, JSON.stringify(entities, null, 2), 'utf-8')
-}
-
-const acceptDrizzlePrompts = async <T>(
-  callPrompt: () => Promise<T> | T,
-  {
-    silenceLogs = false,
-  }: {
-    silenceLogs?: boolean
-  } = {},
-): Promise<T> => {
-  // eslint-disable-next-line @typescript-eslint/unbound-method
-  const write = process.stdout.write
-
-  if (silenceLogs) {
-    process.stdout.write = () => true
-  }
-
-  const promise = callPrompt()
-
-  const interval = setInterval(
-    () =>
-      process.stdin.emit('keypress', '\n', {
-        name: 'return',
-        ctrl: false,
-      }),
-    25,
-  )
-
-  const res = await promise
-
-  if (silenceLogs) {
-    process.stdout.write = write
-  }
-
-  clearInterval(interval)
-
-  return res
 }
 
 const entityHasBlocksField = (entity: { flattenedFields: FlattenedField[] }): boolean => {
@@ -563,12 +527,11 @@ class BlocksToJsonMigratorImpl implements BlocksToJsonMigrator {
     this.resetSchema()
     await this.adapter.init()
 
-    const statements = await acceptDrizzlePrompts(
-      () => generateMigration(drizzleJsonBefore, drizzleJsonAfter),
-      {
-        silenceLogs: true,
-      },
-    )
+    const statements = await generateMigrationWithCreateHints({
+      after: drizzleJsonAfter,
+      before: drizzleJsonBefore,
+      generateMigration,
+    })
 
     const sqlExecute = `await db.${this.executeMethod}(` + 'sql`'
 
