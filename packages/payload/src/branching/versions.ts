@@ -2,7 +2,13 @@ import type { PayloadRequest, Where } from '../types/index.js'
 
 import { extractRelationshipID } from '../utilities/extractRelationshipID.js'
 import { rewriteBranchVersionParents } from './branchIDs.js'
-import { loadBranchDeletions, loadBranchManifest, resolveBranch } from './resolveBranch.js'
+import {
+  loadBranchDeletions,
+  loadBranchManifest,
+  peekBranchDeletions,
+  peekBranchManifest,
+  resolveBranch,
+} from './resolveBranch.js'
 import { resolveBranchRowID } from './resolveBranchRowID.js'
 import {
   branchChangesCollectionSlug,
@@ -156,6 +162,42 @@ export const resolveBranchVersionQuery = async ({
   const manifest = await loadBranchManifest(req as PayloadRequest)
   const shadowedIDs = manifest.get(collectionSlug) ?? []
   const deletedIDs = (await loadBranchDeletions(req as PayloadRequest)).get(collectionSlug) ?? []
+
+  return buildBranchVersionQuery({ branch, deletedIDs, shadowedIDs, where })
+}
+
+/**
+ * Synchronous branch predicate for version joins.
+ *
+ * Join query builders run after the top-level read has loaded and memoized the branch manifest.
+ * This uses that state while sharing the exact query construction with
+ * {@link resolveBranchVersionQuery}.
+ */
+export const resolveBranchVersionQuerySync = ({
+  branch: branchOverride,
+  collectionSlug,
+  req,
+  where,
+}: QueryArgs): undefined | Where => {
+  if (bypassed(branchOverride, req)) {
+    return where
+  }
+
+  const branching = req!.payload!.config?.branching
+
+  if (!branching?.enabled || !branching.branchableCollections.has(collectionSlug)) {
+    return where
+  }
+
+  const branch =
+    typeof branchOverride === 'string' ? branchOverride : resolveBranch(req as PayloadRequest)
+
+  if (branch === MAIN_BRANCH) {
+    return buildBranchVersionQuery({ branch, deletedIDs: [], shadowedIDs: [], where })
+  }
+
+  const shadowedIDs = peekBranchManifest(req as PayloadRequest).get(collectionSlug) ?? []
+  const deletedIDs = peekBranchDeletions(req as PayloadRequest).get(collectionSlug) ?? []
 
   return buildBranchVersionQuery({ branch, deletedIDs, shadowedIDs, where })
 }

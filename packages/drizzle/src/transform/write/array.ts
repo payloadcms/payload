@@ -8,6 +8,7 @@ import type {
   BlockRowToInsert,
   NumberToDelete,
   RelationshipToDelete,
+  RowToInsert,
   TextToDelete,
 } from './types.js'
 
@@ -34,6 +35,7 @@ type Args = {
   selects: {
     [tableName: string]: Record<string, unknown>[]
   }
+  selectsToDelete: RowToInsert['selectsToDelete']
   texts: Record<string, unknown>[]
   textsToDelete: TextToDelete[]
   /**
@@ -59,6 +61,7 @@ export const transformArray = ({
   relationships,
   relationshipsToDelete,
   selects,
+  selectsToDelete,
   texts,
   textsToDelete,
   withinArrayOrBlockLocale,
@@ -125,6 +128,7 @@ export const transformArray = ({
         relationshipsToDelete,
         row: newRow.row,
         selects,
+        selectsToDelete,
         texts,
         textsToDelete,
         withinArrayOrBlockLocale,

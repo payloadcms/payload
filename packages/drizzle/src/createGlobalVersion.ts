@@ -1,7 +1,7 @@
 import type { CreateGlobalVersionArgs, JsonObject, TypeWithVersion } from 'payload'
 
 import { sql } from 'drizzle-orm'
-import { buildVersionGlobalFields } from 'payload'
+import { buildVersionGlobalFields, MAIN_BRANCH, resolveBranch } from 'payload'
 import { hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
@@ -32,12 +32,16 @@ export async function createGlobalVersion<T extends JsonObject = JsonObject>(
 
   const db = getPrimaryDb(this, await getTransaction(this, req))
 
+  const isBranchable = Boolean(req?.payload?.config?.branching?.branchableGlobals?.has(globalSlug))
+  const versionBranch = isBranchable ? resolveBranch(req as never) : MAIN_BRANCH
+
   const result = await upsertRow<TypeWithVersion<T>>({
     adapter: this,
     data: {
       autosave,
       createdAt,
       latest: true,
+      ...(isBranchable ? { _branch: versionBranch } : {}),
       publishedLocale,
       snapshot,
       updatedAt,
@@ -55,9 +59,19 @@ export async function createGlobalVersion<T extends JsonObject = JsonObject>(
 
   const table = this.tables[tableName]
   if (hasDraftsEnabled(global)) {
+    // Scoped by `_branch` when the global is branchable. Global versions have no
+    // `parent` to separate streams by — every version of a global shares one —
+    // so an unscoped clear would wipe main's latest flag from a branch.
     await this.execute({
       db,
-      sql: sql`
+      sql: isBranchable
+        ? sql`
+          UPDATE ${table}
+          SET latest = false
+          WHERE ${table.id} != ${result.id}
+            AND ${table._branch} = ${versionBranch};
+        `
+        : sql`
           UPDATE ${table}
           SET latest = false
           WHERE ${table.id} != ${result.id};
