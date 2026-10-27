@@ -426,8 +426,11 @@ export function addStorageAdapter({
     })
   } else if (!storageProperty) {
     debug('[AST] Creating new storage array')
-    // Create storage array
-    objLiteral.addPropertyAssignment({
+    // Insert after the last property, not after trailing comments, which would produce `},,`
+    const propertiesWithComments = objLiteral.getPropertiesWithComments()
+    const lastProperty = objLiteral.getProperties().at(-1)
+    const insertIndex = lastProperty ? propertiesWithComments.indexOf(lastProperty) + 1 : 0
+    objLiteral.insertPropertyAssignment(insertIndex, {
       name: 'storage',
       initializer: '[]',
     })

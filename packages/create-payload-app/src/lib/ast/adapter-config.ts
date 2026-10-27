@@ -86,6 +86,10 @@ export const STORAGE_ADAPTER_CONFIG: Record<StorageAdapter, StorageAdapterConfig
       media: true,
     },
     bucket: process.env.GCS_BUCKET || '',
+    options: {
+      apiEndpoint: process.env.GCS_ENDPOINT,
+      projectId: process.env.GCS_PROJECT_ID,
+    },
   })`,
     packageName: '@payloadcms/storage-gcs',
   },

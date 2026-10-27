@@ -250,6 +250,26 @@ export default buildConfig({
     expect(text).toMatch(/storage: \[\s*someOtherStorage\(\),\s*s3Storage\(/)
   })
 
+  it('creates valid syntax when the config ends with a trailing comma and comments', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig } from 'payload'
+
+export default buildConfig({
+  collections: [],
+  plugins,
+  // sharp,
+})`,
+    )
+
+    const result = addStorageAdapter({ sourceFile, adapter: 's3Storage' })
+
+    expect(result.success).toBe(true)
+    expect(project.getProgram().getSyntacticDiagnostics(sourceFile)).toHaveLength(0)
+    expect(sourceFile.getText()).toMatch(/storage: \[\s*s3Storage\(/)
+  })
+
   it('spreads shorthand storage property', () => {
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
