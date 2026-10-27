@@ -1594,6 +1594,8 @@ describe('List View', () => {
       const paginator = page.locator('.paginator')
       await expect(paginator.getByRole('button', { name: 'Previous table page' })).toBeVisible()
       await expect(paginator.getByRole('button', { name: 'Next table page' })).toBeVisible()
+
+      await deleteAllPosts()
     })
 
     test('should paginate without resetting selected limit', async () => {
