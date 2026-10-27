@@ -1203,6 +1203,163 @@ export async function openLLMInstructions({ page, serverURL }: { page: Page; ser
   return field
 }
 
+export async function disableWorkflowAutoLogin({
+  page,
+  serverURL,
+}: {
+  page: Page
+  serverURL: string
+}) {
+  // Keep the test-only header off cross-origin assets, where it triggers CORS preflights.
+  await page.route(`${serverURL}/**`, async (route) => {
+    await route.continue({
+      headers: { ...route.request().headers(), DisableAutologin: 'true' },
+    })
+  })
+}
+
+export async function scanA11y({
+  name,
+  page,
+  include,
+  deferred,
+  testInfo = test.info(),
+}: {
+  deferred?: string
+  include?: string[]
+  name: string
+  page: Page
+  testInfo?: TestInfo
+}) {
+  const run = async () => {
+    const startedAt = performance.now()
+    const results = await runAxeScan({
+      defaultExcludes: false,
+      include,
+      page,
+      screenshotViolations: false,
+      testInfo,
+    })
+
+    testInfo.annotations.push({
+      type: 'a11y-scan',
+      description: JSON.stringify({
+        name,
+        durationMs: Math.round(performance.now() - startedAt),
+        violations: results.violations.length,
+      }),
+    })
+    expect.soft(results.violations, `Axe checkpoint: ${name}`).toEqual([])
+  }
+
+  if (deferred) {
+    await test.step.skip(`axe: ${name} — ${deferred}`, run)
+  } else {
+    await test.step(`axe: ${name}`, run)
+  }
+}
+
+export async function expectNoPageOverflow({ page }: { page: Page }) {
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+      ),
+    )
+    .toBe(true)
+}
+
+export async function tabToSignInControl({ control, page }: { control: Locator; page: Page }) {
+  await expect(control).toBeVisible()
+  await expect(control).toBeEnabled()
+  // Bound traversal so a missing/unreachable control fails instead of hanging.
+  for (let tabCount = 0; tabCount < 12; tabCount++) {
+    if (await control.evaluate((element) => element === element.ownerDocument.activeElement)) {
+      return
+    }
+    await page.keyboard.press(workflowTabKey({ direction: 'Tab', page }))
+  }
+  await expect(control).toBeFocused()
+}
+
+export async function openWorkflowDeleteDialog({ page }: { page: Page }) {
+  const menu = page.locator('.doc-controls__popup .popup__trigger-wrap button')
+
+  await tabToWorkflowControl({ control: menu, page })
+  await page.keyboard.press('Enter')
+  const trigger = page.getByRole('menuitem', { name: 'Delete', exact: true })
+
+  await expect(trigger).toBeVisible()
+  for (let index = 0; index < 12; index++) {
+    if (await trigger.evaluate((element) => element === element.ownerDocument.activeElement)) {
+      break
+    }
+    await page.keyboard.press('ArrowDown')
+  }
+  await expect(trigger).toBeFocused()
+  await page.keyboard.press('Enter')
+  const dialog = page.getByRole('dialog', { name: /confirm deletion/i })
+
+  await expectFocusInside({ container: dialog, page })
+  return { dialog, trigger: menu }
+}
+
+export async function arrowToWorkflowItem({
+  item,
+  key = 'ArrowDown',
+  page,
+}: {
+  item: Locator
+  key?: 'ArrowDown' | 'ArrowLeft' | 'ArrowRight'
+  page: Page
+}) {
+  for (let index = 0; index < 20; index++) {
+    if (await item.evaluate((element) => element === element.ownerDocument.activeElement)) {
+      return
+    }
+    await page.keyboard.press(key)
+  }
+  await expect(item).toBeFocused()
+}
+
+export async function deleteWorkflowPostsByTitle({
+  page,
+  serverURL,
+  title,
+}: {
+  page: Page
+  serverURL: string
+  title: string
+}) {
+  const response = await page.request.get(`${serverURL}/api/posts`, {
+    params: { draft: 'true', trash: 'true', 'where[title][equals]': title },
+  })
+
+  await expect(response).toBeOK()
+  for (const doc of (await response.json()).docs) {
+    await expect(await page.request.delete(`${serverURL}/api/posts/${doc.id}?trash=true`)).toBeOK()
+  }
+}
+
+export async function chooseWorkflowUpload({ page }: { page: Page }) {
+  const select = page.getByRole('button', { name: /select.*file/i })
+
+  await tabToWorkflowControl({ control: select, page })
+  const chooser = page.waitForEvent('filechooser')
+
+  await page.keyboard.press('Enter')
+  // Playwright supplies the file at the native picker boundary; in-app controls use the keyboard.
+  await (await chooser).setFiles(fileURLToPath(new URL('../uploads/image.png', import.meta.url)))
+  await expect(page.locator('.file-manager__selected-preview')).toBeVisible()
+}
+
+export async function enterWorkflowGrid({ grid, page }: { grid: Locator; page: Page }) {
+  // The grid has one roving Tab stop; Control+Home moves to its first header control.
+  await tabToWorkflowControl({ control: grid.locator('[tabindex="0"]').first(), page })
+  await page.keyboard.press('Control+Home')
+  await expect(grid.locator('thead').getByRole('checkbox')).toBeFocused()
+}
+
 export async function prepareSignInPage({ page, serverURL }: { page: Page; serverURL: string }) {
   const contrastCookies = (await page.context().cookies()).filter(
     ({ name }) => name === 'payload-high-contrast-mode',
@@ -1367,7 +1524,49 @@ export async function expectPersistedWorkflowPost({
     })
 }
 
-function workflowTabKey({ direction, page }: { direction: 'Shift+Tab' | 'Tab'; page: Page }) {
+export async function withWorkflowPosts({
+  action,
+  labels,
+  page,
+  serverURL,
+}: {
+  action: (posts: Array<{ id: number | string; title: string }>) => Promise<void>
+  labels: string[]
+  page: Page
+  serverURL: string
+}) {
+  const prefix = 'Accessibility collection ' + randomUUID()
+  const posts: Array<{ id: number | string; title: string }> = []
+
+  try {
+    for (const label of labels) {
+      const title = prefix + ' ' + label
+      const response = await page.request.post(serverURL + '/api/posts', {
+        data: { _status: 'published', title },
+      })
+
+      expect(response.ok()).toBe(true)
+      const { doc } = await response.json()
+      posts.push({ id: doc.id, title })
+    }
+    await action(posts)
+  } finally {
+    const responses = await Promise.all(
+      posts.map(({ id }) => page.request.delete(serverURL + '/api/posts/' + id + '?trash=true')),
+    )
+    for (const response of responses) {
+      expect(response.ok() || response.status() === 404).toBe(true)
+    }
+  }
+}
+
+export function workflowTabKey({
+  direction,
+  page,
+}: {
+  direction: 'Shift+Tab' | 'Tab'
+  page: Page
+}) {
   // With default macOS settings, Safari uses Option-Tab to include buttons and links.
   return process.platform === 'darwin' &&
     page.context().browser()?.browserType().name() === 'webkit'

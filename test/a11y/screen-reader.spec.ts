@@ -49,6 +49,7 @@ import {
   openVersionsList,
   openWidgetDrawer,
   waitForKeyboardDragActivation,
+  withWorkflowPost,
 } from './helpers.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
