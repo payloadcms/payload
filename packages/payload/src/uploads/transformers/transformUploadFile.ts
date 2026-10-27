@@ -15,7 +15,9 @@ import { createFileSource } from './createFileSource.js'
  * so passing the same `File` through unchanged never copies its buffer.
  *
  * Each stage gets the same `doc`, so later stages see earlier `_transforms` changes. A stage
- * that changes any other field stops the pipeline with a `TransformerContractError`.
+ * that changes any other field stops the pipeline with a `TransformerContractError`. The check
+ * compares with `unchangedDoc`, a frozen copy of `doc` that no transformer receives, because
+ * `originalDoc` is the stored document and can differ from `doc`.
  */
 export async function transformUploadFile({
   collectionSlug,
@@ -26,6 +28,7 @@ export async function transformUploadFile({
   originalFile,
   pipeline,
   req,
+  unchangedDoc,
 }: {
   collectionSlug: string
   doc: Document
@@ -35,6 +38,7 @@ export async function transformUploadFile({
   originalFile: File
   pipeline: UploadTransformer[]
   req: PayloadRequest
+  unchangedDoc: Readonly<Document>
 }): Promise<{ doc: Document; file: File }> {
   const originalSource = createFileSource({ file: originalFile })
   let accumulator = file
@@ -55,7 +59,7 @@ export async function transformUploadFile({
       source: createFileSource({ file: accumulator }),
     })
 
-    assertOnlyTransformsChanged({ doc, originalDoc, transformerSlug: transformer.slug })
+    assertOnlyTransformsChanged({ doc, transformerSlug: transformer.slug, unchangedDoc })
 
     if (result.file) {
       accumulator = result.file
@@ -75,17 +79,17 @@ export async function transformUploadFile({
  */
 function assertOnlyTransformsChanged({
   doc,
-  originalDoc,
   transformerSlug,
+  unchangedDoc,
 }: {
   doc: Document
-  originalDoc: Readonly<Document>
   transformerSlug: string
+  unchangedDoc: Readonly<Document>
 }): void {
   const { _transforms: _docTransforms, ...docFields } = doc
-  const { _transforms: _originalTransforms, ...originalFields } = originalDoc
+  const { _transforms: _unchangedTransforms, ...unchangedFields } = unchangedDoc
 
-  if (!isDeepStrictEqual(docFields, originalFields)) {
+  if (!isDeepStrictEqual(docFields, unchangedFields)) {
     throw new TransformerContractError(
       `The "${transformerSlug}" transformer changed a document field other than _transforms.`,
     )

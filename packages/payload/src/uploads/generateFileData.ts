@@ -150,7 +150,11 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
   const result = await processUpload({
     ...args,
     pipelineDoc,
-    pipelineOriginalDoc: deepFreeze(deepCopyObject(pipelineDoc)),
+    // Like `originalDoc` in hooks: the stored document, or the incoming data on a create.
+    pipelineOriginalDoc: deepFreeze(
+      deepCopyObject((operation === 'update' || isDuplicating ? originalDoc : data) ?? {}),
+    ),
+    pipelineUnchangedDoc: deepFreeze(deepCopyObject(pipelineDoc)),
     uploadEdits,
   })
 
@@ -171,12 +175,15 @@ const processUpload = async <T>({
   overwriteExistingFiles,
   pipelineDoc,
   pipelineOriginalDoc,
+  pipelineUnchangedDoc,
   req,
   throwOnMissingFile,
   uploadEdits,
 }: {
   pipelineDoc: Document
   pipelineOriginalDoc: Readonly<Document>
+  /** A frozen copy of `pipelineDoc` before any stage ran. Core checks stage changes against it. */
+  pipelineUnchangedDoc: Readonly<Document>
   uploadEdits: UploadEdits
 } & Args<T>): Result<T> => {
   if (!collectionConfig.upload) {
@@ -358,7 +365,7 @@ const processUpload = async <T>({
     const pipeline = await planTransformerPipeline({
       args: {
         collectionSlug: collectionConfig.slug,
-        doc: pipelineOriginalDoc,
+        doc: pipelineUnchangedDoc,
         mimeType: file.mimetype,
         operation: 'upload',
         originalDoc: pipelineOriginalDoc,
@@ -435,6 +442,7 @@ const processUpload = async <T>({
               originalFile: originalWebFile!,
               pipeline: bridgeTaskPipeline,
               req,
+              unchangedDoc: pipelineUnchangedDoc,
             })
 
             return taskFile
@@ -459,6 +467,7 @@ const processUpload = async <T>({
           originalFile: originalWebFile,
           pipeline,
           req,
+          unchangedDoc: pipelineUnchangedDoc,
         })
 
         mainWebFile = transformedFile
