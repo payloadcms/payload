@@ -7,6 +7,83 @@
  */
 
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "UploadTransforms".
+ */
+export type UploadTransforms = {
+  /**
+   * Time range on the original, in milliseconds. Start inclusive, end exclusive.
+   */
+  clip?: {
+    endMs: number;
+    startMs: number;
+  };
+  /**
+   * Rectangle in original-file pixels, applied before resize and encoding.
+   */
+  crop?: {
+    height: number;
+    width: number;
+    x: number;
+    y: number;
+  };
+  /**
+   * Encoding settings for the output format. Does not select the format.
+   */
+  encoding?: {
+    [k: string]: unknown;
+  };
+  /**
+   * Mirror the image on one or both axes.
+   */
+  flip?: {
+    horizontal?: boolean;
+    vertical?: boolean;
+  };
+  /**
+   * Preferred point as percentages of the original, from 0 to 100.
+   */
+  focalPoint?: {
+    x: number;
+    y: number;
+  };
+  /**
+   * Keep or remove metadata embedded in the output file.
+   */
+  metadataPolicy?: {
+    mode: 'preserve' | 'strip';
+  };
+  /**
+   * One-based, inclusive page range on the original document.
+   */
+  pageRange?: {
+    endPage: number;
+    startPage: number;
+  };
+  /**
+   * Video frame to use as the poster, in milliseconds on the original.
+   */
+  posterFrame?: {
+    timestampMs: number;
+  };
+  /**
+   * Target size for visual media.
+   */
+  resize?: {
+    fit?: 'contain' | 'cover' | 'fill' | 'inside' | 'outside';
+    height?: number;
+    width?: number;
+    withoutEnlargement?: boolean;
+  };
+  /**
+   * Clockwise rotation in degrees.
+   */
+  rotate?: {
+    angle: number;
+  };
+  [k: string]: unknown;
+} | null;
+/**
  * Supported timezones in IANA format.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -73,6 +150,7 @@ export interface Config {
     'file-versioned-converted-media': FileVersionedConvertedMedia;
     'file-versioned-trash-media': FileVersionedTrashMedia;
     'file-versioned-plain-media': FileVersionedPlainMedia;
+    'file-versioned-legacy-media': FileVersionedLegacyMedia;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -87,6 +165,7 @@ export interface Config {
     'file-versioned-converted-media': FileVersionedConvertedMediaSelect<false> | FileVersionedConvertedMediaSelect<true>;
     'file-versioned-trash-media': FileVersionedTrashMediaSelect<false> | FileVersionedTrashMediaSelect<true>;
     'file-versioned-plain-media': FileVersionedPlainMediaSelect<false> | FileVersionedPlainMediaSelect<true>;
+    'file-versioned-legacy-media': FileVersionedLegacyMediaSelect<false> | FileVersionedLegacyMediaSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -155,6 +234,7 @@ export interface FileVersionedMedia {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
     url?: string | null;
@@ -227,6 +307,7 @@ export interface FileVersionedDraftMedia {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
     url?: string | null;
@@ -264,6 +345,7 @@ export interface FileVersionedTransformedMedia {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
     url?: string | null;
@@ -313,6 +395,7 @@ export interface FileVersionedConvertedMedia {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
     url?: string | null;
@@ -351,6 +434,7 @@ export interface FileVersionedTrashMedia {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
     url?: string | null;
@@ -388,6 +472,7 @@ export interface FileVersionedPlainMedia {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
     url?: string | null;
@@ -400,6 +485,56 @@ export interface FileVersionedPlainMedia {
   };
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "file-versioned-legacy-media".
+ */
+export interface FileVersionedLegacyMedia {
+  id: string;
+  alt?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  _transforms?: UploadTransforms;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+  variants?: {
+    small?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -448,6 +583,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'file-versioned-plain-media';
         value: string | FileVersionedPlainMedia;
+      } | null)
+    | ({
+        relationTo: 'file-versioned-legacy-media';
+        value: string | FileVersionedLegacyMedia;
       } | null)
     | ({
         relationTo: 'users';
@@ -512,6 +651,7 @@ export interface FileVersionedMediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _transforms?: T;
   original?:
     | T
     | {
@@ -545,6 +685,7 @@ export interface FileVersionedDraftMediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _transforms?: T;
   original?:
     | T
     | {
@@ -577,6 +718,7 @@ export interface FileVersionedTransformedMediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _transforms?: T;
   original?:
     | T
     | {
@@ -625,6 +767,7 @@ export interface FileVersionedConvertedMediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _transforms?: T;
   original?:
     | T
     | {
@@ -658,6 +801,7 @@ export interface FileVersionedTrashMediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _transforms?: T;
   original?:
     | T
     | {
@@ -690,6 +834,7 @@ export interface FileVersionedPlainMediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _transforms?: T;
   original?:
     | T
     | {
@@ -704,6 +849,55 @@ export interface FileVersionedPlainMediaSelect<T extends boolean = true> {
       };
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "file-versioned-legacy-media_select".
+ */
+export interface FileVersionedLegacyMediaSelect<T extends boolean = true> {
+  alt?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  _transforms?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
+  focalX?: T;
+  focalY?: T;
+  variants?:
+    | T
+    | {
+        small?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -804,6 +998,7 @@ export interface CollectionQueryWidget {
       | 'file-versioned-converted-media'
       | 'file-versioned-trash-media'
       | 'file-versioned-plain-media'
+      | 'file-versioned-legacy-media'
       | 'users';
     where?:
       | {
@@ -834,6 +1029,7 @@ export interface ActivityWidget {
           | 'file-versioned-converted-media'
           | 'file-versioned-trash-media'
           | 'file-versioned-plain-media'
+          | 'file-versioned-legacy-media'
           | 'users'
         )[]
       | null;
@@ -854,6 +1050,7 @@ export interface UploadDropzoneWidget {
           | 'file-versioned-converted-media'
           | 'file-versioned-trash-media'
           | 'file-versioned-plain-media'
+          | 'file-versioned-legacy-media'
         )[]
       | null;
   };

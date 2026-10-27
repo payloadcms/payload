@@ -8349,6 +8349,30 @@ test.describe('WCAG 2.2 Level AA', () => {
         .toHaveAccessibleName(/focal point/i)
     })
 
+    test('should expose the saved crop size when the image editor reopens', async () => {
+      const doc = await createMediaFixture({ page, serverURL })
+      const saved = await page.request.patch(
+        formatAdminURL({ apiRoute: '/api', path: `/media/${doc.id}`, serverURL }),
+        { data: { _transforms: { crop: { height: 600, width: 400, x: 0, y: 0 } } } },
+      )
+
+      expect(saved.ok(), 'Save a crop so the editor reopens with it').toBe(true)
+
+      await page.goto(
+        formatAdminURL({ adminRoute: '/admin', path: `/collections/media/${doc.id}`, serverURL }),
+      )
+      await waitForFormReady(page)
+      await page.getByRole('button', { name: /edit image/i }).click()
+      const dialog = page.locator('.edit-upload__dialog')
+
+      await expect(dialog.getByRole('spinbutton', { name: 'Width', exact: true })).toHaveValue(
+        '400',
+      )
+      await expect(dialog.getByRole('spinbutton', { name: 'Height', exact: true })).toHaveValue(
+        '600',
+      )
+    })
+
     test('should expose the active locale as selected rather than disabled', async () => {
       // Additional coverage for PYLD-3699.
       // Additional coverage for PYLD-3700.
