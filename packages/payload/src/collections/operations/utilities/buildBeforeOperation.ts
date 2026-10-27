@@ -1,6 +1,7 @@
 import type { CollectionSlug } from '../../../index.js'
 import type { BeforeOperationArg, OperationArgs, OperationMap } from './types.js'
 
+import { assertBranchReadable } from '../../../branching/assertBranchReadable.js'
 import { operationToHookOperation } from './types.js'
 // Specific overloads with TArgs (these take priority over the general overload)
 // Overload for 'read' operation (deprecated, backward compatibility)
@@ -83,6 +84,10 @@ export async function buildBeforeOperation<TOperationGeneric extends CollectionS
   const { args, collection, operation, overrideAccess } = operationArgs
 
   let newArgs = args
+
+  if (!overrideAccess) {
+    await assertBranchReadable({ collectionSlug: collection.slug, req: args.req! })
+  }
 
   if (args.collection.config.hooks?.beforeOperation?.length) {
     // TODO: v4 should not need this mapping

@@ -33,6 +33,7 @@ import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
+import { useBranchParam } from '../../providers/Branch/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
@@ -134,6 +135,7 @@ export function UploadInput(props: UploadInputProps) {
   const { permissions } = useAuth()
   const locale = useLocale()
   const code = locale?.code
+  const branch = useBranchParam()
   const { i18n, t } = useTranslation()
   const labelID = React.useId()
   const a11yID = label ? labelID : undefined
@@ -268,6 +270,7 @@ export function UploadInput(props: UploadInputProps) {
       // 2. Fetch per collection
       const fetches = Object.entries(grouped).map(async ([collection, ids]) => {
         const query = {
+          branch,
           depth: 0,
           draft: true,
           limit: ids.length,
@@ -332,7 +335,7 @@ export function UploadInput(props: UploadInputProps) {
 
       return sortedDocs
     },
-    [api, code, i18n.language, t],
+    [branch, api, code, i18n.language, t],
   )
 
   const normalizeValue = useCallback(

@@ -16,11 +16,20 @@ import type {
 } from './types.js'
 
 import { useDebouncedCallback } from '../../hooks/useDebouncedCallback.js'
+import { useBranchParam } from '../Branch/index.js'
 import { useConfig } from '../Config/index.js'
 import { usePreferences } from '../Preferences/index.js'
 import { useRouter } from '../RouterAdapter/index.js'
 
 const HierarchyContext = createContext<HierarchyContextValue | undefined>(undefined)
+
+const getHierarchyCacheKey = ({
+  branch,
+  collectionSlug,
+}: {
+  branch?: string
+  collectionSlug: string
+}): string => JSON.stringify([branch ?? null, collectionSlug])
 
 export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }) => {
   const { setPreference } = usePreferences()
@@ -31,6 +40,8 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
       serverURL,
     },
   } = useConfig()
+
+  const branch = useBranchParam()
 
   const [baseFilter, setBaseFilter] = useState<null | Where>(null)
   const [collectionSlug, setCollectionSlug] = useState<null | string>(null)
@@ -58,7 +69,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
         return []
       }
 
-      const cache = treeCache.get(collectionSlug)
+      const cache = treeCache.get(getHierarchyCacheKey({ branch, collectionSlug }))
       if (!cache) {
         return []
       }
@@ -71,7 +82,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
         return docParentId !== null && String(docParentId) === String(parentId)
       })
     },
-    [collectionSlug, parentFieldName, treeCache],
+    [branch, collectionSlug, parentFieldName, treeCache],
   )
 
   const hydrate = useCallback((data: HierarchyHydrateData) => {
@@ -122,18 +133,23 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
     if (treeData) {
       setTreeCache((prev) => {
         const newCache = new Map(prev)
-        const existingEntry = newCache.get(slug)
+        const cacheKey = getHierarchyCacheKey({
+          branch: treeData.branch ?? undefined,
+          collectionSlug: slug,
+        })
+        const existingEntry = newCache.get(cacheKey)
 
         // If baseFilter is provided, replace cache entirely (tenant changed)
         // Otherwise merge to support incremental loading
         if (newBaseFilter !== undefined || !existingEntry) {
-          newCache.set(slug, { ...treeData, baseFilter: newBaseFilter ?? null })
+          newCache.set(cacheKey, { ...treeData, baseFilter: newBaseFilter ?? null })
         } else {
           const existingDocIds = new Set(existingEntry.docs.map((doc) => doc.id))
           const newDocs = treeData.docs.filter((doc) => !existingDocIds.has(doc.id))
 
-          newCache.set(slug, {
+          newCache.set(cacheKey, {
             baseFilter: existingEntry.baseFilter,
+            branch: treeData.branch ?? existingEntry.branch ?? null,
             docs: [...existingEntry.docs, ...newDocs],
             loadedParents: {
               ...existingEntry.loadedParents,
@@ -219,9 +235,9 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
 
   const getTreeDataForCollection = useCallback(
     (slug: string) => {
-      return treeCache.get(slug) || null
+      return treeCache.get(getHierarchyCacheKey({ branch, collectionSlug: slug })) || null
     },
-    [treeCache],
+    [branch, treeCache],
   )
 
   const setSelectedFilters = useCallback(
@@ -263,7 +279,8 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
         return
       }
 
-      const cache = treeCache.get(collectionSlug)
+      const cacheKey = getHierarchyCacheKey({ branch, collectionSlug })
+      const cache = treeCache.get(cacheKey)
       if (!cache) {
         return
       }
@@ -299,7 +316,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
             : { [parentFieldName]: { equals: parentId } }
 
         const queryString = qs.stringify(
-          { limit: treeLimit, page: nextPage, sort: useAsTitle ?? 'id', where },
+          { branch, limit: treeLimit, page: nextPage, sort: useAsTitle ?? 'id', where },
           { addQueryPrefix: true },
         )
         const url = formatAdminURL({
@@ -320,13 +337,13 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
 
         setTreeCache((prev) => {
           const newCache = new Map(prev)
-          const existingEntry = newCache.get(collectionSlug)
+          const existingEntry = newCache.get(cacheKey)
 
           if (existingEntry) {
             const existingDocIds = new Set(existingEntry.docs.map((doc) => doc.id))
             const uniqueNewDocs = newDocs.filter((doc) => !existingDocIds.has(doc.id))
 
-            newCache.set(collectionSlug, {
+            newCache.set(cacheKey, {
               docs: [...existingEntry.docs, ...uniqueNewDocs],
               loadedParents: {
                 ...existingEntry.loadedParents,
@@ -348,6 +365,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
       }
     },
     [
+      branch,
       api,
       collectionSlug,
       isLoadingMore,
@@ -374,18 +392,21 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
     setLoadingNodeId(null)
   }, [])
 
-  const refreshTree = useCallback((slug: string) => {
-    setTreeCache((prev) => {
-      const next = new Map(prev)
-      next.delete(slug)
-      return next
-    })
-    setTreeRefreshKeys((prev) => {
-      const next = new Map(prev)
-      next.set(slug, (next.get(slug) ?? 0) + 1)
-      return next
-    })
-  }, [])
+  const refreshTree = useCallback(
+    (slug: string) => {
+      setTreeCache((prev) => {
+        const next = new Map(prev)
+        next.delete(getHierarchyCacheKey({ branch, collectionSlug: slug }))
+        return next
+      })
+      setTreeRefreshKeys((prev) => {
+        const next = new Map(prev)
+        next.set(slug, (next.get(slug) ?? 0) + 1)
+        return next
+      })
+    },
+    [branch],
+  )
 
   const expandedNodes =
     collectionSlug && expandedNodesByCollection.has(collectionSlug)

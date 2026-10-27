@@ -3,6 +3,10 @@ import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
+import { assertBranchReadable } from '../../branching/assertBranchReadable.js'
+import { recordBranchGlobalChange, resolveBranchGlobalWrite } from '../../branching/globals.js'
+import { assertBranchMergeValidationWriteAllowed } from '../../branching/mergeWriteGuard.js'
+import { branchField, MAIN_BRANCH } from '../../branching/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
@@ -10,8 +14,10 @@ import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { markTransactionWrite } from '../../utilities/transactionMutationTracker.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
 import { getRestoredStatusesToAuthorize } from '../../versions/getRestoredStatusesToAuthorize.js'
 import { saveVersion } from '../../versions/saveVersion.js'
@@ -36,8 +42,16 @@ export const restoreVersionOperation = async <T extends JsonObject = any>(
   const req = args.req!
   const { fallbackLocale, locale, payload } = req
 
+  assertBranchMergeValidationWriteAllowed({ req })
+
+  if (!overrideAccess) {
+    await assertBranchReadable({ globalSlug: globalConfig.slug, req })
+  }
+
+  let shouldCommit = false
+
   try {
-    const shouldCommit = await initTransaction(req)
+    shouldCommit = await initTransaction(req)
 
     // /////////////////////////////////////
     // beforeOperation - Global
@@ -92,7 +106,12 @@ export const restoreVersionOperation = async <T extends JsonObject = any>(
 
     // Overwrite draft status if draft is true
     if (draft) {
-      rawVersion.version._status = 'draft'
+      rawVersion.version._status =
+        payload.config.localization && hasLocalizeStatusEnabled(globalConfig)
+          ? Object.fromEntries(
+              payload.config.localization.localeCodes.map((localeCode) => [localeCode, 'draft']),
+            )
+          : 'draft'
     }
 
     // A localized `_status` can publish and unpublish locales in one restore, so authorize every
@@ -157,10 +176,15 @@ export const restoreVersionOperation = async <T extends JsonObject = any>(
       slug: globalConfig.slug,
       req,
     })
+    const writeBranch = resolveBranchGlobalWrite({ globalSlug: globalConfig.slug, req })
 
     let result = rawVersion.version
 
-    if (global || draft) {
+    if (payload.config.branching?.branchableGlobals.has(globalConfig.slug)) {
+      result[branchField] = writeBranch ?? MAIN_BRANCH
+    }
+
+    if (global || writeBranch || draft) {
       // Ensure updatedAt date is always updated
       result.updatedAt = new Date().toISOString()
       if (!draft) {
@@ -169,11 +193,20 @@ export const restoreVersionOperation = async <T extends JsonObject = any>(
           data: result,
           req,
         })
+        markTransactionWrite({ req })
       }
     } else {
       result = await payload.db.createGlobal({
         slug: globalConfig.slug,
         data: result,
+        req,
+      })
+      markTransactionWrite({ req })
+    }
+    if (writeBranch) {
+      await recordBranchGlobalChange({
+        branch: writeBranch,
+        globalSlug: globalConfig.slug,
         req,
       })
     }
@@ -270,7 +303,9 @@ export const restoreVersionOperation = async <T extends JsonObject = any>(
 
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    if (shouldCommit) {
+      await killTransaction(req)
+    }
     throw error
   }
 }

@@ -39,6 +39,7 @@ export const updateVersion: UpdateVersion = async function updateVersion(
     adapter: this,
     fields: flattenedFields,
     locale,
+    req,
     where: whereToUse,
   })
 

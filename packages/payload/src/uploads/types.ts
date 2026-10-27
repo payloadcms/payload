@@ -208,6 +208,17 @@ export type UploadConfig = {
    */
   crop?: boolean
   /**
+   * Deletes files from adapter-managed storage when an internal operation removes file references
+   * without deleting the owning document.
+   *
+   * @internal
+   */
+  deleteFiles?: (args: {
+    req: PayloadRequest
+    retainedDoc?: null | object
+    sourceDoc: object
+  }) => Promise<void>
+  /**
    * Disable the ability to save files to disk.
    * @default false
    */

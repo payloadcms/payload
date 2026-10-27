@@ -704,6 +704,10 @@ export interface CustomSchema {
   text?: string | null;
   localizedText?: string | null;
   relationship?: (string | RelationA)[] | null;
+  localizedRelationship?: (string | RelationA)[] | null;
+  localizedTexts?: string[] | null;
+  localizedNumbers?: number[] | null;
+  localizedSelect?: ('a' | 'b' | 'c')[] | null;
   select?: ('a' | 'b' | 'c')[] | null;
   radio?: ('a' | 'b' | 'c') | null;
   array?:
@@ -1582,6 +1586,10 @@ export interface CustomSchemaSelect<T extends boolean = true> {
   text?: T;
   localizedText?: T;
   relationship?: T;
+  localizedRelationship?: T;
+  localizedTexts?: T;
+  localizedNumbers?: T;
+  localizedSelect?: T;
   select?: T;
   radio?: T;
   array?:
