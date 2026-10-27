@@ -231,6 +231,7 @@ export const BranchSelector: React.FC<{ className?: string }> = ({ className }) 
         // a search that filters everything out still says so.
         showEmptyMessage={entries.length > 0}
         size="fit-content"
+        theme="auto"
       />
       <NewBranchModal />
     </Fragment>
