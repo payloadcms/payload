@@ -71,6 +71,8 @@ export const sanitizeBranchingConfig = (config: Config): SanitizedBranchingConfi
   )
 
   if (isMultiTenantPluginEnabled) {
+    // Config sanitization runs before the Payload logger is initialized.
+    // oxlint-disable-next-line no-console
     console.warn(
       '[Payload] Content branching and @payloadcms/plugin-multi-tenant are enabled together. This combination is not supported and does not provide tenant isolation.',
     )
