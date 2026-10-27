@@ -104,7 +104,7 @@ export const BranchProvider: React.FC<BranchProviderProps> = ({
         await setPreference(PREFERENCE_KEYS.NAV, { branch: slug }, true)
 
         if (refresh) {
-          startRouteTransition(() => {
+          await startRouteTransition(() => {
             router.refresh()
           })
         }

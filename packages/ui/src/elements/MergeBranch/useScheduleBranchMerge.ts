@@ -69,7 +69,7 @@ export const useScheduleBranchMerge = ({
       )
 
       dismiss()
-      startRouteTransition(() => router.refresh())
+      await startRouteTransition(() => router.refresh())
     } catch (_err) {
       toast.error(t('error:unknown'))
     } finally {

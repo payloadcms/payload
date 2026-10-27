@@ -70,7 +70,7 @@ export const DiscardChangesButton: React.FC<{
 
       toast.success(t('branching:discardedCount', { count: json.discarded?.length ?? 0 }))
       closeModal(modalSlug)
-      startRouteTransition(() => router.refresh())
+      await startRouteTransition(() => router.refresh())
     } catch (_err) {
       toast.error(t('error:unknown'))
     } finally {

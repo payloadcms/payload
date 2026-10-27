@@ -112,7 +112,7 @@ export const useMergeBranchAction = ({
 
       reportResult(result.result)
       setOutcome(result.result)
-      startRouteTransition(() => router.refresh())
+      await startRouteTransition(() => router.refresh())
     } catch (_err) {
       toast.error(t('error:unknown'))
     } finally {

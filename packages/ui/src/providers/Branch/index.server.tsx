@@ -83,6 +83,7 @@ export const RenderBranchProvider = async ({
         where: {
           and: [
             { taskSlug: { equals: 'scheduleMerge' } },
+            // eslint-disable-next-line react/purity -- This async server component queries schedules relative to the current request.
             { waitUntil: { greater_than: new Date() } },
           ],
         },
