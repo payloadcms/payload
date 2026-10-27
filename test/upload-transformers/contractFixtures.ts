@@ -21,7 +21,6 @@ export type ContractStages = {
 
 export type RecordedTransformFileCall = {
   docAtStart: Record<string, unknown>
-  fileName: string
   isDocFrozen: boolean
   isOriginalDocFrozen: boolean
   originalDoc: Record<string, unknown>
@@ -73,7 +72,6 @@ const createContractTransformer = (stageName: keyof ContractStages): UploadTrans
   transformFile: async (args) => {
     contractCalls.transformFile.push({
       docAtStart: structuredClone(args.doc),
-      fileName: args.file.name,
       isDocFrozen: Object.isFrozen(args.doc),
       isOriginalDocFrozen: Object.isFrozen(args.originalDoc),
       originalDoc: args.originalDoc,
