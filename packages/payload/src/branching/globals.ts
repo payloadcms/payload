@@ -1,7 +1,12 @@
 import type { PayloadRequest, Where } from '../types/index.js'
 
-import { resolveBranch } from './resolveBranch.js'
-import { branchField, MAIN_BRANCH } from './types.js'
+import { loadBranchRow, resolveBranch, setBranchRow } from './resolveBranch.js'
+import {
+  branchChangesCollectionSlug,
+  branchesCollectionSlug,
+  branchField,
+  MAIN_BRANCH,
+} from './types.js'
 
 type BaseArgs = {
   branch?: false | string
@@ -13,6 +18,8 @@ const bypassed = (branch: false | string | undefined, req?: Partial<PayloadReque
   branch === false ||
   !req?.payload ||
   Boolean((req.context as Record<string, unknown> | undefined)?._branchBypass)
+
+const recordedGlobalsKey = '_branchRecordedGlobals'
 
 const activeBranch = ({ branch, globalSlug, req }: BaseArgs): null | string => {
   if (bypassed(branch, req)) {
@@ -83,6 +90,91 @@ export const resolveBranchGlobalWrite = (args: BaseArgs): null | string => {
   const active = activeBranch(args)
 
   return active && active !== MAIN_BRANCH ? active : null
+}
+
+/** Registers a global as changed on a branch, if it is not already. */
+export const recordBranchGlobalChange = async ({
+  branch,
+  globalSlug,
+  req,
+}: { branch: string } & BaseArgs): Promise<void> => {
+  // Every write to a branched global asks whether it is already registered. The answer
+  // cannot change within a request except by this function, so it is remembered — which
+  // matters for a request that writes several globals, or one global repeatedly.
+  const context = req!.context as Record<string, unknown> | undefined
+  const recorded = (context?.[recordedGlobalsKey] as Set<string> | undefined) ?? new Set<string>()
+  const key = `${branch}:${globalSlug}`
+
+  if (context && !context[recordedGlobalsKey]) {
+    context[recordedGlobalsKey] = recorded
+  }
+
+  if (recorded.has(key)) {
+    return
+  }
+
+  if (req!.payload!.db.upsertBranchGlobalChange) {
+    await req!.payload!.db.upsertBranchGlobalChange({ branch, globalSlug, req })
+    await reopenBranchForGlobalChange({ branch, req: req as PayloadRequest })
+    recorded.add(key)
+
+    return
+  }
+
+  const existing = await req!.payload!.find({
+    collection: branchChangesCollectionSlug,
+    limit: 1,
+    overrideAccess: true,
+    pagination: false,
+    req: req as PayloadRequest,
+    where: {
+      and: [{ branch: { equals: branch } }, { globalSlug: { equals: globalSlug } }],
+    },
+  })
+
+  if (existing.docs.length) {
+    recorded.add(key)
+
+    return
+  }
+
+  await req!.payload!.create({
+    collection: branchChangesCollectionSlug,
+    data: {
+      branch,
+      entityType: 'global',
+      globalSlug,
+      operation: 'update',
+    },
+    overrideAccess: true,
+    req: req as PayloadRequest,
+  })
+
+  recorded.add(key)
+}
+
+const reopenBranchForGlobalChange = async ({
+  branch,
+  req,
+}: {
+  branch: string
+  req: PayloadRequest
+}): Promise<void> => {
+  const row = await loadBranchRow({ branch, req })
+
+  if (row?.status !== 'merged') {
+    return
+  }
+
+  const reopened = await req.payload.update({
+    id: row.id as number | string,
+    collection: branchesCollectionSlug,
+    data: { mergedAt: null, status: 'open' },
+    overrideAccess: true,
+    req,
+  })
+
+  setBranchRow({ branch, req, row: reopened as Record<string, unknown> })
 }
 
 /**
