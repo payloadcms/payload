@@ -16,7 +16,6 @@ export const connect: Connect = async function connect(
 
   this.schema = {
     ...this.tables,
-    ...this.relations,
   }
 
   try {
@@ -32,7 +31,7 @@ export const connect: Connect = async function connect(
 
     this.drizzle = drizzle(binding, {
       logger,
-      schema: this.schema,
+      relations: this.relations,
     })
 
     this.client = this.drizzle.$client as any

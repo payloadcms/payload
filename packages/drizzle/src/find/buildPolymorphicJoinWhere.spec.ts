@@ -28,7 +28,7 @@ const notesTable = sqliteTable('join_notes', {
 })
 
 const client: Client = createClient({ url: 'file::memory:' })
-const db = drizzle(client, { schema: { articlesTable, notesTable } })
+const db = drizzle({ client })
 const textField = { name: 'title', type: 'text' } as FlattenedField
 const numberField = { name: 'score', type: 'number' } as FlattenedField
 const hasManySelectField = {
@@ -147,7 +147,7 @@ describe('buildPolymorphicJoinWhere', () => {
       wherePlan,
     })
 
-    expect(query.sql).toContain('where ("join_articles"."title" = ? and')
+    expect(query.sql).toContain('where (("join_articles"."title" = ?) and')
     expect(query.sql).toContain('or')
     expect(query.params).toEqual(['available', 'reviewed', 'published'])
   })
@@ -170,12 +170,12 @@ describe('buildPolymorphicJoinWhere', () => {
       wherePlan: scalarPlan({ columnPath: 'score', collections: ['articles'], field: numberField }),
     })
 
-    expect(query.sql).toContain('where null is null')
+    expect(query.sql).toContain('where (null is null)')
     expect(query.params).toEqual([])
   })
 
   it.each([
-    ['exists', { exists: 'false' }, 'where null is null', []],
+    ['exists', { exists: 'false' }, 'where (null is null)', []],
     ['in', { in: '1,2' }, 'where null in (?, ?)', [1, 2]],
   ] as const)(
     'normalizes a REST %s value when a scalar field is absent from the current collection',
@@ -232,7 +232,7 @@ describe('buildPolymorphicJoinWhere', () => {
   })
 
   it.each([
-    ['exists', { exists: 'false' }, 'where ? is null', ['notes']],
+    ['exists', { exists: 'false' }, 'where (? is null)', ['notes']],
     ['in', { in: 'articles,notes' }, 'where ? in (?, ?)', ['notes', 'articles', 'notes']],
   ] as const)(
     'normalizes a REST %s value for relationTo',
@@ -266,13 +266,13 @@ describe('buildPolymorphicJoinWhere', () => {
     [
       'not_equals a value',
       { title: { not_equals: 'restricted' } },
-      '"join_articles"."title" is null or "join_articles"."title" <> ?',
+      '"join_articles"."title" is null)) or ("join_articles"."title" <> ?',
       ['restricted'],
     ],
     [
       'in values including null',
       { title: { in: ['available', null] } },
-      '"join_articles"."title" is null or "join_articles"."title" in (?)',
+      '"join_articles"."title" is null)) or ("join_articles"."title" in (?)',
       ['available'],
     ],
   ] as const)('keeps null semantics for %s', (_description, where, expectedSQL, expectedParams) => {
@@ -291,7 +291,7 @@ describe('buildPolymorphicJoinWhere', () => {
       wherePlan: scalarPlan({ columnPath: 'title' }),
     })
 
-    expect(query.sql).toContain('"join_articles"."title" like ? and')
+    expect(query.sql).toContain('"join_articles"."title" like ?) and')
     expect(query.params).toEqual(['%available%', '%child%'])
   })
 
@@ -407,7 +407,7 @@ describe('buildPolymorphicJoinWhere', () => {
       wherePlan: scalarPlan({ columnPath: 'title' }),
     })
 
-    expect(query.sql).toContain('where false')
+    expect(query.sql).toContain('where 1 = 0')
   })
 
   it.each([

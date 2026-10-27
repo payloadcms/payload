@@ -116,6 +116,59 @@ describe('buildDynamicPredefinedSizesToVariantsMigration', () => {
     expect(written.prevId).toBe(legacySnapshot.id)
   })
 
+  it('should rename columns and indexes in a Drizzle 1.0 DDL snapshot', async () => {
+    const migrationDir = makeMigrationDir()
+    const filePath = path.join(migrationDir, '20260102_000000_sizes_to_variants')
+    const snapshot = {
+      id: 'previous-ddl-snapshot',
+      version: '9',
+      dialect: 'postgres',
+      prevIds: ['initial-snapshot'],
+      ddl: [
+        { entityType: 'tables', name: 'media', schema: 'public' },
+        {
+          entityType: 'columns',
+          table: 'media',
+          schema: 'public',
+          name: 'sizes_hero_large_filename',
+          type: 'text',
+        },
+        {
+          entityType: 'indexes',
+          table: 'media',
+          schema: 'public',
+          name: 'media_sizes_hero_large_sizes_hero_large_filename_idx',
+          columns: [{ value: 'sizes_hero_large_filename', isExpression: false, asc: true }],
+        },
+        { entityType: 'columns', table: 'posts', schema: 'public', name: 'title', type: 'text' },
+      ],
+    }
+    const payload = makePayload({ migrationDir })
+
+    payload.db.requireDrizzleKit = () => ({
+      generateDrizzleJson: () => Promise.resolve({ version: '9' }),
+    })
+    fs.writeFileSync(
+      path.join(migrationDir, '20260101_000000_initial.json'),
+      JSON.stringify(snapshot),
+    )
+
+    await buildDynamicPredefinedSizesToVariantsMigration({
+      packageName: '@payloadcms/db-postgres',
+    })({ filePath, payload })
+
+    const written = JSON.parse(fs.readFileSync(`${filePath}.json`, 'utf8'))
+
+    expect(written.ddl[1]).toMatchObject({ name: 'variants_hero_large_filename', type: 'text' })
+    expect(written.ddl[2]).toMatchObject({
+      name: 'media_variants_hero_large_variants_hero_large_filename_idx',
+      columns: [{ value: 'variants_hero_large_filename', isExpression: false, asc: true }],
+    })
+    expect(written.ddl[3]).toEqual(snapshot.ddl[3])
+    expect(written.prevIds).toEqual([snapshot.id])
+    expect(written.id).not.toBe(snapshot.id)
+  })
+
   it('should not write a snapshot when the project has no previous one', async () => {
     const migrationDir = makeMigrationDir()
     const filePath = path.join(migrationDir, '20260102_000000_sizes_to_variants')

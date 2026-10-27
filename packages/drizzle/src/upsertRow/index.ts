@@ -2,7 +2,7 @@ import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SelectedFields } from 'drizzle-orm/sqlite-core'
 import type { TypeWithID } from 'payload'
 
-import { and, desc, eq, isNull, or } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNull, or } from 'drizzle-orm'
 
 import type { BlockRowToInsert } from '../transform/write/types.js'
 import type { Args } from './types.js'
@@ -123,7 +123,16 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
       if (!hasDataToUpdate) {
         // Nothing to update => just fetch current row and return
-        findManyArgs.where = updateWhere
+        findManyArgs.where = {
+          RAW: (table) =>
+            inArray(
+              table.id,
+              drizzle
+                .select({ id: adapter.tables[tableName].id })
+                .from(adapter.tables[tableName])
+                .where(updateWhere),
+            ),
+        }
 
         const doc = await db.query[tableName].findFirst(findManyArgs)
 
@@ -190,7 +199,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
       insertedRow = docs[0]
 
-      findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
+      findManyArgs.where = { RAW: (table) => eq(table.id, insertedRow.id) }
 
       const doc = await db.query[tableName].findFirst(findManyArgs)
 
@@ -783,7 +792,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     tableName,
   })
 
-  findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
+  findManyArgs.where = { RAW: (table) => eq(table.id, insertedRow.id) }
 
   const doc = await db.query[tableName].findFirst(findManyArgs)
 

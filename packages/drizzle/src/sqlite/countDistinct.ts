@@ -1,5 +1,3 @@
-import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
-
 import { count, sql } from 'drizzle-orm'
 
 import type { BaseSQLiteAdapter, CountDistinct } from './types.js'
@@ -19,7 +17,7 @@ export const countDistinct: CountDistinct = async function countDistinct(
     return Number(countResult?.[0]?.count ?? 0)
   }
 
-  let query: SQLiteSelect = db
+  let query = db
     .select({
       count: sql`COUNT(1) OVER()`,
     })

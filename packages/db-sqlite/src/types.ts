@@ -6,7 +6,7 @@ import type {
   Operators,
 } from '@payloadcms/drizzle'
 import type { BaseSQLiteAdapter, BaseSQLiteArgs } from '@payloadcms/drizzle/sqlite'
-import type { DrizzleConfig, Relation, Relations, SQL } from 'drizzle-orm'
+import type { AnyRelations, DrizzleConfig, SQL, TableRelationalConfig } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type {
   AnySQLiteColumn,
@@ -72,11 +72,12 @@ export type GenericColumns = {
 export type GenericTable = SQLiteTableWithColumns<{
   columns: GenericColumns
   dialect: string
+  isAlias: boolean
   name: string
   schema: string
 }>
 
-export type GenericRelation = Relations<string, Record<string, Relation<string>>>
+export type GenericRelation = TableRelationalConfig
 
 export type CountDistinct = (args: {
   column?: SQLiteColumn<any>
@@ -123,7 +124,7 @@ type SQLiteDrizzleAdapter = Omit<
 >
 
 export interface GeneratedDatabaseSchema {
-  schemaUntyped: Record<string, unknown>
+  schemaUntyped: AnyRelations
 }
 
 type ResolveSchemaType<T> = 'schema' extends keyof T
