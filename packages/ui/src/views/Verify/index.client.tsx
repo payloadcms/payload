@@ -28,7 +28,7 @@ export function ToastAndRedirect({ message, redirectTo }: Props) {
       timeoutID = setTimeout(() => {
         toast.success(message)
         hasToastedRef.current = true
-        startRouteTransition(() => router.push(redirectTo))
+        void startRouteTransition(() => router.push(redirectTo))
       }, 100)
     }
 
@@ -49,7 +49,7 @@ export function VerifyClient({ loginRoute }: { loginRoute: string }) {
 
   useEffect(() => {
     const timeoutID = setTimeout(() => {
-      startRouteTransition(() => router.push(loginRoute))
+      void startRouteTransition(() => router.push(loginRoute))
     }, redirectDelay)
 
     return () => {

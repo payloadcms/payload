@@ -38,7 +38,7 @@ export const absoluteRegExp =
  * - /page?id=123
  * - /page?id=123#section
  *  */
-export const relativeOrAnchorRegExp = /^(?:\/[\w\-./]*(?:\?[-;&=%\w]*)?(?:#[\w-]+)?|#[\w\-]+)$/
+export const relativeOrAnchorRegExp = /^(?:\/[\w\-./]*(?:\?[-;&=%\w]*)?(?:#[\w-]+)?|#[\w-]+)$/
 
 /**
  * Prevents unreasonable URLs from being inserted into the editor.

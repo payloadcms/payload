@@ -219,7 +219,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           isEditor={true}
           isJSXConverter={false}
           nodeKey={nodeKey}
-          // eslint-disable-next-line react-compiler/react-compiler -- intentionally passed as a prop for custom block components to call
+          // eslint-disable-next-line react-hooks/hooks -- intentionally passed as a prop for custom block components to call
           useBlockComponentContext={useBlockComponentContext}
         />
       )
@@ -236,7 +236,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           isEditor={true}
           isJSXConverter={false}
           nodeKey={nodeKey}
-          // eslint-disable-next-line react-compiler/react-compiler -- intentionally passed as a prop for custom block components to call
+          // eslint-disable-next-line react-hooks/hooks -- intentionally passed as a prop for custom block components to call
           useBlockComponentContext={useBlockComponentContext}
         />
       )
@@ -260,9 +260,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
         data: formData,
         docPermissions: { fields: true },
         docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
-          excludeFiles: true,
-        }),
+        documentFormState: parentDocumentFields,
         globalSlug,
         initialBlockData: formData,
         operation: 'update',
@@ -348,10 +346,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
 
       const controller = new AbortController()
       onChangeAbortControllerRef.current = controller
-      const blockData = reduceFormStateToBlockData(
-        deepCopyObjectSimpleWithoutReactComponents(prevFormState, { excludeFiles: true }),
-        formDataRef.current,
-      )
+      const blockData = reduceFormStateToBlockData(prevFormState, formDataRef.current)
 
       const { state: newFormState } = await getFormState({
         id,
@@ -361,9 +356,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           fields: true,
         },
         docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
-          excludeFiles: true,
-        }),
+        documentFormState: parentDocumentFields,
         formState: prevFormState,
         globalSlug,
         initialBlockData: blockData,
@@ -680,6 +673,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
                             role: 'button',
                             tabIndex: 0,
                           },
+                          draggable: true,
                           listeners: { onBlur },
                         }
                       : undefined
@@ -712,9 +706,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
                             <SectionTitle path="blockName" readOnly={!isEditable} />
                           )}
 
-                          {fieldHasErrors && (
-                            <ErrorPill count={errorCount ?? 0} i18n={i18n} withMessage />
-                          )}
+                          {fieldHasErrors && <BlockErrorPill count={errorCount ?? 0} />}
                         </div>
                       )}
                     </div>
@@ -754,7 +746,6 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       baseClass,
       clientBlock?.admin?.disableBlockName,
       blockType,
-      i18n,
       isCollapsed,
       onCollapsedChange,
       isEditable,
@@ -902,4 +893,15 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
   }
 
   return Block
+}
+
+/**
+ * Reads `i18n` itself so `BlockCollapsible` does not depend on it. `BlockCollapsible` is created in
+ * a `useMemo`, so each new `i18n` object (e.g. once the date-fns locale is set after mount) would
+ * remount the whole block, closing its open menus and dropping focus.
+ */
+const BlockErrorPill: React.FC<{ readonly count: number }> = ({ count }) => {
+  const { i18n } = useTranslation()
+
+  return <ErrorPill count={count} i18n={i18n} withMessage />
 }

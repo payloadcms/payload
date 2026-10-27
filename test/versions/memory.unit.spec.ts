@@ -43,10 +43,10 @@ const createVersionedPostsConfig = (): Config => ({
   collections: [
     {
       slug: 'posts',
-      fields: Array.from(
-        { length: 100 },
-        (_, index): Field => ({ name: `field_${index}`, type: 'text' }),
-      ),
+      fields: Array.from({ length: 100 }, (_, index): Field => ({
+        name: `field_${index}`,
+        type: 'text',
+      })),
       versions: {
         drafts: true,
       },
