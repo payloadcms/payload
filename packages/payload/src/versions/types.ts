@@ -125,6 +125,8 @@ export type SanitizedGlobalVersions = {
 }
 
 export type TypeWithVersion<T> = {
+  /** The owning branch, when content branching is enabled. */
+  _branch?: string
   createdAt: string
   id: string
   latest?: boolean

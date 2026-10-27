@@ -1,3 +1,4 @@
+import type { Payload } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 
 import { extractRelationshipID } from '../utilities/extractRelationshipID.js'
@@ -471,4 +472,80 @@ export const resolveBranchOwnVersions = async ({
   const rowID = await resolveBranchRowID({ id, collectionSlug, req })
 
   return { and: [{ parent: { equals: rowID } }, { [branchField]: { equals: branch } }] }
+}
+
+/**
+ * Drops a branch's version chain for one document.
+ *
+ * Every way a branch stops owning a document ends here: merged, discarded, or
+ * promoted to main. A branch's versions hang off its *shadow row's* primary key
+ * rather than the canonical ID, so they do not travel with the document and are not
+ * cascaded by anything that addresses it — they have to be deleted deliberately.
+ *
+ * Leaving them behind is not inert. The drafts list reads through versions, so an
+ * orphaned branch chain keeps answering for a document the branch no longer has a
+ * row for: the branch lists the document twice, once from its stale chain and once
+ * from main's, as two identical rows.
+ *
+ * Scoped by `_branch` as well as `parent`: main's chain shares no parent with this
+ * one, but saying so costs nothing and a wrong delete here would strip production
+ * history. `_branchParent` is required for the same reason — only rows that were
+ * written as branch versions are in scope.
+ */
+export const deleteBranchVersionChain = async ({
+  branch,
+  collectionSlug,
+  payload,
+  req,
+  rowID,
+}: {
+  branch: string
+  collectionSlug: string
+  payload: Payload
+  req: PayloadRequest
+  /** Primary key the branch's versions hang off — the shadow row, not the document. */
+  rowID: number | string
+}): Promise<void> => {
+  // Asking a collection without versions to delete versions throws, and a
+  // branchable collection need not be versioned.
+  if (!payload.collections[collectionSlug]?.config.versions) {
+    return
+  }
+
+  await payload.db.deleteVersions({
+    collection: collectionSlug,
+    req,
+    where: {
+      and: [
+        { parent: { equals: rowID } },
+        { [branchField]: { equals: branch } },
+        { [branchParentField]: { exists: true } },
+      ],
+    },
+  })
+}
+
+/** Drops every version of one global owned by a branch that is being discarded or merged. */
+export const deleteBranchGlobalVersionChain = async ({
+  branch,
+  globalSlug,
+  payload,
+  req,
+}: {
+  branch: string
+  globalSlug: string
+  payload: Payload
+  req: PayloadRequest
+}): Promise<void> => {
+  const globalConfig = payload.globals.config.find(({ slug }) => slug === globalSlug)
+
+  if (!globalConfig?.versions) {
+    return
+  }
+
+  await payload.db.deleteVersions({
+    globalSlug,
+    req,
+    where: { [branchField]: { equals: branch } },
+  })
 }

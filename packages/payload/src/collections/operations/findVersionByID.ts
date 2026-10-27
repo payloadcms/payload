@@ -4,6 +4,7 @@ import type { TypeWithVersion } from '../../versions/types.js'
 import type { Collection, TypeWithID } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { branchParentField } from '../../branching/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
@@ -274,6 +275,10 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
   // /////////////////////////////////////
   // Return results
   // /////////////////////////////////////
+
+  if (!req.context._branchBypass) {
+    Reflect.deleteProperty(result, branchParentField)
+  }
 
   return result
 }
