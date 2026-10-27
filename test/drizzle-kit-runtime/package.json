@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "next build",
+    "build": "next build --webpack",
     "build:worker": "opennextjs-cloudflare build --skipNextBuild",
     "dev": "next dev",
     "verify:output": "node verify-output.mjs",
