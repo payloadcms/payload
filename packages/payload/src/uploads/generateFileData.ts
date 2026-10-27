@@ -21,6 +21,7 @@ import { downloadFileToBuffer } from './downloadFileToBuffer.js'
 import { getOriginalFilename } from './fileVersioning/naming.js'
 import { generateImageSizeFilename } from './generateImageSizeFilename.js'
 import { getFileByPath } from './getFileByPath.js'
+import { fetchFullClientUpload } from './getFileFromUploadInstructions.js'
 import { getFileExtension, getSanitizedUploadFilename } from './getFileTypeIdentity.js'
 import { getImageSize } from './getImageSize.js'
 import { getSafeFileName, incrementName } from './getSafeFilename.js'
@@ -374,6 +375,20 @@ const processUpload = async <T>({
       capability: 'transformFile',
       transformers: req.payload.config.upload?.transformers ?? [],
     })
+
+    // A client upload can arrive with only a header probe or no contents (see
+    // getFileContentRequirement.ts). Download it only when a stage needs its bytes, which
+    // `canTransform` decides here with the real document. Sharp's bridge is excluded: the
+    // content requirement already covers what it needs.
+    if (
+      !hasFullFileContents(file) &&
+      file.uploadReference &&
+      pipeline.some((transformer) => !getUploadTransformerInternal(transformer)?.prepareUpload)
+    ) {
+      file = await fetchFullClientUpload({ collectionSlug: collectionConfig.slug, file, req })
+      // On req.file, the temp file is removed after the operation.
+      req.file = file
+    }
 
     // A large client upload can arrive as a bounded probe alongside a temp file. Transformers
     // need the whole file, so leave such an upload untouched rather than buffering it.

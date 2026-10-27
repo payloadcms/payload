@@ -161,14 +161,17 @@ describe('getFileFromUploadInstructions', () => {
     fs.rmSync(customTempDir, { force: true, recursive: true })
   })
 
-  // No document exists yet at this point, so `canTransform` cannot be given a `doc`.
-  it('should fetch the whole file for a MIME-matching transformer without calling canTransform', async () => {
+  // `generateFileData` decides with the real document, and downloads the file only then.
+  it('should not download the file or call canTransform for a transformer that matches its type', async () => {
     const handler = vi.fn(
       async () =>
-        new Response('some file contents', { headers: { 'Content-Length': '18' }, status: 200 }),
+        new Response('s', {
+          headers: { 'Content-Length': '18', 'Content-Range': 'bytes 0-0/18' },
+          status: 206,
+        }),
     )
     const req = createReq([handler], { mimeTypes: undefined })
-    const canTransform = vi.fn(() => false)
+    const canTransform = vi.fn(() => true)
     req.payload.config.upload = {
       transformers: [
         {
@@ -186,10 +189,9 @@ describe('getFileFromUploadInstructions', () => {
       req,
     })
 
-    tempFilesToClean.push(file.tempFilePath!)
-
     expect(canTransform).not.toHaveBeenCalled()
-    expect(fs.readFileSync(file.tempFilePath!, 'utf8')).toBe('some file contents')
+    expect(file.tempFilePath).toBeUndefined()
+    expect(file.data.length).toBe(0)
   })
 
   it('throws when no handler returns a response with a body', async () => {
