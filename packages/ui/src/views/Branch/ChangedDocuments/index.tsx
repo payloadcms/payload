@@ -79,7 +79,9 @@ export const ChangedDocuments: React.FC<{
   // Read inside the loader without making it a dependency, so a completed load
   // doesn't re-create the callback and re-trigger observers.
   const loadedRef = useRef(loaded)
-  loadedRef.current = loaded
+  useEffect(() => {
+    loadedRef.current = loaded
+  }, [loaded])
 
   const load = useCallback(
     async (change: BranchChange) => {
