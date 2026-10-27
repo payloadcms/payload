@@ -52,9 +52,16 @@ export async function resolveUploadEdits({
     req,
   })
 
-  // A duplicate copies `_transforms` with the rest of the document and reprocesses nothing new.
+  // A duplicate is made from the source's cropped main file, which becomes the copy's original.
+  // The crop is already part of those files, so the copy keeps every other key but not `crop`.
   if (isDuplicating) {
-    return { applyTransformState: (fileData) => fileData, uploadEdits: parsedEdits }
+    const applyTransformState = <T>(fileData: T): T => {
+      const { crop: _crop, ...rest } = ((fileData as Document)._transforms ?? {}) as Document
+
+      return { ...fileData, _transforms: Object.keys(rest).length ? rest : null }
+    }
+
+    return { applyTransformState, uploadEdits: parsedEdits }
   }
 
   const incoming = (data ?? {}) as Document
@@ -64,8 +71,9 @@ export async function resolveUploadEdits({
   const isSubmitted = Object.prototype.hasOwnProperty.call(incoming, '_transforms')
   // Crop coordinates belong to the replaced file, so a new file starts without them.
   const previous: TransformState = hasNewFile ? null : (current?._transforms ?? null)
+  // Use the form JSON stores, so validation and processing see the value that is saved.
   const submitted = isSubmitted
-    ? structuredClone((incoming._transforms as TransformState) ?? null)
+    ? (JSON.parse(JSON.stringify(incoming._transforms ?? null)) as TransformState)
     : undefined
   const hasCrop = Boolean(submitted?.crop || queryEdits?.crop || previous?.crop)
   const original = hasCrop ? await getOriginalDimensions({ current, hasNewFile, req }) : undefined

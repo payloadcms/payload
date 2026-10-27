@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import { resolveNextState, toPipelineEdits } from './resolveUploadEdits.js'
+import type { PayloadRequest } from '../../types/index.js'
+
+import { resolveNextState, resolveUploadEdits, toPipelineEdits } from './resolveUploadEdits.js'
 
 const original = { height: 1000, width: 2000 }
 const center = { x: 50, y: 50 }
@@ -160,5 +162,23 @@ describe('toPipelineEdits', () => {
 
   it('should leave the edits unchanged when the original size is unknown', () => {
     expect(pipelineEdits({ next: { crop }, original: undefined })).toEqual({})
+  })
+})
+
+describe('resolveUploadEdits', () => {
+  it('should save a submitted value in the form JSON stores it', async () => {
+    const sparse: unknown[] = [1, , 3]
+    Object.assign(sparse, { extra: true })
+
+    const { applyTransformState } = await resolveUploadEdits({
+      collectionSlug: 'media',
+      data: { _transforms: { custom: sparse, missing: undefined } },
+      focalPointEnabled: false,
+      operation: 'update',
+      originalDoc: {},
+      req: { query: {} } as unknown as PayloadRequest,
+    })
+
+    expect(applyTransformState({})._transforms).toStrictEqual({ custom: [1, null, 3] })
   })
 })
