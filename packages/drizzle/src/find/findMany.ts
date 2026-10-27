@@ -1,8 +1,8 @@
 import type { FindArgs, FlattenedField, TypeWithID } from 'payload'
 
-import { asc, desc, inArray, max, min, sql } from 'drizzle-orm'
+import { asc, desc, getColumnTable, inArray, max, min, sql } from 'drizzle-orm'
 
-import type { DrizzleAdapter } from '../types.js'
+import type { DrizzleAdapter, GenericColumn } from '../types.js'
 
 import { buildQuery } from '../queries/buildQuery.js'
 import { selectDistinct } from '../queries/selectDistinct.js'
@@ -142,11 +142,6 @@ export const findMany = async function find({
       // multiplied by joins. Without joins it's redundant and would break ORDER BY on expressions
       // Postgres requires in the select list (e.g. the `near` distance sort).
       disableDistinct: joins.length === 0,
-      // RQB v2 aliases the base table in `db.query`, which breaks the raw SQL `where`/`orderBy`
-      // Payload builds against real table names. Resolving the ordered IDs up front via a manual
-      // select (which keeps real table names) sidesteps that, so the relational fetch below only
-      // needs to filter by primary key.
-      forceRun: true,
       joins,
       query: ({ query }) => {
         if (orderBy) {
@@ -194,11 +189,24 @@ export const findMany = async function find({
     }
   } else {
     findManyArgs.limit = limit
-    findManyArgs.offset = offset
-    findManyArgs.orderBy = () => orderBy.map(({ column, order }) => order(column))
+    findManyArgs.offset = typeof limit === 'number' ? offset : undefined
+    // Build against RQB's parent alias so simple reads do not need a separate ID query.
+    const buildAliasedQuery = (table: Record<string, GenericColumn>) =>
+      buildQuery({
+        adapter,
+        aliasTable: getColumnTable(table.id),
+        fields,
+        locale,
+        sort,
+        tableName,
+        where: whereArg,
+      })
+
+    findManyArgs.orderBy = (table) =>
+      buildAliasedQuery(table).orderBy.map(({ column, order }) => order(column))
 
     if (where) {
-      findManyArgs.where = { RAW: where }
+      findManyArgs.where = { RAW: (table) => buildAliasedQuery(table).where }
     }
   }
 
