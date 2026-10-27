@@ -1,0 +1,12 @@
+@layer payload-default {
+  /* Matches the version-count pill so the two document tabs read as one family. */
+  .pill-branch-changes {
+    line-height: var(--spacer-2-5);
+    min-width: var(--spacer-2-5);
+    text-align: center;
+    background-color: var(--color-bg-secondary);
+    border-radius: var(--radius-small);
+    padding: 2px var(--spacer-1);
+    color: var(--color-text-secondary);
+  }
+}
