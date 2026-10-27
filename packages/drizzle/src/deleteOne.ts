@@ -30,7 +30,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
   })
 
   if (branchDelete.tombstoned) {
-    return returning === false ? null : (branchDelete.doc as any)
+    return returning === false ? null : (branchDelete.doc as Awaited<ReturnType<DeleteOne>>)
   }
 
   if (branchDelete.deleteRowID !== undefined) {

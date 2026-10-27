@@ -92,7 +92,7 @@ const getRelationshipJoinCondition = ({
   collectionSlug: string
   relationshipID: GenericColumn
   req?: Partial<PayloadRequest>
-  table: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
+  table: TableColumn['table']
   value: unknown
 }): SQL => {
   const branchReadState = resolveBranchReadState({ collectionSlug, req })
@@ -120,7 +120,7 @@ const getBranchTableCondition = ({
   adapter: DrizzleAdapter
   collectionSlug: string
   req?: Partial<PayloadRequest>
-  table: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
+  table: TableColumn['table']
 }): SQL | undefined => {
   const branchReadState = resolveBranchReadState({ collectionSlug, req })
 
@@ -144,7 +144,7 @@ const buildBranchPredicateCondition = ({
   table,
   where,
 }: {
-  table: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
+  table: TableColumn['table']
   where: Where
 }): SQL | undefined => {
   const conditions: SQL[] = []
