@@ -1,5 +1,6 @@
-import { MAIN_BRANCH, resolveBranch } from 'payload'
-import { buildVersionGlobalFields, type CreateGlobalVersion } from 'payload'
+import type { CreateGlobalVersion } from 'payload'
+
+import { buildVersionGlobalFields, MAIN_BRANCH, resolveBranch } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 

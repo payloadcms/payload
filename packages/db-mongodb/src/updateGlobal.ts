@@ -10,11 +10,13 @@ import { getGlobal } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
-type BranchUpdateGlobalArgs = {
+type BranchUpdateGlobalArgs<T extends Record<string, unknown>> = {
   branchConflictData?: Record<string, unknown>
-} & UpdateGlobalArgs
+} & UpdateGlobalArgs<T>
 
-export const updateGlobal: UpdateGlobal = async function updateGlobal(this: MongooseAdapter, args) {
+export const updateGlobal: UpdateGlobal = async function updateGlobal<
+  T extends Record<string, unknown>,
+>(this: MongooseAdapter, args: UpdateGlobalArgs<T>) {
   const {
     slug: globalSlug,
     branch,
@@ -24,7 +26,7 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(this: Mong
     req,
     returning,
     select,
-  } = args as BranchUpdateGlobalArgs
+  } = args as BranchUpdateGlobalArgs<T>
   const { globalConfig, Model } = getGlobal({ adapter: this, globalSlug })
 
   const fields = globalConfig.fields
@@ -64,7 +66,7 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(this: Mong
       : { globalType: globalSlug }
 
   if (writeBranch) {
-    const mainDoc: any = await Model.findOne(
+    const mainDoc = await Model.findOne(
       { _branch: { $eq: 'main' }, globalType: globalSlug },
       {},
       baseOptions,
@@ -82,10 +84,10 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(this: Mong
 
     if (returning === false) {
       await Model.findOneAndUpdate(filter, update, { ...baseOptions, upsert: true })
-      return null
+      return null as unknown as T
     }
 
-    const result: any = await Model.findOneAndUpdate(filter, update, upsertOptions)
+    const result = (await Model.findOneAndUpdate(filter, update, upsertOptions)) as unknown as T
 
     transform({ adapter: this, data: result, fields, globalSlug, operation: 'read' })
 
@@ -100,10 +102,10 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(this: Mong
 
   if (returning === false) {
     await Model.updateOne(filter, writeData, baseOptions)
-    return null
+    return null as unknown as T
   }
 
-  const result: any = await Model.findOneAndUpdate(filter, writeData, findOptions)
+  const result = (await Model.findOneAndUpdate(filter, writeData, findOptions)) as unknown as T
 
   transform({ adapter: this, data: result, fields, globalSlug, operation: 'read' })
 

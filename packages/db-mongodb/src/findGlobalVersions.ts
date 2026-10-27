@@ -2,7 +2,6 @@ import type { PaginateOptions, QueryOptions } from 'mongoose'
 import type { FindGlobalVersions } from 'payload'
 
 import {
-  APIError,
   buildVersionGlobalFields,
   flattenWhereToOperators,
   resolveBranchGlobalVersionQuery,
