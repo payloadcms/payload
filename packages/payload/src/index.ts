@@ -46,6 +46,10 @@ export {
 export type * from './admin/adapters/index.js'
 export type { FieldState } from './admin/forms/Form.js'
 
+export { getAdminPreferences } from './admin/getAdminPreferences.js'
+
+export { getRequestBranch } from './admin/getRequestBranch.js'
+
 export type * from './admin/types.js'
 
 export { EntityType } from './admin/views/dashboard.js'
@@ -2231,6 +2235,7 @@ export * from './kv/adapters/InMemoryKVAdapter.js'
 
 export * from './kv/index.js'
 export type {
+  AdminPreferences,
   CollapsedPreferences,
   CollectionPreferences,
   CollectionPreferences as ListPreferences,
