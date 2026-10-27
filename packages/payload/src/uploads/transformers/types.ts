@@ -34,7 +34,10 @@ export type CanTransformArgs = {
   documentID?: number | string
   mimeType: string
   operation: 'request' | 'upload'
-  /** A frozen snapshot of the document, taken before the pipeline runs. */
+  /**
+   * The stored document before this operation, as in hooks, or the incoming data on a create.
+   * Frozen.
+   */
   originalDoc: Readonly<Document>
   req: PayloadRequest
 }
@@ -50,7 +53,10 @@ export type TransformFileArgs<TOptions = unknown> = {
   /** The current pipeline file. The same file as `source`. */
   file: File
   options: TOptions
-  /** A frozen snapshot of the document, taken before the pipeline runs. */
+  /**
+   * The stored document before this operation, as in hooks, or the incoming data on a create.
+   * Frozen.
+   */
   originalDoc: Readonly<Document>
   /** The retained original file, before any transformer changed it. */
   originalSource: FileSource
