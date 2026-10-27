@@ -45,18 +45,13 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
   const { extensions = {}, tablesFilter } = adapter as BasePostgresAdapter
 
   // This will prompt if clarifications are needed for Drizzle to push new schema
-  const { apply, hints } = await pushSchema(
-    adapter.schema,
-    adapter.drizzle,
-    {
-      // Drizzle extensionsFilter supports only postgis for now
-      // https://github.com/drizzle-team/drizzle-orm/blob/83daf2d5cf023112de878bc2249ee2c41a2a5b1b/drizzle-kit/src/cli/validations/cli.ts#L26
-      extensions: extensions.postgis ? ['postgis'] : undefined,
-      schemas: adapter.schemaName ? [adapter.schemaName] : undefined,
-      tables: tablesFilter,
-    },
-    adapter.schemaName ? { schema: adapter.schemaName } : undefined,
-  )
+  const { apply, hints } = await pushSchema(adapter.schema, adapter.drizzle, {
+    // Drizzle extensionsFilter supports only postgis for now
+    // https://github.com/drizzle-team/drizzle-orm/blob/83daf2d5cf023112de878bc2249ee2c41a2a5b1b/drizzle-kit/src/cli/validations/cli.ts#L26
+    extensions: extensions.postgis ? ['postgis'] : undefined,
+    schemas: [adapter.schemaName || 'public'],
+    tables: tablesFilter,
+  })
 
   const warnings = hints.map(({ hint }) => hint)
 
