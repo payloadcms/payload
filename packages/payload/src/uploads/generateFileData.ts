@@ -11,6 +11,7 @@ import type { PreparedUploadTransformation } from './transformers/uploadTransfor
 import type { FileData, FileSizes, FileToSave, UploadEdits } from './types.js'
 
 import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
+import { deepCopyObject } from '../utilities/deepCopyObject.js'
 import { formatAdminURL } from '../utilities/formatAdminURL.js'
 import { isNumber } from '../utilities/isNumber.js'
 import { canResizeImage } from './canResizeImage.js'
@@ -25,6 +26,7 @@ import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
 import { hasFullFileContents } from './hasFullFileContents.js'
 import { isProcessableImage } from './isProcessableImage.js'
 import { parseFilename } from './parseFilename.js'
+import { createDocumentSnapshot } from './transformers/createDocumentSnapshot.js'
 import { planTransformerPipeline } from './transformers/planTransformerPipeline.js'
 import { transformUploadFile } from './transformers/transformUploadFile.js'
 import {
@@ -137,17 +139,25 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
     originalDoc,
     req,
   }
+  // Transformers get the document as the operation would save it, and may change only its
+  // `_transforms`. File processing runs before the hooks and validation, so those then run on
+  // the transformers' changes.
+  const candidateDoc =
+    operation === 'update' ? { ...originalDoc, ...data } : isDuplicating ? originalDoc : data
   // A create from a URL reads its file later, so a saved crop is checked once the file is read.
   let edits = await resolveUploadEdits({
     ...editArgs,
     canWaitForFile: operation === 'create' && !req.file,
   })
+  let pipelineDoc: Document = deepCopyObject(edits.applyTransformState(candidateDoc))
   const result = await processUpload({
     ...args,
+    pipelineDoc,
     resolveEditsForFile: edits.isWaitingForFile
       ? async (file) => {
           edits = await resolveUploadEdits({ ...editArgs, file })
-          return edits.uploadEdits
+          pipelineDoc = deepCopyObject(edits.applyTransformState(candidateDoc))
+          return { pipelineDoc, uploadEdits: edits.uploadEdits }
         }
       : undefined,
     uploadEdits: edits.uploadEdits,
@@ -158,7 +168,10 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
     edits = await resolveUploadEdits(editArgs)
   }
 
-  return { ...result, data: edits.applyTransformState(result.data) }
+  return {
+    ...result,
+    data: { ...edits.applyTransformState(result.data), _transforms: pipelineDoc._transforms ?? null },
+  }
 }
 
 const processUpload = async <T>({
@@ -170,15 +183,23 @@ const processUpload = async <T>({
   operation,
   originalDoc,
   overwriteExistingFiles,
+  pipelineDoc: initialPipelineDoc,
   req,
   resolveEditsForFile,
   throwOnMissingFile,
   uploadEdits: initialUploadEdits,
 }: {
-  /** Resolves the edits again for a file read during the operation, before any transformer runs. */
-  resolveEditsForFile?: (file: NonNullable<PayloadRequest['file']>) => Promise<UploadEdits>
+  pipelineDoc: Document
+  /**
+   * Resolves the edits again for a file read during the operation, before any transformer runs.
+   * The transformer `doc` holds the resolved `_transforms`, so it is built again too.
+   */
+  resolveEditsForFile?: (
+    file: NonNullable<PayloadRequest['file']>,
+  ) => Promise<{ pipelineDoc: Document; uploadEdits: UploadEdits }>
   uploadEdits: UploadEdits
 } & Args<T>): Result<T> => {
+  let pipelineDoc = initialPipelineDoc
   let uploadEdits = initialUploadEdits
   if (!collectionConfig.upload) {
     return {
@@ -343,8 +364,10 @@ const processUpload = async <T>({
   }
 
   if (resolveEditsForFile) {
-    uploadEdits = await resolveEditsForFile(file)
+    ;({ pipelineDoc, uploadEdits } = await resolveEditsForFile(file))
   }
+
+  const pipelineOriginalDoc = createDocumentSnapshot(pipelineDoc)
 
   if (!disableLocalStorage) {
     await fs.mkdir(staticPath!, { recursive: true })
@@ -374,8 +397,10 @@ const processUpload = async <T>({
     const pipeline = await planTransformerPipeline({
       args: {
         collectionSlug: collectionConfig.slug,
+        doc: pipelineOriginalDoc,
         mimeType: file.mimetype,
         operation: 'upload',
+        originalDoc: pipelineOriginalDoc,
         req,
       },
       capability: 'transformFile',
@@ -426,19 +451,33 @@ const processUpload = async <T>({
 
       if (bridgeTransformer) {
         const bridge = getUploadTransformerInternal(bridgeTransformer)!
+        let sizeTaskDoc: Readonly<Document> | undefined
 
         const results = await bridge.prepareUpload!({
           collectionSlug: collectionConfig.slug,
           file: originalWebFile,
           req,
-          transform: (task) =>
-            transformUploadFile({
+          transform: async (task) => {
+            // Size tasks run after the main task, maybe in parallel, so only the main task's
+            // changes are kept and the size tasks share a read-only copy of its result.
+            const taskDoc =
+              task.fieldPath === 'filename'
+                ? pipelineDoc
+                : (sizeTaskDoc ??= createDocumentSnapshot(pipelineDoc))
+
+            const { file: taskFile } = await transformUploadFile({
               collectionSlug: collectionConfig.slug,
+              doc: taskDoc,
               file: task.file ?? originalWebFile!,
               options: task.options,
+              originalDoc: pipelineOriginalDoc,
+              originalFile: originalWebFile!,
               pipeline: bridgeTaskPipeline,
               req,
-            }),
+            })
+
+            return taskFile
+          },
           uploadEdits: editsForTransformer,
         })
 
@@ -450,13 +489,18 @@ const processUpload = async <T>({
         hasDimensionsFromBridge = true
         sizeResults = results.filter((result) => result.fieldPath !== 'filename')
       } else {
-        mainWebFile = await transformUploadFile({
+        const { file: transformedFile } = await transformUploadFile({
           collectionSlug: collectionConfig.slug,
+          doc: pipelineDoc,
           file: originalWebFile,
           options: undefined,
+          originalDoc: pipelineOriginalDoc,
+          originalFile: originalWebFile,
           pipeline,
           req,
         })
+
+        mainWebFile = transformedFile
       }
     }
 
