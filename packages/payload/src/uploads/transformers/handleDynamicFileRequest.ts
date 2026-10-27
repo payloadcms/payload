@@ -8,6 +8,7 @@ import { NotFound } from '../../errors/NotFound.js'
 import { TransformerContractError } from '../../errors/TransformerContractError.js'
 import { checkFileAccess } from '../checkFileAccess.js'
 import { retrieveFileResponse } from '../endpoints/getFile.js'
+import { createDocumentSnapshot } from './createDocumentSnapshot.js'
 import { createLazySourceGetter } from './createLazySourceGetter.js'
 import { finalizeFileResponse } from './finalizeFileResponse.js'
 import { getSourceFileResponse } from './getSourceFileResponse.js'
@@ -79,6 +80,8 @@ export async function handleDynamicFileRequest({
   })
 
   const requestedFile = getRequestedFile({ document, filename })
+  // A request never saves the document, so every stage gets the same read-only snapshot.
+  const documentSnapshot = createDocumentSnapshot(document)
 
   const source = createLazySourceGetter({
     retrieve: () => getSourceFileResponse({ collection, document, filename, prefix, req }),
@@ -114,10 +117,12 @@ export async function handleDynamicFileRequest({
 
       const result = await transformer.handleRequest!({
         collectionSlug: collection.config.slug,
+        doc: documentSnapshot,
         documentID: document.id,
         filename: requestedFile.filename,
         getSourceFile: stageSource.get,
         mimeType: requestedFile.mimeType,
+        originalDoc: documentSnapshot,
         req,
       })
 
@@ -214,12 +219,16 @@ function planRequestPipeline({
   filename: string
   req: PayloadRequest
 }): Promise<UploadTransformer[]> {
+  const documentSnapshot = createDocumentSnapshot(document)
+
   return planTransformerPipeline({
     args: {
       collectionSlug: collection.config.slug,
+      doc: documentSnapshot,
       documentID: document.id,
       mimeType: getRequestedFile({ document, filename }).mimeType,
       operation: 'request',
+      originalDoc: documentSnapshot,
       req,
     },
     capability: 'handleRequest',
