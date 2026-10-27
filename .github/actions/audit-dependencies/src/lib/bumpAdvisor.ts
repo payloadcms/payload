@@ -1,4 +1,14 @@
-import { gte, major, maxSatisfying, minVersion, prerelease, satisfies, sort, valid } from 'semver'
+import {
+  gte,
+  major,
+  maxSatisfying,
+  minVersion,
+  prerelease,
+  satisfies,
+  sort,
+  valid,
+  validRange,
+} from 'semver'
 
 type DependencyGroup = {
   dependency: string
@@ -91,7 +101,8 @@ const buildBump = async ({
   patchedRange: string
 }): Promise<Bump> => {
   const { dependency, spec, workspacePackages } = group
-  const min = spec ? minVersion(spec) : null
+  // Aliases, dist-tags, and file/git specs are not ranges; their current version is unknown.
+  const min = spec && validRange(spec) ? minVersion(spec) : null
   const fix = await findMinimalFix({
     chainPackages,
     client,
@@ -197,6 +208,10 @@ const traceModule = async ({
   rootName: string
   rootVersion: string
 }): Promise<TraceOutcome> => {
+  if (rootName === module) {
+    return satisfies(rootVersion, patchedRange) ? 'clear' : 'vulnerable'
+  }
+
   const moduleVersions: string[] = []
   const visited = new Set<string>([`${rootName}@${rootVersion}`])
   const queue: Array<{ name: string; version: string }> = [{ name: rootName, version: rootVersion }]
