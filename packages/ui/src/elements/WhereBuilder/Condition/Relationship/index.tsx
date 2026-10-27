@@ -10,6 +10,7 @@ import type { RelationshipFilterProps as Props, ValueWithRelation } from './type
 
 import { useDebounce } from '../../../../hooks/useDebounce.js'
 import { useEffectEvent } from '../../../../hooks/useEffectEvent.js'
+import { useBranchParam } from '../../../../providers/Branch/index.js'
 import { useConfig } from '../../../../providers/Config/index.js'
 import { useLocale } from '../../../../providers/Locale/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
@@ -51,6 +52,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
   const [hasLoadedFirstOptions, setHasLoadedFirstOptions] = useState(false)
   const { i18n, t } = useTranslation()
   const locale = useLocale()
+  const branch = useBranchParam()
 
   const relationSlugs = hasMultipleRelations ? relationTo : [relationTo]
 
@@ -104,6 +106,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         }
 
         const query = {
+          branch,
           depth: 0,
           limit: maxResultsPerRequest,
           locale: locale?.code,
@@ -268,8 +271,9 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
   const addOptionByID = useCallback(
     async (id, relation) => {
       if (!errorLoading && id !== 'null' && id && relation) {
+        const queryString = qs.stringify({ branch, depth: 0 }, { addQueryPrefix: true })
         const response = await fetch(
-          formatAdminURL({ apiRoute: api, path: `/${relation}/${id}?depth=0` }),
+          formatAdminURL({ apiRoute: api, path: `/${relation}/${id}${queryString}` }),
           {
             credentials: 'include',
             headers: {
@@ -287,7 +291,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         }
       }
     },
-    [i18n, addOptions, api, errorLoading, t],
+    [addOptions, api, branch, errorLoading, i18n, t],
   )
 
   /**
