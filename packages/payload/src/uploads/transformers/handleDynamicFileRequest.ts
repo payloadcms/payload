@@ -6,10 +6,11 @@ import type { UploadTransformer } from './types.js'
 import { Forbidden } from '../../errors/Forbidden.js'
 import { NotFound } from '../../errors/NotFound.js'
 import { TransformerContractError } from '../../errors/TransformerContractError.js'
+import { deepCopyObject } from '../../utilities/deepCopyObject.js'
+import { deepFreeze } from '../../utilities/deepFreeze.js'
 import { checkFileAccess } from '../checkFileAccess.js'
 import { retrieveFileResponse } from '../endpoints/getFile.js'
 import { isOriginalFileRequest } from '../isOriginalFileRequest.js'
-import { createDocumentSnapshot } from './createDocumentSnapshot.js'
 import { createLazySourceGetter } from './createLazySourceGetter.js'
 import { finalizeFileResponse } from './finalizeFileResponse.js'
 import { getSourceFileResponse } from './getSourceFileResponse.js'
@@ -93,7 +94,7 @@ export async function handleDynamicFileRequest({
 
   const requestedFile = getRequestedFile({ document, filename })
   // A request never saves the document, so every stage gets the same read-only snapshot.
-  const documentSnapshot = createDocumentSnapshot(document)
+  const documentSnapshot = deepFreeze(deepCopyObject(document))
 
   const source = createLazySourceGetter({
     retrieve: () => getSourceFileResponse({ collection, document, filename, prefix, req }),
@@ -231,7 +232,7 @@ function planRequestPipeline({
   filename: string
   req: PayloadRequest
 }): Promise<UploadTransformer[]> {
-  const documentSnapshot = createDocumentSnapshot(document)
+  const documentSnapshot = deepFreeze(deepCopyObject(document))
 
   return planTransformerPipeline({
     args: {
