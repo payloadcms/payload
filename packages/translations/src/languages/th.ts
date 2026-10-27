@@ -1,3 +1,4 @@
+import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
 export const thTranslations: DefaultTranslationsObject = {
@@ -82,6 +83,7 @@ export const thTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'หากคุณไม่ได้ร้องขอให้มีการรีเซ็ตรหัสผ่าน คุณสามารถเพิกเฉยข้อความนี้ได้ โดยรหัสผ่านของคุณจะคงอยู่เช่นเดิม',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'การดำเนินการ',
     createNew: 'สร้างใหม่',
@@ -296,6 +298,7 @@ export const thTranslations: DefaultTranslationsObject = {
     clearAll: 'ล้างทั้งหมด',
     clearSearch: 'ล้างการค้นหา',
     close: 'ปิด',
+    closed: 'ปิดแล้ว',
     collapse: 'ยุบ',
     collection: 'คอลเลกชัน',
     collections: 'Collections',

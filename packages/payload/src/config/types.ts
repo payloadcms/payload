@@ -31,6 +31,7 @@ import type {
 } from '../admin/types.js'
 import type { AdminViewConfig, ViewTypes, VisibleEntities } from '../admin/views/index.js'
 import type { SanitizedPermissions } from '../auth/index.js'
+import type { BranchingConfig, SanitizedBranchingConfig } from '../branching/types.js'
 import type {
   AddToImportMap,
   ImportMap,
@@ -1475,6 +1476,24 @@ export type Config = {
    * @experimental This property is experimental and may change in future releases. Use at your own risk.
    */
   bodyParser?: Partial<BusboyConfig>
+  /**
+   * Enable content branching.
+   *
+   * When enabled, editors can create named branches and create, update, delete
+   * and publish documents on them in isolation, then merge selected changes
+   * back to `main`.
+   *
+   * Applies to every eligible collection and global. Built-in Payload collections are
+   * excluded by default but can opt in with `branching: true` on the
+   * collection itself. Auth-enabled collections cannot use branching.
+   *
+   * Enabling this adds `_branch` columns to every included collection, which
+   * requires a migration on relational databases. Disabling it again does not.
+   *
+   * @experimental Content Branching can include breaking changes in minor releases. Its configuration, APIs, database structure, and behavior are not stable.
+   * @default false
+   */
+  branching?: boolean | BranchingConfig
   /** Customize the Payload CLI, or set to `false` to disable it. */
   cli?:
     | {
@@ -1848,6 +1867,7 @@ export interface SanitizedConfig
       | 'admin'
       | 'auth'
       | 'blocks'
+      | 'branching'
       | 'cli'
       | 'collections'
       | 'cookiePrefix'
@@ -1896,6 +1916,7 @@ export interface SanitizedConfig
   admin: SanitizedAdminConfig
   auth: Required<NonNullable<Config['auth']>>
   blocks: FlattenedBlock[]
+  branching: SanitizedBranchingConfig
   cli:
     | {
         commands: CLICommands

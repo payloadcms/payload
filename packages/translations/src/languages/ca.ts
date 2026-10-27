@@ -1,3 +1,4 @@
+import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
 export const caTranslations: DefaultTranslationsObject = {
@@ -86,6 +87,7 @@ export const caTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Si no has sol·licitat això, ignora aquest correu i la teva contrasenya romandrà inalterada.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Accions',
     createNew: 'Crear nou',
@@ -313,6 +315,7 @@ export const caTranslations: DefaultTranslationsObject = {
     clearAll: 'Esborra-ho tot',
     clearSearch: 'Esborra la cerca',
     close: 'Tanca',
+    closed: 'Tancada',
     collapse: 'Replegar',
     collection: 'Col·lecció',
     collections: 'Col·leccions',

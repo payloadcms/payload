@@ -1,3 +1,4 @@
+import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
 export const ptTranslations: DefaultTranslationsObject = {
@@ -86,6 +87,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Se você não fez essa requisição, por favor ignore esse email e sua senha permanecerá igual.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Ações',
     createNew: 'Criar Novo',
@@ -312,6 +314,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     clearAll: 'Limpar Tudo',
     clearSearch: 'Limpar pesquisa',
     close: 'Fechar',
+    closed: 'Fechada',
     collapse: 'Recolher',
     collection: 'Coleção',
     collections: 'Coleções',

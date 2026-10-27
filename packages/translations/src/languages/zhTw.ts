@@ -1,3 +1,4 @@
+import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
 export const zhTwTranslations: DefaultTranslationsObject = {
@@ -81,6 +82,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
       '您會收到這封郵件是因為您（或其他人）請求重設此帳戶的密碼。請點選以下連結，或將該連結貼至瀏覽器以完成操作：',
     youDidNotRequestPassword: '如果這不是您本人操作，請忽略這封郵件，您的密碼將不會改變。',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: '操作',
     createNew: '建立新項目',
@@ -291,6 +293,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     clearAll: '全部清除',
     clearSearch: '清除搜尋',
     close: '關閉',
+    closed: '已關閉',
     collapse: '收合',
     collection: '集合',
     collections: '集合',

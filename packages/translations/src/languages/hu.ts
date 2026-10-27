@@ -1,3 +1,4 @@
+import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
 export const huTranslations: DefaultTranslationsObject = {
@@ -88,6 +89,7 @@ export const huTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ha nem Ön kérte ezt, kérjük, hagyja figyelmen kívül ezt az e-mailt, és jelszava változatlan marad.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Műveletek',
     createNew: 'Új létrehozása',
@@ -316,6 +318,7 @@ export const huTranslations: DefaultTranslationsObject = {
     clearAll: 'Törölj mindent',
     clearSearch: 'Keresés törlése',
     close: 'Bezárás',
+    closed: 'Lezárt',
     collapse: 'Összecsukás',
     collection: 'Gyűjtemény',
     collections: 'Gyűjtemények',

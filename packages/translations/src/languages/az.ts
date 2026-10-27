@@ -1,3 +1,4 @@
+import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
 export const azTranslations: DefaultTranslationsObject = {
@@ -85,6 +86,7 @@ export const azTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Əgər siz bunu tələb etməmisinizsə, lütfən, bu e-poçtu nəzərə almayın və şifrəniz dəyişilməz qalacaq.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Əməliyyatlar',
     createNew: 'Yeni Yaradın',
@@ -313,6 +315,7 @@ export const azTranslations: DefaultTranslationsObject = {
     clearAll: 'Hamısını təmizlə',
     clearSearch: 'Axtarışı təmizlə',
     close: 'Bağla',
+    closed: 'Bağlı',
     collapse: 'Bağla',
     collection: 'Kolleksiya',
     collections: 'Kolleksiyalar',

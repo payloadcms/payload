@@ -1,3 +1,4 @@
+import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
 export const jaTranslations: DefaultTranslationsObject = {
@@ -86,6 +87,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'もし望まない場合は、このメールを無視してください。パスワードは変更されません。',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'アクション',
     createNew: '新規作成',
@@ -312,6 +314,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     clearAll: 'すべてクリア',
     clearSearch: '検索をクリア',
     close: '閉じる',
+    closed: 'クローズ',
     collapse: '閉じる',
     collection: 'コレクション',
     collections: 'コレクション',

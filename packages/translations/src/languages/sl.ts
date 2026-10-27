@@ -1,3 +1,4 @@
+import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
 export const slTranslations: DefaultTranslationsObject = {
@@ -85,6 +86,7 @@ export const slTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Če tega niste zahtevali, prezrite to e-pošto in vaše geslo bo ostalo nespremenjeno.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Dejanja',
     createNew: 'Ustvari novo',
@@ -309,6 +311,7 @@ export const slTranslations: DefaultTranslationsObject = {
     clearAll: 'Počisti vse',
     clearSearch: 'Počisti iskanje',
     close: 'Zapri',
+    closed: 'Zaprta',
     collapse: 'Strni',
     collection: 'Zbirka',
     collections: 'Zbirke',

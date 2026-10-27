@@ -35,6 +35,23 @@ export interface PayloadRequestAPI {
 }
 
 export type CustomPayloadRequestProperties = {
+  /**
+   * The active content branch, or `'main'`.
+   *
+   * Local API operations inherit the supplied request's branch unless an explicit
+   * `branch` argument overrides it. With no branch context, resolution falls back
+   * to the `branch` query param, then `'main'`.
+   *
+   * Admin rendering resolves the user's stored branch preference separately.
+   * Ordinary API operations do not load that preference.
+   *
+   * Pass `branch: 'main'` to explicitly target main. `branch: false` bypasses
+   * branch filtering and identity projection rather than selecting main.
+   *
+   * Available inside access control functions, so a collection can allow on a
+   * branch what it denies on main.
+   */
+  branch?: string
   context: RequestContext
   /** The locale that should be used for a field when it is not translated to the requested locale */
   fallbackLocale?: TypedFallbackLocale
@@ -53,6 +70,8 @@ export type CustomPayloadRequestProperties = {
    */
   // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   locale?: 'all' | TypedLocale
+  /** The internal operation scope for this request. */
+  operation?: 'validate' | Operation
   /**
    * The payload object
    */

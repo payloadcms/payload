@@ -1,3 +1,4 @@
+import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
 export const hyTranslations: DefaultTranslationsObject = {
@@ -86,6 +87,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Եթե Դուք չեք ուղարկել հարցումը, խնդրում ենք անտեսել այս էլ. նամակը, և Ձեր գաղտնաբառը կմնա անփոփոխ։',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Գործողություններ',
     createNew: 'Ստեղծել Նոր',
@@ -311,6 +313,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     clearAll: 'Մաքրել բոլորը',
     clearSearch: 'Մաքրել որոնումը',
     close: 'Փակել',
+    closed: 'Փակ',
     collapse: 'Փակել',
     collection: 'Հավաքածու',
     collections: 'Հավաքածուներ',

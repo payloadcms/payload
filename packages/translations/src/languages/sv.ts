@@ -1,3 +1,4 @@
+import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
 export const svTranslations: DefaultTranslationsObject = {
@@ -85,6 +86,7 @@ export const svTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Om du inte begärde detta, ignorera detta e-postmeddelande och ditt lösenord kommer att förbli oförändrat.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Åtgärder',
     createNew: 'Skapa ny',
@@ -310,6 +312,7 @@ export const svTranslations: DefaultTranslationsObject = {
     clearAll: 'Rensa alla',
     clearSearch: 'Rensa sökning',
     close: 'Stäng',
+    closed: 'Stängd',
     collapse: 'Fäll ihop',
     collection: 'Samling',
     collections: 'Samlingar',

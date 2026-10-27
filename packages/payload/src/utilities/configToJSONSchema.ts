@@ -652,10 +652,15 @@ export function fieldsToJSONSchema({
           }
 
           case 'json': {
-            fieldSchema = field.jsonSchema?.schema || {
-              ...baseFieldSchema,
-              type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
-            }
+            const jsonFieldSchema = field.jsonSchema?.schema
+            fieldSchema = jsonFieldSchema
+              ? isRequired
+                ? jsonFieldSchema
+                : { anyOf: [jsonFieldSchema, { type: 'null' }] }
+              : {
+                  ...baseFieldSchema,
+                  type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
+                }
             break
           }
 
@@ -811,7 +816,7 @@ export function fieldsToJSONSchema({
               throw new Error('Attempted to access unsanitized rich text editor.')
             }
             if (field.editor.jsonSchema) {
-              fieldSchema = {
+              const richTextSchema = {
                 ...baseFieldSchema,
                 ...field.editor.jsonSchema({
                   collectionIDFieldTypes,
@@ -824,6 +829,11 @@ export function fieldsToJSONSchema({
                   variant,
                 }),
               }
+              fieldSchema = isRequired
+                ? richTextSchema
+                : {
+                    anyOf: [richTextSchema, { type: 'null' }],
+                  }
             } else {
               // Maintain backwards compatibility with existing rich text editors
               fieldSchema = {
