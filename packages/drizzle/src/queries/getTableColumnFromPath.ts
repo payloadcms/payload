@@ -1,5 +1,4 @@
 import type { SQL } from 'drizzle-orm'
-import type { SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core'
 import type {
   FlattenedBlock,
   FlattenedField,
@@ -50,7 +49,7 @@ type TableColumn = {
 type Args = {
   adapter: DrizzleAdapter
   /** The current table when a query is being built with an alias, such as inside a subquery. */
-  aliasTable?: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
+  aliasTable?: PgTableWithColumns<any>
   collectionPath: string
   columnPrefix?: string
   constraintPath?: string
@@ -59,7 +58,7 @@ type Args = {
   joins: BuildQueryJoinAliases
   locale?: string
   /** The aliased table that owns a field nested inside an array or block. */
-  parentAliasTable?: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
+  parentAliasTable?: PgTableWithColumns<any>
   parentIsLocalized: boolean
   pathSegments: string[]
   rootTableName?: string

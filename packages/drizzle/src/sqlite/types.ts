@@ -83,6 +83,7 @@ export type GenericColumns = {
 export type GenericTable = SQLiteTableWithColumns<{
   columns: GenericColumns
   dialect: string
+  isAlias: boolean
   name: string
   schema: string
 }>

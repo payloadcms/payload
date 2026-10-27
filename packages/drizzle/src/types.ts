@@ -4,7 +4,7 @@ import type { NodePgDatabase, NodePgQueryResultHKT } from 'drizzle-orm/node-post
 import type {
   PgAsyncTransaction,
   PgColumn,
-  PgTable,
+  PgTableWithColumns,
   Precision,
   UpdateDeleteAction,
 } from 'drizzle-orm/pg-core'
@@ -12,7 +12,7 @@ import type {
   Result,
   SQLiteAsyncTransaction,
   SQLiteColumn,
-  SQLiteTable,
+  SQLiteTableWithColumns,
 } from 'drizzle-orm/sqlite-core'
 import type {
   BaseDatabaseAdapter,
@@ -50,16 +50,18 @@ export type GenericColumns<T> = {
   [x: string]: T
 }
 
-type GenericPgTable = PgTable<{
+type GenericPgTable = PgTableWithColumns<{
   columns: GenericColumns<GenericPgColumn>
   dialect: string
+  isAlias: boolean
   name: string
   schema: undefined
 }>
 
-type GenericSQLiteTable = SQLiteTable<{
+type GenericSQLiteTable = SQLiteTableWithColumns<{
   columns: GenericColumns<SQLiteColumn>
   dialect: string
+  isAlias: boolean
   name: string
   schema: undefined
 }>

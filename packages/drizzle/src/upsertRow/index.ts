@@ -2,7 +2,7 @@ import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SelectedFields } from 'drizzle-orm/sqlite-core'
 import type { TypeWithID } from 'payload'
 
-import { and, desc, eq, isNull, or } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNull, or } from 'drizzle-orm'
 
 import type { BlockRowToInsert } from '../transform/write/types.js'
 import type { Args } from './types.js'
@@ -123,7 +123,16 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
       if (!hasDataToUpdate) {
         // Nothing to update => just fetch current row and return
-        findManyArgs.where = { RAW: () => updateWhere }
+        findManyArgs.where = {
+          RAW: (table) =>
+            inArray(
+              table.id,
+              drizzle
+                .select({ id: adapter.tables[tableName].id })
+                .from(adapter.tables[tableName])
+                .where(updateWhere),
+            ),
+        }
 
         const doc = await db.query[tableName].findFirst(findManyArgs)
 

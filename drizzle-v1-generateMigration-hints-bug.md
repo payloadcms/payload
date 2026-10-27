@@ -1,3 +1,5 @@
+Written with AI
+
 # Bug report: drizzle-kit v1 `generateMigration` cannot resolve create/delete ambiguity programmatically (no `HintsHandler`)
 
 ## Summary

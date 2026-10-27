@@ -16,7 +16,7 @@ import {
 import { fieldIsVirtual, fieldShouldBeLocalized, hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
-import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
+import type { BuildQueryJoinAliases, DrizzleAdapter, GenericTable } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
 import { buildQuery } from '../queries/buildQuery.js'
@@ -407,25 +407,29 @@ export const traverseFields = ({
         }
 
         if (Array.isArray(field.collection)) {
-          const polymorphicJoinQuery = buildPolymorphicJoinQuery({
-            adapter,
-            currentTableName,
-            field,
-            limit,
-            locale,
-            page,
-            pageSize: limitArg,
-            path,
-            shouldCount,
-            sort,
-            where,
-          })
+          const buildJoinQuery = (parentTable: GenericTable) =>
+            buildPolymorphicJoinQuery({
+              adapter,
+              currentTableName,
+              field,
+              limit,
+              locale,
+              page,
+              pageSize: limitArg,
+              parentTable,
+              path,
+              shouldCount,
+              sort,
+              where,
+            })
 
-          currentArgs.extras[polymorphicJoinQuery.columnName] = polymorphicJoinQuery.documents
+          const columnName = `${path.replaceAll('.', '_')}${field.name}`
 
-          if (polymorphicJoinQuery.count) {
-            currentArgs.extras[`${polymorphicJoinQuery.columnName}_count`] =
-              polymorphicJoinQuery.count
+          currentArgs.extras[columnName] = (parentTable) => buildJoinQuery(parentTable).documents
+
+          if (shouldCount) {
+            currentArgs.extras[`${columnName}_count`] = (parentTable) =>
+              buildJoinQuery(parentTable).count
           }
         } else {
           const db = adapter.drizzle as LibSQLDatabase

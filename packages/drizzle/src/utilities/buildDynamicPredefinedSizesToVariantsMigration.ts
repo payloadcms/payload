@@ -22,10 +22,21 @@ type SnapshotTable = {
   name: string
 }
 
+type SnapshotDDLEntity = {
+  [key: string]: unknown
+  columns?: ({ isExpression?: boolean; value: string } | string)[]
+  entityType: string
+  name: string
+  schema?: string
+  table?: string
+}
+
 type Snapshot = {
+  ddl?: SnapshotDDLEntity[]
   id?: string
   prevId?: string
-  tables: Record<string, SnapshotTable>
+  prevIds?: string[]
+  tables?: Record<string, SnapshotTable>
   version: string
 }
 
@@ -85,7 +96,9 @@ async function readLatestSnapshot({
   const currentVersion = (await generateDrizzleJson(adapter.schema)).version
   const snapshot = JSON.parse(readFileSync(`${dir}/${latestSnapshotFile}`, 'utf8')) as Snapshot
 
-  return upSnapshot && snapshot.version < currentVersion ? upSnapshot(snapshot) : snapshot
+  return upSnapshot && snapshot.version < currentVersion
+    ? (upSnapshot(snapshot) as Snapshot)
+    : snapshot
 }
 
 function applySizesToVariantsRenames({
@@ -95,6 +108,10 @@ function applySizesToVariantsRenames({
   plan: SizesToVariantsTableRenames[]
   snapshot: Snapshot
 }): Snapshot {
+  if (snapshot.ddl) {
+    return applyDDLSizesToVariantsRenames({ plan, snapshot })
+  }
+
   const renamed: Snapshot = structuredClone(snapshot)
 
   for (const { columns, indexes, tableName } of plan) {
@@ -167,6 +184,78 @@ function applySizesToVariantsRenames({
   }
 
   renamed.prevId = snapshot.id
+  renamed.id = randomUUID()
+
+  return renamed
+}
+
+/** Adapt the flat Drizzle 1.0 snapshot to the same collision and rename rules as legacy snapshots. */
+function applyDDLSizesToVariantsRenames({
+  plan,
+  snapshot,
+}: {
+  plan: SizesToVariantsTableRenames[]
+  snapshot: Snapshot
+}): Snapshot {
+  const tables: Record<string, SnapshotTable> = {}
+  const tableKey = ({ schema, table }: SnapshotDDLEntity) => `${schema ?? ''}.${table}`
+
+  for (const entity of snapshot.ddl) {
+    if (!['columns', 'indexes'].includes(entity.entityType)) {
+      continue
+    }
+
+    const table = (tables[tableKey(entity)] ??= { name: entity.table, columns: {}, indexes: {} })
+
+    if (entity.entityType === 'columns') {
+      table.columns[entity.name] = { name: entity.name }
+    } else {
+      table.indexes[entity.name] = {
+        name: entity.name,
+        columns: entity.columns.map((column) =>
+          typeof column === 'string' ? column : { expression: column.value },
+        ),
+      }
+    }
+  }
+
+  const renamedTables = applySizesToVariantsRenames({
+    plan,
+    snapshot: { tables, version: snapshot.version },
+  }).tables
+  const renamed = structuredClone(snapshot)
+
+  for (const entity of renamed.ddl) {
+    const tablePlan = plan.find(({ tableName }) => tableName === entity.table)
+
+    if (!tablePlan) {
+      continue
+    }
+
+    if (entity.entityType === 'columns') {
+      entity.name = tablePlan.columns.find(({ from }) => from === entity.name)?.to ?? entity.name
+    } else if (entity.entityType === 'indexes') {
+      entity.columns = entity.columns.map((column) => {
+        const name = typeof column === 'string' ? column : column.value
+        const renamedName = tablePlan.columns.find(({ from }) => from === name)?.to ?? name
+
+        return typeof column === 'string' ? renamedName : { ...column, value: renamedName }
+      })
+      const indexColumns = entity.columns.map((column) =>
+        typeof column === 'string' ? column : column.value,
+      )
+      const renamedIndex = Object.values(renamedTables[tableKey(entity)].indexes).find(
+        (index) =>
+          index.columns
+            .map((column) => (typeof column === 'string' ? column : column.expression))
+            .join(',') === indexColumns.join(','),
+      )
+
+      entity.name = renamedIndex?.name ?? entity.name
+    }
+  }
+
+  renamed.prevIds = snapshot.id ? [snapshot.id] : []
   renamed.id = randomUUID()
 
   return renamed
