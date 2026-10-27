@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "4.0.0-beta.3",
+  "version": "4.0.0-beta.4",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -225,7 +225,7 @@
     "sax": "1.6.1",
     "ts-essentials": "10.0.3",
     "tsx": "4.23.15",
-    "undici": "7.29.1",
+    "undici": "7.30.1",
     "uuid": "14.0.0",
     "ws": "^8.16.0",
     "zod": "catalog:"
@@ -252,6 +252,6 @@
     "graphql": "^16.8.1"
   },
   "engines": {
-    "node": ">=24.15.0"
+    "node": ">=24.22.1"
   }
 }

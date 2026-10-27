@@ -1,0 +1,57 @@
+---
+title: Icons
+label: Icons
+order: 170
+desc: Use Payload's exported icons in Custom Views, controls, and other Admin Panel UI.
+keywords: ui, component, icon, graphic, svg, custom view
+---
+
+Payload exports the icons used throughout the Admin Panel so custom UI can use the same visual language.
+
+## Import
+
+```tsx
+import { CopyIcon, EditIcon, PlusIcon, SearchIcon } from '@payloadcms/ui'
+```
+
+## Available icons
+
+<ComponentPreview component="Icons" example="gallery" />
+
+Icons inherit their color from the surrounding text. Their default dimensions vary according to where each icon is used in the Admin Panel; apply a shared class to the surrounding element when your layout requires a consistent size.
+
+The client export includes:
+
+- `CalendarIcon`, `CheckIcon`, `ChevronIcon`, `CloseMenuIcon`, and `CodeBlockIcon`
+- `CopyIcon`, `DocumentIcon`, `DragHandleIcon`, `EditIcon`, and `NewTabIcon`
+- `FolderIcon`, `GearIcon`, `GridViewIcon`, `LineIcon`, and `LinkIcon`
+- `ListViewIcon`, `LogOutIcon`, `MinimizeMaximizeIcon`, `MoreIcon`, and `Dots`
+- `MoveFolderIcon`, `PlusIcon`, `SearchIcon`, `SwapIcon`, and `XIcon`
+- `ErrorIcon`, `InfoIcon`, `SuccessIcon`, `WarningIcon`, and `WarningTriangleIcon` for notification states
+- `ArrowIcon`, `CirclePlusIcon`, `CircledXIcon`, `ClipboardIcon`, `DuplicateIcon`, and `EyeIcon`
+- `FilterIcon`, `KeyIcon`, `LockIcon`, `LockOpenIcon`, `PeopleIcon`, `RefreshIcon`, and `ReplaceIcon`
+- `SortDownIcon`, `TagIcon`, `ThreeDotsIcon`, `TrashIcon`, `VariableColorIcon`, and `WriteIcon`
+
+## Configurable icons
+
+Most icons render without props. These exports expose additional options:
+
+| Component              | Props                                         | Description                                        |
+| ---------------------- | --------------------------------------------- | -------------------------------------------------- |
+| `ChevronIcon`          | `direction`, `size`, `ariaLabel`, `className` | Sets its direction, preset size, label, or class.  |
+| `GearIcon`             | `ariaLabel`, `className`, `size`              | Sets its label, class, or 16/24-pixel preset size. |
+| `MinimizeMaximizeIcon` | `isMinimized`, `className`, `size`            | Switches graphics and sets a preset size.          |
+| `DragHandleIcon`       | `className`, `size`                           | Adds a custom class or 16/24-pixel preset size.    |
+| `EditIcon`             | `className`                                   | Adds a custom class.                               |
+| `NewTabIcon`           | `className`, `size`                           | Adds a custom class or 16/24-pixel preset size.    |
+| `FolderIcon`           | `className`, `size`                           | Adds a custom class or 16/24-pixel preset size.    |
+| `MoreIcon`             | `className`, `size`                           | Adds a custom class or 16/24-pixel preset size.    |
+| `XIcon`                | `className`, `size`                           | Adds a custom class or 16/24-pixel preset size.    |
+
+## Accessibility
+
+- Treat an icon as decorative when adjacent text already describes the action.
+- Give an icon-only button or link an accessible name on the interactive element.
+- Do not use color alone to communicate a state or outcome.
+
+The icons use SVG markup and require no Payload providers.

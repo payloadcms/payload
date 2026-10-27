@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/storage-s3",
-  "version": "4.0.0-beta.3",
+  "version": "4.0.0-beta.4",
   "description": "Payload storage adapter for Amazon S3",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
@@ -74,6 +74,6 @@
     "payload": "workspace:*"
   },
   "engines": {
-    "node": ">=24.15.0"
+    "node": ">=24.22.1"
   }
 }

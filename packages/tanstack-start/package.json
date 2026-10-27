@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/tanstack-start",
-  "version": "4.0.0-beta.3",
+  "version": "4.0.0-beta.4",
   "description": "TanStack Start framework adapter for Payload",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
@@ -154,6 +154,6 @@
     }
   },
   "engines": {
-    "node": "^18.20.2 || >=20.9.0"
+    "node": ">=24.22.1"
   }
 }

@@ -22,7 +22,7 @@
     "@payloadcms/db-postgres": "3.82.1",
     "@payloadcms/next": "3.82.1",
     "@payloadcms/richtext-lexical": "3.82.1",
-    "@payloadcms/transformer-sharp": "3.82.1",
+    "@payloadcms/transformer-sharp": "4.0.0-beta.4",
     "@payloadcms/ui": "3.82.1",
     "cross-env": "10.1.0",
     "graphql": "^16.8.1",
@@ -48,7 +48,7 @@
     "vitest": "5.0.1"
   },
   "engines": {
-    "node": ">=24.15.0",
+    "node": ">=24.22.1",
     "pnpm": "^9 || ^10 || ^11"
   },
   "pnpm": {

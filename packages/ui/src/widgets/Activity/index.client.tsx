@@ -43,7 +43,10 @@ export function ActivityWidgetClient({
   const pinnedTabRef = useRef<HTMLButtonElement>(null)
   const recentsTabRef = useRef<HTMLButtonElement>(null)
   const paginationFocusRef = useRef(false)
-  const [view, setView] = useState<View>({ offset: 0, tab: 'pinned' })
+  const [view, setView] = useState<View>(() => ({
+    offset: 0,
+    tab: initialPages?.pinned?.totalDocs ? 'pinned' : 'recents',
+  }))
   const [previousInitialPages, setPreviousInitialPages] = useState(initialPages)
   const pageSize = usePageSize({ paginationFocusRef, viewportRef })
   // Until the CSS page size is read, render a full batch and let the CSS tiers hide the overflow.

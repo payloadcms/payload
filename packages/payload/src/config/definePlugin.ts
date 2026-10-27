@@ -58,10 +58,12 @@ export function definePlugin<TOptions>(descriptor: {
   slug: string
 }): (options: TOptions) => Plugin {
   return (options?: TOptions): Plugin => {
+    // Read `pluginFn.options` when the plugin runs, so other plugins can edit or replace it, even
+    // when the plugin was registered without options
     const pluginFn: Plugin = (config) =>
       descriptor.plugin({
         config,
-        options: options as TOptions,
+        options: pluginFn.options as TOptions,
         plugins: buildPluginsMap(config.plugins),
       })
 
