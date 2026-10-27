@@ -26,5 +26,5 @@ export const generatePageMetadata = async ({
 
   const metadata = await generateMetadata({ adminViews, config, i18n, params })
 
-  return metadata as unknown as Metadata
+  return metadata
 }

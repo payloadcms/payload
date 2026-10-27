@@ -1,4 +1,6 @@
 'use client'
+import type { ComponentProps } from 'react'
+
 import React from 'react'
 
 import {
@@ -19,6 +21,7 @@ export type ConfirmationModalProps = {
   className?: string
   confirmingLabel?: string
   confirmLabel?: string
+  focusTrapOptions?: ComponentProps<typeof DialogModal>['focusTrapOptions']
   heading: React.ReactNode
   modalSlug: string
   onCancel?: OnCancel
@@ -32,6 +35,7 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
     className,
     confirmingLabel,
     confirmLabel,
+    focusTrapOptions,
     heading,
     modalSlug,
     onCancel,
@@ -39,7 +43,7 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
   } = props
 
   return (
-    <DialogModal className={className} slug={modalSlug}>
+    <DialogModal className={className} focusTrapOptions={focusTrapOptions} slug={modalSlug}>
       <DialogHeader showClose title={heading} />
       <DialogBody>
         <div className="confirmation-modal__body">

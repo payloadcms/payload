@@ -293,6 +293,7 @@ export const daTranslations: DefaultTranslationsObject = {
     and: 'Og',
     anotherUser: 'En anden bruger',
     anotherUserTakenOver: 'En anden bruger har overtaget denne ressource.',
+    apiResponse: 'API-svar',
     applyChanges: 'Tilføj ændringer',
     ascending: 'Stigende',
     auto: 'Automatisk',
@@ -364,6 +365,13 @@ export const daTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Dette dokument er for nylig blevet opdateret af en anden bruger. Din visning er forældet.',
     documents: 'Dokumenter',
+    dragCancelled: 'Træk af {{label}} er annulleret.',
+    dragDropped: '{{label}} er sluppet. Position {{position}} af {{count}}.',
+    dragInstructions:
+      'Tryk på Space eller Enter for at tage en række op. Brug piletasterne til at flytte den. Med VoiceOver skal du slå Quick Nav fra og bruge Command + piletasterne. Tryk på Space eller Enter for at slippe, eller Escape for at annullere.',
+    dragMoved: '{{label}}: {{direction}}. Position {{position}} af {{count}}.',
+    dragPickedUp: '{{label}} er taget op. Position {{position}} af {{count}}.',
+    dragToMove: 'Træk for at flytte',
     dragToReorder: 'Træk for at ændre rækkefølgen',
     duplicate: 'Duplikér',
     duplicateWithoutSaving: 'Dupliker uden at gemme ændringer',
@@ -478,6 +486,7 @@ export const daTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Genindekserer alle {{collections}}.',
     reloadDocument: 'Genindlæs dokument',
     remove: 'Fjern',
+    removeFilter: 'Fjern filter',
     rename: 'Omdøb',
     replaceRow: 'Erstat række',
     requiredFields: 'Felter markeret med * er obligatoriske.',
@@ -571,6 +580,7 @@ export const daTranslations: DefaultTranslationsObject = {
     yes: 'Ja',
   },
   hierarchy: {
+    folderLocation: 'Mappeplacering',
     goTo: 'Gå til "{{name}}"',
     itemsMovedTo: '{{title}} flyttet til {{destination}}',
     itemsMovedToRoot: '{{title}} flyttet til rod',

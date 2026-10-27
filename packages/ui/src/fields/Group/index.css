@@ -7,9 +7,8 @@
     &::before {
       content: '';
       position: absolute;
-      top: calc(var(--gutter-h) * -1);
-      left: calc(var(--gutter-h) * -1);
-      right: calc(var(--gutter-h) * -1);
+      top: calc(var(--spacing-field) * -1.5);
+      inset-inline: calc(var(--gutter-h) * -1 * var(--field-border-bleed, 1));
       height: 0;
       border-top: var(--stroke-width-small) solid var(--color-border);
     }
@@ -30,8 +29,7 @@
       content: '';
       position: absolute;
       top: calc(var(--spacer-5) / 2);
-      left: calc(var(--spacer-3) * -1);
-      right: calc(var(--spacer-3) * -1);
+      inset-inline: calc(var(--spacer-3) * -1 * var(--field-border-bleed, 1));
       height: 0;
       border-top: var(--stroke-width-small) solid var(--color-border);
     }
