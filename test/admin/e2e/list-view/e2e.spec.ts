@@ -1582,6 +1582,20 @@ describe('List View', () => {
       await expect.poll(async () => await page.locator(tableRowLocator).count()).toBe(5)
     })
 
+    test('should give the pagination arrow buttons accessible names', async () => {
+      await deleteAllPosts()
+
+      await mapAsync([...Array(6)], async () => {
+        await createPost()
+      })
+
+      await page.goto(postsUrl.list)
+
+      const paginator = page.locator('.paginator')
+      await expect(paginator.getByRole('button', { name: 'Previous table page' })).toBeVisible()
+      await expect(paginator.getByRole('button', { name: 'Next table page' })).toBeVisible()
+    })
+
     test('should paginate without resetting selected limit', async () => {
       await deleteAllPosts()
 
