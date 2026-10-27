@@ -481,8 +481,11 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
         const { doc } = await createRes.json()
         createdIds.push(doc.id)
 
-        expect(downloadSpy).toHaveBeenCalledTimes(1)
-        expect(downloadSpy.mock.calls[0]![1]).toBeUndefined()
+        // A one-byte read verifies the upload before the document exists. The whole file is
+        // downloaded only after `canTransform` accepts it with that document.
+        expect(downloadSpy).toHaveBeenCalledTimes(2)
+        expect(downloadSpy.mock.calls[0]!.slice(0, 2)).toEqual([0, 1])
+        expect(downloadSpy.mock.calls[1]![1]).toBeUndefined()
       } finally {
         downloadSpy.mockRestore()
       }
