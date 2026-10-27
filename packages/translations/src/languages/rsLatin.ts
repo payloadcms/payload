@@ -138,7 +138,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     mergeInterrupted: 'Spajanje je prekinuto i ništa nije primenjeno. Probajte ponovo.',
     mergeNow: 'Spoji sada',
     mergeOnlySelected: 'Izaberite koje promene da se spoje',
-    mergePartial: 'Spoji delimično završeno',
+    mergePartial: 'Spajanje je delimično završeno',
     mergeScheduledFor: 'Spajanje zakazano za {{date}}.',
     mergeSelectedOfTotal: 'Primeniće se {{selected}} od {{total}} promenjenih dokumenata.',
     mergeStarting: 'Pokretanje spajanja…',

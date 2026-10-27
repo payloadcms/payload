@@ -139,7 +139,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     mergeInterrupted: 'Обʼєднання було перервано, і нічого не застосовано. Спробуйте ще раз.',
     mergeNow: 'Обʼєднати зараз',
     mergeOnlySelected: 'Виберіть, які зміни обʼєднати',
-    mergePartial: "Об'єднати частково завершені",
+    mergePartial: 'Об’єднання виконано частково',
     mergeScheduledFor: 'Обʼєднання заплановано на {{date}}.',
     mergeSelectedOfTotal: 'Буде застосовано {{selected}} з {{total}} змінених документів.',
     mergeStarting: 'Початок обʼєднання…',

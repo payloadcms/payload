@@ -137,7 +137,7 @@ export const slTranslations: DefaultTranslationsObject = {
     mergeInterrupted: 'Združevanje je bilo prekinjeno in nič ni bilo uporabljeno. Poskusite znova.',
     mergeNow: 'Združi zdaj',
     mergeOnlySelected: 'Izberite, katere spremembe naj se združijo',
-    mergePartial: 'Združi delno dokončano',
+    mergePartial: 'Združevanje je delno končano',
     mergeScheduledFor: 'Združevanje načrtovano za {{date}}.',
     mergeSelectedOfTotal: 'Uporabljenih bo {{selected}} od {{total}} spremenjenih dokumentov.',
     mergeStarting: 'Začenjanje združevanja…',

@@ -138,7 +138,7 @@ export const itTranslations: DefaultTranslationsObject = {
     mergeInterrupted: 'L’unione è stata interrotta e non è stato applicato nulla. Riprova.',
     mergeNow: 'Unisci ora',
     mergeOnlySelected: 'Scegli quali modifiche unire',
-    mergePartial: 'Unisci parzialmente completo',
+    mergePartial: 'Unione parzialmente completata',
     mergeScheduledFor: 'Unione pianificata per {{date}}.',
     mergeSelectedOfTotal: 'Verranno applicati {{selected}} di {{total}} documenti modificati.',
     mergeStarting: 'Avvio dell’unione…',

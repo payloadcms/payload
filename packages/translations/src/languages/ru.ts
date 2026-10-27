@@ -140,7 +140,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     mergeInterrupted: 'Объединение было прервано, и ничего не применено. Попробуйте снова.',
     mergeNow: 'Объединить сейчас',
     mergeOnlySelected: 'Выберите, какие изменения объединить',
-    mergePartial: 'Объединить частично завершённый',
+    mergePartial: 'Объединение выполнено частично',
     mergeScheduledFor: 'Объединение запланировано на {{date}}.',
     mergeSelectedOfTotal: 'Будет применено {{selected}} из {{total}} изменённых документов.',
     mergeStarting: 'Начало объединения…',
