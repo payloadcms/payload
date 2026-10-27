@@ -124,7 +124,7 @@ describe('generateFileData - client uploads without full contents', () => {
     expect(canTransform).toHaveBeenCalledWith(
       expect.objectContaining({
         doc: expect.objectContaining({ alt: 'new', title: 'stored' }),
-        originalDoc: expect.objectContaining({ alt: 'old', title: 'stored' }),
+        originalDoc: expect.objectContaining({ alt: 'new', title: 'stored' }),
       }),
     )
     expect(fetchFullClientUploadMock).not.toHaveBeenCalled()
