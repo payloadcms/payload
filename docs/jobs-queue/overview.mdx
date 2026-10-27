@@ -233,9 +233,11 @@ On serverless platforms, use API endpoints called by external cron services:
 
 Never use `autoRun` on serverless platforms.
 
-### Visualizing Jobs in the Admin UI
+### Inspecting Jobs
 
-By default, the internal `payload-jobs` collection is hidden from the Payload Admin Panel. To make this collection visible for debugging or inspection purposes, you can override its configuration using `jobsCollectionOverrides`.
+The internal `payload-jobs` collection is hidden from the Admin Panel and denies generic access by default because job data can contain sensitive inputs, outputs, errors, and logs. Trusted server code can inspect jobs through the Local API with access override enabled.
+
+To provide trusted administrators with read-only access in the Admin Panel, explicitly override the collection configuration:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -244,14 +246,24 @@ export default buildConfig({
   // ... other config
   jobs: {
     // ... other job settings
-    jobsCollectionOverrides: ({ defaultJobsCollection }) => {
-      if (!defaultJobsCollection.admin) {
-        defaultJobsCollection.admin = {}
-      }
-
-      defaultJobsCollection.admin.hidden = false
-      return defaultJobsCollection
-    },
+    jobsCollectionOverrides: ({ defaultJobsCollection }) => ({
+      ...defaultJobsCollection,
+      access: {
+        ...defaultJobsCollection.access,
+        read: ({ req }) => Boolean(req.user?.roles?.includes('admin')),
+      },
+      admin: {
+        ...defaultJobsCollection.admin,
+        hidden: false,
+      },
+    }),
   },
 })
 ```
+
+This keeps generic create, update, and delete operations denied.
+
+<Banner type="warning">
+  Enabling raw collection access can expose job data and execution-control
+  fields. Prefer read-only access for trusted administrators.
+</Banner>

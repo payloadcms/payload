@@ -82,9 +82,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
   const [editor] = useLexicalComposerContext()
 
   const { enabledCollectionSlugs } = useEnabledRelationships({
-    collectionSlugsBlacklist: clientProps?.disabledCollections,
-    collectionSlugsWhitelist: clientProps?.enabledCollections,
-    uploads: true,
+    enabledCollectionSlugs: clientProps.enabledCollectionSlugs,
   })
 
   const {

@@ -16,7 +16,6 @@ type Args = {
    * @todo make required in v4.0. Usually you'd wanna pass this in
    */
   parentIsLocalized?: boolean
-  rootTableName: string
   table: RawTable
   tableLocales?: RawTable
 }

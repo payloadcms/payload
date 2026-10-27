@@ -1,17 +1,27 @@
 import type {
+  ArrayField,
+  BlocksField,
   BulkOperationResult,
+  CollapsibleField,
   CollectionSlug,
   CustomDocumentViewConfig,
   DefaultDocumentViewConfig,
   GeneratedTypes,
   JoinQuery,
   JsonObject,
+  NamedGroupField,
+  NamedTab,
   PaginatedDocs,
   PayloadTypesShape,
+  RowField,
   SelectType,
+  TabsField,
+  TextField,
   TypedCollectionSelect,
   TypeWithID,
   TypeWithVersion,
+  UnnamedGroupField,
+  UnnamedTab,
   Where,
 } from 'payload'
 
@@ -44,6 +54,22 @@ const asType = <T>() => {
 }
 
 describe('Types testing', () => {
+  describe('field duplication configuration', () => {
+    test('should only expose disableDuplicate on fields that own data', () => {
+      expect<ArrayField>().type.toHaveProperty('disableDuplicate')
+      expect<BlocksField>().type.toHaveProperty('disableDuplicate')
+      expect<NamedGroupField>().type.toHaveProperty('disableDuplicate')
+      expect<NamedTab>().type.toHaveProperty('disableDuplicate')
+      expect<TextField>().type.toHaveProperty('disableDuplicate')
+
+      expect<CollapsibleField>().type.not.toHaveProperty('disableDuplicate')
+      expect<RowField>().type.not.toHaveProperty('disableDuplicate')
+      expect<TabsField>().type.not.toHaveProperty('disableDuplicate')
+      expect<UnnamedGroupField>().type.not.toHaveProperty('disableDuplicate')
+      expect<UnnamedTab>().type.not.toHaveProperty('disableDuplicate')
+    })
+  })
+
   test('payload.find', () => {
     expect(payload.find({ collection: 'users' })).type.toBe<Promise<PaginatedDocs<User>>>()
   })
@@ -1266,20 +1292,21 @@ describe('Types testing', () => {
 
       test('update with draft:true on draft-enabled collection should work', () => {
         expect(
-          payload.update({ collection: 'draft-posts', id: 1, data: { title: 'Test' }, draft: true }),
+          payload.update({
+            collection: 'draft-posts',
+            id: 1,
+            data: { title: 'Test' },
+            draft: true,
+          }),
         ).type.not.toRaiseError()
       })
 
       test('duplicate with draft:true on non-draft collection should error', () => {
-        expect(
-          payload.duplicate({ collection: 'pages', id: 1, draft: true }),
-        ).type.toRaiseError()
+        expect(payload.duplicate({ collection: 'pages', id: 1, draft: true })).type.toRaiseError()
       })
 
       test('duplicate with draft:false on non-draft collection should error', () => {
-        expect(
-          payload.duplicate({ collection: 'pages', id: 1, draft: false }),
-        ).type.toRaiseError()
+        expect(payload.duplicate({ collection: 'pages', id: 1, draft: false })).type.toRaiseError()
       })
 
       test('duplicate with draft:true on draft-enabled collection should work', () => {
@@ -1301,15 +1328,11 @@ describe('Types testing', () => {
       })
 
       test('global update with draft:true on non-draft global should error', () => {
-        expect(
-          payload.updateGlobal({ slug: 'menu', data: {}, draft: true }),
-        ).type.toRaiseError()
+        expect(payload.updateGlobal({ slug: 'menu', data: {}, draft: true })).type.toRaiseError()
       })
 
       test('global update with draft:false on non-draft global should error', () => {
-        expect(
-          payload.updateGlobal({ slug: 'menu', data: {}, draft: false }),
-        ).type.toRaiseError()
+        expect(payload.updateGlobal({ slug: 'menu', data: {}, draft: false })).type.toRaiseError()
       })
 
       test('global update with draft:true on draft-enabled global should work', () => {
@@ -1318,6 +1341,5 @@ describe('Types testing', () => {
         ).type.not.toRaiseError()
       })
     })
-
   })
 })

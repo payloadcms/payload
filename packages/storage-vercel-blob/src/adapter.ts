@@ -4,6 +4,8 @@ import type {
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
+import { CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY } from 'payload'
+
 import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
@@ -31,6 +33,7 @@ export function createVercelBlobAdapter({
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'vercel-blob',
     clientUploads,
+    requiresClientUploadReceipt: true,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({
@@ -41,50 +44,55 @@ export function createVercelBlobAdapter({
         useCompositePrefixes,
       }),
 
-    handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
+    handleDelete: ({ storageFilePath }) =>
       deleteFile({
         baseUrl,
-        collectionPrefix: prefix,
-        docPrefix,
-        filename,
+        storageFilePath,
         token,
-        useCompositePrefixes,
       }),
 
-    handleUpload: async ({ data, file: { buffer, filename, mimeType } }) => {
+    handleUpload: async ({
+      data,
+      file: { buffer, imageSizeName, mimeType, tempFilePath },
+      req,
+      storageFilePath,
+    }) => {
+      // A processed client upload keeps the storage key from its receipt.
+      const isClientUpload =
+        Boolean(tempFilePath) &&
+        tempFilePath === req.context?.[CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY]
       const result = await uploadFile({
         access,
-        addRandomSuffix,
+        addRandomSuffix: addRandomSuffix && !isClientUpload,
         buffer,
         cacheControlMaxAge,
-        collectionPrefix: prefix,
-        docPrefix: data.prefix,
-        filename,
         mimeType,
+        storageFilePath,
+        tempFilePath,
         token,
-        useCompositePrefixes,
       })
 
       if (result.filename) {
-        data.filename = result.filename
+        if (imageSizeName !== undefined) {
+          data.sizes[imageSizeName].filename = result.filename
+        } else {
+          data.filename = result.filename
+        }
       }
 
       return data
     },
 
-    staticHandler: (
-      req,
-      { headers, params: { clientUploadContext, filename, prefix: prefixQueryParam } },
-    ) =>
+    staticHandler: (req, { doc, headers, params: { clientUploadContext, filename } }) =>
       getFile({
         baseUrl,
         cacheControlMaxAge,
         clientUploadContext,
         collection,
         collectionPrefix: prefix,
+        doc,
         filename,
         incomingHeaders: headers,
-        prefixQueryParam,
         req,
         token,
         useCompositePrefixes,

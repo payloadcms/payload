@@ -14,7 +14,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 
 import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
-import { prefix } from '../shared.js'
+import { prefix, resizedMediaSlug } from '../shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -26,7 +26,35 @@ let restClient: NextRESTClient
 let httpServer: Server
 let handleUploadUrl: string
 
+const createdResizedMediaIDs: (number | string)[] = []
+
 const serverHandlerPath = '/vercel-blob-client-upload-route'
+
+const issueClientUpload = async ({
+  collectionSlug,
+  docPrefix,
+  filename,
+  mimeType,
+}: {
+  collectionSlug: string
+  docPrefix?: string
+  filename: string
+  mimeType: string
+}) =>
+  restClient
+    .POST(`${serverHandlerPath}?issue-client-upload=1`, {
+      body: JSON.stringify({ collectionSlug, docPrefix, filename, mimeType }),
+    })
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error('Failed to initialize client upload')
+      }
+      return res.json<{
+        clientUploadContext: { prefix: string; signedReceipt: string }
+        filename: string
+        pathname: string
+      }>()
+    })
 
 describe('@payloadcms/storage-vercel-blob clientUploads', () => {
   beforeAll(async () => {
@@ -65,6 +93,11 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
   })
 
   afterEach(async () => {
+    for (const id of createdResizedMediaIDs) {
+      await payload.delete({ id, collection: resizedMediaSlug, overrideAccess: true })
+    }
+    createdResizedMediaIDs.length = 0
+
     const { blobs } = await list()
     if (blobs.length > 0) {
       await del(blobs.map((b) => b.url))
@@ -73,30 +106,107 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
 
   it('should upload a file via client upload flow', async () => {
     const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
-    const pathname = 'image.png'
+    const issued = await issueClientUpload({
+      collectionSlug: 'media',
+      filename: 'image.png',
+      mimeType: 'image/png',
+    })
 
-    const result = await upload(pathname, new Blob([file], { type: 'image/png' }), {
+    const result = await upload(issued.pathname, new Blob([file], { type: 'image/png' }), {
       access: 'public',
-      clientPayload: 'media',
+      clientPayload: JSON.stringify({
+        collectionSlug: 'media',
+        mimeType: 'image/png',
+        signedReceipt: issued.clientUploadContext.signedReceipt,
+      }),
       contentType: 'image/png',
       handleUploadUrl,
     })
 
     expect(result.url).toBeDefined()
-    expect(result.url).toContain(pathname)
+    expect(result.url).toContain(issued.pathname)
 
     const { blobs } = await list()
-    const uploaded = blobs.find((b) => b.pathname === pathname)
+    const uploaded = blobs.find((b) => b.pathname === issued.pathname)
     expect(uploaded).toBeDefined()
+  })
+
+  it.each([
+    ['resized', 'image/png', ''],
+    [
+      'cropped',
+      'image/png',
+      '?uploadEdits[crop][unit]=%25&uploadEdits[crop][x]=0&uploadEdits[crop][y]=0&uploadEdits[crop][width]=50&uploadEdits[crop][height]=50&uploadEdits[heightInPixels]=800&uploadEdits[widthInPixels]=800',
+    ],
+    ['mislabeled', 'image/jpeg', ''],
+  ])('should store processed bytes for a %s client upload', async (_, mimeType, query) => {
+    const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+    const issued = await issueClientUpload({
+      collectionSlug: resizedMediaSlug,
+      filename: 'image.png',
+      mimeType,
+    })
+
+    await upload(issued.pathname, new Blob([file], { type: mimeType }), {
+      access: 'public',
+      clientPayload: JSON.stringify({
+        collectionSlug: resizedMediaSlug,
+        mimeType,
+        signedReceipt: issued.clientUploadContext.signedReceipt,
+      }),
+      contentType: mimeType,
+      handleUploadUrl,
+    })
+
+    const formData = new FormData()
+    formData.append('_payload', JSON.stringify({}))
+    formData.append(
+      'file',
+      JSON.stringify({
+        clientUploadContext: issued.clientUploadContext,
+        collectionSlug: resizedMediaSlug,
+        filename: issued.filename,
+        mimeType,
+        size: file.length,
+      }),
+    )
+
+    const response = await restClient.POST(`/${resizedMediaSlug}${query}`, { body: formData })
+
+    expect(response.status).toBe(201)
+
+    const { doc } = await response.json()
+
+    createdResizedMediaIDs.push(doc.id)
+
+    const { blobs } = await list()
+    const storedMain = blobs.find(({ pathname }) => pathname.endsWith(`/${doc.filename}`))
+    const storedThumbnail = blobs.find(({ pathname }) =>
+      pathname.endsWith(`/${doc.sizes.thumbnail.filename}`),
+    )
+
+    expect(doc.width).toBe(10)
+    expect(storedMain?.size).toBe(doc.filesize)
+    expect(storedThumbnail?.size).toBe(doc.sizes.thumbnail.filesize)
   })
 
   it("should reject upload when 'x-disallow-access' header is set", async () => {
     const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+    const issued = await issueClientUpload({
+      collectionSlug: 'media',
+      filename: 'image.png',
+      mimeType: 'image/png',
+    })
 
     await expect(
-      upload('image.png', new Blob([file], { type: 'image/png' }), {
+      upload(issued.pathname, new Blob([file], { type: 'image/png' }), {
         access: 'public',
-        clientPayload: 'media',
+        clientPayload: JSON.stringify({
+          collectionSlug: 'media',
+          mimeType: 'image/png',
+          signedReceipt: issued.clientUploadContext.signedReceipt,
+        }),
+        contentType: 'image/png',
         handleUploadUrl,
         headers: { 'x-disallow-access': 'true' },
       }),
@@ -114,13 +224,56 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
     ).rejects.toThrow()
   })
 
+  it('should reject legacy payloads without an issued receipt', async () => {
+    const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+
+    await expect(
+      upload('image.png', new Blob([file], { type: 'image/png' }), {
+        access: 'public',
+        clientPayload: 'media',
+        contentType: 'image/png',
+        handleUploadUrl,
+      }),
+    ).rejects.toThrow()
+
+    await expect(
+      upload('legacy-image.png', new Blob([file], { type: 'image/png' }), {
+        access: 'public',
+        clientPayload: 'legacy-media',
+        contentType: 'image/png',
+        handleUploadUrl,
+      }),
+    ).rejects.toThrow()
+  })
+
+  it.each([
+    ['SVG', 'reference.svg', 'image/svg+xml'],
+    ['XML', 'reference.xml', 'application/xml'],
+  ])('should keep %s files in the document upload path', async (_, filename, mimeType) => {
+    await expect(
+      issueClientUpload({
+        collectionSlug: 'media',
+        filename,
+        mimeType,
+      }),
+    ).rejects.toThrow()
+  })
+
   it('should upload a file with prefix via client upload flow', async () => {
     const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
-    const pathname = `${prefix}/image.png`
+    const issued = await issueClientUpload({
+      collectionSlug: 'media-with-prefix',
+      filename: 'image.png',
+      mimeType: 'image/png',
+    })
 
-    const result = await upload(pathname, new Blob([file], { type: 'image/png' }), {
+    const result = await upload(issued.pathname, new Blob([file], { type: 'image/png' }), {
       access: 'public',
-      clientPayload: 'media-with-prefix',
+      clientPayload: JSON.stringify({
+        collectionSlug: 'media-with-prefix',
+        mimeType: 'image/png',
+        signedReceipt: issued.clientUploadContext.signedReceipt,
+      }),
       contentType: 'image/png',
       handleUploadUrl,
     })
@@ -130,7 +283,7 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
     expect(result.url).toContain('image.png')
 
     const { blobs } = await list()
-    const uploaded = blobs.find((b) => b.pathname === pathname)
+    const uploaded = blobs.find((b) => b.pathname === issued.pathname)
     expect(uploaded).toBeDefined()
   })
 })

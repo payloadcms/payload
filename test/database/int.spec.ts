@@ -15,6 +15,7 @@ import {
   migrateVersionsV1_V2,
 } from '@payloadcms/db-mongodb/migration-utils'
 import { randomUUID } from 'crypto'
+import { sql } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
@@ -42,6 +43,7 @@ import { devUser } from '../credentials.js'
 import { seed } from './seed.js'
 import {
   customIDsSlug,
+  customSchemaSlug,
   defaultValuesSlug,
   errorOnUnnamedFieldsSlug,
   fieldsPersistanceSlug,
@@ -558,6 +560,35 @@ describe('database', () => {
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {},
+      })
+    })
+
+    describe('conditional updateOne', { db: 'drizzle' }, () => {
+      it('should allow exactly one concurrent compare-and-set winner', async () => {
+        const post = await payload.create({
+          collection: postsSlug,
+          data: { title: 'pending' },
+        })
+
+        const results = await Promise.all(
+          Array.from({ length: 20 }, () =>
+            payload.db.updateOne({
+              collection: postsSlug,
+              data: { title: 'processing' },
+              options: { atomic: true },
+              where: {
+                and: [{ id: { equals: post.id } }, { title: { equals: 'pending' } }],
+              },
+            }),
+          ),
+        )
+
+        expect(results.filter(Boolean)).toHaveLength(1)
+
+        await payload.db.deleteMany({
+          collection: postsSlug,
+          where: { id: { equals: post.id } },
+        })
       })
     })
 
@@ -2098,6 +2129,86 @@ describe('database', () => {
       }
     })
 
+    describe(
+      'locale table _parent_id index (Postgres)',
+      { db: (adapter) => adapter.startsWith('postgres') || adapter.startsWith('vercel-postgres') },
+      () => {
+        // Returns the parenthesized column list of the dedicated (non-unique) `_parent_id`
+        // index on a locale table, e.g. "_parent_id". Throws if the index is missing.
+        const getParentIDIndexColumns = async (tableName: string): Promise<string> => {
+          const db = payload.db as PostgresAdapter
+          const schemaName = db.schemaName || 'public'
+          const result = await db.drizzle.execute(sql`
+            SELECT indexdef FROM pg_indexes
+            WHERE schemaname = ${schemaName}
+              AND tablename = ${tableName}
+              AND indexdef ILIKE '%(_parent_id)%'
+              AND indexdef NOT ILIKE '%unique%'
+          `)
+
+          const indexdef = result.rows[0]?.indexdef as string | undefined
+
+          if (!indexdef) {
+            throw new Error(`Expected a non-unique _parent_id index on ${tableName}`)
+          }
+
+          return indexdef.slice(indexdef.lastIndexOf('(') + 1, indexdef.lastIndexOf(')'))
+        }
+
+        for (const tableName of ['customs_locales', '_customs_v_locales']) {
+          it(`should create a dedicated _parent_id index on ${tableName}`, async () => {
+            const columns = await getParentIDIndexColumns(tableName)
+
+            expect(columns.replaceAll('"', '').trim()).toBe('_parent_id')
+          })
+        }
+      },
+    )
+
+    describe(
+      'locale table _parent_id index (SQLite)',
+      { db: (adapter) => adapter.startsWith('sqlite') },
+      () => {
+        const getParentIDIndexColumns = async (tableName: string): Promise<string> => {
+          const rows = (await payload.db.drizzle.all(
+            sql.raw(
+              `SELECT name, sql FROM sqlite_master WHERE type='index' AND tbl_name='${tableName}'`,
+            ),
+          )) as { name: string; sql: null | string }[]
+
+          // Match on the index's column list rather than the whole statement — the table name
+          // `${tableName}` itself contains `_locale`, so substring checks on `sql` are unreliable.
+          const normalizeColumns = (indexSql: string): string =>
+            indexSql
+              .slice(indexSql.lastIndexOf('(') + 1, indexSql.lastIndexOf(')'))
+              .replaceAll('`', '')
+              .replaceAll('"', '')
+              .replaceAll(' ', '')
+
+          const indexdef = rows.find(
+            (row) =>
+              typeof row.sql === 'string' &&
+              !row.sql.toLowerCase().includes('unique') &&
+              normalizeColumns(row.sql) === '_parent_id',
+          )?.sql
+
+          if (!indexdef) {
+            throw new Error(`Expected a non-unique _parent_id index on ${tableName}`)
+          }
+
+          return normalizeColumns(indexdef)
+        }
+
+        for (const tableName of ['customs_locales', '_customs_v_locales']) {
+          it(`should create a dedicated _parent_id index on ${tableName}`, async () => {
+            const columns = await getParentIDIndexColumns(tableName)
+
+            expect(columns).toBe('_parent_id')
+          })
+        }
+      },
+    )
+
     it('should create and read doc with custom db names', async () => {
       const relationA = await payload.create({
         collection: 'relation-a',
@@ -2144,6 +2255,66 @@ describe('database', () => {
       expect(doc.array[0].localizedText).toStrictEqual('goodbye')
       expect(doc.blocks[0].text).toStrictEqual('hello')
       expect(doc.blocks[0].localizedText).toStrictEqual('goodbye')
+    })
+
+    it('should preserve omitted hasMany selects when updating an array with db.updateOne', async () => {
+      const doc = await payload.create({
+        collection: customSchemaSlug,
+        data: {
+          array: [{ text: 'array row' }],
+          select: ['a', 'b'],
+        },
+      })
+
+      await payload.db.updateOne({
+        collection: customSchemaSlug,
+        id: doc.id,
+        data: {
+          array: [],
+        },
+      })
+
+      const updated = await payload.findByID({
+        collection: customSchemaSlug,
+        id: doc.id,
+      })
+
+      expect(updated.array).toHaveLength(0)
+      expect(updated.select).toStrictEqual(['a', 'b'])
+
+      await payload.delete({
+        collection: customSchemaSlug,
+        id: doc.id,
+      })
+    })
+
+    it('should clear hasMany selects when provided as an empty array to db.updateOne', async () => {
+      const doc = await payload.create({
+        collection: customSchemaSlug,
+        data: {
+          select: ['a', 'b'],
+        },
+      })
+
+      await payload.db.updateOne({
+        collection: customSchemaSlug,
+        id: doc.id,
+        data: {
+          select: [],
+        },
+      })
+
+      const updated = await payload.findByID({
+        collection: customSchemaSlug,
+        id: doc.id,
+      })
+
+      expect(updated.select).toHaveLength(0)
+
+      await payload.delete({
+        collection: customSchemaSlug,
+        id: doc.id,
+      })
     })
 
     it('arrays should work with both long field names and dbName', async () => {
@@ -3813,6 +3984,19 @@ describe('database', () => {
     })
 
     it('should allow to sort by a virtual field with a refence, Local / GraphQL', async () => {
+      // The `migrate:fresh` test earlier in this file drops the entire database, which removes
+      // the admin user backing the REST client's session. Re-authenticate so the GraphQL request
+      // below has a logged-in user for the field-level access checks the sort validation performs.
+      const { docs: existingUsers } = await payload.find({
+        collection: 'users',
+        limit: 1,
+        where: { email: { equals: devUser.email } },
+      })
+      if (existingUsers.length === 0) {
+        await payload.create({ collection: 'users', data: devUser })
+      }
+      await restClient.login({ slug: 'users', credentials: devUser })
+
       const post_1 = await payload.create({ collection: 'posts', data: { title: 'A' } })
       const post_2 = await payload.create({ collection: 'posts', data: { title: 'B' } })
       const doc_1 = await payload.create({

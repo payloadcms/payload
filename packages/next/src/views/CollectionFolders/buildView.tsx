@@ -43,6 +43,7 @@ export const buildCollectionFolderView = async (
     params,
     query: queryFromArgs,
     searchParams,
+    user: userWithReadAccess,
   } = args
 
   const {
@@ -55,7 +56,6 @@ export const buildCollectionFolderView = async (
       payload,
       payload: { config },
       query: queryFromReq,
-      user,
     },
     visibleEntities,
   } = initPageResult
@@ -145,7 +145,7 @@ export const buildCollectionFolderView = async (
       permissions,
       searchParams,
       subfolders,
-      user,
+      user: userWithReadAccess,
     }
 
     // We could support slots in the folder view in the future

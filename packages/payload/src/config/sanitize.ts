@@ -369,7 +369,9 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   if (schedulePublishCollections.length || schedulePublishGlobals.length) {
     ;((config.jobs ??= {} as SanitizedJobsConfig).tasks ??= []).push(
       getSchedulePublishTask({
-        adminUserSlug: config.admin!.user,
+        authCollectionSlugs: config
+          .collections!.filter((collection) => Boolean(collection.auth))
+          .map(({ slug }) => slug),
         collections: schedulePublishCollections,
         globals: schedulePublishGlobals,
       }),

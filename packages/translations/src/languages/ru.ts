@@ -57,6 +57,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     newPassword: 'Новый пароль',
     passed: 'Аутентификация пройдена',
     passwordResetSuccessfully: 'Сброс пароля успешно выполнен.',
+    resend: 'Отправить повторно',
     resetPassword: 'Сброс пароля',
     resetPasswordExpiration: 'Сброс пароля по истечении срока действия',
     resetPasswordToken: 'Токен сброса пароля',

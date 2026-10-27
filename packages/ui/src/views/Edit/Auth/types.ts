@@ -10,7 +10,7 @@ export type Props = {
   readOnly: boolean
   requirePassword?: boolean
   setValidateBeforeSubmit: (validate: boolean) => void
-  useAPIKey?: boolean
+  useAPIKey?: SanitizedCollectionConfig['auth']['useAPIKey']
   username: string
   verify?: boolean
 }

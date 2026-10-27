@@ -1,9 +1,11 @@
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { Access, AccessResult } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { Forbidden } from '../errors/index.js'
 
 type OperationArgs = {
+  collectionConfig?: SanitizedCollectionConfig
   data?: any
   disableErrors?: boolean
   id?: number | string
@@ -11,12 +13,13 @@ type OperationArgs = {
   req: PayloadRequest
 }
 export const executeAccess = async (
-  { id, data, disableErrors, isReadingStaticFile = false, req }: OperationArgs,
+  { id, collectionConfig, data, disableErrors, isReadingStaticFile = false, req }: OperationArgs,
   access: Access,
 ): Promise<AccessResult> => {
   if (access) {
     const resolvedConstraint = await access({
       id,
+      collectionConfig,
       data,
       isReadingStaticFile,
       req,

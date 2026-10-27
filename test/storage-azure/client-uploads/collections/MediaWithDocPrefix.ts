@@ -4,9 +4,6 @@ export const mediaWithDocPrefixSlug = 'media-with-doc-prefix'
 
 export const MediaWithDocPrefix: CollectionConfig = {
   slug: mediaWithDocPrefixSlug,
-  upload: {
-    filenameCompoundIndex: ['prefix', 'filename'],
-  },
   fields: [
     {
       name: 'prefix',
@@ -14,4 +11,8 @@ export const MediaWithDocPrefix: CollectionConfig = {
       defaultValue: () => `doc-${Math.random().toString(36).slice(2, 10)}`,
     },
   ],
+  upload: {
+    filenameCompoundIndex: ['prefix', 'filename'],
+    imageSizes: [{ name: 'thumbnail', height: 100, width: 100 }],
+  },
 }

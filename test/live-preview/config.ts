@@ -8,6 +8,7 @@ import { Categories } from './collections/Categories.js'
 import { CollectionLevelConfig } from './collections/CollectionLevelConfig.js'
 import { ConditionalURL } from './collections/ConditionalURL.js'
 import { CustomLivePreview } from './collections/CustomLivePreview.js'
+import { ForbiddenURL } from './collections/ForbiddenURL.js'
 import { Media } from './collections/Media.js'
 import { OpenByDefault } from './collections/OpenByDefault.js'
 import { Pages } from './collections/Pages.js'
@@ -71,6 +72,7 @@ export default buildConfigWithDefaults({
     StaticURLCollection,
     CustomLivePreview,
     ConditionalURL,
+    ForbiddenURL,
   ],
   globals: [Header, Footer],
   onInit: seed,

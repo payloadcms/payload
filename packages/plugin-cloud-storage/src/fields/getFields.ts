@@ -6,6 +6,7 @@ import type { GeneratedAdapter, GenerateFileURL } from '../types.js'
 
 import { getAfterReadHook } from '../hooks/afterRead.js'
 import { getBeforeChangeHook } from '../hooks/beforeChange.js'
+import { getNormalizeUploadPrefixFieldHook } from '../hooks/normalizeUploadPrefix.js'
 
 interface Args {
   adapter?: GeneratedAdapter
@@ -47,6 +48,24 @@ export const getFields = ({
     name: 'prefix',
     type: 'text',
     admin: {
+      disableBulkEdit: true,
+      disableGroupBy: true,
+      disableListColumn: true,
+      disableListFilter: true,
+      hidden: true,
+      readOnly: true,
+    },
+  }
+
+  // Unique storage object key
+  const baseObjectKeyField: TextField = {
+    name: '_objectKey',
+    type: 'text',
+    admin: {
+      disableBulkEdit: true,
+      disableGroupBy: true,
+      disableListColumn: true,
+      disableListFilter: true,
       hidden: true,
       readOnly: true,
     },
@@ -203,8 +222,24 @@ export const getFields = ({
       defaultValue:
         existingPrefixField?.defaultValue ??
         (useCompositePrefixes ? '' : prefix ? path.posix.join(prefix) : ''),
+      hooks: {
+        ...existingPrefixField?.hooks,
+        beforeChange: [
+          ...(existingPrefixField?.hooks?.beforeChange || []),
+          getNormalizeUploadPrefixFieldHook({ collectionPrefix: prefix, useCompositePrefixes }),
+        ],
+      },
     } as TextField)
   }
+
+  const existingObjectKeyFieldIndex = fields.findIndex(
+    (existingField) => 'name' in existingField && existingField.name === '_objectKey',
+  )
+  if (existingObjectKeyFieldIndex > -1) {
+    fields.splice(existingObjectKeyFieldIndex, 1)
+  }
+
+  fields.push({ ...baseObjectKeyField } as TextField)
 
   return fields
 }

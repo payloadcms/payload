@@ -15,17 +15,24 @@ concurrency:
 env:
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
+  NODE_OPTIONS: --max-old-space-size=4096
+  NODE_HEAP_HIGH: --max-old-space-size=8192
+
+permissions:
+  contents: read
 
 jobs:
   changes:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
+      contents: read
       pull-requests: read
     outputs:
       needs_build: ${{ steps.filter.outputs.needs_build }}
       needs_tests: ${{ steps.filter.outputs.needs_tests }}
       templates: ${{ steps.filter.outputs.templates }}
       build_approvals: ${{ steps.filter.outputs.build_approvals }}
+      needs_sbom: ${{ steps.filter.outputs.needs_sbom }}
     steps:
       # https://github.com/actions/virtual-environments/issues/1187
       - name: tune linux network
@@ -38,6 +45,8 @@ jobs:
           filters: |
             needs_build:
               - '.github/workflows/main.yml'
+              - '.github/actions/start-services/**'
+              - '.github/actions/setup/**'
               - 'packages/**'
               - 'test/**'
               - 'pnpm-lock.yaml'
@@ -58,15 +67,31 @@ jobs:
               # the root lockfile; that, plus the allowlist itself, is what can introduce drift.
               - 'pnpm-lock.yaml'
               - 'packages/create-payload-app/src/lib/configure-pnpm-builds.ts'
+            # Inputs of the release SBOMs (the dependency graph, the pnpm version, the generator) and this job.
+            needs_sbom:
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'packages/*/package.json'
+              - '.tool-versions'
+              - 'tools/releaser/src/release-sbom.ts'
+              - 'tools/releaser/src/lib/sbom/**'
+              - 'tools/releaser/src/lib/publishList.ts'
+              - 'tools/releaser/src/lib/getPackageDetails.ts'
+              - 'tools/releaser/package.json'
+              - 'tools/constants/**'
+              - 'package.json'
+              - '.github/actions/setup/**'
+              - '.github/workflows/main.yml'
       - name: Log filter results
         run: |
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
           echo "needs_tests: ${{ steps.filter.outputs.needs_tests }}"
           echo "templates: ${{ steps.filter.outputs.templates }}"
           echo "build_approvals: ${{ steps.filter.outputs.build_approvals }}"
+          echo "needs_sbom: ${{ steps.filter.outputs.needs_sbom }}"
 
   lint:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v5
         with:
@@ -77,6 +102,8 @@ jobs:
 
       - name: Lint TypeScript/JavaScript
         run: pnpm lint -- --quiet
+        env:
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
 
       - name: Lint SCSS
         run: pnpm run lint:scss
@@ -84,7 +111,7 @@ jobs:
   build:
     needs: changes
     if: needs.changes.outputs.needs_build == 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
 
     steps:
       - uses: actions/checkout@v5
@@ -102,8 +129,28 @@ jobs:
           path: ./*
           key: ${{ github.sha }}
 
-  tests-unit:
+  # Catches SBOM generation regressions before a release. Push to 3.x only, not part of all-green.
+  sbom:
+    needs: changes
+    if: github.event_name == 'push' && needs.changes.outputs.needs_sbom == 'true'
     runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+
+      - name: Generate SBOMs
+        run: pnpm release-sbom --out-dir "$RUNNER_TEMP/sboms"
+
+  tests-unit:
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-26.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true'
     steps:
@@ -117,10 +164,13 @@ jobs:
       - name: Unit Tests
         run: pnpm test:unit
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
 
   tests-types:
-    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-26.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true'
     steps:
@@ -134,12 +184,12 @@ jobs:
       - name: Types Tests
         run: pnpm test:types --target '>=5.7'
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
 
   # Generate the integration test matrix from TypeScript config
   int-matrix:
     name: Setup Int Matrix
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     outputs:
       matrix: ${{ steps.generate.outputs.matrix }}
     steps:
@@ -160,7 +210,10 @@ jobs:
           echo "matrix=$matrix" >> $GITHUB_OUTPUT
 
   tests-int:
-    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-26.04
     needs: [changes, build, int-matrix]
     if: needs.changes.outputs.needs_tests == 'true'
     name: int-${{ matrix.database }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}
@@ -204,7 +257,7 @@ jobs:
       - name: Integration Tests
         run: pnpm test:int --shard=${{ matrix.shard }}/${{ matrix.total-shards }}
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
@@ -213,7 +266,7 @@ jobs:
   # Generate the E2E test matrix from TypeScript config
   e2e-matrix:
     name: Setup E2E Matrix
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     outputs:
       matrix: ${{ steps.generate.outputs.matrix }}
     steps:
@@ -235,8 +288,11 @@ jobs:
 
   # Prepare prod test environment once, shared by all E2E shards
   e2e-prep:
+    permissions:
+      actions: read
+      contents: read
     name: E2E Prep
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true'
     steps:
@@ -263,7 +319,10 @@ jobs:
           if-no-files-found: error
 
   tests-e2e:
-    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-26.04
     needs: [e2e-matrix, e2e-prep]
     name: E2E - ${{ matrix.suite }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}${{ matrix.cacheComponents && ' [cacheComponents]' || '' }}
     timeout-minutes: 45
@@ -382,7 +441,10 @@ jobs:
 
   # Build listed templates with packed local packages and then runs their int and e2e tests
   build-and-test-templates:
-    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-26.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_build == 'true'
     name: build-template-${{ matrix.template }}-${{ matrix.database }}
@@ -432,7 +494,7 @@ jobs:
           pnpm run script:pack --all --dest templates/${{ matrix.template }}
           pnpm run script:build-template-with-local-pkgs ${{ matrix.template }} $DB_CONNECTION
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           DB_CONNECTION: ${{ steps.db.outputs.POSTGRES_URL || steps.db.outputs.MONGODB_URL }}
 
       - name: Store Playwright's Version
@@ -461,7 +523,7 @@ jobs:
       - name: Runs Template Int Tests
         run: pnpm --filter ${{ matrix.template }} run test:int
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
@@ -469,7 +531,7 @@ jobs:
       - name: Runs Template E2E Tests
         run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.template }}.json pnpm --filter ${{ matrix.template }} test:e2e
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
@@ -478,7 +540,7 @@ jobs:
   # Fails if create-payload-app's build-script allowlist drifts from the blank template's deps:
   # scaffolds blank, installs it standalone under pnpm v11, and asserts no ERR_PNPM_IGNORED_BUILDS.
   check-template-build-approvals:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: [changes, build]
     if: needs.changes.outputs.build_approvals == 'true'
     steps:
@@ -491,7 +553,10 @@ jobs:
         run: pnpm --filter scripts check-template-build-approvals
 
   tests-type-generation:
-    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-26.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true'
     steps:
@@ -515,7 +580,7 @@ jobs:
   # concurrent CI runs and removing the need for shared credentials.
   tests-content-api:
     name: Content API Tests
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: [changes, build]
     # Skip fork PRs: this job uses credentials fork workflows must not reach.
     if: needs.changes.outputs.needs_tests == 'true' && github.event.pull_request.head.repo.fork == false
@@ -524,6 +589,7 @@ jobs:
     # with --shard); `test:int:summary` cannot shard.
     continue-on-error: true
     permissions:
+      actions: read
       id-token: write
       contents: read
     services:
@@ -637,7 +703,7 @@ jobs:
         continue-on-error: true
         run: pnpm test:int:summary
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           PAYLOAD_DATABASE: content-api
 
       - name: Dump Content API logs on failure
@@ -647,7 +713,7 @@ jobs:
   all-green:
     name: All Green
     if: always()
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs:
       [
         lint,
@@ -666,7 +732,7 @@ jobs:
         run: exit 1
 
   analyze:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs: [changes, build]
     timeout-minutes: 5
     permissions:

@@ -40,11 +40,12 @@ test.describe('MCP Plugin', () => {
     const userId = loginData.user.id
 
     // Create an API key with permissions to call tools/list
+    apiKey = randomUUID()
     const createKeyRes = await request.post(`${serverURL}/api/payload-mcp-api-keys`, {
       data: {
         enableAPIKey: true,
         label: 'E2E Test Key',
-        apiKey: randomUUID(),
+        apiKey,
         user: userId,
         posts: { create: true, find: true, update: true, delete: true },
         products: { find: true },
@@ -54,8 +55,6 @@ test.describe('MCP Plugin', () => {
       },
     })
     expect(createKeyRes.ok()).toBeTruthy()
-    const keyData = await createKeyRes.json()
-    apiKey = keyData.doc.apiKey
   })
 
   test('should not poison the Next.js runtime after MCP requests', async ({ request }) => {

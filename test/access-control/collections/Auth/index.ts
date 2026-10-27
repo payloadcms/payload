@@ -4,6 +4,10 @@ import { authSlug } from '../../shared.js'
 
 export const Auth: CollectionConfig = {
   slug: authSlug,
+  access: {
+    create: () => true,
+    read: () => true,
+  },
   auth: {
     verify: true,
     // loginWithUsername: {
@@ -11,6 +15,7 @@ export const Auth: CollectionConfig = {
     //   allowEmailLogin: true,
     // },
   },
+  disableDuplicate: false,
   fields: [
     {
       name: 'email',
@@ -36,9 +41,10 @@ export const Auth: CollectionConfig = {
       type: 'text',
       hidden: true,
       access: {
-        update: ({ req: { user }, data }) => {
+        update: ({ req: { user }, id }) => {
           const isUserOrSelf =
-            (user && 'roles' in user && user?.roles?.includes('admin')) || user?.id === data?.id
+            (user && 'roles' in user && user?.roles?.includes('admin')) ||
+            (user?.collection === authSlug && user?.id === id)
           return isUserOrSelf
         },
       },
@@ -46,6 +52,14 @@ export const Auth: CollectionConfig = {
     {
       name: 'roles',
       type: 'select',
+      access: {
+        create: ({ req }) =>
+          Boolean(req.user?.collection === 'users' && req.user.roles?.includes('admin')),
+        read: ({ req }) =>
+          Boolean(req.user?.collection === 'users' && req.user.roles?.includes('admin')),
+        update: ({ req }) =>
+          Boolean(req.user?.collection === 'users' && req.user.roles?.includes('admin')),
+      },
       defaultValue: ['user'],
       hasMany: true,
       options: ['admin', 'user'],

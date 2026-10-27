@@ -1,5 +1,6 @@
 import type { UTApi } from 'uploadthing/server'
 
+import { openAsBlob } from 'fs'
 import { APIError } from 'payload'
 import { UTFile } from 'uploadthing/server'
 
@@ -12,6 +13,7 @@ interface UploadFileArgs {
   data: Record<string, unknown>
   filename: string
   mimeType: string
+  tempFilePath?: string
   utApi: UTApi
 }
 
@@ -22,6 +24,7 @@ export async function uploadFile({
   data,
   filename,
   mimeType,
+  tempFilePath,
   utApi,
 }: UploadFileArgs): Promise<Record<string, unknown>> {
   try {
@@ -34,7 +37,9 @@ export async function uploadFile({
       await utApi.deleteFiles(clientUploadContext.key)
     }
 
-    const blob = new Blob([buffer], { type: mimeType })
+    const blob = tempFilePath
+      ? await openAsBlob(tempFilePath, { type: mimeType })
+      : new Blob([buffer], { type: mimeType })
     const res = await utApi.uploadFiles(new UTFile([blob], filename), { acl })
 
     if (res.error) {

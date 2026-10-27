@@ -4,7 +4,10 @@ import { _internal_renderFieldHandler, copyDataFromLocaleHandler } from '@payloa
 import { buildFormStateHandler } from '@payloadcms/ui/utilities/buildFormState'
 import { buildTableStateHandler } from '@payloadcms/ui/utilities/buildTableState'
 import { getFolderResultsComponentAndDataHandler } from '@payloadcms/ui/utilities/getFolderResultsComponentAndData'
-import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
+import {
+  getUpcomingScheduledPublishHandler,
+  schedulePublishHandler,
+} from '@payloadcms/ui/utilities/schedulePublishHandler'
 
 import { getDefaultLayoutHandler } from '../views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.js'
 import { renderWidgetHandler } from '../views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.js'
@@ -19,6 +22,7 @@ const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   'form-state': buildFormStateHandler,
   'get-default-layout': getDefaultLayoutHandler,
   'get-folder-results-component-and-data': getFolderResultsComponentAndDataHandler,
+  'get-upcoming-scheduled-publish': getUpcomingScheduledPublishHandler,
   'render-document': renderDocumentHandler,
   'render-document-slots': renderDocumentSlotsHandler,
   'render-field': _internal_renderFieldHandler,
@@ -38,7 +42,7 @@ export const handleServerFunctions: ServerFunctionHandler = async (args) => {
     serverFunctions: extraServerFunctions,
   } = args
 
-  const { cookies, locale, permissions, req } = await initReq({
+  const { cookies, locale, permissions, req, user } = await initReq({
     configPromise,
     importMap,
     key: 'RootLayout',
@@ -51,6 +55,7 @@ export const handleServerFunctions: ServerFunctionHandler = async (args) => {
     locale,
     permissions,
     req,
+    user,
   }
 
   const fn = extraServerFunctions?.[fnKey] || baseServerFunctions[fnKey]
