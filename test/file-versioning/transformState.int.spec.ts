@@ -13,6 +13,8 @@ import type { UploadTransforms } from './payload-types.js'
 import { test } from '../__helpers/int/vitest.js'
 import { legacyFocalPoints } from './seedLegacyMedia.js'
 import {
+  draftMediaDir,
+  draftMediaSlug,
   legacyMediaDir,
   legacyMediaSlug,
   transformedMediaDir,
@@ -31,6 +33,7 @@ test.suite('File transform state', { config: './config.ts' }, () => {
   test.afterEach(async () => {
     await rm(transformedMediaDir, { force: true, recursive: true })
     await rm(legacyMediaDir, { force: true, recursive: true })
+    await rm(draftMediaDir, { force: true, recursive: true })
   })
 
   const createImage = async ({
@@ -518,4 +521,98 @@ test.suite('File transform state', { config: './config.ts' }, () => {
       expect(restored._transforms).toBeNull()
     },
   )
+
+  test('should keep the cropped file and drop the crop when duplicating', async ({ payload }) => {
+    const created = await createImage({
+      payload,
+      _transforms: {
+        crop: { height: 600, width: 800, x: 100, y: 200 },
+        focalPoint: { x: 20, y: 30 },
+      },
+    })
+
+    // The copy is made from the cropped file, so the crop is already part of its files.
+    const copy = await payload.duplicate({ id: created.id, collection: transformedMediaSlug })
+
+    expect(copy).toMatchObject({ height: 600, width: 800 })
+    expect(copy._transforms).toEqual({ focalPoint: { x: 20, y: 30 } })
+  })
+
+  test('should apply transform state to every document in a bulk update', async ({ payload }) => {
+    const bytes = await readFile(imageFixture)
+    // Different upload names: bulk updates of same-named files clash on main (a separate fix).
+    const createNamed = (name: string) =>
+      payload.create({
+        collection: transformedMediaSlug,
+        data: { alt: 'source' },
+        file: { name, data: bytes, mimetype: 'image/png', size: bytes.length },
+      })
+    const first = await createNamed('first.png')
+    const second = await createNamed('second.png')
+
+    const { docs } = await payload.update({
+      collection: transformedMediaSlug,
+      data: { _transforms: { crop: { height: 600, width: 800, x: 0, y: 0 } } },
+      where: { id: { in: [first.id, second.id] } },
+    })
+
+    expect(docs).toHaveLength(2)
+    for (const doc of docs) {
+      expect(doc).toMatchObject({ height: 600, width: 800 })
+      expect(doc._transforms).toEqual({ crop: { height: 600, width: 800, x: 0, y: 0 } })
+    }
+  })
+
+  test('should keep the published transform state until a draft is published', async ({
+    payload,
+  }) => {
+    const bytes = await readFile(imageFixture)
+    const created = await payload.create({
+      collection: draftMediaSlug,
+      data: { _status: 'published', _transforms: { focalPoint: { x: 20, y: 30 } } },
+      file: { name: 'draft.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+    })
+
+    await payload.update({
+      id: created.id,
+      collection: draftMediaSlug,
+      data: { _transforms: { focalPoint: { x: 70, y: 80 } } },
+      draft: true,
+    })
+
+    const published = await payload.findByID({ id: created.id, collection: draftMediaSlug })
+    const draft = await payload.findByID({
+      id: created.id,
+      collection: draftMediaSlug,
+      draft: true,
+    })
+
+    expect(published._transforms).toEqual({ focalPoint: { x: 20, y: 30 } })
+    expect(draft._transforms).toEqual({ focalPoint: { x: 70, y: 80 } })
+
+    await payload.update({
+      id: created.id,
+      collection: draftMediaSlug,
+      data: { _status: 'published' },
+    })
+
+    const republished = await payload.findByID({ id: created.id, collection: draftMediaSlug })
+
+    expect(republished._transforms).toEqual({ focalPoint: { x: 70, y: 80 } })
+  })
+
+  test('should return transform state as JSON through GraphQL', async ({ payload, restClient }) => {
+    const created = await createImage({ payload, _transforms: { focalPoint: { x: 20, y: 30 } } })
+
+    const response = await restClient.GRAPHQL_POST({
+      body: JSON.stringify({
+        // SQL IDs are numbers and MongoDB IDs are strings, so let JSON quote them as needed.
+        query: `query { FileVersionedTransformedMedia(id: ${JSON.stringify(created.id)}) { _transforms } }`,
+      }),
+    })
+    const { data, errors } = await response.json()
+
+    expect(errors).toBeUndefined()
+    expect(data.FileVersionedTransformedMedia._transforms).toEqual({ focalPoint: { x: 20, y: 30 } })
+  })
 })
