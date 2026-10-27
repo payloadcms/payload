@@ -12,6 +12,7 @@ import type { FileData, FileSizes, FileToSave, UploadEdits } from './types.js'
 
 import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
 import { deepCopyObject } from '../utilities/deepCopyObject.js'
+import { deepFreeze } from '../utilities/deepFreeze.js'
 import { formatAdminURL } from '../utilities/formatAdminURL.js'
 import { isNumber } from '../utilities/isNumber.js'
 import { canResizeImage } from './canResizeImage.js'
@@ -26,7 +27,6 @@ import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
 import { hasFullFileContents } from './hasFullFileContents.js'
 import { isProcessableImage } from './isProcessableImage.js'
 import { parseFilename } from './parseFilename.js'
-import { createDocumentSnapshot } from './transformers/createDocumentSnapshot.js'
 import { planTransformerPipeline } from './transformers/planTransformerPipeline.js'
 import { transformUploadFile } from './transformers/transformUploadFile.js'
 import {
@@ -367,7 +367,7 @@ const processUpload = async <T>({
     ;({ pipelineDoc, uploadEdits } = await resolveEditsForFile(file))
   }
 
-  const pipelineOriginalDoc = createDocumentSnapshot(pipelineDoc)
+  const pipelineOriginalDoc = deepFreeze(deepCopyObject(pipelineDoc))
 
   if (!disableLocalStorage) {
     await fs.mkdir(staticPath!, { recursive: true })
@@ -463,7 +463,7 @@ const processUpload = async <T>({
             const taskDoc =
               task.fieldPath === 'filename'
                 ? pipelineDoc
-                : (sizeTaskDoc ??= createDocumentSnapshot(pipelineDoc))
+                : (sizeTaskDoc ??= deepFreeze(deepCopyObject(pipelineDoc)))
 
             const { file: taskFile } = await transformUploadFile({
               collectionSlug: collectionConfig.slug,
