@@ -1,6 +1,6 @@
 import type { PayloadRequest, SelectType } from 'payload'
 
-import { createDataloaderCacheKey } from 'payload'
+import { createDataloaderCacheKey, resolveBranch } from 'payload'
 
 type PopulateArguments = {
   collectionSlug: string
@@ -41,6 +41,7 @@ export const populate: PopulateFn = async ({
 
   const doc = await req.payloadDataLoader?.load(
     createDataloaderCacheKey({
+      branch: resolveBranch(req),
       collectionSlug,
       currentDepth: currentDepth! + 1,
       depth,
