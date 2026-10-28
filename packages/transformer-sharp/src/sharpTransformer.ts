@@ -71,8 +71,10 @@ export function sharpTransformer(
         return { canTransform: true, handledTransformKeys: ['crop', 'focalPoint'] }
       }
 
+      // Sharp applies saved transforms at upload time, so it resizes only for the request phase.
       if (
         !dynamicOptions ||
+        args.purpose === 'persisted-default' ||
         (dynamicOptions.collections && !dynamicOptions.collections.includes(args.collectionSlug))
       ) {
         return false

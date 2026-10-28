@@ -484,7 +484,11 @@ const processUpload = async <T>({
               collectionSlug: collectionConfig.slug,
               doc: taskDoc,
               file: task.file ?? originalWebFile!,
-              options: task.options,
+              // A stage that returned no options keeps getting the bridge's task options, as before.
+              getOptions: (transformer) =>
+                transformer === bridgeTransformer || !plan.options.has(transformer)
+                  ? task.options
+                  : plan.options.get(transformer),
               originalDoc: pipelineOriginalDoc,
               originalFile: originalWebFile!,
               pipeline: bridgeTaskPipeline,
@@ -509,7 +513,7 @@ const processUpload = async <T>({
           collectionSlug: collectionConfig.slug,
           doc: pipelineDoc,
           file: originalWebFile,
-          options: undefined,
+          getOptions: (transformer) => plan.options.get(transformer),
           originalDoc: pipelineOriginalDoc,
           originalFile: originalWebFile,
           pipeline,

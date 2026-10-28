@@ -10,10 +10,10 @@ import { createFileSource } from './createFileSource.js'
 
 /**
  * Runs one file through every eligible `transformFile` stage in declaration
- * order. Used both for the ordinary top-level upload call (`options: undefined`)
- * and, via the private v4 bridge's `transform` callback, once per legacy task
- * (the main file, crop output, or a named image size) with that task's own
- * `options`. Retains only the current accumulator — never a history array —
+ * order. Used both for the ordinary top-level upload call (each stage's own
+ * `canTransform` options) and, via the private v4 bridge's `transform` callback,
+ * once per legacy task (the main file, crop output, or a named image size) with
+ * that task's own `options`. Retains only the current accumulator — never a history array —
  * so passing the same `File` through unchanged never copies its buffer.
  *
  * Each stage gets the same `doc`, so later stages see earlier `_transforms` changes. A stage
@@ -25,7 +25,7 @@ export async function transformUploadFile({
   collectionSlug,
   doc,
   file,
-  options,
+  getOptions,
   originalDoc,
   originalFile,
   pipeline,
@@ -36,7 +36,8 @@ export async function transformUploadFile({
   collectionSlug: string
   doc: Document
   file: File
-  options: unknown
+  /** The `options` a stage gets. */
+  getOptions: (transformer: UploadTransformer) => unknown
   originalDoc: Readonly<Document>
   originalFile: File
   pipeline: UploadTransformer[]
@@ -56,7 +57,7 @@ export async function transformUploadFile({
       collectionSlug,
       doc,
       file: accumulator,
-      options,
+      options: getOptions(transformer),
       originalDoc,
       originalSource,
       req,

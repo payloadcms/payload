@@ -129,6 +129,7 @@ export const sanitizeUploadData = <T>(data: T, operation: Operation): T => {
   delete sanitizedData.url
   // Server-owned; never accepted from the caller.
   delete sanitizedData._objectKey
+  delete sanitizedData._stored
   delete sanitizedData.original
 
   // On update, `prefix` is restored from the stored document (file identity); kept on create.

@@ -83,16 +83,31 @@ canTransform: (args: {
   mimeType: string
   operation: 'request' | 'upload'
   originalDoc: Readonly<Document>
+  purpose?: 'persisted-default' | 'request-override'
   req: PayloadRequest
 }) =>
   | boolean
-  | { canTransform: true; handledTransformKeys?: string[] }
-  | Promise<boolean | { canTransform: true; handledTransformKeys?: string[] }>
+  | { canTransform: true; handledTransformKeys?: string[]; options?: TOptions }
+  | Promise<
+      | boolean
+      | { canTransform: true; handledTransformKeys?: string[]; options?: TOptions }
+    >
 ```
 
 `canTransform` must be inexpensive and side-effect-free — it must not fetch the file's source, call an external service, or perform the transformation itself. It only decides eligibility. If you omit it, the transformer is eligible for every request/upload that already passed the MIME filter.
 
 `doc` is the current document. For an upload, it is the document as the operation would save it: the incoming data, merged with the stored document on an update. `originalDoc` is a snapshot of that document, taken before the pipeline runs. This is not the `originalDoc` that hooks receive: on an update, it already includes the incoming data. Both are frozen, so `canTransform` cannot change them. For a dynamic request, both are the stored document.
+
+`purpose` is set only for a dynamic request. It tells which phase Payload is planning (see [Request phases](#request-phases)).
+
+To give the stage data that it found while it decided, return it as `options` in the object form. Payload passes it unchanged as `options` to the same stage's `transformFile` or `handleRequest`. When `canTransform` returns `true`, `options` is `undefined`. A transformer that runs in both request phases gets the options of each phase's own `canTransform` call, so it can tell the phases apart:
+
+```ts
+canTransform: ({ purpose, req }) =>
+  purpose === 'persisted-default'
+    ? { canTransform: true, handledTransformKeys: ['crop'], options: { source: 'saved' } }
+    : { canTransform: true, options: { width: Number(req.searchParams.get('width')) } },
+```
 
 ### Applying saved `_transforms` keys
 
@@ -128,7 +143,7 @@ transformFile: (args: {
   collectionSlug: string
   doc: Document
   file: File
-  options: unknown
+  options: TOptions
   originalDoc: Readonly<Document>
   originalSource: FileSource
   req: PayloadRequest
@@ -139,7 +154,7 @@ transformFile: (args: {
   >
 ```
 
-`transformFile` is a one-file-in, one-file-out primitive — it never writes to storage itself. Payload's upload pipeline calls every eligible transformer's `transformFile` in declaration order, threading the result of one into the next, then persists whatever the pipeline produces. `options` is `undefined` for an ordinary upload.
+`transformFile` is a one-file-in, one-file-out primitive — it never writes to storage itself. Payload's upload pipeline calls every eligible transformer's `transformFile` in declaration order, threading the result of one into the next, then persists whatever the pipeline produces. `options` is what this stage's `canTransform` returned as `options`, or `undefined`. Inside Sharp's processing, a stage that returned no `options` gets Sharp's task object (see the note below).
 
 | Argument         | Description                                                                                                                                                                    |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -210,9 +225,11 @@ There is no whole-file read. A transformer that needs the whole file in memory m
   **Note:** When `sharpTransformer` is registered, it drives every image upload,
   whether or not the collection is listed in its `collections`: every other
   eligible transformer's `transformFile` runs inside Sharp's processing, once
-  for the main file and once for each of the collection's `variants`, and
-  receives Sharp's own task object as `options`. A transformer that should only
-  see the main file must not be combined with Sharp for image uploads.
+  for the main file and once for each of the collection's `variants`. In each of
+  these calls, a stage whose `canTransform` returned `options` gets its own
+  `options`, and a stage that returned none gets Sharp's own task object as
+  `options`. A transformer that should only see the main file must not be
+  combined with Sharp for image uploads.
 </Banner>
 
 Transformers only run on uploads whose full bytes are available. When a client uploads directly to cloud storage (`clientUploads`) on a collection with `disableLocalStorage`, Payload first reads only what it needs: the whole file when `upload.mimeTypes` restricts the allowed types, the request carries a crop or resize edit, the file is an animated image, or the collection has Sharp `variants` or image adjustments (`resizeOptions`, `formatOptions`, and so on); otherwise only a header or nothing. Payload then plans the pipeline with the real `doc`. If a transformer other than `sharpTransformer` accepts the upload (its `mimeTypes` match and its `canTransform`, if any, returns `true` or an object), Payload downloads the whole file before that transformer runs. Payload also downloads the whole file when `sharpTransformer` claims a saved built-in `_transforms` key that changes the file, such as a crop. A saved `focalPoint` alone does not cause a download, because Sharp uses it only for sizes. A transformer that declines never causes a download, and a built-in key that no stage claims fails before any download.
@@ -227,8 +244,10 @@ handleRequest: (args: {
   doc: Readonly<Document>
   documentID: number | string
   filename: string
+  getOriginalFile: () => Promise<Response>
   getSourceFile: () => Promise<Response>
   mimeType: string
+  options: TOptions
   originalDoc: Readonly<Document>
   req: PayloadRequest
 }) =>
@@ -244,7 +263,27 @@ handleRequest: (args: {
 - The stored file is read at most once per request, and each stage reads the output of the one before it.
 - A stage that calls `getSourceFile` must return a `response` — returning `continue` without one throws a `TransformerContractError` (a `500`), because the source it consumed would otherwise be lost.
 
+`getOriginalFile` returns the retained original file (or the main file, for an older upload with no `original`). Like `getSourceFile`, each stage gets its own getter, which can be called only once. Payload closes the original's response when the stage does not return it, or when the pipeline fails.
+
 Dynamic requests never write anything back to storage, and never trigger a document's own upload/delete hooks. A dynamic-transform request is a read-only view over an already-uploaded file. For the same reason, `doc` and `originalDoc` are the same frozen snapshot of the stored document.
+
+### Request phases
+
+A request runs in two phases. Payload plans each phase with its own `canTransform` calls, and runs the phases one after the other:
+
+```
+GET /api/<collection>/file/<filename>?width=500
+  ──► phase 1, purpose: 'persisted-default'  apply the saved _transforms
+  ──► phase 2, purpose: 'request-override'   apply the request parameters
+```
+
+Inside each phase, transformers run in the order of `upload.transformers`. A `complete` result in phase 1 also ends phase 2.
+
+Phase 1 runs only for a document that has no stored default file. Payload marks such a document internally. For all other documents, such as a collection where Sharp stores the cropped file at upload time, Payload serves the stored file and runs only phase 2, as before.
+
+In phase 1, the [rules for saved keys](#applying-saved-_transforms-keys) apply to the stages that return `handledTransformKeys`. If a built-in key has no stage, or a key has two, the request fails with a `500`, and Payload logs an error that names the key. This happens before Payload reads a file or runs a stage.
+
+Request parameters never change `_transforms`. To save a change, update the document.
 
 ### Example: a multi-stage local transformer
 

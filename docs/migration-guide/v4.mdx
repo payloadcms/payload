@@ -2159,6 +2159,8 @@ Upload collections now have a `_transforms` JSON field that saves the crop and f
 
 **Postgres and SQLite:** run `payload migrate:create`, check that it adds a `_transforms` column to each upload collection table and its versions table, then run `payload migrate`. Existing rows keep `null` until their next write.
 
+Upload collections also have a private `_stored` field on the main file, on `original`, and on each entry under `variants`. Payload uses it to mark a file entry with no stored object. Clients cannot write it, and API responses do not include it. A missing value means the file is stored, so existing documents keep their behavior. **Postgres and SQLite:** `payload migrate:create` adds `_stored` columns next to the `_transforms` column. Existing rows keep `null`.
+
 ### File size types have been consolidated ([#16593](https://github.com/payloadcms/payload/pull/16593))
 
 `FileSizeImproved` has been merged into `FileSize`. The `url`, `width`, `height`, `filesize`, `mimeType`, and `filename` properties now accept `null` directly on `FileSize`, matching what the database stores for sizes that were not generated.

@@ -6,6 +6,11 @@ import { matchesMimeType } from './matchesMimeType.js'
 export type PlannedTransformerPipeline = {
   /** The `_transforms` keys each planned transformer claims. Empty when it claims none. */
   claims: Map<UploadTransformer, string[]>
+  /**
+   * The `options` each planned transformer returned. A transformer that returned none has no
+   * entry. One plan is one phase, so a transformer has at most one entry.
+   */
+  options: Map<UploadTransformer, unknown>
   pipeline: UploadTransformer[]
 }
 
@@ -26,6 +31,7 @@ export async function planTransformerPipeline({
   transformers: UploadTransformer[]
 }): Promise<PlannedTransformerPipeline> {
   const claims = new Map<UploadTransformer, string[]>()
+  const options = new Map<UploadTransformer, unknown>()
   const pipeline: UploadTransformer[] = []
 
   for (const transformer of getCandidateTransformers({
@@ -41,10 +47,14 @@ export async function planTransformerPipeline({
     }
 
     claims.set(transformer, getHandledTransformKeys({ result, transformer }))
+    if (typeof result === 'object' && result.options !== undefined) {
+      options.set(transformer, result.options)
+    }
+
     pipeline.push(transformer)
   }
 
-  return { claims, pipeline }
+  return { claims, options, pipeline }
 }
 
 /**
