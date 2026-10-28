@@ -1,19 +1,15 @@
-import { Banner } from '@payloadcms/ui'
 import React from 'react'
 
 import { SeedButton } from './SeedButton'
 import './index.css'
 
-const baseClass = 'before-dashboard'
+const baseClass = 'getting-started'
 
-export const BeforeDashboard: React.FC = () => {
+export const GettingStarted: React.FC = () => {
   return (
-    <div className={baseClass}>
-      <Banner className={`${baseClass}__banner`} type="success">
-        <h4>Welcome to your dashboard!</h4>
-      </Banner>
-      Here&apos;s what to do next:
-      <ul className={`${baseClass}__instructions`}>
+    <section className={`card ${baseClass}`}>
+      <h2 className={`${baseClass}__heading`}>Get started with your new store</h2>
+      <ol className={`${baseClass}__instructions`}>
         <li>
           <SeedButton />
           {' with a few products and pages to jump-start your new project, then '}
@@ -69,16 +65,19 @@ export const BeforeDashboard: React.FC = () => {
           </a>
           {' docs.'}
         </li>
-      </ul>
-      {'Pro Tip: This block is a '}
-      <a
-        href="https://payloadcms.com/docs/admin/components#base-component-overrides"
-        rel="noopener noreferrer"
-        target="_blank"
-      >
-        custom component
-      </a>
-      , you can remove it at any time by updating your <strong>payload.config</strong>.
-    </div>
+      </ol>
+      <p className={`${baseClass}__tip`}>
+        {'Pro Tip: This block is a '}
+        <a
+          href="https://payloadcms.com/docs/custom-components/dashboard"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          dashboard widget
+        </a>
+        . Remove it with <strong>Edit Dashboard</strong>, or delete it from the{' '}
+        <strong>payload.config</strong>.
+      </p>
+    </section>
   )
 }
