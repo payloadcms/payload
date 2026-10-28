@@ -14,6 +14,6 @@ export { migratePostgresSizesToVariants } from '../postgres/predefinedMigrations
 export { migratePostgresV2toV3 } from '../postgres/predefinedMigrations/v2-v3/index.js'
 export { assertOperatorHandlerExtensionsInstalled } from '../postgres/query/assertOperatorHandlerExtensionsInstalled.js'
 export { postgresUnaccent } from '../postgres/query/postgresUnaccent.js'
-export { requireDrizzleKit } from '../postgres/requireDrizzleKit.js'
+export { createRequireDrizzleKit, requireDrizzleKit } from '../postgres/requireDrizzleKit.js'
 export { geometryColumn } from '../postgres/schema/geometryColumn.js'
 export * from '../postgres/types.js'

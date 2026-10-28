@@ -717,6 +717,10 @@ export const daTranslations: DefaultTranslationsObject = {
       'Du er ved at offentliggøre alt {{label}} i denne sektion. Er du sikker?',
     aboutToRestore:
       'Du er ved at gendanne dette {{label}} dokument til den tilstand, det var i den {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Gendan indholdet fra {{versionDate}} som en kladde. Det udgivne indhold forbliver uændret, indtil du udgiver fra editoren.',
+    aboutToRestoreAsDraftAllLocales:
+      'Gendan indholdet fra {{versionDate}} som en kladde for alle sprog. Det udgivne indhold forbliver uændret, indtil du udgiver fra editoren.',
     aboutToRestoreGlobal:
       'Du er ved at gendanne den globale {{label}} til den tilstand, den var i den {{versionDate}}.',
     aboutToRevertToPublished:

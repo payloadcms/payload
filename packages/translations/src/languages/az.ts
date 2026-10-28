@@ -722,6 +722,10 @@ export const azTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'Seçimdə olan bütün {{label}}-i dərc etməyə hazırsınız. Əminsiniz?',
     aboutToRestore:
       'Bu {{label}} sənədini {{versionDate}} tarixindəki vəziyyətinə bərpa etmək üzrəsiniz.',
+    aboutToRestoreAsDraft:
+      '{{versionDate}} tarixindəki məzmunu qaralama kimi bərpa edin. Redaktordan dərc edənə qədər dərc edilmiş məzmun dəyişməz qalacaq.',
+    aboutToRestoreAsDraftAllLocales:
+      '{{versionDate}} tarixindəki məzmunu bütün dillərdə qaralama kimi bərpa edin. Redaktordan dərc edənə qədər dərc edilmiş məzmun dəyişməz qalacaq.',
     aboutToRestoreGlobal:
       'Qlobal {{label}}-i {{versionDate}} tarixindəki vəziyyətinə bərpa etmək üzrəsiniz.',
     aboutToRevertToPublished:
