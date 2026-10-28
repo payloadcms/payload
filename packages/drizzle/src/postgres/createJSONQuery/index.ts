@@ -1,3 +1,4 @@
+import { getTableName } from 'drizzle-orm'
 import { APIError } from 'payload'
 
 import type { CreateJSONQueryArgs } from '../../types.js'
@@ -8,7 +9,11 @@ import { parseJSONPathSegment } from '../../utilities/parseJSONPathSegment.js'
 const operatorMap: Record<string, string> = {
   contains: '~',
   equals: '==',
+  greater_than: '>',
+  greater_than_equal: '>=',
   in: 'in',
+  less_than: '<',
+  less_than_equal: '<=',
   like: 'like_regex',
   not_equals: '!=',
   not_in: 'in',
@@ -40,7 +45,14 @@ const sanitizeValue = (value: unknown, operator?: string): string => {
 }
 
 export const createJSONQuery = ({ column, operator, pathSegments, value }: CreateJSONQueryArgs) => {
-  const columnName = typeof column === 'object' ? column.name : column
+  const columnName =
+    typeof column === 'object' && column !== null
+      ? column.table
+        ? `"${getTableName(column.table)}"."${column.name}"`
+        : `"${column.name}"`
+      : typeof column === 'string'
+        ? column
+        : ''
   const jsonPaths = pathSegments
     .slice(1)
     .map((key) => {
@@ -64,8 +76,10 @@ export const createJSONQuery = ({ column, operator, pathSegments, value }: Creat
     const mappedOperator = operatorMap[operator]
 
     sql = `NOT jsonb_path_exists(${columnName}, '${fullPath} ? (@ ${mappedOperator.substring(1)} ${sanitizeValue(value, operator)})')`
-  } else {
+  } else if (operator in operatorMap) {
     sql = `jsonb_path_exists(${columnName}, '${fullPath} ? (@ ${operatorMap[operator]} ${sanitizeValue(value, operator)})')`
+  } else {
+    throw new APIError(`Operator ${operator} is not supported for JSON queries`, 400)
   }
 
   return sql
