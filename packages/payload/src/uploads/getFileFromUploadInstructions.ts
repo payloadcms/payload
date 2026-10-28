@@ -303,17 +303,13 @@ const downloadToTempFile = async ({
 }
 
 /**
- * Whether the request carries a crop or resize edit - reads the raw `req.query.uploadEdits` and
- * `req.data._transforms.crop`, since a full parse (with its `data`/`originalDoc` focal-point
+ * Whether the request's `uploadEdits` query param carries a crop or resize edit - reads the raw
+ * `req.query.uploadEdits`, since a full parse (with its `data`/`originalDoc` focal-point
  * fallback, done in generateFileData.ts) isn't available yet at this point in the request
- * lifecycle.
+ * lifecycle. Saved `_transforms` keys are not checked here: whether a stage applies them is known
+ * only after planning, so generateFileData decides that download.
  */
 const requestHasSizeEdits = (req: PayloadRequest): boolean => {
-  const transforms = req.data?._transforms
-  if (transforms && typeof transforms === 'object' && 'crop' in transforms && transforms.crop) {
-    return true
-  }
-
   const uploadEdits = req.query?.uploadEdits
   if (typeof uploadEdits !== 'object' || uploadEdits === null) {
     return false

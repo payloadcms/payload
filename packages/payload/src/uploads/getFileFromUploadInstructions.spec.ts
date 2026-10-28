@@ -400,10 +400,18 @@ describe('getFileFromUploadInstructions', () => {
     expect(fs.readFileSync(file.tempFilePath!)).toEqual(MINIMAL_PNG)
   })
 
-  it('fetches the full file for an image with no configured adjustments when the request body includes a _transforms crop', async () => {
+  it('fetches only a bounded header for an image when the request body includes a _transforms crop', async () => {
+    // Whether a stage applies the crop is known only after planning, so generateFileData decides
+    // the full download.
     const handler = vi.fn(async (handlerReq: PayloadRequest) => {
-      expect(handlerReq.headers.get('range')).toBeNull()
-      return new Response(MINIMAL_PNG, { headers: { 'Content-Type': 'image/png' }, status: 200 })
+      expect(handlerReq.headers.get('range')).toBe(`bytes=0-${HEADER_PROBE_BYTE_LENGTH - 1}`)
+      return new Response(MINIMAL_PNG, {
+        headers: {
+          'Content-Range': `bytes 0-${MINIMAL_PNG.length - 1}/${MINIMAL_PNG.length}`,
+          'Content-Type': 'image/png',
+        },
+        status: 206,
+      })
     })
 
     const req = createReq([handler], {})
@@ -420,9 +428,8 @@ describe('getFileFromUploadInstructions', () => {
     })
 
     expect(handler).toHaveBeenCalledTimes(1)
-    expect(file.tempFilePath).toBeTruthy()
-    tempFilesToClean.push(file.tempFilePath!)
-    expect(fs.readFileSync(file.tempFilePath!)).toEqual(MINIMAL_PNG)
+    expect(file.tempFilePath).toBeUndefined()
+    expect(file.data.equals(MINIMAL_PNG)).toBe(true)
   })
 
   it('stops reading once it has enough bytes to probe dimensions, even if the handler ignores the range hint', async () => {
