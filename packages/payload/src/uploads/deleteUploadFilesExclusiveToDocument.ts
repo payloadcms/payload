@@ -1,7 +1,5 @@
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
-
 import type { SanitizedConfig } from '../config/types.js'
-
 import type { PayloadRequest } from '../types/index.js'
 
 import { deleteAssociatedFiles } from './deleteAssociatedFiles.js'

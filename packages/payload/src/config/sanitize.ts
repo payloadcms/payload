@@ -3,20 +3,15 @@ import type { AcceptedLanguages } from '@payloadcms/translations'
 import { en } from '@payloadcms/translations/languages/en'
 
 import type { RichTextSanitizer } from '../fields/config/sanitize.js'
-
 import type { OrderableJoinInfo } from '../fields/config/sanitizeJoinField.js'
-
 import type { GlobalConfig } from '../globals/config/types.js'
-
 import type {
   CollectionConfig,
   CollectionSlug,
   GlobalSlug,
   SanitizedCollectionConfig,
 } from '../index.js'
-
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
-
 import type {
   Config,
   DashboardConfig,
@@ -29,63 +24,39 @@ import type {
 } from './types.js'
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
-
 import { authRootEndpoints } from '../auth/endpoints/index.js'
-
 import {
   getBranchChangesCollection,
   getBranchesCollection,
   getBranchMergesCollection,
 } from '../branching/collections.js'
-
 import { injectBranchFields, injectGlobalBranchFields } from '../branching/injectBranchFields.js'
-
 import { sanitizeBranchingConfig } from '../branching/sanitizeBranchingConfig.js'
-
 import { sanitizeCollection } from '../collections/config/sanitize.js'
-
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
-
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
-
 import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
-
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
-
 import { resolveHierarchyCollections } from '../hierarchy/resolveHierarchyCollections.js'
-
 import { baseBlockFields, formatLabels, sanitizeFields } from '../index.js'
-
 import { addLLMInstructions } from '../llm-instructions/addLLMInstructions.js'
-
 import {
   getLockedDocumentsCollection,
   lockedDocumentsCollectionSlug,
 } from '../locked-documents/config.js'
-
 import { getPreferencesCollection, preferencesCollectionSlug } from '../preferences/config.js'
-
 import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-presets/config.js'
-
 import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/collection.js'
-
 import { getJobStatsGlobal } from '../queues/config/global.js'
-
 import {
   stagedUploadEndpoints,
   uploadInstructionsEndpoint,
 } from '../uploads/endpoints/uploadInstructions.js'
-
 import { flattenAllFields, flattenBlock } from '../utilities/flattenAllFields.js'
-
 import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
-
 import { validateTimezones } from '../utilities/validateTimezones.js'
-
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
-
 import { addDefaultsToConfig } from './defaults.js'
-
 import { addOrderableEndpoint, addOrderableFieldsAndHook } from './orderable/index.js'
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {

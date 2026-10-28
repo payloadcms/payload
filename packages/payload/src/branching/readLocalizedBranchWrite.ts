@@ -1,13 +1,9 @@
 import type { Payload, PayloadRequest } from '../types/index.js'
 
 import { afterRead } from '../fields/hooks/afterRead/index.js'
-
 import { hasDraftsEnabled } from '../utilities/getVersionsConfig.js'
-
 import { isolateBranchState, withoutBranch } from './resolveBranch.js'
-
 import { resolveBranchRowID } from './resolveBranchRowID.js'
-
 import { branchField } from './types.js'
 
 type Args = {

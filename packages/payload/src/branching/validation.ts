@@ -2,12 +2,10 @@ import type { PayloadRequest } from '../types/index.js'
 import type { EffectiveOperation } from './effectiveOperations.js'
 
 import { ValidationError } from '../errors/ValidationError.js'
-
 import {
   validateCollectionData,
   validateGlobalData,
 } from '../utilities/entityInputSchema/validateEntityData.js'
-
 import { isolateBranchState } from './resolveBranch.js'
 
 export type BranchMergeValidationCandidate = {
