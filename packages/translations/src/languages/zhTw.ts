@@ -681,6 +681,10 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     type: '類型',
     aboutToPublishSelection: '您即將發佈所有選取的 {{label}}。確定要繼續？',
     aboutToRestore: '您即將將此 {{label}} 文件還原至 {{versionDate}} 的狀態。',
+    aboutToRestoreAsDraft:
+      '將 {{versionDate}} 的內容還原為草稿。已發布的內容將保持不變，直到您從編輯器中發布。',
+    aboutToRestoreAsDraftAllLocales:
+      '將 {{versionDate}} 的所有語言版本的內容還原為草稿。已發布的內容將保持不變，直到您從編輯器中發布。',
     aboutToRestoreGlobal: '您即將將全域 {{label}} 還原至 {{versionDate}} 的狀態。',
     aboutToRevertToPublished: '您即將還原此文件至已發佈狀態。確定要繼續？',
     aboutToUnpublish: '您即將取消發佈此文件。確定要繼續？',

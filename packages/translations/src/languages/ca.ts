@@ -724,6 +724,10 @@ export const caTranslations: DefaultTranslationsObject = {
       'Estàs a punt de publicar tots els {{label}} de la selecció. Estàs segur?',
     aboutToRestore:
       "Estàs a punt de restaurar aquest document {{label}} a l'estat en què es trobava el {{versionDate}}.",
+    aboutToRestoreAsDraft:
+      'Restaureu el contingut de {{versionDate}} com a esborrany. El contingut publicat no canviarà fins que publiqueu des de l’editor.',
+    aboutToRestoreAsDraftAllLocales:
+      'Restaureu el contingut de {{versionDate}} com a esborrany en totes les configuracions regionals. El contingut publicat no canviarà fins que publiqueu des de l’editor.',
     aboutToRestoreGlobal:
       "Estàs a punt de restaurar el {{label}} global a l'estat en què es trobava el {{versionDate}}.",
     aboutToRevertToPublished:

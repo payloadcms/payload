@@ -690,6 +690,10 @@ export const thTranslations: DefaultTranslationsObject = {
     type: 'ประเภท',
     aboutToPublishSelection: 'คุณกำลังจะเผยแพร่ {{label}} ทั้งหมดในส่วนที่เลือก คุณแน่ใจไหม?',
     aboutToRestore: 'คุณกำลังจะคืนค่าเอกสาร {{label}} นี้กลับไปอยู่ในเวอร์ชันเมื่อวันที่ {{versionDate}}',
+    aboutToRestoreAsDraft:
+      'กู้คืนเนื้อหาจาก {{versionDate}} เป็นฉบับร่าง เนื้อหาที่เผยแพร่จะยังคงไม่เปลี่ยนแปลงจนกว่าคุณจะเผยแพร่จากตัวแก้ไข',
+    aboutToRestoreAsDraftAllLocales:
+      'กู้คืนเนื้อหาจาก {{versionDate}} เป็นฉบับร่างในทุกภาษา เนื้อหาที่เผยแพร่จะยังคงไม่เปลี่ยนแปลงจนกว่าคุณจะเผยแพร่จากตัวแก้ไข',
     aboutToRestoreGlobal: 'คุณกำลังจะคืนค่า global {{label}} กลับไปอยู่ในเวอร์ชันเมื่อวันที่ {{versionDate}}.',
     aboutToRevertToPublished:
       'คุณกำลังจะย้อนการเปลี่ยนแปลงของเอกสารนี้ไปยังเวอร์ชันที่เผยแพร่อยู่ คุณต้องการดำเนินการต่อหรือไม่?',

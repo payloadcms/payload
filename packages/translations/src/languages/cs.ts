@@ -713,6 +713,10 @@ export const csTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'Chystáte se publikovat všechny {{label}} ve výběru. Jsi si jistá?',
     aboutToRestore:
       'Chystáte se obnovit tento {{label}} dokument do stavu, v jakém byl {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Obnovte obsah z {{versionDate}} jako koncept. Publikovaný obsah zůstane beze změny, dokud jej nepublikujete z editoru.',
+    aboutToRestoreAsDraftAllLocales:
+      'Obnovte obsah z {{versionDate}} jako koncept ve všech jazykových verzích. Publikovaný obsah zůstane beze změny, dokud jej nepublikujete z editoru.',
     aboutToRestoreGlobal:
       'Chystáte se obnovit globální {{label}} do stavu, v jakém byl {{versionDate}}.',
     aboutToRevertToPublished:

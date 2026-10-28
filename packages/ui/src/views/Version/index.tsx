@@ -438,7 +438,6 @@ export async function VersionView(props: DocumentViewServerProps) {
       versionToCreatedAtFormatted={versionToCreatedAtFormatted}
       VersionToCreatedAtLabel={formatPill({ doc: versionTo, labelStyle: 'pill' })}
       versionToID={versionTo.id}
-      versionToStatus={versionTo.version?._status}
     />
   )
 }

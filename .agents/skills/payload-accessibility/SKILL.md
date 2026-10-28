@@ -19,9 +19,10 @@ For every affected component or flow:
 
 ## Test placement
 
-- Put browser-observable, criterion-level accessibility evidence in `test/a11y/WCAG.e2e.spec.ts`, inside the numerically ordered `test.describe` group for its primary criterion.
+- Put general browser regressions in `test/a11y/e2e.spec.ts`, grouped by admin workflow with keyboard/focus assertions and axe checkpoints.
+- Keep audit validation in `test/a11y/WCAG.audit.spec.ts`; it runs only with the explicit audit command.
 - Put evidence that depends on synthesized speech or a screen-reader virtual/browse cursor in `test/a11y/screen-reader.spec.ts`, under the same criterion organization.
-- Put setup shared by both accessibility specs in `test/a11y/helpers.ts`. Keep scenario-specific setup in its spec.
+- Put setup shared by accessibility specs in `test/a11y/helpers.ts`. Keep scenario-specific setup in its spec.
 - Keep low-level unit tests beside their component when they verify an implementation contract. They supplement, but do not replace, an end-to-end WCAG regression when the reported barrier occurs only in the rendered application.
 - Reuse the existing `test/a11y` Payload configuration and real UI components. Do not create a new accessibility fixture or criterion file by default.
 

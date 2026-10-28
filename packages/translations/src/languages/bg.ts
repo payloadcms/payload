@@ -719,6 +719,10 @@ export const bgTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'На път си да публикуваш всички избрани {{label}}. Сигурен ли си?',
     aboutToRestore:
       'На път си да възстановиш този {{label}} документ до състоянието му от {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Възстановете съдържанието от {{versionDate}} като чернова. Публикуваното съдържание ще остане непроменено, докато не публикувате от редактора.',
+    aboutToRestoreAsDraftAllLocales:
+      'Възстановете съдържанието от {{versionDate}} като чернова за всички езици. Публикуваното съдържание ще остане непроменено, докато не публикувате от редактора.',
     aboutToRestoreGlobal:
       'На път си да възстановиш глобалния документ {{label}} до състоянието му от {{versionDate}}.',
     aboutToRevertToPublished:
