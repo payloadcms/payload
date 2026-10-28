@@ -611,7 +611,7 @@ jobs:
         timeout-minutes: 10
 
       - name: Accessibility tests
-        run: pnpm test:e2e:prod:server:run:noturbo a11y --workers=1 --grep-invert="@visual"
+        run: pnpm test:e2e:prod:server:run a11y --workers=1 --grep-invert="@visual"
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: results_a11y_${{ matrix.framework }}_1.json
           NEXT_TELEMETRY_DISABLED: 1
