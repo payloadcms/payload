@@ -952,3 +952,22 @@ export type CompoundIndex = {
   /**
    * MongoDB only: include documents in this index only when every listed field exists.
    * Explicit null values count as existing. SQL adapters ignore this option.
+   */
+  requireExists?: string[]
+  unique?: boolean
+}
+
+export type SanitizedCompoundIndex = {
+  fields: {
+    field: FlattenedField
+    localizedPath: string
+    path: string
+    pathHasLocalized: boolean
+  }[]
+  requireExists?: {
+    localizedPath: string
+    path: string
+    pathHasLocalized: boolean
+  }[]
+  unique: boolean
+}
