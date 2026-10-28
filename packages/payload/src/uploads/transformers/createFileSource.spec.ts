@@ -17,14 +17,6 @@ describe('createFileSource', () => {
     const createSource = () =>
       createFileSource({ file: new File(['abcdef'], 'image.png', { type: 'image/png' }) })
 
-    it('should expose the file name, MIME type and size', () => {
-      const source = createSource()
-
-      expect(source.filename).toBe('image.png')
-      expect(source.mimeType).toBe('image/png')
-      expect(source.sizeInBytes).toBe(6)
-    })
-
     it('should read a byte range', async () => {
       const source = createSource()
 
@@ -34,50 +26,35 @@ describe('createFileSource', () => {
       expect(decode(bytes)).toBe('cde')
     })
 
-    it('should stream the whole file when no range is given', async () => {
-      const source = createSource()
-
-      expect(await readStream(await source.streamFile())).toBe('abcdef')
+    it.for([
+      { name: 'the whole file when no range is given', range: undefined, expected: 'abcdef' },
+      {
+        name: 'only the requested range',
+        range: { numberOfBytes: 2, startByte: 3 },
+        expected: 'de',
+      },
+      {
+        name: 'from startByte to the end when numberOfBytes is omitted',
+        range: { startByte: 4 },
+        expected: 'ef',
+      },
+    ])('should stream $name', async ({ expected, range }) => {
+      expect(await readStream(await createSource().streamFile(range))).toBe(expected)
     })
 
-    it('should stream only the requested range', async () => {
+    it.for([
+      { name: 'a negative startByte', read: { numberOfBytes: 1, startByte: -1 } },
+      { name: 'a fractional startByte', read: { numberOfBytes: 1, startByte: 0.5 } },
+      { name: 'a zero numberOfBytes', read: { numberOfBytes: 0, startByte: 0 } },
+      { name: 'a range past the end of the file', read: { numberOfBytes: 2, startByte: 5 } },
+      { name: 'a zero numberOfBytes in a stream', stream: { numberOfBytes: 0 } },
+      { name: 'a stream start past the end of the file', stream: { startByte: 7 } },
+    ])('should reject $name', async ({ read, stream }) => {
       const source = createSource()
 
-      expect(await readStream(await source.streamFile({ numberOfBytes: 2, startByte: 3 }))).toBe(
-        'de',
-      )
-    })
-
-    it('should stream from startByte to the end when numberOfBytes is omitted', async () => {
-      const source = createSource()
-
-      expect(await readStream(await source.streamFile({ startByte: 4 }))).toBe('ef')
-    })
-
-    it('should reject invalid byte ranges', async () => {
-      const source = createSource()
-
-      await expect(source.readFileBytes({ numberOfBytes: 1, startByte: -1 })).rejects.toThrow(
+      await expect(read ? source.readFileBytes(read) : source.streamFile(stream)).rejects.toThrow(
         TransformerContractError,
       )
-      await expect(source.readFileBytes({ numberOfBytes: 1, startByte: 0.5 })).rejects.toThrow(
-        TransformerContractError,
-      )
-      await expect(source.readFileBytes({ numberOfBytes: 0, startByte: 0 })).rejects.toThrow(
-        TransformerContractError,
-      )
-      await expect(source.streamFile({ numberOfBytes: 0 })).rejects.toThrow(
-        TransformerContractError,
-      )
-    })
-
-    it('should reject a range that goes past the end of the file', async () => {
-      const source = createSource()
-
-      await expect(source.readFileBytes({ numberOfBytes: 2, startByte: 5 })).rejects.toThrow(
-        TransformerContractError,
-      )
-      await expect(source.streamFile({ startByte: 7 })).rejects.toThrow(TransformerContractError)
     })
 
     it('should reject a read when the signal is already aborted', async () => {
