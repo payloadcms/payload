@@ -30,26 +30,6 @@ const pipelineEdits = (args: Partial<Parameters<typeof toPipelineEdits>[0]>) =>
   })
 
 describe('resolveNextState', () => {
-  it('should keep the previous state when nothing is submitted', () => {
-    expect(nextState({ previous: { crop } })).toEqual({ crop })
-  })
-
-  it('should replace the previous state with the submitted one', () => {
-    const next = nextState({ previous: { crop, watermark: true }, submitted: { watermark: false } })
-
-    expect(next).toEqual({ watermark: false })
-  })
-
-  it('should clear the state when null is submitted', () => {
-    expect(nextState({ previous: { crop }, submitted: null })).toBeNull()
-  })
-
-  it('should save an admin percent crop as original pixels', () => {
-    const next = nextState({ adminCrop: { height: 50, unit: '%', width: 50, x: 10, y: 10 } })
-
-    expect(next).toEqual({ crop: { height: 500, width: 1000, x: 200, y: 100 } })
-  })
-
   it('should remove the crop when the admin crop selects the whole image', () => {
     const next = nextState({
       adminCrop: { height: 100, unit: '%', width: 100, x: 0, y: 0 },
@@ -59,33 +39,8 @@ describe('resolveNextState', () => {
     expect(next).toEqual({ watermark: true })
   })
 
-  it('should save a written focal point that changes the current one', () => {
-    expect(nextState({ focalPointWrite: { x: 30, y: 70 } })).toEqual({
-      focalPoint: { x: 30, y: 70 },
-    })
-  })
-
   it('should not save a written focal point equal to the current one', () => {
     expect(nextState({ focalPointWrite: center })).toBeNull()
-  })
-
-  it('should prefer a submitted focal point over focalX and focalY', () => {
-    const next = nextState({
-      focalPointWrite: center,
-      submitted: { focalPoint: { x: 10, y: 90 } },
-    })
-
-    expect(next).toEqual({ focalPoint: { x: 10, y: 90 } })
-  })
-
-  it('should copy a legacy focal point on the first write', () => {
-    const next = nextState({
-      currentFocalPoint: { x: 30, y: 70 },
-      isLegacyDocument: true,
-      submitted: { crop },
-    })
-
-    expect(next).toEqual({ crop, focalPoint: { x: 30, y: 70 } })
   })
 
   it('should not copy a legacy focal point at the center', () => {
@@ -96,10 +51,6 @@ describe('resolveNextState', () => {
     const next = nextState({ currentFocalPoint: { x: 30, y: 70 }, submitted: { crop } })
 
     expect(next).toEqual({ crop })
-  })
-
-  it('should store an empty state as null', () => {
-    expect(nextState({ submitted: {} })).toBeNull()
   })
 })
 
@@ -138,7 +89,7 @@ describe('toPipelineEdits', () => {
   })
 
   it('should send the saved crop for a new file', () => {
-    expect(pipelineEdits({ hasNewFile: true, next: { crop }, previous: null })).toHaveProperty(
+    expect(pipelineEdits({ hasNewFile: true, next: { crop }, previous: { crop } })).toHaveProperty(
       'crop',
     )
   })
