@@ -1,7 +1,7 @@
-import type { RESTClient } from '../../__helpers/shared/RESTClient.js'
-
 import { wait } from 'payload/shared'
 import { expect, onTestFinished, vi } from 'vitest'
+
+import type { RESTClient } from '../../__helpers/shared/RESTClient.js'
 
 import { test } from '../../__helpers/int/vitest.js'
 import { devUser } from '../../credentials.js'
