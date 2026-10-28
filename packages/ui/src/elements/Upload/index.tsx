@@ -337,6 +337,8 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
               x: uploadEdits?.focalPoint?.x || data?.focalX || 50,
               y: uploadEdits?.focalPoint?.y || data?.focalY || 50,
             }}
+            // The editor keeps its crop in state, so it starts again for each new file.
+            key={value ? `${value.name}-${value.lastModified}` : data?.filename}
             onSave={onEditsSave}
             showCrop={showCrop}
             showFocalPoint={showFocalPoint}
