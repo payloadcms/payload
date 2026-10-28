@@ -78,8 +78,16 @@ async function main() {
   await fs.writeFile(
     path.join(templatePath, 'pnpm-workspace.yaml'),
     toWorkspaceYaml({
-      // sharp/esbuild/unrs-resolver: all templates; mongodb-memory-server/@swc/core: plugin template.
-      allowBuilds: ['esbuild', 'sharp', 'unrs-resolver', 'mongodb-memory-server', '@swc/core'],
+      // sharp/esbuild/unrs-resolver: all templates; mongodb-memory-server/@swc/core: plugin template;
+      // bufferutil: vercel-postgres templates (via @vercel/postgres).
+      allowBuilds: [
+        'bufferutil',
+        'esbuild',
+        'sharp',
+        'unrs-resolver',
+        'mongodb-memory-server',
+        '@swc/core',
+      ],
       overrides: fileSpecByPackageName,
     }),
   )

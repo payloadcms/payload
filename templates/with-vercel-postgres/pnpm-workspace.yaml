@@ -1,0 +1,6 @@
+allowBuilds:
+  bufferutil: true
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
+  workerd: true
