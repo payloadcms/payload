@@ -81,7 +81,11 @@ export const redeemRefreshToken = async ({
   const sessionExpiresAt = new Date(session.expiresAt).getTime()
   const refreshedAt = sessionExpiresAt - expiration * 1000
 
-  if (sessionExpiresAt === contents.expiresAt) {
+  // Usually the refresh token's expiresAt matches the session's exactly. But when a client refreshes
+  // twice at the same time, each refresh saves a new expiresAt, a few milliseconds apart, and only
+  // the last save is kept. So that both new refresh tokens keep working, a refresh token counts as
+  // current when it's less than 30 seconds off.
+  if (sessionExpiresAt - contents.expiresAt < reuseInterval) {
     await extendSession({
       collectionConfig,
       req,
