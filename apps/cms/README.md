@@ -40,7 +40,7 @@ uses to test templates.
 | `src/endpoints/appClients.ts`              | VgemsAI app signups as clients, and their Account screen (see "The VgemsAI app")       |
 | `src/endpoints/appChat.ts`                 | Saves VgemsAI app chats, deletes app accounts' data (see "The VgemsAI app")            |
 | `src/collections/ChatSessions.ts`, `…/ChatMessages.ts` | VgemsAI app conversations, deleted after 90 days (see "Chats")             |
-| `src/app/(frontend)/ios-app/`, `scripts/import-legal-pages.ts` | The VgemsAI app's Privacy Policy and Terms of Use as web pages (see "Privacy policy and terms of use") |
+| `src/app/(frontend)/ios-app/`, `scripts/import-legal-pages.ts` | Privacy Policy and Terms of Use of the app and the Vigor website (see "Privacy policy and terms of use") |
 | `src/vigor/`, `src/locales.ts`             | Content of the Vigor website in four languages (see "Vigor website")                   |
 | `scripts/import-vigor.ts`                  | Copies the Vigor website's current content into the CMS (see "Vigor website")          |
 | `src/timezones.ts`                         | Time zones offered for event dates                                                     |
@@ -57,7 +57,7 @@ uses to test templates.
 | `deploy/locate-events.sh`                  | Looks up the coordinates of events on the server                                       |
 | `deploy/import-personal-website.sh`        | Runs the personal website import on the server                                         |
 | `deploy/import-vigor.sh`                   | Runs the Vigor website import on the server                                            |
-| `deploy/import-legal-pages.sh`             | Adds the VgemsAI app's Privacy Policy and Terms of Use on the server                   |
+| `deploy/import-legal-pages.sh`             | Adds the Privacy Policy and Terms of Use on the server                                 |
 | `deploy/mongodb/create-payload-user.js`    | Creates the MongoDB user for Payload (run on the DB EC2)                               |
 | `scripts/pack-local-packages.mjs`          | Packs `packages/*` into tarballs for the app (used by the Dockerfile)                  |
 
@@ -495,7 +495,7 @@ The personal website shows its pages (see "Personal website"); no website reads 
 ### Pages for several websites and apps
 
 Every page has a **Sites** field (in the sidebar) that says which websites and apps show it. A page can
-belong to several, e.g. one privacy policy for the business website and the iOS app. The sites are listed
+belong to several, e.g. one privacy policy for the Vigor website and the iOS app. The sites are listed
 in `src/sites.ts`:
 
 | Site             | Value it sends |
@@ -503,6 +503,7 @@ in `src/sites.ts`:
 | Personal website | `personal`     |
 | Business website | `business`     |
 | iOS app          | `ios-app`      |
+| Vigor website    | `vigor`        |
 
 Each website or app asks only for its own pages by adding its value to the request:
 
@@ -561,6 +562,7 @@ Traditional Chinese. The code is in `src/vigor/`, the languages in `src/locales.
 | Site settings      | Company name, contact details (see below), social links, main menu, key figures         |
 | Home page          | The hero slides at the top of the home page                                             |
 | About page         | `/about`                                                                                |
+| Pages              | Pages whose **Sites** include Vigor website, at `/<slug>`, e.g. the privacy policy      |
 
 **Languages.** Switch language with the menu at the top right; each text field shows its language, e.g.
 "Name — English". Categories, gemstones, metals, badges, units, slugs, SKUs, links and images are the same in
@@ -871,19 +873,27 @@ session only ever answers to the account that started it:
 
 #### Privacy policy and terms of use
 
-The app's **Privacy Policy** and **Terms of Use** are ordinary pages under **Pages**, for the iOS app, with the
-slugs `privacy-policy` and `terms-of-use`. Once published, the CMS shows them as web pages, which is the address to
-give App Store Connect (App Privacy → Privacy Policy URL; App Information → License Agreement or the description for
-the terms) and the address the app opens from Settings and the signup screen:
+One **Privacy Policy** and one **Terms of Use** cover both the app and the Vigor website. They are ordinary pages
+under **Pages**, for the iOS app and the Vigor website, with the slugs `privacy-policy` and `terms-of-use`, so
+publishing an edit updates both at once:
 
-```
-SERVER_URL/ios-app/privacy-policy
-SERVER_URL/ios-app/terms-of-use
-```
+- **The app:** the CMS shows every published page of the iOS app as a web page
+  (`src/app/(frontend)/ios-app/[slug]/page.tsx`). That is the address to give App Store Connect (App Privacy →
+  Privacy Policy URL; App Information → License Agreement or the description for the terms) and the address the
+  app opens from Settings and the signup screen:
 
-Every published page of the iOS app is shown this way (`src/app/(frontend)/ios-app/[slug]/page.tsx`), so the app can
-get more of them, e.g. a support page, without changes here. Drafts aren't shown, and an edit shows up as soon as
-it's published. The page's version history (**Versions** tab) keeps every earlier text.
+  ```
+  SERVER_URL/ios-app/privacy-policy
+  SERVER_URL/ios-app/terms-of-use
+  ```
+
+- **The Vigor website** shows every published page of the Vigor website at `/<slug>` in each of its languages, e.g.
+  `/privacy-policy` and `/fr/privacy-policy`, and links to both from its footer (see "Vigor website"). The text is
+  the same in every language, since pages aren't translated.
+
+Drafts aren't shown anywhere, and a published edit shows up right away (on the website, once `VIGOR_WEBSITE_URL` is
+set; otherwise within a minute). Links to another page (**Link → Internal link**) point to that page on each site.
+The page's version history (**Versions** tab) keeps every earlier text.
 
 **Adding them (once).** The first version of both texts is in `scripts/legal/`. Add them as drafts, then open each
 one under **Pages**, replace every `[ADD CONTACT EMAIL]` and `[ADD STATE]` (the US state whose laws govern the
@@ -895,12 +905,20 @@ cd ~/payloadcms/apps/cms
 ./deploy/import-legal-pages.sh
 ```
 
-A page that the iOS app already has with the same slug is skipped, so running it again keeps your edits.
+A page that already exists with the same slug is skipped, so running it again keeps your edits. If you added the
+app-only first version earlier, `--update` saves the current text, which also covers the website, as a new draft of
+each page (the published version stays live until you publish it, and the earlier text stays under **Versions**).
+Fill in the `[ADD …]` spots again, then publish:
+
+```bash
+./deploy/import-legal-pages.sh --update
+```
 
 **Updating them.** Edit the page under **Pages** and change the "Last updated" date at the top, then publish. When the
-app starts collecting something new or uses a new service (another AI provider, analytics, payments), update the
-Privacy Policy and the answers in App Store Connect → App Privacy before releasing that version. Tell users in the
-app or by email before significant changes take effect, as both texts promise.
+app or the website starts collecting something new or uses a new service (another AI provider, analytics tool,
+payments), update the Privacy Policy, and for the app the answers in App Store Connect → App Privacy, before releasing
+that version. Tell users in the app, on the website or by email before significant changes take effect, as both
+texts promise.
 
 ## Two-factor authentication
 

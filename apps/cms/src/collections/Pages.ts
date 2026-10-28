@@ -17,6 +17,7 @@ import { Code } from '../blocks/Code'
 import { YouTube } from '../blocks/YouTube'
 import { revalidateWebsiteCollection } from '../hooks/revalidateWebsite'
 import { sites } from '../sites'
+import { revalidateVigorPageAfterChange, revalidateVigorPageAfterDelete } from '../vigor/revalidate'
 
 /** "About Me!" → "about-me": derived from the title while empty, normalized when typed */
 function fillSlug({ data, value }: Parameters<FieldHook<Page>>[0]) {
@@ -90,7 +91,7 @@ const revalidatePersonalWebsite = revalidateWebsiteCollection({
  *
  * Each site asks only for its own pages:
  * `GET /api/pages?where[sites][in]=business&where[slug][equals]=about`.
- * A page can belong to several sites, e.g. one privacy policy for the business website and the iOS
+ * A page can belong to several sites, e.g. one privacy policy for the Vigor website and the iOS
  * app. Slugs are unique per site, so every site can have its own "about" page.
  * Only published pages are visible without logging in.
  */
@@ -192,8 +193,8 @@ export const Pages: CollectionConfig = {
     },
   ],
   hooks: {
-    afterChange: [revalidatePersonalWebsite.afterChange],
-    afterDelete: [revalidatePersonalWebsite.afterDelete],
+    afterChange: [revalidatePersonalWebsite.afterChange, revalidateVigorPageAfterChange],
+    afterDelete: [revalidatePersonalWebsite.afterDelete, revalidateVigorPageAfterDelete],
     beforeChange: [preventDuplicateSlugs, revalidatePersonalWebsite.beforeChange],
   },
   // Backstop for the check in preventDuplicateSlugs: one slug per site
