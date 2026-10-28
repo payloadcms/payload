@@ -715,6 +715,10 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     type: 'Tip',
     aboutToPublishSelection: 'Upravo ćete objaviti sve {{label}} u izboru. Da li ste sigurni?',
     aboutToRestore: 'Vratićete {{label}} dokument u stanje u kojem je bio {{versionDate}}',
+    aboutToRestoreAsDraft:
+      'Vratite sadržaj od {{versionDate}} kao nacrt. Objavljeni sadržaj ostaće nepromenjen dok ga ne objavite iz uređivača.',
+    aboutToRestoreAsDraftAllLocales:
+      'Vratite sadržaj od {{versionDate}} kao nacrt na svim jezicima. Objavljeni sadržaj ostaće nepromenjen dok ga ne objavite iz uređivača.',
     aboutToRestoreGlobal: 'Vratićete globalni {{label}} u stanje u kojem je bio {{versionDate}}.',
     aboutToRevertToPublished:
       'Vratićete promene u dokumentu u objavljeno stanje. Da li ste sigurni?',

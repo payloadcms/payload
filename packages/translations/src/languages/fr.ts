@@ -734,6 +734,10 @@ export const frTranslations: DefaultTranslationsObject = {
       'Vous êtes sur le point de publier tous les {{label}} de la sélection. Êtes-vous sûr ?',
     aboutToRestore:
       'Vous êtes sur le point de restaurer le document {{label}} à l’état où il se trouvait le {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Restaurez le contenu du {{versionDate}} en tant que brouillon. Le contenu publié restera inchangé jusqu’à ce que vous le publiiez depuis l’éditeur.',
+    aboutToRestoreAsDraftAllLocales:
+      'Restaurez le contenu du {{versionDate}} en tant que brouillon dans toutes les langues. Le contenu publié restera inchangé jusqu’à ce que vous le publiiez depuis l’éditeur.',
     aboutToRestoreGlobal:
       'Vous êtes sur le point de restaurer le ou la {{label}} global(e) à l’état où il ou elle se trouvait le {{versionDate}}.',
     aboutToRevertToPublished:

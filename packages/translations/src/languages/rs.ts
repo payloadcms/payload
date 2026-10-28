@@ -714,6 +714,10 @@ export const rsTranslations: DefaultTranslationsObject = {
     type: 'Тип',
     aboutToPublishSelection: 'Управо ћете објавити све {{label}} у избору. Да ли сте сигурни?',
     aboutToRestore: 'Вратићете {{label}} документ у стање у којем је био {{versionDate}}',
+    aboutToRestoreAsDraft:
+      'Вратите садржај од {{versionDate}} као нацрт. Објављени садржај остаће непромењен док га не објавите из уређивача.',
+    aboutToRestoreAsDraftAllLocales:
+      'Вратите садржај од {{versionDate}} као нацрт на свим језицима. Објављени садржај остаће непромењен док га не објавите из уређивача.',
     aboutToRestoreGlobal: 'Вратићете глобални {{label}} у стање у којем је био {{versionDate}}.',
     aboutToRevertToPublished: 'Вратићете промене у документу у објављено стање. Да ли сте сигурни?',
     aboutToUnpublish: 'Поништићете објаву овог документа. Да ли сте сигурни?',

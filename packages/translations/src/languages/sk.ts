@@ -713,6 +713,10 @@ export const skTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'Chystáte sa publikovať všetky {{label}} vo výbere. Ste si istý?',
     aboutToRestore:
       'Chystáte sa obnoviť tento {{label}} dokument do stavu, v akom bol {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Obnovte obsah z {{versionDate}} ako koncept. Publikovaný obsah zostane nezmenený, kým ho nepublikujete z editora.',
+    aboutToRestoreAsDraftAllLocales:
+      'Obnovte obsah z {{versionDate}} ako koncept vo všetkých jazykových verziách. Publikovaný obsah zostane nezmenený, kým ho nepublikujete z editora.',
     aboutToRestoreGlobal:
       'Chystáte sa obnoviť globálne {{label}} do stavu, v akom bol {{versionDate}}.',
     aboutToRevertToPublished:

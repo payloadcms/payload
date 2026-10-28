@@ -212,7 +212,7 @@ const DateTimeFieldComponent: React.FC<DateFieldClientProps> = (props) => {
         />
         {timezone && supportedTimezones.length > 0 && (
           <TimezonePicker
-            id={`${path}-timezone-picker`}
+            id={`${inputId}-timezone-picker`}
             onChange={onChangeTimezone}
             options={supportedTimezones}
             readOnly={readOnly || disabled}
