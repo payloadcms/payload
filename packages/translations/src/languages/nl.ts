@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const nlTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Account',

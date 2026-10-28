@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const bnBdTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'অ্যাকাউন্ট',
