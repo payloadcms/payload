@@ -213,21 +213,60 @@ export const buildSchema = (args: {
 
   if (args.compoundIndexes) {
     for (const index of args.compoundIndexes) {
-      const indexDefinition: Record<string, 1> = {}
+      const requiredFields = index.requireExists ?? []
+      const hasLocalizedIndexField = index.fields.some(({ pathHasLocalized }) => pathHasLocalized)
+      const hasLocalizedRequiredField = requiredFields.some(
+        ({ pathHasLocalized }) => pathHasLocalized,
+      )
+      const localization = payload.config.localization
+      // Preserve existing compound index definitions unless a partial index was requested.
+      const locales =
+        requiredFields.length &&
+        localization &&
+        (hasLocalizedIndexField || hasLocalizedRequiredField)
+          ? localization.locales
+          : [undefined]
 
-      for (const field of index.fields) {
-        if (field.pathHasLocalized && payload.config.localization) {
-          for (const locale of payload.config.localization.locales) {
-            indexDefinition[field.localizedPath.replace('<locale>', locale.code)] = 1
+      for (const locale of locales) {
+        const indexDefinition: Record<string, 1> = {}
+        const resolveIndexPath = ({
+          localizedPath,
+          path,
+          pathHasLocalized,
+        }: {
+          localizedPath: string
+          path: string
+          pathHasLocalized: boolean
+        }): string =>
+          pathHasLocalized && locale ? localizedPath.replaceAll('<locale>', locale.code) : path
+
+        for (const field of index.fields) {
+          if (!requiredFields.length && field.pathHasLocalized && localization) {
+            for (const indexLocale of localization.locales) {
+              indexDefinition[field.localizedPath.replaceAll('<locale>', indexLocale.code)] = 1
+            }
+          } else {
+            indexDefinition[resolveIndexPath(field)] = 1
           }
-        } else {
-          indexDefinition[field.path] = 1
         }
-      }
 
-      schema.index(indexDefinition, {
-        unique: args.buildSchemaOptions.disableUnique ? false : index.unique,
-      })
+        const indexOptions: IndexOptions = {
+          unique: args.buildSchemaOptions.disableUnique ? false : index.unique,
+        }
+
+        if (requiredFields.length) {
+          indexOptions.partialFilterExpression = Object.fromEntries(
+            requiredFields.map((field) => [resolveIndexPath(field), { $exists: true }]),
+          )
+
+          // Filter-only localized fields otherwise produce identical automatic index names.
+          if (locale && !hasLocalizedIndexField) {
+            indexOptions.name = `${Object.keys(indexDefinition).join('_')}_${locale.code}_require_exists`
+          }
+        }
+
+        schema.index(indexDefinition, indexOptions)
+      }
     }
   }
 
