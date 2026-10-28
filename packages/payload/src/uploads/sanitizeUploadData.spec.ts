@@ -29,6 +29,7 @@ describe('sanitizeUploadData', () => {
     expect(
       sanitizeUploadData(
         {
+          _stored: false,
           alt: 'Updated alternative text',
           filename: 'submitted.png',
           prefix: 'articles',

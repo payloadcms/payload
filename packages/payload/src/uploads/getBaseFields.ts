@@ -109,6 +109,15 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     label: ({ t }) => t('upload:fileSize'),
   }
 
+  // Set only by core, and only to `false`, for a file entry with no stored object. A missing value
+  // means stored. `hidden` keeps it out of API output; `sanitizeUploadData` drops client input.
+  const storedField: Field = {
+    name: '_stored',
+    type: 'checkbox',
+    admin: { disabled: true },
+    hidden: true,
+  }
+
   const filename: Field = {
     name: 'filename',
     type: 'text',
@@ -174,6 +183,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     filesize,
     width,
     height,
+    storedField,
     {
       name: '_transforms',
       type: 'json',
@@ -254,6 +264,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
           type: 'text',
           admin: { disabled: true, hidden: true, readOnly: true },
         },
+        storedField,
       ],
     },
   ]
@@ -379,6 +390,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               type: 'text',
               admin: { disabled: true, hidden: true, readOnly: true },
             },
+            storedField,
           ],
           label: size.name,
         })),

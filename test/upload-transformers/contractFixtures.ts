@@ -1,5 +1,6 @@
 import type {
   CanTransformArgs,
+  HandleTransformRequestArgs,
   TransformFileArgs,
   TransformFileResult,
   UploadTransformer,
@@ -20,6 +21,7 @@ export type ContractStages = {
 /** The arguments the contract transformer received, in the order the calls ran. */
 export const contractCalls = {
   canTransform: [] as CanTransformArgs[],
+  handleRequest: [] as ({ slug: string } & HandleTransformRequestArgs)[],
   /** `docAtStart` is a copy of `doc` before the stage ran. */
   transformFile: [] as ({ docAtStart: Record<string, unknown> } & TransformFileArgs)[],
 }
@@ -29,6 +31,7 @@ export const contractHookCalls: { _transforms: unknown; hook: string }[] = []
 
 export function resetContractCalls(): void {
   contractCalls.canTransform.length = 0
+  contractCalls.handleRequest.length = 0
   contractCalls.transformFile.length = 0
   contractHookCalls.length = 0
 }
@@ -39,12 +42,26 @@ export const contractTransformers: UploadTransformer[] = [
     canTransform: (args) => {
       contractCalls.canTransform.push(args)
 
-      const contractStages = args.req.context?.contractStages as ContractStages | undefined
-      const handledTransformKeys = contractStages?.handledTransformKeys
+      if (args.operation === 'request') {
+        return args.req.searchParams?.has('contract')
+          ? { canTransform: true, options: { purpose: args.purpose } }
+          : false
+      }
 
-      return handledTransformKeys
-        ? { canTransform: true, handledTransformKeys }
-        : Boolean(contractStages)
+      const contractStages = args.req.context?.contractStages as ContractStages | undefined
+
+      return contractStages
+        ? {
+            canTransform: true,
+            handledTransformKeys: contractStages.handledTransformKeys,
+            options: { stage: 'first' },
+          }
+        : false
+    },
+    handleRequest: (args) => {
+      contractCalls.handleRequest.push({ ...args, slug: 'contract-first' })
+
+      return Promise.resolve({ status: 'continue' })
     },
     mimeTypes: ['text/markdown', 'image/*'],
     transformFile: async (args) => {
