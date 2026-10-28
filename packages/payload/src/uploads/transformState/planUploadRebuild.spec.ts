@@ -74,12 +74,6 @@ describe('planUploadRebuild', () => {
     expect(stage.canTransform).not.toHaveBeenCalled()
   })
 
-  it('should rebuild without a plan when the stored MIME type is unknown', async () => {
-    const result = await plan({ next: rotate, previous: null, storedMimeType: undefined })
-
-    expect(result).toEqual({ shouldRebuild: true })
-  })
-
   it('should rebuild when a built-in key changes and a stage claims it', async () => {
     const result = await plan({
       next: rotate,
@@ -100,72 +94,67 @@ describe('planUploadRebuild', () => {
     })
   })
 
-  it('should rebuild a duplicate with no _transforms change', async () => {
-    const result = await plan({ isDuplicating: true, next: null, previous: undefined })
+  it('should rebuild without a plan when the stored MIME type is unknown', async () => {
+    const result = await plan({ next: rotate, previous: null, storedMimeType: undefined })
 
-    expect(result.shouldRebuild).toBe(true)
+    expect(result).toEqual({ shouldRebuild: true })
   })
 
-  it('should rebuild for a crop sent in the uploadEdits query', async () => {
-    const result = await plan({
-      hasCropOrResizeEdit: true,
-      isLegacyReupload: true,
-      next: null,
-      previous: null,
-    })
-
-    expect(result.shouldRebuild).toBe(true)
-  })
-
-  it('should not rebuild when only a custom key that no stage claims changed', async () => {
-    const result = await plan({
-      next: { watermark: 'draft' },
-      previous: null,
-      transformers: [makeStage('stage')],
-    })
-
-    expect(result.shouldRebuild).toBe(false)
-  })
-
-  it('should rebuild when a changed custom key is claimed by a stage that runs', async () => {
-    const result = await plan({
-      next: { watermark: 'draft' },
-      previous: null,
-      transformers: [makeStage('watermarker', ['watermark'])],
-    })
-
-    expect(result.shouldRebuild).toBe(true)
-  })
-
-  it('should not count a claim from a Sharp bridge that does not run', async () => {
-    const result = await plan({
-      next: { watermark: 'draft' },
-      previous: null,
-      transformers: [makeBridge('chosen', []), makeBridge('not-chosen', ['watermark'])],
-    })
-
-    expect(result.shouldRebuild).toBe(false)
-  })
-
-  it('should rebuild for a focal point write when a stage that runs claims focalPoint', async () => {
-    const result = await plan({
-      isLegacyReupload: true,
-      next: null,
-      previous: null,
-      transformers: [makeStage('sharp', ['focalPoint'])],
-    })
-
-    expect(result.shouldRebuild).toBe(true)
-  })
-
-  it('should not rebuild or check coverage for a focal point write that no stage claims', async () => {
-    const result = await plan({
-      isLegacyReupload: true,
-      next: { ...rotate, focalPoint: { x: 20, y: 80 } },
-      previous: rotate,
-      transformers: [makeStage('stage')],
-    })
-
-    expect(result.shouldRebuild).toBe(false)
+  it.for<{ args: Parameters<typeof plan>[0]; name: string; shouldRebuild: boolean }>([
+    {
+      name: 'rebuild a duplicate with no _transforms change',
+      args: { isDuplicating: true, next: null, previous: undefined },
+      shouldRebuild: true,
+    },
+    {
+      name: 'rebuild for a crop sent in the uploadEdits query',
+      args: { hasCropOrResizeEdit: true, isLegacyReupload: true, next: null, previous: null },
+      shouldRebuild: true,
+    },
+    {
+      name: 'not rebuild when only a custom key that no stage claims changed',
+      args: { next: { watermark: 'draft' }, previous: null, transformers: [makeStage('stage')] },
+      shouldRebuild: false,
+    },
+    {
+      name: 'rebuild when a changed custom key is claimed by a stage that runs',
+      args: {
+        next: { watermark: 'draft' },
+        previous: null,
+        transformers: [makeStage('watermarker', ['watermark'])],
+      },
+      shouldRebuild: true,
+    },
+    {
+      name: 'not count a claim from a Sharp bridge that does not run',
+      args: {
+        next: { watermark: 'draft' },
+        previous: null,
+        transformers: [makeBridge('chosen', []), makeBridge('not-chosen', ['watermark'])],
+      },
+      shouldRebuild: false,
+    },
+    {
+      name: 'rebuild for a focal point write when a stage that runs claims focalPoint',
+      args: {
+        isLegacyReupload: true,
+        next: null,
+        previous: null,
+        transformers: [makeStage('sharp', ['focalPoint'])],
+      },
+      shouldRebuild: true,
+    },
+    {
+      name: 'not rebuild or check coverage for a focal point write that no stage claims',
+      args: {
+        isLegacyReupload: true,
+        next: { ...rotate, focalPoint: { x: 20, y: 80 } },
+        previous: rotate,
+        transformers: [makeStage('stage')],
+      },
+      shouldRebuild: false,
+    },
+  ])('should $name', async ({ args, shouldRebuild }) => {
+    expect((await plan(args)).shouldRebuild).toBe(shouldRebuild)
   })
 })

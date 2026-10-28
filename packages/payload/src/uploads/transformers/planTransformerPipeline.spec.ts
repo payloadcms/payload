@@ -19,6 +19,13 @@ const makeTransformer = (overrides: Partial<UploadTransformer> = {}): UploadTran
   ...overrides,
 })
 
+const planUpload = (transformers: UploadTransformer[]) =>
+  planTransformerPipeline({
+    args: makeArgs({ operation: 'upload' }),
+    capability: 'transformFile',
+    transformers,
+  })
+
 describe('planTransformerPipeline', () => {
   it('should only include transformers that implement the requested capability', async () => {
     const requestOnly = makeTransformer({ handleRequest: vi.fn(), slug: 'request-only' })
@@ -87,11 +94,7 @@ describe('planTransformerPipeline', () => {
       transformFile: vi.fn(),
     })
 
-    const { pipeline } = await planTransformerPipeline({
-      args: makeArgs({ operation: 'upload' }),
-      capability: 'transformFile',
-      transformers: [transformer],
-    })
+    const { pipeline } = await planUpload([transformer])
 
     expect(pipeline).toEqual([])
   })
@@ -109,11 +112,7 @@ describe('planTransformerPipeline', () => {
     })
     const noPredicate = makeTransformer({ slug: 'no-predicate', transformFile: vi.fn() })
 
-    const { claims, pipeline } = await planTransformerPipeline({
-      args: makeArgs({ operation: 'upload' }),
-      capability: 'transformFile',
-      transformers: [clipper, plain, noPredicate],
-    })
+    const { claims, pipeline } = await planUpload([clipper, plain, noPredicate])
 
     expect(pipeline).toEqual([clipper, plain, noPredicate])
     expect(claims.get(clipper)).toEqual(['clip', 'posterFrame'])
@@ -127,11 +126,7 @@ describe('planTransformerPipeline', () => {
       transformFile: vi.fn(),
     })
 
-    const { claims } = await planTransformerPipeline({
-      args: makeArgs({ operation: 'upload' }),
-      capability: 'transformFile',
-      transformers: [declined],
-    })
+    const { claims } = await planUpload([declined])
 
     expect(claims.has(declined)).toBe(false)
   })
@@ -149,11 +144,7 @@ describe('planTransformerPipeline', () => {
         transformFile: vi.fn(),
       })
 
-      const planning = planTransformerPipeline({
-        args: makeArgs({ operation: 'upload' }),
-        capability: 'transformFile',
-        transformers: [transformer],
-      })
+      const planning = planUpload([transformer])
 
       await expect(planning).rejects.toThrow(TransformerContractError)
       await expect(planning).rejects.toThrow('"bad-claims"')

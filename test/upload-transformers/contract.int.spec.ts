@@ -239,25 +239,27 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
     const createSuffixedNote = ({
       contractStages = suffixClaim,
       payload,
-      suffix = '!',
     }: {
       contractStages?: ContractStages
       payload: Payload
-      suffix?: string
-    }) =>
-      payload.create({
-        collection: contractMediaSlug,
-        context: { contractStages },
-        data: {
-          _transforms: { contractSuffix: suffix },
-          alt: 'note',
-          details: { caption: 'A note' },
-        },
-        file: textFile('hello'),
-      })
+    }) => createNote({ _transforms: { contractSuffix: '!' }, contractStages, payload })
+
+    const updateNote = ({
+      id,
+      contractStages,
+      data,
+      payload,
+    }: {
+      contractStages: ContractStages
+      data: Record<string, unknown>
+      id: number | string
+      payload: Payload
+    }) => payload.update({ id, collection: contractMediaSlug, context: { contractStages }, data })
 
     const readStoredFile = (filename?: null | string) =>
       readFile(path.join(contractMediaDir, filename!), 'utf8')
+
+    const rotateClaim: ContractStages = { claims: { first: ['rotate'] } }
 
     test('should give the claiming transformer the saved key to apply to the original', async ({
       payload,
@@ -358,18 +360,15 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
     })
 
     test('should accept a built-in key that a transformer claims', async ({ payload }) => {
-      const created = await payload.create({
-        collection: contractMediaSlug,
-        context: { contractStages: { claims: { first: ['clip'] } } },
-        data: {
-          _transforms: { clip: { endMs: 1000, startMs: 0 } },
-          alt: 'note',
-          details: { caption: 'A note' },
-        },
-        file: textFile('hello'),
+      const clip = { endMs: 1000, startMs: 0 }
+
+      const created = await createNote({
+        _transforms: { clip },
+        contractStages: { claims: { first: ['clip'] } },
+        payload,
       })
 
-      expect(created._transforms).toEqual({ clip: { endMs: 1000, startMs: 0 } })
+      expect(created._transforms).toEqual({ clip })
     })
 
     test('should rebuild from the original when a claimed key changes, without stacking', async ({
@@ -377,18 +376,18 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
     }) => {
       const created = await createSuffixedNote({ payload })
 
-      const firstChange = await payload.update({
+      const firstChange = await updateNote({
         id: created.id,
-        collection: contractMediaSlug,
-        context: { contractStages: suffixClaim },
+        contractStages: suffixClaim,
         data: { _transforms: { contractSuffix: '?' } },
+        payload,
       })
       const firstChangeText = await readStoredFile(firstChange.filename)
-      const secondChange = await payload.update({
+      const secondChange = await updateNote({
         id: created.id,
-        collection: contractMediaSlug,
-        context: { contractStages: suffixClaim },
+        contractStages: suffixClaim,
         data: { _transforms: { contractSuffix: '#' } },
+        payload,
       })
 
       expect(firstChangeText).toBe('hello?')
@@ -402,11 +401,11 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
       const created = await createSuffixedNote({ payload })
       resetContractCalls()
 
-      const updated = await payload.update({
+      const updated = await updateNote({
         id: created.id,
-        collection: contractMediaSlug,
-        context: { contractStages: suffixClaim },
+        contractStages: suffixClaim,
         data: { _transforms: { contractSuffix: '?' } },
+        payload,
       })
 
       expect(contractCalls.transformFile[0]?.source.mimeType).toBe('text/markdown')
@@ -414,34 +413,12 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
       expect(await readStoredFile(updated.filename)).toBe('hello?')
     })
 
-    test('should keep a built-in key no transformer claims any more through an unrelated update', async ({
-      payload,
-    }) => {
-      const created = await createNote({
-        _transforms: { rotate: { angle: 90 } },
-        contractStages: { claims: { first: ['rotate'] } },
-        payload,
-      })
-      resetContractCalls()
-
-      const updated = await payload.update({
-        id: created.id,
-        collection: contractMediaSlug,
-        context: { contractStages: {} },
-        data: { alt: 'changed' },
-      })
-
-      expect(updated.alt).toBe('changed')
-      expect(updated._transforms).toEqual({ rotate: { angle: 90 } })
-      expect(contractCalls.transformFile).toEqual([])
-    })
-
     test('should reject a rebuild of a built-in key no transformer claims any more, before reading the original', async ({
       payload,
     }) => {
       const created = await createNote({
         _transforms: { rotate: { angle: 90 } },
-        contractStages: { claims: { first: ['rotate'] } },
+        contractStages: rotateClaim,
         payload,
       })
       // Reading the original now would fail with a different error, so this proves the check
@@ -450,11 +427,11 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
       resetContractCalls()
 
       await expect(
-        payload.update({
+        updateNote({
           id: created.id,
-          collection: contractMediaSlug,
-          context: { contractStages: {} },
+          contractStages: {},
           data: { _transforms: { rotate: { angle: 180 } } },
+          payload,
         }),
       ).rejects.toThrow(/_transforms\.rotate/)
 
@@ -464,23 +441,45 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
       expect(stored._transforms).toEqual({ rotate: { angle: 90 } })
     })
 
-    test('should save a change to a custom key no transformer claims any more, without a rebuild', async ({
-      payload,
-    }) => {
-      const created = await createSuffixedNote({ payload })
-      resetContractCalls()
-
-      const updated = await payload.update({
-        id: created.id,
-        collection: contractMediaSlug,
-        context: { contractStages: {} },
+    test.for([
+      {
+        name: 'keep a built-in key no transformer claims any more through an unrelated update',
+        created: { _transforms: { rotate: { angle: 90 } }, contractStages: rotateClaim },
+        data: { alt: 'changed' },
+        expected: { _transforms: { rotate: { angle: 90 } }, alt: 'changed' },
+      },
+      {
+        name: 'save a change to a custom key no transformer claims any more',
+        created: { _transforms: { contractSuffix: '!' }, contractStages: suffixClaim },
         data: { _transforms: { contractSuffix: '?' } },
-      })
+        expected: { _transforms: { contractSuffix: '?' } },
+        expectedFileText: 'hello!',
+      },
+      {
+        name: 'save a focalPoint change that no transformer claims on a document with an unclaimed built-in key',
+        created: { _transforms: { rotate: { angle: 90 } }, contractStages: rotateClaim },
+        data: { _transforms: { focalPoint: { x: 20, y: 80 }, rotate: { angle: 90 } } },
+        expected: { _transforms: { focalPoint: { x: 20, y: 80 }, rotate: { angle: 90 } } },
+      },
+      {
+        name: 'save a focalPoint change that no transformer claims',
+        created: {},
+        data: { _transforms: { focalPoint: { x: 20, y: 80 } } },
+        expected: { _transforms: { focalPoint: { x: 20, y: 80 } } },
+      },
+    ])(
+      'should $name, without a rebuild',
+      async ({ created: createArgs, data, expected, expectedFileText }, { payload }) => {
+        const created = await createNote({ ...createArgs, payload })
+        resetContractCalls()
 
-      expect(updated._transforms).toEqual({ contractSuffix: '?' })
-      expect(contractCalls.transformFile).toEqual([])
-      expect(await readStoredFile(updated.filename)).toBe('hello!')
-    })
+        const updated = await updateNote({ id: created.id, contractStages: {}, data, payload })
+
+        expect(updated).toMatchObject(expected)
+        expect(contractCalls.transformFile).toEqual([])
+        expect(await readStoredFile(updated.filename)).toBe(expectedFileText ?? 'hello')
+      },
+    )
 
     test('should rebuild an upload without an original once from its main file, then from that file', async ({
       payload,
@@ -504,61 +503,24 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
         },
       })
 
-      const firstChange = await payload.update({
+      const firstChange = await updateNote({
         id: created.id,
-        collection: contractMediaSlug,
-        context: { contractStages: suffixClaim },
+        contractStages: suffixClaim,
         data: { _transforms: { contractSuffix: '?' } },
+        payload,
       })
       const firstChangeText = await readStoredFile(firstChange.filename)
       const adoptedOriginalText = await readStoredFile(firstChange.original?.filename)
-      const secondChange = await payload.update({
+      const secondChange = await updateNote({
         id: created.id,
-        collection: contractMediaSlug,
-        context: { contractStages: suffixClaim },
+        contractStages: suffixClaim,
         data: { _transforms: { contractSuffix: '#' } },
+        payload,
       })
 
       expect(firstChangeText).toBe('hello!?')
       expect(adoptedOriginalText).toBe('hello!')
       expect(await readStoredFile(secondChange.filename)).toBe('hello!#')
-    })
-
-    test('should save a focalPoint change that no transformer claims on a document with an unclaimed built-in key', async ({
-      payload,
-    }) => {
-      const created = await createNote({
-        _transforms: { rotate: { angle: 90 } },
-        contractStages: { claims: { first: ['rotate'] } },
-        payload,
-      })
-      resetContractCalls()
-
-      const updated = await payload.update({
-        id: created.id,
-        collection: contractMediaSlug,
-        context: { contractStages: {} },
-        data: { _transforms: { focalPoint: { x: 20, y: 80 }, rotate: { angle: 90 } } },
-      })
-
-      expect(updated._transforms).toEqual({ focalPoint: { x: 20, y: 80 }, rotate: { angle: 90 } })
-      expect(contractCalls.transformFile).toEqual([])
-    })
-
-    test('should save a focalPoint change that no transformer claims, without a rebuild', async ({
-      payload,
-    }) => {
-      const created = await createNote({ payload })
-
-      const updated = await payload.update({
-        id: created.id,
-        collection: contractMediaSlug,
-        context: { contractStages: {} },
-        data: { _transforms: { focalPoint: { x: 20, y: 80 } } },
-      })
-
-      expect(updated._transforms).toEqual({ focalPoint: { x: 20, y: 80 } })
-      expect(contractCalls.transformFile).toEqual([])
     })
   })
 
