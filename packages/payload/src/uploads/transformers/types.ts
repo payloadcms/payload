@@ -42,6 +42,19 @@ export type CanTransformArgs = {
   req: PayloadRequest
 }
 
+/**
+ * `true` or `false` decides only whether the transformer runs. The object form also lists the
+ * saved `_transforms` keys this stage applies. Every saved key that must run needs exactly one
+ * claiming stage, or the upload fails before any file work.
+ */
+export type CanTransformResult =
+  | {
+      canTransform: true
+      /** The `_transforms` keys this stage applies, for example `['crop']`. */
+      handledTransformKeys?: string[]
+    }
+  | boolean
+
 export type TransformFileArgs<TOptions = unknown> = {
   collectionSlug: string
   /**
@@ -107,7 +120,7 @@ export type UploadTransformer = {
    * Inexpensive, side-effect-free routing predicate. Must not fetch the source,
    * call an external service, or perform the transformation.
    */
-  canTransform?: (args: CanTransformArgs) => boolean | Promise<boolean>
+  canTransform?: (args: CanTransformArgs) => CanTransformResult | Promise<CanTransformResult>
   /**
    * Handles one stage of a dynamic transformation request.
    */

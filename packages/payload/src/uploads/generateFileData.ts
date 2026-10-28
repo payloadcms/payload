@@ -10,7 +10,13 @@ import type { ExternalUploadSource } from './sanitizeUploadData.js'
 import type { PreparedUploadTransformation } from './transformers/uploadTransformerBridge.js'
 import type { FileData, FileSizes, FileToSave, UploadEdits } from './types.js'
 
-import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
+import {
+  FileRetrievalError,
+  FileUploadError,
+  Forbidden,
+  MissingFile,
+  ValidationError,
+} from '../errors/index.js'
 import { TransformerContractError } from '../errors/TransformerContractError.js'
 import { deepCopyObject } from '../utilities/deepCopyObject.js'
 import { deepFreeze } from '../utilities/deepFreeze.js'
@@ -30,13 +36,18 @@ import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
 import { hasFullFileContents } from './hasFullFileContents.js'
 import { isProcessableImage } from './isProcessableImage.js'
 import { parseFilename } from './parseFilename.js'
-import { planTransformerPipeline } from './transformers/planTransformerPipeline.js'
 import { transformUploadFile } from './transformers/transformUploadFile.js'
 import {
   getUploadTransformerInternal,
   setUploadFilePath,
 } from './transformers/uploadTransformerBridge.js'
 import { isFullCrop } from './transformState/cropUnits.js'
+import {
+  assertTransformKeysCovered,
+  getStagesThatRun,
+  planUploadPipeline,
+  planUploadRebuild,
+} from './transformState/planUploadRebuild.js'
 import { resolveUploadEdits } from './transformState/resolveUploadEdits.js'
 type Args<T> = {
   collection: Collection
@@ -242,13 +253,30 @@ const processUpload = async <T>({
   const fileSourceData = externalUploadSource ?? retainedOriginal ?? currentFileData
   let isLocalFile = false
 
-  if (
-    !file &&
-    fileSourceData &&
-    (externalUploadSource ||
-      isDuplicating ||
-      shouldReupload(uploadEdits, incomingFileData as Record<string, unknown>))
-  ) {
+  const storedMimeType = retainedOriginal?.mimeType ?? currentFileData?.mimeType
+  const { rebuildPlan, shouldRebuild } =
+    file || !fileSourceData
+      ? { rebuildPlan: undefined, shouldRebuild: false }
+      : await planUploadRebuild({
+          collectionSlug: collectionConfig.slug,
+          hasCropOrResizeEdit: hasCropOrResizeEdit(uploadEdits),
+          isDuplicating: Boolean(isDuplicating),
+          isExternalSource: Boolean(externalUploadSource),
+          isLegacyReupload: shouldReupload(
+            uploadEdits,
+            incomingFileData as Record<string, unknown>,
+          ),
+          pipelineDoc,
+          pipelineOriginalDoc,
+          previousTransforms:
+            operation === 'update'
+              ? ((originalDoc as Document | undefined)?._transforms ?? null)
+              : undefined,
+          req,
+          storedMimeType,
+        })
+
+  if (shouldRebuild && fileSourceData) {
     const { filename, url } = fileSourceData
     if (filename && (filename.includes('../') || filename.includes('..\\'))) {
       throw new Forbidden(req.t)
@@ -296,6 +324,12 @@ const processUpload = async <T>({
       }
     } catch (err: unknown) {
       throw new FileRetrievalError(req.t, err instanceof Error ? err.message : undefined)
+    }
+
+    // A stored file whose type cannot be detected from its bytes or extension keeps the type
+    // saved on the document.
+    if (file && !file.mimetype && storedMimeType) {
+      file = { ...file, mimetype: storedMimeType }
     }
 
     if (file && retainedOriginal && currentFileData?.filename) {
@@ -357,27 +391,46 @@ const processUpload = async <T>({
     : uploadEdits
 
   try {
-    const pipeline = await planTransformerPipeline({
-      args: {
-        collectionSlug: collectionConfig.slug,
-        doc: pipelineOriginalDoc,
-        mimeType: file.mimetype,
-        operation: 'upload',
-        originalDoc: pipelineOriginalDoc,
-        req,
-      },
-      capability: 'transformFile',
-      transformers: req.payload.config.upload?.transformers ?? [],
+    const plan =
+      rebuildPlan?.mimeType === file.mimetype
+        ? rebuildPlan
+        : await planUploadPipeline({
+            collectionSlug: collectionConfig.slug,
+            mimeType: file.mimetype,
+            pipelineDoc,
+            pipelineOriginalDoc,
+            req,
+          })
+    const { pipeline } = plan
+
+    if (plan !== rebuildPlan) {
+      assertTransformKeysCovered({ collectionSlug: collectionConfig.slug, pipelineDoc, plan, req })
+    }
+
+    const {
+      bridgeTransformer: plannedBridgeTransformer,
+      claimsOfStagesThatRun,
+      stagesThatRun,
+    } = getStagesThatRun({
+      collectionSlug: collectionConfig.slug,
+      plan,
     })
 
     // A client upload can arrive with only a header probe or no contents (see
     // getFileContentRequirement.ts). Download it only when a stage needs its bytes, which
-    // `canTransform` decides here with the real document. Sharp's bridge is excluded: the
-    // content requirement already covers what it needs.
+    // `canTransform` decides here with the real document. The content requirement covers what
+    // Sharp's bridge needs for its configuration, but not saved keys that it claims.
+    const isBridgeApplyingSavedKey =
+      plannedBridgeTransformer !== undefined &&
+      Object.keys(pipelineDoc._transforms ?? {}).some((key) =>
+        plan.claims.get(plannedBridgeTransformer)?.includes(key),
+      )
+
     if (
       !hasFullFileContents(file) &&
       file.uploadReference &&
-      pipeline.some((transformer) => !getUploadTransformerInternal(transformer)?.prepareUpload)
+      (isBridgeApplyingSavedKey ||
+        pipeline.some((transformer) => !getUploadTransformerInternal(transformer)?.prepareUpload))
     ) {
       file = await fetchFullClientUpload({ collectionSlug: collectionConfig.slug, file, req })
       // On req.file, the temp file is removed after the operation.
@@ -388,31 +441,9 @@ const processUpload = async <T>({
     // need the whole file, so leave such an upload untouched rather than buffering it.
     const canRunTransformers = pipeline.length > 0 && hasFullFileContents(file)
 
-    const bridgeTransformers = canRunTransformers
-      ? pipeline.filter((transformer) =>
-          Boolean(getUploadTransformerInternal(transformer)?.prepareUpload),
-        )
-      : []
-
-    const bridgeTransformer =
-      bridgeTransformers.find((transformer) =>
-        getUploadTransformerInternal(transformer)!.handlesCollection?.({
-          collectionSlug: collectionConfig.slug,
-        }),
-      ) ?? bridgeTransformers[0]
-
-    // Only the Sharp transformer applies crops for now; others receive `_transforms` later.
-    if (!bridgeTransformer && editsForTransformer?.crop) {
-      req.payload.logger.warn(
-        `No configured transformer applies crops for "${collectionConfig.slug}". The crop is saved in _transforms but not applied to the file.`,
-      )
-    }
-
+    const bridgeTransformer = canRunTransformers ? plannedBridgeTransformer : undefined
     // The chosen bridge's task options are private to it, so other bridges must not see them.
-    const bridgeTaskPipeline = pipeline.filter(
-      (transformer) =>
-        transformer === bridgeTransformer || !bridgeTransformers.includes(transformer),
-    )
+    const bridgeTaskPipeline = stagesThatRun
 
     let originalWebFile: File | undefined
     let mainWebFile: File | undefined
@@ -443,6 +474,7 @@ const processUpload = async <T>({
                 : (sizeTaskDoc ??= deepFreeze(deepCopyObject(pipelineDoc)))
 
             const { file: taskFile } = await transformUploadFile({
+              claims: claimsOfStagesThatRun,
               collectionSlug: collectionConfig.slug,
               doc: taskDoc,
               file: task.file ?? originalWebFile!,
@@ -467,6 +499,7 @@ const processUpload = async <T>({
         sizeResults = results.filter((result) => result.fieldPath !== 'filename')
       } else {
         const { file: transformedFile } = await transformUploadFile({
+          claims: claimsOfStagesThatRun,
           collectionSlug: collectionConfig.slug,
           doc: pipelineDoc,
           file: originalWebFile,
@@ -479,6 +512,10 @@ const processUpload = async <T>({
 
         mainWebFile = transformedFile
       }
+
+      // Planning checked `_transforms` before the stages ran. A stage can add or change a key, so
+      // check the final value too, or a key nobody applies would be saved.
+      assertTransformKeysCovered({ collectionSlug: collectionConfig.slug, pipelineDoc, plan, req })
     }
 
     // Saved for any resizable image, not just one a transformer processed, so it's kept with no
@@ -839,6 +876,10 @@ const processUpload = async <T>({
       fileData.variants = sizes
     }
   } catch (err) {
+    if (err instanceof ValidationError) {
+      throw err
+    }
+
     req.payload.logger.error(err)
 
     // A broken transformer contract is a bug in the transformer, so it keeps its own message.

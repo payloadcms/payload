@@ -3,13 +3,12 @@ import { validateJSONSchema } from '#validateJSONSchema'
 import type { Validate } from '../../fields/config/types.js'
 import type { PixelCrop } from './cropUnits.js'
 
-import { reservedTransformKeys, transformStateObjectSchema } from './transformStateSchema.js'
+import { transformStateObjectSchema } from './transformStateSchema.js'
 
 type Dimensions = { height?: null | number; width?: null | number }
 
 /**
- * Checks `_transforms` for reserved keys and against its schema, then checks the crop against the
- * original's size.
+ * Checks `_transforms` against its schema, then checks the crop against the original's size.
  */
 export async function getTransformStateError({
   original,
@@ -20,12 +19,6 @@ export async function getTransformStateError({
 }): Promise<string | undefined> {
   if (value === null || value === undefined) {
     return undefined
-  }
-
-  const reservedKey = reservedTransformKeys.find((key) => Object.hasOwn(value, key))
-
-  if (reservedKey) {
-    return `${reservedKey}: reserved for a built-in transform that Payload does not apply yet`
   }
 
   // `null` returned above, so check the object schema directly: its errors name the failing key.

@@ -9,21 +9,6 @@ const strictObject = (
 ): JSONSchema4 => ({ type: 'object', additionalProperties: false, ...schema })
 
 /**
- * Built-in keys that Payload defines but does not apply yet. They are rejected so that no
- * stored value can conflict with the built-in shape before a transformer applies it.
- */
-export const reservedTransformKeys = [
-  'clip',
-  'encoding',
-  'flip',
-  'metadataPolicy',
-  'pageRange',
-  'posterFrame',
-  'resize',
-  'rotate',
-]
-
-/**
  * Shapes for the built-in `_transforms` keys. Any other key is allowed and owned by the
  * transformer that reads it.
  */

@@ -14,7 +14,11 @@ export type ContractStage = (
   args: TransformFileArgs,
 ) => Promise<TransformFileResult | void> | TransformFileResult | void
 
+type ContractStageName = 'first' | 'second'
+
 export type ContractStages = {
+  /** The `_transforms` keys each stage claims. A stage without an entry returns `true`. */
+  claims?: Partial<Record<ContractStageName, string[]>>
   first?: ContractStage
   second?: ContractStage
 }
@@ -52,7 +56,7 @@ const readAllText = async (source: TransformFileArgs['source']): Promise<string>
     await source.readFileBytes({ numberOfBytes: source.sizeInBytes, startByte: 0 }),
   )
 
-const createContractTransformer = (stageName: keyof ContractStages): UploadTransformer => ({
+const createContractTransformer = (stageName: ContractStageName): UploadTransformer => ({
   slug: `contract-${stageName}`,
   canTransform: (args) => {
     contractCalls.canTransform.push(args)
@@ -61,7 +65,14 @@ const createContractTransformer = (stageName: keyof ContractStages): UploadTrans
       return args.req.searchParams?.has('contract') ?? false
     }
 
-    return Boolean(args.req.context?.contractStages)
+    const contractStages = args.req.context?.contractStages as ContractStages | undefined
+    const handledTransformKeys = contractStages?.claims?.[stageName]
+
+    if (!contractStages) {
+      return false
+    }
+
+    return handledTransformKeys ? { canTransform: true, handledTransformKeys } : true
   },
   handleRequest: (args) => {
     contractCalls.handleRequest.push(args)

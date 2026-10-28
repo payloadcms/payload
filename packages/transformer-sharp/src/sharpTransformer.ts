@@ -68,7 +68,7 @@ export function sharpTransformer(
       // Upload-time eligibility is already decided by the MIME match that ran
       // before `canTransform`; only dynamic request routing needs the query.
       if (args.operation === 'upload') {
-        return true
+        return { canTransform: true, handledTransformKeys: ['crop', 'focalPoint'] }
       }
 
       if (
