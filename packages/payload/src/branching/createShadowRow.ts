@@ -1,24 +1,16 @@
 import type { PayloadRequest } from '../types/index.js'
-
 import type { BranchOperation } from './types.js'
 
 import { APIError } from '../errors/index.js'
-
 import { ValidationError } from '../errors/ValidationError.js'
-
 import { shareFileOperationScope } from '../uploads/fileVersioning/fileOperationManager.js'
-
 import {
   commitTransaction,
   isUnknownTransactionCommitResult,
 } from '../utilities/commitTransaction.js'
-
 import { initTransaction } from '../utilities/initTransaction.js'
-
 import { isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
-
 import { killTransaction } from '../utilities/killTransaction.js'
-
 import { branchChangesCollectionSlug, branchDocIDField, branchField } from './types.js'
 
 type ShadowSource = {

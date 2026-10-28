@@ -1,7 +1,6 @@
 import type { PayloadRequest } from '../types/index.js'
 
 import { peekBranchRowID, rememberBranchRowID, resolveBranch } from './resolveBranch.js'
-
 import { branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
 
 type Args = {

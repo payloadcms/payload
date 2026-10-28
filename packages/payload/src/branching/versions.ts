@@ -1,13 +1,9 @@
 import type { PayloadRequest, Where } from '../types/index.js'
 
 import { extractRelationshipID } from '../utilities/extractRelationshipID.js'
-
 import { rewriteBranchVersionParents } from './branchIDs.js'
-
 import { loadBranchDeletions, loadBranchManifest, resolveBranch } from './resolveBranch.js'
-
 import { resolveBranchRowID } from './resolveBranchRowID.js'
-
 import {
   branchChangesCollectionSlug,
   branchField,
@@ -313,7 +309,7 @@ const findVersionHistoryParentIDs = ({
  * Restores canonical document IDs on version rows read from a branch, whose
  * `parent` is the shadow row rather than the document.
  */
-export const projectBranchVersionParents = (docs: Record<string, any>[]): void => {
+export const projectBranchVersionParents = (docs: Record<string, unknown>[]): void => {
   for (const doc of docs) {
     const canonical = doc?.[branchParentField]
 
@@ -374,5 +370,7 @@ export const resolveBranchVersionParent = async ({
  * Restores canonical document IDs on rows returned by `queryDrafts`, which
  * surfaces a version's `parent` as the document ID.
  */
-export const projectBranchVersionParent = (row: Record<string, any>): number | string =>
-  row?.[branchParentField]?.value ?? row?.[branchParentField] ?? row?.parent
+export const projectBranchVersionParent = (row: Record<string, unknown>): number | string =>
+  (extractRelationshipID({ relationship: row?.[branchParentField] }) ?? row?.parent) as
+    | number
+    | string

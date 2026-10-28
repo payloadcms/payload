@@ -1,15 +1,10 @@
 import type { Field, FlattenedField } from '../fields/config/types.js'
-
 import type { PayloadRequest, Where } from '../types/index.js'
 
 import { APIError } from '../errors/index.js'
-
 import { fieldIsVirtual, fieldShouldBeLocalized } from '../fields/config/types.js'
-
 import { flattenAllFields } from '../utilities/flattenAllFields.js'
-
 import { corePayloadCollectionSlugs, hardExcludedSlugs } from './sanitizeBranchingConfig.js'
-
 import { branchesCollectionSlug, branchField, MAIN_BRANCH } from './types.js'
 
 export type BranchCreatedTarget = {

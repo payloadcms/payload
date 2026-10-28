@@ -1,11 +1,8 @@
 import type { PayloadRequest, SelectType } from '../types/index.js'
 
 import { getSelectMode } from '../utilities/getSelectMode.js'
-
 import { branchGlobalNeedsBothRows } from './globals.js'
-
 import { resolveBranch } from './resolveBranch.js'
-
 import { branchDocIDField, branchField, branchParentField, MAIN_BRANCH } from './types.js'
 
 type ActiveArgs = {
