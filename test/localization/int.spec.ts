@@ -7,6 +7,7 @@ import { expect } from 'vitest'
 import type {
   ArrayField,
   BlocksField,
+  GlobalText,
   LocalizedPost,
   LocalizedSort,
   Nested,
@@ -3995,6 +3996,38 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
         })
 
         expect(enPublishedAfter.title).toBe('Published EN')
+      })
+
+      test('should copy a global to another locale', async ({ payload }) => {
+        await payload.updateGlobal({
+          slug: 'global-text',
+          data: {
+            text: 'copied global text',
+          },
+          locale: 'en',
+          overrideAccess: true,
+        })
+
+        const req = await createPayloadRequest({ payload, user })
+
+        const res = (await copyDataFromLocaleHandler({
+          fromLocale: 'en',
+          globalSlug: 'global-text',
+          overrideData: true,
+          req,
+          toLocale: 'es',
+        })) as GlobalText
+
+        expect(res.text).toBe('copied global text')
+
+        const spanish = await payload.findGlobal({
+          slug: 'global-text',
+          fallbackLocale: false,
+          locale: 'es',
+          overrideAccess: true,
+        })
+
+        expect(spanish.text).toBe('copied global text')
       })
     })
 
