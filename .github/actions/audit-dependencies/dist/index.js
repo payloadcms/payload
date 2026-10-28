@@ -11951,7 +11951,7 @@ const toAdvisory = (value) => {
         typeof value.github_advisory_id !== 'string' ||
         typeof value.module_name !== 'string' ||
         typeof value.severity !== 'string' ||
-        typeof value.patched_versions !== 'string' ||
+        (typeof value.patched_versions !== 'string' && value.patched_versions !== null) ||
         typeof value.vulnerable_versions !== 'string') {
         return null;
     }
@@ -11960,7 +11960,8 @@ const toAdvisory = (value) => {
         github_advisory_id: value.github_advisory_id,
         id: typeof value.id === 'number' ? value.id : 0,
         module_name: value.module_name,
-        patched_versions: value.patched_versions,
+        // pnpm reports `null` when no patched version is published; keep it as the unfixable sentinel.
+        patched_versions: value.patched_versions ?? '<0.0.0',
         severity: value.severity,
         title: typeof value.title === 'string' ? value.title : '',
         url: typeof value.url === 'string' ? value.url : '',
