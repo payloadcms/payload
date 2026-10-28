@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const zhTwTranslations: DefaultTranslationsObject = {
   authentication: {
     account: '帳戶',
