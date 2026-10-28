@@ -23,7 +23,9 @@ type PreferencesContext = {
   /**
    * @param key - a string identifier for the property being set
    * @param value - preference data to store
-   * @param merge - when true will combine the existing preference object batch the change into one request for objects, default = false
+   * @param merge - when true, combines the value with the existing preference stored under the key
+   * and batches concurrent changes to that key into one request, default = false. Awaiting the
+   * returned promise waits for the write to land either way.
    */
   setPreference: SetPreference
   syncPreference: <T = Preferences>(key: string, value: T) => void
@@ -43,6 +45,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
   const contextRef = useRef({} as PreferencesContext)
   const preferencesRef = useRef({})
   const pendingUpdate = useRef({})
+  const scheduledMergedUpdates = useRef<Record<string, Promise<void>>>({})
   const pendingWrites = useRef<Record<string, number>>({})
   const updateQueues = useRef<Record<string, Promise<void>>>({})
   const { config } = useConfig()
@@ -185,6 +188,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         }
 
         if (dequal(newValue, currentPreference)) {
+          await updateQueues.current[key]
           return
         }
 
@@ -195,6 +199,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         }
       } else {
         if (newValue === currentPreference) {
+          await updateQueues.current[key]
           return
         }
 
@@ -207,25 +212,41 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
           return
         }
 
-        // preference set in context here to prevent other updatePreference at the same time
-        preferencesRef.current[key] = pendingUpdate.current[key]
+        // Take this batch before awaiting persistence so later changes form a new batch.
+        const nextValue = pendingUpdate.current[key]
 
-        await requests.post(
-          formatAdminURL({
-            apiRoute: api,
-            path: `/payload-preferences/${key}`,
-          }),
-          requestOptions(preferencesRef.current[key], i18n.language),
+        delete pendingUpdate.current[key]
+        preferencesRef.current[key] = nextValue
+
+        const previousUpdate = updateQueues.current[key] ?? Promise.resolve()
+        const update = previousUpdate.then(() =>
+          requests.post(
+            formatAdminURL({
+              apiRoute: api,
+              path: `/payload-preferences/${key}`,
+            }),
+            requestOptions(nextValue, i18n.language),
+          ),
         )
 
-        // reset any changes for this key after sending the request
-        delete pendingUpdate.current[key]
+        updateQueues.current[key] = update.then(
+          () => undefined,
+          () => undefined,
+        )
+        await update
       }
 
-      // use timeout to allow multiple changes of different values using the same key in one request
-      setTimeout(() => {
-        void updatePreference()
-      })
+      // Callers coalesced into the same batch must all await its persisted write.
+      if (typeof scheduledMergedUpdates.current[key] === 'undefined') {
+        scheduledMergedUpdates.current[key] = new Promise<void>((resolve, reject) => {
+          setTimeout(() => {
+            delete scheduledMergedUpdates.current[key]
+            updatePreference().then(resolve, reject)
+          })
+        })
+      }
+
+      await scheduledMergedUpdates.current[key]
     },
     [api, getPreference, i18n.language, pendingUpdate, updateQueues],
   )
