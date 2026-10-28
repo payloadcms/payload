@@ -30,4 +30,5 @@ export type ListControlsProps = {
   readonly renderedFilters?: Map<string, React.ReactNode>
   readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
   readonly viewType?: ViewTypes
+  readonly wherePanelID?: string
 }

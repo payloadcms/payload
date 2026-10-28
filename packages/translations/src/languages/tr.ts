@@ -722,6 +722,10 @@ export const trTranslations: DefaultTranslationsObject = {
     type: 'Tür',
     aboutToPublishSelection: "Seçimdeki tüm {{label}}'i yayınlamak üzeresiniz. Emin misin?",
     aboutToRestore: 'Döküman {{label}}, {{versionDate}} tarihindeki sürümüne geri döndürülecek.',
+    aboutToRestoreAsDraft:
+      '{{versionDate}} tarihindeki içeriği taslak olarak geri yükleyin. Yayımlanmış içerik, düzenleyiciden yayımlayana kadar değişmeden kalacaktır.',
+    aboutToRestoreAsDraftAllLocales:
+      '{{versionDate}} tarihindeki içeriği tüm yerel ayarlarda taslak olarak geri yükleyin. Yayımlanmış içerik, düzenleyiciden yayımlayana kadar değişmeden kalacaktır.',
     aboutToRestoreGlobal:
       'Global {{label}}, {{versionDate}} tarihindeki sürümüne geri döndürülecek.',
     aboutToRevertToPublished:

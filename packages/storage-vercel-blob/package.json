@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/storage-vercel-blob",
-  "version": "4.0.0-beta.4",
+  "version": "4.0.0-beta.5",
   "description": "Payload storage adapter for Vercel Blob Storage",
   "homepage": "https://payloadcms.com",
   "license": "MIT",

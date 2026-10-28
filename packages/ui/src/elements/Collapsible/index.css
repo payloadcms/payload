@@ -77,7 +77,7 @@
 
     &:focus-visible {
       outline: var(--accessibility-outline);
-      outline-offset: -1px;
+      outline-offset: var(--accessibility-outline-inset);
     }
 
     span {
