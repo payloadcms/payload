@@ -17,6 +17,20 @@ export default buildConfigWithDefaults({
       },
     },
   },
+  collections: [
+    {
+      slug: 'users',
+      auth: true,
+      fields: [
+        {
+          name: 'password',
+          type: 'text',
+          hidden: true,
+          minLength: 4,
+        },
+      ],
+    },
+  ],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
