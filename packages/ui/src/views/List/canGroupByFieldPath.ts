@@ -1,5 +1,7 @@
 import type { FlattenedField } from 'payload'
 
+type GetRelatedFields = (collectionSlug: string) => FlattenedField[] | undefined
+
 /**
  * Whether the list view can group documents by the field at `path`.
  *
@@ -11,6 +13,10 @@ import type { FlattenedField } from 'payload'
  * A path can also run through a relationship or upload field into the related collection
  * (`category.links.label`), so `getRelatedFields` lets the walk continue there. A path that goes
  * on past a polymorphic relationship is rejected: its target collection is not known.
+ *
+ * A virtual field linked to a path (`virtual: 'category.links.label'`) is grouped by that path,
+ * which `findDistinct` resolves from the root of the field's collection, so the walk checks the
+ * target path the same way. Virtual fields that link to each other in a cycle are rejected.
  */
 export const canGroupByFieldPath = ({
   fields,
@@ -18,18 +24,53 @@ export const canGroupByFieldPath = ({
   path,
 }: {
   fields: FlattenedField[]
-  getRelatedFields?: (collectionSlug: string) => FlattenedField[] | undefined
+  getRelatedFields?: GetRelatedFields
   path: string
+}): boolean =>
+  canGroupByPath({
+    fields,
+    getRelatedFields,
+    path: path.replace(/^-/, ''),
+    visitedVirtualFields: new Set(),
+  })
+
+const canGroupByPath = ({
+  fields,
+  getRelatedFields,
+  path,
+  visitedVirtualFields,
+}: {
+  fields: FlattenedField[]
+  getRelatedFields?: GetRelatedFields
+  path: string
+  visitedVirtualFields: Set<FlattenedField>
 }): boolean => {
+  // Virtual paths resolve from the root of the collection the virtual field belongs to.
+  let collectionFields: FlattenedField[] = fields
   let currentFields: FlattenedField[] | undefined = fields
 
-  const segments = path.replace(/^-/, '').split('.')
+  const segments = path.split('.')
 
   for (const [index, segment] of segments.entries()) {
     const field: FlattenedField | undefined = currentFields?.find((each) => each.name === segment)
 
     if (!field) {
       return true
+    }
+
+    if ('virtual' in field && typeof field.virtual === 'string') {
+      if (visitedVirtualFields.has(field)) {
+        return false
+      }
+
+      visitedVirtualFields.add(field)
+
+      return canGroupByPath({
+        fields: collectionFields,
+        getRelatedFields,
+        path: [field.virtual, ...segments.slice(index + 1)].join('.'),
+        visitedVirtualFields,
+      })
     }
 
     if (field.type === 'array' || field.type === 'blocks') {
@@ -44,6 +85,11 @@ export const canGroupByFieldPath = ({
       }
 
       currentFields = getRelatedFields?.(field.relationTo)
+
+      if (currentFields) {
+        collectionFields = currentFields
+      }
+
       continue
     }
 

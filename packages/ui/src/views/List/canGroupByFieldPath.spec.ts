@@ -22,6 +22,10 @@ const fields = [
   },
   { name: 'category', type: 'relationship', relationTo: 'categories' },
   { name: 'related', type: 'relationship', relationTo: ['categories', 'posts'] },
+  { name: 'categoryTitle', type: 'text', virtual: 'category.title' },
+  { name: 'linkLabels', type: 'text', virtual: 'category.links.label' },
+  { name: 'loopA', type: 'text', virtual: 'loopB' },
+  { name: 'loopB', type: 'text', virtual: 'loopA' },
 ] as unknown as FlattenedField[]
 
 const categoryFields = [
@@ -59,6 +63,15 @@ describe('canGroupByFieldPath', () => {
     expect(canGroupByFieldPath({ fields, getRelatedFields, path: 'related.links.label' })).toBe(
       false,
     )
+  })
+
+  it('follows virtual fields linked to a path and checks their target', () => {
+    expect(canGroupByFieldPath({ fields, getRelatedFields, path: 'categoryTitle' })).toBe(true)
+    expect(canGroupByFieldPath({ fields, getRelatedFields, path: 'linkLabels' })).toBe(false)
+  })
+
+  it('rejects virtual fields that link to each other in a cycle', () => {
+    expect(canGroupByFieldPath({ fields, getRelatedFields, path: 'loopA' })).toBe(false)
   })
 
   it('rejects fields inside arrays and blocks', () => {
