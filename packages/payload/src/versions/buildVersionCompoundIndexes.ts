@@ -11,7 +11,12 @@ export const buildVersionCompoundIndexes = ({
     fields: each.fields.map(({ field, localizedPath, path, pathHasLocalized }) =>
       path === branchField
         ? { field, localizedPath, path, pathHasLocalized }
-        : { field, localizedPath: `version.${localizedPath}`, path: `version.${path}`, pathHasLocalized },
+        : {
+            field,
+            localizedPath: `version.${localizedPath}`,
+            path: `version.${path}`,
+            pathHasLocalized,
+          },
     ),
     ...(each.requireExists
       ? {

@@ -29,6 +29,9 @@ describe('buildVersionCompoundIndexes', () => {
 
     const [versionIndex] = buildVersionCompoundIndexes({ indexes: [slugIndex!] })
 
+    expect(versionIndex.requireExists).toEqual([
+      { localizedPath: 'version.slug.<locale>', path: 'version.slug', pathHasLocalized: true },
+    ])
     expect(versionIndex.fields.map((field) => field.path)).toEqual(['version.slug', '_branch'])
     expect(versionIndex.fields.map((field) => field.localizedPath)).toEqual([
       'version.slug.<locale>',
