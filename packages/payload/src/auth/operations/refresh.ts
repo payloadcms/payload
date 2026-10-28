@@ -205,7 +205,8 @@ const refreshWithRequestToken = async ({ args }: { args: Arguments }): Promise<R
 /**
  * Refreshes the session of a refresh token, also after its token expired.
  *
- * @returns `null` when the refresh token is invalid, its session ended, or it was reused
+ * @returns `null` when the refresh token is invalid, its session ended, it was reused, or its user
+ * is in the trash or not verified
  */
 const refreshWithRefreshToken = async ({
   args,
