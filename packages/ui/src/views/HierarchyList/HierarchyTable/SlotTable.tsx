@@ -7,9 +7,13 @@ import React from 'react'
 import { Locked } from '../../../elements/Locked/index.js'
 import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
 import { AlignJustifiedIcon } from '../../../icons/AlignJustified/index.js'
+import '../../../elements/Table/index.css'
+import { useTranslation } from '../../../providers/Translation/index.js'
 import './SlotTable.css'
 
 const baseClass = 'slot-table'
+
+const selectRowClass = 'select-row select-row__checkbox'
 
 export type SlotColumn<TRow = Record<string, unknown>> = {
   /**
@@ -28,6 +32,7 @@ export type SlotColumn<TRow = Record<string, unknown>> = {
    * Column header content
    */
   heading: React.ReactNode
+  isLinked?: boolean
 }
 
 export type SlotTableProps<TRow = Record<string, unknown>> = {
@@ -122,6 +127,7 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
   parentId,
   selectedIds = new Set(),
 }: SlotTableProps<TRow>) {
+  const { t } = useTranslation()
   const allSelected = data.length > 0 && data.every((row, i) => selectedIds.has(getRowId(row, i)))
   const someSelected = data.some((row, i) => selectedIds.has(getRowId(row, i)))
 
@@ -146,7 +152,7 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
 
   return (
     <div
-      className={[baseClass, appearance && `${baseClass}--appearance-${appearance}`, className]
+      className={['table', appearance && `table--appearance-${appearance}`, baseClass, className]
         .filter(Boolean)
         .join(' ')}
       key={`${collectionSlug}-${parentId}`}
@@ -156,11 +162,12 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
           <thead>
             <tr>
               {enableCheckbox && !mergeCheckboxHeader && (
-                <th className={`${baseClass}__th ${baseClass}__th--checkbox`}>
+                <th className="heading-_select">
                   {enableSelectAll && (
                     <CheckboxInput
+                      aria-label={t('general:selectAllRows')}
                       checked={allSelected}
-                      className={`${baseClass}__checkbox`}
+                      className={selectRowClass}
                       onToggle={handleSelectAll}
                       partialChecked={someSelected && !allSelected}
                       variant="muted"
@@ -169,7 +176,7 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
                 </th>
               )}
               {enableDragHandle && (
-                <th className={`${baseClass}__th ${baseClass}__th--drag`}>
+                <th className="heading-_dragHandle">
                   <span className={`${baseClass}__drag-header`} />
                 </th>
               )}
@@ -179,15 +186,16 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
 
                 return (
                   <th
-                    className={[`${baseClass}__th`, col.className].filter(Boolean).join(' ')}
+                    className={col.className}
                     colSpan={isMergedCheckboxColumn ? 2 : undefined}
                     key={col.accessor}
                   >
                     {isMergedCheckboxColumn && enableSelectAll ? (
                       <span className={`${baseClass}__th-merged`}>
                         <CheckboxInput
+                          aria-label={t('general:selectLabel', { label: t('general:document') })}
                           checked={allSelected}
-                          className={`${baseClass}__checkbox`}
+                          className={selectRowClass}
                           onToggle={handleSelectAll}
                           partialChecked={someSelected && !allSelected}
                           variant="muted"
@@ -211,13 +219,7 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
 
             return (
               <tr
-                className={[
-                  `${baseClass}__tr`,
-                  isSelected && `${baseClass}__tr--selected`,
-                  isClickable && `${baseClass}__tr--clickable`,
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
+                className={isClickable ? `${baseClass}__tr--clickable` : undefined}
                 data-id={rowId}
                 key={rowId}
                 onClick={isClickable ? () => handleRowClick(row, rowIndex) : undefined}
@@ -225,7 +227,7 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
                 tabIndex={isClickable ? 0 : undefined}
               >
                 {enableCheckbox && (
-                  <td className={`${baseClass}__td ${baseClass}__td--checkbox`}>
+                  <td className="cell-_select">
                     {(() => {
                       const lockedUser = getRowLockedUser?.(row, rowIndex)
 
@@ -235,8 +237,9 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
 
                       return (
                         <CheckboxInput
+                          aria-label={t('general:selectLabel', { label: t('general:document') })}
                           checked={isSelected}
-                          className={`${baseClass}__checkbox`}
+                          className={selectRowClass}
                           onToggle={() => handleRowCheckbox(row, rowIndex, isSelected)}
                           variant="muted"
                         />
@@ -245,7 +248,7 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
                   </td>
                 )}
                 {enableDragHandle && (
-                  <td className={`${baseClass}__td ${baseClass}__td--drag`}>
+                  <td className="cell-_dragHandle">
                     <span className={`${baseClass}__drag-handle`}>
                       <AlignJustifiedIcon />
                     </span>
@@ -253,7 +256,13 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
                 )}
                 {columns.map((col) => (
                   <td
-                    className={[`${baseClass}__td`, col.className].filter(Boolean).join(' ')}
+                    className={[
+                      `cell-${col.accessor}`,
+                      col.isLinked && 'cell--linked',
+                      col.className,
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
                     key={col.accessor}
                   >
                     <col.Cell column={col} row={row} rowIndex={rowIndex} />

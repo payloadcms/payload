@@ -205,6 +205,7 @@ export async function scheduleQueueable({
       meta: {
         scheduled: true,
       },
+      overrideAccess: true,
       queue: queueable.scheduleConfig.queue,
       req,
       task: queueable?.taskConfig?.slug,

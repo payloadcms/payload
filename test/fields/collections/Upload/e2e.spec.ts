@@ -35,7 +35,6 @@ let url: AdminUrlUtil
 describe('Upload', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       // prebuild,
@@ -49,8 +48,6 @@ describe('Upload', () => {
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 
     await ensureCompilationIsDone({ page, serverURL })
@@ -98,7 +95,7 @@ describe('Upload', () => {
 
     await expect(page.locator('.file-preview__thumbnail img')).toHaveAttribute(
       'src',
-      /\/api\/uploads\/file\/og-image(-\d+)?\.jpg(\?.*)?$/,
+      /\/api\/uploads\/file\/og-image(?:-\d+)?-original(?:-\d+)?\.jpg(\?.*)?$/,
     )
   })
 
@@ -126,7 +123,7 @@ describe('Upload', () => {
 
     await expect(page.locator('.file-preview__thumbnail img')).toHaveAttribute(
       'src',
-      /\/api\/uploads\/file\/og-image(-\d+)?\.jpg(\?.*)?$/,
+      /\/api\/uploads\/file\/og-image(?:-\d+)?-original(?:-\d+)?\.jpg(\?.*)?$/,
     )
   })
 
@@ -160,7 +157,7 @@ describe('Upload', () => {
     await uploadImage()
     await expect(page.locator('.file-preview__thumbnail img')).toHaveAttribute(
       'src',
-      /\/api\/uploads\/file\/payload-\d+\.jpg(\?.*)?$/,
+      /\/api\/uploads\/file\/payload(?:-\d+)?-original(?:-\d+)?\.jpg(\?.*)?$/,
     )
   })
 
@@ -185,15 +182,18 @@ describe('Upload', () => {
     // Assert that the media field has the png upload
     await expect(
       page.locator('.field-type.upload .upload-relationship-details__filename a'),
-    ).toHaveAttribute('href', /\/api\/uploads\/file\/payload-\d+\.png$/)
+    ).toHaveAttribute('href', /\/api\/uploads\/file\/payload(?:-\d+)?-original(?:-\d+)?\.png$/)
 
     await expect(
       page.locator('.field-type.upload .upload-relationship-details__filename a'),
-    ).toContainText(/payload-\d+\.png/)
+    ).toContainText(/payload(?:-\d+)?-original(?:-\d+)?\.png/)
 
     await expect(
       page.locator('.field-type.upload .upload-relationship-details img'),
-    ).toHaveAttribute('src', /\/api\/uploads\/file\/payload-\d+\.png(\?.*)?$/)
+    ).toHaveAttribute(
+      'src',
+      /\/api\/uploads\/file\/payload(?:-\d+)?-original(?:-\d+)?\.png(\?.*)?$/,
+    )
     await saveDocAndAssert(page)
   })
 
@@ -290,42 +290,40 @@ describe('Upload', () => {
   })
 
   describe.skip('A11y', () => {
-    test.fixme(
-      'Create view should have no accessibility violations',
-      async ({ page: _unusedPage }, testInfo) => {
-        await page.goto(url.create)
-        await page.locator('#field-text').waitFor()
+    test.fixme('Create view should have no accessibility violations', async ({
+      page: _unusedPage,
+    }, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-text').waitFor()
 
-        const scanResults = await runAxeScan({
-          exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
-          include: ['.collection-edit__main'],
-          page,
-          testInfo,
-        })
+      const scanResults = await runAxeScan({
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+        include: ['.collection-edit__main'],
+        page,
+        testInfo,
+      })
 
-        expect(scanResults.violations.length).toBe(0)
-      },
-    )
+      expect(scanResults.violations.length).toBe(0)
+    })
 
-    test.fixme(
-      'Edit view should have no accessibility violations',
-      async ({ page: _unusedPage }, testInfo) => {
-        await page.goto(url.list)
-        const firstItem = page.locator('.cell-filename a').nth(0)
-        await firstItem.click()
+    test.fixme('Edit view should have no accessibility violations', async ({
+      page: _unusedPage,
+    }, testInfo) => {
+      await page.goto(url.list)
+      const firstItem = page.locator('.cell-filename a').nth(0)
+      await firstItem.click()
 
-        await page.locator('#field-text').waitFor()
+      await page.locator('#field-text').waitFor()
 
-        const scanResults = await runAxeScan({
-          exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
-          include: ['.collection-edit__main'],
-          page,
-          testInfo,
-        })
+      const scanResults = await runAxeScan({
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+        include: ['.collection-edit__main'],
+        page,
+        testInfo,
+      })
 
-        expect(scanResults.violations.length).toBe(0)
-      },
-    )
+      expect(scanResults.violations.length).toBe(0)
+    })
 
     test('Upload fields have focus indicators', async ({ page: _unusedPage }, testInfo) => {
       await page.goto(url.create)

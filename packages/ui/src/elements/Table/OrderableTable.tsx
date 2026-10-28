@@ -17,6 +17,7 @@ import { DraggableSortableItem } from '../DraggableSortable/DraggableSortableIte
 import { DraggableSortable } from '../DraggableSortable/index.js'
 import { OrderableRow } from './OrderableRow.js'
 import { OrderableRowDragPreview } from './OrderableRowDragPreview.js'
+import { useTableID } from './TableIdentity.js'
 
 const baseClass = 'table'
 
@@ -30,15 +31,18 @@ export type Props = {
   readonly columns?: Column[]
   readonly data: Record<string, unknown>[]
   readonly heading?: React.ReactNode
+  readonly id?: string
 }
 
 export const OrderableTable: React.FC<Props> = ({
+  id,
   appearance = 'default',
   BeforeTable,
   collection,
   columns,
   data: initialData,
 }) => {
+  const tableID = useTableID(id)
   const { config } = useConfig()
   const { data: listQueryData, orderableFieldName, query } = useListQuery()
   const locale = useLocale()
@@ -190,7 +194,7 @@ export const OrderableTable: React.FC<Props> = ({
     >
       {BeforeTable}
       <DraggableSortable ids={rowIds} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
-        <table cellPadding="0" cellSpacing="0">
+        <table cellPadding="0" cellSpacing="0" id={tableID}>
           <thead>
             <tr>
               {activeColumns.map((col, i) => (

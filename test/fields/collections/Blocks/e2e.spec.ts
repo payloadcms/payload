@@ -47,8 +47,6 @@ let context: BrowserContext
 describe('Block fields', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ serverURL } = await initPayloadE2ENoConfig({
       dirname,
     }))
@@ -65,8 +63,6 @@ describe('Block fields', () => {
     })*/
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 
     if (client) {
@@ -509,7 +505,7 @@ describe('Block fields', () => {
       )
       await popupBtn.click()
       const disabledCopyBtn = page.locator(
-        '.popup__content div.popup-button-list__disabled:has-text("Copy Field")',
+        '.popup__content button.popup-button-list__disabled:has-text("Copy Field")',
       )
       await expect(disabledCopyBtn).toBeVisible()
     })
@@ -526,7 +522,7 @@ describe('Block fields', () => {
       await expect(popupBtn).toBeVisible()
       await popupBtn.click()
       const disabledPasteBtn = page.locator(
-        '.popup__content div.popup-button-list__disabled:has-text("Paste Field")',
+        '.popup__content button.popup-button-list__disabled:has-text("Paste Field")',
       )
       await expect(disabledPasteBtn).toBeVisible()
     })
@@ -543,21 +539,21 @@ describe('Block fields', () => {
       await expect(popupBtn).toBeVisible()
       await popupBtn.click()
       const disabledPasteBtn = page.locator(
-        '.popup__content div.popup-button-list__disabled:has-text("Paste Field")',
+        '.popup__content button.popup-button-list__disabled:has-text("Paste Field")',
       )
       await expect(disabledPasteBtn).toBeVisible()
     })
 
     test('should disable paste when the clipboard is empty', async () => {
       await page.goto(url.create)
-      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+      await page.localStorage.removeItem('_payloadClipboard')
 
       const fieldPopupBtn = page
         .locator('#field-blocks .popup.clipboard-action__popup button.popup-button')
         .first()
       await fieldPopupBtn.click()
       await expect(
-        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Field")'),
+        page.locator('.popup__content button.popup-button-list__disabled:has-text("Paste Field")'),
       ).toBeVisible()
       await page.keyboard.press('Escape')
 
@@ -566,23 +562,23 @@ describe('Block fields', () => {
         .first()
       await rowPopupBtn.click()
       await expect(
-        page.locator('.popup__content div.popup-button-list__disabled:has-text("Replace Row")'),
+        page.locator('.popup__content button.popup-button-list__disabled:has-text("Replace Row")'),
       ).toBeVisible()
       await expect(
-        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Below")'),
+        page.locator('.popup__content button.popup-button-list__disabled:has-text("Paste Below")'),
       ).toBeVisible()
     })
 
     test('should enable paste after copying a compatible field', async () => {
       await page.goto(url.create)
-      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+      await page.localStorage.removeItem('_payloadClipboard')
 
       const fieldPopupBtn = page
         .locator('#field-blocks .popup.clipboard-action__popup button.popup-button')
         .first()
       await fieldPopupBtn.click()
       await expect(
-        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Field")'),
+        page.locator('.popup__content button.popup-button-list__disabled:has-text("Paste Field")'),
       ).toBeVisible()
       await page.keyboard.press('Escape')
 
@@ -854,14 +850,14 @@ describe('Block fields', () => {
 
     test('should disable paste on a nested block row when the clipboard is empty', async () => {
       await page.goto(url.create)
-      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+      await page.localStorage.removeItem('_payloadClipboard')
 
       const rowPopupBtn = page
         .locator('#blocks-2-subBlocks-row-0 .collapsible__actions button.array-actions__button')
         .first()
       await rowPopupBtn.click()
       await expect(
-        page.locator('.popup__content div.popup-button-list__disabled:has-text("Replace Row")'),
+        page.locator('.popup__content button.popup-button-list__disabled:has-text("Replace Row")'),
       ).toBeVisible()
     })
 
@@ -938,6 +934,93 @@ describe('Block fields', () => {
   })
 
   describe('conditional blocks', () => {
+    const createdIDs: string[] = []
+
+    test.afterEach(async () => {
+      for (const id of createdIDs) {
+        await client.delete(id, { slug: 'block-fields' })
+      }
+      createdIDs.length = 0
+    })
+
+    test('should retain block type when a block condition becomes true within a block reference', async () => {
+      await page.goto(url.create)
+
+      const configuration = page.locator('#field-configuration')
+      const conditionalBlock = page.locator('#field-configuration__0__testBlocks')
+
+      await expect(configuration.locator('.blocks-field__row').first()).toBeVisible()
+      await expect(conditionalBlock).toBeHidden()
+
+      await page.locator('label[for=field-showConditionalFields]').click()
+
+      await expect(conditionalBlock).toBeVisible()
+      await expect(conditionalBlock.locator('.blocks-field__row')).toHaveCount(1)
+
+      await saveDocAndAssert(page)
+
+      const id = page.url().split('/').pop()!
+      createdIDs.push(id)
+
+      const { doc } = await client.findByID({ id, slug: 'block-fields' })
+
+      expect(doc.configuration).toHaveLength(1)
+      expect(doc.configuration[0].blockType).toBe('conditionalReference')
+      expect(doc.configuration[0].testBlocks).toHaveLength(1)
+      expect(doc.configuration[0].testBlocks[0].blockType).toBe('testBlock')
+    })
+
+    test('should keep the block type when a referenced blocks field in a group becomes visible', async () => {
+      await page.goto(url.create)
+
+      const conditionalConfiguration = page.locator(
+        '#field-conditionalGroup__conditionalConfiguration',
+      )
+
+      await expect(conditionalConfiguration).toBeHidden()
+      await page.locator('label[for=field-showConditionalFields]').click()
+      await expect(conditionalConfiguration).toBeVisible()
+
+      await page.locator('#field-enabledBlocks').fill('blockOne')
+      await expect(page.locator('#conditionalGroup-conditionalConfiguration-row-0')).toBeVisible()
+
+      await saveDocAndAssert(page)
+
+      const id = page.url().split('/').pop()!
+      createdIDs.push(id)
+
+      const { doc } = await client.findByID({ id, slug: 'block-fields' })
+
+      expect(doc.conditionalGroup.conditionalConfiguration).toHaveLength(1)
+      expect(doc.conditionalGroup.conditionalConfiguration[0].blockType).toBe(
+        'conditionalReference',
+      )
+    })
+
+    test('should retain a default inline block type when a top-level condition becomes true', async () => {
+      await page.goto(url.create)
+
+      const testBlocks = page.locator('#field-testBlocks')
+
+      await expect(testBlocks).toBeHidden()
+      await page.locator('label[for=field-showInlineBlocks]').click()
+      await expect(testBlocks).toBeVisible()
+      await expect(testBlocks.locator('.blocks-field__row')).toHaveCount(1)
+
+      await page.locator('#field-enabledBlocks').fill('blockOne')
+      await expect(testBlocks.locator('.blocks-field__row')).toHaveCount(1)
+
+      await saveDocAndAssert(page)
+
+      const id = page.url().split('/').pop()!
+      createdIDs.push(id)
+
+      const { doc } = await client.findByID({ id, slug: 'block-fields' })
+
+      expect(doc.testBlocks).toHaveLength(1)
+      expect(doc.testBlocks[0].blockType).toBe('testBlock')
+    })
+
     test('ensure static filterOptions are respected', async () => {
       await page.goto(url.create)
       const addButton = page.locator(

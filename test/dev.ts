@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url'
 import open from 'open'
 import { loadEnv } from 'payload/node'
 
-import type { DevServerResult } from './adapters/nextDevServer.js'
+import type { DevServerResult } from './__setup/server/nextDevServer.js'
 
 import { assertDbReachable } from './__helpers/shared/assertDbReachable.js'
 import { getCurrentDatabaseAdapter } from './dbAdapters.js'
@@ -18,6 +18,8 @@ import { createTestHooks } from './testHooks.js'
 // --prod-server boots a real production server (next build + dev: false) against the
 // packed dist packages. Without it, the dev server runs against source.
 const prodServer = process.argv.includes('--prod-server')
+// --no-turbo switches the Next dev server to webpack. The prod server's `next build` always uses Turbopack.
+const enableTurbo = prodServer || !process.argv.includes('--no-turbo')
 
 if (prodServer) {
   process.argv = process.argv.filter((arg) => arg !== '--prod-server')
@@ -35,7 +37,10 @@ const {
 } = minimist(process.argv.slice(2), {
   // Treat framework flags as boolean so a trailing suite positional
   // (e.g. `--framework-tanstack-start admin`) isn't consumed as the flag's value.
-  boolean: ['framework-next', 'framework-tanstack-start'],
+  boolean: ['framework-next', 'framework-tanstack-start', 'seed'],
+  default: {
+    seed: true,
+  },
 })
 
 let testSuiteArg: string | undefined
@@ -51,18 +56,6 @@ if (!testSuiteArg || !fs.existsSync(path.resolve(dirname, testSuiteArg))) {
   process.exit(0)
 }
 
-// Enable turbopack by default, unless --no-turbo is passed
-let enableTurbo = args.turbo !== false
-
-if (['admin-root'].includes(testSuiteArg)) {
-  console.log(
-    chalk.yellow(
-      `The "${testSuiteArg}" test directory is not compatible with turbopack, using webpack instead.`,
-    ),
-  )
-  enableTurbo = false
-}
-
 // Framework is selected with a --framework-<name> flag (e.g. --framework-tanstack-start),
 // falling back to the PAYLOAD_FRAMEWORK env var, then 'next'. The flag suffix is the
 // framework name. Resolved value is written back to the env var so downstream helpers
@@ -75,12 +68,8 @@ const framework = frameworkFromFlag || process.env.PAYLOAD_FRAMEWORK || 'next'
 process.env.PAYLOAD_FRAMEWORK = framework
 
 console.log(
-  `Selected test suite: ${testSuiteArg} [${framework}]${framework === 'next' && enableTurbo ? ' [Turbopack]' : framework === 'next' ? ' [Webpack]' : ''}`,
+  `Selected test suite: ${testSuiteArg} [${framework}]${framework === 'next' ? (enableTurbo ? ' [Turbopack]' : ' [Webpack]') : ''}`,
 )
-
-if (enableTurbo && framework === 'next' && !prodServer) {
-  process.env.TURBOPACK = '1'
-}
 
 await assertDbReachable(getCurrentDatabaseAdapter())
 
@@ -117,13 +106,13 @@ let serverResult: DevServerResult
 switch (framework) {
   case 'next': {
     if (prodServer) {
-      const { startNextProdServer } = await import('./adapters/nextProdServer.js')
+      const { startNextProdServer } = await import('./__setup/server/nextProdServer.js')
       serverResult = await startNextProdServer({
         port: availablePort,
         testSuiteArg,
       })
     } else {
-      const { startNextDevServer } = await import('./adapters/nextDevServer.js')
+      const { startNextDevServer } = await import('./__setup/server/nextDevServer.js')
       serverResult = await startNextDevServer({
         enableTurbo,
         port: availablePort,
@@ -134,14 +123,14 @@ switch (framework) {
   }
   case 'tanstack-start': {
     if (prodServer) {
-      const { startTanStackStartProdServer } = await import('./adapters/tanstackStartProdServer.js')
-      serverResult = await startTanStackStartProdServer({
+      const { startTanstackProdServer } = await import('./__setup/server/tanstackProdServer.js')
+      serverResult = await startTanstackProdServer({
         port: availablePort,
         testSuiteArg,
       })
     } else {
-      const { startTanStackStartDevServer } = await import('./adapters/tanstackStartDevServer.js')
-      serverResult = await startTanStackStartDevServer({
+      const { startTanstackDevServer } = await import('./__setup/server/tanstackDevServer.js')
+      serverResult = await startTanstackDevServer({
         port: availablePort,
         testSuiteArg,
       })
@@ -162,6 +151,18 @@ if (args.o) {
 }
 
 process.env.PAYLOAD_DROP_DATABASE = process.env.PAYLOAD_DROP_DATABASE === 'false' ? 'false' : 'true'
+
+if (args.seed !== false) {
+  const response = await fetch(`http://localhost:${serverResult.port}/api/re-initialize`, {
+    method: 'POST',
+  })
+
+  if (response.ok) {
+    console.log(`✓ Seeded ${testSuiteArg}`)
+  } else if (response.status !== 404) {
+    throw new Error(`Failed to seed ${testSuiteArg}: ${response.status} ${await response.text()}`)
+  }
+}
 
 void fetch(`http://localhost:${serverResult.port}${serverResult.adminRoute}`).catch(() => {})
 void fetch(`http://localhost:${serverResult.port}/api/access`).catch(() => {})

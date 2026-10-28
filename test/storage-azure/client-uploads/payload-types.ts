@@ -134,6 +134,7 @@ export interface UserAuthOperations {
 export interface Media {
   id: string;
   alt?: string | null;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -145,7 +146,7 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     square?: {
       url?: string | null;
       width?: number | null;
@@ -226,6 +227,7 @@ export interface MediaHeaderOnly {
  */
 export interface MediaHeaderOnlyWithSize {
   id: string;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -237,7 +239,7 @@ export interface MediaHeaderOnlyWithSize {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     thumbnail?: {
       url?: string | null;
       width?: number | null;
@@ -369,6 +371,7 @@ export interface PayloadMigration {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -380,7 +383,7 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         square?:
@@ -463,6 +466,7 @@ export interface MediaHeaderOnlySelect<T extends boolean = true> {
  * via the `definition` "media-header-only-with-sizes_select".
  */
 export interface MediaHeaderOnlyWithSizesSelect<T extends boolean = true> {
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -474,7 +478,7 @@ export interface MediaHeaderOnlyWithSizesSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         thumbnail?:
@@ -619,6 +623,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

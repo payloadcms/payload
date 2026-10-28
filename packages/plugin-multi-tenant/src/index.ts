@@ -13,6 +13,7 @@ import { tenantField } from './fields/tenantField/index.js'
 import { tenantsArrayField } from './fields/tenantsArrayField/index.js'
 import { filterDocumentsByTenants } from './filters/filterDocumentsByTenants.js'
 import { addTenantCleanup } from './hooks/afterTenantDelete.js'
+import { enforceTenantMembership } from './hooks/enforceTenantMembership.js'
 import { translations } from './translations/index.js'
 import { addCollectionAccess, type TenantAccessConfig } from './utilities/addCollectionAccess.js'
 import { addFilterOptionsToFields } from './utilities/addFilterOptionsToFields.js'
@@ -299,6 +300,7 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
           collection.fields.unshift(
             tenantField({
               name: tenantFieldName,
+              adminUsersSlug: adminUsersCollection.slug,
               debug: pluginConfig.debug,
               isAutosaveEnabled: hasAutosaveEnabled(collection),
               overrides: pluginConfig.collections[collection.slug]?.tenantFieldOverrides
@@ -308,9 +310,22 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
               tenantsArrayTenantFieldName,
               tenantsCollectionSlug,
               unique: isGlobal,
+              userHasAccessToAllTenants,
             }),
           )
         }
+
+        collection.hooks ??= {}
+        collection.hooks.beforeValidate ??= []
+        collection.hooks.beforeValidate.push(
+          enforceTenantMembership({
+            collectionSlug: collection.slug,
+            tenantFieldName,
+            tenantsArrayFieldName,
+            tenantsArrayTenantFieldName,
+            userHasAccessToAllTenants,
+          }),
+        )
 
         const { useBaseFilter, useBaseListFilter } = pluginConfig.collections[collection.slug] || {}
         if (useBaseFilter ?? useBaseListFilter ?? true) {

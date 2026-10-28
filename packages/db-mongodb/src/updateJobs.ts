@@ -89,7 +89,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
   const findOptions: QueryOptions = {
     ...baseOptions,
     lean: true,
-    new: true,
+    returnDocument: 'after',
   }
 
   let result: Job[] = []

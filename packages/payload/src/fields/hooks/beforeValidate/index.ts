@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { JsonObject, PayloadRequest } from '../../../types/index.js'
+import type { BeforeValidateOperation, JsonObject, PayloadRequest } from '../../../types/index.js'
 
 import { type RequestContext } from '../../../index.js'
 import { traverseFields } from './traverseFields.js'
@@ -10,10 +10,12 @@ type Args<T extends JsonObject> = {
   context: RequestContext
   data: T
   doc?: T
+  docForHooks?: T
   duplicate?: boolean
   global: null | SanitizedGlobalConfig
   id?: number | string
-  operation: 'create' | 'update'
+  onFieldAccess?: (args: { accessResult: boolean; path: string }) => void
+  operation: BeforeValidateOperation
   overrideAccess: boolean
   req: PayloadRequest
 }
@@ -32,7 +34,9 @@ export const beforeValidate = async <T extends JsonObject>({
   context,
   data: incomingData,
   doc,
+  docForHooks,
   global,
+  onFieldAccess,
   operation,
   overrideAccess,
   req,
@@ -43,8 +47,10 @@ export const beforeValidate = async <T extends JsonObject>({
     context,
     data: incomingData,
     doc,
+    docForHooks,
     fields: (collection?.fields || global?.fields)!,
     global,
+    onFieldAccess,
     operation,
     overrideAccess,
     parentIndexPath: '',

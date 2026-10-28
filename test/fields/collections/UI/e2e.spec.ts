@@ -32,7 +32,6 @@ let url: AdminUrlUtil
 describe('Radio', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       // prebuild,
@@ -47,8 +46,6 @@ describe('Radio', () => {
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
     if (client) {
       await client.logout()
@@ -65,5 +62,29 @@ describe('Radio', () => {
 
     await expect(uiField).toBeVisible()
     await expect(uiField).toContainText('client-side-configuration')
+  })
+
+  test(
+    'should render custom server Cell component in list view',
+    { framework: 'rsc' },
+    async () => {
+      await page.goto(url.list)
+
+      await expect(page.locator('.ui-custom-server-cell').first()).toHaveText('cell: text')
+    },
+  )
+
+  test('should not render custom Cell component in edit view', { framework: 'next' }, async () => {
+    const {
+      docs: [existingDoc],
+    } = await payload.find({
+      collection: uiSlug,
+      overrideAccess: true,
+    })
+
+    const response = await page.goto(url.edit(existingDoc!.id))
+
+    await expect(page.locator('#field-text')).toHaveValue('text')
+    expect(await response?.text()).not.toContain('ui-custom-server-cell')
   })
 })

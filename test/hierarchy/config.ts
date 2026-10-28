@@ -6,11 +6,12 @@ const dirname = path.dirname(filename)
 
 import type { CollectionConfig } from 'payload'
 
-import { createFolderField } from 'payload'
+import { createFolderField, createTagField } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { seed } from './seed.js'
+import { foldersSlug, folderTagDocumentsSlug } from './shared.js'
 
 // Categories collection with sidebar tab disabled (should appear in nav, not as tab)
 export const Categories: CollectionConfig = {
@@ -168,6 +169,16 @@ export const Organizations: CollectionConfig = {
       type: 'text',
     },
     createFolderField({ relationTo: 'folders' }),
+    {
+      name: 'restrictedFolder',
+      type: 'relationship',
+      admin: {
+        components: { Field: '@payloadcms/ui/rsc#HierarchyField' },
+        position: 'sidebar',
+      },
+      label: 'Restricted folder',
+      relationTo: 'folders',
+    },
   ],
   hierarchy: {
     admin: {
@@ -191,7 +202,26 @@ export const Organizations: CollectionConfig = {
 
 // Folders collection with collectionSpecific (enables filter in tree search)
 export const Folders: CollectionConfig = {
-  slug: 'folders',
+  slug: foldersSlug,
+  access: {
+    // Row-level update access: locked folders are read-only
+    update: () => ({ isLocked: { not_equals: true } }),
+  },
+  admin: {
+    defaultColumns: ['name', 'parentFolder'],
+    useAsTitle: 'name',
+  },
+  fields: [
+    {
+      name: 'name',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'isLocked',
+      type: 'checkbox',
+    },
+  ],
   folders: {
     admin: {
       components: {
@@ -204,15 +234,22 @@ export const Folders: CollectionConfig = {
     collectionSpecific: { fieldName: 'allowedTypes' },
     parentFieldName: 'parentFolder',
   },
+  versions: false,
+}
+
+// Test collection with a hasMany relationship to the collection-specific hierarchy
+export const FolderTagDocuments: CollectionConfig = {
+  slug: folderTagDocumentsSlug,
   admin: {
-    useAsTitle: 'name',
+    useAsTitle: 'title',
   },
   fields: [
     {
-      name: 'name',
+      name: 'title',
       type: 'text',
       required: true,
     },
+    createTagField({ relationTo: foldersSlug }),
   ],
   versions: false,
 }
@@ -221,6 +258,7 @@ export const Folders: CollectionConfig = {
 export const Products: CollectionConfig = {
   slug: 'products',
   admin: {
+    defaultColumns: ['name', 'parentFolder'],
     useAsTitle: 'name',
   },
   fields: [
@@ -254,38 +292,43 @@ export const Products: CollectionConfig = {
 }
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [
+      Categories,
+      Departments,
+      Divisions,
+      Folders,
+      FolderTagDocuments,
+      Organizations,
+      Pages,
+      Products,
+      Regions,
+    ],
+    debug: true,
+    localization: {
+      defaultLocale: 'en',
+      fallback: true,
+      locales: ['en', 'es', 'de'],
+    },
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [
-    Categories,
-    Departments,
-    Divisions,
-    Folders,
-    Organizations,
-    Pages,
-    Products,
-    Regions,
-  ],
-  debug: true,
-  localization: {
-    defaultLocale: 'en',
-    fallback: true,
-    locales: ['en', 'es', 'de'],
-  },
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
     await seed(payload)
   },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
+  suite: 'hierarchy',
 })

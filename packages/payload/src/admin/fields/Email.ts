@@ -2,21 +2,15 @@ import type { MarkOptional } from 'ts-essentials'
 
 import type { EmailField, EmailFieldClient } from '../../fields/config/types.js'
 import type { EmailFieldValidation } from '../../fields/validations.js'
-import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type { FieldErrorClientProps, FieldErrorServerProps } from '../forms/Error.js'
+import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
-  ClientFieldBase,
-  FieldClientComponent,
-  FieldPaths,
-  FieldServerComponent,
-  ServerFieldBase,
-} from '../forms/Field.js'
-import type {
-  FieldDescriptionClientComponent,
-  FieldDescriptionServerComponent,
-  FieldDiffClientComponent,
-  FieldDiffServerComponent,
-  FieldLabelClientComponent,
-  FieldLabelServerComponent,
+  FieldDescriptionClientProps,
+  FieldDescriptionServerProps,
+  FieldDiffClientProps,
+  FieldDiffServerProps,
+  FieldLabelClientProps,
+  FieldLabelServerProps,
 } from '../types.js'
 
 type EmailFieldClientWithoutType = MarkOptional<EmailFieldClient, 'type'>
@@ -33,40 +27,28 @@ export type EmailFieldClientProps = ClientFieldBase<EmailFieldClientWithoutType>
 
 export type EmailFieldServerProps = EmailFieldBaseServerProps &
   ServerFieldBase<EmailField, EmailFieldClientWithoutType>
-
-export type EmailFieldServerComponent = FieldServerComponent<
-  EmailField,
-  EmailFieldClientWithoutType,
-  EmailFieldBaseServerProps
->
-
-export type EmailFieldClientComponent = FieldClientComponent<
-  EmailFieldClientWithoutType,
-  EmailFieldBaseClientProps
->
-
-export type EmailFieldLabelServerComponent = FieldLabelServerComponent<
+export type EmailFieldLabelServerProps = FieldLabelServerProps<
   EmailField,
   EmailFieldClientWithoutType
 >
 
-export type EmailFieldLabelClientComponent = FieldLabelClientComponent<EmailFieldClientWithoutType>
+export type EmailFieldLabelClientProps = FieldLabelClientProps<EmailFieldClientWithoutType>
 
-export type EmailFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+export type EmailFieldDescriptionServerProps = FieldDescriptionServerProps<
   EmailField,
   EmailFieldClientWithoutType
 >
 
-export type EmailFieldDescriptionClientComponent =
-  FieldDescriptionClientComponent<EmailFieldClientWithoutType>
+export type EmailFieldDescriptionClientProps =
+  FieldDescriptionClientProps<EmailFieldClientWithoutType>
 
-export type EmailFieldErrorServerComponent = FieldErrorServerComponent<
+export type EmailFieldErrorServerProps = FieldErrorServerProps<
   EmailField,
   EmailFieldClientWithoutType
 >
 
-export type EmailFieldErrorClientComponent = FieldErrorClientComponent<EmailFieldClientWithoutType>
+export type EmailFieldErrorClientProps = FieldErrorClientProps<EmailFieldClientWithoutType>
 
-export type EmailFieldDiffServerComponent = FieldDiffServerComponent<EmailField, EmailFieldClient>
+export type EmailFieldDiffServerProps = FieldDiffServerProps<EmailField, EmailFieldClient>
 
-export type EmailFieldDiffClientComponent = FieldDiffClientComponent<EmailFieldClient>
+export type EmailFieldDiffClientProps = FieldDiffClientProps<EmailFieldClient>

@@ -12,10 +12,9 @@ import { fieldsToJSONSchema, flattenAllFields } from 'payload'
 
 import type { LexicalElementFormat } from '../../../types/nodeTypes.js'
 import type { JSONSchemaFn } from '../../typesServer.js'
-import type { UploadFeatureProps } from './index.js'
+import type { UploadFeatureServerProps } from './index.js'
 
 import { formatSchema, versionSchema } from '../../../types/jsonSchemaHelpers.js'
-import { filterEnabledRelationshipCollections } from '../../relationship/shared/filterEnabledRelationshipCollections.js'
 
 export type UploadData<TFields extends JsonObject = JsonObject> = {
   [TCollectionSlug in UploadCollectionSlug]: {
@@ -24,7 +23,7 @@ export type UploadData<TFields extends JsonObject = JsonObject> = {
     id: string
     relationTo: TCollectionSlug
     /** Either the document ID or the full populated document. */
-    value: DataFromCollectionSlug<TCollectionSlug> | IDTypeForCollectionSlug<TCollectionSlug>
+    value: IDTypeForCollectionSlug<TCollectionSlug> | TypedUploadCollection[TCollectionSlug]
   }
 }[UploadCollectionSlug]
 
@@ -37,20 +36,6 @@ export type Internal_UploadData<TFields extends JsonObject = JsonObject> = {
     src: string
   }
 } & UploadData<TFields>
-
-/**
- * More precise variant of {@link UploadData}. Replaces `UploadData` in v4.
- * @internal
- * @todo Replace UploadData with UploadDataImproved in 4.0
- */
-export type UploadDataImproved<TFields extends JsonObject = JsonObject> = {
-  [TCollectionSlug in UploadCollectionSlug]: {
-    fields: TFields
-    id: string
-    relationTo: TCollectionSlug
-    value: IDTypeForCollectionSlug<TCollectionSlug> | TypedUploadCollection[TCollectionSlug]
-  }
-}[UploadCollectionSlug]
 
 export type SerializedUploadNode<
   TSlugs extends UploadCollectionSlug = UploadCollectionSlug,
@@ -65,6 +50,7 @@ export type SerializedUploadNode<
   format: LexicalElementFormat
   id: string
   type: 'upload'
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number
 }
 
@@ -73,6 +59,7 @@ const SERIALIZED_UPLOAD_NODE_TS = `export type SerializedUploadNode<TSlugs exten
   type: 'upload';
   format: LexicalElementFormat;
   id: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
   fields: TFields;
 } & {
@@ -87,6 +74,7 @@ const SERIALIZED_UPLOAD_NODE_INPUT_TS = `export type SerializedUploadNodeInput<T
   type: 'upload';
   format: LexicalElementFormat;
   id: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
   fields: TFields;
 } & {
@@ -100,7 +88,7 @@ const hashUploadFields = (schema: JSONSchema4): string =>
   createHash('sha256').update(JSON.stringify(schema)).digest('hex').slice(0, 8).toUpperCase()
 
 export const createUploadNodeJSONSchema =
-  (props: undefined | UploadFeatureProps): JSONSchemaFn =>
+  (props: UploadFeatureServerProps): JSONSchemaFn =>
   ({
     collectionIDFieldTypes,
     config,
@@ -111,13 +99,7 @@ export const createUploadNodeJSONSchema =
   }) => {
     const isInput = variant === 'input'
     typeStringDefinitions.add(isInput ? SERIALIZED_UPLOAD_NODE_INPUT_TS : SERIALIZED_UPLOAD_NODE_TS)
-    const enabledCollections = config?.collections
-      ? filterEnabledRelationshipCollections(config.collections, {
-          disabledCollections: props?.disabledCollections,
-          enabledCollections: props?.enabledCollections,
-          uploads: true,
-        })
-      : []
+    const { enabledCollectionSlugs } = props
 
     // Configured extra fields are registered as their own interface and referenced here, so the
     // generated TypeScript keeps them - the node-level `tsType` would otherwise erase `fields` to
@@ -127,8 +109,7 @@ export const createUploadNodeJSONSchema =
     // generated union correctly pairs each `relationTo` with its own fields type. A single
     // `SerializedUploadNode<'a' | 'b', AFields | BFields>` would lose that pairing.
     const perCollectionTsTypes: string[] = []
-    const collectionVariants: JSONSchema4[] = enabledCollections.map((collection) => {
-      const slug = collection.slug
+    const collectionVariants: JSONSchema4[] = enabledCollectionSlugs.map((slug) => {
       const idType: 'number' | 'string' = collectionIDFieldTypes[slug] ?? 'string'
       const extraFields = props?.collections?.[slug]?.fields ?? []
       const flattenedExtra = flattenAllFields({ fields: extraFields })
@@ -183,7 +164,7 @@ export const createUploadNodeJSONSchema =
               },
           version: versionSchema,
         },
-        required: ['fields', 'format', 'id', 'relationTo', 'type', 'value', 'version'],
+        required: ['fields', 'format', 'id', 'relationTo', 'type', 'value'],
       }
     })
 
@@ -197,7 +178,7 @@ export const createUploadNodeJSONSchema =
           type: { type: 'string', const: 'upload' },
           version: versionSchema,
         },
-        required: ['type', 'version'],
+        required: ['type'],
       }
     } else {
       const baseSchema: JSONSchema4 =

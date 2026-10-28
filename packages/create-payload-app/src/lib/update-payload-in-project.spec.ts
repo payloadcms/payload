@@ -139,7 +139,7 @@ describe('Payload project updates', () => {
       isSrcDir: true,
       isSupportedNextVersion: true,
       nextConfigPath,
-      nextVersion: '15.0.0',
+      nextVersion: '16.4.0',
     }
 
     const result = await updatePayloadInNextProject({ appDetails, versionOrTag: 'beta' })
@@ -151,7 +151,7 @@ describe('Payload project updates', () => {
     expect(fse.readFileSync(customCssPath, 'utf8')).toBe('.custom { color: rebeccapurple; }\n')
   })
 
-  it('should refresh only Payload-owned TanStack route files', async () => {
+  it('should refresh Payload-owned TanStack files without overwriting custom styles', async () => {
     writeProjectPackage(projectDir)
     writeFiles({
       files: {
@@ -159,9 +159,9 @@ describe('Payload project updates', () => {
         'routes/_payload/admin.$.tsx': 'fresh admin splat\n',
         'routes/_payload/admin.index.tsx': 'fresh admin index\n',
         'routes/_payload/api.$.ts': 'fresh API route\n',
+        'routes/_payload/custom.css': '',
         'routes/_payload/importMap.js': 'fresh import map\n',
         'routes/_payload/server.functions.ts': 'fresh server functions\n',
-        'src/payload-foundation.css': 'template Payload CSS\n',
         'src/payload.config.ts': 'template Payload config\n',
       },
       root: templateRoot,
@@ -176,6 +176,7 @@ describe('Payload project updates', () => {
         'src/routes/_payload/admin.$.tsx': 'stale admin splat\n',
         'src/routes/_payload/admin.index.tsx': 'stale admin index\n',
         'src/routes/_payload/api.$.ts': 'stale API route\n',
+        'src/routes/_payload/custom.css': 'custom Payload CSS\n',
         'src/routes/_payload/importMap.js': 'stale import map\n',
         'src/routes/_payload/server.functions.ts': 'stale server functions\n',
         'src/styles.css': 'custom frontend CSS\n',
@@ -201,6 +202,7 @@ describe('Payload project updates', () => {
       appDetails.rootRoutePath,
       path.join(appDetails.routesDir, '_frontend.tsx'),
       path.join(appDetails.routesDir, '_frontend/index.tsx'),
+      path.join(appDetails.routesDir, '_payload/custom.css'),
       path.join(appDetails.sourceDir, 'styles.css'),
     ]
     const before = new Map(
@@ -232,6 +234,10 @@ describe('Payload project updates', () => {
       dirname,
       '../../../../templates/blank-tanstack/src/app/_payload.tsx',
     )
+    const sourceCustomStylesPath = path.resolve(
+      dirname,
+      '../../../../templates/blank-tanstack/src/app/_payload/custom.css',
+    )
     fse.outputFileSync(payloadLayoutPath, 'stale payload layout\n')
 
     const appDetails: TanStackAppDetails = {
@@ -250,6 +256,10 @@ describe('Payload project updates', () => {
     expect(fse.readFileSync(payloadLayoutPath, 'utf8')).toBe(
       fse.readFileSync(sourcePayloadLayoutPath, 'utf8'),
     )
+    expect(fse.readFileSync(path.join(appDetails.routesDir, '_payload/custom.css'), 'utf8')).toBe(
+      fse.readFileSync(sourceCustomStylesPath, 'utf8'),
+    )
+    expect(fse.pathExistsSync(path.join(appDetails.sourceDir, 'payload.css'))).toBe(false)
   })
 })
 

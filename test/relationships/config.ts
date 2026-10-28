@@ -20,9 +20,9 @@ import {
 
 const openAccess = {
   create: () => true,
+  delete: () => true,
   read: () => true,
   update: () => true,
-  delete: () => true,
 }
 
 const defaultAccess = ({ req: { user } }) => Boolean(user)
@@ -42,10 +42,10 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
       {
         name: 'disableRelation', // used filteredRelation
         type: 'checkbox',
-        required: true,
         admin: {
           position: 'sidebar',
         },
+        required: true,
       },
     ],
     versions: false,
@@ -53,561 +53,560 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
 }
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-  },
-  localization: {
-    locales: ['en', 'de'],
-    defaultLocale: 'en',
-  },
-  collections: [
-    {
-      slug,
-      access: openAccess,
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-        {
-          name: 'description',
-          type: 'text',
-        },
-        {
-          name: 'number',
-          type: 'number',
-        },
-        // Relationship
-        {
-          name: 'relationField',
-          type: 'relationship',
-          relationTo: relationSlug,
-        },
-        {
-          name: 'blocks',
-          type: 'blocks',
-          blocks: [
-            {
-              slug: 'block',
-              fields: [
-                {
-                  name: 'relationField',
-                  type: 'relationship',
-                  relationTo: relationSlug,
-                },
-              ],
-            },
-          ],
-        },
-        // Relationship w/ default access
-        {
-          name: 'defaultAccessRelation',
-          type: 'relationship',
-          relationTo: defaultAccessRelSlug,
-        },
-        {
-          name: 'chainedRelation',
-          type: 'relationship',
-          relationTo: chainedRelSlug,
-        },
-        {
-          name: 'maxDepthRelation',
-          maxDepth: 0,
-          type: 'relationship',
-          relationTo: relationSlug,
-        },
-        {
-          name: 'customIdRelation',
-          type: 'relationship',
-          relationTo: customIdSlug,
-        },
-        {
-          name: 'customIdNumberRelation',
-          type: 'relationship',
-          relationTo: customIdNumberSlug,
-        },
-        {
-          name: 'filteredRelation',
-          type: 'relationship',
-          relationTo: relationSlug,
-          filterOptions: {
-            disableRelation: {
-              not_equals: true,
-            },
-          },
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: slugWithLocalizedRel,
-      access: openAccess,
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-        // Relationship
-        {
-          name: 'relationField',
-          type: 'relationship',
-          relationTo: relationSlug,
-          localized: true,
-        },
-        // Localized array wrapping a relationship to a collection that owns a non-localized hasMany relationship
-        {
-          name: 'localizedDirectors',
-          type: 'array',
-          localized: true,
-          fields: [
-            {
-              name: 'director',
-              type: 'relationship',
-              relationTo: 'directors',
-            },
-          ],
-        },
-      ],
-      versions: false,
-    },
-    collectionWithName(relationSlug),
-    {
-      ...collectionWithName(defaultAccessRelSlug),
-      access: {
-        create: defaultAccess,
-        read: defaultAccess,
-        update: defaultAccess,
-        delete: defaultAccess,
+  suite: 'relationships',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
       },
-      versions: false,
     },
-    {
-      slug: chainedRelSlug,
-      access: openAccess,
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-        {
-          name: 'relation',
-          type: 'relationship',
-          relationTo: chainedRelSlug,
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: customIdSlug,
-      fields: [
-        {
-          name: 'id',
-          type: 'text',
-        },
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: customIdNumberSlug,
-      fields: [
-        {
-          name: 'id',
-          type: 'number',
-        },
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'screenings',
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-        {
-          name: 'movie',
-          type: 'relationship',
-          relationTo: 'movies',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'movies',
-      versions: { drafts: true },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-        {
-          name: 'select',
-          type: 'select',
-          hasMany: true,
-          options: ['a', 'b', 'c'],
-        },
-        {
-          name: 'location',
-          type: 'point',
-        },
-        {
-          name: 'director',
-          type: 'relationship',
-          relationTo: 'directors',
-        },
-        {
-          type: 'array',
-          name: 'array',
-          fields: [
-            {
-              name: 'director',
-              type: 'relationship',
-              relationTo: 'directors',
-              hasMany: true,
+    collections: [
+      {
+        slug,
+        access: openAccess,
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+          },
+          {
+            name: 'description',
+            type: 'text',
+          },
+          {
+            name: 'number',
+            type: 'number',
+          },
+          // Relationship
+          {
+            name: 'relationField',
+            type: 'relationship',
+            relationTo: relationSlug,
+          },
+          {
+            name: 'blocks',
+            type: 'blocks',
+            blocks: [
+              {
+                slug: 'block',
+                fields: [
+                  {
+                    name: 'relationField',
+                    type: 'relationship',
+                    relationTo: relationSlug,
+                  },
+                ],
+              },
+            ],
+          },
+          // Relationship w/ default access
+          {
+            name: 'defaultAccessRelation',
+            type: 'relationship',
+            relationTo: defaultAccessRelSlug,
+          },
+          {
+            name: 'chainedRelation',
+            type: 'relationship',
+            relationTo: chainedRelSlug,
+          },
+          {
+            name: 'maxDepthRelation',
+            type: 'relationship',
+            maxDepth: 0,
+            relationTo: relationSlug,
+          },
+          {
+            name: 'customIdRelation',
+            type: 'relationship',
+            relationTo: customIdSlug,
+          },
+          {
+            name: 'customIdNumberRelation',
+            type: 'relationship',
+            relationTo: customIdNumberSlug,
+          },
+          {
+            name: 'filteredRelation',
+            type: 'relationship',
+            filterOptions: {
+              disableRelation: {
+                not_equals: true,
+              },
             },
-            {
-              name: 'polymorphic',
-              type: 'relationship',
-              relationTo: ['directors'],
-            },
-          ],
+            relationTo: relationSlug,
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: slugWithLocalizedRel,
+        access: openAccess,
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+          },
+          // Relationship
+          {
+            name: 'relationField',
+            type: 'relationship',
+            localized: true,
+            relationTo: relationSlug,
+          },
+          // Localized array wrapping a relationship to a collection that owns a non-localized hasMany relationship
+          {
+            name: 'localizedDirectors',
+            type: 'array',
+            fields: [
+              {
+                name: 'director',
+                type: 'relationship',
+                relationTo: 'directors',
+              },
+            ],
+            localized: true,
+          },
+        ],
+        versions: false,
+      },
+      collectionWithName(relationSlug),
+      {
+        ...collectionWithName(defaultAccessRelSlug),
+        access: {
+          create: defaultAccess,
+          delete: defaultAccess,
+          read: defaultAccess,
+          update: defaultAccess,
         },
-      ],
+        versions: false,
+      },
+      {
+        slug: chainedRelSlug,
+        access: openAccess,
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+          {
+            name: 'relation',
+            type: 'relationship',
+            relationTo: chainedRelSlug,
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: customIdSlug,
+        fields: [
+          {
+            name: 'id',
+            type: 'text',
+          },
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: customIdNumberSlug,
+        fields: [
+          {
+            name: 'id',
+            type: 'number',
+          },
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'screenings',
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+          {
+            name: 'movie',
+            type: 'relationship',
+            relationTo: 'movies',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'movies',
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+          {
+            name: 'select',
+            type: 'select',
+            hasMany: true,
+            options: ['a', 'b', 'c'],
+          },
+          {
+            name: 'location',
+            type: 'point',
+          },
+          {
+            name: 'director',
+            type: 'relationship',
+            relationTo: 'directors',
+          },
+          {
+            name: 'array',
+            type: 'array',
+            fields: [
+              {
+                name: 'director',
+                type: 'relationship',
+                hasMany: true,
+                relationTo: 'directors',
+              },
+              {
+                name: 'polymorphic',
+                type: 'relationship',
+                relationTo: ['directors'],
+              },
+            ],
+          },
+        ],
+        versions: { drafts: true },
+      },
+      {
+        slug: 'directors',
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+          {
+            name: 'localized',
+            type: 'text',
+            localized: true,
+          },
+          {
+            name: 'movies',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: 'movies',
+          },
+          {
+            name: 'movie',
+            type: 'relationship',
+            relationTo: 'movies',
+          },
+          {
+            name: 'directors',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: 'directors',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'transitive-join-songs',
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+          {
+            name: 'albums',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: 'transitive-join-albums',
+          },
+        ],
+      },
+      {
+        slug: 'transitive-join-albums',
+        fields: [
+          {
+            name: 'artist',
+            type: 'relationship',
+            relationTo: 'transitive-join-artists',
+          },
+          {
+            name: 'song',
+            type: 'join',
+            collection: 'transitive-join-songs',
+            on: 'albums',
+          },
+        ],
+      },
+      {
+        slug: 'transitive-join-artists',
+        fields: [
+          {
+            name: 'album',
+            type: 'join',
+            collection: 'transitive-join-albums',
+            on: 'artist',
+          },
+        ],
+      },
+      {
+        slug: 'movieReviews',
+        fields: [
+          {
+            name: 'movieReviewer',
+            type: 'relationship',
+            relationTo: 'users',
+            required: true,
+          },
+          {
+            name: 'likes',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: 'users',
+          },
+          {
+            name: 'visibility',
+            type: 'radio',
+            options: [
+              {
+                label: 'followers',
+                value: 'followers',
+              },
+              {
+                label: 'public',
+                value: 'public',
+              },
+            ],
+            required: true,
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: polymorphicRelationshipsSlug,
+        fields: [
+          {
+            name: 'polymorphic',
+            type: 'relationship',
+            relationTo: ['movies'],
+          },
+          {
+            name: 'polymorphicLocalized',
+            type: 'relationship',
+            localized: true,
+            relationTo: ['movies'],
+          },
+          {
+            name: 'polymorphicMany',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: ['movies'],
+          },
+          {
+            name: 'polymorphicManyLocalized',
+            type: 'relationship',
+            hasMany: true,
+            localized: true,
+            relationTo: ['movies'],
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: treeSlug,
+        fields: [
+          {
+            name: 'text',
+            type: 'text',
+          },
+          {
+            name: 'parent',
+            type: 'relationship',
+            relationTo: 'tree',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'pages',
+        fields: [
+          {
+            name: 'menu',
+            type: 'array',
+            fields: [
+              {
+                name: 'label',
+                type: 'text',
+              },
+            ],
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'rels-to-pages',
+        fields: [
+          {
+            name: 'page',
+            type: 'relationship',
+            relationTo: 'pages',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'rels-to-pages-and-custom-text-ids',
+        fields: [
+          {
+            name: 'rel',
+            type: 'relationship',
+            relationTo: ['pages', 'custom-id', 'custom-id-number'],
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'object-writes',
+        fields: [
+          {
+            name: 'one',
+            type: 'relationship',
+            relationTo: 'movies',
+          },
+          {
+            name: 'many',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: 'movies',
+          },
+          {
+            name: 'onePoly',
+            type: 'relationship',
+            relationTo: ['movies'],
+          },
+          {
+            name: 'manyPoly',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: ['movies'],
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'deep-nested',
+        fields: [
+          {
+            type: 'tabs',
+            tabs: [
+              {
+                name: 'content',
+                fields: [
+                  {
+                    name: 'blocks',
+                    type: 'blocks',
+                    blocks: [
+                      {
+                        slug: 'testBlock',
+                        fields: [
+                          {
+                            type: 'tabs',
+                            tabs: [
+                              {
+                                name: 'meta',
+                                fields: [
+                                  {
+                                    name: 'movie',
+                                    type: 'relationship',
+                                    relationTo: 'movies',
+                                  },
+                                ],
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'relations',
+        fields: [
+          {
+            name: 'item',
+            type: 'relationship',
+            relationTo: ['items'],
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'items',
+        fields: [
+          {
+            name: 'status',
+            type: 'select',
+            options: ['completed', 'failed', 'pending'],
+          },
+          {
+            name: 'relation',
+            type: 'join',
+            collection: 'relations',
+            on: 'item',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'blocks',
+        fields: [
+          {
+            name: 'blocks',
+            type: 'blocks',
+            blocks: [
+              {
+                slug: 'some',
+                fields: [
+                  {
+                    name: 'director',
+                    type: 'relationship',
+                    relationTo: 'directors',
+                  },
+                  {
+                    name: 'directors',
+                    type: 'relationship',
+                    hasMany: true,
+                    localized: true,
+                    relationTo: 'directors',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        versions: false,
+      },
+    ],
+    localization: {
+      defaultLocale: 'en',
+      locales: ['en', 'de'],
     },
-    {
-      slug: 'directors',
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-        {
-          name: 'localized',
-          type: 'text',
-          localized: true,
-        },
-        {
-          name: 'movies',
-          type: 'relationship',
-          relationTo: 'movies',
-          hasMany: true,
-        },
-        {
-          name: 'movie',
-          type: 'relationship',
-          relationTo: 'movies',
-        },
-        {
-          name: 'directors',
-          type: 'relationship',
-          relationTo: 'directors',
-          hasMany: true,
-        },
-      ],
-      versions: false,
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
-    {
-      slug: 'transitive-join-songs',
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-        {
-          name: 'albums',
-          type: 'relationship',
-          relationTo: 'transitive-join-albums',
-          hasMany: true,
-        },
-      ],
-    },
-    {
-      slug: 'transitive-join-albums',
-      fields: [
-        {
-          name: 'artist',
-          type: 'relationship',
-          relationTo: 'transitive-join-artists',
-        },
-        {
-          name: 'song',
-          type: 'join',
-          collection: 'transitive-join-songs',
-          on: 'albums',
-        },
-      ],
-    },
-    {
-      slug: 'transitive-join-artists',
-      fields: [
-        {
-          name: 'album',
-          type: 'join',
-          collection: 'transitive-join-albums',
-          on: 'artist',
-        },
-      ],
-    },
-    {
-      slug: 'movieReviews',
-      fields: [
-        {
-          name: 'movieReviewer',
-          relationTo: 'users',
-          required: true,
-          type: 'relationship',
-        },
-        {
-          name: 'likes',
-          hasMany: true,
-          relationTo: 'users',
-          type: 'relationship',
-        },
-        {
-          name: 'visibility',
-          options: [
-            {
-              label: 'followers',
-              value: 'followers',
-            },
-            {
-              label: 'public',
-              value: 'public',
-            },
-          ],
-          required: true,
-          type: 'radio',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: polymorphicRelationshipsSlug,
-      fields: [
-        {
-          type: 'relationship',
-          name: 'polymorphic',
-          relationTo: ['movies'],
-        },
-        {
-          type: 'relationship',
-          name: 'polymorphicLocalized',
-          relationTo: ['movies'],
-          localized: true,
-        },
-        {
-          type: 'relationship',
-          name: 'polymorphicMany',
-          hasMany: true,
-          relationTo: ['movies'],
-        },
-        {
-          type: 'relationship',
-          hasMany: true,
-          name: 'polymorphicManyLocalized',
-          localized: true,
-          relationTo: ['movies'],
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: treeSlug,
-      fields: [
-        {
-          name: 'text',
-          type: 'text',
-        },
-        {
-          name: 'parent',
-          type: 'relationship',
-          relationTo: 'tree',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'pages',
-      fields: [
-        {
-          type: 'array',
-          name: 'menu',
-          fields: [
-            {
-              name: 'label',
-              type: 'text',
-            },
-          ],
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'rels-to-pages',
-      fields: [
-        {
-          name: 'page',
-          type: 'relationship',
-          relationTo: 'pages',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'rels-to-pages-and-custom-text-ids',
-      fields: [
-        {
-          name: 'rel',
-          type: 'relationship',
-          relationTo: ['pages', 'custom-id', 'custom-id-number'],
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'object-writes',
-      fields: [
-        {
-          type: 'relationship',
-          relationTo: 'movies',
-          name: 'one',
-        },
-        {
-          type: 'relationship',
-          relationTo: 'movies',
-          name: 'many',
-          hasMany: true,
-        },
-        {
-          type: 'relationship',
-          relationTo: ['movies'],
-          name: 'onePoly',
-        },
-        {
-          type: 'relationship',
-          relationTo: ['movies'],
-          name: 'manyPoly',
-          hasMany: true,
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'deep-nested',
-      fields: [
-        {
-          type: 'tabs',
-          tabs: [
-            {
-              name: 'content',
-              fields: [
-                {
-                  type: 'blocks',
-                  name: 'blocks',
-                  blocks: [
-                    {
-                      slug: 'testBlock',
-                      fields: [
-                        {
-                          type: 'tabs',
-                          tabs: [
-                            {
-                              name: 'meta',
-                              fields: [
-                                {
-                                  type: 'relationship',
-                                  relationTo: 'movies',
-                                  name: 'movie',
-                                },
-                              ],
-                            },
-                          ],
-                        },
-                      ],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'relations',
-      fields: [
-        {
-          name: 'item',
-          type: 'relationship',
-          relationTo: ['items'],
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'items',
-      fields: [
-        {
-          type: 'select',
-          options: ['completed', 'failed', 'pending'],
-          name: 'status',
-        },
-        {
-          type: 'join',
-          on: 'item',
-          collection: 'relations',
-          name: 'relation',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'blocks',
-      fields: [
-        {
-          type: 'blocks',
-          name: 'blocks',
-          blocks: [
-            {
-              slug: 'some',
-              fields: [
-                {
-                  type: 'relationship',
-                  relationTo: 'directors',
-                  name: 'director',
-                },
-                {
-                  type: 'relationship',
-                  hasMany: true,
-                  name: 'directors',
-                  relationTo: 'directors',
-                  localized: true,
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      versions: false,
-    },
-  ],
-  onInit: async (payload) => {
-    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await seed(payload)
-    }
   },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
+  seed,
 })

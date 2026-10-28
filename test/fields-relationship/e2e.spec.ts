@@ -103,37 +103,41 @@ describe('Relationship Field', () => {
     })*/
 
     // Create docs to relate to
-    relationOneDoc = (await payload.create({
+    relationOneDoc = await payload.create({
       collection: relationOneSlug,
       data: {
         name: 'relation',
       },
-    })) as any
+      overrideAccess: true,
+    })
 
-    anotherRelationOneDoc = (await payload.create({
+    anotherRelationOneDoc = await payload.create({
       collection: relationOneSlug,
       data: {
         name: 'relation',
       },
-    })) as any
+      overrideAccess: true,
+    })
 
-    relationTwoDoc = (await payload.create({
+    relationTwoDoc = await payload.create({
       collection: relationTwoSlug,
       data: {
         name: 'second-relation',
       },
-    })) as any
+      overrideAccess: true,
+    })
 
     // Create restricted doc
-    restrictedRelation = (await payload.create({
+    restrictedRelation = await payload.create({
       collection: relationRestrictedSlug,
       data: {
         name: 'restricted',
       },
-    })) as any
+      overrideAccess: true,
+    })
 
     // Doc with useAsTitle
-    relationWithTitle = (await payload.create({
+    relationWithTitle = await payload.create({
       collection: relationWithTitleSlug,
       data: {
         name: 'relation-title',
@@ -141,7 +145,8 @@ describe('Relationship Field', () => {
           title: 'relation-title',
         },
       },
-    })) as any
+      overrideAccess: true,
+    })
 
     // Doc with useAsTitle for word boundary test
     await payload.create({
@@ -152,18 +157,20 @@ describe('Relationship Field', () => {
           title: 'word boundary search',
         },
       },
+      overrideAccess: true,
     })
 
     // Collection 1 Doc
-    collectionOneDoc = (await payload.create({
+    collectionOneDoc = await payload.create({
       collection: collection1Slug,
       data: {
         name: 'One',
       },
-    })) as any
+      overrideAccess: true,
+    })
 
     // Add restricted doc as relation
-    docWithExistingRelations = (await payload.create({
+    docWithExistingRelations = await payload.create({
       collection: slug,
       data: {
         name: 'with-existing-relations',
@@ -172,7 +179,8 @@ describe('Relationship Field', () => {
         relationshipRestricted: restrictedRelation.id,
         relationshipWithTitle: relationWithTitle.id,
       },
-    })) as any
+      overrideAccess: true,
+    })
   })
 
   const tableRowLocator = 'table > tbody > tr'
@@ -293,6 +301,7 @@ describe('Relationship Field', () => {
         data: {
           name: `relation-one-${i}`,
         },
+        overrideAccess: true,
       })
       relationOneIDs.push(doc.id)
     }
@@ -304,6 +313,7 @@ describe('Relationship Field', () => {
         data: {
           name: `relation-two-${i}`,
         },
+        overrideAccess: true,
       })
       relationTwoIDs.push(doc.id)
     }
@@ -421,6 +431,7 @@ describe('Relationship Field', () => {
         data: {
           filter: 'Include me',
         },
+        overrideAccess: true,
       })
 
       // first ensure that filter options are applied in the edit view
@@ -457,6 +468,7 @@ describe('Relationship Field', () => {
         data: {
           filter: 'Include me',
         },
+        overrideAccess: true,
       })
 
       // First ensure that filter options are applied to the Edit View
@@ -518,6 +530,7 @@ describe('Relationship Field', () => {
         data: {
           name: 'include',
         },
+        overrideAccess: true,
       })) as any
 
       const { id: exclude } = (await payload.create({
@@ -525,6 +538,7 @@ describe('Relationship Field', () => {
         data: {
           name: 'exclude',
         },
+        overrideAccess: true,
       })) as any
 
       await loadCreatePage()
@@ -543,6 +557,7 @@ describe('Relationship Field', () => {
         data: {
           name: 'exclude',
         },
+        overrideAccess: true,
       })
 
       await loadCreatePage()
@@ -564,6 +579,7 @@ describe('Relationship Field', () => {
         data: {
           name: 'whatever',
         },
+        overrideAccess: true,
       })
 
       await loadCreatePage()
@@ -583,6 +599,7 @@ describe('Relationship Field', () => {
         data: {
           name: 'truth',
         },
+        overrideAccess: true,
       })
 
       await loadCreatePage()
@@ -650,12 +667,14 @@ describe('Relationship Field', () => {
       data: {
         name: 'Drawer ID Label',
       },
+      overrideAccess: true,
     })
     const doc = await payload.create({
       collection: slug,
       data: {
         relationship: relatedDoc.id,
       },
+      overrideAccess: true,
     })
     await payload.update({
       id: doc.id,
@@ -663,6 +682,7 @@ describe('Relationship Field', () => {
       data: {
         relationToSelf: doc.id,
       },
+      overrideAccess: true,
     })
 
     await page.goto(url.edit(doc.id))
@@ -700,10 +720,12 @@ describe('Relationship Field', () => {
       payload.delete({
         id: relatedDoc.id,
         collection: relationOneSlug,
+        overrideAccess: true,
       }),
       payload.delete({
         id: doc.id,
         collection: slug,
+        overrideAccess: true,
       }),
     ])
   })
@@ -714,7 +736,7 @@ describe('Relationship Field', () => {
     await openCreateDocDrawer({ fieldSelector: '#field-relationshipHasMany', page })
     const documentDrawer = page.locator('[id^=doc-drawer_relation-one_1_]')
     await expect(documentDrawer).toBeVisible()
-    const drawerField = documentDrawer.locator('#field-name')
+    const drawerField = documentDrawer.locator('input[name="name"]')
     await drawerField.fill('Newly created document')
     const saveButton = documentDrawer.locator('#action-save')
     await saveButton.click()
@@ -744,7 +766,7 @@ describe('Relationship Field', () => {
       selector: '#field-relationship button.relationship--single-value__drawer-toggler',
     })
 
-    const field = page.locator('#field-name')
+    const field = page.locator('.doc-drawer').getByRole('textbox', { name: 'Name', exact: true })
     await field.fill('Updated')
 
     await saveButton.nth(1).click()
@@ -787,6 +809,7 @@ describe('Relationship Field', () => {
         title: '',
       },
       draft: true,
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -796,6 +819,7 @@ describe('Relationship Field', () => {
         title: 'Draft Only Title',
       },
       draft: true,
+      overrideAccess: true,
     })
 
     // Create the doc that holds the relationship to the draft-only related doc.
@@ -912,6 +936,7 @@ describe('Relationship Field', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
       }
 
@@ -926,6 +951,7 @@ describe('Relationship Field', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
       }
 
@@ -984,6 +1010,7 @@ describe('Relationship Field', () => {
               data: {
                 name: 'relation',
               },
+              overrideAccess: true,
             }),
           )
         }
@@ -998,6 +1025,7 @@ describe('Relationship Field', () => {
         data: {
           relationshipHasMany: relations,
         },
+        overrideAccess: true,
       })
     })
 
@@ -1028,6 +1056,7 @@ describe('Relationship Field', () => {
         data: {
           name: 'Doc to filter on',
         },
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -1046,16 +1075,19 @@ describe('Relationship Field', () => {
             value: relatedDoc.id,
           },
         },
+        overrideAccess: true,
       })
 
       const cleanup = async () => {
         await payload.delete({
           id: relatedDoc.id,
           collection: slug,
+          overrideAccess: true,
         })
         await payload.delete({
           id: relatedDoc.id,
           collection: relationOneSlug,
+          overrideAccess: true,
         })
       }
 
@@ -1125,28 +1157,34 @@ describe('Relationship Field', () => {
       const relatedDoc1 = await payload.create({
         collection: relationOneSlug,
         data: { name: 'Related Doc 1' },
+        overrideAccess: true,
       })
       const relatedDoc2 = await payload.create({
         collection: relationOneSlug,
         data: { name: 'Related Doc 2' },
+        overrideAccess: true,
       })
       const relatedDoc3 = await payload.create({
         collection: relationOneSlug,
         data: { name: 'Related Doc 3' },
+        overrideAccess: true,
       })
 
       // Create main docs that reference different related docs
       const mainDoc1 = await payload.create({
         collection: slug,
         data: { relationship: relatedDoc1.id },
+        overrideAccess: true,
       })
       const mainDoc2 = await payload.create({
         collection: slug,
         data: { relationship: relatedDoc2.id },
+        overrideAccess: true,
       })
       const mainDoc3 = await payload.create({
         collection: slug,
         data: { relationship: relatedDoc3.id },
+        overrideAccess: true,
       })
 
       await page.goto(url.list)
@@ -1164,12 +1202,24 @@ describe('Relationship Field', () => {
       await expect(tableRow).toHaveCount(2)
 
       // Cleanup
-      await payload.delete({ id: String(mainDoc1.id), collection: slug })
-      await payload.delete({ id: String(mainDoc2.id), collection: slug })
-      await payload.delete({ id: String(mainDoc3.id), collection: slug })
-      await payload.delete({ id: String(relatedDoc1.id), collection: relationOneSlug })
-      await payload.delete({ id: String(relatedDoc2.id), collection: relationOneSlug })
-      await payload.delete({ id: String(relatedDoc3.id), collection: relationOneSlug })
+      await payload.delete({ id: String(mainDoc1.id), collection: slug, overrideAccess: true })
+      await payload.delete({ id: String(mainDoc2.id), collection: slug, overrideAccess: true })
+      await payload.delete({ id: String(mainDoc3.id), collection: slug, overrideAccess: true })
+      await payload.delete({
+        id: String(relatedDoc1.id),
+        collection: relationOneSlug,
+        overrideAccess: true,
+      })
+      await payload.delete({
+        id: String(relatedDoc2.id),
+        collection: relationOneSlug,
+        overrideAccess: true,
+      })
+      await payload.delete({
+        id: String(relatedDoc3.id),
+        collection: relationOneSlug,
+        overrideAccess: true,
+      })
     })
   })
 })
@@ -1189,6 +1239,7 @@ async function clearCollectionDocs(collectionSlug: CollectionSlug): Promise<void
     where: {
       id: { exists: true },
     },
+    overrideAccess: true,
   })
 }
 
@@ -1204,5 +1255,6 @@ async function createVersionedRelationshipFieldDoc(
       title,
       ...overrides,
     },
-  }) as unknown as Promise<VersionedRelationshipField>
+    overrideAccess: true,
+  })
 }

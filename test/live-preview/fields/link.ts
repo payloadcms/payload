@@ -21,7 +21,7 @@ export const appearanceOptions = {
 export type LinkAppearances = 'default' | 'primary' | 'secondary'
 
 type LinkType = (options?: {
-  appearances?: LinkAppearances[] | false
+  appearances?: false | LinkAppearances[]
   disableLabel?: boolean
   overrides?: Record<string, unknown>
 }) => Field

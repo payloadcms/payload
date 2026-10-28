@@ -30,10 +30,43 @@ export const optimizeDepsExcludeDefaults: string[] = [
   '@azure/storage-blob',
   // Preserve RSC client boundaries on storage admin upload handlers.
   '@payloadcms/storage-azure',
+  '@payloadcms/storage-r2',
   '@payloadcms/storage-vercel-blob',
   '@aws-sdk/client-s3',
   '@aws-sdk/s3-request-presigner',
   '@google-cloud/storage',
+  // Packages whose admin component barrel re-exports `'use client'` modules
+  // without carrying the directive itself. Pre-bundling one puts those modules
+  // in the optimized dep chunk *and* in the `rsc` environment as client
+  // references, which `@vitejs/plugin-rsc` warns about ("client component
+  // dependency is inconsistently optimized") once per component. Barrels that
+  // start with `'use client'` (e.g. `richtext-lexical`, `plugin-stripe`) don't
+  // warn and stay pre-bundled. Only shows up in published installs; workspace
+  // source is never pre-bundled.
+  '@payloadcms/plugin-cloud-storage',
+  '@payloadcms/plugin-ecommerce',
+  '@payloadcms/plugin-form-builder',
+  '@payloadcms/plugin-import-export',
+  '@payloadcms/plugin-multi-tenant',
+  '@payloadcms/plugin-search',
+  '@payloadcms/plugin-sentry',
+  '@payloadcms/plugin-seo',
+  // Database adapters and their drivers. The client scan reaches them through the
+  // Payload config (it follows server functions' `import('@payload-config')`
+  // without TanStack's server-fn stripping), so Vite would pre-bundle the whole
+  // driver for a browser that never loads it. Mongoose 9 has no browser build, so
+  // that bundles `mongodb`, whose optional `@aws-sdk/credential-providers` peer —
+  // when linked, as in the monorepo via `@payloadcms/payload-cloud` — fails the
+  // same `MISSING_EXPORT` way. Published installs reach the adapter packages;
+  // the monorepo, which resolves them to source, reaches the drivers.
+  '@payloadcms/db-d1-sqlite',
+  '@payloadcms/db-mongodb',
+  '@payloadcms/db-postgres',
+  '@payloadcms/db-sqlite',
+  '@payloadcms/db-vercel-postgres',
+  '@payloadcms/drizzle',
+  'mongodb',
+  'mongoose',
 ]
 
 /**
@@ -99,16 +132,16 @@ export const optimizeDepsIncludeDefaults: string[] = [
   '@payloadcms/ui > react-select > prop-types > react-is',
   '@payloadcms/ui > date-fns/locale/en-US',
   // Further late discoveries observed re-optimizing mid-run in CI cold starts
-  // (see CI logs: "✨ new dependencies optimized: @dnd-kit/modifiers / ajv /
+  // (see CI logs: "✨ new dependencies optimized: @dnd-kit/modifiers / zod /
   // dequal/lite"). The modular dashboard pulls in `@dnd-kit/modifiers` on first
   // render; form-state diffing reaches `dequal/lite` (a distinct entry point
   // from the already-listed `dequal`); client-side field validation reaches
-  // `ajv` *through `payload`* — it is `ssrExternal` server-side but still
+  // `zod` *through `payload`* — it is `ssrExternal` server-side but still
   // bundled into the client, and must be pathed via `payload` so the optimizer
   // pre-bundles the exact copy the runtime loads.
   '@payloadcms/ui > @dnd-kit/modifiers',
   '@payloadcms/ui > dequal/lite',
-  'payload > ajv',
+  'payload > zod',
   // The storage client-upload suites (esp. vercel-blob) crawl part of the
   // `payload` server runtime into the client bundle and discover these late,
   // triggering several "optimized dependencies changed. reloading" waves that

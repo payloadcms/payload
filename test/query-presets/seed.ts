@@ -1,7 +1,7 @@
 import type { Payload, QueryPreset } from 'payload'
 
-import { devUser as devCredentials, regularUser as regularCredentials } from '../credentials.js'
 import { executePromises } from '../__helpers/shared/executePromises.js'
+import { devUser as devCredentials, regularUser as regularCredentials } from '../credentials.js'
 import { pagesSlug, postsSlug, usersSlug } from './slugs.js'
 
 type SeededQueryPreset = {
@@ -13,46 +13,43 @@ export const seedData: {
   onlyMe: () => SeededQueryPreset
   specificUsers: (args: { adminUserID: string }) => SeededQueryPreset
 } = {
-  onlyMe: () => ({
-    relatedCollection: pagesSlug,
-    isShared: false,
-    title: 'Only Me',
+  everyone: () => ({
+    access: {
+      delete: {
+        constraint: 'everyone',
+      },
+      read: {
+        constraint: 'everyone',
+      },
+      update: {
+        constraint: 'everyone',
+      },
+    },
     columns: [
       {
         accessor: 'text',
         active: true,
       },
     ],
-    access: {
-      delete: {
-        constraint: 'onlyMe',
-      },
-      update: {
-        constraint: 'onlyMe',
-      },
-      read: {
-        constraint: 'onlyMe',
-      },
-    },
+    isShared: true,
+    relatedCollection: pagesSlug,
+    title: 'Everyone',
     where: {
       text: {
         equals: 'example page',
       },
     },
   }),
-  everyone: () => ({
-    relatedCollection: pagesSlug,
-    isShared: true,
-    title: 'Everyone',
+  onlyMe: () => ({
     access: {
       delete: {
-        constraint: 'everyone',
-      },
-      update: {
-        constraint: 'everyone',
+        constraint: 'onlyMe',
       },
       read: {
-        constraint: 'everyone',
+        constraint: 'onlyMe',
+      },
+      update: {
+        constraint: 'onlyMe',
       },
     },
     columns: [
@@ -61,6 +58,9 @@ export const seedData: {
         active: true,
       },
     ],
+    isShared: false,
+    relatedCollection: pagesSlug,
+    title: 'Only Me',
     where: {
       text: {
         equals: 'example page',
@@ -68,23 +68,16 @@ export const seedData: {
     },
   }),
   specificUsers: ({ adminUserID }: { adminUserID: string }) => ({
-    title: 'Specific Users',
-    isShared: true,
-    where: {
-      text: {
-        equals: 'example page',
-      },
-    },
     access: {
+      delete: {
+        constraint: 'specificUsers',
+        users: [adminUserID],
+      },
       read: {
         constraint: 'specificUsers',
         users: [adminUserID],
       },
       update: {
-        constraint: 'specificUsers',
-        users: [adminUserID],
-      },
-      delete: {
         constraint: 'specificUsers',
         users: [adminUserID],
       },
@@ -95,7 +88,14 @@ export const seedData: {
         active: true,
       },
     ],
+    isShared: true,
     relatedCollection: pagesSlug,
+    title: 'Specific Users',
+    where: {
+      text: {
+        equals: 'example page',
+      },
+    },
   }),
 }
 
@@ -106,31 +106,34 @@ export const seed = async (_payload: Payload) => {
         _payload.create({
           collection: usersSlug,
           data: {
+            name: 'Admin',
             email: devCredentials.email,
             password: devCredentials.password,
-            name: 'Admin',
             roles: ['admin'],
           },
+          overrideAccess: true,
         }),
       () =>
         _payload.create({
           collection: usersSlug,
           data: {
+            name: 'Editor',
             email: regularCredentials.email,
             password: regularCredentials.password,
-            name: 'Editor',
             roles: ['editor'],
           },
+          overrideAccess: true,
         }),
       () =>
         _payload.create({
           collection: usersSlug,
           data: {
+            name: 'Public User',
             email: 'public@email.com',
             password: regularCredentials.password,
-            name: 'Public User',
             roles: ['user'],
           },
+          overrideAccess: true,
         }),
     ],
     false,
@@ -145,6 +148,7 @@ export const seed = async (_payload: Payload) => {
           data: {
             text: 'Test Post 1',
           },
+          overrideAccess: true,
         }),
       () =>
         _payload.create({
@@ -152,6 +156,7 @@ export const seed = async (_payload: Payload) => {
           data: {
             text: 'Test Post 2',
           },
+          overrideAccess: true,
         }),
     ],
     false,
@@ -163,63 +168,69 @@ export const seed = async (_payload: Payload) => {
         _payload.create({
           collection: pagesSlug,
           data: {
-            text: 'example page',
             postsRelationship: [post1.id, post2.id],
+            text: 'example page',
           },
+          overrideAccess: true,
         }),
       () =>
         _payload.create({
           collection: 'payload-query-presets',
-          user: adminUser,
-          overrideAccess: false,
           data: seedData.specificUsers({
             adminUserID: adminUser?.id || '',
           }),
+          overrideAccess: false,
+          user: adminUser,
         }),
       () =>
         _payload.create({
           collection: 'payload-query-presets',
-          user: adminUser,
-          overrideAccess: false,
           data: seedData.everyone(),
-        }),
-      () =>
-        _payload.create({
-          collection: 'payload-query-presets',
-          user: adminUser,
           overrideAccess: false,
-          data: seedData.onlyMe(),
+          user: adminUser,
         }),
       () =>
         _payload.create({
           collection: 'payload-query-presets',
+          data: seedData.onlyMe(),
+          overrideAccess: false,
           user: adminUser,
+        }),
+      () =>
+        _payload.create({
+          collection: 'payload-query-presets',
           data: {
-            relatedCollection: 'pages',
-            title: 'Noone',
             access: {
               read: {
                 constraint: 'noone',
               },
             },
+            relatedCollection: 'pages',
+            title: 'Noone',
           },
+          overrideAccess: true,
+          user: adminUser,
         }),
       () =>
         _payload.create({
           collection: 'default-columns',
           data: {
+            defaultColumnField: 'defaultColumnField',
             field1: 'field1',
             field2: 'field2',
-            defaultColumnField: 'defaultColumnField',
           },
+          overrideAccess: true,
         }),
       // Create basic query preset for default columns
       () =>
         _payload.create({
           collection: 'payload-query-presets',
-          user: adminUser,
-          overrideAccess: false,
           data: {
+            access: {
+              read: {
+                constraint: 'everyone',
+              },
+            },
             relatedCollection: 'default-columns',
             title: 'Default Columns',
             where: {
@@ -227,12 +238,9 @@ export const seed = async (_payload: Payload) => {
                 exists: true,
               },
             },
-            access: {
-              read: {
-                constraint: 'everyone',
-              },
-            },
           },
+          overrideAccess: false,
+          user: adminUser,
         }),
     ],
     false,

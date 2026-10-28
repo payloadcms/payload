@@ -99,11 +99,21 @@ export async function updatePayloadInTanStackProject({
   const hasPackedTemplateLayout = fse.existsSync(path.join(templateRoot, 'routes'))
 
   for (const { destination, relativePath, sourcePath } of TANSTACK_TEMPLATE_FILES) {
-    if (destination !== 'routes' || !relativePath.startsWith('_payload')) {
+    const isPayloadRoute = destination === 'routes' && relativePath.startsWith('_payload')
+    const isCustomStyles = destination === 'routes' && relativePath === '_payload/custom.css'
+
+    if (!isPayloadRoute) {
       continue
     }
 
-    const destinationPath = path.join(appDetails.routesDir, relativePath)
+    const destinationPath = path.join(
+      destination === 'routes' ? appDetails.routesDir : appDetails.sourceDir,
+      relativePath,
+    )
+    if (isCustomStyles && fse.existsSync(destinationPath)) {
+      continue
+    }
+
     const templatePath = hasPackedTemplateLayout
       ? path.join(templateRoot, destination, relativePath)
       : path.join(templateRoot, sourcePath)

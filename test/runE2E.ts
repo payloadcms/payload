@@ -1,4 +1,6 @@
-import { spawn } from 'child_process'
+import type { ChildProcess } from 'child_process'
+
+import fs from 'fs'
 import globby from 'globby'
 import minimist from 'minimist'
 import { createServer } from 'net'
@@ -6,6 +8,10 @@ import path from 'path'
 import shelljs from 'shelljs'
 import slash from 'slash'
 import { fileURLToPath } from 'url'
+
+import type { TestServerProcess } from './__helpers/shared/devServer.js'
+
+import { spawnTestServer } from './__helpers/shared/devServer.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(__filename)
@@ -29,17 +35,36 @@ const playwrightBin = path.resolve(dirname, '../node_modules/.bin/playwright')
 const testRunCodes: { code: number; suiteName: string }[] = []
 const {
   _: args,
+  audit,
   bail,
   'fully-parallel': fullyParallel,
   grep,
   'grep-invert': grepInvert,
   headed,
   part,
+  'screen-reader': screenReader,
   shard,
   'update-snapshots': updateSnapshots,
   workers,
 } = minimist(process.argv.slice(2), { alias: { g: 'grep' } })
-const suiteName = args[0]
+const suiteName = args[0] ?? (audit ? 'a11y' : undefined)
+let configFile = bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'
+let testFilePattern = '*e2e.spec.ts'
+
+if (audit && screenReader) {
+  throw new Error('Choose either --audit or --screen-reader.')
+}
+
+if (audit) {
+  if (suiteName !== 'a11y') {
+    throw new Error('Audit validation is only available for the a11y suite.')
+  }
+  configFile = 'playwright.audit.config.ts'
+  testFilePattern = 'WCAG.audit.spec.ts'
+} else if (screenReader) {
+  configFile = 'playwright.screen-reader.config.ts'
+  testFilePattern = '*screen-reader.spec.ts'
+}
 
 // `@visual` screenshot comparisons only run against a real production build (see
 // `expectScreenshot`) and are opted into explicitly, via `--grep @visual`, by the dedicated
@@ -50,7 +75,18 @@ const effectiveGrepInvert = grepInvert ?? (grep === '@visual' ? undefined : '@vi
 
 // Run all
 if (!suiteName) {
-  let files = await globby(`${path.resolve(dirname).replace(/\\/g, '/')}/**/*e2e.spec.ts`)
+  let files = await globby(`${path.resolve(dirname).replace(/\\/g, '/')}/**/${testFilePattern}`)
+
+  // Accessibility has its own gated CI job; exclude it from aggregate runs.
+  if (process.env.CI === 'true' && !screenReader) {
+    files = files.filter((file) => path.relative(dirname, file).split(path.sep)[0] !== 'a11y')
+  }
+
+  if (grep) {
+    // Booting a server per suite is slow, so skip spec files that can't match. This only works
+    // for greps that appear literally in the spec file, e.g. `@also-without-cache-components`.
+    files = files.filter((file) => fs.readFileSync(file, 'utf8').includes(grep))
+  }
 
   const totalFiles = files.length
 
@@ -88,6 +124,7 @@ if (!suiteName) {
     await executePlaywright({
       bail,
       baseTestFolder,
+      grepArg: grep,
       grepInvertArg: effectiveGrepInvert,
       headedArg: headed,
       suitePaths: file,
@@ -111,7 +148,9 @@ if (!suiteName) {
     .resolve(dirname, inputSuitePath)
     .replaceAll('__', '/')
 
-  const allSuitesInFolder = await globby(`${suiteFolderPath.replace(/\\/g, '/')}/*e2e.spec.ts`)
+  const allSuitesInFolder = await globby(
+    `${suiteFolderPath.replace(/\\/g, '/')}/${testFilePattern}`,
+  )
 
   const baseTestFolder = inputSuitePath.split('__')[0]
 
@@ -126,6 +165,7 @@ if (!suiteName) {
   // Run all spec files in the folder with a single dev server and playwright invocation
   // This avoids port conflicts when multiple spec files exist in the same folder
   await executePlaywright({
+    bail,
     baseTestFolder,
     fullyParallelArg: fullyParallel,
     grepArg: grep,
@@ -175,10 +215,7 @@ async function executePlaywright({
 }) {
   const paths = Array.isArray(suitePaths) ? suitePaths : [suitePaths]
   console.log(`Executing ${paths.join(', ')}...`)
-  const playwrightCfg = path.resolve(
-    dirname,
-    `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
-  )
+  const playwrightCfg = path.resolve(dirname, configFile)
 
   const spawnDevArgs: string[] = [
     'dev',
@@ -191,6 +228,7 @@ async function executePlaywright({
   if (!turbo) {
     spawnDevArgs.push('--no-turbo')
   }
+  spawnDevArgs.push('--no-seed')
 
   process.env.START_MEMORY_DB = 'true'
 
@@ -203,32 +241,24 @@ async function executePlaywright({
     server.listen(e2ePort)
   })
 
-  let child: ReturnType<typeof spawn> | undefined
+  let server: TestServerProcess | undefined
 
   if (portInUse) {
     console.log(`Port ${e2ePort} is already in use — reusing existing dev server.`)
   } else {
-    child = spawn('pnpm', spawnDevArgs, {
-      cwd: path.resolve(dirname, '..'),
-      // Makes this process the leader of its own process group, so `stopServer` can signal every
-      // descendant it spawns (pnpm -> a shell -> cross-env -> tsx -> the actual Next.js server)
-      // by targeting the group instead of just this one PID, which by itself never reaches the
-      // real server process running several layers down.
-      detached: true,
-      env: {
-        ...process.env,
-      },
-      stdio: 'inherit',
-    })
+    server = spawnTestServer({ args: spawnDevArgs })
   }
 
   // A prod server only starts listening after the build/init completes, which outlasts Playwright's navigation timeout.
   // Wait for it before running tests.
   // (The dev server compiles routes lazily, so it needs no upfront wait.)
   if (prodServer && !portInUse) {
-    await waitForServer(e2ePort)
+    await waitForServer({ child: server?.child, port: e2ePort })
   }
 
+  await resetServer({ child: server?.child, port: e2ePort })
+
+  const auditBailFlag = audit && bail && !process.env.CI ? ' --max-failures=1' : ''
   const shardFlag = shardArg ? ` --shard=${shardArg}` : ''
   const fullyParallelFlag = fullyParallelArg ? ' --fully-parallel' : ''
   const workersFlag = workersArg !== undefined ? ` --workers=${workersArg}` : ''
@@ -237,7 +267,7 @@ async function executePlaywright({
   const headedFlag = headedArg ? ' --headed' : ''
   const updateSnapshotsFlag = updateSnapshotsArg ? ' --update-snapshots' : ''
   const cmd = slash(
-    `${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}${shardFlag}${fullyParallelFlag}${workersFlag}${grepFlag}${grepInvertFlag}${headedFlag}${updateSnapshotsFlag}`,
+    `${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}${shardFlag}${fullyParallelFlag}${workersFlag}${auditBailFlag}${grepFlag}${grepInvertFlag}${headedFlag}${updateSnapshotsFlag}`,
   )
   console.log('\n', cmd)
   const { code, stdout } = shelljs.exec(cmd, {
@@ -250,10 +280,10 @@ async function executePlaywright({
     if (bail) {
       console.error(`TEST FAILURE DURING ${suite} suite.`)
     }
-    await stopServer(child)
+    await server?.stop()
     process.exit(1)
   } else {
-    await stopServer(child)
+    await server?.stop()
   }
   testRunCodes.push(results)
 
@@ -266,51 +296,27 @@ function clearWebpackCache() {
 }
 
 /**
- * Waits for the spawned server to fully exit before resolving, instead of firing the kill signal
- * and moving on. Without this, a caller that runs several suites back-to-back (each against its
- * own config, bound to the same port) can start the next suite's port-in-use check before this
- * server has actually released the port — that next suite then silently reuses the still-dying
- * server from the wrong suite instead of starting its own.
- */
-async function stopServer(serverChild: ReturnType<typeof spawn> | undefined): Promise<void> {
-  if (!serverChild || serverChild.exitCode !== null || !serverChild.pid) {
-    return
-  }
-
-  // Negative PID targets the whole process group `spawn`'s `detached: true` made this process the
-  // leader of, not just this one PID — see the comment where it's spawned. Already exited by the
-  // time this fires is the expected, common case (ESRCH), not an error.
-  const killGroup = (signal: NodeJS.Signals) => {
-    try {
-      process.kill(-serverChild.pid!, signal)
-    } catch {
-      // Already exited — nothing left to signal.
-    }
-  }
-
-  await new Promise<void>((resolve) => {
-    const killTimer = setTimeout(() => killGroup('SIGKILL'), 15000)
-
-    serverChild.once('exit', () => {
-      clearTimeout(killTimer)
-      resolve()
-    })
-
-    killGroup('SIGTERM')
-  })
-}
-
-/**
  * Poll a port until the server responds, so Playwright doesn't start against a prod server that is still building.
  * Resolves on any HTTP response (the server only binds after the build/init finishes);
- * rejects if it never comes up.
+ * rejects if the server process exits or it never comes up.
  */
-async function waitForServer(port: number, timeoutMs = 8 * 60 * 1000): Promise<void> {
+async function waitForServer({
+  child,
+  port,
+  timeoutMs = 8 * 60 * 1000,
+}: {
+  /** The server process started by this run, if any. Polling stops as soon as it exits. */
+  child?: ChildProcess
+  port: number
+  timeoutMs?: number
+}): Promise<void> {
   const url = `http://localhost:${port}/`
   const start = Date.now()
   console.log(`Waiting for prod server on ${url} …`)
 
   while (Date.now() - start < timeoutMs) {
+    assertServerIsRunning({ child })
+
     try {
       await fetch(url)
       console.log(`Prod server ready after ${Math.round((Date.now() - start) / 1000)}s`)
@@ -321,4 +327,57 @@ async function waitForServer(port: number, timeoutMs = 8 * 60 * 1000): Promise<v
   }
 
   throw new Error(`Prod server did not start within ${timeoutMs / 1000}s`)
+}
+
+async function resetServer({
+  child,
+  port,
+  timeoutMs = 8 * 60 * 1000,
+}: {
+  /** The server process started by this run, if any. Polling stops as soon as it exits. */
+  child?: ChildProcess
+  port: number
+  timeoutMs?: number
+}): Promise<void> {
+  const url = `http://localhost:${port}/api/re-initialize`
+  const start = Date.now()
+  let lastConnectionError: unknown
+  console.log(`Waiting to reset test data at ${url} …`)
+
+  while (Date.now() - start < timeoutMs) {
+    assertServerIsRunning({ child })
+
+    let response: Response
+
+    try {
+      response = await fetch(url, { method: 'POST' })
+    } catch (error) {
+      lastConnectionError = error
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      continue
+    }
+
+    if (response.ok || response.status === 404) {
+      return
+    }
+
+    throw new Error(`Failed to reset test data: ${response.status} ${await response.text()}`)
+  }
+
+  const connectionError =
+    lastConnectionError instanceof Error ? `: ${lastConnectionError.message}` : ''
+
+  throw new Error(`Timed out waiting to reset test data at ${url}${connectionError}`)
+}
+
+/**
+ * Without this check, a server that crashed on startup (e.g. a failed `next build`)
+ * would leave the caller polling a dead port until its timeout.
+ */
+function assertServerIsRunning({ child }: { child?: ChildProcess }): void {
+  if (child && (child.exitCode !== null || child.signalCode !== null)) {
+    throw new Error(
+      `Test server exited with ${child.signalCode ?? `code ${child.exitCode}`} before it was ready`,
+    )
+  }
 }

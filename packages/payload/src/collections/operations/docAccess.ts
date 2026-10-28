@@ -5,7 +5,7 @@ import type { Collection } from '../config/types.js'
 import { getEntityPermissions } from '../../utilities/getEntityPermissions/getEntityPermissions.js'
 import { sanitizePermissions } from '../../utilities/sanitizePermissions.js'
 
-const allOperations: AllOperations[] = ['create', 'read', 'update', 'delete']
+const allOperations: AllOperations[] = ['create', 'read', 'update', 'delete', 'validate']
 
 type Arguments = {
   collection: Collection

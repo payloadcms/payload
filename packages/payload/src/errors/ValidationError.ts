@@ -1,21 +1,26 @@
 import type { TFunction } from '@payloadcms/translations'
 
 import { en } from '@payloadcms/translations/languages/en'
-import { status as httpStatus } from 'http-status'
 
 import type { LabelFunction, StaticLabel } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
+import { httpStatus } from '../utilities/httpStatus.js'
 import { APIError } from './APIError.js'
 
 /** @deprecated Use `instanceof ValidationError` instead of name comparison. */
 export const ValidationErrorName = 'ValidationError'
 
 export type ValidationFieldError = {
+  /** Configured field label, when available. */
   label?: LabelFunction | StaticLabel
-  // The error message to display for this field
+  /** Locale for a localized validation pass. Omitted for non-localized validation. */
+  locale?: string
+  /** Error message to display for this field. */
   message: string
+  /** Dot-separated path to the invalid field. */
   path: string
+  /** Database table associated with the invalid field, when applicable. */
   tableName?: string
 }
 
@@ -47,34 +52,42 @@ export class ValidationError extends APIError<{
     // delete to avoid logging the whole req
     delete results['req']
 
+    const locales = results.errors
+      .map((fieldError) => fieldError.locale)
+      .filter((locale): locale is string => Boolean(locale))
+    const spansMultipleLocales = new Set(locales).size > 1
+
     super(
       `${message} ${results.errors
         .map((f) => {
+          const localePrefix = spansMultipleLocales && f.locale ? `[${f.locale}] ` : ''
+
           if (f.label) {
             if (typeof f.label === 'function') {
               if (!req || !req.i18n || !req.t) {
-                return f.path
+                return `${localePrefix}${f.path}`
               }
 
-              return f.label({ i18n: req.i18n, t: req.t })
+              return `${localePrefix}${f.label({ i18n: req.i18n, t: req.t })}`
             }
 
             if (typeof f.label === 'object') {
               if (req?.i18n?.language) {
-                return f.label[req.i18n.language]
+                return `${localePrefix}${f.label[req.i18n.language]}`
               }
 
-              return f.label[Object.keys(f.label)[0]!]
+              return `${localePrefix}${f.label[Object.keys(f.label)[0]!]}`
             }
 
-            return f.label
+            return `${localePrefix}${f.label}`
           }
 
-          return f.path
+          return `${localePrefix}${f.path}`
         })
         .join(', ')}`,
       httpStatus.BAD_REQUEST,
       results,
     )
+    this.name = 'ValidationError'
   }
 }
