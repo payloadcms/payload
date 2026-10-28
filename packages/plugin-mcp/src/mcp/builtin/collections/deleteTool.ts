@@ -23,7 +23,7 @@ export const deleteDocumentsTool = defineCollectionTool({
   const payload = req.payload
   const logger = getLogger({ payload })
 
-  const { id, depth, fallbackLocale, locale, where } = input
+  const { id, depth, fallbackLocale, locale, trash, where } = input
 
   logger.info(
     `Deleting document from collection: ${slug}${id ? ` with ID: ${id}` : ' with where clause'}${locale ? `, locale: ${locale}` : ''}`,
@@ -37,6 +37,7 @@ export const deleteDocumentsTool = defineCollectionTool({
         depth,
         overrideAccess: authorizedMCP.overrideAccess,
         req,
+        trash,
         ...(locale && { locale }),
         ...(fallbackLocale !== undefined && { fallbackLocale }),
       })
@@ -63,6 +64,7 @@ export const deleteDocumentsTool = defineCollectionTool({
       depth,
       overrideAccess: authorizedMCP.overrideAccess,
       req,
+      trash,
       where,
       ...(locale && { locale }),
       ...(fallbackLocale !== undefined && { fallbackLocale }),
