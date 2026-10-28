@@ -49,6 +49,7 @@ import {
   planUploadRebuild,
 } from './transformState/planUploadRebuild.js'
 import { resolveUploadEdits } from './transformState/resolveUploadEdits.js'
+import { isClaimRequired } from './transformState/transformKeyClaims.js'
 type Args<T> = {
   collection: Collection
   config: SanitizedConfig
@@ -259,7 +260,11 @@ const processUpload = async <T>({
       ? { rebuildPlan: undefined, shouldRebuild: false }
       : await planUploadRebuild({
           collectionSlug: collectionConfig.slug,
-          hasCropOrResizeEdit: hasCropOrResizeEdit(uploadEdits),
+          // Not `uploadEdits`: a focal point change copies the saved crop into it, so the crop is
+          // applied again if the file is rebuilt. That copy is not a crop edit.
+          hasCropOrResizeEdit: hasCropOrResizeEdit(
+            req.query?.uploadEdits as undefined | UploadEdits,
+          ),
           isDuplicating: Boolean(isDuplicating),
           isExternalSource: Boolean(externalUploadSource),
           isLegacyReupload: shouldReupload(
@@ -274,7 +279,7 @@ const processUpload = async <T>({
               : undefined,
           req,
           storedMimeType,
-        })
+        }).catch((err: unknown) => throwUploadPipelineError({ err, req }))
 
   if (shouldRebuild && fileSourceData) {
     const { filename, url } = fileSourceData
@@ -419,11 +424,12 @@ const processUpload = async <T>({
     // A client upload can arrive with only a header probe or no contents (see
     // getFileContentRequirement.ts). Download it only when a stage needs its bytes, which
     // `canTransform` decides here with the real document. The content requirement covers what
-    // Sharp's bridge needs for its configuration, but not saved keys that it claims.
+    // Sharp's bridge needs for its configuration, but not saved keys that it claims. A focal point
+    // only guides sizes, which the content requirement already covers, so it needs no download.
     const isBridgeApplyingSavedKey =
       plannedBridgeTransformer !== undefined &&
-      Object.keys(pipelineDoc._transforms ?? {}).some((key) =>
-        plan.claims.get(plannedBridgeTransformer)?.includes(key),
+      Object.keys(pipelineDoc._transforms ?? {}).some(
+        (key) => isClaimRequired(key) && plan.claims.get(plannedBridgeTransformer)?.includes(key),
       )
 
     if (
@@ -876,18 +882,7 @@ const processUpload = async <T>({
       fileData.variants = sizes
     }
   } catch (err) {
-    if (err instanceof ValidationError) {
-      throw err
-    }
-
-    req.payload.logger.error(err)
-
-    // A broken transformer contract is a bug in the transformer, so it keeps its own message.
-    if (err instanceof TransformerContractError) {
-      throw err
-    }
-
-    throw new FileUploadError(req.t)
+    throwUploadPipelineError({ err, req })
   }
 
   newData = {
@@ -900,4 +895,24 @@ const processUpload = async <T>({
     data: newData,
     files: filesToSave,
   }
+}
+
+/**
+ * Maps an error from transformer planning or the pipeline. A validation error and a broken
+ * transformer contract keep their own message; anything else is logged and becomes a
+ * `FileUploadError`.
+ */
+function throwUploadPipelineError({ err, req }: { err: unknown; req: PayloadRequest }): never {
+  if (err instanceof ValidationError) {
+    throw err
+  }
+
+  req.payload.logger.error(err)
+
+  // A broken transformer contract is a bug in the transformer, so it keeps its own message.
+  if (err instanceof TransformerContractError) {
+    throw err
+  }
+
+  throw new FileUploadError(req.t)
 }
