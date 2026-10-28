@@ -210,9 +210,9 @@ export const DocumentControls: React.FC<DocumentControlsProps> = (props) => {
 
   const showDotMenu = Boolean(
     !disableActions &&
-      (EditMenuItems ||
-        (collectionConfig && id && (hasCreatePermission || hasDeletePermission)) ||
-        (globalConfig && (globalHasDraftsEnabled || localization))),
+    (EditMenuItems ||
+      (collectionConfig && id && (hasCreatePermission || hasDeletePermission)) ||
+      (globalConfig && (globalHasDraftsEnabled || localization))),
   )
   const collectionAutosaveEnabled = hasAutosaveEnabled(collectionConfig)
   const globalAutosaveEnabled = hasAutosaveEnabled(globalConfig)
@@ -383,7 +383,7 @@ export const DocumentControls: React.FC<DocumentControlsProps> = (props) => {
             renderButton={({ active, ...buttonProps }) => (
               <Button
                 {...buttonProps}
-                aria-label={t('general:moreOptions')}
+                aria-label={`${t('general:moreOptions')}: ${t('general:document')}`}
                 buttonStyle="ghost"
                 className={`${baseClass}__popup-button`}
                 icon={<MoreIcon />}

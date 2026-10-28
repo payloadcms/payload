@@ -105,6 +105,7 @@ const StepNav: React.FC<{
     { isFirst, isLast }: { isFirst: boolean; isLast: boolean },
   ) => {
     const StepLabel = getTranslation(item.label, i18n)
+    const title = typeof StepLabel === 'string' ? StepLabel : undefined
     const isCurrent = item.isCurrent ?? isLast
     const itemClassName = [
       `${baseClass}__item`,
@@ -120,7 +121,7 @@ const StepNav: React.FC<{
           buttonStyle="ghost"
           className={itemClassName}
           el="link"
-          extraButtonProps={{ 'aria-current': isCurrent ? 'page' : false }}
+          extraButtonProps={{ 'aria-current': isCurrent ? 'page' : false, title }}
           url={item.url}
         >
           {StepLabel}
@@ -129,7 +130,7 @@ const StepNav: React.FC<{
     }
 
     return (
-      <span aria-current={isCurrent ? 'page' : undefined} className={itemClassName}>
+      <span aria-current={isCurrent ? 'page' : undefined} className={itemClassName} title={title}>
         {StepLabel}
       </span>
     )

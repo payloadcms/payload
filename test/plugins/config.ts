@@ -13,8 +13,11 @@ export type ReaderPluginOptions = {
   items: Array<{ name: string }>
 }
 
+export type OptionalSettingsPluginOptions = { items: string[] } | undefined
+
 declare module 'payload' {
   interface RegisteredPlugins {
+    'optional-settings': OptionalSettingsPluginOptions
     'priority-reader': ReaderPluginOptions
   }
 }
@@ -37,6 +40,21 @@ const readerPlugin = definePlugin<ReaderPluginOptions>({
 })
 
 /**
+ * Plugin registered without options. The writer replaces its options with a new object.
+ */
+const optionalSettingsPlugin = definePlugin<OptionalSettingsPluginOptions>({
+  slug: 'optional-settings',
+  order: 10,
+  plugin: ({ config, options }): Config => ({
+    ...config,
+    custom: {
+      ...(config.custom || {}),
+      optionalSettingsItems: options?.items ?? [],
+    },
+  }),
+})
+
+/**
  * Plugin with order 1 (runs first) that writes to config.custom and injects items
  * into the reader plugin's options via typed slug discovery.
  */
@@ -47,6 +65,11 @@ const writerPlugin = definePlugin({
     const reader = plugins['priority-reader']
     if (reader?.options) {
       reader.options.items.push({ name: 'injected-by-writer' })
+    }
+
+    const optionalSettings = plugins['optional-settings']
+    if (optionalSettings) {
+      optionalSettings.options = { items: ['set-by-writer'] }
     }
 
     return {
@@ -94,6 +117,7 @@ export default buildConfigWithDefaults({
       }),
       // Intentionally listed BEFORE the writer to verify order sorting works
       readerPlugin({ items: [{ name: 'user-provided' }] }),
+      optionalSettingsPlugin(),
       writerPlugin(),
     ],
     typescript: {

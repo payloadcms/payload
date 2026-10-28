@@ -13,6 +13,9 @@ import { getCollectionFieldPaths } from '../getCollectionFieldPaths.js'
 
 const baseFieldValues = new Set(['createdAt', 'id', 'updatedAt'])
 
+/**
+ * @internal - may change or be removed without a major version bump
+ */
 export const CollectionQuerySortField: React.FC<TextFieldClientProps> = ({
   field,
   path: pathFromProps,

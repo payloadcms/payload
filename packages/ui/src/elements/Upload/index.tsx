@@ -433,6 +433,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
                   />
                   <span className={`${baseClass}__orText`}>{t('general:or')}</span>
                   <Button
+                    aria-label={t('upload:pasteURL')}
                     buttonStyle="pill"
                     className={`${baseClass}__pasteFromClipboard`}
                     icon="clipboard"
@@ -452,6 +453,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
           {value && fileSrc && (
             <React.Fragment>
               <Button
+                aria-label={t('general:cancel')}
                 buttonStyle="ghost"
                 className={`${baseClass}__remove`}
                 icon="x"

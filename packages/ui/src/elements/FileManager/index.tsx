@@ -166,8 +166,11 @@ export const FileManager: React.FC<FileManagerProps> = ({
         toast.error(t('error:invalidFileType'))
         return
       }
-      if (isNewFile && file instanceof File) {
-        setFileSrc(URL.createObjectURL(file))
+      if (isNewFile) {
+        setFilename(file?.name ?? '')
+        if (file instanceof File) {
+          setFileSrc(URL.createObjectURL(file))
+        }
       }
       onSessionFileChange({ file, isNewFile })
       setValue(file)
@@ -318,6 +321,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
       <div className={`${baseClass}__selected-preview`}>
         <Thumbnail
           collectionSlug={collectionSlug}
+          doc={{ filename: filename || value?.name }}
           fileSrc={isImage(fileType) ? src : null}
           size="expand"
         />
@@ -388,7 +392,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
           {data?.filename && !removedFile ? (
             <FilePreview
               collectionSlug={collectionSlug}
-              data={data as Record<string, unknown>}
+              data={data}
               imageCacheTag={imageCacheTag}
               selectedSize={selectedSize}
               selectedSizeData={selectedSizeData}

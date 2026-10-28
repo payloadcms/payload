@@ -1,1 +1,5 @@
-@layer payload-default { .icon--table { /* Icon uses fill. */ } }
+@layer payload-default {
+  .icon--table {
+    /* Icon uses fill. */
+  }
+}

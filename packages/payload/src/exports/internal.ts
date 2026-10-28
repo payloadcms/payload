@@ -18,6 +18,7 @@ export { assertClientUploadAccess } from '../uploads/assertClientUploadAccess.js
 export { assertClientUploadAllowed } from '../uploads/assertClientUploadAllowed.js'
 export {
   createClientUploadReceipt,
+  resignClientUploadReceipt,
   verifyClientUploadReceipt,
 } from '../uploads/clientUploadReceipt.js'
 export { downloadFileToBuffer } from '../uploads/downloadFileToBuffer.js'

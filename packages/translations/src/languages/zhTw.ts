@@ -276,6 +276,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     and: '與',
     anotherUser: '其他使用者',
     anotherUserTakenOver: '其他使用者已接手編輯此文件。',
+    apiResponse: 'API 回應',
     applyChanges: '套用變更',
     ascending: '遞增',
     auto: '自動',
@@ -343,6 +344,13 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     documentModified: '已修改的文件',
     documentOutOfDate: '這份文件最近被另一位使用者更新。您的視圖已過期。',
     documents: '文件',
+    dragCancelled: '已取消拖曳{{label}}。',
+    dragDropped: '已放下{{label}}。 位置：第{{position}}項，共{{count}}項。',
+    dragInstructions:
+      '按Space或Enter拾起一列。使用方向鍵移動。使用VoiceOver時，請關閉Quick Nav並使用Command + 方向鍵。按Space或Enter放下，或按Escape取消。',
+    dragMoved: '{{label}}: {{direction}}. 位置：第{{position}}項，共{{count}}項。',
+    dragPickedUp: '已拾起{{label}}。 位置：第{{position}}項，共{{count}}項。',
+    dragToMove: '拖曳以移動',
     dragToReorder: '拖曳以重新排序',
     duplicate: '複製',
     duplicateWithoutSaving: '不儲存變更直接複製',
@@ -454,6 +462,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     reindexingAll: '正在重新索引 {{collections}}。',
     reloadDocument: '重新載入文件',
     remove: '移除',
+    removeFilter: '移除篩選器',
     rename: '重新命名',
     replaceRow: '替換資料列',
     requiredFields: '標有 * 的欄位為必填項。',
@@ -544,6 +553,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     yes: '是',
   },
   hierarchy: {
+    folderLocation: '資料夾位置',
     goTo: '前往「{{name}}」',
     itemsMovedTo: '{{title}} 移至 {{destination}}',
     itemsMovedToRoot: '{{title}} 已移至根目錄',
@@ -684,6 +694,10 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     type: '類型',
     aboutToPublishSelection: '您即將發佈所有選取的 {{label}}。確定要繼續？',
     aboutToRestore: '您即將將此 {{label}} 文件還原至 {{versionDate}} 的狀態。',
+    aboutToRestoreAsDraft:
+      '將 {{versionDate}} 的內容還原為草稿。已發布的內容將保持不變，直到您從編輯器中發布。',
+    aboutToRestoreAsDraftAllLocales:
+      '將 {{versionDate}} 的所有語言版本的內容還原為草稿。已發布的內容將保持不變，直到您從編輯器中發布。',
     aboutToRestoreGlobal: '您即將將全域 {{label}} 還原至 {{versionDate}} 的狀態。',
     aboutToRevertToPublished: '您即將還原此文件至已發佈狀態。確定要繼續？',
     aboutToUnpublish: '您即將取消發佈此文件。確定要繼續？',
