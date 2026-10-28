@@ -4445,13 +4445,16 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           params: { client_id, grant_type: 'refresh_token', refresh_token: refreshToken },
           restClient,
         })
+
+      vi.useFakeTimers({ now: Date.now() + 3 * 60 * 60 * 1000, toFake: ['Date'] })
+      onTestFinished(() => vi.useRealTimers())
+
       const refreshed = await refresh(tokens.refresh_token).then((res) => res.json())
 
       // Right after a refresh, the client may be refreshing twice at once
       expect((await refresh(tokens.refresh_token)).status).toBe(200)
 
       vi.useFakeTimers({ now: Date.now() + 60 * 1000, toFake: ['Date'] })
-      onTestFinished(() => vi.useRealTimers())
 
       expect((await refresh(tokens.refresh_token)).status).toBe(400)
       expect((await refresh(refreshed.refresh_token)).status).toBe(400)
