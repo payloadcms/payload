@@ -1,10 +1,50 @@
-import type { ArrayField, Config } from 'payload'
+import type { ArrayField, Config, PayloadComponent } from 'payload'
 
 import { describe, expect, it } from 'vitest'
 
 import { multiTenantPlugin } from './index.js'
 
 describe('multiTenantPlugin', () => {
+  it.each([
+    undefined,
+    '@payloadcms/plugin-multi-tenant/client#AssignTenantFieldTrigger',
+    { path: '@payloadcms/plugin-multi-tenant/client#AssignTenantFieldTrigger' },
+  ])(
+    'should register the tenant assignment menu item once when reapplied with %j',
+    async (trigger) => {
+      const customMenuItem = { path: '/components/CustomMenuItem.js#CustomMenuItem' }
+      const editMenuItems: PayloadComponent[] = [customMenuItem]
+
+      if (trigger) {
+        editMenuItems.push(trigger)
+      }
+
+      const plugin = multiTenantPlugin({ collections: { posts: {} } })
+      const config = {
+        collections: [
+          { slug: 'users', auth: true, fields: [] },
+          { slug: 'tenants', fields: [] },
+          {
+            slug: 'posts',
+            admin: { components: { edit: { editMenuItems } } },
+            fields: [],
+          },
+        ],
+      } as Config
+
+      await plugin(config)
+      await plugin(config)
+      await plugin(config)
+
+      const posts = config.collections?.find(({ slug }) => slug === 'posts')
+
+      expect(posts?.admin?.components?.edit?.editMenuItems).toEqual([
+        customMenuItem,
+        trigger ?? { path: '@payloadcms/plugin-multi-tenant/client#AssignTenantFieldTrigger' },
+      ])
+    },
+  )
+
   it('applies tenant assignment access defaults', async () => {
     let hasAllTenantAccess = false
     const plugin = multiTenantPlugin({

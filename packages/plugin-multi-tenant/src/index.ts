@@ -272,9 +272,17 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
           collection.admin.components ??= {}
           collection.admin.components.edit ??= {}
           collection.admin.components.edit.editMenuItems ??= []
-          collection.admin.components.edit.editMenuItems.push({
-            path: '@payloadcms/plugin-multi-tenant/client#AssignTenantFieldTrigger',
-          })
+          const assignTenantTriggerPath =
+            '@payloadcms/plugin-multi-tenant/client#AssignTenantFieldTrigger'
+          const hasAssignTenantTrigger = collection.admin.components.edit.editMenuItems.some(
+            (component) =>
+              (typeof component === 'string' ? component : component.path) ===
+              assignTenantTriggerPath,
+          )
+
+          if (!hasAssignTenantTrigger) {
+            collection.admin.components.edit.editMenuItems.push({ path: assignTenantTriggerPath })
+          }
         }
 
         /**
