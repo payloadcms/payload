@@ -151,9 +151,13 @@ transformFile: (args: {
 
 ### Changing the document
 
-`doc` is passed in order through the stages. A stage may change `doc._transforms`, and later stages see the change. All other fields belong to core or to the operation's data: if a stage changes, adds or removes any other field, the upload fails with a `TransformerContractError` and nothing is saved.
+`doc` is passed in order through the stages. A stage may change the `doc._transforms` keys it claims in `canTransform` (see [Applying saved `_transforms` keys](#applying-saved-_transforms-keys)), and later stages see the change. All other fields belong to core or to the operation's data: if a stage changes, adds or removes any other field, the upload fails with a `TransformerContractError` and nothing is saved.
 
 ```ts
+canTransform: () => ({
+  canTransform: true,
+  handledTransformKeys: ['myTransformer'],
+}),
 transformFile: async ({ doc, source }) => {
   const header = await source.readFileBytes({
     numberOfBytes: 1024,
