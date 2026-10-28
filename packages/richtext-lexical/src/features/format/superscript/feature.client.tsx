@@ -20,6 +20,9 @@ const toolbarGroups: ToolbarGroup[] = [
         return false
       },
       key: 'superscript',
+      label: ({ i18n }) => {
+        return i18n.t('lexical:superscript:label')
+      },
       onSelect: ({ editor }) => {
         editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'superscript')
       },
