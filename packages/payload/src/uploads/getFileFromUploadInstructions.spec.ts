@@ -161,6 +161,39 @@ describe('getFileFromUploadInstructions', () => {
     fs.rmSync(customTempDir, { force: true, recursive: true })
   })
 
+  // `generateFileData` decides with the real document, and downloads the file only then.
+  it('should not download the file or call canTransform for a transformer that matches its type', async () => {
+    const handler = vi.fn(
+      async () =>
+        new Response('s', {
+          headers: { 'Content-Length': '18', 'Content-Range': 'bytes 0-0/18' },
+          status: 206,
+        }),
+    )
+    const req = createReq([handler], { mimeTypes: undefined })
+    const canTransform = vi.fn(() => true)
+    req.payload.config.upload = {
+      transformers: [
+        {
+          slug: 'video-transformer',
+          canTransform,
+          mimeTypes: ['video/*'],
+          transformFile: vi.fn(),
+        },
+      ],
+    } as unknown as PayloadRequest['payload']['config']['upload']
+
+    const file = await getFileFromUploadInstructions({
+      collectionSlug: 'media',
+      file: createUploadReferenceFile(),
+      req,
+    })
+
+    expect(canTransform).not.toHaveBeenCalled()
+    expect(file.tempFilePath).toBeUndefined()
+    expect(file.data.length).toBe(0)
+  })
+
   it('throws when no handler returns a response with a body', async () => {
     const handler = vi.fn(async () => new Response(null, { status: 204 }))
     const req = createReq([handler])
