@@ -4,6 +4,7 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { APIKeys } from './collections/APIKeys.js'
+import { ReadableAPIKeys } from './collections/ReadableAPIKeys.js'
 import { RestrictedRevealableKeys } from './collections/RestrictedRevealableKeys.js'
 import { RevealableKeys } from './collections/RevealableKeys.js'
 import { TenantRevealableKeys } from './collections/TenantRevealableKeys.js'
@@ -18,7 +19,14 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, APIKeys, RevealableKeys, RestrictedRevealableKeys, TenantRevealableKeys],
+  collections: [
+    Users,
+    APIKeys,
+    ReadableAPIKeys,
+    RevealableKeys,
+    RestrictedRevealableKeys,
+    TenantRevealableKeys,
+  ],
   localization: { defaultLocale: 'en', locales: ['en', 'fr'] },
   onInit: async (payload) => {
     await payload.create({
