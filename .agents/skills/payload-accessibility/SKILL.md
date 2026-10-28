@@ -33,7 +33,7 @@ Follow [change-assessment.md](references/change-assessment.md), proportionally t
 3. Read [wcag-2.2-aa.md](references/wcag-2.2-aa.md). Assess every plausibly affected A/AA criterion, beyond those named in an issue; resolve uncertainty using linked W3C guidance.
 4. Prefer native HTML. Composite ARIA patterns require complete semantics and keyboard behavior.
 5. Follow [testing.md](references/testing.md). Reuse sufficient evidence; fill gaps with focused checks against production components in context.
-6. Within authorised implementation, reproduce and fix confirmed barriers, then verify. In assessment-only work, report without editing implementation or tests unless requested. Distinguish failures, risks and coverage gaps.
+6. Within authorised implementation, reproduce and fix confirmed barriers, then verify. In assessment-only work, report without editing implementation or tests until fixes are approved. Distinguish failures, risks and coverage gaps.
 
 ## Test placement
 
