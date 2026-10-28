@@ -3,30 +3,40 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { afterAll, expect, it } from 'vitest'
+import { afterAll, expect } from 'vitest'
 
 import { updatePackageJSONDependencies } from '../../../packages/create-payload-app/src/lib/create-project.js'
-import { describe } from '../../__helpers/int/vitest.js'
+import { test } from '../../__helpers/int/vitest.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.resolve(dirname, '../../..')
-const oldVersion = '3.86.0'
-const newVersion = '4.0.0-canary.18'
+const oldVersion = '3.92.1'
+const newVersion = '4.0.0-beta.5'
 const projectDir = await mkdtemp(path.join(tmpdir(), 'payload-jobs-v4-upgrade-'))
 
 afterAll(async () => {
   await rm(projectDir, { force: true, recursive: true })
 })
 
-describe('jobs v4 upgrade migration', { db: (adapter) => adapter === 'sqlite' }, () => {
-  it('should upgrade a project created before the jobs v4 database changes', async () => {
+test.suite('jobs v4 upgrade migration', { db: (adapter) => adapter === 'sqlite' }, () => {
+  test('should upgrade a project created before the jobs v4 database changes', async () => {
     await createOldProject()
     await runCommand({
       args: ['install', '--no-frozen-lockfile'],
       command: 'pnpm',
     })
     await expectInstalledPayloadVersion({ version: oldVersion })
-    await runProjectScript({ mode: 'seed', shouldPushSchema: true })
+    await runCommand({
+      args: ['exec', 'payload', 'migrate:create', 'initial'],
+      command: 'pnpm',
+      shouldPushSchema: false,
+    })
+    await runCommand({
+      args: ['exec', 'payload', 'migrate'],
+      command: 'pnpm',
+      shouldPushSchema: false,
+    })
+    await runProjectScript({ mode: 'seed', shouldPushSchema: false })
 
     await usePayloadVersion({ version: newVersion })
     await runCommand({
@@ -60,6 +70,13 @@ describe('jobs v4 upgrade migration', { db: (adapter) => adapter === 'sqlite' },
       command: 'pnpm',
       shouldPushSchema: false,
     })
+    // The jobs-v4 snapshot must leave the other v4 schema changes, such as the posts versions
+    // table, for the next generated migration.
+    await runCommand({
+      args: ['exec', 'payload', 'migrate:create', 'upgrade', '--skip-empty'],
+      command: 'pnpm',
+      shouldPushSchema: false,
+    })
     await runCommand({
       args: ['exec', 'payload', 'migrate'],
       command: 'pnpm',
@@ -89,7 +106,7 @@ async function createOldProject(): Promise<void> {
           payload: oldVersion,
           tsx: '4.22.4',
         },
-        packageManager: 'pnpm@11.9.0',
+        packageManager: 'pnpm@11.28.6',
         private: true,
       },
       null,
@@ -128,7 +145,17 @@ export default buildConfig({
   admin: {
     disable: true,
   },
-  collections: [],
+  collections: [
+    {
+      slug: 'posts',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+  ],
   db: sqliteAdapter({
     client: {
       url: 'file:./payload.db',
@@ -184,6 +211,7 @@ try {
     const jobsBeforeRun = await payload.find({
       collection: 'payload-jobs',
       limit: 10,
+      overrideAccess: true,
     })
 
     if (jobsBeforeRun.totalDocs !== 1) {
@@ -192,11 +220,13 @@ try {
 
     await payload.jobs.run({
       limit: 10,
+      overrideAccess: true,
     })
 
     const jobsAfterRun = await payload.find({
       collection: 'payload-jobs',
       limit: 10,
+      overrideAccess: true,
     })
     const migratedJob = jobsAfterRun.docs[0]
 
@@ -204,8 +234,20 @@ try {
       throw new Error('The migrated job did not run with its original input')
     }
 
-    await payload.findGlobal({
+    await payload.updateGlobal({
       slug: 'payload-jobs-stats',
+      data: {
+        stats: {},
+      },
+      overrideAccess: true,
+    })
+
+    await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'created after upgrade',
+      },
+      overrideAccess: true,
     })
 
     console.log('Verified migrated jobs project')

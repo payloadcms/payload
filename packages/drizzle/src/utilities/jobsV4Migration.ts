@@ -1,10 +1,13 @@
 import type { SQL } from 'drizzle-orm'
 import type { DynamicMigrationTemplate, Payload } from 'payload'
 
+import { randomUUID } from 'crypto'
 import { writeFileSync } from 'fs'
 import toSnakeCase from 'to-snake-case'
 
-import type { DrizzleAdapter, RawTable } from '../types.js'
+import type { DrizzleAdapter, RawColumn, RawTable } from '../types.js'
+
+import { readLatestSnapshot } from './readLatestSnapshot.js'
 
 type Dialect = 'postgres' | 'sqlite'
 
@@ -42,6 +45,7 @@ type JobsV4Metadata = {
   jobsTableName: string
   logForeignKeyName: string
   logOrderIndexName: string
+  logParentIDType: RawColumn['type']
   logParentIndexName: string
   logTableName: string
   parentTaskSlugEnumName: string
@@ -49,7 +53,22 @@ type JobsV4Metadata = {
   processingIndexName: string
   processingUntilIndexName: string
   statsAutoIncrement: boolean
+  statsIDType: RawColumn['type']
   statsTableName: string
+}
+
+type SnapshotTable = {
+  columns: Record<string, unknown>
+  indexes: Record<string, unknown>
+  name: string
+}
+
+type Snapshot = {
+  enums?: Record<string, { name: string }>
+  id?: string
+  prevId?: string
+  tables: Record<string, SnapshotTable>
+  version: string
 }
 
 const quoteIdentifier = (identifier: string): string => `"${identifier.replaceAll('"', '""')}"`
@@ -61,6 +80,19 @@ const isDuplicateColumnError = (error: unknown): boolean => {
     error instanceof Error &&
     (error.message.includes('duplicate column name') || isDuplicateColumnError(error.cause))
   )
+}
+
+/** Matches the column types the SQLite schema builder uses for ID columns. */
+const getSQLiteIDType = (type: RawColumn['type']): string => {
+  if (type === 'integer' || type === 'serial') {
+    return 'integer'
+  }
+
+  if (type === 'numeric') {
+    return 'numeric'
+  }
+
+  return type === 'uuid' ? 'text(36)' : 'text'
 }
 
 const getDefaultIndexName = (name: string): string => {
@@ -134,6 +166,7 @@ const getJobsV4Metadata = (adapter: DrizzleAdapter): JobsV4Metadata => {
     jobsTableName,
     logForeignKeyName: logForeignKey?.name ?? `${logTableName}_parent_id_fk`,
     logOrderIndexName: getRawIndexName({ column: '_order', table: logTable }),
+    logParentIDType: logTable.columns._parentID.type,
     logParentIndexName: getRawIndexName({ column: '_parentID', table: logTable }),
     logTableName,
     parentTaskSlugEnumName: parentTaskSlug.enumName,
@@ -145,6 +178,7 @@ const getJobsV4Metadata = (adapter: DrizzleAdapter): JobsV4Metadata => {
     }),
     statsAutoIncrement:
       statsTable.columns.id?.type === 'integer' && Boolean(statsTable.columns.id.autoIncrement),
+    statsIDType: statsTable.columns.id.type,
     statsTableName,
   }
 }
@@ -176,9 +210,9 @@ const getSQLiteLogTableStatements = ({
    * Rebuild the jobs log table to migrate its parent-task columns and `input`
    * nullability. SQLite cannot alter either constraint in place.
    */
-  const { columns, idType, jobsTableName, logTableName } = metadata
+  const { columns, jobsTableName, logTableName } = metadata
   const temporaryTableName = `__new_${logTableName}`
-  const parentIDType = idType === 'serial' ? 'integer' : 'text'
+  const parentIDType = getSQLiteIDType(metadata.logParentIDType)
   const parentColumns = includeParent
     ? [
         `${quoteIdentifier(columns.parentTaskSlug)} text`,
@@ -227,6 +261,74 @@ const getSQLiteLogTableStatements = ({
     `CREATE INDEX ${quoteIdentifier(metadata.logParentIndexName)} ON ${quoteIdentifier(logTableName)} ("_parent_id")`,
     'PRAGMA foreign_keys=ON',
   ]
+}
+
+/**
+ * Applies the schema changes made by `migrateJobsV4` to the project's previous snapshot. The next
+ * generated migration then starts from the migrated jobs tables and still picks up every other
+ * schema change the upgrade brings.
+ */
+const applyJobsV4ToSnapshot = ({
+  current,
+  metadata,
+  previous,
+}: {
+  current: Snapshot
+  metadata: JobsV4Metadata
+  previous: Snapshot
+}): Snapshot => {
+  const snapshot = structuredClone(previous)
+  const getTable = ({ name, source }: { name: string; source: Snapshot }) => {
+    const entry = Object.entries(source.tables).find(([, table]) => table.name === name)
+
+    if (!entry) {
+      throw new Error(`Could not find the ${name} table in the migration snapshot`)
+    }
+
+    return entry
+  }
+  const [, jobsTable] = getTable({ name: metadata.jobsTableName, source: snapshot })
+  const [, logTable] = getTable({ name: metadata.logTableName, source: snapshot })
+  const [, currentJobsTable] = getTable({ name: metadata.jobsTableName, source: current })
+  const [, currentLogTable] = getTable({ name: metadata.logTableName, source: current })
+  const [statsTableKey, currentStatsTable] = getTable({
+    name: metadata.statsTableName,
+    source: current,
+  })
+  const { columns } = metadata
+
+  delete jobsTable.columns.processing
+  delete jobsTable.indexes[metadata.processingIndexName]
+
+  for (const column of [
+    columns.concurrencyKey,
+    columns.meta,
+    columns.processingToken,
+    columns.processingUntil,
+  ]) {
+    jobsTable.columns[column] = currentJobsTable.columns[column]
+  }
+
+  for (const index of [metadata.concurrencyKeyIndexName, metadata.processingUntilIndexName]) {
+    jobsTable.indexes[index] = currentJobsTable.indexes[index]
+  }
+
+  for (const column of [columns.input, columns.parentTaskID, columns.parentTaskSlug]) {
+    logTable.columns[column] = currentLogTable.columns[column]
+  }
+
+  snapshot.tables[statsTableKey] = currentStatsTable
+
+  for (const [key, enumType] of Object.entries(current.enums ?? {})) {
+    if (enumType.name === metadata.parentTaskSlugEnumName) {
+      snapshot.enums = { ...snapshot.enums, [key]: enumType }
+    }
+  }
+
+  snapshot.prevId = previous.id
+  snapshot.id = randomUUID()
+
+  return snapshot
 }
 
 export async function migrateJobsV4(args: MigrationArgs): Promise<void> {
@@ -322,7 +424,7 @@ export async function migrateJobsV4(args: MigrationArgs): Promise<void> {
   const sqliteJobsTable = quoteIdentifier(metadata.jobsTableName)
   const sqliteLogTable = quoteIdentifier(metadata.logTableName)
   const sqliteStatsTable = quoteIdentifier(metadata.statsTableName)
-  const sqliteStatsID = `${metadata.idType === 'serial' ? 'integer' : 'text'} PRIMARY KEY NOT NULL${metadata.statsAutoIncrement ? ' AUTOINCREMENT' : ''}`
+  const sqliteStatsID = `${getSQLiteIDType(metadata.statsIDType)} PRIMARY KEY NOT NULL${metadata.statsAutoIncrement ? ' AUTOINCREMENT' : ''}`
 
   const upSQLite = [
     /** Add the processing lease fields used to safely claim and renew jobs. */
@@ -389,6 +491,14 @@ export async function migrateJobsV4(args: MigrationArgs): Promise<void> {
   }
 }
 
+/**
+ * Builds the `jobs-v4` predefined migration for a SQL adapter.
+ *
+ * It also writes a schema snapshot: the project's previous snapshot with only the jobs changes
+ * applied, so the next generated migration still picks up every other schema change the upgrade
+ * brings. A project that has only ever used `push` has no previous snapshot, so the current schema
+ * is written instead.
+ */
 export const buildDynamicPredefinedJobsV4Migration = ({
   dialect,
   packageName,
@@ -398,7 +508,16 @@ export const buildDynamicPredefinedJobsV4Migration = ({
 }): DynamicMigrationTemplate => {
   return async ({ filePath, payload }) => {
     const adapter = payload.db as DrizzleAdapter
-    const snapshot = await adapter.requireDrizzleKit().generateDrizzleJson(adapter.schema)
+    const { generateDrizzleJson } = await adapter.requireDrizzleKit()
+    const currentSnapshot = (await generateDrizzleJson(adapter.schema)) as unknown as Snapshot
+    const previousSnapshot = await readLatestSnapshot<Snapshot>({ adapter })
+    const snapshot = previousSnapshot
+      ? applyJobsV4ToSnapshot({
+          current: currentSnapshot,
+          metadata: getJobsV4Metadata(adapter),
+          previous: previousSnapshot,
+        })
+      : currentSnapshot
     const sharedArgs = `
     db,
     dialect: ${JSON.stringify(dialect)},
