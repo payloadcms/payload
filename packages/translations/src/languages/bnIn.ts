@@ -1,5 +1,6 @@
-import { enTranslations } from './en.js'
 import type { DefaultTranslationsObject, Language } from '../types.js'
+
+import { enTranslations } from './en.js'
 
 export const bnInTranslations: DefaultTranslationsObject = {
   authentication: {

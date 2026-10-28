@@ -1,5 +1,4 @@
 import type { MergeResult } from '../merge.js'
-
 import type { MergeProgress } from '../types.js'
 
 /**

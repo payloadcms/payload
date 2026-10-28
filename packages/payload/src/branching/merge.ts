@@ -1,7 +1,5 @@
 import type { BlockedChange } from './preflight.js'
-
 import type { MergeableChange, MergeWarning } from './types.js'
-
 import type { BranchMergeValidationError } from './validation.js'
 
 export type MergeResult = {

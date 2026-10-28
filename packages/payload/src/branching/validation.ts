@@ -1,5 +1,4 @@
 import type { PayloadRequest } from '../types/index.js'
-
 import type { EffectiveOperation } from './effectiveOperations.js'
 
 export type BranchMergeValidationCandidate = {

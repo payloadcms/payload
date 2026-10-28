@@ -1,5 +1,4 @@
 import type { PayloadRequest } from '../types/index.js'
-
 import type { BranchOperation, SanitizedBranchingConfig } from './types.js'
 
 import { branchesCollectionSlug, MAIN_BRANCH } from './types.js'
