@@ -1,4 +1,4 @@
-import type { FlattenedField } from "payload";
+import type { FlattenedField } from 'payload'
 
 /**
  * Whether the list view can group documents by the field at `path`.
@@ -12,27 +12,24 @@ export const canGroupByFieldPath = ({
   fields,
   path,
 }: {
-  fields: FlattenedField[];
-  path: string;
+  fields: FlattenedField[]
+  path: string
 }): boolean => {
-  let currentFields: FlattenedField[] | undefined = fields;
+  let currentFields: FlattenedField[] | undefined = fields
 
-  for (const segment of path.replace(/^-/, "").split(".")) {
-    const field: FlattenedField | undefined = currentFields?.find(
-      (each) => each.name === segment,
-    );
+  for (const segment of path.replace(/^-/, '').split('.')) {
+    const field: FlattenedField | undefined = currentFields?.find((each) => each.name === segment)
 
     if (!field) {
-      return true;
+      return true
     }
 
-    if (field.type === "array" || field.type === "blocks") {
-      return false;
+    if (field.type === 'array' || field.type === 'blocks') {
+      return false
     }
 
-    currentFields =
-      "flattenedFields" in field ? field.flattenedFields : undefined;
+    currentFields = 'flattenedFields' in field ? field.flattenedFields : undefined
   }
 
-  return true;
-};
+  return true
+}
