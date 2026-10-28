@@ -256,3 +256,32 @@ function getSchemaPaths(versionFields: VersionField[]): string[] {
     ]
   })
 }
+
+describe('version diff fields', () => {
+  it('should omit API-hidden fields while retaining admin-hidden fields', () => {
+    const fields = [
+      { name: 'secret', type: 'text', hidden: true },
+      { name: 'visible', type: 'text', admin: { hidden: true } },
+    ]
+    const result = buildVersionFields({
+      fields,
+      clientSchemaMap: new Map([['posts.visible', fields[1]]]),
+      customDiffComponents: {},
+      entitySlug: 'posts',
+      fieldsPermissions: true,
+      i18n: { t: (key: string) => key },
+      modifiedOnly: false,
+      parentIndexPath: '',
+      parentIsLocalized: false,
+      parentPath: '',
+      parentSchemaPath: '',
+      req: { payload: { config: {}, logger: { error: vi.fn() } } },
+      selectedLocales: [],
+      versionFromSiblingData: { visible: 'before' },
+      versionToSiblingData: { visible: 'after' },
+    } as unknown as BuildVersionFieldsArgs)
+
+    expect(result.versionFields).toHaveLength(1)
+    expect(result.versionFields[0].field.path).toBe('visible')
+  })
+})
