@@ -1,10 +1,11 @@
 import type { UploadTransformer } from '../transformers/types.js'
 
-import { isFocalPointKey } from './focalPoint.js'
+import { isClaimRequired } from './transformKeyClaims.js'
 
 /**
- * Checks that every saved `_transforms` key is claimed by exactly one stage that will run, so a
- * rebuild never saves a key that nothing applies or that two stages apply.
+ * Checks that no saved `_transforms` key is claimed by two stages that will run, and that every
+ * key that needs a claim (see `isClaimRequired`) has one. So a rebuild never saves a built-in key
+ * that nothing applies, or any key that two stages apply.
  */
 export function getTransformKeyCoverageErrors({
   claims,
@@ -19,7 +20,7 @@ export function getTransformKeyCoverageErrors({
   for (const key of Object.keys(transforms ?? {})) {
     const claimers = [...claims].filter(([, keys]) => keys.includes(key))
 
-    if (claimers.length === 0 && !isFocalPointKey(key)) {
+    if (claimers.length === 0 && isClaimRequired(key)) {
       errors.push({
         message: 'No configured transformer applies this key.',
         path: `_transforms.${key}`,
