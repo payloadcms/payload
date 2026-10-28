@@ -3,6 +3,7 @@ import type { AuthenticatedUser, UserSession } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { defaultRefreshTokenExpiration } from '../collections/config/defaults.js'
+import { appendNonTrashedFilter } from '../utilities/appendNonTrashedFilter.js'
 import { assertNoValidationWrite } from '../utilities/assertNoValidationWrite.js'
 import { getFieldsToSign } from './getFieldsToSign.js'
 import { jwtSign } from './jwt.js'
@@ -32,7 +33,8 @@ type RefreshTokenContents = {
  * The refresh operation uses it when it gets a refresh token. Plugins can also call it directly,
  * since it needs nothing but the refresh token.
  *
- * @returns `null` when the refresh token is invalid, its session ended, or it was reused
+ * @returns `null` when the refresh token is invalid, its session ended, it was reused, or its user
+ * is in the trash or not verified
  */
 export const redeemRefreshToken = async ({
   collection,
@@ -62,11 +64,16 @@ export const redeemRefreshToken = async ({
   const user = await req.payload.db.findOne<AuthenticatedUser>({
     collection: collectionConfig.slug,
     req,
-    where: { id: { equals: contents.userID } },
+    where: appendNonTrashedFilter({
+      enableTrash: Boolean(collectionConfig.trash),
+      trash: false,
+      where: { id: { equals: contents.userID } },
+    }),
   })
   const session = removeExpiredSessions(user?.sessions ?? []).find(({ id }) => id === contents.sid)
 
-  if (!user || !session) {
+  // The JWT strategy wouldn't accept a token for a user who isn't verified
+  if (!user || !session || (collectionConfig.auth.verify && !user._verified)) {
     return null
   }
 
