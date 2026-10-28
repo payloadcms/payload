@@ -28,7 +28,7 @@ Measure computed foreground/background colors in that mode for the actual enable
 
 In the audit, use ordered `test.describe` groups named with the WCAG criterion and level. A test belongs under its primary criterion; note secondary affected criteria in the handoff rather than duplicating the scenario. Consolidate tests only when one arrangement, interaction, and assertion genuinely exercises every covered case.
 
-Use the existing a11y Payload config and real UI components. Keep scenario-specific setup in its spec; reusable helpers live in `test/a11y/helpers.ts`.
+Prefer the existing a11y Payload config and real UI components. If it cannot render the feature, assess with an existing feature fixture and report which config was used. Keep regression placement consistent with the canonical suites; extend their setup only when needed. Scenario-specific setup stays in its spec; reusable helpers live in `test/a11y/helpers.ts`.
 
 ## Regression quality
 
@@ -70,4 +70,4 @@ pnpm test:a11y:audit --workers=1
 pnpm test:a11y:screen-reader
 ```
 
-Run affected tests while developing. Before handoff, run the complete relevant suite and report any check that could not run in the current environment.
+Run affected tests during development. Before handoff, verify changed behavior and affected shared consumers with a sufficient focused set or suite. Report scope and unavailable checks; repeat unrelated suites only with a reason.
