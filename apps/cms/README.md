@@ -40,6 +40,7 @@ uses to test templates.
 | `src/endpoints/appClients.ts`              | VgemsAI app signups as clients, and their Account screen (see "The VgemsAI app")       |
 | `src/endpoints/appChat.ts`                 | Saves VgemsAI app chats, deletes app accounts' data (see "The VgemsAI app")            |
 | `src/collections/ChatSessions.ts`, `…/ChatMessages.ts` | VgemsAI app conversations, deleted after 90 days (see "Chats")             |
+| `src/app/(frontend)/ios-app/`, `scripts/import-legal-pages.ts` | The VgemsAI app's Privacy Policy and Terms of Use as web pages (see "Privacy policy and terms of use") |
 | `src/vigor/`, `src/locales.ts`             | Content of the Vigor website in four languages (see "Vigor website")                   |
 | `scripts/import-vigor.ts`                  | Copies the Vigor website's current content into the CMS (see "Vigor website")          |
 | `src/timezones.ts`                         | Time zones offered for event dates                                                     |
@@ -56,6 +57,7 @@ uses to test templates.
 | `deploy/locate-events.sh`                  | Looks up the coordinates of events on the server                                       |
 | `deploy/import-personal-website.sh`        | Runs the personal website import on the server                                         |
 | `deploy/import-vigor.sh`                   | Runs the Vigor website import on the server                                            |
+| `deploy/import-legal-pages.sh`             | Adds the VgemsAI app's Privacy Policy and Terms of Use on the server                   |
 | `deploy/mongodb/create-payload-user.js`    | Creates the MongoDB user for Payload (run on the DB EC2)                               |
 | `scripts/pack-local-packages.mjs`          | Packs `packages/*` into tarballs for the app (used by the Dockerfile)                  |
 
@@ -854,7 +856,8 @@ Every question asked in the app's chat, and every answer, is kept under **VgemsA
 Both are read-only in the admin panel (the app writes them), and can be deleted. **MongoDB deletes each message 90
 days after it was sent, and each session 90 days after its last message** (a TTL index on `expiresAt`, created when
 the CMS starts; MongoDB checks about once a minute). To keep chats longer or shorter, change
-`CHAT_RETENTION_DAYS` in `src/collections/chatRetention.ts`; it applies to messages saved from then on.
+`CHAT_RETENTION_DAYS` in `src/collections/chatRetention.ts`; it applies to messages saved from then on. The app's
+Privacy Policy says 90 days too, so change it there as well (see "Privacy policy and terms of use").
 
 awoz-api uses these endpoints (`src/endpoints/appChat.ts`); it decides who is asking from the app login, and a
 session only ever answers to the account that started it:
@@ -865,6 +868,39 @@ session only ever answers to the account that started it:
 | `GET /api/app/chat-sessions/to-summarize` | Sessions quiet for 30 minutes whose summary is missing or older than their last message |
 | `POST /api/app/chat-sessions/:id/summary` | Saves the AI's summary and topics |
 | `POST /api/app/accounts/delete` | When someone deletes their app account: deletes their chats, and their client while it's still an untouched app lead (status Lead, source "VgemsAI app"); otherwise the client stays, unlinked, with a note |
+
+#### Privacy policy and terms of use
+
+The app's **Privacy Policy** and **Terms of Use** are ordinary pages under **Pages**, for the iOS app, with the
+slugs `privacy-policy` and `terms-of-use`. Once published, the CMS shows them as web pages, which is the address to
+give App Store Connect (App Privacy → Privacy Policy URL; App Information → License Agreement or the description for
+the terms) and the address the app opens from Settings and the signup screen:
+
+```
+SERVER_URL/ios-app/privacy-policy
+SERVER_URL/ios-app/terms-of-use
+```
+
+Every published page of the iOS app is shown this way (`src/app/(frontend)/ios-app/[slug]/page.tsx`), so the app can
+get more of them, e.g. a support page, without changes here. Drafts aren't shown, and an edit shows up as soon as
+it's published. The page's version history (**Versions** tab) keeps every earlier text.
+
+**Adding them (once).** The first version of both texts is in `scripts/legal/`. Add them as drafts, then open each
+one under **Pages**, replace every `[ADD CONTACT EMAIL]` and `[ADD STATE]` (the US state whose laws govern the
+terms), and press **Publish**:
+
+```bash
+cd ~/payloadcms/apps/cms
+./deploy/import-legal-pages.sh --dry-run   # only show what would happen
+./deploy/import-legal-pages.sh
+```
+
+A page that the iOS app already has with the same slug is skipped, so running it again keeps your edits.
+
+**Updating them.** Edit the page under **Pages** and change the "Last updated" date at the top, then publish. When the
+app starts collecting something new or uses a new service (another AI provider, analytics, payments), update the
+Privacy Policy and the answers in App Store Connect → App Privacy before releasing that version. Tell users in the
+app or by email before significant changes take effect, as both texts promise.
 
 ## Two-factor authentication
 
