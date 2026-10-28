@@ -17,6 +17,12 @@ For every affected component or flow:
 4. Read [testing.md](references/testing.md) and select evidence based on the observable outcome.
 5. Exercise the changed behavior in every relevant state. Accessibility checks must cover the production component and integration context, not a simplified substitute.
 
+## Payload contrast mode and remediation scope
+
+Check feature contrast with enhanced contrast mode enabled: verify `html[data-enhanced-contrast]` and test the relevant light/dark theme and interaction state. Enabling the mode does not replace the other accessibility checks. Use the existing mode-switching tests rather than rechecking the shared setting for each feature; see [contrast setup](references/testing.md#payload-enhanced-contrast-setup). Continue checking ordinary-mode integration and behavior, but do not use an ordinary-mode contrast measurement alone to replace the shared palette in a feature.
+
+If a measurement still fails, first verify the intended component variant, semantic tokens, inherited theme and loaded shared styles. Fix incorrect feature usage or custom styling at its source. A reproducible defect inherited from a shared component belongs to that component's owner; resolve it within authorized scope or report it with the exact mode/state and evidence. Do not add a feature-local color override merely to make a contrast check pass. Record the tested mode explicitly; enhanced-mode evidence does not establish contrast conformance for ordinary mode.
+
 ## Test placement
 
 - Put general browser regressions in `test/a11y/e2e.spec.ts`, grouped by admin workflow with keyboard/focus assertions and axe checkpoints.
