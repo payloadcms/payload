@@ -51,6 +51,33 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
     await rm(contractMediaDir, { force: true, recursive: true })
   })
 
+  // Each case runs the pipeline once and gives the fields the working doc must have.
+  const pipelineRuns = [
+    {
+      name: 'a create',
+      expected: { alt: 'note', details: { caption: 'A note' } },
+      run: async ({ payload }: { payload: Payload }) => {
+        await createNote({ contractStages: {}, payload })
+      },
+    },
+    {
+      name: 'an update, with the stored fields merged in',
+      expected: { alt: 'changed', details: { caption: 'A note' } },
+      run: async ({ payload }: { payload: Payload }) => {
+        const created = await createNote({ payload })
+        resetContractCalls()
+
+        await payload.update({
+          id: created.id,
+          collection: contractMediaSlug,
+          context: { contractStages: {} },
+          data: { alt: 'changed' },
+          file: textFile('replacement'),
+        })
+      },
+    },
+  ]
+
   test.describe('transformFile arguments', () => {
     test('should pass the upload as source and originalSource', async ({ payload }) => {
       await createNote({ contractStages: {}, payload })
@@ -62,99 +89,36 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
       })
     })
 
-    test('should pass the incoming document as doc, and a frozen copy as originalDoc', async ({
-      payload,
-    }) => {
-      await createNote({ contractStages: {}, payload })
+    test.for(pipelineRuns)(
+      'should pass the working doc, and a frozen copy of it as originalDoc, on $name',
+      async ({ expected, run }, { payload }) => {
+        await run({ payload })
 
-      const call = contractCalls.transformFile[0]
+        const call = contractCalls.transformFile[0]
 
-      expect(call?.docAtStart).toMatchObject({ alt: 'note', details: { caption: 'A note' } })
-      expect(call?.originalDoc).toMatchObject({ alt: 'note', details: { caption: 'A note' } })
-      expect(call?.isDocFrozen).toBe(false)
-      expect(call?.isOriginalDocFrozen).toBe(true)
-    })
-
-    test('should pass the stored document merged with the update as doc', async ({ payload }) => {
-      const created = await createNote({ payload })
-
-      await payload.update({
-        id: created.id,
-        collection: contractMediaSlug,
-        context: { contractStages: {} },
-        data: { alt: 'changed' },
-        file: textFile('replacement'),
-      })
-
-      expect(contractCalls.transformFile[0]?.docAtStart).toMatchObject({
-        id: created.id,
-        alt: 'changed',
-        details: { caption: 'A note' },
-      })
-    })
-
-    test('should pass doc at pipeline start as a frozen originalDoc on an update', async ({
-      payload,
-    }) => {
-      const created = await createNote({ payload })
-      resetContractCalls()
-
-      await payload.update({
-        id: created.id,
-        collection: contractMediaSlug,
-        context: { contractStages: {} },
-        data: { alt: 'changed' },
-        file: textFile('replacement'),
-      })
-
-      const call = contractCalls.transformFile[0]
-
-      expect(call?.originalDoc).toEqual(call?.docAtStart)
-      expect(call?.originalDoc).toMatchObject({
-        id: created.id,
-        alt: 'changed',
-        details: { caption: 'A note' },
-      })
-      expect(call?.isOriginalDocFrozen).toBe(true)
-    })
-  })
-
-  test('should pass doc at pipeline start to canTransform as a frozen originalDoc on an update', async ({
-    payload,
-  }) => {
-    const created = await createNote({ payload })
-    resetContractCalls()
-
-    await payload.update({
-      id: created.id,
-      collection: contractMediaSlug,
-      context: { contractStages: {} },
-      data: { alt: 'changed' },
-      file: textFile('replacement'),
-    })
-
-    const call = contractCalls.canTransform.find(
-      ({ collectionSlug, operation }) =>
-        collectionSlug === contractMediaSlug && operation === 'upload',
+        expect(call?.docAtStart).toMatchObject(expected)
+        expect(call?.originalDoc).toEqual(call?.docAtStart)
+        expect(call?.isDocFrozen).toBe(false)
+        expect(call?.isOriginalDocFrozen).toBe(true)
+      },
     )
-
-    expect(call?.originalDoc).toEqual(call?.doc)
-    expect(call?.originalDoc).toMatchObject({ alt: 'changed', details: { caption: 'A note' } })
-    expect(Object.isFrozen(call?.originalDoc)).toBe(true)
   })
 
-  test('should pass doc and a frozen originalDoc to canTransform', async ({ payload }) => {
-    await createNote({ contractStages: {}, payload })
+  test.for(pipelineRuns)(
+    'should pass the working doc, and a frozen copy of it as originalDoc, to canTransform on $name',
+    async ({ expected, run }, { payload }) => {
+      await run({ payload })
 
-    const call = contractCalls.canTransform.find(
-      ({ collectionSlug, operation }) =>
-        collectionSlug === contractMediaSlug && operation === 'upload',
-    )
+      const call = contractCalls.canTransform.find(
+        ({ collectionSlug, operation }) =>
+          collectionSlug === contractMediaSlug && operation === 'upload',
+      )
 
-    expect(call?.doc).toMatchObject({ alt: 'note' })
-    expect(call?.originalDoc).toMatchObject({ alt: 'note' })
-    expect(Object.isFrozen(call?.originalDoc)).toBe(true)
-  })
+      expect(call?.doc).toMatchObject(expected)
+      expect(call?.originalDoc).toEqual(call?.doc)
+      expect(Object.isFrozen(call?.originalDoc)).toBe(true)
+    },
+  )
 
   test('should pass doc and a frozen originalDoc to handleRequest', async ({
     payload,
@@ -173,7 +137,9 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
   })
 
   test.describe('changing _transforms', () => {
-    test('should save a _transforms change', async ({ payload }) => {
+    test('should save a _transforms change after running beforeValidate and beforeChange hooks on it', async ({
+      payload,
+    }) => {
       const created = await createNote({
         contractStages: { first: setTransforms({ contractScore: 1 }) },
         payload,
@@ -181,22 +147,12 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
 
       const stored = await payload.findByID({ id: created.id, collection: contractMediaSlug })
 
-      expect(created._transforms).toEqual({ contractScore: 1 })
-      expect(stored._transforms).toEqual({ contractScore: 1 })
-    })
-
-    test('should run beforeValidate and beforeChange hooks on the _transforms change', async ({
-      payload,
-    }) => {
-      await createNote({
-        contractStages: { first: setTransforms({ contractScore: 1 }) },
-        payload,
-      })
-
       expect(contractHookCalls).toEqual([
         { _transforms: { contractScore: 1 }, hook: 'beforeValidate' },
         { _transforms: { contractScore: 1 }, hook: 'beforeChange' },
       ])
+      expect(created._transforms).toEqual({ contractScore: 1 })
+      expect(stored._transforms).toEqual({ contractScore: 1 })
     })
 
     test('should reject an invalid _transforms change and keep the stored document and file', async ({
