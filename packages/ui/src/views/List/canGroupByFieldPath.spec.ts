@@ -20,8 +20,21 @@ const fields = [
     name: 'layout',
     type: 'blocks',
   },
-  { name: 'category', type: 'relationship' },
+  { name: 'category', type: 'relationship', relationTo: 'categories' },
+  { name: 'related', type: 'relationship', relationTo: ['categories', 'posts'] },
 ] as unknown as FlattenedField[]
+
+const categoryFields = [
+  { name: 'title', type: 'text' },
+  {
+    name: 'links',
+    type: 'array',
+    flattenedFields: [{ name: 'label', type: 'text' }],
+  },
+] as unknown as FlattenedField[]
+
+const getRelatedFields = (collectionSlug: string) =>
+  collectionSlug === 'categories' ? categoryFields : undefined
 
 describe('canGroupByFieldPath', () => {
   it('allows top-level fields and fields inside groups', () => {
@@ -32,6 +45,19 @@ describe('canGroupByFieldPath', () => {
 
   it('allows paths through relationships (virtual fields)', () => {
     expect(canGroupByFieldPath({ fields, path: 'category.title' })).toBe(true)
+  })
+
+  it('rejects fields inside arrays of a related collection', () => {
+    expect(canGroupByFieldPath({ fields, getRelatedFields, path: 'category.title' })).toBe(true)
+    expect(canGroupByFieldPath({ fields, getRelatedFields, path: 'category.links.label' })).toBe(
+      false,
+    )
+  })
+
+  it('allows paths through polymorphic relationships, whose target is unknown', () => {
+    expect(canGroupByFieldPath({ fields, getRelatedFields, path: 'related.links.label' })).toBe(
+      true,
+    )
   })
 
   it('rejects fields inside arrays and blocks', () => {

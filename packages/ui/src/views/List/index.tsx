@@ -201,7 +201,11 @@ export const renderListView = async (
 
   if (
     query.groupBy &&
-    !canGroupByFieldPath({ fields: collectionConfig.flattenedFields, path: query.groupBy })
+    !canGroupByFieldPath({
+      fields: collectionConfig.flattenedFields,
+      getRelatedFields: (slug) => req.payload.collections[slug]?.config.flattenedFields,
+      path: query.groupBy,
+    })
   ) {
     query.groupBy = undefined
   }
