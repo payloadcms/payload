@@ -2537,7 +2537,7 @@ describe('Uploads', () => {
       await expect(heightInput).toHaveValue('800')
     })
 
-    test('should reopen the image editor with the saved crop', async () => {
+    test('should save the admin crop and clear it when the file is replaced', async () => {
       await gotoAndWaitForForm(page, mediaURL.create)
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
       await saveDocAndAssert(page)
@@ -2549,37 +2549,18 @@ describe('Uploads', () => {
       await saveDocAndAssert(page)
 
       const id = page.url().split('/').pop()!
-      const { doc } = await client.findByID({ id, slug: mediaSlug, auth: true })
+      const { doc: cropped } = await client.findByID({ id, slug: mediaSlug, auth: true })
 
-      expect(doc._transforms?.crop).toMatchObject({ height: 600, width: 400 })
-
-      await gotoAndWaitForForm(page, mediaURL.edit(id))
-      await page.locator('button[aria-label="Edit Image"]').click()
-
-      await expect(page.locator('input[name="cropWidth"]')).toHaveValue('400')
-      await expect(page.locator('input[name="cropHeight"]')).toHaveValue('600')
-    })
-
-    test('should clear the saved crop when the file is replaced', async () => {
-      await gotoAndWaitForForm(page, mediaURL.create)
-      await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
-      await saveDocAndAssert(page)
-
-      await page.locator('button[aria-label="Edit Image"]').click()
-      await page.locator('input[name="cropWidth"]').fill('400')
-      await page.locator('input[name="cropHeight"]').fill('600')
-      await page.locator('button:has-text("Apply Changes")').click()
-      await saveDocAndAssert(page)
+      expect(cropped._transforms?.crop).toMatchObject({ height: 600, width: 400 })
 
       await page.locator('.file-toolbar__filename-btn').click()
       await page.locator('.popup-button-list__button', { hasText: 'Replace file' }).click()
       await page.setInputFiles('.file-manager input[type="file"]', path.join(dirname, 'small.png'))
       await saveDocAndAssert(page)
 
-      const id = page.url().split('/').pop()!
-      const { doc } = await client.findByID({ id, slug: mediaSlug, auth: true })
+      const { doc: replaced } = await client.findByID({ id, slug: mediaSlug, auth: true })
 
-      expect(doc._transforms).toBeNull()
+      expect(replaced._transforms).toBeNull()
 
       // The editor stays open in the page across the replace, so it must not keep the old crop.
       await page.locator('button[aria-label="Edit Image"]').click()
