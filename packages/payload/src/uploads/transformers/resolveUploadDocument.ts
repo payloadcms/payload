@@ -5,6 +5,9 @@ import { Forbidden } from '../../errors/Forbidden.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 
 export type ResolvedUploadDocument = {
+  /** `false` when no default file is stored, so a request applies the saved `_transforms`. */
+  _stored?: boolean | null
+  _transforms?: null | Record<string, unknown>
   filename: string
   mimeType: string
   original?: { filename?: null | string; mimeType?: null | string } | null

@@ -3,13 +3,16 @@ import type { PayloadRequest } from '../../types/index.js'
 import type { ResolvedUploadDocument } from './resolveUploadDocument.js'
 import type { UploadTransformer } from './types.js'
 
+import { APIError } from '../../errors/APIError.js'
 import { Forbidden } from '../../errors/Forbidden.js'
 import { NotFound } from '../../errors/NotFound.js'
 import { TransformerContractError } from '../../errors/TransformerContractError.js'
 import { deepCopyObject } from '../../utilities/deepCopyObject.js'
 import { deepFreeze } from '../../utilities/deepFreeze.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { checkFileAccess } from '../checkFileAccess.js'
 import { retrieveFileResponse } from '../endpoints/getFile.js'
+import { getTransformKeyCoverageErrors } from '../transformState/getTransformKeyCoverageErrors.js'
 import { createLazySourceGetter } from './createLazySourceGetter.js'
 import { finalizeFileResponse } from './finalizeFileResponse.js'
 import { getSourceFileResponse } from './getSourceFileResponse.js'
@@ -21,8 +24,9 @@ import { withFileTransformAccessContext } from './withFileTransformAccessContext
  * Orchestrates a dynamic file request end to end: resolve the document, plan the
  * request-capable transformer pipeline from the requested file's authoritative
  * MIME type (the primary file or the matched image size), enforce
- * transform-aware read access, then run every eligible transformer in declaration
- * order against a lazily-fetched source. Called from `getFileHandler` only when at
+ * transform-aware read access, then run every eligible transformer against a lazily-fetched
+ * source: first the stages that apply the saved `_transforms` (only when no default file is
+ * stored), then the stages that apply the request, each phase in declaration order. Called from `getFileHandler` only when at
  * least one transformer is configured — the zero-transformer path never reaches
  * this function.
  */
@@ -100,20 +104,44 @@ export async function handleDynamicFileRequest({
   }
 
   try {
-    for (const transformer of pipeline) {
+    for (const { options, transformer } of pipeline) {
       const previousResponse = currentResponse
-      let handedOutResponse: Response | undefined
-      const handedOutBodyController = new AbortController()
-      const stageSource = createLazySourceGetter({
-        retrieve: async () => {
-          handedOutResponse = withAbortableBody({
-            response: currentResponse ?? (await source.get()),
-            signal: handedOutBodyController.signal,
-          })
-          handedOutBodyControllers.set(handedOutResponse, handedOutBodyController)
+      const handedOutResponses: Response[] = []
+      const createStageGetter = ({
+        getterName,
+        retrieve,
+      }: {
+        getterName: 'getOriginalFile' | 'getSourceFile'
+        retrieve: () => Promise<Response>
+      }) =>
+        createLazySourceGetter({
+          getterName,
+          retrieve: async () => {
+            const handedOutBodyController = new AbortController()
+            const handedOutResponse = withAbortableBody({
+              response: await retrieve(),
+              signal: handedOutBodyController.signal,
+            })
+            handedOutBodyControllers.set(handedOutResponse, handedOutBodyController)
+            handedOutResponses.push(handedOutResponse)
 
-          return handedOutResponse
-        },
+            return handedOutResponse
+          },
+        })
+      const stageSource = createStageGetter({
+        getterName: 'getSourceFile',
+        retrieve: async () => currentResponse ?? (await source.get()),
+      })
+      const stageOriginal = createStageGetter({
+        getterName: 'getOriginalFile',
+        retrieve: () =>
+          getSourceFileResponse({
+            collection,
+            document,
+            filename: document.original?.filename ?? document.filename,
+            prefix,
+            req,
+          }),
       })
 
       const result = await transformer.handleRequest!({
@@ -121,16 +149,16 @@ export async function handleDynamicFileRequest({
         doc: documentSnapshot,
         documentID: document.id,
         filename: requestedFile.filename,
+        getOriginalFile: stageOriginal.get,
         getSourceFile: stageSource.get,
         mimeType: requestedFile.mimeType,
+        options,
         originalDoc: documentSnapshot,
         req,
       })
 
       if (result.response) {
-        if (handedOutResponse && result.response !== handedOutResponse) {
-          await discardResponse(handedOutResponse)
-        } else if (!handedOutResponse && previousResponse && result.response !== previousResponse) {
+        if (!stageSource.wasCalled() && previousResponse && result.response !== previousResponse) {
           await discardResponse(previousResponse)
         }
 
@@ -139,6 +167,12 @@ export async function handleDynamicFileRequest({
         throw new TransformerContractError(
           'A transformer that consumes its source must return a response.',
         )
+      }
+
+      for (const handedOutResponse of handedOutResponses) {
+        if (handedOutResponse !== result.response) {
+          await discardResponse(handedOutResponse)
+        }
       }
 
       if (result.status === 'complete') {
@@ -209,6 +243,13 @@ async function cancelUnusedBody(response: Response | undefined): Promise<void> {
   }
 }
 
+/** One planned `handleRequest` call. A transformer planned in both phases is two stages. */
+type RequestStage = { options: unknown; transformer: UploadTransformer }
+
+/**
+ * Plans the saved-state phase, when no default file is stored, then the request phase. Fails
+ * before any file is read when a saved key that must run has no saved-state stage, or two.
+ */
 async function planRequestPipeline({
   collection,
   document,
@@ -219,22 +260,51 @@ async function planRequestPipeline({
   document: ResolvedUploadDocument
   filename: string
   req: PayloadRequest
-}): Promise<UploadTransformer[]> {
+}): Promise<RequestStage[]> {
   const documentSnapshot = deepFreeze(deepCopyObject(document))
+  const purposes =
+    document._stored === false
+      ? (['persisted-default', 'request-override'] as const)
+      : (['request-override'] as const)
+  const pipeline: RequestStage[] = []
 
-  const { pipeline } = await planTransformerPipeline({
-    args: {
-      collectionSlug: collection.config.slug,
-      doc: documentSnapshot,
-      documentID: document.id,
-      mimeType: getRequestedFile({ document, filename }).mimeType,
-      operation: 'request',
-      originalDoc: documentSnapshot,
-      req,
-    },
-    capability: 'handleRequest',
-    transformers: req.payload.config.upload.transformers,
-  })
+  for (const purpose of purposes) {
+    const plan = await planTransformerPipeline({
+      args: {
+        collectionSlug: collection.config.slug,
+        doc: documentSnapshot,
+        documentID: document.id,
+        mimeType: getRequestedFile({ document, filename }).mimeType,
+        operation: 'request',
+        originalDoc: documentSnapshot,
+        purpose,
+        req,
+      },
+      capability: 'handleRequest',
+      transformers: req.payload.config.upload.transformers,
+    })
+
+    if (purpose === 'persisted-default') {
+      const errors = getTransformKeyCoverageErrors({
+        claims: plan.claims,
+        transforms: document._transforms,
+      })
+
+      if (errors.length > 0) {
+        throw new APIError(
+          `Cannot apply the saved transforms. ${errors.map(({ message, path }) => `${path}: ${message}`).join(' ')}`,
+          httpStatus.INTERNAL_SERVER_ERROR,
+        )
+      }
+    }
+
+    pipeline.push(
+      ...plan.pipeline.map((transformer) => ({
+        options: plan.options.get(transformer),
+        transformer,
+      })),
+    )
+  }
 
   return pipeline
 }
@@ -271,7 +341,7 @@ async function authorizeDocument({
   prefix?: string
   req: PayloadRequest
   resolvedDocument: ResolvedUploadDocument
-}): Promise<{ document: ResolvedUploadDocument; pipeline: UploadTransformer[] }> {
+}): Promise<{ document: ResolvedUploadDocument; pipeline: RequestStage[] }> {
   const accessResults = new Map<boolean, Promise<AccessResult>>()
 
   const checkAccess = ({ isTransform }: { isTransform: boolean }): Promise<AccessResult> => {
