@@ -254,7 +254,7 @@ const { refreshedToken, refreshToken: nextRefreshToken } = await res.json()
 
 Refresh tokens don't expire on their own. They work as long as their session, which lasts `expiration` from the last refresh instead of `tokenExpiration`. The token itself still expires after `tokenExpiration`.
 
-Each refresh token works once, so store the new one after every refresh. If a used refresh token comes back later, Payload treats it as copied and logs out its session. Logging out ends refresh tokens too. They require `useSessions`, and aren't returned with `removeTokenFromResponses`.
+Each refresh token is meant to be used once, so store the new one after every refresh. For 30 seconds after a refresh, older refresh tokens still work, so clients that refresh twice at once stay logged in. If a used refresh token comes back later, Payload treats it as copied and logs out its session. Logging out ends refresh tokens too. They require `useSessions`, and aren't returned with `removeTokenFromResponses`.
 
 ## Operations
 

@@ -299,7 +299,9 @@ export interface IncomingAuthType {
   /**
    * Lets clients stay logged in after their token expires. Logins also return a refresh token,
    * which the refresh operation trades for a new token and a new refresh token. Each refresh token
-   * works once: when a used one comes back, its session is logged out. Requires `useSessions`.
+   * is meant to be used once. Older ones still work for 30 seconds after a refresh, for clients that
+   * refresh twice at once. When a used one comes back later, its session is logged out. Requires
+   * `useSessions`.
    *
    * Refresh tokens don't expire on their own. They work as long as their login session, which lasts
    * `expiration` from the last refresh instead of `tokenExpiration`.
