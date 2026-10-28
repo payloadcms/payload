@@ -141,7 +141,7 @@ transformFile: async ({ doc, source }) => {
 
 Payload processes the file before the `beforeValidate` and `beforeChange` hooks and field validation, so those run on the final `_transforms` value. If validation fails, the operation fails and the stored document and files stay unchanged.
 
-With `sharpTransformer`, the pipeline runs once for the main file and once for each variant. Only the main-file run can change `doc`. The variant runs get a frozen copy of the result of the main-file run.
+With `sharpTransformer`, the pipeline runs once for the main file and once for each variant. Only the main-file run can change `doc`. The variant runs get a frozen copy of the result of the main-file run. A variant run that changes its copy throws a `TypeError`, the upload fails, and nothing is saved.
 
 ### The `FileSource` type
 

@@ -11,6 +11,7 @@ import type { PreparedUploadTransformation } from './transformers/uploadTransfor
 import type { FileData, FileSizes, FileToSave, UploadEdits } from './types.js'
 
 import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
+import { TransformerContractError } from '../errors/TransformerContractError.js'
 import { deepCopyObject } from '../utilities/deepCopyObject.js'
 import { deepFreeze } from '../utilities/deepFreeze.js'
 import { formatAdminURL } from '../utilities/formatAdminURL.js'
@@ -839,6 +840,12 @@ const processUpload = async <T>({
     }
   } catch (err) {
     req.payload.logger.error(err)
+
+    // A broken transformer contract is a bug in the transformer, so it keeps its own message.
+    if (err instanceof TransformerContractError) {
+      throw err
+    }
+
     throw new FileUploadError(req.t)
   }
 

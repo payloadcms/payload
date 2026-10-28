@@ -3,6 +3,7 @@ import type { Payload, TransformFileArgs } from 'payload'
 
 import { readFile, rm } from 'fs/promises'
 import path from 'path'
+import { TransformerContractError } from 'payload'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
@@ -261,7 +262,7 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
     ])('should reject a change to $name and save nothing', async ({ change }, { payload }) => {
       await expect(
         createNote({ contractStages: { first: ({ doc }) => void change(doc) }, payload }),
-      ).rejects.toThrow()
+      ).rejects.toThrow(TransformerContractError)
 
       const { totalDocs } = await payload.count({ collection: contractMediaSlug })
 

@@ -481,10 +481,17 @@ export const updateOperation = async <
           message: error instanceof Error ? error.message : 'Unknown error',
         })
       } finally {
-        if (documentTempFilePath) {
-          await fs.rm(documentTempFilePath, { force: true }).catch((error) => {
-            req.payload.logger.error({ err: error, msg: 'Failed to remove temp file copy' })
-          })
+        // generateFileData can replace the document's file with a full client upload download.
+        // That temp file is only on the document's request, so the operation cleanup misses it.
+        const downloadedTempFilePath =
+          documentReq !== req ? documentReq.file?.tempFilePath : undefined
+
+        for (const tempFilePath of new Set([documentTempFilePath, downloadedTempFilePath])) {
+          if (tempFilePath) {
+            await fs.rm(tempFilePath, { force: true }).catch((error) => {
+              req.payload.logger.error({ err: error, msg: 'Failed to remove temp file copy' })
+            })
+          }
         }
       }
       return null
