@@ -199,9 +199,11 @@ export interface Config {
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {
     menu: Menu;
+    'workflow-menu': WorkflowMenu;
   };
   globalsSelect: {
     menu: MenuSelect<false> | MenuSelect<true>;
+    'workflow-menu': WorkflowMenuSelect<false> | WorkflowMenuSelect<true>;
   };
   locale: 'en' | 'es';
   widgets: {
@@ -318,6 +320,8 @@ export interface Post {
    * A subtitle field to test focus indicators in the admin UI, helps us detect exiting out of rich text editor properly.
    */
   subtitle?: string | null;
+  showConditionalNote?: boolean | null;
+  conditionalNote?: string | null;
   accessibilitySelect: 'one' | 'two';
   accessibilitySortableSelect?: ('one' | 'two')[] | null;
   accessibilityDisabledSelect?: ('one' | 'two') | null;
@@ -704,6 +708,8 @@ export interface PayloadFoldersSelect<T extends boolean = true> {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   subtitle?: T;
+  showConditionalNote?: T;
+  conditionalNote?: T;
   accessibilitySelect?: T;
   accessibilitySortableSelect?: T;
   accessibilityDisabledSelect?: T;
@@ -973,6 +979,24 @@ export interface Menu {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workflow-menu".
+ */
+export interface WorkflowMenu {
+  id: string;
+  globalText?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "menu_select".
  */
 export interface MenuSelect<T extends boolean = true> {
@@ -983,6 +1007,18 @@ export interface MenuSelect<T extends boolean = true> {
         title?: T;
         description?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workflow-menu_select".
+ */
+export interface WorkflowMenuSelect<T extends boolean = true> {
+  globalText?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;

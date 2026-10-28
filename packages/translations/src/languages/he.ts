@@ -694,6 +694,10 @@ export const heTranslations: DefaultTranslationsObject = {
     type: 'סוג',
     aboutToPublishSelection: 'אתה עומד לפרסם את כל ה{{label}} שנבחרו. האם אתה בטוח?',
     aboutToRestore: 'אתה עומד לשחזר את מסמך {{label}} למצב שהיה בו בתאריך {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'שחזר את התוכן מתאריך {{versionDate}} כטיוטה. התוכן שפורסם יישאר ללא שינוי עד לפרסום מתוך העורך.',
+    aboutToRestoreAsDraftAllLocales:
+      'שחזר את התוכן מתאריך {{versionDate}} כטיוטה בכל השפות. התוכן שפורסם יישאר ללא שינוי עד לפרסום מתוך העורך.',
     aboutToRestoreGlobal:
       'אתה עומד לשחזר את {{label}} הגלובלי למצב שהיה בו בתאריך {{versionDate}}.',
     aboutToRevertToPublished: 'אתה עומד להחזיר את השינויים במסמך הזה לגרסה שפורסמה. האם אתה בטוח?',

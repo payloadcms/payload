@@ -4,7 +4,7 @@ import type { CollectionPreferences, ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL, formatFilesize } from 'payload/shared'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useId, useRef, useState } from 'react'
 
 import type { DocumentLayout } from '../../elements/LayoutToggle/index.js'
 
@@ -74,6 +74,9 @@ export function DefaultListView(props: ListViewClientProps) {
     Table: InitialTable,
     viewType,
   } = props
+
+  const instanceID = useId()
+  const wherePanelID = `list-controls-where-${instanceID}`
 
   const [Table] = useControllableState(InitialTable)
   const [layout, setLayout] = useState<DocumentLayout>(documentLayout ?? 'table')
@@ -349,16 +352,19 @@ export function DefaultListView(props: ListViewClientProps) {
               renderedFilters={renderedFilters}
               resolvedFilterOptions={resolvedFilterOptions}
               viewType={viewType}
+              wherePanelID={wherePanelID}
             />
             {isWhereOpen && (
-              <ListWhereBuilder
-                collectionPluralLabel={collectionConfig?.labels?.plural}
-                collectionSlug={collectionSlug}
-                fields={collectionConfig?.fields}
-                onEmptyRemove={() => setIsWhereOpen(false)}
-                renderedFilters={renderedFilters}
-                resolvedFilterOptions={resolvedFilterOptions}
-              />
+              <div id={wherePanelID}>
+                <ListWhereBuilder
+                  collectionPluralLabel={collectionConfig?.labels?.plural}
+                  collectionSlug={collectionSlug}
+                  fields={collectionConfig?.fields}
+                  onEmptyRemove={() => setIsWhereOpen(false)}
+                  renderedFilters={renderedFilters}
+                  resolvedFilterOptions={resolvedFilterOptions}
+                />
+              </div>
             )}
             <div aria-atomic="true" className={`${baseClass}__search-status sr-only`} role="status">
               {isSearchSettled && resultsAnnouncement && (

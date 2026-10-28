@@ -81,7 +81,7 @@ async function readLatestSnapshot({
     return undefined
   }
 
-  const { generateDrizzleJson, upSnapshot } = adapter.requireDrizzleKit()
+  const { generateDrizzleJson, upSnapshot } = await adapter.requireDrizzleKit()
   const currentVersion = (await generateDrizzleJson(adapter.schema)).version
   const snapshot = JSON.parse(readFileSync(`${dir}/${latestSnapshotFile}`, 'utf8')) as Snapshot
 

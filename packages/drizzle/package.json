@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/drizzle",
-  "version": "4.0.0-beta.4",
+  "version": "4.0.0-beta.5",
   "description": "A library of shared functions used by different payload database adapters",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
@@ -82,6 +82,7 @@
     "@libsql/client": "0.14.0",
     "@types/pg": "8.20.0",
     "@types/to-snake-case": "1.0.0",
+    "esbuild": "0.27.1",
     "payload": "workspace:*"
   },
   "peerDependencies": {
