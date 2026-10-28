@@ -96,6 +96,32 @@ describe('createJSONQuery (postgres)', () => {
         'jsonb_path_exists("posts"."data", \'$.createdAt[*] ? (@ >= "2026-01-01T00:00:00.000Z")\')',
       )
     })
+
+    it('normalizes REST numeric string thresholds into JSONPath numbers for range operators', () => {
+      const gtResult = createJSONQuery({
+        column: postsTable.data,
+        operator: 'greater_than',
+        pathSegments: ['data', 'price'],
+        value: '49',
+      })
+      expect(gtResult).toBe('jsonb_path_exists("posts"."data", \'$.price[*] ? (@ > 49)\')')
+
+      const ltResult = createJSONQuery({
+        column: postsTable.data,
+        operator: 'less_than',
+        pathSegments: ['data', 'viewCount'],
+        value: '100',
+      })
+      expect(ltResult).toBe('jsonb_path_exists("posts"."data", \'$.viewCount[*] ? (@ < 100)\')')
+
+      const gteResult = createJSONQuery({
+        column: postsTable.data,
+        operator: 'greater_than_equal',
+        pathSegments: ['data', 'score'],
+        value: '49.99',
+      })
+      expect(gteResult).toBe('jsonb_path_exists("posts"."data", \'$.score[*] ? (@ >= 49.99)\')')
+    })
   })
 
   describe('existing operators compatibility', () => {

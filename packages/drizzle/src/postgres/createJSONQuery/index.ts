@@ -20,6 +20,8 @@ const operatorMap: Record<string, string> = {
   not_like: '!like_regex',
 }
 
+const RANGE_OPERATORS = ['greater_than', 'greater_than_equal', 'less_than', 'less_than_equal']
+
 const sanitizeValue = (value: unknown, operator?: string): string => {
   if (value === null) {
     return `null`
@@ -35,6 +37,15 @@ const sanitizeValue = (value: unknown, operator?: string): string => {
 
   if (!SAFE_STRING_REGEX.test(value)) {
     throw new APIError(`${value} is not allowed as a JSON query value`, 400)
+  }
+
+  if (
+    operator &&
+    RANGE_OPERATORS.includes(operator) &&
+    value.trim() !== '' &&
+    Number.isFinite(Number(value))
+  ) {
+    return `${Number(value)}`
   }
 
   const escaped = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
