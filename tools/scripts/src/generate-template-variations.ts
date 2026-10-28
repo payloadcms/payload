@@ -228,6 +228,20 @@ async function main() {
       workspace: false,
       targetDeployment: 'cloudflare',
     },
+    {
+      name: 'with-cloudflare-d1-tanstack',
+      db: 'd1-sqlite',
+      dirname: 'with-cloudflare-d1-tanstack',
+      sharp: false,
+      skipConfig: true,
+      skipDockerCompose: true,
+      skipReadme: true,
+      storage: 'r2Storage',
+      configureConfig: false,
+      workspace: false,
+      base: 'none',
+      targetDeployment: 'cloudflare',
+    },
   ]
 
   // If template is set, only generate that template. The plugin template is not a
@@ -334,9 +348,14 @@ async function main() {
      * and dangerouslyAllowAllBuilds can't conflict with its onlyBuiltDependencies. verifyDepsBeforeRun
      * stops v11 re-installing before the later `pnpm generate:*`/`build` runs.
      */
+    const standaloneWorkspacePath = path.join(destDir, 'pnpm-workspace.yaml')
+    const standaloneWorkspaceContents = !workspace
+      ? await fs.readFile(standaloneWorkspacePath, 'utf8').catch(() => undefined)
+      : undefined
+
     if (!workspace) {
       await fs.writeFile(
-        path.join(destDir, 'pnpm-workspace.yaml'),
+        standaloneWorkspacePath,
         `verifyDepsBeforeRun: false\ndangerouslyAllowAllBuilds: true\n`,
       )
     }
@@ -406,9 +425,13 @@ async function main() {
       execSyncSafe(`pnpm build`, { cwd: destDir })
     }
 
-    // Remove the transient workspace root so it isn't committed into the generated template.
+    // Restore a template's standalone workspace settings, or remove the transient workspace root.
     if (!workspace) {
-      await fs.rm(path.join(destDir, 'pnpm-workspace.yaml'), { force: true })
+      if (standaloneWorkspaceContents === undefined) {
+        await fs.rm(standaloneWorkspacePath, { force: true })
+      } else {
+        await fs.writeFile(standaloneWorkspacePath, standaloneWorkspaceContents)
+      }
     }
 
     // TODO: Email?

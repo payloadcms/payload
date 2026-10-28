@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "my-app",
+  "main": "@tanstack/react-start/server-entry",
+  "compatibility_date": "2026-10-23",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true,
+  },
+  "d1_databases": [
+    {
+      "binding": "D1",
+      "database_name": "my-app",
+      "database_id": "DATABASE_ID",
+    },
+  ],
+  "r2_buckets": [
+    {
+      "binding": "R2",
+      "bucket_name": "my-app",
+    },
+  ],
+}
