@@ -665,11 +665,9 @@ export const thTranslations: DefaultTranslationsObject = {
     uploadFileMismatch: 'ไฟล์ที่เลือกไม่ตรงกับการอัปโหลดที่ถูกขัดจังหวะ',
     uploadingFile: 'กำลังอัปโหลด {{filename}}',
     uploadingFileProgress: 'กำลังอัปโหลด {{filename}}: {{percent}}%',
-    uploadInProgressLeaveWarning:
-      'การอัปโหลดยังดำเนินการอยู่ หากออกจากหน้านี้ตอนนี้ การอัปโหลดจะถูกขัดจังหวะ',
+    uploadInProgressLeaveWarning: 'การอัปโหลดยังดำเนินการอยู่ หากออกจากหน้านี้ตอนนี้ การอัปโหลดจะถูกขัดจังหวะ',
     uploadInterrupted: 'การอัปโหลด {{filename}} ถูกขัดจังหวะ',
-    uploadInterruptedWillSave:
-      'การอัปโหลด {{filename}} ถูกขัดจังหวะ เอกสารจะถูกบันทึกเมื่ออัปโหลดเสร็จ',
+    uploadInterruptedWillSave: 'การอัปโหลด {{filename}} ถูกขัดจังหวะ เอกสารจะถูกบันทึกเมื่ออัปโหลดเสร็จ',
     uploadReadyToFinishSaving: 'อัปโหลด {{filename}} เสร็จแล้ว เปิดแบบฟอร์มเพื่อบันทึกให้เสร็จ',
     uploadSavedInBackground: 'อัปโหลดเสร็จแล้วและบันทึกเอกสารเรียบร้อย',
     uploadStorageRejectedSegments:

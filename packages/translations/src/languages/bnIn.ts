@@ -694,8 +694,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
       '{{filename}}-এর আপলোড বাধাপ্রাপ্ত হয়েছে। এটি শেষ হলে ডকুমেন্টটি সংরক্ষিত হবে।',
     uploadReadyToFinishSaving: '{{filename}} আপলোড সম্পূর্ণ হয়েছে। সংরক্ষণ শেষ করতে ফর্মটি খুলুন।',
     uploadSavedInBackground: 'আপলোড সম্পূর্ণ হয়েছে এবং ডকুমেন্টটি সংরক্ষিত হয়েছে।',
-    uploadStorageRejectedSegments:
-      'স্টোরেজ কোনো আপলোড অংশ গ্রহণ করেনি। বাকেটের CORS নীতি যাচাই করুন।',
+    uploadStorageRejectedSegments: 'স্টোরেজ কোনো আপলোড অংশ গ্রহণ করেনি। বাকেটের CORS নীতি যাচাই করুন।',
     width: 'প্রস্থ',
   },
   validation: {

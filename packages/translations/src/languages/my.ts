@@ -664,8 +664,7 @@ export const myTranslations: DefaultTranslationsObject = {
     renameFile: 'ဖိုင်အမည်ပြောင်းရန်',
     replaceFile: 'ဖိုင်ကို ပြန်လည်အစားထိုးပါ',
     resumingFile: '{{filename}} ကို ဆက်လက်လုပ်ဆောင်နေသည်',
-    savingInBackground:
-      'အပ်လုဒ်သည် နောက်ခံတွင် ပြီးဆုံးမည်ဖြစ်ပြီး ထိုအချိန်တွင် စာရွက်စာတမ်းကို သိမ်းဆည်းပါမည်။',
+    savingInBackground: 'အပ်လုဒ်သည် နောက်ခံတွင် ပြီးဆုံးမည်ဖြစ်ပြီး ထိုအချိန်တွင် စာရွက်စာတမ်းကို သိမ်းဆည်းပါမည်။',
     selectCollectionToBrowse: 'စုစည်းမှု တစ်ခုခုကို ရွေးချယ်ပါ။',
     selectFile: 'ဖိုင်ရွေးပါ။',
     setCropArea: 'စပြန်းနယ်မြေထားပါ',
@@ -675,16 +674,13 @@ export const myTranslations: DefaultTranslationsObject = {
     uploadFileMismatch: 'ရွေးချယ်ထားသော ဖိုင်သည် ကြားဖြတ်ခံရသော အပ်လုဒ်နှင့် မကိုက်ညီပါ။',
     uploadingFile: '{{filename}} ကို အပ်လုဒ်လုပ်နေသည်',
     uploadingFileProgress: '{{filename}} ကို အပ်လုဒ်လုပ်နေသည်: {{percent}}%',
-    uploadInProgressLeaveWarning:
-      'အပ်လုဒ်တစ်ခု ဆက်လက်လုပ်ဆောင်နေဆဲဖြစ်သည်။ ယခုထွက်ခွာပါက ၎င်းကို ကြားဖြတ်ပါမည်။',
+    uploadInProgressLeaveWarning: 'အပ်လုဒ်တစ်ခု ဆက်လက်လုပ်ဆောင်နေဆဲဖြစ်သည်။ ယခုထွက်ခွာပါက ၎င်းကို ကြားဖြတ်ပါမည်။',
     uploadInterrupted: '{{filename}} ၏ အပ်လုဒ်ကို ကြားဖြတ်ခံရသည်။',
     uploadInterruptedWillSave:
       '{{filename}} ၏ အပ်လုဒ်ကို ကြားဖြတ်ခံရသည်။ ပြီးဆုံးသည့်အခါ စာရွက်စာတမ်းကို သိမ်းဆည်းပါမည်။',
-    uploadReadyToFinishSaving:
-      '{{filename}} အပ်လုဒ် ပြီးဆုံးပါပြီ။ သိမ်းဆည်းခြင်းကို ပြီးဆုံးရန် ဖောင်ကို ဖွင့်ပါ။',
+    uploadReadyToFinishSaving: '{{filename}} အပ်လုဒ် ပြီးဆုံးပါပြီ။ သိမ်းဆည်းခြင်းကို ပြီးဆုံးရန် ဖောင်ကို ဖွင့်ပါ။',
     uploadSavedInBackground: 'အပ်လုဒ် ပြီးဆုံးပြီး စာရွက်စာတမ်းကို သိမ်းဆည်းပြီးပါပြီ။',
-    uploadStorageRejectedSegments:
-      'သိုလှောင်မှုသည် အပ်လုဒ်အပိုင်းများကို လက်မခံခဲ့ပါ။ bucket ၏ CORS မူဝါဒကို စစ်ဆေးပါ။',
+    uploadStorageRejectedSegments: 'သိုလှောင်မှုသည် အပ်လုဒ်အပိုင်းများကို လက်မခံခဲ့ပါ။ bucket ၏ CORS မူဝါဒကို စစ်ဆေးပါ။',
     width: 'အကျယ်',
   },
   validation: {

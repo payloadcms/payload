@@ -685,10 +685,8 @@ export const taTranslations: DefaultTranslationsObject = {
     uploadInProgressLeaveWarning:
       'ஒரு பதிவேற்றம் இன்னும் நடந்துகொண்டிருக்கிறது. இப்போது வெளியேறினால் அது தடைபடும்.',
     uploadInterrupted: '{{filename}} பதிவேற்றம் தடைபட்டது.',
-    uploadInterruptedWillSave:
-      '{{filename}} பதிவேற்றம் தடைபட்டது. அது முடிந்ததும் ஆவணம் சேமிக்கப்படும்.',
-    uploadReadyToFinishSaving:
-      '{{filename}} பதிவேற்றம் முடிந்தது. சேமிப்பை முடிக்க படிவத்தைத் திறக்கவும்.',
+    uploadInterruptedWillSave: '{{filename}} பதிவேற்றம் தடைபட்டது. அது முடிந்ததும் ஆவணம் சேமிக்கப்படும்.',
+    uploadReadyToFinishSaving: '{{filename}} பதிவேற்றம் முடிந்தது. சேமிப்பை முடிக்க படிவத்தைத் திறக்கவும்.',
     uploadSavedInBackground: 'பதிவேற்றம் முடிந்தது, ஆவணம் சேமிக்கப்பட்டது.',
     uploadStorageRejectedSegments:
       'சேமிப்பகம் எந்தப் பதிவேற்றப் பகுதியையும் ஏற்கவில்லை. bucket-இன் CORS கொள்கையைச் சரிபார்க்கவும்.',
