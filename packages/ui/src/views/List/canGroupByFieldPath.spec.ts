@@ -54,9 +54,10 @@ describe('canGroupByFieldPath', () => {
     )
   })
 
-  it('allows paths through polymorphic relationships, whose target is unknown', () => {
+  it('allows a polymorphic relationship itself but rejects paths past it', () => {
+    expect(canGroupByFieldPath({ fields, getRelatedFields, path: 'related' })).toBe(true)
     expect(canGroupByFieldPath({ fields, getRelatedFields, path: 'related.links.label' })).toBe(
-      true,
+      false,
     )
   })
 

@@ -9,7 +9,8 @@ import type { FlattenedField } from 'payload'
  * preferences, so the list view ignores it instead of failing to render.
  *
  * A path can also run through a relationship or upload field into the related collection
- * (`category.links.label`), so `getRelatedFields` lets the walk continue there.
+ * (`category.links.label`), so `getRelatedFields` lets the walk continue there. A path that goes
+ * on past a polymorphic relationship is rejected: its target collection is not known.
  */
 export const canGroupByFieldPath = ({
   fields,
@@ -22,7 +23,9 @@ export const canGroupByFieldPath = ({
 }): boolean => {
   let currentFields: FlattenedField[] | undefined = fields
 
-  for (const segment of path.replace(/^-/, '').split('.')) {
+  const segments = path.replace(/^-/, '').split('.')
+
+  for (const [index, segment] of segments.entries()) {
     const field: FlattenedField | undefined = currentFields?.find((each) => each.name === segment)
 
     if (!field) {
@@ -34,8 +37,13 @@ export const canGroupByFieldPath = ({
     }
 
     if (field.type === 'relationship' || field.type === 'upload') {
-      currentFields =
-        typeof field.relationTo === 'string' ? getRelatedFields?.(field.relationTo) : undefined
+      // A polymorphic relationship can be grouped by itself, but the field after it depends on
+      // the related document's collection, which the query cannot resolve.
+      if (typeof field.relationTo !== 'string') {
+        return index === segments.length - 1
+      }
+
+      currentFields = getRelatedFields?.(field.relationTo)
       continue
     }
 
