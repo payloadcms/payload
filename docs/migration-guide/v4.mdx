@@ -2150,6 +2150,15 @@ Upload collections now store `original` metadata and a `prefix` and `_objectKey`
 
 **Postgres and SQLite:** after updating, run `payload migrate:create`, check that it adds these columns to each upload collection table and its versions table, then run `payload migrate`. Existing rows keep `null` values until their next write.
 
+### Upload collections save crop and focal point edits in `_transforms`
+
+Upload collections now have a `_transforms` JSON field that saves the crop and focal point, so an edit can start again from the retained original. See [Saved crop and focal point](../upload/overview#saved-crop-and-focal-point).
+
+- `_transforms` is a reserved field name on upload collections. If an upload collection defines its own field named `_transforms`, rename it and move its data before you update.
+- `focalX` and `focalY` stay available and always match `_transforms.focalPoint`. For a document saved before `_transforms` existed, the first write copies its focal point into `_transforms`.
+
+**Postgres and SQLite:** run `payload migrate:create`, check that it adds a `_transforms` column to each upload collection table and its versions table, then run `payload migrate`. Existing rows keep `null` until their next write.
+
 ### File size types have been consolidated ([#16593](https://github.com/payloadcms/payload/pull/16593))
 
 `FileSizeImproved` has been merged into `FileSize`. The `url`, `width`, `height`, `filesize`, `mimeType`, and `filename` properties now accept `null` directly on `FileSize`, matching what the database stores for sizes that were not generated.

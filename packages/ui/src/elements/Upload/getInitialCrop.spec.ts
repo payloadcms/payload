@@ -24,6 +24,15 @@ describe('getInitialCrop', () => {
     expect(crop).toBe(unsaved)
   })
 
+  it('should not open the editor with the saved crop after a new file is selected', () => {
+    const crop = getInitialCrop({
+      data: { _transforms: { crop: { height: 1200, width: 2000, x: 400, y: 450 } }, original },
+      hasSelectedFile: true,
+    })
+
+    expect(crop).toBeUndefined()
+  })
+
   it('should return nothing when no crop is saved', () => {
     expect(getInitialCrop({ data: { _transforms: null, original } })).toBeUndefined()
   })

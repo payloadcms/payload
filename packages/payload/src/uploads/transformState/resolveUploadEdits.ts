@@ -97,17 +97,15 @@ export async function resolveUploadEdits({
     (isNumber(current?.focalX) && isNumber(current?.focalY)
       ? { x: current.focalX, y: current.focalY }
       : centerFocalPoint)
-  const hasLegacyFocalWrite = Boolean(
-    queryEdits?.focalPoint || (isNumber(incoming.focalX) && isNumber(incoming.focalY)),
-  )
   const next = resolveNextState({
     adminCrop: queryEdits?.crop,
     currentFocalPoint,
-    // Query values arrive as strings.
-    focalPointWrite:
-      hasLegacyFocalWrite && parsedEdits?.focalPoint
-        ? { x: Number(parsedEdits.focalPoint.x), y: Number(parsedEdits.focalPoint.y) }
-        : undefined,
+    focalPointWrite: getFocalPointWrite({
+      current,
+      currentFocalPoint,
+      incoming,
+      queryFocalPoint: queryEdits?.focalPoint,
+    }),
     isLegacyDocument: !previous && !hasNewFile && operation === 'update',
     original,
     previous,
@@ -117,12 +115,14 @@ export async function resolveUploadEdits({
   const nextFocalPoint =
     next?.focalPoint ?? (previous?.focalPoint ? centerFocalPoint : currentFocalPoint)
   const hasFocalPointChange = !isDeepStrictEqual(nextFocalPoint, currentFocalPoint)
+  // `focalX`, `focalY` and the pipeline use whole numbers; `_transforms` keeps the exact value.
+  const roundedFocalPoint = { x: Math.round(nextFocalPoint.x), y: Math.round(nextFocalPoint.y) }
 
   const uploadEdits = toPipelineEdits({
     hasFocalPointChange,
     hasNewFile,
     next,
-    nextFocalPoint,
+    nextFocalPoint: roundedFocalPoint,
     original,
     parsedEdits,
     previous,
@@ -131,7 +131,7 @@ export async function resolveUploadEdits({
   const applyTransformState = <T>(fileData: T): T => ({
     ...fileData,
     ...(focalPointEnabled && (next?.focalPoint || hasFocalPointChange)
-      ? { focalX: Math.round(nextFocalPoint.x), focalY: Math.round(nextFocalPoint.y) }
+      ? { focalX: roundedFocalPoint.x, focalY: roundedFocalPoint.y }
       : {}),
     _transforms: next,
   })
@@ -244,6 +244,39 @@ export function toPipelineEdits({
   }
 
   return edits
+}
+
+/**
+ * The focal point written through the query or through `focalX`/`focalY`. Each of `focalX` and
+ * `focalY` can be sent alone. The admin sends back the stored, rounded values on every save, so a
+ * value equal to the stored one is not a write and the exact saved value is kept.
+ */
+function getFocalPointWrite({
+  current,
+  currentFocalPoint,
+  incoming,
+  queryFocalPoint,
+}: {
+  current?: Document
+  currentFocalPoint: FocalPoint
+  incoming: Document
+  queryFocalPoint?: FocalPoint
+}): FocalPoint | undefined {
+  if (queryFocalPoint) {
+    // Query values arrive as strings.
+    return { x: Number(queryFocalPoint.x), y: Number(queryFocalPoint.y) }
+  }
+
+  const x =
+    isNumber(incoming.focalX) && incoming.focalX !== current?.focalX ? incoming.focalX : undefined
+  const y =
+    isNumber(incoming.focalY) && incoming.focalY !== current?.focalY ? incoming.focalY : undefined
+
+  if (x === undefined && y === undefined) {
+    return undefined
+  }
+
+  return { x: x ?? currentFocalPoint.x, y: y ?? currentFocalPoint.y }
 }
 
 /** The original's size: the new file, the retained original, or the main file of an older upload. */

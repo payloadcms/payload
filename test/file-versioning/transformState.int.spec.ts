@@ -358,6 +358,48 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     expect(updated).toMatchObject({ focalX: 10, focalY: 90 })
   })
 
+  test('should save focalX when it is sent without focalY', async ({ payload }) => {
+    const created = await createImage({ payload, _transforms: { focalPoint: { x: 10, y: 90 } } })
+
+    const updated = await payload.update({
+      id: created.id,
+      collection: transformedMediaSlug,
+      data: { focalX: 30 },
+    })
+
+    expect(updated).toMatchObject({ focalX: 30, focalY: 90 })
+    expect(updated._transforms).toEqual({ focalPoint: { x: 30, y: 90 } })
+  })
+
+  test('should save a focal point of 0 sent through focalX', async ({ payload }) => {
+    const created = await createImage({ payload, _transforms: { focalPoint: { x: 10, y: 90 } } })
+
+    const updated = await payload.update({
+      id: created.id,
+      collection: transformedMediaSlug,
+      data: { focalX: 0, focalY: 90 },
+    })
+
+    expect(updated).toMatchObject({ focalX: 0, focalY: 90 })
+    expect(updated._transforms).toEqual({ focalPoint: { x: 0, y: 90 } })
+  })
+
+  test('should keep a fractional focal point when the rounded focalX and focalY are sent back', async ({
+    payload,
+  }) => {
+    const created = await createImage({ payload, _transforms: { focalPoint: { x: 33.3, y: 50 } } })
+
+    // The admin sends the stored, rounded focalX and focalY again on every save.
+    const updated = await payload.update({
+      id: created.id,
+      collection: transformedMediaSlug,
+      data: { alt: 'renamed', focalX: 33, focalY: 50 },
+    })
+
+    expect(updated).toMatchObject({ focalX: 33, focalY: 50 })
+    expect(updated._transforms).toEqual({ focalPoint: { x: 33.3, y: 50 } })
+  })
+
   test('should use the transform state focal point when focalX and focalY disagree', async ({
     payload,
   }) => {
