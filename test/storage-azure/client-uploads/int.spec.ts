@@ -4,8 +4,10 @@ import type { Payload, UploadInstructions } from 'payload'
 
 import { BlobServiceClient, BlockBlobClient } from '@azure/storage-blob'
 import { readFileSync } from 'node:fs'
-import { readFile } from 'node:fs/promises'
+import { readdir, readFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import path from 'path'
+import * as qs from 'qs-esm'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 import { expect, vi } from 'vitest'
@@ -493,6 +495,45 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
       const stored = await restClient.GET(`/${mediaHeaderOnlySlug}/file/note.txt`)
 
       expect(await stored.text()).toBe('CLIENT TEXT')
+    })
+
+    test('removes the downloaded temp file of every document in a bulk update', async ({
+      payload,
+      restClient,
+    }) => {
+      const listClientUploadTempFiles = async () =>
+        (await readdir(tmpdir())).filter((name) => name.startsWith('payload-client-upload-'))
+      const ids: (number | string)[] = []
+
+      for (const name of ['first.txt', 'second.txt']) {
+        const doc = await payload.create({
+          collection: mediaHeaderOnlySlug,
+          data: {},
+          file: { name, data: Buffer.from('old'), mimetype: 'text/plain', size: 3 },
+          overrideAccess: true,
+        })
+        ids.push(doc.id)
+        createdIds.push(doc.id)
+      }
+
+      const form = await stageAzureClientUpload({
+        collectionSlug: mediaHeaderOnlySlug,
+        file: Buffer.from('replacement'),
+        filename: 'replacement.txt',
+        mimeType: 'text/plain',
+        restClient,
+      })
+      const before = await listClientUploadTempFiles()
+
+      const updateRes = await restClient.PATCH(
+        `/${mediaHeaderOnlySlug}${qs.stringify({ where: { id: { in: ids } } }, { addQueryPrefix: true })}`,
+        { body: form },
+      )
+      const { docs, errors } = await updateRes.json()
+
+      expect(errors).toEqual([])
+      expect(docs).toHaveLength(2)
+      expect(await listClientUploadTempFiles()).toEqual(before)
     })
 
     test('creates a document from a client-uploaded image via the real Azure handler', async ({
