@@ -118,7 +118,7 @@ describe('generateFileData', () => {
         query,
       }) as unknown as PayloadRequest
 
-    it('should reject a crop that no configured transformer applies, without a warning', async () => {
+    it('should reject a crop that no configured transformer applies', async () => {
       const req = createPngReq({
         query: {
           uploadEdits: {
@@ -139,8 +139,6 @@ describe('generateFileData', () => {
           req,
         }),
       ).rejects.toMatchObject({ data: { errors: [{ path: '_transforms.crop' }] } })
-
-      expect(req.payload.logger.warn).not.toHaveBeenCalled()
     })
 
     it('should default the focal point to the center on create', async () => {

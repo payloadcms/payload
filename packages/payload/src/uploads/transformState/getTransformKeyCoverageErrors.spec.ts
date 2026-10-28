@@ -7,7 +7,7 @@ import { getTransformKeyCoverageErrors } from './getTransformKeyCoverageErrors.j
 const makeStage = (slug: string): UploadTransformer => ({ mimeTypes: ['*/*'], slug })
 
 describe('getTransformKeyCoverageErrors', () => {
-  it('should return no errors when there is nothing to run', () => {
+  it('should return no errors when no keys are saved', () => {
     const errors = getTransformKeyCoverageErrors({ claims: new Map(), transforms: null })
 
     expect(errors).toEqual([])
