@@ -2580,6 +2580,12 @@ describe('Uploads', () => {
       const { doc } = await client.findByID({ id, slug: mediaSlug, auth: true })
 
       expect(doc._transforms).toBeNull()
+
+      // The editor stays open in the page across the replace, so it must not keep the old crop.
+      await page.locator('button[aria-label="Edit Image"]').click()
+
+      await expect(page.locator('input[name="cropWidth"]')).toHaveValue('320')
+      await expect(page.locator('input[name="cropHeight"]')).toHaveValue('80')
     })
   })
 
