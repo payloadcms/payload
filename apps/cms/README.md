@@ -808,7 +808,8 @@ A wrong or missing key gets `401`; while `APP_API_KEY` is empty every `/api/app/
 #### Events
 
 `GET /api/app/events` returns events that aren't over yet and start within the next 12 months, soonest first, without
-cancelled ones. Each event has its name, type, description, start and end date with time zone, location
+cancelled ones. An end date without a time (00:00, as the import saves them) counts as the whole of that day, so an
+event stays listed, and shows as happening now in the app, until its last day is over. Each event has its name, type, description, start and end date with time zone, location
 (venue, booth, address, city, country and coordinates), organizer, website and status. **Clients, notes and
 attachments are never included.** The coordinates are `{ "latitude": 22.2829, "longitude": 114.1736,
 "precision": "venue" }`, where `precision` is `exact` (set by hand), `venue`, `address`, `city` or `country`,

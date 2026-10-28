@@ -18,8 +18,9 @@ const DAY_MS = 24 * 60 * 60 * 1000
  * (see src/hooks/locateEvent.ts), otherwise null. `precision` is `exact` (set by hand), `venue`,
  * `address`, `city` or `country`.
  * "Upcoming" means not over yet (still running, or starting later) and starting within the next 12
- * months. Cancelled events are left out. Soonest first, in the same `{ docs: [...] }` shape as
- * Payload's REST API.
+ * months. An end date without a time (00:00 in the event's time zone, as scripts/import-events.ts
+ * saves them) means the whole of that day. Cancelled events are left out. Soonest first, in the same
+ * `{ docs: [...] }` shape as Payload's REST API.
  */
 export const appEventsEndpoint: Endpoint = {
   handler: async (req) => {
@@ -40,7 +41,8 @@ export const appEventsEndpoint: Endpoint = {
         { startDate: { less_than: until.toISOString() } },
         {
           or: [
-            { endDate: { greater_than_equal: now.toISOString() } },
+            // A day early: an end date without a time lasts until the end of that day
+            { endDate: { greater_than_equal: new Date(now.getTime() - DAY_MS).toISOString() } },
             // Single-day events have no end date
             { startDate: { greater_than_equal: new Date(now.getTime() - DAY_MS).toISOString() } },
           ],
@@ -115,11 +117,34 @@ const appCoordinates = (location: Partial<Event['location']> | undefined) => {
   return { latitude, longitude, precision: !source || source === 'manual' ? 'exact' : source }
 }
 
-/** An event without an end date lasts one day */
+/**
+ * An event without an end date lasts one day, and one whose end date has no time (00:00 in its time
+ * zone) lasts until the end of that day.
+ */
 const isOver = ({ event, now }: { event: Partial<Event>; now: Date }) => {
   const end = event.endDate
     ? new Date(event.endDate)
     : new Date(new Date(event.startDate ?? 0).getTime() + DAY_MS)
 
+  if (event.endDate && isMidnight({ date: end, timeZone: event.endDate_tz })) {
+    end.setTime(end.getTime() + DAY_MS)
+  }
+
   return end < now
+}
+
+const isMidnight = ({ date, timeZone }: { date: Date; timeZone?: null | string }) => {
+  try {
+    const time = new Intl.DateTimeFormat('en-GB', {
+      hour: '2-digit',
+      hourCycle: 'h23',
+      minute: '2-digit',
+      timeZone: timeZone || 'UTC',
+    }).format(date)
+
+    return time === '00:00'
+  } catch {
+    // Unknown time zone
+    return false
+  }
 }
