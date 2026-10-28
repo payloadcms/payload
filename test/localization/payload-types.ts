@@ -1180,6 +1180,18 @@ export interface LocalizedWithinLocalized {
   myBlocks?: MyBlock[] | null;
   myGroup?: {
     shouldNotBeLocalized?: string | null;
+    rows?:
+      | {
+          text?: string | null;
+          children?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
   };
   createdBy?: {
     relationTo: 'users';
@@ -2242,6 +2254,18 @@ export interface LocalizedWithinLocalizedSelect<T extends boolean = true> {
     | T
     | {
         shouldNotBeLocalized?: T;
+        rows?:
+          | T
+          | {
+              text?: T;
+              children?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
       };
   createdBy?: T;
   updatedBy?: T;
