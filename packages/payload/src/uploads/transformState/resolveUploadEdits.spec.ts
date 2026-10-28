@@ -181,4 +181,18 @@ describe('resolveUploadEdits', () => {
 
     expect(applyTransformState({})._transforms).toStrictEqual({ custom: [1, null, 3] })
   })
+
+  it('should give the pipeline the rounded focal point that focalX and focalY store', async () => {
+    const { uploadEdits } = await resolveUploadEdits({
+      collectionSlug: 'media',
+      data: { focalX: 33, focalY: 50 },
+      focalPointEnabled: true,
+      operation: 'update',
+      originalDoc: { _transforms: { focalPoint: { x: 33.3, y: 50 } }, focalX: 33, focalY: 50 },
+      req: { query: {} } as unknown as PayloadRequest,
+    })
+
+    // An unrounded value differs from the sent focalX, which makes the pipeline reprocess the file.
+    expect(uploadEdits.focalPoint).toEqual({ x: 33, y: 50 })
+  })
 })

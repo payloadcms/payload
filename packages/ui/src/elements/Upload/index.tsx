@@ -332,7 +332,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
             fileName={value?.name || data?.filename}
             fileSrc={getEditorFileSrc({ data, fileSrc, hasSelectedFile: Boolean(value) })}
             imageCacheTag={imageCacheTag}
-            initialCrop={getInitialCrop({ data, uploadEdits })}
+            initialCrop={getInitialCrop({ data, hasSelectedFile: Boolean(value), uploadEdits })}
             initialFocalPoint={{
               x: uploadEdits?.focalPoint?.x || data?.focalX || 50,
               y: uploadEdits?.focalPoint?.y || data?.focalY || 50,
