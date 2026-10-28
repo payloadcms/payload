@@ -31,8 +31,6 @@ export function createS3Adapter({
   signedDownloads,
   useCompositePrefixes = false,
 }: CreateS3AdapterArgs): Adapter {
-  // Client uploads are on unless explicitly disabled with `clientUploads: false`.
-  const isClientUploadsEnabled = clientUploads !== false
   const clientUploadsAccess = typeof clientUploads === 'object' ? clientUploads.access : undefined
 
   const deleteStoredFile: DeleteFile = async ({ storageFilePath }) => {
@@ -61,7 +59,7 @@ export function createS3Adapter({
       }),
 
     uploadInstructions: {
-      enabled: isClientUploadsEnabled,
+      enabled: Boolean(clientUploads),
       generate: generateUploadInstructions({
         access: clientUploadsAccess,
         acl,

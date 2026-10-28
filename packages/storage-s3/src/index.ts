@@ -37,11 +37,8 @@ export type S3StorageOptions = {
   clientCacheKey?: string
 
   /**
-   * Upload directly from the browser to S3 instead of through Payload. Large files use resumable
-   * multipart upload sessions. Requires a bucket CORS rule that allows `PUT` from your Admin
-   * origin. Set to `false` to upload through Payload instead.
-   *
-   * @default true
+   * Upload directly to S3 instead of through Payload. Large files use resumable multipart upload
+   * sessions. You must allow CORS PUT requests from your website.
    */
   clientUploads?: ClientUploadsConfig
   /**
