@@ -38,6 +38,19 @@ describe('runMonorepoAudit', () => {
     expect(await runMonorepoAudit({ cwd: '/repo', run })).toEqual([])
   })
 
+  it('returns hits when the only advisory has no published patch', async () => {
+    const unpatched = JSON.stringify({
+      advisories: {
+        '1': { ...JSON.parse(advisoryJson).advisories['1'], patched_versions: null },
+      },
+    })
+    const run = runReturning({ code: 1, stderr: '', stdout: unpatched })
+
+    const hits = await runMonorepoAudit({ cwd: '/repo', run })
+
+    expect(hits.map((hit) => hit.advisory.patched_versions)).toEqual(['<0.0.0'])
+  })
+
   it('fails when pnpm audit exits non-zero without advisories (no false clean)', async () => {
     const run = runReturning({ code: 1, stderr: 'ERR_PNPM_AUDIT_NO_LOCKFILE', stdout: '' })
 
