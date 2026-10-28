@@ -50,11 +50,17 @@ export function createPrepareLegacyUpload({
         : undefined
 
     let originalDimensions: ProbedImageSize | undefined
+    // Dimensions as displayed. EXIF orientations 5-8 store the image sideways, and
+    // `transformSize` rotates it upright before resizing, so size decisions use these.
+    let displayDimensions: ProbedImageSize | undefined
 
     if (fileSupportsResize) {
       const originalMeta = await tryProbe(file, sharpDependency)
       if (originalMeta) {
         originalDimensions = { height: originalMeta.height, width: originalMeta.width }
+        displayDimensions = [5, 6, 7, 8].includes(originalMeta.orientation!)
+          ? { height: originalMeta.width, width: originalMeta.height }
+          : originalDimensions
       }
     }
 
@@ -92,7 +98,7 @@ export function createPrepareLegacyUpload({
     const focalPointEnabled = effectiveFocalPoint !== false
     const variants = collectionUpload.variants
 
-    if (canProcessAsImage && Array.isArray(variants) && originalDimensions) {
+    if (canProcessAsImage && Array.isArray(variants) && originalDimensions && displayDimensions) {
       const focalPoint: FocalPoint | undefined =
         focalPointEnabled && uploadEdits?.focalPoint
           ? {
@@ -106,7 +112,7 @@ export function createPrepareLegacyUpload({
         const fieldPath = `variants.${imageResizeConfig.name}` as const
 
         const resizeAction = getImageResizeAction({
-          dimensions: originalDimensions,
+          dimensions: displayDimensions,
           hasFocalPoint: Boolean(focalPoint),
           imageResizeConfig,
         })
