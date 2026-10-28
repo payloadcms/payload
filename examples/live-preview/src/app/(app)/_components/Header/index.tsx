@@ -14,6 +14,7 @@ export const Header = async () => {
   const mainMenu = await payload.findGlobal({
     slug: 'main-menu',
     depth: 1,
+    overrideAccess: true,
   })
 
   const { navItems } = mainMenu

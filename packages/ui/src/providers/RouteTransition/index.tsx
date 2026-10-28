@@ -18,8 +18,11 @@ import React, { startTransition, useCallback, useEffect, useOptimistic, useRef }
  * )
  */
 export const RouteTransitionProvider: React.FC<RouteTransitionProps> = ({ children }) => {
-  const [isTransitioning, setIsTransitioning] = useOptimistic(false)
+  const [isOptimisticallyTransitioning, setIsOptimisticallyTransitioning] = useOptimistic(false)
+  const [activeRouteTransitionHolds, setActiveRouteTransitionHolds] = React.useState(0)
+  const routeTransitionHolds = useRef(new Set<Promise<void>>())
   const [transitionProgress, setTransitionProgress] = React.useState<number>(0)
+  const isTransitioning = isOptimisticallyTransitioning || activeRouteTransitionHolds > 0
 
   const transitionProgressRef = useRef(transitionProgress)
 
@@ -60,21 +63,65 @@ export const RouteTransitionProvider: React.FC<RouteTransitionProps> = ({ childr
     }
   }, [isTransitioning, initiateProgress])
 
-  const startRouteTransition: StartRouteTransition = useCallback(
-    (callback?: () => void) => {
-      startTransition(() => {
-        setIsTransitioning(true)
+  const waitForHoldsToRelease = useCallback(async () => {
+    while (routeTransitionHolds.current.size > 0) {
+      await Promise.all(routeTransitionHolds.current)
+    }
+  }, [])
 
-        if (typeof callback === 'function') {
-          callback()
-        }
+  const startRouteTransition: StartRouteTransition = useCallback(
+    (callback?: () => unknown) => {
+      const runAction = async () => {
+        setIsOptimisticallyTransitioning(true)
+
+        await callback?.()
+        await waitForHoldsToRelease()
+      }
+
+      // React runs the scope synchronously but does not return its promise.
+      let action = Promise.resolve()
+
+      startTransition(() => {
+        action = runAction()
+        return action
       })
+
+      return action
     },
-    [setIsTransitioning],
+    [setIsOptimisticallyTransitioning, waitForHoldsToRelease],
   )
 
+  const holdRouteTransition = useCallback(() => {
+    let hasReleased = false
+    let resolveHold: () => void
+    const hold = new Promise<void>((resolve) => {
+      resolveHold = resolve
+    })
+
+    routeTransitionHolds.current.add(hold)
+    setActiveRouteTransitionHolds((count) => count + 1)
+
+    return () => {
+      if (hasReleased) {
+        return
+      }
+
+      hasReleased = true
+      routeTransitionHolds.current.delete(hold)
+      resolveHold()
+      setActiveRouteTransitionHolds((count) => Math.max(0, count - 1))
+    }
+  }, [])
+
   return (
-    <RouteTransitionContext value={{ isTransitioning, startRouteTransition, transitionProgress }}>
+    <RouteTransitionContext
+      value={{
+        holdRouteTransition,
+        isTransitioning,
+        startRouteTransition,
+        transitionProgress,
+      }}
+    >
       {children}
     </RouteTransitionContext>
   )
@@ -84,21 +131,23 @@ type RouteTransitionProps = {
   children: React.ReactNode
 }
 
-type StartRouteTransition = (callback?: () => void) => void
+type StartRouteTransition = (callback?: () => unknown) => Promise<void>
 
 type RouteTransitionContextValue = {
+  /** Keeps the transition active until the returned release function is called. */
+  holdRouteTransition: () => () => void
   isTransitioning: boolean
+  /** Resolves after the callback and active route transition holds complete. */
   startRouteTransition: StartRouteTransition
   transitionProgress: number
 }
 
 const RouteTransitionContext = React.createContext<RouteTransitionContextValue>({
+  holdRouteTransition: () => () => undefined,
   isTransitioning: false,
   // Default implementation: just call the callback directly (no transition animation)
-  startRouteTransition: (callback) => {
-    if (typeof callback === 'function') {
-      callback()
-    }
+  startRouteTransition: async (callback) => {
+    await callback?.()
   },
   transitionProgress: 0,
 })
@@ -117,7 +166,7 @@ const RouteTransitionContext = React.createContext<RouteTransitionContextValue>(
  *   const { startRouteTransition } = useRouteTransition()
  *
  *   const redirectSomewhere = useCallback(() => {
- *     startRouteTransition(() => router.push('/somewhere'))
+ *     void startRouteTransition(() => router.push('/somewhere'))
  *   }, [startRouteTransition, router])
  *
  *   // ...

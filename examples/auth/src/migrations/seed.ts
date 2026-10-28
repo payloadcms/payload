@@ -8,5 +8,6 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
       password: 'demo',
       roles: ['admin'],
     },
+    overrideAccess: true,
   })
 }

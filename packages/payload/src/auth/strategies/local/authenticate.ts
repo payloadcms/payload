@@ -3,31 +3,45 @@ import crypto from 'crypto'
 
 import type { TypeWithID } from '../../../collections/config/types.js'
 
+import { getPasswordHashParameters, isCurrentPasswordHash } from './generatePasswordSaltHash.js'
+
 type Doc = Record<string, unknown> & TypeWithID
+
+type AuthenticationResult = {
+  doc: Doc
+  shouldUpdatePasswordHash: boolean
+}
 
 type Args = {
   doc: Doc
   password: string
 }
 
-export const authenticateLocalStrategy = async ({ doc, password }: Args): Promise<Doc | null> => {
+export const authenticateLocalStrategy = async ({
+  doc,
+  password,
+}: Args): Promise<AuthenticationResult | null> => {
   try {
     const { hash, salt } = doc
 
     if (typeof salt === 'string' && typeof hash === 'string') {
-      const res = await new Promise<Doc | null>((resolve, reject) => {
-        crypto.pbkdf2(password, salt, 25000, 512, 'sha256', (e, hashBuffer) => {
+      const { hash: storedHash, iterations, keyLength } = getPasswordHashParameters(hash)
+      const res = await new Promise<AuthenticationResult | null>((resolve, reject) => {
+        crypto.pbkdf2(password, salt, iterations, keyLength, 'sha256', (e, hashBuffer) => {
           if (e) {
             reject(e)
           }
 
-          const storedHashBuffer = Buffer.from(hash, 'hex')
+          const storedHashBuffer = Buffer.from(storedHash, 'hex')
 
           if (
             hashBuffer.length === storedHashBuffer.length &&
             crypto.timingSafeEqual(hashBuffer, storedHashBuffer)
           ) {
-            resolve(doc)
+            resolve({
+              doc,
+              shouldUpdatePasswordHash: !isCurrentPasswordHash(hash),
+            })
           } else {
             reject(new Error('Invalid password'))
           }

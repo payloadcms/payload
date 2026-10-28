@@ -21,6 +21,11 @@ export const RouteCache: React.FC<{ cachingEnabled?: boolean; children: React.Re
 }) => {
   const pathname = usePathname()
   const router = useRouter()
+  const previousPathnameRef = useRef('')
+
+  const clearRouteCache = useCallback(() => {
+    router.refresh()
+  }, [router])
 
   /**
    * Next.js caches pages in memory in their {@link https://nextjs.org/docs/app/guides/caching#client-side-router-cache Client-side Router Cache},
@@ -29,33 +34,58 @@ export const RouteCache: React.FC<{ cachingEnabled?: boolean; children: React.Re
    * The workaround is to force a refresh when navigating via the browser controls.
    * This should be removed if/when Next.js supports this natively.
    */
-  const clearAfterPathnameChange = useRef(false)
-
-  const clearRouteCache = useCallback(() => {
-    router.refresh()
-  }, [router])
-
   useEffect(() => {
+    if (cachingEnabled) {
+      // Already refreshed on every pathname change below
+      return
+    }
+
+    previousPathnameRef.current = window.location.pathname
+
+    let refreshTimeout: ReturnType<typeof setTimeout> | undefined
+
     const handlePopState = () => {
-      clearAfterPathnameChange.current = true
+      const currentPathname = window.location.pathname
+
+      // Fragment navigation also fires popstate. Refreshing the same route resets unsaved forms.
+      if (previousPathnameRef.current === currentPathname) {
+        return
+      }
+
+      previousPathnameRef.current = currentPathname
+
+      // Next.js restores the previous page in its own `popstate` listener. With `cacheComponents`,
+      // that happens synchronously and may run before or after this listener, so refreshing right
+      // away (or in a microtask) could refresh the page we are leaving. A timeout runs after all
+      // `popstate` listeners, once the restored page is the current route.
+      refreshTimeout = setTimeout(clearRouteCache, 0)
     }
 
     window.addEventListener('popstate', handlePopState)
 
     return () => {
+      clearTimeout(refreshTimeout)
       window.removeEventListener('popstate', handlePopState)
     }
-  }, [router])
+  }, [cachingEnabled, clearRouteCache])
 
-  const handlePathnameChange = useEffectEvent((pathname: string) => {
-    if (cachingEnabled || clearAfterPathnameChange.current) {
-      clearAfterPathnameChange.current = false
+  const handlePathnameChange = useEffectEvent(() => {
+    if (cachingEnabled) {
       clearRouteCache()
     }
   })
 
   useEffect(() => {
-    handlePathnameChange(pathname)
+    handlePathnameChange()
+
+    const currentPathname = window.location.pathname
+
+    // Next.js may commit the restored route before popstate runs. Keep the previous path until then.
+    const timeout = setTimeout(() => {
+      previousPathnameRef.current = currentPathname
+    }, 0)
+
+    return () => clearTimeout(timeout)
   }, [pathname])
 
   return <Context value={{ cachingEnabled, clearRouteCache }}>{children}</Context>

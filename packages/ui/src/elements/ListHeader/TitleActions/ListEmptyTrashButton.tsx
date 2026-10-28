@@ -28,7 +28,8 @@ export function ListEmptyTrashButton({
   hasDeletePermission: boolean
 }) {
   const { i18n, t } = useTranslation()
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const { config } = useConfig()
   const { openModal } = useModal()
   const router = useRouter()
@@ -131,7 +132,7 @@ export function ListEmptyTrashButton({
         })
       }
 
-      router.replace(
+      void router.replace(
         qs.stringify(
           {
             ...Object.fromEntries(searchParams.entries()),
@@ -163,7 +164,7 @@ export function ListEmptyTrashButton({
         aria-label={t('general:emptyTrashLabel', {
           label: getTranslation(collectionConfig?.labels?.plural, i18n),
         })}
-        buttonStyle="pill"
+        buttonStyle="secondary"
         disabled={trashCount === 0}
         id="empty-trash-button"
         key="empty-trash-button"

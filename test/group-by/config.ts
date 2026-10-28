@@ -2,9 +2,10 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { mediaSharpTransformer } from '../__helpers/shared/mediaSharpTransformer.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { CategoriesCollection } from './collections/Categories/index.js'
-import { MediaCollection } from './collections/Media/index.js'
+import { MediaCollection, mediaSlug } from './collections/Media/index.js'
 import { NoGroupableCollection } from './collections/NoGroupable/index.js'
 import { PagesCollection } from './collections/Pages/index.js'
 import { PostsCollection } from './collections/Posts/index.js'
@@ -15,26 +16,28 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  collections: [
-    PagesCollection,
-    PostsCollection,
-    CategoriesCollection,
-    MediaCollection,
-    RelationshipsCollection,
-    NoGroupableCollection,
-  ],
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'group-by',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [
+      PagesCollection,
+      PostsCollection,
+      CategoriesCollection,
+      MediaCollection,
+      RelationshipsCollection,
+      NoGroupableCollection,
+    ],
+    editor: lexicalEditor({}),
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
+    upload: {
+      transformers: [mediaSharpTransformer({ mediaSlug })],
     },
   },
-  editor: lexicalEditor({}),
-  onInit: async (payload) => {
-    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await seed(payload)
-    }
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
+  seed,
 })

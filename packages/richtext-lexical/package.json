@@ -1,13 +1,8 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "4.0.0-canary.14",
+  "version": "4.0.0-beta.5",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/richtext-lexical"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -17,10 +12,20 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/richtext-lexical"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
   "sideEffects": [
     "*.css"
   ],
-  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts",
@@ -112,6 +117,11 @@
       "types": "./src/lexical-proxy/@lexical-utils.ts",
       "default": "./src/lexical-proxy/@lexical-utils.ts"
     },
+    "./lexical/react/ExtensionComponent": {
+      "import": "./src/lexical-proxy/@lexical-react/ExtensionComponent.ts",
+      "types": "./src/lexical-proxy/@lexical-react/ExtensionComponent.ts",
+      "default": "./src/lexical-proxy/@lexical-react/ExtensionComponent.ts"
+    },
     "./lexical/react/LexicalAutoEmbedPlugin": {
       "import": "./src/lexical-proxy/@lexical-react/LexicalAutoEmbedPlugin.ts",
       "types": "./src/lexical-proxy/@lexical-react/LexicalAutoEmbedPlugin.ts",
@@ -176,6 +186,16 @@
       "import": "./src/lexical-proxy/@lexical-react/LexicalContentEditable.ts",
       "types": "./src/lexical-proxy/@lexical-react/LexicalContentEditable.ts",
       "default": "./src/lexical-proxy/@lexical-react/LexicalContentEditable.ts"
+    },
+    "./lexical/react/LexicalExtensionComposer": {
+      "import": "./src/lexical-proxy/@lexical-react/LexicalExtensionComposer.ts",
+      "types": "./src/lexical-proxy/@lexical-react/LexicalExtensionComposer.ts",
+      "default": "./src/lexical-proxy/@lexical-react/LexicalExtensionComposer.ts"
+    },
+    "./lexical/react/LexicalExtensionEditorComposer": {
+      "import": "./src/lexical-proxy/@lexical-react/LexicalExtensionEditorComposer.ts",
+      "types": "./src/lexical-proxy/@lexical-react/LexicalExtensionEditorComposer.ts",
+      "default": "./src/lexical-proxy/@lexical-react/LexicalExtensionEditorComposer.ts"
     },
     "./lexical/react/LexicalNodeContextMenuPlugin": {
       "import": "./src/lexical-proxy/@lexical-react/LexicalNodeContextMenuPlugin.ts",
@@ -267,6 +287,11 @@
       "types": "./src/lexical-proxy/@lexical-react/LexicalRichTextPlugin.ts",
       "default": "./src/lexical-proxy/@lexical-react/LexicalRichTextPlugin.ts"
     },
+    "./lexical/react/LexicalSelectionAlwaysOnDisplay": {
+      "import": "./src/lexical-proxy/@lexical-react/LexicalSelectionAlwaysOnDisplay.ts",
+      "types": "./src/lexical-proxy/@lexical-react/LexicalSelectionAlwaysOnDisplay.ts",
+      "default": "./src/lexical-proxy/@lexical-react/LexicalSelectionAlwaysOnDisplay.ts"
+    },
     "./lexical/react/LexicalTabIndentationPlugin": {
       "import": "./src/lexical-proxy/@lexical-react/LexicalTabIndentationPlugin.ts",
       "types": "./src/lexical-proxy/@lexical-react/LexicalTabIndentationPlugin.ts",
@@ -292,10 +317,55 @@
       "types": "./src/lexical-proxy/@lexical-react/LexicalTypeaheadMenuPlugin.ts",
       "default": "./src/lexical-proxy/@lexical-react/LexicalTypeaheadMenuPlugin.ts"
     },
+    "./lexical/react/ReactExtension": {
+      "import": "./src/lexical-proxy/@lexical-react/ReactExtension.ts",
+      "types": "./src/lexical-proxy/@lexical-react/ReactExtension.ts",
+      "default": "./src/lexical-proxy/@lexical-react/ReactExtension.ts"
+    },
+    "./lexical/react/ReactPluginHostExtension": {
+      "import": "./src/lexical-proxy/@lexical-react/ReactPluginHostExtension.ts",
+      "types": "./src/lexical-proxy/@lexical-react/ReactPluginHostExtension.ts",
+      "default": "./src/lexical-proxy/@lexical-react/ReactPluginHostExtension.ts"
+    },
+    "./lexical/react/ReactProviderExtension": {
+      "import": "./src/lexical-proxy/@lexical-react/ReactProviderExtension.ts",
+      "types": "./src/lexical-proxy/@lexical-react/ReactProviderExtension.ts",
+      "default": "./src/lexical-proxy/@lexical-react/ReactProviderExtension.ts"
+    },
+    "./lexical/react/TreeViewExtension": {
+      "import": "./src/lexical-proxy/@lexical-react/TreeViewExtension.ts",
+      "types": "./src/lexical-proxy/@lexical-react/TreeViewExtension.ts",
+      "default": "./src/lexical-proxy/@lexical-react/TreeViewExtension.ts"
+    },
+    "./lexical/react/useExtensionComponent": {
+      "import": "./src/lexical-proxy/@lexical-react/useExtensionComponent.ts",
+      "types": "./src/lexical-proxy/@lexical-react/useExtensionComponent.ts",
+      "default": "./src/lexical-proxy/@lexical-react/useExtensionComponent.ts"
+    },
+    "./lexical/react/useExtensionSignalValue": {
+      "import": "./src/lexical-proxy/@lexical-react/useExtensionSignalValue.ts",
+      "types": "./src/lexical-proxy/@lexical-react/useExtensionSignalValue.ts",
+      "default": "./src/lexical-proxy/@lexical-react/useExtensionSignalValue.ts"
+    },
+    "./lexical/react/useLexicalAriaLiveRegion": {
+      "import": "./src/lexical-proxy/@lexical-react/useLexicalAriaLiveRegion.ts",
+      "types": "./src/lexical-proxy/@lexical-react/useLexicalAriaLiveRegion.ts",
+      "default": "./src/lexical-proxy/@lexical-react/useLexicalAriaLiveRegion.ts"
+    },
     "./lexical/react/useLexicalEditable": {
       "import": "./src/lexical-proxy/@lexical-react/useLexicalEditable.ts",
       "types": "./src/lexical-proxy/@lexical-react/useLexicalEditable.ts",
       "default": "./src/lexical-proxy/@lexical-react/useLexicalEditable.ts"
+    },
+    "./lexical/react/useLexicalFocusManagerRef": {
+      "import": "./src/lexical-proxy/@lexical-react/useLexicalFocusManagerRef.ts",
+      "types": "./src/lexical-proxy/@lexical-react/useLexicalFocusManagerRef.ts",
+      "default": "./src/lexical-proxy/@lexical-react/useLexicalFocusManagerRef.ts"
+    },
+    "./lexical/react/useLexicalFocusTrapRef": {
+      "import": "./src/lexical-proxy/@lexical-react/useLexicalFocusTrapRef.ts",
+      "types": "./src/lexical-proxy/@lexical-react/useLexicalFocusTrapRef.ts",
+      "default": "./src/lexical-proxy/@lexical-react/useLexicalFocusTrapRef.ts"
     },
     "./lexical/react/useLexicalIsTextContentEmpty": {
       "import": "./src/lexical-proxy/@lexical-react/useLexicalIsTextContentEmpty.ts",
@@ -306,6 +376,16 @@
       "import": "./src/lexical-proxy/@lexical-react/useLexicalNodeSelection.ts",
       "types": "./src/lexical-proxy/@lexical-react/useLexicalNodeSelection.ts",
       "default": "./src/lexical-proxy/@lexical-react/useLexicalNodeSelection.ts"
+    },
+    "./lexical/react/useLexicalRovingTabIndexRef": {
+      "import": "./src/lexical-proxy/@lexical-react/useLexicalRovingTabIndexRef.ts",
+      "types": "./src/lexical-proxy/@lexical-react/useLexicalRovingTabIndexRef.ts",
+      "default": "./src/lexical-proxy/@lexical-react/useLexicalRovingTabIndexRef.ts"
+    },
+    "./lexical/react/useLexicalSlotRef": {
+      "import": "./src/lexical-proxy/@lexical-react/useLexicalSlotRef.ts",
+      "types": "./src/lexical-proxy/@lexical-react/useLexicalSlotRef.ts",
+      "default": "./src/lexical-proxy/@lexical-react/useLexicalSlotRef.ts"
     },
     "./lexical/react/useLexicalSubscription": {
       "import": "./src/lexical-proxy/@lexical-react/useLexicalSubscription.ts",
@@ -328,99 +408,9 @@
       "default": "./src/exports/shared.ts"
     }
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "pnpm build:reactcompiler",
-    "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
-    "build:bundle-for-analysis": "rm -rf dist esbuild && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild esbuild --no-split",
-    "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
-    "build:debug": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc:debug && pnpm copyfiles:debug && pnpm build:types",
-    "build:esbuild": "node bundle.js",
-    "build:esbuild:postprocess": "rm -rf dist/exports/client && mv dist/exports/client_optimized dist/exports/client",
-    "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild && pnpm build:esbuild:postprocess && pnpm build:types",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
-    "build:swc:debug": "swc ./src -d ./dist --config-file .swcrc-debug --strip-leading-paths",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:esbuild && pnpm build:esbuild:postproces && rm -rf dist/exports/client && mv dist/exports/client_unoptimized dist/exports/client",
-    "clean": "rimraf -g {dist,*.tsbuildinfo,esbuild}",
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "copyfiles:debug": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
-  },
-  "lint-staged": {
-    "**/package.json": "sort-package-json",
-    "*.{md,mdx,yml,json}": "prettier --write",
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --flag v10_config_lookup_from_file --cache --fix",
-      "prettier --write"
-    ]
-  },
-  "dependencies": {
-    "@lexical/clipboard": "0.45.0",
-    "@lexical/headless": "0.45.0",
-    "@lexical/html": "0.45.0",
-    "@lexical/link": "0.45.0",
-    "@lexical/list": "0.45.0",
-    "@lexical/mark": "0.45.0",
-    "@lexical/markdown": "0.45.0",
-    "@lexical/react": "0.45.0",
-    "@lexical/rich-text": "0.45.0",
-    "@lexical/selection": "0.45.0",
-    "@lexical/table": "0.45.0",
-    "@lexical/utils": "0.45.0",
-    "@payloadcms/translations": "workspace:*",
-    "@payloadcms/ui": "workspace:*",
-    "acorn": "8.16.0",
-    "bson-objectid": "2.0.4",
-    "csstype": "3.2.3",
-    "dequal": "2.0.3",
-    "escape-html": "1.0.3",
-    "jsox": "1.2.125",
-    "lexical": "0.45.0",
-    "mdast-util-from-markdown": "2.0.3",
-    "mdast-util-mdx-jsx": "3.2.0",
-    "micromark-extension-mdx-jsx": "3.0.2",
-    "qs-esm": "8.0.1",
-    "react-error-boundary": "6.1.1",
-    "ts-essentials": "10.0.3",
-    "uuid": "14.0.0"
-  },
-  "devDependencies": {
-    "@babel/cli": "7.27.2",
-    "@babel/core": "7.27.3",
-    "@babel/preset-env": "7.27.2",
-    "@babel/preset-react": "7.27.1",
-    "@babel/preset-typescript": "7.27.1",
-    "@lexical/eslint-plugin": "0.45.0",
-    "@payloadcms/eslint-config": "workspace:*",
-    "@types/escape-html": "1.0.4",
-    "@types/json-schema": "7.0.15",
-    "@types/node": "24.12.3",
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3",
-    "babel-plugin-react-compiler": "19.1.0-rc.3",
-    "babel-plugin-transform-remove-imports": "^1.8.0",
-    "esbuild": "0.27.1",
-    "esbuild-sass-plugin": "3.3.1",
-    "payload": "workspace:*",
-    "swc-plugin-transform-remove-imports": "8.3.0"
-  },
-  "peerDependencies": {
-    "@faceless-ui/modal": "3.0.1",
-    "@faceless-ui/scroll-info": "2.0.0",
-    "payload": "workspace:*",
-    "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
-    "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
-  },
-  "engines": {
-    "node": ">=24.15.0"
-  },
   "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "exports": {
       ".": {
         "import": "./dist/index.js",
@@ -512,6 +502,11 @@
         "types": "./dist/lexical-proxy/@lexical-utils.d.ts",
         "default": "./dist/lexical-proxy/@lexical-utils.js"
       },
+      "./lexical/react/ExtensionComponent": {
+        "import": "./dist/lexical-proxy/@lexical-react/ExtensionComponent.js",
+        "types": "./dist/lexical-proxy/@lexical-react/ExtensionComponent.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/ExtensionComponent.js"
+      },
       "./lexical/react/LexicalAutoEmbedPlugin": {
         "import": "./dist/lexical-proxy/@lexical-react/LexicalAutoEmbedPlugin.js",
         "types": "./dist/lexical-proxy/@lexical-react/LexicalAutoEmbedPlugin.d.ts",
@@ -576,6 +571,16 @@
         "import": "./dist/lexical-proxy/@lexical-react/LexicalContentEditable.js",
         "types": "./dist/lexical-proxy/@lexical-react/LexicalContentEditable.d.ts",
         "default": "./dist/lexical-proxy/@lexical-react/LexicalContentEditable.js"
+      },
+      "./lexical/react/LexicalExtensionComposer": {
+        "import": "./dist/lexical-proxy/@lexical-react/LexicalExtensionComposer.js",
+        "types": "./dist/lexical-proxy/@lexical-react/LexicalExtensionComposer.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/LexicalExtensionComposer.js"
+      },
+      "./lexical/react/LexicalExtensionEditorComposer": {
+        "import": "./dist/lexical-proxy/@lexical-react/LexicalExtensionEditorComposer.js",
+        "types": "./dist/lexical-proxy/@lexical-react/LexicalExtensionEditorComposer.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/LexicalExtensionEditorComposer.js"
       },
       "./lexical/react/LexicalNodeContextMenuPlugin": {
         "import": "./dist/lexical-proxy/@lexical-react/LexicalNodeContextMenuPlugin.js",
@@ -667,6 +672,11 @@
         "types": "./dist/lexical-proxy/@lexical-react/LexicalRichTextPlugin.d.ts",
         "default": "./dist/lexical-proxy/@lexical-react/LexicalRichTextPlugin.js"
       },
+      "./lexical/react/LexicalSelectionAlwaysOnDisplay": {
+        "import": "./dist/lexical-proxy/@lexical-react/LexicalSelectionAlwaysOnDisplay.js",
+        "types": "./dist/lexical-proxy/@lexical-react/LexicalSelectionAlwaysOnDisplay.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/LexicalSelectionAlwaysOnDisplay.js"
+      },
       "./lexical/react/LexicalTabIndentationPlugin": {
         "import": "./dist/lexical-proxy/@lexical-react/LexicalTabIndentationPlugin.js",
         "types": "./dist/lexical-proxy/@lexical-react/LexicalTabIndentationPlugin.d.ts",
@@ -692,10 +702,55 @@
         "types": "./dist/lexical-proxy/@lexical-react/LexicalTypeaheadMenuPlugin.d.ts",
         "default": "./dist/lexical-proxy/@lexical-react/LexicalTypeaheadMenuPlugin.js"
       },
+      "./lexical/react/ReactExtension": {
+        "import": "./dist/lexical-proxy/@lexical-react/ReactExtension.js",
+        "types": "./dist/lexical-proxy/@lexical-react/ReactExtension.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/ReactExtension.js"
+      },
+      "./lexical/react/ReactPluginHostExtension": {
+        "import": "./dist/lexical-proxy/@lexical-react/ReactPluginHostExtension.js",
+        "types": "./dist/lexical-proxy/@lexical-react/ReactPluginHostExtension.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/ReactPluginHostExtension.js"
+      },
+      "./lexical/react/ReactProviderExtension": {
+        "import": "./dist/lexical-proxy/@lexical-react/ReactProviderExtension.js",
+        "types": "./dist/lexical-proxy/@lexical-react/ReactProviderExtension.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/ReactProviderExtension.js"
+      },
+      "./lexical/react/TreeViewExtension": {
+        "import": "./dist/lexical-proxy/@lexical-react/TreeViewExtension.js",
+        "types": "./dist/lexical-proxy/@lexical-react/TreeViewExtension.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/TreeViewExtension.js"
+      },
+      "./lexical/react/useExtensionComponent": {
+        "import": "./dist/lexical-proxy/@lexical-react/useExtensionComponent.js",
+        "types": "./dist/lexical-proxy/@lexical-react/useExtensionComponent.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/useExtensionComponent.js"
+      },
+      "./lexical/react/useExtensionSignalValue": {
+        "import": "./dist/lexical-proxy/@lexical-react/useExtensionSignalValue.js",
+        "types": "./dist/lexical-proxy/@lexical-react/useExtensionSignalValue.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/useExtensionSignalValue.js"
+      },
+      "./lexical/react/useLexicalAriaLiveRegion": {
+        "import": "./dist/lexical-proxy/@lexical-react/useLexicalAriaLiveRegion.js",
+        "types": "./dist/lexical-proxy/@lexical-react/useLexicalAriaLiveRegion.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/useLexicalAriaLiveRegion.js"
+      },
       "./lexical/react/useLexicalEditable": {
         "import": "./dist/lexical-proxy/@lexical-react/useLexicalEditable.js",
         "types": "./dist/lexical-proxy/@lexical-react/useLexicalEditable.d.ts",
         "default": "./dist/lexical-proxy/@lexical-react/useLexicalEditable.js"
+      },
+      "./lexical/react/useLexicalFocusManagerRef": {
+        "import": "./dist/lexical-proxy/@lexical-react/useLexicalFocusManagerRef.js",
+        "types": "./dist/lexical-proxy/@lexical-react/useLexicalFocusManagerRef.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/useLexicalFocusManagerRef.js"
+      },
+      "./lexical/react/useLexicalFocusTrapRef": {
+        "import": "./dist/lexical-proxy/@lexical-react/useLexicalFocusTrapRef.js",
+        "types": "./dist/lexical-proxy/@lexical-react/useLexicalFocusTrapRef.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/useLexicalFocusTrapRef.js"
       },
       "./lexical/react/useLexicalIsTextContentEmpty": {
         "import": "./dist/lexical-proxy/@lexical-react/useLexicalIsTextContentEmpty.js",
@@ -706,6 +761,16 @@
         "import": "./dist/lexical-proxy/@lexical-react/useLexicalNodeSelection.js",
         "types": "./dist/lexical-proxy/@lexical-react/useLexicalNodeSelection.d.ts",
         "default": "./dist/lexical-proxy/@lexical-react/useLexicalNodeSelection.js"
+      },
+      "./lexical/react/useLexicalRovingTabIndexRef": {
+        "import": "./dist/lexical-proxy/@lexical-react/useLexicalRovingTabIndexRef.js",
+        "types": "./dist/lexical-proxy/@lexical-react/useLexicalRovingTabIndexRef.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/useLexicalRovingTabIndexRef.js"
+      },
+      "./lexical/react/useLexicalSlotRef": {
+        "import": "./dist/lexical-proxy/@lexical-react/useLexicalSlotRef.js",
+        "types": "./dist/lexical-proxy/@lexical-react/useLexicalSlotRef.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-react/useLexicalSlotRef.js"
       },
       "./lexical/react/useLexicalSubscription": {
         "import": "./dist/lexical-proxy/@lexical-react/useLexicalSubscription.js",
@@ -728,8 +793,90 @@
         "default": "./dist/exports/shared.js"
       }
     },
-    "main": "./dist/index.js",
-    "registry": "https://registry.npmjs.org/",
-    "types": "./dist/index.d.ts"
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "pnpm build:reactcompiler",
+    "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
+    "build:bundle-for-analysis": "rm -rf dist esbuild && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild esbuild --no-split",
+    "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
+    "build:debug": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc:debug && pnpm copyfiles:debug && pnpm build:types",
+    "build:esbuild": "node bundle.js",
+    "build:esbuild:postprocess": "rm -rf dist/exports/client && mv dist/exports/client_optimized dist/exports/client",
+    "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild && pnpm build:esbuild:postprocess && pnpm build:types",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:swc:debug": "swc ./src -d ./dist --config-file .swcrc-debug --strip-leading-paths",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:esbuild && pnpm build:esbuild:postproces && rm -rf dist/exports/client && mv dist/exports/client_unoptimized dist/exports/client",
+    "clean": "rimraf -g {dist,*.tsbuildinfo,esbuild}",
+    "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "copyfiles:debug": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/"
+  },
+  "dependencies": {
+    "@lexical/clipboard": "0.52.0",
+    "@lexical/headless": "0.52.0",
+    "@lexical/html": "0.52.0",
+    "@lexical/link": "0.52.0",
+    "@lexical/list": "0.52.0",
+    "@lexical/mark": "0.52.0",
+    "@lexical/markdown": "0.52.0",
+    "@lexical/react": "0.52.0",
+    "@lexical/rich-text": "0.52.0",
+    "@lexical/selection": "0.52.0",
+    "@lexical/table": "0.52.0",
+    "@lexical/utils": "0.52.0",
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
+    "acorn": "8.16.0",
+    "bson-objectid": "2.0.4",
+    "csstype": "3.2.3",
+    "dequal": "2.0.3",
+    "escape-html": "1.0.3",
+    "jsox": "1.2.125",
+    "lexical": "0.52.0",
+    "mdast-util-from-markdown": "2.0.3",
+    "mdast-util-mdx-jsx": "3.2.0",
+    "micromark-extension-mdx-jsx": "3.0.2",
+    "qs-esm": "8.0.1",
+    "react-error-boundary": "6.1.1",
+    "ts-essentials": "10.0.3",
+    "uuid": "14.0.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "7.27.2",
+    "@babel/core": "7.27.3",
+    "@babel/preset-env": "7.27.2",
+    "@babel/preset-react": "7.27.1",
+    "@babel/preset-typescript": "7.27.1",
+    "@lexical/eslint-plugin": "0.52.0",
+    "@types/escape-html": "1.0.4",
+    "@types/json-schema": "7.0.15",
+    "@types/node": "24.12.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "babel-plugin-react-compiler": "1.0.0",
+    "babel-plugin-transform-remove-imports": "^1.8.0",
+    "esbuild": "0.27.1",
+    "esbuild-sass-plugin": "3.3.1",
+    "payload": "workspace:*",
+    "swc-plugin-transform-remove-imports": "8.3.0"
+  },
+  "peerDependencies": {
+    "@faceless-ui/modal": "3.0.2",
+    "@faceless-ui/scroll-info": "2.0.0",
+    "payload": "workspace:*",
+    "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
+    "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
+  },
+  "lint-staged": {
+    "*.{cjs,css,cts,graphql,html,json,jsonc,md,mdx,mjs,mts,scss,toml,yaml,yml}": "oxfmt --no-error-on-unmatched-pattern",
+    ".swcrc": "oxfmt --no-error-on-unmatched-pattern",
+    "*.{js,jsx,ts,tsx}": [
+      "oxlint -c ../../oxlint.config.ts --fix --no-error-on-unmatched-pattern",
+      "oxfmt --no-error-on-unmatched-pattern"
+    ]
+  },
+  "engines": {
+    "node": ">=24.22.1"
   }
 }

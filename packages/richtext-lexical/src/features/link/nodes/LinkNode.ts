@@ -72,26 +72,10 @@ export class LinkNode extends ElementNode {
     }
   }
 
-  static override importJSON(serializedNode: SerializedLinkNode): LinkNode {
-    const node = $createLinkNode({}).updateFromJSON(serializedNode)
-
-    /**
-     * @todo remove this in 4.0
-     */
-    if (
-      serializedNode.version === 1 &&
-      typeof serializedNode.fields?.doc?.value === 'object' &&
-      serializedNode.fields?.doc?.value?.id
-    ) {
-      serializedNode.fields.doc.value = serializedNode.fields.doc.value.id
-      serializedNode.version = 2
-    }
-
-    if (serializedNode.version === 2 && !serializedNode.id) {
-      serializedNode.id = new ObjectID.default().toHexString()
-      serializedNode.version = 3
-    }
-    return node
+  static override importJSON(
+    serializedNode: Record<string, unknown> & SerializedLinkNode,
+  ): LinkNode {
+    return $createLinkNode({}).updateFromJSON(serializedNode)
   }
 
   override canBeEmpty(): false {
@@ -136,7 +120,6 @@ export class LinkNode extends ElementNode {
       ...super.exportJSON(),
       type: 'link',
       fields,
-      version: 3,
     }
     const id = this.getID()
     if (id) {

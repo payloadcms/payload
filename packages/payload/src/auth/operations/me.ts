@@ -1,4 +1,4 @@
-import { decodeJwt } from 'jose'
+import { decodeJwt } from 'jose/jwt/decode'
 
 import type { Collection } from '../../collections/config/types.js'
 import type { AuthenticatedUser } from '../../index.js'
@@ -7,13 +7,6 @@ import type { JoinQuery, PayloadRequest, PopulateType, SelectType } from '../../
 export type MeOperationResult = {
   collection?: string
   exp?: number
-  /** @deprecated
-   * use:
-   * ```ts
-   * user._strategy
-   * ```
-   */
-  strategy?: string
   token?: string
   user?: AuthenticatedUser | null
 }
@@ -80,13 +73,6 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
     }
 
     result.collection = req.user.collection
-    /** @deprecated
-     * use:
-     * ```ts
-     * user._strategy
-     * ```
-     */
-    result.strategy = req.user._strategy
 
     if (!result.user) {
       result.user = user

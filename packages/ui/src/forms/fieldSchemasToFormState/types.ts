@@ -3,10 +3,10 @@ import type {
   Data,
   DocumentPreferences,
   Field,
+  FieldOperation,
   FieldSchemaMap,
   FieldState,
   FormState,
-  Operation,
   PayloadRequest,
   SanitizedFieldPermissions,
 } from 'payload'
@@ -29,7 +29,7 @@ export type RenderFieldArgs = {
   indexPath: string
   lastRenderedPath: string
   mockRSCs?: boolean
-  operation: Operation
+  operation: FieldOperation
   parentPath: string
   parentSchemaPath: string
   path: string
@@ -41,6 +41,7 @@ export type RenderFieldArgs = {
   req: PayloadRequest
   schemaPath: string
   siblingData: Data
+  user?: PayloadRequest['user']
 }
 
 export type RenderFieldMethod = (args: RenderFieldArgs) => void

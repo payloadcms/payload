@@ -1,0 +1,53 @@
+---
+name: payload-accessibility
+description: Use when changing or reviewing rendered Payload UI, interaction or focus behavior, semantic markup, accessibility tests, or WCAG/VPAT evidence.
+---
+
+# Payload Accessibility
+
+Assess accessibility as part of the change, not as a scan added afterward. Scope conclusions to the behavior and states actually evaluated.
+
+## Change assessment
+
+For every affected component or flow:
+
+1. Identify the rendered states, input methods, viewport conditions, and assistive-technology behavior the change can affect.
+2. Read [wcag-2.2-aa.md](references/wcag-2.2-aa.md). Assess every plausibly affected WCAG 2.2 Level A and AA criterion; do not limit review to criteria named in an issue.
+3. Prefer native HTML semantics. When a composite ARIA pattern is necessary, implement its complete semantics and keyboard behavior rather than adding roles or states in isolation.
+4. Read [testing.md](references/testing.md) and select evidence based on the observable outcome.
+5. Exercise the changed behavior in every relevant state. Accessibility checks must cover the production component and integration context, not a simplified substitute.
+
+## Payload contrast mode and remediation scope
+
+Check feature contrast with enhanced contrast mode enabled: verify `html[data-enhanced-contrast]` and test the relevant light/dark theme and interaction state. Enabling the mode does not replace the other accessibility checks. Use the existing mode-switching tests rather than rechecking the shared setting for each feature; see [contrast setup](references/testing.md#payload-enhanced-contrast-setup). Continue checking ordinary-mode integration and behavior, but do not use an ordinary-mode contrast measurement alone to replace the shared palette in a feature.
+
+If a measurement still fails, first verify the intended component variant, semantic tokens, inherited theme and loaded shared styles. Fix incorrect feature usage or custom styling at its source. A reproducible defect inherited from a shared component belongs to that component's owner; resolve it within authorized scope or report it with the exact mode/state and evidence. Do not add a feature-local color override merely to make a contrast check pass. Record the tested mode explicitly; enhanced-mode evidence does not establish contrast conformance for ordinary mode.
+
+## Test placement
+
+- Put general browser regressions in `test/a11y/e2e.spec.ts`, grouped by admin workflow with keyboard/focus assertions and axe checkpoints.
+- Keep audit validation in `test/a11y/WCAG.audit.spec.ts`; it runs only with the explicit audit command.
+- Put evidence that depends on synthesized speech or a screen-reader virtual/browse cursor in `test/a11y/screen-reader.spec.ts`, under the same criterion organization.
+- Put setup shared by accessibility specs in `test/a11y/helpers.ts`. Keep scenario-specific setup in its spec.
+- Keep low-level unit tests beside their component when they verify an implementation contract. They supplement, but do not replace, an end-to-end WCAG regression when the reported barrier occurs only in the rendered application.
+- Reuse the existing `test/a11y` Payload configuration and real UI components. Do not create a new accessibility fixture or criterion file by default.
+
+## Evidence boundaries
+
+- Axe finds a subset of machine-detectable failures. A clean scan is not proof of criterion or product conformance.
+- DOM and accessibility-tree assertions do not prove exact spoken output.
+- Guidepup is for outcomes that specifically depend on screen-reader output or cursor behavior, not every issue originally discovered with a screen reader.
+- Require human visual or assistive-technology confirmation only when the outcome depends on judgement, timing, platform behavior, or an interaction that reliable automation does not reproduce.
+- WCAG 2.2 Level AA conformance requires all applicable Level A and Level AA criteria. A qualified human reviewer approves VPAT/ACR conformance statements.
+
+## Required handoff
+
+Report:
+
+1. The affected UI, states, and interaction methods assessed.
+2. The WCAG 2.2 A/AA criteria assessed and why they were applicable or potentially affected.
+3. Automated tests and commands run, with their results.
+4. Required visual, screen-reader, or other manual verification.
+5. Known failures, limitations, and any criterion that cannot yet be supported.
+
+Never report a component, criterion, or product as conforming beyond the evidence collected.

@@ -71,7 +71,10 @@ export const slugifyHandler: ServerFunction<
   // Probing reads across the whole collection with the raw db, so require unrestricted read access —
   // a row-filtered (`Where`) result is treated as not allowed, since scoping the probe to readable
   // rows would break uniqueness.
-  const canRead = await executeAccess({ disableErrors: true, req }, collectionConfig.access.read)
+  const canRead = await executeAccess(
+    { slug: collectionConfig.slug, disableErrors: true, req },
+    collectionConfig.access.read,
+  )
 
   if (canRead !== true) {
     return result
@@ -94,6 +97,7 @@ export const slugifyHandler: ServerFunction<
       draftsEnabled: hasDraftsEnabled(collectionConfig),
       field: field.name,
       locale: localeToScope,
+      overrideAccess: true,
       req,
       value: result,
     })
@@ -104,6 +108,7 @@ export const slugifyHandler: ServerFunction<
     collection: collectionConfig,
     field: field.name,
     locale: localeToScope,
+    overrideAccess: true,
     req,
     slugify,
   })

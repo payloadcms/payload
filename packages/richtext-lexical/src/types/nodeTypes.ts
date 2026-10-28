@@ -5,16 +5,16 @@ import type {
   SerializedBlockNode,
   SerializedInlineBlockNode,
 } from '../features/blocks/server/schema.js'
-import type {
-  SerializedTableCellNode,
-  SerializedTableNode,
-  SerializedTableRowNode,
-} from '../features/experimental_table/server/schema.js'
 import type { SerializedHeadingNode } from '../features/heading/server/schema.js'
 import type { SerializedHorizontalRuleNode } from '../features/horizontalRule/server/schema.js'
 import type { SerializedAutoLinkNode, SerializedLinkNode } from '../features/link/server/schema.js'
 import type { SerializedListItemNode, SerializedListNode } from '../features/lists/shared/schema.js'
 import type { SerializedRelationshipNode } from '../features/relationship/server/schema.js'
+import type {
+  SerializedTableCellNode,
+  SerializedTableNode,
+  SerializedTableRowNode,
+} from '../features/table/server/schema.js'
 import type { SerializedUploadNode } from '../features/upload/server/schema.js'
 
 // The declarations below must stay byte-for-byte aligned with the TS source
@@ -32,6 +32,7 @@ export interface SerializedLexicalElementBase<TChildren> {
   indent: number
   textFormat?: number
   textStyle?: string
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number
 }
 
@@ -44,6 +45,7 @@ export interface SerializedTextNode {
   style: string
   text: string
   type: 'text'
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number
 }
 
@@ -54,11 +56,13 @@ export interface SerializedTabNode {
   style: string
   text: string
   type: 'tab'
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number
 }
 
 export interface SerializedLineBreakNode {
   type: 'linebreak'
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number
 }
 
@@ -78,6 +82,7 @@ export interface LexicalRichText<TNode> {
     format: LexicalElementFormat
     indent: number
     type: 'root'
+    /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
     version: number
   }
 }

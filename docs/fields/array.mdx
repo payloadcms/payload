@@ -150,9 +150,9 @@ export const ExampleCollection: CollectionConfig = {
 ```tsx
 import type React from 'react'
 import { ArrayField } from '@payloadcms/ui'
-import type { ArrayFieldServerComponent } from 'payload'
+import type { ArrayFieldServerProps } from 'payload'
 
-export const CustomArrayFieldServer: ArrayFieldServerComponent = ({
+export const CustomArrayFieldServer: React.FC<ArrayFieldServerProps> = ({
   clientField,
   path,
   schemaPath,
@@ -175,9 +175,11 @@ export const CustomArrayFieldServer: ArrayFieldServerComponent = ({
 'use client'
 import React from 'react'
 import { ArrayField } from '@payloadcms/ui'
-import type { ArrayFieldClientComponent } from 'payload'
+import type { ArrayFieldClientProps } from 'payload'
 
-export const CustomArrayFieldClient: ArrayFieldClientComponent = (props) => {
+export const CustomArrayFieldClient: React.FC<ArrayFieldClientProps> = (
+  props,
+) => {
   return <ArrayField {...props} />
 }
 ```
@@ -189,12 +191,11 @@ export const CustomArrayFieldClient: ArrayFieldClientComponent = (props) => {
 ```tsx
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { ArrayFieldLabelServerComponent } from 'payload'
+import type { ArrayFieldLabelServerProps } from 'payload'
 
-export const CustomArrayFieldLabelServer: ArrayFieldLabelServerComponent = ({
-  clientField,
-  path,
-}) => {
+export const CustomArrayFieldLabelServer: React.FC<
+  ArrayFieldLabelServerProps
+> = ({ clientField, path }) => {
   return (
     <FieldLabel
       label={clientField?.label || clientField?.name}
@@ -209,15 +210,14 @@ export const CustomArrayFieldLabelServer: ArrayFieldLabelServerComponent = ({
 
 ```tsx
 'use client'
-import type { ArrayFieldLabelClientComponent } from 'payload'
+import type { ArrayFieldLabelClientProps } from 'payload'
 
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomArrayFieldLabelClient: ArrayFieldLabelClientComponent = ({
-  field,
-  path,
-}) => {
+export const CustomArrayFieldLabelClient: React.FC<
+  ArrayFieldLabelClientProps
+> = ({ field, path }) => {
   return (
     <FieldLabel
       label={field?.label || field?.name}

@@ -8,6 +8,7 @@ import './index.css'
 const baseClass = 'switch'
 
 export type SwitchProps = {
+  readonly ariaLabel?: string
   readonly checked?: boolean
   readonly className?: string
   readonly disabled?: boolean
@@ -18,6 +19,7 @@ export type SwitchProps = {
 
 export const Switch: React.FC<SwitchProps> = ({
   id: idFromProps,
+  ariaLabel,
   checked = false,
   className,
   disabled = false,
@@ -42,7 +44,7 @@ export const Switch: React.FC<SwitchProps> = ({
       htmlFor={id}
     >
       <input
-        aria-label={typeof label === 'string' ? label : t('general:toggle')}
+        aria-label={ariaLabel ?? (typeof label === 'string' ? label : t('general:toggle'))}
         checked={checked}
         className={`${baseClass}__input`}
         disabled={disabled}

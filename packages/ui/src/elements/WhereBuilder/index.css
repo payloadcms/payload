@@ -48,6 +48,7 @@
     grid-column: 2 / -1;
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .where-builder__or-filters {
       display: flex;
@@ -66,6 +67,7 @@
     }
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .where-builder {
       padding-top: var(--spacer-2);

@@ -12,8 +12,8 @@ on:
 
 jobs:
   run:
-    if: github.repository_owner == 'payloadcms'
-    runs-on: ubuntu-latest
+    if: github.repository == 'payloadcms/payload'
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
         uses: actions/checkout@v5

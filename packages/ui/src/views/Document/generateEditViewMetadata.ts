@@ -42,18 +42,18 @@ export const generateEditViewMetadata: GenerateEditViewMetadata = async ({
   const ogToUse: MetaConfig['openGraph'] = {
     title: `${isEditing ? t('general:edit') : t('general:edit')} - ${entityLabel}`,
     ...(config.admin.meta.openGraph || {}),
-    ...((collectionConfig
+    ...(collectionConfig
       ? {
           ...(collectionConfig?.admin.meta?.openGraph || {}),
           ...(collectionConfig?.admin?.components?.views?.edit?.[view]?.meta?.openGraph || {}),
         }
-      : {}) as MetaConfig['openGraph']),
-    ...((globalConfig
+      : {}),
+    ...(globalConfig
       ? {
           ...(globalConfig?.admin.meta?.openGraph || {}),
           ...(globalConfig?.admin?.components?.views?.edit?.[view]?.meta?.openGraph || {}),
         }
-      : {}) as MetaConfig['openGraph']),
+      : {}),
   }
 
   return formatMetadata({

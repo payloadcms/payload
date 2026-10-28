@@ -1,8 +1,11 @@
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { storageMediaSharpOptions } from '../__helpers/shared/storageMediaSharpOptions.js'
+import { proveSourceHashTransformer } from '../__helpers/shared/transformSourceTests.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
@@ -33,55 +36,71 @@ dotenv.config({
 })
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'storage-vercel-blob',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [
+      Media,
+      MediaWithAlwaysInsertFields,
+      MediaWithDirectAccess,
+      MediaWithDynamicPrefix,
+      MediaWithPrefix,
+      Users,
+    ],
+    storage: [
+      vercelBlobStorage({
+        collections: {
+          [mediaSlug]: true,
+          [mediaWithDirectAccessSlug]: {
+            disablePayloadAccessControl: true,
+          },
+          [mediaWithDynamicPrefixSlug]: true,
+          [mediaWithPrefixSlug]: {
+            prefix,
+          },
+        },
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+      }),
+      // Plugin disabled: the prefix field should still be inserted by default
+      vercelBlobStorage({
+        collections: {
+          [mediaWithAlwaysInsertFieldsSlug]: {
+            prefix: '',
+          },
+        },
+        enabled: false,
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+      }),
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
+    upload: {
+      transformers: [
+        proveSourceHashTransformer,
+        sharpTransformer({
+          collections: {
+            [mediaSlug]: storageMediaSharpOptions,
+            [mediaWithDirectAccessSlug]: {
+              variants: [{ name: 'thumbnail', width: 400, height: 300, crop: 'center' }],
+            },
+          },
+        }),
+      ],
     },
   },
-  collections: [
-    Media,
-    MediaWithAlwaysInsertFields,
-    MediaWithDirectAccess,
-    MediaWithDynamicPrefix,
-    MediaWithPrefix,
-    Users,
-  ],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
-  },
-  storage: [
-    vercelBlobStorage({
-      collections: {
-        [mediaSlug]: true,
-        [mediaWithDirectAccessSlug]: {
-          disablePayloadAccessControl: true,
-        },
-        [mediaWithDynamicPrefixSlug]: true,
-        [mediaWithPrefixSlug]: {
-          prefix,
-        },
-      },
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-    }),
-    // Test alwaysInsertFields with enabled: false
-    vercelBlobStorage({
-      alwaysInsertFields: true,
-      collections: {
-        [mediaWithAlwaysInsertFieldsSlug]: {
-          prefix: '',
-        },
-      },
-      enabled: false,
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-    }),
-  ],
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

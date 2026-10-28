@@ -81,12 +81,6 @@ export const baseConfig: Partial<Config> = {
       },
     },
   },
-  onInit: async (payload) => {
-    // IMPORTANT: This should only seed, not clear the database.
-    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await seed(payload)
-    }
-  },
   plugins: [
     multiTenantPlugin<ConfigType>({
       userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
@@ -127,6 +121,10 @@ export const baseConfig: Partial<Config> = {
         },
         ['relationships']: {},
         [multiTenantPostsSlug]: {
+          accessResultOverride: ({ accessKey, accessResult }) => {
+            multiTenantPostsAccessResultEvents.push({ accessKey, accessResult })
+            return accessResult
+          },
           tenantFieldOverrides: {
             hasMany: true,
           },
@@ -153,6 +151,7 @@ export const baseConfig: Partial<Config> = {
         const fullTenant = await req.payload.findByID({
           collection: 'tenants',
           id: tenant,
+          overrideAccess: true,
         })
         if (
           fullTenant &&
@@ -174,3 +173,10 @@ export const baseConfig: Partial<Config> = {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 }
+
+export const multiTenantPostsAccessResultEvents: Array<{
+  accessKey: string
+  accessResult: unknown
+}> = []
+
+export { seed }

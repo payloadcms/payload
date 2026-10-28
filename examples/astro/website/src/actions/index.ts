@@ -11,7 +11,7 @@ export const server = {
     accept: 'json',
     handler: async (input) => {
       const payload = await getPayload({ config })
-      return payload.create({ collection: 'posts', data: input })
+      return payload.create({ collection: 'posts', data: input, overrideAccess: true })
     },
   }),
   deletePost: defineAction({
@@ -21,7 +21,7 @@ export const server = {
     accept: 'json',
     handler: async (input) => {
       const payload = await getPayload({ config })
-      return payload.delete({ collection: 'posts', id: input.id })
+      return payload.delete({ collection: 'posts', id: input.id, overrideAccess: true })
     },
   }),
 }

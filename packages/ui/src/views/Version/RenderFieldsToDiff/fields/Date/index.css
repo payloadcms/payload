@@ -1,22 +1,30 @@
 @layer payload-default {
   .date-diff[data-match-type] {
+    /* stylelint-disable-next-line plugin/no-important -- TODO: pre-existing; revisit whether specificity can win instead */
     background-color: unset !important;
+    /* stylelint-disable-next-line plugin/no-important -- TODO: pre-existing; revisit whether specificity can win instead */
     border-radius: unset !important;
+    /* stylelint-disable-next-line plugin/no-important -- TODO: pre-existing; revisit whether specificity can win instead */
     padding: 0 !important;
   }
 
   .date-diff {
     p *[data-match-type='delete'] {
+      /* stylelint-disable-next-line plugin/no-important -- TODO: pre-existing; revisit whether specificity can win instead */
       color: unset !important;
+      /* stylelint-disable-next-line plugin/no-important -- TODO: pre-existing; revisit whether specificity can win instead */
       background-color: unset !important;
     }
 
     p *[data-match-type='create'] {
+      /* stylelint-disable-next-line plugin/no-important -- TODO: pre-existing; revisit whether specificity can win instead */
       color: unset !important;
+      /* stylelint-disable-next-line plugin/no-important -- TODO: pre-existing; revisit whether specificity can win instead */
       background-color: unset !important;
     }
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .field-diff-content .date-diff {
       display: contents;

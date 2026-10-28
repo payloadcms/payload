@@ -2,6 +2,8 @@ import type { SelectField, ValidateOptions } from './config/types.js'
 
 import {
   blocks,
+  email,
+  json,
   number,
   password,
   point,
@@ -10,6 +12,7 @@ import {
   text,
   textarea,
   type BlocksFieldValidation,
+  type JSONFieldValidation,
   type PointFieldValidation,
   type SelectFieldValidation,
 } from './validations.js'
@@ -36,6 +39,102 @@ let options: ValidateOptions<any, any, any, any> = {
 }
 
 describe('Field Validations', () => {
+  describe('email', () => {
+    it.each(['', null, undefined])('should require an empty email value of %s', (value) => {
+      expect(email(value, { ...options, required: true })).toBe('validation:required')
+    })
+
+    it.each(['', null, undefined])('should allow an optional empty email value of %s', (value) => {
+      expect(email(value, { ...options, required: false })).toBe(true)
+    })
+
+    it.each([false, true])('should reject a malformed email when required is %s', (required) => {
+      expect(email('invalid-address', { ...options, required })).toBe('validation:emailAddress')
+    })
+
+    it('should allow a valid email', () => {
+      expect(email('user@example.com', { ...options, required: true })).toBe(true)
+    })
+
+    describe.each(['server', 'client'])('username authentication on the %s', (environment) => {
+      it.each([
+        {
+          scenario: 'neither identifier',
+          requireEmail: false,
+          requireUsername: false,
+          value: '',
+          username: undefined,
+          expected: 'validation:required',
+        },
+        {
+          scenario: 'username without email',
+          requireEmail: false,
+          requireUsername: false,
+          value: '',
+          username: 'example',
+          expected: true,
+        },
+        {
+          scenario: 'email without username',
+          requireEmail: false,
+          requireUsername: false,
+          value: 'user@example.com',
+          username: undefined,
+          expected: true,
+        },
+        {
+          scenario: 'malformed email with username',
+          requireEmail: false,
+          requireUsername: false,
+          value: 'invalid-address',
+          username: 'example',
+          expected: 'validation:emailAddress',
+        },
+        {
+          scenario: 'required email with username',
+          requireEmail: true,
+          requireUsername: false,
+          value: '',
+          username: 'example',
+          expected: 'validation:required',
+        },
+        {
+          scenario: 'optional email with required username',
+          requireEmail: false,
+          requireUsername: true,
+          value: '',
+          username: 'example',
+          expected: true,
+        },
+      ])(
+        'should preserve the rules for $scenario',
+        ({ expected, requireEmail, requireUsername, username, value }) => {
+          const collection = {
+            slug: 'users',
+            auth: { loginWithUsername: { allowEmailLogin: true, requireEmail, requireUsername } },
+          }
+          const validationOptions = {
+            ...options,
+            collectionSlug: collection.slug,
+            req: {
+              ...options.req,
+              payload: {
+                ...options.req.payload,
+                collections:
+                  environment === 'server' ? { users: { config: collection } } : undefined,
+                config: { ...options.req.payload.config, collections: [collection] },
+              },
+            },
+            required: requireEmail,
+            siblingData: { username },
+          }
+
+          expect(email(value, validationOptions)).toBe(expected)
+        },
+      )
+    })
+  })
+
   describe('text', () => {
     it('should validate', () => {
       const val = 'test'
@@ -688,6 +787,171 @@ describe('Field Validations', () => {
         filterOptions: () => ['block1', 'block3'],
       })
       expect(result6).not.toStrictEqual(true)
+    })
+  })
+
+  describe('json', () => {
+    const jsonOptions: Parameters<JSONFieldValidation>[1] = {
+      ...options,
+      name: 'test',
+      type: 'json',
+    }
+
+    it('should validate a value with no jsonSchema', async () => {
+      const result = await json({ foo: 'bar' } as any, jsonOptions)
+      expect(result).toBe(true)
+    })
+
+    it('should show required message when empty', async () => {
+      const result = await json(undefined as any, { ...jsonOptions, required: true })
+      expect(result).toBe('validation:required')
+    })
+
+    it('should show invalid input message when jsonError is set', async () => {
+      const result = await json({} as any, { ...jsonOptions, jsonError: 'parse error' })
+      expect(result).toBe('validation:invalidInput')
+    })
+
+    describe('with jsonSchema', () => {
+      const jsonSchema = {
+        schema: {
+          type: 'object',
+          required: ['name'],
+          properties: {
+            name: { type: 'string' },
+          },
+        },
+        uri: 'a://b/foo.json',
+      }
+
+      it('should pass when the value matches the schema', async () => {
+        const result = await json({ name: 'Alice' } as any, { ...jsonOptions, jsonSchema })
+        expect(result).toBe(true)
+      })
+
+      it('should return an error message when the value violates a required property', async () => {
+        const result = await json({ other: 'field' } as any, { ...jsonOptions, jsonSchema })
+        expect(result).not.toBe(true)
+        expect(typeof result).toBe('string')
+      })
+
+      it('should return an error message when a property has the wrong type', async () => {
+        const result = await json({ name: 123 } as any, { ...jsonOptions, jsonSchema })
+        expect(result).not.toBe(true)
+        expect(typeof result).toBe('string')
+      })
+
+      it('should skip validation for an empty value', async () => {
+        const result = await json(null as any, { ...jsonOptions, jsonSchema })
+        expect(result).toBe(true)
+      })
+
+      it('should return a dotted path in the error message for a nested property violation', async () => {
+        const nestedSchema = {
+          schema: {
+            type: 'object',
+            properties: {
+              address: {
+                type: 'object',
+                properties: {
+                  zip: { type: 'string' },
+                },
+              },
+            },
+          },
+          uri: 'a://b/foo.json',
+        }
+        const result = await json({ address: { zip: 12345 } } as any, {
+          ...jsonOptions,
+          jsonSchema: nestedSchema,
+        })
+        expect(result).toContain('address.zip')
+      })
+
+      it('should return a comma-joined message when multiple properties are invalid', async () => {
+        const multiSchema = {
+          schema: {
+            type: 'object',
+            required: ['name'],
+            properties: {
+              age: { type: 'number' },
+              name: { type: 'string' },
+            },
+          },
+          uri: 'a://b/foo.json',
+        }
+        const result = await json({ age: 'not a number' } as any, {
+          ...jsonOptions,
+          jsonSchema: multiSchema,
+        })
+        expect(result).toContain(', ')
+      })
+    })
+
+    describe('with the JSON field test fixture schema', () => {
+      // Mirrors test/fields/collections/JSON/index.tsx to catch fromJSONSchema gaps for this exact shape
+      const jsonSchema = {
+        schema: {
+          type: 'object',
+          properties: {
+            array: {
+              type: 'array',
+              items: {
+                type: 'object',
+                additionalProperties: false,
+                properties: {
+                  object: {
+                    type: 'object',
+                    additionalProperties: false,
+                    properties: {
+                      array: {
+                        type: 'array',
+                        items: {
+                          type: 'number',
+                        },
+                      },
+                      text: {
+                        type: 'string',
+                      },
+                    },
+                  },
+                  text: {
+                    type: 'string',
+                  },
+                },
+              },
+            },
+            foo: {
+              enum: ['bar', 'foobar'],
+            },
+            number: {
+              enum: [10, 5],
+            },
+          },
+        },
+        uri: 'a://b/foo.json',
+      }
+
+      it('should pass when the value matches the fixture schema', async () => {
+        const result = await json(
+          {
+            array: [{ object: { array: [1, 2], text: 'nested' }, text: 'row' }],
+            foo: 'bar',
+            number: 10,
+          } as any,
+          { ...jsonOptions, jsonSchema },
+        )
+        expect(result).toBe(true)
+      })
+
+      it('should reject additional properties nested inside the array items', async () => {
+        const result = await json(
+          { array: [{ object: { text: 'nested' }, text: 'row', unexpected: true }] } as any,
+          { ...jsonOptions, jsonSchema },
+        )
+        expect(result).not.toBe(true)
+        expect(typeof result).toBe('string')
+      })
     })
   })
 

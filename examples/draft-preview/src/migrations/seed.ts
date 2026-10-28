@@ -11,6 +11,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
       email: 'demo@payloadcms.com',
       password: 'demo',
     },
+    overrideAccess: true,
   })
 
   const { id: examplePageID } = await payload.create({
@@ -19,6 +20,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
       skipRevalidate: true,
     },
     data: examplePage as any, // eslint-disable-line
+    overrideAccess: true,
   })
 
   await payload.update({
@@ -29,6 +31,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
     },
     data: examplePageDraft as any, // eslint-disable-line
     draft: true,
+    overrideAccess: true,
   })
 
   const homepageJSON = JSON.parse(JSON.stringify(home).replace('{{DRAFT_PAGE_ID}}', examplePageID))
@@ -39,6 +42,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
       skipRevalidate: true,
     },
     data: homepageJSON,
+    overrideAccess: true,
   })
 
   await payload.updateGlobal({
@@ -80,5 +84,6 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
         },
       ],
     },
+    overrideAccess: true,
   })
 }

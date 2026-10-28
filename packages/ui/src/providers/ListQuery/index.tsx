@@ -1,5 +1,7 @@
 'use client'
-import { type ListQuery, type Where } from 'payload'
+import type { ListQuery, Where } from 'payload'
+
+import { dequal } from 'dequal/lite'
 import { transformWhereQuery, validateWhereQuery } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -12,6 +14,7 @@ import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useRouter, useSearchParams } from '../RouterAdapter/index.js'
 import { ListQueryContext, ListQueryModifiedContext } from './context.js'
+import { getSearchWithListQuery } from './getSearchWithListQuery.js'
 import { mergeQuery } from './mergeQuery.js'
 import { sanitizeQuery } from './sanitizeQuery.js'
 
@@ -46,7 +49,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   const [query, setQuery] = useState<ListQuery>(() => {
     if (modifySearchParams) {
-      return queryFromURL
+      return queryFromProps ? sanitizeQuery(queryFromProps) : queryFromURL
     } else {
       return {
         limit: queryFromProps.limit,
@@ -55,8 +58,9 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     }
   })
 
+  const [searchInput, setSearchInput] = useState(query?.search || '')
+
   const refineListData = useCallback(
-    // eslint-disable-next-line @typescript-eslint/require-await
     async (incomingQuery: ListQuery, modified?: boolean) => {
       setModified(modified ?? true)
 
@@ -67,20 +71,23 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         },
       })
 
+      let pendingUpdate: Promise<unknown> | void = undefined
+
       if (modifySearchParams) {
-        const search = `?${qs.stringify({
-          ...newQuery,
-          columns: JSON.stringify(newQuery.columns),
-          queryByGroup: JSON.stringify(newQuery.queryByGroup),
-        })}`
+        const search = getSearchWithListQuery({
+          currentSearch: window.location.search,
+          query: newQuery,
+          updatedQuery: incomingQuery,
+        })
         if (window.location.search !== search) {
-          startRouteTransition(() => router.replace(search, { scroll: false }))
+          pendingUpdate = startRouteTransition(() => router.replace(search, { scroll: false }))
         }
       } else if (typeof onQueryChange === 'function') {
-        onQueryChange(newQuery)
+        pendingUpdate = onQueryChange(newQuery)
       }
 
       setQuery(newQuery)
+      await pendingUpdate
     },
     [
       query,
@@ -136,13 +143,22 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
    * triggering a re-render.
    */
   const syncPropsToURL = useEffectEvent(() => {
-    const newQuery = sanitizeQuery({ ...(query || {}), ...(queryFromProps || {}) })
+    // URL serialization omits empty draft conditions and compacts their array indexes.
+    // Preserve those rows on an equivalent server echo so the focused input stays mounted.
+    const shouldKeepDraftFilters = dequal(
+      qs.parse(qs.stringify({ where: query?.where }), { depth: 10 }),
+      qs.parse(qs.stringify({ where: queryFromProps?.where }), { depth: 10 }),
+    )
+    const newQuery = sanitizeQuery({
+      ...(query || {}),
+      ...(queryFromProps || {}),
+      ...(shouldKeepDraftFilters ? { where: query?.where } : {}),
+    })
 
-    const search = `?${qs.stringify({
-      ...newQuery,
-      columns: JSON.stringify(newQuery.columns),
-      queryByGroup: JSON.stringify(newQuery.queryByGroup),
-    })}`
+    const search = getSearchWithListQuery({
+      currentSearch: window.location.search,
+      query: newQuery,
+    })
 
     if (window.location.search !== search) {
       setQuery(newQuery)
@@ -209,7 +225,11 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         orderableFieldName,
         query,
         refineListData,
+        resolvedGroupBy: queryFromProps?.groupBy,
+        resolvedSearch: queryFromProps?.search,
+        searchInput,
         setModified,
+        setSearchInput,
         ...contextRef.current,
       }}
     >

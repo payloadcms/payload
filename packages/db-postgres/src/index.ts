@@ -40,6 +40,7 @@ import {
   updateOne,
   updateVersion,
   upsert,
+  validateOperatorHandlers,
 } from '@payloadcms/drizzle'
 import {
   columnToCodeConverter,
@@ -47,13 +48,13 @@ import {
   createDatabase,
   createExtensions,
   createJSONQuery,
+  createRequireDrizzleKit,
   defaultDrizzleSnapshot,
   deleteWhere,
   dropDatabase,
   execute,
   init,
   insert,
-  requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
 import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
@@ -65,6 +66,8 @@ import type { Args, PostgresAdapter } from './types.js'
 import { connect } from './connect.js'
 
 const filename = fileURLToPath(import.meta.url)
+
+const requireDrizzleKit = createRequireDrizzleKit({ from: import.meta.url })
 
 export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter> {
   const postgresIDType = args.idType || 'serial'
@@ -96,6 +99,10 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       },
       {} as Record<string, boolean>,
     )
+
+    const operatorHandlers = args.query?.operatorHandlers ?? []
+
+    validateOperatorHandlers(operatorHandlers)
 
     const sanitizeStatements = ({
       sqlExecute,
@@ -145,6 +152,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
+      operatorHandlers,
       operators: operatorMap,
       pg: args.pg || pgDependency,
       pgSchema: adapterSchema,
@@ -247,6 +255,11 @@ export type {
   GeneratedDatabaseSchema,
   PostgresAdapter,
 } from './types.js'
-export type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/drizzle/postgres'
-export { geometryColumn } from '@payloadcms/drizzle/postgres'
+export type {
+  MigrateDownArgs,
+  MigrateUpArgs,
+  PostgresOperatorHandler,
+  PostgresQueryConfig,
+} from '@payloadcms/drizzle/postgres'
+export { geometryColumn, postgresUnaccent } from '@payloadcms/drizzle/postgres'
 export { sql } from 'drizzle-orm'

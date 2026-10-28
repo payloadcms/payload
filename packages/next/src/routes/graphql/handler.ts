@@ -3,15 +3,15 @@ import type { APIError, Payload, PayloadRequest, SanitizedConfig } from 'payload
 
 import { configToSchema } from '@payloadcms/graphql'
 import { createHandler } from 'graphql-http/lib/use/fetch'
-import { status as httpStatus } from 'http-status'
 import {
   addDataAndFileToRequest,
   addLocalesToRequestFromData,
-  createPayloadRequest,
+  createPayloadRequestFromWebRequest,
   headersWithCors,
   logError,
   mergeHeaders,
 } from 'payload'
+import { httpStatus } from 'payload/internal'
 
 const handleError = async ({
   err,
@@ -98,7 +98,7 @@ export const getGraphql = async (config: Promise<SanitizedConfig> | SanitizedCon
 export const POST =
   (config: Promise<SanitizedConfig> | SanitizedConfig) => async (request: Request) => {
     const originalRequest = request.clone()
-    const req = await createPayloadRequest({
+    const req = await createPayloadRequestFromWebRequest({
       canSetHeaders: true,
       config,
       request,

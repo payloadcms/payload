@@ -99,6 +99,7 @@ export const seed = async ({
         context: {
           disableRevalidate: true,
         },
+        overrideAccess: true,
       }),
     ),
   )
@@ -120,6 +121,7 @@ export const seed = async ({
         equals: 'customer@example.com',
       },
     },
+    overrideAccess: true,
   })
 
   payload.logger.info(`— Seeding media...`)
@@ -158,26 +160,31 @@ export const seed = async ({
         password: 'password',
         roles: ['customer'],
       },
+      overrideAccess: true,
     }),
     payload.create({
       collection: 'media',
       data: imageHatData,
       file: imageHatBuffer,
+      overrideAccess: true,
     }),
     payload.create({
       collection: 'media',
       data: imageTshirtBlackData,
       file: imageTshirtBlackBuffer,
+      overrideAccess: true,
     }),
     payload.create({
       collection: 'media',
       data: imageTshirtWhiteData,
       file: imageTshirtWhiteBuffer,
+      overrideAccess: true,
     }),
     payload.create({
       collection: 'media',
       data: imageHero1Data,
       file: heroBuffer,
+      overrideAccess: true,
     }),
     ...categories.map((category) =>
       payload.create({
@@ -186,6 +193,7 @@ export const seed = async ({
           title: category,
           slug: category,
         },
+        overrideAccess: true,
       }),
     ),
   ])
@@ -198,6 +206,7 @@ export const seed = async ({
       name: 'size',
       label: 'Size',
     },
+    overrideAccess: true,
   })
 
   const sizeVariantOptionsResults: VariantOption[] = []
@@ -209,6 +218,7 @@ export const seed = async ({
         ...option,
         variantType: sizeVariantType.id,
       },
+      overrideAccess: true,
     })
     sizeVariantOptionsResults.push(result)
   }
@@ -221,6 +231,7 @@ export const seed = async ({
       name: 'color',
       label: 'Color',
     },
+    overrideAccess: true,
   })
 
   const [black, white] = await Promise.all(
@@ -231,6 +242,7 @@ export const seed = async ({
           ...option,
           variantType: colorVariantType.id,
         },
+        overrideAccess: true,
       })
     }),
   )
@@ -247,6 +259,7 @@ export const seed = async ({
       categories: [hatsCategory],
       relatedProducts: [],
     }),
+    overrideAccess: true,
   })
 
   const productTshirt = await payload.create({
@@ -263,6 +276,7 @@ export const seed = async ({
       categories: [tshirtsCategory],
       relatedProducts: [productHat],
     }),
+    overrideAccess: true,
   })
 
   let hoodieID: number | string = productTshirt.id
@@ -285,6 +299,7 @@ export const seed = async ({
           product: productTshirt,
           variantOptions: [variantOption, white],
         }),
+        overrideAccess: true,
       }),
     ),
   )
@@ -299,6 +314,7 @@ export const seed = async ({
           variantOptions: [variantOption, black],
           ...(variantOption.value === 'medium' ? { inventory: 0 } : {}),
         }),
+        overrideAccess: true,
       }),
     ),
   )
@@ -309,6 +325,7 @@ export const seed = async ({
     collection: 'forms',
     depth: 0,
     data: contactFormData(),
+    overrideAccess: true,
   })
 
   payload.logger.info(`— Seeding pages...`)
@@ -321,6 +338,7 @@ export const seed = async ({
         contentImage: imageHero,
         metaImage: imageHat,
       }),
+      overrideAccess: true,
     }),
     payload.create({
       collection: 'pages',
@@ -328,6 +346,7 @@ export const seed = async ({
       data: contactPageData({
         contactForm: contactForm,
       }),
+      overrideAccess: true,
     }),
   ])
 
@@ -340,6 +359,7 @@ export const seed = async ({
       customer: customer.id,
       ...(baseAddressUSData as Address),
     },
+    overrideAccess: true,
   })
 
   const customerUKAddress = await payload.create({
@@ -349,6 +369,7 @@ export const seed = async ({
       customer: customer.id,
       ...(baseAddressUKData as Address),
     },
+    overrideAccess: true,
   })
 
   payload.logger.info(`— Seeding transactions...`)
@@ -366,6 +387,7 @@ export const seed = async ({
       status: 'pending',
       billingAddress: baseAddressUSData,
     },
+    overrideAccess: true,
   })
 
   const succeededTransaction = await payload.create({
@@ -381,6 +403,7 @@ export const seed = async ({
       status: 'succeeded',
       billingAddress: baseAddressUSData,
     },
+    overrideAccess: true,
   })
 
   let succeededTransactionID: number | string = succeededTransaction.id
@@ -405,6 +428,7 @@ export const seed = async ({
         },
       ],
     },
+    overrideAccess: true,
   })
 
   const oldTimestamp = new Date('2023-01-01T00:00:00Z').toISOString()
@@ -422,6 +446,7 @@ export const seed = async ({
         },
       ],
     },
+    overrideAccess: true,
   })
 
   // Cart is purchased because it has a purchasedAt date
@@ -445,6 +470,7 @@ export const seed = async ({
         },
       ],
     },
+    overrideAccess: true,
   })
 
   let completedCartID: number | string = completedCart.id
@@ -477,6 +503,7 @@ export const seed = async ({
       status: 'completed',
       transactions: [succeededTransaction.id],
     },
+    overrideAccess: true,
   })
 
   const orderInProcessing = await payload.create({
@@ -501,6 +528,7 @@ export const seed = async ({
       status: 'processing',
       transactions: [succeededTransaction.id],
     },
+    overrideAccess: true,
   })
 
   payload.logger.info(`— Seeding globals...`)
@@ -533,6 +561,7 @@ export const seed = async ({
           },
         ],
       },
+      overrideAccess: true,
     }),
     payload.updateGlobal({
       slug: 'footer',
@@ -570,6 +599,7 @@ export const seed = async ({
           },
         ],
       },
+      overrideAccess: true,
     }),
   ])
 

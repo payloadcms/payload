@@ -24,9 +24,13 @@ import type { buildFormStateHandler } from '../../utilities/buildFormState.js'
 import type { buildTableStateHandler } from '../../utilities/buildTableState.js'
 import type { CopyDataFromLocaleArgs } from '../../utilities/copyDataFromLocale.js'
 import type {
+  getUpcomingScheduledPublishHandler,
+  GetUpcomingScheduledPublishHandlerArgs,
   schedulePublishHandler,
   SchedulePublishHandlerArgs,
 } from '../../utilities/schedulePublishHandler.js'
+
+import { reduceToSerializableFields } from '../../forms/Form/reduceToSerializableFields.js'
 
 type GetFormStateClient = (
   args: {
@@ -39,6 +43,12 @@ type SchedulePublishClient = (
     signal?: AbortSignal
   } & Omit<SchedulePublishHandlerArgs, 'clientConfig' | 'req'>,
 ) => ReturnType<typeof schedulePublishHandler>
+
+type GetUpcomingScheduledPublishClient = (
+  args: {
+    signal?: AbortSignal
+  } & Omit<GetUpcomingScheduledPublishHandlerArgs, 'clientConfig' | 'req'>,
+) => ReturnType<typeof getUpcomingScheduledPublishHandler>
 
 type GetTableStateClient = (
   args: {
@@ -112,6 +122,7 @@ export type ServerFunctionsContextType = {
   getDocumentSlots: GetDocumentSlots
   getFormState: GetFormStateClient
   getTableState: GetTableStateClient
+  getUpcomingScheduledPublish: GetUpcomingScheduledPublishClient
   renderDocument: RenderDocumentServerFunctionHookFn
   schedulePublish: SchedulePublishClient
   serverFunction: ServerFunctionClient
@@ -140,7 +151,7 @@ export const ServerFunctionsProvider: React.FC<{
   }
 
   const getDocumentSlots = useCallback<GetDocumentSlots>(
-    async (args) =>
+    async ({ signal: _signal, ...args }) =>
       await serverFunction({
         name: 'render-document-slots',
         args,
@@ -156,7 +167,10 @@ export const ServerFunctionsProvider: React.FC<{
         if (!remoteSignal?.aborted) {
           const result = await serverFunction({
             name: 'schedule-publish',
-            args: { ...rest },
+            args: {
+              ...rest,
+              date: rest.date ? new Date(rest.date.getTime()) : rest.date,
+            } satisfies SchedulePublishHandlerArgs,
           })
 
           if (!remoteSignal?.aborted) {
@@ -178,18 +192,53 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
+  const getUpcomingScheduledPublish = useCallback<GetUpcomingScheduledPublishClient>(
+    async (args) => {
+      const { signal: remoteSignal, ...rest } = args
+
+      if (remoteSignal?.aborted) {
+        return []
+      }
+
+      const result = (await serverFunction({
+        name: 'get-upcoming-scheduled-publish',
+        args: rest,
+      })) as Awaited<ReturnType<typeof getUpcomingScheduledPublishHandler>>
+
+      return remoteSignal?.aborted ? [] : result
+    },
+    [serverFunction],
+  )
+
   const getFormState = useCallback<GetFormStateClient>(
     async (args) => {
-      const { signal: remoteSignal, ...rest } = args || {}
+      const { signal: remoteSignal, ...rest } = args
 
       try {
         if (!remoteSignal?.aborted) {
           const result = (await serverFunction({
             name: 'form-state',
-            args: { fallbackLocale: false, ...rest },
+            args: {
+              ...rest,
+              documentFormState: reduceToSerializableFields(rest.documentFormState),
+              formState: reduceToSerializableFields(rest.formState),
+              initialBlockFormState: reduceToSerializableFields(rest.initialBlockFormState),
+            } satisfies Parameters<GetFormStateClient>[0],
           })) as Awaited<ReturnType<typeof buildFormStateHandler>> // TODO: infer this type when `strictNullChecks` is enabled
 
           if (!remoteSignal?.aborted) {
+            const file = rest.formState?.file
+
+            if (typeof File !== 'undefined' && result.state?.file) {
+              if (file?.initialValue instanceof File) {
+                result.state.file.initialValue = file.initialValue
+              }
+
+              if (file?.value instanceof File) {
+                result.state.file.value = file.value
+              }
+            }
+
             return result
           }
         }
@@ -204,13 +253,13 @@ export const ServerFunctionsProvider: React.FC<{
 
   const getTableState = useCallback<GetTableStateClient>(
     async (args) => {
-      const { signal: remoteSignal, ...rest } = args || {}
+      const { signal: remoteSignal, ...rest } = args
 
       try {
         if (!remoteSignal?.aborted) {
           const result = (await serverFunction({
             name: 'table-state',
-            args: { fallbackLocale: false, ...rest },
+            args: rest,
           })) as Awaited<ReturnType<typeof buildTableStateHandler>> // TODO: infer this type when `strictNullChecks` is enabled
 
           if (!remoteSignal?.aborted) {
@@ -227,15 +276,14 @@ export const ServerFunctionsProvider: React.FC<{
   )
 
   const renderDocument = useCallback<RenderDocumentServerFunctionHookFn>(
-    async (args) => {
-      const { signal: remoteSignal, ...rest } = args || {}
+    async ({ signal: _signal, ...rest }) => {
       try {
         const result = (await serverFunction({
           name: 'render-document',
           args: {
-            fallbackLocale: false,
             ...rest,
-          } as Parameters<RenderDocumentServerFunctionHookFn>[0],
+            initialState: reduceToSerializableFields(rest.initialState),
+          } satisfies RenderDocumentBaseArgs,
         })) as Awaited<ReturnType<RenderDocumentServerFunctionHookFn>> // TODO: infer this type when `strictNullChecks` is enabled
 
         return result
@@ -248,7 +296,7 @@ export const ServerFunctionsProvider: React.FC<{
 
   const copyDataFromLocale = useCallback<CopyDataFromLocaleClient>(
     async (args) => {
-      const { signal: remoteSignal, ...rest } = args || {}
+      const { signal: remoteSignal, ...rest } = args
 
       const result = (await serverFunction({
         name: 'copy-data-from-locale',
@@ -279,13 +327,13 @@ export const ServerFunctionsProvider: React.FC<{
   )
 
   const slugify = useCallback<SlugifyClient>(
-    async (args) => {
-      const { signal: remoteSignal, ...rest } = args || {}
-
+    async ({ signal: _signal, ...rest }) => {
       try {
         const result = (await serverFunction({
           name: 'slugify',
-          args: { ...rest },
+          args: {
+            ...rest,
+          } satisfies SlugifyServerFunctionArgs,
         })) as Awaited<ReturnType<Slugify>> // TODO: infer this type when `strictNullChecks` is enabled
 
         return result
@@ -314,6 +362,7 @@ export const ServerFunctionsProvider: React.FC<{
         getDocumentSlots,
         getFormState,
         getTableState,
+        getUpcomingScheduledPublish,
         renderDocument,
         schedulePublish,
         serverFunction,

@@ -1,6 +1,6 @@
 'use client'
 
-import type { SelectFieldClientComponent } from 'payload'
+import type { SelectFieldClientProps } from 'payload'
 import type { ReactNode } from 'react'
 
 import {
@@ -20,7 +20,7 @@ import './index.css'
 
 const baseClass = 'sort-by-fields'
 
-export const SortBy: SelectFieldClientComponent = (props) => {
+export const SortBy: React.FC<SelectFieldClientProps> = (props) => {
   const { id } = useDocumentInfo()
 
   // The "sort" text field that stores 'title' or '-title'

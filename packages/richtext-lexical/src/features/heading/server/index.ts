@@ -7,6 +7,7 @@ import { createNode } from '../../typeUtilities.js'
 import { PAYLOAD_HEADING } from '../markdownTransformer.js'
 import { i18n } from './i18n.js'
 import { createHeadingJSONSchema } from './schema.js'
+import { headingValidation } from './validate.js'
 
 export type { SerializedHeadingNode } from './schema.js'
 
@@ -38,6 +39,7 @@ export const HeadingFeature = createServerFeature<
         createNode({
           jsonSchema: createHeadingJSONSchema(enabledHeadingSizes),
           node: HeadingNode,
+          validations: [headingValidation({ enabledHeadingSizes })],
         }),
       ],
       sanitizedServerFeatureProps: props,

@@ -11,38 +11,45 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  collections: [PostsCollection],
-  admin: {
-    autoLogin: {
-      email: devUser.email,
-      password: devUser.password,
-      prefillOnly: true,
-    },
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-    theme: 'dark',
-    components: {
-      views: {
-        CustomDefaultView: {
-          Component: '/CustomView/index.js#CustomView',
-          path: '/custom-view',
+  suite: 'admin-root',
+  config: {
+    admin: {
+      autoLogin: {
+        email: devUser.email,
+        password: devUser.password,
+        prefillOnly: true,
+      },
+      components: {
+        views: {
+          CustomDefaultView: {
+            Component: '/CustomView/index.js#CustomView',
+            path: '/custom-view',
+          },
         },
       },
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+      theme: 'dark',
+    },
+    collections: [PostsCollection],
+    cors: [`http://localhost:${process.env.PORT || 3000}`, 'http://localhost:3001'],
+    globals: [MenuGlobal],
+    routes: {
+      admin: adminRoute,
+    },
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  cors: [`http://localhost:${process.env.PORT || 3000}`, 'http://localhost:3001'],
-  globals: [MenuGlobal],
-  routes: {
-    admin: adminRoute,
-  },
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -50,9 +57,7 @@ export default buildConfigWithDefaults({
       data: {
         text: 'example post',
       },
+      overrideAccess: true,
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

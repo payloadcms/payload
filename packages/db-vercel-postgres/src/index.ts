@@ -41,6 +41,7 @@ import {
   updateOne,
   updateVersion,
   upsert,
+  validateOperatorHandlers,
 } from '@payloadcms/drizzle'
 import {
   columnToCodeConverter,
@@ -48,13 +49,13 @@ import {
   createDatabase,
   createExtensions,
   createJSONQuery,
+  createRequireDrizzleKit,
   defaultDrizzleSnapshot,
   deleteWhere,
   dropDatabase,
   execute,
   init,
   insert,
-  requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
 import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
@@ -65,6 +66,8 @@ import type { Args, VercelPostgresAdapter } from './types.js'
 import { connect } from './connect.js'
 
 const filename = fileURLToPath(import.meta.url)
+
+const requireDrizzleKit = createRequireDrizzleKit({ from: import.meta.url })
 
 export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<VercelPostgresAdapter> {
   const postgresIDType = args.idType || 'serial'
@@ -92,6 +95,10 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       acc[name] = true
       return acc
     }, {})
+
+    const operatorHandlers = args.query?.operatorHandlers ?? []
+
+    validateOperatorHandlers(operatorHandlers)
 
     const executeMethod = 'execute'
     const sanitizeStatements = ({
@@ -135,6 +142,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
+      operatorHandlers,
       operators: operatorMap,
       pgSchema: adapterSchema,
       pool: undefined,
@@ -234,14 +242,16 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
   }
 }
 
-/**
- * @todo deprecate /types subpath export in 4.0
- */
 export type {
   Args as VercelPostgresAdapterArgs,
   GeneratedDatabaseSchema,
   VercelPostgresAdapter,
 } from './types.js'
-export type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/drizzle/postgres'
-export { geometryColumn } from '@payloadcms/drizzle/postgres'
+export type {
+  MigrateDownArgs,
+  MigrateUpArgs,
+  PostgresOperatorHandler,
+  PostgresQueryConfig,
+} from '@payloadcms/drizzle/postgres'
+export { geometryColumn, postgresUnaccent } from '@payloadcms/drizzle/postgres'
 export { sql } from 'drizzle-orm'
