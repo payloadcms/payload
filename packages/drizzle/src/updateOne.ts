@@ -2,6 +2,7 @@ import type { SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { UpdateOne } from 'payload'
 
+import { and, eq } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -51,6 +52,10 @@ export const updateOne: UpdateOne = async function updateOne(
     whereToUpdate = joins.length === 0 ? where : undefined
 
     if (options.atomic === true) {
+      if (joins.length > 0) {
+        throw new Error('Atomic where updates do not support predicates that require joins')
+      }
+
       if (!shouldUseOptimizedUpsertRow({ data, fields: collection.flattenedFields })) {
         throw new Error('Atomic where updates only support fields stored on the main table')
       }
@@ -67,12 +72,24 @@ export const updateOne: UpdateOne = async function updateOne(
         throw new Error('Atomic where updates do not support array operations')
       }
 
+      const table = this.tables[tableName]
+      const matchingRows = await (db as LibSQLDatabase)
+        .select({ id: table.id })
+        .from(table)
+        .where(where)
+        .limit(1)
+      const matchingRowID = matchingRows[0]?.id
+
+      if (matchingRowID === undefined || matchingRowID === null) {
+        return null
+      }
+
       markWrite(this)
 
       const docs = await (db as LibSQLDatabase)
-        .update(this.tables[tableName])
+        .update(table)
         .set(row)
-        .where(where)
+        .where(and(eq(table.id, matchingRowID), where))
         .returning()
 
       if (!docs[0]) {

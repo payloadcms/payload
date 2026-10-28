@@ -7,6 +7,7 @@ import { fieldAffectsData } from '../../../fields/config/types.js'
 import { documentMatchingWhereExists } from '../../../utilities/documentMatchingWhereExists.js'
 import { fieldValueExists } from '../../../utilities/fieldValueExists.js'
 import { getObjectDotNotation } from '../../../utilities/getObjectDotNotation.js'
+import { isolateObjectProperty } from '../../../utilities/isolateObjectProperty.js'
 import { traverseFields } from '../../../utilities/traverseFields.js'
 
 type Args = {
@@ -79,29 +80,72 @@ export const validateUniqueConstraints = async ({
   const uniqueCompoundIndexes = collection.sanitizedIndexes.filter(({ unique }) => unique)
   const compoundIndexConflicts = await Promise.all(
     uniqueCompoundIndexes.map(async (index) => {
+      const requiredFields = req.payload.db.name === 'mongoose' ? (index.requireExists ?? []) : []
+
+      if (requiredFields.some(({ path }) => getObjectDotNotation(data, path) === undefined)) {
+        return null
+      }
+
       const values = index.fields.map(({ path }) => ({
         path,
         value: getObjectDotNotation(data, path),
       }))
 
-      if (values.some(({ value }) => value === null || typeof value === 'undefined')) {
+      if (
+        !requiredFields.length &&
+        values.some(({ value }) => value === null || typeof value === 'undefined')
+      ) {
         return null
       }
 
-      const exists = await documentMatchingWhereExists({
-        id,
-        collection: collection.slug,
-        locale: req.locale ?? undefined,
-        overrideAccess: true,
-        req,
-        where: {
-          and: values.map(({ path, value }) => ({
-            [path]: {
-              equals: value,
-            },
-          })),
-        },
-      })
+      const where = {
+        and: values.map(({ path, value }) => ({ [path]: { equals: value ?? null } })),
+      }
+      let exists: boolean
+
+      const shouldReadRawCandidates =
+        requiredFields.length > 0 &&
+        (values.some(({ value }) => value == null) ||
+          requiredFields.some(({ path }) => !index.fields.some((field) => field.path === path)))
+
+      if (shouldReadRawCandidates) {
+        // Payload's `exists` operator excludes null, while MongoDB partial indexes include it.
+        // Raw candidates preserve the distinction between a stored null and an absent field.
+        const queryReq = isolateObjectProperty(req, ['transactionID'])
+
+        delete queryReq.transactionID
+
+        const { docs } = await req.payload.db.find({
+          collection: collection.slug,
+          limit: 0,
+          locale: req.locale ?? undefined,
+          pagination: false,
+          req: queryReq,
+          where,
+        })
+
+        exists = docs.some(
+          (doc) =>
+            doc.id !== id &&
+            requiredFields.every((field) => {
+              const path =
+                field.pathHasLocalized && req.payload.config.localization && req.locale
+                  ? field.localizedPath.replaceAll('<locale>', req.locale)
+                  : field.path
+
+              return getObjectDotNotation(doc, path) !== undefined
+            }),
+        )
+      } else {
+        exists = await documentMatchingWhereExists({
+          id,
+          collection: collection.slug,
+          locale: req.locale ?? undefined,
+          overrideAccess: true,
+          req,
+          where,
+        })
+      }
 
       return exists ? index : null
     }),
