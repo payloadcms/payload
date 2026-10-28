@@ -12,12 +12,12 @@ import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
-import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
-import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 let payload: PayloadTestSDK<Config>
@@ -239,6 +239,18 @@ describe('i18n', () => {
         }),
       ).toBeVisible()
       await expect(page.locator('#nav-global-global')).toContainText('ES Global')
+    })
+
+    test('should show translated collection label in the create new card button', async () => {
+      // set language to Spanish
+      await setUserLanguage('es')
+
+      await page.goto(serverURL + '/admin')
+
+      const createNewLink = page.locator('#card-collection1 .card__actions a')
+
+      await expect(createNewLink).toHaveAttribute('aria-label', 'Crear ES Collection 1s')
+      await expect(createNewLink).toHaveAttribute('title', 'Crear ES Collection 1s')
     })
   })
 })
