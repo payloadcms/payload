@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# Adds the VgemsAI app's Privacy Policy and Terms of Use to Pages, as drafts
-# (README: "Privacy policy and terms of use").
+# Adds the Privacy Policy and Terms of Use of the VgemsAI app and the Vigor website to Pages, as
+# drafts (README: "Privacy policy and terms of use").
 #
 #   apps/cms/deploy/import-legal-pages.sh --dry-run   # only show what would happen
 #   apps/cms/deploy/import-legal-pages.sh             # import
+#   apps/cms/deploy/import-legal-pages.sh --update    # also replace the text of pages that exist
 #
 # Runs scripts/import-legal-pages.ts in the image's build stage, which has the Payload CLI (the
 # running container only has the compiled server). Right after a deploy, that stage comes from the

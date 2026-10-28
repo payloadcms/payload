@@ -5,11 +5,13 @@ import type {
   PayloadRequest,
 } from 'payload'
 
+import type { Page } from '../payload-types'
+
 import { waitForCommit } from '../hooks/revalidateWebsite'
 
 /**
- * Asks the Vigor website to reload its content right after anything under "Vigor website" is
- * saved or deleted, instead of when its cache expires (about a minute).
+ * Asks the Vigor website to reload its content right after anything under "Vigor website", or one
+ * of its pages in Pages, is saved or deleted, instead of when its cache expires (about a minute).
  *
  * Calls `POST <VIGOR_WEBSITE_URL>/api/revalidate` (server/src/index.ts in the website repo) with
  * `Authorization: Bearer <VIGOR_WEBSITE_REVALIDATE_SECRET>`. Does nothing unless both are set, or
@@ -33,6 +35,27 @@ export const revalidateVigorGlobal: GlobalAfterChangeHook = ({ doc, req }) => {
   notifyWebsite({ req })
   return doc
 }
+
+/** For Pages: only pages of the Vigor website, or that were until this change */
+export const revalidateVigorPageAfterChange: CollectionAfterChangeHook<Page> = ({
+  doc,
+  previousDoc,
+  req,
+}) => {
+  if (isVigorPage(doc) || isVigorPage(previousDoc)) {
+    notifyWebsite({ req })
+  }
+  return doc
+}
+
+export const revalidateVigorPageAfterDelete: CollectionAfterDeleteHook<Page> = ({ doc, req }) => {
+  if (isVigorPage(doc)) {
+    notifyWebsite({ req })
+  }
+  return doc
+}
+
+const isVigorPage = (page?: Page) => Boolean(page?.sites?.includes('vigor'))
 
 const notifyWebsite = ({ req }: { req: PayloadRequest }) => {
   if (!websiteURL || !secret || req.context.disableRevalidate) {

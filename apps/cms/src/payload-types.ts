@@ -745,7 +745,7 @@ export interface Page {
   /**
    * The websites and apps that show this page.
    */
-  sites: ('personal' | 'business' | 'ios-app')[];
+  sites: ('personal' | 'business' | 'ios-app' | 'vigor')[];
   /**
    * Identifies the page within each site, e.g. "about" for /about. Filled in from the title when left empty.
    */
