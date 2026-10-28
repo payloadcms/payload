@@ -11626,6 +11626,10 @@ const findMinimalFix = async ({ chainPackages, client, currentMajor, currentSpec
  * that appeared on the introducing chains, resolving each hop to its highest
  * satisfying version. Returns whether every reachable version of the vulnerable
  * module lands in the patched range.
+ *
+ * The chain restriction bounds registry requests per candidate. A path that a newer
+ * version adds through a package off the original chain is not traced, so `clear` is a
+ * suggestion: the plan's verify step re-runs the audit and catches any remaining copy.
  */
 const traceModule = async ({ chainPackages, client, module, patchedRange, rootName, rootVersion, }) => {
     // A patched root can still pull a vulnerable copy back in, so the trace continues below it.
