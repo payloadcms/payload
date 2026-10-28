@@ -82,7 +82,9 @@ test.suite('Refresh tokens', { config: './config.ts' }, () => {
     onTestFinished(() => vi.restoreAllMocks())
 
     // Like two requests a few milliseconds apart that both found the token expired
-    const first = refresh({ refreshToken: login.refreshToken, restClient }).then((res) => res.json())
+    const first = refresh({ refreshToken: login.refreshToken, restClient }).then((res) =>
+      res.json(),
+    )
     await wait(10)
     await refresh({ refreshToken: login.refreshToken, restClient })
 
