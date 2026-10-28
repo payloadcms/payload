@@ -78,7 +78,10 @@ describe('handleDynamicFileRequest', () => {
         }),
         mimeTypes: ['image/*'],
       }
-      vi.mocked(planTransformerPipeline).mockResolvedValue([transformer])
+      vi.mocked(planTransformerPipeline).mockResolvedValue({
+        claims: new Map(),
+        pipeline: [transformer],
+      })
 
       await expect(
         handleDynamicFileRequest({ collection, filename: 'logo.png', req: makeReq() }),
@@ -105,7 +108,10 @@ describe('handleDynamicFileRequest', () => {
           mimeTypes: ['image/*'],
         },
       ]
-      vi.mocked(planTransformerPipeline).mockResolvedValue(transformers)
+      vi.mocked(planTransformerPipeline).mockResolvedValue({
+        claims: new Map(),
+        pipeline: transformers,
+      })
 
       await expect(
         handleDynamicFileRequest({ collection, filename: 'logo.png', req: makeReq() }),
@@ -141,7 +147,10 @@ describe('handleDynamicFileRequest', () => {
         }),
         mimeTypes: ['image/*'],
       }
-      vi.mocked(planTransformerPipeline).mockResolvedValue([transformer])
+      vi.mocked(planTransformerPipeline).mockResolvedValue({
+        claims: new Map(),
+        pipeline: [transformer],
+      })
 
       const result = await handleDynamicFileRequest({
         collection,
@@ -168,7 +177,10 @@ describe('handleDynamicFileRequest', () => {
         }),
         mimeTypes: ['image/*'],
       }
-      vi.mocked(planTransformerPipeline).mockResolvedValue([transformer])
+      vi.mocked(planTransformerPipeline).mockResolvedValue({
+        claims: new Map(),
+        pipeline: [transformer],
+      })
 
       const result = await handleDynamicFileRequest({
         collection,
@@ -200,7 +212,10 @@ describe('handleDynamicFileRequest', () => {
           mimeTypes: ['image/*'],
         },
       ]
-      vi.mocked(planTransformerPipeline).mockResolvedValue(transformers)
+      vi.mocked(planTransformerPipeline).mockResolvedValue({
+        claims: new Map(),
+        pipeline: transformers,
+      })
 
       const result = await handleDynamicFileRequest({
         collection,
@@ -237,7 +252,10 @@ describe('handleDynamicFileRequest', () => {
           mimeTypes: ['image/*'],
         },
       ]
-      vi.mocked(planTransformerPipeline).mockResolvedValue(transformers)
+      vi.mocked(planTransformerPipeline).mockResolvedValue({
+        claims: new Map(),
+        pipeline: transformers,
+      })
 
       const result = await handleDynamicFileRequest({
         collection,

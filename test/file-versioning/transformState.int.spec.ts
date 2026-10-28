@@ -101,12 +101,23 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     expect(updated._transforms).toEqual(expected)
   })
 
-  test('should keep unknown custom keys unchanged', async ({ payload }) => {
-    const watermark = { opacity: 0.5, position: 'bottom-right' }
+  test('should reject a built-in key that no transformer applies', async ({ payload }) => {
+    await expect(
+      createImage({ payload, _transforms: { resize: { width: 100 } } }),
+    ).rejects.toMatchObject({
+      data: { errors: [expect.objectContaining({ path: '_transforms.resize' })] },
+    })
+  })
 
-    const created = await createImage({ payload, _transforms: { watermark } })
-
-    expect(created._transforms).toEqual({ watermark })
+  test('should reject a custom key that no transformer applies', async ({ payload }) => {
+    await expect(
+      createImage({
+        payload,
+        _transforms: { watermark: { opacity: 0.5, position: 'bottom-right' } },
+      }),
+    ).rejects.toMatchObject({
+      data: { errors: [expect.objectContaining({ path: '_transforms.watermark' })] },
+    })
   })
 
   test.for([
@@ -129,11 +140,6 @@ test.suite('File transform state', { config: './config.ts' }, () => {
       name: 'a focal point outside 0 to 100',
       _transforms: { focalPoint: { x: 120, y: 50 } },
       failingKey: 'focalPoint',
-    },
-    {
-      name: 'a reserved built-in key that nothing applies yet',
-      _transforms: { resize: { width: 100 } },
-      failingKey: 'resize',
     },
     {
       name: 'a value with the wrong type',
